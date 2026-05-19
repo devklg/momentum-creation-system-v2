@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Magnificent — App Style Guide</title>
+<link rel="icon" type="image/png" href="../assets/logos/logo_icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0A0A0A; --ink-2: #131312; --ink-3: #1B1B19;
+  --line: rgba(201,168,76,0.18); --line-soft: rgba(245,239,230,0.08);
+  --gold: #C9A84C; --gold-bright: #F5C030;
+  --gold-soft: rgba(201,168,76,0.12);
+  --teal: #2DD4BF; --teal-soft: rgba(45,212,191,0.12);
+  --cream: #F5EFE6;
+  --cream-mute: rgba(245,239,230,0.62);
+  --cream-faint: rgba(245,239,230,0.38);
+  --display: 'Bebas Neue', sans-serif;
+  --body: 'DM Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', ui-monospace, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--ink); color: var(--cream); }
+body { font-family: var(--body); font-size: 16px; line-height: 1.55; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(900px circle at 12% 8%, rgba(201,168,76,0.10), transparent 55%), radial-gradient(700px circle at 88% 95%, rgba(45,212,191,0.08), transparent 55%), radial-gradient(500px circle at 50% 50%, rgba(201,168,76,0.04), transparent 60%); }
+body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.6; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.96 0 0 0 0 0.93 0 0 0 0 0.85 0 0 0 0.04 0'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>"); }
+main { position: relative; z-index: 2; }
+.ribbon { position: sticky; top: 0; z-index: 10; background: rgba(10,10,10,0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); padding: 14px clamp(20px,5vw,56px); display: flex; align-items: center; gap: 16px; }
+.ribbon-logo { height: 36px; width: auto; display: block; }
+.ribbon-title { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cream-mute); }
+.ribbon-title strong { color: var(--cream); font-weight: 500; }
+.ribbon-meta { margin-left: auto; font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cream-faint); }
+section { padding: clamp(40px,6vw,88px) clamp(20px,5vw,56px); border-bottom: 1px solid var(--line-soft); position: relative; max-width: 1280px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; letter-spacing: 0.02em; line-height: 0.96; color: var(--cream); }
+h1 { font-size: clamp(56px,11vw,144px); margin-bottom: 32px; }
+h2 { font-size: clamp(36px,5.5vw,72px); margin-bottom: 18px; }
+h3 { font-size: clamp(22px,3vw,32px); margin-bottom: 14px; margin-top: 32px; }
+.gold-bright { color: var(--gold-bright); }
+p { font-family: var(--body); color: var(--cream-mute); max-width: 64ch; margin-bottom: 16px; }
+p.lead { font-size: clamp(17px,1.7vw,21px); color: var(--cream); margin-bottom: 32px; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--gold); }
+ul.tm-list { list-style: none; margin: 16px 0 32px; padding: 0; max-width: 70ch; }
+ul.tm-list li { position: relative; padding-left: 24px; margin-bottom: 10px; color: var(--cream-mute); font-family: var(--body); font-size: 15px; line-height: 1.6; }
+ul.tm-list li::before { content: ''; position: absolute; left: 0; top: 12px; width: 8px; height: 1px; background: var(--gold); }
+.callout { border-left: 3px solid var(--gold); background: var(--gold-soft); padding: 18px 24px; margin: 32px 0; font-family: var(--body); font-size: 15px; color: var(--cream); max-width: 70ch; }
+.callout-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 8px; }
+code.inline { font-family: var(--mono); font-size: 13px; color: var(--gold); background: var(--ink-2); padding: 2px 8px; border-radius: 2px; border: 1px solid var(--line); }
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; margin: 24px 0 32px; overflow: hidden; }
+.swatch { background: var(--ink-2); display: flex; flex-direction: column; }
+.swatch-color { height: 96px; }
+.swatch-info { padding: 14px 16px; }
+.swatch-name { font-family: var(--display); font-size: 22px; color: var(--cream); letter-spacing: 0.02em; line-height: 1; }
+.swatch-hex { font-family: var(--mono); font-size: 11px; color: var(--cream-mute); letter-spacing: 0.12em; margin-top: 6px; }
+.swatch-role { font-family: var(--body); font-size: 12px; color: var(--cream-faint); margin-top: 8px; line-height: 1.5; }
+table.tokens { width: 100%; border-collapse: collapse; margin: 20px 0 32px; }
+table.tokens th { font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); text-align: left; padding: 14px 16px 14px 0; border-bottom: 1px solid var(--line); font-weight: 400; }
+table.tokens td { font-family: var(--body); font-size: 14px; color: var(--cream); padding: 14px 16px 14px 0; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+table.tokens td.token-name { font-family: var(--mono); font-size: 13px; color: var(--gold); white-space: nowrap; }
+table.tokens td.token-value { font-family: var(--mono); font-size: 12px; color: var(--cream-mute); }
+table.tokens td.token-role { color: var(--cream-mute); font-size: 13px; line-height: 1.6; }
+.type-demo { margin: 24px 0; padding: 32px; background: var(--ink-2); border: 1px solid var(--line); border-radius: 4px; }
+.type-demo + .type-demo { margin-top: 16px; }
+.type-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+.type-sample-display { font-family: var(--display); font-size: 72px; letter-spacing: 0.02em; line-height: 0.96; color: var(--cream); }
+.type-sample-display .accent { color: var(--gold-bright); }
+.type-sample-body { font-family: var(--body); font-size: 17px; line-height: 1.55; color: var(--cream); }
+.type-sample-mono { font-family: var(--mono); font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
+.component-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin: 24px 0 32px; }
+.component-demo { background: var(--ink-2); border: 1px solid var(--line); border-radius: 4px; padding: 32px; }
+.component-demo-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; }
+.btn-primary { font-family: var(--body); font-size: 14px; font-weight: 500; letter-spacing: 0.04em; background: var(--gold); color: var(--ink); border: none; border-radius: 4px; padding: 14px 28px; cursor: pointer; transition: all 200ms ease; }
+.btn-primary:hover { background: var(--gold-bright); transform: translateY(-1px); }
+.btn-secondary { font-family: var(--body); font-size: 14px; font-weight: 500; letter-spacing: 0.04em; background: transparent; color: var(--gold); border: 1px solid var(--gold); border-radius: 4px; padding: 13px 27px; cursor: pointer; transition: all 200ms ease; }
+.btn-secondary:hover { background: var(--gold-soft); }
+.btn-ghost { font-family: var(--body); font-size: 14px; font-weight: 500; background: transparent; color: var(--gold); border: none; padding: 13px 16px; cursor: pointer; }
+.btn-ghost:hover { text-decoration: underline; }
+.form-field { margin-bottom: 24px; }
+.form-field label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.form-field input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--line); border-radius: 0; padding: 12px 0; font-family: var(--body); font-size: 16px; color: var(--cream); transition: border-color 200ms ease; }
+.form-field input::placeholder { color: var(--cream-faint); }
+.form-field input:focus { outline: none; border-bottom-color: var(--gold-bright); }
+.pill-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+.pill { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; padding: 4px 10px; border-radius: 2px; }
+.pill-live { background: var(--teal-soft); color: var(--teal); }
+.pill-pending { background: transparent; border: 1px solid var(--line); color: var(--cream-mute); }
+.pill-locked { background: var(--gold-soft); color: var(--gold); }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(45,212,191,0.6); } 70% { box-shadow: 0 0 0 10px rgba(45,212,191,0); } 100% { box-shadow: 0 0 0 0 rgba(45,212,191,0); } }
+.live-dot { display: inline-block; width: 8px; height: 8px; background: var(--teal); border-radius: 50%; animation: pulse 2s infinite; vertical-align: middle; }
+.live-row { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cream-mute); }
+.position-card { background: linear-gradient(135deg, rgba(201,168,76,0.10), rgba(45,212,191,0.05)); border: 1px solid var(--gold); border-radius: 4px; padding: clamp(24px,3.5vw,40px) clamp(24px,4vw,48px); position: relative; overflow: hidden; margin: 24px 0; max-width: 480px; }
+.position-card::before { content: ''; position: absolute; bottom: -50%; left: -20%; width: 80%; height: 100%; background: radial-gradient(circle, rgba(201,168,76,0.15), transparent 60%); pointer-events: none; }
+.position-card-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+.position-card-number { font-family: var(--display); font-size: clamp(72px,12vw,144px); color: var(--gold-bright); line-height: 0.92; letter-spacing: -0.02em; text-shadow: 0 0 40px rgba(245,192,48,0.3); position: relative; }
+.position-card-meta { font-family: var(--body); font-size: 14px; color: var(--cream-mute); margin-top: 16px; position: relative; }
+.hero-logo-feature { background: var(--ink-2); border: 1px solid var(--line); border-radius: 4px; padding: clamp(40px,6vw,80px); margin: 32px 0; text-align: center; }
+.hero-logo-feature img { max-width: 320px; width: 60%; height: auto; display: block; margin: 0 auto 24px; }
+.hero-logo-feature .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
+.logo-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; margin: 32px 0; overflow: hidden; }
+.logo-tile { background: var(--ink-2); padding: 32px 24px 20px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.logo-tile.print { background: var(--cream); }
+.logo-tile img { max-width: 100%; max-height: 120px; height: auto; object-fit: contain; margin-bottom: 20px; }
+.logo-tile .logo-fname { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+.logo-tile.print .logo-fname { color: #6B5A1F; }
+.logo-tile .logo-use { font-family: var(--body); font-size: 12px; color: var(--cream-mute); line-height: 1.5; max-width: 24ch; }
+.logo-tile.print .logo-use { color: #4A3F1F; }
+.tier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 16px; margin: 24px 0 32px; }
+.tier-card { background: var(--ink-2); border: 1px solid var(--line); border-radius: 4px; padding: 24px; }
+.tier-card.t1 { border-color: var(--gold); }
+.tier-num { font-family: var(--display); font-size: 72px; color: var(--gold-bright); line-height: 0.9; letter-spacing: -0.02em; margin-bottom: 12px; }
+.tier-name { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.tier-title { font-family: var(--display); font-size: 32px; color: var(--cream); margin-bottom: 14px; letter-spacing: 0.02em; }
+.tier-body { font-family: var(--body); font-size: 13px; color: var(--cream-mute); line-height: 1.65; }
+@keyframes rise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.arrival { padding: clamp(80px,14vw,160px) clamp(20px,5vw,56px) clamp(40px,8vw,96px); max-width: 1280px; margin: 0 auto; min-height: 78vh; display: flex; flex-direction: column; justify-content: center; }
+.arrival .eyebrow { animation: rise 0.9s cubic-bezier(.2,.7,.2,1) 0.10s both; }
+.arrival h1 { animation: rise 1.0s cubic-bezier(.2,.7,.2,1) 0.30s both; }
+.arrival p.lead { animation: rise 1.0s cubic-bezier(.2,.7,.2,1) 0.55s both; }
+.arrival .meta { animation: rise 1.1s cubic-bezier(.2,.7,.2,1) 0.80s both; font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cream-faint); margin-top: 40px; display: flex; flex-direction: column; gap: 4px; }
+footer { padding: 56px clamp(20px,5vw,56px); max-width: 1280px; margin: 0 auto; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cream-faint); display: flex; align-items: center; gap: 16px; }
+footer img { height: 24px; width: auto; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+</style>
+</head>
+<body>
+<div class="ribbon">
+  <img src="../assets/logos/logo_navbar.png" alt="Team Magnificent" class="ribbon-logo">
+  <span class="ribbon-title"><strong>Team Magnificent</strong> &nbsp;&middot;&nbsp; App Style Guide</span>
+  <span class="ribbon-meta">v1.0 &nbsp;&middot;&nbsp; ink + gold + teal</span>
+</div>
+<main>
+
+<section class="arrival">
+  <div class="eyebrow">— the visual law</div>
+  <h1>App Style <span class="gold-bright">Guide.</span></h1>
+  <p class="lead">The visual language of the Marketing Momentum Creation System. Same palette, same type, same atmosphere, three intensity registers. Cinematic on .com. Focused on .team. Dense and dramatic on admin.</p>
+  <div class="meta">
+    <span>doc &nbsp;/&nbsp; D:/momentum-creation-system/docs/</span>
+    <span>brand &nbsp;/&nbsp; assets/logos/</span>
+    <span>reference &nbsp;/&nbsp; dashboard-prototype.html</span>
+  </div>
+</section>
+
+<section id="a">
+  <div class="eyebrow">— A &nbsp;&middot;&nbsp; the document</div>
+  <h2>What this guide is, what it is <span class="gold-bright">not.</span></h2>
+  <p class="lead">The source of truth for every color, font, corner, motion, logo placement, and component across the three surfaces.</p>
+  <h3>The three surfaces, one language</h3>
+  <ul class="tm-list">
+    <li><strong style="color:var(--cream)">teammagnificent.com</strong> — prospect-facing. Replicated BA site and replicated prospect dashboard at /p/{token}. Cinematic energy.</li>
+    <li><strong style="color:var(--cream)">teammagnificent.team</strong> — BA workspace. Login, signup, welcome, Michael interview, Fast Start Guide, orientation, ScriptMaker, cockpit, callback alerts, profile. Focused energy.</li>
+    <li><strong style="color:var(--cream)">Admin surface</strong> — Kevin-only. Master dashboard, oversight, queue, tenant architecture, broadcast, live ops, reporting, audit. Dense energy.</li>
+  </ul>
+  <div class="callout">
+    <span class="callout-label">— locked direction</span>
+    Dramatic throughout. Every surface inherits the prospect dashboard prototype energy. The differences between surfaces are intensity dials, not stylistic departures.
+  </div>
+</section>
+
+<section id="b">
+  <div class="eyebrow">— B &nbsp;&middot;&nbsp; palette</div>
+  <h2>Five <span class="gold-bright">colors.</span></h2>
+  <p class="lead">Five colors carry the system. Every other color used anywhere in the app is derived from these five plus the cream text family.</p>
+  <div class="swatch-grid">
+    <div class="swatch"><div class="swatch-color" style="background:#0A0A0A; border-bottom:1px solid var(--line);"></div><div class="swatch-info"><div class="swatch-name">ink</div><div class="swatch-hex">#0A0A0A</div><div class="swatch-role">Primary surface. The app background.</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#131312;"></div><div class="swatch-info"><div class="swatch-name">ink-2</div><div class="swatch-hex">#131312</div><div class="swatch-role">Tinted surface. Card backgrounds.</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#1B1B19;"></div><div class="swatch-info"><div class="swatch-name">ink-3</div><div class="swatch-hex">#1B1B19</div><div class="swatch-role">Tertiary surface. Inset wells.</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#C9A84C;"></div><div class="swatch-info"><div class="swatch-name">gold</div><div class="swatch-hex">#C9A84C</div><div class="swatch-role">Primary brand accent.</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#F5C030;"></div><div class="swatch-info"><div class="swatch-name">gold-bright</div><div class="swatch-hex">#F5C030</div><div class="swatch-role">Spotlight. The one number that matters most.</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#2DD4BF;"></div><div class="swatch-info"><div class="swatch-name">teal</div><div class="swatch-hex">#2DD4BF</div><div class="swatch-role">Live indicator. Pulses, status dots.</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#F5EFE6;"></div><div class="swatch-info"><div class="swatch-name" style="color:#1A1A1A;">cream</div><div class="swatch-hex">#F5EFE6</div><div class="swatch-role">Primary text on dark.</div></div></div>
+  </div>
+  <h3>Derived opacities</h3>
+  <table class="tokens">
+    <thead><tr><th>Token</th><th>Value</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td class="token-name">--line</td><td class="token-value">rgba(201,168,76,0.18)</td><td class="token-role">Default hairline border. Gold at 18%.</td></tr>
+      <tr><td class="token-name">--line-soft</td><td class="token-value">rgba(245,239,230,0.08)</td><td class="token-role">Section dividers, table rows.</td></tr>
+      <tr><td class="token-name">--gold-soft</td><td class="token-value">rgba(201,168,76,0.12)</td><td class="token-role">Subtle gold washes.</td></tr>
+      <tr><td class="token-name">--teal-soft</td><td class="token-value">rgba(45,212,191,0.12)</td><td class="token-role">Subtle teal washes.</td></tr>
+      <tr><td class="token-name">--cream-mute</td><td class="token-value">rgba(245,239,230,0.62)</td><td class="token-role">Secondary text.</td></tr>
+      <tr><td class="token-name">--cream-faint</td><td class="token-value">rgba(245,239,230,0.38)</td><td class="token-role">Tertiary text. Captions, timestamps.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="c">
+  <div class="eyebrow">— C &nbsp;&middot;&nbsp; typography</div>
+  <h2>Three <span class="gold-bright">families.</span></h2>
+  <p class="lead">Three fonts carry the system: Bebas Neue display, DM Sans body, DM Mono labels.</p>
+  <div class="type-demo">
+    <div class="type-label">Bebas Neue &nbsp;/&nbsp; display</div>
+    <div class="type-sample-display">You're <span class="accent">in.</span></div>
+    <p style="margin-top:18px; font-size:13px; color:var(--cream-mute);">Every h1, h2, h3. Weight 400, letter-spacing 0.02em, line-height 0.96. Fluid sizes via clamp().</p>
+  </div>
+  <div class="type-demo">
+    <div class="type-label">DM Sans &nbsp;/&nbsp; body</div>
+    <div class="type-sample-body">Every paragraph, every form input, every button label, every table cell. Base size 16px, line-height 1.55.</div>
+  </div>
+  <div class="type-demo">
+    <div class="type-label">DM Mono &nbsp;/&nbsp; labels</div>
+    <div class="type-sample-mono">— position #347 &nbsp;/&nbsp; 21 behind you</div>
+    <p style="margin-top:18px; font-size:13px; color:var(--cream-mute);">Every eyebrow, every uppercase label, every timestamp, every status pill.</p>
+  </div>
+</section>
+
+<section id="f">
+  <div class="eyebrow">— F &nbsp;&middot;&nbsp; components</div>
+  <h2>Component <span class="gold-bright">library.</span></h2>
+  <p class="lead">Every component appears on multiple surfaces. The intensity register changes per surface, but the component is defined once.</p>
+  <div class="component-grid">
+    <div class="component-demo">
+      <div class="component-demo-label">Buttons</div>
+      <div class="btn-row">
+        <button class="btn-primary">Tell Kevin I'm Ready</button>
+        <button class="btn-secondary">Maybe later</button>
+        <button class="btn-ghost">Cancel</button>
+      </div>
+    </div>
+    <div class="component-demo">
+      <div class="component-demo-label">Form fields</div>
+      <div class="form-field">
+        <label>your phone number</label>
+        <input type="tel" placeholder="(555) 123-4567">
+      </div>
+      <div class="form-field">
+        <label>best time to reach you</label>
+        <input type="text" placeholder="Weekday evenings">
+      </div>
+    </div>
+    <div class="component-demo">
+      <div class="component-demo-label">Status pills &amp; live indicator</div>
+      <div class="pill-row">
+        <span class="pill pill-live">live</span>
+        <span class="pill pill-pending">pending</span>
+        <span class="pill pill-locked">locked</span>
+      </div>
+      <div class="live-row" style="margin-top:18px;"><span class="live-dot"></span>7 prospects arrived in the last hour</div>
+    </div>
+    <div class="component-demo">
+      <div class="component-demo-label">Position card &nbsp;/&nbsp; the hero card</div>
+      <div class="position-card">
+        <div class="position-card-label">— your position</div>
+        <div class="position-card-number">347</div>
+        <div class="position-card-meta">21 behind you, climbing.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="h">
+  <div class="eyebrow">— H &nbsp;&middot;&nbsp; logo system</div>
+  <h2>The compass <span class="gold-bright">rose.</span></h2>
+  <p class="lead">The Team Magnificent logo is a compass rose: gold star points, teal center dot, blue compass lines. It is the brand mark of every surface in the system.</p>
+  <div class="hero-logo-feature">
+    <img src="../assets/logos/logo_dark_hero.png" alt="Team Magnificent compass rose">
+    <div class="label">— the brand</div>
+  </div>
+  <div class="callout">
+    <span class="callout-label">— locked</span>
+    The logo is never redesigned. The compass rose is the artifact; the world around it evolves. Decision from Chat #2.
+  </div>
+  <h3>The five files</h3>
+  <p>Five files live in <code class="inline">D:/momentum-creation-system/assets/logos/</code>. Each has a specific use.</p>
+  <div class="logo-gallery">
+    <div class="logo-tile"><img src="../assets/logos/logo_dark_hero.png" alt=""><div class="logo-fname">logo_dark_hero.png</div><div class="logo-use">Hero placement on .com landings. Primary reference.</div></div>
+    <div class="logo-tile"><img src="../assets/logos/logo_dark_square.png" alt=""><div class="logo-fname">logo_dark_square.png</div><div class="logo-use">Square containers, app icon, OG share card.</div></div>
+    <div class="logo-tile"><img src="../assets/logos/logo_icon.png" alt=""><div class="logo-fname">logo_icon.png</div><div class="logo-use">Favicon, browser tab, tight spaces.</div></div>
+    <div class="logo-tile print"><img src="../assets/logos/logo_light_print.png" alt=""><div class="logo-fname">logo_light_print.png</div><div class="logo-use">Print materials, B&amp;W ink on white.</div></div>
+    <div class="logo-tile"><img src="../assets/logos/logo_navbar.png" alt=""><div class="logo-fname">logo_navbar.png</div><div class="logo-use">Top navigation on .team and admin.</div></div>
+  </div>
+  <h3>What never to do with the logo</h3>
+  <ul class="tm-list">
+    <li>Never recolor the compass rose. Gold points and teal center are fixed.</li>
+    <li>Never rotate. The compass orientation is the brand orientation.</li>
+    <li>Never apply effects: no drop shadow, no glow, no outline, no blur.</li>
+    <li>Never place on a light gray background. Designed for ink or white only.</li>
+    <li>Never substitute a custom emoji, icon, or AI-generated mark.</li>
+  </ul>
+</section>
+
+<section id="i">
+  <div class="eyebrow">— I &nbsp;&middot;&nbsp; intensity tiers</div>
+  <h2>One language. Three <span class="gold-bright">registers.</span></h2>
+  <p class="lead">Same design language, three intensity registers. The differences are dials, not departures.</p>
+  <div class="tier-grid">
+    <div class="tier-card t1">
+      <div class="tier-num">01</div>
+      <div class="tier-name">tier one</div>
+      <div class="tier-title">.com cinematic</div>
+      <div class="tier-body">Full atmosphere. Headlines at 112px on wide screens. Staggered entrance animation, position card with gold-bright spotlight, live ticker always visible.</div>
+    </div>
+    <div class="tier-card">
+      <div class="tier-num">02</div>
+      <div class="tier-name">tier two</div>
+      <div class="tier-title">.team focused</div>
+      <div class="tier-body">Same atmosphere on body, content density goes up. Headlines moderate. Entrance animation reserved for milestones: welcome, Michael complete, first invite sent.</div>
+    </div>
+    <div class="tier-card">
+      <div class="tier-num">03</div>
+      <div class="tier-name">tier three</div>
+      <div class="tier-title">admin dense</div>
+      <div class="tier-body">Full body atmosphere stays. Data-dense regions sit on solid ink-2 panels. Headlines smaller. Tables get hairline gold dividers.</div>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer>
+  <img src="../assets/logos/logo_icon.png" alt="">
+  <span>Team Magnificent &nbsp;&middot;&nbsp; App Style Guide &nbsp;&middot;&nbsp; v1.0</span>
+  <span style="margin-left:auto;">the visual law</span>
+</footer>
+</body>
+</html>

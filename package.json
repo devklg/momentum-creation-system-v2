@@ -1,0 +1,32 @@
+{
+  "name": "momentum-creation-system-v1",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Team Magnificent Marketing Momentum Creation System — three clients (.com prospect-facing, .team BA-facing, admin Kevin-only), one server, one gateway.",
+  "author": "Kevin L. Gardner",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @momentum/team --filter @momentum/server dev",
+    "dev:server": "pnpm --filter @momentum/server dev",
+    "dev:com": "pnpm --filter @momentum/com dev",
+    "dev:team": "pnpm --filter @momentum/team dev",
+    "dev:admin": "pnpm --filter @momentum/admin dev",
+    "dev:all": "pnpm --parallel --filter \"@momentum/*\" dev",
+    "build": "pnpm -r build",
+    "build:shared": "pnpm --filter @momentum/shared build",
+    "build:server": "pnpm --filter @momentum/server build",
+    "build:com": "pnpm --filter @momentum/com build",
+    "build:team": "pnpm --filter @momentum/team build",
+    "build:admin": "pnpm --filter @momentum/admin build",
+    "typecheck": "pnpm -r typecheck",
+    "clean": "pnpm -r exec rm -rf dist node_modules"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

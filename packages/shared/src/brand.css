@@ -1,0 +1,37 @@
+/* Team Magnificent brand tokens as CSS custom properties.
+   Single source of truth, mirrors packages/shared/src/brand.ts.
+   Import once at the top of each client's main entry. */
+
+:root {
+  /* Color palette */
+  --ink: #0A0A0A;
+  --ink-2: #0F0F0F;
+  --gold: #C9A84C;
+  --gold-bright: #F5C030;
+  --teal: #2DD4BF;
+  --cream: #F5EFE6;
+  --cream-mute: rgba(245, 239, 230, 0.72);
+  --cream-faint: rgba(245, 239, 230, 0.48);
+  --line: rgba(245, 239, 230, 0.12);
+
+  /* Typography */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', 'JetBrains Mono', monospace;
+
+  /* Defaults */
+  color-scheme: dark;
+  background: var(--ink);
+  color: var(--cream);
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
