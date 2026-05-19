@@ -420,6 +420,116 @@ The `.com` site feels alive. Animation is the demonstration, not decoration. The
 
 The `/welcome` Continue button routes to `/cockpit`, which is currently a placeholder ("Cockpit coming soon"). The real cockpit per TEAM Design Section H is Phase 4 work. Locked Chat #94.
 
+## 4.3  Component naming — the `/p/{token}` family
+
+The single `/p/{token}` URL on `teammagnificent.com` resolves to one of two React components based on token state. Both names locked Chat #99.
+
+- **Pre-`video_complete`:** `tm-video-presentation` — the eleven-section presentation page from the Chat #39 schematic, with the Chat #84 updates (silent placement at `video_complete`, no save-spot form, opaque token resolution server-side).
+- **Post-`video_complete`:** `tm-prospect-dashboard` — the six-section prospect dashboard locked Chat #82 (Arrival, Opportunity, Mechanic, Live Place, TM Advantage, Real Conversation / Your Next Move).
+
+The `tm-` prefix is the canonical component naming convention on the `.com` client. Use it for any future prospect-facing component on this surface.
+
+## 4.4  Section 4 (Live Place) on the prospect dashboard — the ticker
+
+Locked Chat #99. The position stack is **not** a static card list with aging behavior. It is a **continuously animated vertical ticker** — newest entries enter at the bottom, scroll upward, oldest exit at the top, never at rest. Real-time placements injected via SSE join the ticker mid-stream; they do not pause the scroll.
+
+- **Visible entries:** 20–40 in the viewport at any time. Specific count tunable in `/admin` Section E.3.
+- **Prospect's own position:** anchored separately above the ticker so the prospect always sees themselves.
+- **New-entry highlight:** brief gold flash on arrival, fading to standard treatment.
+- **Behind-you counter:** SSE — server pushes the count when a new placement arrives; no polling.
+
+**Ticker entry format** (locked Chat #99, verbatim per Kevin):
+
+```
+#347   Marcus T. from Los Angeles, CA · invited by Kevin G.   7:34:18 PM PT
+```
+
+Four components per entry:
+
+- **Position number** — monotonic, never reshuffled, never recycled.
+- **Prospect identity** — first name + last initial + city + state. Country field captured on the prospect record from day one for future international rollout.
+- **Inviting BA attribution** — "invited by" + first name + last initial. Names every BA's contribution to the team-wide pool across every prospect's dashboard. Compliance-clear: "invited by" is factually neutral; it does not promise binary placement.
+- **Absolute timestamp** — actual clock time, not relative ("just now" / "8s ago"). Locked per Kevin: "the tombstone not just now whatever the actual time is."
+
+**Data model implication — prospect record fields required from day one:**
+
+```
+location: {
+  city: string
+  state_or_region: string
+  country: string  // ISO 3166-1 alpha-2 preferred
+}
+placed_at: ISO8601 timestamp  // for the absolute clock display
+```
+
+Display formatter sub-question deferred: always show country, or show country only when outside the viewing BA's home country. Decided at international rollout time.
+
+## 4.5  10-step orientation curriculum — the new BA's blueprint
+
+Locked Chat #99. Supersedes the placeholder list in TEAM Design Section F.3.
+
+- **Format:** live Zoom or conference call hosted by Kevin or Paul. Not self-paced. The page is the shared visual aid during the live call and the BA's permanent reference after.
+- **Page location:** `teammagnificent.team/training/10-steps`. Replaces the legacy `devklg.github.io/team-magnificent-training/10-steps.html` URL.
+- **Compliance scope:** `.team` only. The page contains CV figures (e.g. 900 CV from a Simple Six Ultimate Pack on day one, 60+ CV/month Smart Ship qualification, 300 CV lesser leg + 600 CV greater leg = $35 per cycle) that are appropriate inside the regulated training environment but never bleed to `.com`.
+- **Footer mantra:** People · Momentum · Volume · Checks. (PMV+C — the BA-facing version of PMV.)
+
+**The ten steps in order:**
+
+1. **Create an Emotional Barrier of Exit** — establish your WHY; it should make you cry. Your WHY is bigger than any obstacle, any rejection, any slow week.
+2. **Place an Appropriate Initial Order** — Entry, Elite, or Pro pack. People do what YOU do. The Simple Six Ultimate Pack generates 900 CV day one — a full cycle by itself.
+3. **Pay Your Overhead** — Smart Ship at 60+ CV per month is your weekly paycheck qualification, not an expense.
+4. **Review Back Office Daily** — DAILY for minimum 30 days. What gets measured gets improved. The back office is your cockpit; professionals check their instruments every day.
+5. **Build Belief** — in the product, the industry, and yourself. Use the product. Know the science. Study the numbers. Kevin lost 14 lbs in 6 weeks on GLP-THREE — belief with evidence.
+6. **Create Your Candidate List** — 100+ names. Add 5–10 daily. Don't pre-judge anyone. Your list is your business; a professional maintains and grows it every day.
+7. **Master the Art of Invitation** — be genuine, not salesy. 2–3 people per day. The invitation is not a pitch; it is an opportunity you are offering to someone you care about. Professionals invite; amateurs try to sell.
+8. **Learn How to Present** — Story → Products → Opportunity → Next Step. 15–30 minutes maximum. Your story is your most powerful tool. People join people, not companies.
+9. **Winning the Race to Profitability** — build BOTH legs equally. 300 CV lesser + 600 CV greater = $35 per cycle. Every week you build both sides is a week you move toward the next threshold.
+10. **Take MASSIVE Action** — CONSISTENT, MASSIVE action. 67 enrollments in 3 days is possible. Speed of the leader is the speed of the group. Success loves speed.
+
+Source HTML: `github.com/devklg/team-magnificent-training/blob/main/10-steps.html`. Already on the locked design tokens (Bebas Neue + DM Sans + DM Mono, gold #C9A84C, dark #0A0A0A, teal #2DD4BF) with two minor accent-color drifts to clean up when the page moves into `.team` (`#2ECC71` green and `#D4601A` orange aren't in the locked five-color palette).
+
+## 4.6  OpenGraph card for tm-video-presentation
+
+Locked Chat #99. When a BA shares `teammagnificent.com/p/{token}` via SMS, social, or any link preview, the receiving app reads the OpenGraph metadata from our server. The OpenGraph card is the prospect's first visual handshake with Team Magnificent — before they tap the link.
+
+**Architecture:** the share URL is our page (`teammagnificent.com/p/{token}`), not the YouTube URL inside it. The OpenGraph metadata lives on our page server. YouTube branding never bleeds into the link preview because YouTube is embedded inside the page, not linked to. (Lesson locked Chat #99: YouTube share vs page share are different architectures — do not propose YouTube auto-thumbnails as the OG image for our pages.)
+
+**Pattern reference:** THREE's `kevinlg.three-app.com` uses the same architecture for their "All Things GLP-THREE with Dr. Dan" share previews — server-hosted branded thumbnail, page-level OG tags, no YouTube branding. Our pattern mirrors THREE's structure with opposite brand identity.
+
+**Locked OG metadata:**
+
+- `og:url` — `https://teammagnificent.com/p/{token}` (resolved server-side at render)
+- `og:title` — `ALL THINGS GLP-THREE`
+- `og:description` — `Dr. Dan Gubler explains the science behind GLP-THREE.`
+- `og:image` — 1200×630 PNG hosted on the Team Magnificent server
+- `og:type` — `website`
+
+**Image content:** dark ink (`#0A0A0A`) background with subtle gold connection-line pattern at low opacity (visual rhyme with THREE's molecular pattern); the GLP-THREE bottle as the hero element (right third); fearless Bebas Neue gold typography reading "ALL THINGS / GLP-THREE" filling the left two-thirds; Team Magnificent compass rose + wordmark anchoring the bottom or top. **No duration pill, no "video presentation" label** — the play overlay on the SMS preview already signals format. **No THREE logo, no THREE color palette, no "THREE International" text anywhere on the card** — the locked `.com` brand-isolation posture (3.8) applies to the OG card as a prospect-facing surface.
+
+**Bottle as hero (not Dr. Dan):** Team Magnificent's identity is the team and the product, not Dr. Dan. THREE leads with Dr. Dan because Dr. Dan is THREE's credibility anchor and they own his image rights. Our card leads with the bottle because the bottle is what every BA shares, what every prospect tries, what every transformation references. Dr. Dan appears in the video itself, when the prospect taps and lands — not in the SMS preview.
+
+## 4.7  Design principle — let complete visuals lead
+
+Locked Chat #99, cross-surface (`.com`, `.team`, `/admin`).
+
+**Principle:** when a complete brand-locked visual exists, let it lead. Words caption, not paraphrase. Do not rebuild a finished photographic or graphic asset into a card layout that paraphrases what the image already says better.
+
+**Specific applications:**
+
+- **Section 8 of tm-video-presentation** renders the full Kevin transformation asset (`luxury-favorite.jpeg` — the 19 lbs / −1½ inches neck / −8 inches belly / −4 inches waist before-and-after) as-is, near-full-width or full-bleed. No rebuilt React card. No competing card chrome. The image leads. Optional minimal caption below if needed; the image stands alone. Supersedes the Chat #39 schematic Section 8 card-based layout (arc line, pull-quote, dynamic-inviter side-by-side structure).
+- **Future product photography** renders at brand fidelity, not decomposed into icons-plus-text.
+- **The compass rose logo** stays as inline SVG with motion, not reduced to a static icon.
+- **The Dr. Dan video** gets a full embed in Section 3 of tm-video-presentation, not abstracted into a "watch the video" button.
+
+The instinct to rebuild a complete brand-locked visual into card components is the same instinct that produces AI-slop interfaces — it strips the soul to fit a framework. Resist.
+
+## 4.8  Locked assets
+
+- **Dr. Dan video URL** — `https://www.youtube.com/embed/89wRvqx1d8M`. Section 3 anchor of tm-video-presentation. Deprecates two prior URLs found in history (`LS0cGIZCs7Y` from the Chat #39 era and `oN8NhkNdAlY` from an older business overview).
+- **Kevin transformation asset** — `luxury-favorite.jpeg`. Section 8 visual of tm-video-presentation. 19 lbs, −1½ neck, −8 belly, −4 waist. Brand-locked palette, "Real People. Real Results." tagline, GLP-THREE bottle center, four product attribute pills.
+- **Hero figure on the 72-hour mission training page** — 32,767 (the running total at Level 14 of the duplication doubling math, 2¹⁵ − 1). Replaces any earlier ambiguity between 14,386 and 32,767.
+- **GLP-THREE product photography** — `D:/TEAM-MAG/assets/` (delivered Chat #99). 28 files including `GLPTHREEE_Bottle_FullLabel_Render_Silo.png` (transparent-background silhouette render — the cleanest asset for compositing into surfaces).
+
 ---
 
 # Part 5 — Still open
@@ -429,7 +539,7 @@ Decisions still needed from Kevin before the surfaces that depend on them ship:
 - **Michael call timing** — immediate on welcome acceptance, or after a short delay so the BA can put the phone down and answer when it rings (TEAM Design J.4)
 - **Email provider** — Resend, Postmark, SendGrid, or SES (Signup Architecture E.6 / ADMIN J.5.1)
 - **Michael's five interview prompts** — Kevin's actual script if drafted, or confirmation of the placeholder list (TEAM Design J.5)
-- **10-step orientation curriculum** — actual content in Kevin's words and order (TEAM Design J.6)
+- ~~**10-step orientation curriculum**~~ — *RESOLVED Chat #99.* See Part 4.3.
 - **Sponsor-leaves card behavior** — auto-roll-up to next active BA in chain, or stay locked to original sponsor with separate escalation contact (TEAM Design J.7)
 - **Phone change verification** — SMS code required like email change, or immediate effect (TEAM Design J.8)
 - **Fast Start gating** — sequential-but-not-gated as current design, or hard-gate certain modules (TEAM Design J.9)
@@ -437,14 +547,14 @@ Decisions still needed from Kevin before the surfaces that depend on them ship:
 - **Re-invite cooldown** — limits on how often or how many times an expired prospect can be re-invited (TEAM Design J.11)
 - **Notification preference defaults** — which alerts default to SMS, email, in-app (TEAM Design J.12)
 - **Holding-tank flush window** — fixed at 8 weeks for everyone, or adaptive by BA / prospect intent (ADMIN J.5.2 / COM H.8)
-- **Behind-you counter update interval** — SSE vs short-poll (ADMIN J.5.3 / COM H.6)
+- ~~**Behind-you counter update interval**~~ — *RESOLVED Chat #99: SSE.*
 - **Market / geographic tracking** — whether BAs and prospects carry market/region as a tracked dimension (ADMIN J.5.4)
-- **Position stack visible window** — 5, 10, or 20 cards on `.com` (ADMIN J.5.6 / COM H.9)
-- **Leader detection threshold values** — invite count, training completion, conversion rate thresholds for system-detected leader tagging (ADMIN J.5.7-8)
+- ~~**Position stack visible window**~~ — *RESOLVED Chat #99: 20–40 visible entries, continuous vertical ticker, no resting state.* See Part 4.4.
+- **Leader detection threshold values** — *PARTIAL Chat #99: directional anchor is "qualified BA + has personally sponsored at least 4–5." Specific numeric thresholds deferred.* (ADMIN J.5.7-8)
 - **Compliance enforcement severity mapping** — block / warn / log per rule (ADMIN J.5.9)
 - **Export PII redaction** — per-export confirmation always, or persistent "show me everything" preference for Kevin (ADMIN J.5.10)
 - **Webinar cadence** — weekly Tuesday 7pm PT, or every 72 hours (COM H.3)
-- **Position stack city/state derivation** — IP geolocation, BA-supplied at mint, or inviting-BA region (COM H.5)
+- ~~**Position stack city/state derivation**~~ — *RESOLVED Chat #99: city + state, with country field captured on the prospect record from day one for international rollout.* See Part 4.4.
 - **Expired token auto-renew** — auto-renew on click if BA still has prospect active, or require BA to mint fresh (COM H.7)
 - **Leadership track records inside `.team`** — where and how Paul's 20-year binary career, Kevin's earnings, and other leader track records as they emerge are surfaced to new BAs inside `.team`. Candidates: a leadership section on profile pages, an "about Team Magnificent" page reachable from the cockpit, contextual placement in the 10-step orientation, or a separate Layer 2 training module that opens after a BA has signed their first two people. Never on `.com`. Never as income claims. The principle is locked in Part 1.14; the specific surface placement is the open question. Added Chat #94.
 
