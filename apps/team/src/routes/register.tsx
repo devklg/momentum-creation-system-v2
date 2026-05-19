@@ -101,6 +101,11 @@ export function RegisterPage() {
           threeUsername: threeUser.trim(),
           threeBaId: threeBaId.trim(),
           password,
+          // IANA timezone read from the browser. Drives Michael's 18-hour
+          // slot window (08:00–21:45 BA local). Fallback to UTC if the
+          // runtime can't resolve it (extremely rare).
+          timezone:
+            Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
           termsAccepted: true,
         }),
       });

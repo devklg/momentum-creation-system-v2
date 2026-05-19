@@ -3,13 +3,30 @@
  *
  * Until the BA's Michael interview is `completed`, every authenticated route
  * EXCEPT the whitelisted few responds with 403. Whitelist lives next to the
- * domain (MICHAEL_GATE_WHITELIST).
+ * domain (MICHAEL_GATE_WHITELIST in domain/michael-schedule.ts).
  *
  * Per Chat #97 lock:
  *   - Hard 403 on everything except /api/michael/*, /api/training/day-1,
  *     /api/profile, /api/auth/me, /api/auth/logout, /api/health.
  *
  * Mounted AFTER requireAuth (gate assumes session is already attached).
+ *
+ * MOUNT PATTERN (per route, NOT global):
+ *   Global mount would also run the DB check on /api/admin/* (which has its
+ *   own requireAdmin gate that founders pass without needing Michael) and on
+ *   unauthenticated routes like /api/health. Per-route mount keeps the
+ *   surface area explicit. Canonical usage when a new authenticated
+ *   BA-facing route is added (cockpit, fast-start, training/day-2+,
+ *   invitations, etc.):
+ *
+ *     import { requireAuth } from '../middleware/requireAuth.js';
+ *     import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+ *
+ *     router.get('/cockpit', requireAuth, requireMichaelComplete, handler);
+ *
+ * Pre-gate routes (welcome, michael, auth, admin, health) MUST NOT use this
+ * middleware — the new BA hasn't completed Michael yet and the welcome flow
+ * is what triggers Michael in the first place.
  */
 
 import type { Request, Response, NextFunction } from 'express';

@@ -30,6 +30,8 @@ interface FounderSeed {
   lastName: string;
   email: string;
   phone: string;
+  /** IANA timezone (e.g. "America/Los_Angeles"). Drives Michael scheduling. */
+  timezone: string;
   role: 'founder' | 'co_leader';
   sponsorBaId: string | null;      // null = root of the tree
   sponsorThreeBaId: string | null;
@@ -44,6 +46,7 @@ const KEVIN: FounderSeed = {
   lastName: 'Gardner',
   email: 'devkev202@gmail.com',
   phone: '+13233519758',
+  timezone: 'America/Los_Angeles',
   role: 'founder',
   sponsorBaId: null,
   sponsorThreeBaId: null,
@@ -58,6 +61,8 @@ const PAUL: FounderSeed = {
   lastName: 'Barrios',
   email: 'paul@teammagnificent.team', // placeholder — update via admin when known
   phone: '',                           // placeholder — update via admin when known
+  // Confirmed Chat #98: Paul is in Pacific timezone (same as Kevin).
+  timezone: 'America/Los_Angeles',
   role: 'co_leader',
   sponsorBaId: KEVIN.baId,
   sponsorThreeBaId: KEVIN.threeBaId,
@@ -96,6 +101,7 @@ async function seedBaRecord(f: FounderSeed): Promise<void> {
       lastName: f.lastName,
       email: f.email,
       phone: f.phone,
+      timezone: f.timezone,
       role: f.role,
       sponsorBaId: f.sponsorBaId,
       sponsorThreeBaId: f.sponsorThreeBaId,
@@ -117,6 +123,7 @@ async function seedBaRecord(f: FounderSeed): Promise<void> {
                n.email = $email,
                n.firstName = $firstName,
                n.lastName = $lastName,
+               n.timezone = $timezone,
                n.role = $role,
                n.founder = true
            MERGE (n)-[:SPONSORED_BY]->(s)`
@@ -125,6 +132,7 @@ async function seedBaRecord(f: FounderSeed): Promise<void> {
                n.email = $email,
                n.firstName = $firstName,
                n.lastName = $lastName,
+               n.timezone = $timezone,
                n.role = $role,
                n.founder = true`,
       params: {
@@ -133,17 +141,19 @@ async function seedBaRecord(f: FounderSeed): Promise<void> {
         email: f.email,
         firstName: f.firstName,
         lastName: f.lastName,
+        timezone: f.timezone,
         role: f.role,
       },
     },
     chroma: {
       collection: 'mcs_brand_ambassadors',
-      document: `Founder BA ${f.firstName} ${f.lastName} (BA ${f.baId} / THREE ${f.threeBaId}) — role: ${f.role}. Access code ${f.code}.`,
+      document: `Founder BA ${f.firstName} ${f.lastName} (BA ${f.baId} / THREE ${f.threeBaId}) — role: ${f.role}, timezone: ${f.timezone}. Access code ${f.code}.`,
       metadata: {
         baId: f.baId,
         threeBaId: f.threeBaId,
         kind: 'brand_ambassador_founder',
         role: f.role,
+        timezone: f.timezone,
         createdAt,
       },
     },

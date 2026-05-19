@@ -16,6 +16,12 @@ export interface NewBAInput {
   threeUsername: string;
   threeBaId: string;
   passwordPlain: string;
+  /**
+   * IANA timezone name (e.g. "America/Los_Angeles"). Captured from the
+   * browser at signup via Intl.DateTimeFormat().resolvedOptions().timeZone.
+   * Required by Michael's slot generator (08:00-21:45 BA local time).
+   */
+  timezone: string;
 }
 
 export interface BARecord {
@@ -26,6 +32,8 @@ export interface BARecord {
   lastName: string;
   email: string;
   phone: string;
+  /** IANA timezone (e.g. "America/Los_Angeles"). Drives Michael scheduling. */
+  timezone: string;
   passwordHash: string;
   sponsorBaId: string;
   sponsorThreeBaId: string;
@@ -72,6 +80,7 @@ export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): 
     lastName: input.lastName,
     email: input.email,
     phone: input.phone,
+    timezone: input.timezone,
     passwordHash,
     sponsorBaId: sponsor.sponsorBaId,
     sponsorThreeBaId: sponsor.sponsorThreeBaId,
@@ -82,11 +91,12 @@ export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): 
   await tripleStackWrite({
     id: baId,
     mongoCollection: 'brand_ambassadors',
-    mongoDoc: record,
+    mongoDoc: { ...record },
     neo4j: {
       cypher:
         'MERGE (s:BA {baId: $sponsorBaId}) MERGE (n:BA {baId: $id}) ' +
-        'SET n.threeBaId = $threeBaId, n.email = $email, n.firstName = $firstName, n.lastName = $lastName ' +
+        'SET n.threeBaId = $threeBaId, n.email = $email, n.firstName = $firstName, ' +
+        'n.lastName = $lastName, n.timezone = $timezone ' +
         'MERGE (n)-[:SPONSORED_BY]->(s)',
       params: {
         sponsorBaId: sponsor.sponsorBaId,
@@ -94,6 +104,7 @@ export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): 
         email: input.email,
         firstName: input.firstName,
         lastName: input.lastName,
+        timezone: input.timezone,
       },
     },
   });

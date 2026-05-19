@@ -45,6 +45,12 @@ const RegisterBody = z.object({
   threeUsername: z.string().min(1).max(80),
   threeBaId: z.string().min(1).max(40),
   password: z.string().min(8).max(200),
+  /**
+   * IANA timezone — captured client-side via
+   * Intl.DateTimeFormat().resolvedOptions().timeZone. Required so Michael's
+   * 18-hour slot window resolves against the BA's local clock.
+   */
+  timezone: z.string().min(3).max(80),
   termsAccepted: z.literal(true),
 });
 
@@ -82,6 +88,7 @@ authRoutes.post('/register', async (req: Request, res: Response) => {
         threeUsername: input.threeUsername.trim(),
         threeBaId: input.threeBaId.trim(),
         passwordPlain: input.password,
+        timezone: input.timezone.trim(),
       },
       sponsor,
     );
