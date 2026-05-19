@@ -3,6 +3,7 @@ import { RegisterPage } from './routes/register';
 import { WelcomePage } from './routes/welcome';
 import { CockpitStubPage } from './routes/cockpit';
 import { MichaelSchedulePage } from './routes/michael-schedule';
+import { TenStepsPage } from './routes/training/10-steps';
 
 export function App() {
   return (
@@ -12,6 +13,7 @@ export function App() {
       <Route path="/welcome" element={<WelcomePage />} />
       <Route path="/michael/schedule" element={<MichaelSchedulePage />} />
       <Route path="/cockpit" element={<CockpitStubPage />} />
+      <Route path="/training/10-steps" element={<TenStepsPage />} />
       <Route
         path="*"
         element={

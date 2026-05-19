@@ -546,11 +546,11 @@ Decisions still needed from Kevin before the surfaces that depend on them ship:
 - **Orientation scheduling mechanism** — Calendly-style embed, custom slot picker, or manual outreach (TEAM Design J.10)
 - **Re-invite cooldown** — limits on how often or how many times an expired prospect can be re-invited (TEAM Design J.11)
 - **Notification preference defaults** — which alerts default to SMS, email, in-app (TEAM Design J.12)
-- **Holding-tank flush window** — fixed at 8 weeks for everyone, or adaptive by BA / prospect intent (ADMIN J.5.2 / COM H.8)
+- ~~**Holding-tank flush window**~~ — *RESOLVED Chat #100: fixed at 8 weeks for everyone. Not adaptive by BA or prospect intent.* (Closes ADMIN J.5.2 / COM H.8.)
 - ~~**Behind-you counter update interval**~~ — *RESOLVED Chat #99: SSE.*
 - **Market / geographic tracking** — whether BAs and prospects carry market/region as a tracked dimension (ADMIN J.5.4)
 - ~~**Position stack visible window**~~ — *RESOLVED Chat #99: 20–40 visible entries, continuous vertical ticker, no resting state.* See Part 4.4.
-- **Leader detection threshold values** — *PARTIAL Chat #99: directional anchor is "qualified BA + has personally sponsored at least 4–5." Specific numeric thresholds deferred.* (ADMIN J.5.7-8)
+- ~~**Leader detection threshold values**~~ — *RESOLVED Chat #100: a BA qualifies as a leader when BOTH conditions are true — (1) binary-qualified (one personally sponsored on the left leg, one personally sponsored on the right leg, i.e. the 2-in-72 qualification gate is closed), AND (2) 5 personally enrolled BAs total across both legs. This is a durable structural threshold, not a rolling activity heuristic. No lookback window needed because both conditions are durable states confirmed by THREE enrollment data.* (Closes ADMIN J.5.7-8.)
 - **Compliance enforcement severity mapping** — block / warn / log per rule (ADMIN J.5.9)
 - **Export PII redaction** — per-export confirmation always, or persistent "show me everything" preference for Kevin (ADMIN J.5.10)
 - **Webinar cadence** — weekly Tuesday 7pm PT, or every 72 hours (COM H.3)

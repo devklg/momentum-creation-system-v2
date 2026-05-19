@@ -82,7 +82,7 @@ type ViewState =
   | { kind: 'in_progress'; slotStartUtc: string; timezone: string }
   | { kind: 'completed' };
 
-export function MichaelSchedulePage(): JSX.Element {
+export function MichaelSchedulePage() {
   const navigate = useNavigate();
   const [view, setView] = useState<ViewState>({ kind: 'loading' });
   const [submitting, setSubmitting] = useState(false);
@@ -233,7 +233,7 @@ function FullScreenMessage({
 }: {
   line: string;
   tone?: 'mute' | 'error';
-}): JSX.Element {
+}) {
   return (
     <div className="min-h-screen bg-ink text-cream flex items-center justify-center px-6">
       <p
@@ -249,7 +249,7 @@ function FullScreenMessage({
   );
 }
 
-function Eyebrow({ text }: { text: string }): JSX.Element {
+function Eyebrow({ text }: { text: string }) {
   return (
     <p className="font-mono tracking-[0.28em] text-[11px] text-gold mb-6 uppercase">
       {text}
@@ -277,7 +277,7 @@ function SchedulingView({
   onConfirm: () => void;
   submitting: boolean;
   submitErr: string | null;
-}): JSX.Element {
+}) {
   const grouped = useMemo(() => groupSlotsByDate(slots, timezone), [slots, timezone]);
   const isReschedule = rescheduleCount > 0 || !!previousSlotUtc;
 
@@ -363,7 +363,7 @@ function ScheduledView({
   timezone: string;
   rescheduleCount: number;
   onReschedule: () => void;
-}): JSX.Element {
+}) {
   const slotLabel = useMemo(() => formatSlotRange(slotStartUtc, slotEndUtc, timezone), [
     slotStartUtc,
     slotEndUtc,
@@ -413,7 +413,7 @@ function ScheduledView({
   );
 }
 
-function InProgressView(): JSX.Element {
+function InProgressView() {
   return (
     <div className="min-h-screen bg-ink text-cream flex items-center justify-center px-6">
       <div className="max-w-lg text-center">
@@ -435,7 +435,7 @@ function InProgressView(): JSX.Element {
   );
 }
 
-function CompletedView({ onContinue }: { onContinue: () => void }): JSX.Element {
+function CompletedView({ onContinue }: { onContinue: () => void }) {
   return (
     <div className="min-h-screen bg-ink text-cream flex items-center justify-center px-6">
       <div className="max-w-xl text-center">
