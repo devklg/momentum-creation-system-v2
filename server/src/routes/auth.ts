@@ -1,8 +1,10 @@
 import express, { type Request, type Response, type Router } from 'express';
+import argon2 from 'argon2';
 import { z } from 'zod';
 import { findAccessCode } from '../domain/access-codes.js';
-import { emailExists, threeBaIdExists, registerBA } from '../domain/ba.js';
-import { signSession, setSessionCookie } from '../services/session.js';
+import { emailExists, threeBaIdExists, registerBA, findBAByBaId } from '../domain/ba.js';
+import { signSession, setSessionCookie, clearSessionCookie } from '../services/session.js';
+import { requireAuth } from '../middleware/requireAuth.js';
 import { env } from '../env.js';
 
 export const authRoutes: Router = express.Router();
@@ -103,5 +105,108 @@ authRoutes.post('/register', async (req: Request, res: Response) => {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Registration failed: ${msg}` });
+  }
+});
+
+/**
+ * POST /api/auth/login — single login surface used by both .team and admin.
+ *
+ * Identity contract: TM BA ID + password. ONLY the TM BA ID (TMBA-...)
+ * authenticates. THREE BA ID and email are tracked on the BA record but are
+ * not login identifiers — they're operational facts, not credentials.
+ *
+ * On success: sets the session cookie and returns { ok: true, baId }.
+ * On failure: returns 401 with a generic error (no "user not found" vs
+ * "wrong password" distinction — standard credential-stuffing defense).
+ */
+const LoginBody = z.object({
+  baId: z.string().min(1).max(80),
+  password: z.string().min(1).max(200),
+});
+
+authRoutes.post('/login', async (req: Request, res: Response) => {
+  const parsed = LoginBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ ok: false, error: 'Invalid input.' });
+    return;
+  }
+  const { baId, password } = parsed.data;
+
+  try {
+    const ba = await findBAByBaId(baId.trim());
+    if (!ba) {
+      res.status(401).json({ ok: false, error: 'Invalid credentials.' });
+      return;
+    }
+
+    let valid = false;
+    try {
+      valid = await argon2.verify(ba.passwordHash, password);
+    } catch {
+      valid = false;
+    }
+    if (!valid) {
+      res.status(401).json({ ok: false, error: 'Invalid credentials.' });
+      return;
+    }
+
+    const token = await signSession(
+      { baId: ba.baId, threeBaId: ba.threeBaId, email: ba.email },
+      env.JWT_TTL_REMEMBER_DAYS,
+    );
+    setSessionCookie(res, token);
+
+    res.json({ ok: true, baId: ba.baId });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Login failed: ${msg}` });
+  }
+});
+
+/**
+ * POST /api/auth/logout — clears the session cookie.
+ * Safe to call even when not authenticated; always returns ok.
+ */
+authRoutes.post('/logout', async (_req: Request, res: Response) => {
+  clearSessionCookie(res);
+  res.json({ ok: true });
+});
+
+/**
+ * GET /api/auth/me — returns the current BA's identity + admin flag.
+ *
+ * Shape: { ok, me: { baId, threeBaId, fullName, email, isAdmin } }
+ *
+ * Used by both .team and admin clients. The admin client reads `isAdmin` to
+ * decide whether to render the shell or the forbidden state. The server's
+ * `requireAdmin` middleware on /api/admin/* is the real gate — this endpoint
+ * is just the UX hint.
+ *
+ * Per locked-spec Part 3.1 + ADMIN Design A.2.
+ */
+authRoutes.get('/me', requireAuth, async (req: Request, res: Response) => {
+  const session = req.session!;
+  try {
+    const ba = await findBAByBaId(session.baId);
+    if (!ba) {
+      res.status(401).json({ ok: false, error: 'Session references missing BA.' });
+      return;
+    }
+    const isAdmin =
+      env.ADMIN_BA_IDS.includes(ba.baId) || env.ADMIN_BA_IDS.includes(ba.threeBaId);
+
+    res.json({
+      ok: true,
+      me: {
+        baId: ba.baId,
+        threeBaId: ba.threeBaId,
+        fullName: `${ba.firstName} ${ba.lastName}`.trim(),
+        email: ba.email,
+        isAdmin,
+      },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Lookup failed: ${msg}` });
   }
 });

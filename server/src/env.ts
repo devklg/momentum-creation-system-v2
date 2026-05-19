@@ -53,6 +53,41 @@ const Env = z.object({
     .string()
     .default('')
     .transform((s) => s.split(',').map((o) => o.trim()).filter(Boolean)),
+
+  /**
+   * Telnyx public key for Ed25519 webhook signature verification.
+   * Base64-encoded — fetch from Mission Control Portal > Auth > Public Key.
+   * Empty in dev means signature verification is bypassed (logged) so
+   * webhook tooling like ngrok-replay works without portal config.
+   */
+  TELNYX_PUBLIC_KEY: z.string().default(''),
+
+  /**
+   * Telnyx API key (v2 Bearer token). Required to originate outbound calls.
+   * From Mission Control Portal > Auth > API Keys.
+   */
+  TELNYX_API_KEY: z.string().default(''),
+
+  /**
+   * Telnyx Call Control Application connection_id. The application's webhook
+   * URL is configured in the Portal; events route to /api/telnyx/webhook.
+   * From Mission Control Portal > Call Control > Applications.
+   */
+  TELNYX_CONNECTION_ID: z.string().default(''),
+
+  /**
+   * Caller ID for Michael's outbound calls. E.164 format, e.g. +13235551234.
+   * Must be a number assigned to the Telnyx Call Control Application above.
+   */
+  TELNYX_FROM_NUMBER: z.string().default(''),
+
+  /**
+   * Optional per-call webhook URL override. If set, included in every dial
+   * request so Telnyx routes events here regardless of portal config — useful
+   * for dev/staging environments using ngrok. If empty, Telnyx uses the
+   * Application's configured webhook URL.
+   */
+  TELNYX_WEBHOOK_URL: z.string().default(''),
 });
 
 export const env = Env.parse(process.env);

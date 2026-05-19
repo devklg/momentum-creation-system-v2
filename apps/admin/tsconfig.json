@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@momentum/shared": ["../../packages/shared/src/index.ts"],
+      "@momentum/shared/*": ["../../packages/shared/src/*"]
+    },
+    "types": ["vite/client", "node"]
+  },
+  "include": ["src/**/*"],
+  "references": [{ "path": "../../packages/shared" }]
+}

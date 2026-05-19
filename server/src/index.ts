@@ -11,6 +11,8 @@ import { healthRoutes } from './routes/health.js';
 import { authRoutes } from './routes/auth.js';
 import { welcomeRoutes } from './routes/welcome.js';
 import { adminAccessCodesRoutes } from './routes/admin/access-codes.js';
+import { adminBasRoutes } from './routes/admin/bas.js';
+import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { michaelRoutes } from './routes/michael.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
@@ -22,6 +24,18 @@ void _requireMichaelComplete;
 const app = express();
 
 app.disable('x-powered-by');
+
+// ─────────────────────────────────────────────────────────────────────────────────────
+// RAW-BODY ROUTES — must mount BEFORE express.json().
+//
+// Telnyx webhooks are Ed25519-signed over the raw payload bytes; if
+// express.json() runs first, those bytes are gone and signature verification
+// is impossible. The route file uses express.raw() internally for this
+// specific path only — everything else still gets JSON parsing below.
+// DO NOT reorder these lines.
+// ─────────────────────────────────────────────────────────────────────────────────────
+app.use('/api/telnyx', telnyxWebhookRoutes);
+
 app.use(express.json({ limit: '256kb' }));
 app.use(cookieParser());
 app.use(
@@ -48,6 +62,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/welcome', welcomeRoutes);
 app.use('/api/michael', michaelRoutes);
 app.use('/api/admin/access-codes', adminAccessCodesRoutes);
+app.use('/api/admin/bas', adminBasRoutes);
 
 // ────────────────────────────────────────────────────────────────────────────
 // BA-FACING GATED ROUTES — mount here.

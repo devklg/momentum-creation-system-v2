@@ -12,6 +12,70 @@ importers:
         specifier: ^5.5.4
         version: 5.5.4
 
+  apps/admin:
+    dependencies:
+      '@momentum/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@radix-ui/react-label':
+        specifier: 2.1.0
+        version: 2.1.0(@types/react-dom@19.0.1)(@types/react@19.0.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@radix-ui/react-slot':
+        specifier: 1.1.0
+        version: 1.1.0(@types/react@19.0.1)(react@19.0.0)
+      class-variance-authority:
+        specifier: 0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: 2.1.1
+        version: 2.1.1
+      lucide-react:
+        specifier: 0.460.0
+        version: 0.460.0(react@19.0.0)
+      react:
+        specifier: 19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: 19.0.0
+        version: 19.0.0(react@19.0.0)
+      react-router-dom:
+        specifier: 7.0.2
+        version: 7.0.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      tailwind-merge:
+        specifier: 2.5.5
+        version: 2.5.5
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/react':
+        specifier: 19.0.1
+        version: 19.0.1
+      '@types/react-dom':
+        specifier: 19.0.1
+        version: 19.0.1
+      '@vitejs/plugin-react':
+        specifier: 4.3.4
+        version: 4.3.4(vite@6.0.3(@types/node@22.10.1)(jiti@1.21.7)(tsx@4.19.2)(yaml@2.9.0))
+      autoprefixer:
+        specifier: 10.4.20
+        version: 10.4.20(postcss@8.4.49)
+      postcss:
+        specifier: 8.4.49
+        version: 8.4.49
+      tailwindcss:
+        specifier: 3.4.16
+        version: 3.4.16
+      tailwindcss-animate:
+        specifier: 1.0.7
+        version: 1.0.7(tailwindcss@3.4.16)
+      typescript:
+        specifier: 5.5.4
+        version: 5.5.4
+      vite:
+        specifier: 6.0.3
+        version: 6.0.3(@types/node@22.10.1)(jiti@1.21.7)(tsx@4.19.2)(yaml@2.9.0)
+
   apps/team:
     dependencies:
       '@momentum/shared':
@@ -108,6 +172,9 @@ importers:
       jose:
         specifier: 5.9.6
         version: 5.9.6
+      tweetnacl:
+        specifier: 1.0.3
+        version: 1.0.3
       undici:
         specifier: 7.1.0
         version: 7.1.0
@@ -1569,6 +1636,9 @@ packages:
   turbo-stream@2.4.0:
     resolution: {integrity: sha512-FHncC10WpBd2eOmGwpmQsWLDoK4cqsA/UT/GqNoaKOQnT8uzhtCbg3EoUDMvqpOSAI0S26mr0rkjzbOO6S3v1g==}
 
+  tweetnacl@1.0.3:
+    resolution: {integrity: sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==}
+
   type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
     engines: {node: '>= 0.6'}
@@ -2978,6 +3048,8 @@ snapshots:
       fsevents: 2.3.3
 
   turbo-stream@2.4.0: {}
+
+  tweetnacl@1.0.3: {}
 
   type-is@1.6.18:
     dependencies:

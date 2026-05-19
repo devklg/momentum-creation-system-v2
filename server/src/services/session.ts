@@ -41,3 +41,17 @@ export function cookieOptions(): CookieOptions {
 export function setSessionCookie(res: Response, token: string): void {
   res.cookie(env.JWT_COOKIE_NAME, token, cookieOptions());
 }
+
+/**
+ * Clear the session cookie. Used by POST /api/auth/logout.
+ * Safe to call when no cookie is set — Express just emits an expired Set-Cookie.
+ */
+export function clearSessionCookie(res: Response): void {
+  res.clearCookie(env.JWT_COOKIE_NAME, {
+    httpOnly: true,
+    secure: env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    ...(env.NODE_ENV === 'production' ? { domain: env.JWT_COOKIE_DOMAIN } : {}),
+  });
+}

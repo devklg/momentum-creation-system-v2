@@ -69,6 +69,89 @@ export async function threeBaIdExists(threeBaId: string): Promise<boolean> {
   return result.count > 0;
 }
 
+/**
+ * Look up a BA by TM BA ID. The TM BA ID is the only login identifier in the
+ * system (locked Chat #102). THREE BA ID and email live on the record but
+ * never resolve to a session.
+ */
+export async function findBAByBaId(baId: string): Promise<BARecord | null> {
+  const result = await gatewayCall<{ documents: BARecord[] }>('mongodb', 'query', {
+    database: 'momentum',
+    collection: 'brand_ambassadors',
+    filter: { baId },
+    limit: 1,
+  });
+  return result.documents.length > 0 ? result.documents[0] ?? null : null;
+}
+
+/**
+ * Admin-only flat BA list. Returns the entire roster in reverse-chronological
+ * order, joined with sponsor name. No genealogy traversal — that lives in
+ * THREE. This is the operational mirror per ADMIN Design Section C.
+ */
+export interface BAListItem {
+  baId: string;
+  threeBaId: string;
+  fullName: string;
+  email: string | null;
+  phone: string | null;
+  timezone: string | null;
+  sponsorBaId: string | null;
+  sponsorName: string | null;
+  joinedAt: string;
+}
+
+export async function listAllBAsForAdmin(limit = 500): Promise<BAListItem[]> {
+  const raw = await gatewayCall<{ documents: BARecord[] }>('mongodb', 'query', {
+    database: 'momentum',
+    collection: 'brand_ambassadors',
+    filter: {},
+    sort: { createdAt: -1 },
+    limit,
+  });
+  const bas = raw.documents ?? [];
+
+  // Build a baId -> fullName map from the same result set so the sponsor name
+  // resolves without an extra query when the sponsor is also in the list
+  // (the common case once the team has any depth).
+  const nameByBaId = new Map<string, string>();
+  for (const b of bas) {
+    nameByBaId.set(b.baId, `${b.firstName} ${b.lastName}`.trim());
+  }
+
+  // Any sponsors not in the result window get a follow-up batch lookup so the
+  // sponsor column is correct even when the upline pre-dates the page.
+  const missingSponsors = new Set<string>();
+  for (const b of bas) {
+    if (b.sponsorBaId && !nameByBaId.has(b.sponsorBaId)) {
+      missingSponsors.add(b.sponsorBaId);
+    }
+  }
+  if (missingSponsors.size > 0) {
+    const sponsorLookup = await gatewayCall<{ documents: BARecord[] }>('mongodb', 'query', {
+      database: 'momentum',
+      collection: 'brand_ambassadors',
+      filter: { baId: { $in: Array.from(missingSponsors) } },
+      limit: missingSponsors.size,
+    });
+    for (const s of sponsorLookup.documents ?? []) {
+      nameByBaId.set(s.baId, `${s.firstName} ${s.lastName}`.trim());
+    }
+  }
+
+  return bas.map((b) => ({
+    baId: b.baId,
+    threeBaId: b.threeBaId,
+    fullName: `${b.firstName} ${b.lastName}`.trim(),
+    email: b.email ?? null,
+    phone: b.phone ?? null,
+    timezone: b.timezone ?? null,
+    sponsorBaId: b.sponsorBaId ?? null,
+    sponsorName: b.sponsorBaId ? nameByBaId.get(b.sponsorBaId) ?? null : null,
+    joinedAt: b.createdAt,
+  }));
+}
+
 export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): Promise<BARecord> {
   const passwordHash = await argon2.hash(input.passwordPlain, { type: argon2.argon2id });
   const baId = mintBaId();

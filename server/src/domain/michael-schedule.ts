@@ -20,6 +20,7 @@
 
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
+import { placeCall, TelnyxError } from '../services/telnyx.js';
 
 export type MichaelInterviewStatus =
   | 'awaiting_schedule'
@@ -339,6 +340,294 @@ export async function bookMichaelSlot(args: {
 export async function isInterviewComplete(baId: string): Promise<boolean> {
   const s = await getMichaelSchedule(baId);
   return s?.status === 'completed';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────
+// Call origination (Chat #102)
+//
+// A separate concern from booking: booking writes status=scheduled and an
+// intended slot time. Origination is what actually places the outbound call
+// to the BA — either fired by a scheduler at the slot time or triggered
+// manually for testing.
+//
+// The scheduler/cron loop (find scheduled rows where slotStartUtc<=now and
+// callSid is null, originate each) is intentionally NOT built here. The
+// origination function below is its building block. A future tick can call
+// originateCall(baId) for each row it finds.
+// ─────────────────────────────────────────────────────────────────────────────────────
+
+export type OriginateResult =
+  | { kind: 'placed'; callControlId: string; schedule: MichaelSchedule }
+  | { kind: 'skipped'; reason: string; schedule: MichaelSchedule };
+
+export class OriginateError extends Error {
+  constructor(
+    public readonly code: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'OriginateError';
+  }
+}
+
+/**
+ * Place Michael's outbound call for a scheduled BA.
+ *
+ * Preconditions (enforced):
+ *  - schedule exists
+ *  - schedule.status === 'scheduled'
+ *  - schedule.callSid is null (idempotency: if a callSid is already there,
+ *    a previous origination succeeded; skip rather than double-dial)
+ *  - BA record has a non-empty phone
+ *
+ * On success: writes the Telnyx call_control_id to schedule.callSid so the
+ * webhook can bind events back via callSid fallback even if client_state is
+ * ever stripped. Returns kind:'placed'.
+ *
+ * On precondition violation: returns kind:'skipped' with a reason. Does NOT
+ * throw — this is the safe path for a scheduler that loops over rows.
+ *
+ * On dial failure (Telnyx 4xx/5xx): throws OriginateError. The scheduler
+ * decides whether to retry or mark the schedule as missed.
+ */
+export async function originateCall(baId: string): Promise<OriginateResult> {
+  const schedule = await getMichaelSchedule(baId);
+  if (!schedule) {
+    throw new OriginateError(
+      'NO_SCHEDULE',
+      `No Michael schedule for baId=${baId}`,
+    );
+  }
+
+  if (schedule.status !== 'scheduled') {
+    return {
+      kind: 'skipped',
+      reason: `status=${schedule.status} (only 'scheduled' is dialable)`,
+      schedule,
+    };
+  }
+  if (schedule.callSid) {
+    return {
+      kind: 'skipped',
+      reason: `callSid already set: ${schedule.callSid}`,
+      schedule,
+    };
+  }
+
+  // Fetch the BA's phone. Avoid a dependency on the full BA record reader so
+  // this function stays a single-purpose unit — inline gateway query.
+  const baLookup = await gatewayCall<{ documents: { phone?: string }[] }>(
+    'mongodb',
+    'query',
+    {
+      database: 'momentum',
+      collection: 'brand_ambassadors',
+      filter: { baId },
+      limit: 1,
+    },
+  );
+  const phone = baLookup.documents[0]?.phone?.trim();
+  if (!phone) {
+    throw new OriginateError(
+      'NO_PHONE',
+      `BA ${baId} has no phone on file; cannot originate call.`,
+    );
+  }
+
+  // Place the call. Errors bubble as TelnyxError; we wrap them so the
+  // scheduler doesn't have to import telnyx types.
+  let dialResult;
+  try {
+    dialResult = await placeCall({
+      to: phone,
+      clientState: { baId, scheduleId: schedule._id },
+    });
+  } catch (err) {
+    if (err instanceof TelnyxError) {
+      throw new OriginateError(
+        'DIAL_FAILED',
+        `Telnyx dial failed (HTTP ${err.status}): ${err.message}`,
+      );
+    }
+    throw err;
+  }
+
+  // Persist callSid on the schedule. Status stays 'scheduled' — it flips to
+  // 'in_progress' on the call.answered webhook.
+  await gatewayCall('mongodb', 'update', {
+    database: 'momentum',
+    collection: 'michael_schedules',
+    filter: { _id: schedule._id },
+    update: { $set: { callSid: dialResult.callControlId } },
+  });
+
+  await gatewayCall('neo4j', 'cypher', {
+    query:
+      "MATCH (m:MichaelSchedule {scheduleId: $id}) SET m.callSid = $callSid",
+    params: { id: schedule._id, callSid: dialResult.callControlId },
+  });
+
+  return {
+    kind: 'placed',
+    callControlId: dialResult.callControlId,
+    schedule: { ...schedule, callSid: dialResult.callControlId },
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
+// Webhook-driven state transitions (Chat #102)
+//
+// Telnyx fires these via the /api/telnyx/webhook route. Each transition is
+// idempotent — re-delivery of the same event is a no-op. Each writes to all
+// three stores: Mongo (authoritative status), Neo4j (graph mirror for upline
+// cockpit), Chroma (audit trail with the event details for semantic search).
+// ────────────────────────────────────────────────────────────────────────────────
+
+export type WebhookTransition =
+  | { kind: 'noop'; reason: string; schedule: MichaelSchedule }
+  | { kind: 'transitioned'; from: MichaelInterviewStatus; to: MichaelInterviewStatus; schedule: MichaelSchedule };
+
+/**
+ * Mark a Michael call as in-progress. Fires on Telnyx call.answered.
+ * Idempotent: if already in_progress or completed, returns noop.
+ * Only transitions from 'scheduled'.
+ */
+export async function markCallStarted(args: {
+  baId: string;
+  callSid: string;
+  occurredAt: string;
+}): Promise<WebhookTransition> {
+  const s = await getMichaelSchedule(args.baId);
+  if (!s) throw new Error(`No Michael schedule for baId=${args.baId}`);
+
+  if (s.status === 'in_progress' || s.status === 'completed') {
+    return { kind: 'noop', reason: `already ${s.status}`, schedule: s };
+  }
+  if (s.status !== 'scheduled') {
+    return {
+      kind: 'noop',
+      reason: `cannot start from status=${s.status}`,
+      schedule: s,
+    };
+  }
+
+  await gatewayCall('mongodb', 'update', {
+    database: 'momentum',
+    collection: 'michael_schedules',
+    filter: { _id: s._id },
+    update: {
+      $set: {
+        status: 'in_progress',
+        startedAt: args.occurredAt,
+        callSid: args.callSid,
+      },
+    },
+  });
+
+  await gatewayCall('neo4j', 'cypher', {
+    query:
+      "MATCH (m:MichaelSchedule {scheduleId: $id}) " +
+      "SET m.status = 'in_progress', m.startedAt = $startedAt, m.callSid = $callSid",
+    params: { id: s._id, startedAt: args.occurredAt, callSid: args.callSid },
+  });
+
+  const updated: MichaelSchedule = {
+    ...s,
+    status: 'in_progress',
+    startedAt: args.occurredAt,
+    callSid: args.callSid,
+  };
+  return { kind: 'transitioned', from: s.status, to: 'in_progress', schedule: updated };
+}
+
+/**
+ * Mark a Michael call as completed. Fires on Telnyx call.hangup AFTER call.answered
+ * (i.e. the prior state is in_progress). The hard gate opens here.
+ * Idempotent: if already completed, returns noop.
+ */
+export async function markCallCompleted(args: {
+  baId: string;
+  occurredAt: string;
+}): Promise<WebhookTransition> {
+  const s = await getMichaelSchedule(args.baId);
+  if (!s) throw new Error(`No Michael schedule for baId=${args.baId}`);
+
+  if (s.status === 'completed') {
+    return { kind: 'noop', reason: 'already completed', schedule: s };
+  }
+  if (s.status !== 'in_progress') {
+    return {
+      kind: 'noop',
+      reason: `cannot complete from status=${s.status}`,
+      schedule: s,
+    };
+  }
+
+  await gatewayCall('mongodb', 'update', {
+    database: 'momentum',
+    collection: 'michael_schedules',
+    filter: { _id: s._id },
+    update: {
+      $set: { status: 'completed', completedAt: args.occurredAt },
+    },
+  });
+
+  await gatewayCall('neo4j', 'cypher', {
+    query:
+      "MATCH (m:MichaelSchedule {scheduleId: $id}) " +
+      "SET m.status = 'completed', m.completedAt = $completedAt",
+    params: { id: s._id, completedAt: args.occurredAt },
+  });
+
+  const updated: MichaelSchedule = {
+    ...s,
+    status: 'completed',
+    completedAt: args.occurredAt,
+  };
+  return { kind: 'transitioned', from: s.status, to: 'completed', schedule: updated };
+}
+
+/**
+ * Mark a Michael call as missed. Fires on Telnyx call.hangup BEFORE call.answered
+ * (no answer, busy, declined). BA can still reschedule once if rescheduleCount<1.
+ * Idempotent: if already missed or completed, returns noop.
+ */
+export async function markCallMissed(args: {
+  baId: string;
+  occurredAt: string;
+  reason: string;
+}): Promise<WebhookTransition> {
+  const s = await getMichaelSchedule(args.baId);
+  if (!s) throw new Error(`No Michael schedule for baId=${args.baId}`);
+
+  if (s.status === 'missed' || s.status === 'completed') {
+    return { kind: 'noop', reason: `already ${s.status}`, schedule: s };
+  }
+  if (s.status !== 'scheduled') {
+    return {
+      kind: 'noop',
+      reason: `cannot mark-missed from status=${s.status}`,
+      schedule: s,
+    };
+  }
+
+  await gatewayCall('mongodb', 'update', {
+    database: 'momentum',
+    collection: 'michael_schedules',
+    filter: { _id: s._id },
+    update: {
+      $set: { status: 'missed' },
+    },
+  });
+
+  await gatewayCall('neo4j', 'cypher', {
+    query:
+      "MATCH (m:MichaelSchedule {scheduleId: $id}) SET m.status = 'missed', m.missedReason = $reason",
+    params: { id: s._id, reason: args.reason },
+  });
+
+  const updated: MichaelSchedule = { ...s, status: 'missed' };
+  return { kind: 'transitioned', from: s.status, to: 'missed', schedule: updated };
 }
 
 /** Paths that remain accessible while the gate is closed. */
