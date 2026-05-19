@@ -9,6 +9,9 @@ import cookieParser from 'cookie-parser';
 import { env } from './env.js';
 import { healthRoutes } from './routes/health.js';
 import { authRoutes } from './routes/auth.js';
+import { welcomeRoutes } from './routes/welcome.js';
+import { adminAccessCodesRoutes } from './routes/admin/access-codes.js';
+import { michaelRoutes } from './routes/michael.js';
 
 const app = express();
 
@@ -29,6 +32,9 @@ app.use(
 
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/welcome', welcomeRoutes);
+app.use('/api/michael', michaelRoutes);
+app.use('/api/admin/access-codes', adminAccessCodesRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 
