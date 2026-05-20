@@ -10,10 +10,13 @@ import { env } from './env.js';
 import { healthRoutes } from './routes/health.js';
 import { authRoutes } from './routes/auth.js';
 import { welcomeRoutes } from './routes/welcome.js';
+import { questionnaireRoutes } from './routes/questionnaire.js';
+import { sponsorWorkbookRoutes } from './routes/sponsor-workbook.js';
 import { adminAccessCodesRoutes } from './routes/admin/access-codes.js';
 import { adminBasRoutes } from './routes/admin/bas.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { michaelRoutes } from './routes/michael.js';
+import { prospectTokenRoutes } from './routes/p.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -60,9 +63,15 @@ app.use(
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/welcome', welcomeRoutes);
+app.use('/api/onboarding/questionnaire', questionnaireRoutes);
+app.use('/api/sponsor/workbook', sponsorWorkbookRoutes);
 app.use('/api/michael', michaelRoutes);
 app.use('/api/admin/access-codes', adminAccessCodesRoutes);
 app.use('/api/admin/bas', adminBasRoutes);
+
+// /api/p/* is prospect-facing (apps/com). No auth, no Michael gate. The token
+// itself is the identity surface per COM Design Section E.3.
+app.use('/api/p', prospectTokenRoutes);
 
 // ────────────────────────────────────────────────────────────────────────────
 // BA-FACING GATED ROUTES — mount here.
