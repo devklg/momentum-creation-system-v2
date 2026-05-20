@@ -5,7 +5,14 @@
 
 export type IsoTimestamp = string;
 
-/** Token lifecycle states per COM Design Section E.1. */
+/** Token lifecycle states per COM Design Section E.1.
+ *
+ * This is the pure funnel rail — how far through the .com experience the
+ * prospect has progressed. Callback requests and webinar reservations are
+ * NOT lifecycle states; they are independent intent records a prospect can
+ * create after video_complete. Both can exist for the same prospect
+ * simultaneously (Chat #105 spec amendment).
+ */
 export type TokenState =
   | 'minted'
   | 'clicked'
@@ -14,8 +21,6 @@ export type TokenState =
   | 'video_half'
   | 'video_three_quarter'
   | 'video_complete'
-  | 'callback_requested'
-  | 'webinar_reserved'
   | 'enrolled'
   | 'expired';
 
@@ -83,6 +88,67 @@ export interface InviteTokenRecord {
   createdAt: IsoTimestamp;
   clickedAt: IsoTimestamp | null;
   expiresAt: IsoTimestamp;
+}
+
+/**
+ * Discrete video milestones the .com client reports as the prospect
+ * progresses through Dr. Dan's 17-minute video. Only 'complete' triggers
+ * holding-tank placement (locked-spec Part 4.5).
+ */
+export type VideoEventKind =
+  | 'started'
+  | 'quarter'
+  | 'half'
+  | 'three_quarter'
+  | 'complete';
+
+/**
+ * Pool placement record. A prospect's spot in the team-wide holding tank.
+ * One pool, every BA's prospects feed it (Chat #84 keystone). Positions
+ * are monotonic and never reshuffle (locked-spec Part 3.2). Flushed at the
+ * 8-week consideration window (locked-spec Part 3.7) but the assigned
+ * position is preserved as a vacant slot — #348 does not become #347.
+ */
+export interface PoolPlacement {
+  prospectId: string;
+  sponsorBaId: string;
+  positionNumber: number;
+  placedAt: IsoTimestamp;
+  expiresAt: IsoTimestamp;
+  flushedAt: IsoTimestamp | null;
+  flushReason: 'enrolled' | 'expired' | 'archived' | null;
+}
+
+/**
+ * Result of placeProspect. Returned to the route layer so it can respond
+ * to the .com client with the assigned position; the client transitions
+ * the render from presentation page to dashboard.
+ */
+export interface PlaceProspectResult {
+  prospectId: string;
+  positionNumber: number;
+  placedAt: IsoTimestamp;
+  alreadyPlaced: boolean;
+}
+
+/**
+ * Request body for POST /api/p/:token/video-event.
+ * Replaying any kind is idempotent — the server only transitions forward,
+ * never backward, in the token lifecycle.
+ */
+export interface VideoEventPayload {
+  kind: VideoEventKind;
+}
+
+/**
+ * Response from POST /api/p/:token/video-event. positionNumber is non-null
+ * only when this event resulted in (or already resulted in) placement.
+ */
+export interface VideoEventResponse {
+  token: string;
+  state: TokenState;
+  positionNumber: number | null;
+  placedAt: IsoTimestamp | null;
 }
 
 /**

@@ -12,8 +12,11 @@
  * Lifecycle (locked-spec Part 3.7 + COM Design Section E.1):
  *   - minted -> clicked -> video_started -> video_quarter -> video_half ->
  *     video_three_quarter -> video_complete (placement happens here)
- *     -> callback_requested OR webinar_reserved -> enrolled.
+ *     -> enrolled.
  *   - expired when 8 weeks elapse from createdAt without enrollment.
+ *   - Note: callback_requested and webinar_reserved are NOT lifecycle
+ *     states (Chat #105 spec amendment); they are independent intent
+ *     records that may co-exist after placement.
  *
  * Sponsor immutability:
  *   - sponsorBaId stamped at mint, never recomputed (locked-spec Part 3.5).
@@ -77,3 +80,64 @@ export function isTokenExpired(record: InviteTokenRecord, nowMs: number = Date.n
 
 /** Terminal token states for which /p/{token} should not render the funnel UI. */
 export const TERMINAL_TOKEN_STATES: ReadonlySet<TokenState> = new Set(['enrolled', 'expired']);
+
+/**
+ * Forward ordering of token lifecycle states. Used by transitionTokenState
+ * to enforce the never-go-backward rule (Chat #105 lock): a 'video_complete'
+ * token receiving a 'video_started' event must NOT regress.
+ *
+ * Order matches COM Design Section E.1 and locked-spec Part 3.7.
+ *
+ * Note: callback_requested and webinar_reserved are NOT lifecycle states.
+ * They are independent intent records that may co-exist for the same
+ * prospect after placement; see domain/callbackRequest.ts and
+ * domain/webinarReservation.ts (Chat #109).
+ */
+const STATE_ORDER: Record<TokenState, number> = {
+  minted: 0,
+  clicked: 1,
+  video_started: 2,
+  video_quarter: 3,
+  video_half: 4,
+  video_three_quarter: 5,
+  video_complete: 6,
+  enrolled: 7,
+  expired: 99,
+};
+
+export function isForwardTransition(from: TokenState, to: TokenState): boolean {
+  // 'expired' is terminal regardless of forward order.
+  if (from === 'expired') return false;
+  return STATE_ORDER[to] > STATE_ORDER[from];
+}
+
+/**
+ * Set the token's state to `next` if and only if it is forward of the
+ * current state. Idempotent: receiving the same state twice is a no-op.
+ * Replaying a stale state is also a no-op (the YouTube IFrame can re-fire
+ * earlier milestones; we do not regress).
+ *
+ * Returns the effective state after the call: either `next` (forward
+ * transition applied) or the unchanged current state.
+ */
+export async function transitionTokenState(
+  token: string,
+  next: TokenState,
+): Promise<{ state: TokenState; changed: boolean }> {
+  const record = await findTokenRecord(token);
+  if (!record) throw new Error('token_not_found');
+
+  if (!isForwardTransition(record.state, next)) {
+    return { state: record.state, changed: false };
+  }
+
+  await gatewayCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: TOKENS_COLLECTION,
+    filter: { token },
+    update: { $set: { state: next, updatedAt: new Date().toISOString() } },
+  });
+
+  return { state: next, changed: true };
+}
+
