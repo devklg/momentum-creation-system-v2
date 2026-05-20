@@ -4,6 +4,8 @@ import { WelcomePage } from './routes/welcome';
 import { CockpitStubPage } from './routes/cockpit';
 import { MichaelSchedulePage } from './routes/michael-schedule';
 import { TenStepsPage } from './routes/training/10-steps';
+import { QuestionnairePage } from './routes/onboarding/questionnaire';
+import { SponsorWorkbookPage } from './routes/sponsor/interview-workbook';
 
 export function App() {
   return (
@@ -14,6 +16,8 @@ export function App() {
       <Route path="/michael/schedule" element={<MichaelSchedulePage />} />
       <Route path="/cockpit" element={<CockpitStubPage />} />
       <Route path="/training/10-steps" element={<TenStepsPage />} />
+      <Route path="/onboarding/questionnaire" element={<QuestionnairePage />} />
+      <Route path="/sponsor/interview-workbook/:baId" element={<SponsorWorkbookPage />} />
       <Route
         path="*"
         element={
