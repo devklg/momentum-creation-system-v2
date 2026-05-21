@@ -45,3 +45,7 @@ coverage/
 # Failed sandbox-to-Windows transfer artifacts (chat89 lesson)
 *.b64
 *.b64.txt
+
+# Per-session handoff scripts (Perry write/verify, chat-specific tooling)
+.handoff/
+

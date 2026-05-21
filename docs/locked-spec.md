@@ -530,6 +530,73 @@ The instinct to rebuild a complete brand-locked visual into card components is t
 - **Hero figure on the 72-hour mission training page** — 32,767 (the running total at Level 14 of the duplication doubling math, 2¹⁵ − 1). Replaces any earlier ambiguity between 14,386 and 32,767.
 - **GLP-THREE product photography** — `D:/TEAM-MAG/assets/` (delivered Chat #99). 28 files including `GLPTHREEE_Bottle_FullLabel_Render_Silo.png` (transparent-background silhouette render — the cleanest asset for compositing into surfaces).
 
+## 4.9  Token lifecycle edge cases — the four return-visit branches
+
+Locked Chat #110. The `GET /api/p/:token` resolver has four terminal branches that produce a prospect-facing view (or a hand-off-to-BA view). Each is specified here.
+
+**Branch 1 — 200 OK, render presentation or dashboard.** Token state is one of `minted`, `clicked`, `video_started`, `video_quarter`, `video_half`, `video_three_quarter` (→ presentation page; client passes the highest milestone reached so the YouTube iframe can `seekTo()` on load), or `video_complete` (→ dashboard with `positionNumber`). The 200 payload always carries the inviting BA per locked-spec 3.9.
+
+**Branch 2 — 404 invalid_token (F.1).** Token does not resolve, or the resolved prospect or BA record is missing. The client renders a minimal Team Magnificent branded message asking the prospect to check the link or ask the person who invited them for a fresh one. No BA contact in the payload because we don't know who they are.
+
+**Branch 3 — 410 expired (F.2).** Token's `expiresAt` has elapsed OR token state is already `expired`. **Lazy-flush rule:** when the resolver encounters a token whose state is non-terminal but whose `expiresAt` is in the past, it transitions the token to `expired` inline (triple-stack write) before returning 410. This makes every read self-healing and the flush a real auditable lifecycle event — not a synthetic per-request error. The cron-based flush scheduler is deferred; lazy-flush covers the read path.
+
+**The 410 payload carries the inviting BA's contact** so the prospect can ask for a re-invite:
+```
+{
+  error: 'expired',
+  expiredAt: ISO-8601,
+  ba: {
+    firstName: 'Kevin',
+    lastInitial: 'G',
+    phoneE164: '+13235551234' | null  // null only if BA has no phone on record
+  }
+}
+```
+Phone is E.164 (raw, no formatting). The client formats for display and uses the same string in `tel:` links and SMS draft helpers.
+
+**The F.2 view** is the tap-to-text helper:
+- Compass mark, then headline: "This invitation has expired."
+- Body: "Ask **[BA first] [BA last initial].** for a fresh link."
+- Phone displayed as `(323) 555-1234`, wrapped in `<a href="tel:+13235551234">` so mobile taps open the dialer.
+- Secondary action: "Copy a text to **[BA first]**." Clicking copies to clipboard: *"Hi [BA first], the link you sent me expired. Could you send a fresh one?"* The prospect pastes into their own SMS app and sends. The system never sends on the prospect's behalf — locked-spec 1.13 (channel protection) and 3.6 (BA-to-BA, off-app) both hold.
+
+**No auto-renew.** The H.7 question is locked closed: the prospect must request, the BA mints fresh from their cockpit. Auto-renewing on click would bypass the BA's decision to extend the consideration window and would silently violate the "share, respect, move on" elegance.
+
+**Branch 4 — 409 enrolled (E.2 return-visit).** Token state is `enrolled`. The prospect has already been walked into THREE off-app and the BA marked them enrolled in their cockpit. The 409 payload carries the inviting BA's full name (no phone — the prospect already has the BA's number from the original invitation):
+```
+{
+  error: 'enrolled',
+  ba: {
+    firstName: 'Kevin',
+    lastName: 'Gardner',
+    fullName: 'Kevin Gardner'
+  }
+}
+```
+
+**The E.2 enrolled view** is a brief acknowledgment only:
+- Compass mark, headline: "Welcome to Team Magnificent."
+- Body: "You're in. Your sponsor **[BA full name]** will reach out to set up your access code for the team site."
+- No CTA. No link to `/register`. No further programmatic path.
+
+The enrolled view's deliberate brevity honors the locked-spec 3.6 BA-to-BA, off-app handoff. The new BA's access to `.team` comes through a separately-issued access code from Kevin per locked-spec 2.3 — not through the prospect-facing `/p/{token}` URL. Adding a register link would re-introduce the programmatic THREE handoff Chat #84 explicitly dropped.
+
+**Branch 5 (out-of-band) — 500 server_error.** Unexpected gateway/DB failure. The client shows an F.4 / F.6-style soft degrade (the dashboard's live counters and stack already degrade gracefully per F.4; the presentation page falls back to a minimal retry surface).
+
+### Sponsor immutability in all branches
+
+Every branch reads `sponsorBaId` from the token record only. No request input — query string, header, body — can influence which BA is named on the page. Locked-spec 3.5 enforced at the route layer in every read.
+
+### Status-code summary
+
+| Code | Meaning | Payload | Client view |
+|------|---------|---------|-------------|
+| 200 | resolved cleanly | ResolvedTokenPayload (state-driven render) | presentation or dashboard |
+| 404 | invalid_token | `{ error }` | F.1 branded message, no BA contact |
+| 409 | enrolled | `{ error, ba: { firstName, lastName, fullName } }` | E.2 brief acknowledgment |
+| 410 | expired | `{ error, expiredAt, ba: { firstName, lastInitial, phoneE164 } }` | F.2 with tap-to-text helper |
+| 500 | server_error | `{ error }` | F.4/F.6 soft degrade |
+
 ---
 
 # Part 5 — Still open
@@ -555,7 +622,7 @@ Decisions still needed from Kevin before the surfaces that depend on them ship:
 - **Export PII redaction** — per-export confirmation always, or persistent "show me everything" preference for Kevin (ADMIN J.5.10)
 - **Webinar cadence** — weekly Tuesday 7pm PT, or every 72 hours (COM H.3)
 - ~~**Position stack city/state derivation**~~ — *RESOLVED Chat #99: city + state, with country field captured on the prospect record from day one for international rollout.* See Part 4.4.
-- **Expired token auto-renew** — auto-renew on click if BA still has prospect active, or require BA to mint fresh (COM H.7)
+- ~~**Expired token auto-renew**~~ — *RESOLVED Chat #110: no auto-renew. An expired `/p/{token}` resolves to a static F.2 expired view with the inviting BA's first name and phone surfaced for the prospect to reach out. The BA mints a fresh token from their cockpit when ready. Keeps the BA in control of the re-invite decision and honors locked-spec 1.4 (share, respect, move on) rather than letting the system silently extend on the prospect's behalf. See Part 4.9 for the resolver behavior.* (Closes COM H.7.)
 - **Leadership track records inside `.team`** — where and how Paul's 20-year binary career, Kevin's earnings, and other leader track records as they emerge are surfaced to new BAs inside `.team`. Candidates: a leadership section on profile pages, an "about Team Magnificent" page reachable from the cockpit, contextual placement in the 10-step orientation, or a separate Layer 2 training module that opens after a BA has signed their first two people. Never on `.com`. Never as income claims. The principle is locked in Part 1.14; the specific surface placement is the open question. Added Chat #94.
 
 ---

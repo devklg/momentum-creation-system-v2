@@ -236,3 +236,58 @@ export interface ResolvedTokenPayload {
   videoUrl: string;
   webinar: { dayOfWeek: string; timeOfDay: string; timezone: string };
 }
+
+/**
+ * 409 enrolled response from GET /api/p/:token, POST /api/p/:token/video-event,
+ * and POST /api/p/:token/callback-request.
+ *
+ * Per locked-spec Part 4.9 Branch 4: the prospect was already walked into
+ * THREE off-app (locked-spec 3.6) and the BA marked them enrolled in their
+ * cockpit. The client renders the E.2 brief-acknowledgment view — no CTA,
+ * no register link, no programmatic path. Access to .team comes through a
+ * separately-issued access code from Kevin per locked-spec 2.3, not through
+ * /p/{token}.
+ *
+ * No phone field: the prospect already has the BA's number from the
+ * original invitation. Carrying it again here would be noise.
+ */
+export interface EnrolledResponse {
+  error: 'enrolled';
+  ba: {
+    firstName: string;
+    lastName: string;
+    fullName: string;
+  };
+}
+
+/**
+ * 410 expired response from GET /api/p/:token, POST /api/p/:token/video-event,
+ * and POST /api/p/:token/callback-request.
+ *
+ * Per locked-spec Part 4.9 Branch 3: the token's expiresAt has elapsed OR
+ * state is already 'expired'. The resolver applies the lazy-flush rule —
+ * non-terminal tokens whose expiresAt is in the past are transitioned to
+ * 'expired' inline (triple-stack write) BEFORE returning 410. Self-healing
+ * read path; the cron-based flush scheduler is deferred.
+ *
+ * The 410 payload carries the inviting BA's contact so the prospect can
+ * ask for a fresh link. The F.2 client view renders this as a tap-to-text
+ * helper — phoneE164 powers a `tel:` link on mobile and a copy-pre-filled-
+ * SMS button. The system never sends on the prospect's behalf; channel
+ * protection (locked-spec 1.13) and BA-to-BA off-app handoff (3.6) both
+ * hold. No auto-renew: the BA mints a fresh token from their cockpit when
+ * ready, honoring locked-spec 1.4 (share, respect, move on).
+ *
+ * Phone is E.164 raw (e.g. '+13235551234'), no formatting. The client
+ * formats for display and uses the same string in `tel:` links and SMS
+ * draft helpers. Null only if the BA has no phone on record.
+ */
+export interface ExpiredResponse {
+  error: 'expired';
+  expiredAt: IsoTimestamp;
+  ba: {
+    firstName: string;
+    lastInitial: string;
+    phoneE164: string | null;
+  };
+}

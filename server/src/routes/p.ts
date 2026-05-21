@@ -27,6 +27,8 @@ import type {
   CallbackIntent,
   CallbackRequestPayload,
   CallbackRequestResponse,
+  EnrolledResponse,
+  ExpiredResponse,
   ResolvedTokenPayload,
   VideoEventKind,
   VideoEventPayload,
@@ -35,7 +37,7 @@ import type {
 } from '@momentum/shared';
 import { findTokenRecord, isTokenExpired, transitionTokenState } from '../domain/tokens.js';
 import { findProspectById, lastInitialOf } from '../domain/prospects.js';
-import { findBAByBaId } from '../domain/ba.js';
+import { findBAByBaId, type BARecord } from '../domain/ba.js';
 import { placeProspect } from '../domain/holdingTank.js';
 import { createCallbackRequest } from '../domain/callbackRequest.js';
 
@@ -51,6 +53,82 @@ const WEBINAR = {
   timezone: 'America/Los_Angeles',
 };
 
+// ─── Helpers ────────────────────────────────────────────────────────
+
+/**
+ * Normalize a stored BA phone string to E.164 (e.g. "+13235551234").
+ * Per locked-spec Part 4.9 the F.2 expired view receives phoneE164 raw
+ * (no display formatting); the client formats for human display and uses
+ * the same string in `tel:` links and SMS draft helpers.
+ *
+ * Rules (conservative — return null on anything we can't trust):
+ *   - Strip everything except digits and a leading '+'.
+ *   - If the input starts with '+', keep as-is after digit-only strip.
+ *   - 10 digits → assume US/Canada NANP, prepend '+1'.
+ *   - 11 digits starting with '1' → prepend '+'.
+ *   - Anything else (empty, too short, too long without a '+') → null.
+ */
+function phoneToE164(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('+')) {
+    const digits = trimmed.slice(1).replace(/\D/g, '');
+    if (digits.length < 8 || digits.length > 15) return null;
+    return `+${digits}`;
+  }
+  const digits = trimmed.replace(/\D/g, '');
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
+  return null;
+}
+
+/**
+ * Build the locked-spec Part 4.9 410 expired payload from a BA record.
+ * Phone is normalized to E.164 raw; null if the BA has no phone on record.
+ */
+function buildExpiredResponse(ba: BARecord, expiredAt: string): ExpiredResponse {
+  return {
+    error: 'expired',
+    expiredAt,
+    ba: {
+      firstName: ba.firstName,
+      lastInitial: ba.lastName.charAt(0).toUpperCase(),
+      phoneE164: phoneToE164(ba.phone),
+    },
+  };
+}
+
+/**
+ * Build the locked-spec Part 4.9 409 enrolled payload from a BA record.
+ * No phone (prospect already has the BA's number from the original invite).
+ */
+function buildEnrolledResponse(ba: BARecord): EnrolledResponse {
+  return {
+    error: 'enrolled',
+    ba: {
+      firstName: ba.firstName,
+      lastName: ba.lastName,
+      fullName: `${ba.firstName} ${ba.lastName}`,
+    },
+  };
+}
+
+/**
+ * Resolve a token's sponsoring BA, used by every 409/410 branch in every
+ * route in this module. Sponsor immutability (locked-spec 3.5): the BA is
+ * looked up from the token record's sponsorBaId only — never from the
+ * request body, query, or headers.
+ *
+ * Returns null only when the BA record is genuinely missing — callers
+ * fall through to 404 rather than rendering a sponsorless page (locked-
+ * spec 3.9, never anonymous; Part 5 sponsor-leaves question still open).
+ */
+async function findSponsorBA(sponsorBaId: string): Promise<BARecord | null> {
+  return findBAByBaId(sponsorBaId);
+}
+
+
 prospectTokenRoutes.get('/:token', async (req, res) => {
   const { token } = req.params;
 
@@ -62,12 +140,32 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
     const tokenRecord = await findTokenRecord(token);
     if (!tokenRecord) return res.status(404).json({ error: 'invalid_token' });
 
+    // ─── 409 enrolled ─── locked-spec Part 4.9 Branch 4
     if (tokenRecord.state === 'enrolled') {
-      return res.status(409).json({ error: 'enrolled' });
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(409).json(buildEnrolledResponse(ba));
     }
 
-    if (tokenRecord.state === 'expired' || isTokenExpired(tokenRecord)) {
-      return res.status(410).json({ error: 'expired', expiredAt: tokenRecord.expiresAt });
+    // ─── 410 expired ─── locked-spec Part 4.9 Branch 3 + lazy-flush rule
+    //
+    // Already-expired tokens return 410 immediately. Time-expired but
+    // still-non-terminal tokens are flushed inline (triple-stack write)
+    // BEFORE responding so the read path is self-healing and the flush
+    // is a real lifecycle event — not a synthetic per-request error.
+    if (tokenRecord.state === 'expired') {
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
+    }
+    if (isTokenExpired(tokenRecord)) {
+      // Lazy-flush: forward-transition to 'expired' before responding.
+      // transitionTokenState is idempotent and forward-only; if a parallel
+      // request raced ahead, the second call is a no-op.
+      await transitionTokenState(token, 'expired');
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
 
     const [prospect, ba] = await Promise.all([
@@ -179,11 +277,25 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
   try {
     const tokenRecord = await findTokenRecord(token);
     if (!tokenRecord) return res.status(404).json({ error: 'invalid_token' });
+
+    // ─── 409 enrolled ─── locked-spec Part 4.9 Branch 4
     if (tokenRecord.state === 'enrolled') {
-      return res.status(409).json({ error: 'enrolled' });
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(409).json(buildEnrolledResponse(ba));
     }
-    if (tokenRecord.state === 'expired' || isTokenExpired(tokenRecord)) {
-      return res.status(410).json({ error: 'expired' });
+
+    // ─── 410 expired ─── locked-spec Part 4.9 Branch 3 + lazy-flush rule
+    if (tokenRecord.state === 'expired') {
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
+    }
+    if (isTokenExpired(tokenRecord)) {
+      await transitionTokenState(token, 'expired');
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
 
     // Forward-only state transition. If the inbound event is stale this
@@ -292,11 +404,25 @@ prospectTokenRoutes.post('/:token/callback-request', async (req, res) => {
   try {
     const tokenRecord = await findTokenRecord(token);
     if (!tokenRecord) return res.status(404).json({ error: 'invalid_token' });
+
+    // ─── 409 enrolled ─── locked-spec Part 4.9 Branch 4
     if (tokenRecord.state === 'enrolled') {
-      return res.status(409).json({ error: 'enrolled' });
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(409).json(buildEnrolledResponse(ba));
     }
-    if (tokenRecord.state === 'expired' || isTokenExpired(tokenRecord)) {
-      return res.status(410).json({ error: 'expired' });
+
+    // ─── 410 expired ─── locked-spec Part 4.9 Branch 3 + lazy-flush rule
+    if (tokenRecord.state === 'expired') {
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
+    }
+    if (isTokenExpired(tokenRecord)) {
+      await transitionTokenState(token, 'expired');
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
 
     const [prospect, ba] = await Promise.all([

@@ -17,6 +17,8 @@ import type {
   CallbackIntent,
   CallbackRequestPayload,
   CallbackRequestResponse,
+  EnrolledResponse,
+  ExpiredResponse,
   TokenState,
   VideoEventKind,
   VideoEventPayload,
@@ -51,16 +53,31 @@ export interface ResolveTokenResponse {
   webinar: { dayOfWeek: string; timeOfDay: string; timezone: string };
 }
 
+/**
+ * Resolve-token error union per locked-spec Part 4.9 payload contracts.
+ *
+ *   F.1 invalid_token (404)  — no BA contact, we don't know who they are
+ *   F.2 expired      (410)   — carries BA firstName, lastInitial, phoneE164
+ *                              for the tap-to-text helper view; phoneE164
+ *                              is E.164 raw (e.g. "+13235551234") or null
+ *                              if the BA has no phone on record. Client
+ *                              formats for display and uses the same string
+ *                              in `tel:` links + clipboard SMS helpers.
+ *   E.2 enrolled     (409)   — carries BA firstName, lastName, fullName.
+ *                              No phone (prospect already has BA's number
+ *                              from the original invitation).
+ *   F.4-F.6 network          — no payload; client shows soft degrade.
+ */
 export type ResolveTokenError =
   | { kind: 'invalid_token' }
-  | { kind: 'expired'; expiredAt: string }
-  | { kind: 'enrolled' }
+  | { kind: 'expired'; expiredAt: string; ba: ExpiredResponse['ba'] }
+  | { kind: 'enrolled'; ba: EnrolledResponse['ba'] }
   | { kind: 'network' };
 
 export type VideoEventError =
   | { kind: 'invalid_token' }
-  | { kind: 'expired' }
-  | { kind: 'enrolled' }
+  | { kind: 'expired'; expiredAt: string; ba: ExpiredResponse['ba'] }
+  | { kind: 'enrolled'; ba: EnrolledResponse['ba'] }
   | { kind: 'network' };
 
 export async function resolveToken(
@@ -74,10 +91,26 @@ export async function resolveToken(
 
     if (res.status === 404) return { ok: false, error: { kind: 'invalid_token' } };
     if (res.status === 410) {
-      const body = (await res.json().catch(() => ({}))) as { expiredAt?: string };
-      return { ok: false, error: { kind: 'expired', expiredAt: body.expiredAt ?? '' } };
+      const body = (await res.json().catch(() => ({}))) as Partial<ExpiredResponse>;
+      return {
+        ok: false,
+        error: {
+          kind: 'expired',
+          expiredAt: body.expiredAt ?? '',
+          ba: body.ba ?? { firstName: '', lastInitial: '', phoneE164: null },
+        },
+      };
     }
-    if (res.status === 409) return { ok: false, error: { kind: 'enrolled' } };
+    if (res.status === 409) {
+      const body = (await res.json().catch(() => ({}))) as Partial<EnrolledResponse>;
+      return {
+        ok: false,
+        error: {
+          kind: 'enrolled',
+          ba: body.ba ?? { firstName: '', lastName: '', fullName: '' },
+        },
+      };
+    }
     if (!res.ok) return { ok: false, error: { kind: 'network' } };
 
     const data = (await res.json()) as ResolveTokenResponse;
@@ -106,8 +139,27 @@ export async function postVideoEvent(
     });
 
     if (res.status === 404) return { ok: false, error: { kind: 'invalid_token' } };
-    if (res.status === 410) return { ok: false, error: { kind: 'expired' } };
-    if (res.status === 409) return { ok: false, error: { kind: 'enrolled' } };
+    if (res.status === 410) {
+      const body = (await res.json().catch(() => ({}))) as Partial<ExpiredResponse>;
+      return {
+        ok: false,
+        error: {
+          kind: 'expired',
+          expiredAt: body.expiredAt ?? '',
+          ba: body.ba ?? { firstName: '', lastInitial: '', phoneE164: null },
+        },
+      };
+    }
+    if (res.status === 409) {
+      const body = (await res.json().catch(() => ({}))) as Partial<EnrolledResponse>;
+      return {
+        ok: false,
+        error: {
+          kind: 'enrolled',
+          ba: body.ba ?? { firstName: '', lastName: '', fullName: '' },
+        },
+      };
+    }
     if (!res.ok) return { ok: false, error: { kind: 'network' } };
 
     const data = (await res.json()) as VideoEventResponse;
@@ -124,8 +176,8 @@ export async function postVideoEvent(
 export type CallbackRequestError =
   | { kind: 'invalid_intent' }
   | { kind: 'invalid_token' }
-  | { kind: 'expired' }
-  | { kind: 'enrolled' }
+  | { kind: 'expired'; expiredAt: string; ba: ExpiredResponse['ba'] }
+  | { kind: 'enrolled'; ba: EnrolledResponse['ba'] }
   | { kind: 'network' };
 
 export type { CallbackIntent, CallbackRequestResponse };
@@ -160,8 +212,27 @@ export async function postCallbackRequest(
 
     if (res.status === 400) return { ok: false, error: { kind: 'invalid_intent' } };
     if (res.status === 404) return { ok: false, error: { kind: 'invalid_token' } };
-    if (res.status === 410) return { ok: false, error: { kind: 'expired' } };
-    if (res.status === 409) return { ok: false, error: { kind: 'enrolled' } };
+    if (res.status === 410) {
+      const body = (await res.json().catch(() => ({}))) as Partial<ExpiredResponse>;
+      return {
+        ok: false,
+        error: {
+          kind: 'expired',
+          expiredAt: body.expiredAt ?? '',
+          ba: body.ba ?? { firstName: '', lastInitial: '', phoneE164: null },
+        },
+      };
+    }
+    if (res.status === 409) {
+      const body = (await res.json().catch(() => ({}))) as Partial<EnrolledResponse>;
+      return {
+        ok: false,
+        error: {
+          kind: 'enrolled',
+          ba: body.ba ?? { firstName: '', lastName: '', fullName: '' },
+        },
+      };
+    }
     if (!res.ok) return { ok: false, error: { kind: 'network' } };
 
     const data = (await res.json()) as CallbackRequestResponse;
