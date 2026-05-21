@@ -32,7 +32,14 @@
  */
 
 import { gatewayCall } from '../services/gateway.js';
-import type { PlaceProspectResult, PoolPlacement } from '@momentum/shared';
+import { publishPlacement } from '../services/poolEvents.js';
+import type {
+  HoldingTankSnapshot,
+  PlaceProspectResult,
+  PlacementEvent,
+  PlacementTickerEntry,
+  PoolPlacement,
+} from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const COUNTERS_COLLECTION = 'pool_counters';
@@ -276,10 +283,115 @@ export async function placeProspect(input: PlaceProspectInput): Promise<PlacePro
     },
   });
 
+  // 6. Publish to the in-process pool event bus so every connected SSE
+  //    viewer receives the placement live (Chat #114 dashboard port).
+  //    Fan-out is fire-and-forget; persistence already committed in steps
+  //    1–5. If no viewers are subscribed, the publish is a no-op.
+  const placementEvent: PlacementEvent = {
+    eventId: `placement_evt_${input.prospectId}_${placedAt}`,
+    positionNumber,
+    firstName: input.firstName,
+    lastInitial: input.lastInitial,
+    city: input.city,
+    stateOrRegion: input.stateOrRegion,
+    placedAt,
+  };
+  publishPlacement(placementEvent);
+
   return {
     prospectId: input.prospectId,
     positionNumber,
     placedAt,
     alreadyPlaced: false,
   };
+}
+
+/**
+ * Build the SSE snapshot payload sent at connection open. The client
+ * uses `globalMaxPosition` to compute its beneath-you count via
+ *   beneath_you = max(0, globalMaxPosition - my_position)
+ * and uses `recent` to seed the position-stack ticker without a second
+ * round-trip.
+ *
+ * `recentLimit` is the number of most-recent placements to include.
+ * Locked-spec 4.4 calls for 20–40 visible entries; pass 40 from the
+ * route layer and let the client trim if needed.
+ */
+export async function buildHoldingTankSnapshot(
+  recentLimit: number,
+): Promise<HoldingTankSnapshot> {
+  const [globalMaxPosition, recent] = await Promise.all([
+    readPoolCounter(),
+    listRecentPlacements(recentLimit),
+  ]);
+  return { globalMaxPosition, recent };
+}
+
+/**
+ * Read the current value of the team pool counter without incrementing.
+ * Returns 0 if the counter doc has not been seeded yet (no placements
+ * have happened ever).
+ */
+async function readPoolCounter(): Promise<number> {
+  const result = await gatewayCall<{ documents: Array<{ current: number }> }>(
+    'mongodb',
+    'query',
+    {
+      database: MONGO_DB,
+      collection: COUNTERS_COLLECTION,
+      filter: { _id: TEAM_POOL_ID },
+      limit: 1,
+    },
+  );
+  return result.documents[0]?.current ?? 0;
+}
+
+/**
+ * Return the most recent N placements (newest first), as ticker entries.
+ * Backed by a Mongo query against `pool_placements` sorted by placedAt
+ * descending. Flushed placements are excluded — the ticker shows the
+ * live team, not historical no-shows.
+ */
+async function listRecentPlacements(
+  limit: number,
+): Promise<PlacementTickerEntry[]> {
+  // We need first name + last initial + city/state for ticker render, but
+  // those live on the prospect record, not the placement record. The most
+  // economical path at v1 scale is a query against the prospect collection
+  // filtered to state=video_complete with the right projection + sort.
+  // When pool_placements is large enough to dominate, this becomes a
+  // single $lookup aggregation or a denormalized field on placement.
+  const result = await gatewayCall<{
+    documents: Array<{
+      firstName: string;
+      lastInitial?: string;
+      lastName?: string;
+      location?: { city?: string; stateOrRegion?: string };
+      positionNumber: number;
+      placedAt: string;
+    }>;
+  }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: 'prospects',
+    filter: {
+      state: 'video_complete',
+      positionNumber: { $ne: null },
+      placedAt: { $ne: null },
+    },
+    sort: { placedAt: -1 },
+    limit,
+  });
+
+  return result.documents
+    .filter((d) => typeof d.positionNumber === 'number' && typeof d.placedAt === 'string')
+    .map<PlacementTickerEntry>((d) => ({
+      positionNumber: d.positionNumber,
+      firstName: d.firstName,
+      lastInitial:
+        d.lastInitial ||
+        (d.lastName ? d.lastName.charAt(0).toUpperCase() : ''),
+      city: d.location?.city ?? '',
+      stateOrRegion: d.location?.stateOrRegion ?? '',
+      placedAt: d.placedAt,
+    }));
 }

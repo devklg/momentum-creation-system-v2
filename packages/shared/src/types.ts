@@ -36,14 +36,18 @@ export type TokenState =
  *
  *   - interested_tell_me_more  → "I'm interested — tell me more"
  *   - have_questions           → "I have questions"
+ *   - ready_to_join            → "I'm ready to join Team Magnificent"
  *
- * When the dashboard Section 6 ships, the union will expand to add
- * 'ready_to_join'. Server, client, and SMS templating all branch on
- * this discriminator.
+ * The 'ready_to_join' intent is rendered ONLY on the post-video
+ * tm-prospect-dashboard Section 6, not on the pre-video presentation
+ * Section 10. Chat #113 expanded the union when the dashboard six-section
+ * port shipped. Server, client, and SMS templating all branch on this
+ * discriminator.
  */
 export type CallbackIntent =
   | 'interested_tell_me_more'
-  | 'have_questions';
+  | 'have_questions'
+  | 'ready_to_join';
 
 /**
  * Request body for POST /api/p/:token/callback-request.
@@ -290,4 +294,151 @@ export interface ExpiredResponse {
     lastInitial: string;
     phoneE164: string | null;
   };
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * SSE — Live placement stream (Chat #114 dashboard port)
+ * ──────────────────────────────────────────────────────────────────
+ *
+ * Recovered architecture (Chat #84 + #94 prior specification):
+ *   GET /api/p/:token/stream
+ *     - Returns text/event-stream. Connection held open per viewer.
+ *     - On connect, server emits a `snapshot` event carrying the
+ *       current global max position + the most recent N placements
+ *       (city/state/lastInitial — never names that could PII-leak).
+ *     - On every team-wide placement (POST /api/p/:token/video-event
+ *       kind=complete from ANY prospect on the whole team), server
+ *       emits a `placement` event with the new position number.
+ *     - Heartbeat `ping` event every 30s so proxies don't close idle
+ *       connections (and so the client can detect a dead pipe).
+ *
+ * Client math (locked-spec 3.4):
+ *   beneath_you = max(0, current_global_max - my_position)
+ *
+ * Compliance (locked-spec 3.10 + COM Design C.4):
+ *   - No names. First name + last initial only.
+ *   - City + state for human texture; no street, no email, no phone.
+ *   - No income claims, no placement promises.
+ *   - The position stream is "team momentum" not "your downline."
+ */
+
+/**
+ * One placement entry as the dashboard ticker renders it.
+ * Used both inside `HoldingTankSnapshot.recent` and as the payload
+ * of `PlacementEvent`. Same shape both places so the React ticker
+ * renders snapshot entries and live entries through one code path.
+ */
+export interface PlacementTickerEntry {
+  positionNumber: number;
+  firstName: string;
+  lastInitial: string;
+  city: string;
+  stateOrRegion: string;
+  placedAt: IsoTimestamp;
+}
+
+/**
+ * SSE `snapshot` event payload — sent once at connection open.
+ * Carries the current global max position so the client can compute
+ * its own beneath-you count, plus the most recent N placements to
+ * seed the position-stack ticker without a separate fetch.
+ */
+export interface HoldingTankSnapshot {
+  globalMaxPosition: number;
+  recent: PlacementTickerEntry[];
+}
+
+/**
+ * SSE `placement` event payload — sent every time any prospect on
+ * the team completes the video. Every viewer increments their own
+ * beneath-you counter by 1 if positionNumber > their own position.
+ * The entry is prepended to the position-stack ticker.
+ */
+export interface PlacementEvent extends PlacementTickerEntry {
+  /** Globally-unique id, used as the SSE `id:` field for resumability. */
+  eventId: string;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Webinar events + reservations (Chat #114 dashboard port)
+ * ──────────────────────────────────────────────────────────────────
+ *
+ * Per locked-spec Part 5, the webinar cadence (weekly Tuesday 7pm PT
+ * vs every 72 hours) is still open. The reservation flow is built
+ * cadence-agnostic: there is always a "next upcoming event"; this
+ * dashboard reads it and lets the prospect reserve. Seeding the
+ * event records is operationally separate (manual /admin action for
+ * now; cron when cadence is decided).
+ *
+ * Email delivery to the prospect is gated on the open Part 5 email
+ * provider decision. Until then the reservation captures successfully
+ * and the BA receives an SMS alert (locked-spec 3.13 — Telnyx is the
+ * proven channel). The prospect is told "your BA will follow up with
+ * the Zoom link."
+ */
+
+/**
+ * A scheduled Team Magnificent live event a prospect can reserve a
+ * seat for. Hosts default to Kevin + Paul (locked-spec 1.14).
+ * Status is upgraded by the seeding job/admin tool, not by reservation.
+ */
+export interface WebinarEvent {
+  eventId: string;
+  scheduledFor: IsoTimestamp;
+  hosts: string[];
+  zoomUrl: string | null;
+  durationMinutes: number;
+  status: 'upcoming' | 'past' | 'cancelled';
+  createdAt: IsoTimestamp;
+}
+
+/**
+ * Request body for POST /api/p/:token/webinar-reserve.
+ * Name + email are the only fields the prospect provides; everything
+ * else (eventId, prospectId, sponsorBaId) is resolved server-side
+ * from the token. Sponsor immutability (locked-spec 3.5) holds.
+ */
+export interface WebinarReservationPayload {
+  name: string;
+  email: string;
+}
+
+/**
+ * Response from POST /api/p/:token/webinar-reserve. The dashboard
+ * transitions Section 6's webinar tile to a "reserved" confirmation
+ * card using `scheduledFor` + `baFirstName` so the prospect knows
+ * who's following up with the Zoom link.
+ */
+export interface WebinarReservationResponse {
+  ok: true;
+  reservationId: string;
+  eventId: string;
+  scheduledFor: IsoTimestamp;
+  baFirstName: string;
+  emailSent: boolean;
+  createdAt: IsoTimestamp;
+}
+
+/**
+ * Stored webinar reservation record. The BA cockpit surfaces these
+ * alongside callback requests so a BA seeing both knows the prospect
+ * is engaged through two distinct channels.
+ *
+ * `emailDeliveryStatus` carries 'skipped' (email provider not yet
+ * configured per locked-spec Part 5) until the provider is wired.
+ * 'queued'/'sent'/'failed' come online when the provider lands.
+ */
+export interface WebinarReservationRecord {
+  reservationId: string;
+  eventId: string;
+  token: string;
+  prospectId: string;
+  sponsorBaId: string;
+  name: string;
+  email: string;
+  createdAt: IsoTimestamp;
+  emailDeliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
+  emailDeliveryError: string | null;
+  smsDeliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
+  smsDeliveryError: string | null;
 }

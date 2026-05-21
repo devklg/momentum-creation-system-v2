@@ -48,6 +48,7 @@ import KevinStory from "./sections/08-KevinStory";
 import Timing from "./sections/09-Timing";
 import QuietDoor from "./sections/10-QuietDoor";
 import Footer from "./sections/11-Footer";
+import { TmProspectDashboard } from "../tm-prospect-dashboard/tm-prospect-dashboard";
 
 // ---------------------------------------------------------------
 // Types — mirror Chat #105's shared discriminated union locally so
@@ -165,7 +166,8 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
   // ---- Render branch -------------------------------------------
   if (placement) {
     return (
-      <ProspectDashboardPlaceholder
+      <TmProspectDashboard
+        token={token}
         prospectFirstName={prospectFirstName}
         baFullName={baFullName}
         positionNumber={placement.positionNumber}
@@ -214,54 +216,10 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
 }
 
 // ---------------------------------------------------------------
-// Dashboard placeholder — unchanged from Chat #106.
+// Dashboard branch is delegated to <TmProspectDashboard/> (Chat #113).
+// The placeholder component that previously lived here has been
+// removed in favor of the real six-section dashboard port.
 // ---------------------------------------------------------------
-
-interface ProspectDashboardPlaceholderProps {
-  prospectFirstName: string;
-  baFullName: string;
-  positionNumber: number;
-  placedAt: string;
-}
-function ProspectDashboardPlaceholder({
-  prospectFirstName,
-  baFullName,
-  positionNumber,
-  placedAt,
-}: ProspectDashboardPlaceholderProps) {
-  const placedDate = useMemo(() => {
-    try {
-      return new Date(placedAt).toLocaleString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
-    } catch {
-      return placedAt;
-    }
-  }, [placedAt]);
-
-  return (
-    <main className="tm-dashboard-placeholder">
-      <section className="tm-dashboard-placeholder__inner">
-        <div className="tm-dashboard-placeholder__eyebrow">
-          {prospectFirstName} · placed in the team line
-        </div>
-        <div className="tm-dashboard-placeholder__position">
-          #{positionNumber.toLocaleString()}
-        </div>
-        <p className="tm-dashboard-placeholder__lede">
-          You are in. {baFullName} will know.
-        </p>
-        <p className="tm-dashboard-placeholder__meta">Placed {placedDate}.</p>
-        <p className="tm-dashboard-placeholder__note">
-          Your full team view is being prepared.
-        </p>
-        <div className="tm-dashboard-placeholder__rule" />
-      </section>
-      <ShellStyles />
-    </main>
-  );
-}
 
 // ---------------------------------------------------------------
 // Shell styles — ink + atmosphere + section transitions
@@ -272,8 +230,7 @@ function ShellStyles() {
 }
 
 const shellCss = `
-  .tm-video-presentation,
-  .tm-dashboard-placeholder {
+  .tm-video-presentation {
     position: relative;
     min-height: 100svh;
     background: #0A0A0A;
@@ -284,8 +241,7 @@ const shellCss = `
   /* Push the page content down to make room for the fixed ticker. */
   .tm-video-presentation { padding-top: 36px; }
 
-  .tm-video-presentation::before,
-  .tm-dashboard-placeholder::before {
+  .tm-video-presentation::before {
     content: '';
     position: fixed;
     inset: 0;
@@ -296,8 +252,7 @@ const shellCss = `
     pointer-events: none;
     z-index: 0;
   }
-  .tm-video-presentation::after,
-  .tm-dashboard-placeholder::after {
+  .tm-video-presentation::after {
     content: '';
     position: fixed;
     inset: 0;
@@ -306,65 +261,9 @@ const shellCss = `
     z-index: 1;
     opacity: 0.6;
   }
-  .tm-video-presentation > *,
-  .tm-dashboard-placeholder > * {
+  .tm-video-presentation > * {
     position: relative;
     z-index: 2;
-  }
-
-  /* ---- dashboard placeholder -------------------------------------- */
-  .tm-dashboard-placeholder { display: flex; align-items: center; justify-content: center; }
-  .tm-dashboard-placeholder__inner {
-    max-width: 720px;
-    padding: clamp(48px, 8vw, 96px) clamp(20px, 5vw, 56px);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: clamp(14px, 2vw, 22px);
-  }
-  .tm-dashboard-placeholder__eyebrow {
-    font-family: 'DM Mono', ui-monospace, monospace;
-    font-size: 11px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: rgba(245, 239, 230, 0.62);
-  }
-  .tm-dashboard-placeholder__position {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(80px, 14vw, 180px);
-    line-height: 0.95;
-    color: #F5C030;
-    letter-spacing: 0.005em;
-  }
-  .tm-dashboard-placeholder__lede {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(28px, 3.5vw, 44px);
-    line-height: 1.1;
-    color: #F5EFE6;
-    margin: 0;
-    max-width: 22ch;
-  }
-  .tm-dashboard-placeholder__meta {
-    font-family: 'DM Mono', ui-monospace, monospace;
-    font-size: 12px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(245, 239, 230, 0.62);
-    margin: 0;
-  }
-  .tm-dashboard-placeholder__note {
-    font-family: 'DM Sans', system-ui, sans-serif;
-    font-size: 15px;
-    color: rgba(245, 239, 230, 0.62);
-    margin: 0;
-    max-width: 42ch;
-  }
-  .tm-dashboard-placeholder__rule {
-    width: 48px;
-    height: 1px;
-    background: rgba(201, 168, 76, 0.45);
-    margin-top: 16px;
   }
 `;
 

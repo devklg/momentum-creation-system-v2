@@ -117,7 +117,7 @@
 | Section 10 — QuietDoor (callback-request form) | `sections/10-QuietDoor.tsx` | live | #109 | placeholder card | Three intent radios + phone + best time + "Tell [BA] I'm Ready" button. |
 | Section 11 — Footer | `sections/11-Footer.tsx` | live | #107 | — | BA attribution + G.5 disclaimer. |
 | `og-injection.ts` middleware | `apps/server/src/middleware/og-injection.ts` | live | #107 | — | Token-resolved OG metadata. Requires marker pair in `apps/com/index.html`. |
-| Dashboard six locked sections (Arrival → Opportunity → Mechanic → Live → Advantage → Next Move) | `apps/com/src/routes/p-token.tsx` post-video state | pending | #82 (design locked) | — | Design locked Chat #82. **Not yet ported from `dashboard-prototype.html` to React.** |
+| Dashboard six locked sections (Arrival → Opportunity → Mechanic → Live → Advantage → Next Move) | `apps/com/src/routes/tm-prospect-dashboard/` (composer + 7 section files) | wired | #114 | placeholder | Ported from `dashboard-prototype.html` Chat #114. **Chat #84 correction applied to Section 4**: behind-only counter, vertical layout, no left/right columns, no ahead-of-you tile. **Chat #112 drift correction applied to Footer**: Team Magnificent branding only, no THREE reference, locked-spec 3.10 compliance disclaimer verbatim. Rendered from `tm-video-presentation.tsx:169` when placement resolves. Typecheck GREEN. |
 
 ---
 
@@ -161,7 +161,7 @@
 
 | Artifact | Spec Source | Chat Locked | Notes |
 |---|---|---|---|
-| Dashboard six locked sections (React port from `dashboard-prototype.html`) | COM Design Section C | #82 design | The conversion engine for `/p/:token` post-video state. **Drift correction at port time:** footer line "operational team inside THREE International" violates locked-spec 3.8 — replace per COM G.5. |
+| Dashboard six locked sections (React port from `dashboard-prototype.html`) | COM Design Section C | #114 SHIPPED | Ported Chat #114 to `apps/com/src/routes/tm-prospect-dashboard/`. Footer drift correction applied (Team Magnificent only, no THREE). Chat #84 Section-4 correction applied (behind-only). Typecheck GREEN. |
 | Real `/cockpit` (My Sponsor card + My Invites + CRM per invite) | TEAM Design Section H | #85 scope locked | Currently a stub. |
 | Michael interview surface (3 states: Awaiting / In Progress / Complete) | TEAM Design Section D | #86 | Telnyx + STT wired #102. UI pending. |
 | Fast Start Guide 5 modules | TEAM Design Section E | #86 + #95 7-day arc | Day 1 prototype drafted. Days 2–7 pending. |
@@ -169,8 +169,8 @@
 | Invitation generator (Ivory + ScriptMaker + token mint) | TEAM Design Section G | #86 | Verbatim agent roles transcribed. Build pending. |
 | Replicated .com preview at `/preview` (sandboxed token) | TEAM Design Section I.1 | #86 | Standalone preview.html exists; in-app version pending. |
 | 9 admin surfaces (B through J per ADMIN-Design) | ADMIN-Design | #89 | Scaffold gated #102. Surfaces pending. |
-| Real-time SSE for behind-you counter + position stack | COM Design C.4 + ADMIN E.6 | #82 design | Open question H.6: SSE vs short-poll. |
-| Webinar event entity + registration backend | App Description + dashboard Section 6 | #82 design | Open question H.3: cadence (every-72h vs Tuesday weekly). |
+| Real-time SSE for behind-you counter + position stack | `server/src/services/poolEvents.ts` + `GET /api/p/:token/stream` + `apps/com/src/lib/usePlacementStream.ts` | #114 SHIPPED | **AUDIT CORRECTION**: previously listed here as "open question H.6 (SSE vs short-poll)." That was wrong — SSE was LOCKED in locked-spec 4.4 AND in Kevin's Phase 3 specification in project knowledge. Shipped Chat #114: in-process EventEmitter pub/sub, snapshot+placement+30s heartbeat. |
+| Webinar event entity + reservation backend | `server/src/domain/webinarEvent.ts` + `server/src/domain/webinarReservation.ts` + `POST /api/p/:token/webinar-reserve` | #114 PARTIALLY SHIPPED | Event entity + reservation triple-stack write + Telnyx BA SMS LIVE. **Prospect-facing email-with-Zoom-link DEFERRED** pending locked-spec Part 5 email provider decision (emailDeliveryStatus='skipped', reason='email_provider_pending_locked_spec_part_5'). Cadence (H.3) also still open — no `webinar_events` records exist until /admin seed UI is built or cadence cron is wired. |
 
 ---
 
@@ -182,7 +182,7 @@ From `locked-spec.md` Part 5, ordered roughly by what blocks earliest builds:
 2. **Michael's 5 interview prompts** — blocks: Michael interview surface. Placeholder list in TEAM D.4.
 3. **10-step orientation curriculum titles + order** — partially closed in #100 port; Kevin's verbatim curriculum still pending.
 4. **8-week flush adaptive vs fixed** — blocks: queue rule management in ADMIN E.6. Architecture doc says adaptive; design assumes fixed.
-5. **Behind-you counter update interval** — SSE vs short-poll. Engineering choice affects Live Ops live tiles.
+5. ~~**Behind-you counter update interval** — SSE vs short-poll. Engineering choice affects Live Ops live tiles.~~ **RESOLVED #114**: SSE. Was never actually open — locked in locked-spec 4.4 + Phase 3 spec; Chat #112 audit misclassified. Shipped Chat #114.
 6. **Position stack visible window** — 5 / 10 / 20 cards. Sets in ADMIN E.3.
 7. **Sponsor-leaves behavior** — auto-roll-up vs locked-with-escalation-contact (TEAM J.7).
 8. **Phone change verification** — SMS code vs immediate effect (TEAM J.8).
@@ -206,7 +206,7 @@ Tracked because they need fixing during a port or audit, not because they block 
 |---|---|---|
 | `luxury-favorite.jpeg` size mismatch | `apps/com/public/assets/luxury-favorite.jpeg` 216KB vs `D:/TEAM-MAG/before-after/luxury-favorite.jpeg` 254KB source | Confirm intentional recompression or overwrite. |
 | Dr. Dan named as "THREE International's Chief Scientific Officer" | `Team-Magnificent-App-Description.docx` Section 3 | Violates locked-spec 3.8 brand isolation. Correct on next docx edit. |
-| Footer "operational team inside THREE International" | `dashboard-prototype.html` + design doc footers | Violates locked-spec 3.8. Correct on port to `apps/com`. |
+| ~~Footer "operational team inside THREE International"~~ **RESOLVED #114** | `dashboard-prototype.html` (original prototype unchanged) | Drift CORRECTED at port time in `apps/com/src/routes/tm-prospect-dashboard/sections/07-Footer.tsx`. Footer carries Team Magnificent branding only + locked-spec 3.10 disclaimer verbatim. |
 | Welcome route on disk pre-dates locked-spec v2 audit | `apps/team/src/routes/welcome.tsx` | Chat #94 flagged: needs audit against locked-spec v2 operating frame. |
 | Chat #84 transcript only in system prompt summary | (not in project knowledge as a transcript) | Kevin planned to transcribe and save as text file. Captured as `chat-84-architecture-revelation.txt` in project knowledge in Chat #94+. **VERIFIED PRESENT.** |
 
@@ -240,7 +240,9 @@ For narrative context. Authoritative detail lives in `D:/claude-learning/KEVIN-C
 - **Chat #110** — Token-lifecycle 409/410 spec + shared types (EnrolledResponse/ExpiredResponse).
 - **Chat #111** (2026-05-21) — Token-lifecycle wiring: server routes/p.ts 409+410 enrichment with lazy-flush, apps/com api.ts payload parsing + p-token.tsx F.1/F.2/E.2/F.4–F.6 verbatim views. Commit `8216311`. preview.html broken image fix.
 - **Chat #112** (2026-05-21, this chat) — Project knowledge readback + build registry file created.
+- **Chat #113** (2026-05-21) — Dashboard wiring scaffolded: composer import added in `tm-video-presentation.tsx:51` and render branch wired at `:169` with full prop contract. (Build went RED — actual six-section files weren't yet on disk; corrected in #114.)
+- **Chat #114** (2026-05-21) — **Dashboard six-section port complete.** Shared types extended (PlacementTickerEntry, HoldingTankSnapshot, PlacementEvent, WebinarEvent, WebinarReservation*). Server: `services/poolEvents.ts` (in-process EventEmitter), `domain/holdingTank.ts` modified (publish after step 5 + snapshot builder), `domain/webinarEvent.ts` + `domain/webinarReservation.ts` new, `routes/p.ts` extended with `GET /:token/stream` SSE + `POST /:token/webinar-reserve`. Client: `lib/usePlacementStream.ts` React hook around EventSource + `lib/api.ts` postWebinarReservation, `routes/tm-prospect-dashboard/` composer + 7 section files (Ribbon, Arrival, Opportunity, Mechanic, LivePlace, TmAdvantage, YourNextMove, Footer). Chat #84 correction to Section 4 (behind-only, vertical). Chat #112 drift correction to Footer (TM only). Third callback intent `ready_to_join` wired in UI (server already supported). Typecheck GREEN: shared, server, apps/com, apps/team, apps/admin. Two locked-spec amendments queued (Part 3.4, Part 4.4). SSE was-locked-not-open audit correction recorded.
 
 ---
 
-*Last updated: 2026-05-21 (Chat #112). Update this file at the end of every chat that ships an artifact, supersedes one, or closes an open spec question.*
+*Last updated: 2026-05-21 (Chat #114). Update this file at the end of every chat that ships an artifact, supersedes one, or closes an open spec question.*

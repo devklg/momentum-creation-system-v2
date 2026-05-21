@@ -23,6 +23,8 @@ import type {
   VideoEventKind,
   VideoEventPayload,
   VideoEventResponse,
+  WebinarReservationPayload,
+  WebinarReservationResponse,
 } from '@momentum/shared';
 
 export interface ResolvedProspect {
@@ -241,3 +243,84 @@ export async function postCallbackRequest(
     return { ok: false, error: { kind: 'network' } };
   }
 }
+
+// ============================================================================
+// Webinar reservation (Chat #114 — Section 6 of tm-prospect-dashboard)
+// ============================================================================
+
+export type WebinarReservationError =
+  | { kind: 'invalid_name' }
+  | { kind: 'invalid_email' }
+  | { kind: 'no_upcoming_event' }
+  | { kind: 'invalid_token' }
+  | { kind: 'expired'; expiredAt: string; ba: ExpiredResponse['ba'] }
+  | { kind: 'enrolled'; ba: EnrolledResponse['ba'] }
+  | { kind: 'network' };
+
+export type { WebinarReservationResponse };
+
+/**
+ * Submit a webinar reservation for the next upcoming Team Magnificent
+ * live event. Server resolves the event from `webinar_events`; the
+ * client never picks which event.
+ *
+ * Email delivery to the prospect waits on locked-spec Part 5 (email
+ * provider TBD). The response's `emailSent` flag tells the client which
+ * confirmation copy to render. The BA always gets a Telnyx SMS alert
+ * regardless.
+ */
+export async function postWebinarReservation(
+  token: string,
+  payload: WebinarReservationPayload,
+): Promise<
+  { ok: true; data: WebinarReservationResponse } | { ok: false; error: WebinarReservationError }
+> {
+  try {
+    const res = await fetch(`/api/p/${encodeURIComponent(token)}/webinar-reserve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.status === 400) {
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      if (body.error === 'invalid_email') return { ok: false, error: { kind: 'invalid_email' } };
+      return { ok: false, error: { kind: 'invalid_name' } };
+    }
+    if (res.status === 404) {
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      if (body.error === 'no_upcoming_event') {
+        return { ok: false, error: { kind: 'no_upcoming_event' } };
+      }
+      return { ok: false, error: { kind: 'invalid_token' } };
+    }
+    if (res.status === 410) {
+      const body = (await res.json().catch(() => ({}))) as Partial<ExpiredResponse>;
+      return {
+        ok: false,
+        error: {
+          kind: 'expired',
+          expiredAt: body.expiredAt ?? '',
+          ba: body.ba ?? { firstName: '', lastInitial: '', phoneE164: null },
+        },
+      };
+    }
+    if (res.status === 409) {
+      const body = (await res.json().catch(() => ({}))) as Partial<EnrolledResponse>;
+      return {
+        ok: false,
+        error: {
+          kind: 'enrolled',
+          ba: body.ba ?? { firstName: '', lastName: '', fullName: '' },
+        },
+      };
+    }
+    if (!res.ok) return { ok: false, error: { kind: 'network' } };
+
+    const data = (await res.json()) as WebinarReservationResponse;
+    return { ok: true, data };
+  } catch {
+    return { ok: false, error: { kind: 'network' } };
+  }
+}
+

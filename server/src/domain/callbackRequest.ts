@@ -70,6 +70,8 @@ export function intentLabel(intent: CallbackIntent): string {
       return "interested \u2014 tell me more";
     case 'have_questions':
       return 'have questions';
+    case 'ready_to_join':
+      return 'ready to join';
   }
 }
 

@@ -38,8 +38,12 @@ import type {
 import { findTokenRecord, isTokenExpired, transitionTokenState } from '../domain/tokens.js';
 import { findProspectById, lastInitialOf } from '../domain/prospects.js';
 import { findBAByBaId, type BARecord } from '../domain/ba.js';
-import { placeProspect } from '../domain/holdingTank.js';
+import { buildHoldingTankSnapshot, placeProspect } from '../domain/holdingTank.js';
 import { createCallbackRequest } from '../domain/callbackRequest.js';
+import { findNextUpcomingEvent } from '../domain/webinarEvent.js';
+import { createWebinarReservation } from '../domain/webinarReservation.js';
+import { subscribePlacements } from '../services/poolEvents.js';
+import type { HoldingTankSnapshot, PlacementEvent, WebinarReservationPayload, WebinarReservationResponse } from '@momentum/shared';
 
 export const prospectTokenRoutes: Router = Router();
 
@@ -355,12 +359,16 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
  * POST /api/p/:token/callback-request
  *
  * The prospect submitted the soft CTA on Section 10 of tm-video-
- * presentation (Chat #109). Two intent radios only:
- *   - 'interested_tell_me_more'
- *   - 'have_questions'
+ * presentation OR Section 6 of tm-prospect-dashboard. Three intent radios:
+ *   - 'interested_tell_me_more'    (Section 10 pre-video, Section 6 dashboard)
+ *   - 'have_questions'             (Section 10 pre-video, Section 6 dashboard)
+ *   - 'ready_to_join'              (Section 6 dashboard ONLY — added Chat #113)
  *
- * The harder "I'm ready to join" intent is reserved for the post-video
- * tm-prospect-dashboard Section 6 (Chat #109 lock) — not accepted here.
+ * The 'ready_to_join' intent surfaces only after video_complete, when the
+ * prospect has seen the team forming around them on the dashboard. On the
+ * pre-video presentation page (Section 10), only the two softer intents
+ * appear; offering "ready to join" before the prospect has seen the team
+ * line would be premature (Chat #109 lock + Chat #113 dashboard port).
  *
  * No phone/best-time fields. The BA already has the prospect's contact
  * info; collecting it again would imply the system doesn't trust the
@@ -388,6 +396,7 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
 const CALLBACK_INTENTS: readonly CallbackIntent[] = [
   'interested_tell_me_more',
   'have_questions',
+  'ready_to_join',
 ];
 
 prospectTokenRoutes.post('/:token/callback-request', async (req, res) => {
@@ -463,3 +472,244 @@ prospectTokenRoutes.post('/:token/callback-request', async (req, res) => {
     return res.status(500).json({ error: 'server_error' });
   }
 });
+
+/**
+ * GET /api/p/:token/stream — the live placement SSE channel
+ * (Chat #114 dashboard port — recovered architecture from Chat #84/#94).
+ *
+ * Per locked-spec 4.4 the prospect dashboard's behind-you counter and
+ * position-stack ticker are powered by a single Server-Sent Events
+ * stream. One connection per viewer; one in-process emitter fans every
+ * team-wide placement out to every connected viewer.
+ *
+ * Token gating: same 200/404/409/410 contract as GET /api/p/:token,
+ * minus the resolved payload. SSE handshake is HTTP, so the route can
+ * return a normal JSON error response before flipping to the
+ * text/event-stream content-type. Once flipped, any error is sent as
+ * an SSE comment line and the connection closes.
+ *
+ * Snapshot semantics (locked-spec 3.4):
+ *   - On open, server emits one `snapshot` event with globalMaxPosition
+ *     + the most-recent N placements.
+ *   - On every subsequent team-wide placement, server emits one
+ *     `placement` event.
+ *   - 30-second `ping` keepalive so reverse proxies don't drop idle
+ *     connections.
+ */
+
+/** Number of recent placements to include in the snapshot event. */
+const SSE_SNAPSHOT_RECENT_LIMIT = 40;
+/** Heartbeat interval. Long enough to be cheap, short enough to beat proxies. */
+const SSE_PING_INTERVAL_MS = 30_000;
+
+/** Format an SSE frame as the wire protocol requires. */
+function sseFrame(event: string, data: unknown, id?: string): string {
+  const lines: string[] = [];
+  if (id) lines.push(`id: ${id}`);
+  lines.push(`event: ${event}`);
+  lines.push(`data: ${JSON.stringify(data)}`);
+  lines.push('');
+  lines.push('');
+  return lines.join('\n');
+}
+
+prospectTokenRoutes.get('/:token/stream', async (req, res) => {
+  const { token } = req.params;
+  if (!token || token.length < 4) {
+    return res.status(404).json({ error: 'invalid_token' });
+  }
+
+  // Resolve the token first — same 4-branch contract as the page resolver.
+  // We do NOT block the stream on prospect placement (a prospect may open
+  // the dashboard before placement completes if they hit complete mid-flight);
+  // but enrolled/expired/invalid must close the connection cleanly.
+  let tokenRecord;
+  try {
+    tokenRecord = await findTokenRecord(token);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[GET /api/p/:token/stream] resolve failed', err);
+    return res.status(500).json({ error: 'server_error' });
+  }
+  if (!tokenRecord) return res.status(404).json({ error: 'invalid_token' });
+
+  if (tokenRecord.state === 'enrolled') {
+    const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+    if (!ba) return res.status(404).json({ error: 'invalid_token' });
+    return res.status(409).json(buildEnrolledResponse(ba));
+  }
+  if (tokenRecord.state === 'expired') {
+    const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+    if (!ba) return res.status(404).json({ error: 'invalid_token' });
+    return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
+  }
+  if (isTokenExpired(tokenRecord)) {
+    await transitionTokenState(token, 'expired');
+    const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+    if (!ba) return res.status(404).json({ error: 'invalid_token' });
+    return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
+  }
+
+  // Flip to SSE.
+  res.status(200);
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no'); // disable nginx buffering
+  res.flushHeaders?.();
+
+  // Send the initial snapshot.
+  try {
+    const snapshot: HoldingTankSnapshot = await buildHoldingTankSnapshot(
+      SSE_SNAPSHOT_RECENT_LIMIT,
+    );
+    res.write(sseFrame('snapshot', snapshot));
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[SSE :token/stream] snapshot failed', err);
+    res.write(`: snapshot_error ${(err as Error).message}\n\n`);
+    res.end();
+    return;
+  }
+
+  // Subscribe to live placements; serialize each one onto the wire.
+  const sub = subscribePlacements((event: PlacementEvent) => {
+    try {
+      res.write(sseFrame('placement', event, event.eventId));
+    } catch {
+      // Write to a closed socket throws; the `close` handler below will
+      // tear down the subscription on the next tick.
+    }
+  });
+
+  // Heartbeat. SSE comments (lines starting with `:`) are ignored by the
+  // EventSource API but keep proxies alive.
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(`: ping ${Date.now()}\n\n`);
+    } catch {
+      // ignore — close handler will clean up.
+    }
+  }, SSE_PING_INTERVAL_MS);
+
+  const teardown = () => {
+    clearInterval(heartbeat);
+    sub.unsubscribe();
+  };
+  req.on('close', teardown);
+  req.on('aborted', teardown);
+  res.on('close', teardown);
+  return;
+});
+
+/**
+ * POST /api/p/:token/webinar-reserve — Chat #114 dashboard port.
+ *
+ * The prospect submitted the webinar reservation form on Section 6
+ * of tm-prospect-dashboard. Two fields: name + email.
+ *
+ * The reservation is captured against the next upcoming webinar event
+ * (resolved server-side from `webinar_events`). Sponsor immutability
+ * (locked-spec 3.5) holds — the BA is read from the token only.
+ *
+ * Email delivery to the prospect is deferred until the locked-spec
+ * Part 5 email provider is decided. The reservation captures
+ * successfully and the BA gets a Telnyx SMS alert; the response
+ * payload's emailSent=false tells the client to render "your BA will
+ * follow up with the Zoom link" copy instead of "check your inbox."
+ *
+ * Status codes:
+ *   200 — reservation captured, BA SMS attempted (best-effort)
+ *   400 — missing/invalid name or email shape
+ *   404 — unknown token, missing prospect, missing BA, or no upcoming event
+ *   409 — token enrolled
+ *   410 — token expired
+ *   500 — unexpected (triple-stack write failure)
+ */
+
+/** Conservative email shape check. Compliance, not validation. */
+function looksLikeEmail(raw: unknown): raw is string {
+  if (typeof raw !== 'string') return false;
+  const trimmed = raw.trim();
+  if (trimmed.length < 5 || trimmed.length > 254) return false;
+  // Single-@, no whitespace, at least one '.' in the host part.
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+}
+
+prospectTokenRoutes.post('/:token/webinar-reserve', async (req, res) => {
+  const { token } = req.params;
+  const body = req.body as Partial<WebinarReservationPayload>;
+
+  if (!token || token.length < 4) {
+    return res.status(404).json({ error: 'invalid_token' });
+  }
+  const name = typeof body?.name === 'string' ? body.name.trim() : '';
+  if (!name || name.length > 120) {
+    return res.status(400).json({ error: 'invalid_name' });
+  }
+  if (!looksLikeEmail(body?.email)) {
+    return res.status(400).json({ error: 'invalid_email' });
+  }
+  const email = (body!.email as string).trim();
+
+  try {
+    const tokenRecord = await findTokenRecord(token);
+    if (!tokenRecord) return res.status(404).json({ error: 'invalid_token' });
+
+    if (tokenRecord.state === 'enrolled') {
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(409).json(buildEnrolledResponse(ba));
+    }
+    if (tokenRecord.state === 'expired') {
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
+    }
+    if (isTokenExpired(tokenRecord)) {
+      await transitionTokenState(token, 'expired');
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
+    }
+
+    const [prospect, ba, nextEvent] = await Promise.all([
+      findProspectById(tokenRecord.prospectId),
+      findBAByBaId(tokenRecord.sponsorBaId),
+      findNextUpcomingEvent(),
+    ]);
+    if (!prospect) return res.status(404).json({ error: 'invalid_token' });
+    if (!ba) return res.status(404).json({ error: 'invalid_token' });
+    if (!nextEvent) return res.status(404).json({ error: 'no_upcoming_event' });
+
+    const result = await createWebinarReservation({
+      token: tokenRecord.token,
+      prospectId: prospect.prospectId,
+      prospectFirstName: prospect.firstName,
+      prospectLastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),
+      sponsorBaId: tokenRecord.sponsorBaId,
+      baFirstName: ba.firstName,
+      baPhone: ba.phone || null,
+      eventId: nextEvent.eventId,
+      scheduledFor: nextEvent.scheduledFor,
+      name,
+      email,
+    });
+
+    const response: WebinarReservationResponse = {
+      ok: true,
+      reservationId: result.reservationId,
+      eventId: nextEvent.eventId,
+      scheduledFor: nextEvent.scheduledFor,
+      baFirstName: ba.firstName,
+      emailSent: result.emailDeliveryStatus === 'sent',
+      createdAt: result.createdAt,
+    };
+    return res.status(200).json(response);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[POST /api/p/:token/webinar-reserve] failed', err);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
