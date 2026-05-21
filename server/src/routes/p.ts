@@ -24,6 +24,9 @@
 
 import { Router } from 'express';
 import type {
+  CallbackIntent,
+  CallbackRequestPayload,
+  CallbackRequestResponse,
   ResolvedTokenPayload,
   VideoEventKind,
   VideoEventPayload,
@@ -34,6 +37,7 @@ import { findTokenRecord, isTokenExpired, transitionTokenState } from '../domain
 import { findProspectById, lastInitialOf } from '../domain/prospects.js';
 import { findBAByBaId } from '../domain/ba.js';
 import { placeProspect } from '../domain/holdingTank.js';
+import { createCallbackRequest } from '../domain/callbackRequest.js';
 
 export const prospectTokenRoutes: Router = Router();
 
@@ -231,6 +235,105 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[POST /api/p/:token/video-event] failed', err);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+/**
+ * POST /api/p/:token/callback-request
+ *
+ * The prospect submitted the soft CTA on Section 10 of tm-video-
+ * presentation (Chat #109). Two intent radios only:
+ *   - 'interested_tell_me_more'
+ *   - 'have_questions'
+ *
+ * The harder "I'm ready to join" intent is reserved for the post-video
+ * tm-prospect-dashboard Section 6 (Chat #109 lock) — not accepted here.
+ *
+ * No phone/best-time fields. The BA already has the prospect's contact
+ * info; collecting it again would imply the system doesn't trust the
+ * BA-prospect relationship. The intent is the message.
+ *
+ * Sponsor immutability (locked-spec Part 3.5):
+ *   The sponsoring BA is read from the token record only; no field in
+ *   the request body can influence which BA gets the SMS.
+ *
+ * Status codes:
+ *   200 — request accepted, record created, SMS attempted (best-effort)
+ *   400 — missing/invalid intent
+ *   404 — unknown token (or prospect missing for token)
+ *   409 — token enrolled
+ *   410 — token expired
+ *   500 — unexpected (triple-stack write failure)
+ *
+ * Note on token state: submission does NOT transition the token state.
+ * Per Chat #105 spec amendment, callback_requested is not a lifecycle
+ * state — it's an independent intent record. A prospect can submit a
+ * callback request before OR after video_complete, can submit multiple
+ * over time, and the token continues its own funnel rail unaffected.
+ */
+
+const CALLBACK_INTENTS: readonly CallbackIntent[] = [
+  'interested_tell_me_more',
+  'have_questions',
+];
+
+prospectTokenRoutes.post('/:token/callback-request', async (req, res) => {
+  const { token } = req.params;
+  const body = req.body as Partial<CallbackRequestPayload>;
+
+  if (!token || token.length < 4) {
+    return res.status(404).json({ error: 'invalid_token' });
+  }
+  if (!body?.intent || !CALLBACK_INTENTS.includes(body.intent)) {
+    return res.status(400).json({ error: 'invalid_intent' });
+  }
+
+  try {
+    const tokenRecord = await findTokenRecord(token);
+    if (!tokenRecord) return res.status(404).json({ error: 'invalid_token' });
+    if (tokenRecord.state === 'enrolled') {
+      return res.status(409).json({ error: 'enrolled' });
+    }
+    if (tokenRecord.state === 'expired' || isTokenExpired(tokenRecord)) {
+      return res.status(410).json({ error: 'expired' });
+    }
+
+    const [prospect, ba] = await Promise.all([
+      findProspectById(tokenRecord.prospectId),
+      findBAByBaId(tokenRecord.sponsorBaId),
+    ]);
+    if (!prospect) {
+      return res.status(404).json({ error: 'invalid_token' });
+    }
+    if (!ba) {
+      // Sponsor BA missing — same posture as GET resolver (locked-spec
+      // Part 5 sponsor-leaves question still open). Until that question
+      // is decided, refuse to land a callback request that can't route.
+      return res.status(404).json({ error: 'invalid_token' });
+    }
+
+    const result = await createCallbackRequest({
+      token: tokenRecord.token,
+      prospectId: prospect.prospectId,
+      prospectFirstName: prospect.firstName,
+      prospectLastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),
+      sponsorBaId: tokenRecord.sponsorBaId,
+      baFirstName: ba.firstName,
+      baPhone: ba.phone || null,
+      intent: body.intent,
+    });
+
+    const response: CallbackRequestResponse = {
+      ok: true,
+      intent: body.intent,
+      baFirstName: ba.firstName,
+      createdAt: result.createdAt,
+    };
+    return res.status(200).json(response);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[POST /api/p/:token/callback-request] failed', err);
     return res.status(500).json({ error: 'server_error' });
   }
 });

@@ -24,11 +24,68 @@ export type TokenState =
   | 'enrolled'
   | 'expired';
 
-/** Prospect intent radio choice on the dashboard callback CTA. */
+/**
+ * Prospect intent radio choice on the .com callback CTA.
+ *
+ * Section 10 of tm-video-presentation (the presentation page) carries the
+ * two soft-CTA options below. The harder "I'm ready to join" option is
+ * intentionally reserved for the post-video tm-prospect-dashboard
+ * Section 6, since on the presentation page the prospect has only seen
+ * the video — they have not yet seen the team forming around them, so
+ * "ready to join" would be premature (Chat #109 lock).
+ *
+ *   - interested_tell_me_more  → "I'm interested — tell me more"
+ *   - have_questions           → "I have questions"
+ *
+ * When the dashboard Section 6 ships, the union will expand to add
+ * 'ready_to_join'. Server, client, and SMS templating all branch on
+ * this discriminator.
+ */
 export type CallbackIntent =
-  | 'interested_understand_more'
-  | 'ready_to_join'
-  | 'specific_questions';
+  | 'interested_tell_me_more'
+  | 'have_questions';
+
+/**
+ * Request body for POST /api/p/:token/callback-request.
+ * The BA already has the prospect's contact info — no phone field is
+ * collected here (Chat #109 lock). The token resolves the prospect and
+ * the inviting BA server-side; sponsor immutability (locked-spec 3.5)
+ * means the request body cannot influence which BA gets notified.
+ */
+export interface CallbackRequestPayload {
+  intent: CallbackIntent;
+}
+
+/**
+ * Response from POST /api/p/:token/callback-request. The page transitions
+ * to a soft confirmation state using `baFirstName`. `createdAt` is echoed
+ * back so the client can show "submitted at HH:MM" if Kevin ever wants
+ * it; for now the UI just confirms the submission landed.
+ */
+export interface CallbackRequestResponse {
+  ok: true;
+  intent: CallbackIntent;
+  baFirstName: string;
+  createdAt: IsoTimestamp;
+}
+
+/**
+ * Stored callback-request record. One prospect can submit multiple
+ * requests over time (Chat #105 spec amendment) — these are independent
+ * intent records, not lifecycle states. The most recent record per
+ * prospect is what the BA cockpit surfaces; older records remain on the
+ * activity timeline.
+ */
+export interface CallbackRequestRecord {
+  callbackRequestId: string;
+  token: string;
+  prospectId: string;
+  sponsorBaId: string;
+  intent: CallbackIntent;
+  createdAt: IsoTimestamp;
+  smsDeliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
+  smsDeliveryError: string | null;
+}
 
 /** Three-stack write result returned by the gateway. */
 export interface TripleStackWriteResult {

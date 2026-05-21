@@ -1,19 +1,22 @@
 /**
- * /p/:token — Phase 0 placeholder.
+ * /p/:token — prospect-facing surface entry point.
  *
- * Resolves the opaque token via the server and renders a single line that
- * confirms both the inviting BA and the prospect were found. This is a
- * scaffold milestone, not the real surface: tm-video-presentation (locked-spec
- * Part 4.3) replaces this in Chat #106.
+ * Resolves the opaque token via the server. While resolving, shows the
+ * brand-locked loader. On error, shows the locked error views (invalid /
+ * expired / enrolled / network). On success, mounts <TmVideoPresentation />
+ * (Chat #107 composer, locked-spec Part 4.3, eleven-section build).
  *
- * Brand-locked: ink background, gold accent on the BA name, Bebas Neue
- * display, DM Sans body, DM Mono operational. Cream secondary text.
- * No THREE branding (locked-spec Part 3.8).
+ * Sponsor immutability (locked-spec Part 3.5) is enforced server-side; this
+ * file does not pass any sponsor field to anything.
  */
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { resolveToken, type ResolveTokenError, type ResolveTokenResponse } from '@/lib/api';
+import {
+  TmVideoPresentation,
+  type ResolveTokenResponse as ComposerInput,
+} from './tm-video-presentation/tm-video-presentation';
 
 type ResolveState =
   | { kind: 'loading' }
@@ -40,6 +43,23 @@ export function PTokenPage() {
     };
   }, [token]);
 
+  // Happy path — mount the full eleven-section composer.
+  if (state.kind === 'ok') {
+    const composerInput: ComposerInput = {
+      token: state.data.token,
+      // Server's TokenState union is a superset of the composer's expected
+      // ResolveTokenState; the composer only branches on a subset and treats
+      // unknowns as the initial "clicked" state, so this cast is safe.
+      state: state.data.state as ComposerInput['state'],
+      prospectFirstName: state.data.prospect.firstName,
+      baFullName: state.data.ba.fullName,
+      positionNumber: state.data.prospect.positionNumber ?? undefined,
+      placedAt: state.data.prospect.placedAt ?? undefined,
+    };
+    return <TmVideoPresentation resolved={composerInput} />;
+  }
+
+  // Loading + error states keep the existing brand-locked single-screen view.
   return (
     <main className="min-h-screen flex items-center justify-center px-6">
       <div className="w-full max-w-2xl text-center">
@@ -52,31 +72,8 @@ export function PTokenPage() {
         )}
 
         {state.kind === 'err' && <ErrorView error={state.error} />}
-
-        {state.kind === 'ok' && <ResolvedView data={state.data} />}
-
-        <div className="mt-16 font-mono text-cream-faint text-[10px] tracking-eyebrow uppercase">
-          Phase 0 placeholder · tm-video-presentation in Chat #106
-        </div>
       </div>
     </main>
-  );
-}
-
-function ResolvedView({ data }: { data: ResolveTokenResponse }) {
-  return (
-    <>
-      <h1 className="font-display text-5xl md:text-7xl text-cream leading-none">
-        Hello, {data.prospect.firstName}.
-      </h1>
-      <p className="mt-8 font-body text-cream-mute text-lg">
-        You were personally invited by{' '}
-        <span className="text-gold font-medium">{data.ba.fullName}</span>.
-      </p>
-      <p className="mt-3 font-mono text-cream-faint text-xs tracking-eyebrow uppercase">
-        token state: {data.state}
-      </p>
-    </>
   );
 }
 

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,5 +13,71 @@
     color: #F5EFE6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+
+  /*
+   * Atmospheric ink canvas — Style Guide Section K.
+   * Faint gold and teal radial gradients on ink. This is the canvas the
+   * .com surface lives on, not a special effect. Applied once, globally.
+   */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(900px circle at 12% 8%, rgba(201, 168, 76, 0.08), transparent 50%),
+      radial-gradient(800px circle at 88% 92%, rgba(45, 212, 191, 0.05), transparent 50%);
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@layer utilities {
+  /* Rise motion — Style Guide G. For arrival of section content. */
+  .motion-rise {
+    animation: rise 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .motion-rise-delay-1 { animation-delay: 0.10s; }
+  .motion-rise-delay-2 { animation-delay: 0.30s; }
+  .motion-rise-delay-3 { animation-delay: 0.55s; }
+  .motion-rise-delay-4 { animation-delay: 0.80s; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Pulse motion — for live indicators (teal). */
+  .motion-pulse-teal {
+    animation: pulseTeal 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseTeal {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.4); }
+    50%      { box-shadow: 0 0 0 8px rgba(45, 212, 191, 0); }
+  }
+
+  /* Compass-rose soft glow. */
+  .motion-glow {
+    animation: glow 4s ease-in-out infinite;
+  }
+
+  @keyframes glow {
+    0%, 100% { filter: drop-shadow(0 0 18px rgba(201, 168, 76, 0.35)); }
+    50%      { filter: drop-shadow(0 0 32px rgba(245, 192, 48, 0.55)); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
