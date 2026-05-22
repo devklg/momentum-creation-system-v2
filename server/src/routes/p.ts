@@ -42,18 +42,22 @@ import { buildHoldingTankSnapshot, placeProspect } from '../domain/holdingTank.j
 import { createCallbackRequest } from '../domain/callbackRequest.js';
 import { findNextUpcomingEvent } from '../domain/webinarEvent.js';
 import { createWebinarReservation } from '../domain/webinarReservation.js';
+import { computeTeamStats } from '../domain/teamStats.js';
 import { subscribePlacements } from '../services/poolEvents.js';
-import type { HoldingTankSnapshot, PlacementEvent, WebinarReservationPayload, WebinarReservationResponse } from '@momentum/shared';
+import type { HoldingTankSnapshot, PlacementEvent, TeamStatsResponse, WebinarReservationPayload, WebinarReservationResponse } from '@momentum/shared';
 
 export const prospectTokenRoutes: Router = Router();
 
 // Dr. Dan video, locked-spec Part 4.8.
 const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/89wRvqx1d8M';
 
-// Webinar slot — Tuesday 7pm PT (cadence still-open per locked-spec Part 5).
+// Webinar slot — Mondays & Thursdays 5pm Pacific (locked Chat #116).
+// This static descriptor is the fallback text for the dashboard's webinar
+// copy; the live countdown + reservation target come from the actual next
+// webinar_events record via findNextUpcomingEvent(), not this constant.
 const WEBINAR = {
-  dayOfWeek: 'Tuesday',
-  timeOfDay: '7:00 PM',
+  dayOfWeek: 'Mondays & Thursdays',
+  timeOfDay: '5:00 PM',
   timezone: 'America/Los_Angeles',
 };
 
@@ -172,9 +176,10 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
 
-    const [prospect, ba] = await Promise.all([
+    const [prospect, ba, nextEvent] = await Promise.all([
       findProspectById(tokenRecord.prospectId),
       findBAByBaId(tokenRecord.sponsorBaId),
+      findNextUpcomingEvent(),
     ]);
 
     if (!prospect) {
@@ -210,6 +215,16 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
       },
       videoUrl: DR_DAN_VIDEO_URL,
       webinar: WEBINAR,
+      // Chat #115: carry the next upcoming event so Section 6's Countdown
+      // can render a real ticking countdown server-side resolved. null
+      // when no upcoming event is seeded; client renders a static fallback.
+      nextEvent: nextEvent
+        ? {
+            eventId: nextEvent.eventId,
+            scheduledFor: nextEvent.scheduledFor,
+            hosts: nextEvent.hosts,
+          }
+        : null,
     };
 
     return res.status(200).json(payload);
@@ -692,6 +707,7 @@ prospectTokenRoutes.post('/:token/webinar-reserve', async (req, res) => {
       baPhone: ba.phone || null,
       eventId: nextEvent.eventId,
       scheduledFor: nextEvent.scheduledFor,
+      zoomUrl: nextEvent.zoomUrl ?? null,
       name,
       email,
     });
@@ -709,6 +725,71 @@ prospectTokenRoutes.post('/:token/webinar-reserve', async (req, res) => {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[POST /api/p/:token/webinar-reserve] failed', err);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+/**
+ * GET /api/p/:token/team-stats — Chat #115 dashboard Section 5 live activity.
+ *
+ * Replaces the four seeded constants (47/213/89/+38%) in TM Advantage
+ * with real, server-computed counts. Same 200/404/409/410/500 token-gating
+ * contract as the other /:token routes — prospect must hold a valid,
+ * non-terminal token to read team stats from the prospect dashboard surface.
+ *
+ * Metric definitions per locked Chat #115:
+ *   basActive24h           BAs who logged into .team in the last 24h
+ *   invitationsSentToday   invite_tokens minted since 00:00 UTC today
+ *   newPlacements24h       pool_placements in the last 24h
+ *   recruitmentVelocityPct (this7d - prior7d) / max(1, prior7d) * 100,
+ *                          rounded to nearest integer percent
+ *
+ * Compliance (locked-spec 3.10):
+ *   No income, no rank, no placement promise. Pure team activity counts.
+ *
+ * No SSE on this route — client polls or re-fetches when it wants a
+ * fresher read. v1 scale (41 BAs growing) makes this cheap; a 30-60s
+ * server-side cache is flagged for future when team is 10k+.
+ */
+prospectTokenRoutes.get('/:token/team-stats', async (req, res) => {
+  const { token } = req.params;
+  if (!token || token.length < 4) {
+    return res.status(404).json({ error: 'invalid_token' });
+  }
+
+  try {
+    const tokenRecord = await findTokenRecord(token);
+    if (!tokenRecord) return res.status(404).json({ error: 'invalid_token' });
+
+    if (tokenRecord.state === 'enrolled') {
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(409).json(buildEnrolledResponse(ba));
+    }
+    if (tokenRecord.state === 'expired') {
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
+    }
+    if (isTokenExpired(tokenRecord)) {
+      await transitionTokenState(token, 'expired');
+      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      if (!ba) return res.status(404).json({ error: 'invalid_token' });
+      return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
+    }
+
+    const stats = await computeTeamStats();
+    const payload: TeamStatsResponse = {
+      basActive24h: stats.basActive24h,
+      invitationsSentToday: stats.invitationsSentToday,
+      newPlacements24h: stats.newPlacements24h,
+      recruitmentVelocityPct: stats.recruitmentVelocityPct,
+      computedAt: stats.computedAt,
+    };
+    return res.status(200).json(payload);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[GET /api/p/:token/team-stats] failed', err);
     return res.status(500).json({ error: 'server_error' });
   }
 });

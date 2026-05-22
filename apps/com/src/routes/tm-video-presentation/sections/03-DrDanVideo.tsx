@@ -44,6 +44,13 @@ type YTPlayer = {
   getCurrentTime: () => number;
   getDuration: () => number;
   getPlayerState: () => number;
+  /**
+   * Seek to a position in the video (in seconds). When allowSeekAhead is
+   * true, the player issues a new request to the server for the new
+   * playhead position; when false, the player only seeks within already-
+   * buffered video. We pass true for return-visit resumes.
+   */
+  seekTo: (seconds: number, allowSeekAhead?: boolean) => void;
 };
 type YTStateChangeEvent = { data: number; target: YTPlayer };
 
@@ -58,6 +65,52 @@ const YT_PLAYER_STATE = {
 } as const;
 
 const VIDEO_ID = "89wRvqx1d8M";
+
+/**
+ * Return-visit resume map (Chat #115). When a prospect returns mid-video,
+ * the composer hydrates firedMilestones from the server's recorded state.
+ * On YT.Player ready we seek to a position just past the highest fired
+ * milestone so the prospect picks up where they left off without
+ * re-watching content they've already seen.
+ *
+ * Fractions are intentionally a hair past each milestone threshold so
+ * the poll loop's >= check does NOT re-fire the milestone (no-op on
+ * the server, but generates noise in logs).
+ *
+ * - started        → don't seek (start at 0; they pressed play but
+ *                    haven't really watched anything yet)
+ * - quarter        → 0.26 (just past 25%)
+ * - half           → 0.51 (just past 50%)
+ * - three_quarter  → 0.76 (just past 75%)
+ * - complete       → not reached here — the composer routes a complete
+ *                    token to the dashboard branch, this section
+ *                    doesn't render. Listed for completeness.
+ */
+const RESUME_FRACTION: Record<VideoEventKind, number | null> = {
+  started: null,
+  quarter: 0.26,
+  half: 0.51,
+  three_quarter: 0.76,
+  complete: null,
+};
+
+/**
+ * Pick the resume fraction for the highest fired milestone in the set.
+ * Returns null when no resume is needed (empty set, only 'started'
+ * fired, or 'complete' — the dashboard branch case).
+ */
+function pickResumeFraction(fired: Set<VideoEventKind>): number | null {
+  // Order matters — check from highest to lowest so we resume at the
+  // furthest-along milestone.
+  const order: VideoEventKind[] = ['three_quarter', 'half', 'quarter'];
+  for (const kind of order) {
+    if (fired.has(kind)) {
+      const f = RESUME_FRACTION[kind];
+      if (f !== null) return f;
+    }
+  }
+  return null;
+}
 
 export interface DrDanVideoProps {
   token: string;
@@ -194,6 +247,33 @@ export function DrDanVideo({
       events: {
         onReady: () => {
           setPlayerReady(true);
+          // Chat #115 — return-visit resume. If the prospect has fired
+          // any quarter/half/three_quarter milestones already, seek the
+          // player to just past their highest milestone so they don't
+          // re-watch what they've already seen. Duration may be 0
+          // briefly right after onReady; retry up to 5 times at 200ms.
+          const resumeFraction = pickResumeFraction(firedRef.current);
+          if (resumeFraction === null) return;
+          let attempts = 0;
+          const trySeek = () => {
+            attempts += 1;
+            try {
+              const dur = player.getDuration();
+              if (dur && dur > 0) {
+                player.seekTo(resumeFraction * dur, true);
+                return;
+              }
+            } catch {
+              // ignore — retry below
+            }
+            if (attempts < 5) {
+              window.setTimeout(trySeek, 200);
+            }
+            // After 5 attempts duration is still 0; the prospect will
+            // see the video start at 0 and have to scrub manually. Not
+            // a hard failure — the page still works.
+          };
+          trySeek();
         },
         onStateChange: (e: YTStateChangeEvent) => {
           // First time the player enters PLAYING, fire `started`.

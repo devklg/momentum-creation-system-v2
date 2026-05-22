@@ -48,10 +48,21 @@ export interface TmProspectDashboardProps {
   baFullName: string;
   positionNumber: number;
   placedAt: string;
+  /**
+   * Next upcoming webinar event resolved server-side at /api/p/:token.
+   * Null when no upcoming event is seeded. Forwarded to Section 6 so
+   * the Countdown can render a real ticking countdown to scheduledFor.
+   * Chat #115.
+   */
+  nextEvent: {
+    eventId: string;
+    scheduledFor: string;
+    hosts: string[];
+  } | null;
 }
 
 export function TmProspectDashboard(props: TmProspectDashboardProps) {
-  const { token, prospectFirstName, baFullName, positionNumber, placedAt } = props;
+  const { token, prospectFirstName, baFullName, positionNumber, placedAt, nextEvent } = props;
 
   const baFirstName = useMemo(
     () => baFullName.trim().split(/\s+/)[0] ?? baFullName,
@@ -80,11 +91,12 @@ export function TmProspectDashboard(props: TmProspectDashboardProps) {
         positionNumber={positionNumber}
         stream={stream}
       />
-      <TmAdvantageSection baFirstName={baFirstName} positionNumber={positionNumber} />
+      <TmAdvantageSection token={token} baFirstName={baFirstName} positionNumber={positionNumber} />
       <YourNextMoveSection
         token={token}
         baFullName={baFullName}
         baFirstName={baFirstName}
+        nextEvent={nextEvent}
       />
       <DashboardFooter />
 

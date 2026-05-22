@@ -239,6 +239,20 @@ export interface ResolvedTokenPayload {
   };
   videoUrl: string;
   webinar: { dayOfWeek: string; timeOfDay: string; timezone: string };
+  /**
+   * Next upcoming webinar event, or null if no event is currently
+   * seeded. When non-null, the dashboard Section 6 renders a live
+   * ticking countdown to `scheduledFor` and pre-attributes the
+   * reservation to this event. When null, the Countdown component
+   * renders a static "check back soon" surface and the reservation
+   * route returns 404 no_upcoming_event. Resolved server-side from
+   * webinar_events at /api/p/:token render. Chat #115.
+   */
+  nextEvent: {
+    eventId: string;
+    scheduledFor: IsoTimestamp;
+    hosts: string[];
+  } | null;
 }
 
 /**
@@ -441,4 +455,27 @@ export interface WebinarReservationRecord {
   emailDeliveryError: string | null;
   smsDeliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
   smsDeliveryError: string | null;
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Team stats (Chat #115 — dashboard Section 5 live activity grid)
+ * ───────────────────────────────────────────────────────────────
+ *
+ * Replaces the four seeded constants (47/213/89/+38%) in Section 5 of
+ * the prospect dashboard with real, live counts queried server-side at
+ * /api/p/:token/team-stats. Refresh policy is client-driven — the
+ * dashboard polls or re-fetches when the prospect returns; the server
+ * computes on each request (no caching at v1 scale).
+ *
+ * Compliance (locked-spec 3.10):
+ *   These four numbers describe TEAM ACTIVITY — they make no income
+ *   claim, no rank claim, no placement promise. They demonstrate real
+ *   recruiting activity in real time and are safe for .com surfaces.
+ */
+export interface TeamStatsResponse {
+  basActive24h: number;
+  invitationsSentToday: number;
+  newPlacements24h: number;
+  recruitmentVelocityPct: number;
+  computedAt: IsoTimestamp;
 }

@@ -79,6 +79,9 @@ export function PTokenPage() {
       baFullName: state.data.ba.fullName,
       positionNumber: state.data.prospect.positionNumber ?? undefined,
       placedAt: state.data.prospect.placedAt ?? undefined,
+      // Chat #115: next upcoming webinar event resolved server-side.
+      // Threaded through to dashboard Section 6 Countdown.
+      nextEvent: state.data.nextEvent ?? null,
     };
     return <TmVideoPresentation resolved={composerInput} />;
   }

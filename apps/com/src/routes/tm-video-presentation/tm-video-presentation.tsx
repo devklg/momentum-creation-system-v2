@@ -82,6 +82,17 @@ export interface ResolveTokenResponse {
   baFullName: string;
   positionNumber?: number;
   placedAt?: string;
+  /**
+   * Next upcoming webinar event (resolved server-side at /api/p/:token).
+   * Null when no upcoming event is seeded. Threaded through to the
+   * dashboard so Section 6's Countdown can render a real ticking
+   * countdown to scheduledFor. Chat #115.
+   */
+  nextEvent?: {
+    eventId: string;
+    scheduledFor: string;
+    hosts: string[];
+  } | null;
 }
 
 export interface VideoCompletePlacement {
@@ -99,6 +110,7 @@ export interface TmVideoPresentationProps {
 
 export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
   const { token, prospectFirstName, baFullName } = resolved;
+  const nextEvent = resolved.nextEvent ?? null;
   const baFirstName = useMemo(
     () => baFullName.trim().split(/\s+/)[0] ?? baFullName,
     [baFullName]
@@ -172,6 +184,7 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
         baFullName={baFullName}
         positionNumber={placement.positionNumber}
         placedAt={placement.placedAt}
+        nextEvent={nextEvent}
       />
     );
   }

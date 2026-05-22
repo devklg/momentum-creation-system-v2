@@ -8,8 +8,8 @@
  *   - The 100,000 GOAL is named. The current count is NOT shown.
  *   - The pool activity stats (BAs active in 24h, invitations sent today,
  *     new placements in 24h, recruitment velocity) describe team motion.
- *     For v1 these are seeded constants matching the prototype — a real
- *     /api/p/:token/team-stats endpoint comes online next session.
+ *     Chat #115: now live counts via GET /api/p/:token/team-stats; while
+ *     loading, render em-dash placeholders so layout doesn't jump.
  *   - The signature line at the bottom of the compounding closer:
  *     "Operational architecture · numbers of record · no performance promise"
  *     locks the section in compliance regardless of what the numbers say.
@@ -18,13 +18,32 @@
  *   - Kevin Gardner attributed as "founding co-leader". No THREE reference.
  */
 
+import { useEffect, useState } from 'react';
+import { fetchTeamStats, type TeamStatsResponse } from '@/lib/api';
+
 export interface TmAdvantageSectionProps {
+  token: string;
   baFirstName: string;
   positionNumber: number;
 }
 
 export function TmAdvantageSection(props: TmAdvantageSectionProps) {
-  const { baFirstName, positionNumber } = props;
+  const { token, baFirstName, positionNumber } = props;
+  const [stats, setStats] = useState<TeamStatsResponse | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchTeamStats(token).then((result) => {
+      if (cancelled) return;
+      if (result.ok) setStats(result.data);
+      // On error we leave stats=null — the section renders em-dash
+      // placeholders. We do NOT surface the failure to the prospect;
+      // a missing live-counter on a marketing surface is a non-event.
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   return (
     <>
@@ -62,10 +81,26 @@ export function TmAdvantageSection(props: TmAdvantageSectionProps) {
         </div>
 
         <div className="tmpd-pool-grid">
-          <PoolStat num="47" label="Brand Ambassadors active in the last 24 hours" tag="Live" />
-          <PoolStat num="213" label="Invitations sent across the team today" tag="Pooled" />
-          <PoolStat num="89" label="New placements added to the team in 24h" tag="Compounding" />
-          <PoolStat num="+38%" label="Recruitment velocity through shared OS" tag="Operational" />
+          <PoolStat
+            num={formatCount(stats?.basActive24h)}
+            label="Brand Ambassadors active in the last 24 hours"
+            tag="Live"
+          />
+          <PoolStat
+            num={formatCount(stats?.invitationsSentToday)}
+            label="Invitations sent across the team today"
+            tag="Pooled"
+          />
+          <PoolStat
+            num={formatCount(stats?.newPlacements24h)}
+            label="New placements added to the team in 24h"
+            tag="Compounding"
+          />
+          <PoolStat
+            num={formatVelocity(stats?.recruitmentVelocityPct)}
+            label="Recruitment velocity through shared OS (week over week)"
+            tag="Operational"
+          />
         </div>
 
         <div className="tmpd-compounding">
@@ -108,6 +143,28 @@ function PoolStat(props: { num: string; label: string; tag: string }) {
       <div className="tmpd-pool-stat-tag">{props.tag}</div>
     </div>
   );
+}
+
+/**
+ * Format an integer count for display. Returns — (em dash) when the
+ * value is undefined (still loading) so the cell stays layout-stable.
+ * Uses locale grouping for readability at higher numbers (1,234).
+ */
+function formatCount(value: number | undefined): string {
+  if (value === undefined || value === null) return '\u2014';
+  return value.toLocaleString();
+}
+
+/**
+ * Format the recruitment velocity percentage. Signed integer with %
+ * suffix; em dash while loading. 0 reads as "0%" not "—" — a flat
+ * week-over-week is real data, not missing data.
+ */
+function formatVelocity(value: number | undefined): string {
+  if (value === undefined || value === null) return '\u2014';
+  if (value === 0) return '0%';
+  const sign = value > 0 ? '+' : '';
+  return `${sign}${value}%`;
 }
 
 const advantageCss = `

@@ -2,7 +2,7 @@ import express, { type Request, type Response, type Router } from 'express';
 import argon2 from 'argon2';
 import { z } from 'zod';
 import { findAccessCode } from '../domain/access-codes.js';
-import { emailExists, threeBaIdExists, registerBA, findBAByBaId } from '../domain/ba.js';
+import { emailExists, threeBaIdExists, registerBA, findBAByBaId, recordLogin } from '../domain/ba.js';
 import { signSession, setSessionCookie, clearSessionCookie } from '../services/session.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { env } from '../env.js';
@@ -155,6 +155,10 @@ authRoutes.post('/login', async (req: Request, res: Response) => {
       env.JWT_TTL_REMEMBER_DAYS,
     );
     setSessionCookie(res, token);
+
+    // Stamp lastLoginAt for team-stats "active 24h" computation (Chat #115).
+    // Best-effort — a failure here does not block the login response.
+    void recordLogin(ba.baId);
 
     res.json({ ok: true, baId: ba.baId });
   } catch (err) {

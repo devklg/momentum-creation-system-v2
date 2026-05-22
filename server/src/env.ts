@@ -88,6 +88,49 @@ const Env = z.object({
    * Application's configured webhook URL.
    */
   TELNYX_WEBHOOK_URL: z.string().default(''),
+
+  /**
+   * Zoom registration URL for the recurring Team Magnificent webinar.
+   * One persistent registration link for all sessions (Mon/Thu 5pm Pacific).
+   * The prospect registers through Zoom; Zoom sends them their own join link.
+   * Stored on each seeded webinar_event as `zoomUrl` and surfaced by the
+   * reservation flow. A future Zoom Server-to-Server OAuth sync agent may
+   * later overwrite individual events with per-occurrence registration
+   * links (Chat #116 decision); the field is already nullable to allow this
+   * without a schema change. Empty default is non-fatal — the seeder warns
+   * rather than failing boot.
+   */
+  WEBINAR_REGISTER_URL: z.string().default(''),
+
+  /**
+   * Email provider selector. Only 'resend' is wired (Chat #116). Kept as an
+   * enum so a future provider swap is a one-line env change, not a code edit.
+   */
+  EMAIL_PROVIDER: z.enum(['resend']).default('resend'),
+
+  /**
+   * Resend API key (re_...). From resend.com > API Keys. Empty in dev/today:
+   * the email transport WARNS and records emailDeliveryStatus='skipped' rather
+   * than crashing, and the BA-follow-up SMS fallback stays the live behavior.
+   * Webinar/welcome/reset emails begin sending the moment this is set AND the
+   * EMAIL_FROM domain is verified in Resend. Chat #116: domain not yet set up
+   * (Namecheap DNS pending) — wired dormant by design.
+   */
+  EMAIL_API_KEY: z.string().default(''),
+
+  /**
+   * From-address for outbound email. MUST be on a domain verified in Resend
+   * (SPF/DKIM DNS records) or sends are rejected. Planned default
+   * webinars@teammagnificent.com pending the teammagnificent.com domain
+   * verification (Chat #116).
+   */
+  EMAIL_FROM: z.string().default('webinars@teammagnificent.com'),
+
+  /**
+   * Optional Reply-To header. Empty = no Reply-To set. Useful later to route
+   * replies to a monitored inbox distinct from the no-reply send address.
+   */
+  EMAIL_REPLY_TO: z.string().default(''),
 });
 
 export const env = Env.parse(process.env);

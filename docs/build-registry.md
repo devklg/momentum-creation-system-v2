@@ -170,7 +170,11 @@
 | Replicated .com preview at `/preview` (sandboxed token) | TEAM Design Section I.1 | #86 | Standalone preview.html exists; in-app version pending. |
 | 9 admin surfaces (B through J per ADMIN-Design) | ADMIN-Design | #89 | Scaffold gated #102. Surfaces pending. |
 | Real-time SSE for behind-you counter + position stack | `server/src/services/poolEvents.ts` + `GET /api/p/:token/stream` + `apps/com/src/lib/usePlacementStream.ts` | #114 SHIPPED | **AUDIT CORRECTION**: previously listed here as "open question H.6 (SSE vs short-poll)." That was wrong — SSE was LOCKED in locked-spec 4.4 AND in Kevin's Phase 3 specification in project knowledge. Shipped Chat #114: in-process EventEmitter pub/sub, snapshot+placement+30s heartbeat. |
-| Webinar event entity + reservation backend | `server/src/domain/webinarEvent.ts` + `server/src/domain/webinarReservation.ts` + `POST /api/p/:token/webinar-reserve` | #114 PARTIALLY SHIPPED | Event entity + reservation triple-stack write + Telnyx BA SMS LIVE. **Prospect-facing email-with-Zoom-link DEFERRED** pending locked-spec Part 5 email provider decision (emailDeliveryStatus='skipped', reason='email_provider_pending_locked_spec_part_5'). Cadence (H.3) also still open — no `webinar_events` records exist until /admin seed UI is built or cadence cron is wired. |
+| Webinar event entity + reservation backend | `server/src/domain/webinarEvent.ts` + `server/src/domain/webinarReservation.ts` + `POST /api/p/:token/webinar-reserve` | #116 SHIPPED | Event entity + reservation triple-stack write + Telnyx BA SMS LIVE. Prospect-facing email-with-Zoom-link WIRED Chat #116 via Resend (see rows below) — DORMANT pending domain verification. Cadence RESOLVED Chat #116 (Mon/Thu 5pm Pacific) and SEEDED — `webinar_events` now populated. |
+| Webinar cadence generator | `server/src/domain/webinarCadence.ts` | #116 SHIPPED | Pure DST-correct generator for Mon/Thu 5pm Pacific slots over an N-week horizon. Per-date America/Los_Angeles offset resolution (no hardcoded offset) so re-seeds across the Nov DST flip stay correct. Typecheck GREEN. |
+| Webinar event seeder | `server/scripts/seed-webinar-events.ts` (`pnpm seed:webinar-events`) | #116 SHIPPED | Idempotent rolling-8-week triple-stack seeder (Mongo `webinar_events` + Neo4j `:WebinarEvent` + Chroma `mcs_webinar_events`). Ran Chat #116: 16 events created (May 26–Jul 17), all three stores verified. ChromaDB collection `mcs_webinar_events` created Chat #116 (CK-04). findNextUpcomingEvent() now returns the live next slot — dashboard countdown ticks, reserve endpoint no longer 404s. Auto-replenish cron deferred. |
+| Resend email transport | `server/src/services/resend.ts` | #116 WIRED — DORMANT | Thin transport mirroring telnyx.ts. ResendConfigError (missing key) / ResendError (non-2xx), best-effort. **Untested against a live domain** — teammagnificent.com not yet verified in Resend (Namecheap DNS deferred by Kevin until app complete). Empty EMAIL_API_KEY → ResendConfigError → emailDeliveryStatus='skipped', BA-SMS fallback stays live. Sends begin with no code change once key + verified domain land. env vars EMAIL_PROVIDER/EMAIL_API_KEY/EMAIL_FROM/EMAIL_REPLY_TO added to env.ts + .env + .env.example. Typecheck GREEN, env boot verified. |
+| Webinar Zoom link config | `WEBINAR_REGISTER_URL` env → `webinar_events.zoomUrl` | #116 SHIPPED | One persistent recurring Zoom registration link for all sessions, threaded into the reservation domain + confirmation email. Future Zoom S2S OAuth per-occurrence-link sync agent deferred (Kevin's paid plan supports it); `zoomUrl` already nullable per-event to accept it without migration. |
 
 ---
 
@@ -178,8 +182,9 @@
 
 From `locked-spec.md` Part 5, ordered roughly by what blocks earliest builds:
 
-1. **Email provider** (Resend / Postmark / SendGrid / SES) — blocks: welcome email send, password reset, webinar reservation, Broadcast (ADMIN G). Kevin deferred 2026-05-21.
-2. **Michael's 5 interview prompts** — blocks: Michael interview surface. Placeholder list in TEAM D.4.
+1. ~~**Email provider**~~ — *RESOLVED Chat #116: Resend, wired dormant pending teammagnificent.com domain verification.*
+2. ~~**Webinar cadence (H.3)**~~ — *RESOLVED Chat #116: Mon/Thu 5pm Pacific, seeded 8-week rolling.*
+3. **Michael's 5 interview prompts** — blocks: Michael interview surface. Placeholder list in TEAM D.4.
 3. **10-step orientation curriculum titles + order** — partially closed in #100 port; Kevin's verbatim curriculum still pending.
 4. **8-week flush adaptive vs fixed** — blocks: queue rule management in ADMIN E.6. Architecture doc says adaptive; design assumes fixed.
 5. ~~**Behind-you counter update interval** — SSE vs short-poll. Engineering choice affects Live Ops live tiles.~~ **RESOLVED #114**: SSE. Was never actually open — locked in locked-spec 4.4 + Phase 3 spec; Chat #112 audit misclassified. Shipped Chat #114.

@@ -39,6 +39,14 @@ export interface BARecord {
   sponsorThreeBaId: string;
   accessCodeUsed: string;
   createdAt: string;
+  /**
+   * Most recent successful login timestamp (ISO 8601). Null until the BA
+   * has logged in for the first time. Used by team-stats to compute
+   * "BAs active in last 24h" — active = logged into .team in the last
+   * 24 hours (Chat #115 decision). Stamped by POST /api/auth/login on
+   * every successful credential verification.
+   */
+  lastLoginAt: string | null;
 }
 
 function mintBaId(): string {
@@ -82,6 +90,31 @@ export async function findBAByBaId(baId: string): Promise<BARecord | null> {
     limit: 1,
   });
   return result.documents.length > 0 ? result.documents[0] ?? null : null;
+}
+
+/**
+ * Stamp the BA's most recent successful login. Called by POST /api/auth/login
+ * AFTER credential verification succeeds; never on failed attempts. Used by
+ * team-stats to compute "BAs active in last 24h" (Chat #115 decision —
+ * active = logged into .team in the last 24h).
+ *
+ * Best-effort: a failure here must NOT block the login response. If the
+ * Mongo write fails the user is still authenticated; the stat is just
+ * slightly less accurate for that BA until their next login.
+ */
+export async function recordLogin(baId: string): Promise<void> {
+  const at = new Date().toISOString();
+  try {
+    await gatewayCall('mongodb', 'update', {
+      database: 'momentum',
+      collection: 'brand_ambassadors',
+      filter: { baId },
+      update: { $set: { lastLoginAt: at } },
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[recordLogin] best-effort update failed', { baId, err });
+  }
 }
 
 /**
@@ -169,6 +202,7 @@ export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): 
     sponsorThreeBaId: sponsor.sponsorThreeBaId,
     accessCodeUsed: sponsor.code,
     createdAt: new Date().toISOString(),
+    lastLoginAt: null,
   };
 
   await tripleStackWrite({

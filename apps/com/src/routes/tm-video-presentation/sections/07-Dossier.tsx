@@ -82,10 +82,9 @@ const ITEMS: DossierItem[] = [
   },
 ];
 
-// Flip this to true once apps/com/public/dossier/glp-three-dossier.pdf
-// is on disk. Or move it to a server-provided flag.
-const DOSSIER_AVAILABLE = false;
-const DOSSIER_HREF = "/dossier/glp-three-dossier.pdf";
+// Flipped true Chat #115 — PDF dropped at apps/com/public/assets/glp-three-dossier.pdf.
+const DOSSIER_AVAILABLE = true;
+const DOSSIER_HREF = "/assets/glp-three-dossier.pdf";
 
 export function Dossier() {
   const [openId, setOpenId] = useState<string | null>(null);

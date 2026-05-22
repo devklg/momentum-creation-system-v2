@@ -19,6 +19,7 @@ import type {
   CallbackRequestResponse,
   EnrolledResponse,
   ExpiredResponse,
+  TeamStatsResponse,
   TokenState,
   VideoEventKind,
   VideoEventPayload,
@@ -53,6 +54,17 @@ export interface ResolveTokenResponse {
   ba: ResolvedBA;
   videoUrl: string;
   webinar: { dayOfWeek: string; timeOfDay: string; timezone: string };
+  /**
+   * Next upcoming webinar event resolved server-side at /api/p/:token,
+   * or null when no upcoming event is seeded. Threaded through to the
+   * dashboard so Section 6's Countdown can render a real ticking
+   * countdown to scheduledFor. Chat #115.
+   */
+  nextEvent: {
+    eventId: string;
+    scheduledFor: string;
+    hosts: string[];
+  } | null;
 }
 
 /**
@@ -318,6 +330,67 @@ export async function postWebinarReservation(
     if (!res.ok) return { ok: false, error: { kind: 'network' } };
 
     const data = (await res.json()) as WebinarReservationResponse;
+    return { ok: true, data };
+  } catch {
+    return { ok: false, error: { kind: 'network' } };
+  }
+}
+
+// ============================================================================
+// Team stats (Chat #115 — Section 5 of tm-prospect-dashboard)
+// ============================================================================
+
+export type TeamStatsError =
+  | { kind: 'invalid_token' }
+  | { kind: 'expired'; expiredAt: string; ba: ExpiredResponse['ba'] }
+  | { kind: 'enrolled'; ba: EnrolledResponse['ba'] }
+  | { kind: 'network' };
+
+export type { TeamStatsResponse };
+
+/**
+ * Fetch live team activity counts for the dashboard Section 5 grid.
+ * Replaces the four seeded constants with real, server-computed metrics.
+ * On error, the section falls back to em-dash placeholders — a missing
+ * live-counter on a marketing surface is a non-event.
+ *
+ * No retry, no polling — v1 fetches once on mount. When the prospect
+ * returns to the dashboard, a fresh mount triggers a fresh fetch.
+ */
+export async function fetchTeamStats(
+  token: string,
+): Promise<{ ok: true; data: TeamStatsResponse } | { ok: false; error: TeamStatsError }> {
+  try {
+    const res = await fetch(`/api/p/${encodeURIComponent(token)}/team-stats`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    });
+
+    if (res.status === 404) return { ok: false, error: { kind: 'invalid_token' } };
+    if (res.status === 410) {
+      const body = (await res.json().catch(() => ({}))) as Partial<ExpiredResponse>;
+      return {
+        ok: false,
+        error: {
+          kind: 'expired',
+          expiredAt: body.expiredAt ?? '',
+          ba: body.ba ?? { firstName: '', lastInitial: '', phoneE164: null },
+        },
+      };
+    }
+    if (res.status === 409) {
+      const body = (await res.json().catch(() => ({}))) as Partial<EnrolledResponse>;
+      return {
+        ok: false,
+        error: {
+          kind: 'enrolled',
+          ba: body.ba ?? { firstName: '', lastName: '', fullName: '' },
+        },
+      };
+    }
+    if (!res.ok) return { ok: false, error: { kind: 'network' } };
+
+    const data = (await res.json()) as TeamStatsResponse;
     return { ok: true, data };
   } catch {
     return { ok: false, error: { kind: 'network' } };

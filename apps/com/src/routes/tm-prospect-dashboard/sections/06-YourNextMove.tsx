@@ -27,6 +27,17 @@ export interface YourNextMoveSectionProps {
   token: string;
   baFullName: string;
   baFirstName: string;
+  /**
+   * Next upcoming webinar event resolved server-side at /api/p/:token.
+   * Null when no upcoming event is seeded. Drives the live ticking
+   * countdown in the webinar card; null falls back to a static
+   * "check back soon" surface. Chat #115.
+   */
+  nextEvent: {
+    eventId: string;
+    scheduledFor: string;
+    hosts: string[];
+  } | null;
 }
 
 export function YourNextMoveSection(props: YourNextMoveSectionProps) {
@@ -48,7 +59,7 @@ export function YourNextMoveSection(props: YourNextMoveSectionProps) {
             baFullName={props.baFullName}
             baFirstName={props.baFirstName}
           />
-          <WebinarCard token={props.token} />
+          <WebinarCard token={props.token} nextEvent={props.nextEvent} />
         </div>
       </section>
       <style>{nextmoveCss}</style>
@@ -163,7 +174,10 @@ function ReasonRadio(props: { checked: boolean; onChange: () => void; label: str
  * captures real; email-to-prospect is deferred per Part 5 email
  * provider open question. BA gets SMS regardless.
  * ───────────────────────────────────────────────────────────────── */
-function WebinarCard(props: { token: string }) {
+function WebinarCard(props: {
+  token: string;
+  nextEvent: YourNextMoveSectionProps['nextEvent'];
+}) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -220,7 +234,7 @@ function WebinarCard(props: { token: string }) {
       <h3>
         The next Team Magnificent <span className="tmpd-cta-accent-teal">live</span>.
       </h3>
-      <Countdown token={props.token} />
+      <Countdown scheduledFor={props.nextEvent?.scheduledFor ?? null} />
       <p className="tmpd-event-hosts">
         Hosted by Kevin L. Gardner and Paul Barrios. Open conversation, real
         team, real momentum — see for yourself.
@@ -261,31 +275,86 @@ function WebinarCard(props: { token: string }) {
 }
 
 /**
- * Countdown to the next event. Reads scheduledFor from a brief fetch
- * against the resolve endpoint's `webinar` block. (The server has a
- * "next upcoming event" concept inside webinarEvent.ts; for v1 the
- * dashboard renders a placeholder countdown if no event is seeded yet.
- * When the prospect submits the reservation form, the server resolves
- * the actual next event server-side and the confirmation shows the
- * real scheduledFor.)
+ * Live countdown to the next event. scheduledFor is resolved server-side
+ * at /api/p/:token and threaded down through the dashboard composer
+ * (Chat #115). When null — because no event is currently seeded in
+ * webinar_events — the component renders a static fallback so the
+ * section degrades gracefully without breaking the visual layout.
+ *
+ * Ticks once per second. Cleans up its interval on unmount and when
+ * the event has passed (the countdown freezes at "happening now" once
+ * the time is in the past; the server will not return a past event on
+ * the next render because findNextUpcomingEvent filters by
+ * scheduledFor > now, so the page will pick up the next event on the
+ * next visit).
  */
-function Countdown(_props: { token: string }) {
-  // For v1, we render a generic "check the next live" message without
-  // a hardcoded countdown. A real countdown needs the scheduledFor on
-  // resolve — which means extending the /api/p/:token payload to carry
-  // the next event, separate work. Surface as a clear placeholder.
-  const [now, setNow] = useState(() => new Date());
+function Countdown(props: { scheduledFor: string | null }) {
+  const { scheduledFor } = props;
+  const [now, setNow] = useState(() => Date.now());
+
   useEffect(() => {
-    const t = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(t);
-  }, []);
-  // Render current time only as a subtle live indicator that the
-  // countdown surface is alive; the actual scheduledFor comes back on
-  // reservation confirmation.
-  void now;
+    if (!scheduledFor) return;
+    const target = new Date(scheduledFor).getTime();
+    if (!Number.isFinite(target)) return;
+    const tick = () => setNow(Date.now());
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [scheduledFor]);
+
+  if (!scheduledFor) {
+    return (
+      <div className="tmpd-event-when">
+        The next live event · hosted by Kevin &amp; Paul
+      </div>
+    );
+  }
+
+  const target = new Date(scheduledFor).getTime();
+  if (!Number.isFinite(target)) {
+    return (
+      <div className="tmpd-event-when">
+        The next live event · hosted by Kevin &amp; Paul
+      </div>
+    );
+  }
+
+  const remainingMs = Math.max(0, target - now);
+  const totalSeconds = Math.floor(remainingMs / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  // Happening-now state — freeze at zeros and surface the live framing.
+  if (remainingMs === 0) {
+    return (
+      <div className="tmpd-countdown tmpd-countdown-live">
+        <div className="tmpd-countdown-live-tag">Happening now</div>
+        <div className="tmpd-event-when">{formatEventWhen(scheduledFor)}</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="tmpd-event-when">
-      The next live event · hosted by Kevin &amp; Paul
+    <div className="tmpd-countdown" aria-live="polite" aria-label="Countdown to next live event">
+      <div className="tmpd-countdown-grid">
+        <CountdownUnit value={days} label="days" />
+        <CountdownUnit value={hours} label="hours" />
+        <CountdownUnit value={minutes} label="min" />
+        <CountdownUnit value={seconds} label="sec" />
+      </div>
+      <div className="tmpd-event-when">{formatEventWhen(scheduledFor)}</div>
+    </div>
+  );
+}
+
+function CountdownUnit(props: { value: number; label: string }) {
+  const padded = props.value < 10 ? `0${props.value}` : `${props.value}`;
+  return (
+    <div className="tmpd-countdown-unit">
+      <div className="tmpd-countdown-value">{padded}</div>
+      <div className="tmpd-countdown-label">{props.label}</div>
     </div>
   );
 }
@@ -468,5 +537,55 @@ const nextmoveCss = `
     font-size: 13px;
     color: rgba(245, 239, 230, 0.62);
     margin-bottom: 18px;
+  }
+  /* ---- Countdown (Chat #115) ----------------------------------- */
+  .tmpd-countdown {
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .tmpd-countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .tmpd-countdown-unit {
+    text-align: center;
+    background: rgba(45, 212, 191, 0.06);
+    border: 1px solid rgba(45, 212, 191, 0.24);
+    padding: 14px 8px 10px;
+    border-radius: 4px;
+  }
+  .tmpd-countdown-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 4vw, 40px);
+    color: #2DD4BF;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .tmpd-countdown-label {
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(245, 239, 230, 0.58);
+    margin-top: 6px;
+  }
+  .tmpd-countdown-live {
+    margin-bottom: 18px;
+  }
+  .tmpd-countdown-live-tag {
+    display: inline-block;
+    background: #2DD4BF;
+    color: #0A0A0A;
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    animation: tmpd-pulse 2s infinite;
   }
 `;
