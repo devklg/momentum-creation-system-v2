@@ -93,9 +93,6 @@ export function QuietDoor({ token, baFirstName }: QuietDoorProps) {
               shortly, the way you two already communicate.
             </p>
             <div className="tm-quiet__rule" aria-hidden="true" />
-            <div className="tm-quiet__footnote">
-              Take your time. There is no clock on this page.
-            </div>
           </div>
         </div>
         <style>{styles}</style>
@@ -162,10 +159,6 @@ export function QuietDoor({ token, baFirstName }: QuietDoorProps) {
           )}
 
           <div className="tm-quiet__rule" aria-hidden="true" />
-
-          <div className="tm-quiet__footnote">
-            Take your time. There is no clock on this page.
-          </div>
         </div>
       </div>
       <style>{styles}</style>

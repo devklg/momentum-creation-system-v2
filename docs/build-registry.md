@@ -106,7 +106,7 @@
 | `tm-video-presentation` composer (11 sections + ticker strip) | `apps/com/src/routes/tm-video-presentation/tm-video-presentation.tsx` | live | #108, #109 | Chat #106 composer | Section 01–11 + ticker. Reconciliation note: B's 11-section structure + A's verbatim copy where B is silent. |
 | Section 00 — TickerStrip | `sections/00-TickerStrip.tsx` | live | #107 | — | Fixed top bar (A1 copy). |
 | Section 01 — PersonalOpen | `sections/01-PersonalOpen.tsx` | live | #106 | — | Hero stagger reveal. Locked Chat #39 schematic. |
-| Section 02 — Invitation | `sections/02-Invitation.tsx` | live | #109 | placeholder | Section 10 callback-request form also landed in #109. |
+| Section 02 — Invitation | `sections/02-Invitation.tsx` | approved | #117 | placeholder | Copy APPROVED by Kevin Chat #117 (Version 2 — the Chat #108 three-factor framing; the earlier preview.html "thirty years to assemble" wording was rejected as a fabricated track record). WORKING-COPY flag cleared. |
 | Section 03 — DrDanVideo | `sections/03-DrDanVideo.tsx` | live | #107 | — | YouTube IFrame state machine. fires milestone events to `/api/p/:token/video-event`. Section 3 seekTo verification for mid-stream return-visits pending. |
 | Section 04 — Market | `sections/04-Market.tsx` | live | #107 | — | IntersectionObserver count-up. |
 | Section 05 — PharmaceuticalSolution | `sections/05-PharmaceuticalSolution.tsx` | live | #107 | — | — |
@@ -114,7 +114,7 @@
 | Section 07 — Dossier | `sections/07-Dossier.tsx` | live | #107 | — | Accordion + gated PDF. **`DOSSIER_AVAILABLE = false`**: PDF needs to drop at `apps/com/public/dossier/glp-three-dossier.pdf` then flip the flag. |
 | Section 08 — KevinStory | `sections/08-KevinStory.tsx` | live | #107 | — | luxury-favorite.jpeg as-is, full-bleed, no rebuilt card. Locked-spec 4.7. |
 | Section 09 — Timing | `sections/09-Timing.tsx` | live | #107 | — | Three-factor convergence + locked Bebas closing. |
-| Section 10 — QuietDoor (callback-request form) | `sections/10-QuietDoor.tsx` | live | #109 | placeholder card | Three intent radios + phone + best time + "Tell [BA] I'm Ready" button. |
+| Section 10 — QuietDoor (callback-request form) | `sections/10-QuietDoor.tsx` | approved | #117 | placeholder card | Two soft-CTA radios (interested / have questions) + "Have [BA] reach out" button + confirmation state. Copy APPROVED by Kevin Chat #117. **Both "Take your time / no clock on this page" footnotes REMOVED Chat #117** — inconsistent with the forthcoming 72-hour dashboard clock. (Note: the historical "three intent radios + phone + best time" description was superseded by the Chat #109 two-radio no-phone design.) |
 | Section 11 — Footer | `sections/11-Footer.tsx` | live | #107 | — | BA attribution + G.5 disclaimer. |
 | `og-injection.ts` middleware | `apps/server/src/middleware/og-injection.ts` | live | #107 | — | Token-resolved OG metadata. Requires marker pair in `apps/com/index.html`. |
 | Dashboard six locked sections (Arrival → Opportunity → Mechanic → Live → Advantage → Next Move) | `apps/com/src/routes/tm-prospect-dashboard/` (composer + 7 section files) | wired | #114 | placeholder | Ported from `dashboard-prototype.html` Chat #114. **Chat #84 correction applied to Section 4**: behind-only counter, vertical layout, no left/right columns, no ahead-of-you tile. **Chat #112 drift correction applied to Footer**: Team Magnificent branding only, no THREE reference, locked-spec 3.10 compliance disclaimer verbatim. Rendered from `tm-video-presentation.tsx:169` when placement resolves. Typecheck GREEN. |
@@ -250,4 +250,4 @@ For narrative context. Authoritative detail lives in `D:/claude-learning/KEVIN-C
 
 ---
 
-*Last updated: 2026-05-21 (Chat #114). Update this file at the end of every chat that ships an artifact, supersedes one, or closes an open spec question.*
+*Last updated: 2026-05-22 (Chat #117). Update this file at the end of every chat that ships an artifact, supersedes one, or closes an open spec question.*
