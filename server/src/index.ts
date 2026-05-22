@@ -17,6 +17,7 @@ import { adminBasRoutes } from './routes/admin/bas.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { michaelRoutes } from './routes/michael.js';
 import { prospectTokenRoutes } from './routes/p.js';
+import { invitationRoutes } from './routes/invitations.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -90,9 +91,13 @@ app.use('/api/p', prospectTokenRoutes);
 // Pending mounts (Chat #97 priorities 8–10 carry forward):
 //   app.use('/api/training', trainingRoutes);     // /training/day-1 whitelisted; day-2+ gated
 //   app.use('/api/cockpit', cockpitRoutes);       // gated
-//   app.use('/api/invitations', invitationRoutes); // gated
 //   app.use('/api/fast-start', fastStartRoutes);  // gated
 // ────────────────────────────────────────────────────────────────────────────
+
+// Invitation spine (Chat #119) — the production line (locked-spec 1.8). Each
+// handler applies (requireAuth, requireMichaelComplete) internally; sponsor
+// is derived from the session, never the body (locked-spec 3.5).
+app.use('/api/invitations', invitationRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 

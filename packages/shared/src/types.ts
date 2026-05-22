@@ -479,3 +479,86 @@ export interface TeamStatsResponse {
   recruitmentVelocityPct: number;
   computedAt: IsoTimestamp;
 }
+
+/* ───────────────────────────────────────────────────────────────
+ * Invitation spine (Chat #119 — the WRITE-side of /p)
+ * ───────────────────────────────────────────────────────────────
+ *
+ * When a BA mints an invitation on .team, the spine creates a prospect
+ * record + an invite-token record atomically (triple-stack), mirroring
+ * holdingTank.ts placeProspect. The /p READ-side already existed; this is
+ * its missing counterpart.
+ *
+ * "Sent" is tracked as a FIELD (sentAt on the prospect record) + an
+ * activity-timeline entry — NOT a new token lifecycle state (Chat #119
+ * decision). The token rail describes what the PROSPECT did; "sent" is a
+ * BA-side fact and lives parallel to the rail so the two never collide.
+ *
+ * Sponsor immutability (locked-spec 3.5): sponsorBaId is stamped from the
+ * authed session BA at the route layer, never from the request body.
+ */
+
+/**
+ * BA-submitted invitation form (Chat #119 field lock). first/last name,
+ * email, phone, city, state — all flow onto the prospect record so the CRM
+ * export carries them and city/state render on the dashboard ticker.
+ * sponsorBaId is NOT in this payload; the route derives it from the session.
+ */
+export interface CreateInvitationPayload {
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phone: string | null;
+  city: string;
+  stateOrRegion: string;
+  /** ISO 3166-1 alpha-2; route defaults to 'US' when omitted. */
+  country?: string;
+}
+
+/**
+ * Response from POST /api/invitations. Carries the fully-substituted
+ * prospect link the BA shares (https://teammagnificent.com/p/{token}).
+ */
+export interface CreateInvitationResponse {
+  ok: true;
+  prospectId: string;
+  token: string;
+  inviteUrl: string;
+  createdAt: IsoTimestamp;
+  expiresAt: IsoTimestamp;
+}
+
+/**
+ * Response from POST /api/invitations/:prospectId/sent ("I sent this").
+ * alreadySent is true on idempotent replays.
+ */
+export interface MarkInvitationSentResponse {
+  ok: true;
+  prospectId: string;
+  sentAt: IsoTimestamp;
+  alreadySent: boolean;
+}
+
+/**
+ * One entry on a prospect's invitation activity timeline. Distinct from
+ * the token lifecycle rail: these are BA-side and system-side events the
+ * cockpit renders chronologically. `kind` is the discriminator.
+ *
+ *   - invitation_sent     → BA confirmed the link was sent (or logged a
+ *                           standalone external invite, G.5).
+ *   - video_completed      → prospect finished Dr. Dan's video (placement).
+ *   - callback_requested   → prospect submitted a callback CTA.
+ */
+export type InvitationActivityKind =
+  | 'invitation_sent'
+  | 'video_completed'
+  | 'callback_requested';
+
+export interface InvitationActivityEntry {
+  activityId: string;
+  prospectId: string;
+  sponsorBaId: string;
+  kind: InvitationActivityKind;
+  note: string;
+  at: IsoTimestamp;
+}

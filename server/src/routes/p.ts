@@ -40,6 +40,7 @@ import { findProspectById, lastInitialOf } from '../domain/prospects.js';
 import { findBAByBaId, type BARecord } from '../domain/ba.js';
 import { buildHoldingTankSnapshot, placeProspect } from '../domain/holdingTank.js';
 import { createCallbackRequest } from '../domain/callbackRequest.js';
+import { alertBaVideoCompleted } from '../domain/invitations.js';
 import { findNextUpcomingEvent } from '../domain/webinarEvent.js';
 import { createWebinarReservation } from '../domain/webinarReservation.js';
 import { computeTeamStats } from '../domain/teamStats.js';
@@ -348,6 +349,23 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
       });
       positionNumber = result.positionNumber;
       placedAt = result.placedAt;
+
+      // Chat #119: fire the BA alert ONLY on first placement (never on
+      // idempotent replays). The BA is read from the token's sponsorBaId
+      // (locked-spec 3.5); alert is best-effort and never blocks the
+      // 200 response to the prospect.
+      if (!result.alreadyPlaced) {
+        const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+        await alertBaVideoCompleted({
+          prospectId: prospect.prospectId,
+          sponsorBaId: tokenRecord.sponsorBaId,
+          prospectFirstName: prospect.firstName,
+          prospectLastInitial:
+            prospect.lastInitial || lastInitialOf(prospect.lastName),
+          positionNumber: result.positionNumber,
+          baPhone: ba?.phone ?? null,
+        });
+      }
     } else if (tokenRecord.state === 'video_complete') {
       // Stale earlier milestone arrived after placement already happened.
       // Carry the existing position forward so the client stays in sync.
