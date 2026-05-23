@@ -25,6 +25,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -143,6 +144,7 @@ function errorCopy(code: string | undefined): string {
 // ─────────────────────────────────────────────────────────────────────────
 
 export function InvitationsPage({ seed, source = 'self' }: InvitationsPageProps) {
+  const navigate = useNavigate();
   const [form, setForm] = useState<ProspectForm>({ ...EMPTY_FORM, ...seed });
   const [view, setView] = useState<View>({ kind: 'compose' });
   const [submitting, setSubmitting] = useState(false);
@@ -245,6 +247,7 @@ export function InvitationsPage({ seed, source = 'self' }: InvitationsPageProps)
         minted={view.minted}
         onInviteAnother={handleInviteAnother}
         onMarkSent={handleMarkSent}
+        onDone={() => navigate('/cockpit')}
       />
     );
   }
@@ -412,8 +415,8 @@ function ComposeView({
               placeholder={
                 'Hey ' +
                 (form.firstName.trim() || '[name]') +
-                ", I&rsquo;ve been using something I think you&rsquo;d want to see. " +
-                'Two minutes — watch this and tell me what you think.'
+                ", I\u2019ve been using something I think you\u2019d want to see. " +
+                'Two minutes \u2014 watch this and tell me what you think.'
               }
               className={
                 'w-full bg-ink-2 border border-line text-cream rounded-md ' +
@@ -457,10 +460,12 @@ function MintedView({
   minted,
   onInviteAnother,
   onMarkSent,
+  onDone,
 }: {
   minted: Minted;
   onInviteAnother: () => void;
   onMarkSent: (prospectId: string) => Promise<boolean>;
+  onDone: () => void;
 }) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedBoth, setCopiedBoth] = useState(false);
@@ -579,6 +584,12 @@ function MintedView({
             className="bg-transparent text-cream border border-cream/20 hover:bg-cream/[0.05] font-mono tracking-[0.04em] text-[13px] px-6 py-5"
           >
             Invite someone else
+          </Button>
+          <Button
+            onClick={onDone}
+            className="bg-transparent text-cream-mute hover:text-gold font-mono tracking-[0.04em] text-[13px] px-6 py-5"
+          >
+            Back to cockpit
           </Button>
         </div>
       </div>

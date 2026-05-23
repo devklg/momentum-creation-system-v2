@@ -18,6 +18,7 @@ import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { michaelRoutes } from './routes/michael.js';
 import { prospectTokenRoutes } from './routes/p.js';
 import { invitationRoutes } from './routes/invitations.js';
+import { cockpitRoutes } from './routes/cockpit.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -98,6 +99,10 @@ app.use('/api/p', prospectTokenRoutes);
 // handler applies (requireAuth, requireMichaelComplete) internally; sponsor
 // is derived from the session, never the body (locked-spec 3.5).
 app.use('/api/invitations', invitationRoutes);
+
+// Cockpit read-side (Chat #121) — the My Invites loop. GET-only; the BA id
+// comes from the session, every read is scoped to that BA (locked-spec 3.5).
+app.use('/api/cockpit', cockpitRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 

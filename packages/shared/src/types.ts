@@ -592,3 +592,114 @@ export interface InvitationActivityEntry {
   note: string;
   at: IsoTimestamp;
 }
+
+/* ───────────────────────────────────────────────────────────────
+ * Cockpit read-side (Chat #121 — the My Invites loop)
+ * ───────────────────────────────────────────────────────────────
+ *
+ * The WRITE-side spine (Chat #119/#120) mints prospects, stamps sentAt,
+ * and appends the invitation_activity timeline. Nothing read it back until
+ * now. The cockpit closes the loop: a BA sees every prospect they've
+ * invited, that prospect's current status, and the per-prospect activity.
+ *
+ * Sponsor immutability (locked-spec 3.5): the cockpit reads ONLY the
+ * authed session BA's own prospects (filter sponsorBaId = session baId).
+ * No request input can widen the set to another BA's prospects.
+ *
+ * Compliance (locked-spec 3.10): this is a BA-FACING surface inside .team,
+ * not .com. It may show the prospect's own contact + status + the saved
+ * message. It still makes no income/placement claims — status is funnel
+ * progress ("watched the video", "asked for a callback"), never earnings.
+ */
+
+/**
+ * A prospect's status as the cockpit displays it. This is a DISPLAY
+ * projection, not a stored field — it is computed server-side from the
+ * token lifecycle state + the sentAt field + customer flag, collapsing
+ * the rail into the handful of states a BA actually acts on.
+ *
+ *   - draft           → minted, link not yet marked sent by the BA
+ *   - sent             → BA tapped "I sent this" (sentAt set), no click yet
+ *   - opened           → prospect clicked / started the video (in progress)
+ *   - watched          → prospect completed the video (placed in the pool)
+ *   - callback         → prospect raised a hand (callback requested)
+ *   - enrolled         → walked into THREE off-app, BA marked enrolled
+ *   - expired          → 8-week window elapsed (locked-spec 3.7)
+ *
+ * 'callback' outranks 'watched' in the display because a raised hand is
+ * the action a BA most needs to see; 'enrolled' and 'expired' are terminal
+ * and outrank everything.
+ */
+export type InviteDisplayStatus =
+  | 'draft'
+  | 'sent'
+  | 'opened'
+  | 'watched'
+  | 'callback'
+  | 'enrolled'
+  | 'expired';
+
+/**
+ * One row in the BA's My Invites list. A flattened, display-ready view of
+ * a prospect the BA invited — the cockpit's primary unit.
+ */
+export interface InviteSummary {
+  prospectId: string;
+  token: string;
+  firstName: string;
+  lastInitial: string;
+  city: string;
+  stateOrRegion: string;
+  /** Token lifecycle rail state (raw). */
+  tokenState: TokenState;
+  /** Computed display status the cockpit badges on the row. */
+  status: InviteDisplayStatus;
+  /** Pool position once placed; null before video_complete. */
+  positionNumber: number | null;
+  /** Most recent callback intent, if the prospect raised a hand. */
+  latestCallbackIntent: CallbackIntent | null;
+  /** The stored invitation message + who composed it (Chat #120). */
+  message: string | null;
+  source: InvitationSource;
+  /** Whether the BA has confirmed they sent the link. */
+  sentAt: IsoTimestamp | null;
+  becameCustomer: boolean;
+  createdAt: IsoTimestamp;
+  expiresAt: IsoTimestamp;
+}
+
+/**
+ * Response from GET /api/cockpit/invites. The BA's own prospects, newest
+ * first, plus the per-prospect activity timeline keyed by prospectId so
+ * the cockpit can expand a row without a second round trip.
+ */
+export interface MyInvitesResponse {
+  ok: true;
+  invites: InviteSummary[];
+  /** activityByProspect[prospectId] = chronological activity for that prospect. */
+  activityByProspect: Record<string, InvitationActivityEntry[]>;
+}
+
+/**
+ * Response from GET /api/cockpit/summary. The headline counts the cockpit
+ * shows above My Invites, plus the My Sponsor card data. Counts are the
+ * BA's own funnel only (sponsorBaId = session baId).
+ */
+export interface CockpitSummaryResponse {
+  ok: true;
+  baFirstName: string;
+  /** My Sponsor card. Null for founders (no upline) per locked-spec 1.2. */
+  sponsor: {
+    fullName: string;
+    firstName: string;
+    lastInitial: string;
+    phone: string | null;
+  } | null;
+  counts: {
+    total: number;
+    sent: number;
+    watched: number;
+    callbacks: number;
+    enrolled: number;
+  };
+}
