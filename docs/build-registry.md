@@ -91,7 +91,7 @@
 | Vite + Tailwind + shadcn scaffold | `apps/team/` | live | #92 | — | Brand tokens in `tailwind.config.ts`. Compass-rose logo header. |
 | `/register` page (10 fields, sponsor confirmation card, password strength, debounced code validation) | `apps/team/src/routes/register.tsx` | live | #92 | — | Working end-to-end test: Sally Sue registered TMBA-20260518-8KVZ2Q via TM-TEST. |
 | `/welcome` page (click-acknowledge per TEAM C.4) | `apps/team/src/routes/welcome.tsx` (209 lines) | wired | #94 | hero "You just hit the lottery" v1 | Voice + atmosphere match welcome-letter-v2.html. Routes to /michael/schedule on accept. **Needs audit against locked-spec v2 per Chat #95 carry-forward.** |
-| `/cockpit` stub ("Cockpit coming soon") | `apps/team/src/routes/cockpit.tsx` (27 lines) | live | #94 | — | Real cockpit per TEAM Design Section H is Phase 4. |
+| `/cockpit` page (real shell: My Invites working, My Sponsor working, CRM stubbed) | `apps/team/src/routes/cockpit.tsx` (670 lines) | live | #121 | `/cockpit` stub (27 lines) | Replaces the stub. My Invites = the read side of the invitation module (status badges, expandable rows with link/saved message/source/activity timeline, 'I sent this' for drafts). My Sponsor card (founder treatment when no upline). CRM stubbed for a later session. Reads GET /api/cockpit/invites + /summary. Local wire types per .team TS6059 convention. |
 | Questionnaire + sponsor workbook routes + onboarding/sponsor surfaces | `apps/team/src/routes/` | live | (carry-forward `3418d61`) | — | Pushed alongside Chat #104. |
 | Welcome-prototype-v2 reconciliation into `/welcome` | `apps/team/src/routes/welcome.tsx` | pending | #95 (drafted) | welcome.tsx (current) | Needs to merge the v2 prototype's letter-voice + 7-day-arc strip into the live route. |
 
@@ -162,7 +162,7 @@
 | Artifact | Spec Source | Chat Locked | Notes |
 |---|---|---|---|
 | Dashboard six locked sections (React port from `dashboard-prototype.html`) | COM Design Section C | #114 SHIPPED | Ported Chat #114 to `apps/com/src/routes/tm-prospect-dashboard/`. Footer drift correction applied (Team Magnificent only, no THREE). Chat #84 Section-4 correction applied (behind-only). Typecheck GREEN. |
-| Real `/cockpit` (My Sponsor card + My Invites + CRM per invite) | TEAM Design Section H | #85 scope locked | Currently a stub. |
+| Real `/cockpit` (My Sponsor card + My Invites + CRM per invite) | TEAM Design Section H | #121 My Invites + My Sponsor SHIPPED | Cockpit shell live Chat #121 with My Invites (read side of the invitation module) + My Sponsor working; CRM still stubbed (its own later session). Reads GET /api/cockpit/invites + /summary (server/src/domain/cockpit.ts + routes/cockpit.ts). |
 | Michael interview surface (3 states: Awaiting / In Progress / Complete) | TEAM Design Section D | #86 | Telnyx + STT wired #102. UI pending. |
 | Fast Start Guide 5 modules | TEAM Design Section E | #86 + #95 7-day arc | Day 1 prototype drafted. Days 2–7 pending. |
 | 10-step orientation surface | TEAM Design Section F + locked-spec | #100 curriculum ported | Currently scheduling-only; live hosted by Kevin/Paul. |
@@ -250,4 +250,4 @@ For narrative context. Authoritative detail lives in `D:/claude-learning/KEVIN-C
 
 ---
 
-*Last updated: 2026-05-22 (Chat #117). Update this file at the end of every chat that ships an artifact, supersedes one, or closes an open spec question.*
+*Last updated: 2026-05-22 (Chat #121). Update this file at the end of every chat that ships an artifact, supersedes one, or closes an open spec question.*
