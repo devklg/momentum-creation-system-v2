@@ -32,6 +32,7 @@ import { Router } from 'express';
 import type {
   CreateInvitationPayload,
   CreateInvitationResponse,
+  InvitationSource,
   MarkInvitationSentResponse,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
@@ -56,6 +57,22 @@ function optionalStr(raw: unknown): string | null {
 function requiredStr(raw: unknown): string {
   return typeof raw === 'string' ? raw.trim() : '';
 }
+
+const INVITATION_SOURCES: readonly InvitationSource[] = [
+  'self',
+  'ivory',
+  'scriptmaker',
+];
+
+/** Validate the source marker; default to 'self' (the plain form). */
+function normalizeSource(raw: unknown): InvitationSource {
+  return INVITATION_SOURCES.includes(raw as InvitationSource)
+    ? (raw as InvitationSource)
+    : 'self';
+}
+
+/** Max stored invitation message length — generous for SMS-length drafts. */
+const MESSAGE_MAX = 1200;
 
 /**
  * Build the domain input from the request body + the authed session BA.
@@ -83,6 +100,15 @@ function buildInput(
 
   const country = optionalStr(body?.country) ?? 'US';
 
+  // Chat #120: invitation message is stored for reuse + history (NOT sent
+  // by the system). Optional at the spine level so /log stays compatible;
+  // the plain form always supplies it. Cap defensively.
+  const message = optionalStr(body?.message);
+  if (message && message.length > MESSAGE_MAX) {
+    return { error: 'message_too_long' };
+  }
+  const source = normalizeSource(body?.source);
+
   return {
     input: {
       sponsorBaId,
@@ -93,6 +119,8 @@ function buildInput(
       city,
       stateOrRegion,
       country,
+      message,
+      source,
     },
   };
 }
@@ -119,6 +147,8 @@ invitationRoutes.post('/', requireAuth, requireMichaelComplete, async (req, res)
       inviteUrl: result.inviteUrl,
       createdAt: result.createdAt,
       expiresAt: result.expiresAt,
+      message: result.message,
+      source: result.source,
     };
     return res.status(201).json(response);
   } catch (err) {
@@ -197,6 +227,8 @@ invitationRoutes.post('/log', requireAuth, requireMichaelComplete, async (req, r
       inviteUrl: result.inviteUrl,
       createdAt: result.createdAt,
       expiresAt: result.expiresAt,
+      message: result.message,
+      source: result.source,
     };
     return res.status(201).json(response);
   } catch (err) {

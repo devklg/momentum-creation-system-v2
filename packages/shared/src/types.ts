@@ -499,10 +499,32 @@ export interface TeamStatsResponse {
  */
 
 /**
- * BA-submitted invitation form (Chat #119 field lock). first/last name,
- * email, phone, city, state — all flow onto the prospect record so the CRM
- * export carries them and city/state render on the dashboard ticker.
- * sponsorBaId is NOT in this payload; the route derives it from the session.
+ * Who composed the invitation message (Chat #120 lock). The plain
+ * /invitations form fills 'self'; Ivory and ScriptMaker fill their own
+ * markers when they ship — same field, same seam, no schema change later.
+ * This is what makes "compare hand-written vs agent-drafted invites"
+ * answerable down the road.
+ *
+ *   - self        → the BA wrote the message by hand in the form
+ *   - ivory        → Ivory (who-do-you-know agent) drafted it
+ *   - scriptmaker  → ScriptMaker drafted it from a product video
+ */
+export type InvitationSource = 'self' | 'ivory' | 'scriptmaker';
+
+/**
+ * BA-submitted invitation form (Chat #119 field lock, extended Chat #120).
+ * first/last name, email, phone, city, state — all flow onto the prospect
+ * record so the CRM export carries them and city/state render on the
+ * dashboard ticker. sponsorBaId is NOT in this payload; the route derives
+ * it from the session.
+ *
+ * `message` (Chat #120) is the invitation text the BA will send. It is
+ * STORED for reuse and history — storing is NOT sending; the BA still
+ * copies the link + message and sends from their own phone (locked-spec
+ * 1.13 channel protection, 3.6 BA-to-BA off-app). `source` records who
+ * composed it. Both are optional at the type level so the spine stays
+ * backward-compatible with the standalone /log path, but the plain form
+ * always sends them.
  */
 export interface CreateInvitationPayload {
   firstName: string;
@@ -513,6 +535,10 @@ export interface CreateInvitationPayload {
   stateOrRegion: string;
   /** ISO 3166-1 alpha-2; route defaults to 'US' when omitted. */
   country?: string;
+  /** The invitation text the BA will send. Stored, never auto-sent. */
+  message?: string | null;
+  /** Who composed `message`. Route defaults to 'self' when omitted. */
+  source?: InvitationSource;
 }
 
 /**
@@ -526,6 +552,10 @@ export interface CreateInvitationResponse {
   inviteUrl: string;
   createdAt: IsoTimestamp;
   expiresAt: IsoTimestamp;
+  /** Echo of the stored message + source (Chat #120), so the page can
+   *  show the BA exactly what was saved alongside the link. */
+  message: string | null;
+  source: InvitationSource;
 }
 
 /**

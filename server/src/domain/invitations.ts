@@ -48,6 +48,7 @@ import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 import { lastInitialOf } from './prospects.js';
 import type {
   InvitationActivityEntry,
+  InvitationSource,
   InviteTokenRecord,
   ProspectLocation,
   ProspectRecord,
@@ -74,6 +75,14 @@ export interface CreateInvitationInput {
   stateOrRegion: string;
   /** ISO 3166-1 alpha-2. Defaults to 'US' at the route layer if unspecified. */
   country: string;
+  /**
+   * Invitation text the BA will send (Chat #120). STORED for reuse +
+   * history; storing is not sending (locked-spec 1.13 / 3.6 — the BA sends
+   * from their own phone). null when not provided (e.g. legacy /log calls).
+   */
+  message: string | null;
+  /** Who composed `message`. 'self' for the plain form. */
+  source: InvitationSource;
 }
 
 export interface CreateInvitationResult {
@@ -84,6 +93,9 @@ export interface CreateInvitationResult {
   expiresAt: string;
   /** Fully-substituted prospect link the BA shares. */
   inviteUrl: string;
+  /** Echo of what was stored (Chat #120). */
+  message: string | null;
+  source: InvitationSource;
 }
 
 /** Base URL the /p/{token} link is built on. teammagnificent.com per 3.1. */
@@ -151,7 +163,7 @@ export async function createInvitation(
   await tripleStackWrite({
     id: prospectId,
     mongoCollection: PROSPECTS_COLLECTION,
-    mongoDoc: { ...prospectRecord, sentAt: null, token },
+    mongoDoc: { ...prospectRecord, sentAt: null, token, message: input.message, source: input.source },
     neo4j: {
       // BA INVITED prospect. sponsorBaId stamped immutably here.
       cypher:
@@ -192,6 +204,7 @@ export async function createInvitation(
         sponsorBaId: input.sponsorBaId,
         city: input.city,
         stateOrRegion: input.stateOrRegion,
+        source: input.source,
         createdAt,
       },
     },
@@ -244,6 +257,8 @@ export async function createInvitation(
     createdAt,
     expiresAt,
     inviteUrl: buildInviteUrl(token),
+    message: input.message,
+    source: input.source,
   };
 }
 
