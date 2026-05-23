@@ -703,3 +703,100 @@ export interface CockpitSummaryResponse {
     enrolled: number;
   };
 }
+
+/* ──────────────────────────────────────
+ * ScriptMaker (Chat #122 — the product-video front door)
+ * ──────────────────────────────────────
+ *
+ * ScriptMaker lives in the .team VIDEO LIBRARY, anchored to the specific
+ * product video the BA just watched (Chat #118 lock — it is NOT a comp-plan
+ * translator; that framing was drift). It fires two ways: a per-card
+ * "who can use this?" button and an auto-prompt when the BA finishes a
+ * product video. It produces a DRAFT invitation message anchored to that
+ * product, then hands the draft into the existing /invitations form via
+ * the seed + source='scriptmaker' seam (Chat #120). It does NOT mint the
+ * token, create the prospect, or send anything — those stay in the spine.
+ *
+ * Prospect-surfacing ("who do you know") is IVORY's job (its own surface,
+ * next session). This session ScriptMaker drafts only; the BA names the
+ * prospect, ScriptMaker writes the product-anchored message. When Ivory
+ * ships it routes a surfaced name into this same draft step. One engine,
+ * multiple front doors (Chat #118).
+ *
+ * Compliance (locked-spec 3.11 script-time enforcement + 3.10):
+ *   The draft is BA-composed outbound word-of-mouth, but the compliance
+ *   frame still binds what the LLM may write — NO income claims, NO
+ *   earnings projections, NO placement/queue promises, NO comp/cycle/rank
+ *   math, NO medical or weight-loss guarantees. The system prefix in
+ *   domain/scriptmaker.ts encodes these as hard rules; the model is
+ *   instructed to refuse and fall back to a neutral product mention rather
+ *   than produce a violating draft. The four G.7 invitation locks (real
+ *   human contact precedes the link, no automated send, no mass send, no
+ *   income content in a prospect-facing draft) attach at the send step in
+ *   the spine, not here.
+ */
+
+/**
+ * A product video in the .team library that ScriptMaker can anchor a draft
+ * to. Ported from team-magnificent-training/video-library.html (Chat #122).
+ * `youtubeId` powers the embedded player (needed for the fire-on-finish
+ * completion signal — the legacy page linked OUT to YouTube with no
+ * completion event, the real build item per Chat #118). `productName` is
+ * the anchor ScriptMaker drafts around.
+ */
+export interface LibraryVideo {
+  videoId: string;
+  youtubeId: string;
+  title: string;
+  productName: string;
+  /** Short human blurb shown on the card. */
+  blurb: string;
+  /** 'glp_three' | 'product_line' | 'back_office' | 'app' — library section. */
+  category: string;
+  /** mm:ss display string from the source catalog. */
+  duration: string;
+  /** 'full' | 'short' | 'deep_dive' — drives the card badge. */
+  kind: 'full' | 'short' | 'deep_dive';
+  featured: boolean;
+}
+
+/**
+ * Request body for POST /api/scriptmaker/draft.
+ *
+ * The BA names the prospect (firstName + optional context the BA knows)
+ * and identifies the product video that just played. ScriptMaker writes a
+ * personalized, compliance-clean invitation draft anchored to that product.
+ * sponsorBaId is NOT in the payload — the route derives it from the session
+ * (locked-spec 3.5), same as the spine.
+ */
+export interface ScriptMakerDraftPayload {
+  /** The product the draft is anchored to (e.g. 'GLP-THREE'). */
+  productName: string;
+  /** The video that played, for context the model can reference. */
+  videoTitle: string;
+  /** Prospect's first name — personalizes the draft. */
+  prospectFirstName: string;
+  /**
+   * Optional free-text the BA knows about the prospect ("struggles with
+   * late-night snacking", "asked me about Ozempic"). Helps the model
+   * tailor the angle. Never required; the draft works without it.
+   */
+  prospectContext?: string | null;
+}
+
+/**
+ * Response from POST /api/scriptmaker/draft.
+ *
+ * `draft` is the suggested invitation message. The BA reviews and edits it
+ * before it ever reaches the spine — ScriptMaker proposes, the BA disposes.
+ * `degraded` is true when the LLM was unavailable (key not yet wired) and
+ * the server returned a neutral fallback so the surface still works.
+ */
+export interface ScriptMakerDraftResponse {
+  ok: true;
+  draft: string;
+  productName: string;
+  prospectFirstName: string;
+  /** True when the Anthropic key is unset and a neutral fallback was used. */
+  degraded: boolean;
+}

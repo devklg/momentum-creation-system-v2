@@ -19,6 +19,7 @@ import { michaelRoutes } from './routes/michael.js';
 import { prospectTokenRoutes } from './routes/p.js';
 import { invitationRoutes } from './routes/invitations.js';
 import { cockpitRoutes } from './routes/cockpit.js';
+import { scriptmakerRoutes } from './routes/scriptmaker.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -103,6 +104,14 @@ app.use('/api/invitations', invitationRoutes);
 // Cockpit read-side (Chat #121) — the My Invites loop. GET-only; the BA id
 // comes from the session, every read is scoped to that BA (locked-spec 3.5).
 app.use('/api/cockpit', cockpitRoutes);
+
+// ScriptMaker draft engine (Chat #122) — the video-library front door's
+// server side. Drafts a product-anchored invitation message; the BA carries
+// the draft to /api/invitations (source='scriptmaker'). DRAFTS ONLY — no
+// mint, no send (Chat #118 boundary). Gated (requireAuth +
+// requireMichaelComplete) inside the route. Degrades to a neutral fallback
+// when ANTHROPIC_API_KEY is unset (dormant today).
+app.use('/api/scriptmaker', scriptmakerRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 

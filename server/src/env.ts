@@ -131,6 +131,30 @@ const Env = z.object({
    * replies to a monitored inbox distinct from the no-reply send address.
    */
   EMAIL_REPLY_TO: z.string().default(''),
+
+  /**
+   * Anthropic API key (sk-ant-...) for the LLM-backed invitation front doors
+   * — ScriptMaker (Chat #122) and Ivory (later). The gateway has NO LLM
+   * connector (confirmed Chat #118 via list_tools), so these call the
+   * Anthropic Messages API DIRECTLY. From console.anthropic.com > API Keys.
+   *
+   * DORMANT BY DESIGN, mirroring EMAIL_API_KEY: empty in dev means the LLM
+   * service WARNS via AnthropicConfigError and the calling surface degrades
+   * (ScriptMaker shows the manual compose path) rather than crashing boot.
+   * Kevin HAS the key (Chat #120 correction) — it just needs to land in the
+   * untracked .env so the running process can read it. Drafts begin the
+   * moment this is set; no code change.
+   */
+  ANTHROPIC_API_KEY: z.string().default(''),
+
+  /**
+   * Model string for invitation-draft generation. A config constant so a
+   * future model swap (e.g. to Claude 5) is a one-line env change, not a code
+   * edit (Chat #118 lock). Default Haiku 4.5 — fast and cheap for short
+   * personalized drafts; A/B against Sonnet on copy quality is a later tuning
+   * step. Prompt-caching applies to the stable compliance+product prefix.
+   */
+  ANTHROPIC_MODEL: z.string().default('claude-haiku-4-5-20251001'),
 });
 
 export const env = Env.parse(process.env);

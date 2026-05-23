@@ -49,3 +49,6 @@ coverage/
 # Per-session handoff scripts (Perry write/verify, chat-specific tooling)
 .handoff/
 
+# Per-session build/typecheck/search scripts (chat-specific throwaway tooling)
+.build/
+
