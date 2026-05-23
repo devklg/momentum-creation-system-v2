@@ -25,7 +25,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -145,7 +145,22 @@ function errorCopy(code: string | undefined): string {
 
 export function InvitationsPage({ seed, source = 'self' }: InvitationsPageProps) {
   const navigate = useNavigate();
-  const [form, setForm] = useState<ProspectForm>({ ...EMPTY_FORM, ...seed });
+  const location = useLocation();
+
+  // ScriptMaker / Ivory seam (Chat #123). A front door routes a chosen
+  // prospect here via navigate('/invitations', { state: { seed, source } }).
+  // Router state takes precedence over props because that is how the agent
+  // front doors actually arrive; the plain nav entry passes neither, so
+  // source falls back to 'self'. Read once on mount — location.state is a
+  // snapshot, not reactive, which is exactly what we want (a later edit by
+  // the BA must not be clobbered by a re-render).
+  const navState = location.state as
+    | { seed?: Partial<ProspectForm>; source?: InvitationSource }
+    | null;
+  const initialSeed = navState?.seed ?? seed;
+  const initialSource = navState?.source ?? source;
+
+  const [form, setForm] = useState<ProspectForm>({ ...EMPTY_FORM, ...initialSeed });
   const [view, setView] = useState<View>({ kind: 'compose' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -179,7 +194,7 @@ export function InvitationsPage({ seed, source = 'self' }: InvitationsPageProps)
       city: form.city.trim(),
       stateOrRegion: form.stateOrRegion.trim(),
       message: form.message.trim() || null,
-      source,
+      source: initialSource,
     };
     try {
       const res = await fetch('/api/invitations', {
@@ -213,7 +228,7 @@ export function InvitationsPage({ seed, source = 'self' }: InvitationsPageProps)
     } finally {
       setSubmitting(false);
     }
-  }, [ready, form, source]);
+  }, [ready, form, initialSource]);
 
   const handleInviteAnother = useCallback(() => {
     setForm({ ...EMPTY_FORM });
@@ -260,7 +275,7 @@ export function InvitationsPage({ seed, source = 'self' }: InvitationsPageProps)
       ready={ready}
       submitting={submitting}
       error={error}
-      source={source}
+      source={initialSource}
     />
   );
 }
