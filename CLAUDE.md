@@ -12,6 +12,16 @@ Before writing code in this repo, read in this order:
 
 The four `.docx` design files (`Team-Magnificent-*-Design.docx`, `Team-Magnificent-App-Description.docx`, `Team-Magnificent-Signup-Architecture.docx`) are the surface-level design references — read the one that covers the surface you're changing.
 
+## Worktree / parallel-branch model
+
+Feature work happens in parallel git worktrees. Each worktree root has a scoped `TASK.md` defining: what to build, what already exists (don't rebuild), open questions to ask Kevin, and merge order vs. other in-flight branches. Read it FIRST.
+
+**Append-only rule on shared files to prevent merge collisions:**
+- `packages/shared/src/types.ts` — only APPEND new exports; never edit existing ones.
+- `server/src/index.ts` — only add new route imports/mounts; touch no existing line.
+
+Commits are tagged with the originating chat number (`Chat #130 - <summary>`), mirroring the chat-indexed history in [docs/build-registry.md](docs/build-registry.md). Kevin merges; agents commit to the feature branch and stop.
+
 ## Common commands
 
 This is a **pnpm 9 workspace, Node ≥ 22**. The default `pnpm dev` script only starts `apps/team` + `server` — use `dev:all` for everything.
@@ -61,6 +71,10 @@ There is no test runner wired in this repo yet — verification happens via `pnp
 | Shared types/brand/compliance | `packages/shared` | — | `@momentum/shared` workspace |
 
 Each Vite client proxies `/api → localhost:7700`. JWT cookie is scoped to `.teammagnificent.team` so apps/team and apps/admin share the session.
+
+### Server layout
+
+`server/src/` is split: `routes/` (thin Express handlers), `domain/` (pure logic — cockpit projections, schedule windows, code gen, holding-tank), `services/` (wrappers for external systems — gateway, telnyx, anthropic, resend, JWT session, in-process SSE pub/sub), `middleware/` (auth, michael-gate, telnyx-verify, og-injection). Runtime is `tsx watch` — edits hot-reload directly; don't compile-then-run.
 
 ### The triple-stack persistence rule
 
