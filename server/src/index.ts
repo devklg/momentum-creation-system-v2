@@ -21,6 +21,7 @@ import { prospectLoginRoutes } from './routes/p-login.js';
 import { invitationRoutes } from './routes/invitations.js';
 import { cockpitRoutes } from './routes/cockpit.js';
 import { scriptmakerRoutes } from './routes/scriptmaker.js';
+import { trainingRoutes } from './routes/training.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -125,6 +126,12 @@ app.use('/api/cockpit', cockpitRoutes);
 // requireMichaelComplete) inside the route. Degrades to a neutral fallback
 // when ANTHROPIC_API_KEY is unset (dormant today).
 app.use('/api/scriptmaker', scriptmakerRoutes);
+
+// Fast Start Training (feat/fast-start-training, wireframe 3.5).
+// GET /fast-start/progress + GET-1 whitelisted pre-Michael in
+// MICHAEL_GATE_WHITELIST; POST .../modules/2-5/state stay gated.
+// Sequential UI, not hard-gated (TASK.md open-question answer).
+app.use('/api/training', trainingRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 

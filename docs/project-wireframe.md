@@ -125,14 +125,17 @@ One route /p/{token}, two faces by token state.
   - [ ] LLM coaching layer (unblocked — key in root .env)
   - [ ] Does NOT call/text/score (compliance)
 
-### 3.5 Fast Start Guide — 5 modules  `[~]` (#95)
-- [~] Module 1 — The product (Dr. Dan video + six-pillar) — Day-1 prototype drafted
-- [ ] Module 2 — Comp plan Layer 1 (written, walked through)
-- [ ] Module 3 — The binary as two legs
-- [ ] Module 4 — Build your prospect list (intro + open Ivory)
-- [ ] Module 5 — Identify first two candidates (mark in CRM)
-- [ ] Completion logic: 5 modules complete AND >=1 invitation sent
-- DEP: Fast Start gating (open — sequential-not-gated current default)
+### 3.5 Fast Start Guide — 5 modules  `[x]` (#95, feat/fast-start-training)
+- [x] Module 1 — The Product (GLP-THREE fact-sheet + MBC-267 + six-pillar product CV table)
+- [x] Module 2 — Comp Plan Layer 1 (6 ways, cycle 300+600=900=$35, Active+Qualified, PIBs, 2-by-2)
+- [x] Module 3 — The Binary as Two Legs (Power/Pay legs, no breakage, first-mover, 14-level dup chart)
+- [x] Module 4 — Build Your Prospect List (names list, mindset, first-touch script, LINK to /ivory)
+- [x] Module 5 — Build Your Team (22-in-2-weeks model, far-left/far-right, mark candidates in CRM)
+- [x] Completion logic: 5 modules complete AND >=1 invitation sent (cross-checked from spine)
+- [x] Triple-stack progress entity (mongo + neo4j + chroma `mcs_training_progress`, lazy bootstrap)
+- [x] Welcome '/welcome' "Day 1 unlocks" step card now links to /training/fast-start
+- DEP RESOLVED: Fast Start gating — sequential UI, NOT hard-gated (Kevin, this branch).
+  Michael gate whitelisted for Module 1 + hub progress; Modules 2-5 stay gated.
 
 ### 3.6 10-step orientation  `[~]` (#100)
 - [x] Curriculum page ported to /training/10-steps

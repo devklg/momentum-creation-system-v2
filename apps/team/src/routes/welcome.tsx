@@ -17,7 +17,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 interface WelcomeLoadResponse {
@@ -248,7 +248,8 @@ export function WelcomePage() {
             <StepCard
               n="2"
               title="Day 1 of training opens."
-              body="While you wait, start Day 1 — The System. Learn who Team Magnificent is and what we built for you."
+              body="While you wait, start Day 1 — The Product. Learn what GLP-THREE is and the science behind it."
+              to="/training/fast-start"
             />
             <StepCard
               n="3"
@@ -309,16 +310,44 @@ export function WelcomePage() {
   );
 }
 
-function StepCard({ n, title, body }: { n: string; title: string; body: string }) {
-  return (
-    <div className="bg-cream/[0.025] border border-cream/10 rounded-md p-5 hover:border-gold/30 transition-colors">
+function StepCard({
+  n,
+  title,
+  body,
+  to,
+}: {
+  n: string;
+  title: string;
+  body: string;
+  /** Optional link — when set the card is interactive. Used to wire the
+   *  "Day 1 of training opens." card to /training/fast-start since the
+   *  Fast Start hub + Module 1 are whitelisted pre-Michael. */
+  to?: string;
+}) {
+  const className =
+    'bg-cream/[0.025] border border-cream/10 rounded-md p-5 hover:border-gold/30 transition-colors block';
+  const body_ = (
+    <>
       <p className="font-display text-[40px] leading-none text-gold mb-3">{n}</p>
       <p className="font-display tracking-[0.04em] text-[16px] text-cream mb-2 leading-tight">
         {title}
       </p>
       <p className="text-[13px] text-cream-mute leading-[1.55]">{body}</p>
-    </div>
+      {to && (
+        <p className="font-mono tracking-[0.18em] text-[10px] text-gold uppercase mt-3">
+          Open Fast Start →
+        </p>
+      )}
+    </>
   );
+  if (to) {
+    return (
+      <Link to={to} className={className}>
+        {body_}
+      </Link>
+    );
+  }
+  return <div className={className}>{body_}</div>;
 }
 
 function SignatureBlock({

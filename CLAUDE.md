@@ -8,9 +8,19 @@ Before writing code in this repo, read in this order:
 
 1. `docs/AGENT-BRIEFING.md` — three-layer orientation (identity, architecture, pointers). End-to-end. Do not skip.
 2. `docs/locked-spec.md` — the authoritative spec. Read **only** the Part(s) you're touching. When this file conflicts with the codebase, the file wins.
-3. `docs/build-registry.md` — what's done, what's pending, what supersedes what. Consult before asking "is X done?"
+3. `docs/project-wireframe.md` — the leaf-level build map. Status (`[x] / [~] / [ ]`) is grounded in disk; pick an unbuilt leaf and it IS the task list. Tick the leaves you finish.
+4. `docs/build-registry.md` — what's done, what's pending, what supersedes what. Consult before asking "is X done?"
 
 The four `.docx` design files (`Team-Magnificent-*-Design.docx`, `Team-Magnificent-App-Description.docx`, `Team-Magnificent-Signup-Architecture.docx`) are the surface-level design references — read the one that covers the surface you're changing.
+
+### Per-worktree task convention
+
+Kevin runs this repo as parallel git worktrees on `feat/*` branches; he merges. If a `TASK.md` sits at the repo root, **read it first** — it's the brief for the branch you're checked out on (scope, source content, hard rules to prevent cross-worktree merge collisions). The branch name and `TASK.md` always agree.
+
+Two merge-collision rules apply across all worktrees:
+
+- **`packages/shared/src/types.ts` is append-only.** Add new exports; never edit existing ones (other worktrees import them).
+- **`server/src/index.ts` only accepts new route import + mount lines.** Don't touch existing lines — boot order is load-bearing (see below).
 
 ## Common commands
 
@@ -120,6 +130,7 @@ Enforcement lives at script-time (ScriptMaker refuses noncompliant drafts) and r
 
 ## Conventions
 
+- **Server split: `domain/` is logic, `routes/` is thin Express.** Triple-stack writes, validation, and state transitions live in [server/src/domain/](server/src/domain/) (one file per entity — `tokens.ts`, `prospects.ts`, `invitations.ts`, etc.). Route files in [server/src/routes/](server/src/routes/) handle HTTP shape, auth/gate middleware, and call into domain functions. New persistent state → new `domain/<entity>.ts`, then a route that calls it.
 - **TypeScript strict mode + `noUncheckedIndexedAccess`** is on repo-wide via [tsconfig.base.json](tsconfig.base.json).
 - Shared types live in [packages/shared/src/types.ts](packages/shared/src/types.ts) — import via `@momentum/shared`. The team app sometimes uses local wire types ("`.team` TS6059 convention") to sidestep cross-workspace type composition issues.
 - Brand tokens are exact and verbatim — never paraphrase. Defined in [packages/shared/src/brand.ts](packages/shared/src/brand.ts) and `brand.css`. Display font Bebas Neue, body DM Sans, mono DM Mono.

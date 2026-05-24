@@ -908,3 +908,162 @@ export interface ProspectLoginRedeemError {
   ok: false;
   error: 'invalid_link' | 'expired_link' | 'already_used';
 }
+
+/* ──────────────────────────────────────────────────────────────────
+ * Fast Start Training — the self-paced first-7-days curriculum
+ * (feat/fast-start-training · wireframe 3.5)
+ * ──────────────────────────────────────────────────────────────────
+ *
+ * Five modules, sequential (not hard-gated) in the UI. Source content
+ * for Modules 2-3 is ported from Team Magnificent's published Power in
+ * Numbers training (devklg.github.io/team-magnificent-training); Module
+ * 1 is built from the THREE GLP-THREE fact sheet + product line; Module
+ * 4 links out to /ivory; Module 5 teaches the names-list + numbers
+ * mindset that turns the binary into real activity.
+ *
+ * Compliance scope: .team only. CV/dollar figures inside these modules
+ * are legitimate inside the regulated training environment and never
+ * bleed to .com (locked-spec 3.10/3.11). The mantra is People · Momentum
+ * · Volume · Checks (PMV+C) — same voice as /training/10-steps.
+ *
+ * Michael gate: Module 1 is whitelisted (a new BA can build belief in
+ * the product before Michael's interview); Modules 2-5 are gated. See
+ * MICHAEL_GATE_WHITELIST in server/src/domain/michael-schedule.ts.
+ *
+ * Sponsor immutability (locked-spec 3.5): progress records are stamped
+ * with the authed session baId; nothing in a request body can write to
+ * a different BA's progress.
+ *
+ * Completion: all 5 modules `completed` AND >= 1 invitation sent
+ * (cross-checked against the spine's sentAt field at read time —
+ * progress doesn't store its own invitation count).
+ */
+
+/** Module identifier — a stable integer 1..5 per locked TASK ordering. */
+export type FastStartModuleId = 1 | 2 | 3 | 4 | 5;
+
+/** Per-module lifecycle. Sequential in the UI, not hard-gated. */
+export type FastStartModuleState =
+  | 'not_started'
+  | 'in_progress'
+  | 'completed';
+
+/**
+ * Stored progress record. One row per (baId, moduleId). The triple-stack
+ * write inserts on first touch and updates state thereafter — domain
+ * branches on existence per the gateway upsert quirk.
+ */
+export interface FastStartProgressRecord {
+  /** Composite id `${baId}__${moduleId}` for idempotent triple-stack writes. */
+  _id: string;
+  baId: string;
+  moduleId: FastStartModuleId;
+  state: FastStartModuleState;
+  startedAt: IsoTimestamp | null;
+  completedAt: IsoTimestamp | null;
+  /** Updated on every state transition. */
+  updatedAt: IsoTimestamp;
+  createdAt: IsoTimestamp;
+}
+
+/**
+ * One module's status as the hub displays it. The eyebrow/title/slug
+ * are *not* stored — they're constants attached client-side and on the
+ * server from FAST_START_MODULES below. Only the lifecycle fields come
+ * from persistence.
+ */
+export interface FastStartModuleStatus {
+  moduleId: FastStartModuleId;
+  state: FastStartModuleState;
+  startedAt: IsoTimestamp | null;
+  completedAt: IsoTimestamp | null;
+}
+
+/**
+ * GET /api/training/fast-start/progress response. The full per-BA Fast
+ * Start state. `complete` is the canonical "is the BA done" boolean
+ * the welcome flow + cockpit + admin metrics read.
+ *
+ * Completion rule (TASK.md, this branch):
+ *   complete = (all 5 modules `completed`) AND (invitationsSent >= 1)
+ *
+ * `invitationsSent` is cross-checked from the Chat #119 invitation
+ * spine (prospects.sentAt) at read time — Fast Start does not duplicate
+ * the count.
+ */
+export interface FastStartProgressResponse {
+  ok: true;
+  modules: FastStartModuleStatus[];
+  invitationsSent: number;
+  complete: boolean;
+}
+
+/**
+ * POST /api/training/fast-start/modules/:id/state request body.
+ * Transitions are forward-only (not_started → in_progress → completed);
+ * the server rejects backward writes idempotently with the current state.
+ */
+export interface FastStartMarkStatePayload {
+  state: Exclude<FastStartModuleState, 'not_started'>;
+}
+
+/** POST response — echoes the resulting status the hub re-renders against. */
+export interface FastStartMarkStateResponse {
+  ok: true;
+  moduleId: FastStartModuleId;
+  state: FastStartModuleState;
+  startedAt: IsoTimestamp | null;
+  completedAt: IsoTimestamp | null;
+}
+
+/**
+ * Static module metadata. Lives in @momentum/shared so both server
+ * (validation, the route's :id parser) and client (hub render) read
+ * one source. Slug drives the client URL: /training/fast-start/{slug}.
+ * Order is fixed and load-bearing — never reorder; append-only if a
+ * Module 6 ever ships (the wireframe currently stops at 5).
+ */
+export const FAST_START_MODULES: readonly {
+  id: FastStartModuleId;
+  slug: 'product' | 'comp-layer-1' | 'binary' | 'prospect-list' | 'team';
+  eyebrow: string;
+  title: string;
+  /** Short one-liner on the hub card. */
+  blurb: string;
+}[] = [
+  {
+    id: 1,
+    slug: 'product',
+    eyebrow: 'MODULE 01 · PRODUCT',
+    title: 'The Product',
+    blurb: 'GLP-THREE and the six-pillar product story. What you take, what you share, why people stay.',
+  },
+  {
+    id: 2,
+    slug: 'comp-layer-1',
+    eyebrow: 'MODULE 02 · COMPENSATION',
+    title: 'Comp Plan, Layer 1',
+    blurb: 'How the money actually works. Active, Qualified, and the 300 + 600 = 900 CV cycle.',
+  },
+  {
+    id: 3,
+    slug: 'binary',
+    eyebrow: 'MODULE 03 · STRUCTURE',
+    title: 'The Binary as Two Legs',
+    blurb: 'Power Leg and Pay Leg, no breakage, and why first-mover position is structural math.',
+  },
+  {
+    id: 4,
+    slug: 'prospect-list',
+    eyebrow: 'MODULE 04 · PROSPECTS',
+    title: 'Build Your Prospect List',
+    blurb: 'Names list, mindset, and where Ivory comes in. The system you write FROM, not into.',
+  },
+  {
+    id: 5,
+    slug: 'team',
+    eyebrow: 'MODULE 05 · TEAM',
+    title: 'Build Your Team',
+    blurb: 'NOT "find two and stop." Your first two activate you. A team is the business.',
+  },
+] as const;

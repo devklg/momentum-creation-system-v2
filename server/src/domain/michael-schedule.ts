@@ -640,4 +640,10 @@ export const MICHAEL_GATE_WHITELIST: readonly string[] = [
   '/api/auth/logout',
   '/api/auth/me',
   '/api/health',
+  // Fast Start (feat/fast-start-training, wireframe 3.5): the hub
+  // render + Module 1 progress writes are pre-Michael accessible so a
+  // brand-new BA can build belief in the product before the interview.
+  // Modules 2-5 stay gated (no whitelist entry).
+  '/api/training/fast-start/progress',
+  '/api/training/fast-start/modules/1',
 ];
