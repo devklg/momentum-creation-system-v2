@@ -171,7 +171,7 @@ export async function readProspectSession(
 /**
  * Clear the prospect session cookie and best-effort delete the row.
  * Reserved for a future explicit logout surface; not wired in the
- * Chat #130 build because there is no `/p/logout` UI today. The
+ * Chat #131 build because there is no `/p/logout` UI today. The
  * session naturally expires with the account.
  */
 export async function closeProspectSession(

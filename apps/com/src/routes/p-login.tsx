@@ -1,7 +1,7 @@
 /**
  * /p/login — prospect re-entry phone-entry surface (locked-spec 3.17).
  *
- * Layer 3 of the prospect re-entry build (Chat #130).
+ * Layer 3 of the prospect re-entry build (Chat #131).
  *
  * The prospect enters their phone number; the server fans out one
  * SMS magic link per matched active account (multi-token edge case

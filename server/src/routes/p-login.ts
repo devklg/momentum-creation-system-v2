@@ -1,7 +1,7 @@
 /**
  * /p/login routes (locked-spec 3.17).
  *
- * Layer 3 of the prospect re-entry build (Chat #130). Closes the
+ * Layer 3 of the prospect re-entry build (Chat #131). Closes the
  * prospect-re-entry open question from Chat #125.
  *
  *   POST /api/p/login/start    — body: { phone } → SMS magic link(s)

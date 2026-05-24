@@ -12,7 +12,7 @@
  *   2. Phone is attached ONLY when the prospect submits a callback
  *      intent on dashboard Section 6. That submission is the consent
  *      signal to copy prospects.phone into the account row. Webinar
- *      reservation is NOT a consent signal (Kevin, Chat #130) — it's
+ *      reservation is NOT a consent signal (Kevin, Chat #131) — it's
  *      logistics for a Zoom call, not opt-in for SMS magic links.
  *      The BA→prospect SMS channel is already established by the
  *      original invite, so the magic link travels on the same channel
@@ -258,7 +258,7 @@ export async function createProspectAccount(
  * Attach a phone to the account row for this token. Called from the
  * callback-request route after createCallbackRequest commits.
  * Webinar reservation does NOT call this — webinar is logistics, not
- * SMS consent (Kevin, Chat #130).
+ * SMS consent (Kevin, Chat #131).
  *
  * Idempotent: if phone is already set to the same value, no-op.
  * If a different phone is recorded, the new value wins — the most

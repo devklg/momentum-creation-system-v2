@@ -80,12 +80,12 @@ One route /p/{token}, two faces by token state.
 - [x] BA SMS notification on reserve (live fallback)
 - [~] Prospect confirmation EMAIL — wired via Resend, DORMANT pending teammagnificent.com domain verification
 
-### 2.7 Prospect re-entry  `[x]` (#126, #130)
+### 2.7 Prospect re-entry  `[x]` (#126, #131)
 - [x] Layer 1: completion-interrupt fix + presentation<->dashboard nav (#126)
-- [x] Layer 2: temporary prospect account (auto-create at video_complete, expire at 8wk flush) (#130)
-- [x] Layer 3: prospect login surface on .com — /p/login phone-entry + /p/login/r/:linkToken redeem (#130)
-- HARD CONSTRAINT met: re-entry resolves ORIGINAL token + ORIGINAL inviting BA per sponsorBaId stamped on prospect_accounts at video_complete (#130 enforced data-layer).
-- Spec amendment locked in Part 3.17 (Chat #130): phone-only SMS magic link, 60-min single-use click window, opaque-by-design /p/login, callback-intent-only consent signal.
+- [x] Layer 2: temporary prospect account (auto-create at video_complete, expire at 8wk flush) (#131)
+- [x] Layer 3: prospect login surface on .com — /p/login phone-entry + /p/login/r/:linkToken redeem (#131)
+- HARD CONSTRAINT met: re-entry resolves ORIGINAL token + ORIGINAL inviting BA per sponsorBaId stamped on prospect_accounts at video_complete (#131 enforced data-layer).
+- Spec amendment locked in Part 3.17 (Chat #131): phone-only SMS magic link, 60-min single-use click window, opaque-by-design /p/login, callback-intent-only consent signal.
 
 ---
 

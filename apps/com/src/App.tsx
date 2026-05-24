@@ -10,7 +10,7 @@ export function App() {
         Login routes mount BEFORE /p/:token so the more specific paths
         win the match. /p/login and /p/login/r/:linkToken would
         otherwise be swallowed as token="login" by the wildcard.
-        Locked-spec 3.17 (Chat #130 — prospect re-entry).
+        Locked-spec 3.17 (Chat #131 — prospect re-entry).
       */}
       <Route path="/p/login" element={<PLoginPage />} />
       <Route path="/p/login/r/:linkToken" element={<PLoginRedeemPage />} />

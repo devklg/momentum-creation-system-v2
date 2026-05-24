@@ -82,7 +82,7 @@ app.use('/api/admin/bas', adminBasRoutes);
 // request to /api/p/login/start would resolve as token="login" and 404
 // inside prospectTokenRoutes before ever reaching the login router.
 //
-// Locked-spec 3.17 (Chat #130 — prospect re-entry, magic-link login):
+// Locked-spec 3.17 (Chat #131 — prospect re-entry, magic-link login):
 //   POST /api/p/login/start    body: { phone }
 //   POST /api/p/login/redeem   body: { linkToken }
 // Cookie scope: .teammagnificent.com, distinct from the BA .team JWT.

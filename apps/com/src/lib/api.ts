@@ -402,7 +402,7 @@ export async function fetchTeamStats(
 }
 
 // ============================================================================
-// Prospect re-entry (Chat #130 — locked-spec 3.17)
+// Prospect re-entry (Chat #131 — locked-spec 3.17)
 // ============================================================================
 //
 // SMS magic-link login for returning prospects. Phone is the only

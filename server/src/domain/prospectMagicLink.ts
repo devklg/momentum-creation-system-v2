@@ -4,7 +4,7 @@
  * The single-use, time-boxed credential a returning prospect uses to
  * re-enter their dashboard on `.com`.
  *
- * Window (Kevin, Chat #130): 60 minutes from issue. Long enough that
+ * Window (Kevin, Chat #131): 60 minutes from issue. Long enough that
  * a prospect who reads the SMS late still gets in without re-requesting;
  * short enough that a leaked SMS (stale screenshot, over-the-shoulder
  * glimpse) doesn't grant an open-ended key. The link is single-use:
@@ -53,7 +53,7 @@ const CHROMA_COLLECTION = 'mcs_prospect_magic_links';
 
 /**
  * Click window: how long an issued link stays redeemable (Kevin,
- * Chat #130). Single source of truth — surface in env later if we
+ * Chat #131). Single source of truth — surface in env later if we
  * want to tune without a code change.
  */
 export const MAGIC_LINK_WINDOW_MS = 60 * 60 * 1000;

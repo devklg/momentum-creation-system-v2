@@ -1,7 +1,7 @@
 /**
  * /p/login/r/:linkToken — magic-link redeem (locked-spec 3.17).
  *
- * Layer 3 of the prospect re-entry build (Chat #130).
+ * Layer 3 of the prospect re-entry build (Chat #131).
  *
  * The prospect lands here by tapping the SMS magic link. The page
  * posts the linkToken to /api/p/login/redeem on mount. On success,
