@@ -37,12 +37,34 @@ import type { PlacementTickerEntry } from '@momentum/shared';
 export interface LivePlaceSectionProps {
   prospectFirstName: string;
   positionNumber: number;
+  /** The prospect's own placement time — anchors the self-row (Chat #125). */
+  placedAt: string;
   stream: PlacementStreamState;
 }
 
 export function LivePlaceSection(props: LivePlaceSectionProps) {
-  const { positionNumber, stream } = props;
+  const { positionNumber, placedAt, stream } = props;
   const beneathYou = Math.max(0, stream.globalMaxPosition - positionNumber);
+
+  // The prospect's own position is anchored SEPARATELY above the ticker
+  // (locked-spec 4.4: three stacked elements — own position, counter,
+  // then the tape of OTHERS). The tape below shows only OTHER placements,
+  // never the prospect themselves — that's why a 'You' row was leaking in
+  // before (Chat #125 fix).
+  const others = stream.ticker.filter(
+    (entry) => entry.positionNumber !== positionNumber,
+  );
+
+  // Render order (locked-spec 4.4): newest enters at the BOTTOM and scrolls
+  // upward, oldest exits at the top. The stream stores newest-first, so we
+  // render a reversed copy (oldest at top, newest at bottom) WITHOUT
+  // mutating the source array.
+  const tape = [...others].reverse();
+
+  // Continuous scroll needs enough entries to overflow the viewport;
+  // below this we render static (no animation) so 2–3 rows don't jitter.
+  const SCROLL_MIN = 8;
+  const scrolling = tape.length >= SCROLL_MIN;
 
   return (
     <>
@@ -54,6 +76,14 @@ export function LivePlaceSection(props: LivePlaceSectionProps) {
           live. Watch what happens when you stay on this page.
         </p>
 
+        {/* Element 1 — the prospect's OWN anchored position. */}
+        <div className="tmpd-liveplace-anchor">
+          <span className="tmpd-liveplace-anchor-pos">#{positionNumber}</span>
+          <span className="tmpd-liveplace-anchor-who">You</span>
+          <span className="tmpd-liveplace-anchor-when">{formatTime(placedAt)}</span>
+        </div>
+
+        {/* Element 2 — the beneath-you live counter. */}
         <div className="tmpd-liveplace-counter">
           <div className="tmpd-liveplace-counter-label">
             <span className="tmpd-liveplace-counter-pulse" />
@@ -65,27 +95,45 @@ export function LivePlaceSection(props: LivePlaceSectionProps) {
           </div>
         </div>
 
+        {/* Element 3 — the tape of OTHER placements, scrolling upward. */}
         <div className="tmpd-liveplace-stack">
           <div className="tmpd-liveplace-stack-label">
             <span>Live placements</span>
             <span className="tmpd-liveplace-stack-live">↑ growing</span>
           </div>
-          <div className="tmpd-liveplace-stack-list">
-            {stream.ticker.length === 0 && stream.connecting ? (
+          <div className="tmpd-liveplace-stack-viewport">
+            {tape.length === 0 && stream.connecting ? (
               <div className="tmpd-liveplace-stack-empty">Connecting&hellip;</div>
-            ) : stream.ticker.length === 0 ? (
+            ) : tape.length === 0 ? (
               <div className="tmpd-liveplace-stack-empty">
                 You&rsquo;re first in line. The next placement will land here.
               </div>
             ) : (
-              stream.ticker.map((entry, idx) => (
-                <TickerEntry
-                  key={`${entry.positionNumber}-${entry.placedAt}`}
-                  entry={entry}
-                  isYou={entry.positionNumber === positionNumber}
-                  isFresh={idx === 0 && stream.connected}
-                />
-              ))
+              <div
+                className={
+                  scrolling
+                    ? 'tmpd-liveplace-stack-track tmpd-liveplace-stack-track--scroll'
+                    : 'tmpd-liveplace-stack-track'
+                }
+              >
+                {tape.map((entry, idx) => (
+                  <TickerEntry
+                    key={`${entry.positionNumber}-${entry.placedAt}`}
+                    entry={entry}
+                    isFresh={idx === tape.length - 1 && stream.connected}
+                  />
+                ))}
+                {/* Duplicate the track for a seamless loop when scrolling. */}
+                {scrolling &&
+                  tape.map((entry) => (
+                    <TickerEntry
+                      key={`dup-${entry.positionNumber}-${entry.placedAt}`}
+                      entry={entry}
+                      isFresh={false}
+                      ariaHidden
+                    />
+                  ))}
+              </div>
             )}
           </div>
         </div>
@@ -97,24 +145,22 @@ export function LivePlaceSection(props: LivePlaceSectionProps) {
 
 function TickerEntry(props: {
   entry: PlacementTickerEntry;
-  isYou: boolean;
   isFresh: boolean;
+  ariaHidden?: boolean;
 }) {
-  const { entry, isYou, isFresh } = props;
+  const { entry, isFresh, ariaHidden } = props;
   const cls = [
     'tmpd-liveplace-stack-item',
-    isYou ? 'tmpd-liveplace-stack-you' : 'tmpd-liveplace-stack-beneath',
+    'tmpd-liveplace-stack-beneath',
     isFresh ? 'tmpd-liveplace-stack-fresh' : '',
   ]
     .filter(Boolean)
     .join(' ');
 
-  const who = isYou
-    ? 'You'
-    : `${entry.firstName} ${entry.lastInitial}.${entry.city ? ` from ${entry.city}${entry.stateOrRegion ? `, ${entry.stateOrRegion}` : ''}` : ''}`;
+  const who = `${entry.firstName} ${entry.lastInitial}.${entry.city ? ` from ${entry.city}${entry.stateOrRegion ? `, ${entry.stateOrRegion}` : ''}` : ''}`;
 
   return (
-    <div className={cls}>
+    <div className={cls} aria-hidden={ariaHidden ? 'true' : undefined}>
       <span className="tmpd-liveplace-stack-pos">#{entry.positionNumber}</span>
       <span className="tmpd-liveplace-stack-who">{who}</span>
       <span className="tmpd-liveplace-stack-when">{formatTime(entry.placedAt)}</span>
@@ -151,6 +197,36 @@ const liveplaceCss = `
     color: rgba(245, 239, 230, 0.62);
     max-width: 60ch;
     margin-bottom: 40px;
+  }
+  .tmpd-liveplace-anchor {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 12px;
+    align-items: baseline;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+    border: 1px solid #C9A84C;
+    border-radius: 4px;
+    background: rgba(201, 168, 76, 0.12);
+    font-family: 'DM Mono', ui-monospace, monospace;
+    color: #F5C030;
+  }
+  .tmpd-liveplace-anchor-pos {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+  .tmpd-liveplace-anchor-who {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    align-self: center;
+  }
+  .tmpd-liveplace-anchor-when {
+    font-size: 11px;
+    opacity: 0.7;
+    align-self: center;
   }
   .tmpd-liveplace-counter {
     border: 1px solid #2DD4BF;
@@ -214,13 +290,35 @@ const liveplaceCss = `
     justify-content: space-between;
   }
   .tmpd-liveplace-stack-live { color: #2DD4BF; }
-  .tmpd-liveplace-stack-list {
+  .tmpd-liveplace-stack-viewport {
+    position: relative;
+    overflow: hidden;
+    max-height: 440px;
+    /* Fade the top + bottom edges so entries scroll in/out softly. */
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 36px, #000 calc(100% - 36px), transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 36px, #000 calc(100% - 36px), transparent 100%);
+  }
+  .tmpd-liveplace-stack-track {
     display: flex;
     flex-direction: column;
     gap: 4px;
     font-family: 'DM Mono', ui-monospace, monospace;
     font-size: 12px;
     letter-spacing: 0.06em;
+  }
+  /* Continuous upward scroll (locked-spec 4.4: 'never at rest'). The track
+     is rendered twice; translating by -50% loops seamlessly because the
+     second copy is identical to the first. */
+  .tmpd-liveplace-stack-track--scroll {
+    animation: tmpd-ticker-scroll 40s linear infinite;
+    will-change: transform;
+  }
+  @keyframes tmpd-ticker-scroll {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tmpd-liveplace-stack-track--scroll { animation: none; }
   }
   .tmpd-liveplace-stack-empty {
     padding: 16px 10px;
@@ -236,12 +334,6 @@ const liveplaceCss = `
     color: rgba(245, 239, 230, 0.62);
     transition: all 0.4s;
   }
-  .tmpd-liveplace-stack-you {
-    color: #F5C030;
-    background: rgba(201, 168, 76, 0.12);
-    border-left-color: #C9A84C;
-  }
-  .tmpd-liveplace-stack-you .tmpd-liveplace-stack-who { font-weight: 500; }
   .tmpd-liveplace-stack-beneath { color: #2DD4BF; }
   .tmpd-liveplace-stack-fresh {
     animation: tmpd-fresh 1.6s ease;

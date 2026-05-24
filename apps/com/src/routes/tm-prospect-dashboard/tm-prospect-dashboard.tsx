@@ -89,6 +89,7 @@ export function TmProspectDashboard(props: TmProspectDashboardProps) {
       <LivePlaceSection
         prospectFirstName={prospectFirstName}
         positionNumber={positionNumber}
+        placedAt={placedAt}
         stream={stream}
       />
       <TmAdvantageSection token={token} baFirstName={baFirstName} positionNumber={positionNumber} />

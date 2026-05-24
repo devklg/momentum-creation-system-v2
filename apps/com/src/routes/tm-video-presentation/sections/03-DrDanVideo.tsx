@@ -276,10 +276,20 @@ export function DrDanVideo({
           trySeek();
         },
         onStateChange: (e: YTStateChangeEvent) => {
-          // First time the player enters PLAYING, fire `started`.
-          if (e.data === YT_PLAYER_STATE.PLAYING && !firedRef.current.has("started")) {
+          // The black loader overlay lifts as soon as the player is
+          // PLAYING — this is a DISPLAY concern and must NOT be gated on
+          // the milestone-dedup guard. On a return visit where 'started'
+          // already fired (token state video_started+), the milestone
+          // guard is already true; coupling hasStarted to it left the
+          // overlay covering a playing video — audio but no picture
+          // (Chat #125 fix).
+          if (e.data === YT_PLAYER_STATE.PLAYING) {
             setHasStarted(true);
-            void fireMilestone("started");
+            // Fire 'started' only once — its own dedup guard, separate
+            // from the overlay.
+            if (!firedRef.current.has("started")) {
+              void fireMilestone("started");
+            }
           }
           // ENDED → fire `complete` (poll loop will catch the 95% case).
           if (e.data === YT_PLAYER_STATE.ENDED) {

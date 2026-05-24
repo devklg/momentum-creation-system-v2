@@ -130,7 +130,8 @@ const FIELD_ERROR_COPY: Record<string, string> = {
   invalid_last_name: 'Enter a last name (up to 80 characters).',
   invalid_city: 'Enter a city (up to 120 characters).',
   invalid_state: 'Enter a state or region (up to 120 characters).',
-  message_too_long: 'That message is a little long — trim it down a touch.',
+  phone_required: 'Add a mobile number \u2014 you\u2019ll text the invite to it.',
+  message_too_long: 'That message is a little long \u2014 trim it down a touch.',
   server_error: 'Something went wrong minting the link. Try again.',
 };
 
@@ -178,6 +179,7 @@ export function InvitationsPage({ seed, source = 'self' }: InvitationsPageProps)
       form.lastName.trim() !== '' &&
       form.city.trim() !== '' &&
       form.stateOrRegion.trim() !== '' &&
+      form.phone.trim() !== '' &&
       !submitting,
     [form, submitting],
   );
@@ -319,8 +321,8 @@ function ComposeView({
           recommendation travels.
         </p>
         <p className="text-cream-faint text-[13px] leading-[1.55] mb-10 max-w-xl">
-          First name, last name, city and state are required. Email and phone
-          are optional &mdash; add what you have.
+          First name, last name, city, state and a mobile phone are required
+          &mdash; you&rsquo;ll text the invite to that number. Email is optional.
         </p>
 
         {fromAgent && (
@@ -400,9 +402,7 @@ function ComposeView({
               />
             </div>
             <div>
-              <Label htmlFor="phone">
-                Phone <span className="text-cream-faint normal-case">(optional)</span>
-              </Label>
+              <Label htmlFor="phone">Phone</Label>
               <Input
                 id="phone"
                 type="tel"

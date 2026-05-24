@@ -138,6 +138,16 @@ invitationRoutes.post('/', requireAuth, requireMichaelComplete, async (req, res)
     return res.status(400).json({ ok: false, error: built.error });
   }
 
+  // Chat #125: phone is REQUIRED on the mint route. The BA sends the invite
+  // by SMS from their own phone (locked-spec 1.13, 3.6) — a prospect with no
+  // number cannot receive the link, so the phone is the delivery channel,
+  // not optional contact metadata. This corrects the Chat #119 "phone
+  // optional" call. Enforced here (mint only) rather than in buildInput so
+  // the /log retroactive-record path stays lenient.
+  if (!built.input.phone) {
+    return res.status(400).json({ ok: false, error: 'phone_required' });
+  }
+
   try {
     const result = await createInvitation(built.input);
     const response: CreateInvitationResponse = {
