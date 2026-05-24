@@ -18,6 +18,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: '/access-codes', label: 'Access Codes' },
   { to: '/bas', label: 'Brand Ambassadors' },
+  { to: '/audit', label: 'Audit Log' },
 ];
 
 export function AdminShell() {
