@@ -22,6 +22,7 @@ import { prospectLoginRoutes } from './routes/p-login.js';
 import { invitationRoutes } from './routes/invitations.js';
 import { cockpitRoutes } from './routes/cockpit.js';
 import { scriptmakerRoutes } from './routes/scriptmaker.js';
+import { ivoryRoutes } from './routes/ivory.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -127,6 +128,12 @@ app.use('/api/cockpit', cockpitRoutes);
 // requireMichaelComplete) inside the route. Degrades to a neutral fallback
 // when ANTHROPIC_API_KEY is unset (dormant today).
 app.use('/api/scriptmaker', scriptmakerRoutes);
+
+// Ivory + Generator (Chat #131 — wireframe §3.4). The BA-private warm-market
+// roster, an LLM WDYK coach, and the per-product Generator runs that converge
+// selected names onto /p/{token} mints via the existing spine (source='ivory').
+// All routes gated (requireAuth + requireMichaelComplete) inside the file.
+app.use('/api/ivory', ivoryRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 
