@@ -59,10 +59,18 @@ export interface TmProspectDashboardProps {
     scheduledFor: string;
     hosts: string[];
   } | null;
+  /**
+   * Chat #126: when the dashboard was reached from the presentation
+   * (the normal path via the WhatsNext closer / ?view=dashboard), the
+   * composer passes this so the ribbon can render a "Back to the video"
+   * link, letting the prospect return to the reference library and
+   * re-watch / re-read. Optional so a future standalone mount can omit it.
+   */
+  onBackToPresentation?: () => void;
 }
 
 export function TmProspectDashboard(props: TmProspectDashboardProps) {
-  const { token, prospectFirstName, baFullName, positionNumber, placedAt, nextEvent } = props;
+  const { token, prospectFirstName, baFullName, positionNumber, placedAt, nextEvent, onBackToPresentation } = props;
 
   const baFirstName = useMemo(
     () => baFullName.trim().split(/\s+/)[0] ?? baFullName,
@@ -76,7 +84,7 @@ export function TmProspectDashboard(props: TmProspectDashboardProps) {
 
   return (
     <main className="tm-prospect-dashboard">
-      <DashboardRibbon />
+      <DashboardRibbon onBack={onBackToPresentation} />
       <ArrivalSection
         prospectFirstName={prospectFirstName}
         baFullName={baFullName}

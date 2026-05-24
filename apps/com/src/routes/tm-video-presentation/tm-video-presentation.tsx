@@ -1,5 +1,5 @@
 /**
- * tm-video-presentation — Page Composer (Chat #107)
+ * tm-video-presentation — Page Composer (Chat #107, nav reworked Chat #126)
  *
  * Locked source: locked-spec Part 4.3 (eleven sections per Chat #39
  * schematic + Chat #84 corrections) + COM Design B.1 (verbatim copy
@@ -9,15 +9,37 @@
  *   • Ticker strip from A1 KEPT as fixed top bar above Section 1
  *   • A's "Part 5 Real Results" testimonials block DEFERRED to v1.1
  *
- * Responsibilities (unchanged from Chat #106):
+ * Responsibilities:
  *   1. Ink + atmosphere shell (gradient mesh + film grain).
  *   2. Thread `prospectFirstName` + `baFirstName` + `baFullName` to
  *      every section that needs them.
  *   3. Own the YouTube state machine state. Section 3 wires the
  *      actual YT.Player.
- *   4. On video_complete from Section 3, swap render to the
- *      tm-prospect-dashboard placeholder (real dashboard ships its
- *      own chat).
+ *   4. Own the presentation<->dashboard VIEW state and the ?view= URL
+ *      param (Chat #126).
+ *
+ * Chat #126 — completion-interrupt fix + presentation<->dashboard nav:
+ *   PREVIOUS BEHAVIOR (the bug): the composer force-swapped the entire
+ *   page to the dashboard the instant `placement` was set
+ *   (`if (placement) return <TmProspectDashboard/>`). A prospect reading
+ *   the dossier / market stats below the video got yanked to the
+ *   dashboard mid-scroll the moment the video hit ~95%, and could not
+ *   finish reading the presentation.
+ *
+ *   NEW BEHAVIOR (locked Chat #126): placement is DECOUPLED from
+ *   navigation. video_complete still places the prospect silently +
+ *   server-side (unchanged, Part 3.4) and we capture the position; but
+ *   completion no longer changes which surface renders. The prospect
+ *   stays on the presentation and reads freely. They cross to the
+ *   dashboard only when THEY choose — via the closing Section 10
+ *   (WhatsNext) CTA, or a ?view=dashboard URL.
+ *
+ *   The view is driven by a ?view= URL param so the choice is
+ *   bookmarkable + shareable and survives a refresh (a prospect studying
+ *   the page across the 8-week window can deep-link back to either
+ *   surface). The dashboard view is GATED on placement existing — we
+ *   never render the team line before the prospect has a position; a
+ *   ?view=dashboard before completion falls back to the presentation.
  *
  * Section list (in render order):
  *   0. TickerStrip  — fixed top bar (A1)
@@ -30,11 +52,14 @@
  *   7. Dossier      — accordion + PDF download
  *   8. KevinStory   — luxury-favorite.jpeg as-is
  *   9. Timing       — three-factor convergence + closing line
- *  10. QuietDoor    — placeholder card (Chat #108 builds the real CTA)
+ *  10. WhatsNext    — assumptive "you've been placed / see the team"
+ *                     closer; CTA crosses to the dashboard (Chat #126,
+ *                     replaces the Chat #109 QuietDoor callback section)
  *  11. Footer
  */
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import TickerStrip from "./sections/00-TickerStrip";
 import { PersonalOpen } from "./sections/01-PersonalOpen";
@@ -46,7 +71,7 @@ import NaturalPath from "./sections/06-NaturalPath";
 import Dossier from "./sections/07-Dossier";
 import KevinStory from "./sections/08-KevinStory";
 import Timing from "./sections/09-Timing";
-import QuietDoor from "./sections/10-QuietDoor";
+import WhatsNext from "./sections/10-WhatsNext";
 import Footer from "./sections/11-Footer";
 import { TmProspectDashboard } from "../tm-prospect-dashboard/tm-prospect-dashboard";
 
@@ -100,6 +125,11 @@ export interface VideoCompletePlacement {
   placedAt: string;
 }
 
+// Which surface the prospect is viewing. Driven by the ?view= URL param;
+// 'dashboard' is only honored once placement exists (see useEffect below).
+type SurfaceView = "presentation" | "dashboard";
+const VIEW_PARAM = "view";
+
 // ---------------------------------------------------------------
 // Composer
 // ---------------------------------------------------------------
@@ -147,7 +177,8 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
   const [firedMilestones, setFiredMilestones] =
     useState<Set<VideoEventKind>>(initialFired);
 
-  // Placement captured on video_complete server response.
+  // Placement captured on video_complete server response. Pre-hydrated
+  // when the prospect returns to an already-completed token (Branch 1).
   const [placement, setPlacement] = useState<VideoCompletePlacement | null>(
     resolved.state === "video_complete" &&
       resolved.positionNumber !== undefined &&
@@ -156,9 +187,57 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
       : null
   );
 
+  // ---- Presentation <-> dashboard view (Chat #126) -------------
+  // The view is a URL-param-backed piece of state so the prospect's
+  // choice of surface is bookmarkable, shareable, and survives refresh.
+  // Placement is decoupled from navigation: completing the video sets
+  // `placement` (which makes the dashboard REACHABLE) but does NOT flip
+  // the view — the prospect stays on the presentation until they act.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedView: SurfaceView =
+    searchParams.get(VIEW_PARAM) === "dashboard" ? "dashboard" : "presentation";
+
+  // The dashboard view is only honored once placement exists. A
+  // ?view=dashboard arriving before completion (e.g. a shared/bookmarked
+  // link the prospect opens fresh) silently falls back to the
+  // presentation; once they finish the video, the same URL resolves to
+  // the dashboard. We never render the team line without a position.
+  const view: SurfaceView =
+    requestedView === "dashboard" && placement ? "dashboard" : "presentation";
+
+  // If a stale ?view=dashboard is in the URL but we can't honor it yet,
+  // strip it so the address bar reflects the surface actually shown.
+  // (Avoids a confusing bookmarked-but-not-yet-placed state.)
+  useEffect(() => {
+    if (requestedView === "dashboard" && !placement) {
+      const next = new URLSearchParams(searchParams);
+      next.delete(VIEW_PARAM);
+      setSearchParams(next, { replace: true });
+    }
+  }, [requestedView, placement, searchParams, setSearchParams]);
+
+  const goToDashboard = useCallback(() => {
+    const next = new URLSearchParams(searchParams);
+    next.set(VIEW_PARAM, "dashboard");
+    setSearchParams(next);
+    // Crossing surfaces — start the new surface at the top.
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [searchParams, setSearchParams]);
+
+  const goToPresentation = useCallback(() => {
+    const next = new URLSearchParams(searchParams);
+    next.delete(VIEW_PARAM);
+    setSearchParams(next);
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [searchParams, setSearchParams]);
+
   // Callback passed to Section 3. Section 3 calls postVideoEvent and
   // on successful response calls this. Server is idempotent; client-
   // side dedup happens via firedMilestones for cleaner UX.
+  //
+  // Chat #126: completion sets `placement` (making the dashboard
+  // reachable) but does NOT navigate. The prospect keeps reading; they
+  // cross to the dashboard from the WhatsNext closer when they choose.
   const handleMilestone = useCallback(
     (kind: VideoEventKind, placementResult?: VideoCompletePlacement) => {
       setFiredMilestones((prev) => {
@@ -176,7 +255,8 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
   );
 
   // ---- Render branch -------------------------------------------
-  if (placement) {
+  // Dashboard only when the prospect has chosen it AND placement exists.
+  if (view === "dashboard" && placement) {
     return (
       <TmProspectDashboard
         token={token}
@@ -185,6 +265,7 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
         positionNumber={placement.positionNumber}
         placedAt={placement.placedAt}
         nextEvent={nextEvent}
+        onBackToPresentation={goToPresentation}
       />
     );
   }
@@ -220,7 +301,7 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
       <Dossier />
       <KevinStory />
       <Timing />
-      <QuietDoor token={token} baFirstName={baFirstName} />
+      <WhatsNext baFirstName={baFirstName} onSeeTeam={goToDashboard} />
       <Footer baFullName={baFullName} />
 
       <ShellStyles />

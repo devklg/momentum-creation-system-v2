@@ -3,11 +3,25 @@
  * Brand mark + "Live · holding tank" label with a pulsing teal dot.
  * Sticky to the top of the viewport, blurred background.
  *
+ * Chat #126: optional "Back to the video" link. When the prospect
+ * reached the dashboard from the presentation (the normal path), the
+ * composer passes onBack so they can return to the reference library
+ * (video, dossier, market stats) and re-watch / re-read freely. The
+ * presentation<->dashboard view is driven by the ?view= URL param in
+ * the composer; this link just calls back to flip it. When onBack is
+ * omitted the link is not rendered (e.g. a future standalone dashboard
+ * mount).
+ *
  * Compliance (locked-spec 3.8): Team Magnificent branding only,
  * no THREE references anywhere.
  */
 
-export function DashboardRibbon() {
+export interface DashboardRibbonProps {
+  /** When provided, renders a "Back to the video" link that calls this. */
+  onBack?: () => void;
+}
+
+export function DashboardRibbon({ onBack }: DashboardRibbonProps = {}) {
   return (
     <>
       <div className="tmpd-ribbon">
@@ -17,9 +31,20 @@ export function DashboardRibbon() {
           </div>
           <span>Team Magnificent</span>
         </div>
-        <div className="tmpd-ribbon-live">
-          <span className="tmpd-ribbon-pulse" />
-          <span>Live · holding tank</span>
+        <div className="tmpd-ribbon-right">
+          {onBack && (
+            <button
+              type="button"
+              className="tmpd-ribbon-back"
+              onClick={onBack}
+            >
+              &larr; Back to the video
+            </button>
+          )}
+          <div className="tmpd-ribbon-live">
+            <span className="tmpd-ribbon-pulse" />
+            <span>Live · holding tank</span>
+          </div>
         </div>
       </div>
       <style>{ribbonCss}</style>
@@ -85,6 +110,26 @@ const ribbonCss = `
     inset: 6px;
     background: #2DD4BF;
     border-radius: 50%;
+  }
+  .tmpd-ribbon-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .tmpd-ribbon-back {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(245, 239, 230, 0.62);
+    padding: 0;
+    transition: color 160ms ease;
+  }
+  .tmpd-ribbon-back:hover {
+    color: #C9A84C;
   }
   .tmpd-ribbon-live {
     display: flex;
