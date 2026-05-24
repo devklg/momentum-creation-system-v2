@@ -800,3 +800,111 @@ export interface ScriptMakerDraftResponse {
   /** True when the Anthropic key is unset and a neutral fallback was used. */
   degraded: boolean;
 }
+
+/* ──────────────────────────────────────────────────────────────────
+ * Prospect re-entry — temporary prospect account (locked-spec 3.17)
+ * ──────────────────────────────────────────────────────────────────
+ *
+ * Closes Chat #125's prospect-re-entry open question. Layer 2 is the
+ * account row; Layer 3 is the /p/login SMS magic-link surface on .com.
+ *
+ * Sponsor immutability (3.5) is the load-bearing invariant: every
+ * record below stamps sponsorBaId from the inviting token and is
+ * not writable thereafter — re-entry resolves to the ORIGINAL token
+ * and ORIGINAL inviting BA, never a different one. A phone may be
+ * tied to multiple active tokens (rare but legal); a /p/login/start
+ * fans out one SMS per matched token so the prospect picks which
+ * dashboard to re-enter. Auto-picking would silently bind a sponsor
+ * the system chose, which 3.5 forbids.
+ */
+
+/**
+ * Temporary prospect account. Created at video_complete in the
+ * placement path. Expires at the 8-week flush boundary of the token
+ * (3.7). Phone is null until the prospect submits a callback_request
+ * or webinar_reserve — those affirmative actions are the consent
+ * signal to copy prospects.phone into the account row.
+ */
+export interface ProspectAccountRecord {
+  accountId: string;
+  prospectId: string;
+  /** The original invite token. Re-entry resolves to this token only. */
+  tokenId: string;
+  /** Stamped from the token at creation; immutable thereafter (3.5). */
+  sponsorBaId: string;
+  /** E.164 — null until callback/webinar consent signal fires. */
+  phone: string | null;
+  createdAt: IsoTimestamp;
+  /** Aligned with the token's expiresAt (3.7 — the 8-week flush). */
+  expiresAt: IsoTimestamp;
+  lastLoginAt: IsoTimestamp | null;
+}
+
+/**
+ * Magic-link row. One per /p/login/start hit per matched account.
+ * The linkToken is the credential — knowledge of it grants a session.
+ * 15-minute TTL, single-use (redeemedAt stamped on redeem).
+ */
+export interface ProspectMagicLinkRecord {
+  linkToken: string;
+  accountId: string;
+  /** Carried for fast redirect after redeem. */
+  tokenId: string;
+  issuedAt: IsoTimestamp;
+  /** issuedAt + 15min. */
+  expiresAt: IsoTimestamp;
+  redeemedAt: IsoTimestamp | null;
+  /** SHA-256 of the requesting phone — supports rate-limit audit without storing raw phones twice. */
+  requestPhoneHash: string;
+}
+
+/**
+ * Request body for POST /api/p/login/start.
+ * Phone is required and is the only field.
+ */
+export interface ProspectLoginStartPayload {
+  /** Caller-supplied phone. Server normalizes to E.164 before lookup. */
+  phone: string;
+}
+
+/**
+ * Response from POST /api/p/login/start.
+ *
+ * Opaque-by-design — the response never reveals whether the phone
+ * matched any account. Same payload returned for "no match" and
+ * "N matches, N SMSes sent". The page copy is identical in both
+ * cases: "If that phone is on file, you'll receive a text shortly."
+ * This prevents anyone holding a phone book from probing the system
+ * for prospect presence.
+ */
+export interface ProspectLoginStartResponse {
+  ok: true;
+}
+
+/**
+ * Request body for POST /api/p/login/redeem.
+ */
+export interface ProspectLoginRedeemPayload {
+  linkToken: string;
+}
+
+/**
+ * Response from POST /api/p/login/redeem on success. The client
+ * redirects to /p/{tokenId} after this lands. The server sets the
+ * mcs_prospect_session cookie (scoped to .teammagnificent.com) in
+ * the same response — the body just confirms the target.
+ */
+export interface ProspectLoginRedeemResponse {
+  ok: true;
+  tokenId: string;
+}
+
+/**
+ * Failure response from /redeem. The client renders one view for
+ * both error shapes — "this link has expired or already been used"
+ * — to avoid leaking which case occurred.
+ */
+export interface ProspectLoginRedeemError {
+  ok: false;
+  error: 'invalid_link' | 'expired_link' | 'already_used';
+}

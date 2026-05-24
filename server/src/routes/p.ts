@@ -44,6 +44,10 @@ import { alertBaVideoCompleted } from '../domain/invitations.js';
 import { findNextUpcomingEvent } from '../domain/webinarEvent.js';
 import { createWebinarReservation } from '../domain/webinarReservation.js';
 import { computeTeamStats } from '../domain/teamStats.js';
+import {
+  attachPhoneOnConsent,
+  createProspectAccount,
+} from '../domain/prospectAccount.js';
 import { subscribePlacements } from '../services/poolEvents.js';
 import type { HoldingTankSnapshot, PlacementEvent, TeamStatsResponse, WebinarReservationPayload, WebinarReservationResponse } from '@momentum/shared';
 
@@ -350,6 +354,29 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
       positionNumber = result.positionNumber;
       placedAt = result.placedAt;
 
+      // Chat #130 (locked-spec 3.17): create the temporary prospect
+      // account row immediately after placement so re-entry via
+      // /p/login becomes possible the moment the prospect submits a
+      // callback intent on dashboard Section 6. Idempotent on tokenId
+      // — replayed video_complete events return the existing row.
+      // Best-effort: failure is logged but does NOT block the 200
+      // response to the prospect; the original /p/{token} URL still
+      // works as the fallback re-entry path.
+      try {
+        await createProspectAccount({
+          prospectId: prospect.prospectId,
+          tokenId: tokenRecord.token,
+          sponsorBaId: tokenRecord.sponsorBaId,
+          tokenExpiresAt: tokenRecord.expiresAt,
+        });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(
+          '[POST /api/p/:token/video-event] createProspectAccount failed (non-fatal)',
+          err instanceof Error ? err.message : err,
+        );
+      }
+
       // Chat #119: fire the BA alert ONLY on first placement (never on
       // idempotent replays). The BA is read from the token's sponsorBaId
       // (locked-spec 3.5); alert is best-effort and never blocks the
@@ -491,6 +518,25 @@ prospectTokenRoutes.post('/:token/callback-request', async (req, res) => {
       baPhone: ba.phone || null,
       intent: body.intent,
     });
+
+    // Chat #130 (locked-spec 3.17): the callback submission is the
+    // prospect's consent signal to enable SMS re-entry. Copy
+    // prospects.phone (BA-supplied at invite mint per 3.16) onto the
+    // account row so future /p/login/start requests resolve. Webinar
+    // reservations do NOT trigger this — webinar is logistics, not
+    // SMS consent (Kevin, Chat #130).
+    // Best-effort: failure is logged but never blocks the 200.
+    if (prospect.phone) {
+      try {
+        await attachPhoneOnConsent(tokenRecord.token, prospect.phone);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(
+          '[POST /api/p/:token/callback-request] attachPhoneOnConsent failed (non-fatal)',
+          err instanceof Error ? err.message : err,
+        );
+      }
+    }
 
     const response: CallbackRequestResponse = {
       ok: true,

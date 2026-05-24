@@ -17,6 +17,7 @@ import { adminBasRoutes } from './routes/admin/bas.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { michaelRoutes } from './routes/michael.js';
 import { prospectTokenRoutes } from './routes/p.js';
+import { prospectLoginRoutes } from './routes/p-login.js';
 import { invitationRoutes } from './routes/invitations.js';
 import { cockpitRoutes } from './routes/cockpit.js';
 import { scriptmakerRoutes } from './routes/scriptmaker.js';
@@ -74,6 +75,18 @@ app.use('/api/admin/bas', adminBasRoutes);
 
 // /api/p/* is prospect-facing (apps/com). No auth, no Michael gate. The token
 // itself is the identity surface per COM Design Section E.3.
+//
+// IMPORTANT: prospectLoginRoutes mounts FIRST at /api/p/login so its more
+// specific routes (/start, /redeem) take precedence over the general
+// /:token wildcard inside prospectTokenRoutes. Without this ordering, a
+// request to /api/p/login/start would resolve as token="login" and 404
+// inside prospectTokenRoutes before ever reaching the login router.
+//
+// Locked-spec 3.17 (Chat #130 — prospect re-entry, magic-link login):
+//   POST /api/p/login/start    body: { phone }
+//   POST /api/p/login/redeem   body: { linkToken }
+// Cookie scope: .teammagnificent.com, distinct from the BA .team JWT.
+app.use('/api/p/login', prospectLoginRoutes);
 app.use('/api/p', prospectTokenRoutes);
 
 // ────────────────────────────────────────────────────────────────────────────

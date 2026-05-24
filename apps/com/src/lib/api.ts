@@ -19,6 +19,10 @@ import type {
   CallbackRequestResponse,
   EnrolledResponse,
   ExpiredResponse,
+  ProspectLoginRedeemPayload,
+  ProspectLoginRedeemResponse,
+  ProspectLoginStartPayload,
+  ProspectLoginStartResponse,
   TeamStatsResponse,
   TokenState,
   VideoEventKind,
@@ -394,6 +398,90 @@ export async function fetchTeamStats(
     return { ok: true, data };
   } catch {
     return { ok: false, error: { kind: 'network' } };
+  }
+}
+
+// ============================================================================
+// Prospect re-entry (Chat #130 — locked-spec 3.17)
+// ============================================================================
+//
+// SMS magic-link login for returning prospects. Phone is the only
+// identifier. The server returns the same opaque success body
+// regardless of whether the phone matched any account — the page
+// copy mirrors this to prevent probing.
+//
+// Cookie scope: .teammagnificent.com (set server-side on /redeem).
+// Distinct from the BA .team JWT cookie.
+
+export type ProspectLoginStartResult =
+  | { ok: true }
+  | { ok: false; error: 'rate_limited' | 'network' };
+
+/**
+ * Submit the phone-entry form on /p/login. The server fans out one
+ * SMS per matched active account (multi-token edge case per 3.17).
+ *
+ * Opaque-by-design: the response NEVER reveals whether the phone
+ * matched. The page copy is identical for "no match" and "N matches,
+ * SMS sent": "If that phone is on file, you'll receive a text
+ * shortly." Do not branch the UI on match count — there is no count.
+ *
+ * The only non-success response is rate_limited (429), which the UI
+ * may surface as a soft "try again in a bit" hint.
+ */
+export async function postLoginStart(
+  phone: string,
+): Promise<ProspectLoginStartResult> {
+  try {
+    const payload: ProspectLoginStartPayload = { phone };
+    const res = await fetch('/api/p/login/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.status === 429) return { ok: false, error: 'rate_limited' };
+    if (!res.ok) return { ok: false, error: 'network' };
+    const data = (await res.json()) as ProspectLoginStartResponse;
+    if (data.ok) return { ok: true };
+    return { ok: false, error: 'network' };
+  } catch {
+    return { ok: false, error: 'network' };
+  }
+}
+
+export type ProspectLoginRedeemResult =
+  | { ok: true; tokenId: string }
+  | { ok: false; error: 'invalid_link' | 'rate_limited' | 'network' };
+
+/**
+ * Redeem the magic link the prospect tapped from their SMS.
+ *
+ * Server collapses invalid_link / expired_link / already_used into
+ * a single 'invalid_link' shape — the redeem page renders one view
+ * for all three (locked-spec 3.17 anti-leak rule).
+ *
+ * On success the server has already set the mcs_prospect_session
+ * cookie scoped to .teammagnificent.com. The client follows up with
+ * a redirect to /p/{tokenId}.
+ */
+export async function postLoginRedeem(
+  linkToken: string,
+): Promise<ProspectLoginRedeemResult> {
+  try {
+    const payload: ProspectLoginRedeemPayload = { linkToken };
+    const res = await fetch('/api/p/login/redeem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.status === 429) return { ok: false, error: 'rate_limited' };
+    if (res.status === 400) return { ok: false, error: 'invalid_link' };
+    if (!res.ok) return { ok: false, error: 'network' };
+    const data = (await res.json()) as ProspectLoginRedeemResponse;
+    if (data.ok) return { ok: true, tokenId: data.tokenId };
+    return { ok: false, error: 'invalid_link' };
+  } catch {
+    return { ok: false, error: 'network' };
   }
 }
 
