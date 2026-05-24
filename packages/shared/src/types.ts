@@ -909,6 +909,201 @@ export interface ProspectLoginRedeemError {
   error: 'invalid_link' | 'expired_link' | 'already_used';
 }
 
+/* ──────────────────────────────────────────────────────────────────
+ * Admin audit-log substrate (locked-spec 4.J · project-wireframe 4.J)
+ * ──────────────────────────────────────────────────────────────────
+ *
+ * The substrate every other /admin surface writes against. Core
+ * Dashboard, BA Oversight, Prospect Oversight, Queue Oversight, and
+ * Live Ops all WRITE here — none of them can be built correctly
+ * until the entry schema is locked.
+ *
+ * Append-only — like the decision ledger and pool positions (3.2).
+ * No update, no delete, ever. Monotonic by `(timestamp, entryId)`.
+ *
+ * Triple-stacked per 3.14: MongoDB (`audit_log`) is the canonical
+ * store; Neo4j stamps `(:AuditEntry)-[:ACTED_BY]->(:Actor)` and
+ * `(:AuditEntry)-[:ACTED_ON]->(:Entity)` for traversal; Chroma
+ * indexes the action+reason+entity blob so Kevin can semantic-search
+ * the log ("find every sponsor override Q1").
+ *
+ * Michael interview transcripts link FROM audit entries via the
+ * optional `linkedTranscriptId` (Chat #89 — no separate tab).
+ */
+
+/**
+ * Top-level role of whoever performed the action. Denormalized off
+ * the `actor` discriminator below so filtering by role doesn't need
+ * a nested predicate on every read.
+ */
+export type AuditActorRole = 'admin' | 'ba' | 'system' | 'prospect' | 'anonymous';
+
+/**
+ * Discriminated actor. The kind aligns with `AuditActorRole`. For
+ * 'system' the label names the cron / boot routine (e.g. 'lazy-flush',
+ * 'webinar-seeder'). For 'anonymous' the actor is unidentifiable —
+ * used for /admin-gate denials and unauthenticated probes.
+ */
+export type AuditActor =
+  | { kind: 'admin'; baId: string; displayName: string }
+  | { kind: 'ba'; baId: string; displayName: string }
+  | { kind: 'system'; label: string }
+  | { kind: 'prospect'; prospectId: string; displayName: string }
+  | { kind: 'anonymous'; ip: string | null };
+
+/**
+ * The thing acted on. `kind` is the entity family; `id` is the
+ * stable identifier in that family. `displayLabel` is an optional
+ * human string the admin view shows in the row ("Jane S. · TOK-...")
+ * so cell formatting doesn't need a per-kind lookup.
+ *
+ * 'none' is the legal value when the action is system-level and
+ * doesn't act on a discrete record (e.g. boot, config reload).
+ */
+export type AuditEntityKind =
+  | 'brand_ambassador'
+  | 'invite_token'
+  | 'prospect'
+  | 'access_code'
+  | 'callback_request'
+  | 'webinar_reservation'
+  | 'pool_placement'
+  | 'admin_session'
+  | 'master_content'
+  | 'queue_rule'
+  | 'compliance_rule'
+  | 'michael_session'
+  | 'audit_entry'
+  | 'none';
+
+export interface AuditEntity {
+  kind: AuditEntityKind;
+  id: string;
+  displayLabel: string | null;
+}
+
+/**
+ * Severity drives row treatment in the admin view and feeds the
+ * Core Dashboard's "needs Kevin" widget. 'critical' is reserved for
+ * sponsor overrides, compliance violations, and admin-gate breaches.
+ */
+export type AuditSeverity = 'info' | 'warn' | 'critical';
+
+/**
+ * Optional request-trace context. Captured for every /admin request
+ * and every API mutation; omitted for system-internal events that
+ * have no HTTP envelope (cron jobs, boot routines).
+ */
+export interface AuditContext {
+  ip: string | null;
+  userAgent: string | null;
+  route: string | null;
+  method: string | null;
+  requestId: string | null;
+}
+
+/**
+ * One audit log entry. The substrate every other /admin surface
+ * writes against. Every triple-stack write, every /admin request,
+ * every mutation produces one of these.
+ *
+ * Fields:
+ *   - entryId          monotonic-friendly ID: `audit_<ISO>_<rand>`
+ *   - timestamp        when the event happened (event time, not write time)
+ *   - createdAt        when the row was persisted (write time)
+ *   - role             denormalized actor.kind → AuditActorRole
+ *   - actor            discriminated; carries the real id + display name
+ *   - action           namespaced verb: `domain.entity.action`
+ *                      (e.g. `admin.sponsor.override`, `ba.invitation.create`,
+ *                      `prospect.video.complete`, `system.token.flush`)
+ *   - entity           what was acted on (kind+id+optional label)
+ *   - severity         info | warn | critical
+ *   - before           pre-state snapshot (mutations / overrides only)
+ *   - after            post-state snapshot (mutations / overrides only)
+ *   - reason           human reason — REQUIRED on critical overrides (locked-spec 2.4)
+ *   - context          request-trace metadata (optional for system actions)
+ *   - linkedTranscriptId Michael interview transcript ID (Chat #89)
+ *
+ * Append-only invariant: writers MUST NOT update or delete entries.
+ * The store has no exported mutator helper — only `appendAuditEntry`.
+ */
+export interface AuditLogEntry {
+  entryId: string;
+  timestamp: IsoTimestamp;
+  createdAt: IsoTimestamp;
+  role: AuditActorRole;
+  actor: AuditActor;
+  action: string;
+  entity: AuditEntity;
+  severity: AuditSeverity;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  reason: string | null;
+  context: AuditContext | null;
+  linkedTranscriptId: string | null;
+}
+
+/**
+ * Input shape for `appendAuditEntry`. The domain layer stamps
+ * `entryId` and `createdAt`; everything else comes from the caller.
+ * `timestamp` defaults to now on the server if the caller omits it.
+ */
+export interface AppendAuditEntryInput {
+  timestamp?: IsoTimestamp;
+  actor: AuditActor;
+  action: string;
+  entity: AuditEntity;
+  severity?: AuditSeverity;
+  before?: Record<string, unknown> | null;
+  after?: Record<string, unknown> | null;
+  reason?: string | null;
+  context?: AuditContext | null;
+  linkedTranscriptId?: string | null;
+}
+
+/**
+ * Query params for GET /api/admin/audit. All filters are optional
+ * and AND together. Cursor pagination is descending by `(timestamp,
+ * entryId)` — newest first — because the most useful read is "what
+ * just happened?". Cursor is the last entry's `entryId` from the
+ * previous page; pass it back as `before` to fetch the next page.
+ */
+export interface AuditQueryFilters {
+  actorBaId?: string;
+  role?: AuditActorRole;
+  action?: string;
+  actionPrefix?: string;
+  entityKind?: AuditEntityKind;
+  entityId?: string;
+  severity?: AuditSeverity;
+  /** ISO timestamp — inclusive lower bound on entry.timestamp. */
+  from?: IsoTimestamp;
+  /** ISO timestamp — exclusive upper bound on entry.timestamp. */
+  to?: IsoTimestamp;
+  /** Pagination cursor: entryId from the previous page. */
+  before?: string;
+  /** Page size, clamped server-side. */
+  limit?: number;
+}
+
+/**
+ * Response from GET /api/admin/audit. Reverse-chronological. Cursor
+ * is null when the page is the last page.
+ */
+export interface AuditListResponse {
+  ok: true;
+  entries: AuditLogEntry[];
+  nextCursor: string | null;
+  appliedFilters: AuditQueryFilters;
+}
+
+/**
+ * Response from GET /api/admin/audit/:entryId. 404 if not found.
+ */
+export interface AuditEntryResponse {
+  ok: true;
+  entry: AuditLogEntry;
+}
 // ───────────────────────────────────────────────────────────────────────
 // IVORY + GENERATOR (Chat #131 — wireframe §3.4)
 //

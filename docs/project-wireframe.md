@@ -216,11 +216,11 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [ ] Audit/consent guardrail (opt-out, STOP keyword, permanent exclusion)
 - DEP: email provider (RESOLVED Resend, dormant) + Telnyx
 
-### 4.J Audit / Controls  `[ ]` (Section J.1-J.3 — build 2nd, SUBSTRATE)
-- [ ] Append-only audit log (every triple-stack write, every /admin request, every mutation)
-- [ ] Views: by actor / role / action / entity / timestamp
-- [ ] Before/after state on overrides, queue rule changes, compliance changes, master content saves
-- [ ] Michael transcripts linked from audit entries (no separate tab, #89)
+### 4.J Audit / Controls  `[~]` (Section J.1-J.3 — build 2nd, SUBSTRATE)
+- [x] Append-only audit log (every triple-stack write, every /admin request, every mutation)
+- [x] Views: by actor / role / action / entity / timestamp
+- [x] Before/after state on overrides, queue rule changes, compliance changes, master content saves
+- [x] Michael transcripts linked from audit entries (no separate tab, #89)
 
 ---
 

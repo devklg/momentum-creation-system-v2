@@ -21,6 +21,7 @@ import { AdminShell } from '@/components/admin-shell';
 import { LoginPage } from '@/routes/login';
 import { AccessCodesPage } from '@/routes/access-codes';
 import { BAsPage } from '@/routes/bas';
+import { AuditPage } from '@/routes/audit';
 
 export function App() {
   return (
@@ -57,6 +58,7 @@ function Inner() {
         <Route path="/" element={<Navigate to="/access-codes" replace />} />
         <Route path="/access-codes" element={<AccessCodesPage />} />
         <Route path="/bas" element={<BAsPage />} />
+        <Route path="/audit" element={<AuditPage />} />
         <Route
           path="*"
           element={
