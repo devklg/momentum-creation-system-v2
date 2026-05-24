@@ -9,9 +9,9 @@
  *     never anonymous)
  *   - Headline: "You saw it. You're [in]." with 'in' in gold-bright
  *   - Subtitle paragraph
- *   - Position card: position number, "Held in [BA first]'s leg"
- *     copy (note: this is the demonstration framing, not a binary
- *     placement promise — the prototype copy is compliance-safe),
+ *   - Position card: position number, "Held by [BA first]" copy
+ *     (Chat #131 hygiene: prior wording said "leg" — removed because
+ *     queue position is not a binary leg position, locked-spec 3.10),
  *     placement timestamp
  *
  * Animations: each element rises in sequence on mount, matching the
@@ -57,7 +57,7 @@ export function ArrivalSection(props: ArrivalSectionProps) {
             </div>
           </div>
           <div className="tmpd-position-copy">
-            <h3>Held in {baFirstName}&rsquo;s leg</h3>
+            <h3>Held by {baFirstName}</h3>
             <p>
               You&rsquo;ve been placed in the Team Magnificent holding tank —
               the live demonstration of how the team is forming around you,

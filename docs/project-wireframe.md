@@ -59,8 +59,8 @@ One route /p/{token}, two faces by token state.
 - [x] 04 Market · 05 PharmaceuticalSolution · 06 NaturalPath · 07 Dossier
 - [x] 08 KevinStory (luxury-favorite.jpeg full-bleed) · 09 Timing · 10 QuietDoor (callback) · 11 Footer
 - [x] OG-injection middleware (token-resolved card)
-- [ ] CONTENT: drop dossier PDF -> flip DOSSIER_AVAILABLE flag in 07-Dossier.tsx
-- [ ] CONTENT: fix literal \u2014 in Part 7 eyebrow
+- [x] CONTENT: drop dossier PDF -> flip DOSSIER_AVAILABLE flag in 07-Dossier.tsx (done #115; PDF at `apps/com/public/assets/glp-three-dossier.pdf`)
+- [x] CONTENT: fix literal \u2014 in Part 7 eyebrow (10-QuietDoor.tsx: 4 occurrences replaced with real em dash, content/hygiene pass)
 
 ### 2.3 Holding-tank placement  `[x]` (#105)
 - [x] Silent placement at video_complete, monotonic position, triple-stack write
@@ -70,7 +70,7 @@ One route /p/{token}, two faces by token state.
 - [x] 04 LivePlace (behind-you SSE counter + vertical ticker; #84 behind-only correction)
 - [x] 05 TmAdvantage · 06 YourNextMove · 07 Footer (TM-only, 3.10 disclaimer)
 - [x] SSE: poolEvents.ts EventEmitter + usePlacementStream hook (snapshot+placement+30s heartbeat)
-- [ ] CONTENT: remove stray 'leg' wording on position card
+- [x] CONTENT: remove stray 'leg' wording on position card (01-Arrival.tsx h3 + comment: "Held in {ba}'s leg" → "Held by {ba}", content/hygiene pass)
 
 ### 2.5 Callback request  `[x]` (#109,#117)
 - [x] Two-radio + reach-out button + confirmation; Telnyx BA SMS alert
@@ -226,9 +226,9 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 
 ## 5 · DRIFT / HYGIENE (non-blocking)
 
-- [ ] Relocate WELCOME LETTER pdf out of apps/com/public/assets (research, not .com asset)
-- [ ] Delete docs/_team-design-extract.txt scratch file
-- [ ] Update build-registry.md to cover #122-#126; remove KEVIN-CONTEXT from source hierarchy (#129 ledger)
+- [x] Relocate WELCOME LETTER pdf out of apps/com/public/assets (verified absent at content/hygiene pass — already not in tree)
+- [x] Delete docs/_team-design-extract.txt scratch file (verified absent; also deleted `docs/_leaves.json` at content/hygiene pass)
+- [x] Update build-registry.md to cover #122-#131; KEVIN-CONTEXT removed from source hierarchy in favor of momentum.decisions ledger (content/hygiene pass)
 - [ ] Fix Dr. Dan "THREE CSO" brand-isolation drift in App-Description.docx Section 3
 
 ---
