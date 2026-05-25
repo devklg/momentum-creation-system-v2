@@ -169,11 +169,11 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 ### 4.A.4.1 Access-code generator UI  `[x]`
 - [x] routes/access-codes.tsx + server route
 
-### 4.B Core Dashboard  `[ ]` (Section B â€” build 3rd)
-- [ ] Master metrics row: active BAs, prospects in flow, queue movement 24h, enrollments 24h, training %
-- [ ] Each tile clickable -> drilldown panel
-- [ ] Filter bar: by BA, by leader group (system-detected + Kevin-curated)
-- [ ] Live event stream
+### 4.B Core Dashboard  `[x]` (Section B â€” build 3rd, #134)
+- [x] Master metrics row: active BAs, prospects in flow, queue movement 24h, enrollments 24h, training %
+- [x] Each tile clickable -> drilldown panel
+- [x] Filter bar: by BA, by leader group (system-detected + Kevin-curated)
+- [x] Live event stream
 
 ### 4.C BA Oversight  `[~]` (Section C â€” build 4th)
 - [~] BA directory (routes/bas.tsx present)

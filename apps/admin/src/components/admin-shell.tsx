@@ -16,6 +16,7 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
+  { to: '/dashboard', label: 'Core Dashboard' },
   { to: '/access-codes', label: 'Access Codes' },
   { to: '/bas', label: 'Brand Ambassadors' },
   { to: '/audit', label: 'Audit Log' },

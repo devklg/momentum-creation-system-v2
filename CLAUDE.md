@@ -11,7 +11,7 @@ Before writing code in this repo, read in this order:
 3. `docs/build-registry.md` — what's done, what's pending, what supersedes what. Consult before asking "is X done?"
 4. `docs/project-wireframe.md` — the build map. Leaf-level status (`[x] / [~] / [ ]`) grounded in disk AND section-numbered (e.g. "4.J audit-log substrate") that worktree TASK.md files reference. Tick leaves when work lands.
 
-If a `TASK.md` exists at the repo root, read it first — it carries branch-specific scope and hard rules for the current worktree.
+If a `TASK-NNN.md` exists at the repo root (chat-numbered, e.g. `TASK-134.md`), read it first — it carries branch-specific scope and hard rules for the current worktree. The tracked `TASK.md` on `main` is usually a stale earlier brief; trust the chat-numbered file in the worktree over it.
 
 The five `.docx` design files (`Team-Magnificent-ADMIN-Design.docx`, `Team-Magnificent-COM-Design.docx`, `Team-Magnificent-TEAM-Design.docx`, `Team-Magnificent-App-Description.docx`, `Team-Magnificent-Signup-Architecture.docx`) are the surface-level design references — read the one that covers the surface you're changing.
 
@@ -66,6 +66,7 @@ pnpm seed:founders                    # seed TM-01 Kevin + TM-02 Paul
 pnpm backfill:founder-timezones       # backfill timezone field on founder records
 pnpm seed:webinar-events              # idempotent rolling-8-week webinar seeder (Mon/Thu 5pm Pacific)
 pnpm setup:founder-access             # founder access scaffolding
+pnpm bootstrap:ivory                  # bootstrap Ivory ChromaDB collection (consumer-facing concierge corpus)
 ```
 
 There is no test runner wired in this repo yet — verification happens via `pnpm typecheck` and end-to-end manual flows against the running dev server.
@@ -143,6 +144,21 @@ The five things that must never appear on `apps/com` (prospect-facing):
 5. THREE International branding (no logo, no name, no "independent promoter" disclaimer)
 
 Enforcement lives at script-time (ScriptMaker refuses noncompliant drafts) and render-time (fail closed). `/admin` shows aggregated enforcement metrics — never a manual review queue. Compliance constants are in [packages/shared/src/compliance.ts](packages/shared/src/compliance.ts) and [packages/shared/src/rules.ts](packages/shared/src/rules.ts).
+
+## Admin audit-log substrate (wireframe 4.J)
+
+Every `/admin` request must write an audit entry — non-optional. The substrate is already on `main`:
+
+- [server/src/domain/auditLog.ts](server/src/domain/auditLog.ts) — `recordAdminAudit()` writer (triple-stack).
+- [server/src/routes/admin/audit.ts](server/src/routes/admin/audit.ts) — read aggregates for the audit page.
+- [apps/admin/src/routes/audit.tsx](apps/admin/src/routes/audit.tsx) — the rendered view.
+- `#audit` block in [packages/shared/src/types.ts](packages/shared/src/types.ts) — wire types.
+
+New admin routes READ the aggregates and WRITE one audit entry per view/action. Do not duplicate the substrate.
+
+## Parallel-agent reporting (chat-batched worktrees)
+
+When a chat number runs multiple worktrees in parallel (the `Chat #N -` commit prefix mirrors this), each worktree has a pre-seeded row in `momentum.agent_status` keyed by a stable `_id` (e.g. `agent_admin_dash`). Agents heartbeat via gateway `mongodb.update` with **`$set` only** — the row pre-exists, never `upsert`. Report at: START, each leaf done, typecheck green, ready to merge, blocked. The exact filter/update payload is spelled out in the worktree's `TASK-NNN.md`.
 
 ## Parallel worktrees — append-only at merge points
 
