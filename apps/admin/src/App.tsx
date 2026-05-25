@@ -21,6 +21,8 @@ import { AdminShell } from '@/components/admin-shell';
 import { LoginPage } from '@/routes/login';
 import { AccessCodesPage } from '@/routes/access-codes';
 import { BAsPage } from '@/routes/bas';
+import { ProspectsPage } from '@/routes/prospects';
+import { QueuePage } from '@/routes/queue';
 import { AuditPage } from '@/routes/audit';
 import { DashboardPage } from '@/routes/dashboard';
 
@@ -60,6 +62,8 @@ function Inner() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/access-codes" element={<AccessCodesPage />} />
         <Route path="/bas" element={<BAsPage />} />
+        <Route path="/prospects" element={<ProspectsPage />} />
+        <Route path="/queue" element={<QueuePage />} />
         <Route path="/audit" element={<AuditPage />} />
         <Route
           path="*"

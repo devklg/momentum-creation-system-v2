@@ -14,6 +14,8 @@ import { questionnaireRoutes } from './routes/questionnaire.js';
 import { sponsorWorkbookRoutes } from './routes/sponsor-workbook.js';
 import { adminAccessCodesRoutes } from './routes/admin/access-codes.js';
 import { adminBasRoutes } from './routes/admin/bas.js';
+import { adminProspectsRoutes } from './routes/admin/prospects.js';
+import { adminQueueRoutes } from './routes/admin/queue.js';
 import { adminAuditRoutes } from './routes/admin/audit.js';
 import { adminDashboardRoutes } from './routes/admin/dashboard.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
@@ -79,6 +81,8 @@ app.use('/api/sponsor/workbook', sponsorWorkbookRoutes);
 app.use('/api/michael', michaelRoutes);
 app.use('/api/admin/access-codes', adminAccessCodesRoutes);
 app.use('/api/admin/bas', adminBasRoutes);
+app.use('/api/admin/prospects', adminProspectsRoutes);
+app.use('/api/admin/queue', adminQueueRoutes);
 app.use('/api/admin/audit', adminAuditRoutes);
 app.use('/api/admin/dashboard', adminDashboardRoutes);
 
