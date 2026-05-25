@@ -2346,3 +2346,165 @@ export interface CockpitTodaysActionsResponse {
 export interface PreviewResolvedTokenPayload extends ResolvedTokenPayload {
   preview: true;
 }
+
+/* ─────────────────────────────────────────────────────────────────
+ * #135 Admin BA Oversight — wireframe 4.C, locked-spec 4.C (Sec C)
+ * ─────────────────────────────────────────────────────────────────
+ *
+ * The Kevin-only Brand Ambassador directory + per-BA profile drawer +
+ * sponsor override flow. Server reads aggregate from brand_ambassadors +
+ * access_codes + ba_commitments + invite_tokens + crm_followups +
+ * fast_start_progress + michael_schedules; writes (override / leader
+ * tag / notes) each append a 4.J audit entry.
+ *
+ * Compliance discipline (Chat #89):
+ *   - No algorithmic flagging. Every directory column is a raw count or
+ *     a raw timestamp; the UI never compares them to a threshold and
+ *     emits a judgment. Kevin reads the numbers.
+ *   - THREE International is the upstream authority. The sponsor override
+ *     mirrors the BA's request — it does NOT push to THREE.
+ *   - System-detected leader is a hard rule (binary-qualified ∧ ≥5
+ *     personally enrolled). Binary qualification is not mirrored locally
+ *     yet (same gap the Core Dashboard surfaces in `leaderDetectionNote`),
+ *     so the badge is currently always false; the field is here so it
+ *     wires up the moment THREE's qualification feed lands.
+ *   - Curated leader is Kevin-toggled; both badges are display, never
+ *     ranking.
+ */
+
+/** One row in the admin BA directory (Section C.1) — the 15 columns the table renders. */
+export interface AdminBaDirectoryRow {
+  baId: string;
+  threeBaId: string;
+  fullName: string;
+  email: string | null;
+  phone: string | null;
+  /** TM-XXXX code this BA owns (one per BA for life, 2.3). Null if Kevin hasn't issued one. */
+  accessCodeOwned: string | null;
+  /** Current sponsor (post-override if one was applied; otherwise the original). */
+  sponsorBaId: string | null;
+  sponsorName: string | null;
+  /** Original sponsor at signup — present ONLY when a C.5 override changed it. */
+  originalSponsorBaId: string | null;
+  originalSponsorName: string | null;
+  /** Signed-up timestamp. */
+  joinedAt: IsoTimestamp;
+  /** When the BA accepted the welcome commitment (J.3). Null = not yet. */
+  welcomeAcceptedAt: IsoTimestamp | null;
+  /** Most recent login. Null = never. */
+  lastLoginAt: IsoTimestamp | null;
+  /** Trailing 72h personal-invite count (C.2). */
+  twoInSeventyTwoCount: number;
+  /** Start of the rolling 72h window — for hover tooltip. */
+  twoInSeventyTwoWindowStart: IsoTimestamp;
+  /** 0..100 integer (C.3). Computed from filled profile fields. */
+  profileCompletenessPct: number;
+  /** Lifetime invite-token count for this BA. */
+  personalInvitesCount: number;
+  /** Oldest open (not-cleared) follow-up dueAt across this BA's prospects. Null = none open. */
+  oldestOpenFollowUpDueAt: IsoTimestamp | null;
+  /** Fast Start modules completed (0..5). */
+  trainingModulesCompleted: number;
+  /** True when all five modules done. */
+  trainingComplete: boolean;
+  /** Michael interview status from michael_schedules. Null = no schedule row yet. */
+  michaelStatus:
+    | 'awaiting_schedule'
+    | 'scheduled'
+    | 'in_progress'
+    | 'completed'
+    | 'missed'
+    | null;
+  /** Operational status. 'active'/'inactive' derive from lastLoginAt; 'suspended' is a future flag. */
+  status: 'active' | 'inactive' | 'suspended';
+  /** Max of lastLoginAt / welcomeAcceptedAt / latest michael event. */
+  lastActivityAt: IsoTimestamp | null;
+  /** System-detected leader badge (currently always false — see leaderDetectionNote). */
+  systemDetectedLeader: boolean;
+  /** Kevin-curated leader badge (admin toggle on row + profile drawer). */
+  curatedLeader: boolean;
+}
+
+export interface AdminBaDirectoryResponse {
+  ok: true;
+  count: number;
+  rows: AdminBaDirectoryRow[];
+  /** Honest disclosure — binary qualification not mirrored locally yet. */
+  leaderDetectionNote: string;
+}
+
+/** One sponsor-override entry on a BA's history. Append-only. */
+export interface AdminSponsorOverrideEntry {
+  overrideId: string;
+  baId: string;
+  previousSponsorBaId: string;
+  newSponsorBaId: string;
+  requestingBaId: string;
+  reason: string;
+  performedByBaId: string;
+  performedAt: IsoTimestamp;
+  /** entryId from the 4.J audit substrate this override wrote to. */
+  auditEntryId: string;
+}
+
+/** Kevin-only note about a BA, append-only. */
+export interface AdminBaNoteEntry {
+  noteId: string;
+  baId: string;
+  text: string;
+  authorBaId: string;
+  createdAt: IsoTimestamp;
+}
+
+/** Full BA profile bundle for the slide-out drawer (C.4). */
+export interface AdminBaProfileBundle {
+  row: AdminBaDirectoryRow;
+  michaelTranscript: {
+    interviewId: string | null;
+    completedAt: IsoTimestamp | null;
+    audioUrl: string | null;
+  } | null;
+  sponsorOverrideHistory: AdminSponsorOverrideEntry[];
+  notes: AdminBaNoteEntry[];
+}
+
+export interface AdminBaProfileResponse {
+  ok: true;
+  profile: AdminBaProfileBundle;
+}
+
+/** POST /api/admin/bas/:baId/sponsor-override body. */
+export interface AdminSponsorOverridePayload {
+  requestingBaId: string;
+  newSponsorBaId: string;
+  reason: string;
+}
+
+export interface AdminSponsorOverrideResponse {
+  ok: true;
+  override: AdminSponsorOverrideEntry;
+  row: AdminBaDirectoryRow;
+}
+
+/** POST /api/admin/bas/:baId/leader-tag body — toggle curated badge. */
+export interface AdminLeaderTagPayload {
+  curated: boolean;
+  /** Optional reason — surfaced in the audit entry. */
+  reason?: string;
+}
+
+export interface AdminLeaderTagResponse {
+  ok: true;
+  baId: string;
+  curated: boolean;
+}
+
+/** POST /api/admin/bas/:baId/notes body — append a Kevin-only note. */
+export interface AdminBaNotePayload {
+  text: string;
+}
+
+export interface AdminBaNoteResponse {
+  ok: true;
+  note: AdminBaNoteEntry;
+}
