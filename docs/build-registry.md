@@ -4,10 +4,11 @@
 
 **Source hierarchy** (when this file conflicts with another, the higher source wins):
 1. `docs/locked-spec.md` — authoritative spec
-2. `D:/claude-learning/KEVIN-CONTEXT.md` — running session log
-3. This file (`docs/build-registry.md`) — artifact index
-4. Git log on `github.com/devklg/momentum-creation-system-v1`
-5. Perry handoffs in MongoDB `session_handoffs` (last-resort lookup)
+2. `momentum.decisions` decision ledger in MongoDB (replaces KEVIN-CONTEXT.md as of #129)
+3. `docs/project-wireframe.md` — build decomposition + per-leaf status (#129)
+4. This file (`docs/build-registry.md`) — artifact index
+5. Git log on `github.com/devklg/momentum-creation-system-v1`
+6. Perry handoffs in MongoDB `session_handoffs` (last-resort lookup)
 
 **How to read the status column:**
 - `drafted` — exists as a prototype or working copy, not yet reviewed by Kevin
@@ -81,6 +82,11 @@
 | `apps/com` scaffold + prospect/token domain + `GET /api/p/:token` | `apps/com/` + `server/src/domain/prospect.ts` | live | #104 | — | Phase 1 prospect flow at `/p/{token}` per locked-spec Part 4. |
 | Holding-tank domain + `POST /api/p/:token/video-event` | `server/src/domain/holding-tank.ts` + `server/src/routes/p.ts` | live | #105 | — | Video milestone events fire monotonic position assignment at `video_complete`. Triple-stack write. |
 | `/p/:token` token-lifecycle edge cases (409 enrolled + 410 expired) + EnrolledResponse/ExpiredResponse types | `server/src/routes/p.ts` + `packages/shared/types.ts` | live | #110, #111 | — | Lazy-flush at read time. F.1/F.2/E.2/F.4–F.6 error views in client. Commit `8216311`. |
+| Invitation spine — write side of `/p` (mint + `invitation_links` domain) | `server/src/domain/invitations.ts` + `server/src/routes/invitations.ts` | live | #119 | — | The plain-form front door's server half. Token mint, sponsor-immutable at mint, triple-stack write. Commit `f3041e1`. |
+| ScriptMaker server (per-product video library + compliance-clean draft pipeline) | `server/src/domain/scriptMaker.ts` + `server/src/routes/scripts.ts` + `services/anthropic.ts` | live | #122 | — | One-name draft → `/invitations` seam. Anthropic transport dormant-aware (key empty → manual-compose fallback). Commit `ef8b433`. |
+| Phone-required invitation mints (server validation) | `server/src/routes/invitations.ts` | live | e1a2d7f (Chat #124/#125) | — | Phone is required at mint so re-entry can resolve to a prospect account later. Part of `fix(com,team)` commit `e1a2d7f`. |
+| Prospect re-entry Layer 1 — completion-interrupt fix + presentation↔dashboard nav | `server/src/routes/p.ts` + `apps/com/` (cross-cut) | live | #126 | — | Fixes the case where a prospect's video session is interrupted before `video_complete`; the token state survives reload and the page resumes correctly. Commit `5c7105f`. |
+| Prospect re-entry Layers 2+3 — temporary prospect account + `/p/login` magic link | `server/src/domain/prospectAccounts.ts` + `server/src/routes/prospectAuth.ts` | live | #130/#131 | — | Auto-create temporary account at `video_complete`; phone-only SMS magic link; 60-min single-use click window; opaque-by-design `/p/login`; expires at 8-week flush. Spec amendment locked in Part 3.17 (#131). Commits `6564e19`, `58d1f8f`. |
 
 ---
 
@@ -94,6 +100,9 @@
 | `/cockpit` page (real shell: My Invites working, My Sponsor working, CRM stubbed) | `apps/team/src/routes/cockpit.tsx` (670 lines) | live | #121 | `/cockpit` stub (27 lines) | Replaces the stub. My Invites = the read side of the invitation module (status badges, expandable rows with link/saved message/source/activity timeline, 'I sent this' for drafts). My Sponsor card (founder treatment when no upline). CRM stubbed for a later session. Reads GET /api/cockpit/invites + /summary. Local wire types per .team TS6059 convention. |
 | Questionnaire + sponsor workbook routes + onboarding/sponsor surfaces | `apps/team/src/routes/` | live | (carry-forward `3418d61`) | — | Pushed alongside Chat #104. |
 | Welcome-prototype-v2 reconciliation into `/welcome` | `apps/team/src/routes/welcome.tsx` | pending | #95 (drafted) | welcome.tsx (current) | Needs to merge the v2 prototype's letter-voice + 7-day-arc strip into the live route. |
+| `/invitations` plain-form front door (write-side seam into invitation spine) | `apps/team/src/routes/invitations.tsx` | live | #120 | — | The minimum-viable invite form: name + phone, posts to invitation spine, returns token, copy-to-share. Commit `6561abc`. |
+| ScriptMaker UI — video-library front door | `apps/team/src/routes/scripts.tsx` + components | live | #123 | — | Per-product video library; one-name compliance-clean draft → routes into `/invitations`. Hands a clean draft + selected video to the spine. Commit `df02b17`. |
+| `/login` BA login page (.team) | `apps/team/src/routes/login.tsx` | live | e1a2d7f (Chat #124/#125) | — | Replaces `/register` as the daily front door; preserves register on a deep link for first-time use. Part of commit `e1a2d7f`. |
 
 ---
 
@@ -111,13 +120,16 @@
 | Section 04 — Market | `sections/04-Market.tsx` | live | #107 | — | IntersectionObserver count-up. |
 | Section 05 — PharmaceuticalSolution | `sections/05-PharmaceuticalSolution.tsx` | live | #107 | — | — |
 | Section 06 — NaturalPath | `sections/06-NaturalPath.tsx` | live | #107 | — | MBC-267 + comparison table. |
-| Section 07 — Dossier | `sections/07-Dossier.tsx` | live | #107 | — | Accordion + gated PDF. **`DOSSIER_AVAILABLE = false`**: PDF needs to drop at `apps/com/public/dossier/glp-three-dossier.pdf` then flip the flag. |
+| Section 07 — Dossier | `sections/07-Dossier.tsx` | live | #107 (flag flip #115) | — | Accordion + gated PDF. `DOSSIER_AVAILABLE = true` since #115; PDF at `apps/com/public/assets/glp-three-dossier.pdf` (canonical path; the older `public/dossier/` plan was abandoned). |
 | Section 08 — KevinStory | `sections/08-KevinStory.tsx` | live | #107 | — | luxury-favorite.jpeg as-is, full-bleed, no rebuilt card. Locked-spec 4.7. |
 | Section 09 — Timing | `sections/09-Timing.tsx` | live | #107 | — | Three-factor convergence + locked Bebas closing. |
 | Section 10 — QuietDoor (callback-request form) | `sections/10-QuietDoor.tsx` | approved | #117 | placeholder card | Two soft-CTA radios (interested / have questions) + "Have [BA] reach out" button + confirmation state. Copy APPROVED by Kevin Chat #117. **Both "Take your time / no clock on this page" footnotes REMOVED Chat #117** — inconsistent with the forthcoming 72-hour dashboard clock. (Note: the historical "three intent radios + phone + best time" description was superseded by the Chat #109 two-radio no-phone design.) |
 | Section 11 — Footer | `sections/11-Footer.tsx` | live | #107 | — | BA attribution + G.5 disclaimer. |
 | `og-injection.ts` middleware | `apps/server/src/middleware/og-injection.ts` | live | #107 | — | Token-resolved OG metadata. Requires marker pair in `apps/com/index.html`. |
 | Dashboard six locked sections (Arrival → Opportunity → Mechanic → Live → Advantage → Next Move) | `apps/com/src/routes/tm-prospect-dashboard/` (composer + 7 section files) | wired | #114 | placeholder | Ported from `dashboard-prototype.html` Chat #114. **Chat #84 correction applied to Section 4**: behind-only counter, vertical layout, no left/right columns, no ahead-of-you tile. **Chat #112 drift correction applied to Footer**: Team Magnificent branding only, no THREE reference, locked-spec 3.10 compliance disclaimer verbatim. Rendered from `tm-video-presentation.tsx:169` when placement resolves. Typecheck GREEN. |
+| Ticker fixes + return-visit video overlay | `apps/com/src/routes/tm-video-presentation/sections/` (00 TickerStrip, 03 DrDanVideo) | live | e1a2d7f (Chat #124/#125) | — | Ticker rendering refinements + overlay for prospects returning mid-video. Part of commit `e1a2d7f`. |
+| Prospect re-entry Layer 1 — completion-interrupt fix + presentation↔dashboard navigation (client) | `apps/com/src/routes/p-token.tsx` + composer | live | #126 | — | Client half of re-entry Layer 1. Commit `5c7105f`. |
+| `/p/login` prospect login surface (phone-entry + `/p/login/r/:linkToken` redeem) | `apps/com/src/routes/p-login.tsx` + `p-login-redeem.tsx` | live | #130/#131 | — | Phone-only, opaque-by-design; consumes server magic-link endpoints. Re-entry resolves to ORIGINAL token + ORIGINAL inviting BA via sponsorBaId stamped on `prospect_accounts` at video_complete. Commits `6564e19`, `58d1f8f`. |
 
 ---
 
@@ -247,7 +259,19 @@ For narrative context. Authoritative detail lives in `D:/claude-learning/KEVIN-C
 - **Chat #112** (2026-05-21, this chat) — Project knowledge readback + build registry file created.
 - **Chat #113** (2026-05-21) — Dashboard wiring scaffolded: composer import added in `tm-video-presentation.tsx:51` and render branch wired at `:169` with full prop contract. (Build went RED — actual six-section files weren't yet on disk; corrected in #114.)
 - **Chat #114** (2026-05-21) — **Dashboard six-section port complete.** Shared types extended (PlacementTickerEntry, HoldingTankSnapshot, PlacementEvent, WebinarEvent, WebinarReservation*). Server: `services/poolEvents.ts` (in-process EventEmitter), `domain/holdingTank.ts` modified (publish after step 5 + snapshot builder), `domain/webinarEvent.ts` + `domain/webinarReservation.ts` new, `routes/p.ts` extended with `GET /:token/stream` SSE + `POST /:token/webinar-reserve`. Client: `lib/usePlacementStream.ts` React hook around EventSource + `lib/api.ts` postWebinarReservation, `routes/tm-prospect-dashboard/` composer + 7 section files (Ribbon, Arrival, Opportunity, Mechanic, LivePlace, TmAdvantage, YourNextMove, Footer). Chat #84 correction to Section 4 (behind-only, vertical). Chat #112 drift correction to Footer (TM only). Third callback intent `ready_to_join` wired in UI (server already supported). Typecheck GREEN: shared, server, apps/com, apps/team, apps/admin. Two locked-spec amendments queued (Part 3.4, Part 4.4). SSE was-locked-not-open audit correction recorded.
+- **Chat #115** — DOSSIER_AVAILABLE flipped to `true`; PDF dropped at `apps/com/public/assets/glp-three-dossier.pdf` (canonical path replaces earlier `public/dossier/` plan).
+- **Chat #116** (2026-05-22) — Webinar cadence locked (Mon/Thu 5pm Pacific) + DST-correct generator + idempotent 8-week seeder (16 events) + Resend transport wired-dormant pending teammagnificent.com domain verification. Commit `2e28a53`.
+- **Chat #117** (2026-05-22) — Section 02 + Section 10 copy signoff; both "Take your time / no clock" footnotes REMOVED. Commit `8c00d8d`.
+- **Chat #119** (2026-05-22) — **Invitation spine.** Write-side of `/p` — `invitation_links` domain + routes + sponsor-immutable mint + triple-stack write. Commit `f3041e1`.
+- **Chat #120** (2026-05-22) — `.team /invitations` plain-form front door. Posts to spine, returns token, copy-to-share. Commit `6561abc`.
+- **Chat #121** (2026-05-22) — Real `/cockpit` shell: My Invites (read side of invitation module, status badges, expandable rows, 'I sent this' for drafts) + My Sponsor card (founder treatment) + Welcome banner + nav. CRM stubbed for later. Commits `82f867b`, `7e02a17`.
+- **Chat #122** (2026-05-22) — Invitation module env plumbing + ScriptMaker server side. Commit `ef8b433`.
+- **Chat #123** (2026-05-22) — ScriptMaker UI: per-product video library + one-name compliance-clean draft → `/invitations` seam. Commit `df02b17`.
+- **Chat #124/#125** (commit `e1a2d7f`) — BA `/login` page on `.team`, phone-required invitation mints, ticker fixes, return-visit video overlay on `apps/com`.
+- **Chat #126** (2026-05-23) — **Prospect re-entry Layer 1.** Completion-interrupt fix + presentation↔dashboard navigation (server + client). Commit `5c7105f`.
+- **Chat #129** (2026-05-23) — `docs/project-wireframe.md` written — full structural tree with per-leaf status verified against disk. Decision ledger formalized in `momentum.decisions`, replacing `KEVIN-CONTEXT.md` in the source hierarchy.
+- **Chat #130/#131** (2026-05-24) — **Prospect re-entry Layers 2 + 3.** Temporary `prospect_accounts` auto-created at `video_complete` (expire at 8-week flush) + `/p/login` magic-link surface on `.com` (phone-entry + `/p/login/r/:linkToken` redeem). Phone-only SMS magic link, 60-min single-use click window, opaque-by-design `/p/login`, callback-intent-only consent signal. Spec amendment locked in Part 3.17. Re-entry resolves to ORIGINAL token + ORIGINAL inviting BA via sponsorBaId stamped on prospect_accounts at video_complete. Commits `6564e19`, `58d1f8f`. (Chat #130 was retroactively renamed to #131 in commit `58d1f8f`.)
 
 ---
 
-*Last updated: 2026-05-22 (Chat #121). Update this file at the end of every chat that ships an artifact, supersedes one, or closes an open spec question.*
+*Last updated: 2026-05-24 (Chat #131 + content/hygiene pass). Update this file at the end of every chat that ships an artifact, supersedes one, or closes an open spec question.*

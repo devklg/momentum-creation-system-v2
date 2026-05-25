@@ -48,7 +48,7 @@ type SubmissionState =
   | { kind: 'error'; message: string };
 
 const OPTIONS: ReadonlyArray<{ value: CallbackIntent; label: string }> = [
-  { value: 'interested_tell_me_more', label: "I'm interested \u2014 tell me more" },
+  { value: 'interested_tell_me_more', label: "I'm interested — tell me more" },
   { value: 'have_questions', label: 'I have questions' },
 ];
 
@@ -80,9 +80,9 @@ export function QuietDoor({ token, baFirstName }: QuietDoorProps) {
 
   if (submission.kind === 'submitted') {
     return (
-      <section className="tm-quiet" aria-label="The Quiet Door \u2014 submitted">
+      <section className="tm-quiet" aria-label="The Quiet Door — submitted">
         <div className="tm-quiet__inner">
-          <div className="tm-quiet__eyebrow">Part 7 \u2014 What's Next</div>
+          <div className="tm-quiet__eyebrow">Part 7 — What's Next</div>
           <div className="tm-quiet__card tm-quiet__card--confirmed">
             <div className="tm-quiet__keyline" aria-hidden="true" />
             <h2 className="tm-quiet__headline">
@@ -103,7 +103,7 @@ export function QuietDoor({ token, baFirstName }: QuietDoorProps) {
   return (
     <section className="tm-quiet" aria-label="The Quiet Door">
       <div className="tm-quiet__inner">
-        <div className="tm-quiet__eyebrow">Part 7 \u2014 What's Next</div>
+        <div className="tm-quiet__eyebrow">Part 7 — What's Next</div>
 
         <div className="tm-quiet__card">
           <div className="tm-quiet__keyline" aria-hidden="true" />

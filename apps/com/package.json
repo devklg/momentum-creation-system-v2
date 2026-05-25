@@ -7,7 +7,7 @@
     "dev": "vite --host --port 7701",
     "build": "tsc -b && vite build",
     "preview": "vite preview --port 7701",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b"
   },
   "dependencies": {
     "@momentum/shared": "workspace:*",

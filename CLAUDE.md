@@ -9,11 +9,20 @@ Before writing code in this repo, read in this order:
 1. `docs/AGENT-BRIEFING.md` — three-layer orientation (identity, architecture, pointers). End-to-end. Do not skip.
 2. `docs/locked-spec.md` — the authoritative spec. Read **only** the Part(s) you're touching. When this file conflicts with the codebase, the file wins.
 3. `docs/build-registry.md` — what's done, what's pending, what supersedes what. Consult before asking "is X done?"
-4. `docs/project-wireframe.md` — section-numbered wireframe (e.g. "4.J audit-log substrate"). Worktree TASK.md files reference these section numbers.
+4. `docs/project-wireframe.md` — the build map. Leaf-level status (`[x] / [~] / [ ]`) grounded in disk AND section-numbered (e.g. "4.J audit-log substrate") that worktree TASK.md files reference. Tick leaves when work lands.
 
 If a `TASK.md` exists at the repo root, read it first — it carries branch-specific scope and hard rules for the current worktree.
 
 The five `.docx` design files (`Team-Magnificent-ADMIN-Design.docx`, `Team-Magnificent-COM-Design.docx`, `Team-Magnificent-TEAM-Design.docx`, `Team-Magnificent-App-Description.docx`, `Team-Magnificent-Signup-Architecture.docx`) are the surface-level design references — read the one that covers the surface you're changing.
+
+Additional reference material in [docs/](docs/) — pull these in when relevant, not by default:
+
+- `chat-XX-decisions.md` and `chat84-vs-docs.md`, `chat-94-locked-spec-rewrite.txt` — historical record of decisions from past chat sessions. Useful when "why was this done this way" matters and the answer isn't in `build-registry.md`.
+- `page-inventory.md` — canonical list of routes/pages per surface.
+- `dashboard-prototype.md` — early prototype notes for the prospect dashboard (still a useful intent reference).
+- `Team-Magnificent-App-Style-Guide.html` — rendered style guide; brand truth lives in [packages/shared/src/brand.ts](packages/shared/src/brand.ts), this is the visual companion.
+- `build-*.cjs`, `render-flow.cjs` — generators that produce the `.docx` design files from source. Don't edit the `.docx` directly; edit the source and regen.
+- `build-plan.md`, `build-checklist.html` — older planning artifacts; `project-wireframe.md` is the live successor.
 
 ## Common commands
 
