@@ -2009,3 +2009,236 @@ export interface MichaelTranscriptChunkIngestPayload {
   callSid: string;
   chunk: Omit<MichaelTranscriptChunk, 'sequence'>;
 }
+
+/* ─── #134 Admin core dashboard ─── */
+/**
+ * Admin Core Dashboard — Section B (wireframe 4.B, leaves wf_0077–wf_0080).
+ *
+ * Operational metrics + filterable drilldown + live event stream for the
+ * Kevin-only /admin surface. Reads aggregate; every view writes one audit
+ * entry through the 4.J substrate. Compliance: regulated surface, CV/cycle
+ * math is permitted but this dashboard scope is operational (activity,
+ * funnel, queue) only — no earnings.
+ *
+ * Leader detection (locked-spec Part 5):
+ *   leader = (binary-qualified) AND (>= 5 personally enrolled)
+ *
+ * Personally-enrolled is computable here (count of BAs in brand_ambassadors
+ * with sponsorBaId = candidate.baId). Binary qualification lives upstream
+ * in THREE and is not mirrored locally yet. Until it is, the system-detected
+ * leader set is empty — the dashboard surfaces this honestly via
+ * `leaderDetectionNote`. A Kevin-curated set will arrive with wireframe
+ * 4.C's leader-tag toggle.
+ */
+
+/** Top-row tile identifier. Drives drilldown routing and SSE highlighting. */
+export type AdminDashboardTile =
+  | 'active_bas'
+  | 'prospects_in_flow'
+  | 'queue_movement'
+  | 'enrollments'
+  | 'training';
+
+/**
+ * Server-applied filter for both metrics and drilldown queries. Filter is
+ * narrowing only — empty / null means "all". `leaderGroup` is enforced
+ * server-side against the locked rule above; the client cannot widen by
+ * passing leader status in the body.
+ */
+export interface AdminDashboardFilter {
+  /** Restrict to one BA's slice (their prospects, their training, etc.). */
+  baId: string | null;
+  /**
+   * 'all'           — no leader-status restriction.
+   * 'leaders_only'  — system-detected ∪ Kevin-curated.
+   * 'non_leaders'   — explicit complement (rest of the team).
+   */
+  leaderGroup: 'all' | 'leaders_only' | 'non_leaders';
+}
+
+/**
+ * Master metrics row — the five tiles at the top of the dashboard
+ * (wf_0077). Each field corresponds to one tile.
+ */
+export interface AdminDashboardMetrics {
+  /** count(brand_ambassadors WHERE lastLoginAt >= now-24h), filter-scoped. */
+  activeBaCount: number;
+  /** count(brand_ambassadors), filter-scoped. The denominator for activity. */
+  totalBaCount: number;
+  /**
+   * count(pool_placements WHERE flushedAt IS NULL), filter-scoped by
+   * sponsorBaId when the filter narrows to a BA / leader group.
+   */
+  prospectsInFlow: number;
+  /** Net queue movement in the last 24h: placements minus flushes. */
+  queueMovement24h: {
+    placements: number;
+    flushes: number;
+    /** placements - flushes. Signed. */
+    net: number;
+  };
+  /**
+   * count(pool_placements WHERE flushedAt >= now-24h AND flushReason='enrolled'),
+   * filter-scoped. Enrollment lives in THREE; this counts the operational
+   * mirror event our pool records when the BA marks enrolled.
+   */
+  enrollments24h: number;
+  /**
+   * Percent (0..100, integer-rounded) of filter-scoped BAs whose Fast Start
+   * is complete (all five modules in `completed` state). Null when the
+   * filter-scoped BA count is 0 (no denominator).
+   */
+  trainingCompletionPct: number | null;
+  /** ISO timestamp when this snapshot was computed (server-side). */
+  computedAt: IsoTimestamp;
+}
+
+/** GET /api/admin/dashboard/metrics?baId=&leaderGroup= response. */
+export interface AdminDashboardMetricsResponse {
+  ok: true;
+  metrics: AdminDashboardMetrics;
+  appliedFilter: AdminDashboardFilter;
+  /**
+   * Honest note about the leader detection gap (binary qualification not
+   * mirrored locally). Rendered in the filter bar so Kevin always knows
+   * what 'leaders_only' currently means.
+   */
+  leaderDetectionNote: string;
+}
+
+/** One BA, for the filter-bar dropdown. */
+export interface AdminBaFilterOption {
+  baId: string;
+  fullName: string;
+  /** True if this BA is in the current leader set (curated ∪ system). */
+  isLeader: boolean;
+}
+
+/** One leader-group option with its current count. */
+export interface AdminLeaderGroupOption {
+  value: AdminDashboardFilter['leaderGroup'];
+  label: string;
+  count: number;
+}
+
+/** GET /api/admin/dashboard/filters response — populates the filter bar. */
+export interface AdminDashboardFiltersResponse {
+  ok: true;
+  bas: AdminBaFilterOption[];
+  leaderGroups: AdminLeaderGroupOption[];
+  /** Same honest note as on metrics — duplicated so the filter bar can render it standalone. */
+  leaderDetectionNote: string;
+}
+
+/* Drilldown rows — one shape per tile (wf_0078). */
+
+export interface AdminActiveBaRow {
+  baId: string;
+  fullName: string;
+  lastLoginAt: IsoTimestamp;
+  prospectsInFlow: number;
+}
+
+export interface AdminProspectInFlowRow {
+  prospectId: string;
+  firstName: string;
+  lastInitial: string;
+  city: string;
+  stateOrRegion: string;
+  state: TokenState;
+  positionNumber: number | null;
+  sponsorBaId: string;
+  sponsorName: string;
+  placedAt: IsoTimestamp | null;
+  expiresAt: IsoTimestamp;
+}
+
+export interface AdminQueueMovementRow {
+  kind: 'placement' | 'flush';
+  prospectId: string;
+  firstName: string;
+  lastInitial: string;
+  positionNumber: number;
+  sponsorBaId: string;
+  sponsorName: string;
+  at: IsoTimestamp;
+  /** 'enrolled' | 'expired' | 'archived' on flush; null on placement. */
+  flushReason: 'enrolled' | 'expired' | 'archived' | null;
+}
+
+export interface AdminEnrollmentRow {
+  prospectId: string;
+  firstName: string;
+  lastInitial: string;
+  positionNumber: number;
+  sponsorBaId: string;
+  sponsorName: string;
+  enrolledAt: IsoTimestamp;
+}
+
+export interface AdminTrainingRow {
+  baId: string;
+  fullName: string;
+  /** Count of modules in `completed` state, 0..5. */
+  modulesCompleted: number;
+  /** Whether (modulesCompleted === 5). */
+  fastStartComplete: boolean;
+  /** Most recent touch across any Fast Start module; null if untouched. */
+  lastTouchedAt: IsoTimestamp | null;
+}
+
+export type AdminDrilldownPayload =
+  | { tile: 'active_bas'; rows: AdminActiveBaRow[] }
+  | { tile: 'prospects_in_flow'; rows: AdminProspectInFlowRow[] }
+  | { tile: 'queue_movement'; rows: AdminQueueMovementRow[] }
+  | { tile: 'enrollments'; rows: AdminEnrollmentRow[] }
+  | { tile: 'training'; rows: AdminTrainingRow[] };
+
+/** GET /api/admin/dashboard/drilldown?tile=&baId=&leaderGroup= response. */
+export interface AdminDrilldownResponse {
+  ok: true;
+  payload: AdminDrilldownPayload;
+  appliedFilter: AdminDashboardFilter;
+  computedAt: IsoTimestamp;
+}
+
+/* Live event stream (wf_0080). */
+
+/** Common event metadata across live-stream events. */
+export interface AdminLiveEventBase {
+  /** Globally-unique id used as the SSE `id:` field for resumability. */
+  eventId: string;
+  /** ISO timestamp the event was emitted. */
+  at: IsoTimestamp;
+}
+
+/** Live placement event — fans out from poolEvents.subscribePlacements. */
+export interface AdminLivePlacementEvent extends AdminLiveEventBase {
+  kind: 'placement';
+  positionNumber: number;
+  firstName: string;
+  lastInitial: string;
+  city: string;
+  stateOrRegion: string;
+}
+
+/** Live audit-log entry — surfaced from poll-based tail of audit_log. */
+export interface AdminLiveAuditEvent extends AdminLiveEventBase {
+  kind: 'audit_entry';
+  action: string;
+  role: AuditActorRole;
+  actorLabel: string;
+  entityLabel: string;
+  severity: AuditSeverity;
+}
+
+export type AdminLiveEvent = AdminLivePlacementEvent | AdminLiveAuditEvent;
+
+/**
+ * Initial SSE snapshot — sent once on connect with the most-recent events
+ * so the stream renders populated immediately rather than waiting for the
+ * next live event.
+ */
+export interface AdminLiveSnapshot {
+  events: AdminLiveEvent[];
+}

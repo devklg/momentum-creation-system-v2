@@ -22,6 +22,7 @@ import { LoginPage } from '@/routes/login';
 import { AccessCodesPage } from '@/routes/access-codes';
 import { BAsPage } from '@/routes/bas';
 import { AuditPage } from '@/routes/audit';
+import { DashboardPage } from '@/routes/dashboard';
 
 export function App() {
   return (
@@ -55,7 +56,8 @@ function Inner() {
   return (
     <Routes>
       <Route element={<AdminShell />}>
-        <Route path="/" element={<Navigate to="/access-codes" replace />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/access-codes" element={<AccessCodesPage />} />
         <Route path="/bas" element={<BAsPage />} />
         <Route path="/audit" element={<AuditPage />} />
