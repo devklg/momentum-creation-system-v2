@@ -9,9 +9,9 @@ Before writing code in this repo, read in this order:
 1. `docs/AGENT-BRIEFING.md` — three-layer orientation (identity, architecture, pointers). End-to-end. Do not skip.
 2. `docs/locked-spec.md` — the authoritative spec. Read **only** the Part(s) you're touching. When this file conflicts with the codebase, the file wins.
 3. `docs/build-registry.md` — what's done, what's pending, what supersedes what. Consult before asking "is X done?"
-4. `docs/project-wireframe.md` — the build map. Leaf-level status (`[x] / [~] / [ ]`) grounded in disk AND section-numbered (e.g. "4.J audit-log substrate") that worktree TASK.md files reference. Tick leaves when work lands.
+4. `docs/project-wireframe.md` — the build map. Leaves carry both section numbers (e.g. "3.3 BA Cockpit") and stable `wf_NNNN` IDs that worktree TASK files reference. Status is leaf-level (`[x] / [~] / [ ]`) and grounded in disk. Tick `[x]` when work lands.
 
-If a `TASK.md` exists at the repo root, read it first — it carries branch-specific scope and hard rules for the current worktree.
+If a `TASK-NNN.md` (chat-numbered) or `TASK.md` exists at the worktree root, read it first — it carries branch-specific scope and hard rules. The chat-numbered variant supersedes any tracked `TASK.md` on `main`, which may be stale.
 
 The five `.docx` design files (`Team-Magnificent-ADMIN-Design.docx`, `Team-Magnificent-COM-Design.docx`, `Team-Magnificent-TEAM-Design.docx`, `Team-Magnificent-App-Description.docx`, `Team-Magnificent-Signup-Architecture.docx`) are the surface-level design references — read the one that covers the surface you're changing.
 
@@ -33,6 +33,8 @@ Feature work happens in parallel git worktrees. Each worktree root has a scoped 
 - `server/src/index.ts` — only add new route imports/mounts; touch no existing line.
 
 Commits are tagged with the originating chat number (`Chat #130 - <summary>`), mirroring the chat-indexed history in [docs/build-registry.md](docs/build-registry.md). Kevin merges; agents commit to the feature branch and stop.
+
+When a chat coordinates parallel batch agents, each worktree's `TASK` file assigns a row `_id` in `momentum.agent_status` (Universal Gateway `mongodb.update`, `$set` only — the row pre-exists, never upsert). Report `state` transitions: `in_progress` → `typecheck_green` → `ready_to_merge`, or `blocked` with the real error.
 
 ## Common commands
 
