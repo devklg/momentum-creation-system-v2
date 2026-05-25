@@ -11,7 +11,7 @@ Before writing code in this repo, read in this order:
 3. `docs/build-registry.md` — what's done, what's pending, what supersedes what. Consult before asking "is X done?"
 4. `docs/project-wireframe.md` — the build map. Leaf-level status (`[x] / [~] / [ ]`) grounded in disk AND section-numbered (e.g. "4.J audit-log substrate") that worktree TASK.md files reference. Tick leaves when work lands.
 
-If a `TASK.md` exists at the repo root, read it first — it carries branch-specific scope and hard rules for the current worktree.
+If a `TASK.md` or `TASK-<chat-number>.md` exists at the repo root, read it first — it carries branch-specific scope and hard rules for the current worktree. A scoped `TASK-NNN.md` (e.g. `TASK-134.md`) supersedes the tracked `TASK.md`, which can be stale from a previous chat that merged to `main`.
 
 The five `.docx` design files (`Team-Magnificent-ADMIN-Design.docx`, `Team-Magnificent-COM-Design.docx`, `Team-Magnificent-TEAM-Design.docx`, `Team-Magnificent-App-Description.docx`, `Team-Magnificent-Signup-Architecture.docx`) are the surface-level design references — read the one that covers the surface you're changing.
 
@@ -157,6 +157,7 @@ When a worktree task lands, it usually carries these rules verbatim in its `TASK
 ## Conventions
 
 - **TypeScript strict mode + `noUncheckedIndexedAccess`** is on repo-wide via [tsconfig.base.json](tsconfig.base.json).
+- Server is **TypeScript end-to-end** — every file under `server/src/routes/`, `server/src/middleware/`, and `server/src/domain/` is `.ts`. Some worktree TASK files refer to `*.js` paths by mistake; new server files should always be `.ts`.
 - Shared types live in [packages/shared/src/types.ts](packages/shared/src/types.ts) — import via `@momentum/shared`. The team app sometimes uses local wire types ("`.team` TS6059 convention") to sidestep cross-workspace type composition issues.
 - Brand tokens are exact and verbatim — never paraphrase. Defined in [packages/shared/src/brand.ts](packages/shared/src/brand.ts) and `brand.css`. Display font Bebas Neue, body DM Sans, mono DM Mono.
 - Vocabulary discipline: never "leads," "sales pipeline," "pitch," or cold-outreach "prospecting" in user-facing copy. BAs are **sharers**, not salespeople.
