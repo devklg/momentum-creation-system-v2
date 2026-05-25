@@ -2802,3 +2802,192 @@ export interface AdminProspectInterventionResponse {
   auditEntryId: string;
   refreshedRow: AdminProspectDirectoryRow;
 }
+
+/* ─────────────────────────────────────────────────────────────────
+ * Section E — Queue / Recruitment Leg Oversight  (ADMIN Design E,
+ *   project-wireframe 4.E)
+ *
+ * Kevin-only surface. Mirrors the holding-tank state without ever
+ * overriding it (monotonic positions never reshuffle — locked-spec
+ * Part 3.2). The /admin ticker (E.5) mirrors the .com ticker event
+ * source (services/poolEvents.ts) but shows REAL names; the .com
+ * source remains anonymized at firstName + lastInitial.
+ * ───────────────────────────────────────────────────────────────── */
+
+/** The Kevin-settable .com position-stack window (E.3). Default 10. */
+export type QueueVisibleWindow = 5 | 10 | 20;
+
+/** Today's queue movement (E.1). All counts UTC-day-bounded. */
+export interface QueueDepthMovement {
+  /** Total prospects currently in the holding tank (placed and not flushed). */
+  currentDepth: number;
+  /** Placements minted today (UTC). */
+  todaysPlacements: number;
+  /** Flushes due to TTL expiration today (UTC). Counted separately from manual. */
+  todaysExpirations: number;
+  /** Flushes performed manually (admin/BA) today (UTC). */
+  todaysManualFlushes: number;
+  /** Enrollments today (UTC) — placements that exited via enrollment. */
+  todaysEnrollments: number;
+  /** placements − expirations − manualFlushes − enrollments. */
+  netMovement: number;
+  computedAt: IsoTimestamp;
+}
+
+/** Monotonic position numbers (E.2). */
+export interface QueueNumbers {
+  /** Max positionNumber minted today (UTC). 0 if no placements yet today. */
+  highestToday: number;
+  /** Lifetime highest position ever minted (== pool_counters.current). */
+  highestEver: number;
+  /** Count of flushed placements (their slots are vacant in the visible line). */
+  vacantSlots: number;
+  computedAt: IsoTimestamp;
+}
+
+/**
+ * Single day in the growth sparkline (E.4). `date` is YYYY-MM-DD UTC.
+ * `count` is new placements that day.
+ */
+export interface QueueGrowthBucket {
+  date: string;
+  count: number;
+}
+
+/** E.4 — TM overall growth movement (no comp math, no binary detail). */
+export interface QueueGrowthSparkline {
+  rolling7: number;
+  rolling30: number;
+  /** Lifetime placements (== pool_counters.current). */
+  lifetime: number;
+  /** 30 daily buckets oldest→newest. Empty days are zero-filled. */
+  daily30: QueueGrowthBucket[];
+}
+
+/**
+ * E.2 position-lookup result. When `found:true`, a prospect record is
+ * attached. When `found:false`, the position has been minted (≤ highestEver)
+ * but the slot is vacant (flushed) OR the number has not been minted yet.
+ */
+export interface QueueLookupResult {
+  position: number;
+  found: boolean;
+  /** True when the slot was once filled and is now vacant (flushed). */
+  vacant: boolean;
+  prospect: QueueLookupProspect | null;
+}
+
+export interface QueueLookupProspect {
+  prospectId: string;
+  firstName: string;
+  lastName: string;
+  state: TokenState;
+  placedAt: IsoTimestamp;
+  sponsorBaId: string;
+  city: string;
+  stateOrRegion: string;
+  flushedAt: IsoTimestamp | null;
+  flushReason: 'enrolled' | 'expired' | 'archived' | null;
+  /** Cross-section deep-link locked with Agent D: /prospects?prospectId=<id>. */
+  deepLink: string;
+}
+
+/**
+ * E.5 — admin ticker entry. Real names (not initials/anonymized
+ * city). Same event source as the .com ticker; the difference is the
+ * projection. `deepLink` points to Agent D's D.2 detail panel.
+ */
+export interface AdminTickerEntry {
+  positionNumber: number;
+  prospectId: string;
+  firstName: string;
+  lastName: string;
+  city: string;
+  stateOrRegion: string;
+  placedAt: IsoTimestamp;
+  sponsorBaId: string;
+  deepLink: string;
+}
+
+/**
+ * E.6 — a managed queue rule. Surface for the resolved 8-week flush
+ * window and any other queue knobs Kevin can change. Every change
+ * append-only audited (action='admin.queue.rule.changed').
+ */
+export interface QueueRule {
+  key: string;
+  label: string;
+  description: string;
+  /** Current value; type depends on the rule (number for flush weeks). */
+  currentValue: number | string | boolean;
+  defaultValue: number | string | boolean;
+  unit: string | null;
+  /** Last audited change; null if untouched (still at default). */
+  lastChangedAt: IsoTimestamp | null;
+  lastChangedBy: string | null;
+}
+
+/** E.1 + E.2 + E.4 in a single fetch (admin queue page bootstrap). */
+export interface QueueOversightSummary {
+  depthMovement: QueueDepthMovement;
+  numbers: QueueNumbers;
+  growth: QueueGrowthSparkline;
+  visibleWindow: QueueVisibleWindow;
+  computedAt: IsoTimestamp;
+}
+
+/* HTTP response envelopes — match the {ok:true, …} shape used by /admin. */
+
+export interface QueueOversightSummaryResponse {
+  ok: true;
+  summary: QueueOversightSummary;
+}
+
+export interface QueueLookupResponse {
+  ok: true;
+  result: QueueLookupResult;
+}
+
+export interface QueueVisibleWindowResponse {
+  ok: true;
+  value: QueueVisibleWindow;
+  defaultValue: QueueVisibleWindow;
+  lastChangedAt: IsoTimestamp | null;
+  lastChangedBy: string | null;
+}
+
+export interface QueueAdminTickerResponse {
+  ok: true;
+  entries: AdminTickerEntry[];
+  globalMaxPosition: number;
+}
+
+export interface QueueRulesResponse {
+  ok: true;
+  rules: QueueRule[];
+}
+
+/**
+ * SSE wire event for the /api/admin/queue/ticker/stream channel.
+ * Mirrors AdminLivePlacementEvent but un-anonymized (carries
+ * lastName + prospectId for click-through to D.2).
+ */
+export interface AdminQueueTickerSseEvent {
+  kind: 'admin_queue_placement';
+  eventId: string;
+  at: IsoTimestamp;
+  positionNumber: number;
+  prospectId: string;
+  firstName: string;
+  lastName: string;
+  city: string;
+  stateOrRegion: string;
+  sponsorBaId: string;
+  deepLink: string;
+}
+
+/** Snapshot payload sent at SSE connection open for the admin ticker. */
+export interface AdminQueueTickerSnapshot {
+  globalMaxPosition: number;
+  recent: AdminTickerEntry[];
+}
