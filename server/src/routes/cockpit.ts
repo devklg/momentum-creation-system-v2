@@ -24,6 +24,7 @@ import { Router } from 'express';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
 import { getMyInvites, getCockpitSummary } from '../domain/cockpit.js';
+import { getCockpitTodaysActions } from '../domain/todaysActions.js';
 
 export const cockpitRoutes: Router = Router();
 
@@ -61,3 +62,27 @@ cockpitRoutes.get('/summary', requireAuth, requireMichaelComplete, async (req, r
     return res.status(500).json({ ok: false, error: 'server_error' });
   }
 });
+
+/**
+ * GET /api/cockpit/todays-actions — derived urgency-ordered list (Chat #134,
+ * wireframe 3.3, locked-spec 1.8/1.9). Callbacks > due follow-ups > expiring
+ * windows. Always includes the bias prompt for the empty state.
+ */
+cockpitRoutes.get(
+  '/todays-actions',
+  requireAuth,
+  requireMichaelComplete,
+  async (req, res) => {
+    const baId = req.session?.baId;
+    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+    try {
+      const payload = await getCockpitTodaysActions(baId);
+      return res.status(200).json(payload);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[GET /api/cockpit/todays-actions] failed', err);
+      return res.status(500).json({ ok: false, error: 'server_error' });
+    }
+  },
+);

@@ -36,6 +36,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { TodaysActions } from '@/components/cockpit/TodaysActions';
 
 // ── Local wire shapes (mirror packages/shared/src/types.ts) ──────────────
 
@@ -187,23 +188,6 @@ interface CrmBundleResponse {
   bundle: ProspectCrmBundle;
 }
 
-type TodayActionKind = 'callback' | 'followup' | 'draft';
-
-interface TodayActionItem {
-  kind: TodayActionKind;
-  prospectId: string;
-  firstName: string;
-  lastInitial: string;
-  at: string;
-  intent: CallbackIntent | null;
-  followUpDueAt: string | null;
-}
-
-interface TodaysActionsResponse {
-  ok: true;
-  actions: TodayActionItem[];
-}
-
 interface CreateNoteResponse {
   ok: true;
   note: CrmNoteRecord;
@@ -301,7 +285,6 @@ type View =
       summary: CockpitSummaryResponse;
       invites: InviteSummary[];
       activityByProspect: Record<string, InvitationActivityEntry[]>;
-      todayActions: TodayActionItem[];
     };
 
 export function CockpitPage() {
@@ -315,32 +298,25 @@ export function CockpitPage() {
 
   const load = useCallback(async () => {
     try {
-      const [summaryRes, invitesRes, todayRes] = await Promise.all([
+      const [summaryRes, invitesRes] = await Promise.all([
         fetch('/api/cockpit/summary', { credentials: 'include' }),
         fetch('/api/cockpit/invites', { credentials: 'include' }),
-        fetch('/api/crm/today', { credentials: 'include' }),
       ]);
-      if (
-        summaryRes.status === 401 ||
-        invitesRes.status === 401 ||
-        todayRes.status === 401
-      ) {
+      if (summaryRes.status === 401 || invitesRes.status === 401) {
         navigate('/register');
         return;
       }
-      if (!summaryRes.ok || !invitesRes.ok || !todayRes.ok) {
+      if (!summaryRes.ok || !invitesRes.ok) {
         setView({ kind: 'error', message: 'Could not load your cockpit. Try again.' });
         return;
       }
       const summary = (await summaryRes.json()) as CockpitSummaryResponse;
       const invites = (await invitesRes.json()) as MyInvitesResponse;
-      const today = (await todayRes.json()) as TodaysActionsResponse;
       setView({
         kind: 'ready',
         summary,
         invites: invites.invites,
         activityByProspect: invites.activityByProspect,
-        todayActions: today.actions,
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'unknown';
@@ -409,7 +385,7 @@ export function CockpitPage() {
     );
   }
 
-  const { summary, invites, activityByProspect, todayActions } = view;
+  const { summary, invites, activityByProspect } = view;
 
   const handleTodayClick = useCallback((prospectId: string) => {
     setForceExpandedId(prospectId);
@@ -444,10 +420,9 @@ export function CockpitPage() {
       <CountsStrip counts={summary.counts} />
 
       {/* Today's Actions — derived from existing pipeline (callbacks, due
-          follow-ups, drafts). Renders only when there's something to act on. */}
-      {todayActions.length > 0 && (
-        <TodaysActionsCard actions={todayActions} onJump={handleTodayClick} />
-      )}
+          follow-ups, expiring windows). Renders the locked-spec 1.9 bias
+          prompt as its own empty state, so it's always present. */}
+      <TodaysActions onJump={handleTodayClick} />
 
       {/* Two-column: My Invites (main) + side rail (My Sponsor, CRM hint) */}
       <div className="mt-12 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-start">
@@ -815,82 +790,6 @@ function InviteRow({
       )}
     </li>
   );
-}
-
-// ── Today's Actions card ─────────────────────────────────────────────────
-
-function TodaysActionsCard({
-  actions,
-  onJump,
-}: {
-  actions: TodayActionItem[];
-  onJump: (prospectId: string) => void;
-}) {
-  return (
-    <div className="mt-10">
-      <SectionLabel>Today's Actions</SectionLabel>
-      <ul className="bg-cream/[0.02] border border-gold/20 rounded-md divide-y divide-cream/10">
-        {actions.map((a, i) => (
-          <li key={`${a.kind}-${a.prospectId}-${i}`}>
-            <button
-              type="button"
-              onClick={() => onJump(a.prospectId)}
-              className="w-full text-left flex items-center gap-4 px-4 py-3 hover:bg-cream/[0.03] transition-colors"
-            >
-              <ActionBadge kind={a.kind} />
-              <span className="flex-1 min-w-0">
-                <span className="text-cream text-[15px]">
-                  {a.firstName} {a.lastInitial}.
-                </span>
-                <span className="text-cream-faint text-[13px] ml-2">
-                  {actionLabel(a)}
-                </span>
-              </span>
-              <span className="font-mono text-[11px] text-cream-faint tracking-[0.04em] shrink-0">
-                {formatActionAt(a)}
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function ActionBadge({ kind }: { kind: TodayActionKind }) {
-  const cfg =
-    kind === 'callback'
-      ? { label: 'CALLBACK', cls: 'text-gold border-gold/40 bg-gold/[0.06]' }
-      : kind === 'followup'
-      ? { label: 'FOLLOW-UP', cls: 'text-teal border-teal/40 bg-teal/[0.06]' }
-      : { label: 'DRAFT', cls: 'text-cream-mute border-cream/15 bg-cream/[0.03]' };
-  return (
-    <span
-      className={
-        'inline-block font-mono tracking-[0.08em] text-[10px] px-2 py-0.5 rounded border shrink-0 ' +
-        cfg.cls
-      }
-    >
-      {cfg.label}
-    </span>
-  );
-}
-
-function actionLabel(a: TodayActionItem): string {
-  if (a.kind === 'callback' && a.intent) {
-    return `· ${INTENT_LABEL[a.intent]}`;
-  }
-  if (a.kind === 'followup') {
-    return '· follow-up due';
-  }
-  return '· draft never sent';
-}
-
-function formatActionAt(a: TodayActionItem): string {
-  if (a.kind === 'followup' && a.followUpDueAt) {
-    return `due ${formatDate(a.followUpDueAt)}`;
-  }
-  return formatDate(a.at);
 }
 
 // ── CRM panel (per-invite) ───────────────────────────────────────────────

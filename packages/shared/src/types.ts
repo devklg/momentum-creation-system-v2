@@ -2242,3 +2242,75 @@ export type AdminLiveEvent = AdminLivePlacementEvent | AdminLiveAuditEvent;
 export interface AdminLiveSnapshot {
   events: AdminLiveEvent[];
 }
+
+/* ─── #134 Cockpit Today's Actions ─────────────────────────────────────────
+ * The DERIVED card at the top of the cockpit (wireframe 3.3, locked-spec
+ * 1.8/1.9). Reads the BA's existing pipeline (callbacks + CRM follow-ups +
+ * prospects' expiresAt) and surfaces what needs action TODAY, ordered by
+ * urgency: a raised hand > a follow-up due > a window about to close.
+ *
+ * No new persistence — every field is derived from collections already on
+ * disk (callback_requests, crm_followups, prospects). The cockpit's existing
+ * inline Today's Actions (Chat #132, kinds callback/followup/draft) is the
+ * predecessor; this block supersedes it with the #134 spec — 'draft' drops
+ * out (not urgent) and 'expiring' enters (8-week window closing, 3.7), with
+ * an explicit bias prompt for the empty state ("Who are you sharing with
+ * today?", 1.9).
+ *
+ * Distinct names from the #132 block (TodayActionKind / TodaysActionsResponse
+ * already exported) to keep the append-only rule on this file — we don't
+ * widen or edit the existing union, we ship a new one alongside.
+ *
+ * Compliance (locked-spec 3.10): BA-facing only. No income/placement/comp
+ * language; action labels are funnel progress ("asked for a callback",
+ * "follow-up due", "window closes soon").
+ */
+
+/** The three kinds of action the cockpit surfaces, in urgency order. */
+export type CockpitActionKind = 'callback' | 'followup' | 'expiring';
+
+/**
+ * One item on the cockpit's Today's Actions card. Discriminated by `kind`
+ * so each branch carries only the fields it actually has — a callback
+ * has an intent; a followup has a dueAt; an expiring window has an
+ * expiresAt. `at` is the timestamp the cockpit sorts on inside a tier
+ * (callback.createdAt, followup.dueAt, prospect.expiresAt).
+ */
+export type CockpitActionItem =
+  | {
+      kind: 'callback';
+      prospectId: string;
+      firstName: string;
+      lastInitial: string;
+      at: IsoTimestamp;
+      intent: CallbackIntent | null;
+    }
+  | {
+      kind: 'followup';
+      prospectId: string;
+      firstName: string;
+      lastInitial: string;
+      at: IsoTimestamp;
+      followUpDueAt: IsoTimestamp;
+    }
+  | {
+      kind: 'expiring';
+      prospectId: string;
+      firstName: string;
+      lastInitial: string;
+      at: IsoTimestamp;
+      expiresAt: IsoTimestamp;
+    };
+
+/**
+ * Response from GET /api/cockpit/todays-actions. `actions` is the urgency-
+ * ordered list (callbacks first, then due follow-ups, then expiring
+ * windows). `biasPrompt` is the copy the empty state renders — server-
+ * supplied so locked-spec 1.9 wording lives in one place.
+ */
+export interface CockpitTodaysActionsResponse {
+  ok: true;
+  actions: CockpitActionItem[];
+  /** Empty-state bias copy (locked-spec 1.9). Always present. */
+  biasPrompt: string;
+}
