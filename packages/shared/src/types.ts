@@ -1331,3 +1331,213 @@ export interface GeneratorInviteResponse {
     expiresAt: string;
   };
 }
+/* ───────────────────────────────────────────────────────────────
+ * BA CRM write-side (Chat #132 — wireframe 3.3 CRM leaves)
+ * ───────────────────────────────────────────────────────────────
+ *
+ * The WRITE-side companion to the Chat #121 cockpit READ-side. The cockpit
+ * lets a BA SEE every prospect they invited; this module lets the BA ACT on
+ * them — notes, follow-up reminders, dispositions, re-invite — without
+ * touching the read pipeline.
+ *
+ * Five fixed disposition tags (Kevin lock):
+ *   new-ba | new-customer | interested | not-interested | later
+ * Dispositions are BA-set state, distinct from the funnel rail (which the
+ * PROSPECT drives). A prospect can be on any token state and carry any
+ * disposition independently.
+ *
+ * Re-invite cooldown: 7 days from the most recent sentAt. A draft (sentAt
+ * null) has no cooldown — that path is just the existing "I sent this".
+ *
+ * Sponsor immutability (locked-spec 3.5): every CRM record carries the
+ * authed session BA's baId and every read/write filters on it. A note,
+ * follow-up, or disposition belongs to ONE (prospect, BA) pair — if two
+ * BAs ever shared a prospect (today they can't), each would have their own
+ * private CRM.
+ *
+ * Compliance (locked-spec 3.10): BA-facing surface only. Notes and tags are
+ * never rendered on .com. Today's Actions list is operational ("Sarah asked
+ * for a callback") and carries no income/placement language.
+ */
+
+export type CrmDisposition =
+  | 'new-ba'
+  | 'new-customer'
+  | 'interested'
+  | 'not-interested'
+  | 'later';
+
+/** All five dispositions in BA-action-priority order (for UI rendering). */
+export const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
+  'new-ba',
+  'new-customer',
+  'interested',
+  'later',
+  'not-interested',
+] as const;
+
+/**
+ * A BA-private timestamped note about a prospect. Append-only — notes are
+ * never edited or deleted, so the cockpit can show the BA their evolving
+ * thinking. One prospect can carry many notes; the cockpit renders them
+ * newest-first.
+ */
+export interface CrmNoteRecord {
+  noteId: string;
+  prospectId: string;
+  sponsorBaId: string;
+  text: string;
+  createdAt: IsoTimestamp;
+}
+
+/**
+ * One follow-up reminder per (prospect, BA). Setting a new follow-up
+ * replaces the previous one (latest wins). Clearing sets clearedAt — the
+ * record stays for audit, but Today's Actions filters it out.
+ */
+export interface CrmFollowUpRecord {
+  prospectId: string;
+  sponsorBaId: string;
+  dueAt: IsoTimestamp;
+  createdAt: IsoTimestamp;
+  clearedAt: IsoTimestamp | null;
+}
+
+/**
+ * Current disposition tag for a (prospect, BA). Only the latest value
+ * matters; the cockpit shows one pill. Stored as its own record so a future
+ * surface can audit the change history without us editing the prospect doc.
+ */
+export interface CrmDispositionRecord {
+  prospectId: string;
+  sponsorBaId: string;
+  disposition: CrmDisposition;
+  updatedAt: IsoTimestamp;
+}
+
+/** POST /api/crm/:prospectId/notes — append a note. */
+export interface CreateNotePayload {
+  text: string;
+}
+
+export interface CreateNoteResponse {
+  ok: true;
+  note: CrmNoteRecord;
+}
+
+/** POST /api/crm/:prospectId/followup — set or replace the active follow-up. */
+export interface SetFollowUpPayload {
+  /** ISO timestamp. Must be in the future. */
+  dueAt: IsoTimestamp;
+}
+
+export interface SetFollowUpResponse {
+  ok: true;
+  followUp: CrmFollowUpRecord;
+}
+
+/** DELETE /api/crm/:prospectId/followup — clear the active follow-up. */
+export interface ClearFollowUpResponse {
+  ok: true;
+}
+
+/**
+ * POST /api/crm/:prospectId/disposition — set or clear the disposition.
+ * `null` clears the tag (prospect has no current disposition).
+ */
+export interface SetDispositionPayload {
+  disposition: CrmDisposition | null;
+}
+
+export interface SetDispositionResponse {
+  ok: true;
+  disposition: CrmDisposition | null;
+}
+
+/**
+ * Per-prospect CRM bundle returned by GET /api/crm/:prospectId. Loaded
+ * lazily when the BA expands an invite row — keeps the initial cockpit
+ * fetch fast.
+ *
+ * `reinviteAvailableAt` is null when the BA can re-invite right now. When
+ * non-null, the cockpit disables the button and renders "available {at}".
+ */
+export interface ProspectCrmBundle {
+  prospectId: string;
+  notes: CrmNoteRecord[];
+  followUp: CrmFollowUpRecord | null;
+  disposition: CrmDisposition | null;
+  reinviteAvailableAt: IsoTimestamp | null;
+}
+
+export interface CrmBundleResponse {
+  ok: true;
+  bundle: ProspectCrmBundle;
+}
+
+/**
+ * One item on the Today's Actions card. Three sources:
+ *   - 'callback'  → prospect raised a hand (latest unhandled intent)
+ *   - 'followup'  → BA-set reminder whose dueAt has elapsed
+ *   - 'draft'     → prospect minted but never marked sent
+ *
+ * `at` is the timestamp the action surfaced (callback time / follow-up
+ * dueAt / mint time). The cockpit sorts by it (newest-first).
+ */
+export type TodayActionKind = 'callback' | 'followup' | 'draft';
+
+export interface TodayActionItem {
+  kind: TodayActionKind;
+  prospectId: string;
+  firstName: string;
+  lastInitial: string;
+  at: IsoTimestamp;
+  /** Set when kind = 'callback'; null otherwise. */
+  intent: CallbackIntent | null;
+  /** Set when kind = 'followup'; null otherwise. */
+  followUpDueAt: IsoTimestamp | null;
+}
+
+export interface TodaysActionsResponse {
+  ok: true;
+  actions: TodayActionItem[];
+}
+
+/**
+ * POST /api/crm/:prospectId/reinvite — bump sentAt and append an activity
+ * entry. If the existing token has expired, the spine also mints a fresh
+ * one — `fresh: true` distinguishes the two cases for the cockpit toast.
+ *
+ * Cooldown: 7 days from the prospect's current sentAt. If the BA has not
+ * yet marked the original sent (sentAt null), reinvite is forbidden — the
+ * BA should use the existing "I sent this" path.
+ */
+export interface ReinviteResponse {
+  ok: true;
+  prospectId: string;
+  token: string;
+  inviteUrl: string;
+  sentAt: IsoTimestamp;
+  expiresAt: IsoTimestamp;
+  /** True when a fresh token was minted (the previous one had expired). */
+  fresh: boolean;
+}
+
+export interface ReinviteCooldownError {
+  ok: false;
+  error: 'cooldown';
+  /** Timestamp the BA can next re-invite this prospect. */
+  availableAt: IsoTimestamp;
+}
+
+export interface ReinviteUnsentError {
+  ok: false;
+  /** The prospect has never been marked sent — use "I sent this" instead. */
+  error: 'not_yet_sent';
+}
+
+export interface ReinviteTerminalError {
+  ok: false;
+  /** Cannot re-invite an enrolled prospect. */
+  error: 'enrolled';
+}

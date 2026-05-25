@@ -21,6 +21,7 @@ import { prospectTokenRoutes } from './routes/p.js';
 import { prospectLoginRoutes } from './routes/p-login.js';
 import { invitationRoutes } from './routes/invitations.js';
 import { cockpitRoutes } from './routes/cockpit.js';
+import { crmRoutes } from './routes/crm.js';
 import { scriptmakerRoutes } from './routes/scriptmaker.js';
 import { ivoryRoutes } from './routes/ivory.js';
 // Imported so the module is part of the build graph and verified by tsc even
@@ -120,6 +121,14 @@ app.use('/api/invitations', invitationRoutes);
 // Cockpit read-side (Chat #121) — the My Invites loop. GET-only; the BA id
 // comes from the session, every read is scoped to that BA (locked-spec 3.5).
 app.use('/api/cockpit', cockpitRoutes);
+
+// BA CRM write-side (Chat #132) — wireframe 3.3 CRM leaves. The WRITE
+// companion to /api/cockpit/*: notes, follow-up reminders, dispositions,
+// re-invite, and the Today's Actions card (derived from existing pipeline).
+// Each handler applies (requireAuth, requireMichaelComplete) internally;
+// every mutation runs assertOwnership(prospectId, session.baId) first so a
+// BA can only read or write their OWN prospects (locked-spec 3.5).
+app.use('/api/crm', crmRoutes);
 
 // ScriptMaker draft engine (Chat #122) — the video-library front door's
 // server side. Drafts a product-anchored invitation message; the BA carries

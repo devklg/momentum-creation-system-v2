@@ -130,6 +130,105 @@ interface MarkInvitationSentResponse {
   alreadySent: boolean;
 }
 
+// ── CRM write-side wire shapes (mirror packages/shared/src/types.ts) ─────
+// Per .team TS6059 convention: API shapes redeclared locally; the shared
+// package remains source-of-truth (see lesson_team_app_cannot_import_shared
+// _types_ts6059_chat120). Keep in sync with shared CRM types added Chat #132.
+
+type CrmDisposition =
+  | 'new-ba'
+  | 'new-customer'
+  | 'interested'
+  | 'not-interested'
+  | 'later';
+
+const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
+  'new-ba',
+  'new-customer',
+  'interested',
+  'later',
+  'not-interested',
+];
+
+const DISPOSITION_LABEL: Record<CrmDisposition, string> = {
+  'new-ba': 'New BA',
+  'new-customer': 'New customer',
+  interested: 'Interested',
+  later: 'Later',
+  'not-interested': 'Not interested',
+};
+
+interface CrmNoteRecord {
+  noteId: string;
+  prospectId: string;
+  sponsorBaId: string;
+  text: string;
+  createdAt: string;
+}
+
+interface CrmFollowUpRecord {
+  prospectId: string;
+  sponsorBaId: string;
+  dueAt: string;
+  createdAt: string;
+  clearedAt: string | null;
+}
+
+interface ProspectCrmBundle {
+  prospectId: string;
+  notes: CrmNoteRecord[];
+  followUp: CrmFollowUpRecord | null;
+  disposition: CrmDisposition | null;
+  reinviteAvailableAt: string | null;
+}
+
+interface CrmBundleResponse {
+  ok: true;
+  bundle: ProspectCrmBundle;
+}
+
+type TodayActionKind = 'callback' | 'followup' | 'draft';
+
+interface TodayActionItem {
+  kind: TodayActionKind;
+  prospectId: string;
+  firstName: string;
+  lastInitial: string;
+  at: string;
+  intent: CallbackIntent | null;
+  followUpDueAt: string | null;
+}
+
+interface TodaysActionsResponse {
+  ok: true;
+  actions: TodayActionItem[];
+}
+
+interface CreateNoteResponse {
+  ok: true;
+  note: CrmNoteRecord;
+}
+
+interface SetFollowUpResponse {
+  ok: true;
+  followUp: CrmFollowUpRecord;
+}
+
+interface SetDispositionResponse {
+  ok: true;
+  disposition: CrmDisposition | null;
+}
+
+interface ReinviteResponse {
+  ok: true;
+  prospectId: string;
+  token: string;
+  inviteUrl: string;
+  sentAt: string;
+  expiresAt: string;
+  fresh: boolean;
+}
+
 // ── Status display config ────────────────────────────────────────────────
 
 const STATUS_META: Record<
@@ -202,33 +301,46 @@ type View =
       summary: CockpitSummaryResponse;
       invites: InviteSummary[];
       activityByProspect: Record<string, InvitationActivityEntry[]>;
+      todayActions: TodayActionItem[];
     };
 
 export function CockpitPage() {
   const navigate = useNavigate();
   const [view, setView] = useState<View>({ kind: 'loading' });
+  // When the BA clicks an item in Today's Actions, we record the target
+  // prospectId here; InviteRow watches for matches and self-expands. We
+  // bump a tick so re-clicking the same id (after a manual collapse) still
+  // re-opens — the prop change is what triggers the effect inside the row.
+  const [forceExpandedId, setForceExpandedId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const [summaryRes, invitesRes] = await Promise.all([
+      const [summaryRes, invitesRes, todayRes] = await Promise.all([
         fetch('/api/cockpit/summary', { credentials: 'include' }),
         fetch('/api/cockpit/invites', { credentials: 'include' }),
+        fetch('/api/crm/today', { credentials: 'include' }),
       ]);
-      if (summaryRes.status === 401 || invitesRes.status === 401) {
+      if (
+        summaryRes.status === 401 ||
+        invitesRes.status === 401 ||
+        todayRes.status === 401
+      ) {
         navigate('/register');
         return;
       }
-      if (!summaryRes.ok || !invitesRes.ok) {
+      if (!summaryRes.ok || !invitesRes.ok || !todayRes.ok) {
         setView({ kind: 'error', message: 'Could not load your cockpit. Try again.' });
         return;
       }
       const summary = (await summaryRes.json()) as CockpitSummaryResponse;
       const invites = (await invitesRes.json()) as MyInvitesResponse;
+      const today = (await todayRes.json()) as TodaysActionsResponse;
       setView({
         kind: 'ready',
         summary,
         invites: invites.invites,
         activityByProspect: invites.activityByProspect,
+        todayActions: today.actions,
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'unknown';
@@ -297,7 +409,14 @@ export function CockpitPage() {
     );
   }
 
-  const { summary, invites, activityByProspect } = view;
+  const { summary, invites, activityByProspect, todayActions } = view;
+
+  const handleTodayClick = useCallback((prospectId: string) => {
+    setForceExpandedId(prospectId);
+    // Scroll to the row. The <li> carries id={`invite-${prospectId}`}.
+    const el = document.getElementById(`invite-${prospectId}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   return (
     <Shell>
@@ -324,7 +443,13 @@ export function CockpitPage() {
       {/* Counts strip */}
       <CountsStrip counts={summary.counts} />
 
-      {/* Two-column: My Invites (main) + side rail (My Sponsor, CRM stub) */}
+      {/* Today's Actions — derived from existing pipeline (callbacks, due
+          follow-ups, drafts). Renders only when there's something to act on. */}
+      {todayActions.length > 0 && (
+        <TodaysActionsCard actions={todayActions} onJump={handleTodayClick} />
+      )}
+
+      {/* Two-column: My Invites (main) + side rail (My Sponsor, CRM hint) */}
       <div className="mt-12 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-start">
         <section>
           <SectionLabel>My Invites</SectionLabel>
@@ -338,6 +463,11 @@ export function CockpitPage() {
                   invite={inv}
                   activity={activityByProspect[inv.prospectId] ?? []}
                   onMarkedSent={patchSent}
+                  forceExpandedId={forceExpandedId}
+                  onReinvited={() => {
+                    setView({ kind: 'loading' });
+                    void load();
+                  }}
                 />
               ))}
             </ul>
@@ -353,11 +483,9 @@ export function CockpitPage() {
             <SectionLabel>CRM</SectionLabel>
             <div className="bg-cream/[0.02] border border-cream/10 rounded-md p-5">
               <p className="text-cream-mute text-[14px] leading-[1.6]">
-                Notes, follow-up reminders, and tags for each prospect are
-                coming here. For now, your invites above are your working list.
-              </p>
-              <p className="text-cream-faint text-[11px] font-mono tracking-[0.1em] mt-3 uppercase">
-                Coming soon
+                Notes, follow-ups, and tags live inside each invite row.
+                Expand any row to write a private note, set a reminder, tag
+                where the conversation stands, or re-invite.
               </p>
             </div>
           </div>
@@ -488,15 +616,24 @@ function InviteRow({
   invite,
   activity,
   onMarkedSent,
+  forceExpandedId,
+  onReinvited,
 }: {
   invite: InviteSummary;
   activity: InvitationActivityEntry[];
   onMarkedSent: (prospectId: string, sentAt: string) => void;
+  forceExpandedId: string | null;
+  onReinvited: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [marking, setMarking] = useState(false);
   const [markErr, setMarkErr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Today's Actions click → parent sets forceExpandedId; we open inline.
+  useEffect(() => {
+    if (forceExpandedId === invite.prospectId) setExpanded(true);
+  }, [forceExpandedId, invite.prospectId]);
 
   const meta = STATUS_META[invite.status];
   const inviteUrl = invite.token
@@ -539,7 +676,10 @@ function InviteRow({
   }, [inviteUrl]);
 
   return (
-    <li className="bg-cream/[0.02] border border-cream/10 rounded-md overflow-hidden">
+    <li
+      id={`invite-${invite.prospectId}`}
+      className="bg-cream/[0.02] border border-cream/10 rounded-md overflow-hidden scroll-mt-6"
+    >
       {/* Row head */}
       <div className="flex items-start justify-between gap-3 p-4">
         <div className="min-w-0">
@@ -662,8 +802,592 @@ function InviteRow({
               </Button>
             </div>
           )}
+
+          {/* CRM panel — notes, follow-up, disposition, re-invite. Loads on
+              first expand; sponsor-scoped on the server (locked-spec 3.5). */}
+          <CrmPanel
+            prospectId={invite.prospectId}
+            isDraft={invite.sentAt === null}
+            isTerminal={invite.status === 'enrolled'}
+            onReinvited={onReinvited}
+          />
         </div>
       )}
     </li>
+  );
+}
+
+// ── Today's Actions card ─────────────────────────────────────────────────
+
+function TodaysActionsCard({
+  actions,
+  onJump,
+}: {
+  actions: TodayActionItem[];
+  onJump: (prospectId: string) => void;
+}) {
+  return (
+    <div className="mt-10">
+      <SectionLabel>Today's Actions</SectionLabel>
+      <ul className="bg-cream/[0.02] border border-gold/20 rounded-md divide-y divide-cream/10">
+        {actions.map((a, i) => (
+          <li key={`${a.kind}-${a.prospectId}-${i}`}>
+            <button
+              type="button"
+              onClick={() => onJump(a.prospectId)}
+              className="w-full text-left flex items-center gap-4 px-4 py-3 hover:bg-cream/[0.03] transition-colors"
+            >
+              <ActionBadge kind={a.kind} />
+              <span className="flex-1 min-w-0">
+                <span className="text-cream text-[15px]">
+                  {a.firstName} {a.lastInitial}.
+                </span>
+                <span className="text-cream-faint text-[13px] ml-2">
+                  {actionLabel(a)}
+                </span>
+              </span>
+              <span className="font-mono text-[11px] text-cream-faint tracking-[0.04em] shrink-0">
+                {formatActionAt(a)}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ActionBadge({ kind }: { kind: TodayActionKind }) {
+  const cfg =
+    kind === 'callback'
+      ? { label: 'CALLBACK', cls: 'text-gold border-gold/40 bg-gold/[0.06]' }
+      : kind === 'followup'
+      ? { label: 'FOLLOW-UP', cls: 'text-teal border-teal/40 bg-teal/[0.06]' }
+      : { label: 'DRAFT', cls: 'text-cream-mute border-cream/15 bg-cream/[0.03]' };
+  return (
+    <span
+      className={
+        'inline-block font-mono tracking-[0.08em] text-[10px] px-2 py-0.5 rounded border shrink-0 ' +
+        cfg.cls
+      }
+    >
+      {cfg.label}
+    </span>
+  );
+}
+
+function actionLabel(a: TodayActionItem): string {
+  if (a.kind === 'callback' && a.intent) {
+    return `· ${INTENT_LABEL[a.intent]}`;
+  }
+  if (a.kind === 'followup') {
+    return '· follow-up due';
+  }
+  return '· draft never sent';
+}
+
+function formatActionAt(a: TodayActionItem): string {
+  if (a.kind === 'followup' && a.followUpDueAt) {
+    return `due ${formatDate(a.followUpDueAt)}`;
+  }
+  return formatDate(a.at);
+}
+
+// ── CRM panel (per-invite) ───────────────────────────────────────────────
+
+function CrmPanel({
+  prospectId,
+  isDraft,
+  isTerminal,
+  onReinvited,
+}: {
+  prospectId: string;
+  isDraft: boolean;
+  isTerminal: boolean;
+  onReinvited: () => void;
+}) {
+  const [bundle, setBundle] = useState<ProspectCrmBundle | null>(null);
+  const [loadErr, setLoadErr] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const reload = useCallback(async () => {
+    setLoading(true);
+    setLoadErr(null);
+    try {
+      const res = await fetch(`/api/crm/${prospectId}`, { credentials: 'include' });
+      if (!res.ok) {
+        setLoadErr('Could not load CRM for this row.');
+        return;
+      }
+      const data = (await res.json()) as CrmBundleResponse;
+      setBundle(data.bundle);
+    } catch {
+      setLoadErr('Network error loading CRM.');
+    } finally {
+      setLoading(false);
+    }
+  }, [prospectId]);
+
+  useEffect(() => {
+    void reload();
+  }, [reload]);
+
+  if (loading && !bundle) {
+    return (
+      <div className="border-t border-cream/10 pt-4">
+        <p className="font-mono tracking-[0.12em] text-[10px] text-cream-faint uppercase mb-2">
+          CRM
+        </p>
+        <p className="text-cream-faint text-[13px]">Loading…</p>
+      </div>
+    );
+  }
+
+  if (loadErr || !bundle) {
+    return (
+      <div className="border-t border-cream/10 pt-4">
+        <p className="font-mono tracking-[0.12em] text-[10px] text-cream-faint uppercase mb-2">
+          CRM
+        </p>
+        <p className="text-red-400 font-mono text-[11px] tracking-[0.04em]">
+          {loadErr ?? 'CRM unavailable.'}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="border-t border-cream/10 pt-4 space-y-5">
+      <p className="font-mono tracking-[0.12em] text-[10px] text-cream-faint uppercase">
+        CRM
+      </p>
+
+      <DispositionRow
+        prospectId={prospectId}
+        current={bundle.disposition}
+        onChanged={(next) => setBundle({ ...bundle, disposition: next })}
+      />
+
+      <FollowUpRow
+        prospectId={prospectId}
+        current={bundle.followUp}
+        onChanged={(next) => setBundle({ ...bundle, followUp: next })}
+      />
+
+      <NotesRow
+        prospectId={prospectId}
+        notes={bundle.notes}
+        onAdded={(note) => setBundle({ ...bundle, notes: [note, ...bundle.notes] })}
+      />
+
+      <ReinviteRow
+        prospectId={prospectId}
+        isDraft={isDraft}
+        isTerminal={isTerminal}
+        availableAt={bundle.reinviteAvailableAt}
+        onReinvited={onReinvited}
+      />
+    </div>
+  );
+}
+
+// Disposition: five pills + clear.
+function DispositionRow({
+  prospectId,
+  current,
+  onChanged,
+}: {
+  prospectId: string;
+  current: CrmDisposition | null;
+  onChanged: (next: CrmDisposition | null) => void;
+}) {
+  const [saving, setSaving] = useState<CrmDisposition | 'clear' | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  const set = useCallback(
+    async (disposition: CrmDisposition | null) => {
+      setSaving(disposition ?? 'clear');
+      setErr(null);
+      try {
+        const res = await fetch(`/api/crm/${prospectId}/disposition`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ disposition }),
+        });
+        const data = (await res.json()) as
+          | SetDispositionResponse
+          | { ok: false; error?: string };
+        if (res.ok && data.ok) {
+          onChanged(data.disposition);
+        } else {
+          setErr('Could not save. Try once more.');
+        }
+      } catch {
+        setErr('Network error.');
+      } finally {
+        setSaving(null);
+      }
+    },
+    [prospectId, onChanged],
+  );
+
+  return (
+    <div>
+      <p className="font-mono tracking-[0.1em] text-[10px] text-cream-faint uppercase mb-2">
+        Where this stands
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {CRM_DISPOSITIONS.map((d) => {
+          const active = current === d;
+          return (
+            <button
+              key={d}
+              type="button"
+              disabled={saving !== null}
+              onClick={() => set(active ? null : d)}
+              className={
+                'font-mono tracking-[0.06em] text-[11px] px-3 py-1 rounded border transition-colors disabled:opacity-50 ' +
+                (active
+                  ? 'text-gold border-gold/60 bg-gold/[0.1]'
+                  : 'text-cream-mute border-cream/15 bg-cream/[0.02] hover:border-gold/30')
+              }
+            >
+              {DISPOSITION_LABEL[d]}
+            </button>
+          );
+        })}
+        {current && (
+          <button
+            type="button"
+            disabled={saving !== null}
+            onClick={() => set(null)}
+            className="font-mono tracking-[0.06em] text-[11px] px-3 py-1 rounded border border-cream/10 text-cream-faint hover:text-red-400 disabled:opacity-50"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+      {err && (
+        <p className="text-red-400 font-mono text-[11px] tracking-[0.04em] mt-2">
+          {err}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// Follow-up: date+time picker (datetime-local) and clear button.
+function FollowUpRow({
+  prospectId,
+  current,
+  onChanged,
+}: {
+  prospectId: string;
+  current: CrmFollowUpRecord | null;
+  onChanged: (next: CrmFollowUpRecord | null) => void;
+}) {
+  const [draft, setDraft] = useState<string>('');
+  const [saving, setSaving] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const save = useCallback(async () => {
+    if (!draft) {
+      setErr('Pick a date and time first.');
+      return;
+    }
+    const dueAt = new Date(draft);
+    if (Number.isNaN(dueAt.getTime())) {
+      setErr('That date didn’t parse.');
+      return;
+    }
+    if (dueAt.getTime() <= Date.now()) {
+      setErr('Follow-up must be in the future.');
+      return;
+    }
+    setSaving(true);
+    setErr(null);
+    try {
+      const res = await fetch(`/api/crm/${prospectId}/followup`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dueAt: dueAt.toISOString() }),
+      });
+      const data = (await res.json()) as
+        | SetFollowUpResponse
+        | { ok: false; error?: string };
+      if (res.ok && data.ok) {
+        onChanged(data.followUp);
+        setDraft('');
+      } else {
+        setErr('Could not save. Try once more.');
+      }
+    } catch {
+      setErr('Network error.');
+    } finally {
+      setSaving(false);
+    }
+  }, [prospectId, draft, onChanged]);
+
+  const clear = useCallback(async () => {
+    setClearing(true);
+    setErr(null);
+    try {
+      const res = await fetch(`/api/crm/${prospectId}/followup`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        onChanged(null);
+      } else {
+        setErr('Could not clear. Try once more.');
+      }
+    } catch {
+      setErr('Network error.');
+    } finally {
+      setClearing(false);
+    }
+  }, [prospectId, onChanged]);
+
+  return (
+    <div>
+      <p className="font-mono tracking-[0.1em] text-[10px] text-cream-faint uppercase mb-2">
+        Follow-up reminder
+      </p>
+      {current ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-cream text-[14px]">
+            Due {formatDueAt(current.dueAt)}
+          </span>
+          <button
+            type="button"
+            disabled={clearing}
+            onClick={clear}
+            className="font-mono tracking-[0.06em] text-[11px] text-cream-faint hover:text-red-400 disabled:opacity-50"
+          >
+            {clearing ? 'Clearing…' : 'Clear'}
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="datetime-local"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            aria-label="Follow-up date and time"
+            title="Follow-up date and time"
+            className="bg-cream/[0.04] border border-cream/15 rounded px-2 py-1 text-cream font-mono text-[13px]"
+          />
+          <Button
+            onClick={save}
+            disabled={saving || !draft}
+            className="bg-cream/[0.05] text-cream border border-cream/15 hover:border-gold/40 font-mono tracking-[0.04em] text-[12px] px-4 py-2 h-auto"
+          >
+            {saving ? 'Saving…' : 'Set reminder'}
+          </Button>
+        </div>
+      )}
+      {err && (
+        <p className="text-red-400 font-mono text-[11px] tracking-[0.04em] mt-2">
+          {err}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function formatDueAt(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  } catch {
+    return iso;
+  }
+}
+
+// Notes: append-only textarea + chronological list.
+function NotesRow({
+  prospectId,
+  notes,
+  onAdded,
+}: {
+  prospectId: string;
+  notes: CrmNoteRecord[];
+  onAdded: (note: CrmNoteRecord) => void;
+}) {
+  const [draft, setDraft] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const save = useCallback(async () => {
+    const text = draft.trim();
+    if (!text) return;
+    setSaving(true);
+    setErr(null);
+    try {
+      const res = await fetch(`/api/crm/${prospectId}/notes`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      const data = (await res.json()) as
+        | CreateNoteResponse
+        | { ok: false; error?: string };
+      if (res.ok && data.ok) {
+        onAdded(data.note);
+        setDraft('');
+      } else {
+        setErr('Could not save. Try once more.');
+      }
+    } catch {
+      setErr('Network error.');
+    } finally {
+      setSaving(false);
+    }
+  }, [prospectId, draft, onAdded]);
+
+  return (
+    <div>
+      <p className="font-mono tracking-[0.1em] text-[10px] text-cream-faint uppercase mb-2">
+        Private notes
+      </p>
+      <div className="space-y-2">
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          rows={2}
+          placeholder="Just for you — what's on your mind about this prospect?"
+          className="w-full bg-cream/[0.04] border border-cream/15 rounded px-3 py-2 text-cream font-mono text-[13px] leading-[1.5] placeholder:text-cream-faint resize-y"
+        />
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={save}
+            disabled={saving || draft.trim().length === 0}
+            className="bg-cream/[0.05] text-cream border border-cream/15 hover:border-gold/40 font-mono tracking-[0.04em] text-[12px] px-4 py-2 h-auto"
+          >
+            {saving ? 'Saving…' : 'Add note'}
+          </Button>
+          {err && (
+            <p className="text-red-400 font-mono text-[11px] tracking-[0.04em]">
+              {err}
+            </p>
+          )}
+        </div>
+      </div>
+      {notes.length > 0 && (
+        <ul className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+          {notes.map((n) => (
+            <li
+              key={n.noteId}
+              className="bg-cream/[0.02] border border-cream/10 rounded px-3 py-2"
+            >
+              <p className="text-cream text-[13px] leading-[1.55] whitespace-pre-wrap">
+                {n.text}
+              </p>
+              <p className="font-mono text-[10px] text-cream-faint tracking-[0.06em] mt-1">
+                {formatDueAt(n.createdAt)}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+// Re-invite: button + cooldown countdown. Disabled for unsent drafts (use
+// "I sent this" instead) and for enrolled prospects (terminal).
+function ReinviteRow({
+  prospectId,
+  isDraft,
+  isTerminal,
+  availableAt,
+  onReinvited,
+}: {
+  prospectId: string;
+  isDraft: boolean;
+  isTerminal: boolean;
+  availableAt: string | null;
+  onReinvited: () => void;
+}) {
+  const [sending, setSending] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [ok, setOk] = useState<string | null>(null);
+
+  // Disabled reasons in priority order.
+  let disabledReason: string | null = null;
+  if (isTerminal) disabledReason = 'This prospect is enrolled — no re-invite needed.';
+  else if (isDraft) disabledReason = 'Mark this draft sent first (button above), then you can re-invite.';
+  else if (availableAt) disabledReason = `Available again on ${formatDueAt(availableAt)}.`;
+
+  const send = useCallback(async () => {
+    setSending(true);
+    setErr(null);
+    setOk(null);
+    try {
+      const res = await fetch(`/api/crm/${prospectId}/reinvite`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = (await res.json()) as
+        | ReinviteResponse
+        | { ok: false; error?: string };
+      if (res.ok && data.ok) {
+        setOk(
+          data.fresh
+            ? 'Fresh link minted — the previous one had expired.'
+            : 'Marked re-sent. Cooldown restarts.',
+        );
+        onReinvited();
+      } else if ('error' in data && data.error === 'cooldown') {
+        setErr('Still in 7-day cooldown.');
+      } else if ('error' in data && data.error === 'not_yet_sent') {
+        setErr('Use "I sent this" first.');
+      } else {
+        setErr('Could not re-invite. Try once more.');
+      }
+    } catch {
+      setErr('Network error.');
+    } finally {
+      setSending(false);
+    }
+  }, [prospectId, onReinvited]);
+
+  return (
+    <div>
+      <p className="font-mono tracking-[0.1em] text-[10px] text-cream-faint uppercase mb-2">
+        Re-invite
+      </p>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          onClick={send}
+          disabled={sending || disabledReason !== null}
+          className="bg-cream/[0.05] text-cream border border-cream/15 hover:border-gold/40 font-mono tracking-[0.04em] text-[12px] px-4 py-2 h-auto disabled:opacity-50"
+        >
+          {sending ? 'Sending…' : 'Re-invite'}
+        </Button>
+        {disabledReason && (
+          <p className="text-cream-faint text-[12px]">{disabledReason}</p>
+        )}
+      </div>
+      {ok && (
+        <p className="text-teal font-mono text-[11px] tracking-[0.04em] mt-2">
+          {ok}
+        </p>
+      )}
+      {err && (
+        <p className="text-red-400 font-mono text-[11px] tracking-[0.04em] mt-2">
+          {err}
+        </p>
+      )}
+    </div>
   );
 }

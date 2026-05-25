@@ -104,12 +104,12 @@ One route /p/{token}, two faces by token state.
 - [ ] Upline cockpit event card (answers + audio link + scoring tags, sponsor-only)
 - DEP: Michael's 5 prompts (open); call-timing immediate-vs-delay (open — Kevin chose scheduler)
 
-### 3.3 BA Cockpit  `[~]` (#121)
+### 3.3 BA Cockpit  `[~]` (#121, #132)
 - [x] My Sponsor card (name+phone+SMS button; founder override for Kevin/Paul)
 - [x] My Invites pipeline (read side: status badges, expandable rows, 'I sent this')
 - [x] Welcome banner / left-rail surfaces nav
-- [ ] Today's actions card (derived from pipeline — what needs attention now)
-- [ ] CRM per invite (activity timeline, notes, follow-up reminders, tags, dispositions, re-invite) — STUBBED, own session
+- [x] Today's actions card (callbacks + due follow-ups + drafts, jump-to-row) (#132)
+- [x] CRM per invite — notes (append-only), follow-up reminders (one active, replace-or-clear), 5-tag dispositions (new-ba/new-customer/interested/later/not-interested), re-invite (7-day cooldown, mints fresh if expired) (#132)
 
 ### 3.4 Invitation engine
 - [x] **Spine** — plain-form front door + mint (phone-required #125) + cockpit read-side (#119,#120,#121)
