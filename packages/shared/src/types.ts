@@ -2508,3 +2508,297 @@ export interface AdminBaNoteResponse {
   ok: true;
   note: AdminBaNoteEntry;
 }
+
+/* ─────────────────────────────────────────────────────────────────
+ * /admin Section D · Prospect Oversight (locked-spec 4.D · wireframe 4.D)
+ * ─────────────────────────────────────────────────────────────────
+ *
+ * Kevin-only cross-team prospect directory + detail panel + four
+ * BA-requested interventions. Mirrors THREE on enrollment state but
+ * never overrides it — interventions are operational safety levers.
+ *
+ * Compliance spine (matches the brief verbatim):
+ *   - NO prospect score, income-potential rank, qualification rating,
+ *     or AI coaching anywhere in this surface (D.3 negation).
+ *   - Every mutation appends one AuditLogEntry with before/after,
+ *     requestingBaId, reason, timestamp.
+ *   - Monotonic queue is sacred: flush vacates a slot; move keeps
+ *     the same positionNumber, only sponsorBaId changes.
+ *   - Reuses AdminDashboardFilter (B.2) verbatim — narrowing only.
+ */
+
+/**
+ * D.1 column 10 — registration handoff state with THREE. Derived from
+ * the pool placement row's flush state (no separate handoff column
+ * exists on prospects today):
+ *   - placement still active (flushedAt=null)             → 'pending'
+ *   - flushReason='enrolled'                              → 'enrolled'
+ *   - flushReason='expired'                               → 'no_show'
+ *   - flushReason='archived' (admin-flushed early)        → 'withdrew'
+ * The mapping is documented in claude-notes-admin-d.md so the integrator
+ * sees the assumption explicitly.
+ */
+export type AdminProspectRegistrationHandoffState =
+  | 'pending'
+  | 'enrolled'
+  | 'no_show'
+  | 'withdrew';
+
+/**
+ * One row in the D.1 directory. The 10 columns the brief enumerates,
+ * plus the prospectId for row-click → ?prospectId=<id> deep-link
+ * navigation to D.2.
+ *
+ * Column ordering matches the brief; UI may reorder visually but the
+ * server payload is canonical.
+ */
+export interface AdminProspectDirectoryRow {
+  prospectId: string;
+  /** Column 1: first + last (full name for admin, not first+initial). */
+  firstName: string;
+  lastName: string;
+  /** Column 2: inviting BA — current sponsorBaId on the prospect record. */
+  sponsorBaId: string;
+  sponsorName: string;
+  /** Column 3: lifecycle state. 'video_25'/'video_50'/'video_75' map to
+   *  TokenState 'video_quarter'/'video_half'/'video_three_quarter'. The
+   *  client translates for display; the wire shape stays TokenState +
+   *  any non-token signal layered on top. */
+  presentationStatus: AdminProspectPresentationStatus;
+  /** Column 4: monotonic pool position; null pre-placement. */
+  positionNumber: number | null;
+  /** Column 5: the sponsor-routed URL Kevin can sandbox-preview. */
+  prospectUrl: string;
+  /** The opaque token the URL resolves; surfaced so the client can
+   *  build an admin-preview href without re-parsing the URL. */
+  token: string;
+  /** Column 6: token mint date. */
+  firstContactAt: IsoTimestamp;
+  /** Column 7: most recent activity (date + event-kind label). */
+  mostRecentActivity: {
+    at: IsoTimestamp;
+    eventKind: AdminProspectActivityEventKind;
+    label: string;
+  };
+  /** Column 8: days in holding tank since video_complete; null pre-placement. */
+  daysInHoldingTank: number | null;
+  /** Column 9: surfaced as the date by which follow-up is needed, NEVER
+   *  as a boolean system flag. Computed from activity-recency threshold:
+   *  most-recent-activity + locked threshold (currently 7 days). Null
+   *  when not applicable (enrolled, expired, or no activity yet). */
+  followUpNeededBy: IsoTimestamp | null;
+  /** Column 10: registration handoff state with THREE (derived; see type). */
+  registrationHandoffState: AdminProspectRegistrationHandoffState;
+}
+
+/**
+ * Presentation status — superset of TokenState with two non-token
+ * signals layered on top so the directory row can show "reading dossier"
+ * (callback-request submitted) and "webinar reserved" without forcing
+ * those into the lifecycle token state machine.
+ *
+ *   - All TokenState values pass through unchanged.
+ *   - 'callback_requested' surfaces when prospect submitted a callback
+ *     intent and state is still video_complete.
+ *   - 'webinar_reserved' surfaces when a webinar reservation exists and
+ *     state is still video_complete.
+ */
+export type AdminProspectPresentationStatus =
+  | TokenState
+  | 'callback_requested'
+  | 'webinar_reserved';
+
+/**
+ * Server response — GET /api/admin/prospects.
+ * Filter is reused verbatim from B.2; the client passes baId + leaderGroup
+ * in the query string. Rows are unsorted at wire level; the client sorts
+ * per column-click.
+ */
+export interface AdminProspectDirectoryResponse {
+  ok: true;
+  rows: AdminProspectDirectoryRow[];
+  appliedFilter: AdminDashboardFilter;
+  computedAt: IsoTimestamp;
+  /** Same honest note from B.2 — duplicated so the directory can render
+   *  it standalone if the user lands here before visiting /dashboard. */
+  leaderDetectionNote: string;
+}
+
+/**
+ * The activity-timeline event kinds for D.2. Each kind has a uniform
+ * envelope plus a kind-specific `details` payload.
+ *
+ * 'admin_*' kinds are written into the timeline as a projection of audit
+ * entries (the four interventions + the kevin-note add) — the audit log
+ * remains the source of truth; the timeline is a per-prospect derived
+ * view.
+ */
+export type AdminProspectActivityEventKind =
+  | 'token_minted'
+  | 'link_clicked'
+  | 'video_started'
+  | 'video_quarter'
+  | 'video_half'
+  | 'video_three_quarter'
+  | 'video_complete'
+  | 'placement'
+  | 'callback_requested'
+  | 'webinar_reserved'
+  | 'enrollment_marked'
+  | 'flush'
+  | 'admin_move'
+  | 'admin_reassign_sponsor'
+  | 'admin_manual_flush'
+  | 'admin_force_enroll'
+  | 'admin_kevin_note';
+
+export interface AdminProspectActivityEvent {
+  eventId: string;
+  /** When the event happened (wall-clock). */
+  at: IsoTimestamp;
+  kind: AdminProspectActivityEventKind;
+  /** Free-form label for the row: "Clicked link", "Manual flush by Kevin". */
+  label: string;
+  /** Source IP for link-click events (duplicate-tab detection); null otherwise. */
+  ip: string | null;
+  /** Referrer for link-click events; null otherwise. */
+  referrer: string | null;
+  /** Kind-specific payload (intent, eventId, before/after, reason, etc.). */
+  details: Record<string, unknown> | null;
+}
+
+/**
+ * Kevin's append-only private note on a prospect. Separate from the BA's
+ * own notes on the prospect (those live in the cockpit, NOT in this
+ * payload). Append-only — no edit, no delete.
+ */
+export interface AdminProspectKevinNote {
+  noteId: string;
+  prospectId: string;
+  body: string;
+  createdAt: IsoTimestamp;
+  /** The admin who wrote the note (today: Kevin; tomorrow: any /admin BA). */
+  createdByBaId: string;
+  createdByDisplayName: string;
+}
+
+/**
+ * D.2 detail payload — everything the prospect detail panel renders.
+ * Identity + activity timeline + token + sponsor drift + (optional)
+ * callback/webinar/enrollment details + Kevin notes.
+ *
+ * Sponsor-drift detector: `sponsorBaIdAtMint` is the sponsorBaId stamped
+ * on the original invite token at mint time (locked-spec 3.5). It MUST
+ * equal `sponsorBaIdNow` on every prospect unless an admin reassign-
+ * sponsor intervention has been applied. When they differ, the detail
+ * panel surfaces the discrepancy as a warning row — the drift detector
+ * the brief explicitly names.
+ */
+export interface AdminProspectDetail {
+  prospectId: string;
+  firstName: string;
+  lastName: string;
+  phone: string | null;
+  email: string | null;
+  location: ProspectLocation;
+  sponsorBaIdAtMint: string;
+  sponsorBaIdNow: string;
+  sponsorNameNow: string;
+  positionNumber: number | null;
+  placedAt: IsoTimestamp | null;
+  state: TokenState;
+  presentationStatus: AdminProspectPresentationStatus;
+  registrationHandoffState: AdminProspectRegistrationHandoffState;
+  /** Token details. `tokenTruncated` is the head of the token for display
+   *  (full token never shown — the prospect URL is the sandbox surface). */
+  token: {
+    tokenTruncated: string;
+    prospectUrl: string;
+    mintedAt: IsoTimestamp;
+    expiresAt: IsoTimestamp;
+    currentState: TokenState;
+  };
+  callback: {
+    callbackRequestId: string;
+    intent: CallbackIntent;
+    submittedAt: IsoTimestamp;
+  } | null;
+  webinar: {
+    reservationId: string;
+    eventId: string;
+    scheduledFor: IsoTimestamp;
+    reservedAt: IsoTimestamp;
+  } | null;
+  enrollment: {
+    markedAt: IsoTimestamp;
+    markedByBaId: string;
+    forceEnrolledByAdmin: boolean;
+  } | null;
+  activity: AdminProspectActivityEvent[];
+  kevinNotes: AdminProspectKevinNote[];
+}
+
+export interface AdminProspectDetailResponse {
+  ok: true;
+  detail: AdminProspectDetail;
+}
+
+/**
+ * Add-note request — POST /api/admin/prospects/:prospectId/notes.
+ * Body fields are append-only: there is no edit / delete surface.
+ */
+export interface AdminProspectAddNoteRequest {
+  body: string;
+}
+export interface AdminProspectAddNoteResponse {
+  ok: true;
+  note: AdminProspectKevinNote;
+}
+
+/* ─── D.4 interventions ─────────────────────────────────────────── */
+
+export type AdminProspectInterventionKind =
+  | 'move'
+  | 'reassign_sponsor'
+  | 'manual_flush'
+  | 'force_enroll';
+
+/**
+ * Shared base for every intervention request. The intervention router
+ * branches on the URL path, so `kind` is not in the body — but the
+ * common base IS the `requestingBaId` + `reason` pair. Both required;
+ * locked-spec 2.4 calls for `reason` on every critical override.
+ */
+export interface AdminProspectInterventionBase {
+  /** The BA who requested the emergency intervention from Kevin. */
+  requestingBaId: string;
+  /** Free-text reason in Kevin's words; required, min 8 chars. */
+  reason: string;
+}
+
+export interface AdminProspectMoveRequest extends AdminProspectInterventionBase {
+  /** The BA the prospect is moved TO (the new inviting BA). */
+  toBaId: string;
+}
+
+export interface AdminProspectReassignSponsorRequest extends AdminProspectInterventionBase {
+  /** The BA who becomes the sponsor of record on the prospect. */
+  newSponsorBaId: string;
+}
+
+export type AdminProspectManualFlushRequest = AdminProspectInterventionBase;
+export type AdminProspectForceEnrollRequest = AdminProspectInterventionBase;
+
+/**
+ * Every intervention returns the same envelope: the audit entry that
+ * was written (so the client can echo it in a toast / confirmation) and
+ * the refreshed directory row for this prospect (so the client can
+ * patch the table in place without a full directory refetch).
+ */
+export interface AdminProspectInterventionResponse {
+  ok: true;
+  kind: AdminProspectInterventionKind;
+  prospectId: string;
+  auditEntryId: string;
+  refreshedRow: AdminProspectDirectoryRow;
+}

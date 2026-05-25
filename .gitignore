@@ -60,6 +60,6 @@ assets/product-sheets/
 apps/com/public/assets/WELCOME LETTER legacymakers*.pdf
 docs/_team-design-extract.txt
 
-# Per-batch agent task briefs - throwaway, caused add/add merge conflicts every merge (Chat #134/135 lesson)
+# Per-batch agent task briefs + worktree-scoped notes - throwaway, caused add/add merge conflicts every merge (Chat #134/135 lesson)
 TASK-*.md
 claude-notes-*.md
