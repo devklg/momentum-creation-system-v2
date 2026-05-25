@@ -114,16 +114,16 @@ One route /p/{token}, two faces by token state.
 ### 3.4 Invitation engine
 - [x] **Spine** — plain-form front door + mint (phone-required #125) + cockpit read-side (#119,#120,#121)
 - [x] **ScriptMaker** — per-product video library, one-name compliance-clean draft -> /invitations seam (#122,#123)
-- [ ] **GENERATOR** (the real heart, NOT done) — gallery-driven, per-product, MULTI-ANGLE WDYK:
-  - [ ] BA picks product from gallery (shared component with training)
-  - [ ] Per-product multi-angle WDYK prompts (do-the-business / make-money / lose-fat)
-  - [ ] Every name converges on ONE action: send that product's /p/{token}
-  - [ ] Roster persists triple-stacked, tagged by product + angle
-- [ ] **IVORY** (WDYK coach, NOT done) — standalone /ivory + feeder into generator:
-  - [ ] Persistent warm-market roster, category tags
-  - [ ] Mark invited / customer / BA / not-interested / follow-up
-  - [ ] LLM coaching layer (unblocked — key in root .env)
-  - [ ] Does NOT call/text/score (compliance)
+- [x] **GENERATOR** (#131) — gallery-driven, per-product, MULTI-ANGLE WDYK:
+  - [x] BA picks product from gallery (shared `packages/shared/src/product-catalog.ts`)
+  - [x] Per-product multi-angle WDYK prompts (do-the-business / make-money / lose-fat)
+  - [x] Every name converges on ONE action: send that product's /p/{token} via spine + source='ivory'
+  - [x] Roster persists triple-stacked, tagged by product + angle (Generator runs in `generator_runs`)
+- [x] **IVORY** (#131) — standalone /ivory + feeder into generator:
+  - [x] Persistent warm-market roster, category tags (`ivory_names`, BA-private)
+  - [x] Mark invited / customer / BA / not-interested / follow-up (`updateIvoryStatus`)
+  - [x] LLM coaching layer (Anthropic transport, evergreen fallback when key unset)
+  - [x] Does NOT call/text/score (compliance — coach surfaces WDYK prompts, never names)
 
 ### 3.5 Fast Start Guide — 5 modules  `[~]` (#95)
 - [~] Module 1 — The product (Dr. Dan video + six-pillar) — Day-1 prototype drafted
@@ -216,11 +216,11 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [ ] Audit/consent guardrail (opt-out, STOP keyword, permanent exclusion)
 - DEP: email provider (RESOLVED Resend, dormant) + Telnyx
 
-### 4.J Audit / Controls  `[ ]` (Section J.1-J.3 — build 2nd, SUBSTRATE)
-- [ ] Append-only audit log (every triple-stack write, every /admin request, every mutation)
-- [ ] Views: by actor / role / action / entity / timestamp
-- [ ] Before/after state on overrides, queue rule changes, compliance changes, master content saves
-- [ ] Michael transcripts linked from audit entries (no separate tab, #89)
+### 4.J Audit / Controls  `[~]` (Section J.1-J.3 — build 2nd, SUBSTRATE)
+- [x] Append-only audit log (every triple-stack write, every /admin request, every mutation)
+- [x] Views: by actor / role / action / entity / timestamp
+- [x] Before/after state on overrides, queue rule changes, compliance changes, master content saves
+- [x] Michael transcripts linked from audit entries (no separate tab, #89)
 
 ---
 

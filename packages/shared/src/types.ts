@@ -908,3 +908,426 @@ export interface ProspectLoginRedeemError {
   ok: false;
   error: 'invalid_link' | 'expired_link' | 'already_used';
 }
+
+/* ──────────────────────────────────────────────────────────────────
+ * Admin audit-log substrate (locked-spec 4.J · project-wireframe 4.J)
+ * ──────────────────────────────────────────────────────────────────
+ *
+ * The substrate every other /admin surface writes against. Core
+ * Dashboard, BA Oversight, Prospect Oversight, Queue Oversight, and
+ * Live Ops all WRITE here — none of them can be built correctly
+ * until the entry schema is locked.
+ *
+ * Append-only — like the decision ledger and pool positions (3.2).
+ * No update, no delete, ever. Monotonic by `(timestamp, entryId)`.
+ *
+ * Triple-stacked per 3.14: MongoDB (`audit_log`) is the canonical
+ * store; Neo4j stamps `(:AuditEntry)-[:ACTED_BY]->(:Actor)` and
+ * `(:AuditEntry)-[:ACTED_ON]->(:Entity)` for traversal; Chroma
+ * indexes the action+reason+entity blob so Kevin can semantic-search
+ * the log ("find every sponsor override Q1").
+ *
+ * Michael interview transcripts link FROM audit entries via the
+ * optional `linkedTranscriptId` (Chat #89 — no separate tab).
+ */
+
+/**
+ * Top-level role of whoever performed the action. Denormalized off
+ * the `actor` discriminator below so filtering by role doesn't need
+ * a nested predicate on every read.
+ */
+export type AuditActorRole = 'admin' | 'ba' | 'system' | 'prospect' | 'anonymous';
+
+/**
+ * Discriminated actor. The kind aligns with `AuditActorRole`. For
+ * 'system' the label names the cron / boot routine (e.g. 'lazy-flush',
+ * 'webinar-seeder'). For 'anonymous' the actor is unidentifiable —
+ * used for /admin-gate denials and unauthenticated probes.
+ */
+export type AuditActor =
+  | { kind: 'admin'; baId: string; displayName: string }
+  | { kind: 'ba'; baId: string; displayName: string }
+  | { kind: 'system'; label: string }
+  | { kind: 'prospect'; prospectId: string; displayName: string }
+  | { kind: 'anonymous'; ip: string | null };
+
+/**
+ * The thing acted on. `kind` is the entity family; `id` is the
+ * stable identifier in that family. `displayLabel` is an optional
+ * human string the admin view shows in the row ("Jane S. · TOK-...")
+ * so cell formatting doesn't need a per-kind lookup.
+ *
+ * 'none' is the legal value when the action is system-level and
+ * doesn't act on a discrete record (e.g. boot, config reload).
+ */
+export type AuditEntityKind =
+  | 'brand_ambassador'
+  | 'invite_token'
+  | 'prospect'
+  | 'access_code'
+  | 'callback_request'
+  | 'webinar_reservation'
+  | 'pool_placement'
+  | 'admin_session'
+  | 'master_content'
+  | 'queue_rule'
+  | 'compliance_rule'
+  | 'michael_session'
+  | 'audit_entry'
+  | 'none';
+
+export interface AuditEntity {
+  kind: AuditEntityKind;
+  id: string;
+  displayLabel: string | null;
+}
+
+/**
+ * Severity drives row treatment in the admin view and feeds the
+ * Core Dashboard's "needs Kevin" widget. 'critical' is reserved for
+ * sponsor overrides, compliance violations, and admin-gate breaches.
+ */
+export type AuditSeverity = 'info' | 'warn' | 'critical';
+
+/**
+ * Optional request-trace context. Captured for every /admin request
+ * and every API mutation; omitted for system-internal events that
+ * have no HTTP envelope (cron jobs, boot routines).
+ */
+export interface AuditContext {
+  ip: string | null;
+  userAgent: string | null;
+  route: string | null;
+  method: string | null;
+  requestId: string | null;
+}
+
+/**
+ * One audit log entry. The substrate every other /admin surface
+ * writes against. Every triple-stack write, every /admin request,
+ * every mutation produces one of these.
+ *
+ * Fields:
+ *   - entryId          monotonic-friendly ID: `audit_<ISO>_<rand>`
+ *   - timestamp        when the event happened (event time, not write time)
+ *   - createdAt        when the row was persisted (write time)
+ *   - role             denormalized actor.kind → AuditActorRole
+ *   - actor            discriminated; carries the real id + display name
+ *   - action           namespaced verb: `domain.entity.action`
+ *                      (e.g. `admin.sponsor.override`, `ba.invitation.create`,
+ *                      `prospect.video.complete`, `system.token.flush`)
+ *   - entity           what was acted on (kind+id+optional label)
+ *   - severity         info | warn | critical
+ *   - before           pre-state snapshot (mutations / overrides only)
+ *   - after            post-state snapshot (mutations / overrides only)
+ *   - reason           human reason — REQUIRED on critical overrides (locked-spec 2.4)
+ *   - context          request-trace metadata (optional for system actions)
+ *   - linkedTranscriptId Michael interview transcript ID (Chat #89)
+ *
+ * Append-only invariant: writers MUST NOT update or delete entries.
+ * The store has no exported mutator helper — only `appendAuditEntry`.
+ */
+export interface AuditLogEntry {
+  entryId: string;
+  timestamp: IsoTimestamp;
+  createdAt: IsoTimestamp;
+  role: AuditActorRole;
+  actor: AuditActor;
+  action: string;
+  entity: AuditEntity;
+  severity: AuditSeverity;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  reason: string | null;
+  context: AuditContext | null;
+  linkedTranscriptId: string | null;
+}
+
+/**
+ * Input shape for `appendAuditEntry`. The domain layer stamps
+ * `entryId` and `createdAt`; everything else comes from the caller.
+ * `timestamp` defaults to now on the server if the caller omits it.
+ */
+export interface AppendAuditEntryInput {
+  timestamp?: IsoTimestamp;
+  actor: AuditActor;
+  action: string;
+  entity: AuditEntity;
+  severity?: AuditSeverity;
+  before?: Record<string, unknown> | null;
+  after?: Record<string, unknown> | null;
+  reason?: string | null;
+  context?: AuditContext | null;
+  linkedTranscriptId?: string | null;
+}
+
+/**
+ * Query params for GET /api/admin/audit. All filters are optional
+ * and AND together. Cursor pagination is descending by `(timestamp,
+ * entryId)` — newest first — because the most useful read is "what
+ * just happened?". Cursor is the last entry's `entryId` from the
+ * previous page; pass it back as `before` to fetch the next page.
+ */
+export interface AuditQueryFilters {
+  actorBaId?: string;
+  role?: AuditActorRole;
+  action?: string;
+  actionPrefix?: string;
+  entityKind?: AuditEntityKind;
+  entityId?: string;
+  severity?: AuditSeverity;
+  /** ISO timestamp — inclusive lower bound on entry.timestamp. */
+  from?: IsoTimestamp;
+  /** ISO timestamp — exclusive upper bound on entry.timestamp. */
+  to?: IsoTimestamp;
+  /** Pagination cursor: entryId from the previous page. */
+  before?: string;
+  /** Page size, clamped server-side. */
+  limit?: number;
+}
+
+/**
+ * Response from GET /api/admin/audit. Reverse-chronological. Cursor
+ * is null when the page is the last page.
+ */
+export interface AuditListResponse {
+  ok: true;
+  entries: AuditLogEntry[];
+  nextCursor: string | null;
+  appliedFilters: AuditQueryFilters;
+}
+
+/**
+ * Response from GET /api/admin/audit/:entryId. 404 if not found.
+ */
+export interface AuditEntryResponse {
+  ok: true;
+  entry: AuditLogEntry;
+}
+// ───────────────────────────────────────────────────────────────────────
+// IVORY + GENERATOR (Chat #131 — wireframe §3.4)
+//
+// Ivory is the BA-private warm-market roster + an LLM coach that surfaces
+// "who do you know?" reflection prompts (it never names specific people).
+// Generator is the per-product, per-angle workflow that reads the roster
+// and converges each selected name onto ONE action: mint that product's
+// /p/{token} invite via the existing spine (source='ivory').
+//
+// Compliance (locked-spec 3.10, 3.11):
+//   - Ivory's coach is BA-facing only. Never calls, texts, or scores a
+//     prospect. Never speaks comp/income/medical (script-time prefix
+//     enforces this exactly like ScriptMaker).
+//   - Ivory does not import the CV table or any compensation figures.
+//     The "product gallery" here means the product VIDEO/share set;
+//     pricing/CV/comp math belong to training surfaces only.
+//   - All Ivory writes are scoped to the authed BA. There is no
+//     cross-BA visibility on warm-market names.
+// ───────────────────────────────────────────────────────────────────────
+
+/**
+ * Domains a BA tags an Ivory name with (the WDYK memory hooks). Multi-tag.
+ * Mirrors the standard warm-market category set BAs actually use; keep this
+ * small and stable — the coach prompts reference these categories by name.
+ */
+export type IvoryCategory =
+  | 'family'
+  | 'close_friend'
+  | 'work'
+  | 'church'
+  | 'school'
+  | 'neighbor'
+  | 'gym'
+  | 'social'
+  | 'past_colleague'
+  | 'other';
+
+/**
+ * Disposition the BA marks on an Ivory name. ALL transitions are BA-driven
+ * (manual). The system never auto-changes status — Ivory is a coach, not a
+ * scorer. The one programmatic transition is new→invited, which fires when
+ * Generator mints an invite for the name (still a BA action, just relayed).
+ */
+export type IvoryStatus =
+  | 'new'
+  | 'invited'
+  | 'customer'
+  | 'ba'
+  | 'not_interested'
+  | 'follow_up';
+
+/**
+ * The share angle the BA most likely uses for this person (Generator hint
+ * + coach context). 'unspecified' is the default for newly-added names.
+ */
+export type IvoryAngle =
+  | 'do_the_business'
+  | 'make_money'
+  | 'lose_fat'
+  | 'unspecified';
+
+/**
+ * The Ivory roster record. One per (baId, person). BA-private — never
+ * surfaced cross-BA. lastInitial is derived from lastName at write time so
+ * a partial display ("Marcus L.") is cheap; full lastName stays on the
+ * record for the BA's own reference.
+ */
+export interface IvoryName {
+  ivoryId: string;
+  baId: string;
+  firstName: string;
+  lastName: string;
+  lastInitial: string;
+  notes: string;
+  categories: IvoryCategory[];
+  preferredAngle: IvoryAngle;
+  status: IvoryStatus;
+  /** prospectId of the most recent invite for this name, if any. */
+  lastProspectId: string | null;
+  /** ISO timestamp of any status/edit change — sort key for the roster view. */
+  lastTouchedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** POST /api/ivory request body. */
+export interface CreateIvoryNamePayload {
+  firstName: string;
+  lastName: string;
+  notes?: string;
+  categories?: IvoryCategory[];
+  preferredAngle?: IvoryAngle;
+}
+
+/** PATCH /api/ivory/:ivoryId request body. */
+export interface UpdateIvoryNamePayload {
+  firstName?: string;
+  lastName?: string;
+  notes?: string;
+  categories?: IvoryCategory[];
+  preferredAngle?: IvoryAngle;
+}
+
+/** PATCH /api/ivory/:ivoryId/status request body. */
+export interface UpdateIvoryStatusPayload {
+  status: IvoryStatus;
+}
+
+/** GET /api/ivory 200 response. */
+export interface ListIvoryNamesResponse {
+  ok: true;
+  names: IvoryName[];
+}
+
+/** Single-record success response shared by POST/PATCH/DELETE. */
+export interface IvoryNameResponse {
+  ok: true;
+  name: IvoryName;
+}
+
+/**
+ * POST /api/ivory/coach request body. The coach surfaces WDYK PROMPTS the
+ * BA reflects on to recall names from their own memory. It never names
+ * specific people, never scores anyone, never speaks comp/income/medical.
+ */
+export interface IvoryCoachPayload {
+  angle: IvoryAngle;
+  /** Anchor the coaching on a specific product video, if one is in context. */
+  productName?: string | null;
+  /** Current roster size — coach uses it to tune tone (e.g. encourage adds). */
+  rosterSize: number;
+  /** BA's own free-form prompt — e.g. "I keep forgetting people from church." */
+  ask: string;
+}
+
+/**
+ * POST /api/ivory/coach 200 response. Returns a short paragraph framing the
+ * brainstorm plus a list of open-ended WDYK questions. degraded=true when
+ * the LLM was unavailable and an evergreen deterministic fallback was used
+ * (mirrors ScriptMaker's pattern — the surface works before the key lands).
+ */
+export interface IvoryCoachResponse {
+  ok: true;
+  coaching: string;
+  prompts: string[];
+  degraded: boolean;
+}
+
+/**
+ * A Generator run: one BA picks a product + angle, surfaces names from
+ * the Ivory roster, and converts each selected name into a /p/{token}
+ * invitation via the existing spine. The run record is the audit trail —
+ * "on Tuesday I worked Visage / lose-fat across these 6 names, minted 6
+ * tokens." The run never owns identity; the spine does.
+ */
+export interface GeneratorRun {
+  runId: string;
+  baId: string;
+  productKey: string;
+  productName: string;
+  angle: IvoryAngle;
+  selectedIvoryIds: string[];
+  invitations: Array<{
+    ivoryId: string;
+    prospectId: string;
+    token: string;
+    inviteUrl: string;
+    createdAt: string;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** POST /api/ivory/generator/run request body. */
+export interface CreateGeneratorRunPayload {
+  productKey: string;
+  angle: IvoryAngle;
+  /** Optional pre-selection — the BA can multi-select before pressing Start. */
+  selectedIvoryIds?: string[];
+}
+
+/** POST /api/ivory/generator/run 200 response. */
+export interface CreateGeneratorRunResponse {
+  ok: true;
+  run: GeneratorRun;
+}
+
+/** GET /api/ivory/generator/run/:runId 200 response. */
+export interface GeneratorRunResponse {
+  ok: true;
+  run: GeneratorRun;
+}
+
+/**
+ * POST /api/ivory/generator/run/:runId/invite request body.
+ *
+ * One name at a time. The server mints a fresh /p/{token} via the existing
+ * createInvitation, marks the Ivory name as status='invited', and appends
+ * to the run's invitations[]. The BA copies the link and texts it from
+ * their own phone — the spine never auto-sends (locked-spec 1.13 / 3.6).
+ */
+export interface GeneratorInvitePayload {
+  ivoryId: string;
+  /** Optional invitation message (mirrors /api/invitations message field). */
+  message?: string | null;
+  /** City / state default to '—' if the BA has not captured them on the name. */
+  city?: string;
+  stateOrRegion?: string;
+  /** Optional phone — falls through to the spine; not required for mint. */
+  phone?: string | null;
+  email?: string | null;
+}
+
+/** POST /api/ivory/generator/run/:runId/invite 200 response. */
+export interface GeneratorInviteResponse {
+  ok: true;
+  run: GeneratorRun;
+  /** The single invitation just minted, surfaced for immediate copy. */
+  invitation: {
+    ivoryId: string;
+    prospectId: string;
+    token: string;
+    inviteUrl: string;
+    createdAt: string;
+    expiresAt: string;
+  };
+}
