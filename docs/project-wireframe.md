@@ -108,7 +108,7 @@ One route /p/{token}, two faces by token state.
 - [x] My Sponsor card (name+phone+SMS button; founder override for Kevin/Paul)
 - [x] My Invites pipeline (read side: status badges, expandable rows, 'I sent this')
 - [x] Welcome banner / left-rail surfaces nav
-- [x] Today's actions card (callbacks + due follow-ups + drafts, jump-to-row) (#132)
+- [x] Today's actions card (callbacks + due follow-ups + expiring windows, bias-prompt empty state, jump-to-row) (#132/#134 wf_0046)
 - [x] CRM per invite â€” notes (append-only), follow-up reminders (one active, replace-or-clear), 5-tag dispositions (new-ba/new-customer/interested/later/not-interested), re-invite (7-day cooldown, mints fresh if expired) (#132)
 
 ### 3.4 Invitation engine
