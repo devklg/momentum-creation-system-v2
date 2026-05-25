@@ -59,3 +59,6 @@ assets/product-sheets/
 # Stray research/scratch - keep local, never track (Chat #133 cleanup)
 apps/com/public/assets/WELCOME LETTER legacymakers*.pdf
 docs/_team-design-extract.txt
+
+# Per-batch agent task briefs - throwaway, caused add/add merge conflicts every merge (Chat #134/135 lesson)
+TASK-*.md
