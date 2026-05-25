@@ -35,7 +35,6 @@
   .box { font-family: "Courier New", monospace; font-weight: 700; white-space: pre; }
   .t { flex: 1; }
   .item.done .t { text-decoration: line-through; color: #555; }
-  .item.partial .box { }
   .tag { font-size: 8.5pt; color: #555; font-style: italic; }
   .legend { font-size: 9pt; color: #000; margin: 4px 0 0; }
   .legend code { font-family: "Courier New", monospace; font-weight: 700; }
@@ -50,12 +49,12 @@
 </head>
 <body>
   <h1>Team Magnificent — Build Checklist</h1>
-  <p class="sub1">Marketing Momentum Creation System · generated from project-wireframe.md · Chat #129 · 2026-05-24</p>
+  <p class="sub1">Marketing Momentum Creation System · generated from project-wireframe.md · Chat #133 · 2026-05-25</p>
   <div class="summary">
     <span><b>114</b> items</span>
-    <span><b>39</b> done</span>
-    <span><b>4</b> partial</span>
-    <span><b>71</b> remaining</span>
+    <span><b>66</b> done</span>
+    <span><b>3</b> partial</span>
+    <span><b>45</b> remaining</span>
   </div>
   <p class="legend">Legend: <code>[x]</code> done · <code>[/]</code> partial · <code>[ ]</code> to&nbsp;build</p>
   <section class="surf">
@@ -65,9 +64,9 @@
 <div class="item done"><span class="n">2.</span><span class="box">[x]</span><span class="t">Triple-stack persistence via Universal Gateway 2525 — services/tripleStack.ts, gateway.ts (#93) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">3.</span><span class="box">[x]</span><span class="t">Shared package — brand.ts, compliance.ts, rules.ts, types.ts (#92,#110) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">4.</span><span class="box">[x]</span><span class="t">Decision ledger + master work queue + this wireframe (#129) <span class="tag">(done)</span></span></div>
-<div class="item partial"><span class="n">5.</span><span class="box">[/]</span><span class="t">LLM layer through gateway — services/anthropic.ts present; ScriptMaker consumes it <span class="tag">(partial)</span></span></div>
+<div class="item partial"><span class="n">5.</span><span class="box">[/]</span><span class="t">LLM layer through gateway — services/anthropic.ts present; ScriptMaker + Ivory consume it <span class="tag">(partial)</span></span></div>
 <div class="item done sub"><span class="n">6.</span><span class="box">[x]</span><span class="t">anthropic.ts transport + dormant-aware fallback <span class="tag">(done)</span></span></div>
-<div class="item pending sub"><span class="n">7.</span><span class="box">[ ]</span><span class="t">Ivory coaching consumer</span></div>
+<div class="item done sub"><span class="n">7.</span><span class="box">[x]</span><span class="t">Ivory coaching consumer (#131/#132 — coach surfaces WDYK prompts, evergreen fallback) <span class="tag">(done)</span></span></div>
 <div class="item pending sub"><span class="n">8.</span><span class="box">[ ]</span><span class="t">Michael scoring consumer</span></div>
 </section>
 <section class="surf">
@@ -87,10 +86,10 @@
 <div class="item done"><span class="n">15.</span><span class="box">[x]</span><span class="t">00 TickerStrip · 01 PersonalOpen · 02 Invitation (copy approved #117) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">16.</span><span class="box">[x]</span><span class="t">03 DrDanVideo (YT IFrame state machine, fires video-event milestones) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">17.</span><span class="box">[x]</span><span class="t">04 Market · 05 PharmaceuticalSolution · 06 NaturalPath · 07 Dossier <span class="tag">(done)</span></span></div>
-<div class="item done"><span class="n">18.</span><span class="box">[x]</span><span class="t">08 KevinStory (luxury-favorite.jpeg full-bleed) · 09 Timing · 10 QuietDoor (callback) · 11 Footer <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">18.</span><span class="box">[x]</span><span class="t">08 KevinStory (luxury-favorite.jpeg full-bleed) · 09 Timing · 10 WhatsNext (presentation→dashboard bridge closer, #126 — REPLACED QuietDoor callback section; callback now lives on dashboard §6) · 11 Footer <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">19.</span><span class="box">[x]</span><span class="t">OG-injection middleware (token-resolved card) <span class="tag">(done)</span></span></div>
-<div class="item pending"><span class="n">20.</span><span class="box">[ ]</span><span class="t">CONTENT: drop dossier PDF -&gt; flip DOSSIER_AVAILABLE flag in 07-Dossier.tsx</span></div>
-<div class="item pending"><span class="n">21.</span><span class="box">[ ]</span><span class="t">CONTENT: fix literal \u2014 in Part 7 eyebrow</span></div>
+<div class="item done"><span class="n">20.</span><span class="box">[x]</span><span class="t">CONTENT: drop dossier PDF -&gt; flip DOSSIER_AVAILABLE flag in 07-Dossier.tsx (done #115; PDF at `apps/com/public/assets/glp-three-dossier.pdf`) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">21.</span><span class="box">[x]</span><span class="t">CONTENT: fix literal \u2014 in Part 7 eyebrow (10-QuietDoor.tsx: 4 occurrences replaced with real em dash, content/hygiene pass) <span class="tag">(done)</span></span></div>
 <h3>2.3 Holding-tank placement  `[x]` (#105)</h3>
 <div class="item done"><span class="n">22.</span><span class="box">[x]</span><span class="t">Silent placement at video_complete, monotonic position, triple-stack write <span class="tag">(done)</span></span></div>
 <h3>2.4 tm-prospect-dashboard — 6 sections  `[x]` (#113,#114)</h3>
@@ -98,7 +97,7 @@
 <div class="item done"><span class="n">24.</span><span class="box">[x]</span><span class="t">04 LivePlace (behind-you SSE counter + vertical ticker; #84 behind-only correction) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">25.</span><span class="box">[x]</span><span class="t">05 TmAdvantage · 06 YourNextMove · 07 Footer (TM-only, 3.10 disclaimer) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">26.</span><span class="box">[x]</span><span class="t">SSE: poolEvents.ts EventEmitter + usePlacementStream hook (snapshot+placement+30s heartbeat) <span class="tag">(done)</span></span></div>
-<div class="item pending"><span class="n">27.</span><span class="box">[ ]</span><span class="t">CONTENT: remove stray 'leg' wording on position card</span></div>
+<div class="item done"><span class="n">27.</span><span class="box">[x]</span><span class="t">CONTENT: remove stray 'leg' wording on position card (01-Arrival.tsx h3 + comment: "Held in {ba}'s leg" → "Held by {ba}", content/hygiene pass) <span class="tag">(done)</span></span></div>
 <h3>2.5 Callback request  `[x]` (#109,#117)</h3>
 <div class="item done"><span class="n">28.</span><span class="box">[x]</span><span class="t">Two-radio + reach-out button + confirmation; Telnyx BA SMS alert <span class="tag">(done)</span></span></div>
 <h3>2.6 Webinar  `[~]` (#116)</h3>
@@ -106,9 +105,9 @@
 <div class="item done"><span class="n">30.</span><span class="box">[x]</span><span class="t">BA SMS notification on reserve (live fallback) <span class="tag">(done)</span></span></div>
 <div class="item partial"><span class="n">31.</span><span class="box">[/]</span><span class="t">Prospect confirmation EMAIL — wired via Resend, DORMANT pending teammagnificent.com domain verification <span class="tag">(partial)</span></span></div>
 <h3>2.7 Prospect re-entry  `[x]` (#126, #131)</h3>
-<div class="item done"><span class="n">32.</span><span class="box">[x]</span><span class="t">Layer 1: completion-interrupt fix + presentation&lt;-&gt;dashboard nav <span class="tag">(done)</span></span></div>
-<div class="item done"><span class="n">33.</span><span class="box">[x]</span><span class="t">Layer 2: temporary prospect account (auto-create at video_complete, expire at 8wk flush) <span class="tag">(done)</span></span></div>
-<div class="item done"><span class="n">34.</span><span class="box">[x]</span><span class="t">Layer 3: prospect login surface on .com (NEW — distinct from BA /login) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">32.</span><span class="box">[x]</span><span class="t">Layer 1: completion-interrupt fix + presentation&lt;-&gt;dashboard nav (#126) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">33.</span><span class="box">[x]</span><span class="t">Layer 2: temporary prospect account (auto-create at video_complete, expire at 8wk flush) (#131) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">34.</span><span class="box">[x]</span><span class="t">Layer 3: prospect login surface on .com — /p/login phone-entry + /p/login/r/:linkToken redeem (#131) <span class="tag">(done)</span></span></div>
 </section>
 <section class="surf">
 <h2>3 · .team — BA Surface</h2>
@@ -131,23 +130,23 @@
 <h3>3.4 Invitation engine</h3>
 <div class="item done"><span class="n">48.</span><span class="box">[x]</span><span class="t">**Spine** — plain-form front door + mint (phone-required #125) + cockpit read-side (#119,#120,#121) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">49.</span><span class="box">[x]</span><span class="t">**ScriptMaker** — per-product video library, one-name compliance-clean draft -&gt; /invitations seam (#122,#123) <span class="tag">(done)</span></span></div>
-<div class="item pending"><span class="n">50.</span><span class="box">[ ]</span><span class="t">**GENERATOR** (the real heart, NOT done) — gallery-driven, per-product, MULTI-ANGLE WDYK:</span></div>
-<div class="item pending sub"><span class="n">51.</span><span class="box">[ ]</span><span class="t">BA picks product from gallery (shared component with training)</span></div>
-<div class="item pending sub"><span class="n">52.</span><span class="box">[ ]</span><span class="t">Per-product multi-angle WDYK prompts (do-the-business / make-money / lose-fat)</span></div>
-<div class="item pending sub"><span class="n">53.</span><span class="box">[ ]</span><span class="t">Every name converges on ONE action: send that product's /p/{token}</span></div>
-<div class="item pending sub"><span class="n">54.</span><span class="box">[ ]</span><span class="t">Roster persists triple-stacked, tagged by product + angle</span></div>
-<div class="item pending"><span class="n">55.</span><span class="box">[ ]</span><span class="t">**IVORY** (WDYK coach, NOT done) — standalone /ivory + feeder into generator:</span></div>
-<div class="item pending sub"><span class="n">56.</span><span class="box">[ ]</span><span class="t">Persistent warm-market roster, category tags</span></div>
-<div class="item pending sub"><span class="n">57.</span><span class="box">[ ]</span><span class="t">Mark invited / customer / BA / not-interested / follow-up</span></div>
-<div class="item pending sub"><span class="n">58.</span><span class="box">[ ]</span><span class="t">LLM coaching layer (unblocked — key in root .env)</span></div>
-<div class="item pending sub"><span class="n">59.</span><span class="box">[ ]</span><span class="t">Does NOT call/text/score (compliance)</span></div>
-<h3>3.5 Fast Start Guide — 5 modules  `[~]` (#95)</h3>
-<div class="item partial"><span class="n">60.</span><span class="box">[/]</span><span class="t">Module 1 — The product (Dr. Dan video + six-pillar) — Day-1 prototype drafted <span class="tag">(partial)</span></span></div>
-<div class="item pending"><span class="n">61.</span><span class="box">[ ]</span><span class="t">Module 2 — Comp plan Layer 1 (written, walked through)</span></div>
-<div class="item pending"><span class="n">62.</span><span class="box">[ ]</span><span class="t">Module 3 — The binary as two legs</span></div>
-<div class="item pending"><span class="n">63.</span><span class="box">[ ]</span><span class="t">Module 4 — Build your prospect list (intro + open Ivory)</span></div>
-<div class="item pending"><span class="n">64.</span><span class="box">[ ]</span><span class="t">Module 5 — Identify first two candidates (mark in CRM)</span></div>
-<div class="item pending"><span class="n">65.</span><span class="box">[ ]</span><span class="t">Completion logic: 5 modules complete AND &gt;=1 invitation sent</span></div>
+<div class="item done"><span class="n">50.</span><span class="box">[x]</span><span class="t">**GENERATOR** (#131) — gallery-driven, per-product, MULTI-ANGLE WDYK: <span class="tag">(done)</span></span></div>
+<div class="item done sub"><span class="n">51.</span><span class="box">[x]</span><span class="t">BA picks product from gallery (shared `packages/shared/src/product-catalog.ts`) <span class="tag">(done)</span></span></div>
+<div class="item done sub"><span class="n">52.</span><span class="box">[x]</span><span class="t">Per-product multi-angle WDYK prompts (do-the-business / make-money / lose-fat) <span class="tag">(done)</span></span></div>
+<div class="item done sub"><span class="n">53.</span><span class="box">[x]</span><span class="t">Every name converges on ONE action: send that product's /p/{token} via spine + source='ivory' <span class="tag">(done)</span></span></div>
+<div class="item done sub"><span class="n">54.</span><span class="box">[x]</span><span class="t">Roster persists triple-stacked, tagged by product + angle (Generator runs in `generator_runs`) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">55.</span><span class="box">[x]</span><span class="t">**IVORY** (#131) — standalone /ivory + feeder into generator: <span class="tag">(done)</span></span></div>
+<div class="item done sub"><span class="n">56.</span><span class="box">[x]</span><span class="t">Persistent warm-market roster, category tags (`ivory_names`, BA-private) <span class="tag">(done)</span></span></div>
+<div class="item done sub"><span class="n">57.</span><span class="box">[x]</span><span class="t">Mark invited / customer / BA / not-interested / follow-up (`updateIvoryStatus`) <span class="tag">(done)</span></span></div>
+<div class="item done sub"><span class="n">58.</span><span class="box">[x]</span><span class="t">LLM coaching layer (Anthropic transport, evergreen fallback when key unset) <span class="tag">(done)</span></span></div>
+<div class="item done sub"><span class="n">59.</span><span class="box">[x]</span><span class="t">Does NOT call/text/score (compliance — coach surfaces WDYK prompts, never names) <span class="tag">(done)</span></span></div>
+<h3>3.5 Fast Start Guide — 5 modules  `[x]` (#95, #132)</h3>
+<div class="item done"><span class="n">60.</span><span class="box">[x]</span><span class="t">Module 1 — The product (Dr. Dan video + six-pillar; CV/price table current per Kevin #132) (#132) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">61.</span><span class="box">[x]</span><span class="t">Module 2 — Comp plan Layer 1 (written, walked through) (#132) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">62.</span><span class="box">[x]</span><span class="t">Module 3 — The binary as two legs (#132) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">63.</span><span class="box">[x]</span><span class="t">Module 4 — Build your prospect list (intro + open Ivory) (#132) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">64.</span><span class="box">[x]</span><span class="t">Module 5 — Identify first two candidates (mark in CRM) (#132) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">65.</span><span class="box">[x]</span><span class="t">Completion logic: 5 modules complete AND &gt;=1 invitation sent (#132) <span class="tag">(done)</span></span></div>
 <h3>3.6 10-step orientation  `[~]` (#100)</h3>
 <div class="item done"><span class="n">66.</span><span class="box">[x]</span><span class="t">Curriculum page ported to /training/10-steps <span class="tag">(done)</span></span></div>
 <div class="item pending"><span class="n">67.</span><span class="box">[ ]</span><span class="t">Cockpit scheduling card + slot mechanism</span></div>
@@ -206,18 +205,18 @@
 <div class="item pending"><span class="n">104.</span><span class="box">[ ]</span><span class="t">Send-test-to-Kevin</span></div>
 <div class="item pending"><span class="n">105.</span><span class="box">[ ]</span><span class="t">Queue master broadcast (triple-stack, per-recipient queue, async delivery, live status)</span></div>
 <div class="item pending"><span class="n">106.</span><span class="box">[ ]</span><span class="t">Audit/consent guardrail (opt-out, STOP keyword, permanent exclusion)</span></div>
-<h3>4.J Audit / Controls  `[ ]` (Section J.1-J.3 — build 2nd, SUBSTRATE)</h3>
-<div class="item pending"><span class="n">107.</span><span class="box">[ ]</span><span class="t">Append-only audit log (every triple-stack write, every /admin request, every mutation)</span></div>
-<div class="item pending"><span class="n">108.</span><span class="box">[ ]</span><span class="t">Views: by actor / role / action / entity / timestamp</span></div>
-<div class="item pending"><span class="n">109.</span><span class="box">[ ]</span><span class="t">Before/after state on overrides, queue rule changes, compliance changes, master content saves</span></div>
-<div class="item pending"><span class="n">110.</span><span class="box">[ ]</span><span class="t">Michael transcripts linked from audit entries (no separate tab, #89)</span></div>
+<h3>4.J Audit / Controls  `[~]` (Section J.1-J.3 — build 2nd, SUBSTRATE)</h3>
+<div class="item done"><span class="n">107.</span><span class="box">[x]</span><span class="t">Append-only audit log (every triple-stack write, every /admin request, every mutation) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">108.</span><span class="box">[x]</span><span class="t">Views: by actor / role / action / entity / timestamp <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">109.</span><span class="box">[x]</span><span class="t">Before/after state on overrides, queue rule changes, compliance changes, master content saves <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">110.</span><span class="box">[x]</span><span class="t">Michael transcripts linked from audit entries (no separate tab, #89) <span class="tag">(done)</span></span></div>
 </section>
 <section class="surf">
 <h2>5 · Drift / Hygiene</h2>
 <h3>5 · DRIFT / HYGIENE (non-blocking)</h3>
-<div class="item pending"><span class="n">111.</span><span class="box">[ ]</span><span class="t">Relocate WELCOME LETTER pdf out of apps/com/public/assets (research, not .com asset)</span></div>
-<div class="item pending"><span class="n">112.</span><span class="box">[ ]</span><span class="t">Delete docs/_team-design-extract.txt scratch file</span></div>
-<div class="item pending"><span class="n">113.</span><span class="box">[ ]</span><span class="t">Update build-registry.md to cover #122-#126; remove KEVIN-CONTEXT from source hierarchy (#129 ledger)</span></div>
+<div class="item done"><span class="n">111.</span><span class="box">[x]</span><span class="t">Relocate WELCOME LETTER pdf out of apps/com/public/assets (verified absent at content/hygiene pass — already not in tree) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">112.</span><span class="box">[x]</span><span class="t">Delete docs/_team-design-extract.txt scratch file (verified absent; also deleted `docs/_leaves.json` at content/hygiene pass) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">113.</span><span class="box">[x]</span><span class="t">Update build-registry.md to cover #122-#131; KEVIN-CONTEXT removed from source hierarchy in favor of momentum.decisions ledger (content/hygiene pass) <span class="tag">(done)</span></span></div>
 <div class="item pending"><span class="n">114.</span><span class="box">[ ]</span><span class="t">Fix Dr. Dan "THREE CSO" brand-isolation drift in App-Description.docx Section 3</span></div>
 </section>
 

@@ -24,6 +24,7 @@ import { cockpitRoutes } from './routes/cockpit.js';
 import { crmRoutes } from './routes/crm.js';
 import { scriptmakerRoutes } from './routes/scriptmaker.js';
 import { ivoryRoutes } from './routes/ivory.js';
+import { trainingRoutes } from './routes/training.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -35,15 +36,15 @@ const app = express();
 
 app.disable('x-powered-by');
 
-// ─────────────────────────────────────────────────────────────────────────────────────
-// RAW-BODY ROUTES — must mount BEFORE express.json().
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// RAW-BODY ROUTES â€” must mount BEFORE express.json().
 //
 // Telnyx webhooks are Ed25519-signed over the raw payload bytes; if
 // express.json() runs first, those bytes are gone and signature verification
 // is impossible. The route file uses express.raw() internally for this
-// specific path only — everything else still gets JSON parsing below.
+// specific path only â€” everything else still gets JSON parsing below.
 // DO NOT reorder these lines.
-// ─────────────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use('/api/telnyx', telnyxWebhookRoutes);
 
 app.use(express.json({ limit: '256kb' }));
@@ -60,13 +61,13 @@ app.use(
   }),
 );
 
-// ────────────────────────────────────────────────────────────────────────────
-// PRE-GATE ROUTES — must NOT use requireMichaelComplete.
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// PRE-GATE ROUTES â€” must NOT use requireMichaelComplete.
 // These are the routes a brand-new BA has to reach BEFORE the gate closes
 // (they are how the gate gets opened). Per Chat #97 whitelist:
 //   /api/health, /api/auth/*, /api/welcome/*, /api/michael/*
-// /admin uses its own requireAdmin gate — founders bypass Michael entirely.
-// ────────────────────────────────────────────────────────────────────────────
+// /admin uses its own requireAdmin gate â€” founders bypass Michael entirely.
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/welcome', welcomeRoutes);
@@ -86,15 +87,15 @@ app.use('/api/admin/audit', adminAuditRoutes);
 // request to /api/p/login/start would resolve as token="login" and 404
 // inside prospectTokenRoutes before ever reaching the login router.
 //
-// Locked-spec 3.17 (Chat #131 — prospect re-entry, magic-link login):
+// Locked-spec 3.17 (Chat #131 â€” prospect re-entry, magic-link login):
 //   POST /api/p/login/start    body: { phone }
 //   POST /api/p/login/redeem   body: { linkToken }
 // Cookie scope: .teammagnificent.com, distinct from the BA .team JWT.
 app.use('/api/p/login', prospectLoginRoutes);
 app.use('/api/p', prospectTokenRoutes);
 
-// ────────────────────────────────────────────────────────────────────────────
-// BA-FACING GATED ROUTES — mount here.
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// BA-FACING GATED ROUTES â€” mount here.
 // Every new authenticated BA-facing route mounted below this line must use
 // the pair (requireAuth, requireMichaelComplete) on its handlers so the
 // 403-until-Michael-complete contract holds project-wide.
@@ -107,22 +108,22 @@ app.use('/api/p', prospectTokenRoutes);
 //
 //   router.get('/', requireAuth, requireMichaelComplete, handler);
 //
-// Pending mounts (Chat #97 priorities 8–10 carry forward):
+// Pending mounts (Chat #97 priorities 8â€“10 carry forward):
 //   app.use('/api/training', trainingRoutes);     // /training/day-1 whitelisted; day-2+ gated
 //   app.use('/api/cockpit', cockpitRoutes);       // gated
 //   app.use('/api/fast-start', fastStartRoutes);  // gated
-// ────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// Invitation spine (Chat #119) — the production line (locked-spec 1.8). Each
+// Invitation spine (Chat #119) â€” the production line (locked-spec 1.8). Each
 // handler applies (requireAuth, requireMichaelComplete) internally; sponsor
 // is derived from the session, never the body (locked-spec 3.5).
 app.use('/api/invitations', invitationRoutes);
 
-// Cockpit read-side (Chat #121) — the My Invites loop. GET-only; the BA id
+// Cockpit read-side (Chat #121) â€” the My Invites loop. GET-only; the BA id
 // comes from the session, every read is scoped to that BA (locked-spec 3.5).
 app.use('/api/cockpit', cockpitRoutes);
 
-// BA CRM write-side (Chat #132) — wireframe 3.3 CRM leaves. The WRITE
+// BA CRM write-side (Chat #132) â€” wireframe 3.3 CRM leaves. The WRITE
 // companion to /api/cockpit/*: notes, follow-up reminders, dispositions,
 // re-invite, and the Today's Actions card (derived from existing pipeline).
 // Each handler applies (requireAuth, requireMichaelComplete) internally;
@@ -130,25 +131,30 @@ app.use('/api/cockpit', cockpitRoutes);
 // BA can only read or write their OWN prospects (locked-spec 3.5).
 app.use('/api/crm', crmRoutes);
 
-// ScriptMaker draft engine (Chat #122) — the video-library front door's
+// ScriptMaker draft engine (Chat #122) â€” the video-library front door's
 // server side. Drafts a product-anchored invitation message; the BA carries
-// the draft to /api/invitations (source='scriptmaker'). DRAFTS ONLY — no
+// the draft to /api/invitations (source='scriptmaker'). DRAFTS ONLY â€” no
 // mint, no send (Chat #118 boundary). Gated (requireAuth +
 // requireMichaelComplete) inside the route. Degrades to a neutral fallback
 // when ANTHROPIC_API_KEY is unset (dormant today).
 app.use('/api/scriptmaker', scriptmakerRoutes);
 
-// Ivory + Generator (Chat #131 — wireframe §3.4). The BA-private warm-market
+// Ivory + Generator (Chat #131 â€” wireframe Â§3.4). The BA-private warm-market
 // roster, an LLM WDYK coach, and the per-product Generator runs that converge
 // selected names onto /p/{token} mints via the existing spine (source='ivory').
 // All routes gated (requireAuth + requireMichaelComplete) inside the file.
 app.use('/api/ivory', ivoryRoutes);
+// Fast Start Training (feat/fast-start-training, wireframe 3.5).
+// GET /fast-start/progress + GET-1 whitelisted pre-Michael in
+// MICHAEL_GATE_WHITELIST; POST .../modules/2-5/state stay gated.
+// Sequential UI, not hard-gated (TASK.md open-question answer).
+app.use('/api/training', trainingRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 
 app.listen(env.SERVER_PORT, () => {
   // eslint-disable-next-line no-console
   console.log(
-    `[momentum-server] listening on :${env.SERVER_PORT} (${env.NODE_ENV}) — admin BA IDs configured: ${env.ADMIN_BA_IDS.length}`,
+    `[momentum-server] listening on :${env.SERVER_PORT} (${env.NODE_ENV}) â€” admin BA IDs configured: ${env.ADMIN_BA_IDS.length}`,
   );
 });

@@ -52,3 +52,10 @@ coverage/
 # Per-session build/typecheck/search scripts (chat-specific throwaway tooling)
 .build/
 
+
+# Product collateral PDFs - stored locally, served by the app, NOT shipped to GitHub (Chat #133)
+assets/product-sheets/
+
+# Stray research/scratch - keep local, never track (Chat #133 cleanup)
+apps/com/public/assets/WELCOME LETTER legacymakers*.pdf
+docs/_team-design-extract.txt

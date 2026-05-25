@@ -5,6 +5,12 @@ import { WelcomePage } from './routes/welcome';
 import { CockpitPage } from './routes/cockpit';
 import { MichaelSchedulePage } from './routes/michael-schedule';
 import { TenStepsPage } from './routes/training/10-steps';
+import { FastStartHubPage } from './routes/training/fast-start/index';
+import { ModuleProductPage } from './routes/training/fast-start/product';
+import { ModuleCompLayer1Page } from './routes/training/fast-start/comp-layer-1';
+import { ModuleBinaryPage } from './routes/training/fast-start/binary';
+import { ModuleProspectListPage } from './routes/training/fast-start/prospect-list';
+import { ModuleTeamPage } from './routes/training/fast-start/team';
 import { QuestionnairePage } from './routes/onboarding/questionnaire';
 import { SponsorWorkbookPage } from './routes/sponsor/interview-workbook';
 import { InvitationsPage } from './routes/invitations';
@@ -24,6 +30,12 @@ export function App() {
       <Route path="/video-library" element={<VideoLibraryPage />} />
       <Route path="/ivory" element={<IvoryPage />} />
       <Route path="/training/10-steps" element={<TenStepsPage />} />
+      <Route path="/training/fast-start" element={<FastStartHubPage />} />
+      <Route path="/training/fast-start/product" element={<ModuleProductPage />} />
+      <Route path="/training/fast-start/comp-layer-1" element={<ModuleCompLayer1Page />} />
+      <Route path="/training/fast-start/binary" element={<ModuleBinaryPage />} />
+      <Route path="/training/fast-start/prospect-list" element={<ModuleProspectListPage />} />
+      <Route path="/training/fast-start/team" element={<ModuleTeamPage />} />
       <Route path="/onboarding/questionnaire" element={<QuestionnairePage />} />
       <Route path="/sponsor/interview-workbook/:baId" element={<SponsorWorkbookPage />} />
       <Route

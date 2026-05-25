@@ -1,13 +1,13 @@
 /**
  * Shared domain types used across server and clients.
- * Kept thin in Phase 0 — expand as Phase 1+ surfaces ship.
+ * Kept thin in Phase 0 â€” expand as Phase 1+ surfaces ship.
  */
 
 export type IsoTimestamp = string;
 
 /** Token lifecycle states per COM Design Section E.1.
  *
- * This is the pure funnel rail — how far through the .com experience the
+ * This is the pure funnel rail â€” how far through the .com experience the
  * prospect has progressed. Callback requests and webinar reservations are
  * NOT lifecycle states; they are independent intent records a prospect can
  * create after video_complete. Both can exist for the same prospect
@@ -31,12 +31,12 @@ export type TokenState =
  * two soft-CTA options below. The harder "I'm ready to join" option is
  * intentionally reserved for the post-video tm-prospect-dashboard
  * Section 6, since on the presentation page the prospect has only seen
- * the video — they have not yet seen the team forming around them, so
+ * the video â€” they have not yet seen the team forming around them, so
  * "ready to join" would be premature (Chat #109 lock).
  *
- *   - interested_tell_me_more  → "I'm interested — tell me more"
- *   - have_questions           → "I have questions"
- *   - ready_to_join            → "I'm ready to join Team Magnificent"
+ *   - interested_tell_me_more  â†’ "I'm interested â€” tell me more"
+ *   - have_questions           â†’ "I have questions"
+ *   - ready_to_join            â†’ "I'm ready to join Team Magnificent"
  *
  * The 'ready_to_join' intent is rendered ONLY on the post-video
  * tm-prospect-dashboard Section 6, not on the pre-video presentation
@@ -51,7 +51,7 @@ export type CallbackIntent =
 
 /**
  * Request body for POST /api/p/:token/callback-request.
- * The BA already has the prospect's contact info — no phone field is
+ * The BA already has the prospect's contact info â€” no phone field is
  * collected here (Chat #109 lock). The token resolves the prospect and
  * the inviting BA server-side; sponsor immutability (locked-spec 3.5)
  * means the request body cannot influence which BA gets notified.
@@ -75,7 +75,7 @@ export interface CallbackRequestResponse {
 
 /**
  * Stored callback-request record. One prospect can submit multiple
- * requests over time (Chat #105 spec amendment) — these are independent
+ * requests over time (Chat #105 spec amendment) â€” these are independent
  * intent records, not lifecycle states. The most recent record per
  * prospect is what the BA cockpit surfaces; older records remain on the
  * activity timeline.
@@ -168,7 +168,7 @@ export type VideoEventKind =
  * One pool, every BA's prospects feed it (Chat #84 keystone). Positions
  * are monotonic and never reshuffle (locked-spec Part 3.2). Flushed at the
  * 8-week consideration window (locked-spec Part 3.7) but the assigned
- * position is preserved as a vacant slot — #348 does not become #347.
+ * position is preserved as a vacant slot â€” #348 does not become #347.
  */
 export interface PoolPlacement {
   prospectId: string;
@@ -194,7 +194,7 @@ export interface PlaceProspectResult {
 
 /**
  * Request body for POST /api/p/:token/video-event.
- * Replaying any kind is idempotent — the server only transitions forward,
+ * Replaying any kind is idempotent â€” the server only transitions forward,
  * never backward, in the token lifecycle.
  */
 export interface VideoEventPayload {
@@ -214,7 +214,7 @@ export interface VideoEventResponse {
 
 /**
  * Resolved /p/{token} payload returned by GET /api/p/:token.
- * Both prospect and BA are always present — the .com surface is never
+ * Both prospect and BA are always present â€” the .com surface is never
  * anonymous per locked-spec Part 3.9.
  */
 export interface ResolvedTokenPayload {
@@ -261,7 +261,7 @@ export interface ResolvedTokenPayload {
  *
  * Per locked-spec Part 4.9 Branch 4: the prospect was already walked into
  * THREE off-app (locked-spec 3.6) and the BA marked them enrolled in their
- * cockpit. The client renders the E.2 brief-acknowledgment view — no CTA,
+ * cockpit. The client renders the E.2 brief-acknowledgment view â€” no CTA,
  * no register link, no programmatic path. Access to .team comes through a
  * separately-issued access code from Kevin per locked-spec 2.3, not through
  * /p/{token}.
@@ -283,14 +283,14 @@ export interface EnrolledResponse {
  * and POST /api/p/:token/callback-request.
  *
  * Per locked-spec Part 4.9 Branch 3: the token's expiresAt has elapsed OR
- * state is already 'expired'. The resolver applies the lazy-flush rule —
+ * state is already 'expired'. The resolver applies the lazy-flush rule â€”
  * non-terminal tokens whose expiresAt is in the past are transitioned to
  * 'expired' inline (triple-stack write) BEFORE returning 410. Self-healing
  * read path; the cron-based flush scheduler is deferred.
  *
  * The 410 payload carries the inviting BA's contact so the prospect can
  * ask for a fresh link. The F.2 client view renders this as a tap-to-text
- * helper — phoneE164 powers a `tel:` link on mobile and a copy-pre-filled-
+ * helper â€” phoneE164 powers a `tel:` link on mobile and a copy-pre-filled-
  * SMS button. The system never sends on the prospect's behalf; channel
  * protection (locked-spec 1.13) and BA-to-BA off-app handoff (3.6) both
  * hold. No auto-renew: the BA mints a fresh token from their cockpit when
@@ -310,16 +310,16 @@ export interface ExpiredResponse {
   };
 }
 
-/* ──────────────────────────────────────────────────────────────────
- * SSE — Live placement stream (Chat #114 dashboard port)
- * ──────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * SSE â€” Live placement stream (Chat #114 dashboard port)
+ * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
  *
  * Recovered architecture (Chat #84 + #94 prior specification):
  *   GET /api/p/:token/stream
  *     - Returns text/event-stream. Connection held open per viewer.
  *     - On connect, server emits a `snapshot` event carrying the
  *       current global max position + the most recent N placements
- *       (city/state/lastInitial — never names that could PII-leak).
+ *       (city/state/lastInitial â€” never names that could PII-leak).
  *     - On every team-wide placement (POST /api/p/:token/video-event
  *       kind=complete from ANY prospect on the whole team), server
  *       emits a `placement` event with the new position number.
@@ -352,7 +352,7 @@ export interface PlacementTickerEntry {
 }
 
 /**
- * SSE `snapshot` event payload — sent once at connection open.
+ * SSE `snapshot` event payload â€” sent once at connection open.
  * Carries the current global max position so the client can compute
  * its own beneath-you count, plus the most recent N placements to
  * seed the position-stack ticker without a separate fetch.
@@ -363,7 +363,7 @@ export interface HoldingTankSnapshot {
 }
 
 /**
- * SSE `placement` event payload — sent every time any prospect on
+ * SSE `placement` event payload â€” sent every time any prospect on
  * the team completes the video. Every viewer increments their own
  * beneath-you counter by 1 if positionNumber > their own position.
  * The entry is prepended to the position-stack ticker.
@@ -373,9 +373,9 @@ export interface PlacementEvent extends PlacementTickerEntry {
   eventId: string;
 }
 
-/* ──────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
  * Webinar events + reservations (Chat #114 dashboard port)
- * ──────────────────────────────────────────────────────────────────
+ * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
  *
  * Per locked-spec Part 5, the webinar cadence (weekly Tuesday 7pm PT
  * vs every 72 hours) is still open. The reservation flow is built
@@ -386,7 +386,7 @@ export interface PlacementEvent extends PlacementTickerEntry {
  *
  * Email delivery to the prospect is gated on the open Part 5 email
  * provider decision. Until then the reservation captures successfully
- * and the BA receives an SMS alert (locked-spec 3.13 — Telnyx is the
+ * and the BA receives an SMS alert (locked-spec 3.13 â€” Telnyx is the
  * proven channel). The prospect is told "your BA will follow up with
  * the Zoom link."
  */
@@ -457,18 +457,18 @@ export interface WebinarReservationRecord {
   smsDeliveryError: string | null;
 }
 
-/* ───────────────────────────────────────────────────────────────
- * Team stats (Chat #115 — dashboard Section 5 live activity grid)
- * ───────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * Team stats (Chat #115 â€” dashboard Section 5 live activity grid)
+ * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
  *
  * Replaces the four seeded constants (47/213/89/+38%) in Section 5 of
  * the prospect dashboard with real, live counts queried server-side at
- * /api/p/:token/team-stats. Refresh policy is client-driven — the
+ * /api/p/:token/team-stats. Refresh policy is client-driven â€” the
  * dashboard polls or re-fetches when the prospect returns; the server
  * computes on each request (no caching at v1 scale).
  *
  * Compliance (locked-spec 3.10):
- *   These four numbers describe TEAM ACTIVITY — they make no income
+ *   These four numbers describe TEAM ACTIVITY â€” they make no income
  *   claim, no rank claim, no placement promise. They demonstrate real
  *   recruiting activity in real time and are safe for .com surfaces.
  */
@@ -480,9 +480,9 @@ export interface TeamStatsResponse {
   computedAt: IsoTimestamp;
 }
 
-/* ───────────────────────────────────────────────────────────────
- * Invitation spine (Chat #119 — the WRITE-side of /p)
- * ───────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * Invitation spine (Chat #119 â€” the WRITE-side of /p)
+ * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
  *
  * When a BA mints an invitation on .team, the spine creates a prospect
  * record + an invite-token record atomically (triple-stack), mirroring
@@ -490,7 +490,7 @@ export interface TeamStatsResponse {
  * its missing counterpart.
  *
  * "Sent" is tracked as a FIELD (sentAt on the prospect record) + an
- * activity-timeline entry — NOT a new token lifecycle state (Chat #119
+ * activity-timeline entry â€” NOT a new token lifecycle state (Chat #119
  * decision). The token rail describes what the PROSPECT did; "sent" is a
  * BA-side fact and lives parallel to the rail so the two never collide.
  *
@@ -501,25 +501,25 @@ export interface TeamStatsResponse {
 /**
  * Who composed the invitation message (Chat #120 lock). The plain
  * /invitations form fills 'self'; Ivory and ScriptMaker fill their own
- * markers when they ship — same field, same seam, no schema change later.
+ * markers when they ship â€” same field, same seam, no schema change later.
  * This is what makes "compare hand-written vs agent-drafted invites"
  * answerable down the road.
  *
- *   - self        → the BA wrote the message by hand in the form
- *   - ivory        → Ivory (who-do-you-know agent) drafted it
- *   - scriptmaker  → ScriptMaker drafted it from a product video
+ *   - self        â†’ the BA wrote the message by hand in the form
+ *   - ivory        â†’ Ivory (who-do-you-know agent) drafted it
+ *   - scriptmaker  â†’ ScriptMaker drafted it from a product video
  */
 export type InvitationSource = 'self' | 'ivory' | 'scriptmaker';
 
 /**
  * BA-submitted invitation form (Chat #119 field lock, extended Chat #120).
- * first/last name, email, phone, city, state — all flow onto the prospect
+ * first/last name, email, phone, city, state â€” all flow onto the prospect
  * record so the CRM export carries them and city/state render on the
  * dashboard ticker. sponsorBaId is NOT in this payload; the route derives
  * it from the session.
  *
  * `message` (Chat #120) is the invitation text the BA will send. It is
- * STORED for reuse and history — storing is NOT sending; the BA still
+ * STORED for reuse and history â€” storing is NOT sending; the BA still
  * copies the link + message and sends from their own phone (locked-spec
  * 1.13 channel protection, 3.6 BA-to-BA off-app). `source` records who
  * composed it. Both are optional at the type level so the spine stays
@@ -574,10 +574,10 @@ export interface MarkInvitationSentResponse {
  * the token lifecycle rail: these are BA-side and system-side events the
  * cockpit renders chronologically. `kind` is the discriminator.
  *
- *   - invitation_sent     → BA confirmed the link was sent (or logged a
+ *   - invitation_sent     â†’ BA confirmed the link was sent (or logged a
  *                           standalone external invite, G.5).
- *   - video_completed      → prospect finished Dr. Dan's video (placement).
- *   - callback_requested   → prospect submitted a callback CTA.
+ *   - video_completed      â†’ prospect finished Dr. Dan's video (placement).
+ *   - callback_requested   â†’ prospect submitted a callback CTA.
  */
 export type InvitationActivityKind =
   | 'invitation_sent'
@@ -593,9 +593,9 @@ export interface InvitationActivityEntry {
   at: IsoTimestamp;
 }
 
-/* ───────────────────────────────────────────────────────────────
- * Cockpit read-side (Chat #121 — the My Invites loop)
- * ───────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * Cockpit read-side (Chat #121 â€” the My Invites loop)
+ * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
  *
  * The WRITE-side spine (Chat #119/#120) mints prospects, stamps sentAt,
  * and appends the invitation_activity timeline. Nothing read it back until
@@ -608,23 +608,23 @@ export interface InvitationActivityEntry {
  *
  * Compliance (locked-spec 3.10): this is a BA-FACING surface inside .team,
  * not .com. It may show the prospect's own contact + status + the saved
- * message. It still makes no income/placement claims — status is funnel
+ * message. It still makes no income/placement claims â€” status is funnel
  * progress ("watched the video", "asked for a callback"), never earnings.
  */
 
 /**
  * A prospect's status as the cockpit displays it. This is a DISPLAY
- * projection, not a stored field — it is computed server-side from the
+ * projection, not a stored field â€” it is computed server-side from the
  * token lifecycle state + the sentAt field + customer flag, collapsing
  * the rail into the handful of states a BA actually acts on.
  *
- *   - draft           → minted, link not yet marked sent by the BA
- *   - sent             → BA tapped "I sent this" (sentAt set), no click yet
- *   - opened           → prospect clicked / started the video (in progress)
- *   - watched          → prospect completed the video (placed in the pool)
- *   - callback         → prospect raised a hand (callback requested)
- *   - enrolled         → walked into THREE off-app, BA marked enrolled
- *   - expired          → 8-week window elapsed (locked-spec 3.7)
+ *   - draft           â†’ minted, link not yet marked sent by the BA
+ *   - sent             â†’ BA tapped "I sent this" (sentAt set), no click yet
+ *   - opened           â†’ prospect clicked / started the video (in progress)
+ *   - watched          â†’ prospect completed the video (placed in the pool)
+ *   - callback         â†’ prospect raised a hand (callback requested)
+ *   - enrolled         â†’ walked into THREE off-app, BA marked enrolled
+ *   - expired          â†’ 8-week window elapsed (locked-spec 3.7)
  *
  * 'callback' outranks 'watched' in the display because a raised hand is
  * the action a BA most needs to see; 'enrolled' and 'expired' are terminal
@@ -641,7 +641,7 @@ export type InviteDisplayStatus =
 
 /**
  * One row in the BA's My Invites list. A flattened, display-ready view of
- * a prospect the BA invited — the cockpit's primary unit.
+ * a prospect the BA invited â€” the cockpit's primary unit.
  */
 export interface InviteSummary {
   prospectId: string;
@@ -704,18 +704,18 @@ export interface CockpitSummaryResponse {
   };
 }
 
-/* ──────────────────────────────────────
- * ScriptMaker (Chat #122 — the product-video front door)
- * ──────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * ScriptMaker (Chat #122 â€” the product-video front door)
+ * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
  *
  * ScriptMaker lives in the .team VIDEO LIBRARY, anchored to the specific
- * product video the BA just watched (Chat #118 lock — it is NOT a comp-plan
+ * product video the BA just watched (Chat #118 lock â€” it is NOT a comp-plan
  * translator; that framing was drift). It fires two ways: a per-card
  * "who can use this?" button and an auto-prompt when the BA finishes a
  * product video. It produces a DRAFT invitation message anchored to that
  * product, then hands the draft into the existing /invitations form via
  * the seed + source='scriptmaker' seam (Chat #120). It does NOT mint the
- * token, create the prospect, or send anything — those stay in the spine.
+ * token, create the prospect, or send anything â€” those stay in the spine.
  *
  * Prospect-surfacing ("who do you know") is IVORY's job (its own surface,
  * next session). This session ScriptMaker drafts only; the BA names the
@@ -725,7 +725,7 @@ export interface CockpitSummaryResponse {
  *
  * Compliance (locked-spec 3.11 script-time enforcement + 3.10):
  *   The draft is BA-composed outbound word-of-mouth, but the compliance
- *   frame still binds what the LLM may write — NO income claims, NO
+ *   frame still binds what the LLM may write â€” NO income claims, NO
  *   earnings projections, NO placement/queue promises, NO comp/cycle/rank
  *   math, NO medical or weight-loss guarantees. The system prefix in
  *   domain/scriptmaker.ts encodes these as hard rules; the model is
@@ -740,7 +740,7 @@ export interface CockpitSummaryResponse {
  * A product video in the .team library that ScriptMaker can anchor a draft
  * to. Ported from team-magnificent-training/video-library.html (Chat #122).
  * `youtubeId` powers the embedded player (needed for the fire-on-finish
- * completion signal — the legacy page linked OUT to YouTube with no
+ * completion signal â€” the legacy page linked OUT to YouTube with no
  * completion event, the real build item per Chat #118). `productName` is
  * the anchor ScriptMaker drafts around.
  */
@@ -751,11 +751,11 @@ export interface LibraryVideo {
   productName: string;
   /** Short human blurb shown on the card. */
   blurb: string;
-  /** 'glp_three' | 'product_line' | 'back_office' | 'app' — library section. */
+  /** 'glp_three' | 'product_line' | 'back_office' | 'app' â€” library section. */
   category: string;
   /** mm:ss display string from the source catalog. */
   duration: string;
-  /** 'full' | 'short' | 'deep_dive' — drives the card badge. */
+  /** 'full' | 'short' | 'deep_dive' â€” drives the card badge. */
   kind: 'full' | 'short' | 'deep_dive';
   featured: boolean;
 }
@@ -766,7 +766,7 @@ export interface LibraryVideo {
  * The BA names the prospect (firstName + optional context the BA knows)
  * and identifies the product video that just played. ScriptMaker writes a
  * personalized, compliance-clean invitation draft anchored to that product.
- * sponsorBaId is NOT in the payload — the route derives it from the session
+ * sponsorBaId is NOT in the payload â€” the route derives it from the session
  * (locked-spec 3.5), same as the spine.
  */
 export interface ScriptMakerDraftPayload {
@@ -774,7 +774,7 @@ export interface ScriptMakerDraftPayload {
   productName: string;
   /** The video that played, for context the model can reference. */
   videoTitle: string;
-  /** Prospect's first name — personalizes the draft. */
+  /** Prospect's first name â€” personalizes the draft. */
   prospectFirstName: string;
   /**
    * Optional free-text the BA knows about the prospect ("struggles with
@@ -788,7 +788,7 @@ export interface ScriptMakerDraftPayload {
  * Response from POST /api/scriptmaker/draft.
  *
  * `draft` is the suggested invitation message. The BA reviews and edits it
- * before it ever reaches the spine — ScriptMaker proposes, the BA disposes.
+ * before it ever reaches the spine â€” ScriptMaker proposes, the BA disposes.
  * `degraded` is true when the LLM was unavailable (key not yet wired) and
  * the server returned a neutral fallback so the surface still works.
  */
@@ -801,16 +801,16 @@ export interface ScriptMakerDraftResponse {
   degraded: boolean;
 }
 
-/* ──────────────────────────────────────────────────────────────────
- * Prospect re-entry — temporary prospect account (locked-spec 3.17)
- * ──────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * Prospect re-entry â€” temporary prospect account (locked-spec 3.17)
+ * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
  *
  * Closes Chat #125's prospect-re-entry open question. Layer 2 is the
  * account row; Layer 3 is the /p/login SMS magic-link surface on .com.
  *
  * Sponsor immutability (3.5) is the load-bearing invariant: every
  * record below stamps sponsorBaId from the inviting token and is
- * not writable thereafter — re-entry resolves to the ORIGINAL token
+ * not writable thereafter â€” re-entry resolves to the ORIGINAL token
  * and ORIGINAL inviting BA, never a different one. A phone may be
  * tied to multiple active tokens (rare but legal); a /p/login/start
  * fans out one SMS per matched token so the prospect picks which
@@ -822,7 +822,7 @@ export interface ScriptMakerDraftResponse {
  * Temporary prospect account. Created at video_complete in the
  * placement path. Expires at the 8-week flush boundary of the token
  * (3.7). Phone is null until the prospect submits a callback_request
- * or webinar_reserve — those affirmative actions are the consent
+ * or webinar_reserve â€” those affirmative actions are the consent
  * signal to copy prospects.phone into the account row.
  */
 export interface ProspectAccountRecord {
@@ -832,17 +832,17 @@ export interface ProspectAccountRecord {
   tokenId: string;
   /** Stamped from the token at creation; immutable thereafter (3.5). */
   sponsorBaId: string;
-  /** E.164 — null until callback/webinar consent signal fires. */
+  /** E.164 â€” null until callback/webinar consent signal fires. */
   phone: string | null;
   createdAt: IsoTimestamp;
-  /** Aligned with the token's expiresAt (3.7 — the 8-week flush). */
+  /** Aligned with the token's expiresAt (3.7 â€” the 8-week flush). */
   expiresAt: IsoTimestamp;
   lastLoginAt: IsoTimestamp | null;
 }
 
 /**
  * Magic-link row. One per /p/login/start hit per matched account.
- * The linkToken is the credential — knowledge of it grants a session.
+ * The linkToken is the credential â€” knowledge of it grants a session.
  * 15-minute TTL, single-use (redeemedAt stamped on redeem).
  */
 export interface ProspectMagicLinkRecord {
@@ -854,7 +854,7 @@ export interface ProspectMagicLinkRecord {
   /** issuedAt + 15min. */
   expiresAt: IsoTimestamp;
   redeemedAt: IsoTimestamp | null;
-  /** SHA-256 of the requesting phone — supports rate-limit audit without storing raw phones twice. */
+  /** SHA-256 of the requesting phone â€” supports rate-limit audit without storing raw phones twice. */
   requestPhoneHash: string;
 }
 
@@ -870,7 +870,7 @@ export interface ProspectLoginStartPayload {
 /**
  * Response from POST /api/p/login/start.
  *
- * Opaque-by-design — the response never reveals whether the phone
+ * Opaque-by-design â€” the response never reveals whether the phone
  * matched any account. Same payload returned for "no match" and
  * "N matches, N SMSes sent". The page copy is identical in both
  * cases: "If that phone is on file, you'll receive a text shortly."
@@ -892,7 +892,7 @@ export interface ProspectLoginRedeemPayload {
  * Response from POST /api/p/login/redeem on success. The client
  * redirects to /p/{tokenId} after this lands. The server sets the
  * mcs_prospect_session cookie (scoped to .teammagnificent.com) in
- * the same response — the body just confirms the target.
+ * the same response â€” the body just confirms the target.
  */
 export interface ProspectLoginRedeemResponse {
   ok: true;
@@ -901,24 +901,24 @@ export interface ProspectLoginRedeemResponse {
 
 /**
  * Failure response from /redeem. The client renders one view for
- * both error shapes — "this link has expired or already been used"
- * — to avoid leaking which case occurred.
+ * both error shapes â€” "this link has expired or already been used"
+ * â€” to avoid leaking which case occurred.
  */
 export interface ProspectLoginRedeemError {
   ok: false;
   error: 'invalid_link' | 'expired_link' | 'already_used';
 }
 
-/* ──────────────────────────────────────────────────────────────────
- * Admin audit-log substrate (locked-spec 4.J · project-wireframe 4.J)
- * ──────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * Admin audit-log substrate (locked-spec 4.J Â· project-wireframe 4.J)
+ * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
  *
  * The substrate every other /admin surface writes against. Core
  * Dashboard, BA Oversight, Prospect Oversight, Queue Oversight, and
- * Live Ops all WRITE here — none of them can be built correctly
+ * Live Ops all WRITE here â€” none of them can be built correctly
  * until the entry schema is locked.
  *
- * Append-only — like the decision ledger and pool positions (3.2).
+ * Append-only â€” like the decision ledger and pool positions (3.2).
  * No update, no delete, ever. Monotonic by `(timestamp, entryId)`.
  *
  * Triple-stacked per 3.14: MongoDB (`audit_log`) is the canonical
@@ -928,7 +928,7 @@ export interface ProspectLoginRedeemError {
  * the log ("find every sponsor override Q1").
  *
  * Michael interview transcripts link FROM audit entries via the
- * optional `linkedTranscriptId` (Chat #89 — no separate tab).
+ * optional `linkedTranscriptId` (Chat #89 â€” no separate tab).
  */
 
 /**
@@ -941,7 +941,7 @@ export type AuditActorRole = 'admin' | 'ba' | 'system' | 'prospect' | 'anonymous
 /**
  * Discriminated actor. The kind aligns with `AuditActorRole`. For
  * 'system' the label names the cron / boot routine (e.g. 'lazy-flush',
- * 'webinar-seeder'). For 'anonymous' the actor is unidentifiable —
+ * 'webinar-seeder'). For 'anonymous' the actor is unidentifiable â€”
  * used for /admin-gate denials and unauthenticated probes.
  */
 export type AuditActor =
@@ -954,7 +954,7 @@ export type AuditActor =
 /**
  * The thing acted on. `kind` is the entity family; `id` is the
  * stable identifier in that family. `displayLabel` is an optional
- * human string the admin view shows in the row ("Jane S. · TOK-...")
+ * human string the admin view shows in the row ("Jane S. Â· TOK-...")
  * so cell formatting doesn't need a per-kind lookup.
  *
  * 'none' is the legal value when the action is system-level and
@@ -1011,7 +1011,7 @@ export interface AuditContext {
  *   - entryId          monotonic-friendly ID: `audit_<ISO>_<rand>`
  *   - timestamp        when the event happened (event time, not write time)
  *   - createdAt        when the row was persisted (write time)
- *   - role             denormalized actor.kind → AuditActorRole
+ *   - role             denormalized actor.kind â†’ AuditActorRole
  *   - actor            discriminated; carries the real id + display name
  *   - action           namespaced verb: `domain.entity.action`
  *                      (e.g. `admin.sponsor.override`, `ba.invitation.create`,
@@ -1020,12 +1020,12 @@ export interface AuditContext {
  *   - severity         info | warn | critical
  *   - before           pre-state snapshot (mutations / overrides only)
  *   - after            post-state snapshot (mutations / overrides only)
- *   - reason           human reason — REQUIRED on critical overrides (locked-spec 2.4)
+ *   - reason           human reason â€” REQUIRED on critical overrides (locked-spec 2.4)
  *   - context          request-trace metadata (optional for system actions)
  *   - linkedTranscriptId Michael interview transcript ID (Chat #89)
  *
  * Append-only invariant: writers MUST NOT update or delete entries.
- * The store has no exported mutator helper — only `appendAuditEntry`.
+ * The store has no exported mutator helper â€” only `appendAuditEntry`.
  */
 export interface AuditLogEntry {
   entryId: string;
@@ -1064,7 +1064,7 @@ export interface AppendAuditEntryInput {
 /**
  * Query params for GET /api/admin/audit. All filters are optional
  * and AND together. Cursor pagination is descending by `(timestamp,
- * entryId)` — newest first — because the most useful read is "what
+ * entryId)` â€” newest first â€” because the most useful read is "what
  * just happened?". Cursor is the last entry's `entryId` from the
  * previous page; pass it back as `before` to fetch the next page.
  */
@@ -1076,9 +1076,9 @@ export interface AuditQueryFilters {
   entityKind?: AuditEntityKind;
   entityId?: string;
   severity?: AuditSeverity;
-  /** ISO timestamp — inclusive lower bound on entry.timestamp. */
+  /** ISO timestamp â€” inclusive lower bound on entry.timestamp. */
   from?: IsoTimestamp;
-  /** ISO timestamp — exclusive upper bound on entry.timestamp. */
+  /** ISO timestamp â€” exclusive upper bound on entry.timestamp. */
   to?: IsoTimestamp;
   /** Pagination cursor: entryId from the previous page. */
   before?: string;
@@ -1104,8 +1104,8 @@ export interface AuditEntryResponse {
   ok: true;
   entry: AuditLogEntry;
 }
-// ───────────────────────────────────────────────────────────────────────
-// IVORY + GENERATOR (Chat #131 — wireframe §3.4)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// IVORY + GENERATOR (Chat #131 â€” wireframe Â§3.4)
 //
 // Ivory is the BA-private warm-market roster + an LLM coach that surfaces
 // "who do you know?" reflection prompts (it never names specific people).
@@ -1122,12 +1122,12 @@ export interface AuditEntryResponse {
 //     pricing/CV/comp math belong to training surfaces only.
 //   - All Ivory writes are scoped to the authed BA. There is no
 //     cross-BA visibility on warm-market names.
-// ───────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Domains a BA tags an Ivory name with (the WDYK memory hooks). Multi-tag.
  * Mirrors the standard warm-market category set BAs actually use; keep this
- * small and stable — the coach prompts reference these categories by name.
+ * small and stable â€” the coach prompts reference these categories by name.
  */
 export type IvoryCategory =
   | 'family'
@@ -1143,8 +1143,8 @@ export type IvoryCategory =
 
 /**
  * Disposition the BA marks on an Ivory name. ALL transitions are BA-driven
- * (manual). The system never auto-changes status — Ivory is a coach, not a
- * scorer. The one programmatic transition is new→invited, which fires when
+ * (manual). The system never auto-changes status â€” Ivory is a coach, not a
+ * scorer. The one programmatic transition is newâ†’invited, which fires when
  * Generator mints an invite for the name (still a BA action, just relayed).
  */
 export type IvoryStatus =
@@ -1166,7 +1166,7 @@ export type IvoryAngle =
   | 'unspecified';
 
 /**
- * The Ivory roster record. One per (baId, person). BA-private — never
+ * The Ivory roster record. One per (baId, person). BA-private â€” never
  * surfaced cross-BA. lastInitial is derived from lastName at write time so
  * a partial display ("Marcus L.") is cheap; full lastName stays on the
  * record for the BA's own reference.
@@ -1183,7 +1183,7 @@ export interface IvoryName {
   status: IvoryStatus;
   /** prospectId of the most recent invite for this name, if any. */
   lastProspectId: string | null;
-  /** ISO timestamp of any status/edit change — sort key for the roster view. */
+  /** ISO timestamp of any status/edit change â€” sort key for the roster view. */
   lastTouchedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -1233,9 +1233,9 @@ export interface IvoryCoachPayload {
   angle: IvoryAngle;
   /** Anchor the coaching on a specific product video, if one is in context. */
   productName?: string | null;
-  /** Current roster size — coach uses it to tune tone (e.g. encourage adds). */
+  /** Current roster size â€” coach uses it to tune tone (e.g. encourage adds). */
   rosterSize: number;
-  /** BA's own free-form prompt — e.g. "I keep forgetting people from church." */
+  /** BA's own free-form prompt â€” e.g. "I keep forgetting people from church." */
   ask: string;
 }
 
@@ -1243,7 +1243,7 @@ export interface IvoryCoachPayload {
  * POST /api/ivory/coach 200 response. Returns a short paragraph framing the
  * brainstorm plus a list of open-ended WDYK questions. degraded=true when
  * the LLM was unavailable and an evergreen deterministic fallback was used
- * (mirrors ScriptMaker's pattern — the surface works before the key lands).
+ * (mirrors ScriptMaker's pattern â€” the surface works before the key lands).
  */
 export interface IvoryCoachResponse {
   ok: true;
@@ -1255,7 +1255,7 @@ export interface IvoryCoachResponse {
 /**
  * A Generator run: one BA picks a product + angle, surfaces names from
  * the Ivory roster, and converts each selected name into a /p/{token}
- * invitation via the existing spine. The run record is the audit trail —
+ * invitation via the existing spine. The run record is the audit trail â€”
  * "on Tuesday I worked Visage / lose-fat across these 6 names, minted 6
  * tokens." The run never owns identity; the spine does.
  */
@@ -1281,7 +1281,7 @@ export interface GeneratorRun {
 export interface CreateGeneratorRunPayload {
   productKey: string;
   angle: IvoryAngle;
-  /** Optional pre-selection — the BA can multi-select before pressing Start. */
+  /** Optional pre-selection â€” the BA can multi-select before pressing Start. */
   selectedIvoryIds?: string[];
 }
 
@@ -1303,16 +1303,16 @@ export interface GeneratorRunResponse {
  * One name at a time. The server mints a fresh /p/{token} via the existing
  * createInvitation, marks the Ivory name as status='invited', and appends
  * to the run's invitations[]. The BA copies the link and texts it from
- * their own phone — the spine never auto-sends (locked-spec 1.13 / 3.6).
+ * their own phone â€” the spine never auto-sends (locked-spec 1.13 / 3.6).
  */
 export interface GeneratorInvitePayload {
   ivoryId: string;
   /** Optional invitation message (mirrors /api/invitations message field). */
   message?: string | null;
-  /** City / state default to '—' if the BA has not captured them on the name. */
+  /** City / state default to 'â€”' if the BA has not captured them on the name. */
   city?: string;
   stateOrRegion?: string;
-  /** Optional phone — falls through to the spine; not required for mint. */
+  /** Optional phone â€” falls through to the spine; not required for mint. */
   phone?: string | null;
   email?: string | null;
 }
@@ -1331,13 +1331,13 @@ export interface GeneratorInviteResponse {
     expiresAt: string;
   };
 }
-/* ───────────────────────────────────────────────────────────────
- * BA CRM write-side (Chat #132 — wireframe 3.3 CRM leaves)
- * ───────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * BA CRM write-side (Chat #132 â€” wireframe 3.3 CRM leaves)
+ * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
  *
  * The WRITE-side companion to the Chat #121 cockpit READ-side. The cockpit
  * lets a BA SEE every prospect they invited; this module lets the BA ACT on
- * them — notes, follow-up reminders, dispositions, re-invite — without
+ * them â€” notes, follow-up reminders, dispositions, re-invite â€” without
  * touching the read pipeline.
  *
  * Five fixed disposition tags (Kevin lock):
@@ -1347,11 +1347,11 @@ export interface GeneratorInviteResponse {
  * disposition independently.
  *
  * Re-invite cooldown: 7 days from the most recent sentAt. A draft (sentAt
- * null) has no cooldown — that path is just the existing "I sent this".
+ * null) has no cooldown â€” that path is just the existing "I sent this".
  *
  * Sponsor immutability (locked-spec 3.5): every CRM record carries the
  * authed session BA's baId and every read/write filters on it. A note,
- * follow-up, or disposition belongs to ONE (prospect, BA) pair — if two
+ * follow-up, or disposition belongs to ONE (prospect, BA) pair â€” if two
  * BAs ever shared a prospect (today they can't), each would have their own
  * private CRM.
  *
@@ -1377,7 +1377,7 @@ export const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
 ] as const;
 
 /**
- * A BA-private timestamped note about a prospect. Append-only — notes are
+ * A BA-private timestamped note about a prospect. Append-only â€” notes are
  * never edited or deleted, so the cockpit can show the BA their evolving
  * thinking. One prospect can carry many notes; the cockpit renders them
  * newest-first.
@@ -1392,7 +1392,7 @@ export interface CrmNoteRecord {
 
 /**
  * One follow-up reminder per (prospect, BA). Setting a new follow-up
- * replaces the previous one (latest wins). Clearing sets clearedAt — the
+ * replaces the previous one (latest wins). Clearing sets clearedAt â€” the
  * record stays for audit, but Today's Actions filters it out.
  */
 export interface CrmFollowUpRecord {
@@ -1415,7 +1415,7 @@ export interface CrmDispositionRecord {
   updatedAt: IsoTimestamp;
 }
 
-/** POST /api/crm/:prospectId/notes — append a note. */
+/** POST /api/crm/:prospectId/notes â€” append a note. */
 export interface CreateNotePayload {
   text: string;
 }
@@ -1425,7 +1425,7 @@ export interface CreateNoteResponse {
   note: CrmNoteRecord;
 }
 
-/** POST /api/crm/:prospectId/followup — set or replace the active follow-up. */
+/** POST /api/crm/:prospectId/followup â€” set or replace the active follow-up. */
 export interface SetFollowUpPayload {
   /** ISO timestamp. Must be in the future. */
   dueAt: IsoTimestamp;
@@ -1436,13 +1436,13 @@ export interface SetFollowUpResponse {
   followUp: CrmFollowUpRecord;
 }
 
-/** DELETE /api/crm/:prospectId/followup — clear the active follow-up. */
+/** DELETE /api/crm/:prospectId/followup â€” clear the active follow-up. */
 export interface ClearFollowUpResponse {
   ok: true;
 }
 
 /**
- * POST /api/crm/:prospectId/disposition — set or clear the disposition.
+ * POST /api/crm/:prospectId/disposition â€” set or clear the disposition.
  * `null` clears the tag (prospect has no current disposition).
  */
 export interface SetDispositionPayload {
@@ -1456,7 +1456,7 @@ export interface SetDispositionResponse {
 
 /**
  * Per-prospect CRM bundle returned by GET /api/crm/:prospectId. Loaded
- * lazily when the BA expands an invite row — keeps the initial cockpit
+ * lazily when the BA expands an invite row â€” keeps the initial cockpit
  * fetch fast.
  *
  * `reinviteAvailableAt` is null when the BA can re-invite right now. When
@@ -1477,9 +1477,9 @@ export interface CrmBundleResponse {
 
 /**
  * One item on the Today's Actions card. Three sources:
- *   - 'callback'  → prospect raised a hand (latest unhandled intent)
- *   - 'followup'  → BA-set reminder whose dueAt has elapsed
- *   - 'draft'     → prospect minted but never marked sent
+ *   - 'callback'  â†’ prospect raised a hand (latest unhandled intent)
+ *   - 'followup'  â†’ BA-set reminder whose dueAt has elapsed
+ *   - 'draft'     â†’ prospect minted but never marked sent
  *
  * `at` is the timestamp the action surfaced (callback time / follow-up
  * dueAt / mint time). The cockpit sorts by it (newest-first).
@@ -1504,12 +1504,12 @@ export interface TodaysActionsResponse {
 }
 
 /**
- * POST /api/crm/:prospectId/reinvite — bump sentAt and append an activity
+ * POST /api/crm/:prospectId/reinvite â€” bump sentAt and append an activity
  * entry. If the existing token has expired, the spine also mints a fresh
- * one — `fresh: true` distinguishes the two cases for the cockpit toast.
+ * one â€” `fresh: true` distinguishes the two cases for the cockpit toast.
  *
  * Cooldown: 7 days from the prospect's current sentAt. If the BA has not
- * yet marked the original sent (sentAt null), reinvite is forbidden — the
+ * yet marked the original sent (sentAt null), reinvite is forbidden â€” the
  * BA should use the existing "I sent this" path.
  */
 export interface ReinviteResponse {
@@ -1532,7 +1532,7 @@ export interface ReinviteCooldownError {
 
 export interface ReinviteUnsentError {
   ok: false;
-  /** The prospect has never been marked sent — use "I sent this" instead. */
+  /** The prospect has never been marked sent â€” use "I sent this" instead. */
   error: 'not_yet_sent';
 }
 
@@ -1541,3 +1541,161 @@ export interface ReinviteTerminalError {
   /** Cannot re-invite an enrolled prospect. */
   error: 'enrolled';
 }
+/*
+ * Fast Start Training â€” the self-paced first-7-days curriculum
+ * (feat/fast-start-training Â· wireframe 3.5)
+ * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ *
+ * Five modules, sequential (not hard-gated) in the UI. Source content
+ * for Modules 2-3 is ported from Team Magnificent's published Power in
+ * Numbers training (devklg.github.io/team-magnificent-training); Module
+ * 1 is built from the THREE GLP-THREE fact sheet + product line; Module
+ * 4 links out to /ivory; Module 5 teaches the names-list + numbers
+ * mindset that turns the binary into real activity.
+ *
+ * Compliance scope: .team only. CV/dollar figures inside these modules
+ * are legitimate inside the regulated training environment and never
+ * bleed to .com (locked-spec 3.10/3.11). The mantra is People Â· Momentum
+ * Â· Volume Â· Checks (PMV+C) â€” same voice as /training/10-steps.
+ *
+ * Michael gate: Module 1 is whitelisted (a new BA can build belief in
+ * the product before Michael's interview); Modules 2-5 are gated. See
+ * MICHAEL_GATE_WHITELIST in server/src/domain/michael-schedule.ts.
+ *
+ * Sponsor immutability (locked-spec 3.5): progress records are stamped
+ * with the authed session baId; nothing in a request body can write to
+ * a different BA's progress.
+ *
+ * Completion: all 5 modules `completed` AND >= 1 invitation sent
+ * (cross-checked against the spine's sentAt field at read time â€”
+ * progress doesn't store its own invitation count).
+ */
+
+/** Module identifier â€” a stable integer 1..5 per locked TASK ordering. */
+export type FastStartModuleId = 1 | 2 | 3 | 4 | 5;
+
+/** Per-module lifecycle. Sequential in the UI, not hard-gated. */
+export type FastStartModuleState =
+  | 'not_started'
+  | 'in_progress'
+  | 'completed';
+
+/**
+ * Stored progress record. One row per (baId, moduleId). The triple-stack
+ * write inserts on first touch and updates state thereafter â€” domain
+ * branches on existence per the gateway upsert quirk.
+ */
+export interface FastStartProgressRecord {
+  /** Composite id `${baId}__${moduleId}` for idempotent triple-stack writes. */
+  _id: string;
+  baId: string;
+  moduleId: FastStartModuleId;
+  state: FastStartModuleState;
+  startedAt: IsoTimestamp | null;
+  completedAt: IsoTimestamp | null;
+  /** Updated on every state transition. */
+  updatedAt: IsoTimestamp;
+  createdAt: IsoTimestamp;
+}
+
+/**
+ * One module's status as the hub displays it. The eyebrow/title/slug
+ * are *not* stored â€” they're constants attached client-side and on the
+ * server from FAST_START_MODULES below. Only the lifecycle fields come
+ * from persistence.
+ */
+export interface FastStartModuleStatus {
+  moduleId: FastStartModuleId;
+  state: FastStartModuleState;
+  startedAt: IsoTimestamp | null;
+  completedAt: IsoTimestamp | null;
+}
+
+/**
+ * GET /api/training/fast-start/progress response. The full per-BA Fast
+ * Start state. `complete` is the canonical "is the BA done" boolean
+ * the welcome flow + cockpit + admin metrics read.
+ *
+ * Completion rule (TASK.md, this branch):
+ *   complete = (all 5 modules `completed`) AND (invitationsSent >= 1)
+ *
+ * `invitationsSent` is cross-checked from the Chat #119 invitation
+ * spine (prospects.sentAt) at read time â€” Fast Start does not duplicate
+ * the count.
+ */
+export interface FastStartProgressResponse {
+  ok: true;
+  modules: FastStartModuleStatus[];
+  invitationsSent: number;
+  complete: boolean;
+}
+
+/**
+ * POST /api/training/fast-start/modules/:id/state request body.
+ * Transitions are forward-only (not_started â†’ in_progress â†’ completed);
+ * the server rejects backward writes idempotently with the current state.
+ */
+export interface FastStartMarkStatePayload {
+  state: Exclude<FastStartModuleState, 'not_started'>;
+}
+
+/** POST response â€” echoes the resulting status the hub re-renders against. */
+export interface FastStartMarkStateResponse {
+  ok: true;
+  moduleId: FastStartModuleId;
+  state: FastStartModuleState;
+  startedAt: IsoTimestamp | null;
+  completedAt: IsoTimestamp | null;
+}
+
+/**
+ * Static module metadata. Lives in @momentum/shared so both server
+ * (validation, the route's :id parser) and client (hub render) read
+ * one source. Slug drives the client URL: /training/fast-start/{slug}.
+ * Order is fixed and load-bearing â€” never reorder; append-only if a
+ * Module 6 ever ships (the wireframe currently stops at 5).
+ */
+export const FAST_START_MODULES: readonly {
+  id: FastStartModuleId;
+  slug: 'product' | 'comp-layer-1' | 'binary' | 'prospect-list' | 'team';
+  eyebrow: string;
+  title: string;
+  /** Short one-liner on the hub card. */
+  blurb: string;
+}[] = [
+  {
+    id: 1,
+    slug: 'product',
+    eyebrow: 'MODULE 01 Â· PRODUCT',
+    title: 'The Product',
+    blurb: 'GLP-THREE and the six-pillar product story. What you take, what you share, why people stay.',
+  },
+  {
+    id: 2,
+    slug: 'comp-layer-1',
+    eyebrow: 'MODULE 02 Â· COMPENSATION',
+    title: 'Comp Plan, Layer 1',
+    blurb: 'How the money actually works. Active, Qualified, and the 300 + 600 = 900 CV cycle.',
+  },
+  {
+    id: 3,
+    slug: 'binary',
+    eyebrow: 'MODULE 03 Â· STRUCTURE',
+    title: 'The Binary as Two Legs',
+    blurb: 'Power Leg and Pay Leg, no breakage, and why first-mover position is structural math.',
+  },
+  {
+    id: 4,
+    slug: 'prospect-list',
+    eyebrow: 'MODULE 04 Â· PROSPECTS',
+    title: 'Build Your Prospect List',
+    blurb: 'Names list, mindset, and where Ivory comes in. The system you write FROM, not into.',
+  },
+  {
+    id: 5,
+    slug: 'team',
+    eyebrow: 'MODULE 05 Â· TEAM',
+    title: 'Build Your Team',
+    blurb: 'NOT "find two and stop." Your first two activate you. A team is the business.',
+  },
+] as const;
