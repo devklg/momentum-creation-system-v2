@@ -143,10 +143,10 @@ One route /p/{token}, two faces by token state.
 - [ ] Cockpit scheduling card + slot mechanism
 - DEP: scheduling mechanism (Calendly / custom / manual â€” open)
 
-### 3.7 Replicated .com preview  `[ ]`
-- [ ] /preview route in-app (standalone preview.html exists, not in-app)
-- [ ] Sandboxed token (no holding-tank write, no placement, no alerts, no counter)
-- [ ] PREVIEW MODE ribbon
+### 3.7 Replicated .com preview  `[x]` (#134)
+- [x] /preview route in-app (standalone preview.html exists, not in-app)
+- [x] Sandboxed token (no holding-tank write, no placement, no alerts, no counter)
+- [x] PREVIEW MODE ribbon
 
 ### 3.8 Profile / settings  `[x]` (#134)
 - [x] Editable: first/last (audit), email (re-verify), phone (update), password, photo, timezone, notif prefs
