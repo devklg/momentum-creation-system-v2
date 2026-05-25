@@ -29,9 +29,9 @@ HEAD at write: `5c7105f` (Chat #126). Verified Chat #129.
 - [x] Triple-stack persistence via Universal Gateway 2525 — services/tripleStack.ts, gateway.ts (#93)
 - [x] Shared package — brand.ts, compliance.ts, rules.ts, types.ts (#92,#110)
 - [x] Decision ledger + master work queue + this wireframe (#129)
-- [~] LLM layer through gateway — services/anthropic.ts present; ScriptMaker consumes it
+- [~] LLM layer through gateway — services/anthropic.ts present; ScriptMaker + Ivory consume it
   - [x] anthropic.ts transport + dormant-aware fallback
-  - [ ] Ivory coaching consumer
+  - [x] Ivory coaching consumer (#131/#132 — coach surfaces WDYK prompts, evergreen fallback)
   - [ ] Michael scoring consumer
 
 ---
@@ -57,7 +57,7 @@ One route /p/{token}, two faces by token state.
 - [x] 00 TickerStrip · 01 PersonalOpen · 02 Invitation (copy approved #117)
 - [x] 03 DrDanVideo (YT IFrame state machine, fires video-event milestones)
 - [x] 04 Market · 05 PharmaceuticalSolution · 06 NaturalPath · 07 Dossier
-- [x] 08 KevinStory (luxury-favorite.jpeg full-bleed) · 09 Timing · 10 QuietDoor (callback) · 11 Footer
+- [x] 08 KevinStory (luxury-favorite.jpeg full-bleed) · 09 Timing · 10 WhatsNext (presentation→dashboard bridge closer, #126 — REPLACED QuietDoor callback section; callback now lives on dashboard §6) · 11 Footer
 - [x] OG-injection middleware (token-resolved card)
 - [x] CONTENT: drop dossier PDF -> flip DOSSIER_AVAILABLE flag in 07-Dossier.tsx (done #115; PDF at `apps/com/public/assets/glp-three-dossier.pdf`)
 - [x] CONTENT: fix literal \u2014 in Part 7 eyebrow (10-QuietDoor.tsx: 4 occurrences replaced with real em dash, content/hygiene pass)
@@ -125,14 +125,15 @@ One route /p/{token}, two faces by token state.
   - [x] LLM coaching layer (Anthropic transport, evergreen fallback when key unset)
   - [x] Does NOT call/text/score (compliance — coach surfaces WDYK prompts, never names)
 
-### 3.5 Fast Start Guide — 5 modules  `[~]` (#95)
-- [~] Module 1 — The product (Dr. Dan video + six-pillar) — Day-1 prototype drafted
-- [ ] Module 2 — Comp plan Layer 1 (written, walked through)
-- [ ] Module 3 — The binary as two legs
-- [ ] Module 4 — Build your prospect list (intro + open Ivory)
-- [ ] Module 5 — Identify first two candidates (mark in CRM)
-- [ ] Completion logic: 5 modules complete AND >=1 invitation sent
-- DEP: Fast Start gating (open — sequential-not-gated current default)
+### 3.5 Fast Start Guide — 5 modules  `[x]` (#95, #132)
+- [x] Module 1 — The product (Dr. Dan video + six-pillar; CV/price table current per Kevin #132) (#132)
+- [x] Module 2 — Comp plan Layer 1 (written, walked through) (#132)
+- [x] Module 3 — The binary as two legs (#132)
+- [x] Module 4 — Build your prospect list (intro + open Ivory) (#132)
+- [x] Module 5 — Identify first two candidates (mark in CRM) (#132)
+- [x] Completion logic: 5 modules complete AND >=1 invitation sent (#132)
+- RESOLVED: Fast Start gating — sequential, not hard-gated (TASK.md #132); Module 1 whitelisted pre-Michael, Modules 2-5 gated
+- Merged feat/fast-start-training b74b4e3; full pnpm -w build green (com+team+server)
 
 ### 3.6 10-step orientation  `[~]` (#100)
 - [x] Curriculum page ported to /training/10-steps
