@@ -25,6 +25,7 @@ import { crmRoutes } from './routes/crm.js';
 import { scriptmakerRoutes } from './routes/scriptmaker.js';
 import { ivoryRoutes } from './routes/ivory.js';
 import { trainingRoutes } from './routes/training.js';
+import { previewRoutes } from './routes/preview.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -149,6 +150,13 @@ app.use('/api/ivory', ivoryRoutes);
 // MICHAEL_GATE_WHITELIST; POST .../modules/2-5/state stay gated.
 // Sequential UI, not hard-gated (TASK.md open-question answer).
 app.use('/api/training', trainingRoutes);
+
+// Replicated .com preview (Chat #134, wireframe 3.7). Sandboxed token
+// resolver — the BA previews their OWN replicated .com page personalized
+// to themselves as the inviting BA, with a sample prospect. ZERO writes:
+// no holding-tank placement, no SSE emit, no counter increment, no SMS.
+// Gated (requireAuth + requireMichaelComplete) inside the route file.
+app.use('/api/preview', previewRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 

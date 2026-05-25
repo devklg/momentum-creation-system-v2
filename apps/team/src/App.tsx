@@ -16,6 +16,7 @@ import { SponsorWorkbookPage } from './routes/sponsor/interview-workbook';
 import { InvitationsPage } from './routes/invitations';
 import { VideoLibraryPage } from './routes/video-library';
 import { IvoryPage } from './routes/ivory';
+import { PreviewPage } from './routes/preview';
 
 export function App() {
   return (
@@ -38,6 +39,7 @@ export function App() {
       <Route path="/training/fast-start/team" element={<ModuleTeamPage />} />
       <Route path="/onboarding/questionnaire" element={<QuestionnairePage />} />
       <Route path="/sponsor/interview-workbook/:baId" element={<SponsorWorkbookPage />} />
+      <Route path="/preview" element={<PreviewPage />} />
       <Route
         path="*"
         element={

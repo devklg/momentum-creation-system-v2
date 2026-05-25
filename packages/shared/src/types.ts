@@ -1699,3 +1699,35 @@ export const FAST_START_MODULES: readonly {
     blurb: 'NOT "find two and stop." Your first two activate you. A team is the business.',
   },
 ] as const;
+
+/* ─────────────────────────────────────────────────────────────────
+ * #134 Replicated .com preview (wireframe 3.7)
+ * ─────────────────────────────────────────────────────────────────
+ *
+ * The /preview surface inside .team lets an authenticated BA see
+ * their own replicated .com landing page personalized to themselves
+ * as the inviting BA, with a sample prospect. It is a SANDBOX —
+ * the response shares the shape of a real ResolvedTokenPayload so
+ * the same components can render it, but every downstream write is
+ * short-circuited:
+ *
+ *   - No holding-tank placement (positions are monotonic + real —
+ *     a preview must never consume a position; locked-spec 3.2)
+ *   - No SSE placement/alert event emission
+ *   - No behind-you counter increment
+ *   - No prospect or invite-token record
+ *   - No BA alert SMS
+ *
+ * Mechanism: the synthesized token field carries a sentinel string
+ * `PREVIEW-<baId>` that no real invite token will ever match (real
+ * tokens are 12 chars from a 31-char alphabet excluding 0/1/I/O/L;
+ * this sentinel is upper+digit+dash, prefixed `PREVIEW-`, and longer
+ * than 12). Any downstream /api/p/<sentinel>/* call from the .com
+ * components 404s silently — which is the design: a preview must
+ * consume zero real state. The `preview: true` flag lets the
+ * preview shell or any consumer that needs to distinguish do so
+ * without parsing the token format.
+ */
+export interface PreviewResolvedTokenPayload extends ResolvedTokenPayload {
+  preview: true;
+}
