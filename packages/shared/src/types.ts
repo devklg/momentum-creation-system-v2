@@ -1699,3 +1699,156 @@ export const FAST_START_MODULES: readonly {
     blurb: 'NOT "find two and stop." Your first two activate you. A team is the business.',
   },
 ] as const;
+
+/* ─── #134 BA profile / settings (wireframe 3.8) ─── */
+
+/**
+ * Per-topic × per-channel notification preferences. Topics are the events
+ * that actually generate alerts in MCS today; J.12 (which channels default
+ * on per topic) is OPEN — the conservative defaults below are flagged in
+ * the chat heartbeat for Kevin to confirm or amend.
+ */
+export interface BANotifChannelMix {
+  sms: boolean;
+  email: boolean;
+  inApp: boolean;
+}
+
+export interface BANotifPrefs {
+  callbackRequested: BANotifChannelMix;
+  webinarReserved: BANotifChannelMix;
+  newSponsoredBA: BANotifChannelMix;
+  michaelComplete: BANotifChannelMix;
+  poolMovement: BANotifChannelMix;
+}
+
+/**
+ * J.12 conservative defaults. Reasoning surfaced in the Chat #134 heartbeat:
+ *   - Live person-asks-for-callback signals (callback, webinar) default
+ *     SMS=on — callback already SMS-alerts the BA per Chat #105.
+ *   - Lower-frequency stream signals default in-app only.
+ *   - Email defaults off everywhere until Resend's domain is verified
+ *     (locked-spec Part 5, Resend dormant until Namecheap DNS lands).
+ */
+export const BA_NOTIF_DEFAULTS: BANotifPrefs = {
+  callbackRequested: { sms: true, email: false, inApp: true },
+  webinarReserved: { sms: true, email: false, inApp: true },
+  newSponsoredBA: { sms: false, email: false, inApp: true },
+  michaelComplete: { sms: false, email: false, inApp: true },
+  poolMovement: { sms: false, email: false, inApp: true },
+};
+
+/**
+ * GET /api/profile response — the authed BA's full profile shape.
+ *
+ * Sponsor + threeBaId + tmBaId + accessCodeHeld are READ-ONLY (locked-spec
+ * 3.5 / 2.3) and the PATCH surface intentionally omits them. The read shape
+ * carries them so the page can render the read-only card without a second
+ * fetch.
+ */
+export interface BAProfile {
+  // Editable (wf_0071)
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  timezone: string;
+  photoUrl: string | null;
+  notifPrefs: BANotifPrefs;
+
+  // Read-only (wf_0072)
+  tmBaId: string;
+  threeBaId: string;
+  /** The BA's own TM-XXXX code (one per BA for life — 2.3). null if Kevin hasn't issued one yet. */
+  accessCodeHeld: string | null;
+  sponsor: {
+    baId: string;
+    threeBaId: string;
+    fullName: string;
+  };
+
+  /** Pending change targets — surface "verify your new email/phone" prompts. */
+  pendingEmail: string | null;
+  pendingPhone: string | null;
+}
+
+/**
+ * PATCH /api/profile body — partial updates of directly-editable fields.
+ * Email and phone changes go through /api/profile/email/* and
+ * /api/profile/phone/* (challenge + verify). Password change goes through
+ * /api/profile/password. None of {sponsor, tmBaId, threeBaId,
+ * accessCodeHeld} appear here by design.
+ */
+export interface BAProfilePatch {
+  firstName?: string;
+  lastName?: string;
+  timezone?: string;
+  photoUrl?: string | null;
+  notifPrefs?: Partial<BANotifPrefs>;
+}
+
+/** GET /api/profile envelope. */
+export interface ProfileGetResponse {
+  ok: true;
+  profile: BAProfile;
+}
+
+/** Generic mutation envelope used by every /profile mutation route. */
+export type ProfileMutationResponse =
+  | { ok: true }
+  | { ok: false; error: string };
+
+/** POST /api/profile/password body — argon2id rehash on success. */
+export interface ProfilePasswordBody {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/**
+ * Email re-verify (start) — body is the *new* address. The server mints a
+ * 6-digit code, persists a challenge row, and dispatches the code to the
+ * NEW address via Resend. If EMAIL_API_KEY is unset, the challenge still
+ * persists (emailDeliveryStatus='skipped') so dev can complete the flow
+ * by reading the code off the challenge row.
+ */
+export interface ProfileEmailStartBody {
+  newEmail: string;
+}
+export interface ProfileEmailVerifyBody {
+  code: string;
+}
+
+/**
+ * Phone re-verify (start) — J.8 conservative default: SMS code mirroring
+ * email re-verify (flagged in Chat #134 heartbeat; Kevin may prefer
+ * immediate effect). The server sends a 6-digit code to the NEW number
+ * via Telnyx SMS. Pending phone is not written to the BA record until
+ * /verify succeeds.
+ */
+export interface ProfilePhoneStartBody {
+  newPhone: string;
+}
+export interface ProfilePhoneVerifyBody {
+  code: string;
+}
+
+/**
+ * Persisted challenge row shape — one collection per channel
+ * (`email_change_challenges`, `phone_change_challenges`). 6-digit numeric
+ * code, 15-minute TTL, single-use.
+ */
+export interface ProfileChangeChallengeRecord {
+  challengeId: string;
+  baId: string;
+  channel: 'email' | 'phone';
+  /** Target address/number the code was dispatched to. */
+  target: string;
+  /** SHA-256 of the code — never store the raw code. */
+  codeHash: string;
+  issuedAt: IsoTimestamp;
+  expiresAt: IsoTimestamp;
+  redeemedAt: IsoTimestamp | null;
+  /** Channel dispatch outcome — mirrors the prospect magic-link convention. */
+  deliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
+  deliveryError: string | null;
+}

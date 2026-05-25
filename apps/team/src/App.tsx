@@ -16,6 +16,7 @@ import { SponsorWorkbookPage } from './routes/sponsor/interview-workbook';
 import { InvitationsPage } from './routes/invitations';
 import { VideoLibraryPage } from './routes/video-library';
 import { IvoryPage } from './routes/ivory';
+import { ProfilePage } from './routes/profile';
 
 export function App() {
   return (
@@ -29,6 +30,7 @@ export function App() {
       <Route path="/invitations" element={<InvitationsPage />} />
       <Route path="/video-library" element={<VideoLibraryPage />} />
       <Route path="/ivory" element={<IvoryPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
       <Route path="/training/10-steps" element={<TenStepsPage />} />
       <Route path="/training/fast-start" element={<FastStartHubPage />} />
       <Route path="/training/fast-start/product" element={<ModuleProductPage />} />

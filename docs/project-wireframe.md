@@ -148,10 +148,10 @@ One route /p/{token}, two faces by token state.
 - [ ] Sandboxed token (no holding-tank write, no placement, no alerts, no counter)
 - [ ] PREVIEW MODE ribbon
 
-### 3.8 Profile / settings  `[ ]`
-- [ ] Editable: first/last (audit), email (re-verify), phone (update), password, photo, timezone, notif prefs
-- [ ] Read-only: sponsor, THREE BA ID, TM BA ID, access code held
-- DEP: phone-change verification (open); notification defaults (open)
+### 3.8 Profile / settings  `[x]` (#134)
+- [x] Editable: first/last (audit), email (re-verify), phone (update), password, photo, timezone, notif prefs
+- [x] Read-only: sponsor, THREE BA ID, TM BA ID, access code held
+- DEP: phone-change verification (J.8 open — current default mirrors email re-verify); notification defaults (J.12 open — flagged in chat heartbeat)
 
 ### 3.9 Onboarding carry-forward  `[x]` (3418d61)
 - [x] Questionnaire + sponsor interview workbook

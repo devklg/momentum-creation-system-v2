@@ -1,0 +1,231 @@
+/**
+ * /api/profile/* — the BA's own profile / settings surface (wireframe 3.8).
+ *
+ * All routes scoped to the authed session BA (locked-spec 3.5). The BA ID
+ * is read from req.session.baId and NEVER from a body/param. No route on
+ * this file accepts sponsor / tmBaId / threeBaId / accessCodeHeld in a
+ * mutation body — those fields are read-only by spec (2.3, 3.5) and the
+ * zod schemas use .strict() so any attempt to send them is rejected.
+ *
+ * Gating: requireAuth + requireMichaelComplete (BA-facing gated routes per
+ * server/src/index.ts canonical pattern). /api/profile is also whitelisted
+ * in MICHAEL_GATE_WHITELIST so a BA who's mid-onboarding can still update
+ * their timezone/photo — but requireAuth is still enforced.
+ *
+ * J.8 (phone change verification) is OPEN — implemented here with SMS-code
+ * verification as the conservative default mirroring email re-verify. If
+ * Kevin opts for immediate-effect, /phone/start + /phone/verify collapse
+ * into a single direct PATCH.
+ */
+
+import { Router } from 'express';
+import { z } from 'zod';
+import { requireAuth } from '../middleware/requireAuth.js';
+import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import {
+  getProfileForBA,
+  patchProfile,
+  changePassword,
+  startEmailChange,
+  completeEmailChange,
+  startPhoneChange,
+  completePhoneChange,
+} from '../domain/profile.js';
+import type { ProfileGetResponse } from '@momentum/shared';
+
+export const profileRoutes: Router = Router();
+
+const ChannelMix = z
+  .object({
+    sms: z.boolean(),
+    email: z.boolean(),
+    inApp: z.boolean(),
+  })
+  .strict();
+
+const NotifPrefsPatch = z
+  .object({
+    callbackRequested: ChannelMix.optional(),
+    webinarReserved: ChannelMix.optional(),
+    newSponsoredBA: ChannelMix.optional(),
+    michaelComplete: ChannelMix.optional(),
+    poolMovement: ChannelMix.optional(),
+  })
+  .strict();
+
+const PatchBody = z
+  .object({
+    firstName: z.string().min(1).max(80).optional(),
+    lastName: z.string().min(1).max(80).optional(),
+    timezone: z.string().min(3).max(80).optional(),
+    photoUrl: z.union([z.string().url().max(2048), z.null()]).optional(),
+    notifPrefs: NotifPrefsPatch.optional(),
+  })
+  .strict();
+
+const PasswordBody = z
+  .object({
+    currentPassword: z.string().min(1).max(200),
+    newPassword: z.string().min(8).max(200),
+  })
+  .strict();
+
+const EmailStartBody = z
+  .object({ newEmail: z.string().email().max(320) })
+  .strict();
+
+const EmailVerifyBody = z
+  .object({ code: z.string().regex(/^\d{6}$/) })
+  .strict();
+
+const PhoneStartBody = z
+  .object({ newPhone: z.string().min(7).max(40) })
+  .strict();
+
+const PhoneVerifyBody = z
+  .object({ code: z.string().regex(/^\d{6}$/) })
+  .strict();
+
+profileRoutes.get('/', requireAuth, requireMichaelComplete, async (req, res) => {
+  const baId = req.session?.baId;
+  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  try {
+    const profile = await getProfileForBA(baId);
+    if (!profile) return res.status(404).json({ ok: false, error: 'profile_not_found' });
+    const payload: ProfileGetResponse = { ok: true, profile };
+    return res.status(200).json(payload);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[GET /api/profile] failed', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
+
+profileRoutes.patch('/', requireAuth, requireMichaelComplete, async (req, res) => {
+  const baId = req.session?.baId;
+  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  const parsed = PatchBody.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: 'invalid_patch' });
+  }
+
+  try {
+    const profile = await patchProfile(baId, parsed.data);
+    const payload: ProfileGetResponse = { ok: true, profile };
+    return res.status(200).json(payload);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[PATCH /api/profile] failed', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
+
+profileRoutes.post('/password', requireAuth, requireMichaelComplete, async (req, res) => {
+  const baId = req.session?.baId;
+  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  const parsed = PasswordBody.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: 'invalid_password_body' });
+  }
+
+  try {
+    const result = await changePassword(
+      baId,
+      parsed.data.currentPassword,
+      parsed.data.newPassword,
+    );
+    if (!result.ok) {
+      return res.status(400).json({ ok: false, error: result.error });
+    }
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[POST /api/profile/password] failed', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
+
+profileRoutes.post('/email/start', requireAuth, requireMichaelComplete, async (req, res) => {
+  const baId = req.session?.baId;
+  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  const parsed = EmailStartBody.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: 'invalid_email' });
+  }
+
+  try {
+    const result = await startEmailChange(baId, parsed.data.newEmail.trim().toLowerCase());
+    return res.status(200).json({ ok: true, deliveryStatus: result.deliveryStatus });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[POST /api/profile/email/start] failed', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
+
+profileRoutes.post('/email/verify', requireAuth, requireMichaelComplete, async (req, res) => {
+  const baId = req.session?.baId;
+  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  const parsed = EmailVerifyBody.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: 'invalid_code' });
+  }
+
+  try {
+    const result = await completeEmailChange(baId, parsed.data.code);
+    if (!result.ok) {
+      return res.status(400).json({ ok: false, error: result.error });
+    }
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[POST /api/profile/email/verify] failed', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
+
+profileRoutes.post('/phone/start', requireAuth, requireMichaelComplete, async (req, res) => {
+  const baId = req.session?.baId;
+  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  const parsed = PhoneStartBody.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: 'invalid_phone' });
+  }
+
+  try {
+    const result = await startPhoneChange(baId, parsed.data.newPhone.trim());
+    return res.status(200).json({ ok: true, deliveryStatus: result.deliveryStatus });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[POST /api/profile/phone/start] failed', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
+
+profileRoutes.post('/phone/verify', requireAuth, requireMichaelComplete, async (req, res) => {
+  const baId = req.session?.baId;
+  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  const parsed = PhoneVerifyBody.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: 'invalid_code' });
+  }
+
+  try {
+    const result = await completePhoneChange(baId, parsed.data.code);
+    if (!result.ok) {
+      return res.status(400).json({ ok: false, error: result.error });
+    }
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[POST /api/profile/phone/verify] failed', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});

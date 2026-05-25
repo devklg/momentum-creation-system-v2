@@ -25,6 +25,7 @@ import { crmRoutes } from './routes/crm.js';
 import { scriptmakerRoutes } from './routes/scriptmaker.js';
 import { ivoryRoutes } from './routes/ivory.js';
 import { trainingRoutes } from './routes/training.js';
+import { profileRoutes } from './routes/profile.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -149,6 +150,12 @@ app.use('/api/ivory', ivoryRoutes);
 // MICHAEL_GATE_WHITELIST; POST .../modules/2-5/state stay gated.
 // Sequential UI, not hard-gated (TASK.md open-question answer).
 app.use('/api/training', trainingRoutes);
+
+// BA profile / settings (Chat #134, wireframe 3.8). Handlers apply
+// requireAuth + requireMichaelComplete internally; /api/profile is also
+// in MICHAEL_GATE_WHITELIST so a BA mid-onboarding can still set timezone
+// and notif prefs. All reads/writes scoped to req.session.baId (3.5).
+app.use('/api/profile', profileRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 
