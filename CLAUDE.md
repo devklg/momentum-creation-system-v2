@@ -6,12 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Before writing code in this repo, read in this order:
 
-1. `docs/AGENT-BRIEFING.md` — three-layer orientation (identity, architecture, pointers). End-to-end. Do not skip.
-2. `docs/locked-spec.md` — the authoritative spec. Read **only** the Part(s) you're touching. When this file conflicts with the codebase, the file wins.
-3. `docs/build-registry.md` — what's done, what's pending, what supersedes what. Consult before asking "is X done?"
-4. `docs/project-wireframe.md` — the build map. Leaf-level status (`[x] / [~] / [ ]`) grounded in disk AND section-numbered (e.g. "4.J audit-log substrate") that worktree TASK.md files reference. Tick leaves when work lands.
+1. `docs/READ-ME-FIRST.md` — 60-second orientation. Names the four artifacts that hold "what's built / what's next" so you don't have to ask Kevin.
+2. `docs/AGENT-BRIEFING.md` — three-layer orientation (identity, architecture, pointers). End-to-end. Do not skip.
+3. `docs/locked-spec.md` — the authoritative spec. Read **only** the Part(s) you're touching. When this file conflicts with the codebase, the file wins.
+4. `docs/build-registry.md` — what's done, what's pending, what supersedes what. Consult before asking "is X done?"
+5. `docs/project-wireframe.md` — the build map. Leaf-level status (`[x] / [~] / [ ]`) grounded in disk AND section-numbered (e.g. "4.J audit-log substrate") that worktree task briefs reference. Tick leaves when work lands.
 
-If a `TASK.md` or `TASK-<chat-number>.md` exists at the repo root, read it first — it carries branch-specific scope and hard rules for the current worktree. A scoped `TASK-NNN.md` (e.g. `TASK-134.md`) supersedes the tracked `TASK.md`, which can be stale from a previous chat that merged to `main`.
+**Worktree task brief — read before anything else.** Worktrees often carry a chat-numbered brief (`TASK-134.md`, `TASK-130.md`, etc.) that supersedes the repo-tracked `TASK.md` (which may be a stale brief from a prior branch that shipped on `main`). If both exist, the chat-numbered one wins — it states branch scope, what already exists (don't rebuild), the leaves you own in `docs/project-wireframe.md`, shared-file append-only rules, and the heartbeat row (see "Parallel-batch coordination" below). When in doubt, the brief itself usually says which to read.
 
 The five `.docx` design files (`Team-Magnificent-ADMIN-Design.docx`, `Team-Magnificent-COM-Design.docx`, `Team-Magnificent-TEAM-Design.docx`, `Team-Magnificent-App-Description.docx`, `Team-Magnificent-Signup-Architecture.docx`) are the surface-level design references — read the one that covers the surface you're changing.
 
@@ -23,6 +24,23 @@ Additional reference material in [docs/](docs/) — pull these in when relevant,
 - `Team-Magnificent-App-Style-Guide.html` — rendered style guide; brand truth lives in [packages/shared/src/brand.ts](packages/shared/src/brand.ts), this is the visual companion.
 - `build-*.cjs`, `render-flow.cjs` — generators that produce the `.docx` design files from source. Don't edit the `.docx` directly; edit the source and regen.
 - `build-plan.md`, `build-checklist.html` — older planning artifacts; `project-wireframe.md` is the live successor.
+- `handoff-contract.md` — canonical handoff location and `_id` shape. See "Decision currency, mirrored queues, and handoffs" below.
+
+## Decision currency, mirrored queues, and handoffs
+
+The wireframe is the source; everything else is a mirror. When sources disagree, the precedence (from `docs/READ-ME-FIRST.md`) is:
+
+> decision ledger (currency) > `docs/locked-spec.md` (state) > design docs > `docs/build-registry.md` > git log > Perry handoffs.
+
+Three Mongo collections back this up — query them via the Universal Gateway, don't try to read the wireframe by hand when you need a list:
+
+- `momentum.work_queue_leaves` — 1 row per leaf in `docs/project-wireframe.md`. Pull next work with `{status:"pending", surface:"team"}` sorted by `seq`. Regenerated from the wireframe by `node server/scripts/sync-queue-from-wireframe.mjs`; never hand-edit it independently of the wireframe.
+- `momentum.decisions` — append-only decision ledger. Resolve "which version is current?" with `{topic:X, status:"active"}`. The `handoff-contract` row (`_id=dec_handoff_contract`) is the canonical example.
+- `momentum.agent_status` — heartbeat row per parallel-batch agent (e.g. `_id:"agent_michael"`). When a worktree brief gives you a row id, `$set` your `state` (`in_progress | typecheck_green | ready_to_merge | blocked`), `current_leaf`, `last_commit`, `note`, and `updated_at` at: start, each leaf done, typecheck green, ready to merge, and on block. Update only — never upsert; the row is pre-seeded by the chat that dispatched the batch.
+
+**When you finish a leaf:** (1) tick the checkbox in `docs/project-wireframe.md`, (2) run `node server/scripts/sync-queue-from-wireframe.mjs` to regenerate the leaf queue, (3) run `node server/scripts/build-checklist.mjs` to regenerate the printable checklist. Don't tick the queue separately — that drift is exactly the disease this system was built to cure.
+
+**Session handoff:** there is ONE canonical handoff location. Every agent writes to MongoDB `universal_gateway.session_handoffs`, with `_id: handoff_chat_{N}` and a matching `chat_number: {N}`. The contract is `docs/handoff-contract.md` (mirror of `momentum.decisions/_id=dec_handoff_contract`); the invariant that motivated it: `_id`, `chat_number`, and the `Chat #{N} — ...` title must all agree.
 
 ## Worktree / parallel-branch model
 
@@ -157,7 +175,6 @@ When a worktree task lands, it usually carries these rules verbatim in its `TASK
 ## Conventions
 
 - **TypeScript strict mode + `noUncheckedIndexedAccess`** is on repo-wide via [tsconfig.base.json](tsconfig.base.json).
-- Server is **TypeScript end-to-end** — every file under `server/src/routes/`, `server/src/middleware/`, and `server/src/domain/` is `.ts`. Some worktree TASK files refer to `*.js` paths by mistake; new server files should always be `.ts`.
 - Shared types live in [packages/shared/src/types.ts](packages/shared/src/types.ts) — import via `@momentum/shared`. The team app sometimes uses local wire types ("`.team` TS6059 convention") to sidestep cross-workspace type composition issues.
 - Brand tokens are exact and verbatim — never paraphrase. Defined in [packages/shared/src/brand.ts](packages/shared/src/brand.ts) and `brand.css`. Display font Bebas Neue, body DM Sans, mono DM Mono.
 - Vocabulary discipline: never "leads," "sales pipeline," "pitch," or cold-outreach "prospecting" in user-facing copy. BAs are **sharers**, not salespeople.

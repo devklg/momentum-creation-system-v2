@@ -1852,3 +1852,160 @@ export interface ProfileChangeChallengeRecord {
   deliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
   deliveryError: string | null;
 }
+
+/* ─── #134 Michael interview surface ─── */
+//
+// Locked-spec 3.12: Michael is an outbound Telnyx voice agent that calls every
+// new BA shortly after signup, conducts a short structured interview, and feeds
+// transcript + scoring back to the BA record and the upline cockpit. BA-facing
+// only — never prospect-facing, never on .com. No objections, no pitch, no
+// qualify. Teaches Layer 1 only and captures context for the sponsor.
+//
+// These types describe the post-scheduling surface (the call itself + the
+// completed-call artifact). The schedule shape lives in
+// server/src/domain/michael-schedule.ts.
+
+/** UI phase of the interview surface (distinct from the schedule status). */
+export type MichaelInterviewPhase =
+  | 'awaiting_call'      // wf_0038 — scheduled, before/at slot, gold pill
+  | 'call_in_progress'   // wf_0039 — call.answered fired, teal pill, live transcript
+  | 'complete'           // wf_0040 — call.hangup after answered, gold check
+  | 'no_answer'          // wf_0041 — missed: no-answer / busy / declined
+  | 'invalid_number'     // wf_0041 — Telnyx flagged invalid destination
+  | 'stt_failed';        // wf_0041 — call completed but transcript ingest failed
+
+/** One speaker turn (or partial turn) in the live transcript. Append-only. */
+export interface MichaelTranscriptChunk {
+  /** Monotonic order within the call. Stamped server-side at ingest. */
+  sequence: number;
+  /** Which side of the line. 'ba' = the new Brand Ambassador on the phone. */
+  speaker: 'michael' | 'ba';
+  /** Plain-text utterance for this chunk. Punctuation per STT. */
+  text: string;
+  /** ISO-8601 UTC of the chunk boundary (STT segment end). */
+  occurredAt: string;
+}
+
+/** One of Michael's 5 structured interview questions + the BA's answer.
+ *  The 5 specific prompts are open per wireframe §3.2 DEP — the artifact
+ *  carries whatever the scoring worker submits. UI renders all answers
+ *  generically without hardcoding question text. */
+export interface MichaelInterviewAnswer {
+  /** Stable id for the question (e.g. "q1_why_now"). */
+  questionId: string;
+  /** The prompt Michael read aloud, captured for sponsor readback. */
+  prompt: string;
+  /** The BA's answer text, derived from the transcript by the scoring worker. */
+  answerText: string;
+  /** Tags the scoring worker attached to the answer (e.g. "high-intent",
+   *  "product-curious", "time-constrained"). No income/placement language. */
+  scoringTags: string[];
+}
+
+/** Aggregate scoring summary across the interview. Surfaced on the sponsor's
+ *  upline cockpit card so the sponsor can lead with the BA's actual context. */
+export interface MichaelScoringSummary {
+  /** Coarse overall read. null = not enough signal. */
+  overallTone: 'positive' | 'neutral' | 'guarded' | null;
+  /** Highlight tags the sponsor should know first (3–5 entries typical). */
+  highlightTags: string[];
+  /** Provenance string surfaced on the card. Pinned literal to keep audit clean. */
+  signedBy: string;
+}
+
+/** Authoritative completed-interview record. Triple-stacked at ingest.
+ *  sponsorBaId is stamped server-side from the BA record — NEVER from the
+ *  scoring worker payload (locked-spec 3.5). */
+export interface MichaelInterviewArtifact {
+  baId: string;
+  /** Stamped server-side from brand_ambassadors.sponsorBaId at ingest. Immutable. */
+  sponsorBaId: string | null;
+  callSid: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  transcript: MichaelTranscriptChunk[];
+  answers: MichaelInterviewAnswer[];
+  scoring: MichaelScoringSummary;
+  /** Optional pointer to call recording (Telnyx storage URL). */
+  audioUrl: string | null;
+}
+
+/** GET /api/michael/interview/state response — what the interview surface
+ *  renders. Pre-call: phase=awaiting_call + scheduledFor. During call:
+ *  phase=call_in_progress + transcript snapshot for SSE hydration. After:
+ *  phase=complete + artifact. */
+export interface MichaelInterviewView {
+  baId: string;
+  phase: MichaelInterviewPhase;
+  /** ISO slot start, BA's local TZ for rendering applied client-side. */
+  scheduledFor: string | null;
+  timezone: string | null;
+  call: {
+    startedAt: string | null;
+    sid: string | null;
+  };
+  /** Hydration snapshot for SSE — chunks already received. The stream pushes
+   *  only NEW chunks after the connection opens. */
+  transcript: MichaelTranscriptChunk[];
+  /** Present only when phase === 'complete'. */
+  artifact: MichaelInterviewArtifact | null;
+  /** Whether the BA flagged "wrong number — this isn't me" from wf_0038.
+   *  Server records the flag and Kevin's admin surface picks it up; the BA
+   *  just sees a "we've been notified" confirmation. */
+  wrongNumberFlaggedAt: string | null;
+}
+
+/** SSE event envelope on /api/michael/interview/transcript/stream.
+ *  - `snapshot` fires once on connect with the chunks already persisted.
+ *  - `chunk` fires for each new chunk as the STT worker pushes them.
+ *  - `phase` fires when the BA's interview phase advances (e.g. complete).
+ *  - `heartbeat` keeps the connection warm; client ignores. */
+export type MichaelInterviewSseEvent =
+  | { type: 'snapshot'; chunks: MichaelTranscriptChunk[]; phase: MichaelInterviewPhase }
+  | { type: 'chunk'; chunk: MichaelTranscriptChunk }
+  | { type: 'phase'; phase: MichaelInterviewPhase }
+  | { type: 'heartbeat' };
+
+/** Sponsor-only data the upline cockpit's MichaelEventCard renders.
+ *  Access is enforced server-side: the requesting BA's session.baId must
+ *  match the downline's sponsorBaId, else 403. Not client-hidden. */
+export interface MichaelCockpitCardData {
+  /** The downline BA the card is about. */
+  downlineBaId: string;
+  /** First name only — keeps the card scannable and consistent with locked-spec
+   *  3.6 (BA-to-BA off-app norms). */
+  downlineFirstName: string;
+  /** ISO completion time, sponsor's timezone applied client-side. */
+  completedAt: string;
+  /** All five (or however many) answers, rendered as a sponsor-readable list. */
+  answers: MichaelInterviewAnswer[];
+  /** Aggregate read for the sponsor's lead-with-context move. */
+  scoring: MichaelScoringSummary;
+  /** Optional audio link (Telnyx recording URL or short-lived signed URL). */
+  audioUrl: string | null;
+  /** Provenance literal — kept verbatim from the artifact. */
+  signedBy: string;
+}
+
+/** Worker → server payload on POST /api/michael/interview/scoring.
+ *  Carries the transcript + the parsed answers + the scoring summary; the
+ *  server stamps sponsorBaId and persists the artifact. Sender authenticates
+ *  with the MICHAEL_WORKER_SECRET header (process.env.MICHAEL_WORKER_SECRET).
+ *  sponsorBaId is intentionally omitted from this shape (server-stamped). */
+export interface MichaelScoringIngestPayload {
+  baId: string;
+  callSid: string;
+  startedAt: string;
+  completedAt: string;
+  transcript: MichaelTranscriptChunk[];
+  answers: MichaelInterviewAnswer[];
+  scoring: MichaelScoringSummary;
+  audioUrl: string | null;
+}
+
+/** Worker → server payload on POST /api/michael/interview/transcript/chunk.
+ *  Streamed during the live call as STT segments finalize. */
+export interface MichaelTranscriptChunkIngestPayload {
+  callSid: string;
+  chunk: Omit<MichaelTranscriptChunk, 'sequence'>;
+}

@@ -32,7 +32,7 @@ HEAD at write: `5c7105f` (Chat #126). Verified Chat #129.
 - [~] LLM layer through gateway â€” services/anthropic.ts present; ScriptMaker + Ivory consume it
   - [x] anthropic.ts transport + dormant-aware fallback
   - [x] Ivory coaching consumer (#131/#132 â€” coach surfaces WDYK prompts, evergreen fallback)
-  - [ ] Michael scoring consumer
+  - [x] Michael scoring consumer (#134 â€” server/src/domain/michaelScoring.ts, triple-stacked, sponsor-stamped)
 
 ---
 
@@ -95,14 +95,14 @@ One route /p/{token}, two faces by token state.
 - [x] Click-acknowledge commitment, triple-stack write, routes to Michael
 - [ ] Audit current welcome.tsx against locked-spec v2; merge welcome-prototype-v2 letter-voice + 7-day-arc strip
 
-### 3.2 Michael interview surface  `[~]` (#102)
+### 3.2 Michael interview surface  `[x]` (#102, #134)
 - [x] Scheduler + Telnyx call origination + webhook + STT wiring
-- [ ] State 1 â€” Awaiting call (gold pill, pulsing dot, wrong-number link)
-- [ ] State 2 â€” Call in progress (teal pill, near-real-time transcript, speaker labels, no buttons)
-- [ ] State 3 â€” Complete (gold check, answer readback, signed-by, CTA to Fast Start)
-- [ ] Fallbacks (no-answer voicemail+retry, invalid-number banner, page-close resume, STT-fail audio)
-- [ ] Upline cockpit event card (answers + audio link + scoring tags, sponsor-only)
-- DEP: Michael's 5 prompts (open); call-timing immediate-vs-delay (open â€” Kevin chose scheduler)
+- [x] State 1 â€” Awaiting call (gold pill, pulsing dot, wrong-number link) (#134 wf_0038)
+- [x] State 2 â€” Call in progress (teal pill, near-real-time transcript via SSE, speaker labels, no buttons) (#134 wf_0039)
+- [x] State 3 â€” Complete (gold check, answer readback, signed-by, CTA to Fast Start) (#134 wf_0040)
+- [x] Fallbacks (no-answer + reschedule, invalid-number banner, page-close resume via /state refetch, STT-fail audio) (#134 wf_0041)
+- [x] Upline cockpit event card (answers + audio link + scoring tags, SPONSOR-ONLY server-enforced) (#134 wf_0042)
+- DEP: Michael's 5 prompts (open â€” surface renders whatever the scoring worker submits; no hard-coded prompts on client); call-timing immediate-vs-delay (resolved â€” Kevin chose scheduler)
 
 ### 3.3 BA Cockpit  `[~]` (#121, #132)
 - [x] My Sponsor card (name+phone+SMS button; founder override for Kevin/Paul)
