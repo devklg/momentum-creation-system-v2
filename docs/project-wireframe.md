@@ -64,7 +64,7 @@ One route /p/{token}, two faces by token state.
 
 ### 2.3 Holding-tank placement  `[x]` (#105)
 - [x] Silent placement at video_complete, monotonic position, triple-stack write
-- [x] 8-week expiry flush — holdingTank.ts flushExpiredPlacements() manual sweep + listProspectsAgedBeyond(8) alert (#140; clock anchored to placedAt, NOT mint expiresAt; flushes past-window placements to flushReason:'expired', vacates slot WITHOUT reshuffle). Domain done+typechecked; NOT yet round-tripped against an aged placement. No scheduler — Kevin-run.
+- [x] 8-week expiry flush — holdingTank.ts flushExpiredPlacements() manual sweep + listProspectsAgedBeyond(8) alert (#140; clock anchored to placedAt, NOT mint expiresAt; flushes past-window placements to flushReason:'expired', vacates slot WITHOUT reshuffle). VERIFIED LIVE #142: seeded a 9-week-aged placement across Mongo+Neo4j, ran the real fn, read back all legs — flushedAt+reason stamped, position preserved, counter never decremented, idempotent on re-run. No scheduler — Kevin-run.
 
 ### 2.4 tm-prospect-dashboard â€” 6 sections  `[x]` (#113,#114)
 - [x] Ribbon Â· 01 Arrival Â· 02 Opportunity Â· 03 Mechanic
@@ -222,9 +222,12 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - DEP: audit log + live event stream
 
 ### 4.I Reporting / Analytics  `[ ]` (Section I â€” build 7th)
-- [ ] BA activation, training, queue velocity, leader scorecards
+- [ ] BA activation, training, queue velocity, leader scorecards (I.1 standard-report library â€” NOT built)
+- [x] I.3 Print Master Report â€” routes/admin/reporting.ts GET /master-report.pdf + domain/adminMasterReport.ts (#142). Brand-locked PDF, verifiability footer (timestamp + SHA-256 source hash), audited on generate. SCOPE: composites Section B dashboard metrics only today; carries an explicit provenance note that the full I.1 library is pending and expands as I.1 lands (no drift). Round-tripped live (valid %PDF, deterministic hash).
+- [x] Cockpit BA prospect-list print â€” cockpit GET /invites/print.pdf + domain/cockpitPrint.ts (#142). Sponsor-scoped via listInvitesForBA; brand-locked PDF, same pdfReport.ts foundation. Round-tripped live (3 prospects, valid %PDF).
+- [x] services/pdfReport.ts â€” shared pdfkit foundation (brand header + verifiability footer + table/section helpers); pdfkit + @types/pdfkit added to server (#142)
 - [ ] Export with PII redaction default
-- DEP: leader detection (RESOLVED threshold); export PII redaction (open)
+- DEP: leader detection (RESOLVED threshold); export PII redaction (open); I.1 report library (the I.3 composite expands per-report as these land)
 
 ### 4.F Tenant Architecture  `[ ]` (Section F â€” build 8th)
 - [ ] Master settings, template control, role/permission, content inheritance

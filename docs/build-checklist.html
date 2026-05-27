@@ -51,8 +51,8 @@
   <h1>Team Magnificent — Build Checklist</h1>
   <p class="sub1">Marketing Momentum Creation System · generated from project-wireframe.md · Chat #133 · 2026-05-27</p>
   <div class="summary">
-    <span><b>133</b> items</span>
-    <span><b>102</b> done</span>
+    <span><b>136</b> items</span>
+    <span><b>105</b> done</span>
     <span><b>3</b> partial</span>
     <span><b>28</b> remaining</span>
   </div>
@@ -92,7 +92,7 @@
 <div class="item done"><span class="n">21.</span><span class="box">[x]</span><span class="t">CONTENT: fix literal \u2014 in Part 7 eyebrow (10-QuietDoor.tsx: 4 occurrences replaced with real em dash, content/hygiene pass) <span class="tag">(done)</span></span></div>
 <h3>2.3 Holding-tank placement  `[x]` (#105)</h3>
 <div class="item done"><span class="n">22.</span><span class="box">[x]</span><span class="t">Silent placement at video_complete, monotonic position, triple-stack write <span class="tag">(done)</span></span></div>
-<div class="item done"><span class="n">23.</span><span class="box">[x]</span><span class="t">8-week expiry flush — holdingTank.ts flushExpiredPlacements() manual sweep + listProspectsAgedBeyond(8) alert (#140; clock anchored to placedAt, NOT mint expiresAt; flushes past-window placements to flushReason:'expired', vacates slot WITHOUT reshuffle). Domain done+typechecked; NOT yet round-tripped against an aged placement. No scheduler — Kevin-run. <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">23.</span><span class="box">[x]</span><span class="t">8-week expiry flush — holdingTank.ts flushExpiredPlacements() manual sweep + listProspectsAgedBeyond(8) alert (#140; clock anchored to placedAt, NOT mint expiresAt; flushes past-window placements to flushReason:'expired', vacates slot WITHOUT reshuffle). VERIFIED LIVE #142: seeded a 9-week-aged placement across Mongo+Neo4j, ran the real fn, read back all legs — flushedAt+reason stamped, position preserved, counter never decremented, idempotent on re-run. No scheduler — Kevin-run. <span class="tag">(done)</span></span></div>
 <h3>2.4 tm-prospect-dashboard â€” 6 sections  `[x]` (#113,#114)</h3>
 <div class="item done"><span class="n">24.</span><span class="box">[x]</span><span class="t">Ribbon Â· 01 Arrival Â· 02 Opportunity Â· 03 Mechanic <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">25.</span><span class="box">[x]</span><span class="t">04 LivePlace (behind-you SSE counter + vertical ticker; #84 behind-only correction) <span class="tag">(done)</span></span></div>
@@ -213,32 +213,35 @@
 <div class="item pending"><span class="n">113.</span><span class="box">[ ]</span><span class="t">Holding-tank live grid (color by days, hover detail, click -&gt; prospect panel)</span></div>
 <div class="item pending"><span class="n">114.</span><span class="box">[ ]</span><span class="t">Toggleable conversion funnels (prospect funnel / BA activation funnel)</span></div>
 <h3>4.I Reporting / Analytics  `[ ]` (Section I â€” build 7th)</h3>
-<div class="item pending"><span class="n">115.</span><span class="box">[ ]</span><span class="t">BA activation, training, queue velocity, leader scorecards</span></div>
-<div class="item pending"><span class="n">116.</span><span class="box">[ ]</span><span class="t">Export with PII redaction default</span></div>
+<div class="item pending"><span class="n">115.</span><span class="box">[ ]</span><span class="t">BA activation, training, queue velocity, leader scorecards (I.1 standard-report library â€” NOT built)</span></div>
+<div class="item done"><span class="n">116.</span><span class="box">[x]</span><span class="t">I.3 Print Master Report â€” routes/admin/reporting.ts GET /master-report.pdf + domain/adminMasterReport.ts (#142). Brand-locked PDF, verifiability footer (timestamp + SHA-256 source hash), audited on generate. SCOPE: composites Section B dashboard metrics only today; carries an explicit provenance note that the full I.1 library is pending and expands as I.1 lands (no drift). Round-tripped live (valid %PDF, deterministic hash). <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">117.</span><span class="box">[x]</span><span class="t">Cockpit BA prospect-list print â€” cockpit GET /invites/print.pdf + domain/cockpitPrint.ts (#142). Sponsor-scoped via listInvitesForBA; brand-locked PDF, same pdfReport.ts foundation. Round-tripped live (3 prospects, valid %PDF). <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">118.</span><span class="box">[x]</span><span class="t">services/pdfReport.ts â€” shared pdfkit foundation (brand header + verifiability footer + table/section helpers); pdfkit + @types/pdfkit added to server (#142) <span class="tag">(done)</span></span></div>
+<div class="item pending"><span class="n">119.</span><span class="box">[ ]</span><span class="t">Export with PII redaction default</span></div>
 <h3>4.F Tenant Architecture  `[ ]` (Section F â€” build 8th)</h3>
-<div class="item pending"><span class="n">117.</span><span class="box">[ ]</span><span class="t">Master settings, template control, role/permission, content inheritance</span></div>
-<div class="item pending"><span class="n">118.</span><span class="box">[ ]</span><span class="t">Master content validated at save-time (compliance fail-closed)</span></div>
+<div class="item pending"><span class="n">120.</span><span class="box">[ ]</span><span class="t">Master settings, template control, role/permission, content inheritance</span></div>
+<div class="item pending"><span class="n">121.</span><span class="box">[ ]</span><span class="t">Master content validated at save-time (compliance fail-closed)</span></div>
 <h3>4.G Kevin-Only Broadcast  `[ ]` (Section G â€” build LAST)</h3>
-<div class="item pending"><span class="n">119.</span><span class="box">[ ]</span><span class="t">Composer + per-recipient interpolation + preview</span></div>
-<div class="item pending"><span class="n">120.</span><span class="box">[ ]</span><span class="t">Audience selector (all / first-72h / leaders / at-risk / custom, live count)</span></div>
-<div class="item pending"><span class="n">121.</span><span class="box">[ ]</span><span class="t">Channel selector (email / text / both)</span></div>
-<div class="item pending"><span class="n">122.</span><span class="box">[ ]</span><span class="t">Send-test-to-Kevin</span></div>
-<div class="item pending"><span class="n">123.</span><span class="box">[ ]</span><span class="t">Queue master broadcast (triple-stack, per-recipient queue, async delivery, live status)</span></div>
-<div class="item pending"><span class="n">124.</span><span class="box">[ ]</span><span class="t">Audit/consent guardrail (opt-out, STOP keyword, permanent exclusion)</span></div>
+<div class="item pending"><span class="n">122.</span><span class="box">[ ]</span><span class="t">Composer + per-recipient interpolation + preview</span></div>
+<div class="item pending"><span class="n">123.</span><span class="box">[ ]</span><span class="t">Audience selector (all / first-72h / leaders / at-risk / custom, live count)</span></div>
+<div class="item pending"><span class="n">124.</span><span class="box">[ ]</span><span class="t">Channel selector (email / text / both)</span></div>
+<div class="item pending"><span class="n">125.</span><span class="box">[ ]</span><span class="t">Send-test-to-Kevin</span></div>
+<div class="item pending"><span class="n">126.</span><span class="box">[ ]</span><span class="t">Queue master broadcast (triple-stack, per-recipient queue, async delivery, live status)</span></div>
+<div class="item pending"><span class="n">127.</span><span class="box">[ ]</span><span class="t">Audit/consent guardrail (opt-out, STOP keyword, permanent exclusion)</span></div>
 <h3>4.J Audit / Controls  `[~]` (Section J.1-J.3 â€” build 2nd, SUBSTRATE)</h3>
-<div class="item done"><span class="n">125.</span><span class="box">[x]</span><span class="t">Append-only audit log (every triple-stack write, every /admin request, every mutation) <span class="tag">(done)</span></span></div>
-<div class="item done"><span class="n">126.</span><span class="box">[x]</span><span class="t">Views: by actor / role / action / entity / timestamp <span class="tag">(done)</span></span></div>
-<div class="item done"><span class="n">127.</span><span class="box">[x]</span><span class="t">Before/after state on overrides, queue rule changes, compliance changes, master content saves <span class="tag">(done)</span></span></div>
-<div class="item done"><span class="n">128.</span><span class="box">[x]</span><span class="t">Michael transcripts linked from audit entries (no separate tab, #89) <span class="tag">(done)</span></span></div>
-<div class="item done"><span class="n">129.</span><span class="box">[x]</span><span class="t">FIX #140: appendAuditEntry chroma leg targeted a nonexistent collection (500'd, left half-written records). Renamed bare `audit_log` → `mcs_audit_log` (Mongo + Chroma) to match mcs_ convention; created the collection; migrated 3 real pre-existing entries; dropped the old Mongo collection. Audit triple-stack now lands clean across all four CRUD actions. <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">128.</span><span class="box">[x]</span><span class="t">Append-only audit log (every triple-stack write, every /admin request, every mutation) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">129.</span><span class="box">[x]</span><span class="t">Views: by actor / role / action / entity / timestamp <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">130.</span><span class="box">[x]</span><span class="t">Before/after state on overrides, queue rule changes, compliance changes, master content saves <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">131.</span><span class="box">[x]</span><span class="t">Michael transcripts linked from audit entries (no separate tab, #89) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">132.</span><span class="box">[x]</span><span class="t">FIX #140: appendAuditEntry chroma leg targeted a nonexistent collection (500'd, left half-written records). Renamed bare `audit_log` → `mcs_audit_log` (Mongo + Chroma) to match mcs_ convention; created the collection; migrated 3 real pre-existing entries; dropped the old Mongo collection. Audit triple-stack now lands clean across all four CRUD actions. <span class="tag">(done)</span></span></div>
 </section>
 <section class="surf">
 <h2>5 · Drift / Hygiene</h2>
 <h3>5 Â· DRIFT / HYGIENE (non-blocking)</h3>
-<div class="item done"><span class="n">130.</span><span class="box">[x]</span><span class="t">Relocate WELCOME LETTER pdf out of apps/com/public/assets (verified absent at content/hygiene pass â€” already not in tree) <span class="tag">(done)</span></span></div>
-<div class="item done"><span class="n">131.</span><span class="box">[x]</span><span class="t">Delete docs/_team-design-extract.txt scratch file (verified absent; also deleted `docs/_leaves.json` at content/hygiene pass) <span class="tag">(done)</span></span></div>
-<div class="item done"><span class="n">132.</span><span class="box">[x]</span><span class="t">Update build-registry.md to cover #122-#131; KEVIN-CONTEXT removed from source hierarchy in favor of momentum.decisions ledger (content/hygiene pass) <span class="tag">(done)</span></span></div>
-<div class="item pending"><span class="n">133.</span><span class="box">[ ]</span><span class="t">Fix Dr. Dan "THREE CSO" brand-isolation drift in App-Description.docx Section 3</span></div>
+<div class="item done"><span class="n">133.</span><span class="box">[x]</span><span class="t">Relocate WELCOME LETTER pdf out of apps/com/public/assets (verified absent at content/hygiene pass â€” already not in tree) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">134.</span><span class="box">[x]</span><span class="t">Delete docs/_team-design-extract.txt scratch file (verified absent; also deleted `docs/_leaves.json` at content/hygiene pass) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">135.</span><span class="box">[x]</span><span class="t">Update build-registry.md to cover #122-#131; KEVIN-CONTEXT removed from source hierarchy in favor of momentum.decisions ledger (content/hygiene pass) <span class="tag">(done)</span></span></div>
+<div class="item pending"><span class="n">136.</span><span class="box">[ ]</span><span class="t">Fix Dr. Dan "THREE CSO" brand-isolation drift in App-Description.docx Section 3</span></div>
 </section>
 
   <footer>Source of truth: docs/project-wireframe.md (state) + momentum.decisions (currency). Re-run server/scripts/build-checklist.mjs after updating the wireframe.</footer>
