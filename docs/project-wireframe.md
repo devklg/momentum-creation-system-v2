@@ -221,8 +221,8 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [ ] Toggleable conversion funnels (prospect funnel / BA activation funnel)
 - DEP: audit log + live event stream
 
-### 4.I Reporting / Analytics  `[ ]` (Section I â€” build 7th)
-- [ ] BA activation, training, queue velocity, leader scorecards (I.1 standard-report library â€” NOT built)
+### 4.I Reporting / Analytics  `[~]` (Section I â€” build 7th; I.1 library shipped #143, export PII redaction still open)
+- [x] I.1 standard-report library (Chat #143) â€” BA activation, training completion, invite-to-presentation movement, queue velocity, enrollment completion (renamed from spec's "Registration handoff completion" per locked-spec 3.6), follow-up aging, leader scorecards. Each report = a JSON domain fn under server/src/domain/reports/* consumed by GET /api/admin/reporting/<name> AND a PDF section in I.3. Time range supports preset (lifetime|last_30d|last_90d|by_month) AND explicit from/to per Kevin decision A. Reports 7 (compliance count) + 8 (exception dashboard) intentionally NOT built (decision dec_reporting_i1_scope). Round-tripped live; full 5-workspace typecheck green.
 - [x] I.3 Print Master Report â€” routes/admin/reporting.ts GET /master-report.pdf + domain/adminMasterReport.ts (#142). Brand-locked PDF, verifiability footer (timestamp + SHA-256 source hash), audited on generate. SCOPE: composites Section B dashboard metrics only today; carries an explicit provenance note that the full I.1 library is pending and expands as I.1 lands (no drift). Round-tripped live (valid %PDF, deterministic hash).
 - [x] Cockpit BA prospect-list print â€” cockpit GET /invites/print.pdf + domain/cockpitPrint.ts (#142). Sponsor-scoped via listInvitesForBA; brand-locked PDF, same pdfReport.ts foundation. Round-tripped live (3 prospects, valid %PDF).
 - [x] services/pdfReport.ts â€” shared pdfkit foundation (brand header + verifiability footer + table/section helpers); pdfkit + @types/pdfkit added to server (#142)

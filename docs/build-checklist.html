@@ -52,9 +52,9 @@
   <p class="sub1">Marketing Momentum Creation System · generated from project-wireframe.md · Chat #133 · 2026-05-27</p>
   <div class="summary">
     <span><b>136</b> items</span>
-    <span><b>117</b> done</span>
+    <span><b>118</b> done</span>
     <span><b>2</b> partial</span>
-    <span><b>17</b> remaining</span>
+    <span><b>16</b> remaining</span>
   </div>
   <p class="legend">Legend: <code>[x]</code> done · <code>[/]</code> partial · <code>[ ]</code> to&nbsp;build</p>
   <section class="surf">
@@ -212,8 +212,8 @@
 <div class="item pending"><span class="n">112.</span><span class="box">[ ]</span><span class="t">Growth stat cards</span></div>
 <div class="item pending"><span class="n">113.</span><span class="box">[ ]</span><span class="t">Holding-tank live grid (color by days, hover detail, click -&gt; prospect panel)</span></div>
 <div class="item pending"><span class="n">114.</span><span class="box">[ ]</span><span class="t">Toggleable conversion funnels (prospect funnel / BA activation funnel)</span></div>
-<h3>4.I Reporting / Analytics  `[ ]` (Section I â€” build 7th)</h3>
-<div class="item pending"><span class="n">115.</span><span class="box">[ ]</span><span class="t">BA activation, training, queue velocity, leader scorecards (I.1 standard-report library â€” NOT built)</span></div>
+<h3>4.I Reporting / Analytics  `[~]` (Section I â€” build 7th; I.1 library shipped #143, export PII redaction still open)</h3>
+<div class="item done"><span class="n">115.</span><span class="box">[x]</span><span class="t">I.1 standard-report library (Chat #143) â€” BA activation, training completion, invite-to-presentation movement, queue velocity, enrollment completion (renamed from spec's "Registration handoff completion" per locked-spec 3.6), follow-up aging, leader scorecards. Each report = a JSON domain fn under server/src/domain/reports/* consumed by GET /api/admin/reporting/&lt;name&gt; AND a PDF section in I.3. Time range supports preset (lifetime|last_30d|last_90d|by_month) AND explicit from/to per Kevin decision A. Reports 7 (compliance count) + 8 (exception dashboard) intentionally NOT built (decision dec_reporting_i1_scope). Round-tripped live; full 5-workspace typecheck green. <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">116.</span><span class="box">[x]</span><span class="t">I.3 Print Master Report â€” routes/admin/reporting.ts GET /master-report.pdf + domain/adminMasterReport.ts (#142). Brand-locked PDF, verifiability footer (timestamp + SHA-256 source hash), audited on generate. SCOPE: composites Section B dashboard metrics only today; carries an explicit provenance note that the full I.1 library is pending and expands as I.1 lands (no drift). Round-tripped live (valid %PDF, deterministic hash). <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">117.</span><span class="box">[x]</span><span class="t">Cockpit BA prospect-list print â€” cockpit GET /invites/print.pdf + domain/cockpitPrint.ts (#142). Sponsor-scoped via listInvitesForBA; brand-locked PDF, same pdfReport.ts foundation. Round-tripped live (3 prospects, valid %PDF). <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">118.</span><span class="box">[x]</span><span class="t">services/pdfReport.ts â€” shared pdfkit foundation (brand header + verifiability footer + table/section helpers); pdfkit + @types/pdfkit added to server (#142) <span class="tag">(done)</span></span></div>

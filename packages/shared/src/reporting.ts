@@ -131,3 +131,209 @@ export interface AdminActivationReport {
   cohorts: AdminActivationCohort[];
   rows: AdminActivationRow[];
 }
+
+/* ─── 2 · Training completion ───────────────────────────────────── */
+
+/**
+ * Per-BA training progress (ADMIN I.1 line 2): Fast Start Module 1–5
+ * completion + 10-step orientation completion + days from signup to each
+ * milestone.
+ *
+ * DATA NOTE (Chat #143): `fast_start_progress` exists as the source but is
+ * currently empty (no BA has progressed). `orientationCompletedAt` has NO
+ * source yet — orientation is a live Zoom call and its completion-tracking
+ * surface (wireframe 4.team 3.6 scheduling card) is unbuilt, so this field
+ * is null for everyone until that lands. The report is structurally
+ * complete and correct the moment data flows; no rework needed. See the
+ * report's provenanceNote.
+ */
+export interface AdminTrainingReportRow {
+  baId: string;
+  fullName: string;
+  signupAt: string;
+  modulesCompleted: number; // 0–5
+  fastStartComplete: boolean; // all 5
+  fastStartCompletedAt: string | null; // max module completedAt when all 5 done
+  orientationCompletedAt: string | null; // forward-declared; null until surface exists
+  daysSignupToFastStartComplete: number | null;
+}
+
+export interface AdminTrainingReport {
+  totals: {
+    bas: number;
+    fastStartComplete: number;
+    fastStartCompletePct: number | null;
+    orientationComplete: number;
+    avgDaysSignupToFastStartComplete: number | null;
+  };
+  /** Module-by-module completion counts across the scoped BA set. */
+  moduleCompletion: Array<{ moduleId: 1 | 2 | 3 | 4 | 5; completed: number }>;
+  rows: AdminTrainingReportRow[];
+  /** Surfaced so the JSON consumer can show the same honesty as the PDF. */
+  provenanceNote: string;
+}
+
+/* ─── 3 · Invite-to-presentation movement ─────────────────────── */
+
+/**
+ * Funnel through the invite_tokens state machine (ADMIN I.1 line 3):
+ * mint → click → video_started → video_complete. Stage counts +
+ * stage-to-stage conversion %.
+ *
+ * Per-stage average days are reported only where a clean transition
+ * timestamp exists (mint→click via tokens.createdAt→clickedAt;
+ * click→video_complete via clickedAt→invitation_activity.video_completed.at).
+ * Other transitions are not currently timestamped per-state; the report
+ * carries a provenanceNote.
+ */
+export interface AdminInviteFunnelStageCount {
+  stage: 'minted' | 'clicked' | 'video_started' | 'video_complete';
+  tokens: number;
+  /** Cumulative conversion from mint (0–1). null when minted=0. */
+  conversionFromMint: number | null;
+}
+
+export interface AdminInviteFunnelReport {
+  totals: {
+    minted: number;
+    clicked: number;
+    videoStarted: number;
+    videoComplete: number;
+    mintToClickPct: number | null;
+    clickToVideoStartPct: number | null;
+    videoStartToCompletePct: number | null;
+    avgDaysMintToClick: number | null;
+    avgDaysClickToVideoComplete: number | null;
+  };
+  stages: AdminInviteFunnelStageCount[];
+  provenanceNote: string;
+}
+
+/* ─── 4 · Queue velocity ────────────────────────────────────────── */
+
+/**
+ * Daily queue flow (ADMIN I.1 line 4): placements/day, flushes/day,
+ * enrollments/day, net change/day. Sources from pool_placements (placedAt,
+ * flushedAt, flushReason). Net = placements − flushes (any reason).
+ * Enrollments are flushes with flushReason='enrolled'.
+ */
+export interface AdminQueueVelocityDay {
+  date: string; // YYYY-MM-DD UTC
+  placements: number;
+  flushes: number;
+  enrollments: number;
+  net: number;
+}
+
+export interface AdminQueueVelocityReport {
+  totals: {
+    placements: number;
+    flushes: number;
+    enrollments: number;
+    net: number;
+    placementsPerDay7d: number | null;
+    placementsPerDay30d: number | null;
+    enrollmentsPerDay7d: number | null;
+    enrollmentsPerDay30d: number | null;
+  };
+  days: AdminQueueVelocityDay[];
+}
+
+/* ─── 5 · Enrollment completion (renamed from spec's "Registration handoff") ── */
+
+/**
+ * Prospects marked enrolled, sliced by BA, by day, by BA signup cohort.
+ * Renamed from the spec's "Registration handoff completion" because per
+ * locked-spec 3.6 and Chat #84 the system has no programmatic registration
+ * handoff — enrollment is BA-to-BA, off-app. What the system records is
+ * the moment the BA marks the prospect enrolled (pool_placements with
+ * flushReason='enrolled' and flushedAt).
+ */
+export interface AdminEnrollmentPerBa {
+  baId: string;
+  fullName: string;
+  enrollments: number;
+}
+export interface AdminEnrollmentPerDay {
+  date: string; // YYYY-MM-DD UTC
+  enrollments: number;
+}
+export interface AdminEnrollmentPerCohort {
+  cohort: string; // BA signup-month YYYY-MM
+  bas: number;
+  enrollments: number;
+}
+
+export interface AdminEnrollmentReport {
+  totals: {
+    enrollments: number;
+    enrollingBas: number;
+    perDayAvg7d: number | null;
+    perDayAvg30d: number | null;
+  };
+  perBa: AdminEnrollmentPerBa[];
+  perDay: AdminEnrollmentPerDay[];
+  perCohort: AdminEnrollmentPerCohort[];
+}
+
+/* ─── 6 · Follow-up aging ──────────────────────────────────────── */
+
+/**
+ * Open follow-up aging (ADMIN I.1 line 6). The spec calls for bucketing
+ * open reminders by age 0–3 / 4–7 / 8–14 / 15+ days. There is no live
+ * "active follow-up reminder" collection yet (the surface is referenced in
+ * the wireframe but unbuilt). Today this report ages prospects by their
+ * crm_dispositions.updatedAt as the closest available proxy; the
+ * provenanceNote states the proxy explicitly so consumers know.
+ */
+export type AdminFollowUpBucket = '0-3' | '4-7' | '8-14' | '15+';
+
+export interface AdminFollowUpBucketCount {
+  bucket: AdminFollowUpBucket;
+  prospects: number;
+}
+
+export interface AdminFollowUpRow {
+  prospectId: string;
+  sponsorBaId: string;
+  disposition: string;
+  lastUpdatedAt: string;
+  ageDays: number;
+  bucket: AdminFollowUpBucket;
+}
+
+export interface AdminFollowUpReport {
+  totals: {
+    prospects: number;
+    avgAgeDays: number | null;
+    maxAgeDays: number | null;
+  };
+  buckets: AdminFollowUpBucketCount[];
+  rows: AdminFollowUpRow[]; // sorted oldest first
+  provenanceNote: string;
+}
+
+/* ─── 9 · Leader scorecards (Kevin-only; coaching, never shown to leader) ── */
+
+/**
+ * Per leader (currently THREE-binary-qualified AND ≥5 personal enrollments,
+ * per Chat #100 — set is empty today until THREE qualifications mirror in;
+ * no algorithmic heuristic permitted). ADMIN I.5: Kevin-only, never shown
+ * to the leader.
+ */
+export interface AdminLeaderScorecardRow {
+  baId: string;
+  fullName: string;
+  signupAt: string;
+  personalEnrollments: number;
+  teamRecentEnrollments: number; // last 30d
+  teamPlacementsLast30d: number;
+  teamVideoCompletesLast30d: number;
+}
+
+export interface AdminLeaderScorecardReport {
+  leaderCount: number;
+  rows: AdminLeaderScorecardRow[];
+  /** Why the list may be empty (Chat #100 / LEADER_DETECTION_NOTE). */
+  provenanceNote: string;
+}

@@ -20,6 +20,12 @@ import { z } from 'zod';
 import { requireAdmin } from '../../middleware/requireAuth.js';
 import { buildMasterReportPdf } from '../../domain/adminMasterReport.js';
 import { buildBaActivationReport } from '../../domain/reports/baActivation.js';
+import { buildTrainingReport } from '../../domain/reports/trainingCompletion.js';
+import { buildInviteFunnelReport } from '../../domain/reports/inviteFunnel.js';
+import { buildQueueVelocityReport } from '../../domain/reports/queueVelocity.js';
+import { buildEnrollmentReport } from '../../domain/reports/enrollmentCompletion.js';
+import { buildFollowUpReport } from '../../domain/reports/followUpAging.js';
+import { buildLeaderScorecardReport } from '../../domain/reports/leaderScorecards.js';
 import { resolveTimeRange } from '../../domain/reports/timeRange.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
 import type {
@@ -161,5 +167,225 @@ adminReportingRoutes.get('/activation', requireAdmin, async (req, res) => {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Activation report failed: ${msg}` });
+  }
+});
+
+/* ─── GET /training — I.1 Report 2 · Training completion ────── */
+
+adminReportingRoutes.get('/training', requireAdmin, async (req, res) => {
+  let filter: AdminDashboardFilter;
+  try {
+    filter = parseFilter(req);
+  } catch (err) {
+    res
+      .status(400)
+      .json({ ok: false, error: 'Invalid filter.', issues: (err as z.ZodError).issues });
+    return;
+  }
+  const range = parseRange(req);
+
+  try {
+    const { result, meta } = await buildTrainingReport(filter, range);
+
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.reporting.training_completion.generated',
+      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      severity: 'info',
+      after: {
+        filter,
+        range,
+        generatedAt: meta.generatedAt,
+        sourceHash: meta.sourceHash,
+        bas: result.totals.bas,
+        fastStartComplete: result.totals.fastStartComplete,
+      },
+      reason: null,
+      context: {
+        ip: req.ip ?? null,
+        userAgent: req.get('user-agent') ?? null,
+        route: '/api/admin/reporting/training',
+        method: 'GET',
+        requestId: null,
+      },
+    });
+
+    res.status(200).json({
+      ok: true,
+      meta: { ...meta, title: 'Training Completion' },
+      result,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Training report failed: ${msg}` });
+  }
+});
+
+/* ─── GET /invite-funnel — I.1 Report 3 · Invite-to-presentation movement ── */
+
+adminReportingRoutes.get('/invite-funnel', requireAdmin, async (req, res) => {
+  let filter: AdminDashboardFilter;
+  try {
+    filter = parseFilter(req);
+  } catch (err) {
+    res.status(400).json({ ok: false, error: 'Invalid filter.', issues: (err as z.ZodError).issues });
+    return;
+  }
+  const range = parseRange(req);
+
+  try {
+    const { result, meta } = await buildInviteFunnelReport(filter, range);
+
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.reporting.invite_to_presentation.generated',
+      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      severity: 'info',
+      after: {
+        filter,
+        range,
+        generatedAt: meta.generatedAt,
+        sourceHash: meta.sourceHash,
+        minted: result.totals.minted,
+        videoComplete: result.totals.videoComplete,
+      },
+      reason: null,
+      context: {
+        ip: req.ip ?? null,
+        userAgent: req.get('user-agent') ?? null,
+        route: '/api/admin/reporting/invite-funnel',
+        method: 'GET',
+        requestId: null,
+      },
+    });
+
+    res.status(200).json({
+      ok: true,
+      meta: { ...meta, title: 'Invite-to-Presentation Movement' },
+      result,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Invite funnel report failed: ${msg}` });
+  }
+});
+
+/* ─── GET /queue-velocity — I.1 Report 4 ───────────────────── */
+
+adminReportingRoutes.get('/queue-velocity', requireAdmin, async (req, res) => {
+  let filter: AdminDashboardFilter;
+  try {
+    filter = parseFilter(req);
+  } catch (err) {
+    res.status(400).json({ ok: false, error: 'Invalid filter.', issues: (err as z.ZodError).issues });
+    return;
+  }
+  const range = parseRange(req);
+
+  try {
+    const { result, meta } = await buildQueueVelocityReport(filter, range);
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.reporting.queue_velocity.generated',
+      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      severity: 'info',
+      after: { filter, range, generatedAt: meta.generatedAt, sourceHash: meta.sourceHash, days: result.days.length },
+      reason: null,
+      context: { ip: req.ip ?? null, userAgent: req.get('user-agent') ?? null, route: '/api/admin/reporting/queue-velocity', method: 'GET', requestId: null },
+    });
+    res.status(200).json({ ok: true, meta: { ...meta, title: 'Queue Velocity' }, result });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Queue velocity report failed: ${msg}` });
+  }
+});
+
+/* ─── GET /enrollment-completion — I.1 Report 5 (renamed) ────── */
+
+adminReportingRoutes.get('/enrollment-completion', requireAdmin, async (req, res) => {
+  let filter: AdminDashboardFilter;
+  try {
+    filter = parseFilter(req);
+  } catch (err) {
+    res.status(400).json({ ok: false, error: 'Invalid filter.', issues: (err as z.ZodError).issues });
+    return;
+  }
+  const range = parseRange(req);
+
+  try {
+    const { result, meta } = await buildEnrollmentReport(filter, range);
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.reporting.enrollment_completion.generated',
+      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      severity: 'info',
+      after: { filter, range, generatedAt: meta.generatedAt, sourceHash: meta.sourceHash, enrollments: result.totals.enrollments },
+      reason: null,
+      context: { ip: req.ip ?? null, userAgent: req.get('user-agent') ?? null, route: '/api/admin/reporting/enrollment-completion', method: 'GET', requestId: null },
+    });
+    res.status(200).json({ ok: true, meta: { ...meta, title: 'Enrollment Completion' }, result });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Enrollment completion report failed: ${msg}` });
+  }
+});
+
+/* ─── GET /follow-up-aging — I.1 Report 6 ──────────────────── */
+
+adminReportingRoutes.get('/follow-up-aging', requireAdmin, async (req, res) => {
+  let filter: AdminDashboardFilter;
+  try {
+    filter = parseFilter(req);
+  } catch (err) {
+    res.status(400).json({ ok: false, error: 'Invalid filter.', issues: (err as z.ZodError).issues });
+    return;
+  }
+  const range = parseRange(req);
+
+  try {
+    const { result, meta } = await buildFollowUpReport(filter, range);
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.reporting.follow_up_aging.generated',
+      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      severity: 'info',
+      after: { filter, range, generatedAt: meta.generatedAt, sourceHash: meta.sourceHash, prospects: result.totals.prospects },
+      reason: null,
+      context: { ip: req.ip ?? null, userAgent: req.get('user-agent') ?? null, route: '/api/admin/reporting/follow-up-aging', method: 'GET', requestId: null },
+    });
+    res.status(200).json({ ok: true, meta: { ...meta, title: 'Follow-Up Aging' }, result });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Follow-up aging report failed: ${msg}` });
+  }
+});
+
+/* ─── GET /leader-scorecards — I.1 Report 9 (Kevin-only) ────── */
+
+adminReportingRoutes.get('/leader-scorecards', requireAdmin, async (req, res) => {
+  let filter: AdminDashboardFilter;
+  try {
+    filter = parseFilter(req);
+  } catch (err) {
+    res.status(400).json({ ok: false, error: 'Invalid filter.', issues: (err as z.ZodError).issues });
+    return;
+  }
+  const range = parseRange(req);
+
+  try {
+    const { result, meta } = await buildLeaderScorecardReport(filter, range);
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.reporting.leader_scorecards.generated',
+      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      severity: 'info',
+      after: { filter, range, generatedAt: meta.generatedAt, sourceHash: meta.sourceHash, leaderCount: result.leaderCount },
+      reason: null,
+      context: { ip: req.ip ?? null, userAgent: req.get('user-agent') ?? null, route: '/api/admin/reporting/leader-scorecards', method: 'GET', requestId: null },
+    });
+    res.status(200).json({ ok: true, meta: { ...meta, title: 'Leader Scorecards' }, result });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Leader scorecards report failed: ${msg}` });
   }
 });
