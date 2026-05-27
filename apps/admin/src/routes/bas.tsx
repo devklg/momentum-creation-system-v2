@@ -22,8 +22,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { DirectoryTable } from '@/components/ba-oversight/directory-table';
 import { ProfileDrawer } from '@/components/ba-oversight/profile-drawer';
+import { BaCrudModal, type BaCrudResponse } from '@/components/ba-oversight/ba-crud-modal';
 import type {
   AdminBaDirectoryResponse,
   AdminBaDirectoryRow,
@@ -37,6 +39,7 @@ export function BAsPage() {
   const [filterText, setFilterText] = useState('');
   const [openBaId, setOpenBaId] = useState<string | null>(null);
   const [togglePendingBaId, setTogglePendingBaId] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -62,6 +65,11 @@ export function BAsPage() {
     setRows((prev) =>
       prev ? prev.map((r) => (r.baId === next.baId ? next : r)) : prev,
     );
+  }
+
+  function onCreateDone(_resp: BaCrudResponse) {
+    setCreateOpen(false);
+    void load();
   }
 
   async function onToggleCurated(baId: string, next: boolean) {
@@ -126,6 +134,12 @@ export function BAsPage() {
         />
       </div>
 
+      <div className="mb-4">
+        <Button variant="primary" size="sm" onClick={() => setCreateOpen(true)}>
+          + New Brand Ambassador
+        </Button>
+      </div>
+
       {rows === null ? (
         <p className="text-[12px] font-mono tracking-label text-cream-faint uppercase">
           Loading…
@@ -145,6 +159,15 @@ export function BAsPage() {
           baId={openBaId}
           onClose={() => setOpenBaId(null)}
           onRowChanged={onRowChanged}
+        />
+      )}
+
+      {createOpen && (
+        <BaCrudModal
+          mode="create"
+          row={null}
+          onClose={() => setCreateOpen(false)}
+          onDone={onCreateDone}
         />
       )}
     </div>

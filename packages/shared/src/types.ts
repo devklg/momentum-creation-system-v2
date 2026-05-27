@@ -1468,6 +1468,21 @@ export interface ProspectCrmBundle {
   followUp: CrmFollowUpRecord | null;
   disposition: CrmDisposition | null;
   reinviteAvailableAt: IsoTimestamp | null;
+  /** Current editable identity fields (Chat #141), so the cockpit edit form
+   *  prefills from the same fetch the row already does on expand. The list
+   *  display shows first name + last initial only (privacy-minimal); the
+   *  full lastName / phone / email live on the record and are surfaced here
+   *  for the owning BA's edit form. Sponsor is intentionally absent — not
+   *  editable from the cockpit (locked-spec 3.5). */
+  editable: {
+    firstName: string;
+    lastName: string;
+    phone: string | null;
+    email: string | null;
+    city: string;
+    stateOrRegion: string;
+    country: string;
+  };
 }
 
 export interface CrmBundleResponse {
@@ -2423,6 +2438,9 @@ export interface AdminBaDirectoryRow {
   systemDetectedLeader: boolean;
   /** Kevin-curated leader badge (admin toggle on row + profile drawer). */
   curatedLeader: boolean;
+  /** Soft-delete lifecycle (Chat #138/#141), distinct from `status`
+   *  'suspended'. True when removed from the roster (reversible). */
+  deleted: boolean;
 }
 
 export interface AdminBaDirectoryResponse {
@@ -2589,6 +2607,10 @@ export interface AdminProspectDirectoryRow {
   followUpNeededBy: IsoTimestamp | null;
   /** Column 10: registration handoff state with THREE (derived; see type). */
   registrationHandoffState: AdminProspectRegistrationHandoffState;
+  /** Soft-delete lifecycle (Chat #138/#141). True when removed from the
+   *  directory (reversible). The table may dim / tag deleted rows; the
+   *  holding-tank position is untouched by delete. */
+  deleted: boolean;
 }
 
 /**
@@ -2698,6 +2720,10 @@ export interface AdminProspectDetail {
   prospectId: string;
   firstName: string;
   lastName: string;
+  /** Soft-delete lifecycle (Chat #138/#141). True when removed from the
+   *  directory (reversible). The holding-tank position is untouched by
+   *  delete; only the flush vacates it. */
+  deleted: boolean;
   phone: string | null;
   email: string | null;
   location: ProspectLocation;
@@ -2990,4 +3016,194 @@ export interface AdminQueueTickerSseEvent {
 export interface AdminQueueTickerSnapshot {
   globalMaxPosition: number;
   recent: AdminTickerEntry[];
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+ * ADMIN CRUD — manual BA + prospect lifecycle (Chat #138)
+ *
+ * The manual complement to the automated paths (access-code signup,
+ * silent video_complete placement). Same authority class as the C.5
+ * sponsor override and the D.4 interventions: friction-heavy, reason
+ * required, every mutation audited with before/after (locked-spec 4.J).
+ *
+ * Boundary (ADMIN-Design standing rule, line 31): these write TM-side
+ * mirror records ONLY. They never enrol anyone in THREE, never fabricate
+ * THREE genealogy/comp. THREE remains the final authority.
+ *
+ * Delete is SOFT (Chat #138 lock): a `deleted` lifecycle state distinct
+ * from `suspended`, a required reason for the paper trail, fully
+ * reversible via restore. A deleted BA/prospect vacates nothing it didn't
+ * already hold and never reshuffles monotonic queue positions.
+ * ────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Lifecycle flag carried on a BA record once an admin soft-deletes it.
+ * Absent/null on every normally-registered BA. Distinct from the
+ * `suspended` flag deriveStatus() already understands: suspended = benched
+ * but present; deleted = pulled from the active roster, restorable.
+ */
+export interface AdminSoftDeleteState {
+  deleted: boolean;
+  deletedAt: IsoTimestamp | null;
+  deletedReason: string | null;
+  deletedByBaId: string | null;
+  /** Stamped on restore so the audit pair is legible on the record too. */
+  restoredAt: IsoTimestamp | null;
+  restoredByBaId: string | null;
+}
+
+/* ── BA create ──────────────────────────────────────────────────────── */
+
+/**
+ * Admin-create a BA. sponsorBaId is REQUIRED (Chat #138) and is stamped as
+ * the original/immutable sponsor from birth — there is no signup
+ * transaction to derive it from. No password is set here: an admin-created
+ * BA is a roster mirror entry, not a login. (If the person later signs up
+ * through the normal access-code flow, that path owns credential creation.)
+ */
+export interface AdminCreateBaPayload {
+  firstName: string;
+  lastName: string;
+  threeBaId: string;
+  threeUsername: string;
+  sponsorBaId: string;
+  email?: string | null;
+  phone?: string | null;
+  timezone?: string | null;
+  marketRegion?: string | null;
+  /** Required paper-trail note (min 8 chars), mirrors override/intervention reason. */
+  reason: string;
+}
+
+export interface AdminCreateBaResponse {
+  ok: true;
+  baId: string;
+  row: AdminBaDirectoryRow;
+}
+
+/* ── BA edit ────────────────────────────────────────────────────────── */
+
+/**
+ * Admin-edit a BA's ordinary fields. The sponsor field is intentionally
+ * NOT here — sponsor changes have exactly one mutation path, the C.5
+ * override flow (see AdminSponsorOverrideResponse). The edit form routes a
+ * sponsor change through that endpoint; this payload covers everything
+ * else. Every supplied field overwrites; omitted fields are untouched.
+ * `reason` is required for the paper trail (Chat #138).
+ */
+export interface AdminEditBaPayload {
+  firstName?: string;
+  lastName?: string;
+  threeBaId?: string;
+  threeUsername?: string;
+  email?: string | null;
+  phone?: string | null;
+  timezone?: string | null;
+  marketRegion?: string | null;
+  reason: string;
+}
+
+export interface AdminEditBaResponse {
+  ok: true;
+  baId: string;
+  row: AdminBaDirectoryRow;
+}
+
+/* ── BA / prospect soft-delete + restore (shared shapes) ────────────── */
+
+export interface AdminSoftDeletePayload {
+  /** Required paper-trail reason (min 8 chars). */
+  reason: string;
+}
+
+export interface AdminRestorePayload {
+  reason: string;
+}
+
+export interface AdminBaDeleteResponse {
+  ok: true;
+  baId: string;
+  deletedAt: IsoTimestamp;
+}
+
+export interface AdminBaRestoreResponse {
+  ok: true;
+  baId: string;
+  restoredAt: IsoTimestamp;
+  row: AdminBaDirectoryRow;
+}
+
+/* ── prospect create ────────────────────────────────────────────────── */
+
+/**
+ * Admin-create a prospect. Mirrors the BA invitation-spine mint exactly:
+ * a real /p/{token} is minted with sponsor locked at mint, then the
+ * prospect is placed in the team-wide holding tank at the NEXT monotonic
+ * position (Chat #138 — no position picking, no delay; placement follows
+ * the same path a real video_complete uses). sponsorBaId is required.
+ */
+export interface AdminCreateProspectPayload {
+  firstName: string;
+  lastName: string;
+  city: string;
+  stateOrRegion: string;
+  country?: string;
+  sponsorBaId: string;
+  phone?: string | null;
+  email?: string | null;
+  reason: string;
+}
+
+export interface AdminCreateProspectResponse {
+  ok: true;
+  prospectId: string;
+  token: string;
+  inviteUrl: string;
+  /**
+   * Null at create. An admin-created prospect goes through the SAME process
+   * as a regular prospect (Chat #140 supersedes #138): mint-only at create,
+   * placed in the holding tank with a real position only at video_complete
+   * via the normal /api/p/:token/video-event path. The position arrives when
+   * they earn it, exactly like every other prospect.
+   */
+  positionNumber: number | null;
+  placedAt: IsoTimestamp | null;
+  row: AdminProspectDirectoryRow;
+}
+
+/* ── prospect edit ──────────────────────────────────────────────────── */
+
+/**
+ * Admin-edit a prospect's ordinary fields. Sponsor is NOT here — a
+ * prospect's sponsor changes only through the D.4 reassign-sponsor
+ * intervention (already built). `reason` required for the paper trail.
+ */
+export interface AdminEditProspectPayload {
+  firstName?: string;
+  lastName?: string;
+  city?: string;
+  stateOrRegion?: string;
+  country?: string;
+  phone?: string | null;
+  email?: string | null;
+  reason: string;
+}
+
+export interface AdminEditProspectResponse {
+  ok: true;
+  prospectId: string;
+  row: AdminProspectDirectoryRow;
+}
+
+export interface AdminProspectDeleteResponse {
+  ok: true;
+  prospectId: string;
+  deletedAt: IsoTimestamp;
+}
+
+export interface AdminProspectRestoreResponse {
+  ok: true;
+  prospectId: string;
+  restoredAt: IsoTimestamp;
+  row: AdminProspectDirectoryRow;
 }

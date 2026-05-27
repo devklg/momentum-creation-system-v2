@@ -43,6 +43,9 @@ import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js'
 import {
   CrmError,
   addNote,
+  baCreateProspect,
+  baEditProspect,
+  baSoftDeleteProspect,
   clearFollowUp,
   getCrmBundle,
   getTodaysActions,
@@ -64,6 +67,11 @@ function sendCrmError(
     }
     if (err.code === 'sponsor_mismatch') {
       return res.status(403).json({ ok: false, error: 'forbidden' });
+    }
+    if (err.code === 'row_unavailable') {
+      // The mutation landed but the directory row couldn't be rebuilt —
+      // a server-side read failure, not a client error.
+      return res.status(500).json({ ok: false, error: 'row_unavailable' });
     }
     // 400-class validation errors
     return res.status(400).json({ ok: false, error: err.code });
@@ -257,3 +265,145 @@ crmRoutes.post(
     }
   },
 );
+
+// ── BA-scoped prospect CRUD (Chat #141) ─────────────────────────────────────
+//
+// create / edit / soft-delete / restore for a BA's OWN prospects. The domain
+// wrappers (crm.ts) force sponsorBaId from the session, run assertOwnership
+// on edit/delete/restore, and delegate the real work to the shared
+// adminProspectCrud engine with a { kind:'ba' } actor. These routes only
+// validate input and map errors — same requireAuth + requireMichaelComplete
+// gating as every other crm route.
+//
+// Reason is required on every mutation (min 8 chars), matching the admin
+// CRUD paper-trail rule — the shared engine rejects reason_too_short, but we
+// surface a clean 400 before delegating when the field is plainly missing.
+
+const MIN_REASON_LEN = 8;
+
+function trimmedString(v: unknown): string {
+  return typeof v === 'string' ? v.trim() : '';
+}
+
+function optionalString(v: unknown): string | undefined {
+  return typeof v === 'string' ? v.trim() : undefined;
+}
+
+function nullableString(v: unknown): string | null | undefined {
+  if (v === null) return null;
+  if (typeof v === 'string') return v.trim();
+  return undefined;
+}
+
+// ── POST /api/crm  (create — mint only) ──────────────────────────────────
+
+crmRoutes.post('/', requireAuth, requireMichaelComplete, async (req, res) => {
+  const sponsorBaId = req.session?.baId;
+  if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  const firstName = trimmedString(body.firstName);
+  const lastName = trimmedString(body.lastName);
+  const city = trimmedString(body.city);
+  const stateOrRegion = trimmedString(body.stateOrRegion);
+  const reason = trimmedString(body.reason);
+
+  if (!firstName || !lastName) {
+    return res.status(400).json({ ok: false, error: 'missing_name' });
+  }
+  if (!city || !stateOrRegion) {
+    return res.status(400).json({ ok: false, error: 'missing_location' });
+  }
+  if (reason.length < MIN_REASON_LEN) {
+    return res.status(400).json({ ok: false, error: 'reason_too_short' });
+  }
+
+  try {
+    const created = await baCreateProspect(sponsorBaId, {
+      firstName,
+      lastName,
+      city,
+      stateOrRegion,
+      country: optionalString(body.country),
+      phone: nullableString(body.phone),
+      email: nullableString(body.email),
+      reason,
+    });
+    return res.status(201).json({
+      ok: true,
+      prospectId: created.prospectId,
+      token: created.token,
+      inviteUrl: created.inviteUrl,
+      row: created.row,
+    });
+  } catch (err) {
+    return sendCrmError(res, err);
+  }
+});
+
+// ── PUT /api/crm/:prospectId  (edit ordinary fields) ─────────────────────
+
+crmRoutes.put('/:prospectId', requireAuth, requireMichaelComplete, async (req, res) => {
+  const sponsorBaId = req.session?.baId;
+  if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  const prospectId = getProspectId(req);
+  if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
+
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  const reason = trimmedString(body.reason);
+  if (reason.length < MIN_REASON_LEN) {
+    return res.status(400).json({ ok: false, error: 'reason_too_short' });
+  }
+
+  try {
+    const result = await baEditProspect(prospectId, sponsorBaId, {
+      firstName: optionalString(body.firstName),
+      lastName: optionalString(body.lastName),
+      city: optionalString(body.city),
+      stateOrRegion: optionalString(body.stateOrRegion),
+      country: optionalString(body.country),
+      phone: nullableString(body.phone),
+      email: nullableString(body.email),
+      reason,
+    });
+    return res.status(200).json({ ok: true, prospectId: result.prospectId, row: result.row });
+  } catch (err) {
+    return sendCrmError(res, err);
+  }
+});
+
+// ── DELETE /api/crm/:prospectId  (soft delete — tank untouched) ────────────
+
+crmRoutes.delete('/:prospectId', requireAuth, requireMichaelComplete, async (req, res) => {
+  const sponsorBaId = req.session?.baId;
+  if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  const prospectId = getProspectId(req);
+  if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
+
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  const reason = trimmedString(body.reason);
+  if (reason.length < MIN_REASON_LEN) {
+    return res.status(400).json({ ok: false, error: 'reason_too_short' });
+  }
+
+  try {
+    const result = await baSoftDeleteProspect(prospectId, sponsorBaId, reason);
+    return res.status(200).json({
+      ok: true,
+      prospectId: result.prospectId,
+      deletedAt: result.deletedAt,
+    });
+  } catch (err) {
+    return sendCrmError(res, err);
+  }
+});
+
+// ── POST /api/crm/:prospectId/restore — REMOVED (Chat #141) ─────────────────
+//
+// Restore is ADMIN-ONLY (Kevin, Chat #141). A BA can soft-delete their own
+// prospect from the cockpit but cannot undo it — recovery is a Kevin lever
+// from /admin (adminRestoreProspect + POST /api/admin/prospects/:id/restore).
+// The BA-scoped restore wrapper and this route were removed deliberately;
+// the admin engine restore stays intact.

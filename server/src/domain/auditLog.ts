@@ -39,8 +39,8 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COLLECTION = 'audit_log';
-const CHROMA_COLLECTION = 'audit_log';
+const COLLECTION = 'mcs_audit_log';
+const CHROMA_COLLECTION = 'mcs_audit_log';
 const MAX_LIMIT = 250;
 const DEFAULT_LIMIT = 100;
 const MAX_SNAPSHOT_BYTES = 4096;

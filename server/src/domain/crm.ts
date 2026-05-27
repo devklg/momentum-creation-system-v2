@@ -35,7 +35,16 @@ import { randomUUID } from 'node:crypto';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
+import { findBAByBaId } from './ba.js';
+import {
+  adminCreateProspect,
+  adminEditProspect,
+  adminSoftDeleteProspect,
+  type CrudActor,
+  type AdminProspectCrudError,
+} from './adminProspectCrud.js';
 import type {
+  AdminProspectDirectoryRow,
   CallbackIntent,
   CrmDisposition,
   CrmDispositionRecord,
@@ -441,13 +450,55 @@ export async function getCrmBundle(
     getDisposition(prospectId, sponsorBaId),
   ]);
 
+  // Editable identity fields (Chat #141). assertOwnership's guard doc is
+  // privacy-minimal (firstName + lastInitial), so read the full record for
+  // the fields the owning BA's edit form needs. Sponsor is intentionally
+  // NOT surfaced — not editable from the cockpit (locked-spec 3.5).
+  const full = await fetchFullProspectForEdit(prospectId);
+
   return {
     prospectId,
     notes,
     followUp,
     disposition,
     reinviteAvailableAt: computeReinviteAvailableAt(prospect),
+    editable: {
+      firstName: full?.firstName ?? prospect.firstName ?? '',
+      lastName: full?.lastName ?? '',
+      phone: full?.phone ?? null,
+      email: full?.email ?? null,
+      city: full?.location?.city ?? '',
+      stateOrRegion: full?.location?.stateOrRegion ?? '',
+      country: full?.location?.country ?? 'US',
+    },
   };
+}
+
+/** Full identity read for the edit form. Separate from the privacy-minimal
+ * guard doc so the guard stays lean. Sponsor-scoping already enforced by the
+ * assertOwnership call in getCrmBundle before this runs. */
+async function fetchFullProspectForEdit(prospectId: string): Promise<{
+  firstName: string;
+  lastName: string;
+  phone: string | null;
+  email: string | null;
+  location?: { city: string; stateOrRegion: string; country: string };
+} | null> {
+  const res = await gatewayCall<{
+    documents: Array<{
+      firstName: string;
+      lastName: string;
+      phone: string | null;
+      email: string | null;
+      location?: { city: string; stateOrRegion: string; country: string };
+    }>;
+  }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: PROSPECTS_COLLECTION,
+    filter: { prospectId },
+    limit: 1,
+  });
+  return res.documents?.[0] ?? null;
 }
 
 /**
@@ -721,7 +772,7 @@ export async function getTodaysActions(
     }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: PROSPECTS_COLLECTION,
-      filter: { sponsorBaId },
+      filter: { sponsorBaId, deleted: { $ne: true } },
       sort: { createdAt: -1 },
       limit: 1000,
     }),
@@ -809,3 +860,162 @@ export async function getTodaysActions(
     ...draftItems.sort(byAtDesc),
   ];
 }
+
+// ── BA-scoped prospect CRUD (Chat #141) ───────────────────────────────────
+//
+// The cockpit complement to the /admin prospect CRUD (#138/#140). A BA may
+// create / edit / soft-delete / restore THEIR OWN prospects. The actual
+// mutation logic is NOT duplicated here — it lives once in
+// adminProspectCrud.ts ("the shared machines", Chat #141 decision). These
+// wrappers do three things and nothing more:
+//
+//   1. Force sponsorBaId from the session (locked-spec 3.5 — never the body).
+//   2. Enforce ownership on edit/delete/restore via the existing
+//      assertOwnership() guard, so a BA can never touch another BA's
+//      prospect (3.5 "no strays"). Create needs no ownership check — the
+//      session BA becomes the sponsor by construction.
+//   3. Pass a { kind: 'ba' } actor so the audit entry names the BA and the
+//      action verb lands in the ba.prospect.* namespace (Chat #141 — the
+//      verb tracks the actor; the shared engine derives it from actor.kind).
+//
+// Scope (Chat #141, against locked-spec 3.2 / 3.7): a BA may soft-delete ANY
+// of their own prospects, placed or not — identical to admin. The holding
+// tank is left ENTIRELY untouched on delete (the shared engine guarantees
+// this); a placed prospect's monotonic position only vacates via the 8-week
+// flush or enrollment, never via a CRUD delete.
+//
+// Create is MINT-ONLY (Chat #141 mirrors #140-A): the BA-created prospect
+// goes through the exact same path as any other — a real /p/{token}, sponsor
+// stamped immutably, NO placement. Position is earned later at
+// video_complete through /api/p/:token/video-event, never assigned here. A
+// BA's normal create path is still the invitation generator (locked-spec
+// 1.8); this cockpit create is the manual complement for a prospect the BA
+// is recording directly, and it behaves identically downstream.
+
+/** Resolve the calling BA's audit actor. Display name from the BA record;
+ * falls back to the baId if the record is somehow nameless. */
+async function baActor(sponsorBaId: string): Promise<CrudActor> {
+  const ba = await findBAByBaId(sponsorBaId);
+  const displayName = ba
+    ? `${ba.firstName ?? ''} ${ba.lastName ?? ''}`.trim() || sponsorBaId
+    : sponsorBaId;
+  return { kind: 'ba', baId: sponsorBaId, displayName };
+}
+
+/**
+ * Map a shared-engine CRUD error to the CrmError vocabulary the crm route
+ * layer already knows how to status-map (sendCrmError). prospect_not_found
+ * and sponsor_mismatch keep their existing 404 / 403 meaning; the rest are
+ * 400-class validation codes surfaced verbatim.
+ */
+function crmErrorFromCrud(error: AdminProspectCrudError): CrmError {
+  switch (error.kind) {
+    case 'prospect_not_found':
+      return new CrmError('prospect_not_found');
+    case 'row_unavailable':
+      return new CrmError('row_unavailable');
+    default:
+      // reason_too_short | sponsor_not_found | prospect_deleted |
+      // prospect_not_deleted | no_fields — all 400-class, surfaced by code.
+      return new CrmError(error.kind);
+  }
+}
+
+/** Fields a BA may supply when creating a prospect from the cockpit.
+ * sponsorBaId is intentionally absent — it is forced from the session. */
+export interface BaCreateProspectInput {
+  firstName: string;
+  lastName: string;
+  city: string;
+  stateOrRegion: string;
+  country?: string;
+  phone?: string | null;
+  email?: string | null;
+  reason: string;
+}
+
+/** Fields a BA may edit. Sponsor is never here (3.5). */
+export interface BaEditProspectInput {
+  firstName?: string;
+  lastName?: string;
+  city?: string;
+  stateOrRegion?: string;
+  country?: string;
+  phone?: string | null;
+  email?: string | null;
+  reason: string;
+}
+
+export async function baCreateProspect(
+  sponsorBaId: string,
+  input: BaCreateProspectInput,
+): Promise<{
+  prospectId: string;
+  token: string;
+  inviteUrl: string;
+  row: AdminProspectDirectoryRow;
+}> {
+  const actor = await baActor(sponsorBaId);
+  // sponsorBaId forced from session — the body never carries it (3.5).
+  const result = await adminCreateProspect(
+    {
+      firstName: input.firstName,
+      lastName: input.lastName,
+      city: input.city,
+      stateOrRegion: input.stateOrRegion,
+      country: input.country,
+      sponsorBaId,
+      phone: input.phone ?? null,
+      email: input.email ?? null,
+      reason: input.reason,
+    },
+    actor,
+  );
+  if (!result.ok) throw crmErrorFromCrud(result.error);
+  return result.value;
+}
+
+export async function baEditProspect(
+  prospectId: string,
+  sponsorBaId: string,
+  input: BaEditProspectInput,
+): Promise<{ prospectId: string; row: AdminProspectDirectoryRow }> {
+  // Ownership first: a BA edits only their own prospect. assertOwnership
+  // throws CrmError('prospect_not_found' | 'sponsor_mismatch') which the
+  // route maps to 404 / 403 without leaking which prospect belongs to whom.
+  await assertOwnership(prospectId, sponsorBaId);
+
+  const actor = await baActor(sponsorBaId);
+  const result = await adminEditProspect(
+    prospectId,
+    {
+      firstName: input.firstName,
+      lastName: input.lastName,
+      city: input.city,
+      stateOrRegion: input.stateOrRegion,
+      country: input.country,
+      phone: input.phone ?? undefined,
+      email: input.email ?? undefined,
+      reason: input.reason,
+    },
+    actor,
+  );
+  if (!result.ok) throw crmErrorFromCrud(result.error);
+  return result.value;
+}
+
+export async function baSoftDeleteProspect(
+  prospectId: string,
+  sponsorBaId: string,
+  reason: string,
+): Promise<{ prospectId: string; deletedAt: string }> {
+  await assertOwnership(prospectId, sponsorBaId);
+  const actor = await baActor(sponsorBaId);
+  const result = await adminSoftDeleteProspect(prospectId, { reason }, actor);
+  if (!result.ok) throw crmErrorFromCrud(result.error);
+  return result.value;
+}
+
+// baRestoreProspect REMOVED (Chat #141): restore is admin-only. A BA can
+// soft-delete their own prospect but cannot undo it; recovery is a Kevin
+// lever from /admin (adminRestoreProspect). No BA-scoped restore exists.

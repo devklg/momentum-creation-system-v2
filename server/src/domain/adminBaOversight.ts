@@ -438,6 +438,7 @@ export async function listBADirectory(
       lastActivityAt,
       systemDetectedLeader: false,
       curatedLeader: curatedByBaId.get(ba.baId) ?? false,
+      deleted: (ba as unknown as Record<string, unknown>).deleted === true,
     };
   });
 
@@ -491,6 +492,7 @@ export async function getBAProfileBundle(
         lastActivityAt: ba.lastLoginAt ?? null,
         systemDetectedLeader: false,
         curatedLeader: false,
+        deleted: (ba as unknown as Record<string, unknown>).deleted === true,
       };
     }
   }

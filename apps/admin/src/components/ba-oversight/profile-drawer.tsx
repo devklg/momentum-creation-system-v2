@@ -30,6 +30,7 @@ import type {
 } from '@momentum/shared';
 import { SponsorOverrideFlow } from './sponsor-override-flow';
 import { NotesPanel } from './notes-panel';
+import { BaCrudModal, type BaCrudMode, type BaCrudResponse } from './ba-crud-modal';
 
 interface Props {
   baId: string;
@@ -41,6 +42,7 @@ export function ProfileDrawer({ baId, onClose, onRowChanged }: Props) {
   const [bundle, setBundle] = useState<AdminBaProfileBundle | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [overrideOpen, setOverrideOpen] = useState(false);
+  const [crudMode, setCrudMode] = useState<BaCrudMode | null>(null);
 
   useEffect(() => {
     void load();
@@ -85,6 +87,17 @@ export function ProfileDrawer({ baId, onClose, onRowChanged }: Props) {
     setBundle((prev) =>
       prev ? { ...prev, notes: [note, ...prev.notes] } : prev,
     );
+  }
+
+  function onCrudDone(resp: BaCrudResponse) {
+    // create / edit / restore carry a refreshed directory row; delete does
+    // not (the drawer reloads to pick up the deleted flag + audit entry).
+    if ('row' in resp && resp.row) {
+      onRowChanged(resp.row);
+      setBundle((prev) => (prev ? { ...prev, row: resp.row } : prev));
+    }
+    setCrudMode(null);
+    void load();
   }
 
   return (
@@ -135,6 +148,38 @@ export function ProfileDrawer({ baId, onClose, onRowChanged }: Props) {
               <KV label="Status">
                 <StatusPill status={bundle.row.status} />
               </KV>
+            </Section>
+
+            <Section
+              title="Lifecycle"
+              right={
+                bundle.row.deleted ? (
+                  <Button size="sm" variant="outline" onClick={() => setCrudMode('restore')}>
+                    Restore
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setCrudMode('edit')}>
+                      Edit
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setCrudMode('delete')}>
+                      Remove
+                    </Button>
+                  </div>
+                )
+              }
+            >
+              {bundle.row.deleted ? (
+                <p className="text-[12px] font-mono text-red-400">
+                  Removed from the roster. Reversible — restore to return it.
+                </p>
+              ) : (
+                <p className="text-[12px] text-cream-mute">
+                  Edit ordinary fields, or remove this BA from the roster. Sponsor
+                  changes route through the override flow below. Remove is
+                  reversible; every action writes an audit entry with a reason.
+                </p>
+              )}
             </Section>
 
             <Section
@@ -328,6 +373,15 @@ export function ProfileDrawer({ baId, onClose, onRowChanged }: Props) {
             row={bundle.row}
             onCancel={() => setOverrideOpen(false)}
             onApplied={onOverrideApplied}
+          />
+        )}
+
+        {crudMode && bundle && (
+          <BaCrudModal
+            mode={crudMode}
+            row={bundle.row}
+            onClose={() => setCrudMode(null)}
+            onDone={onCrudDone}
           />
         )}
       </aside>

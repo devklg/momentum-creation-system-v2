@@ -181,6 +181,15 @@ interface ProspectCrmBundle {
   followUp: CrmFollowUpRecord | null;
   disposition: CrmDisposition | null;
   reinviteAvailableAt: string | null;
+  editable: {
+    firstName: string;
+    lastName: string;
+    phone: string | null;
+    email: string | null;
+    city: string;
+    stateOrRegion: string;
+    country: string;
+  };
 }
 
 interface CrmBundleResponse {
@@ -328,6 +337,18 @@ export function CockpitPage() {
     void load();
   }, [load]);
 
+  // Today's Actions click → record target prospectId; InviteRow self-expands
+  // on match. Declared here with the other hooks (ABOVE the early returns)
+  // so the hook count is stable across loading/error/ready renders — a hook
+  // after the early returns changes the count on the ready transition and
+  // trips "rendered more hooks than during the previous render" (#141 fix).
+  const handleTodayClick = useCallback((prospectId: string) => {
+    setForceExpandedId(prospectId);
+    // Scroll to the row. The <li> carries id={`invite-${prospectId}`}.
+    const el = document.getElementById(`invite-${prospectId}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
   // Optimistic patch when "I sent this" succeeds, so the row updates without
   // a full reload. The server is the source of truth; this just mirrors it.
   const patchSent = useCallback((prospectId: string, sentAt: string) => {
@@ -386,13 +407,6 @@ export function CockpitPage() {
   }
 
   const { summary, invites, activityByProspect } = view;
-
-  const handleTodayClick = useCallback((prospectId: string) => {
-    setForceExpandedId(prospectId);
-    // Scroll to the row. The <li> carries id={`invite-${prospectId}`}.
-    const el = document.getElementById(`invite-${prospectId}`);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
 
   return (
     <Shell>
@@ -886,6 +900,14 @@ function CrmPanel({
         availableAt={bundle.reinviteAvailableAt}
         onReinvited={onReinvited}
       />
+
+      <EditRow
+        prospectId={prospectId}
+        editable={bundle.editable}
+        onSaved={onReinvited}
+      />
+
+      <DeleteRow prospectId={prospectId} onDeleted={onReinvited} />
     </div>
   );
 }
@@ -1281,6 +1303,279 @@ function ReinviteRow({
         <p className="text-teal font-mono text-[11px] tracking-[0.04em] mt-2">
           {ok}
         </p>
+      )}
+      {err && (
+        <p className="text-red-400 font-mono text-[11px] tracking-[0.04em] mt-2">
+          {err}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// Edit: correct a prospect's identity fields (Chat #141). Prefilled from the
+// CRM bundle's `editable` block. Sponsor is NOT editable here (locked-spec
+// 3.5) and is intentionally absent. A reason (min 8 chars) is required for
+// the audit trail; on save the parent reloads so the row shows the new name.
+function EditRow({
+  prospectId,
+  editable,
+  onSaved,
+}: {
+  prospectId: string;
+  editable: ProspectCrmBundle['editable'];
+  onSaved: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [firstName, setFirstName] = useState(editable.firstName);
+  const [lastName, setLastName] = useState(editable.lastName);
+  const [phone, setPhone] = useState(editable.phone ?? '');
+  const [email, setEmail] = useState(editable.email ?? '');
+  const [city, setCity] = useState(editable.city);
+  const [stateOrRegion, setStateOrRegion] = useState(editable.stateOrRegion);
+  const [reason, setReason] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const reasonOk = reason.trim().length >= 8;
+
+  const save = useCallback(async () => {
+    if (!reasonOk) {
+      setErr('A short reason (8+ chars) keeps the audit trail honest.');
+      return;
+    }
+    setSaving(true);
+    setErr(null);
+    try {
+      const res = await fetch(`/api/crm/${prospectId}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          phone: phone.trim() || null,
+          email: email.trim() || null,
+          city: city.trim(),
+          stateOrRegion: stateOrRegion.trim(),
+          reason: reason.trim(),
+        }),
+      });
+      const data = (await res.json()) as { ok: boolean; error?: string };
+      if (res.ok && data.ok) {
+        setOpen(false);
+        onSaved();
+      } else {
+        setErr(
+          data.error === 'no_fields'
+            ? 'Nothing changed.'
+            : 'Could not save. Try once more.',
+        );
+      }
+    } catch {
+      setErr('Network error.');
+    } finally {
+      setSaving(false);
+    }
+  }, [prospectId, firstName, lastName, phone, email, city, stateOrRegion, reason, reasonOk, onSaved]);
+
+  return (
+    <div>
+      <p className="font-mono tracking-[0.1em] text-[10px] text-cream-faint uppercase mb-2">
+        Edit details
+      </p>
+      {!open ? (
+        <Button
+          onClick={() => setOpen(true)}
+          className="bg-cream/[0.05] text-cream border border-cream/15 hover:border-gold/40 font-mono tracking-[0.04em] text-[12px] px-4 py-2 h-auto"
+        >
+          Edit
+        </Button>
+      ) : (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              aria-label="First name"
+              placeholder="First name"
+              className="bg-cream/[0.04] border border-cream/15 rounded px-2 py-1 text-cream font-mono text-[13px]"
+            />
+            <input
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              aria-label="Last name"
+              placeholder="Last name"
+              className="bg-cream/[0.04] border border-cream/15 rounded px-2 py-1 text-cream font-mono text-[13px]"
+            />
+            <input
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              aria-label="City"
+              placeholder="City"
+              className="bg-cream/[0.04] border border-cream/15 rounded px-2 py-1 text-cream font-mono text-[13px]"
+            />
+            <input
+              value={stateOrRegion}
+              onChange={(e) => setStateOrRegion(e.target.value)}
+              aria-label="State or region"
+              placeholder="State / region"
+              className="bg-cream/[0.04] border border-cream/15 rounded px-2 py-1 text-cream font-mono text-[13px]"
+            />
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              aria-label="Phone"
+              placeholder="Phone"
+              className="bg-cream/[0.04] border border-cream/15 rounded px-2 py-1 text-cream font-mono text-[13px]"
+            />
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-label="Email"
+              placeholder="Email (optional)"
+              className="bg-cream/[0.04] border border-cream/15 rounded px-2 py-1 text-cream font-mono text-[13px]"
+            />
+          </div>
+          <input
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            aria-label="Reason for the change"
+            placeholder="Reason for the change (min 8 chars)"
+            className="w-full bg-cream/[0.04] border border-cream/15 rounded px-2 py-1 text-cream font-mono text-[13px]"
+          />
+          {reason.trim().length > 0 && !reasonOk && (
+            <p className="text-cream-faint font-mono text-[11px] tracking-[0.04em]">
+              {reason.trim().length}/8 — a few more characters needed before you can save.
+            </p>
+          )}
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={save}
+              disabled={saving || !reasonOk}
+              className="bg-cream/[0.05] text-cream border border-cream/15 hover:border-gold/40 font-mono tracking-[0.04em] text-[12px] px-4 py-2 h-auto disabled:opacity-50"
+            >
+              {saving ? 'Saving…' : 'Save changes'}
+            </Button>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              disabled={saving}
+              className="font-mono tracking-[0.06em] text-[11px] text-cream-faint hover:text-cream disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      {err && (
+        <p className="text-red-400 font-mono text-[11px] tracking-[0.04em] mt-2">
+          {err}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// Delete: soft-remove a prospect from the BA's pipeline (Chat #141). Two-step
+// confirm + required reason. Reversible — only Kevin can restore from /admin
+// (restore is admin-only, Chat #141), and the holding-tank position is left
+// untouched. On success the parent reloads and the row drops out of the list.
+function DeleteRow({
+  prospectId,
+  onDeleted,
+}: {
+  prospectId: string;
+  onDeleted: () => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [reason, setReason] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const reasonOk = reason.trim().length >= 8;
+
+  const remove = useCallback(async () => {
+    if (!reasonOk) {
+      setErr('A short reason (8+ chars) is required.');
+      return;
+    }
+    setDeleting(true);
+    setErr(null);
+    try {
+      const res = await fetch(`/api/crm/${prospectId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: reason.trim() }),
+      });
+      const data = (await res.json()) as { ok: boolean; error?: string };
+      if (res.ok && data.ok) {
+        onDeleted();
+      } else {
+        setErr('Could not remove. Try once more.');
+      }
+    } catch {
+      setErr('Network error.');
+    } finally {
+      setDeleting(false);
+    }
+  }, [prospectId, reason, reasonOk, onDeleted]);
+
+  return (
+    <div className="border-t border-cream/10 pt-4">
+      <p className="font-mono tracking-[0.1em] text-[10px] text-cream-faint uppercase mb-2">
+        Remove prospect
+      </p>
+      {!confirming ? (
+        <button
+          type="button"
+          onClick={() => setConfirming(true)}
+          className="font-mono tracking-[0.06em] text-[11px] text-cream-faint hover:text-red-400"
+        >
+          Remove from my list
+        </button>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-cream-mute text-[12px] leading-[1.5]">
+            This removes the prospect from your list. It&rsquo;s reversible —
+            ask Kevin if you need it back — and their place in the team line
+            is left untouched.
+          </p>
+          <input
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            aria-label="Reason for removing"
+            placeholder="Reason (min 8 chars)"
+            className="w-full bg-cream/[0.04] border border-cream/15 rounded px-2 py-1 text-cream font-mono text-[13px]"
+          />
+          {reason.trim().length > 0 && !reasonOk && (
+            <p className="text-cream-faint font-mono text-[11px] tracking-[0.04em]">
+              {reason.trim().length}/8 — a few more characters needed before you can confirm.
+            </p>
+          )}
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={remove}
+              disabled={deleting || !reasonOk}
+              className="bg-red-500/10 text-red-300 border border-red-400/40 hover:bg-red-500/20 font-mono tracking-[0.04em] text-[12px] px-4 py-2 h-auto disabled:opacity-50"
+            >
+              {deleting ? 'Removing…' : 'Confirm remove'}
+            </Button>
+            <button
+              type="button"
+              onClick={() => {
+                setConfirming(false);
+                setReason('');
+                setErr(null);
+              }}
+              disabled={deleting}
+              className="font-mono tracking-[0.06em] text-[11px] text-cream-faint hover:text-cream disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
       {err && (
         <p className="text-red-400 font-mono text-[11px] tracking-[0.04em] mt-2">

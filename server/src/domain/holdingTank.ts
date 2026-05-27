@@ -395,3 +395,146 @@ async function listRecentPlacements(
       placedAt: d.placedAt,
     }));
 }
+
+/* ── 8-week expiry: manual flush + aged alert (Chat #138 / #140) ───── */
+
+/**
+ * The 8-week consideration window (locked-spec Part 3.7).
+ *
+ * Clock decision (Chat #140): the window runs from `placedAt` — the moment
+ * the prospect entered the tank at video_complete — NOT from the mint-time
+ * token `expiresAt`. A prospect can sit minted for days before they watch
+ * the video; the consideration window is about time spent WAITING in the
+ * tank, so it is anchored to placement.
+ *
+ * No background scheduler / cron (Chat #138). Kevin runs the flush on
+ * demand; listProspectsAgedBeyond powers the admin alert that tells him
+ * when it's worth running.
+ */
+export const HOLDING_TANK_WINDOW_WEEKS = 8;
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** ISO timestamp of the cutoff `weeks` ago. Placements with placedAt strictly
+ * older than this are past the window. */
+function windowCutoffIso(weeks: number, nowMs: number): string {
+  return new Date(nowMs - weeks * ONE_WEEK_MS).toISOString();
+}
+
+export interface AgedPlacement {
+  prospectId: string;
+  positionNumber: number;
+  sponsorBaId: string;
+  placedAt: string;
+  /** Whole weeks the prospect has been in the tank (floor). */
+  weeksInTank: number;
+}
+
+/**
+ * Read-only alert query. Returns every LIVE placement (flushedAt === null)
+ * whose placedAt is older than `weeks` ago, newest-placed first. Powers the
+ * admin "N prospects ≥ 8 weeks — time to flush" banner. Performs no writes.
+ */
+export async function listProspectsAgedBeyond(
+  weeks: number = HOLDING_TANK_WINDOW_WEEKS,
+  nowMs: number = Date.now(),
+): Promise<AgedPlacement[]> {
+  const cutoff = windowCutoffIso(weeks, nowMs);
+  const result = await gatewayCall<{ documents: PoolPlacement[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: PLACEMENTS_COLLECTION,
+    filter: {
+      flushedAt: null,
+      placedAt: { $lt: cutoff },
+    },
+    sort: { placedAt: -1 },
+    limit: 50_000,
+  });
+  return (result.documents ?? []).map<AgedPlacement>((p) => ({
+    prospectId: p.prospectId,
+    positionNumber: p.positionNumber,
+    sponsorBaId: p.sponsorBaId,
+    placedAt: p.placedAt,
+    weeksInTank: Math.floor((nowMs - new Date(p.placedAt).getTime()) / ONE_WEEK_MS),
+  }));
+}
+
+export interface FlushExpiredResult {
+  /** How many placements were flushed this run. */
+  flushedCount: number;
+  /** The placements flushed, for the admin to review. */
+  flushed: AgedPlacement[];
+  /** Cutoff used (ISO) — placements placed before this were swept. */
+  cutoff: string;
+}
+
+/**
+ * Manual expiry sweep (Chat #138 — the build that makes the 8-week window
+ * REAL; nothing wrote flushReason:'expired' on a schedule before this).
+ *
+ * For every LIVE placement past the `weeks` window (by placedAt), this:
+ *   1. Sets flushedAt + flushReason:'expired' on the pool_placements row.
+ *   2. Sets the prospect's state to 'expired' (mirrors the flush onto the
+ *      funnel record the directory reads).
+ *   3. Marks the Neo4j tank edge flushed — WITHOUT deleting the edge or
+ *      touching the position. The vacant slot is preserved (monotonic
+ *      contract, locked-spec 3.2): #347 stays #347's empty slot; #348 is
+ *      NEVER renumbered to #347.
+ *
+ * The position number is never cleared and the counter is never decremented.
+ * Per-placement failures are collected and the sweep continues; the result
+ * reports only what actually flushed (verify-before-done discipline).
+ *
+ * Kevin-run on demand. No scheduler. Idempotent: a second run finds nothing
+ * because the first run set flushedAt.
+ */
+export async function flushExpiredPlacements(
+  weeks: number = HOLDING_TANK_WINDOW_WEEKS,
+  nowMs: number = Date.now(),
+): Promise<FlushExpiredResult> {
+  const cutoff = windowCutoffIso(weeks, nowMs);
+  const candidates = await listProspectsAgedBeyond(weeks, nowMs);
+
+  const flushed: AgedPlacement[] = [];
+  for (const c of candidates) {
+    const flushedAt = new Date().toISOString();
+    try {
+      // 1. Placement row — flush stamp. Position untouched.
+      await gatewayCall('mongodb', 'update', {
+        database: MONGO_DB,
+        collection: PLACEMENTS_COLLECTION,
+        filter: { prospectId: c.prospectId, flushedAt: null },
+        update: { $set: { flushedAt, flushReason: 'expired' } },
+      });
+
+      // 2. Prospect funnel record — mirror to 'expired'.
+      await gatewayCall('mongodb', 'update', {
+        database: MONGO_DB,
+        collection: 'prospects',
+        filter: { prospectId: c.prospectId },
+        update: { $set: { state: 'expired', updatedAt: flushedAt } },
+      });
+
+      // 3. Neo4j tank edge — mark flushed, preserve the position. We do NOT
+      //    delete the relationship: graph walks still see the vacated slot.
+      await gatewayCall('neo4j', 'cypher', {
+        query:
+          'MATCH (p:Prospect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:Pool) ' +
+          'SET r.flushedAt = $flushedAt, r.flushReason = $flushReason',
+        params: {
+          prospectId: c.prospectId,
+          flushedAt,
+          flushReason: 'expired',
+        },
+      });
+
+      flushed.push(c);
+    } catch (err) {
+      // Collect-and-continue: one bad row must not abort the sweep. The
+      // result simply won't list it as flushed, so a re-run picks it up.
+      // eslint-disable-next-line no-console
+      console.error(`[flushExpiredPlacements] failed for ${c.prospectId}:`, err);
+    }
+  }
+
+  return { flushedCount: flushed.length, flushed, cutoff };
+}

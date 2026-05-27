@@ -35,6 +35,11 @@ import type {
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { InterventionModal } from '@/components/prospect-oversight/InterventionModal';
+import {
+  ProspectCrudModal,
+  type ProspectCrudMode,
+  type ProspectCrudResponse,
+} from '@/components/prospect-oversight/ProspectCrudModal';
 
 interface Props {
   prospectId: string;
@@ -56,6 +61,7 @@ export function DetailPanel({ prospectId, onClose, onRowRefreshed }: Props) {
   const [noteErr, setNoteErr] = useState<string | null>(null);
   const [activeIntervention, setActiveIntervention] =
     useState<AdminProspectInterventionKind | null>(null);
+  const [crudMode, setCrudMode] = useState<ProspectCrudMode | null>(null);
 
   const loadDetail = useCallback(async () => {
     setLoading(true);
@@ -143,6 +149,19 @@ export function DetailPanel({ prospectId, onClose, onRowRefreshed }: Props) {
       onRowRefreshed(resp.refreshedRow);
       // Refetch detail to pick up the new audit-log event + state changes.
       setActiveIntervention(null);
+      void loadDetail();
+    },
+    [loadDetail, onRowRefreshed],
+  );
+
+  const handleCrudDone = useCallback(
+    (resp: ProspectCrudResponse) => {
+      // create / edit / restore carry a refreshed directory row; delete does
+      // not (the row's deleted flag is reflected on the next directory load).
+      if ('row' in resp && resp.row) onRowRefreshed(resp.row);
+      setCrudMode(null);
+      // Refetch detail so the new ba/admin.prospect.* audit entry and any
+      // field changes show immediately.
       void loadDetail();
     },
     [loadDetail, onRowRefreshed],
@@ -237,6 +256,10 @@ export function DetailPanel({ prospectId, onClose, onRowRefreshed }: Props) {
               saving={noteSaving}
               error={noteErr}
             />
+            <CrudLauncher
+              deleted={detail.deleted}
+              onSelect={(m) => setCrudMode(m)}
+            />
             <InterventionLauncher
               onSelect={(k) => setActiveIntervention(k)}
               terminalState={
@@ -253,6 +276,15 @@ export function DetailPanel({ prospectId, onClose, onRowRefreshed }: Props) {
           detail={detail}
           onClose={() => setActiveIntervention(null)}
           onDone={handleInterventionDone}
+        />
+      )}
+
+      {crudMode && detail && (
+        <ProspectCrudModal
+          mode={crudMode}
+          detail={detail}
+          onClose={() => setCrudMode(null)}
+          onDone={handleCrudDone}
         />
       )}
     </aside>
@@ -556,6 +588,44 @@ function KevinNotesSection({
 }
 
 /* ─── intervention launcher ─────────────────────────────────────── */
+
+function CrudLauncher({
+  deleted,
+  onSelect,
+}: {
+  deleted: boolean;
+  onSelect: (mode: ProspectCrudMode) => void;
+}) {
+  return (
+    <Section eyebrow="Prospect lifecycle (D)">
+      <p className="text-[12px] text-cream-mute mb-3">
+        Edit ordinary fields, or remove / restore this prospect. Sponsor is
+        not editable here — it routes through the D.4 reassign-sponsor
+        intervention below. Remove is reversible and leaves the holding-tank
+        position untouched; every action writes an audit entry with a reason.
+      </p>
+      {deleted ? (
+        <div className="space-y-2">
+          <p className="text-[12px] font-mono text-red-400">
+            This prospect is removed from the directory.
+          </p>
+          <Button variant="outline" size="sm" onClick={() => onSelect('restore')}>
+            Restore prospect
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="outline" size="sm" onClick={() => onSelect('edit')}>
+            Edit fields
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onSelect('delete')}>
+            Remove prospect
+          </Button>
+        </div>
+      )}
+    </Section>
+  );
+}
 
 function InterventionLauncher({
   onSelect,

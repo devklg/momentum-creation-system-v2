@@ -30,6 +30,14 @@ import {
   listBADirectory,
   setCuratedLeaderTag,
 } from '../../domain/adminBaOversight.js';
+import {
+  adminCreateBa,
+  adminEditBa,
+  adminSoftDeleteBa,
+  adminRestoreBa,
+  type AdminBaCrudError,
+  type AdminActor,
+} from '../../domain/adminBaCrud.js';
 import type {
   AdminBaDirectoryResponse,
   AdminBaNoteResponse,
@@ -268,3 +276,198 @@ adminBasRoutes.post(
     }
   },
 );
+
+/* ═══════════════════════════════════════════════════════════════════
+ * Admin BA CRUD (Chat #138 / #140)
+ *
+ * Manual BA lifecycle. The domain layer (adminBaCrud.ts) writes its own
+ * before/after audit entry per mutation and delegates sponsor changes to
+ * the C.5 applySponsorOverride path, so these routes only validate, build
+ * the actor, call, and map the domain Result to HTTP.
+ *
+ *   POST   /                create a BA (sponsor stamped immutable, no pwd)
+ *   PATCH  /:baId           edit ordinary fields (sponsor NOT editable here)
+ *   DELETE /:baId           soft delete (reversible, reason required)
+ *   POST   /:baId/restore   restore a soft-deleted BA
+ *
+ * Route order: GET /:baId and POST /:baId/<verb> already exist above.
+ * /restore is a distinct second segment; PATCH and DELETE are new verbs on
+ * /:baId with no existing collision.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/** Build the admin actor from the session, mirroring the prospect routes:
+ * prefer a full name when present, else fall back to email/baId. */
+function adminActor(req: Request): AdminActor {
+  const session = req.session!;
+  const displayName =
+    (session as unknown as { fullName?: string }).fullName ?? session.email ?? session.baId;
+  return { baId: session.baId, displayName };
+}
+
+/** Map a domain CRUD error to an HTTP status. */
+function baCrudErrorStatus(error: AdminBaCrudError): number {
+  switch (error.kind) {
+    case 'ba_not_found':
+      return 404;
+    case 'reason_too_short':
+    case 'sponsor_not_found':
+    case 'email_taken':
+    case 'ba_deleted':
+    case 'ba_not_deleted':
+    case 'no_fields':
+      return 400;
+    case 'row_unavailable':
+      return 500;
+    default:
+      return 400;
+  }
+}
+
+const CreateBaBody = z.object({
+  firstName: z.string().trim().min(1).max(120),
+  lastName: z.string().trim().min(1).max(120),
+  threeBaId: z.string().trim().min(1).max(80),
+  threeUsername: z.string().trim().min(1).max(120),
+  sponsorBaId: z.string().trim().min(2).max(80),
+  email: z.string().trim().email().max(200).optional(),
+  phone: z.string().trim().max(40).optional(),
+  timezone: z.string().trim().max(80).optional(),
+  marketRegion: z.string().trim().max(120).optional(),
+  reason: z.string().trim().min(8).max(2000),
+});
+
+const EditBaBody = z
+  .object({
+    firstName: z.string().trim().min(1).max(120).optional(),
+    lastName: z.string().trim().min(1).max(120).optional(),
+    threeBaId: z.string().trim().min(1).max(80).optional(),
+    threeUsername: z.string().trim().min(1).max(120).optional(),
+    email: z.string().trim().email().max(200).optional(),
+    phone: z.string().trim().max(40).optional(),
+    timezone: z.string().trim().max(80).optional(),
+    marketRegion: z.string().trim().max(120).optional(),
+    reason: z.string().trim().min(8).max(2000),
+  })
+  .strict();
+
+const ReasonOnlyBody = z.object({
+  reason: z.string().trim().min(8).max(2000),
+});
+
+/* ─── POST /  (create) ────────────────────────────────────────── */
+
+adminBasRoutes.post('/', requireAdmin, async (req: Request, res: Response) => {
+  const body = CreateBaBody.safeParse(req.body);
+  if (!body.success) {
+    res.status(400).json({ ok: false, error: 'Invalid create payload.', issues: body.error.issues });
+    return;
+  }
+  try {
+    const result = await adminCreateBa(
+      {
+        firstName: body.data.firstName,
+        lastName: body.data.lastName,
+        threeBaId: body.data.threeBaId,
+        threeUsername: body.data.threeUsername,
+        sponsorBaId: body.data.sponsorBaId,
+        email: body.data.email ?? null,
+        phone: body.data.phone ?? null,
+        timezone: body.data.timezone ?? null,
+        marketRegion: body.data.marketRegion ?? null,
+        reason: body.data.reason,
+      },
+      adminActor(req),
+    );
+    if (!result.ok) {
+      res.status(baCrudErrorStatus(result.error)).json({ ok: false, error: result.error.kind });
+      return;
+    }
+    res.status(201).json({ ok: true, baId: result.value.baId, row: result.value.row });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Create failed: ${msg}` });
+  }
+});
+
+/* ─── PATCH /:baId  (edit — sponsor not editable here) ───────────── */
+
+adminBasRoutes.patch('/:baId', requireAdmin, async (req: Request, res: Response) => {
+  const params = BaIdParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ ok: false, error: 'Invalid baId.' });
+    return;
+  }
+  const body = EditBaBody.safeParse(req.body);
+  if (!body.success) {
+    res.status(400).json({ ok: false, error: 'Invalid edit payload.', issues: body.error.issues });
+    return;
+  }
+  try {
+    const result = await adminEditBa(params.data.baId, body.data, adminActor(req));
+    if (!result.ok) {
+      res.status(baCrudErrorStatus(result.error)).json({ ok: false, error: result.error.kind });
+      return;
+    }
+    res.json({ ok: true, baId: result.value.baId, row: result.value.row });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Edit failed: ${msg}` });
+  }
+});
+
+/* ─── DELETE /:baId  (soft delete) ───────────────────────────── */
+
+adminBasRoutes.delete('/:baId', requireAdmin, async (req: Request, res: Response) => {
+  const params = BaIdParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ ok: false, error: 'Invalid baId.' });
+    return;
+  }
+  const body = ReasonOnlyBody.safeParse(req.body);
+  if (!body.success) {
+    res.status(400).json({ ok: false, error: 'A reason (min 8 chars) is required.' });
+    return;
+  }
+  try {
+    const result = await adminSoftDeleteBa(params.data.baId, body.data, adminActor(req));
+    if (!result.ok) {
+      res.status(baCrudErrorStatus(result.error)).json({ ok: false, error: result.error.kind });
+      return;
+    }
+    res.json({ ok: true, baId: result.value.baId, deletedAt: result.value.deletedAt });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Delete failed: ${msg}` });
+  }
+});
+
+/* ─── POST /:baId/restore ───────────────────────────────────── */
+
+adminBasRoutes.post('/:baId/restore', requireAdmin, async (req: Request, res: Response) => {
+  const params = BaIdParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ ok: false, error: 'Invalid baId.' });
+    return;
+  }
+  const body = ReasonOnlyBody.safeParse(req.body);
+  if (!body.success) {
+    res.status(400).json({ ok: false, error: 'A reason (min 8 chars) is required.' });
+    return;
+  }
+  try {
+    const result = await adminRestoreBa(params.data.baId, body.data, adminActor(req));
+    if (!result.ok) {
+      res.status(baCrudErrorStatus(result.error)).json({ ok: false, error: result.error.kind });
+      return;
+    }
+    res.json({
+      ok: true,
+      baId: result.value.baId,
+      restoredAt: result.value.restoredAt,
+      row: result.value.row,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Restore failed: ${msg}` });
+  }
+});

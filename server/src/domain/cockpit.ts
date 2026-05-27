@@ -110,14 +110,17 @@ export async function listInvitesForBA(baId: string): Promise<{
   invites: InviteSummary[];
   activityByProspect: Record<string, InvitationActivityEntry[]>;
 }> {
-  // 1. The BA's prospects, newest first.
+  // 1. The BA's prospects, newest first. Soft-deleted prospects (Chat #141)
+  // are excluded — the BA has no restore (admin-only), so a removed prospect
+  // drops out of the cockpit entirely. $ne:true matches both absent and
+  // false, so legacy rows without the field still show.
   const prospectsRes = await gatewayCall<{ documents: ProspectDoc[] }>(
     'mongodb',
     'query',
     {
       database: MONGO_DB,
       collection: PROSPECTS_COLLECTION,
-      filter: { sponsorBaId: baId },
+      filter: { sponsorBaId: baId, deleted: { $ne: true } },
       sort: { createdAt: -1 },
       limit: 1000,
     },

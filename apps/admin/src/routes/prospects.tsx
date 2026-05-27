@@ -31,6 +31,11 @@ import type {
 import { FilterBar } from '@/components/dashboard/FilterBar';
 import { DirectoryTable } from '@/components/prospect-oversight/DirectoryTable';
 import { DetailPanel } from '@/components/prospect-oversight/DetailPanel';
+import { Button } from '@/components/ui/button';
+import {
+  ProspectCrudModal,
+  type ProspectCrudResponse,
+} from '@/components/prospect-oversight/ProspectCrudModal';
 
 const DEFAULT_FILTER: AdminDashboardFilter = { baId: null, leaderGroup: 'all' };
 
@@ -59,6 +64,7 @@ export function ProspectsPage() {
   const [selectedProspectId, setSelectedProspectId] = useState<string | null>(
     readProspectIdParam(),
   );
+  const [createOpen, setCreateOpen] = useState(false);
 
   // Filter options — load once.
   useEffect(() => {
@@ -123,6 +129,16 @@ export function ProspectsPage() {
     );
   }, []);
 
+  // A freshly minted prospect may not match the active filter; refetch the
+  // directory so it appears (or correctly doesn't) under current filters.
+  const handleCreateDone = useCallback(
+    (_resp: ProspectCrudResponse) => {
+      setCreateOpen(false);
+      void loadRows(filter);
+    },
+    [filter, loadRows],
+  );
+
   return (
     <div className="max-w-[1600px]">
       <p className="font-mono tracking-eyebrow text-[10px] text-gold uppercase mb-2">
@@ -144,6 +160,12 @@ export function ProspectsPage() {
         </p>
       )}
 
+      <div className="mb-4">
+        <Button variant="primary" size="sm" onClick={() => setCreateOpen(true)}>
+          + New prospect
+        </Button>
+      </div>
+
       <FilterBar filter={filter} options={options} onChange={setFilter} />
 
       <DirectoryTable
@@ -157,6 +179,15 @@ export function ProspectsPage() {
           prospectId={selectedProspectId}
           onClose={() => handleSelectProspect(null)}
           onRowRefreshed={handleRowRefreshed}
+        />
+      )}
+
+      {createOpen && (
+        <ProspectCrudModal
+          mode="create"
+          detail={null}
+          onClose={() => setCreateOpen(false)}
+          onDone={handleCreateDone}
         />
       )}
     </div>

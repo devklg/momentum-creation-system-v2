@@ -44,6 +44,18 @@ import {
   listDirectoryRows,
   synthesizeAdminSandboxPreview,
 } from '../../domain/adminProspectOversight.js';
+import {
+  adminCreateProspect,
+  adminEditProspect,
+  adminSoftDeleteProspect,
+  adminRestoreProspect,
+  type AdminProspectCrudError,
+} from '../../domain/adminProspectCrud.js';
+import {
+  flushExpiredPlacements,
+  listProspectsAgedBeyond,
+  HOLDING_TANK_WINDOW_WEEKS,
+} from '../../domain/holdingTank.js';
 import { appendAuditEntry, queryAuditEntries } from '../../domain/auditLog.js';
 import type {
   AdminDashboardFilter,
@@ -494,3 +506,275 @@ function toActivityEventFromAudit(
     },
   };
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+ * Admin Prospect CRUD (Chat #138 / #140)
+ *
+ * Manual prospect lifecycle. Domain layer (adminProspectCrud.ts) writes
+ * its own before/after audit entry per mutation; these routes validate,
+ * call, and map the domain Result to HTTP. Create is MINT-ONLY — the
+ * prospect goes through the same video_complete → placement path as any
+ * other (Chat #140), so no position is returned at create.
+ *
+ * Route order note: GET /:prospectId already exists above and matches a
+ * single path segment. The aged-alert read is mounted at the two-segment
+ * literal /alerts/aged so it can never be captured as a :prospectId.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/** Map a domain CRUD error to an HTTP status + stable code. */
+function crudErrorStatus(error: AdminProspectCrudError): number {
+  switch (error.kind) {
+    case 'prospect_not_found':
+      return 404;
+    case 'reason_too_short':
+    case 'sponsor_not_found':
+    case 'prospect_deleted':
+    case 'prospect_not_deleted':
+    case 'no_fields':
+      return 400;
+    case 'row_unavailable':
+      return 500;
+    default:
+      return 400;
+  }
+}
+
+const CreateProspectSchema = z.object({
+  firstName: z.string().min(1).max(120),
+  lastName: z.string().min(1).max(120),
+  city: z.string().min(1).max(120),
+  stateOrRegion: z.string().min(1).max(120),
+  country: z.string().min(2).max(60).optional(),
+  sponsorBaId: z.string().min(2).max(80),
+  phone: z.string().max(40).nullish(),
+  email: z.string().email().max(200).nullish(),
+  reason: z.string().min(8).max(2000),
+});
+
+const EditProspectSchema = z
+  .object({
+    firstName: z.string().min(1).max(120).optional(),
+    lastName: z.string().min(1).max(120).optional(),
+    city: z.string().min(1).max(120).optional(),
+    stateOrRegion: z.string().min(1).max(120).optional(),
+    country: z.string().min(2).max(60).optional(),
+    phone: z.string().max(40).nullish(),
+    email: z.string().email().max(200).nullish(),
+    reason: z.string().min(8).max(2000),
+  })
+  .strict();
+
+const ReasonOnlySchema = z.object({
+  reason: z.string().min(8).max(2000),
+});
+
+/* ─── POST /  (create — mint only) ──────────────────────────────── */
+
+adminProspectsRoutes.post('/', requireAdmin, async (req, res) => {
+  let payload: z.infer<typeof CreateProspectSchema>;
+  try {
+    payload = CreateProspectSchema.parse(req.body);
+  } catch (err) {
+    res.status(400).json({
+      ok: false,
+      error: 'Invalid request.',
+      issues: (err as z.ZodError).issues,
+    });
+    return;
+  }
+  try {
+    const result = await adminCreateProspect(
+      {
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        city: payload.city,
+        stateOrRegion: payload.stateOrRegion,
+        country: payload.country,
+        sponsorBaId: payload.sponsorBaId,
+        phone: payload.phone ?? null,
+        email: payload.email ?? null,
+        reason: payload.reason,
+      },
+      adminActorFromRequest(req),
+    );
+    if (!result.ok) {
+      res.status(crudErrorStatus(result.error)).json({ ok: false, error: result.error.kind });
+      return;
+    }
+    res.status(201).json({
+      ok: true,
+      prospectId: result.value.prospectId,
+      token: result.value.token,
+      inviteUrl: result.value.inviteUrl,
+      positionNumber: result.value.row.positionNumber,
+      placedAt: null,
+      row: result.value.row,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Create failed: ${msg}` });
+  }
+});
+
+/* ─── PATCH /:prospectId  (edit ordinary fields) ────────────────── */
+
+adminProspectsRoutes.patch('/:prospectId', requireAdmin, async (req, res) => {
+  let prospectId: string;
+  let payload: z.infer<typeof EditProspectSchema>;
+  try {
+    prospectId = ProspectIdSchema.parse(req.params.prospectId);
+    payload = EditProspectSchema.parse(req.body);
+  } catch (err) {
+    res.status(400).json({
+      ok: false,
+      error: 'Invalid request.',
+      issues: (err as z.ZodError).issues,
+    });
+    return;
+  }
+  try {
+    const result = await adminEditProspect(
+      prospectId,
+      {
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        city: payload.city,
+        stateOrRegion: payload.stateOrRegion,
+        country: payload.country,
+        phone: payload.phone ?? undefined,
+        email: payload.email ?? undefined,
+        reason: payload.reason,
+      },
+      adminActorFromRequest(req),
+    );
+    if (!result.ok) {
+      res.status(crudErrorStatus(result.error)).json({ ok: false, error: result.error.kind });
+      return;
+    }
+    res.json({ ok: true, prospectId: result.value.prospectId, row: result.value.row });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Edit failed: ${msg}` });
+  }
+});
+
+/* ─── DELETE /:prospectId  (soft delete — tank untouched) ───────── */
+
+adminProspectsRoutes.delete('/:prospectId', requireAdmin, async (req, res) => {
+  let prospectId: string;
+  let payload: z.infer<typeof ReasonOnlySchema>;
+  try {
+    prospectId = ProspectIdSchema.parse(req.params.prospectId);
+    payload = ReasonOnlySchema.parse(req.body);
+  } catch (err) {
+    res.status(400).json({
+      ok: false,
+      error: 'Invalid request.',
+      issues: (err as z.ZodError).issues,
+    });
+    return;
+  }
+  try {
+    const result = await adminSoftDeleteProspect(prospectId, payload, adminActorFromRequest(req));
+    if (!result.ok) {
+      res.status(crudErrorStatus(result.error)).json({ ok: false, error: result.error.kind });
+      return;
+    }
+    res.json({ ok: true, prospectId: result.value.prospectId, deletedAt: result.value.deletedAt });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Delete failed: ${msg}` });
+  }
+});
+
+/* ─── POST /:prospectId/restore ─────────────────────────────────── */
+
+adminProspectsRoutes.post('/:prospectId/restore', requireAdmin, async (req, res) => {
+  let prospectId: string;
+  let payload: z.infer<typeof ReasonOnlySchema>;
+  try {
+    prospectId = ProspectIdSchema.parse(req.params.prospectId);
+    payload = ReasonOnlySchema.parse(req.body);
+  } catch (err) {
+    res.status(400).json({
+      ok: false,
+      error: 'Invalid request.',
+      issues: (err as z.ZodError).issues,
+    });
+    return;
+  }
+  try {
+    const result = await adminRestoreProspect(prospectId, payload, adminActorFromRequest(req));
+    if (!result.ok) {
+      res.status(crudErrorStatus(result.error)).json({ ok: false, error: result.error.kind });
+      return;
+    }
+    res.json({
+      ok: true,
+      prospectId: result.value.prospectId,
+      restoredAt: result.value.restoredAt,
+      row: result.value.row,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Restore failed: ${msg}` });
+  }
+});
+
+/* ─── POST /flush-expired  (manual 8-week sweep) ────────────────── */
+
+const FlushExpiredSchema = z.object({
+  reason: z.string().min(8).max(2000),
+  weeks: z.number().int().min(1).max(104).optional(),
+});
+
+adminProspectsRoutes.post('/flush-expired', requireAdmin, async (req, res) => {
+  let payload: z.infer<typeof FlushExpiredSchema>;
+  try {
+    payload = FlushExpiredSchema.parse(req.body);
+  } catch (err) {
+    res.status(400).json({
+      ok: false,
+      error: 'Invalid request.',
+      issues: (err as z.ZodError).issues,
+    });
+    return;
+  }
+  try {
+    const weeks = payload.weeks ?? HOLDING_TANK_WINDOW_WEEKS;
+    const result = await flushExpiredPlacements(weeks);
+
+    // One audit entry for the whole sweep (Kevin-run, routine → info).
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.prospects.flush_expired',
+      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      severity: 'info',
+      after: { weeks, flushedCount: result.flushedCount, cutoff: result.cutoff },
+      reason: payload.reason,
+      context: contextFromRequest(req, '/api/admin/prospects/flush-expired', 'POST'),
+    });
+
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Flush failed: ${msg}` });
+  }
+});
+
+/* ─── GET /alerts/aged  (≥8-week banner; read-only) ─────────────── */
+
+adminProspectsRoutes.get('/alerts/aged', requireAdmin, async (req, res) => {
+  try {
+    const weeksRaw = typeof req.query.weeks === 'string' ? Number(req.query.weeks) : NaN;
+    const weeks =
+      Number.isInteger(weeksRaw) && weeksRaw >= 1 && weeksRaw <= 104
+        ? weeksRaw
+        : HOLDING_TANK_WINDOW_WEEKS;
+    const aged = await listProspectsAgedBeyond(weeks);
+    res.json({ ok: true, weeks, count: aged.length, aged });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Aged alert failed: ${msg}` });
+  }
+});

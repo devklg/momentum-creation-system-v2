@@ -120,6 +120,10 @@ interface ProspectDoc extends ProspectRecord {
   /** Inviting BA at mint time (sponsorBaIdAtMint). Optional because legacy
    *  rows predate the field — fall back to sponsorBaId in projection. */
   sponsorBaIdAtMint?: string;
+  /** Soft-delete lifecycle (Chat #138/#141). Absent === not deleted. */
+  deleted?: boolean;
+  deletedAt?: string | null;
+  deletedReason?: string | null;
 }
 
 interface NoteDoc extends AdminProspectKevinNote {
@@ -364,6 +368,7 @@ export async function listDirectoryRows(
       daysInHoldingTank: deriveDaysInHoldingTank(placement, nowMs),
       followUpNeededBy: deriveFollowUpNeededBy(p, placement),
       registrationHandoffState: deriveRegistrationHandoffState(placement),
+      deleted: p.deleted === true,
     };
   });
 }
@@ -458,6 +463,7 @@ export async function buildDetailPayload(
     prospectId: prospect.prospectId,
     firstName: prospect.firstName,
     lastName: prospect.lastName,
+    deleted: prospect.deleted === true,
     phone: prospect.phone,
     email: prospect.email,
     location: prospect.location,
@@ -876,7 +882,7 @@ export class InterventionError extends Error {
  * the prospect so the client can patch the table in place. Single-row
  * projection — reuses the directory derivation helpers.
  */
-async function refreshRowFor(prospectId: string): Promise<AdminProspectDirectoryRow> {
+export async function refreshRowFor(prospectId: string): Promise<AdminProspectDirectoryRow> {
   const baNames = await loadBaNameMap();
   const [prospect, placement, tokens, callbacks, webinars] = await Promise.all([
     findProspectById(prospectId),
@@ -916,6 +922,7 @@ async function refreshRowFor(prospectId: string): Promise<AdminProspectDirectory
     daysInHoldingTank: deriveDaysInHoldingTank(placement, nowMs),
     followUpNeededBy: deriveFollowUpNeededBy(prospect, placement),
     registrationHandoffState: deriveRegistrationHandoffState(placement),
+    deleted: (prospect as ProspectDoc).deleted === true,
   };
 }
 
