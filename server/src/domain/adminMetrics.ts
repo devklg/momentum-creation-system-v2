@@ -117,7 +117,7 @@ interface FastStartDoc {
  * Honors the locked leader rule (Part 5). When binary-qualified mirroring
  * and/or 4.C curated tags land, this function changes shape; callers don't.
  */
-async function resolveScopedBaIds(filter: AdminDashboardFilter): Promise<string[] | null> {
+export async function resolveScopedBaIds(filter: AdminDashboardFilter): Promise<string[] | null> {
   if (filter.baId) {
     return [filter.baId];
   }

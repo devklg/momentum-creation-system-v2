@@ -19,8 +19,14 @@ import express, { type Request, type Router } from 'express';
 import { z } from 'zod';
 import { requireAdmin } from '../../middleware/requireAuth.js';
 import { buildMasterReportPdf } from '../../domain/adminMasterReport.js';
+import { buildBaActivationReport } from '../../domain/reports/baActivation.js';
+import { resolveTimeRange } from '../../domain/reports/timeRange.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
-import type { AdminDashboardFilter, AuditActor } from '@momentum/shared';
+import type {
+  AdminDashboardFilter,
+  AdminReportTimeRange,
+  AuditActor,
+} from '@momentum/shared';
 
 export const adminReportingRoutes: Router = express.Router();
 
@@ -39,6 +45,19 @@ function parseFilter(req: Request): AdminDashboardFilter {
     baId: parsed.baId ?? null,
     leaderGroup: parsed.leaderGroup ?? 'all',
   };
+}
+
+/**
+ * Parse the time-range query params (Kevin decision A: preset enum AND
+ * explicit from/to). The resolver tolerates absent / invalid inputs and
+ * defaults to lifetime.
+ */
+function parseRange(req: Request): AdminReportTimeRange {
+  return resolveTimeRange({
+    preset: typeof req.query.preset === 'string' ? req.query.preset : null,
+    from: typeof req.query.from === 'string' ? req.query.from : null,
+    to: typeof req.query.to === 'string' ? req.query.to : null,
+  });
 }
 
 function adminActorFromRequest(req: Request): AuditActor & { kind: 'admin' } {
@@ -92,5 +111,55 @@ adminReportingRoutes.get('/master-report.pdf', requireAdmin, async (req, res) =>
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Master report failed: ${msg}` });
+  }
+});
+
+/* ─── GET /activation — I.1 Report 1 · BA activation ───────── */
+
+adminReportingRoutes.get('/activation', requireAdmin, async (req, res) => {
+  let filter: AdminDashboardFilter;
+  try {
+    filter = parseFilter(req);
+  } catch (err) {
+    res
+      .status(400)
+      .json({ ok: false, error: 'Invalid filter.', issues: (err as z.ZodError).issues });
+    return;
+  }
+  const range = parseRange(req);
+
+  try {
+    const { result, meta } = await buildBaActivationReport(filter, range);
+
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.reporting.ba_activation.generated',
+      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      severity: 'info',
+      after: {
+        filter,
+        range,
+        generatedAt: meta.generatedAt,
+        sourceHash: meta.sourceHash,
+        signups: result.totals.signups,
+      },
+      reason: null,
+      context: {
+        ip: req.ip ?? null,
+        userAgent: req.get('user-agent') ?? null,
+        route: '/api/admin/reporting/activation',
+        method: 'GET',
+        requestId: null,
+      },
+    });
+
+    res.status(200).json({
+      ok: true,
+      meta: { ...meta, title: 'BA Activation' },
+      result,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Activation report failed: ${msg}` });
   }
 });

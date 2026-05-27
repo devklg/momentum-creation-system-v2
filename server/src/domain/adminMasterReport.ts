@@ -26,15 +26,17 @@ import {
   computeAdminDashboardMetrics,
   LEADER_DETECTION_NOTE,
 } from './adminMetrics.js';
+import { buildBaActivationReport } from './reports/baActivation.js';
+import { resolveTimeRange } from './reports/timeRange.js';
 import { buildPdfToBuffer } from '../services/pdfReport.js';
 import type { AdminDashboardFilter, AdminDashboardMetrics } from '@momentum/shared';
 
 const PROVENANCE_NOTE =
-  'Scope note (Chat #142): This master report currently composites the ' +
-  'Section B dashboard metrics only. The full I.1 standard-report library ' +
-  '(activation, training, invite-to-presentation, queue velocity, follow-up ' +
-  'aging, compliance counts, exception dashboard, leader scorecards) is not ' +
-  'yet built; each report will be appended here as it lands.';
+  'Scope note (Chat #143): This master report composites the Section B ' +
+  'dashboard metrics plus I.1 Report 1 (BA activation). The remaining I.1 ' +
+  'reports (training, invite-to-presentation, queue velocity, enrollment ' +
+  'completion, follow-up aging, leader scorecards) are appended here as they ' +
+  'land; this note shrinks accordingly.';
 
 function fmtFilterScope(filter: AdminDashboardFilter): string {
   const parts: string[] = [];
@@ -62,13 +64,17 @@ export async function buildMasterReportPdf(
 ): Promise<MasterReportResult> {
   const metrics: AdminDashboardMetrics = await computeAdminDashboardMetrics(filter);
 
+  // I.1 reports composited into the master (lifetime window for the snapshot).
+  const lifetimeRange = resolveTimeRange({ preset: 'lifetime' });
+  const activation = await buildBaActivationReport(filter, lifetimeRange);
+
   const { buffer, generatedAt, sourceHash } = await buildPdfToBuffer(
     {
       title: 'Master Report',
       subtitle: `Team Magnificent · ${fmtFilterScope(filter)}`,
       provenanceNote: PROVENANCE_NOTE,
-      // Hash over the exact metrics + applied filter rendered.
-      sourceData: { filter, metrics },
+      // Hash over the exact metrics + applied filter + composited reports.
+      sourceData: { filter, metrics, activation: activation.result },
     },
     (report) => {
       report.section('Dashboard Metrics (Section B)');
@@ -87,6 +93,32 @@ export async function buildMasterReportPdf(
         metrics.trainingCompletionPct == null ? '—' : `${metrics.trainingCompletionPct}%`,
       );
       report.stat('Metrics computed at', metrics.computedAt);
+
+      report.section('I.1 · BA Activation');
+      report.stat('Signups in scope', String(activation.result.totals.signups));
+      report.stat(
+        'Reached first invite',
+        String(activation.result.totals.reachedFirstInvite),
+      );
+      report.stat(
+        'Reached first enrollment',
+        String(activation.result.totals.reachedFirstEnrollment),
+      );
+      report.stat(
+        'Median days signup -> first invite',
+        activation.result.totals.medianDaysSignupToFirstInvite == null
+          ? '—'
+          : String(activation.result.totals.medianDaysSignupToFirstInvite),
+      );
+      if (activation.result.cohorts.length > 0) {
+        report.paragraph('Signup cohorts:');
+        for (const c of activation.result.cohorts) {
+          report.stat(
+            c.cohort,
+            `${c.signups} signed · ${c.reachedFirstInvite} invited · ${c.reachedFirstEnrollment} enrolled`,
+          );
+        }
+      }
 
       report.section('Notes');
       report.paragraph(`Leader detection: ${LEADER_DETECTION_NOTE}`);
