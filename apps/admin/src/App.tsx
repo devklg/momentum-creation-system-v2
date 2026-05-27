@@ -27,6 +27,7 @@ import { AuditPage } from '@/routes/audit';
 import { DashboardPage } from '@/routes/dashboard';
 import { LiveOpsPage } from '@/routes/live-ops';
 import { ReportsPage } from '@/routes/reports';
+import { BroadcastPage } from '@/routes/broadcast';
 
 export function App() {
   return (
@@ -69,6 +70,7 @@ function Inner() {
         <Route path="/live-ops" element={<LiveOpsPage />} />
         <Route path="/audit" element={<AuditPage />} />
         <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/broadcast" element={<BroadcastPage />} />
         <Route
           path="*"
           element={

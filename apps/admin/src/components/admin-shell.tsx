@@ -23,6 +23,7 @@ const NAV: NavItem[] = [
   { to: '/queue', label: 'Queue Oversight' },
   { to: '/live-ops', label: 'Live Operations' },
   { to: '/audit', label: 'Audit Log' },
+  { to: '/broadcast', label: 'Broadcast' },
 ];
 
 export function AdminShell() {
