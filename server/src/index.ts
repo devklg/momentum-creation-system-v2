@@ -18,6 +18,7 @@ import { adminProspectsRoutes } from './routes/admin/prospects.js';
 import { adminQueueRoutes } from './routes/admin/queue.js';
 import { adminAuditRoutes } from './routes/admin/audit.js';
 import { adminDashboardRoutes } from './routes/admin/dashboard.js';
+import { adminReportingRoutes } from './routes/admin/reporting.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { michaelRoutes } from './routes/michael.js';
 import { prospectTokenRoutes } from './routes/p.js';
@@ -85,6 +86,7 @@ app.use('/api/admin/prospects', adminProspectsRoutes);
 app.use('/api/admin/queue', adminQueueRoutes);
 app.use('/api/admin/audit', adminAuditRoutes);
 app.use('/api/admin/dashboard', adminDashboardRoutes);
+app.use('/api/admin/reporting', adminReportingRoutes);
 
 // /api/p/* is prospect-facing (apps/com). No auth, no Michael gate. The token
 // itself is the identity surface per COM Design Section E.3.

@@ -25,6 +25,7 @@ import { requireAuth } from '../middleware/requireAuth.js';
 import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
 import { getMyInvites, getCockpitSummary } from '../domain/cockpit.js';
 import { getCockpitTodaysActions } from '../domain/todaysActions.js';
+import { buildCockpitProspectListPdf } from '../domain/cockpitPrint.js';
 
 export const cockpitRoutes: Router = Router();
 
@@ -82,6 +83,37 @@ cockpitRoutes.get(
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('[GET /api/cockpit/todays-actions] failed', err);
+      return res.status(500).json({ ok: false, error: 'server_error' });
+    }
+  },
+);
+
+/**
+ * GET /api/cockpit/invites/print.pdf — the BA's prospect list as a
+ * brand-locked PDF (Chat #142). Same sponsor-scoped read as /invites
+ * (listInvitesForBA via the print builder); a BA can only ever print their
+ * own prospects (locked-spec 3.5). Compliance: .team funnel-status artifact,
+ * no income/placement claims (locked-spec 3.10).
+ */
+cockpitRoutes.get(
+  '/invites/print.pdf',
+  requireAuth,
+  requireMichaelComplete,
+  async (req, res) => {
+    const baId = req.session?.baId;
+    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+    try {
+      const { buffer, filename } = await buildCockpitProspectListPdf(baId);
+      res.status(200);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', String(buffer.length));
+      res.setHeader('Cache-Control', 'no-store');
+      return res.end(buffer);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[GET /api/cockpit/invites/print.pdf] failed', err);
       return res.status(500).json({ ok: false, error: 'server_error' });
     }
   },
