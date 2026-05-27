@@ -233,8 +233,13 @@ adminReportingRoutes.get('/invite-funnel', requireAdmin, async (req, res) => {
   }
   const range = parseRange(req);
 
+  // Per-BA sort: completes | mints | completion_pct (default completes).
+  const rawSort = typeof req.query.sort === 'string' ? req.query.sort : '';
+  const perBaSort: 'completes' | 'mints' | 'completion_pct' =
+    rawSort === 'mints' || rawSort === 'completion_pct' ? rawSort : 'completes';
+
   try {
-    const { result, meta } = await buildInviteFunnelReport(filter, range);
+    const { result, meta } = await buildInviteFunnelReport(filter, range, perBaSort);
 
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
@@ -244,6 +249,7 @@ adminReportingRoutes.get('/invite-funnel', requireAdmin, async (req, res) => {
       after: {
         filter,
         range,
+        perBaSort,
         generatedAt: meta.generatedAt,
         sourceHash: meta.sourceHash,
         minted: result.totals.minted,

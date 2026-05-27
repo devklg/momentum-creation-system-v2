@@ -22,6 +22,8 @@ import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
   AdminDashboardFilter,
+  AdminInviteFunnelPerBaRow,
+  AdminInviteFunnelPerBaSort,
   AdminInviteFunnelReport,
   AdminInviteFunnelStageCount,
   AdminReportMeta,
@@ -31,6 +33,7 @@ import type {
 const MONGO_DB = 'momentum';
 const COLL_TOKENS = 'invite_tokens';
 const COLL_ACTIVITY = 'invitation_activity';
+const COLL_BAS = 'brand_ambassadors';
 
 const PROVENANCE =
   'Invite-funnel data note (Chat #143): mint → click → video_started → ' +
@@ -56,6 +59,12 @@ interface VideoActivityDoc {
   prospectId: string;
   at: string;
 }
+interface BaDoc {
+  baId: string;
+  firstName: string;
+  lastName: string;
+  deleted?: boolean;
+}
 
 function daysBetween(aIso: string, bIso: string): number {
   const ms = new Date(bIso).getTime() - new Date(aIso).getTime();
@@ -73,6 +82,7 @@ function pct(num: number, den: number): number | null {
 export async function buildInviteFunnelReport(
   filter: AdminDashboardFilter,
   range: AdminReportTimeRange,
+  perBaSort: AdminInviteFunnelPerBaSort = 'completes',
 ): Promise<{
   result: AdminInviteFunnelReport;
   meta: Omit<AdminReportMeta, 'title'>;
@@ -140,6 +150,71 @@ export async function buildInviteFunnelReport(
       .filter((d): d is number => d !== null);
   }
 
+  // ─── Per-BA breakdown (Chat #143 extension) ────────────────────────────────
+  // Hides BAs with zero mints (same convention as #5 enrollment.perBa).
+  // Identify which video_completed prospects we observed (for per-BA count),
+  // since a token can reach 'video_complete' state without us having to check
+  // the activity collection again — the token's state already tells us.
+  const baStats = new Map<
+    string,
+    { minted: number; clicked: number; videoStarted: number; videoComplete: number }
+  >();
+  for (const t of tokens) {
+    const s =
+      baStats.get(t.sponsorBaId) ?? { minted: 0, clicked: 0, videoStarted: 0, videoComplete: 0 };
+    s.minted += 1;
+    if (reached(t, 'clicked')) s.clicked += 1;
+    if (reached(t, 'video_started')) s.videoStarted += 1;
+    if (reached(t, 'video_complete')) s.videoComplete += 1;
+    baStats.set(t.sponsorBaId, s);
+  }
+
+  // Resolve names for the BAs that have any minted token (zero-mints already hidden).
+  const perBaIds = [...baStats.keys()];
+  const baNameLookup = new Map<string, string>();
+  if (perBaIds.length > 0) {
+    const basRes = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+      database: MONGO_DB,
+      collection: COLL_BAS,
+      filter: { baId: { $in: perBaIds }, deleted: { $ne: true } },
+      limit: perBaIds.length,
+    });
+    for (const b of basRes.documents ?? []) {
+      baNameLookup.set(b.baId, `${b.firstName} ${b.lastName}`.trim());
+    }
+  }
+
+  let perBa: AdminInviteFunnelPerBaRow[] = perBaIds.map((id) => {
+    const s = baStats.get(id)!;
+    return {
+      baId: id,
+      fullName: baNameLookup.get(id) ?? id,
+      minted: s.minted,
+      clicked: s.clicked,
+      videoStarted: s.videoStarted,
+      videoComplete: s.videoComplete,
+      mintToCompletePct: pct(s.videoComplete, s.minted),
+    };
+  });
+
+  // Sort by requested field (defaults to videoComplete desc).
+  perBa = perBa.sort((a, b) => {
+    switch (perBaSort) {
+      case 'mints':
+        return b.minted - a.minted;
+      case 'completion_pct': {
+        // Null pct sorts last; ties broken by completes desc for stability.
+        const ap = a.mintToCompletePct ?? -1;
+        const bp = b.mintToCompletePct ?? -1;
+        if (bp !== ap) return bp - ap;
+        return b.videoComplete - a.videoComplete;
+      }
+      case 'completes':
+      default:
+        return b.videoComplete - a.videoComplete;
+    }
+  });
+
   const result: AdminInviteFunnelReport = {
     totals: {
       minted,
@@ -153,6 +228,8 @@ export async function buildInviteFunnelReport(
       avgDaysClickToVideoComplete: avg(clickToComplete),
     },
     stages,
+    perBa,
+    perBaSort,
     provenanceNote: PROVENANCE,
   };
 

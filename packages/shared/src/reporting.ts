@@ -193,6 +193,22 @@ export interface AdminInviteFunnelStageCount {
   conversionFromMint: number | null;
 }
 
+/**
+ * Per-BA breakdown of the invite funnel (Chat #143 extension). BAs with
+ * zero mints are HIDDEN — same convention as Report #5's perBa.
+ */
+export type AdminInviteFunnelPerBaSort = 'completes' | 'mints' | 'completion_pct';
+
+export interface AdminInviteFunnelPerBaRow {
+  baId: string;
+  fullName: string;
+  minted: number;
+  clicked: number;
+  videoStarted: number;
+  videoComplete: number;
+  mintToCompletePct: number | null;
+}
+
 export interface AdminInviteFunnelReport {
   totals: {
     minted: number;
@@ -206,6 +222,10 @@ export interface AdminInviteFunnelReport {
     avgDaysClickToVideoComplete: number | null;
   };
   stages: AdminInviteFunnelStageCount[];
+  /** Per-BA breakdown; default sort is by videoComplete desc. */
+  perBa: AdminInviteFunnelPerBaRow[];
+  /** Sort field actually used to order perBa[] in this response. */
+  perBaSort: AdminInviteFunnelPerBaSort;
   provenanceNote: string;
 }
 

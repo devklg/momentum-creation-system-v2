@@ -163,6 +163,16 @@ export async function buildMasterReportPdf(
       report.stat('Video start -> complete', inviteFunnel.result.totals.videoStartToCompletePct == null ? '—' : `${inviteFunnel.result.totals.videoStartToCompletePct}%`);
       report.stat('Avg days mint -> click', inviteFunnel.result.totals.avgDaysMintToClick == null ? '—' : String(inviteFunnel.result.totals.avgDaysMintToClick));
       report.stat('Avg days click -> video complete', inviteFunnel.result.totals.avgDaysClickToVideoComplete == null ? '—' : String(inviteFunnel.result.totals.avgDaysClickToVideoComplete));
+      if (inviteFunnel.result.perBa.length > 0) {
+        report.paragraph(`Per BA (sorted by ${inviteFunnel.result.perBaSort}):`);
+        for (const r of inviteFunnel.result.perBa) {
+          report.stat(
+            r.fullName,
+            `mints=${r.minted} · clicks=${r.clicked} · video started=${r.videoStarted} · completes=${r.videoComplete}` +
+              (r.mintToCompletePct == null ? '' : ` · ${r.mintToCompletePct}% complete`),
+          );
+        }
+      }
       report.paragraph(inviteFunnel.result.provenanceNote, { size: 8 });
 
       report.section('I.1 · Queue Velocity');
