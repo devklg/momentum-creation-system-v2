@@ -22,6 +22,7 @@ const NAV: NavItem[] = [
   { to: '/prospects', label: 'Prospect Oversight' },
   { to: '/queue', label: 'Queue Oversight' },
   { to: '/audit', label: 'Audit Log' },
+  { to: '/broadcast', label: 'Broadcast' },
 ];
 
 export function AdminShell() {

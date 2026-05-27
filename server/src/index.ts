@@ -19,6 +19,8 @@ import { adminQueueRoutes } from './routes/admin/queue.js';
 import { adminAuditRoutes } from './routes/admin/audit.js';
 import { adminDashboardRoutes } from './routes/admin/dashboard.js';
 import { adminReportingRoutes } from './routes/admin/reporting.js';
+import { adminBroadcastRoutes } from './routes/admin/broadcast.js';
+import { startBroadcastWorker } from './services/broadcastQueue.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { michaelRoutes } from './routes/michael.js';
 import { prospectTokenRoutes } from './routes/p.js';
@@ -87,6 +89,10 @@ app.use('/api/admin/queue', adminQueueRoutes);
 app.use('/api/admin/audit', adminAuditRoutes);
 app.use('/api/admin/dashboard', adminDashboardRoutes);
 app.use('/api/admin/reporting', adminReportingRoutes);
+// ADMIN Section G — Kevin-only broadcast composer (Chat #144). BA-facing
+// only: audience resolution filters out STOP-list members server-side; the
+// composer never reaches prospects, never appears on `.com`.
+app.use('/api/admin/broadcast', adminBroadcastRoutes);
 
 // /api/p/* is prospect-facing (apps/com). No auth, no Michael gate. The token
 // itself is the identity surface per COM Design Section E.3.
@@ -181,3 +187,9 @@ app.listen(env.SERVER_PORT, () => {
     `[momentum-server] listening on :${env.SERVER_PORT} (${env.NODE_ENV}) â€” admin BA IDs configured: ${env.ADMIN_BA_IDS.length}`,
   );
 });
+
+// ADMIN Section G — broadcast delivery worker (Chat #144). Tails
+// `broadcast_recipients` for queued rows and dispatches via Telnyx + Resend.
+// Idempotent: safe even if invoked outside the listen callback (start order
+// doesn't matter — the worker queries the gateway, not the listening port).
+void startBroadcastWorker();
