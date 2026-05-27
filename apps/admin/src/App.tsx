@@ -25,6 +25,7 @@ import { ProspectsPage } from '@/routes/prospects';
 import { QueuePage } from '@/routes/queue';
 import { AuditPage } from '@/routes/audit';
 import { DashboardPage } from '@/routes/dashboard';
+import { LiveOpsPage } from '@/routes/live-ops';
 
 export function App() {
   return (
@@ -64,6 +65,7 @@ function Inner() {
         <Route path="/bas" element={<BAsPage />} />
         <Route path="/prospects" element={<ProspectsPage />} />
         <Route path="/queue" element={<QueuePage />} />
+        <Route path="/live-ops" element={<LiveOpsPage />} />
         <Route path="/audit" element={<AuditPage />} />
         <Route
           path="*"

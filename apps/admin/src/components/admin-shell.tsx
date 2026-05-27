@@ -21,6 +21,7 @@ const NAV: NavItem[] = [
   { to: '/bas', label: 'Brand Ambassadors' },
   { to: '/prospects', label: 'Prospect Oversight' },
   { to: '/queue', label: 'Queue Oversight' },
+  { to: '/live-ops', label: 'Live Operations' },
   { to: '/audit', label: 'Audit Log' },
 ];
 
