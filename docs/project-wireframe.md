@@ -182,14 +182,14 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [ ] BA-requested sponsor override (audited, before/after, requesting-BA, reason)
 - [ ] Leader tag toggle + at-risk tag (Kevin-curated, no algorithmic flagging)
 
-### 4.C.CRUD Manual BA lifecycle  `[~]` (Section C CRUD — domain+routes done #140)
+### 4.C.CRUD Manual BA lifecycle  `[x]` (Section C CRUD — domain+routes #140, UI #141)
 - [x] domain/adminBaCrud.ts — create / edit / softDelete / restore (#140, round-tripped live Mongo)
 - [x] CREATE: sponsorBaId required + stamped original/immutable-from-birth, no password (mirror entry), unique-email enforced
 - [x] EDIT: ordinary fields + reason→info audit; sponsor change delegates to C.5 applySponsorOverride (one mutation path)
 - [x] SOFT DELETE: distinct `deleted` state, reason required, reversible; severity info (#140); EDIT rejects a deleted BA (restore first)
 - [x] RESTORE: clears deleted, stamps restoredAt, keeps delete history
 - [x] routes/admin/bas.ts — POST / · PATCH /:baId · DELETE /:baId · POST /:baId/restore (typecheck clean, round-tripped)
-- [ ] Admin UI: bas.tsx create/edit/delete/restore forms + friction-heavy confirm (before/after on sponsor)
+- [x] Admin UI: bas.tsx create/edit/delete/restore forms + friction-heavy confirm (before/after on sponsor) (#141, typecheck clean)
 
 ### 4.D Prospect Oversight  `[ ]` (Section D â€” build 4th)
 - [ ] Cross-team prospect view
@@ -197,15 +197,15 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [ ] Prospect detail panel (token, callback, webinar, enrollment, Kevin's private notes)
 - [ ] BA-requested holding-tank intervention: move / reassign sponsor / manual flush / force-enroll (monotonic preserved, audited)
 
-### 4.D.CRUD Manual prospect lifecycle  `[~]` (Section D CRUD — domain+routes done #140)
+### 4.D.CRUD Manual prospect lifecycle  `[x]` (Section D CRUD — domain+routes #140, UI #141)
 - [x] domain/adminProspectCrud.ts — create / edit / softDelete / restore (#140, round-tripped live Mongo)
 - [x] CREATE: MINT-ONLY via createInvitation — #140 SUPERSEDES #138 "place at create"; placement+SMS+video tracking happen later through the normal /api/p/:token/video-event path (position earned at video_complete, not create)
 - [x] EDIT: ordinary fields + reason; sponsor stays D.4 reassign-only; EDIT rejects a deleted prospect
 - [x] SOFT DELETE: record-only `deleted` flip + audit; HOLDING TANK LEFT ENTIRELY UNTOUCHED (slot/position/ticker persist until the manual 8-week flush); severity info
 - [x] RESTORE: clears deleted, keeps delete history
 - [x] routes/admin/prospects.ts — POST / · PATCH /:prospectId · DELETE /:prospectId · POST /:prospectId/restore · POST /flush-expired · GET /alerts/aged (typecheck clean, round-tripped)
-- [ ] Cockpit BA-scoped prospect edit/delete/restore (sponsor-guarded to own prospects) — routes + UI
-- [ ] Admin UI: prospects.tsx create/edit/delete/restore forms
+- [x] Cockpit BA-scoped prospect edit/delete (sponsor-guarded to own prospects) — routes + UI (#141; restore is admin-only by decision, no cockpit restore; soft-deleted excluded from invites + today's actions)
+- [x] Admin UI: prospects.tsx create/edit/delete/restore forms (#141, typecheck clean)
 
 ### 4.E Queue / Recruitment Leg Oversight  `[ ]` (Section E â€” build 5th)
 - [ ] Queue depth + movement (placements/flushes/enrollments, net)
