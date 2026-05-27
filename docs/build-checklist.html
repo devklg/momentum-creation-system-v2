@@ -52,9 +52,9 @@
   <p class="sub1">Marketing Momentum Creation System · generated from project-wireframe.md · Chat #133 · 2026-05-27</p>
   <div class="summary">
     <span><b>136</b> items</span>
-    <span><b>105</b> done</span>
-    <span><b>3</b> partial</span>
-    <span><b>28</b> remaining</span>
+    <span><b>117</b> done</span>
+    <span><b>2</b> partial</span>
+    <span><b>17</b> remaining</span>
   </div>
   <p class="legend">Legend: <code>[x]</code> done · <code>[/]</code> partial · <code>[ ]</code> to&nbsp;build</p>
   <section class="surf">
@@ -175,11 +175,11 @@
 <div class="item done"><span class="n">81.</span><span class="box">[x]</span><span class="t">Each tile clickable -&gt; drilldown panel <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">82.</span><span class="box">[x]</span><span class="t">Filter bar: by BA, by leader group (system-detected + Kevin-curated) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">83.</span><span class="box">[x]</span><span class="t">Live event stream <span class="tag">(done)</span></span></div>
-<h3>4.C BA Oversight  `[~]` (Section C â€” build 4th)</h3>
-<div class="item partial"><span class="n">84.</span><span class="box">[/]</span><span class="t">BA directory (routes/bas.tsx present) <span class="tag">(partial)</span></span></div>
-<div class="item pending"><span class="n">85.</span><span class="box">[ ]</span><span class="t">BA profile detail</span></div>
-<div class="item pending"><span class="n">86.</span><span class="box">[ ]</span><span class="t">BA-requested sponsor override (audited, before/after, requesting-BA, reason)</span></div>
-<div class="item pending"><span class="n">87.</span><span class="box">[ ]</span><span class="t">Leader tag toggle + at-risk tag (Kevin-curated, no algorithmic flagging)</span></div>
+<h3>4.C BA Oversight  `[x]` (Section C â€” build 4th; UI shipped #141, VERIFIED #143)</h3>
+<div class="item done"><span class="n">84.</span><span class="box">[x]</span><span class="t">BA directory (routes/bas.tsx mounts DirectoryTable + filter + create; GET /api/admin/bas with leaderDetectionNote) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">85.</span><span class="box">[x]</span><span class="t">BA profile detail (ProfileDrawer, GET /api/admin/bas/:baId profile bundle) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">86.</span><span class="box">[x]</span><span class="t">BA-requested sponsor override (audited, before/after, requesting-BA, reason) â€” sponsor-override-flow.tsx via drawer, POST /:baId/sponsor-override <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">87.</span><span class="box">[x]</span><span class="t">Leader tag toggle + at-risk tag (Kevin-curated, no algorithmic flagging) â€” POST /:baId/leader-tag, system-detected dormant per leaderDetectionNote <span class="tag">(done)</span></span></div>
 <h3>4.C.CRUD Manual BA lifecycle  `[x]` (Section C CRUD — domain+routes #140, UI #141)</h3>
 <div class="item done"><span class="n">88.</span><span class="box">[x]</span><span class="t">domain/adminBaCrud.ts — create / edit / softDelete / restore (#140, round-tripped live Mongo) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">89.</span><span class="box">[x]</span><span class="t">CREATE: sponsorBaId required + stamped original/immutable-from-birth, no password (mirror entry), unique-email enforced <span class="tag">(done)</span></span></div>
@@ -188,11 +188,11 @@
 <div class="item done"><span class="n">92.</span><span class="box">[x]</span><span class="t">RESTORE: clears deleted, stamps restoredAt, keeps delete history <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">93.</span><span class="box">[x]</span><span class="t">routes/admin/bas.ts — POST / · PATCH /:baId · DELETE /:baId · POST /:baId/restore (typecheck clean, round-tripped) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">94.</span><span class="box">[x]</span><span class="t">Admin UI: bas.tsx create/edit/delete/restore forms + friction-heavy confirm (before/after on sponsor) (#141, typecheck clean) <span class="tag">(done)</span></span></div>
-<h3>4.D Prospect Oversight  `[ ]` (Section D â€” build 4th)</h3>
-<div class="item pending"><span class="n">95.</span><span class="box">[ ]</span><span class="t">Cross-team prospect view</span></div>
-<div class="item pending"><span class="n">96.</span><span class="box">[ ]</span><span class="t">Sponsor-routed URL inspection (resolved-BA-at-mint vs now, discrepancy surfacing)</span></div>
-<div class="item pending"><span class="n">97.</span><span class="box">[ ]</span><span class="t">Prospect detail panel (token, callback, webinar, enrollment, Kevin's private notes)</span></div>
-<div class="item pending"><span class="n">98.</span><span class="box">[ ]</span><span class="t">BA-requested holding-tank intervention: move / reassign sponsor / manual flush / force-enroll (monotonic preserved, audited)</span></div>
+<h3>4.D Prospect Oversight  `[x]` (Section D â€” build 4th; UI shipped #141, VERIFIED #143)</h3>
+<div class="item done"><span class="n">95.</span><span class="box">[x]</span><span class="t">Cross-team prospect view (routes/prospects.tsx: FilterBar + DirectoryTable, GET /api/admin/prospects) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">96.</span><span class="box">[x]</span><span class="t">Sponsor-routed URL inspection (resolved-BA-at-mint vs now, discrepancy surfacing) â€” DetailPanel drift detector (sponsorBaIdAtMint !== sponsorBaIdNow, warn banner) + Token+sponsor-routed-URL section w/ sandbox preview <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">97.</span><span class="box">[x]</span><span class="t">Prospect detail panel (token, callback, webinar, enrollment, Kevin's private notes) â€” DetailPanel, ?prospectId= deep-link contract w/ Agent E <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">98.</span><span class="box">[x]</span><span class="t">BA-requested holding-tank intervention: move / reassign sponsor / manual flush / force-enroll (monotonic preserved, audited) â€” InterventionModal + prospects.ts intervention routes <span class="tag">(done)</span></span></div>
 <h3>4.D.CRUD Manual prospect lifecycle  `[x]` (Section D CRUD — domain+routes #140, UI #141)</h3>
 <div class="item done"><span class="n">99.</span><span class="box">[x]</span><span class="t">domain/adminProspectCrud.ts — create / edit / softDelete / restore (#140, round-tripped live Mongo) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">100.</span><span class="box">[x]</span><span class="t">CREATE: MINT-ONLY via createInvitation — #140 SUPERSEDES #138 "place at create"; placement+SMS+video tracking happen later through the normal /api/p/:token/video-event path (position earned at video_complete, not create) <span class="tag">(done)</span></span></div>
@@ -202,11 +202,11 @@
 <div class="item done"><span class="n">104.</span><span class="box">[x]</span><span class="t">routes/admin/prospects.ts — POST / · PATCH /:prospectId · DELETE /:prospectId · POST /:prospectId/restore · POST /flush-expired · GET /alerts/aged (typecheck clean, round-tripped) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">105.</span><span class="box">[x]</span><span class="t">Cockpit BA-scoped prospect edit/delete (sponsor-guarded to own prospects) — routes + UI (#141; restore is admin-only by decision, no cockpit restore; soft-deleted excluded from invites + today's actions) <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">106.</span><span class="box">[x]</span><span class="t">Admin UI: prospects.tsx create/edit/delete/restore forms (#141, typecheck clean) <span class="tag">(done)</span></span></div>
-<h3>4.E Queue / Recruitment Leg Oversight  `[ ]` (Section E â€” build 5th)</h3>
-<div class="item pending"><span class="n">107.</span><span class="box">[ ]</span><span class="t">Queue depth + movement (placements/flushes/enrollments, net)</span></div>
-<div class="item pending"><span class="n">108.</span><span class="box">[ ]</span><span class="t">Fixed assigned queue numbers (monotonic, highest today / ever, vacant slots)</span></div>
-<div class="item pending"><span class="n">109.</span><span class="box">[ ]</span><span class="t">Ticker config (E.3 â€” position-stack visible window)</span></div>
-<div class="item pending"><span class="n">110.</span><span class="box">[ ]</span><span class="t">Queue rule management (E.6)</span></div>
+<h3>4.E Queue / Recruitment Leg Oversight  `[x]` (Section E â€” build 5th; UI shipped #141, VERIFIED #143)</h3>
+<div class="item done"><span class="n">107.</span><span class="box">[x]</span><span class="t">Queue depth + movement (placements/flushes/enrollments, net) â€” QueueDepthPanel (E.1), GET /api/admin/queue/summary <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">108.</span><span class="box">[x]</span><span class="t">Fixed assigned queue numbers (monotonic, highest today / ever, vacant slots) â€” QueueNumbersPanel (E.2), GET /queue/lookup <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">109.</span><span class="box">[x]</span><span class="t">Ticker config (E.3 â€” position-stack visible window) â€” VisibleWindowPanel, GET/PUT /queue/visible-window + GrowthSparkline (E.4) + AdminTickerPanel (E.5, SSE /queue/ticker/stream) <span class="tag">(done)</span></span></div>
+<div class="item done"><span class="n">110.</span><span class="box">[x]</span><span class="t">Queue rule management (E.6) â€” QueueRulesPanel, GET /queue/rules + PUT /queue/rules/:key (audited) <span class="tag">(done)</span></span></div>
 <h3>4.H Live Operations  `[ ]` (Section H â€” build 6th)</h3>
 <div class="item pending"><span class="n">111.</span><span class="box">[ ]</span><span class="t">Real-time usage strip (active .team/.com, events/min, gateway p50/p95) via SSE</span></div>
 <div class="item pending"><span class="n">112.</span><span class="box">[ ]</span><span class="t">Growth stat cards</span></div>

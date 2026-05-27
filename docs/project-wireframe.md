@@ -176,11 +176,11 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [x] Filter bar: by BA, by leader group (system-detected + Kevin-curated)
 - [x] Live event stream
 
-### 4.C BA Oversight  `[~]` (Section C â€” build 4th)
-- [~] BA directory (routes/bas.tsx present)
-- [ ] BA profile detail
-- [ ] BA-requested sponsor override (audited, before/after, requesting-BA, reason)
-- [ ] Leader tag toggle + at-risk tag (Kevin-curated, no algorithmic flagging)
+### 4.C BA Oversight  `[x]` (Section C â€” build 4th; UI shipped #141, VERIFIED #143)
+- [x] BA directory (routes/bas.tsx mounts DirectoryTable + filter + create; GET /api/admin/bas with leaderDetectionNote)
+- [x] BA profile detail (ProfileDrawer, GET /api/admin/bas/:baId profile bundle)
+- [x] BA-requested sponsor override (audited, before/after, requesting-BA, reason) â€” sponsor-override-flow.tsx via drawer, POST /:baId/sponsor-override
+- [x] Leader tag toggle + at-risk tag (Kevin-curated, no algorithmic flagging) â€” POST /:baId/leader-tag, system-detected dormant per leaderDetectionNote
 
 ### 4.C.CRUD Manual BA lifecycle  `[x]` (Section C CRUD — domain+routes #140, UI #141)
 - [x] domain/adminBaCrud.ts — create / edit / softDelete / restore (#140, round-tripped live Mongo)
@@ -191,11 +191,11 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [x] routes/admin/bas.ts — POST / · PATCH /:baId · DELETE /:baId · POST /:baId/restore (typecheck clean, round-tripped)
 - [x] Admin UI: bas.tsx create/edit/delete/restore forms + friction-heavy confirm (before/after on sponsor) (#141, typecheck clean)
 
-### 4.D Prospect Oversight  `[ ]` (Section D â€” build 4th)
-- [ ] Cross-team prospect view
-- [ ] Sponsor-routed URL inspection (resolved-BA-at-mint vs now, discrepancy surfacing)
-- [ ] Prospect detail panel (token, callback, webinar, enrollment, Kevin's private notes)
-- [ ] BA-requested holding-tank intervention: move / reassign sponsor / manual flush / force-enroll (monotonic preserved, audited)
+### 4.D Prospect Oversight  `[x]` (Section D â€” build 4th; UI shipped #141, VERIFIED #143)
+- [x] Cross-team prospect view (routes/prospects.tsx: FilterBar + DirectoryTable, GET /api/admin/prospects)
+- [x] Sponsor-routed URL inspection (resolved-BA-at-mint vs now, discrepancy surfacing) â€” DetailPanel drift detector (sponsorBaIdAtMint !== sponsorBaIdNow, warn banner) + Token+sponsor-routed-URL section w/ sandbox preview
+- [x] Prospect detail panel (token, callback, webinar, enrollment, Kevin's private notes) â€” DetailPanel, ?prospectId= deep-link contract w/ Agent E
+- [x] BA-requested holding-tank intervention: move / reassign sponsor / manual flush / force-enroll (monotonic preserved, audited) â€” InterventionModal + prospects.ts intervention routes
 
 ### 4.D.CRUD Manual prospect lifecycle  `[x]` (Section D CRUD — domain+routes #140, UI #141)
 - [x] domain/adminProspectCrud.ts — create / edit / softDelete / restore (#140, round-tripped live Mongo)
@@ -207,12 +207,12 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [x] Cockpit BA-scoped prospect edit/delete (sponsor-guarded to own prospects) — routes + UI (#141; restore is admin-only by decision, no cockpit restore; soft-deleted excluded from invites + today's actions)
 - [x] Admin UI: prospects.tsx create/edit/delete/restore forms (#141, typecheck clean)
 
-### 4.E Queue / Recruitment Leg Oversight  `[ ]` (Section E â€” build 5th)
-- [ ] Queue depth + movement (placements/flushes/enrollments, net)
-- [ ] Fixed assigned queue numbers (monotonic, highest today / ever, vacant slots)
-- [ ] Ticker config (E.3 â€” position-stack visible window)
-- [ ] Queue rule management (E.6)
-- DEP: flush window (RESOLVED fixed-8wk); position-stack window (open)
+### 4.E Queue / Recruitment Leg Oversight  `[x]` (Section E â€” build 5th; UI shipped #141, VERIFIED #143)
+- [x] Queue depth + movement (placements/flushes/enrollments, net) â€” QueueDepthPanel (E.1), GET /api/admin/queue/summary
+- [x] Fixed assigned queue numbers (monotonic, highest today / ever, vacant slots) â€” QueueNumbersPanel (E.2), GET /queue/lookup
+- [x] Ticker config (E.3 â€” position-stack visible window) â€” VisibleWindowPanel, GET/PUT /queue/visible-window + GrowthSparkline (E.4) + AdminTickerPanel (E.5, SSE /queue/ticker/stream)
+- [x] Queue rule management (E.6) â€” QueueRulesPanel, GET /queue/rules + PUT /queue/rules/:key (audited)
+- DEP: flush window (RESOLVED fixed-8wk); position-stack window (open â€” VisibleWindowPanel lets Kevin set it live)
 
 ### 4.H Live Operations  `[ ]` (Section H â€” build 6th)
 - [ ] Real-time usage strip (active .team/.com, events/min, gateway p50/p95) via SSE
