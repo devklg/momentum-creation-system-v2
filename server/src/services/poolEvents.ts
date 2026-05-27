@@ -52,8 +52,15 @@ export interface PlacementSubscription {
  * Publish a placement event. Called from holdingTank.placeProspect
  * after the triple-stack write commits. Fire-and-forget; the emitter
  * is synchronous and the listeners are pure (just push to a pipe).
+ *
+ * Also records the event in the rolling 60s window so the /admin Live
+ * Operations H.1 usage strip can report events/min. Until a broader
+ * centralized event firehose exists, "events" here is exactly
+ * "placements" — H.1's domain layer is responsible for surfacing that
+ * scope honestly (placements-per-minute, not all-system-events).
  */
 export function publishPlacement(event: PlacementEvent): void {
+  recordEvent();
   bus.emit(POOL_EVENT_PLACEMENT, event);
 }
 
@@ -87,4 +94,64 @@ export function subscribePlacements(
  */
 export function activePlacementSubscriberCount(): number {
   return bus.listenerCount(POOL_EVENT_PLACEMENT);
+}
+
+/* ── /admin Live Operations H.1 — additive surface (Chat #144) ──────
+ *
+ * The H.1 usage strip needs two numbers this module is the natural
+ * home for: events-per-minute (a rolling 60s count of placements
+ * published) and active-admin-sessions (a counter the /admin SSE
+ * stream bumps on connect/disconnect). Both are tiny in-memory
+ * structures; if the process restarts they reset to zero, which is
+ * fine — H.1 is a "right now" surface, not a historical one.
+ *
+ * Strict invariants:
+ *  - The existing exports above are unchanged. publishPlacement gained
+ *    a side-effect (recordEvent) but its public signature is identical.
+ *  - These additions are pure-additive. No reader of the prior public
+ *    API needs to know they exist.
+ */
+
+const EVENT_WINDOW_MS = 60_000;
+const eventTimestamps: number[] = [];
+
+function pruneOldEvents(now: number): void {
+  // The ring is monotonically appended; shift() from the head until the
+  // oldest entry is within the window.
+  while (eventTimestamps.length > 0 && now - eventTimestamps[0]! > EVENT_WINDOW_MS) {
+    eventTimestamps.shift();
+  }
+}
+
+/**
+ * Stamp the rolling event window. Called from publishPlacement above; can
+ * be called by other publishers if a broader event firehose materializes
+ * later. Cheap — bounded by the number of placements per minute.
+ */
+export function recordEvent(at: number = Date.now()): void {
+  pruneOldEvents(at);
+  eventTimestamps.push(at);
+}
+
+/** Count of recorded events in the trailing 60 seconds. */
+export function eventsInLastMinute(): number {
+  pruneOldEvents(Date.now());
+  return eventTimestamps.length;
+}
+
+let adminSessionCount = 0;
+
+/** /admin SSE stream calls this on connect. */
+export function incrementAdminSessions(): void {
+  adminSessionCount += 1;
+}
+
+/** /admin SSE stream calls this on disconnect. Floored at zero. */
+export function decrementAdminSessions(): void {
+  if (adminSessionCount > 0) adminSessionCount -= 1;
+}
+
+/** Current count of open /admin SSE subscribers (H.1 sanity check). */
+export function activeAdminSessionCount(): number {
+  return adminSessionCount;
 }
