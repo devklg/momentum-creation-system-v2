@@ -19,7 +19,7 @@ locked-spec wins on STATE. This wireframe is the BUILD DECOMPOSITION of that
 state â€” if it disagrees with locked-spec, locked-spec wins and this gets fixed.
 Depth is weighted toward UNBUILT surfaces (that's where a session needs detail).
 
-HEAD at write: `5c7105f` (Chat #126). Verified Chat #129.
+HEAD at write: `b3847b6` (Chat #144). Verified Chat #144.
 
 ---
 
@@ -214,34 +214,36 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [x] Queue rule management (E.6) â€” QueueRulesPanel, GET /queue/rules + PUT /queue/rules/:key (audited)
 - DEP: flush window (RESOLVED fixed-8wk); position-stack window (open â€” VisibleWindowPanel lets Kevin set it live)
 
-### 4.H Live Operations  `[ ]` (Section H â€” build 6th)
-- [ ] Real-time usage strip (active .team/.com, events/min, gateway p50/p95) via SSE
-- [ ] Growth stat cards
-- [ ] Holding-tank live grid (color by days, hover detail, click -> prospect panel)
-- [ ] Toggleable conversion funnels (prospect funnel / BA activation funnel)
-- DEP: audit log + live event stream
+### 4.H Live Operations  `[x]` (Section H — build 6th; shipped Chat #144 fan-out)
+- [x] Real-time usage strip (active dashboard viewers, events/min, gateway p50/p95, active admin sessions) via SSE — UsageStrip.tsx + useUsageStream.ts hook (H.1, snapshot+heartbeat at 30s); server services/gatewayLatency.ts + services/poolEvents.ts extended additively (eventsInLastMinute / activeAdminSessions counters added; original public API unchanged); GET /api/admin/live-ops/usage/stream
+- [x] Growth stat cards 24h / 7d / 30d with previous-window deltas (BAs added, prospects placed, enrollments) — GrowthCards.tsx; GET /api/admin/live-ops/growth
+- [x] Holding-tank live grid (color by age bucket fresh/warming/aging/stale, hover detail, click → /admin/prospects?prospectId={id} deep-link) — HoldingTankGrid.tsx; GET /api/admin/live-ops/grid
+- [x] Toggleable conversion funnels (prospect funnel: mint→click→video_started→video_complete→enrolled; BA activation funnel: signed_up→welcomed→michael_done→first_invite→first_video_complete→first_enrollment) — ConversionFunnel.tsx; GET /api/admin/live-ops/funnel?kind=prospect|ba_activation
+- [x] Contract pinned in packages/shared/src/admin-live-ops.ts (AdminLiveUsageSample, AdminLiveUsageStreamEvent, AdminGrowthCard*, AdminLiveGridSlot, AdminFunnel*, ADMIN_LIVE_OPS_PATHS); H-server and H-UI both import from @momentum/shared, neither defines locally
+- DEP RESOLVED: audit log + live event stream (substrate already in place since #134 dashboard); events-per-minute scope honestly == placements-per-minute until a broader event firehose exists (flagged in poolEvents.ts JSDoc)
 
-### 4.I Reporting / Analytics  `[~]` (Section I â€” build 7th; I.1 library shipped #143, export PII redaction still open)
+### 4.I Reporting / Analytics  `[x]` (Section I — build 7th; I.1 library shipped #143, I.4/I.5 export shipped #144)
 - [x] I.1 standard-report library (Chat #143) â€” BA activation, training completion, invite-to-presentation movement (incl. per-BA breakdown w/ ?sort=completes|mints|completion_pct, Chat #143), queue velocity, enrollment completion (renamed from spec's "Registration handoff completion" per locked-spec 3.6), follow-up aging, leader scorecards. Each report = a JSON domain fn under server/src/domain/reports/* consumed by GET /api/admin/reporting/<name> AND a PDF section in I.3. Time range supports preset (lifetime|last_30d|last_90d|by_month) AND explicit from/to per Kevin decision A. Reports 7 (compliance count) + 8 (exception dashboard) intentionally NOT built (decision dec_reporting_i1_scope). FUTURE: video playback telemetry deferred to dec_video_playback_telemetry_deferred. Round-tripped live; full 5-workspace typecheck green.
 - [x] I.3 Print Master Report â€” routes/admin/reporting.ts GET /master-report.pdf + domain/adminMasterReport.ts (#142, completed #143). Brand-locked PDF, verifiability footer (timestamp + SHA-256 source hash), audited on generate. Composites Section B dashboard metrics AND the full I.1 library (Reports 1–6 + 9) as of Chat #143 â€” provenance note now records that scope rather than pending state. Round-tripped live (valid %PDF, deterministic hash).
 - [x] Cockpit BA prospect-list print â€” cockpit GET /invites/print.pdf + domain/cockpitPrint.ts (#142). Sponsor-scoped via listInvitesForBA; brand-locked PDF, same pdfReport.ts foundation. Round-tripped live (3 prospects, valid %PDF).
 - [x] services/pdfReport.ts â€” shared pdfkit foundation (brand header + verifiability footer + table/section helpers); pdfkit + @types/pdfkit added to server (#142)
-- [ ] Export with PII redaction default
-- DEP: leader detection (RESOLVED threshold Chat #100); export PII redaction (open); I.1 report library (RESOLVED â€” shipped Chat #143, I.3 composites all seven)
+- [x] Export with PII redaction — modal every export, Kevin picks redact/raw each time (locked Chat #144; never persisted as a preference). Redacted fields: prospectFirstName, prospectLastName, phone, email. Kept verbatim: city, prospectId, tokenId, sponsorBaId, sponsorFullName. Pure functions in server/src/services/piiRedact.ts; CSV serializer in server/src/domain/reports/export.ts. 7 append-only routes on routes/admin/reporting.ts (one per I.1 report) returning text/csv with attachment disposition. Every export (raw OR redacted) appends one audit entry with redaction choice recorded (info severity). Admin UI: ExportPanel.tsx + RedactionModal.tsx mounted on /reports route.
+- DEP RESOLVED: leader detection (Chat #100); export PII redaction (Chat #144); I.1 report library (Chat #143, I.3 composites all seven)
 
-### 4.F Tenant Architecture  `[ ]` (Section F â€” build 8th)
+### 4.F Tenant Architecture  `[ ]` (Section F — build 8th; deferred Chat #144)
 - [ ] Master settings, template control, role/permission, content inheritance
 - [ ] Master content validated at save-time (compliance fail-closed)
-- DEP: compliance severity mapping (open)
+- DEP: compliance severity mapping (open). Chat #144 deferral rationale: F.5/F.6 compose with a yet-to-exist admin master-content editor (the form that lets an admin SAVE new master templates from /admin). Without that editor, the compliance-block question is premature — today all master content lives in code and ships through deploys, where the deploy is itself the compliance gate. Build F.5/F.6 when the editor is the actual ask; the severity question will resolve in context.
 
-### 4.G Kevin-Only Broadcast  `[ ]` (Section G â€” build LAST)
-- [ ] Composer + per-recipient interpolation + preview
-- [ ] Audience selector (all / first-72h / leaders / at-risk / custom, live count)
-- [ ] Channel selector (email / text / both)
-- [ ] Send-test-to-Kevin
-- [ ] Queue master broadcast (triple-stack, per-recipient queue, async delivery, live status)
-- [ ] Audit/consent guardrail (opt-out, STOP keyword, permanent exclusion)
-- DEP: email provider (RESOLVED Resend, dormant) + Telnyx
+### 4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export)
+- [x] Composer with per-recipient {{firstName}} interpolation + preview — Composer.tsx; server-side interpolation only (client never sees rendered text for a third-party recipient)
+- [x] Audience selector (all / first-72h / leaders / at-risk / custom, live count) — AudienceSelector.tsx; STOP-exclusion-list members filtered server-side at audience resolution, not client-side
+- [x] Channel selector (email / text / both) — ChannelSelector.tsx; email DORMANT pending teammagnificent.com domain verification in Resend (transport stamps emailDeliveryStatus='skipped' until both EMAIL_API_KEY and verified domain land); SMS via Telnyx LIVE
+- [x] Send-test-to-Kevin — SendTestButton.tsx; sends ONE message to Kevin's own BA contact identical to what the audience will receive (full interpolation); audit severity info
+- [x] Queue master broadcast — server/src/domain/broadcast.ts (audience resolution, interpolation, enqueue, status reporting) + server/src/services/broadcastQueue.ts (in-memory worker w/ retry+backoff, startBroadcastWorker() void-called after listen); broadcast record + per-recipient rows triple-stacked; states queued → sending → sent | failed; BroadcastStatus.tsx renders live counts; audit severity critical for full sends
+- [x] Audit/consent guardrail — STOP keyword permanent exclusion enforced server-side at audience resolution; opt-out global across Team Magnificent; every broadcast send audited with audience preset + recipient count + channel
+- [x] Contract pinned in packages/shared/src/broadcast.ts (exported via index.ts barrel); routes/admin/broadcast.ts mounted at /api/admin/broadcast
+- DEP RESOLVED: email provider (Resend, dormant); Telnyx (live)
 
 ### 4.J Audit / Controls  `[~]` (Section J.1-J.3 â€” build 2nd, SUBSTRATE)
 - [x] Append-only audit log (every triple-stack write, every /admin request, every mutation)
@@ -263,7 +265,7 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 
 ## OPEN DECISIONS BLOCKING BUILDS (from ledger + locked-spec Part 5)
 
-Resolved: email=Resend(dormant) Â· flush=fixed-8wk Â· counter=SSE Â· webinar=Mon/Thu-5pmPT Â· leader-threshold Â· callback=two-radio Â· source-hierarchy(#129)
+Resolved: email=Resend(dormant) · flush=fixed-8wk · counter=SSE · webinar=Mon/Thu-5pmPT · leader-threshold · callback=two-radio · source-hierarchy(#129) · export-PII-redaction=modal-every-export(#144)
 
 Still open (only these block their surfaces):
 - Michael's 5 interview prompts -> blocks Michael State-3 readback
@@ -272,8 +274,7 @@ Still open (only these block their surfaces):
 - Phone-change verification -> profile
 - Notification preference defaults -> profile
 - Position-stack visible window -> admin Queue E.3
-- Compliance severity mapping (block/warn/log) -> admin Tenant
-- Export PII redaction default -> admin Reporting
+- Compliance severity mapping (block/warn/log) -> admin Tenant (F deferred Chat #144 until master-content editor lands; the severity question composes with that editor)
 - Sponsor-leaves card behavior -> cockpit My Sponsor edge case
 - Re-invite cooldown -> cockpit CRM re-invite
 - Leadership track-record placement inside .team -> training
@@ -282,4 +283,4 @@ Still open (only these block their surfaces):
 
 *Source of truth for STATE: locked-spec.md. For CURRENCY: momentum.decisions.*
 *This wireframe = build decomposition. Update leaf status at the end of any chat that ships one.*
-*Written Chat #129.*
+*Written Chat #129. Updated Chat #144 (H + I.4/I.5 export + G all shipped; F deferred).*
