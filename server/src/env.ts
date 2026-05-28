@@ -37,6 +37,15 @@ const Env = z.object({
 
   GATEWAY_URL: z.string().url().default('http://localhost:2525/api'),
 
+  /**
+   * Base URL minted /p/{token} prospect links are built on (#145). Dev
+   * default is the local .com app (localhost:7701) so links resolve without
+   * a deploy; production sets PROSPECT_BASE_URL=https://teammagnificent.com.
+   * Was hardcoded in domain/invitations.ts through #144 — every dev link
+   * 404'd against prod until hand-swapped. No trailing slash.
+   */
+  PROSPECT_BASE_URL: z.string().url().default('http://localhost:7701'),
+
   ADMIN_BA_IDS: z
     .string()
     .default('')

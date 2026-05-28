@@ -41,6 +41,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { env } from '../env.js';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
@@ -98,8 +99,13 @@ export interface CreateInvitationResult {
   source: InvitationSource;
 }
 
-/** Base URL the /p/{token} link is built on. teammagnificent.com per 3.1. */
-const PROSPECT_BASE_URL = 'https://teammagnificent.com';
+/**
+ * Base URL the /p/{token} link is built on. Env-driven (#145): prod sets
+ * PROSPECT_BASE_URL=https://teammagnificent.com; dev defaults to
+ * http://localhost:7701 (the .com app) so minted links resolve locally.
+ * Was hardcoded to the prod domain through #144, which 404'd every dev link.
+ */
+const PROSPECT_BASE_URL = env.PROSPECT_BASE_URL;
 
 function buildInviteUrl(token: string): string {
   return `${PROSPECT_BASE_URL}/p/${token}`;

@@ -29,9 +29,9 @@ HEAD at write: `b3847b6` (Chat #144). Verified Chat #144.
 - [x] Triple-stack persistence via Universal Gateway 2525 â€” services/tripleStack.ts, gateway.ts (#93)
 - [x] Shared package â€” brand.ts, compliance.ts, rules.ts, types.ts (#92,#110)
 - [x] Decision ledger + master work queue + this wireframe (#129)
-- [~] LLM layer through gateway â€” services/anthropic.ts present; ScriptMaker + Ivory consume it
-  - [x] anthropic.ts transport + dormant-aware fallback
-  - [x] Ivory coaching consumer (#131/#132 â€” coach surfaces WDYK prompts, evergreen fallback)
+- [x] LLM layer (direct Anthropic Messages API, NOT through gateway, #118) â€” services/anthropic.ts; ScriptMaker + Ivory consume it. VERIFIED LIVE #145: ANTHROPIC_API_KEY landed in root .env, server restarted, Ivory Coach returned input-specific questions (typed "i went to oru" produced 7 ORU-specific prompts, impossible from the evergreen fallback). Key live, complete() reaching the API end to end.
+  - [x] anthropic.ts transport + dormant-aware fallback (default claude-haiku-4-5-20251001; prompt-caching on stable prefix)
+  - [x] Ivory coaching consumer (#131/#132 â€” coach surfaces WDYK prompts; evergreen fallback when key unset; VERIFIED firing real LLM #145)
   - [x] Michael scoring consumer (#134 â€” server/src/domain/michaelScoring.ts, triple-stacked, sponsor-stamped)
 
 ---
@@ -113,7 +113,7 @@ One route /p/{token}, two faces by token state.
 - [x] CRM per invite â€” notes (append-only), follow-up reminders (one active, replace-or-clear), 5-tag dispositions (new-ba/new-customer/interested/later/not-interested), re-invite (7-day cooldown, mints fresh if expired) (#132)
 
 ### 3.4 Invitation engine
-- [x] **Spine** â€” plain-form front door + mint (phone-required #125) + cockpit read-side (#119,#120,#121)
+- [x] **Spine** â€” plain-form front door + mint (phone-required #125) + cockpit read-side (#119,#120,#121). VERIFIED LIVE #145: Generator minted /p/{token}, prospect page rendered against local Mongo (position #3, held by Kevin, live placement strip). NOTE the link rendered only after swapping the prod domain for localhost â€” see PROSPECT_BASE_URL bug in Section 5.
 - [x] **ScriptMaker** â€” per-product video library, one-name compliance-clean draft -> /invitations seam (#122,#123)
 - [x] **GENERATOR** (#131) â€” gallery-driven, per-product, MULTI-ANGLE WDYK:
   - [x] BA picks product from gallery (shared `packages/shared/src/product-catalog.ts`)
@@ -123,7 +123,7 @@ One route /p/{token}, two faces by token state.
 - [x] **IVORY** (#131) â€” standalone /ivory + feeder into generator:
   - [x] Persistent warm-market roster, category tags (`ivory_names`, BA-private)
   - [x] Mark invited / customer / BA / not-interested / follow-up (`updateIvoryStatus`)
-  - [x] LLM coaching layer (Anthropic transport, evergreen fallback when key unset)
+  - [x] LLM coaching layer (Anthropic transport, evergreen fallback when key unset) â€” VERIFIED LIVE #145: Coach returned ORU-specific questions from a 13-char ask; Generator ran "THE THREE PRODUCT LINE / make-money" and queued a name for mint; ADD A NAME triple-stacked clean after the mcs_ivory Chroma bootstrap was run (#145 â€” collection was missing, every prior add 500'd silently while Mongo committed; see Section 5)
   - [x] Does NOT call/text/score (compliance â€” coach surfaces WDYK prompts, never names)
 
 ### 3.5 Fast Start Guide â€” 5 modules  `[x]` (#95, feat/fast-start-training)
@@ -230,11 +230,10 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [x] Export with PII redaction — modal every export, Kevin picks redact/raw each time (locked Chat #144; never persisted as a preference). Redacted fields: prospectFirstName, prospectLastName, phone, email. Kept verbatim: city, prospectId, tokenId, sponsorBaId, sponsorFullName. Pure functions in server/src/services/piiRedact.ts; CSV serializer in server/src/domain/reports/export.ts. 7 append-only routes on routes/admin/reporting.ts (one per I.1 report) returning text/csv with attachment disposition. Every export (raw OR redacted) appends one audit entry with redaction choice recorded (info severity). Admin UI: ExportPanel.tsx + RedactionModal.tsx mounted on /reports route.
 - DEP RESOLVED: leader detection (Chat #100); export PII redaction (Chat #144); I.1 report library (Chat #143, I.3 composites all seven)
 
-### 4.F Tenant Architecture  `[x]` (Section F — build 8th; shipped Chat #145)
-- [x] Master settings, template control, role/permission, content inheritance — /admin/tenant UI + /api/admin/tenant/overview
-- [x] Master content validated at save-time (compliance fail-closed) — PUT /api/admin/tenant/templates/:templateKey blocks critical .com violations before persistence; blocked saves are audited
-- [x] Append-only tenant settings + master-content version records triple-stacked through TenantSettingsVersion / MasterContentVersion graph nodes and Chroma semantic records
-- DEP RESOLVED: compliance severity mapping — block=critical fail-closed, warn=warn returned/audited, log=info through normal master-content audit.
+### 4.F Tenant Architecture  `[ ]` (Section F — build 8th; deferred Chat #144)
+- [ ] Master settings, template control, role/permission, content inheritance
+- [ ] Master content validated at save-time (compliance fail-closed)
+- DEP: compliance severity mapping (open). Chat #144 deferral rationale: F.5/F.6 compose with a yet-to-exist admin master-content editor (the form that lets an admin SAVE new master templates from /admin). Without that editor, the compliance-block question is premature — today all master content lives in code and ships through deploys, where the deploy is itself the compliance gate. Build F.5/F.6 when the editor is the actual ask; the severity question will resolve in context.
 
 ### 4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export)
 - [x] Composer with per-recipient {{firstName}} interpolation + preview — Composer.tsx; server-side interpolation only (client never sees rendered text for a third-party recipient)
@@ -261,6 +260,8 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [x] Delete docs/_team-design-extract.txt scratch file (verified absent; also deleted `docs/_leaves.json` at content/hygiene pass)
 - [x] Update build-registry.md to cover #122-#131; KEVIN-CONTEXT removed from source hierarchy in favor of momentum.decisions ledger (content/hygiene pass)
 - [ ] Fix Dr. Dan "THREE CSO" brand-isolation drift in App-Description.docx Section 3
+- [ ] FIX (#145): PROSPECT_BASE_URL hardcoded to 'https://teammagnificent.com' in server/src/domain/invitations.ts â€” every minted /p/{token} link points to the prod domain in EVERY environment, so dev links 404 until you hand-swap localhost:7701. Make it env-driven (add PROSPECT_BASE_URL to env.ts w/ localhost:7701 default; read it in invitations.ts; set the prod value in deploy env). Existing minted tokens in Mongo carry the wrong inviteUrl â€” resolve by re-mint or accept for old test invites.
+- [ ] HARDEN (#145): no startup check warns when a triple-stack Chroma collection is missing. mcs_ivory was never bootstrapped, so Ivory ADD A NAME 500'd while Mongo committed anyway (3 orphan John Doe rows, deleted #145). Same failure class as the #140 audit_log fix. Consider a boot-time assertion that every CHROMA_COLLECTION constant resolves to an existing collection, or fail the triple-stack write loudly on the Chroma leg instead of letting Mongo land alone.
 
 ---
 
@@ -275,6 +276,7 @@ Still open (only these block their surfaces):
 - Phone-change verification -> profile
 - Notification preference defaults -> profile
 - Position-stack visible window -> admin Queue E.3
+- Compliance severity mapping (block/warn/log) -> admin Tenant (F deferred Chat #144 until master-content editor lands; the severity question composes with that editor)
 - Sponsor-leaves card behavior -> cockpit My Sponsor edge case
 - Re-invite cooldown -> cockpit CRM re-invite
 - Leadership track-record placement inside .team -> training
@@ -284,3 +286,4 @@ Still open (only these block their surfaces):
 *Source of truth for STATE: locked-spec.md. For CURRENCY: momentum.decisions.*
 *This wireframe = build decomposition. Update leaf status at the end of any chat that ships one.*
 *Written Chat #129. Updated Chat #144 (H + I.4/I.5 export + G all shipped; F deferred).*
+*Updated Chat #145: LLM layer VERIFIED LIVE (Anthropic key landed in .env, Ivory Coach + Generator + spine exercised end-to-end, /p/{token} rendered). Found PROSPECT_BASE_URL hardcoded-to-prod bug + triple-stack missing-collection-no-warning gap (both logged in Section 5). No new leaves shipped â€” this was runtime verification of #131 surfaces + the key activation.*
