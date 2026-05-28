@@ -21,6 +21,7 @@ import { adminDashboardRoutes } from './routes/admin/dashboard.js';
 import { adminReportingRoutes } from './routes/admin/reporting.js';
 import { adminLiveOpsRoutes } from './routes/admin/liveOps.js';
 import { adminBroadcastRoutes } from './routes/admin/broadcast.js';
+import { adminTenantRoutes } from './routes/admin/tenant.js';
 import { startBroadcastWorker } from './services/broadcastQueue.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { michaelRoutes } from './routes/michael.js';
@@ -91,6 +92,7 @@ app.use('/api/admin/audit', adminAuditRoutes);
 app.use('/api/admin/dashboard', adminDashboardRoutes);
 app.use('/api/admin/reporting', adminReportingRoutes);
 app.use('/api/admin/live-ops', adminLiveOpsRoutes);
+app.use('/api/admin/tenant', adminTenantRoutes);
 // ADMIN Section G — Kevin-only broadcast composer (Chat #144). BA-facing
 // only: audience resolution filters out STOP-list members server-side; the
 // composer never reaches prospects, never appears on `.com`.

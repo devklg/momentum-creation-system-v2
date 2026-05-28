@@ -230,10 +230,11 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [x] Export with PII redaction — modal every export, Kevin picks redact/raw each time (locked Chat #144; never persisted as a preference). Redacted fields: prospectFirstName, prospectLastName, phone, email. Kept verbatim: city, prospectId, tokenId, sponsorBaId, sponsorFullName. Pure functions in server/src/services/piiRedact.ts; CSV serializer in server/src/domain/reports/export.ts. 7 append-only routes on routes/admin/reporting.ts (one per I.1 report) returning text/csv with attachment disposition. Every export (raw OR redacted) appends one audit entry with redaction choice recorded (info severity). Admin UI: ExportPanel.tsx + RedactionModal.tsx mounted on /reports route.
 - DEP RESOLVED: leader detection (Chat #100); export PII redaction (Chat #144); I.1 report library (Chat #143, I.3 composites all seven)
 
-### 4.F Tenant Architecture  `[ ]` (Section F — build 8th; deferred Chat #144)
-- [ ] Master settings, template control, role/permission, content inheritance
-- [ ] Master content validated at save-time (compliance fail-closed)
-- DEP: compliance severity mapping (open). Chat #144 deferral rationale: F.5/F.6 compose with a yet-to-exist admin master-content editor (the form that lets an admin SAVE new master templates from /admin). Without that editor, the compliance-block question is premature — today all master content lives in code and ships through deploys, where the deploy is itself the compliance gate. Build F.5/F.6 when the editor is the actual ask; the severity question will resolve in context.
+### 4.F Tenant Architecture  `[x]` (Section F — build 8th; shipped Chat #145)
+- [x] Master settings, template control, role/permission, content inheritance — /admin/tenant UI + /api/admin/tenant/overview
+- [x] Master content validated at save-time (compliance fail-closed) — PUT /api/admin/tenant/templates/:templateKey blocks critical .com violations before persistence; blocked saves are audited
+- [x] Append-only tenant settings + master-content version records triple-stacked through TenantSettingsVersion / MasterContentVersion graph nodes and Chroma semantic records
+- DEP RESOLVED: compliance severity mapping — block=critical fail-closed, warn=warn returned/audited, log=info through normal master-content audit.
 
 ### 4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export)
 - [x] Composer with per-recipient {{firstName}} interpolation + preview — Composer.tsx; server-side interpolation only (client never sees rendered text for a third-party recipient)
@@ -274,7 +275,6 @@ Still open (only these block their surfaces):
 - Phone-change verification -> profile
 - Notification preference defaults -> profile
 - Position-stack visible window -> admin Queue E.3
-- Compliance severity mapping (block/warn/log) -> admin Tenant (F deferred Chat #144 until master-content editor lands; the severity question composes with that editor)
 - Sponsor-leaves card behavior -> cockpit My Sponsor edge case
 - Re-invite cooldown -> cockpit CRM re-invite
 - Leadership track-record placement inside .team -> training
