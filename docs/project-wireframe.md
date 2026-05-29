@@ -19,7 +19,7 @@ locked-spec wins on STATE. This wireframe is the BUILD DECOMPOSITION of that
 state â€” if it disagrees with locked-spec, locked-spec wins and this gets fixed.
 Depth is weighted toward UNBUILT surfaces (that's where a session needs detail).
 
-HEAD at write: `b3847b6` (Chat #144). Verified Chat #144.
+HEAD at write: `664b42c` (Chat #145). Verified Chat #145.
 
 ---
 
