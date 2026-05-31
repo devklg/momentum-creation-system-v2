@@ -37,6 +37,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { TodaysActions } from '@/components/cockpit/TodaysActions';
+import { TrackRecordCard } from '@/components/cockpit/TrackRecordCard';
 
 // ── Local wire shapes (mirror packages/shared/src/types.ts) ──────────────
 
@@ -437,6 +438,12 @@ export function CockpitPage() {
           follow-ups, expiring windows). Renders the locked-spec 1.9 bias
           prompt as its own empty state, so it's always present. */}
       <TodaysActions onJump={handleTodayClick} />
+
+      {/* Track Record (Chat #147) — the BA's own invitation activity record
+          (invitations generated + who they're bringing in) as their personal
+          success indicator. Pure display over the invites already loaded;
+          activity metric only, never income (dec seq 25, .team-only). */}
+      <TrackRecordCard invites={invites} />
 
       {/* Two-column: My Invites (main) + side rail (My Sponsor, CRM hint) */}
       <div className="mt-12 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-start">
