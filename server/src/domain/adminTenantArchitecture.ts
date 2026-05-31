@@ -50,8 +50,15 @@ export const TENANT_TEMPLATE_DEFINITIONS: readonly TenantTemplateDefinition[] = 
     label: '.com presentation hero',
     surface: 'com',
     description:
-      'Opening prospect-facing copy personalized to the prospect and inviting BA.',
-    tokens: ['{{prospectFirstName}}', '{{baFirstName}}', '{{baFullName}}'],
+      'Opening prospect-facing copy personalized to the prospect and inviting BA. ' +
+      '{{baVoiceCopy}} is the inviting BA’s own personal note (locked-spec F.2 / 3.9 ' +
+      '— "inviting BA voice copy"), rendered when present.',
+    tokens: [
+      '{{prospectFirstName}}',
+      '{{baFirstName}}',
+      '{{baFullName}}',
+      '{{baVoiceCopy}}',
+    ],
     defaultContent:
       '{{prospectFirstName}}, {{baFullName}} invited you to see the Team Magnificent momentum forming around GLP-THREE.',
     editable: true,
@@ -98,6 +105,153 @@ export const TENANT_TEMPLATE_DEFINITIONS: readonly TenantTemplateDefinition[] = 
     tokens: ['{{firstName}}'],
     defaultContent:
       '{{firstName}}, Team Magnificent update: check your cockpit for today’s next best action.',
+    editable: true,
+  },
+
+  // ─── F.5 remaining master-content categories (TASK-147 / wf_0133) ───────────
+  // These complete the master-content contract: the six locked .com dashboard
+  // sections (callback_cta already covers Section 6), the fuller ScriptMaker
+  // invitation-seed library, BA-facing training copy, the Michael interview
+  // scaffold, and the Ivory coach prompt. Code defaults below are the safe
+  // baseline; Kevin overrides them tenant-wide via the editor, and Wave-2
+  // consumers read them through readMasterContent() (services/masterContent.ts).
+  // .com defaults are written to pass validateMasterContent('com', …) — no
+  // income/comp/placement/THREE/AI-prospecting language.
+
+  {
+    templateKey: 'com.dashboard.arrival',
+    label: '.com dashboard — Section 1 Arrival',
+    surface: 'com',
+    description:
+      'Post-video_complete arrival copy. Confirms placement; names the inviting BA.',
+    tokens: ['{{prospectFirstName}}', '{{baFullName}}', '{{positionNumber}}'],
+    defaultContent:
+      'You saw it. You’re in. {{prospectFirstName}}, {{baFullName}} brought you in — your place is held at #{{positionNumber}}.',
+    editable: true,
+  },
+  {
+    templateKey: 'com.dashboard.opportunity',
+    label: '.com dashboard — Section 2 Opportunity',
+    surface: 'com',
+    description:
+      'Market-scale framing. No head count, no income, no comparison to other companies.',
+    tokens: ['{{prospectFirstName}}'],
+    defaultContent:
+      'This isn’t a small room. {{prospectFirstName}}, the category is brand new and the timing is wide open.',
+    editable: true,
+  },
+  {
+    templateKey: 'com.dashboard.mechanic',
+    label: '.com dashboard — Section 3 Mechanic',
+    surface: 'com',
+    description:
+      'The power-of-two cascade pointing toward the 100,000 goal. Goal is named; the current count never is.',
+    tokens: [],
+    defaultContent:
+      'Two people. Then they find two. That simple pattern is how a team grows toward 100,000.',
+    editable: true,
+  },
+  {
+    templateKey: 'com.dashboard.live_place',
+    label: '.com dashboard — Section 4 Live Place',
+    surface: 'com',
+    description:
+      'The live ticker framing — ahead/behind counters. Queue position is pool order, never a leg/placement promise.',
+    tokens: ['{{prospectFirstName}}'],
+    defaultContent:
+      'The team is forming around you. Right now. {{prospectFirstName}}, watch your place hold as others arrive.',
+    editable: true,
+  },
+  {
+    templateKey: 'com.dashboard.advantage',
+    label: '.com dashboard — Section 5 Advantage',
+    surface: 'com',
+    description:
+      'Shared-mission framing toward the 100,000 goal. Names the goal, not the count.',
+    tokens: [],
+    defaultContent:
+      'We work together. With the same goal. One team, one mission, building toward 100,000.',
+    editable: true,
+  },
+
+  {
+    templateKey: 'team.invitation.product_anchored',
+    label: '.team invitation seed — product-anchored',
+    surface: 'team',
+    description:
+      'ScriptMaker seed for a draft anchored to a specific product video the BA just watched.',
+    tokens: ['{{prospectFirstName}}', '{{productName}}', '{{videoTitle}}'],
+    defaultContent:
+      '{{prospectFirstName}}, I just watched “{{videoTitle}}” about {{productName}} and thought of you. Mind if I send the short video so you can decide for yourself?',
+    editable: true,
+  },
+  {
+    templateKey: 'team.invitation.reconnect',
+    label: '.team invitation seed — warm reconnect',
+    surface: 'team',
+    description:
+      'ScriptMaker seed for reconnecting with someone the BA already knows before sharing the video.',
+    tokens: ['{{prospectFirstName}}'],
+    defaultContent:
+      '{{prospectFirstName}}, it’s been too long — I’ve been thinking about you. Something came across my desk I’d genuinely like your honest take on. Can I send it over?',
+    editable: true,
+  },
+  {
+    templateKey: 'team.invitation.event_invite',
+    label: '.team invitation seed — webinar/event',
+    surface: 'team',
+    description:
+      'ScriptMaker seed inviting a prospect to a scheduled live overview. No pressure, no claims.',
+    tokens: ['{{prospectFirstName}}', '{{eventDay}}', '{{eventTime}}'],
+    defaultContent:
+      '{{prospectFirstName}}, there’s a short live overview {{eventDay}} at {{eventTime}}. I’d love for you to sit in and form your own opinion — want me to save you a seat?',
+    editable: true,
+  },
+
+  {
+    templateKey: 'team.training.fast_start_day1',
+    label: '.team training — Fast Start Day 1',
+    surface: 'team',
+    description:
+      'BA-facing Day 1 Fast Start orientation copy. May reference THREE operationally.',
+    tokens: ['{{baFirstName}}', '{{sponsorFirstName}}'],
+    defaultContent:
+      '{{baFirstName}}, Day 1 is about belief and motion: know the product, send a few honest invitations, and lean on {{sponsorFirstName}} for the rest. Two legs, find two people — the team grows beneath you.',
+    editable: true,
+  },
+  {
+    templateKey: 'team.training.orientation_overview',
+    label: '.team training — orientation overview',
+    surface: 'team',
+    description:
+      'BA-facing overview of the 10-step orientation curriculum (locked-spec Part 4.5).',
+    tokens: ['{{baFirstName}}'],
+    defaultContent:
+      '{{baFirstName}}, your first seven days walk a simple blueprint: product belief, clean invitations, your warm market, and working your two legs. Each step builds on the last — take them in order.',
+    editable: true,
+  },
+
+  {
+    templateKey: 'team.michael.interview_prompts',
+    label: '.team Michael — interview prompt scaffold',
+    surface: 'team',
+    description:
+      'BA-facing only. Scaffold for Michael’s onboarding interview. The locked 5-prompt set is still an open decision — this default carries Michael’s Layer-1 teaching frame (locked-spec 3.12), to be replaced when Kevin locks the prompts.',
+    tokens: ['{{baFirstName}}'],
+    defaultContent:
+      'Welcome {{baFirstName}} and confirm a good time. Capture: their goals, their warm market, how comfortable they feel sharing, and any concerns. Teach Layer 1 only — two legs, find two people, the team grows beneath you, your sponsor helps with the rest. No comp plan, no objection-handling, no pitch.',
+    editable: true,
+  },
+
+  {
+    templateKey: 'team.ivory.coach_prompt',
+    label: '.team Ivory — “who do you know” coach prompt',
+    surface: 'team',
+    description:
+      'BA-facing WDYK coaching prompt. Helps the BA surface people they already know to share with — never cold outreach, never mass send.',
+    tokens: ['{{baFirstName}}'],
+    defaultContent:
+      '{{baFirstName}}, let’s find people you already know who’d genuinely want to see this. Think of someone you’d happily grab coffee with — who comes to mind first?',
     editable: true,
   },
 ] as const;

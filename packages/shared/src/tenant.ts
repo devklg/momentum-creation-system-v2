@@ -40,8 +40,27 @@ export interface TenantSettingsVersion extends TenantSettings {
 export type TenantTemplateKey =
   | 'com.presentation.hero'
   | 'com.dashboard.callback_cta'
+  // F.5 remaining .com dashboard sections (six locked sections; callback_cta
+  // already covers Section 6's CTA, so these add Sections 1–5). TASK-147.
+  | 'com.dashboard.arrival'
+  | 'com.dashboard.opportunity'
+  | 'com.dashboard.mechanic'
+  | 'com.dashboard.live_place'
+  | 'com.dashboard.advantage'
   | 'team.welcome.letter'
   | 'team.invitation.default_script'
+  // F.5 fuller ScriptMaker invitation-seed library (was: only default_script).
+  | 'team.invitation.product_anchored'
+  | 'team.invitation.reconnect'
+  | 'team.invitation.event_invite'
+  // F.5 BA-facing training module copy.
+  | 'team.training.fast_start_day1'
+  | 'team.training.orientation_overview'
+  // F.5 Michael interview-prompt scaffold (BA-facing only; the locked 5-prompt
+  // set is still an open decision — this slot carries a safe scaffold default).
+  | 'team.michael.interview_prompts'
+  // F.5 Ivory "who do you know" coach prompt library.
+  | 'team.ivory.coach_prompt'
   | 'admin.broadcast.sms';
 
 export interface TenantTemplateDefinition {

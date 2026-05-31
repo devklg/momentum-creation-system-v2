@@ -35,9 +35,18 @@ import { CompassRose } from '@/components/CompassRose';
 export interface PersonalOpenProps {
   prospectFirstName: string;
   baFullName: string;
+  /**
+   * The inviting BA's own personal note ({{baVoiceCopy}} — locked-spec F.2 /
+   * 3.9 "inviting BA voice copy"). Optional: rendered as a personal line in
+   * the BA's voice when present, omitted otherwise. The master-content read
+   * path (services/masterContent.ts) supplies it once Wave-2 inherit-com
+   * wires this surface to read from master_content_versions; until then it is
+   * simply absent and the generic sub-line carries the hero.
+   */
+  baVoiceCopy?: string;
 }
 
-export function PersonalOpen({ prospectFirstName, baFullName }: PersonalOpenProps) {
+export function PersonalOpen({ prospectFirstName, baFullName, baVoiceCopy }: PersonalOpenProps) {
   return (
     <section
       className="
@@ -98,6 +107,22 @@ export function PersonalOpen({ prospectFirstName, baFullName }: PersonalOpenProp
       >
         And has information that is timely and powerful to share with you.
       </p>
+
+      {/* Inviting BA's personal note ({{baVoiceCopy}}). Rendered only when the
+          master-content read path supplies it; absent by default. */}
+      {baVoiceCopy && (
+        <p
+          className="
+            motion-rise motion-rise-delay-4
+            mt-6 max-w-[44ch]
+            font-body text-cream
+            leading-[1.55]
+          "
+          style={{ fontSize: 'clamp(16px, 1.6vw, 18px)' }}
+        >
+          “{baVoiceCopy}”
+        </p>
+      )}
 
       {/* Italic instruction line */}
       <p
