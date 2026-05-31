@@ -50,22 +50,22 @@ const TRANSCRIPTS_COLLECTION = 'michael_transcripts';
 const CHROMA_INTERVIEWS = 'mcs_michael_interviews';
 
 /** Lazy, idempotent bootstrap of the interviews Chroma collection (TASK-147
- *  hard rule: ensure the mcs_ collection exists before add()). */
+ *  hard rule: ensure the mcs_ collection exists before add()). Existence-first:
+ *  the gateway's HTTP path reports a duplicate create as a generic 500, so we
+ *  check via list_collections rather than matching an error string. */
 let interviewsCollectionBootstrap: Promise<void> | null = null;
 async function ensureInterviewsCollection(): Promise<void> {
   if (interviewsCollectionBootstrap) return interviewsCollectionBootstrap;
   interviewsCollectionBootstrap = (async () => {
-    try {
-      await gatewayCall('chromadb', 'create_collection', {
-        name: CHROMA_INTERVIEWS,
-        metadata: { branch: 'feat/mcs-michael', wireframe_leaf: '3.2', purpose: 'Michael interviews' },
-      });
-    } catch (err) {
-      const s = String(err instanceof Error ? err.message : err).toLowerCase();
-      if (!(s.includes('exists') || s.includes('duplicate') || s.includes('uniqueconstraint'))) {
-        throw err;
-      }
-    }
+    const existing = await gatewayCall<{ collections?: Array<{ name: string }> }>(
+      'chromadb', 'list_collections', {},
+    );
+    const present = (existing?.collections ?? []).some((c) => c.name === CHROMA_INTERVIEWS);
+    if (present) return;
+    await gatewayCall('chromadb', 'create_collection', {
+      name: CHROMA_INTERVIEWS,
+      metadata: { branch: 'feat/mcs-michael', wireframe_leaf: '3.2', purpose: 'Michael interviews' },
+    });
   })();
   return interviewsCollectionBootstrap;
 }

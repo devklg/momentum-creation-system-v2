@@ -73,26 +73,24 @@ export function subscribeFounderHandoffs(
 
 let collectionBootstrap: Promise<void> | null = null;
 
-function isAlreadyExistsError(err: unknown): boolean {
-  const s = String(err instanceof Error ? err.message : err).toLowerCase();
-  return s.includes('exists') || s.includes('duplicate') || s.includes('uniqueconstraint');
-}
-
 async function ensureHandoffCollection(): Promise<void> {
   if (collectionBootstrap) return collectionBootstrap;
   collectionBootstrap = (async () => {
-    try {
-      await gatewayCall('chromadb', 'create_collection', {
-        name: CHROMA_HANDOFFS,
-        metadata: {
-          branch: 'feat/mcs-michael',
-          wireframe_leaf: '3.2',
-          purpose: 'Michael founder-handoff queue (profile + classification)',
-        },
-      });
-    } catch (err) {
-      if (!isAlreadyExistsError(err)) throw err;
-    }
+    // Existence-first: the gateway HTTP path reports a duplicate create as a
+    // generic 500, so check via list_collections rather than an error string.
+    const existing = await gatewayCall<{ collections?: Array<{ name: string }> }>(
+      'chromadb', 'list_collections', {},
+    );
+    const present = (existing?.collections ?? []).some((c) => c.name === CHROMA_HANDOFFS);
+    if (present) return;
+    await gatewayCall('chromadb', 'create_collection', {
+      name: CHROMA_HANDOFFS,
+      metadata: {
+        branch: 'feat/mcs-michael',
+        wireframe_leaf: '3.2',
+        purpose: 'Michael founder-handoff queue (profile + classification)',
+      },
+    });
   })();
   return collectionBootstrap;
 }
