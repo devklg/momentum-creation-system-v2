@@ -40,7 +40,16 @@ export async function gatewayCall<T = unknown>(
   });
 
   if (!res.ok) {
-    throw new GatewayError(tool, action, `HTTP ${res.status} ${res.statusText}`);
+    // Surface the gateway's own error message (e.g. "The resource already
+    // exists"), not just the HTTP status — callers' error guards depend on it.
+    let detail = `HTTP ${res.status} ${res.statusText}`;
+    try {
+      const errBody = (await res.json()) as { error?: string; message?: string };
+      detail = errBody?.error ?? errBody?.message ?? detail;
+    } catch {
+      /* non-JSON error body — keep the HTTP status */
+    }
+    throw new GatewayError(tool, action, detail);
   }
 
   const body = (await res.json()) as GatewayResponse<T>;
