@@ -25,11 +25,14 @@
  */
 
 import type {
-  MichaelCockpitCardData,
+  MichaelCategoryScores,
+  MichaelClassification,
+  MichaelCockpitCardClassified,
   MichaelInterviewArtifact,
   MichaelInterviewPhase,
   MichaelInterviewView,
   MichaelScoringIngestPayload,
+  MichaelSuccessProfile,
   MichaelTranscriptChunk,
 } from '@momentum/shared';
 import { gatewayCall } from '../services/gateway.js';
@@ -39,10 +42,33 @@ import {
   getMichaelSchedule,
   type MichaelSchedule,
 } from './michael-schedule.js';
+import { classifyInterview, buildSuccessProfile } from './michael-classification.js';
+import { fireFounderHandoff } from './michael-founder-handoff.js';
 
 const INTERVIEWS_COLLECTION = 'michael_interviews';
 const TRANSCRIPTS_COLLECTION = 'michael_transcripts';
 const CHROMA_INTERVIEWS = 'mcs_michael_interviews';
+
+/** Lazy, idempotent bootstrap of the interviews Chroma collection (TASK-147
+ *  hard rule: ensure the mcs_ collection exists before add()). Existence-first:
+ *  the gateway's HTTP path reports a duplicate create as a generic 500, so we
+ *  check via list_collections rather than matching an error string. */
+let interviewsCollectionBootstrap: Promise<void> | null = null;
+async function ensureInterviewsCollection(): Promise<void> {
+  if (interviewsCollectionBootstrap) return interviewsCollectionBootstrap;
+  interviewsCollectionBootstrap = (async () => {
+    const existing = await gatewayCall<{ collections?: Array<{ name: string }> }>(
+      'chromadb', 'list_collections', {},
+    );
+    const present = (existing?.collections ?? []).some((c) => c.name === CHROMA_INTERVIEWS);
+    if (present) return;
+    await gatewayCall('chromadb', 'create_collection', {
+      name: CHROMA_INTERVIEWS,
+      metadata: { branch: 'feat/mcs-michael', wireframe_leaf: '3.2', purpose: 'Michael interviews' },
+    });
+  })();
+  return interviewsCollectionBootstrap;
+}
 
 /** A transcript chunk as persisted. Mirrors MichaelTranscriptChunk plus the
  *  call/BA binding. _id = `${callSid}:${sequence}` so re-delivery is idempotent. */
@@ -54,6 +80,10 @@ interface PersistedTranscriptChunk extends MichaelTranscriptChunk {
 
 interface PersistedInterview extends MichaelInterviewArtifact {
   _id: string;
+  /** #147 — computed server-side from the worker's category scores. null when
+   *  the interview was ingested without a rubric scoring (e.g. STT-degraded). */
+  classification?: MichaelClassification | null;
+  successProfile?: MichaelSuccessProfile | null;
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -274,6 +304,7 @@ export class ScoringIngestError extends Error {
  *  is NEVER taken from the payload (locked-spec 3.5). */
 export async function ingestInterviewArtifact(
   payload: MichaelScoringIngestPayload,
+  categoryScores?: MichaelCategoryScores,
 ): Promise<MichaelInterviewArtifact> {
   const baInfo = await getBaSponsor(payload.baId);
   if (!baInfo) {
@@ -282,6 +313,19 @@ export async function ingestInterviewArtifact(
       `No BA record for baId=${payload.baId}; cannot ingest scoring.`,
     );
   }
+
+  // #147 — compute the classification + success profile server-side from the
+  // worker's raw per-category points. Deterministic + auditable; enforces the
+  // intel-tags-only rule (a worker reports category reads, never a tier).
+  const classification = categoryScores ? classifyInterview(categoryScores) : null;
+  const successProfile =
+    classification && payload.completedAt
+      ? buildSuccessProfile({
+          baId: payload.baId,
+          classification,
+          generatedAt: payload.completedAt,
+        })
+      : null;
 
   // Truncate transcript chunks defensively — every other write to the gateway
   // applies the 5000-char per-content cap.
@@ -305,6 +349,8 @@ export async function ingestInterviewArtifact(
     })),
     scoring: payload.scoring,
     audioUrl: payload.audioUrl,
+    classification,
+    successProfile,
   };
 
   // Upsert: branch on existence (mongodb.update does not honor upsert per
@@ -319,6 +365,7 @@ export async function ingestInterviewArtifact(
     });
     await mirrorArtifactToGraphAndChroma(artifact);
   } else {
+    await ensureInterviewsCollection();
     await tripleStackWrite({
       id,
       mongoCollection: INTERVIEWS_COLLECTION,
@@ -334,6 +381,10 @@ export async function ingestInterviewArtifact(
           callSid: artifact.callSid ?? '',
           completedAt: artifact.completedAt ?? '',
           overallTone: artifact.scoring.overallTone ?? 'unknown',
+          // #147 — classification rides into Chroma metadata so transcript +
+          // score feed GraphRAG with the tier attached.
+          tier: classification?.tier ?? 'unscored',
+          weightedTotal: classification?.weightedTotal ?? -1,
           kind: 'michael_interview',
         },
       },
@@ -346,6 +397,30 @@ export async function ingestInterviewArtifact(
     baId: artifact.baId,
     phase: 'complete',
   });
+
+  // #147 — fire the founder handoff once we have a classification + profile.
+  // Idempotent on baId (handoffId = MFH-${baId}); a re-score updates rather
+  // than re-fires. Best-effort: a handoff failure must not fail scoring ingest
+  // (the artifact is already persisted + authoritative).
+  if (classification && successProfile && payload.completedAt) {
+    try {
+      await fireFounderHandoff({
+        baId: payload.baId,
+        baFirstName: baInfo.firstName,
+        sponsorBaId: baInfo.sponsorBaId,
+        classification,
+        successProfile,
+        completedAt: payload.completedAt,
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[michael] founder handoff failed for baId=${payload.baId}: ${
+          err instanceof Error ? err.message : 'unknown'
+        }`,
+      );
+    }
+  }
 
   return stripPersistedArtifactFields(artifact);
 }
@@ -360,6 +435,8 @@ function artifactToUpdate(a: PersistedInterview): Partial<PersistedInterview> {
     answers: a.answers,
     scoring: a.scoring,
     audioUrl: a.audioUrl,
+    classification: a.classification ?? null,
+    successProfile: a.successProfile ?? null,
   };
 }
 
@@ -370,6 +447,8 @@ function artifactCypher(a: PersistedInterview): { cypher: string; params: Record
       'MERGE (i:MichaelInterview {interviewId: $id}) ' +
       'SET i.completedAt = $completedAt, i.overallTone = $overallTone, ' +
       '    i.callSid = $callSid, i.audioUrl = $audioUrl ' +
+      // #147 — tier + total on the interview node for GraphRAG queries.
+      'SET i.tier = $tier, i.weightedTotal = $weightedTotal ' +
       'MERGE (b)-[:HAD_MICHAEL_INTERVIEW]->(i) ' +
       'WITH i, $sponsorBaId AS sponsorId ' +
       'WHERE sponsorId IS NOT NULL ' +
@@ -383,6 +462,8 @@ function artifactCypher(a: PersistedInterview): { cypher: string; params: Record
       overallTone: a.scoring.overallTone ?? 'unknown',
       callSid: a.callSid,
       audioUrl: a.audioUrl,
+      tier: a.classification?.tier ?? 'unscored',
+      weightedTotal: a.classification?.weightedTotal ?? -1,
     },
   };
 }
@@ -431,7 +512,7 @@ export class SponsorAccessError extends Error {
 export async function getCockpitCardForSponsor(args: {
   requestingBaId: string;
   downlineBaId: string;
-}): Promise<MichaelCockpitCardData> {
+}): Promise<MichaelCockpitCardClassified> {
   const downlineInfo = await getBaSponsor(args.downlineBaId);
   if (!downlineInfo) {
     throw new SponsorAccessError(
@@ -471,6 +552,10 @@ export async function getCockpitCardForSponsor(args: {
     scoring: artifact.scoring,
     audioUrl: artifact.audioUrl,
     signedBy: artifact.scoring.signedBy,
+    // #147 — the classification + success profile ride the same sponsor-only
+    // card. null when the interview was ingested without rubric scoring.
+    classification: artifact.classification ?? null,
+    successProfile: artifact.successProfile ?? null,
   };
 }
 

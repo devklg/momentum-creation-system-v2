@@ -3207,3 +3207,187 @@ export interface AdminProspectRestoreResponse {
   restoredAt: IsoTimestamp;
   row: AdminProspectDirectoryRow;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * #147 — Michael interview classification + founder handoff (wireframe §3.2,
+ * decision ledger dec_michael_interview / seq 20).
+ *
+ * Michael runs the full 29-question, 9-section New Associate Success Interview
+ * as a natural guided VOICE conversation. The transcript is scored against a
+ * 6-category weighted rubric (total = 100) and resolved to ONE of four
+ * associate-type CLASSIFICATIONS.
+ *
+ * HARD RULE (seq 20): classifications are INTEL TAGS ONLY — never automated
+ * routing. There is ONE Fast Start curriculum (wireframe §3.5); the tier never
+ * branches a BA into a separate track. Michael's output is the generated
+ * success profile + classification, surfaced to the sponsor (existing cockpit
+ * card) AND to founders Paul + Kevin, plus a founder-handoff trigger.
+ *
+ * COMPLIANCE: the rubric scores the associate's OWN stated goals/effort; it
+ * carries NO earnings, commission, cycle, or placement language. Tier labels
+ * are effort/intent reads, not income predictions.
+ *
+ * Append-only block — never edit the #134 Michael types above; these are
+ * additive and consumed alongside them.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+/** The six weighted rubric categories. */
+export type MichaelRubricCategory =
+  | 'vision'
+  | 'commitment'
+  | 'coachability'
+  | 'available_time'
+  | 'network'
+  | 'experience';
+
+/** Max points each category contributes to the 100-point total (the weights). */
+export const MICHAEL_RUBRIC_MAX: Readonly<Record<MichaelRubricCategory, number>> = {
+  vision: 20,
+  commitment: 20,
+  coachability: 20,
+  available_time: 15,
+  network: 15,
+  experience: 10,
+} as const;
+
+/** Raw per-category points the scoring worker assigns from the transcript.
+ *  Each value is 0..MICHAEL_RUBRIC_MAX[category]; the server clamps and sums. */
+export interface MichaelCategoryScores {
+  vision: number;
+  commitment: number;
+  coachability: number;
+  availableTime: number;
+  network: number;
+  experience: number;
+}
+
+/** The four associate-type classifications. Ordered strongest → lightest. */
+export type MichaelClassificationTier =
+  | 'builder'
+  | 'emerging_leader'
+  | 'part_time_producer'
+  | 'casual_participant';
+
+/** Computed classification. weightedTotal is the 0..100 sum of clamped
+ *  category points; tier is resolved by band. Computed SERVER-SIDE so the
+ *  intel-tags-only rule can't be bypassed by a worker payload. */
+export interface MichaelClassification {
+  categoryScores: MichaelCategoryScores;
+  /** 0..100, sum of clamped per-category points. */
+  weightedTotal: number;
+  tier: MichaelClassificationTier;
+  /** Human label, e.g. "Builder". */
+  tierLabel: string;
+  /** Score band for the tier, e.g. "85–100". */
+  band: string;
+  /** Provenance literal surfaced on cards. */
+  signedBy: string;
+}
+
+/** Band edges for each tier, inclusive. weightedTotal ∈ [min, max]. */
+export const MICHAEL_CLASSIFICATION_BANDS: ReadonlyArray<{
+  tier: MichaelClassificationTier;
+  label: string;
+  min: number;
+  max: number;
+}> = [
+  { tier: 'builder', label: 'Builder', min: 85, max: 100 },
+  { tier: 'emerging_leader', label: 'Emerging Leader', min: 70, max: 84 },
+  { tier: 'part_time_producer', label: 'Part-Time Producer', min: 50, max: 69 },
+  { tier: 'casual_participant', label: 'Casual Participant', min: 0, max: 49 },
+] as const;
+
+/** The generated success profile — the sponsor/founder-readable synthesis of
+ *  the interview. Effort/intent framed; never income or placement. */
+export interface MichaelSuccessProfile {
+  baId: string;
+  classification: MichaelClassification;
+  /** One-line read the sponsor leads with, e.g. "Vision-led, time-rich, ready to be coached." */
+  headline: string;
+  /** What this BA brings — the strongest 1–3 categories rendered as plain reads. */
+  strengths: string[];
+  /** Where the sponsor should focus support — the lightest 1–3 categories. */
+  sponsorFocus: string[];
+  generatedAt: IsoTimestamp;
+  signedBy: string;
+}
+
+/** Founder-handoff record. Fired once when an interview artifact is ingested:
+ *  notifies founders Paul + Kevin that the BA is ready for human-led Fast Start
+ *  + orientation. Persisted (triple-stacked) and surfaced on the founder read. */
+export interface MichaelFounderHandoff {
+  handoffId: string;
+  baId: string;
+  baFirstName: string;
+  sponsorBaId: string | null;
+  /** Lightweight classification summary (full profile on the linked artifact). */
+  tier: MichaelClassificationTier;
+  tierLabel: string;
+  weightedTotal: number;
+  successProfile: MichaelSuccessProfile;
+  completedAt: IsoTimestamp;
+  firedAt: IsoTimestamp;
+  /** Founder BA-IDs the handoff was addressed to (from ADMIN_BA_IDS). */
+  founderBaIds: string[];
+  /** Whether the new BA's Fast Start gate is open (interview complete). Always
+   *  true at handoff time — recorded for the founder's at-a-glance readiness. */
+  fastStartReady: boolean;
+  /** Per-channel delivery status. 'skipped' when the provider key is dormant. */
+  dispatch: {
+    sms: 'sent' | 'skipped' | 'failed';
+    email: 'sent' | 'skipped' | 'failed';
+  };
+}
+
+/** Worker → server optional addendum on POST /api/michael/interview/scoring.
+ *  When present, the server computes the classification + success profile from
+ *  these raw category points and fires the founder handoff. Omitted = the
+ *  interview is recorded without a classification (e.g. an STT-degraded call). */
+export interface MichaelScoringCategoryInput {
+  categoryScores: MichaelCategoryScores;
+}
+
+/** Enriched sponsor cockpit card — the #134 card plus the #147 classification
+ *  + success profile. classification is null when the interview was ingested
+ *  without category scores. */
+export interface MichaelCockpitCardClassified extends MichaelCockpitCardData {
+  classification: MichaelClassification | null;
+  successProfile: MichaelSuccessProfile | null;
+}
+
+/** GET /api/michael/interview/founder-handoffs response (founder-gated). */
+export interface MichaelFounderHandoffListResponse {
+  ok: true;
+  handoffs: MichaelFounderHandoff[];
+}
+
+/** One question in Michael's 29-Q backbone, surfaced read-only via
+ *  GET /api/michael/interview/script. */
+export interface MichaelInterviewScriptQuestion {
+  id: string;
+  /** 1-based question number across the whole interview (1..29). */
+  number: number;
+  /** The section this question belongs to. */
+  sectionId: string;
+  /** The prompt Michael leads with (backbone; the LLM expands naturally). */
+  prompt: string;
+  /** Which rubric category this question primarily informs (null = rapport/none). */
+  category: MichaelRubricCategory | null;
+}
+
+/** One of the 9 sections of the New Associate Success Interview. */
+export interface MichaelInterviewScriptSection {
+  id: string;
+  title: string;
+  /** What Michael is listening for in this section. */
+  intent: string;
+  questions: MichaelInterviewScriptQuestion[];
+}
+
+/** GET /api/michael/interview/script response. */
+export interface MichaelInterviewScriptResponse {
+  ok: true;
+  sections: MichaelInterviewScriptSection[];
+  rubric: Array<{ category: MichaelRubricCategory; max: number; label: string }>;
+  bands: typeof MICHAEL_CLASSIFICATION_BANDS;
+}

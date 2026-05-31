@@ -73,4 +73,44 @@ export interface MichaelCockpitCardData {
   scoring: MichaelScoringSummary;
   audioUrl: string | null;
   signedBy: string;
+  // #147 — classification + success profile (intel tags only). Optional so the
+  // mirror tolerates a pre-#147 artifact ingested without rubric scoring.
+  classification?: MichaelClassification | null;
+  successProfile?: MichaelSuccessProfile | null;
+}
+
+/* ─── #147 Michael classification + success profile (mirror of shared) ─── */
+
+export type MichaelClassificationTier =
+  | 'builder'
+  | 'emerging_leader'
+  | 'part_time_producer'
+  | 'casual_participant';
+
+export interface MichaelCategoryScores {
+  vision: number;
+  commitment: number;
+  coachability: number;
+  availableTime: number;
+  network: number;
+  experience: number;
+}
+
+export interface MichaelClassification {
+  categoryScores: MichaelCategoryScores;
+  weightedTotal: number;
+  tier: MichaelClassificationTier;
+  tierLabel: string;
+  band: string;
+  signedBy: string;
+}
+
+export interface MichaelSuccessProfile {
+  baId: string;
+  classification: MichaelClassification;
+  headline: string;
+  strengths: string[];
+  sponsorFocus: string[];
+  generatedAt: string;
+  signedBy: string;
 }

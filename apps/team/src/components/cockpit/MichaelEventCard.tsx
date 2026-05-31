@@ -16,8 +16,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type {
+  MichaelClassification,
   MichaelCockpitCardData,
   MichaelInterviewAnswer,
+  MichaelSuccessProfile,
 } from './../michael/_wire';
 
 interface MichaelEventCardProps {
@@ -119,6 +121,13 @@ export function MichaelEventCard({ downlineBaId }: MichaelEventCardProps) {
           Tone · {card.scoring.overallTone}
         </p>
       )}
+
+      {card.classification && (
+        <ClassificationBlock
+          classification={card.classification}
+          profile={card.successProfile ?? null}
+        />
+      )}
       {card.scoring.highlightTags.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-5">
           {card.scoring.highlightTags.map((t) => (
@@ -157,6 +166,65 @@ export function MichaelEventCard({ downlineBaId }: MichaelEventCardProps) {
         Signed: {card.signedBy}
       </p>
     </CardShell>
+  );
+}
+
+/** #147 — classification badge + success profile. Intel tags only — these are
+ *  effort/intent reads of the BA's own goals, never income or placement. The
+ *  sponsor leads with this context; it does NOT route the BA anywhere. */
+function ClassificationBlock({
+  classification,
+  profile,
+}: {
+  classification: MichaelClassification;
+  profile: MichaelSuccessProfile | null;
+}) {
+  return (
+    <div className="mb-5 bg-gold/[0.05] border border-gold/20 rounded-md p-4">
+      <div className="flex items-baseline justify-between gap-3 mb-2">
+        <span className="font-display text-[18px] text-gold leading-none">
+          {classification.tierLabel}
+        </span>
+        <span className="font-mono tracking-[0.08em] text-[11px] text-cream-mute">
+          {classification.weightedTotal}/100 · band {classification.band}
+        </span>
+      </div>
+      {profile?.headline && (
+        <p className="text-cream text-[13px] leading-[1.5] mb-3">{profile.headline}</p>
+      )}
+      {profile && profile.strengths.length > 0 && (
+        <ProfileList label="Strengths" items={profile.strengths} tone="teal" />
+      )}
+      {profile && profile.sponsorFocus.length > 0 && (
+        <ProfileList label="Where to focus" items={profile.sponsorFocus} tone="gold" />
+      )}
+    </div>
+  );
+}
+
+function ProfileList({
+  label,
+  items,
+  tone,
+}: {
+  label: string;
+  items: string[];
+  tone: 'teal' | 'gold';
+}) {
+  const labelColor = tone === 'teal' ? 'text-teal' : 'text-gold';
+  return (
+    <div className="mt-2">
+      <p className={`font-mono tracking-[0.14em] text-[10px] uppercase mb-1 ${labelColor}`}>
+        {label}
+      </p>
+      <ul className="list-disc list-inside space-y-0.5">
+        {items.map((it) => (
+          <li key={it} className="text-cream-mute text-[12px] leading-[1.45]">
+            {it}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
