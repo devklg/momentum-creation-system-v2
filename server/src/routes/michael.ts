@@ -10,8 +10,14 @@
 
 import express, { type Request, type Response, type Router } from 'express';
 import { z } from 'zod';
-import { requireAuth } from '../middleware/requireAuth.js';
+import { requireAuth, requireAdmin } from '../middleware/requireAuth.js';
 import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import {
+  MICHAEL_INTERVIEW_SECTIONS,
+  MICHAEL_RUBRIC_ROWS,
+} from '../domain/michael-interview-script.js';
+import { MICHAEL_CLASSIFICATION_BANDS } from '@momentum/shared';
+import { listFounderHandoffs } from '../domain/michael-founder-handoff.js';
 import {
   bookMichaelSlot,
   generateSlots,
@@ -312,6 +318,19 @@ const ScoringBody = z.object({
     signedBy: z.string(),
   }),
   audioUrl: z.string().nullable(),
+  // #147 — optional rubric scoring. When present, the server computes the
+  // 6-category weighted total → classification and fires the founder handoff.
+  // Raw per-category points; the server clamps each to its rubric max.
+  categoryScores: z
+    .object({
+      vision: z.number(),
+      commitment: z.number(),
+      coachability: z.number(),
+      availableTime: z.number(),
+      network: z.number(),
+      experience: z.number(),
+    })
+    .optional(),
 });
 
 michaelRoutes.post(
@@ -326,10 +345,11 @@ michaelRoutes.post(
       return;
     }
     try {
-      const artifact = await ingestInterviewArtifact(parsed.data);
+      const { categoryScores, ...payload } = parsed.data;
+      const artifact = await ingestInterviewArtifact(payload, categoryScores);
       // eslint-disable-next-line no-console
       console.log(
-        `[audit] michael_scoring_ingested baId=${artifact.baId} sponsor=${artifact.sponsorBaId ?? 'none'} answers=${artifact.answers.length}`,
+        `[audit] michael_scoring_ingested baId=${artifact.baId} sponsor=${artifact.sponsorBaId ?? 'none'} answers=${artifact.answers.length} scored=${categoryScores ? 'yes' : 'no'}`,
       );
       res.json({ ok: true, artifact });
     } catch (err) {
@@ -402,6 +422,45 @@ michaelRoutes.get(
       }
       const msg = err instanceof Error ? err.message : 'unknown';
       res.status(500).json({ ok: false, error: `Cockpit read failed: ${msg}` });
+    }
+  },
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Chat #147 — interview content (29-Q backbone) + founder handoff read
+// (wireframe §3.2, dec_michael_interview / seq 20).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** GET /api/michael/interview/script — the 29-Q, 9-section backbone + rubric.
+ *  Read-only reference for the BA-facing surface (what Michael covers) and for
+ *  debugging. Auth-only; the script is BA-facing content, never prospect-facing. */
+michaelRoutes.get(
+  '/interview/script',
+  requireAuth,
+  (_req: Request, res: Response) => {
+    res.json({
+      ok: true,
+      sections: MICHAEL_INTERVIEW_SECTIONS,
+      rubric: MICHAEL_RUBRIC_ROWS,
+      bands: MICHAEL_CLASSIFICATION_BANDS,
+    });
+  },
+);
+
+/** GET /api/michael/interview/founder-handoffs — founders-only (Paul + Kevin).
+ *  The human-led Fast Start + orientation queue: every BA who finished their
+ *  interview, most recent first, with the classification + success profile.
+ *  Gated by requireAdmin (ADMIN_BA_IDS = the founders). */
+michaelRoutes.get(
+  '/interview/founder-handoffs',
+  requireAdmin,
+  async (_req: Request, res: Response) => {
+    try {
+      const handoffs = await listFounderHandoffs();
+      res.json({ ok: true, handoffs });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'unknown';
+      res.status(500).json({ ok: false, error: `Handoff read failed: ${msg}` });
     }
   },
 );
