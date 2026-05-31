@@ -3207,3 +3207,154 @@ export interface AdminProspectRestoreResponse {
   restoredAt: IsoTimestamp;
   row: AdminProspectDirectoryRow;
 }
+
+/* ────────────────────────────────────────────────────────────────────────
+ * Group orientation scheduler (Chat #147 — wireframe §3.6,
+ * dec_orientation_scheduling seq 21)
+ * ────────────────────────────────────────────────────────────────────────
+ *
+ * New-member orientation runs as scheduled GROUP sessions of up to 10 BAs
+ * each, hosted by founders (Kevin + Paul today; the host field is ASSIGNABLE
+ * so trained leaders can host later — never hardcoded). This REUSES the
+ * webinar Event + reservation architecture (§2.6): a session is an event with
+ * a hard capacity cap; a BA reserves a seat.
+ *
+ * Flow: Michael completion → new BA sees available sessions in the .team
+ * cockpit scheduling card → books a seat (cap 10) → founders see the
+ * per-session roster in /admin. Founders add more sessions as the team grows
+ * (seed more events — no rebuild). Google Calendar sync is DEFERRED.
+ *
+ * Distinction from the webinar:
+ *   - Webinar reservations are PROSPECT-facing (via /api/p/:token), capacity
+ *     is unbounded, and the reserving party is a prospect.
+ *   - Orientation reservations are BA-facing (the new BA reserves their own
+ *     seat from the authed .team session), capacity is capped at 10, and the
+ *     reserving party is the BA. baId is read from the session, never the body.
+ */
+
+/** Default seat cap per orientation session (Chat #147). */
+export const ORIENTATION_SESSION_CAPACITY = 10;
+
+/**
+ * A scheduled group orientation session a BA can reserve a seat in. Models
+ * WebinarEvent but adds a `capacity` cap and keeps `hosts` assignable (the
+ * seeder/admin sets them; founders today, leaders later).
+ */
+export interface OrientationSession {
+  sessionId: string;
+  scheduledFor: IsoTimestamp;
+  /** Assignable host display names. Defaults to founders; never hardcoded downstream. */
+  hosts: string[];
+  /** Hard seat cap. Defaults to ORIENTATION_SESSION_CAPACITY (10). */
+  capacity: number;
+  durationMinutes: number;
+  /** Optional join link (Zoom etc.); null until set by the host. */
+  joinUrl: string | null;
+  status: 'upcoming' | 'past' | 'cancelled';
+  createdAt: IsoTimestamp;
+}
+
+/**
+ * A BA's reservation of a seat in an orientation session. One active
+ * reservation per BA per session; cancellation flips status to 'cancelled'
+ * (the row is retained for the audit/roster history, not deleted).
+ */
+export interface OrientationReservationRecord {
+  reservationId: string;
+  sessionId: string;
+  /** The reserving BA — read from the authed session, never the request body. */
+  baId: string;
+  /** Snapshot of the BA's display name at reservation time (for the roster). */
+  baName: string;
+  scheduledFor: IsoTimestamp;
+  status: 'reserved' | 'cancelled';
+  createdAt: IsoTimestamp;
+  cancelledAt: IsoTimestamp | null;
+  smsDeliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
+  smsDeliveryError: string | null;
+}
+
+/**
+ * One available session as the cockpit scheduling card renders it: the
+ * session plus its live seat math and whether THIS BA already holds a seat.
+ */
+export interface OrientationSessionAvailability {
+  sessionId: string;
+  scheduledFor: IsoTimestamp;
+  hosts: string[];
+  capacity: number;
+  seatsTaken: number;
+  seatsRemaining: number;
+  durationMinutes: number;
+  /** True when the authed BA already holds an active seat in this session. */
+  reservedByMe: boolean;
+}
+
+/** GET /api/orientation/sessions — the cockpit scheduling card payload. */
+export interface OrientationSessionsResponse {
+  ok: true;
+  sessions: OrientationSessionAvailability[];
+  /** The session id this BA currently holds a seat in, or null. */
+  myReservationSessionId: string | null;
+}
+
+/** POST /api/orientation/sessions/:sessionId/reserve response. */
+export interface OrientationReserveResponse {
+  ok: true;
+  reservationId: string;
+  sessionId: string;
+  scheduledFor: IsoTimestamp;
+  seatsRemaining: number;
+  createdAt: IsoTimestamp;
+}
+
+/** DELETE /api/orientation/sessions/:sessionId/reserve response. */
+export interface OrientationCancelResponse {
+  ok: true;
+  sessionId: string;
+  cancelledAt: IsoTimestamp;
+}
+
+/** One BA on a session roster (the founder-facing /admin view). */
+export interface OrientationRosterSeat {
+  reservationId: string;
+  baId: string;
+  baName: string;
+  reservedAt: IsoTimestamp;
+}
+
+/** A session plus its full roster, for the founder /admin roster view. */
+export interface OrientationSessionWithRoster {
+  sessionId: string;
+  scheduledFor: IsoTimestamp;
+  hosts: string[];
+  capacity: number;
+  durationMinutes: number;
+  joinUrl: string | null;
+  status: 'upcoming' | 'past' | 'cancelled';
+  seatsTaken: number;
+  seatsRemaining: number;
+  roster: OrientationRosterSeat[];
+}
+
+/** GET /api/admin/orientation/sessions — founder roster view. */
+export interface AdminOrientationSessionsResponse {
+  ok: true;
+  sessions: OrientationSessionWithRoster[];
+}
+
+/** POST /api/admin/orientation/sessions — founders seed a new session. */
+export interface AdminCreateOrientationSessionPayload {
+  scheduledFor: IsoTimestamp;
+  /** Assignable hosts. Omit/empty → server defaults to the founders. */
+  hosts?: string[];
+  /** Seat cap. Omit → ORIENTATION_SESSION_CAPACITY (10). */
+  capacity?: number;
+  durationMinutes?: number;
+  joinUrl?: string | null;
+}
+
+export interface AdminCreateOrientationSessionResponse {
+  ok: true;
+  session: OrientationSessionWithRoster;
+}

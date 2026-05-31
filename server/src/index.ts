@@ -22,6 +22,7 @@ import { adminReportingRoutes } from './routes/admin/reporting.js';
 import { adminLiveOpsRoutes } from './routes/admin/liveOps.js';
 import { adminBroadcastRoutes } from './routes/admin/broadcast.js';
 import { adminTenantRoutes } from './routes/admin/tenant.js';
+import { adminOrientationRoutes } from './routes/admin/orientation.js';
 import { startBroadcastWorker } from './services/broadcastQueue.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { michaelRoutes } from './routes/michael.js';
@@ -35,6 +36,7 @@ import { ivoryRoutes } from './routes/ivory.js';
 import { trainingRoutes } from './routes/training.js';
 import { profileRoutes } from './routes/profile.js';
 import { previewRoutes } from './routes/preview.js';
+import { orientationRoutes } from './routes/orientation.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -97,6 +99,10 @@ app.use('/api/admin/tenant', adminTenantRoutes);
 // only: audience resolution filters out STOP-list members server-side; the
 // composer never reaches prospects, never appears on `.com`.
 app.use('/api/admin/broadcast', adminBroadcastRoutes);
+// ADMIN — group orientation roster + seeding (Chat #147, wireframe §3.6).
+// Kevin-only via requireAdmin inside the route file; founders view per-session
+// rosters and add sessions as the team grows. Audit-logged like the rest of /admin.
+app.use('/api/admin/orientation', adminOrientationRoutes);
 
 // /api/p/* is prospect-facing (apps/com). No auth, no Michael gate. The token
 // itself is the identity surface per COM Design Section E.3.
@@ -182,6 +188,13 @@ app.use('/api/profile', profileRoutes);
 // no holding-tank placement, no SSE emit, no counter increment, no SMS.
 // Gated (requireAuth + requireMichaelComplete) inside the route file.
 app.use('/api/preview', previewRoutes);
+
+// Group orientation scheduler (Chat #147, wireframe §3.6). BA-facing cockpit
+// scheduling card: a post-Michael BA sees available group sessions, books one
+// seat (cap 10), and can cancel. Handlers apply (requireAuth +
+// requireMichaelComplete) internally; baId is read from the session, never the
+// body (locked-spec 3.5). REUSES the §2.6 webinar event/reservation pattern.
+app.use('/api/orientation', orientationRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 
