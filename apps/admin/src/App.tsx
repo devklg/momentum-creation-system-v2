@@ -29,6 +29,7 @@ import { LiveOpsPage } from '@/routes/live-ops';
 import { ReportsPage } from '@/routes/reports';
 import { BroadcastPage } from '@/routes/broadcast';
 import { TenantPage } from '@/routes/tenant';
+import { OrientationPage } from '@/routes/orientation';
 
 export function App() {
   return (
@@ -72,6 +73,7 @@ function Inner() {
         <Route path="/audit" element={<AuditPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/tenant" element={<TenantPage />} />
+        <Route path="/orientation" element={<OrientationPage />} />
         <Route path="/broadcast" element={<BroadcastPage />} />
         <Route
           path="*"

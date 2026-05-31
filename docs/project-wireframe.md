@@ -142,9 +142,9 @@ One route /p/{token}, two faces by token state.
   Michael gate whitelisted for Module 1 + hub progress; Modules 2-5 stay gated.
 - Merged onto main Chat #133 (feat/ba-crm + feat/fast-start-training); PDFs gitignored, stored locally
 
-### 3.6 10-step orientation  `[~]` (#100)
+### 3.6 10-step orientation  `[x]` (#100, #147)
 - [x] Curriculum page ported to /training/10-steps
-- [ ] Cockpit scheduling card + slot mechanism (#147, dec_orientation_scheduling seq 21): in-app GROUP orientation sessions, cap 10 BAs/session, hosts Kevin+Paul (host field assignable, leader-extensible later), REUSE webinar Event/reservation pattern (2.6) â€” NOT new infra; Michael-handoff -> cockpit card shows available sessions -> BA reserves seat -> founders see per-session roster; founders add sessions as growth demands; Google Calendar sync DEFERRED
+- [x] Cockpit scheduling card + slot mechanism (#147, dec_orientation_scheduling seq 21): in-app GROUP orientation sessions, cap 10 BAs/session, hosts Kevin+Paul (host field assignable, leader-extensible later), REUSE webinar Event/reservation pattern (2.6) â€” NOT new infra; Michael-handoff -> cockpit card shows available sessions -> BA reserves seat -> founders see per-session roster; founders add sessions as growth demands; Google Calendar sync DEFERRED. SHIPPED: domain/orientationSession.ts (entity+reservation+roster, triple-stack, mcs_orientation Chroma), routes/orientation.ts (BA list/reserve/cancel, gated), routes/admin/orientation.ts (founder roster+create, audited), apps/team OrientationCard in cockpit, apps/admin /orientation roster page, seed:orientation-sessions; live round-trip verified (create->reserve->roster->cancel)
 - DEP RESOLVED (#147): scheduling mechanism = fixed scheduled group sessions reusing webinar pattern (was Calendly/custom/manual open)
 
 ### 3.7 Replicated .com preview  `[x]` (#134)

@@ -14,7 +14,8 @@
     "backfill:founder-timezones": "tsx scripts/backfill-founder-timezones.ts",
     "seed:webinar-events": "tsx scripts/seed-webinar-events.ts",
     "setup:founder-access": "tsx scripts/setup-founder-access.ts",
-    "bootstrap:ivory": "tsx scripts/bootstrap-ivory-collection.ts"
+    "bootstrap:ivory": "tsx scripts/bootstrap-ivory-collection.ts",
+    "seed:orientation-sessions": "tsx scripts/seed-orientation-sessions.ts"
   },
   "dependencies": {
     "@momentum/shared": "workspace:*",

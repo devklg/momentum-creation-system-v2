@@ -38,6 +38,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { TodaysActions } from '@/components/cockpit/TodaysActions';
 import { TrackRecordCard } from '@/components/cockpit/TrackRecordCard';
+import { OrientationCard } from '@/components/cockpit/OrientationCard';
 
 // ── Local wire shapes (mirror packages/shared/src/types.ts) ──────────────
 
@@ -475,6 +476,9 @@ export function CockpitPage() {
             <SectionLabel>My Sponsor</SectionLabel>
             <SponsorCard sponsor={summary.sponsor} />
           </div>
+          {/* Group orientation scheduler (Chat #147, wireframe §3.6). Self-
+              contained: fetches its own data, books/cancels a seat. */}
+          <OrientationCard />
           <div>
             <SectionLabel>CRM</SectionLabel>
             <div className="bg-cream/[0.02] border border-cream/10 rounded-md p-5">
