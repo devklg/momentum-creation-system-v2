@@ -92,9 +92,9 @@ One route /p/{token}, two faces by token state.
 
 ## 3 Â· .TEAM â€” BA SURFACE (teammagnificent.team)
 
-### 3.1 Welcome  `[~]` (#94)
+### 3.1 Welcome  `[x]` (#94, #147)
 - [x] Click-acknowledge commitment, triple-stack write, routes to Michael
-- [ ] Audit current welcome.tsx against locked-spec v2; merge welcome-prototype-v2 letter-voice + 7-day-arc strip
+- [x] Audit current welcome.tsx against locked-spec v2; merge welcome-prototype-v2 letter-voice + 7-day-arc strip (#147 wf_0037)
 
 ### 3.2 Michael interview surface  `[~]` (#102, #134; interview content #147)
 - [x] Scheduler + Telnyx call origination + webhook + STT wiring

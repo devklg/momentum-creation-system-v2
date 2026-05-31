@@ -260,6 +260,26 @@ export function WelcomePage() {
         </div>
       </section>
 
+      {/* THE WEEK AHEAD — the 7-day arc strip (Chat #147, leaf wf_0037).
+          A different time scale than "What happens next": that strip is the next
+          30 minutes; this is the full first seven days, grounded in the locked
+          Fast Start modules + Michael + the 2-in-72 cadence. */}
+      <section className="relative z-10 px-4 pb-16">
+        <div className="max-w-5xl mx-auto">
+          <p className="font-mono tracking-[0.28em] text-[11px] text-gold mb-3 text-center uppercase">
+            The week ahead · your first seven days
+          </p>
+          <p className="text-center text-cream-mute font-body text-[14px] leading-[1.7] max-w-2xl mx-auto mb-10">
+            One move a day. By Day 7 you are not learning the business — you are running it.
+          </p>
+          <ol className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-x-3 gap-y-9">
+            {SEVEN_DAY_ARC.map((d) => (
+              <DayNode key={d.n} {...d} />
+            ))}
+          </ol>
+        </div>
+      </section>
+
       {/* ACCEPT — single primary action */}
       <section className="relative z-10 px-4 pb-24">
         <div className="max-w-md mx-auto text-center">
@@ -307,6 +327,66 @@ export function WelcomePage() {
         }
       `}</style>
     </div>
+  );
+}
+
+/**
+ * The 7-day arc. Content is grounded in the locked Fast Start curriculum
+ * (FAST_START_MODULES, see apps/team/.../fast-start/_wire.ts) + the Michael
+ * interview + the 2-in-72 cadence — not invented copy. Day 1 is the "now"
+ * node (teal). `.team` is BA-facing, so the comp/CV references are legitimate
+ * here; the five .com bans do not apply on this surface.
+ */
+const SEVEN_DAY_ARC: { n: number; title: string; body: string; now?: boolean }[] = [
+  { n: 1, title: 'Welcome & Michael', body: 'Your interview call, then Module 1 — the product you’ll share.', now: true },
+  { n: 2, title: 'How it pays', body: 'Comp Plan Layer 1 — Active, Qualified, and the 900 CV cycle.' },
+  { n: 3, title: 'Two legs', body: 'The binary as two legs, not a tree. First-mover is structural math.' },
+  { n: 4, title: 'Your list', body: 'Name your warm market. Ivory turns it into your first asks.' },
+  { n: 5, title: 'Your team', body: 'Not “find two and stop.” Your first two activate you.' },
+  { n: 6, title: 'First invites', body: 'You share the video. The market does the convincing.' },
+  { n: 7, title: 'In motion', body: 'Prospects in the tank, two candidates named. You’re running.' },
+];
+
+function DayNode({
+  n,
+  title,
+  body,
+  now,
+}: {
+  n: number;
+  title: string;
+  body: string;
+  now?: boolean;
+}) {
+  return (
+    <li className="relative pt-8 text-center px-1">
+      {/* arc segment — the dotted gold rule the nodes sit on */}
+      <span
+        className="absolute top-3 left-0 right-0 h-px bg-gradient-to-r from-gold/0 via-gold/40 to-gold/0"
+        aria-hidden="true"
+      />
+      {/* node dot */}
+      <span
+        className={[
+          'absolute top-[5px] left-1/2 -translate-x-1/2 w-3 h-3 rounded-full',
+          now ? 'bg-teal' : 'bg-gold',
+        ].join(' ')}
+        style={now ? { boxShadow: '0 0 0 4px rgba(45,212,191,0.18)' } : undefined}
+        aria-hidden="true"
+      />
+      <p
+        className={[
+          'font-mono tracking-[0.25em] text-[9px] uppercase mb-1.5',
+          now ? 'text-teal' : 'text-gold',
+        ].join(' ')}
+      >
+        {now ? 'Today' : `Day ${n}`}
+      </p>
+      <p className="font-display tracking-[0.03em] text-[16px] text-cream leading-tight mb-1.5">
+        {title}
+      </p>
+      <p className="text-[11px] text-cream-mute leading-[1.5] font-body">{body}</p>
+    </li>
   );
 }
 
