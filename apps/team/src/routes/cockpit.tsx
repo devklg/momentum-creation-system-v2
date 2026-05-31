@@ -108,6 +108,17 @@ interface MyInvitesResponse {
   activityByProspect: Record<string, InvitationActivityEntry[]>;
 }
 
+interface SponsorFallbackFounder {
+  fullName: string;
+  firstName: string;
+  phone: string | null;
+}
+
+interface CockpitSponsorFallback {
+  sponsorInactive: boolean;
+  founders: SponsorFallbackFounder[];
+}
+
 interface CockpitSummaryResponse {
   ok: true;
   baFirstName: string;
@@ -117,6 +128,8 @@ interface CockpitSummaryResponse {
     lastInitial: string;
     phone: string | null;
   } | null;
+  // Chat #147, seq 23: founder fallback when the immutable sponsor is inactive.
+  sponsorFallback: CockpitSponsorFallback | null;
   counts: {
     total: number;
     sent: number;
@@ -222,6 +235,12 @@ interface ReinviteResponse {
   sentAt: string;
   expiresAt: string;
   fresh: boolean;
+}
+
+interface ReinviteScriptResponse {
+  ok: true;
+  prospectId: string;
+  script: string;
 }
 
 // ── Status display config ────────────────────────────────────────────────
@@ -474,7 +493,10 @@ export function CockpitPage() {
         <aside className="space-y-8">
           <div>
             <SectionLabel>My Sponsor</SectionLabel>
-            <SponsorCard sponsor={summary.sponsor} />
+            <SponsorCard
+              sponsor={summary.sponsor}
+              fallback={summary.sponsorFallback}
+            />
           </div>
           {/* Group orientation scheduler (Chat #147, wireframe §3.6). Self-
               contained: fetches its own data, books/cancels a seat. */}
@@ -588,8 +610,10 @@ function EmptyInvites({ onInvite }: { onInvite: () => void }) {
 
 function SponsorCard({
   sponsor,
+  fallback,
 }: {
   sponsor: CockpitSummaryResponse['sponsor'];
+  fallback: CockpitSponsorFallback | null;
 }) {
   if (!sponsor) {
     return (
@@ -604,6 +628,10 @@ function SponsorCard({
       </div>
     );
   }
+  // Chat #147, seq 23: the card ALWAYS shows the original (immutable) sponsor.
+  // When that sponsor is inactive, we add a founder fallback below — never
+  // replacing the sponsor, only adding a support/contact path.
+  const showFallback = fallback?.sponsorInactive === true && fallback.founders.length > 0;
   return (
     <div className="bg-cream/[0.02] border border-cream/10 rounded-md p-5">
       <p className="font-display text-[22px] text-cream leading-[1.1] mb-1">
@@ -624,6 +652,38 @@ function SponsorCard({
           Reach out to {sponsor.firstName} anytime you&rsquo;re stuck — that&rsquo;s
           what your sponsor is for.
         </p>
+      )}
+
+      {showFallback && (
+        <div className="mt-4 pt-4 border-t border-gold/20">
+          <p className="text-cream-mute text-[13px] leading-[1.55] mb-3">
+            {sponsor.firstName} isn&rsquo;t active right now. Until they&rsquo;re
+            back, reach out to a founder of Team Magnificent — they&rsquo;re here
+            to support you directly.
+          </p>
+          <p className="font-mono tracking-[0.12em] text-[10px] text-gold uppercase mb-2">
+            Founder support
+          </p>
+          <ul className="space-y-2">
+            {fallback.founders.map((f) => (
+              <li key={f.fullName} className="flex items-baseline justify-between gap-3">
+                <span className="text-cream text-[14px]">{f.fullName}</span>
+                {f.phone ? (
+                  <a
+                    href={`tel:${f.phone}`}
+                    className="text-teal text-[13px] font-mono tracking-[0.04em] hover:underline"
+                  >
+                    {f.phone}
+                  </a>
+                ) : (
+                  <span className="text-cream-faint text-[12px] font-mono">
+                    contact in-app
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
@@ -925,7 +985,6 @@ function CrmPanel({
         prospectId={prospectId}
         isDraft={isDraft}
         isTerminal={isTerminal}
-        availableAt={bundle.reinviteAvailableAt}
         onReinvited={onReinvited}
       />
 
@@ -1251,30 +1310,35 @@ function NotesRow({
   );
 }
 
-// Re-invite: button + cooldown countdown. Disabled for unsent drafts (use
-// "I sent this" instead) and for enrolled prospects (terminal).
+// Re-invite (Chat #147, seq 23): NO cooldown — the BA decides when to
+// re-invite. Disabled only for unsent drafts (use "I sent this" instead) and
+// for enrolled prospects (terminal). A "Re-invite script" button surfaces
+// ready-to-send copy; it never gates the re-invite.
 function ReinviteRow({
   prospectId,
   isDraft,
   isTerminal,
-  availableAt,
   onReinvited,
 }: {
   prospectId: string;
   isDraft: boolean;
   isTerminal: boolean;
-  availableAt: string | null;
   onReinvited: () => void;
 }) {
   const [sending, setSending] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
 
-  // Disabled reasons in priority order.
+  // Script state.
+  const [script, setScript] = useState<string | null>(null);
+  const [scriptLoading, setScriptLoading] = useState(false);
+  const [scriptErr, setScriptErr] = useState<string | null>(null);
+  const [scriptCopied, setScriptCopied] = useState(false);
+
+  // Disabled reasons in priority order (no cooldown — seq 23).
   let disabledReason: string | null = null;
   if (isTerminal) disabledReason = 'This prospect is enrolled — no re-invite needed.';
   else if (isDraft) disabledReason = 'Mark this draft sent first (button above), then you can re-invite.';
-  else if (availableAt) disabledReason = `Available again on ${formatDueAt(availableAt)}.`;
 
   const send = useCallback(async () => {
     setSending(true);
@@ -1293,11 +1357,9 @@ function ReinviteRow({
         setOk(
           data.fresh
             ? 'Fresh link minted — the previous one had expired.'
-            : 'Marked re-sent. Cooldown restarts.',
+            : 'Marked re-sent.',
         );
         onReinvited();
-      } else if ('error' in data && data.error === 'cooldown') {
-        setErr('Still in 7-day cooldown.');
       } else if ('error' in data && data.error === 'not_yet_sent') {
         setErr('Use "I sent this" first.');
       } else {
@@ -1309,6 +1371,42 @@ function ReinviteRow({
       setSending(false);
     }
   }, [prospectId, onReinvited]);
+
+  const loadScript = useCallback(async () => {
+    setScriptLoading(true);
+    setScriptErr(null);
+    setScriptCopied(false);
+    try {
+      const res = await fetch(`/api/crm/${prospectId}/reinvite-script`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = (await res.json()) as
+        | ReinviteScriptResponse
+        | { ok: false; error?: string };
+      if (res.ok && data.ok) {
+        setScript(data.script);
+      } else {
+        setScriptErr('Could not build a script. Try once more.');
+      }
+    } catch {
+      setScriptErr('Network error.');
+    } finally {
+      setScriptLoading(false);
+    }
+  }, [prospectId]);
+
+  const copyScript = useCallback(async () => {
+    if (!script) return;
+    try {
+      await navigator.clipboard.writeText(script);
+      setScriptCopied(true);
+      setTimeout(() => setScriptCopied(false), 2000);
+    } catch {
+      /* clipboard blocked; the BA can select manually */
+    }
+  }, [script]);
 
   return (
     <div>
@@ -1323,10 +1421,33 @@ function ReinviteRow({
         >
           {sending ? 'Sending…' : 'Re-invite'}
         </Button>
+        <Button
+          onClick={loadScript}
+          disabled={scriptLoading}
+          className="bg-transparent text-gold border border-gold/40 hover:bg-gold/[0.08] font-mono tracking-[0.04em] text-[12px] px-4 py-2 h-auto disabled:opacity-50"
+        >
+          {scriptLoading ? 'Writing…' : script ? 'Refresh script' : 'Re-invite script'}
+        </Button>
         {disabledReason && (
           <p className="text-cream-faint text-[12px]">{disabledReason}</p>
         )}
       </div>
+
+      {script && (
+        <div className="mt-3 bg-cream/[0.03] border border-gold/20 rounded px-3 py-2.5">
+          <p className="text-cream text-[13px] leading-[1.6] whitespace-pre-wrap">
+            {script}
+          </p>
+          <button
+            type="button"
+            onClick={copyScript}
+            className="mt-2 font-mono text-[11px] tracking-[0.06em] text-teal hover:underline"
+          >
+            {scriptCopied ? 'Copied' : 'Copy script'}
+          </button>
+        </div>
+      )}
+
       {ok && (
         <p className="text-teal font-mono text-[11px] tracking-[0.04em] mt-2">
           {ok}
@@ -1335,6 +1456,11 @@ function ReinviteRow({
       {err && (
         <p className="text-red-400 font-mono text-[11px] tracking-[0.04em] mt-2">
           {err}
+        </p>
+      )}
+      {scriptErr && (
+        <p className="text-red-400 font-mono text-[11px] tracking-[0.04em] mt-2">
+          {scriptErr}
         </p>
       )}
     </div>

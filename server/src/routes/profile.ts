@@ -12,10 +12,11 @@
  * in MICHAEL_GATE_WHITELIST so a BA who's mid-onboarding can still update
  * their timezone/photo — but requireAuth is still enforced.
  *
- * J.8 (phone change verification) is OPEN — implemented here with SMS-code
- * verification as the conservative default mirroring email re-verify. If
- * Kevin opts for immediate-effect, /phone/start + /phone/verify collapse
- * into a single direct PATCH.
+ * J.8 (phone change verification) is RESOLVED (Chat #147, seq 22): NO SMS code.
+ * The .team client confirms the typed number in a modal (restating it + why it
+ * matters) and POSTs to /phone, which applies the change directly. Email keeps
+ * its two-step code challenge (proving access to a new inbox is a different
+ * problem from confirming a number you typed).
  */
 
 import { Router } from 'express';
@@ -28,8 +29,7 @@ import {
   changePassword,
   startEmailChange,
   completeEmailChange,
-  startPhoneChange,
-  completePhoneChange,
+  setPhone,
 } from '../domain/profile.js';
 import type { ProfileGetResponse } from '@momentum/shared';
 
@@ -78,12 +78,8 @@ const EmailVerifyBody = z
   .object({ code: z.string().regex(/^\d{6}$/) })
   .strict();
 
-const PhoneStartBody = z
+const PhoneSetBody = z
   .object({ newPhone: z.string().min(7).max(40) })
-  .strict();
-
-const PhoneVerifyBody = z
-  .object({ code: z.string().regex(/^\d{6}$/) })
   .strict();
 
 profileRoutes.get('/', requireAuth, requireMichaelComplete, async (req, res) => {
@@ -189,43 +185,27 @@ profileRoutes.post('/email/verify', requireAuth, requireMichaelComplete, async (
   }
 });
 
-profileRoutes.post('/phone/start', requireAuth, requireMichaelComplete, async (req, res) => {
+// J.8 (Chat #147, seq 22): direct phone set — NO SMS code. The client confirms
+// the typed number in a modal, then POSTs here. requireAuth ensures it's the
+// session BA; the domain audits the swap.
+profileRoutes.post('/phone', requireAuth, requireMichaelComplete, async (req, res) => {
   const baId = req.session?.baId;
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
-  const parsed = PhoneStartBody.safeParse(req.body);
+  const parsed = PhoneSetBody.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ ok: false, error: 'invalid_phone' });
   }
 
   try {
-    const result = await startPhoneChange(baId, parsed.data.newPhone.trim());
-    return res.status(200).json({ ok: true, deliveryStatus: result.deliveryStatus });
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('[POST /api/profile/phone/start] failed', err);
-    return res.status(500).json({ ok: false, error: 'server_error' });
-  }
-});
-
-profileRoutes.post('/phone/verify', requireAuth, requireMichaelComplete, async (req, res) => {
-  const baId = req.session?.baId;
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
-
-  const parsed = PhoneVerifyBody.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ ok: false, error: 'invalid_code' });
-  }
-
-  try {
-    const result = await completePhoneChange(baId, parsed.data.code);
+    const result = await setPhone(baId, parsed.data.newPhone.trim());
     if (!result.ok) {
-      return res.status(400).json({ ok: false, error: result.error });
+      return res.status(404).json({ ok: false, error: result.error });
     }
     return res.status(200).json({ ok: true });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error('[POST /api/profile/phone/verify] failed', err);
+    console.error('[POST /api/profile/phone] failed', err);
     return res.status(500).json({ ok: false, error: 'server_error' });
   }
 });

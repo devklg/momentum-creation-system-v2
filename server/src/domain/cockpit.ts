@@ -19,15 +19,17 @@
  */
 
 import { gatewayCall } from '../services/gateway.js';
-import { findBAByBaId } from './ba.js';
+import { findBAByBaId, type BARecord } from './ba.js';
 import { lastInitialOf } from './prospects.js';
 import type {
   CallbackIntent,
+  CockpitSponsorFallback,
   CockpitSummaryResponse,
   InvitationActivityEntry,
   InviteDisplayStatus,
   InviteSummary,
   MyInvitesResponse,
+  SponsorFallbackFounder,
   TokenState,
 } from '@momentum/shared';
 
@@ -35,6 +37,78 @@ const MONGO_DB = 'momentum';
 const PROSPECTS_COLLECTION = 'prospects';
 const ACTIVITY_COLLECTION = 'invitation_activity';
 const CALLBACK_COLLECTION = 'callback_requests';
+const BA_COLLECTION = 'brand_ambassadors';
+
+/**
+ * Sponsor-inactive dormancy window for the founder fallback (Chat #147, seq 23,
+ * dec_cockpit_sponsor_and_reinvite). Kevin's lock: a sponsor counts as inactive
+ * if Kevin has SUSPENDED or DELETED them from /admin, OR they've gone dormant —
+ * no .team login in 120 days. This is intentionally MUCH longer than the
+ * 24h admin "active now" presence window (adminBaOversight.ts) — that stat is
+ * for real-time presence; this is "has my sponsor genuinely gone quiet?" and
+ * must not fire on normal day-to-day gaps.
+ */
+const SPONSOR_DORMANT_MS = 120 * 24 * 60 * 60 * 1000;
+
+/**
+ * Lifecycle fields the founder-fallback check reads off a sponsor's BA record.
+ * They aren't on the lean BARecord type (suspended/deleted are admin-set), so
+ * we read them defensively off the raw doc.
+ */
+interface BaLifecycleExtras {
+  role?: string;
+  suspended?: boolean;
+  deleted?: boolean;
+}
+
+/**
+ * Is this sponsor inactive for the founder-fallback (Chat #147, seq 23)?
+ * Founders are NEVER inactive here — they ARE the fallback, and a founder
+ * pointing a BA back to founders is nonsensical. Otherwise: suspended OR
+ * admin-deleted OR dormant 120+ days. A null lastLoginAt is NOT treated as
+ * inactive (a brand-new sponsor or a founder may simply not have a login
+ * stamp yet) — only a measured 120-day lapse counts.
+ */
+function isSponsorInactive(sp: BARecord): boolean {
+  const extras = sp as BARecord & BaLifecycleExtras;
+  if (extras.role === 'founder' || extras.role === 'co_leader') return false;
+  if (extras.suspended === true) return true;
+  if (extras.deleted === true) return true;
+  if (sp.lastLoginAt) {
+    const since = Date.now() - new Date(sp.lastLoginAt).getTime();
+    if (Number.isFinite(since) && since > SPONSOR_DORMANT_MS) return true;
+  }
+  return false;
+}
+
+/**
+ * The founders (Kevin + Paul) as the support/contact fallback. Sourced from
+ * the brand_ambassadors records seeded by seed-founders.ts (role founder /
+ * co_leader), so a leader added later (extensible host model, 3.3) is picked
+ * up automatically. Founder role sorts before co_leader so Kevin leads.
+ */
+async function getFounderContacts(): Promise<SponsorFallbackFounder[]> {
+  const res = await gatewayCall<{ documents: Array<BARecord & BaLifecycleExtras> }>(
+    'mongodb',
+    'query',
+    {
+      database: MONGO_DB,
+      collection: BA_COLLECTION,
+      filter: { role: { $in: ['founder', 'co_leader'] }, deleted: { $ne: true } },
+      limit: 10,
+    },
+  );
+  const founders = res.documents ?? [];
+  founders.sort((a, b) => {
+    const rank = (r?: string) => (r === 'founder' ? 0 : 1);
+    return rank(a.role) - rank(b.role);
+  });
+  return founders.map((f) => ({
+    fullName: `${f.firstName} ${f.lastName}`.trim(),
+    firstName: f.firstName,
+    phone: f.phone && f.phone.trim() ? f.phone : null,
+  }));
+}
 
 /**
  * Shape of the prospect Mongo doc as the spine actually persists it
@@ -207,13 +281,20 @@ export async function getMyInvites(baId: string): Promise<MyInvitesResponse> {
  */
 export async function getCockpitSummary(
   baId: string,
-): Promise<CockpitSummaryResponse> {
+): Promise<CockpitSummaryResponse & { sponsorFallback: CockpitSponsorFallback | null }> {
   const ba = await findBAByBaId(baId);
   const { invites } = await listInvitesForBA(baId);
 
   // My Sponsor card. Founders (TM-01/TM-02) have no upline (locked-spec 1.2)
   // — sponsor is null and the cockpit renders a founder treatment.
+  //
+  // sponsorFallback (Chat #147, seq 23): the card ALWAYS shows the original,
+  // immutable sponsor. But if that sponsor is INACTIVE (suspended / deleted /
+  // dormant 120d+), we also surface Kevin + Paul as the support/contact
+  // fallback. Placement and the immutable sponsor relationship are untouched —
+  // this is a contact path only.
   let sponsor: CockpitSummaryResponse['sponsor'] = null;
+  let sponsorFallback: CockpitSponsorFallback | null = null;
   if (ba?.sponsorBaId) {
     const sp = await findBAByBaId(ba.sponsorBaId);
     if (sp) {
@@ -223,6 +304,12 @@ export async function getCockpitSummary(
         lastInitial: lastInitialOf(sp.lastName),
         phone: sp.phone ?? null,
       };
+      if (isSponsorInactive(sp)) {
+        sponsorFallback = {
+          sponsorInactive: true,
+          founders: await getFounderContacts(),
+        };
+      }
     }
   }
 
@@ -240,6 +327,7 @@ export async function getCockpitSummary(
     ok: true,
     baFirstName: ba?.firstName ?? '',
     sponsor,
+    sponsorFallback,
     counts,
   };
 }

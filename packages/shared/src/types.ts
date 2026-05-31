@@ -1738,10 +1738,17 @@ export interface BANotifPrefs {
 }
 
 /**
- * J.12 conservative defaults. Reasoning surfaced in the Chat #134 heartbeat:
- *   - Live person-asks-for-callback signals (callback, webinar) default
- *     SMS=on — callback already SMS-alerts the BA per Chat #105.
- *   - Lower-frequency stream signals default in-app only.
+ * J.12 defaults (RESOLVED Chat #147, seq 22, dec_profile_verification_and_notifications):
+ * OPERATIONAL signals ON by default; PROMOTIONAL / DIGEST signals OFF until the
+ * BA opts in. All tunable in settings.
+ *
+ * Reasoning (carried from the Chat #134 heartbeat, finalized #147):
+ *   - Operational signals — a prospect asked for a callback, reserved a webinar
+ *     seat, a new BA registered under you, Michael finished an interview — are
+ *     things a BA needs to act on, so they default ON (in-app always; SMS on for
+ *     the live person-asks signals, which already SMS-alert per Chat #105).
+ *   - poolMovement is a DIGEST (the daily roll-up), not an operational signal,
+ *     so it defaults fully OFF until the BA opts in (J.12).
  *   - Email defaults off everywhere until Resend's domain is verified
  *     (locked-spec Part 5, Resend dormant until Namecheap DNS lands).
  */
@@ -1750,7 +1757,8 @@ export const BA_NOTIF_DEFAULTS: BANotifPrefs = {
   webinarReserved: { sms: true, email: false, inApp: true },
   newSponsoredBA: { sms: false, email: false, inApp: true },
   michaelComplete: { sms: false, email: false, inApp: true },
-  poolMovement: { sms: false, email: false, inApp: true },
+  // Digest — OFF until opt-in (J.12).
+  poolMovement: { sms: false, email: false, inApp: false },
 };
 
 /**
@@ -3540,4 +3548,43 @@ export interface AdminCreateOrientationSessionPayload {
 export interface AdminCreateOrientationSessionResponse {
   ok: true;
   session: OrientationSessionWithRoster;
+}
+/* ───────────────────────────────────────────────
+ * Chat #147 — cockpit + profile edges (seq 22 + seq 23)
+ * Appended per the append-only rule on this file.
+ * ─────────────────────────────────────────────── */
+
+/**
+ * POST /api/crm/:prospectId/reinvite-script (Chat #147, seq 23,
+ * dec_cockpit_sponsor_and_reinvite). Surfaces a ready-to-send, compliance-clean
+ * re-invite message the BA can copy. This does NOT gate or mint — it only
+ * generates copy. The BA decides when (and whether) to actually re-invite.
+ */
+export interface ReinviteScriptResponse {
+  ok: true;
+  prospectId: string;
+  /** A warm, personal follow-up message. Compliance-safe by construction. */
+  script: string;
+}
+
+/**
+ * Founder contact surfaced as the support fallback when a BA's immutable
+ * sponsor is inactive (Chat #147, seq 23). Placement and the immutable
+ * sponsor relationship are unchanged — this is only a contact path.
+ */
+export interface SponsorFallbackFounder {
+  fullName: string;
+  firstName: string;
+  phone: string | null;
+}
+
+/**
+ * Founder-fallback block on the cockpit summary (Chat #147, seq 23). Present
+ * (sponsorInactive true) only when the immutable sponsor is suspended,
+ * admin-deleted, or dormant 120+ days. The My Sponsor card ALWAYS still shows
+ * the original sponsor; this points the BA to Kevin + Paul for support.
+ */
+export interface CockpitSponsorFallback {
+  sponsorInactive: boolean;
+  founders: SponsorFallbackFounder[];
 }

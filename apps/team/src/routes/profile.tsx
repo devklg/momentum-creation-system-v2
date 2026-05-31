@@ -539,7 +539,7 @@ function EmailChanger({
   );
 }
 
-/* ─── Phone re-verify (two-step — J.8 default) ─── */
+/* ─── Phone change (J.8 — confirm-your-input modal, NO SMS code) ─── */
 
 function PhoneChanger({
   profile,
@@ -549,53 +549,30 @@ function PhoneChanger({
   onSaved: () => Promise<void>;
 }) {
   const [newPhone, setNewPhone] = useState('');
-  const [code, setCode] = useState('');
-  const [step, setStep] = useState<'idle' | 'sent'>(profile.pendingPhone ? 'sent' : 'idle');
+  const [confirming, setConfirming] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
-  const [deliveryStatus, setDeliveryStatus] = useState<string | null>(null);
 
-  async function start(e: FormEvent) {
+  const trimmed = newPhone.trim();
+  const dirty = trimmed !== '' && trimmed !== profile.phone;
+
+  function openConfirm(e: FormEvent) {
     e.preventDefault();
-    if (newPhone.trim() === '' || saving) return;
-    setSaving(true);
+    if (!dirty || saving) return;
     setMsg(null);
-    try {
-      const res = await fetch('/api/profile/phone/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ newPhone: newPhone.trim() }),
-      });
-      const body = (await res.json().catch(() => null)) as
-        | { ok: true; deliveryStatus: string }
-        | { ok: false; error?: string }
-        | null;
-      if (!res.ok || !body || body.ok === false) {
-        throw new Error((body && 'error' in body && body.error) || `HTTP ${res.status}`);
-      }
-      setDeliveryStatus(body.deliveryStatus);
-      setStep('sent');
-      await onSaved();
-      setMsg({ kind: 'ok', text: 'Code sent via SMS to the new number.' });
-    } catch (err) {
-      setMsg({ kind: 'err', text: err instanceof Error ? err.message : 'send failed' });
-    } finally {
-      setSaving(false);
-    }
+    setConfirming(true);
   }
 
-  async function verify(e: FormEvent) {
-    e.preventDefault();
-    if (code.trim().length !== 6 || saving) return;
+  async function confirmSave() {
+    if (!dirty || saving) return;
     setSaving(true);
     setMsg(null);
     try {
-      const res = await fetch('/api/profile/phone/verify', {
+      const res = await fetch('/api/profile/phone', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ code: code.trim() }),
+        body: JSON.stringify({ newPhone: trimmed }),
       });
       const body = (await res.json().catch(() => null)) as
         | { ok: true }
@@ -605,13 +582,12 @@ function PhoneChanger({
         throw new Error((body && 'error' in body && body.error) || `HTTP ${res.status}`);
       }
       await onSaved();
-      setStep('idle');
       setNewPhone('');
-      setCode('');
-      setDeliveryStatus(null);
+      setConfirming(false);
       setMsg({ kind: 'ok', text: 'Phone updated.' });
     } catch (err) {
-      setMsg({ kind: 'err', text: err instanceof Error ? err.message : 'verify failed' });
+      setConfirming(false);
+      setMsg({ kind: 'err', text: err instanceof Error ? err.message : 'save failed' });
     } finally {
       setSaving(false);
     }
@@ -621,68 +597,86 @@ function PhoneChanger({
     <ProfileSection
       eyebrow="PHONE"
       title="Phone number"
-      description="Changing your phone requires a 6-digit SMS code sent to the NEW number. (Open question J.8 — current default mirrors email re-verify; subject to change.)"
+      description="Update the number we use for you. We don't text you a code — instead you'll confirm the new number in one step before it's saved (J.8)."
     >
       <div className="space-y-3">
         <div className="text-[13px] text-cream-mute">
           Current:{' '}
-          <span className="font-mono text-cream">{profile.phone}</span>
+          <span className="font-mono text-cream">{profile.phone || '—'}</span>
         </div>
 
-        {profile.pendingPhone && step === 'sent' && (
-          <div className="text-[12px] font-mono tracking-[0.04em] text-gold bg-gold/5 border border-gold/30 rounded-md p-2.5">
-            Pending verify: {profile.pendingPhone}
-          </div>
-        )}
-
-        {step === 'idle' && (
-          <form onSubmit={start} className="space-y-3">
-            <Label htmlFor="newPhone">New phone (E.164, e.g. +13235551234)</Label>
-            <Input
-              id="newPhone"
-              type="tel"
-              value={newPhone}
-              onChange={(e) => setNewPhone(e.target.value)}
-              autoComplete="tel"
-            />
-            <SaveRow saving={saving} msg={msg} label="Send code" />
-          </form>
-        )}
-
-        {step === 'sent' && (
-          <form onSubmit={verify} className="space-y-3">
-            <Label htmlFor="phoneCode">6-digit code</Label>
-            <Input
-              id="phoneCode"
-              inputMode="numeric"
-              pattern="\d{6}"
-              maxLength={6}
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-            />
-            {deliveryStatus && deliveryStatus !== 'sent' && (
-              <p className="text-[12px] text-cream-faint">
-                (SMS delivery: {deliveryStatus} — provider may be dormant in dev.)
-              </p>
-            )}
-            <div className="flex gap-2">
-              <SaveRow saving={saving} msg={msg} label="Verify" />
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  setStep('idle');
-                  setCode('');
-                  setMsg(null);
-                }}
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        )}
+        <form onSubmit={openConfirm} className="space-y-3">
+          <Label htmlFor="newPhone">New phone (E.164, e.g. +13235551234)</Label>
+          <Input
+            id="newPhone"
+            type="tel"
+            value={newPhone}
+            onChange={(e) => setNewPhone(e.target.value)}
+            autoComplete="tel"
+          />
+          <SaveRow saving={saving} msg={msg} disabled={!dirty} label="Update number" />
+        </form>
       </div>
+
+      {confirming && (
+        <PhoneConfirmModal
+          newPhone={trimmed}
+          saving={saving}
+          onConfirm={confirmSave}
+          onCancel={() => setConfirming(false)}
+        />
+      )}
     </ProfileSection>
+  );
+}
+
+/** J.8 confirm-your-input modal. Restates the typed number and why it matters,
+ * then takes one explicit confirm before the change is saved. NOT an OTP — it
+ * guards against a typo, not against an impostor (requireAuth already does). */
+function PhoneConfirmModal({
+  newPhone,
+  saving,
+  onConfirm,
+  onCancel,
+}: {
+  newPhone: string;
+  saving: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/80 px-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Confirm your new phone number"
+    >
+      <div className="w-full max-w-md rounded-lg border border-gold/30 bg-ink-2 p-6 shadow-2xl">
+        <p className="font-display tracking-eyebrow text-[12px] text-gold mb-2">
+          CONFIRM YOUR NEW NUMBER
+        </p>
+        <p className="text-[14px] text-cream-mute leading-[1.55] mb-4">
+          Please double-check this is right — we&rsquo;ll save it as your phone
+          number:
+        </p>
+        <p className="font-mono text-[20px] text-cream text-center bg-cream/[0.04] border border-line rounded-md py-3 mb-4 break-all">
+          {newPhone}
+        </p>
+        <p className="text-[13px] text-cream-mute leading-[1.6] mb-5">
+          This number is what we use for your Telnyx alerts, Michael&rsquo;s
+          onboarding calls, and prospect-login — so it needs to be one you can
+          receive texts and calls on.
+        </p>
+        <div className="flex gap-2 justify-end">
+          <Button type="button" variant="ghost" onClick={onCancel} disabled={saving}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={onConfirm} disabled={saving}>
+            {saving ? 'Saving…' : 'Confirm & save'}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -17,11 +17,14 @@
  * before any mutation. A BA cannot read or write another BA's prospect's
  * CRM, ever.
  *
- * Re-invite (Kevin lock, Chat #132): 7-day cooldown counted from the
- * prospect's latest sentAt. If the existing token has expired, the spine
- * also mints a fresh one and points the prospect doc at it (state reset to
- * 'minted'). If the prospect was never marked sent, the BA must use the
- * existing "I sent this" path instead — there's nothing to re-send yet.
+ * Re-invite (Chat #147 EDGE, seq 23, dec_cockpit_sponsor_and_reinvite):
+ * NO enforced cooldown — the BA decides when to re-invite. (The 7-day
+ * cooldown from Chat #132 was REMOVED here.) If the existing token has
+ * expired, the spine mints a fresh one and points the prospect doc at it
+ * (state reset to 'minted'). If the prospect was never marked sent, the BA
+ * must use the existing "I sent this" path instead — there's nothing to
+ * re-send yet. A re-invite SCRIPT button (reinviteScript) surfaces ready-to-
+ * send copy; it never gates the re-invite.
  *
  * Gateway quirks (per tripleStack.ts header):
  *   - mongodb.query filter param is `filter`, returns {count, documents}
@@ -52,6 +55,7 @@ import type {
   CrmNoteRecord,
   ProspectCrmBundle,
   ReinviteResponse,
+  ReinviteScriptResponse,
   TodayActionItem,
 } from '@momentum/shared';
 
@@ -64,9 +68,6 @@ const NOTES_COLLECTION = 'crm_notes';
 const FOLLOWUPS_COLLECTION = 'crm_followups';
 const DISPOSITIONS_COLLECTION = 'crm_dispositions';
 const CHROMA_COLLECTION = 'mcs_invitations';
-
-/** 7 days, per Kevin lock (Chat #132). */
-export const REINVITE_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** Max note length — generous for a free-form journal entry. */
 const NOTE_MAX = 2000;
@@ -461,7 +462,10 @@ export async function getCrmBundle(
     notes,
     followUp,
     disposition,
-    reinviteAvailableAt: computeReinviteAvailableAt(prospect),
+    // No enforced re-invite cooldown (Chat #147, seq 23) — always available.
+    // The field is retained on the bundle shape for back-compat; null means
+    // "re-invite anytime".
+    reinviteAvailableAt: null,
     editable: {
       firstName: full?.firstName ?? prospect.firstName ?? '',
       lastName: full?.lastName ?? '',
@@ -501,19 +505,6 @@ async function fetchFullProspectForEdit(prospectId: string): Promise<{
   return res.documents?.[0] ?? null;
 }
 
-/**
- * Null when re-invite is allowed right now. ISO timestamp when the BA must
- * wait until. Returns null for unsent drafts (no cooldown applies — the BA
- * uses "I sent this" not re-invite for those) so the UI can render a
- * different affordance instead of a misleading countdown.
- */
-function computeReinviteAvailableAt(prospect: ProspectGuardDoc): string | null {
-  if (!prospect.sentAt) return null;
-  const next = new Date(prospect.sentAt).getTime() + REINVITE_COOLDOWN_MS;
-  if (next <= Date.now()) return null;
-  return new Date(next).toISOString();
-}
-
 // ── Re-invite ─────────────────────────────────────────────────────────────
 
 /**
@@ -521,13 +512,11 @@ function computeReinviteAvailableAt(prospect: ProspectGuardDoc): string | null {
  * existing token has expired — mint a fresh token and point the prospect
  * at it (state reset to 'minted', expiresAt extended).
  *
+ * No enforced cooldown (Chat #147, seq 23) — the BA decides when to re-invite.
+ *
  * Forbidden states:
  *   - prospect.sentAt null → CrmError('not_yet_sent'): use "I sent this".
  *   - prospect.state 'enrolled' → CrmError('enrolled'): terminal.
- *   - within 7-day cooldown → CrmError('cooldown'): UI shows countdown.
- *
- * The cooldown is checked here as well as surfaced via `reinviteAvailableAt`
- * on the bundle. Two paths can race; the server is authoritative.
  */
 export async function reinvite(
   prospectId: string,
@@ -540,12 +529,6 @@ export async function reinvite(
   }
   if (!prospect.sentAt) {
     throw new CrmError('not_yet_sent');
-  }
-
-  // 7-day cooldown gate (server-authoritative).
-  const sentMs = new Date(prospect.sentAt).getTime();
-  if (Date.now() - sentMs < REINVITE_COOLDOWN_MS) {
-    throw new CrmError('cooldown');
   }
 
   const now = new Date().toISOString();
@@ -658,6 +641,51 @@ export async function reinvite(
     expiresAt,
     fresh,
   };
+}
+
+// ── Re-invite script (Chat #147, seq 23) ──────────────────────────────────
+
+/**
+ * Generate a ready-to-send, compliance-clean re-invite message the BA can copy
+ * (Chat #147, seq 23, dec_cockpit_sponsor_and_reinvite). This is the SCRIPT
+ * BUTTON's server side. It NEVER mints, sends, or gates — it only returns copy.
+ *
+ * Compliance (locked-spec 3.10 / 3.11): BA-facing, personal word-of-mouth
+ * follow-up. Compliance-safe by construction — no income, earnings, comp,
+ * placement/queue, or AI-prospecting language. The message leads with a warm,
+ * low-pressure nudge to (re)watch a short video and decide for themselves.
+ *
+ * State-aware opener:
+ *   - watched (video_complete / callback / webinar) → "you watched it, let's talk"
+ *   - everything else → "circling back on that short video"
+ */
+export async function reinviteScript(
+  prospectId: string,
+  sponsorBaId: string,
+): Promise<ReinviteScriptResponse> {
+  const prospect = await assertOwnership(prospectId, sponsorBaId);
+
+  const name = (prospect.firstName ?? '').trim() || 'there';
+  const link = prospect.token
+    ? `https://teammagnificent.com/p/${prospect.token}`
+    : '';
+
+  const watched =
+    prospect.state === 'video_complete' ||
+    prospect.state === 'callback_requested' ||
+    prospect.state === 'webinar_reserved';
+
+  const opener = watched
+    ? `Hey ${name}, I know you got a chance to watch that short video — I'd ` +
+      `genuinely love to hear what you thought, no pressure at all. ` +
+      `Whenever you have a few minutes to chat, I'm here.`
+    : `Hey ${name}, just circling back on that short video I sent over — no ` +
+      `pressure at all, I just didn't want it to get buried in your messages. ` +
+      `Whenever you have a few minutes, I'd love to hear what you think.`;
+
+  const script = link ? `${opener}\n\nHere's the link again: ${link}` : opener;
+
+  return { ok: true, prospectId, script };
 }
 
 /**

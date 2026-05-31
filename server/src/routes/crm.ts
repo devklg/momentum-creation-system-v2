@@ -28,8 +28,8 @@ import type {
   CreateNotePayload,
   CreateNoteResponse,
   CrmBundleResponse,
-  ReinviteCooldownError,
   ReinviteResponse,
+  ReinviteScriptResponse,
   ReinviteTerminalError,
   ReinviteUnsentError,
   SetDispositionPayload,
@@ -50,6 +50,7 @@ import {
   getCrmBundle,
   getTodaysActions,
   reinvite,
+  reinviteScript,
   setDisposition,
   setFollowUp,
 } from '../domain/crm.js';
@@ -243,16 +244,7 @@ crmRoutes.post(
       const result: ReinviteResponse = await reinvite(prospectId, sponsorBaId);
       return res.status(200).json(result);
     } catch (err) {
-      if (err instanceof CrmError && err.code === 'cooldown') {
-        // 429 — needs to wait. The bundle endpoint surfaces the exact time;
-        // the client can re-fetch the bundle to render the countdown.
-        const body: ReinviteCooldownError = {
-          ok: false,
-          error: 'cooldown',
-          availableAt: new Date().toISOString(), // placeholder; UI re-fetches bundle for the real time
-        };
-        return res.status(429).json(body);
-      }
+      // No cooldown gate (Chat #147, seq 23) — the BA decides timing.
       if (err instanceof CrmError && err.code === 'not_yet_sent') {
         const body: ReinviteUnsentError = { ok: false, error: 'not_yet_sent' };
         return res.status(409).json(body);
@@ -261,6 +253,32 @@ crmRoutes.post(
         const body: ReinviteTerminalError = { ok: false, error: 'enrolled' };
         return res.status(409).json(body);
       }
+      return sendCrmError(res, err);
+    }
+  },
+);
+
+// ── POST /api/crm/:prospectId/reinvite-script (Chat #147, seq 23) ──────────
+//
+// Surfaces a ready-to-send, compliance-clean re-invite message the BA can
+// copy. This NEVER mints/sends/gates — re-invite has no cooldown (seq 23);
+// this is just the SCRIPT BUTTON's copy source.
+
+crmRoutes.post(
+  '/:prospectId/reinvite-script',
+  requireAuth,
+  requireMichaelComplete,
+  async (req, res) => {
+    const sponsorBaId = req.session?.baId;
+    if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+    const prospectId = getProspectId(req);
+    if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
+
+    try {
+      const result: ReinviteScriptResponse = await reinviteScript(prospectId, sponsorBaId);
+      return res.status(200).json(result);
+    } catch (err) {
       return sendCrmError(res, err);
     }
   },
