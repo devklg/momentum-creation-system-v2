@@ -19,7 +19,7 @@ locked-spec wins on STATE. This wireframe is the BUILD DECOMPOSITION of that
 state â€” if it disagrees with locked-spec, locked-spec wins and this gets fixed.
 Depth is weighted toward UNBUILT surfaces (that's where a session needs detail).
 
-HEAD at write: `664b42c` (Chat #145). Verified Chat #146 (Section 4.F status reconciled vs Codex PR #4 / bb03711).
+HEAD at write: `d20741f` (Chat #146). Reconciled Chat #147 (Category-A decisions seq 19-25: F.6 dropped, Michael/orientation/leader-credibility/track-record/cockpit+profile-edges leaves added, open-decisions block cleared).
 
 ---
 
@@ -60,7 +60,7 @@ One route /p/{token}, two faces by token state.
 - [x] 08 KevinStory (luxury-favorite.jpeg full-bleed) Â· 09 Timing Â· 10 WhatsNext (presentationâ†’dashboard bridge closer, #126 â€” REPLACED QuietDoor callback section; callback now lives on dashboard Â§6) Â· 11 Footer
 - [x] OG-injection middleware (token-resolved card)
 - [x] CONTENT: drop dossier PDF -> flip DOSSIER_AVAILABLE flag in 07-Dossier.tsx (done #115; PDF at `apps/com/public/assets/glp-three-dossier.pdf`)
-- [x] CONTENT: fix literal \u2014 in Part 7 eyebrow (10-QuietDoor.tsx: 4 occurrences replaced with real em dash, content/hygiene pass)
+- [x] HYGIENE #147: removed orphaned `10-QuietDoor.tsx` (replaced by 10-WhatsNext #126, never imported by the composer; em-dash content fix is moot with the file gone)
 
 ### 2.3 Holding-tank placement  `[x]` (#105)
 - [x] Silent placement at video_complete, monotonic position, triple-stack write
@@ -96,14 +96,15 @@ One route /p/{token}, two faces by token state.
 - [x] Click-acknowledge commitment, triple-stack write, routes to Michael
 - [ ] Audit current welcome.tsx against locked-spec v2; merge welcome-prototype-v2 letter-voice + 7-day-arc strip
 
-### 3.2 Michael interview surface  `[x]` (#102, #134)
+### 3.2 Michael interview surface  `[~]` (#102, #134; interview content #147)
 - [x] Scheduler + Telnyx call origination + webhook + STT wiring
 - [x] State 1 â€” Awaiting call (gold pill, pulsing dot, wrong-number link) (#134 wf_0038)
 - [x] State 2 â€” Call in progress (teal pill, near-real-time transcript via SSE, speaker labels, no buttons) (#134 wf_0039)
 - [x] State 3 â€” Complete (gold check, answer readback, signed-by, CTA to Fast Start) (#134 wf_0040)
 - [x] Fallbacks (no-answer + reschedule, invalid-number banner, page-close resume via /state refetch, STT-fail audio) (#134 wf_0041)
 - [x] Upline cockpit event card (answers + audio link + scoring tags, SPONSOR-ONLY server-enforced) (#134 wf_0042)
-- DEP: Michael's 5 prompts (open â€” surface renders whatever the scoring worker submits; no hard-coded prompts on client); call-timing immediate-vs-delay (resolved â€” Kevin chose scheduler)
+- [ ] INTERVIEW BUILD (#147, dec_michael_interview seq 20): full 29-Q New Associate Success Interview as natural guided VOICE conversation (script = backbone, LLM expands; adaptive dig-to-the-why follow-ups); 6-category weighted rubric (Vision 20 / Commitment 20 / Coachability 20 / Time 15 / Network 15 / Experience 10 = 100) -> 4 classifications (Builder 85-100 / Emerging Leader 70-84 / Part-Time Producer 50-69 / Casual 0-49); classifications are INTEL TAGS ONLY (no auto-routing); post-interview sets up existing Fast Start + fires founder-handoff trigger to Paul+Kevin (profile attached) for human-led training+orientation; transcripts+scores feed GraphRAG
+- DEP RESOLVED (#147): Michael's interview content = full 29-Q script (was "5 prompts open"); call-timing immediate-vs-delay (Kevin chose scheduler)
 
 ### 3.3 BA Cockpit  `[~]` (#121, #132)
 - [x] My Sponsor card (name+phone+SMS button; founder override for Kevin/Paul)
@@ -111,6 +112,8 @@ One route /p/{token}, two faces by token state.
 - [x] Welcome banner / left-rail surfaces nav
 - [x] Today's actions card (callbacks + due follow-ups + expiring windows, bias-prompt empty state, jump-to-row) (#132/#134 wf_0046)
 - [x] CRM per invite â€” notes (append-only), follow-up reminders (one active, replace-or-clear), 5-tag dispositions (new-ba/new-customer/interested/later/not-interested), re-invite (7-day cooldown, mints fresh if expired) (#132)
+- [ ] EDGE (#147, dec_cockpit_sponsor_and_reinvite seq 23): REMOVE the 7-day re-invite cooldown gate â€” BA decides timing; add a re-invite SCRIPT BUTTON (surfaces/generates a re-invite script; does not gate)
+- [ ] EDGE (#147, seq 23): My Sponsor card â€” if the (immutable) sponsor is INACTIVE, point the BA to founders Kevin+Paul as support/contact fallback (placement + immutable relationship unchanged)
 
 ### 3.4 Invitation engine
 - [x] **Spine** â€” plain-form front door + mint (phone-required #125) + cockpit read-side (#119,#120,#121). VERIFIED LIVE #145: Generator minted /p/{token}, prospect page rendered against local Mongo (position #3, held by Kevin, live placement strip). NOTE the link rendered only after swapping the prod domain for localhost â€” see PROSPECT_BASE_URL bug in Section 5.
@@ -141,8 +144,8 @@ One route /p/{token}, two faces by token state.
 
 ### 3.6 10-step orientation  `[~]` (#100)
 - [x] Curriculum page ported to /training/10-steps
-- [ ] Cockpit scheduling card + slot mechanism
-- DEP: scheduling mechanism (Calendly / custom / manual â€” open)
+- [ ] Cockpit scheduling card + slot mechanism (#147, dec_orientation_scheduling seq 21): in-app GROUP orientation sessions, cap 10 BAs/session, hosts Kevin+Paul (host field assignable, leader-extensible later), REUSE webinar Event/reservation pattern (2.6) â€” NOT new infra; Michael-handoff -> cockpit card shows available sessions -> BA reserves seat -> founders see per-session roster; founders add sessions as growth demands; Google Calendar sync DEFERRED
+- DEP RESOLVED (#147): scheduling mechanism = fixed scheduled group sessions reusing webinar pattern (was Calendly/custom/manual open)
 
 ### 3.7 Replicated .com preview  `[x]` (#134)
 - [x] /preview route in-app (standalone preview.html exists, not in-app)
@@ -152,10 +155,16 @@ One route /p/{token}, two faces by token state.
 ### 3.8 Profile / settings  `[x]` (#134)
 - [x] Editable: first/last (audit), email (re-verify), phone (update), password, photo, timezone, notif prefs
 - [x] Read-only: sponsor, THREE BA ID, TM BA ID, access code held
-- DEP: phone-change verification (J.8 open — current default mirrors email re-verify); notification defaults (J.12 open — flagged in chat heartbeat)
+- [ ] J.8 phone-change verification (#147, dec_profile_verification_and_notifications seq 22): NO SMS code â€” confirmation MODAL restating the new number + why it matters (Telnyx alerts, Michael calls, prospect-login), explicit confirm before save (confirm-your-input, not an OTP)
+- [ ] J.12 notification defaults (#147, seq 22): operational signals ON by default (callback alerts, video-complete, follow-up-due); promotional/digest OFF until opt-in; all tunable in settings
+- DEP RESOLVED (#147): phone-change verification (J.8 = confirm-modal); notification defaults (J.12 = operational-on/promotional-off)
 
 ### 3.9 Onboarding carry-forward  `[x]` (3418d61)
 - [x] Questionnaire + sponsor interview workbook
+
+### 3.11 Leadership credibility + BA track-record  `[ ]` (#147, dec_leadership_credibility_and_track_record seq 25)
+- [ ] #1 LEADER CREDIBILITY (Paul+Kevin) — founder credibility component (who leads, Kevin+Paul track records, why trust the path); STATIC content, NOT master-content-driven; renders on BOTH .com presentation (prospect trust) AND .team (new-BA confidence); .com side compliance-clean (no income/comp/THREE branding)
+- [ ] #2 BA INVITATION TRACK-RECORD — .team-ONLY display of the BA's own activity (invitations generated + who they invite) as the success indicator; DISPLAY layer over existing data (spine mint log + admin per-BA invite funnel); activity metric NOT income; never shown raw on .com (protects new BAs)
 
 ---
 
@@ -238,10 +247,9 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [ ] F.2 add `{{baVoiceCopy}}` token to `com.presentation.hero` — locked-spec F.2 lists "inviting BA voice copy" as one of three interpolation fields; current impl emits only prospectFirstName / baFirstName / baFullName
 - [ ] F.5 add remaining master-content categories per spec F.5: dashboard sections 2–6 (only `callback_cta` covered of the six sections), training module copy, Michael interview prompts, Ivory prompt library, full ScriptMaker template library (currently only one `default_script` seed)
 - [ ] F.5 wire BA-facing consumers (.com renderers, ScriptMaker, Ivory, Michael) to read from `master_content_versions` — the leg that makes inheritance actually inherit
-- [ ] F.6 versioned compliance rule set — rules currently hardcoded as RegExp arrays inside `validateMasterContent()` (no_three_branding, no_income_claims, no_comp_math, no_placement_promises, no_ai_prospecting). Locked-spec F.6: "Rule changes are versioned. Audit log shows every change." Needs versioned store + audited change path, not a code constant.
-- [ ] F.6 render-time + script-time enforcement reads same rule set — .com renderers and ScriptMaker currently enforce via their own `packages/shared/src/compliance.ts`, not via the tenant rule set. Locked-spec 3.11 has three enforcement points (script / render / change-time); only change-time reads from the tenant surface today.
+- RESOLVED (#147, dec_compliance_severity_mapping seq 19): J.5.9 BLESSED as Codex default (block=critical fail-closed / warn=warn+audited / log=info). F.6 BUILD DECLINED — no versioned compliance rule set, no expanded render/script-time enforcement; existing validateMasterContent() RegExp backstop + packages/shared/src/compliance.ts checks stay as-is. (Two former F.6 leaves dropped: Kevin authors clean content by design and wants no governor; existing checks already protect the .com no-claims boundary without firing on compliant content.)
 - [ ] F.3 explicit URL-structure read-only panel — locked-spec F.3 lists token pattern, mint endpoint, resolution rules as a read-only display. Currently absorbed into F.1 domain fields. Low priority — spec itself flags this surface as read-only-display, "URL structure changes require a deploy."
-- AWAITING KEVIN (J.5.9): Codex shipped a default severity mapping inside `getTenantOverview()` — `block` → audit `critical` + fail-closed (.com saves blocked); `warn` → audit `warn`, save permitted, warning returned; `log` → audit `info`, normal master-content audit entry only. Bless or revise before this can move off the "Still open" decisions block below.
+- AWAITING KEVIN (J.5.9): RESOLVED #147 — see note below.
 
 ### 4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export)
 - [x] Composer with per-recipient {{firstName}} interpolation + preview — Composer.tsx; server-side interpolation only (client never sees rendered text for a third-party recipient)
@@ -275,19 +283,10 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 
 ## OPEN DECISIONS BLOCKING BUILDS (from ledger + locked-spec Part 5)
 
-Resolved: email=Resend(dormant) · flush=fixed-8wk · counter=SSE · webinar=Mon/Thu-5pmPT · leader-threshold · callback=two-radio · source-hierarchy(#129) · export-PII-redaction=modal-every-export(#144)
+Resolved: email=Resend(dormant) · flush=fixed-8wk · counter=SSE · webinar=Mon/Thu-5pmPT · leader-threshold · callback=two-radio · source-hierarchy(#129) · export-PII-redaction=modal-every-export(#144) · **Chat #147 cleared:** Michael-interview=full-29Q(seq20) · Fast-Start-gating=sequential-not-gated(#133) · orientation=fixed-group-sessions-cap10(seq21) · phone-verify=confirm-modal(seq22) · notif-defaults=operational-on(seq22) · position-stack-window=live-VisibleWindowPanel(#141) · compliance-severity=Codex-default+F.6-declined(seq19) · sponsor-leaves=founder-fallback(seq23) · re-invite-cooldown=removed+script-button(seq23) · leadership-track-record=defined-as-3.11-both-surfaces(seq25)
 
 Still open (only these block their surfaces):
-- Michael's 5 interview prompts -> blocks Michael State-3 readback
-- Fast Start gating (sequential-not-gated vs hard-gate) -> Fast Start
-- Orientation scheduling mechanism -> orientation card
-- Phone-change verification -> profile
-- Notification preference defaults -> profile
-- Position-stack visible window -> admin Queue E.3
-- Compliance severity mapping (block/warn/log) -> admin Tenant (Codex PR #4 / bb03711 shipped default Chat #144: block=critical fail-closed, warn=warn returned+audited, log=info via normal master-content audit. AWAITING KEVIN bless before removal from this block. Reconciled Chat #146.)
-- Sponsor-leaves card behavior -> cockpit My Sponsor edge case
-- Re-invite cooldown -> cockpit CRM re-invite
-- Leadership track-record placement inside .team -> training
+- (none currently — all Category-A decisions cleared Chat #147)
 
 ---
 
@@ -296,3 +295,4 @@ Still open (only these block their surfaces):
 *Written Chat #129. Updated Chat #144 (H + I.4/I.5 export + G all shipped; F deferred).*
 *Updated Chat #145: LLM layer VERIFIED LIVE (Anthropic key landed in .env, Ivory Coach + Generator + spine exercised end-to-end, /p/{token} rendered). Found PROSPECT_BASE_URL hardcoded-to-prod bug + triple-stack missing-collection-no-warning gap (both logged in Section 5). No new leaves shipped â€” this was runtime verification of #131 surfaces + the key activation.*
 *Updated Chat #146: Reconciled Section 4.F vs Codex PR #4 / bb03711 — code is shipped; wireframe had been silently reverted in #145 (664b42c clobbered Codex's [x] flip back to [ ] and re-added J.5.9 to open decisions). Flipped to [~] with honest sub-leaves: F.1 settings + F.4 role matrix + master-content editor [x]; F.2/F.5 inheritance [~] (saves land in master_content_versions but BA-facing consumers still read code defaults — functionally inert until rewired); 6 explicit gap leaves carried (F.2 baVoiceCopy token, F.5 remaining content categories + consumer rewire, F.6 versioned rules + render/script-time enforcement, F.3 URL panel). J.5.9 severity mapping awaiting Kevin's bless on Codex's default (block=critical fail-closed, warn=warn returned+audited, log=info). No code changed; docs-only edit.*
+*Updated Chat #147: Category-A decisions cleared (ledger seq 19-25). F.6 build DECLINED (J.5.9 blessed as Codex default) — two F.6 leaves dropped, C2 compliance lane closed. New leaves added: Michael 29-Q interview build (3.2), orientation fixed-group-session scheduler (3.6), cockpit re-invite/sponsor-fallback edges (3.3), profile J.8/J.12 (3.8), new §3.11 leadership credibility (#1 Paul/Kevin, .com+.team) + BA invitation track-record (#2, .team-only). QuietDoor orphan removed (2.2). Open-decisions block now empty. Dispatched as 8 Wave-1 worktrees (D:\mcs-*) + heartbeats agent_147_*. Queue re-synced.*
