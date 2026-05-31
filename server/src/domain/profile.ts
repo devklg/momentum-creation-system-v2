@@ -21,10 +21,14 @@
  *            authed BA + channel, matches the hash, stamps redeemedAt,
  *            and applies the change to the BA record.
  *
- * J.8 is open — the conservative default chosen here is SMS code for phone
- * change (mirrors email re-verify). Kevin may amend later; if he does, the
- * phone-side route becomes a no-challenge direct patch and the verify
- * endpoint can be removed.
+ * J.8 (RESOLVED Chat #147, seq 22, dec_profile_verification_and_notifications):
+ * phone change is NOT SMS-verified. Routinely SMS-challenging phone edits would
+ * fire thousands of needless texts. Instead the .team client shows a
+ * confirm-your-input MODAL (restating the new number and why it matters —
+ * Telnyx alerts, Michael's calls, prospect-login), and on explicit confirm the
+ * server applies the change directly via setPhone(). Email still uses the
+ * two-step code challenge (verifying ownership of a NEW inbox is different from
+ * confirming a number you typed).
  *
  * Audit:
  *   - First/last name edits append an audit entry (action
@@ -41,7 +45,6 @@ import { gatewayCall } from '../services/gateway.js';
 import { appendAuditEntry } from './auditLog.js';
 import { findBAByBaId } from './ba.js';
 import { sendEmail, ResendConfigError, ResendError } from '../services/resend.js';
-import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import type {
   BAProfile,
   BAProfilePatch,
@@ -385,55 +388,52 @@ export async function startEmailChange(
   return { ok: true, challengeId, deliveryStatus };
 }
 
-export async function startPhoneChange(
+/**
+ * J.8 (Chat #147, seq 22): apply a phone change directly — NO SMS code.
+ * The .team client gates this behind a confirm-your-input modal (restating the
+ * number + why it matters), so by the time we're called the BA has explicitly
+ * confirmed. Audited like any sensitive contact swap. pendingPhone is cleared
+ * defensively in case a stale challenge row from the old flow lingers.
+ *
+ * Phone is not on the Neo4j BA node (registerBA only sets email/name/timezone),
+ * so unlike email there's no graph update — Mongo + audit only.
+ */
+export async function setPhone(
   baId: string,
   newPhone: string,
-): Promise<StartChallengeResult> {
-  const code = mintNumericCode();
-  const now = new Date();
-  const issuedAt = now.toISOString();
-  const expiresAt = new Date(now.getTime() + CHALLENGE_TTL_MS).toISOString();
-  const challengeId = mintChallengeId();
+): Promise<{ ok: true; phone: string } | { ok: false; error: 'ba_not_found' }> {
+  const ba = await findBAByBaId(baId);
+  if (!ba) return { ok: false, error: 'ba_not_found' };
 
-  let deliveryStatus: 'sent' | 'failed' | 'skipped' = 'failed';
-  let deliveryError: string | null = null;
-  try {
-    await sendSms({
-      to: newPhone,
-      text:
-        `Team Magnificent verification code: ${code}. ` +
-        `Expires in 15 minutes. Reply STOP to opt out.`,
-    });
-    deliveryStatus = 'sent';
-  } catch (err) {
-    if (err instanceof TelnyxConfigError) {
-      deliveryStatus = 'skipped';
-      deliveryError = err.message;
-    } else if (err instanceof TelnyxError) {
-      deliveryStatus = 'failed';
-      deliveryError = err.message;
-    } else {
-      deliveryStatus = 'failed';
-      deliveryError = err instanceof Error ? err.message : 'unknown';
-    }
-  }
+  const next = newPhone.trim();
+  const before = { phone: ba.phone };
+  const after = { phone: next };
 
-  const record: ProfileChangeChallengeRecord = {
-    challengeId,
-    baId,
-    channel: 'phone',
-    target: newPhone,
-    codeHash: hashCode(code),
-    issuedAt,
-    expiresAt,
-    redeemedAt: null,
-    deliveryStatus,
-    deliveryError,
-  };
-  await persistChallenge(record);
-  await stampPendingTarget(baId, 'phone', newPhone);
+  await gatewayCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: BA_COLLECTION,
+    filter: { baId },
+    update: { $set: { phone: next, pendingPhone: null } },
+  });
 
-  return { ok: true, challengeId, deliveryStatus };
+  await appendAuditEntry({
+    actor: {
+      kind: 'ba',
+      baId,
+      displayName: `${ba.firstName} ${ba.lastName}`.trim(),
+    },
+    action: 'ba.profile.phone_change',
+    entity: {
+      kind: 'brand_ambassador',
+      id: baId,
+      displayLabel: `${ba.firstName} ${ba.lastName}`.trim(),
+    },
+    severity: 'info',
+    before,
+    after,
+  });
+
+  return { ok: true, phone: next };
 }
 
 export type VerifyResult =
@@ -514,43 +514,6 @@ export async function completeEmailChange(
   return result;
 }
 
-export async function completePhoneChange(
-  baId: string,
-  code: string,
-): Promise<VerifyResult> {
-  const ba = await findBAByBaId(baId);
-  if (!ba) return { ok: false, error: 'no_pending_challenge' };
-
-  const result = await verifyChallenge(baId, 'phone', code);
-  if (!result.ok) return result;
-
-  const before = { phone: ba.phone };
-  const after = { phone: result.appliedTo };
-
-  await gatewayCall('mongodb', 'update', {
-    database: MONGO_DB,
-    collection: BA_COLLECTION,
-    filter: { baId },
-    update: { $set: { phone: result.appliedTo } },
-  });
-  await clearPendingTarget(baId, 'phone');
-
-  await appendAuditEntry({
-    actor: {
-      kind: 'ba',
-      baId,
-      displayName: `${ba.firstName} ${ba.lastName}`.trim(),
-    },
-    action: 'ba.profile.phone_change',
-    entity: {
-      kind: 'brand_ambassador',
-      id: baId,
-      displayLabel: `${ba.firstName} ${ba.lastName}`.trim(),
-    },
-    severity: 'info',
-    before,
-    after,
-  });
-
-  return result;
-}
+// completePhoneChange REMOVED (Chat #147, seq 22): phone changes no longer use
+// the SMS-code challenge. setPhone() applies the change directly after the
+// client-side confirm modal. Email retains the two-step challenge above.
