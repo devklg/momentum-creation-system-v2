@@ -163,7 +163,7 @@ One route /p/{token}, two faces by token state.
 - [x] Questionnaire + sponsor interview workbook
 
 ### 3.11 Leadership credibility + BA track-record  `[ ]` (#147, dec_leadership_credibility_and_track_record seq 25)
-- [ ] #1 LEADER CREDIBILITY (Paul+Kevin) — founder credibility component (who leads, Kevin+Paul track records, why trust the path); STATIC content, NOT master-content-driven; renders on BOTH .com presentation (prospect trust) AND .team (new-BA confidence); .com side compliance-clean (no income/comp/THREE branding)
+- [x] #1 LEADER CREDIBILITY (Paul+Kevin) — founder credibility component (who leads, Kevin+Paul track records, why trust the path); STATIC content, NOT master-content-driven; renders on BOTH .com presentation (prospect trust) AND .team (new-BA confidence); .com side compliance-clean (no income/comp/THREE branding) (#147 — packages/shared/src/leaders.ts LEADER_CREDIBILITY; .com Section 12-Leadership.tsx; .team /leadership route + cockpit link; income line stripped for .com)
 - [x] #2 BA INVITATION TRACK-RECORD — .team-ONLY display of the BA's own activity (invitations generated + who they invite) as the success indicator; DISPLAY layer over existing data (spine mint log + admin per-BA invite funnel); activity metric NOT income; never shown raw on .com (protects new BAs) (#147 — cockpit TrackRecordCard over already-loaded GET /api/cockpit/invites)
 
 ---
