@@ -10,6 +10,7 @@
  */
 
 import { gatewayCall } from './gateway.js';
+import { assertChromaCollectionExists } from './chromaCollections.js';
 import type { TripleStackWriteResult } from '@momentum/shared';
 
 export interface TripleStackInput {
@@ -31,6 +32,15 @@ const MONGO_DB = 'momentum';
 
 export async function tripleStackWrite(input: TripleStackInput): Promise<TripleStackWriteResult> {
   const database = input.mongoDatabase ?? MONGO_DB;
+
+  // 0. Chroma collection guard (#147). The Chroma leg runs LAST below, so a
+  //    missing collection used to 500 only AFTER Mongo had committed —
+  //    orphaning the Mongo row (the #145 / #140 failure class). Assert the
+  //    collection exists up front so we fail loud BEFORE Mongo lands, never
+  //    half-write. Cache-first: free after the boot-time ensure.
+  if (input.chroma) {
+    await assertChromaCollectionExists(input.chroma.collection);
+  }
 
   // 1. Mongo insert. Use the shared `id` field as the document's _id-equivalent.
   const mongoData = await gatewayCall<{ insertedCount?: number }>('mongodb', 'insert', {

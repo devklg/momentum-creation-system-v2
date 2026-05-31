@@ -23,6 +23,7 @@ import { adminLiveOpsRoutes } from './routes/admin/liveOps.js';
 import { adminBroadcastRoutes } from './routes/admin/broadcast.js';
 import { adminTenantRoutes } from './routes/admin/tenant.js';
 import { startBroadcastWorker } from './services/broadcastQueue.js';
+import { ensureChromaCollections } from './services/chromaCollections.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { michaelRoutes } from './routes/michael.js';
 import { prospectTokenRoutes } from './routes/p.js';
@@ -184,6 +185,16 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/preview', previewRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
+
+// â”€â”€ BOOT ASSERTION (#147) â€” Chroma collections must exist before writes. â”€â”€
+// Same failure class as the #140 audit_log fix and the #145 mcs_ivory orphan:
+// ChromaDB add() does not auto-create collections, so a missing collection
+// 500's the Chroma leg AFTER Mongo has committed. ensureChromaCollections()
+// idempotently creates any registered collection that's missing and logs
+// loudly; the write-time guard in tripleStack.ts is the per-write safety net.
+// Awaited before listen so a fresh environment self-heals at startup. Does NOT
+// touch the route mount ORDER above.
+await ensureChromaCollections();
 
 app.listen(env.SERVER_PORT, () => {
   // eslint-disable-next-line no-console
