@@ -71,6 +71,7 @@ import NaturalPath from "./sections/06-NaturalPath";
 import Dossier from "./sections/07-Dossier";
 import KevinStory from "./sections/08-KevinStory";
 import Timing from "./sections/09-Timing";
+import Leadership from "./sections/12-Leadership";
 import WhatsNext from "./sections/10-WhatsNext";
 import Footer from "./sections/11-Footer";
 import { TmProspectDashboard } from "../tm-prospect-dashboard/tm-prospect-dashboard";
@@ -301,6 +302,7 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
       <Dossier />
       <KevinStory />
       <Timing />
+      <Leadership />
       <WhatsNext baFirstName={baFirstName} onSeeTeam={goToDashboard} />
       <Footer baFullName={baFullName} />
 

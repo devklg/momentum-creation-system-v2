@@ -18,6 +18,7 @@ import { InvitationsPage } from './routes/invitations';
 import { VideoLibraryPage } from './routes/video-library';
 import { IvoryPage } from './routes/ivory';
 import { ProfilePage } from './routes/profile';
+import { LeadershipPage } from './routes/leadership';
 import { PreviewPage } from './routes/preview';
 
 export function App() {
@@ -34,6 +35,7 @@ export function App() {
       <Route path="/video-library" element={<VideoLibraryPage />} />
       <Route path="/ivory" element={<IvoryPage />} />
       <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/leadership" element={<LeadershipPage />} />
       <Route path="/training/10-steps" element={<TenStepsPage />} />
       <Route path="/training/fast-start" element={<FastStartHubPage />} />
       <Route path="/training/fast-start/product" element={<ModuleProductPage />} />

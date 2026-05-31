@@ -489,6 +489,23 @@ export function CockpitPage() {
               </p>
             </div>
           </div>
+          {/* Leader credibility — who leads the system (Chat #147, surface #1) */}
+          <div>
+            <SectionLabel>Leadership</SectionLabel>
+            <button
+              type="button"
+              onClick={() => navigate('/leadership')}
+              className="w-full text-left bg-cream/[0.02] border border-gold/25 rounded-md p-5 hover:border-gold/50 transition-colors"
+            >
+              <p className="text-cream text-[14px] leading-[1.6]">
+                The people leading this team — Kevin &amp; Paul, and why you can
+                trust the path.
+              </p>
+              <p className="font-mono tracking-[0.14em] text-[11px] text-gold uppercase mt-3">
+                Meet your leaders →
+              </p>
+            </button>
+          </div>
         </aside>
       </div>
     </Shell>
