@@ -96,7 +96,7 @@ async function main() {
   }
 
   const now = new Date().toISOString();
-  const docs = leaves.map((l) => ({ ...l, synced_at: now, source: WIREFRAME, synced_chat: 129 }));
+  const docs = leaves.map((l) => ({ ...l, synced_at: now, source: WIREFRAME, synced_chat: 146 }));
   // Insert in batches to keep payloads small.
   const BATCH = 40;
   for (let i = 0; i < docs.length; i += BATCH) {

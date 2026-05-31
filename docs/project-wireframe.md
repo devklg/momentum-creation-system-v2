@@ -19,7 +19,7 @@ locked-spec wins on STATE. This wireframe is the BUILD DECOMPOSITION of that
 state â€” if it disagrees with locked-spec, locked-spec wins and this gets fixed.
 Depth is weighted toward UNBUILT surfaces (that's where a session needs detail).
 
-HEAD at write: `664b42c` (Chat #145). Verified Chat #145.
+HEAD at write: `664b42c` (Chat #145). Verified Chat #146 (Section 4.F status reconciled vs Codex PR #4 / bb03711).
 
 ---
 
@@ -230,10 +230,18 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - [x] Export with PII redaction — modal every export, Kevin picks redact/raw each time (locked Chat #144; never persisted as a preference). Redacted fields: prospectFirstName, prospectLastName, phone, email. Kept verbatim: city, prospectId, tokenId, sponsorBaId, sponsorFullName. Pure functions in server/src/services/piiRedact.ts; CSV serializer in server/src/domain/reports/export.ts. 7 append-only routes on routes/admin/reporting.ts (one per I.1 report) returning text/csv with attachment disposition. Every export (raw OR redacted) appends one audit entry with redaction choice recorded (info severity). Admin UI: ExportPanel.tsx + RedactionModal.tsx mounted on /reports route.
 - DEP RESOLVED: leader detection (Chat #100); export PII redaction (Chat #144); I.1 report library (Chat #143, I.3 composites all seven)
 
-### 4.F Tenant Architecture  `[ ]` (Section F — build 8th; deferred Chat #144)
-- [ ] Master settings, template control, role/permission, content inheritance
-- [ ] Master content validated at save-time (compliance fail-closed)
-- DEP: compliance severity mapping (open). Chat #144 deferral rationale: F.5/F.6 compose with a yet-to-exist admin master-content editor (the form that lets an admin SAVE new master templates from /admin). Without that editor, the compliance-block question is premature — today all master content lives in code and ships through deploys, where the deploy is itself the compliance gate. Build F.5/F.6 when the editor is the actual ask; the severity question will resolve in context.
+### 4.F Tenant Architecture  `[~]` (Section F — build 8th; editor surface shipped via Codex PR #4 / bb03711 merged Chat #144, wireframe reconciled Chat #146)
+- [x] F.1 master settings — tenant name + .com/.team/admin domains + compliance posture (hard-locked `fail_closed`, read-only display per spec) — GET /api/admin/tenant/overview + PATCH /api/admin/tenant/settings; triple-stacked to `tenant_settings_versions` / `:TenantSettingsVersion` / `mcs_tenant_settings`; every PATCH audit warn
+- [x] F.4 role permission matrix — 5 roles (founder_admin / leader / brand_ambassador / prospect / system) × 10 permissions, read-only display. NOTE: goes beyond locked-spec F.4 which calls for two roles (BA, Admin) — extra granularity is informational only; role assignment still env-var-only per Section A.2, no UI flow
+- [x] master-content EDITOR surface — sandboxed preview + POST /api/admin/tenant/templates/validate + PUT /api/admin/tenant/templates/:templateKey; .com violations block save with 422 + structured `TenantComplianceValidation`; saves triple-stacked to `master_content_versions` / `:MasterContentVersion` / `mcs_master_content`; audit critical on save AND on block. Resolves the #144 deferral concern (the editor surface did not exist when F was deferred)
+- [~] F.2 / F.5 master-content INHERITANCE — editor exists; 5 templates currently defined: `com.presentation.hero`, `com.dashboard.callback_cta`, `team.welcome.letter`, `team.invitation.default_script`, `admin.broadcast.sms`. Saved overrides land in `master_content_versions` but BA-facing consumers (.com renderers, ScriptMaker, Ivory, Michael) still read code defaults — they have NOT been re-wired to read from this collection. Until they are, a saved master override is FUNCTIONALLY INERT. Editor-exists ≠ inheritance-works.
+- [ ] F.2 add `{{baVoiceCopy}}` token to `com.presentation.hero` — locked-spec F.2 lists "inviting BA voice copy" as one of three interpolation fields; current impl emits only prospectFirstName / baFirstName / baFullName
+- [ ] F.5 add remaining master-content categories per spec F.5: dashboard sections 2–6 (only `callback_cta` covered of the six sections), training module copy, Michael interview prompts, Ivory prompt library, full ScriptMaker template library (currently only one `default_script` seed)
+- [ ] F.5 wire BA-facing consumers (.com renderers, ScriptMaker, Ivory, Michael) to read from `master_content_versions` — the leg that makes inheritance actually inherit
+- [ ] F.6 versioned compliance rule set — rules currently hardcoded as RegExp arrays inside `validateMasterContent()` (no_three_branding, no_income_claims, no_comp_math, no_placement_promises, no_ai_prospecting). Locked-spec F.6: "Rule changes are versioned. Audit log shows every change." Needs versioned store + audited change path, not a code constant.
+- [ ] F.6 render-time + script-time enforcement reads same rule set — .com renderers and ScriptMaker currently enforce via their own `packages/shared/src/compliance.ts`, not via the tenant rule set. Locked-spec 3.11 has three enforcement points (script / render / change-time); only change-time reads from the tenant surface today.
+- [ ] F.3 explicit URL-structure read-only panel — locked-spec F.3 lists token pattern, mint endpoint, resolution rules as a read-only display. Currently absorbed into F.1 domain fields. Low priority — spec itself flags this surface as read-only-display, "URL structure changes require a deploy."
+- AWAITING KEVIN (J.5.9): Codex shipped a default severity mapping inside `getTenantOverview()` — `block` → audit `critical` + fail-closed (.com saves blocked); `warn` → audit `warn`, save permitted, warning returned; `log` → audit `info`, normal master-content audit entry only. Bless or revise before this can move off the "Still open" decisions block below.
 
 ### 4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export)
 - [x] Composer with per-recipient {{firstName}} interpolation + preview — Composer.tsx; server-side interpolation only (client never sees rendered text for a third-party recipient)
@@ -276,7 +284,7 @@ Still open (only these block their surfaces):
 - Phone-change verification -> profile
 - Notification preference defaults -> profile
 - Position-stack visible window -> admin Queue E.3
-- Compliance severity mapping (block/warn/log) -> admin Tenant (F deferred Chat #144 until master-content editor lands; the severity question composes with that editor)
+- Compliance severity mapping (block/warn/log) -> admin Tenant (Codex PR #4 / bb03711 shipped default Chat #144: block=critical fail-closed, warn=warn returned+audited, log=info via normal master-content audit. AWAITING KEVIN bless before removal from this block. Reconciled Chat #146.)
 - Sponsor-leaves card behavior -> cockpit My Sponsor edge case
 - Re-invite cooldown -> cockpit CRM re-invite
 - Leadership track-record placement inside .team -> training
@@ -287,3 +295,4 @@ Still open (only these block their surfaces):
 *This wireframe = build decomposition. Update leaf status at the end of any chat that ships one.*
 *Written Chat #129. Updated Chat #144 (H + I.4/I.5 export + G all shipped; F deferred).*
 *Updated Chat #145: LLM layer VERIFIED LIVE (Anthropic key landed in .env, Ivory Coach + Generator + spine exercised end-to-end, /p/{token} rendered). Found PROSPECT_BASE_URL hardcoded-to-prod bug + triple-stack missing-collection-no-warning gap (both logged in Section 5). No new leaves shipped â€” this was runtime verification of #131 surfaces + the key activation.*
+*Updated Chat #146: Reconciled Section 4.F vs Codex PR #4 / bb03711 — code is shipped; wireframe had been silently reverted in #145 (664b42c clobbered Codex's [x] flip back to [ ] and re-added J.5.9 to open decisions). Flipped to [~] with honest sub-leaves: F.1 settings + F.4 role matrix + master-content editor [x]; F.2/F.5 inheritance [~] (saves land in master_content_versions but BA-facing consumers still read code defaults — functionally inert until rewired); 6 explicit gap leaves carried (F.2 baVoiceCopy token, F.5 remaining content categories + consumer rewire, F.6 versioned rules + render/script-time enforcement, F.3 URL panel). J.5.9 severity mapping awaiting Kevin's bless on Codex's default (block=critical fail-closed, warn=warn returned+audited, log=info). No code changed; docs-only edit.*
