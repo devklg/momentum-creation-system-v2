@@ -112,8 +112,8 @@ One route /p/{token}, two faces by token state.
 - [x] Welcome banner / left-rail surfaces nav
 - [x] Today's actions card (callbacks + due follow-ups + expiring windows, bias-prompt empty state, jump-to-row) (#132/#134 wf_0046)
 - [x] CRM per invite â€” notes (append-only), follow-up reminders (one active, replace-or-clear), 5-tag dispositions (new-ba/new-customer/interested/later/not-interested), re-invite (7-day cooldown, mints fresh if expired) (#132)
-- [ ] EDGE (#147, dec_cockpit_sponsor_and_reinvite seq 23): REMOVE the 7-day re-invite cooldown gate â€” BA decides timing; add a re-invite SCRIPT BUTTON (surfaces/generates a re-invite script; does not gate)
-- [ ] EDGE (#147, seq 23): My Sponsor card â€” if the (immutable) sponsor is INACTIVE, point the BA to founders Kevin+Paul as support/contact fallback (placement + immutable relationship unchanged)
+- [x] EDGE (#147, dec_cockpit_sponsor_and_reinvite seq 23): REMOVE the 7-day re-invite cooldown gate â€” BA decides timing; add a re-invite SCRIPT BUTTON (surfaces/generates a re-invite script; does not gate)
+- [x] EDGE (#147, seq 23): My Sponsor card â€” if the (immutable) sponsor is INACTIVE, point the BA to founders Kevin+Paul as support/contact fallback (placement + immutable relationship unchanged)
 
 ### 3.4 Invitation engine
 - [x] **Spine** â€” plain-form front door + mint (phone-required #125) + cockpit read-side (#119,#120,#121). VERIFIED LIVE #145: Generator minted /p/{token}, prospect page rendered against local Mongo (position #3, held by Kevin, live placement strip). NOTE the link rendered only after swapping the prod domain for localhost â€” see PROSPECT_BASE_URL bug in Section 5.
@@ -155,8 +155,8 @@ One route /p/{token}, two faces by token state.
 ### 3.8 Profile / settings  `[x]` (#134)
 - [x] Editable: first/last (audit), email (re-verify), phone (update), password, photo, timezone, notif prefs
 - [x] Read-only: sponsor, THREE BA ID, TM BA ID, access code held
-- [ ] J.8 phone-change verification (#147, dec_profile_verification_and_notifications seq 22): NO SMS code â€” confirmation MODAL restating the new number + why it matters (Telnyx alerts, Michael calls, prospect-login), explicit confirm before save (confirm-your-input, not an OTP)
-- [ ] J.12 notification defaults (#147, seq 22): operational signals ON by default (callback alerts, video-complete, follow-up-due); promotional/digest OFF until opt-in; all tunable in settings
+- [x] J.8 phone-change verification (#147, dec_profile_verification_and_notifications seq 22): NO SMS code â€” confirmation MODAL restating the new number + why it matters (Telnyx alerts, Michael calls, prospect-login), explicit confirm before save (confirm-your-input, not an OTP)
+- [x] J.12 notification defaults (#147, seq 22): operational signals ON by default (callback alerts, video-complete, follow-up-due); promotional/digest OFF until opt-in; all tunable in settings
 - DEP RESOLVED (#147): phone-change verification (J.8 = confirm-modal); notification defaults (J.12 = operational-on/promotional-off)
 
 ### 3.9 Onboarding carry-forward  `[x]` (3418d61)
