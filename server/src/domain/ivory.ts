@@ -48,6 +48,10 @@ import {
   AnthropicConfigError,
   AnthropicError,
 } from '../services/anthropic.js';
+import {
+  readMasterContent,
+  interpolateMasterContent,
+} from '../services/masterContent.js';
 import { lastInitialOf } from './prospects.js';
 import type {
   CreateIvoryNamePayload,
@@ -470,9 +474,13 @@ function stripMongoMeta<T extends { _id?: unknown }>(doc: T): IvoryName {
 // ───────────────────────────────────────────────────────────────────────
 
 /**
- * Stable cacheable system prefix for the Ivory coach. Encodes the role,
- * the WDYK posture, and the compliance rules. KEEP STABLE so prompt
- * caching hits across calls — only the per-call user turn varies.
+ * Stable, code-owned scaffolding for the Ivory coach system prompt — the role,
+ * the WDYK posture, the HARD COMPLIANCE RULES, and the JSON OUTPUT FORMAT the
+ * parser depends on. KEEP STABLE: it leads the system prompt as the cacheable
+ * prefix. The admin-tunable voice/framing is composed on AFTER this in
+ * buildCoachSystem() via the master-content chain (`team.ivory.coach_prompt`),
+ * so Kevin can re-voice Ivory without a redeploy while these guardrails stay
+ * immovable.
  */
 const COACH_SYSTEM_PREFIX = [
   'You are IVORY, a private coaching companion for Team Magnificent Brand',
@@ -594,12 +602,49 @@ function parseCoachJson(raw: string): { coaching: string; prompts: string[] } | 
   return { coaching: parsed.coaching.trim(), prompts: prompts.slice(0, 8) };
 }
 
+/**
+ * Build the coach system prompt by composing the FIXED, code-owned scaffolding
+ * (role + HARD COMPLIANCE RULES + JSON OUTPUT FORMAT — the guardrails the parser
+ * and compliance posture depend on) with the admin-tunable voice/framing block
+ * resolved through the master-content inheritance chain (TASK-147 F.5):
+ *
+ *   code default  →  master override (`team.ivory.coach_prompt`)
+ *
+ * The override lets Kevin re-voice Ivory from /admin WITHOUT a redeploy, while
+ * the scaffolding stays immovable so a voice edit can never break the JSON
+ * contract or the compliance rules. `readMasterContent()` already falls back to
+ * the code default on any gateway/Mongo failure (never throws), so the system
+ * prompt is never empty or partial — the code default is the guaranteed
+ * baseline. The scaffolding leads so it remains the stable cacheable prefix.
+ *
+ * Tokens are interpolated with the values Ivory has in scope. Unknown tokens are
+ * left intact by `interpolateMasterContent` (it never blanks), and the wrapper
+ * note tells the model any leftover `{{placeholder}}` is a stylistic cue, not
+ * literal output.
+ */
+async function buildCoachSystem(input: IvoryCoachPayload): Promise<string> {
+  const voiceTemplate = await readMasterContent('team.ivory.coach_prompt');
+  const voice = interpolateMasterContent(voiceTemplate, {
+    productName: input.productName ?? undefined,
+    angle: ANGLE_LABEL[input.angle],
+    rosterSize: input.rosterSize,
+  });
+  return [
+    COACH_SYSTEM_PREFIX,
+    '',
+    'ADMIN VOICE & FRAMING (tunable; adopt this tone and intent, but the HARD',
+    'COMPLIANCE RULES and OUTPUT FORMAT above ALWAYS win — any {{placeholder}}',
+    'left in the text is a stylistic cue, never literal output):',
+    voice,
+  ].join('\n');
+}
+
 export async function ivoryCoach(
   input: IvoryCoachPayload,
 ): Promise<IvoryCoachResponse> {
   try {
     const { text } = await complete({
-      system: COACH_SYSTEM_PREFIX,
+      system: await buildCoachSystem(input),
       messages: [{ role: 'user', content: buildCoachUserTurn(input) }],
       maxTokens: 700,
     });
