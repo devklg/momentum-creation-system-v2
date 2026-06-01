@@ -9,16 +9,28 @@
  * cited in locked-spec 1.6 verbatim.
  */
 
-export function OpportunitySection() {
+export interface OpportunitySectionProps {
+  /**
+   * Master-content-resolved lead copy (`com.dashboard.opportunity`), resolved
+   * server-side (TASK-147 inherit-com). Falls back to the built-in lead below.
+   */
+  copy?: string;
+}
+
+export function OpportunitySection({ copy }: OpportunitySectionProps) {
   return (
     <>
       <section className="tmpd-opportunity">
         <div className="eyebrow">The market you just stepped into</div>
         <h2>This isn&rsquo;t a small room.</h2>
         <p className="tmpd-opportunity-lead">
-          GLP-THREE is a natural alternative in one of the fastest-expanding
-          wellness categories on the planet. The numbers aren&rsquo;t ours —
-          they&rsquo;re public. We&rsquo;re just standing where they point.
+          {copy ?? (
+            <>
+              GLP-THREE is a natural alternative in one of the fastest-expanding
+              wellness categories on the planet. The numbers aren&rsquo;t ours —
+              they&rsquo;re public. We&rsquo;re just standing where they point.
+            </>
+          )}
         </p>
 
         <div className="tmpd-market-grid">

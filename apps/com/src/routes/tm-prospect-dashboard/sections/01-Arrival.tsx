@@ -24,10 +24,16 @@ export interface ArrivalSectionProps {
   baFirstName: string;
   positionNumber: number;
   placedAt: string;
+  /**
+   * Master-content-resolved lead copy (`com.dashboard.arrival`), resolved +
+   * interpolated server-side (TASK-147 inherit-com). Renders in place of the
+   * built-in sub-line; the hardcoded copy below is the resilience fallback.
+   */
+  copy?: string;
 }
 
 export function ArrivalSection(props: ArrivalSectionProps) {
-  const { baFullName, baFirstName, positionNumber, placedAt } = props;
+  const { baFullName, baFirstName, positionNumber, placedAt, copy } = props;
   const placedDisplay = formatPlacedAt(placedAt);
 
   return (
@@ -43,9 +49,13 @@ export function ArrivalSection(props: ArrivalSectionProps) {
         </h1>
 
         <p className="tmpd-arrival-sub">
-          The video did its work. You&rsquo;re now part of the team that&rsquo;s
-          building the fastest-moving wellness movement in network marketing.
-          Welcome.
+          {copy ?? (
+            <>
+              The video did its work. You&rsquo;re now part of the team
+              that&rsquo;s building the fastest-moving wellness movement in
+              network marketing. Welcome.
+            </>
+          )}
         </p>
 
         <div className="tmpd-position-card">

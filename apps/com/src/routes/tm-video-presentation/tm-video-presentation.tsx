@@ -60,6 +60,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import type { ComProspectCopy } from "@momentum/shared";
 
 import TickerStrip from "./sections/00-TickerStrip";
 import { PersonalOpen } from "./sections/01-PersonalOpen";
@@ -119,6 +120,14 @@ export interface ResolveTokenResponse {
     scheduledFor: string;
     hosts: string[];
   } | null;
+  /**
+   * Master-content-resolved copy for the prospect surfaces (TASK-147
+   * inherit-com), resolved + interpolated server-side. Threaded to the
+   * presentation hero (baVoiceCopy) and forwarded to the dashboard so its
+   * six sections render Kevin's overrides. Optional/null-tolerant — every
+   * consumer falls back to its built-in copy when absent.
+   */
+  copy?: ComProspectCopy | null;
 }
 
 export interface VideoCompletePlacement {
@@ -266,6 +275,7 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
         positionNumber={placement.positionNumber}
         placedAt={placement.placedAt}
         nextEvent={nextEvent}
+        copy={resolved.copy ?? null}
         onBackToPresentation={goToPresentation}
       />
     );
@@ -282,6 +292,7 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
       <PersonalOpen
         prospectFirstName={prospectFirstName}
         baFullName={baFullName}
+        baVoiceCopy={resolved.copy?.heroBaVoiceCopy ?? undefined}
       />
 
       <Invitation

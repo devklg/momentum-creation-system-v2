@@ -24,7 +24,15 @@ const CASCADE_ROWS: ReadonlyArray<{ count: number; label: string }> = [
   { count: 64, label: '64 builders' },
 ];
 
-export function MechanicSection() {
+export interface MechanicSectionProps {
+  /**
+   * Master-content-resolved lead copy (`com.dashboard.mechanic`), resolved
+   * server-side (TASK-147 inherit-com). Falls back to the built-in lead below.
+   */
+  copy?: string;
+}
+
+export function MechanicSection({ copy }: MechanicSectionProps) {
   // Sequence the rows lighting up after mount, matching the prototype.
   const [litCount, setLitCount] = useState(0);
   useEffect(() => {
@@ -42,9 +50,14 @@ export function MechanicSection() {
         <div className="eyebrow">How teams build in this market</div>
         <h2>Two people. Then they find two.</h2>
         <p className="tmpd-mechanic-lead">
-          The math is simple and the rhythm is fast. Each person finds <em>two</em>.
-          Those two each find two. The team doubles. We move on a <em>72-hour</em>
-          {' '}rhythm — speed is the multiplier, not the exception.
+          {copy ?? (
+            <>
+              The math is simple and the rhythm is fast. Each person finds{' '}
+              <em>two</em>. Those two each find two. The team doubles. We move on
+              a <em>72-hour</em> rhythm — speed is the multiplier, not the
+              exception.
+            </>
+          )}
         </p>
 
         <div className="tmpd-cascade">

@@ -82,6 +82,9 @@ export function PTokenPage() {
       // Chat #115: next upcoming webinar event resolved server-side.
       // Threaded through to dashboard Section 6 Countdown.
       nextEvent: state.data.nextEvent ?? null,
+      // TASK-147 inherit-com: master-content-resolved copy for the hero +
+      // dashboard sections, resolved + interpolated server-side.
+      copy: state.data.copy ?? null,
     };
     return <TmVideoPresentation resolved={composerInput} />;
   }

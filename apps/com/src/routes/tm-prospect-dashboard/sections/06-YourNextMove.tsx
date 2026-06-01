@@ -38,6 +38,11 @@ export interface YourNextMoveSectionProps {
     scheduledFor: string;
     hosts: string[];
   } | null;
+  /**
+   * Master-content-resolved lead copy (`com.dashboard.callback_cta`), resolved
+   * server-side (TASK-147 inherit-com). Falls back to the built-in lead below.
+   */
+  copy?: string;
 }
 
 export function YourNextMoveSection(props: YourNextMoveSectionProps) {
@@ -47,10 +52,14 @@ export function YourNextMoveSection(props: YourNextMoveSectionProps) {
         <div className="eyebrow">Your next move</div>
         <h2>Let&rsquo;s have a real conversation about this unfolding new opportunity.</h2>
         <p className="tmpd-nextmove-lead">
-          Two ways to take the next step — a personal call with{' '}
-          {props.baFirstName}, or the next live team event. Both lead to the
-          same place: two humans, an honest conversation, real context for
-          your decision.
+          {props.copy ?? (
+            <>
+              Two ways to take the next step — a personal call with{' '}
+              {props.baFirstName}, or the next live team event. Both lead to the
+              same place: two humans, an honest conversation, real context for
+              your decision.
+            </>
+          )}
         </p>
 
         <div className="tmpd-nextmove-grid">
