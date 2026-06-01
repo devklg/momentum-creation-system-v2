@@ -31,10 +31,26 @@ import { Router } from 'express';
 import type {
   ScriptMakerDraftPayload,
   ScriptMakerDraftResponse,
+  ScriptMakerDraftSelectors,
+  ScriptMakerScriptKind,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
 import { draftInvitation } from '../domain/scriptmaker.js';
+
+const SCRIPT_KINDS: ReadonlySet<ScriptMakerScriptKind> = new Set([
+  'default_script',
+  'product_anchored',
+  'reconnect',
+  'event_invite',
+]);
+
+/** Resolve the optional scriptKind selector; defaults to product_anchored. */
+function resolveScriptKind(raw: unknown): ScriptMakerScriptKind {
+  return typeof raw === 'string' && SCRIPT_KINDS.has(raw as ScriptMakerScriptKind)
+    ? (raw as ScriptMakerScriptKind)
+    : 'product_anchored';
+}
 
 export const scriptmakerRoutes: Router = Router();
 
@@ -70,11 +86,16 @@ scriptmakerRoutes.post(
       return res.status(401).json({ ok: false, error: 'Not authenticated.' });
     }
 
-    const body = req.body as Partial<ScriptMakerDraftPayload>;
+    const body = req.body as Partial<
+      ScriptMakerDraftPayload & ScriptMakerDraftSelectors
+    >;
     const productName = requiredStr(body?.productName);
     const videoTitle = requiredStr(body?.videoTitle);
     const prospectFirstName = requiredStr(body?.prospectFirstName);
     const prospectContext = optionalStr(body?.prospectContext);
+    const scriptKind = resolveScriptKind(body?.scriptKind);
+    const eventDay = optionalStr(body?.eventDay);
+    const eventTime = optionalStr(body?.eventTime);
 
     if (!productName || productName.length > PRODUCT_MAX) {
       return res.status(400).json({ ok: false, error: 'invalid_product' });
@@ -97,6 +118,9 @@ scriptmakerRoutes.post(
         videoTitle,
         prospectFirstName,
         prospectContext,
+        scriptKind,
+        eventDay,
+        eventTime,
       });
       const response: ScriptMakerDraftResponse = {
         ok: true,

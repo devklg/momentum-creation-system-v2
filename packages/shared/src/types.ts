@@ -3588,3 +3588,37 @@ export interface CockpitSponsorFallback {
   sponsorInactive: boolean;
   founders: SponsorFallbackFounder[];
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * ScriptMaker master-content seed selection (Chat #147 — inherit-scriptmaker)
+ * ───────────────────────────────────────────────────────────────────────────
+ *
+ * F.5 inheritance wave-2: ScriptMaker no longer hardcodes its draft seed
+ * language — it resolves one of four master-content invitation seeds through
+ * readMasterContent() (server/src/services/masterContent.ts). These selectors
+ * are appended (not merged into ScriptMakerDraftPayload) to honor the
+ * append-only shared-types rule; the /api/scriptmaker/draft route reads them
+ * alongside the base payload.
+ */
+
+/**
+ * Which master-content invitation seed drives a ScriptMaker draft. Maps 1:1 to
+ * the `team.invitation.*` template keys in domain/adminTenantArchitecture.ts.
+ * Defaults to 'product_anchored' (the product-video front door) when omitted.
+ */
+export type ScriptMakerScriptKind =
+  | 'default_script'
+  | 'product_anchored'
+  | 'reconnect'
+  | 'event_invite';
+
+/**
+ * Optional draft selectors accepted by POST /api/scriptmaker/draft in addition
+ * to ScriptMakerDraftPayload. `scriptKind` picks the seed; `eventDay`/
+ * `eventTime` fill the event_invite seed's {{eventDay}}/{{eventTime}} tokens.
+ */
+export interface ScriptMakerDraftSelectors {
+  scriptKind?: ScriptMakerScriptKind;
+  eventDay?: string | null;
+  eventTime?: string | null;
+}
