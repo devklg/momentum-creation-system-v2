@@ -49,12 +49,12 @@
 </head>
 <body>
   <h1>Team Magnificent — Build Checklist</h1>
-  <p class="sub1">Marketing Momentum Creation System · generated from project-wireframe.md · Chat #133 · 2026-05-31</p>
+  <p class="sub1">Marketing Momentum Creation System · generated from project-wireframe.md · Chat #133 · 2026-06-01</p>
   <div class="summary">
     <span><b>153</b> items</span>
-    <span><b>148</b> done</span>
+    <span><b>149</b> done</span>
     <span><b>2</b> partial</span>
-    <span><b>3</b> remaining</span>
+    <span><b>2</b> remaining</span>
   </div>
   <p class="legend">Legend: <code>[x]</code> done · <code>[/]</code> partial · <code>[ ]</code> to&nbsp;build</p>
   <section class="surf">
@@ -234,7 +234,7 @@
 <div class="item partial"><span class="n">131.</span><span class="box">[/]</span><span class="t">F.2 / F.5 master-content INHERITANCE — editor exists; 5 templates currently defined: `com.presentation.hero`, `com.dashboard.callback_cta`, `team.welcome.letter`, `team.invitation.default_script`, `admin.broadcast.sms`. Saved overrides land in `master_content_versions` but BA-facing consumers (.com renderers, ScriptMaker, Ivory, Michael) still read code defaults — they have NOT been re-wired to read from this collection. Until they are, a saved master override is FUNCTIONALLY INERT. Editor-exists ≠ inheritance-works. <span class="tag">(partial)</span></span></div>
 <div class="item done"><span class="n">132.</span><span class="box">[x]</span><span class="t">F.2 add `{{baVoiceCopy}}` token to `com.presentation.hero` (Chat #147 keystone) — token declared on the hero template definition; apps/com PersonalOpen renders an optional inviting-BA voice line when supplied <span class="tag">(done)</span></span></div>
 <div class="item done"><span class="n">133.</span><span class="box">[x]</span><span class="t">F.5 add remaining master-content categories per spec F.5 (Chat #147 keystone) — 12 template keys added (.com dashboard sections, ScriptMaker seed library, training, michael.interview_prompts scaffold, ivory.coach_prompt); .com defaults pass validateMasterContent; all surface in the registry-driven editor <span class="tag">(done)</span></span></div>
-<div class="item pending"><span class="n">134.</span><span class="box">[ ]</span><span class="t">F.5 wire BA-facing consumers (.com renderers, ScriptMaker, Ivory, Michael) to read from `master_content_versions` — the leg that makes inheritance actually inherit. READ-PATH NOW EXISTS (Chat #147 keystone): `server/src/services/masterContent.ts` readMasterContent(key) resolves override-else-code-default with infra-failure fallback + interpolateMasterContent(). Wave-2 inherit-* lanes swap call sites to this helper.</span></div>
+<div class="item done"><span class="n">134.</span><span class="box">[x]</span><span class="t">F.5 wire BA-facing consumers (.com renderers, ScriptMaker, Ivory, Michael) to read from `master_content_versions` — the leg that makes inheritance actually inherit. READ-PATH NOW EXISTS (Chat #147 keystone): `server/src/services/masterContent.ts` readMasterContent(key) resolves override-else-code-default with infra-failure fallback + interpolateMasterContent(). Wave-2 inherit-* lanes swap call sites to this helper. <span class="tag">(done)</span></span></div>
 <div class="item pending"><span class="n">135.</span><span class="box">[ ]</span><span class="t">F.3 explicit URL-structure read-only panel — locked-spec F.3 lists token pattern, mint endpoint, resolution rules as a read-only display. Currently absorbed into F.1 domain fields. Low priority — spec itself flags this surface as read-only-display, "URL structure changes require a deploy."</span></div>
 <h3>4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export)</h3>
 <div class="item done"><span class="n">136.</span><span class="box">[x]</span><span class="t">Composer with per-recipient {{firstName}} interpolation + preview — Composer.tsx; server-side interpolation only (client never sees rendered text for a third-party recipient) <span class="tag">(done)</span></span></div>
