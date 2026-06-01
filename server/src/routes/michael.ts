@@ -15,6 +15,7 @@ import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js'
 import {
   MICHAEL_INTERVIEW_SECTIONS,
   MICHAEL_RUBRIC_ROWS,
+  buildMichaelSystemPrompt,
 } from '../domain/michael-interview-script.js';
 import { MICHAEL_CLASSIFICATION_BANDS } from '@momentum/shared';
 import { listFounderHandoffs } from '../domain/michael-founder-handoff.js';
@@ -462,5 +463,100 @@ michaelRoutes.get(
       const msg = err instanceof Error ? err.message : 'unknown';
       res.status(500).json({ ok: false, error: `Handoff read failed: ${msg}` });
     }
+  },
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Chat #147 — inherit-michael (F.5 master-content inheritance, Wave 2)
+//
+// The Michael voice model call runs in the EXTERNAL STT→LLM→TTS worker (the same
+// worker that pushes transcript chunks + scoring back to the guarded endpoints
+// above). For the master-content-resolved interview prompt to ACTUALLY reach
+// that model call, the server must SERVE it: this endpoint returns the system
+// prompt built by buildMichaelSystemPrompt(), whose FRAMING line is resolved
+// through readMasterContent('team.michael.interview_prompts') — override-else-
+// code-default, interpolated server-side. Saving a master override changes the
+// served prompt immediately; the 29-Q backbone stays code-owned.
+//
+// Worker-secret guarded (same x-michael-worker-secret as the ingest endpoints).
+// The worker fetches this once at call start and passes `system` to its model.
+//
+// RESILIENCE: readMasterContent never throws (it degrades to the code default on
+// any gateway/Mongo hiccup), and a missing BA first name degrades to a neutral
+// greeting — so this always returns 200 with a NON-EMPTY system string. Michael
+// must never start a call with an empty prompt.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** GET /api/michael/interview/system-prompt?callSid=...|baId=... — worker → server.
+ *  Returns the resolved Michael interview system prompt for the external voice
+ *  worker's model call. Bind by callSid (worker knows it from Telnyx) with a
+ *  baId fallback. */
+michaelRoutes.get(
+  '/interview/system-prompt',
+  async (req: Request, res: Response) => {
+    if (!requireMichaelWorker(req, res)) return;
+
+    const callSid =
+      typeof req.query.callSid === 'string' ? req.query.callSid.trim() : '';
+    const baIdParam =
+      typeof req.query.baId === 'string' ? req.query.baId.trim() : '';
+    if (!callSid && !baIdParam) {
+      res
+        .status(400)
+        .json({ ok: false, error: 'Provide callSid or baId.' });
+      return;
+    }
+
+    // Resolve the BA (and their first name) the server owns the binding — the
+    // worker never asserts baId when a callSid is given.
+    const { gatewayCall } = await import('../services/gateway.js');
+    let baId = baIdParam || null;
+    if (!baId && callSid) {
+      const lookup = await gatewayCall<{ documents: { baId: string }[] }>(
+        'mongodb',
+        'query',
+        {
+          database: 'momentum',
+          collection: 'michael_schedules',
+          filter: { callSid },
+          limit: 1,
+        },
+      );
+      baId = lookup.documents[0]?.baId ?? null;
+    }
+    if (!baId) {
+      res.status(404).json({
+        ok: false,
+        error: `No schedule bound to callSid=${callSid}.`,
+      });
+      return;
+    }
+
+    // Best-effort first-name lookup. A blank/missing name degrades to a neutral
+    // greeting rather than blocking the call.
+    let firstName = '';
+    try {
+      const baLookup = await gatewayCall<{ documents: { firstName?: string }[] }>(
+        'mongodb',
+        'query',
+        {
+          database: 'momentum',
+          collection: 'brand_ambassadors',
+          filter: { baId },
+          limit: 1,
+        },
+      );
+      firstName = baLookup.documents[0]?.firstName?.trim() ?? '';
+    } catch {
+      firstName = '';
+    }
+
+    // buildMichaelSystemPrompt resolves team.michael.interview_prompts via
+    // readMasterContent (override-else-code-default, never throws) and folds it
+    // into the system prompt. This is the resolved string the model sees.
+    const system = await buildMichaelSystemPrompt({
+      baFirstName: firstName || 'there',
+    });
+    res.json({ ok: true, baId, system });
   },
 );
