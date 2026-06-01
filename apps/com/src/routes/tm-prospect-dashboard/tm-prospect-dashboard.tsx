@@ -31,6 +31,7 @@
  */
 
 import { useMemo } from 'react';
+import type { ComProspectCopy } from '@momentum/shared';
 
 import { ArrivalSection } from './sections/01-Arrival';
 import { OpportunitySection } from './sections/02-Opportunity';
@@ -67,10 +68,17 @@ export interface TmProspectDashboardProps {
    * re-watch / re-read. Optional so a future standalone mount can omit it.
    */
   onBackToPresentation?: () => void;
+  /**
+   * Master-content-resolved copy for the six dashboard sections (TASK-147
+   * inherit-com), resolved + interpolated server-side. Each section reads its
+   * own lead string from here and falls back to its built-in copy when the
+   * field is absent (older server / master-content read failure).
+   */
+  copy?: ComProspectCopy | null;
 }
 
 export function TmProspectDashboard(props: TmProspectDashboardProps) {
-  const { token, prospectFirstName, baFullName, positionNumber, placedAt, nextEvent, onBackToPresentation } = props;
+  const { token, prospectFirstName, baFullName, positionNumber, placedAt, nextEvent, copy, onBackToPresentation } = props;
 
   const baFirstName = useMemo(
     () => baFullName.trim().split(/\s+/)[0] ?? baFullName,
@@ -91,21 +99,24 @@ export function TmProspectDashboard(props: TmProspectDashboardProps) {
         baFirstName={baFirstName}
         positionNumber={positionNumber}
         placedAt={placedAt}
+        copy={copy?.dashboardArrival}
       />
-      <OpportunitySection />
-      <MechanicSection />
+      <OpportunitySection copy={copy?.dashboardOpportunity} />
+      <MechanicSection copy={copy?.dashboardMechanic} />
       <LivePlaceSection
         prospectFirstName={prospectFirstName}
         positionNumber={positionNumber}
         placedAt={placedAt}
         stream={stream}
+        copy={copy?.dashboardLivePlace}
       />
-      <TmAdvantageSection token={token} baFirstName={baFirstName} positionNumber={positionNumber} />
+      <TmAdvantageSection token={token} baFirstName={baFirstName} positionNumber={positionNumber} copy={copy?.dashboardAdvantage} />
       <YourNextMoveSection
         token={token}
         baFullName={baFullName}
         baFirstName={baFirstName}
         nextEvent={nextEvent}
+        copy={copy?.dashboardCallbackCta}
       />
       <DashboardFooter />
 

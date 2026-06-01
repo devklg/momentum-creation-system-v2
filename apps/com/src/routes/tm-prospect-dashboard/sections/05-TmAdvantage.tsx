@@ -25,10 +25,15 @@ export interface TmAdvantageSectionProps {
   token: string;
   baFirstName: string;
   positionNumber: number;
+  /**
+   * Master-content-resolved lead copy (`com.dashboard.advantage`), resolved
+   * server-side (TASK-147 inherit-com). Falls back to the built-in lead below.
+   */
+  copy?: string;
 }
 
 export function TmAdvantageSection(props: TmAdvantageSectionProps) {
-  const { token, baFirstName, positionNumber } = props;
+  const { token, baFirstName, positionNumber, copy } = props;
   const [stats, setStats] = useState<TeamStatsResponse | null>(null);
 
   useEffect(() => {
@@ -51,9 +56,13 @@ export function TmAdvantageSection(props: TmAdvantageSectionProps) {
         <div className="eyebrow">Why Team Magnificent moves faster</div>
         <h2>We work together. With the same goal.</h2>
         <p className="tmpd-advantage-lead">
-          Most teams in network marketing recruit alone — every Brand
-          Ambassador running their own scattered tools, their own scattered
-          process. Team Magnificent built the technology that changes that.
+          {copy ?? (
+            <>
+              Most teams in network marketing recruit alone — every Brand
+              Ambassador running their own scattered tools, their own scattered
+              process. Team Magnificent built the technology that changes that.
+            </>
+          )}
         </p>
 
         <div className="tmpd-quote">

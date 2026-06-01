@@ -3622,3 +3622,36 @@ export interface ScriptMakerDraftSelectors {
   eventDay?: string | null;
   eventTime?: string | null;
 }
+/**
+ * Resolved master-content copy for the .com prospect surfaces (TASK-147
+ * Wave-2 inherit-com). The server resolves each `com.*` master-content key
+ * through the inheritance chain (code default → master override) and
+ * interpolates the token-bound prospect/BA values SERVER-SIDE (the read
+ * helper is server-only), then carries the finished strings to the client
+ * on the GET /api/p/:token payload. The .com renderers consume these in
+ * place of their hardcoded copy constants so a Kevin-saved override in
+ * master_content_versions actually changes what the prospect sees.
+ *
+ * Resilience: every field is already a code-default-backed string
+ * (readMasterContent never throws). The one nullable field is
+ * `heroBaVoiceCopy` — it is non-null ONLY when the inviting-BA hero
+ * (`com.presentation.hero`) carries an actual master override; with no
+ * override the prop is absent and the generic hero sub-line carries the
+ * page (locked-spec F.2 / 3.9 "inviting BA voice copy").
+ */
+export interface ComProspectCopy {
+  /** com.presentation.hero — null unless a master override exists. */
+  heroBaVoiceCopy: string | null;
+  /** com.dashboard.arrival — Section 1 lead. */
+  dashboardArrival: string;
+  /** com.dashboard.opportunity — Section 2 lead. */
+  dashboardOpportunity: string;
+  /** com.dashboard.mechanic — Section 3 lead. */
+  dashboardMechanic: string;
+  /** com.dashboard.live_place — Section 4 lead. */
+  dashboardLivePlace: string;
+  /** com.dashboard.advantage — Section 5 lead. */
+  dashboardAdvantage: string;
+  /** com.dashboard.callback_cta — Section 6 lead. */
+  dashboardCallbackCta: string;
+}

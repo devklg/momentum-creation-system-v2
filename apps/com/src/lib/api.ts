@@ -17,6 +17,7 @@ import type {
   CallbackIntent,
   CallbackRequestPayload,
   CallbackRequestResponse,
+  ComProspectCopy,
   EnrolledResponse,
   ExpiredResponse,
   ProspectLoginRedeemPayload,
@@ -69,6 +70,15 @@ export interface ResolveTokenResponse {
     scheduledFor: string;
     hosts: string[];
   } | null;
+  /**
+   * Master-content-resolved copy for the .com prospect surfaces (TASK-147
+   * inherit-com). Resolved + interpolated server-side through the
+   * inheritance chain (code default → master override) and carried here so
+   * the presentation hero + dashboard sections render Kevin's overrides.
+   * Optional/null-tolerant: an older server or a master-content read failure
+   * leaves it absent, and every consumer falls back to its built-in copy.
+   */
+  copy?: ComProspectCopy | null;
 }
 
 /**

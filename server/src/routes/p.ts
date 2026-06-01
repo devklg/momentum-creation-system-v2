@@ -49,7 +49,19 @@ import {
   createProspectAccount,
 } from '../domain/prospectAccount.js';
 import { subscribePlacements } from '../services/poolEvents.js';
-import type { HoldingTankSnapshot, PlacementEvent, TeamStatsResponse, WebinarReservationPayload, WebinarReservationResponse } from '@momentum/shared';
+import {
+  readMasterContent,
+  readMasterTemplate,
+  interpolateMasterContent,
+} from '../services/masterContent.js';
+import type {
+  ComProspectCopy,
+  HoldingTankSnapshot,
+  PlacementEvent,
+  TeamStatsResponse,
+  WebinarReservationPayload,
+  WebinarReservationResponse,
+} from '@momentum/shared';
 
 export const prospectTokenRoutes: Router = Router();
 
@@ -139,6 +151,69 @@ function buildEnrolledResponse(ba: BARecord): EnrolledResponse {
  */
 async function findSponsorBA(sponsorBaId: string): Promise<BARecord | null> {
   return findBAByBaId(sponsorBaId);
+}
+
+/**
+ * Resolve the .com prospect-surface copy through the master-content
+ * inheritance chain (TASK-147 Wave-2 inherit-com). Each `com.*` key is read
+ * via readMasterContent (code default → master override, never throws) and
+ * interpolated SERVER-SIDE with the token-bound prospect/BA values — the read
+ * helper is server-only, so the finished strings ride the resolve payload to
+ * the client, which renders them in place of its hardcoded copy constants.
+ *
+ * The inviting-BA hero is read via readMasterTemplate so we can branch on
+ * `source`: `heroBaVoiceCopy` is supplied ONLY when an actual master override
+ * exists. With no override the field is null and the generic hero sub-line
+ * carries the page (locked-spec F.2 / 3.9 "inviting BA voice copy").
+ *
+ * RESILIENCE (locked brief §4): the prospect page must never 500 on a
+ * master-content read. readMasterContent/readMasterTemplate already degrade to
+ * the code default on any gateway/Mongo failure; this wrapper additionally
+ * catches anything unexpected and returns null so the client simply renders
+ * its built-in fallback copy.
+ */
+async function resolveComProspectCopy(args: {
+  prospectFirstName: string;
+  baFirstName: string;
+  baFullName: string;
+  positionNumber: number | null;
+}): Promise<ComProspectCopy | null> {
+  const values: Record<string, string | number | null | undefined> = {
+    prospectFirstName: args.prospectFirstName,
+    baFirstName: args.baFirstName,
+    baFullName: args.baFullName,
+    positionNumber: args.positionNumber,
+  };
+  try {
+    const [hero, arrival, opportunity, mechanic, livePlace, advantage, callbackCta] =
+      await Promise.all([
+        readMasterTemplate('com.presentation.hero'),
+        readMasterContent('com.dashboard.arrival'),
+        readMasterContent('com.dashboard.opportunity'),
+        readMasterContent('com.dashboard.mechanic'),
+        readMasterContent('com.dashboard.live_place'),
+        readMasterContent('com.dashboard.advantage'),
+        readMasterContent('com.dashboard.callback_cta'),
+      ]);
+
+    return {
+      heroBaVoiceCopy:
+        hero.source === 'master_override'
+          ? interpolateMasterContent(hero.content, values)
+          : null,
+      dashboardArrival: interpolateMasterContent(arrival, values),
+      dashboardOpportunity: interpolateMasterContent(opportunity, values),
+      dashboardMechanic: interpolateMasterContent(mechanic, values),
+      dashboardLivePlace: interpolateMasterContent(livePlace, values),
+      dashboardAdvantage: interpolateMasterContent(advantage, values),
+      dashboardCallbackCta: interpolateMasterContent(callbackCta, values),
+    };
+  } catch (err) {
+    // Never let a master-content read sink the prospect page.
+    // eslint-disable-next-line no-console
+    console.error('[resolveComProspectCopy] failed (non-fatal)', err);
+    return null;
+  }
 }
 
 
@@ -232,7 +307,19 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
         : null,
     };
 
-    return res.status(200).json(payload);
+    // TASK-147 inherit-com: resolve the .com surface copy through the
+    // master-content inheritance chain and carry the finished strings on the
+    // payload. `copy` is additive (never part of ResolvedTokenPayload's locked
+    // shape) so the .com renderers consume Kevin's overrides while old/absent
+    // clients keep working off their built-in copy. Null on any read failure.
+    const copy = await resolveComProspectCopy({
+      prospectFirstName: prospect.firstName,
+      baFirstName: ba.firstName,
+      baFullName: `${ba.firstName} ${ba.lastName}`,
+      positionNumber: prospect.positionNumber,
+    });
+
+    return res.status(200).json({ ...payload, copy });
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[GET /api/p/:token] resolve failed', err);

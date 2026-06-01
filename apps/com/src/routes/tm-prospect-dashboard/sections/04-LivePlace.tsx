@@ -40,10 +40,15 @@ export interface LivePlaceSectionProps {
   /** The prospect's own placement time — anchors the self-row (Chat #125). */
   placedAt: string;
   stream: PlacementStreamState;
+  /**
+   * Master-content-resolved lead copy (`com.dashboard.live_place`), resolved
+   * server-side (TASK-147 inherit-com). Falls back to the built-in lead below.
+   */
+  copy?: string;
 }
 
 export function LivePlaceSection(props: LivePlaceSectionProps) {
-  const { positionNumber, placedAt, stream } = props;
+  const { positionNumber, placedAt, stream, copy } = props;
   const beneathYou = Math.max(0, stream.globalMaxPosition - positionNumber);
 
   // The prospect's own position is anchored SEPARATELY above the ticker
@@ -72,8 +77,12 @@ export function LivePlaceSection(props: LivePlaceSectionProps) {
         <div className="eyebrow">Your place in the live team</div>
         <h2>The team is forming beneath you. Right now.</h2>
         <p className="tmpd-liveplace-lead">
-          You&rsquo;re position #{positionNumber}. The numbers below update
-          live. Watch what happens when you stay on this page.
+          {copy ?? (
+            <>
+              You&rsquo;re position #{positionNumber}. The numbers below update
+              live. Watch what happens when you stay on this page.
+            </>
+          )}
         </p>
 
         {/* Element 1 — the prospect's OWN anchored position. */}
