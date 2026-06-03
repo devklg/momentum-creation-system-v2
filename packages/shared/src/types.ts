@@ -834,6 +834,10 @@ export interface ProspectAccountRecord {
   sponsorBaId: string;
   /** E.164 â€” null until callback/webinar consent signal fires. */
   phone: string | null;
+  /** App-generated re-entry credential (#148): 6-char, unambiguous alphabet.
+   *  Set at invite mint so a prospect can return via phone + code even before
+   *  any consent signal. */
+  reentryCode: string;
   createdAt: IsoTimestamp;
   /** Aligned with the token's expiresAt (3.7 â€” the 8-week flush). */
   expiresAt: IsoTimestamp;

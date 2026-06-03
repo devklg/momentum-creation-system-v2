@@ -38,7 +38,7 @@
 import { Router, type Request } from 'express';
 import { z } from 'zod';
 import { findBAByBaId } from '../domain/ba.js';
-import { findAccountById } from '../domain/prospectAccount.js';
+import { findAccountById, findAccountByPhoneAndCode } from '../domain/prospectAccount.js';
 import {
   hashPhone,
   issueLinksForPhone,
@@ -46,7 +46,11 @@ import {
   redeemLink,
 } from '../domain/prospectMagicLink.js';
 import { normalizePhone } from '../domain/prospectAccount.js';
-import { openProspectSession } from '../services/prospectSession.js';
+import {
+  openProspectSession,
+  readProspectSession,
+  closeProspectSession,
+} from '../services/prospectSession.js';
 import type {
   ProspectLoginRedeemError,
   ProspectLoginRedeemResponse,
@@ -240,5 +244,79 @@ prospectLoginRoutes.post('/redeem', async (req, res) => {
     // eslint-disable-next-line no-console
     console.error('[POST /api/p/login/redeem] failed', err);
     return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
+
+// ─── POST /api/p/login/code ──────────────────────────────
+//
+// #148: phone + app-generated re-entry code. The compliant, no-SMS path
+// back — the prospect wrote the code down from his own page. Generic
+// failure shape (never reveals whether phone or code was wrong). Same
+// per-IP / per-phone rate limits as the magic-link path.
+
+const CodeBody = z.object({
+  phone: z.string().min(4).max(40),
+  code: z.string().min(4).max(16).regex(/^[A-Za-z0-9]+$/),
+});
+
+const GENERIC_CODE_ERROR = { ok: false as const, error: 'invalid_credentials' as const };
+
+prospectLoginRoutes.post('/code', async (req, res) => {
+  const ip = clientIp(req);
+  if (!rateLimitHit(`code_ip:${ip}`, REDEEM_PER_IP)) {
+    return res.status(429).json({ ok: false, error: 'rate_limited' });
+  }
+  const parsed = CodeBody.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json(GENERIC_CODE_ERROR);
+  }
+  const e164 = normalizePhone(parsed.data.phone);
+  if (!e164) {
+    return res.status(400).json(GENERIC_CODE_ERROR);
+  }
+  if (!rateLimitHit(`code_phone:${hashPhone(e164)}`, START_PER_PHONE)) {
+    return res.status(429).json({ ok: false, error: 'rate_limited' });
+  }
+  try {
+    const code = parsed.data.code.trim().toUpperCase();
+    const account = await findAccountByPhoneAndCode(e164, code);
+    if (!account) {
+      return res.status(400).json(GENERIC_CODE_ERROR);
+    }
+    await openProspectSession(res, {
+      accountId: account.accountId,
+      prospectId: account.prospectId,
+      tokenId: account.tokenId,
+      sponsorBaId: account.sponsorBaId,
+      accountExpiresAt: account.expiresAt,
+    });
+    const response: ProspectLoginRedeemResponse = {
+      ok: true,
+      tokenId: account.tokenId,
+    };
+    return res.status(200).json(response);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[POST /api/p/login/code] failed', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
+
+// ─── POST /api/p/login/logout ────────────────────────────
+//
+// #148: explicit prospect sign-out. Reads the session from the cookie,
+// deletes the session row, clears the cookie. Idempotent — no session is
+// still a 200 (clearing an absent cookie is a no-op). Useful on a shared
+// or family phone where "close the tab" is not enough.
+
+prospectLoginRoutes.post('/logout', async (req, res) => {
+  try {
+    const session = await readProspectSession(req);
+    await closeProspectSession(res, session ? session.sessionId : '');
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[POST /api/p/login/logout] failed', err);
+    return res.status(200).json({ ok: true });
   }
 });

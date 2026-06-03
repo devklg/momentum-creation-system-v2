@@ -54,6 +54,11 @@ export interface CreateProspectAccountInput {
   prospectId: string;
   tokenId: string;
   sponsorBaId: string;
+  /** BA-supplied phone, set at mint (#148). Optional only so the legacy
+   *  idempotent video-complete call site still type-checks. */
+  phone?: string | null;
+  /** App-generated re-entry code, set at mint (#148). */
+  reentryCode?: string;
   /**
    * Token's expiresAt — copied onto the account so the magic-link
    * layer and any future flush sweep can find expired rows without
@@ -180,6 +185,33 @@ export async function findAccountById(
  * (callbackRequest / webinarReservation) attaches it later via
  * attachPhoneOnConsent.
  */
+/**
+ * Login validation (#148): find an active account matching phone + reentry
+ * code. Exact match on normalized E.164 phone and the stored code. Returns
+ * the single account or null. Used by POST /api/p/login/code.
+ */
+export async function findAccountByPhoneAndCode(
+  e164: string,
+  code: string,
+  nowMs: number = Date.now(),
+): Promise<ProspectAccountRecord | null> {
+  const result = await gatewayCall<{ documents: ProspectAccountRecord[] }>(
+    'mongodb',
+    'query',
+    {
+      database: MONGO_DB,
+      collection: MONGO_COLLECTION,
+      filter: {
+        phone: e164,
+        reentryCode: code,
+        expiresAt: { $gt: new Date(nowMs).toISOString() },
+      },
+      limit: 1,
+    },
+  );
+  return result.documents[0] ?? null;
+}
+
 export async function createProspectAccount(
   input: CreateProspectAccountInput,
 ): Promise<ProspectAccountRecord> {
@@ -195,7 +227,8 @@ export async function createProspectAccount(
     prospectId: input.prospectId,
     tokenId: input.tokenId,
     sponsorBaId: input.sponsorBaId,
-    phone: null,
+    phone: input.phone ?? null,
+    reentryCode: input.reentryCode ?? '',
     createdAt,
     expiresAt: input.tokenExpiresAt,
     lastLoginAt: null,

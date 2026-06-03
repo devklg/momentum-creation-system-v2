@@ -43,6 +43,7 @@ import {
   markInvitationSent,
   type CreateInvitationInput,
 } from '../domain/invitations.js';
+import { normalizePhone } from '../domain/prospectAccount.js';
 
 export const invitationRoutes: Router = Router();
 
@@ -146,6 +147,13 @@ invitationRoutes.post('/', requireAuth, requireMichaelComplete, async (req, res)
   // the /log retroactive-record path stays lenient.
   if (!built.input.phone) {
     return res.status(400).json({ ok: false, error: 'phone_required' });
+  }
+  // #148: phone must normalize to E.164 so the prospect-account row created
+  // at mint carries a usable login key (phone + re-entry code). Reject
+  // un-parseable numbers here rather than silently minting an account the
+  // prospect can never log into.
+  if (!normalizePhone(built.input.phone)) {
+    return res.status(400).json({ ok: false, error: 'phone_invalid' });
   }
 
   try {

@@ -40,10 +40,11 @@
  *     bootstrapped Chat #119 (CK-04).
  */
 
-import { randomUUID } from 'node:crypto';
+import { randomUUID, randomInt } from 'node:crypto';
 import { env } from '../env.js';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
+import { createProspectAccount, normalizePhone } from './prospectAccount.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 import { lastInitialOf } from './prospects.js';
@@ -60,6 +61,19 @@ const PROSPECTS_COLLECTION = 'prospects';
 const TOKENS_COLLECTION = 'invite_tokens';
 const ACTIVITY_COLLECTION = 'invitation_activity';
 const CHROMA_COLLECTION = 'mcs_invitations';
+
+/**
+ * Re-entry code alphabet (#148): unambiguous - no I, O, 0, 1. A prospect
+ * writes this down from the presentation page to return via phone + code.
+ */
+const REENTRY_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function genReentryCode(len = 6): string {
+  let out = '';
+  for (let i = 0; i < len; i += 1) {
+    out += REENTRY_ALPHABET[randomInt(REENTRY_ALPHABET.length)];
+  }
+  return out;
+}
 
 /**
  * Input to createInvitation. sponsorBaId is supplied by the route from the
@@ -90,6 +104,8 @@ export interface CreateInvitationResult {
   prospectId: string;
   token: string;
   sponsorBaId: string;
+  /** App-generated re-entry code (#148), shown on-page for the prospect. */
+  reentryCode: string;
   createdAt: string;
   expiresAt: string;
   /** Fully-substituted prospect link the BA shares. */
@@ -133,6 +149,7 @@ export async function createInvitation(
 ): Promise<CreateInvitationResult> {
   const prospectId = `prospect_${randomUUID()}`;
   const token = await mintUniqueToken();
+  const reentryCode = genReentryCode();
   const createdAt = new Date().toISOString();
   const expiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
   const lastInitial = lastInitialOf(input.lastName);
@@ -256,10 +273,26 @@ export async function createInvitation(
     },
   });
 
+  // Step 4 (#148): create the prospect-account at MINT with the BA-supplied
+  // phone (normalized to E.164 so login lookups match) + the generated
+  // re-entry code. Was created at video_complete; moving it here lets a
+  // prospect return via phone + code even if he closes the tab before
+  // finishing the video or requesting a callback. createProspectAccount is
+  // idempotent on tokenId, so the later video_complete call finds this row.
+  await createProspectAccount({
+    prospectId,
+    tokenId: token,
+    sponsorBaId: input.sponsorBaId,
+    tokenExpiresAt: expiresAt,
+    phone: normalizePhone(input.phone),
+    reentryCode,
+  });
+
   return {
     prospectId,
     token,
     sponsorBaId: input.sponsorBaId,
+    reentryCode,
     createdAt,
     expiresAt,
     inviteUrl: buildInviteUrl(token),
