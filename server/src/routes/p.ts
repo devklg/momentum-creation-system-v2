@@ -35,7 +35,12 @@ import type {
   VideoEventResponse,
   TokenState,
 } from '@momentum/shared';
-import { findTokenRecord, isTokenExpired, transitionTokenState } from '../domain/tokens.js';
+import {
+  findTokenRecord,
+  isTokenExpired,
+  markTokenOpened,
+  transitionTokenState,
+} from '../domain/tokens.js';
 import { findProspectById, lastInitialOf } from '../domain/prospects.js';
 import { findBAByBaId, type BARecord } from '../domain/ba.js';
 import { buildHoldingTankSnapshot, placeProspect } from '../domain/holdingTank.js';
@@ -256,6 +261,8 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
 
+    const open = await markTokenOpened(tokenRecord.token);
+
     const [prospect, ba, nextEvent] = await Promise.all([
       findProspectById(tokenRecord.prospectId),
       findBAByBaId(tokenRecord.sponsorBaId),
@@ -275,7 +282,7 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
 
     const payload: ResolvedTokenPayload = {
       token: tokenRecord.token,
-      state: tokenRecord.state,
+      state: open.state,
       prospect: {
         firstName: prospect.firstName,
         lastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),

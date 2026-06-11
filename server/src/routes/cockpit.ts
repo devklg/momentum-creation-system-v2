@@ -23,8 +23,12 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
-import { getMyInvites, getCockpitSummary } from '../domain/cockpit.js';
-import { getCockpitTodaysActions } from '../domain/todaysActions.js';
+import {
+  getMyInvites,
+  getCockpitSummary,
+  getCockpitTodaysActions,
+  getProspectMomentumViewer,
+} from '../domain/cockpit.js';
 import { buildCockpitProspectListPdf } from '../domain/cockpitPrint.js';
 
 export const cockpitRoutes: Router = Router();
@@ -60,6 +64,26 @@ cockpitRoutes.get('/summary', requireAuth, requireMichaelComplete, async (req, r
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[GET /api/cockpit/summary] failed', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
+
+/**
+ * GET /api/cockpit/pmv — BA-scoped Prospect Momentum Viewer projection.
+ *
+ * Returns focusQueue + table rows from the same deterministic rules the
+ * cockpit Today's Actions card uses. Read-only; no outreach is sent.
+ */
+cockpitRoutes.get('/pmv', requireAuth, requireMichaelComplete, async (req, res) => {
+  const baId = req.session?.baId;
+  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  try {
+    const payload = await getProspectMomentumViewer(baId);
+    return res.status(200).json(payload);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[GET /api/cockpit/pmv] failed', err);
     return res.status(500).json({ ok: false, error: 'server_error' });
   }
 });

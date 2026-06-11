@@ -8,8 +8,8 @@ Date: 2026-06-11
 - v2 is redesign workspace: `momentum-creation-system-v2` is separated for UX/styling redesign work only.
 - Current repo: `momentum-creation-system-v2`
 - Local repo path: `D:\momentum-creation-system-v2`
-- Current branch: `task-3-prospect-dashboard`
-- v2 integration branch: `ux-redesign-v2`
+- Current branch: `task-4-pmv-backend`
+- v2 integration branch: `main` after GitHub removed the remote `ux-redesign-v2` branch during the Task 2 merge flow.
 - GitHub repo: `https://github.com/devklg/momentum-creation-system-v2`
 
 ## Completed Review Docs
@@ -68,7 +68,7 @@ Task 2: Shared Brand/Motion Primitives
 
 Task 3: Prospect Position & Momentum Center
 
-- Status: implemented on `task-3-prospect-dashboard`; ready for PR review after final branch push.
+- Status: completed, reviewed, and merged.
 - Branch: `task-3-prospect-dashboard`
 - Base used: `origin/main` at `1cecad7` because remote `ux-redesign-v2` no longer exists after PR #8; this base contains merged Task 2.
 - Allowed files touched: `.com` prospect dashboard composer, LivePlace anchor id, YourNextMove anchor id, and this checkpoint.
@@ -79,23 +79,35 @@ Task 3: Prospect Position & Momentum Center
 - Compliance scan: no new income, spillover, CV, cycle, rank, placement-promise, automated outreach, AI qualification, or auto-send language added. Existing market-stat dollar figures remain in the preserved Opportunity section from the prior approved dashboard content.
 - Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts` now also lists the dashboard composer because the new center fetches compact team stats; `.team` chunk-size warning for a 516.51 kB minified JS bundle.
 
+Task 4: PMV Backend Projection
+
+- Status: implemented on `task-4-pmv-backend`; ready for PR review after final branch push.
+- Branch: `task-4-pmv-backend`
+- Base used: `origin/main` after PR #9 merged Task 3.
+- Allowed files touched: server cockpit/token/prospect routes, shared type contracts, and this checkpoint.
+- Apps changed: no
+- Prospect-facing page design changed: no
+- Invitation spine, CRM ownership, token placement, and source tracking changed: no
+- New endpoint: `GET /api/cockpit/pmv`
+- PMV response shape: `{ ok, generatedAt, focusQueue, rows, lifecycleGaps }`
+- PMV row fields include: granular lifecycle, token state, video progress percent, click/open timestamp, source, last signal, CRM summary, follow-up due state, latest callback intent, and deterministic next action.
+- Lifecycle mapping includes: `draft`, `sent_unopened`, `clicked`, `video_started`, `video_25`, `video_50`, `video_75`, `watched`, `callback_requested`, `customer`, `enrolled`, `expired`, and `archived`.
+- Click/open stamping: `GET /api/p/:token` now idempotently stamps `invite_tokens.clickedAt` and advances `minted -> clicked` after terminal/expired checks.
+- Today’s Actions alignment: `/api/cockpit/todays-actions` now derives from the same PMV projection rules used by the Focus Queue.
+- Next actions are deterministic, explainable, BA-sent/manual only, and include no AI qualification, prospect ranking, auto-prospecting, automated calling, or auto-sending.
+- Verified backend gaps: per-milestone historical timestamps are not stored; PMV uses `invite_tokens.updatedAt` for the current partial video milestone. Archived rows appear only when a BA-owned prospect carries `deleted=true`; existing BA CRM still has no self-restore path.
+- Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`; `.team` chunk-size warning for a 516.51 kB minified JS bundle.
+
 ## Next Implementation Phases
 
-1. Task 4: PMV backend projection
-   - Granular lifecycle states.
-   - Video progress visibility.
-   - Focus Queue data.
-   - Deterministic next action.
-   - Today's Actions alignment.
-
-2. Task 5: PMV cockpit frontend
+1. Task 5: PMV cockpit frontend
    - Focus Queue.
    - Prospect Momentum Table.
    - Row drawer.
    - Next-action display.
    - CRM controls preserved.
 
-3. Task 6: Ivory Invitation Agent
+2. Task 6: Ivory Invitation Agent
    - Relationship-first BA-controlled invitation flow.
    - Person/CRM merge.
    - Relationship reason.
@@ -104,18 +116,18 @@ Task 3: Prospect Position & Momentum Center
    - Copy/send screen.
    - PMV visibility.
 
-4. Task 7: Team Launch Center
+3. Task 7: Team Launch Center
    - New-BA launch checklist.
    - Michael status card.
    - First Invitation mission.
    - Welcome handoff.
 
-5. Task 8: Questionnaire wizard / welcome shortening
+4. Task 8: Questionnaire wizard / welcome shortening
    - Guided questionnaire wizard.
    - Shorter welcome ceremony.
    - Launch Center handoff.
 
-6. Task 9: QA and compliance pass
+5. Task 9: QA and compliance pass
    - Responsive QA.
    - Reduced-motion QA.
    - Token journey QA.
@@ -152,6 +164,6 @@ Task 3: Prospect Position & Momentum Center
 
 ## Current Stop Point
 
-Task 3 prospect dashboard center has been implemented and verified. Next step is PR review/merge before beginning Task 4.
+Task 4 PMV backend projection has been implemented and verified. Next step is PR review/merge before beginning Task 5.
 
 
