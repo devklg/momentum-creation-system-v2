@@ -1,0 +1,203 @@
+{
+  "communities": {
+    "0": [
+      "admin_cde_integration_followups_apps_admin_src_app_tsx",
+      "admin_cde_integration_followups_apps_admin_src_components_admin_shell_tsx",
+      "admin_cde_integration_followups_packages_shared_src_types_ts",
+      "admin_cde_integration_followups_server_src_index_ts",
+      "chat_105_decisions_md",
+      "chat_109_decisions_md",
+      "cockpit_workflow_print_md",
+      "route_inventory_print_md"
+    ],
+    "1": [
+      "agent_briefing_md",
+      "chat84_vs_docs_md",
+      "chat_85_decisions_md",
+      "chat_94_locked_spec_rewrite_txt",
+      "dashboard_prototype_md",
+      "locked_spec_md"
+    ],
+    "2": [
+      "v2redesign_brand_visual_review",
+      "v2redesign_dashboard_ux_review",
+      "v2redesign_ivory_invitation_agent_review",
+      "v2redesign_master_ux_implementation_spec",
+      "v2redesign_prospect_momentum_viewer_review",
+      "v2redesign_team_onboarding_review"
+    ],
+    "3": [
+      "agent_briefs_g_broadcast",
+      "agent_briefs_h_server",
+      "agent_briefs_h_ui",
+      "agent_briefs_i_export",
+      "team_magnificent_admin_design"
+    ],
+    "4": [
+      "build_checklist_html",
+      "build_registry_md",
+      "handoff_contract_md",
+      "project_wireframe_md",
+      "read_me_first_md"
+    ],
+    "5": [
+      "team_magnificent_app_description",
+      "team_magnificent_com_design",
+      "team_magnificent_signup_architecture",
+      "team_magnificent_team_design"
+    ],
+    "6": [
+      "training_sources_teammagnificent_training"
+    ],
+    "7": [
+      "screenshots_team_cockpit_crm_notes_preview"
+    ],
+    "8": [
+      "screenshots_team_cockpit_preview"
+    ],
+    "9": [
+      "screenshots_team_cockpit_track_record_preview"
+    ],
+    "10": [
+      "build_plan_md"
+    ],
+    "11": [
+      "page_inventory_md"
+    ],
+    "12": [
+      "team_magnificent_app_style_guide_html"
+    ],
+    "13": [
+      "testing_links_md"
+    ]
+  },
+  "cohesion": {
+    "0": 0.43,
+    "1": 0.33,
+    "2": 0.33,
+    "3": 0.4,
+    "4": 0.5,
+    "5": 0.5,
+    "6": 1.0,
+    "7": 1.0,
+    "8": 1.0,
+    "9": 1.0,
+    "10": 1.0,
+    "11": 1.0,
+    "12": 1.0,
+    "13": 1.0
+  },
+  "gods": [
+    {
+      "id": "admin_cde_integration_followups_server_src_index_ts",
+      "label": "server/src/index.ts",
+      "degree": 6
+    },
+    {
+      "id": "route_inventory_print_md",
+      "label": "Route Inventory",
+      "degree": 5
+    },
+    {
+      "id": "v2redesign_master_ux_implementation_spec",
+      "label": "MASTER UX IMPLEMENTATION SPEC",
+      "degree": 5
+    },
+    {
+      "id": "team_magnificent_admin_design",
+      "label": "Team Magnificent ADMIN Design",
+      "degree": 4
+    },
+    {
+      "id": "locked_spec_md",
+      "label": "Locked Spec",
+      "degree": 4
+    },
+    {
+      "id": "project_wireframe_md",
+      "label": "Project Wireframe",
+      "degree": 4
+    },
+    {
+      "id": "read_me_first_md",
+      "label": "Read Me First",
+      "degree": 4
+    },
+    {
+      "id": "admin_cde_integration_followups_apps_admin_src_app_tsx",
+      "label": "apps/admin/src/App.tsx",
+      "degree": 3
+    },
+    {
+      "id": "admin_cde_integration_followups_apps_admin_src_components_admin_shell_tsx",
+      "label": "apps/admin/src/components/admin-shell.tsx",
+      "degree": 3
+    },
+    {
+      "id": "admin_cde_integration_followups_packages_shared_src_types_ts",
+      "label": "packages/shared/src/types.ts",
+      "degree": 3
+    }
+  ],
+  "surprises": [
+    {
+      "source": "Project Wireframe",
+      "target": "Agent Briefing",
+      "source_files": [
+        "project-wireframe.md",
+        "AGENT-BRIEFING.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "references",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "Cockpit Workflow Print",
+      "target": "Route Inventory",
+      "source_files": [
+        "cockpit-workflow-print.md",
+        "route-inventory-print.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "references",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `Cockpit Workflow Print` unexpectedly reaches hub `Route Inventory`"
+    },
+    {
+      "source": "Project Wireframe",
+      "target": "Locked Spec",
+      "source_files": [
+        "project-wireframe.md",
+        "locked-spec.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "references",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "Team Magnificent ADMIN Design",
+      "target": "G-broadcast Agent Brief",
+      "source_files": [
+        "graphify-out/converted/Team-Magnificent-ADMIN-Design_fd208eae.md",
+        "agent-briefs/brief-g-broadcast.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "conceptually_related_to",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
+      "source": "Team Magnificent ADMIN Design",
+      "target": "H-server Agent Brief",
+      "source_files": [
+        "graphify-out/converted/Team-Magnificent-ADMIN-Design_fd208eae.md",
+        "agent-briefs/brief-h-server.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "conceptually_related_to",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    }
+  ],
+  "tokens": {
+    "input": 217517,
+    "output": 5605
+  }
+}

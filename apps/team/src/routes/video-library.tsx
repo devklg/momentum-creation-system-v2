@@ -442,7 +442,7 @@ function LibrarySection({
 }: {
   section: LibSection;
   ytReady: boolean;
-  onDraft: (video: LibVideo, trigger: 'button') => void;
+  onDraft: (video: LibVideo, trigger: DraftTarget['trigger']) => void;
 }) {
   const count = section.videos.length;
   return (
@@ -503,7 +503,7 @@ function VideoCard({
 }: {
   video: LibVideo;
   ytReady: boolean;
-  onDraft: (video: LibVideo, trigger: 'button') => void;
+  onDraft: (video: LibVideo, trigger: DraftTarget['trigger']) => void;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<YTPlayer | null>(null);
@@ -521,7 +521,7 @@ function VideoCard({
     if (finishedRef.current) return;
     finishedRef.current = true;
     setFinished(true);
-    if (video.draftable) onDraft(video, 'button');
+    if (video.draftable) onDraft(video, 'finish');
   }, [video, onDraft]);
 
   // Create the player once the API + container are ready.
@@ -690,6 +690,10 @@ function DraftModal({
   const [error, setError] = useState<string | null>(null);
 
   const ready = firstName.trim() !== '' && !submitting;
+  const intro =
+    target.trigger === 'finish'
+      ? 'That video is done. Name one person who came to mind while you watched.'
+      : 'Name one person who came to mind while you watched.';
 
   const handleDraft = useCallback(async () => {
     if (!ready) return;
@@ -740,8 +744,7 @@ function DraftModal({
           Who do you know?
         </h2>
         <p className="text-cream-mute text-[14px] leading-[1.6] mb-6">
-          Name one person who came to mind while you watched. ScriptMaker will
-          draft a personal note about{' '}
+          {intro} ScriptMaker will draft a personal note about{' '}
           <span className="text-cream">{target.productName}</span> — you&rsquo;ll
           review and edit it on the next screen before anything is sent.
         </p>
