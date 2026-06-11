@@ -8,7 +8,7 @@ Date: 2026-06-11
 - v2 is redesign workspace: `momentum-creation-system-v2` is separated for UX/styling redesign work only.
 - Current repo: `momentum-creation-system-v2`
 - Local repo path: `D:\momentum-creation-system-v2`
-- Current branch: `task-4-pmv-backend`
+- Current branch: `task-5-pmv-frontend`
 - v2 integration branch: `main` after GitHub removed the remote `ux-redesign-v2` branch during the Task 2 merge flow.
 - GitHub repo: `https://github.com/devklg/momentum-creation-system-v2`
 
@@ -81,7 +81,7 @@ Task 3: Prospect Position & Momentum Center
 
 Task 4: PMV Backend Projection
 
-- Status: implemented on `task-4-pmv-backend`; ready for PR review after final branch push.
+- Status: completed, reviewed, and merged.
 - Branch: `task-4-pmv-backend`
 - Base used: `origin/main` after PR #9 merged Task 3.
 - Allowed files touched: server cockpit/token/prospect routes, shared type contracts, and this checkpoint.
@@ -98,16 +98,27 @@ Task 4: PMV Backend Projection
 - Verified backend gaps: per-milestone historical timestamps are not stored; PMV uses `invite_tokens.updatedAt` for the current partial video milestone. Archived rows appear only when a BA-owned prospect carries `deleted=true`; existing BA CRM still has no self-restore path.
 - Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`; `.team` chunk-size warning for a 516.51 kB minified JS bundle.
 
+Task 5: PMV Cockpit Frontend
+
+- Status: implemented on `task-5-pmv-frontend`; ready for PR review after final branch push.
+- Branch: `task-5-pmv-frontend`
+- Base used: `origin/main` after Task 4 merged.
+- Allowed files touched: `.team` cockpit route and this checkpoint.
+- Backend/server changed: no
+- `.com` prospect-facing pages changed: no
+- Shared contracts changed: no
+- First viewport now centers: Team Magnificent PMV header, counts strip, Focus Queue, status filters, and Prospect Momentum Table.
+- PMV table collapsed rows show: source, lifecycle/stage, video progress, last signal, next action, follow-up state, and priority.
+- CRM controls preserved in the row drawer: link copy, saved message/source, activity timeline, "I sent this", disposition, follow-up reminders, notes, re-invite, re-invite script, edit, and remove.
+- Secondary surfaces preserved below PMV: Track Record, My Sponsor, Orientation, CRM helper copy, and Leadership.
+- Status filters added: All, Needs action, Sent, Watching, Watched, and Closed.
+- Compliance scan: no AI lead qualification, prospect ranking, automated prospecting, automated calling, auto-send, income, spillover, CV, cycle, rank, or placement-promise language added.
+- Browser QA: attempted with the in-app browser against existing local `7702`/`7700` dev servers, but the browser runtime failed during setup with a Windows sandbox refresh error. Typecheck/build remain the verification source for this task.
+- Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`; `.team` chunk-size warning for a 521.89 kB minified JS bundle.
+
 ## Next Implementation Phases
 
-1. Task 5: PMV cockpit frontend
-   - Focus Queue.
-   - Prospect Momentum Table.
-   - Row drawer.
-   - Next-action display.
-   - CRM controls preserved.
-
-2. Task 6: Ivory Invitation Agent
+1. Task 6: Ivory Invitation Agent
    - Relationship-first BA-controlled invitation flow.
    - Person/CRM merge.
    - Relationship reason.
@@ -116,18 +127,18 @@ Task 4: PMV Backend Projection
    - Copy/send screen.
    - PMV visibility.
 
-3. Task 7: Team Launch Center
+2. Task 7: Team Launch Center
    - New-BA launch checklist.
    - Michael status card.
    - First Invitation mission.
    - Welcome handoff.
 
-4. Task 8: Questionnaire wizard / welcome shortening
+3. Task 8: Questionnaire wizard / welcome shortening
    - Guided questionnaire wizard.
    - Shorter welcome ceremony.
    - Launch Center handoff.
 
-5. Task 9: QA and compliance pass
+4. Task 9: QA and compliance pass
    - Responsive QA.
    - Reduced-motion QA.
    - Token journey QA.
@@ -164,6 +175,6 @@ Task 4: PMV Backend Projection
 
 ## Current Stop Point
 
-Task 4 PMV backend projection has been implemented and verified. Next step is PR review/merge before beginning Task 5.
+Task 5 PMV cockpit frontend has been implemented and verified. Next step is PR review/merge before beginning Task 6.
 
 
