@@ -8,7 +8,7 @@ Date: 2026-06-11
 - v2 is redesign workspace: `momentum-creation-system-v2` is separated for UX/styling redesign work only.
 - Current repo: `momentum-creation-system-v2`
 - Local repo path: `D:\momentum-creation-system-v2`
-- Current branch: `task-8-questionnaire-welcome`
+- Current branch: `task-9-qa-compliance`
 - v2 integration branch: `main` after GitHub removed the remote `ux-redesign-v2` branch during the Task 2 merge flow.
 - GitHub repo: `https://github.com/devklg/momentum-creation-system-v2`
 
@@ -154,7 +154,7 @@ Task 7: Team Launch Center
 
 Task 8: Questionnaire Wizard / Welcome Shortening
 
-- Status: implemented on `task-8-questionnaire-welcome`; ready for PR review after final branch push.
+- Status: completed, reviewed, and merged.
 - Branch: `task-8-questionnaire-welcome`
 - Base used: `origin/main` after Task 7 merged and the prior branch was deleted.
 - Allowed files touched: `.team` welcome route, `.team` onboarding questionnaire route, and this checkpoint.
@@ -171,15 +171,32 @@ Task 8: Questionnaire Wizard / Welcome Shortening
 - Compliance scan: no AI lead qualification, prospect ranking, automated prospecting, automated calling, auto-send, or prospect-facing income/placement claims added. Existing BA-facing questionnaire fields about income/product readiness were preserved as required by the current backend contract.
 - Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`; `.team` chunk-size warning for a 521.70 kB minified JS bundle.
 
+
+Task 9: QA and Compliance Pass
+
+- Status: implemented on `task-9-qa-compliance`; ready for PR review after final branch push.
+- Branch: `task-9-qa-compliance`
+- Base used: `origin/main` after Task 8 merged and the prior branch was deleted.
+- Allowed files touched: `docs/v2-redesign/qa/QA_REPORT.md`, `docs/v2-redesign/qa/COMPLIANCE_AUDIT.md`, and this checkpoint.
+- Application code changed: no
+- Backend/server changed: no
+- Shared contracts changed: no
+- `.com` prospect-facing pages changed: no
+- Token journey QA: invalid token and invalid video-event paths live-tested against the running local API; valid, expired, enrolled, and placed states source-verified because no seeded fixture tokens were provided and Task 9 avoided creating data.
+- Video milestone QA: start, 25, 50, 75, and complete mappings source-verified through `/api/p/:token/video-event`, `transitionTokenState()`, and `placeProspect()` idempotency.
+- Placement idempotency QA: source-verified in `placeProspect()`; existing placements return `alreadyPlaced:true` without minting another position.
+- PMV/CRM ownership QA: source-verified that PMV reads filter by session BA and CRM writes run ownership guards before mutation.
+- Ivory QA: source-verified create/list/update/draft/mint routes are BA-gated; mint uses the invitation spine with `source:"ivory"`; send remains manual.
+- Launch Center and questionnaire QA: source-verified durable step sources, auth/Michael gate boundaries, welcome accept handoff, and preserved questionnaire payload.
+- Responsive/reduced-motion QA: source-verified responsive breakpoints and reduced-motion media rules. Browser automation was attempted but failed twice with `windows sandbox failed: spawn setup refresh`, so no screenshots were captured.
+- Runtime smoke: existing local `7700`, `7701`, and `7702` services responded. A fresh server start from this shell failed because `JWT_SECRET` was not present in the environment.
+- Compliance audit: no required code fixes. Kevin clarified that the researched `.com` market/cost numbers are intentional informational context, not income, placement, or compensation claims; they remain unchanged.
+- Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`; `.team` chunk-size warning for a 521.70 kB minified JS bundle.
+
 ## Next Implementation Phases
 
 1. Task 9: QA and compliance pass
-   - Responsive QA.
-   - Reduced-motion QA.
-   - Token journey QA.
-   - PMV ownership QA.
-   - Ivory flow QA.
-   - Compliance copy audit.
+   - Status: implemented; PR review/merge is next.
 
 ## Exact Codex Agent Order
 
@@ -213,6 +230,4 @@ Task 8: Questionnaire Wizard / Welcome Shortening
 
 ## Current Stop Point
 
-Task 8 Questionnaire Wizard / Welcome Shortening has been implemented and verified. Next step is PR review/merge before beginning Task 9 QA/Compliance.
-
-
+Task 9 QA/Compliance has been implemented and verified locally. Next step is PR review/merge before beginning any release follow-up work.
