@@ -1,0 +1,3038 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "postcss.config.js",
+      "file_type": "code",
+      "source_file": "postcss.config.js",
+      "source_location": "L1",
+      "id": "postcss_config_js",
+      "community": 13,
+      "norm_label": "postcss.config.js"
+    },
+    {
+      "label": "tailwind.config.ts",
+      "file_type": "code",
+      "source_file": "tailwind.config.ts",
+      "source_location": "L1",
+      "id": "tailwind_config_ts",
+      "community": 11,
+      "norm_label": "tailwind.config.ts"
+    },
+    {
+      "label": "config",
+      "file_type": "code",
+      "source_file": "tailwind.config.ts",
+      "source_location": "L4",
+      "id": "com_tailwind_config_config",
+      "community": 11,
+      "norm_label": "config"
+    },
+    {
+      "label": "vite.config.ts",
+      "file_type": "code",
+      "source_file": "vite.config.ts",
+      "source_location": "L1",
+      "id": "vite_config_ts",
+      "community": 14,
+      "norm_label": "vite.config.ts"
+    },
+    {
+      "label": "App.tsx",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L1",
+      "id": "src_app_tsx",
+      "community": 3,
+      "norm_label": "app.tsx"
+    },
+    {
+      "label": "App()",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L6",
+      "id": "src_app_app",
+      "community": 3,
+      "norm_label": "app()"
+    },
+    {
+      "label": "main.tsx",
+      "file_type": "code",
+      "source_file": "src/main.tsx",
+      "source_location": "L1",
+      "id": "src_main_tsx",
+      "community": 3,
+      "norm_label": "main.tsx"
+    },
+    {
+      "label": "rootEl",
+      "file_type": "code",
+      "source_file": "src/main.tsx",
+      "source_location": "L7",
+      "id": "src_main_rootel",
+      "community": 3,
+      "norm_label": "rootel"
+    },
+    {
+      "label": "CompassRose.tsx",
+      "file_type": "code",
+      "source_file": "src/components/CompassRose.tsx",
+      "source_location": "L1",
+      "id": "src_components_compassrose_tsx",
+      "community": 3,
+      "norm_label": "compassrose.tsx"
+    },
+    {
+      "label": "api.ts",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L1",
+      "id": "src_lib_api_ts",
+      "community": 1,
+      "norm_label": "api.ts"
+    },
+    {
+      "label": "ResolvedProspect",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L36",
+      "id": "lib_api_resolvedprospect",
+      "community": 1,
+      "norm_label": "resolvedprospect"
+    },
+    {
+      "label": "ResolvedBA",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L47",
+      "id": "lib_api_resolvedba",
+      "community": 1,
+      "norm_label": "resolvedba"
+    },
+    {
+      "label": "ResolveTokenResponse",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L55",
+      "id": "lib_api_resolvetokenresponse",
+      "community": 2,
+      "norm_label": "resolvetokenresponse"
+    },
+    {
+      "label": "ResolveTokenError",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L99",
+      "id": "lib_api_resolvetokenerror",
+      "community": 1,
+      "norm_label": "resolvetokenerror"
+    },
+    {
+      "label": "VideoEventError",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L105",
+      "id": "lib_api_videoeventerror",
+      "community": 1,
+      "norm_label": "videoeventerror"
+    },
+    {
+      "label": "resolveToken()",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L111",
+      "id": "lib_api_resolvetoken",
+      "community": 1,
+      "norm_label": "resolvetoken()"
+    },
+    {
+      "label": "postVideoEvent()",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L157",
+      "id": "lib_api_postvideoevent",
+      "community": 1,
+      "norm_label": "postvideoevent()"
+    },
+    {
+      "label": "CallbackRequestError",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L204",
+      "id": "lib_api_callbackrequesterror",
+      "community": 1,
+      "norm_label": "callbackrequesterror"
+    },
+    {
+      "label": "postCallbackRequest()",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L227",
+      "id": "lib_api_postcallbackrequest",
+      "community": 1,
+      "norm_label": "postcallbackrequest()"
+    },
+    {
+      "label": "WebinarReservationError",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L277",
+      "id": "lib_api_webinarreservationerror",
+      "community": 1,
+      "norm_label": "webinarreservationerror"
+    },
+    {
+      "label": "postWebinarReservation()",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L298",
+      "id": "lib_api_postwebinarreservation",
+      "community": 1,
+      "norm_label": "postwebinarreservation()"
+    },
+    {
+      "label": "TeamStatsError",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L357",
+      "id": "lib_api_teamstatserror",
+      "community": 1,
+      "norm_label": "teamstatserror"
+    },
+    {
+      "label": "fetchTeamStats()",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L374",
+      "id": "lib_api_fetchteamstats",
+      "community": 1,
+      "norm_label": "fetchteamstats()"
+    },
+    {
+      "label": "ProspectLoginStartResult",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L426",
+      "id": "lib_api_prospectloginstartresult",
+      "community": 1,
+      "norm_label": "prospectloginstartresult"
+    },
+    {
+      "label": "postLoginStart()",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L442",
+      "id": "lib_api_postloginstart",
+      "community": 3,
+      "norm_label": "postloginstart()"
+    },
+    {
+      "label": "ProspectLoginRedeemResult",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L462",
+      "id": "lib_api_prospectloginredeemresult",
+      "community": 1,
+      "norm_label": "prospectloginredeemresult"
+    },
+    {
+      "label": "postLoginRedeem()",
+      "file_type": "code",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L477",
+      "id": "lib_api_postloginredeem",
+      "community": 3,
+      "norm_label": "postloginredeem()"
+    },
+    {
+      "label": "usePlacementStream.ts",
+      "file_type": "code",
+      "source_file": "src/lib/usePlacementStream.ts",
+      "source_location": "L1",
+      "id": "src_lib_useplacementstream_ts",
+      "community": 5,
+      "norm_label": "useplacementstream.ts"
+    },
+    {
+      "label": "PlacementStreamState",
+      "file_type": "code",
+      "source_file": "src/lib/usePlacementStream.ts",
+      "source_location": "L33",
+      "id": "lib_useplacementstream_placementstreamstate",
+      "community": 5,
+      "norm_label": "placementstreamstate"
+    },
+    {
+      "label": "INITIAL",
+      "file_type": "code",
+      "source_file": "src/lib/usePlacementStream.ts",
+      "source_location": "L46",
+      "id": "lib_useplacementstream_initial",
+      "community": 5,
+      "norm_label": "initial"
+    },
+    {
+      "label": "utils.ts",
+      "file_type": "code",
+      "source_file": "src/lib/utils.ts",
+      "source_location": "L1",
+      "id": "src_lib_utils_ts",
+      "community": 12,
+      "norm_label": "utils.ts"
+    },
+    {
+      "label": "cn()",
+      "file_type": "code",
+      "source_file": "src/lib/utils.ts",
+      "source_location": "L4",
+      "id": "lib_utils_cn",
+      "community": 12,
+      "norm_label": "cn()"
+    },
+    {
+      "label": "p-login-redeem.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L1",
+      "id": "src_routes_p_login_redeem_tsx",
+      "community": 3,
+      "norm_label": "p-login-redeem.tsx"
+    },
+    {
+      "label": "RedeemView",
+      "file_type": "code",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L24",
+      "id": "routes_p_login_redeem_redeemview",
+      "community": 3,
+      "norm_label": "redeemview"
+    },
+    {
+      "label": "PLoginRedeemPage()",
+      "file_type": "code",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L30",
+      "id": "routes_p_login_redeem_ploginredeempage",
+      "community": 3,
+      "norm_label": "ploginredeempage()"
+    },
+    {
+      "label": "RedeemingView()",
+      "file_type": "code",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L88",
+      "id": "routes_p_login_redeem_redeemingview",
+      "community": 3,
+      "norm_label": "redeemingview()"
+    },
+    {
+      "label": "InvalidView()",
+      "file_type": "code",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L101",
+      "id": "routes_p_login_redeem_invalidview",
+      "community": 3,
+      "norm_label": "invalidview()"
+    },
+    {
+      "label": "p-login.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L1",
+      "id": "src_routes_p_login_tsx",
+      "community": 3,
+      "norm_label": "p-login.tsx"
+    },
+    {
+      "label": "ViewState",
+      "file_type": "code",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L33",
+      "id": "routes_p_login_viewstate",
+      "community": 3,
+      "norm_label": "viewstate"
+    },
+    {
+      "label": "PLoginPage()",
+      "file_type": "code",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L40",
+      "id": "routes_p_login_ploginpage",
+      "community": 3,
+      "norm_label": "ploginpage()"
+    },
+    {
+      "label": "FormView()",
+      "file_type": "code",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L94",
+      "id": "routes_p_login_formview",
+      "community": 3,
+      "norm_label": "formview()"
+    },
+    {
+      "label": "SentView()",
+      "file_type": "code",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L153",
+      "id": "routes_p_login_sentview",
+      "community": 3,
+      "norm_label": "sentview()"
+    },
+    {
+      "label": "RateLimitedView()",
+      "file_type": "code",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L175",
+      "id": "routes_p_login_ratelimitedview",
+      "community": 3,
+      "norm_label": "ratelimitedview()"
+    },
+    {
+      "label": "NetworkErrorView()",
+      "file_type": "code",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L200",
+      "id": "routes_p_login_networkerrorview",
+      "community": 3,
+      "norm_label": "networkerrorview()"
+    },
+    {
+      "label": "tm-prospect-dashboard.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "community": 0,
+      "norm_label": "tm-prospect-dashboard.tsx"
+    },
+    {
+      "label": "TmProspectDashboardProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L46",
+      "id": "tm_prospect_dashboard_tm_prospect_dashboard_tmprospectdashboardprops",
+      "community": 0,
+      "norm_label": "tmprospectdashboardprops"
+    },
+    {
+      "label": "DashboardShellStyles()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L137",
+      "id": "tm_prospect_dashboard_tm_prospect_dashboard_dashboardshellstyles",
+      "community": 0,
+      "norm_label": "dashboardshellstyles()"
+    },
+    {
+      "label": "00-Ribbon.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_prospect_dashboard_sections_00_ribbon_tsx",
+      "community": 0,
+      "norm_label": "00-ribbon.tsx"
+    },
+    {
+      "label": "DashboardRibbonProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx",
+      "source_location": "L19",
+      "id": "sections_00_ribbon_dashboardribbonprops",
+      "community": 0,
+      "norm_label": "dashboardribbonprops"
+    },
+    {
+      "label": "DashboardRibbon()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx",
+      "source_location": "L24",
+      "id": "sections_00_ribbon_dashboardribbon",
+      "community": 0,
+      "norm_label": "dashboardribbon()"
+    },
+    {
+      "label": "01-Arrival.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_prospect_dashboard_sections_01_arrival_tsx",
+      "community": 0,
+      "norm_label": "01-arrival.tsx"
+    },
+    {
+      "label": "ArrivalSectionProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "source_location": "L21",
+      "id": "sections_01_arrival_arrivalsectionprops",
+      "community": 0,
+      "norm_label": "arrivalsectionprops"
+    },
+    {
+      "label": "ArrivalSection()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "source_location": "L35",
+      "id": "sections_01_arrival_arrivalsection",
+      "community": 0,
+      "norm_label": "arrivalsection()"
+    },
+    {
+      "label": "formatPlacedAt()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "source_location": "L94",
+      "id": "sections_01_arrival_formatplacedat",
+      "community": 0,
+      "norm_label": "formatplacedat()"
+    },
+    {
+      "label": "02-Opportunity.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_prospect_dashboard_sections_02_opportunity_tsx",
+      "community": 0,
+      "norm_label": "02-opportunity.tsx"
+    },
+    {
+      "label": "OpportunitySectionProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "source_location": "L12",
+      "id": "sections_02_opportunity_opportunitysectionprops",
+      "community": 0,
+      "norm_label": "opportunitysectionprops"
+    },
+    {
+      "label": "OpportunitySection()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "source_location": "L20",
+      "id": "sections_02_opportunity_opportunitysection",
+      "community": 0,
+      "norm_label": "opportunitysection()"
+    },
+    {
+      "label": "MarketCell()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "source_location": "L48",
+      "id": "sections_02_opportunity_marketcell",
+      "community": 0,
+      "norm_label": "marketcell()"
+    },
+    {
+      "label": "03-Mechanic.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_prospect_dashboard_sections_03_mechanic_tsx",
+      "community": 0,
+      "norm_label": "03-mechanic.tsx"
+    },
+    {
+      "label": "CASCADE_ROWS",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "source_location": "L17",
+      "id": "sections_03_mechanic_cascade_rows",
+      "community": 0,
+      "norm_label": "cascade_rows"
+    },
+    {
+      "label": "MechanicSection()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "source_location": "L35",
+      "id": "sections_03_mechanic_mechanicsection",
+      "community": 0,
+      "norm_label": "mechanicsection()"
+    },
+    {
+      "label": "Principle()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "source_location": "L110",
+      "id": "sections_03_mechanic_principle",
+      "community": 0,
+      "norm_label": "principle()"
+    },
+    {
+      "label": "04-LivePlace.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_prospect_dashboard_sections_04_liveplace_tsx",
+      "community": 5,
+      "norm_label": "04-liveplace.tsx"
+    },
+    {
+      "label": "LivePlaceSectionProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L37",
+      "id": "sections_04_liveplace_liveplacesectionprops",
+      "community": 5,
+      "norm_label": "liveplacesectionprops"
+    },
+    {
+      "label": "LivePlaceSection()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L50",
+      "id": "sections_04_liveplace_liveplacesection",
+      "community": 5,
+      "norm_label": "liveplacesection()"
+    },
+    {
+      "label": "TickerEntry()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L155",
+      "id": "sections_04_liveplace_tickerentry",
+      "community": 5,
+      "norm_label": "tickerentry()"
+    },
+    {
+      "label": "formatTime()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L181",
+      "id": "sections_04_liveplace_formattime",
+      "community": 5,
+      "norm_label": "formattime()"
+    },
+    {
+      "label": "05-TmAdvantage.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_prospect_dashboard_sections_05_tmadvantage_tsx",
+      "community": 0,
+      "norm_label": "05-tmadvantage.tsx"
+    },
+    {
+      "label": "TmAdvantageSection()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "source_location": "L35",
+      "id": "sections_05_tmadvantage_tmadvantagesection",
+      "community": 0,
+      "norm_label": "tmadvantagesection()"
+    },
+    {
+      "label": "PoolStat()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "source_location": "L147",
+      "id": "sections_05_tmadvantage_poolstat",
+      "community": 0,
+      "norm_label": "poolstat()"
+    },
+    {
+      "label": "formatVelocity()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "source_location": "L172",
+      "id": "sections_05_tmadvantage_formatvelocity",
+      "community": 0,
+      "norm_label": "formatvelocity()"
+    },
+    {
+      "label": "06-YourNextMove.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "community": 1,
+      "norm_label": "06-yournextmove.tsx"
+    },
+    {
+      "label": "YourNextMoveSectionProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L26",
+      "id": "sections_06_yournextmove_yournextmovesectionprops",
+      "community": 1,
+      "norm_label": "yournextmovesectionprops"
+    },
+    {
+      "label": "YourNextMoveSection()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L48",
+      "id": "sections_06_yournextmove_yournextmovesection",
+      "community": 1,
+      "norm_label": "yournextmovesection()"
+    },
+    {
+      "label": "CallbackCard()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L84",
+      "id": "sections_06_yournextmove_callbackcard",
+      "community": 1,
+      "norm_label": "callbackcard()"
+    },
+    {
+      "label": "ReasonRadio()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L167",
+      "id": "sections_06_yournextmove_reasonradio",
+      "community": 1,
+      "norm_label": "reasonradio()"
+    },
+    {
+      "label": "WebinarCard()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L186",
+      "id": "sections_06_yournextmove_webinarcard",
+      "community": 1,
+      "norm_label": "webinarcard()"
+    },
+    {
+      "label": "Countdown()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L300",
+      "id": "sections_06_yournextmove_countdown",
+      "community": 1,
+      "norm_label": "countdown()"
+    },
+    {
+      "label": "CountdownUnit()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L361",
+      "id": "sections_06_yournextmove_countdownunit",
+      "community": 1,
+      "norm_label": "countdownunit()"
+    },
+    {
+      "label": "formatEventWhen()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L371",
+      "id": "sections_06_yournextmove_formateventwhen",
+      "community": 1,
+      "norm_label": "formateventwhen()"
+    },
+    {
+      "label": "07-Footer.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/07-Footer.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_prospect_dashboard_sections_07_footer_tsx",
+      "community": 0,
+      "norm_label": "07-footer.tsx"
+    },
+    {
+      "label": "DashboardFooter()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/07-Footer.tsx",
+      "source_location": "L22",
+      "id": "sections_07_footer_dashboardfooter",
+      "community": 0,
+      "norm_label": "dashboardfooter()"
+    },
+    {
+      "label": "tm-video-presentation.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "community": 2,
+      "norm_label": "tm-video-presentation.tsx"
+    },
+    {
+      "label": "VideoEventKind",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L86",
+      "id": "tm_video_presentation_tm_video_presentation_videoeventkind",
+      "community": 4,
+      "norm_label": "videoeventkind"
+    },
+    {
+      "label": "ResolveTokenState",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L93",
+      "id": "tm_video_presentation_tm_video_presentation_resolvetokenstate",
+      "community": 2,
+      "norm_label": "resolvetokenstate"
+    },
+    {
+      "label": "VideoCompletePlacement",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L133",
+      "id": "tm_video_presentation_tm_video_presentation_videocompleteplacement",
+      "community": 4,
+      "norm_label": "videocompleteplacement"
+    },
+    {
+      "label": "SurfaceView",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L140",
+      "id": "tm_video_presentation_tm_video_presentation_surfaceview",
+      "community": 2,
+      "norm_label": "surfaceview"
+    },
+    {
+      "label": "ShellStyles()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L335",
+      "id": "tm_video_presentation_tm_video_presentation_shellstyles",
+      "community": 2,
+      "norm_label": "shellstyles()"
+    },
+    {
+      "label": "00-TickerStrip.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_00_tickerstrip_tsx",
+      "community": 2,
+      "norm_label": "00-tickerstrip.tsx"
+    },
+    {
+      "label": "TickerStripProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "source_location": "L21",
+      "id": "sections_00_tickerstrip_tickerstripprops",
+      "community": 2,
+      "norm_label": "tickerstripprops"
+    },
+    {
+      "label": "TickerStrip()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "source_location": "L26",
+      "id": "sections_00_tickerstrip_tickerstrip",
+      "community": 2,
+      "norm_label": "tickerstrip()"
+    },
+    {
+      "label": "01-PersonalOpen.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/01-PersonalOpen.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_01_personalopen_tsx",
+      "community": 3,
+      "norm_label": "01-personalopen.tsx"
+    },
+    {
+      "label": "PersonalOpenProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/01-PersonalOpen.tsx",
+      "source_location": "L35",
+      "id": "sections_01_personalopen_personalopenprops",
+      "community": 3,
+      "norm_label": "personalopenprops"
+    },
+    {
+      "label": "PersonalOpen()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/01-PersonalOpen.tsx",
+      "source_location": "L49",
+      "id": "sections_01_personalopen_personalopen",
+      "community": 3,
+      "norm_label": "personalopen()"
+    },
+    {
+      "label": "02-Invitation.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/02-Invitation.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_02_invitation_tsx",
+      "community": 2,
+      "norm_label": "02-invitation.tsx"
+    },
+    {
+      "label": "InvitationProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/02-Invitation.tsx",
+      "source_location": "L25",
+      "id": "sections_02_invitation_invitationprops",
+      "community": 2,
+      "norm_label": "invitationprops"
+    },
+    {
+      "label": "Invitation()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/02-Invitation.tsx",
+      "source_location": "L31",
+      "id": "sections_02_invitation_invitation",
+      "community": 2,
+      "norm_label": "invitation()"
+    },
+    {
+      "label": "03-DrDanVideo.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_03_drdanvideo_tsx",
+      "community": 4,
+      "norm_label": "03-drdanvideo.tsx"
+    },
+    {
+      "label": "YTPlayer",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L43",
+      "id": "sections_03_drdanvideo_ytplayer",
+      "community": 4,
+      "norm_label": "ytplayer"
+    },
+    {
+      "label": "YTStateChangeEvent",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L55",
+      "id": "sections_03_drdanvideo_ytstatechangeevent",
+      "community": 4,
+      "norm_label": "ytstatechangeevent"
+    },
+    {
+      "label": "YT_PLAYER_STATE",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L58",
+      "id": "sections_03_drdanvideo_yt_player_state",
+      "community": 4,
+      "norm_label": "yt_player_state"
+    },
+    {
+      "label": "RESUME_FRACTION",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L89",
+      "id": "sections_03_drdanvideo_resume_fraction",
+      "community": 4,
+      "norm_label": "resume_fraction"
+    },
+    {
+      "label": "pickResumeFraction()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L102",
+      "id": "sections_03_drdanvideo_pickresumefraction",
+      "community": 4,
+      "norm_label": "pickresumefraction()"
+    },
+    {
+      "label": "DrDanVideoProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L115",
+      "id": "sections_03_drdanvideo_drdanvideoprops",
+      "community": 4,
+      "norm_label": "drdanvideoprops"
+    },
+    {
+      "label": "DrDanVideo()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L132",
+      "id": "sections_03_drdanvideo_drdanvideo",
+      "community": 4,
+      "norm_label": "drdanvideo()"
+    },
+    {
+      "label": "CompassPulse()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L412",
+      "id": "sections_03_drdanvideo_compasspulse",
+      "community": 4,
+      "norm_label": "compasspulse()"
+    },
+    {
+      "label": "04-Market.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_04_market_tsx",
+      "community": 6,
+      "norm_label": "04-market.tsx"
+    },
+    {
+      "label": "STATS",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "source_location": "L40",
+      "id": "sections_04_market_stats",
+      "community": 6,
+      "norm_label": "stats"
+    },
+    {
+      "label": "Market()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "source_location": "L74",
+      "id": "sections_04_market_market",
+      "community": 6,
+      "norm_label": "market()"
+    },
+    {
+      "label": "MarketTileProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "source_location": "L121",
+      "id": "sections_04_market_markettileprops",
+      "community": 6,
+      "norm_label": "markettileprops"
+    },
+    {
+      "label": "MarketTile()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "source_location": "L126",
+      "id": "sections_04_market_markettile",
+      "community": 6,
+      "norm_label": "markettile()"
+    },
+    {
+      "label": "formatCount()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "source_location": "L174",
+      "id": "sections_04_market_formatcount",
+      "community": 0,
+      "norm_label": "formatcount()"
+    },
+    {
+      "label": "05-PharmaceuticalSolution.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_05_pharmaceuticalsolution_tsx",
+      "community": 2,
+      "norm_label": "05-pharmaceuticalsolution.tsx"
+    },
+    {
+      "label": "PharmaceuticalSolution()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "source_location": "L22",
+      "id": "sections_05_pharmaceuticalsolution_pharmaceuticalsolution",
+      "community": 2,
+      "norm_label": "pharmaceuticalsolution()"
+    },
+    {
+      "label": "06-NaturalPath.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_06_naturalpath_tsx",
+      "community": 7,
+      "norm_label": "06-naturalpath.tsx"
+    },
+    {
+      "label": "CompareRow",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "source_location": "L26",
+      "id": "sections_06_naturalpath_comparerow",
+      "community": 7,
+      "norm_label": "comparerow"
+    },
+    {
+      "label": "ROWS",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "source_location": "L32",
+      "id": "sections_06_naturalpath_rows",
+      "community": 7,
+      "norm_label": "rows"
+    },
+    {
+      "label": "NaturalPath()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "source_location": "L60",
+      "id": "sections_06_naturalpath_naturalpath",
+      "community": 7,
+      "norm_label": "naturalpath()"
+    },
+    {
+      "label": "07-Dossier.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_07_dossier_tsx",
+      "community": 8,
+      "norm_label": "07-dossier.tsx"
+    },
+    {
+      "label": "DossierItem",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "source_location": "L30",
+      "id": "sections_07_dossier_dossieritem",
+      "community": 8,
+      "norm_label": "dossieritem"
+    },
+    {
+      "label": "ITEMS",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "source_location": "L38",
+      "id": "sections_07_dossier_items",
+      "community": 8,
+      "norm_label": "items"
+    },
+    {
+      "label": "Dossier()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "source_location": "L89",
+      "id": "sections_07_dossier_dossier",
+      "community": 8,
+      "norm_label": "dossier()"
+    },
+    {
+      "label": "08-KevinStory.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/08-KevinStory.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_08_kevinstory_tsx",
+      "community": 2,
+      "norm_label": "08-kevinstory.tsx"
+    },
+    {
+      "label": "KevinStory()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/08-KevinStory.tsx",
+      "source_location": "L29",
+      "id": "sections_08_kevinstory_kevinstory",
+      "community": 2,
+      "norm_label": "kevinstory()"
+    },
+    {
+      "label": "09-Timing.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_09_timing_tsx",
+      "community": 2,
+      "norm_label": "09-timing.tsx"
+    },
+    {
+      "label": "Factor",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "source_location": "L29",
+      "id": "sections_09_timing_factor",
+      "community": 2,
+      "norm_label": "factor"
+    },
+    {
+      "label": "Timing()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "source_location": "L53",
+      "id": "sections_09_timing_timing",
+      "community": 2,
+      "norm_label": "timing()"
+    },
+    {
+      "label": "10-WhatsNext.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/10-WhatsNext.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_10_whatsnext_tsx",
+      "community": 2,
+      "norm_label": "10-whatsnext.tsx"
+    },
+    {
+      "label": "WhatsNextProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/10-WhatsNext.tsx",
+      "source_location": "L52",
+      "id": "sections_10_whatsnext_whatsnextprops",
+      "community": 2,
+      "norm_label": "whatsnextprops"
+    },
+    {
+      "label": "WhatsNext()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/10-WhatsNext.tsx",
+      "source_location": "L63",
+      "id": "sections_10_whatsnext_whatsnext",
+      "community": 2,
+      "norm_label": "whatsnext()"
+    },
+    {
+      "label": "11-Footer.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_11_footer_tsx",
+      "community": 9,
+      "norm_label": "11-footer.tsx"
+    },
+    {
+      "label": "FooterProps",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "source_location": "L29",
+      "id": "sections_11_footer_footerprops",
+      "community": 9,
+      "norm_label": "footerprops"
+    },
+    {
+      "label": "Footer()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "source_location": "L33",
+      "id": "sections_11_footer_footer",
+      "community": 9,
+      "norm_label": "footer()"
+    },
+    {
+      "label": "CompassRoseMini()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "source_location": "L63",
+      "id": "sections_11_footer_compassrosemini",
+      "community": 9,
+      "norm_label": "compassrosemini()"
+    },
+    {
+      "label": "12-Leadership.tsx",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/12-Leadership.tsx",
+      "source_location": "L1",
+      "id": "src_routes_tm_video_presentation_sections_12_leadership_tsx",
+      "community": 2,
+      "norm_label": "12-leadership.tsx"
+    },
+    {
+      "label": "Leadership()",
+      "file_type": "code",
+      "source_file": "src/routes/tm-video-presentation/sections/12-Leadership.tsx",
+      "source_location": "L29",
+      "id": "sections_12_leadership_leadership",
+      "community": 2,
+      "norm_label": "leadership()"
+    },
+    {
+      "label": "index.html",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "indexhtml_index_html",
+      "community": 10,
+      "norm_label": "index.html"
+    },
+    {
+      "label": "glp-three-dossier.pdf",
+      "file_type": "document",
+      "source_file": "public/assets/glp-three-dossier.pdf",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "glpthreedossier_public_assets_glp_three_dossier_pdf",
+      "community": 10,
+      "norm_label": "glp-three-dossier.pdf"
+    },
+    {
+      "label": "luxury-favorite.jpeg",
+      "file_type": "image",
+      "source_file": "public/assets/luxury-favorite.jpeg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "luxuryfavorite_public_assets_luxury_favorite_jpeg",
+      "community": 15,
+      "norm_label": "luxury-favorite.jpeg"
+    },
+    {
+      "label": "all-things-glp-three.png",
+      "file_type": "image",
+      "source_file": "public/og/all-things-glp-three.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "allthingsglpthree_public_og_all_things_glp_three_png",
+      "community": 10,
+      "norm_label": "all-things-glp-three.png"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tailwind.config.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "tailwind_config_ts",
+      "target": "com_tailwind_config_config",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "src_app_tsx",
+      "target": "src_routes_p_login_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "src_app_tsx",
+      "target": "routes_p_login_ploginpage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "src_app_tsx",
+      "target": "src_routes_p_login_redeem_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "src_app_tsx",
+      "target": "routes_p_login_redeem_ploginredeempage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "src_app_tsx",
+      "target": "src_app_app",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/main.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "src_main_tsx",
+      "target": "src_app_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/main.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "src_main_tsx",
+      "target": "src_app_app",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/main.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "src_main_tsx",
+      "target": "src_main_rootel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "src_routes_p_login_redeem_tsx",
+      "target": "src_components_compassrose_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "src_routes_p_login_tsx",
+      "target": "src_components_compassrose_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/01-PersonalOpen.tsx",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_01_personalopen_tsx",
+      "target": "src_components_compassrose_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_resolvedprospect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L47",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_resolvedba",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_resolvetokenresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L99",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_resolvetokenerror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L105",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_videoeventerror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L111",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_resolvetoken",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L157",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_postvideoevent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L204",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_callbackrequesterror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L227",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_postcallbackrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L277",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_webinarreservationerror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L298",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_postwebinarreservation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L357",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_teamstatserror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L374",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_fetchteamstats",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L426",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_prospectloginstartresult",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L442",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_postloginstart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L462",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_prospectloginredeemresult",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/api.ts",
+      "source_location": "L477",
+      "weight": 1.0,
+      "source": "src_lib_api_ts",
+      "target": "lib_api_postloginredeem",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "src_routes_p_login_redeem_tsx",
+      "target": "src_lib_api_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "src_routes_p_login_tsx",
+      "target": "src_lib_api_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_05_tmadvantage_tsx",
+      "target": "src_lib_api_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "target": "src_lib_api_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L105",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "lib_api_resolvetokenresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "target": "lib_api_postcallbackrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "target": "lib_api_postwebinarreservation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_05_tmadvantage_tsx",
+      "target": "lib_api_fetchteamstats",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "src_routes_p_login_tsx",
+      "target": "lib_api_postloginstart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "src_routes_p_login_redeem_tsx",
+      "target": "lib_api_postloginredeem",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/usePlacementStream.ts",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "src_lib_useplacementstream_ts",
+      "target": "lib_useplacementstream_placementstreamstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/usePlacementStream.ts",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "src_lib_useplacementstream_ts",
+      "target": "lib_useplacementstream_initial",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L91",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "src_lib_useplacementstream_ts"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_04_liveplace_tsx",
+      "target": "src_lib_useplacementstream_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_04_liveplace_tsx",
+      "target": "lib_useplacementstream_placementstreamstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/utils.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "src_lib_utils_ts",
+      "target": "lib_utils_cn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "src_routes_p_login_redeem_tsx",
+      "target": "routes_p_login_redeem_redeemview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "src_routes_p_login_redeem_tsx",
+      "target": "routes_p_login_redeem_ploginredeempage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L88",
+      "weight": 1.0,
+      "source": "src_routes_p_login_redeem_tsx",
+      "target": "routes_p_login_redeem_redeemingview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "src_routes_p_login_redeem_tsx",
+      "target": "routes_p_login_redeem_invalidview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L127",
+      "weight": 1.0,
+      "source": "src_routes_p_login_redeem_tsx",
+      "target": "routes_p_login_ratelimitedview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login-redeem.tsx",
+      "source_location": "L145",
+      "weight": 1.0,
+      "source": "src_routes_p_login_redeem_tsx",
+      "target": "routes_p_login_networkerrorview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "src_routes_p_login_tsx",
+      "target": "routes_p_login_viewstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "src_routes_p_login_tsx",
+      "target": "routes_p_login_ploginpage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L94",
+      "weight": 1.0,
+      "source": "src_routes_p_login_tsx",
+      "target": "routes_p_login_formview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L153",
+      "weight": 1.0,
+      "source": "src_routes_p_login_tsx",
+      "target": "routes_p_login_sentview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L175",
+      "weight": 1.0,
+      "source": "src_routes_p_login_tsx",
+      "target": "routes_p_login_ratelimitedview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/p-login.tsx",
+      "source_location": "L200",
+      "weight": 1.0,
+      "source": "src_routes_p_login_tsx",
+      "target": "routes_p_login_networkerrorview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "src_routes_tm_prospect_dashboard_sections_01_arrival_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "sections_01_arrival_arrivalsection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "src_routes_tm_prospect_dashboard_sections_02_opportunity_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "sections_02_opportunity_opportunitysection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "src_routes_tm_prospect_dashboard_sections_03_mechanic_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "sections_03_mechanic_mechanicsection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "src_routes_tm_prospect_dashboard_sections_04_liveplace_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "sections_04_liveplace_liveplacesection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "src_routes_tm_prospect_dashboard_sections_05_tmadvantage_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "sections_05_tmadvantage_tmadvantagesection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "sections_06_yournextmove_yournextmovesection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "src_routes_tm_prospect_dashboard_sections_00_ribbon_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "sections_00_ribbon_dashboardribbon",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "src_routes_tm_prospect_dashboard_sections_07_footer_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "sections_07_footer_dashboardfooter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "tm_prospect_dashboard_tm_prospect_dashboard_tmprospectdashboardprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "source_location": "L137",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "target": "tm_prospect_dashboard_tm_prospect_dashboard_dashboardshellstyles",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L78",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_prospect_dashboard_tm_prospect_dashboard_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_00_ribbon_tsx",
+      "target": "sections_00_ribbon_dashboardribbonprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_00_ribbon_tsx",
+      "target": "sections_00_ribbon_dashboardribbon",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_01_arrival_tsx",
+      "target": "sections_01_arrival_arrivalsectionprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_01_arrival_tsx",
+      "target": "sections_01_arrival_arrivalsection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "source_location": "L94",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_01_arrival_tsx",
+      "target": "sections_01_arrival_formatplacedat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "sections_01_arrival_arrivalsection",
+      "target": "sections_01_arrival_formatplacedat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_02_opportunity_tsx",
+      "target": "sections_02_opportunity_opportunitysectionprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_02_opportunity_tsx",
+      "target": "sections_02_opportunity_opportunitysection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_02_opportunity_tsx",
+      "target": "sections_02_opportunity_marketcell",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_03_mechanic_tsx",
+      "target": "sections_03_mechanic_cascade_rows",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_03_mechanic_tsx",
+      "target": "sections_03_mechanic_mechanicsection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_03_mechanic_tsx",
+      "target": "sections_03_mechanic_principle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_04_liveplace_tsx",
+      "target": "sections_04_liveplace_liveplacesectionprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L50",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_04_liveplace_tsx",
+      "target": "sections_04_liveplace_liveplacesection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L155",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_04_liveplace_tsx",
+      "target": "sections_04_liveplace_tickerentry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L181",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_04_liveplace_tsx",
+      "target": "sections_04_liveplace_formattime",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "sections_04_liveplace_liveplacesection",
+      "target": "sections_04_liveplace_formattime",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "source_location": "L175",
+      "weight": 1.0,
+      "source": "sections_04_liveplace_tickerentry",
+      "target": "sections_04_liveplace_formattime",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_05_tmadvantage_tsx",
+      "target": "sections_05_tmadvantage_tmadvantagesection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "source_location": "L147",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_05_tmadvantage_tsx",
+      "target": "sections_05_tmadvantage_poolstat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "source_location": "L162",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_05_tmadvantage_tsx",
+      "target": "sections_04_market_formatcount",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "source_location": "L172",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_05_tmadvantage_tsx",
+      "target": "sections_05_tmadvantage_formatvelocity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "source_location": "L94",
+      "weight": 1.0,
+      "source": "sections_05_tmadvantage_tmadvantagesection",
+      "target": "sections_04_market_formatcount",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "source_location": "L109",
+      "weight": 1.0,
+      "source": "sections_05_tmadvantage_tmadvantagesection",
+      "target": "sections_05_tmadvantage_formatvelocity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "target": "sections_06_yournextmove_yournextmovesectionprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "target": "sections_06_yournextmove_yournextmovesection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L84",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "target": "sections_06_yournextmove_callbackcard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L167",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "target": "sections_06_yournextmove_reasonradio",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L186",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "target": "sections_06_yournextmove_webinarcard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L300",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "target": "sections_06_yournextmove_countdown",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L361",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "target": "sections_06_yournextmove_countdownunit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L371",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_06_yournextmove_tsx",
+      "target": "sections_06_yournextmove_formateventwhen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L235",
+      "weight": 1.0,
+      "source": "sections_06_yournextmove_webinarcard",
+      "target": "sections_06_yournextmove_formateventwhen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "source_location": "L343",
+      "weight": 1.0,
+      "source": "sections_06_yournextmove_countdown",
+      "target": "sections_06_yournextmove_formateventwhen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-prospect-dashboard/sections/07-Footer.tsx",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "src_routes_tm_prospect_dashboard_sections_07_footer_tsx",
+      "target": "sections_07_footer_dashboardfooter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L65",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_video_presentation_sections_00_tickerstrip_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_video_presentation_sections_01_personalopen_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "sections_01_personalopen_personalopen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_video_presentation_sections_02_invitation_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_03_drdanvideo_tsx",
+      "target": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_video_presentation_sections_04_market_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L70",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_video_presentation_sections_05_pharmaceuticalsolution_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L71",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_video_presentation_sections_06_naturalpath_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L72",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_video_presentation_sections_07_dossier_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L73",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_video_presentation_sections_08_kevinstory_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_video_presentation_sections_09_timing_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_video_presentation_sections_12_leadership_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_video_presentation_sections_10_whatsnext_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "src_routes_tm_video_presentation_sections_11_footer_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L86",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "tm_video_presentation_tm_video_presentation_videoeventkind",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L93",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "tm_video_presentation_tm_video_presentation_resolvetokenstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L133",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "tm_video_presentation_tm_video_presentation_videocompleteplacement",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L140",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "tm_video_presentation_tm_video_presentation_surfaceview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/tm-video-presentation.tsx",
+      "source_location": "L335",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_tm_video_presentation_tsx",
+      "target": "tm_video_presentation_tm_video_presentation_shellstyles",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_03_drdanvideo_tsx",
+      "target": "tm_video_presentation_tm_video_presentation_videoeventkind",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_03_drdanvideo_tsx",
+      "target": "tm_video_presentation_tm_video_presentation_videocompleteplacement",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_00_tickerstrip_tsx",
+      "target": "sections_00_tickerstrip_tickerstripprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_00_tickerstrip_tsx",
+      "target": "sections_00_tickerstrip_tickerstrip",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/01-PersonalOpen.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_01_personalopen_tsx",
+      "target": "sections_01_personalopen_personalopenprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/01-PersonalOpen.tsx",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_01_personalopen_tsx",
+      "target": "sections_01_personalopen_personalopen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/02-Invitation.tsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_02_invitation_tsx",
+      "target": "sections_02_invitation_invitationprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/02-Invitation.tsx",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_02_invitation_tsx",
+      "target": "sections_02_invitation_invitation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_03_drdanvideo_tsx",
+      "target": "sections_03_drdanvideo_ytplayer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_03_drdanvideo_tsx",
+      "target": "sections_03_drdanvideo_ytstatechangeevent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_03_drdanvideo_tsx",
+      "target": "sections_03_drdanvideo_yt_player_state",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_03_drdanvideo_tsx",
+      "target": "sections_03_drdanvideo_resume_fraction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L102",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_03_drdanvideo_tsx",
+      "target": "sections_03_drdanvideo_pickresumefraction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L115",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_03_drdanvideo_tsx",
+      "target": "sections_03_drdanvideo_drdanvideoprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L132",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_03_drdanvideo_tsx",
+      "target": "sections_03_drdanvideo_drdanvideo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "source_location": "L412",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_03_drdanvideo_tsx",
+      "target": "sections_03_drdanvideo_compasspulse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_04_market_tsx",
+      "target": "sections_04_market_market",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_04_market_tsx",
+      "target": "sections_04_market_stats",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "source_location": "L121",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_04_market_tsx",
+      "target": "sections_04_market_markettileprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "source_location": "L126",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_04_market_tsx",
+      "target": "sections_04_market_markettile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "source_location": "L174",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_04_market_tsx",
+      "target": "sections_04_market_formatcount",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_05_pharmaceuticalsolution_tsx",
+      "target": "sections_05_pharmaceuticalsolution_pharmaceuticalsolution",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_06_naturalpath_tsx",
+      "target": "sections_06_naturalpath_comparerow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_06_naturalpath_tsx",
+      "target": "sections_06_naturalpath_rows",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "source_location": "L60",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_06_naturalpath_tsx",
+      "target": "sections_06_naturalpath_naturalpath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_07_dossier_tsx",
+      "target": "sections_07_dossier_dossieritem",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_07_dossier_tsx",
+      "target": "sections_07_dossier_items",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_07_dossier_tsx",
+      "target": "sections_07_dossier_dossier",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/08-KevinStory.tsx",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_08_kevinstory_tsx",
+      "target": "sections_08_kevinstory_kevinstory",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_09_timing_tsx",
+      "target": "sections_09_timing_factor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_09_timing_tsx",
+      "target": "sections_09_timing_timing",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/10-WhatsNext.tsx",
+      "source_location": "L52",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_10_whatsnext_tsx",
+      "target": "sections_10_whatsnext_whatsnextprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/10-WhatsNext.tsx",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_10_whatsnext_tsx",
+      "target": "sections_10_whatsnext_whatsnext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_11_footer_tsx",
+      "target": "sections_11_footer_footerprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_11_footer_tsx",
+      "target": "sections_11_footer_footer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_11_footer_tsx",
+      "target": "sections_11_footer_compassrosemini",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/tm-video-presentation/sections/12-Leadership.tsx",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "src_routes_tm_video_presentation_sections_12_leadership_tsx",
+      "target": "sections_12_leadership_leadership",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "indexhtml_index_html",
+      "target": "glpthreedossier_public_assets_glp_three_dossier_pdf"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "indexhtml_index_html",
+      "target": "allthingsglpthree_public_og_all_things_glp_three_png"
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "4d8cc7d533bcb509607d5353aa6f886a25a27e90"
+}

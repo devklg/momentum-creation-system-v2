@@ -1,0 +1,391 @@
+{
+  "communities": {
+    "0": [
+      "ba_oversight_ba_crud_modal_apiresult",
+      "ba_oversight_ba_crud_modal_bacrudmodal",
+      "ba_oversight_ba_crud_modal_bacrudmode",
+      "ba_oversight_ba_crud_modal_bacrudokdata",
+      "ba_oversight_ba_crud_modal_bacrudresponse",
+      "ba_oversight_ba_crud_modal_callapi",
+      "ba_oversight_ba_crud_modal_description",
+      "ba_oversight_ba_crud_modal_diffrow",
+      "ba_oversight_ba_crud_modal_formstate",
+      "ba_oversight_ba_crud_modal_initialform",
+      "ba_oversight_ba_crud_modal_request",
+      "ba_oversight_ba_crud_modal_splitname",
+      "ba_oversight_ba_crud_modal_title",
+      "ba_oversight_profile_drawer_formatdatetime",
+      "ba_oversight_profile_drawer_kv",
+      "ba_oversight_profile_drawer_profiledrawer",
+      "ba_oversight_profile_drawer_section",
+      "prospect_oversight_detailpanel_activitytimeline",
+      "prospect_oversight_detailpanel_crudlauncher",
+      "prospect_oversight_detailpanel_detailpanel",
+      "prospect_oversight_detailpanel_identitysection",
+      "prospect_oversight_detailpanel_interventionlauncher",
+      "prospect_oversight_detailpanel_isadminevent",
+      "prospect_oversight_detailpanel_kevinnotessection",
+      "prospect_oversight_detailpanel_tokensection",
+      "prospect_oversight_interventionmodal_afterhandoff",
+      "prospect_oversight_interventionmodal_aftersponsor",
+      "prospect_oversight_interventionmodal_afterstate",
+      "prospect_oversight_interventionmodal_beforeblock",
+      "prospect_oversight_interventionmodal_diff",
+      "prospect_oversight_interventionmodal_empty_form",
+      "prospect_oversight_interventionmodal_interventionmodal",
+      "prospect_oversight_interventionmodal_path",
+      "prospect_oversight_prospectcrudmodal_prospectcrudmode",
+      "prospect_oversight_prospectcrudmodal_prospectcrudokdata",
+      "prospect_oversight_prospectcrudmodal_prospectcrudresponse",
+      "routes_bas_baspage",
+      "src_components_ba_oversight_ba_crud_modal_tsx",
+      "src_components_prospect_oversight_detailpanel_tsx",
+      "src_routes_bas_tsx"
+    ],
+    "1": [
+      "ba_oversight_notes_panel_notespanel",
+      "broadcast_audienceselector_audienceselector",
+      "broadcast_audienceselector_audienceselectorprops",
+      "broadcast_audienceselector_presets",
+      "broadcast_audienceselector_stat",
+      "broadcast_broadcaststatus_broadcaststatus",
+      "broadcast_broadcaststatus_broadcaststatusprops",
+      "broadcast_broadcaststatus_countsrow",
+      "broadcast_broadcaststatus_recipientrow",
+      "broadcast_broadcaststatus_statusbadge",
+      "dashboard_metricsrow_formatpct",
+      "dashboard_metricsrow_metricsrow",
+      "dashboard_metricsrow_signednumber",
+      "live_ops_holdingtankgrid_classesforbucket",
+      "live_ops_holdingtankgrid_holdingtankgrid",
+      "live_ops_holdingtankgrid_hoverdetail",
+      "live_ops_holdingtankgrid_legend",
+      "live_ops_holdingtankgrid_legenddot",
+      "live_ops_holdingtankgrid_slot",
+      "live_ops_usagestrip_props",
+      "live_ops_usagestrip_tile",
+      "live_ops_usagestrip_tileprops",
+      "prospect_oversight_detailpanel_sandboxpreview",
+      "queue_oversight_admintickerpanel_admintickerpanel",
+      "queue_oversight_admintickerpanel_statusdot",
+      "queue_oversight_growthsparkline_growthsparkline",
+      "queue_oversight_growthsparkline_sparkchart",
+      "queue_oversight_queuedepthpanel_formatnumber",
+      "queue_oversight_queuedepthpanel_queuedepthpanel",
+      "queue_oversight_visiblewindowpanel_choices",
+      "routes_queue_queuepage",
+      "src_components_queue_oversight_visiblewindowpanel_tsx",
+      "src_routes_queue_tsx"
+    ],
+    "2": [
+      "broadcast_channelselector_channelselector",
+      "broadcast_channelselector_channelselectorprops",
+      "broadcast_channelselector_options",
+      "broadcast_composer_composer",
+      "broadcast_composer_composerprops",
+      "broadcast_composer_preview",
+      "broadcast_sendtestbutton_sendtestbutton",
+      "reports_exportpanel_exportpanel",
+      "reports_exportpanel_exportpanelprops",
+      "reports_exportpanel_reportentry",
+      "reports_redactionmodal_redactionchoice",
+      "reports_redactionmodal_redactionmodal",
+      "reports_redactionmodal_redactionmodalprops",
+      "routes_audit_field",
+      "routes_broadcast_empty_template",
+      "routes_broadcast_recentlist",
+      "routes_tenant_compliancepanel",
+      "routes_tenant_inheritancepanel",
+      "routes_tenant_meta",
+      "routes_tenant_rolespanel",
+      "routes_tenant_savestate",
+      "routes_tenant_settingspanel",
+      "routes_tenant_templatepanel",
+      "routes_tenant_tenantpage",
+      "routes_tenant_validationbox",
+      "src_components_admin_broadcast_composer_tsx",
+      "src_routes_broadcast_tsx",
+      "src_routes_tenant_tsx",
+      "ui_button_button"
+    ],
+    "3": [
+      "ba_oversight_sponsor_override_flow_humanerror",
+      "ba_oversight_sponsor_override_flow_phase",
+      "lib_utils_cn",
+      "queue_oversight_queuenumberspanel_lookupform",
+      "queue_oversight_queuenumberspanel_lookupresultview",
+      "queue_oversight_queuenumberspanel_numberstat",
+      "queue_oversight_queuenumberspanel_queuenumberspanel",
+      "queue_oversight_queuerulespanel_queuerulespanel",
+      "queue_oversight_queuerulespanel_rulerow",
+      "routes_access_codes_accesscode",
+      "routes_access_codes_accesscodespage",
+      "routes_access_codes_mintresponse",
+      "routes_audit_listresponse",
+      "routes_audit_th",
+      "routes_orientation_fmt",
+      "routes_orientation_orientationpage",
+      "src_components_ba_oversight_sponsor_override_flow_tsx",
+      "src_components_ui_button_tsx",
+      "src_components_ui_input_tsx",
+      "src_components_ui_label_tsx",
+      "src_lib_utils_ts",
+      "src_routes_access_codes_tsx",
+      "src_routes_orientation_tsx",
+      "ui_button_buttonprops",
+      "ui_button_buttonvariants",
+      "ui_input_input",
+      "ui_input_inputprops",
+      "ui_label_label"
+    ],
+    "4": [
+      "live_ops_growthcards_card",
+      "live_ops_growthcards_cardplaceholder",
+      "live_ops_growthcards_delta",
+      "live_ops_growthcards_growthcards",
+      "live_ops_growthcards_labelforwindow",
+      "live_ops_mocks_mockfunnel",
+      "live_ops_mocks_mockgrowthcards",
+      "live_ops_mocks_mocklivegrid",
+      "live_ops_mocks_mockusagesample",
+      "live_ops_mocks_now",
+      "live_ops_usagestrip_fmtlatency",
+      "live_ops_usagestrip_usagestrip",
+      "live_ops_useusagestream_usagestreamstatus",
+      "live_ops_useusagestream_useusagestream",
+      "live_ops_useusagestream_useusagestreamoptions",
+      "live_ops_useusagestream_useusagestreamresult",
+      "routes_live_ops_filtertoquery",
+      "routes_live_ops_liveopspage",
+      "src_components_admin_live_ops_growthcards_tsx",
+      "src_components_admin_live_ops_mocks_ts",
+      "src_routes_live_ops_tsx"
+    ],
+    "5": [
+      "components_admin_shell_nav",
+      "components_admin_shell_navitem",
+      "index_html",
+      "lib_auth_adminauthcontext",
+      "lib_auth_adminauthprovider",
+      "lib_auth_adminauthstate",
+      "lib_auth_adminme",
+      "lib_auth_useadminauth",
+      "routes_broadcast_broadcastpage",
+      "routes_login_loginpage",
+      "routes_reports_reportspage",
+      "src_app_app",
+      "src_app_inner",
+      "src_app_tsx",
+      "src_components_admin_shell_tsx",
+      "src_lib_auth_tsx",
+      "src_main_rootel",
+      "src_main_tsx",
+      "src_routes_login_tsx",
+      "src_routes_reports_tsx"
+    ],
+    "6": [
+      "live_ops_conversionfunnel_conversionfunnel",
+      "live_ops_conversionfunnel_formatconversion",
+      "live_ops_conversionfunnel_kindtoggle",
+      "live_ops_conversionfunnel_togglebutton",
+      "routes_audit_actordisplay",
+      "routes_audit_auditpage",
+      "routes_audit_buildquerystring",
+      "routes_audit_details",
+      "routes_audit_empty_filters",
+      "routes_audit_entitydisplay",
+      "routes_audit_filterdraft",
+      "routes_audit_formattimestamp",
+      "routes_audit_label2",
+      "routes_audit_rolepill",
+      "routes_audit_row",
+      "routes_audit_select",
+      "routes_audit_severitypill",
+      "src_routes_audit_tsx"
+    ],
+    "7": [
+      "ba_oversight_directory_table_agingfromnow",
+      "ba_oversight_directory_table_comparerows",
+      "ba_oversight_directory_table_directorytable",
+      "ba_oversight_directory_table_formatdate",
+      "ba_oversight_directory_table_sortheader",
+      "ba_oversight_directory_table_sortkey",
+      "ba_oversight_directory_table_sortstate",
+      "ba_oversight_profile_drawer_statuspill",
+      "prospect_oversight_directorytable_compareiso",
+      "prospect_oversight_directorytable_comparenullableiso",
+      "prospect_oversight_directorytable_comparenullablenumber",
+      "prospect_oversight_directorytable_default_sort",
+      "prospect_oversight_directorytable_describepresentationstatus",
+      "prospect_oversight_directorytable_handoffpill",
+      "prospect_oversight_directorytable_sortableth",
+      "prospect_oversight_directorytable_sortcolumn",
+      "prospect_oversight_directorytable_sortdir"
+    ],
+    "8": [
+      "dashboard_filterbar_filterbar",
+      "dashboard_liveeventstream_eventline",
+      "dashboard_liveeventstream_fmttime",
+      "dashboard_liveeventstream_kindpill",
+      "dashboard_liveeventstream_liveeventstream",
+      "live_ops_usagestrip_connectionpill",
+      "routes_dashboard_dashboardpage",
+      "routes_live_ops_default_filter",
+      "routes_prospects_prospectspage",
+      "routes_prospects_readprospectidparam",
+      "routes_prospects_writeprospectidparam",
+      "src_components_dashboard_filterbar_tsx",
+      "src_routes_dashboard_tsx",
+      "src_routes_prospects_tsx"
+    ],
+    "9": [
+      "dashboard_drilldownpanel_drilldownbody",
+      "dashboard_drilldownpanel_drilldownpanel",
+      "dashboard_drilldownpanel_fetchresponse",
+      "dashboard_drilldownpanel_fmtdate",
+      "dashboard_drilldownpanel_fmtdatetime",
+      "dashboard_drilldownpanel_mono",
+      "dashboard_drilldownpanel_table",
+      "dashboard_drilldownpanel_tiletitle",
+      "routes_audit_td"
+    ],
+    "10": [
+      "admin_tailwind_config_config",
+      "tailwind_config_ts"
+    ],
+    "11": [
+      "postcss_config_js"
+    ],
+    "12": [
+      "vite_config_ts"
+    ]
+  },
+  "cohesion": {
+    "0": 0.08,
+    "1": 0.07,
+    "2": 0.08,
+    "3": 0.12,
+    "4": 0.16,
+    "5": 0.16,
+    "6": 0.14,
+    "7": 0.15,
+    "8": 0.19,
+    "9": 0.22,
+    "10": 1.0,
+    "11": 1.0,
+    "12": 1.0
+  },
+  "gods": [
+    {
+      "id": "ui_button_button",
+      "label": "Button",
+      "degree": 24
+    },
+    {
+      "id": "ba_oversight_directory_table_directorytable",
+      "label": "DirectoryTable()",
+      "degree": 21
+    },
+    {
+      "id": "prospect_oversight_prospectcrudmodal_prospectcrudmode",
+      "label": "ProspectCrudMode",
+      "degree": 21
+    },
+    {
+      "id": "live_ops_usagestrip_props",
+      "label": "Props",
+      "degree": 19
+    },
+    {
+      "id": "prospect_oversight_interventionmodal_interventionmodal",
+      "label": "InterventionModal()",
+      "degree": 19
+    },
+    {
+      "id": "ba_oversight_profile_drawer_profiledrawer",
+      "label": "ProfileDrawer()",
+      "degree": 14
+    },
+    {
+      "id": "ui_input_input",
+      "label": "Input",
+      "degree": 12
+    },
+    {
+      "id": "dashboard_drilldownpanel_drilldownpanel",
+      "label": "DrilldownPanel()",
+      "degree": 10
+    },
+    {
+      "id": "routes_audit_row",
+      "label": "Row()",
+      "degree": 10
+    },
+    {
+      "id": "queue_oversight_queuenumberspanel_queuenumberspanel",
+      "label": "QueueNumbersPanel()",
+      "degree": 9
+    }
+  ],
+  "surprises": [
+    {
+      "source": "Inner()",
+      "target": "useAdminAuth()",
+      "source_files": [
+        "src/App.tsx",
+        "src/lib/auth.tsx"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `Inner()` unexpectedly reaches hub `useAdminAuth()`"
+    },
+    {
+      "source": "Row()",
+      "target": "formatConversion()",
+      "source_files": [
+        "src/routes/audit.tsx",
+        "src/components/admin/live-ops/ConversionFunnel.tsx"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `formatConversion()` unexpectedly reaches hub `Row()`"
+    },
+    {
+      "source": "IdentitySection()",
+      "target": "formatDateTime()",
+      "source_files": [
+        "src/components/prospect-oversight/DetailPanel.tsx",
+        "src/components/ba-oversight/profile-drawer.tsx"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `IdentitySection()` unexpectedly reaches hub `formatDateTime()`"
+    },
+    {
+      "source": "TokenSection()",
+      "target": "formatDateTime()",
+      "source_files": [
+        "src/components/prospect-oversight/DetailPanel.tsx",
+        "src/components/ba-oversight/profile-drawer.tsx"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `TokenSection()` unexpectedly reaches hub `formatDateTime()`"
+    },
+    {
+      "source": "Stat()",
+      "target": "formatNumber()",
+      "source_files": [
+        "src/components/admin/broadcast/AudienceSelector.tsx",
+        "src/components/queue-oversight/QueueDepthPanel.tsx"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    }
+  ],
+  "tokens": {
+    "input": 529,
+    "output": 166
+  }
+}

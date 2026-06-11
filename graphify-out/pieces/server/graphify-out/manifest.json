@@ -1,0 +1,474 @@
+{
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\backfill-founder-timezones.ts": {
+    "mtime": 1781136890.9580717,
+    "hash": "68660133448217726d93f0a599926162"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\bootstrap-ivory-collection.ts": {
+    "mtime": 1781136890.9585755,
+    "hash": "aece147cdfc4e69810bb9aedeeeaf07d"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\build-checklist.mjs": {
+    "mtime": 1781136890.9585755,
+    "hash": "a9414c35d0f1653b4c873eeb80c21572"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\seed-access-codes.ts": {
+    "mtime": 1781136890.9585755,
+    "hash": "9b7e4109b226858b4f0173d1f1ba3b24"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\seed-decisions.mjs": {
+    "mtime": 1781136890.9585755,
+    "hash": "87a6de2c55d9a56c1127d6055fe85b9e"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\seed-founders.ts": {
+    "mtime": 1781136890.9585755,
+    "hash": "384172dd80105da2757fff6c442fd33f"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\seed-orientation-sessions.ts": {
+    "mtime": 1781136890.9585755,
+    "hash": "06938e0ead53ebfb425ba08165570bf3"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\seed-webinar-events.ts": {
+    "mtime": 1781136890.9595804,
+    "hash": "c9d9c0a8b6fb9f27b6d56ca181bf0bc6"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\seed-work-queue.mjs": {
+    "mtime": 1781136890.9595804,
+    "hash": "4b184d87c9bd73ce3db88719eb375ab7"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\setup-founder-access.ts": {
+    "mtime": 1781136890.9595804,
+    "hash": "f6c50be2e7b8c0a7a605f96b421adff7"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\smoke-holding-tank.ts": {
+    "mtime": 1781136890.9595804,
+    "hash": "3f716371d9c28837ad415585be007de0"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\smoke-michael-interview.ts": {
+    "mtime": 1781136890.9595804,
+    "hash": "c78d2b7843a2c838b6e4683b0b4f1b00"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\smoke-michael-schedule.ts": {
+    "mtime": 1781136890.9595804,
+    "hash": "646661670e94c762cc9c4b08a813f2ce"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\sync-queue-from-wireframe.mjs": {
+    "mtime": 1781136890.9595804,
+    "hash": "248b0ea65e79a66761760747ba73f271"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\write-handoff-129.mjs": {
+    "mtime": 1781136890.9595804,
+    "hash": "28b8e0ea6cf90d79f83a3449a1b1e697"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\scripts\\write-handoff-129b.mjs": {
+    "mtime": 1781136890.9595804,
+    "hash": "0e37c9540eadb3a74aed2ebf26e6e203"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\env.ts": {
+    "mtime": 1781136890.9721227,
+    "hash": "0df4f0b096c1a12ac0c50bfb4820410a"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\index.ts": {
+    "mtime": 1781136890.9721227,
+    "hash": "d1062d2bbe86e6812f8b22e24f69d79a"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\access-codes.ts": {
+    "mtime": 1781136890.9610846,
+    "hash": "f5677028777a72c715a32eb7e18126cd"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\adminBaCrud.ts": {
+    "mtime": 1781136890.9610846,
+    "hash": "783143a26fd49dc589e7fdfd2a719adf"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\adminBaOversight.ts": {
+    "mtime": 1781136890.9610846,
+    "hash": "331710f8057bfd76cfcf280506a13994"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\adminMasterReport.ts": {
+    "mtime": 1781136890.9610846,
+    "hash": "7972282d32fa3efa65ea28d5a3d503f0"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\adminMetrics.ts": {
+    "mtime": 1781136890.9620898,
+    "hash": "f476305477917cebd27d6bfe53dcc784"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\adminProspectCrud.ts": {
+    "mtime": 1781136890.9620898,
+    "hash": "b94c0f187f0d80fdadd27525c21194ae"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\adminProspectOversight.ts": {
+    "mtime": 1781136890.9620898,
+    "hash": "4149d8e38748d7634589459cd0b0cf1d"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\adminQueueOversight.ts": {
+    "mtime": 1781136890.9620898,
+    "hash": "e9672036087143d84f596dbb88440dac"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\adminTenantArchitecture.ts": {
+    "mtime": 1781136890.96309,
+    "hash": "2dcb2e6fb617cb6ffd63f4238f26f143"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\auditLog.ts": {
+    "mtime": 1781136890.96309,
+    "hash": "b382ff28253812931e339ca4d1859209"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\ba.ts": {
+    "mtime": 1781136890.9635942,
+    "hash": "02e1d8e703a29bf48ee2af822acfbd45"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\broadcast.ts": {
+    "mtime": 1781136890.9635942,
+    "hash": "3d11c0c5fdf436142056e2d106ae986e"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\callbackRequest.ts": {
+    "mtime": 1781136890.9635942,
+    "hash": "13b0e31fc376de4f0b671db778e5e417"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\cockpit.ts": {
+    "mtime": 1781136890.964098,
+    "hash": "26ac1b3f01f0cd11131b0e9b349357fe"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\cockpitPrint.ts": {
+    "mtime": 1781136890.964098,
+    "hash": "615221dc625902c5ca68e71eb8ef62d1"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\codeGen.ts": {
+    "mtime": 1781136890.964098,
+    "hash": "723921fd0ff4e48f8bc5bb025f6925ca"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\commitments.ts": {
+    "mtime": 1781136890.964098,
+    "hash": "96faa061ca8cdd67025ea48278e54dc2"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\crm.ts": {
+    "mtime": 1781136890.964098,
+    "hash": "d87765e9c9e361d2e4e0b46a80a24c70"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\generator.ts": {
+    "mtime": 1781136890.9651031,
+    "hash": "2ac07634aaa085dd6df597b12754d81d"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\holdingTank.ts": {
+    "mtime": 1781136890.9651031,
+    "hash": "c52f584f70db7a0e5e405de40fffa23c"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\invitations.ts": {
+    "mtime": 1781136890.9651031,
+    "hash": "2ba476e1572a96c5141c19ade522449a"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\ivory.ts": {
+    "mtime": 1781136890.9651031,
+    "hash": "cfec52db132e3ae6f95523f940e68d29"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\liveOps.ts": {
+    "mtime": 1781136890.966103,
+    "hash": "1e26efcc4212539217554c7465f8dfd0"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\michael-classification.ts": {
+    "mtime": 1781136890.966103,
+    "hash": "e66525e6d2d1f8fd6b0fff970041bc2a"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\michael-founder-handoff.ts": {
+    "mtime": 1781136890.966103,
+    "hash": "1222ca6a44db8f521d6f385d62799c72"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\michael-interview-script.ts": {
+    "mtime": 1781136890.966103,
+    "hash": "a7815b5a14ac00c46694eaa5d5299bc4"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\michael-schedule.ts": {
+    "mtime": 1781136890.966103,
+    "hash": "b3a64d58168b98dbba86c707a942d09b"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\michaelScoring.ts": {
+    "mtime": 1781136890.967103,
+    "hash": "57c8d878c86f712c7fedfce46965dddd"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\orientationSession.ts": {
+    "mtime": 1781136890.967103,
+    "hash": "aad3974beed6c475ca4b59526a63949a"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\previewToken.ts": {
+    "mtime": 1781136890.967103,
+    "hash": "60bd0112cafdcbed1e2be3b09dc97b95"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\profile.ts": {
+    "mtime": 1781136890.967103,
+    "hash": "2d1542bff096f36b0a942f5a2101e3a3"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\prospectAccount.ts": {
+    "mtime": 1781136890.967103,
+    "hash": "d47bf6b7202e3b08c9884cbab64f9417"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\prospectMagicLink.ts": {
+    "mtime": 1781136890.967103,
+    "hash": "d27a850ee49476117afd00ce5d8d21c9"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\prospects.ts": {
+    "mtime": 1781136890.967103,
+    "hash": "12b6130670a7bf971250f763aa1b8925"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\questionnaire.ts": {
+    "mtime": 1781136890.9686072,
+    "hash": "e4cb2672e1e461e0e90b9a631916b142"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\scriptmaker.ts": {
+    "mtime": 1781136890.9696124,
+    "hash": "71aa8d27f89787d3b833a955141e4d2b"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\teamStats.ts": {
+    "mtime": 1781136890.9696124,
+    "hash": "520e44bcee93a77035b8990062936fa1"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\todaysActions.ts": {
+    "mtime": 1781136890.9711177,
+    "hash": "98fe60ab55ce7ad96c62979b14eea6b1"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\training.ts": {
+    "mtime": 1781136890.9711177,
+    "hash": "26618a8ec38631bac611bd3fb7b375f9"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\webinarCadence.ts": {
+    "mtime": 1781136890.9711177,
+    "hash": "f5ea69dce606ff4c2cee57fc5058ed3b"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\webinarEvent.ts": {
+    "mtime": 1781136890.9711177,
+    "hash": "e8f4e07ae11a126087101d2e87f0f5dd"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\webinarReservation.ts": {
+    "mtime": 1781136890.9711177,
+    "hash": "51fb4935314b50f15815fe360f860019"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\workbook.ts": {
+    "mtime": 1781136890.9721227,
+    "hash": "3ee3de160a03f3d59d7a7b933dba9471"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\reports\\baActivation.ts": {
+    "mtime": 1781136890.9686072,
+    "hash": "f612e01fa1c018d63fc837f1f6486499"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\reports\\enrollmentCompletion.ts": {
+    "mtime": 1781136890.9686072,
+    "hash": "1fb865b16e29754a385b1017cf2575e7"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\reports\\export.ts": {
+    "mtime": 1781136890.9686072,
+    "hash": "551b1ec1fb59892a89632d665c281d11"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\reports\\followUpAging.ts": {
+    "mtime": 1781136890.9696124,
+    "hash": "69517255892994a045e032ce12c0b770"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\reports\\inviteFunnel.ts": {
+    "mtime": 1781136890.9696124,
+    "hash": "52b7d6e3be9f9a6ce6b58f3ddce17a49"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\reports\\leaderScorecards.ts": {
+    "mtime": 1781136890.9696124,
+    "hash": "8e30bfc7f32d9c9d03858e7b7c03a71f"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\reports\\queueVelocity.ts": {
+    "mtime": 1781136890.9696124,
+    "hash": "1b2258229174f2a43219f8db80084a43"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\reports\\timeRange.ts": {
+    "mtime": 1781136890.9696124,
+    "hash": "9a2a2e91b05beb08955a768d641b92c5"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\domain\\reports\\trainingCompletion.ts": {
+    "mtime": 1781136890.9696124,
+    "hash": "9101df2006047d6440a24b7afeb64e58"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\middleware\\og-injection.ts": {
+    "mtime": 1781136890.9721227,
+    "hash": "8e7727af9379ec68cc31c7e42f161044"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\middleware\\requireAuth.ts": {
+    "mtime": 1781136890.9721227,
+    "hash": "fe5d6a5c36ab711d8a0dbed177d0730b"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\middleware\\requireMichaelComplete.ts": {
+    "mtime": 1781136890.9721227,
+    "hash": "2eda2ae775fe312a44e38870183a69c3"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\middleware\\verifyTelnyxWebhook.ts": {
+    "mtime": 1781136890.9721227,
+    "hash": "f926bae14975c3ac76a9dda0bf86fc38"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\auth.ts": {
+    "mtime": 1781136890.9756303,
+    "hash": "fb763a86dc6deb0b8da42058aa07a87a"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\cockpit.ts": {
+    "mtime": 1781136890.9756303,
+    "hash": "b2bb1337ae7e35c2da7fa072e36ae6e1"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\crm.ts": {
+    "mtime": 1781136890.9756303,
+    "hash": "1b3d9f94e29067b0d3c907486eb1c5e6"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\health.ts": {
+    "mtime": 1781136890.9756303,
+    "hash": "d18f73dd93265178d1e580abcc94955d"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\invitations.ts": {
+    "mtime": 1781136890.9756303,
+    "hash": "6a9a191c25a7816191c6a54e774feedf"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\ivory.ts": {
+    "mtime": 1781136890.977134,
+    "hash": "464ad9c908d886751c557c90ea0747e4"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\michael.ts": {
+    "mtime": 1781136890.977134,
+    "hash": "4dab573100a434810d53d3d9130ffe32"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\orientation.ts": {
+    "mtime": 1781136890.977134,
+    "hash": "7af63add37f276737f9e9d5c355a9863"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\p-login.ts": {
+    "mtime": 1781136890.977134,
+    "hash": "1e4601061aa7478d14a3e8f46eb4bed0"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\p.ts": {
+    "mtime": 1781136890.977134,
+    "hash": "62d81aeade7ec4cca883e9eb4d4d29ae"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\preview.ts": {
+    "mtime": 1781136890.97814,
+    "hash": "c7e91fdfea242350390e789c71933a24"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\profile.ts": {
+    "mtime": 1781136890.97814,
+    "hash": "7d0f8d1f79e704458377e2f6533aed9f"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\questionnaire.ts": {
+    "mtime": 1781136890.97814,
+    "hash": "9dcbee08f976101ee0cf71af5a7930ce"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\scriptmaker.ts": {
+    "mtime": 1781136890.97814,
+    "hash": "7c82c441b630bd5ee4ae05c3a4a8e6f9"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\sponsor-workbook.ts": {
+    "mtime": 1781136890.97814,
+    "hash": "f673de18de11782f9d917ace6b971f08"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\telnyx-webhook.ts": {
+    "mtime": 1781136890.979139,
+    "hash": "068bf96e7635ac5a7e0f62b183630fd8"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\training.ts": {
+    "mtime": 1781136890.979139,
+    "hash": "f35e439b8f8887e7a8843636727338c5"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\welcome.ts": {
+    "mtime": 1781136890.979139,
+    "hash": "c60085fec828c3a390e2400c1420ddf9"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\admin\\access-codes.ts": {
+    "mtime": 1781136890.9736266,
+    "hash": "3fcd2f3c1705022753f21dd081842856"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\admin\\audit.ts": {
+    "mtime": 1781136890.9736266,
+    "hash": "9d68a4551a5068693291c983936d87b7"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\admin\\bas.ts": {
+    "mtime": 1781136890.9736266,
+    "hash": "070079318af6751b303a78e68f62562c"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\admin\\broadcast.ts": {
+    "mtime": 1781136890.9736266,
+    "hash": "59a2214bfac961b7a52f186b5fc5670b"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\admin\\dashboard.ts": {
+    "mtime": 1781136890.9736266,
+    "hash": "273ef59ce114d654c9977ccb57e70ae7"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\admin\\liveOps.ts": {
+    "mtime": 1781136890.9746318,
+    "hash": "4f36e3912c48e1ed1f5d6e4116d4626c"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\admin\\orientation.ts": {
+    "mtime": 1781136890.9746318,
+    "hash": "3de362cdf8643e1fac1ecc719f28193f"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\admin\\prospects.ts": {
+    "mtime": 1781136890.9746318,
+    "hash": "ca7faba1b48bedbf50f22c03c1495085"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\admin\\queue.ts": {
+    "mtime": 1781136890.9746318,
+    "hash": "a39fe4b29a2a91c668443cce2a9994d4"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\admin\\reporting.ts": {
+    "mtime": 1781136890.9756303,
+    "hash": "74cf4969d065aa0be8a8c3f76e5ff978"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\routes\\admin\\tenant.ts": {
+    "mtime": 1781136890.9756303,
+    "hash": "799e4e500b86798e74481855a0deea68"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\anthropic.ts": {
+    "mtime": 1781136890.979139,
+    "hash": "29ca1e578f01968f6b17d085df2ed3ad"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\broadcastQueue.ts": {
+    "mtime": 1781136890.979139,
+    "hash": "ecea84a843cf0920a0ee32a332b93c4e"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\chromaCollections.ts": {
+    "mtime": 1781136890.980139,
+    "hash": "82de826a3cb74794b473d3fceb15afd4"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\gateway.ts": {
+    "mtime": 1781136890.980139,
+    "hash": "74ae6d824f526420ced28d48576ee131"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\gatewayLatency.ts": {
+    "mtime": 1781136890.980139,
+    "hash": "1b0855edc7bce4ac89dd5264270727f1"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\masterContent.ts": {
+    "mtime": 1781136890.980139,
+    "hash": "81824698127be53ed12bc5ac34e35e80"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\michaelEvents.ts": {
+    "mtime": 1781136890.980139,
+    "hash": "904e92f4a8e0180385bcb6cfa829c531"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\pdfReport.ts": {
+    "mtime": 1781136890.9811385,
+    "hash": "ed70c56805914de9fdb6027e3504615a"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\piiRedact.ts": {
+    "mtime": 1781136890.9811385,
+    "hash": "301f5e7c6c802cae8d90afea81725ecd"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\poolEvents.ts": {
+    "mtime": 1781136890.9811385,
+    "hash": "6a8c11da846e26ae7c7cee82c18f73b2"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\prospectSession.ts": {
+    "mtime": 1781136890.9811385,
+    "hash": "f314e9c407897d8af65fa9846eb36c2d"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\resend.ts": {
+    "mtime": 1781136890.9811385,
+    "hash": "d9ba91f2a7240b9c0be955234da5fbaf"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\session.ts": {
+    "mtime": 1781136890.9811385,
+    "hash": "56facedc3872cb624e3f62a39fef659a"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\telnyx.ts": {
+    "mtime": 1781136890.9822023,
+    "hash": "4d3cb3ccb2974d64599a3553261de0c1"
+  },
+  "D:\\agents\\.codex\\worktrees\\5ef8\\momentum-creation-system-v2\\server\\src\\services\\tripleStack.ts": {
+    "mtime": 1781136890.9822023,
+    "hash": "2993eadec9b9cdc23989dcd9be498fa4"
+  }
+}
