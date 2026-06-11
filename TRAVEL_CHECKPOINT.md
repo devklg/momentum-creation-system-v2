@@ -1,6 +1,6 @@
 # Travel Checkpoint
 
-Date: 2026-06-10
+Date: 2026-06-11
 
 ## Repository State
 
@@ -8,7 +8,7 @@ Date: 2026-06-10
 - v2 is redesign workspace: `momentum-creation-system-v2` is separated for UX/styling redesign work only.
 - Current repo: `momentum-creation-system-v2`
 - Local repo path: `D:\momentum-creation-system-v2`
-- Current branch: `task-1-safety-audit`
+- Current branch: `task-2-brand-motion`
 - v2 integration branch: `ux-redesign-v2`
 - GitHub repo: `https://github.com/devklg/momentum-creation-system-v2`
 
@@ -48,22 +48,27 @@ Task 1 audit doc created:
 
 Task 1: Safety Audit
 
-- Status: documentation created and verification passed.
+- Status: completed and merged into `ux-redesign-v2`.
 - Branch: `task-1-safety-audit`
 - Allowed files touched: `docs/v2-redesign/audits/SAFETY_AUDIT.md`, `TRAVEL_CHECKPOINT.md`
 - Application code changed: no
 - Verification: `pnpm install`, `pnpm typecheck`, and `pnpm build` completed. Build warnings were non-blocking Vite chunk warnings.
 
+Task 2: Shared Brand/Motion Primitives
+
+- Status: implemented on `task-2-brand-motion`; ready for PR review into `ux-redesign-v2`.
+- Branch: `task-2-brand-motion`
+- Allowed files touched: shared brand tokens/CSS, `.com` and `.team` CSS entry points, `.com` and `.team` Tailwind configs, and this checkpoint.
+- Application route pages changed: no
+- Backend/server changed: no
+- Primitives added: logo asset classes, Team Magnificent shell, command ribbon, progress meter, animated counter, rolling ticker, countdown, status badges, lifecycle badges, rise motion, and live pulse motion.
+- Brand roles established: gold for identity/ceremony; teal for live state, action, motion, and progress.
+- Reduced-motion behavior: shared motion primitives stop animation and progress transitions under `prefers-reduced-motion: reduce`.
+- Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`, plus `.team` chunk-size warning for a 516.40 kB minified JS bundle.
+
 ## Next Implementation Phases
 
-1. Task 2: Shared brand/motion primitives
-   - Team Magnificent shell/header.
-   - Logo primitives.
-   - Gold/teal roles.
-   - Countdown, ticker, counter, progress, and status primitives.
-   - Reduced-motion support.
-
-2. Task 3: Prospect Position & Momentum Center
+1. Task 3: Prospect Position & Momentum Center
    - First viewport dashboard.
    - Position card.
    - Beneath-you counter.
@@ -72,21 +77,21 @@ Task 1: Safety Audit
    - Primary CTA.
    - Preserve existing content below.
 
-3. Task 4: PMV backend projection
+2. Task 4: PMV backend projection
    - Granular lifecycle states.
    - Video progress visibility.
    - Focus Queue data.
    - Deterministic next action.
    - Today's Actions alignment.
 
-4. Task 5: PMV cockpit frontend
+3. Task 5: PMV cockpit frontend
    - Focus Queue.
    - Prospect Momentum Table.
    - Row drawer.
    - Next-action display.
    - CRM controls preserved.
 
-5. Task 6: Ivory Invitation Agent
+4. Task 6: Ivory Invitation Agent
    - Relationship-first BA-controlled invitation flow.
    - Person/CRM merge.
    - Relationship reason.
@@ -95,18 +100,18 @@ Task 1: Safety Audit
    - Copy/send screen.
    - PMV visibility.
 
-6. Task 7: Team Launch Center
+5. Task 7: Team Launch Center
    - New-BA launch checklist.
    - Michael status card.
    - First Invitation mission.
    - Welcome handoff.
 
-7. Task 8: Questionnaire wizard / welcome shortening
+6. Task 8: Questionnaire wizard / welcome shortening
    - Guided questionnaire wizard.
    - Shorter welcome ceremony.
    - Launch Center handoff.
 
-8. Task 9: QA and compliance pass
+7. Task 9: QA and compliance pass
    - Responsive QA.
    - Reduced-motion QA.
    - Token journey QA.
@@ -143,6 +148,6 @@ Task 1: Safety Audit
 
 ## Current Stop Point
 
-Task 1 documentation has been created and verified. Next step is commit, push, and PR to `ux-redesign-v2`.
+Task 2 brand/motion primitives have been implemented and verified. Next step is PR review/merge into `ux-redesign-v2`; do not begin Task 3 until that PR is reviewed and merged.
 
 
