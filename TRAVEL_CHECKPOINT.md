@@ -8,7 +8,7 @@ Date: 2026-06-11
 - v2 is redesign workspace: `momentum-creation-system-v2` is separated for UX/styling redesign work only.
 - Current repo: `momentum-creation-system-v2`
 - Local repo path: `D:\momentum-creation-system-v2`
-- Current branch: `task-2-brand-motion`
+- Current branch: `task-3-prospect-dashboard`
 - v2 integration branch: `ux-redesign-v2`
 - GitHub repo: `https://github.com/devklg/momentum-creation-system-v2`
 
@@ -56,7 +56,7 @@ Task 1: Safety Audit
 
 Task 2: Shared Brand/Motion Primitives
 
-- Status: implemented on `task-2-brand-motion`; ready for PR review into `ux-redesign-v2`.
+- Status: completed, reviewed, and merged. GitHub then merged `ux-redesign-v2` into `main` and removed the remote `ux-redesign-v2` branch; `main` at `1cecad7` is the current merged v2 base.
 - Branch: `task-2-brand-motion`
 - Allowed files touched: shared brand tokens/CSS, `.com` and `.team` CSS entry points, `.com` and `.team` Tailwind configs, and this checkpoint.
 - Application route pages changed: no
@@ -66,32 +66,36 @@ Task 2: Shared Brand/Motion Primitives
 - Reduced-motion behavior: shared motion primitives stop animation and progress transitions under `prefers-reduced-motion: reduce`.
 - Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`, plus `.team` chunk-size warning for a 516.40 kB minified JS bundle.
 
+Task 3: Prospect Position & Momentum Center
+
+- Status: implemented on `task-3-prospect-dashboard`; ready for PR review after final branch push.
+- Branch: `task-3-prospect-dashboard`
+- Base used: `origin/main` at `1cecad7` because remote `ux-redesign-v2` no longer exists after PR #8; this base contains merged Task 2.
+- Allowed files touched: `.com` prospect dashboard composer, LivePlace anchor id, YourNextMove anchor id, and this checkpoint.
+- Backend/server changed: no
+- Token, placement, invitation, CRM, and source tracking logic changed: no
+- First viewport now includes: Team Magnificent logo ribbon signal, prospect identity/inviter context, position card, beneath-you live counter, next-event countdown, primary talk-to-BA action, live placement ticker, and compact live stats when team stats load.
+- Preserved below center: Arrival, Opportunity, Mechanic, Live Place, Team Magnificent Advantage, full callback/webinar flows, and footer.
+- Compliance scan: no new income, spillover, CV, cycle, rank, placement-promise, automated outreach, AI qualification, or auto-send language added. Existing market-stat dollar figures remain in the preserved Opportunity section from the prior approved dashboard content.
+- Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts` now also lists the dashboard composer because the new center fetches compact team stats; `.team` chunk-size warning for a 516.51 kB minified JS bundle.
+
 ## Next Implementation Phases
 
-1. Task 3: Prospect Position & Momentum Center
-   - First viewport dashboard.
-   - Position card.
-   - Beneath-you counter.
-   - Rolling ticker.
-   - Countdown.
-   - Primary CTA.
-   - Preserve existing content below.
-
-2. Task 4: PMV backend projection
+1. Task 4: PMV backend projection
    - Granular lifecycle states.
    - Video progress visibility.
    - Focus Queue data.
    - Deterministic next action.
    - Today's Actions alignment.
 
-3. Task 5: PMV cockpit frontend
+2. Task 5: PMV cockpit frontend
    - Focus Queue.
    - Prospect Momentum Table.
    - Row drawer.
    - Next-action display.
    - CRM controls preserved.
 
-4. Task 6: Ivory Invitation Agent
+3. Task 6: Ivory Invitation Agent
    - Relationship-first BA-controlled invitation flow.
    - Person/CRM merge.
    - Relationship reason.
@@ -100,18 +104,18 @@ Task 2: Shared Brand/Motion Primitives
    - Copy/send screen.
    - PMV visibility.
 
-5. Task 7: Team Launch Center
+4. Task 7: Team Launch Center
    - New-BA launch checklist.
    - Michael status card.
    - First Invitation mission.
    - Welcome handoff.
 
-6. Task 8: Questionnaire wizard / welcome shortening
+5. Task 8: Questionnaire wizard / welcome shortening
    - Guided questionnaire wizard.
    - Shorter welcome ceremony.
    - Launch Center handoff.
 
-7. Task 9: QA and compliance pass
+6. Task 9: QA and compliance pass
    - Responsive QA.
    - Reduced-motion QA.
    - Token journey QA.
@@ -148,6 +152,6 @@ Task 2: Shared Brand/Motion Primitives
 
 ## Current Stop Point
 
-Task 2 brand/motion primitives have been implemented and verified. Next step is PR review/merge into `ux-redesign-v2`; do not begin Task 3 until that PR is reviewed and merged.
+Task 3 prospect dashboard center has been implemented and verified. Next step is PR review/merge before beginning Task 4.
 
 

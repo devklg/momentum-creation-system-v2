@@ -73,7 +73,7 @@ export function LivePlaceSection(props: LivePlaceSectionProps) {
 
   return (
     <>
-      <section className="tmpd-liveplace">
+      <section id="tmpd-live-place" className="tmpd-liveplace">
         <div className="eyebrow">Your place in the live team</div>
         <h2>The team is forming beneath you. Right now.</h2>
         <p className="tmpd-liveplace-lead">
