@@ -48,7 +48,7 @@ export interface YourNextMoveSectionProps {
 export function YourNextMoveSection(props: YourNextMoveSectionProps) {
   return (
     <>
-      <section className="tmpd-nextmove">
+      <section id="tmpd-talk-to-ba" className="tmpd-nextmove">
         <div className="eyebrow">Your next move</div>
         <h2>Let&rsquo;s have a real conversation about this unfolding new opportunity.</h2>
         <p className="tmpd-nextmove-lead">
