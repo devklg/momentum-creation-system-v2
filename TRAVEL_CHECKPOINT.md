@@ -1,15 +1,15 @@
 # Travel Checkpoint
 
-Date: 2026-06-03
+Date: 2026-06-10
 
 ## Repository State
 
-- v1 is stable: `momentum-creation-system-v1` remains the completed stable
-  version.
-- v2 is redesign workspace: `momentum-creation-system-v2` is separated for
-  UX/styling redesign work only.
+- v1 is stable: `momentum-creation-system-v1` remains the completed stable version.
+- v2 is redesign workspace: `momentum-creation-system-v2` is separated for UX/styling redesign work only.
 - Current repo: `momentum-creation-system-v2`
-- Current branch: `ux-redesign-v2`
+- Local repo path: `D:\momentum-creation-system-v2`
+- Current branch: `task-1-safety-audit`
+- v2 integration branch: `ux-redesign-v2`
 - GitHub repo: `https://github.com/devklg/momentum-creation-system-v2`
 
 ## Completed Review Docs
@@ -26,37 +26,44 @@ Review packet copied into `docs/v2-redesign/`:
 Root planning docs created:
 
 - `MASTER_UX_IMPLEMENTATION_SPEC.md`
+- `IMPLEMENTATION_TASKS.md`
 - `TRAVEL_CHECKPOINT.md`
+
+Task 1 audit doc created:
+
+- `docs/v2-redesign/audits/SAFETY_AUDIT.md`
 
 ## Working Boundaries
 
-- Do not implement redesign changes until explicitly requested.
 - Do not modify v1.
 - Do not rebuild backend logic unless required by a verified UX gap.
 - Preserve token placement.
 - Preserve CRM ownership.
 - Preserve invitation spine.
 - Preserve compliance boundaries.
+- Ivory may create invitations for BA-selected names through the existing spine.
+- Do not introduce AI lead qualification, prospect ranking, automated prospecting, automated calling, or auto-sending.
+
+## Current Task Status
+
+Task 1: Safety Audit
+
+- Status: documentation created and verification passed.
+- Branch: `task-1-safety-audit`
+- Allowed files touched: `docs/v2-redesign/audits/SAFETY_AUDIT.md`, `TRAVEL_CHECKPOINT.md`
+- Application code changed: no
+- Verification: `pnpm install`, `pnpm typecheck`, and `pnpm build` completed. Build warnings were non-blocking Vite chunk warnings.
 
 ## Next Implementation Phases
 
-1. Phase 0: Audit and Safety Map
-   - Token resolution.
-   - Click/video progress events.
-   - Placement idempotency.
-   - Cockpit/PMV projection.
-   - Invitation source fields.
-   - Ivory source flow.
-   - CRM BA ownership.
-
-2. Phase 1: Shared Brand and Motion Foundation
+1. Task 2: Shared brand/motion primitives
    - Team Magnificent shell/header.
    - Logo primitives.
    - Gold/teal roles.
    - Countdown, ticker, counter, progress, and status primitives.
    - Reduced-motion support.
 
-3. Phase 2: Prospect Position & Momentum Center
+2. Task 3: Prospect Position & Momentum Center
    - First viewport dashboard.
    - Position card.
    - Beneath-you counter.
@@ -65,37 +72,41 @@ Root planning docs created:
    - Primary CTA.
    - Preserve existing content below.
 
-4. Phase 3: PMV Backend Projection
+3. Task 4: PMV backend projection
    - Granular lifecycle states.
    - Video progress visibility.
    - Focus Queue data.
    - Deterministic next action.
-   - Today’s Actions alignment.
+   - Today's Actions alignment.
 
-5. Phase 4: PMV Frontend Redesign
+4. Task 5: PMV cockpit frontend
    - Focus Queue.
    - Prospect Momentum Table.
    - Row drawer.
    - Next-action display.
    - CRM controls preserved.
 
-6. Phase 5: Ivory Invitation Agent
-   - Relationship-first flow.
+5. Task 6: Ivory Invitation Agent
+   - Relationship-first BA-controlled invitation flow.
    - Person/CRM merge.
    - Relationship reason.
    - Editable draft.
-   - Minted link.
+   - Minted link through the existing spine.
    - Copy/send screen.
    - PMV visibility.
 
-7. Phase 6: Team Launch Center
+6. Task 7: Team Launch Center
    - New-BA launch checklist.
    - Michael status card.
    - First Invitation mission.
    - Welcome handoff.
-   - Questionnaire wizard.
 
-8. Phase 7: QA and Compliance
+7. Task 8: Questionnaire wizard / welcome shortening
+   - Guided questionnaire wizard.
+   - Shorter welcome ceremony.
+   - Launch Center handoff.
+
+8. Task 9: QA and compliance pass
    - Responsive QA.
    - Reduced-motion QA.
    - Token journey QA.
@@ -110,31 +121,28 @@ Root planning docs created:
    - No UI edits.
 
 2. Brand Foundation Agent
-   - Build shared Team Magnificent shell, logo, motion, countdown, ticker,
-     counter, progress, and badge primitives.
+   - Build shared Team Magnificent shell, logo, motion, countdown, ticker, counter, progress, and badge primitives.
 
 3. Prospect Dashboard Agent
-   - Build the Position & Momentum Center and preserve existing dashboard
-     content below it.
+   - Build the Position & Momentum Center and preserve existing dashboard content below it.
 
 4. PMV Backend Agent
-   - Build PMV projection, lifecycle visibility, Focus Queue data, and next
-     action rules.
+   - Build PMV projection, lifecycle visibility, Focus Queue data, and next action rules.
 
 5. PMV Frontend Agent
    - Redesign cockpit into the Prospect Momentum Viewer.
 
 6. Ivory Agent
-   - Convert Ivory into the relationship-first Invitation Agent using the
-     existing invitation spine.
+   - Convert Ivory into the relationship-first Invitation Agent using the existing invitation spine.
 
 7. Launch Center Agent
    - Build the Team Launch Center and questionnaire wizard.
 
 8. QA/Compliance Agent
-   - Run functional, visual, mobile, reduced-motion, CRM scoping, and compliance
-     checks before release.
+   - Run functional, visual, mobile, reduced-motion, CRM scoping, and compliance checks before release.
 
 ## Current Stop Point
 
-Documentation checkpoint only. No redesign implementation has begun.
+Task 1 documentation has been created and verified. Next step is commit, push, and PR to `ux-redesign-v2`.
+
+
