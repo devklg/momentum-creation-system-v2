@@ -176,7 +176,7 @@ export function MichaelSchedulePage() {
     return <InProgressView />;
   }
   if (view.kind === 'completed') {
-    return <CompletedView onContinue={() => navigate('/training/day-1')} />;
+    return <CompletedView onContinue={() => navigate('/cockpit')} />;
   }
   if (view.kind === 'scheduled') {
     return (
@@ -388,15 +388,15 @@ function ScheduledView({
           </p>
         </div>
         <p className="text-cream-mute text-[15px] leading-[1.6] mb-8">
-          The rest of your tools unlock the moment the call wraps. Until then, your Day 1
-          training is the place to be — it covers the system.
+          The rest of your tools unlock the moment the call wraps. Until then, your Launch
+          Center keeps the next step in front of you.
         </p>
         <div className="flex gap-3 justify-center">
           <Button
             className="bg-gold text-ink hover:bg-gold-bright font-display tracking-[0.06em] text-[14px] px-6 py-5"
-            onClick={() => (window.location.href = '/training/day-1')}
+            onClick={() => (window.location.href = '/cockpit')}
           >
-            Open Day 1 Training
+            Open Launch Center
           </Button>
           {canReschedule && (
             <Button
@@ -445,13 +445,13 @@ function CompletedView({ onContinue }: { onContinue: () => void }) {
         </h1>
         <p className="text-cream-mute text-[16px] leading-[1.6] mb-10">
           Michael captured your context. Your sponsor will see the highlights in their cockpit.
-          Day 1 training is open.
+          Your Launch Center is open and will show the next right action.
         </p>
         <Button
           onClick={onContinue}
           className="bg-gold text-ink hover:bg-gold-bright font-display tracking-[0.06em] text-[16px] px-8 py-6"
         >
-          Continue to Day 1 →
+          Open Launch Center
         </Button>
       </div>
     </div>

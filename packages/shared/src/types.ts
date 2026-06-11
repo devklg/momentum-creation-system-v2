@@ -3838,3 +3838,94 @@ export interface ComProspectCopy {
   /** com.dashboard.callback_cta — Section 6 lead. */
   dashboardCallbackCta: string;
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * Task 7 — Team Magnificent Launch Center
+ * ───────────────────────────────────────────────────────────────────────────
+ *
+ * /api/cockpit/launch is a read-only projection that gives a new BA one
+ * dominant next action before the cockpit matures into the operational PMV.
+ * It reads existing onboarding truth: welcome commitment, Michael schedule,
+ * Fast Start progress, Ivory roster, invitation spine, and questionnaire.
+ */
+
+export type LaunchStepId =
+  | 'welcome_accepted'
+  | 'michael_scheduled'
+  | 'michael_completed'
+  | 'day_1_started'
+  | 'day_1_completed'
+  | 'who_do_you_know_started'
+  | 'first_invitation_drafted'
+  | 'first_invitation_minted'
+  | 'first_invitation_sent'
+  | 'questionnaire_submitted'
+  | 'sponsor_connection_confirmed';
+
+export type LaunchStepState =
+  | 'complete'
+  | 'current'
+  | 'available'
+  | 'locked'
+  | 'optional';
+
+export interface LaunchStep {
+  id: LaunchStepId;
+  label: string;
+  state: LaunchStepState;
+  source: string;
+  href: string | null;
+  completedAt: IsoTimestamp | null;
+  detail: string;
+}
+
+export interface LaunchNextAction {
+  stepId: LaunchStepId | null;
+  label: string;
+  href: string | null;
+  reason: string;
+}
+
+export interface LaunchMichaelState {
+  status:
+    | 'awaiting_schedule'
+    | 'scheduled'
+    | 'in_progress'
+    | 'completed'
+    | 'missed'
+    | 'missing';
+  slotStartUtc: IsoTimestamp | null;
+  completedAt: IsoTimestamp | null;
+}
+
+export interface LaunchFirstInvitationState {
+  ivoryNames: number;
+  draftedCount: number;
+  mintedCount: number;
+  sentCount: number;
+}
+
+export interface LaunchFastStartState {
+  day1State: FastStartModuleState;
+  day1StartedAt: IsoTimestamp | null;
+  day1CompletedAt: IsoTimestamp | null;
+  complete: boolean;
+}
+
+export interface TeamLaunchCenterResponse {
+  ok: true;
+  generatedAt: IsoTimestamp;
+  baFirstName: string;
+  progress: {
+    completed: number;
+    total: number;
+    percent: number;
+  };
+  nextAction: LaunchNextAction;
+  steps: LaunchStep[];
+  michael: LaunchMichaelState;
+  firstInvitation: LaunchFirstInvitationState;
+  fastStart: LaunchFastStartState;
+  questionnaireSubmitted: boolean;
+  launchComplete: boolean;
+}

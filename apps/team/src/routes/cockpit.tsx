@@ -37,6 +37,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { TrackRecordCard } from '@/components/cockpit/TrackRecordCard';
 import { OrientationCard } from '@/components/cockpit/OrientationCard';
+import {
+  LaunchCenter,
+  type TeamLaunchCenter,
+} from '@/components/launch/LaunchCenter';
 
 // ── Local wire shapes (mirror packages/shared/src/types.ts) ──────────────
 
@@ -450,8 +454,9 @@ type View =
   | { kind: 'error'; message: string }
   | {
       kind: 'ready';
-      summary: CockpitSummaryResponse;
-      pmv: ProspectMomentumViewerResponse;
+      launch: TeamLaunchCenter;
+      summary: CockpitSummaryResponse | null;
+      pmv: ProspectMomentumViewerResponse | null;
       invites: InviteSummary[];
       activityByProspect: Record<string, InvitationActivityEntry[]>;
     };
@@ -468,6 +473,29 @@ export function CockpitPage() {
 
   const load = useCallback(async () => {
     try {
+      const launchRes = await fetch('/api/cockpit/launch', { credentials: 'include' });
+      if (launchRes.status === 401) {
+        navigate('/register');
+        return;
+      }
+      if (!launchRes.ok) {
+        setView({ kind: 'error', message: 'Could not load your Launch Center. Try again.' });
+        return;
+      }
+      const launch = (await launchRes.json()) as TeamLaunchCenter;
+
+      if (launch.michael.status !== 'completed') {
+        setView({
+          kind: 'ready',
+          launch,
+          summary: null,
+          pmv: null,
+          invites: [],
+          activityByProspect: {},
+        });
+        return;
+      }
+
       const [summaryRes, pmvRes, invitesRes] = await Promise.all([
         fetch('/api/cockpit/summary', { credentials: 'include' }),
         fetch('/api/cockpit/pmv', { credentials: 'include' }),
@@ -490,6 +518,7 @@ export function CockpitPage() {
       const invites = (await invitesRes.json()) as MyInvitesResponse;
       setView({
         kind: 'ready',
+        launch,
         summary,
         pmv,
         invites: invites.invites,
@@ -517,11 +546,22 @@ export function CockpitPage() {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
+  const handleLaunchNavigate = useCallback((href: string) => {
+    navigate(href);
+    const hash = href.split('#')[1];
+    if (hash) {
+      window.setTimeout(() => {
+        document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
+    }
+  }, [navigate]);
+
   // Optimistic patch when "I sent this" succeeds, so the row updates without
   // a full reload. The server is the source of truth; this just mirrors it.
   const patchSent = useCallback((prospectId: string, sentAt: string) => {
     setView((prev) => {
       if (prev.kind !== 'ready') return prev;
+      if (!prev.summary || !prev.pmv) return prev;
       const nextInvites = prev.invites.map((i) =>
         i.prospectId === prospectId
           ? {
@@ -592,7 +632,16 @@ export function CockpitPage() {
     );
   }
 
-  const { summary, pmv, invites, activityByProspect } = view;
+  const { launch, summary, pmv, invites, activityByProspect } = view;
+  if (!summary || !pmv) {
+    return (
+      <Shell>
+        <LaunchCenter launch={launch} onNavigate={handleLaunchNavigate} />
+        <OperationalPmvLocked onNavigate={handleLaunchNavigate} />
+      </Shell>
+    );
+  }
+
   const inviteByProspect = new Map(invites.map((i) => [i.prospectId, i]));
   const visibleRows = pmv.rows.filter((row) => {
     if (filter === 'all') return true;
@@ -602,17 +651,19 @@ export function CockpitPage() {
 
   return (
     <Shell>
+      <LaunchCenter launch={launch} onNavigate={handleLaunchNavigate} />
+
       {/* Header */}
-      <div className="tm-command-ribbon mb-8">
+      <div id="pmv" className="tm-command-ribbon mb-8 scroll-mt-8">
         <div>
           <p className="font-mono tracking-[0.22em] text-[11px] text-gold uppercase mb-2">
-            Team Magnificent
+            Operational PMV
           </p>
-          <h1 className="font-display text-[clamp(36px,6vw,62px)] leading-[0.95] text-cream">
+          <h2 className="font-display text-[clamp(32px,5vw,54px)] leading-[0.98] text-cream">
             {summary.baFirstName
               ? `${summary.baFirstName}'s Prospect Momentum Viewer`
               : 'Prospect Momentum Viewer'}
-          </h1>
+          </h2>
         </div>
         <Button
           onClick={() => navigate('/invitations')}
@@ -676,7 +727,7 @@ export function CockpitPage() {
         </section>
 
         <aside className="space-y-8">
-          <div>
+          <div id="sponsor" className="scroll-mt-8">
             <SectionLabel>My Sponsor</SectionLabel>
             <SponsorCard
               sponsor={summary.sponsor}
@@ -715,6 +766,32 @@ export function CockpitPage() {
         </aside>
       </div>
     </Shell>
+  );
+}
+
+function OperationalPmvLocked({ onNavigate }: { onNavigate: (href: string) => void }) {
+  return (
+    <section
+      id="pmv"
+      className="scroll-mt-8 border border-cream/10 bg-cream/[0.02] rounded-md p-6 sm:p-8"
+    >
+      <p className="font-mono tracking-[0.18em] text-[11px] text-cream-mute uppercase mb-3">
+        Operational PMV
+      </p>
+      <h2 className="font-display text-[30px] leading-[1.05] text-cream mb-3">
+        Prospect Momentum Viewer unlocks after Michael.
+      </h2>
+      <p className="text-cream-mute text-[14px] leading-[1.6] max-w-2xl mb-5">
+        Your launch steps stay available here. The full PMV, CRM notes, follow-ups,
+        and invite activity remain behind the Michael completion gate.
+      </p>
+      <Button
+        onClick={() => onNavigate('/michael/schedule')}
+        className="bg-gold text-ink hover:bg-gold-bright font-display tracking-[0.06em] text-[15px] px-6 py-5"
+      >
+        Open Michael
+      </Button>
+    </section>
   );
 }
 
