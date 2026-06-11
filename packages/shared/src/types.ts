@@ -680,6 +680,130 @@ export interface MyInvitesResponse {
   activityByProspect: Record<string, InvitationActivityEntry[]>;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+ * PMV backend projection (Task 4)
+ * ─────────────────────────────────────────────────────────────────────────
+ *
+ * Prospect Momentum Viewer rows are BA-scoped server projections. They expose
+ * explicit lifecycle, CRM summary, last signal, and deterministic next action
+ * without scoring, qualifying, ranking, auto-sending, or widening ownership.
+ */
+
+export type ProspectLifecycleStage =
+  | 'draft'
+  | 'sent_unopened'
+  | 'clicked'
+  | 'video_started'
+  | 'video_25'
+  | 'video_50'
+  | 'video_75'
+  | 'watched'
+  | 'callback_requested'
+  | 'customer'
+  | 'enrolled'
+  | 'expired'
+  | 'archived';
+
+export type ProspectNextActionKind =
+  | 'send_invite'
+  | 'call_now'
+  | 'reply_to_callback'
+  | 'follow_up_due'
+  | 'send_soft_nudge'
+  | 'ask_if_video_played'
+  | 'reinvite'
+  | 'schedule_followup'
+  | 'wait'
+  | 'none';
+
+export type ProspectNextActionScriptKind =
+  | 'initial_send'
+  | 'callback_reply'
+  | 'clicked_no_watch'
+  | 'partial_watch'
+  | 'watched_no_callback'
+  | 'reinvite'
+  | 'later_reconnect';
+
+export interface ProspectNextAction {
+  kind: ProspectNextActionKind;
+  label: string;
+  reason: string;
+  priority: 0 | 1 | 2 | 3 | 4 | 5;
+  dueAt: IsoTimestamp | null;
+  scriptKind: ProspectNextActionScriptKind | null;
+}
+
+export type ProspectLastSignalKind =
+  | 'created'
+  | 'sent'
+  | 'opened'
+  | 'video_started'
+  | 'video_25'
+  | 'video_50'
+  | 'video_75'
+  | 'watched'
+  | 'callback_requested'
+  | 'customer'
+  | 'enrolled'
+  | 'expired'
+  | 'archived';
+
+export interface ProspectLastSignal {
+  kind: ProspectLastSignalKind;
+  label: string;
+  at: IsoTimestamp;
+}
+
+export interface ProspectMomentumCrmSummary {
+  disposition: CrmDisposition | null;
+  followUpDueAt: IsoTimestamp | null;
+  followUpIsDue: boolean;
+  noteCount: number;
+  latestNoteAt: IsoTimestamp | null;
+}
+
+export interface ProspectMomentumRow {
+  prospectId: string;
+  token: string;
+  firstName: string;
+  lastInitial: string;
+  city: string;
+  stateOrRegion: string;
+  source: InvitationSource;
+  lifecycle: ProspectLifecycleStage;
+  tokenState: TokenState;
+  videoProgressPct: 0 | 25 | 50 | 75 | 100 | null;
+  clickedAt: IsoTimestamp | null;
+  sentAt: IsoTimestamp | null;
+  createdAt: IsoTimestamp;
+  expiresAt: IsoTimestamp;
+  positionNumber: number | null;
+  placedAt: IsoTimestamp | null;
+  latestCallbackIntent: CallbackIntent | null;
+  crm: ProspectMomentumCrmSummary;
+  lastSignal: ProspectLastSignal;
+  nextAction: ProspectNextAction;
+}
+
+export interface ProspectFocusQueueItem {
+  prospectId: string;
+  firstName: string;
+  lastInitial: string;
+  lifecycle: ProspectLifecycleStage;
+  source: InvitationSource;
+  lastSignal: ProspectLastSignal;
+  nextAction: ProspectNextAction;
+}
+
+export interface ProspectMomentumViewerResponse {
+  ok: true;
+  generatedAt: IsoTimestamp;
+  focusQueue: ProspectFocusQueueItem[];
+  rows: ProspectMomentumRow[];
+  lifecycleGaps: string[];
+}
+
 /**
  * Response from GET /api/cockpit/summary. The headline counts the cockpit
  * shows above My Invites, plus the My Sponsor card data. Counts are the

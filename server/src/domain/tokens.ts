@@ -141,3 +141,45 @@ export async function transitionTokenState(
   return { state: next, changed: true };
 }
 
+/**
+ * Stamp the first prospect-facing open for PMV/click visibility.
+ *
+ * GET /p/{token} is the open signal: the prospect resolved the link. We set
+ * clickedAt once and advance minted -> clicked when that is still the forward
+ * lifecycle move. Later video states keep their higher state but still get a
+ * backfilled clickedAt if legacy rows are missing it.
+ */
+export async function markTokenOpened(
+  token: string,
+): Promise<{ state: TokenState; clickedAt: string; changed: boolean }> {
+  const record = await findTokenRecord(token);
+  if (!record) throw new Error('token_not_found');
+
+  const clickedAt = record.clickedAt ?? new Date().toISOString();
+  const shouldAdvanceState = isForwardTransition(record.state, 'clicked');
+  const shouldStampClick = record.clickedAt === null;
+
+  if (!shouldAdvanceState && !shouldStampClick) {
+    return { state: record.state, clickedAt, changed: false };
+  }
+
+  const set: Partial<InviteTokenRecord> & { updatedAt: string } = {
+    updatedAt: clickedAt,
+  };
+  if (shouldStampClick) set.clickedAt = clickedAt;
+  if (shouldAdvanceState) set.state = 'clicked';
+
+  await gatewayCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: TOKENS_COLLECTION,
+    filter: { token },
+    update: { $set: set },
+  });
+
+  return {
+    state: shouldAdvanceState ? 'clicked' : record.state,
+    clickedAt,
+    changed: true,
+  };
+}
+
