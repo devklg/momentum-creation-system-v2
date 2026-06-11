@@ -8,7 +8,7 @@ Date: 2026-06-11
 - v2 is redesign workspace: `momentum-creation-system-v2` is separated for UX/styling redesign work only.
 - Current repo: `momentum-creation-system-v2`
 - Local repo path: `D:\momentum-creation-system-v2`
-- Current branch: `task-7-team-launch-center`
+- Current branch: `task-8-questionnaire-welcome`
 - v2 integration branch: `main` after GitHub removed the remote `ux-redesign-v2` branch during the Task 2 merge flow.
 - GitHub repo: `https://github.com/devklg/momentum-creation-system-v2`
 
@@ -135,7 +135,7 @@ Task 6: Ivory Invitation Agent
 
 Task 7: Team Launch Center
 
-- Status: implemented on `task-7-team-launch-center`; ready for PR review after final branch push.
+- Status: completed, reviewed, and merged.
 - Branch: `task-7-team-launch-center`
 - Base used: `origin/main` after Task 6 merged and the prior branch was deleted.
 - Allowed files touched: `.team` cockpit route, new `.team` launch component directory, Michael schedule handoff, cockpit backend route/domain, shared type contracts, and this checkpoint.
@@ -152,14 +152,28 @@ Task 7: Team Launch Center
 - Compliance scan: no AI lead qualification, prospect ranking, automated prospecting, automated calling, auto-send, income, spillover, CV, cycle, rank, placement-promise, or dollar claims added.
 - Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`; `.team` chunk-size warning for a 523.04 kB minified JS bundle.
 
+Task 8: Questionnaire Wizard / Welcome Shortening
+
+- Status: implemented on `task-8-questionnaire-welcome`; ready for PR review after final branch push.
+- Branch: `task-8-questionnaire-welcome`
+- Base used: `origin/main` after Task 7 merged and the prior branch was deleted.
+- Allowed files touched: `.team` welcome route, `.team` onboarding questionnaire route, and this checkpoint.
+- Backend/server changed: no
+- Shared contracts changed: no
+- `.com` prospect-facing pages changed: no
+- Token/placement/Ivory/PMV backend files changed: no
+- Welcome is shortened into a Team Magnificent ceremony with Kevin/Paul credibility, clear commitment CTA, and Launch Center handoff to `/cockpit`.
+- Welcome still records the same click commitment through `/api/welcome/accept`; only the post-accept route changed from Michael scheduler to Launch Center.
+- Questionnaire preserves the existing submitted field names and backend payload while converting the long form into a six-step wizard.
+- Wizard sections: contact snapshot, why you are here, product and goals, execution pattern, coachability, and readiness/commitment.
+- Wizard behavior: progress rail, answered-field count, step progress meter, back/next navigation, step-level completion guard, final submit, and completion path back to Launch Center.
+- Save/resume persistence was not added; no new backend draft contract was introduced.
+- Compliance scan: no AI lead qualification, prospect ranking, automated prospecting, automated calling, auto-send, or prospect-facing income/placement claims added. Existing BA-facing questionnaire fields about income/product readiness were preserved as required by the current backend contract.
+- Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`; `.team` chunk-size warning for a 521.70 kB minified JS bundle.
+
 ## Next Implementation Phases
 
-1. Task 8: Questionnaire wizard / welcome shortening
-   - Guided questionnaire wizard.
-   - Shorter welcome ceremony.
-   - Launch Center handoff.
-
-2. Task 9: QA and compliance pass
+1. Task 9: QA and compliance pass
    - Responsive QA.
    - Reduced-motion QA.
    - Token journey QA.
@@ -191,11 +205,14 @@ Task 7: Team Launch Center
 7. Launch Center Agent
    - Build the Team Launch Center.
 
-8. QA/Compliance Agent
+8. Questionnaire/Welcome Agent
+   - Shorten welcome and convert questionnaire into a guided wizard.
+
+9. QA/Compliance Agent
    - Run functional, visual, mobile, reduced-motion, CRM scoping, and compliance checks before release.
 
 ## Current Stop Point
 
-Task 7 Team Launch Center has been implemented and verified. Next step is PR review/merge before beginning Task 8.
+Task 8 Questionnaire Wizard / Welcome Shortening has been implemented and verified. Next step is PR review/merge before beginning Task 9 QA/Compliance.
 
 
