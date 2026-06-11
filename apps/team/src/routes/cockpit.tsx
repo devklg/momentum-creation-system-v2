@@ -1,28 +1,20 @@
 /**
- * /cockpit — the BA's home base (Chat #121).
+ * /cockpit - Prospect Momentum Viewer.
  *
- * Replaces the Chat #94 "Cockpit coming soon" stub with the real cockpit
- * shell. Per TEAM Design Section H the cockpit is three things: My Sponsor,
- * My Invites, and a CRM view. This session ships:
- *   - My Invites      — WORKING. The read side of the invitation module:
- *                       every prospect the BA invited, their status, the
- *                       saved message, and an expandable activity timeline.
- *   - My Sponsor      — WORKING. Card from GET /api/cockpit/summary (founder
- *                       treatment when there's no upline, locked-spec 1.2).
- *   - CRM             — STUBBED. A later session; the My Invites list is the
- *                       interim CRM.
+ * Task 5 rebuilds the first viewport around the Task 4 PMV projection:
+ * Focus Queue, Prospect Momentum Table, lifecycle filters, next action, and
+ * a CRM-safe row drawer. Existing CRM controls remain BA-scoped server calls.
  *
  * Data:
  *   GET /api/cockpit/summary  -> counts + sponsor card
+ *   GET /api/cockpit/pmv      -> focusQueue + PMV rows
  *   GET /api/cockpit/invites  -> invites[] + activityByProspect{}
  *   POST /api/invitations/:id/sent -> "I sent this" for a draft row (reuses
  *                       the spine route; the cockpit just calls it).
  *
  * Compliance (locked-spec 3.10): BA-facing .team surface. Shows funnel
- * status + saved message + prospect contact. No income/placement claims —
- * status is progress, never earnings. The headline number a BA is nudged
- * toward is invitations sent (locked-spec 1.9), so the empty state and the
- * primary CTA both point at /invitations.
+ * status + saved message + CRM controls. No income/placement claims - status
+ * is prospect momentum, never earnings. All outreach remains manual BA action.
  *
  * Per .team convention (register.tsx, michael-schedule.tsx, invitations.tsx):
  * API wire shapes are declared locally rather than imported from
@@ -35,8 +27,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  ChevronDown,
+  ChevronRight,
+  RefreshCw,
+  Send,
+  SlidersHorizontal,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { TodaysActions } from '@/components/cockpit/TodaysActions';
 import { TrackRecordCard } from '@/components/cockpit/TrackRecordCard';
 import { OrientationCard } from '@/components/cockpit/OrientationCard';
 
@@ -243,31 +241,171 @@ interface ReinviteScriptResponse {
   script: string;
 }
 
+// ── PMV wire shapes (mirror packages/shared/src/types.ts Task 4 block) ──
+
+type ProspectLifecycleStage =
+  | 'draft'
+  | 'sent_unopened'
+  | 'clicked'
+  | 'video_started'
+  | 'video_25'
+  | 'video_50'
+  | 'video_75'
+  | 'watched'
+  | 'callback_requested'
+  | 'customer'
+  | 'enrolled'
+  | 'expired'
+  | 'archived';
+
+type ProspectNextActionKind =
+  | 'send_invite'
+  | 'call_now'
+  | 'reply_to_callback'
+  | 'follow_up_due'
+  | 'send_soft_nudge'
+  | 'ask_if_video_played'
+  | 'reinvite'
+  | 'schedule_followup'
+  | 'wait'
+  | 'none';
+
+type ProspectNextActionScriptKind =
+  | 'initial_send'
+  | 'callback_reply'
+  | 'clicked_no_watch'
+  | 'partial_watch'
+  | 'watched_no_callback'
+  | 'reinvite'
+  | 'later_reconnect';
+
+interface ProspectNextAction {
+  kind: ProspectNextActionKind;
+  label: string;
+  reason: string;
+  priority: 0 | 1 | 2 | 3 | 4 | 5;
+  dueAt: string | null;
+  scriptKind: ProspectNextActionScriptKind | null;
+}
+
+type ProspectLastSignalKind =
+  | 'created'
+  | 'sent'
+  | 'opened'
+  | 'video_started'
+  | 'video_25'
+  | 'video_50'
+  | 'video_75'
+  | 'watched'
+  | 'callback_requested'
+  | 'customer'
+  | 'enrolled'
+  | 'expired'
+  | 'archived';
+
+interface ProspectLastSignal {
+  kind: ProspectLastSignalKind;
+  label: string;
+  at: string;
+}
+
+interface ProspectMomentumCrmSummary {
+  disposition: CrmDisposition | null;
+  followUpDueAt: string | null;
+  followUpIsDue: boolean;
+  noteCount: number;
+  latestNoteAt: string | null;
+}
+
+interface ProspectMomentumRow {
+  prospectId: string;
+  token: string;
+  firstName: string;
+  lastInitial: string;
+  city: string;
+  stateOrRegion: string;
+  source: InvitationSource;
+  lifecycle: ProspectLifecycleStage;
+  tokenState: TokenState;
+  videoProgressPct: 0 | 25 | 50 | 75 | 100 | null;
+  clickedAt: string | null;
+  sentAt: string | null;
+  createdAt: string;
+  expiresAt: string;
+  positionNumber: number | null;
+  placedAt: string | null;
+  latestCallbackIntent: CallbackIntent | null;
+  crm: ProspectMomentumCrmSummary;
+  lastSignal: ProspectLastSignal;
+  nextAction: ProspectNextAction;
+}
+
+interface ProspectFocusQueueItem {
+  prospectId: string;
+  firstName: string;
+  lastInitial: string;
+  lifecycle: ProspectLifecycleStage;
+  source: InvitationSource;
+  lastSignal: ProspectLastSignal;
+  nextAction: ProspectNextAction;
+}
+
+interface ProspectMomentumViewerResponse {
+  ok: true;
+  generatedAt: string;
+  focusQueue: ProspectFocusQueueItem[];
+  rows: ProspectMomentumRow[];
+  lifecycleGaps: string[];
+}
+
 // ── Status display config ────────────────────────────────────────────────
 
-const STATUS_META: Record<
-  InviteDisplayStatus,
-  { label: string; tone: 'gold' | 'teal' | 'mute' | 'dim' }
+const LIFECYCLE_META: Record<
+  ProspectLifecycleStage,
+  { label: string; tone: 'gold' | 'teal' | 'mute' | 'dim'; group: PmvFilter }
 > = {
-  draft: { label: 'Draft — not sent', tone: 'dim' },
-  sent: { label: 'Sent', tone: 'mute' },
-  opened: { label: 'Opened the link', tone: 'mute' },
-  watched: { label: 'Watched the video', tone: 'teal' },
-  callback: { label: 'Asked for a callback', tone: 'gold' },
-  enrolled: { label: 'Enrolled', tone: 'teal' },
-  expired: { label: 'Expired', tone: 'dim' },
+  draft: { label: 'Draft', tone: 'dim', group: 'needs_action' },
+  sent_unopened: { label: 'Sent, unopened', tone: 'mute', group: 'sent' },
+  clicked: { label: 'Clicked', tone: 'mute', group: 'watching' },
+  video_started: { label: 'Started video', tone: 'teal', group: 'watching' },
+  video_25: { label: 'Video 25%', tone: 'teal', group: 'watching' },
+  video_50: { label: 'Video 50%', tone: 'teal', group: 'watching' },
+  video_75: { label: 'Video 75%', tone: 'teal', group: 'watching' },
+  watched: { label: 'Watched', tone: 'teal', group: 'watched' },
+  callback_requested: { label: 'Callback', tone: 'gold', group: 'needs_action' },
+  customer: { label: 'Customer', tone: 'teal', group: 'closed' },
+  enrolled: { label: 'Enrolled', tone: 'teal', group: 'closed' },
+  expired: { label: 'Expired', tone: 'dim', group: 'closed' },
+  archived: { label: 'Archived', tone: 'dim', group: 'closed' },
 };
 
-const INTENT_LABEL: Record<CallbackIntent, string> = {
-  interested_tell_me_more: 'interested — tell me more',
-  have_questions: 'has questions',
-  ready_to_join: 'ready to join',
-};
+type PmvFilter =
+  | 'all'
+  | 'needs_action'
+  | 'sent'
+  | 'watching'
+  | 'watched'
+  | 'closed';
+
+const PMV_FILTERS: Array<{ key: PmvFilter; label: string }> = [
+  { key: 'all', label: 'All' },
+  { key: 'needs_action', label: 'Needs action' },
+  { key: 'sent', label: 'Sent' },
+  { key: 'watching', label: 'Watching' },
+  { key: 'watched', label: 'Watched' },
+  { key: 'closed', label: 'Closed' },
+];
 
 const SOURCE_LABEL: Record<InvitationSource, string> = {
   self: 'You wrote this',
   ivory: 'Prepared with Ivory',
   scriptmaker: 'Prepared from a product video',
+};
+
+const SOURCE_SHORT: Record<InvitationSource, string> = {
+  self: 'Self',
+  ivory: 'Ivory',
+  scriptmaker: 'ScriptMaker',
 };
 
 function toneClass(tone: 'gold' | 'teal' | 'mute' | 'dim'): string {
@@ -313,6 +451,7 @@ type View =
   | {
       kind: 'ready';
       summary: CockpitSummaryResponse;
+      pmv: ProspectMomentumViewerResponse;
       invites: InviteSummary[];
       activityByProspect: Record<string, InvitationActivityEntry[]>;
     };
@@ -320,6 +459,7 @@ type View =
 export function CockpitPage() {
   const navigate = useNavigate();
   const [view, setView] = useState<View>({ kind: 'loading' });
+  const [filter, setFilter] = useState<PmvFilter>('all');
   // When the BA clicks an item in Today's Actions, we record the target
   // prospectId here; InviteRow watches for matches and self-expands. We
   // bump a tick so re-clicking the same id (after a manual collapse) still
@@ -328,23 +468,30 @@ export function CockpitPage() {
 
   const load = useCallback(async () => {
     try {
-      const [summaryRes, invitesRes] = await Promise.all([
+      const [summaryRes, pmvRes, invitesRes] = await Promise.all([
         fetch('/api/cockpit/summary', { credentials: 'include' }),
+        fetch('/api/cockpit/pmv', { credentials: 'include' }),
         fetch('/api/cockpit/invites', { credentials: 'include' }),
       ]);
-      if (summaryRes.status === 401 || invitesRes.status === 401) {
+      if (
+        summaryRes.status === 401 ||
+        pmvRes.status === 401 ||
+        invitesRes.status === 401
+      ) {
         navigate('/register');
         return;
       }
-      if (!summaryRes.ok || !invitesRes.ok) {
-        setView({ kind: 'error', message: 'Could not load your cockpit. Try again.' });
+      if (!summaryRes.ok || !pmvRes.ok || !invitesRes.ok) {
+        setView({ kind: 'error', message: 'Could not load your PMV. Try again.' });
         return;
       }
       const summary = (await summaryRes.json()) as CockpitSummaryResponse;
+      const pmv = (await pmvRes.json()) as ProspectMomentumViewerResponse;
       const invites = (await invitesRes.json()) as MyInvitesResponse;
       setView({
         kind: 'ready',
         summary,
+        pmv,
         invites: invites.invites,
         activityByProspect: invites.activityByProspect,
       });
@@ -363,7 +510,7 @@ export function CockpitPage() {
   // so the hook count is stable across loading/error/ready renders — a hook
   // after the early returns changes the count on the ready transition and
   // trips "rendered more hooks than during the previous render" (#141 fix).
-  const handleTodayClick = useCallback((prospectId: string) => {
+  const handlePmvJump = useCallback((prospectId: string) => {
     setForceExpandedId(prospectId);
     // Scroll to the row. The <li> carries id={`invite-${prospectId}`}.
     const el = document.getElementById(`invite-${prospectId}`);
@@ -384,9 +531,26 @@ export function CockpitPage() {
             }
           : i,
       );
+      const nextRows = prev.pmv.rows.map((row) =>
+        row.prospectId === prospectId
+          ? {
+              ...row,
+              sentAt,
+              lifecycle:
+                row.lifecycle === 'draft'
+                  ? ('sent_unopened' as ProspectLifecycleStage)
+                  : row.lifecycle,
+            }
+          : row,
+      );
       return {
         ...prev,
         invites: nextInvites,
+        pmv: {
+          ...prev.pmv,
+          rows: nextRows,
+          focusQueue: prev.pmv.focusQueue.filter((q) => q.prospectId !== prospectId),
+        },
         summary: {
           ...prev.summary,
           counts: {
@@ -402,7 +566,7 @@ export function CockpitPage() {
     return (
       <Shell>
         <p className="text-cream-faint font-mono text-[13px] tracking-[0.04em]">
-          Loading your cockpit…
+          Loading your Prospect Momentum Viewer...
         </p>
       </Shell>
     );
@@ -421,63 +585,72 @@ export function CockpitPage() {
           }}
           className="bg-cream/[0.05] text-cream border border-cream/15 hover:border-gold/40 font-mono tracking-[0.04em] text-[13px] px-5 py-4"
         >
+          <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
           Try again
         </Button>
       </Shell>
     );
   }
 
-  const { summary, invites, activityByProspect } = view;
+  const { summary, pmv, invites, activityByProspect } = view;
+  const inviteByProspect = new Map(invites.map((i) => [i.prospectId, i]));
+  const visibleRows = pmv.rows.filter((row) => {
+    if (filter === 'all') return true;
+    if (filter === 'needs_action') return row.nextAction.priority > 0;
+    return LIFECYCLE_META[row.lifecycle].group === filter;
+  });
 
   return (
     <Shell>
       {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4 mb-10">
+      <div className="tm-command-ribbon mb-8">
         <div>
-          <p className="font-display tracking-eyebrow text-[13px] text-gold mb-3">
-            TEAM MAGNIFICENT · COCKPIT
+          <p className="font-mono tracking-[0.22em] text-[11px] text-gold uppercase mb-2">
+            Team Magnificent
           </p>
-          <h1 className="font-display text-[clamp(40px,7vw,68px)] leading-[0.95] text-cream">
+          <h1 className="font-display text-[clamp(36px,6vw,62px)] leading-[0.95] text-cream">
             {summary.baFirstName
-              ? `Welcome back, ${summary.baFirstName}.`
-              : 'Welcome back.'}
+              ? `${summary.baFirstName}'s Prospect Momentum Viewer`
+              : 'Prospect Momentum Viewer'}
           </h1>
         </div>
         <Button
           onClick={() => navigate('/invitations')}
-          className="bg-gold text-ink hover:bg-gold-bright font-display tracking-[0.06em] text-[16px] px-7 py-6"
+          className="bg-gold text-ink hover:bg-gold-bright font-display tracking-[0.06em] text-[16px] px-6 py-5"
         >
+          <Send className="mr-2 h-4 w-4" aria-hidden="true" />
           Invite someone
         </Button>
       </div>
 
-      {/* Counts strip */}
       <CountsStrip counts={summary.counts} />
 
-      {/* Today's Actions — derived from existing pipeline (callbacks, due
-          follow-ups, expiring windows). Renders the locked-spec 1.9 bias
-          prompt as its own empty state, so it's always present. */}
-      <TodaysActions onJump={handleTodayClick} />
-
-      {/* Track Record (Chat #147) — the BA's own invitation activity record
-          (invitations generated + who they're bringing in) as their personal
-          success indicator. Pure display over the invites already loaded;
-          activity metric only, never income (dec seq 25, .team-only). */}
-      <TrackRecordCard invites={invites} />
-
-      {/* Two-column: My Invites (main) + side rail (My Sponsor, CRM hint) */}
-      <div className="mt-12 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-start">
+      <div className="mt-8 grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-6 items-start">
+        <FocusQueue
+          queue={pmv.focusQueue}
+          onJump={handlePmvJump}
+          onInvite={() => navigate('/invitations')}
+        />
         <section>
-          <SectionLabel>My Invites</SectionLabel>
-          {invites.length === 0 ? (
+          <div className="flex flex-wrap items-end justify-between gap-4 mb-4">
+            <div>
+              <SectionLabel>Prospect Momentum Table</SectionLabel>
+              <p className="text-cream-faint text-[13px] leading-[1.5]">
+                {visibleRows.length} of {pmv.rows.length} prospects shown.
+              </p>
+            </div>
+            <PmvFilters value={filter} onChange={setFilter} rows={pmv.rows} />
+          </div>
+          {pmv.rows.length === 0 ? (
             <EmptyInvites onInvite={() => navigate('/invitations')} />
           ) : (
-            <ul className="space-y-3">
-              {invites.map((inv) => (
+            <div className="space-y-3">
+              {visibleRows.map((row) => (
                 <InviteRow
-                  key={inv.prospectId}
-                  invite={inv}
-                  activity={activityByProspect[inv.prospectId] ?? []}
+                  key={row.prospectId}
+                  row={row}
+                  invite={inviteByProspect.get(row.prospectId) ?? null}
+                  activity={activityByProspect[row.prospectId] ?? []}
                   onMarkedSent={patchSent}
                   forceExpandedId={forceExpandedId}
                   onReinvited={() => {
@@ -486,8 +659,20 @@ export function CockpitPage() {
                   }}
                 />
               ))}
-            </ul>
+              {visibleRows.length === 0 && (
+                <div className="border border-cream/10 rounded-md p-6 text-cream-faint text-[14px]">
+                  No prospects match this filter.
+                </div>
+              )}
+            </div>
           )}
+        </section>
+      </div>
+
+      {/* Secondary cockpit surfaces stay below the PMV first viewport. */}
+      <div className="mt-12 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-start">
+        <section>
+          <TrackRecordCard invites={invites} />
         </section>
 
         <aside className="space-y-8">
@@ -505,9 +690,8 @@ export function CockpitPage() {
             <SectionLabel>CRM</SectionLabel>
             <div className="bg-cream/[0.02] border border-cream/10 rounded-md p-5">
               <p className="text-cream-mute text-[14px] leading-[1.6]">
-                Notes, follow-ups, and tags live inside each invite row.
-                Expand any row to write a private note, set a reminder, tag
-                where the conversation stands, or re-invite.
+                Notes, follow-ups, tags, re-invite scripts, edits, and remove
+                controls live inside each PMV row drawer.
               </p>
             </div>
           </div>
@@ -539,7 +723,7 @@ export function CockpitPage() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-ink text-cream py-14 px-6">
-      <div className="max-w-5xl mx-auto">{children}</div>
+      <div className="max-w-7xl mx-auto">{children}</div>
     </div>
   );
 }
@@ -596,7 +780,7 @@ function EmptyInvites({ onInvite }: { onInvite: () => void }) {
       </h3>
       <p className="text-cream-mute text-[15px] leading-[1.6] max-w-md mx-auto mb-6">
         Your invites show up here the moment you mint a link. The one thing
-        that matters is sending the next one — everything else follows.
+        that matters is sending the next one. Everything else follows.
       </p>
       <Button
         onClick={onInvite}
@@ -604,6 +788,171 @@ function EmptyInvites({ onInvite }: { onInvite: () => void }) {
       >
         Mint your first link
       </Button>
+    </div>
+  );
+}
+
+function FocusQueue({
+  queue,
+  onJump,
+  onInvite,
+}: {
+  queue: ProspectFocusQueueItem[];
+  onJump: (prospectId: string) => void;
+  onInvite: () => void;
+}) {
+  return (
+    <section className="border border-gold/25 bg-gold/[0.04] rounded-md p-5">
+      <div className="flex items-center justify-between gap-3 mb-5">
+        <div>
+          <SectionLabel>Focus Queue</SectionLabel>
+          <p className="text-cream-faint text-[13px] leading-[1.5]">
+            Highest-priority manual actions from the PMV projection.
+          </p>
+        </div>
+        <span className="font-display text-[34px] leading-none text-gold">
+          {queue.length}
+        </span>
+      </div>
+
+      {queue.length === 0 ? (
+        <div className="space-y-4">
+          <div>
+            <p className="font-display text-[24px] leading-[1.1] text-cream">
+              Nothing pressing.
+            </p>
+            <p className="text-gold text-[14px] mt-1">
+              Who are you sharing with today?
+            </p>
+          </div>
+          <Button
+            onClick={onInvite}
+            className="bg-gold text-ink hover:bg-gold-bright font-display tracking-[0.06em] text-[15px] px-5 py-4"
+          >
+            <Send className="mr-2 h-4 w-4" aria-hidden="true" />
+            Invite someone
+          </Button>
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {queue.slice(0, 6).map((item) => (
+            <li key={item.prospectId}>
+              <button
+                type="button"
+                onClick={() => onJump(item.prospectId)}
+                className="w-full text-left border border-cream/10 bg-ink/40 rounded-md px-3 py-3 hover:border-gold/40 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-cream text-[15px] leading-[1.3] truncate">
+                      {item.firstName} {item.lastInitial}.
+                    </p>
+                    <p className="text-cream-faint text-[12px] leading-[1.4] mt-1">
+                      {item.nextAction.label}
+                    </p>
+                  </div>
+                  <span className="font-mono text-[10px] tracking-[0.08em] text-gold shrink-0">
+                    P{item.nextAction.priority}
+                  </span>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <LifecycleBadge stage={item.lifecycle} />
+                  <span className="font-mono text-[10px] tracking-[0.06em] text-cream-faint">
+                    {formatDate(item.lastSignal.at)}
+                  </span>
+                </div>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function PmvFilters({
+  value,
+  onChange,
+  rows,
+}: {
+  value: PmvFilter;
+  onChange: (next: PmvFilter) => void;
+  rows: ProspectMomentumRow[];
+}) {
+  const countFor = (key: PmvFilter) => {
+    if (key === 'all') return rows.length;
+    if (key === 'needs_action') {
+      return rows.filter((row) => row.nextAction.priority > 0).length;
+    }
+    return rows.filter((row) => LIFECYCLE_META[row.lifecycle].group === key).length;
+  };
+
+  return (
+    <div
+      className="flex flex-wrap items-center gap-2"
+      aria-label="Prospect status filters"
+    >
+      <span className="inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.12em] text-cream-faint uppercase">
+        <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+        Filter
+      </span>
+      {PMV_FILTERS.map((f) => {
+        const active = value === f.key;
+        return (
+          <button
+            key={f.key}
+            type="button"
+            onClick={() => onChange(f.key)}
+            className={
+              'min-h-8 rounded border px-3 py-1 font-mono text-[11px] tracking-[0.04em] transition-colors ' +
+              (active
+                ? 'border-gold/60 bg-gold/[0.1] text-gold'
+                : 'border-cream/10 bg-cream/[0.02] text-cream-mute hover:border-gold/35')
+            }
+          >
+            {f.label} <span className="text-cream-faint">{countFor(f.key)}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function LifecycleBadge({ stage }: { stage: ProspectLifecycleStage }) {
+  const meta = LIFECYCLE_META[stage];
+  return (
+    <span
+      className={
+        'inline-block font-mono tracking-[0.06em] text-[10px] px-2 py-0.5 rounded border ' +
+        toneClass(meta.tone)
+      }
+    >
+      {meta.label}
+    </span>
+  );
+}
+
+function SourcePill({ source }: { source: InvitationSource }) {
+  return (
+    <span className="font-mono text-[10px] tracking-[0.08em] text-cream-faint uppercase">
+      {SOURCE_SHORT[source]}
+    </span>
+  );
+}
+
+function ProgressMeter({ value }: { value: ProspectMomentumRow['videoProgressPct'] }) {
+  const pct = value ?? 0;
+  return (
+    <div className="min-w-[92px]">
+      <div className="h-1.5 w-full rounded-full bg-cream/10 overflow-hidden">
+        <div
+          className="h-full bg-teal transition-[width]"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="mt-1 font-mono text-[10px] tracking-[0.06em] text-cream-faint">
+        {value === null ? 'No video' : `${value}%`}
+      </p>
     </div>
   );
 }
@@ -690,13 +1039,15 @@ function SponsorCard({
 }
 
 function InviteRow({
+  row,
   invite,
   activity,
   onMarkedSent,
   forceExpandedId,
   onReinvited,
 }: {
-  invite: InviteSummary;
+  row: ProspectMomentumRow;
+  invite: InviteSummary | null;
   activity: InvitationActivityEntry[];
   onMarkedSent: (prospectId: string, sentAt: string) => void;
   forceExpandedId: string | null;
@@ -707,21 +1058,20 @@ function InviteRow({
   const [markErr, setMarkErr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Today's Actions click → parent sets forceExpandedId; we open inline.
+  // Focus Queue click -> parent sets forceExpandedId; we open inline.
   useEffect(() => {
-    if (forceExpandedId === invite.prospectId) setExpanded(true);
-  }, [forceExpandedId, invite.prospectId]);
+    if (forceExpandedId === row.prospectId) setExpanded(true);
+  }, [forceExpandedId, row.prospectId]);
 
-  const meta = STATUS_META[invite.status];
-  const inviteUrl = invite.token
-    ? `https://teammagnificent.com/p/${invite.token}`
+  const inviteUrl = row.token
+    ? `https://teammagnificent.com/p/${row.token}`
     : '';
 
   const handleMarkSent = useCallback(async () => {
     setMarking(true);
     setMarkErr(null);
     try {
-      const res = await fetch(`/api/invitations/${invite.prospectId}/sent`, {
+      const res = await fetch(`/api/invitations/${row.prospectId}/sent`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -730,7 +1080,7 @@ function InviteRow({
         | MarkInvitationSentResponse
         | { ok: false; error?: string };
       if (res.ok && data.ok) {
-        onMarkedSent(invite.prospectId, data.sentAt);
+        onMarkedSent(row.prospectId, data.sentAt);
       } else {
         setMarkErr('Could not record that. Try once more.');
       }
@@ -739,7 +1089,7 @@ function InviteRow({
     } finally {
       setMarking(false);
     }
-  }, [invite.prospectId, onMarkedSent]);
+  }, [row.prospectId, onMarkedSent]);
 
   const copyLink = useCallback(async () => {
     if (!inviteUrl) return;
@@ -753,56 +1103,92 @@ function InviteRow({
   }, [inviteUrl]);
 
   return (
-    <li
-      id={`invite-${invite.prospectId}`}
+    <article
+      id={`invite-${row.prospectId}`}
       className="bg-cream/[0.02] border border-cream/10 rounded-md overflow-hidden scroll-mt-6"
     >
-      {/* Row head */}
-      <div className="flex items-start justify-between gap-3 p-4">
-        <div className="min-w-0">
-          <p className="text-cream text-[16px] leading-[1.3]">
-            {invite.firstName} {invite.lastInitial}.
-            {invite.city && (
-              <span className="text-cream-faint text-[14px]">
-                {' '}
-                · {invite.city}, {invite.stateOrRegion}
-              </span>
-            )}
-          </p>
-          <div className="flex flex-wrap items-center gap-2 mt-2">
-            <span
-              className={
-                'inline-block font-mono tracking-[0.06em] text-[11px] px-2 py-0.5 rounded border ' +
-                toneClass(meta.tone)
-              }
-            >
-              {meta.label}
-              {invite.status === 'callback' && invite.latestCallbackIntent
-                ? ` · ${INTENT_LABEL[invite.latestCallbackIntent]}`
-                : ''}
-            </span>
-            {invite.positionNumber !== null && (
-              <span className="font-mono text-[11px] text-cream-faint tracking-[0.06em]">
-                #{invite.positionNumber}
-              </span>
-            )}
-            <span className="font-mono text-[11px] text-cream-faint tracking-[0.06em]">
-              {formatDate(invite.createdAt)}
-            </span>
+      <button
+        type="button"
+        onClick={() => setExpanded((e) => !e)}
+        className="w-full text-left p-4 hover:bg-cream/[0.025] transition-colors"
+        aria-expanded={expanded}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-[1.25fr_0.8fr_0.95fr_1.25fr_40px] gap-4 items-center">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              {expanded ? (
+                <ChevronDown className="h-4 w-4 text-gold shrink-0" aria-hidden="true" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-cream-faint shrink-0" aria-hidden="true" />
+              )}
+              <p className="text-cream text-[16px] leading-[1.3] truncate">
+                {row.firstName} {row.lastInitial}.
+                {row.city && (
+                  <span className="text-cream-faint text-[14px]">
+                    {' '}
+                    · {row.city}, {row.stateOrRegion}
+                  </span>
+                )}
+              </p>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2 pl-6">
+              <SourcePill source={row.source} />
+              {row.positionNumber !== null && (
+                <span className="font-mono text-[10px] text-cream-faint tracking-[0.06em]">
+                  Position #{row.positionNumber}
+                </span>
+              )}
+              {row.crm.followUpDueAt && (
+                <span
+                  className={
+                    'font-mono text-[10px] tracking-[0.06em] ' +
+                    (row.crm.followUpIsDue ? 'text-gold' : 'text-cream-faint')
+                  }
+                >
+                  Follow-up {row.crm.followUpIsDue ? 'due ' : ''}
+                  {formatDate(row.crm.followUpDueAt)}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-        <button
-          onClick={() => setExpanded((e) => !e)}
-          className="shrink-0 font-mono text-[11px] tracking-[0.08em] text-cream-mute hover:text-gold uppercase pt-1"
-        >
-          {expanded ? 'Hide' : 'Details'}
-        </button>
-      </div>
 
-      {/* Expanded detail */}
+          <div className="flex items-center gap-3">
+            <LifecycleBadge stage={row.lifecycle} />
+            <ProgressMeter value={row.videoProgressPct} />
+          </div>
+
+          <div>
+            <p className="font-mono text-[10px] tracking-[0.12em] text-cream-faint uppercase">
+              Last signal
+            </p>
+            <p className="text-cream text-[13px] leading-[1.4] mt-1">
+              {row.lastSignal.label}
+            </p>
+            <p className="font-mono text-[10px] tracking-[0.06em] text-cream-faint mt-1">
+              {formatDate(row.lastSignal.at)}
+            </p>
+          </div>
+
+          <div>
+            <p className="font-mono text-[10px] tracking-[0.12em] text-cream-faint uppercase">
+              Next action
+            </p>
+            <p className="text-cream text-[13px] leading-[1.4] mt-1">
+              {row.nextAction.label}
+            </p>
+            <p className="text-cream-faint text-[12px] leading-[1.4] mt-1 line-clamp-2">
+              {row.nextAction.reason}
+            </p>
+          </div>
+
+          <span className="font-mono text-[10px] tracking-[0.08em] text-gold justify-self-start lg:justify-self-end">
+            P{row.nextAction.priority}
+          </span>
+        </div>
+      </button>
+
       {expanded && (
         <div className="border-t border-cream/10 px-4 py-4 space-y-4">
-          {/* The link */}
           {inviteUrl && (
             <div>
               <p className="font-mono tracking-[0.12em] text-[10px] text-cream-faint uppercase mb-1.5">
@@ -822,8 +1208,7 @@ function InviteRow({
             </div>
           )}
 
-          {/* Saved message + source */}
-          {invite.message && (
+          {invite?.message && (
             <div>
               <p className="font-mono tracking-[0.12em] text-[10px] text-cream-faint uppercase mb-1.5">
                 Saved message · {SOURCE_LABEL[invite.source]}
@@ -834,7 +1219,6 @@ function InviteRow({
             </div>
           )}
 
-          {/* Activity timeline */}
           <div>
             <p className="font-mono tracking-[0.12em] text-[10px] text-cream-faint uppercase mb-2">
               Activity
@@ -862,8 +1246,7 @@ function InviteRow({
             )}
           </div>
 
-          {/* "I sent this" — only meaningful for an unsent draft */}
-          {invite.sentAt === null && (
+          {row.sentAt === null && (
             <div className="pt-1">
               {markErr && (
                 <p className="text-red-400 font-mono text-[11px] tracking-[0.04em] mb-2">
@@ -875,22 +1258,24 @@ function InviteRow({
                 disabled={marking}
                 className="bg-gold text-ink hover:bg-gold-bright font-display tracking-[0.06em] text-[14px] px-5 py-4"
               >
-                {marking ? 'Saving…' : 'I sent this'}
+                {marking ? 'Saving...' : 'I sent this'}
               </Button>
             </div>
           )}
 
-          {/* CRM panel — notes, follow-up, disposition, re-invite. Loads on
-              first expand; sponsor-scoped on the server (locked-spec 3.5). */}
           <CrmPanel
-            prospectId={invite.prospectId}
-            isDraft={invite.sentAt === null}
-            isTerminal={invite.status === 'enrolled'}
+            prospectId={row.prospectId}
+            isDraft={row.sentAt === null}
+            isTerminal={
+              row.lifecycle === 'enrolled' ||
+              row.lifecycle === 'customer' ||
+              row.lifecycle === 'archived'
+            }
             onReinvited={onReinvited}
           />
         </div>
       )}
-    </li>
+    </article>
   );
 }
 
