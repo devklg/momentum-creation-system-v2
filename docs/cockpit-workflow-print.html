@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Team Magnificent Cockpit Workflow</title>
+  <style>
+    :root {
+      --ink: #111;
+      --muted: #565656;
+      --line: #222;
+      --gold: #9a771f;
+      --teal: #0f8f86;
+      --paper: #fff;
+      --soft: #f6f4ef;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    main {
+      width: min(1100px, calc(100% - 48px));
+      margin: 28px auto 60px;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: 28px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    h2 {
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      margin: 28px 0 12px;
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 6px;
+    }
+
+    h3 {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .subhead {
+      color: var(--muted);
+      max-width: 860px;
+    }
+
+    .note-grid,
+    .shot-grid,
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .note,
+    .box,
+    .lane,
+    .shot {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--paper);
+      break-inside: avoid;
+    }
+
+    .note {
+      border-left: 6px solid var(--gold);
+      background: var(--soft);
+    }
+
+    .note strong,
+    .accent { color: var(--gold); }
+    .teal { color: var(--teal); }
+
+    .screen {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .section-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .box {
+      min-height: 72px;
+    }
+
+    .box h3 {
+      font-size: 12px;
+    }
+
+    .box p,
+    li {
+      color: var(--muted);
+    }
+
+    .arrow {
+      text-align: center;
+      font-family: "Courier New", monospace;
+      color: var(--line);
+      padding: 4px 0;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .lane {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      background: #fbfbfb;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .api-list {
+      columns: 2;
+      column-gap: 30px;
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+    }
+
+    .api-list li {
+      margin-bottom: 5px;
+      break-inside: avoid;
+    }
+
+    .shot img {
+      display: block;
+      width: 100%;
+      border: 1px solid #ddd;
+      margin-top: 10px;
+    }
+
+    .print-break {
+      break-before: page;
+      page-break-before: always;
+    }
+
+    @media print {
+      body { font-size: 12px; }
+      main { width: auto; margin: 0.35in; }
+      .note, .box, .lane, .shot { border-color: #000; }
+      .shot img { max-height: 5in; object-fit: contain; }
+      a { color: #000; text-decoration: none; }
+    }
+
+    @media (max-width: 850px) {
+      .screen,
+      .note-grid,
+      .shot-grid,
+      .two-col,
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      .row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Team Magnificent Cockpit Workflow</h1>
+      <p class="subhead">
+        Printable map of the current Brand Ambassador cockpit, the invitation path connected to it,
+        and the two cockpit notes that should shape the next implementation.
+      </p>
+    </header>
+
+    <h2>Kevin's Cockpit Notes</h2>
+    <section class="note-grid">
+      <article class="note">
+        <h3>Script generation for new BAs</h3>
+        <p>
+          The system should do more than create a link. The agent should ask key questions
+          about the prospect and the BA's context, then create the invitation for the BA.
+        </p>
+      </article>
+      <article class="note">
+        <h3>CRM as its own tool</h3>
+        <p>
+          The inline CRM is useful, and the next product shape should make CRM a separate
+          tab or app tool with full create, read, update, and delete capabilities.
+        </p>
+      </article>
+    </section>
+
+    <h2>Current Cockpit Page</h2>
+    <section class="screen">
+      <div class="section-stack">
+        <div class="box">
+          <h3>/cockpit header</h3>
+          <p>Welcome message and primary "Invite someone" action. Sends the BA to `/invitations`.</p>
+        </div>
+        <div class="row">
+          <div class="box"><h3>Invited</h3><p>Total invite rows.</p></div>
+          <div class="box"><h3>Sent</h3><p>Rows marked with "I sent this."</p></div>
+          <div class="box"><h3>Watched</h3><p>Video complete or deeper progress.</p></div>
+          <div class="box"><h3>Callbacks</h3><p>Prospects who raised a hand.</p></div>
+          <div class="box"><h3>Enrolled</h3><p>Terminal joined status.</p></div>
+        </div>
+        <div class="box">
+          <h3>Today's Actions</h3>
+          <p>Urgency list from callbacks, due follow-ups, and expiring windows. Click jumps to the matching invite row.</p>
+        </div>
+        <div class="box">
+          <h3>Your Track Record</h3>
+          <p>Invitation activity proof: generated, sent, watched through, joining you, and invitations per week.</p>
+        </div>
+        <div class="box">
+          <h3>My Invites</h3>
+          <p>Every prospect row. Expand for link, saved message, activity, sent marker, and CRM.</p>
+        </div>
+      </div>
+      <aside class="section-stack">
+        <div class="box"><h3>My Sponsor</h3><p>Shows sponsor or founder treatment.</p></div>
+        <div class="box"><h3>New-member orientation</h3><p>Reserve or cancel a group orientation seat.</p></div>
+        <div class="box"><h3>CRM hint</h3><p>Explains that notes, tags, follow-ups, and re-invites live inside each invite row.</p></div>
+        <div class="box"><h3>Leadership</h3><p>Links to `/leadership` for Kevin and Paul credibility.</p></div>
+      </aside>
+    </section>
+
+    <h2>Expanded Invite Row</h2>
+    <section class="flow">
+      <div class="lane">
+        <h3>Prospect row</h3>
+        <div class="box"><p>Name, city, state, status badge, position number, created date.</p></div>
+        <div class="arrow">down</div>
+        <div class="box"><p>Details toggle opens the working area.</p></div>
+      </div>
+      <div class="lane">
+        <h3>Invite details</h3>
+        <div class="box"><p>Their link and copy button.</p></div>
+        <div class="box"><p>Saved message and source: self, Ivory, or ScriptMaker.</p></div>
+        <div class="box"><p>Activity timeline: sent, video completed, callback requested.</p></div>
+        <div class="box"><p>"I sent this" records the BA's manual send.</p></div>
+      </div>
+      <div class="lane">
+        <h3>Inline CRM today</h3>
+        <div class="box"><p>Disposition tags: New BA, New customer, Interested, Later, Not interested.</p></div>
+        <div class="box"><p>Follow-up reminder with clear action.</p></div>
+        <div class="box"><p>Private notes, append-only.</p></div>
+        <div class="box"><p>Re-invite and re-invite script.</p></div>
+      </div>
+      <div class="lane">
+        <h3>CRUD controls</h3>
+        <div class="box"><p>Edit details with audit reason.</p></div>
+        <div class="box"><p>Remove prospect with required reason.</p></div>
+        <div class="box"><p>Manual CRM create exists in API and should be surfaced in the separate CRM tool.</p></div>
+      </div>
+    </section>
+
+    <h2>Invitation And Prospect Flow</h2>
+    <section class="flow">
+      <div class="lane">
+        <h3>Entry</h3>
+        <div class="box"><p>`/invitations`: BA writes the invitation manually.</p></div>
+        <div class="box"><p>`/video-library`: ScriptMaker drafts from a watched product video.</p></div>
+        <div class="box"><p>`/ivory`: relationship engine feeds a prospect into invitations.</p></div>
+      </div>
+      <div class="lane">
+        <h3>Create</h3>
+        <div class="box"><p>`POST /api/scriptmaker/draft` creates compliant copy when ScriptMaker is used.</p></div>
+        <div class="box"><p>`POST /api/invitations` mints the prospect and token.</p></div>
+        <div class="box"><p>Link Ready page gives the link and lets BA mark it sent.</p></div>
+      </div>
+      <div class="lane">
+        <h3>Prospect</h3>
+        <div class="box"><p>Prospect opens `/p/:token`.</p></div>
+        <div class="box"><p>Video events update the token rail.</p></div>
+        <div class="box"><p>Callback request creates a cockpit action.</p></div>
+      </div>
+      <div class="lane">
+        <h3>Back to cockpit</h3>
+        <div class="box"><p>Counts update.</p></div>
+        <div class="box"><p>Activity appears on the invite row.</p></div>
+        <div class="box"><p>CRM note, follow-up, tag, re-invite, edit, and remove happen from the row.</p></div>
+      </div>
+    </section>
+
+    <h2>Recommended Next Workflow</h2>
+    <section class="two-col">
+      <article class="box">
+        <h3>Separate CRM tab/tool</h3>
+        <ul>
+          <li>Route: `/crm` or a cockpit tab labeled CRM.</li>
+          <li>Prospect table with search, filter, disposition, follow-up due, and last activity.</li>
+          <li>Detail drawer or page for notes, reminders, scripts, edit, delete, and restore request.</li>
+          <li>Create manual prospect should be visible, since `POST /api/crm` already exists.</li>
+        </ul>
+      </article>
+      <article class="box">
+        <h3>Agent-created invitation</h3>
+        <ul>
+          <li>Ask who the prospect is and what the BA knows about them.</li>
+          <li>Ask why the BA thought of this person.</li>
+          <li>Ask which product/video or opportunity angle applies.</li>
+          <li>Draft the invitation, then pass it to `/invitations` for BA approval and link minting.</li>
+        </ul>
+      </article>
+    </section>
+
+    <h2>API Map</h2>
+    <ul class="api-list">
+      <li>GET /api/cockpit/summary</li>
+      <li>GET /api/cockpit/invites</li>
+      <li>GET /api/cockpit/todays-actions</li>
+      <li>POST /api/invitations</li>
+      <li>POST /api/invitations/:prospectId/sent</li>
+      <li>GET /api/crm/:prospectId</li>
+      <li>POST /api/crm/:prospectId/notes</li>
+      <li>POST /api/crm/:prospectId/followup</li>
+      <li>DELETE /api/crm/:prospectId/followup</li>
+      <li>POST /api/crm/:prospectId/disposition</li>
+      <li>POST /api/crm/:prospectId/reinvite</li>
+      <li>POST /api/crm/:prospectId/reinvite-script</li>
+      <li>POST /api/crm</li>
+      <li>PUT /api/crm/:prospectId</li>
+      <li>DELETE /api/crm/:prospectId</li>
+      <li>POST /api/scriptmaker/draft</li>
+      <li>GET /api/orientation/sessions</li>
+      <li>POST /api/orientation/sessions/:id/reserve</li>
+      <li>DELETE /api/orientation/sessions/:id/reserve</li>
+    </ul>
+
+    <section class="print-break">
+      <h2>Saved Cockpit Screens</h2>
+      <div class="shot-grid">
+        <figure class="shot">
+          <h3>CRM notes and controls</h3>
+          <p>Expanded invite row showing CRM notes, follow-up, disposition, and re-invite area.</p>
+          <img src="screenshots/team-cockpit-crm-notes-preview.png" alt="Cockpit CRM notes preview">
+        </figure>
+        <figure class="shot">
+          <h3>Track record</h3>
+          <p>BA activity record with generated invitations, sent, watched through, joining you, and weekly chart.</p>
+          <img src="screenshots/team-cockpit-track-record-preview.png" alt="Cockpit track record preview">
+        </figure>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
