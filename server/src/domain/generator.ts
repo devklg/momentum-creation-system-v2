@@ -48,6 +48,7 @@ import type {
   IvoryAngle,
 } from '@momentum/shared';
 import { createInvitation } from './invitations.js';
+import { normalizePhone } from './prospectAccount.js';
 import {
   getIvoryName,
   markIvoryInvited,
@@ -250,18 +251,26 @@ export async function mintInvitationForRun(
 ): Promise<MintForRunResult> {
   const run = await getGeneratorRun(input.runId, input.baId);
   const name = await getIvoryName(input.ivoryId, input.baId);
+  const city = (input.city ?? '').trim();
+  const stateOrRegion = (input.stateOrRegion ?? '').trim();
+  const phone = (input.phone ?? '').trim();
+  if (!city) throw new GeneratorValidationError('invalid_city');
+  if (!stateOrRegion) throw new GeneratorValidationError('invalid_state');
+  if (!phone) throw new GeneratorValidationError('phone_required');
+  if (!normalizePhone(phone)) throw new GeneratorValidationError('phone_invalid');
 
   const created = await createInvitation({
     sponsorBaId: input.baId,
     firstName: name.firstName,
     lastName: name.lastName,
     email: input.email ?? null,
-    phone: input.phone ?? null,
-    city: (input.city ?? '').trim() || '—',
-    stateOrRegion: (input.stateOrRegion ?? '').trim() || '—',
+    phone,
+    city,
+    stateOrRegion,
     country: 'US',
     message: input.message ?? null,
     source: 'ivory',
+    relationshipReason: null,
   });
 
   await markIvoryInvited(input.ivoryId, input.baId, created.prospectId);

@@ -98,6 +98,8 @@ export interface CreateInvitationInput {
   message: string | null;
   /** Who composed `message`. 'self' for the plain form. */
   source: InvitationSource;
+  /** BA-authored relationship context captured by Ivory before drafting. */
+  relationshipReason?: string | null;
 }
 
 export interface CreateInvitationResult {
@@ -113,6 +115,7 @@ export interface CreateInvitationResult {
   /** Echo of what was stored (Chat #120). */
   message: string | null;
   source: InvitationSource;
+  relationshipReason: string | null;
 }
 
 /**
@@ -183,10 +186,19 @@ export async function createInvitation(
 
   // sentAt is a spine field (Chat #119), not part of the shared ProspectRecord
   // funnel shape. Persist it on the Mongo doc alongside the record.
+  const relationshipReason = input.relationshipReason?.trim() || null;
+
   await tripleStackWrite({
     id: prospectId,
     mongoCollection: PROSPECTS_COLLECTION,
-    mongoDoc: { ...prospectRecord, sentAt: null, token, message: input.message, source: input.source },
+    mongoDoc: {
+      ...prospectRecord,
+      sentAt: null,
+      token,
+      message: input.message,
+      source: input.source,
+      relationshipReason,
+    },
     neo4j: {
       // BA INVITED prospect. sponsorBaId stamped immutably here.
       cypher:
@@ -199,6 +211,7 @@ export async function createInvitation(
         '    p.country = $country, ' +
         '    p.state = $state, ' +
         '    p.sponsorBaId = $sponsorBaId, ' +
+        '    p.relationshipReason = $relationshipReason, ' +
         '    p.createdAt = $createdAt ' +
         'MERGE (b)-[r:INVITED]->(p) ' +
         'SET r.token = $token, r.createdAt = $createdAt',
@@ -210,6 +223,7 @@ export async function createInvitation(
         stateOrRegion: input.stateOrRegion,
         country: input.country,
         state: 'minted',
+        relationshipReason,
         token,
         createdAt,
       },
@@ -219,7 +233,8 @@ export async function createInvitation(
       document:
         `${input.firstName} ${lastInitial}. from ${input.city}, ` +
         `${input.stateOrRegion} invited by ${input.sponsorBaId} ` +
-        `at ${createdAt} (token ${token})`,
+        `at ${createdAt} (token ${token})` +
+        (relationshipReason ? `. Relationship context: ${relationshipReason}` : ''),
       metadata: {
         kind: 'invitation_created',
         prospectId,
@@ -228,6 +243,7 @@ export async function createInvitation(
         city: input.city,
         stateOrRegion: input.stateOrRegion,
         source: input.source,
+        relationshipReason,
         createdAt,
       },
     },
@@ -298,6 +314,7 @@ export async function createInvitation(
     inviteUrl: buildInviteUrl(token),
     message: input.message,
     source: input.source,
+    relationshipReason,
   };
 }
 

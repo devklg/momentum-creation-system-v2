@@ -74,6 +74,7 @@ function normalizeSource(raw: unknown): InvitationSource {
 
 /** Max stored invitation message length — generous for SMS-length drafts. */
 const MESSAGE_MAX = 1200;
+const RELATIONSHIP_REASON_MAX = 600;
 
 /**
  * Build the domain input from the request body + the authed session BA.
@@ -109,6 +110,10 @@ function buildInput(
     return { error: 'message_too_long' };
   }
   const source = normalizeSource(body?.source);
+  const relationshipReason = optionalStr(body?.relationshipReason);
+  if (relationshipReason && relationshipReason.length > RELATIONSHIP_REASON_MAX) {
+    return { error: 'relationship_reason_too_long' };
+  }
 
   return {
     input: {
@@ -122,6 +127,7 @@ function buildInput(
       country,
       message,
       source,
+      relationshipReason,
     },
   };
 }
@@ -167,6 +173,7 @@ invitationRoutes.post('/', requireAuth, requireMichaelComplete, async (req, res)
       expiresAt: result.expiresAt,
       message: result.message,
       source: result.source,
+      relationshipReason: result.relationshipReason,
     };
     return res.status(201).json(response);
   } catch (err) {
@@ -247,6 +254,7 @@ invitationRoutes.post('/log', requireAuth, requireMichaelComplete, async (req, r
       expiresAt: result.expiresAt,
       message: result.message,
       source: result.source,
+      relationshipReason: result.relationshipReason,
     };
     return res.status(201).json(response);
   } catch (err) {

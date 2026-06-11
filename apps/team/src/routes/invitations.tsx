@@ -49,6 +49,7 @@ interface CreateInvitationPayload {
   country?: string;
   message?: string | null;
   source?: InvitationSource;
+  relationshipReason?: string | null;
 }
 
 interface CreateInvitationResponse {
@@ -60,6 +61,7 @@ interface CreateInvitationResponse {
   expiresAt: string;
   message: string | null;
   source: InvitationSource;
+  relationshipReason: string | null;
 }
 
 interface MarkInvitationSentResponse {

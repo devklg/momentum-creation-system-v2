@@ -539,6 +539,8 @@ export interface CreateInvitationPayload {
   message?: string | null;
   /** Who composed `message`. Route defaults to 'self' when omitted. */
   source?: InvitationSource;
+  /** Optional BA-authored context, used by Ivory relationship-first invites. */
+  relationshipReason?: string | null;
 }
 
 /**
@@ -556,6 +558,7 @@ export interface CreateInvitationResponse {
    *  show the BA exactly what was saved alongside the link. */
   message: string | null;
   source: InvitationSource;
+  relationshipReason: string | null;
 }
 
 /**
@@ -661,6 +664,8 @@ export interface InviteSummary {
   /** The stored invitation message + who composed it (Chat #120). */
   message: string | null;
   source: InvitationSource;
+  /** Optional relationship context captured by Ivory before drafting. */
+  relationshipReason?: string | null;
   /** Whether the BA has confirmed they sent the link. */
   sentAt: IsoTimestamp | null;
   becameCustomer: boolean;
@@ -771,6 +776,8 @@ export interface ProspectMomentumRow {
   city: string;
   stateOrRegion: string;
   source: InvitationSource;
+  /** Optional relationship context captured by Ivory before drafting. */
+  relationshipReason?: string | null;
   lifecycle: ProspectLifecycleStage;
   tokenState: TokenState;
   videoProgressPct: 0 | 25 | 50 | 75 | 100 | null;
@@ -1381,6 +1388,54 @@ export interface IvoryCoachResponse {
 }
 
 /**
+ * POST /api/ivory/invitation-agent/draft request body.
+ *
+ * The BA has already selected or created exactly one Ivory name and written
+ * why that person came to mind. Ivory drafts copy only; it never scores,
+ * qualifies, sends, or chooses people autonomously.
+ */
+export interface IvoryInvitationDraftPayload {
+  ivoryId: string;
+  relationshipReason: string;
+  productName?: string | null;
+}
+
+export interface IvoryInvitationDraftResponse {
+  ok: true;
+  draft: string;
+  degraded: boolean;
+}
+
+/**
+ * POST /api/ivory/invitation-agent/mint request body.
+ *
+ * The BA-edited message and real CRM fields mint through the existing
+ * invitation spine with source='ivory'. No placeholder CRM facts are allowed.
+ */
+export interface IvoryInvitationMintPayload {
+  ivoryId: string;
+  relationshipReason: string;
+  message: string;
+  city: string;
+  stateOrRegion: string;
+  phone: string;
+  email?: string | null;
+}
+
+export interface IvoryInvitationMintResponse {
+  ok: true;
+  ivoryId: string;
+  prospectId: string;
+  token: string;
+  inviteUrl: string;
+  createdAt: string;
+  expiresAt: string;
+  message: string | null;
+  source: 'ivory';
+  relationshipReason: string;
+}
+
+/**
  * A Generator run: one BA picks a product + angle, surfaces names from
  * the Ivory roster, and converts each selected name into a /p/{token}
  * invitation via the existing spine. The run record is the audit trail â€”
@@ -1437,10 +1492,10 @@ export interface GeneratorInvitePayload {
   ivoryId: string;
   /** Optional invitation message (mirrors /api/invitations message field). */
   message?: string | null;
-  /** City / state default to 'â€”' if the BA has not captured them on the name. */
+  /** Real CRM fields required before mint; placeholders are not stored. */
   city?: string;
   stateOrRegion?: string;
-  /** Optional phone â€” falls through to the spine; not required for mint. */
+  /** Phone is required before mint because the BA sends manually by SMS. */
   phone?: string | null;
   email?: string | null;
 }
