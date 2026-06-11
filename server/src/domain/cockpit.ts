@@ -21,6 +21,9 @@
 import { gatewayCall } from '../services/gateway.js';
 import { findBAByBaId, type BARecord } from './ba.js';
 import { lastInitialOf } from './prospects.js';
+import { getMichaelSchedule } from './michael-schedule.js';
+import { getFastStartProgress } from './training.js';
+import { questionnaireExists } from './questionnaire.js';
 import type {
   CallbackIntent,
   CockpitSponsorFallback,
@@ -42,6 +45,10 @@ import type {
   ProspectMomentumViewerResponse,
   ProspectNextAction,
   SponsorFallbackFounder,
+  LaunchNextAction,
+  LaunchStep,
+  LaunchStepId,
+  TeamLaunchCenterResponse,
   TokenState,
 } from '@momentum/shared';
 
@@ -54,6 +61,8 @@ const BA_COLLECTION = 'brand_ambassadors';
 const FOLLOWUPS_COLLECTION = 'crm_followups';
 const DISPOSITIONS_COLLECTION = 'crm_dispositions';
 const NOTES_COLLECTION = 'crm_notes';
+const COMMITMENTS_COLLECTION = 'ba_commitments';
+const IVORY_COLLECTION = 'ivory_names';
 
 /**
  * Sponsor-inactive dormancy window for the founder fallback (Chat #147, seq 23,
@@ -880,6 +889,310 @@ export async function getProspectMomentumViewer(
       'Partial video milestone timestamps are represented by invite_tokens.updatedAt for the current milestone; per-milestone historical timestamps are not stored yet.',
       'Archived prospects are returned only when the BA-owned prospect record carries deleted=true; the existing BA CRM surface still has no self-restore path.',
     ],
+  };
+}
+
+interface CommitmentDoc {
+  acceptedAt?: string | null;
+}
+
+interface BaWelcomeExtras {
+  commitment_accepted?: boolean;
+  commitment_accepted_at?: string | null;
+}
+
+async function getLatestCommitmentAcceptedAt(baId: string): Promise<string | null> {
+  const result = await gatewayCall<{ documents?: CommitmentDoc[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: COMMITMENTS_COLLECTION,
+    filter: { baId },
+    sort: { acceptedAt: -1 },
+    limit: 1,
+  });
+  return result.documents?.[0]?.acceptedAt ?? null;
+}
+
+async function countCollection(collection: string, filter: Record<string, unknown>): Promise<number> {
+  const result = await gatewayCall<{ count?: number; documents?: unknown[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection,
+    filter,
+    limit: 1,
+  });
+  if (typeof result.count === 'number') return result.count;
+  return result.documents?.length ?? 0;
+}
+
+function buildLaunchStep(args: {
+  id: LaunchStepId;
+  label: string;
+  complete: boolean;
+  current?: boolean;
+  available?: boolean;
+  optional?: boolean;
+  href: string | null;
+  completedAt?: string | null;
+  source: string;
+  detail: string;
+}): LaunchStep {
+  const state: LaunchStep['state'] = args.complete
+    ? 'complete'
+    : args.optional
+      ? 'optional'
+      : args.current
+        ? 'current'
+        : args.available
+          ? 'available'
+          : 'locked';
+  return {
+    id: args.id,
+    label: args.label,
+    state,
+    source: args.source,
+    href: args.href,
+    completedAt: args.complete ? args.completedAt ?? null : null,
+    detail: args.detail,
+  };
+}
+
+function nextActionFromSteps(steps: LaunchStep[], launchComplete: boolean): LaunchNextAction {
+  const active = steps.find((step) => step.state === 'current')
+    ?? steps.find((step) => step.state === 'available');
+  if (active) {
+    return {
+      stepId: active.id,
+      label: active.label,
+      href: active.href,
+      reason: active.detail,
+    };
+  }
+  if (launchComplete) {
+    return {
+      stepId: null,
+      label: 'Work the Prospect Momentum Viewer',
+      href: '/cockpit#pmv',
+      reason: 'Your launch steps are complete. Keep manual follow-up moving from the PMV.',
+    };
+  }
+  return {
+    stepId: null,
+    label: 'Check in with your sponsor',
+    href: '/cockpit#sponsor',
+    reason: 'No unlocked launch action is available yet.',
+  };
+}
+
+/**
+ * Team Magnificent Launch Center: read-only onboarding projection for the
+ * first cockpit viewport. This deliberately reads existing durable sources
+ * instead of writing a parallel launch-state record.
+ */
+export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCenterResponse> {
+  const [ba, commitmentAcceptedAt, michael, fastStart, questionnaireSubmitted, ivoryNames] =
+    await Promise.all([
+      findBAByBaId(baId),
+      getLatestCommitmentAcceptedAt(baId),
+      getMichaelSchedule(baId),
+      getFastStartProgress(baId),
+      questionnaireExists(baId),
+      countCollection(IVORY_COLLECTION, { baId }),
+    ]);
+
+  const { invites } = await listInvitesForBA(baId);
+  const baExtras = ba as (BARecord & BaWelcomeExtras) | null;
+  const welcomeAcceptedAt =
+    commitmentAcceptedAt ??
+    (baExtras?.commitment_accepted ? baExtras.commitment_accepted_at ?? ba?.createdAt ?? null : null);
+  const welcomeComplete = Boolean(welcomeAcceptedAt);
+
+  const michaelStatus = michael?.status ?? 'missing';
+  const michaelScheduled =
+    michaelStatus === 'scheduled' ||
+    michaelStatus === 'in_progress' ||
+    michaelStatus === 'completed';
+  const michaelComplete = michaelStatus === 'completed';
+  const day1 = fastStart.modules.find((m) => m.moduleId === 1);
+  const day1State = day1?.state ?? 'not_started';
+  const day1Started = day1State === 'in_progress' || day1State === 'completed';
+  const day1Complete = day1State === 'completed';
+  const mintedCount = invites.length;
+  const sentCount = invites.filter((invite) => invite.sentAt !== null).length;
+  const firstInviteDrafted = mintedCount > 0;
+  const firstInviteSent = sentCount > 0;
+  const ivoryStarted = ivoryNames > 0;
+
+  const steps: LaunchStep[] = [
+    buildLaunchStep({
+      id: 'welcome_accepted',
+      label: 'Accept the Team Magnificent welcome',
+      complete: welcomeComplete,
+      current: !welcomeComplete,
+      href: '/welcome',
+      completedAt: welcomeAcceptedAt,
+      source: 'ba_commitments.acceptedAt',
+      detail: welcomeComplete
+        ? 'Welcome commitment accepted.'
+        : 'Start by acknowledging the Team Magnificent operating agreement.',
+    }),
+    buildLaunchStep({
+      id: 'michael_scheduled',
+      label: 'Schedule Michael',
+      complete: michaelScheduled,
+      current: welcomeComplete && !michaelScheduled,
+      href: '/michael/schedule',
+      completedAt: michael?.scheduledAt ?? michael?.slotStartUtc ?? null,
+      source: 'michael_schedules.status',
+      detail: michaelScheduled
+        ? 'Michael is on your calendar.'
+        : 'Pick the 15-minute Michael call time that works for you.',
+    }),
+    buildLaunchStep({
+      id: 'michael_completed',
+      label: 'Complete the Michael call',
+      complete: michaelComplete,
+      current: michaelScheduled && !michaelComplete,
+      href: '/michael/schedule',
+      completedAt: michael?.completedAt ?? null,
+      source: 'michael_schedules.completedAt',
+      detail: michaelComplete
+        ? 'Michael is complete.'
+        : 'Finish the onboarding call so your cockpit unlocks.',
+    }),
+    buildLaunchStep({
+      id: 'day_1_started',
+      label: 'Start Day 1 training',
+      complete: day1Started,
+      current: michaelComplete && !day1Started,
+      href: '/training/fast-start/product',
+      completedAt: day1?.startedAt ?? day1?.completedAt ?? null,
+      source: 'fast_start_progress.moduleId=1',
+      detail: day1Started
+        ? 'Day 1 training is underway.'
+        : 'Open the first Fast Start module and begin the system.',
+    }),
+    buildLaunchStep({
+      id: 'day_1_completed',
+      label: 'Complete Day 1 training',
+      complete: day1Complete,
+      current: day1Started && !day1Complete,
+      available: michaelComplete && !day1Complete,
+      href: '/training/fast-start/product',
+      completedAt: day1?.completedAt ?? null,
+      source: 'fast_start_progress.moduleId=1',
+      detail: day1Complete
+        ? 'Day 1 training is complete.'
+        : 'Finish the first module before you settle into daily PMV work.',
+    }),
+    buildLaunchStep({
+      id: 'who_do_you_know_started',
+      label: 'Start your Who Do You Know list',
+      complete: ivoryStarted,
+      current: michaelComplete && !ivoryStarted,
+      href: '/ivory',
+      completedAt: null,
+      source: 'ivory_names count by baId',
+      detail: ivoryStarted
+        ? 'Your private warm-market list has names in it.'
+        : 'Use Ivory to write down the people you already know. It does not prospect for you.',
+    }),
+    buildLaunchStep({
+      id: 'first_invitation_drafted',
+      label: 'Draft your first personal invitation',
+      complete: firstInviteDrafted,
+      current: ivoryStarted && !firstInviteDrafted,
+      available: michaelComplete && !firstInviteDrafted,
+      href: '/ivory',
+      completedAt: invites[0]?.createdAt ?? null,
+      source: 'prospects.createdAt via invitation spine',
+      detail: firstInviteDrafted
+        ? 'Your first invitation draft is in the spine.'
+        : 'Prepare one manual invitation from a real relationship.',
+    }),
+    buildLaunchStep({
+      id: 'first_invitation_minted',
+      label: 'Mint the first invitation link',
+      complete: mintedCount > 0,
+      current: firstInviteDrafted && mintedCount === 0,
+      available: ivoryStarted && mintedCount === 0,
+      href: '/ivory',
+      completedAt: invites[0]?.createdAt ?? null,
+      source: 'prospects + invite_tokens via invitation spine',
+      detail: mintedCount > 0
+        ? 'The first trackable invitation link exists.'
+        : 'Mint the link only after you choose the person and message.',
+    }),
+    buildLaunchStep({
+      id: 'first_invitation_sent',
+      label: 'Send your first invitation manually',
+      complete: firstInviteSent,
+      current: mintedCount > 0 && !firstInviteSent,
+      href: '/cockpit#pmv',
+      completedAt: invites.find((invite) => invite.sentAt !== null)?.sentAt ?? null,
+      source: 'prospects.sentAt via manual BA confirmation',
+      detail: firstInviteSent
+        ? 'You confirmed that the first invitation was sent.'
+        : 'After you personally send the message, mark it sent in the PMV.',
+    }),
+    buildLaunchStep({
+      id: 'questionnaire_submitted',
+      label: 'Submit your onboarding questionnaire',
+      complete: questionnaireSubmitted,
+      current: firstInviteSent && !questionnaireSubmitted,
+      available: michaelComplete && !questionnaireSubmitted,
+      href: '/onboarding/questionnaire',
+      completedAt: null,
+      source: 'ba_questionnaires existence by baId',
+      detail: questionnaireSubmitted
+        ? 'Your sponsor can review your questionnaire.'
+        : 'Give your sponsor context for coaching and workbook follow-up.',
+    }),
+    buildLaunchStep({
+      id: 'sponsor_connection_confirmed',
+      label: 'Connect with your sponsor',
+      complete: false,
+      optional: true,
+      href: '/cockpit#sponsor',
+      completedAt: null,
+      source: 'brand_ambassadors.sponsorBaId; confirmation not separately tracked',
+      detail: 'Your immutable sponsor card stays visible; confirm connection directly with your sponsor.',
+    }),
+  ];
+
+  const requiredSteps = steps.filter((step) => step.state !== 'optional');
+  const completed = requiredSteps.filter((step) => step.state === 'complete').length;
+  const total = requiredSteps.length;
+  const launchComplete = completed === total;
+
+  return {
+    ok: true,
+    generatedAt: new Date().toISOString(),
+    baFirstName: ba?.firstName ?? '',
+    progress: {
+      completed,
+      total,
+      percent: total > 0 ? Math.round((completed / total) * 100) : 0,
+    },
+    nextAction: nextActionFromSteps(steps, launchComplete),
+    steps,
+    michael: {
+      status: michaelStatus,
+      slotStartUtc: michael?.slotStartUtc ?? null,
+      completedAt: michael?.completedAt ?? null,
+    },
+    firstInvitation: {
+      ivoryNames,
+      draftedCount: mintedCount,
+      mintedCount,
+      sentCount,
+    },
+    fastStart: {
+      day1State,
+      day1StartedAt: day1?.startedAt ?? null,
+      day1CompletedAt: day1?.completedAt ?? null,
+      complete: fastStart.complete,
+    },
+    questionnaireSubmitted,
+    launchComplete,
   };
 }
 

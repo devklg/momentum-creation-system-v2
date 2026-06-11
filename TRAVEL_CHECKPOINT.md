@@ -8,7 +8,7 @@ Date: 2026-06-11
 - v2 is redesign workspace: `momentum-creation-system-v2` is separated for UX/styling redesign work only.
 - Current repo: `momentum-creation-system-v2`
 - Local repo path: `D:\momentum-creation-system-v2`
-- Current branch: `task-6-ivory-invitation-agent`
+- Current branch: `task-7-team-launch-center`
 - v2 integration branch: `main` after GitHub removed the remote `ux-redesign-v2` branch during the Task 2 merge flow.
 - GitHub repo: `https://github.com/devklg/momentum-creation-system-v2`
 
@@ -118,7 +118,7 @@ Task 5: PMV Cockpit Frontend
 
 Task 6: Ivory Invitation Agent
 
-- Status: implemented on `task-6-ivory-invitation-agent`; ready for PR review after final branch push.
+- Status: completed, reviewed, and merged.
 - Branch: `task-6-ivory-invitation-agent`
 - Base used: `origin/main` after Task 5 merged.
 - Allowed files touched: `.team` Ivory route, invitation route seam, Ivory/generator/invitation backend domains and routes, shared type contracts, and this checkpoint.
@@ -133,20 +133,33 @@ Task 6: Ivory Invitation Agent
 - Compliance scan: no AI lead qualification, prospect ranking, automated prospecting, automated calling, auto-send, income, spillover, CV, cycle, rank, placement-promise, or dollar claims added.
 - Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`; `.team` chunk-size warning for a 512.33 kB minified JS bundle.
 
+Task 7: Team Launch Center
+
+- Status: implemented on `task-7-team-launch-center`; ready for PR review after final branch push.
+- Branch: `task-7-team-launch-center`
+- Base used: `origin/main` after Task 6 merged and the prior branch was deleted.
+- Allowed files touched: `.team` cockpit route, new `.team` launch component directory, Michael schedule handoff, cockpit backend route/domain, shared type contracts, and this checkpoint.
+- `.com` prospect-facing pages changed: no
+- Token/placement backend changed: no
+- Invitation spine, CRM ownership, source tracking, and compliance boundaries changed: no
+- New endpoint: `GET /api/cockpit/launch`, auth-only so new BAs can see Launch Center state before the Michael gate.
+- Launch steps: welcome accepted, Michael scheduled, Michael complete, Day 1 started, Day 1 complete, Who Do You Know list started, first invitation drafted, first invitation minted, first invitation sent, questionnaire submitted, and optional sponsor connection.
+- Source of step truth: `ba_commitments`, `michael_schedules`, `fast_start_progress`, `ivory_names`, existing `prospects` / `invite_tokens` spine via `listInvitesForBA`, `ba_questionnaires`, and immutable sponsor on `brand_ambassadors`.
+- New-BA path: `/cockpit` loads Launch Center first, avoids gated PMV calls until Michael is complete, and shows one dominant next action.
+- First Invitation mission appears before operational PMV metrics when the BA has not minted an invitation link.
+- Operational PMV remains available below Launch Center once Michael is complete; CRM row controls remain unchanged.
+- Michael completion handoff now returns BAs to `/cockpit` / Launch Center.
+- Compliance scan: no AI lead qualification, prospect ranking, automated prospecting, automated calling, auto-send, income, spillover, CV, cycle, rank, placement-promise, or dollar claims added.
+- Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`; `.team` chunk-size warning for a 523.04 kB minified JS bundle.
+
 ## Next Implementation Phases
 
-1. Task 7: Team Launch Center
-   - New-BA launch checklist.
-   - Michael status card.
-   - First Invitation mission.
-   - Welcome handoff.
-
-2. Task 8: Questionnaire wizard / welcome shortening
+1. Task 8: Questionnaire wizard / welcome shortening
    - Guided questionnaire wizard.
    - Shorter welcome ceremony.
    - Launch Center handoff.
 
-3. Task 9: QA and compliance pass
+2. Task 9: QA and compliance pass
    - Responsive QA.
    - Reduced-motion QA.
    - Token journey QA.
@@ -176,13 +189,13 @@ Task 6: Ivory Invitation Agent
    - Convert Ivory into the relationship-first Invitation Agent using the existing invitation spine.
 
 7. Launch Center Agent
-   - Build the Team Launch Center and questionnaire wizard.
+   - Build the Team Launch Center.
 
 8. QA/Compliance Agent
    - Run functional, visual, mobile, reduced-motion, CRM scoping, and compliance checks before release.
 
 ## Current Stop Point
 
-Task 6 Ivory Invitation Agent has been implemented and verified. Next step is PR review/merge before beginning Task 7.
+Task 7 Team Launch Center has been implemented and verified. Next step is PR review/merge before beginning Task 8.
 
 

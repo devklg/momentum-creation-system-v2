@@ -7,12 +7,13 @@
  * per-prospect activity.
  *
  * Routes:
+ *   GET /api/cockpit/launch     auth-only Launch Center projection for new BAs
  *   GET /api/cockpit/invites    the BA's My Invites list + activity timeline
  *   GET /api/cockpit/summary    headline counts + My Sponsor card
  *
- * Gating: requireAuth + requireMichaelComplete (BA-facing gated routes per
- * index.ts canonical pattern). A BA reaches the cockpit only after Michael
- * onboarding is complete.
+ * Gating: /launch is requireAuth only so a new BA can see their current
+ * onboarding action before the Michael gate. Operational PMV/CRM reads remain
+ * requireAuth + requireMichaelComplete.
  *
  * Sponsor immutability (locked-spec 3.5): the BA id is read from
  * req.session.baId — the authed session — NEVER from a query param or body.
@@ -28,10 +29,29 @@ import {
   getCockpitSummary,
   getCockpitTodaysActions,
   getProspectMomentumViewer,
+  getTeamLaunchCenter,
 } from '../domain/cockpit.js';
 import { buildCockpitProspectListPdf } from '../domain/cockpitPrint.js';
 
 export const cockpitRoutes: Router = Router();
+
+/**
+ * GET /api/cockpit/launch — Launch Center projection for new BAs. Auth-only;
+ * it reads Michael status without unlocking the operational PMV early.
+ */
+cockpitRoutes.get('/launch', requireAuth, async (req, res) => {
+  const baId = req.session?.baId;
+  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  try {
+    const payload = await getTeamLaunchCenter(baId);
+    return res.status(200).json(payload);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[GET /api/cockpit/launch] failed', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
 
 /**
  * GET /api/cockpit/invites — the BA's own prospects, newest first, with the
