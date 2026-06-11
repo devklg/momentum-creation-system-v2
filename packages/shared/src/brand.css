@@ -14,6 +14,22 @@
   --cream-faint: rgba(245, 239, 230, 0.48);
   --line: rgba(245, 239, 230, 0.12);
 
+  /* Semantic roles */
+  --tm-identity: var(--gold);
+  --tm-ceremony: var(--gold-bright);
+  --tm-live: var(--teal);
+  --tm-action: var(--teal);
+  --tm-progress: var(--teal);
+  --tm-surface: var(--ink-2);
+  --tm-copy: var(--cream);
+
+  /* Real logo assets, resolved by Vite from the shared CSS import. */
+  --tm-logo-navbar: url('../../../assets/logos/logo_navbar.png');
+  --tm-logo-dark-hero: url('../../../assets/logos/logo_dark_hero.png');
+  --tm-logo-icon: url('../../../assets/logos/logo_icon.png');
+  --tm-logo-dark-square: url('../../../assets/logos/logo_dark_square.png');
+  --tm-logo-light-print: url('../../../assets/logos/logo_light_print.png');
+
   /* Typography */
   --font-display: 'Bebas Neue', sans-serif;
   --font-body: 'DM Sans', sans-serif;
@@ -34,4 +50,314 @@ html, body, #root {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Shared Team Magnificent primitives.
+   These are framework-neutral so .com and .team can consume the same
+   foundation before route-level redesign work begins. */
+
+.tm-shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(10, 10, 10, 0.96), rgba(10, 10, 10, 1)),
+    radial-gradient(760px circle at 18% 0%, rgba(201, 168, 76, 0.09), transparent 58%),
+    radial-gradient(720px circle at 92% 16%, rgba(45, 212, 191, 0.07), transparent 54%),
+    var(--ink);
+  color: var(--cream);
+}
+
+.tm-shell__surface {
+  border: 1px solid var(--line);
+  background: rgba(15, 15, 15, 0.78);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.28);
+}
+
+.tm-logo {
+  display: inline-block;
+  flex: none;
+  overflow: hidden;
+  color: transparent;
+  text-indent: -9999px;
+  vertical-align: middle;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.tm-logo--navbar {
+  width: 9.5rem;
+  height: 2rem;
+  background-image: var(--tm-logo-navbar);
+}
+
+.tm-logo--dark-hero {
+  width: min(100%, 24rem);
+  aspect-ratio: 2.7 / 1;
+  background-image: var(--tm-logo-dark-hero);
+}
+
+.tm-logo--icon {
+  width: 2.75rem;
+  aspect-ratio: 1;
+  background-image: var(--tm-logo-icon);
+}
+
+.tm-logo--dark-square,
+.tm-logo--light-print {
+  width: 4rem;
+  aspect-ratio: 1;
+}
+
+.tm-logo--dark-square {
+  background-image: var(--tm-logo-dark-square);
+}
+
+.tm-logo--light-print {
+  background-image: var(--tm-logo-light-print);
+}
+
+.tm-command-ribbon {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  min-height: 4rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(245, 239, 230, 0.12);
+  background: rgba(10, 10, 10, 0.88);
+  padding: 0.75rem 1rem;
+  backdrop-filter: blur(18px);
+}
+
+.tm-command-ribbon__brand,
+.tm-command-ribbon__actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tm-command-ribbon__actions {
+  justify-content: flex-end;
+}
+
+.tm-progress-meter {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.tm-progress-meter__label {
+  color: var(--cream-mute);
+  font: 700 0.75rem / 1.2 var(--font-mono);
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.tm-progress-meter__track {
+  position: relative;
+  overflow: hidden;
+  height: 0.625rem;
+  border-radius: 999px;
+  background: rgba(245, 239, 230, 0.1);
+}
+
+.tm-progress-meter__value {
+  display: block;
+  width: var(--tm-progress-value, 0%);
+  min-width: 0.625rem;
+  max-width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gold), var(--teal));
+  box-shadow: 0 0 22px rgba(45, 212, 191, 0.28);
+  transition: width 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.tm-animated-counter {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 5.5rem;
+}
+
+.tm-animated-counter__value {
+  color: var(--cream);
+  font: 700 2rem / 1 var(--font-display);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.tm-animated-counter__label {
+  color: var(--cream-mute);
+  font: 700 0.75rem / 1.25 var(--font-mono);
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.tm-rolling-ticker {
+  overflow: hidden;
+  border-block: 1px solid rgba(245, 239, 230, 0.1);
+  background: rgba(15, 15, 15, 0.7);
+}
+
+.tm-rolling-ticker__track {
+  display: flex;
+  width: max-content;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 1rem;
+  animation: tmTicker 28s linear infinite;
+}
+
+.tm-rolling-ticker__item {
+  flex: 0 0 auto;
+  color: var(--cream-mute);
+  font: 700 0.8rem / 1.2 var(--font-mono);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.tm-countdown {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(3.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.tm-countdown__unit {
+  display: grid;
+  place-items: center;
+  min-height: 4.25rem;
+  border: 1px solid rgba(45, 212, 191, 0.2);
+  background: rgba(45, 212, 191, 0.06);
+}
+
+.tm-countdown__value {
+  color: var(--cream);
+  font: 700 1.75rem / 1 var(--font-display);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.tm-countdown__label {
+  color: var(--cream-faint);
+  font: 700 0.7rem / 1.2 var(--font-mono);
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.tm-status-badge,
+.tm-lifecycle-badge {
+  display: inline-flex;
+  min-height: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(245, 239, 230, 0.12);
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  background: rgba(245, 239, 230, 0.06);
+  color: var(--cream-mute);
+  font: 700 0.72rem / 1 var(--font-mono);
+  letter-spacing: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tm-status-badge--identity,
+.tm-lifecycle-badge--sent {
+  border-color: rgba(201, 168, 76, 0.35);
+  background: rgba(201, 168, 76, 0.1);
+  color: var(--gold-bright);
+}
+
+.tm-status-badge--live,
+.tm-status-badge--progress,
+.tm-lifecycle-badge--active,
+.tm-lifecycle-badge--watched,
+.tm-lifecycle-badge--callback {
+  border-color: rgba(45, 212, 191, 0.35);
+  background: rgba(45, 212, 191, 0.1);
+  color: var(--teal);
+}
+
+.tm-status-badge--warning {
+  border-color: rgba(245, 192, 48, 0.42);
+  background: rgba(245, 192, 48, 0.1);
+  color: var(--gold-bright);
+}
+
+.tm-status-badge--neutral,
+.tm-lifecycle-badge--draft,
+.tm-lifecycle-badge--terminal {
+  border-color: rgba(245, 239, 230, 0.16);
+  background: rgba(245, 239, 230, 0.06);
+  color: var(--cream-mute);
+}
+
+.tm-motion-rise {
+  animation: tmRise 620ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.tm-motion-live-pulse {
+  animation: tmLivePulse 2s ease-in-out infinite;
+}
+
+@keyframes tmRise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tmLivePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 0.55rem rgba(45, 212, 191, 0);
+  }
+}
+
+@keyframes tmTicker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 640px) {
+  .tm-command-ribbon {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .tm-command-ribbon__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .tm-countdown {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tm-motion-rise,
+  .tm-motion-live-pulse,
+  .tm-rolling-ticker__track {
+    animation: none !important;
+  }
+
+  .tm-progress-meter__value {
+    transition: none !important;
+  }
 }
