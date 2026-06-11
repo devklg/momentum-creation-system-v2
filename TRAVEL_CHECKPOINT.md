@@ -8,7 +8,7 @@ Date: 2026-06-11
 - v2 is redesign workspace: `momentum-creation-system-v2` is separated for UX/styling redesign work only.
 - Current repo: `momentum-creation-system-v2`
 - Local repo path: `D:\momentum-creation-system-v2`
-- Current branch: `task-5-pmv-frontend`
+- Current branch: `task-6-ivory-invitation-agent`
 - v2 integration branch: `main` after GitHub removed the remote `ux-redesign-v2` branch during the Task 2 merge flow.
 - GitHub repo: `https://github.com/devklg/momentum-creation-system-v2`
 
@@ -100,7 +100,7 @@ Task 4: PMV Backend Projection
 
 Task 5: PMV Cockpit Frontend
 
-- Status: implemented on `task-5-pmv-frontend`; ready for PR review after final branch push.
+- Status: completed, reviewed, and merged.
 - Branch: `task-5-pmv-frontend`
 - Base used: `origin/main` after Task 4 merged.
 - Allowed files touched: `.team` cockpit route and this checkpoint.
@@ -116,29 +116,37 @@ Task 5: PMV Cockpit Frontend
 - Browser QA: attempted with the in-app browser against existing local `7702`/`7700` dev servers, but the browser runtime failed during setup with a Windows sandbox refresh error. Typecheck/build remain the verification source for this task.
 - Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`; `.team` chunk-size warning for a 521.89 kB minified JS bundle.
 
+Task 6: Ivory Invitation Agent
+
+- Status: implemented on `task-6-ivory-invitation-agent`; ready for PR review after final branch push.
+- Branch: `task-6-ivory-invitation-agent`
+- Base used: `origin/main` after Task 5 merged.
+- Allowed files touched: `.team` Ivory route, invitation route seam, Ivory/generator/invitation backend domains and routes, shared type contracts, and this checkpoint.
+- `.com` prospect-facing pages changed: no
+- Token/placement backend changed: no
+- Ivory first viewport no longer presents `Roster + Coach + Generator`; it starts with one relationship-selected person.
+- Ivory state machine: select/create one person -> capture relationship reason -> draft one editable message -> capture real CRM fields -> mint through the invitation spine -> copy message/link -> "I sent this".
+- Stored fields added to the invitation spine: `relationshipReason` alongside existing `message` and `source`.
+- Invitation spine integration: Ivory mint calls `createInvitation()` with `source: "ivory"`, requires real city/state/phone, stores the BA-edited message, stamps the Ivory name as invited, and preserves BA-owned manual sending.
+- PMV visibility: minted prospects enter the existing PMV projection through the normal prospects/invite_tokens records with `source: "ivory"` and stored relationship context.
+- Placeholder CRM gap closed for the legacy Generator mint path: Ivory-origin mints now require real city/state/phone before creating prospect records.
+- Compliance scan: no AI lead qualification, prospect ranking, automated prospecting, automated calling, auto-send, income, spillover, CV, cycle, rank, placement-promise, or dollar claims added.
+- Verification: `pnpm typecheck` passed and `pnpm build` passed. Build warnings were non-blocking Vite warnings: `.com` dynamic/static import chunk warning for `apps/com/src/lib/api.ts`; `.team` chunk-size warning for a 512.33 kB minified JS bundle.
+
 ## Next Implementation Phases
 
-1. Task 6: Ivory Invitation Agent
-   - Relationship-first BA-controlled invitation flow.
-   - Person/CRM merge.
-   - Relationship reason.
-   - Editable draft.
-   - Minted link through the existing spine.
-   - Copy/send screen.
-   - PMV visibility.
-
-2. Task 7: Team Launch Center
+1. Task 7: Team Launch Center
    - New-BA launch checklist.
    - Michael status card.
    - First Invitation mission.
    - Welcome handoff.
 
-3. Task 8: Questionnaire wizard / welcome shortening
+2. Task 8: Questionnaire wizard / welcome shortening
    - Guided questionnaire wizard.
    - Shorter welcome ceremony.
    - Launch Center handoff.
 
-4. Task 9: QA and compliance pass
+3. Task 9: QA and compliance pass
    - Responsive QA.
    - Reduced-motion QA.
    - Token journey QA.
@@ -175,6 +183,6 @@ Task 5: PMV Cockpit Frontend
 
 ## Current Stop Point
 
-Task 5 PMV cockpit frontend has been implemented and verified. Next step is PR review/merge before beginning Task 6.
+Task 6 Ivory Invitation Agent has been implemented and verified. Next step is PR review/merge before beginning Task 7.
 
 

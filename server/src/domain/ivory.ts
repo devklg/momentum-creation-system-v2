@@ -55,6 +55,10 @@ import {
 import { lastInitialOf } from './prospects.js';
 import type {
   CreateIvoryNamePayload,
+  IvoryInvitationDraftPayload,
+  IvoryInvitationDraftResponse,
+  IvoryInvitationMintPayload,
+  IvoryInvitationMintResponse,
   IvoryAngle,
   IvoryCategory,
   IvoryCoachPayload,
@@ -63,6 +67,8 @@ import type {
   IvoryStatus,
   UpdateIvoryNamePayload,
 } from '@momentum/shared';
+import { createInvitation } from './invitations.js';
+import { normalizePhone } from './prospectAccount.js';
 
 const MONGO_DB = 'momentum';
 const IVORY_COLLECTION = 'ivory_names';
@@ -673,4 +679,181 @@ export async function ivoryCoach(
     }
     throw err;
   }
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// INVITATION AGENT
+// ───────────────────────────────────────────────────────────────────────
+
+const RELATIONSHIP_REASON_MAX = 600;
+const INVITATION_MESSAGE_MAX = 1200;
+
+function cleanRelationshipReason(raw: string): string {
+  const reason = raw.trim();
+  if (!reason) throw new IvoryValidationError('missing_relationship_reason');
+  if (reason.length > RELATIONSHIP_REASON_MAX) {
+    throw new IvoryValidationError('relationship_reason_too_long');
+  }
+  return reason;
+}
+
+function neutralInvitationDraft(input: {
+  firstName: string;
+  relationshipReason: string;
+  productName?: string | null;
+}): string {
+  const productLine = input.productName
+    ? `I saw something around ${input.productName} and it made me think of you.`
+    : 'I saw something and it made me think of you.';
+  return [
+    `Hey ${input.firstName}, ${productLine}`,
+    `The reason you came to mind is ${input.relationshipReason}.`,
+    'No pressure at all, but would you watch this short video and tell me what you think?',
+  ].join(' ');
+}
+
+const INVITATION_DRAFT_SYSTEM = [
+  'You are IVORY, a private Team Magnificent invitation companion for a Brand',
+  'Ambassador. The BA has already chosen exactly one person and written why',
+  'that person came to mind. Your only job is to draft one warm invitation',
+  'message the BA can edit and send manually.',
+  '',
+  'HARD RULES:',
+  '- Never score, rank, rate, qualify, or compare the person.',
+  '- Never choose a prospect or suggest a new person.',
+  '- Never mention income, earnings, compensation, cycles, ranks, placement,',
+  '  spillover, guarantees, medical outcomes, scarcity, urgency, or guilt.',
+  '- Never say the system will send, call, or follow up for the BA.',
+  '- Keep the message personal, short, and conversational.',
+  '- Return ONLY the message text. No preamble, no markdown.',
+].join('\n');
+
+function buildInvitationDraftUserTurn(input: {
+  name: IvoryName;
+  relationshipReason: string;
+  productName?: string | null;
+}): string {
+  return [
+    `Prospect first name: ${input.name.firstName}`,
+    `Relationship context from BA: ${input.relationshipReason}`,
+    input.productName ? `Optional product context: ${input.productName}` : 'Optional product context: none',
+    '',
+    'Draft one editable invitation message now.',
+  ].join('\n');
+}
+
+export async function draftIvoryInvitation(
+  baId: string,
+  input: IvoryInvitationDraftPayload,
+): Promise<IvoryInvitationDraftResponse> {
+  const name = await getIvoryName(input.ivoryId, baId);
+  const relationshipReason = cleanRelationshipReason(input.relationshipReason);
+  const productName =
+    typeof input.productName === 'string' && input.productName.trim()
+      ? input.productName.trim()
+      : null;
+
+  try {
+    const { text } = await complete({
+      system: INVITATION_DRAFT_SYSTEM,
+      messages: [
+        {
+          role: 'user',
+          content: buildInvitationDraftUserTurn({
+            name,
+            relationshipReason,
+            productName,
+          }),
+        },
+      ],
+      maxTokens: 260,
+    });
+    const draft = text.trim().replace(/^"|"$/g, '').trim();
+    if (!draft) {
+      return {
+        ok: true,
+        draft: neutralInvitationDraft({
+          firstName: name.firstName,
+          relationshipReason,
+          productName,
+        }),
+        degraded: true,
+      };
+    }
+    return { ok: true, draft: draft.slice(0, INVITATION_MESSAGE_MAX), degraded: false };
+  } catch (err) {
+    if (err instanceof AnthropicConfigError || err instanceof AnthropicError) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[ivory.invitation-agent.draft] LLM unavailable, using neutral fallback:',
+        err.message,
+      );
+      return {
+        ok: true,
+        draft: neutralInvitationDraft({
+          firstName: name.firstName,
+          relationshipReason,
+          productName,
+        }),
+        degraded: true,
+      };
+    }
+    throw err;
+  }
+}
+
+export async function mintIvoryInvitation(
+  baId: string,
+  input: IvoryInvitationMintPayload,
+): Promise<IvoryInvitationMintResponse> {
+  const name = await getIvoryName(input.ivoryId, baId);
+  const relationshipReason = cleanRelationshipReason(input.relationshipReason);
+  const message = input.message.trim();
+  const city = input.city.trim();
+  const stateOrRegion = input.stateOrRegion.trim();
+  const phone = input.phone.trim();
+  const email =
+    typeof input.email === 'string' && input.email.trim()
+      ? input.email.trim()
+      : null;
+
+  if (!message) throw new IvoryValidationError('missing_message');
+  if (message.length > INVITATION_MESSAGE_MAX) {
+    throw new IvoryValidationError('message_too_long');
+  }
+  if (!city || city.length > 120) throw new IvoryValidationError('invalid_city');
+  if (!stateOrRegion || stateOrRegion.length > 120) {
+    throw new IvoryValidationError('invalid_state');
+  }
+  if (!phone) throw new IvoryValidationError('phone_required');
+  if (!normalizePhone(phone)) throw new IvoryValidationError('phone_invalid');
+
+  const created = await createInvitation({
+    sponsorBaId: baId,
+    firstName: name.firstName,
+    lastName: name.lastName,
+    email,
+    phone,
+    city,
+    stateOrRegion,
+    country: 'US',
+    message,
+    source: 'ivory',
+    relationshipReason,
+  });
+
+  await markIvoryInvited(input.ivoryId, baId, created.prospectId);
+
+  return {
+    ok: true,
+    ivoryId: input.ivoryId,
+    prospectId: created.prospectId,
+    token: created.token,
+    inviteUrl: created.inviteUrl,
+    createdAt: created.createdAt,
+    expiresAt: created.expiresAt,
+    message: created.message,
+    source: 'ivory',
+    relationshipReason,
+  };
 }

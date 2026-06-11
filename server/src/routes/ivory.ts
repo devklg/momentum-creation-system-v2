@@ -37,6 +37,10 @@ import type {
   IvoryCategory,
   IvoryCoachPayload,
   IvoryCoachResponse,
+  IvoryInvitationDraftPayload,
+  IvoryInvitationDraftResponse,
+  IvoryInvitationMintPayload,
+  IvoryInvitationMintResponse,
   IvoryNameResponse,
   IvoryStatus,
   ListIvoryNamesResponse,
@@ -48,11 +52,13 @@ import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js'
 import {
   createIvoryName,
   deleteIvoryName,
+  draftIvoryInvitation,
   ivoryCoach,
   IvoryNotFoundError,
   IvoryOwnershipError,
   IvoryValidationError,
   listIvoryNamesForBA,
+  mintIvoryInvitation,
   updateIvoryName,
   updateIvoryStatus,
 } from '../domain/ivory.js';
@@ -71,6 +77,8 @@ const NAME_MAX = 80;
 const NOTES_MAX = 1200;
 const ASK_MAX = 600;
 const PRODUCT_NAME_MAX = 120;
+const RELATIONSHIP_REASON_MAX = 600;
+const MESSAGE_MAX = 1200;
 
 function requiredStr(raw: unknown): string {
   return typeof raw === 'string' ? raw.trim() : '';
@@ -309,6 +317,123 @@ ivoryRoutes.post(
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('[POST /api/ivory/coach] failed', err);
+      return res.status(500).json({ ok: false, error: 'server_error' });
+    }
+  },
+);
+
+// ───────────────────────────────────────────────────────────────────────
+// Invitation Agent
+// ───────────────────────────────────────────────────────────────────────
+
+ivoryRoutes.post(
+  '/invitation-agent/draft',
+  requireAuth,
+  requireMichaelComplete,
+  async (req, res) => {
+    const baId = req.session?.baId;
+    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+    const body = req.body as Partial<IvoryInvitationDraftPayload>;
+    const ivoryId = requiredStr(body?.ivoryId);
+    const relationshipReason = requiredStr(body?.relationshipReason);
+    if (!ivoryId) return res.status(400).json({ ok: false, error: 'invalid_ivory_id' });
+    if (!relationshipReason) {
+      return res.status(400).json({ ok: false, error: 'missing_relationship_reason' });
+    }
+    if (relationshipReason.length > RELATIONSHIP_REASON_MAX) {
+      return res.status(400).json({ ok: false, error: 'relationship_reason_too_long' });
+    }
+    const productName = optionalStr(body?.productName);
+    if (productName && productName.length > PRODUCT_NAME_MAX) {
+      return res.status(400).json({ ok: false, error: 'invalid_product_name' });
+    }
+
+    try {
+      const result = await draftIvoryInvitation(baId, {
+        ivoryId,
+        relationshipReason,
+        productName,
+      });
+      const out: IvoryInvitationDraftResponse = result;
+      return res.status(200).json(out);
+    } catch (err) {
+      if (err instanceof IvoryNotFoundError) {
+        return res.status(404).json({ ok: false, error: 'ivory_not_found' });
+      }
+      if (err instanceof IvoryOwnershipError) {
+        return res.status(403).json({ ok: false, error: 'forbidden' });
+      }
+      if (err instanceof IvoryValidationError) {
+        return res.status(400).json({ ok: false, error: err.code });
+      }
+      // eslint-disable-next-line no-console
+      console.error('[POST /api/ivory/invitation-agent/draft] failed', err);
+      return res.status(500).json({ ok: false, error: 'server_error' });
+    }
+  },
+);
+
+ivoryRoutes.post(
+  '/invitation-agent/mint',
+  requireAuth,
+  requireMichaelComplete,
+  async (req, res) => {
+    const baId = req.session?.baId;
+    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+    const body = req.body as Partial<IvoryInvitationMintPayload>;
+    const ivoryId = requiredStr(body?.ivoryId);
+    const relationshipReason = requiredStr(body?.relationshipReason);
+    const message = requiredStr(body?.message);
+    const city = requiredStr(body?.city);
+    const stateOrRegion = requiredStr(body?.stateOrRegion);
+    const phone = requiredStr(body?.phone);
+    const email = optionalStr(body?.email);
+
+    if (!ivoryId) return res.status(400).json({ ok: false, error: 'invalid_ivory_id' });
+    if (!relationshipReason) {
+      return res.status(400).json({ ok: false, error: 'missing_relationship_reason' });
+    }
+    if (relationshipReason.length > RELATIONSHIP_REASON_MAX) {
+      return res.status(400).json({ ok: false, error: 'relationship_reason_too_long' });
+    }
+    if (!message) return res.status(400).json({ ok: false, error: 'missing_message' });
+    if (message.length > MESSAGE_MAX) {
+      return res.status(400).json({ ok: false, error: 'message_too_long' });
+    }
+    if (!city || city.length > 120) {
+      return res.status(400).json({ ok: false, error: 'invalid_city' });
+    }
+    if (!stateOrRegion || stateOrRegion.length > 120) {
+      return res.status(400).json({ ok: false, error: 'invalid_state' });
+    }
+    if (!phone) return res.status(400).json({ ok: false, error: 'phone_required' });
+
+    try {
+      const result = await mintIvoryInvitation(baId, {
+        ivoryId,
+        relationshipReason,
+        message,
+        city,
+        stateOrRegion,
+        phone,
+        email,
+      });
+      const out: IvoryInvitationMintResponse = result;
+      return res.status(201).json(out);
+    } catch (err) {
+      if (err instanceof IvoryNotFoundError) {
+        return res.status(404).json({ ok: false, error: 'ivory_not_found' });
+      }
+      if (err instanceof IvoryOwnershipError) {
+        return res.status(403).json({ ok: false, error: 'forbidden' });
+      }
+      if (err instanceof IvoryValidationError) {
+        return res.status(400).json({ ok: false, error: err.code });
+      }
+      // eslint-disable-next-line no-console
+      console.error('[POST /api/ivory/invitation-agent/mint] failed', err);
       return res.status(500).json({ ok: false, error: 'server_error' });
     }
   },
