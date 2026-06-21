@@ -27,6 +27,7 @@ import { startBroadcastWorker } from './services/broadcastQueue.js';
 import { ensureChromaCollections } from './services/chromaCollections.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { michaelRoutes } from './routes/michael.js';
+import { steveRoutes } from './routes/steve.js';
 import { prospectTokenRoutes } from './routes/p.js';
 import { prospectLoginRoutes } from './routes/p-login.js';
 import { invitationRoutes } from './routes/invitations.js';
@@ -87,6 +88,12 @@ app.use('/api/welcome', welcomeRoutes);
 app.use('/api/onboarding/questionnaire', questionnaireRoutes);
 app.use('/api/sponsor/workbook', sponsorWorkbookRoutes);
 app.use('/api/michael', michaelRoutes);
+// Steve — New BA Discovery & Success Interview (SEPARATE agent; does NOT touch
+// Michael's schedule/interview/scoring). BA-facing self-reads are pre-gate (a
+// brand-new BA reaches their own discovery state); worker ingest/system-prompt
+// are STEVE_WORKER_SECRET guarded; the sponsor-only profile read applies
+// requireMichaelComplete internally. Steve never scores or judges.
+app.use('/api/steve', steveRoutes);
 app.use('/api/admin/access-codes', adminAccessCodesRoutes);
 app.use('/api/admin/bas', adminBasRoutes);
 app.use('/api/admin/prospects', adminProspectsRoutes);
