@@ -5,6 +5,7 @@ import { WelcomePage } from './routes/welcome';
 import { CockpitPage } from './routes/cockpit';
 import { MichaelSchedulePage } from './routes/michael-schedule';
 import { MichaelInterviewPage } from './routes/michael-interview';
+import { SteveSuccessInterviewPage } from './routes/steve-success-interview';
 import { TenStepsPage } from './routes/training/10-steps';
 import { FastStartHubPage } from './routes/training/fast-start/index';
 import { ModuleProductPage } from './routes/training/fast-start/product';
@@ -30,6 +31,7 @@ export function App() {
       <Route path="/welcome" element={<WelcomePage />} />
       <Route path="/michael/schedule" element={<MichaelSchedulePage />} />
       <Route path="/michael/interview" element={<MichaelInterviewPage />} />
+      <Route path="/steve/discovery" element={<SteveSuccessInterviewPage />} />
       <Route path="/cockpit" element={<CockpitPage />} />
       <Route path="/invitations" element={<InvitationsPage />} />
       <Route path="/video-library" element={<VideoLibraryPage />} />
