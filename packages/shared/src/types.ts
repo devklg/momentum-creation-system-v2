@@ -3930,7 +3930,6 @@ export interface TeamLaunchCenterResponse {
   launchComplete: boolean;
 }
 
-
 /* ─────────────────────────────────────────────────────────────────────────
  * Steve — New BA Discovery & Success Interview (SEPARATE agent)
  * ─────────────────────────────────────────────────────────────────────────
@@ -4188,4 +4187,129 @@ export interface SteveDiscoveryScriptSection {
 export interface SteveDiscoveryScriptResponse {
   ok: true;
   sections: SteveDiscoveryScriptSection[];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Ivory Prospect Momentum Agent (feature/ivory-momentum-agent)
+//
+// The post-mint companion to the Ivory Invitation Agent. After a BA mints a
+// `source: 'ivory'` invitation, the Momentum Agent tracks that prospect's
+// lifecycle through the existing PMV substrate and surfaces:
+//
+//   1. A cohort-scoped view of every Ivory-sourced prospect for the BA.
+//   2. A small focus queue prioritized by the existing PMV `nextAction` model.
+//   3. Per-prospect relationship context from the originating IvoryName record
+//      (categories, preferredAngle, the BA's saved memory note) so the BA can
+//      remember WHY they invited this person without leaving the page.
+//   4. An on-demand, LLM-coached "what to say next" suggestion (NOT auto-sent;
+//      never a placement/income claim) with a neutral fallback when
+//      ANTHROPIC_API_KEY is unset.
+//
+// Everything is BA-scoped (sponsorBaId = session baId, ownership enforced on
+// the IvoryName side). The agent NEVER auto-sends, never scores prospects, and
+// never speaks comp/income/medical (locked-spec 3.10/3.11) — it's a reflection
+// surface for manual follow-up, modeled on Ivory's coach posture.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Why a prospect appears in the Momentum focus queue — surfaced alongside the
+ * existing PMV `nextAction.reason` so the BA sees one Ivory-flavored phrase
+ * ("because Jordan watched the video") not just the generic call-now reason.
+ */
+export type IvoryMomentumPriorityReason =
+  | 'callback_raised'
+  | 'video_watched'
+  | 'follow_up_due'
+  | 'video_partial'
+  | 'clicked_no_watch'
+  | 'sent_no_open'
+  | 'draft_unsent'
+  | 'expiring_soon'
+  | 'expired_consider_reinvite';
+
+/**
+ * Ivory-side context on a prospect row — the slice of the IvoryName record the
+ * Momentum view needs to remind the BA WHY this person came to mind. Every
+ * field can be null because a prospect minted before the IvoryName link
+ * existed (legacy data, manual ivoryId-less mint) still appears in the cohort
+ * via the source='ivory' filter — we just don't have the warm-market memory.
+ */
+export interface IvoryMomentumContext {
+  ivoryId: string | null;
+  categories: IvoryCategory[];
+  preferredAngle: IvoryAngle | null;
+  /** The BA's saved memory note on the IvoryName record (NOT the invite message). */
+  memoryNote: string | null;
+  /** The relationshipReason the BA captured at mint time (lives on the prospect). */
+  relationshipReason: string | null;
+}
+
+/**
+ * One row in the Momentum cohort. Composes the canonical PMV row (the source
+ * of truth for lifecycle/lastSignal/nextAction) with Ivory-side context and a
+ * single derived priority reason. The PMV row is embedded whole — the UI
+ * should never recompute lifecycle/nextAction from raw fields, only read it.
+ */
+export interface IvoryMomentumRow {
+  prospectId: string;
+  /** The full PMV row — single source of truth for lifecycle + next action. */
+  pmv: ProspectMomentumRow;
+  /** Ivory-specific relationship context for the BA. */
+  ivory: IvoryMomentumContext;
+  /**
+   * Derived priority reason used to rank the row in the cohort focus queue.
+   * Independent from `pmv.nextAction.kind` because the Ivory queue prioritizes
+   * relational moments ("Jordan watched") even when PMV would also surface
+   * a generic 'call_now'.
+   */
+  priorityReason: IvoryMomentumPriorityReason | null;
+}
+
+/** Cohort-level counts surfaced in the Momentum page header. */
+export interface IvoryMomentumCohortCounts {
+  total: number;
+  draft: number;
+  sentUnopened: number;
+  clicked: number;
+  videoInProgress: number;
+  watched: number;
+  callbackRaised: number;
+  enrolled: number;
+  customer: number;
+  expired: number;
+  archived: number;
+}
+
+/** GET /api/ivory/momentum 200 response. BA-scoped. */
+export interface IvoryMomentumViewResponse {
+  ok: true;
+  generatedAt: IsoTimestamp;
+  counts: IvoryMomentumCohortCounts;
+  focusQueue: IvoryMomentumRow[];
+  rows: IvoryMomentumRow[];
+}
+
+/**
+ * POST /api/ivory/momentum/:prospectId/suggest request body. The Ivory
+ * Momentum Agent reads the prospect's current lifecycle/lastSignal and the
+ * BA's saved relationship context, then asks the LLM for one short, warm
+ * follow-up suggestion the BA can adapt and send manually. Optional `ask`
+ * lets the BA bias the suggestion ("they said they'd watch this weekend").
+ */
+export interface IvoryMomentumSuggestionPayload {
+  /** Optional free-form BA prompt to bias the suggestion. */
+  ask?: string;
+}
+
+/** POST /api/ivory/momentum/:prospectId/suggest 200 response. */
+export interface IvoryMomentumSuggestionResponse {
+  ok: true;
+  prospectId: string;
+  lifecycle: ProspectLifecycleStage;
+  /** 1–2 sentence framing the BA reads before the suggestion text. */
+  coaching: string;
+  /** The suggested follow-up text. BA edits before sending — never auto-sent. */
+  suggestion: string;
+  /** True when the LLM is unavailable and a deterministic fallback was returned. */
+  degraded: boolean;
 }
