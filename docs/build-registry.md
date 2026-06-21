@@ -8,7 +8,8 @@
 3. `docs/project-wireframe.md` — build decomposition + per-leaf status (#129)
 4. This file (`docs/build-registry.md`) — artifact index
 5. Git log on `github.com/devklg/momentum-creation-system-v1`
-6. Perry handoffs in MongoDB `session_handoffs` (last-resort lookup)
+6. Gateway chat registry in MongoDB `universal_gateway.chat_registry`
+7. Handoffs in MongoDB `universal_gateway.session_handoffs` (artifact lookup, not identity authority)
 
 **How to read the status column:**
 - `drafted` — exists as a prototype or working copy, not yet reviewed by Kevin

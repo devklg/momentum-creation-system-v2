@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MCS v2 — Run &amp; Deploy Guide</title>
+<style>
+  :root{ --ink:#111; --muted:#555; --gold:#9a7d2e; --line:#cfcfcf; --box:#f4f1ea; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ font-family:'DM Sans','Segoe UI',Arial,sans-serif; color:var(--ink); font-size:11.5pt; line-height:1.45; }
+  .wrap{ max-width:760px; margin:0 auto; padding:28px 30px; }
+  h1{ font-size:23pt; margin:0 0 2px; letter-spacing:.3px; }
+  h1 .v{ color:var(--gold); }
+  .sub{ color:var(--muted); font-size:10pt; margin:0 0 4px; }
+  .rule{ height:3px; background:var(--gold); border:0; margin:10px 0 18px; }
+  h2{ font-size:13.5pt; margin:22px 0 8px; padding-bottom:3px; border-bottom:1.5px solid var(--gold); }
+  h3{ font-size:11.5pt; margin:14px 0 4px; }
+  p{ margin:6px 0; }
+  code,kbd{ font-family:'Consolas','Courier New',monospace; font-size:10pt; background:var(--box); padding:1px 5px; border-radius:3px; }
+  pre{ font-family:'Consolas','Courier New',monospace; font-size:9.6pt; background:var(--box); border:1px solid var(--line); border-radius:5px; padding:9px 11px; margin:6px 0; white-space:pre-wrap; word-break:break-word; }
+  table{ border-collapse:collapse; width:100%; margin:8px 0; font-size:10pt; }
+  th,td{ border:1px solid var(--line); padding:5px 8px; text-align:left; vertical-align:top; }
+  th{ background:var(--box); }
+  ol{ margin:6px 0 6px 4px; padding-left:20px; }
+  ol li{ margin:7px 0; padding-left:4px; }
+  ul.tight{ margin:4px 0; padding-left:18px; }
+  ul.tight li{ margin:3px 0; }
+  .step-cmd{ margin-top:4px; }
+  .chk{ display:inline-block; width:12px; height:12px; border:1.4px solid #333; border-radius:2px; margin-right:8px; vertical-align:middle; }
+  .note{ background:var(--box); border-left:3px solid var(--gold); padding:8px 12px; margin:10px 0; font-size:10pt; }
+  .ok{ color:#1f7a3d; font-weight:600; }
+  .warn{ color:#9a5b00; font-weight:600; }
+  .small{ font-size:9.2pt; color:var(--muted); }
+  .foot{ margin-top:26px; border-top:1px solid var(--line); padding-top:8px; color:var(--muted); font-size:9pt; }
+  @page{ size:Letter; margin:14mm 14mm 16mm; }
+  @media print{ h2{ page-break-after:avoid; } ol li, tr, pre, .note{ page-break-inside:avoid; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Momentum Creation System <span class="v">v2</span></h1>
+  <p class="sub">Local Run &amp; Team-Deployment Guide &nbsp;•&nbsp; Repo: <code>D:\momentum-creation-system-v2</code> &nbsp;•&nbsp; Branch: <code>task-9-qa-compliance</code> &nbsp;•&nbsp; Prepared 2026-06-20</p>
+  <hr class="rule">
+
+  <div class="note"><strong>Status in one line:</strong> the code is essentially complete — all 154 API routes are mounted and the server boots. What turns “built” into “running on your screen” is three things: the <code>.env</code> (done), a free port 7700, and seed data for login.</div>
+
+  <h2>1. At a glance</h2>
+  <table>
+    <tr><th>Surface</th><th>Folder</th><th>Dev URL</th><th>Audience</th></tr>
+    <tr><td>Prospect site (.com)</td><td><code>apps/com</code></td><td><code>http://localhost:7701</code></td><td>Public — no login</td></tr>
+    <tr><td>BA cockpit (.team)</td><td><code>apps/team</code></td><td><code>http://localhost:7702</code></td><td>Brand Ambassadors — login</td></tr>
+    <tr><td>Admin</td><td><code>apps/admin</code></td><td><code>http://localhost:7703</code></td><td>Kevin only — login</td></tr>
+    <tr><td>API server</td><td><code>server</code></td><td><code>http://localhost:7700/api</code></td><td>Shared backend</td></tr>
+  </table>
+  <p class="small">Ports are fixed (<code>strictPort</code>). The v2 Universal Gateway runs on <code>localhost:2526</code> (NOT 2525 — that is the v1 gateway).</p>
+
+  <h2>2. Prerequisites (must be up first)</h2>
+  <table>
+    <tr><th>Service</th><th>Where</th><th>Needed for</th></tr>
+    <tr><td>Universal Gateway v2</td><td><code>localhost:2526</code></td><td>All data reads/writes (Mongo/Neo4j/Chroma/Surreal fan-out)</td></tr>
+    <tr><td>MongoDB / Neo4j / ChromaDB / SurrealDB</td><td>via the gateway</td><td>Persistence</td></tr>
+    <tr><td>GPU embedding service</td><td><code>localhost:8300</code></td><td>ChromaDB writes (384-dim)</td></tr>
+    <tr><td>Node + pnpm</td><td>local</td><td>Node 24 confirmed present</td></tr>
+  </table>
+
+  <h2>3. Run it locally</h2>
+  <ol>
+    <li><span class="chk"></span><strong>Environment file</strong> — <span class="ok">already done.</span> <code>.env</code> exists at the repo root with a 256-bit <code>JWT_SECRET</code>, <code>ADMIN_BA_IDS=TMBA-FOUNDER-KEVIN</code>, and <code>GATEWAY_URL=http://localhost:2526/api</code>.</li>
+    <li><span class="chk"></span><strong>Free port 7700.</strong> Another process currently holds it, and all three front-ends are hard-wired to call the API there, so v2’s server must own 7700. Identify and stop the occupant (or decide it is the one to keep).
+      <pre class="step-cmd">Get-NetTCPConnection -LocalPort 7700 -State Listen |
+  ForEach-Object { Get-Process -Id $_.OwningProcess } | Format-List Id,Path</pre></li>
+    <li><span class="chk"></span><strong>Install dependencies</strong> (likely already installed):
+      <pre class="step-cmd">cd D:\momentum-creation-system-v2
+pnpm install</pre></li>
+    <li><span class="chk"></span><strong>Build the shared package once</strong> (so imports resolve):
+      <pre class="step-cmd">pnpm build:shared</pre></li>
+    <li><span class="chk"></span><strong>Start everything</strong> (server + all three clients in parallel):
+      <pre class="step-cmd">pnpm dev:all</pre>
+      <span class="small">Or run separately: <code>pnpm dev:server</code>, <code>pnpm dev:com</code>, <code>pnpm dev:team</code>, <code>pnpm dev:admin</code>.</span></li>
+    <li><span class="chk"></span><strong>Open in the browser:</strong>
+      <ul class="tight">
+        <li><code>http://localhost:7701</code> — prospect site (public, no login) — <strong>fastest thing to see.</strong></li>
+        <li><code>http://localhost:7702</code> — BA cockpit (needs login).</li>
+        <li><code>http://localhost:7703</code> — admin (needs login).</li>
+      </ul></li>
+    <li><span class="chk"></span><strong>Seed data so logins work</strong> (otherwise the database is empty). From the repo root:
+      <pre class="step-cmd">pnpm --filter @momentum/server seed:founders
+pnpm --filter @momentum/server setup:founder-access
+pnpm --filter @momentum/server seed:codes
+pnpm --filter @momentum/server seed:webinar-events
+pnpm --filter @momentum/server seed:orientation-sessions
+pnpm --filter @momentum/server bootstrap:ivory</pre>
+      <span class="small">Confirm which of these are required for a working login before running blind — founders + founder-access are the ones that create your account.</span></li>
+  </ol>
+
+  <div class="note"><strong>Fastest path to seeing <em>something</em>:</strong> steps 2 → 4 → 5, then open <code>http://localhost:7701</code>. The prospect site renders with no login and no data.</div>
+
+  <h2>4. Current state &amp; known gaps (honest)</h2>
+  <table>
+    <tr><th>Item</th><th>State</th></tr>
+    <tr><td>All 154 API routes</td><td class="ok">Mounted &amp; responding (verified by full sweep)</td></tr>
+    <tr><td>Tasks 1–8 (UX redesign)</td><td class="ok">Merged to <code>main</code></td></tr>
+    <tr><td>Task 9 (QA/compliance)</td><td class="warn">Committed on its branch, NOT yet merged (no PR #15); plus uncommitted docs on that branch</td></tr>
+    <tr><td>Gateway health route</td><td class="warn">Reports 503 — false negative (pings unsupported <code>mongodb:ping</code>); real gateway calls work</td></tr>
+    <tr><td>Michael interview (4 routes)</td><td class="warn">503 until <code>ANTHROPIC_API_KEY</code> is set (LLM dependency)</td></tr>
+    <tr><td>Ivory / ScriptMaker (LLM)</td><td class="warn">Degrade to manual until <code>ANTHROPIC_API_KEY</code> is set</td></tr>
+    <tr><td>Email (Resend)</td><td class="warn">Dormant — not configured; sends are skipped/logged</td></tr>
+    <tr><td>SMS / calls (Telnyx)</td><td class="warn">Dormant — not configured</td></tr>
+    <tr><td>Compiled <code>pnpm start</code> path</td><td class="warn">Needs <code>pnpm build:shared</code> first; <code>tsx</code> dev path works now</td></tr>
+  </table>
+
+  <h2>5. Phase 2 — deploy for the team (10-day target)</h2>
+  <p class="small">High-level target plan from the prior production brief. Confirm specifics before executing each line.</p>
+  <ol>
+    <li><span class="chk"></span><strong>Merge Task 9</strong> and prune stale duplicate remote branches; tag a release commit on <code>main</code>.</li>
+    <li><span class="chk"></span><strong>Provision the host</strong> (VPS — InterServer or your Quasar VPS). Install Docker + Docker Compose.</li>
+    <li><span class="chk"></span><strong>Managed data layer:</strong> MongoDB Atlas as the authoritative store, Neo4j Aura for the genealogy graph; decide Chroma + Surreal hosting. MongoDB stays the single write authority.</li>
+    <li><span class="chk"></span><strong>Reverse proxy + TLS:</strong> Caddy in front of the apps for automatic HTTPS.</li>
+    <li><span class="chk"></span><strong>Production secrets/env:</strong> real <code>JWT_SECRET</code>, set <code>JWT_COOKIE_DOMAIN=.teammagnificent.team</code>, <code>ADMIN_BA_IDS</code>, <code>GATEWAY_URL</code>, <code>PROSPECT_BASE_URL=https://teammagnificent.com</code>.</li>
+    <li><span class="chk"></span><strong>Turn on the dormant integrations:</strong> verify <code>teammagnificent.com</code> in Resend (DNS) for email; add Telnyx keys for Michael’s calls; add <code>ANTHROPIC_API_KEY</code> for Michael/Ivory/ScriptMaker.</li>
+    <li><span class="chk"></span><strong>DNS:</strong> point <code>teammagnificent.com</code> → com, <code>teammagnificent.team</code> → team, <code>admin.teammagnificent.team</code> → admin (Namecheap).</li>
+    <li><span class="chk"></span><strong>Seed founders + access</strong> on production; smoke-test login on each surface.</li>
+    <li><span class="chk"></span><strong>Compliance pass on <code>.com</code>:</strong> no income/placement/CV/rank language; PMV wording only.</li>
+    <li><span class="chk"></span><strong>Onboard the team:</strong> issue access codes, walk the welcome → Michael → Launch Center flow.</li>
+  </ol>
+
+  <div class="foot">Momentum Creation System v2 — internal run/deploy guide. Ports, gateway (2526), and route status verified against the live repo on 2026-06-20. Phase-2 specifics are a target plan to confirm.</div>
+
+</div>
+</body>
+</html>

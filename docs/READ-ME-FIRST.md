@@ -30,7 +30,7 @@ disease this system was built to cure.
 ## Precedence (when sources disagree)
 
 decision ledger (currency) > `docs/locked-spec.md` (state) > design docs >
-`docs/build-registry.md` > git log > Perry handoffs.
+`docs/build-registry.md` > git log > Gateway chat registry > handoffs.
 
 `KEVIN-CONTEXT.md` / `THE-KEY` are NOT session-start reads under current settings.
 Pull a specific doc only when the work needs it.
