@@ -40,6 +40,10 @@ import {
   subscribeChunksForCall,
   subscribePhaseForBa,
 } from '../services/michaelEvents.js';
+import {
+  getTrainingSupportCardForSponsor,
+  TrainingSupportAccessError,
+} from '../domain/michael-training-support.js';
 
 export const michaelRoutes: Router = express.Router();
 
@@ -558,5 +562,45 @@ michaelRoutes.get(
       baFirstName: firstName || 'there',
     });
     res.json({ ok: true, baId, system });
+  },
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// feature/michael-training-support — sponsor-facing training support card.
+// Projects Steve's already-persisted SuccessProfile (steve_discoveries) into
+// "how to support this downline's training" guidance for the direct sponsor.
+// READ-ONLY; no new collection. Sibling to /interview/cockpit/:downlineBaId.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** GET /api/michael/training-support/:downlineBaId — sponsor-only.
+ *  Sponsor reads the downline's derived training-support card. Authoritative
+ *  check is server-side via getTrainingSupportCardForSponsor; 403 if not the
+ *  direct sponsor, 404 if no downline or no Steve discovery yet. */
+michaelRoutes.get(
+  '/training-support/:downlineBaId',
+  requireAuth,
+  requireMichaelComplete,
+  async (req: Request, res: Response) => {
+    const session = req.session!;
+    const downlineBaId = String(req.params.downlineBaId ?? '');
+    if (!downlineBaId) {
+      res.status(400).json({ ok: false, error: 'Missing downlineBaId.' });
+      return;
+    }
+    try {
+      const card = await getTrainingSupportCardForSponsor({
+        requestingBaId: session.baId,
+        downlineBaId,
+      });
+      res.json({ ok: true, card });
+    } catch (err) {
+      if (err instanceof TrainingSupportAccessError) {
+        const status = err.code === 'NOT_SPONSOR' ? 403 : 404;
+        res.status(status).json({ ok: false, error: err.message, code: err.code });
+        return;
+      }
+      const msg = err instanceof Error ? err.message : 'unknown';
+      res.status(500).json({ ok: false, error: `Training-support read failed: ${msg}` });
+    }
   },
 );
