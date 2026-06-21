@@ -4313,3 +4313,39 @@ export interface IvoryMomentumSuggestionResponse {
   /** True when the LLM is unavailable and a deterministic fallback was returned. */
   degraded: boolean;
 }
+
+// ─── feature/michael-training-support ────────────────────────────────────────
+// Sponsor-facing "how to support this downline's training" card. PROJECTION of
+// Steve's already-persisted SuccessProfile (steve_discoveries) — read-only on
+// each request, no new collection. Steve owns capture; this surface owns
+// presentation of the support guidance to the direct sponsor.
+//
+// Compliance: BA-language read-back only. No income, no comp math, no placement
+// promises. The sponsor uses this to meet the BA where they are during training.
+
+export interface MichaelTrainingSupportGuidanceSection {
+  /** Section label, e.g. "How they learn". */
+  label: string;
+  /** Distilled guidance lines pulled from the BA's own discovery answers. */
+  bullets: string[];
+}
+
+export interface MichaelTrainingSupportCard {
+  downlineBaId: string;
+  downlineFirstName: string;
+  /** Timestamp from Steve's SuccessProfile (generatedAt). */
+  derivedFromSteveAt: string;
+  /** Pass-through of the BA's own primary-why statement. */
+  primaryWhy: string;
+  /** Pass-through of the BA's own success-vision statement. */
+  successVision: string;
+  learningStyle: MichaelTrainingSupportGuidanceSection;
+  communication: MichaelTrainingSupportGuidanceSection;
+  supportFocus: MichaelTrainingSupportGuidanceSection;
+  /** Pass-through of Steve's training recommendations (verbatim, may be empty). */
+  trainingRecommendations: string[];
+  /** Pass-through of Steve's one-way handoff summary for Michael / humans. */
+  michaelHandoffSummary: string;
+  /** Provenance: who signed this card. */
+  signedBy: string;
+}
