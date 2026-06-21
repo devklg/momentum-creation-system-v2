@@ -34,6 +34,7 @@ import { cockpitRoutes } from './routes/cockpit.js';
 import { crmRoutes } from './routes/crm.js';
 import { scriptmakerRoutes } from './routes/scriptmaker.js';
 import { ivoryRoutes } from './routes/ivory.js';
+import { agentRoutes } from './routes/agents.js';
 import { trainingRoutes } from './routes/training.js';
 import { profileRoutes } from './routes/profile.js';
 import { previewRoutes } from './routes/preview.js';
@@ -171,6 +172,10 @@ app.use('/api/scriptmaker', scriptmakerRoutes);
 // selected names onto /p/{token} mints via the existing spine (source='ivory').
 // All routes gated (requireAuth + requireMichaelComplete) inside the file.
 app.use('/api/ivory', ivoryRoutes);
+// Agent Orchestration Layer (feature/agent-orchestrator). Read-only
+// recommendation feed + append-only interaction events; the underlying
+// Michael/Ivory/Steve lane logic stays in its existing domain modules.
+app.use('/api/agents', agentRoutes);
 // Fast Start Training (feat/fast-start-training, wireframe 3.5).
 // GET /fast-start/progress + GET-1 whitelisted pre-Michael in
 // MICHAEL_GATE_WHITELIST; POST .../modules/2-5/state stay gated.

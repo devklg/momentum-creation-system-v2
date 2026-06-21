@@ -3929,3 +3929,85 @@ export interface TeamLaunchCenterResponse {
   questionnaireSubmitted: boolean;
   launchComplete: boolean;
 }
+
+// -----------------------------------------------------------------------------
+// Agent Orchestration Layer
+// -----------------------------------------------------------------------------
+
+export type AgentId = 'michael' | 'ivory' | 'steve' | 'system';
+
+export type AgentRecommendationPriority = 1 | 2 | 3 | 4 | 5;
+
+export type AgentRecommendationKind =
+  | 'complete_michael'
+  | 'review_michael_profile'
+  | 'follow_up_prospect'
+  | 'invite_from_ivory'
+  | 'open_daily_actions'
+  | 'keep_sharing';
+
+export type AgentSubjectType =
+  | 'ba'
+  | 'prospect'
+  | 'ivory_name'
+  | 'michael_interview'
+  | 'daily_actions'
+  | 'system';
+
+export interface AgentRecommendation {
+  recommendationId: string;
+  agentId: AgentId;
+  kind: AgentRecommendationKind;
+  priority: AgentRecommendationPriority;
+  title: string;
+  summary: string;
+  reason: string;
+  ctaLabel: string;
+  route: string;
+  subjectType: AgentSubjectType;
+  subjectId: string | null;
+  createdAt: IsoTimestamp;
+  expiresAt: IsoTimestamp | null;
+}
+
+export interface AgentRecommendationsResponse {
+  ok: true;
+  generatedAt: IsoTimestamp;
+  recommendations: AgentRecommendation[];
+}
+
+export type AgentEventKind =
+  | 'recommendation_viewed'
+  | 'recommendation_actioned'
+  | 'recommendation_dismissed'
+  | 'agent_opened'
+  | 'handoff_started'
+  | 'handoff_completed';
+
+export type AgentEventMetadataValue = string | number | boolean | null;
+
+export interface AgentEvent {
+  eventId: string;
+  baId: string;
+  agentId: AgentId;
+  kind: AgentEventKind;
+  recommendationId: string | null;
+  subjectType: AgentSubjectType;
+  subjectId: string | null;
+  metadata: Record<string, AgentEventMetadataValue>;
+  createdAt: IsoTimestamp;
+}
+
+export interface CreateAgentEventPayload {
+  agentId: AgentId;
+  kind: AgentEventKind;
+  recommendationId?: string | null;
+  subjectType?: AgentSubjectType;
+  subjectId?: string | null;
+  metadata?: Record<string, AgentEventMetadataValue>;
+}
+
+export interface AgentEventResponse {
+  ok: true;
+  event: AgentEvent;
+}

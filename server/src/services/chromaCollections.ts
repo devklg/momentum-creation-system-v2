@@ -55,6 +55,7 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_prospect_magic_links', // domain/prospectMagicLink.ts
   'mcs_webinar_reservations', // domain/webinarReservation.ts
   'mcs_training_progress', // domain/training.ts (also lazy-bootstrapped there)
+  'mcs_agent_events', // domain/agents/orchestrator.ts
 ] as const;
 
 /** Thrown by the write-time guard when a Chroma collection is absent. */
