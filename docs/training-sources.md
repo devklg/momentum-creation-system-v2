@@ -6,10 +6,11 @@
 >
 > **Build repo:** `D:/momentum-creation-system-v1/` (`devklg/momentum-creation-system-v1`)
 > **Training content repo:** `D:/team-magnificent-training/` (publishes to `devklg.github.io/team-magnificent-training/`)
-> **Latest handoff:** Mongo `universal_gateway.session_handoffs` — read the collection
-> directly, `$sort {created_at:-1} $limit 1` (per the handoff contract). As of Chat
-> #135 the latest is `handoff_chat_134`. (The original #129 draft of this list named
-> `handoff_chat_129b`; that was the latest at the time and is now stale — do not rely on it.)
+> **Chat identity:** Mongo `universal_gateway.chat_registry` is the authority.
+> Handoffs live in `universal_gateway.session_handoffs` as attached artifacts,
+> not as the source of chat numbering. This file was harvested in Chat #129 and
+> committed in Chat #135; verify current continuity through the registry first,
+> then read the linked handoff when needed.
 
 ---
 

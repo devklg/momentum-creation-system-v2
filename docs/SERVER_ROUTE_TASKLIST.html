@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Server API Route Tasklist</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #000;
+      --line: #000;
+      --muted: #333;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #fff;
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 11pt;
+      line-height: 1.3;
+    }
+
+    .page {
+      width: 8.5in;
+      min-height: 11in;
+      margin: 0 auto;
+      padding: 0.45in 0.5in;
+      background: #fff;
+    }
+
+    header {
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 0.16in;
+      margin-bottom: 0.18in;
+    }
+
+    h1 {
+      margin: 0 0 0.08in;
+      font-size: 20pt;
+      line-height: 1.05;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .meta,
+    .source,
+    .notes {
+      color: var(--muted);
+      font-size: 9.5pt;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.18in;
+      margin-top: 0.14in;
+      color: var(--ink);
+    }
+
+    .blank {
+      display: inline-block;
+      border-bottom: 1px solid var(--line);
+      min-width: 2.5in;
+      height: 0.18in;
+      vertical-align: bottom;
+    }
+
+    ol {
+      margin: 0;
+      padding-left: 0.34in;
+      columns: 2;
+      column-gap: 0.35in;
+    }
+
+    li {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin: 0 0 0.055in;
+      padding-left: 0.03in;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 8.8pt;
+      line-height: 1.22;
+    }
+
+    .box {
+      display: inline-block;
+      width: 0.13in;
+      height: 0.13in;
+      border: 1.5px solid var(--line);
+      margin-right: 0.055in;
+      vertical-align: -0.02in;
+    }
+
+    .route {
+      overflow-wrap: anywhere;
+    }
+
+    .footer {
+      border-top: 1px solid var(--line);
+      margin-top: 0.2in;
+      padding-top: 0.1in;
+      font-size: 9pt;
+      color: var(--muted);
+    }
+
+    .screen-actions {
+      width: 8.5in;
+      margin: 0.2in auto 0;
+      text-align: right;
+    }
+
+    button {
+      border: 1px solid #000;
+      background: #fff;
+      color: #000;
+      padding: 8px 12px;
+      font: 12px Arial, Helvetica, sans-serif;
+      cursor: pointer;
+    }
+
+    @media print {
+      @page { size: letter; margin: 0.35in; }
+      body { margin: 0; }
+      .page { width: auto; min-height: auto; margin: 0; padding: 0; }
+      .screen-actions { display: none; }
+      a { color: #000; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="screen-actions">
+    <button type="button" onclick="window.print()">Print</button>
+  </div>
+  <main class="page">
+    <header>
+      <h1>Server API Route Tasklist</h1>
+      <div class="source">Source: server/dist/index.js plus mounted modules under server/dist/routes/</div>
+      <div class="meta">
+        <div>Name: <span class="blank"></span></div>
+        <div>Date: <span class="blank"></span></div>
+      </div>
+    </header>
+
+    <ol>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/access-codes</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/access-codes</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/audit</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/audit/:entryId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/bas</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/bas</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">DELETE /api/admin/bas/:baId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/bas/:baId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">PATCH /api/admin/bas/:baId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/bas/:baId/dial-michael</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/bas/:baId/leader-tag</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/bas/:baId/notes</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/bas/:baId/restore</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/bas/:baId/sponsor-override</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/broadcast</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/broadcast/:broadcastId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/broadcast/audience</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/broadcast/list</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/broadcast/test</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/dashboard/drilldown</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/dashboard/filters</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/dashboard/metrics</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/dashboard/stream</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/live-ops/funnel</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/live-ops/grid</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/live-ops/growth</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/live-ops/usage/stream</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/orientation/sessions</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/orientation/sessions</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/prospects</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/prospects</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">DELETE /api/admin/prospects/:prospectId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/prospects/:prospectId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">PATCH /api/admin/prospects/:prospectId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/prospects/:prospectId/force-enroll</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/prospects/:prospectId/manual-flush</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/prospects/:prospectId/move</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/prospects/:prospectId/notes</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/prospects/:prospectId/reassign-sponsor</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/prospects/:prospectId/restore</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/prospects/:prospectId/sandbox-preview</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/prospects/alerts/aged</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/prospects/filters</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/prospects/flush-expired</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/queue/lookup</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/queue/rules</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">PUT /api/admin/queue/rules/:key</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/queue/summary</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/queue/ticker</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/queue/ticker/stream</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/queue/visible-window</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">PUT /api/admin/queue/visible-window</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/activation</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/activation/export</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/enrollment-completion</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/enrollment-completion/export</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/follow-up-aging</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/follow-up-aging/export</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/invite-funnel</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/invite-funnel/export</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/leader-scorecards</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/leader-scorecards/export</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/master-report.pdf</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/queue-velocity</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/queue-velocity/export</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/training</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/reporting/training/export</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/admin/tenant/overview</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">PATCH /api/admin/tenant/settings</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">PUT /api/admin/tenant/templates/:templateKey</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/admin/tenant/templates/validate</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/auth/login</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/auth/logout</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/auth/me</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/auth/register</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/auth/verify-code</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/cockpit/invites</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/cockpit/invites/print.pdf</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/cockpit/launch</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/cockpit/pmv</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/cockpit/summary</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/cockpit/todays-actions</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/crm</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">DELETE /api/crm/:prospectId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/crm/:prospectId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">PUT /api/crm/:prospectId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/crm/:prospectId/disposition</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">DELETE /api/crm/:prospectId/followup</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/crm/:prospectId/followup</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/crm/:prospectId/notes</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/crm/:prospectId/reinvite</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/crm/:prospectId/reinvite-script</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/crm/today</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/health</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/health/gateway</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/invitations</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/invitations/:prospectId/sent</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/invitations/log</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/ivory</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/ivory</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">DELETE /api/ivory/:ivoryId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">PATCH /api/ivory/:ivoryId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">PATCH /api/ivory/:ivoryId/status</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/ivory/coach</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/ivory/generator/run</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/ivory/generator/run/:runId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/ivory/generator/run/:runId/invite</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/ivory/invitation-agent/draft</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/ivory/invitation-agent/mint</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/michael/book</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/michael/interview/cockpit/:downlineBaId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/michael/interview/founder-handoffs</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/michael/interview/scoring</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/michael/interview/script</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/michael/interview/state</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/michael/interview/stt-fail</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/michael/interview/system-prompt</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/michael/interview/transcript/chunk</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/michael/interview/transcript/stream</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/michael/interview/wrong-number</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/michael/slots</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/michael/status</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/onboarding/questionnaire/load</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/onboarding/questionnaire/status</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/onboarding/questionnaire/submit</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/orientation/sessions</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">DELETE /api/orientation/sessions/:sessionId/reserve</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/orientation/sessions/:sessionId/reserve</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/p/:token</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/p/:token/callback-request</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/p/:token/stream</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/p/:token/team-stats</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/p/:token/video-event</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/p/:token/webinar-reserve</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/p/login/code</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/p/login/logout</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/p/login/redeem</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/p/login/start</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/preview</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/profile</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">PATCH /api/profile</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/profile/email/start</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/profile/email/verify</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/profile/password</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/profile/phone</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/scriptmaker/draft</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/sponsor/workbook/:baId</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">PUT /api/sponsor/workbook/:baId/draft</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/sponsor/workbook/:baId/finalize</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/telnyx/webhook</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/training/fast-start/modules/:id/state</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">GET /api/training/fast-start/progress</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/welcome/accept</span></li>
+      <li><span class="box" aria-hidden="true"></span><span class="route">POST /api/welcome/load</span></li>
+    </ol>
+
+    <div class="footer">
+      Total routes: 154. Generated for black-and-white print review from compiled server output.
+    </div>
+  </main>
+</body>
+</html>
