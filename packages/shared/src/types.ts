@@ -4011,3 +4011,423 @@ export interface AgentEventResponse {
   ok: true;
   event: AgentEvent;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * Steve — New BA Discovery & Success Interview (SEPARATE agent)
+ * ─────────────────────────────────────────────────────────────────────────
+ *
+ * Steve is a second, independent BA-facing agent. He runs a warm DISCOVERY
+ * conversation with a brand-new Brand Ambassador and produces a Success
+ * Profile that helps the sponsor and the team UNDERSTAND, PERSONALIZE,
+ * SUPPORT, and PREPARE for that BA.
+ *
+ * RELATIONSHIP TO MICHAEL: Steve does NOT replace Michael and does NOT touch
+ * Michael's schedule, interview, or scoring flow. The ONLY link is a one-way
+ * `michaelHandoffSummary` string Steve writes onto its OWN artifact so a human
+ * (or Michael's worker, if it chooses to read it) can lead warm. Nothing here
+ * mutates michael_* collections or the Michael graph.
+ *
+ * HARD RULE — Steve does NOT classify, rank, score, or judge. There is no
+ * rubric, no tier, no weighted total, no "tone" read anywhere in Steve's
+ * output. Every field below is a descriptive reflection of the BA's OWN words.
+ * Steve exists to understand, personalize, support, and prepare — never to
+ * evaluate.
+ *
+ * COMPLIANCE (locked-spec 3.10 / 3.12, same frame as Michael): no earnings,
+ * commissions, cycle math, or placement/queue promises anywhere in Steve's
+ * output. Layer 1 only.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+/** UI phase of the Steve discovery surface. Steve has no scheduler of its own
+ *  (Michael owns scheduling); the phase is derived purely from whether the
+ *  discovery artifact exists yet. */
+export type SteveDiscoveryPhase =
+  | 'awaiting_call'
+  | 'call_in_progress'
+  | 'complete'
+  | 'no_answer'
+  | 'invalid_number'
+  | 'stt_failed';
+
+/** One speaker turn in Steve's discovery transcript. 'ba' = the new BA. */
+export interface SteveTranscriptChunk {
+  sequence: number;
+  speaker: 'steve' | 'ba';
+  text: string;
+  occurredAt: IsoTimestamp;
+}
+
+/** One discovery question + the BA's answer. NOTE: no scoringTags — Steve
+ *  records understanding, never tags or scores. */
+export interface SteveDiscoveryAnswer {
+  questionId: string;
+  /** The prompt Steve led with (captured for sponsor readback). */
+  prompt: string;
+  /** The BA's answer text, derived from the transcript by the worker. */
+  answerText: string;
+}
+
+/** What a discovery question is gently surfacing. Descriptive grouping only —
+ *  it is NOT a rubric category and carries no weight or score. */
+export type SteveDiscoveryFocus =
+  | 'primary_why'
+  | 'success_vision'
+  | 'learning_style'
+  | 'communication'
+  | 'support_needs';
+
+/** How the BA prefers to take in something new. Descriptive, not ranked. */
+export type SteveLearningModality =
+  | 'watching'
+  | 'doing'
+  | 'step_by_step'
+  | 'reading'
+  | 'discussing'
+  | 'mixed';
+
+/** The BA's learning style — their own preferences, reflected back. */
+export interface SteveLearningStyle {
+  /** Preferred way(s) to learn, mapped from the BA's own words. */
+  modalities: SteveLearningModality[];
+  /** How the BA likes feedback when doing something a little wrong. */
+  feedbackPreference: string;
+  /** Free-text reflection of what helps this person learn best. */
+  notes: string;
+}
+
+/** Channels the BA likes to be reached on. */
+export type SteveContactChannel =
+  | 'text'
+  | 'call'
+  | 'email'
+  | 'in_app'
+  | 'video'
+  | 'in_person';
+
+/** How often the BA wants to hear from their sponsor/team. */
+export type SteveContactCadence =
+  | 'daily'
+  | 'few_times_week'
+  | 'weekly'
+  | 'as_needed';
+
+/** The BA's communication preferences — their own stated preferences. */
+export interface SteveCommunicationPreferences {
+  preferredChannels: SteveContactChannel[];
+  cadence: SteveContactCadence | null;
+  /** When the BA is reachable, in their own words. */
+  bestTimes: string;
+  notes: string;
+}
+
+/** Where the BA wants support early. Reflective, never a judgment of capacity. */
+export interface SteveSupportNeeds {
+  /** Areas the BA wants a hand with, mapped to short reads. */
+  areas: string[];
+  /** Obstacles the BA themselves named. Recorded, not scored. */
+  potentialObstacles: string[];
+  /** How they like to be supported when stuck (ask early vs push through, etc.). */
+  helpStyle: string;
+  notes: string;
+}
+
+/** The BA's deeper, emotional reason for being here — in their own words. */
+export interface StevePrimaryWhy {
+  /** The why beneath the surface answer. */
+  statement: string;
+  /** Who they're doing this for, if named. */
+  who: string;
+  /** Why now — the timing pull they described. */
+  whyNow: string;
+}
+
+/** The BA's picture of success — in their own words. */
+export interface SteveSuccessVision {
+  /** Life a year out, as the BA painted it. */
+  statement: string;
+  /** The one change that would make the biggest difference. */
+  oneBigChange: string;
+}
+
+/** One personalized recommendation — supportive preparation, not evaluation. */
+export interface SteveRecommendation {
+  /** Short, actionable, supportive — how to meet this BA where they are. */
+  text: string;
+  /** Optional pointer to a surface/resource (e.g. '/training/fast-start/product'). */
+  href?: string | null;
+}
+
+/** The generated Success Profile — Steve's synthesis of the discovery. Every
+ *  field reflects the BA's own words; nothing here ranks or scores the BA. */
+export interface SteveSuccessProfile {
+  baId: string;
+  primaryWhy: StevePrimaryWhy;
+  successVision: SteveSuccessVision;
+  learningStyle: SteveLearningStyle;
+  communicationPreferences: SteveCommunicationPreferences;
+  supportNeeds: SteveSupportNeeds;
+  /** How to launch this BA well — personalized first steps. */
+  launchRecommendations: SteveRecommendation[];
+  /** What training to point them at first, given how they learn. */
+  trainingRecommendations: SteveRecommendation[];
+  /** Short context summary Steve hands to Michael so Michael can lead warm.
+   *  CONTEXT ONLY — it does not alter Michael's schedule/interview/scoring. */
+  michaelHandoffSummary: string;
+  generatedAt: IsoTimestamp;
+  signedBy: string;
+}
+
+/** Authoritative completed-discovery record. Triple-stacked at ingest.
+ *  sponsorBaId is stamped server-side from brand_ambassadors — NEVER from the
+ *  worker payload (locked-spec 3.5). */
+export interface SteveDiscoveryArtifact {
+  baId: string;
+  sponsorBaId: string | null;
+  callSid: string | null;
+  startedAt: IsoTimestamp | null;
+  completedAt: IsoTimestamp | null;
+  transcript: SteveTranscriptChunk[];
+  /** The raw discovery interview (questions + the BA's answers). */
+  answers: SteveDiscoveryAnswer[];
+  /** The synthesized Success Profile. */
+  successProfile: SteveSuccessProfile;
+  audioUrl: string | null;
+}
+
+/** GET /api/steve/discovery/state response — the BA's own discovery view.
+ *  Pre-discovery: phase=awaiting_call, artifact=null. After: phase=complete
+ *  + artifact. */
+export interface SteveDiscoveryView {
+  baId: string;
+  phase: SteveDiscoveryPhase;
+  transcript: SteveTranscriptChunk[];
+  artifact: SteveDiscoveryArtifact | null;
+}
+
+/** Sponsor-only card: a downline's Steve Success Profile. Access enforced
+ *  server-side (requesting BA must be the downline's sponsor). */
+export interface SteveProfileCard {
+  downlineBaId: string;
+  downlineFirstName: string;
+  completedAt: IsoTimestamp;
+  answers: SteveDiscoveryAnswer[];
+  successProfile: SteveSuccessProfile;
+  audioUrl: string | null;
+  signedBy: string;
+}
+
+/** Worker → server payload on POST /api/steve/discovery/ingest. The worker
+ *  conducts the conversation and supplies the discovery + the understanding it
+ *  produced; the server stamps baId/sponsorBaId/generatedAt/signedBy and
+ *  assembles the SteveSuccessProfile, then triple-stacks it. sponsorBaId is
+ *  intentionally omitted from this shape (server-stamped). */
+export interface SteveDiscoveryIngestPayload {
+  baId: string;
+  callSid: string | null;
+  startedAt: IsoTimestamp;
+  completedAt: IsoTimestamp;
+  transcript: SteveTranscriptChunk[];
+  answers: SteveDiscoveryAnswer[];
+  audioUrl: string | null;
+  /** The understanding Steve produced. The server assembles these into the
+   *  SteveSuccessProfile (stamping baId, generatedAt, signedBy). */
+  profile: {
+    primaryWhy: StevePrimaryWhy;
+    successVision: SteveSuccessVision;
+    learningStyle: SteveLearningStyle;
+    communicationPreferences: SteveCommunicationPreferences;
+    supportNeeds: SteveSupportNeeds;
+    launchRecommendations: SteveRecommendation[];
+    trainingRecommendations: SteveRecommendation[];
+    michaelHandoffSummary: string;
+  };
+}
+
+/** One question in Steve's discovery backbone, surfaced read-only via
+ *  GET /api/steve/discovery/script. */
+export interface SteveDiscoveryScriptQuestion {
+  id: string;
+  /** 1-based question number across the whole discovery. */
+  number: number;
+  sectionId: string;
+  /** The prompt Steve leads with (backbone; the LLM expands naturally). */
+  prompt: string;
+  /** What this question gently surfaces (understanding only; never scored). */
+  focus: SteveDiscoveryFocus | null;
+}
+
+/** One section of Steve's discovery conversation. */
+export interface SteveDiscoveryScriptSection {
+  id: string;
+  title: string;
+  /** What Steve is listening for in this section. */
+  intent: string;
+  questions: SteveDiscoveryScriptQuestion[];
+}
+
+/** GET /api/steve/discovery/script response. */
+export interface SteveDiscoveryScriptResponse {
+  ok: true;
+  sections: SteveDiscoveryScriptSection[];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Ivory Prospect Momentum Agent (feature/ivory-momentum-agent)
+//
+// The post-mint companion to the Ivory Invitation Agent. After a BA mints a
+// `source: 'ivory'` invitation, the Momentum Agent tracks that prospect's
+// lifecycle through the existing PMV substrate and surfaces:
+//
+//   1. A cohort-scoped view of every Ivory-sourced prospect for the BA.
+//   2. A small focus queue prioritized by the existing PMV `nextAction` model.
+//   3. Per-prospect relationship context from the originating IvoryName record
+//      (categories, preferredAngle, the BA's saved memory note) so the BA can
+//      remember WHY they invited this person without leaving the page.
+//   4. An on-demand, LLM-coached "what to say next" suggestion (NOT auto-sent;
+//      never a placement/income claim) with a neutral fallback when
+//      ANTHROPIC_API_KEY is unset.
+//
+// Everything is BA-scoped (sponsorBaId = session baId, ownership enforced on
+// the IvoryName side). The agent NEVER auto-sends, never scores prospects, and
+// never speaks comp/income/medical (locked-spec 3.10/3.11) — it's a reflection
+// surface for manual follow-up, modeled on Ivory's coach posture.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Why a prospect appears in the Momentum focus queue — surfaced alongside the
+ * existing PMV `nextAction.reason` so the BA sees one Ivory-flavored phrase
+ * ("because Jordan watched the video") not just the generic call-now reason.
+ */
+export type IvoryMomentumPriorityReason =
+  | 'callback_raised'
+  | 'video_watched'
+  | 'follow_up_due'
+  | 'video_partial'
+  | 'clicked_no_watch'
+  | 'sent_no_open'
+  | 'draft_unsent'
+  | 'expiring_soon'
+  | 'expired_consider_reinvite';
+
+/**
+ * Ivory-side context on a prospect row — the slice of the IvoryName record the
+ * Momentum view needs to remind the BA WHY this person came to mind. Every
+ * field can be null because a prospect minted before the IvoryName link
+ * existed (legacy data, manual ivoryId-less mint) still appears in the cohort
+ * via the source='ivory' filter — we just don't have the warm-market memory.
+ */
+export interface IvoryMomentumContext {
+  ivoryId: string | null;
+  categories: IvoryCategory[];
+  preferredAngle: IvoryAngle | null;
+  /** The BA's saved memory note on the IvoryName record (NOT the invite message). */
+  memoryNote: string | null;
+  /** The relationshipReason the BA captured at mint time (lives on the prospect). */
+  relationshipReason: string | null;
+}
+
+/**
+ * One row in the Momentum cohort. Composes the canonical PMV row (the source
+ * of truth for lifecycle/lastSignal/nextAction) with Ivory-side context and a
+ * single derived priority reason. The PMV row is embedded whole — the UI
+ * should never recompute lifecycle/nextAction from raw fields, only read it.
+ */
+export interface IvoryMomentumRow {
+  prospectId: string;
+  /** The full PMV row — single source of truth for lifecycle + next action. */
+  pmv: ProspectMomentumRow;
+  /** Ivory-specific relationship context for the BA. */
+  ivory: IvoryMomentumContext;
+  /**
+   * Derived priority reason used to rank the row in the cohort focus queue.
+   * Independent from `pmv.nextAction.kind` because the Ivory queue prioritizes
+   * relational moments ("Jordan watched") even when PMV would also surface
+   * a generic 'call_now'.
+   */
+  priorityReason: IvoryMomentumPriorityReason | null;
+}
+
+/** Cohort-level counts surfaced in the Momentum page header. */
+export interface IvoryMomentumCohortCounts {
+  total: number;
+  draft: number;
+  sentUnopened: number;
+  clicked: number;
+  videoInProgress: number;
+  watched: number;
+  callbackRaised: number;
+  enrolled: number;
+  customer: number;
+  expired: number;
+  archived: number;
+}
+
+/** GET /api/ivory/momentum 200 response. BA-scoped. */
+export interface IvoryMomentumViewResponse {
+  ok: true;
+  generatedAt: IsoTimestamp;
+  counts: IvoryMomentumCohortCounts;
+  focusQueue: IvoryMomentumRow[];
+  rows: IvoryMomentumRow[];
+}
+
+/**
+ * POST /api/ivory/momentum/:prospectId/suggest request body. The Ivory
+ * Momentum Agent reads the prospect's current lifecycle/lastSignal and the
+ * BA's saved relationship context, then asks the LLM for one short, warm
+ * follow-up suggestion the BA can adapt and send manually. Optional `ask`
+ * lets the BA bias the suggestion ("they said they'd watch this weekend").
+ */
+export interface IvoryMomentumSuggestionPayload {
+  /** Optional free-form BA prompt to bias the suggestion. */
+  ask?: string;
+}
+
+/** POST /api/ivory/momentum/:prospectId/suggest 200 response. */
+export interface IvoryMomentumSuggestionResponse {
+  ok: true;
+  prospectId: string;
+  lifecycle: ProspectLifecycleStage;
+  /** 1–2 sentence framing the BA reads before the suggestion text. */
+  coaching: string;
+  /** The suggested follow-up text. BA edits before sending — never auto-sent. */
+  suggestion: string;
+  /** True when the LLM is unavailable and a deterministic fallback was returned. */
+  degraded: boolean;
+}
+
+// ─── feature/michael-training-support ────────────────────────────────────────
+// Sponsor-facing "how to support this downline's training" card. PROJECTION of
+// Steve's already-persisted SuccessProfile (steve_discoveries) — read-only on
+// each request, no new collection. Steve owns capture; this surface owns
+// presentation of the support guidance to the direct sponsor.
+//
+// Compliance: BA-language read-back only. No income, no comp math, no placement
+// promises. The sponsor uses this to meet the BA where they are during training.
+
+export interface MichaelTrainingSupportGuidanceSection {
+  /** Section label, e.g. "How they learn". */
+  label: string;
+  /** Distilled guidance lines pulled from the BA's own discovery answers. */
+  bullets: string[];
+}
+
+export interface MichaelTrainingSupportCard {
+  downlineBaId: string;
+  downlineFirstName: string;
+  /** Timestamp from Steve's SuccessProfile (generatedAt). */
+  derivedFromSteveAt: string;
+  /** Pass-through of the BA's own primary-why statement. */
+  primaryWhy: string;
+  /** Pass-through of the BA's own success-vision statement. */
+  successVision: string;
+  learningStyle: MichaelTrainingSupportGuidanceSection;
+  communication: MichaelTrainingSupportGuidanceSection;
+  supportFocus: MichaelTrainingSupportGuidanceSection;
+  /** Pass-through of Steve's training recommendations (verbatim, may be empty). */
+  trainingRecommendations: string[];
+  /** Pass-through of Steve's one-way handoff summary for Michael / humans. */
+  michaelHandoffSummary: string;
+  /** Provenance: who signed this card. */
+  signedBy: string;
+}

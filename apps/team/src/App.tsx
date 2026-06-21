@@ -5,6 +5,7 @@ import { WelcomePage } from './routes/welcome';
 import { CockpitPage } from './routes/cockpit';
 import { MichaelSchedulePage } from './routes/michael-schedule';
 import { MichaelInterviewPage } from './routes/michael-interview';
+import { SteveSuccessInterviewPage } from './routes/steve-success-interview';
 import { TenStepsPage } from './routes/training/10-steps';
 import { FastStartHubPage } from './routes/training/fast-start/index';
 import { ModuleProductPage } from './routes/training/fast-start/product';
@@ -17,6 +18,7 @@ import { SponsorWorkbookPage } from './routes/sponsor/interview-workbook';
 import { InvitationsPage } from './routes/invitations';
 import { VideoLibraryPage } from './routes/video-library';
 import { IvoryPage } from './routes/ivory';
+import { IvoryMomentumPage } from './routes/ivory-momentum';
 import { ProfilePage } from './routes/profile';
 import { LeadershipPage } from './routes/leadership';
 import { PreviewPage } from './routes/preview';
@@ -30,10 +32,12 @@ export function App() {
       <Route path="/welcome" element={<WelcomePage />} />
       <Route path="/michael/schedule" element={<MichaelSchedulePage />} />
       <Route path="/michael/interview" element={<MichaelInterviewPage />} />
+      <Route path="/steve/discovery" element={<SteveSuccessInterviewPage />} />
       <Route path="/cockpit" element={<CockpitPage />} />
       <Route path="/invitations" element={<InvitationsPage />} />
       <Route path="/video-library" element={<VideoLibraryPage />} />
       <Route path="/ivory" element={<IvoryPage />} />
+      <Route path="/ivory/momentum" element={<IvoryMomentumPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/leadership" element={<LeadershipPage />} />
       <Route path="/training/10-steps" element={<TenStepsPage />} />

@@ -70,6 +70,18 @@ import {
   GeneratorOwnershipError,
   GeneratorValidationError,
 } from '../domain/generator.js';
+import {
+  getIvoryMomentumView,
+  suggestIvoryMomentumFollowUp,
+  IvoryMomentumNotFoundError,
+  IvoryMomentumOwnershipError,
+  IvoryMomentumValidationError,
+} from '../domain/ivory-momentum.js';
+import type {
+  IvoryMomentumSuggestionPayload,
+  IvoryMomentumSuggestionResponse,
+  IvoryMomentumViewResponse,
+} from '@momentum/shared';
 
 export const ivoryRoutes: Router = Router();
 
@@ -574,6 +586,76 @@ ivoryRoutes.post(
       }
       // eslint-disable-next-line no-console
       console.error('[POST /api/ivory/generator/run/:runId/invite] failed', err);
+      return res.status(500).json({ ok: false, error: 'server_error' });
+    }
+  },
+);
+
+// ───────────────────────────────────────────────────────────────────────
+// Prospect Momentum Agent (feature/ivory-momentum-agent)
+//
+// Post-mint cohort view + per-prospect follow-up suggestion. Reuses the
+// canonical PMV projection (cockpit domain) so lifecycle/nextAction can
+// never disagree with what /cockpit shows; enriches each Ivory-sourced row
+// with the BA's warm-market context (categories, angle, memory note).
+// All handlers apply (requireAuth, requireMichaelComplete) per the
+// canonical pattern. baId is read from the session, never the body.
+// ───────────────────────────────────────────────────────────────────────
+
+ivoryRoutes.get(
+  '/momentum',
+  requireAuth,
+  requireMichaelComplete,
+  async (req, res) => {
+    const baId = req.session?.baId;
+    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    try {
+      const view = await getIvoryMomentumView(baId);
+      const out: IvoryMomentumViewResponse = view;
+      return res.status(200).json(out);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[GET /api/ivory/momentum] failed', err);
+      return res.status(500).json({ ok: false, error: 'server_error' });
+    }
+  },
+);
+
+ivoryRoutes.post(
+  '/momentum/:prospectId/suggest',
+  requireAuth,
+  requireMichaelComplete,
+  async (req, res) => {
+    const baId = req.session?.baId;
+    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+    const prospectId = paramStr(req.params.prospectId);
+    if (!prospectId) {
+      return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
+    }
+
+    const body = req.body as Partial<IvoryMomentumSuggestionPayload>;
+    const ask = typeof body?.ask === 'string' ? body.ask : '';
+    if (ask.length > ASK_MAX) {
+      return res.status(400).json({ ok: false, error: 'ask_too_long' });
+    }
+
+    try {
+      const result = await suggestIvoryMomentumFollowUp(baId, prospectId, { ask });
+      const out: IvoryMomentumSuggestionResponse = result;
+      return res.status(200).json(out);
+    } catch (err) {
+      if (err instanceof IvoryMomentumNotFoundError) {
+        return res.status(404).json({ ok: false, error: 'prospect_not_found' });
+      }
+      if (err instanceof IvoryMomentumOwnershipError) {
+        return res.status(403).json({ ok: false, error: 'forbidden' });
+      }
+      if (err instanceof IvoryMomentumValidationError) {
+        return res.status(400).json({ ok: false, error: err.code });
+      }
+      // eslint-disable-next-line no-console
+      console.error('[POST /api/ivory/momentum/:prospectId/suggest] failed', err);
       return res.status(500).json({ ok: false, error: 'server_error' });
     }
   },
