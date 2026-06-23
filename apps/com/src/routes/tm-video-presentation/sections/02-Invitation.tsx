@@ -22,17 +22,27 @@
  *     replaced with sourced three-factor language).
  */
 
+import { getPresentationCopy, type PresentationCopy, type PresentationEntryKind } from '../presentationCopy';
+
 export interface InvitationProps {
   prospectFirstName: string;
   baFullName: string;
   baFirstName: string;
+  entryKind?: PresentationEntryKind;
+  copy?: PresentationCopy['invitation'];
 }
 
 export function Invitation({
   prospectFirstName,
   baFullName,
   baFirstName,
+  entryKind = 'pmv',
+  copy,
 }: InvitationProps) {
+  const invitationCopy = copy ?? getPresentationCopy(entryKind).invitation;
+  const opener = invitationCopy.opener({ prospectFirstName, baFullName });
+  const baNameIndex = opener.indexOf(baFullName);
+
   return (
     <section className="tm-invitation" aria-label="The Invitation">
       <div className="tm-invitation__inner">
@@ -41,8 +51,15 @@ export function Invitation({
         {/* Verbatim from COM Design B.1 Hero — opener line.
             Bebas Neue, cream, BA full name in gold. */}
         <h2 className="tm-invitation__opener">
-          {prospectFirstName}, you were personally invited by{" "}
-          <span className="tm-invitation__ba-name">{baFullName}</span>.
+          {baNameIndex >= 0 ? (
+            <>
+              {opener.slice(0, baNameIndex)}
+              <span className="tm-invitation__ba-name">{baFullName}</span>
+              {opener.slice(baNameIndex + baFullName.length)}
+            </>
+          ) : (
+            opener
+          )}
         </h2>
 
         {/* COPY: LOCKED by Kevin in Chat #108. Two paragraphs, three-factor
@@ -50,23 +67,18 @@ export function Invitation({
             No BA name in body — it remains in the opener above and the
             pulse badge below. */}
         <div className="tm-invitation__body">
-          <p className="tm-invitation__paragraph">
-            What you are about to see is three things happening at the same
-            time. A category-defining product. A team that is forming in this
-            exact window. A moment in the market that won't come around again.
-          </p>
-          <p className="tm-invitation__paragraph">
-            That is what the invitation is about. Not a sales call — a
-            briefing on all three. Read it the way you would read a memo from
-            a friend who has done the homework.
-          </p>
+          {invitationCopy.paragraphs.map((paragraph) => (
+            <p className="tm-invitation__paragraph" key={paragraph}>
+              {paragraph}
+            </p>
+          ))}
         </div>
 
         {/* Live pulse badge — verbatim from COM Design B.1 Hero. */}
         <div className="tm-invitation__pulse-badge">
           <span className="tm-invitation__pulse" aria-hidden="true" />
           <span className="tm-invitation__pulse-text">
-            {baFirstName} personally invited you
+            {invitationCopy.pulseText({ baFirstName })}
           </span>
         </div>
 
