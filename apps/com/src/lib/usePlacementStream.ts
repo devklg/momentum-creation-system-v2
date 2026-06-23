@@ -51,7 +51,10 @@ const INITIAL: PlacementStreamState = {
   errored: false,
 };
 
-export function usePlacementStream(token: string | undefined): PlacementStreamState {
+export function usePlacementStream(
+  token: string | undefined,
+  apiBase: '/api/p' | '/api/rvm' = '/api/p',
+): PlacementStreamState {
   const [state, setState] = useState<PlacementStreamState>(INITIAL);
   const sourceRef = useRef<EventSource | null>(null);
 
@@ -61,7 +64,7 @@ export function usePlacementStream(token: string | undefined): PlacementStreamSt
       return;
     }
 
-    const url = `/api/p/${encodeURIComponent(token)}/stream`;
+    const url = `${apiBase}/${encodeURIComponent(token)}/stream`;
     const es = new EventSource(url);
     sourceRef.current = es;
 
@@ -123,7 +126,7 @@ export function usePlacementStream(token: string | undefined): PlacementStreamSt
       es.close();
       sourceRef.current = null;
     };
-  }, [token]);
+  }, [token, apiBase]);
 
   return state;
 }

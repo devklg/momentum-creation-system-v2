@@ -21,7 +21,12 @@
 
 import { useEffect, useState } from 'react';
 import type { CallbackIntent } from '@momentum/shared';
-import { postCallbackRequest, postWebinarReservation } from '@/lib/api';
+import {
+  postCallbackRequest,
+  postRvmCallbackRequest,
+  postRvmWebinarReservation,
+  postWebinarReservation,
+} from '@/lib/api';
 
 export interface YourNextMoveSectionProps {
   token: string;
@@ -43,6 +48,7 @@ export interface YourNextMoveSectionProps {
    * server-side (TASK-147 inherit-com). Falls back to the built-in lead below.
    */
   copy?: string;
+  entryKind?: 'pmv' | 'rvm';
 }
 
 export function YourNextMoveSection(props: YourNextMoveSectionProps) {
@@ -67,8 +73,13 @@ export function YourNextMoveSection(props: YourNextMoveSectionProps) {
             token={props.token}
             baFullName={props.baFullName}
             baFirstName={props.baFirstName}
+            entryKind={props.entryKind ?? 'pmv'}
           />
-          <WebinarCard token={props.token} nextEvent={props.nextEvent} />
+          <WebinarCard
+            token={props.token}
+            nextEvent={props.nextEvent}
+            entryKind={props.entryKind ?? 'pmv'}
+          />
         </div>
       </section>
       <style>{nextmoveCss}</style>
@@ -81,7 +92,12 @@ export function YourNextMoveSection(props: YourNextMoveSectionProps) {
  * inputs collected here; the BA has the prospect's contact info per
  * Chat #109 lock).
  * ───────────────────────────────────────────────────────────────── */
-function CallbackCard(props: { token: string; baFullName: string; baFirstName: string }) {
+function CallbackCard(props: {
+  token: string;
+  baFullName: string;
+  baFirstName: string;
+  entryKind: 'pmv' | 'rvm';
+}) {
   const [intent, setIntent] = useState<CallbackIntent | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -91,7 +107,8 @@ function CallbackCard(props: { token: string; baFullName: string; baFirstName: s
     if (!intent || submitting) return;
     setSubmitting(true);
     setError(null);
-    const result = await postCallbackRequest(props.token, intent);
+    const post = props.entryKind === 'rvm' ? postRvmCallbackRequest : postCallbackRequest;
+    const result = await post(props.token, intent);
     setSubmitting(false);
     if (result.ok) {
       setSubmitted(true);
@@ -186,6 +203,7 @@ function ReasonRadio(props: { checked: boolean; onChange: () => void; label: str
 function WebinarCard(props: {
   token: string;
   nextEvent: YourNextMoveSectionProps['nextEvent'];
+  entryKind: 'pmv' | 'rvm';
 }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -200,7 +218,9 @@ function WebinarCard(props: {
     if (!name.trim() || !email.trim() || submitting) return;
     setSubmitting(true);
     setError(null);
-    const result = await postWebinarReservation(props.token, { name, email });
+    const post =
+      props.entryKind === 'rvm' ? postRvmWebinarReservation : postWebinarReservation;
+    const result = await post(props.token, { name, email });
     setSubmitting(false);
     if (result.ok) {
       setConfirmation({

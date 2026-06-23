@@ -146,9 +146,10 @@ const VIEW_PARAM = "view";
 
 export interface TmVideoPresentationProps {
   resolved: ResolveTokenResponse;
+  entryKind?: "pmv" | "rvm";
 }
 
-export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
+export function TmVideoPresentation({ resolved, entryKind = "pmv" }: TmVideoPresentationProps) {
   const { token, prospectFirstName, baFullName } = resolved;
   const nextEvent = resolved.nextEvent ?? null;
   const baFirstName = useMemo(
@@ -276,6 +277,7 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
         placedAt={placement.placedAt}
         nextEvent={nextEvent}
         copy={resolved.copy ?? null}
+        entryKind={entryKind}
         onBackToPresentation={goToPresentation}
       />
     );
@@ -293,6 +295,7 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
         prospectFirstName={prospectFirstName}
         baFullName={baFullName}
         baVoiceCopy={resolved.copy?.heroBaVoiceCopy ?? undefined}
+        entryKind={entryKind}
       />
 
       <Invitation
@@ -303,6 +306,7 @@ export function TmVideoPresentation({ resolved }: TmVideoPresentationProps) {
 
       <DrDanVideo
         token={token}
+        entryKind={entryKind}
         onMilestone={handleMilestone}
         firedMilestones={firedMilestones}
       />

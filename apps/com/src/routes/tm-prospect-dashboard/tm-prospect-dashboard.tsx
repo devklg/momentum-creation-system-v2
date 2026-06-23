@@ -42,7 +42,7 @@ import { YourNextMoveSection } from './sections/06-YourNextMove';
 import { DashboardRibbon } from './sections/00-Ribbon';
 import { DashboardFooter } from './sections/07-Footer';
 import { usePlacementStream } from '@/lib/usePlacementStream';
-import { fetchTeamStats, type TeamStatsResponse } from '@/lib/api';
+import { fetchRvmTeamStats, fetchTeamStats, type TeamStatsResponse } from '@/lib/api';
 
 export interface TmProspectDashboardProps {
   token: string;
@@ -76,10 +76,21 @@ export interface TmProspectDashboardProps {
    * field is absent (older server / master-content read failure).
    */
   copy?: ComProspectCopy | null;
+  entryKind?: 'pmv' | 'rvm';
 }
 
 export function TmProspectDashboard(props: TmProspectDashboardProps) {
-  const { token, prospectFirstName, baFullName, positionNumber, placedAt, nextEvent, copy, onBackToPresentation } = props;
+  const {
+    token,
+    prospectFirstName,
+    baFullName,
+    positionNumber,
+    placedAt,
+    nextEvent,
+    copy,
+    entryKind = 'pmv',
+    onBackToPresentation,
+  } = props;
 
   const baFirstName = useMemo(
     () => baFullName.trim().split(/\s+/)[0] ?? baFullName,
@@ -89,7 +100,7 @@ export function TmProspectDashboard(props: TmProspectDashboardProps) {
   // Live placement stream — powers Section 4's beneath-you counter and
   // the position-stack ticker. Snapshot on connect, placement events on
   // every team-wide video_complete. See lib/usePlacementStream.ts.
-  const stream = usePlacementStream(token);
+  const stream = usePlacementStream(token, entryKind === 'rvm' ? '/api/rvm' : '/api/p');
 
   return (
     <main className="tm-prospect-dashboard">
@@ -103,6 +114,7 @@ export function TmProspectDashboard(props: TmProspectDashboardProps) {
         nextEvent={nextEvent}
         stream={stream}
         token={token}
+        entryKind={entryKind}
       />
       <ArrivalSection
         prospectFirstName={prospectFirstName}
@@ -121,13 +133,20 @@ export function TmProspectDashboard(props: TmProspectDashboardProps) {
         stream={stream}
         copy={copy?.dashboardLivePlace}
       />
-      <TmAdvantageSection token={token} baFirstName={baFirstName} positionNumber={positionNumber} copy={copy?.dashboardAdvantage} />
+      <TmAdvantageSection
+        token={token}
+        baFirstName={baFirstName}
+        positionNumber={positionNumber}
+        copy={copy?.dashboardAdvantage}
+        entryKind={entryKind}
+      />
       <YourNextMoveSection
         token={token}
         baFullName={baFullName}
         baFirstName={baFirstName}
         nextEvent={nextEvent}
         copy={copy?.dashboardCallbackCta}
+        entryKind={entryKind}
       />
       <DashboardFooter />
 
@@ -147,6 +166,7 @@ function PositionMomentumCenter(props: {
   nextEvent: TmProspectDashboardProps['nextEvent'];
   stream: ReturnType<typeof usePlacementStream>;
   token: string;
+  entryKind: 'pmv' | 'rvm';
 }) {
   const {
     prospectFirstName,
@@ -157,19 +177,21 @@ function PositionMomentumCenter(props: {
     nextEvent,
     stream,
     token,
+    entryKind,
   } = props;
   const beneathYou = Math.max(0, stream.globalMaxPosition - positionNumber);
   const [stats, setStats] = useState<TeamStatsResponse | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    void fetchTeamStats(token).then((result) => {
+    const load = entryKind === 'rvm' ? fetchRvmTeamStats : fetchTeamStats;
+    void load(token).then((result) => {
       if (!cancelled && result.ok) setStats(result.data);
     });
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, entryKind]);
 
   const ticker = stream.ticker
     .filter((entry) => entry.positionNumber !== positionNumber)

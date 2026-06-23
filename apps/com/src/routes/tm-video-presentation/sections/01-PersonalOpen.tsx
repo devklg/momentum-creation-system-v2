@@ -35,6 +35,7 @@ import { CompassRose } from '@/components/CompassRose';
 export interface PersonalOpenProps {
   prospectFirstName: string;
   baFullName: string;
+  entryKind?: 'pmv' | 'rvm';
   /**
    * The inviting BA's own personal note ({{baVoiceCopy}} — locked-spec F.2 /
    * 3.9 "inviting BA voice copy"). Optional: rendered as a personal line in
@@ -46,7 +47,14 @@ export interface PersonalOpenProps {
   baVoiceCopy?: string;
 }
 
-export function PersonalOpen({ prospectFirstName, baFullName, baVoiceCopy }: PersonalOpenProps) {
+export function PersonalOpen({
+  prospectFirstName,
+  baFullName,
+  baVoiceCopy,
+  entryKind = 'pmv',
+}: PersonalOpenProps) {
+  const isRvm = entryKind === 'rvm';
+
   return (
     <section
       className="
@@ -75,7 +83,7 @@ export function PersonalOpen({ prospectFirstName, baFullName, baVoiceCopy }: Per
           text-cream-faint
         "
       >
-        —  A Personal Invitation  ·  Team Magnificent
+        {isRvm ? '—  A Team Magnificent Message  ·  Team Magnificent' : '—  A Personal Invitation  ·  Team Magnificent'}
       </div>
 
       {/* Headline */}
@@ -88,11 +96,23 @@ export function PersonalOpen({ prospectFirstName, baFullName, baVoiceCopy }: Per
         "
         style={{ fontSize: 'clamp(56px, 9vw, 116px)' }}
       >
-        {prospectFirstName},
-        <br />
-        <span className="text-gold">{baFullName}</span>
-        <br />
-        thinks highly of you.
+        {isRvm ? (
+          <>
+            {prospectFirstName},
+            <br />
+            <span className="text-gold">{baFullName}</span>
+            <br />
+            has something timely to share.
+          </>
+        ) : (
+          <>
+            {prospectFirstName},
+            <br />
+            <span className="text-gold">{baFullName}</span>
+            <br />
+            thinks highly of you.
+          </>
+        )}
       </h1>
 
       {/* Sub-line */}
@@ -105,7 +125,9 @@ export function PersonalOpen({ prospectFirstName, baFullName, baVoiceCopy }: Per
         "
         style={{ fontSize: 'clamp(17px, 1.7vw, 19px)' }}
       >
-        And has information that is timely and powerful to share with you.
+        {isRvm
+          ? 'Start with the video. It explains the product, the timing, and why Team Magnificent is paying attention.'
+          : 'And has information that is timely and powerful to share with you.'}
       </p>
 
       {/* Inviting BA's personal note ({{baVoiceCopy}}). Rendered only when the
@@ -133,7 +155,9 @@ export function PersonalOpen({ prospectFirstName, baFullName, baVoiceCopy }: Per
         "
         style={{ fontSize: 'clamp(15px, 1.5vw, 16px)' }}
       >
-        You were not chosen randomly. You were chosen deliberately.
+        {isRvm
+          ? 'No pressure, no obligation — just clear information to consider.'
+          : 'You were not chosen randomly. You were chosen deliberately.'}
       </p>
 
       {/* Bottom-anchored instruction (out of the way; doesn't fight the hero) */}

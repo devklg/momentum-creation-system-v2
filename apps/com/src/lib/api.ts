@@ -111,8 +111,21 @@ export type VideoEventError =
 export async function resolveToken(
   token: string,
 ): Promise<{ ok: true; data: ResolveTokenResponse } | { ok: false; error: ResolveTokenError }> {
+  return resolveTokenAt('/api/p', token);
+}
+
+export async function resolveRvmToken(
+  token: string,
+): Promise<{ ok: true; data: ResolveTokenResponse } | { ok: false; error: ResolveTokenError }> {
+  return resolveTokenAt('/api/rvm', token);
+}
+
+async function resolveTokenAt(
+  apiBase: '/api/p' | '/api/rvm',
+  token: string,
+): Promise<{ ok: true; data: ResolveTokenResponse } | { ok: false; error: ResolveTokenError }> {
   try {
-    const res = await fetch(`/api/p/${encodeURIComponent(token)}`, {
+    const res = await fetch(`${apiBase}/${encodeURIComponent(token)}`, {
       method: 'GET',
       headers: { Accept: 'application/json' },
     });
@@ -158,9 +171,24 @@ export async function postVideoEvent(
   token: string,
   kind: VideoEventKind,
 ): Promise<{ ok: true; data: VideoEventResponse } | { ok: false; error: VideoEventError }> {
+  return postVideoEventAt('/api/p', token, kind);
+}
+
+export async function postRvmVideoEvent(
+  token: string,
+  kind: VideoEventKind,
+): Promise<{ ok: true; data: VideoEventResponse } | { ok: false; error: VideoEventError }> {
+  return postVideoEventAt('/api/rvm', token, kind);
+}
+
+async function postVideoEventAt(
+  apiBase: '/api/p' | '/api/rvm',
+  token: string,
+  kind: VideoEventKind,
+): Promise<{ ok: true; data: VideoEventResponse } | { ok: false; error: VideoEventError }> {
   try {
     const payload: VideoEventPayload = { kind };
-    const res = await fetch(`/api/p/${encodeURIComponent(token)}/video-event`, {
+    const res = await fetch(`${apiBase}/${encodeURIComponent(token)}/video-event`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(payload),
@@ -230,9 +258,28 @@ export async function postCallbackRequest(
 ): Promise<
   { ok: true; data: CallbackRequestResponse } | { ok: false; error: CallbackRequestError }
 > {
+  return postCallbackRequestAt('/api/p', token, intent);
+}
+
+export async function postRvmCallbackRequest(
+  token: string,
+  intent: CallbackIntent,
+): Promise<
+  { ok: true; data: CallbackRequestResponse } | { ok: false; error: CallbackRequestError }
+> {
+  return postCallbackRequestAt('/api/rvm', token, intent);
+}
+
+async function postCallbackRequestAt(
+  apiBase: '/api/p' | '/api/rvm',
+  token: string,
+  intent: CallbackIntent,
+): Promise<
+  { ok: true; data: CallbackRequestResponse } | { ok: false; error: CallbackRequestError }
+> {
   try {
     const payload: CallbackRequestPayload = { intent };
-    const res = await fetch(`/api/p/${encodeURIComponent(token)}/callback-request`, {
+    const res = await fetch(`${apiBase}/${encodeURIComponent(token)}/callback-request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(payload),
@@ -301,8 +348,27 @@ export async function postWebinarReservation(
 ): Promise<
   { ok: true; data: WebinarReservationResponse } | { ok: false; error: WebinarReservationError }
 > {
+  return postWebinarReservationAt('/api/p', token, payload);
+}
+
+export async function postRvmWebinarReservation(
+  token: string,
+  payload: WebinarReservationPayload,
+): Promise<
+  { ok: true; data: WebinarReservationResponse } | { ok: false; error: WebinarReservationError }
+> {
+  return postWebinarReservationAt('/api/rvm', token, payload);
+}
+
+async function postWebinarReservationAt(
+  apiBase: '/api/p' | '/api/rvm',
+  token: string,
+  payload: WebinarReservationPayload,
+): Promise<
+  { ok: true; data: WebinarReservationResponse } | { ok: false; error: WebinarReservationError }
+> {
   try {
-    const res = await fetch(`/api/p/${encodeURIComponent(token)}/webinar-reserve`, {
+    const res = await fetch(`${apiBase}/${encodeURIComponent(token)}/webinar-reserve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(payload),
@@ -374,8 +440,21 @@ export type { TeamStatsResponse };
 export async function fetchTeamStats(
   token: string,
 ): Promise<{ ok: true; data: TeamStatsResponse } | { ok: false; error: TeamStatsError }> {
+  return fetchTeamStatsAt('/api/p', token);
+}
+
+export async function fetchRvmTeamStats(
+  token: string,
+): Promise<{ ok: true; data: TeamStatsResponse } | { ok: false; error: TeamStatsError }> {
+  return fetchTeamStatsAt('/api/rvm', token);
+}
+
+async function fetchTeamStatsAt(
+  apiBase: '/api/p' | '/api/rvm',
+  token: string,
+): Promise<{ ok: true; data: TeamStatsResponse } | { ok: false; error: TeamStatsError }> {
   try {
-    const res = await fetch(`/api/p/${encodeURIComponent(token)}/team-stats`, {
+    const res = await fetch(`${apiBase}/${encodeURIComponent(token)}/team-stats`, {
       method: 'GET',
       headers: { Accept: 'application/json' },
     });

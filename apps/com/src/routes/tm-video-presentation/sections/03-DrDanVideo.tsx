@@ -114,6 +114,7 @@ function pickResumeFraction(fired: Set<VideoEventKind>): number | null {
 
 export interface DrDanVideoProps {
   token: string;
+  entryKind?: "pmv" | "rvm";
   /**
    * Fired by the component when a milestone successfully posts to the
    * server AND was not already in the fired set. For `complete`, the
@@ -131,6 +132,7 @@ export interface DrDanVideoProps {
 
 export function DrDanVideo({
   token,
+  entryKind = "pmv",
   onMilestone,
   firedMilestones,
 }: DrDanVideoProps) {
@@ -185,8 +187,11 @@ export function DrDanVideo({
       try {
         // Lazy import keeps the section file decoupled from lib/api
         // shape changes and matches the page composer's import style.
-        const { postVideoEvent } = await import("../../../lib/api");
-        const result = await postVideoEvent(token, kind);
+        const api = await import("../../../lib/api");
+        const result =
+          entryKind === "rvm"
+            ? await api.postRvmVideoEvent(token, kind)
+            : await api.postVideoEvent(token, kind);
         if (result.ok) {
           if (kind === "complete") {
             const d = result.data;
@@ -217,7 +222,7 @@ export function DrDanVideo({
         console.warn("[tm-video] milestone post threw", kind, err);
       }
     },
-    [token, onMilestone]
+    [token, entryKind, onMilestone]
   );
 
   // ---- Create the YT.Player once the API is ready -------------

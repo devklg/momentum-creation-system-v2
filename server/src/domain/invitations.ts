@@ -48,10 +48,12 @@ import { createProspectAccount, normalizePhone } from './prospectAccount.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 import { lastInitialOf } from './prospects.js';
+import { createOrUpdateCrmRecordForToken } from './prospectCrm.js';
 import type {
   InvitationActivityEntry,
   InvitationSource,
   InviteTokenRecord,
+  ProspectCrmSource,
   ProspectLocation,
   ProspectRecord,
 } from '@momentum/shared';
@@ -128,6 +130,12 @@ const PROSPECT_BASE_URL = env.PROSPECT_BASE_URL;
 
 function buildInviteUrl(token: string): string {
   return `${PROSPECT_BASE_URL}/p/${token}`;
+}
+
+function crmSourceForInvitation(source: InvitationSource): ProspectCrmSource {
+  if (source === 'ivory') return 'ivory';
+  if (source === 'scriptmaker') return 'scriptmaker';
+  return 'pmv';
 }
 
 /**
@@ -287,6 +295,22 @@ export async function createInvitation(
       createdAt,
       expiresAt,
     },
+  });
+
+  // VM/CRM architecture rule: every token creation immediately creates
+  // or updates a BA-scoped CRM record. Existing cockpit reads still work
+  // from the prospect row; this dedicated record powers the CRM hub and VM
+  // module without changing the /p/:token PMV spine.
+  await createOrUpdateCrmRecordForToken({
+    prospectId,
+    token,
+    ownerTmBaId: input.sponsorBaId,
+    sponsorTmBaId: input.sponsorBaId,
+    source: crmSourceForInvitation(input.source),
+    leadId: null,
+    leadBatchId: null,
+    vmCampaignId: null,
+    createdAt,
   });
 
   // Step 4 (#148): create the prospect-account at MINT with the BA-supplied
