@@ -57,6 +57,12 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_webinar_reservations', // domain/webinarReservation.ts
   'mcs_training_progress', // domain/training.ts (also lazy-bootstrapped there)
   'mcs_agent_events', // domain/agents/orchestrator.ts
+  'mcs_vm_lead_batches', // domain/vmSchemas.ts, future VM batch writes
+  'mcs_vm_leads', // domain/vmSchemas.ts, future VM lead writes
+  'mcs_vm_campaigns', // domain/vmSchemas.ts, future VM campaign writes
+  'mcs_vm_delivery_events', // domain/vmSchemas.ts, future provider event writes
+  'mcs_prospect_crm', // domain/vmSchemas.ts, future CRM hub writes
+  'mcs_prospect_timeline', // domain/vmSchemas.ts, future prospect timeline writes
 ] as const;
 
 /** Thrown by the write-time guard when a Chroma collection is absent. */

@@ -30,6 +30,8 @@ import { ReportsPage } from '@/routes/reports';
 import { BroadcastPage } from '@/routes/broadcast';
 import { TenantPage } from '@/routes/tenant';
 import { OrientationPage } from '@/routes/orientation';
+import { VmPage } from '@/routes/vm';
+import { AgentsPage } from '@/routes/agents';
 
 export function App() {
   return (
@@ -74,6 +76,8 @@ function Inner() {
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/tenant" element={<TenantPage />} />
         <Route path="/orientation" element={<OrientationPage />} />
+        <Route path="/vm" element={<VmPage />} />
+        <Route path="/agents" element={<AgentsPage />} />
         <Route path="/broadcast" element={<BroadcastPage />} />
         <Route
           path="*"

@@ -23,9 +23,15 @@ import { adminLiveOpsRoutes } from './routes/admin/liveOps.js';
 import { adminBroadcastRoutes } from './routes/admin/broadcast.js';
 import { adminTenantRoutes } from './routes/admin/tenant.js';
 import { adminOrientationRoutes } from './routes/admin/orientation.js';
+import { adminVmRoutes } from './routes/admin/vm.js';
+import { adminAgentsRoutes } from './routes/admin/agents.js';
 import { startBroadcastWorker } from './services/broadcastQueue.js';
+import { startVmDeliveryWorker } from './workers/vmDeliveryWorker.js';
+import { startVmImportWorker } from './workers/vmImportWorker.js';
+import { startVmWebhookWorker } from './workers/vmWebhookWorker.js';
 import { ensureChromaCollections } from './services/chromaCollections.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
+import { vmProviderWebhookRoutes } from './routes/vmProviderWebhooks.js';
 import { michaelRoutes } from './routes/michael.js';
 import { steveRoutes } from './routes/steve.js';
 import { prospectTokenRoutes } from './routes/p.js';
@@ -33,9 +39,12 @@ import { prospectLoginRoutes } from './routes/p-login.js';
 import { invitationRoutes } from './routes/invitations.js';
 import { cockpitRoutes } from './routes/cockpit.js';
 import { crmRoutes } from './routes/crm.js';
+import { crmHubRoutes } from './routes/crmHub.js';
+import { rvmRoutes } from './routes/rvm.js';
 import { scriptmakerRoutes } from './routes/scriptmaker.js';
 import { ivoryRoutes } from './routes/ivory.js';
 import { agentRoutes } from './routes/agents.js';
+import { vmRoutes } from './routes/vm.js';
 import { trainingRoutes } from './routes/training.js';
 import { profileRoutes } from './routes/profile.js';
 import { previewRoutes } from './routes/preview.js';
@@ -104,6 +113,8 @@ app.use('/api/admin/dashboard', adminDashboardRoutes);
 app.use('/api/admin/reporting', adminReportingRoutes);
 app.use('/api/admin/live-ops', adminLiveOpsRoutes);
 app.use('/api/admin/tenant', adminTenantRoutes);
+app.use('/api/admin/vm', adminVmRoutes);
+app.use('/api/admin/agents', adminAgentsRoutes);
 // ADMIN Section G — Kevin-only broadcast composer (Chat #144). BA-facing
 // only: audience resolution filters out STOP-list members server-side; the
 // composer never reaches prospects, never appears on `.com`.
@@ -128,6 +139,11 @@ app.use('/api/admin/orientation', adminOrientationRoutes);
 // Cookie scope: .teammagnificent.com, distinct from the BA .team JWT.
 app.use('/api/p/login', prospectLoginRoutes);
 app.use('/api/p', prospectTokenRoutes);
+app.use('/api/rvm', rvmRoutes);
+// VM provider/import foundation. Provider webhooks are unauthenticated but
+// secret-guarded when VM_WEBHOOK_SHARED_SECRET is set; live delivery is still
+// feature-flagged and campaign-admin-approved in the delivery worker.
+app.use('/api/vm/provider', vmProviderWebhookRoutes);
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // BA-FACING GATED ROUTES â€” mount here.
@@ -165,6 +181,7 @@ app.use('/api/cockpit', cockpitRoutes);
 // every mutation runs assertOwnership(prospectId, session.baId) first so a
 // BA can only read or write their OWN prospects (locked-spec 3.5).
 app.use('/api/crm', crmRoutes);
+app.use('/api/crm-hub', crmHubRoutes);
 
 // ScriptMaker draft engine (Chat #122) â€” the video-library front door's
 // server side. Drafts a product-anchored invitation message; the BA carries
@@ -183,6 +200,7 @@ app.use('/api/ivory', ivoryRoutes);
 // recommendation feed + append-only interaction events; the underlying
 // Michael/Ivory/Steve lane logic stays in its existing domain modules.
 app.use('/api/agents', agentRoutes);
+app.use('/api/vm', vmRoutes);
 // Fast Start Training (feat/fast-start-training, wireframe 3.5).
 // GET /fast-start/progress + GET-1 whitelisted pre-Michael in
 // MICHAEL_GATE_WHITELIST; POST .../modules/2-5/state stay gated.
@@ -233,3 +251,6 @@ app.listen(env.SERVER_PORT, () => {
 // Idempotent: safe even if invoked outside the listen callback (start order
 // doesn't matter — the worker queries the gateway, not the listening port).
 void startBroadcastWorker();
+void startVmImportWorker();
+void startVmDeliveryWorker();
+void startVmWebhookWorker();

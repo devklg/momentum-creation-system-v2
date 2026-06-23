@@ -1,0 +1,352 @@
+/**
+ * Bulk RVM lead import domain.
+ *
+ * Imported leads are acquisition records only. This module mints RVM tokens
+ * and creates BA-scoped CRM records immediately, but it never calls
+ * placeProspect and never inserts holding-tank rows.
+ */
+
+import { randomUUID } from 'node:crypto';
+import { gatewayCall } from '../services/gateway.js';
+import { tripleStackWrite } from '../services/tripleStack.js';
+import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
+import { lastInitialOf } from './prospects.js';
+import {
+  appendProspectTimelineEvent,
+  createOrUpdateCrmRecordForToken,
+} from './prospectCrm.js';
+import { findVMCampaignForOwner } from './vmCampaigns.js';
+import { markLeadBatchImported } from './vmLeadBatches.js';
+import type {
+  BulkLeadRecord,
+  ImportBulkLeadPayload,
+  InviteTokenRecord,
+  LeadBatchRecord,
+  ProspectLocation,
+  ProspectRecord,
+  VmLeadBatchSource,
+  VMCampaignRecord,
+} from '@momentum/shared';
+
+const MONGO_DB = 'momentum';
+const BULK_LEADS_COLLECTION = 'vm_bulk_leads';
+const PROSPECTS_COLLECTION = 'prospects';
+const TOKENS_COLLECTION = 'invite_tokens';
+const CHROMA_COLLECTION = 'mcs_vm_leads';
+
+export class BulkLeadError extends Error {
+  constructor(public readonly code: string) {
+    super(code);
+    this.name = 'BulkLeadError';
+  }
+}
+
+export interface ImportBulkLeadsInput {
+  ownerTmBaId: string;
+  sponsorTmBaId: string;
+  leadBatchId: string;
+  vmCampaignId: string;
+  leads: ImportBulkLeadPayload[];
+}
+
+export interface ImportBulkLeadsResult {
+  batch: LeadBatchRecord;
+  campaign: VMCampaignRecord;
+  leads: BulkLeadRecord[];
+}
+
+function nonEmpty(raw: string | undefined | null): string {
+  return typeof raw === 'string' ? raw.trim() : '';
+}
+
+function normalizedOptional(raw: string | undefined | null): string | null {
+  const value = nonEmpty(raw);
+  return value ? value : null;
+}
+
+async function createBulkLeadRecord(input: {
+  ownerTmBaId: string;
+  sponsorTmBaId: string;
+  leadBatchId: string;
+  vmCampaignId: string;
+  source: string;
+  lead: ImportBulkLeadPayload;
+}): Promise<BulkLeadRecord> {
+  const firstName = nonEmpty(input.lead.firstName);
+  const lastName = nonEmpty(input.lead.lastName);
+  const city = nonEmpty(input.lead.city);
+  const stateOrRegion = nonEmpty(input.lead.stateOrRegion);
+  const country = nonEmpty(input.lead.country) || 'US';
+  if (!firstName || !lastName) throw new BulkLeadError('missing_name');
+  if (!city || !stateOrRegion) throw new BulkLeadError('missing_location');
+
+  const now = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
+  const leadId = `lead_${randomUUID()}`;
+  const prospectId = `prospect_${randomUUID()}`;
+  const token = await mintUniqueToken();
+  const location: ProspectLocation = { city, stateOrRegion, country };
+  const lastInitial = lastInitialOf(lastName);
+
+  const prospect: ProspectRecord = {
+    prospectId,
+    firstName,
+    lastName,
+    lastInitial,
+    location,
+    phone: normalizedOptional(input.lead.phone),
+    email: normalizedOptional(input.lead.email),
+    sponsorBaId: input.sponsorTmBaId,
+    state: 'minted',
+    positionNumber: null,
+    placedAt: null,
+    becameCustomer: false,
+    becameCustomerAt: null,
+    customerNote: null,
+    createdAt: now,
+    updatedAt: now,
+    expiresAt,
+  };
+
+  await tripleStackWrite({
+    id: prospectId,
+    mongoCollection: PROSPECTS_COLLECTION,
+    mongoDoc: {
+      ...prospect,
+      ownerTmBaId: input.ownerTmBaId,
+      sponsorTmBaId: input.sponsorTmBaId,
+      token,
+      source: 'rvm',
+      leadId,
+      leadBatchId: input.leadBatchId,
+      vmCampaignId: input.vmCampaignId,
+      sentAt: null,
+      message: null,
+    },
+    neo4j: {
+      cypher:
+        'MERGE (b:BA {baId: $ownerTmBaId}) ' +
+        'CREATE (p:Prospect {prospectId: $id, firstName: $firstName, lastInitial: $lastInitial, ' +
+        '  city: $city, stateOrRegion: $stateOrRegion, country: $country, state: $state, ' +
+        '  ownerTmBaId: $ownerTmBaId, sponsorTmBaId: $sponsorTmBaId, source: $source, createdAt: $createdAt}) ' +
+        'CREATE (b)-[:OWNS_RVM_PROSPECT]->(p)',
+      params: {
+        ownerTmBaId: input.ownerTmBaId,
+        sponsorTmBaId: input.sponsorTmBaId,
+        firstName,
+        lastInitial,
+        city,
+        stateOrRegion,
+        country,
+        state: 'minted',
+        source: 'rvm',
+        createdAt: now,
+      },
+    },
+    chroma: {
+      collection: CHROMA_COLLECTION,
+      document:
+        `RVM prospect ${firstName} ${lastInitial}. from ${city}, ${stateOrRegion}; ` +
+        `owner ${input.ownerTmBaId}; batch ${input.leadBatchId}; campaign ${input.vmCampaignId}.`,
+      metadata: {
+        kind: 'rvm_prospect_created',
+        prospectId,
+        leadId,
+        token,
+        ownerTmBaId: input.ownerTmBaId,
+        sponsorTmBaId: input.sponsorTmBaId,
+        leadBatchId: input.leadBatchId,
+        vmCampaignId: input.vmCampaignId,
+        createdAt: now,
+      },
+    },
+  });
+
+  const tokenRecord: InviteTokenRecord = {
+    token,
+    prospectId,
+    sponsorBaId: input.sponsorTmBaId,
+    state: 'minted',
+    createdAt: now,
+    clickedAt: null,
+    expiresAt,
+  };
+  await gatewayCall('mongodb', 'insert', {
+    database: MONGO_DB,
+    collection: TOKENS_COLLECTION,
+    documents: [
+      {
+        _id: token,
+        ...tokenRecord,
+        ownerTmBaId: input.ownerTmBaId,
+        sponsorTmBaId: input.sponsorTmBaId,
+        source: 'rvm',
+        leadId,
+        leadBatchId: input.leadBatchId,
+        vmCampaignId: input.vmCampaignId,
+      },
+    ],
+  });
+  await gatewayCall('neo4j', 'cypher', {
+    query:
+      'MERGE (t:InviteToken {token: $token}) ' +
+      'SET t.prospectId = $prospectId, t.sponsorBaId = $sponsorTmBaId, ' +
+      '    t.ownerTmBaId = $ownerTmBaId, t.state = $state, t.source = $source, ' +
+      '    t.createdAt = $createdAt, t.expiresAt = $expiresAt ' +
+      'WITH t ' +
+      'MATCH (p:Prospect {prospectId: $prospectId}) ' +
+      'MERGE (t)-[:FOR_PROSPECT]->(p)',
+    params: {
+      token,
+      prospectId,
+      ownerTmBaId: input.ownerTmBaId,
+      sponsorTmBaId: input.sponsorTmBaId,
+      state: 'minted',
+      source: 'rvm',
+      createdAt: now,
+      expiresAt,
+    },
+  });
+
+  const bulkLead: BulkLeadRecord = {
+    leadId,
+    leadBatchId: input.leadBatchId,
+    vmCampaignId: input.vmCampaignId,
+    prospectId,
+    token,
+    ownerTmBaId: input.ownerTmBaId,
+    sponsorTmBaId: input.sponsorTmBaId,
+    firstName,
+    lastName,
+    phone: prospect.phone,
+    email: prospect.email,
+    city,
+    stateOrRegion,
+    country,
+    source: input.source as VmLeadBatchSource,
+    status: 'token_created',
+    activatedAt: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await tripleStackWrite({
+    id: leadId,
+    mongoCollection: BULK_LEADS_COLLECTION,
+    mongoDoc: { ...bulkLead },
+    neo4j: {
+      cypher:
+        'MERGE (lb:LeadBatch {leadBatchId: $leadBatchId}) ' +
+        'MERGE (vm:VMCampaign {vmCampaignId: $vmCampaignId}) ' +
+        'MERGE (p:Prospect {prospectId: $prospectId}) ' +
+        'CREATE (lead:BulkLead {leadId: $id, token: $token, status: $status, ' +
+        '  ownerTmBaId: $ownerTmBaId, sponsorTmBaId: $sponsorTmBaId, createdAt: $createdAt}) ' +
+        'CREATE (lb)-[:CONTAINS_LEAD]->(lead) ' +
+        'CREATE (vm)-[:TARGETS_LEAD]->(lead) ' +
+        'CREATE (lead)-[:BECAME_PROSPECT_RECORD]->(p)',
+      params: {
+        leadBatchId: bulkLead.leadBatchId,
+        vmCampaignId: bulkLead.vmCampaignId,
+        prospectId: bulkLead.prospectId,
+        token: bulkLead.token,
+        status: bulkLead.status,
+        ownerTmBaId: bulkLead.ownerTmBaId,
+        sponsorTmBaId: bulkLead.sponsorTmBaId,
+        createdAt: now,
+      },
+    },
+    chroma: {
+      collection: CHROMA_COLLECTION,
+      document:
+        `Bulk RVM lead ${firstName} ${lastInitial}. imported with token ${token}; ` +
+        `owner ${input.ownerTmBaId}; campaign ${input.vmCampaignId}.`,
+      metadata: {
+        kind: 'bulk_lead_imported',
+        leadId,
+        prospectId,
+        token,
+        ownerTmBaId: input.ownerTmBaId,
+        leadBatchId: input.leadBatchId,
+        vmCampaignId: input.vmCampaignId,
+        createdAt: now,
+      },
+    },
+  });
+
+  const crm = await createOrUpdateCrmRecordForToken({
+    prospectId,
+    token,
+    ownerTmBaId: input.ownerTmBaId,
+    sponsorTmBaId: input.sponsorTmBaId,
+    source: 'rvm',
+    leadId,
+    leadBatchId: input.leadBatchId,
+    vmCampaignId: input.vmCampaignId,
+    createdAt: now,
+  });
+
+  await appendProspectTimelineEvent({
+    prospectId,
+    crmRecordId: crm.crmRecordId,
+    ownerTmBaId: input.ownerTmBaId,
+    sponsorTmBaId: input.sponsorTmBaId,
+    kind: 'token_created',
+    note: 'RVM lead imported as an inactive acquisition record.',
+    metadata: { leadId, leadBatchId: input.leadBatchId, vmCampaignId: input.vmCampaignId },
+    createdAt: now,
+  });
+  await appendProspectTimelineEvent({
+    prospectId,
+    crmRecordId: crm.crmRecordId,
+    ownerTmBaId: input.ownerTmBaId,
+    sponsorTmBaId: input.sponsorTmBaId,
+    kind: 'token_created',
+    note: 'RVM token created. CRM-visible; not placed in the holding tank.',
+    metadata: { leadId, token },
+    createdAt: now,
+  });
+
+  return bulkLead;
+}
+
+export async function importBulkLeads(
+  input: ImportBulkLeadsInput,
+): Promise<ImportBulkLeadsResult> {
+  if (input.leads.length === 0) throw new BulkLeadError('no_leads');
+  if (input.leads.length > 500) throw new BulkLeadError('too_many_leads');
+
+  const campaign = await findVMCampaignForOwner(input.vmCampaignId, input.ownerTmBaId);
+  if (campaign.leadBatchId !== input.leadBatchId) {
+    throw new BulkLeadError('campaign_batch_mismatch');
+  }
+
+  const created: BulkLeadRecord[] = [];
+  for (const lead of input.leads) {
+    const record = await createBulkLeadRecord({
+      ownerTmBaId: input.ownerTmBaId,
+      sponsorTmBaId: input.sponsorTmBaId,
+      leadBatchId: input.leadBatchId,
+      vmCampaignId: input.vmCampaignId,
+      source: campaign.provider,
+      lead,
+    });
+    created.push(record);
+  }
+
+  const batch = await markLeadBatchImported(
+    input.leadBatchId,
+    input.ownerTmBaId,
+    created.length,
+  );
+  return { batch, campaign, leads: created };
+}
+
+export async function findBulkLeadByToken(token: string): Promise<BulkLeadRecord | null> {
+  const result = await gatewayCall<{ documents: BulkLeadRecord[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: BULK_LEADS_COLLECTION,
+    filter: { token },
+    limit: 1,
+  });
+  return result.documents?.[0] ?? null;
+}

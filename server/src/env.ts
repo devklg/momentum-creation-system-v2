@@ -31,6 +31,15 @@ if (process.env.DEBUG_ENV) {
   console.log('[env] from:', here, '| root:', repoRoot, '| envPath:', envPath, '| parsed keys:', result.parsed ? Object.keys(result.parsed).length : 0, '| error:', result.error?.message);
 }
 
+const EnvBoolean = z.preprocess((value) => {
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'off', ''].includes(normalized)) return false;
+  }
+  return value;
+}, z.boolean());
+
 const Env = z.object({
   SERVER_PORT: z.coerce.number().int().positive().default(7700),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -164,6 +173,19 @@ const Env = z.object({
    * step. Prompt-caching applies to the stable compliance+product prefix.
    */
   ANTHROPIC_MODEL: z.string().default('claude-haiku-4-5-20251001'),
+
+  /**
+   * VM campaign provider scale layer. Delivery is dry-run/manual by default.
+   * Live voicemail/SMS/email provider sends require BOTH:
+   *   1. VM_LIVE_DELIVERY_ENABLED=true
+   *   2. the campaign document carrying adminApprovedForLiveDelivery=true
+   */
+  VM_PROVIDER_MODE: z.enum(['manual_csv', 'acquisition_provider_placeholder']).default('manual_csv'),
+  VM_LIVE_DELIVERY_ENABLED: EnvBoolean.default(false),
+  VM_DELIVERY_RATE_PER_MINUTE: z.coerce.number().int().positive().max(600).default(60),
+  VM_WEBHOOK_SHARED_SECRET: z.string().default(''),
+  VM_ACQUISITION_PROVIDER_API_URL: z.string().url().optional(),
+  VM_ACQUISITION_PROVIDER_API_KEY: z.string().default(''),
 });
 
 export const env = Env.parse(process.env);

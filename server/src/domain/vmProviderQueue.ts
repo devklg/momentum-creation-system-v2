@@ -1,0 +1,905 @@
+/**
+ * VM provider/import queue foundation.
+ *
+ * Agent 5 owns the scale substrate only: import chunking, validation,
+ * dedupe/suppression placeholders, token/CRM/delivery queue rows, provider
+ * webhook ingestion, retries, rate limits, and audit events. UI/RVM rendering
+ * and final campaign APIs belong to adjacent agents.
+ *
+ * Imported VM leads are acquisition records. They do not enter the public
+ * momentum leg or Holding Tank here; later RVM/video-complete flows must do
+ * that through the existing placement rule.
+ */
+
+import { createHash, randomUUID } from 'node:crypto';
+import { gatewayCall } from '../services/gateway.js';
+import { tripleStackWrite } from '../services/tripleStack.js';
+import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
+
+const MONGO_DB = 'momentum';
+const CHROMA_COLLECTION = 'mcs_vm_campaigns';
+
+const LEADS_COLLECTION = 'vm_bulk_leads';
+const QUEUE_COLLECTION = 'vm_queue_jobs';
+const DELIVERY_EVENTS_COLLECTION = 'vm_delivery_events';
+const WEBHOOK_EVENTS_COLLECTION = 'vm_provider_webhook_events';
+const CRM_COLLECTION = 'prospect_crm_records';
+const TOKENS_COLLECTION = 'invite_tokens';
+const AUDIT_COLLECTION = 'vm_audit_events';
+const SUPPRESSION_COLLECTION = 'vm_suppression_list';
+
+const DEFAULT_MAX_ATTEMPTS = 3;
+const IMPORT_CHUNK_SIZE = 500;
+
+export type VmProviderKey = 'manual_csv' | 'acquisition_provider_placeholder';
+
+export type VmQueueJobKind =
+  | 'import_validate'
+  | 'suppression_check'
+  | 'token_generate'
+  | 'crm_create'
+  | 'delivery'
+  | 'webhook_event';
+
+export type VmQueueJobStatus =
+  | 'queued'
+  | 'processing'
+  | 'complete'
+  | 'failed'
+  | 'dead_lettered'
+  | 'skipped';
+
+export type VmLeadStatus =
+  | 'imported'
+  | 'validated'
+  | 'invalid'
+  | 'duplicate'
+  | 'suppressed'
+  | 'token_created'
+  | 'crm_created'
+  | 'queued'
+  | 'delivery_dry_run'
+  | 'manual_exported'
+  | 'voicemail_drop_queued'
+  | 'voicemail_drop_delivered'
+  | 'voicemail_drop_failed'
+  | 'opted_out';
+
+export interface VmImportLeadRow {
+  firstName?: string | null;
+  lastName?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  city?: string | null;
+  stateOrRegion?: string | null;
+  country?: string | null;
+  sourceLeadId?: string | null;
+  consentStatus?: 'unknown' | 'provided' | 'not_provided' | 'do_not_contact';
+  raw?: Record<string, unknown>;
+}
+
+export interface VmQueueJob<TPayload extends Record<string, unknown> = Record<string, unknown>> {
+  jobId: string;
+  kind: VmQueueJobKind;
+  status: VmQueueJobStatus;
+  attempts: number;
+  maxAttempts: number;
+  availableAt: string;
+  lockedAt: string | null;
+  completedAt: string | null;
+  failedAt: string | null;
+  failureReason: string | null;
+  payload: TPayload;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VmBulkLeadRecord {
+  leadId: string;
+  importJobId: string;
+  leadBatchId: string;
+  vmCampaignId: string;
+  ownerTmBaId: string;
+  sponsorTmBaId: string;
+  sourceLabel: string;
+  sourceLeadId: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  normalizedPhone: string | null;
+  email: string | null;
+  normalizedEmail: string | null;
+  city: string | null;
+  stateOrRegion: string | null;
+  country: string;
+  consentStatus: 'unknown' | 'provided' | 'not_provided' | 'do_not_contact';
+  dedupeKey: string;
+  status: VmLeadStatus;
+  token: string | null;
+  crmRecordId: string | null;
+  validationIssues: string[];
+  activatedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VmDeliveryEventRecord {
+  eventId: string;
+  provider: VmProviderKey;
+  leadId: string;
+  vmCampaignId: string;
+  ownerTmBaId: string;
+  status: string;
+  providerMessageId: string | null;
+  providerStatus: string | null;
+  dryRun: boolean;
+  attempt: number;
+  details: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface CreateImportJobInput {
+  leadBatchId: string;
+  vmCampaignId: string;
+  ownerTmBaId: string;
+  sponsorTmBaId: string;
+  sourceLabel: string;
+  rows: VmImportLeadRow[];
+  createdBy: string;
+}
+
+interface ImportChunkPayload extends Record<string, unknown> {
+  importJobId: string;
+  leadBatchId: string;
+  vmCampaignId: string;
+  ownerTmBaId: string;
+  sponsorTmBaId: string;
+  sourceLabel: string;
+  chunkIndex: number;
+  rows: VmImportLeadRow[];
+}
+
+interface LeadPayload extends Record<string, unknown> {
+  leadId: string;
+}
+
+export function normalizeVmPhone(input: string | null | undefined): string | null {
+  const raw = input?.trim();
+  if (!raw) return null;
+  if (raw.startsWith('+')) {
+    const e164 = `+${raw.slice(1).replace(/\D/g, '')}`;
+    return /^\+[1-9]\d{7,14}$/.test(e164) ? e164 : null;
+  }
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
+  return null;
+}
+
+export function normalizeVmEmail(input: string | null | undefined): string | null {
+  const value = input?.trim().toLowerCase();
+  if (!value) return null;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? value : null;
+}
+
+function hashDedupe(parts: string[]): string {
+  return createHash('sha256').update(parts.join('|')).digest('hex').slice(0, 32);
+}
+
+function leadDedupeKey(ownerTmBaId: string, phone: string | null, email: string | null): string {
+  return hashDedupe([ownerTmBaId, phone ?? '', email ?? '']);
+}
+
+function assertOwnership(input: {
+  ownerTmBaId?: string | null;
+  sponsorTmBaId?: string | null;
+  leadBatchId?: string | null;
+  vmCampaignId?: string | null;
+}): void {
+  if (!input.ownerTmBaId) throw new Error('ownerTmBaId_required');
+  if (!input.sponsorTmBaId) throw new Error('sponsorTmBaId_required');
+  if (!input.leadBatchId) throw new Error('leadBatchId_required');
+  if (!input.vmCampaignId) throw new Error('vmCampaignId_required');
+}
+
+async function vmAudit(input: {
+  action: string;
+  entityId: string;
+  ownerTmBaId: string | null;
+  summary: string;
+  payload?: Record<string, unknown>;
+}): Promise<void> {
+  const at = new Date().toISOString();
+  const id = `vmaudit_${randomUUID()}`;
+  await tripleStackWrite({
+    id,
+    mongoCollection: AUDIT_COLLECTION,
+    mongoDoc: {
+      auditId: id,
+      action: input.action,
+      entityId: input.entityId,
+      ownerTmBaId: input.ownerTmBaId,
+      summary: input.summary,
+      payload: input.payload ?? {},
+      createdAt: at,
+    },
+    neo4j: {
+      cypher:
+        'MERGE (e:VmAuditEvent {auditId: $id}) ' +
+        'SET e.action = $action, e.entityId = $entityId, e.ownerTmBaId = $ownerTmBaId, e.createdAt = datetime($createdAt) ' +
+        'WITH e ' +
+        'OPTIONAL MATCH (ba:BrandAmbassador {baId: $ownerTmBaId}) ' +
+        'FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END | MERGE (ba)-[:HAS_VM_AUDIT]->(e))',
+      params: {
+        action: input.action,
+        entityId: input.entityId,
+        ownerTmBaId: input.ownerTmBaId,
+        createdAt: at,
+      },
+    },
+    chroma: {
+      collection: CHROMA_COLLECTION,
+      document: `${input.action}: ${input.summary}`,
+      metadata: {
+        kind: 'vm_audit',
+        action: input.action,
+        entityId: input.entityId,
+        ownerTmBaId: input.ownerTmBaId,
+        createdAt: at,
+      },
+    },
+  });
+}
+
+export async function enqueueVmJob<TPayload extends Record<string, unknown>>(
+  kind: VmQueueJobKind,
+  payload: TPayload,
+  options?: { maxAttempts?: number; availableAt?: string },
+): Promise<VmQueueJob<TPayload>> {
+  const now = new Date().toISOString();
+  const job: VmQueueJob<TPayload> = {
+    jobId: `vmjob_${randomUUID()}`,
+    kind,
+    status: 'queued',
+    attempts: 0,
+    maxAttempts: options?.maxAttempts ?? DEFAULT_MAX_ATTEMPTS,
+    availableAt: options?.availableAt ?? now,
+    lockedAt: null,
+    completedAt: null,
+    failedAt: null,
+    failureReason: null,
+    payload,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await tripleStackWrite({
+    id: job.jobId,
+    mongoCollection: QUEUE_COLLECTION,
+    mongoDoc: job as unknown as Record<string, unknown>,
+    neo4j: {
+      cypher:
+        'MERGE (j:VmQueueJob {jobId: $id}) ' +
+        'SET j.kind = $kind, j.status = $status, j.availableAt = datetime($availableAt), j.createdAt = datetime($createdAt)',
+      params: {
+        kind: job.kind,
+        status: job.status,
+        availableAt: job.availableAt,
+        createdAt: job.createdAt,
+      },
+    },
+    chroma: {
+      collection: CHROMA_COLLECTION,
+      document: `VM queue job ${job.kind} queued at ${job.createdAt}`,
+      metadata: {
+        kind: 'vm_queue_job',
+        jobKind: job.kind,
+        status: job.status,
+        createdAt: job.createdAt,
+      },
+    },
+  });
+  return job;
+}
+
+export async function claimVmJobs(
+  kinds: VmQueueJobKind[],
+  limit: number,
+): Promise<VmQueueJob[]> {
+  const now = new Date().toISOString();
+  const result = await gatewayCall<{ documents: VmQueueJob[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: QUEUE_COLLECTION,
+    filter: { kind: { $in: kinds }, status: 'queued', availableAt: { $lte: now } },
+    sort: { availableAt: 1, createdAt: 1 },
+    limit,
+  });
+
+  const claimed: VmQueueJob[] = [];
+  for (const job of result.documents ?? []) {
+    const lockedAt = new Date().toISOString();
+    await gatewayCall('mongodb', 'update', {
+      database: MONGO_DB,
+      collection: QUEUE_COLLECTION,
+      filter: { jobId: job.jobId, status: 'queued' },
+      update: {
+        $set: {
+          status: 'processing',
+          lockedAt,
+          updatedAt: lockedAt,
+          attempts: job.attempts + 1,
+        },
+      },
+    });
+    await vmAudit({
+      action: 'vm.queue.claimed',
+      entityId: job.jobId,
+      ownerTmBaId: ownerFromPayload(job.payload),
+      summary: `Claimed ${job.kind} job ${job.jobId}.`,
+      payload: { kind: job.kind, attempt: job.attempts + 1 },
+    });
+    claimed.push({ ...job, status: 'processing', lockedAt, attempts: job.attempts + 1 });
+  }
+  return claimed;
+}
+
+function ownerFromPayload(payload: Record<string, unknown>): string | null {
+  const owner = payload.ownerTmBaId;
+  return typeof owner === 'string' ? owner : null;
+}
+
+export async function completeVmJob(jobId: string, note: string): Promise<void> {
+  const at = new Date().toISOString();
+  await gatewayCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: QUEUE_COLLECTION,
+    filter: { jobId },
+    update: {
+      $set: {
+        status: 'complete',
+        completedAt: at,
+        lockedAt: null,
+        updatedAt: at,
+        failureReason: null,
+      },
+    },
+  });
+  await vmAudit({
+    action: 'vm.queue.completed',
+    entityId: jobId,
+    ownerTmBaId: null,
+    summary: note,
+  });
+}
+
+export async function failVmJob(job: VmQueueJob, reason: string): Promise<void> {
+  const at = new Date().toISOString();
+  const terminal = job.attempts >= job.maxAttempts;
+  const delayMs = Math.min(15 * 60_000, 2 ** Math.max(0, job.attempts - 1) * 30_000);
+  const status: VmQueueJobStatus = terminal ? 'dead_lettered' : 'queued';
+  const availableAt = terminal ? job.availableAt : new Date(Date.now() + delayMs).toISOString();
+
+  await gatewayCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: QUEUE_COLLECTION,
+    filter: { jobId: job.jobId },
+    update: {
+      $set: {
+        status,
+        failedAt: at,
+        failureReason: reason.slice(0, 500),
+        lockedAt: null,
+        availableAt,
+        updatedAt: at,
+      },
+    },
+  });
+  await vmAudit({
+    action: terminal ? 'vm.queue.dead_lettered' : 'vm.queue.retry_scheduled',
+    entityId: job.jobId,
+    ownerTmBaId: ownerFromPayload(job.payload),
+    summary: `${job.kind} job ${terminal ? 'dead-lettered' : 'scheduled for retry'}: ${reason}`,
+    payload: { kind: job.kind, attempts: job.attempts, maxAttempts: job.maxAttempts },
+  });
+}
+
+export async function createManualImportJobs(input: CreateImportJobInput): Promise<{
+  importJobId: string;
+  chunksQueued: number;
+  rowsAccepted: number;
+}> {
+  assertOwnership(input);
+  const importJobId = `vmimport_${randomUUID()}`;
+  const rows = input.rows;
+
+  for (let i = 0; i < rows.length; i += IMPORT_CHUNK_SIZE) {
+    const chunk = rows.slice(i, i + IMPORT_CHUNK_SIZE);
+    await enqueueVmJob<ImportChunkPayload>('import_validate', {
+      importJobId,
+      leadBatchId: input.leadBatchId,
+      vmCampaignId: input.vmCampaignId,
+      ownerTmBaId: input.ownerTmBaId,
+      sponsorTmBaId: input.sponsorTmBaId,
+      sourceLabel: input.sourceLabel,
+      chunkIndex: Math.floor(i / IMPORT_CHUNK_SIZE),
+      rows: chunk,
+    });
+  }
+
+  await vmAudit({
+    action: 'vm.import.queued',
+    entityId: importJobId,
+    ownerTmBaId: input.ownerTmBaId,
+    summary: `Queued VM manual import ${importJobId} with ${rows.length} rows.`,
+    payload: {
+      leadBatchId: input.leadBatchId,
+      vmCampaignId: input.vmCampaignId,
+      sourceLabel: input.sourceLabel,
+      chunksQueued: Math.ceil(rows.length / IMPORT_CHUNK_SIZE),
+      createdBy: input.createdBy,
+    },
+  });
+
+  return {
+    importJobId,
+    chunksQueued: Math.ceil(rows.length / IMPORT_CHUNK_SIZE),
+    rowsAccepted: rows.length,
+  };
+}
+
+export async function processImportChunk(job: VmQueueJob<ImportChunkPayload>): Promise<void> {
+  const payload = job.payload;
+  assertOwnership(payload);
+
+  let imported = 0;
+  let skipped = 0;
+  for (const row of payload.rows) {
+    const result = await upsertImportedLead(payload, row);
+    if (result.created) {
+      imported += 1;
+      await enqueueVmJob<LeadPayload>('suppression_check', { leadId: result.lead.leadId });
+    } else {
+      skipped += 1;
+    }
+  }
+  await completeVmJob(job.jobId, `Imported ${imported} lead rows; skipped ${skipped}.`);
+}
+
+async function upsertImportedLead(
+  payload: ImportChunkPayload,
+  row: VmImportLeadRow,
+): Promise<{ lead: VmBulkLeadRecord; created: boolean }> {
+  const normalizedPhone = normalizeVmPhone(row.phone);
+  const normalizedEmail = normalizeVmEmail(row.email);
+  const validationIssues: string[] = [];
+  if (row.phone && !normalizedPhone) validationIssues.push('invalid_phone');
+  if (row.email && !normalizedEmail) validationIssues.push('invalid_email');
+  if (!normalizedPhone && !normalizedEmail) validationIssues.push('missing_contact_channel');
+
+  const dedupeKey = leadDedupeKey(payload.ownerTmBaId, normalizedPhone, normalizedEmail);
+  const existing = await gatewayCall<{ documents: VmBulkLeadRecord[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: LEADS_COLLECTION,
+    filter: { ownerTmBaId: payload.ownerTmBaId, dedupeKey },
+    limit: 1,
+  });
+
+  if (existing.documents?.[0]) {
+    await vmAudit({
+      action: 'vm.lead.duplicate_skipped',
+      entityId: existing.documents[0].leadId,
+      ownerTmBaId: payload.ownerTmBaId,
+      summary: `Skipped duplicate VM lead in batch ${payload.leadBatchId}.`,
+      payload: { importJobId: payload.importJobId, dedupeKey },
+    });
+    return { lead: existing.documents[0], created: false };
+  }
+
+  const now = new Date().toISOString();
+  const leadId = `vmlead_${randomUUID()}`;
+  const status: VmLeadStatus = validationIssues.length > 0 ? 'invalid' : 'imported';
+  const lead: VmBulkLeadRecord = {
+    leadId,
+    importJobId: payload.importJobId,
+    leadBatchId: payload.leadBatchId,
+    vmCampaignId: payload.vmCampaignId,
+    ownerTmBaId: payload.ownerTmBaId,
+    sponsorTmBaId: payload.sponsorTmBaId,
+    sourceLabel: payload.sourceLabel,
+    sourceLeadId: row.sourceLeadId?.trim() || null,
+    firstName: row.firstName?.trim() || null,
+    lastName: row.lastName?.trim() || null,
+    phone: row.phone?.trim() || null,
+    normalizedPhone,
+    email: row.email?.trim() || null,
+    normalizedEmail,
+    city: row.city?.trim() || null,
+    stateOrRegion: row.stateOrRegion?.trim() || null,
+    country: row.country?.trim() || 'US',
+    consentStatus: row.consentStatus ?? 'unknown',
+    dedupeKey,
+    status,
+    token: null,
+    crmRecordId: null,
+    validationIssues,
+    activatedAt: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await tripleStackWrite({
+    id: leadId,
+    mongoCollection: LEADS_COLLECTION,
+    mongoDoc: lead as unknown as Record<string, unknown>,
+    neo4j: {
+      cypher:
+        'MERGE (l:VmLead {leadId: $id}) ' +
+        'SET l.ownerTmBaId = $ownerTmBaId, l.sponsorTmBaId = $sponsorTmBaId, l.status = $status, l.createdAt = datetime($createdAt) ' +
+        'WITH l ' +
+        'OPTIONAL MATCH (ba:BrandAmbassador {baId: $ownerTmBaId}) ' +
+        'FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END | MERGE (ba)-[:OWNS_VM_LEAD]->(l))',
+      params: {
+        ownerTmBaId: lead.ownerTmBaId,
+        sponsorTmBaId: lead.sponsorTmBaId,
+        status: lead.status,
+        createdAt: lead.createdAt,
+      },
+    },
+    chroma: {
+      collection: CHROMA_COLLECTION,
+      document:
+        `VM lead ${lead.firstName ?? ''} ${lead.lastName ?? ''} ` +
+        `from ${lead.city ?? 'unknown city'} imported for ${lead.ownerTmBaId}.`,
+      metadata: {
+        kind: 'vm_lead_imported',
+        leadId,
+        ownerTmBaId: lead.ownerTmBaId,
+        vmCampaignId: lead.vmCampaignId,
+        status: lead.status,
+        createdAt: lead.createdAt,
+      },
+    },
+  });
+  return { lead, created: true };
+}
+
+export async function processSuppressionCheck(job: VmQueueJob<LeadPayload>): Promise<void> {
+  const lead = await findLead(job.payload.leadId);
+  if (!lead) throw new Error('lead_not_found');
+
+  if (lead.status === 'invalid') {
+    await completeVmJob(job.jobId, `Lead ${lead.leadId} invalid; not queued.`);
+    return;
+  }
+
+  const suppressed = await isLeadSuppressed(lead);
+  const nextStatus: VmLeadStatus =
+    suppressed || lead.consentStatus === 'do_not_contact' ? 'suppressed' : 'validated';
+
+  await updateLeadStatus(lead.leadId, nextStatus, {
+    suppressionCheckedAt: new Date().toISOString(),
+  });
+  if (nextStatus === 'validated') {
+    await enqueueVmJob<LeadPayload>('token_generate', { leadId: lead.leadId });
+  }
+  await completeVmJob(job.jobId, `Suppression check completed for ${lead.leadId}: ${nextStatus}.`);
+}
+
+async function isLeadSuppressed(lead: VmBulkLeadRecord): Promise<boolean> {
+  const clauses: Record<string, unknown>[] = [];
+  if (lead.normalizedPhone) clauses.push({ normalizedPhone: lead.normalizedPhone });
+  if (lead.normalizedEmail) clauses.push({ normalizedEmail: lead.normalizedEmail });
+  if (clauses.length === 0) return true;
+  const result = await gatewayCall<{ count?: number; documents?: unknown[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: SUPPRESSION_COLLECTION,
+    filter: { ownerTmBaId: { $in: [lead.ownerTmBaId, 'global'] }, $or: clauses },
+    limit: 1,
+  });
+  return (result.count ?? result.documents?.length ?? 0) > 0;
+}
+
+export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Promise<void> {
+  const lead = await findLead(job.payload.leadId);
+  if (!lead) throw new Error('lead_not_found');
+  if (lead.token) {
+    await completeVmJob(job.jobId, `Lead ${lead.leadId} already had token.`);
+    return;
+  }
+  if (lead.status !== 'validated') {
+    await completeVmJob(job.jobId, `Lead ${lead.leadId} status ${lead.status}; token skipped.`);
+    return;
+  }
+
+  const token = await mintUniqueToken();
+  const now = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
+
+  await tripleStackWrite({
+    id: token,
+    mongoCollection: TOKENS_COLLECTION,
+    mongoDoc: {
+      token,
+      tokenKind: 'rvm',
+      prospectId: null,
+      leadId: lead.leadId,
+      sponsorBaId: lead.sponsorTmBaId,
+      ownerTmBaId: lead.ownerTmBaId,
+      leadBatchId: lead.leadBatchId,
+      vmCampaignId: lead.vmCampaignId,
+      state: 'minted',
+      createdAt: now,
+      clickedAt: null,
+      expiresAt,
+    },
+    neo4j: {
+      cypher:
+        'MERGE (t:InviteToken {token: $id}) ' +
+        'SET t.tokenKind = "rvm", t.leadId = $leadId, t.ownerTmBaId = $ownerTmBaId, t.sponsorBaId = $sponsorTmBaId, t.state = "minted", t.createdAt = datetime($createdAt) ' +
+        'WITH t MATCH (l:VmLead {leadId: $leadId}) MERGE (t)-[:FOR_VM_LEAD]->(l)',
+      params: {
+        leadId: lead.leadId,
+        ownerTmBaId: lead.ownerTmBaId,
+        sponsorTmBaId: lead.sponsorTmBaId,
+        createdAt: now,
+      },
+    },
+    chroma: {
+      collection: CHROMA_COLLECTION,
+      document: `RVM token minted for VM lead ${lead.leadId} owned by ${lead.ownerTmBaId}.`,
+      metadata: {
+        kind: 'rvm_token_created',
+        leadId: lead.leadId,
+        token,
+        ownerTmBaId: lead.ownerTmBaId,
+        createdAt: now,
+      },
+    },
+  });
+
+  await gatewayCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: LEADS_COLLECTION,
+    filter: { leadId: lead.leadId },
+    update: { $set: { token, status: 'token_created', updatedAt: now } },
+  });
+  await enqueueVmJob<LeadPayload>('crm_create', { leadId: lead.leadId });
+  await completeVmJob(job.jobId, `Token created for VM lead ${lead.leadId}.`);
+}
+
+export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<void> {
+  const lead = await findLead(job.payload.leadId);
+  if (!lead) throw new Error('lead_not_found');
+  if (!lead.token) {
+    await completeVmJob(job.jobId, `Lead ${lead.leadId} has no token; CRM skipped.`);
+    return;
+  }
+  if (lead.crmRecordId) {
+    await completeVmJob(job.jobId, `Lead ${lead.leadId} already had CRM record.`);
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const crmRecordId = `crm_${randomUUID()}`;
+  await tripleStackWrite({
+    id: crmRecordId,
+    mongoCollection: CRM_COLLECTION,
+    mongoDoc: {
+      crmRecordId,
+      prospectId: null,
+      leadId: lead.leadId,
+      ownerTmBaId: lead.ownerTmBaId,
+      sponsorTmBaId: lead.sponsorTmBaId,
+      source: 'rvm',
+      sourceLabel: lead.sourceLabel,
+      leadBatchId: lead.leadBatchId,
+      vmCampaignId: lead.vmCampaignId,
+      token: lead.token,
+      status: 'inactive_pre_engagement',
+      disposition: null,
+      followUpDueAt: null,
+      closedAt: null,
+      closedReason: null,
+      createdAt: now,
+      updatedAt: now,
+    },
+    neo4j: {
+      cypher:
+        'MERGE (c:ProspectCrmRecord {crmRecordId: $id}) ' +
+        'SET c.leadId = $leadId, c.ownerTmBaId = $ownerTmBaId, c.status = "inactive_pre_engagement", c.createdAt = datetime($createdAt) ' +
+        'WITH c MATCH (l:VmLead {leadId: $leadId}) MERGE (l)-[:HAS_CRM_RECORD]->(c)',
+      params: {
+        leadId: lead.leadId,
+        ownerTmBaId: lead.ownerTmBaId,
+        createdAt: now,
+      },
+    },
+    chroma: {
+      collection: CHROMA_COLLECTION,
+      document: `CRM record ${crmRecordId} created for inactive VM lead ${lead.leadId}.`,
+      metadata: {
+        kind: 'vm_crm_created',
+        leadId: lead.leadId,
+        crmRecordId,
+        ownerTmBaId: lead.ownerTmBaId,
+        createdAt: now,
+      },
+    },
+  });
+
+  await gatewayCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: LEADS_COLLECTION,
+    filter: { leadId: lead.leadId },
+    update: { $set: { crmRecordId, status: 'crm_created', updatedAt: now } },
+  });
+  await enqueueVmJob<LeadPayload>('delivery', { leadId: lead.leadId });
+  await completeVmJob(job.jobId, `CRM record created for VM lead ${lead.leadId}.`);
+}
+
+export async function findLead(leadId: string): Promise<VmBulkLeadRecord | null> {
+  const result = await gatewayCall<{ documents: VmBulkLeadRecord[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: LEADS_COLLECTION,
+    filter: { leadId },
+    limit: 1,
+  });
+  return result.documents?.[0] ?? null;
+}
+
+export async function updateLeadStatus(
+  leadId: string,
+  status: VmLeadStatus,
+  extra: Record<string, unknown> = {},
+): Promise<void> {
+  const at = new Date().toISOString();
+  await gatewayCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: LEADS_COLLECTION,
+    filter: { leadId },
+    update: { $set: { status, updatedAt: at, ...extra } },
+  });
+  await vmAudit({
+    action: 'vm.lead.status_changed',
+    entityId: leadId,
+    ownerTmBaId: typeof extra.ownerTmBaId === 'string' ? extra.ownerTmBaId : null,
+    summary: `VM lead ${leadId} changed to ${status}.`,
+    payload: { status, ...extra },
+  });
+}
+
+export async function recordDeliveryEvent(input: Omit<VmDeliveryEventRecord, 'eventId' | 'createdAt'>): Promise<VmDeliveryEventRecord> {
+  const createdAt = new Date().toISOString();
+  const event: VmDeliveryEventRecord = {
+    ...input,
+    eventId: `vmdeliv_${randomUUID()}`,
+    createdAt,
+  };
+  await tripleStackWrite({
+    id: event.eventId,
+    mongoCollection: DELIVERY_EVENTS_COLLECTION,
+    mongoDoc: event as unknown as Record<string, unknown>,
+    neo4j: {
+      cypher:
+        'MERGE (e:VmDeliveryEvent {eventId: $id}) ' +
+        'SET e.provider = $provider, e.status = $status, e.leadId = $leadId, e.createdAt = datetime($createdAt) ' +
+        'WITH e MATCH (l:VmLead {leadId: $leadId}) MERGE (l)-[:HAS_VM_DELIVERY_EVENT]->(e)',
+      params: {
+        provider: event.provider,
+        status: event.status,
+        leadId: event.leadId,
+        createdAt,
+      },
+    },
+    chroma: {
+      collection: CHROMA_COLLECTION,
+      document: `VM delivery event ${event.status} for lead ${event.leadId} via ${event.provider}.`,
+      metadata: {
+        kind: 'vm_delivery_event',
+        provider: event.provider,
+        status: event.status,
+        leadId: event.leadId,
+        createdAt,
+      },
+    },
+  });
+  return event;
+}
+
+export async function recordProviderWebhook(input: {
+  provider: VmProviderKey;
+  payload: Record<string, unknown>;
+  headers: Record<string, string | string[] | undefined>;
+}): Promise<{ webhookEventId: string; jobId: string }> {
+  const now = new Date().toISOString();
+  const webhookEventId = `vmwebhook_${randomUUID()}`;
+  await tripleStackWrite({
+    id: webhookEventId,
+    mongoCollection: WEBHOOK_EVENTS_COLLECTION,
+    mongoDoc: {
+      webhookEventId,
+      provider: input.provider,
+      payload: input.payload,
+      headers: input.headers,
+      status: 'received',
+      createdAt: now,
+      processedAt: null,
+    },
+    neo4j: {
+      cypher:
+        'MERGE (w:VmProviderWebhook {webhookEventId: $id}) ' +
+        'SET w.provider = $provider, w.status = "received", w.createdAt = datetime($createdAt)',
+      params: { provider: input.provider, createdAt: now },
+    },
+    chroma: {
+      collection: CHROMA_COLLECTION,
+      document: `VM provider webhook received from ${input.provider} at ${now}.`,
+      metadata: {
+        kind: 'vm_provider_webhook',
+        provider: input.provider,
+        createdAt: now,
+      },
+    },
+  });
+  const job = await enqueueVmJob('webhook_event', { webhookEventId, provider: input.provider });
+  return { webhookEventId, jobId: job.jobId };
+}
+
+export async function processWebhookEvent(job: VmQueueJob<{ webhookEventId: string; provider: VmProviderKey }>): Promise<void> {
+  const result = await gatewayCall<{ documents: Array<{ payload: Record<string, unknown>; provider: VmProviderKey }> }>(
+    'mongodb',
+    'query',
+    {
+      database: MONGO_DB,
+      collection: WEBHOOK_EVENTS_COLLECTION,
+      filter: { webhookEventId: job.payload.webhookEventId },
+      limit: 1,
+    },
+  );
+  const event = result.documents?.[0];
+  if (!event) throw new Error('webhook_event_not_found');
+
+  const leadId = typeof event.payload.leadId === 'string' ? event.payload.leadId : null;
+  if (leadId) {
+    const lead = await findLead(leadId);
+    if (lead) {
+      const providerStatus = typeof event.payload.status === 'string' ? event.payload.status : 'webhook_received';
+      await recordDeliveryEvent({
+        provider: event.provider,
+        leadId,
+        vmCampaignId: lead.vmCampaignId,
+        ownerTmBaId: lead.ownerTmBaId,
+        status: 'provider_webhook',
+        providerMessageId: typeof event.payload.providerMessageId === 'string' ? event.payload.providerMessageId : null,
+        providerStatus,
+        dryRun: false,
+        attempt: job.attempts,
+        details: event.payload,
+      });
+    }
+  }
+
+  const at = new Date().toISOString();
+  await gatewayCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: WEBHOOK_EVENTS_COLLECTION,
+    filter: { webhookEventId: job.payload.webhookEventId },
+    update: { $set: { status: 'processed', processedAt: at } },
+  });
+  await completeVmJob(job.jobId, `Webhook ${job.payload.webhookEventId} processed.`);
+}
+
+export async function listDeliveryRowsForManualExport(campaignId: string): Promise<VmBulkLeadRecord[]> {
+  const result = await gatewayCall<{ documents: VmBulkLeadRecord[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: LEADS_COLLECTION,
+    filter: {
+      vmCampaignId: campaignId,
+      status: { $in: ['crm_created', 'queued', 'manual_exported', 'delivery_dry_run'] },
+      normalizedPhone: { $ne: null },
+    },
+    sort: { createdAt: 1 },
+    limit: 10_000,
+  });
+  return result.documents ?? [];
+}

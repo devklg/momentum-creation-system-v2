@@ -8,8 +8,9 @@
  *   - The 100,000 GOAL is named. The current count is NOT shown.
  *   - The pool activity stats (BAs active in 24h, invitations sent today,
  *     new placements in 24h, recruitment velocity) describe team motion.
- *     Chat #115: now live counts via GET /api/p/:token/team-stats; while
- *     loading, render em-dash placeholders so layout doesn't jump.
+ *     Chat #115: now live counts via GET /api/p/:token/team-stats or the
+ *     matching RVM route; while loading, render em-dash placeholders so
+ *     layout doesn't jump.
  *   - The signature line at the bottom of the compounding closer:
  *     "Operational architecture · numbers of record · no performance promise"
  *     locks the section in compliance regardless of what the numbers say.
@@ -19,12 +20,13 @@
  */
 
 import { useEffect, useState } from 'react';
-import { fetchTeamStats, type TeamStatsResponse } from '@/lib/api';
+import { fetchRvmTeamStats, fetchTeamStats, type TeamStatsResponse } from '@/lib/api';
 
 export interface TmAdvantageSectionProps {
   token: string;
   baFirstName: string;
   positionNumber: number;
+  entryKind?: 'pmv' | 'rvm';
   /**
    * Master-content-resolved lead copy (`com.dashboard.advantage`), resolved
    * server-side (TASK-147 inherit-com). Falls back to the built-in lead below.
@@ -33,12 +35,13 @@ export interface TmAdvantageSectionProps {
 }
 
 export function TmAdvantageSection(props: TmAdvantageSectionProps) {
-  const { token, baFirstName, positionNumber, copy } = props;
+  const { token, baFirstName, positionNumber, copy, entryKind = 'pmv' } = props;
   const [stats, setStats] = useState<TeamStatsResponse | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    void fetchTeamStats(token).then((result) => {
+    const load = entryKind === 'rvm' ? fetchRvmTeamStats : fetchTeamStats;
+    void load(token).then((result) => {
       if (cancelled) return;
       if (result.ok) setStats(result.data);
       // On error we leave stats=null — the section renders em-dash
@@ -48,7 +51,7 @@ export function TmAdvantageSection(props: TmAdvantageSectionProps) {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, entryKind]);
 
   return (
     <>

@@ -28,8 +28,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Bot,
   ChevronDown,
   ChevronRight,
+  ListChecks,
+  Megaphone,
+  MessageSquareText,
+  PlayCircle,
   RefreshCw,
   Send,
   SlidersHorizontal,
@@ -722,11 +727,59 @@ export function CockpitPage() {
 
       {/* Secondary cockpit surfaces stay below the PMV first viewport. */}
       <div className="mt-12 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-start">
-        <section>
+        <section className="space-y-8">
           <TrackRecordCard invites={invites} />
+
+          <div>
+            <SectionLabel>Cockpit modules</SectionLabel>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <CockpitModuleCard
+                icon={<ListChecks className="h-4 w-4" aria-hidden="true" />}
+                eyebrow="Prospect CRM"
+                title="Open the hub"
+                body="All active and historical prospect records in one BA-scoped view."
+                action="Open CRM"
+                onClick={() => navigate('/crm')}
+              />
+              <CockpitModuleCard
+                icon={<PlayCircle className="h-4 w-4" aria-hidden="true" />}
+                eyebrow="PMV"
+                title="Work the table"
+                body="Focus queue, video progress, callbacks, notes, follow-ups, and row drawers."
+                action="Jump to PMV"
+                onClick={() => {
+                  document.getElementById('pmv')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                  });
+                }}
+              />
+              <CockpitModuleCard
+                icon={<Megaphone className="h-4 w-4" aria-hidden="true" />}
+                eyebrow="VM Campaigns"
+                title="Prepare a campaign"
+                body="Contact batches, approved message drafts, dry-run status, and engagement counts."
+                action="Open campaigns"
+                onClick={() => navigate('/vm-campaigns')}
+              />
+              <CockpitModuleCard
+                icon={<MessageSquareText className="h-4 w-4" aria-hidden="true" />}
+                eyebrow="Ivory"
+                title="Write the next message"
+                body="Warm invitation and follow-up language stays editable before you send it."
+                action="Open Ivory"
+                onClick={() => navigate('/ivory')}
+              />
+            </div>
+          </div>
         </section>
 
         <aside className="space-y-8">
+          <AgentSupportPanel
+            onOpenCrm={() => navigate('/crm')}
+            onOpenIvory={() => navigate('/ivory')}
+            onOpenTraining={() => navigate('/training/fast-start')}
+          />
           <div id="sponsor" className="scroll-mt-8">
             <SectionLabel>My Sponsor</SectionLabel>
             <SponsorCard
@@ -737,15 +790,6 @@ export function CockpitPage() {
           {/* Group orientation scheduler (Chat #147, wireframe §3.6). Self-
               contained: fetches its own data, books/cancels a seat. */}
           <OrientationCard />
-          <div>
-            <SectionLabel>CRM</SectionLabel>
-            <div className="bg-cream/[0.02] border border-cream/10 rounded-md p-5">
-              <p className="text-cream-mute text-[14px] leading-[1.6]">
-                Notes, follow-ups, tags, re-invite scripts, edits, and remove
-                controls live inside each PMV row drawer.
-              </p>
-            </div>
-          </div>
           {/* Leader credibility — who leads the system (Chat #147, surface #1) */}
           <div>
             <SectionLabel>Leadership</SectionLabel>
@@ -810,6 +854,114 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <p className="font-mono tracking-[0.18em] text-[11px] text-cream-mute uppercase mb-4">
       {children}
     </p>
+  );
+}
+
+function CockpitModuleCard({
+  icon,
+  eyebrow,
+  title,
+  body,
+  action,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  eyebrow: string;
+  title: string;
+  body: string;
+  action: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="min-h-[172px] text-left bg-cream/[0.02] border border-cream/10 rounded-md p-5 hover:border-gold/40 transition-colors"
+    >
+      <span className="inline-flex h-9 w-9 items-center justify-center rounded border border-gold/30 bg-gold/[0.06] text-gold">
+        {icon}
+      </span>
+      <span className="block font-mono tracking-[0.12em] text-[10px] text-cream-faint uppercase mt-4">
+        {eyebrow}
+      </span>
+      <span className="block text-cream text-[18px] leading-[1.2] mt-1">
+        {title}
+      </span>
+      <span className="block text-cream-mute text-[13px] leading-[1.5] mt-2">
+        {body}
+      </span>
+      <span className="block font-mono tracking-[0.12em] text-[10px] text-gold uppercase mt-4">
+        {action} -&gt;
+      </span>
+    </button>
+  );
+}
+
+function AgentSupportPanel({
+  onOpenCrm,
+  onOpenIvory,
+  onOpenTraining,
+}: {
+  onOpenCrm: () => void;
+  onOpenIvory: () => void;
+  onOpenTraining: () => void;
+}) {
+  const actions = [
+    {
+      label: 'Follow up with the warmest prospect in your CRM.',
+      cta: 'Open CRM',
+      onClick: onOpenCrm,
+    },
+    {
+      label: 'Prepare one personal invitation with Ivory.',
+      cta: 'Open Ivory',
+      onClick: onOpenIvory,
+    },
+    {
+      label: 'Keep your Fast Start path moving.',
+      cta: 'Open training',
+      onClick: onOpenTraining,
+    },
+  ];
+
+  return (
+    <div>
+      <SectionLabel>Agent Support</SectionLabel>
+      <div className="bg-cream/[0.02] border border-gold/25 rounded-md p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded border border-gold/30 bg-gold/[0.06] text-gold">
+            <Bot className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="font-display text-[24px] leading-none text-cream">
+              What should I do next?
+            </p>
+            <p className="font-mono tracking-[0.08em] text-[10px] text-cream-faint uppercase mt-1">
+              Steve + Ivory + Michael
+            </p>
+          </div>
+        </div>
+        <ul className="space-y-3">
+          {actions.map((action, index) => (
+            <li key={action.cta} className="border-t border-cream/10 pt-3 first:border-0 first:pt-0">
+              <p className="text-cream-mute text-[13px] leading-[1.5]">
+                <span className="text-gold font-mono text-[11px] mr-2">
+                  {index + 1}.
+                </span>
+                {action.label}
+              </p>
+              <button
+                type="button"
+                onClick={action.onClick}
+                className="font-mono tracking-[0.1em] text-[10px] text-gold uppercase mt-2 hover:underline"
+              >
+                {action.cta} -&gt;
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 

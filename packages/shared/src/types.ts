@@ -4431,3 +4431,747 @@ export interface MichaelTrainingSupportCard {
   /** Provenance: who signed this card. */
   signedBy: string;
 }
+
+/* --------------------------------------------------------------------------
+ * VM Lead Campaign + Prospect CRM Hub foundation (Agent 1 schema pass)
+ * --------------------------------------------------------------------------
+ *
+ * These are additive contracts for the VM/RVM acquisition module. They do not
+ * alter the existing /p/:token PMV spine: imported/tokenized leads are CRM
+ * visible immediately, but Holding Tank visibility still requires the existing
+ * video_complete placement rule.
+ *
+ * Ownership invariant: every lead/prospect record carries ownerTmBaId and
+ * sponsorTmBaId. VM leads also carry leadBatchId and vmCampaignId. Client
+ * payloads must not provide or override those ownership fields; routes stamp
+ * them from the authenticated BA, token, or audited admin correction.
+ */
+
+export type TmBaId = string;
+
+export interface OwnedProspectIdentity {
+  ownerTmBaId: TmBaId;
+  sponsorTmBaId: TmBaId;
+}
+
+export interface VmLeadIdentity extends OwnedProspectIdentity {
+  leadBatchId: string;
+  vmCampaignId: string;
+}
+
+export type ProspectAcquisitionSource =
+  | 'pmv'
+  | 'rvm'
+  | 'qr'
+  | 'manual'
+  | 'referral'
+  | 'social'
+  | 'personal'
+  | 'callback'
+  | 'info_request'
+  | 'ivory'
+  | 'scriptmaker';
+
+export type VmLeadBatchSource =
+  | 'apache_leads'
+  | 'uploaded_csv'
+  | 'manual_import'
+  | 'provider_import'
+  | 'admin_seed'
+  | 'other';
+
+export type VmLeadType =
+  | 'mobile_vm'
+  | 'mobile_sms'
+  | 'email'
+  | 'mixed'
+  | 'unknown';
+
+export type LeadBatchStatus =
+  | 'draft'
+  | 'processing'
+  | 'imported'
+  | 'validated'
+  | 'partially_failed'
+  | 'completed'
+  | 'archived';
+
+export type VmCampaignProvider =
+  | 'leadsrain_style_adapter'
+  | 'slybroadcast_style_adapter'
+  | 'manual_csv'
+  | 'future_telecom_adapter'
+  | 'none';
+
+export type VmCampaignStatus =
+  | 'draft'
+  | 'ready'
+  | 'scheduled'
+  | 'dry_run'
+  | 'running'
+  | 'paused'
+  | 'completed'
+  | 'cancelled'
+  | 'archived';
+
+export type VmDeliveryChannel = 'voicemail' | 'sms' | 'email' | 'manual_export';
+
+export type VmDeliveryStatus =
+  | 'queued'
+  | 'sent'
+  | 'delivered'
+  | 'failed'
+  | 'skipped'
+  | 'opted_out'
+  | 'suppressed'
+  | 'unknown';
+
+export type ProspectCrmStatus =
+  | 'inactive_pre_engagement'
+  | 'active'
+  | 'needs_follow_up'
+  | 'watching'
+  | 'presentation_completed'
+  | 'holding_tank'
+  | 'closed';
+
+export type ProspectCrmDisposition =
+  | 'new_ba'
+  | 'new_customer'
+  | 'interested'
+  | 'not_interested'
+  | 'later'
+  | 'no_response'
+  | 'wrong_number'
+  | 'do_not_contact';
+
+export type ProspectCrmClosedReason =
+  | 'enrolled_as_ba'
+  | 'became_customer'
+  | 'not_interested'
+  | 'do_not_contact'
+  | 'expired'
+  | 'duplicate'
+  | 'invalid_contact'
+  | 'admin_closed';
+
+export type ProspectTimelineEventKind =
+  | 'crm_created'
+  | 'token_created'
+  | 'voicemail_sent'
+  | 'sms_sent'
+  | 'email_sent'
+  | 'link_clicked'
+  | 'activated'
+  | 'info_requested'
+  | 'callback_requested'
+  | 'presentation_started'
+  | 'presentation_25'
+  | 'presentation_50'
+  | 'presentation_75'
+  | 'presentation_completed'
+  | 'dashboard_entered'
+  | 'holding_tank'
+  | 'note_added'
+  | 'follow_up_set'
+  | 'follow_up_cleared'
+  | 'disposition_changed'
+  | 'closed_new_ba'
+  | 'closed_new_customer'
+  | 'closed_not_interested'
+  | 'closed_later'
+  | 'expired'
+  | 'archived'
+  | 'ownership_corrected';
+
+export type VmLeadLifecycleStatus =
+  | 'imported'
+  | 'validated'
+  | 'suppressed'
+  | 'crm_created'
+  | 'token_created'
+  | 'queued'
+  | 'voicemail_sent'
+  | 'sms_sent'
+  | 'email_sent'
+  | 'link_clicked'
+  | 'activated'
+  | 'info_requested'
+  | 'callback_requested'
+  | 'presentation_started'
+  | 'presentation_25'
+  | 'presentation_50'
+  | 'presentation_75'
+  | 'presentation_completed'
+  | 'dashboard_entered'
+  | 'holding_tank'
+  | 'closed_new_ba'
+  | 'closed_new_customer'
+  | 'closed_not_interested'
+  | 'closed_later'
+  | 'expired'
+  | 'archived';
+
+export const VM_LEAD_LIFECYCLE_STATUSES: readonly VmLeadLifecycleStatus[] = [
+  'imported',
+  'validated',
+  'suppressed',
+  'crm_created',
+  'token_created',
+  'queued',
+  'voicemail_sent',
+  'sms_sent',
+  'email_sent',
+  'link_clicked',
+  'activated',
+  'info_requested',
+  'callback_requested',
+  'presentation_started',
+  'presentation_25',
+  'presentation_50',
+  'presentation_75',
+  'presentation_completed',
+  'dashboard_entered',
+  'holding_tank',
+  'closed_new_ba',
+  'closed_new_customer',
+  'closed_not_interested',
+  'closed_later',
+  'expired',
+  'archived',
+] as const;
+
+export interface LeadBatchRecord extends OwnedProspectIdentity {
+  leadBatchId: string;
+  name: string;
+  source: VmLeadBatchSource;
+  sourceLabel: string | null;
+  country: string;
+  leadType: VmLeadType;
+  quantityExpected: number;
+  quantityImported: number;
+  quantitySuppressed: number;
+  quantityInvalid: number;
+  status: LeadBatchStatus;
+  createdAt: IsoTimestamp;
+  updatedAt: IsoTimestamp;
+  completedAt: IsoTimestamp | null;
+}
+
+export interface BulkLeadRecord extends VmLeadIdentity {
+  leadId: string;
+  prospectId: string | null;
+  token: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  email: string | null;
+  city: string | null;
+  stateOrRegion: string | null;
+  country: string | null;
+  source: VmLeadBatchSource;
+  status: VmLeadLifecycleStatus;
+  activatedAt: IsoTimestamp | null;
+  createdAt: IsoTimestamp;
+  updatedAt: IsoTimestamp;
+}
+
+export interface VMCampaignRecord extends OwnedProspectIdentity {
+  vmCampaignId: string;
+  leadBatchId: string;
+  name: string;
+  provider: VmCampaignProvider;
+  status: VmCampaignStatus;
+  voicemailAudioId: string | null;
+  smsTemplateId: string | null;
+  emailTemplateId: string | null;
+  scheduledAt: IsoTimestamp | null;
+  startedAt: IsoTimestamp | null;
+  completedAt: IsoTimestamp | null;
+  createdAt: IsoTimestamp;
+  updatedAt: IsoTimestamp;
+}
+
+export interface VMDeliveryEventRecord extends VmLeadIdentity {
+  deliveryEventId: string;
+  leadId: string;
+  prospectId: string | null;
+  channel: VmDeliveryChannel;
+  provider: VmCampaignProvider;
+  providerMessageId: string | null;
+  status: VmDeliveryStatus;
+  occurredAt: IsoTimestamp;
+  errorCode: string | null;
+  errorMessage: string | null;
+  metadata: Record<string, string | number | boolean | null>;
+}
+
+export interface ProspectCRMRecord extends OwnedProspectIdentity {
+  crmRecordId: string;
+  prospectId: string;
+  leadId: string | null;
+  leadBatchId: string | null;
+  vmCampaignId: string | null;
+  source: ProspectAcquisitionSource;
+  status: ProspectCrmStatus;
+  disposition: ProspectCrmDisposition | null;
+  followUpDueAt: IsoTimestamp | null;
+  closedAt: IsoTimestamp | null;
+  closedReason: ProspectCrmClosedReason | null;
+  createdAt: IsoTimestamp;
+  updatedAt: IsoTimestamp;
+}
+
+export interface ProspectTimelineEventRecord extends OwnedProspectIdentity {
+  eventId: string;
+  prospectId: string;
+  crmRecordId: string | null;
+  leadId: string | null;
+  leadBatchId: string | null;
+  vmCampaignId: string | null;
+  kind: ProspectTimelineEventKind;
+  title: string;
+  occurredAt: IsoTimestamp;
+  payload: Record<string, string | number | boolean | null>;
+}
+
+export interface OwnershipCorrectionAuditRecord {
+  auditId: string;
+  prospectId: string;
+  leadId: string | null;
+  oldOwnerTmBaId: TmBaId;
+  newOwnerTmBaId: TmBaId;
+  oldSponsorTmBaId: TmBaId;
+  newSponsorTmBaId: TmBaId;
+  reason: string;
+  adminUserId: string;
+  changedAt: IsoTimestamp;
+}
+
+export interface ProspectCrmHubFilter {
+  source?: ProspectAcquisitionSource | 'all';
+  status?: ProspectCrmStatus | 'all';
+  disposition?: ProspectCrmDisposition | 'all';
+  campaignId?: string | null;
+  leadBatchId?: string | null;
+  followUp?: 'due' | 'upcoming' | 'none' | 'all';
+  closed?: 'include' | 'exclude' | 'only';
+}
+
+export interface ProspectCrmHubRow extends OwnedProspectIdentity {
+  crmRecordId: string;
+  prospectId: string;
+  leadId: string | null;
+  firstName: string;
+  lastInitial: string;
+  phone: string | null;
+  email: string | null;
+  city: string | null;
+  stateOrRegion: string | null;
+  country: string | null;
+  source: ProspectAcquisitionSource;
+  status: ProspectCrmStatus;
+  disposition: ProspectCrmDisposition | null;
+  followUpDueAt: IsoTimestamp | null;
+  lastSignal: ProspectTimelineEventKind | null;
+  lastSignalAt: IsoTimestamp | null;
+  leadBatchId: string | null;
+  vmCampaignId: string | null;
+}
+
+export interface ProspectCrmHubListResponse {
+  ok: true;
+  generatedAt: IsoTimestamp;
+  filters: ProspectCrmHubFilter;
+  rows: ProspectCrmHubRow[];
+}
+
+export interface ProspectCrmHubDetailResponse {
+  ok: true;
+  record: ProspectCRMRecord;
+  timeline: ProspectTimelineEventRecord[];
+}
+
+export type BulkLeadStatus = VmLeadLifecycleStatus;
+export type ProspectCrmSource = ProspectAcquisitionSource;
+export type ProspectTimelineKind = ProspectTimelineEventKind;
+export type VMCampaignProviderMode = VmCampaignProvider;
+
+export interface CreateLeadBatchPayload {
+  name: string;
+  source: string;
+  country?: string;
+  leadType: string;
+  quantityImported?: number;
+}
+
+export interface CreateVMCampaignPayload {
+  leadBatchId: string;
+  name: string;
+  provider?: VMCampaignProviderMode;
+  voicemailAudioId?: string | null;
+  smsTemplateId?: string | null;
+  emailTemplateId?: string | null;
+  scheduledAt?: IsoTimestamp | null;
+}
+
+export interface ImportBulkLeadPayload {
+  firstName: string;
+  lastName: string;
+  phone?: string | null;
+  email?: string | null;
+  city: string;
+  stateOrRegion: string;
+  country?: string;
+}
+
+export interface ImportBulkLeadsPayload {
+  vmCampaignId: string;
+  leads: ImportBulkLeadPayload[];
+}
+
+export interface LeadBatchResponse {
+  ok: true;
+  batch: LeadBatchRecord;
+}
+
+export interface LeadBatchListResponse {
+  ok: true;
+  batches: LeadBatchRecord[];
+}
+
+export interface VMCampaignResponse {
+  ok: true;
+  campaign: VMCampaignRecord;
+}
+
+export interface VMCampaignListResponse {
+  ok: true;
+  campaigns: VMCampaignRecord[];
+}
+
+export interface ImportBulkLeadsResponse {
+  ok: true;
+  batch: LeadBatchRecord;
+  campaign: VMCampaignRecord;
+  leads: BulkLeadRecord[];
+}
+
+export interface ProspectCrmListResponse {
+  ok: true;
+  records: ProspectCRMRecord[];
+}
+
+export interface ProspectCrmRecordResponse {
+  ok: true;
+  record: ProspectCRMRecord;
+  timeline: ProspectTimelineEventRecord[];
+}
+
+export interface CloseAsNewBaResponse {
+  ok: true;
+  record: ProspectCRMRecord;
+  closedAt: IsoTimestamp;
+}
+
+export interface RvmResolvedTokenPayload extends ResolvedTokenPayload {
+  source: 'rvm';
+  lead: {
+    leadId: string;
+    leadBatchId: string;
+    vmCampaignId: string;
+    status: BulkLeadStatus;
+  };
+  crm: {
+    crmRecordId: string;
+    crmStatus: ProspectCrmStatus;
+    disposition: ProspectCrmDisposition | null;
+  };
+}
+
+export interface RvmInfoRequestPayload {
+  note?: string;
+}
+
+export interface RvmInfoRequestResponse {
+  ok: true;
+  prospectId: string;
+  createdAt: IsoTimestamp;
+}
+
+export type AdminVmMetricTone = 'neutral' | 'good' | 'watch' | 'risk';
+
+export interface AdminVmMetricCard {
+  key: string;
+  label: string;
+  value: number | string;
+  detail: string;
+  tone: AdminVmMetricTone;
+}
+
+export interface AdminVmBaPerformanceRow {
+  tmBaId: string;
+  baName: string;
+  campaignCount: number;
+  batchCount: number;
+  leadsImported: number;
+  leadsContacted: number;
+  activated: number;
+  activationRate: number | null;
+  videoStarts: number;
+  videoCompletions: number;
+  completionRate: number | null;
+  callbacks: number;
+  infoRequests: number;
+  holdingTankEntries: number;
+  closedNewBa: number;
+  lastActivityAt: IsoTimestamp | null;
+}
+
+export interface AdminVmBatchHealthRow {
+  leadBatchId: string;
+  ownerTmBaId: string;
+  ownerName: string;
+  source: string;
+  status: string;
+  quantityImported: number;
+  validated: number;
+  suppressed: number;
+  tokenized: number;
+  crmCreated: number;
+  activated: number;
+  createdAt: IsoTimestamp | null;
+  completedAt: IsoTimestamp | null;
+}
+
+export interface AdminVmCampaignRow {
+  vmCampaignId: string;
+  ownerTmBaId: string;
+  ownerName: string;
+  leadBatchId: string | null;
+  name: string;
+  provider: string;
+  status: string;
+  scheduledAt: IsoTimestamp | null;
+  leadsQueued: number;
+  delivered: number;
+  deliveryFailed: number;
+  activated: number;
+  videoCompletions: number;
+  callbacks: number;
+  closedNewBa: number;
+  createdAt: IsoTimestamp | null;
+}
+
+export interface AdminVmComplianceSummary {
+  suppressedLeads: number;
+  optOuts: number;
+  dncFlags: number;
+  invalidPhones: number;
+  invalidEmails: number;
+  complianceHolds: number;
+  liveSendEnabled: boolean;
+  note: string;
+}
+
+export interface AdminVmProviderHealth {
+  provider: string;
+  mode: 'stub' | 'manual' | 'dry_run' | 'live';
+  status: 'not_configured' | 'healthy' | 'warning' | 'error';
+  lastWebhookAt: IsoTimestamp | null;
+  delivered24h: number;
+  failed24h: number;
+  note: string;
+}
+
+export type AdminVmHookStatus = 'stubbed' | 'wired' | 'disabled';
+
+export interface AdminVmNotificationHook {
+  hookId: string;
+  trigger:
+    | 'vm_lead_activated'
+    | 'prospect_clicked_token'
+    | 'presentation_started'
+    | 'presentation_completed'
+    | 'callback_requested'
+    | 'info_requested'
+    | 'follow_up_due'
+    | 'campaign_completed'
+    | 'import_completed'
+    | 'event_starting_soon';
+  audience: 'owning_ba' | 'admin' | 'team';
+  channel: 'in_app' | 'sms' | 'email' | 'team_news';
+  status: AdminVmHookStatus;
+  privacyBoundary: string;
+}
+
+export interface AdminVmTeamNewsHook {
+  hookId: string;
+  source:
+    | 'campaign_milestone'
+    | 'training_update'
+    | 'event_update'
+    | 'success_story'
+    | 'team_momentum';
+  status: AdminVmHookStatus;
+  reviewRequired: boolean;
+  note: string;
+}
+
+export interface AdminVmOverviewResponse {
+  ok: true;
+  generatedAt: IsoTimestamp;
+  cards: AdminVmMetricCard[];
+  baPerformance: AdminVmBaPerformanceRow[];
+  batches: AdminVmBatchHealthRow[];
+  campaigns: AdminVmCampaignRow[];
+  compliance: AdminVmComplianceSummary;
+  providerHealth: AdminVmProviderHealth[];
+  notificationHooks: AdminVmNotificationHook[];
+  teamNewsHooks: AdminVmTeamNewsHook[];
+  warnings: string[];
+}
+
+export interface AdminVmOwnershipCorrectionPayload {
+  leadId?: string | null;
+  prospectId?: string | null;
+  leadBatchId?: string | null;
+  vmCampaignId?: string | null;
+  oldOwnerTmBaId: string;
+  newOwnerTmBaId: string;
+  oldSponsorTmBaId: string;
+  newSponsorTmBaId: string;
+  reason: string;
+}
+
+export interface AdminVmOwnershipCorrectionResponse {
+  ok: true;
+  applied: false;
+  auditEntryId: string;
+  note: string;
+}
+
+export interface AdminSuccessProfileSummary {
+  baId: string;
+  baName: string;
+  sponsorBaId: string | null;
+  generatedAt: IsoTimestamp | null;
+  primaryWhy: string | null;
+  learningStyle: string[];
+  supportAreas: string[];
+  signedBy: string | null;
+}
+
+export interface AdminAgentMemoryStatus {
+  collection: string;
+  purpose: string;
+  status: 'present' | 'missing' | 'unknown';
+  recordCount: number | null;
+  note: string;
+}
+
+export interface AdminAgentInteractionSummary {
+  agentId: AgentId;
+  events7d: number;
+  lastEventAt: IsoTimestamp | null;
+}
+
+export interface AdminSuccessProfileMemoryBridgeDraft {
+  baId: string;
+  ready: boolean;
+  base: {
+    id: string;
+    type: 'document';
+    schema_version: 1;
+    namespace: 'momentum';
+    source: 'momentum_admin_agent_memory_bridge';
+    created_at: IsoTimestamp;
+    title: string;
+    origin_kind: 'system';
+    service_name: 'admin_agent_memory_bridge';
+  };
+  semanticDocument: string;
+  requiredWritePath: 'quadstack.write';
+  options: { require: ['mongo', 'neo4j', 'chroma']; enforce_schema: true };
+  note: string;
+}
+
+export interface AdminAgentOversightResponse {
+  ok: true;
+  generatedAt: IsoTimestamp;
+  successProfiles: AdminSuccessProfileSummary[];
+  memoryStatus: AdminAgentMemoryStatus[];
+  interactionSummary: AdminAgentInteractionSummary[];
+  bridgeDrafts: AdminSuccessProfileMemoryBridgeDraft[];
+  warnings: string[];
+}
+
+export type SupportAgentKind = 'ivory' | 'michael' | 'steve_success';
+
+export type SupportAgentInteractionKind =
+  | 'invitation_draft'
+  | 'followup_draft'
+  | 'discovery_interview'
+  | 'success_profile_generated'
+  | 'training_recommendation'
+  | 'daily_action_plan'
+  | 'vm_campaign_recommendation'
+  | 'crm_next_action';
+
+export interface AgentInteractionRecord {
+  interactionId: string;
+  agent: SupportAgentKind;
+  tmBaId: TmBaId;
+  relatedProspectId: string | null;
+  relatedCampaignId: string | null;
+  kind: SupportAgentInteractionKind;
+  summary: string;
+  payload: Record<string, unknown>;
+  createdAt: IsoTimestamp;
+}
+
+export type DailyActionPrimaryFocus =
+  | 'invite'
+  | 'follow_up'
+  | 'training'
+  | 'vm_campaign'
+  | 'event'
+  | 'launch';
+
+export interface DailyActionPlanItem {
+  actionId: string;
+  label: string;
+  reason: string;
+  priority: AgentRecommendationPriority;
+  relatedProspectId: string | null;
+  relatedCampaignId: string | null;
+  suggestedAgent: SupportAgentKind | null;
+  dueAt: IsoTimestamp | null;
+  completedAt: IsoTimestamp | null;
+}
+
+export interface DailyActionPlan {
+  planId: string;
+  tmBaId: TmBaId;
+  generatedAt: IsoTimestamp;
+  primaryFocus: DailyActionPrimaryFocus;
+  actions: DailyActionPlanItem[];
+}
+
+export interface SuccessProfileAgentContext {
+  tmBaId: TmBaId;
+  primaryWhy: string | null;
+  successVision: string | null;
+  learningStyle: {
+    watching: number;
+    reading: number;
+    listening: number;
+    doing: number;
+  };
+  communicationPreferences: string[];
+  supportNeeds: string[];
+  recommendedOrientationPath: string | null;
+  recommendedLaunchPath: string | null;
+  recommendedCoachingFocus: string | null;
+  updatedAt: IsoTimestamp;
+}

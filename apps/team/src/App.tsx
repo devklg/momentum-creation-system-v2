@@ -19,6 +19,8 @@ import { InvitationsPage } from './routes/invitations';
 import { VideoLibraryPage } from './routes/video-library';
 import { IvoryPage } from './routes/ivory';
 import { IvoryMomentumPage } from './routes/ivory-momentum';
+import { CrmPage } from './routes/crm';
+import { VmCampaignsPage } from './routes/vm-campaigns';
 import { ProfilePage } from './routes/profile';
 import { LeadershipPage } from './routes/leadership';
 import { PreviewPage } from './routes/preview';
@@ -38,6 +40,8 @@ export function App() {
       <Route path="/video-library" element={<VideoLibraryPage />} />
       <Route path="/ivory" element={<IvoryPage />} />
       <Route path="/ivory/momentum" element={<IvoryMomentumPage />} />
+      <Route path="/crm" element={<CrmPage />} />
+      <Route path="/vm-campaigns" element={<VmCampaignsPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/leadership" element={<LeadershipPage />} />
       <Route path="/training/10-steps" element={<TenStepsPage />} />

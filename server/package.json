@@ -15,7 +15,10 @@
     "seed:webinar-events": "tsx scripts/seed-webinar-events.ts",
     "setup:founder-access": "tsx scripts/setup-founder-access.ts",
     "bootstrap:ivory": "tsx scripts/bootstrap-ivory-collection.ts",
-    "seed:orientation-sessions": "tsx scripts/seed-orientation-sessions.ts"
+    "seed:orientation-sessions": "tsx scripts/seed-orientation-sessions.ts",
+    "worker:vm-import": "tsx src/workers/vmImportWorker.ts",
+    "worker:vm-delivery": "tsx src/workers/vmDeliveryWorker.ts",
+    "worker:vm-webhook": "tsx src/workers/vmWebhookWorker.ts"
   },
   "dependencies": {
     "@momentum/shared": "workspace:*",
