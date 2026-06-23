@@ -49,8 +49,12 @@
  * cross over.
  */
 
+import { getPresentationCopy, type PresentationCopy, type PresentationEntryKind } from '../presentationCopy';
+
 export interface WhatsNextProps {
   baFirstName: string;
+  entryKind?: PresentationEntryKind;
+  copy?: PresentationCopy['whatsNext'];
   /**
    * Switch the page to the dashboard view. Provided by the composer,
    * which owns the view state + the ?view= URL param. Only meaningful
@@ -60,8 +64,9 @@ export interface WhatsNextProps {
   onSeeTeam: () => void;
 }
 
-export function WhatsNext({ baFirstName, onSeeTeam }: WhatsNextProps) {
+export function WhatsNext({ baFirstName, entryKind = 'pmv', copy, onSeeTeam }: WhatsNextProps) {
   const baLabel = baFirstName || 'the person who invited you';
+  const whatsNextCopy = copy ?? getPresentationCopy(entryKind).whatsNext;
 
   return (
     <section className="tm-whatsnext" aria-label="What's next">
@@ -72,42 +77,29 @@ export function WhatsNext({ baFirstName, onSeeTeam }: WhatsNextProps) {
           <div className="tm-whatsnext__keyline" aria-hidden="true" />
 
           <h2 className="tm-whatsnext__headline">
-            Now that you&rsquo;ve seen the video &mdash; what&rsquo;s next?
+            {whatsNextCopy.headline}
           </h2>
 
           {/* Beat 1 — assumptive reveal + demonstration. */}
-          <p className="tm-whatsnext__body">
-            Here&rsquo;s something you may not have noticed. While you were
-            watching, you were placed into our team&rsquo;s line. Not enrolled,
-            not signed up &mdash; <span className="tm-whatsnext__em">placed</span>,
-            so we could show you something real.
-          </p>
-
-          <p className="tm-whatsnext__body">
-            The team you&rsquo;re about to see is being built right now, in real
-            time. This is the mechanism we&rsquo;re so excited about &mdash; how
-            our teams are actually built, and why the opportunity in front of
-            you is real. We wanted you to see it for yourself.
-          </p>
+          {whatsNextCopy.body.map((paragraph) => (
+            <p className="tm-whatsnext__body" key={paragraph}>
+              {paragraph}
+            </p>
+          ))}
 
           <button
             type="button"
             className="tm-whatsnext__cta"
             onClick={onSeeTeam}
           >
-            See the team forming around you &rarr;
+            {whatsNextCopy.cta}
           </button>
 
           <div className="tm-whatsnext__rule" aria-hidden="true" />
 
           {/* Beat 2 — the single soft ask, framing only. */}
           <p className="tm-whatsnext__ask">
-            We&rsquo;re not asking you to buy anything or do anything today. The
-            one next step is a real conversation with{' '}
-            <span className="tm-whatsnext__ask-name">{baLabel}</span> &mdash; the
-            person who can walk you through exactly what&rsquo;s going on, and the
-            advantage that&rsquo;s been created for you here. You&rsquo;ll find the
-            way to start that conversation on the next screen.
+            {whatsNextCopy.ask({ baLabel })}
           </p>
         </div>
       </div>

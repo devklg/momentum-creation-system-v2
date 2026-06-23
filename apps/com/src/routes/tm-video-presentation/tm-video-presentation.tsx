@@ -63,6 +63,7 @@ import { useSearchParams } from "react-router-dom";
 import type { ComProspectCopy } from "@momentum/shared";
 
 import TickerStrip from "./sections/00-TickerStrip";
+import { getPresentationCopy, type PresentationEntryKind } from "./presentationCopy";
 import { PersonalOpen } from "./sections/01-PersonalOpen";
 import Invitation from "./sections/02-Invitation";
 import DrDanVideo from "./sections/03-DrDanVideo";
@@ -146,11 +147,12 @@ const VIEW_PARAM = "view";
 
 export interface TmVideoPresentationProps {
   resolved: ResolveTokenResponse;
-  entryKind?: "pmv" | "rvm";
+  entryKind?: PresentationEntryKind;
 }
 
 export function TmVideoPresentation({ resolved, entryKind = "pmv" }: TmVideoPresentationProps) {
   const { token, prospectFirstName, baFullName } = resolved;
+  const presentationCopy = getPresentationCopy(entryKind);
   const nextEvent = resolved.nextEvent ?? null;
   const baFirstName = useMemo(
     () => baFullName.trim().split(/\s+/)[0] ?? baFullName,
@@ -296,12 +298,14 @@ export function TmVideoPresentation({ resolved, entryKind = "pmv" }: TmVideoPres
         baFullName={baFullName}
         baVoiceCopy={resolved.copy?.heroBaVoiceCopy ?? undefined}
         entryKind={entryKind}
+        copy={presentationCopy.hero}
       />
 
       <Invitation
         prospectFirstName={prospectFirstName}
         baFullName={baFullName}
         baFirstName={baFirstName}
+        copy={presentationCopy.invitation}
       />
 
       <DrDanVideo
@@ -318,7 +322,7 @@ export function TmVideoPresentation({ resolved, entryKind = "pmv" }: TmVideoPres
       <KevinStory />
       <Timing />
       <Leadership />
-      <WhatsNext baFirstName={baFirstName} onSeeTeam={goToDashboard} />
+      <WhatsNext baFirstName={baFirstName} copy={presentationCopy.whatsNext} onSeeTeam={goToDashboard} />
       <Footer baFullName={baFullName} />
 
       <ShellStyles />

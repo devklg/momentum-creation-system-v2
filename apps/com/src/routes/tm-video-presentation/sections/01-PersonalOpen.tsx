@@ -31,11 +31,13 @@
  */
 
 import { CompassRose } from '@/components/CompassRose';
+import { getPresentationCopy, type PresentationCopy, type PresentationEntryKind } from '../presentationCopy';
 
 export interface PersonalOpenProps {
   prospectFirstName: string;
   baFullName: string;
-  entryKind?: 'pmv' | 'rvm';
+  entryKind?: PresentationEntryKind;
+  copy?: PresentationCopy['hero'];
   /**
    * The inviting BA's own personal note ({{baVoiceCopy}} — locked-spec F.2 /
    * 3.9 "inviting BA voice copy"). Optional: rendered as a personal line in
@@ -52,8 +54,9 @@ export function PersonalOpen({
   baFullName,
   baVoiceCopy,
   entryKind = 'pmv',
+  copy,
 }: PersonalOpenProps) {
-  const isRvm = entryKind === 'rvm';
+  const heroCopy = copy ?? getPresentationCopy(entryKind).hero;
 
   return (
     <section
@@ -83,7 +86,7 @@ export function PersonalOpen({
           text-cream-faint
         "
       >
-        {isRvm ? '—  A Team Magnificent Message  ·  Team Magnificent' : '—  A Personal Invitation  ·  Team Magnificent'}
+        {heroCopy.eyebrow}
       </div>
 
       {/* Headline */}
@@ -96,23 +99,11 @@ export function PersonalOpen({
         "
         style={{ fontSize: 'clamp(56px, 9vw, 116px)' }}
       >
-        {isRvm ? (
-          <>
-            {prospectFirstName},
-            <br />
-            <span className="text-gold">{baFullName}</span>
-            <br />
-            has something timely to share.
-          </>
-        ) : (
-          <>
-            {prospectFirstName},
-            <br />
-            <span className="text-gold">{baFullName}</span>
-            <br />
-            thinks highly of you.
-          </>
-        )}
+        {prospectFirstName},
+        <br />
+        <span className="text-gold">{baFullName}</span>
+        <br />
+        {heroCopy.headlineSuffix}
       </h1>
 
       {/* Sub-line */}
@@ -125,9 +116,7 @@ export function PersonalOpen({
         "
         style={{ fontSize: 'clamp(17px, 1.7vw, 19px)' }}
       >
-        {isRvm
-          ? 'Start with the video. It explains the product, the timing, and why Team Magnificent is paying attention.'
-          : 'And has information that is timely and powerful to share with you.'}
+        {heroCopy.subline}
       </p>
 
       {/* Inviting BA's personal note ({{baVoiceCopy}}). Rendered only when the
@@ -155,9 +144,7 @@ export function PersonalOpen({
         "
         style={{ fontSize: 'clamp(15px, 1.5vw, 16px)' }}
       >
-        {isRvm
-          ? 'No pressure, no obligation — just clear information to consider.'
-          : 'You were not chosen randomly. You were chosen deliberately.'}
+        {heroCopy.instruction}
       </p>
 
       {/* Bottom-anchored instruction (out of the way; doesn't fight the hero) */}
