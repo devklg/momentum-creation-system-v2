@@ -14,10 +14,8 @@ import { requireAuth, requireAdmin } from '../middleware/requireAuth.js';
 import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
 import {
   MICHAEL_INTERVIEW_SECTIONS,
-  MICHAEL_RUBRIC_ROWS,
   buildMichaelSystemPrompt,
 } from '../domain/michael-interview-script.js';
-import { MICHAEL_CLASSIFICATION_BANDS } from '@momentum/shared';
 import { listFounderHandoffs } from '../domain/michael-founder-handoff.js';
 import {
   bookMichaelSlot,
@@ -295,7 +293,9 @@ michaelRoutes.post(
 );
 
 /** POST /api/michael/interview/scoring — worker → server.
- *  Final scoring artifact ingest. Triple-stacked; sponsorBaId server-stamped. */
+ *  Final Training Agent + Daily Success Coach artifact ingest. Route name is retained for worker
+ *  compatibility, but Michael no longer scores or classifies BAs. Any
+ *  categoryScores supplied by an older worker are ignored by the domain. */
 const ScoringBody = z.object({
   baId: z.string().min(1),
   callSid: z.string().min(1),
@@ -323,9 +323,8 @@ const ScoringBody = z.object({
     signedBy: z.string(),
   }),
   audioUrl: z.string().nullable(),
-  // #147 — optional rubric scoring. When present, the server computes the
-  // 6-category weighted total → classification and fires the founder handoff.
-  // Raw per-category points; the server clamps each to its rubric max.
+  // Legacy worker compatibility only. Current architecture ignores this field:
+  // Steve discovers context without scoring, and Michael coaches launch.
   categoryScores: z
     .object({
       vision: z.number(),
@@ -354,7 +353,7 @@ michaelRoutes.post(
       const artifact = await ingestInterviewArtifact(payload, categoryScores);
       // eslint-disable-next-line no-console
       console.log(
-        `[audit] michael_scoring_ingested baId=${artifact.baId} sponsor=${artifact.sponsorBaId ?? 'none'} answers=${artifact.answers.length} scored=${categoryScores ? 'yes' : 'no'}`,
+        `[audit] michael_artifact_ingested baId=${artifact.baId} sponsor=${artifact.sponsorBaId ?? 'none'} answers=${artifact.answers.length} classification=retired`,
       );
       res.json({ ok: true, artifact });
     } catch (err) {
@@ -432,13 +431,13 @@ michaelRoutes.get(
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Chat #147 — interview content (29-Q backbone) + founder handoff read
-// (wireframe §3.2, dec_michael_interview / seq 20).
+// Michael Training Agent + Daily Success Coach content + legacy founder handoff read.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** GET /api/michael/interview/script — the 29-Q, 9-section backbone + rubric.
+/** GET /api/michael/interview/script — Michael's guided Training Agent + Daily Success Coach backbone.
  *  Read-only reference for the BA-facing surface (what Michael covers) and for
- *  debugging. Auth-only; the script is BA-facing content, never prospect-facing. */
+ *  debugging. Auth-only; the script is BA-facing content, never prospect-facing.
+ *  No rubric or classification bands are served. */
 michaelRoutes.get(
   '/interview/script',
   requireAuth,
@@ -446,16 +445,15 @@ michaelRoutes.get(
     res.json({
       ok: true,
       sections: MICHAEL_INTERVIEW_SECTIONS,
-      rubric: MICHAEL_RUBRIC_ROWS,
-      bands: MICHAEL_CLASSIFICATION_BANDS,
+      philosophy:
+        'Michael is the Training Agent and Daily Success Coach. Steve owns discovery and Success Profile. Michael does not score, rank, or classify.',
     });
   },
 );
 
-/** GET /api/michael/interview/founder-handoffs — founders-only (Paul + Kevin).
- *  The human-led Fast Start + orientation queue: every BA who finished their
- *  interview, most recent first, with the classification + success profile.
- *  Gated by requireAdmin (ADMIN_BA_IDS = the founders). */
+/** GET /api/michael/interview/founder-handoffs — founders-only legacy read.
+ *  Kept so historical handoff records remain visible. New Michael ingests do
+ *  not create classified founder handoffs. */
 michaelRoutes.get(
   '/interview/founder-handoffs',
   requireAdmin,

@@ -115,7 +115,7 @@ const Q = [
     evidence: 'NOT on disk; ScriptMaker header defers WDYK to Ivory; verified #129', note: 'Standalone /ivory + feeder into the generator. Persistent roster triple-stacked, tagged by product+angle, mark invited/customer/BA/not-interested/follow-up. Does NOT call/text/score (compliance). LLM coaching UNBLOCKED (ANTHROPIC_API_KEY in root .env).', deps: ['llm_layer'] },
   { id: 'wq_llm_layer', surface: 'infra', order: 47, status: 'partial',
     title: 'LLM layer through the gateway (Ivory -> ScriptMaker -> Michael)',
-    evidence: 'server services/anthropic.ts present; key in root .env', note: 'ScriptMaker consumes it (dormant-aware fallback). Ivory coaching + Michael scoring consumers PENDING.', deps: [] },
+    evidence: 'server services/anthropic.ts present; key in root .env', note: 'ScriptMaker consumes it (dormant-aware fallback). Ivory coaching + Michael Training Agent + Daily Success Coach consumers PENDING.', deps: [] },
 
   { id: 'wq_fast_start', surface: 'team', order: 50, status: 'partial',
     title: 'Fast Start Guide (5 modules, first 72 hours)',

@@ -76,7 +76,7 @@ Source checked: current React route files in `apps/*/src/App.tsx` and Express AP
 58. `POST /api/michael/interview/wrong-number` - Record that the Michael call reached the wrong number.
 59. `GET /api/michael/interview/transcript/stream` - Stream Michael interview transcript events.
 60. `POST /api/michael/interview/transcript/chunk` - Save a Michael transcript chunk.
-61. `POST /api/michael/interview/scoring` - Score or save Michael interview results.
+61. `POST /api/michael/interview/scoring` - Legacy route name; saves Michael Training Agent + Daily Success Coach artifact and ignores scoring fields.
 62. `POST /api/michael/interview/stt-fail` - Record a speech-to-text failure during the interview.
 63. `GET /api/michael/interview/cockpit/:downlineBaId` - Admin or sponsor cockpit view of a downline Michael interview.
 

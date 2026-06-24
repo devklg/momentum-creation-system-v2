@@ -45,7 +45,7 @@ The main list is not dense enough. A BA must expand a row to see the saved messa
 
 The status model is too compressed. `computeStatus()` collapses `clicked`, `video_started`, `video_quarter`, `video_half`, and `video_three_quarter` into `opened`. For a PMV, "clicked but never started" and "watched 75%" are completely different follow-up situations.
 
-The scoring model does not exist. There is no hot/warm/cold momentum temperature, and no deterministic score based on real prospect behavior. The only scoring-like component in the reviewed UI is `MichaelEventCard`, but that scores a BA's Michael interview, not a prospect. It should stay separate from PMV prospect scoring.
+The scoring model does not exist. There is no hot/warm/cold momentum temperature, and no deterministic score based on real prospect behavior. The older MichaelEventCard classification path has been retired; PMV should continue using behavior-state progression rather than predictive scoring.
 
 Disposition is useful but not the same as momentum. `interested`, `later`, `not-interested`, `new-customer`, and `new-ba` are BA-entered CRM tags. They do not answer "who should I contact next because they are moving?"
 

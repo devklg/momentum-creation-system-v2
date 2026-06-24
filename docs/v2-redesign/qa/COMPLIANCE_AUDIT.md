@@ -45,7 +45,7 @@ Reviewed examples:
 
 - Fast Start training includes compensation/CV/cycle/rank education for BAs.
 - Questionnaire asks BA-facing income-goal/readiness questions because the backend contract already requires those sponsor-coaching fields.
-- Michael scoring/classification is BA interview coaching context, not prospect lead qualification.
+- Steve/Michael BA support context is not prospect lead qualification, and Michael scoring/classification has been retired.
 - Admin leader/reporting language is admin-only and not prospect-facing.
 
 These are within the documented BA/admin training scope and do not widen prospect-facing claims.

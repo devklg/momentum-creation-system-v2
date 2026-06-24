@@ -2,12 +2,12 @@
  * wf_0040 — Michael interview State 3: complete.
  *
  * Render: gold check, answer readback (the BA's parsed answers from the
- * scoring artifact), the "signed by" provenance, and a CTA to /training/fast-start.
+ * Training Agent + Daily Success Coach artifact), the "signed by" provenance, and a CTA to /training/fast-start.
  * The hard gate opens at this state (server-side, when markCallCompleted
  * fires); this is the BA's first post-Michael landing.
  *
  * Compliance: only the BA's own answers are shown — no income/placement
- * language is rendered. Answer text is whatever Michael's scoring worker
+ * language is rendered. Answer text is whatever Michael's Training Agent + Daily Success Coach worker
  * captured; the script-time enforcement prevents non-compliant prompts in
  * the first place.
  */

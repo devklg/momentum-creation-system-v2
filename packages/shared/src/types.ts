@@ -3400,26 +3400,17 @@ export interface AdminProspectRestoreResponse {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
- * #147 — Michael interview classification + founder handoff (wireframe §3.2,
- * decision ledger dec_michael_interview / seq 20).
+ * LEGACY — retired Michael interview classification + founder handoff.
  *
- * Michael runs the full 29-question, 9-section New Associate Success Interview
- * as a natural guided VOICE conversation. The transcript is scored against a
- * 6-category weighted rubric (total = 100) and resolved to ONE of four
- * associate-type CLASSIFICATIONS.
+ * Reconciled 2026-06-24: Steve owns Discovery + Success Profile with no
+ * scoring, ranking, or prediction. Michael is the Training Agent and Daily Success Coach. New Michael
+ * ingests must not classify a BA or produce Builder / Emerging Leader /
+ * Part-Time Producer / Casual Participant labels.
  *
- * HARD RULE (seq 20): classifications are INTEL TAGS ONLY — never automated
- * routing. There is ONE Fast Start curriculum (wireframe §3.5); the tier never
- * branches a BA into a separate track. Michael's output is the generated
- * success profile + classification, surfaced to the sponsor (existing cockpit
- * card) AND to founders Paul + Kevin, plus a founder-handoff trigger.
+ * These exports remain so historical records and older compiled clients can be
+ * read safely. They are not the current product contract.
  *
- * COMPLIANCE: the rubric scores the associate's OWN stated goals/effort; it
- * carries NO earnings, commission, cycle, or placement language. Tier labels
- * are effort/intent reads, not income predictions.
- *
- * Append-only block — never edit the #134 Michael types above; these are
- * additive and consumed alongside them.
+ * Append-only block — do not remove without a migration.
  * ───────────────────────────────────────────────────────────────────────── */
 
 /** The six weighted rubric categories. */
@@ -3452,16 +3443,14 @@ export interface MichaelCategoryScores {
   experience: number;
 }
 
-/** The four associate-type classifications. Ordered strongest → lightest. */
+/** Legacy classification tiers. Do not produce for new Michael artifacts. */
 export type MichaelClassificationTier =
   | 'builder'
   | 'emerging_leader'
   | 'part_time_producer'
   | 'casual_participant';
 
-/** Computed classification. weightedTotal is the 0..100 sum of clamped
- *  category points; tier is resolved by band. Computed SERVER-SIDE so the
- *  intel-tags-only rule can't be bypassed by a worker payload. */
+/** Legacy computed classification. Historical-read only. */
 export interface MichaelClassification {
   categoryScores: MichaelCategoryScores;
   /** 0..100, sum of clamped per-category points. */
@@ -3475,7 +3464,7 @@ export interface MichaelClassification {
   signedBy: string;
 }
 
-/** Band edges for each tier, inclusive. weightedTotal ∈ [min, max]. */
+/** Legacy band edges for old records. */
 export const MICHAEL_CLASSIFICATION_BANDS: ReadonlyArray<{
   tier: MichaelClassificationTier;
   label: string;
@@ -3488,8 +3477,7 @@ export const MICHAEL_CLASSIFICATION_BANDS: ReadonlyArray<{
   { tier: 'casual_participant', label: 'Casual Participant', min: 0, max: 49 },
 ] as const;
 
-/** The generated success profile — the sponsor/founder-readable synthesis of
- *  the interview. Effort/intent framed; never income or placement. */
+/** Legacy Michael-generated profile. Current Success Profile is Steve-owned. */
 export interface MichaelSuccessProfile {
   baId: string;
   classification: MichaelClassification;
@@ -3503,9 +3491,7 @@ export interface MichaelSuccessProfile {
   signedBy: string;
 }
 
-/** Founder-handoff record. Fired once when an interview artifact is ingested:
- *  notifies founders Paul + Kevin that the BA is ready for human-led Fast Start
- *  + orientation. Persisted (triple-stacked) and surfaced on the founder read. */
+/** Legacy founder-handoff record. New Michael ingests do not create this. */
 export interface MichaelFounderHandoff {
   handoffId: string;
   baId: string;
@@ -3530,17 +3516,15 @@ export interface MichaelFounderHandoff {
   };
 }
 
-/** Worker → server optional addendum on POST /api/michael/interview/scoring.
- *  When present, the server computes the classification + success profile from
- *  these raw category points and fires the founder handoff. Omitted = the
- *  interview is recorded without a classification (e.g. an STT-degraded call). */
+/** Legacy worker addendum on POST /api/michael/interview/scoring.
+ *  Accepted for compatibility; ignored by current server code. */
 export interface MichaelScoringCategoryInput {
   categoryScores: MichaelCategoryScores;
 }
 
-/** Enriched sponsor cockpit card — the #134 card plus the #147 classification
- *  + success profile. classification is null when the interview was ingested
- *  without category scores. */
+/** Sponsor cockpit card shape retains nullable legacy fields for compatibility.
+ *  Current server returns null for both; Steve-derived training support is the
+ *  active Success Profile read. */
 export interface MichaelCockpitCardClassified extends MichaelCockpitCardData {
   classification: MichaelClassification | null;
   successProfile: MichaelSuccessProfile | null;
@@ -4022,7 +4006,7 @@ export interface AgentEventResponse {
  * SUPPORT, and PREPARE for that BA.
  *
  * RELATIONSHIP TO MICHAEL: Steve does NOT replace Michael and does NOT touch
- * Michael's schedule, interview, or scoring flow. The ONLY link is a one-way
+ * Michael's schedule or Training Agent + Daily Success Coach artifact flow. The ONLY link is a one-way
  * `michaelHandoffSummary` string Steve writes onto its OWN artifact so a human
  * (or Michael's worker, if it chooses to read it) can lead warm. Nothing here
  * mutates michael_* collections or the Michael graph.
@@ -4171,7 +4155,7 @@ export interface SteveSuccessProfile {
   /** What training to point them at first, given how they learn. */
   trainingRecommendations: SteveRecommendation[];
   /** Short context summary Steve hands to Michael so Michael can lead warm.
-   *  CONTEXT ONLY — it does not alter Michael's schedule/interview/scoring. */
+   *  CONTEXT ONLY — it does not alter Michael's schedule or Training Agent + Daily Success Coach artifact. */
   michaelHandoffSummary: string;
   generatedAt: IsoTimestamp;
   signedBy: string;

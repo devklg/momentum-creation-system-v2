@@ -73,13 +73,13 @@ Live/written edge names found: `UPLINE_IS` (210 live) but registration writes
   LIVE (Anthropic key set). Reads master content (`team.ivory.coach_prompt`),
   walks the graph (`MATCH (n:IvoryName)`). GAPS: create=fire-once; updates are
   separate Mongo-then-Neo4j (desync); coaching voice inert until Wave 2.
-- **Michael** (interview/score/handoff): `michaelScoring.ts` (597) well-built —
-  `sponsorBaId` server-stamped (3.5 honored), idempotent `MI-${baId}`, handoff
-  fired best-effort. GAPS: `:BA` drift, transcript chunks Mongo-ONLY by design
-  (never embedded — only a 500-char summary goes to Chroma), re-score silently
-  skips Chroma (stale embedding), fire-once. `michael-founder-handoff.ts` (375)
-  has good dormant-safe dispatch but `:BA` MERGE, update path desync, and
-  `getFounderRecipients` failure aborts the whole handoff before persist.
+- **Michael** (Training Agent + Daily Success Coach artifact): `michaelScoring.ts` is sponsor-stamped
+  and idempotent. The 2026-06-24 correction retires scoring/classification:
+  legacy score fields are ignored and no founder handoff is created for new
+  ingests. GAPS: `:BA` drift, transcript chunks Mongo-ONLY by design (never
+  embedded — only a 500-char summary goes to Chroma), re-ingest silently skips
+  Chroma (stale embedding), fire-once. `michael-founder-handoff.ts` remains
+  legacy/historical-read code only.
 - **Training** (`domain/training.ts`, 325): BEST FILE. Real writes, forward-only,
   idempotent, correct `:BrandAmbassador`, cross-checks invites from spine.
   `fast_start_progress` empty only because no BA has run. GAPS: same fire-once +

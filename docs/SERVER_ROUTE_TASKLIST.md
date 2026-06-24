@@ -118,8 +118,8 @@ Name: ________________________________    Date: ____________________
 109. [ ] POST /api/ivory/invitation-agent/mint
 110. [ ] POST /api/michael/book
 111. [ ] GET /api/michael/interview/cockpit/:downlineBaId
-112. [ ] GET /api/michael/interview/founder-handoffs
-113. [ ] POST /api/michael/interview/scoring
+112. [ ] GET /api/michael/interview/founder-handoffs — legacy read only
+113. [ ] POST /api/michael/interview/scoring — legacy name; saves Training Agent + Daily Success Coach artifact, ignores scoring
 114. [ ] GET /api/michael/interview/script
 115. [ ] GET /api/michael/interview/state
 116. [ ] POST /api/michael/interview/stt-fail

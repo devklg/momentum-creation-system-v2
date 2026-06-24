@@ -1,18 +1,17 @@
 /**
- * Michael's backbone — the full 29-question, 9-section New Associate Success
- * Interview (wireframe §3.2, decision ledger dec_michael_interview / seq 20).
+ * Michael's backbone — Training Agent + Daily Success Coach conversation after Steve's Discovery &
+ * Success Interview.
  *
  * This file is the SCRIPT (the backbone), not the conversation. Michael runs it
  * as a natural guided VOICE conversation: the prompts below are what he leads
- * with, and the LLM expands them — adaptive "dig to the emotional why"
- * follow-ups are his interview STYLE, not a fixed reading. The 29 prompts give
- * the call a spine and guarantee every rubric category gets covered; the model
- * is free to reorder gently, mirror the BA's language, and follow threads.
+ * with, and the LLM expands them. The prompts give the call a spine for
+ * clarity, confidence, launch support, and action readiness; they are not a
+ * scoring instrument.
  *
- * Each question is tagged with the single rubric category it primarily informs
- * (or null for rapport/teaching turns that aren't scored). The scoring worker
- * uses these tags to anchor its per-category reads against
- * server/src/domain/michael-classification.ts.
+ * Each question retains a legacy `category` tag for old worker compatibility
+ * and future support analytics. Those tags are not used to classify, rank, or
+ * predict a BA. Steve owns Discovery and the Success Profile; Michael owns
+ * training support and daily success coaching.
  *
  * COMPLIANCE (locked-spec 3.10 / 3.12): the interview asks the associate's OWN
  * goals, effort, and history — that is fine. Michael's RESPONSES must never
@@ -31,7 +30,7 @@ import { MICHAEL_RUBRIC_MAX } from '@momentum/shared';
 import { readMasterContent, interpolateMasterContent } from '../services/masterContent.js';
 
 /** Provenance literal stamped on script-derived artifacts. */
-export const MICHAEL_SIGNED_BY = 'Michael Magnificent · New Associate Success Interview';
+export const MICHAEL_SIGNED_BY = 'Michael Magnificent · Training Agent + Daily Success Coach';
 
 /** Raw section definitions. Question numbers are assigned sequentially below so
  *  inserting/removing a question never desyncs the 1..29 numbering. */
@@ -309,7 +308,7 @@ export const MICHAEL_INTERVIEW_SECTIONS: MichaelInterviewScriptSection[] = (() =
 export const MICHAEL_INTERVIEW_QUESTIONS: MichaelInterviewScriptQuestion[] =
   MICHAEL_INTERVIEW_SECTIONS.flatMap((s) => s.questions);
 
-/** Rubric rows for the script response (category → max points + label). */
+/** Legacy focus rows. Retained for compatibility; not served as a scoring rubric. */
 export const MICHAEL_RUBRIC_ROWS: Array<{
   category: MichaelRubricCategory;
   max: number;
@@ -332,7 +331,7 @@ export const MICHAEL_RUBRIC_ROWS: Array<{
  * The scaffold from the master-content key `team.michael.interview_prompts`
  * (override-else-code-default via readMasterContent) is folded in as Michael's
  * framing line so Kevin can retune the opening without a code change — the 29-Q
- * backbone itself stays code-owned (it is the rubric's anchor).
+ * backbone itself stays code-owned.
  *
  * Resilience: readMasterContent already degrades to the code default on a
  * gateway hiccup, so this never hard-fails the call setup.

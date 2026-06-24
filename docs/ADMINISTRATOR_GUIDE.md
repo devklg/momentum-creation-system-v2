@@ -581,14 +581,18 @@ The agents serve the human, never the reverse (Foundation Art. XIX). They are:
 
 | Agent | Role (Foundation) | Module surface | Build state |
 | --- | --- | --- | --- |
-| **Michael** | Mentor / Discovery Interview, classify, founder handoff (Art. XI) | `michael-interview-script.ts`, `michael-classification.ts`, `michaelScoring.ts`, `michael-founder-handoff.ts`, `michael-schedule.ts` | `PARTIAL` |
+| **Steve** | Discovery / Success Profile, no scoring or ranking | `steve-success-interview.ts`, `michael-training-support.ts` | `PARTIAL` |
+| **Michael** | Training Agent + Daily Success Coach: teach, clarify, support, build confidence, prepare action, recommend manageable daily rhythm | `michael-interview-script.ts`, `michaelScoring.ts`, `michael-schedule.ts`, `todaysActions.ts`, `training.ts` | `PARTIAL` |
 | **Ivory** | Invitation through service (Art. XIV) | `ivory.ts`, `generator.ts`, `scriptmaker.ts` | `PARTIAL` |
-| **Daily Success Coach** | Consistency / momentum (Art. XVIII) | `todaysActions.ts`, `training.ts` | `PARTIAL` |
 
 ### 11.2 The locked governance for agents
 
 - **Human authority (Art. XIX.1).** Every agent recommendation is advisory; a
   human decides. No agent performs an irreversible action autonomously.
+- **No predictive labels.** Steve and Michael must not classify a BA as Builder,
+  Part-Time, Casual, high-potential, low-potential, or any equivalent ceiling.
+  The system adapts support from context and observed action; it does not
+  predict who will succeed.
 - **Explainability (Multi-DB Governance, Principle 4).** A recommendation must be
   traceable to source, context, relationship, observation, outcome. Until the
   observation/outcome layer exists (Section 12), explainability is limited to the
@@ -615,8 +619,9 @@ the staged activation path.
 ### 11.5 Administrative controls
 
 - Configure agent voice/content (master content) — audited.
-- Configure Michael's interview script, scoring rubric, and handoff tiers —
-  owner-approved decisions.
+- Configure Steve Discovery prompts and Michael Training Agent + Daily Success Coach prompts —
+  owner-approved decisions. Do not configure scoring rubrics or handoff tiers
+  for BA classification.
 - Confirm `VISIBLE_TO_SPONSOR` gating behaves at read for any interview-surfacing
   change.
 

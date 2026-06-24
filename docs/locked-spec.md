@@ -306,7 +306,7 @@ The dashboard renders in this fixed order:
 1. **Arrival** — you're here, you're in. Position number. "Invited by [BA Name]" line.
 2. **Opportunity** — the market scope. $6.8T wellness, $200B GLP-1 by 2033, 72% overweight, $1,200/mo synthetic. Sources cited.
 3. **Mechanic** — the Power of 2, the 2-in-72 rhythm, the cascading doubling. Compliance-safe structural mechanic, never income, never placement promise. Destination card: 100,000 qualified BAs.
-4. **Live Place** — position number, behind-you live counter (the team forming beneath the prospect — the FOMO mechanic, a prominent large number climbing in real time as new placements arrive), position stack (continuously animated vertical ticker tape of recent placements with city/state and timestamps). Vertical scroll layout, no left/right columns. Per Chat #84: "we will also show how many people are beneath or behind the prospect to demonstrate the size of team growing." Amended Chat #115.
+4. **Live Place** — position number, behind-you live counter (the team forming beneath the prospect — the FOMO mechanic, a prominent large number climbing in real time as new placements arrive), position stack (continuously animated vertical ticker tape of recent placements with city/state and timestamps). Vertical scroll layout, no left/right columns. Per Chat #84: "we will also show how many people are beneath or behind the prospect to demonstrate the size of team growing." Amended Chat #115. This counter and ticker are explicitly permitted under §3.10 (see the head-count carve-out): they show placement activity in the prospect's own pool line, not total organizational size, and carry the §3.8 disclaimer.
 5. **TM Advantage** — Kevin's quote, the 100,000 mission board, pool grid stats, compounding closer.
 6. **Your Next Move** — "Let's have a real conversation about this unfolding new opportunity." Two CTAs: personal callback from inviting BA (gold, primary) or webinar reservation (teal, secondary).
 
@@ -362,7 +362,9 @@ The marketing layer shows reality without making promises. The compensation laye
 - Placement or queue-position-equals-leg-position promises (queue position is timestamp order in the pool; THREE's binary leg position is something else entirely — they are not the same and must not be conflated)
 - AI prospecting (Michael is BA-facing only)
 - Compensation cycle math, volume math, or rank math
-- A current head count of the team (the 100,000 goal is named; the current count is not)
+- A current total head count of the **team or company** — the overall size of the organization (e.g. "we have N,NNN BAs total"). The 100,000 figure is named only as the mission goal; the organization's current total is not shown.
+
+  *This prohibition does not restrict the §3.4 Live Place / Holding Tank momentum mechanic.* The behind-you/beneath-you placement counter and the recent-placements ticker are permitted: they demonstrate real-time **placement activity within the prospect's own pool line** — how the collective is recruiting and where the prospect sits in that motion — not the organization's total size. They reflect real placement events, carry the §3.8 disclaimer verbatim, and remain bound by every other rule in this section: no earnings, compensation, cycle/volume/rank math, and no placement-equals-leg-position promise may attach to them. Where the display implies that joining an active team is advantageous, "benefit" means **positional benefit** — joining a line already in motion, and spillover as a structural mechanic of the binary — and never a representation of money earned. *Disambiguated 2026-06-23, scoped to Holding Tank / Live Place.*
 - Direct comparison to other teams or other companies
 - THREE International branding (see 3.8)
 
@@ -378,13 +380,17 @@ Locked Chat #89. Compliance enforcement does **not** live in `/admin` as a manua
 
 Kevin sees aggregated metrics on enforcement in `/admin` Live Operations and Reporting — count of drafts auto-corrected, master content saves blocked, render failures. Not a queue of individual items to triage.
 
-## 3.12  Michael
+## 3.12  Steve and Michael
 
-Michael Magnificent is an outbound voice agent (Telnyx-based) that calls every new BA shortly after signup, conducts a short structured interview, and feeds the transcript and scoring back into the BA's record and their upline cockpit.
+Steve conducts the New BA Discovery & Success Interview and is the **sole interviewer** in the system — the canonical 36-question / 11-section script. Steve creates the Success Profile and does **not** score, rank, classify, predict, or label the BA. The Success Profile is descriptive support context only: goals, why, current situation, experience, questions, training interests, available time, learning style, concerns, and Who Do You Know progress.
 
-Michael is BA-facing only. **Michael is never prospect-facing. Michael never appears on `.com`.** Michael does not handle objections, does not pitch, does not qualify. Michael's job is to teach the new BA Layer 1 (two legs, find two people, the team grows beneath you, your sponsor will help you with the rest) and to capture context for the sponsor.
+Michael Magnificent is the **Training Agent and Daily Success Coach**. He no longer interviews — interviewing is Steve's alone — and he does not score, rank, or classify anyone; that scaffolding is retired entirely. Michael is a BA-facing voice agent (LiveKit-on-Telnyx, STT→LLM→TTS) who picks up Steve's Success Profile and supports both learning and daily rhythm: he teaches Layer 1 (two legs, find two people, the team grows beneath you, your sponsor helps with the rest), answers questions, reinforces the training curriculum, builds confidence, recommends manageable daily actions, and prepares the BA for orientation and Launch Center action — meeting each BA the way Steve's profile says works for them.
+
+Michael is BA-facing only. **Michael is never prospect-facing. Michael never appears on `.com`.** Michael does not interview, score, classify, handle objections, pitch, or qualify. Everyone receives the same opportunity, tools, training, and support; actions and outcomes determine results.
 
 Comp plan is deferred until the new BA has signed two people and earned enough conviction to want to know more.
+
+*Amended 2026-06-24: Steve is the sole success interviewer; Michael is repurposed from interviewer/scorer to the Training Agent and Daily Success Coach; all Michael interview and scoring/classification logic is retired from the code.*
 
 ## 3.13  Communication
 

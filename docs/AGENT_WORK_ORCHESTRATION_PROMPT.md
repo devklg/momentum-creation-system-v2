@@ -359,9 +359,11 @@ experience
 goals
 ```
 
-Michael creates the Success Profile for admin/agent support.
+Steve creates the Success Profile for admin/agent support.
 
 Michael is not an evaluator, qualifier, or judge.
+
+Michael is the Training Agent and Daily Success Coach. He does not score, rank, classify, or predict.
 
 ---
 

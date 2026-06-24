@@ -516,7 +516,7 @@ Steve can recommend:
 
 Michael does not run VM campaigns.
 
-Michael's Success Profile helps Steve and Ivory adapt coaching and communication support to the BA.
+Steve's Success Profile helps Michael, Steve, and Ivory adapt coaching and communication support to the BA.
 
 ---
 

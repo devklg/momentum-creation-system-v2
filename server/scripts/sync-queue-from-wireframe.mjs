@@ -18,7 +18,8 @@
 
 import { readFile } from 'node:fs/promises';
 
-const GATEWAY = 'http://localhost:2525/api/execute';
+const GATEWAY_BASE = (process.env.GATEWAY_URL || 'http://localhost:2526/api').replace(/\/$/, '');
+const GATEWAY = `${GATEWAY_BASE}/execute`;
 const DB = 'momentum';
 const COLL = 'work_queue_leaves';
 const WIREFRAME = 'docs/project-wireframe.md';

@@ -53,7 +53,8 @@ in the helper today.
 ### 2.1 Why one global policy is wrong
 
 This app is a tool that **trains and sponsors** via three agents — **Ivory**
-(sponsorship coach), **Michael** (interview/classify/handoff), and the
+(sponsorship coach), **Steve** (Discovery + non-scored Success Profile),
+**Michael** (daily success coach), and the
 **training agent** (Fast Start concierge). Those agents *reason over the graph
 and the knowledge layer* to coach. So the integrity bar is set by a single
 test, applied to every write:
@@ -142,7 +143,9 @@ Replace fire-once `tripleStackWrite` with a tiered writer:
    resolving token, never from a request body, and is never updated except
    through an audited admin override.
 6. **Compliance fields carry no earnings/rank/placement claims** (locked-spec
-   3.10/3.11). Scoring/classification is intel-only and computed server-side.
+   3.10/3.11). Current architecture: Steve creates the non-scored Success
+   Profile; Michael records training/daily-success context only. No BA classification
+   is computed or displayed.
 7. **Append-only collections never update or delete**: `audit_log`,
    `crm_notes`, `invitation_activity`, `broadcast_optouts`.
 
@@ -236,9 +239,9 @@ default. Only entities that earn a graph edge or a semantic search are projected
 - id: `baId`(one per BA). fields: `sponsorBaId|null, callSid, startedAt, completedAt, transcript[]{sequence,speaker,text,occurredAt}, answers[]{questionId,prompt,answerText,scoringTags[]}, scoring{overallTone,highlightTags[],signedBy}, audioUrl|null`.
 - Neo4j: optional — `(:MichaelInterview {baId})-[:INTERVIEW_OF]->(:BrandAmbassador)` only if graph queries need it.
 - Chroma: **yes** — `mcs_michael_interviews`, embed transcript/answer text (384-dim, GPU service). One of the four real Chroma uses.
-- indexes: unique `baId`, index `sponsorBaId`, `completedAt`. invariants: `sponsorBaId` stamped server-side from BA record at ingest (3.5); classification computed server-side; worker auth via `MICHAEL_WORKER_SECRET`.
+- indexes: unique `baId`, index `sponsorBaId`, `completedAt`. invariants: `sponsorBaId` stamped server-side from BA record at ingest (3.5); no new classification is computed; worker auth via `MICHAEL_WORKER_SECRET`.
 
-**`michael_founder_handoffs`** — Source: `types.ts:MichaelFounderHandoff`. id `handoffId`; fields `baId, baFirstName, sponsorBaId|null, tier, tierLabel, weightedTotal, successProfile{}, completedAt, firedAt, founderBaIds[], fastStartReady, dispatch{sms,email}`. indexes: `baId`, `firedAt`. invariant: fired once per ingest.
+**`michael_founder_handoffs`** — Legacy collection from the retired scored-Michael path. New Michael ingests do not create classified founder handoffs. Human orientation/Launch Center readiness should read Steve Success Profile + Michael completion state instead.
 
 ### 5E. Onboarding (sponsor-led)
 
@@ -441,7 +444,7 @@ rediscovered one file at a time.
 |---|---|---|---|
 | **Registration** (`ba.ts`) | BA joins the membership tree with a sponsor edge | Writes `:BA` not `:BrandAmbassador`; `MERGE` invents phantom sponsor; Mongo-then-Neo4j fire-once — can orphan a BA with no edge | `ba.ts` ~205 `MERGE (s:BA)...MERGE (n)-[:SPONSORED_BY]->(s)` |
 | **Ivory** (`ivory.ts`) | LLM coach that walks a live graph; voice from master content | Coach LIVE (key set); create fire-once; **updates are separate Mongo-then-Neo4j (desync)**; coaching voice **inert until Wave 2** | `ivory.ts` 317/337 split update; `readMasterContent('team.ivory.coach_prompt')` |
-| **Michael interview** (`michaelScoring.ts`) | Transcript+score "feed GraphRAG"; sponsor-stamped | `sponsorBaId` correctly server-stamped; idempotent; BUT `:BA` drift; **transcript Mongo-only, never embedded** (only 500-char summary to Chroma); re-score silently skips Chroma | `michaelScoring.ts` artifactCypher `MERGE (b:BA)`; `appendTranscriptChunk` "Mongo only"; `mirrorArtifactToGraphAndChroma` skips Chroma |
+| **Michael Training Agent + Daily Success Coach artifact** (`michaelScoring.ts`) | Launch transcript/context feed GraphRAG; sponsor-stamped; no classification | `sponsorBaId` correctly server-stamped; idempotent; retired score inputs ignored; BUT `:BA` drift; **transcript Mongo-only, never embedded** (only 500-char summary to Chroma); re-ingest silently skips Chroma | `michaelScoring.ts` artifactCypher `MERGE (b:BA)`; `appendTranscriptChunk` "Mongo only"; `mirrorArtifactToGraphAndChroma` skips Chroma |
 | **Michael handoff** (`michael-founder-handoff.ts`) | Durable founder queue + dormant-safe dispatch | Dispatch well-built; idempotent; BUT `:BA` MERGE; update path desync; `getFounderRecipients` failure aborts before persist | `michael-founder-handoff.ts` handoffCypher `MERGE (b:BA)` |
 | **Training** (`training.ts`) | Per-BA Fast Start trail, feeds the training agent | BEST FILE — real writes, forward-only, idempotent, **correct `:BrandAmbassador`**; same fire-once + phantom-MERGE gap; `fast_start_progress` empty only because no BA has run | `training.ts` `MERGE (b:BrandAmbassador)` |
 | **Master content** (`masterContent.ts`) | Agents read copy via `code default → master override` | Read leg exists w/ good fallback; **consumers still read hardcoded defaults — saved overrides functionally inert** until Wave 2 rewires | `masterContent.ts` header: "a saved override is functionally inert" |

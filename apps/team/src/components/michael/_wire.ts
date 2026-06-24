@@ -73,13 +73,13 @@ export interface MichaelCockpitCardData {
   scoring: MichaelScoringSummary;
   audioUrl: string | null;
   signedBy: string;
-  // #147 — classification + success profile (intel tags only). Optional so the
-  // mirror tolerates a pre-#147 artifact ingested without rubric scoring.
+  // Legacy nullable fields. Current server returns null; Steve owns Success
+  // Profile and Michael no longer classifies.
   classification?: MichaelClassification | null;
   successProfile?: MichaelSuccessProfile | null;
 }
 
-/* ─── #147 Michael classification + success profile (mirror of shared) ─── */
+/* ─── Legacy Michael classification types (mirror of shared) ─── */
 
 export type MichaelClassificationTier =
   | 'builder'
@@ -107,6 +107,7 @@ export interface MichaelClassification {
 
 export interface MichaelSuccessProfile {
   baId: string;
+  /** Legacy: current Success Profile is Steve-owned. */
   classification: MichaelClassification;
   headline: string;
   strengths: string[];

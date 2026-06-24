@@ -2,7 +2,8 @@
  * Agent Orchestration Layer.
  *
  * Coordinates existing agent surfaces without rewriting their logic:
- * - Michael remains the interview/scoring source of truth.
+ * - Steve remains the Discovery/Success Profile source of truth.
+ * - Michael remains the Daily Success Coach conversation source of truth.
  * - Ivory remains the warm-market/generator source of truth.
  * - Steve is represented here only as a daily-action lane over existing
  *   cockpit projections; no outbound automation, scoring, or messaging.

@@ -288,12 +288,12 @@ const children = [
   rule(),
   pageBreak(),
 
-  // ===== SECTION D — MICHAEL INTERVIEW UI =====
-  h1('D.  The Michael Magnificent interview \u2014 BA-facing surface'),
-  p('Michael is not a chat agent. Michael is the outbound voice that calls every new BA shortly after signup, conducts a short structured interview, and feeds the transcript and scoring back into the BA\u2019s record and their upline cockpit. The BA-facing surface inside .team is the visual companion to that call \u2014 not a replacement for it.'),
+  // ===== SECTION D — MICHAEL LAUNCH COACH UI =====
+  h1('D.  The Michael Magnificent Daily Success Coach call \u2014 BA-facing surface'),
+  p('Michael is not a chat agent. Michael is the outbound voice that calls every new BA shortly after signup as a Daily Success Coach. Steve owns Discovery and the Success Profile without scoring or classification. Michael uses that context where available, clarifies the path, answers questions, teaches Layer 1, and prepares the BA for orientation and Launch Center action. The BA-facing surface inside .team is the visual companion to that call \u2014 not a replacement for it.'),
 
   h2('D.1  Michael, in the language of the system'),
-  quote('Michael Magnificent is the onboarding voice. When a brand new BA gets enrolled, Michael calls them within minutes \u2014 not to teach the comp plan, but to teach Layer 1. \u201CYou joined Team Magnificent. Here\u2019s how this works: you have two legs. You need to find two people. The team grows beneath you. Here are your tools. Your sponsor will help you with the rest.\u201D Comp plan deferred until the BA has signed two people and earned enough conviction to want to know more.'),
+  quote('Michael Magnificent is the daily success coach. When a brand new BA gets enrolled, Michael calls them within minutes \u2014 not to judge, score, or teach the comp plan, but to teach Layer 1. \u201CYou joined Team Magnificent. Here\u2019s how this works: you have two legs. You need to find two people. The team grows beneath you. Here are your tools. Your sponsor will help you with the rest.\u201D Comp plan deferred until the BA has signed two people and earned enough conviction to want to know more.'),
   note('Verbatim from project knowledge, captured in the locked description of the agents\u2019 roles.'),
 
   h2('D.2  Where Michael lives in .team'),
@@ -306,7 +306,7 @@ const children = [
   p('From the moment the BA accepts the welcome through the moment Michael\u2019s outbound call rings their phone. The page shows:'),
   bullet('Status pill (gold): \u201CMichael will call you shortly at [BA phone number].\u201D'),
   bullet('A live waiting indicator \u2014 a soft pulsing dot, the kind of detail that signals \u201Csystem is working, stand by.\u201D'),
-  bullet('A one-line context note: \u201CMichael conducts a short voice interview to help your sponsor know how to support you best. The call usually takes 5 to 8 minutes.\u201D'),
+  bullet('A one-line context note: \u201CMichael conducts a short Daily Success Coach call to help your sponsor support your next step. The call usually takes 5 to 8 minutes.\u201D'),
   bullet('A small button beneath: \u201CMy phone number is wrong \u2014 update it.\u201D Links to the profile page.'),
 
   h3('State 2 \u2014 Call in progress'),
@@ -324,7 +324,7 @@ const children = [
   bullet('A primary CTA: \u201CContinue to the Fast Start Guide.\u201D Links to /fast-start.'),
 
   h2('D.4  What Michael captures'),
-  p('Michael\u2019s script is locked separately and lives in the agent prompt store (kevin_library, id nwm_strategist_gateway_prompt_v1 family). The .team surface displays the captured answers, not the script itself. Captured fields include:'),
+  p('Michael\u2019s script is locked separately and lives in the agent prompt store (kevin_library, id nwm_strategist_gateway_prompt_v1 family). The .team surface displays the captured answers and support tags, not a score, rubric, prediction, or classification. Captured fields include:'),
   bullet('Why are you doing this business? (open answer, voice transcribed)'),
   bullet('What does success in the next 12 months look like for you? (open answer)'),
   bullet('How many hours per week can you commit to building this? (open answer, normalized to a numeric range)'),
@@ -339,10 +339,10 @@ const children = [
   bulletBold('Speech-to-text fails. ', 'The call audio is captured to a Telnyx recording URL. The page shows \u201CTranscript unavailable \u2014 your sponsor has the audio.\u201D The audio is attached to the BA\u2019s record and available to the upline cockpit.'),
 
   h2('D.6  What the upline cockpit sees'),
-  bullet('A new BA event card appears in the sponsor\u2019s cockpit when Michael\u2019s call completes: \u201C[New BA Name] completed their Michael interview.\u201D'),
+  bullet('A new BA event card appears in the sponsor\u2019s cockpit when Michael\u2019s call completes: \u201C[New BA Name] completed their Michael Training Agent + Daily Success Coach call.\u201D'),
   bullet('The card expands to show the captured answers and a link to the audio.'),
-  bullet('Scoring (intent strength, time commitment classification, prior experience) is calculated by Michael and surfaced as small tags on the card.'),
-  callout('Compliance.', 'Scoring is internal context for the sponsor only. It never appears on the new BA\u2019s own screen, in any prospect-facing surface, or in any compensation calculation. It is operational \u2014 not a rating, not a judgment, not a placement input.'),
+  bullet('Support tags may surface context for coaching. Michael does not score, classify, rank, or predict the BA.'),
+  callout('Governance.', 'Everyone receives the same opportunity, tools, training, and support. Steve creates a non-scored Success Profile; Michael helps the BA launch. Labels such as Builder, Emerging Leader, Part-Time Producer, and Casual Participant are retired.'),
 
   rule(),
   pageBreak(),

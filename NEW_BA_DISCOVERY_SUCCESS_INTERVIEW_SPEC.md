@@ -6,6 +6,12 @@
 
 Version 1.0
 
+Reconciled 2026-06-24: Steve owns Discovery and the Success Profile. Michael is
+the Training Agent and Daily Success Coach. The system does not predict who will succeed, classify BAs as
+Builder / Part-Time / Casual, or route people into unequal opportunity tracks.
+Everyone receives the same opportunity, tools, training, and support; actions
+and outcomes determine results.
+
 Constitutional Alignment:
 MOMENTUM_CREATION_SYSTEM_V2_FOUNDATION.md
 

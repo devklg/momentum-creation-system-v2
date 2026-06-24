@@ -1,13 +1,9 @@
 /**
- * Michael → founder handoff (wireframe §3.2, decision ledger
- * dec_michael_interview / seq 20).
+ * LEGACY Michael → founder handoff (retired scored-Michael path).
  *
- * When a Michael interview artifact is ingested, the new BA's Fast Start gate
- * is already open (markCallCompleted set status=completed at call hangup). The
- * handoff is the trigger that tells the human founders — Paul + Kevin — that
- * this BA is ready for HUMAN-LED Fast Start training + new-member orientation,
- * with the generated success profile attached. Michael does NOT deliver
- * training; he interviews, classifies, and hands off.
+ * Reconciled 2026-06-24: Steve owns Discovery + Success Profile without
+ * scoring; Michael is the Training Agent and Daily Success Coach and does not classify. This module remains
+ * for historical handoff reads only. New Michael ingests no longer call it.
  *
  * Mechanics:
  *   1. Persist a `michael_founder_handoffs` record (triple-stacked → Mongo +

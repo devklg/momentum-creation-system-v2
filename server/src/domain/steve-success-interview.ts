@@ -8,7 +8,7 @@
  *
  * RELATIONSHIP TO MICHAEL (load-bearing): Steve does NOT replace Michael and
  * does NOT read or write any michael_* collection, the Michael graph, or the
- * Michael schedule/interview/scoring flow. The only Steve→Michael link is a
+ * Michael schedule/Training Agent + Daily Success Coach artifact flow. The only Steve→Michael link is a
  * one-way `michaelHandoffSummary` STRING carried on Steve's own artifact —
  * context a human (or Michael's worker, if it chooses) can read; it never
  * mutates Michael.

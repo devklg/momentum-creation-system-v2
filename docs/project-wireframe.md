@@ -19,7 +19,7 @@ locked-spec wins on STATE. This wireframe is the BUILD DECOMPOSITION of that
 state â€” if it disagrees with locked-spec, locked-spec wins and this gets fixed.
 Depth is weighted toward UNBUILT surfaces (that's where a session needs detail).
 
-HEAD at write: `d20741f` (Chat #146). Reconciled Chat #147 (Category-A decisions seq 19-25: F.6 dropped, Michael/orientation/leader-credibility/track-record/cockpit+profile-edges leaves added, open-decisions block cleared).
+HEAD at write: `d20741f` (Chat #146). Reconciled Chat #147 (Category-A decisions seq 19-25: F.6 dropped, Michael/orientation/leader-credibility/track-record/cockpit+profile-edges leaves added, open-decisions block cleared). Reconciled again 2026-06-24: Steve owns Discovery + Success Profile with no scoring; Michael is the Training Agent and Daily Success Coach and no longer classifies BAs.
 
 ---
 
@@ -32,7 +32,7 @@ HEAD at write: `d20741f` (Chat #146). Reconciled Chat #147 (Category-A decisions
 - [x] LLM layer (direct Anthropic Messages API, NOT through gateway, #118) â€” services/anthropic.ts; ScriptMaker + Ivory consume it. VERIFIED LIVE #145: ANTHROPIC_API_KEY landed in root .env, server restarted, Ivory Coach returned input-specific questions (typed "i went to oru" produced 7 ORU-specific prompts, impossible from the evergreen fallback). Key live, complete() reaching the API end to end.
   - [x] anthropic.ts transport + dormant-aware fallback (default claude-haiku-4-5-20251001; prompt-caching on stable prefix)
   - [x] Ivory coaching consumer (#131/#132 â€” coach surfaces WDYK prompts; evergreen fallback when key unset; VERIFIED firing real LLM #145)
-  - [x] Michael scoring consumer (#134 â€” server/src/domain/michaelScoring.ts, triple-stacked, sponsor-stamped)
+  - [x] Michael Training Agent + Daily Success Coach artifact consumer (#134/#147 reconciled 2026-06-24 — server/src/domain/michaelScoring.ts, triple-stacked, sponsor-stamped, no classification)
 
 ---
 
@@ -96,14 +96,14 @@ One route /p/{token}, two faces by token state.
 - [x] Click-acknowledge commitment, triple-stack write, routes to Michael
 - [x] Audit current welcome.tsx against locked-spec v2; merge welcome-prototype-v2 letter-voice + 7-day-arc strip (#147 wf_0037)
 
-### 3.2 Michael interview surface  `[~]` (#102, #134; interview content #147)
+### 3.2 Steve discovery + Michael training and daily success coach  `[~]` (#102, #134, #147; reconciled 2026-06-24)
 - [x] Scheduler + Telnyx call origination + webhook + STT wiring
 - [x] State 1 â€” Awaiting call (gold pill, pulsing dot, wrong-number link) (#134 wf_0038)
 - [x] State 2 â€” Call in progress (teal pill, near-real-time transcript via SSE, speaker labels, no buttons) (#134 wf_0039)
 - [x] State 3 â€” Complete (gold check, answer readback, signed-by, CTA to Fast Start) (#134 wf_0040)
 - [x] Fallbacks (no-answer + reschedule, invalid-number banner, page-close resume via /state refetch, STT-fail audio) (#134 wf_0041)
-- [x] Upline cockpit event card (answers + audio link + scoring tags, SPONSOR-ONLY server-enforced) (#134 wf_0042)
-- [x] INTERVIEW BUILD (#147, dec_michael_interview seq 20): full 29-Q New Associate Success Interview as natural guided VOICE conversation (script = backbone, LLM expands; adaptive dig-to-the-why follow-ups); 6-category weighted rubric (Vision 20 / Commitment 20 / Coachability 20 / Time 15 / Network 15 / Experience 10 = 100) -> 4 classifications (Builder 85-100 / Emerging Leader 70-84 / Part-Time Producer 50-69 / Casual 0-49); classifications are INTEL TAGS ONLY (no auto-routing); post-interview sets up existing Fast Start + fires founder-handoff trigger to Paul+Kevin (profile attached) for human-led training+orientation; transcripts+scores feed GraphRAG
+- [x] Upline cockpit event card (answers + audio link + support tags, SPONSOR-ONLY server-enforced, no classification) (#134 wf_0042)
+- [x] RECONCILED 2026-06-24: old Michael scoring/classification is retired. No Builder / Emerging Leader / Part-Time Producer / Casual Participant labels. Steve conducts New BA Discovery + Success Interview and creates the Success Profile without scoring, ranking, or predicting. Michael receives that context and acts as the Training Agent and Daily Success Coach: clarify, support, answer questions, build confidence, prepare for action, and route the BA into orientation + Launch Center. Everyone receives the same opportunity, tools, training, and support; actions and outcomes determine results.
 - DEP RESOLVED (#147): Michael's interview content = full 29-Q script (was "5 prompts open"); call-timing immediate-vs-delay (Kevin chose scheduler)
 
 ### 3.3 BA Cockpit  `[~]` (#121, #132)
@@ -284,7 +284,7 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 
 ## OPEN DECISIONS BLOCKING BUILDS (from ledger + locked-spec Part 5)
 
-Resolved: email=Resend(dormant) · flush=fixed-8wk · counter=SSE · webinar=Mon/Thu-5pmPT · leader-threshold · callback=two-radio · source-hierarchy(#129) · export-PII-redaction=modal-every-export(#144) · **Chat #147 cleared:** Michael-interview=full-29Q(seq20) · Fast-Start-gating=sequential-not-gated(#133) · orientation=fixed-group-sessions-cap10(seq21) · phone-verify=confirm-modal(seq22) · notif-defaults=operational-on(seq22) · position-stack-window=live-VisibleWindowPanel(#141) · compliance-severity=Codex-default+F.6-declined(seq19) · sponsor-leaves=founder-fallback(seq23) · re-invite-cooldown=removed+script-button(seq23) · leadership-track-record=defined-as-3.11-both-surfaces(seq25)
+Resolved: email=Resend(dormant) · flush=fixed-8wk · counter=SSE · webinar=Mon/Thu-5pmPT · leader-threshold · callback=two-radio · source-hierarchy(#129) · export-PII-redaction=modal-every-export(#144) · **2026-06-24 correction:** Steve=Discovery+Success Profile, no scoring; Michael=Training Agent + Daily Success Coach, no classification · Fast-Start-gating=sequential-not-gated(#133) · orientation=fixed-group-sessions-cap10(seq21) · phone-verify=confirm-modal(seq22) · notif-defaults=operational-on(seq22) · position-stack-window=live-VisibleWindowPanel(#141) · compliance-severity=Codex-default+F.6-declined(seq19) · sponsor-leaves=founder-fallback(seq23) · re-invite-cooldown=removed+script-button(seq23) · leadership-track-record=defined-as-3.11-both-surfaces(seq25)
 
 Still open (only these block their surfaces):
 - (none currently — all Category-A decisions cleared Chat #147)

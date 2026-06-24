@@ -1,6 +1,6 @@
 /**
  * /api/steve/* — Steve New BA Discovery & Success Interview routes (SEPARATE
- * agent; does NOT touch Michael's schedule/interview/scoring flow).
+ * agent; does NOT touch Michael's schedule/Training Agent + Daily Success Coach artifact flow).
  *
  * BA self-reads:
  *   GET  /api/steve/discovery/state   → the BA's own discovery view

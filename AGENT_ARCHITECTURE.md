@@ -9,6 +9,12 @@ Version 1.0
 Constitutional Authority:
 MOMENTUM_CREATION_SYSTEM_V2_FOUNDATION.md
 
+Reconciled 2026-06-24: Steve owns New BA Discovery and the non-scored Success
+Profile. Michael is the Training Agent and Daily Success Coach. Agents must not predict who will succeed
+or classify BAs as Builder, Part-Time, Casual, high-potential, or low-potential.
+The system adapts support from context and observed action while preserving the
+same opportunity, tools, training, and support for every BA.
+
 Companion Governance:
 SCHEMA_GOVERNANCE.md
 MULTI_DB_AGENT_LEARNING_GOVERNANCE.md

@@ -65,7 +65,7 @@
 
 **No save-spot.** The presentation page has no "save your spot" button anywhere. Placement fires silently at `video_complete`. The only explicit form on the prospect-facing surface is the callback request: "I want [BA] to call me ASAP" with three intent radios (interested / want to join / questions), phone, best time, "TELL [BA] I'M READY" button.
 
-**Michael.** Outbound voice agent (Telnyx-based). Calls each new BA shortly after signup for a 15-20 minute structured interview during onboarding. Captures goals, warm market, comfort, concerns. Transcript and scoring flow back to the BA's record and the upline's cockpit. **BA-facing only. Never prospect-facing.** Reuses Kevin's existing voice agent infrastructure.
+**Steve + Michael.** Steve conducts Discovery and creates the non-scored Success Profile. Michael is the outbound Training Agent + Daily Success Coach (Telnyx-based): calls each new BA shortly after signup, clarifies the path, answers questions, teaches Layer 1, supports daily rhythm, and captures training/daily-success context for the upline cockpit. Neither agent scores, ranks, predicts, or classifies the BA. **BA-facing only. Never prospect-facing.** Reuses Kevin's existing voice agent infrastructure.
 
 **The six locked dashboard sections** (post-video_complete view at `/p/{token}`, fixed order):
 1. Arrival — "You saw it. You're **in.**" Position card with #N, invited-by line, placement timestamp.

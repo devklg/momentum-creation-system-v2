@@ -1,10 +1,10 @@
 /**
- * wf_0008 — Michael scoring consumer.
+ * wf_0008 — Michael Training Agent + Daily Success Coach artifact consumer.
  *
  * Receives:
  *   - Live transcript chunks during the call (one row per chunk in
  *     `michael_transcripts`, fan-out via michaelEvents).
- *   - Final scoring artifact after the call (one row per BA in
+ *   - Final coaching artifact after the call (one row per BA in
  *     `michael_interviews`, triple-stacked, sponsor-stamped server-side).
  *
  * Produces:
@@ -14,10 +14,10 @@
  *
  * Compliance posture (locked-spec 3.10):
  *   - No income claims, no placement promises, no comp-plan figures rendered
- *     by this module. Scoring tags are short labels (e.g. "high-intent"),
- *     never dollar amounts or rank language. The transcript is captured as
- *     spoken — the script-time enforcement guarantees Michael never offers
- *     those claims, so the transcript is clean by construction.
+ *     by this module. Worker tags are descriptive support notes, never
+ *     rankings, score bands, dollar amounts, or rank language. The transcript
+ *     is captured as spoken — the script-time enforcement guarantees Michael
+ *     never offers those claims, so the transcript is clean by construction.
  *
  * Sponsor immutability (locked-spec 3.5):
  *   - sponsorBaId on the persisted artifact is read from brand_ambassadors
@@ -42,8 +42,6 @@ import {
   getMichaelSchedule,
   type MichaelSchedule,
 } from './michael-schedule.js';
-import { classifyInterview, buildSuccessProfile } from './michael-classification.js';
-import { fireFounderHandoff } from './michael-founder-handoff.js';
 
 const INTERVIEWS_COLLECTION = 'michael_interviews';
 const TRANSCRIPTS_COLLECTION = 'michael_transcripts';
@@ -80,8 +78,10 @@ interface PersistedTranscriptChunk extends MichaelTranscriptChunk {
 
 interface PersistedInterview extends MichaelInterviewArtifact {
   _id: string;
-  /** #147 — computed server-side from the worker's category scores. null when
-   *  the interview was ingested without a rubric scoring (e.g. STT-degraded). */
+  /** Legacy nullable fields retained for backward-compatible reads only.
+   *  Current architecture: Steve discovers context without scoring; Michael
+   *  uses that Success Profile as Training Agent + Daily Success Coach. New Michael ingests
+   *  always persist these as null and never classify a BA. */
   classification?: MichaelClassification | null;
   successProfile?: MichaelSuccessProfile | null;
 }
@@ -304,7 +304,7 @@ export class ScoringIngestError extends Error {
  *  is NEVER taken from the payload (locked-spec 3.5). */
 export async function ingestInterviewArtifact(
   payload: MichaelScoringIngestPayload,
-  categoryScores?: MichaelCategoryScores,
+  _categoryScores?: MichaelCategoryScores,
 ): Promise<MichaelInterviewArtifact> {
   const baInfo = await getBaSponsor(payload.baId);
   if (!baInfo) {
@@ -314,18 +314,12 @@ export async function ingestInterviewArtifact(
     );
   }
 
-  // #147 — compute the classification + success profile server-side from the
-  // worker's raw per-category points. Deterministic + auditable; enforces the
-  // intel-tags-only rule (a worker reports category reads, never a tier).
-  const classification = categoryScores ? classifyInterview(categoryScores) : null;
-  const successProfile =
-    classification && payload.completedAt
-      ? buildSuccessProfile({
-          baId: payload.baId,
-          classification,
-          generatedAt: payload.completedAt,
-        })
-      : null;
+  // Architecture update: Michael no longer predicts, scores, or classifies.
+  // The optional categoryScores input is accepted only for worker backward
+  // compatibility and is intentionally ignored. Steve owns discovery and the
+  // Success Profile; Michael owns training support and daily success coaching.
+  const classification = null;
+  const successProfile = null;
 
   // Truncate transcript chunks defensively — every other write to the gateway
   // applies the 5000-char per-content cap.
@@ -381,10 +375,8 @@ export async function ingestInterviewArtifact(
           callSid: artifact.callSid ?? '',
           completedAt: artifact.completedAt ?? '',
           overallTone: artifact.scoring.overallTone ?? 'unknown',
-          // #147 — classification rides into Chroma metadata so transcript +
-          // score feed GraphRAG with the tier attached.
-          tier: classification?.tier ?? 'unscored',
-          weightedTotal: classification?.weightedTotal ?? -1,
+          michaelRole: 'training_agent_daily_success_coach',
+          classificationStatus: 'retired',
           kind: 'michael_interview',
         },
       },
@@ -397,30 +389,6 @@ export async function ingestInterviewArtifact(
     baId: artifact.baId,
     phase: 'complete',
   });
-
-  // #147 — fire the founder handoff once we have a classification + profile.
-  // Idempotent on baId (handoffId = MFH-${baId}); a re-score updates rather
-  // than re-fires. Best-effort: a handoff failure must not fail scoring ingest
-  // (the artifact is already persisted + authoritative).
-  if (classification && successProfile && payload.completedAt) {
-    try {
-      await fireFounderHandoff({
-        baId: payload.baId,
-        baFirstName: baInfo.firstName,
-        sponsorBaId: baInfo.sponsorBaId,
-        classification,
-        successProfile,
-        completedAt: payload.completedAt,
-      });
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `[michael] founder handoff failed for baId=${payload.baId}: ${
-          err instanceof Error ? err.message : 'unknown'
-        }`,
-      );
-    }
-  }
 
   return stripPersistedArtifactFields(artifact);
 }
@@ -446,9 +414,8 @@ function artifactCypher(a: PersistedInterview): { cypher: string; params: Record
       'MERGE (b:BA {baId: $baId}) ' +
       'MERGE (i:MichaelInterview {interviewId: $id}) ' +
       'SET i.completedAt = $completedAt, i.overallTone = $overallTone, ' +
-      '    i.callSid = $callSid, i.audioUrl = $audioUrl ' +
-      // #147 — tier + total on the interview node for GraphRAG queries.
-      'SET i.tier = $tier, i.weightedTotal = $weightedTotal ' +
+      '    i.callSid = $callSid, i.audioUrl = $audioUrl, ' +
+      '    i.role = "training_agent_daily_success_coach", i.classificationStatus = "retired" ' +
       'MERGE (b)-[:HAD_MICHAEL_INTERVIEW]->(i) ' +
       'WITH i, $sponsorBaId AS sponsorId ' +
       'WHERE sponsorId IS NOT NULL ' +
@@ -462,8 +429,6 @@ function artifactCypher(a: PersistedInterview): { cypher: string; params: Record
       overallTone: a.scoring.overallTone ?? 'unknown',
       callSid: a.callSid,
       audioUrl: a.audioUrl,
-      tier: a.classification?.tier ?? 'unscored',
-      weightedTotal: a.classification?.weightedTotal ?? -1,
     },
   };
 }
@@ -483,7 +448,7 @@ function chromaDocForArtifact(a: PersistedInterview): string {
     .map((ans) => `${ans.prompt} -> ${ans.answerText.slice(0, 200)}`)
     .join(' | ');
   return [
-    `Michael interview completed for BA ${a.baId}.`,
+    `Michael Training Agent + Daily Success Coach conversation completed for BA ${a.baId}.`,
     `Tone: ${tonePart}.`,
     `Highlights: ${tagSummary}.`,
     `Answers: ${answerSummary.slice(0, 500)}`,
@@ -552,10 +517,10 @@ export async function getCockpitCardForSponsor(args: {
     scoring: artifact.scoring,
     audioUrl: artifact.audioUrl,
     signedBy: artifact.scoring.signedBy,
-    // #147 — the classification + success profile ride the same sponsor-only
-    // card. null when the interview was ingested without rubric scoring.
-    classification: artifact.classification ?? null,
-    successProfile: artifact.successProfile ?? null,
+    // Current architecture: Steve owns Success Profile; Michael does not
+    // classify. Legacy stored fields are intentionally not surfaced.
+    classification: null,
+    successProfile: null,
   };
 }
 

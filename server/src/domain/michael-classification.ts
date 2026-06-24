@@ -1,14 +1,10 @@
 /**
- * Michael interview classification + success profile (wireframe §3.2, decision
- * ledger dec_michael_interview / seq 20).
+ * LEGACY Michael interview classification helpers.
  *
- * Pure, deterministic, no I/O — easy to unit-test and audit. The scoring worker
- * supplies raw per-category points (read from the transcript); this module
- * clamps them to the rubric maxes, sums the 100-point weighted total, and
- * resolves the single classification tier by band. Computing the tier here,
- * server-side, is what enforces the HARD RULE that classifications are INTEL
- * TAGS ONLY — a worker cannot smuggle in a routing decision; it only reports
- * category reads, and the tier falls out of the bands deterministically.
+ * Reconciled 2026-06-24: Steve owns Discovery + Success Profile without
+ * scoring. Michael is the Training Agent and Daily Success Coach and must not classify, rank, or predict.
+ * This file remains only so historical imports/tests compile until a later
+ * migration deletes the old scored-Michael path.
  *
  * COMPLIANCE: tier labels and profile copy are effort/intent reads of the BA's
  * OWN stated goals. No earnings, commissions, cycle math, or placement.
