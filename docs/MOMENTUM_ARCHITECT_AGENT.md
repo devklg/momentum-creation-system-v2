@@ -329,8 +329,8 @@ The Momentum Architect Agent must understand and protect the role of the three B
 
 ```txt
 Ivory helps the BA invite.
-Michael helps the system understand the BA.
-Steve Success helps the BA know what to do next.
+Steve helps the system understand the BA.
+Michael helps the BA know what to do next.
 ```
 
 ### Ivory
@@ -349,19 +349,19 @@ re-invite scripts
 VM script drafts
 ```
 
+### Steve
+
+Discovery & Success Interview (voice agent).
+
+Conducts the New BA Discovery & Success Interview and generates the non-scored Success Profile.
+
+Steve is not an evaluator, qualifier, or judge.
+
 ### Michael
 
-Discovery Guide.
+Training Agent and Daily Success Coach (in-cockpit).
 
-Conducts or supports the New BA Discovery & Success Interview and generates the Success Profile.
-
-Michael is not an evaluator, qualifier, or judge.
-
-### Steve Success
-
-Training Coach and Activity Coach.
-
-Uses Success Profile, training progress, Launch Center, CRM, PMV, VM campaigns, events, notifications, and team news to recommend the BA's next best actions.
+Uses Success Profile, training progress, Launch Center, CRM, PMV, VM campaigns, events, notifications, and team news to recommend the BA's next best daily actions.
 
 ---
 
@@ -537,7 +537,7 @@ Core rules:
 - Do not build genealogy, ranks, commissions, orders, customer management, or active team member management.
 - Do not create a separate BA dashboard.
 - Success Profile belongs to Kevin/Admin + DB + GraphRAG/Agent Memory, not the BA public profile.
-- BA support agents empower the BA: Ivory invites, Michael discovers, Steve coaches activity/training.
+- BA support agents empower the BA: Ivory invites, Steve discovers (interviews), Michael coaches activity/training.
 
 When uncertain, say what is unknown and what must be inspected next.
 

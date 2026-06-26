@@ -152,9 +152,9 @@ It is not the BA's public editable profile.
 
 Ivory supports invitation.
 
-Michael supports discovery and personalization.
+Steve supports discovery and personalization (the New BA Discovery interview).
 
-Steve Success supports training and daily activity.
+Michael supports training and daily activity.
 
 No agent should pressure, shame, judge, rank worth, predict success/failure, make earnings claims, or make placement promises.
 
@@ -403,8 +403,8 @@ Non-negotiable current rules:
 - CRM closes when a lead becomes a BA.
 - Success Profile belongs to Kevin/Admin + DB + GraphRAG/Agent Memory, not the public BA profile.
 - Ivory supports invitations.
-- Michael supports discovery/personalization.
-- Steve Success supports training and daily activity.
+- Steve supports discovery/personalization (Discovery interview).
+- Michael supports training and daily activity.
 - Agents must not pressure, shame, judge, rank worth, predict success/failure, make earnings claims, or make placement promises.
 
 When a change conflicts, do not say Kevin cannot do it.
