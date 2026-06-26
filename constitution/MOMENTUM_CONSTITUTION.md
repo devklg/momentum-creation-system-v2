@@ -5,8 +5,8 @@
 **Version:** 2.1.0 — Living Constitution
 **Descends from:** `MOMENTUM_CREATION_SYSTEM_V2_FOUNDATION.md` (Version 2.0, the Founding Charter)
 **Constitutional Authority:** Kevin L. Gardner — sole and final
-**Ratified:** _pending Kevin's ratification (see Article XII)_
-**Status:** Canonical root of the Momentum constitutional library.
+**Ratified:** 2026-06-26 — ratified by Kevin L. Gardner, sole and final Constitutional Authority (Article XII)
+**Status:** Ratified and in force — canonical root of the Momentum constitutional library.
 
 ---
 
@@ -284,6 +284,6 @@ This Constitution takes effect as the living constitutional authority of Momentu
 
 - **Constitutional Authority:** Kevin L. Gardner
 - **Version:** 2.1.0 — Living Constitution
-- **Ratified on:** ______________________
+- **Ratified on:** 2026-06-26 — ratified by Kevin L. Gardner as sole and final Constitutional Authority. This Constitution is now **in force** as the living constitutional authority of Momentum Creation System V2, binding on every subordinate instrument, agent, prompt, schema, surface, and decision until amended under Article XII.
 
 *The Constitution Agent warns. Kevin decides. This document binds every agent, instrument, and surface subordinate to it until amended under Article XII.*
