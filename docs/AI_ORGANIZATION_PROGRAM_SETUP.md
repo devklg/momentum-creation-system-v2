@@ -19,6 +19,8 @@ The purpose is to create the constitutional, organizational, knowledge, governan
 
 ## 2. Program Rule
 
+> **CIO reconciliation flag (2026-06-26).** This program plan predates the constitutional reconciliation + ACR-001. Three items are now out of date and must be honored before running any agency: (1) Agency 1's four `constitution/` documents (`MOMENTUM_CONSTITUTION`, `GOVERNANCE`, `DECISION_FRAMEWORK`, `ACR_SYSTEM`) **already exist and are awaiting ratification** — reconcile/extend, do not re-create. (2) The generated handbooks Agencies 2 and 4 assign **into `constitution/`** (`MOMENTUM_AI_ORGANIZATION`, `MOMENTUM_AGENT_DIRECTORY`, `MOMENTUM_AGENT_COMMUNICATION_PROTOCOL`, `MISSION_CONTROL_ARCHITECTURE`, `MOMENTUM_EXECUTIVE_SYSTEM`, `MOMENTUM_KNOWLEDGE_CORE`) were **reclassified as build artifacts by ACR-001** and moved to `docs/reference-manuals/`; the compilers now refuse to write into `constitution/`. Target `docs/reference-manuals/`, not `constitution/`. (3) Agency 5's `MOMENTUM_MASTER_INDEX.md` is still genuinely missing and remains valid work.
+
 No agency may treat its assigned document as isolated.
 
 Every agency must align with:
@@ -202,8 +204,8 @@ Define:
 
 The core support agents are:
 - Ivory: Invitation Provider
-- Michael: Discovery Guide
-- Steve Success: Training Coach and Activity Coach
+- Steve: New BA Discovery & Success Interview (voice agent)
+- Michael: Training Agent and Daily Success Coach
 
 Governance agents include:
 - Constitution Agent
