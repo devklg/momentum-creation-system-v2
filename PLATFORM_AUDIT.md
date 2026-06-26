@@ -6,13 +6,27 @@
 
 **Document Type:** Repository-grade platform audit  
 **Repository Analyzed:** `D:/momentum-creation-system-v2`  
-**Current Branch:** `task-9-qa-compliance`  
-**Current HEAD Reviewed:** `763f04cd16bb0299ab4d9a8a912e9a5fb85e7da2`  
-**Constitutional Authority:** `MOMENTUM_CREATION_SYSTEM_V2_FOUNDATION.md`  
-**Comparison Documents:** `SCHEMA_GOVERNANCE.md`, `TRAINING_ARCHITECTURE.md`, `MULTI_DB_AGENT_LEARNING_GOVERNANCE.md`, `AI_AGENT_PLAYBOOK.md`  
-**Operational Source of Truth:** Repository implementation as read in this audit session  
-**Status:** Production audit document  
-**Version:** 1.0.0
+**Current Branch:** `main`
+**Currentization Basis HEAD:** `8400a5ee993b45b39e71db786bb28c98c29502e6`
+**Constitutional Authority:** `constitution/MOMENTUM_CONSTITUTION.md` with `MOMENTUM_CREATION_SYSTEM_V2_FOUNDATION.md` preserved as the founding charter
+**Comparison Documents:** `constitution/MOMENTUM_CONSTITUTION.md`, `constitution/MOMENTUM_GOVERNANCE.md`, `constitution/MOMENTUM_DECISION_FRAMEWORK.md`, `constitution/MOMENTUM_ACR_SYSTEM.md`, `SCHEMA_GOVERNANCE.md`, `TRAINING_ARCHITECTURE.md`, `MULTI_DB_AGENT_LEARNING_GOVERNANCE.md`, `AGENT_ARCHITECTURE.md`, `AGENT_PROMPT_GOVERNANCE.md`
+**Operational Source of Truth:** Repository implementation as read in the original audit session, currentized by the 2026-06-26 governance and documentation-compiler work
+**Status:** Historical platform audit with currentization addendum
+**Version:** 1.1.0
+
+---
+
+## 2026-06-26 Currentization Addendum
+
+This audit was originally written against branch `task-9-qa-compliance` at `763f04cd16bb0299ab4d9a8a912e9a5fb85e7da2`. Subsequent work on `main` changed the governance source-of-truth layer enough that several findings in the original body are now stale if read as current open risks.
+
+Current state as of `8400a5ee993b45b39e71db786bb28c98c29502e6`:
+
+1. The old `AI_AGENT_PLAYBOOK.md` P0 is **resolved by replacement**, not by creating that exact file. Agent operating governance now lives in `AGENT_ARCHITECTURE.md`, `AGENT_PROMPT_GOVERNANCE.md`, `constitution/MOMENTUM_CONSTITUTION.md`, and `constitution/MOMENTUM_GOVERNANCE.md`.
+2. `constitution/acr/ACR-001-documentation-compilers.md` is released. The generated handbooks were reclassified as Documentation Compiler outputs, moved out of `constitution/` root, and treated as non-authoritative reference manuals under `docs/reference-manuals/`.
+3. The generated AI organization manuals are reference artifacts, not constitutional authority. Archive copies remain under `constitution/_generated_archive/`; living authority remains in the canonical constitution and governance documents.
+4. Any remaining recommendation in this file to "create `AI_AGENT_PLAYBOOK.md`" should now be read as: keep the current agent governance spine synchronized and do not resurrect a duplicate playbook unless Kevin explicitly approves a new ACR.
+5. Findings about persistence discipline, graph vocabulary drift, GraphRAG runtime readiness, and operational hardening were not re-audited in this currentization pass and remain subject to fresh code review before being closed.
 
 ---
 
@@ -34,7 +48,7 @@ The primary platform risk is that governance documents now describe a more matur
 
 | Priority | Finding | Evidence | Impact |
 |---|---|---|---|
-| P0 | `AI_AGENT_PLAYBOOK.md` is referenced by the audit request but is absent from the repository | `Get-ChildItem -Recurse -Filter AI_AGENT_PLAYBOOK.md` returned no file | Agent operating governance cannot be compared against a missing authority |
+| P0 resolved by replacement | `AI_AGENT_PLAYBOOK.md` was referenced by the original audit request but has been superseded by the current governance spine | `constitution/MOMENTUM_CONSTITUTION.md`, `constitution/MOMENTUM_GOVERNANCE.md`, `AGENT_ARCHITECTURE.md`, and `AGENT_PROMPT_GOVERNANCE.md`; ACR-001 release record | Do not create a duplicate playbook unless Kevin approves a new governance change; keep the current spine synchronized |
 | P0 | Persistence architecture is split between older `tripleStackWrite` and newer `tieredWrite`/projection outbox | `server/src/services/tripleStack.ts`, `tieredWrite.ts`, `projectionOutbox.ts` | Some domains still risk partial Mongo/Neo4j/Chroma writes |
 | P0 | Graph vocabulary drift remains in domain code | `:BA` and `:BrandAmbassador` both appear; `SPONSORED_BY`, `UPLINE_IS`, `INVITED`, `IN_HOLDING_TANK` coexist | Agent GraphRAG traversals can fragment or misread lineage |
 | P1 | GraphRAG is architecturally documented but not implemented as a unified runtime retrieval service | Docs contain GraphRAG architecture; code contains graph/vector writes and reads but no central GraphRAG engine | AI agents cannot yet reliably perform source-grounded multi-store reasoning |
@@ -120,13 +134,13 @@ The audit read or inspected:
 
 ## 2.3 Source Availability Finding
 
-`AI_AGENT_PLAYBOOK.md` was requested as a comparison document but does not exist in the repository.
+`AI_AGENT_PLAYBOOK.md` was requested as a comparison document in the original audit request but does not exist in the repository.
 
 Governance interpretation:
 
-1. This is a documentation gap.
-2. Claims requiring that file cannot be verified.
-3. The platform should either add the file or update audit instructions to reference the correct current agent governance documents.
+1. This was a valid documentation gap in the original evidence session.
+2. The gap is now resolved by replacement: current agent governance is in `constitution/MOMENTUM_CONSTITUTION.md`, `constitution/MOMENTUM_GOVERNANCE.md`, `AGENT_ARCHITECTURE.md`, and `AGENT_PROMPT_GOVERNANCE.md`.
+3. Future audits should reference those documents instead of recreating `AI_AGENT_PLAYBOOK.md` by default.
 
 ## 2.4 Method
 
@@ -406,7 +420,7 @@ Agents include:
 
 ## 7.3 Weaknesses
 
-1. `AI_AGENT_PLAYBOOK.md` is missing.
+1. The original `AI_AGENT_PLAYBOOK.md` gap is resolved by replacement; the current agent governance spine must stay synchronized.
 2. No central runtime agent registry was found.
 3. No central prompt registry was found.
 4. Daily Success Coach is implemented as domain logic and UI patterns, not a named autonomous agent runtime.
@@ -426,7 +440,7 @@ Agents include:
 3. Agent event ledger.
 4. Agent recommendation engine runtime.
 5. Agent learning feedback loop.
-6. AI_AGENT_PLAYBOOK.md or replacement canonical playbook.
+6. Current agent governance spine synchronization across `constitution/`, `AGENT_ARCHITECTURE.md`, and `AGENT_PROMPT_GOVERNANCE.md`.
 
 ## 7.6 Optimization Opportunities
 
@@ -446,7 +460,7 @@ Agents include:
 1. AI cannot replace human sponsor, mentor, or leader.
 2. Ivory and ScriptMaker must remain draft-only and BA-controlled.
 3. Michael must remain BA-facing and mentor-style.
-4. Missing playbook must be resolved before future agent expansion.
+4. Future agent expansion must use the current governance spine instead of recreating an unapproved duplicate playbook.
 
 ---
 
@@ -929,7 +943,7 @@ Agents include:
 2. No centralized GraphRAG service was found.
 3. No central Knowledge Agent implementation was found.
 4. Graphify output is stale.
-5. AI_AGENT_PLAYBOOK.md is absent.
+5. The former `AI_AGENT_PLAYBOOK.md` gap is resolved by replacement, but governance-to-runtime synchronization remains required.
 
 ## 17.3 Technical Debt
 
@@ -961,7 +975,7 @@ Agents include:
 ## 17.7 Governance Concerns
 
 1. The system must not cite unsourced or stale knowledge as current truth.
-2. Missing playbook creates ambiguity for AI operational behavior.
+2. Agent behavior still requires runtime registries and prompt governance enforcement so the current governance spine becomes operational, not merely documentary.
 
 ---
 
@@ -1304,7 +1318,7 @@ Observation
 
 | Gap | Severity |
 |---|---|
-| Missing AI_AGENT_PLAYBOOK.md | P0 |
+| Agent governance spine must stay synchronized with runtime registries | P1 |
 | Write discipline migration incomplete | P0 |
 | Graph vocabulary drift | P0 |
 | GraphRAG runtime absent | P1 |
@@ -1334,7 +1348,7 @@ Observation
 |---|---|---|---|
 | Half-written graph-critical records | Mixed write paths | Agents reason from broken graph | Migrate to tiered write |
 | Phantom graph nodes | `MERGE` for must-exist BAs | Genealogy/sponsor graph corruption | Use `MATCH` and verify |
-| Missing playbook authority | `AI_AGENT_PLAYBOOK.md` absent | Agent governance uncertainty | Create or replace source |
+| Agent governance synchronization | Current authority lives across constitution and agent governance docs | Runtime ambiguity if registries lag documents | Maintain spine, registries, and ACR discipline |
 | Split graph vocabulary | `:BA` and `:BrandAmbassador` | GraphRAG misses relationships | Vocabulary migration |
 
 ## 25.3 P1 Risks
@@ -1378,7 +1392,7 @@ Prioritize by:
 
 | Priority | Work Item | Reason | Owner |
 |---|---|---|---|
-| P0 | Add or reconcile `AI_AGENT_PLAYBOOK.md` | Required comparison authority missing | Governance |
+| P1 | Keep agent governance spine synchronized | Replacement authority exists; runtime registry enforcement still needed | Governance |
 | P0 | Complete tiered write migration | Prevent partial integrity failures | Architecture |
 | P0 | Standardize Neo4j vocabulary | Prevent graph fragmentation | Data/Graph |
 | P0 | Replace phantom `MERGE` with `MATCH` | Prevent fake sponsor/member nodes | Data/Graph |
@@ -1408,7 +1422,7 @@ P0 write + graph cleanup
 
 ## 27.1 Phase 1 - Integrity Convergence
 
-1. Add `AI_AGENT_PLAYBOOK.md` or update governance references.
+1. Keep the current agent governance spine synchronized and update stale references.
 2. Migrate graph-critical writes to `writeGraphCritical`.
 3. Migrate knowledge-critical writes to `writeKnowledge`.
 4. Migrate operational writes to `writeOperational`.
@@ -1605,7 +1619,7 @@ Integrity convergence is the immediate need.
 
 ## 31.1 Governance Recommendations
 
-1. Create `AI_AGENT_PLAYBOOK.md`.
+1. Keep the current agent governance spine synchronized and avoid recreating `AI_AGENT_PLAYBOOK.md` without a new approved ACR.
 2. Add implementation status to every architecture document.
 3. Create a single governance dashboard for schema, prompt, agent, and recommendation status.
 4. Require read-backed citations in future audit docs.
@@ -1707,7 +1721,7 @@ The platform passes product acceptance when:
 
 | ID | Debt | Area | Priority |
 |---|---|---|---|
-| TD-001 | `AI_AGENT_PLAYBOOK.md` missing | Governance | P0 |
+| TD-001 | Agent governance runtime registry not yet unified with current governance spine | Governance | P1 |
 | TD-002 | `tripleStackWrite` remains in active use | Persistence | P0 |
 | TD-003 | Direct gateway writes in domains | Persistence | P0 |
 | TD-004 | `:BA` label drift | Neo4j | P0 |
@@ -1901,7 +1915,7 @@ It records findings and recommends priorities.
 
 | Decision | Owner | Priority |
 |---|---|---|
-| Create or replace `AI_AGENT_PLAYBOOK.md` | Governance | P0 |
+| Maintain current agent governance spine and runtime registry alignment | Governance | P1 |
 | Approve final Chroma collection scope | Data governance | P1 |
 | Approve graph vocabulary migration | Data governance | P0 |
 | Approve tiered write migration plan | Architecture | P0 |
@@ -1947,7 +1961,7 @@ This audit should not be used to justify destructive database cleanup without ex
 
 ## 42.5 Governance Owner
 
-1. Resolve missing playbook.
+1. Maintain the current agent governance spine and prevent stale duplicate-playbook references.
 2. Maintain source hierarchy.
 3. Review compliance severity mapping.
 4. Ensure docs map to implementation state.
@@ -1995,7 +2009,7 @@ Complete the P0 data convergence pass before expanding agent autonomy.
 
 ## 44.2 Recommendation 2
 
-Create `AI_AGENT_PLAYBOOK.md` or formally deprecate it and update all references to current agent governance documents.
+Treat `AI_AGENT_PLAYBOOK.md` as formally superseded by the current governance spine; keep `constitution/MOMENTUM_CONSTITUTION.md`, `constitution/MOMENTUM_GOVERNANCE.md`, `AGENT_ARCHITECTURE.md`, and `AGENT_PROMPT_GOVERNANCE.md` synchronized with runtime registries.
 
 ## 44.3 Recommendation 3
 
