@@ -161,6 +161,7 @@ An approved ACR **produces a decision-ledger entry** (`momentum.decisions`) reco
 
 | For | See |
 |---|---|
+| The ACR register (all change requests) | `constitution/acr/REGISTER.md` |
 | Whether a change is *allowed* | `MOMENTUM_CONSTITUTION.md` Art. VII, X |
 | Who approves / decides | `MOMENTUM_DECISION_FRAMEWORK.md` §6 |
 | Delivery, merge, gates detail | `MOMENTUM_GOVERNANCE.md` §9–10 |
