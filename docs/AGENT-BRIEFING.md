@@ -34,7 +34,7 @@
 - Sponsor immutability: set at access-code resolution at signup, never edited later. One exception: BA-requested-emergency override in /admin, fully audited.
 - Position monotonicity: queue positions are timestamp-anchored at video_complete, never reshuffle, never reused. Flushes vacate slots; no renumbering.
 - 8-week flush window for holding tank records (currently locked fixed; adaptive flag exists in spec, deferred).
-- Triple-stack persistence: every write hits MongoDB + Neo4j + ChromaDB via Universal Gateway at `localhost:2525`. None of the three is optional.
+- Triple-stack persistence: every write hits MongoDB + Neo4j + ChromaDB via Universal Gateway V2 at `localhost:2526`. None of the three is optional.
 - Team Magnificent is Kevin's downline only. Not THREE-wide. Access codes enforce this — every TM-XXXX traces back to TM-01.
 
 **The five things that never appear on .com:**
@@ -129,7 +129,7 @@ Do not load these in full unless you're auditing a decision from that chat. For 
 **Brand and style.** `Team-Magnificent-App-Style-Guide.html` is 1,544 lines. The brand tokens you need are in Layer 1 of this file. Read the full style guide only when building a new component pattern that isn't already shown in `apps/com/src/routes/tm-video-presentation/` or `dashboard-prototype.html`.
 
 **Infrastructure quick reference.**
-- Universal Gateway: `localhost:2525/api/execute`
+- Universal Gateway V2: `localhost:2526/api/execute`
 - ChromaDB: `localhost:8100` v2 API
 - Maxwell GPU embedding service: `localhost:8300` (autostart wired)
 - GitHub repo: `github.com/devklg/momentum-creation-system-v1` (private, main branch)

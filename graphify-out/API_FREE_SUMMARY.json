@@ -1,0 +1,15 @@
+{
+  "mode": "api_free_ast_only",
+  "code_files": 340,
+  "nodes": 3281,
+  "edges": 6098,
+  "communities": 146,
+  "commit": "bdc2ec0",
+  "outputs": [
+    "graphify-out/graph.json",
+    "graphify-out/graph.html",
+    "graphify-out/GRAPH_TREE.html",
+    "graphify-out/GRAPH_REPORT.md",
+    "graphify-out/.graphify_ast_only.json"
+  ]
+}

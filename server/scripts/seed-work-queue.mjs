@@ -24,7 +24,8 @@
  * Run:  node server/scripts/seed-work-queue.mjs   (from repo root)
  */
 
-const GATEWAY = 'http://localhost:2525/api/execute';
+const GATEWAY_BASE = (process.env.GATEWAY_URL || 'http://localhost:2526/api').replace(/\/$/, '');
+const GATEWAY = `${GATEWAY_BASE}/execute`;
 const DB = 'momentum';
 const COLL = 'work_queue';
 

@@ -399,7 +399,7 @@ Comp plan is deferred until the new BA has signed two people and earned enough c
 
 ## 3.14  Persistence
 
-Every write hits **MongoDB + Neo4j + ChromaDB** in the same operation, via the Universal Gateway at `localhost:2525`. No store is optional. No store is deferred. The architecture is built to handle the volume in 1.10 from day one.
+Every write hits **MongoDB + Neo4j + ChromaDB** in the same operation, via Universal Gateway V2 at `localhost:2526`. No store is optional. No store is deferred. The architecture is built to handle the volume in 1.10 from day one. Gateway V2 lives at `D:/server-gateway-mcp-v2` and is the standard MCS V2 gateway, even though that infrastructure folder is not currently tracked in this repo.
 
 ## 3.15  Brand tokens
 

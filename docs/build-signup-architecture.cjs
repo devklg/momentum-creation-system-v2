@@ -275,7 +275,7 @@ const children = [
   bulletBold('Realtime', 'Server-Sent Events stream for the dashboard\u2019s live placement section. New prospects arriving cause an event to fan out to every connected dashboard.'),
   bulletBold('Notifications', 'Callback alert SMS to BAs (via Telnyx), welcome email, webinar reservation confirmation, audit logging.'),
   h2('C.3  Persistence gateway and the triple stack'),
-  p('Every write that needs to persist hits the Universal Gateway at localhost:2525. The gateway fans the write to all three databases. This is the existing pattern from Kevin\u2019s infrastructure, used by other projects already.'),
+  p('Every write that needs to persist hits Universal Gateway V2 at localhost:2526. The gateway fans the write to MongoDB, Neo4j, and ChromaDB. This is the standard MCS V2 gateway path.'),
   h3('MongoDB \u2014 the system of record'),
   bullet('access_codes \u2014 every code Kevin has generated, who it is assigned to, when, and its current state.'),
   bullet('bas \u2014 every Brand Ambassador profile: name, email, phone, THREE username and ID, password hash, sponsor BA ID, photo, etc.'),

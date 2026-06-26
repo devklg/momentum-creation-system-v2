@@ -3,7 +3,8 @@
  * write-handoff-129b.mjs — Chat #129 session save (second half). Writes the
  * handoff to every LIVE leg and reads each back to confirm. Does NOT run ARCHIE.
  */
-const GW = 'http://localhost:2525/api/execute';
+const GATEWAY_BASE = (process.env.GATEWAY_URL || 'http://localhost:2526/api').replace(/\/$/, '');
+const GW = `${GATEWAY_BASE}/execute`;
 async function gw(tool, action, params) {
   const r = await fetch(GW, { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ tool, action, params }) });

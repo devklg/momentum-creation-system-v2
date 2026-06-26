@@ -112,7 +112,9 @@ export function AdminTickerPanel() {
           </p>
         ) : (
           <ol className="divide-y divide-line">
-            {entries.map((e) => (
+            {[...entries]
+              .sort((a, b) => a.positionNumber - b.positionNumber)
+              .map((e) => (
               <li
                 key={`${e.prospectId}_${e.placedAt}`}
                 className="flex items-baseline justify-between gap-4 py-1.5"
