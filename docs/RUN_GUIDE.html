@@ -40,7 +40,7 @@
 <div class="wrap">
 
   <h1>Momentum Creation System <span class="v">v2</span></h1>
-  <p class="sub">Local Run &amp; Team-Deployment Guide &nbsp;•&nbsp; Repo: <code>D:\momentum-creation-system-v2</code> &nbsp;•&nbsp; Branch: <code>task-9-qa-compliance</code> &nbsp;•&nbsp; Prepared 2026-06-20</p>
+  <p class="sub">Local Run &amp; Team-Deployment Guide &nbsp;•&nbsp; Repo: <code>D:\momentum-creation-system-v2</code> &nbsp;•&nbsp; Branch: <code>main</code> &nbsp;•&nbsp; Currentized 2026-06-26</p>
   <hr class="rule">
 
   <div class="note"><strong>Status in one line:</strong> the code is essentially complete — all 154 API routes are mounted and the server boots. What turns “built” into “running on your screen” is three things: the <code>.env</code> (done), a free port 7700, and seed data for login.</div>
@@ -101,7 +101,7 @@ pnpm --filter @momentum/server bootstrap:ivory</pre>
     <tr><th>Item</th><th>State</th></tr>
     <tr><td>All 154 API routes</td><td class="ok">Mounted &amp; responding (verified by full sweep)</td></tr>
     <tr><td>Tasks 1–8 (UX redesign)</td><td class="ok">Merged to <code>main</code></td></tr>
-    <tr><td>Task 9 (QA/compliance)</td><td class="warn">Committed on its branch, NOT yet merged (no PR #15); plus uncommitted docs on that branch</td></tr>
+    <tr><td>Task 9 (QA/compliance)</td><td class="ok">Merged into <code>main</code>; historical branch warning is superseded</td></tr>
     <tr><td>Gateway health route</td><td class="warn">Reports 503 — false negative (pings unsupported <code>mongodb:ping</code>); real gateway calls work</td></tr>
     <tr><td>Michael interview (4 routes)</td><td class="warn">503 until <code>ANTHROPIC_API_KEY</code> is set (LLM dependency)</td></tr>
     <tr><td>Ivory / ScriptMaker (LLM)</td><td class="warn">Degrade to manual until <code>ANTHROPIC_API_KEY</code> is set</td></tr>
@@ -113,7 +113,7 @@ pnpm --filter @momentum/server bootstrap:ivory</pre>
   <h2>5. Phase 2 — deploy for the team (10-day target)</h2>
   <p class="small">High-level target plan from the prior production brief. Confirm specifics before executing each line.</p>
   <ol>
-    <li><span class="chk"></span><strong>Merge Task 9</strong> and prune stale duplicate remote branches; tag a release commit on <code>main</code>.</li>
+    <li><span class="chk"></span><strong>Confirm current <code>main</code></strong>, prune stale duplicate remote branches if needed, and tag a release commit when Kevin approves the release point.</li>
     <li><span class="chk"></span><strong>Provision the host</strong> (VPS — InterServer or your Quasar VPS). Install Docker + Docker Compose.</li>
     <li><span class="chk"></span><strong>Managed data layer:</strong> MongoDB Atlas as the authoritative store, Neo4j Aura for the genealogy graph; decide Chroma + Surreal hosting. MongoDB stays the single write authority.</li>
     <li><span class="chk"></span><strong>Reverse proxy + TLS:</strong> Caddy in front of the apps for automatic HTTPS.</li>
