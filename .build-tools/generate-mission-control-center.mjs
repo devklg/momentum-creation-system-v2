@@ -803,7 +803,7 @@ const executive = buildBook({
   bodyFactory: executiveBody,
 });
 
-const ARTIFACT_BANNER = `> **BUILD ARTIFACT — NON-AUTHORITATIVE.** Compiled by a Documentation Compiler (.build-tools, ACR-001) on ${generatedAt}. Source of truth lives in \`constitution/\`. Do not cite this file as governance.\n\n`;
+const ARTIFACT_BANNER = `> **Generated Reference Manual — Not Constitutional Authority.** Source-of-truth documents live in \`constitution/\` and governing architecture documents.\n\n`;
 writeFileSync(join(outDir, 'MISSION_CONTROL_ARCHITECTURE.md'), ARTIFACT_BANNER + architecture, 'utf8');
 writeFileSync(join(outDir, 'MOMENTUM_EXECUTIVE_SYSTEM.md'), ARTIFACT_BANNER + executive, 'utf8');
 

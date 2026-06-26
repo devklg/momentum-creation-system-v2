@@ -1274,7 +1274,7 @@ flowchart TD
   return `# Momentum Agent Communication Protocol\n\nGenerated: ${today}\n\n${pages.join("\n")}`;
 }
 
-const ARTIFACT_BANNER = `> **BUILD ARTIFACT — NON-AUTHORITATIVE.** Compiled by a Documentation Compiler (.build-tools, ACR-001) on ${today}. Source of truth lives in \`constitution/\`. Do not cite this file as governance.\n\n`;
+const ARTIFACT_BANNER = `> **Generated Reference Manual — Not Constitutional Authority.** Source-of-truth documents live in \`constitution/\` and governing architecture documents.\n\n`;
 writeFileSync(join(outDir, "MOMENTUM_AI_ORGANIZATION.md"), ARTIFACT_BANNER + generateOrganization(), "utf8");
 writeFileSync(join(outDir, "MOMENTUM_AGENT_DIRECTORY.md"), ARTIFACT_BANNER + generateDirectory(), "utf8");
 writeFileSync(join(outDir, "MOMENTUM_AGENT_COMMUNICATION_PROTOCOL.md"), ARTIFACT_BANNER + generateProtocol(), "utf8");

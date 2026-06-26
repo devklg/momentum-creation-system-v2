@@ -62,8 +62,8 @@ flowchart LR
 
 **Invariants this ACR establishes:**
 1. Compilers **read** living docs; they never become the source.
-2. Compiler output **never** lands in `constitution/`. It lands in a dedicated artifacts location (proposed: `docs/reference-manuals/`).
-3. Every generated manual carries a header: *“Build artifact compiled from [sources] on [date]. Non-authoritative. Source of truth: constitution/.”*
+2. Compiler output **never** lands in `constitution/`. It lands in `docs/reference-manuals/`.
+3. Every generated manual carries the approved banner: *“Generated Reference Manual — Not Constitutional Authority. Source-of-truth documents live in `constitution/` and governing architecture documents.”*
 4. Generated manuals are **build artifacts**, not constitutional authority, and may not be cited as governance.
 
 ---
@@ -181,8 +181,41 @@ Approval writes a decision-ledger entry (`momentum.decisions`, e.g. `dec_documen
 
 - **Approved by:** Kevin L. Gardner, 2026-06-26 (approval gate; source-of-truth / high risk → Kevin).
 - **Implemented:** the three `.build-tools/generate-momentum-*.mjs` scripts were reclassified as Documentation Compilers — output redirected from `constitution/` to `docs/reference-manuals/`, a guard added that throws if the resolved output path contains `constitution`, and a non-authoritative build-artifact banner stamped on every emitted file. `docs/reference-manuals/` created with a non-authoritative `README` and a `.gitignore` excluding compiled artifacts from version control.
-- **Verified (testing gate):** all three compilers run successfully; output lands in `docs/reference-manuals/` (MISSION_CONTROL_ARCHITECTURE 127 pages, MOMENTUM_EXECUTIVE_SYSTEM 123 pages, MOMENTUM_KNOWLEDGE_CORE 160 pages, plus the three AI-organization manuals); none write to `constitution/`; banner confirmed at the head of output.
+- **Verified (testing gate):** all three compilers run successfully; output lands in `docs/reference-manuals/` (MISSION_CONTROL_ARCHITECTURE 127 pages, MOMENTUM_EXECUTIVE_SYSTEM 123 pages, MOMENTUM_KNOWLEDGE_CORE 160 pages, plus the three AI-organization manuals); none write to `constitution/`. The compilers were re-run with `constitution/` root listed immediately before and after — identical both times (six source-of-truth documents, zero handbooks regenerated), proving they no longer repopulate `constitution/`. The approved banner — *“Generated Reference Manual — Not Constitutional Authority. Source-of-truth documents live in `constitution/` and governing architecture documents.”* — was confirmed at the head of the output.
 - **Released:** the four duplicated handbooks were removed from `constitution/` root (`MOMENTUM_AI_ORGANIZATION`, `MOMENTUM_AGENT_DIRECTORY`, `MOMENTUM_AGENT_COMMUNICATION_PROTOCOL`, `MOMENTUM_KNOWLEDGE_CORE`); their archived copies in `constitution/_generated_archive/` were retained; no source-of-truth document, the archive, or FOUNDATION.md was touched.
 - **Open decision left to Kevin:** compiled artifacts are gitignored (not tracked). Remove the ignore if the binders should be version-controlled for distribution.
+
+---
+
+## §12 — Files Changed
+
+**Modified (reclassified as Documentation Compilers):**
+- `.build-tools/generate-momentum-ai-constitution.mjs`
+- `.build-tools/generate-momentum-knowledge-core.mjs`
+- `.build-tools/generate-mission-control-center.mjs`
+
+**Added:**
+- `docs/reference-manuals/README.md`
+- `docs/reference-manuals/.gitignore`
+
+**Removed from `constitution/` root (archive copies retained in `_generated_archive/`):**
+- `MOMENTUM_AI_ORGANIZATION.md`
+- `MOMENTUM_AGENT_DIRECTORY.md`
+- `MOMENTUM_AGENT_COMMUNICATION_PROTOCOL.md`
+- `MOMENTUM_KNOWLEDGE_CORE.md`
+
+**ACR records updated:**
+- `constitution/acr/ACR-001-documentation-compilers.md`
+- `constitution/acr/REGISTER.md`
+
+**Decision ledger:** `dec_documentation_compilers` written to MongoDB `momentum.decisions`, Neo4j, and ChromaDB `momentum_decisions` (all read back and verified).
+
+**Commits:** `38c840f` (governed change), plus the banner-wording correction and this record update.
+
+---
+
+## §13 — Release Status
+
+**RELEASED.** Approved 2026-06-26, implemented, verified, merged to `main`, and pushed to origin. The generators are preserved and reclassified as Documentation Compilers; living constitutional documents remain the sole source of truth.
 
 *The Constitution Agent warns. Kevin decided: approved. This record is the first completed pass through the Constitutional Governance process.*

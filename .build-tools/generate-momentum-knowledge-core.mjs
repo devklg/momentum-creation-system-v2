@@ -860,6 +860,6 @@ No appendix grants permission to bypass source hierarchy, sponsor immutability, 
 
 const document = `# Momentum Knowledge Core\n\nGenerated: ${today}\n\nMinimum depth target: 150 pages. Actual page markers: ${pages.length}.\n\n${pages.join("\n")}`;
 
-const ARTIFACT_BANNER = `> **BUILD ARTIFACT — NON-AUTHORITATIVE.** Compiled by a Documentation Compiler (.build-tools, ACR-001) on ${today}. Source of truth lives in \`constitution/\`. Do not cite this file as governance.\n\n`;
+const ARTIFACT_BANNER = `> **Generated Reference Manual — Not Constitutional Authority.** Source-of-truth documents live in \`constitution/\` and governing architecture documents.\n\n`;
 writeFileSync(join(outDir, "MOMENTUM_KNOWLEDGE_CORE.md"), ARTIFACT_BANNER + document, "utf8");
 console.log("Compiled docs/reference-manuals/MOMENTUM_KNOWLEDGE_CORE.md (build artifact)");
