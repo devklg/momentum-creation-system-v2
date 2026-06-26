@@ -332,6 +332,9 @@ function describePresentationStatus(s: AdminProspectPresentationStatus): {
       return { label: 'enrolled', tone: 'text-teal border-teal/40' };
     case 'expired':
       return { label: 'expired', tone: 'text-red-400 border-red-400/40' };
+    default:
+      // Defensive: an unrecognized status must never blank the page.
+      return { label: String(s ?? 'unknown'), tone: 'text-cream-faint border-line' };
   }
 }
 

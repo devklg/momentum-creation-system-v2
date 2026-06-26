@@ -3,7 +3,8 @@
  * write-handoff-129.mjs — Chat #129 session close. Writes the handoff to every
  * LIVE leg and reads each back to confirm. Does NOT run ARCHIE (Kevin's job).
  */
-const GW = 'http://localhost:2525/api/execute';
+const GATEWAY_BASE = (process.env.GATEWAY_URL || 'http://localhost:2526/api').replace(/\/$/, '');
+const GW = `${GATEWAY_BASE}/execute`;
 async function gw(tool, action, params) {
   const r = await fetch(GW, { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ tool, action, params }) });
@@ -39,7 +40,7 @@ const HANDOFF = {
   blockers: [
     'NONE blocking the build. ANTHROPIC_API_KEY in root .env (Ivory/LLM unblocked). GitHub connector fixed #128.',
     'Open (non-blocking): gmail invalid_grant (OAuth re-auth needed); telnyx intentionally disabled pending Kevin re-key; Resend dormant pending teammagnificent.com domain verification (BA-SMS is live fallback).',
-    'Standing fragility: do NOT trust connector status/lastError (sticky/stale); test live gateway via POST localhost:2525/api/execute; do NOT trust build-registry/docs over git log.',
+    'Standing fragility: do NOT trust connector status/lastError (sticky/stale); test live gateway via POST localhost:2526/api/execute; do NOT trust build-registry/docs over git log.',
   ],
   front_of_line: 'BUILD a surface (reconciliation is DONE). Pick (A) .team invitation generator + Ivory [wf_0050-0059] OR (B) /admin audit-log substrate [wf_0107-0110]. Source of truth for what to build: docs/project-wireframe.md + momentum.work_queue_leaves. Currency: momentum.decisions. State: locked-spec.md.',
   artifacts_this_chat: [

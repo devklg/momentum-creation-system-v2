@@ -44,7 +44,7 @@ const Env = z.object({
   SERVER_PORT: z.coerce.number().int().positive().default(7700),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
-  GATEWAY_URL: z.string().url().default('http://localhost:2525/api'),
+  GATEWAY_URL: z.string().url().default('http://localhost:2526/api'),
 
   /**
    * Base URL minted /p/{token} prospect links are built on (#145). Dev

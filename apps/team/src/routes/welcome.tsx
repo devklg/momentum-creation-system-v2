@@ -124,8 +124,8 @@ export function WelcomePage() {
               Accept once. Launch from cockpit.
             </p>
             <p className="text-cream-mute text-[14px] leading-[1.55] mt-3">
-              After this page, the Launch Center will guide Michael, Day 1, your first
-              invitation, and the questionnaire.
+              After this page, the Launch Center will guide your discovery interview with
+              Steve, Day 1, your first invitation, and the questionnaire.
             </p>
           </div>
         </div>
@@ -153,8 +153,8 @@ export function WelcomePage() {
           />
           <CeremonyCard
             icon={<CalendarClock className="h-5 w-5" aria-hidden="true" />}
-            title="Michael comes first."
-            body="Schedule the 15-minute onboarding call, then your operating tools open in order."
+            title="Steve comes first."
+            body="Schedule your New BA Discovery interview with Steve, then your operating tools open in order."
           />
         </div>
       </section>

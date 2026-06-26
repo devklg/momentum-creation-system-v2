@@ -18,7 +18,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-const GATEWAY_URL = valueArg('--gateway-url') || process.env.GATEWAY_URL || 'http://localhost:2525';
+const GATEWAY_URL = valueArg('--gateway-url') || process.env.GATEWAY_URL || 'http://localhost:2526';
 const APPLY = process.argv.includes('--apply');
 const limitArg = valueArg('--limit-per-source') || '50';
 const LIMIT_PER_SOURCE = limitArg.toLowerCase() === 'all' ? null : Number(limitArg);

@@ -1,4 +1,4 @@
-# Momentum Creation System v1
+# Momentum Creation System v2
 
 **Team Magnificent Marketing Momentum Creation System.** Founded by Kevin L. Gardner, co-led with Paul Barrios, operating inside THREE International around GLP-THREE.
 
@@ -15,7 +15,7 @@ Three clients, one server, one gateway.
 
 ## Architecture
 
-Every persistent write fans to MongoDB + Neo4j + ChromaDB through the Universal Gateway at `localhost:2525`. THREE International is the final authority on sponsorship, enrollment, placement, and compensation — this system mirrors THREE for operational visibility, never overrides it.
+Every persistent write fans to MongoDB + Neo4j + ChromaDB through Universal Gateway V2 at `localhost:2526`. THREE International is the final authority on sponsorship, enrollment, placement, and compensation — this system mirrors THREE for operational visibility, never overrides it. Gateway V2 is the MCS V2 standard; see `docs/UNIVERSAL_GATEWAY_V2_STANDARD.md`.
 
 For full architecture, see `docs/locked-spec.md` (condensed authoritative reference) and the five design `.docx` files in `docs/`.
 

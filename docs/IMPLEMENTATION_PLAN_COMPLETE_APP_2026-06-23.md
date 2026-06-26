@@ -49,7 +49,7 @@ VERIFY (audit items 1–10):
 - `pnpm install` → `pnpm typecheck` → `pnpm build` → `git diff --check`.
 - Boot server + all apps; confirm API health route responds.
 - Confirm `.com`, `.team`, `/admin` all load in browser.
-- Confirm Gateway is reachable on port **2526** (note: this is the app's expected port per the audit; the personal-memory gateway runs on 2525 — verify which the app config points at and that it answers).
+- Confirm Universal Gateway V2 is reachable on port **2526**. This is the settled MCS V2 standard.
 
 **Exit criteria:** clean build, three apps load, API health green, gateway answers. No red here moves forward.
 

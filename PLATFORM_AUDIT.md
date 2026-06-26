@@ -221,7 +221,7 @@ apps/com        apps/team        apps/admin
                     |
               Express API :7700
                     |
-          Universal Gateway :2525
+          Universal Gateway V2 :2526
                     |
         +-----------+-----------+
         |           |           |
