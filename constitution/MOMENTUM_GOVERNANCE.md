@@ -5,7 +5,7 @@
 **Version:** 1.0.0
 **Authority:** Subordinate to `constitution/MOMENTUM_CONSTITUTION.md`. Where this document conflicts with the Constitution, the Constitution wins.
 **Constitutional Authority:** Kevin L. Gardner — sole and final
-**Status:** Canonical (governance layer). Part of the integrated governance package awaiting ratification.
+**Status:** Ratified and in force — 2026-06-26, by Kevin L. Gardner (sole and final Constitutional Authority), under `MOMENTUM_CONSTITUTION.md` Article IX. Canonical (governance layer).
 
 ---
 
