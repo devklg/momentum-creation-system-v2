@@ -203,8 +203,8 @@ export function mockFunnel(
         conversionFromStart: counts[1]! / counts[0]!,
       },
       {
-        key: 'michael_done',
-        label: 'Michael done',
+        key: 'steve_discovery_done',
+        label: 'Steve discovery done',
         count: counts[2]!,
         conversionFromStart: counts[2]! / counts[0]!,
       },

@@ -56,9 +56,8 @@ export type TenantTemplateKey =
   // F.5 BA-facing training module copy.
   | 'team.training.fast_start_day1'
   | 'team.training.orientation_overview'
-  // F.5 Michael interview-prompt scaffold (BA-facing only; the locked 5-prompt
-  // set is still an open decision — this slot carries a safe scaffold default).
-  | 'team.michael.interview_prompts'
+  // F.5 Michael training-support prompt scaffold (BA-facing sponsor context).
+  | 'team.michael.training_support_prompt'
   // F.5 Ivory "who do you know" coach prompt library.
   | 'team.ivory.coach_prompt'
   | 'admin.broadcast.sms';

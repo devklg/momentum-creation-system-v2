@@ -29,7 +29,7 @@ import {
 import { placeProspect } from './holdingTank.js';
 import { findNextUpcomingEvent } from './webinarEvent.js';
 
-const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/89wRvqx1d8M';
+const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/1IZiV7RXdCY';
 const WEBINAR = {
   dayOfWeek: 'Mondays & Thursdays',
   timeOfDay: '5:00 PM',

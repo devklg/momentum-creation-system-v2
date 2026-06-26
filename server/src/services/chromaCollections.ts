@@ -42,9 +42,7 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_audit_log', // domain/auditLog.ts
   'audit_log', // domain/adminBaOversight.ts (sponsor-override audit line)
   'admin_prospect_notes', // domain/adminProspectOversight.ts
-  'mcs_michael_interviews', // domain/michaelScoring.ts
   'mcs_steve_discoveries', // domain/steve-success-interview.ts (Steve discovery + success profiles)
-  'mcs_michael_schedules', // domain/michael-schedule.ts
   'mcs_access_codes', // domain/codeGen.ts
   'mcs_commitments', // domain/commitments.ts
   'mcs_ba_questionnaires', // domain/questionnaire.ts

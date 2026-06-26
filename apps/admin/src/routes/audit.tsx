@@ -4,9 +4,8 @@
  * Reads /api/admin/audit. Filterable by actor / role / action / entity /
  * severity / time range. Reverse-chronological, cursor-paged.
  *
- * Michael interview transcripts link FROM entries via linkedTranscriptId
- * (Chat #89 — no separate tab); when a transcript exists, the row renders
- * a "view transcript" affordance.
+ * Legacy Michael interview transcripts can still link FROM historical entries
+ * via linkedTranscriptId (Chat #89 - no separate tab).
  */
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';

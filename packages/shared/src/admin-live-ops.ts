@@ -123,7 +123,7 @@ export interface AdminLiveGridResponse {
  *
  *   - prospect funnel:  minted → clicked → video_started → video_complete
  *                       → enrolled
- *   - BA activation:    signed_up → welcomed → michael_done →
+ *   - BA activation:    signed_up → welcomed → steve_discovery_done →
  *                       first_invite_sent → first_video_complete →
  *                       first_enrollment
  *

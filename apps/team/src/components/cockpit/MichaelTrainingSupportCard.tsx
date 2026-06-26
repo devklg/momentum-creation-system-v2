@@ -12,9 +12,6 @@
  * direct sponsor of the downline. This component never receives card data for a
  * downline the user isn't entitled to read.
  *
- * Sibling to MichaelEventCard (the Michael-interview card). Both cards live on
- * a sponsor's downline-detail surface; they read independent artifacts.
- *
  * Compliance: BA-language read-back only. The card never surfaces income,
  * placement, or comp math — it's the BA's own discovery answers + light
  * structural guidance.

@@ -12,8 +12,8 @@
  *   GET /api/cockpit/summary    headline counts + My Sponsor card
  *
  * Gating: /launch is requireAuth only so a new BA can see their current
- * onboarding action before the Michael gate. Operational PMV/CRM reads remain
- * requireAuth + requireMichaelComplete.
+ * onboarding action before the Steve gate. Operational PMV/CRM reads remain
+ * requireAuth + requireSteveComplete.
  *
  * Sponsor immutability (locked-spec 3.5): the BA id is read from
  * req.session.baId — the authed session — NEVER from a query param or body.
@@ -23,7 +23,7 @@
 
 import { Router } from 'express';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
   getMyInvites,
   getCockpitSummary,
@@ -57,7 +57,7 @@ cockpitRoutes.get('/launch', requireAuth, async (req, res) => {
  * GET /api/cockpit/invites — the BA's own prospects, newest first, with the
  * per-prospect activity timeline keyed by prospectId.
  */
-cockpitRoutes.get('/invites', requireAuth, requireMichaelComplete, async (req, res) => {
+cockpitRoutes.get('/invites', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = req.session?.baId;
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -74,7 +74,7 @@ cockpitRoutes.get('/invites', requireAuth, requireMichaelComplete, async (req, r
 /**
  * GET /api/cockpit/summary — headline funnel counts + the My Sponsor card.
  */
-cockpitRoutes.get('/summary', requireAuth, requireMichaelComplete, async (req, res) => {
+cockpitRoutes.get('/summary', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = req.session?.baId;
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -94,7 +94,7 @@ cockpitRoutes.get('/summary', requireAuth, requireMichaelComplete, async (req, r
  * Returns focusQueue + table rows from the same deterministic rules the
  * cockpit Today's Actions card uses. Read-only; no outreach is sent.
  */
-cockpitRoutes.get('/pmv', requireAuth, requireMichaelComplete, async (req, res) => {
+cockpitRoutes.get('/pmv', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = req.session?.baId;
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -116,7 +116,7 @@ cockpitRoutes.get('/pmv', requireAuth, requireMichaelComplete, async (req, res) 
 cockpitRoutes.get(
   '/todays-actions',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -142,7 +142,7 @@ cockpitRoutes.get(
 cockpitRoutes.get(
   '/invites/print.pdf',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });

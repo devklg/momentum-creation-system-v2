@@ -108,6 +108,7 @@ export interface ResolveTokenResponse {
   state: ResolveTokenState;
   prospectFirstName: string;
   baFullName: string;
+  videoUrl?: string;
   positionNumber?: number;
   placedAt?: string;
   /**
@@ -310,6 +311,7 @@ export function TmVideoPresentation({ resolved, entryKind = "pmv" }: TmVideoPres
 
       <DrDanVideo
         token={token}
+        videoUrl={resolved.videoUrl}
         entryKind={entryKind}
         onMilestone={handleMilestone}
         firedMilestones={firedMilestones}

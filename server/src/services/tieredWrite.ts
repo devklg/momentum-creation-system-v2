@@ -16,8 +16,8 @@
  *     pre-exist (cypher uses MATCH, never MERGE — a phantom sponsor is
  *     forbidden, §6.3). Verified by a caller-supplied read-back (n>=1).
  *
- *   - 'knowledge' (Tier 2): what the agents learn from — Michael interview +
- *     full transcript, master content, CRM notes, behavioral trail. Mongo
+ *   - 'knowledge' (Tier 2): what the agents learn from - Steve discovery,
+ *     master content, CRM notes, behavioral trail. Mongo
  *     commit = success; Neo4j/Chroma projection is MANDATORY via the durable
  *     retry queue (projectionOutbox.ts) until it lands; alert on exhaustion.
  *

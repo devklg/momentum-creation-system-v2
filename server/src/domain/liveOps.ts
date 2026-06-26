@@ -52,7 +52,7 @@ const MONGO_DB = 'momentum';
 const COLL_BAS = 'brand_ambassadors';
 const COLL_PLACEMENTS = 'pool_placements';
 const COLL_PROSPECTS = 'prospects';
-const COLL_MICHAEL = 'michael_schedules';
+const COLL_STEVE = 'steve_discoveries';
 const COLL_ACTIVITY = 'invitation_activity';
 
 const MS_24H = 24 * 60 * 60 * 1000;
@@ -428,12 +428,12 @@ async function buildProspectFunnel(
 }
 
 /**
- * BA-activation funnel — signed_up → welcomed → michael_done →
+ * BA-activation funnel — signed_up → welcomed → steve_discovery_done →
  * first_invite_sent → first_video_complete → first_enrollment.
  *
  * Reuses the same source set as `buildBaActivationReport`:
  *   brand_ambassadors  (signup, welcomedAt)
- *   michael_schedules  (status='completed' rows)
+ *   steve_discoveries  (completedAt rows)
  *   invitation_activity (kind 'invitation_sent' / 'video_completed', per-sponsor)
  *   pool_placements    (flushReason='enrolled', per-sponsor)
  *
@@ -443,7 +443,7 @@ async function buildProspectFunnel(
 const BA_STAGES = [
   { key: 'signed_up', label: 'Signed up' },
   { key: 'welcomed', label: 'Welcomed' },
-  { key: 'michael_done', label: 'Michael done' },
+  { key: 'steve_discovery_done', label: 'Steve discovery done' },
   { key: 'first_invite_sent', label: 'First invite sent' },
   { key: 'first_video_complete', label: 'First video complete' },
   { key: 'first_enrollment', label: 'First enrollment' },
@@ -484,11 +484,11 @@ async function buildBaActivationFunnel(
     };
   }
 
-  const [michaelRes, activityRes, enrollRes] = await Promise.all([
+  const [steveRes, activityRes, enrollRes] = await Promise.all([
     instrumentedGatewayCall<{ documents: MichaelDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
-      collection: COLL_MICHAEL,
-      filter: { baId: { $in: baIds }, status: 'completed' },
+      collection: COLL_STEVE,
+      filter: { baId: { $in: baIds }, completedAt: { $ne: null } },
       limit: baIds.length,
     }),
     instrumentedGatewayCall<{ documents: ActivityDoc[] }>('mongodb', 'query', {
@@ -508,8 +508,8 @@ async function buildBaActivationFunnel(
     }),
   ]);
 
-  const michaelDone = new Set(
-    (michaelRes.documents ?? [])
+  const steveDone = new Set(
+    (steveRes.documents ?? [])
       .filter((m) => m.completedAt)
       .map((m) => m.baId),
   );
@@ -529,20 +529,20 @@ async function buildBaActivationFunnel(
 
   let signedUp = 0;
   let welcomed = 0;
-  let michael = 0;
+  let steve = 0;
   let invited = 0;
   let videoComplete = 0;
   let enrolled = 0;
   for (const ba of bas) {
     signedUp += 1;
     if (ba.welcomedAt) welcomed += 1;
-    if (michaelDone.has(ba.baId)) michael += 1;
+    if (steveDone.has(ba.baId)) steve += 1;
     if (firstInvite.has(ba.baId)) invited += 1;
     if (firstVideo.has(ba.baId)) videoComplete += 1;
     if (firstEnroll.has(ba.baId)) enrolled += 1;
   }
 
-  const counts = [signedUp, welcomed, michael, invited, videoComplete, enrolled];
+  const counts = [signedUp, welcomed, steve, invited, videoComplete, enrolled];
   const first = counts[0] ?? 0;
   const stages: AdminFunnelStage[] = BA_STAGES.map((s, i) => ({
     key: s.key,

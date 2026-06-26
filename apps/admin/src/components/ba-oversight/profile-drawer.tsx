@@ -11,9 +11,8 @@
  *   5. 2-in-72 (current count + 30-day historical not yet wired — display today's number)
  *   6. Invite activity (count + link to that BA's prospect list — link wired-dormant)
  *   7. Training (Fast Start module count + complete badge)
- *   8. Michael interview transcript link
- *   9. Leader tags (system + curated toggle)
- *  10. Notes (Kevin-private, append-only)
+ *   8. Leader tags (system + curated toggle)
+ *   9. Notes (Kevin-private, append-only)
  *
  * Override flow is launched from the Sponsor section via the Override
  * button — handled by SponsorOverrideFlow.
@@ -295,40 +294,6 @@ export function ProfileDrawer({ baId, onClose, onRowChanged }: Props) {
                   </span>
                 )}
               </KV>
-            </Section>
-
-            <Section title="Michael interview">
-              {bundle.michaelTranscript ? (
-                <div className="space-y-1">
-                  <KV label="Completed">
-                    {bundle.michaelTranscript.completedAt
-                      ? formatDateTime(bundle.michaelTranscript.completedAt)
-                      : '—'}
-                  </KV>
-                  <KV label="Interview id">
-                    <span className="font-mono text-cream-mute">
-                      {bundle.michaelTranscript.interviewId ?? '—'}
-                    </span>
-                  </KV>
-                  {bundle.michaelTranscript.audioUrl && (
-                    <KV label="Recording">
-                      <a
-                        href={bundle.michaelTranscript.audioUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-gold hover:underline"
-                      >
-                        open recording
-                      </a>
-                    </KV>
-                  )}
-                  <p className="text-[11px] font-mono text-cream-faint mt-2 uppercase tracking-label">
-                    Full transcript lives in Audit / Section J
-                  </p>
-                </div>
-              ) : (
-                <p className="text-cream-faint">— no interview on file —</p>
-              )}
             </Section>
 
             <Section title="Leader tags">

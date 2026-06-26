@@ -13,7 +13,7 @@ import type {
   CreateAgentEventPayload,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
   AgentEventValidationError,
   getAgentRecommendations,
@@ -25,7 +25,7 @@ export const agentRoutes: Router = Router();
 agentRoutes.get(
   '/recommendations',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -45,7 +45,7 @@ agentRoutes.get(
 agentRoutes.post(
   '/events',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });

@@ -13,7 +13,7 @@
  *   POST   /api/crm/:prospectId/disposition     { disposition: 5-tag | null }
  *   POST   /api/crm/:prospectId/reinvite        bump sentAt; mint fresh if expired
  *
- * Gating: requireAuth + requireMichaelComplete on every handler — BA-facing
+ * Gating: requireAuth + requireSteveComplete on every handler — BA-facing
  * gated routes per server/index.ts canonical pattern.
  *
  * Sponsor immutability (locked-spec 3.5): sponsorBaId comes from
@@ -39,7 +39,7 @@ import type {
   TodaysActionsResponse,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
   CrmError,
   addNote,
@@ -89,7 +89,7 @@ function getProspectId(req: import('express').Request): string {
 
 // ── GET /api/crm/today ────────────────────────────────────────────────────
 
-crmRoutes.get('/today', requireAuth, requireMichaelComplete, async (req, res) => {
+crmRoutes.get('/today', requireAuth, requireSteveComplete, async (req, res) => {
   const sponsorBaId = req.session?.baId;
   if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -104,7 +104,7 @@ crmRoutes.get('/today', requireAuth, requireMichaelComplete, async (req, res) =>
 
 // ── GET /api/crm/:prospectId ──────────────────────────────────────────────
 
-crmRoutes.get('/:prospectId', requireAuth, requireMichaelComplete, async (req, res) => {
+crmRoutes.get('/:prospectId', requireAuth, requireSteveComplete, async (req, res) => {
   const sponsorBaId = req.session?.baId;
   if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -125,7 +125,7 @@ crmRoutes.get('/:prospectId', requireAuth, requireMichaelComplete, async (req, r
 crmRoutes.post(
   '/:prospectId/notes',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const sponsorBaId = req.session?.baId;
     if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -151,7 +151,7 @@ crmRoutes.post(
 crmRoutes.post(
   '/:prospectId/followup',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const sponsorBaId = req.session?.baId;
     if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -178,7 +178,7 @@ crmRoutes.post(
 crmRoutes.delete(
   '/:prospectId/followup',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const sponsorBaId = req.session?.baId;
     if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -201,7 +201,7 @@ crmRoutes.delete(
 crmRoutes.post(
   '/:prospectId/disposition',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const sponsorBaId = req.session?.baId;
     if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -232,7 +232,7 @@ crmRoutes.post(
 crmRoutes.post(
   '/:prospectId/reinvite',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const sponsorBaId = req.session?.baId;
     if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -267,7 +267,7 @@ crmRoutes.post(
 crmRoutes.post(
   '/:prospectId/reinvite-script',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const sponsorBaId = req.session?.baId;
     if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -290,7 +290,7 @@ crmRoutes.post(
 // wrappers (crm.ts) force sponsorBaId from the session, run assertOwnership
 // on edit/delete/restore, and delegate the real work to the shared
 // adminProspectCrud engine with a { kind:'ba' } actor. These routes only
-// validate input and map errors — same requireAuth + requireMichaelComplete
+// validate input and map errors — same requireAuth + requireSteveComplete
 // gating as every other crm route.
 //
 // Reason is required on every mutation (min 8 chars), matching the admin
@@ -315,7 +315,7 @@ function nullableString(v: unknown): string | null | undefined {
 
 // ── POST /api/crm  (create — mint only) ──────────────────────────────────
 
-crmRoutes.post('/', requireAuth, requireMichaelComplete, async (req, res) => {
+crmRoutes.post('/', requireAuth, requireSteveComplete, async (req, res) => {
   const sponsorBaId = req.session?.baId;
   if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -361,7 +361,7 @@ crmRoutes.post('/', requireAuth, requireMichaelComplete, async (req, res) => {
 
 // ── PUT /api/crm/:prospectId  (edit ordinary fields) ─────────────────────
 
-crmRoutes.put('/:prospectId', requireAuth, requireMichaelComplete, async (req, res) => {
+crmRoutes.put('/:prospectId', requireAuth, requireSteveComplete, async (req, res) => {
   const sponsorBaId = req.session?.baId;
   if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -393,7 +393,7 @@ crmRoutes.put('/:prospectId', requireAuth, requireMichaelComplete, async (req, r
 
 // ── DELETE /api/crm/:prospectId  (soft delete — tank untouched) ────────────
 
-crmRoutes.delete('/:prospectId', requireAuth, requireMichaelComplete, async (req, res) => {
+crmRoutes.delete('/:prospectId', requireAuth, requireSteveComplete, async (req, res) => {
   const sponsorBaId = req.session?.baId;
   if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 

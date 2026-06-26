@@ -13,7 +13,7 @@ import type {
   ProspectCrmRecordResponse,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import { findBAByBaId } from '../domain/ba.js';
 import {
   ProspectCrmError,
@@ -57,7 +57,7 @@ function sendCrmHubError(res: import('express').Response, err: unknown) {
   return res.status(500).json({ ok: false, error: 'server_error' });
 }
 
-crmHubRoutes.get('/prospects', requireAuth, requireMichaelComplete, async (req, res) => {
+crmHubRoutes.get('/prospects', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = sessionBaId(req);
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
@@ -69,7 +69,7 @@ crmHubRoutes.get('/prospects', requireAuth, requireMichaelComplete, async (req, 
   }
 });
 
-crmHubRoutes.get('/prospects/:prospectId', requireAuth, requireMichaelComplete, async (req, res) => {
+crmHubRoutes.get('/prospects/:prospectId', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = sessionBaId(req);
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
@@ -86,7 +86,7 @@ crmHubRoutes.get('/prospects/:prospectId', requireAuth, requireMichaelComplete, 
 crmHubRoutes.post(
   '/prospects/:prospectId/close-as-ba',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = sessionBaId(req);
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });

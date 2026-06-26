@@ -77,6 +77,7 @@ export function PTokenPage() {
       state: state.data.state as ComposerInput['state'],
       prospectFirstName: state.data.prospect.firstName,
       baFullName: state.data.ba.fullName,
+      videoUrl: state.data.videoUrl,
       positionNumber: state.data.prospect.positionNumber ?? undefined,
       placedAt: state.data.prospect.placedAt ?? undefined,
       // Chat #115: next upcoming webinar event resolved server-side.

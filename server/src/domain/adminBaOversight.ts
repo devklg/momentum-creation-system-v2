@@ -13,8 +13,6 @@
  *     invite_tokens              2-in-72 count + lifetime invite count
  *     crm_followups              oldest open follow-up due date
  *     fast_start_progress        Fast Start modules complete (0..5)
- *     michael_schedules          interview status
- *     michael_interviews         transcript link (C.4 drawer only)
  *     admin_sponsor_overrides    override history (C.5)
  *     admin_curated_leader_tags  Kevin-toggled badge (C.4)
  *     admin_ba_notes             Kevin-private append-only notes (C.4)
@@ -62,8 +60,6 @@ const COMMITMENTS_COLLECTION = 'ba_commitments';
 const TOKENS_COLLECTION = 'invite_tokens';
 const FOLLOWUPS_COLLECTION = 'crm_followups';
 const FAST_START_COLLECTION = 'fast_start_progress';
-const MICHAEL_SCHEDULES_COLLECTION = 'michael_schedules';
-const MICHAEL_INTERVIEWS_COLLECTION = 'michael_interviews';
 const OVERRIDES_COLLECTION = 'admin_sponsor_overrides';
 const CURATED_LEADER_TAGS_COLLECTION = 'admin_curated_leader_tags';
 const BA_NOTES_COLLECTION = 'admin_ba_notes';
@@ -130,18 +126,6 @@ interface FastStartLite {
   baId: string;
   moduleId: number;
   state: 'not_started' | 'in_progress' | 'completed';
-}
-
-interface MichaelScheduleLite {
-  baId: string;
-  status: 'awaiting_schedule' | 'scheduled' | 'in_progress' | 'completed' | 'missed';
-  completedAt: string | null;
-}
-
-interface MichaelInterviewLite {
-  baId: string;
-  completedAt: string | null;
-  audioUrl: string | null;
 }
 
 interface SponsorOverrideRecord {
@@ -364,30 +348,7 @@ export async function listBADirectory(
     }
   }
 
-  // 8. Michael schedules.
-  const michaels = await fetchAllPaged<MichaelScheduleLite>(
-    MONGO_DB,
-    MICHAEL_SCHEDULES_COLLECTION,
-    { baId: { $in: baIds } },
-  );
-  const michaelByBaId = new Map<string, MichaelScheduleLite>();
-  for (const m of michaels) {
-    const cur = michaelByBaId.get(m.baId);
-    // Prefer the most progressed status row when there are multiple.
-    if (!cur) michaelByBaId.set(m.baId, m);
-    else {
-      const order: Record<MichaelScheduleLite['status'], number> = {
-        awaiting_schedule: 0,
-        missed: 1,
-        scheduled: 2,
-        in_progress: 3,
-        completed: 4,
-      };
-      if (order[m.status] > order[cur.status]) michaelByBaId.set(m.baId, m);
-    }
-  }
-
-  // 9. Curated leader tags.
+  // 8. Curated leader tags.
   const tags = await fetchAllPaged<CuratedLeaderTagRecord>(
     MONGO_DB,
     CURATED_LEADER_TAGS_COLLECTION,
@@ -396,20 +357,15 @@ export async function listBADirectory(
   const curatedByBaId = new Map<string, boolean>();
   for (const t of tags) curatedByBaId.set(t.baId, t.curated);
 
-  // 10. Assemble rows.
+  // 9. Assemble rows.
   const rows: AdminBaDirectoryRow[] = bas.map((ba) => {
     const completedMods = completedModulesByBaId.get(ba.baId) ?? 0;
-    const michael = michaelByBaId.get(ba.baId);
     const welcomeAt = welcomeByBaId.get(ba.baId) ?? null;
     const originalSponsorBaId =
       ba.originalSponsorBaId && ba.originalSponsorBaId !== ba.sponsorBaId
         ? ba.originalSponsorBaId
         : null;
-    const lastActivityAt = maxIso(
-      ba.lastLoginAt,
-      welcomeAt,
-      michael?.completedAt ?? null,
-    );
+    const lastActivityAt = maxIso(ba.lastLoginAt, welcomeAt);
     return {
       baId: ba.baId,
       threeBaId: ba.threeBaId,
@@ -433,7 +389,6 @@ export async function listBADirectory(
       oldestOpenFollowUpDueAt: oldestFollowupByBaId.get(ba.baId) ?? null,
       trainingModulesCompleted: completedMods,
       trainingComplete: completedMods >= 5,
-      michaelStatus: michael?.status ?? null,
       status: deriveStatus(ba),
       lastActivityAt,
       systemDetectedLeader: false,
@@ -487,7 +442,6 @@ export async function getBAProfileBundle(
         oldestOpenFollowUpDueAt: null,
         trainingModulesCompleted: 0,
         trainingComplete: false,
-        michaelStatus: null,
         status: 'inactive',
         lastActivityAt: ba.lastLoginAt ?? null,
         systemDetectedLeader: false,
@@ -497,39 +451,15 @@ export async function getBAProfileBundle(
     }
   }
 
-  const [interview, history, notes] = await Promise.all([
-    fetchMichaelInterviewLink(baId),
+  const [history, notes] = await Promise.all([
     fetchOverrideHistory(baId),
     fetchBaNotes(baId),
   ]);
 
   return {
     row,
-    michaelTranscript: interview,
     sponsorOverrideHistory: history,
     notes,
-  };
-}
-
-async function fetchMichaelInterviewLink(
-  baId: string,
-): Promise<AdminBaProfileBundle['michaelTranscript']> {
-  const r = await gatewayCall<{ documents: MichaelInterviewLite[] }>(
-    'mongodb',
-    'query',
-    {
-      database: MONGO_DB,
-      collection: MICHAEL_INTERVIEWS_COLLECTION,
-      filter: { baId },
-      limit: 1,
-    },
-  );
-  const doc = r.documents?.[0];
-  if (!doc) return null;
-  return {
-    interviewId: baId,
-    completedAt: doc.completedAt ?? null,
-    audioUrl: doc.audioUrl ?? null,
   };
 }
 

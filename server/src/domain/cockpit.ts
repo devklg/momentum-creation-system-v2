@@ -21,7 +21,7 @@
 import { gatewayCall } from '../services/gateway.js';
 import { findBAByBaId, type BARecord } from './ba.js';
 import { lastInitialOf } from './prospects.js';
-import { getMichaelSchedule } from './michael-schedule.js';
+import { buildDiscoveryView } from './steve-success-interview.js';
 import { getFastStartProgress } from './training.js';
 import { questionnaireExists } from './questionnaire.js';
 import type {
@@ -988,11 +988,11 @@ function nextActionFromSteps(steps: LaunchStep[], launchComplete: boolean): Laun
  * instead of writing a parallel launch-state record.
  */
 export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCenterResponse> {
-  const [ba, commitmentAcceptedAt, michael, fastStart, questionnaireSubmitted, ivoryNames] =
+  const [ba, commitmentAcceptedAt, steve, fastStart, questionnaireSubmitted, ivoryNames] =
     await Promise.all([
       findBAByBaId(baId),
       getLatestCommitmentAcceptedAt(baId),
-      getMichaelSchedule(baId),
+      buildDiscoveryView(baId),
       getFastStartProgress(baId),
       questionnaireExists(baId),
       countCollection(IVORY_COLLECTION, { baId }),
@@ -1005,12 +1005,8 @@ export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCente
     (baExtras?.commitment_accepted ? baExtras.commitment_accepted_at ?? ba?.createdAt ?? null : null);
   const welcomeComplete = Boolean(welcomeAcceptedAt);
 
-  const michaelStatus = michael?.status ?? 'missing';
-  const michaelScheduled =
-    michaelStatus === 'scheduled' ||
-    michaelStatus === 'in_progress' ||
-    michaelStatus === 'completed';
-  const michaelComplete = michaelStatus === 'completed';
+  const steveComplete = steve.phase === 'complete';
+  const steveCompletedAt = steve.artifact?.completedAt ?? null;
   const day1 = fastStart.modules.find((m) => m.moduleId === 1);
   const day1State = day1?.state ?? 'not_started';
   const day1Started = day1State === 'in_progress' || day1State === 'completed';
@@ -1035,34 +1031,22 @@ export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCente
         : 'Start by acknowledging the Team Magnificent operating agreement.',
     }),
     buildLaunchStep({
-      id: 'michael_scheduled',
-      label: 'Schedule Michael',
-      complete: michaelScheduled,
-      current: welcomeComplete && !michaelScheduled,
-      href: '/michael/schedule',
-      completedAt: michael?.scheduledAt ?? michael?.slotStartUtc ?? null,
-      source: 'michael_schedules.status',
-      detail: michaelScheduled
-        ? 'Michael is on your calendar.'
-        : 'Pick the 15-minute Michael call time that works for you.',
-    }),
-    buildLaunchStep({
-      id: 'michael_completed',
-      label: 'Complete the Michael call',
-      complete: michaelComplete,
-      current: michaelScheduled && !michaelComplete,
-      href: '/michael/schedule',
-      completedAt: michael?.completedAt ?? null,
-      source: 'michael_schedules.completedAt',
-      detail: michaelComplete
-        ? 'Michael is complete.'
-        : 'Finish the onboarding call so your cockpit unlocks.',
+      id: 'steve_discovery_completed',
+      label: 'Complete Steve discovery',
+      complete: steveComplete,
+      current: welcomeComplete && !steveComplete,
+      href: '/steve/discovery',
+      completedAt: steveCompletedAt,
+      source: 'steve_discoveries.completedAt',
+      detail: steveComplete
+        ? 'Steve discovery is complete.'
+        : 'Complete Steve first so your Success Profile can guide the launch path.',
     }),
     buildLaunchStep({
       id: 'day_1_started',
       label: 'Start Day 1 training',
       complete: day1Started,
-      current: michaelComplete && !day1Started,
+      current: steveComplete && !day1Started,
       href: '/training/fast-start/product',
       completedAt: day1?.startedAt ?? day1?.completedAt ?? null,
       source: 'fast_start_progress.moduleId=1',
@@ -1075,7 +1059,7 @@ export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCente
       label: 'Complete Day 1 training',
       complete: day1Complete,
       current: day1Started && !day1Complete,
-      available: michaelComplete && !day1Complete,
+      available: steveComplete && !day1Complete,
       href: '/training/fast-start/product',
       completedAt: day1?.completedAt ?? null,
       source: 'fast_start_progress.moduleId=1',
@@ -1087,7 +1071,7 @@ export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCente
       id: 'who_do_you_know_started',
       label: 'Start your Who Do You Know list',
       complete: ivoryStarted,
-      current: michaelComplete && !ivoryStarted,
+      current: steveComplete && !ivoryStarted,
       href: '/ivory',
       completedAt: null,
       source: 'ivory_names count by baId',
@@ -1100,7 +1084,7 @@ export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCente
       label: 'Draft your first personal invitation',
       complete: firstInviteDrafted,
       current: ivoryStarted && !firstInviteDrafted,
-      available: michaelComplete && !firstInviteDrafted,
+      available: steveComplete && !firstInviteDrafted,
       href: '/ivory',
       completedAt: invites[0]?.createdAt ?? null,
       source: 'prospects.createdAt via invitation spine',
@@ -1138,7 +1122,7 @@ export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCente
       label: 'Submit your onboarding questionnaire',
       complete: questionnaireSubmitted,
       current: firstInviteSent && !questionnaireSubmitted,
-      available: michaelComplete && !questionnaireSubmitted,
+      available: steveComplete && !questionnaireSubmitted,
       href: '/onboarding/questionnaire',
       completedAt: null,
       source: 'ba_questionnaires existence by baId',
@@ -1174,10 +1158,9 @@ export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCente
     },
     nextAction: nextActionFromSteps(steps, launchComplete),
     steps,
-    michael: {
-      status: michaelStatus,
-      slotStartUtc: michael?.slotStartUtc ?? null,
-      completedAt: michael?.completedAt ?? null,
+    steve: {
+      phase: steve.phase,
+      completedAt: steveCompletedAt,
     },
     firstInvitation: {
       ivoryNames,

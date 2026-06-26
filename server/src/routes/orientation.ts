@@ -11,7 +11,7 @@
  *   POST   /sessions/:sessionId/reserve   book a seat (cap 10)
  *   DELETE /sessions/:sessionId/reserve   cancel my seat
  *
- * Gating: requireAuth + requireMichaelComplete — the BA-facing gated pattern
+ * Gating: requireAuth + requireSteveComplete — the BA-facing gated pattern
  * (a BA reaches the cockpit, and thus this card, only after Michael completes).
  *
  * Identity discipline (locked-spec 3.5): baId comes from req.session — never a
@@ -20,7 +20,7 @@
 
 import { Router } from 'express';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import { findBAByBaId } from '../domain/ba.js';
 import {
   cancelSeat,
@@ -39,7 +39,7 @@ export const orientationRoutes: Router = Router();
 orientationRoutes.get(
   '/sessions',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -64,7 +64,7 @@ orientationRoutes.get(
 orientationRoutes.post(
   '/sessions/:sessionId/reserve',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -116,7 +116,7 @@ orientationRoutes.post(
 orientationRoutes.delete(
   '/sessions/:sessionId/reserve',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });

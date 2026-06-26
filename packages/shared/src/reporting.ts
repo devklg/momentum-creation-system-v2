@@ -103,7 +103,7 @@ export interface AdminActivationRow {
   fullName: string;
   signupAt: string;
   welcomeAcceptedAt: string | null;
-  michaelCompletedAt: string | null;
+  steveDiscoveryCompletedAt: string | null;
   firstInviteAt: string | null;
   firstVideoCompleteAt: string | null;
   firstEnrollmentAt: string | null;
@@ -115,7 +115,7 @@ export interface AdminActivationCohort {
   cohort: string;
   signups: number;
   reachedWelcome: number;
-  reachedMichael: number;
+  reachedSteveDiscovery: number;
   reachedFirstInvite: number;
   reachedFirstVideoComplete: number;
   reachedFirstEnrollment: number;

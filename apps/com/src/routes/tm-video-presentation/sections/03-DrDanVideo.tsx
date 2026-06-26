@@ -24,7 +24,7 @@
  *       Client-side dedup via firedMilestones Set.
  *       complete fires on YT.PlayerState.ENDED OR currentTime >= 0.95 * duration.
  *   • App Description §3 + Chat #84 — video URL is the existing
- *     GLP-THREE video: https://www.youtube.com/embed/89wRvqx1d8M
+ *     GLP-THREE video: https://www.youtube.com/embed/1IZiV7RXdCY
  *
  * Compliance (locked-spec Part 3.8 / COM Design G.5):
  *   • Dr. Dan's employer is NOT named on .com
@@ -64,7 +64,27 @@ const YT_PLAYER_STATE = {
   CUED: 5,
 } as const;
 
-const VIDEO_ID = "89wRvqx1d8M";
+const DEFAULT_VIDEO_ID = "1IZiV7RXdCY";
+const YT_API_LOAD_TIMEOUT_MS = 8000;
+
+function extractYouTubeId(videoUrl?: string | null): string {
+  if (!videoUrl) return DEFAULT_VIDEO_ID;
+  const trimmed = videoUrl.trim();
+  if (!trimmed) return DEFAULT_VIDEO_ID;
+  try {
+    const url = new URL(trimmed);
+    if (url.hostname.includes("youtu.be")) {
+      return url.pathname.replace("/", "") || DEFAULT_VIDEO_ID;
+    }
+    const queryId = url.searchParams.get("v");
+    if (queryId) return queryId;
+    const embedMatch = /\/embed\/([^/?#]+)/.exec(url.pathname);
+    if (embedMatch?.[1]) return embedMatch[1];
+  } catch {
+    // Fall through to direct id handling below.
+  }
+  return /^[A-Za-z0-9_-]{6,}$/.test(trimmed) ? trimmed : DEFAULT_VIDEO_ID;
+}
 
 /**
  * Return-visit resume map (Chat #115). When a prospect returns mid-video,
@@ -114,6 +134,7 @@ function pickResumeFraction(fired: Set<VideoEventKind>): number | null {
 
 export interface DrDanVideoProps {
   token: string;
+  videoUrl?: string | null;
   entryKind?: "pmv" | "rvm";
   /**
    * Fired by the component when a milestone successfully posts to the
@@ -132,6 +153,7 @@ export interface DrDanVideoProps {
 
 export function DrDanVideo({
   token,
+  videoUrl,
   entryKind = "pmv",
   onMilestone,
   firedMilestones,
@@ -144,6 +166,9 @@ export function DrDanVideo({
   const [ytApiReady, setYtApiReady] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [playerError, setPlayerError] = useState(false);
+  const [plainIframeMode, setPlainIframeMode] = useState(false);
+  const videoId = extractYouTubeId(videoUrl);
 
   // Keep the imperative fired set in sync with the prop. The prop is
   // the source of truth for "what the server says is fired"; the ref
@@ -173,6 +198,12 @@ export function DrDanVideo({
       if (prev) prev();
       setYtApiReady(true);
     };
+    const timeout = window.setTimeout(() => {
+      if (!w.YT?.Player) {
+        setPlainIframeMode(true);
+      }
+    }, YT_API_LOAD_TIMEOUT_MS);
+    return () => window.clearTimeout(timeout);
   }, []);
 
   // ---- Fire a milestone to the server --------------------------
@@ -227,7 +258,7 @@ export function DrDanVideo({
 
   // ---- Create the YT.Player once the API is ready -------------
   useEffect(() => {
-    if (!ytApiReady || !containerRef.current) return;
+    if (plainIframeMode || !ytApiReady || !containerRef.current) return;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window as any;
     if (!w.YT || !w.YT.Player) return;
@@ -242,7 +273,7 @@ export function DrDanVideo({
     }
 
     const player = new w.YT.Player(inner, {
-      videoId: VIDEO_ID,
+      videoId,
       playerVars: {
         rel: 0,        // related videos from this channel only
         modestbranding: 1,
@@ -302,8 +333,7 @@ export function DrDanVideo({
           }
         },
         onError: () => {
-          // Silent — the player will surface its own UI. We do not
-          // fire a server event here.
+          setPlayerError(true);
         },
       },
     });
@@ -320,7 +350,7 @@ export function DrDanVideo({
       playerRef.current = null;
       setPlayerReady(false);
     };
-  }, [ytApiReady, fireMilestone]);
+  }, [plainIframeMode, ytApiReady, videoId, fireMilestone]);
 
   // ---- Poll loop: 25 / 50 / 75 / 95% milestones ----------------
   useEffect(() => {
@@ -386,12 +416,22 @@ export function DrDanVideo({
 
         {/* 16:9 video frame + loader */}
         <div className="tm-drdan-video__frame">
-          <div
-            ref={containerRef}
-            className="tm-drdan-video__container"
-            aria-label="Dr. Dan Gubler — GLP-THREE product video"
-          />
-          {(!playerReady || !hasStarted) && (
+          {plainIframeMode ? (
+            <iframe
+              className="tm-drdan-video__plain-iframe"
+              src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1`}
+              title="Dr. Dan Gubler GLP-THREE product video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          ) : (
+            <div
+              ref={containerRef}
+              className="tm-drdan-video__container"
+              aria-label="Dr. Dan Gubler — GLP-THREE product video"
+            />
+          )}
+          {(!playerReady || !hasStarted) && !playerError && !plainIframeMode && (
             <div className="tm-drdan-video__loader" aria-hidden="true">
               <CompassPulse />
               <div className="tm-drdan-video__loader-text">
@@ -399,7 +439,42 @@ export function DrDanVideo({
               </div>
             </div>
           )}
+          {playerError && (
+            <div className="tm-drdan-video__fallback">
+              <div className="tm-drdan-video__fallback-title">Video did not load.</div>
+              <p className="tm-drdan-video__fallback-copy">
+                Open Dr. Dan's GLP-THREE video in YouTube, then come back and continue.
+              </p>
+              <a
+                className="tm-drdan-video__fallback-link"
+                href={`https://www.youtube.com/watch?v=${videoId}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open video
+              </a>
+              <button
+                type="button"
+                className="tm-drdan-video__fallback-button"
+                onClick={() => void fireMilestone("complete")}
+              >
+                I finished the video
+              </button>
+            </div>
+          )}
         </div>
+        {plainIframeMode && !playerError && (
+          <div className="tm-drdan-video__manual-actions">
+            <span>When the video finishes, continue to your live team position.</span>
+            <button
+              type="button"
+              className="tm-drdan-video__fallback-button"
+              onClick={() => void fireMilestone("complete")}
+            >
+              I finished the video
+            </button>
+          </div>
+        )}
 
         <p className="tm-drdan-video__caption">
           Then scroll. The rest of this page expands on what he just told you.
@@ -533,7 +608,8 @@ const styles = `
   .tm-drdan-video__container,
   .tm-drdan-video__container > iframe,
   .tm-drdan-video__yt,
-  .tm-drdan-video__yt > iframe {
+  .tm-drdan-video__yt > iframe,
+  .tm-drdan-video__plain-iframe {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -572,6 +648,68 @@ const styles = `
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: rgba(245, 239, 230, 0.62);
+  }
+  .tm-drdan-video__fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: clamp(20px, 5vw, 48px);
+    background:
+      radial-gradient(circle at 50% 20%, rgba(201, 168, 76, 0.12), transparent 48%),
+      #0A0A0A;
+    text-align: center;
+  }
+  .tm-drdan-video__fallback-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 4vw, 48px);
+    line-height: 1;
+    color: #F5EFE6;
+  }
+  .tm-drdan-video__fallback-copy {
+    max-width: 42ch;
+    margin: 0;
+    color: rgba(245, 239, 230, 0.72);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .tm-drdan-video__fallback-link,
+  .tm-drdan-video__fallback-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 4px;
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .tm-drdan-video__fallback-link {
+    background: #C9A84C;
+    border: 1px solid #C9A84C;
+    color: #0A0A0A;
+  }
+  .tm-drdan-video__fallback-button {
+    background: transparent;
+    border: 1px solid rgba(245, 239, 230, 0.34);
+    color: #F5EFE6;
+  }
+  .tm-drdan-video__manual-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: rgba(245, 239, 230, 0.68);
+    font-size: 14px;
+    line-height: 1.4;
   }
 
   .tm-drdan-video__caption {

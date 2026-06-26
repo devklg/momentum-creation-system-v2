@@ -53,8 +53,8 @@ import { orientationRoutes } from './routes/orientation.js';
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
 // "BA-facing gated routes" block below for the canonical mount pattern.
-import { requireMichaelComplete as _requireMichaelComplete } from './middleware/requireMichaelComplete.js';
-void _requireMichaelComplete;
+import { requireSteveComplete as _requireSteveComplete } from './middleware/requireSteveComplete.js';
+void _requireSteveComplete;
 
 const app = express();
 
@@ -86,11 +86,11 @@ app.use(
 );
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// PRE-GATE ROUTES â€” must NOT use requireMichaelComplete.
+// PRE-GATE ROUTES â€” must NOT use requireSteveComplete.
 // These are the routes a brand-new BA has to reach BEFORE the gate closes
 // (they are how the gate gets opened). Per Chat #97 whitelist:
-//   /api/health, /api/auth/*, /api/welcome/*, /api/michael/*
-// /admin uses its own requireAdmin gate â€” founders bypass Michael entirely.
+//   /api/health, /api/auth/*, /api/welcome/*, /api/steve/*
+// /admin uses its own requireAdmin gate â€” founders bypass Steve entirely.
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
@@ -99,11 +99,11 @@ app.use('/api/onboarding/questionnaire', questionnaireRoutes);
 app.use('/api/sponsor/workbook', sponsorWorkbookRoutes);
 app.use('/api/michael', michaelRoutes);
 // Steve — New BA Discovery & Success Interview (SEPARATE agent; does NOT score,
-// rank, or classify; does NOT touch Michael's schedule/Training Agent + Daily Success Coach artifact).
+// rank, or classify; does NOT touch Michael graph data).
 // BA-facing self-reads are pre-gate (a
 // brand-new BA reaches their own discovery state); worker ingest/system-prompt
 // are STEVE_WORKER_SECRET guarded; the sponsor-only profile read applies
-// requireMichaelComplete internally. Steve never scores or judges.
+// requireSteveComplete internally. Steve never scores or judges.
 app.use('/api/steve', steveRoutes);
 app.use('/api/admin/access-codes', adminAccessCodesRoutes);
 app.use('/api/admin/bas', adminBasRoutes);
@@ -125,7 +125,7 @@ app.use('/api/admin/broadcast', adminBroadcastRoutes);
 // rosters and add sessions as the team grows. Audit-logged like the rest of /admin.
 app.use('/api/admin/orientation', adminOrientationRoutes);
 
-// /api/p/* is prospect-facing (apps/com). No auth, no Michael gate. The token
+// /api/p/* is prospect-facing (apps/com). No auth, no Steve gate. The token
 // itself is the identity surface per COM Design Section E.3.
 //
 // IMPORTANT: prospectLoginRoutes mounts FIRST at /api/p/login so its more
@@ -149,16 +149,16 @@ app.use('/api/vm/provider', vmProviderWebhookRoutes);
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // BA-FACING GATED ROUTES â€” mount here.
 // Every new authenticated BA-facing route mounted below this line must use
-// the pair (requireAuth, requireMichaelComplete) on its handlers so the
-// 403-until-Michael-complete contract holds project-wide.
+// the pair (requireAuth, requireSteveComplete) on its handlers so the
+// 403-until-Steve-complete contract holds project-wide.
 //
 // Canonical pattern inside a route file:
 //
 //   import { requireAuth } from '../middleware/requireAuth.js';
-//   import { requireMichaelComplete }
-//     from '../middleware/requireMichaelComplete.js';
+//   import { requireSteveComplete }
+//     from '../middleware/requireSteveComplete.js';
 //
-//   router.get('/', requireAuth, requireMichaelComplete, handler);
+//   router.get('/', requireAuth, requireSteveComplete, handler);
 //
 // Pending mounts (Chat #97 priorities 8â€“10 carry forward):
 //   app.use('/api/training', trainingRoutes);     // /training/day-1 whitelisted; day-2+ gated
@@ -167,7 +167,7 @@ app.use('/api/vm/provider', vmProviderWebhookRoutes);
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // Invitation spine (Chat #119) â€” the production line (locked-spec 1.8). Each
-// handler applies (requireAuth, requireMichaelComplete) internally; sponsor
+// handler applies (requireAuth, requireSteveComplete) internally; sponsor
 // is derived from the session, never the body (locked-spec 3.5).
 app.use('/api/invitations', invitationRoutes);
 
@@ -178,7 +178,7 @@ app.use('/api/cockpit', cockpitRoutes);
 // BA CRM write-side (Chat #132) â€” wireframe 3.3 CRM leaves. The WRITE
 // companion to /api/cockpit/*: notes, follow-up reminders, dispositions,
 // re-invite, and the Today's Actions card (derived from existing pipeline).
-// Each handler applies (requireAuth, requireMichaelComplete) internally;
+// Each handler applies (requireAuth, requireSteveComplete) internally;
 // every mutation runs assertOwnership(prospectId, session.baId) first so a
 // BA can only read or write their OWN prospects (locked-spec 3.5).
 app.use('/api/crm', crmRoutes);
@@ -188,14 +188,14 @@ app.use('/api/crm-hub', crmHubRoutes);
 // server side. Drafts a product-anchored invitation message; the BA carries
 // the draft to /api/invitations (source='scriptmaker'). DRAFTS ONLY â€” no
 // mint, no send (Chat #118 boundary). Gated (requireAuth +
-// requireMichaelComplete) inside the route. Degrades to a neutral fallback
+// requireSteveComplete) inside the route. Degrades to a neutral fallback
 // when ANTHROPIC_API_KEY is unset (dormant today).
 app.use('/api/scriptmaker', scriptmakerRoutes);
 
 // Ivory + Generator (Chat #131 â€” wireframe Â§3.4). The BA-private warm-market
 // roster, an LLM WDYK coach, and the per-product Generator runs that converge
 // selected names onto /p/{token} mints via the existing spine (source='ivory').
-// All routes gated (requireAuth + requireMichaelComplete) inside the file.
+// All routes gated (requireAuth + requireSteveComplete) inside the file.
 app.use('/api/ivory', ivoryRoutes);
 // Agent Orchestration Layer (feature/agent-orchestrator). Read-only
 // recommendation feed + append-only interaction events; the underlying
@@ -203,14 +203,14 @@ app.use('/api/ivory', ivoryRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/vm', vmRoutes);
 // Fast Start Training (feat/fast-start-training, wireframe 3.5).
-// GET /fast-start/progress + GET-1 whitelisted pre-Michael in
-// MICHAEL_GATE_WHITELIST; POST .../modules/2-5/state stay gated.
+// GET /fast-start/progress + GET-1 whitelisted pre-Steve in
+// requireSteveComplete whitelist; POST .../modules/2-5/state stay gated.
 // Sequential UI, not hard-gated (TASK.md open-question answer).
 app.use('/api/training', trainingRoutes);
 
 // BA profile / settings (Chat #134, wireframe 3.8). Handlers apply
-// requireAuth + requireMichaelComplete internally; /api/profile is also
-// in MICHAEL_GATE_WHITELIST so a BA mid-onboarding can still set timezone
+// requireAuth + requireSteveComplete internally; /api/profile is also
+// in the Steve gate whitelist so a BA mid-onboarding can still set timezone
 // and notif prefs. All reads/writes scoped to req.session.baId (3.5).
 app.use('/api/profile', profileRoutes);
 
@@ -218,13 +218,13 @@ app.use('/api/profile', profileRoutes);
 // resolver — the BA previews their OWN replicated .com page personalized
 // to themselves as the inviting BA, with a sample prospect. ZERO writes:
 // no holding-tank placement, no SSE emit, no counter increment, no SMS.
-// Gated (requireAuth + requireMichaelComplete) inside the route file.
+// Gated (requireAuth + requireSteveComplete) inside the route file.
 app.use('/api/preview', previewRoutes);
 
 // Group orientation scheduler (Chat #147, wireframe §3.6). BA-facing cockpit
-// scheduling card: a post-Michael BA sees available group sessions, books one
+// scheduling card: a post-Steve BA sees available group sessions, books one
 // seat (cap 10), and can cancel. Handlers apply (requireAuth +
-// requireMichaelComplete) internally; baId is read from the session, never the
+// requireSteveComplete) internally; baId is read from the session, never the
 // body (locked-spec 3.5). REUSES the §2.6 webinar event/reservation pattern.
 app.use('/api/orientation', orientationRoutes);
 

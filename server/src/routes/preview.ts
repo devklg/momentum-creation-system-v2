@@ -17,14 +17,14 @@
  *     against the sentinel (real /api/p resolver does not recognize it) —
  *     which is exactly the design: a preview must consume zero real state.
  *
- * Gating: BA-FACING — requireAuth + requireMichaelComplete. A BA can only
+ * Gating: BA-FACING — requireAuth + requireSteveComplete. A BA can only
  * preview their OWN replicated page; the BA shown in the synthesized
  * payload is always derived from the session, not the request.
  */
 
 import { Router } from 'express';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import { synthesizePreviewPayload } from '../domain/previewToken.js';
 
 export const previewRoutes: Router = Router();
@@ -32,7 +32,7 @@ export const previewRoutes: Router = Router();
 previewRoutes.get(
   '/',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const session = req.session;
     if (!session) {

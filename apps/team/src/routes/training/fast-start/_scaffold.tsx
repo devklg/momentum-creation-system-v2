@@ -7,7 +7,7 @@
  *
  *   - On mount: POSTs `in_progress` (idempotent — the server
  *     short-circuits when the module is already in_progress or
- *     completed). Module 1 mounts pre-Michael; the route is
+ *     completed). Module 1 mounts pre-Steve; the route is
  *     whitelisted server-side.
  *
  *   - Mark complete button: POSTs `completed`. On success the dot
@@ -66,7 +66,7 @@ function useMarkModuleProgress(moduleId: FastStartModuleId) {
           const body = (await res.json()) as FastStartMarkStateResponse;
           setState((s) => ({ ...s, current: body.state }));
         }
-        // 403 = Michael gate. The hub is still informative; ignore quietly here.
+        // 403 = Steve gate. The hub is still informative; ignore quietly here.
       } catch {
         // Network failure — silent. The user can still read the module
         // body; mark-complete will surface the error if it persists.

@@ -16,7 +16,7 @@
  * status + saved message + CRM controls. No income/placement claims - status
  * is prospect momentum, never earnings. All outreach remains manual BA action.
  *
- * Per .team convention (register.tsx, michael-schedule.tsx, invitations.tsx):
+ * Per .team convention (register.tsx, invitations.tsx):
  * API wire shapes are declared locally rather than imported from
  * @momentum/shared — the shared `src` alias is outside this app's rootDir and
  * importing it trips TS6059 (lesson_team_app_cannot_import_shared_types_ts6059
@@ -489,7 +489,7 @@ export function CockpitPage() {
       }
       const launch = (await launchRes.json()) as TeamLaunchCenter;
 
-      if (launch.michael.status !== 'completed') {
+      if (launch.steve.phase !== 'complete') {
         setView({
           kind: 'ready',
           launch,
@@ -823,17 +823,17 @@ function OperationalPmvLocked({ onNavigate }: { onNavigate: (href: string) => vo
         Operational PMV
       </p>
       <h2 className="font-display text-[30px] leading-[1.05] text-cream mb-3">
-        Prospect Momentum Viewer unlocks after Michael.
+        Prospect Momentum Viewer unlocks after Steve.
       </h2>
       <p className="text-cream-mute text-[14px] leading-[1.6] max-w-2xl mb-5">
         Your launch steps stay available here. The full PMV, CRM notes, follow-ups,
-        and invite activity remain behind the Michael completion gate.
+        and invite activity remain behind the Steve discovery gate.
       </p>
       <Button
-        onClick={() => onNavigate('/michael/schedule')}
+        onClick={() => onNavigate('/steve/discovery')}
         className="bg-gold text-ink hover:bg-gold-bright font-display tracking-[0.06em] text-[15px] px-6 py-5"
       >
-        Open Michael
+        Open Steve
       </Button>
     </section>
   );

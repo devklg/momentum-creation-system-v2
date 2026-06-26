@@ -4,7 +4,7 @@
  * The questionnaire is the SECOND stage of the three-stage onboarding spine
  * (Chat #22 + Chat #25 architecture, recovered in Chat #103):
  *
- *   T+1-4h   Michael voice call (3 discovery prompts)        ← /api/michael/*
+ *   T+1-4h   Steve discovery + Success Profile               ← /api/steve/*
  *   T+0-48h  Self-serve questionnaire (this domain)          ← /api/onboarding/questionnaire/*
  *   T+24-72h Sponsor-led workbook call (30-45 min, 20 Qs)    ← future /api/sponsor/workbook/*
  *

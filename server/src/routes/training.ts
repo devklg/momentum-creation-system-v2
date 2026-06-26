@@ -4,21 +4,21 @@
  *
  * Routes:
  *   GET  /api/training/fast-start/progress
- *     Whitelisted (pre-Michael accessible). Returns the BA's per-module
+ *     Whitelisted (pre-Steve accessible). Returns the BA's per-module
  *     status + invitations-sent cross-check + the canonical `complete`
  *     boolean the welcome flow + cockpit + admin metrics read.
  *
  *   POST /api/training/fast-start/modules/:id/state
  *     Body: { state: 'in_progress' | 'completed' }
- *     Module 1 is whitelisted (pre-Michael); 2-5 gated.
+ *     Module 1 is whitelisted (pre-Steve); 2-5 gated.
  *
  * Gating decision (Kevin, this branch):
  *   - Inter-module gating: sequential UI ordering, NOT hard-gated. A
  *     BA can jump to any module — the hub shows order, the route does
  *     not enforce it. (locked-spec E.3 / TASK.md open-question answer.)
- *   - Michael gate: Module 1 is whitelisted in MICHAEL_GATE_WHITELIST
+ *   - Steve gate: Module 1 is whitelisted in requireSteveComplete
  *     (the on-ramp surface — build belief in the product BEFORE the
- *     Michael interview). Modules 2-5 require Michael complete. The
+ *     Steve discovery). Modules 2-5 require Steve complete. The
  *     pre-Chat-#97 whitelist already anticipated this with
  *     '/api/training/day-1'; we add the fast-start equivalents.
  *
@@ -29,7 +29,7 @@
 
 import { Router } from 'express';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
   getFastStartProgress,
   isValidModuleId,
@@ -44,7 +44,7 @@ export const trainingRoutes: Router = Router();
 
 /* ──────────────────────────────────────────────────────────────────
  * GET /api/training/fast-start/progress
- * Whitelisted (Module 1 hub render is pre-Michael accessible).
+ * Whitelisted (Module 1 hub render is pre-Steve accessible).
  * ────────────────────────────────────────────────────────────────── */
 trainingRoutes.get('/fast-start/progress', requireAuth, async (req, res) => {
   const baId = req.session?.baId;
@@ -66,20 +66,20 @@ trainingRoutes.get('/fast-start/progress', requireAuth, async (req, res) => {
  * POST /api/training/fast-start/modules/:id/state
  *
  * Both Module 1 and Modules 2-5 mount through the SAME handler. The
- * Michael gate is applied via the whitelist — '/api/training/fast-
- * start/modules/1' is whitelisted so this route resolves pre-Michael
- * for moduleId=1; all other ids hit requireMichaelComplete inside the
+ * Steve gate is applied via the whitelist — '/api/training/fast-
+ * start/modules/1' is whitelisted so this route resolves pre-Steve
+ * for moduleId=1; all other ids hit requireSteveComplete inside the
  * middleware chain.
  *
- * (We mount requireMichaelComplete unconditionally and let the
- * MICHAEL_GATE_WHITELIST pathInWhitelist check handle the Module-1
- * exemption — see middleware/requireMichaelComplete.ts startsWith
+ * (We mount requireSteveComplete unconditionally and let the
+ * requireSteveComplete pathInWhitelist check handles the Module-1
+ * exemption — see middleware/requireSteveComplete.ts startsWith
  * matching against '/api/training/fast-start/modules/1'.)
  * ────────────────────────────────────────────────────────────────── */
 trainingRoutes.post(
   '/fast-start/modules/:id/state',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) {

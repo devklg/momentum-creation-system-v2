@@ -130,13 +130,13 @@ function serializeActivation(
       'cohort',
       'signups',
       'reachedWelcome',
-      'reachedMichael',
+      'reachedSteveDiscovery',
       'reachedFirstInvite',
       'reachedFirstVideoComplete',
       'reachedFirstEnrollment',
     ]));
     for (const c of result.cohorts) {
-      lines.push(csvRow([c.cohort, c.signups, c.reachedWelcome, c.reachedMichael, c.reachedFirstInvite, c.reachedFirstVideoComplete, c.reachedFirstEnrollment]));
+      lines.push(csvRow([c.cohort, c.signups, c.reachedWelcome, c.reachedSteveDiscovery, c.reachedFirstInvite, c.reachedFirstVideoComplete, c.reachedFirstEnrollment]));
       rowCount++;
     }
   }
@@ -147,7 +147,7 @@ function serializeActivation(
       'fullName',
       'signupAt',
       'welcomeAcceptedAt',
-      'michaelCompletedAt',
+      'steveDiscoveryCompletedAt',
       'firstInviteAt',
       'firstVideoCompleteAt',
       'firstEnrollmentAt',

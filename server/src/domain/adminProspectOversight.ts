@@ -104,7 +104,7 @@ const WEBINAR_COPY = {
   timezone: 'America/Los_Angeles',
 };
 
-const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/89wRvqx1d8M';
+const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/1IZiV7RXdCY';
 
 /* ─── document shapes (private; mirror gateway result rows) ─────── */
 

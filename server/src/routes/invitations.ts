@@ -12,7 +12,7 @@
  *   POST /api/invitations/:id/sent       "I sent this" — set sentAt (FIELD)
  *   POST /api/invitations/log            standalone "log an invite I sent" (G.5)
  *
- * Gating: requireAuth + requireMichaelComplete (BA-facing gated routes per
+ * Gating: requireAuth + requireSteveComplete (BA-facing gated routes per
  * index.ts canonical pattern). A BA cannot mint invitations until Michael
  * onboarding is complete.
  *
@@ -36,7 +36,7 @@ import type {
   MarkInvitationSentResponse,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
   createInvitation,
   logExternalInvite,
@@ -136,7 +136,7 @@ function buildInput(
  * POST /api/invitations — mint a new invitation.
  * Returns 201 with the substituted prospect link.
  */
-invitationRoutes.post('/', requireAuth, requireMichaelComplete, async (req, res) => {
+invitationRoutes.post('/', requireAuth, requireSteveComplete, async (req, res) => {
   const sponsorBaId = req.session?.baId;
   if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -191,7 +191,7 @@ invitationRoutes.post('/', requireAuth, requireMichaelComplete, async (req, res)
 invitationRoutes.post(
   '/:prospectId/sent',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const sponsorBaId = req.session?.baId;
     if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -234,7 +234,7 @@ invitationRoutes.post(
  * invite they shared outside the normal mint-then-confirm flow.
  * Returns 201 with the same link payload as the mint route.
  */
-invitationRoutes.post('/log', requireAuth, requireMichaelComplete, async (req, res) => {
+invitationRoutes.post('/log', requireAuth, requireSteveComplete, async (req, res) => {
   const sponsorBaId = req.session?.baId;
   if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 

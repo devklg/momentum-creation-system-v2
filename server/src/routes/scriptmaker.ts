@@ -10,7 +10,7 @@
  * create a prospect, or send anything — those stay in the invitation spine.
  * The draft is returned to the client; the BA carries it to /invitations.
  *
- * Gating: requireAuth + requireMichaelComplete (BA-facing gated routes per
+ * Gating: requireAuth + requireSteveComplete (BA-facing gated routes per
  * index.ts canonical pattern), same as the spine. A BA cannot draft until
  * Michael onboarding is complete.
  *
@@ -35,7 +35,7 @@ import type {
   ScriptMakerScriptKind,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import { draftInvitation } from '../domain/scriptmaker.js';
 
 const SCRIPT_KINDS: ReadonlySet<ScriptMakerScriptKind> = new Set([
@@ -79,7 +79,7 @@ const CONTEXT_MAX = 600;
 scriptmakerRoutes.post(
   '/draft',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) {

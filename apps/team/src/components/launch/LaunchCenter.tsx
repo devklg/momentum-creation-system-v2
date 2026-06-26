@@ -4,8 +4,8 @@ import {
   Circle,
   ClipboardList,
   Lock,
-  PhoneCall,
   Send,
+  UserRoundCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -18,8 +18,7 @@ export type LaunchStepState =
 
 export type LaunchStepId =
   | 'welcome_accepted'
-  | 'michael_scheduled'
-  | 'michael_completed'
+  | 'steve_discovery_completed'
   | 'day_1_started'
   | 'day_1_completed'
   | 'who_do_you_know_started'
@@ -55,15 +54,8 @@ export interface TeamLaunchCenter {
     reason: string;
   };
   steps: LaunchStep[];
-  michael: {
-    status:
-      | 'awaiting_schedule'
-      | 'scheduled'
-      | 'in_progress'
-      | 'completed'
-      | 'missed'
-      | 'missing';
-    slotStartUtc: string | null;
+  steve: {
+    phase: 'awaiting_call' | 'in_progress' | 'complete';
     completedAt: string | null;
   };
   firstInvitation: {
@@ -116,35 +108,14 @@ function statusIcon(state: LaunchStepState) {
   return <Circle className="h-4 w-4" aria-hidden="true" />;
 }
 
-function formatMichaelStatus(status: TeamLaunchCenter['michael']['status']): string {
-  switch (status) {
-    case 'awaiting_schedule':
-      return 'Awaiting schedule';
-    case 'scheduled':
-      return 'Scheduled';
+function formatSteveStatus(phase: TeamLaunchCenter['steve']['phase']): string {
+  switch (phase) {
+    case 'awaiting_call':
+      return 'Awaiting discovery';
     case 'in_progress':
       return 'In progress';
-    case 'completed':
+    case 'complete':
       return 'Complete';
-    case 'missed':
-      return 'Missed';
-    case 'missing':
-      return 'Not initialized';
-  }
-}
-
-function formatSlot(iso: string | null): string {
-  if (!iso) return 'No time selected';
-  try {
-    return new Date(iso).toLocaleString(undefined, {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-  } catch {
-    return 'Time selected';
   }
 }
 
@@ -154,7 +125,7 @@ function navigateIfPossible(href: string | null, onNavigate: (href: string) => v
 
 export function LaunchCenter({ launch, onNavigate }: LaunchCenterProps) {
   const showFirstInvitationMission = launch.firstInvitation.mintedCount === 0;
-  const firstInvitationUnlocked = launch.michael.status === 'completed';
+  const firstInvitationUnlocked = launch.steve.phase === 'complete';
 
   return (
     <section className="mb-10" aria-labelledby="launch-center-title">
@@ -233,7 +204,7 @@ export function LaunchCenter({ launch, onNavigate }: LaunchCenterProps) {
                       onNavigate(
                         firstInvitationUnlocked
                           ? '/ivory'
-                          : launch.nextAction.href ?? '/michael/schedule',
+                          : launch.nextAction.href ?? '/steve/discovery',
                       )
                     }
                     className="mt-5 bg-cream/[0.06] text-cream hover:bg-cream/[0.1] border border-cream/15 font-display tracking-[0.06em] text-[14px] px-5 py-4"
@@ -249,18 +220,18 @@ export function LaunchCenter({ launch, onNavigate }: LaunchCenterProps) {
         <aside className="space-y-4">
           <div className="border border-cream/10 bg-cream/[0.02] rounded-md p-5">
             <div className="flex items-start gap-3">
-              <PhoneCall className="h-5 w-5 text-gold mt-0.5" aria-hidden="true" />
+              <UserRoundCheck className="h-5 w-5 text-gold mt-0.5" aria-hidden="true" />
               <div>
                 <p className="font-mono tracking-[0.16em] text-[11px] text-cream-faint uppercase mb-2">
-                  Michael
+                  Steve
                 </p>
                 <p className="font-display text-[25px] text-cream leading-tight">
-                  {formatMichaelStatus(launch.michael.status)}
+                  {formatSteveStatus(launch.steve.phase)}
                 </p>
                 <p className="text-cream-mute text-[13px] leading-[1.5] mt-2">
-                  {launch.michael.status === 'completed'
-                    ? 'Your call is complete.'
-                    : formatSlot(launch.michael.slotStartUtc)}
+                  {launch.steve.phase === 'complete'
+                    ? 'Your Success Profile is ready.'
+                    : 'Complete Steve before the launch path opens.'}
                 </p>
               </div>
             </div>

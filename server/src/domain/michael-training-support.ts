@@ -14,10 +14,9 @@
  * @momentum/shared types will be the source of truth; the shape below is
  * structurally compatible so the Mongo read flows through unchanged.
  *
- * RELATIONSHIP TO MICHAEL: this is a sibling sponsor surface alongside the
- * existing /api/michael/interview/cockpit/:downlineBaId (Chat #134 / #147).
- * Where MichaelCockpitCard surfaces the Michael interview artifact, this card
- * surfaces Steve's onboarding-discovery guidance. They are independent reads.
+ * RELATIONSHIP TO MICHAEL: this is Michael's remaining BA-facing role. It
+ * surfaces Steve's onboarding-discovery guidance as sponsor training support;
+ * Michael does not schedule or conduct interviews.
  *
  * COMPLIANCE (locked-spec 3.10): BA-language read-back only. No earnings, no
  * cycle math, no placement promises. The Layer-1 frame Michael and Steve both
@@ -25,7 +24,7 @@
  * are during training, not to project outcomes.
  *
  * SPONSOR AUTHORITY: enforced server-side, mirrors getProfileCardForSponsor
- * (steve-success-interview.ts) and getCockpitCardForSponsor (michaelScoring.ts)
+ * (steve-success-interview.ts).
  * — only the direct sponsor (downline.sponsorBaId === requestingBaId) can read.
  */
 

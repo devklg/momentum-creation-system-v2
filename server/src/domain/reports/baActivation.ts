@@ -2,13 +2,13 @@
  * ADMIN I.1 · Report 1 — BA activation (Chat #143).
  *
  * Per-BA activation milestones + signup-month cohort rollup (ADMIN Design
- * I.1 line 1): signups, welcome completion, Michael interview completion,
+ * I.1 line 1): signups, welcome completion, Steve discovery completion,
  * first invite, first prospect to video_complete, first enrollment.
  *
  * Data sources (all confirmed live, Chat #143):
  *   brand_ambassadors  — baId, firstName/lastName, createdAt (signup),
  *                         welcomedAt (welcome-accept commitment)
- *   michael_schedules  — MS-<baId>, completedAt (interview completion)
+ *   steve_discoveries  — SD-<baId>, completedAt (discovery completion)
  *   invitation_activity— kind 'invitation_sent' / 'video_completed', at,
  *                         sponsorBaId (first-invite / first-video-complete)
  *   pool_placements    — flushReason 'enrolled', flushedAt, sponsorBaId
@@ -37,7 +37,7 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLL_BAS = 'brand_ambassadors';
-const COLL_MICHAEL = 'michael_schedules';
+const COLL_STEVE = 'steve_discoveries';
 const COLL_ACTIVITY = 'invitation_activity';
 const COLL_PLACEMENTS = 'pool_placements';
 
@@ -49,7 +49,7 @@ interface BaDoc {
   welcomedAt?: string | null;
   deleted?: boolean;
 }
-interface MichaelDoc {
+interface SteveDiscoveryDoc {
   baId: string;
   completedAt: string | null;
 }
@@ -129,11 +129,11 @@ export async function buildBaActivationReport(
   }
 
   // Pull the three milestone sources scoped to exactly this BA set.
-  const [michaelRes, activityRes, enrollRes] = await Promise.all([
-    gatewayCall<{ documents: MichaelDoc[] }>('mongodb', 'query', {
+  const [steveRes, activityRes, enrollRes] = await Promise.all([
+    gatewayCall<{ documents: SteveDiscoveryDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
-      collection: COLL_MICHAEL,
-      filter: { baId: { $in: baIds }, status: 'completed' },
+      collection: COLL_STEVE,
+      filter: { baId: { $in: baIds }, completedAt: { $ne: null } },
       limit: baIds.length,
     }),
     gatewayCall<{ documents: ActivityDoc[] }>('mongodb', 'query', {
@@ -150,8 +150,8 @@ export async function buildBaActivationReport(
     }),
   ]);
 
-  const michaelByBa = new Map(
-    (michaelRes.documents ?? []).map((m) => [m.baId, m.completedAt]),
+  const steveByBa = new Map(
+    (steveRes.documents ?? []).map((m) => [m.baId, m.completedAt]),
   );
   const activity = activityRes.documents ?? [];
   const firstInvite = firstByBa(activity, 'invitation_sent');
@@ -171,7 +171,7 @@ export async function buildBaActivationReport(
       fullName: `${b.firstName} ${b.lastName}`.trim(),
       signupAt: b.createdAt,
       welcomeAcceptedAt: b.welcomedAt ?? null,
-      michaelCompletedAt: michaelByBa.get(b.baId) ?? null,
+      steveDiscoveryCompletedAt: steveByBa.get(b.baId) ?? null,
       firstInviteAt,
       firstVideoCompleteAt: firstVideo.get(b.baId) ?? null,
       firstEnrollmentAt: firstEnroll.get(b.baId) ?? null,
@@ -189,14 +189,14 @@ export async function buildBaActivationReport(
         cohort: key,
         signups: 0,
         reachedWelcome: 0,
-        reachedMichael: 0,
+        reachedSteveDiscovery: 0,
         reachedFirstInvite: 0,
         reachedFirstVideoComplete: 0,
         reachedFirstEnrollment: 0,
       };
     c.signups += 1;
     if (r.welcomeAcceptedAt) c.reachedWelcome += 1;
-    if (r.michaelCompletedAt) c.reachedMichael += 1;
+    if (r.steveDiscoveryCompletedAt) c.reachedSteveDiscovery += 1;
     if (r.firstInviteAt) c.reachedFirstInvite += 1;
     if (r.firstVideoCompleteAt) c.reachedFirstVideoComplete += 1;
     if (r.firstEnrollmentAt) c.reachedFirstEnrollment += 1;

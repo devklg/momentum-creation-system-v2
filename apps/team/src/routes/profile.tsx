@@ -34,7 +34,7 @@ interface NotifPrefs {
   callbackRequested: ChannelMix;
   webinarReserved: ChannelMix;
   newSponsoredBA: ChannelMix;
-  michaelComplete: ChannelMix;
+  steveDiscoveryComplete: ChannelMix;
   poolMovement: ChannelMix;
 }
 
@@ -66,7 +66,7 @@ const TOPIC_LABELS: Record<NotifTopic, string> = {
   callbackRequested: 'Prospect requested a callback',
   webinarReserved: 'Prospect reserved a webinar seat',
   newSponsoredBA: 'A new BA registered with your code',
-  michaelComplete: 'Michael interview completed (downline)',
+  steveDiscoveryComplete: 'Steve discovery completed (downline)',
   poolMovement: 'Daily pool movement digest',
 };
 

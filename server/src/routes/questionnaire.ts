@@ -10,8 +10,8 @@
  *   POST   /load     - Audit-log marker that the questionnaire surface was
  *                      displayed. Mirrors welcome.ts /load pattern.
  *
- * All three require auth. None use requireMichaelComplete — the
- * questionnaire is a pre-Michael-gate surface (the BA fills it out within
+ * All three require auth. None use requireSteveComplete — the
+ * questionnaire is a pre-Steve-gate surface (the BA fills it out within
  * 48 hours of signup, before or during Michael completion).
  *
  * Locked Chat #22: mandatory 48h post-enrollment. The gate enforcement for

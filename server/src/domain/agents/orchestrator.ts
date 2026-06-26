@@ -32,7 +32,7 @@ import {
   getProspectMomentumViewer,
 } from '../cockpit.js';
 import { listIvoryNamesForBA } from '../ivory.js';
-import { buildInterviewView } from '../michaelScoring.js';
+import { buildDiscoveryView } from '../steve-success-interview.js';
 
 const EVENTS_COLLECTION = 'agent_events';
 const EVENTS_CHROMA_COLLECTION = 'mcs_agent_events';
@@ -50,7 +50,7 @@ const SUBJECT_TYPES: readonly AgentSubjectType[] = [
   'ba',
   'prospect',
   'ivory_name',
-  'michael_interview',
+  'steve_discovery',
   'daily_actions',
   'system',
 ];
@@ -143,29 +143,29 @@ export async function getAgentRecommendations(
   baId: string,
 ): Promise<AgentRecommendationsResponse> {
   const generatedAt = new Date().toISOString();
-  const [pmv, todaysActions, ivoryNames, michaelView] = await Promise.all([
+  const [pmv, todaysActions, ivoryNames, steveView] = await Promise.all([
     getProspectMomentumViewer(baId),
     getCockpitTodaysActions(baId),
     listIvoryNamesForBA(baId),
-    buildInterviewView(baId),
+    buildDiscoveryView(baId),
   ]);
 
   const recommendations: AgentRecommendation[] = [];
 
-  const michaelArtifact = michaelView?.artifact ?? null;
-  if (michaelArtifact) {
+  const steveArtifact = steveView?.artifact ?? null;
+  if (steveArtifact) {
     recommendations.push(
       recommendation({
-        agentId: 'michael',
-        kind: 'review_michael_profile',
+        agentId: 'steve',
+        kind: 'review_steve_profile',
         priority: 3,
-        title: 'Review your Michael profile',
-        summary: 'Michael has a completed interview artifact ready to read back.',
-        reason: 'The orchestration layer found a completed Michael interview.',
-        ctaLabel: 'Open Michael',
-        route: '/michael/schedule',
-        subjectType: 'michael_interview',
-        subjectId: michaelArtifact.callSid,
+        title: 'Review your Steve Success Profile',
+        summary: 'Steve has a completed discovery profile ready to read back.',
+        reason: 'The orchestration layer found a completed Steve discovery.',
+        ctaLabel: 'Open Steve',
+        route: '/steve/discovery',
+        subjectType: 'steve_discovery',
+        subjectId: steveArtifact.callSid,
         createdAt: generatedAt,
       }),
     );

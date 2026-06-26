@@ -1,6 +1,6 @@
 /**
  * /api/steve/* — Steve New BA Discovery & Success Interview routes (SEPARATE
- * agent; does NOT touch Michael's schedule/Training Agent + Daily Success Coach artifact flow).
+ * agent; does NOT touch Michael graph data).
  *
  * BA self-reads:
  *   GET  /api/steve/discovery/state   → the BA's own discovery view
@@ -21,7 +21,7 @@
 import express, { type Request, type Response, type Router } from 'express';
 import { z } from 'zod';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
   STEVE_DISCOVERY_SECTIONS,
   buildSteveSystemPrompt,
@@ -241,7 +241,7 @@ steveRoutes.post(
 steveRoutes.get(
   '/discovery/profile/:downlineBaId',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req: Request, res: Response) => {
     const session = req.session!;
     const downlineBaId = String(req.params.downlineBaId ?? '');

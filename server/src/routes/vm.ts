@@ -16,7 +16,7 @@ import type {
   ImportBulkLeadsResponse,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
   LeadBatchError,
   createLeadBatch,
@@ -99,7 +99,7 @@ function sendVmError(res: import('express').Response, err: unknown) {
   return res.status(500).json({ ok: false, error: 'server_error' });
 }
 
-vmRoutes.get('/batches', requireAuth, requireMichaelComplete, async (req, res) => {
+vmRoutes.get('/batches', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = sessionBaId(req);
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
@@ -111,7 +111,7 @@ vmRoutes.get('/batches', requireAuth, requireMichaelComplete, async (req, res) =
   }
 });
 
-vmRoutes.post('/batches', requireAuth, requireMichaelComplete, async (req, res) => {
+vmRoutes.post('/batches', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = sessionBaId(req);
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   const parsed = CreateBatchSchema.safeParse(req.body);
@@ -131,7 +131,7 @@ vmRoutes.post('/batches', requireAuth, requireMichaelComplete, async (req, res) 
   }
 });
 
-vmRoutes.get('/batches/:batchId', requireAuth, requireMichaelComplete, async (req, res) => {
+vmRoutes.get('/batches/:batchId', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = sessionBaId(req);
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
@@ -143,7 +143,7 @@ vmRoutes.get('/batches/:batchId', requireAuth, requireMichaelComplete, async (re
   }
 });
 
-vmRoutes.get('/campaigns', requireAuth, requireMichaelComplete, async (req, res) => {
+vmRoutes.get('/campaigns', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = sessionBaId(req);
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
@@ -155,7 +155,7 @@ vmRoutes.get('/campaigns', requireAuth, requireMichaelComplete, async (req, res)
   }
 });
 
-vmRoutes.post('/campaigns', requireAuth, requireMichaelComplete, async (req, res) => {
+vmRoutes.post('/campaigns', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = sessionBaId(req);
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   const parsed = CreateCampaignSchema.safeParse(req.body);
@@ -181,7 +181,7 @@ vmRoutes.post('/campaigns', requireAuth, requireMichaelComplete, async (req, res
   }
 });
 
-vmRoutes.get('/campaigns/:campaignId', requireAuth, requireMichaelComplete, async (req, res) => {
+vmRoutes.get('/campaigns/:campaignId', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = sessionBaId(req);
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
@@ -193,7 +193,7 @@ vmRoutes.get('/campaigns/:campaignId', requireAuth, requireMichaelComplete, asyn
   }
 });
 
-vmRoutes.post('/batches/:batchId/import', requireAuth, requireMichaelComplete, async (req, res) => {
+vmRoutes.post('/batches/:batchId/import', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = sessionBaId(req);
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   const parsed = ImportLeadsSchema.safeParse(req.body);

@@ -1062,8 +1062,8 @@ export interface ProspectLoginRedeemError {
  * indexes the action+reason+entity blob so Kevin can semantic-search
  * the log ("find every sponsor override Q1").
  *
- * Michael interview transcripts link FROM audit entries via the
- * optional `linkedTranscriptId` (Chat #89 â€” no separate tab).
+ * Legacy Michael interview transcripts may link FROM historical audit entries
+ * via the optional `linkedTranscriptId` (Chat #89 - no separate tab).
  */
 
 /**
@@ -1157,7 +1157,7 @@ export interface AuditContext {
  *   - after            post-state snapshot (mutations / overrides only)
  *   - reason           human reason â€” REQUIRED on critical overrides (locked-spec 2.4)
  *   - context          request-trace metadata (optional for system actions)
- *   - linkedTranscriptId Michael interview transcript ID (Chat #89)
+ *   - linkedTranscriptId legacy Michael interview transcript ID (Chat #89)
  *
  * Append-only invariant: writers MUST NOT update or delete entries.
  * The store has no exported mutator helper â€” only `appendAuditEntry`.
@@ -1756,9 +1756,9 @@ export interface ReinviteTerminalError {
  * bleed to .com (locked-spec 3.10/3.11). The mantra is People Â· Momentum
  * Â· Volume Â· Checks (PMV+C) â€” same voice as /training/10-steps.
  *
- * Michael gate: Module 1 is whitelisted (a new BA can build belief in
- * the product before Michael's interview); Modules 2-5 are gated. See
- * MICHAEL_GATE_WHITELIST in server/src/domain/michael-schedule.ts.
+ * Steve gate: Module 1 is whitelisted (a new BA can build belief in
+ * the product before Steve discovery); Modules 2-5 are gated. See
+ * requireSteveComplete.ts.
  *
  * Sponsor immutability (locked-spec 3.5): progress records are stamped
  * with the authed session baId; nothing in a request body can write to
@@ -1916,7 +1916,7 @@ export interface BANotifPrefs {
   callbackRequested: BANotifChannelMix;
   webinarReserved: BANotifChannelMix;
   newSponsoredBA: BANotifChannelMix;
-  michaelComplete: BANotifChannelMix;
+  steveDiscoveryComplete: BANotifChannelMix;
   poolMovement: BANotifChannelMix;
 }
 
@@ -1927,7 +1927,7 @@ export interface BANotifPrefs {
  *
  * Reasoning (carried from the Chat #134 heartbeat, finalized #147):
  *   - Operational signals — a prospect asked for a callback, reserved a webinar
- *     seat, a new BA registered under you, Michael finished an interview — are
+ *     seat, a new BA registered under you, Steve discovery completed — are
  *     things a BA needs to act on, so they default ON (in-app always; SMS on for
  *     the live person-asks signals, which already SMS-alert per Chat #105).
  *   - poolMovement is a DIGEST (the daily roll-up), not an operational signal,
@@ -1939,7 +1939,7 @@ export const BA_NOTIF_DEFAULTS: BANotifPrefs = {
   callbackRequested: { sms: true, email: false, inApp: true },
   webinarReserved: { sms: true, email: false, inApp: true },
   newSponsoredBA: { sms: false, email: false, inApp: true },
-  michaelComplete: { sms: false, email: false, inApp: true },
+  steveDiscoveryComplete: { sms: false, email: false, inApp: true },
   // Digest — OFF until opt-in (J.12).
   poolMovement: { sms: false, email: false, inApp: false },
 };
@@ -2059,17 +2059,12 @@ export interface ProfileChangeChallengeRecord {
   deliveryError: string | null;
 }
 
-/* ─── #134 Michael interview surface ─── */
+/* ─── LEGACY #134 Michael interview surface (retired) ─── */
 //
-// Locked-spec 3.12: Michael is an outbound Telnyx voice agent that calls every
-// new BA shortly after signup, conducts a short structured interview, and feeds
-// transcript + scoring back to the BA record and the upline cockpit. BA-facing
-// only — never prospect-facing, never on .com. No objections, no pitch, no
-// qualify. Teaches Layer 1 only and captures context for the sponsor.
-//
-// These types describe the post-scheduling surface (the call itself + the
-// completed-call artifact). The schedule shape lives in
-// server/src/domain/michael-schedule.ts.
+// Michael no longer schedules or conducts BA interviews. He remains only as a
+// BA-facing training-support suggestion surface. These legacy types stay
+// temporarily so old persisted artifacts and historical admin exports can still
+// be read without reintroducing any live route.
 
 /** UI phase of the interview surface (distinct from the schedule status). */
 export type MichaelInterviewPhase =
@@ -2136,10 +2131,8 @@ export interface MichaelInterviewArtifact {
   audioUrl: string | null;
 }
 
-/** GET /api/michael/interview/state response — what the interview surface
- *  renders. Pre-call: phase=awaiting_call + scheduledFor. During call:
- *  phase=call_in_progress + transcript snapshot for SSE hydration. After:
- *  phase=complete + artifact. */
+/** LEGACY — retired Michael interview view.
+ *  Michael no longer schedules or interviews; no active route serves this. */
 export interface MichaelInterviewView {
   baId: string;
   phase: MichaelInterviewPhase;
@@ -2161,20 +2154,14 @@ export interface MichaelInterviewView {
   wrongNumberFlaggedAt: string | null;
 }
 
-/** SSE event envelope on /api/michael/interview/transcript/stream.
- *  - `snapshot` fires once on connect with the chunks already persisted.
- *  - `chunk` fires for each new chunk as the STT worker pushes them.
- *  - `phase` fires when the BA's interview phase advances (e.g. complete).
- *  - `heartbeat` keeps the connection warm; client ignores. */
+/** LEGACY — retired Michael transcript SSE event envelope. */
 export type MichaelInterviewSseEvent =
   | { type: 'snapshot'; chunks: MichaelTranscriptChunk[]; phase: MichaelInterviewPhase }
   | { type: 'chunk'; chunk: MichaelTranscriptChunk }
   | { type: 'phase'; phase: MichaelInterviewPhase }
   | { type: 'heartbeat' };
 
-/** Sponsor-only data the upline cockpit's MichaelEventCard renders.
- *  Access is enforced server-side: the requesting BA's session.baId must
- *  match the downline's sponsorBaId, else 403. Not client-hidden. */
+/** LEGACY — retired sponsor-only Michael interview card data. */
 export interface MichaelCockpitCardData {
   /** The downline BA the card is about. */
   downlineBaId: string;
@@ -2193,11 +2180,7 @@ export interface MichaelCockpitCardData {
   signedBy: string;
 }
 
-/** Worker → server payload on POST /api/michael/interview/scoring.
- *  Carries the transcript + the parsed answers + the scoring summary; the
- *  server stamps sponsorBaId and persists the artifact. Sender authenticates
- *  with the MICHAEL_WORKER_SECRET header (process.env.MICHAEL_WORKER_SECRET).
- *  sponsorBaId is intentionally omitted from this shape (server-stamped). */
+/** LEGACY — retired Michael worker scoring payload. */
 export interface MichaelScoringIngestPayload {
   baId: string;
   callSid: string;
@@ -2209,8 +2192,7 @@ export interface MichaelScoringIngestPayload {
   audioUrl: string | null;
 }
 
-/** Worker → server payload on POST /api/michael/interview/transcript/chunk.
- *  Streamed during the live call as STT segments finalize. */
+/** LEGACY — retired Michael transcript chunk ingest payload. */
 export interface MichaelTranscriptChunkIngestPayload {
   callSid: string;
   chunk: Omit<MichaelTranscriptChunk, 'sequence'>;
@@ -2560,7 +2542,7 @@ export interface PreviewResolvedTokenPayload extends ResolvedTokenPayload {
  * The Kevin-only Brand Ambassador directory + per-BA profile drawer +
  * sponsor override flow. Server reads aggregate from brand_ambassadors +
  * access_codes + ba_commitments + invite_tokens + crm_followups +
- * fast_start_progress + michael_schedules; writes (override / leader
+ * fast_start_progress + steve_discoveries; writes (override / leader
  * tag / notes) each append a 4.J audit entry.
  *
  * Compliance discipline (Chat #89):
@@ -2613,17 +2595,9 @@ export interface AdminBaDirectoryRow {
   trainingModulesCompleted: number;
   /** True when all five modules done. */
   trainingComplete: boolean;
-  /** Michael interview status from michael_schedules. Null = no schedule row yet. */
-  michaelStatus:
-    | 'awaiting_schedule'
-    | 'scheduled'
-    | 'in_progress'
-    | 'completed'
-    | 'missed'
-    | null;
   /** Operational status. 'active'/'inactive' derive from lastLoginAt; 'suspended' is a future flag. */
   status: 'active' | 'inactive' | 'suspended';
-  /** Max of lastLoginAt / welcomeAcceptedAt / latest michael event. */
+  /** Max of lastLoginAt / welcomeAcceptedAt. */
   lastActivityAt: IsoTimestamp | null;
   /** System-detected leader badge (currently always false — see leaderDetectionNote). */
   systemDetectedLeader: boolean;
@@ -2668,11 +2642,6 @@ export interface AdminBaNoteEntry {
 /** Full BA profile bundle for the slide-out drawer (C.4). */
 export interface AdminBaProfileBundle {
   row: AdminBaDirectoryRow;
-  michaelTranscript: {
-    interviewId: string | null;
-    completedAt: IsoTimestamp | null;
-    audioUrl: string | null;
-  } | null;
   sponsorOverrideHistory: AdminSponsorOverrideEntry[];
   notes: AdminBaNoteEntry[];
 }
@@ -3402,10 +3371,9 @@ export interface AdminProspectRestoreResponse {
 /* ─────────────────────────────────────────────────────────────────────────
  * LEGACY — retired Michael interview classification + founder handoff.
  *
- * Reconciled 2026-06-24: Steve owns Discovery + Success Profile with no
- * scoring, ranking, or prediction. Michael is the Training Agent and Daily Success Coach. New Michael
- * ingests must not classify a BA or produce Builder / Emerging Leader /
- * Part-Time Producer / Casual Participant labels.
+ * Reconciled 2026-06-26: Steve owns Discovery + Success Profile with no
+ * scoring, ranking, or prediction. Michael no longer schedules or interviews;
+ * he only uses Steve context for training-support suggestions.
  *
  * These exports remain so historical records and older compiled clients can be
  * read safely. They are not the current product contract.
@@ -3516,8 +3484,7 @@ export interface MichaelFounderHandoff {
   };
 }
 
-/** Legacy worker addendum on POST /api/michael/interview/scoring.
- *  Accepted for compatibility; ignored by current server code. */
+/** Legacy worker addendum from the retired Michael interview ingest. */
 export interface MichaelScoringCategoryInput {
   categoryScores: MichaelCategoryScores;
 }
@@ -3530,14 +3497,13 @@ export interface MichaelCockpitCardClassified extends MichaelCockpitCardData {
   successProfile: MichaelSuccessProfile | null;
 }
 
-/** GET /api/michael/interview/founder-handoffs response (founder-gated). */
+/** LEGACY — retired founder-handoff response. */
 export interface MichaelFounderHandoffListResponse {
   ok: true;
   handoffs: MichaelFounderHandoff[];
 }
 
-/** One question in Michael's 29-Q backbone, surfaced read-only via
- *  GET /api/michael/interview/script. */
+/** LEGACY — one question in Michael's retired interview backbone. */
 export interface MichaelInterviewScriptQuestion {
   id: string;
   /** 1-based question number across the whole interview (1..29). */
@@ -3559,7 +3525,7 @@ export interface MichaelInterviewScriptSection {
   questions: MichaelInterviewScriptQuestion[];
 }
 
-/** GET /api/michael/interview/script response. */
+/** LEGACY — retired Michael interview script response. */
 export interface MichaelInterviewScriptResponse {
   ok: true;
   sections: MichaelInterviewScriptSection[];
@@ -3829,14 +3795,13 @@ export interface ComProspectCopy {
  *
  * /api/cockpit/launch is a read-only projection that gives a new BA one
  * dominant next action before the cockpit matures into the operational PMV.
- * It reads existing onboarding truth: welcome commitment, Michael schedule,
+ * It reads existing onboarding truth: welcome commitment, Steve discovery,
  * Fast Start progress, Ivory roster, invitation spine, and questionnaire.
  */
 
 export type LaunchStepId =
   | 'welcome_accepted'
-  | 'michael_scheduled'
-  | 'michael_completed'
+  | 'steve_discovery_completed'
   | 'day_1_started'
   | 'day_1_completed'
   | 'who_do_you_know_started'
@@ -3870,15 +3835,8 @@ export interface LaunchNextAction {
   reason: string;
 }
 
-export interface LaunchMichaelState {
-  status:
-    | 'awaiting_schedule'
-    | 'scheduled'
-    | 'in_progress'
-    | 'completed'
-    | 'missed'
-    | 'missing';
-  slotStartUtc: IsoTimestamp | null;
+export interface LaunchSteveState {
+  phase: SteveDiscoveryPhase;
   completedAt: IsoTimestamp | null;
 }
 
@@ -3907,7 +3865,7 @@ export interface TeamLaunchCenterResponse {
   };
   nextAction: LaunchNextAction;
   steps: LaunchStep[];
-  michael: LaunchMichaelState;
+  steve: LaunchSteveState;
   firstInvitation: LaunchFirstInvitationState;
   fastStart: LaunchFastStartState;
   questionnaireSubmitted: boolean;
@@ -3923,8 +3881,8 @@ export type AgentId = 'michael' | 'ivory' | 'steve' | 'system';
 export type AgentRecommendationPriority = 1 | 2 | 3 | 4 | 5;
 
 export type AgentRecommendationKind =
-  | 'complete_michael'
-  | 'review_michael_profile'
+  | 'complete_steve'
+  | 'review_steve_profile'
   | 'follow_up_prospect'
   | 'invite_from_ivory'
   | 'open_daily_actions'
@@ -3934,7 +3892,7 @@ export type AgentSubjectType =
   | 'ba'
   | 'prospect'
   | 'ivory_name'
-  | 'michael_interview'
+  | 'steve_discovery'
   | 'daily_actions'
   | 'system';
 
@@ -4006,10 +3964,9 @@ export interface AgentEventResponse {
  * SUPPORT, and PREPARE for that BA.
  *
  * RELATIONSHIP TO MICHAEL: Steve does NOT replace Michael and does NOT touch
- * Michael's schedule or Training Agent + Daily Success Coach artifact flow. The ONLY link is a one-way
- * `michaelHandoffSummary` string Steve writes onto its OWN artifact so a human
- * (or Michael's worker, if it chooses to read it) can lead warm. Nothing here
- * mutates michael_* collections or the Michael graph.
+ * Michael graph data. Michael no longer schedules or interviews; the only link
+ * is a one-way `michaelHandoffSummary` string Steve writes onto its OWN artifact
+ * for training-support context.
  *
  * HARD RULE — Steve does NOT classify, rank, score, or judge. There is no
  * rubric, no tier, no weighted total, no "tone" read anywhere in Steve's
@@ -4154,8 +4111,8 @@ export interface SteveSuccessProfile {
   launchRecommendations: SteveRecommendation[];
   /** What training to point them at first, given how they learn. */
   trainingRecommendations: SteveRecommendation[];
-  /** Short context summary Steve hands to Michael so Michael can lead warm.
-   *  CONTEXT ONLY — it does not alter Michael's schedule or Training Agent + Daily Success Coach artifact. */
+  /** Short context summary Steve hands to Michael for training suggestions.
+   *  CONTEXT ONLY — Michael does not schedule or interview. */
   michaelHandoffSummary: string;
   generatedAt: IsoTimestamp;
   signedBy: string;

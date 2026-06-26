@@ -7,9 +7,9 @@
  * mutation body — those fields are read-only by spec (2.3, 3.5) and the
  * zod schemas use .strict() so any attempt to send them is rejected.
  *
- * Gating: requireAuth + requireMichaelComplete (BA-facing gated routes per
+ * Gating: requireAuth + requireSteveComplete (BA-facing gated routes per
  * server/src/index.ts canonical pattern). /api/profile is also whitelisted
- * in MICHAEL_GATE_WHITELIST so a BA who's mid-onboarding can still update
+ * in requireSteveComplete's whitelist so a BA who's mid-onboarding can still update
  * their timezone/photo — but requireAuth is still enforced.
  *
  * J.8 (phone change verification) is RESOLVED (Chat #147, seq 22): NO SMS code.
@@ -22,7 +22,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
   getProfileForBA,
   patchProfile,
@@ -48,7 +48,7 @@ const NotifPrefsPatch = z
     callbackRequested: ChannelMix.optional(),
     webinarReserved: ChannelMix.optional(),
     newSponsoredBA: ChannelMix.optional(),
-    michaelComplete: ChannelMix.optional(),
+    steveDiscoveryComplete: ChannelMix.optional(),
     poolMovement: ChannelMix.optional(),
   })
   .strict();
@@ -82,7 +82,7 @@ const PhoneSetBody = z
   .object({ newPhone: z.string().min(7).max(40) })
   .strict();
 
-profileRoutes.get('/', requireAuth, requireMichaelComplete, async (req, res) => {
+profileRoutes.get('/', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = req.session?.baId;
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -98,7 +98,7 @@ profileRoutes.get('/', requireAuth, requireMichaelComplete, async (req, res) => 
   }
 });
 
-profileRoutes.patch('/', requireAuth, requireMichaelComplete, async (req, res) => {
+profileRoutes.patch('/', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = req.session?.baId;
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -118,7 +118,7 @@ profileRoutes.patch('/', requireAuth, requireMichaelComplete, async (req, res) =
   }
 });
 
-profileRoutes.post('/password', requireAuth, requireMichaelComplete, async (req, res) => {
+profileRoutes.post('/password', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = req.session?.baId;
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -144,7 +144,7 @@ profileRoutes.post('/password', requireAuth, requireMichaelComplete, async (req,
   }
 });
 
-profileRoutes.post('/email/start', requireAuth, requireMichaelComplete, async (req, res) => {
+profileRoutes.post('/email/start', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = req.session?.baId;
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -163,7 +163,7 @@ profileRoutes.post('/email/start', requireAuth, requireMichaelComplete, async (r
   }
 });
 
-profileRoutes.post('/email/verify', requireAuth, requireMichaelComplete, async (req, res) => {
+profileRoutes.post('/email/verify', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = req.session?.baId;
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
@@ -188,7 +188,7 @@ profileRoutes.post('/email/verify', requireAuth, requireMichaelComplete, async (
 // J.8 (Chat #147, seq 22): direct phone set — NO SMS code. The client confirms
 // the typed number in a modal, then POSTs here. requireAuth ensures it's the
 // session BA; the domain audits the swap.
-profileRoutes.post('/phone', requireAuth, requireMichaelComplete, async (req, res) => {
+profileRoutes.post('/phone', requireAuth, requireSteveComplete, async (req, res) => {
   const baId = req.session?.baId;
   if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 

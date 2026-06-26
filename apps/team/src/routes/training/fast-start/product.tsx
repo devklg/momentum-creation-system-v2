@@ -14,8 +14,8 @@
  *     is a drug claim.
  *   - CV/dollar figures are .team-only and never bleed to .com.
  *
- * Whitelisted pre-Michael in MICHAEL_GATE_WHITELIST — a brand-new BA
- * can build belief in the product before the Michael interview.
+ * Whitelisted pre-Steve in requireSteveComplete — a brand-new BA
+ * can build belief in the product before completing discovery.
  */
 
 import {

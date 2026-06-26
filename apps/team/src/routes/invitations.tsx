@@ -18,7 +18,7 @@
  * message and sends from their OWN phone (locked-spec 1.13 channel protection,
  * 3.6 BA-to-BA off-app). The system never auto-sends to a prospect.
  *
- * Flow (server-truth, mirrors michael-schedule.tsx state discipline):
+ * Flow (server-truth, using explicit server state as the source of truth):
  *   COMPOSE  — prospect fields + message box → POST /api/invitations
  *   MINTED   — show the link + the stored message, copy buttons,
  *              "I sent this" (POST /:prospectId/sent), "Invite someone else"
@@ -31,7 +31,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 // Local mirrors of the spine's wire contract. Per .team convention
-// (register.tsx, michael-schedule.tsx), pages declare their own API shapes
+// (register.tsx, cockpit.tsx), pages declare their own API shapes
 // rather than importing @momentum/shared — the shared package's `src` alias
 // is outside this app's rootDir, so importing it pulls source into the
 // compile and trips TS6059. The server is the source of truth for these

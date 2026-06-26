@@ -6,7 +6,6 @@
  *   POST   /:baId/sponsor-override    C.5 sponsor override (friction-heavy, audited)
  *   POST   /:baId/leader-tag          C.4 toggle Kevin-curated leader badge
  *   POST   /:baId/notes               C.4 append Kevin-only note (append-only)
- *   POST   /:baId/dial-michael        operator dial — existed pre-#135, untouched
  *
  * All routes are admin-gated by `requireAdmin`. Compliance discipline lives
  * in `domain/adminBaOversight.ts`; this file is the thin route layer.
@@ -22,7 +21,6 @@ import express, { type Request, type Response, type Router } from 'express';
 import { z } from 'zod';
 import { requireAdmin } from '../../middleware/requireAuth.js';
 import { listAllBAsForAdmin } from '../../domain/ba.js';
-import { originateCall, OriginateError } from '../../domain/michael-schedule.js';
 import {
   appendBaNote,
   applySponsorOverride,
@@ -230,49 +228,6 @@ adminBasRoutes.post(
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'unknown';
       res.status(500).json({ ok: false, error: `Note append failed: ${msg}` });
-    }
-  },
-);
-
-const DialParams = z.object({
-  baId: z.string().min(2).max(80),
-});
-
-adminBasRoutes.post(
-  '/:baId/dial-michael',
-  requireAdmin,
-  async (req: Request, res: Response) => {
-    const parsed = DialParams.safeParse(req.params);
-    if (!parsed.success) {
-      res.status(400).json({ ok: false, error: 'Invalid baId.' });
-      return;
-    }
-    const session = req.session!;
-    try {
-      const result = await originateCall(parsed.data.baId);
-      // eslint-disable-next-line no-console
-      console.log(
-        `[audit] admin_dial_michael baId=${parsed.data.baId} by=${session.baId} result=${result.kind}` +
-          (result.kind === 'placed'
-            ? ` callControlId=${result.callControlId}`
-            : ` reason=${result.reason}`),
-      );
-      if (result.kind === 'skipped') {
-        res.status(409).json({ ok: false, error: result.reason, schedule: result.schedule });
-        return;
-      }
-      res.json({
-        ok: true,
-        callControlId: result.callControlId,
-        schedule: result.schedule,
-      });
-    } catch (err) {
-      if (err instanceof OriginateError) {
-        res.status(400).json({ ok: false, error: err.message, code: err.code });
-        return;
-      }
-      const msg = err instanceof Error ? err.message : 'unknown';
-      res.status(500).json({ ok: false, error: `Dial failed: ${msg}` });
     }
   },
 );

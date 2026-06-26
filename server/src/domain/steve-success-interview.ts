@@ -7,11 +7,10 @@
  * and PREPARE for that BA.
  *
  * RELATIONSHIP TO MICHAEL (load-bearing): Steve does NOT replace Michael and
- * does NOT read or write any michael_* collection, the Michael graph, or the
- * Michael schedule/Training Agent + Daily Success Coach artifact flow. The only Steve→Michael link is a
- * one-way `michaelHandoffSummary` STRING carried on Steve's own artifact —
- * context a human (or Michael's worker, if it chooses) can read; it never
- * mutates Michael.
+ * does NOT read or write any michael_* collection or Michael graph data.
+ * Michael no longer schedules or interviews; the only Steve→Michael link is a
+ * one-way `michaelHandoffSummary` STRING carried on Steve's own artifact for
+ * training-support context. It never mutates Michael.
  *
  * HARD RULE: Steve does NOT classify, rank, score, or judge. No rubric, no
  * tier, no weighted total, no tone. Every produced field reflects the BA's OWN
@@ -319,7 +318,7 @@ export function assembleSuccessProfile(args: {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Chroma collection bootstrap (existence-first, mirrors michaelScoring.ts)
+// Chroma collection bootstrap (existence-first)
 // ─────────────────────────────────────────────────────────────────────────
 
 let discoveriesCollectionBootstrap: Promise<void> | null = null;
@@ -405,6 +404,11 @@ export async function buildDiscoveryView(baId: string): Promise<SteveDiscoveryVi
   };
 }
 
+export async function isSteveDiscoveryComplete(baId: string): Promise<boolean> {
+  const artifact = await getDiscoveryByBaId(baId);
+  return derivePhase(artifact) === 'complete';
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // Write — discovery artifact ingest
 // ─────────────────────────────────────────────────────────────────────────
@@ -417,10 +421,8 @@ export class DiscoveryIngestError extends Error {
 }
 
 function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Record<string, unknown> } {
-  // Mirrors michaelScoring.ts label/relationship conventions (:BA,
-  // VISIBLE_TO_SPONSOR) so Steve adds no new graph drift. A separate node
-  // label (SteveDiscovery) and a distinct edge (HAD_STEVE_DISCOVERY) keep
-  // Steve's graph fully independent of Michael's.
+  // Keep Steve's graph independent from retired Michael interview data while
+  // preserving the shared BA and sponsor visibility shape.
   return {
     cypher:
       'MERGE (b:BA {baId: $baId}) ' +

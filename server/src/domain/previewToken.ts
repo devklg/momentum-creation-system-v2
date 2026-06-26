@@ -35,7 +35,7 @@ import type { PreviewResolvedTokenPayload } from '@momentum/shared';
 const PREVIEW_TOKEN_PREFIX = 'PREVIEW-';
 
 /** Dr. Dan video — same constant as server/src/routes/p.ts (locked-spec 4.8). */
-const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/89wRvqx1d8M';
+const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/1IZiV7RXdCY';
 
 /** Webinar slot copy — same constant as server/src/routes/p.ts (Chat #116). */
 const WEBINAR = {
@@ -91,7 +91,7 @@ async function readPoolCounterForPreview(): Promise<number> {
  * Returns null only when the BA record itself is missing (the session
  * baId points at a deleted/never-existed record). The route layer maps
  * that to a 404 — callers must already be authed past requireAuth +
- * requireMichaelComplete to reach here.
+ * requireSteveComplete to reach here.
  */
 export async function synthesizePreviewPayload(
   sessionBaId: string,

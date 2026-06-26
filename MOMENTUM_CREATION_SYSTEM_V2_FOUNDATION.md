@@ -4,6 +4,8 @@
 
 **Version 2.0 Constitutional Edition**
 
+> **Status (2026-06-26): Preserved as the historical Founding Charter.** This document is retained intact for its founding intent and is amended by nothing. The living constitutional authority going forward is `constitution/MOMENTUM_CONSTITUTION.md` (v2.1.0), which descends from this charter, carries its principles forward as binding law, and supersedes it as the operative document. Amend the living Constitution, not this charter.
+
 ---
 
 # PREAMBLE

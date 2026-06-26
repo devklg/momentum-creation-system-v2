@@ -71,7 +71,7 @@ import type {
 export const prospectTokenRoutes: Router = Router();
 
 // Dr. Dan video, locked-spec Part 4.8.
-const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/89wRvqx1d8M';
+const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/1IZiV7RXdCY';
 
 // Webinar slot — Mondays & Thursdays 5pm Pacific (locked Chat #116).
 // This static descriptor is the fallback text for the dashboard's webinar

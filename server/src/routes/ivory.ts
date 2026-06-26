@@ -7,7 +7,7 @@
  * Mount point in server/src/index.ts:
  *   app.use('/api/ivory', ivoryRoutes);   // BA-FACING GATED block
  *
- * Every route applies (requireAuth, requireMichaelComplete) per the
+ * Every route applies (requireAuth, requireSteveComplete) per the
  * canonical pattern. baId comes from the session, never from the body or
  * the URL — Ivory is BA-private and the spine enforces it.
  *
@@ -48,7 +48,7 @@ import type {
   UpdateIvoryStatusPayload,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { requireMichaelComplete } from '../middleware/requireMichaelComplete.js';
+import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
   createIvoryName,
   deleteIvoryName,
@@ -113,7 +113,7 @@ function paramStr(p: string | string[] | undefined): string {
 ivoryRoutes.get(
   '/',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -132,7 +132,7 @@ ivoryRoutes.get(
 ivoryRoutes.post(
   '/',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -178,7 +178,7 @@ ivoryRoutes.post(
 ivoryRoutes.patch(
   '/:ivoryId',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -227,7 +227,7 @@ ivoryRoutes.patch(
 ivoryRoutes.patch(
   '/:ivoryId/status',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -265,7 +265,7 @@ ivoryRoutes.patch(
 ivoryRoutes.delete(
   '/:ivoryId',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -297,7 +297,7 @@ ivoryRoutes.delete(
 ivoryRoutes.post(
   '/coach',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -341,7 +341,7 @@ ivoryRoutes.post(
 ivoryRoutes.post(
   '/invitation-agent/draft',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -389,7 +389,7 @@ ivoryRoutes.post(
 ivoryRoutes.post(
   '/invitation-agent/mint',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -458,7 +458,7 @@ ivoryRoutes.post(
 ivoryRoutes.post(
   '/generator/run',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -495,7 +495,7 @@ ivoryRoutes.post(
 ivoryRoutes.get(
   '/generator/run/:runId',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -524,7 +524,7 @@ ivoryRoutes.get(
 ivoryRoutes.post(
   '/generator/run/:runId/invite',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -598,14 +598,14 @@ ivoryRoutes.post(
 // canonical PMV projection (cockpit domain) so lifecycle/nextAction can
 // never disagree with what /cockpit shows; enriches each Ivory-sourced row
 // with the BA's warm-market context (categories, angle, memory note).
-// All handlers apply (requireAuth, requireMichaelComplete) per the
+// All handlers apply (requireAuth, requireSteveComplete) per the
 // canonical pattern. baId is read from the session, never the body.
 // ───────────────────────────────────────────────────────────────────────
 
 ivoryRoutes.get(
   '/momentum',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
@@ -624,7 +624,7 @@ ivoryRoutes.get(
 ivoryRoutes.post(
   '/momentum/:prospectId/suggest',
   requireAuth,
-  requireMichaelComplete,
+  requireSteveComplete,
   async (req, res) => {
     const baId = req.session?.baId;
     if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });

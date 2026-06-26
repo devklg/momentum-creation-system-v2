@@ -3,7 +3,7 @@
  *
  * Self-paced first-7-days curriculum (feat/fast-start-training,
  * wireframe 3.5). Five modules ordered, sequential in display but NOT
- * hard-gated — a BA can jump to any module. The Michael gate restricts
+ * hard-gated — a BA can jump to any module. The Steve gate restricts
  * Modules 2-5 server-side; this hub renders all 5 cards but indicates
  * gated state when relevant.
  *

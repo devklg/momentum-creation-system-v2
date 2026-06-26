@@ -87,11 +87,17 @@ function mergeNotifPrefs(stored: BANotifPrefs | undefined): BANotifPrefs {
   // a record from a partial save may be missing a topic added later. Always
   // resolve to the full shape so the UI never has to defend against undef.
   if (!stored) return BA_NOTIF_DEFAULTS;
+  const legacy = stored as Partial<BANotifPrefs> & {
+    michaelComplete?: BANotifPrefs['steveDiscoveryComplete'];
+  };
   return {
     callbackRequested: { ...BA_NOTIF_DEFAULTS.callbackRequested, ...(stored.callbackRequested ?? {}) },
     webinarReserved: { ...BA_NOTIF_DEFAULTS.webinarReserved, ...(stored.webinarReserved ?? {}) },
     newSponsoredBA: { ...BA_NOTIF_DEFAULTS.newSponsoredBA, ...(stored.newSponsoredBA ?? {}) },
-    michaelComplete: { ...BA_NOTIF_DEFAULTS.michaelComplete, ...(stored.michaelComplete ?? {}) },
+    steveDiscoveryComplete: {
+      ...BA_NOTIF_DEFAULTS.steveDiscoveryComplete,
+      ...(legacy.steveDiscoveryComplete ?? legacy.michaelComplete ?? {}),
+    },
     poolMovement: { ...BA_NOTIF_DEFAULTS.poolMovement, ...(stored.poolMovement ?? {}) },
   };
 }

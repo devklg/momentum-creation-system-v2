@@ -111,8 +111,8 @@ export const TENANT_TEMPLATE_DEFINITIONS: readonly TenantTemplateDefinition[] = 
   // ─── F.5 remaining master-content categories (TASK-147 / wf_0133) ───────────
   // These complete the master-content contract: the six locked .com dashboard
   // sections (callback_cta already covers Section 6), the fuller ScriptMaker
-  // invitation-seed library, BA-facing training copy, the Michael interview
-  // scaffold, and the Ivory coach prompt. Code defaults below are the safe
+  // invitation-seed library, BA-facing training copy, the Michael training
+  // support scaffold, and the Ivory coach prompt. Code defaults below are the safe
   // baseline; Kevin overrides them tenant-wide via the editor, and Wave-2
   // consumers read them through readMasterContent() (services/masterContent.ts).
   // .com defaults are written to pass validateMasterContent('com', …) — no
@@ -232,14 +232,14 @@ export const TENANT_TEMPLATE_DEFINITIONS: readonly TenantTemplateDefinition[] = 
   },
 
   {
-    templateKey: 'team.michael.interview_prompts',
-    label: '.team Michael — interview prompt scaffold',
+    templateKey: 'team.michael.training_support_prompt',
+    label: '.team Michael - training-support prompt scaffold',
     surface: 'team',
     description:
-      'BA-facing only. Scaffold for Michael’s onboarding interview. The locked 5-prompt set is still an open decision — this default carries Michael’s Layer-1 teaching frame (locked-spec 3.12), to be replaced when Kevin locks the prompts.',
+      'BA-facing only. Scaffold for Michael’s training-support suggestions. Michael no longer schedules or interviews.',
     tokens: ['{{baFirstName}}'],
     defaultContent:
-      'Welcome {{baFirstName}} and confirm a good time. Capture: their goals, their warm market, how comfortable they feel sharing, and any concerns. Teach Layer 1 only — two legs, find two people, the team grows beneath you, your sponsor helps with the rest. No comp plan, no objection-handling, no pitch.',
+      '{{baFirstName}}, use Steve’s Success Profile to recommend the next training step. Stay Layer 1: product belief, clean invitations, and sponsor support. No comp plan, no objection-handling, no pitch.',
     editable: true,
   },
 
