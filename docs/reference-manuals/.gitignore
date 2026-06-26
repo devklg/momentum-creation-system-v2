@@ -1,0 +1,7 @@
+# Build artifacts compiled by the Documentation Compilers (ACR-001).
+# These are regenerated output, not source of truth, and are intentionally NOT tracked
+# so recompiling never re-bloats git. Source of truth lives in constitution/.
+# To version-control the binders for distribution, remove this ignore.
+*
+!.gitignore
+!README.md

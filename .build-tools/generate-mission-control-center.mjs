@@ -2,7 +2,13 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const generatedAt = '2026-06-26';
-const outDir = 'constitution';
+// Documentation Compiler (ACR-001): compiles living docs into non-authoritative build artifacts.
+// Source of truth stays in constitution/. This compiler must NOT write into constitution/.
+// Output dir docs/reference-manuals/ is created and tracked in-repo (see its README).
+const outDir = join(process.cwd(), 'docs', 'reference-manuals');
+if (/constitution/i.test(outDir)) {
+  throw new Error("Documentation Compiler (ACR-001) must not write into constitution/. Resolved outDir: " + outDir);
+}
 
 const sourceList = [
   'AGENTS.md',
@@ -797,8 +803,9 @@ const executive = buildBook({
   bodyFactory: executiveBody,
 });
 
-writeFileSync(join(outDir, 'MISSION_CONTROL_ARCHITECTURE.md'), architecture, 'utf8');
-writeFileSync(join(outDir, 'MOMENTUM_EXECUTIVE_SYSTEM.md'), executive, 'utf8');
+const ARTIFACT_BANNER = `> **BUILD ARTIFACT — NON-AUTHORITATIVE.** Compiled by a Documentation Compiler (.build-tools, ACR-001) on ${generatedAt}. Source of truth lives in \`constitution/\`. Do not cite this file as governance.\n\n`;
+writeFileSync(join(outDir, 'MISSION_CONTROL_ARCHITECTURE.md'), ARTIFACT_BANNER + architecture, 'utf8');
+writeFileSync(join(outDir, 'MOMENTUM_EXECUTIVE_SYSTEM.md'), ARTIFACT_BANNER + executive, 'utf8');
 
 console.log(JSON.stringify({
   generatedAt,

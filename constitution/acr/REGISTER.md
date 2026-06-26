@@ -4,6 +4,6 @@ The index of all Architectural Change Requests. Governed by `../MOMENTUM_ACR_SYS
 
 | ACR | Title | Risk | Status | Approver |
 |---|---|---|---|---|
-| [ACR-001](ACR-001-documentation-compilers.md) | Reclassify document generators as Documentation Compilers | High | Reviewed — awaiting approval | Kevin |
+| [ACR-001](ACR-001-documentation-compilers.md) | Reclassify document generators as Documentation Compilers | High | Released (approved 2026-06-26) | Kevin |
 
 *Statuses follow the ACR state machine: Proposed → Triaged → Reconciled → Reviewed → Approved → Implementing → Verified → Merged → Released (or Rejected / RolledBack / Blocked).*

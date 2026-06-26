@@ -2,7 +2,7 @@
 
 **The first official Architectural Change Request of Momentum Creation System V2.**
 
-**Status:** REVIEWED — awaiting Kevin's approval gate.
+**Status:** RELEASED — approved by Kevin 2026-06-26; implemented, verified, merged on commit.
 **Risk level:** High (source-of-truth classification change; reversible; not prospect-facing, compliance, or safety-critical). *Kevin may re-rate.*
 **Change type:** source-of-truth (with build-tooling reclassification).
 **Proposed by:** Kevin L. Gardner (directive) — drafted by the Constitution Agent (advisory).
@@ -125,13 +125,13 @@ flowchart LR
 
 | Gate | State | Notes |
 |---|---|---|
-| Review gate | **Passed (advisory)** | Future-Development Test passes; boundaries reviewed; no duplicate concept introduced |
-| Approval gate | **Pending — Kevin** | High/source-of-truth → Kevin approves |
-| Testing gate | Not started | Runs during implementation |
-| Merge gate | Not started | Kevin merges |
-| Release gate | Not started | Confirms `constitution/` no longer receives generated files |
+| Review gate | **Passed** | Future-Development Test passes; boundaries reviewed; no duplicate concept introduced |
+| Approval gate | **Passed** | Approved by Kevin, 2026-06-26 |
+| Testing gate | **Passed** | All 3 compilers run; output lands in docs/reference-manuals/, never constitution/; banner present |
+| Merge gate | **Passed on commit** | Committed to main per Kevin's directive |
+| Release gate | **Passed** | constitution/ no longer receives generated files; root duplicates removed; archive retained |
 
-Current state on the ACR state machine: **Reviewed** (Proposed → Triaged → Reconciled → **Reviewed** → _Approved?_).
+Current state on the ACR state machine: **Released** (Proposed → Triaged → Reconciled → Reviewed → Approved → Implementing → Verified → Merged → **Released**).
 
 ---
 
@@ -175,4 +175,14 @@ Fully reversible: revert the generator changes. No data migration, no schema cha
 
 Approval writes a decision-ledger entry (`momentum.decisions`, e.g. `dec_documentation_compilers`, status `active`) recording: generators are Documentation Compilers; living documents are source of truth; generated documents are build artifacts. The ACR then advances Approved → Implementing → Verified → Merged (Kevin) → Released.
 
-*The Constitution Agent warns. Kevin decides. This ACR is a recommendation awaiting the approval gate.*
+---
+
+## §11 — Approval & Implementation Record
+
+- **Approved by:** Kevin L. Gardner, 2026-06-26 (approval gate; source-of-truth / high risk → Kevin).
+- **Implemented:** the three `.build-tools/generate-momentum-*.mjs` scripts were reclassified as Documentation Compilers — output redirected from `constitution/` to `docs/reference-manuals/`, a guard added that throws if the resolved output path contains `constitution`, and a non-authoritative build-artifact banner stamped on every emitted file. `docs/reference-manuals/` created with a non-authoritative `README` and a `.gitignore` excluding compiled artifacts from version control.
+- **Verified (testing gate):** all three compilers run successfully; output lands in `docs/reference-manuals/` (MISSION_CONTROL_ARCHITECTURE 127 pages, MOMENTUM_EXECUTIVE_SYSTEM 123 pages, MOMENTUM_KNOWLEDGE_CORE 160 pages, plus the three AI-organization manuals); none write to `constitution/`; banner confirmed at the head of output.
+- **Released:** the four duplicated handbooks were removed from `constitution/` root (`MOMENTUM_AI_ORGANIZATION`, `MOMENTUM_AGENT_DIRECTORY`, `MOMENTUM_AGENT_COMMUNICATION_PROTOCOL`, `MOMENTUM_KNOWLEDGE_CORE`); their archived copies in `constitution/_generated_archive/` were retained; no source-of-truth document, the archive, or FOUNDATION.md was touched.
+- **Open decision left to Kevin:** compiled artifacts are gitignored (not tracked). Remove the ignore if the binders should be version-controlled for distribution.
+
+*The Constitution Agent warns. Kevin decided: approved. This record is the first completed pass through the Constitutional Governance process.*

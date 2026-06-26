@@ -1,7 +1,12 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const outDir = join(process.cwd(), "constitution");
+// Documentation Compiler (ACR-001): compiles living docs into non-authoritative build artifacts.
+// Source of truth stays in constitution/. This compiler must NOT write into constitution/.
+const outDir = join(process.cwd(), "docs", "reference-manuals");
+if (/constitution/i.test(outDir)) {
+  throw new Error("Documentation Compiler (ACR-001) must not write into constitution/. Resolved outDir: " + outDir);
+}
 mkdirSync(outDir, { recursive: true });
 
 const today = "2026-06-26";
@@ -855,5 +860,6 @@ No appendix grants permission to bypass source hierarchy, sponsor immutability, 
 
 const document = `# Momentum Knowledge Core\n\nGenerated: ${today}\n\nMinimum depth target: 150 pages. Actual page markers: ${pages.length}.\n\n${pages.join("\n")}`;
 
-writeFileSync(join(outDir, "MOMENTUM_KNOWLEDGE_CORE.md"), document, "utf8");
-console.log("Generated constitution/MOMENTUM_KNOWLEDGE_CORE.md");
+const ARTIFACT_BANNER = `> **BUILD ARTIFACT — NON-AUTHORITATIVE.** Compiled by a Documentation Compiler (.build-tools, ACR-001) on ${today}. Source of truth lives in \`constitution/\`. Do not cite this file as governance.\n\n`;
+writeFileSync(join(outDir, "MOMENTUM_KNOWLEDGE_CORE.md"), ARTIFACT_BANNER + document, "utf8");
+console.log("Compiled docs/reference-manuals/MOMENTUM_KNOWLEDGE_CORE.md (build artifact)");

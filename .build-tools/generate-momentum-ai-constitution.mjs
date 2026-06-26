@@ -1,7 +1,12 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const outDir = join(process.cwd(), "constitution");
+// Documentation Compiler (ACR-001): compiles living docs into non-authoritative build artifacts.
+// Source of truth stays in constitution/. This compiler must NOT write into constitution/.
+const outDir = join(process.cwd(), "docs", "reference-manuals");
+if (/constitution/i.test(outDir)) {
+  throw new Error("Documentation Compiler (ACR-001) must not write into constitution/. Resolved outDir: " + outDir);
+}
 mkdirSync(outDir, { recursive: true });
 
 const today = "2026-06-26";
@@ -1269,11 +1274,12 @@ flowchart TD
   return `# Momentum Agent Communication Protocol\n\nGenerated: ${today}\n\n${pages.join("\n")}`;
 }
 
-writeFileSync(join(outDir, "MOMENTUM_AI_ORGANIZATION.md"), generateOrganization(), "utf8");
-writeFileSync(join(outDir, "MOMENTUM_AGENT_DIRECTORY.md"), generateDirectory(), "utf8");
-writeFileSync(join(outDir, "MOMENTUM_AGENT_COMMUNICATION_PROTOCOL.md"), generateProtocol(), "utf8");
+const ARTIFACT_BANNER = `> **BUILD ARTIFACT — NON-AUTHORITATIVE.** Compiled by a Documentation Compiler (.build-tools, ACR-001) on ${today}. Source of truth lives in \`constitution/\`. Do not cite this file as governance.\n\n`;
+writeFileSync(join(outDir, "MOMENTUM_AI_ORGANIZATION.md"), ARTIFACT_BANNER + generateOrganization(), "utf8");
+writeFileSync(join(outDir, "MOMENTUM_AGENT_DIRECTORY.md"), ARTIFACT_BANNER + generateDirectory(), "utf8");
+writeFileSync(join(outDir, "MOMENTUM_AGENT_COMMUNICATION_PROTOCOL.md"), ARTIFACT_BANNER + generateProtocol(), "utf8");
 
-console.log("Generated Momentum AI constitution documents:");
-console.log("constitution/MOMENTUM_AI_ORGANIZATION.md");
-console.log("constitution/MOMENTUM_AGENT_DIRECTORY.md");
-console.log("constitution/MOMENTUM_AGENT_COMMUNICATION_PROTOCOL.md");
+console.log("Compiled reference manuals (build artifacts) to docs/reference-manuals/:");
+console.log("docs/reference-manuals/MOMENTUM_AI_ORGANIZATION.md");
+console.log("docs/reference-manuals/MOMENTUM_AGENT_DIRECTORY.md");
+console.log("docs/reference-manuals/MOMENTUM_AGENT_COMMUNICATION_PROTOCOL.md");
