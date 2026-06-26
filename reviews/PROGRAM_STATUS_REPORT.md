@@ -9,6 +9,18 @@
 
 ---
 
+## 0. Audit Provenance (what was actually read)
+
+An audit is only as good as what it read. This is explicit so the scope is not overstated.
+
+**Read in full, line by line (governance/constitutional spine):** `MOMENTUM_CONSTITUTION.md` (290), `MOMENTUM_GOVERNANCE.md` (258), `MOMENTUM_DECISION_FRAMEWORK.md` (161), `MOMENTUM_ACR_SYSTEM.md` (174), `acr/ACR-001-documentation-compilers.md` (222), `acr/REGISTER.md`, `CONSTITUTION_DEPENDENCY_MAP.md`, `MOMENTUM_CONSTITUTIONAL_RECONCILIATION_REPORT.md` (163), `docs/reference-manuals/README.md` + `.gitignore`. Repo tree and archive directory inventoried.
+
+**NOT yet read in full (declared, not assumed):** the ~16 domain architecture specs (`PMV`, `CRM`, `COMMUNITY`, `HOLDING_TANK`, `LAUNCH_CENTER`, `ORIENTATION`, `TRAINING`, `RESOURCE_CENTER`, `EVENT_CENTER`, `RECOMMENDATION_ENGINE`, `NEW_BA_DISCOVERY_SUCCESS_INTERVIEW_SPEC`, `MASTER_UX_IMPLEMENTATION_SPEC`, `VM_LEAD_CAMPAIGN_*`, `BA_SUPPORT_AGENTS`), the four governance *pillars* (`AGENT_ARCHITECTURE`, `SCHEMA_GOVERNANCE`, `MULTI_DB_AGENT_LEARNING_GOVERNANCE`, `AGENT_PROMPT_GOVERNANCE`), the operational docs (`locked-spec`, `build-registry`), and the enforcement code (`packages/shared/src/compliance.ts`, `rules.ts`). These are the R-8 audit — a real, larger second pass, not done here.
+
+**Conclusion of the spine read:** the four governance documents are internally coherent, correctly cross-referenced, non-restating, and conflict-free against each other and the Constitution. Findings revised after this read are marked in the Conflict Report (C-4 → resolved, C-5 → expected-interim, boundary framing corrected).
+
+---
+
 ## 1. Executive Summary
 
 The integration this review was commissioned to plan is **largely already executed.** The repository is materially more reconciled than the commissioning brief assumes.
@@ -95,8 +107,9 @@ The brief references "four agencies." On disk, the work clusters into the follow
 1. **Stale status lines** — authored docs whose status no longer matches disk (confirmed in the reconciliation report). Medium.
 2. **Dual-copy of generated handbooks** — identical sets in `constitution/_generated_archive/` (archived originals) and `docs/reference-manuals/` (recompiled). Benign *if* reference-manuals is gitignored and treated as output; a confusion hazard otherwise. Low–Medium. (See Conflict Report C-2.)
 3. **`CLAUDE.md` / `AGENTS.md` byte-identical with no sync enforcement** — silent-drift hazard. Low.
-4. **Unratified supreme law** — the system currently runs on a constitution marked "pending ratification." Until ratified, agents may cite an instrument that is not yet binding. Medium.
+4. **Unratified governance package** — the package reads "pending ratification." *Revised after full read:* Constitution Article IX explicitly governs the interim, so this is an expected state to finalize, not a hazard. Low (action, not risk).
 5. **Missing agent charters** — the Constitution Agent and Momentum Architect operate without standalone charters. Low–Medium.
+6. **"Five vs six" handbook count** — minor wording inconsistency across docs (Conflict Report C-7). Low.
 
 ---
 
