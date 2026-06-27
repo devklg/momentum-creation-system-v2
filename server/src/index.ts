@@ -30,6 +30,10 @@ import { startVmDeliveryWorker } from './workers/vmDeliveryWorker.js';
 import { startVmImportWorker } from './workers/vmImportWorker.js';
 import { startVmWebhookWorker } from './workers/vmWebhookWorker.js';
 import { ensureChromaCollections } from './services/chromaCollections.js';
+import {
+  connectDirectPersistence,
+  installDirectPersistenceShutdownHooks,
+} from './services/persistence/index.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { vmProviderWebhookRoutes } from './routes/vmProviderWebhooks.js';
 import { michaelRoutes } from './routes/michael.js';
@@ -238,6 +242,8 @@ app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 // loudly; the write-time guard in tripleStack.ts is the per-write safety net.
 // Awaited before listen so a fresh environment self-heals at startup. Does NOT
 // touch the route mount ORDER above.
+await connectDirectPersistence();
+installDirectPersistenceShutdownHooks();
 await ensureChromaCollections();
 
 app.listen(env.SERVER_PORT, () => {
