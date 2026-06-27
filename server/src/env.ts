@@ -197,8 +197,8 @@ const Env = z.object({
   NEO4J_URI: z.string().default('bolt://127.0.0.1:7687'),
   NEO4J_USERNAME: z.string().default('neo4j'),
   NEO4J_PASSWORD: z.string().default(''),
-  CHROMA_URL: z.string().url().default('http://127.0.0.1:8100'),
-  GPU_EMBEDDER_URL: z.string().url().default('http://127.0.0.1:8300'),
+  CHROMA_URL: z.string().url().default('http://localhost:8100'),
+  GPU_EMBEDDER_URL: z.string().url().default('http://localhost:8300'),
 
   // Per-store cutover flags (S1_3_IMPLEMENTATION_BREAKDOWN §9). Default 'gateway'.
   PERSISTENCE_MONGO_MODE: z.enum(['gateway', 'direct']).default('gateway'),

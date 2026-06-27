@@ -23,10 +23,29 @@ const STORE_MODE_ENV: Record<PersistenceStore, PersistenceMode> = {
 
 const ALL_STORES: readonly PersistenceStore[] = ['mongodb', 'neo4j', 'chromadb'];
 
+export interface PersistenceFlagConfig {
+  directEnabled: boolean;
+  storeModes: Record<PersistenceStore, PersistenceMode>;
+}
+
+export function resolveModeFromConfig(
+  config: PersistenceFlagConfig,
+  store: PersistenceStore,
+): PersistenceMode {
+  if (!config.directEnabled) return 'gateway';
+  return config.storeModes[store];
+}
+
+function currentConfig(): PersistenceFlagConfig {
+  return {
+    directEnabled: env.PERSISTENCE_DIRECT_ENABLED,
+    storeModes: STORE_MODE_ENV,
+  };
+}
+
 /** Resolve the effective persistence mode for a store. */
 export function resolveMode(store: PersistenceStore): PersistenceMode {
-  if (!env.PERSISTENCE_DIRECT_ENABLED) return 'gateway';
-  return STORE_MODE_ENV[store];
+  return resolveModeFromConfig(currentConfig(), store);
 }
 
 /** True iff the store should use the direct adapter. */
