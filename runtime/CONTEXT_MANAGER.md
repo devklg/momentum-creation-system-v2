@@ -550,6 +550,11 @@ interface ContextRequest {
   requestId: string;
 
   tenantId: string;
+
+  teamId: string;
+  teamKey: "team_magnificent";
+  teamName: "Team Magnificent";
+
   baId: string;
   sessionId: string;
 
@@ -1571,6 +1576,11 @@ interface ContextRetrievalAudit {
   packetId: string;
 
   tenantId: string;
+
+  teamId: string;
+  teamKey: "team_magnificent";
+  teamName: "Team Magnificent";
+
   baId: string;
   sessionId: string;
 
@@ -2814,6 +2824,7 @@ The following invariants must always hold.
 18. Language fallback is audited.
 19. Degraded packets do not invent knowledge.
 20. Safety cannot be outweighed by relevance.
+21. Every ContextRequest and ContextRetrievalAudit carries Team Magnificent identity (`teamId`, `teamKey`, and `teamName`) whenever a Brand Ambassador-scoped context is requested.
 
 ---
 
@@ -2885,3 +2896,25 @@ The Agent guides.
 The Brand Ambassador acts.
 
 The outcome teaches Momentum.
+
+---
+
+## Ratification
+
+Status: RATIFIED
+
+Ratified By: Kevin Gardner
+
+Ratification Date: 2026-06-27
+
+Architecture Review: PASS
+
+Review Authority: Claude (Chief Governance Architect)
+
+Implementation Authority: Codex
+
+Version: 1.0.0
+
+This document is now a canonical source-of-truth for Momentum Creation System V2.
+
+Future modifications require an approved ACR.

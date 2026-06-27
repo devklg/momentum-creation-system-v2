@@ -241,6 +241,10 @@ export interface AgentEventEnvelope<TPayload = Record<string, unknown>> {
 
   tenantId: string;
 
+  teamId?: string;
+  teamKey?: "team_magnificent";
+  teamName?: "Team Magnificent";
+
   baId?: string;
 
   agentKey?: "steve_success" | "michael_magnificent" | "ivory";
@@ -675,17 +679,15 @@ agent.context.requested
 agent.context.received
 agent.turn.received
 agent.turn.responded
-agent.state.transitioned
-agent.guided_action.suggested
-agent.guided_action.accepted
-agent.guided_action.dismissed
+agent.state.advanced
+agent.guided_action.created
 agent.journal_entry.created
 agent.knowledge_candidate.proposed
 agent.relationship_context.created
 agent.invitation_draft.created
 agent.invitation_link.requested
 agent.invitation_link.created
-agent.output.blocked_by_guardrail
+agent.output_guardrail.blocked
 ```
 
 ### 15.2 Agent Session Created Payload
@@ -736,10 +738,10 @@ export interface AgentTurnRespondedPayload {
 }
 ```
 
-### 15.5 Agent State Transitioned Payload
+### 15.5 Agent State Advanced Payload
 
 ```ts id="z0l0p9"
-export interface AgentStateTransitionedPayload {
+export interface AgentStateAdvancedPayload {
   sessionId: string;
   agentKey: "steve_success" | "michael_magnificent" | "ivory";
   fromStateKey: string;
@@ -754,10 +756,10 @@ export interface AgentStateTransitionedPayload {
 }
 ```
 
-### 15.6 Agent Output Blocked Payload
+### 15.6 Agent Output Guardrail Blocked Payload
 
 ```ts id="qoi1f9"
-export interface AgentOutputBlockedByGuardrailPayload {
+export interface AgentOutputGuardrailBlockedPayload {
   sessionId: string;
   agentKey: "steve_success" | "michael_magnificent" | "ivory";
   responseId?: string;
@@ -1400,6 +1402,10 @@ export interface CreateRuntimeEventInput<TPayload = Record<string, unknown>> {
 
   tenantId: string;
 
+  teamId?: string;
+  teamKey?: "team_magnificent";
+  teamName?: "Team Magnificent";
+
   baId?: string;
 
   agentKey?: "steve_success" | "michael_magnificent" | "ivory";
@@ -2039,6 +2045,9 @@ Request:
 export interface EmitRuntimeEventRequest<TPayload = Record<string, unknown>> {
   eventType: AgentEventType;
   tenantId: string;
+  teamId?: string;
+  teamKey?: "team_magnificent";
+  teamName?: "Team Magnificent";
   baId?: string;
   agentKey?: AgentKey;
   sessionId?: string;
@@ -2683,6 +2692,7 @@ The following invariants must always hold.
 22. Correlation IDs allow timeline reconstruction.
 23. Causation IDs allow cause-chain reconstruction.
 24. English and Spanish language metadata are preserved where relevant.
+25. Every Brand Ambassador-scoped event carries Team Magnificent identity, including `teamId`, `teamKey`, and `teamName`.
 
 ---
 
@@ -2749,3 +2759,25 @@ The Brand Ambassador acts.
 The Learning Pipeline evaluates.
 
 Momentum evolves.
+
+---
+
+## Ratification
+
+Status: RATIFIED
+
+Ratified By: Kevin Gardner
+
+Ratification Date: 2026-06-27
+
+Architecture Review: PASS
+
+Review Authority: Claude (Chief Governance Architect)
+
+Implementation Authority: Codex
+
+Version: 1.0.0
+
+This document is now a canonical source-of-truth for Momentum Creation System V2.
+
+Future modifications require an approved ACR.

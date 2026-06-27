@@ -1486,9 +1486,9 @@ learning.metrics.updated
 ```text id="k1cnpn"
 agent.session.completed
 agent.turn.responded
-agent.guided_action.suggested
-agent.guided_action.accepted
-agent.guided_action.dismissed
+guided_action.suggested
+guided_action.accepted
+guided_action.dismissed
 agent.journal_entry.created
 agent.knowledge_candidate.proposed
 agent.invitation_draft.created
@@ -2515,3 +2515,25 @@ The Learning Pipeline observes.
 The Knowledge Core evolves through review.
 
 Momentum improves.
+
+---
+
+## Ratification
+
+Status: RATIFIED
+
+Ratified By: Kevin Gardner
+
+Ratification Date: 2026-06-27
+
+Architecture Review: PASS
+
+Review Authority: Claude (Chief Governance Architect)
+
+Implementation Authority: Codex
+
+Version: 1.0.0
+
+This document is now a canonical source-of-truth for Momentum Creation System V2.
+
+Future modifications require an approved ACR.

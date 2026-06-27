@@ -552,9 +552,12 @@ interface CapturedInput {
   captureId: string;
   tenantId: string;
 
+  teamId?: string;
+  teamKey?: "team_magnificent";
+  teamName?: "Team Magnificent";
+
   baId?: string;
   prospectId?: string;
-  teamId?: string;
 
   sourceType:
     | "agent_session"
@@ -1368,6 +1371,10 @@ interface KnowledgeCandidate {
 
   tenantId: string;
 
+  teamId?: string;
+  teamKey?: "team_magnificent";
+  teamName?: "Team Magnificent";
+
   title: string;
   summary: string;
   content: string;
@@ -1479,6 +1486,7 @@ type CandidateOwner =
   | {
       ownerType: "brand_ambassador";
       baId: string;
+      teamMagnificentId: string;
     }
   | {
       ownerType: "momentum_organization";
@@ -1633,6 +1641,10 @@ interface MomentumJournalEntry {
   journalEntryId: string;
   tenantId: string;
   baId: string;
+
+  teamId: string;
+  teamKey: "team_magnificent";
+  teamName: "Team Magnificent";
 
   sourceSessionId?: string;
   promptId?: string;
@@ -2120,8 +2132,8 @@ knowledge.candidate.created
 knowledge.candidate.queued_for_review
 knowledge.candidate.indexed_for_review
 knowledge.graph.linked
-knowledge.journal.entry.created
-knowledge.journal.selected_for_review
+journal.entry.created
+journal.entry.selected_for_review
 knowledge.ingestion.failed
 knowledge.ingestion.idempotent_replay
 ```
@@ -3415,8 +3427,8 @@ The Knowledge Ingestion Protocol is complete only when all acceptance criteria a
 - Journal promotion creates a candidate.
 - Original journal entry remains private.
 - External runtime cannot access private journal entries.
-- `knowledge.journal.entry.created` is emitted.
-- `knowledge.journal.selected_for_review` is emitted.
+- `journal.entry.created` is emitted.
+- `journal.entry.selected_for_review` is emitted.
 
 ### 44.9 Review-Only Indexing Acceptance Criteria
 
@@ -3572,6 +3584,7 @@ The following invariants must always hold.
 18. Internal Browser Voice does not use Telnyx.
 19. External Telnyx usage is limited to SMS, ringless voicemail, and future callback workflows.
 20. All ingestion stages are idempotent.
+21. Every Brand Ambassador-scoped ingestion object carries Team Magnificent identity, including captured inputs, Knowledge Candidates, Momentum Journal entries, and Brand Ambassador-owned candidate records.
 
 ---
 
@@ -3629,3 +3642,25 @@ Momentum learns because experience is captured carefully.
 Momentum improves because knowledge is prepared responsibly.
 
 The Knowledge Ingestion Protocol is the runtime gateway from experience to organizational learning.
+
+---
+
+## Ratification
+
+Status: RATIFIED
+
+Ratified By: Kevin Gardner
+
+Ratification Date: 2026-06-27
+
+Architecture Review: PASS
+
+Review Authority: Claude (Chief Governance Architect)
+
+Implementation Authority: Codex
+
+Version: 1.0.0
+
+This document is now a canonical source-of-truth for Momentum Creation System V2.
+
+Future modifications require an approved ACR.

@@ -831,7 +831,46 @@ export interface SubmitVoiceTurnRequest {
 }
 ```
 
-### 16.3 Agent Response Handling
+### 16.3 Wire Conformance to Agent Runtime Turn Contract
+
+Browser Voice final transcript submission must conform to the Agent Runtime `AddAgentSessionTurnRequest` contract.
+
+The Browser Voice Runtime may maintain its own internal `SubmitVoiceTurnRequest` model, but the payload sent over the wire to Agent Runtime must match the Agent Runtime session turn API.
+
+Required wire payload:
+
+```ts id="wireconf1"
+export interface BrowserVoiceAgentTurnWirePayload {
+  tenantId: string;
+
+  teamId: string;
+  teamKey: "team_magnificent";
+  teamName: "Team Magnificent";
+
+  baId: string;
+
+  text: string;
+
+  language?: RuntimeLanguage;
+
+  mode: "browser_voice";
+
+  transcriptMetadata: {
+    transcriptTurnId: string;
+    confidence?: number;
+    isFinal: true;
+    browserLocale?: string;
+    transcriptHash: string;
+    corrected: boolean;
+  };
+
+  metadata?: Record<string, unknown>;
+}
+```
+
+`BrowserVoiceAgentTurnWirePayload` must be accepted by Agent Runtime as an `AddAgentSessionTurnRequest`-compatible payload.
+
+### 16.4 Agent Response Handling
 
 Agent Runtime returns an `AgentTurnResponse`.
 
@@ -1613,6 +1652,27 @@ Browser Voice frontend may emit events through a frontend-safe runtime event end
 
 The implementation must avoid exposing unrestricted event write access to unauthenticated clients.
 
+### 30.5 Implementation-Layer Pointer Boundary
+
+Sections that reference frontend files, frontend components, frontend routes, or Codex implementation layout are non-normative Implementation-Layer pointers.
+
+These pointers exist only to help Codex locate likely implementation surfaces.
+
+They do not define Runtime Layer authority.
+
+They may be adapted during implementation if all Runtime acceptance criteria remain satisfied.
+
+This boundary applies to:
+
+- Section 20.2 Agent Pages
+- Section 31 Frontend File Structure
+- Section 31.1 Required Routes
+- Section 45 Implementation Structure for Codex
+
+The Runtime Layer defines required behavior, boundaries, interfaces, and acceptance criteria.
+
+The Implementation Layer determines exact file placement when repository structure requires adaptation.
+
 ---
 
 ## 31. Frontend File Structure
@@ -2270,3 +2330,25 @@ It never uses Telnyx for internal coaching.
 Telnyx remains external.
 
 Browser Voice is how Team Magnificent Brand Ambassadors can speak with Momentum agents safely, accessibly, privately, and bilingually inside the app.
+
+---
+
+## Ratification
+
+Status: RATIFIED
+
+Ratified By: Kevin Gardner
+
+Ratification Date: 2026-06-27
+
+Architecture Review: PASS
+
+Review Authority: Claude (Chief Governance Architect)
+
+Implementation Authority: Codex
+
+Version: 1.0.0
+
+This document is now a canonical source-of-truth for Momentum Creation System V2.
+
+Future modifications require an approved ACR.
