@@ -51,4 +51,80 @@ describe('Chroma direct adapter', () => {
       embeddings: [[0.1, 0.2, 0.3]],
     });
   });
+
+  it('normalizes direct search responses to the Gateway caller-facing shape', async () => {
+    const { chromaAdapter } = await import('../chroma/adapter.js');
+    mocks.embed.mockResolvedValue([[0.4, 0.5, 0.6]]);
+    mocks.fetch
+      .mockResolvedValueOnce(jsonResponse({ collections: [{ id: 'col-1', name: 'mcs_test' }] }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          ids: [['id-1', 'id-2']],
+          documents: [['first', 'second']],
+          metadatas: [[{ kind: 'one' }, { kind: 'two' }]],
+          distances: [[0.1, 0.2]],
+          include: ['documents', 'metadatas', 'distances'],
+        }),
+      );
+
+    await expect(
+      chromaAdapter('search', {
+        collection: 'mcs_test',
+        query: 'readiness',
+        n_results: 2,
+      }),
+    ).resolves.toEqual({
+      collection: 'mcs_test',
+      query: 'readiness',
+      n_results: 2,
+      results: {
+        ids: ['id-1', 'id-2'],
+        documents: ['first', 'second'],
+        metadatas: [{ kind: 'one' }, { kind: 'two' }],
+        distances: [0.1, 0.2],
+      },
+    });
+
+    expect(mocks.embed).toHaveBeenCalledWith(['readiness']);
+    expect(String(mocks.fetch.mock.calls[1]?.[0])).toContain('/collections/col-1/query');
+  });
+
+  it('normalizes direct query_with_filter responses to the Gateway caller-facing shape', async () => {
+    const { chromaAdapter } = await import('../chroma/adapter.js');
+    mocks.embed.mockResolvedValue([[0.7, 0.8, 0.9]]);
+    mocks.fetch
+      .mockResolvedValueOnce(jsonResponse({ collections: [{ id: 'col-1', name: 'mcs_test' }] }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          ids: [['id-3']],
+          documents: [['filtered']],
+          metadatas: [[{ runId: 'phase3', source: 'direct' }]],
+          distances: [[0.05]],
+        }),
+      );
+
+    await expect(
+      chromaAdapter('query_with_filter', {
+        collection: 'mcs_test',
+        query: 'filtered readiness',
+        n_results: 3,
+        filter: { runId: 'phase3' },
+      }),
+    ).resolves.toEqual({
+      collection: 'mcs_test',
+      n_results: 3,
+      results: {
+        ids: ['id-3'],
+        documents: ['filtered'],
+        metadatas: [{ runId: 'phase3', source: 'direct' }],
+        distances: [0.05],
+      },
+    });
+
+    expect(JSON.parse(String(mocks.fetch.mock.calls[1]?.[1]?.body))).toEqual({
+      query_embeddings: [[0.7, 0.8, 0.9]],
+      n_results: 3,
+      where: { runId: 'phase3' },
+    });
+  });
 });
