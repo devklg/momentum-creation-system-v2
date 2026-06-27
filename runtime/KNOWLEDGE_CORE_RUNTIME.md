@@ -1028,6 +1028,7 @@ type KnowledgeOwner =
   | {
       ownerType: "brand_ambassador";
       brandAmbassadorId: string;
+      teamMagnificentId: string;
     }
   | {
       ownerType: "momentum_organization";
@@ -3434,6 +3435,7 @@ The following invariants must always hold.
 18. Telnyx is not part of internal browser voice runtime.
 19. English and Spanish are supported.
 20. Every retrieval used in a Context Packet is auditable.
+21. Every Brand Ambassador-scoped Knowledge Object carries Team Magnificent identity.
 
 ---
 
@@ -3631,3 +3633,30 @@ It enables Momentum to become more valuable over time because the Knowledge Core
 The Knowledge Core is the foundation of the Runtime Layer.
 
 All runtime intelligence begins here.
+
+---
+
+## Ratification
+
+Status: RATIFIED
+
+Ratified By: Kevin Gardner
+
+Ratification Date: 2026-06-27
+
+Architecture Review: PASS
+
+Review Authority: Claude (Chief Governance Architect)
+
+Implementation Authority: Codex
+
+Version: 1.0.1
+
+This document is now a canonical source-of-truth for Momentum Creation System V2.
+
+Future modifications require an approved ACR.
+
+### Amendment History
+
+- **1.0.1 (2026-06-27):** Closed Criterion 11 (Team Magnificent Boundary). Added `teamMagnificentId` to the `brand_ambassador` owner variant (§11.5) and invariant 21 (§40). Re-ratified by Kevin Gardner; Architecture Review: PASS.
+- **1.0.0 (2026-06-27):** Initial ratification.

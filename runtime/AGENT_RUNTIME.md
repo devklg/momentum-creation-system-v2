@@ -633,6 +633,12 @@ A cancelled session is intentionally stopped.
 export interface AgentRuntimeSessionState {
   sessionId: string;
   tenantId: string;
+
+  teamMagnificentId: string;
+  teamId: string;
+  teamKey: "team_magnificent";
+  teamName: "Team Magnificent";
+
   baId: string;
 
   agentKey: AgentKey;
@@ -738,6 +744,12 @@ export interface BrowserTranscriptMetadata {
   isFinal?: boolean;
   segmentSequence?: number;
   detectedLanguage?: RuntimeLanguage;
+
+  // Browser Voice fields (optional; see BROWSER_VOICE_RUNTIME.md §16.3)
+  transcriptTurnId?: string;
+  browserLocale?: string;
+  transcriptHash?: string;
+  corrected?: boolean;
 }
 ```
 
@@ -1999,6 +2011,15 @@ Request:
 export interface AddAgentSessionTurnRequest {
   tenantId: string;
   baId: string;
+
+  // Team Magnificent identity (optional on the turn; established at session
+  // creation in AgentRuntimeSessionState §14.3). Accepting these top-level
+  // keeps the request compatible with the Browser Voice wire payload
+  // (BROWSER_VOICE_RUNTIME.md §16.3).
+  teamId?: string;
+  teamKey?: "team_magnificent";
+  teamName?: "Team Magnificent";
+
   text: string;
   language?: RuntimeLanguage;
   mode: AgentRuntimeMode;
@@ -2665,6 +2686,8 @@ apps/team/src/routes/michael/interview.tsx
 apps/team/src/routes/ivory/index.tsx
 ```
 
+Frontend route suggestions are non-normative Implementation Layer pointers. They are included only to help Codex locate likely UI entry points. They do not define Runtime Layer authority and may be adapted during implementation if the Runtime acceptance criteria remain satisfied.
+
 ---
 
 ## 48. Minimal Runtime Implementation Sequence
@@ -2959,6 +2982,7 @@ The following invariants must always hold.
 21. Output guardrails run before responses are returned.
 22. Degraded context does not permit invented knowledge.
 23. Failed context prevents substantive guidance.
+24. Every Agent Runtime session state includes Team Magnificent identity scope, including `teamMagnificentId`, `teamId`, `teamKey`, and `teamName`.
 
 ---
 
@@ -3022,3 +3046,30 @@ The Brand Ambassador decides.
 The outcome teaches.
 
 Momentum learns.
+
+---
+
+## Ratification
+
+Status: RATIFIED
+
+Ratified By: Kevin Gardner
+
+Ratification Date: 2026-06-27
+
+Architecture Review: PASS
+
+Review Authority: Claude (Chief Governance Architect)
+
+Implementation Authority: Codex
+
+Version: 1.0.1
+
+This document is now a canonical source-of-truth for Momentum Creation System V2.
+
+Future modifications require an approved ACR.
+
+### Amendment History
+
+- **1.0.1 (2026-06-27):** Append-only contract reconciliation with `BROWSER_VOICE_RUNTIME.md` §16.3. Added optional Team Magnificent identity fields (`teamId`, `teamKey`, `teamName`) to `AddAgentSessionTurnRequest` (§31.3) and optional Browser Voice fields (`transcriptTurnId`, `browserLocale`, `transcriptHash`, `corrected`) to `BrowserTranscriptMetadata` (§15), so the Browser Voice wire payload is `AddAgentSessionTurnRequest`-compatible. No existing field changed. Re-ratified by Kevin Gardner; Architecture Review: PASS.
+- **1.0.0 (2026-06-27):** Initial ratification (closed Criterion 11 Team Magnificent Boundary and Criterion 4 scope note before ratification).

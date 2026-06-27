@@ -213,6 +213,7 @@ export interface ContextPacketV1 {
   packetStatus: ContextPacketStatus;
 
   tenant: TenantContext;
+  team: TeamContext;
   ba: BAContext;
   session: SessionContext;
   agent: AgentContext;
@@ -324,6 +325,32 @@ A packet is invalid if:
 - `tenantId` is missing.
 - `environment` is not one of `development`, `staging`, or `production`.
 - Tenant context conflicts with the request tenant.
+
+---
+
+## 10.3 Team Context
+
+```ts
+export interface TeamContext {
+  teamId: string;
+
+  teamKey: "team_magnificent";
+
+  teamName: "Team Magnificent";
+}
+```
+
+### 10.3.1 Team Requirements
+
+Every Context Packet must carry Team Magnificent identity.
+
+The Team section defines the organizational boundary for every Brand Ambassador-scoped packet.
+
+A packet is invalid if:
+
+- `teamId` is missing.
+- `teamKey` is not `"team_magnificent"`.
+- `teamName` is not `"Team Magnificent"`.
 
 ---
 
@@ -2139,6 +2166,12 @@ const examplePacket: ContextPacketV1 = {
     environment: "development"
   },
 
+  team: {
+    teamId: "team_magnificent",
+    teamKey: "team_magnificent",
+    teamName: "Team Magnificent"
+  },
+
   ba: {
     baId: "ba_123",
     preferredName: "Kevin",
@@ -2325,6 +2358,7 @@ export type {
   ContextPacketV1,
   ContextPacketStatus,
   TenantContext,
+  TeamContext,
   BAContext,
   BAPermissions,
   SessionContext,
@@ -2819,6 +2853,7 @@ The following invariants must always hold.
 28. Degraded packets do not invent knowledge.
 29. Failed packets do not proceed with substantive guidance.
 30. Agents use Context Packets as their source of truth.
+31. Every Brand Ambassador-scoped Context Packet carries Team Magnificent identity through the required `team` section (`teamId`, `teamKey`, and `teamName`).
 
 ---
 
@@ -3028,3 +3063,25 @@ The Brand Ambassador decides and acts.
 The Learning Pipeline evaluates the outcome.
 
 The organization learns.
+
+---
+
+## Ratification
+
+Status: RATIFIED
+
+Ratified By: Kevin Gardner
+
+Ratification Date: 2026-06-27
+
+Architecture Review: PASS
+
+Review Authority: Claude (Chief Governance Architect)
+
+Implementation Authority: Codex
+
+Version: 1.0.0
+
+This document is now a canonical source-of-truth for Momentum Creation System V2.
+
+Future modifications require an approved ACR.

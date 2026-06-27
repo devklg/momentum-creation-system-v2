@@ -2588,3 +2588,29 @@ Brand Ambassadors act better.
 Outcomes teach Momentum again.
 
 That is Knowledge Growth.
+
+---
+
+## Ratification
+
+Status: RATIFIED
+
+Ratified By: Kevin Gardner
+
+Ratification Date: 2026-06-27
+
+Architecture Review: PASS
+
+Review Authority: Claude (Chief Governance Architect)
+
+Implementation Authority: Codex
+
+Version: 1.0.0
+
+This document is now a canonical source-of-truth for Momentum Creation System V2.
+
+Future modifications require an approved ACR.
+
+### Related ACRs
+
+- [[ACR-0001]] — Agent Event Model Alignment for Knowledge Evolution (Proposed): registers the `knowledge_evolution` source, the `knowledge.evolution.*` event family, and the `knowledge.*.approved` review→evolution events in `AGENT_EVENT_MODEL.md`. Post-ratification consistency only; no change to this document.
