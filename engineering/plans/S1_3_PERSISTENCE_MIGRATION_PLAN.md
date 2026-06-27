@@ -120,6 +120,16 @@ Each phase is independently reversible. Callers are never edited.
 
 ## 10. Resolved decisions (all confirmed 2026-06-27, Kevin)
 
+**Decision — Option C (Mongoose-authored, validator-enforced).** One schema source of truth, in one direction:
+
+> **Mongoose schema → generated Mongo `$jsonSchema` validator → MongoDB collection enforcement.**
+
+- MongoDB persistence uses **Mongoose models** as the primary application-layer schema and authoring layer.
+- Mongo **`$jsonSchema` validators are generated from the Mongoose schemas** and applied as the database-level backstop. They **must not be hand-maintained separately** — the Mongoose schema is the sole source; the validator is a build artifact of it.
+- **Neo4j** remains direct through the Neo4j driver + Cypher.
+- **ChromaDB** remains direct through the Chroma adapter using the local GPU embedder, **no CPU fallback**.
+- The **Universal Gateway** remains MCP developer tooling only — it is **not** the production runtime database access path.
+
 **Q1 — Mongo access: RESOLVED 2026-06-27 (Kevin). Mongoose models throughout (supersedes the earlier native-first "Option A").**
 - **All collections — legacy operational AND new runtime knowledge/event models → Mongoose models.** One consistent persistence standard across the whole system, chosen for hooks/middleware, references/`populate`, typed models, and the layered structure. The direct mongo adapter (per ACR-0007) is implemented with Mongoose; `gatewayCall('mongodb', …)` keeps its response-shape contract by mapping Mongoose results to the existing shapes (`insertedCount`, `documents`/`count`, `deletedCount`, …).
 - **Parity caution:** Mongoose validates/casts on write, so each schema must match what the current code actually writes, or gateway-accepted writes get rejected mid-cutover. Disposable dev/test data makes this safe (model from real write shapes; wipe/re-seed any non-conforming test doc). Per-store parity testing must catch this.
