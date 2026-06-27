@@ -23,6 +23,25 @@ interface ChromaParams {
   where?: Record<string, unknown>;
 }
 
+interface ChromaQueryResponse {
+  ids?: string[][];
+  documents?: string[][];
+  metadatas?: Array<Array<Record<string, unknown> | null>>;
+  distances?: number[][];
+}
+
+interface GatewayChromaQueryResult {
+  collection: string;
+  query?: string;
+  n_results: number;
+  results: {
+    ids: string[];
+    documents: string[];
+    metadatas: Array<Record<string, unknown> | null>;
+    distances: number[];
+  };
+}
+
 async function readJson(res: Awaited<ReturnType<typeof fetch>>): Promise<unknown> {
   const text = await res.text();
   if (!text) return {};
@@ -114,6 +133,34 @@ export async function query(params: ChromaParams): Promise<unknown> {
   });
 }
 
+function flattenFirstQueryResult(body: unknown): GatewayChromaQueryResult['results'] {
+  const response = body as ChromaQueryResponse;
+  return {
+    ids: response.ids?.[0] ?? [],
+    documents: response.documents?.[0] ?? [],
+    metadatas: response.metadatas?.[0] ?? [],
+    distances: response.distances?.[0] ?? [],
+  };
+}
+
+export async function queryGatewayShape(
+  params: ChromaParams,
+  options: { includeQuery: boolean },
+): Promise<GatewayChromaQueryResult> {
+  if (!params.collection) throw new GatewayError('chromadb', 'query_with_filter', 'collection required');
+  const queryText = params.query_texts?.[0] ?? params.query;
+  if (!queryText) {
+    throw new GatewayError('chromadb', 'query_with_filter', 'query text required');
+  }
+  const body = await query(params);
+  return {
+    collection: params.collection,
+    ...(options.includeQuery ? { query: queryText } : {}),
+    n_results: params.n_results ?? 5,
+    results: flattenFirstQueryResult(body),
+  };
+}
+
 export async function chromaAdapter(
   action: string,
   params: Record<string, unknown>,
@@ -130,8 +177,9 @@ export async function chromaAdapter(
       case 'add':
         return await add(p);
       case 'search':
+        return await queryGatewayShape(p, { includeQuery: true });
       case 'query_with_filter':
-        return await query(p);
+        return await queryGatewayShape(p, { includeQuery: false });
       default:
         throw new GatewayError('chromadb', action, `unsupported chromadb action: ${action}`);
     }
