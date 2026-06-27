@@ -56,7 +56,7 @@ The adapters must reproduce observable behavior, not just "talk to the DB." Pari
 **MongoDB adapter** — actions `insert`, `query`, `update`, `delete`, `aggregate`, `list_collections`.
 - Response shapes to match: `insert → { insertedCount, insertedIds }`; `query → { documents[], count }`; `delete → { deletedCount }`; `aggregate → { results[], count }`; `update → { matchedCount, modifiedCount, upsertedCount }`.
 - Param-name parity: `query` filters on **`filter`** (not `query`); `database` is explicit (default `momentum`).
-- Driver choice is an open question (§10): native `mongodb` driver vs Mongoose. The ratified Runtime layer says Mongoose; the current code is driver-shaped (raw collections/filters). Recommendation: thin native-driver adapter first for 1:1 parity, introduce Mongoose models incrementally as runtime modules need them — both satisfy ACR-0007 ("direct adapters/service layers").
+- **Driver: RESOLVED (see §10) — Mongoose models throughout.** The mongo adapter is implemented with Mongoose for every collection (legacy + runtime), mapping Mongoose results back to the gateway response shapes above so the ~405 callers are unchanged. Mongo `$jsonSchema` validators, generated from the Mongoose schemas (never hand-maintained), back the app layer as a bypass-proof floor. Parity caution: Mongoose validates/casts on write, so schemas must match real write shapes — details in §10.
 
 **Neo4j adapter** — action `cypher` (`{query, params}`).
 - Response shape: `{ records[], summary: { counters } }` (callers read `summary.counters` and `records`).
@@ -118,7 +118,7 @@ Each phase is independently reversible. Callers are never edited.
 
 ---
 
-## 10. Resolved decisions & remaining questions
+## 10. Resolved decisions (all confirmed 2026-06-27, Kevin)
 
 **Q1 — Mongo access: RESOLVED 2026-06-27 (Kevin). Mongoose models throughout (supersedes the earlier native-first "Option A").**
 - **All collections — legacy operational AND new runtime knowledge/event models → Mongoose models.** One consistent persistence standard across the whole system, chosen for hooks/middleware, references/`populate`, typed models, and the layered structure. The direct mongo adapter (per ACR-0007) is implemented with Mongoose; `gatewayCall('mongodb', …)` keeps its response-shape contract by mapping Mongoose results to the existing shapes (`insertedCount`, `documents`/`count`, `deletedCount`, …).
