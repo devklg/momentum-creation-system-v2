@@ -186,6 +186,29 @@ const Env = z.object({
   VM_WEBHOOK_SHARED_SECRET: z.string().default(''),
   VM_ACQUISITION_PROVIDER_API_URL: z.string().url().optional(),
   VM_ACQUISITION_PROVIDER_API_KEY: z.string().default(''),
+
+  // ─── S1.3 direct-persistence (ACR-0007 / Option C) ───────────────────────
+  // Additive and fully defaulted: the server boots unchanged in gateway mode.
+  // Direct adapters connect only when a per-store *_MODE is 'direct' AND
+  // PERSISTENCE_DIRECT_ENABLED is true. The Gateway HTTP path stays the default
+  // runtime persistence path until a later, separately approved cutover.
+  MONGODB_URI: z.string().default('mongodb://127.0.0.1:28000'),
+  MONGODB_DB: z.string().default('momentum'),
+  NEO4J_URI: z.string().default('bolt://127.0.0.1:7687'),
+  NEO4J_USERNAME: z.string().default('neo4j'),
+  NEO4J_PASSWORD: z.string().default(''),
+  CHROMA_URL: z.string().url().default('http://127.0.0.1:8100'),
+  GPU_EMBEDDER_URL: z.string().url().default('http://127.0.0.1:8300'),
+
+  // Per-store cutover flags (S1_3_IMPLEMENTATION_BREAKDOWN §9). Default 'gateway'.
+  PERSISTENCE_MONGO_MODE: z.enum(['gateway', 'direct']).default('gateway'),
+  PERSISTENCE_NEO4J_MODE: z.enum(['gateway', 'direct']).default('gateway'),
+  PERSISTENCE_CHROMA_MODE: z.enum(['gateway', 'direct']).default('gateway'),
+  // Master safety switch: even if a *_MODE is 'direct', direct dispatch is only
+  // active when this is true. Lets Phase 0/1 land without changing runtime.
+  PERSISTENCE_DIRECT_ENABLED: EnvBoolean.default(false),
+  // GPU embedder is required for Chroma direct writes; there is no CPU fallback.
+  GPU_EMBEDDER_REQUIRED: EnvBoolean.default(true),
 });
 
 export const env = Env.parse(process.env);
