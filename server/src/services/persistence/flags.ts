@@ -6,9 +6,9 @@
  *   - that store's PERSISTENCE_<STORE>_MODE is 'direct'.
  * Otherwise the store stays on the Gateway HTTP path (the default).
  *
- * Phase 0/1 ship with PERSISTENCE_DIRECT_ENABLED=false, so resolveMode()
- * returns 'gateway' for every store and runtime behavior is unchanged. The
- * dispatcher wiring that consumes these flags is Phase 2 (out of this scope).
+ * Defaults ship with PERSISTENCE_DIRECT_ENABLED=false, so resolveMode()
+ * returns 'gateway' for every store and runtime behavior is unchanged until a
+ * separately approved cutover flips the master flag and per-store mode.
  */
 import { env } from '../../env.js';
 
