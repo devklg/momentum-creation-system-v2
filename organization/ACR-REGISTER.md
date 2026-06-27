@@ -20,6 +20,8 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0002 | Context Exclusion Type Alignment               | CONTEXT_PACKET_SCHEMA.md       | Proposed | v1.1           |
 | ACR-0003 | Candidate Owner / Knowledge Owner Alignment    | KNOWLEDGE_CORE_RUNTIME.md      | Proposed | v1.1           |
 | ACR-0004 | Learning Outcome Type Alignment                | LEARNING_PIPELINE.md           | Proposed | v1.1           |
+| ACR-0005 | Runtime README Completion for Knowledge Evolution | runtime/README.md           | Proposed | v1.1           |
+| ACR-0006 | Canonical ACR Register Reconciliation          | MOMENTUM_ACR_SYSTEM.md         | Proposed | v1.1           |
 
 ---
 
@@ -47,7 +49,7 @@ The Target Version column maps each ACR to a disciplined release path that prese
 
 **v1.0 — Architecture Freeze** — The ratified runtime set. No canonical document may change except through an approved ACR recorded in this register.
 
-**v1.1 — First post-freeze architectural refinements** — Consistency ACRs (currently ACR-0001 through ACR-0004) that align cross-document contracts and remove naming or taxonomy divergence without changing runtime behavior.
+**v1.1 — First post-freeze architectural refinements** — Consistency ACRs (currently ACR-0001 through ACR-0006) that align cross-document contracts and remove naming, taxonomy, register, and documentation divergence without changing runtime behavior.
 
 **v1.2 — Future enhancements** — New capabilities and architectural additions proposed after v1.1.
 
