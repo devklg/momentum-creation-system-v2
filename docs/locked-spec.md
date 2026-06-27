@@ -128,7 +128,7 @@ The math:
 - 10,000 active BAs × 5 shares/day = 50,000/day = 1,500,000/month
 - 100,000 BAs (the named goal) × 5 shares/day = 500,000/day = 15,000,000/month
 
-This is a math problem the system solves once the team reaches scale. **The architecture must handle the volume from day one** — triple-stack writes per event, SSE streams on the dashboard, gateway-mediated persistence. Those were not arbitrary choices.
+This is a math problem the system solves once the team reaches scale. **The architecture must handle the volume from day one** — triple-stack writes per event, SSE streams on the dashboard, direct triple-stack persistence. Those were not arbitrary choices.
 
 ## 1.11  Outcome optimized
 
@@ -196,7 +196,7 @@ Kevin's words: *"I know what the future holds, and I know if we create this app 
 
 This is a **strategic posture, not a reactive one.** Not solving a problem that exists — putting infrastructure in the ground before the moment the team needs it, so when the moment arrives the team scales smoothly instead of cracking under load.
 
-**This is why the architectural choices in Part 3 are correct.** Triple-stack persistence from day one, SSE streams, team-wide pool, gateway-mediated writes — these are not choices for 41 BAs. They are choices for the team that 41 becomes when the timing-product-leadership-tool combination compounds. The architecture is sized for the wave, not for the current shoreline.
+**This is why the architectural choices in Part 3 are correct.** Triple-stack persistence from day one, SSE streams, team-wide pool, direct triple-stack writes — these are not choices for 41 BAs. They are choices for the team that 41 becomes when the timing-product-leadership-tool combination compounds. The architecture is sized for the wave, not for the current shoreline.
 
 **The full statement of what the system does:**
 
@@ -399,7 +399,9 @@ Comp plan is deferred until the new BA has signed two people and earned enough c
 
 ## 3.14  Persistence
 
-Every write hits **MongoDB + Neo4j + ChromaDB** in the same operation, via Universal Gateway V2 at `localhost:2526`. No store is optional. No store is deferred. The architecture is built to handle the volume in 1.10 from day one. Gateway V2 lives at `D:/server-gateway-mcp-v2` and is the standard MCS V2 gateway, even though that infrastructure folder is not currently tracked in this repo.
+Every write hits **MongoDB + Neo4j + ChromaDB** in the same logical operation. No store is optional. No store is deferred. The architecture is built to handle the volume in 1.10 from day one. The runtime accesses these three stores **directly**, through dedicated adapters and service layers (Mongoose models, Neo4j graph services, Chroma embedding/collection services) — consistent with the ratified Runtime layer (`KNOWLEDGE_CORE_RUNTIME.md`, `AGENT_EVENT_MODEL.md`).
+
+The MCP Universal Gateway V2 (`D:/server-gateway-mcp-v2`, `localhost:2526`) is **developer tooling only** — used by Claude Desktop, Claude Code, Codex, and Codex CLI to reach the stores during build sessions — and is **never a production runtime dependency**. (Reconciled 2026-06-27: an earlier draft of this section described persistence as routed "via Universal Gateway V2," which conflicted with the ratified Runtime layer; the direct-store statement above is controlling. The current server still routes through the gateway at 405 call sites — that is implementation debt scheduled for migration under Sprint 1 item S1.3, not the target architecture.)
 
 ## 3.15  Brand tokens
 

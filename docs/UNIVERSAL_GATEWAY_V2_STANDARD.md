@@ -1,6 +1,8 @@
 # Universal Gateway V2 Standard
 
-Universal Gateway V2 is the standard gateway for Momentum Creation System V2.
+Universal Gateway V2 is the standard **MCP developer-tooling** gateway for Momentum Creation System V2 — the connector layer that Claude Desktop, Claude Code, Codex, and Codex CLI use to reach MongoDB, Neo4j, and ChromaDB during build sessions.
+
+> **Scope (reconciled 2026-06-27).** This document standardizes the *developer tooling*. The Universal Gateway is **not** a production runtime dependency. Per the ratified Runtime layer and `docs/locked-spec.md` §3.14, the app runtime persists to MongoDB, Neo4j, and ChromaDB **directly**, through dedicated adapters and service layers. The current server still routes persistence through the gateway (405 call sites); that is implementation debt scheduled for migration under Sprint 1 item S1.3, not the target architecture.
 
 ## Canonical Runtime
 
@@ -11,16 +13,18 @@ Universal Gateway V2 is the standard gateway for Momentum Creation System V2.
 - ChromaDB: `http://localhost:8100`
 - GPU FastAPI embedding service: `http://127.0.0.1:8300`
 
-Gateway V1 on `2525` is legacy context for older personal-memory infrastructure and historical documents. MCS V2 app runtime, local `.env`, scripts, and active docs should point to Gateway V2 on `2526`.
+Gateway V1 on `2525` is legacy context for older personal-memory infrastructure and historical documents. MCS V2 developer tooling, local build/inspection scripts, and active docs should point to Gateway V2 on `2526`. (The app runtime does not point to the gateway — see Scope note above.)
 
 ## Persistence Rule
 
-Every persistent MCS V2 write that belongs in the app data layer must land in MongoDB, Neo4j, and ChromaDB through Gateway V2. The app helper is:
+Every persistent MCS V2 write that belongs in the app data layer must land in **MongoDB, Neo4j, and ChromaDB** — no store optional, no store deferred. The **target** runtime accesses these three stores directly through dedicated adapters and service layers (per `docs/locked-spec.md` §3.14 and the ratified Runtime layer).
+
+The current app helpers route through the gateway and are the **migration target** for Sprint 1 item S1.3 (repoint their internals at direct store adapters, callers unchanged):
 
 - `server/src/services/gateway.ts`
 - `server/src/services/tripleStack.ts`
 
-Gateway V2 currently exposes MongoDB, Neo4j, and ChromaDB as individual connector actions. It does not expose the old V1 `quadstack` connector by default, so app code should keep using `tripleStackWrite()` unless/until V2 adds a schema-enforced quadstack connector.
+Until that migration lands, `tripleStackWrite()` remains the app's write helper; the V1 `quadstack` connector is not used.
 
 ## Chroma Requirement
 

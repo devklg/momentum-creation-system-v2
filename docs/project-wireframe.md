@@ -26,7 +26,7 @@ HEAD at write: `d20741f` (Chat #146). Reconciled Chat #147 (Category-A decisions
 ## 0 Â· FOUNDATION (infra + shared)
 
 - [x] Monorepo scaffold â€” apps/com, apps/team, apps/admin, server, packages/shared (#92)
-- [x] Triple-stack persistence via Universal Gateway V2 2526 — services/tripleStack.ts, gateway.ts (#93; standard reconciled 2026-06-24)
+- [x] Triple-stack persistence: MongoDB + Neo4j + ChromaDB — services/tripleStack.ts, gateway.ts (#93). NOTE (2026-06-27): target architecture is direct store access per locked-spec §3.14; current helpers route through the MCP gateway (dev tooling) and are the migration target for Sprint 1 S1.3.
 - [x] Shared package â€” brand.ts, compliance.ts, rules.ts, types.ts (#92,#110)
 - [x] Decision ledger + master work queue + this wireframe (#129)
 - [x] LLM layer (direct Anthropic Messages API, NOT through gateway, #118) â€” services/anthropic.ts; ScriptMaker + Ivory consume it. VERIFIED LIVE #145: ANTHROPIC_API_KEY landed in root .env, server restarted, Ivory Coach returned input-specific questions (typed "i went to oru" produced 7 ORU-specific prompts, impossible from the evergreen fallback). Key live, complete() reaching the API end to end.

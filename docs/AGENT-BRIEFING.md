@@ -34,7 +34,7 @@
 - Sponsor immutability: set at access-code resolution at signup, never edited later. One exception: BA-requested-emergency override in /admin, fully audited.
 - Position monotonicity: queue positions are timestamp-anchored at video_complete, never reshuffle, never reused. Flushes vacate slots; no renumbering.
 - 8-week flush window for holding tank records (currently locked fixed; adaptive flag exists in spec, deferred).
-- Triple-stack persistence: every write hits MongoDB + Neo4j + ChromaDB via Universal Gateway V2 at `localhost:2526`. None of the three is optional.
+- Triple-stack persistence: every write hits MongoDB + Neo4j + ChromaDB in the same logical operation. None of the three is optional. The runtime accesses these stores **directly** (per `docs/locked-spec.md` §3.14). The MCP Universal Gateway V2 (`localhost:2526`) is developer tooling only — not a runtime dependency. (Current code still routes through the gateway; that's migration debt under Sprint 1 S1.3.)
 - Team Magnificent is Kevin's downline only. Not THREE-wide. Access codes enforce this — every TM-XXXX traces back to TM-01.
 
 **The five things that never appear on .com:**
