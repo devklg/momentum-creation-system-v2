@@ -118,11 +118,17 @@ Each phase is independently reversible. Callers are never edited.
 
 ---
 
-## 10. Open questions for Kevin (resolve before Phase 1 code)
+## 10. Resolved decisions & remaining questions
 
-1. **Mongo driver:** native `mongodb` driver (fastest 1:1 parity with current code) vs Mongoose models now (matches ratified wording, more upfront work). Recommendation: native-first, Mongoose introduced per runtime module.
-2. **Embedding placement:** adapter calls the GPU embedder and passes vectors to Chroma (explicit, matches today) vs configuring a Chroma server-side embedding function. Recommendation: explicit GPU call in the adapter (keeps the no-CPU-fallback guarantee visible).
-3. **Cutover granularity:** all three stores at once vs per-store (Mongo → Neo4j → Chroma). Recommendation: per-store, lowest blast radius.
+**Q1 — Mongo access: RESOLVED 2026-06-27 (Kevin). Mongoose models throughout (supersedes the earlier native-first "Option A").**
+- **All collections — legacy operational AND new runtime knowledge/event models → Mongoose models.** One consistent persistence standard across the whole system, chosen for hooks/middleware, references/`populate`, typed models, and the layered structure. The direct mongo adapter (per ACR-0007) is implemented with Mongoose; `gatewayCall('mongodb', …)` keeps its response-shape contract by mapping Mongoose results to the existing shapes (`insertedCount`, `documents`/`count`, `deletedCount`, …).
+- **Parity caution:** Mongoose validates/casts on write, so each schema must match what the current code actually writes, or gateway-accepted writes get rejected mid-cutover. Disposable dev/test data makes this safe (model from real write shapes; wipe/re-seed any non-conforming test doc). Per-store parity testing must catch this.
+- **Schema governance / drift backstop (anti-drift):** Mongoose schemas are the standard and the authoring layer. Because Mongoose only validates writes that go *through* Mongoose (a stray script/agent/shell write bypasses it), mirror the schemas to Mongo `$jsonSchema` collection validators as a bypass-proof backstop — the database rejects malformed writes regardless of path. Recommended hardening; Kevin to confirm or veto keeping Mongoose as the sole gate. This is an elaboration of approved ACR-0007 ("direct adapters/service layers"), recorded here as implementation detail, not an in-place amendment to the ACR-0007 record.
+- **Data context:** all current `momentum` data is disposable dev/test (holding tank + a few test invitations); only Kevin's login userid/password must be preserved (never touched by Claude). So validators can be applied against intended shapes now and any non-conforming test docs wiped/re-seeded — the cheap, clean moment to set the standard.
+
+**Q2 — Embedding placement: CONFIRMED 2026-06-27 (Kevin).** Use the local GPU embedder, started at boot, with **no CPU fallback** — the adapter calls it and passes vectors to Chroma (explicit, keeps the no-fallback guarantee visible). If the embedder is unavailable, the Chroma leg fails loud rather than degrading silently.
+
+**Q3 — Cutover granularity: CONFIRMED 2026-06-27 (Kevin). Per-store, sequential.** Independent per-store flags (Mongo → Neo4j → Chroma); each store cut to direct and watched under live traffic before the next, with isolated instant rollback (flip one store back to gateway without touching the others). The seam already branches on `tool`, so the per-store switch falls out of the existing dispatch. Triple-stack writes run safely in mixed transport mode during the rollout (each leg lands and read-backs independently); parity testing must include a mixed-mode triple-stack write.
 
 ---
 
