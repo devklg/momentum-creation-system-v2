@@ -8,7 +8,18 @@ Architecture version: v1.0 frozen
 
 ## Status
 
-APPROVED for implementation planning — Kevin L. Gardner, 2026-06-27 (decision `dec_sprint1_approved_20260627`; governance audit `engineering/reports/ENGINEERING_WORKFLOW_AUDIT.md` = PASS). Planning artifacts only — no production code. The S1.3 persistence migration is planned under ACR-0007 (Approved); migration code execution remains gated (Implementing → Verified with persistence read-back → Merged, Kevin merges).
+APPROVED for implementation planning — Kevin L. Gardner, 2026-06-27 (decision `dec_sprint1_approved_20260627`; governance audit `engineering/reports/ENGINEERING_WORKFLOW_AUDIT.md` = PASS).
+
+S1.3 is CLOSED / VERIFIED as of 2026-06-27. Runtime persistence direct adapter migration is complete under the approved flags:
+
+```text
+PERSISTENCE_DIRECT_ENABLED=true
+PERSISTENCE_MONGO_MODE=direct
+PERSISTENCE_NEO4J_MODE=direct
+PERSISTENCE_CHROMA_MODE=direct
+```
+
+MongoDB, Neo4j, and ChromaDB are verified through direct runtime adapter paths. The Gateway HTTP fallback remains in place and must not be removed without separate Kevin approval. Caller sites were not rewritten. Ratified architecture documents and `.com` prospect-facing surfaces were not modified. Closeout governance record: `engineering/reports/S1_3_CLOSEOUT_GOVERNANCE_RECORD.md`.
 
 ## Objective
 
@@ -74,17 +85,27 @@ Acceptance:
 
 ### S1.3 Persistence Mapping Decision
 
-RESOLVED by ACR-0007 (Approved 2026-06-27). Runtime persistence is **direct** MongoDB (Mongoose) + Neo4j + Chroma, through dedicated adapters and service layers. The Universal Gateway is developer tooling only and is not a runtime dependency. This sprint PLANS the migration (it does not execute it):
+RESOLVED by ACR-0007 (Approved 2026-06-27). Runtime persistence is **direct** MongoDB (Mongoose) + Neo4j + Chroma, through dedicated adapters and service layers. The Universal Gateway is developer tooling only and is not a runtime dependency.
 
-- Plan direct `mongo` / `neo4j` / `chroma` adapters behind the existing service boundary.
-- Plan repointing the internals of `gatewayCall` / `tripleStackWrite` / `tieredWrite` at the direct adapters; the 405 callers stay unchanged (incremental, no big-bang rip-out).
+S1.3 execution is CLOSED / VERIFIED as of 2026-06-27:
+
+- MongoDB direct adapter path verified.
+- Neo4j direct adapter path verified.
+- ChromaDB direct adapter path verified.
+- Generated Mongo `$jsonSchema` validator determinism verified.
+- GPU embedder required behavior verified.
+- No CPU fallback verified.
+- Gateway HTTP fallback preserved.
+- Rollback flags verified.
+- Existing caller sites preserved behind the `gatewayCall(tool, action, params)` seam.
 
 Acceptance:
 
-- Migration plan documented before any backend code.
-- No architecture redesign (this aligns the implementation to the already-ratified v1.0 architecture).
+- Migration plan documented before backend code.
+- No architecture redesign (this aligns implementation to the already-ratified v1.0 architecture).
 - Triple-stack semantics preserved (all three stores per write, read-back verified).
-- Code execution stays under ACR-0007 gates; Kevin merges.
+- Code execution completed under ACR-0007 gates; Kevin approvals and merges recorded through the S1.3 verification reports.
+- Gateway fallback removal remains out of scope and not approved.
 
 ### S1.4 Runtime Event Foundation Plan
 
