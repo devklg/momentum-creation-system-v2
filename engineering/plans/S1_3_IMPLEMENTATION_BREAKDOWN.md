@@ -177,6 +177,7 @@ Contract:
 
 - Support existing actions: `add`, `search`, `query_with_filter`, `get_collection`, `list_collections`, `create_collection`.
 - Preserve plural `add` inputs: `ids`, `documents`, `metadatas`.
+- Define explicit overwrite semantics for `add` on an existing id: the direct adapter must actually upsert (true overwrite, or delete-then-add with re-embed) and never silently no-op. NOTE: the MCP gateway's `chromadb.add` does NOT overwrite an existing id — it returns success while leaving the stored document and embedding unchanged. The production adapter must not inherit that behavior; any update to an existing id must be read-back-verified.
 - Generate embeddings by calling the local GPU embedder before Chroma writes/searches.
 - Do not use Chroma's CPU embedding fallback.
 - Do not auto-create collections during `add`.
@@ -239,6 +240,7 @@ Required scenarios:
 - Missing Chroma collection during mixed mode.
 - Neo4j verification query returns zero rows during mixed mode.
 - Mongo validator rejects malformed write during mixed mode.
+- Update an existing Chroma doc (same id) actually overwrites its document and embedding — verified by read-back; no silent no-op.
 
 Assertions:
 
