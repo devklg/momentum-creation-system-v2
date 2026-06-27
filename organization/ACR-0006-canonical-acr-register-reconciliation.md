@@ -47,7 +47,7 @@ Relocate the four (now six) alignment ACR files into `constitution/acr/`. Conver
 
 ### 4. Resolve the `ACR-001` vs `ACR-0001` numbering drift
 
-Reconcile the legacy released record `ACR-001` (Documentation Compilers) with the four-digit standard. Default proposal: grandfather `ACR-001` with its original identifier (to avoid dangling references in the Master Index and the decision ledger) and apply the four-digit standard to all subsequent ACRs. Alternative, if Kevin prefers strict uniformity: renumber the legacy record and reconcile every reference to it.
+Per Kevin Gardner's decision (2026-06-27): **grandfather legacy ACR numbering.** Historical ACR documents (for example `ACR-001` Documentation Compilers) are **not** renumbered and remain valid historical records. No migration of historical IDs is required. All future ACRs adopt the four-digit `ACR-0001` format. This avoids dangling references in the Master Index and the decision ledger.
 
 ### 5. Resolve version-format consistency (F-6)
 
