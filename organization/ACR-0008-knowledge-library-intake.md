@@ -2,15 +2,15 @@
 
 ## Momentum Creation System V2
 
-Status: Proposed
+Status: Approved
 
-Priority: Phase 8 (Knowledge Ingestion) — planning-time; no code until approved
+Priority: Phase 8 (Knowledge Ingestion) — planning-time; no code until implementation gates pass
 
 Type: Knowledge Data-Model + Ingestion-Governance + Persistence Component (GridFS)
 
 Risk: High (knowledge data-model, knowledge-activation approval flow, and a new binary-persistence component; reversible) — approval authority is Kevin
 
-Approval: PROPOSED — awaiting Kevin L. Gardner. (Per MOMENTUM_ACR_SYSTEM §8, Claude proposes; Claude does not self-approve.)
+Approval: APPROVED by Kevin L. Gardner — 2026-06-27
 
 Register note: Recorded in the active register (`organization/ACR-REGISTER.md`). Canonical-register-location question remains deferred to ACR-0006.
 
@@ -102,7 +102,7 @@ One canonical Mongo document per item (Mongoose model, per the system persistenc
 {
   "acr_id": "ACR-0008",
   "title": "Knowledge Library Intake Model (classification, author fast-lane, media storage)",
-  "status": "proposed",
+  "status": "approved",
   "risk_level": "high",
   "change_type": "knowledge-data-model+ingestion-governance+persistence-component",
   "proposed_by": "Claude (Chief Governance Architect)",
@@ -115,12 +115,12 @@ One canonical Mongo document per item (Mongoose model, per the system persistenc
   },
   "reconciliation_ref": "engineering/plans/KNOWLEDGE_LIBRARY_INTAKE_PLAN.md",
   "review": { "reviewers": ["Constitution & Governance", "Architect", "QA"], "decision": "", "conditions": [] },
-  "approval": { "approved_by": null, "approved_at": null },
+  "approval": { "approved_by": "Kevin L. Gardner", "approved_at": "2026-06-27" },
   "implementation": { "branch": "", "commits": [], "append_only_respected": true },
   "verification": { "typecheck": false, "flows": [], "persistence_readback": false },
   "release": { "gates_passed": [], "released_at": null },
   "version": { "from": "review-gated-only", "to": "classified-intake+author-fast-lane", "supersedes": null, "rollback_to": "additive" },
-  "decision_ledger_ref": null,
+  "decision_ledger_ref": "dec_knowledge_library_intake_model",
   "created_at": "2026-06-27",
   "updated_at": "2026-06-27"
 }
@@ -128,6 +128,10 @@ One canonical Mongo document per item (Mongoose model, per the system persistenc
 
 ---
 
-## Proposed — awaiting approval
+## Approval
 
-PROPOSED by Claude (Chief Governance Architect), 2026-06-27. Awaiting Kevin L. Gardner (sole and final Constitutional Authority). On approval: set status Approved, record the approval block, write the decision-ledger entry (triple-stack), and update the register row. Implementation (Phase 8) then passes Implementing → Verified (persistence read-back) → Merged, with Kevin merging.
+APPROVED — Kevin L. Gardner, 2026-06-27 (sole and final Constitutional Authority).
+
+Approval terms (intent): The Team Magnificent knowledge library accepts content through a classified front door — owned-text, owned-media, and reference. Kevin-authored / Kevin-curated content enters ACTIVE knowledge directly (curation is the approval reference); agent-generated, transcribed, learned, or auto-ingested content enters as review-only candidates promoted by Kevin / designated review. Third-party content is reference-only (URL + metadata), never stored as payload. Owned media is stored in Mongo GridFS to start (object storage when volume grows); owned recordings are transcribed by local Whisper on the RTX 4070 Ti and enter as candidates; THREE's public product videos may be enriched with public YouTube captions. New knowledge-object `source_type` variants are authorized. Agents consume only via the Context Manager. This extends — does not override — the ratified `KNOWLEDGE_INGESTION_PROTOCOL`, `KNOWLEDGE_CORE_RUNTIME`, and `KNOWLEDGE_EVOLUTION_RUNTIME`. No production code is authorized by this approval; implementation (Phase 8) passes Implementing → Verified (persistence read-back) → Merged, with Kevin merging.
+
+Decision-ledger entry: `dec_knowledge_library_intake_model` (seq 31), written to all three legs on approval.
