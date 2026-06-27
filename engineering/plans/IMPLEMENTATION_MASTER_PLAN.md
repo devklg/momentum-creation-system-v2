@@ -235,4 +235,4 @@ Must include:
 
 ## Stop Condition
 
-This plan does not authorize Sprint 1 implementation. Stop here until Kevin approves `engineering/sprints/SPRINT_001_PLATFORM_ALIGNMENT.md`.
+UPDATE 2026-06-27: Kevin approved Sprint 1 for implementation PLANNING and approved ACR-0007 (persistence is direct; Gateway is dev tooling only). Sprint 1 planning is authorized; production runtime code and the S1.3 persistence migration are planned here and executed only under ACR-0007's gates, with Kevin merging. Frozen v1.0 architecture governs; no ratified-document edits, no other proposed ACRs applied, no redesign.

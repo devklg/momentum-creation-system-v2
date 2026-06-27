@@ -1,0 +1,131 @@
+# S1.3 — Persistence Migration Plan (Gateway → Direct Adapters)
+
+Report date: 2026-06-27
+Author: Claude (Chief Governance Architect)
+Sprint: 1 (Platform Alignment), item S1.3
+Governs / governed by: **ACR-0007 (Approved 2026-06-27)** — runtime persistence is direct Mongo/Neo4j/Chroma; the Universal Gateway is developer tooling only.
+Status: **Planning document only. No production code in this artifact.** Code execution runs under ACR-0007's gates (Implementing → Verified with persistence read-back → Merged; Kevin merges).
+
+---
+
+## 1. Objective
+
+Move the production runtime's persistence from gateway-routed HTTP calls to **direct** MongoDB, Neo4j, and ChromaDB drivers, **behind the existing service boundary**, with **zero changes to the ~405 caller sites**. The migration is reversible, incremental, and preserves triple-stack semantics and read-back verification throughout.
+
+---
+
+## 2. Current state (verified on disk)
+
+All persistence funnels through one function: `gatewayCall(tool, action, params)` in `server/src/services/gateway.ts`, which POSTs `{ tool, action, params }` to `${GATEWAY_URL}/execute` (`http://localhost:2526/api`, the MCP gateway). Reach: **405 call sites across 63 files**, plus the two write helpers and the outbox that wrap it:
+
+- `services/tripleStack.ts` — `tripleStackWrite()` wraps three calls: `gatewayCall('mongodb','insert',…)`, `gatewayCall('neo4j','cypher',…)`, `gatewayCall('chromadb','add',…)`.
+- `services/tieredWrite.ts` — `tieredWrite()` (+ `writeGraphCritical/Knowledge/Operational`) adds per-tier failure policy, Mongo read-back (`verifyMongoLanded` → `mongodb.query` with `filter`), compensating rollback (`mongodb.delete`), and Neo4j read-back (`neo4j.cypher` verify). Knowledge/operational projections defer to `projectionOutbox.ts` (durable retry, also via `gatewayCall`).
+- `services/chromaCollections.ts` — `assertChromaCollectionExists()` guards Chroma writes (collections are not auto-created).
+
+The `tool` argument already partitions the work cleanly:
+
+| `tool` | actions seen in code | direct target |
+| --- | --- | --- |
+| `mongodb` | `insert`, `query` (param `filter`), `delete`; (`update`, `aggregate` used elsewhere) | MongoDB driver |
+| `neo4j` | `cypher` (`{query, params}`) | neo4j-driver |
+| `chromadb` | `add` (`{collection, ids, documents, metadatas}`); reads (`search`, `query_with_filter`) | Chroma client + GPU embedding |
+
+This is the decisive fact: **the seam is `gatewayCall`.** Repoint its internals and the entire system migrates without touching `tripleStackWrite`, `tieredWrite`, the outbox, or any of the 405 callers.
+
+---
+
+## 3. Target state
+
+`gatewayCall(tool, action, params)` keeps its exact signature and return contract, but its body dispatches on `tool` to a direct in-process adapter instead of an HTTP POST:
+
+```
+gatewayCall(tool, action, params)
+   ├─ 'mongodb'  → mongoAdapter[action](params)
+   ├─ 'neo4j'    → neo4jAdapter[action](params)
+   └─ 'chromadb' → chromaAdapter[action](params)
+```
+
+Each adapter returns the **same response shape** the gateway returned, so callers' result-destructuring and error guards keep working unchanged. The gateway HTTP path is retained behind a flag during rollout and removed at the end.
+
+---
+
+## 4. Adapter design (behavioral parity is the contract)
+
+The adapters must reproduce observable behavior, not just "talk to the DB." Parity targets drawn from the current call sites:
+
+**MongoDB adapter** — actions `insert`, `query`, `update`, `delete`, `aggregate`, `list_collections`.
+- Response shapes to match: `insert → { insertedCount, insertedIds }`; `query → { documents[], count }`; `delete → { deletedCount }`; `aggregate → { results[], count }`; `update → { matchedCount, modifiedCount, upsertedCount }`.
+- Param-name parity: `query` filters on **`filter`** (not `query`); `database` is explicit (default `momentum`).
+- Driver choice is an open question (§10): native `mongodb` driver vs Mongoose. The ratified Runtime layer says Mongoose; the current code is driver-shaped (raw collections/filters). Recommendation: thin native-driver adapter first for 1:1 parity, introduce Mongoose models incrementally as runtime modules need them — both satisfy ACR-0007 ("direct adapters/service layers").
+
+**Neo4j adapter** — action `cypher` (`{query, params}`).
+- Response shape: `{ records[], summary: { counters } }` (callers read `summary.counters` and `records`).
+- Session/transaction management replaces the gateway's per-call execution; preserve the MATCH-not-MERGE / read-back patterns `tieredWrite` relies on.
+
+**Chroma adapter** — actions `add`, `search`, `query_with_filter`, `get_collection`, `list_collections`, `create_collection`.
+- `add` plural-array contract (`ids`, `documents`, `metadatas`).
+- **Embedding parity is mandatory:** embeddings come from the GPU service (`localhost:8300`, all-MiniLM-L6-v2, 384-dim). The adapter must call the GPU embedder and **never silently fall back to CPU**; if 8300 is down, fail loud (matches the standing rule). Collections still asserted via `chromaCollections.ts` (no auto-create).
+
+**Error parity** — preserve the `GatewayError(tool, action, message)` surface and the practice of surfacing the store's own message (e.g. "resource already exists"), because callers' error guards branch on it.
+
+**Quirk preservation (then deliberately relax):** the current helpers encode gateway quirks — Mongo `update` not honoring `upsert`, Neo4j optional-field nulls for the email-unique constraint, Chroma no auto-create, Mongo `query` param `filter`. The adapters reproduce these **initially** for a clean cutover; relaxing any of them (e.g. enabling real `upsert`) is a separate, post-migration change, not part of S1.3.
+
+---
+
+## 5. Migration sequence (incremental, behind the seam)
+
+Each phase is independently reversible. Callers are never edited.
+
+- **Phase 0 — Config & connections.** Add `MONGODB_URI`, `NEO4J_URI` / `NEO4J_USERNAME` / `NEO4J_PASSWORD`, `CHROMA_URL`, GPU embedder URL to `server/src/env.ts`. Add connection lifecycle (pooled clients, startup connect, graceful shutdown, health checks) to replace gateway health. Add a `PERSISTENCE_MODE` flag (`gateway` | `direct`), default `gateway`.
+- **Phase 1 — Build adapters.** Implement the three adapters to the §4 parity contract. No caller changes. Adapters exist but are not yet wired into `gatewayCall`.
+- **Phase 2 — Dispatcher.** Refactor `gatewayCall` internals to branch on `PERSISTENCE_MODE`: `gateway` keeps the HTTP POST; `direct` dispatches to adapters. Signature and return contract unchanged. Default stays `gateway`.
+- **Phase 3 — Parity verification.** Run the parity test suite (§7) and shadow/compare reads against both paths until green. This is where "verify, don't assume" is proven.
+- **Phase 4 — Cutover.** Flip `PERSISTENCE_MODE=direct` (optionally per-store first: Mongo, then Neo4j, then Chroma). Monitor read-backs, outbox drain, error rates.
+- **Phase 5 — Retire the gateway path.** Remove the HTTP branch and `GATEWAY_URL` from the runtime; update the current-state runbooks (`DEPLOYMENT_GUIDE.md`, `ADMINISTRATOR_GUIDE.md`, `DEPLOYMENT_AND_REALTIME_TEST_GUIDE_2026-06-24.md`) to direct-store at this point (they correctly describe gateway-routed behavior until now). The MCP gateway remains available as developer tooling.
+
+---
+
+## 6. Triple-stack & verification semantics (preserved)
+
+- Every write still lands in MongoDB + Neo4j + ChromaDB in the same logical operation; no store optional.
+- `tieredWrite`'s existing guarantees carry over unchanged because they sit above the seam: Tier-1 Mongo+Neo4j atomic-or-rollback, Tier-2/3 durable projection via the outbox, Mongo read-back on every tier, `GraphCriticalWriteError` / `HalfWriteError` semantics intact.
+- Read-back is the acceptance signal at cutover: the same `verifyMongoLanded` / Neo4j-verify queries must pass against the direct adapters.
+
+---
+
+## 7. Test / verification plan (for the implementation sprint, not now)
+
+- **Parity unit tests** per adapter: assert response shapes for `insert`/`query`/`delete`/`aggregate`/`update`, `cypher` counters/records, `add` + embedding dimension 384.
+- **`tripleStackWrite` / `tieredWrite` integration tests** run identically under `gateway` and `direct` modes — same results, same read-backs, same rollback behavior on induced Neo4j failure.
+- **Quirk tests**: Mongo `query` honors `filter`; Chroma write fails loud on missing collection; GPU embedder down → loud failure, no CPU fallback.
+- **Gates**: `pnpm typecheck` + `pnpm build` repo-wide; end-to-end flow against the running dev server; persistence read-back on every triple-stack write; `git status` review.
+
+---
+
+## 8. Rollback
+
+`rollback_to` = commit `0c969c0` (pre-migration server state). Operationally, rollback is a flag flip: `PERSISTENCE_MODE=gateway` restores gateway-routed writes instantly without code changes, until Phase 5 removes the HTTP path. After Phase 5, rollback is the revert of the Phase-5 commit.
+
+---
+
+## 9. Constraints (ACR-0007 + frozen v1.0)
+
+- No production code is written in S1.3 planning (this document).
+- No ratified-document edits; no other proposed ACR (0001–0006) applied; no redesign.
+- The Universal Gateway must not reappear as a runtime persistence path — it is developer tooling only.
+- Redis is not introduced (not part of the persistence layer).
+- `.com` prospect surfaces untouched.
+
+---
+
+## 10. Open questions for Kevin (resolve before Phase 1 code)
+
+1. **Mongo driver:** native `mongodb` driver (fastest 1:1 parity with current code) vs Mongoose models now (matches ratified wording, more upfront work). Recommendation: native-first, Mongoose introduced per runtime module.
+2. **Embedding placement:** adapter calls the GPU embedder and passes vectors to Chroma (explicit, matches today) vs configuring a Chroma server-side embedding function. Recommendation: explicit GPU call in the adapter (keeps the no-CPU-fallback guarantee visible).
+3. **Cutover granularity:** all three stores at once vs per-store (Mongo → Neo4j → Chroma). Recommendation: per-store, lowest blast radius.
+
+---
+
+## 11. ACR-0007 gate mapping
+
+This plan satisfies the ACR-0007 **Review** gate (boundaries enumerated, no hidden persistence, future-development test passed). Phases 1–4 are **Implementing**; Phase 3/§7 is **Verified** (persistence read-back); cutover and Phase 5 are **Merged/Released** under Kevin's merge authority.

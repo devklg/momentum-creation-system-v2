@@ -2,7 +2,7 @@
 
 ## Momentum Creation System V2
 
-Status: Proposed
+Status: Approved
 
 Priority: Pre-Sprint-1 — governs Sprint 1 item S1.3 (persistence implementation)
 
@@ -10,7 +10,7 @@ Type: Persistence Pattern + Source-of-Truth Reconciliation (includes a behaviora
 
 Risk: Critical (source-of-truth change; irreversible persistence migration) — approval authority is Kevin
 
-Approval: Pending
+Approval: APPROVED by Kevin L. Gardner — 2026-06-27
 
 Register note: Recorded in the active register (`organization/ACR-REGISTER.md`) per Kevin's direction 2026-06-27. The canonical-register-location question (active `organization/ACR-REGISTER.md` vs. `constitution/acr/REGISTER.md` named in `MOMENTUM_ACR_SYSTEM.md` §11) is deferred to ACR-0006.
 
@@ -104,7 +104,7 @@ Commits: `0a776d1` → rebased/pushed as `0c969c0` on `main`. These doc edits la
 {
   "acr_id": "ACR-0007",
   "title": "Runtime persistence is direct; Universal Gateway is developer tooling, not a runtime dependency",
-  "status": "proposed",
+  "status": "approved",
   "risk_level": "critical",
   "change_type": "persistence",
   "proposed_by": "Claude (Chief Governance Architect)",
@@ -117,7 +117,7 @@ Commits: `0a776d1` → rebased/pushed as `0c969c0` on `main`. These doc edits la
   },
   "reconciliation_ref": "engineering/reports/PERSISTENCE_AND_GATEWAY_CLARIFICATION.md",
   "review": { "reviewers": ["Constitution & Governance", "Architect", "QA"], "decision": "", "conditions": [] },
-  "approval": { "approved_by": "", "approved_at": null },
+  "approval": { "approved_by": "Kevin L. Gardner", "approved_at": "2026-06-27" },
   "implementation": { "branch": "", "commits": ["0a776d1", "0c969c0"], "append_only_respected": true },
   "verification": { "typecheck": false, "flows": [], "persistence_readback": false },
   "release": { "gates_passed": [], "released_at": null },
@@ -132,4 +132,8 @@ Commits: `0a776d1` → rebased/pushed as `0c969c0` on `main`. These doc edits la
 
 ## Approval
 
-Pending — Kevin L. Gardner.
+APPROVED — Kevin L. Gardner, 2026-06-27 (sole and final Constitutional Authority).
+
+Approval terms (verbatim intent): Runtime persistence for MCS V2 shall be implemented directly through MongoDB, Neo4j, and ChromaDB adapters and service layers. The Universal Gateway is approved as developer tooling only (Claude Desktop, Claude Code, Codex, Codex CLI, MCP orchestration) and must not be introduced as a production runtime dependency. Sprint 1 is approved for implementation planning and S1.3 persistence-migration planning under the frozen v1.0 architecture. No ratified documents may be modified; no proposed ACRs may be applied beyond this approval without separate approval; no redesign is authorized.
+
+Scope note: Part A (documentation reconciliation) is complete. Part B (the 405-site code migration) is approved in principle and is to be PLANNED in Sprint 1 (S1.3); its code execution still passes the ACR Implementing → Verified (persistence read-back) → Merged gates, with Kevin merging.

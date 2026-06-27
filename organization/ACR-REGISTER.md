@@ -22,7 +22,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0004 | Learning Outcome Type Alignment                | LEARNING_PIPELINE.md           | Proposed | v1.1           |
 | ACR-0005 | Runtime README Completion for Knowledge Evolution | runtime/README.md           | Proposed | v1.1           |
 | ACR-0006 | Canonical ACR Register Reconciliation          | MOMENTUM_ACR_SYSTEM.md         | Proposed | v1.1           |
-| ACR-0007 | Runtime Persistence Direct — Gateway Is Dev Tooling Only | locked-spec §3.14 / KNOWLEDGE_CORE_RUNTIME.md | Proposed | v1.1 |
+| ACR-0007 | Runtime Persistence Direct — Gateway Is Dev Tooling Only | locked-spec §3.14 / KNOWLEDGE_CORE_RUNTIME.md | Approved | v1.1 |
 
 ---
 

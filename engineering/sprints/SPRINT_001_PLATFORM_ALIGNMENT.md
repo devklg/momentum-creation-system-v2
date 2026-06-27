@@ -8,7 +8,7 @@ Architecture version: v1.0 frozen
 
 ## Status
 
-Planned only. Not approved for implementation.
+APPROVED for implementation planning — Kevin L. Gardner, 2026-06-27 (decision `dec_sprint1_approved_20260627`; governance audit `engineering/reports/ENGINEERING_WORKFLOW_AUDIT.md` = PASS). Planning artifacts only — no production code. The S1.3 persistence migration is planned under ACR-0007 (Approved); migration code execution remains gated (Implementing → Verified with persistence read-back → Merged, Kevin merges).
 
 ## Objective
 
@@ -74,16 +74,17 @@ Acceptance:
 
 ### S1.3 Persistence Mapping Decision
 
-Resolve implementation mapping:
+RESOLVED by ACR-0007 (Approved 2026-06-27). Runtime persistence is **direct** MongoDB (Mongoose) + Neo4j + Chroma, through dedicated adapters and service layers. The Universal Gateway is developer tooling only and is not a runtime dependency. This sprint PLANS the migration (it does not execute it):
 
-- Option to confirm: use existing Gateway/tiered-write adapter boundary for runtime persistence.
-- Risk to resolve: Package 001 says Mongo/Mongoose, but repo currently uses Universal Gateway calls.
+- Plan direct `mongo` / `neo4j` / `chroma` adapters behind the existing service boundary.
+- Plan repointing the internals of `gatewayCall` / `tripleStackWrite` / `tieredWrite` at the direct adapters; the 405 callers stay unchanged (incremental, no big-bang rip-out).
 
 Acceptance:
 
-- Decision is documented before backend implementation.
-- No architecture redesign occurs.
-- If governance says ACR is needed, stop and route through ACR process.
+- Migration plan documented before any backend code.
+- No architecture redesign (this aligns the implementation to the already-ratified v1.0 architecture).
+- Triple-stack semantics preserved (all three stores per write, read-back verified).
+- Code execution stays under ACR-0007 gates; Kevin merges.
 
 ### S1.4 Runtime Event Foundation Plan
 
@@ -147,11 +148,16 @@ Acceptance:
 
 ## Sprint 1 Blockers
 
-- Gateway V2 MCP connector unavailable during audit.
-- Persistence mapping needs governance confirmation.
-- Test framework not selected.
-- Claude governance audit not yet run.
-- Kevin approval not yet granted.
+Resolved as of 2026-06-27:
+
+- ~~Gateway V2 MCP connector unavailable during audit.~~ RESOLVED — verified live (Mongo/Neo4j/Chroma reachable); was a session-local tooling glitch, not a production issue (see `PERSISTENCE_AND_GATEWAY_CLARIFICATION.md`).
+- ~~Persistence mapping needs governance confirmation.~~ RESOLVED — ACR-0007 (Approved): direct stores.
+- ~~Claude governance audit not yet run.~~ RESOLVED — `ENGINEERING_WORKFLOW_AUDIT.md` = PASS.
+- ~~Kevin approval not yet granted.~~ RESOLVED — approved 2026-06-27 (`dec_sprint1_approved_20260627`).
+
+Remaining (in-sprint planning items, not blockers):
+
+- Test framework not yet selected — to be decided in S1.7.
 
 ## Verification Plan
 
@@ -169,4 +175,4 @@ Send this audit package to Claude for governance review, then ask Kevin to appro
 
 ## Stop Condition
 
-Stop now. Do not implement Sprint 1 until Kevin approves this plan.
+Approved for PLANNING 2026-06-27. Sprint 1 may produce platform-alignment plans, paths, and decisions (including the S1.3 migration plan) — no production code. Production runtime code and the persistence migration do not begin until their work is planned here and executed under ACR-0007's gates, with Kevin merging.
