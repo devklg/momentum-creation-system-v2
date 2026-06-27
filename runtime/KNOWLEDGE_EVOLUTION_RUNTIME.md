@@ -116,6 +116,38 @@ Momentum improves because approved knowledge is evolved through controlled runti
 
 ---
 
+The Knowledge Evolution Runtime is a consumer of the Knowledge Layer.
+
+The Knowledge Layer defines:
+
+- What organizational knowledge is.
+- How knowledge is acquired.
+- How knowledge is categorized.
+- Who owns knowledge.
+- How knowledge is preserved.
+
+The Knowledge Evolution Runtime **does not redefine knowledge**.
+
+Its responsibility is to transform **approved organizational knowledge** into active runtime knowledge that is:
+
+- Versioned
+- Indexed
+- Graph-linked
+- Retrieval-ready
+- Auditable
+
+The Knowledge Layer answers:
+
+> What does Momentum know?
+
+The Knowledge Evolution Runtime answers:
+
+> How does approved knowledge safely become operational knowledge?
+
+This separation is mandatory throughout Momentum Creation System V2.
+
+---
+
 ## 4. Core Runtime Principle
 
 The Knowledge Evolution Runtime must enforce this principle:
@@ -196,6 +228,84 @@ All BA-derived knowledge evolution records must also be Team Magnificent scoped.
 ### 5.3 Team Scope Rule
 
 Knowledge derived from Team Magnificent Brand Ambassador activity must remain Team Magnificent scoped unless a future ratified architecture expands organizational scope.
+
+---
+
+---
+
+### 5.4 Knowledge Domains
+
+The Knowledge Evolution Runtime supports every organizational knowledge domain.
+
+Current runtime domains are:
+
+#### Success Knowledge
+
+- Success Interviews
+- Success Profiles
+- Goals
+- Motivation
+- Momentum
+- Success patterns
+
+#### Training Knowledge
+
+- Fast Start
+- Training
+- Learning Paths
+- Leadership Development
+- Momentum Journal coaching
+
+#### Relationship Knowledge
+
+- Opportunity Maps
+- Relationship CRM
+- Invitation strategies
+- Prospect relationships
+- Communication history
+
+#### Performance Knowledge
+
+- Outcomes
+- Guided actions
+- Activity history
+- Coaching effectiveness
+- Learning signals
+
+#### Personal Knowledge
+
+Source: Momentum Journal
+
+Characteristics:
+
+- Private to the Brand Ambassador
+- Never organizational knowledge by default
+- May become a Knowledge Candidate only through explicit promotion and review
+
+#### Organizational Knowledge
+
+Examples include:
+
+- Constitution
+- Governance
+- Approved Knowledge Candidates
+- Knowledge Sessions
+- Architecture
+- Best Practices
+- Approved Training
+
+Knowledge Evolution is domain-independent.
+
+Its responsibility is to evolve approved knowledge consistently regardless of domain while preserving:
+
+- Version history
+- Source traceability
+- Approval lineage
+- Team Magnificent scope
+- Language
+- Retrieval integrity
+
+Additional knowledge domains may be introduced through future ratified implementation packages without changing the Knowledge Evolution Runtime architecture.
 
 ---
 
@@ -2008,6 +2118,29 @@ Agents may benefit from evolved knowledge through Context Packets.
 Agent Runtime must not activate or supersede knowledge.
 
 ---
+
+### 39.1 Constitutional Boundary
+
+The Knowledge Evolution Runtime operates entirely within the constitutional boundaries established by Momentum Creation System V2.
+
+The Knowledge Evolution Runtime shall never:
+
+- Modify the Constitution.
+- Modify Governance.
+- Modify the Decision Framework.
+- Bypass approved review processes.
+- Activate unapproved knowledge.
+- Allow agents to self-modify.
+- Redefine organizational truth.
+- Override responsibilities assigned to other runtime components.
+
+Its responsibility is limited to the safe operational evolution of approved organizational knowledge.
+
+Constitutional authority always remains above the Runtime Layer.
+
+The Runtime implements constitutional intent.
+
+It never changes constitutional authority.
 
 ## 40. Relationship to Agent Event Model
 
