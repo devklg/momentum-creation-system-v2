@@ -7,6 +7,7 @@
 
 import { fetch } from 'undici';
 import { env } from '../env.js';
+import { isDirect, type PersistenceStore } from './persistence/flags.js';
 
 export interface GatewayResponse<T = unknown> {
   success: boolean;
@@ -28,11 +29,53 @@ export class GatewayError extends Error {
   }
 }
 
+function persistenceStoreForTool(tool: string): PersistenceStore | undefined {
+  switch (tool) {
+    case 'mongodb':
+    case 'neo4j':
+    case 'chromadb':
+      return tool;
+    default:
+      return undefined;
+  }
+}
+
+async function directPersistenceCall<T>(
+  store: PersistenceStore,
+  action: string,
+  params: Record<string, unknown>,
+): Promise<T> {
+  try {
+    switch (store) {
+      case 'mongodb': {
+        const { mongoAdapter } = await import('./persistence/mongo/adapter.js');
+        return (await mongoAdapter(action, params)) as T;
+      }
+      case 'neo4j': {
+        const { neo4jAdapter } = await import('./persistence/neo4j/adapter.js');
+        return (await neo4jAdapter(action, params)) as T;
+      }
+      case 'chromadb': {
+        const { chromaAdapter } = await import('./persistence/chroma/adapter.js');
+        return (await chromaAdapter(action, params)) as T;
+      }
+    }
+  } catch (err) {
+    if (err instanceof GatewayError) throw err;
+    throw new GatewayError(store, action, err instanceof Error ? err.message : String(err));
+  }
+}
+
 export async function gatewayCall<T = unknown>(
   tool: string,
   action: string,
   params: Record<string, unknown>,
 ): Promise<T> {
+  const directStore = persistenceStoreForTool(tool);
+  if (directStore && isDirect(directStore)) {
+    return directPersistenceCall<T>(directStore, action, params);
+  }
+
   const res = await fetch(`${env.GATEWAY_URL}/execute`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
