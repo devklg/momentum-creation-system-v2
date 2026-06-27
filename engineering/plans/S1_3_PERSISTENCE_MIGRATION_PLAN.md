@@ -76,11 +76,11 @@ The adapters must reproduce observable behavior, not just "talk to the DB." Pari
 
 Each phase is independently reversible. Callers are never edited.
 
-- **Phase 0 — Config & connections.** Add `MONGODB_URI`, `NEO4J_URI` / `NEO4J_USERNAME` / `NEO4J_PASSWORD`, `CHROMA_URL`, GPU embedder URL to `server/src/env.ts`. Add connection lifecycle (pooled clients, startup connect, graceful shutdown, health checks) to replace gateway health. Add a `PERSISTENCE_MODE` flag (`gateway` | `direct`), default `gateway`.
+- **Phase 0 — Config & connections.** Add `MONGODB_URI`, `NEO4J_URI` / `NEO4J_USERNAME` / `NEO4J_PASSWORD`, `CHROMA_URL`, GPU embedder URL to `server/src/env.ts`. Add connection lifecycle (pooled clients, startup connect, graceful shutdown, health checks) to replace gateway health. Add **per-store flags** `PERSISTENCE_MONGO_MODE` / `PERSISTENCE_NEO4J_MODE` / `PERSISTENCE_CHROMA_MODE` (`gateway` | `direct`, default `gateway`), a master `PERSISTENCE_DIRECT_ENABLED`, and `GPU_EMBEDDER_REQUIRED=true` (canonical flag scheme in `S1_3_IMPLEMENTATION_BREAKDOWN.md` §9).
 - **Phase 1 — Build adapters.** Implement the three adapters to the §4 parity contract. No caller changes. Adapters exist but are not yet wired into `gatewayCall`.
 - **Phase 2 — Dispatcher.** Refactor `gatewayCall` internals to branch on `PERSISTENCE_MODE`: `gateway` keeps the HTTP POST; `direct` dispatches to adapters. Signature and return contract unchanged. Default stays `gateway`.
 - **Phase 3 — Parity verification.** Run the parity test suite (§7) and shadow/compare reads against both paths until green. This is where "verify, don't assume" is proven.
-- **Phase 4 — Cutover.** Flip `PERSISTENCE_MODE=direct` (optionally per-store first: Mongo, then Neo4j, then Chroma). Monitor read-backs, outbox drain, error rates.
+- **Phase 4 — Cutover.** Flip per store in sequence — `PERSISTENCE_MONGO_MODE=direct`, then `PERSISTENCE_NEO4J_MODE=direct`, then `PERSISTENCE_CHROMA_MODE=direct` — watching each under live traffic before the next. Monitor read-backs, outbox drain, error rates.
 - **Phase 5 — Retire the gateway path.** Remove the HTTP branch and `GATEWAY_URL` from the runtime; update the current-state runbooks (`DEPLOYMENT_GUIDE.md`, `ADMINISTRATOR_GUIDE.md`, `DEPLOYMENT_AND_REALTIME_TEST_GUIDE_2026-06-24.md`) to direct-store at this point (they correctly describe gateway-routed behavior until now). The MCP gateway remains available as developer tooling.
 
 ---
@@ -104,7 +104,7 @@ Each phase is independently reversible. Callers are never edited.
 
 ## 8. Rollback
 
-`rollback_to` = commit `0c969c0` (pre-migration server state). Operationally, rollback is a flag flip: `PERSISTENCE_MODE=gateway` restores gateway-routed writes instantly without code changes, until Phase 5 removes the HTTP path. After Phase 5, rollback is the revert of the Phase-5 commit.
+`rollback_to` = commit `0c969c0` (pre-migration server state). Operationally, rollback is a flag flip: setting the affected store's flag back to `gateway` (e.g. `PERSISTENCE_MONGO_MODE=gateway`) restores gateway-routed writes for that store instantly without code changes, leaving the other stores in their verified mode, until Phase 5 removes the HTTP path. After Phase 5, rollback is the revert of the Phase-5 commit.
 
 ---
 
