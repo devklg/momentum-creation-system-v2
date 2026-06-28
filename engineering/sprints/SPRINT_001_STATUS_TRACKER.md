@@ -1,6 +1,6 @@
 # Sprint 1 Status Tracker
 
-Date: 2026-06-28
+Date: 2026-06-28 (updated after Wave 2B verification and main repair)
 
 Sprint: Sprint 1 - Platform Alignment
 
@@ -8,129 +8,58 @@ Architecture version: v1.0 frozen
 
 ## Current Sprint State
 
-Sprint 1 remains governed by the frozen v1.0 architecture and the Sprint 1 platform-alignment boundaries. This tracker records status only; it does not approve Gateway fallback removal, new runtime architecture implementation, Wave 2B implementation, or Sprint 2 work.
-
-Canonical tracker path:
-
-```text
-engineering/sprints/SPRINT_001_STATUS_TRACKER.md
-```
+Sprint 1 remains governed by the frozen v1.0 architecture and the Sprint 1 platform-alignment boundaries. Wave 2B (S1.5, S1.6) is approved, implemented, and verified, and `main` has been repaired to a compiling/passing state. This tracker records status only; it does not approve Gateway fallback removal, runtime activation, event persistence/outbox/replay/subscriber/API activation, `/api/runtime/*` mounting, or Sprint 2 work.
 
 ## Workstream Status
 
 | Item | Workstream | Status | Evidence / Next Step |
 |---|---|---:|---|
-| S1.1 | Shared Runtime Contracts | IMPLEMENTED / VERIFIED | See `engineering/reports/S1_1_SHARED_RUNTIME_CONTRACTS_IMPLEMENTATION_VERIFICATION.md`. |
-| S1.2 | Backend Runtime Boundary Skeleton | IMPLEMENTED / VERIFIED | See `engineering/reports/S1_2_BACKEND_RUNTIME_BOUNDARY_IMPLEMENTATION_VERIFICATION.md`. |
-| S1.3 | Runtime Persistence Direct Adapter Migration | CLOSED / VERIFIED | See `engineering/reports/S1_3_CLOSEOUT_GOVERNANCE_RECORD.md` and `engineering/reports/S1_3_FINAL_DIRECT_MODE_CLOSEOUT.md`. |
-| S1.4 | Runtime Event Foundation | IMPLEMENTED / VERIFIED | See `engineering/reports/S1_4_RUNTIME_EVENT_FOUNDATION_IMPLEMENTATION_VERIFICATION.md`. |
-| S1.5 | Context Packet Foundation Plan | PLANNING COMPLETE | See `engineering/plans/CONTEXT_PACKET_FOUNDATION_PLAN.md`. |
-| S1.6 | Browser Voice/Text Foundation Plan | PLANNING COMPLETE | See `engineering/plans/BROWSER_VOICE_FOUNDATION_PLAN.md`. |
-| S1.7 | QA Harness Scaffolding | IMPLEMENTED / VERIFIED | See `engineering/reports/S1_7_QA_HARNESS_SCAFFOLDING_VERIFICATION.md`. |
+| S1.1 | Shared Runtime Contracts | IMPLEMENTED / VERIFIED | `engineering/reports/S1_1_SHARED_RUNTIME_CONTRACTS_IMPLEMENTATION_VERIFICATION.md` |
+| S1.2 | Backend Runtime Boundary Skeleton | IMPLEMENTED / VERIFIED | `engineering/reports/S1_2_BACKEND_RUNTIME_BOUNDARY_IMPLEMENTATION_VERIFICATION.md` |
+| S1.3 | Runtime Persistence Direct Adapter Migration | CLOSED / VERIFIED | `engineering/reports/S1_3_CLOSEOUT_GOVERNANCE_RECORD.md` |
+| S1.4 | Runtime Event Foundation | IMPLEMENTED / VERIFIED | `engineering/reports/S1_4_RUNTIME_EVENT_FOUNDATION_IMPLEMENTATION_VERIFICATION.md` |
+| S1.5 | Context Packet Foundation | IMPLEMENTED / VERIFIED | `engineering/reports/S1_5_CONTEXT_PACKET_FOUNDATION_IMPLEMENTATION_VERIFICATION.md` |
+| S1.6 | Browser Voice/Text Foundation | IMPLEMENTED / VERIFIED | `engineering/reports/S1_6_BROWSER_VOICE_TEXT_FOUNDATION_IMPLEMENTATION_VERIFICATION.md` |
+| S1.7 | QA Harness Scaffolding | IMPLEMENTED / VERIFIED | `engineering/reports/S1_7_QA_HARNESS_SCAFFOLDING_VERIFICATION.md` |
 
-## S1.3 Closure Record
+## Wave 2B Status
 
-S1.3 remains CLOSED / VERIFIED as of 2026-06-28.
+Wave 2B Integration Review: PASS WITH CONDITIONS - `engineering/reports/SPRINT_001_WAVE_2B_INTEGRATION_REVIEW.md`.
 
-Final approved runtime flags:
+Wave 2B implemented / verified items:
 
-```text
-PERSISTENCE_DIRECT_ENABLED=true
-PERSISTENCE_MONGO_MODE=direct
-PERSISTENCE_NEO4J_MODE=direct
-PERSISTENCE_CHROMA_MODE=direct
-```
+1. S1.5 - Context Packet Foundation.
+2. S1.6 - Browser Voice/Text Foundation.
 
-Confirmed:
+main repair note: The prior Wave 2B merge left `main` failing `pnpm typecheck` and `pnpm build` due to a type error in `server/src/runtime/browser/foundation.ts`. This was repaired by applying the verified S1.6 browser foundation finishing work (and matching `index.ts` exports and browser tests).
 
-- MongoDB is verified through the direct runtime adapter path.
-- Neo4j is verified through the direct runtime adapter path.
-- ChromaDB is verified through the direct runtime adapter path.
-- Gateway HTTP fallback remains in place and must not be removed yet.
-- Caller sites were not rewritten.
-- Ratified architecture documents were not modified.
-- `.com` prospect-facing surfaces were not modified.
+Gates re-run independently on a clean `main` worktree with the repair applied:
 
-## Wave 2A Status
+- `pnpm typecheck` - PASS (5 projects).
+- `pnpm build` - PASS (warnings only).
+- `pnpm --filter @momentum/server test` - PASS (15 files / 60 tests).
 
-Wave 2A Integration Review returned PASS WITH CONDITIONS in `engineering/reports/SPRINT_001_WAVE_2A_INTEGRATION_REVIEW.md`.
+Locked rules confirmed held: Gateway fallback retained; ratified docs untouched; `.com` untouched; caller sites not rewritten; `/api/runtime/*` not mounted; no event persistence/outbox/replay/subscriber/API; runtime events use the S1.4 foundation; agents cannot directly access stores; Context Manager is the sole Context Packet assembler; candidate/review-only knowledge excluded by default; Browser Voice/Text is `.team` only; Telnyx/PSTN/call-control excluded; text fallback required; EN/ES preserved.
 
-Wave 2A implemented / verified items:
+## Open Conditions
 
-1. S1.7 - QA Harness Scaffolding.
-2. S1.2 - Backend Runtime Boundary Skeleton.
-3. S1.4 - Runtime Event Foundation.
-
-S1.4 status boundary:
-
-- S1.4 remains validation and envelope construction only.
-- Event persistence is not approved.
-- Event outbox implementation is not approved.
-- Event replay implementation is not approved.
-- Event subscribers are not approved.
-- Event API activation is not approved.
-- Future Event Runtime emitters must use the S1.4 validation foundation and must not bypass it.
-
-## Sprint 1 Planning Package Status
-
-The Sprint 1 planning package is complete with conditions recorded by `engineering/reports/SPRINT_001_PLANNING_INTEGRATION_REVIEW.md`.
-
-Planning-complete items awaiting separate implementation approval:
-
-1. S1.5 - Context Packet Foundation Plan.
-2. S1.6 - Browser Voice/Text Foundation Plan.
-
-Implemented / verified items:
-
-1. S1.1 - Shared Runtime Contracts.
-2. S1.2 - Backend Runtime Boundary Skeleton.
-3. S1.4 - Runtime Event Foundation.
-4. S1.7 - QA Harness Scaffolding.
-
-Closed / verified item:
-
-1. S1.3 - Runtime Persistence Direct Adapter Migration.
-
-## Resolved Wave 2A Decisions
-
-1. Canonical event timestamp fields.
-   - Resolution: runtime event implementation uses `occurredAt` and `recordedAt`.
-   - `createdAt` is not part of `agent_event.v1`.
-
-2. Canonical agent identity naming.
-   - Resolution: `agentKey` names the semantic runtime registry identity.
-   - `agentId` names a configured runtime/database agent instance identity only.
-
-3. Vitest-compatible QA command.
-   - Resolution: use `pnpm --filter @momentum/server test`.
-   - Jest-only `--runInBand` is not part of the Sprint 1 QA command set.
-
-4. Runtime feature flag names and defaults.
-   - Resolution for Wave 2A: no new runtime behavior flags are active.
-   - S1.2 skeleton descriptors remain inert with runtime behavior disabled and `/api/runtime/*` unmounted.
+1. The Wave 2B foundation merge to `main` was not gated on typecheck/build. Recommend enforcing `pnpm typecheck` and `pnpm build` as required merge checks.
+2. Stale local feature branches and linked worktrees remain and should be reviewed and pruned by the owner.
 
 ## Governance Confirmations
 
 - Gateway fallback removal is not approved.
 - `.com` prospect-facing surfaces remain untouched.
-- Ratified documents were not modified by this status update.
-- Caller sites were not rewritten by Wave 2A.
+- Ratified documents were not modified.
 - `/api/runtime/*` is not mounted.
 - Agents cannot directly access stores.
-- Wave 2B implementation has not started.
 - Sprint 2 implementation has not started.
-
-## Recommended Next Governance-Safe Workstream
-
-Recommended next action: Kevin approval for Wave 2B scope selection.
-
-Preferred Wave 2B candidate: S1.5 - Context Packet Foundation, because S1.6 Browser Voice/Text depends on the context packet boundary, agent context, language context, runtime rules, guardrails, degraded/failed packet behavior, and Telnyx exclusion rules.
 
 ## Explicit Non-Actions
 
 - Do not begin Gateway fallback removal.
-- Do not begin Wave 2B implementation without separate Kevin approval.
 - Do not begin Sprint 2.
+- Do not activate event persistence, outbox, replay, subscribers, or the event API.
+- Do not mount `/api/runtime/*`.
 - Do not modify ratified documents.
-- Do not modify production code in status-only updates.
 - Do not modify `.com` prospect-facing surfaces.

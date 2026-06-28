@@ -38,7 +38,7 @@ const validSession = {
   internalRuntimeOnly: true,
 } as const;
 
-describe('browser voice/text foundation', () => {
+describe('browser voice/text foundation compatibility', () => {
   it('accepts a .team-scoped Browser Voice/Text session foundation', () => {
     const result = validateBrowserVoiceTextSessionFoundation(validSession);
 
@@ -76,6 +76,7 @@ describe('browser voice/text foundation', () => {
     expect(turn.baId).toBe(baId);
     expect(turn.teamKey).toBe('team_magnificent');
     expect(turn.text).toContain('invitation');
+    expect(turn.metadata?.textFallbackAvailable).toBe(true);
   });
 
   it('finalizes voice transcripts into Agent Runtime wire payloads', () => {
