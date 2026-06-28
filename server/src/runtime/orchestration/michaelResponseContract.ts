@@ -62,6 +62,49 @@ export const MICHAEL_RESPONSE_CONTRACT_FORBIDDEN_FIELDS = [
 export const MICHAEL_RESPONSE_FORBIDDEN_FIELDS =
   MICHAEL_RESPONSE_CONTRACT_FORBIDDEN_FIELDS;
 
+export const MICHAEL_RESPONSE_CONTRACT_FORBIDDEN_FIELD_ALIASES = [
+  'earningsProjection',
+  'compensationProjection',
+  'cvCalculation',
+  'placementGuarantee',
+  'prospectQualification',
+  'callControl',
+] as const;
+
+const PROHIBITED_TEXT_PATTERNS = [
+  {
+    label: 'income_claim',
+    pattern: /\b(?:income|earnings?|commission|compensation|paycheck|checks?|dollars?|paid|get paid|make money|earn money|guaranteed?\s+to\s+make|make\s+\$?\d)|\$\s?\d/i,
+  },
+  {
+    label: 'placement_promise',
+    pattern: /\b(?:placement|guarantee|guaranteed|spillover|positioned under|binary leg|leg position)\b/i,
+  },
+  {
+    label: 'cycle_math',
+    pattern: /\b(?:cycle|cycles|cycle math|cv|volume points?|binary volume)\b/i,
+  },
+  {
+    label: 'medical_advice',
+    pattern: /\b(?:medical advice|diagnose|treat|cure|prescribe|dosage|doctor says|stop taking)\b/i,
+  },
+  {
+    label: 'three_authority',
+    pattern: /\b(?:THREE approved|THREE has approved|THREE guarantees|enroll through THREE|THREE authority|official THREE)\b/i,
+  },
+  {
+    label: 'prospect_facing_instruction',
+    pattern: /\b(?:send this to your prospect|tell your prospect|tell the prospect|forward this to|share this with a prospect|prospect they are qualified|send this exact page|lead)\b/i,
+  },
+  {
+    label: 'automatic_action',
+    pattern: /\b(?:auto-?send|send automatically|call automatically|schedule automatically|automatically\s+(?:send|text|call|schedule)|send texts?|call prospects?|schedule follow-ups?|auto-?call|automatic prospecting|prospecting list|dial)\b/i,
+  },
+] as const;
+
+const SAFE_CLOSE_SUBSTANTIVE_TRAINING_PATTERN =
+  /\b(?:open|review|practice|complete|start|continue)\s+(?:module|lesson|training|script|next step)\b/i;
+
 const TOP_LEVEL_FIELDS = [
   'schemaVersion',
   'responseType',
@@ -137,6 +180,8 @@ export function validateMichaelResponseContractV1(
   expectLiteral(candidate, 'persistence', 'disabled', issues);
   expectTimestamp(candidate, 'generatedAt', issues);
   expectLiteral(candidate, 'agentResponseGenerated', false, issues);
+  validateTextContent(candidate.text, 'text', issues);
+  validateSafeCloseTextContent(candidate, issues);
 
   if ('contextPacketId' in candidate) {
     expectString(candidate, 'contextPacketId', issues);
@@ -272,6 +317,9 @@ function validateNextStep(
   expectOptionalString(value, 'title', issues, 'nextStep');
   expectOptionalString(value, 'instruction', issues, 'nextStep');
   expectOptionalString(value, 'label', issues, 'nextStep');
+  validateTextContent(value.title, 'nextStep.title', issues);
+  validateTextContent(value.instruction, 'nextStep.instruction', issues);
+  validateTextContent(value.label, 'nextStep.label', issues);
   expectLiteral(value, 'baOwned', true, issues, 'nextStep');
   expectLiteral(value, 'automaticSending', false, issues, 'nextStep');
   expectLiteral(value, 'automaticCalling', false, issues, 'nextStep');
@@ -326,7 +374,10 @@ function collectForbiddenFieldIssues(
 
   for (const [key, child] of Object.entries(value)) {
     const childPath = path ? `${path}.${key}` : key;
-    if ((MICHAEL_RESPONSE_CONTRACT_FORBIDDEN_FIELDS as readonly string[]).includes(key)) {
+    if (
+      (MICHAEL_RESPONSE_CONTRACT_FORBIDDEN_FIELDS as readonly string[]).includes(key) ||
+      (MICHAEL_RESPONSE_CONTRACT_FORBIDDEN_FIELD_ALIASES as readonly string[]).includes(key)
+    ) {
       issues.push(
         issue(
           childPath,
@@ -337,6 +388,42 @@ function collectForbiddenFieldIssues(
     }
     collectForbiddenFieldIssues(child, childPath, issues);
   }
+}
+
+function validateTextContent(
+  value: unknown,
+  path: string,
+  issues: MichaelResponseContractValidationIssue[],
+): void {
+  if (typeof value !== 'string') return;
+
+  for (const { label, pattern } of PROHIBITED_TEXT_PATTERNS) {
+    if (!pattern.test(value)) continue;
+    issues.push(
+      issue(
+        path,
+        'prohibited_text',
+        `Text field ${path} contains prohibited ${label} language.`,
+      ),
+    );
+  }
+}
+
+function validateSafeCloseTextContent(
+  candidate: Record<string, unknown>,
+  issues: MichaelResponseContractValidationIssue[],
+): void {
+  if (candidate.responseType !== 'safe_close') return;
+  if (typeof candidate.text !== 'string') return;
+  if (!SAFE_CLOSE_SUBSTANTIVE_TRAINING_PATTERN.test(candidate.text)) return;
+
+  issues.push(
+    issue(
+      'text',
+      'prohibited_text',
+      'safe_close text cannot include substantive training guidance.',
+    ),
+  );
 }
 
 function validateAllowedKeys(
