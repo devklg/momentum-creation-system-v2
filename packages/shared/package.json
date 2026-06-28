@@ -9,7 +9,8 @@
     ".": "./src/index.ts",
     "./brand": "./src/brand.ts",
     "./compliance": "./src/compliance.ts",
-    "./types": "./src/types.ts"
+    "./types": "./src/types.ts",
+    "./runtime": "./src/runtime/index.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
