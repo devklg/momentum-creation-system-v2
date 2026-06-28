@@ -8,7 +8,7 @@ Architecture version: v1.0 frozen
 
 ## Current Sprint State
 
-Sprint 1 remains governed by the frozen v1.0 architecture and the Sprint 1 platform-alignment boundaries. This tracker records status only; it does not approve Gateway fallback removal, new runtime architecture implementation, or Sprint 2 work.
+Sprint 1 remains governed by the frozen v1.0 architecture and the Sprint 1 platform-alignment boundaries. This tracker records status only; it does not approve Gateway fallback removal, new runtime architecture implementation, Wave 2B implementation, or Sprint 2 work.
 
 Canonical tracker path:
 
@@ -20,13 +20,13 @@ engineering/sprints/SPRINT_001_STATUS_TRACKER.md
 
 | Item | Workstream | Status | Evidence / Next Step |
 |---|---|---:|---|
-| S1.1 | Shared Runtime Contract Plan | PLANNING COMPLETE | See `engineering/plans/SHARED_RUNTIME_CONTRACT_PLAN.md`. |
-| S1.2 | Backend Runtime Boundary Plan | PLANNING COMPLETE | See `engineering/plans/BACKEND_RUNTIME_BOUNDARY_PLAN.md`. |
+| S1.1 | Shared Runtime Contracts | IMPLEMENTED / VERIFIED | See `engineering/reports/S1_1_SHARED_RUNTIME_CONTRACTS_IMPLEMENTATION_VERIFICATION.md`. |
+| S1.2 | Backend Runtime Boundary Skeleton | IMPLEMENTED / VERIFIED | See `engineering/reports/S1_2_BACKEND_RUNTIME_BOUNDARY_IMPLEMENTATION_VERIFICATION.md`. |
 | S1.3 | Runtime Persistence Direct Adapter Migration | CLOSED / VERIFIED | See `engineering/reports/S1_3_CLOSEOUT_GOVERNANCE_RECORD.md` and `engineering/reports/S1_3_FINAL_DIRECT_MODE_CLOSEOUT.md`. |
-| S1.4 | Runtime Event Foundation Plan | PLANNING COMPLETE | See `engineering/plans/RUNTIME_EVENT_FOUNDATION_PLAN.md`. |
+| S1.4 | Runtime Event Foundation | IMPLEMENTED / VERIFIED | See `engineering/reports/S1_4_RUNTIME_EVENT_FOUNDATION_IMPLEMENTATION_VERIFICATION.md`. |
 | S1.5 | Context Packet Foundation Plan | PLANNING COMPLETE | See `engineering/plans/CONTEXT_PACKET_FOUNDATION_PLAN.md`. |
 | S1.6 | Browser Voice/Text Foundation Plan | PLANNING COMPLETE | See `engineering/plans/BROWSER_VOICE_FOUNDATION_PLAN.md`. |
-| S1.7 | QA Harness Plan | PLANNING COMPLETE | See `engineering/plans/QA_HARNESS_PLAN.md`. |
+| S1.7 | QA Harness Scaffolding | IMPLEMENTED / VERIFIED | See `engineering/reports/S1_7_QA_HARNESS_SCAFFOLDING_VERIFICATION.md`. |
 
 ## S1.3 Closure Record
 
@@ -51,56 +51,86 @@ Confirmed:
 - Ratified architecture documents were not modified.
 - `.com` prospect-facing surfaces were not modified.
 
+## Wave 2A Status
+
+Wave 2A Integration Review returned PASS WITH CONDITIONS in `engineering/reports/SPRINT_001_WAVE_2A_INTEGRATION_REVIEW.md`.
+
+Wave 2A implemented / verified items:
+
+1. S1.7 - QA Harness Scaffolding.
+2. S1.2 - Backend Runtime Boundary Skeleton.
+3. S1.4 - Runtime Event Foundation.
+
+S1.4 status boundary:
+
+- S1.4 remains validation and envelope construction only.
+- Event persistence is not approved.
+- Event outbox implementation is not approved.
+- Event replay implementation is not approved.
+- Event subscribers are not approved.
+- Event API activation is not approved.
+- Future Event Runtime emitters must use the S1.4 validation foundation and must not bypass it.
+
 ## Sprint 1 Planning Package Status
 
 The Sprint 1 planning package is complete with conditions recorded by `engineering/reports/SPRINT_001_PLANNING_INTEGRATION_REVIEW.md`.
 
-Planning-complete items:
+Planning-complete items awaiting separate implementation approval:
 
-1. S1.1 - Shared Runtime Contract Plan.
-2. S1.2 - Backend Runtime Boundary Plan.
-3. S1.4 - Runtime Event Foundation Plan.
-4. S1.5 - Context Packet Foundation Plan.
-5. S1.6 - Browser Voice/Text Foundation Plan.
-6. S1.7 - QA Harness Plan.
+1. S1.5 - Context Packet Foundation Plan.
+2. S1.6 - Browser Voice/Text Foundation Plan.
+
+Implemented / verified items:
+
+1. S1.1 - Shared Runtime Contracts.
+2. S1.2 - Backend Runtime Boundary Skeleton.
+3. S1.4 - Runtime Event Foundation.
+4. S1.7 - QA Harness Scaffolding.
 
 Closed / verified item:
 
 1. S1.3 - Runtime Persistence Direct Adapter Migration.
 
-## Pre-Implementation Decisions And Open Items
-
-These items must be resolved before implementation begins:
+## Resolved Wave 2A Decisions
 
 1. Canonical event timestamp fields.
-   - Current planning state: S1.4 uses `createdAt` and notes that the ratified event model names `occurredAt` and `recordedAt`.
-   - Required decision: define whether implementation uses `occurredAt` / `recordedAt` directly, uses `createdAt` as an API-facing alias, or carries all three with distinct meanings.
-   - Governance rule: do not modify ratified documents during this cleanup.
+   - Resolution: runtime event implementation uses `occurredAt` and `recordedAt`.
+   - `createdAt` is not part of `agent_event.v1`.
 
 2. Canonical agent identity naming.
-   - Current planning state: S1.1 uses `AgentKey`; S1.5 uses `agentId` with literal agent keys; S1.6 uses `agentKey`.
-   - Required decision: define whether `agentKey` names the stable agent type (`steve_success`, `michael_magnificent`, `ivory`) and `agentId` names a concrete runtime instance/session participant, or choose one canonical field.
+   - Resolution: `agentKey` names the semantic runtime registry identity.
+   - `agentId` names a configured runtime/database agent instance identity only.
 
-3. Vitest-compatible replacement for `--runInBand`.
-   - Current planning state: S1.7 lists `pnpm --filter @momentum/server test -- --runInBand`, but the server harness is Vitest.
-   - Required decision: replace with a Vitest-compatible serial/live-test command during QA implementation, or omit the serial flag until a dedicated integration script exists.
+3. Vitest-compatible QA command.
+   - Resolution: use `pnpm --filter @momentum/server test`.
+   - Jest-only `--runInBand` is not part of the Sprint 1 QA command set.
 
-4. Runtime feature flag names and defaults for the first implementation slice.
-   - Current planning state: S1.2 proposes safe default-off runtime flags, including `RUNTIME_ENABLED=false`, `RUNTIME_API_ENABLED=false`, `RUNTIME_CONTEXT_MANAGER_ENABLED=false`, `RUNTIME_AGENT_RUNTIME_ENABLED=false`, `RUNTIME_BROWSER_VOICE_ENABLED=false`, and `RUNTIME_QA_HARNESS_ENABLED=false`.
-   - Required decision: confirm the initial implementation slice uses these names and defaults, or record a revised flag set before production code begins.
+4. Runtime feature flag names and defaults.
+   - Resolution for Wave 2A: no new runtime behavior flags are active.
+   - S1.2 skeleton descriptors remain inert with runtime behavior disabled and `/api/runtime/*` unmounted.
+
+## Governance Confirmations
+
+- Gateway fallback removal is not approved.
+- `.com` prospect-facing surfaces remain untouched.
+- Ratified documents were not modified by this status update.
+- Caller sites were not rewritten by Wave 2A.
+- `/api/runtime/*` is not mounted.
+- Agents cannot directly access stores.
+- Wave 2B implementation has not started.
+- Sprint 2 implementation has not started.
 
 ## Recommended Next Governance-Safe Workstream
 
-Recommended first implementation candidate after Kevin approval: S1.1 - Shared Runtime Contracts.
+Recommended next action: Kevin approval for Wave 2B scope selection.
 
-Reason: every remaining implementation path depends on shared scope, ID, language, event, context, agent, browser-runtime, and QA fixture contracts.
-
-Recommended companion workstream after S1.1: QA harness scaffolding, limited to the accepted S1.7 gates and static boundary checks.
+Preferred Wave 2B candidate: S1.5 - Context Packet Foundation, because S1.6 Browser Voice/Text depends on the context packet boundary, agent context, language context, runtime rules, guardrails, degraded/failed packet behavior, and Telnyx exclusion rules.
 
 ## Explicit Non-Actions
 
 - Do not begin Gateway fallback removal.
-- Do not begin new runtime architecture work.
+- Do not begin Wave 2B implementation without separate Kevin approval.
+- Do not begin Sprint 2.
 - Do not modify ratified documents.
-- Do not modify production code.
+- Do not modify production code in status-only updates.
 - Do not modify `.com` prospect-facing surfaces.
