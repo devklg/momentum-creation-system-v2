@@ -48,6 +48,20 @@ export { draftOutcomeGuidedActionEnvelopes } from './outcomeGuidedAction.js';
 export { composeOrchestrationTurn } from './composition.js';
 
 export {
+  isIvoryRuntimeTaskAllowed,
+  isMichaelMagnificentObjectiveAllowed,
+  mapMichaelMagnificentIdentity,
+  runIvoryRuntimeAdapter,
+  runMichaelMagnificentRuntimeAdapter,
+  runSteveSuccessRuntimeAdapter,
+} from './adapters/index.js';
+export type {
+  IvoryRuntimeAdapterInput,
+  MichaelMagnificentRuntimeAdapterInput,
+  SteveSuccessRuntimeAdapterInput,
+} from './adapters/index.js';
+
+export {
   ORCHESTRATION_COMPONENT_VERSION,
   ORCHESTRATION_EMITTER,
   ORCHESTRATION_EVENT_SOURCE,
