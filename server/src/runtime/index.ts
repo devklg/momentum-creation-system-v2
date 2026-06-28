@@ -94,3 +94,43 @@ export const backendRuntimeBoundaries = [
   eventRuntimeBoundary,
   browserVoiceTextRuntimeBoundary,
 ] as const;
+
+// S2.1 Agent Runtime Orchestration skeleton (additive, inert).
+// Intentionally NOT added to backendRuntimeBoundaries above: that set is the
+// S1.2 inert backend boundary contract pinned by runtimeBoundarySkeleton.test.
+export {
+  AGENT_ORCHESTRATION_REGISTRY,
+  ORCHESTRATION_AGENT_KEYS,
+  ORCHESTRATION_COMPONENT_VERSION,
+  ORCHESTRATION_EMITTER,
+  ORCHESTRATION_EVENT_SOURCE,
+  agentOrchestrationBoundary,
+  captureOrchestrationEvent,
+  consumeContextPacket,
+  createAgentSession,
+  createEventCapture,
+  getAgentDescriptor,
+  idempotencyKeys,
+  isKnownAgentKey,
+  isTaskTypeAllowed,
+  listOrchestrationDescriptors,
+  planAgentTurn,
+} from './orchestration/index.js';
+export type {
+  AgentEventFamily,
+  AgentOrchestrationBoundaryDescriptor,
+  AgentOrchestrationDescriptor,
+  ConsumeContextPacketInput,
+  ContextPacketConsumptionDecision,
+  ContextPacketConsumptionIssue,
+  ContextPacketConsumptionResult,
+  CreateAgentSessionInput,
+  CreateAgentSessionResult,
+  EventCapture,
+  OrchestrationEventInput,
+  OrchestrationSessionIdentity,
+  OrchestrationSessionState,
+  OrchestrationSessionStatus,
+  OrchestrationTurnPlan,
+  PlanAgentTurnInput,
+} from './orchestration/index.js';
