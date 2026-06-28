@@ -21,3 +21,7 @@ export {
 export type {
   IvoryRuntimeAdapterInput,
 } from './ivoryAdapter.js';
+
+export {
+  dispatchAgentRuntimeAdapter,
+} from './dispatchAdapter.js';

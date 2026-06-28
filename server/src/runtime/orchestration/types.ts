@@ -270,6 +270,37 @@ export interface OrchestrationTurnCompositionResult {
   agentResponseGenerated: false;
 }
 
+export interface AgentRuntimeAdapterDispatchIdentity
+  extends Omit<OrchestrationSessionIdentity, 'agentKey'> {
+  agentKey: unknown;
+}
+
+export interface DispatchAgentRuntimeAdapterInput
+  extends Omit<ComposeOrchestrationTurnInput, 'identity'> {
+  identity: AgentRuntimeAdapterDispatchIdentity;
+}
+
+export interface AgentRuntimeAdapterDispatchRejection {
+  decision: 'reject';
+  agentKey: unknown;
+  turnId: RuntimeTurnId;
+  behavior: 'not_implemented';
+  issues: ContextPacketRequestIssue[];
+  events: [];
+  outcomeDrafts: [];
+  guidedActionDrafts: [];
+  notes: readonly string[];
+  eventPersistence: 'disabled';
+  outcomePersistence: 'disabled';
+  guidedActionPersistence: 'disabled';
+  envelopePersistence: 'disabled';
+  agentResponseGenerated: false;
+}
+
+export type AgentRuntimeAdapterDispatchResult =
+  | OrchestrationTurnCompositionResult
+  | AgentRuntimeAdapterDispatchRejection;
+
 /**
  * Outcome of planning a single turn.
  *

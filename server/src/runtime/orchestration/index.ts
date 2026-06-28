@@ -13,6 +13,10 @@ export type {
   ContextManagerRequestPort,
   CreateAgentSessionInput,
   BuildContextPacketRequestInput,
+  AgentRuntimeAdapterDispatchIdentity,
+  AgentRuntimeAdapterDispatchRejection,
+  AgentRuntimeAdapterDispatchResult,
+  DispatchAgentRuntimeAdapterInput,
   DraftOutcomeGuidedActionInput,
   OrchestrationDraftContentScope,
   OrchestrationGuidedActionDraftEnvelope,
@@ -48,6 +52,7 @@ export { draftOutcomeGuidedActionEnvelopes } from './outcomeGuidedAction.js';
 export { composeOrchestrationTurn } from './composition.js';
 
 export {
+  dispatchAgentRuntimeAdapter,
   isIvoryRuntimeTaskAllowed,
   isMichaelMagnificentObjectiveAllowed,
   mapMichaelMagnificentIdentity,
