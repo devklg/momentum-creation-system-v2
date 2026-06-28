@@ -177,6 +177,18 @@ export type {
 } from './types.js';
 
 export {
+  resolveMichaelRuntimeTurnResponse,
+  resolveMichaelRuntimeTurnResponseFromAdapterInput,
+  resolveMichaelRuntimeTurnResponseFromFixture,
+} from './michaelRuntimeResolutionFacade.js';
+export type {
+  MichaelRuntimeResolutionClassification,
+  MichaelRuntimeResolutionIssue,
+  MichaelRuntimeResolutionResult,
+  MichaelRuntimeResolutionTrace,
+} from './types.js';
+
+export {
   MICHAEL_RESPONSE_AGENT_KEY,
   MICHAEL_RESPONSE_CONTRACT_SCHEMA_VERSION,
   MICHAEL_RESPONSE_CONTRACT_FORBIDDEN_FIELD_ALIASES,
