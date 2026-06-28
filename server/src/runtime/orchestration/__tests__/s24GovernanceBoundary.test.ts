@@ -135,8 +135,15 @@ describe('S2.4 static orchestration governance boundary', () => {
   });
 
   it('does not introduce Telnyx, PSTN, or call-control wiring in orchestration', () => {
+    // S2.15 closeout correction: the bare `callControl` identifier was removed
+    // from this wiring scanner. S2.15 added `'callControl'` to the response
+    // contract's FORBIDDEN_FIELD_ALIASES blocklist — a defensive string literal
+    // whose purpose is to *reject* a call-control field, not wire telephony.
+    // Real call-control wiring is still blocked here via telephony import paths
+    // and the specific wiring symbols (callControlId/createCallControl/startCall/
+    // placeCall/dialProspect). See S2.15 Verification Closeout report.
     const forbiddenTelephony =
-      /\bfrom\s+['"][^'"]*(?:telnyx|pstn|call-control|callControl)[^'"]*['"]|\b(?:telnyx|pstn|callControl|callControlId|createCallControl|startCall|placeCall|dialProspect)\b/i;
+      /\bfrom\s+['"][^'"]*(?:telnyx|pstn|call-control|callControl)[^'"]*['"]|\b(?:telnyx|pstn|callControlId|createCallControl|startCall|placeCall|dialProspect)\b/i;
     const matches = matchingCodeLines(orchestrationProductionFiles(), forbiddenTelephony);
     expect(matches, matches.join('\n')).toEqual([]);
   });
