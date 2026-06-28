@@ -151,6 +151,47 @@ export const michaelResponseFixtureSafeCloseCandidateReviewOnlyRejection = baseF
   },
 });
 
+// S2.16 — Spanish (`es`) safe-path fixtures. These mirror the English safe-path
+// set 1:1 so the inert Michael adapter can return a validated Spanish safe
+// response on every degraded / missing / failed / rejected-family path when the
+// resolved language is `es`. They remain controlled, pre-authored text: no
+// dynamic generation, no persistence, agentResponseGenerated stays false.
+export const michaelResponseFixtureSafeFallbackDegradedContextPacketEs = baseFixture({
+  responseType: 'safe_fallback',
+  contextPacketStatus: 'degraded',
+  contextPacketId: DEGRADED_CONTEXT_PACKET_ID,
+  language: 'es',
+  text: 'Ahora tengo contexto limitado, así que mantengámoslo sencillo: sigue con tu entrenamiento y consulta a tu patrocinador antes de cualquier compromiso externo.',
+  safety: safeFallbackSafety,
+});
+
+export const michaelResponseFixtureSafeFallbackMissingContextPacketEs = baseFixture({
+  responseType: 'safe_fallback',
+  contextPacketStatus: 'missing',
+  language: 'es',
+  text: 'No tengo el contexto de entrenamiento que necesito. Por favor regresa a la página de entrenamiento o pide a tu patrocinador el siguiente paso.',
+  safety: safeFallbackSafety,
+});
+
+export const michaelResponseFixtureSafeCloseFailedContextPacketEs = baseFixture({
+  responseType: 'safe_close',
+  contextPacketStatus: 'failed',
+  language: 'es',
+  text: 'No puedo continuar este turno de entrenamiento sin un Context Packet válido. No se guardó ni se envió nada.',
+  safety: blockedSafety,
+});
+
+export const michaelResponseFixtureSafeCloseCandidateReviewOnlyRejectionEs = baseFixture({
+  responseType: 'safe_close',
+  contextPacketStatus: 'rejected',
+  language: 'es',
+  text: 'No puedo usar contexto candidato o de solo revisión en este turno. Por favor continúa solo desde contexto de entrenamiento aprobado.',
+  safety: {
+    ...blockedSafety,
+    blockedReasonCodes: ['candidate_review_only_context_rejected'],
+  },
+});
+
 export const michaelResponseInvalidFixtureWithForbiddenScoringField: unknown = {
   ...michaelResponseFixtureClarificationQuestionEn,
   score: 92,
@@ -190,6 +231,10 @@ export const validMichaelResponseFixtures = [
   michaelResponseFixtureSafeFallbackMissingContextPacket,
   michaelResponseFixtureSafeCloseFailedContextPacket,
   michaelResponseFixtureSafeCloseCandidateReviewOnlyRejection,
+  michaelResponseFixtureSafeFallbackDegradedContextPacketEs,
+  michaelResponseFixtureSafeFallbackMissingContextPacketEs,
+  michaelResponseFixtureSafeCloseFailedContextPacketEs,
+  michaelResponseFixtureSafeCloseCandidateReviewOnlyRejectionEs,
 ] as const;
 
 export const invalidMichaelResponseFixtures = [
@@ -212,6 +257,13 @@ export const michaelResponseFixtures = {
   safeCloseFailedContextPacket: michaelResponseFixtureSafeCloseFailedContextPacket,
   safeCloseCandidateReviewOnlyRejection:
     michaelResponseFixtureSafeCloseCandidateReviewOnlyRejection,
+  safeFallbackDegradedContextPacketEs:
+    michaelResponseFixtureSafeFallbackDegradedContextPacketEs,
+  safeFallbackMissingContextPacketEs:
+    michaelResponseFixtureSafeFallbackMissingContextPacketEs,
+  safeCloseFailedContextPacketEs: michaelResponseFixtureSafeCloseFailedContextPacketEs,
+  safeCloseCandidateReviewOnlyRejectionEs:
+    michaelResponseFixtureSafeCloseCandidateReviewOnlyRejectionEs,
   invalidWithForbiddenScoringField:
     michaelResponseInvalidFixtureWithForbiddenScoringField,
   invalidWithForbiddenProspectFacingField:

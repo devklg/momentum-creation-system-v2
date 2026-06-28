@@ -17,9 +17,13 @@ import {
   michaelResponseFixtureNextTrainingStepEn,
   michaelResponseFixtureNextTrainingStepEs,
   michaelResponseFixtureSafeCloseCandidateReviewOnlyRejection,
+  michaelResponseFixtureSafeCloseCandidateReviewOnlyRejectionEs,
   michaelResponseFixtureSafeCloseFailedContextPacket,
+  michaelResponseFixtureSafeCloseFailedContextPacketEs,
   michaelResponseFixtureSafeFallbackDegradedContextPacket,
+  michaelResponseFixtureSafeFallbackDegradedContextPacketEs,
   michaelResponseFixtureSafeFallbackMissingContextPacket,
+  michaelResponseFixtureSafeFallbackMissingContextPacketEs,
 } from './fixtures/index.js';
 
 const MICHAEL_AGENT_KEY = 'michael_magnificent' as const;
@@ -57,68 +61,74 @@ export function runMichaelRuntimeAdapterContract(
   const language = resolveLanguage(input);
   const identity = input.identity;
 
+  // S2.16 — thread the resolved language through every safe path so an `es`
+  // request returns a validated Spanish safe response. Unsupported languages
+  // resolve to `undefined`, so safe paths fall back to the language-neutral
+  // English safe fixtures (no Spanish or English substantive training guidance).
+  const safeLanguage: SupportedMichaelLanguage = language ?? 'en';
+
   if (identity.agentKey !== MICHAEL_AGENT_KEY) {
-    return selectResponse(input, 'wrong_agent', 'safe_close', 'rejected');
+    return selectResponse(input, 'wrong_agent', 'safe_close', 'rejected', safeLanguage);
   }
 
   if (input.taskType !== MICHAEL_TASK_TYPE) {
-    return selectResponse(input, 'wrong_task', 'safe_close', 'rejected');
+    return selectResponse(input, 'wrong_task', 'safe_close', 'rejected', safeLanguage);
   }
 
   if (!language) {
-    return selectResponse(input, 'unsupported_language', 'safe_close', 'rejected');
+    return selectResponse(input, 'unsupported_language', 'safe_close', 'rejected', safeLanguage);
   }
 
   const inertIssue = findInertRuntimeIssue(runtimeTurn, input);
   if (inertIssue) {
-    return selectResponse(input, inertIssue, 'safe_close', 'rejected');
+    return selectResponse(input, inertIssue, 'safe_close', 'rejected', safeLanguage);
   }
 
   const issueReason = reasonFromIssueCodes(collectIssueCodes(runtimeTurn));
   if (issueReason) {
     const responseKind = issueReason === 'missing_context' ? 'safe_fallback' : 'safe_close';
     const contextKind = issueReason === 'missing_context' ? 'missing' : 'rejected';
-    return selectResponse(input, issueReason, responseKind, contextKind);
+    return selectResponse(input, issueReason, responseKind, contextKind, safeLanguage);
   }
 
   const consumption = runtimeTurn.consumption;
   if (!consumption) {
-    return selectResponse(input, 'invalid_runtime_turn', 'safe_close', 'rejected');
+    return selectResponse(input, 'invalid_runtime_turn', 'safe_close', 'rejected', safeLanguage);
   }
 
   if (consumption.packetAgentKey && consumption.packetAgentKey !== MICHAEL_AGENT_KEY) {
-    return selectResponse(input, 'wrong_agent', 'safe_close', 'rejected');
+    return selectResponse(input, 'wrong_agent', 'safe_close', 'rejected', safeLanguage);
   }
 
   if (consumption.taskType && consumption.taskType !== MICHAEL_TASK_TYPE) {
-    return selectResponse(input, 'wrong_task', 'safe_close', 'rejected');
+    return selectResponse(input, 'wrong_task', 'safe_close', 'rejected', safeLanguage);
   }
 
   if (
     (consumption.decision === 'proceed' || consumption.decision === 'degraded') &&
     !hasContextManagerAssemblyMarker(consumption)
   ) {
-    return selectResponse(input, 'non_context_manager', 'safe_close', 'rejected');
+    return selectResponse(input, 'non_context_manager', 'safe_close', 'rejected', safeLanguage);
   }
 
   if (hasCandidateReviewOnlyContext(consumption)) {
-    return selectResponse(input, 'candidate_review_only', 'safe_close', 'rejected');
+    return selectResponse(input, 'candidate_review_only', 'safe_close', 'rejected', safeLanguage);
   }
 
   if (consumption.decision === 'degraded' || consumption.packetStatus === 'degraded') {
-    return selectResponse(input, 'degraded_context', 'safe_fallback', 'degraded');
+    return selectResponse(input, 'degraded_context', 'safe_fallback', 'degraded', safeLanguage);
   }
 
   if (consumption.decision === 'block_substantive' || consumption.packetStatus === 'failed') {
-    return selectResponse(input, 'failed_context', 'safe_close', 'failed');
+    return selectResponse(input, 'failed_context', 'safe_close', 'failed', safeLanguage);
   }
 
   if (consumption.decision === 'reject') {
-    return selectResponse(input, 'rejected_context', 'safe_close', 'rejected');
+    return selectResponse(input, 'rejected_context', 'safe_close', 'rejected', safeLanguage);
   }
 
   if (consumption.packetStatus !== 'complete') {
-    return selectResponse(input, 'invalid_runtime_turn', 'safe_close', 'rejected');
+    return selectResponse(input, 'invalid_runtime_turn', 'safe_close', 'rejected', safeLanguage);
   }
 
   if (
@@ -375,13 +385,24 @@ function fixtureFor(
   }
 
   if (responseKind === 'safe_fallback') {
-    return contextKind === 'degraded'
-      ? michaelResponseFixtureSafeFallbackDegradedContextPacket
+    if (contextKind === 'degraded') {
+      return language === 'es'
+        ? michaelResponseFixtureSafeFallbackDegradedContextPacketEs
+        : michaelResponseFixtureSafeFallbackDegradedContextPacket;
+    }
+    return language === 'es'
+      ? michaelResponseFixtureSafeFallbackMissingContextPacketEs
       : michaelResponseFixtureSafeFallbackMissingContextPacket;
   }
 
-  return contextKind === 'failed'
-    ? michaelResponseFixtureSafeCloseFailedContextPacket
+  if (contextKind === 'failed') {
+    return language === 'es'
+      ? michaelResponseFixtureSafeCloseFailedContextPacketEs
+      : michaelResponseFixtureSafeCloseFailedContextPacket;
+  }
+
+  return language === 'es'
+    ? michaelResponseFixtureSafeCloseCandidateReviewOnlyRejectionEs
     : michaelResponseFixtureSafeCloseCandidateReviewOnlyRejection;
 }
 
@@ -403,13 +424,24 @@ function fixtureKeyFor(
   }
 
   if (responseKind === 'safe_fallback') {
-    return contextKind === 'degraded'
-      ? 'safeFallbackDegradedContextPacket'
+    if (contextKind === 'degraded') {
+      return language === 'es'
+        ? 'safeFallbackDegradedContextPacketEs'
+        : 'safeFallbackDegradedContextPacket';
+    }
+    return language === 'es'
+      ? 'safeFallbackMissingContextPacketEs'
       : 'safeFallbackMissingContextPacket';
   }
 
-  return contextKind === 'failed'
-    ? 'safeCloseFailedContextPacket'
+  if (contextKind === 'failed') {
+    return language === 'es'
+      ? 'safeCloseFailedContextPacketEs'
+      : 'safeCloseFailedContextPacket';
+  }
+
+  return language === 'es'
+    ? 'safeCloseCandidateReviewOnlyRejectionEs'
     : 'safeCloseCandidateReviewOnlyRejection';
 }
 
