@@ -40,6 +40,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build shared package for downstream typecheck
+        run: pnpm build:shared
+
       - name: Typecheck (merge gate)
         run: pnpm typecheck
 

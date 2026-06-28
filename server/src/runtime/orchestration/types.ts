@@ -245,6 +245,31 @@ export interface OutcomeGuidedActionDraftResult {
   agentResponseGenerated: false;
 }
 
+export interface ComposeOrchestrationTurnInput extends BuildContextPacketRequestInput {
+  contextManager: ContextManagerRequestPort;
+  requireSubstantive?: boolean;
+  createdAt?: string;
+}
+
+export interface OrchestrationTurnCompositionResult {
+  decision: ContextPacketConsumptionDecision;
+  agentKey: AgentKey;
+  turnId: RuntimeTurnId;
+  behavior: 'not_implemented';
+  contextRequestResult: ContextPacketRequestWiringResult;
+  outcomeGuidedActionResult: OutcomeGuidedActionDraftResult;
+  consumption: ContextPacketConsumptionResult;
+  events: RuntimeAgentEventEnvelope[];
+  outcomeDrafts: OrchestrationOutcomeDraftEnvelope[];
+  guidedActionDrafts: OrchestrationGuidedActionDraftEnvelope[];
+  notes: readonly string[];
+  eventPersistence: 'disabled';
+  outcomePersistence: 'disabled';
+  guidedActionPersistence: 'disabled';
+  envelopePersistence: 'disabled';
+  agentResponseGenerated: false;
+}
+
 /**
  * Outcome of planning a single turn.
  *

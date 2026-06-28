@@ -2,6 +2,7 @@ export type {
   AgentEventFamily,
   AgentOrchestrationBoundaryDescriptor,
   AgentOrchestrationDescriptor,
+  ComposeOrchestrationTurnInput,
   ConsumeContextPacketInput,
   ContextPacketConsumptionDecision,
   ContextPacketConsumptionIssue,
@@ -20,6 +21,7 @@ export type {
   OrchestrationSessionIdentity,
   OrchestrationSessionState,
   OrchestrationSessionStatus,
+  OrchestrationTurnCompositionResult,
   OrchestrationTurnPlan,
   PlanAgentTurnInput,
   RequestContextPacketForTurnInput,
@@ -42,6 +44,8 @@ export {
 } from './contextRequest.js';
 
 export { draftOutcomeGuidedActionEnvelopes } from './outcomeGuidedAction.js';
+
+export { composeOrchestrationTurn } from './composition.js';
 
 export {
   ORCHESTRATION_COMPONENT_VERSION,
