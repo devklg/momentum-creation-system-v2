@@ -58,13 +58,15 @@ pnpm build
 pnpm --filter @momentum/server test
 ```
 
-Integration commands where applicable:
+Vitest integration commands where applicable:
 
 ```powershell
-pnpm --filter @momentum/server test -- --runInBand
+pnpm --filter @momentum/server test
 ```
 
 Future integration commands may be added only when the corresponding harness exists. Until then, live integration checks should be run as explicit, logged harnesses under `.logs/` and summarized in `engineering/reports/`.
+
+Live and integration tests that require isolation or serialized execution must use Vitest-compatible CLI or configuration options supported by the repo's installed Vitest version. Do not use Jest-only serialization flags.
 
 ## First Acceptance Tests
 
