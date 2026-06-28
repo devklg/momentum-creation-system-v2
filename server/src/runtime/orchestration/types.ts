@@ -753,3 +753,46 @@ export type MichaelResponseCatalogSelectionResult =
       readonly ok: false;
       readonly issues: readonly MichaelResponseCatalogSelectionIssue[];
     };
+
+// ───────────────────────────────────────────────────────────────────────────
+// S2.19 — Michael selection-request derivation (pure, inert, returned-only).
+// Derives a MichaelResponseCatalogSelectionRequest from an existing runtime turn
+// fixture result or Michael adapter-contract input, by reusing the inert
+// adapter classification. Generates NO text, calls NO LLM, mounts NO route,
+// performs NO persistence/data access, and mutates NO runtime turn or catalog.
+// ───────────────────────────────────────────────────────────────────────────
+
+/** A single derivation issue (why a runtime turn did not derive a request). */
+export interface MichaelResponseSelectionRequestDerivationIssue {
+  readonly code:
+    | 'missing_identity'
+    | 'missing_turn_id'
+    | 'missing_task_type'
+    | 'selection_invalid';
+  readonly message: string;
+}
+
+/** Discriminated result of a selection-request derivation. */
+export type MichaelResponseSelectionRequestDerivationResult =
+  | {
+      readonly ok: true;
+      readonly selectionRequest: MichaelResponseCatalogSelectionRequest;
+    }
+  | {
+      readonly ok: false;
+      readonly issues: readonly MichaelResponseSelectionRequestDerivationIssue[];
+    };
+
+/** Input for deriving a selection request from a runtime turn fixture result. */
+export interface DeriveMichaelSelectionRequestFromRuntimeTurnInput {
+  readonly runtimeTurn: RuntimeTurnFixtureHarnessResult;
+  /** Defaults to runtimeTurn.input.identity when omitted. */
+  readonly identity?: AgentRuntimeAdapterDispatchIdentity;
+  /** Defaults to runtimeTurn.input.turnId when omitted. */
+  readonly turnId?: RuntimeTurnId;
+  /** Defaults to runtimeTurn.input.taskType when omitted. */
+  readonly taskType?: RuntimeTaskType;
+  readonly turnClarity?: 'clear' | 'ambiguous';
+  readonly intent?: MichaelRuntimeAdapterContractIntent;
+  readonly language?: unknown;
+}

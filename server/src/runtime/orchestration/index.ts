@@ -166,6 +166,17 @@ export type {
 } from './types.js';
 
 export {
+  deriveMichaelResponseCatalogSelectionRequest,
+  deriveMichaelResponseCatalogSelectionRequestFromAdapterContractInput,
+  deriveMichaelResponseCatalogSelectionRequestFromRuntimeTurn,
+} from './michaelResponseSelectionRequest.js';
+export type {
+  DeriveMichaelSelectionRequestFromRuntimeTurnInput,
+  MichaelResponseSelectionRequestDerivationIssue,
+  MichaelResponseSelectionRequestDerivationResult,
+} from './types.js';
+
+export {
   MICHAEL_RESPONSE_AGENT_KEY,
   MICHAEL_RESPONSE_CONTRACT_SCHEMA_VERSION,
   MICHAEL_RESPONSE_CONTRACT_FORBIDDEN_FIELD_ALIASES,
