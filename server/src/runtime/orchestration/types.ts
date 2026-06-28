@@ -331,6 +331,63 @@ export type RuntimeTurnCoordinatorResult =
   | AgentRuntimeAdapterDispatchResult
   | RuntimeTurnCoordinatorRejection;
 
+export type RuntimeTurnFixtureScenarioType =
+  | 'accepted_complete'
+  | 'accepted_degraded'
+  | 'failed_context'
+  | 'invalid_objective'
+  | 'unknown_agent'
+  | 'missing_identity'
+  | 'missing_turn_id'
+  | 'missing_task_type'
+  | 'missing_context_manager'
+  | 'candidate_review_only_rejected';
+
+export interface RuntimeTurnFixtureScenarioOptions {
+  scenario: RuntimeTurnFixtureScenarioType;
+  agentKey?: unknown;
+  taskType?: RuntimeTaskType;
+  requireSubstantive?: boolean;
+  createdAt?: string;
+}
+
+export interface RuntimeTurnFixtureScenarioMetadata {
+  scenario: RuntimeTurnFixtureScenarioType;
+  description: string;
+  fixtureOnly: true;
+  contextManagerInjected: boolean;
+  expectedContextRequest: boolean;
+  expectedDecision:
+    | ContextPacketConsumptionDecision
+    | RuntimeTurnCoordinatorRejection['decision'];
+  persistence: 'disabled';
+  behavior: 'not_implemented';
+  agentResponseGenerated: false;
+}
+
+export interface RuntimeTurnFixtureHarnessResult {
+  scenario: RuntimeTurnFixtureScenarioType;
+  metadata: RuntimeTurnFixtureScenarioMetadata;
+  input: RuntimeTurnCoordinatorInput;
+  result: RuntimeTurnCoordinatorResult;
+  contextCalls: Array<{
+    scope: RuntimeRequestScope;
+    request: ContextPacketRequest;
+  }>;
+  eventPersistence: 'disabled';
+  outcomePersistence: 'disabled';
+  guidedActionPersistence: 'disabled';
+  envelopePersistence: 'disabled';
+  behavior: 'not_implemented';
+  agentResponseGenerated: false;
+}
+
+export interface RuntimeTurnFixtureHarness {
+  runScenario(
+    options: RuntimeTurnFixtureScenarioOptions,
+  ): Promise<RuntimeTurnFixtureHarnessResult>;
+}
+
 /**
  * Outcome of planning a single turn.
  *

@@ -32,6 +32,11 @@ export type {
   RuntimeTurnCoordinatorInput,
   RuntimeTurnCoordinatorRejection,
   RuntimeTurnCoordinatorResult,
+  RuntimeTurnFixtureHarness,
+  RuntimeTurnFixtureHarnessResult,
+  RuntimeTurnFixtureScenarioMetadata,
+  RuntimeTurnFixtureScenarioOptions,
+  RuntimeTurnFixtureScenarioType,
 } from './types.js';
 
 export {
@@ -72,6 +77,11 @@ export type {
 export {
   coordinateRuntimeTurn,
 } from './turnCoordinator.js';
+
+export {
+  createRuntimeTurnFixtureHarness,
+  runRuntimeTurnFixtureScenario,
+} from './fixtures/index.js';
 
 export {
   ORCHESTRATION_COMPONENT_VERSION,
