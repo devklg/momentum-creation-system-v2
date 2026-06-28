@@ -233,9 +233,9 @@ function validateBrowserVoiceTranscript(
   }
 
   const errors: BrowserVoiceTextValidationIssue[] = [];
-  requireString(transcript, 'transcriptTurnId', errors);
-  requireString(transcript, 'finalText', errors);
-  requireString(transcript, 'transcriptHash', errors);
+  requireString(transcript as unknown as Record<string, unknown>, 'transcriptTurnId', errors);
+  requireString(transcript as unknown as Record<string, unknown>, 'finalText', errors);
+  requireString(transcript as unknown as Record<string, unknown>, 'transcriptHash', errors);
 
   if (transcript.inputMode !== 'voice') {
     errors.push(error('inputMode', 'transcript_invalid', 'Voice transcripts must use inputMode voice.'));
