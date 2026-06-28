@@ -6,12 +6,18 @@ export type {
   ContextPacketConsumptionDecision,
   ContextPacketConsumptionIssue,
   ContextPacketConsumptionResult,
+  ContextPacketRequestBundle,
+  ContextPacketRequestIssue,
+  ContextPacketRequestWiringResult,
+  ContextManagerRequestPort,
   CreateAgentSessionInput,
+  BuildContextPacketRequestInput,
   OrchestrationSessionIdentity,
   OrchestrationSessionState,
   OrchestrationSessionStatus,
   OrchestrationTurnPlan,
   PlanAgentTurnInput,
+  RequestContextPacketForTurnInput,
 } from './types.js';
 
 export {
@@ -24,6 +30,11 @@ export {
 } from './registry.js';
 
 export { consumeContextPacket } from './consumption.js';
+
+export {
+  buildContextPacketRequest,
+  requestContextPacketForTurn,
+} from './contextRequest.js';
 
 export {
   ORCHESTRATION_COMPONENT_VERSION,
