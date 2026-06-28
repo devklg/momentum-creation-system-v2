@@ -458,6 +458,65 @@ export interface MichaelRuntimeResponseFixtureHarness {
   ): Promise<MichaelRuntimeResponseFixtureHarnessResult>;
 }
 
+export type MichaelRuntimeAdapterContractIntent =
+  | 'clear_training_support'
+  | 'ambiguous_training_support';
+
+export type MichaelRuntimeAdapterContractDecision =
+  | 'accepted'
+  | 'safe_fallback'
+  | 'safe_close';
+
+export interface MichaelRuntimeAdapterContractInput {
+  identity: AgentRuntimeAdapterDispatchIdentity;
+  turnId: RuntimeTurnId;
+  taskType: RuntimeTaskType;
+  runtimeTurn: RuntimeTurnFixtureHarnessResult;
+  turnClarity?: 'clear' | 'ambiguous';
+  language?: unknown;
+  intent?: MichaelRuntimeAdapterContractIntent;
+}
+
+export interface MichaelRuntimeAdapterContractIssue {
+  path: string;
+  code: string;
+  message: string;
+}
+
+export interface MichaelRuntimeAdapterRuntimeTurnSummary {
+  scenario: RuntimeTurnFixtureScenarioType;
+  decision: ContextPacketConsumptionDecision | RuntimeTurnCoordinatorRejection['decision'];
+  agentKey: unknown;
+  taskType?: RuntimeTaskType;
+  packetStatus?: MichaelResponseContextPacketStatus;
+  contextManagerInjected: boolean;
+}
+
+export interface MichaelRuntimeAdapterContractResult {
+  decision: MichaelRuntimeAdapterContractDecision;
+  agentKey: 'michael_magnificent';
+  taskType: 'training_support';
+  turnId: RuntimeTurnId;
+  selectionReason: string;
+  blockedReasonCodes: string[];
+  runtimeTurnStatus: MichaelRuntimeTurnOutcomeStatus;
+  responseType: MichaelResponseType;
+  runtimeTurn: MichaelRuntimeAdapterRuntimeTurnSummary;
+  michaelResponse: MichaelResponseContractV1;
+  validation: Extract<MichaelResponseContractValidationResult, { ok: true }>;
+  issues: MichaelRuntimeAdapterContractIssue[];
+  selectedFixtureKey: string;
+  eventPersistence: 'disabled';
+  outcomePersistence: 'disabled';
+  guidedActionPersistence: 'disabled';
+  envelopePersistence: 'disabled';
+  responsePersistence: 'disabled';
+  sessionPersistence: 'disabled';
+  transcriptPersistence: 'disabled';
+  behavior: 'not_implemented';
+  agentResponseGenerated: false;
+}
+
 export type MichaelResponseContractSchemaVersion = 'michael_response_contract.v1';
 
 export type MichaelResponseType =
@@ -527,7 +586,8 @@ export type MichaelResponseContractValidationCode =
   | 'substantive_response_not_allowed'
   | 'rejected_context_requires_safe_close'
   | 'next_step_not_allowed'
-  | 'next_step_required';
+  | 'next_step_required'
+  | 'prohibited_text';
 
 export interface MichaelResponseContractValidationIssue {
   path: string;

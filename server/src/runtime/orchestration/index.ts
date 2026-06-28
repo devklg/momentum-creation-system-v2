@@ -37,6 +37,12 @@ export type {
   RuntimeTurnFixtureScenarioMetadata,
   RuntimeTurnFixtureScenarioOptions,
   RuntimeTurnFixtureScenarioType,
+  MichaelRuntimeAdapterContractDecision,
+  MichaelRuntimeAdapterContractInput,
+  MichaelRuntimeAdapterContractIntent,
+  MichaelRuntimeAdapterContractIssue,
+  MichaelRuntimeAdapterContractResult,
+  MichaelRuntimeAdapterRuntimeTurnSummary,
   MichaelRuntimeResponseFixtureHarness,
   MichaelRuntimeResponseFixtureHarnessResult,
   MichaelRuntimeResponseFixtureScenario,
@@ -124,9 +130,12 @@ export {
 } from './fixtures/index.js';
 export type { MichaelRuntimeResponseScenarioKey } from './fixtures/index.js';
 
+export { runMichaelRuntimeAdapterContract } from './michaelRuntimeAdapterContract.js';
+
 export {
   MICHAEL_RESPONSE_AGENT_KEY,
   MICHAEL_RESPONSE_CONTRACT_SCHEMA_VERSION,
+  MICHAEL_RESPONSE_CONTRACT_FORBIDDEN_FIELD_ALIASES,
   MICHAEL_RESPONSE_FORBIDDEN_FIELDS,
   MICHAEL_RESPONSE_TASK_TYPE,
   MICHAEL_RESPONSE_TYPES,
