@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -62,6 +62,31 @@ function collectOrchestrationFiles(): Array<{ relativePath: string; text: string
   }
 
   walk(orchestrationRoot);
+  return files;
+}
+
+function collectTextFiles(relativeRoot: string): Array<{ relativePath: string; text: string }> {
+  const root = resolve(repoRoot, relativeRoot);
+  const files: Array<{ relativePath: string; text: string }> = [];
+  if (!existsSync(root)) return files;
+
+  function walk(current: string): void {
+    for (const entry of readdirSync(current)) {
+      const absolutePath = resolve(current, entry);
+      const stats = statSync(absolutePath);
+      if (stats.isDirectory()) {
+        walk(absolutePath);
+        continue;
+      }
+      if (!/\.(ts|tsx|js|jsx|css|html)$/.test(entry)) continue;
+      files.push({
+        relativePath: normalizePath(relative(repoRoot, absolutePath)),
+        text: readFileSync(absolutePath, 'utf8'),
+      });
+    }
+  }
+
+  walk(root);
   return files;
 }
 
@@ -166,7 +191,7 @@ function validInput(): ContextPacketBuildInput {
 describe('S2.1 orchestration import boundary', () => {
   it('does not import stores, direct adapters, GraphRAG, or Gateway fallback clients', () => {
     const forbidden =
-      /\bfrom\s+['"](?:mongoose|mongodb|neo4j-driver|chromadb|[^'"]*\/services\/gateway\.js|[^'"]*\/services\/persistence\/[^'"]*|[^'"]*graph-?rag[^'"]*)['"]|new\s+MongoClient\b|mongoose\.connect\b|neo4j\.driver\b|ChromaClient\b|gatewayCall\b|tripleStackWrite\b/i;
+      /\bfrom\s+['"](?:mongoose|mongodb|neo4j-driver|chromadb|[^'"]*\/services\/gateway\.js|[^'"]*\/services\/persistence\/[^'"]*|[^'"]*graph-?rag[^'"]*|[^'"]*retrieval[^'"]*)['"]|new\s+MongoClient\b|mongoose\.connect\b|neo4j\.driver\b|ChromaClient\b|gatewayCall\b|tripleStackWrite\b|rawRetrieval\b|retrievalHelper\b|directRetrieval\b/i;
     const matches = matchingLines(forbidden);
     expect(matches, matches.join('\n')).toEqual([]);
   });
@@ -179,6 +204,33 @@ describe('S2.1 orchestration import boundary', () => {
   it('does not mount routes or reference an /api/runtime surface', () => {
     const matches = matchingLines(/app\.use\(|express\(|\/api\/runtime/);
     expect(matches, matches.join('\n')).toEqual([]);
+  });
+
+  it('confirms /api/runtime remains unmounted in the server entrypoint', () => {
+    const serverIndex = readFileSync(resolve(repoRoot, 'server/src/index.ts'), 'utf8');
+    expect(serverIndex).not.toMatch(/\/api\/runtime/);
+  });
+
+  it('confirms .com has no S2 agent runtime request wiring', () => {
+    const matches = collectTextFiles('apps/com/src').flatMap((file) =>
+      file.text
+        .split(/\r?\n/)
+        .map((line, index) => ({ line, lineNumber: index + 1 }))
+        .filter(({ line }) =>
+          /agent_runtime|runtime\/orchestration|requestContextPacket|ContextPacket|\/api\/runtime|steve_success|michael_magnificent|ivory|context\.packet/i.test(
+            line,
+          ),
+        )
+        .map(({ line, lineNumber }) => `${file.relativePath}:${lineNumber}: ${line.trim()}`),
+    );
+    expect(matches, matches.join('\n')).toEqual([]);
+  });
+
+  it('confirms the Gateway fallback client remains present and unchanged by orchestration', () => {
+    const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
+    expect(gatewayClient).toContain('export async function gatewayCall');
+    expect(gatewayClient).toContain('/execute');
+    expect(gatewayClient).toContain('GATEWAY_URL');
   });
 
   it('keeps the orchestration boundary descriptor inert', () => {

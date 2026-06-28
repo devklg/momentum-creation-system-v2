@@ -2,9 +2,11 @@ import type {
   AgentAllowedOutput,
   AgentKey,
   BaId,
+  ContextPacketRequest,
   ContextPacketV1,
   CorrelationId,
   RequestId,
+  RuntimeRequestScope,
   RuntimeLanguage,
   RuntimeMode,
   RuntimeTaskType,
@@ -130,6 +132,57 @@ export interface PlanAgentTurnInput {
   /** Untrusted packet returned by the Context Manager for this turn. */
   packet: unknown;
   requireSubstantive?: boolean;
+}
+
+/**
+ * Narrow Context Manager boundary used by S2.2 request wiring.
+ *
+ * The orchestrator depends on this injected port only. It does not assemble
+ * packets, retrieve knowledge, or import Context Manager builder internals.
+ */
+export interface ContextManagerRequestPort {
+  readonly assembledBy: 'context_manager';
+  requestContextPacket(
+    scope: RuntimeRequestScope,
+    request: ContextPacketRequest,
+  ): Promise<unknown>;
+}
+
+export interface BuildContextPacketRequestInput {
+  identity: OrchestrationSessionIdentity;
+  turnId: RuntimeTurnId;
+  taskType: RuntimeTaskType;
+}
+
+export interface ContextPacketRequestBundle {
+  scope: RuntimeRequestScope;
+  request: ContextPacketRequest;
+}
+
+export interface RequestContextPacketForTurnInput extends BuildContextPacketRequestInput {
+  contextManager: ContextManagerRequestPort;
+  requireSubstantive?: boolean;
+}
+
+export interface ContextPacketRequestIssue {
+  path: string;
+  code: string;
+  message: string;
+}
+
+export interface ContextPacketRequestWiringResult {
+  decision: ContextPacketConsumptionDecision;
+  agentKey: AgentKey;
+  behavior: 'not_implemented';
+  request: ContextPacketRequest;
+  scope: RuntimeRequestScope;
+  response?: unknown;
+  consumption: ContextPacketConsumptionResult;
+  events: RuntimeAgentEventEnvelope[];
+  issues: ContextPacketRequestIssue[];
+  notes: readonly string[];
+  /** Explicitly documents S2.2 event behavior: returned only, never persisted. */
+  eventPersistence: 'disabled';
 }
 
 /**

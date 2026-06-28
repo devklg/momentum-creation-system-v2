@@ -112,6 +112,8 @@ export const idempotencyKeys = {
     `agent-turn:${sessionId}:${turnId}:received`,
   contextPacketReceived: (sessionId: string, turnId: string): string =>
     `context-packet:${sessionId}:${turnId}:received`,
+  contextPacketRequested: (sessionId: string, turnId: string): string =>
+    `context-packet:${sessionId}:${turnId}:requested`,
   contextPacketRejected: (sessionId: string, turnId: string): string =>
     `context-packet:${sessionId}:${turnId}:rejected`,
   guardrailBlocked: (sessionId: string, turnId: string): string =>
