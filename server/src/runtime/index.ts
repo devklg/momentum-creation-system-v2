@@ -15,12 +15,59 @@ export {
 export type {
   BrowserVoiceTextRuntimeBoundaryPort,
 } from './browser/voiceTextRuntime.js';
+export type {
+  BrowserRuntimeEventEnvelope,
+  BrowserRuntimeEventEnvelopeInput,
+  BrowserVoiceTextFoundationPort,
+  BrowserVoiceTextSafeFailure,
+  BrowserVoiceTextSessionFoundation,
+  BrowserVoiceTextValidationCode,
+  BrowserVoiceTextValidationIssue,
+  BrowserVoiceTextValidationResult,
+} from './browser/index.js';
+export {
+  BROWSER_RUNTIME_AGENT_KEYS,
+  BROWSER_RUNTIME_ALLOWED_SURFACE,
+  BROWSER_RUNTIME_MODES,
+  BROWSER_RUNTIME_SUPPORTED_LANGUAGES,
+  BrowserVoiceTextValidationError,
+  INTERNAL_BROWSER_RUNTIME_EVENT_SOURCES,
+  MICROPHONE_PERMISSION_POLICY,
+  TEXT_FALLBACK_REQUIRED,
+  assertBrowserVoiceTextSessionFoundation,
+  createBrowserRuntimeEventEnvelope,
+  createBrowserTextFallbackTurn,
+  finalizeBrowserVoiceTurn,
+  speechLanguageMap,
+  validateBrowserVoiceTextSessionFoundation,
+} from './browser/index.js';
 export {
   contextManagerBoundary,
 } from './context/contextManager.js';
 export type {
   ContextManagerBoundaryPort,
 } from './context/contextManager.js';
+export type {
+  ContextPacketFoundationBoundary,
+  ContextPacketFoundationRequest,
+  ContextPacketValidationCode,
+  ContextPacketValidationIssue,
+  ContextPacketValidationResult,
+} from './context/index.js';
+export {
+  CONTEXT_MANAGER_ASSEMBLER,
+  CONTEXT_PACKET_AGENT_KEYS,
+  CONTEXT_PACKET_SUPPORTED_LANGUAGES,
+  CONTEXT_PACKET_V1_SCHEMA_VERSION,
+  REQUIRED_CONTEXT_RUNTIME_RULE_IDS,
+  TEAM_MAGNIFICENT_KEY,
+  TEAM_MAGNIFICENT_NAME,
+  ContextPacketValidationError,
+  assertValidContextPacketV1,
+  contextPacketFoundationBoundary,
+  prepareContextPacketFoundation,
+  validateContextPacketV1,
+} from './context/index.js';
 export {
   eventRuntimeBoundary,
 } from './events/eventRuntime.js';
