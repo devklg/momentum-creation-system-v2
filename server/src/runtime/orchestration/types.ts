@@ -645,3 +645,57 @@ export interface AgentOrchestrationBoundaryDescriptor {
 }
 
 export type { BaId, OutcomeId, RuntimeTurnId };
+
+// ───────────────────────────────────────────────────────────────────────────
+// S2.17 — Michael response catalog (inert, controlled, returned-only).
+// A read-only catalog wrapper over the pre-authored EN/ES Michael response
+// contract fixtures. It generates NO text, calls NO LLM, mounts NO route, and
+// performs NO persistence or data access — it only lists and looks up fixtures
+// that already validate against michael_response_contract.v1.
+// ───────────────────────────────────────────────────────────────────────────
+
+/** Scenario family a catalog entry belongs to (mirrors the Context Packet status). */
+export type MichaelResponseScenarioFamily =
+  | 'complete'
+  | 'degraded'
+  | 'missing'
+  | 'failed'
+  | 'rejected';
+
+/** A single controlled catalog entry: metadata plus its validated fixture. */
+export interface MichaelResponseCatalogEntry {
+  /** Stable, deterministic lookup key (e.g. `michael_next_training_step_en`). */
+  readonly catalogKey: string;
+  readonly language: 'en' | 'es';
+  readonly responseType: MichaelResponseType;
+  readonly contextPacketStatus: MichaelResponseContextPacketStatus;
+  readonly scenarioFamily: MichaelResponseScenarioFamily;
+  /** True only for complete-Context-Packet substantive responses. */
+  readonly isSubstantive: boolean;
+  /** True for safe_fallback / safe_close (non-substantive) responses. */
+  readonly isSafePath: boolean;
+  /** Metadata flag: part of the governance-approved first-Michael-slice set. */
+  readonly allowedForFirstMichaelSlice: boolean;
+  /** The pre-authored, contract-valid response fixture (no dynamic text). */
+  readonly response: MichaelResponseContractV1;
+}
+
+/** A single catalog-level validation issue (keyed by catalogKey). */
+export interface MichaelResponseCatalogValidationIssue {
+  readonly catalogKey: string;
+  readonly code:
+    | 'invalid_contract'
+    | 'wrong_agent'
+    | 'wrong_task'
+    | 'persistence_not_disabled'
+    | 'agent_response_generated'
+    | 'next_step_on_safe_path';
+  readonly message: string;
+}
+
+/** Result of validating the entire Michael response catalog. */
+export interface MichaelResponseCatalogValidationResult {
+  readonly ok: boolean;
+  readonly entryCount: number;
+  readonly issues: readonly MichaelResponseCatalogValidationIssue[];
+}

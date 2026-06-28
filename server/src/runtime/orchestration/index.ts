@@ -115,9 +115,13 @@ export {
   michaelResponseFixtureNextTrainingStepEn,
   michaelResponseFixtureNextTrainingStepEs,
   michaelResponseFixtureSafeCloseCandidateReviewOnlyRejection,
+  michaelResponseFixtureSafeCloseCandidateReviewOnlyRejectionEs,
   michaelResponseFixtureSafeCloseFailedContextPacket,
+  michaelResponseFixtureSafeCloseFailedContextPacketEs,
   michaelResponseFixtureSafeFallbackDegradedContextPacket,
+  michaelResponseFixtureSafeFallbackDegradedContextPacketEs,
   michaelResponseFixtureSafeFallbackMissingContextPacket,
+  michaelResponseFixtureSafeFallbackMissingContextPacketEs,
   michaelResponseInvalidFixtureWithForbiddenAutomaticActionField,
   michaelResponseInvalidFixtureWithForbiddenProspectFacingField,
   michaelResponseInvalidFixtureWithForbiddenScoringField,
@@ -131,6 +135,21 @@ export {
 export type { MichaelRuntimeResponseScenarioKey } from './fixtures/index.js';
 
 export { runMichaelRuntimeAdapterContract } from './michaelRuntimeAdapterContract.js';
+
+export {
+  MICHAEL_RESPONSE_CATALOG,
+  getMichaelResponseCatalogEntry,
+  hasMichaelResponseCatalogEntry,
+  listMichaelResponseCatalogEntries,
+  listMichaelResponseCatalogKeys,
+  validateMichaelResponseCatalog,
+} from './michaelResponseCatalog.js';
+export type {
+  MichaelResponseCatalogEntry,
+  MichaelResponseCatalogValidationIssue,
+  MichaelResponseCatalogValidationResult,
+  MichaelResponseScenarioFamily,
+} from './types.js';
 
 export {
   MICHAEL_RESPONSE_AGENT_KEY,
