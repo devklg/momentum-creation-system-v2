@@ -114,11 +114,17 @@ export {
   draftOutcomeGuidedActionEnvelopes,
   getAgentDescriptor,
   idempotencyKeys,
+  isIvoryRuntimeTaskAllowed,
   isKnownAgentKey,
+  isMichaelMagnificentObjectiveAllowed,
   isTaskTypeAllowed,
   listOrchestrationDescriptors,
+  mapMichaelMagnificentIdentity,
   planAgentTurn,
   requestContextPacketForTurn,
+  runIvoryRuntimeAdapter,
+  runMichaelMagnificentRuntimeAdapter,
+  runSteveSuccessRuntimeAdapter,
 } from './orchestration/index.js';
 export type {
   AgentEventFamily,
@@ -138,6 +144,8 @@ export type {
   CreateAgentSessionResult,
   DraftOutcomeGuidedActionInput,
   EventCapture,
+  IvoryRuntimeAdapterInput,
+  MichaelMagnificentRuntimeAdapterInput,
   OrchestrationDraftContentScope,
   OrchestrationEventInput,
   OrchestrationGuidedActionDraftEnvelope,
@@ -150,4 +158,5 @@ export type {
   OrchestrationTurnPlan,
   PlanAgentTurnInput,
   RequestContextPacketForTurnInput,
+  SteveSuccessRuntimeAdapterInput,
 } from './orchestration/index.js';
