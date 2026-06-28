@@ -29,6 +29,9 @@ export type {
   OrchestrationTurnPlan,
   PlanAgentTurnInput,
   RequestContextPacketForTurnInput,
+  RuntimeTurnCoordinatorInput,
+  RuntimeTurnCoordinatorRejection,
+  RuntimeTurnCoordinatorResult,
 } from './types.js';
 
 export {
@@ -65,6 +68,10 @@ export type {
   MichaelMagnificentRuntimeAdapterInput,
   SteveSuccessRuntimeAdapterInput,
 } from './adapters/index.js';
+
+export {
+  coordinateRuntimeTurn,
+} from './turnCoordinator.js';
 
 export {
   ORCHESTRATION_COMPONENT_VERSION,

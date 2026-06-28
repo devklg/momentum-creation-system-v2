@@ -109,6 +109,7 @@ export {
   buildContextPacketRequest,
   composeOrchestrationTurn,
   consumeContextPacket,
+  coordinateRuntimeTurn,
   createAgentSession,
   createEventCapture,
   dispatchAgentRuntimeAdapter,
@@ -163,5 +164,8 @@ export type {
   OrchestrationTurnPlan,
   PlanAgentTurnInput,
   RequestContextPacketForTurnInput,
+  RuntimeTurnCoordinatorInput,
+  RuntimeTurnCoordinatorRejection,
+  RuntimeTurnCoordinatorResult,
   SteveSuccessRuntimeAdapterInput,
 } from './orchestration/index.js';
