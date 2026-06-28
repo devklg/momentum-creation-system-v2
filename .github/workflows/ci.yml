@@ -2,8 +2,10 @@ name: CI Merge Gates
 
 # Enforces the Sprint 1 verification gates (typecheck + build + server tests)
 # on every pull request targeting main and on every push to main.
-# To make these blocking on merge, enable branch protection on `main` and mark
-# the "gates" job as a Required status check (repo setting, owner action).
+# The single job below is named "gates" so the check run it publishes matches
+# the branch-protection Required status check context "gates" exactly. To make
+# it blocking on merge, enable branch protection on `main` and mark the "gates"
+# check as Required (repo setting, owner action).
 
 on:
   pull_request:
@@ -18,7 +20,7 @@ concurrency:
 
 jobs:
   gates:
-    name: typecheck / build / server tests
+    name: gates
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
