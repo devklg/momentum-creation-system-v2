@@ -796,3 +796,64 @@ export interface DeriveMichaelSelectionRequestFromRuntimeTurnInput {
   readonly intent?: MichaelRuntimeAdapterContractIntent;
   readonly language?: unknown;
 }
+
+// ───────────────────────────────────────────────────────────────────────────
+// S2.20 — Michael end-to-end inert resolution facade (pure, returned-only).
+// Composes the S2.19 derivation layer and the S2.18 selector/catalog layer to
+// resolve a runtime turn / adapter input into the matching, pre-authored,
+// contract-valid Michael response fixture (returned by reference). Generates NO
+// text, calls NO LLM, mounts NO route, performs NO persistence/data access, and
+// mutates NO runtime turn or catalog entry. Any trace is inert and redacted.
+// ───────────────────────────────────────────────────────────────────────────
+
+/** Inert, redacted classification metadata for a resolution. */
+export interface MichaelRuntimeResolutionClassification {
+  readonly scenarioFamily: MichaelResponseScenarioFamily;
+  readonly responseType: MichaelResponseType;
+  readonly language: 'en' | 'es';
+  readonly intent?: MichaelCatalogSelectorIntent;
+}
+
+/**
+ * Inert, returned-only resolution trace. Contains ONLY redacted, controlled
+ * metadata: no raw Context Packet, no raw retrieval/store/GraphRAG/Gateway
+ * output, no generated text, no tokens / request IDs / session IDs / PII.
+ */
+export interface MichaelRuntimeResolutionTrace {
+  readonly classification: MichaelRuntimeResolutionClassification;
+  readonly selectionRequest: MichaelResponseCatalogSelectionRequest;
+  readonly catalogKey: string;
+  readonly responseType: MichaelResponseType;
+  readonly contextPacketStatus: MichaelResponseContextPacketStatus;
+  readonly language: 'en' | 'es';
+  readonly persistence: 'disabled';
+  readonly agentResponseGenerated: false;
+}
+
+/** A single resolution issue (why a runtime turn did not resolve). */
+export interface MichaelRuntimeResolutionIssue {
+  readonly code:
+    | 'invalid_runtime_turn'
+    | 'derivation_failed'
+    | 'selection_failed'
+    | 'contract_validation_failed'
+    | 'wrong_agent'
+    | 'wrong_task'
+    | 'unsupported_language';
+  readonly message: string;
+}
+
+/** Discriminated result of an end-to-end inert resolution. */
+export type MichaelRuntimeResolutionResult =
+  | {
+      readonly ok: true;
+      readonly selectionRequest: MichaelResponseCatalogSelectionRequest;
+      readonly catalogKey: string;
+      readonly catalogEntry: MichaelResponseCatalogEntry;
+      readonly response: MichaelResponseContractV1;
+      readonly trace: MichaelRuntimeResolutionTrace;
+    }
+  | {
+      readonly ok: false;
+      readonly issues: readonly MichaelRuntimeResolutionIssue[];
+    };
