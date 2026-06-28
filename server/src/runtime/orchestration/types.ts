@@ -699,3 +699,57 @@ export interface MichaelResponseCatalogValidationResult {
   readonly entryCount: number;
   readonly issues: readonly MichaelResponseCatalogValidationIssue[];
 }
+
+// ───────────────────────────────────────────────────────────────────────────
+// S2.18 — Michael catalog selector contract (pure, returned-only, inert).
+// Maps a deterministic selection request to the matching MICHAEL_RESPONSE_CATALOG
+// entry. Generates NO text, calls NO LLM, mounts NO route, performs NO
+// persistence or data access, and NEVER mutates a catalog entry.
+// ───────────────────────────────────────────────────────────────────────────
+
+/** Optional intent used only to cross-check complete-Context-Packet requests. */
+export type MichaelCatalogSelectorIntent =
+  | 'clear_training_support'
+  | 'ambiguous_training_support';
+
+/** A deterministic catalog selection request. */
+export interface MichaelResponseCatalogSelectionRequest {
+  readonly agentKey: string;
+  readonly taskType: string;
+  readonly language: string;
+  readonly responseType: string;
+  readonly scenarioFamily: string;
+  /** Optional; if present it must equal scenarioFamily. */
+  readonly contextPacketStatus?: string;
+  /** Optional; cross-checked only for the `complete` scenario family. */
+  readonly intent?: MichaelCatalogSelectorIntent;
+}
+
+/** A single selection issue (why a request did not resolve to an entry). */
+export interface MichaelResponseCatalogSelectionIssue {
+  readonly code:
+    | 'wrong_agent'
+    | 'wrong_task'
+    | 'unsupported_language'
+    | 'invalid_response_type'
+    | 'invalid_scenario_family'
+    | 'inconsistent_context_status'
+    | 'intent_mismatch'
+    | 'invalid_combination'
+    | 'catalog_key_not_found'
+    | 'invalid_contract';
+  readonly message: string;
+}
+
+/** Discriminated result of a catalog selection. */
+export type MichaelResponseCatalogSelectionResult =
+  | {
+      readonly ok: true;
+      readonly catalogKey: string;
+      readonly entry: MichaelResponseCatalogEntry;
+      readonly response: MichaelResponseContractV1;
+    }
+  | {
+      readonly ok: false;
+      readonly issues: readonly MichaelResponseCatalogSelectionIssue[];
+    };
