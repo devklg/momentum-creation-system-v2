@@ -63,3 +63,46 @@ Locked rules confirmed held: Gateway fallback retained; ratified docs untouched;
 - Do not mount `/api/runtime/*`.
 - Do not modify ratified documents.
 - Do not modify `.com` prospect-facing surfaces.
+
+## Owner Cleanup — Stale Branches / Worktrees (action: owner; not executed here)
+
+Recorded per Sprint 1 final-review prep. Nothing below was deleted; this is a
+reviewed inventory for the owner. Branch comparison is against `main` as
+`main-ahead / branch-ahead`.
+
+### Local branches
+
+| Branch | vs main | Disposition |
+|---|---|---|
+| `codex/app-state-audit-html` | 120 / 0 | Fully contained in `main` — safe to delete. |
+| `codex/s1-2-backend-runtime-boundary` | 8 / 0 | Fully contained — safe to delete, but it is checked out in the primary dir `D:/momentum-creation-system-v2`; re-point that worktree to `main` first. |
+| `codex/wave-2a-integration-review` | 8 / 0 | Fully contained — safe to delete. |
+| `codex/wave-2b-context-browser-foundations` | 7 / 4 | Has 4 unique commits not on `main` (divergent older browser foundation + a redundant S1.5 commit). Superseded by `main`'s reconciled S1.5/S1.6. **Do NOT merge into `main`** (would regress the repaired browser foundation). Force-delete only after the owner confirms nothing unique is wanted. |
+| `feat/s1.3-phase0-1-direct-persistence` | 53 / 0 | Fully contained (S1.3 CLOSED/VERIFIED on `main`) — safe to delete. |
+
+### Worktrees
+
+| Path | Branch / HEAD | Note |
+|---|---|---|
+| `D:/momentum-creation-system-v2` | `codex/s1-2-backend-runtime-boundary` | Primary clone dir is pinned to a feature branch, not `main`. Recommend `git switch main` here. |
+| `D:/agents/.codex/worktrees/6a15/momentum-creation-system-v2` | `codex/app-state-audit-html` | Stale linked worktree. |
+| `D:/momentum-creation-system-v2-wave2a-status` | `codex/wave-2b-context-browser-foundations` | Stale linked worktree (divergent branch above). |
+| `D:/tmp/mcs-main-s1-5` | `main` | Canonical `main` worktree. Keep. |
+| `D:/tmp/mcs-v2-s1-6` | detached HEAD `6796c74` | Stale detached worktree. |
+
+### Suggested owner commands (review first; run manually)
+
+```sh
+# Re-point the primary dir to main, then prune stale linked worktrees:
+git -C D:/momentum-creation-system-v2 switch main
+git worktree remove D:/momentum-creation-system-v2-wave2a-status
+git worktree remove D:/tmp/mcs-v2-s1-6
+git worktree remove "D:/agents/.codex/worktrees/6a15/momentum-creation-system-v2"
+git worktree prune
+
+# Delete fully-merged branches:
+git branch -d codex/app-state-audit-html codex/s1-2-backend-runtime-boundary codex/wave-2a-integration-review feat/s1.3-phase0-1-direct-persistence
+
+# Only after confirming nothing unique is wanted (4 unique commits, do NOT merge):
+git branch -D codex/wave-2b-context-browser-foundations
+```

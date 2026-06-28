@@ -1,0 +1,48 @@
+name: CI Merge Gates
+
+# Enforces the Sprint 1 verification gates (typecheck + build + server tests)
+# on every pull request targeting main and on every push to main.
+# To make these blocking on merge, enable branch protection on `main` and mark
+# the "gates" job as a Required status check (repo setting, owner action).
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: typecheck / build / server tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck (merge gate)
+        run: pnpm typecheck
+
+      - name: Build (merge gate)
+        run: pnpm build
+
+      - name: Server tests
+        run: pnpm --filter @momentum/server test

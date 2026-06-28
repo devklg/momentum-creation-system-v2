@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Opt-in pre-push merge gate.
+# Blocks a push when `pnpm typecheck` or `pnpm build` fails, so a non-compiling
+# state cannot be pushed (this is what the Wave 2B review flagged: main was once
+# merged in a non-compiling state because the merge was not gated).
+#
+# Enable (per clone/worktree):
+#   git config core.hooksPath scripts/git-hooks
+# Disable:
+#   git config --unset core.hooksPath
+#
+# Note: this runs on every push while enabled. Leave disabled if you rely on
+# fast automated direct-to-main pushes and prefer the GitHub Actions CI gate
+# (.github/workflows/ci.yml) to catch regressions instead.
+
+set -e
+
+echo "[pre-push] merge gate: pnpm typecheck"
+pnpm typecheck
+
+echo "[pre-push] merge gate: pnpm build"
+pnpm build
+
+echo "[pre-push] gates passed"
