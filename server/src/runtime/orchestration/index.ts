@@ -37,6 +37,16 @@ export type {
   RuntimeTurnFixtureScenarioMetadata,
   RuntimeTurnFixtureScenarioOptions,
   RuntimeTurnFixtureScenarioType,
+  MichaelResponseContractValidationIssue,
+  MichaelResponseContractValidationResult,
+  MichaelResponseContractV1,
+  MichaelResponseContextPacketStatus,
+  MichaelResponseNextStep,
+  MichaelResponseSafety,
+  MichaelResponseType,
+  MichaelResponseValidationIssue,
+  MichaelResponseValidationResult,
+  MichaelResponseValidationStatus,
 } from './types.js';
 
 export {
@@ -80,8 +90,38 @@ export {
 
 export {
   createRuntimeTurnFixtureHarness,
+  invalidMichaelResponseFixtures,
+  michaelResponseFixtureClarificationQuestionEn,
+  michaelResponseFixtureClarificationQuestionEs,
+  michaelResponseFixtureNextTrainingStepEn,
+  michaelResponseFixtureNextTrainingStepEs,
+  michaelResponseFixtureSafeCloseCandidateReviewOnlyRejection,
+  michaelResponseFixtureSafeCloseFailedContextPacket,
+  michaelResponseFixtureSafeFallbackDegradedContextPacket,
+  michaelResponseFixtureSafeFallbackMissingContextPacket,
+  michaelResponseInvalidFixtureWithForbiddenAutomaticActionField,
+  michaelResponseInvalidFixtureWithForbiddenProspectFacingField,
+  michaelResponseInvalidFixtureWithForbiddenScoringField,
+  michaelResponseInvalidFixtureWithPersistenceNotDisabled,
+  michaelResponseInvalidFixtureWithWrongAgentKey,
+  michaelResponseInvalidFixtureWithWrongTaskType,
   runRuntimeTurnFixtureScenario,
+  validMichaelResponseFixtures,
 } from './fixtures/index.js';
+
+export {
+  MICHAEL_RESPONSE_AGENT_KEY,
+  MICHAEL_RESPONSE_CONTRACT_SCHEMA_VERSION,
+  MICHAEL_RESPONSE_FORBIDDEN_FIELDS,
+  MICHAEL_RESPONSE_TASK_TYPE,
+  MICHAEL_RESPONSE_TYPES,
+  MichaelResponseValidationError,
+  assertMichaelResponseContractV1,
+  assertValidMichaelResponseContract,
+  isMichaelResponseContractV1,
+  validateMichaelResponseContract,
+  validateMichaelResponseContractV1,
+} from './michaelResponseContract.js';
 
 export {
   ORCHESTRATION_COMPONENT_VERSION,

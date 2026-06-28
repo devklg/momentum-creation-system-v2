@@ -388,6 +388,100 @@ export interface RuntimeTurnFixtureHarness {
   ): Promise<RuntimeTurnFixtureHarnessResult>;
 }
 
+export type MichaelResponseContractSchemaVersion = 'michael_response_contract.v1';
+
+export type MichaelResponseType =
+  | 'next_training_step'
+  | 'clarification_question'
+  | 'safe_fallback'
+  | 'safe_close';
+
+export type MichaelResponseSafetyValidationStatus =
+  | 'passed'
+  | 'blocked'
+  | 'degraded';
+
+export type MichaelResponseValidationStatus =
+  MichaelResponseSafetyValidationStatus;
+
+export type MichaelResponseContextPacketStatus =
+  | ContextPacketV1['packetStatus']
+  | 'missing'
+  | 'rejected';
+
+export interface MichaelResponseSafety {
+  validationStatus: MichaelResponseSafetyValidationStatus;
+  guardrailIds: string[];
+  blockedReasonCodes: string[];
+}
+
+export interface MichaelResponseNextStep {
+  label?: string;
+  title?: string;
+  instruction?: string;
+  baOwned: true;
+  automaticSending: false;
+  automaticCalling: false;
+  externalSideEffect: false;
+}
+
+export interface MichaelResponseContractV1 {
+  schemaVersion: MichaelResponseContractSchemaVersion;
+  responseType: MichaelResponseType;
+  agentKey: 'michael_magnificent';
+  taskType: 'training_support';
+  sessionId: SessionId;
+  turnId: RuntimeTurnId;
+  correlationId: CorrelationId;
+  contextPacketStatus: MichaelResponseContextPacketStatus;
+  language: 'en' | 'es';
+  text: string;
+  safety: MichaelResponseSafety;
+  persistence: 'disabled';
+  generatedAt: string;
+  agentResponseGenerated: false;
+  contextPacketId?: string;
+  nextStep?: MichaelResponseNextStep;
+}
+
+export type MichaelResponseContractValidationCode =
+  | 'not_object'
+  | 'missing_required_field'
+  | 'invalid_literal'
+  | 'invalid_enum'
+  | 'invalid_type'
+  | 'invalid_timestamp'
+  | 'forbidden_field'
+  | 'unexpected_field'
+  | 'context_packet_id_without_valid_packet'
+  | 'substantive_response_not_allowed'
+  | 'rejected_context_requires_safe_close'
+  | 'next_step_not_allowed'
+  | 'next_step_required';
+
+export interface MichaelResponseContractValidationIssue {
+  path: string;
+  code: MichaelResponseContractValidationCode;
+  message: string;
+}
+
+export type MichaelResponseValidationIssue =
+  MichaelResponseContractValidationIssue;
+
+export type MichaelResponseContractValidationResult =
+  | {
+      ok: true;
+      contract: MichaelResponseContractV1;
+      issues: [];
+    }
+  | {
+      ok: false;
+      issues: MichaelResponseContractValidationIssue[];
+    };
+
+export type MichaelResponseValidationResult =
+  MichaelResponseContractValidationResult;
+
 /**
  * Outcome of planning a single turn.
  *
