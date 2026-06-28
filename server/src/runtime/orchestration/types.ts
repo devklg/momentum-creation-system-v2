@@ -388,6 +388,76 @@ export interface RuntimeTurnFixtureHarness {
   ): Promise<RuntimeTurnFixtureHarnessResult>;
 }
 
+export type MichaelRuntimeResponseFixtureScenarioName =
+  | 'complete_training_support'
+  | 'complete_ambiguous_training_support'
+  | 'degraded_context_packet'
+  | 'missing_context_manager_boundary'
+  | 'failed_context_packet'
+  | 'rejected_context_packet'
+  | 'invalid_objective'
+  | 'unknown_agent'
+  | 'candidate_review_only_rejected'
+  | 'unsupported_language'
+  | 'wrong_task_type'
+  | 'non_michael_agent';
+
+export type MichaelRuntimeTurnOutcomeStatus =
+  | 'accepted'
+  | 'degraded'
+  | 'blocked'
+  | 'rejected';
+
+export type MichaelRuntimeResponseFixtureValidationStatus =
+  | 'validated'
+  | 'safe_close';
+
+export interface MichaelRuntimeResponseFixtureScenarioMetadata {
+  scenarioName: MichaelRuntimeResponseFixtureScenarioName;
+  description: string;
+  expectedResponseType: MichaelResponseType;
+  expectedContextStatus: MichaelResponseContextPacketStatus;
+  expectedValidationStatus: MichaelRuntimeResponseFixtureValidationStatus;
+  runtimeTurnStatus: MichaelRuntimeTurnOutcomeStatus;
+  runtimeScenario: RuntimeTurnFixtureScenarioType;
+  agentKey: unknown;
+  taskType: RuntimeTaskType;
+  fixtureOnly: true;
+  persistence: 'disabled';
+  agentResponseGenerated: false;
+}
+
+export interface MichaelRuntimeResponseFixtureScenario {
+  metadata: MichaelRuntimeResponseFixtureScenarioMetadata;
+  responseFixtureKey: string;
+}
+
+export interface MichaelRuntimeResponseFixtureScenarioOptions {
+  scenarioName: MichaelRuntimeResponseFixtureScenarioName;
+  createdAt?: string;
+}
+
+export interface MichaelRuntimeResponseFixtureHarnessResult {
+  scenarioName: MichaelRuntimeResponseFixtureScenarioName;
+  scenario: MichaelRuntimeResponseFixtureScenario;
+  runtimeTurn: RuntimeTurnFixtureHarnessResult;
+  michaelResponse: MichaelResponseContractV1;
+  validation: Extract<MichaelResponseContractValidationResult, { ok: true }>;
+  eventPersistence: 'disabled';
+  outcomePersistence: 'disabled';
+  guidedActionPersistence: 'disabled';
+  envelopePersistence: 'disabled';
+  responsePersistence: 'disabled';
+  behavior: 'not_implemented';
+  agentResponseGenerated: false;
+}
+
+export interface MichaelRuntimeResponseFixtureHarness {
+  runScenario(
+    options: MichaelRuntimeResponseFixtureScenarioOptions,
+  ): Promise<MichaelRuntimeResponseFixtureHarnessResult>;
+}
+
 export type MichaelResponseContractSchemaVersion = 'michael_response_contract.v1';
 
 export type MichaelResponseType =

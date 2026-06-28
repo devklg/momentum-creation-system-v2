@@ -4,6 +4,25 @@ export {
 } from './runtimeTurnHarness.js';
 
 export {
+  createMichaelRuntimeResponseFixtureHarness,
+  runMichaelRuntimeResponseFixtureScenario,
+} from './michaelRuntimeResponseHarness.js';
+
+export {
+  getMichaelRuntimeResponseScenario,
+  michaelRuntimeResponseScenarioEntries,
+  michaelRuntimeResponseScenarioNames,
+  michaelRuntimeResponseScenarios,
+} from './michaelRuntimeResponseScenarios.js';
+export type {
+  MichaelRuntimeResponseScenario,
+  MichaelRuntimeResponseScenarioKey,
+  MichaelRuntimeResponseScenarioMetadata,
+  MichaelRuntimeResponseScenarioName,
+  MichaelRuntimeTurnStatus,
+} from './michaelRuntimeResponseScenarios.js';
+
+export {
   invalidMichaelResponseFixtures,
   michaelResponseFixtureClarificationQuestionEn,
   michaelResponseFixtureClarificationQuestionEs,

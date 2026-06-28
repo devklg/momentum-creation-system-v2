@@ -37,6 +37,14 @@ export type {
   RuntimeTurnFixtureScenarioMetadata,
   RuntimeTurnFixtureScenarioOptions,
   RuntimeTurnFixtureScenarioType,
+  MichaelRuntimeResponseFixtureHarness,
+  MichaelRuntimeResponseFixtureHarnessResult,
+  MichaelRuntimeResponseFixtureScenario,
+  MichaelRuntimeResponseFixtureScenarioMetadata,
+  MichaelRuntimeResponseFixtureScenarioName,
+  MichaelRuntimeResponseFixtureScenarioOptions,
+  MichaelRuntimeResponseFixtureValidationStatus,
+  MichaelRuntimeTurnOutcomeStatus,
   MichaelResponseContractValidationIssue,
   MichaelResponseContractValidationResult,
   MichaelResponseContractV1,
@@ -89,8 +97,13 @@ export {
 } from './turnCoordinator.js';
 
 export {
+  createMichaelRuntimeResponseFixtureHarness,
   createRuntimeTurnFixtureHarness,
+  getMichaelRuntimeResponseScenario,
   invalidMichaelResponseFixtures,
+  michaelRuntimeResponseScenarioEntries,
+  michaelRuntimeResponseScenarios,
+  michaelResponseFixtureEntries,
   michaelResponseFixtureClarificationQuestionEn,
   michaelResponseFixtureClarificationQuestionEs,
   michaelResponseFixtureNextTrainingStepEn,
@@ -105,9 +118,11 @@ export {
   michaelResponseInvalidFixtureWithPersistenceNotDisabled,
   michaelResponseInvalidFixtureWithWrongAgentKey,
   michaelResponseInvalidFixtureWithWrongTaskType,
+  runMichaelRuntimeResponseFixtureScenario,
   runRuntimeTurnFixtureScenario,
   validMichaelResponseFixtures,
 } from './fixtures/index.js';
+export type { MichaelRuntimeResponseScenarioKey } from './fixtures/index.js';
 
 export {
   MICHAEL_RESPONSE_AGENT_KEY,
