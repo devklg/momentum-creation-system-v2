@@ -12,6 +12,11 @@ export type {
   ContextManagerRequestPort,
   CreateAgentSessionInput,
   BuildContextPacketRequestInput,
+  DraftOutcomeGuidedActionInput,
+  OrchestrationDraftContentScope,
+  OrchestrationGuidedActionDraftEnvelope,
+  OrchestrationOutcomeDraftEnvelope,
+  OutcomeGuidedActionDraftResult,
   OrchestrationSessionIdentity,
   OrchestrationSessionState,
   OrchestrationSessionStatus,
@@ -35,6 +40,8 @@ export {
   buildContextPacketRequest,
   requestContextPacketForTurn,
 } from './contextRequest.js';
+
+export { draftOutcomeGuidedActionEnvelopes } from './outcomeGuidedAction.js';
 
 export {
   ORCHESTRATION_COMPONENT_VERSION,

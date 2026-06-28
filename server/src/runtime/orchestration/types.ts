@@ -5,7 +5,10 @@ import type {
   ContextPacketRequest,
   ContextPacketV1,
   CorrelationId,
+  GuidedActionId,
+  OutcomeId,
   RequestId,
+  RuntimeOutcomeReference,
   RuntimeRequestScope,
   RuntimeLanguage,
   RuntimeMode,
@@ -185,6 +188,63 @@ export interface ContextPacketRequestWiringResult {
   eventPersistence: 'disabled';
 }
 
+export type OrchestrationDraftContentScope = 'substantive' | 'limited';
+
+export interface OrchestrationOutcomeDraftEnvelope extends RuntimeOutcomeReference {
+  schemaVersion: 'orchestration_outcome_draft.v1';
+  envelopeKind: 'outcome_draft';
+  turnId: RuntimeTurnId;
+  category: string;
+  contentScope: OrchestrationDraftContentScope;
+  summary: string;
+  draftStatus: 'draft_only';
+  source: 'agent_runtime_orchestrator';
+  persistence: 'disabled';
+  agentResponseGenerated: false;
+}
+
+export interface OrchestrationGuidedActionDraftEnvelope extends BaRuntimeScope {
+  schemaVersion: 'orchestration_guided_action_draft.v1';
+  envelopeKind: 'guided_action_draft';
+  guidedActionId: GuidedActionId;
+  sessionId: SessionId;
+  agentKey: AgentKey;
+  taskType: RuntimeTaskType;
+  language: RuntimeLanguage;
+  contextPacketId?: ContextPacketV1['packetId'];
+  turnId: RuntimeTurnId;
+  category: string;
+  title: string;
+  instruction: string;
+  contentScope: OrchestrationDraftContentScope;
+  draftStatus: 'draft_only';
+  actionOwner: 'brand_ambassador';
+  requiresBaApproval: true;
+  automaticSending: false;
+  automaticCalling: false;
+  persistence: 'disabled';
+  agentResponseGenerated: false;
+  createdAt: string;
+}
+
+export interface DraftOutcomeGuidedActionInput {
+  identity: OrchestrationSessionIdentity;
+  turnId: RuntimeTurnId;
+  consumption: ContextPacketConsumptionResult;
+  createdAt?: string;
+}
+
+export interface OutcomeGuidedActionDraftResult {
+  decision: ContextPacketConsumptionDecision;
+  agentKey: AgentKey;
+  behavior: 'not_implemented';
+  outcomeDrafts: OrchestrationOutcomeDraftEnvelope[];
+  guidedActionDrafts: OrchestrationGuidedActionDraftEnvelope[];
+  notes: readonly string[];
+  envelopePersistence: 'disabled';
+  agentResponseGenerated: false;
+}
+
 /**
  * Outcome of planning a single turn.
  *
@@ -217,4 +277,4 @@ export interface AgentOrchestrationBoundaryDescriptor {
   notes: readonly string[];
 }
 
-export type { BaId, RuntimeTurnId };
+export type { BaId, OutcomeId, RuntimeTurnId };
