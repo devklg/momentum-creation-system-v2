@@ -133,8 +133,10 @@ THREE is the final authority on enrollment, registration, genealogy, and patrona
 In [server/src/index.ts](server/src/index.ts):
 
 1. **Raw-body routes mount FIRST.** `/api/telnyx` must mount before `express.json()` — Telnyx webhooks are Ed25519-signed over raw bytes; if JSON parses first the signature is unverifiable. Do not reorder.
-2. **Pre-gate routes** (`/api/health`, `/api/auth`, `/api/welcome`, `/api/michael`, `/api/admin/*`, `/api/p`) must **not** use `requireMichaelComplete`. These are how a new BA opens the gate (or, for `/api/p`, are prospect-facing with no auth at all).
-3. **BA-facing gated routes** mount below the marked banner and must apply `(requireAuth, requireMichaelComplete)` inside the route file. The canonical mount pattern is documented at [server/src/middleware/requireMichaelComplete.ts](server/src/middleware/requireMichaelComplete.ts) — apply it per-route, never globally. Whitelist lives in `MICHAEL_GATE_WHITELIST` in `domain/michael-schedule.ts`.
+2. **Pre-gate routes** (`/api/health`, `/api/auth`, `/api/welcome`, `/api/michael`, `/api/admin/*`, `/api/p`) must **not** use `requireSteveComplete`. These are how a new BA opens the gate (or, for `/api/p`, are prospect-facing with no auth at all).
+3. **BA-facing gated routes** mount below the marked banner and must apply `(requireAuth, requireSteveComplete)` inside the route file. The canonical mount pattern is documented at [server/src/middleware/requireSteveComplete.ts](server/src/middleware/requireSteveComplete.ts) — apply it per-route, never globally. Whitelist lives in `MICHAEL_GATE_WHITELIST` in `domain/michael-schedule.ts`.
+
+> **Onboarding-gate naming:** the on-disk onboarding-complete gate is `requireSteveComplete` ([server/src/middleware/requireSteveComplete.ts](server/src/middleware/requireSteveComplete.ts)). Historical engineering reports may still mention `requireMichaelComplete`; that middleware does not exist. Do not create or assume a `requireMichaelComplete` middleware unless a future approved rename/migration slice explicitly introduces one.
 
 ### The pool mechanic and token lifecycle
 
