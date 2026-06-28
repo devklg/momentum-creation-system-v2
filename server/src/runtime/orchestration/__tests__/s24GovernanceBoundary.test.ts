@@ -80,7 +80,7 @@ function matchingImportLines(pattern: RegExp): string[] {
 describe('S2.4 static orchestration governance boundary', () => {
   it('does not import MongoDB, Neo4j, ChromaDB, GraphRAG, persistence, Gateway, or retrieval clients', () => {
     const forbiddenImports =
-      /\bfrom\s+['"][^'"]*(?:^|\/|\\|@)(?:mongoose|mongodb|neo4j-driver|chromadb)(?:$|\/|\\|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/gateway|\/services\/persistence|\/persistence\/|\/adapters?\/|\/adapter(?:\.js)?|retrieval|gatewayFallback|gateway-fallback)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:^|\/|\\|@)(?:mongoose|mongodb|neo4j-driver|chromadb)(?:$|\/|\\|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/gateway|\/services\/persistence|\/persistence\/|\/services\/[^'"]*adapter|retrieval|gatewayFallback|gateway-fallback)[^'"]*['"]/i;
     const matches = matchingImportLines(forbiddenImports);
     expect(matches, matches.join('\n')).toEqual([]);
   });

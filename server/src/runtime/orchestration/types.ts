@@ -301,6 +301,36 @@ export type AgentRuntimeAdapterDispatchResult =
   | OrchestrationTurnCompositionResult
   | AgentRuntimeAdapterDispatchRejection;
 
+export interface RuntimeTurnCoordinatorInput {
+  identity?: AgentRuntimeAdapterDispatchIdentity;
+  turnId?: RuntimeTurnId;
+  taskType?: RuntimeTaskType;
+  contextManager?: ContextManagerRequestPort;
+  requireSubstantive?: boolean;
+  createdAt?: string;
+}
+
+export interface RuntimeTurnCoordinatorRejection {
+  decision: 'reject';
+  agentKey: unknown;
+  turnId?: RuntimeTurnId;
+  behavior: 'not_implemented';
+  issues: ContextPacketRequestIssue[];
+  events: [];
+  outcomeDrafts: [];
+  guidedActionDrafts: [];
+  notes: readonly string[];
+  eventPersistence: 'disabled';
+  outcomePersistence: 'disabled';
+  guidedActionPersistence: 'disabled';
+  envelopePersistence: 'disabled';
+  agentResponseGenerated: false;
+}
+
+export type RuntimeTurnCoordinatorResult =
+  | AgentRuntimeAdapterDispatchResult
+  | RuntimeTurnCoordinatorRejection;
+
 /**
  * Outcome of planning a single turn.
  *
