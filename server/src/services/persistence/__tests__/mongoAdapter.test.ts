@@ -19,6 +19,10 @@ vi.mock('../mongo/models/registry.js', () => ({
   getMongoModel: mocks.getMongoModel,
 }));
 
+// Per-describe timeout bump (default 5000ms). The dynamic `await import('../mongo/adapter.js')`
+// in each test pays a contended module-transform cost on the FIRST full-suite run under
+// parallel load, which can exceed the 5s default. Known parallel-load timing flake, not a
+// logic bug (passes in isolation and on re-run). Kept local to this file; no global config change.
 describe('Mongo direct adapter', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -88,4 +92,4 @@ describe('Mongo direct adapter', () => {
       }),
     ).resolves.toEqual({ results: [{ ok: true }], count: 1 });
   });
-});
+}, 15000);

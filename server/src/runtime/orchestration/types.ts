@@ -585,6 +585,7 @@ export type MichaelResponseContractValidationCode =
   | 'context_packet_id_without_valid_packet'
   | 'substantive_response_not_allowed'
   | 'rejected_context_requires_safe_close'
+  | 'failed_context_requires_safe_close'
   | 'next_step_not_allowed'
   | 'next_step_required'
   | 'prohibited_text';

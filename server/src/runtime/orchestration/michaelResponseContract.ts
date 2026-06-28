@@ -105,6 +105,55 @@ const PROHIBITED_TEXT_PATTERNS = [
 const SAFE_CLOSE_SUBSTANTIVE_TRAINING_PATTERN =
   /\b(?:open|review|practice|complete|start|continue)\s+(?:module|lesson|training|script|next step)\b/i;
 
+// S3.3 — Spanish (es) lexical guardrails. These run against a diacritic- and
+// case-normalized copy of the text so `comisión`/`comision`/`COMISIÓN` all
+// match. They sit ALONGSIDE the English patterns above (English coverage is
+// unchanged). Automatic-action terms target instruction forms (infinitive /
+// imperative / gerund), not simple past statements like "no se envió nada",
+// mirroring how the English guard blocks "send automatically" but not "sent".
+const ES_PROHIBITED_TEXT_PATTERNS = [
+  {
+    label: 'income_claim',
+    pattern: /\b(?:ingresos?|ganancias?|comision(?:es)?|compensacion(?:es)?)\b/,
+  },
+  {
+    label: 'placement_promise',
+    pattern: /\b(?:colocacion(?:es)?|garantizad[oa]s?|garantia)\b/,
+  },
+  {
+    label: 'medical_advice',
+    pattern: /\b(?:medic[oa]s?|salud)\b/,
+  },
+  {
+    label: 'prospect_facing_instruction',
+    pattern: /\b(?:prospectos?)\b/,
+  },
+  {
+    label: 'automatic_action',
+    pattern:
+      /\b(?:automatic[oa]s?|automaticamente|enviar(?:les|le|nos)?|enviando|envien|envie|llamar(?:les|le|nos)?|llamando|llamen|llame|agendar|programar)\b/,
+  },
+] as const;
+
+// Spanish safe-close substantive-guidance guard: a training verb immediately
+// followed by an optional article and a training noun (mirrors the English
+// SAFE_CLOSE pattern). Safe phrases like "continúa solo desde contexto de
+// entrenamiento" do not match (no article/noun directly after the verb).
+const ES_SAFE_CLOSE_SUBSTANTIVE_TRAINING_PATTERN =
+  /\b(?:abre|revisa|repasa|practica|completa|empieza|comienza|inicia|continua|sigue|estudia)\s+(?:el|la|los|las|un|una|tu|su|al)?\s*(?:modulo|leccion|entrenamiento|guion|paso|capacitacion|curso|pagina|video)\b/;
+
+/**
+ * Normalize text for Spanish lexical scanning: lowercase and strip combining
+ * diacritics (NFD decomposition). Pure and deterministic; English text is
+ * unaffected by the transform.
+ */
+function normalizeForLexicalScan(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase();
+}
+
 const TOP_LEVEL_FIELDS = [
   'schemaVersion',
   'responseType',
@@ -356,6 +405,19 @@ function validateContextPacketStatusBehavior(
       ),
     );
   }
+
+  // S3.3 — contract-level strictness: failed Context Packets require safe_close
+  // (the adapter already enforces this; this closes the latent gap for any
+  // future non-adapter consumer that validates the contract directly).
+  if (packetStatus === 'failed' && responseType !== 'safe_close') {
+    issues.push(
+      issue(
+        'responseType',
+        'failed_context_requires_safe_close',
+        'failed Context Packets require safe_close.',
+      ),
+    );
+  }
 }
 
 function collectForbiddenFieldIssues(
@@ -407,6 +469,19 @@ function validateTextContent(
       ),
     );
   }
+
+  // S3.3 — Spanish lexical guardrails over diacritic-/case-normalized text.
+  const normalized = normalizeForLexicalScan(value);
+  for (const { label, pattern } of ES_PROHIBITED_TEXT_PATTERNS) {
+    if (!pattern.test(normalized)) continue;
+    issues.push(
+      issue(
+        path,
+        'prohibited_text',
+        `Text field ${path} contains prohibited ${label} language.`,
+      ),
+    );
+  }
 }
 
 function validateSafeCloseTextContent(
@@ -415,7 +490,12 @@ function validateSafeCloseTextContent(
 ): void {
   if (candidate.responseType !== 'safe_close') return;
   if (typeof candidate.text !== 'string') return;
-  if (!SAFE_CLOSE_SUBSTANTIVE_TRAINING_PATTERN.test(candidate.text)) return;
+
+  const matchesEn = SAFE_CLOSE_SUBSTANTIVE_TRAINING_PATTERN.test(candidate.text);
+  const matchesEs = ES_SAFE_CLOSE_SUBSTANTIVE_TRAINING_PATTERN.test(
+    normalizeForLexicalScan(candidate.text),
+  );
+  if (!matchesEn && !matchesEs) return;
 
   issues.push(
     issue(
