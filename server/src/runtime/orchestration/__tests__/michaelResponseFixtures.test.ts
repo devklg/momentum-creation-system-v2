@@ -20,6 +20,16 @@ import {
   type MichaelResponseContractValidationIssue,
   type MichaelResponseContractValidationResult,
 } from '../index.js';
+// S2.16 — the four Spanish (`es`) safe-path fixtures are exported via the
+// fixtures barrel (per the S2.16 export scope), not re-exported on the
+// orchestration `../index.js` barrel. Import them directly from the fixtures
+// barrel so this pinning test can assert the expanded valid-fixture set.
+import {
+  michaelResponseFixtureSafeCloseCandidateReviewOnlyRejectionEs,
+  michaelResponseFixtureSafeCloseFailedContextPacketEs,
+  michaelResponseFixtureSafeFallbackDegradedContextPacketEs,
+  michaelResponseFixtureSafeFallbackMissingContextPacketEs,
+} from '../fixtures/index.js';
 
 function expectIssue(
   result: MichaelResponseContractValidationResult,
@@ -32,7 +42,12 @@ function expectIssue(
 }
 
 describe('S2.12 Michael response fixtures', () => {
-  it('exports the eight valid response envelopes requested by S2.12', () => {
+  it('exports the valid response envelopes requested by S2.12 plus the S2.16 ES safe-path set', () => {
+    // S2.16 — Agent A appended the four Spanish (`es`) safe-path fixtures to
+    // `validMichaelResponseFixtures` so the adjacent contract-validation loop
+    // (and the adapter) cover them. The original S2.12 set was eight (EN/ES
+    // next-step + clarification, plus the four EN safe paths); the four ES safe
+    // paths bring the array to twelve. Test-only update to track that growth.
     expect(validMichaelResponseFixtures).toEqual([
       michaelResponseFixtureNextTrainingStepEn,
       michaelResponseFixtureNextTrainingStepEs,
@@ -42,8 +57,12 @@ describe('S2.12 Michael response fixtures', () => {
       michaelResponseFixtureSafeFallbackMissingContextPacket,
       michaelResponseFixtureSafeCloseFailedContextPacket,
       michaelResponseFixtureSafeCloseCandidateReviewOnlyRejection,
+      michaelResponseFixtureSafeFallbackDegradedContextPacketEs,
+      michaelResponseFixtureSafeFallbackMissingContextPacketEs,
+      michaelResponseFixtureSafeCloseFailedContextPacketEs,
+      michaelResponseFixtureSafeCloseCandidateReviewOnlyRejectionEs,
     ]);
-    expect(validMichaelResponseFixtures).toHaveLength(8);
+    expect(validMichaelResponseFixtures).toHaveLength(12);
   });
 
   it('keeps all valid fixtures inside the Michael training-support response contract', () => {
