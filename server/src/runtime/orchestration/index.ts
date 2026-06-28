@@ -152,6 +152,20 @@ export type {
 } from './types.js';
 
 export {
+  MICHAEL_RESPONSE_CATALOG_SELECTABLE_KEYS,
+  selectMichaelResponseCatalogEntry,
+  selectMichaelResponseCatalogKey,
+  selectionRequestForCatalogKey,
+  validateMichaelResponseCatalogSelection,
+} from './michaelResponseCatalogSelector.js';
+export type {
+  MichaelCatalogSelectorIntent,
+  MichaelResponseCatalogSelectionIssue,
+  MichaelResponseCatalogSelectionRequest,
+  MichaelResponseCatalogSelectionResult,
+} from './types.js';
+
+export {
   MICHAEL_RESPONSE_AGENT_KEY,
   MICHAEL_RESPONSE_CONTRACT_SCHEMA_VERSION,
   MICHAEL_RESPONSE_CONTRACT_FORBIDDEN_FIELD_ALIASES,
