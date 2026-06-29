@@ -53,6 +53,7 @@ import { trainingRoutes } from './routes/training.js';
 import { profileRoutes } from './routes/profile.js';
 import { previewRoutes } from './routes/preview.js';
 import { orientationRoutes } from './routes/orientation.js';
+import { michaelRuntimeRoutes } from './routes/michael-runtime.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -231,6 +232,14 @@ app.use('/api/preview', previewRoutes);
 // requireSteveComplete) internally; baId is read from the session, never the
 // body (locked-spec 3.5). REUSES the §2.6 webinar event/reservation pattern.
 app.use('/api/orientation', orientationRoutes);
+
+// Sprint 3 S3.4 minimal Michael runtime route (gated BA route family). Handler
+// applies (requireAuth + requireSteveComplete) internally and is fail-closed
+// behind the default-off MICHAEL_RUNTIME_* kill switch. Fixtures-only via the
+// S2.20 facade; no persistence/LLM/voice. Distinct from the pre-gate
+// /api/michael onboarding route; the reserved bare runtime namespace stays
+// unmounted.
+app.use('/api/michael-runtime', michaelRuntimeRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 
