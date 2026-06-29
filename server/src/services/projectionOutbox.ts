@@ -268,3 +268,83 @@ export async function drainProjectionOutbox(opts?: { limit?: number }): Promise<
   }
   return summary;
 }
+
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// OUTBOX DRAIN WORKER
+//
+// drainProjectionOutbox() above is the engine; this is the scheduler that
+// actually RUNS it. Without a scheduler the durable retry queue is never
+// drained: failed Tier-2/3 Neo4j/Chroma projections enqueue rows that sit
+// forever, Neo4j/Chroma silently drift from authoritative Mongo, and the
+// dead-letter ALERT can never fire (nothing ever replays a row to exhaustion).
+// (Phase 10 audit finding H1.)
+//
+// Mirrors the broadcastQueue worker shape: idempotent start, single in-flight
+// tick, drain once at boot (so a backlog from a previous run lands promptly)
+// then on a fixed interval. The first retry backoff is 1 minute, so a 30s tick
+// catches due rows without busy-waiting. `drain` is injectable purely so the
+// scheduler can be unit-tested without touching the gateway.
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+const DRAIN_INTERVAL_MS = 30_000;
+const DRAIN_LIMIT = 50;
+
+let outboxWorkerStarted = false;
+let outboxTimer: NodeJS.Timeout | null = null;
+let outboxTickInFlight = false;
+
+export interface ProjectionOutboxWorkerOptions {
+  intervalMs?: number;
+  drainLimit?: number;
+  /** Injectable for tests; defaults to the real drainProjectionOutbox. */
+  drain?: (opts?: { limit?: number }) => Promise<DrainSummary>;
+}
+
+/**
+ * Start the outbox drain loop. Idempotent and safe to call from app boot.
+ */
+export function startProjectionOutboxWorker(opts?: ProjectionOutboxWorkerOptions): void {
+  if (outboxWorkerStarted) return;
+  outboxWorkerStarted = true;
+
+  const intervalMs = opts?.intervalMs ?? DRAIN_INTERVAL_MS;
+  const limit = opts?.drainLimit ?? DRAIN_LIMIT;
+  const drain = opts?.drain ?? drainProjectionOutbox;
+
+  const runTick = async (): Promise<void> => {
+    if (outboxTickInFlight) return;
+    outboxTickInFlight = true;
+    try {
+      const summary = await drain({ limit });
+      if (summary.landed > 0 || summary.deadLettered > 0) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `[projection-outbox] drain: scanned=${summary.scanned} landed=${summary.landed} ` +
+            `reEnqueued=${summary.reEnqueued} deadLettered=${summary.deadLettered}`,
+        );
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[projection-outbox] drain tick failed (continuing)', err);
+    } finally {
+      outboxTickInFlight = false;
+    }
+  };
+
+  // Drain once at boot, then on the interval.
+  void runTick();
+  outboxTimer = setInterval(() => {
+    void runTick();
+  }, intervalMs);
+  // eslint-disable-next-line no-console
+  console.log(`[projection-outbox] worker started — interval=${intervalMs}ms, limit=${limit}`);
+}
+
+export function stopProjectionOutboxWorker(): void {
+  if (outboxTimer) {
+    clearInterval(outboxTimer);
+    outboxTimer = null;
+  }
+  outboxWorkerStarted = false;
+  outboxTickInFlight = false;
+}
