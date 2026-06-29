@@ -46,3 +46,15 @@ export type {
   ApprovedKnowledgeQueryValidationCode,
   ApprovedKnowledgeQueryValidationIssue,
 } from './approvedKnowledgeQueryContract.js';
+
+// P4.4 — Context Manager Retrieval Adapter: the sole runtime edge that obtains approved
+// knowledge through the injected Knowledge Core boundary and maps it to ContextReferences
+// for buildContextPacket(). Fail-closed; constructs no store/Gateway client.
+export {
+  createContextManagerRetrievalAdapter,
+  toContextReferences,
+} from './contextManagerRetrievalAdapter.js';
+export type {
+  ApprovedKnowledgeProvider,
+  ContextManagerRetrievalAdapter,
+} from './contextManagerRetrievalAdapter.js';
