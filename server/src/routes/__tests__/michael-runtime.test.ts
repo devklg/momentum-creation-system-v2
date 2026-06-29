@@ -1,16 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { handleMichaelRuntimeResolve } from '../michael-runtime.js';
 import { validateMichaelResponseContract } from '../../runtime/orchestration/index.js';
-import { runRuntimeTurnFixtureScenario } from '../../runtime/orchestration/fixtures/runtimeTurnHarness.js';
-import type { RuntimeTurnFixtureScenarioType } from '../../runtime/orchestration/types.js';
 
 /**
- * S3.4 — direct handler-level tests for the Michael runtime route.
+ * S3.11 — direct handler-level tests for the SERVER-OWNED Michael runtime route.
+ *
+ * The runtime turn is now built entirely server-side from the authenticated
+ * session — the client NO LONGER supplies a `body.turn`. The request body is
+ * server-owned: the ONLY accepted field is optional `language` ('en' | 'es').
+ * Any other key — or a malformed `language` — is rejected with 400
+ * `CLIENT_RUNTIME_INPUT_NOT_ALLOWED`. A valid request body is `{}` or
+ * `{ language: 'en' | 'es' }`.
  *
  * supertest is not installed and `server/src/index.ts` calls `app.listen()` at
  * import, so we exercise `handleMichaelRuntimeResolve(req, res)` directly with
- * mock req/res. Mount facts (path, no clobbering of /api/michael) are covered by
- * the static governance test, not here.
+ * mock req/res. The handler is ASYNC — every call is awaited. Mount facts (path,
+ * no clobbering of /api/michael) are covered by the static governance test, not
+ * here.
  */
 
 const SESSION_BA_ID = 'TMBA-20240101-ABCDEF';
@@ -63,40 +69,21 @@ function mockRes() {
   return r;
 }
 
-function mockReq(turn: unknown, extraBody: Record<string, unknown> = {}, withSession = true) {
-  return {
-    ...(withSession ? { session: { baId: SESSION_BA_ID } } : {}),
-    body: { ...(turn !== undefined ? { turn } : {}), ...extraBody },
-  } as any;
-}
-
-interface BuildTurnOptions {
-  readonly scenario?: RuntimeTurnFixtureScenarioType;
-  readonly intent?: 'clear_training_support' | 'ambiguous_training_support';
-  readonly language?: 'en' | 'es';
-}
-
 /**
- * Build a valid MichaelRuntimeAdapterContractInput "turn" from the inert S2.8
- * runtime turn harness — the same shape the S2.15/S2.20 tests use. Returned only.
+ * Build a server-owned request. The body is whatever the client sends (the
+ * route accepts only `{}` or `{ language }`); session identity is server-owned.
+ * Pass `withSession=false` to drop the session, or a custom `sessionBaId` (e.g.
+ * whitespace) to exercise the downstream turn-source failure path.
  */
-async function buildTurn(options: BuildTurnOptions = {}): Promise<Record<string, unknown>> {
-  const rt = await runRuntimeTurnFixtureScenario({
-    scenario: options.scenario ?? 'accepted_complete',
-    agentKey: 'michael_magnificent',
-    taskType: 'training_support',
-  });
-  if (options.language && rt.input.identity) {
-    rt.input.identity.language = options.language as never;
-  }
+function mockReq(
+  body: Record<string, unknown> = {},
+  withSession = true,
+  sessionBaId: string = SESSION_BA_ID,
+) {
   return {
-    identity: rt.input.identity,
-    turnId: rt.input.turnId,
-    taskType: 'training_support',
-    runtimeTurn: rt,
-    ...(options.intent ? { intent: options.intent } : {}),
-    ...(options.language ? { language: options.language } : {}),
-  };
+    ...(withSession ? { session: { baId: sessionBaId } } : {}),
+    body,
+  } as any;
 }
 
 /** Recursively collect every object key reachable from a value. */
@@ -129,80 +116,92 @@ const FORBIDDEN_TRACE_KEYS = [
   'text',
 ] as const;
 
-describe('S3.4 Michael runtime route handler', () => {
-  it('1. rejects a missing turn with 400 MISSING_RUNTIME_TURN', () => {
+// Every body key that is NOT exactly `language` must be rejected. This covers
+// the former body-BA-scope keys PLUS the broader server-owned forbidden set
+// (client-supplied turn, Context Packet, identifiers, tokens, …).
+const FORBIDDEN_BODY_CASES: ReadonlyArray<readonly [string, Record<string, unknown>]> = [
+  ['baId', { baId: 'TMBA-EVIL-000000' }],
+  ['sponsorBaId', { sponsorBaId: 'TMBA-EVIL-000000' }],
+  ['targetBaId', { targetBaId: 'TMBA-EVIL-000000' }],
+  ['downlineBaId', { downlineBaId: 'TMBA-EVIL-000000' }],
+  ['turn', { turn: { identity: {}, taskType: 'training_support' } }],
+  ['runtimeTurn', { runtimeTurn: { scenario: 'accepted_degraded' } }],
+  ['contextPacket', { contextPacket: { approvedKnowledge: [] } }],
+  ['token', { token: 'prospect-token-xyz' }],
+  ['sessionId', { sessionId: 'sess-123' }],
+  ['correlationId', { correlationId: 'corr-123' }],
+];
+
+describe('S3.11 Michael runtime route handler — server-owned turn', () => {
+  it('1. resolves an empty {} body to the degraded safe_fallback EN entry (200)', async () => {
     enableRouteAndResponse();
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(undefined), res);
+    await handleMichaelRuntimeResolve(mockReq({}), res);
 
-    expect(res.statusCode).toBe(400);
-    expect(res.body.code).toBe('MISSING_RUNTIME_TURN');
-    expect(res.body.ok).toBe(false);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.ok).toBe(true);
+    expect(res.body.catalogKey).toBe('michael_safe_fallback_degraded_en');
+    expect(res.body.response.responseType).toBe('safe_fallback');
+    expect(validateMichaelResponseContract(res.body.response).ok).toBe(true);
   });
 
-  it('2. rejects a body baId with 400 BODY_BA_SCOPE_NOT_ALLOWED', async () => {
+  it.each(FORBIDDEN_BODY_CASES)(
+    '2. rejects a server-owned-forbidden body field %s with 400 CLIENT_RUNTIME_INPUT_NOT_ALLOWED',
+    async (_label, extraBody) => {
+      enableRouteAndResponse();
+      const res = mockRes();
+      await handleMichaelRuntimeResolve(mockReq(extraBody), res);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
+      expect(res.body.error).toBe('Michael runtime input must be server-owned.');
+      // Forbidden input is rejected before any facade work — no resolution leaked.
+      expect(res.body).not.toHaveProperty('response');
+      expect(res.body).not.toHaveProperty('catalogKey');
+      expect(res.body).not.toHaveProperty('trace');
+    },
+  );
+
+  it('3. rejects a malformed language value with 400 CLIENT_RUNTIME_INPUT_NOT_ALLOWED', async () => {
     enableRouteAndResponse();
-    const turn = await buildTurn({ intent: 'clear_training_support' });
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn, { baId: 'TMBA-EVIL-000000' }), res);
+    await handleMichaelRuntimeResolve(mockReq({ language: 'fr' }), res);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body.code).toBe('BODY_BA_SCOPE_NOT_ALLOWED');
+    expect(res.body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
   });
 
-  it('3. rejects a body sponsorBaId with 400 BODY_BA_SCOPE_NOT_ALLOWED', async () => {
+  it('4. rejects a missing session baId with 401 (server-owned body)', async () => {
     enableRouteAndResponse();
-    const turn = await buildTurn({ intent: 'clear_training_support' });
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn, { sponsorBaId: 'TMBA-EVIL-000000' }), res);
-
-    expect(res.statusCode).toBe(400);
-    expect(res.body.code).toBe('BODY_BA_SCOPE_NOT_ALLOWED');
-  });
-
-  it('4. rejects a body targetBaId with 400 BODY_BA_SCOPE_NOT_ALLOWED', async () => {
-    enableRouteAndResponse();
-    const turn = await buildTurn({ intent: 'clear_training_support' });
-    const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn, { targetBaId: 'TMBA-EVIL-000000' }), res);
-
-    expect(res.statusCode).toBe(400);
-    expect(res.body.code).toBe('BODY_BA_SCOPE_NOT_ALLOWED');
-  });
-
-  it('5. rejects a missing session baId with 401', async () => {
-    enableRouteAndResponse();
-    const turn = await buildTurn({ intent: 'clear_training_support' });
-    const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn, {}, false), res);
+    await handleMichaelRuntimeResolve(mockReq({}, false), res);
 
     expect(res.statusCode).toBe(401);
     expect(res.body.ok).toBe(false);
   });
 
-  it('6. fails closed with 503 michael_runtime_disabled and leaks no facade output when the route flag is off', async () => {
+  it('5. fails closed with 503 michael_runtime_disabled and leaks no facade output when the route flag is off', async () => {
     // No flags set — route axis is off.
-    const turn = await buildTurn({ intent: 'clear_training_support' });
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn), res);
+    await handleMichaelRuntimeResolve(mockReq({}), res);
 
     expect(res.statusCode).toBe(503);
     expect(res.body.reason).toBe('michael_runtime_disabled');
     expect(res.body.ok).toBe(false);
     expect(res.body.disabled).toBe(true);
-    // Proves the facade was never called — no resolution surface leaked.
+    // Proves the turn source / facade were never called — nothing leaked.
     expect(res.body).not.toHaveProperty('response');
     expect(res.body).not.toHaveProperty('trace');
     expect(res.body).not.toHaveProperty('catalogKey');
     expect(res.body).not.toHaveProperty('selectionRequest');
   });
 
-  it('7. fails closed with 503 michael_runtime_response_disabled when the response flag is off', async () => {
+  it('6. fails closed with 503 michael_runtime_response_disabled when the response flag is off', async () => {
     process.env.MICHAEL_RUNTIME_ROUTE_ENABLED = 'true';
     // response axis deliberately left off
-    const turn = await buildTurn({ intent: 'clear_training_support' });
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn), res);
+    await handleMichaelRuntimeResolve(mockReq({}), res);
 
     expect(res.statusCode).toBe(503);
     expect(res.body.reason).toBe('michael_runtime_response_disabled');
@@ -210,12 +209,11 @@ describe('S3.4 Michael runtime route handler', () => {
     expect(res.body).not.toHaveProperty('trace');
   });
 
-  it('8. returns 200 with no trace when the trace flag is absent', async () => {
+  it('7. returns 200 with no trace when the trace flag is absent', async () => {
     enableRouteAndResponse();
     // trace axis off
-    const turn = await buildTurn({ intent: 'clear_training_support' });
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn), res);
+    await handleMichaelRuntimeResolve(mockReq({}), res);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.ok).toBe(true);
@@ -225,12 +223,11 @@ describe('S3.4 Michael runtime route handler', () => {
     expect(res.body.trace).toBeUndefined();
   });
 
-  it('9. returns 200 with a redacted trace carrying no forbidden keys when all three flags are on', async () => {
+  it('8. returns 200 with a redacted trace carrying no forbidden keys when all three flags are on', async () => {
     enableRouteAndResponse();
     process.env.MICHAEL_RUNTIME_TRACE_ENABLED = 'true';
-    const turn = await buildTurn({ intent: 'clear_training_support' });
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn), res);
+    await handleMichaelRuntimeResolve(mockReq({}), res);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.trace).toBeDefined();
@@ -242,44 +239,28 @@ describe('S3.4 Michael runtime route handler', () => {
     }
   });
 
-  it('10. resolves an enabled clear turn to the next_training_step EN catalog entry', async () => {
+  it('9. keeps agentResponseGenerated === false on a successful response', async () => {
     enableRouteAndResponse();
-    const turn = await buildTurn({ intent: 'clear_training_support' });
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn), res);
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body.catalogKey).toBe('michael_next_training_step_en');
-    expect(res.body.catalogKey.endsWith('_en')).toBe(true);
-    expect(res.body.response.responseType).toBe('next_training_step');
-    expect(validateMichaelResponseContract(res.body.response).ok).toBe(true);
-  });
-
-  it('11. keeps agentResponseGenerated === false on a successful response', async () => {
-    enableRouteAndResponse();
-    const turn = await buildTurn({ intent: 'clear_training_support' });
-    const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn), res);
+    await handleMichaelRuntimeResolve(mockReq({}), res);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.response.agentResponseGenerated).toBe(false);
   });
 
-  it("12. keeps persistence === 'disabled' on a successful response", async () => {
+  it("10. keeps persistence === 'disabled' on a successful response", async () => {
     enableRouteAndResponse();
-    const turn = await buildTurn({ intent: 'clear_training_support' });
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn), res);
+    await handleMichaelRuntimeResolve(mockReq({}), res);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.response.persistence).toBe('disabled');
   });
 
-  it('13. returns the verbatim catalog fixture with no generated-text metadata', async () => {
+  it('11. returns the verbatim catalog fixture with string text and no generated-text metadata', async () => {
     enableRouteAndResponse();
-    const turn = await buildTurn({ intent: 'clear_training_support' });
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn), res);
+    await handleMichaelRuntimeResolve(mockReq({}), res);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.response.agentResponseGenerated).toBe(false);
@@ -287,35 +268,28 @@ describe('S3.4 Michael runtime route handler', () => {
     expect(typeof res.body.response.text).toBe('string');
   });
 
-  it('14. maps a malformed turn to a deterministic 422 without throwing', () => {
+  it('12. maps a downstream turn-source failure (whitespace session baId) to a deterministic 422 without throwing', async () => {
     enableRouteAndResponse();
     const res = mockRes();
 
-    expect(() => handleMichaelRuntimeResolve(mockReq({}), res)).not.toThrow();
+    // A whitespace session baId is truthy (passes the 401 guard) but the
+    // server-owned turn source trims it to '' and fails closed -> 422.
+    await expect(
+      handleMichaelRuntimeResolve(mockReq({}, true, '   '), res),
+    ).resolves.toBeDefined();
     expect(res.statusCode).toBe(422);
     expect(res.body.ok).toBe(false);
     expect(Array.isArray(res.body.issues)).toBe(true);
   });
 
-  it('15. resolves a degraded scenario to the safe_fallback degraded EN entry', async () => {
+  it('13. resolves an ES session ({ language: "es" }) to an ES catalog entry with an ES response', async () => {
     enableRouteAndResponse();
-    const turn = await buildTurn({ scenario: 'accepted_degraded' });
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn), res);
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body.catalogKey).toBe('michael_safe_fallback_degraded_en');
-    expect(res.body.response.responseType).toBe('safe_fallback');
-  });
-
-  it('16. resolves an ES clear turn to an ES catalog entry with an ES response', async () => {
-    enableRouteAndResponse();
-    const turn = await buildTurn({ intent: 'clear_training_support', language: 'es' });
-    const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn), res);
+    await handleMichaelRuntimeResolve(mockReq({ language: 'es' }), res);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.catalogKey.endsWith('_es')).toBe(true);
+    expect(res.body.response.responseType).toBe('safe_fallback');
     expect(res.body.response.language).toBe('es');
   });
 });

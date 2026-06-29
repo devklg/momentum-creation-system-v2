@@ -129,11 +129,12 @@ describe('S3.4 Michael runtime route static governance boundary', () => {
   it('#5 imports the S2.20 facade resolveMichaelRuntimeTurnResponse as the resolution entry point', () => {
     const route = readSourceFile(routeFilePath).text;
     expect(route).toContain('resolveMichaelRuntimeTurnResponse');
-    const matches = matchingImportLines(
-      routeFiles(),
-      /\bresolveMichaelRuntimeTurnResponse\b[\s\S]*?from\s+['"]\.\.\/runtime\/orchestration\/index\.js['"]/,
-    );
-    expect(matches.length, matches.join('\n')).toBeGreaterThan(0);
+    // S3.11: the facade now shares a multiline `import { … } from
+    // '../runtime/orchestration/index.js'` with the server-owned turn source, so
+    // the import is matched across the whole (possibly multiline) statement.
+    const facadeImport =
+      /import\s*\{[\s\S]*?\bresolveMichaelRuntimeTurnResponse\b[\s\S]*?\}\s*from\s+['"]\.\.\/runtime\/orchestration\/index\.js['"]/;
+    expect(facadeImport.test(route), 'S2.20 facade imported from orchestration index').toBe(true);
   });
 
   it('#6 does NOT import the S2.13 harness (michaelRuntimeResponseHarness / michaelRuntimeResponseScenarios)', () => {
@@ -248,10 +249,24 @@ describe('S3.4 Michael runtime route static governance boundary', () => {
     expect(pattern.test(route), 'post(/resolve, requireAuth, requireSteveComplete, ...) not found').toBe(true);
   });
 
-  it('#21 reads BA identity from the session and rejects body BA scope via BODY_BA_SCOPE_NOT_ALLOWED', () => {
+  it('#21 derives BA scope from the session and rejects body-supplied runtime input (incl. BA authority) via CLIENT_RUNTIME_INPUT_NOT_ALLOWED', () => {
     const route = readSourceFile(routeFilePath).text;
+    // BA scope is session-derived, never body-derived (sponsor immutability).
     expect(route).toContain('req.session?.baId');
-    expect(route).toContain('BODY_BA_SCOPE_NOT_ALLOWED');
+    // S3.11 server-owned body rule SUBSUMES the old body-BA-scope rejection: any
+    // non-`language` field — including baId/sponsorBaId/targetBaId — is rejected
+    // with the single broader code.
+    expect(route).toContain('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
+    // The retired reason codes are gone (no weakening — the rule got broader).
+    expect(route).not.toContain('BODY_BA_SCOPE_NOT_ALLOWED');
+    expect(route).not.toContain('MISSING_RUNTIME_TURN');
+    // Body BA authority is never read as scope. Comments AND strings stripped so
+    // the self-documenting forbidden-key comment cannot trip this.
+    const stripped = sourceWithoutCommentsOrStrings(route);
+    expect(
+      /\b(?:req\.body|body)\.(?:baId|sponsorBaId|targetBaId|downlineBaId|prospectId)\b/.test(stripped),
+      'no body BA-authority read in code',
+    ).toBe(false);
   });
 
   it('#22 includes the trace only conditionally on the trace flag', () => {

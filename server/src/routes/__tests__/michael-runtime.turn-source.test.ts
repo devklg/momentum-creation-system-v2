@@ -3,25 +3,26 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { handleMichaelRuntimeResolve } from '../michael-runtime.js';
-import { runRuntimeTurnFixtureScenario } from '../../runtime/orchestration/fixtures/runtimeTurnHarness.js';
-import type { RuntimeTurnFixtureScenarioType } from '../../runtime/orchestration/types.js';
 
 /**
- * S3.10 — proves the Michael runtime ROUTE is UNCHANGED by the turn-source slice.
+ * S3.11 — proves the Michael runtime ROUTE is NOW WIRED to the server-owned turn
+ * source (the inverse of the S3.10 boundary, which proved it was NOT wired).
  *
- * S3.10 CREATED `createMichaelRuntimeTurnForAuthenticatedBa` and EXPORTED it from
- * the orchestration barrel, but DID NOT wire it into the route. This file
- * documents that boundary two ways:
+ * S3.10 created `createMichaelRuntimeTurnForAuthenticatedBa` and exported it from
+ * the orchestration barrel but DID NOT wire it into the route. S3.11 swaps the
+ * route's old client-supplied `body.turn` for this server-owned source. This file
+ * documents that transition two ways:
  *
- *  (A) STATIC: the route source (`routes/michael-runtime.ts`) does not import or
- *      reference the turn source — it still consumes the client-supplied
- *      `body.turn` through the inert S2.20 facade only.
- *  (B) BEHAVIORAL: the S3.4/S3.9 handler contract is intact (body-BA rejection,
- *      session 401, degraded -> safe_fallback) — exactly as before S3.10.
+ *  (A) STATIC: the route source (`routes/michael-runtime.ts`) NOW imports and
+ *      references `createMichaelRuntimeTurnForAuthenticatedBa`, still resolves
+ *      through the inert S2.20 facade, and NO LONGER reads `body.turn`.
+ *  (B) BEHAVIORAL: an empty-body request drives the server-owned turn to the
+ *      degraded `safe_fallback` fixture; forbidden body input and missing session
+ *      are rejected; the route fails closed behind the kill switch.
  *
- * Read-only on production source; the behavioral checks call the exported
+ * Read-only on production source; the behavioral checks call the exported ASYNC
  * handler with mock req/res (supertest is not installed; index.ts listens at
- * import). Mirrors the static-scan style of s39MichaelRuntimeUiServerBoundary.
+ * import).
  */
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
@@ -30,7 +31,7 @@ const routeFilePath = 'server/src/routes/michael-runtime.ts';
 function readRouteSource(): string {
   const absolute = resolve(repoRoot, routeFilePath);
   if (!existsSync(absolute)) {
-    throw new Error(`S3.10 turn-source boundary test: route source not found at ${routeFilePath}`);
+    throw new Error(`S3.11 turn-source wiring test: route source not found at ${routeFilePath}`);
   }
   return readFileSync(absolute, 'utf8');
 }
@@ -50,31 +51,27 @@ function sourceWithoutCommentsOrStrings(text: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// GROUP A — STATIC: the route does NOT wire the S3.10 turn source.
+// GROUP A — STATIC: the route IS NOW wired to the S3.10 turn source.
 // ---------------------------------------------------------------------------
-describe('S3.10 route is not wired to the turn source (static)', () => {
-  it('1. route source does NOT reference createMichaelRuntimeTurnForAuthenticatedBa', () => {
+describe('S3.11 route is wired to the server-owned turn source (static)', () => {
+  it('1. route source NOW references createMichaelRuntimeTurnForAuthenticatedBa', () => {
     const stripped = sourceWithoutCommentsOrStrings(readRouteSource());
-    expect(stripped.includes('createMichaelRuntimeTurnForAuthenticatedBa')).toBe(false);
+    expect(stripped.includes('createMichaelRuntimeTurnForAuthenticatedBa')).toBe(true);
   });
 
-  it('2. route source does NOT import the michaelRuntimeTurnSource module', () => {
-    const stripped = sourceWithoutCommentsOrStrings(readRouteSource());
-    expect(/\bmichaelRuntimeTurnSource\b/.test(stripped)).toBe(false);
-    expect(/from\s+\S*michaelRuntimeTurnSource/.test(stripped)).toBe(false);
-  });
-
-  it('3. route still consumes the client-supplied body.turn through the inert facade', () => {
+  it('2. route still resolves through the inert S2.20 facade', () => {
     const stripped = sourceWithoutComments(readRouteSource());
-    // The facade is still the only resolution path.
     expect(stripped.includes('resolveMichaelRuntimeTurnResponse')).toBe(true);
-    // The route still reads body.turn (the future swap target).
-    expect(/body\.turn\b/.test(stripped)).toBe(true);
+  });
+
+  it('3. route NO LONGER reads the client-supplied body.turn (server-owned input)', () => {
+    const stripped = sourceWithoutComments(readRouteSource());
+    expect(/body\.turn\b/.test(stripped)).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// GROUP B — BEHAVIORAL: the S3.4/S3.9 handler contract is intact post-S3.10.
+// GROUP B — BEHAVIORAL: the empty-body request drives the server-owned turn.
 // ---------------------------------------------------------------------------
 const SESSION_BA_ID = 'TMBA-20240101-ABCDEF';
 
@@ -124,67 +121,49 @@ function mockRes() {
   return r;
 }
 
-function mockReq(turn: unknown, extraBody: Record<string, unknown> = {}, withSession = true) {
+function mockReq(
+  body: Record<string, unknown> = {},
+  withSession = true,
+  sessionBaId: string = SESSION_BA_ID,
+) {
   return {
-    ...(withSession ? { session: { baId: SESSION_BA_ID } } : {}),
-    body: { ...(turn !== undefined ? { turn } : {}), ...extraBody },
+    ...(withSession ? { session: { baId: sessionBaId } } : {}),
+    body,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
 }
 
-async function buildTurn(
-  scenario: RuntimeTurnFixtureScenarioType = 'accepted_complete',
-  intent?: 'clear_training_support' | 'ambiguous_training_support',
-): Promise<Record<string, unknown>> {
-  const rt = await runRuntimeTurnFixtureScenario({
-    scenario,
-    agentKey: 'michael_magnificent',
-    taskType: 'training_support',
-  });
-  return {
-    identity: rt.input.identity,
-    turnId: rt.input.turnId,
-    taskType: 'training_support',
-    runtimeTurn: rt,
-    ...(intent ? { intent } : {}),
-  };
-}
-
-describe('S3.10 route behavior is unchanged (S3.4/S3.9 contract intact)', () => {
-  it('4. still rejects a body baId with 400 BODY_BA_SCOPE_NOT_ALLOWED (sponsor immutability)', async () => {
+describe('S3.11 route behavior — empty body drives the server-owned turn', () => {
+  it('4. rejects a forbidden body baId with 400 CLIENT_RUNTIME_INPUT_NOT_ALLOWED (sponsor immutability)', async () => {
     enableRouteAndResponse();
-    const turn = await buildTurn('accepted_complete', 'clear_training_support');
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn, { baId: 'TMBA-EVIL-000000' }), res);
+    await handleMichaelRuntimeResolve(mockReq({ baId: 'TMBA-EVIL-000000' }), res);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body.code).toBe('BODY_BA_SCOPE_NOT_ALLOWED');
+    expect(res.body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
   });
 
-  it('5. still rejects a missing session baId with 401', async () => {
+  it('5. rejects a missing session baId with 401', async () => {
     enableRouteAndResponse();
-    const turn = await buildTurn('accepted_complete', 'clear_training_support');
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn, {}, false), res);
+    await handleMichaelRuntimeResolve(mockReq({}, false), res);
 
     expect(res.statusCode).toBe(401);
     expect(res.body.ok).toBe(false);
   });
 
-  it('6. still fails closed with 503 when the route flag is off', async () => {
-    const turn = await buildTurn('accepted_complete', 'clear_training_support');
+  it('6. fails closed with 503 when the route flag is off', async () => {
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn), res);
+    await handleMichaelRuntimeResolve(mockReq({}), res);
 
     expect(res.statusCode).toBe(503);
     expect(res.body.reason).toBe('michael_runtime_disabled');
   });
 
-  it('7. still resolves the client-supplied degraded turn to safe_fallback (facade unchanged)', async () => {
+  it('7. an empty-body request drives the server-owned turn to the degraded safe_fallback fixture', async () => {
     enableRouteAndResponse();
-    const turn = await buildTurn('accepted_degraded');
     const res = mockRes();
-    handleMichaelRuntimeResolve(mockReq(turn), res);
+    await handleMichaelRuntimeResolve(mockReq({}), res);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.catalogKey).toBe('michael_safe_fallback_degraded_en');
