@@ -45,6 +45,15 @@ importers:
         specifier: 2.5.5
         version: 2.5.5
     devDependencies:
+      '@testing-library/dom':
+        specifier: ^10.4.0
+        version: 10.4.1
+      '@testing-library/jest-dom':
+        specifier: ^6.6.3
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^16.1.0
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.0.1)(@types/react@19.0.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@types/node':
         specifier: 22.10.1
         version: 22.10.1
@@ -56,10 +65,13 @@ importers:
         version: 19.0.1
       '@vitejs/plugin-react':
         specifier: 4.3.4
-        version: 4.3.4(vite@6.0.3(@types/node@22.10.1)(jiti@1.21.7)(tsx@4.19.2)(yaml@2.9.0))
+        version: 4.3.4(vite@6.4.3(@types/node@22.10.1)(jiti@1.21.7)(tsx@4.19.2)(yaml@2.9.0))
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.4.49)
+      jsdom:
+        specifier: ^25.0.1
+        version: 25.0.1
       postcss:
         specifier: 8.4.49
         version: 8.4.49
@@ -73,8 +85,11 @@ importers:
         specifier: 5.5.4
         version: 5.5.4
       vite:
-        specifier: 6.0.3
-        version: 6.0.3(@types/node@22.10.1)(jiti@1.21.7)(tsx@4.19.2)(yaml@2.9.0)
+        specifier: 6.4.3
+        version: 6.4.3(@types/node@22.10.1)(jiti@1.21.7)(tsx@4.19.2)(yaml@2.9.0)
+      vitest:
+        specifier: 4.1.9
+        version: 4.1.9(@types/node@22.10.1)(jsdom@25.0.1)(vite@6.4.3(@types/node@22.10.1)(jiti@1.21.7)(tsx@4.19.2)(yaml@2.9.0))
 
   apps/com:
     dependencies:
