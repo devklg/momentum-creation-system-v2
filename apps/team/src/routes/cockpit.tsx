@@ -42,6 +42,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { TrackRecordCard } from '@/components/cockpit/TrackRecordCard';
 import { OrientationCard } from '@/components/cockpit/OrientationCard';
+import { MichaelRuntimeSupportCard } from '@/components/cockpit/MichaelRuntimeSupportCard';
 import {
   LaunchCenter,
   type TeamLaunchCenter,
@@ -780,6 +781,7 @@ export function CockpitPage() {
             onOpenIvory={() => navigate('/ivory')}
             onOpenTraining={() => navigate('/training/fast-start')}
           />
+          <MichaelRuntimeSupportCard />
           <div id="sponsor" className="scroll-mt-8">
             <SectionLabel>My Sponsor</SectionLabel>
             <SponsorCard
