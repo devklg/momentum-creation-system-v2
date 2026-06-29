@@ -20,3 +20,8 @@ export {
   prepareContextPacketFoundation,
   validateContextPacketV1,
 } from './validation.js';
+
+// S3.10 remediation — sanctioned CONTEXT-LAYER home for Michael runtime packet
+// assembly. The orchestration turn source injects this port; it never assembles.
+export { createMichaelRuntimeContextManagerPort } from './michaelRuntimeContextFoundation.js';
+export type { MichaelRuntimeContextFoundationInput } from './michaelRuntimeContextFoundation.js';

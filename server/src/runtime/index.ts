@@ -255,3 +255,10 @@ export type {
   MichaelResponseValidationStatus,
   SteveSuccessRuntimeAdapterInput,
 } from './orchestration/index.js';
+
+export { createMichaelRuntimeTurnForAuthenticatedBa } from './orchestration/index.js';
+export type {
+  CreateMichaelRuntimeTurnForAuthenticatedBaInput,
+  CreateMichaelRuntimeTurnForAuthenticatedBaResult,
+  MichaelRuntimeTurnSourceIssue,
+} from './orchestration/index.js';
