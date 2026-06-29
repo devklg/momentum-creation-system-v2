@@ -228,16 +228,31 @@ describe('S3.9 Michael runtime support card static governance boundary', () => {
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#13 documents the turn-source blocker and defaults to the disabled state', () => {
+  it('#13 turn-source blocker RESOLVED — card auto-invokes the server-owned resolve on mount yet stays read-only/inert behind the kill switch', () => {
     const raw = readSourceFile(cardFilePath).text;
-    // A blocker note exists (comment mentions both "turn" and "blocker").
-    expect(/\bblocker\b/i.test(raw), 'blocker note present').toBe(true);
+    // S3.11: the S3.9 client-safe turn-source blocker is RESOLVED — the server
+    // now owns the runtime turn. The doc-comment records that resolution.
     expect(/turn[-\s]?source/i.test(raw), 'turn-source phrasing present').toBe(true);
-    // Default state is disabled.
-    const stripped = sourceWithoutComments(raw);
-    expect(/kind\s*:\s*['"]disabled['"]/.test(stripped), "default kind: 'disabled' present").toBe(
-      true,
+    expect(/\bresolved\b/i.test(raw), 'resolution recorded').toBe(true);
+    const strippedCode = sourceWithoutCommentsOrStrings(raw);
+    // It auto-invokes the renamed server-owned helper on mount via useEffect …
+    expect(/\buseEffect\s*\(/.test(strippedCode), 'on-mount effect present').toBe(true);
+    const callSites = matchingCodeTokenLines(
+      cardFiles(),
+      /\bresolveMichaelRuntimeTrainingStep\s*\(/,
+    ).filter((line) => !/\bfunction\b/.test(line));
+    expect(callSites.length, callSites.join('\n')).toBeGreaterThan(0);
+    // … the retired helper name is gone (renamed resolveMichaelRuntimeTurn →
+    // resolveMichaelRuntimeTrainingStep) …
+    expect(/\bresolveMichaelRuntimeTurn\b/.test(strippedCode), 'old helper name retired').toBe(
+      false,
     );
+    // … and it stays read-only/inert: behind the default-off kill switch the live
+    // route answers 503 and the card still renders the calm disabled state.
+    expect(
+      /kind\s*:\s*['"]disabled['"]/.test(sourceWithoutComments(raw)),
+      "disabled-state branch present",
+    ).toBe(true);
   });
 });
 
@@ -283,10 +298,11 @@ describe('S3.9 server invariants static regression boundary', () => {
   });
 
   it('#19 michael-runtime.ts keeps the S2.20 facade + auth gates and excludes the harness/requireMichaelComplete', () => {
-    const facade = matchingImportLines(
-      routeFiles(),
-      /\bresolveMichaelRuntimeTurnResponse\b[\s\S]*?from\s+['"]\.\.\/runtime\/orchestration\/index\.js['"]/,
-    );
+    const route = readSourceFile(routeFilePath).text;
+    // S3.11: the facade now shares a multiline import with the server-owned turn
+    // source — match across the whole (possibly multiline) import statement.
+    const facadeImport =
+      /import\s*\{[\s\S]*?\bresolveMichaelRuntimeTurnResponse\b[\s\S]*?\}\s*from\s+['"]\.\.\/runtime\/orchestration\/index\.js['"]/;
     const auth = matchingImportLines(
       routeFiles(),
       /\brequireAuth\b[\s\S]*?from\s+['"]\.\.\/middleware\/requireAuth\.js['"]/,
@@ -295,7 +311,7 @@ describe('S3.9 server invariants static regression boundary', () => {
       routeFiles(),
       /\brequireSteveComplete\b[\s\S]*?from\s+['"]\.\.\/middleware\/requireSteveComplete\.js['"]/,
     );
-    expect(facade.length, 'S2.20 facade import present').toBeGreaterThan(0);
+    expect(facadeImport.test(route), 'S2.20 facade import present').toBe(true);
     expect(auth.length, 'requireAuth import present').toBeGreaterThan(0);
     expect(steve.length, 'requireSteveComplete import present').toBeGreaterThan(0);
 

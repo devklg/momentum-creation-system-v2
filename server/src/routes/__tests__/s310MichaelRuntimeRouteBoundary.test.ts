@@ -4,10 +4,18 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 // ---------------------------------------------------------------------------
-// Sprint 3 S3.10 — static REGRESSION/BOUNDARY test guarding that the new
-// server-owned Michael runtime TURN SOURCE
-// (server/src/runtime/orchestration/michaelRuntimeTurnSource.ts) was added
-// WITHOUT wiring it into the route, the server boot, or the `.team` UI.
+// Sprint 3 S3.10 → S3.11 — static REGRESSION/BOUNDARY test for the server-owned
+// Michael runtime TURN SOURCE
+// (server/src/runtime/orchestration/michaelRuntimeTurnSource.ts).
+//
+// S3.10 added the turn source UNWIRED. S3.11 wires it into the route
+// (routes/michael-runtime.ts) and the `.team` UI
+// (MichaelRuntimeSupportCard.tsx) — but STILL NOT into the server boot
+// (index.ts). This file is updated to that reality: the route now imports AND
+// invokes the turn source, and the card auto-invokes the renamed helper
+// (resolveMichaelRuntimeTrainingStep) on mount while staying read-only/inert
+// behind the default-off kill switch; index.ts remains free of the turn source
+// and of any bare /api/runtime family.
 //
 // It mirrors the proven static-scan style of
 //   server/src/routes/__tests__/s36MichaelRuntimeObservabilityGovernanceBoundary.test.ts
@@ -159,17 +167,18 @@ describe('S3.10 server boot static regression boundary', () => {
 });
 
 // ---------------------------------------------------------------------------
-// GROUP B — BA route (michael-runtime.ts). Unchanged in spirit: still the S2.20
-// facade consumer behind requireAuth + requireSteveComplete; no harness, no
-// requireMichaelComplete, and the turn source is NOT yet imported or used.
+// GROUP B — BA route (michael-runtime.ts). Still the S2.20 facade consumer
+// behind requireAuth + requireSteveComplete; no harness, no
+// requireMichaelComplete. S3.11: the turn source IS now imported and invoked.
 // ---------------------------------------------------------------------------
-describe('S3.10 michael-runtime route static regression boundary', () => {
+describe('S3.11 michael-runtime route static regression boundary', () => {
   it('#6 still imports the S2.20 facade resolveMichaelRuntimeTurnResponse from ../runtime/orchestration/index.js', () => {
-    const matches = matchingImportLines(
-      routeFiles(),
-      /\bresolveMichaelRuntimeTurnResponse\b[\s\S]*?from\s+['"]\.\.\/runtime\/orchestration\/index\.js['"]/,
-    );
-    expect(matches.length, matches.join('\n')).toBeGreaterThan(0);
+    const route = readSourceFile(routeFilePath).text;
+    // S3.11: the facade now shares a multiline import with the server-owned turn
+    // source — match across the whole (possibly multiline) import statement.
+    const facadeImport =
+      /import\s*\{[\s\S]*?\bresolveMichaelRuntimeTurnResponse\b[\s\S]*?\}\s*from\s+['"]\.\.\/runtime\/orchestration\/index\.js['"]/;
+    expect(facadeImport.test(route), 'S2.20 facade imported from orchestration index').toBe(true);
   });
 
   it('#7 still imports BOTH requireAuth and requireSteveComplete', () => {
@@ -207,12 +216,21 @@ describe('S3.10 michael-runtime route static regression boundary', () => {
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#11 does NOT import or invoke createMichaelRuntimeTurnForAuthenticatedBa (turn source NOT wired in S3.10)', () => {
-    const matches = matchingCodeTokenLines(
+  it('#11 imports AND invokes createMichaelRuntimeTurnForAuthenticatedBa (server-owned turn source wired in S3.11)', () => {
+    const route = readSourceFile(routeFilePath).text;
+    // Imported from the sanctioned orchestration index (possibly multiline).
+    const turnSourceImport =
+      /import\s*\{[\s\S]*?\bcreateMichaelRuntimeTurnForAuthenticatedBa\b[\s\S]*?\}\s*from\s+['"]\.\.\/runtime\/orchestration\/index\.js['"]/;
+    expect(
+      turnSourceImport.test(route),
+      'server-owned turn source imported from orchestration index',
+    ).toBe(true);
+    // And actually invoked (call site, comments + strings stripped).
+    const invocations = matchingCodeTokenLines(
       routeFiles(),
-      /\bcreateMichaelRuntimeTurnForAuthenticatedBa\b|\bmichaelRuntimeTurnSource\b/,
+      /\bcreateMichaelRuntimeTurnForAuthenticatedBa\s*\(/,
     );
-    expect(matches, matches.join('\n')).toEqual([]);
+    expect(invocations.length, invocations.join('\n')).toBeGreaterThan(0);
   });
 
   it('#12 did not add store / persistence / LLM imports', () => {
@@ -230,33 +248,43 @@ describe('S3.10 michael-runtime route static regression boundary', () => {
 });
 
 // ---------------------------------------------------------------------------
-// GROUP C — `.team` card (MichaelRuntimeSupportCard.tsx). Still defaults to the
-// disabled state and still does NOT auto-invoke the live resolve. No apps/com
-// import.
+// GROUP C — `.team` card (MichaelRuntimeSupportCard.tsx). S3.11: the card now
+// auto-invokes the renamed server-owned helper on mount, yet stays read-only/
+// inert behind the kill switch (still renders the calm disabled state when the
+// route answers 503). No automatic send/call/schedule handlers; no apps/com.
 // ---------------------------------------------------------------------------
-describe('S3.10 .team card static regression boundary', () => {
-  it("#14 still defaults to the disabled state (kind: 'disabled')", () => {
+describe('S3.11 .team card static regression boundary', () => {
+  it("#14 still handles the route-off disabled state (renders the calm disabled placeholder)", () => {
     const stripped = sourceWithoutComments(readSourceFile(cardFilePath).text);
-    expect(/kind\s*:\s*['"]disabled['"]/.test(stripped), "default kind: 'disabled' present").toBe(
+    // Behind the default-off kill switch the live route answers 503 and the card
+    // settles to this calm disabled placeholder — the disabled-state result is
+    // still produced and rendered.
+    expect(/kind\s*:\s*['"]disabled['"]/.test(stripped), "disabled-state branch present").toBe(
       true,
     );
   });
 
-  it('#15 does NOT auto-invoke resolveMichaelRuntimeTurn (live call still not wired)', () => {
-    // After stripping comments AND strings, the only line referencing
-    // `resolveMichaelRuntimeTurn(` must be the function DECLARATION itself —
-    // never a call site (which would be the live invocation).
-    const callSites = matchingCodeTokenLines(cardFiles(), /\bresolveMichaelRuntimeTurn\s*\(/).filter(
-      (line) => !/\bfunction\b/.test(line),
-    );
-    expect(callSites, callSites.join('\n')).toEqual([]);
+  it('#15 auto-invokes the renamed helper resolveMichaelRuntimeTrainingStep on mount (old name retired)', () => {
+    // After stripping comments AND strings, there must be at least one CALL site
+    // of the renamed helper that is NOT the declaration — the live server-owned
+    // invocation in the on-mount effect.
+    const callSites = matchingCodeTokenLines(
+      cardFiles(),
+      /\bresolveMichaelRuntimeTrainingStep\s*\(/,
+    ).filter((line) => !/\bfunction\b/.test(line));
+    expect(callSites.length, callSites.join('\n')).toBeGreaterThan(0);
+    // The old helper name is fully retired.
+    const oldName = matchingCodeTokenLines(cardFiles(), /\bresolveMichaelRuntimeTurn\b/);
+    expect(oldName, oldName.join('\n')).toEqual([]);
   });
 
-  it('#16 has no fetch-on-mount hook (no useEffect / no auto-resolve wiring)', () => {
+  it('#16 has a fetch-on-mount hook (useEffect) but wires no automatic send/call/schedule handlers', () => {
     const stripped = sourceWithoutCommentsOrStrings(readSourceFile(cardFilePath).text);
-    expect(/\buseEffect\s*\(/.test(stripped), 'no useEffect on mount').toBe(false);
+    // S3.11: the card DOES auto-resolve on mount (server-owned turn source).
+    expect(/\buseEffect\s*\(/.test(stripped), 'useEffect on-mount auto-resolve present').toBe(true);
+    // But it still wires NO automatic outreach/action handlers.
     const autoHandlers =
-      /\b(?:autoResolve|autoInvoke|autoSend|sendMessage|scheduleCall|callProspect|dialProspect)\s*\(/;
+      /\b(?:autoSend|sendMessage|scheduleCall|callProspect|dialProspect)\s*\(/;
     expect(autoHandlers.test(stripped), 'no automatic-action handlers').toBe(false);
   });
 

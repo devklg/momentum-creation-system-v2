@@ -1,27 +1,41 @@
 /**
- * POST /api/michael-runtime/resolve — Sprint 3 S3.4 minimal Michael runtime route.
+ * POST /api/michael-runtime/resolve — Sprint 3 S3.11 server-owned Michael runtime route.
  *
  * The FIRST runtime-facing Michael route. It is `.team`-only, authenticated,
  * BA-scoped, fixtures-only, non-persistent, LLM-free, voice-free, and
  * fail-closed behind a three-axis kill switch (route / response / trace).
  *
- * It is a one-call consumer of the S2.20 inert resolution facade
- * (`resolveMichaelRuntimeTurnResponse`), which composes the canonical
- * S2.17–S2.20 chain (catalog → selector → derivation → facade) and returns a
+ * SERVER-OWNED TURN CONTRACT (S3.11): the runtime turn is built entirely
+ * server-side from the authenticated session — the client NO LONGER supplies a
+ * `body.turn`. The request body must be server-owned: the ONLY accepted field is
+ * optional `language` ('en' | 'es'). Any other key — or a malformed `language`
+ * value — is rejected with 400 `CLIENT_RUNTIME_INPUT_NOT_ALLOWED`. This merges the
+ * old body-BA-scope rejection (`baId`/`sponsorBaId`/`targetBaId`) into one broader
+ * rule. A valid client request is `{}` or `{ "language": "en" | "es" }`.
+ *
+ * The turn is produced by the S3.10 server-owned turn source
+ * (`createMichaelRuntimeTurnForAuthenticatedBa`), which derives BA scope from the
+ * session alone and delegates packet assembly to the sanctioned context layer
+ * (degraded, fail-closed). The resulting adapter input is then resolved by the
+ * S2.20 inert facade (`resolveMichaelRuntimeTurnResponse`), which returns a
  * pre-authored, contract-validated fixture BY REFERENCE plus a redacted trace.
- * It NEVER generates text, calls an LLM, persists anything, assembles a Context
- * Packet, touches a store/Gateway/retrieval helper, or imports the S2.13
- * test-only harness.
+ * The route NEVER generates text, calls an LLM, persists anything, assembles a
+ * Context Packet itself, touches a store/Gateway/retrieval helper, or imports the
+ * S2.13 test-only harness.
  *
  * Sponsor immutability (locked-spec 3.5): BA scope comes from req.session.baId,
- * never the request body. Body-supplied BA authority is rejected.
+ * never the request body. Body-supplied runtime input (incl. BA authority) is
+ * rejected before any work.
  */
 
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
-import { resolveMichaelRuntimeTurnResponse } from '../runtime/orchestration/index.js';
+import {
+  createMichaelRuntimeTurnForAuthenticatedBa,
+  resolveMichaelRuntimeTurnResponse,
+} from '../runtime/orchestration/index.js';
 import type { MichaelRuntimeAdapterContractInput } from '../runtime/orchestration/index.js';
 import {
   michaelRuntimeResponseEnabled,
@@ -31,7 +45,6 @@ import {
 import {
   recordMichaelRuntimeBodyBaOverrideRejection,
   recordMichaelRuntimeFacadeFailure,
-  recordMichaelRuntimeMissingTurnRejection,
   recordMichaelRuntimeResponseDisabled,
   recordMichaelRuntimeRouteDisabled,
   recordMichaelRuntimeSuccess,
@@ -39,19 +52,27 @@ import {
 
 export const michaelRuntimeRoutes: Router = Router();
 
-// Body-supplied BA-authority fields are never trusted (sponsor immutability).
-const FORBIDDEN_BODY_BA_FIELDS = ['baId', 'sponsorBaId', 'targetBaId'] as const;
+// The request body is server-owned: the ONLY accepted field is optional
+// `language`. Everything else (client-supplied turn, Context Packet, retrieval,
+// BA authority, identifiers, tokens, …) is rejected. We allowlist `language` and
+// reject ANY other key, but also name the high-risk forbidden keys explicitly so
+// the boundary is self-documenting.
+const ALLOWED_BODY_FIELDS = new Set(['language']);
+const SUPPORTED_BODY_LANGUAGES = new Set(['en', 'es']);
 
 /**
  * POST /api/michael-runtime/resolve handler. Exported for direct unit testing
  * with mock req/res (the route registers it behind requireAuth +
- * requireSteveComplete). Pure with respect to I/O: it reads req.session/req.body
- * and the env-driven flags, calls only the inert S2.20 facade, and writes the
- * response — no persistence, LLM, or side effects.
+ * requireSteveComplete). Async: it builds the server-owned turn from the session
+ * via the S3.10 turn source, then resolves it through the inert S2.20 facade. No
+ * persistence, LLM, or side effects beyond in-memory observability counters.
  */
-export function handleMichaelRuntimeResolve(req: Request, res: Response): Response {
-  // Axis 1 — route kill switch. Fail-closed BEFORE any work: no facade call,
-  // no response, no trace, no side effect.
+export async function handleMichaelRuntimeResolve(
+  req: Request,
+  res: Response,
+): Promise<Response> {
+  // Axis 1 — route kill switch. Fail-closed BEFORE any work: no turn source, no
+  // facade call, no response, no trace, no side effect.
   if (!michaelRuntimeRouteEnabled()) {
     recordMichaelRuntimeRouteDisabled();
     return res
@@ -68,55 +89,67 @@ export function handleMichaelRuntimeResolve(req: Request, res: Response): Respon
       .json({ ok: false, disabled: true, reason: 'michael_runtime_response_disabled' });
   }
 
+  // Server-owned body validation. Reject ANY field that is not exactly
+  // `language`, and reject a `language` value that is not 'en' or 'es'. This
+  // single rule subsumes the old body-BA-scope rejection — body baId/sponsorBaId/
+  // targetBaId (and turn/contextPacket/token/sessionId/etc.) now all yield
+  // CLIENT_RUNTIME_INPUT_NOT_ALLOWED.
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  let validatedLanguage: 'en' | 'es' | undefined;
+  for (const key of Object.keys(body)) {
+    if (!ALLOWED_BODY_FIELDS.has(key)) {
+      recordMichaelRuntimeBodyBaOverrideRejection();
+      return res.status(400).json({
+        ok: false,
+        error: 'Michael runtime input must be server-owned.',
+        code: 'CLIENT_RUNTIME_INPUT_NOT_ALLOWED',
+      });
+    }
+  }
+  if (body.language !== undefined) {
+    if (typeof body.language !== 'string' || !SUPPORTED_BODY_LANGUAGES.has(body.language)) {
+      recordMichaelRuntimeBodyBaOverrideRejection();
+      return res.status(400).json({
+        ok: false,
+        error: 'Michael runtime input must be server-owned.',
+        code: 'CLIENT_RUNTIME_INPUT_NOT_ALLOWED',
+      });
+    }
+    validatedLanguage = body.language as 'en' | 'es';
+  }
+
   const sessionBaId = req.session?.baId;
   if (!sessionBaId) {
     return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   }
 
-  const body = (req.body ?? {}) as Record<string, unknown>;
-
-  // Sponsor immutability — reject any body-supplied BA authority.
-  for (const field of FORBIDDEN_BODY_BA_FIELDS) {
-    if (body[field] !== undefined) {
-      recordMichaelRuntimeBodyBaOverrideRejection();
-      return res.status(400).json({
-        ok: false,
-        error: 'BA scope must come from the authenticated session.',
-        code: 'BODY_BA_SCOPE_NOT_ALLOWED',
-      });
-    }
+  // Build the server-owned turn from session-derived identity ONLY. The turn
+  // source delegates packet assembly to the sanctioned context layer and returns
+  // a degraded, fail-closed adapter input — never a client-supplied turn.
+  let created: Awaited<ReturnType<typeof createMichaelRuntimeTurnForAuthenticatedBa>>;
+  try {
+    created = await createMichaelRuntimeTurnForAuthenticatedBa({
+      baId: sessionBaId,
+      language: validatedLanguage,
+    });
+  } catch {
+    recordMichaelRuntimeFacadeFailure();
+    return res.status(422).json({
+      ok: false,
+      issues: [{ code: 'resolution_error', message: 'Runtime resolution failed.' }],
+    });
   }
 
-  const turn = body.turn;
-  if (!turn || typeof turn !== 'object') {
-    recordMichaelRuntimeMissingTurnRejection();
-    return res
-      .status(400)
-      .json({ ok: false, error: 'Missing runtime turn.', code: 'MISSING_RUNTIME_TURN' });
+  if (!created.ok) {
+    recordMichaelRuntimeFacadeFailure();
+    return res.status(422).json({ ok: false, issues: created.issues });
   }
 
-  // Normalize the adapter input: force the session BA scope (server-authoritative),
-  // preserving the rest of the supplied turn. The inert facade does not use the
-  // scope for classification, but this guarantees BA scope is session-derived.
-  const turnInput = turn as Partial<MichaelRuntimeAdapterContractInput> & {
-    identity?: { scope?: Record<string, unknown> };
-  };
-  const scopedInput = {
-    ...turnInput,
-    identity: {
-      ...turnInput.identity,
-      scope: {
-        ...(turnInput.identity?.scope ?? {}),
-        baId: sessionBaId,
-      },
-    },
-  } as unknown as MichaelRuntimeAdapterContractInput;
-
-  // The facade is documented as never-throwing, but the body is untrusted —
-  // a malformed turn is mapped to a deterministic failure, never a 500.
+  // The facade is documented as never-throwing, but is wrapped defensively —
+  // any unexpected throw is mapped to a deterministic failure, never a 500.
   let result: ReturnType<typeof resolveMichaelRuntimeTurnResponse>;
   try {
-    result = resolveMichaelRuntimeTurnResponse(scopedInput);
+    result = resolveMichaelRuntimeTurnResponse(created.input);
   } catch {
     recordMichaelRuntimeFacadeFailure();
     return res.status(422).json({
@@ -157,5 +190,7 @@ michaelRuntimeRoutes.post(
   '/resolve',
   requireAuth,
   requireSteveComplete,
-  handleMichaelRuntimeResolve,
+  (req, res) => {
+    void handleMichaelRuntimeResolve(req, res);
+  },
 );

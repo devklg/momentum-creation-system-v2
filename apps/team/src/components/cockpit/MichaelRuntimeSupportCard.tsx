@@ -1,5 +1,5 @@
 /**
- * Michael Runtime Support card (Sprint 3 S3.9).
+ * Michael Runtime Support card (Sprint 3 S3.9 → S3.11 wiring).
  *
  * Read-only, `.team`-only cockpit card that surfaces Michael's runtime
  * *training guidance* to the signed-in Brand Ambassador. Michael is BA-facing
@@ -10,23 +10,28 @@
  * BA scope is enforced SERVER-SIDE. POST /api/michael-runtime/resolve derives
  * the BA from req.session.baId and rejects any body-supplied BA authority
  * (sponsor immutability, locked-spec 3.5). This component never sends a BA id —
- * the request body is `{ turn }` and nothing else.
+ * the request body carries at most `{ language }` and nothing else.
  *
  * Fixtures-only / non-persistent: the runtime route is a one-call consumer of
  * the inert S2.20 resolution facade. It returns a pre-authored, contract-
  * validated fixture by reference. Nothing is persisted, no LLM is called, no
  * voice path exists, and the redacted trace is NEVER shown to the BA.
  *
- * ── TURN-SOURCE BLOCKER (S3.8) — why the live call is intentionally NOT wired ──
- * There is currently NO client-safe producer of a valid `runtimeTurn`. A valid
- * 200 came ONLY from a test-only fixture harness; a hand-authored/flat turn
- * yields 422 (contract validation failure). Per the S3.9 Critical Data Contract
- * Rule (option 2), the UI MUST NOT fabricate a Context Packet or turn. So this
- * card renders the DISABLED / PLACEHOLDER state by default and does NOT
- * auto-invoke a live resolve with a synthesized turn. The typed client helper
- * `resolveMichaelRuntimeTurn` below is implemented and ready for a future
- * SERVER-OWNED turn source — until that exists, it is deliberately left
- * un-invoked (referenced only for type/export coverage).
+ * ── TURN-SOURCE BLOCKER (S3.9) — RESOLVED ────────────────────────────────────
+ * S3.9 left a client-safe turn-source blocker: there was NO client-safe producer
+ * of a valid `runtimeTurn`, so the UI could not call resolve without fabricating
+ * a Context Packet / turn (forbidden by the S3.9 Critical Data Contract Rule).
+ * The S3.10 server-owned turn source RESOLVES this: the server now owns and
+ * produces the runtime turn entirely. The client sends NO turn, NO Context
+ * Packet, and NO BA authority — at most an optional UI language hint. This S3.11
+ * wiring therefore safely calls the route LIVE on mount.
+ *
+ * The card remains read-only and inert. Behind the default-off kill switch the
+ * route returns 503 michael_runtime_disabled, so the card shows the calm
+ * disabled state driven by the REAL endpoint until Kevin enables the flags.
+ * When route + response are enabled it renders the server's degraded
+ * safe_fallback (and other) fixtures. trace / IDs / counters / Context-Packet
+ * are NEVER read or rendered.
  *
  * Compliance: no income / placement / cycle / comp language; no IDs, tokens,
  * PII, counters, persistence internals, safety internals, nextStep boolean
@@ -38,6 +43,7 @@
  * (lesson_team_app_cannot_import_shared_types_ts6059_chat120).
  */
 
+import { useEffect, useState } from 'react';
 import { Bot } from 'lucide-react';
 
 // ── Safe render subset ───────────────────────────────────────────────────────
@@ -81,34 +87,35 @@ export type MichaelRuntimeResult =
   | { kind: 'safe_close'; text: string }
   | { kind: 'error' }; // generic — no internals surfaced
 
-// ── Client helper (server-owned turn source pending) ─────────────────────────
+// ── Client helper (server-owned turn source) ─────────────────────────────────
 
 /**
- * POST a runtime turn to the resolve route and map every status to a typed,
- * leak-free `MichaelRuntimeResult`.
+ * Ask the server-owned resolve route for the next training step and map every
+ * status to a typed, leak-free `MichaelRuntimeResult`.
  *
- * The request body is `{ turn }` ONLY. It NEVER includes baId / sponsorBaId /
- * targetBaId / downlineBaId / prospectId / token / sessionId / correlationId —
- * BA scope is session-derived server-side. This helper reads only the safe
+ * The server owns the runtime turn entirely (S3.10). This helper sends ONLY an
+ * optional `{ language }` UI hint — and an empty body `{}` when no hint is
+ * given. It NEVER sends turn / runtimeTurn / contextPacket / baId / sponsorBaId
+ * / targetBaId / downlineBaId / prospectId / token / sessionId / turnId /
+ * correlationId or any other BA-authority or id field. It reads only the safe
  * subset of a 200 response: it never reads or stores `trace`, IDs, safety, or
  * persistence internals, never writes localStorage / sessionStorage /
  * IndexedDB, and emits no analytics.
- *
- * NOTE (turn-source blocker): there is no client-safe producer of a valid
- * `runtimeTurn` yet, so this helper is intentionally NOT called on mount with a
- * fabricated turn. It exists for a future server-owned turn source.
  */
-export async function resolveMichaelRuntimeTurn(
-  turn: unknown,
-): Promise<MichaelRuntimeResult> {
+export async function resolveMichaelRuntimeTrainingStep(opts?: {
+  language?: 'en' | 'es';
+}): Promise<MichaelRuntimeResult> {
+  // Body is an optional UI language hint ONLY — `{}` when absent. No turn, no
+  // Context Packet, no BA-authority / id fields ever.
+  const body = opts?.language ? { language: opts.language } : {};
+
   let res: Response;
   try {
     res = await fetch('/api/michael-runtime/resolve', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      // Body is `{ turn }` and nothing else — no BA-authority / id fields.
-      body: JSON.stringify({ turn }),
+      body: JSON.stringify(body),
     });
   } catch {
     return { kind: 'error' };
@@ -130,9 +137,9 @@ export async function resolveMichaelRuntimeTurn(
     return { kind: 'error' };
   }
 
-  // 400 (MISSING_RUNTIME_TURN / BODY_BA_SCOPE_NOT_ALLOWED), 401, 403
-  // (STEVE_GATE_CLOSED), 422 (contract failure) and any other non-200 → generic
-  // error. We never surface codes / issues / reasons to the BA.
+  // 400 (CLIENT_RUNTIME_INPUT_NOT_ALLOWED / other), 401, 403 (STEVE_GATE_CLOSED),
+  // 422 (contract failure) and any other non-200 → generic error. We never
+  // surface codes / issues / reasons to the BA.
   if (res.status !== 200) {
     return { kind: 'error' };
   }
@@ -208,16 +215,31 @@ function extractSafeNextStep(
 // ── Component ────────────────────────────────────────────────────────────────
 
 /**
- * Read-only card. Default (and only) state today is the disabled / placeholder
- * variant: the runtime route is default-off AND there is no client-safe turn
- * source, so we never auto-invoke `resolveMichaelRuntimeTurn` with a fabricated
- * turn. The `renderRuntimeResult` switch below is wired to handle every state
- * for the future server-owned turn source.
+ * Read-only card. On mount it calls the server-owned resolve route ONCE (no
+ * turn, no Context Packet, no BA authority — at most a language hint). With the
+ * flags off (default) the route answers 503 michael_runtime_disabled and the
+ * card shows the calm disabled state driven by the REAL endpoint. When Kevin
+ * enables route + response, it renders the server's degraded safe_fallback (and
+ * other) fixtures. The render stays read-only and leak-free in every state.
  */
 export function MichaelRuntimeSupportCard() {
-  // No fetch on mount — turn-source blocker (see file header). The card is a
-  // calm placeholder until a server-owned turn source exists.
-  const result: MichaelRuntimeResult = { kind: 'disabled' };
+  const [result, setResult] = useState<MichaelRuntimeResult>({
+    kind: 'loading',
+  });
+  // Bump to re-run the resolve (manual "try again" affordance, read-only).
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    // Live call to the server-owned route — safe because the client fabricates
+    // nothing and the default-off kill switch protects it.
+    void resolveMichaelRuntimeTrainingStep().then((next) => {
+      if (!cancelled) setResult(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [attempt]);
 
   return (
     <section
@@ -236,6 +258,15 @@ export function MichaelRuntimeSupportCard() {
         </h3>
       </div>
       {renderRuntimeResult(result)}
+      {result.kind === 'error' && (
+        <button
+          type="button"
+          onClick={() => setAttempt((n) => n + 1)}
+          className="mt-3 font-mono tracking-[0.12em] text-[10px] text-gold uppercase underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none"
+        >
+          Try again
+        </button>
+      )}
     </section>
   );
 }
@@ -252,8 +283,8 @@ function renderRuntimeResult(result: MichaelRuntimeResult) {
       );
 
     case 'disabled':
-      // Route off (and no client-safe turn source yet) — the honest, calm
-      // placeholder a BA sees today.
+      // Route off — the honest, calm placeholder a BA sees today, now driven by
+      // the real endpoint's default-off kill switch.
       return (
         <div className="space-y-2">
           <p className="text-cream-mute text-[13px] leading-[1.5]">

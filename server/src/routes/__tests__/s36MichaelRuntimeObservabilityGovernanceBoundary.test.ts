@@ -333,11 +333,13 @@ describe('S3.6 admin observability route static governance boundary', () => {
 // ---------------------------------------------------------------------------
 describe('S3.6 wired runtime route static governance boundary', () => {
   it('#25 still imports the S2.20 facade resolveMichaelRuntimeTurnResponse from ../runtime/orchestration/index.js', () => {
-    const matches = matchingImportLines(
-      routeFiles(),
-      /\bresolveMichaelRuntimeTurnResponse\b[\s\S]*?from\s+['"]\.\.\/runtime\/orchestration\/index\.js['"]/,
-    );
-    expect(matches.length, matches.join('\n')).toBeGreaterThan(0);
+    const route = readSourceFile(routeFilePath).text;
+    // S3.11: the facade now shares a multiline `import { … } from
+    // '../runtime/orchestration/index.js'` with the server-owned turn source, so
+    // the import is matched across the whole (possibly multiline) statement.
+    const facadeImport =
+      /import\s*\{[\s\S]*?\bresolveMichaelRuntimeTurnResponse\b[\s\S]*?\}\s*from\s+['"]\.\.\/runtime\/orchestration\/index\.js['"]/;
+    expect(facadeImport.test(route), 'S2.20 facade imported from orchestration index').toBe(true);
   });
 
   it('#26 still imports BOTH requireAuth and requireSteveComplete', () => {
