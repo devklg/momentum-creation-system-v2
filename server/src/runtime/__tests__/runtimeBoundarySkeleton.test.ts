@@ -77,6 +77,10 @@ describe('backend runtime boundary skeleton', () => {
     const indexText = readFileSync(resolve(repoRoot, 'server/src/index.ts'), 'utf8');
 
     expect(indexText).not.toMatch(/app\.use\(\s*['"`]\/api\/runtime\b/);
-    expect(indexText).not.toMatch(/from\s+['"].*runtime.*routes|runtimeRoutes/i);
+    // S3.4: target the forbidden bare `/api/runtime` route family precisely —
+    // an import from a `runtime` route module or a bare `runtimeRoutes` binding.
+    // The approved gated `/api/michael-runtime` route (michaelRuntimeRoutes from
+    // ./routes/michael-runtime.js) is intentionally NOT matched.
+    expect(indexText).not.toMatch(/from\s+['"][^'"]*\/runtime\.js['"]|\bruntimeRoutes\b/i);
   });
 });
