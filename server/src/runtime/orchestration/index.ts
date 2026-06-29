@@ -222,3 +222,10 @@ export {
   planAgentTurn,
 } from './orchestrator.js';
 export type { CreateAgentSessionResult } from './orchestrator.js';
+
+export { createMichaelRuntimeTurnForAuthenticatedBa } from './michaelRuntimeTurnSource.js';
+export type {
+  CreateMichaelRuntimeTurnForAuthenticatedBaInput,
+  CreateMichaelRuntimeTurnForAuthenticatedBaResult,
+  MichaelRuntimeTurnSourceIssue,
+} from './michaelRuntimeTurnSource.js';
