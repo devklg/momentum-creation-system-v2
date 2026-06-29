@@ -28,6 +28,14 @@ import {
   michaelRuntimeRouteEnabled,
   michaelRuntimeTraceEnabled,
 } from '../config/michaelRuntimeFlags.js';
+import {
+  recordMichaelRuntimeBodyBaOverrideRejection,
+  recordMichaelRuntimeFacadeFailure,
+  recordMichaelRuntimeMissingTurnRejection,
+  recordMichaelRuntimeResponseDisabled,
+  recordMichaelRuntimeRouteDisabled,
+  recordMichaelRuntimeSuccess,
+} from '../services/michaelRuntimeObservability.js';
 
 export const michaelRuntimeRoutes: Router = Router();
 
@@ -45,6 +53,7 @@ export function handleMichaelRuntimeResolve(req: Request, res: Response): Respon
   // Axis 1 — route kill switch. Fail-closed BEFORE any work: no facade call,
   // no response, no trace, no side effect.
   if (!michaelRuntimeRouteEnabled()) {
+    recordMichaelRuntimeRouteDisabled();
     return res
       .status(503)
       .json({ ok: false, disabled: true, reason: 'michael_runtime_disabled' });
@@ -53,6 +62,7 @@ export function handleMichaelRuntimeResolve(req: Request, res: Response): Respon
   // Axis 2 — response kill switch. Authenticated and route-enabled, but no
   // response body and (for this first implementation) no trace either.
   if (!michaelRuntimeResponseEnabled()) {
+    recordMichaelRuntimeResponseDisabled();
     return res
       .status(503)
       .json({ ok: false, disabled: true, reason: 'michael_runtime_response_disabled' });
@@ -68,6 +78,7 @@ export function handleMichaelRuntimeResolve(req: Request, res: Response): Respon
   // Sponsor immutability — reject any body-supplied BA authority.
   for (const field of FORBIDDEN_BODY_BA_FIELDS) {
     if (body[field] !== undefined) {
+      recordMichaelRuntimeBodyBaOverrideRejection();
       return res.status(400).json({
         ok: false,
         error: 'BA scope must come from the authenticated session.',
@@ -78,6 +89,7 @@ export function handleMichaelRuntimeResolve(req: Request, res: Response): Respon
 
   const turn = body.turn;
   if (!turn || typeof turn !== 'object') {
+    recordMichaelRuntimeMissingTurnRejection();
     return res
       .status(400)
       .json({ ok: false, error: 'Missing runtime turn.', code: 'MISSING_RUNTIME_TURN' });
@@ -106,6 +118,7 @@ export function handleMichaelRuntimeResolve(req: Request, res: Response): Respon
   try {
     result = resolveMichaelRuntimeTurnResponse(scopedInput);
   } catch {
+    recordMichaelRuntimeFacadeFailure();
     return res.status(422).json({
       ok: false,
       issues: [{ code: 'resolution_error', message: 'Runtime resolution failed.' }],
@@ -113,6 +126,7 @@ export function handleMichaelRuntimeResolve(req: Request, res: Response): Respon
   }
 
   if (!result.ok) {
+    recordMichaelRuntimeFacadeFailure();
     return res.status(422).json({ ok: false, issues: result.issues });
   }
 
@@ -135,6 +149,7 @@ export function handleMichaelRuntimeResolve(req: Request, res: Response): Respon
     payload.trace = result.trace;
   }
 
+  recordMichaelRuntimeSuccess();
   return res.status(200).json(payload);
 }
 

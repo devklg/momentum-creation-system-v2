@@ -1,0 +1,242 @@
+/**
+ * S3.6 — admin Michael runtime observability endpoint tests (Agent C).
+ *
+ * GET /api/admin/michael-runtime/observability is Kevin-only (requireAdmin) and
+ * returns the in-memory aggregate snapshot: { ok: true, michaelRuntime: <snapshot> }.
+ * It is a PURE read — no persistence, no audit-log, no triple-stack, no PII,
+ * tokens, IDs, or raw env strings.
+ *
+ * supertest is not installed and index.ts calls app.listen() at import, so the
+ * mounted app is never booted. Instead this test (a) introspects the router
+ * stack to prove `requireAdmin` guards the route, and (b) invokes the route's
+ * terminal handler directly with mock req/res to assert the response contract.
+ *
+ * Env hygiene: the three MICHAEL_RUNTIME_* vars are snapshotted/cleared in
+ * beforeEach and restored exactly in afterEach. The counter store is reset
+ * around every test.
+ */
+
+import type { Response } from 'express';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { adminMichaelRuntimeObservabilityRoutes } from '../michael-runtime-observability.js';
+import {
+  getMichaelRuntimeObservabilitySnapshot,
+  recordMichaelRuntimeSuccess,
+  resetMichaelRuntimeObservabilityForTests,
+} from '../../../services/michaelRuntimeObservability.js';
+
+const ENV_VARS = [
+  'MICHAEL_RUNTIME_ROUTE_ENABLED',
+  'MICHAEL_RUNTIME_RESPONSE_ENABLED',
+  'MICHAEL_RUNTIME_TRACE_ENABLED',
+] as const;
+
+type EnvVarName = (typeof ENV_VARS)[number];
+
+let envSnapshot: Record<EnvVarName, string | undefined>;
+
+beforeEach(() => {
+  envSnapshot = {
+    MICHAEL_RUNTIME_ROUTE_ENABLED: process.env.MICHAEL_RUNTIME_ROUTE_ENABLED,
+    MICHAEL_RUNTIME_RESPONSE_ENABLED: process.env.MICHAEL_RUNTIME_RESPONSE_ENABLED,
+    MICHAEL_RUNTIME_TRACE_ENABLED: process.env.MICHAEL_RUNTIME_TRACE_ENABLED,
+  };
+  for (const name of ENV_VARS) delete process.env[name];
+  resetMichaelRuntimeObservabilityForTests();
+});
+
+afterEach(() => {
+  resetMichaelRuntimeObservabilityForTests();
+  for (const name of ENV_VARS) {
+    const original = envSnapshot[name];
+    if (original === undefined) delete process.env[name];
+    else process.env[name] = original;
+  }
+});
+
+interface RouteLayerHandle {
+  name?: string;
+  handle: (...args: unknown[]) => unknown;
+}
+
+/** Locate the GET /observability route layer in the express router stack. */
+function findObservabilityRoute(): {
+  handles: RouteLayerHandle[];
+  path: string;
+  isGet: boolean;
+} {
+  const stack = (adminMichaelRuntimeObservabilityRoutes as unknown as {
+    stack: Array<{
+      route?: {
+        path: string;
+        methods: Record<string, boolean>;
+        stack: RouteLayerHandle[];
+      };
+    }>;
+  }).stack;
+
+  for (const layer of stack) {
+    if (layer.route && layer.route.path === '/observability') {
+      return {
+        handles: layer.route.stack,
+        path: layer.route.path,
+        isGet: layer.route.methods.get === true,
+      };
+    }
+  }
+  throw new Error('GET /observability route not found on router');
+}
+
+function mockRes() {
+  const r: any = { statusCode: 0 };
+  r.status = (c: number) => {
+    r.statusCode = c;
+    return r;
+  };
+  r.json = (b: unknown) => {
+    r.body = b;
+    return r;
+  };
+  return r;
+}
+
+describe('S3.6 admin Michael runtime observability endpoint', () => {
+  it('1. exposes a GET /observability route', () => {
+    const route = findObservabilityRoute();
+    expect(route.path).toBe('/observability');
+    expect(route.isGet).toBe(true);
+  });
+
+  it('2. is guarded by requireAdmin (admin-only)', () => {
+    const route = findObservabilityRoute();
+    const names = route.handles.map((h) => h.name);
+    expect(names).toContain('requireAdmin');
+  });
+
+  it('3. requireAdmin runs BEFORE the terminal handler', () => {
+    const route = findObservabilityRoute();
+    const adminIdx = route.handles.findIndex((h) => h.name === 'requireAdmin');
+    expect(adminIdx).toBe(0);
+    expect(route.handles.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('4. terminal handler returns { ok: true, michaelRuntime: <snapshot> }', () => {
+    const route = findObservabilityRoute();
+    const handler = route.handles[route.handles.length - 1]!.handle;
+    const res = mockRes();
+    handler({} as unknown, res as unknown as Response);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.ok).toBe(true);
+    expect(res.body.michaelRuntime).toBeDefined();
+  });
+
+  it('5. michaelRuntime payload equals the observability snapshot shape (aggregate only)', () => {
+    const route = findObservabilityRoute();
+    const handler = route.handles[route.handles.length - 1]!.handle;
+    const res = mockRes();
+    handler({} as unknown, res as unknown as Response);
+
+    const snap = getMichaelRuntimeObservabilitySnapshot();
+    expect(Object.keys(res.body.michaelRuntime).sort()).toEqual(Object.keys(snap).sort());
+    expect(Object.keys(res.body.michaelRuntime.counters).sort()).toEqual(
+      Object.keys(snap.counters).sort(),
+    );
+  });
+
+  it('6. reflects current aggregate counts and evaluated flags', () => {
+    process.env.MICHAEL_RUNTIME_ROUTE_ENABLED = 'true';
+    recordMichaelRuntimeSuccess();
+    recordMichaelRuntimeSuccess();
+
+    const route = findObservabilityRoute();
+    const handler = route.handles[route.handles.length - 1]!.handle;
+    const res = mockRes();
+    handler({} as unknown, res as unknown as Response);
+
+    expect(res.body.michaelRuntime.routeEnabled).toBe(true);
+    expect(res.body.michaelRuntime.responseEnabled).toBe(false);
+    expect(res.body.michaelRuntime.counters.successfulFacadeResolutions).toBe(2);
+  });
+
+  it('7. exposes no raw env strings — flags are evaluated booleans', () => {
+    process.env.MICHAEL_RUNTIME_ROUTE_ENABLED = 'true';
+    process.env.MICHAEL_RUNTIME_RESPONSE_ENABLED = 'TRUE';
+    process.env.MICHAEL_RUNTIME_TRACE_ENABLED = 'false';
+
+    const route = findObservabilityRoute();
+    const handler = route.handles[route.handles.length - 1]!.handle;
+    const res = mockRes();
+    handler({} as unknown, res as unknown as Response);
+
+    const mr = res.body.michaelRuntime;
+    expect(typeof mr.routeEnabled).toBe('boolean');
+    expect(typeof mr.responseEnabled).toBe('boolean');
+    expect(typeof mr.traceEnabled).toBe('boolean');
+    // "TRUE" is not exact "true" -> false; no raw env leaked.
+    expect(mr.responseEnabled).toBe(false);
+    const serialized = JSON.stringify(res.body);
+    expect(serialized).not.toContain('TRUE');
+  });
+
+  it('8. exposes no PII / trace / token / ID keys (aggregate-only contract)', () => {
+    recordMichaelRuntimeSuccess();
+    const route = findObservabilityRoute();
+    const handler = route.handles[route.handles.length - 1]!.handle;
+    const res = mockRes();
+    handler({} as unknown, res as unknown as Response);
+
+    const allKeys = new Set<string>();
+    const walk = (value: unknown): void => {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        for (const [k, child] of Object.entries(value as Record<string, unknown>)) {
+          allKeys.add(k);
+          walk(child);
+        }
+      }
+    };
+    walk(res.body);
+    const FORBIDDEN = [
+      'trace',
+      'packet',
+      'contextPacket',
+      'retrieval',
+      'token',
+      'sessionId',
+      'turnId',
+      'correlationId',
+      'baId',
+      'email',
+      'phone',
+      'prospect',
+      'text',
+    ];
+    for (const forbidden of FORBIDDEN) {
+      expect(allKeys.has(forbidden)).toBe(false);
+    }
+  });
+
+  it('9. terminal handler performs no persistence/audit — it is synchronous and returns no promise', () => {
+    const route = findObservabilityRoute();
+    const handler = route.handles[route.handles.length - 1]!.handle;
+    const res = mockRes();
+    const returned = handler({} as unknown, res as unknown as Response);
+    // A persisting/audit handler would be async (return a Promise). This is a
+    // pure in-memory read.
+    expect(returned).not.toBeInstanceOf(Promise);
+  });
+
+  it('10. repeated reads are non-mutating — counts do not change just by reading', () => {
+    recordMichaelRuntimeSuccess();
+    const route = findObservabilityRoute();
+    const handler = route.handles[route.handles.length - 1]!.handle;
+
+    const res1 = mockRes();
+    handler({} as unknown, res1 as unknown as Response);
+    const res2 = mockRes();
+    handler({} as unknown, res2 as unknown as Response);
+
+    expect(res1.body.michaelRuntime.counters.successfulFacadeResolutions).toBe(1);
+    expect(res2.body.michaelRuntime.counters.successfulFacadeResolutions).toBe(1);
+  });
+});

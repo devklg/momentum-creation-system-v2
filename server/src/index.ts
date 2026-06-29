@@ -25,6 +25,7 @@ import { adminTenantRoutes } from './routes/admin/tenant.js';
 import { adminOrientationRoutes } from './routes/admin/orientation.js';
 import { adminVmRoutes } from './routes/admin/vm.js';
 import { adminAgentsRoutes } from './routes/admin/agents.js';
+import { adminMichaelRuntimeObservabilityRoutes } from './routes/admin/michael-runtime-observability.js';
 import { startBroadcastWorker } from './services/broadcastQueue.js';
 import { startVmDeliveryWorker } from './workers/vmDeliveryWorker.js';
 import { startVmImportWorker } from './workers/vmImportWorker.js';
@@ -129,6 +130,9 @@ app.use('/api/admin/broadcast', adminBroadcastRoutes);
 // Kevin-only via requireAdmin inside the route file; founders view per-session
 // rosters and add sessions as the team grows. Audit-logged like the rest of /admin.
 app.use('/api/admin/orientation', adminOrientationRoutes);
+// ADMIN — Sprint 3 S3.6 in-memory Michael runtime observability snapshot.
+// Kevin-only via requireAdmin; pure in-memory read, no persistence, no audit.
+app.use('/api/admin/michael-runtime', adminMichaelRuntimeObservabilityRoutes);
 
 // /api/p/* is prospect-facing (apps/com). No auth, no Steve gate. The token
 // itself is the identity surface per COM Design Section E.3.
