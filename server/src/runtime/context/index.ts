@@ -25,3 +25,24 @@ export {
 // assembly. The orchestration turn source injects this port; it never assembles.
 export { createMichaelRuntimeContextManagerPort } from './michaelRuntimeContextFoundation.js';
 export type { MichaelRuntimeContextFoundationInput } from './michaelRuntimeContextFoundation.js';
+
+// P4.2 — Approved Knowledge Query Contract: context-layer guards for the store-agnostic
+// approved_knowledge_query.v1 contract (shared types live in @momentum/shared/runtime).
+export {
+  APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
+  APPROVED_KNOWLEDGE_SUPPORTED_LANGUAGES,
+  APPROVED_KNOWLEDGE_EXCLUSION_REASONS,
+  APPROVED_KNOWLEDGE_DEGRADE_REASONS,
+  APPROVED_REFERENCE_STATUSES,
+  KNOWLEDGE_DOMAINS,
+  ApprovedKnowledgeQueryValidationError,
+  assertApprovedKnowledgeQueryResult,
+  validateApprovedKnowledgeQueryRequest,
+  validateApprovedKnowledgeQueryResult,
+} from './approvedKnowledgeQueryContract.js';
+export type {
+  ApprovedKnowledgeQueryRequestValidationResult,
+  ApprovedKnowledgeQueryResultValidationResult,
+  ApprovedKnowledgeQueryValidationCode,
+  ApprovedKnowledgeQueryValidationIssue,
+} from './approvedKnowledgeQueryContract.js';
