@@ -193,6 +193,17 @@ Agent order (M3–M5) follows Implementation Package 001: Michael first (Momentu
 
 ---
 
+## High-Priority Post-MCS V2 Backlog
+
+These items are intentionally queued after the MCS V2 implementation is complete.
+They are not substitutes for the M1-M9 sequence above.
+
+| Priority | Item | Status |
+| -------- | ---- | ------ |
+| High | Fork and customize Handy as a Windows-native FluidVoice-style dictation app for Kevin's workflow. Start from Handy's open-source cross-platform dictation base, then add Kevin-specific profiles for Codex prompts, Claude prompts, email/messages, cleanup rules, and optional Universal Gateway/MCP action mode. | Queued after MCS V2 implementation |
+
+---
+
 ## Governance Note
 
 This roadmap is an engineering sequence, not an architectural authority. The frozen v1.0 architecture governs *what* is built; this roadmap governs *order*. Any architectural change discovered during implementation is raised as a proposed ACR in `organization/ACR-REGISTER.md` and resolved before the affected milestone proceeds.
