@@ -15,6 +15,7 @@ import type {
   ContextPacketStatus,
   ContextPacketV1,
   ContextRequestId,
+  DegradedContextState,
   Guardrail,
   KnowledgeId,
   RequestId,
@@ -104,6 +105,7 @@ export interface ContextPacketBuildInput {
   eventContextReferences?: RuntimeAgentEventEnvelope[];
   constraints?: ContextConstraint[];
   excludedKnowledge?: ContextExclusion[];
+  degraded?: DegradedContextState;
   provenance: ContextPacketProvenance;
   packetStatus?: ContextPacketStatus;
   authorizeCandidateKnowledge?: boolean;
@@ -175,6 +177,8 @@ export function buildContextPacket(input: ContextPacketBuildInput): ContextPacke
     ...(input.graphContextReferences ?? []),
     ...(input.vectorContextReferences ?? []),
   ]);
+  const packetStatus = input.packetStatus ?? 'complete';
+  const degraded = input.degraded ?? defaultDegradedState(packetStatus);
   const explicitExclusions = input.excludedKnowledge ?? [];
   const exclusions = [
     ...explicitExclusions,
@@ -197,7 +201,7 @@ export function buildContextPacket(input: ContextPacketBuildInput): ContextPacke
     requestId: input.requestId,
     createdAt,
     expiresAt: input.expiresAt,
-    packetStatus: input.packetStatus ?? 'complete',
+    packetStatus,
     tenant: input.tenant,
     team: input.team,
     ba: input.ba,
@@ -244,7 +248,7 @@ export function buildContextPacket(input: ContextPacketBuildInput): ContextPacke
       candidateKnowledgeIncluded: false,
       candidateKnowledgeExcluded: true,
       privateJournalIncluded: false,
-      degraded: input.packetStatus === 'degraded',
+      degraded: packetStatus !== 'complete',
       includedItems: [
         ...retrievalItemsFromReferences(input.knowledgeReferences ?? [], 'direct_reference'),
         ...retrievalItemsFromReferences(input.graphContextReferences ?? [], 'graph_expansion'),
@@ -258,6 +262,7 @@ export function buildContextPacket(input: ContextPacketBuildInput): ContextPacke
       ],
       exclusions,
     },
+    degraded,
     metadata: {
       generatedBy: CONTEXT_MANAGER_COMPONENT,
       environment: input.tenant.environment,
@@ -272,6 +277,16 @@ export function buildContextPacket(input: ContextPacketBuildInput): ContextPacke
 
   assertValidContextPacket(packet);
   return packet;
+}
+
+function defaultDegradedState(packetStatus: ContextPacketStatus): DegradedContextState | undefined {
+  if (packetStatus === 'complete') return undefined;
+
+  return {
+    reasons: ['knowledge_unavailable'],
+    safeFallbackInstruction: 'Proceed only with packet identity, runtime rules, guardrails, and clarifying questions; do not infer missing knowledge.',
+    missingSections: ['approvedKnowledge'],
+  };
 }
 
 export function validateContextPacket(packet: unknown): ContextPacketValidationResult {
