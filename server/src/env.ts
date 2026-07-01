@@ -225,6 +225,10 @@ const Env = z.object({
   // NEVER active knowledge; no agent may approve — enabling this flag only turns
   // on candidate CAPTURE + the human review-decision recorder, nothing else.
   LEARNING_CANDIDATE_PERSISTENCE_ENABLED: EnvBoolean.default(false),
+  // Phase 7 · R3 canary kill-switch (P7.1 §6 / P7.6). When false (default) the
+  // GraphRAG writer + retrieval are no-ops. Only active, retrieval-ready,
+  // approved knowledge is ever served; candidates/superseded/archived excluded.
+  GRAPHRAG_PERSISTENCE_ENABLED: EnvBoolean.default(false),
 });
 
 export const env = Env.parse(process.env);

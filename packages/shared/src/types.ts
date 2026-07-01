@@ -5340,3 +5340,64 @@ export interface ReviewLearningCandidateInput {
   reason?: string | null;
   approvalReferenceId?: string | null;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · R3 — GraphRAG (P7.6).
+//
+// Derived-memory records + retrieval over the app's OWN dedicated stores,
+// app-direct. A GraphRAG record indexes an ACTIVE, approved Knowledge Object for
+// semantic recall (Chroma) stitched to lineage (Neo4j) by the shared id. NO
+// Universal Gateway, no `quadstack.write`, no `universal_gateway` (ACR-0007).
+// Only records with `retrievalReady: true` and an active knowledge object are
+// served; superseded/archived/review-only records are excluded. The Context
+// Manager is the sole caller — agents never read/write GraphRAG stores directly.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Embedding model — all app vectors are 384-dim all-MiniLM-L6-v2 (P10 §7.3). */
+export type McsEmbeddingModel = 'all-MiniLM-L6-v2';
+
+/** A persisted GraphRAG derived-memory record: app-memory envelope + fields (P7.6 §4). */
+export interface McsGraphRagRecord extends McsMemoryEnvelope {
+  type: 'graphrag_record' | 'graphrag_chunk';
+  knowledgeObjectId: string;
+  version: number;
+  domain: McsLearningDomain;
+  language: 'en' | 'es';
+  summary: string;
+  model: McsEmbeddingModel;
+  modelVersion: string;
+  retrievalReady: boolean;
+}
+
+/** Input to `appendGraphRagRecord`. */
+export interface AppendGraphRagRecordInput {
+  knowledgeObjectId: string;
+  version: number;
+  tenantId: string;
+  domain: McsLearningDomain;
+  language: 'en' | 'es';
+  summary: string;
+  modelVersion: string;
+  title?: string;
+  type?: 'graphrag_record' | 'graphrag_chunk';
+  retrievalReady?: boolean;
+  derivedFrom?: string[];
+}
+
+/** A GraphRAG retrieval query (issued only by the Context Manager). */
+export interface GraphRagRetrievalQuery {
+  tenantId: string;
+  domain: McsLearningDomain;
+  language: 'en' | 'es';
+  queryText: string;
+  topK?: number;
+}
+
+/** One retrieval hit — the shared id stitches Chroma/Neo4j/Mongo. */
+export interface GraphRagRetrievalHit {
+  id: string;
+  knowledgeObjectId: string;
+  version: number;
+  summary: string;
+  distance: number | null;
+}
