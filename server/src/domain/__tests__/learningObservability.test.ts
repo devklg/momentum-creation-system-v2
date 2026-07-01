@@ -42,7 +42,7 @@ function outcome(kind: McsOutcomeRecord['kind']): McsOutcomeRecord {
     tenantId: 'team_magnificent',
     teamKey: 'team_magnificent',
     kind,
-    confirmedByBaId: 'TMBA-1',
+    confirmedByTmagId: 'TMAG-1',
     outcomeAt: GEN_AT,
   };
 }

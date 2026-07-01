@@ -24,7 +24,7 @@ const CTX: RuntimeAuditContext = {
   turnId: 't1',
   correlationId: 'c1',
   agent: 'michael',
-  baId: 'TMBA-1',
+  tmagId: 'TMAG-1',
   tenantId: 'team_magnificent',
   gate: null,
   draftKind: null,

@@ -38,7 +38,7 @@ async function loadOutcomes(enabled: boolean) {
 function input(overrides: Partial<AppendOutcomeInput> = {}): AppendOutcomeInput {
   return {
     kind: 'webinar_attended',
-    confirmedByBaId: 'TMBA-1',
+    confirmedByTmagId: 'TMAG-1',
     tenantId: 'team_magnificent',
     prospectId: 'P1',
     outcomeAt: '2026-07-01T00:00:00.000Z',
@@ -96,7 +96,7 @@ describe('Phase 7 R1 — app-memory envelope + scope', () => {
     expect(result.schemaVersion).toBe(1);
     expect(result.tenantId).toBe('team_magnificent');
     expect(result.teamKey).toBe('team_magnificent');
-    expect(result.baId).toBe('TMBA-1');
+    expect(result.tmagId).toBe('TMAG-1');
     // No gateway-only fields leaked onto the app record.
     expect(result).not.toHaveProperty('chat_number');
     expect(result).not.toHaveProperty('chat_registry_id');
@@ -154,11 +154,11 @@ describe('Phase 7 R1 — deterministic id, idempotency, correction chain', () =>
   it('once-per-(scope,BA) kinds get a stable id independent of outcomeAt', async () => {
     const outcomes = await loadOutcomes(true);
     const a = outcomes.deterministicOutcomeId({
-      kind: 'webinar_attended', confirmedByBaId: 'TMBA-1', prospectId: 'P1',
+      kind: 'webinar_attended', confirmedByTmagId: 'TMAG-1', prospectId: 'P1',
       outcomeAt: '2026-07-01T00:00:00.000Z',
     });
     const b = outcomes.deterministicOutcomeId({
-      kind: 'webinar_attended', confirmedByBaId: 'TMBA-1', prospectId: 'P1',
+      kind: 'webinar_attended', confirmedByTmagId: 'TMAG-1', prospectId: 'P1',
       outcomeAt: '2026-08-09T09:09:09.000Z',
     });
     expect(a).toBe(b);
@@ -167,11 +167,11 @@ describe('Phase 7 R1 — deterministic id, idempotency, correction chain', () =>
   it('multi-occurrence kinds (callback_completed) fold outcomeAt into the id', async () => {
     const outcomes = await loadOutcomes(true);
     const a = outcomes.deterministicOutcomeId({
-      kind: 'callback_completed', confirmedByBaId: 'TMBA-1', prospectId: 'P1',
+      kind: 'callback_completed', confirmedByTmagId: 'TMAG-1', prospectId: 'P1',
       outcomeAt: '2026-07-01T00:00:00.000Z',
     });
     const b = outcomes.deterministicOutcomeId({
-      kind: 'callback_completed', confirmedByBaId: 'TMBA-1', prospectId: 'P1',
+      kind: 'callback_completed', confirmedByTmagId: 'TMAG-1', prospectId: 'P1',
       outcomeAt: '2026-07-02T00:00:00.000Z',
     });
     expect(a).not.toBe(b);

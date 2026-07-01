@@ -13,7 +13,7 @@
  *   - `appendLearningCandidate` ALWAYS produces a `detected` candidate. It has
  *     no status parameter — a pipeline/agent cannot mint an approved candidate.
  *   - `reviewLearningCandidate` is the ONLY path to approved/rejected, and it
- *     requires a human `reviewedByBaId`. There is no auto-promotion.
+ *     requires a human `reviewedByTmagId`. There is no auto-promotion.
  *   - Reviews are written once; a changed decision supersedes with a new
  *     candidate (append-only). Rejected candidates are retained for audit.
  *
@@ -142,7 +142,7 @@ export async function appendLearningCandidate(
     originKind: 'system',
     serviceName: SERVICE_NAME,
     tenantId: input.tenantId,
-    baId: input.baId,
+    tmagId: input.tmagId,
     derivedFrom: [...sourceOutcomeIds, ...sourceSignalIds],
     status: 'detected', // ALWAYS — no agent-set approval
     domain: input.domain,
@@ -181,7 +181,7 @@ export async function appendLearningCandidate(
  * Record a HUMAN review decision (approved/rejected). This is the ONLY path to a
  * non-`detected` status. Enforces:
  *   - the canary is on (else no-op → null);
- *   - a non-empty human `reviewedByBaId` (no agent approval);
+ *   - a non-empty human `reviewedByTmagId` (no agent approval);
  *   - the candidate exists and has not already been reviewed (a changed decision
  *     must supersede with a new candidate — reviews are written once).
  */
@@ -190,7 +190,7 @@ export async function reviewLearningCandidate(
 ): Promise<McsLearningCandidateRecord | null> {
   if (!learningCandidatePersistenceEnabled()) return null;
 
-  if (!input.reviewedByBaId || !input.reviewedByBaId.trim()) {
+  if (!input.reviewedByTmagId || !input.reviewedByTmagId.trim()) {
     throw new LearningCandidateValidationError(
       'A review requires a human reviewer id — no agent may approve knowledge.',
     );
@@ -212,7 +212,7 @@ export async function reviewLearningCandidate(
   const now = new Date().toISOString();
   const review: McsCandidateReview = {
     decision: input.decision,
-    reviewedByBaId: input.reviewedByBaId,
+    reviewedByTmagId: input.reviewedByTmagId,
     reviewedAt: now,
     reason: input.reason ? input.reason.slice(0, MAX_REASON_CHARS) : null,
     approvalReferenceId: input.approvalReferenceId ?? null,
@@ -232,14 +232,14 @@ export async function reviewLearningCandidate(
     query: `
       MERGE (c:LearningCandidate {id: $id})
       SET c.status = $status, c.reviewDecision = $decision,
-          c.reviewedByBaId = $reviewedByBaId, c.reviewedAt = datetime($reviewedAt)
+          c.reviewedByTmagId = $reviewedByTmagId, c.reviewedAt = datetime($reviewedAt)
       RETURN c.id AS id
     `,
     params: {
       id: input.candidateId,
       status,
       decision: input.decision,
-      reviewedByBaId: input.reviewedByBaId,
+      reviewedByTmagId: input.reviewedByTmagId,
       reviewedAt: now,
     },
   });

@@ -5156,7 +5156,7 @@ export interface RuntimeAuditContext {
   turnId: string;
   correlationId: string;
   agent: RuntimeAuditAgent;
-  baId: string;
+  tmagId: string;
   tenantId: string;
   gate: string | null;
   draftKind: RuntimeAuditDraftKind | null;
@@ -5207,8 +5207,8 @@ export type McsMemoryType =
  *
  * Membership-first scope (DECISION_team_magnificent_membership_canonical_identity):
  * every record is scoped to Team Magnificent membership — `tenantId` + the
- * `teamKey: 'team_magnificent'` team scope, plus `baId` = the Team Magnificent
- * MEMBER id (the `TMBA-…` login). The app is exclusively for TM members (an
+ * `teamKey: 'team_magnificent'` team scope, plus `tmagId` = the Team Magnificent
+ * MEMBER id (value `TMAG-…`, the login). The app is exclusively for TM members (an
  * enrolled III International BA in Kevin's downline); the THREE BA role is a
  * mirrored attribute of the member, never the identity.
  *
@@ -5229,8 +5229,8 @@ export interface McsMemoryEnvelope {
   tenantId: string;
   /** Team Magnificent membership scope — the single tenant/team the app serves. */
   teamKey: 'team_magnificent';
-  /** The Team Magnificent member id (`TMBA-…`), when the record is member-scoped. */
-  baId?: string;
+  /** The Team Magnificent member id `tmagId` (value `TMAG-…`), when the record is member-scoped. */
+  tmagId?: string;
   derivedFrom?: string[];
 }
 
@@ -5258,7 +5258,7 @@ export type McsOutcomeKind =
 export interface McsOutcomeRecord extends McsMemoryEnvelope {
   type: 'outcome';
   kind: McsOutcomeKind;
-  confirmedByBaId: string;
+  confirmedByTmagId: string;
   prospectId?: string;
   token?: string;
   outcomeAt: IsoTimestamp;
@@ -5269,7 +5269,7 @@ export interface McsOutcomeRecord extends McsMemoryEnvelope {
 /** Input to `appendOutcome`. The domain layer stamps id/envelope; BA supplies the fact. */
 export interface AppendOutcomeInput {
   kind: McsOutcomeKind;
-  confirmedByBaId: string;
+  confirmedByTmagId: string;
   tenantId: string;
   prospectId?: string;
   token?: string;
@@ -5306,12 +5306,12 @@ export type McsLearningDomain =
   | 'organizational';
 
 /**
- * A human review decision. `reviewedByBaId` is a HUMAN reviewer id — never an
+ * A human review decision. `reviewedByTmagId` is a HUMAN reviewer id — never an
  * agent id. Written once; a changed decision supersedes with a new candidate.
  */
 export interface McsCandidateReview {
   decision: 'approved' | 'rejected';
-  reviewedByBaId: string;
+  reviewedByTmagId: string;
   reviewedAt: IsoTimestamp;
   reason?: string | null;
   approvalReferenceId?: string | null;
@@ -5338,7 +5338,7 @@ export interface AppendLearningCandidateInput {
   proposedSummary: string;
   sourceOutcomeIds?: string[];
   sourceSignalIds?: string[];
-  baId?: string;
+  tmagId?: string;
   supersedesCandidateId?: string | null;
 }
 
@@ -5346,7 +5346,7 @@ export interface AppendLearningCandidateInput {
 export interface ReviewLearningCandidateInput {
   candidateId: string;
   decision: 'approved' | 'rejected';
-  reviewedByBaId: string;
+  reviewedByTmagId: string;
   reason?: string | null;
   approvalReferenceId?: string | null;
 }

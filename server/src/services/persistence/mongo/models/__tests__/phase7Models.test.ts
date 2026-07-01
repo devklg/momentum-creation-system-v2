@@ -32,7 +32,7 @@ describe('Phase 7 P7.12 — governed doors (first-pass $jsonSchema)', () => {
   it('mcs_outcomes: required core + string timestamps + additionalProperties true', () => {
     const js = generateMongoJsonSchema(buildOutcomeSchema());
     expect(js.additionalProperties).toBe(true);
-    for (const field of [...ENVELOPE_CORE, 'kind', 'confirmedByBaId', 'outcomeAt']) {
+    for (const field of [...ENVELOPE_CORE, 'kind', 'confirmedByTmagId', 'outcomeAt']) {
       expect(js.required).toContain(field);
     }
     // Timestamps are ISO strings, never BSON Date (P10 §3.3).

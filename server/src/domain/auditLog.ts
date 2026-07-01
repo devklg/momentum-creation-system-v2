@@ -414,7 +414,7 @@ export async function appendRuntimeAuditEntry(
         correlationId: runtime.correlationId,
         agent: runtime.agent,
         tenantId: runtime.tenantId,
-        baId: runtime.baId,
+        tmagId: runtime.tmagId,
       },
     },
   });
@@ -429,7 +429,7 @@ function runtimeSemanticDocument(entry: RuntimeAuditLogEntry): string {
     `action=${entry.action}`,
     `agent=${runtime.agent}`,
     `turn=${runtime.turnId}`,
-    `ba=${runtime.baId}`,
+    `tmag=${runtime.tmagId}`,
     `tenant=${runtime.tenantId}`,
     `severity=${entry.severity}`,
   ];
@@ -457,7 +457,7 @@ function buildRuntimeCypher(
         correlationId: $correlationId, tenantId: $tenantId, gate: $gate
       }
       WITH a
-      OPTIONAL MATCH (ba:BrandAmbassador {baId: $baId})
+      OPTIONAL MATCH (ba:BrandAmbassador {baId: $tmagId})
       FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END |
         MERGE (a)-[:ACTED_FOR]->(ba)
       )
@@ -474,7 +474,7 @@ function buildRuntimeCypher(
       correlationId: runtime.correlationId,
       tenantId: runtime.tenantId,
       gate: runtime.gate,
-      baId: runtime.baId,
+      tmagId: runtime.tmagId,
     },
   };
 }

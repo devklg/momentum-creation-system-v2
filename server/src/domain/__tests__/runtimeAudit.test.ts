@@ -28,7 +28,7 @@ const RUNTIME: RuntimeAuditContext = {
   turnId: 'turn_abc',
   correlationId: 'corr_1',
   agent: 'michael',
-  baId: 'TMBA-1',
+  tmagId: 'TMAG-1',
   tenantId: 'team_magnificent',
   gate: null,
   draftKind: null,
@@ -117,7 +117,7 @@ describe('Phase 7 R0 — metadata-only + scope invariants', () => {
     expect(result!.actor).toEqual({ kind: 'system', label: 'runtime:michael' });
     expect(result!.role).toBe('system');
     expect(result!.runtime.tenantId).toBe('team_magnificent');
-    expect(result!.runtime.baId).toBe('TMBA-1');
+    expect(result!.runtime.tmagId).toBe('TMAG-1');
     const meta = (mocks.tripleStackWrite.mock.calls[0]![0] as AnyRec).chroma as AnyRec;
     expect((meta.metadata as AnyRec).tenantId).toBe('team_magnificent');
     expect((meta.metadata as AnyRec).agent).toBe('michael');

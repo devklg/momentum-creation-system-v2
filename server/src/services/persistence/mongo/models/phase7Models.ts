@@ -42,7 +42,7 @@ function envelopeCore() {
     tenantId: { type: String, required: true },
     // Team Magnificent membership scope (DECISION_team_magnificent_membership_canonical_identity).
     teamKey: { type: String, required: true, enum: ['team_magnificent'] },
-    baId: { type: String },
+    tmagId: { type: String },
     derivedFrom: { type: [String] },
   };
 }
@@ -66,7 +66,7 @@ export function buildOutcomeSchema(): Schema<MongoDocument> {
           'no_show',
         ],
       },
-      confirmedByBaId: { type: String, required: true },
+      confirmedByTmagId: { type: String, required: true },
       outcomeAt: { type: String, required: true },
       prospectId: { type: String },
       token: { type: String },

@@ -92,7 +92,7 @@ describe('Phase 7 R2 — no agent approval, no auto-promotion', () => {
   it('reviewLearningCandidate refuses a decision without a human reviewer id', async () => {
     const m = await load(true);
     await expect(
-      m.reviewLearningCandidate({ candidateId: 'mcslearn_x', decision: 'approved', reviewedByBaId: '' }),
+      m.reviewLearningCandidate({ candidateId: 'mcslearn_x', decision: 'approved', reviewedByTmagId: '' }),
     ).rejects.toBeInstanceOf(m.LearningCandidateValidationError);
   });
 
@@ -114,12 +114,12 @@ describe('Phase 7 R2 — human review transition', () => {
     const result = (await m.reviewLearningCandidate({
       candidateId: 'mcslearn_1',
       decision: 'approved',
-      reviewedByBaId: 'TMBA-KEVIN',
+      reviewedByTmagId: 'TMAG-KEVIN',
       reason: 'clear pattern',
     }))!;
 
     expect(result.status).toBe('approved');
-    expect(result.review!.reviewedByBaId).toBe('TMBA-KEVIN');
+    expect(result.review!.reviewedByTmagId).toBe('TMAG-KEVIN');
     const update = mocks.gatewayCall.mock.calls.find(
       ([tool, action]) => tool === 'mongodb' && action === 'update',
     );
@@ -131,13 +131,13 @@ describe('Phase 7 R2 — human review transition', () => {
       gatewayReturning({
         id: 'mcslearn_1',
         status: 'approved',
-        review: { decision: 'approved', reviewedByBaId: 'TMBA-KEVIN', reviewedAt: '2026-07-01T00:00:00.000Z' },
+        review: { decision: 'approved', reviewedByTmagId: 'TMAG-KEVIN', reviewedAt: '2026-07-01T00:00:00.000Z' },
       }),
     );
     const m = await load(true);
 
     await expect(
-      m.reviewLearningCandidate({ candidateId: 'mcslearn_1', decision: 'rejected', reviewedByBaId: 'TMBA-KEVIN' }),
+      m.reviewLearningCandidate({ candidateId: 'mcslearn_1', decision: 'rejected', reviewedByTmagId: 'TMAG-KEVIN' }),
     ).rejects.toBeInstanceOf(m.LearningCandidateValidationError);
   });
 
@@ -146,7 +146,7 @@ describe('Phase 7 R2 — human review transition', () => {
     const m = await load(true);
 
     await expect(
-      m.reviewLearningCandidate({ candidateId: 'ghost', decision: 'approved', reviewedByBaId: 'TMBA-KEVIN' }),
+      m.reviewLearningCandidate({ candidateId: 'ghost', decision: 'approved', reviewedByTmagId: 'TMAG-KEVIN' }),
     ).rejects.toBeInstanceOf(m.LearningCandidateNotFoundError);
   });
 });

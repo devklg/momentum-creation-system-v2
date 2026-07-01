@@ -12,7 +12,7 @@
 
 Everything below is **built as code but not applied to any store**. Mongo models live in `phase7Models.ts`; Neo4j statements in `phase7Constraints.ts`; Chroma names in `chromaCollections.ts`. Each is drafted + unit-tested but not wired into the live apply path. When you've reviewed the full surface, application is a per-store step (see P7.12 §5).
 
-Shared **app-memory envelope** on every memory record (P7.3 §4.2), **membership-first** (`DECISION_team_magnificent_membership_canonical_identity`): `id · type · schemaVersion · namespace('momentum') · source · createdAt(ISO string) · title · originKind('system') · serviceName · tenantId · teamKey('team_magnificent')`, optional `baId` (= the Team Magnificent **member** id `tmagId`, value `TMAG-…`; `tm→tmag` rename per the identity decision runs in the governed reidentification migration), `derivedFrom[]`. Every record is scoped to Team Magnificent membership. Gateway-only fields (`chat_number`, `chat_registry_id`, `universal_gateway`) are never present.
+Shared **app-memory envelope** on every memory record (P7.3 §4.2), **membership-first** (`DECISION_team_magnificent_membership_canonical_identity`): `id · type · schemaVersion · namespace('momentum') · source · createdAt(ISO string) · title · originKind('system') · serviceName · tenantId · teamKey('team_magnificent')`, optional `tmagId` (the Team Magnificent **member** id, value `TMAG-…`; the Phase 7 stores use `tmagId`/`confirmedByTmagId`/`reviewedByTmagId` from birth — canonical, no drift), `derivedFrom[]`. Every record is scoped to Team Magnificent membership. Gateway-only fields (`chat_number`, `chat_registry_id`, `universal_gateway`) are never present.
 
 ---
 

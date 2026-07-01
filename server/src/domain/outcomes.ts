@@ -68,32 +68,32 @@ function shortHash(input: string): string {
 }
 
 /**
- * Deterministic id from (scope, kind, confirmedByBaId) — idempotent retries.
+ * Deterministic id from (scope, kind, confirmedByTmagId) — idempotent retries.
  * For multi-occurrence kinds `outcomeAt` is folded in so distinct events differ.
  */
 export function deterministicOutcomeId(input: {
   kind: McsOutcomeKind;
-  confirmedByBaId: string;
+  confirmedByTmagId: string;
   prospectId?: string;
   token?: string;
   outcomeAt: string;
 }): string {
   const scope = input.prospectId ?? input.token ?? 'noscope';
-  const base = `${input.confirmedByBaId}:${input.kind}:${scope}`;
+  const base = `${input.confirmedByTmagId}:${input.kind}:${scope}`;
   const keyed = MULTI_OCCURRENCE_KINDS.has(input.kind) ? `${base}:${input.outcomeAt}` : base;
   return `mcsoutcome_${shortHash(keyed)}`;
 }
 
 function outcomeTitle(record: McsOutcomeRecord): string {
   const scope = record.prospectId ?? record.token ?? 'unscoped';
-  return `outcome ${record.kind} · ba=${record.confirmedByBaId} · ${scope}`;
+  return `outcome ${record.kind} · tmag=${record.confirmedByTmagId} · ${scope}`;
 }
 
 /** Semantic blob for Chroma — scope + kind only, never PII or a body. */
 function outcomeSemanticDocument(record: McsOutcomeRecord): string {
   const parts = [
     `outcome kind=${record.kind}`,
-    `ba=${record.confirmedByBaId}`,
+    `tmag=${record.confirmedByTmagId}`,
     `tenant=${record.tenantId}`,
     `at=${record.outcomeAt}`,
   ];
@@ -126,7 +126,7 @@ export async function appendOutcome(
 ): Promise<McsOutcomeRecord | null> {
   if (!outcomeCapturePersistenceEnabled()) return null;
 
-  if (!input.confirmedByBaId) {
+  if (!input.confirmedByTmagId) {
     throw new OutcomeValidationError('An outcome requires the confirming BA id.');
   }
   if (!input.tenantId) {
@@ -140,7 +140,7 @@ export async function appendOutcome(
   const outcomeAt = input.outcomeAt ?? now;
   const id = deterministicOutcomeId({
     kind: input.kind,
-    confirmedByBaId: input.confirmedByBaId,
+    confirmedByTmagId: input.confirmedByTmagId,
     prospectId: input.prospectId,
     token: input.token,
     outcomeAt,
@@ -168,11 +168,11 @@ export async function appendOutcome(
     serviceName: SERVICE_NAME,
     tenantId: input.tenantId,
     teamKey: 'team_magnificent',
-    baId: input.confirmedByBaId,
+    tmagId: input.confirmedByTmagId,
     derivedFrom: [],
     // outcome fields
     kind: input.kind,
-    confirmedByBaId: input.confirmedByBaId,
+    confirmedByTmagId: input.confirmedByTmagId,
     prospectId: input.prospectId,
     token: input.token,
     outcomeAt,
@@ -193,7 +193,7 @@ export async function appendOutcome(
         kind: record.kind,
         type: record.type,
         tenantId: record.tenantId,
-        baId: record.confirmedByBaId,
+        tmagId: record.confirmedByTmagId,
         prospectId: record.prospectId ?? null,
         token: record.token ?? null,
         outcomeAt: record.outcomeAt,
@@ -218,14 +218,14 @@ function buildOutcomeCypher(
     cypher: `
       MERGE (o:Outcome {id: $id})
       SET o += {
-        id: $id, kind: $kind, tenantId: $tenantId, baId: $baId,
+        id: $id, kind: $kind, tenantId: $tenantId, tmagId: $tmagId,
         teamKey: 'team_magnificent',
         outcomeAt: datetime($outcomeAt), createdAt: datetime($createdAt)
       }
       MERGE (t:TeamMagnificent {teamKey: 'team_magnificent'})
       MERGE (o)-[:SCOPED_TO]->(t)
       WITH o
-      OPTIONAL MATCH (ba:BrandAmbassador {baId: $baId})
+      OPTIONAL MATCH (ba:BrandAmbassador {baId: $tmagId})
       FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END |
         MERGE (o)-[:CONFIRMED_BY]->(ba)
       )
@@ -245,7 +245,7 @@ function buildOutcomeCypher(
       id: record.id,
       kind: record.kind,
       tenantId: record.tenantId,
-      baId: record.confirmedByBaId,
+      tmagId: record.confirmedByTmagId,
       outcomeAt: record.outcomeAt,
       createdAt: record.createdAt,
       prospectId: record.prospectId ?? null,
