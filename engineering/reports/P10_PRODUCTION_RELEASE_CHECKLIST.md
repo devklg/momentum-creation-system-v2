@@ -93,7 +93,7 @@ All three are HIGH findings and change production behavior, so they are Kevin-ga
 ## 5. BLOCKER B4 — Data integrity & operational readiness
 
 - [x] **H1 code fix shipped** — `drainProjectionOutbox()` is now scheduled at boot + 30s interval (PR #72 → `main`, regression test present). *(Verification report §15)*
-- [ ] **H1 live smoke test** against the app's **dedicated** Neo4j/Mongo/Chroma — procedure in verification report §15. The dedicated stack **now exists** (2026-06-30); the remaining gate is **schema creation + approval** — the write-freeze (`[[mcs-v2-db-write-freeze]]`) still bars writes to MCS V2 stores until schemas are in place. Once schemas exist, run the smoke. *(Kevin: create/approve schemas → then smoke — BLOCKER for GO)*
+- [ ] **H1 live smoke test** against the app's **dedicated** Neo4j/Mongo/Chroma — procedure in verification report §15. The dedicated stack **now exists** (2026-06-30); the remaining gate is **schema creation + approval** — the write-freeze (`[[mcs-v2-db-write-freeze]]`) still bars writes to MCS V2 stores until schemas are in place. **Schema design drafted:** `engineering/reports/P10_MCS_V2_SCHEMA_DESIGN.md` (49 Mongo collections, Neo4j constraints/indexes, Chroma registry + record contract — proposed, not applied). Approve it → apply per-store → then smoke. *(Kevin: approve schema design → apply → smoke — BLOCKER for GO)*
 - [ ] **Backup & restore** — no tooling exists (finding H, P10.7). Author a backup PLAN (cadence, retention, off-host, Mongo as RPO anchor with Neo4j/Chroma as rebuildable projections) and a restore runbook + RPO/RTO. *(Plan = Agent docs-once B1 known; execution = Kevin)*
 - [ ] Deployment, real-time, and **rollback** procedures verified (`ROADMAP.md:190`) — see §9. *(Kevin)*
 
