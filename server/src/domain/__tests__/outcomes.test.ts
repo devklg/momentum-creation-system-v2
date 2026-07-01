@@ -95,6 +95,7 @@ describe('Phase 7 R1 — app-memory envelope + scope', () => {
     expect(result.serviceName).toBe('mcs_outcome_capture');
     expect(result.schemaVersion).toBe(1);
     expect(result.tenantId).toBe('team_magnificent');
+    expect(result.teamKey).toBe('team_magnificent');
     expect(result.baId).toBe('TMBA-1');
     // No gateway-only fields leaked onto the app record.
     expect(result).not.toHaveProperty('chat_number');

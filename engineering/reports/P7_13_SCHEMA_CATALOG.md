@@ -12,7 +12,7 @@
 
 Everything below is **built as code but not applied to any store**. Mongo models live in `phase7Models.ts`; Neo4j statements in `phase7Constraints.ts`; Chroma names in `chromaCollections.ts`. Each is drafted + unit-tested but not wired into the live apply path. When you've reviewed the full surface, application is a per-store step (see P7.12 §5).
 
-Shared **app-memory envelope** on every memory record (P7.3 §4.2): `id · type · schemaVersion · namespace('momentum') · source · createdAt(ISO string) · title · originKind('system') · serviceName · tenantId`, optional `baId`, `derivedFrom[]`. Gateway-only fields (`chat_number`, `chat_registry_id`, `universal_gateway`) are never present.
+Shared **app-memory envelope** on every memory record (P7.3 §4.2), **membership-first** (`DECISION_team_magnificent_membership_canonical_identity`): `id · type · schemaVersion · namespace('momentum') · source · createdAt(ISO string) · title · originKind('system') · serviceName · tenantId · teamKey('team_magnificent')`, optional `baId` (= the Team Magnificent **member** id, `TMBA-…`), `derivedFrom[]`. Every record is scoped to Team Magnificent membership. Gateway-only fields (`chat_number`, `chat_registry_id`, `universal_gateway`) are never present.
 
 ---
 
@@ -22,7 +22,7 @@ Shared **app-memory envelope** on every memory record (P7.3 §4.2): `id · type 
 |---|---|---|---|---|
 | `mcs_audit_log` | R0 | `entryId` | *(4.J substrate)* + optional `runtime` block | Canonical append-only audit; R0 adds runtime turn/gate markers (metadata only, no body). |
 | `mcs_outcomes` | R1 | `id` (`mcsoutcome_<hash>`) | `kind`(7-enum) · `confirmedByBaId` · `outcomeAt` | BA-confirmed real-world outcomes; `enrolled_three` is a THREE mirror, not a handoff. Append-only correction chain. |
-| `mcs_learning_candidates` | R2 | `id` (`mcslearn_<hash>`) | `status`(5-enum) · `domain`(5-enum) · `language` · `proposedSummary` · `sourceOutcomeIds[]` · `sourceSignalIds[]` · `teamKey` · optional `review` | Review-only proposed learning; **no agent may approve** (status starts `detected`; only a human review sets approved/rejected). |
+| `mcs_learning_candidates` | R2 | `id` (`mcslearn_<hash>`) | `status`(5-enum) · `domain`(5-enum) · `language` · `proposedSummary` · `sourceOutcomeIds[]` · `sourceSignalIds[]` · optional `review` | Review-only proposed learning; **no agent may approve** (status starts `detected`; only a human review sets approved/rejected). |
 | `mcs_graphrag_records` | R3 | `id` (`mcsgraph_<kobj>_v<n>_<lang>`) | `knowledgeObjectId` · `version`(int) · `domain` · `language` · `summary` · `model` · `modelVersion` · `retrievalReady`(bool) | Derived-memory index of active knowledge for GraphRAG retrieval. |
 
 First-pass validator posture (all): `required` = core above; `additionalProperties:true`; ISO-string timestamps (never `Date`); field enums enforced client-side on direct writes. Tighten to `additionalProperties:false` per-collection after a soak (P10 §5/§8).
@@ -33,7 +33,7 @@ First-pass validator posture (all): `required` = core above; `additionalProperti
 
 | Label | Constraint (unique) | Indexes | Relationships (specific verbs) | Purpose |
 |---|---|---|---|---|
-| `Outcome` | `id` | `baId` | `-[:CONFIRMED_BY]->(:BrandAmbassador)`, `-[:ABOUT_PROSPECT]->(:Prospect)`, `-[:SUPERSEDES]->(:Outcome)` | R1 outcome lineage. |
+| `Outcome` | `id` | `baId` | `-[:CONFIRMED_BY]->(:BrandAmbassador)`, `-[:ABOUT_PROSPECT]->(:Prospect)`, `-[:SUPERSEDES]->(:Outcome)`, `-[:SCOPED_TO]->(:TeamMagnificent)` | R1 outcome lineage + team scope. |
 | `LearningCandidate` | `id` | `status` | `-[:DERIVED_FROM]->(:Outcome)`, `-[:SCOPED_TO]->(:TeamMagnificent)` | R2 candidate provenance + team scope. |
 | `Knowledge` | `id` | `retrievalReady` | `-[:SCOPED_TO]->(:TeamMagnificent)` | R3 active-knowledge nodes. |
 | `TeamMagnificent` | `teamKey` | — | *(target of `:SCOPED_TO`)* | Single team scope node. |

@@ -167,6 +167,7 @@ export async function appendOutcome(
     originKind: 'system',
     serviceName: SERVICE_NAME,
     tenantId: input.tenantId,
+    teamKey: 'team_magnificent',
     baId: input.confirmedByBaId,
     derivedFrom: [],
     // outcome fields
@@ -218,8 +219,11 @@ function buildOutcomeCypher(
       MERGE (o:Outcome {id: $id})
       SET o += {
         id: $id, kind: $kind, tenantId: $tenantId, baId: $baId,
+        teamKey: 'team_magnificent',
         outcomeAt: datetime($outcomeAt), createdAt: datetime($createdAt)
       }
+      MERGE (t:TeamMagnificent {teamKey: 'team_magnificent'})
+      MERGE (o)-[:SCOPED_TO]->(t)
       WITH o
       OPTIONAL MATCH (ba:BrandAmbassador {baId: $baId})
       FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END |

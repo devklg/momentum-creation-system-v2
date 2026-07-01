@@ -40,6 +40,8 @@ function envelopeCore() {
     originKind: { type: String, required: true, enum: ['system'] },
     serviceName: { type: String, required: true },
     tenantId: { type: String, required: true },
+    // Team Magnificent membership scope (DECISION_team_magnificent_membership_canonical_identity).
+    teamKey: { type: String, required: true, enum: ['team_magnificent'] },
     baId: { type: String },
     derivedFrom: { type: [String] },
   };

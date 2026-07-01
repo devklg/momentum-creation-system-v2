@@ -5204,6 +5204,14 @@ export type McsMemoryType =
 /**
  * The app-memory envelope. camelCase (app-data convention, P10 §3.6). `id` is
  * shared across all three stores (Mongo `_id` / Neo4j `{id}` / Chroma id).
+ *
+ * Membership-first scope (DECISION_team_magnificent_membership_canonical_identity):
+ * every record is scoped to Team Magnificent membership — `tenantId` + the
+ * `teamKey: 'team_magnificent'` team scope, plus `baId` = the Team Magnificent
+ * MEMBER id (the `TMBA-…` login). The app is exclusively for TM members (an
+ * enrolled III International BA in Kevin's downline); the THREE BA role is a
+ * mirrored attribute of the member, never the identity.
+ *
  * Banned on any app record: `chat_number`, `chat_registry_id`,
  * `namespace: 'universal_gateway'`, and the `date`/`timestamp`/`chat`/
  * `synced_chat`/`start_time` aliases.
@@ -5219,6 +5227,9 @@ export interface McsMemoryEnvelope {
   originKind: 'system';
   serviceName: string;
   tenantId: string;
+  /** Team Magnificent membership scope — the single tenant/team the app serves. */
+  teamKey: 'team_magnificent';
+  /** The Team Magnificent member id (`TMBA-…`), when the record is member-scoped. */
   baId?: string;
   derivedFrom?: string[];
 }
@@ -5315,7 +5326,6 @@ export interface McsLearningCandidateRecord extends McsMemoryEnvelope {
   proposedSummary: string;
   sourceOutcomeIds: string[];
   sourceSignalIds: string[];
-  teamKey: 'team_magnificent';
   review?: McsCandidateReview | null;
   supersedesCandidateId?: string | null;
 }

@@ -22,6 +22,7 @@ const ENVELOPE_CORE = [
   'schemaVersion',
   'serviceName',
   'source',
+  'teamKey',
   'tenantId',
   'title',
   'type',

@@ -40,6 +40,7 @@ function outcome(kind: McsOutcomeRecord['kind']): McsOutcomeRecord {
     originKind: 'system',
     serviceName: 'mcs_outcome_capture',
     tenantId: 'team_magnificent',
+    teamKey: 'team_magnificent',
     kind,
     confirmedByBaId: 'TMBA-1',
     outcomeAt: GEN_AT,

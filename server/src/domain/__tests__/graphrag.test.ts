@@ -91,6 +91,7 @@ describe('Phase 7 R3 — active-collection routing + isolation', () => {
     const record = (await m.appendGraphRagRecord(writeInput()))!;
     expect(record.namespace).toBe('momentum');
     expect(record.originKind).toBe('system');
+    expect(record.teamKey).toBe('team_magnificent');
     expect(record).not.toHaveProperty('chat_number');
     expect(record).not.toHaveProperty('chat_registry_id');
   });

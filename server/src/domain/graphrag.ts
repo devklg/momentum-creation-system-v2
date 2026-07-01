@@ -112,6 +112,7 @@ export async function appendGraphRagRecord(
     originKind: 'system',
     serviceName: SERVICE_NAME,
     tenantId: input.tenantId,
+    teamKey: 'team_magnificent',
     derivedFrom: input.derivedFrom ?? [],
     knowledgeObjectId: input.knowledgeObjectId,
     version: input.version,
