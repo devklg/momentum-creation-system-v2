@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { RuntimeTaskType } from '@momentum/shared/runtime';
+import type { McsRuntimeTaskType } from '@momentum/shared/runtime';
 import {
   isIvoryRuntimeTaskAllowed,
   runIvoryRuntimeAdapter,
@@ -10,7 +10,7 @@ import {
   requestTurnId,
 } from './contextRequestFixtures.js';
 
-async function runIvoryTurn(taskType: RuntimeTaskType = 'relationship_coaching') {
+async function runIvoryTurn(taskType: McsRuntimeTaskType = 'relationship_coaching') {
   const fixture = createContextManagerFixture('complete');
   const result = await runIvoryRuntimeAdapter({
     identity: requestIdentity({ agentKey: 'michael_magnificent' }),

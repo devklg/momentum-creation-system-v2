@@ -7,22 +7,22 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type {
-  SaveTenantTemplateResponse,
-  TenantComplianceValidation,
-  TenantOverview,
-  TenantOverviewResponse,
-  TenantSettings,
-  TenantTemplateKey,
-  TenantTemplateVersion,
-  UpdateTenantSettingsResponse,
-  ValidateTenantTemplateResponse,
+  McsSaveTenantTemplateResponse,
+  McsTenantComplianceValidation,
+  McsTenantOverview,
+  McsTenantOverviewResponse,
+  McsTenantSettings,
+  McsTenantTemplateKey,
+  McsTenantTemplateVersion,
+  McsUpdateTenantSettingsResponse,
+  McsValidateTenantTemplateResponse,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
 export function TenantPage() {
-  const [overview, setOverview] = useState<TenantOverview | null>(null);
+  const [overview, setOverview] = useState<McsTenantOverview | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -31,7 +31,7 @@ export function TenantPage() {
     setErr(null);
     try {
       const res = await fetch('/api/admin/tenant/overview', { credentials: 'include' });
-      const data = (await res.json()) as TenantOverviewResponse & { error?: string };
+      const data = (await res.json()) as McsTenantOverviewResponse & { error?: string };
       if (!data.ok) {
         setErr(data.error ?? 'Could not load tenant architecture.');
         return;
@@ -109,8 +109,8 @@ function SettingsPanel({
   settings,
   onSaved,
 }: {
-  settings: TenantSettings;
-  onSaved: (settings: TenantSettings) => void;
+  settings: McsTenantSettings;
+  onSaved: (settings: McsTenantSettings) => void;
 }) {
   const [tenantName, setTenantName] = useState(settings.tenantName);
   const [publicComDomain, setPublicComDomain] = useState(settings.publicComDomain);
@@ -142,7 +142,7 @@ function SettingsPanel({
           reason,
         }),
       });
-      const data = (await res.json()) as UpdateTenantSettingsResponse & {
+      const data = (await res.json()) as McsUpdateTenantSettingsResponse & {
         error?: string;
       };
       if (!data.ok) {
@@ -200,17 +200,17 @@ function TemplatePanel({
   overview,
   onSaved,
 }: {
-  overview: TenantOverview;
-  onSaved: (template: TenantTemplateVersion) => void;
+  overview: McsTenantOverview;
+  onSaved: (template: McsTenantTemplateVersion) => void;
 }) {
-  const [selectedKey, setSelectedKey] = useState<TenantTemplateKey>(
+  const [selectedKey, setSelectedKey] = useState<McsTenantTemplateKey>(
     overview.templates[0]?.templateKey ?? 'com.presentation.hero',
   );
   const selected = overview.templates.find((t) => t.templateKey === selectedKey);
   const definition = overview.templateDefinitions.find((t) => t.templateKey === selectedKey);
   const [content, setContent] = useState(selected?.content ?? '');
   const [reason, setReason] = useState('');
-  const [validation, setValidation] = useState<TenantComplianceValidation | null>(null);
+  const [validation, setValidation] = useState<McsTenantComplianceValidation | null>(null);
   const [state, setState] = useState<SaveState>('idle');
   const [err, setErr] = useState<string | null>(null);
 
@@ -237,7 +237,7 @@ function TemplatePanel({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ surface: selected.surface, content }),
       });
-      const data = (await res.json()) as ValidateTenantTemplateResponse & {
+      const data = (await res.json()) as McsValidateTenantTemplateResponse & {
         error?: string;
       };
       if (!data.ok) {
@@ -261,9 +261,9 @@ function TemplatePanel({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content, reason }),
       });
-      const data = (await res.json()) as SaveTenantTemplateResponse & {
+      const data = (await res.json()) as McsSaveTenantTemplateResponse & {
         error?: string;
-        validation?: TenantComplianceValidation;
+        validation?: McsTenantComplianceValidation;
       };
       if (!data.ok) {
         if (data.validation) setValidation(data.validation);
@@ -296,7 +296,7 @@ function TemplatePanel({
         </div>
         <select
           value={selectedKey}
-          onChange={(e) => setSelectedKey(e.target.value as TenantTemplateKey)}
+          onChange={(e) => setSelectedKey(e.target.value as McsTenantTemplateKey)}
           className="bg-ink border border-line rounded-md px-3 h-10 text-sm text-cream focus:outline-none focus:border-gold"
         >
           {overview.templates.map((template) => (
@@ -351,7 +351,7 @@ function TemplatePanel({
   );
 }
 
-function RolesPanel({ overview }: { overview: TenantOverview }) {
+function RolesPanel({ overview }: { overview: McsTenantOverview }) {
   return (
     <section className="border border-line rounded-md p-5 bg-ink-2/40 overflow-x-auto">
       <p className="font-mono tracking-label text-[10px] text-gold uppercase mb-1">
@@ -391,7 +391,7 @@ function RolesPanel({ overview }: { overview: TenantOverview }) {
   );
 }
 
-function InheritancePanel({ overview }: { overview: TenantOverview }) {
+function InheritancePanel({ overview }: { overview: McsTenantOverview }) {
   return (
     <section className="border border-line rounded-md p-5 bg-ink-2/40">
       <p className="font-mono tracking-label text-[10px] text-gold uppercase mb-1">
@@ -418,7 +418,7 @@ function InheritancePanel({ overview }: { overview: TenantOverview }) {
   );
 }
 
-function CompliancePanel({ overview }: { overview: TenantOverview }) {
+function CompliancePanel({ overview }: { overview: McsTenantOverview }) {
   return (
     <section className="border border-line rounded-md p-5 bg-ink-2/40">
       <p className="font-mono tracking-label text-[10px] text-gold uppercase mb-1">
@@ -476,7 +476,7 @@ function Meta({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ValidationBox({ validation }: { validation: TenantComplianceValidation }) {
+function ValidationBox({ validation }: { validation: McsTenantComplianceValidation }) {
   return (
     <div
       className={[

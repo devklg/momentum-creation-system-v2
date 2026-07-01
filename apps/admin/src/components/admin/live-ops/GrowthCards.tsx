@@ -8,10 +8,10 @@
  * not drilldown affordances.
  */
 
-import type { AdminGrowthCard, AdminGrowthCardsResponse } from '@momentum/shared';
+import type { McsAdminGrowthCard, McsAdminGrowthCardsResponse } from '@momentum/shared';
 
 interface Props {
-  data: AdminGrowthCardsResponse | null;
+  data: McsAdminGrowthCardsResponse | null;
   loading: boolean;
 }
 
@@ -43,7 +43,7 @@ export function GrowthCards({ data, loading }: Props) {
   );
 }
 
-function Card({ card, loading }: { card: AdminGrowthCard; loading: boolean }) {
+function Card({ card, loading }: { card: McsAdminGrowthCard; loading: boolean }) {
   return (
     <div
       className={[
@@ -131,7 +131,7 @@ function Delta({ value }: { value: number }) {
   );
 }
 
-function labelForWindow(window: AdminGrowthCard['window']): string {
+function labelForWindow(window: McsAdminGrowthCard['window']): string {
   if (window === '24h') return 'last 24 hours';
   if (window === '7d') return 'last 7 days';
   return 'last 30 days';

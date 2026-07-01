@@ -17,10 +17,10 @@
 import { listInvitesForBA } from './cockpit.js';
 import { findBAByTmagId } from './ba.js';
 import { buildPdfToBuffer, type TableColumn } from '../services/pdfReport.js';
-import type { InviteSummary, InviteDisplayStatus } from '@momentum/shared';
+import type { McsInviteSummary, McsInviteDisplayStatus } from '@momentum/shared';
 
 /** Human-facing label for each display status (title-cased, print-friendly). */
-const STATUS_LABEL: Record<InviteDisplayStatus, string> = {
+const STATUS_LABEL: Record<McsInviteDisplayStatus, string> = {
   draft: 'Draft',
   sent: 'Sent',
   opened: 'Opened',
@@ -68,7 +68,7 @@ export async function buildCockpitProspectListPdf(tmagId: string): Promise<Cockp
     return acc;
   }, {});
 
-  const columns: TableColumn<InviteSummary>[] = [
+  const columns: TableColumn<McsInviteSummary>[] = [
     { header: 'Prospect', width: 120, value: (r) => `${r.firstName} ${r.lastInitial}.` },
     { header: 'City / State', width: 120, value: (r) => `${r.city}, ${r.stateOrRegion}` },
     { header: 'Status', width: 70, value: (r) => STATUS_LABEL[r.status] },
@@ -86,7 +86,7 @@ export async function buildCockpitProspectListPdf(tmagId: string): Promise<Cockp
     (report) => {
       report.section('Summary');
       report.stat('Total prospects', String(rows.length));
-      const order: InviteDisplayStatus[] = [
+      const order: McsInviteDisplayStatus[] = [
         'draft',
         'sent',
         'opened',

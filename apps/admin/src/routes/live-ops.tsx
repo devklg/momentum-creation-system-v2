@@ -20,14 +20,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type {
-  AdminDashboardFilter,
-  AdminDashboardFiltersResponse,
-  AdminFunnelKind,
-  AdminFunnelResponse,
-  AdminGrowthCardsResponse,
-  AdminLiveGridResponse,
+  McsAdminDashboardFilter,
+  McsAdminDashboardFiltersResponse,
+  McsAdminFunnelKind,
+  McsAdminFunnelResponse,
+  McsAdminGrowthCardsResponse,
+  McsAdminLiveGridResponse,
 } from '@momentum/shared';
-import { ADMIN_LIVE_OPS_PATHS } from '@momentum/shared';
+import { MCS_ADMIN_LIVE_OPS_PATHS } from '@momentum/shared';
 import { FilterBar } from '@/components/dashboard/FilterBar';
 import { UsageStrip } from '@/components/admin/live-ops/UsageStrip';
 import { GrowthCards } from '@/components/admin/live-ops/GrowthCards';
@@ -49,19 +49,19 @@ import {
 const USE_MOCKS = true;
 
 const POLL_INTERVAL_MS = 30_000;
-const DEFAULT_FILTER: AdminDashboardFilter = { tmagId: null, leaderGroup: 'all' };
+const DEFAULT_FILTER: McsAdminDashboardFilter = { tmagId: null, leaderGroup: 'all' };
 
 export function LiveOpsPage() {
-  const [filter, setFilter] = useState<AdminDashboardFilter>(DEFAULT_FILTER);
-  const [options, setOptions] = useState<AdminDashboardFiltersResponse | null>(null);
+  const [filter, setFilter] = useState<McsAdminDashboardFilter>(DEFAULT_FILTER);
+  const [options, setOptions] = useState<McsAdminDashboardFiltersResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
-  const [growth, setGrowth] = useState<AdminGrowthCardsResponse | null>(null);
+  const [growth, setGrowth] = useState<McsAdminGrowthCardsResponse | null>(null);
   const [growthLoading, setGrowthLoading] = useState<boolean>(false);
-  const [grid, setGrid] = useState<AdminLiveGridResponse | null>(null);
+  const [grid, setGrid] = useState<McsAdminLiveGridResponse | null>(null);
   const [gridLoading, setGridLoading] = useState<boolean>(false);
-  const [funnelKind, setFunnelKind] = useState<AdminFunnelKind>('prospect');
-  const [funnel, setFunnel] = useState<AdminFunnelResponse | null>(null);
+  const [funnelKind, setFunnelKind] = useState<McsAdminFunnelKind>('prospect');
+  const [funnel, setFunnel] = useState<McsAdminFunnelResponse | null>(null);
   const [funnelLoading, setFunnelLoading] = useState<boolean>(false);
 
   const stream = useUsageStream({ enabled: !USE_MOCKS });
@@ -73,7 +73,7 @@ export function LiveOpsPage() {
         const res = await fetch('/api/admin/dashboard/filters', {
           credentials: 'include',
         });
-        const data = (await res.json()) as AdminDashboardFiltersResponse & { error?: string };
+        const data = (await res.json()) as McsAdminDashboardFiltersResponse & { error?: string };
         if (!data.ok) {
           setErr(data.error ?? 'Could not load filter options.');
           return;
@@ -86,7 +86,7 @@ export function LiveOpsPage() {
   }, []);
 
   const loadGrowth = useCallback(
-    async (f: AdminDashboardFilter) => {
+    async (f: McsAdminDashboardFilter) => {
       setGrowthLoading(true);
       try {
         if (USE_MOCKS) {
@@ -94,10 +94,10 @@ export function LiveOpsPage() {
           return;
         }
         const params = filterToQuery(f);
-        const res = await fetch(`${ADMIN_LIVE_OPS_PATHS.growthCards}?${params}`, {
+        const res = await fetch(`${MCS_ADMIN_LIVE_OPS_PATHS.growthCards}?${params}`, {
           credentials: 'include',
         });
-        const data = (await res.json()) as AdminGrowthCardsResponse & {
+        const data = (await res.json()) as McsAdminGrowthCardsResponse & {
           ok?: boolean;
           error?: string;
         };
@@ -116,7 +116,7 @@ export function LiveOpsPage() {
   );
 
   const loadGrid = useCallback(
-    async (f: AdminDashboardFilter) => {
+    async (f: McsAdminDashboardFilter) => {
       setGridLoading(true);
       try {
         if (USE_MOCKS) {
@@ -124,10 +124,10 @@ export function LiveOpsPage() {
           return;
         }
         const params = filterToQuery(f);
-        const res = await fetch(`${ADMIN_LIVE_OPS_PATHS.liveGrid}?${params}`, {
+        const res = await fetch(`${MCS_ADMIN_LIVE_OPS_PATHS.liveGrid}?${params}`, {
           credentials: 'include',
         });
-        const data = (await res.json()) as AdminLiveGridResponse & {
+        const data = (await res.json()) as McsAdminLiveGridResponse & {
           ok?: boolean;
           error?: string;
         };
@@ -146,7 +146,7 @@ export function LiveOpsPage() {
   );
 
   const loadFunnel = useCallback(
-    async (kind: AdminFunnelKind, f: AdminDashboardFilter) => {
+    async (kind: McsAdminFunnelKind, f: McsAdminDashboardFilter) => {
       setFunnelLoading(true);
       try {
         if (USE_MOCKS) {
@@ -155,10 +155,10 @@ export function LiveOpsPage() {
         }
         const params = filterToQuery(f);
         params.set('kind', kind);
-        const res = await fetch(`${ADMIN_LIVE_OPS_PATHS.funnel}?${params}`, {
+        const res = await fetch(`${MCS_ADMIN_LIVE_OPS_PATHS.funnel}?${params}`, {
           credentials: 'include',
         });
-        const data = (await res.json()) as AdminFunnelResponse & {
+        const data = (await res.json()) as McsAdminFunnelResponse & {
           ok?: boolean;
           error?: string;
         };
@@ -244,7 +244,7 @@ export function LiveOpsPage() {
   );
 }
 
-function filterToQuery(f: AdminDashboardFilter): URLSearchParams {
+function filterToQuery(f: McsAdminDashboardFilter): URLSearchParams {
   const params = new URLSearchParams();
   if (f.tmagId) params.set('tmagId', f.tmagId);
   if (f.leaderGroup) params.set('leaderGroup', f.leaderGroup);

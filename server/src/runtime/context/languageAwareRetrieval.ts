@@ -24,12 +24,12 @@
  */
 
 import type {
-  ApprovedKnowledgeQueryRequest,
-  KnowledgeReference,
-  RuntimeLanguage,
-  RuntimeLanguageFallbackReason,
-  RuntimeLanguageMetadata,
-  RuntimeTranslationStatus,
+  McsApprovedKnowledgeQueryRequest,
+  McsKnowledgeReference,
+  McsRuntimeLanguage,
+  McsRuntimeLanguageFallbackReason,
+  McsRuntimeLanguageMetadata,
+  McsRuntimeTranslationStatus,
 } from '@momentum/shared/runtime';
 
 export type LanguageSelectionDegradeReason = 'language_unavailable';
@@ -37,9 +37,9 @@ export type LanguageSelectionDegradeReason = 'language_unavailable';
 export interface LanguageSelection {
   status: 'ok' | 'degraded';
   /** Selected references — a single homogeneous quality tier. Empty when degraded (fail-closed). */
-  references: KnowledgeReference[];
+  references: McsKnowledgeReference[];
   /** Honest language metadata describing the delivered batch. */
-  language: RuntimeLanguageMetadata;
+  language: McsRuntimeLanguageMetadata;
   /** Present only when degraded. */
   degradeReason?: LanguageSelectionDegradeReason;
   /** Whether a fallback language tier was used (false for primary-language and degraded). */
@@ -47,18 +47,18 @@ export interface LanguageSelection {
 }
 
 /** The other supported runtime language (en↔es). */
-export function otherLanguage(language: RuntimeLanguage): RuntimeLanguage {
+export function otherLanguage(language: McsRuntimeLanguage): McsRuntimeLanguage {
   return language === 'en' ? 'es' : 'en';
 }
 
 /** `clarification_required` is never deliverable — it is the ask-clarify / fail-closed tier. */
-function isDeliverable(reference: KnowledgeReference): boolean {
+function isDeliverable(reference: McsKnowledgeReference): boolean {
   return reference.translationStatus !== 'clarification_required';
 }
 
 interface QualityTier {
-  references: KnowledgeReference[];
-  translationStatus: RuntimeTranslationStatus;
+  references: McsKnowledgeReference[];
+  translationStatus: McsRuntimeTranslationStatus;
   machineTranslationUsed: boolean;
   humanReviewed: boolean;
 }
@@ -68,7 +68,7 @@ interface QualityTier {
  * language: native (`same_language`/`not_required`) → human-reviewed translation → MARKED
  * machine translation → language-neutral template. Returns null when nothing is deliverable.
  */
-function pickQualityTier(sameLanguageReferences: readonly KnowledgeReference[]): QualityTier | null {
+function pickQualityTier(sameLanguageReferences: readonly McsKnowledgeReference[]): QualityTier | null {
   const native = sameLanguageReferences.filter(
     (reference) => reference.translationStatus === 'same_language' || reference.translationStatus === 'not_required',
   );
@@ -101,7 +101,7 @@ function pickQualityTier(sameLanguageReferences: readonly KnowledgeReference[]):
   return null;
 }
 
-function primaryMetadata(primary: RuntimeLanguage, tier: QualityTier): RuntimeLanguageMetadata {
+function primaryMetadata(primary: McsRuntimeLanguage, tier: QualityTier): McsRuntimeLanguageMetadata {
   return {
     language: primary,
     translationStatus: tier.translationStatus,
@@ -110,17 +110,17 @@ function primaryMetadata(primary: RuntimeLanguage, tier: QualityTier): RuntimeLa
   };
 }
 
-function fallbackReasonFor(translationStatus: RuntimeTranslationStatus): RuntimeLanguageFallbackReason {
+function fallbackReasonFor(translationStatus: McsRuntimeTranslationStatus): McsRuntimeLanguageFallbackReason {
   if (translationStatus === 'machine_translation_marked') return 'machine_translation_marked';
   if (translationStatus === 'language_neutral_template') return 'language_neutral_template';
   return 'same_language_unavailable';
 }
 
 function fallbackMetadata(
-  primary: RuntimeLanguage,
-  fallbackLanguage: RuntimeLanguage,
+  primary: McsRuntimeLanguage,
+  fallbackLanguage: McsRuntimeLanguage,
   tier: QualityTier,
-): RuntimeLanguageMetadata {
+): McsRuntimeLanguageMetadata {
   return {
     language: primary,
     fallbackLanguage,
@@ -131,7 +131,7 @@ function fallbackMetadata(
   };
 }
 
-function degraded(primary: RuntimeLanguage): LanguageSelection {
+function degraded(primary: McsRuntimeLanguage): LanguageSelection {
   return {
     status: 'degraded',
     references: [],
@@ -152,8 +152,8 @@ function degraded(primary: RuntimeLanguage): LanguageSelection {
  * decides language/quality tiers.
  */
 export function resolveLanguageSelection(
-  kept: readonly KnowledgeReference[],
-  request: ApprovedKnowledgeQueryRequest,
+  kept: readonly McsKnowledgeReference[],
+  request: McsApprovedKnowledgeQueryRequest,
 ): LanguageSelection {
   const primary = request.language;
   const deliverable = kept.filter(isDeliverable);

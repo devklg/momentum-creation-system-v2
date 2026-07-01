@@ -13,7 +13,7 @@
  */
 
 import type {
-  AuditLogEntry,
+  McsAuditLogEntry,
   McsLearningObservabilitySnapshot,
   McsLearningCandidateRecord,
   McsOutcomeKind,
@@ -44,7 +44,7 @@ function rate(numerator: number, denominator: number): number {
 export interface McsLearningObservabilityInput {
   tenantId: string;
   generatedAt: string;
-  runtimeAuditEntries: readonly AuditLogEntry[];
+  runtimeAuditEntries: readonly McsAuditLogEntry[];
   outcomes: readonly McsOutcomeRecord[];
   candidates: readonly McsLearningCandidateRecord[];
 }

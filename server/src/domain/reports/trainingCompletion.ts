@@ -25,11 +25,11 @@ import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
-  AdminDashboardFilter,
-  AdminReportMeta,
-  AdminReportTimeRange,
-  AdminTrainingReport,
-  AdminTrainingReportRow,
+  McsAdminDashboardFilter,
+  McsAdminReportMeta,
+  McsAdminReportTimeRange,
+  McsAdminTrainingReport,
+  McsAdminTrainingReportRow,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -68,9 +68,9 @@ function avg(values: number[]): number | null {
 }
 
 export async function buildTrainingReport(
-  filter: AdminDashboardFilter,
-  range: AdminReportTimeRange,
-): Promise<{ result: AdminTrainingReport; meta: Omit<AdminReportMeta, 'title'> }> {
+  filter: McsAdminDashboardFilter,
+  range: McsAdminReportTimeRange,
+): Promise<{ result: McsAdminTrainingReport; meta: Omit<McsAdminReportMeta, 'title'> }> {
   const scopedTmagIds = await resolveScopedTmagIds(filter);
 
   const baFilter: Record<string, unknown> = { deleted: { $ne: true } };
@@ -106,7 +106,7 @@ export async function buildTrainingReport(
     }
   }
 
-  const rows: AdminTrainingReportRow[] = bas.map((b) => {
+  const rows: McsAdminTrainingReportRow[] = bas.map((b) => {
     const mods = progressByBa.get(b.tmagId) ?? new Map<number, string | null>();
     const modulesCompleted = mods.size;
     const fastStartComplete = modulesCompleted === 5;
@@ -131,7 +131,7 @@ export async function buildTrainingReport(
   });
 
   const fastStartCompleteRows = rows.filter((r) => r.fastStartComplete);
-  const result: AdminTrainingReport = {
+  const result: McsAdminTrainingReport = {
     totals: {
       bas: rows.length,
       fastStartComplete: fastStartCompleteRows.length,

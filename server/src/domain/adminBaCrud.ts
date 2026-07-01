@@ -38,12 +38,12 @@ import { appendAuditEntry } from './auditLog.js';
 import { emailExists, type BARecord } from './ba.js';
 import { getTmagProfileBundle } from './adminBaOversight.js';
 import type {
-  AdminBaDirectoryRow,
-  AdminCreateBaPayload,
-  AdminEditBaPayload,
-  AdminSoftDeletePayload,
-  AdminRestorePayload,
-  AdminSoftDeleteState,
+  McsAdminBaDirectoryRow,
+  McsAdminCreateBaPayload,
+  McsAdminEditBaPayload,
+  McsAdminSoftDeletePayload,
+  McsAdminRestorePayload,
+  McsAdminSoftDeleteState,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -71,7 +71,7 @@ type Result<T> = { ok: true; value: T } | { ok: false; error: AdminBaCrudError }
 
 /** A normally-registered BA has no soft-delete block; absent === not deleted. */
 type BARecordMaybeDeleted = BARecord &
-  Partial<AdminSoftDeleteState> & {
+  Partial<McsAdminSoftDeleteState> & {
     originalSponsorTmagId?: string | null;
     originalSponsorThreeBaId?: string | null;
   };
@@ -108,7 +108,7 @@ async function findBAByTmagIdAnyState(tmagId: string): Promise<BARecordMaybeDele
 }
 
 /** Re-read the directory row so responses match the directory/drawer. */
-async function readRow(tmagId: string): Promise<AdminBaDirectoryRow | null> {
+async function readRow(tmagId: string): Promise<McsAdminBaDirectoryRow | null> {
   const bundle = await getTmagProfileBundle(tmagId);
   return bundle?.row ?? null;
 }
@@ -116,9 +116,9 @@ async function readRow(tmagId: string): Promise<AdminBaDirectoryRow | null> {
 /* ── create ───────────────────────────────────────── */
 
 export async function adminCreateBa(
-  payload: AdminCreateBaPayload,
+  payload: McsAdminCreateBaPayload,
   actor: AdminActor,
-): Promise<Result<{ tmagId: string; row: AdminBaDirectoryRow }>> {
+): Promise<Result<{ tmagId: string; row: McsAdminBaDirectoryRow }>> {
   if (!validReason(payload.reason)) return { ok: false, error: { kind: 'reason_too_short' } };
 
   // Sponsor must resolve to a real, non-deleted BA. Sponsor immutability
@@ -136,7 +136,7 @@ export async function adminCreateBa(
   const tmagId = mintTmagId();
   const createdAt = new Date().toISOString();
 
-  const softDelete: AdminSoftDeleteState = {
+  const softDelete: McsAdminSoftDeleteState = {
     deleted: false,
     deletedAt: null,
     deletedReason: null,
@@ -211,9 +211,9 @@ export async function adminCreateBa(
 
 export async function adminEditBa(
   tmagId: string,
-  payload: AdminEditBaPayload,
+  payload: McsAdminEditBaPayload,
   actor: AdminActor,
-): Promise<Result<{ tmagId: string; row: AdminBaDirectoryRow }>> {
+): Promise<Result<{ tmagId: string; row: McsAdminBaDirectoryRow }>> {
   if (!validReason(payload.reason)) return { ok: false, error: { kind: 'reason_too_short' } };
 
   const ba = await findBAByTmagIdAnyState(tmagId);
@@ -225,7 +225,7 @@ export async function adminEditBa(
   const before: Record<string, unknown> = {};
   const after: Record<string, unknown> = {};
 
-  const fields: Array<keyof AdminEditBaPayload> = [
+  const fields: Array<keyof McsAdminEditBaPayload> = [
     'firstName',
     'lastName',
     'threeBaId',
@@ -289,7 +289,7 @@ export async function adminEditBa(
 
 export async function adminSoftDeleteBa(
   tmagId: string,
-  payload: AdminSoftDeletePayload,
+  payload: McsAdminSoftDeletePayload,
   actor: AdminActor,
 ): Promise<Result<{ tmagId: string; deletedAt: string }>> {
   if (!validReason(payload.reason)) return { ok: false, error: { kind: 'reason_too_short' } };
@@ -299,7 +299,7 @@ export async function adminSoftDeleteBa(
   if (isDeleted(ba)) return { ok: false, error: { kind: 'ba_deleted' } };
 
   const deletedAt = new Date().toISOString();
-  const patch: Partial<AdminSoftDeleteState> = {
+  const patch: Partial<McsAdminSoftDeleteState> = {
     deleted: true,
     deletedAt,
     deletedReason: payload.reason,
@@ -334,9 +334,9 @@ export async function adminSoftDeleteBa(
 
 export async function adminRestoreBa(
   tmagId: string,
-  payload: AdminRestorePayload,
+  payload: McsAdminRestorePayload,
   actor: AdminActor,
-): Promise<Result<{ tmagId: string; restoredAt: string; row: AdminBaDirectoryRow }>> {
+): Promise<Result<{ tmagId: string; restoredAt: string; row: McsAdminBaDirectoryRow }>> {
   if (!validReason(payload.reason)) return { ok: false, error: { kind: 'reason_too_short' } };
 
   const ba = await findBAByTmagIdAnyState(tmagId);
@@ -344,7 +344,7 @@ export async function adminRestoreBa(
   if (!isDeleted(ba)) return { ok: false, error: { kind: 'ba_not_deleted' } };
 
   const restoredAt = new Date().toISOString();
-  const patch: Partial<AdminSoftDeleteState> = {
+  const patch: Partial<McsAdminSoftDeleteState> = {
     deleted: false,
     restoredAt,
     restoredByTmagId: actor.tmagId,

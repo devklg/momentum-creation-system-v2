@@ -23,7 +23,7 @@
  */
 
 import { gatewayCall } from '../services/gateway.js';
-import type { ProspectRecord, ProspectLocation } from '@momentum/shared';
+import type { McsProspectRecord, McsProspectLocation } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const PROSPECTS_COLLECTION = 'prospects';
@@ -32,7 +32,7 @@ export interface NewProspectInput {
   prospectId: string;
   firstName: string;
   lastName: string;
-  location: ProspectLocation;
+  location: McsProspectLocation;
   sponsorTmagId: string;
   phone?: string | null;
   email?: string | null;
@@ -44,8 +44,8 @@ export function lastInitialOf(lastName: string): string {
   return lastName.trim().charAt(0).toUpperCase();
 }
 
-export async function findProspectById(prospectId: string): Promise<ProspectRecord | null> {
-  const result = await gatewayCall<{ documents: ProspectRecord[] }>('mongodb', 'query', {
+export async function findProspectById(prospectId: string): Promise<McsProspectRecord | null> {
+  const result = await gatewayCall<{ documents: McsProspectRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PROSPECTS_COLLECTION,
     filter: { prospectId },

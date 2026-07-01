@@ -13,18 +13,18 @@
  */
 
 import type {
-  ApprovedKnowledgeQueryDegradeReason,
-  ApprovedKnowledgeQueryResult,
-  DegradedContextReason,
-  DegradedContextState,
-  RuntimeLanguage,
+  McsApprovedKnowledgeQueryDegradeReason,
+  McsApprovedKnowledgeQueryResult,
+  McsDegradedContextReason,
+  McsDegradedContextState,
+  McsRuntimeLanguage,
 } from '@momentum/shared/runtime';
 import { otherLanguage } from './languageAwareRetrieval.js';
 
 export interface SafeFallbackInput {
-  degradeReasons: readonly ApprovedKnowledgeQueryDegradeReason[];
-  requestedLanguage: RuntimeLanguage;
-  fallbackLanguage?: RuntimeLanguage;
+  degradeReasons: readonly McsApprovedKnowledgeQueryDegradeReason[];
+  requestedLanguage: McsRuntimeLanguage;
+  fallbackLanguage?: McsRuntimeLanguage;
 }
 
 export const SAFE_FALLBACK_BASE_DIRECTIVE =
@@ -35,7 +35,7 @@ export const SAFE_FALLBACK_BASE_DIRECTIVE =
  * compile time — adding a new `ApprovedKnowledgeQueryDegradeReason` is a type error here until it
  * is given an order, so the mapping can never silently drop a reason.
  */
-const REASON_PRIORITY: Record<ApprovedKnowledgeQueryDegradeReason, number> = {
+const REASON_PRIORITY: Record<McsApprovedKnowledgeQueryDegradeReason, number> = {
   knowledge_unavailable: 0,
   no_approved_match: 1,
   language_unavailable: 2,
@@ -44,21 +44,21 @@ const REASON_PRIORITY: Record<ApprovedKnowledgeQueryDegradeReason, number> = {
 };
 
 /** The distinct reasons in stable priority order (keys are unique — no dedup needed). */
-const ORDERED_REASONS: readonly ApprovedKnowledgeQueryDegradeReason[] = (
-  Object.keys(REASON_PRIORITY) as ApprovedKnowledgeQueryDegradeReason[]
+const ORDERED_REASONS: readonly McsApprovedKnowledgeQueryDegradeReason[] = (
+  Object.keys(REASON_PRIORITY) as McsApprovedKnowledgeQueryDegradeReason[]
 ).sort((a, b) => REASON_PRIORITY[a] - REASON_PRIORITY[b]);
 
-function languageName(language: RuntimeLanguage): string {
+function languageName(language: McsRuntimeLanguage): string {
   return language === 'es' ? 'Spanish' : 'English';
 }
 
 interface FallbackFragment {
-  packetReason: DegradedContextReason;
+  packetReason: McsDegradedContextReason;
   guidance: string;
 }
 
 function fragmentFor(
-  reason: ApprovedKnowledgeQueryDegradeReason,
+  reason: McsApprovedKnowledgeQueryDegradeReason,
   input: SafeFallbackInput,
 ): FallbackFragment {
   switch (reason) {
@@ -99,7 +99,7 @@ function fragmentFor(
  * Resolve a reason-specific, safe, compliant degraded state. Never empty: unknown/empty input
  * degrades safely to `knowledge_unavailable` + the base directive.
  */
-export function resolveSafeFallbackState(input: SafeFallbackInput): DegradedContextState {
+export function resolveSafeFallbackState(input: SafeFallbackInput): McsDegradedContextState {
   const orderedReasons = ORDERED_REASONS.filter((reason) => input.degradeReasons.includes(reason));
 
   if (orderedReasons.length === 0) {
@@ -111,7 +111,7 @@ export function resolveSafeFallbackState(input: SafeFallbackInput): DegradedCont
   }
 
   const fragments = orderedReasons.map((reason) => fragmentFor(reason, input));
-  const packetReasons: DegradedContextReason[] = [];
+  const packetReasons: McsDegradedContextReason[] = [];
   for (const fragment of fragments) {
     if (!packetReasons.includes(fragment.packetReason)) packetReasons.push(fragment.packetReason);
   }
@@ -125,7 +125,7 @@ export function resolveSafeFallbackState(input: SafeFallbackInput): DegradedCont
 
 export interface SafeFallbackPacketInput {
   packetStatus: 'degraded';
-  degraded: DegradedContextState;
+  degraded: McsDegradedContextState;
 }
 
 /**
@@ -133,7 +133,7 @@ export interface SafeFallbackPacketInput {
  * a degraded `approved_knowledge_query.v1` result. Returns `null` for an `ok` result.
  */
 export function safeFallbackFromResult(
-  result: ApprovedKnowledgeQueryResult,
+  result: McsApprovedKnowledgeQueryResult,
 ): SafeFallbackPacketInput | null {
   if (result.status === 'ok') return null;
   const languageMetadata = result.metadata.language;

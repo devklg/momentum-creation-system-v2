@@ -26,8 +26,8 @@ import { tripleStackWrite } from '../services/tripleStack.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import { sendEmail, ResendConfigError, ResendError } from '../services/resend.js';
 import type {
-  IsoTimestamp,
-  WebinarReservationRecord,
+  McsIsoTimestamp,
+  McsWebinarReservationRecord,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -43,7 +43,7 @@ export interface CreateWebinarReservationInput {
   baFirstName: string;
   baPhone: string | null;
   eventId: string;
-  scheduledFor: IsoTimestamp;
+  scheduledFor: McsIsoTimestamp;
   /**
    * Zoom registration URL for this event (from webinar_events.zoomUrl).
    * Included in the prospect confirmation email. May be null if the event
@@ -57,9 +57,9 @@ export interface CreateWebinarReservationInput {
 
 export interface CreateWebinarReservationResult {
   reservationId: string;
-  createdAt: IsoTimestamp;
-  emailDeliveryStatus: WebinarReservationRecord['emailDeliveryStatus'];
-  smsDeliveryStatus: WebinarReservationRecord['smsDeliveryStatus'];
+  createdAt: McsIsoTimestamp;
+  emailDeliveryStatus: McsWebinarReservationRecord['emailDeliveryStatus'];
+  smsDeliveryStatus: McsWebinarReservationRecord['smsDeliveryStatus'];
   smsDeliveryError: string | null;
 }
 
@@ -70,7 +70,7 @@ export interface CreateWebinarReservationResult {
  * 5pm Pacific (locked Chat #116); we render in America/Los_Angeles so the
  * prospect sees the wall-clock time the host actually means.
  */
-function formatPacific(iso: IsoTimestamp): string {
+function formatPacific(iso: McsIsoTimestamp): string {
   const d = new Date(iso);
   const date = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Los_Angeles',
@@ -172,7 +172,7 @@ export async function createWebinarReservation(
 
   // 1. Triple-stack write.
   const base: Omit<
-    WebinarReservationRecord,
+    McsWebinarReservationRecord,
     'emailDeliveryStatus'
     | 'emailDeliveryError'
     | 'smsDeliveryStatus'
@@ -233,7 +233,7 @@ export async function createWebinarReservation(
   });
 
   // 2. Telnyx SMS to the BA. Best-effort.
-  let smsDeliveryStatus: WebinarReservationRecord['smsDeliveryStatus'] = 'queued';
+  let smsDeliveryStatus: McsWebinarReservationRecord['smsDeliveryStatus'] = 'queued';
   let smsDeliveryError: string | null = null;
 
   if (!input.baPhone) {
@@ -265,7 +265,7 @@ export async function createWebinarReservation(
   //    is caught and recorded as 'skipped', leaving the BA-follow-up SMS as
   //    the live fallback. Once the key + domain land, this begins sending
   //    with no code change and the .com response flips emailSent=true.
-  let emailDeliveryStatus: WebinarReservationRecord['emailDeliveryStatus'] = 'queued';
+  let emailDeliveryStatus: McsWebinarReservationRecord['emailDeliveryStatus'] = 'queued';
   let emailDeliveryError: string | null = null;
 
   try {

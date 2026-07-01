@@ -1,6 +1,6 @@
 import type {
-  GuidedActionId,
-  OutcomeId,
+  McsGuidedActionId,
+  McsOutcomeId,
 } from '@momentum/shared/runtime';
 import { getAgentDescriptor } from './registry.js';
 import type {
@@ -60,7 +60,7 @@ export function draftOutcomeGuidedActionEnvelopes(
     ...identity.scope,
     schemaVersion: 'orchestration_outcome_draft.v1',
     envelopeKind: 'outcome_draft',
-    outcomeId: `outcome_draft_${identity.sessionId}_${turnId}` as OutcomeId,
+    outcomeId: `outcome_draft_${identity.sessionId}_${turnId}` as McsOutcomeId,
     sessionId: identity.sessionId,
     agentKey: identity.agentKey,
     taskType: packet.session.taskType,
@@ -85,7 +85,7 @@ export function draftOutcomeGuidedActionEnvelopes(
     ...identity.scope,
     schemaVersion: 'orchestration_guided_action_draft.v1',
     envelopeKind: 'guided_action_draft',
-    guidedActionId: `guided_action_draft_${identity.sessionId}_${turnId}` as GuidedActionId,
+    guidedActionId: `guided_action_draft_${identity.sessionId}_${turnId}` as McsGuidedActionId,
     sessionId: identity.sessionId,
     agentKey: identity.agentKey,
     taskType: packet.session.taskType,

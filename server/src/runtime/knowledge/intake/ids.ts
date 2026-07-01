@@ -6,7 +6,7 @@
  * not run-dependent. No randomness, no clock, no persistence.
  */
 
-import type { SourceId } from '@momentum/shared/runtime';
+import type { McsSourceId } from '@momentum/shared/runtime';
 
 /** FNV-1a 32-bit hash → 8-char zero-padded hex. Deterministic and dependency-free. */
 function fnv1a(input: string): string {
@@ -18,11 +18,11 @@ function fnv1a(input: string): string {
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
-export function deriveDocumentId(sourceId: SourceId, version: number): string {
+export function deriveDocumentId(sourceId: McsSourceId, version: number): string {
   return `kdoc_${fnv1a(`${String(sourceId)}:${version}`)}`;
 }
 
-export function deriveChunkId(sourceId: SourceId, version: number, chunkIndex: number): string {
+export function deriveChunkId(sourceId: McsSourceId, version: number, chunkIndex: number): string {
   return `kchunk_${fnv1a(`${String(sourceId)}:${version}:${chunkIndex}`)}`;
 }
 

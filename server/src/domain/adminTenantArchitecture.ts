@@ -11,18 +11,18 @@ import { randomBytes } from 'node:crypto';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
-  AuditActor,
-  TenantComplianceIssue,
-  TenantComplianceValidation,
-  TenantInheritanceLayer,
-  TenantOverview,
-  TenantRoleMatrixRow,
-  TenantSettings,
-  TenantSettingsVersion,
-  TenantSurface,
-  TenantTemplateDefinition,
-  TenantTemplateKey,
-  TenantTemplateVersion,
+  McsAuditActor,
+  McsTenantComplianceIssue,
+  McsTenantComplianceValidation,
+  McsTenantInheritanceLayer,
+  McsTenantOverview,
+  McsTenantRoleMatrixRow,
+  McsTenantSettings,
+  McsTenantSettingsVersion,
+  McsTenantSurface,
+  McsTenantTemplateDefinition,
+  McsTenantTemplateKey,
+  McsTenantTemplateVersion,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -32,7 +32,7 @@ const SETTINGS_CHROMA = 'mcs_tenant_settings';
 const TEMPLATE_CHROMA = 'mcs_master_content';
 const TENANT_ID = 'team-magnificent';
 
-const DEFAULT_SETTINGS: TenantSettings = {
+const DEFAULT_SETTINGS: McsTenantSettings = {
   tenantId: TENANT_ID,
   tenantName: 'Team Magnificent',
   publicComDomain: 'teammagnificent.com',
@@ -44,7 +44,7 @@ const DEFAULT_SETTINGS: TenantSettings = {
   updatedBy: null,
 };
 
-export const TENANT_TEMPLATE_DEFINITIONS: readonly TenantTemplateDefinition[] = [
+export const TENANT_TEMPLATE_DEFINITIONS: readonly McsTenantTemplateDefinition[] = [
   {
     templateKey: 'com.presentation.hero',
     label: '.com presentation hero',
@@ -259,14 +259,14 @@ export const TENANT_TEMPLATE_DEFINITIONS: readonly TenantTemplateDefinition[] = 
 export class TenantComplianceError extends Error {
   constructor(
     message: string,
-    public readonly validation: TenantComplianceValidation,
+    public readonly validation: McsTenantComplianceValidation,
   ) {
     super(message);
     this.name = 'TenantComplianceError';
   }
 }
 
-export async function getTenantOverview(): Promise<TenantOverview> {
+export async function getTenantOverview(): Promise<McsTenantOverview> {
   const [settings, templates] = await Promise.all([
     getTenantSettings(),
     listTenantTemplates(),
@@ -303,8 +303,8 @@ export async function getTenantOverview(): Promise<TenantOverview> {
   };
 }
 
-export async function getTenantSettings(): Promise<TenantSettings> {
-  const result = await gatewayCall<{ documents: TenantSettingsVersion[] }>(
+export async function getTenantSettings(): Promise<McsTenantSettings> {
+  const result = await gatewayCall<{ documents: McsTenantSettingsVersion[] }>(
     'mongodb',
     'query',
     {
@@ -332,16 +332,16 @@ export async function getTenantSettings(): Promise<TenantSettings> {
 
 export async function saveTenantSettings(input: {
   settings: Pick<
-    TenantSettings,
+    McsTenantSettings,
     'tenantName' | 'publicComDomain' | 'teamDomain' | 'adminDomain'
   >;
-  actor: AuditActor & { kind: 'admin' };
+  actor: McsAuditActor & { kind: 'admin' };
   reason: string;
-}): Promise<{ before: TenantSettings; after: TenantSettings; version: TenantSettingsVersion }> {
+}): Promise<{ before: McsTenantSettings; after: McsTenantSettings; version: McsTenantSettingsVersion }> {
   const before = await getTenantSettings();
   const now = new Date().toISOString();
   const nextVersion = (await getLatestSettingsVersionNumber()) + 1;
-  const after: TenantSettings = {
+  const after: McsTenantSettings = {
     ...before,
     tenantName: input.settings.tenantName.trim(),
     publicComDomain: normalizeDomain(input.settings.publicComDomain),
@@ -353,7 +353,7 @@ export async function saveTenantSettings(input: {
     updatedBy: input.actor.tmagId,
   };
 
-  const version: TenantSettingsVersion = {
+  const version: McsTenantSettingsVersion = {
     ...after,
     settingsVersionId: `tenant_settings_${toIdPart(now)}_${randomBytes(3).toString('hex')}`,
     version: nextVersion,
@@ -394,8 +394,8 @@ export async function saveTenantSettings(input: {
   return { before, after, version };
 }
 
-export async function listTenantTemplates(): Promise<TenantTemplateVersion[]> {
-  const out: TenantTemplateVersion[] = [];
+export async function listTenantTemplates(): Promise<McsTenantTemplateVersion[]> {
+  const out: McsTenantTemplateVersion[] = [];
   for (const def of TENANT_TEMPLATE_DEFINITIONS) {
     out.push(await getTenantTemplate(def.templateKey));
   }
@@ -403,10 +403,10 @@ export async function listTenantTemplates(): Promise<TenantTemplateVersion[]> {
 }
 
 export async function getTenantTemplate(
-  templateKey: TenantTemplateKey,
-): Promise<TenantTemplateVersion> {
+  templateKey: McsTenantTemplateKey,
+): Promise<McsTenantTemplateVersion> {
   const def = findTemplateDefinition(templateKey);
-  const result = await gatewayCall<{ documents: TenantTemplateVersion[] }>(
+  const result = await gatewayCall<{ documents: McsTenantTemplateVersion[] }>(
     'mongodb',
     'query',
     {
@@ -423,14 +423,14 @@ export async function getTenantTemplate(
 }
 
 export async function saveTenantTemplate(input: {
-  templateKey: TenantTemplateKey;
+  templateKey: McsTenantTemplateKey;
   content: string;
-  actor: AuditActor & { kind: 'admin' };
+  actor: McsAuditActor & { kind: 'admin' };
   reason: string;
 }): Promise<{
-  before: TenantTemplateVersion;
-  after: TenantTemplateVersion;
-  validation: TenantComplianceValidation;
+  before: McsTenantTemplateVersion;
+  after: McsTenantTemplateVersion;
+  validation: McsTenantComplianceValidation;
 }> {
   const def = findTemplateDefinition(input.templateKey);
   if (!def.editable) {
@@ -444,7 +444,7 @@ export async function saveTenantTemplate(input: {
 
   const before = await getTenantTemplate(input.templateKey);
   const now = new Date().toISOString();
-  const after: TenantTemplateVersion = {
+  const after: McsTenantTemplateVersion = {
     templateVersionId: `master_content_${sanitizeKey(input.templateKey)}_${toIdPart(now)}_${randomBytes(3).toString('hex')}`,
     tenantId: TENANT_ID,
     templateKey: input.templateKey,
@@ -495,10 +495,10 @@ export async function saveTenantTemplate(input: {
 }
 
 export function validateMasterContent(
-  surface: TenantSurface,
+  surface: McsTenantSurface,
   content: string,
-): TenantComplianceValidation {
-  const issues: TenantComplianceIssue[] = [];
+): McsTenantComplianceValidation {
+  const issues: McsTenantComplianceIssue[] = [];
 
   if (!content.trim()) {
     issues.push({
@@ -571,7 +571,7 @@ export function validateMasterContent(
   };
 }
 
-function findTemplateDefinition(templateKey: TenantTemplateKey): TenantTemplateDefinition {
+function findTemplateDefinition(templateKey: McsTenantTemplateKey): McsTenantTemplateDefinition {
   const def = TENANT_TEMPLATE_DEFINITIONS.find((t) => t.templateKey === templateKey);
   if (!def) throw new Error(`unknown_template_key: ${templateKey}`);
   return def;
@@ -592,7 +592,7 @@ async function getLatestSettingsVersionNumber(): Promise<number> {
   return result.documents[0]?.version ?? 0;
 }
 
-function defaultTemplateVersion(def: TenantTemplateDefinition): TenantTemplateVersion {
+function defaultTemplateVersion(def: McsTenantTemplateDefinition): McsTenantTemplateVersion {
   return {
     templateVersionId: `code_default_${def.templateKey}`,
     tenantId: TENANT_ID,
@@ -608,7 +608,7 @@ function defaultTemplateVersion(def: TenantTemplateDefinition): TenantTemplateVe
   };
 }
 
-function buildInheritanceLayers(): TenantInheritanceLayer[] {
+function buildInheritanceLayers(): McsTenantInheritanceLayer[] {
   return [
     {
       order: 1,
@@ -641,9 +641,9 @@ function buildInheritanceLayers(): TenantInheritanceLayer[] {
   ];
 }
 
-function buildRoleMatrix(): TenantRoleMatrixRow[] {
+function buildRoleMatrix(): McsTenantRoleMatrixRow[] {
   const permissions: ReadonlyArray<{
-    permission: TenantRoleMatrixRow['permissions'][number]['permission'];
+    permission: McsTenantRoleMatrixRow['permissions'][number]['permission'];
     label: string;
   }> = [
     { permission: 'admin.dashboard.view', label: 'View admin dashboard' },
@@ -659,8 +659,8 @@ function buildRoleMatrix(): TenantRoleMatrixRow[] {
   ] as const;
 
   const allow: Record<
-    TenantRoleMatrixRow['role'],
-    ReadonlyArray<TenantRoleMatrixRow['permissions'][number]['permission']>
+    McsTenantRoleMatrixRow['role'],
+    ReadonlyArray<McsTenantRoleMatrixRow['permissions'][number]['permission']>
   > = {
     founder_admin: permissions.map((p) => p.permission),
     leader: ['ba.invitation.create', 'ba.crm.write'],
@@ -669,7 +669,7 @@ function buildRoleMatrix(): TenantRoleMatrixRow[] {
     system: ['system.persistence.write'],
   };
 
-  const rows: Array<Omit<TenantRoleMatrixRow, 'permissions'>> = [
+  const rows: Array<Omit<McsTenantRoleMatrixRow, 'permissions'>> = [
     {
       role: 'founder_admin',
       label: 'Founder admin',

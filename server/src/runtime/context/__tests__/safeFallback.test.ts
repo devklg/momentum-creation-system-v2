@@ -3,15 +3,15 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type {
-  ApprovedKnowledgeQueryRequest,
+  McsApprovedKnowledgeQueryRequest,
   TmagId,
-  KnowledgeId,
-  KnowledgeReference,
-  RuntimeRequestScope,
-  SessionId,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsKnowledgeId,
+  McsKnowledgeReference,
+  McsRuntimeRequestScope,
+  McsSessionId,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
@@ -91,17 +91,17 @@ describe('P4.9 resolveSafeFallbackState — reason-specific safe directives', ()
 
 // ---- bridge + end-to-end ----
 
-function scope(): RuntimeRequestScope {
+function scope(): McsRuntimeRequestScope {
   return {
-    tenantId: 'tenant_team_magnificent' as TenantId,
-    teamId: 'team_magnificent' as TeamId,
+    tenantId: 'tenant_team_magnificent' as McsTenantId,
+    teamId: 'team_magnificent' as McsTeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
     tmagId: 'TMAG-P49-001' as TmagId,
   };
 }
 
-function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): ApprovedKnowledgeQueryRequest {
+function request(overrides: Partial<McsApprovedKnowledgeQueryRequest> = {}): McsApprovedKnowledgeQueryRequest {
   return {
     schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
     scope: scope(),
@@ -112,18 +112,18 @@ function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): Approv
   };
 }
 
-function esReference(): KnowledgeReference {
+function esReference(): McsKnowledgeReference {
   return {
-    knowledgeId: 'knowledge_p49_es' as KnowledgeId,
+    knowledgeId: 'knowledge_p49_es' as McsKnowledgeId,
     domain: 'training',
     status: 'approved',
     language: 'es',
     translationStatus: 'same_language',
-    sourceId: 'source_p49_es' as SourceId,
+    sourceId: 'source_p49_es' as McsSourceId,
   };
 }
 
-function providerReturning(references: readonly KnowledgeReference[]): ApprovedKnowledgeProvider {
+function providerReturning(references: readonly McsKnowledgeReference[]): ApprovedKnowledgeProvider {
   return { async listApprovedKnowledge() { return references; } };
 }
 function providerThrowing(): ApprovedKnowledgeProvider {
@@ -134,11 +134,11 @@ function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextP
   return {
     packetId: 'ctx_packet_p49_001' as ContextPacketBuildInput['packetId'],
     requestId: 'ctx_req_p49_001' as ContextPacketBuildInput['requestId'],
-    tenant: { tenantId: 'tenant_team_magnificent' as TenantId, tenantName: 'TM', brandName: TEAM_MAGNIFICENT_NAME, environment: 'development' },
-    team: { teamId: 'team_magnificent' as TeamId, teamKey: TEAM_MAGNIFICENT_KEY, teamName: TEAM_MAGNIFICENT_NAME },
+    tenant: { tenantId: 'tenant_team_magnificent' as McsTenantId, tenantName: 'TM', brandName: TEAM_MAGNIFICENT_NAME, environment: 'development' },
+    team: { teamId: 'team_magnificent' as McsTeamId, teamKey: TEAM_MAGNIFICENT_KEY, teamName: TEAM_MAGNIFICENT_NAME },
     ba: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
-      teamId: 'team_magnificent' as TeamId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
       tmagId: 'TMAG-P49-001' as TmagId,
@@ -153,7 +153,7 @@ function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextP
         canUseBrowserText: true,
       },
     },
-    session: { sessionId: 'session_p49_001' as SessionId, mode: 'browser_text', status: 'active', taskType: 'training_support', startedAt: '2026-06-30T12:00:00.000Z' },
+    session: { sessionId: 'session_p49_001' as McsSessionId, mode: 'browser_text', status: 'active', taskType: 'training_support', startedAt: '2026-06-30T12:00:00.000Z' },
     agentKey: 'michael_magnificent',
     objective: 'training_support',
     language: { primary: 'en', userPreference: 'en', translationAllowed: false, translationStatus: 'same_language', machineTranslationUsed: false, humanReviewed: true },
@@ -166,7 +166,7 @@ function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextP
 describe('P4.9 safeFallbackFromResult — bridge', () => {
   it('returns null for an ok result', async () => {
     const adapter = createContextManagerRetrievalAdapter(
-      providerReturning([{ ...esReference(), language: 'en', knowledgeId: 'knowledge_p49_en' as KnowledgeId }]),
+      providerReturning([{ ...esReference(), language: 'en', knowledgeId: 'knowledge_p49_en' as McsKnowledgeId }]),
     );
     const result = await adapter.retrieveApprovedKnowledge(request());
     expect(result.status).toBe('ok');

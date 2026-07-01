@@ -8,9 +8,9 @@
 
 import { Router } from 'express';
 import type {
-  AgentEventResponse,
-  AgentRecommendationsResponse,
-  CreateAgentEventPayload,
+  McsAgentEventResponse,
+  McsAgentRecommendationsResponse,
+  McsCreateAgentEventPayload,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
@@ -31,7 +31,7 @@ agentRoutes.get(
     if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     try {
-      const payload: AgentRecommendationsResponse =
+      const payload: McsAgentRecommendationsResponse =
         await getAgentRecommendations(tmagId);
       return res.status(200).json(payload);
     } catch (err) {
@@ -53,9 +53,9 @@ agentRoutes.post(
     try {
       const event = await recordAgentEvent(
         tmagId,
-        (req.body ?? {}) as CreateAgentEventPayload,
+        (req.body ?? {}) as McsCreateAgentEventPayload,
       );
-      const payload: AgentEventResponse = { ok: true, event };
+      const payload: McsAgentEventResponse = { ok: true, event };
       return res.status(201).json(payload);
     } catch (err) {
       if (err instanceof AgentEventValidationError) {

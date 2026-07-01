@@ -1,5 +1,5 @@
 import type {
-  IdempotencyKey,
+  McsIdempotencyKey,
 } from '@momentum/shared/runtime';
 import {
   createRuntimeEventEnvelope,
@@ -57,7 +57,7 @@ export function captureOrchestrationEvent(
     sessionId: identity.sessionId,
     correlationId: identity.correlationId,
     causationId: input.causationId as RuntimeAgentEventEnvelope['causationId'],
-    idempotencyKey: input.idempotencyKey as IdempotencyKey,
+    idempotencyKey: input.idempotencyKey as McsIdempotencyKey,
     source: ORCHESTRATION_EVENT_SOURCE,
     payload: input.payload ?? {},
     actor: {

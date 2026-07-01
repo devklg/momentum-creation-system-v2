@@ -3,11 +3,11 @@
  * Counts are UTC-day-bounded server-side.
  */
 
-import type { QueueDepthMovement } from '@momentum/shared';
+import type { McsQueueDepthMovement } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 
 interface Props {
-  movement: QueueDepthMovement | null;
+  movement: McsQueueDepthMovement | null;
   loading: boolean;
   onRefresh: () => void;
 }

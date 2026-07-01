@@ -20,7 +20,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { CallbackIntent } from '@momentum/shared';
+import type { McsCallbackIntent } from '@momentum/shared';
 import {
   postCallbackRequest,
   postRvmCallbackRequest,
@@ -98,7 +98,7 @@ function CallbackCard(props: {
   baFirstName: string;
   entryKind: 'pmv' | 'rvm';
 }) {
-  const [intent, setIntent] = useState<CallbackIntent | null>(null);
+  const [intent, setIntent] = useState<McsCallbackIntent | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);

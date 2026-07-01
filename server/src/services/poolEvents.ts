@@ -27,7 +27,7 @@
  */
 
 import { EventEmitter } from 'node:events';
-import type { PlacementEvent } from '@momentum/shared';
+import type { McsPlacementEvent } from '@momentum/shared';
 
 export const POOL_EVENT_PLACEMENT = 'placement' as const;
 
@@ -59,7 +59,7 @@ export interface PlacementSubscription {
  * "placements" — H.1's domain layer is responsible for surfacing that
  * scope honestly (placements-per-minute, not all-system-events).
  */
-export function publishPlacement(event: PlacementEvent): void {
+export function publishPlacement(event: McsPlacementEvent): void {
   recordEvent();
   bus.emit(POOL_EVENT_PLACEMENT, event);
 }
@@ -73,7 +73,7 @@ export function publishPlacement(event: PlacementEvent): void {
  * unsubscribe().
  */
 export function subscribePlacements(
-  handler: (event: PlacementEvent) => void,
+  handler: (event: McsPlacementEvent) => void,
 ): PlacementSubscription {
   bus.on(POOL_EVENT_PLACEMENT, handler);
   let detached = false;

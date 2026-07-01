@@ -7,10 +7,10 @@
  */
 
 import type {
-  RvmResolvedTokenPayload,
-  TokenState,
-  VideoEventKind,
-  VideoEventResponse,
+  McsRvmResolvedTokenPayload,
+  McsTokenState,
+  McsVideoEventKind,
+  McsVideoEventResponse,
 } from '@momentum/shared';
 import {
   findTokenRecord,
@@ -36,7 +36,7 @@ const WEBINAR = {
   timezone: 'America/Los_Angeles',
 };
 
-const KIND_TO_STATE: Record<VideoEventKind, TokenState> = {
+const KIND_TO_STATE: Record<McsVideoEventKind, McsTokenState> = {
   started: 'video_started',
   quarter: 'video_quarter',
   half: 'video_half',
@@ -44,7 +44,7 @@ const KIND_TO_STATE: Record<VideoEventKind, TokenState> = {
   complete: 'video_complete',
 };
 
-const KIND_TO_TIMELINE: Record<VideoEventKind, Parameters<typeof applyCrmLifecycleEvent>[1]> = {
+const KIND_TO_TIMELINE: Record<McsVideoEventKind, Parameters<typeof applyCrmLifecycleEvent>[1]> = {
   started: 'presentation_started',
   quarter: 'presentation_25',
   half: 'presentation_50',
@@ -59,7 +59,7 @@ export class RvmTokenError extends Error {
   }
 }
 
-export async function resolveRvmToken(token: string): Promise<RvmResolvedTokenPayload> {
+export async function resolveRvmToken(token: string): Promise<McsRvmResolvedTokenPayload> {
   const bulkLead = await findBulkLeadByToken(token);
   if (!bulkLead) throw new RvmTokenError('invalid_token');
 
@@ -153,8 +153,8 @@ export async function resolveRvmToken(token: string): Promise<RvmResolvedTokenPa
 
 export async function recordRvmVideoEvent(
   token: string,
-  kind: VideoEventKind,
-): Promise<VideoEventResponse> {
+  kind: McsVideoEventKind,
+): Promise<McsVideoEventResponse> {
   const bulkLead = await findBulkLeadByToken(token);
   if (!bulkLead) throw new RvmTokenError('invalid_token');
 

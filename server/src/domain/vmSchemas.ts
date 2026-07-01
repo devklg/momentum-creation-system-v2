@@ -8,12 +8,12 @@
  */
 
 import type {
-  BulkLeadRecord,
-  LeadBatchRecord,
-  ProspectCRMRecord,
-  ProspectTimelineEventRecord,
-  VMCampaignRecord,
-  VMDeliveryEventRecord,
+  McsBulkLeadRecord,
+  McsLeadBatchRecord,
+  McsProspectCRMRecord,
+  McsProspectTimelineEventRecord,
+  McsVMCampaignRecord,
+  McsVMDeliveryEventRecord,
 } from '@momentum/shared';
 
 export const VM_SCHEMA_VERSION = 'vm-lead-campaign.v1';
@@ -98,7 +98,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       'A batch is owned by exactly one BA by TM BA ID.',
       'Batch import does not create Holding Tank visibility.',
     ],
-  } satisfies VmCollectionSchemaDefinition<LeadBatchRecord>,
+  } satisfies VmCollectionSchemaDefinition<McsLeadBatchRecord>,
   bulkLeads: {
     key: 'bulkLeads',
     collection: VM_COLLECTIONS.bulkLeads,
@@ -128,7 +128,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       'VM leads require leadBatchId and vmCampaignId in addition to ownership fields.',
       'Imported leads are acquisition records until engagement activates them.',
     ],
-  } satisfies VmCollectionSchemaDefinition<BulkLeadRecord>,
+  } satisfies VmCollectionSchemaDefinition<McsBulkLeadRecord>,
   campaigns: {
     key: 'campaigns',
     collection: VM_COLLECTIONS.campaigns,
@@ -156,7 +156,7 @@ export const VM_SCHEMA_DEFINITIONS = {
     notes: [
       'Provider is abstract; live sending remains gated by later provider/queue code.',
     ],
-  } satisfies VmCollectionSchemaDefinition<VMCampaignRecord>,
+  } satisfies VmCollectionSchemaDefinition<McsVMCampaignRecord>,
   deliveryEvents: {
     key: 'deliveryEvents',
     collection: VM_COLLECTIONS.deliveryEvents,
@@ -184,7 +184,7 @@ export const VM_SCHEMA_DEFINITIONS = {
     notes: [
       'Delivery events are audit/history. Terminal provider events must be idempotent.',
     ],
-  } satisfies VmCollectionSchemaDefinition<VMDeliveryEventRecord>,
+  } satisfies VmCollectionSchemaDefinition<McsVMDeliveryEventRecord>,
   prospectCrm: {
     key: 'prospectCrm',
     collection: VM_COLLECTIONS.prospectCrm,
@@ -214,7 +214,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       'Token creation creates or updates this BA-scoped CRM row immediately.',
       'Closed BA/customer outcomes are historical only, not active back-office management.',
     ],
-  } satisfies VmCollectionSchemaDefinition<ProspectCRMRecord>,
+  } satisfies VmCollectionSchemaDefinition<McsProspectCRMRecord>,
   prospectTimeline: {
     key: 'prospectTimeline',
     collection: VM_COLLECTIONS.prospectTimeline,
@@ -241,7 +241,7 @@ export const VM_SCHEMA_DEFINITIONS = {
     notes: [
       'Presentation milestones mirror the PMV rail; only presentation_completed/video_complete places.',
     ],
-  } satisfies VmCollectionSchemaDefinition<ProspectTimelineEventRecord>,
+  } satisfies VmCollectionSchemaDefinition<McsProspectTimelineEventRecord>,
   ownershipCorrections: {
     key: 'ownershipCorrections',
     collection: VM_COLLECTIONS.ownershipCorrections,

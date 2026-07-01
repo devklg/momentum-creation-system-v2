@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import type {
-  ApprovedKnowledgeExcludedItem,
-  ApprovedKnowledgeQueryRequest,
+  McsApprovedKnowledgeExcludedItem,
+  McsApprovedKnowledgeQueryRequest,
   TmagId,
-  ContextExclusion,
-  ContextExclusionReason,
-  ContextPacketId,
-  ContextRequestId,
-  KnowledgeId,
-  KnowledgeReference,
-  RuntimeRequestScope,
-  SessionId,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsContextExclusion,
+  McsContextExclusionReason,
+  McsContextPacketId,
+  McsContextRequestId,
+  McsKnowledgeId,
+  McsKnowledgeReference,
+  McsRuntimeRequestScope,
+  McsSessionId,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
@@ -24,17 +24,17 @@ import {
 import { buildContextPacket, validateContextPacket, type ContextPacketBuildInput } from '../contextManager.js';
 import { TEAM_MAGNIFICENT_KEY, TEAM_MAGNIFICENT_NAME } from '../validation.js';
 
-function scope(): RuntimeRequestScope {
+function scope(): McsRuntimeRequestScope {
   return {
-    tenantId: 'tenant_team_magnificent' as TenantId,
-    teamId: 'team_magnificent' as TeamId,
+    tenantId: 'tenant_team_magnificent' as McsTenantId,
+    teamId: 'team_magnificent' as McsTeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
     tmagId: 'TMAG-P45-001' as TmagId,
   };
 }
 
-function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): ApprovedKnowledgeQueryRequest {
+function request(overrides: Partial<McsApprovedKnowledgeQueryRequest> = {}): McsApprovedKnowledgeQueryRequest {
   return {
     schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
     scope: scope(),
@@ -46,19 +46,19 @@ function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): Approv
   };
 }
 
-function knowledge(id: string, overrides: Partial<KnowledgeReference> = {}): KnowledgeReference {
+function knowledge(id: string, overrides: Partial<McsKnowledgeReference> = {}): McsKnowledgeReference {
   return {
-    knowledgeId: `knowledge_p45_${id}` as KnowledgeId,
+    knowledgeId: `knowledge_p45_${id}` as McsKnowledgeId,
     domain: 'training',
     status: 'approved',
     language: 'en',
     translationStatus: 'same_language',
-    sourceId: `source_p45_${id}` as SourceId,
+    sourceId: `source_p45_${id}` as McsSourceId,
     ...overrides,
   };
 }
 
-function providerReturning(references: readonly KnowledgeReference[]): ApprovedKnowledgeProvider {
+function providerReturning(references: readonly McsKnowledgeReference[]): ApprovedKnowledgeProvider {
   return {
     async listApprovedKnowledge() {
       return references;
@@ -74,7 +74,7 @@ function providerThrowing(): ApprovedKnowledgeProvider {
   };
 }
 
-function exclusionsFromAdapter(excluded: readonly ApprovedKnowledgeExcludedItem[]): ContextExclusion[] {
+function exclusionsFromAdapter(excluded: readonly McsApprovedKnowledgeExcludedItem[]): McsContextExclusion[] {
   return excluded.map((item) => ({
     sourceId: item.sourceId,
     reason: packetExclusionReason(item.reason),
@@ -82,29 +82,29 @@ function exclusionsFromAdapter(excluded: readonly ApprovedKnowledgeExcludedItem[
   }));
 }
 
-function packetExclusionReason(reason: ApprovedKnowledgeExcludedItem['reason']): ContextExclusionReason {
+function packetExclusionReason(reason: McsApprovedKnowledgeExcludedItem['reason']): McsContextExclusionReason {
   if (reason === 'queued_for_review') return 'not_review_workflow';
   return reason;
 }
 
 function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextPacketBuildInput {
   return {
-    packetId: 'ctx_packet_p45_001' as ContextPacketId,
-    requestId: 'ctx_req_p45_001' as ContextRequestId,
+    packetId: 'ctx_packet_p45_001' as McsContextPacketId,
+    requestId: 'ctx_req_p45_001' as McsContextRequestId,
     tenant: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
       tenantName: 'Team Magnificent Tenant',
       brandName: TEAM_MAGNIFICENT_NAME,
       environment: 'development',
     },
     team: {
-      teamId: 'team_magnificent' as TeamId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
     },
     ba: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
-      teamId: 'team_magnificent' as TeamId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
       tmagId: 'TMAG-P45-001' as TmagId,
@@ -120,7 +120,7 @@ function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextP
       },
     },
     session: {
-      sessionId: 'session_p45_001' as SessionId,
+      sessionId: 'session_p45_001' as McsSessionId,
       mode: 'browser_text',
       status: 'active',
       taskType: 'training_support',
@@ -138,7 +138,7 @@ function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextP
     },
     provenance: {
       assembledBy: 'context_manager',
-      requestId: 'ctx_req_p45_001' as ContextRequestId,
+      requestId: 'ctx_req_p45_001' as McsContextRequestId,
       componentVersion: 's1.5',
       traceId: 'trace_p45_001',
     },
@@ -150,7 +150,7 @@ function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextP
 describe('P4.5 context packet enrichment', () => {
   it('enriches context_packet.v1 from approved retrieval results with traceable audit entries', async () => {
     const leakedCandidate = knowledge('candidate', {
-      status: 'candidate' as KnowledgeReference['status'],
+      status: 'candidate' as McsKnowledgeReference['status'],
     });
     const adapter = createContextManagerRetrievalAdapter(
       providerReturning([knowledge('001'), leakedCandidate, knowledge('002')]),

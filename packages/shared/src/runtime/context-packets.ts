@@ -1,41 +1,41 @@
-import type { AgentAllowedOutput, AgentContext, AgentKey, RuntimeMode, RuntimeTaskType } from './agents.js';
+import type { McsAgentAllowedOutput, McsAgentContext, McsAgentKey, McsRuntimeMode, McsRuntimeTaskType } from './agents.js';
 import type {
-  ContextPacketId,
-  ContextRequestId,
-  GuidedActionId,
-  JournalEntryId,
-  KnowledgeId,
-  RelationshipContextId,
-  RequestId,
-  RuntimeTurnId,
-  SessionId,
-  SourceId,
-  TemplateId,
+  McsContextPacketId,
+  McsContextRequestId,
+  McsGuidedActionId,
+  McsJournalEntryId,
+  McsKnowledgeId,
+  McsRelationshipContextId,
+  McsRequestId,
+  McsRuntimeTurnId,
+  McsSessionId,
+  McsSourceId,
+  McsTemplateId,
 } from './ids.js';
-import type { BaContext, TeamContext, TenantContext, RuntimeEnvironment } from './identity.js';
-import type { RuntimeLanguage, RuntimeLanguageContext, RuntimeTranslationStatus } from './language.js';
+import type { McsBaContext, McsTeamContext, McsTenantContext, McsRuntimeEnvironment } from './identity.js';
+import type { McsRuntimeLanguage, McsRuntimeLanguageContext, McsRuntimeTranslationStatus } from './language.js';
 
-export type ContextPacketSchemaVersion = 'context_packet.v1';
+export type McsContextPacketSchemaVersion = 'context_packet.v1';
 
-export type ContextPacketStatus = 'complete' | 'degraded' | 'failed';
+export type McsContextPacketStatus = 'complete' | 'degraded' | 'failed';
 
-export interface SessionContext {
-  sessionId: SessionId;
-  mode: RuntimeMode;
+export interface McsSessionContext {
+  sessionId: McsSessionId;
+  mode: McsRuntimeMode;
   status: 'created' | 'active' | 'paused' | 'completed' | 'failed' | 'cancelled';
-  taskType: RuntimeTaskType;
+  taskType: McsRuntimeTaskType;
   currentState?: string;
   previousState?: string;
   startedAt?: string;
   lastActivityAt?: string;
   workflowId?: string;
   prospectId?: string;
-  guidedActionId?: GuidedActionId;
+  guidedActionId?: McsGuidedActionId;
 }
 
-export interface ContextPacketMetadata {
+export interface McsContextPacketMetadata {
   generatedBy: 'context_manager';
-  environment: RuntimeEnvironment;
+  environment: McsRuntimeEnvironment;
   correlationId?: string;
   causationId?: string;
   buildDurationMs?: number;
@@ -44,7 +44,7 @@ export interface ContextPacketMetadata {
   notes?: string[];
 }
 
-export interface RuntimeRule {
+export interface McsRuntimeRule {
   ruleId: string;
   category:
     | 'agent_boundary'
@@ -59,13 +59,13 @@ export interface RuntimeRule {
     | 'governance';
   instruction: string;
   required: true;
-  appliesTo: 'all_agents' | AgentKey;
+  appliesTo: 'all_agents' | McsAgentKey;
   reason?: string;
 }
 
-export interface Guardrail {
+export interface McsGuardrail {
   guardrailId: string;
-  appliesTo: 'all_agents' | AgentKey;
+  appliesTo: 'all_agents' | McsAgentKey;
   instruction: string;
   reason?: string;
   severity: 'info' | 'required' | 'critical';
@@ -80,40 +80,40 @@ export interface Guardrail {
     | 'runtime_boundary';
 }
 
-export interface InterviewTemplateContext {
-  templateId: TemplateId;
-  agentKey: AgentKey;
-  language: RuntimeLanguage;
+export interface McsInterviewTemplateContext {
+  templateId: McsTemplateId;
+  agentKey: McsAgentKey;
+  language: McsRuntimeLanguage;
   title: string;
   version: number;
-  templateType: RuntimeTaskType;
+  templateType: McsRuntimeTaskType;
   currentState?: string;
-  states: InterviewTemplateState[];
+  states: McsInterviewTemplateState[];
   templateInstructions?: string[];
 }
 
-export interface InterviewTemplateState {
+export interface McsInterviewTemplateState {
   stateKey: string;
   purpose: string;
   prompt: string;
   expectedCaptureFields: string[];
   nextStates: string[];
   completionCriteria?: string[];
-  allowedAgentOutputs?: AgentAllowedOutput[];
+  allowedAgentOutputs?: McsAgentAllowedOutput[];
 }
 
-export type KnowledgeGovernanceStatus = 'approved' | 'approval_not_required';
-export type ApprovedKnowledgeStatus = 'active';
+export type McsKnowledgeGovernanceStatus = 'approved' | 'approval_not_required';
+export type McsApprovedKnowledgeStatus = 'active';
 
-export interface SourceTraceability {
-  sourceId: SourceId;
+export interface McsSourceTraceability {
+  sourceId: McsSourceId;
   sourceType: string;
   title?: string;
   capturedAt?: string;
   reviewedAt?: string;
 }
 
-export type RetrievalMethod =
+export type McsRetrievalMethod =
   | 'semantic_search'
   | 'graph_expansion'
   | 'direct_reference'
@@ -121,7 +121,7 @@ export type RetrievalMethod =
   | 'rule_inclusion'
   | 'fallback';
 
-export type RetrievalReasonCode =
+export type McsRetrievalReasonCode =
   | 'agent_task_match'
   | 'language_match'
   | 'same_ba_scope'
@@ -130,89 +130,89 @@ export type RetrievalReasonCode =
   | 'guardrail_required'
   | 'fallback_required';
 
-export interface KnowledgeRetrievalMetadata {
-  retrievalMethod: RetrievalMethod;
-  reasonCodes: RetrievalReasonCode[];
+export interface McsKnowledgeRetrievalMetadata {
+  retrievalMethod: McsRetrievalMethod;
+  reasonCodes: McsRetrievalReasonCode[];
   score?: number;
-  language: RuntimeLanguage;
-  translationStatus: RuntimeTranslationStatus;
+  language: McsRuntimeLanguage;
+  translationStatus: McsRuntimeTranslationStatus;
 }
 
-export interface ApprovedKnowledgeContextItem {
-  knowledgeId: KnowledgeId;
+export interface McsApprovedKnowledgeContextItem {
+  knowledgeId: McsKnowledgeId;
   title: string;
   summary: string;
-  status: ApprovedKnowledgeStatus;
-  governanceStatus: KnowledgeGovernanceStatus;
-  language: RuntimeLanguage;
-  sourceTraceability: SourceTraceability;
-  retrieval: KnowledgeRetrievalMetadata;
+  status: McsApprovedKnowledgeStatus;
+  governanceStatus: McsKnowledgeGovernanceStatus;
+  language: McsRuntimeLanguage;
+  sourceTraceability: McsSourceTraceability;
+  retrieval: McsKnowledgeRetrievalMetadata;
 }
 
-export interface PrivateContextItem {
+export interface McsPrivateContextItem {
   contextId: string;
-  ownerTmagId: BaContext['tmagId'];
+  ownerTmagId: McsBaContext['tmagId'];
   summary: string;
-  language: RuntimeLanguage;
-  sourceTraceability: SourceTraceability;
+  language: McsRuntimeLanguage;
+  sourceTraceability: McsSourceTraceability;
 }
 
-export interface PrivateContextSection {
+export interface McsPrivateContextSection {
   included: boolean;
-  items: PrivateContextItem[];
+  items: McsPrivateContextItem[];
   reason?: string;
 }
 
-export interface JournalContextItem {
-  journalEntryId: JournalEntryId;
-  ownerTmagId: BaContext['tmagId'];
+export interface McsJournalContextItem {
+  journalEntryId: McsJournalEntryId;
+  ownerTmagId: McsBaContext['tmagId'];
   summary: string;
-  language: RuntimeLanguage;
+  language: McsRuntimeLanguage;
   selectedForReview: boolean;
 }
 
-export interface JournalContextSection {
+export interface McsJournalContextSection {
   included: boolean;
-  entries: JournalContextItem[];
+  entries: McsJournalContextItem[];
   privateByDefault: true;
 }
 
-export interface RelationshipContextItem {
-  relationshipContextId: RelationshipContextId;
-  ownerTmagId: BaContext['tmagId'];
+export interface McsRelationshipContextItem {
+  relationshipContextId: McsRelationshipContextId;
+  ownerTmagId: McsBaContext['tmagId'];
   summary: string;
   personSensitive: true;
-  language: RuntimeLanguage;
+  language: McsRuntimeLanguage;
 }
 
-export interface RelationshipContextSection {
+export interface McsRelationshipContextSection {
   included: boolean;
-  items: RelationshipContextItem[];
+  items: McsRelationshipContextItem[];
 }
 
-export interface SessionTurnContextItem {
-  turnId: RuntimeTurnId;
+export interface McsSessionTurnContextItem {
+  turnId: McsRuntimeTurnId;
   sequence: number;
   speaker: 'brand_ambassador' | 'agent' | 'system';
   summary: string;
-  language: RuntimeLanguage;
+  language: McsRuntimeLanguage;
 }
 
-export interface SessionHistorySection {
+export interface McsSessionHistorySection {
   included: boolean;
-  turns: SessionTurnContextItem[];
+  turns: McsSessionTurnContextItem[];
   omittedTurnCount?: number;
 }
 
-export interface GuidedActionContextItem {
-  guidedActionId: GuidedActionId;
-  ownerTmagId: BaContext['tmagId'];
+export interface McsGuidedActionContextItem {
+  guidedActionId: McsGuidedActionId;
+  ownerTmagId: McsBaContext['tmagId'];
   title: string;
   status: 'suggested' | 'accepted' | 'completed' | 'dismissed';
-  sourceKnowledgeIds?: KnowledgeId[];
+  sourceKnowledgeIds?: McsKnowledgeId[];
 }
 
-export type ContextExclusionReason =
+export type McsContextExclusionReason =
   | 'candidate_not_approved'
   | 'not_review_workflow'
   | 'permission_denied'
@@ -220,42 +220,42 @@ export type ContextExclusionReason =
   | 'language_unavailable'
   | 'privacy_boundary';
 
-export interface ContextExclusion {
-  sourceId: SourceId | string;
-  reason: ContextExclusionReason;
+export interface McsContextExclusion {
+  sourceId: McsSourceId | string;
+  reason: McsContextExclusionReason;
   description?: string;
 }
 
-export interface RetrievalAuditItem {
-  sourceId: SourceId | string;
-  method: RetrievalMethod;
+export interface McsRetrievalAuditItem {
+  sourceId: McsSourceId | string;
+  method: McsRetrievalMethod;
   included: boolean;
-  reasonCodes: RetrievalReasonCode[];
+  reasonCodes: McsRetrievalReasonCode[];
   score?: number;
 }
 
-export interface RetrievalAudit {
-  requestId: ContextRequestId;
-  packetId: ContextPacketId;
+export interface McsRetrievalAudit {
+  requestId: McsContextRequestId;
+  packetId: McsContextPacketId;
   requestedScopes: string[];
-  includedKnowledgeIds: KnowledgeId[];
+  includedKnowledgeIds: McsKnowledgeId[];
   includedPrivateContextIds: string[];
-  includedJournalEntryIds?: JournalEntryId[];
-  includedRelationshipContextIds?: RelationshipContextId[];
-  includedGuidedActionIds?: GuidedActionId[];
-  excludedSourceIds: Array<SourceId | string>;
-  retrievalMethods: RetrievalMethod[];
+  includedJournalEntryIds?: McsJournalEntryId[];
+  includedRelationshipContextIds?: McsRelationshipContextId[];
+  includedGuidedActionIds?: McsGuidedActionId[];
+  excludedSourceIds: Array<McsSourceId | string>;
+  retrievalMethods: McsRetrievalMethod[];
   tokenEstimate: number;
   languageFallbackUsed: boolean;
   candidateKnowledgeIncluded: false;
   candidateKnowledgeExcluded: true;
   privateJournalIncluded: boolean;
   degraded: boolean;
-  includedItems: RetrievalAuditItem[];
-  exclusions: ContextExclusion[];
+  includedItems: McsRetrievalAuditItem[];
+  exclusions: McsContextExclusion[];
 }
 
-export type DegradedContextReason =
+export type McsDegradedContextReason =
   | 'knowledge_unavailable'
   | 'translation_unavailable'
   | 'private_context_unavailable'
@@ -263,44 +263,44 @@ export type DegradedContextReason =
   | 'retrieval_timeout'
   | 'partial_system_failure';
 
-export interface DegradedContextState {
-  reasons: DegradedContextReason[];
+export interface McsDegradedContextState {
+  reasons: McsDegradedContextReason[];
   safeFallbackInstruction: string;
   missingSections: string[];
 }
 
-export interface ContextPacketV1 {
-  schemaVersion: ContextPacketSchemaVersion;
-  packetId: ContextPacketId;
-  requestId: ContextRequestId;
+export interface McsContextPacketV1 {
+  schemaVersion: McsContextPacketSchemaVersion;
+  packetId: McsContextPacketId;
+  requestId: McsContextRequestId;
   createdAt: string;
   expiresAt?: string;
-  packetStatus: ContextPacketStatus;
-  tenant: TenantContext;
-  team: TeamContext;
-  ba: BaContext;
-  session: SessionContext;
-  agent: AgentContext;
-  language: RuntimeLanguageContext;
-  runtimeRules: RuntimeRule[];
-  guardrails: Guardrail[];
-  activeTemplate?: InterviewTemplateContext;
-  approvedKnowledge: ApprovedKnowledgeContextItem[];
-  privateContext: PrivateContextSection;
-  relationshipContext: RelationshipContextSection;
-  journalContext: JournalContextSection;
-  sessionHistory: SessionHistorySection;
-  guidedActions: GuidedActionContextItem[];
-  exclusions: ContextExclusion[];
-  retrievalAudit: RetrievalAudit;
-  degraded?: DegradedContextState;
-  metadata?: ContextPacketMetadata;
+  packetStatus: McsContextPacketStatus;
+  tenant: McsTenantContext;
+  team: McsTeamContext;
+  ba: McsBaContext;
+  session: McsSessionContext;
+  agent: McsAgentContext;
+  language: McsRuntimeLanguageContext;
+  runtimeRules: McsRuntimeRule[];
+  guardrails: McsGuardrail[];
+  activeTemplate?: McsInterviewTemplateContext;
+  approvedKnowledge: McsApprovedKnowledgeContextItem[];
+  privateContext: McsPrivateContextSection;
+  relationshipContext: McsRelationshipContextSection;
+  journalContext: McsJournalContextSection;
+  sessionHistory: McsSessionHistorySection;
+  guidedActions: McsGuidedActionContextItem[];
+  exclusions: McsContextExclusion[];
+  retrievalAudit: McsRetrievalAudit;
+  degraded?: McsDegradedContextState;
+  metadata?: McsContextPacketMetadata;
 }
 
-export interface ContextPacketRequest {
-  requestId: RequestId;
-  sessionId: SessionId;
-  agentKey: AgentKey;
-  language: RuntimeLanguage;
-  taskType: RuntimeTaskType;
+export interface McsContextPacketRequest {
+  requestId: McsRequestId;
+  sessionId: McsSessionId;
+  agentKey: McsAgentKey;
+  language: McsRuntimeLanguage;
+  taskType: McsRuntimeTaskType;
 }

@@ -14,17 +14,17 @@
 
 import { randomUUID } from 'node:crypto';
 import type {
-  AgentEvent,
-  AgentEventKind,
-  AgentEventMetadataValue,
-  AgentId,
-  AgentRecommendation,
-  AgentRecommendationKind,
-  AgentRecommendationPriority,
-  AgentRecommendationsResponse,
-  AgentSubjectType,
-  CreateAgentEventPayload,
-  ProspectFocusQueueItem,
+  McsAgentEvent,
+  McsAgentEventKind,
+  McsAgentEventMetadataValue,
+  McsAgentId,
+  McsAgentRecommendation,
+  McsAgentRecommendationKind,
+  McsAgentRecommendationPriority,
+  McsAgentRecommendationsResponse,
+  McsAgentSubjectType,
+  McsCreateAgentEventPayload,
+  McsProspectFocusQueueItem,
 } from '@momentum/shared';
 import { tripleStackWrite } from '../../services/tripleStack.js';
 import {
@@ -37,8 +37,8 @@ import { buildDiscoveryView } from '../steve-success-interview.js';
 const EVENTS_COLLECTION = 'agent_events';
 const EVENTS_CHROMA_COLLECTION = 'mcs_agent_events';
 
-const AGENT_IDS: readonly AgentId[] = ['michael', 'ivory', 'steve', 'system'];
-const EVENT_KINDS: readonly AgentEventKind[] = [
+const AGENT_IDS: readonly McsAgentId[] = ['michael', 'ivory', 'steve', 'system'];
+const EVENT_KINDS: readonly McsAgentEventKind[] = [
   'recommendation_viewed',
   'recommendation_actioned',
   'recommendation_dismissed',
@@ -46,7 +46,7 @@ const EVENT_KINDS: readonly AgentEventKind[] = [
   'handoff_started',
   'handoff_completed',
 ];
-const SUBJECT_TYPES: readonly AgentSubjectType[] = [
+const SUBJECT_TYPES: readonly McsAgentSubjectType[] = [
   'ba',
   'prospect',
   'ivory_name',
@@ -62,23 +62,23 @@ export class AgentEventValidationError extends Error {
   }
 }
 
-function isAgentId(value: unknown): value is AgentId {
-  return typeof value === 'string' && AGENT_IDS.includes(value as AgentId);
+function isAgentId(value: unknown): value is McsAgentId {
+  return typeof value === 'string' && AGENT_IDS.includes(value as McsAgentId);
 }
 
-function isEventKind(value: unknown): value is AgentEventKind {
-  return typeof value === 'string' && EVENT_KINDS.includes(value as AgentEventKind);
+function isEventKind(value: unknown): value is McsAgentEventKind {
+  return typeof value === 'string' && EVENT_KINDS.includes(value as McsAgentEventKind);
 }
 
-function isSubjectType(value: unknown): value is AgentSubjectType {
-  return typeof value === 'string' && SUBJECT_TYPES.includes(value as AgentSubjectType);
+function isSubjectType(value: unknown): value is McsAgentSubjectType {
+  return typeof value === 'string' && SUBJECT_TYPES.includes(value as McsAgentSubjectType);
 }
 
 function sanitizeMetadata(
-  input: Record<string, AgentEventMetadataValue> | undefined,
-): Record<string, AgentEventMetadataValue> {
+  input: Record<string, McsAgentEventMetadataValue> | undefined,
+): Record<string, McsAgentEventMetadataValue> {
   if (!input) return {};
-  const out: Record<string, AgentEventMetadataValue> = {};
+  const out: Record<string, McsAgentEventMetadataValue> = {};
   for (const [key, value] of Object.entries(input)) {
     if (!key || key.length > 80) continue;
     if (
@@ -94,19 +94,19 @@ function sanitizeMetadata(
 }
 
 function recommendation(args: {
-  agentId: AgentId;
-  kind: AgentRecommendationKind;
-  priority: AgentRecommendationPriority;
+  agentId: McsAgentId;
+  kind: McsAgentRecommendationKind;
+  priority: McsAgentRecommendationPriority;
   title: string;
   summary: string;
   reason: string;
   ctaLabel: string;
   route: string;
-  subjectType: AgentSubjectType;
+  subjectType: McsAgentSubjectType;
   subjectId: string | null;
   createdAt: string;
   expiresAt?: string | null;
-}): AgentRecommendation {
+}): McsAgentRecommendation {
   return {
     recommendationId: [
       args.agentId,
@@ -129,19 +129,19 @@ function recommendation(args: {
   };
 }
 
-function clampPriority(input: number): AgentRecommendationPriority {
+function clampPriority(input: number): McsAgentRecommendationPriority {
   if (input >= 5) return 5;
   if (input <= 1) return 1;
-  return input as AgentRecommendationPriority;
+  return input as McsAgentRecommendationPriority;
 }
 
-function buildProspectRoute(item: ProspectFocusQueueItem): string {
+function buildProspectRoute(item: McsProspectFocusQueueItem): string {
   return `/cockpit?prospectId=${encodeURIComponent(item.prospectId)}`;
 }
 
 export async function getAgentRecommendations(
   tmagId: string,
-): Promise<AgentRecommendationsResponse> {
+): Promise<McsAgentRecommendationsResponse> {
   const generatedAt = new Date().toISOString();
   const [pmv, todaysActions, ivoryNames, steveView] = await Promise.all([
     getProspectMomentumViewer(tmagId),
@@ -150,7 +150,7 @@ export async function getAgentRecommendations(
     buildDiscoveryView(tmagId),
   ]);
 
-  const recommendations: AgentRecommendation[] = [];
+  const recommendations: McsAgentRecommendation[] = [];
 
   const steveArtifact = steveView?.artifact ?? null;
   if (steveArtifact) {
@@ -258,8 +258,8 @@ export async function getAgentRecommendations(
 
 export async function recordAgentEvent(
   tmagId: string,
-  input: CreateAgentEventPayload,
-): Promise<AgentEvent> {
+  input: McsCreateAgentEventPayload,
+): Promise<McsAgentEvent> {
   if (!isAgentId(input.agentId)) {
     throw new AgentEventValidationError('invalid_agent_id');
   }
@@ -283,7 +283,7 @@ export async function recordAgentEvent(
   const now = new Date().toISOString();
   const eventId = `agent_event_${randomUUID()}`;
 
-  const event: AgentEvent = {
+  const event: McsAgentEvent = {
     eventId,
     tmagId,
     agentId: input.agentId,

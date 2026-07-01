@@ -39,9 +39,9 @@ import {
 } from '../../domain/reports/export.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
 import type {
-  AdminDashboardFilter,
-  AdminReportTimeRange,
-  AuditActor,
+  McsAdminDashboardFilter,
+  McsAdminReportTimeRange,
+  McsAuditActor,
 } from '@momentum/shared';
 
 export const adminReportingRoutes: Router = express.Router();
@@ -51,7 +51,7 @@ const FilterSchema = z.object({
   leaderGroup: z.enum(['all', 'leaders_only', 'non_leaders']).optional(),
 });
 
-function parseFilter(req: Request): AdminDashboardFilter {
+function parseFilter(req: Request): McsAdminDashboardFilter {
   const parsed = FilterSchema.parse({
     tmagId: typeof req.query.tmagId === 'string' ? req.query.tmagId : undefined,
     leaderGroup:
@@ -68,7 +68,7 @@ function parseFilter(req: Request): AdminDashboardFilter {
  * explicit from/to). The resolver tolerates absent / invalid inputs and
  * defaults to lifetime.
  */
-function parseRange(req: Request): AdminReportTimeRange {
+function parseRange(req: Request): McsAdminReportTimeRange {
   return resolveTimeRange({
     preset: typeof req.query.preset === 'string' ? req.query.preset : null,
     from: typeof req.query.from === 'string' ? req.query.from : null,
@@ -76,7 +76,7 @@ function parseRange(req: Request): AdminReportTimeRange {
   });
 }
 
-function adminActorFromRequest(req: Request): AuditActor & { kind: 'admin' } {
+function adminActorFromRequest(req: Request): McsAuditActor & { kind: 'admin' } {
   const session = req.session!;
   const displayName =
     (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
@@ -86,7 +86,7 @@ function adminActorFromRequest(req: Request): AuditActor & { kind: 'admin' } {
 /* ─── GET /master-report.pdf — I.3 ───────────────────────── */
 
 adminReportingRoutes.get('/master-report.pdf', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -133,7 +133,7 @@ adminReportingRoutes.get('/master-report.pdf', requireAdmin, async (req, res) =>
 /* ─── GET /activation — I.1 Report 1 · BA activation ───────── */
 
 adminReportingRoutes.get('/activation', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -183,7 +183,7 @@ adminReportingRoutes.get('/activation', requireAdmin, async (req, res) => {
 /* ─── GET /training — I.1 Report 2 · Training completion ────── */
 
 adminReportingRoutes.get('/training', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -234,7 +234,7 @@ adminReportingRoutes.get('/training', requireAdmin, async (req, res) => {
 /* ─── GET /invite-funnel — I.1 Report 3 · Invite-to-presentation movement ── */
 
 adminReportingRoutes.get('/invite-funnel', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -289,7 +289,7 @@ adminReportingRoutes.get('/invite-funnel', requireAdmin, async (req, res) => {
 /* ─── GET /queue-velocity — I.1 Report 4 ───────────────────── */
 
 adminReportingRoutes.get('/queue-velocity', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -319,7 +319,7 @@ adminReportingRoutes.get('/queue-velocity', requireAdmin, async (req, res) => {
 /* ─── GET /enrollment-completion — I.1 Report 5 (renamed) ────── */
 
 adminReportingRoutes.get('/enrollment-completion', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -349,7 +349,7 @@ adminReportingRoutes.get('/enrollment-completion', requireAdmin, async (req, res
 /* ─── GET /follow-up-aging — I.1 Report 6 ──────────────────── */
 
 adminReportingRoutes.get('/follow-up-aging', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -379,7 +379,7 @@ adminReportingRoutes.get('/follow-up-aging', requireAdmin, async (req, res) => {
 /* ─── GET /leader-scorecards — I.1 Report 9 (Kevin-only) ────── */
 
 adminReportingRoutes.get('/leader-scorecards', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -469,7 +469,7 @@ async function auditExport(
 }
 
 adminReportingRoutes.get('/activation/export', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -496,7 +496,7 @@ adminReportingRoutes.get('/activation/export', requireAdmin, async (req, res) =>
 });
 
 adminReportingRoutes.get('/training/export', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -523,7 +523,7 @@ adminReportingRoutes.get('/training/export', requireAdmin, async (req, res) => {
 });
 
 adminReportingRoutes.get('/invite-funnel/export', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -553,7 +553,7 @@ adminReportingRoutes.get('/invite-funnel/export', requireAdmin, async (req, res)
 });
 
 adminReportingRoutes.get('/queue-velocity/export', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -580,7 +580,7 @@ adminReportingRoutes.get('/queue-velocity/export', requireAdmin, async (req, res
 });
 
 adminReportingRoutes.get('/enrollment-completion/export', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -607,7 +607,7 @@ adminReportingRoutes.get('/enrollment-completion/export', requireAdmin, async (r
 });
 
 adminReportingRoutes.get('/follow-up-aging/export', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -634,7 +634,7 @@ adminReportingRoutes.get('/follow-up-aging/export', requireAdmin, async (req, re
 });
 
 adminReportingRoutes.get('/leader-scorecards/export', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {

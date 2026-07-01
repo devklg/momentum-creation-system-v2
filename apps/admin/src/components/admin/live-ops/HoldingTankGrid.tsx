@@ -13,10 +13,10 @@
  */
 
 import { useState } from 'react';
-import type { AdminLiveGridResponse, AdminLiveGridSlot } from '@momentum/shared';
+import type { McsAdminLiveGridResponse, McsAdminLiveGridSlot } from '@momentum/shared';
 
 interface Props {
-  data: AdminLiveGridResponse | null;
+  data: McsAdminLiveGridResponse | null;
   loading: boolean;
 }
 
@@ -24,7 +24,7 @@ const PAGE_SIZE = 96;
 
 export function HoldingTankGrid({ data, loading }: Props) {
   const [visible, setVisible] = useState<number>(PAGE_SIZE);
-  const [hovered, setHovered] = useState<AdminLiveGridSlot | null>(null);
+  const [hovered, setHovered] = useState<McsAdminLiveGridSlot | null>(null);
 
   const slots = data?.slots ?? [];
   const shown = slots.slice(0, visible);
@@ -84,8 +84,8 @@ function Slot({
   slot,
   onHover,
 }: {
-  slot: AdminLiveGridSlot;
-  onHover: (s: AdminLiveGridSlot) => void;
+  slot: McsAdminLiveGridSlot;
+  onHover: (s: McsAdminLiveGridSlot) => void;
 }) {
   const cls = classesForBucket(slot.ageBucket);
   const label = `${slot.prospectFirstName} ${slot.prospectLastInitial}. · #${slot.positionNumber} · ${slot.ageDays}d in tank`;
@@ -119,7 +119,7 @@ function LegendDot({
   bucket,
   label,
 }: {
-  bucket: AdminLiveGridSlot['ageBucket'];
+  bucket: McsAdminLiveGridSlot['ageBucket'];
   label: string;
 }) {
   return (
@@ -130,7 +130,7 @@ function LegendDot({
   );
 }
 
-function HoverDetail({ slot }: { slot: AdminLiveGridSlot | null }) {
+function HoverDetail({ slot }: { slot: McsAdminLiveGridSlot | null }) {
   return (
     <div className="mt-3 min-h-[44px] text-[12px] font-mono">
       {slot === null ? (
@@ -149,7 +149,7 @@ function HoverDetail({ slot }: { slot: AdminLiveGridSlot | null }) {
   );
 }
 
-function classesForBucket(bucket: AdminLiveGridSlot['ageBucket']): string {
+function classesForBucket(bucket: McsAdminLiveGridSlot['ageBucket']): string {
   switch (bucket) {
     case 'fresh':
       // gold C9A84C — saturated fill

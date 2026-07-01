@@ -1,4 +1,4 @@
-import type { RuntimeTaskType } from '@momentum/shared/runtime';
+import type { McsRuntimeTaskType } from '@momentum/shared/runtime';
 import type {
   MichaelResponseContextPacketStatus,
   MichaelResponseType,
@@ -20,7 +20,7 @@ type ScenarioInput = {
   readonly runtimeTurnStatus: MichaelRuntimeTurnOutcomeStatus;
   readonly runtimeScenario: RuntimeTurnFixtureScenarioType;
   readonly agentKey: unknown;
-  readonly taskType: RuntimeTaskType;
+  readonly taskType: McsRuntimeTaskType;
   readonly responseFixtureKey: MichaelResponseFixtureKey;
 };
 

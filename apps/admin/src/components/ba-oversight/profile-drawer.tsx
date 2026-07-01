@@ -21,11 +21,11 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type {
-  AdminBaDirectoryRow,
-  AdminBaNoteEntry,
-  AdminBaProfileBundle,
-  AdminBaProfileResponse,
-  AdminSponsorOverrideEntry,
+  McsAdminBaDirectoryRow,
+  McsAdminBaNoteEntry,
+  McsAdminBaProfileBundle,
+  McsAdminBaProfileResponse,
+  McsAdminSponsorOverrideEntry,
 } from '@momentum/shared';
 import { SponsorOverrideFlow } from './sponsor-override-flow';
 import { NotesPanel } from './notes-panel';
@@ -34,11 +34,11 @@ import { BaCrudModal, type BaCrudMode, type BaCrudResponse } from './ba-crud-mod
 interface Props {
   tmagId: string;
   onClose: () => void;
-  onRowChanged: (row: AdminBaDirectoryRow) => void;
+  onRowChanged: (row: McsAdminBaDirectoryRow) => void;
 }
 
 export function ProfileDrawer({ tmagId, onClose, onRowChanged }: Props) {
-  const [bundle, setBundle] = useState<AdminBaProfileBundle | null>(null);
+  const [bundle, setBundle] = useState<McsAdminBaProfileBundle | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [overrideOpen, setOverrideOpen] = useState(false);
   const [crudMode, setCrudMode] = useState<BaCrudMode | null>(null);
@@ -54,7 +54,7 @@ export function ProfileDrawer({ tmagId, onClose, onRowChanged }: Props) {
       const res = await fetch(`/api/admin/bas/${encodeURIComponent(tmagId)}`, {
         credentials: 'include',
       });
-      const data = (await res.json()) as AdminBaProfileResponse & { error?: string };
+      const data = (await res.json()) as McsAdminBaProfileResponse & { error?: string };
       if (!data.ok) {
         setErr(data.error ?? 'Could not load profile.');
         return;
@@ -66,8 +66,8 @@ export function ProfileDrawer({ tmagId, onClose, onRowChanged }: Props) {
   }
 
   function onOverrideApplied(
-    nextRow: AdminBaDirectoryRow,
-    entry: AdminSponsorOverrideEntry,
+    nextRow: McsAdminBaDirectoryRow,
+    entry: McsAdminSponsorOverrideEntry,
   ) {
     setBundle((prev) =>
       prev
@@ -82,7 +82,7 @@ export function ProfileDrawer({ tmagId, onClose, onRowChanged }: Props) {
     onRowChanged(nextRow);
   }
 
-  function onNoteAppended(note: AdminBaNoteEntry) {
+  function onNoteAppended(note: McsAdminBaNoteEntry) {
     setBundle((prev) =>
       prev ? { ...prev, notes: [note, ...prev.notes] } : prev,
     );
@@ -390,7 +390,7 @@ function KV({ label, children }: { label: string; children: React.ReactNode }) {
 function StatusPill({
   status,
 }: {
-  status: AdminBaDirectoryRow['status'];
+  status: McsAdminBaDirectoryRow['status'];
 }) {
   const cls =
     status === 'active'

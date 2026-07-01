@@ -40,16 +40,16 @@ import {
   AnthropicError,
 } from '../services/anthropic.js';
 import type {
-  IvoryMomentumCohortCounts,
-  IvoryMomentumContext,
-  IvoryMomentumPriorityReason,
-  IvoryMomentumRow,
-  IvoryMomentumSuggestionPayload,
-  IvoryMomentumSuggestionResponse,
-  IvoryMomentumViewResponse,
-  IvoryName,
-  ProspectLifecycleStage,
-  ProspectMomentumRow,
+  McsIvoryMomentumCohortCounts,
+  McsIvoryMomentumContext,
+  McsIvoryMomentumPriorityReason,
+  McsIvoryMomentumRow,
+  McsIvoryMomentumSuggestionPayload,
+  McsIvoryMomentumSuggestionResponse,
+  McsIvoryMomentumViewResponse,
+  McsIvoryName,
+  McsProspectLifecycleStage,
+  McsProspectMomentumRow,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -95,9 +95,9 @@ const EXPIRING_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
  * the row is in a terminal state and should not appear in the queue.
  */
 function derivePriorityReason(
-  pmv: ProspectMomentumRow,
+  pmv: McsProspectMomentumRow,
   nowMs: number,
-): IvoryMomentumPriorityReason | null {
+): McsIvoryMomentumPriorityReason | null {
   if (
     pmv.lifecycle === 'enrolled' ||
     pmv.lifecycle === 'customer' ||
@@ -137,7 +137,7 @@ function derivePriorityReason(
   return null;
 }
 
-const PRIORITY_RANK: Record<IvoryMomentumPriorityReason, number> = {
+const PRIORITY_RANK: Record<McsIvoryMomentumPriorityReason, number> = {
   callback_raised: 6,
   video_watched: 5,
   follow_up_due: 5,
@@ -157,9 +157,9 @@ const PRIORITY_RANK: Record<IvoryMomentumPriorityReason, number> = {
  * relationshipReason is read off the PMV row's optional field (Chat #131+).
  */
 function buildContext(
-  pmv: ProspectMomentumRow,
-  byLastProspectId: Map<string, IvoryName>,
-): IvoryMomentumContext {
+  pmv: McsProspectMomentumRow,
+  byLastProspectId: Map<string, McsIvoryName>,
+): McsIvoryMomentumContext {
   const link = byLastProspectId.get(pmv.prospectId) ?? null;
   return {
     ivoryId: link?.ivoryId ?? null,
@@ -170,8 +170,8 @@ function buildContext(
   };
 }
 
-function buildCohortCounts(rows: IvoryMomentumRow[]): IvoryMomentumCohortCounts {
-  const counts: IvoryMomentumCohortCounts = {
+function buildCohortCounts(rows: McsIvoryMomentumRow[]): McsIvoryMomentumCohortCounts {
+  const counts: McsIvoryMomentumCohortCounts = {
     total: rows.length,
     draft: 0,
     sentUnopened: 0,
@@ -233,19 +233,19 @@ function buildCohortCounts(rows: IvoryMomentumRow[]): IvoryMomentumCohortCounts 
  */
 export async function getIvoryMomentumView(
   tmagId: string,
-): Promise<IvoryMomentumViewResponse> {
+): Promise<McsIvoryMomentumViewResponse> {
   const [pmv, ivoryNames] = await Promise.all([
     getProspectMomentumViewer(tmagId),
     listIvoryNamesForBA(tmagId),
   ]);
 
-  const byLastProspectId = new Map<string, IvoryName>();
+  const byLastProspectId = new Map<string, McsIvoryName>();
   for (const name of ivoryNames) {
     if (name.lastProspectId) byLastProspectId.set(name.lastProspectId, name);
   }
 
   const nowMs = Date.now();
-  const ivoryRows: IvoryMomentumRow[] = pmv.rows
+  const ivoryRows: McsIvoryMomentumRow[] = pmv.rows
     .filter((row) => row.source === 'ivory')
     .map((row) => ({
       prospectId: row.prospectId,
@@ -317,7 +317,7 @@ async function assertProspectOwnership(
   }
 }
 
-const LIFECYCLE_DESCRIPTION: Record<ProspectLifecycleStage, string> = {
+const LIFECYCLE_DESCRIPTION: Record<McsProspectLifecycleStage, string> = {
   draft: 'You have a minted invitation that has not been marked sent yet.',
   sent_unopened: 'The invitation was sent but the link has not been opened.',
   clicked: 'They opened the link but have not started the video.',
@@ -374,8 +374,8 @@ const SUGGEST_SYSTEM_PREFIX = [
 ].join('\n');
 
 function buildSuggestUserTurn(input: {
-  prospect: ProspectMomentumRow;
-  context: IvoryMomentumContext;
+  prospect: McsProspectMomentumRow;
+  context: McsIvoryMomentumContext;
   ask: string | null;
 }): string {
   const { prospect, context, ask } = input;
@@ -436,8 +436,8 @@ function parseSuggestJson(
  * neutralCoach() in domain/ivory.ts.
  */
 function neutralSuggestion(
-  prospect: ProspectMomentumRow,
-): IvoryMomentumSuggestionResponse {
+  prospect: McsProspectMomentumRow,
+): McsIvoryMomentumSuggestionResponse {
   const first = prospect.firstName;
   const stage = prospect.lifecycle;
 
@@ -514,8 +514,8 @@ const ASK_MAX = 600;
 export async function suggestIvoryMomentumFollowUp(
   tmagId: string,
   prospectId: string,
-  input: IvoryMomentumSuggestionPayload,
-): Promise<IvoryMomentumSuggestionResponse> {
+  input: McsIvoryMomentumSuggestionPayload,
+): Promise<McsIvoryMomentumSuggestionResponse> {
   if (!prospectId) {
     throw new IvoryMomentumValidationError('invalid_prospect_id');
   }
@@ -539,7 +539,7 @@ export async function suggestIvoryMomentumFollowUp(
   // angle. The cohort view already does this, but the suggest path may be
   // called directly without the cohort having been computed in the same tick.
   const ivoryNames = await listIvoryNamesForBA(tmagId);
-  const byLastProspectId = new Map<string, IvoryName>();
+  const byLastProspectId = new Map<string, McsIvoryName>();
   for (const name of ivoryNames) {
     if (name.lastProspectId) byLastProspectId.set(name.lastProspectId, name);
   }

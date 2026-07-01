@@ -24,11 +24,11 @@
 
 import { useState } from 'react';
 import type {
-  AdminCreateProspectResponse,
-  AdminEditProspectResponse,
-  AdminProspectDeleteResponse,
-  AdminProspectDetail,
-  AdminProspectRestoreResponse,
+  McsAdminCreateProspectResponse,
+  McsAdminEditProspectResponse,
+  McsAdminProspectDeleteResponse,
+  McsAdminProspectDetail,
+  McsAdminProspectRestoreResponse,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,15 +38,15 @@ export type ProspectCrudMode = 'create' | 'edit' | 'delete' | 'restore';
 
 /** Union of the four success responses; the parent narrows on mode. */
 export type ProspectCrudResponse =
-  | ({ mode: 'create' } & AdminCreateProspectResponse)
-  | ({ mode: 'edit' } & AdminEditProspectResponse)
-  | ({ mode: 'delete' } & AdminProspectDeleteResponse)
-  | ({ mode: 'restore' } & AdminProspectRestoreResponse);
+  | ({ mode: 'create' } & McsAdminCreateProspectResponse)
+  | ({ mode: 'edit' } & McsAdminEditProspectResponse)
+  | ({ mode: 'delete' } & McsAdminProspectDeleteResponse)
+  | ({ mode: 'restore' } & McsAdminProspectRestoreResponse);
 
 interface Props {
   mode: ProspectCrudMode;
   /** Present for edit/delete/restore; absent for create. */
-  detail: AdminProspectDetail | null;
+  detail: McsAdminProspectDetail | null;
   onClose: () => void;
   onDone: (resp: ProspectCrudResponse) => void;
 }
@@ -63,7 +63,7 @@ interface FormState {
   reason: string;
 }
 
-function initialForm(mode: ProspectCrudMode, detail: AdminProspectDetail | null): FormState {
+function initialForm(mode: ProspectCrudMode, detail: McsAdminProspectDetail | null): FormState {
   if (mode === 'edit' && detail) {
     return {
       firstName: detail.firstName ?? '',
@@ -333,14 +333,14 @@ type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
  * after the call; the request helper returns the union so each branch can
  * pass its own concrete response type without fighting inference. */
 type ProspectCrudOkData =
-  | AdminCreateProspectResponse
-  | AdminEditProspectResponse
-  | AdminProspectDeleteResponse
-  | AdminProspectRestoreResponse;
+  | McsAdminCreateProspectResponse
+  | McsAdminEditProspectResponse
+  | McsAdminProspectDeleteResponse
+  | McsAdminProspectRestoreResponse;
 
 async function callApi(
   mode: ProspectCrudMode,
-  detail: AdminProspectDetail | null,
+  detail: McsAdminProspectDetail | null,
   form: FormState,
 ): Promise<ApiResult<ProspectCrudOkData>> {
   const reason = form.reason.trim();
@@ -348,7 +348,7 @@ async function callApi(
   const id = detail ? encodeURIComponent(detail.prospectId) : '';
 
   if (mode === 'create') {
-    return request<AdminCreateProspectResponse>(base, 'POST', {
+    return request<McsAdminCreateProspectResponse>(base, 'POST', {
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
       city: form.city.trim(),
@@ -361,7 +361,7 @@ async function callApi(
     });
   }
   if (mode === 'edit') {
-    return request<AdminEditProspectResponse>(`${base}/${id}`, 'PATCH', {
+    return request<McsAdminEditProspectResponse>(`${base}/${id}`, 'PATCH', {
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
       city: form.city.trim(),
@@ -373,9 +373,9 @@ async function callApi(
     });
   }
   if (mode === 'delete') {
-    return request<AdminProspectDeleteResponse>(`${base}/${id}`, 'DELETE', { reason });
+    return request<McsAdminProspectDeleteResponse>(`${base}/${id}`, 'DELETE', { reason });
   }
-  return request<AdminProspectRestoreResponse>(`${base}/${id}/restore`, 'POST', { reason });
+  return request<McsAdminProspectRestoreResponse>(`${base}/${id}/restore`, 'POST', { reason });
 }
 
 async function request<T>(

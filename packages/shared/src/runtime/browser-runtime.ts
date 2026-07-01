@@ -1,9 +1,9 @@
-import type { AgentKey, RuntimeMode } from './agents.js';
-import type { RuntimeEventId, SessionId, TranscriptTurnId } from './ids.js';
-import type { BaRuntimeScope } from './identity.js';
-import type { BrowserSpeechLocale, RuntimeLanguage } from './language.js';
+import type { McsAgentKey, McsRuntimeMode } from './agents.js';
+import type { McsRuntimeEventId, McsSessionId, McsTranscriptTurnId } from './ids.js';
+import type { McsBaRuntimeScope } from './identity.js';
+import type { McsBrowserSpeechLocale, McsRuntimeLanguage } from './language.js';
 
-export type BrowserVoiceState =
+export type McsBrowserVoiceState =
   | 'unsupported'
   | 'idle'
   | 'requesting_permission'
@@ -15,7 +15,7 @@ export type BrowserVoiceState =
   | 'text_fallback'
   | 'error';
 
-export type BrowserVoiceErrorCode =
+export type McsBrowserVoiceErrorCode =
   | 'unsupported'
   | 'permission_denied'
   | 'no_microphone'
@@ -25,27 +25,27 @@ export type BrowserVoiceErrorCode =
   | 'language_not_supported'
   | 'unknown';
 
-export interface BrowserVoiceError {
-  code: BrowserVoiceErrorCode;
+export interface McsBrowserVoiceError {
+  code: McsBrowserVoiceErrorCode;
   message: string;
   safeMessage: string;
   retryable: boolean;
   occurredAt: string;
 }
 
-export type BrowserRuntimeTransport = 'browser_voice' | 'browser_text';
+export type McsBrowserRuntimeTransport = 'browser_voice' | 'browser_text';
 
-export interface BrowserRuntimeSessionScope extends BaRuntimeScope {
-  sessionId: SessionId;
-  agentKey: AgentKey;
-  mode: RuntimeMode;
-  language: RuntimeLanguage;
+export interface McsBrowserRuntimeSessionScope extends McsBaRuntimeScope {
+  sessionId: McsSessionId;
+  agentKey: McsAgentKey;
+  mode: McsRuntimeMode;
+  language: McsRuntimeLanguage;
 }
 
-export interface BrowserTranscriptTurn extends BrowserRuntimeSessionScope {
-  transcriptTurnId: TranscriptTurnId;
+export interface McsBrowserTranscriptTurn extends McsBrowserRuntimeSessionScope {
+  transcriptTurnId: McsTranscriptTurnId;
   inputMode: 'voice';
-  browserLocale?: BrowserSpeechLocale | string;
+  browserLocale?: McsBrowserSpeechLocale | string;
   originalText: string;
   correctedText?: string;
   finalText: string;
@@ -54,34 +54,34 @@ export interface BrowserTranscriptTurn extends BrowserRuntimeSessionScope {
   transcriptHash: string;
   capturedAt: string;
   correctedAt?: string;
-  emittedEventId?: RuntimeEventId;
+  emittedEventId?: McsRuntimeEventId;
   metadata?: Record<string, unknown>;
 }
 
-export interface BrowserInterimTranscript extends BrowserRuntimeSessionScope {
+export interface McsBrowserInterimTranscript extends McsBrowserRuntimeSessionScope {
   text: string;
   confidence?: number;
   capturedAt: string;
 }
 
-export interface BrowserVoiceAgentTurnWirePayload extends BaRuntimeScope {
+export interface McsBrowserVoiceAgentTurnWirePayload extends McsBaRuntimeScope {
   text: string;
-  language?: RuntimeLanguage;
+  language?: McsRuntimeLanguage;
   mode: 'browser_voice';
   transcriptMetadata: {
-    transcriptTurnId: TranscriptTurnId;
+    transcriptTurnId: McsTranscriptTurnId;
     confidence?: number;
     isFinal: true;
-    browserLocale?: BrowserSpeechLocale | string;
+    browserLocale?: McsBrowserSpeechLocale | string;
     transcriptHash: string;
     corrected: boolean;
   };
   metadata?: Record<string, unknown>;
 }
 
-export interface BrowserTextTurnWirePayload extends BaRuntimeScope {
+export interface McsBrowserTextTurnWirePayload extends McsBaRuntimeScope {
   text: string;
-  language?: RuntimeLanguage;
+  language?: McsRuntimeLanguage;
   mode: 'browser_text';
   metadata?: Record<string, unknown>;
 }

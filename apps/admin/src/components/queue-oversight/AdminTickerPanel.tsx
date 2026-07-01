@@ -9,15 +9,15 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type {
-  AdminQueueTickerSseEvent,
-  AdminQueueTickerSnapshot,
-  AdminTickerEntry,
+  McsAdminQueueTickerSseEvent,
+  McsAdminQueueTickerSnapshot,
+  McsAdminTickerEntry,
 } from '@momentum/shared';
 
 const MAX_ENTRIES = 80;
 
 export function AdminTickerPanel() {
-  const [entries, setEntries] = useState<AdminTickerEntry[] | null>(null);
+  const [entries, setEntries] = useState<McsAdminTickerEntry[] | null>(null);
   const [globalMaxPosition, setGlobalMaxPosition] = useState<number>(0);
   const [status, setStatus] = useState<'connecting' | 'live' | 'closed'>('connecting');
   const [err, setErr] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export function AdminTickerPanel() {
 
     es.addEventListener('snapshot', (evt) => {
       try {
-        const payload = JSON.parse((evt as MessageEvent).data) as AdminQueueTickerSnapshot;
+        const payload = JSON.parse((evt as MessageEvent).data) as McsAdminQueueTickerSnapshot;
         setEntries(payload.recent.slice(0, MAX_ENTRIES));
         setGlobalMaxPosition(payload.globalMaxPosition);
         setStatus('live');
@@ -41,8 +41,8 @@ export function AdminTickerPanel() {
 
     es.addEventListener('admin_queue_placement', (evt) => {
       try {
-        const event = JSON.parse((evt as MessageEvent).data) as AdminQueueTickerSseEvent;
-        const entry: AdminTickerEntry = {
+        const event = JSON.parse((evt as MessageEvent).data) as McsAdminQueueTickerSseEvent;
+        const entry: McsAdminTickerEntry = {
           positionNumber: event.positionNumber,
           prospectId: event.prospectId,
           firstName: event.firstName,

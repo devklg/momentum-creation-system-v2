@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type {
-  AgentKey,
-  RuntimeTaskType,
+  McsAgentKey,
+  McsRuntimeTaskType,
 } from '@momentum/shared/runtime';
 import { assertValidRuntimeEventEnvelope } from '../../events/index.js';
 import {
@@ -128,7 +128,7 @@ describe('S2.2 Context Packet request wiring', () => {
   it('rejects an invalid agent before requesting context', async () => {
     const fixture = createContextManagerFixture('complete');
     const result = await requestContextPacketForTurn({
-      identity: requestIdentity({ agentKey: 'unknown_agent' as AgentKey }),
+      identity: requestIdentity({ agentKey: 'unknown_agent' as McsAgentKey }),
       turnId: requestTurnId(),
       taskType: 'training_support',
       contextManager: fixture.port,
@@ -145,7 +145,7 @@ describe('S2.2 Context Packet request wiring', () => {
     const result = await requestContextPacketForTurn({
       identity: requestIdentity({ agentKey: 'steve_success' }),
       turnId: requestTurnId(),
-      taskType: 'training_support' as RuntimeTaskType,
+      taskType: 'training_support' as McsRuntimeTaskType,
       contextManager: fixture.port,
     });
 

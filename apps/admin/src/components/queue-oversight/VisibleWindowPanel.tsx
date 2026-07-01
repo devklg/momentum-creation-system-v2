@@ -13,22 +13,22 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type {
-  AdminTickerEntry,
-  QueueAdminTickerResponse,
-  QueueVisibleWindow,
-  QueueVisibleWindowResponse,
+  McsAdminTickerEntry,
+  McsQueueAdminTickerResponse,
+  McsQueueVisibleWindow,
+  McsQueueVisibleWindowResponse,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 
 interface Props {
-  initialValue: QueueVisibleWindow | null;
+  initialValue: McsQueueVisibleWindow | null;
 }
 
-const CHOICES: ReadonlyArray<QueueVisibleWindow> = [5, 10, 20];
+const CHOICES: ReadonlyArray<McsQueueVisibleWindow> = [5, 10, 20];
 
 export function VisibleWindowPanel({ initialValue }: Props) {
-  const [value, setValue] = useState<QueueVisibleWindow | null>(initialValue);
-  const [draft, setDraft] = useState<QueueVisibleWindow | null>(initialValue);
+  const [value, setValue] = useState<McsQueueVisibleWindow | null>(initialValue);
+  const [draft, setDraft] = useState<McsQueueVisibleWindow | null>(initialValue);
   const [reason, setReason] = useState('');
   const [lastChangedAt, setLastChangedAt] = useState<string | null>(null);
   const [lastChangedBy, setLastChangedBy] = useState<string | null>(null);
@@ -50,7 +50,7 @@ export function VisibleWindowPanel({ initialValue }: Props) {
       const res = await fetch('/api/admin/queue/visible-window', {
         credentials: 'include',
       });
-      const data = (await res.json()) as QueueVisibleWindowResponse & { error?: string };
+      const data = (await res.json()) as McsQueueVisibleWindowResponse & { error?: string };
       if (!data.ok) {
         setErr(data.error ?? 'Could not load setting.');
         return;
@@ -83,7 +83,7 @@ export function VisibleWindowPanel({ initialValue }: Props) {
           reason: reason.trim() || undefined,
         }),
       });
-      const data = (await res.json()) as QueueVisibleWindowResponse & { error?: string };
+      const data = (await res.json()) as McsQueueVisibleWindowResponse & { error?: string };
       if (!data.ok) {
         setErr(data.error ?? 'Update failed.');
         return;
@@ -190,8 +190,8 @@ export function VisibleWindowPanel({ initialValue }: Props) {
   );
 }
 
-function SandboxPreview({ windowSize }: { windowSize: QueueVisibleWindow }) {
-  const [entries, setEntries] = useState<AdminTickerEntry[] | null>(null);
+function SandboxPreview({ windowSize }: { windowSize: McsQueueVisibleWindow }) {
+  const [entries, setEntries] = useState<McsAdminTickerEntry[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
@@ -201,7 +201,7 @@ function SandboxPreview({ windowSize }: { windowSize: QueueVisibleWindow }) {
         const res = await fetch(`/api/admin/queue/ticker?limit=${windowSize}`, {
           credentials: 'include',
         });
-        const data = (await res.json()) as QueueAdminTickerResponse & { error?: string };
+        const data = (await res.json()) as McsQueueAdminTickerResponse & { error?: string };
         if (cancelled) return;
         if (!data.ok) {
           setErr(data.error ?? 'Preview failed.');

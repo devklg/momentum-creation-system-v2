@@ -25,18 +25,18 @@
 
 import { gatewayCall } from '../services/gateway.js';
 import type {
-  AdminTickerEntry,
-  IsoTimestamp,
-  QueueDepthMovement,
-  QueueGrowthBucket,
-  QueueGrowthSparkline,
-  QueueLookupProspect,
-  QueueLookupResult,
-  QueueNumbers,
-  QueueOversightSummary,
-  QueueRule,
-  QueueVisibleWindow,
-  TokenState,
+  McsAdminTickerEntry,
+  McsIsoTimestamp,
+  McsQueueDepthMovement,
+  McsQueueGrowthBucket,
+  McsQueueGrowthSparkline,
+  McsQueueLookupProspect,
+  McsQueueLookupResult,
+  McsQueueNumbers,
+  McsQueueOversightSummary,
+  McsQueueRule,
+  McsQueueVisibleWindow,
+  McsTokenState,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -53,14 +53,14 @@ export function buildProspectDeepLink(prospectId: string): string {
 
 /* ─── settings: visible window (E.3) ──────────────────────────────── */
 
-export const VISIBLE_WINDOW_VALUES: ReadonlyArray<QueueVisibleWindow> = [5, 10, 20];
-export const VISIBLE_WINDOW_DEFAULT: QueueVisibleWindow = 10;
+export const VISIBLE_WINDOW_VALUES: ReadonlyArray<McsQueueVisibleWindow> = [5, 10, 20];
+export const VISIBLE_WINDOW_DEFAULT: McsQueueVisibleWindow = 10;
 const VISIBLE_WINDOW_DOC_ID = 'queue_visible_window';
 
 export interface VisibleWindowSetting {
-  value: QueueVisibleWindow;
-  defaultValue: QueueVisibleWindow;
-  lastChangedAt: IsoTimestamp | null;
+  value: McsQueueVisibleWindow;
+  defaultValue: McsQueueVisibleWindow;
+  lastChangedAt: McsIsoTimestamp | null;
   lastChangedBy: string | null;
 }
 
@@ -71,7 +71,7 @@ interface AdminSettingDoc {
   updatedBy?: string;
 }
 
-function isQueueVisibleWindow(v: unknown): v is QueueVisibleWindow {
+function isQueueVisibleWindow(v: unknown): v is McsQueueVisibleWindow {
   return v === 5 || v === 10 || v === 20;
 }
 
@@ -95,7 +95,7 @@ export async function getVisibleWindow(): Promise<VisibleWindowSetting> {
 }
 
 export interface SetVisibleWindowInput {
-  value: QueueVisibleWindow;
+  value: McsQueueVisibleWindow;
   actorTmagId: string;
 }
 
@@ -106,7 +106,7 @@ export interface SetVisibleWindowInput {
  */
 export async function setVisibleWindow(
   input: SetVisibleWindowInput,
-): Promise<{ before: QueueVisibleWindow; after: QueueVisibleWindow }> {
+): Promise<{ before: McsQueueVisibleWindow; after: McsQueueVisibleWindow }> {
   const before = (await getVisibleWindow()).value;
   await upsertAdminSetting(VISIBLE_WINDOW_DOC_ID, {
     value: input.value,
@@ -150,8 +150,8 @@ const QUEUE_RULE_REGISTRY: ReadonlyArray<QueueRuleSpec> = [
   },
 ];
 
-export async function listQueueRules(): Promise<QueueRule[]> {
-  const rules: QueueRule[] = [];
+export async function listQueueRules(): Promise<McsQueueRule[]> {
+  const rules: McsQueueRule[] = [];
   for (const spec of QUEUE_RULE_REGISTRY) {
     const doc = await readAdminSetting(spec.docId);
     const currentValue =
@@ -179,7 +179,7 @@ export interface SetQueueRuleInput {
 }
 
 export interface SetQueueRuleResult {
-  rule: QueueRule;
+  rule: McsQueueRule;
   before: number;
   after: number;
 }
@@ -289,7 +289,7 @@ async function countPlacements(filter: Record<string, unknown>): Promise<number>
   return typeof result.count === 'number' ? result.count : result.documents.length;
 }
 
-export async function computeQueueDepthMovement(): Promise<QueueDepthMovement> {
+export async function computeQueueDepthMovement(): Promise<McsQueueDepthMovement> {
   const now = new Date();
   const todayStartIso = utcDayStart(now).toISOString();
 
@@ -332,7 +332,7 @@ export async function computeQueueDepthMovement(): Promise<QueueDepthMovement> {
 
 /* ─── E.2  fixed assigned queue numbers ───────────────────────────── */
 
-export async function computeQueueNumbers(): Promise<QueueNumbers> {
+export async function computeQueueNumbers(): Promise<McsQueueNumbers> {
   const now = new Date();
   const todayStartIso = utcDayStart(now).toISOString();
 
@@ -380,7 +380,7 @@ async function readPoolCounter(): Promise<number> {
 
 export async function lookupByPosition(
   position: number,
-): Promise<QueueLookupResult> {
+): Promise<McsQueueLookupResult> {
   if (!Number.isInteger(position) || position < 1) {
     return { position, found: false, vacant: false, prospect: null };
   }
@@ -447,12 +447,12 @@ interface ProspectRow {
   firstName?: string;
   lastName?: string;
   lastInitial?: string;
-  state?: TokenState;
+  state?: McsTokenState;
   location?: { city?: string; stateOrRegion?: string };
 }
 
 async function loadProspect(prospectId: string): Promise<Omit<
-  QueueLookupProspect,
+  McsQueueLookupProspect,
   'placedAt' | 'sponsorTmagId' | 'flushedAt' | 'flushReason' | 'deepLink'
 > | null> {
   const result = await gatewayCall<{ documents: ProspectRow[] }>(
@@ -479,7 +479,7 @@ async function loadProspect(prospectId: string): Promise<Omit<
 
 /* ─── E.4  growth sparkline ───────────────────────────────────────── */
 
-export async function computeGrowthSparkline(): Promise<QueueGrowthSparkline> {
+export async function computeGrowthSparkline(): Promise<McsQueueGrowthSparkline> {
   const now = new Date();
   const todayStart = utcDayStart(now);
   const days30Start = new Date(todayStart);
@@ -500,7 +500,7 @@ export async function computeGrowthSparkline(): Promise<QueueGrowthSparkline> {
 async function buildDailyBuckets(
   startUtcDay: Date,
   endUtcDay: Date,
-): Promise<QueueGrowthBucket[]> {
+): Promise<McsQueueGrowthBucket[]> {
   // Pull all placedAt timestamps in the window in one query. At v1 volumes
   // (well under 10k/30d) this is well-bounded; if it grows we move to an
   // aggregation pipeline. For now the simplest read is fastest to verify.
@@ -551,7 +551,7 @@ function toDateKey(d: Date): string {
 /* ─── E.5  admin ticker (real names) ──────────────────────────────── */
 
 export async function listAdminTicker(limit: number): Promise<{
-  entries: AdminTickerEntry[];
+  entries: McsAdminTickerEntry[];
   globalMaxPosition: number;
 }> {
   const safeLimit = Math.max(1, Math.min(limit, 200));
@@ -570,7 +570,7 @@ export async function listAdminTicker(limit: number): Promise<{
     ),
   ]);
 
-  const entries: AdminTickerEntry[] = [];
+  const entries: McsAdminTickerEntry[] = [];
   for (const p of placements.documents) {
     const prospect = await loadProspect(p.prospectId);
     if (!prospect) continue;
@@ -600,9 +600,9 @@ export async function listAdminTicker(limit: number): Promise<{
 export async function enrichPlacementForAdmin(
   prospectId: string,
   positionNumber: number,
-  placedAt: IsoTimestamp,
+  placedAt: McsIsoTimestamp,
   sponsorTmagId: string,
-): Promise<AdminTickerEntry | null> {
+): Promise<McsAdminTickerEntry | null> {
   const prospect = await loadProspect(prospectId);
   if (!prospect) return null;
   return {
@@ -620,7 +620,7 @@ export async function enrichPlacementForAdmin(
 
 /* ─── composite summary (page bootstrap) ──────────────────────────── */
 
-export async function computeQueueOversightSummary(): Promise<QueueOversightSummary> {
+export async function computeQueueOversightSummary(): Promise<McsQueueOversightSummary> {
   const [depthMovement, numbers, growth, visibleWindow] = await Promise.all([
     computeQueueDepthMovement(),
     computeQueueNumbers(),

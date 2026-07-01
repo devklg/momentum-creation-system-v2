@@ -12,22 +12,22 @@
 
 import { useEffect, useState } from 'react';
 import type {
-  BroadcastAudiencePreset,
-  BroadcastAudiencePreview,
-  BroadcastAudiencePreviewResponse,
-  BroadcastChannel,
+  McsBroadcastAudiencePreset,
+  McsBroadcastAudiencePreview,
+  McsBroadcastAudiencePreviewResponse,
+  McsBroadcastChannel,
 } from '@momentum/shared';
 
 interface AudienceSelectorProps {
-  preset: BroadcastAudiencePreset;
-  channel: BroadcastChannel;
+  preset: McsBroadcastAudiencePreset;
+  channel: McsBroadcastChannel;
   customTmagIds: string[];
-  onPresetChange: (next: BroadcastAudiencePreset) => void;
+  onPresetChange: (next: McsBroadcastAudiencePreset) => void;
   onCustomChange: (next: string[]) => void;
-  onPreviewChange: (preview: BroadcastAudiencePreview | null) => void;
+  onPreviewChange: (preview: McsBroadcastAudiencePreview | null) => void;
 }
 
-const PRESETS: Array<{ value: BroadcastAudiencePreset; label: string; hint: string }> = [
+const PRESETS: Array<{ value: McsBroadcastAudiencePreset; label: string; hint: string }> = [
   { value: 'all', label: 'All BAs', hint: 'Every Brand Ambassador on the team' },
   { value: 'first_72h', label: 'First 72h', hint: 'Signed up in the last 72 hours' },
   { value: 'leaders', label: 'Leaders', hint: 'Curated ∪ qualified leaders' },
@@ -43,7 +43,7 @@ export function AudienceSelector({
   onCustomChange,
   onPreviewChange,
 }: AudienceSelectorProps) {
-  const [preview, setPreview] = useState<BroadcastAudiencePreview | null>(null);
+  const [preview, setPreview] = useState<McsBroadcastAudiencePreview | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [customText, setCustomText] = useState(customTmagIds.join(', '));
@@ -64,7 +64,7 @@ export function AudienceSelector({
         const res = await fetch(`/api/admin/broadcast/audience?${params.toString()}`, {
           credentials: 'include',
         });
-        const data = (await res.json()) as BroadcastAudiencePreviewResponse & {
+        const data = (await res.json()) as McsBroadcastAudiencePreviewResponse & {
           error?: string;
         };
         if (cancelled) return;

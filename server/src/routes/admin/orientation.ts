@@ -23,22 +23,22 @@ import {
 } from '../../domain/orientationSession.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
 import type {
-  AdminCreateOrientationSessionResponse,
-  AdminOrientationSessionsResponse,
-  AuditActor,
-  AuditContext,
+  McsAdminCreateOrientationSessionResponse,
+  McsAdminOrientationSessionsResponse,
+  McsAuditActor,
+  McsAuditContext,
 } from '@momentum/shared';
 
 export const adminOrientationRoutes: Router = express.Router();
 
-function adminActorFromRequest(req: Request): AuditActor & { kind: 'admin' } {
+function adminActorFromRequest(req: Request): McsAuditActor & { kind: 'admin' } {
   const session = req.session!;
   const displayName =
     (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
   return { kind: 'admin', tmagId: session.tmagId, displayName };
 }
 
-function contextFromRequest(req: Request, route: string, method: string): AuditContext {
+function contextFromRequest(req: Request, route: string, method: string): McsAuditContext {
   return {
     ip: req.ip ?? null,
     userAgent: req.get('user-agent') ?? null,
@@ -64,7 +64,7 @@ adminOrientationRoutes.get('/sessions', requireAdmin, async (req, res) => {
       context: contextFromRequest(req, '/api/admin/orientation/sessions', 'GET'),
     });
 
-    const body: AdminOrientationSessionsResponse = { ok: true, sessions };
+    const body: McsAdminOrientationSessionsResponse = { ok: true, sessions };
     res.json(body);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
@@ -127,7 +127,7 @@ adminOrientationRoutes.post('/sessions', requireAdmin, async (req, res) => {
     });
 
     const withRoster = await getSessionWithRoster(session.sessionId);
-    const body: AdminCreateOrientationSessionResponse = {
+    const body: McsAdminCreateOrientationSessionResponse = {
       ok: true,
       session: withRoster ?? {
         sessionId: session.sessionId,

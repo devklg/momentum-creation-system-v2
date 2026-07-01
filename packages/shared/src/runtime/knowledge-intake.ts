@@ -15,34 +15,34 @@
  * the existing P4.4 retrieval adapter and P4.5 packet assembly unchanged.
  */
 
-import type { RuntimeLanguage } from './language.js';
-import type { KnowledgeDomain } from './knowledge.js';
-import type { RuntimeScope } from './identity.js';
-import type { AgentKey } from './agents.js';
-import type { KnowledgeId, SourceId } from './ids.js';
+import type { McsRuntimeLanguage } from './language.js';
+import type { McsKnowledgeDomain } from './knowledge.js';
+import type { McsRuntimeScope } from './identity.js';
+import type { McsAgentKey } from './agents.js';
+import type { McsKnowledgeId, McsSourceId } from './ids.js';
 
 /** Parseable intake formats. Owned-text family only in P4.5A (media/reference are Phase 8). */
-export type KnowledgeIntakeFormat = 'plain_text' | 'markdown' | 'html';
+export type McsKnowledgeIntakeFormat = 'plain_text' | 'markdown' | 'html';
 
 /**
  * Semantic origin of an owned-text source (ACR-0008 owned-text family). Owned-media and
  * third-party reference source types are deliberately NOT included in P4.5A — they require
  * GridFS / transcription / reference handling that is Phase 8.
  */
-export type KnowledgeSourceType = 'tm_training_page' | 'note' | 'owned_text';
+export type McsKnowledgeSourceType = 'tm_training_page' | 'note' | 'owned_text';
 
 /** Lifecycle of a raw source. Only `active` sources yield retrieval-eligible chunks. */
-export type RawKnowledgeStatus = 'active' | 'deprecated' | 'archived' | 'rejected';
+export type McsRawKnowledgeStatus = 'active' | 'deprecated' | 'archived' | 'rejected';
 
 /**
  * The original knowledge exactly as Kevin added it — the single point of authority and
  * traceability. `originalContent` is preserved verbatim and never mutated by parsing.
  */
-export interface RawKnowledgeSource {
-  sourceId: SourceId;
+export interface McsRawKnowledgeSource {
+  sourceId: McsSourceId;
   title: string;
-  sourceType: KnowledgeSourceType;
-  format: KnowledgeIntakeFormat;
+  sourceType: McsKnowledgeSourceType;
+  format: McsKnowledgeIntakeFormat;
   /** Verbatim original content — authority; never rewritten. */
   originalContent: string;
   /** Optional pointer to an external owned location (e.g. a GitHub training-page path). */
@@ -50,23 +50,23 @@ export interface RawKnowledgeSource {
   createdBy: string;
   /** ISO-8601 timestamp. */
   createdAt: string;
-  language: RuntimeLanguage;
-  domain: KnowledgeDomain;
+  language: McsRuntimeLanguage;
+  domain: McsKnowledgeDomain;
   /** Team Magnificent scope (tenant/team always TM; optional BA). */
-  scope: RuntimeScope;
+  scope: McsRuntimeScope;
   /** Monotonic content version. New content = new version; prior versions are supersedable. */
   version: number;
-  status: RawKnowledgeStatus;
+  status: McsRawKnowledgeStatus;
 }
 
 /** Outcome of deterministic parsing. */
-export type ParseStatus = 'parsed' | 'parsed_with_warnings' | 'parse_failed';
+export type McsParseStatus = 'parsed' | 'parsed_with_warnings' | 'parse_failed';
 
 /**
  * A detected section of normalized text. A `heading: null`, `level: 0` section is the preamble
  * before the first heading (or the whole document for `plain_text`).
  */
-export interface DetectedSection {
+export interface McsDetectedSection {
   heading: string | null;
   level: number;
   text: string;
@@ -75,79 +75,79 @@ export interface DetectedSection {
   endOffset: number;
 }
 
-export interface ParsedDocumentMetadata {
-  language: RuntimeLanguage;
-  domain: KnowledgeDomain;
-  sourceType: KnowledgeSourceType;
-  format: KnowledgeIntakeFormat;
+export interface McsParsedDocumentMetadata {
+  language: McsRuntimeLanguage;
+  domain: McsKnowledgeDomain;
+  sourceType: McsKnowledgeSourceType;
+  format: McsKnowledgeIntakeFormat;
   title: string;
   sectionCount: number;
   characterCount: number;
 }
 
 /** The normalized, section-detected projection of a raw source. Does not replace the source. */
-export interface ParsedKnowledgeDocument {
+export interface McsParsedKnowledgeDocument {
   /** Deterministic id derived from `sourceId` + `sourceVersion`. */
   documentId: string;
-  sourceId: SourceId;
+  sourceId: McsSourceId;
   sourceVersion: number;
   normalizedText: string;
-  detectedSections: readonly DetectedSection[];
-  metadata: ParsedDocumentMetadata;
-  parseStatus: ParseStatus;
+  detectedSections: readonly McsDetectedSection[];
+  metadata: McsParsedDocumentMetadata;
+  parseStatus: McsParseStatus;
   parseWarnings: readonly string[];
 }
 
 /** Surfaces a chunk may serve. `com` is intentionally absent — compliance: never on `.com`. */
-export type KnowledgeSurfaceScope = 'team' | 'admin';
+export type McsKnowledgeSurfaceScope = 'team' | 'admin';
 
 /** Lifecycle of a derived chunk. Only `active` chunks are retrieval-eligible. */
-export type KnowledgeChunkStatus =
+export type McsKnowledgeChunkStatus =
   | 'active'
   | 'deprecated'
   | 'archived'
   | 'rejected'
   | 'parse_failed';
 
-export interface ChunkSourceOffsets {
+export interface McsChunkSourceOffsets {
   /** Offsets into the parent `ParsedKnowledgeDocument.normalizedText`. */
   startOffset: number;
   endOffset: number;
 }
 
 /** A retrieval unit. Points back to its parsed document and raw source. */
-export interface KnowledgeChunk {
+export interface McsKnowledgeChunk {
   /** Deterministic id derived from `sourceId` + `sourceVersion` + `chunkIndex`. */
   chunkId: string;
-  sourceId: SourceId;
+  sourceId: McsSourceId;
   documentId: string;
   sourceVersion: number;
   heading: string | null;
   text: string;
   /** Document-global index in reading order (0..n). */
   chunkIndex: number;
-  language: RuntimeLanguage;
-  domain: KnowledgeDomain;
-  scope: RuntimeScope;
+  language: McsRuntimeLanguage;
+  domain: McsKnowledgeDomain;
+  scope: McsRuntimeScope;
   topicTags: readonly string[];
   /** Which agents may use this chunk. */
-  agentScopes: readonly AgentKey[];
+  agentScopes: readonly McsAgentKey[];
   /** Surfaces this chunk may serve — never `com`. */
-  surfaceScopes: readonly KnowledgeSurfaceScope[];
-  sourceOffsets: ChunkSourceOffsets;
-  status: KnowledgeChunkStatus;
+  surfaceScopes: readonly McsKnowledgeSurfaceScope[];
+  sourceOffsets: McsChunkSourceOffsets;
+  status: McsKnowledgeChunkStatus;
   retrievalEligible: boolean;
 }
 
-export type KnowledgeIndexRecordStatus = 'indexed' | 'excluded';
+export type McsKnowledgeIndexRecordStatus = 'indexed' | 'excluded';
 
-export interface KnowledgeIndexMetadata {
-  language: RuntimeLanguage;
-  domain: KnowledgeDomain;
+export interface McsKnowledgeIndexMetadata {
+  language: McsRuntimeLanguage;
+  domain: McsKnowledgeDomain;
   heading: string | null;
   topicTags: readonly string[];
-  agentScopes: readonly AgentKey[];
-  surfaceScopes: readonly KnowledgeSurfaceScope[];
+  agentScopes: readonly McsAgentKey[];
+  surfaceScopes: readonly McsKnowledgeSurfaceScope[];
   sourceVersion: number;
 }
 
@@ -156,23 +156,23 @@ export interface KnowledgeIndexMetadata {
  * or summarization in P4.5A — vector/graph indexing is Phase 8). `knowledgeId` is the id used
  * when the chunk is mapped to a `KnowledgeReference`.
  */
-export interface KnowledgeIndexRecord {
+export interface McsKnowledgeIndexRecord {
   indexRecordId: string;
   chunkId: string;
-  sourceId: SourceId;
+  sourceId: McsSourceId;
   documentId: string;
   searchableText: string;
-  metadata: KnowledgeIndexMetadata;
+  metadata: McsKnowledgeIndexMetadata;
   /** Stable composite retrieval key: `{domain}:{language}:{chunkId}`. */
   retrievalKey: string;
-  knowledgeId: KnowledgeId;
-  status: KnowledgeIndexRecordStatus;
+  knowledgeId: McsKnowledgeId;
+  status: McsKnowledgeIndexRecordStatus;
 }
 
 /** Inputs that decide chunk retrieval-eligibility at request time. */
-export interface KnowledgeChunkEligibilityRequest {
-  scope: RuntimeScope;
-  language: RuntimeLanguage;
+export interface McsKnowledgeChunkEligibilityRequest {
+  scope: McsRuntimeScope;
+  language: McsRuntimeLanguage;
   /** Carried for P4.6; inert in P4.5A (same-language only). */
   allowLanguageFallback?: boolean;
 }

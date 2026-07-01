@@ -13,13 +13,13 @@
  */
 
 import type {
-  AdminReportRangePreset,
-  AdminReportTimeRange,
+  McsAdminReportRangePreset,
+  McsAdminReportTimeRange,
 } from '@momentum/shared';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const PRESET_LABEL: Record<AdminReportRangePreset, string> = {
+const PRESET_LABEL: Record<McsAdminReportRangePreset, string> = {
   lifetime: 'Lifetime',
   last_30d: 'Last 30 days',
   last_90d: 'Last 90 days',
@@ -35,7 +35,7 @@ export function resolveTimeRange(input: {
   preset?: string | null;
   from?: string | null;
   to?: string | null;
-}): AdminReportTimeRange {
+}): McsAdminReportTimeRange {
   const nowIso = new Date().toISOString();
   const from = input.from && isIso(input.from) ? new Date(input.from).toISOString() : null;
   const to = input.to && isIso(input.to) ? new Date(input.to).toISOString() : null;
@@ -46,7 +46,7 @@ export function resolveTimeRange(input: {
     return { preset: null, fromIso: from, toIso, label };
   }
 
-  const preset = (input.preset ?? 'lifetime') as AdminReportRangePreset;
+  const preset = (input.preset ?? 'lifetime') as McsAdminReportRangePreset;
   switch (preset) {
     case 'last_30d':
       return {
@@ -81,7 +81,7 @@ export function monthKey(iso: string): string {
  */
 export function rangeClause(
   field: string,
-  range: AdminReportTimeRange,
+  range: McsAdminReportTimeRange,
 ): Record<string, unknown> {
   const bounds: Record<string, string> = {};
   if (range.fromIso) bounds.$gte = range.fromIso;

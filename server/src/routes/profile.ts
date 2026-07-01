@@ -31,7 +31,7 @@ import {
   completeEmailChange,
   setPhone,
 } from '../domain/profile.js';
-import type { ProfileGetResponse } from '@momentum/shared';
+import type { McsProfileGetResponse } from '@momentum/shared';
 
 export const profileRoutes: Router = Router();
 
@@ -89,7 +89,7 @@ profileRoutes.get('/', requireAuth, requireSteveComplete, async (req, res) => {
   try {
     const profile = await getProfileForBA(tmagId);
     if (!profile) return res.status(404).json({ ok: false, error: 'profile_not_found' });
-    const payload: ProfileGetResponse = { ok: true, profile };
+    const payload: McsProfileGetResponse = { ok: true, profile };
     return res.status(200).json(payload);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -109,7 +109,7 @@ profileRoutes.patch('/', requireAuth, requireSteveComplete, async (req, res) => 
 
   try {
     const profile = await patchProfile(tmagId, parsed.data);
-    const payload: ProfileGetResponse = { ok: true, profile };
+    const payload: McsProfileGetResponse = { ok: true, profile };
     return res.status(200).json(payload);
   } catch (err) {
     // eslint-disable-next-line no-console

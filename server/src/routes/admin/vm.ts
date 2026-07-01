@@ -12,14 +12,14 @@ import { requireAdmin } from '../../middleware/requireAuth.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
 import { buildAdminVmOverview } from '../../domain/adminVm.js';
 import type {
-  AdminVmOwnershipCorrectionPayload,
-  AdminVmOwnershipCorrectionResponse,
-  AuditActor,
+  McsAdminVmOwnershipCorrectionPayload,
+  McsAdminVmOwnershipCorrectionResponse,
+  McsAuditActor,
 } from '@momentum/shared';
 
 export const adminVmRoutes: Router = express.Router();
 
-function adminActorFromRequest(req: Request): AuditActor & { kind: 'admin' } {
+function adminActorFromRequest(req: Request): McsAuditActor & { kind: 'admin' } {
   const session = req.session!;
   const displayName =
     (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
@@ -87,7 +87,7 @@ adminVmRoutes.post('/ownership-correction', requireAdmin, async (req, res) => {
     return;
   }
 
-  const payload: AdminVmOwnershipCorrectionPayload = parsed.data;
+  const payload: McsAdminVmOwnershipCorrectionPayload = parsed.data;
 
   try {
     const audit = await appendAuditEntry({
@@ -127,7 +127,7 @@ adminVmRoutes.post('/ownership-correction', requireAdmin, async (req, res) => {
       },
     });
 
-    const body: AdminVmOwnershipCorrectionResponse = {
+    const body: McsAdminVmOwnershipCorrectionResponse = {
       ok: true,
       applied: false,
       auditEntryId: audit.entryId,

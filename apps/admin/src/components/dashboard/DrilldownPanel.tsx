@@ -6,27 +6,27 @@
 
 import { useEffect, useState } from 'react';
 import type {
-  AdminDashboardFilter,
-  AdminDashboardTile,
-  AdminDrilldownPayload,
-  AdminDrilldownResponse,
+  McsAdminDashboardFilter,
+  McsAdminDashboardTile,
+  McsAdminDrilldownPayload,
+  McsAdminDrilldownResponse,
 } from '@momentum/shared';
 
 interface Props {
-  tile: AdminDashboardTile;
-  filter: AdminDashboardFilter;
+  tile: McsAdminDashboardTile;
+  filter: McsAdminDashboardFilter;
   onClose: () => void;
 }
 
 interface FetchResponse {
   ok: boolean;
-  payload?: AdminDrilldownPayload;
+  payload?: McsAdminDrilldownPayload;
   computedAt?: string;
   error?: string;
 }
 
 export function DrilldownPanel({ tile, filter, onClose }: Props) {
-  const [resp, setResp] = useState<AdminDrilldownResponse | null>(null);
+  const [resp, setResp] = useState<McsAdminDrilldownResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
@@ -92,7 +92,7 @@ export function DrilldownPanel({ tile, filter, onClose }: Props) {
   );
 }
 
-function tileTitle(tile: AdminDashboardTile): string {
+function tileTitle(tile: McsAdminDashboardTile): string {
   switch (tile) {
     case 'active_bas':
       return 'Active BAs (last 24h)';
@@ -107,7 +107,7 @@ function tileTitle(tile: AdminDashboardTile): string {
   }
 }
 
-function DrilldownBody({ payload }: { payload: AdminDrilldownPayload }) {
+function DrilldownBody({ payload }: { payload: McsAdminDrilldownPayload }) {
   if (payload.rows.length === 0) {
     return (
       <p className="text-[11px] font-mono tracking-label uppercase text-cream-faint">

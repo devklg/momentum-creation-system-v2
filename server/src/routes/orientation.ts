@@ -28,9 +28,9 @@ import {
   reserveSeat,
 } from '../domain/orientationSession.js';
 import type {
-  OrientationCancelResponse,
-  OrientationReserveResponse,
-  OrientationSessionsResponse,
+  McsOrientationCancelResponse,
+  McsOrientationReserveResponse,
+  McsOrientationSessionsResponse,
 } from '@momentum/shared';
 
 export const orientationRoutes: Router = Router();
@@ -46,7 +46,7 @@ orientationRoutes.get(
     try {
       const { sessions, myReservationSessionId } =
         await getSessionAvailabilityForBA(tmagId);
-      const body: OrientationSessionsResponse = {
+      const body: McsOrientationSessionsResponse = {
         ok: true,
         sessions,
         myReservationSessionId,
@@ -95,7 +95,7 @@ orientationRoutes.post(
         return res.status(status).json({ ok: false, error: result.error });
       }
 
-      const body: OrientationReserveResponse = {
+      const body: McsOrientationReserveResponse = {
         ok: true,
         reservationId: result.reservationId,
         sessionId: result.sessionId,
@@ -129,7 +129,7 @@ orientationRoutes.delete(
       if (!result.ok) {
         return res.status(404).json({ ok: false, error: result.error });
       }
-      const body: OrientationCancelResponse = {
+      const body: McsOrientationCancelResponse = {
         ok: true,
         sessionId: result.sessionId,
         cancelledAt: result.cancelledAt,

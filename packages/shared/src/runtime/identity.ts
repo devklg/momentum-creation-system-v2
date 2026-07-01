@@ -1,55 +1,55 @@
-import type { TmagId, RequestId, SessionId, TeamId, TenantId } from './ids.js';
+import type { TmagId, McsRequestId, McsSessionId, McsTeamId, McsTenantId } from './ids.js';
 
-export type RuntimeEnvironment = 'development' | 'staging' | 'production';
+export type McsRuntimeEnvironment = 'development' | 'staging' | 'production';
 
-export type TeamMagnificentTeamKey = 'team_magnificent';
-export type TeamMagnificentTeamName = 'Team Magnificent';
+export type McsTeamMagnificentTeamKey = 'team_magnificent';
+export type McsTeamMagnificentTeamName = 'Team Magnificent';
 
-export interface TenantRuntimeScope {
-  tenantId: TenantId;
+export interface McsTenantRuntimeScope {
+  tenantId: McsTenantId;
   teamId?: never;
   teamKey?: never;
   teamName?: never;
   tmagId?: never;
 }
 
-export interface TeamMagnificentScope {
-  tenantId: TenantId;
-  teamId: TeamId;
-  teamKey: TeamMagnificentTeamKey;
-  teamName: TeamMagnificentTeamName;
+export interface McsTeamMagnificentScope {
+  tenantId: McsTenantId;
+  teamId: McsTeamId;
+  teamKey: McsTeamMagnificentTeamKey;
+  teamName: McsTeamMagnificentTeamName;
   tmagId?: never;
 }
 
-export interface BaRuntimeScope {
-  tenantId: TenantId;
-  teamId: TeamId;
-  teamKey: TeamMagnificentTeamKey;
-  teamName: TeamMagnificentTeamName;
+export interface McsBaRuntimeScope {
+  tenantId: McsTenantId;
+  teamId: McsTeamId;
+  teamKey: McsTeamMagnificentTeamKey;
+  teamName: McsTeamMagnificentTeamName;
   tmagId: TmagId;
 }
 
-export type RuntimeScope = TenantRuntimeScope | TeamMagnificentScope | BaRuntimeScope;
+export type McsRuntimeScope = McsTenantRuntimeScope | McsTeamMagnificentScope | McsBaRuntimeScope;
 
-export type RuntimeRequestScope = RuntimeScope & {
-  requestId?: RequestId;
-  sessionId?: SessionId;
+export type McsRuntimeRequestScope = McsRuntimeScope & {
+  requestId?: McsRequestId;
+  sessionId?: McsSessionId;
 };
 
-export interface TenantContext {
-  tenantId: TenantId;
+export interface McsTenantContext {
+  tenantId: McsTenantId;
   tenantName: string;
   brandName: string;
-  environment: RuntimeEnvironment;
+  environment: McsRuntimeEnvironment;
 }
 
-export interface TeamContext {
-  teamId: TeamId;
-  teamKey: TeamMagnificentTeamKey;
-  teamName: TeamMagnificentTeamName;
+export interface McsTeamContext {
+  teamId: McsTeamId;
+  teamKey: McsTeamMagnificentTeamKey;
+  teamName: McsTeamMagnificentTeamName;
 }
 
-export interface BaPermissions {
+export interface McsBaPermissions {
   canUsePrivateJournal: boolean;
   canSelectJournalForReview: boolean;
   canCreateKnowledgeCandidate: boolean;
@@ -58,14 +58,14 @@ export interface BaPermissions {
   canUseBrowserText: boolean;
 }
 
-export interface BaContext extends BaRuntimeScope {
+export interface McsBaContext extends McsBaRuntimeScope {
   displayName?: string;
   preferredName?: string;
   timezone?: string;
   onboardingState?: string;
   journalEnabled: boolean;
-  languagePreference: import('./language.js').RuntimeLanguage;
-  permissions: BaPermissions;
+  languagePreference: import('./language.js').McsRuntimeLanguage;
+  permissions: McsBaPermissions;
   profileSummary?: string;
   successProfileAvailable?: boolean;
   trainingProfileAvailable?: boolean;

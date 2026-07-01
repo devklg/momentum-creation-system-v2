@@ -26,7 +26,7 @@
  *   - H.1's SSE stream is keepalive at 30s heartbeat, same as poolEvents
  */
 
-import type { AdminDashboardFilter } from './types.js';
+import type { McsAdminDashboardFilter } from './types.js';
 
 /* ─── H.1 · Real-time usage strip (SSE) ─────────────────────────── */
 
@@ -45,7 +45,7 @@ import type { AdminDashboardFilter } from './types.js';
  * measured server-side over the last 60 seconds; null when no calls
  * happened in that window.
  */
-export interface AdminLiveUsageSample {
+export interface McsAdminLiveUsageSample {
   sampledAt: string; // ISO-8601
   activeDashboardViewers: number;
   activeAdminSessions: number;
@@ -55,8 +55,8 @@ export interface AdminLiveUsageSample {
 }
 
 /** SSE event kinds on GET /api/admin/live-ops/usage/stream. */
-export type AdminLiveUsageStreamEvent =
-  | { kind: 'snapshot'; sample: AdminLiveUsageSample }
+export type McsAdminLiveUsageStreamEvent =
+  | { kind: 'snapshot'; sample: McsAdminLiveUsageSample }
   | { kind: 'heartbeat'; at: string };
 
 /* ─── H.2 · Growth stat cards (JSON GET) ───────────────────────── */
@@ -66,7 +66,7 @@ export type AdminLiveUsageStreamEvent =
  * count over the window plus delta vs. the previous equal window
  * (e.g. last 24h vs. the 24h before that).
  */
-export interface AdminGrowthCard {
+export interface McsAdminGrowthCard {
   window: '24h' | '7d' | '30d';
   basAdded: number;
   prospectsPlaced: number;
@@ -76,10 +76,10 @@ export interface AdminGrowthCard {
   enrollmentsDelta: number;
 }
 
-export interface AdminGrowthCardsResponse {
-  appliedFilter: AdminDashboardFilter;
+export interface McsAdminGrowthCardsResponse {
+  appliedFilter: McsAdminDashboardFilter;
   generatedAt: string;
-  cards: [AdminGrowthCard, AdminGrowthCard, AdminGrowthCard]; // 24h, 7d, 30d
+  cards: [McsAdminGrowthCard, McsAdminGrowthCard, McsAdminGrowthCard]; // 24h, 7d, 30d
 }
 
 /* ─── H.3 · Holding-tank live grid (JSON GET) ──────────────────── */
@@ -94,7 +94,7 @@ export interface AdminGrowthCardsResponse {
  * "hover detail, click → prospect panel") — this is /admin only and
  * audited. Never reuse this shape for non-admin surfaces.
  */
-export interface AdminLiveGridSlot {
+export interface McsAdminLiveGridSlot {
   prospectId: string;
   positionNumber: number;
   prospectFirstName: string;
@@ -108,12 +108,12 @@ export interface AdminLiveGridSlot {
   ageBucket: 'fresh' | 'warming' | 'aging' | 'stale'; // 0–6, 7–20, 21–41, 42–56
 }
 
-export interface AdminLiveGridResponse {
-  appliedFilter: AdminDashboardFilter;
+export interface McsAdminLiveGridResponse {
+  appliedFilter: McsAdminDashboardFilter;
   generatedAt: string;
   totalActive: number;
   /** Sorted newest-placedAt first. UI may page client-side. */
-  slots: AdminLiveGridSlot[];
+  slots: McsAdminLiveGridSlot[];
 }
 
 /* ─── H.4 · Conversion funnels (JSON GET) ──────────────────────── */
@@ -131,9 +131,9 @@ export interface AdminLiveGridResponse {
  * the first stage. The UI renders a horizontal funnel; bars width =
  * stage / first.
  */
-export type AdminFunnelKind = 'prospect' | 'ba_activation';
+export type McsAdminFunnelKind = 'prospect' | 'ba_activation';
 
-export interface AdminFunnelStage {
+export interface McsAdminFunnelStage {
   key: string;
   label: string;
   count: number;
@@ -141,16 +141,16 @@ export interface AdminFunnelStage {
   conversionFromStart: number | null;
 }
 
-export interface AdminFunnelResponse {
-  kind: AdminFunnelKind;
-  appliedFilter: AdminDashboardFilter;
+export interface McsAdminFunnelResponse {
+  kind: McsAdminFunnelKind;
+  appliedFilter: McsAdminDashboardFilter;
   generatedAt: string;
-  stages: AdminFunnelStage[];
+  stages: McsAdminFunnelStage[];
 }
 
 /* ─── Endpoint paths (single source of truth for both worktrees) ── */
 
-export const ADMIN_LIVE_OPS_PATHS = {
+export const MCS_ADMIN_LIVE_OPS_PATHS = {
   /** SSE — H.1 usage strip stream */
   usageStream: '/api/admin/live-ops/usage/stream',
   /** GET — H.2 growth cards */

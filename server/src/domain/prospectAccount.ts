@@ -42,8 +42,8 @@ import { createHash, randomUUID } from 'node:crypto';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
-  IsoTimestamp,
-  ProspectAccountRecord,
+  McsIsoTimestamp,
+  McsProspectAccountRecord,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -64,7 +64,7 @@ export interface CreateProspectAccountInput {
    * layer and any future flush sweep can find expired rows without
    * a join back to invite_tokens.
    */
-  tokenExpiresAt: IsoTimestamp;
+  tokenExpiresAt: McsIsoTimestamp;
 }
 
 /**
@@ -113,8 +113,8 @@ export function normalizePhone(raw: string | null | undefined): string | null {
  */
 export async function findAccountByTokenId(
   tokenId: string,
-): Promise<ProspectAccountRecord | null> {
-  const result = await gatewayCall<{ documents: ProspectAccountRecord[] }>(
+): Promise<McsProspectAccountRecord | null> {
+  const result = await gatewayCall<{ documents: McsProspectAccountRecord[] }>(
     'mongodb',
     'query',
     {
@@ -139,8 +139,8 @@ export async function findAccountByTokenId(
 export async function findAccountsByPhone(
   e164: string,
   nowMs: number = Date.now(),
-): Promise<ProspectAccountRecord[]> {
-  const result = await gatewayCall<{ documents: ProspectAccountRecord[] }>(
+): Promise<McsProspectAccountRecord[]> {
+  const result = await gatewayCall<{ documents: McsProspectAccountRecord[] }>(
     'mongodb',
     'query',
     {
@@ -162,8 +162,8 @@ export async function findAccountsByPhone(
  */
 export async function findAccountById(
   accountId: string,
-): Promise<ProspectAccountRecord | null> {
-  const result = await gatewayCall<{ documents: ProspectAccountRecord[] }>(
+): Promise<McsProspectAccountRecord | null> {
+  const result = await gatewayCall<{ documents: McsProspectAccountRecord[] }>(
     'mongodb',
     'query',
     {
@@ -194,8 +194,8 @@ export async function findAccountByPhoneAndCode(
   e164: string,
   code: string,
   nowMs: number = Date.now(),
-): Promise<ProspectAccountRecord | null> {
-  const result = await gatewayCall<{ documents: ProspectAccountRecord[] }>(
+): Promise<McsProspectAccountRecord | null> {
+  const result = await gatewayCall<{ documents: McsProspectAccountRecord[] }>(
     'mongodb',
     'query',
     {
@@ -214,7 +214,7 @@ export async function findAccountByPhoneAndCode(
 
 export async function createProspectAccount(
   input: CreateProspectAccountInput,
-): Promise<ProspectAccountRecord> {
+): Promise<McsProspectAccountRecord> {
   // Idempotency check — replayed video_complete must not mint a duplicate.
   const existing = await findAccountByTokenId(input.tokenId);
   if (existing) return existing;
@@ -222,7 +222,7 @@ export async function createProspectAccount(
   const accountId = `pacct_${randomUUID()}`;
   const createdAt = new Date().toISOString();
 
-  const record: ProspectAccountRecord = {
+  const record: McsProspectAccountRecord = {
     accountId,
     prospectId: input.prospectId,
     tokenId: input.tokenId,

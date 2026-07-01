@@ -18,13 +18,13 @@ import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
-  AdminDashboardFilter,
-  AdminFollowUpBucket,
-  AdminFollowUpBucketCount,
-  AdminFollowUpReport,
-  AdminFollowUpRow,
-  AdminReportMeta,
-  AdminReportTimeRange,
+  McsAdminDashboardFilter,
+  McsAdminFollowUpBucket,
+  McsAdminFollowUpBucketCount,
+  McsAdminFollowUpReport,
+  McsAdminFollowUpRow,
+  McsAdminReportMeta,
+  McsAdminReportTimeRange,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -48,7 +48,7 @@ interface DispoDoc {
   updatedAt: string;
 }
 
-function bucketFor(age: number): AdminFollowUpBucket {
+function bucketFor(age: number): McsAdminFollowUpBucket {
   if (age <= 3) return '0-3';
   if (age <= 7) return '4-7';
   if (age <= 14) return '8-14';
@@ -61,11 +61,11 @@ function ageDays(iso: string, nowMs: number): number {
 }
 
 export async function buildFollowUpReport(
-  filter: AdminDashboardFilter,
-  range: AdminReportTimeRange,
+  filter: McsAdminDashboardFilter,
+  range: McsAdminReportTimeRange,
 ): Promise<{
-  result: AdminFollowUpReport;
-  meta: Omit<AdminReportMeta, 'title'>;
+  result: McsAdminFollowUpReport;
+  meta: Omit<McsAdminReportMeta, 'title'>;
 }> {
   const scopedTmagIds = await resolveScopedTmagIds(filter);
 
@@ -83,7 +83,7 @@ export async function buildFollowUpReport(
   const dispos = (res.documents ?? []).filter((d) => !CLOSED_DISPOSITIONS.has(d.disposition));
 
   const nowMs = Date.now();
-  const rows: AdminFollowUpRow[] = dispos
+  const rows: McsAdminFollowUpRow[] = dispos
     .map((d) => {
       const age = ageDays(d.updatedAt, nowMs);
       return {
@@ -97,14 +97,14 @@ export async function buildFollowUpReport(
     })
     .sort((a, b) => b.ageDays - a.ageDays);
 
-  const bucketCounts = new Map<AdminFollowUpBucket, number>([
+  const bucketCounts = new Map<McsAdminFollowUpBucket, number>([
     ['0-3', 0],
     ['4-7', 0],
     ['8-14', 0],
     ['15+', 0],
   ]);
   for (const r of rows) bucketCounts.set(r.bucket, (bucketCounts.get(r.bucket) ?? 0) + 1);
-  const buckets: AdminFollowUpBucketCount[] = (['0-3', '4-7', '8-14', '15+'] as const).map(
+  const buckets: McsAdminFollowUpBucketCount[] = (['0-3', '4-7', '8-14', '15+'] as const).map(
     (b) => ({ bucket: b, prospects: bucketCounts.get(b) ?? 0 }),
   );
 
@@ -113,7 +113,7 @@ export async function buildFollowUpReport(
     ages.length === 0 ? null : Math.round((ages.reduce((a, b) => a + b, 0) / ages.length) * 10) / 10;
   const maxAge = ages.length === 0 ? null : ages[0]!; // sorted desc
 
-  const result: AdminFollowUpReport = {
+  const result: McsAdminFollowUpReport = {
     totals: { prospects: rows.length, avgAgeDays: avgAge, maxAgeDays: maxAge },
     buckets,
     rows,

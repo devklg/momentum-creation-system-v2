@@ -60,7 +60,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import type { ComProspectCopy } from "@momentum/shared";
+import type { McsComProspectCopy } from "@momentum/shared";
 
 import TickerStrip from "./sections/00-TickerStrip";
 import { getPresentationCopy, type PresentationEntryKind } from "./presentationCopy";
@@ -129,7 +129,7 @@ export interface ResolveTokenResponse {
    * six sections render Kevin's overrides. Optional/null-tolerant — every
    * consumer falls back to its built-in copy when absent.
    */
-  copy?: ComProspectCopy | null;
+  copy?: McsComProspectCopy | null;
 }
 
 export interface VideoCompletePlacement {

@@ -9,14 +9,14 @@
  * and the worker will record 'failed: email_skipped_dormant').
  */
 
-import type { BroadcastChannel } from '@momentum/shared';
+import type { McsBroadcastChannel } from '@momentum/shared';
 
 interface ChannelSelectorProps {
-  value: BroadcastChannel;
-  onChange: (next: BroadcastChannel) => void;
+  value: McsBroadcastChannel;
+  onChange: (next: McsBroadcastChannel) => void;
 }
 
-const OPTIONS: Array<{ value: BroadcastChannel; label: string; hint: string }> = [
+const OPTIONS: Array<{ value: McsBroadcastChannel; label: string; hint: string }> = [
   { value: 'sms', label: 'SMS', hint: 'Telnyx · live' },
   { value: 'email', label: 'Email', hint: 'Resend · dormant until domain verified' },
   { value: 'both', label: 'Both', hint: 'SMS + Email per recipient' },

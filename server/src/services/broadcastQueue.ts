@@ -43,8 +43,8 @@ import {
   resetStuckSendingRows,
 } from '../domain/broadcast.js';
 import type {
-  BroadcastRecipientRow,
-  BroadcastRecipientStatus,
+  McsBroadcastRecipientRow,
+  McsBroadcastRecipientStatus,
 } from '@momentum/shared';
 
 const TICK_MS = 1000;
@@ -126,7 +126,7 @@ async function tick(): Promise<void> {
  * Public so the send-test route can run a row inline without going
  * through the queue.
  */
-export async function dispatchOne(row: BroadcastRecipientRow): Promise<BroadcastRecipientRow> {
+export async function dispatchOne(row: McsBroadcastRecipientRow): Promise<McsBroadcastRecipientRow> {
   await markRecipientSending(row.rowId);
   const attempt = row.attempts + 1;
 
@@ -181,7 +181,7 @@ export async function dispatchOne(row: BroadcastRecipientRow): Promise<Broadcast
   // delivered the message on the other channel — the audit captures the
   // partial failure via failureReason.
   if (anySuccess) {
-    const status: BroadcastRecipientStatus = 'sent';
+    const status: McsBroadcastRecipientStatus = 'sent';
     await markRecipientResult(row.rowId, {
       status,
       smsMessageId,
@@ -195,7 +195,7 @@ export async function dispatchOne(row: BroadcastRecipientRow): Promise<Broadcast
   const allHard = smsHardFail && (wantsEmail ? emailHardFail : true);
   const exhausted = attempt >= MAX_ATTEMPTS;
   if (allHard || exhausted) {
-    const status: BroadcastRecipientStatus = 'failed';
+    const status: McsBroadcastRecipientStatus = 'failed';
     await markRecipientResult(row.rowId, {
       status,
       failureReason: failures.length > 0 ? failures.join(',') : 'unknown',

@@ -14,10 +14,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type {
-  AdminLiveUsageSample,
-  AdminLiveUsageStreamEvent,
+  McsAdminLiveUsageSample,
+  McsAdminLiveUsageStreamEvent,
 } from '@momentum/shared';
-import { ADMIN_LIVE_OPS_PATHS } from '@momentum/shared';
+import { MCS_ADMIN_LIVE_OPS_PATHS } from '@momentum/shared';
 
 export type UsageStreamStatus = 'connecting' | 'live' | 'reconnecting' | 'closed' | 'disabled';
 
@@ -32,7 +32,7 @@ export interface UseUsageStreamOptions {
 }
 
 export interface UseUsageStreamResult {
-  sample: AdminLiveUsageSample | null;
+  sample: McsAdminLiveUsageSample | null;
   lastHeartbeatAt: string | null;
   status: UsageStreamStatus;
 }
@@ -42,7 +42,7 @@ const BACKOFF_MAX_MS = 30_000;
 
 export function useUsageStream(options: UseUsageStreamOptions = {}): UseUsageStreamResult {
   const enabled = options.enabled ?? true;
-  const [sample, setSample] = useState<AdminLiveUsageSample | null>(null);
+  const [sample, setSample] = useState<McsAdminLiveUsageSample | null>(null);
   const [lastHeartbeatAt, setLastHeartbeatAt] = useState<string | null>(null);
   const [status, setStatus] = useState<UsageStreamStatus>(enabled ? 'connecting' : 'disabled');
 
@@ -59,7 +59,7 @@ export function useUsageStream(options: UseUsageStreamOptions = {}): UseUsageStr
     closedByUnmountRef.current = false;
 
     function connect() {
-      const es = new EventSource(ADMIN_LIVE_OPS_PATHS.usageStream, {
+      const es = new EventSource(MCS_ADMIN_LIVE_OPS_PATHS.usageStream, {
         withCredentials: true,
       });
       esRef.current = es;
@@ -71,7 +71,7 @@ export function useUsageStream(options: UseUsageStreamOptions = {}): UseUsageStr
 
       const onFrame = (evt: MessageEvent) => {
         try {
-          const frame = JSON.parse(evt.data) as AdminLiveUsageStreamEvent;
+          const frame = JSON.parse(evt.data) as McsAdminLiveUsageStreamEvent;
           if (frame.kind === 'snapshot') {
             setSample(frame.sample);
           } else if (frame.kind === 'heartbeat') {

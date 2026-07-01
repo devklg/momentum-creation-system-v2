@@ -34,7 +34,7 @@
  * Nothing here is invented; edit this one file and both surfaces update.
  */
 
-export interface LeaderProfile {
+export interface McsLeaderProfile {
   /** Stable BA id (matches seed-founders.ts). */
   tmagId: string;
   /** Full display name. */
@@ -52,7 +52,7 @@ export interface LeaderProfile {
   trackRecord: string[];
 }
 
-export interface LeaderCredibilityContent {
+export interface McsLeaderCredibilityContent {
   /** Small mono eyebrow above the headline. */
   eyebrow: string;
   /** Bebas-Neue headline. Works for prospect AND new BA. */
@@ -60,12 +60,12 @@ export interface LeaderCredibilityContent {
   /** Supporting line under the headline. */
   subhead: string;
   /** The two leaders, in display order (Kevin first, Paul second). */
-  leaders: LeaderProfile[];
+  leaders: McsLeaderProfile[];
   /** Closing trust line — "why you can trust the path." */
   trustLine: string;
 }
 
-const KEVIN: LeaderProfile = {
+const KEVIN: McsLeaderProfile = {
   tmagId: 'TMAG-FOUNDER-KEVIN',
   name: 'Kevin L. Gardner',
   role: 'Founder',
@@ -79,7 +79,7 @@ const KEVIN: LeaderProfile = {
   ],
 };
 
-const PAUL: LeaderProfile = {
+const PAUL: McsLeaderProfile = {
   tmagId: 'TMAG-FOUNDER-PAUL',
   name: 'Paul Barrios',
   role: 'Co-Leader',
@@ -93,7 +93,7 @@ const PAUL: LeaderProfile = {
   ],
 };
 
-export const LEADER_CREDIBILITY: LeaderCredibilityContent = {
+export const MCS_LEADER_CREDIBILITY: McsLeaderCredibilityContent = {
   eyebrow: 'WHO LEADS THIS',
   headline: "You're not following a stranger.",
   subhead:

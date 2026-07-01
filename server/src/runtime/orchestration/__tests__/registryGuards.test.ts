@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { AgentKey, RuntimeTaskType } from '@momentum/shared/runtime';
+import type { McsAgentKey, McsRuntimeTaskType } from '@momentum/shared/runtime';
 import {
   getAgentDescriptor,
   isKnownAgentKey,
@@ -19,22 +19,22 @@ describe('registry unknown-agentKey guards', () => {
   });
 
   it('throws a clear error for an unknown agentKey instead of a TypeError', () => {
-    const bogus = 'not_a_real_agent' as unknown as AgentKey;
+    const bogus = 'not_a_real_agent' as unknown as McsAgentKey;
     expect(() => getAgentDescriptor(bogus)).toThrowError(/unknown agentKey/i);
   });
 
   it('isTaskTypeAllowed returns false (no throw) for an unknown agentKey', () => {
-    const bogus = 'not_a_real_agent' as unknown as AgentKey;
-    const task = 'relationship_coaching' as RuntimeTaskType;
+    const bogus = 'not_a_real_agent' as unknown as McsAgentKey;
+    const task = 'relationship_coaching' as McsRuntimeTaskType;
     expect(() => isTaskTypeAllowed(bogus, task)).not.toThrow();
     expect(isTaskTypeAllowed(bogus, task)).toBe(false);
   });
 
   it('isTaskTypeAllowed still resolves correctly for a known agent', () => {
-    expect(isTaskTypeAllowed('ivory', 'relationship_coaching' as RuntimeTaskType)).toBe(
+    expect(isTaskTypeAllowed('ivory', 'relationship_coaching' as McsRuntimeTaskType)).toBe(
       true,
     );
-    expect(isTaskTypeAllowed('ivory', 'training_support' as RuntimeTaskType)).toBe(false);
+    expect(isTaskTypeAllowed('ivory', 'training_support' as McsRuntimeTaskType)).toBe(false);
   });
 
   it('isKnownAgentKey narrows only real keys', () => {

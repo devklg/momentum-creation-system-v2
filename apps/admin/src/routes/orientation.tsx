@@ -12,9 +12,9 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import type {
-  AdminOrientationSessionsResponse,
-  AdminCreateOrientationSessionResponse,
-  OrientationSessionWithRoster,
+  McsAdminOrientationSessionsResponse,
+  McsAdminCreateOrientationSessionResponse,
+  McsOrientationSessionWithRoster,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +35,7 @@ function fmt(iso: string): string {
 }
 
 export function OrientationPage() {
-  const [sessions, setSessions] = useState<OrientationSessionWithRoster[] | null>(null);
+  const [sessions, setSessions] = useState<McsOrientationSessionWithRoster[] | null>(null);
   const [loadErr, setLoadErr] = useState<string | null>(null);
 
   // Create-form state
@@ -56,7 +56,7 @@ export function OrientationPage() {
         setLoadErr('Could not load orientation sessions.');
         return;
       }
-      const data = (await res.json()) as AdminOrientationSessionsResponse;
+      const data = (await res.json()) as McsAdminOrientationSessionsResponse;
       setSessions(data.sessions);
     } catch {
       setLoadErr('Network error loading sessions.');
@@ -105,7 +105,7 @@ export function OrientationPage() {
           }),
         });
         const data = (await res.json().catch(() => null)) as
-          | AdminCreateOrientationSessionResponse
+          | McsAdminCreateOrientationSessionResponse
           | { ok: false; error?: string }
           | null;
         if (res.ok && data && data.ok) {

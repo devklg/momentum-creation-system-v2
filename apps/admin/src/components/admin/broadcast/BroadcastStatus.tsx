@@ -12,9 +12,9 @@
 
 import { useEffect, useState } from 'react';
 import type {
-  BroadcastRecipientRow,
-  BroadcastStatusCounts,
-  BroadcastStatusResponse,
+  McsBroadcastRecipientRow,
+  McsBroadcastStatusCounts,
+  McsBroadcastStatusResponse,
 } from '@momentum/shared';
 
 interface BroadcastStatusProps {
@@ -24,7 +24,7 @@ interface BroadcastStatusProps {
 const POLL_MS = 2000;
 
 export function BroadcastStatus({ broadcastId }: BroadcastStatusProps) {
-  const [snapshot, setSnapshot] = useState<BroadcastStatusResponse | null>(null);
+  const [snapshot, setSnapshot] = useState<McsBroadcastStatusResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export function BroadcastStatus({ broadcastId }: BroadcastStatusProps) {
         const res = await fetch(`/api/admin/broadcast/${broadcastId}`, {
           credentials: 'include',
         });
-        const data = (await res.json()) as BroadcastStatusResponse & { error?: string };
+        const data = (await res.json()) as McsBroadcastStatusResponse & { error?: string };
         if (cancelled) return;
         if (!data.ok) {
           setErr(data.error ?? 'Could not load status.');
@@ -136,7 +136,7 @@ export function BroadcastStatus({ broadcastId }: BroadcastStatusProps) {
   );
 }
 
-function CountsRow({ counts }: { counts: BroadcastStatusCounts }) {
+function CountsRow({ counts }: { counts: McsBroadcastStatusCounts }) {
   return (
     <div className="grid grid-cols-3 md:grid-cols-6 gap-2 font-mono text-[11px] tracking-label uppercase">
       <Tile label="Queued" value={counts.queued} />
@@ -176,7 +176,7 @@ function Tile({
   );
 }
 
-function RecipientRow({ row }: { row: BroadcastRecipientRow }) {
+function RecipientRow({ row }: { row: McsBroadcastRecipientRow }) {
   return (
     <tr className="border-b border-line/40 last:border-b-0">
       <td className="px-3 py-1.5 text-cream">{row.recipientFullName}</td>
@@ -196,7 +196,7 @@ function RecipientRow({ row }: { row: BroadcastRecipientRow }) {
   );
 }
 
-function StatusBadge({ status }: { status: BroadcastRecipientRow['status'] }) {
+function StatusBadge({ status }: { status: McsBroadcastRecipientRow['status'] }) {
   const cls =
     status === 'sent'
       ? 'text-teal'

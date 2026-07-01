@@ -10,8 +10,8 @@ import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { findLeadBatchForOwner } from './vmLeadBatches.js';
 import type {
-  VMCampaignProviderMode,
-  VMCampaignRecord,
+  McsVMCampaignProviderMode,
+  McsVMCampaignRecord,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -30,7 +30,7 @@ export interface CreateVMCampaignInput {
   sponsorTmagId: string;
   leadBatchId: string;
   name: string;
-  provider: VMCampaignProviderMode;
+  provider: McsVMCampaignProviderMode;
   voicemailAudioId: string | null;
   smsTemplateId: string | null;
   emailTemplateId: string | null;
@@ -39,11 +39,11 @@ export interface CreateVMCampaignInput {
 
 export async function createVMCampaign(
   input: CreateVMCampaignInput,
-): Promise<VMCampaignRecord> {
+): Promise<McsVMCampaignRecord> {
   await findLeadBatchForOwner(input.leadBatchId, input.ownerTmagId);
 
   const now = new Date().toISOString();
-  const campaign: VMCampaignRecord = {
+  const campaign: McsVMCampaignRecord = {
     vmCampaignId: `vm_${randomUUID()}`,
     ownerTmagId: input.ownerTmagId,
     sponsorTmagId: input.sponsorTmagId,
@@ -107,8 +107,8 @@ export async function createVMCampaign(
 export async function findVMCampaignForOwner(
   vmCampaignId: string,
   ownerTmagId: string,
-): Promise<VMCampaignRecord> {
-  const result = await gatewayCall<{ documents: VMCampaignRecord[] }>('mongodb', 'query', {
+): Promise<McsVMCampaignRecord> {
+  const result = await gatewayCall<{ documents: McsVMCampaignRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { vmCampaignId, ownerTmagId },
@@ -121,8 +121,8 @@ export async function findVMCampaignForOwner(
 
 export async function listVMCampaignsForOwner(
   ownerTmagId: string,
-): Promise<VMCampaignRecord[]> {
-  const result = await gatewayCall<{ documents: VMCampaignRecord[] }>('mongodb', 'query', {
+): Promise<McsVMCampaignRecord[]> {
+  const result = await gatewayCall<{ documents: McsVMCampaignRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { ownerTmagId },

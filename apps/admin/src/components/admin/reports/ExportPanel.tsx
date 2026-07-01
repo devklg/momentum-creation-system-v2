@@ -16,7 +16,7 @@
  */
 
 import { useState } from 'react';
-import type { AdminDashboardFilter } from '@momentum/shared';
+import type { McsAdminDashboardFilter } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { RedactionModal, type RedactionChoice } from './RedactionModal';
 
@@ -72,7 +72,7 @@ export interface ExportPanelProps {
    * Dashboard filter applied to every export (BA narrowing + leader-group).
    * Defaults to no filter / all BAs when omitted.
    */
-  filter?: AdminDashboardFilter;
+  filter?: McsAdminDashboardFilter;
 }
 
 export function ExportPanel({ filter }: ExportPanelProps) {

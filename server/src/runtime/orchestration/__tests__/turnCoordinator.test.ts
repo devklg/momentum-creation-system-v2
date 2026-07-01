@@ -1,4 +1,4 @@
-import type { AgentKey, RuntimeTaskType } from '@momentum/shared/runtime';
+import type { McsAgentKey, McsRuntimeTaskType } from '@momentum/shared/runtime';
 import { describe, expect, it } from 'vitest';
 import {
   coordinateRuntimeTurn,
@@ -31,7 +31,7 @@ async function coordinateFixtureTurn(
       ? Key
       : unknown
     : unknown,
-  taskType: RuntimeTaskType,
+  taskType: McsRuntimeTaskType,
 ) {
   const fixture = createContextManagerFixture('complete');
   const result = await coordinateRuntimeTurn({
@@ -245,7 +245,7 @@ describe('S2.7 inert runtime turn coordinator', () => {
       ['steve_success', 'success_interview'],
       ['michael_magnificent', 'training_support'],
       ['ivory', 'relationship_coaching'],
-    ] satisfies Array<[AgentKey, RuntimeTaskType]>) {
+    ] satisfies Array<[McsAgentKey, McsRuntimeTaskType]>) {
       const { result } = await coordinateFixtureTurn(agentKey, taskType);
 
       expectComposedResult(result);

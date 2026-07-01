@@ -8,15 +8,15 @@
 
 import { useState, type FormEvent } from 'react';
 import type {
-  QueueLookupResponse,
-  QueueLookupResult,
-  QueueNumbers,
+  McsQueueLookupResponse,
+  McsQueueLookupResult,
+  McsQueueNumbers,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 interface Props {
-  numbers: QueueNumbers | null;
+  numbers: McsQueueNumbers | null;
   loading: boolean;
 }
 
@@ -78,7 +78,7 @@ function NumberStat({
 
 function LookupForm() {
   const [position, setPosition] = useState('');
-  const [result, setResult] = useState<QueueLookupResult | null>(null);
+  const [result, setResult] = useState<McsQueueLookupResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -97,7 +97,7 @@ function LookupForm() {
       const res = await fetch(`/api/admin/queue/lookup?position=${n}`, {
         credentials: 'include',
       });
-      const data = (await res.json()) as QueueLookupResponse & { error?: string };
+      const data = (await res.json()) as McsQueueLookupResponse & { error?: string };
       if (!data.ok) {
         setErr(data.error ?? 'Lookup failed.');
         return;
@@ -138,7 +138,7 @@ function LookupForm() {
   );
 }
 
-function LookupResultView({ result }: { result: QueueLookupResult }) {
+function LookupResultView({ result }: { result: McsQueueLookupResult }) {
   if (!result.found && !result.vacant) {
     return (
       <p className="text-[12px] font-mono tracking-label text-cream-faint uppercase">

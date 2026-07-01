@@ -1,4 +1,4 @@
-import type { RuntimeTaskType } from '@momentum/shared/runtime';
+import type { McsRuntimeTaskType } from '@momentum/shared/runtime';
 import { describe, expect, it } from 'vitest';
 import { resolveMichaelRuntimeTurnResponseFromFixture } from '../index.js';
 import { runRuntimeTurnFixtureScenario } from '../fixtures/runtimeTurnHarness.js';
@@ -23,7 +23,7 @@ import type {
 type TurnOverrides = {
   readonly scenario?: RuntimeTurnFixtureScenarioType;
   readonly agentKey?: unknown;
-  readonly taskType?: RuntimeTaskType;
+  readonly taskType?: McsRuntimeTaskType;
 };
 
 type DeriveArgs = Omit<DeriveMichaelSelectionRequestFromRuntimeTurnInput, 'runtimeTurn'>;

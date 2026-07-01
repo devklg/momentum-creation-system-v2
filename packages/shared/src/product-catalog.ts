@@ -20,19 +20,19 @@
  * video as the default anchor when one is required.
  */
 
-export type ProductVideoKind = 'full' | 'short' | 'deep_dive';
+export type McsProductVideoKind = 'full' | 'short' | 'deep_dive';
 
-export interface ProductVideo {
+export interface McsProductVideo {
   videoId: string;
   youtubeId: string;
   title: string;
   blurb: string;
   duration: string;
-  kind: ProductVideoKind;
+  kind: McsProductVideoKind;
   featured: boolean;
 }
 
-export interface CatalogProduct {
+export interface McsCatalogProduct {
   /** Stable key for Generator runs. Lowercase, kebab. */
   productKey: string;
   /** Section number for display (matches video-library.tsx ordering). */
@@ -41,10 +41,10 @@ export interface CatalogProduct {
   productName: string;
   /** Short marketing blurb shown on the gallery card. */
   blurb: string;
-  videos: ProductVideo[];
+  videos: McsProductVideo[];
 }
 
-export const PRODUCT_CATALOG: CatalogProduct[] = [
+export const MCS_PRODUCT_CATALOG: McsCatalogProduct[] = [
   {
     productKey: 'glp-three',
     sectionNumber: '01',
@@ -230,11 +230,11 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
 ];
 
 /** Lookup by stable key. Returns null when the key is unknown. */
-export function findProductByKey(productKey: string): CatalogProduct | null {
-  return PRODUCT_CATALOG.find((p) => p.productKey === productKey) ?? null;
+export function findProductByKey(productKey: string): McsCatalogProduct | null {
+  return MCS_PRODUCT_CATALOG.find((p) => p.productKey === productKey) ?? null;
 }
 
 /** Quick set of valid product keys — handy for validation at route layer. */
-export const PRODUCT_KEYS: ReadonlySet<string> = new Set(
-  PRODUCT_CATALOG.map((p) => p.productKey),
+export const MCS_PRODUCT_KEYS: ReadonlySet<string> = new Set(
+  MCS_PRODUCT_CATALOG.map((p) => p.productKey),
 );

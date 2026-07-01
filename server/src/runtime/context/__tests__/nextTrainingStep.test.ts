@@ -3,14 +3,14 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type {
-  ApprovedKnowledgeQueryRequest,
+  McsApprovedKnowledgeQueryRequest,
   TmagId,
-  KnowledgeId,
-  KnowledgeReference,
-  RuntimeRequestScope,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsKnowledgeId,
+  McsKnowledgeReference,
+  McsRuntimeRequestScope,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
@@ -20,17 +20,17 @@ import {
 } from '../index.js';
 import { TEAM_MAGNIFICENT_KEY, TEAM_MAGNIFICENT_NAME } from '../validation.js';
 
-function scope(): RuntimeRequestScope {
+function scope(): McsRuntimeRequestScope {
   return {
-    tenantId: 'tenant_team_magnificent' as TenantId,
-    teamId: 'team_magnificent' as TeamId,
+    tenantId: 'tenant_team_magnificent' as McsTenantId,
+    teamId: 'team_magnificent' as McsTeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
     tmagId: 'TMAG-P410-001' as TmagId,
   };
 }
 
-function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): ApprovedKnowledgeQueryRequest {
+function request(overrides: Partial<McsApprovedKnowledgeQueryRequest> = {}): McsApprovedKnowledgeQueryRequest {
   return {
     schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
     scope: scope(),
@@ -41,30 +41,30 @@ function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): Approv
   };
 }
 
-function knowledge(id: string): KnowledgeReference {
+function knowledge(id: string): McsKnowledgeReference {
   return {
-    knowledgeId: `knowledge_p410_${id}` as KnowledgeId,
+    knowledgeId: `knowledge_p410_${id}` as McsKnowledgeId,
     domain: 'training',
     status: 'approved',
     language: 'en',
     translationStatus: 'same_language',
-    sourceId: `source_p410_${id}` as SourceId,
+    sourceId: `source_p410_${id}` as McsSourceId,
   };
 }
 
-function providerReturning(references: readonly KnowledgeReference[]): ApprovedKnowledgeProvider {
+function providerReturning(references: readonly McsKnowledgeReference[]): ApprovedKnowledgeProvider {
   return { async listApprovedKnowledge() { return references; } };
 }
 function providerThrowing(): ApprovedKnowledgeProvider {
   return { async listApprovedKnowledge() { throw new Error('down'); } };
 }
 
-async function okResult(references: readonly KnowledgeReference[]) {
+async function okResult(references: readonly McsKnowledgeReference[]) {
   const adapter = createContextManagerRetrievalAdapter(providerReturning(references));
   return adapter.retrieveApprovedKnowledge(request());
 }
 
-const K = (id: string) => `knowledge_p410_${id}` as KnowledgeId;
+const K = (id: string) => `knowledge_p410_${id}` as McsKnowledgeId;
 const STEP_KEYS = new Set(['knowledgeId', 'sourceId', 'domain', 'language', 'stepIndex', 'totalSteps']);
 
 describe('P4.10 resolveNextTrainingStep — selection over approved knowledge', () => {
@@ -100,7 +100,7 @@ describe('P4.10 resolveNextTrainingStep — selection over approved knowledge', 
 
   it('ignores completed ids that are not in the approved sequence', async () => {
     const result = await okResult([knowledge('a')]);
-    const resolution = resolveNextTrainingStep({ result, completedKnowledgeIds: ['knowledge_unknown' as KnowledgeId] });
+    const resolution = resolveNextTrainingStep({ result, completedKnowledgeIds: ['knowledge_unknown' as McsKnowledgeId] });
     expect(resolution.status).toBe('resolved');
     expect(resolution.step?.knowledgeId).toBe(K('a'));
     expect(resolution.completedCount).toBe(0);
@@ -152,7 +152,7 @@ describe('P4.10 resolveNextTrainingStep — fail-closed unavailable path', () =>
 
   it('is unavailable with a translation_unavailable fallback on a language miss', async () => {
     // en request, only es content, no fallback → degraded language_unavailable.
-    const esRef: KnowledgeReference = { ...knowledge('es'), language: 'es' };
+    const esRef: McsKnowledgeReference = { ...knowledge('es'), language: 'es' };
     const adapter = createContextManagerRetrievalAdapter(providerReturning([esRef]));
     const result = await adapter.retrieveApprovedKnowledge(request({ allowLanguageFallback: false }));
     const resolution = resolveNextTrainingStep({ result });

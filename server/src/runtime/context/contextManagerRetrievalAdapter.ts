@@ -23,13 +23,13 @@
  */
 
 import type {
-  ApprovedKnowledgeExcludedItem,
-  ApprovedKnowledgeQueryDegradeReason,
-  ApprovedKnowledgeQueryRequest,
-  ApprovedKnowledgeQueryResult,
-  KnowledgeId,
-  KnowledgeReference,
-  RuntimeLanguageMetadata,
+  McsApprovedKnowledgeExcludedItem,
+  McsApprovedKnowledgeQueryDegradeReason,
+  McsApprovedKnowledgeQueryRequest,
+  McsApprovedKnowledgeQueryResult,
+  McsKnowledgeId,
+  McsKnowledgeReference,
+  McsRuntimeLanguageMetadata,
 } from '@momentum/shared/runtime';
 import type { KnowledgeCoreBoundaryPort } from '../knowledge/knowledgeCore.js';
 import type { ContextReference } from './contextManager.js';
@@ -79,8 +79,8 @@ export interface ContextManagerRetrievalAdapter {
    * provider failure (it degrades). Rejects only for a malformed REQUEST (caller bug).
    */
   retrieveApprovedKnowledge(
-    request: ApprovedKnowledgeQueryRequest,
-  ): Promise<ApprovedKnowledgeQueryResult>;
+    request: McsApprovedKnowledgeQueryRequest,
+  ): Promise<McsApprovedKnowledgeQueryResult>;
 }
 
 /**
@@ -105,7 +105,7 @@ export function createContextManagerRetrievalAdapter(
         );
       }
 
-      let raw: readonly KnowledgeReference[];
+      let raw: readonly McsKnowledgeReference[];
       try {
         raw = await provider.listApprovedKnowledge(request.scope);
       } catch {
@@ -124,8 +124,8 @@ export function createContextManagerRetrievalAdapter(
         return result;
       }
 
-      const excluded: ApprovedKnowledgeExcludedItem[] = [];
-      const statusDomainKept: KnowledgeReference[] = [];
+      const excluded: McsApprovedKnowledgeExcludedItem[] = [];
+      const statusDomainKept: McsKnowledgeReference[] = [];
 
       for (const reference of raw) {
         if (!APPROVED_REFERENCE_STATUSES.includes(reference.status as (typeof APPROVED_REFERENCE_STATUSES)[number])) {
@@ -158,7 +158,7 @@ export function createContextManagerRetrievalAdapter(
       );
 
       const candidateExcludedSourceIds = excluded.map((item) => item.sourceId);
-      const emit = (result: ApprovedKnowledgeQueryResult): void => {
+      const emit = (result: McsApprovedKnowledgeQueryResult): void => {
         emitObservability(sink, {
           request,
           result,
@@ -178,7 +178,7 @@ export function createContextManagerRetrievalAdapter(
       const selection = resolveLanguageSelection(freshKept, request);
 
       if (selection.status === 'degraded') {
-        const reason: ApprovedKnowledgeQueryDegradeReason =
+        const reason: McsApprovedKnowledgeQueryDegradeReason =
           freshKept.length > 0 ? (selection.degradeReason ?? 'language_unavailable') : 'no_approved_match';
         const result = degradedResult(request, [reason], excluded);
         emit(result);
@@ -188,7 +188,7 @@ export function createContextManagerRetrievalAdapter(
       const limited =
         request.maxResults !== undefined ? selection.references.slice(0, request.maxResults) : selection.references;
 
-      const result: ApprovedKnowledgeQueryResult = {
+      const result: McsApprovedKnowledgeQueryResult = {
         schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
         status: 'ok',
         scope: request.scope,
@@ -244,7 +244,7 @@ function emitObservability(
  * homogeneous quality tier, so per-item marking and the batch metadata agree; per-item is used
  * here as defense-in-depth against ever laundering a marking.
  */
-export function toContextReferences(result: ApprovedKnowledgeQueryResult): ContextReference[] {
+export function toContextReferences(result: McsApprovedKnowledgeQueryResult): ContextReference[] {
   if (result.status === 'degraded') return [];
   return result.references.map((reference) => ({
     sourceId: reference.sourceId,
@@ -258,11 +258,11 @@ export function toContextReferences(result: ApprovedKnowledgeQueryResult): Conte
 }
 
 function degradedResult(
-  request: ApprovedKnowledgeQueryRequest,
-  degradeReasons: readonly ApprovedKnowledgeQueryDegradeReason[],
-  excluded: ApprovedKnowledgeExcludedItem[],
-): ApprovedKnowledgeQueryResult {
-  const result: ApprovedKnowledgeQueryResult = {
+  request: McsApprovedKnowledgeQueryRequest,
+  degradeReasons: readonly McsApprovedKnowledgeQueryDegradeReason[],
+  excluded: McsApprovedKnowledgeExcludedItem[],
+): McsApprovedKnowledgeQueryResult {
+  const result: McsApprovedKnowledgeQueryResult = {
     schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
     status: 'degraded',
     scope: request.scope,
@@ -280,7 +280,7 @@ function degradedResult(
   return result;
 }
 
-function sameLanguageMetadata(request: ApprovedKnowledgeQueryRequest): RuntimeLanguageMetadata {
+function sameLanguageMetadata(request: McsApprovedKnowledgeQueryRequest): McsRuntimeLanguageMetadata {
   return {
     language: request.language,
     translationStatus: 'same_language',
@@ -289,6 +289,6 @@ function sameLanguageMetadata(request: ApprovedKnowledgeQueryRequest): RuntimeLa
   };
 }
 
-function structuralSummary(domain: string, knowledgeId: KnowledgeId): string {
+function structuralSummary(domain: string, knowledgeId: McsKnowledgeId): string {
   return `Approved ${domain} knowledge reference ${String(knowledgeId)}`;
 }

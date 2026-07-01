@@ -50,12 +50,12 @@ import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 import { lastInitialOf } from './prospects.js';
 import { createOrUpdateCrmRecordForToken } from './prospectCrm.js';
 import type {
-  InvitationActivityEntry,
-  InvitationSource,
-  InviteTokenRecord,
-  ProspectCrmSource,
-  ProspectLocation,
-  ProspectRecord,
+  McsInvitationActivityEntry,
+  McsInvitationSource,
+  McsInviteTokenRecord,
+  McsProspectCrmSource,
+  McsProspectLocation,
+  McsProspectRecord,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -99,7 +99,7 @@ export interface CreateInvitationInput {
    */
   message: string | null;
   /** Who composed `message`. 'self' for the plain form. */
-  source: InvitationSource;
+  source: McsInvitationSource;
   /** BA-authored relationship context captured by Ivory before drafting. */
   relationshipReason?: string | null;
 }
@@ -116,7 +116,7 @@ export interface CreateInvitationResult {
   inviteUrl: string;
   /** Echo of what was stored (Chat #120). */
   message: string | null;
-  source: InvitationSource;
+  source: McsInvitationSource;
   relationshipReason: string | null;
 }
 
@@ -132,7 +132,7 @@ function buildInviteUrl(token: string): string {
   return `${PROSPECT_BASE_URL}/p/${token}`;
 }
 
-function crmSourceForInvitation(source: InvitationSource): ProspectCrmSource {
+function crmSourceForInvitation(source: McsInvitationSource): McsProspectCrmSource {
   if (source === 'ivory') return 'ivory';
   if (source === 'scriptmaker') return 'scriptmaker';
   return 'pmv';
@@ -165,14 +165,14 @@ export async function createInvitation(
   const expiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
   const lastInitial = lastInitialOf(input.lastName);
 
-  const location: ProspectLocation = {
+  const location: McsProspectLocation = {
     city: input.city,
     stateOrRegion: input.stateOrRegion,
     country: input.country,
   };
 
   // ── Step 2: prospect record, triple-stacked. ──────────────────────────
-  const prospectRecord: ProspectRecord = {
+  const prospectRecord: McsProspectRecord = {
     prospectId,
     firstName: input.firstName,
     lastName: input.lastName,
@@ -260,7 +260,7 @@ export async function createInvitation(
   // ── Step 3: invite-token record, Mongo + Neo4j. ───────────────────────
   // Chroma already carries the invitation event from step 2; the token's
   // authoritative home is Mongo (resolver reads it) + Neo4j (graph walks).
-  const tokenRecord: InviteTokenRecord = {
+  const tokenRecord: McsInviteTokenRecord = {
     token,
     prospectId,
     sponsorTmagId: input.sponsorTmagId,
@@ -351,7 +351,7 @@ export async function createInvitation(
 async function appendActivity(entry: {
   prospectId: string;
   sponsorTmagId: string;
-  kind: InvitationActivityEntry['kind'];
+  kind: McsInvitationActivityEntry['kind'];
   note: string;
   at: string;
 }): Promise<string> {

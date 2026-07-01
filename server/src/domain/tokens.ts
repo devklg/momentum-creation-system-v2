@@ -23,7 +23,7 @@
  */
 
 import { gatewayCall } from '../services/gateway.js';
-import type { InviteTokenRecord, TokenState } from '@momentum/shared';
+import type { McsInviteTokenRecord, McsTokenState } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const TOKENS_COLLECTION = 'invite_tokens';
@@ -62,8 +62,8 @@ export async function mintUniqueToken(): Promise<string> {
   throw new Error('token_generation_exhausted');
 }
 
-export async function findTokenRecord(token: string): Promise<InviteTokenRecord | null> {
-  const result = await gatewayCall<{ documents: InviteTokenRecord[] }>('mongodb', 'query', {
+export async function findTokenRecord(token: string): Promise<McsInviteTokenRecord | null> {
+  const result = await gatewayCall<{ documents: McsInviteTokenRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: TOKENS_COLLECTION,
     filter: { token },
@@ -74,12 +74,12 @@ export async function findTokenRecord(token: string): Promise<InviteTokenRecord 
 }
 
 /** True if 'now' (default Date.now()) is past the token's expiresAt. */
-export function isTokenExpired(record: InviteTokenRecord, nowMs: number = Date.now()): boolean {
+export function isTokenExpired(record: McsInviteTokenRecord, nowMs: number = Date.now()): boolean {
   return new Date(record.expiresAt).getTime() <= nowMs;
 }
 
 /** Terminal token states for which /p/{token} should not render the funnel UI. */
-export const TERMINAL_TOKEN_STATES: ReadonlySet<TokenState> = new Set(['enrolled', 'expired']);
+export const TERMINAL_TOKEN_STATES: ReadonlySet<McsTokenState> = new Set(['enrolled', 'expired']);
 
 /**
  * Forward ordering of token lifecycle states. Used by transitionTokenState
@@ -93,7 +93,7 @@ export const TERMINAL_TOKEN_STATES: ReadonlySet<TokenState> = new Set(['enrolled
  * prospect after placement; see domain/callbackRequest.ts and
  * domain/webinarReservation.ts (Chat #109).
  */
-const STATE_ORDER: Record<TokenState, number> = {
+const STATE_ORDER: Record<McsTokenState, number> = {
   minted: 0,
   clicked: 1,
   video_started: 2,
@@ -105,7 +105,7 @@ const STATE_ORDER: Record<TokenState, number> = {
   expired: 99,
 };
 
-export function isForwardTransition(from: TokenState, to: TokenState): boolean {
+export function isForwardTransition(from: McsTokenState, to: McsTokenState): boolean {
   // 'expired' is terminal regardless of forward order.
   if (from === 'expired') return false;
   return STATE_ORDER[to] > STATE_ORDER[from];
@@ -122,8 +122,8 @@ export function isForwardTransition(from: TokenState, to: TokenState): boolean {
  */
 export async function transitionTokenState(
   token: string,
-  next: TokenState,
-): Promise<{ state: TokenState; changed: boolean }> {
+  next: McsTokenState,
+): Promise<{ state: McsTokenState; changed: boolean }> {
   const record = await findTokenRecord(token);
   if (!record) throw new Error('token_not_found');
 
@@ -151,7 +151,7 @@ export async function transitionTokenState(
  */
 export async function markTokenOpened(
   token: string,
-): Promise<{ state: TokenState; clickedAt: string; changed: boolean }> {
+): Promise<{ state: McsTokenState; clickedAt: string; changed: boolean }> {
   const record = await findTokenRecord(token);
   if (!record) throw new Error('token_not_found');
 
@@ -163,7 +163,7 @@ export async function markTokenOpened(
     return { state: record.state, clickedAt, changed: false };
   }
 
-  const set: Partial<InviteTokenRecord> & { updatedAt: string } = {
+  const set: Partial<McsInviteTokenRecord> & { updatedAt: string } = {
     updatedAt: clickedAt,
   };
   if (shouldStampClick) set.clickedAt = clickedAt;

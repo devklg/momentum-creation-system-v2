@@ -35,7 +35,7 @@ import { buildFollowUpReport } from './reports/followUpAging.js';
 import { buildLeaderScorecardReport } from './reports/leaderScorecards.js';
 import { resolveTimeRange } from './reports/timeRange.js';
 import { buildPdfToBuffer } from '../services/pdfReport.js';
-import type { AdminDashboardFilter, AdminDashboardMetrics } from '@momentum/shared';
+import type { McsAdminDashboardFilter, McsAdminDashboardMetrics } from '@momentum/shared';
 
 const PROVENANCE_NOTE =
   'Scope note (Chat #143): This master report composites the Section B ' +
@@ -45,7 +45,7 @@ const PROVENANCE_NOTE =
   'aging, leader scorecards). Reports 7 and 8 are intentionally not built ' +
   '(see decision dec_reporting_i1_scope).';
 
-function fmtFilterScope(filter: AdminDashboardFilter): string {
+function fmtFilterScope(filter: McsAdminDashboardFilter): string {
   const parts: string[] = [];
   parts.push(filter.tmagId ? `BA: ${filter.tmagId}` : 'All BAs');
   const lg = filter.leaderGroup;
@@ -67,9 +67,9 @@ export interface MasterReportResult {
  * plus verifiability fields (timestamp + source hash) for the audit entry.
  */
 export async function buildMasterReportPdf(
-  filter: AdminDashboardFilter,
+  filter: McsAdminDashboardFilter,
 ): Promise<MasterReportResult> {
-  const metrics: AdminDashboardMetrics = await computeAdminDashboardMetrics(filter);
+  const metrics: McsAdminDashboardMetrics = await computeAdminDashboardMetrics(filter);
 
   // I.1 reports composited into the master (lifetime window for the snapshot).
   const lifetimeRange = resolveTimeRange({ preset: 'lifetime' });

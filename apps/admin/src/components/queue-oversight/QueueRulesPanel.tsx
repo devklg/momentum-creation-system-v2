@@ -12,12 +12,12 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import type { QueueRule, QueueRulesResponse } from '@momentum/shared';
+import type { McsQueueRule, McsQueueRulesResponse } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export function QueueRulesPanel() {
-  const [rules, setRules] = useState<QueueRule[] | null>(null);
+  const [rules, setRules] = useState<McsQueueRule[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +26,7 @@ export function QueueRulesPanel() {
     setErr(null);
     try {
       const res = await fetch('/api/admin/queue/rules', { credentials: 'include' });
-      const data = (await res.json()) as QueueRulesResponse & { error?: string };
+      const data = (await res.json()) as McsQueueRulesResponse & { error?: string };
       if (!data.ok) {
         setErr(data.error ?? 'Could not load rules.');
         return;
@@ -73,7 +73,7 @@ export function QueueRulesPanel() {
   );
 }
 
-function RuleRow({ rule, onSaved }: { rule: QueueRule; onSaved: () => void }) {
+function RuleRow({ rule, onSaved }: { rule: McsQueueRule; onSaved: () => void }) {
   const [draft, setDraft] = useState<string>(String(rule.currentValue));
   const [reason, setReason] = useState('');
   const [saving, setSaving] = useState(false);

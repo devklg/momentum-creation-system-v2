@@ -7,12 +7,12 @@
  * because the parent does the fetch, so changing kind triggers a refetch.
  */
 
-import type { AdminFunnelKind, AdminFunnelResponse, AdminFunnelStage } from '@momentum/shared';
+import type { McsAdminFunnelKind, McsAdminFunnelResponse, McsAdminFunnelStage } from '@momentum/shared';
 
 interface Props {
-  data: AdminFunnelResponse | null;
-  kind: AdminFunnelKind;
-  onKindChange: (next: AdminFunnelKind) => void;
+  data: McsAdminFunnelResponse | null;
+  kind: McsAdminFunnelKind;
+  onKindChange: (next: McsAdminFunnelKind) => void;
   loading: boolean;
 }
 
@@ -72,7 +72,7 @@ function Row({
   firstCount,
   index,
 }: {
-  stage: AdminFunnelStage;
+  stage: McsAdminFunnelStage;
   firstCount: number;
   index: number;
 }) {
@@ -106,8 +106,8 @@ function KindToggle({
   kind,
   onChange,
 }: {
-  kind: AdminFunnelKind;
-  onChange: (next: AdminFunnelKind) => void;
+  kind: McsAdminFunnelKind;
+  onChange: (next: McsAdminFunnelKind) => void;
 }) {
   return (
     <div className="inline-flex border border-line rounded overflow-hidden">

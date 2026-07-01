@@ -1,8 +1,8 @@
-import type { RuntimeLanguage, RuntimeTranslationStatus } from './language.js';
-import type { KnowledgeCandidateId, KnowledgeId, SourceId } from './ids.js';
-import type { KnowledgeFreshness } from './knowledge-freshness.js';
+import type { McsRuntimeLanguage, McsRuntimeTranslationStatus } from './language.js';
+import type { McsKnowledgeCandidateId, McsKnowledgeId, McsSourceId } from './ids.js';
+import type { McsKnowledgeFreshness } from './knowledge-freshness.js';
 
-export type KnowledgeDomain =
+export type McsKnowledgeDomain =
   | 'success'
   | 'training'
   | 'relationship'
@@ -11,7 +11,7 @@ export type KnowledgeDomain =
   | 'system'
   | 'governance';
 
-export type KnowledgeLifecycleStatus =
+export type McsKnowledgeLifecycleStatus =
   | 'candidate'
   | 'queued_for_review'
   | 'approved'
@@ -20,23 +20,23 @@ export type KnowledgeLifecycleStatus =
   | 'superseded'
   | 'archived';
 
-export interface KnowledgeReference {
-  knowledgeId: KnowledgeId;
-  domain: KnowledgeDomain;
-  status: Extract<KnowledgeLifecycleStatus, 'approved' | 'active'>;
-  language: RuntimeLanguage;
-  translationStatus: RuntimeTranslationStatus;
-  sourceId: SourceId;
+export interface McsKnowledgeReference {
+  knowledgeId: McsKnowledgeId;
+  domain: McsKnowledgeDomain;
+  status: Extract<McsKnowledgeLifecycleStatus, 'approved' | 'active'>;
+  language: McsRuntimeLanguage;
+  translationStatus: McsRuntimeTranslationStatus;
+  sourceId: McsSourceId;
   // P4.7 — optional freshness/deprecation descriptor. Absent ⇒ treated as current (a reference
   // without this field behaves exactly as pre-P4.7).
-  freshness?: KnowledgeFreshness;
+  freshness?: McsKnowledgeFreshness;
 }
 
-export interface KnowledgeCandidateReference {
-  candidateId: KnowledgeCandidateId;
-  domain: KnowledgeDomain;
-  status: Extract<KnowledgeLifecycleStatus, 'candidate' | 'queued_for_review'>;
-  language: RuntimeLanguage;
-  sourceId: SourceId;
+export interface McsKnowledgeCandidateReference {
+  candidateId: McsKnowledgeCandidateId;
+  domain: McsKnowledgeDomain;
+  status: Extract<McsKnowledgeLifecycleStatus, 'candidate' | 'queued_for_review'>;
+  language: McsRuntimeLanguage;
+  sourceId: McsSourceId;
   riskFlags: string[];
 }

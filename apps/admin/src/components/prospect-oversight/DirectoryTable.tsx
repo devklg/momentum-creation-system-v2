@@ -14,9 +14,9 @@
 
 import { useMemo, useState } from 'react';
 import type {
-  AdminProspectDirectoryRow,
-  AdminProspectPresentationStatus,
-  ProspectStatus,
+  McsAdminProspectDirectoryRow,
+  McsAdminProspectPresentationStatus,
+  McsProspectStatus,
 } from '@momentum/shared';
 
 type SortDir = 'asc' | 'desc';
@@ -40,7 +40,7 @@ interface SortState {
 const DEFAULT_SORT: SortState = { column: 'firstContact', dir: 'desc' };
 
 interface Props {
-  rows: AdminProspectDirectoryRow[] | null;
+  rows: McsAdminProspectDirectoryRow[] | null;
   loading: boolean;
   onSelectProspect: (prospectId: string) => void;
 }
@@ -266,7 +266,7 @@ function Td({
   );
 }
 
-function StatusPill({ status }: { status: AdminProspectPresentationStatus }) {
+function StatusPill({ status }: { status: McsAdminProspectPresentationStatus }) {
   const { label, tone } = describePresentationStatus(status);
   return (
     <span
@@ -283,7 +283,7 @@ function StatusPill({ status }: { status: AdminProspectPresentationStatus }) {
 function ProspectStatusPill({
   state,
 }: {
-  state: ProspectStatus;
+  state: McsProspectStatus;
 }) {
   const tone =
     state === 'enrolled_iii'
@@ -305,7 +305,7 @@ function ProspectStatusPill({
   );
 }
 
-function describePresentationStatus(s: AdminProspectPresentationStatus): {
+function describePresentationStatus(s: McsAdminProspectPresentationStatus): {
   label: string;
   tone: string;
 } {
@@ -353,8 +353,8 @@ function formatDate(iso: string): string {
 }
 
 function compareRows(
-  a: AdminProspectDirectoryRow,
-  b: AdminProspectDirectoryRow,
+  a: McsAdminProspectDirectoryRow,
+  b: McsAdminProspectDirectoryRow,
   sort: SortState,
 ): number {
   const flip = sort.dir === 'asc' ? 1 : -1;

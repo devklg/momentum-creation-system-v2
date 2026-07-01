@@ -30,7 +30,7 @@ import { gatewayCall } from '../services/gateway.js';
 import { findBAByTmagId } from './ba.js';
 import { findNextUpcomingEvent } from './webinarEvent.js';
 import { TEAM_POOL_ID } from './holdingTank.js';
-import type { PreviewResolvedTokenPayload } from '@momentum/shared';
+import type { McsPreviewResolvedTokenPayload } from '@momentum/shared';
 
 const PREVIEW_TOKEN_PREFIX = 'PREVIEW-';
 
@@ -95,7 +95,7 @@ async function readPoolCounterForPreview(): Promise<number> {
  */
 export async function synthesizePreviewPayload(
   sessionTmagId: string,
-): Promise<PreviewResolvedTokenPayload | null> {
+): Promise<McsPreviewResolvedTokenPayload | null> {
   const ba = await findBAByTmagId(sessionTmagId);
   if (!ba) return null;
 

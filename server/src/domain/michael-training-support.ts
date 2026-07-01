@@ -28,7 +28,7 @@
  * — only the direct sponsor (downline.sponsorTmagId === requestingTmagId) can read.
  */
 
-import type { MichaelTrainingSupportCard, MichaelTrainingSupportGuidanceSection } from '@momentum/shared';
+import type { McsMichaelTrainingSupportCard, McsMichaelTrainingSupportGuidanceSection } from '@momentum/shared';
 import { gatewayCall } from '../services/gateway.js';
 
 /** Provenance literal stamped on the derived training-support card. */
@@ -160,7 +160,7 @@ function joinNatural(items: string[]): string {
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
 }
 
-function deriveLearningStyle(ls: SuccessProfileLearningStyle): MichaelTrainingSupportGuidanceSection {
+function deriveLearningStyle(ls: SuccessProfileLearningStyle): McsMichaelTrainingSupportGuidanceSection {
   const modalities = cleanList(ls.modalities);
   const feedback = trimToNonEmpty(ls.feedbackPreference);
   const pace = trimToNonEmpty(ls.pacePreference);
@@ -173,7 +173,7 @@ function deriveLearningStyle(ls: SuccessProfileLearningStyle): MichaelTrainingSu
 
 function deriveCommunication(
   cp: SuccessProfileCommunicationPreferences,
-): MichaelTrainingSupportGuidanceSection {
+): McsMichaelTrainingSupportGuidanceSection {
   const channels = cleanList(cp.preferredChannels);
   const cadence = trimToNonEmpty(cp.cadence);
   const bestTimes = trimToNonEmpty(cp.bestTimes);
@@ -184,7 +184,7 @@ function deriveCommunication(
   return { label: 'How to stay in touch', bullets };
 }
 
-function deriveSupportFocus(sn: SuccessProfileSupportNeeds): MichaelTrainingSupportGuidanceSection {
+function deriveSupportFocus(sn: SuccessProfileSupportNeeds): McsMichaelTrainingSupportGuidanceSection {
   const areas = cleanList(sn.areas);
   const obstacles = trimToNonEmpty(sn.pastObstacles);
   const helpStyle = trimToNonEmpty(sn.helpStyle);
@@ -204,7 +204,7 @@ export function projectSuccessProfileToCard(args: {
   downlineTmagId: string;
   downlineFirstName: string;
   profile: SuccessProfile;
-}): MichaelTrainingSupportCard {
+}): McsMichaelTrainingSupportCard {
   const p = args.profile;
   return {
     downlineTmagId: args.downlineTmagId,
@@ -238,7 +238,7 @@ export function projectSuccessProfileToCard(args: {
 export async function getTrainingSupportCardForSponsor(args: {
   requestingTmagId: string;
   downlineTmagId: string;
-}): Promise<MichaelTrainingSupportCard> {
+}): Promise<McsMichaelTrainingSupportCard> {
   const downline = await getTeamMagnificentMember(args.downlineTmagId);
   if (!downline) {
     throw new TrainingSupportAccessError(

@@ -58,15 +58,15 @@ import {
 } from '../../domain/holdingTank.js';
 import { appendAuditEntry, queryAuditEntries } from '../../domain/auditLog.js';
 import type {
-  AdminDashboardFilter,
-  AdminProspectActivityEvent,
-  AdminProspectActivityEventKind,
-  AdminProspectAddNoteResponse,
-  AdminProspectDetailResponse,
-  AdminProspectDirectoryResponse,
-  AuditActor,
-  AuditContext,
-  AuditLogEntry,
+  McsAdminDashboardFilter,
+  McsAdminProspectActivityEvent,
+  McsAdminProspectActivityEventKind,
+  McsAdminProspectAddNoteResponse,
+  McsAdminProspectDetailResponse,
+  McsAdminProspectDirectoryResponse,
+  McsAuditActor,
+  McsAuditContext,
+  McsAuditLogEntry,
 } from '@momentum/shared';
 
 export const adminProspectsRoutes: Router = express.Router();
@@ -78,7 +78,7 @@ const FilterSchema = z.object({
   leaderGroup: z.enum(['all', 'leaders_only', 'non_leaders']).optional(),
 });
 
-function parseFilter(req: Request): AdminDashboardFilter {
+function parseFilter(req: Request): McsAdminDashboardFilter {
   const parsed = FilterSchema.parse({
     tmagId: typeof req.query.tmagId === 'string' ? req.query.tmagId : undefined,
     leaderGroup:
@@ -92,14 +92,14 @@ function parseFilter(req: Request): AdminDashboardFilter {
 
 function adminActorFromRequest(
   req: Request,
-): AuditActor & { kind: 'admin' } {
+): McsAuditActor & { kind: 'admin' } {
   const session = req.session!;
   const displayName =
     (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
   return { kind: 'admin', tmagId: session.tmagId, displayName };
 }
 
-function contextFromRequest(req: Request, route: string, method: string): AuditContext {
+function contextFromRequest(req: Request, route: string, method: string): McsAuditContext {
   return {
     ip: req.ip ?? null,
     userAgent: req.get('user-agent') ?? null,
@@ -112,7 +112,7 @@ function contextFromRequest(req: Request, route: string, method: string): AuditC
 /* ─── GET /  (D.1 directory) ────────────────────────────────────── */
 
 adminProspectsRoutes.get('/', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -137,7 +137,7 @@ adminProspectsRoutes.get('/', requireAdmin, async (req, res) => {
       context: contextFromRequest(req, '/api/admin/prospects', 'GET'),
     });
 
-    const body: AdminProspectDirectoryResponse = {
+    const body: McsAdminProspectDirectoryResponse = {
       ok: true,
       rows,
       appliedFilter: filter,
@@ -208,12 +208,12 @@ adminProspectsRoutes.get('/:prospectId', requireAdmin, async (req, res) => {
       entityId: prospectId,
       limit: 250,
     });
-    const adminEvents: AdminProspectActivityEvent[] = [
+    const adminEvents: McsAdminProspectActivityEvent[] = [
       ...auditPage.entries,
       ...placementAudits.entries,
     ]
       .map(toActivityEventFromAudit)
-      .filter((e): e is AdminProspectActivityEvent => e !== null);
+      .filter((e): e is McsAdminProspectActivityEvent => e !== null);
 
     const merged = [...detail.activity, ...adminEvents].sort((a, b) =>
       a.at < b.at ? -1 : a.at > b.at ? 1 : 0,
@@ -233,7 +233,7 @@ adminProspectsRoutes.get('/:prospectId', requireAdmin, async (req, res) => {
       context: contextFromRequest(req, '/api/admin/prospects/:prospectId', 'GET'),
     });
 
-    const body: AdminProspectDetailResponse = {
+    const body: McsAdminProspectDetailResponse = {
       ok: true,
       detail: { ...detail, activity: merged },
     };
@@ -310,7 +310,7 @@ adminProspectsRoutes.post('/:prospectId/notes', requireAdmin, async (req, res) =
   }
 
   try {
-    const out: AdminProspectAddNoteResponse = await appendProspectNote({
+    const out: McsAdminProspectAddNoteResponse = await appendProspectNote({
       prospectId,
       body: bodyParsed.body,
       actor: adminActorFromRequest(req),
@@ -463,9 +463,9 @@ async function runIntervention(
 /* ─── audit → activity-event projection ─────────────────────────── */
 
 function toActivityEventFromAudit(
-  entry: AuditLogEntry,
-): AdminProspectActivityEvent | null {
-  let kind: AdminProspectActivityEventKind;
+  entry: McsAuditLogEntry,
+): McsAdminProspectActivityEvent | null {
+  let kind: McsAdminProspectActivityEventKind;
   let label: string;
   switch (entry.action) {
     case 'admin.prospect.move':

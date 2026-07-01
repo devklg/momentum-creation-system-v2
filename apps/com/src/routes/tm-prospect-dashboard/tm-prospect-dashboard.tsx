@@ -31,7 +31,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import type { ComProspectCopy } from '@momentum/shared';
+import type { McsComProspectCopy } from '@momentum/shared';
 
 import { ArrivalSection } from './sections/01-Arrival';
 import { OpportunitySection } from './sections/02-Opportunity';
@@ -42,7 +42,7 @@ import { YourNextMoveSection } from './sections/06-YourNextMove';
 import { DashboardRibbon } from './sections/00-Ribbon';
 import { DashboardFooter } from './sections/07-Footer';
 import { usePlacementStream } from '@/lib/usePlacementStream';
-import { fetchRvmTeamStats, fetchTeamStats, type TeamStatsResponse } from '@/lib/api';
+import { fetchRvmTeamStats, fetchTeamStats, type McsTeamStatsResponse } from '@/lib/api';
 
 export interface TmProspectDashboardProps {
   token: string;
@@ -75,7 +75,7 @@ export interface TmProspectDashboardProps {
    * own lead string from here and falls back to its built-in copy when the
    * field is absent (older server / master-content read failure).
    */
-  copy?: ComProspectCopy | null;
+  copy?: McsComProspectCopy | null;
   entryKind?: 'pmv' | 'rvm';
 }
 
@@ -180,7 +180,7 @@ function PositionMomentumCenter(props: {
     entryKind,
   } = props;
   const beneathYou = Math.max(0, stream.globalMaxPosition - positionNumber);
-  const [stats, setStats] = useState<TeamStatsResponse | null>(null);
+  const [stats, setStats] = useState<McsTeamStatsResponse | null>(null);
 
   useEffect(() => {
     let cancelled = false;

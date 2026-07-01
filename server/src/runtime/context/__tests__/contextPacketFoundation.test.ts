@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import type {
-  AgentId,
+  McsAgentId,
   TmagId,
-  ContextPacketId,
-  ContextPacketV1,
-  ContextRequestId,
-  GuidedActionId,
-  JournalEntryId,
-  KnowledgeId,
-  RelationshipContextId,
-  RuntimeTurnId,
-  SessionId,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsContextPacketId,
+  McsContextPacketV1,
+  McsContextRequestId,
+  McsGuidedActionId,
+  McsJournalEntryId,
+  McsKnowledgeId,
+  McsRelationshipContextId,
+  McsRuntimeTurnId,
+  McsSessionId,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   REQUIRED_CONTEXT_RUNTIME_RULE_IDS,
@@ -23,17 +23,17 @@ import {
   validateContextPacketV1,
 } from '../index.js';
 
-const tenantId = 'tenant_tm' as TenantId;
-const teamId = 'team_tm' as TeamId;
+const tenantId = 'tenant_tm' as McsTenantId;
+const teamId = 'team_tm' as McsTeamId;
 const tmagId = 'ba_tm_001' as TmagId;
-const packetId = 'ctxpkt_test' as ContextPacketId;
-const requestId = 'ctxreq_test' as ContextRequestId;
-const sessionId = 'session_test' as SessionId;
-const sourceId = 'source_test' as SourceId;
-const knowledgeId = 'knowledge_test' as KnowledgeId;
+const packetId = 'ctxpkt_test' as McsContextPacketId;
+const requestId = 'ctxreq_test' as McsContextRequestId;
+const sessionId = 'session_test' as McsSessionId;
+const sourceId = 'source_test' as McsSourceId;
+const knowledgeId = 'knowledge_test' as McsKnowledgeId;
 
-function makePacket(overrides: Partial<ContextPacketV1> = {}): ContextPacketV1 {
-  const packet: ContextPacketV1 = {
+function makePacket(overrides: Partial<McsContextPacketV1> = {}): McsContextPacketV1 {
+  const packet: McsContextPacketV1 = {
     schemaVersion: 'context_packet.v1',
     packetId,
     requestId,
@@ -75,7 +75,7 @@ function makePacket(overrides: Partial<ContextPacketV1> = {}): ContextPacketV1 {
     },
     agent: {
       agentKey: 'michael_magnificent',
-      agentId: 'agent_instance_michael_default' as AgentId,
+      agentId: 'agent_instance_michael_default' as McsAgentId,
       displayName: 'Michael Magnificent',
       primaryDomain: 'training',
       roleSummary: 'Training support.',
@@ -146,7 +146,7 @@ function makePacket(overrides: Partial<ContextPacketV1> = {}): ContextPacketV1 {
       included: true,
       items: [
         {
-          relationshipContextId: 'relationship_test' as RelationshipContextId,
+          relationshipContextId: 'relationship_test' as McsRelationshipContextId,
           ownerTmagId: tmagId,
           summary: 'Relationship context summary.',
           personSensitive: true,
@@ -159,7 +159,7 @@ function makePacket(overrides: Partial<ContextPacketV1> = {}): ContextPacketV1 {
       privateByDefault: true,
       entries: [
         {
-          journalEntryId: 'journal_test' as JournalEntryId,
+          journalEntryId: 'journal_test' as McsJournalEntryId,
           ownerTmagId: tmagId,
           summary: 'Journal summary.',
           language: 'en',
@@ -171,7 +171,7 @@ function makePacket(overrides: Partial<ContextPacketV1> = {}): ContextPacketV1 {
       included: true,
       turns: [
         {
-          turnId: 'turn_test' as RuntimeTurnId,
+          turnId: 'turn_test' as McsRuntimeTurnId,
           sequence: 1,
           speaker: 'brand_ambassador',
           summary: 'Turn summary.',
@@ -181,7 +181,7 @@ function makePacket(overrides: Partial<ContextPacketV1> = {}): ContextPacketV1 {
     },
     guidedActions: [
       {
-        guidedActionId: 'guided_test' as GuidedActionId,
+        guidedActionId: 'guided_test' as McsGuidedActionId,
         ownerTmagId: tmagId,
         title: 'Practice sharing',
         status: 'suggested',
@@ -199,9 +199,9 @@ function makePacket(overrides: Partial<ContextPacketV1> = {}): ContextPacketV1 {
       requestedScopes: ['approved_knowledge', 'runtime_rules'],
       includedKnowledgeIds: [knowledgeId],
       includedPrivateContextIds: ['private_context_test'],
-      includedJournalEntryIds: ['journal_test' as JournalEntryId],
-      includedRelationshipContextIds: ['relationship_test' as RelationshipContextId],
-      includedGuidedActionIds: ['guided_test' as GuidedActionId],
+      includedJournalEntryIds: ['journal_test' as McsJournalEntryId],
+      includedRelationshipContextIds: ['relationship_test' as McsRelationshipContextId],
+      includedGuidedActionIds: ['guided_test' as McsGuidedActionId],
       excludedSourceIds: ['candidate_test'],
       retrievalMethods: ['direct_reference'],
       tokenEstimate: 900,

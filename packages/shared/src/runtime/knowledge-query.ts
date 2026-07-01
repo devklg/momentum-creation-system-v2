@@ -17,20 +17,20 @@
  * packets and does not make the Context Manager any less the sole packet assembler.
  */
 
-import type { RuntimeRequestScope } from './identity.js';
-import type { RuntimeLanguage, RuntimeLanguageMetadata } from './language.js';
-import type { KnowledgeDomain, KnowledgeReference } from './knowledge.js';
-import type { KnowledgeFreshnessPolicy } from './knowledge-freshness.js';
+import type { McsRuntimeRequestScope } from './identity.js';
+import type { McsRuntimeLanguage, McsRuntimeLanguageMetadata } from './language.js';
+import type { McsKnowledgeDomain, McsKnowledgeReference } from './knowledge.js';
+import type { McsKnowledgeFreshnessPolicy } from './knowledge-freshness.js';
 
 /** Schema version for the approved-knowledge query contract. */
-export type ApprovedKnowledgeQuerySchemaVersion = 'approved_knowledge_query.v1';
+export type McsApprovedKnowledgeQuerySchemaVersion = 'approved_knowledge_query.v1';
 
 /**
  * Why a query returned fewer (or no) approved references than the caller hoped. These are
  * descriptive result-metadata reasons — they never widen what is returned; an unavailable
  * or empty result is a fail-closed (degraded) signal, never a candidate substitution.
  */
-export type ApprovedKnowledgeQueryDegradeReason =
+export type McsApprovedKnowledgeQueryDegradeReason =
   | 'knowledge_unavailable'
   | 'no_approved_match'
   | 'language_unavailable'
@@ -38,7 +38,7 @@ export type ApprovedKnowledgeQueryDegradeReason =
   | 'retrieval_timeout';
 
 /** Why candidate/queued-for-review knowledge was excluded from a result (always recorded). */
-export type ApprovedKnowledgeExclusionReason =
+export type McsApprovedKnowledgeExclusionReason =
   | 'candidate_not_approved'
   | 'queued_for_review'
   | 'not_review_workflow';
@@ -48,16 +48,16 @@ export type ApprovedKnowledgeExclusionReason =
  * Carries scope, the agent objective/domains it is enriching for, and the target language.
  * Never carries a store query, a candidate flag, or any directive to include candidates.
  */
-export interface ApprovedKnowledgeQueryRequest {
-  schemaVersion: ApprovedKnowledgeQuerySchemaVersion;
+export interface McsApprovedKnowledgeQueryRequest {
+  schemaVersion: McsApprovedKnowledgeQuerySchemaVersion;
   /** Team Magnificent tenant/team/BA scope — the only scope a result may serve. */
-  scope: RuntimeRequestScope;
+  scope: McsRuntimeRequestScope;
   /** Free-text objective the packet is being assembled for (e.g. `training_support`). */
   objective: string;
   /** Knowledge domains relevant to this objective; empty means no domain filter. */
-  domains: readonly KnowledgeDomain[];
+  domains: readonly McsKnowledgeDomain[];
   /** Target language for the assembled packet. */
-  language: RuntimeLanguage;
+  language: McsRuntimeLanguage;
   /**
    * Whether a same-language-unavailable approved item may be returned in the fallback
    * language. Defaults to false at the validator; never permits candidate inclusion.
@@ -70,20 +70,20 @@ export interface ApprovedKnowledgeQueryRequest {
    * deprecated/superseded/expired/not-yet-effective); a reference with no freshness metadata is
    * always treated as current, so the default policy changes nothing for a pre-P4.7 corpus.
    */
-  freshness?: KnowledgeFreshnessPolicy;
+  freshness?: McsKnowledgeFreshnessPolicy;
 }
 
 /**
  * A single candidate/review-only item that was excluded from the result. Carries no body —
  * only the identity needed for the Context Manager to stamp a `ContextExclusion` honestly.
  */
-export interface ApprovedKnowledgeExcludedItem {
-  sourceId: KnowledgeReference['sourceId'];
-  reason: ApprovedKnowledgeExclusionReason;
+export interface McsApprovedKnowledgeExcludedItem {
+  sourceId: McsKnowledgeReference['sourceId'];
+  reason: McsApprovedKnowledgeExclusionReason;
 }
 
 /** Result-level metadata: counts, language fallback, and degrade signals. */
-export interface ApprovedKnowledgeQueryResultMetadata {
+export interface McsApprovedKnowledgeQueryResultMetadata {
   /** Number of approved/active references returned. */
   approvedCount: number;
   /** Number of candidate/queued items excluded (counted, never returned). */
@@ -91,9 +91,9 @@ export interface ApprovedKnowledgeQueryResultMetadata {
   /** Always true — candidate exclusion is structural and recorded on every result. */
   candidateExcluded: true;
   /** Language metadata, including any fallback that was applied. */
-  language: RuntimeLanguageMetadata;
+  language: McsRuntimeLanguageMetadata;
   /** Present when the result is degraded (empty/unavailable); drives fail-closed assembly. */
-  degradeReasons?: readonly ApprovedKnowledgeQueryDegradeReason[];
+  degradeReasons?: readonly McsApprovedKnowledgeQueryDegradeReason[];
 }
 
 /**
@@ -104,11 +104,11 @@ export interface ApprovedKnowledgeQueryResultMetadata {
  * `status: 'degraded'` signals the Context Manager to assemble an empty-approved-knowledge,
  * fail-closed packet rather than error.
  */
-export interface ApprovedKnowledgeQueryResult {
-  schemaVersion: ApprovedKnowledgeQuerySchemaVersion;
+export interface McsApprovedKnowledgeQueryResult {
+  schemaVersion: McsApprovedKnowledgeQuerySchemaVersion;
   status: 'ok' | 'degraded';
-  scope: RuntimeRequestScope;
-  references: readonly KnowledgeReference[];
-  excluded: readonly ApprovedKnowledgeExcludedItem[];
-  metadata: ApprovedKnowledgeQueryResultMetadata;
+  scope: McsRuntimeRequestScope;
+  references: readonly McsKnowledgeReference[];
+  excluded: readonly McsApprovedKnowledgeExcludedItem[];
+  metadata: McsApprovedKnowledgeQueryResultMetadata;
 }

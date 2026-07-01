@@ -29,16 +29,16 @@
 
 import { Router } from 'express';
 import type {
-  ScriptMakerDraftPayload,
-  ScriptMakerDraftResponse,
-  ScriptMakerDraftSelectors,
-  ScriptMakerScriptKind,
+  McsScriptMakerDraftPayload,
+  McsScriptMakerDraftResponse,
+  McsScriptMakerDraftSelectors,
+  McsScriptMakerScriptKind,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import { draftInvitation } from '../domain/scriptmaker.js';
 
-const SCRIPT_KINDS: ReadonlySet<ScriptMakerScriptKind> = new Set([
+const SCRIPT_KINDS: ReadonlySet<McsScriptMakerScriptKind> = new Set([
   'default_script',
   'product_anchored',
   'reconnect',
@@ -46,9 +46,9 @@ const SCRIPT_KINDS: ReadonlySet<ScriptMakerScriptKind> = new Set([
 ]);
 
 /** Resolve the optional scriptKind selector; defaults to product_anchored. */
-function resolveScriptKind(raw: unknown): ScriptMakerScriptKind {
-  return typeof raw === 'string' && SCRIPT_KINDS.has(raw as ScriptMakerScriptKind)
-    ? (raw as ScriptMakerScriptKind)
+function resolveScriptKind(raw: unknown): McsScriptMakerScriptKind {
+  return typeof raw === 'string' && SCRIPT_KINDS.has(raw as McsScriptMakerScriptKind)
+    ? (raw as McsScriptMakerScriptKind)
     : 'product_anchored';
 }
 
@@ -87,7 +87,7 @@ scriptmakerRoutes.post(
     }
 
     const body = req.body as Partial<
-      ScriptMakerDraftPayload & ScriptMakerDraftSelectors
+      McsScriptMakerDraftPayload & McsScriptMakerDraftSelectors
     >;
     const productName = requiredStr(body?.productName);
     const videoTitle = requiredStr(body?.videoTitle);
@@ -122,7 +122,7 @@ scriptmakerRoutes.post(
         eventDay,
         eventTime,
       });
-      const response: ScriptMakerDraftResponse = {
+      const response: McsScriptMakerDraftResponse = {
         ok: true,
         draft: result.draft,
         productName,

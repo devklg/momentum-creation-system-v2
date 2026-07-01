@@ -38,11 +38,11 @@ import {
   incrementAdminSessions,
 } from '../../services/poolEvents.js';
 import type {
-  AdminDashboardFilter,
-  AdminFunnelKind,
-  AdminLiveUsageSample,
-  AdminLiveUsageStreamEvent,
-  AuditActor,
+  McsAdminDashboardFilter,
+  McsAdminFunnelKind,
+  McsAdminLiveUsageSample,
+  McsAdminLiveUsageStreamEvent,
+  McsAuditActor,
 } from '@momentum/shared';
 
 export const adminLiveOpsRoutes: Router = express.Router();
@@ -52,7 +52,7 @@ const FilterSchema = z.object({
   leaderGroup: z.enum(['all', 'leaders_only', 'non_leaders']).optional(),
 });
 
-function parseFilter(req: Request): AdminDashboardFilter {
+function parseFilter(req: Request): McsAdminDashboardFilter {
   const parsed = FilterSchema.parse({
     tmagId: typeof req.query.tmagId === 'string' ? req.query.tmagId : undefined,
     leaderGroup:
@@ -64,7 +64,7 @@ function parseFilter(req: Request): AdminDashboardFilter {
   };
 }
 
-function adminActorFromRequest(req: Request): AuditActor & { kind: 'admin' } {
+function adminActorFromRequest(req: Request): McsAuditActor & { kind: 'admin' } {
   const session = req.session!;
   const displayName =
     (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
@@ -80,7 +80,7 @@ function badFilter(res: Response, err: z.ZodError): void {
 /* ─── H.2 · GET /growth ───────────────────────────────────────────── */
 
 adminLiveOpsRoutes.get('/growth', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -121,7 +121,7 @@ adminLiveOpsRoutes.get('/growth', requireAdmin, async (req, res) => {
 /* ─── H.3 · GET /grid ─────────────────────────────────────────────── */
 
 adminLiveOpsRoutes.get('/grid', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -162,7 +162,7 @@ adminLiveOpsRoutes.get('/grid', requireAdmin, async (req, res) => {
 /* ─── H.4 · GET /funnel?kind=... ──────────────────────────────────── */
 
 adminLiveOpsRoutes.get('/funnel', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -171,7 +171,7 @@ adminLiveOpsRoutes.get('/funnel', requireAdmin, async (req, res) => {
   }
 
   const rawKind = typeof req.query.kind === 'string' ? req.query.kind : '';
-  const kind: AdminFunnelKind =
+  const kind: McsAdminFunnelKind =
     rawKind === 'ba_activation' ? 'ba_activation' : 'prospect';
 
   try {
@@ -225,8 +225,8 @@ function sseFrame(event: string, data: unknown, id?: string): string {
  * matches. `sampledAt` is excluded since it changes every tick.
  */
 function sampleEquals(
-  a: AdminLiveUsageSample | null,
-  b: AdminLiveUsageSample,
+  a: McsAdminLiveUsageSample | null,
+  b: McsAdminLiveUsageSample,
 ): boolean {
   if (!a) return false;
   return (
@@ -253,11 +253,11 @@ adminLiveOpsRoutes.get('/usage/stream', requireAdmin, async (req, res) => {
 
   // Initial snapshot — always pushed, satisfies the H.1 acceptance criterion
   // that a snapshot lands within 35s of connection.
-  let lastSample: AdminLiveUsageSample | null = null;
+  let lastSample: McsAdminLiveUsageSample | null = null;
   const pushSnapshot = (force = false): void => {
     const sample = getUsageSample();
     if (!force && sampleEquals(lastSample, sample)) return;
-    const event: AdminLiveUsageStreamEvent = { kind: 'snapshot', sample };
+    const event: McsAdminLiveUsageStreamEvent = { kind: 'snapshot', sample };
     try {
       res.write(sseFrame('snapshot', event));
       lastSample = sample;
@@ -294,7 +294,7 @@ adminLiveOpsRoutes.get('/usage/stream', requireAdmin, async (req, res) => {
 
   const tick = setInterval(() => pushSnapshot(false), USAGE_TICK_INTERVAL_MS);
   const heartbeat = setInterval(() => {
-    const event: AdminLiveUsageStreamEvent = {
+    const event: McsAdminLiveUsageStreamEvent = {
       kind: 'heartbeat',
       at: new Date().toISOString(),
     };

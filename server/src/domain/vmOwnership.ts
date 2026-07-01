@@ -6,7 +6,7 @@
  * client payload containing ownership fields is rejected before persistence.
  */
 
-import type { OwnedProspectIdentity, VmLeadIdentity } from '@momentum/shared';
+import type { McsOwnedProspectIdentity, McsVmLeadIdentity } from '@momentum/shared';
 
 export const CLIENT_OWNERSHIP_OVERRIDE_FIELDS = [
   'ownerTmagId',
@@ -54,7 +54,7 @@ export function assertNoClientOwnershipOverride(payload: unknown): void {
 
 export function assertOwnedProspectIdentity(
   value: unknown,
-): asserts value is OwnedProspectIdentity {
+): asserts value is McsOwnedProspectIdentity {
   if (!isRecord(value)) throw new VmOwnershipError('ownership_not_object');
   if (!hasNonEmptyString(value, 'ownerTmagId')) {
     throw new VmOwnershipError('missing_owner_tm_ba_id');
@@ -66,7 +66,7 @@ export function assertOwnedProspectIdentity(
 
 export function assertVmLeadIdentity(
   value: unknown,
-): asserts value is VmLeadIdentity {
+): asserts value is McsVmLeadIdentity {
   assertOwnedProspectIdentity(value);
   if (!isRecord(value)) throw new VmOwnershipError('ownership_not_object');
   if (!hasNonEmptyString(value, 'leadBatchId')) {
@@ -78,8 +78,8 @@ export function assertVmLeadIdentity(
 }
 
 export function assertSameProspectOwner(
-  expected: OwnedProspectIdentity,
-  actual: OwnedProspectIdentity,
+  expected: McsOwnedProspectIdentity,
+  actual: McsOwnedProspectIdentity,
 ): void {
   if (expected.ownerTmagId !== actual.ownerTmagId) {
     throw new VmOwnershipError('owner_tm_ba_mismatch');
@@ -89,7 +89,7 @@ export function assertSameProspectOwner(
   }
 }
 
-export function buildBaOwnedIdentity(tmagId: string): OwnedProspectIdentity {
+export function buildBaOwnedIdentity(tmagId: string): McsOwnedProspectIdentity {
   const normalized = tmagId.trim();
   if (!normalized) throw new VmOwnershipError('missing_tm_ba_id');
   return {

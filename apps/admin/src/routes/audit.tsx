@@ -10,12 +10,12 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import type {
-  AuditActor,
-  AuditActorRole,
-  AuditEntityKind,
-  AuditEntity,
-  AuditLogEntry,
-  AuditSeverity,
+  McsAuditActor,
+  McsAuditActorRole,
+  McsAuditEntityKind,
+  McsAuditEntity,
+  McsAuditLogEntry,
+  McsAuditSeverity,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,18 +23,18 @@ import { Label } from '@/components/ui/label';
 
 interface ListResponse {
   ok: boolean;
-  entries?: AuditLogEntry[];
+  entries?: McsAuditLogEntry[];
   nextCursor?: string | null;
   error?: string;
 }
 
 interface FilterDraft {
-  role: '' | AuditActorRole;
+  role: '' | McsAuditActorRole;
   actorTmagId: string;
   action: string;
-  entityKind: '' | AuditEntityKind;
+  entityKind: '' | McsAuditEntityKind;
   entityId: string;
-  severity: '' | AuditSeverity;
+  severity: '' | McsAuditSeverity;
   from: string;
   to: string;
 }
@@ -53,7 +53,7 @@ const EMPTY_FILTERS: FilterDraft = {
 export function AuditPage() {
   const [draft, setDraft] = useState<FilterDraft>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<FilterDraft>(EMPTY_FILTERS);
-  const [entries, setEntries] = useState<AuditLogEntry[] | null>(null);
+  const [entries, setEntries] = useState<McsAuditLogEntry[] | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -245,7 +245,7 @@ function Row({
   open,
   onToggle,
 }: {
-  entry: AuditLogEntry;
+  entry: McsAuditLogEntry;
   open: boolean;
   onToggle: () => void;
 }) {
@@ -281,7 +281,7 @@ function Row({
   );
 }
 
-function Details({ entry }: { entry: AuditLogEntry }) {
+function Details({ entry }: { entry: McsAuditLogEntry }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-[12px] font-mono text-cream-mute">
       <div><Label2>Entry ID</Label2> {entry.entryId}</div>
@@ -321,7 +321,7 @@ function Details({ entry }: { entry: AuditLogEntry }) {
   );
 }
 
-function actorDisplay(actor: AuditActor): string {
+function actorDisplay(actor: McsAuditActor): string {
   switch (actor.kind) {
     case 'admin':
     case 'ba':
@@ -335,7 +335,7 @@ function actorDisplay(actor: AuditActor): string {
   }
 }
 
-function entityDisplay(entity: AuditEntity): string {
+function entityDisplay(entity: McsAuditEntity): string {
   if (entity.kind === 'none') return '—';
   if (entity.displayLabel) return `${entity.kind} · ${entity.displayLabel}`;
   return `${entity.kind} · ${entity.id}`;
@@ -362,7 +362,7 @@ function buildQueryString(f: FilterDraft, before: string | null): string {
   return s ? `?${s}` : '';
 }
 
-function RolePill({ role }: { role: AuditActorRole }) {
+function RolePill({ role }: { role: McsAuditActorRole }) {
   const cls =
     role === 'admin'
       ? 'text-gold border-gold/30 bg-gold/[0.06]'
@@ -385,7 +385,7 @@ function RolePill({ role }: { role: AuditActorRole }) {
   );
 }
 
-function SeverityPill({ severity }: { severity: AuditSeverity }) {
+function SeverityPill({ severity }: { severity: McsAuditSeverity }) {
   const cls =
     severity === 'critical'
       ? 'text-red-400 border-red-400/30 bg-red-400/[0.06]'

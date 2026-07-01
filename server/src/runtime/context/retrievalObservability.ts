@@ -11,15 +11,15 @@
  */
 
 import type {
-  ApprovedKnowledgeQueryDegradeReason,
-  ApprovedKnowledgeQueryRequest,
-  ApprovedKnowledgeQueryResult,
-  KnowledgeDomain,
-  KnowledgeId,
-  RuntimeLanguage,
-  RuntimeLanguageMetadata,
-  RuntimeRequestScope,
-  SourceId,
+  McsApprovedKnowledgeQueryDegradeReason,
+  McsApprovedKnowledgeQueryRequest,
+  McsApprovedKnowledgeQueryResult,
+  McsKnowledgeDomain,
+  McsKnowledgeId,
+  McsRuntimeLanguage,
+  McsRuntimeLanguageMetadata,
+  McsRuntimeRequestScope,
+  McsSourceId,
 } from '@momentum/shared/runtime';
 import type { FreshnessExclusionVerdict } from './freshnessGuard.js';
 
@@ -54,32 +54,32 @@ export interface RetrievalObservabilityRecord {
    * keep it a short intent tag — never route prospect/user free text through it.
    */
   objective: string;
-  domains: readonly KnowledgeDomain[];
-  requestedLanguage: RuntimeLanguage;
+  domains: readonly McsKnowledgeDomain[];
+  requestedLanguage: McsRuntimeLanguage;
   allowLanguageFallback: boolean;
   outcome: 'ok' | 'degraded';
-  degradeReasons?: readonly ApprovedKnowledgeQueryDegradeReason[];
+  degradeReasons?: readonly McsApprovedKnowledgeQueryDegradeReason[];
   stageCounts: RetrievalStageCounts;
   freshnessExclusions: Partial<Record<FreshnessExclusionVerdict, number>>;
-  language: RuntimeLanguageMetadata;
+  language: McsRuntimeLanguageMetadata;
   fallbackUsed: boolean;
   machineTranslationUsed: boolean;
-  selectedKnowledgeIds: readonly KnowledgeId[];
-  candidateExcludedSourceIds: readonly SourceId[];
+  selectedKnowledgeIds: readonly McsKnowledgeId[];
+  candidateExcludedSourceIds: readonly McsSourceId[];
 }
 
 export interface RetrievalObservabilityInput {
-  request: ApprovedKnowledgeQueryRequest;
-  result: ApprovedKnowledgeQueryResult;
+  request: McsApprovedKnowledgeQueryRequest;
+  result: McsApprovedKnowledgeQueryResult;
   rawCount: number;
   statusDomainKeptCount: number;
   freshKeptCount: number;
   freshnessExclusions: Partial<Record<FreshnessExclusionVerdict, number>>;
-  candidateExcludedSourceIds: readonly SourceId[];
+  candidateExcludedSourceIds: readonly McsSourceId[];
   observedAt?: string;
 }
 
-function scopeProjection(scope: RuntimeRequestScope): RetrievalObservabilityScope {
+function scopeProjection(scope: McsRuntimeRequestScope): RetrievalObservabilityScope {
   const record = scope as {
     tenantId: string;
     teamId?: string;

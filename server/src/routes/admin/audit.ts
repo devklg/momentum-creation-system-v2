@@ -26,25 +26,25 @@ import {
   queryAuditEntries,
 } from '../../domain/auditLog.js';
 import type {
-  AuditListResponse,
-  AuditEntryResponse,
-  AuditQueryFilters,
-  AuditActorRole,
-  AuditEntityKind,
-  AuditSeverity,
+  McsAuditListResponse,
+  McsAuditEntryResponse,
+  McsAuditQueryFilters,
+  McsAuditActorRole,
+  McsAuditEntityKind,
+  McsAuditSeverity,
 } from '@momentum/shared';
 
 export const adminAuditRoutes: Router = express.Router();
 
-const ROLE_VALUES: readonly AuditActorRole[] = [
+const ROLE_VALUES: readonly McsAuditActorRole[] = [
   'admin',
   'ba',
   'system',
   'prospect',
   'anonymous',
 ];
-const SEVERITY_VALUES: readonly AuditSeverity[] = ['info', 'warn', 'critical'];
-const ENTITY_KIND_VALUES: readonly AuditEntityKind[] = [
+const SEVERITY_VALUES: readonly McsAuditSeverity[] = ['info', 'warn', 'critical'];
+const ENTITY_KIND_VALUES: readonly McsAuditEntityKind[] = [
   'brand_ambassador',
   'invite_token',
   'prospect',
@@ -63,12 +63,12 @@ const ENTITY_KIND_VALUES: readonly AuditEntityKind[] = [
 
 const QuerySchema = z.object({
   actorTmagId: z.string().min(2).max(80).optional(),
-  role: z.enum(ROLE_VALUES as [AuditActorRole, ...AuditActorRole[]]).optional(),
+  role: z.enum(ROLE_VALUES as [McsAuditActorRole, ...McsAuditActorRole[]]).optional(),
   action: z.string().min(1).max(120).optional(),
   actionPrefix: z.string().min(1).max(120).optional(),
-  entityKind: z.enum(ENTITY_KIND_VALUES as [AuditEntityKind, ...AuditEntityKind[]]).optional(),
+  entityKind: z.enum(ENTITY_KIND_VALUES as [McsAuditEntityKind, ...McsAuditEntityKind[]]).optional(),
   entityId: z.string().min(1).max(200).optional(),
-  severity: z.enum(SEVERITY_VALUES as [AuditSeverity, ...AuditSeverity[]]).optional(),
+  severity: z.enum(SEVERITY_VALUES as [McsAuditSeverity, ...McsAuditSeverity[]]).optional(),
   from: z.string().datetime().optional(),
   to: z.string().datetime().optional(),
   before: z.string().min(1).max(200).optional(),
@@ -83,11 +83,11 @@ adminAuditRoutes.get('/', requireAdmin, async (req: Request, res: Response) => {
     res.status(400).json({ ok: false, error: 'Invalid query parameters.', issues: parsed.error.issues });
     return;
   }
-  const filters: AuditQueryFilters = parsed.data;
+  const filters: McsAuditQueryFilters = parsed.data;
 
   try {
     const { entries, nextCursor } = await queryAuditEntries(filters);
-    const body: AuditListResponse = {
+    const body: McsAuditListResponse = {
       ok: true,
       entries,
       nextCursor,
@@ -116,7 +116,7 @@ adminAuditRoutes.get('/:entryId', requireAdmin, async (req: Request, res: Respon
       res.status(404).json({ ok: false, error: 'Audit entry not found.' });
       return;
     }
-    const body: AuditEntryResponse = { ok: true, entry };
+    const body: McsAuditEntryResponse = { ok: true, entry };
     res.json(body);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';

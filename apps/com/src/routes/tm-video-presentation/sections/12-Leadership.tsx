@@ -22,10 +22,10 @@
  * teal #2DD4BF, cream #F5EFE6.
  */
 
-import { LEADER_CREDIBILITY } from "@momentum/shared";
+import { MCS_LEADER_CREDIBILITY } from "@momentum/shared";
 
 export function Leadership() {
-  const { eyebrow, headline, subhead, leaders, trustLine } = LEADER_CREDIBILITY;
+  const { eyebrow, headline, subhead, leaders, trustLine } = MCS_LEADER_CREDIBILITY;
 
   return (
     <section className="tm-leadership" aria-label="Who leads this">

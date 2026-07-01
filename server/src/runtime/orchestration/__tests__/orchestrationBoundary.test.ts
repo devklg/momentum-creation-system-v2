@@ -3,17 +3,17 @@ import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type {
-  AgentId,
+  McsAgentId,
   TmagId,
-  ContextPacketId,
-  ContextRequestId,
-  CorrelationId,
-  SessionId,
-  RuntimeTurnId,
-  SourceId,
-  KnowledgeId,
-  TeamId,
-  TenantId,
+  McsContextPacketId,
+  McsContextRequestId,
+  McsCorrelationId,
+  McsSessionId,
+  McsRuntimeTurnId,
+  McsSourceId,
+  McsKnowledgeId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   buildContextPacket,
@@ -103,38 +103,38 @@ function matchingLines(pattern: RegExp): string[] {
 function identity(): OrchestrationSessionIdentity {
   return {
     scope: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
-      teamId: 'team_magnificent' as TeamId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
       tmagId: 'TMAG-ORCH-001' as TmagId,
     },
-    sessionId: 'session_orch_001' as SessionId,
+    sessionId: 'session_orch_001' as McsSessionId,
     agentKey: 'michael_magnificent',
     mode: 'browser_text',
     language: 'en',
-    correlationId: 'corr_orch_001' as CorrelationId,
+    correlationId: 'corr_orch_001' as McsCorrelationId,
   };
 }
 
 function validInput(): ContextPacketBuildInput {
   return {
-    packetId: 'ctx_orch_001' as ContextPacketId,
-    requestId: 'ctx_orch_req_001' as ContextRequestId,
+    packetId: 'ctx_orch_001' as McsContextPacketId,
+    requestId: 'ctx_orch_req_001' as McsContextRequestId,
     tenant: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
       tenantName: 'Team Magnificent Tenant',
       brandName: 'Team Magnificent',
       environment: 'development',
     },
     team: {
-      teamId: 'team_magnificent' as TeamId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
     },
     ba: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
-      teamId: 'team_magnificent' as TeamId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
       tmagId: 'TMAG-ORCH-001' as TmagId,
@@ -150,14 +150,14 @@ function validInput(): ContextPacketBuildInput {
       },
     },
     session: {
-      sessionId: 'session_orch_001' as SessionId,
+      sessionId: 'session_orch_001' as McsSessionId,
       mode: 'browser_text',
       status: 'active',
       taskType: 'training_support',
       startedAt: '2026-06-28T11:59:00.000Z',
     },
     agentKey: 'michael_magnificent',
-    agentId: 'agent_instance_michael_default' as AgentId,
+    agentId: 'agent_instance_michael_default' as McsAgentId,
     objective: 'prepare a training support turn',
     language: {
       primary: 'en',
@@ -169,8 +169,8 @@ function validInput(): ContextPacketBuildInput {
     },
     knowledgeReferences: [
       {
-        sourceId: 'knowledge_approved_001' as SourceId,
-        knowledgeId: 'knowledge_approved_001' as KnowledgeId,
+        sourceId: 'knowledge_approved_001' as McsSourceId,
+        knowledgeId: 'knowledge_approved_001' as McsKnowledgeId,
         kind: 'approved_knowledge',
         title: 'Approved training rule',
         summary: 'Approved guidance for the training support turn.',
@@ -180,7 +180,7 @@ function validInput(): ContextPacketBuildInput {
     ],
     provenance: {
       assembledBy: 'context_manager',
-      requestId: 'ctx_orch_req_001' as ContextRequestId,
+      requestId: 'ctx_orch_req_001' as McsContextRequestId,
       componentVersion: 's1.5',
       traceId: 'trace_orch_001',
     },
@@ -278,7 +278,7 @@ describe('S2.1 non-persistent runtime event capture', () => {
     const packet = buildContextPacket(validInput());
     const plan = planAgentTurn({
       identity: identity(),
-      turnId: 'turn_orch_001' as RuntimeTurnId,
+      turnId: 'turn_orch_001' as McsRuntimeTurnId,
       packet,
     });
 
@@ -294,7 +294,7 @@ describe('S2.1 non-persistent runtime event capture', () => {
   it('captures rejection and guardrail events for an invalid packet without throwing', () => {
     const plan = planAgentTurn({
       identity: identity(),
-      turnId: 'turn_orch_002' as RuntimeTurnId,
+      turnId: 'turn_orch_002' as McsRuntimeTurnId,
       packet: {},
     });
 

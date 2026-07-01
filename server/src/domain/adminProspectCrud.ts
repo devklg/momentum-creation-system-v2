@@ -53,14 +53,14 @@ import { createInvitation } from './invitations.js';
 import { findBAByTmagId } from './ba.js';
 import { refreshRowFor } from './adminProspectOversight.js';
 import type {
-  AdminProspectDirectoryRow,
-  AdminCreateProspectPayload,
-  AdminEditProspectPayload,
-  AdminSoftDeletePayload,
-  AdminRestorePayload,
-  AdminSoftDeleteState,
-  AuditActor,
-  ProspectRecord,
+  McsAdminProspectDirectoryRow,
+  McsAdminCreateProspectPayload,
+  McsAdminEditProspectPayload,
+  McsAdminSoftDeletePayload,
+  McsAdminRestorePayload,
+  McsAdminSoftDeleteState,
+  McsAuditActor,
+  McsProspectRecord,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -75,7 +75,7 @@ const MIN_REASON_LEN = 8;
  * action-verb namespace (admin.prospect.* vs ba.prospect.*), per Chat #141:
  * the verb tracks the actor so audit filtering by actionPrefix stays honest.
  */
-export type CrudActor = Extract<AuditActor, { kind: 'admin' | 'ba' }>;
+export type CrudActor = Extract<McsAuditActor, { kind: 'admin' | 'ba' }>;
 
 /** Back-compat alias — admin call sites kept this name. */
 export type AdminActor = CrudActor;
@@ -97,7 +97,7 @@ export type AdminProspectCrudError =
 type Result<T> = { ok: true; value: T } | { ok: false; error: AdminProspectCrudError };
 
 /** A normally-minted prospect has no soft-delete block; absent === not deleted. */
-type ProspectRecordMaybeDeleted = ProspectRecord & Partial<AdminSoftDeleteState>;
+type ProspectRecordMaybeDeleted = McsProspectRecord & Partial<McsAdminSoftDeleteState>;
 
 function isDeleted(p: ProspectRecordMaybeDeleted): boolean {
   return p.deleted === true;
@@ -126,13 +126,13 @@ async function findProspectByIdAnyState(
 /* ── create (MINT-ONLY — same process as a regular prospect) ────────── */
 
 export async function adminCreateProspect(
-  payload: AdminCreateProspectPayload,
+  payload: McsAdminCreateProspectPayload,
   actor: AdminActor,
 ): Promise<Result<{
   prospectId: string;
   token: string;
   inviteUrl: string;
-  row: AdminProspectDirectoryRow;
+  row: McsAdminProspectDirectoryRow;
 }>> {
   if (!validReason(payload.reason)) {
     return { ok: false, error: { kind: 'reason_too_short' } };
@@ -195,9 +195,9 @@ export async function adminCreateProspect(
 
 export async function adminEditProspect(
   prospectId: string,
-  payload: AdminEditProspectPayload,
+  payload: McsAdminEditProspectPayload,
   actor: AdminActor,
-): Promise<Result<{ prospectId: string; row: AdminProspectDirectoryRow }>> {
+): Promise<Result<{ prospectId: string; row: McsAdminProspectDirectoryRow }>> {
   if (!validReason(payload.reason)) {
     return { ok: false, error: { kind: 'reason_too_short' } };
   }
@@ -294,7 +294,7 @@ export async function adminEditProspect(
 
 export async function adminSoftDeleteProspect(
   prospectId: string,
-  payload: AdminSoftDeletePayload,
+  payload: McsAdminSoftDeletePayload,
   actor: AdminActor,
 ): Promise<Result<{ prospectId: string; deletedAt: string }>> {
   if (!validReason(payload.reason)) {
@@ -310,7 +310,7 @@ export async function adminSoftDeleteProspect(
   // RECORD-ONLY mutation. No pool_placements write, no counter touch, no
   // Neo4j tank-edge change, no ticker mutation. The slot persists exactly
   // as-is until the separate manual 8-week flush ages it out (Chat #138).
-  const patch: Partial<AdminSoftDeleteState> = {
+  const patch: Partial<McsAdminSoftDeleteState> = {
     deleted: true,
     deletedAt,
     deletedReason: payload.reason,
@@ -345,9 +345,9 @@ export async function adminSoftDeleteProspect(
 
 export async function adminRestoreProspect(
   prospectId: string,
-  payload: AdminRestorePayload,
+  payload: McsAdminRestorePayload,
   actor: AdminActor,
-): Promise<Result<{ prospectId: string; restoredAt: string; row: AdminProspectDirectoryRow }>> {
+): Promise<Result<{ prospectId: string; restoredAt: string; row: McsAdminProspectDirectoryRow }>> {
   if (!validReason(payload.reason)) {
     return { ok: false, error: { kind: 'reason_too_short' } };
   }
@@ -357,7 +357,7 @@ export async function adminRestoreProspect(
   if (!isDeleted(prospect)) return { ok: false, error: { kind: 'prospect_not_deleted' } };
 
   const restoredAt = new Date().toISOString();
-  const patch: Partial<AdminSoftDeleteState> = {
+  const patch: Partial<McsAdminSoftDeleteState> = {
     deleted: false,
     restoredAt,
     restoredByTmagId: actor.tmagId,

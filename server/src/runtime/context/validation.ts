@@ -1,8 +1,8 @@
 import type {
-  AgentKey,
+  McsAgentKey,
   TmagId,
-  ContextPacketV1,
-  RuntimeLanguage,
+  McsContextPacketV1,
+  McsRuntimeLanguage,
 } from '@momentum/shared/runtime';
 import type {
   ContextPacketFoundationBoundary,
@@ -16,13 +16,13 @@ export const CONTEXT_MANAGER_ASSEMBLER = 'context_manager' as const;
 export const TEAM_MAGNIFICENT_KEY = 'team_magnificent' as const;
 export const TEAM_MAGNIFICENT_NAME = 'Team Magnificent' as const;
 
-export const CONTEXT_PACKET_SUPPORTED_LANGUAGES = ['en', 'es'] as const satisfies readonly RuntimeLanguage[];
+export const CONTEXT_PACKET_SUPPORTED_LANGUAGES = ['en', 'es'] as const satisfies readonly McsRuntimeLanguage[];
 
 export const CONTEXT_PACKET_AGENT_KEYS = [
   'steve_success',
   'michael_magnificent',
   'ivory',
-] as const satisfies readonly AgentKey[];
+] as const satisfies readonly McsAgentKey[];
 
 export const REQUIRED_CONTEXT_RUNTIME_RULE_IDS = [
   'team_magnificent_scope',
@@ -42,7 +42,7 @@ export const contextPacketFoundationBoundary = {
   requiredRuntimeRuleIds: REQUIRED_CONTEXT_RUNTIME_RULE_IDS,
 } as const satisfies ContextPacketFoundationBoundary;
 
-export function assertValidContextPacketV1(candidate: unknown): asserts candidate is ContextPacketV1 {
+export function assertValidContextPacketV1(candidate: unknown): asserts candidate is McsContextPacketV1 {
   const result = validateContextPacketV1(candidate);
   if (!result.ok) {
     const detail = result.errors.map((error) => `${error.path}: ${error.message}`).join('; ');
@@ -50,7 +50,7 @@ export function assertValidContextPacketV1(candidate: unknown): asserts candidat
   }
 }
 
-export function prepareContextPacketFoundation(packet: ContextPacketV1): ContextPacketV1 {
+export function prepareContextPacketFoundation(packet: McsContextPacketV1): McsContextPacketV1 {
   assertValidContextPacketV1(packet);
   return packet;
 }
@@ -97,7 +97,7 @@ export function validateContextPacketV1(candidate: unknown): ContextPacketValida
     return { ok: false, errors };
   }
 
-  return { ok: true, packet: packet as unknown as ContextPacketV1, errors: [] };
+  return { ok: true, packet: packet as unknown as McsContextPacketV1, errors: [] };
 }
 
 export class ContextPacketValidationError extends Error {
@@ -179,11 +179,11 @@ function validateAgent(value: unknown, errors: ContextPacketValidationIssue[]): 
     return;
   }
 
-  if (!CONTEXT_PACKET_AGENT_KEYS.includes(value.agentKey as AgentKey)) {
+  if (!CONTEXT_PACKET_AGENT_KEYS.includes(value.agentKey as McsAgentKey)) {
     errors.push(error('agent.agentKey', 'agent_identity_invalid', 'agentKey must be a semantic runtime registry identity.'));
   }
 
-  if (value.agentId !== undefined && CONTEXT_PACKET_AGENT_KEYS.includes(value.agentId as AgentKey)) {
+  if (value.agentId !== undefined && CONTEXT_PACKET_AGENT_KEYS.includes(value.agentId as McsAgentKey)) {
     errors.push(error('agent.agentId', 'agent_identity_invalid', 'agentId must not be used as the semantic agent registry identity.'));
   }
 }
@@ -194,11 +194,11 @@ function validateLanguage(value: unknown, errors: ContextPacketValidationIssue[]
     return;
   }
 
-  if (!CONTEXT_PACKET_SUPPORTED_LANGUAGES.includes(value.primary as RuntimeLanguage)) {
+  if (!CONTEXT_PACKET_SUPPORTED_LANGUAGES.includes(value.primary as McsRuntimeLanguage)) {
     errors.push(error('language.primary', 'language_invalid', 'primary language must be en or es.'));
   }
 
-  if (value.fallback !== undefined && !CONTEXT_PACKET_SUPPORTED_LANGUAGES.includes(value.fallback as RuntimeLanguage)) {
+  if (value.fallback !== undefined && !CONTEXT_PACKET_SUPPORTED_LANGUAGES.includes(value.fallback as McsRuntimeLanguage)) {
     errors.push(error('language.fallback', 'language_invalid', 'fallback language must be en or es when present.'));
   }
 

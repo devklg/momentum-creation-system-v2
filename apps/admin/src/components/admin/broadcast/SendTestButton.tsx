@@ -12,21 +12,21 @@
 
 import { useState } from 'react';
 import type {
-  BroadcastChannel,
-  BroadcastSendTestResponse,
-  BroadcastTemplate,
+  McsBroadcastChannel,
+  McsBroadcastSendTestResponse,
+  McsBroadcastTemplate,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 
 interface SendTestButtonProps {
-  channel: BroadcastChannel;
-  template: BroadcastTemplate;
+  channel: McsBroadcastChannel;
+  template: McsBroadcastTemplate;
   disabled?: boolean;
 }
 
 export function SendTestButton({ channel, template, disabled }: SendTestButtonProps) {
   const [sending, setSending] = useState(false);
-  const [result, setResult] = useState<BroadcastSendTestResponse | null>(null);
+  const [result, setResult] = useState<McsBroadcastSendTestResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   const handleClick = async () => {
@@ -40,7 +40,7 @@ export function SendTestButton({ channel, template, disabled }: SendTestButtonPr
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channel, template }),
       });
-      const data = (await res.json()) as BroadcastSendTestResponse & {
+      const data = (await res.json()) as McsBroadcastSendTestResponse & {
         error?: string;
         issues?: string[];
       };

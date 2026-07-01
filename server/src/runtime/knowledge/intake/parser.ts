@@ -8,10 +8,10 @@
  */
 
 import type {
-  DetectedSection,
-  ParsedKnowledgeDocument,
-  ParseStatus,
-  RawKnowledgeSource,
+  McsDetectedSection,
+  McsParsedKnowledgeDocument,
+  McsParseStatus,
+  McsRawKnowledgeSource,
 } from '@momentum/shared/runtime';
 import { deriveDocumentId } from './ids.js';
 
@@ -97,11 +97,11 @@ interface OpenSection {
   hasBody: boolean;
 }
 
-function detectSections(normalized: string): DetectedSection[] {
+function detectSections(normalized: string): McsDetectedSection[] {
   if (normalized.length === 0) return [];
 
   const tokens = tokenizeLines(normalized);
-  const sections: DetectedSection[] = [];
+  const sections: McsDetectedSection[] = [];
   let current: OpenSection | null = { heading: null, level: 0, bodyStart: 0, bodyEnd: 0, hasBody: false };
 
   const close = (): void => {
@@ -140,7 +140,7 @@ function detectSections(normalized: string): DetectedSection[] {
   return sections.filter((section) => section.heading !== null || section.text.length > 0);
 }
 
-export function parseRawKnowledgeSource(source: RawKnowledgeSource): ParsedKnowledgeDocument {
+export function parseRawKnowledgeSource(source: McsRawKnowledgeSource): McsParsedKnowledgeDocument {
   const warnings: string[] = [];
 
   let pre = source.originalContent ?? '';
@@ -154,7 +154,7 @@ export function parseRawKnowledgeSource(source: RawKnowledgeSource): ParsedKnowl
   const normalizedText = normalizeWhitespace(pre);
   const detectedSections = detectSections(normalizedText);
 
-  let parseStatus: ParseStatus;
+  let parseStatus: McsParseStatus;
   if (normalizedText.trim().length === 0) {
     warnings.push('Source produced no parseable text after normalization.');
     parseStatus = 'parse_failed';

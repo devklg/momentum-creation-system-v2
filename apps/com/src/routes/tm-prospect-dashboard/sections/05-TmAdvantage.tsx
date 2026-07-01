@@ -20,7 +20,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { fetchRvmTeamStats, fetchTeamStats, type TeamStatsResponse } from '@/lib/api';
+import { fetchRvmTeamStats, fetchTeamStats, type McsTeamStatsResponse } from '@/lib/api';
 
 export interface TmAdvantageSectionProps {
   token: string;
@@ -36,7 +36,7 @@ export interface TmAdvantageSectionProps {
 
 export function TmAdvantageSection(props: TmAdvantageSectionProps) {
   const { token, baFirstName, positionNumber, copy, entryKind = 'pmv' } = props;
-  const [stats, setStats] = useState<TeamStatsResponse | null>(null);
+  const [stats, setStats] = useState<McsTeamStatsResponse | null>(null);
 
   useEffect(() => {
     let cancelled = false;

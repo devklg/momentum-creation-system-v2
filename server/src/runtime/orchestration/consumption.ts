@@ -1,4 +1,4 @@
-import type { AgentKey, ContextPacketV1 } from '@momentum/shared/runtime';
+import type { McsAgentKey, McsContextPacketV1 } from '@momentum/shared/runtime';
 // Structural validation only. The Context Manager remains the sole assembler;
 // this module imports the validator, never the packet builder.
 import { validateContextPacket } from '../context/contextManager.js';
@@ -39,7 +39,7 @@ export function consumeContextPacket(
     };
   }
 
-  const valid: ContextPacketV1 = structural.packet;
+  const valid: McsContextPacketV1 = structural.packet;
   const packetAgentKey = valid.agent.agentKey;
   const taskType = valid.session.taskType;
   const packetStatus = valid.packetStatus;
@@ -129,7 +129,7 @@ export function consumeContextPacket(
     return {
       decision: 'block_substantive',
       expectedAgentKey,
-      packetAgentKey: packetAgentKey as AgentKey,
+      packetAgentKey: packetAgentKey as McsAgentKey,
       taskType,
       packetStatus,
       issues,
@@ -140,7 +140,7 @@ export function consumeContextPacket(
     return {
       decision: 'degraded',
       expectedAgentKey,
-      packetAgentKey: packetAgentKey as AgentKey,
+      packetAgentKey: packetAgentKey as McsAgentKey,
       taskType,
       packetStatus,
       packet: valid,
@@ -153,7 +153,7 @@ export function consumeContextPacket(
   return {
     decision: 'proceed',
     expectedAgentKey,
-    packetAgentKey: packetAgentKey as AgentKey,
+    packetAgentKey: packetAgentKey as McsAgentKey,
     taskType,
     packetStatus,
     packet: valid,

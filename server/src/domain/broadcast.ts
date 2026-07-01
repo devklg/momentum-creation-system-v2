@@ -29,21 +29,21 @@ import { findBAByTmagId, listAllBAsForAdmin, type BAListItem } from './ba.js';
 import { listLeaderTmagIds } from './adminMetrics.js';
 import { appendAuditEntry } from './auditLog.js';
 import type {
-  BroadcastAudiencePreset,
-  BroadcastAudiencePreview,
-  BroadcastChannel,
-  BroadcastEnqueueRequest,
-  BroadcastOptoutReason,
-  BroadcastOptoutRow,
-  BroadcastRecipientRow,
-  BroadcastRecipientStatus,
-  BroadcastRecord,
-  BroadcastSendTestRequest,
-  BroadcastStatusCounts,
-  BroadcastTemplate,
-  AuditActor,
+  McsBroadcastAudiencePreset,
+  McsBroadcastAudiencePreview,
+  McsBroadcastChannel,
+  McsBroadcastEnqueueRequest,
+  McsBroadcastOptoutReason,
+  McsBroadcastOptoutRow,
+  McsBroadcastRecipientRow,
+  McsBroadcastRecipientStatus,
+  McsBroadcastRecord,
+  McsBroadcastSendTestRequest,
+  McsBroadcastStatusCounts,
+  McsBroadcastTemplate,
+  McsAuditActor,
 } from '@momentum/shared';
-import { BROADCAST_LIMITS } from '@momentum/shared';
+import { MCS_BROADCAST_LIMITS } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const COLL_BROADCASTS = 'broadcasts';
@@ -73,7 +73,7 @@ export const LEADER_NOTE =
 
 /** Load the global STOP/optout set. Used everywhere audience is resolved. */
 export async function loadOptoutTmagIds(): Promise<Set<string>> {
-  const result = await gatewayCall<{ documents: BroadcastOptoutRow[] }>(
+  const result = await gatewayCall<{ documents: McsBroadcastOptoutRow[] }>(
     'mongodb',
     'query',
     {
@@ -93,11 +93,11 @@ export async function loadOptoutTmagIds(): Promise<Set<string>> {
  */
 export async function appendBroadcastOptout(input: {
   tmagId: string;
-  reason: BroadcastOptoutReason;
+  reason: McsBroadcastOptoutReason;
   sourcePhone?: string | null;
   note?: string | null;
-}): Promise<BroadcastOptoutRow> {
-  const existing = await gatewayCall<{ documents: BroadcastOptoutRow[]; count: number }>(
+}): Promise<McsBroadcastOptoutRow> {
+  const existing = await gatewayCall<{ documents: McsBroadcastOptoutRow[]; count: number }>(
     'mongodb',
     'query',
     {
@@ -110,7 +110,7 @@ export async function appendBroadcastOptout(input: {
   if (existing.count > 0 && existing.documents[0]) {
     return existing.documents[0];
   }
-  const row: BroadcastOptoutRow = {
+  const row: McsBroadcastOptoutRow = {
     tmagId: input.tmagId,
     reason: input.reason,
     addedAt: new Date().toISOString(),
@@ -132,10 +132,10 @@ export async function appendBroadcastOptout(input: {
  * second return value carries the breakdown the preview surfaces.
  */
 export async function resolveAudience(
-  preset: BroadcastAudiencePreset,
-  channel: BroadcastChannel,
+  preset: McsBroadcastAudiencePreset,
+  channel: McsBroadcastChannel,
   customAudienceTmagIds: string[] | null,
-): Promise<{ recipients: BAListItem[]; preview: BroadcastAudiencePreview }> {
+): Promise<{ recipients: BAListItem[]; preview: McsBroadcastAudiencePreview }> {
   const optouts = await loadOptoutTmagIds();
   const allBas = await listAllBAsForAdmin(50_000);
 
@@ -182,7 +182,7 @@ export async function resolveAudience(
   const missingEmail = wantsEmail ? eligible.filter((b) => !b.email).length : 0;
   const missingPhone = wantsSms ? eligible.filter((b) => !b.phone).length : 0;
 
-  const preview: BroadcastAudiencePreview = {
+  const preview: McsBroadcastAudiencePreview = {
     preset,
     totalCandidates,
     excludedBySTOP,
@@ -260,8 +260,8 @@ export class BroadcastValidationError extends Error {
 }
 
 export function validateTemplate(
-  channel: BroadcastChannel,
-  template: BroadcastTemplate,
+  channel: McsBroadcastChannel,
+  template: McsBroadcastTemplate,
 ): void {
   const issues: string[] = [];
   const wantsSms = channel === 'sms' || channel === 'both';
@@ -270,8 +270,8 @@ export function validateTemplate(
   if (wantsSms) {
     const t = template.smsText?.trim() ?? '';
     if (!t) issues.push('SMS text is required when channel includes sms.');
-    if (t.length > BROADCAST_LIMITS.smsMaxChars) {
-      issues.push(`SMS text exceeds ${BROADCAST_LIMITS.smsMaxChars} characters.`);
+    if (t.length > MCS_BROADCAST_LIMITS.smsMaxChars) {
+      issues.push(`SMS text exceeds ${MCS_BROADCAST_LIMITS.smsMaxChars} characters.`);
     }
   } else if (template.smsText && template.smsText.trim() !== '') {
     issues.push('SMS text must be empty when channel does not include sms.');
@@ -282,13 +282,13 @@ export function validateTemplate(
     const text = template.emailText?.trim() ?? '';
     if (!subj) issues.push('Email subject is required when channel includes email.');
     if (!text) issues.push('Email body is required when channel includes email.');
-    if (subj.length > BROADCAST_LIMITS.emailSubjectMaxChars) {
+    if (subj.length > MCS_BROADCAST_LIMITS.emailSubjectMaxChars) {
       issues.push(
-        `Email subject exceeds ${BROADCAST_LIMITS.emailSubjectMaxChars} characters.`,
+        `Email subject exceeds ${MCS_BROADCAST_LIMITS.emailSubjectMaxChars} characters.`,
       );
     }
-    if (text.length > BROADCAST_LIMITS.emailTextMaxChars) {
-      issues.push(`Email body exceeds ${BROADCAST_LIMITS.emailTextMaxChars} characters.`);
+    if (text.length > MCS_BROADCAST_LIMITS.emailTextMaxChars) {
+      issues.push(`Email body exceeds ${MCS_BROADCAST_LIMITS.emailTextMaxChars} characters.`);
     }
   } else {
     if (template.emailSubject && template.emailSubject.trim() !== '') {
@@ -322,10 +322,10 @@ function recipientRowId(broadcastId: string, tmagId: string): string {
 function renderRecipient(
   broadcastId: string,
   ba: BAListItem,
-  channel: BroadcastChannel,
-  template: BroadcastTemplate,
+  channel: McsBroadcastChannel,
+  template: McsBroadcastTemplate,
   senderName: string,
-): BroadcastRecipientRow {
+): McsBroadcastRecipientRow {
   const [firstName, ...rest] = ba.fullName.split(' ');
   const lastName = rest.join(' ');
   const ctx: InterpolateContext = {
@@ -387,10 +387,10 @@ function renderRecipient(
  * status='queued' and dispatches.
  */
 export async function enqueueBroadcast(
-  request: BroadcastEnqueueRequest,
-  actor: AuditActor & { kind: 'admin' },
+  request: McsBroadcastEnqueueRequest,
+  actor: McsAuditActor & { kind: 'admin' },
   actorDisplayName: string,
-): Promise<{ broadcast: BroadcastRecord; recipientCount: number; excludedBySTOP: number }> {
+): Promise<{ broadcast: McsBroadcastRecord; recipientCount: number; excludedBySTOP: number }> {
   validateTemplate(request.channel, request.template);
 
   if (request.audiencePreset === 'custom') {
@@ -398,9 +398,9 @@ export async function enqueueBroadcast(
     if (list.length === 0) {
       throw new BroadcastValidationError(['Custom audience requires at least one BA ID.']);
     }
-    if (list.length > BROADCAST_LIMITS.customAudienceMaxTmagIds) {
+    if (list.length > MCS_BROADCAST_LIMITS.customAudienceMaxTmagIds) {
       throw new BroadcastValidationError([
-        `Custom audience exceeds ${BROADCAST_LIMITS.customAudienceMaxTmagIds} BA IDs.`,
+        `Custom audience exceeds ${MCS_BROADCAST_LIMITS.customAudienceMaxTmagIds} BA IDs.`,
       ]);
     }
   }
@@ -419,7 +419,7 @@ export async function enqueueBroadcast(
 
   const broadcastId = mintBroadcastId(false);
   const now = new Date().toISOString();
-  const broadcast: BroadcastRecord = {
+  const broadcast: McsBroadcastRecord = {
     broadcastId,
     createdByTmagId: actor.tmagId,
     createdByDisplayName: actorDisplayName,
@@ -501,7 +501,7 @@ export async function enqueueBroadcast(
   };
 }
 
-async function insertRecipientRows(rows: BroadcastRecipientRow[]): Promise<void> {
+async function insertRecipientRows(rows: McsBroadcastRecipientRow[]): Promise<void> {
   if (rows.length === 0) return;
   const BATCH = 200;
   for (let i = 0; i < rows.length; i += BATCH) {
@@ -514,7 +514,7 @@ async function insertRecipientRows(rows: BroadcastRecipientRow[]): Promise<void>
   }
 }
 
-function semanticDocument(b: BroadcastRecord): string {
+function semanticDocument(b: McsBroadcastRecord): string {
   const parts = [
     `channel=${b.channel}`,
     `audience=${b.audiencePreset}`,
@@ -538,10 +538,10 @@ function semanticDocument(b: BroadcastRecord): string {
  * domain stays transport-free.
  */
 export async function prepareSendTest(
-  request: BroadcastSendTestRequest,
-  actor: AuditActor & { kind: 'admin' },
+  request: McsBroadcastSendTestRequest,
+  actor: McsAuditActor & { kind: 'admin' },
   actorDisplayName: string,
-): Promise<{ broadcast: BroadcastRecord; row: BroadcastRecipientRow }> {
+): Promise<{ broadcast: McsBroadcastRecord; row: McsBroadcastRecipientRow }> {
   validateTemplate(request.channel, request.template);
 
   const ba = await findBAByTmagId(actor.tmagId);
@@ -564,7 +564,7 @@ export async function prepareSendTest(
 
   const broadcastId = mintBroadcastId(true);
   const now = new Date().toISOString();
-  const broadcast: BroadcastRecord = {
+  const broadcast: McsBroadcastRecord = {
     broadcastId,
     createdByTmagId: actor.tmagId,
     createdByDisplayName: actorDisplayName,
@@ -641,7 +641,7 @@ export async function markRecipientSending(rowId: string): Promise<void> {
     collection: COLL_RECIPIENTS,
     filter: { _id: rowId },
     update: {
-      $set: { status: 'sending' as BroadcastRecipientStatus, startedAt: new Date().toISOString() },
+      $set: { status: 'sending' as McsBroadcastRecipientStatus, startedAt: new Date().toISOString() },
       $inc: { attempts: 1 },
     },
   });
@@ -650,7 +650,7 @@ export async function markRecipientSending(rowId: string): Promise<void> {
 export async function markRecipientResult(
   rowId: string,
   patch: {
-    status: BroadcastRecipientStatus;
+    status: McsBroadcastRecipientStatus;
     smsMessageId?: string | null;
     emailMessageId?: string | null;
     failureReason?: string | null;
@@ -674,8 +674,8 @@ export async function markRecipientResult(
 
 /* ─── status (G.5 polling) ─────────────────────────────────────── */
 
-export async function getBroadcastById(broadcastId: string): Promise<BroadcastRecord | null> {
-  const result = await gatewayCall<{ documents: BroadcastRecord[] }>('mongodb', 'query', {
+export async function getBroadcastById(broadcastId: string): Promise<McsBroadcastRecord | null> {
+  const result = await gatewayCall<{ documents: McsBroadcastRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BROADCASTS,
     filter: { broadcastId },
@@ -684,8 +684,8 @@ export async function getBroadcastById(broadcastId: string): Promise<BroadcastRe
   return result.documents?.[0] ?? null;
 }
 
-export async function listRecentBroadcasts(limit = 20): Promise<BroadcastRecord[]> {
-  const result = await gatewayCall<{ documents: BroadcastRecord[] }>('mongodb', 'query', {
+export async function listRecentBroadcasts(limit = 20): Promise<McsBroadcastRecord[]> {
+  const result = await gatewayCall<{ documents: McsBroadcastRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BROADCASTS,
     filter: {},
@@ -695,15 +695,15 @@ export async function listRecentBroadcasts(limit = 20): Promise<BroadcastRecord[
   return result.documents ?? [];
 }
 
-export async function getBroadcastCounts(broadcastId: string): Promise<BroadcastStatusCounts> {
-  const result = await gatewayCall<{ documents: BroadcastRecipientRow[] }>('mongodb', 'query', {
+export async function getBroadcastCounts(broadcastId: string): Promise<McsBroadcastStatusCounts> {
+  const result = await gatewayCall<{ documents: McsBroadcastRecipientRow[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_RECIPIENTS,
     filter: { broadcastId },
     projection: { status: 1 },
     limit: 50_000,
   });
-  const counts: BroadcastStatusCounts = {
+  const counts: McsBroadcastStatusCounts = {
     queued: 0,
     sending: 0,
     sent: 0,
@@ -739,8 +739,8 @@ export async function getBroadcastCounts(broadcastId: string): Promise<Broadcast
 export async function listRecentRecipientRows(
   broadcastId: string,
   limit = 50,
-): Promise<BroadcastRecipientRow[]> {
-  const result = await gatewayCall<{ documents: BroadcastRecipientRow[] }>('mongodb', 'query', {
+): Promise<McsBroadcastRecipientRow[]> {
+  const result = await gatewayCall<{ documents: McsBroadcastRecipientRow[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_RECIPIENTS,
     filter: { broadcastId },
@@ -753,8 +753,8 @@ export async function listRecentRecipientRows(
 /**
  * Pull queued rows for the worker. Capped to keep transport bursts sane.
  */
-export async function claimQueuedRows(limit = 10): Promise<BroadcastRecipientRow[]> {
-  const result = await gatewayCall<{ documents: BroadcastRecipientRow[] }>('mongodb', 'query', {
+export async function claimQueuedRows(limit = 10): Promise<McsBroadcastRecipientRow[]> {
+  const result = await gatewayCall<{ documents: McsBroadcastRecipientRow[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_RECIPIENTS,
     filter: { status: 'queued' },
@@ -769,7 +769,7 @@ export async function claimQueuedRows(limit = 10): Promise<BroadcastRecipientRow
  * crash/restart mid-flight doesn't permanently strand them.
  */
 export async function resetStuckSendingRows(): Promise<number> {
-  const stuck = await gatewayCall<{ documents: BroadcastRecipientRow[]; count: number }>(
+  const stuck = await gatewayCall<{ documents: McsBroadcastRecipientRow[]; count: number }>(
     'mongodb',
     'query',
     {
@@ -784,7 +784,7 @@ export async function resetStuckSendingRows(): Promise<number> {
       database: MONGO_DB,
       collection: COLL_RECIPIENTS,
       filter: { _id: row.rowId },
-      update: { $set: { status: 'queued' as BroadcastRecipientStatus, startedAt: null } },
+      update: { $set: { status: 'queued' as McsBroadcastRecipientStatus, startedAt: null } },
     });
   }
   return stuck.count;
@@ -794,7 +794,7 @@ export async function resetStuckSendingRows(): Promise<number> {
  * Recompute a broadcast's top-level status from its recipient rows.
  * Called by the worker after each row resolves. Idempotent.
  */
-export async function reconcileBroadcastStatus(broadcastId: string): Promise<BroadcastRecord | null> {
+export async function reconcileBroadcastStatus(broadcastId: string): Promise<McsBroadcastRecord | null> {
   const counts = await getBroadcastCounts(broadcastId);
   const broadcast = await getBroadcastById(broadcastId);
   if (!broadcast) return null;
@@ -803,7 +803,7 @@ export async function reconcileBroadcastStatus(broadcastId: string): Promise<Bro
   const terminal = counts.sent + counts.failed + counts.skippedOptedOut + counts.skippedNoAddress;
   const total = inFlight + terminal;
 
-  let next: BroadcastRecord['status'];
+  let next: McsBroadcastRecord['status'];
   if (total === 0) next = broadcast.status;
   else if (inFlight === 0) next = 'complete';
   else if (counts.sending > 0 || counts.sent > 0 || counts.failed > 0) next = 'sending';

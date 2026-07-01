@@ -14,7 +14,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import type { AdminBaDirectoryRow } from '@momentum/shared';
+import type { McsAdminBaDirectoryRow } from '@momentum/shared';
 
 type SortKey =
   | 'fullName'
@@ -39,7 +39,7 @@ interface SortState {
 }
 
 interface Props {
-  rows: AdminBaDirectoryRow[];
+  rows: McsAdminBaDirectoryRow[];
   filterText: string;
   onOpenProfile: (tmagId: string) => void;
   onToggleCurated: (tmagId: string, next: boolean) => void;
@@ -356,8 +356,8 @@ export function DirectoryTable({
 }
 
 function compareRows(
-  a: AdminBaDirectoryRow,
-  b: AdminBaDirectoryRow,
+  a: McsAdminBaDirectoryRow,
+  b: McsAdminBaDirectoryRow,
   key: SortKey,
 ): number {
   const av = a[key];
@@ -413,7 +413,7 @@ function Td({
 function StatusPill({
   status,
 }: {
-  status: AdminBaDirectoryRow['status'];
+  status: McsAdminBaDirectoryRow['status'];
 }) {
   const cls =
     status === 'active'

@@ -1,19 +1,19 @@
 import type {
-  AgentId,
-  AgentKey,
+  McsAgentId,
+  McsAgentKey,
   TmagId,
-  ContextPacketRequest,
-  ContextRequestId,
-  CorrelationId,
-  KnowledgeId,
-  RequestId,
-  RuntimeRequestScope,
-  RuntimeTaskType,
-  RuntimeTurnId,
-  SessionId,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsContextPacketRequest,
+  McsContextRequestId,
+  McsCorrelationId,
+  McsKnowledgeId,
+  McsRequestId,
+  McsRuntimeRequestScope,
+  McsRuntimeTaskType,
+  McsRuntimeTurnId,
+  McsSessionId,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   TEAM_MAGNIFICENT_KEY,
@@ -34,29 +34,29 @@ import type {
 type FixtureContextMode = 'complete' | 'degraded' | 'failed' | 'candidate_included';
 
 const DEFAULT_CREATED_AT = '2026-06-28T12:00:02.000Z';
-const DEFAULT_SESSION_ID = 'session_s2_8_fixture_001' as SessionId;
-const DEFAULT_TURN_ID = 'turn_s2_8_fixture_001' as RuntimeTurnId;
-const DEFAULT_CORRELATION_ID = 'corr_s2_8_fixture_001' as CorrelationId;
+const DEFAULT_SESSION_ID = 'session_s2_8_fixture_001' as McsSessionId;
+const DEFAULT_TURN_ID = 'turn_s2_8_fixture_001' as McsRuntimeTurnId;
+const DEFAULT_CORRELATION_ID = 'corr_s2_8_fixture_001' as McsCorrelationId;
 
-const AGENT_IDS: Record<AgentKey, AgentId> = {
-  steve_success: 'agent_instance_steve_default' as AgentId,
-  michael_magnificent: 'agent_instance_michael_default' as AgentId,
-  ivory: 'agent_instance_ivory_default' as AgentId,
+const AGENT_IDS: Record<McsAgentKey, McsAgentId> = {
+  steve_success: 'agent_instance_steve_default' as McsAgentId,
+  michael_magnificent: 'agent_instance_michael_default' as McsAgentId,
+  ivory: 'agent_instance_ivory_default' as McsAgentId,
 };
 
-const AGENT_DISPLAY_NAMES: Record<AgentKey, string> = {
+const AGENT_DISPLAY_NAMES: Record<McsAgentKey, string> = {
   steve_success: 'Steve Success',
   michael_magnificent: 'Michael Magnificent',
   ivory: 'Ivory',
 };
 
-const AGENT_DOMAINS: Record<AgentKey, string> = {
+const AGENT_DOMAINS: Record<McsAgentKey, string> = {
   steve_success: 'success',
   michael_magnificent: 'training',
   ivory: 'relationship',
 };
 
-const AGENT_RUNTIME_MODES: Record<AgentKey, string> = {
+const AGENT_RUNTIME_MODES: Record<McsAgentKey, string> = {
   steve_success: 'interview_specialist',
   michael_magnificent: 'training_specialist',
   ivory: 'relationship_specialist',
@@ -122,8 +122,8 @@ function coordinatorInputForScenario(
 function identityForScenario(agentKey: unknown): AgentRuntimeAdapterDispatchIdentity {
   return {
     scope: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
-      teamId: 'team_magnificent' as TeamId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
       tmagId: 'TMAG-S2-8-001' as TmagId,
@@ -133,7 +133,7 @@ function identityForScenario(agentKey: unknown): AgentRuntimeAdapterDispatchIden
     mode: 'browser_text',
     language: 'en',
     correlationId: DEFAULT_CORRELATION_ID,
-    requestId: 'request_s2_8_fixture_001' as RequestId,
+    requestId: 'request_s2_8_fixture_001' as McsRequestId,
   };
 }
 
@@ -144,7 +144,7 @@ function defaultAgentKeyForScenario(scenario: RuntimeTurnFixtureScenarioType): u
 
 function defaultTaskTypeForScenario(
   scenario: RuntimeTurnFixtureScenarioType,
-): RuntimeTaskType {
+): McsRuntimeTaskType {
   if (scenario === 'invalid_objective') return 'success_interview';
   return 'training_support';
 }
@@ -203,13 +203,13 @@ function metadataForScenario(
 function createFixtureContextManager(mode: FixtureContextMode): {
   readonly port: ContextManagerRequestPort;
   readonly calls: Array<{
-    scope: RuntimeRequestScope;
-    request: ContextPacketRequest;
+    scope: McsRuntimeRequestScope;
+    request: McsContextPacketRequest;
   }>;
 } {
   const calls: Array<{
-    scope: RuntimeRequestScope;
-    request: ContextPacketRequest;
+    scope: McsRuntimeRequestScope;
+    request: McsContextPacketRequest;
   }> = [];
 
   return {
@@ -237,33 +237,33 @@ function createFixtureContextManager(mode: FixtureContextMode): {
 }
 
 function createFixtureContextPacket(
-  request: ContextPacketRequest,
+  request: McsContextPacketRequest,
   packetStatus: 'complete' | 'degraded' | 'failed',
 ) {
   const packetId = `ctx_s2_8_${request.requestId}` as string;
-  const knowledgeId = 'knowledge_s2_8_approved_001' as KnowledgeId;
-  const sourceId = 'knowledge_s2_8_approved_001' as SourceId;
+  const knowledgeId = 'knowledge_s2_8_approved_001' as McsKnowledgeId;
+  const sourceId = 'knowledge_s2_8_approved_001' as McsSourceId;
 
   return {
     schemaVersion: 'context_packet.v1',
     packetId,
-    requestId: request.requestId as unknown as ContextRequestId,
+    requestId: request.requestId as unknown as McsContextRequestId,
     createdAt: DEFAULT_CREATED_AT,
     packetStatus,
     tenant: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
       tenantName: 'Team Magnificent Tenant',
       brandName: 'Team Magnificent',
       environment: 'development',
     },
     team: {
-      teamId: 'team_magnificent' as TeamId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
     },
     ba: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
-      teamId: 'team_magnificent' as TeamId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
       tmagId: 'TMAG-S2-8-001' as TmagId,
@@ -390,7 +390,7 @@ function createFixtureContextPacket(
     guidedActions: [],
     exclusions: [],
     retrievalAudit: {
-      requestId: request.requestId as unknown as ContextRequestId,
+      requestId: request.requestId as unknown as McsContextRequestId,
       packetId,
       requestedScopes: ['team_magnificent', 'ba', 'agent_runtime'],
       includedKnowledgeIds: [knowledgeId],

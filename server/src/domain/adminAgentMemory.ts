@@ -10,13 +10,13 @@
 
 import { gatewayCall } from '../services/gateway.js';
 import type {
-  AdminAgentInteractionSummary,
-  AdminAgentMemoryStatus,
-  AdminAgentOversightResponse,
-  AdminSuccessProfileMemoryBridgeDraft,
-  AdminSuccessProfileSummary,
-  AgentId,
-  SteveDiscoveryArtifact,
+  McsAdminAgentInteractionSummary,
+  McsAdminAgentMemoryStatus,
+  McsAdminAgentOversightResponse,
+  McsAdminSuccessProfileMemoryBridgeDraft,
+  McsAdminSuccessProfileSummary,
+  McsAgentId,
+  McsSteveDiscoveryArtifact,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -27,7 +27,7 @@ const COLL_OUTBOX = 'projection_outbox';
 const CHROMA_STEVE = 'mcs_steve_discoveries';
 const CHROMA_AGENT_EVENTS = 'mcs_agent_events';
 
-interface PersistedSteveDiscovery extends SteveDiscoveryArtifact {
+interface PersistedSteveDiscovery extends McsSteveDiscoveryArtifact {
   _id: string;
 }
 
@@ -39,7 +39,7 @@ interface BaDoc {
 }
 
 interface AgentEventDoc {
-  agentId?: AgentId;
+  agentId?: McsAgentId;
   createdAt?: string;
 }
 
@@ -103,7 +103,7 @@ function baName(ba: BaDoc | undefined, fallback: string): string {
 function summarizeSuccessProfiles(
   discoveries: PersistedSteveDiscovery[],
   bas: BaDoc[],
-): AdminSuccessProfileSummary[] {
+): McsAdminSuccessProfileSummary[] {
   const baById = new Map(bas.map((b) => [b.tmagId, b]));
   return discoveries.map((d) => {
     const profile = d.successProfile;
@@ -120,9 +120,9 @@ function summarizeSuccessProfiles(
   });
 }
 
-function buildInteractionSummary(events: AgentEventDoc[]): AdminAgentInteractionSummary[] {
+function buildInteractionSummary(events: AgentEventDoc[]): McsAdminAgentInteractionSummary[] {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const agentIds: AgentId[] = ['michael', 'ivory', 'steve', 'system'];
+  const agentIds: McsAgentId[] = ['michael', 'ivory', 'steve', 'system'];
   return agentIds.map((agentId) => {
     const matching = events.filter((event) => event.agentId === agentId);
     const recent = matching.filter((event) => (event.createdAt ?? '') >= sevenDaysAgo);
@@ -141,7 +141,7 @@ function memoryStatus(args: {
   discoveries: PersistedSteveDiscovery[];
   events: AgentEventDoc[];
   outbox: OutboxDoc[];
-}): AdminAgentMemoryStatus[] {
+}): McsAdminAgentMemoryStatus[] {
   const chroma = args.chromaCollections;
   const pendingKnowledge = args.outbox.filter(
     (row) => row.tier === 'knowledge' && row.status === 'pending',
@@ -186,7 +186,7 @@ function memoryStatus(args: {
   ];
 }
 
-function bridgeDraft(discovery: PersistedSteveDiscovery): AdminSuccessProfileMemoryBridgeDraft {
+function bridgeDraft(discovery: PersistedSteveDiscovery): McsAdminSuccessProfileMemoryBridgeDraft {
   const now = new Date().toISOString();
   const id = `graphrag_success_profile_${discovery.tmagId}`;
   const profile = discovery.successProfile;
@@ -222,7 +222,7 @@ function bridgeDraft(discovery: PersistedSteveDiscovery): AdminSuccessProfileMem
   };
 }
 
-export async function buildAdminAgentOversight(): Promise<AdminAgentOversightResponse> {
+export async function buildAdminAgentOversight(): Promise<McsAdminAgentOversightResponse> {
   const warnings: string[] = [];
   const [discoveries, bas, events, outbox, chromaCollections] = await Promise.all([
     safeQuery<PersistedSteveDiscovery>(COLL_STEVE, warnings),

@@ -22,19 +22,19 @@
 
 import { useState } from 'react';
 import type {
-  AdminProspectDetail,
-  AdminProspectInterventionKind,
-  AdminProspectInterventionResponse,
+  McsAdminProspectDetail,
+  McsAdminProspectInterventionKind,
+  McsAdminProspectInterventionResponse,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 interface Props {
-  kind: AdminProspectInterventionKind;
-  detail: AdminProspectDetail;
+  kind: McsAdminProspectInterventionKind;
+  detail: McsAdminProspectDetail;
   onClose: () => void;
-  onDone: (resp: AdminProspectInterventionResponse) => void;
+  onDone: (resp: McsAdminProspectInterventionResponse) => void;
 }
 
 interface FormState {
@@ -104,7 +104,7 @@ export function InterventionModal({ kind, detail, onClose, onDone }: Props) {
         },
       );
       const data = (await res.json()) as
-        | AdminProspectInterventionResponse
+        | McsAdminProspectInterventionResponse
         | { ok: false; error: string };
       if (!('ok' in data) || !data.ok) {
         setError(('error' in data && data.error) || 'Intervention failed.');
@@ -261,14 +261,14 @@ export function InterventionModal({ kind, detail, onClose, onDone }: Props) {
 
 /* ─── kind-specific copy and route paths ────────────────────────── */
 
-const TITLE: Record<AdminProspectInterventionKind, string> = {
+const TITLE: Record<McsAdminProspectInterventionKind, string> = {
   move: 'Move prospect',
   reassign_sponsor: 'Reassign sponsor',
   manual_flush: 'Manual flush',
   force_enroll: 'Force enroll',
 };
 
-const DESCRIPTION: Record<AdminProspectInterventionKind, string> = {
+const DESCRIPTION: Record<McsAdminProspectInterventionKind, string> = {
   move:
     'Reassign the inviting BA. Position number is preserved. The original sponsor-at-mint is recorded on the prospect; the drift detector surfaces the change on the detail panel.',
   reassign_sponsor:
@@ -279,7 +279,7 @@ const DESCRIPTION: Record<AdminProspectInterventionKind, string> = {
     'Mark enrolled even if the BA hasn’t. flushReason=enrolled. Position number is preserved. THREE remains the upstream authority; this only mirrors the operational state.',
 };
 
-const PATH: Record<AdminProspectInterventionKind, string> = {
+const PATH: Record<McsAdminProspectInterventionKind, string> = {
   move: 'move',
   reassign_sponsor: 'reassign-sponsor',
   manual_flush: 'manual-flush',
@@ -288,7 +288,7 @@ const PATH: Record<AdminProspectInterventionKind, string> = {
 
 /* ─── before / after helpers ────────────────────────────────────── */
 
-function BeforeBlock({ detail }: { detail: AdminProspectDetail }) {
+function BeforeBlock({ detail }: { detail: McsAdminProspectDetail }) {
   return (
     <div className="border border-line rounded-md p-3 text-sm">
       <p className="text-[11px] font-mono tracking-label uppercase text-cream-faint mb-2">
@@ -347,8 +347,8 @@ function Diff({
 }
 
 function afterSponsor(
-  kind: AdminProspectInterventionKind,
-  detail: AdminProspectDetail,
+  kind: McsAdminProspectInterventionKind,
+  detail: McsAdminProspectDetail,
   form: FormState,
 ): string {
   if (kind === 'move') return form.toTmagId || detail.sponsorTmagIdNow;
@@ -357,8 +357,8 @@ function afterSponsor(
 }
 
 function afterState(
-  kind: AdminProspectInterventionKind,
-  current: AdminProspectDetail['state'],
+  kind: McsAdminProspectInterventionKind,
+  current: McsAdminProspectDetail['state'],
 ): string {
   if (kind === 'manual_flush') return 'expired';
   if (kind === 'force_enroll') return 'enrolled';
@@ -366,8 +366,8 @@ function afterState(
 }
 
 function afterHandoff(
-  kind: AdminProspectInterventionKind,
-  current: AdminProspectDetail['prospectStatus'],
+  kind: McsAdminProspectInterventionKind,
+  current: McsAdminProspectDetail['prospectStatus'],
 ): string {
   if (kind === 'manual_flush') return 'withdrew';
   if (kind === 'force_enroll') return 'enrolled';

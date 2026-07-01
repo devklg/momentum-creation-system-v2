@@ -23,11 +23,11 @@
 
 import { useState } from 'react';
 import type {
-  AdminBaDirectoryRow,
-  AdminCreateBaResponse,
-  AdminEditBaResponse,
-  AdminBaDeleteResponse,
-  AdminBaRestoreResponse,
+  McsAdminBaDirectoryRow,
+  McsAdminCreateBaResponse,
+  McsAdminEditBaResponse,
+  McsAdminBaDeleteResponse,
+  McsAdminBaRestoreResponse,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,15 +36,15 @@ import { Label } from '@/components/ui/label';
 export type BaCrudMode = 'create' | 'edit' | 'delete' | 'restore';
 
 export type BaCrudResponse =
-  | ({ mode: 'create' } & AdminCreateBaResponse)
-  | ({ mode: 'edit' } & AdminEditBaResponse)
-  | ({ mode: 'delete' } & AdminBaDeleteResponse)
-  | ({ mode: 'restore' } & AdminBaRestoreResponse);
+  | ({ mode: 'create' } & McsAdminCreateBaResponse)
+  | ({ mode: 'edit' } & McsAdminEditBaResponse)
+  | ({ mode: 'delete' } & McsAdminBaDeleteResponse)
+  | ({ mode: 'restore' } & McsAdminBaRestoreResponse);
 
 interface Props {
   mode: BaCrudMode;
   /** Present for edit/delete/restore; absent for create. */
-  row: AdminBaDirectoryRow | null;
+  row: McsAdminBaDirectoryRow | null;
   onClose: () => void;
   onDone: (resp: BaCrudResponse) => void;
 }
@@ -69,7 +69,7 @@ function splitName(fullName: string): { firstName: string; lastName: string } {
   return { firstName: parts[0] ?? '', lastName: parts.slice(1).join(' ') };
 }
 
-function initialForm(mode: BaCrudMode, row: AdminBaDirectoryRow | null): FormState {
+function initialForm(mode: BaCrudMode, row: McsAdminBaDirectoryRow | null): FormState {
   if (mode === 'edit' && row) {
     const { firstName, lastName } = splitName(row.fullName);
     return {
@@ -329,14 +329,14 @@ export function BaCrudModal({ mode, row, onClose, onDone }: Props) {
 type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
 
 type BaCrudOkData =
-  | AdminCreateBaResponse
-  | AdminEditBaResponse
-  | AdminBaDeleteResponse
-  | AdminBaRestoreResponse;
+  | McsAdminCreateBaResponse
+  | McsAdminEditBaResponse
+  | McsAdminBaDeleteResponse
+  | McsAdminBaRestoreResponse;
 
 async function callApi(
   mode: BaCrudMode,
-  row: AdminBaDirectoryRow | null,
+  row: McsAdminBaDirectoryRow | null,
   form: FormState,
 ): Promise<ApiResult<BaCrudOkData>> {
   const reason = form.reason.trim();
@@ -344,7 +344,7 @@ async function callApi(
   const id = row ? encodeURIComponent(row.tmagId) : '';
 
   if (mode === 'create') {
-    return request<AdminCreateBaResponse>(base, 'POST', {
+    return request<McsAdminCreateBaResponse>(base, 'POST', {
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
       threeBaId: form.threeBaId.trim(),
@@ -358,7 +358,7 @@ async function callApi(
     });
   }
   if (mode === 'edit') {
-    return request<AdminEditBaResponse>(`${base}/${id}`, 'PATCH', {
+    return request<McsAdminEditBaResponse>(`${base}/${id}`, 'PATCH', {
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
       threeBaId: form.threeBaId.trim(),
@@ -371,9 +371,9 @@ async function callApi(
     });
   }
   if (mode === 'delete') {
-    return request<AdminBaDeleteResponse>(`${base}/${id}`, 'DELETE', { reason });
+    return request<McsAdminBaDeleteResponse>(`${base}/${id}`, 'DELETE', { reason });
   }
-  return request<AdminBaRestoreResponse>(`${base}/${id}/restore`, 'POST', { reason });
+  return request<McsAdminBaRestoreResponse>(`${base}/${id}/restore`, 'POST', { reason });
 }
 
 async function request<T>(

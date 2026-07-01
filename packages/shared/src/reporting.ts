@@ -25,7 +25,7 @@
  * prospect/BA scoring or income ranking.
  */
 
-import type { AdminDashboardFilter } from './types.js';
+import type { McsAdminDashboardFilter } from './types.js';
 
 /* ─── Time range (Kevin decision A, Chat #143: preset enum AND explicit dates) ── */
 
@@ -34,7 +34,7 @@ import type { AdminDashboardFilter } from './types.js';
  * days, last 90 days, lifetime"). `by_month` is the cohort-grouped view;
  * the other three are flat windows ending now.
  */
-export type AdminReportRangePreset = 'lifetime' | 'last_30d' | 'last_90d' | 'by_month';
+export type McsAdminReportRangePreset = 'lifetime' | 'last_30d' | 'last_90d' | 'by_month';
 
 /**
  * The resolved time range a report runs against. Exactly one of `preset` or
@@ -43,8 +43,8 @@ export type AdminReportRangePreset = 'lifetime' | 'last_30d' | 'last_90d' | 'by_
  * its PDF footer can state the precise window. `fromIso` is null for
  * lifetime / open-start ranges.
  */
-export interface AdminReportTimeRange {
-  preset: AdminReportRangePreset | null;
+export interface McsAdminReportTimeRange {
+  preset: McsAdminReportRangePreset | null;
   /** Inclusive lower bound actually queried (ISO-8601), or null = open start. */
   fromIso: string | null;
   /** Exclusive upper bound actually queried (ISO-8601). Defaults to now. */
@@ -54,9 +54,9 @@ export interface AdminReportTimeRange {
 }
 
 /** Query input accepted by every report route, parsed from the query string. */
-export interface AdminReportQuery {
-  filter: AdminDashboardFilter;
-  range: AdminReportTimeRange;
+export interface McsAdminReportQuery {
+  filter: McsAdminDashboardFilter;
+  range: McsAdminReportTimeRange;
 }
 
 /* ─── Shared envelope ──────────────────────────────────────────── */
@@ -66,16 +66,16 @@ export interface AdminReportQuery {
  * verifiability contract — SHA-256 over the exact rows returned — so a JSON
  * snapshot and its PDF render can be cross-checked.
  */
-export interface AdminReportMeta {
-  reportKey: AdminReportKey;
+export interface McsAdminReportMeta {
+  reportKey: McsAdminReportKey;
   title: string;
   generatedAt: string;
-  appliedFilter: AdminDashboardFilter;
-  range: AdminReportTimeRange;
+  appliedFilter: McsAdminDashboardFilter;
+  range: McsAdminReportTimeRange;
   sourceHash: string;
 }
 
-export type AdminReportKey =
+export type McsAdminReportKey =
   | 'ba_activation'
   | 'training_completion'
   | 'invite_to_presentation'
@@ -85,9 +85,9 @@ export type AdminReportKey =
   | 'leader_scorecards';
 
 /** Generic JSON response wrapper for a report route. */
-export interface AdminReportResponse<Result> {
+export interface McsAdminReportResponse<Result> {
   ok: true;
-  meta: AdminReportMeta;
+  meta: McsAdminReportMeta;
   result: Result;
 }
 
@@ -98,7 +98,7 @@ export interface AdminReportResponse<Result> {
  * FIRST occurrence; null = not yet reached. Days-to-first-invite measures
  * signup → first invitation_sent.
  */
-export interface AdminActivationRow {
+export interface McsAdminActivationRow {
   tmagId: string;
   fullName: string;
   signupAt: string;
@@ -111,7 +111,7 @@ export interface AdminActivationRow {
 }
 
 /** Cohort bucket (signup month, "YYYY-MM") with activation counts. */
-export interface AdminActivationCohort {
+export interface McsAdminActivationCohort {
   cohort: string;
   signups: number;
   reachedWelcome: number;
@@ -121,15 +121,15 @@ export interface AdminActivationCohort {
   reachedFirstEnrollment: number;
 }
 
-export interface AdminActivationReport {
+export interface McsAdminActivationReport {
   totals: {
     signups: number;
     reachedFirstInvite: number;
     reachedFirstEnrollment: number;
     medianDaysSignupToFirstInvite: number | null;
   };
-  cohorts: AdminActivationCohort[];
-  rows: AdminActivationRow[];
+  cohorts: McsAdminActivationCohort[];
+  rows: McsAdminActivationRow[];
 }
 
 /* ─── 2 · Training completion ───────────────────────────────────── */
@@ -147,7 +147,7 @@ export interface AdminActivationReport {
  * complete and correct the moment data flows; no rework needed. See the
  * report's provenanceNote.
  */
-export interface AdminTrainingReportRow {
+export interface McsAdminTrainingReportRow {
   tmagId: string;
   fullName: string;
   signupAt: string;
@@ -158,7 +158,7 @@ export interface AdminTrainingReportRow {
   daysSignupToFastStartComplete: number | null;
 }
 
-export interface AdminTrainingReport {
+export interface McsAdminTrainingReport {
   totals: {
     bas: number;
     fastStartComplete: number;
@@ -168,7 +168,7 @@ export interface AdminTrainingReport {
   };
   /** Module-by-module completion counts across the scoped BA set. */
   moduleCompletion: Array<{ moduleId: 1 | 2 | 3 | 4 | 5; completed: number }>;
-  rows: AdminTrainingReportRow[];
+  rows: McsAdminTrainingReportRow[];
   /** Surfaced so the JSON consumer can show the same honesty as the PDF. */
   provenanceNote: string;
 }
@@ -186,7 +186,7 @@ export interface AdminTrainingReport {
  * Other transitions are not currently timestamped per-state; the report
  * carries a provenanceNote.
  */
-export interface AdminInviteFunnelStageCount {
+export interface McsAdminInviteFunnelStageCount {
   stage: 'minted' | 'clicked' | 'video_started' | 'video_complete';
   tokens: number;
   /** Cumulative conversion from mint (0–1). null when minted=0. */
@@ -197,9 +197,9 @@ export interface AdminInviteFunnelStageCount {
  * Per-BA breakdown of the invite funnel (Chat #143 extension). BAs with
  * zero mints are HIDDEN — same convention as Report #5's perBa.
  */
-export type AdminInviteFunnelPerBaSort = 'completes' | 'mints' | 'completion_pct';
+export type McsAdminInviteFunnelPerBaSort = 'completes' | 'mints' | 'completion_pct';
 
-export interface AdminInviteFunnelPerBaRow {
+export interface McsAdminInviteFunnelPerBaRow {
   tmagId: string;
   fullName: string;
   minted: number;
@@ -209,7 +209,7 @@ export interface AdminInviteFunnelPerBaRow {
   mintToCompletePct: number | null;
 }
 
-export interface AdminInviteFunnelReport {
+export interface McsAdminInviteFunnelReport {
   totals: {
     minted: number;
     clicked: number;
@@ -221,11 +221,11 @@ export interface AdminInviteFunnelReport {
     avgDaysMintToClick: number | null;
     avgDaysClickToVideoComplete: number | null;
   };
-  stages: AdminInviteFunnelStageCount[];
+  stages: McsAdminInviteFunnelStageCount[];
   /** Per-BA breakdown; default sort is by videoComplete desc. */
-  perBa: AdminInviteFunnelPerBaRow[];
+  perBa: McsAdminInviteFunnelPerBaRow[];
   /** Sort field actually used to order perBa[] in this response. */
-  perBaSort: AdminInviteFunnelPerBaSort;
+  perBaSort: McsAdminInviteFunnelPerBaSort;
   provenanceNote: string;
 }
 
@@ -237,7 +237,7 @@ export interface AdminInviteFunnelReport {
  * flushedAt, flushReason). Net = placements − flushes (any reason).
  * Enrollments are flushes with flushReason='enrolled'.
  */
-export interface AdminQueueVelocityDay {
+export interface McsAdminQueueVelocityDay {
   date: string; // YYYY-MM-DD UTC
   placements: number;
   flushes: number;
@@ -245,7 +245,7 @@ export interface AdminQueueVelocityDay {
   net: number;
 }
 
-export interface AdminQueueVelocityReport {
+export interface McsAdminQueueVelocityReport {
   totals: {
     placements: number;
     flushes: number;
@@ -256,7 +256,7 @@ export interface AdminQueueVelocityReport {
     enrollmentsPerDay7d: number | null;
     enrollmentsPerDay30d: number | null;
   };
-  days: AdminQueueVelocityDay[];
+  days: McsAdminQueueVelocityDay[];
 }
 
 /* ─── 5 · Enrollment completion (renamed from spec's "Registration handoff") ── */
@@ -269,31 +269,31 @@ export interface AdminQueueVelocityReport {
  * the moment the BA marks the prospect enrolled (pool_placements with
  * flushReason='enrolled' and flushedAt).
  */
-export interface AdminEnrollmentPerBa {
+export interface McsAdminEnrollmentPerBa {
   tmagId: string;
   fullName: string;
   enrollments: number;
 }
-export interface AdminEnrollmentPerDay {
+export interface McsAdminEnrollmentPerDay {
   date: string; // YYYY-MM-DD UTC
   enrollments: number;
 }
-export interface AdminEnrollmentPerCohort {
+export interface McsAdminEnrollmentPerCohort {
   cohort: string; // BA signup-month YYYY-MM
   bas: number;
   enrollments: number;
 }
 
-export interface AdminEnrollmentReport {
+export interface McsAdminEnrollmentReport {
   totals: {
     enrollments: number;
     enrollingBas: number;
     perDayAvg7d: number | null;
     perDayAvg30d: number | null;
   };
-  perBa: AdminEnrollmentPerBa[];
-  perDay: AdminEnrollmentPerDay[];
-  perCohort: AdminEnrollmentPerCohort[];
+  perBa: McsAdminEnrollmentPerBa[];
+  perDay: McsAdminEnrollmentPerDay[];
+  perCohort: McsAdminEnrollmentPerCohort[];
 }
 
 /* ─── 6 · Follow-up aging ──────────────────────────────────────── */
@@ -306,30 +306,30 @@ export interface AdminEnrollmentReport {
  * crm_dispositions.updatedAt as the closest available proxy; the
  * provenanceNote states the proxy explicitly so consumers know.
  */
-export type AdminFollowUpBucket = '0-3' | '4-7' | '8-14' | '15+';
+export type McsAdminFollowUpBucket = '0-3' | '4-7' | '8-14' | '15+';
 
-export interface AdminFollowUpBucketCount {
-  bucket: AdminFollowUpBucket;
+export interface McsAdminFollowUpBucketCount {
+  bucket: McsAdminFollowUpBucket;
   prospects: number;
 }
 
-export interface AdminFollowUpRow {
+export interface McsAdminFollowUpRow {
   prospectId: string;
   sponsorTmagId: string;
   disposition: string;
   lastUpdatedAt: string;
   ageDays: number;
-  bucket: AdminFollowUpBucket;
+  bucket: McsAdminFollowUpBucket;
 }
 
-export interface AdminFollowUpReport {
+export interface McsAdminFollowUpReport {
   totals: {
     prospects: number;
     avgAgeDays: number | null;
     maxAgeDays: number | null;
   };
-  buckets: AdminFollowUpBucketCount[];
-  rows: AdminFollowUpRow[]; // sorted oldest first
+  buckets: McsAdminFollowUpBucketCount[];
+  rows: McsAdminFollowUpRow[]; // sorted oldest first
   provenanceNote: string;
 }
 
@@ -341,7 +341,7 @@ export interface AdminFollowUpReport {
  * no algorithmic heuristic permitted). ADMIN I.5: Kevin-only, never shown
  * to the leader.
  */
-export interface AdminLeaderScorecardRow {
+export interface McsAdminLeaderScorecardRow {
   tmagId: string;
   fullName: string;
   signupAt: string;
@@ -351,9 +351,9 @@ export interface AdminLeaderScorecardRow {
   teamVideoCompletesLast30d: number;
 }
 
-export interface AdminLeaderScorecardReport {
+export interface McsAdminLeaderScorecardReport {
   leaderCount: number;
-  rows: AdminLeaderScorecardRow[];
+  rows: McsAdminLeaderScorecardRow[];
   /** Why the list may be empty (Chat #100 / LEADER_DETECTION_NOTE). */
   provenanceNote: string;
 }

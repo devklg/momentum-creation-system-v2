@@ -10,13 +10,13 @@
  * map to nothing — fail-closed.
  */
 
-import type { KnowledgeChunk, KnowledgeId, KnowledgeReference } from '@momentum/shared/runtime';
+import type { McsKnowledgeChunk, McsKnowledgeId, McsKnowledgeReference } from '@momentum/shared/runtime';
 import { deriveKnowledgeId } from './ids.js';
 
-export function chunkToKnowledgeReference(chunk: KnowledgeChunk): KnowledgeReference | null {
+export function chunkToKnowledgeReference(chunk: McsKnowledgeChunk): McsKnowledgeReference | null {
   if (chunk.status !== 'active' || !chunk.retrievalEligible) return null;
   return {
-    knowledgeId: deriveKnowledgeId(chunk.chunkId) as KnowledgeId,
+    knowledgeId: deriveKnowledgeId(chunk.chunkId) as McsKnowledgeId,
     domain: chunk.domain,
     status: 'active',
     language: chunk.language,
@@ -26,9 +26,9 @@ export function chunkToKnowledgeReference(chunk: KnowledgeChunk): KnowledgeRefer
 }
 
 export function chunksToKnowledgeReferences(
-  chunks: readonly KnowledgeChunk[],
-): KnowledgeReference[] {
+  chunks: readonly McsKnowledgeChunk[],
+): McsKnowledgeReference[] {
   return chunks
     .map(chunkToKnowledgeReference)
-    .filter((reference): reference is KnowledgeReference => reference !== null);
+    .filter((reference): reference is McsKnowledgeReference => reference !== null);
 }

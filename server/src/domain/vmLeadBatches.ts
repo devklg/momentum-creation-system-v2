@@ -8,7 +8,7 @@
 import { randomUUID } from 'node:crypto';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
-import type { LeadBatchRecord, VmLeadBatchSource, VmLeadType } from '@momentum/shared';
+import type { McsLeadBatchRecord, McsVmLeadBatchSource, McsVmLeadType } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const COLLECTION = 'vm_lead_batches';
@@ -31,17 +31,17 @@ export interface CreateLeadBatchInput {
   quantityImported: number;
 }
 
-export async function createLeadBatch(input: CreateLeadBatchInput): Promise<LeadBatchRecord> {
+export async function createLeadBatch(input: CreateLeadBatchInput): Promise<McsLeadBatchRecord> {
   const now = new Date().toISOString();
-  const batch: LeadBatchRecord = {
+  const batch: McsLeadBatchRecord = {
     leadBatchId: `batch_${randomUUID()}`,
     ownerTmagId: input.ownerTmagId,
     sponsorTmagId: input.sponsorTmagId,
     name: input.name,
-    source: input.source as VmLeadBatchSource,
+    source: input.source as McsVmLeadBatchSource,
     sourceLabel: input.source,
     country: input.country,
-    leadType: input.leadType as VmLeadType,
+    leadType: input.leadType as McsVmLeadType,
     quantityExpected: input.quantityImported,
     quantityImported: input.quantityImported,
     quantitySuppressed: 0,
@@ -96,8 +96,8 @@ export async function createLeadBatch(input: CreateLeadBatchInput): Promise<Lead
 export async function findLeadBatchForOwner(
   leadBatchId: string,
   ownerTmagId: string,
-): Promise<LeadBatchRecord> {
-  const result = await gatewayCall<{ documents: LeadBatchRecord[] }>('mongodb', 'query', {
+): Promise<McsLeadBatchRecord> {
+  const result = await gatewayCall<{ documents: McsLeadBatchRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { leadBatchId, ownerTmagId },
@@ -108,8 +108,8 @@ export async function findLeadBatchForOwner(
   return batch;
 }
 
-export async function listLeadBatchesForOwner(ownerTmagId: string): Promise<LeadBatchRecord[]> {
-  const result = await gatewayCall<{ documents: LeadBatchRecord[] }>('mongodb', 'query', {
+export async function listLeadBatchesForOwner(ownerTmagId: string): Promise<McsLeadBatchRecord[]> {
+  const result = await gatewayCall<{ documents: McsLeadBatchRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { ownerTmagId },
@@ -123,7 +123,7 @@ export async function markLeadBatchImported(
   leadBatchId: string,
   ownerTmagId: string,
   importedCount: number,
-): Promise<LeadBatchRecord> {
+): Promise<McsLeadBatchRecord> {
   const batch = await findLeadBatchForOwner(leadBatchId, ownerTmagId);
   const now = new Date().toISOString();
   const quantityImported = batch.quantityImported + importedCount;

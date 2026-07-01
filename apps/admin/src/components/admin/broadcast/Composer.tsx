@@ -12,13 +12,13 @@
  * hits Send Test.
  */
 
-import type { BroadcastChannel, BroadcastTemplate } from '@momentum/shared';
-import { BROADCAST_INTERPOLATION_TOKENS, BROADCAST_LIMITS } from '@momentum/shared';
+import type { McsBroadcastChannel, McsBroadcastTemplate } from '@momentum/shared';
+import { MCS_BROADCAST_INTERPOLATION_TOKENS, MCS_BROADCAST_LIMITS } from '@momentum/shared';
 
 interface ComposerProps {
-  channel: BroadcastChannel;
-  template: BroadcastTemplate;
-  onTemplateChange: (next: BroadcastTemplate) => void;
+  channel: McsBroadcastChannel;
+  template: McsBroadcastTemplate;
+  onTemplateChange: (next: McsBroadcastTemplate) => void;
   /** Seed for the live preview pane. */
   previewFirstName: string;
   previewLastName: string;
@@ -45,7 +45,7 @@ export function Composer({
           Interpolation tokens (server-rendered per recipient)
         </p>
         <div className="flex flex-wrap gap-2">
-          {BROADCAST_INTERPOLATION_TOKENS.map((tok) => (
+          {MCS_BROADCAST_INTERPOLATION_TOKENS.map((tok) => (
             <code
               key={tok}
               className="text-[12px] font-mono text-gold bg-gold/[0.08] border border-gold/30 px-2 py-0.5 rounded"
@@ -62,7 +62,7 @@ export function Composer({
             htmlFor="bc-sms"
             className="font-mono tracking-label text-[10px] text-gold uppercase"
           >
-            SMS text · max {BROADCAST_LIMITS.smsMaxChars}
+            SMS text · max {MCS_BROADCAST_LIMITS.smsMaxChars}
           </label>
           <textarea
             id="bc-sms"
@@ -71,12 +71,12 @@ export function Composer({
               onTemplateChange({ ...template, smsText: e.target.value || null })
             }
             rows={4}
-            maxLength={BROADCAST_LIMITS.smsMaxChars}
+            maxLength={MCS_BROADCAST_LIMITS.smsMaxChars}
             placeholder="Hey {{firstName}} — quick note from {{senderName}}. …"
             className="w-full bg-ink-2 border border-line text-cream rounded-md px-3.5 py-2 text-sm font-body placeholder:text-cream/30 focus:outline-none focus:border-gold transition-colors"
           />
           <p className="font-mono text-[10px] text-cream-faint">
-            {(template.smsText ?? '').length} / {BROADCAST_LIMITS.smsMaxChars}
+            {(template.smsText ?? '').length} / {MCS_BROADCAST_LIMITS.smsMaxChars}
           </p>
         </div>
       )}
@@ -88,7 +88,7 @@ export function Composer({
               htmlFor="bc-subject"
               className="font-mono tracking-label text-[10px] text-gold uppercase"
             >
-              Email subject · max {BROADCAST_LIMITS.emailSubjectMaxChars}
+              Email subject · max {MCS_BROADCAST_LIMITS.emailSubjectMaxChars}
             </label>
             <input
               id="bc-subject"
@@ -97,7 +97,7 @@ export function Composer({
               onChange={(e) =>
                 onTemplateChange({ ...template, emailSubject: e.target.value || null })
               }
-              maxLength={BROADCAST_LIMITS.emailSubjectMaxChars}
+              maxLength={MCS_BROADCAST_LIMITS.emailSubjectMaxChars}
               placeholder="Quick note, {{firstName}}"
               className="w-full bg-ink-2 border border-line text-cream rounded-md px-3.5 h-11 text-sm font-body placeholder:text-cream/30 focus:outline-none focus:border-gold transition-colors"
             />
@@ -107,7 +107,7 @@ export function Composer({
               htmlFor="bc-email"
               className="font-mono tracking-label text-[10px] text-gold uppercase"
             >
-              Email body · plain text · max {BROADCAST_LIMITS.emailTextMaxChars}
+              Email body · plain text · max {MCS_BROADCAST_LIMITS.emailTextMaxChars}
             </label>
             <textarea
               id="bc-email"
@@ -116,12 +116,12 @@ export function Composer({
                 onTemplateChange({ ...template, emailText: e.target.value || null })
               }
               rows={10}
-              maxLength={BROADCAST_LIMITS.emailTextMaxChars}
+              maxLength={MCS_BROADCAST_LIMITS.emailTextMaxChars}
               placeholder={'Hi {{firstName}},\n\n…\n\n— {{senderName}}'}
               className="w-full bg-ink-2 border border-line text-cream rounded-md px-3.5 py-2 text-sm font-body placeholder:text-cream/30 focus:outline-none focus:border-gold transition-colors"
             />
             <p className="font-mono text-[10px] text-cream-faint">
-              {(template.emailText ?? '').length} / {BROADCAST_LIMITS.emailTextMaxChars}
+              {(template.emailText ?? '').length} / {MCS_BROADCAST_LIMITS.emailTextMaxChars}
             </p>
           </div>
         </>
@@ -146,8 +146,8 @@ function Preview({
   lastName,
   senderName,
 }: {
-  channel: BroadcastChannel;
-  template: BroadcastTemplate;
+  channel: McsBroadcastChannel;
+  template: McsBroadcastTemplate;
   firstName: string;
   lastName: string;
   senderName: string;

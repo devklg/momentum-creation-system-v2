@@ -1,13 +1,13 @@
 import type {
-  CorrelationId,
-  RuntimeTurnId,
-  SessionId,
+  McsCorrelationId,
+  McsRuntimeTurnId,
+  McsSessionId,
 } from '@momentum/shared/runtime';
 import type { MichaelResponseContractV1 } from '../types.js';
 
-const SESSION_ID = 'session_s2_12_michael_response_fixture' as SessionId;
-const TURN_ID = 'turn_s2_12_michael_response_fixture' as RuntimeTurnId;
-const CORRELATION_ID = 'corr_s2_12_michael_response_fixture' as CorrelationId;
+const SESSION_ID = 'session_s2_12_michael_response_fixture' as McsSessionId;
+const TURN_ID = 'turn_s2_12_michael_response_fixture' as McsRuntimeTurnId;
+const CORRELATION_ID = 'corr_s2_12_michael_response_fixture' as McsCorrelationId;
 const GENERATED_AT = '2026-06-28T12:00:12.000Z';
 const COMPLETE_CONTEXT_PACKET_ID = 'ctx_s2_12_michael_complete';
 const DEGRADED_CONTEXT_PACKET_ID = 'ctx_s2_12_michael_degraded';

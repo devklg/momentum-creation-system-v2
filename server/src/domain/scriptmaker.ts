@@ -40,8 +40,8 @@ import {
   interpolateMasterContent,
 } from '../services/masterContent.js';
 import type {
-  ScriptMakerScriptKind,
-  TenantTemplateKey,
+  McsScriptMakerScriptKind,
+  McsTenantTemplateKey,
 } from '@momentum/shared';
 
 export interface DraftInvitationInput {
@@ -53,7 +53,7 @@ export interface DraftInvitationInput {
    * Which master-content invitation seed to draft from. Defaults to
    * 'product_anchored' (the product-video front door). See SCRIPT_KIND_KEYS.
    */
-  scriptKind?: ScriptMakerScriptKind;
+  scriptKind?: McsScriptMakerScriptKind;
   /** Feeds the event_invite seed's {{eventDay}} token. */
   eventDay?: string | null;
   /** Feeds the event_invite seed's {{eventTime}} token. */
@@ -73,7 +73,7 @@ export interface DraftInvitationResult {
  * gateway/Mongo failure it returns the code default (the safe baseline shipped
  * in domain/adminTenantArchitecture.ts), so ScriptMaker degrades, never 500s.
  */
-const SCRIPT_KIND_KEYS: Record<ScriptMakerScriptKind, TenantTemplateKey> = {
+const SCRIPT_KIND_KEYS: Record<McsScriptMakerScriptKind, McsTenantTemplateKey> = {
   default_script: 'team.invitation.default_script',
   product_anchored: 'team.invitation.product_anchored',
   reconnect: 'team.invitation.reconnect',

@@ -37,11 +37,11 @@ import {
   type AdminActor,
 } from '../../domain/adminBaCrud.js';
 import type {
-  AdminBaDirectoryResponse,
-  AdminBaNoteResponse,
-  AdminBaProfileResponse,
-  AdminLeaderTagResponse,
-  AdminSponsorOverrideResponse,
+  McsAdminBaDirectoryResponse,
+  McsAdminBaNoteResponse,
+  McsAdminBaProfileResponse,
+  McsAdminLeaderTagResponse,
+  McsAdminSponsorOverrideResponse,
 } from '@momentum/shared';
 
 export const adminBasRoutes: Router = express.Router();
@@ -57,7 +57,7 @@ adminBasRoutes.get('/', requireAdmin, async (req: Request, res: Response) => {
       // keeps working. The new client reads `rows:`.
       listAllBAsForAdmin(limit),
     ]);
-    const body: AdminBaDirectoryResponse & { bas: typeof legacy; count: number } = {
+    const body: McsAdminBaDirectoryResponse & { bas: typeof legacy; count: number } = {
       ok: true,
       count: rows.length,
       rows,
@@ -87,7 +87,7 @@ adminBasRoutes.get('/:tmagId', requireAdmin, async (req: Request, res: Response)
       res.status(404).json({ ok: false, error: 'BA not found.' });
       return;
     }
-    const body: AdminBaProfileResponse = { ok: true, profile };
+    const body: McsAdminBaProfileResponse = { ok: true, profile };
     res.json(body);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
@@ -141,7 +141,7 @@ adminBasRoutes.post(
       }
       // Refresh the row so the table can update in place.
       const bundle = await getTmagProfileBundle(params.data.tmagId);
-      const responseBody: AdminSponsorOverrideResponse = {
+      const responseBody: McsAdminSponsorOverrideResponse = {
         ok: true,
         override: result.entry,
         row:
@@ -184,7 +184,7 @@ adminBasRoutes.post(
         setByDisplayName: session.email,
         reason: body.data.reason,
       });
-      const responseBody: AdminLeaderTagResponse = {
+      const responseBody: McsAdminLeaderTagResponse = {
         ok: true,
         tmagId: params.data.tmagId,
         curated: body.data.curated,
@@ -223,7 +223,7 @@ adminBasRoutes.post(
         authorTmagId: session.tmagId,
         authorDisplayName: session.email,
       });
-      const responseBody: AdminBaNoteResponse = { ok: true, note };
+      const responseBody: McsAdminBaNoteResponse = { ok: true, note };
       res.json(responseBody);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'unknown';

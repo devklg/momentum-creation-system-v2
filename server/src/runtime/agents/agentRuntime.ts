@@ -1,18 +1,18 @@
 import type {
-  AgentContext,
-  AgentRuntimeInstanceConfig,
-  ContextPacketV1,
-  RuntimeRequestScope,
+  McsAgentContext,
+  McsAgentRuntimeInstanceConfig,
+  McsContextPacketV1,
+  McsRuntimeRequestScope,
 } from '@momentum/shared/runtime';
 import { defineRuntimeBoundary } from '../common.js';
 import type { BackendRuntimeBoundaryDescriptor } from '../common.js';
 
 export interface AgentRuntimeBoundaryPort {
   prepareAgentContext(
-    scope: RuntimeRequestScope,
-    config: AgentRuntimeInstanceConfig,
-    contextPacket: ContextPacketV1,
-  ): Promise<AgentContext>;
+    scope: McsRuntimeRequestScope,
+    config: McsAgentRuntimeInstanceConfig,
+    contextPacket: McsContextPacketV1,
+  ): Promise<McsAgentContext>;
 }
 
 export const agentRuntimeBoundary = defineRuntimeBoundary({

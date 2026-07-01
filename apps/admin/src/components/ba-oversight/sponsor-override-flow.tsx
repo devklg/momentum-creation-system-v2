@@ -23,17 +23,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type {
-  AdminBaDirectoryRow,
-  AdminSponsorOverrideEntry,
-  AdminSponsorOverrideResponse,
+  McsAdminBaDirectoryRow,
+  McsAdminSponsorOverrideEntry,
+  McsAdminSponsorOverrideResponse,
 } from '@momentum/shared';
 
 interface Props {
-  row: AdminBaDirectoryRow;
+  row: McsAdminBaDirectoryRow;
   onCancel: () => void;
   onApplied: (
-    nextRow: AdminBaDirectoryRow,
-    entry: AdminSponsorOverrideEntry,
+    nextRow: McsAdminBaDirectoryRow,
+    entry: McsAdminSponsorOverrideEntry,
   ) => void;
 }
 
@@ -84,7 +84,7 @@ export function SponsorOverrideFlow({ row, onCancel, onApplied }: Props) {
         },
       );
       const data = (await res.json()) as
-        | AdminSponsorOverrideResponse
+        | McsAdminSponsorOverrideResponse
         | { ok: false; error: unknown };
       if (!data.ok) {
         setErr(humanError(data.error));

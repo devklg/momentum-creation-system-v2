@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import type {
-  ApprovedKnowledgeQueryRequest,
+  McsApprovedKnowledgeQueryRequest,
   TmagId,
-  KnowledgeDomain,
-  KnowledgeFreshness,
-  KnowledgeId,
-  KnowledgeReference,
-  RawKnowledgeSource,
-  RuntimeLanguage,
-  RuntimeRequestScope,
-  RuntimeScope,
-  SessionId,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsKnowledgeDomain,
+  McsKnowledgeFreshness,
+  McsKnowledgeId,
+  McsKnowledgeReference,
+  McsRawKnowledgeSource,
+  McsRuntimeLanguage,
+  McsRuntimeRequestScope,
+  McsRuntimeScope,
+  McsSessionId,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
@@ -42,17 +42,17 @@ const MICHAEL = 'michael_magnificent';
 
 // ── fixtures ────────────────────────────────────────────────────────────────
 
-function scope(): RuntimeRequestScope {
+function scope(): McsRuntimeRequestScope {
   return {
-    tenantId: 'tenant_team_magnificent' as TenantId,
-    teamId: 'team_magnificent' as TeamId,
+    tenantId: 'tenant_team_magnificent' as McsTenantId,
+    teamId: 'team_magnificent' as McsTeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
     tmagId: 'TMAG-P411-001' as TmagId,
   };
 }
 
-function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): ApprovedKnowledgeQueryRequest {
+function request(overrides: Partial<McsApprovedKnowledgeQueryRequest> = {}): McsApprovedKnowledgeQueryRequest {
   return {
     schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
     scope: scope(),
@@ -64,45 +64,45 @@ function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): Approv
 }
 
 interface KOpts {
-  language?: RuntimeLanguage;
-  translationStatus?: KnowledgeReference['translationStatus'];
-  domain?: KnowledgeDomain;
-  status?: KnowledgeReference['status'];
-  freshness?: KnowledgeFreshness;
+  language?: McsRuntimeLanguage;
+  translationStatus?: McsKnowledgeReference['translationStatus'];
+  domain?: McsKnowledgeDomain;
+  status?: McsKnowledgeReference['status'];
+  freshness?: McsKnowledgeFreshness;
 }
 
-function knowledge(id: string, opts: KOpts = {}): KnowledgeReference {
+function knowledge(id: string, opts: KOpts = {}): McsKnowledgeReference {
   return {
-    knowledgeId: `knowledge_p411_${id}` as KnowledgeId,
+    knowledgeId: `knowledge_p411_${id}` as McsKnowledgeId,
     domain: opts.domain ?? 'training',
     status: opts.status ?? 'approved',
     language: opts.language ?? 'en',
     translationStatus: opts.translationStatus ?? 'same_language',
-    sourceId: `source_p411_${id}` as SourceId,
+    sourceId: `source_p411_${id}` as McsSourceId,
     ...(opts.freshness ? { freshness: opts.freshness } : {}),
   };
 }
 
-function providerReturning(references: readonly KnowledgeReference[]): ApprovedKnowledgeProvider {
+function providerReturning(references: readonly McsKnowledgeReference[]): ApprovedKnowledgeProvider {
   return { async listApprovedKnowledge() { return references; } };
 }
 
-function adapterFor(references: readonly KnowledgeReference[], sink?: (r: RetrievalObservabilityRecord) => void) {
+function adapterFor(references: readonly McsKnowledgeReference[], sink?: (r: RetrievalObservabilityRecord) => void) {
   return createContextManagerRetrievalAdapter(providerReturning(references), {
     now: () => NOW,
     ...(sink ? { onRetrievalObservability: sink } : {}),
   });
 }
 
-function packetInput(language: RuntimeLanguage, overrides: Partial<ContextPacketBuildInput> = {}): ContextPacketBuildInput {
+function packetInput(language: McsRuntimeLanguage, overrides: Partial<ContextPacketBuildInput> = {}): ContextPacketBuildInput {
   return {
     packetId: 'ctx_packet_p411' as ContextPacketBuildInput['packetId'],
     requestId: 'ctx_req_p411' as ContextPacketBuildInput['requestId'],
-    tenant: { tenantId: 'tenant_team_magnificent' as TenantId, tenantName: 'TM', brandName: TEAM_MAGNIFICENT_NAME, environment: 'development' },
-    team: { teamId: 'team_magnificent' as TeamId, teamKey: TEAM_MAGNIFICENT_KEY, teamName: TEAM_MAGNIFICENT_NAME },
+    tenant: { tenantId: 'tenant_team_magnificent' as McsTenantId, tenantName: 'TM', brandName: TEAM_MAGNIFICENT_NAME, environment: 'development' },
+    team: { teamId: 'team_magnificent' as McsTeamId, teamKey: TEAM_MAGNIFICENT_KEY, teamName: TEAM_MAGNIFICENT_NAME },
     ba: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
-      teamId: 'team_magnificent' as TeamId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
       tmagId: 'TMAG-P411-001' as TmagId,
@@ -117,7 +117,7 @@ function packetInput(language: RuntimeLanguage, overrides: Partial<ContextPacket
         canUseBrowserText: true,
       },
     },
-    session: { sessionId: 'session_p411' as SessionId, mode: 'browser_text', status: 'active', taskType: 'training_support', startedAt: '2026-06-30T12:00:00.000Z' },
+    session: { sessionId: 'session_p411' as McsSessionId, mode: 'browser_text', status: 'active', taskType: 'training_support', startedAt: '2026-06-30T12:00:00.000Z' },
     agentKey: MICHAEL,
     objective: 'training_support',
     language: { primary: language, userPreference: language, translationAllowed: true, translationStatus: 'same_language', machineTranslationUsed: false, humanReviewed: true },
@@ -128,7 +128,7 @@ function packetInput(language: RuntimeLanguage, overrides: Partial<ContextPacket
 }
 
 /** Assemble the packet exactly as the Context Manager would from a retrieval result. */
-function assembledPacket(result: Awaited<ReturnType<ReturnType<typeof adapterFor>['retrieveApprovedKnowledge']>>, language: RuntimeLanguage) {
+function assembledPacket(result: Awaited<ReturnType<ReturnType<typeof adapterFor>['retrieveApprovedKnowledge']>>, language: McsRuntimeLanguage) {
   const upgrade = safeFallbackFromResult(result); // null when ok; { packetStatus, degraded } when degraded
   return buildContextPacket(packetInput(language, {
     knowledgeReferences: toContextReferences(result),
@@ -145,7 +145,7 @@ function assembledPacket(result: Awaited<ReturnType<ReturnType<typeof adapterFor
  */
 function selectionFromPacketStatus(
   packetStatus: 'complete' | 'degraded' | 'failed',
-  language: RuntimeLanguage,
+  language: McsRuntimeLanguage,
   clarity: 'clear' | 'ambiguous' = 'clear',
 ): MichaelResponseCatalogSelectionRequest {
   if (packetStatus === 'complete') {
@@ -240,12 +240,12 @@ describe('P4.11 canary — Scenario 2: approved knowledge drives substantive sel
 describe('P4.11 canary — Scenario 3: excluded knowledge never enters the Context Packet', () => {
   it('only the approved-active-fresh-scoped reference survives; observability counts exclusions content-free', async () => {
     const records: RetrievalObservabilityRecord[] = [];
-    const mix: KnowledgeReference[] = [
+    const mix: McsKnowledgeReference[] = [
       knowledge('ok'),
-      { ...knowledge('candidate'), status: 'candidate' as KnowledgeReference['status'] },
-      { ...knowledge('review'), status: 'queued_for_review' as KnowledgeReference['status'] },
-      { ...knowledge('rejected'), status: 'rejected' as KnowledgeReference['status'] },
-      { ...knowledge('archived'), status: 'archived' as KnowledgeReference['status'] },
+      { ...knowledge('candidate'), status: 'candidate' as McsKnowledgeReference['status'] },
+      { ...knowledge('review'), status: 'queued_for_review' as McsKnowledgeReference['status'] },
+      { ...knowledge('rejected'), status: 'rejected' as McsKnowledgeReference['status'] },
+      { ...knowledge('archived'), status: 'archived' as McsKnowledgeReference['status'] },
       knowledge('deprecated', { freshness: { lifecycle: 'deprecated' } }),
       knowledge('stale', { freshness: { updatedAt: '2020-01-01T00:00:00.000Z' } }),
       knowledge('wronglang', { language: 'es' }),
@@ -275,8 +275,8 @@ describe('P4.11 canary — Scenario 3: excluded knowledge never enters the Conte
   });
 
   it('a parse-failed source maps to zero references (P4.5A intake), so it can never enter retrieval', () => {
-    const source: RawKnowledgeSource = {
-      sourceId: 'source_p411_parsefail' as SourceId,
+    const source: McsRawKnowledgeSource = {
+      sourceId: 'source_p411_parsefail' as McsSourceId,
       title: 'Empty',
       sourceType: 'note',
       format: 'markdown',
@@ -285,7 +285,7 @@ describe('P4.11 canary — Scenario 3: excluded knowledge never enters the Conte
       createdAt: '2026-06-30T12:00:00.000Z',
       language: 'en',
       domain: 'training',
-      scope: scope() as RuntimeScope,
+      scope: scope() as McsRuntimeScope,
       version: 1,
       status: 'active',
     };
@@ -297,7 +297,7 @@ describe('P4.11 canary — Scenario 3: excluded knowledge never enters the Conte
 
   it('all-excluded input degrades safely (no approved reference survives)', async () => {
     const result = await adapterFor([
-      { ...knowledge('candidate'), status: 'candidate' as KnowledgeReference['status'] },
+      { ...knowledge('candidate'), status: 'candidate' as McsKnowledgeReference['status'] },
       knowledge('deprecated', { freshness: { lifecycle: 'deprecated' } }),
     ]).retrieveApprovedKnowledge(request());
     expect(result.status).toBe('degraded');
@@ -315,7 +315,7 @@ describe('P4.11 canary — Scenario 3: excluded knowledge never enters the Conte
     // Scope enforcement lives at the provider boundary — the adapter forwards request.scope to
     // listApprovedKnowledge and never widens it. This proves scope-bound retrieval (not a
     // post-hoc adapter scope filter, which does not and should not exist).
-    let seenScope: RuntimeRequestScope | undefined;
+    let seenScope: McsRuntimeRequestScope | undefined;
     const provider: ApprovedKnowledgeProvider = {
       async listApprovedKnowledge(s) { seenScope = s; return [knowledge('a')]; },
     };
@@ -366,7 +366,7 @@ describe('P4.11 canary — Scenario 4: language and fallback behavior', () => {
   it('an unsupported language request fails closed (rejected by the query contract)', async () => {
     const adapter = adapterFor([knowledge('a')]);
     await expect(
-      adapter.retrieveApprovedKnowledge(request({ language: 'fr' as RuntimeLanguage })),
+      adapter.retrieveApprovedKnowledge(request({ language: 'fr' as McsRuntimeLanguage })),
     ).rejects.toThrow();
   });
 });

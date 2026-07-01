@@ -31,14 +31,14 @@ import { env } from '../env.js';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
-  AppendAuditEntryInput,
+  McsAppendAuditEntryInput,
   McsRuntimeAuditInput,
-  AuditActor,
-  AuditEntity,
-  AuditLogEntry,
-  AuditQueryFilters,
-  AuditActorRole,
-  AuditSeverity,
+  McsAuditActor,
+  McsAuditEntity,
+  McsAuditLogEntry,
+  McsAuditQueryFilters,
+  McsAuditActorRole,
+  McsAuditSeverity,
   McsRuntimeAuditAction,
   McsRuntimeAuditLogEntry,
 } from '@momentum/shared';
@@ -59,7 +59,7 @@ function mintEntryId(timestamp: string): string {
   return `audit_${tsSlice}_${rand}`;
 }
 
-function roleOfActor(actor: AuditActor): AuditActorRole {
+function roleOfActor(actor: McsAuditActor): McsAuditActorRole {
   return actor.kind;
 }
 
@@ -77,13 +77,13 @@ function clampSnapshot(
   return { _truncated: true, _bytes: json.length, preview: json.slice(0, MAX_SNAPSHOT_BYTES) };
 }
 
-function entityLabel(entity: AuditEntity): string {
+function entityLabel(entity: McsAuditEntity): string {
   if (entity.displayLabel) return `${entity.kind}:${entity.displayLabel}`;
   if (entity.kind === 'none') return 'none';
   return `${entity.kind}:${entity.id}`;
 }
 
-function actorLabel(actor: AuditActor): string {
+function actorLabel(actor: McsAuditActor): string {
   switch (actor.kind) {
     case 'admin':
     case 'ba':
@@ -97,7 +97,7 @@ function actorLabel(actor: AuditActor): string {
   }
 }
 
-function semanticDocument(entry: AuditLogEntry): string {
+function semanticDocument(entry: McsAuditLogEntry): string {
   const parts = [
     `action=${entry.action}`,
     `actor=${actorLabel(entry.actor)}`,
@@ -112,12 +112,12 @@ function semanticDocument(entry: AuditLogEntry): string {
  * Triple-stacked append. The ONLY writer. Returns the persisted
  * entry so callers can echo entryId in their own response if useful.
  */
-export async function appendAuditEntry(input: AppendAuditEntryInput): Promise<AuditLogEntry> {
+export async function appendAuditEntry(input: McsAppendAuditEntryInput): Promise<McsAuditLogEntry> {
   const now = new Date().toISOString();
   const timestamp = input.timestamp ?? now;
   const entryId = mintEntryId(timestamp);
 
-  const entry: AuditLogEntry = {
+  const entry: McsAuditLogEntry = {
     entryId,
     timestamp,
     createdAt: now,
@@ -162,7 +162,7 @@ export async function appendAuditEntry(input: AppendAuditEntryInput): Promise<Au
 }
 
 function buildCypher(
-  entry: AuditLogEntry,
+  entry: McsAuditLogEntry,
 ): { cypher: string; params?: Record<string, unknown> } {
   const baseProps =
     'entryId: $entryId, timestamp: datetime($timestamp), action: $action, role: $role, severity: $severity, entityKind: $entityKind, entityId: $entityId';
@@ -203,7 +203,7 @@ function buildCypher(
   };
 }
 
-function buildMongoFilter(filters: AuditQueryFilters): Record<string, unknown> {
+function buildMongoFilter(filters: McsAuditQueryFilters): Record<string, unknown> {
   const f: Record<string, unknown> = {};
 
   if (filters.role) f.role = filters.role;
@@ -242,8 +242,8 @@ function buildMongoFilter(filters: AuditQueryFilters): Record<string, unknown> {
  * deterministically.
  */
 export async function queryAuditEntries(
-  filters: AuditQueryFilters,
-): Promise<{ entries: AuditLogEntry[]; nextCursor: string | null }> {
+  filters: McsAuditQueryFilters,
+): Promise<{ entries: McsAuditLogEntry[]; nextCursor: string | null }> {
   const limit = Math.max(1, Math.min(filters.limit ?? DEFAULT_LIMIT, MAX_LIMIT));
   const filter = buildMongoFilter(filters);
 
@@ -258,7 +258,7 @@ export async function queryAuditEntries(
     }
   }
 
-  const result = await gatewayCall<{ documents: AuditLogEntry[]; count: number }>(
+  const result = await gatewayCall<{ documents: McsAuditLogEntry[]; count: number }>(
     'mongodb',
     'query',
     {
@@ -278,8 +278,8 @@ export async function queryAuditEntries(
   return { entries, nextCursor };
 }
 
-export async function findAuditEntry(entryId: string): Promise<AuditLogEntry | null> {
-  const result = await gatewayCall<{ documents: AuditLogEntry[] }>('mongodb', 'query', {
+export async function findAuditEntry(entryId: string): Promise<McsAuditLogEntry | null> {
+  const result = await gatewayCall<{ documents: McsAuditLogEntry[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { entryId },
@@ -317,7 +317,7 @@ export function runtimeAuditPersistenceEnabled(): boolean {
  * Default severity per action (P7.2 §3.2): gate denials are expected traffic
  * (`warn`), persistence-flag flips are `critical`, everything else `info`.
  */
-function runtimeSeverityFor(action: McsRuntimeAuditAction): AuditSeverity {
+function runtimeSeverityFor(action: McsRuntimeAuditAction): McsAuditSeverity {
   if (action === 'runtime.gate.denied') return 'warn';
   if (action === 'runtime.persistence.enabled' || action === 'runtime.persistence.disabled') {
     return 'critical';
@@ -370,8 +370,8 @@ export async function appendRuntimeAuditEntry(
   // Actor is the runtime agent acting as a system principal — never a BA-authored
   // write. Entity is the turn itself; kind stays 'none' (no new AuditEntityKind
   // member — append-only) and the `runtime.*` action prefix isolates the read.
-  const actor: AuditActor = { kind: 'system', label: `runtime:${runtime.agent}` };
-  const entity: AuditEntity = {
+  const actor: McsAuditActor = { kind: 'system', label: `runtime:${runtime.agent}` };
+  const entity: McsAuditEntity = {
     kind: 'none',
     id: runtime.turnId,
     displayLabel: `${runtime.agent} turn`,

@@ -4,8 +4,8 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type {
-  AdminVmOverviewResponse,
-  AdminVmOwnershipCorrectionResponse,
+  McsAdminVmOverviewResponse,
+  McsAdminVmOwnershipCorrectionResponse,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +35,7 @@ const EMPTY_CORRECTION: CorrectionForm = {
 };
 
 export function VmPage() {
-  const [data, setData] = useState<AdminVmOverviewResponse | null>(null);
+  const [data, setData] = useState<McsAdminVmOverviewResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [correction, setCorrection] = useState<CorrectionForm>(EMPTY_CORRECTION);
@@ -48,7 +48,7 @@ export function VmPage() {
       setErr(null);
       try {
         const res = await fetch('/api/admin/vm/overview', { credentials: 'include' });
-        const body = (await res.json()) as AdminVmOverviewResponse & { error?: string };
+        const body = (await res.json()) as McsAdminVmOverviewResponse & { error?: string };
         if (!body.ok) {
           setErr(body.error ?? 'Could not load VM overview.');
           return;
@@ -87,7 +87,7 @@ export function VmPage() {
         body: JSON.stringify(body),
       });
       const result = (await res.json()) as
-        | AdminVmOwnershipCorrectionResponse
+        | McsAdminVmOwnershipCorrectionResponse
         | { ok: false; error: string };
       if (!result.ok) {
         setErr(result.error || 'Ownership correction audit failed.');

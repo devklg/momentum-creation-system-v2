@@ -1,4 +1,4 @@
-import type { RuntimeTaskType } from '@momentum/shared/runtime';
+import type { McsRuntimeTaskType } from '@momentum/shared/runtime';
 import { describe, expect, it } from 'vitest';
 import { runMichaelRuntimeAdapterContract } from '../michaelRuntimeAdapterContract.js';
 import {
@@ -29,7 +29,7 @@ const SUBSTANTIVE_TRAINING_GUIDANCE_PATTERN =
 type ContractInputOverrides = {
   readonly scenario?: RuntimeTurnFixtureScenarioType;
   readonly agentKey?: unknown;
-  readonly taskType?: RuntimeTaskType;
+  readonly taskType?: McsRuntimeTaskType;
   readonly language?: unknown;
   readonly intent?: 'clear_training_support' | 'ambiguous_training_support';
   readonly mutateRuntimeTurn?: (
@@ -217,7 +217,7 @@ describe('S2.16 Michael runtime adapter contract — Spanish safe paths', () => 
       'relationship_coaching',
       'invitation_drafting',
       'journal_teaching',
-    ] as const satisfies readonly RuntimeTaskType[];
+    ] as const satisfies readonly McsRuntimeTaskType[];
 
     for (const taskType of wrongTaskTypes) {
       const result = await runContract({ taskType, language: 'es' });

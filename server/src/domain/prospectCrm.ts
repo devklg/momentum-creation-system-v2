@@ -17,16 +17,16 @@ import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
 import type {
-  AuditActor,
-  VmLeadLifecycleStatus,
-  ProspectCRMRecord,
-  ProspectCrmSource,
-  ProspectCrmStatus,
-  ProspectTimelineEventRecord,
-  ProspectTimelineEventKind,
+  McsAuditActor,
+  McsVmLeadLifecycleStatus,
+  McsProspectCRMRecord,
+  McsProspectCrmSource,
+  McsProspectCrmStatus,
+  McsProspectTimelineEventRecord,
+  McsProspectTimelineEventKind,
 } from '@momentum/shared';
 
-type ProspectCRMDocument = ProspectCRMRecord & { token: string | null };
+type ProspectCRMDocument = McsProspectCRMRecord & { token: string | null };
 
 const MONGO_DB = 'momentum';
 const CRM_COLLECTION = 'prospect_crm_records';
@@ -49,7 +49,7 @@ interface CreateOrUpdateCrmInput {
   token: string;
   ownerTmagId: string;
   sponsorTmagId: string;
-  source: ProspectCrmSource;
+  source: McsProspectCrmSource;
   leadId?: string | null;
   leadBatchId?: string | null;
   vmCampaignId?: string | null;
@@ -61,7 +61,7 @@ interface TimelineInput {
   crmRecordId?: string | null;
   ownerTmagId: string;
   sponsorTmagId: string;
-  kind: ProspectTimelineEventKind;
+  kind: McsProspectTimelineEventKind;
   note: string;
   metadata?: Record<string, unknown>;
   createdAt?: string;
@@ -88,7 +88,7 @@ function crmIdForProspect(prospectId: string): string {
   return `crm_${prospectId}`;
 }
 
-function bulkLeadStatusFor(kind: ProspectTimelineEventKind): VmLeadLifecycleStatus | null {
+function bulkLeadStatusFor(kind: McsProspectTimelineEventKind): McsVmLeadLifecycleStatus | null {
   switch (kind) {
     case 'link_clicked':
       return 'link_clicked';
@@ -117,7 +117,7 @@ function bulkLeadStatusFor(kind: ProspectTimelineEventKind): VmLeadLifecycleStat
   }
 }
 
-function crmStatusFor(kind: ProspectTimelineEventKind): ProspectCrmStatus | null {
+function crmStatusFor(kind: McsProspectTimelineEventKind): McsProspectCrmStatus | null {
   switch (kind) {
     case 'link_clicked':
     case 'activated':
@@ -166,10 +166,10 @@ export async function findCrmRecordByToken(token: string): Promise<ProspectCRMDo
 export async function listCrmRecordsForOwner(
   ownerTmagId: string,
   includeClosed = false,
-): Promise<ProspectCRMRecord[]> {
+): Promise<McsProspectCRMRecord[]> {
   const filter: Record<string, unknown> = { ownerTmagId };
   if (!includeClosed) filter.status = { $ne: 'closed' };
-  const result = await gatewayCall<{ documents: ProspectCRMRecord[] }>('mongodb', 'query', {
+  const result = await gatewayCall<{ documents: McsProspectCRMRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: CRM_COLLECTION,
     filter,
@@ -182,8 +182,8 @@ export async function listCrmRecordsForOwner(
 export async function listTimelineForProspect(
   prospectId: string,
   ownerTmagId: string,
-): Promise<ProspectTimelineEventRecord[]> {
-  const result = await gatewayCall<{ documents: ProspectTimelineEventRecord[] }>(
+): Promise<McsProspectTimelineEventRecord[]> {
+  const result = await gatewayCall<{ documents: McsProspectTimelineEventRecord[] }>(
     'mongodb',
     'query',
     {
@@ -199,10 +199,10 @@ export async function listTimelineForProspect(
 
 export async function appendProspectTimelineEvent(
   input: TimelineInput,
-): Promise<ProspectTimelineEventRecord> {
+): Promise<McsProspectTimelineEventRecord> {
   const createdAt = input.createdAt ?? new Date().toISOString();
   const eventId = `ptl_${randomUUID()}`;
-  const record: ProspectTimelineEventRecord = {
+  const record: McsProspectTimelineEventRecord = {
     eventId,
     prospectId: input.prospectId,
     crmRecordId: input.crmRecordId ?? null,
@@ -370,7 +370,7 @@ export async function createOrUpdateCrmRecordForToken(
 
 export async function applyCrmLifecycleEvent(
   prospectId: string,
-  kind: ProspectTimelineEventKind,
+  kind: McsProspectTimelineEventKind,
   note: string,
   metadata: Record<string, unknown> = {},
 ): Promise<ProspectCRMDocument> {
@@ -380,7 +380,7 @@ export async function applyCrmLifecycleEvent(
 
   const now = new Date().toISOString();
   const nextStatus = crmStatusFor(kind);
-  const patch: Partial<ProspectCRMRecord> = { updatedAt: now };
+  const patch: Partial<McsProspectCRMRecord> = { updatedAt: now };
   if (nextStatus) patch.status = nextStatus;
 
   await gatewayCall('mongodb', 'update', {
@@ -439,9 +439,9 @@ export async function getOwnerScopedCrmRecord(
 export async function closeCrmAsNewBa(input: {
   prospectId: string;
   ownerTmagId: string;
-  actor: AuditActor;
+  actor: McsAuditActor;
   reason: string;
-}): Promise<ProspectCRMRecord> {
+}): Promise<McsProspectCRMRecord> {
   const record = await getOwnerScopedCrmRecord(input.prospectId, input.ownerTmagId);
   if (record.status === 'closed' && record.disposition === 'new_brand_ambassador') return record;
 
@@ -543,7 +543,7 @@ export async function recordOwnershipCorrectionAudit(input: {
   oldSponsorTmagId: string;
   newSponsorTmagId: string;
   reason: string;
-  actor: AuditActor;
+  actor: McsAuditActor;
 }): Promise<void> {
   await appendAuditEntry({
     actor: input.actor,

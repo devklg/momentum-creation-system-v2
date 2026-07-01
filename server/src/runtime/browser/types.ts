@@ -1,16 +1,16 @@
 import type {
-  AgentEventType,
-  AgentKey,
-  BaRuntimeScope,
-  BrowserTextTurnWirePayload,
-  BrowserTranscriptTurn,
-  BrowserVoiceAgentTurnWirePayload,
-  BrowserVoiceError,
-  BrowserVoiceState,
-  CorrelationId,
-  IdempotencyKey,
-  RuntimeLanguage,
-  SessionId,
+  McsAgentEventType,
+  McsAgentKey,
+  McsBaRuntimeScope,
+  McsBrowserTextTurnWirePayload,
+  McsBrowserTranscriptTurn,
+  McsBrowserVoiceAgentTurnWirePayload,
+  McsBrowserVoiceError,
+  McsBrowserVoiceState,
+  McsCorrelationId,
+  McsIdempotencyKey,
+  McsRuntimeLanguage,
+  McsSessionId,
 } from '@momentum/shared/runtime';
 import type { RuntimeAgentEventEnvelope } from '../events/index.js';
 
@@ -41,22 +41,22 @@ export type BrowserVoiceTextValidationResult<TValue> =
       errors: BrowserVoiceTextValidationIssue[];
     };
 
-export interface BrowserVoiceTextSessionFoundation extends BaRuntimeScope {
-  sessionId: SessionId;
-  agentKey: AgentKey;
-  language: RuntimeLanguage;
+export interface BrowserVoiceTextSessionFoundation extends McsBaRuntimeScope {
+  sessionId: McsSessionId;
+  agentKey: McsAgentKey;
+  language: McsRuntimeLanguage;
   mode: 'browser_voice' | 'browser_text' | 'mixed';
   textFallbackRequired: true;
   microphonePermissionMayBeRequested: 'after_explicit_ba_action_only';
   internalRuntimeOnly: true;
 }
 
-export interface BrowserRuntimeEventEnvelopeInput extends BaRuntimeScope {
-  eventType: AgentEventType;
-  sessionId: SessionId;
-  agentKey: AgentKey;
-  correlationId: CorrelationId;
-  idempotencyKey: IdempotencyKey;
+export interface BrowserRuntimeEventEnvelopeInput extends McsBaRuntimeScope {
+  eventType: McsAgentEventType;
+  sessionId: McsSessionId;
+  agentKey: McsAgentKey;
+  correlationId: McsCorrelationId;
+  idempotencyKey: McsIdempotencyKey;
   payload: Record<string, unknown>;
   occurredAt?: string;
 }
@@ -68,17 +68,17 @@ export interface BrowserVoiceTextFoundationPort {
   createTextFallbackTurn(
     session: BrowserVoiceTextSessionFoundation,
     text: string,
-  ): BrowserTextTurnWirePayload;
+  ): McsBrowserTextTurnWirePayload;
   finalizeVoiceTurn(
-    transcript: BrowserTranscriptTurn,
-  ): BrowserVoiceAgentTurnWirePayload;
+    transcript: McsBrowserTranscriptTurn,
+  ): McsBrowserVoiceAgentTurnWirePayload;
   createRuntimeEventEnvelope(
     input: BrowserRuntimeEventEnvelopeInput,
   ): BrowserRuntimeEventEnvelope;
 }
 
 export interface BrowserVoiceTextSafeFailure {
-  state: BrowserVoiceState;
-  error: BrowserVoiceError;
+  state: McsBrowserVoiceState;
+  error: McsBrowserVoiceError;
   fallback: 'browser_text';
 }
