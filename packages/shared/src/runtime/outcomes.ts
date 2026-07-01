@@ -1,9 +1,9 @@
-import type { AgentKey, RuntimeTaskType } from './agents.js';
-import type { ContextPacketId, GuidedActionId, OutcomeId, SessionId } from './ids.js';
-import type { BaRuntimeScope } from './identity.js';
-import type { RuntimeLanguage } from './language.js';
+import type { McsAgentKey, McsRuntimeTaskType } from './agents.js';
+import type { McsContextPacketId, McsGuidedActionId, McsOutcomeId, McsSessionId } from './ids.js';
+import type { McsBaRuntimeScope } from './identity.js';
+import type { McsRuntimeLanguage } from './language.js';
 
-export type RuntimeOutcomeStatus =
+export type McsRuntimeOutcomeStatus =
   | 'created'
   | 'observed'
   | 'ba_accepted'
@@ -12,23 +12,23 @@ export type RuntimeOutcomeStatus =
   | 'failed'
   | 'not_applicable';
 
-export type LearningSignalStrength = 'weak' | 'moderate' | 'strong';
+export type McsLearningSignalStrength = 'weak' | 'moderate' | 'strong';
 
-export interface RuntimeOutcomeReference extends BaRuntimeScope {
-  outcomeId: OutcomeId;
-  sessionId: SessionId;
-  agentKey: AgentKey;
-  taskType: RuntimeTaskType;
-  language: RuntimeLanguage;
-  contextPacketId?: ContextPacketId;
-  guidedActionId?: GuidedActionId;
-  status: RuntimeOutcomeStatus;
+export interface McsRuntimeOutcomeReference extends McsBaRuntimeScope {
+  outcomeId: McsOutcomeId;
+  sessionId: McsSessionId;
+  agentKey: McsAgentKey;
+  taskType: McsRuntimeTaskType;
+  language: McsRuntimeLanguage;
+  contextPacketId?: McsContextPacketId;
+  guidedActionId?: McsGuidedActionId;
+  status: McsRuntimeOutcomeStatus;
   observedAt: string;
 }
 
-export interface LearningSignalReference {
-  outcomeId: OutcomeId;
-  signalStrength: LearningSignalStrength;
+export interface McsLearningSignalReference {
+  outcomeId: McsOutcomeId;
+  signalStrength: McsLearningSignalStrength;
   reasonCodes: string[];
   capturedAt: string;
 }

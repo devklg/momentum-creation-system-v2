@@ -1,17 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import type {
-  ApprovedKnowledgeQueryRequest,
-  ApprovedKnowledgeQueryResult,
+  McsApprovedKnowledgeQueryRequest,
+  McsApprovedKnowledgeQueryResult,
   TmagId,
-  KnowledgeId,
-  KnowledgeReference,
-  RuntimeLanguage,
-  RuntimeRequestScope,
-  RuntimeTranslationStatus,
-  SessionId,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsKnowledgeId,
+  McsKnowledgeReference,
+  McsRuntimeLanguage,
+  McsRuntimeRequestScope,
+  McsRuntimeTranslationStatus,
+  McsSessionId,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   otherLanguage,
@@ -30,17 +30,17 @@ import {
 } from '../contextManager.js';
 import { TEAM_MAGNIFICENT_KEY, TEAM_MAGNIFICENT_NAME } from '../validation.js';
 
-function scope(): RuntimeRequestScope {
+function scope(): McsRuntimeRequestScope {
   return {
-    tenantId: 'tenant_team_magnificent' as TenantId,
-    teamId: 'team_magnificent' as TeamId,
+    tenantId: 'tenant_team_magnificent' as McsTenantId,
+    teamId: 'team_magnificent' as McsTeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
     tmagId: 'TMAG-P46-001' as TmagId,
   };
 }
 
-function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): ApprovedKnowledgeQueryRequest {
+function request(overrides: Partial<McsApprovedKnowledgeQueryRequest> = {}): McsApprovedKnowledgeQueryRequest {
   return {
     schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
     scope: scope(),
@@ -54,20 +54,20 @@ function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): Approv
 
 function knowledge(
   id: string,
-  language: RuntimeLanguage,
-  translationStatus: RuntimeTranslationStatus,
-): KnowledgeReference {
+  language: McsRuntimeLanguage,
+  translationStatus: McsRuntimeTranslationStatus,
+): McsKnowledgeReference {
   return {
-    knowledgeId: `knowledge_p46_${id}` as KnowledgeId,
+    knowledgeId: `knowledge_p46_${id}` as McsKnowledgeId,
     domain: 'training',
     status: 'approved',
     language,
     translationStatus,
-    sourceId: `source_p46_${id}` as SourceId,
+    sourceId: `source_p46_${id}` as McsSourceId,
   };
 }
 
-function providerReturning(references: readonly KnowledgeReference[]): ApprovedKnowledgeProvider {
+function providerReturning(references: readonly McsKnowledgeReference[]): ApprovedKnowledgeProvider {
   return {
     async listApprovedKnowledge() {
       return references;
@@ -76,7 +76,7 @@ function providerReturning(references: readonly KnowledgeReference[]): ApprovedK
 }
 
 function languageContextFrom(
-  metadata: ApprovedKnowledgeQueryResult['metadata']['language'],
+  metadata: McsApprovedKnowledgeQueryResult['metadata']['language'],
 ): ContextPacketBuildInput['language'] {
   return {
     primary: metadata.language,
@@ -95,19 +95,19 @@ function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextP
     packetId: 'ctx_packet_p46_001' as ContextPacketBuildInput['packetId'],
     requestId: 'ctx_req_p46_001' as ContextPacketBuildInput['requestId'],
     tenant: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
       tenantName: 'Team Magnificent Tenant',
       brandName: TEAM_MAGNIFICENT_NAME,
       environment: 'development',
     },
     team: {
-      teamId: 'team_magnificent' as TeamId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
     },
     ba: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
-      teamId: 'team_magnificent' as TeamId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
       tmagId: 'TMAG-P46-001' as TmagId,
@@ -123,7 +123,7 @@ function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextP
       },
     },
     session: {
-      sessionId: 'session_p46_001' as SessionId,
+      sessionId: 'session_p46_001' as McsSessionId,
       mode: 'browser_text',
       status: 'active',
       taskType: 'training_support',

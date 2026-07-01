@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type {
   TmagId,
-  KnowledgeChunk,
-  KnowledgeChunkEligibilityRequest,
-  RawKnowledgeSource,
-  RuntimeRequestScope,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsKnowledgeChunk,
+  McsKnowledgeChunkEligibilityRequest,
+  McsRawKnowledgeSource,
+  McsRuntimeRequestScope,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   chunkParsedDocument,
@@ -31,10 +31,10 @@ import {
 } from '../../../context/contextManager.js';
 import { TEAM_MAGNIFICENT_KEY, TEAM_MAGNIFICENT_NAME } from '../../../context/validation.js';
 
-function scope(): RuntimeRequestScope {
+function scope(): McsRuntimeRequestScope {
   return {
-    tenantId: 'tenant_team_magnificent' as TenantId,
-    teamId: 'team_magnificent' as TeamId,
+    tenantId: 'tenant_team_magnificent' as McsTenantId,
+    teamId: 'team_magnificent' as McsTeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
     tmagId: 'TMAG-P45A-001' as TmagId,
@@ -55,9 +55,9 @@ const MARKDOWN_SOURCE = [
   'Follow up with care and consistency.',
 ].join('\n');
 
-function source(overrides: Partial<RawKnowledgeSource> = {}): RawKnowledgeSource {
+function source(overrides: Partial<McsRawKnowledgeSource> = {}): McsRawKnowledgeSource {
   return {
-    sourceId: 'source_p45a_training' as SourceId,
+    sourceId: 'source_p45a_training' as McsSourceId,
     title: 'Sharing With Confidence',
     sourceType: 'tm_training_page',
     format: 'markdown',
@@ -74,8 +74,8 @@ function source(overrides: Partial<RawKnowledgeSource> = {}): RawKnowledgeSource
 }
 
 function eligibilityRequest(
-  overrides: Partial<KnowledgeChunkEligibilityRequest> = {},
-): KnowledgeChunkEligibilityRequest {
+  overrides: Partial<McsKnowledgeChunkEligibilityRequest> = {},
+): McsKnowledgeChunkEligibilityRequest {
   return { scope: scope(), language: 'en', ...overrides };
 }
 
@@ -84,19 +84,19 @@ function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextP
     packetId: 'ctx_packet_p45a_001' as ContextPacketBuildInput['packetId'],
     requestId: 'ctx_req_p45a_001' as ContextPacketBuildInput['requestId'],
     tenant: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
       tenantName: 'Team Magnificent Tenant',
       brandName: TEAM_MAGNIFICENT_NAME,
       environment: 'development',
     },
     team: {
-      teamId: 'team_magnificent' as TeamId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
     },
     ba: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
-      teamId: 'team_magnificent' as TeamId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
       tmagId: 'TMAG-P45A-001' as TmagId,
@@ -252,7 +252,7 @@ describe('P4.5A knowledge intake — chunker & traceability', () => {
 });
 
 describe('P4.5A knowledge intake — eligibility predicate', () => {
-  function activeChunk(): KnowledgeChunk {
+  function activeChunk(): McsKnowledgeChunk {
     const chunk = ingestRawKnowledgeSource(source()).chunks[0];
     if (!chunk) throw new Error('expected at least one chunk');
     return chunk;
@@ -263,13 +263,13 @@ describe('P4.5A knowledge intake — eligibility predicate', () => {
   });
 
   it('excludes an explicitly inactive (retrievalEligible=false) chunk', () => {
-    const chunk: KnowledgeChunk = { ...activeChunk(), retrievalEligible: false };
+    const chunk: McsKnowledgeChunk = { ...activeChunk(), retrievalEligible: false };
     expect(isChunkRetrievalEligible(chunk, eligibilityRequest())).toBe(false);
   });
 
   it('excludes deprecated, archived, rejected, and parse_failed chunks', () => {
     for (const status of ['deprecated', 'archived', 'rejected', 'parse_failed'] as const) {
-      const chunk: KnowledgeChunk = { ...activeChunk(), status, retrievalEligible: false };
+      const chunk: McsKnowledgeChunk = { ...activeChunk(), status, retrievalEligible: false };
       expect(isChunkRetrievalEligible(chunk, eligibilityRequest()), status).toBe(false);
     }
   });
@@ -286,9 +286,9 @@ describe('P4.5A knowledge intake — eligibility predicate', () => {
   });
 
   it('excludes a chunk scoped to a different BA', () => {
-    const otherScope: RuntimeRequestScope = {
-      tenantId: 'tenant_team_magnificent' as TenantId,
-      teamId: 'team_magnificent' as TeamId,
+    const otherScope: McsRuntimeRequestScope = {
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
       tmagId: 'TMAG-OTHER-999' as TmagId,

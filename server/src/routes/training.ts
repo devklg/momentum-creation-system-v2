@@ -36,8 +36,8 @@ import {
   markFastStartModuleState,
 } from '../domain/training.js';
 import type {
-  FastStartMarkStatePayload,
-  FastStartModuleId,
+  McsFastStartMarkStatePayload,
+  McsFastStartModuleId,
 } from '@momentum/shared';
 
 export const trainingRoutes: Router = Router();
@@ -92,9 +92,9 @@ trainingRoutes.post(
       res.status(400).json({ ok: false, error: 'invalid_module_id' });
       return;
     }
-    const moduleId: FastStartModuleId = moduleIdNum;
+    const moduleId: McsFastStartModuleId = moduleIdNum;
 
-    const body = req.body as Partial<FastStartMarkStatePayload> | undefined;
+    const body = req.body as Partial<McsFastStartMarkStatePayload> | undefined;
     const to = body?.state;
     if (to !== 'in_progress' && to !== 'completed') {
       res.status(400).json({ ok: false, error: 'invalid_state' });

@@ -30,10 +30,10 @@
 
 import { Router } from 'express';
 import type {
-  CreateInvitationPayload,
-  CreateInvitationResponse,
-  InvitationSource,
-  MarkInvitationSentResponse,
+  McsCreateInvitationPayload,
+  McsCreateInvitationResponse,
+  McsInvitationSource,
+  McsMarkInvitationSentResponse,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
@@ -59,16 +59,16 @@ function requiredStr(raw: unknown): string {
   return typeof raw === 'string' ? raw.trim() : '';
 }
 
-const INVITATION_SOURCES: readonly InvitationSource[] = [
+const INVITATION_SOURCES: readonly McsInvitationSource[] = [
   'self',
   'ivory',
   'scriptmaker',
 ];
 
 /** Validate the source marker; default to 'self' (the plain form). */
-function normalizeSource(raw: unknown): InvitationSource {
-  return INVITATION_SOURCES.includes(raw as InvitationSource)
-    ? (raw as InvitationSource)
+function normalizeSource(raw: unknown): McsInvitationSource {
+  return INVITATION_SOURCES.includes(raw as McsInvitationSource)
+    ? (raw as McsInvitationSource)
     : 'self';
 }
 
@@ -82,7 +82,7 @@ const RELATIONSHIP_REASON_MAX = 600;
  * validation error string, or the input object.
  */
 function buildInput(
-  body: Partial<CreateInvitationPayload>,
+  body: Partial<McsCreateInvitationPayload>,
   sponsorTmagId: string,
 ): { error: string } | { input: CreateInvitationInput } {
   const firstName = requiredStr(body?.firstName);
@@ -140,7 +140,7 @@ invitationRoutes.post('/', requireAuth, requireSteveComplete, async (req, res) =
   const sponsorTmagId = req.session?.tmagId;
   if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
-  const built = buildInput(req.body as Partial<CreateInvitationPayload>, sponsorTmagId);
+  const built = buildInput(req.body as Partial<McsCreateInvitationPayload>, sponsorTmagId);
   if ('error' in built) {
     return res.status(400).json({ ok: false, error: built.error });
   }
@@ -164,7 +164,7 @@ invitationRoutes.post('/', requireAuth, requireSteveComplete, async (req, res) =
 
   try {
     const result = await createInvitation(built.input);
-    const response: CreateInvitationResponse = {
+    const response: McsCreateInvitationResponse = {
       ok: true,
       prospectId: result.prospectId,
       token: result.token,
@@ -203,7 +203,7 @@ invitationRoutes.post(
 
     try {
       const result = await markInvitationSent(prospectId, sponsorTmagId);
-      const response: MarkInvitationSentResponse = {
+      const response: McsMarkInvitationSentResponse = {
         ok: true,
         prospectId,
         sentAt: result.sentAt,
@@ -238,14 +238,14 @@ invitationRoutes.post('/log', requireAuth, requireSteveComplete, async (req, res
   const sponsorTmagId = req.session?.tmagId;
   if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
-  const built = buildInput(req.body as Partial<CreateInvitationPayload>, sponsorTmagId);
+  const built = buildInput(req.body as Partial<McsCreateInvitationPayload>, sponsorTmagId);
   if ('error' in built) {
     return res.status(400).json({ ok: false, error: built.error });
   }
 
   try {
     const result = await logExternalInvite(built.input);
-    const response: CreateInvitationResponse = {
+    const response: McsCreateInvitationResponse = {
       ok: true,
       prospectId: result.prospectId,
       token: result.token,

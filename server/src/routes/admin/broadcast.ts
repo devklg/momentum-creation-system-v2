@@ -37,11 +37,11 @@ import {
 import { dispatchOne } from '../../services/broadcastQueue.js';
 import { findBAByTmagId } from '../../domain/ba.js';
 import type {
-  AuditActor,
-  BroadcastAudiencePreviewResponse,
-  BroadcastEnqueueResponse,
-  BroadcastSendTestResponse,
-  BroadcastStatusResponse,
+  McsAuditActor,
+  McsBroadcastAudiencePreviewResponse,
+  McsBroadcastEnqueueResponse,
+  McsBroadcastSendTestResponse,
+  McsBroadcastStatusResponse,
 } from '@momentum/shared';
 
 export const adminBroadcastRoutes: Router = express.Router();
@@ -71,7 +71,7 @@ const SendTestBodySchema = z.object({
 
 async function adminActorFromRequest(
   req: Request,
-): Promise<{ actor: AuditActor & { kind: 'admin' }; displayName: string }> {
+): Promise<{ actor: McsAuditActor & { kind: 'admin' }; displayName: string }> {
   const session = req.session!;
   // Resolve a friendly display name. The session may carry `fullName`;
   // fall back to looking up the BA record.
@@ -115,7 +115,7 @@ adminBroadcastRoutes.get('/audience', requireAdmin, async (req: Request, res: Re
       channelParse.data,
       customAudienceTmagIds,
     );
-    const body: BroadcastAudiencePreviewResponse = { ok: true, preview };
+    const body: McsBroadcastAudiencePreviewResponse = { ok: true, preview };
     res.json(body);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
@@ -155,7 +155,7 @@ adminBroadcastRoutes.get('/:broadcastId', requireAdmin, async (req: Request, res
       getBroadcastCounts(broadcast.broadcastId),
       listRecentRecipientRows(broadcast.broadcastId, 50),
     ]);
-    const body: BroadcastStatusResponse = {
+    const body: McsBroadcastStatusResponse = {
       ok: true,
       broadcast,
       counts,
@@ -185,7 +185,7 @@ adminBroadcastRoutes.post('/test', requireAdmin, async (req: Request, res: Respo
     );
     // Send inline — Kevin is waiting; do not detour through the queue.
     const result = await dispatchOne(row);
-    const response: BroadcastSendTestResponse = {
+    const response: McsBroadcastSendTestResponse = {
       ok: true,
       broadcastId: broadcast.broadcastId,
       recipient: result,
@@ -221,7 +221,7 @@ adminBroadcastRoutes.post('/', requireAdmin, async (req: Request, res: Response)
       actor,
       displayName,
     );
-    const response: BroadcastEnqueueResponse = {
+    const response: McsBroadcastEnqueueResponse = {
       ok: true,
       broadcastId: broadcast.broadcastId,
       recipientCount,

@@ -54,18 +54,18 @@ import {
 } from '../services/masterContent.js';
 import { lastInitialOf } from './prospects.js';
 import type {
-  CreateIvoryNamePayload,
-  IvoryInvitationDraftPayload,
-  IvoryInvitationDraftResponse,
-  IvoryInvitationMintPayload,
-  IvoryInvitationMintResponse,
-  IvoryAngle,
-  IvoryCategory,
-  IvoryCoachPayload,
-  IvoryCoachResponse,
-  IvoryName,
-  IvoryStatus,
-  UpdateIvoryNamePayload,
+  McsCreateIvoryNamePayload,
+  McsIvoryInvitationDraftPayload,
+  McsIvoryInvitationDraftResponse,
+  McsIvoryInvitationMintPayload,
+  McsIvoryInvitationMintResponse,
+  McsIvoryAngle,
+  McsIvoryCategory,
+  McsIvoryCoachPayload,
+  McsIvoryCoachResponse,
+  McsIvoryName,
+  McsIvoryStatus,
+  McsUpdateIvoryNamePayload,
 } from '@momentum/shared';
 import { createInvitation } from './invitations.js';
 import { ANGLE_LABEL } from './ivoryAngle.js';
@@ -75,7 +75,7 @@ const MONGO_DB = 'momentum';
 const IVORY_COLLECTION = 'ivory_names';
 const CHROMA_COLLECTION = 'mcs_ivory';
 
-const ALLOWED_CATEGORIES: ReadonlySet<IvoryCategory> = new Set([
+const ALLOWED_CATEGORIES: ReadonlySet<McsIvoryCategory> = new Set([
   'family',
   'close_friend',
   'work',
@@ -88,14 +88,14 @@ const ALLOWED_CATEGORIES: ReadonlySet<IvoryCategory> = new Set([
   'other',
 ]);
 
-const ALLOWED_ANGLES: ReadonlySet<IvoryAngle> = new Set([
+const ALLOWED_ANGLES: ReadonlySet<McsIvoryAngle> = new Set([
   'do_the_business',
   'make_money',
   'lose_fat',
   'unspecified',
 ]);
 
-const ALLOWED_STATUSES: ReadonlySet<IvoryStatus> = new Set([
+const ALLOWED_STATUSES: ReadonlySet<McsIvoryStatus> = new Set([
   'new',
   'invited',
   'customer',
@@ -125,21 +125,21 @@ export class IvoryValidationError extends Error {
   }
 }
 
-function sanitizeCategories(input: IvoryCategory[] | undefined): IvoryCategory[] {
+function sanitizeCategories(input: McsIvoryCategory[] | undefined): McsIvoryCategory[] {
   if (!input) return [];
-  const seen = new Set<IvoryCategory>();
+  const seen = new Set<McsIvoryCategory>();
   for (const c of input) {
     if (ALLOWED_CATEGORIES.has(c)) seen.add(c);
   }
   return Array.from(seen);
 }
 
-function sanitizeAngle(input: IvoryAngle | undefined): IvoryAngle {
+function sanitizeAngle(input: McsIvoryAngle | undefined): McsIvoryAngle {
   if (input && ALLOWED_ANGLES.has(input)) return input;
   return 'unspecified';
 }
 
-function sanitizeStatus(input: IvoryStatus): IvoryStatus {
+function sanitizeStatus(input: McsIvoryStatus): McsIvoryStatus {
   if (!ALLOWED_STATUSES.has(input)) {
     throw new IvoryValidationError('invalid_status');
   }
@@ -177,8 +177,8 @@ function ivoryChromaDoc(r: {
 
 export async function createIvoryName(
   tmagId: string,
-  input: CreateIvoryNamePayload,
-): Promise<IvoryName> {
+  input: McsCreateIvoryNamePayload,
+): Promise<McsIvoryName> {
   const firstName = input.firstName.trim();
   const lastName = input.lastName.trim();
   if (!firstName) throw new IvoryValidationError('invalid_first_name');
@@ -191,7 +191,7 @@ export async function createIvoryName(
   const preferredAngle = sanitizeAngle(input.preferredAngle);
   const notes = (input.notes ?? '').trim();
 
-  const record: IvoryName = {
+  const record: McsIvoryName = {
     ivoryId,
     tmagId,
     firstName,
@@ -274,10 +274,10 @@ export async function createIvoryName(
  * roster sizes are expected to fit comfortably in one fetch (<500 names per
  * BA). If that assumption breaks, add a server-side limit/offset.
  */
-export async function listIvoryNamesForBA(tmagId: string): Promise<IvoryName[]> {
+export async function listIvoryNamesForBA(tmagId: string): Promise<McsIvoryName[]> {
   const res = await gatewayCall<{
     count: number;
-    documents: Array<IvoryName & { _id?: unknown }>;
+    documents: Array<McsIvoryName & { _id?: unknown }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: IVORY_COLLECTION,
@@ -293,10 +293,10 @@ export async function listIvoryNamesForBA(tmagId: string): Promise<IvoryName[]> 
 export async function getIvoryName(
   ivoryId: string,
   tmagId: string,
-): Promise<IvoryName> {
+): Promise<McsIvoryName> {
   const res = await gatewayCall<{
     count: number;
-    documents: Array<IvoryName & { _id?: unknown }>;
+    documents: Array<McsIvoryName & { _id?: unknown }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: IVORY_COLLECTION,
@@ -317,8 +317,8 @@ export async function getIvoryName(
 export async function updateIvoryName(
   ivoryId: string,
   tmagId: string,
-  patch: UpdateIvoryNamePayload,
-): Promise<IvoryName> {
+  patch: McsUpdateIvoryNamePayload,
+): Promise<McsIvoryName> {
   const existing = await getIvoryName(ivoryId, tmagId);
   const now = new Date().toISOString();
 
@@ -340,7 +340,7 @@ export async function updateIvoryName(
       ? sanitizeAngle(patch.preferredAngle)
       : existing.preferredAngle;
 
-  const next: IvoryName = {
+  const next: McsIvoryName = {
     ...existing,
     firstName,
     lastName,
@@ -425,8 +425,8 @@ export async function updateIvoryName(
 export async function updateIvoryStatus(
   ivoryId: string,
   tmagId: string,
-  status: IvoryStatus,
-): Promise<IvoryName> {
+  status: McsIvoryStatus,
+): Promise<McsIvoryName> {
   const validated = sanitizeStatus(status);
   if (validated === 'invited') {
     // 'invited' carries an invariant (lastProspectId + the INVITED_AS edge) that
@@ -437,7 +437,7 @@ export async function updateIvoryStatus(
   }
   const existing = await getIvoryName(ivoryId, tmagId);
   const now = new Date().toISOString();
-  const next: IvoryName = {
+  const next: McsIvoryName = {
     ...existing,
     status: validated,
     lastTouchedAt: now,
@@ -475,10 +475,10 @@ export async function markIvoryInvited(
   ivoryId: string,
   tmagId: string,
   prospectId: string,
-): Promise<IvoryName> {
+): Promise<McsIvoryName> {
   const existing = await getIvoryName(ivoryId, tmagId);
   const now = new Date().toISOString();
-  const next: IvoryName = {
+  const next: McsIvoryName = {
     ...existing,
     status: 'invited',
     lastProspectId: prospectId,
@@ -549,10 +549,10 @@ export async function deleteIvoryName(
   });
 }
 
-function stripMongoMeta<T extends { _id?: unknown }>(doc: T): IvoryName {
+function stripMongoMeta<T extends { _id?: unknown }>(doc: T): McsIvoryName {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { _id, ...rest } = doc;
-  return rest as unknown as IvoryName;
+  return rest as unknown as McsIvoryName;
 }
 
 // ───────────────────────────────────────────────────────────────────────
@@ -607,7 +607,7 @@ const COACH_SYSTEM_PREFIX = [
   'The prompts array must contain between 5 and 8 short questions.',
 ].join('\n');
 
-function buildCoachUserTurn(input: IvoryCoachPayload): string {
+function buildCoachUserTurn(input: McsIvoryCoachPayload): string {
   const lines = [
     `BA angle: people who might be interested in ${ANGLE_LABEL[input.angle]}.`,
     `Current roster size: ${input.rosterSize} names.`,
@@ -630,7 +630,7 @@ function buildCoachUserTurn(input: IvoryCoachPayload): string {
  * a generation error occurs. Compliance-safe by construction — generic
  * WDYK prompts that name no one, score no one, sell nothing.
  */
-function neutralCoach(input: IvoryCoachPayload): IvoryCoachResponse {
+function neutralCoach(input: McsIvoryCoachPayload): McsIvoryCoachResponse {
   const angle = ANGLE_LABEL[input.angle];
   const productLine = input.productName
     ? `When you think about ${input.productName}, `
@@ -701,7 +701,7 @@ function parseCoachJson(raw: string): { coaching: string; prompts: string[] } | 
  * note tells the model any leftover `{{placeholder}}` is a stylistic cue, not
  * literal output.
  */
-async function buildCoachSystem(input: IvoryCoachPayload): Promise<string> {
+async function buildCoachSystem(input: McsIvoryCoachPayload): Promise<string> {
   const voiceTemplate = await readMasterContent('team.ivory.coach_prompt');
   const voice = interpolateMasterContent(voiceTemplate, {
     productName: input.productName ?? undefined,
@@ -719,8 +719,8 @@ async function buildCoachSystem(input: IvoryCoachPayload): Promise<string> {
 }
 
 export async function ivoryCoach(
-  input: IvoryCoachPayload,
-): Promise<IvoryCoachResponse> {
+  input: McsIvoryCoachPayload,
+): Promise<McsIvoryCoachResponse> {
   try {
     const { text } = await complete({
       system: await buildCoachSystem(input),
@@ -802,7 +802,7 @@ const INVITATION_DRAFT_SYSTEM = [
 ].join('\n');
 
 function buildInvitationDraftUserTurn(input: {
-  name: IvoryName;
+  name: McsIvoryName;
   relationshipReason: string;
   productName?: string | null;
 }): string {
@@ -817,8 +817,8 @@ function buildInvitationDraftUserTurn(input: {
 
 export async function draftIvoryInvitation(
   tmagId: string,
-  input: IvoryInvitationDraftPayload,
-): Promise<IvoryInvitationDraftResponse> {
+  input: McsIvoryInvitationDraftPayload,
+): Promise<McsIvoryInvitationDraftResponse> {
   const name = await getIvoryName(input.ivoryId, tmagId);
   const relationshipReason = cleanRelationshipReason(input.relationshipReason);
   const productName =
@@ -877,8 +877,8 @@ export async function draftIvoryInvitation(
 
 export async function mintIvoryInvitation(
   tmagId: string,
-  input: IvoryInvitationMintPayload,
-): Promise<IvoryInvitationMintResponse> {
+  input: McsIvoryInvitationMintPayload,
+): Promise<McsIvoryInvitationMintResponse> {
   const name = await getIvoryName(input.ivoryId, tmagId);
   const relationshipReason = cleanRelationshipReason(input.relationshipReason);
   const message = input.message.trim();

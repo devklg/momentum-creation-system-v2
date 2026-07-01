@@ -3,16 +3,16 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type {
-  ApprovedKnowledgeQueryRequest,
+  McsApprovedKnowledgeQueryRequest,
   TmagId,
-  KnowledgeFreshness,
-  KnowledgeFreshnessPolicy,
-  KnowledgeId,
-  KnowledgeReference,
-  RuntimeRequestScope,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsKnowledgeFreshness,
+  McsKnowledgeFreshnessPolicy,
+  McsKnowledgeId,
+  McsKnowledgeReference,
+  McsRuntimeRequestScope,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   evaluateFreshness,
@@ -30,29 +30,29 @@ const NOW = new Date('2026-06-30T12:00:00.000Z');
 const PAST = '2026-01-01T00:00:00.000Z';
 const FUTURE = '2026-12-31T00:00:00.000Z';
 
-function scope(): RuntimeRequestScope {
+function scope(): McsRuntimeRequestScope {
   return {
-    tenantId: 'tenant_team_magnificent' as TenantId,
-    teamId: 'team_magnificent' as TeamId,
+    tenantId: 'tenant_team_magnificent' as McsTenantId,
+    teamId: 'team_magnificent' as McsTeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
     tmagId: 'TMAG-P47-001' as TmagId,
   };
 }
 
-function knowledge(id: string, freshness?: KnowledgeFreshness): KnowledgeReference {
+function knowledge(id: string, freshness?: McsKnowledgeFreshness): McsKnowledgeReference {
   return {
-    knowledgeId: `knowledge_p47_${id}` as KnowledgeId,
+    knowledgeId: `knowledge_p47_${id}` as McsKnowledgeId,
     domain: 'training',
     status: 'approved',
     language: 'en',
     translationStatus: 'same_language',
-    sourceId: `source_p47_${id}` as SourceId,
+    sourceId: `source_p47_${id}` as McsSourceId,
     ...(freshness ? { freshness } : {}),
   };
 }
 
-function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): ApprovedKnowledgeQueryRequest {
+function request(overrides: Partial<McsApprovedKnowledgeQueryRequest> = {}): McsApprovedKnowledgeQueryRequest {
   return {
     schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
     scope: scope(),
@@ -63,7 +63,7 @@ function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): Approv
   };
 }
 
-function providerReturning(references: readonly KnowledgeReference[]): ApprovedKnowledgeProvider {
+function providerReturning(references: readonly McsKnowledgeReference[]): ApprovedKnowledgeProvider {
   return {
     async listApprovedKnowledge() {
       return references;
@@ -146,7 +146,7 @@ describe('P4.7 evaluateFreshness — pure guard', () => {
 });
 
 describe('P4.7 through the retrieval adapter', () => {
-  function adapter(references: readonly KnowledgeReference[]) {
+  function adapter(references: readonly McsKnowledgeReference[]) {
     return createContextManagerRetrievalAdapter(providerReturning(references), { now: () => NOW });
   }
 
@@ -176,7 +176,7 @@ describe('P4.7 through the retrieval adapter', () => {
 
   it('honors an explicit policy that opts out of deprecation exclusion', async () => {
     const result = await adapter([knowledge('dep', { lifecycle: 'deprecated' })]).retrieveApprovedKnowledge(
-      request({ freshness: { excludeDeprecated: false } as KnowledgeFreshnessPolicy }),
+      request({ freshness: { excludeDeprecated: false } as McsKnowledgeFreshnessPolicy }),
     );
     expect(result.status).toBe('ok');
     expect(result.references.map((r) => r.knowledgeId)).toEqual(['knowledge_p47_dep']);

@@ -47,16 +47,16 @@ import {
   type AdminProspectCrudError,
 } from './adminProspectCrud.js';
 import type {
-  AdminProspectDirectoryRow,
-  CallbackIntent,
-  CrmDisposition,
-  CrmDispositionRecord,
-  CrmFollowUpRecord,
-  CrmNoteRecord,
-  ProspectCrmBundle,
-  ReinviteResponse,
-  ReinviteScriptResponse,
-  TodayActionItem,
+  McsAdminProspectDirectoryRow,
+  McsCallbackIntent,
+  McsCrmDisposition,
+  McsCrmDispositionRecord,
+  McsCrmFollowUpRecord,
+  McsCrmNoteRecord,
+  McsProspectCrmBundle,
+  McsReinviteResponse,
+  McsReinviteScriptResponse,
+  McsTodayActionItem,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -73,7 +73,7 @@ const CHROMA_COLLECTION = 'mcs_invitations';
 const NOTE_MAX = 2000;
 
 /** All five disposition tags Kevin locked. Server-side validation list. */
-const VALID_DISPOSITIONS: ReadonlySet<CrmDisposition> = new Set([
+const VALID_DISPOSITIONS: ReadonlySet<McsCrmDisposition> = new Set([
   'new_brand_ambassador',
   'new_customer',
   'interested',
@@ -137,7 +137,7 @@ export async function addNote(
   prospectId: string,
   sponsorTmagId: string,
   text: string,
-): Promise<CrmNoteRecord> {
+): Promise<McsCrmNoteRecord> {
   const trimmed = text.trim();
   if (!trimmed) throw new CrmError('empty_note');
   if (trimmed.length > NOTE_MAX) throw new CrmError('note_too_long');
@@ -146,7 +146,7 @@ export async function addNote(
 
   const noteId = `crmnote_${randomUUID()}`;
   const createdAt = new Date().toISOString();
-  const record: CrmNoteRecord = {
+  const record: McsCrmNoteRecord = {
     noteId,
     prospectId,
     sponsorTmagId,
@@ -186,8 +186,8 @@ export async function addNote(
 export async function listNotes(
   prospectId: string,
   sponsorTmagId: string,
-): Promise<CrmNoteRecord[]> {
-  const res = await gatewayCall<{ documents: CrmNoteRecord[] }>(
+): Promise<McsCrmNoteRecord[]> {
+  const res = await gatewayCall<{ documents: McsCrmNoteRecord[] }>(
     'mongodb',
     'query',
     {
@@ -212,7 +212,7 @@ export async function setFollowUp(
   prospectId: string,
   sponsorTmagId: string,
   dueAt: string,
-): Promise<CrmFollowUpRecord> {
+): Promise<McsCrmFollowUpRecord> {
   // Validate: ISO timestamp, in the future.
   const dueMs = new Date(dueAt).getTime();
   if (Number.isNaN(dueMs)) throw new CrmError('invalid_due_at');
@@ -250,7 +250,7 @@ export async function setFollowUp(
   // Insert new active follow-up. Use compound id so a second insert with
   // clearedAt set later can co-exist (cleared rows live alongside the active).
   const followUpId = `crmfup_${randomUUID()}`;
-  const record: CrmFollowUpRecord = {
+  const record: McsCrmFollowUpRecord = {
     prospectId,
     sponsorTmagId,
     dueAt: dueAtIso,
@@ -289,8 +289,8 @@ export async function setFollowUp(
 export async function getActiveFollowUp(
   prospectId: string,
   sponsorTmagId: string,
-): Promise<CrmFollowUpRecord | null> {
-  const res = await gatewayCall<{ documents: CrmFollowUpRecord[] }>(
+): Promise<McsCrmFollowUpRecord | null> {
+  const res = await gatewayCall<{ documents: McsCrmFollowUpRecord[] }>(
     'mongodb',
     'query',
     {
@@ -332,8 +332,8 @@ export async function clearFollowUp(
 export async function setDisposition(
   prospectId: string,
   sponsorTmagId: string,
-  disposition: CrmDisposition | null,
-): Promise<CrmDisposition | null> {
+  disposition: McsCrmDisposition | null,
+): Promise<McsCrmDisposition | null> {
   if (disposition !== null && !VALID_DISPOSITIONS.has(disposition)) {
     throw new CrmError('invalid_disposition');
   }
@@ -381,7 +381,7 @@ export async function setDisposition(
   }
 
   const dispoId = `crmdispo_${prospectId}_${sponsorTmagId}`;
-  const record: CrmDispositionRecord = {
+  const record: McsCrmDispositionRecord = {
     prospectId,
     sponsorTmagId,
     disposition,
@@ -417,8 +417,8 @@ export async function setDisposition(
 export async function getDisposition(
   prospectId: string,
   sponsorTmagId: string,
-): Promise<CrmDisposition | null> {
-  const res = await gatewayCall<{ documents: Array<{ disposition: CrmDisposition | null }> }>(
+): Promise<McsCrmDisposition | null> {
+  const res = await gatewayCall<{ documents: Array<{ disposition: McsCrmDisposition | null }> }>(
     'mongodb',
     'query',
     {
@@ -442,7 +442,7 @@ export async function getDisposition(
 export async function getCrmBundle(
   prospectId: string,
   sponsorTmagId: string,
-): Promise<ProspectCrmBundle> {
+): Promise<McsProspectCrmBundle> {
   const prospect = await assertOwnership(prospectId, sponsorTmagId);
 
   const [notes, followUp, disposition] = await Promise.all([
@@ -521,7 +521,7 @@ async function fetchFullProspectForEdit(prospectId: string): Promise<{
 export async function reinvite(
   prospectId: string,
   sponsorTmagId: string,
-): Promise<ReinviteResponse> {
+): Promise<McsReinviteResponse> {
   const prospect = await assertOwnership(prospectId, sponsorTmagId);
 
   if (prospect.state === 'enrolled') {
@@ -662,7 +662,7 @@ export async function reinvite(
 export async function reinviteScript(
   prospectId: string,
   sponsorTmagId: string,
-): Promise<ReinviteScriptResponse> {
+): Promise<McsReinviteScriptResponse> {
   const prospect = await assertOwnership(prospectId, sponsorTmagId);
 
   const name = (prospect.firstName ?? '').trim() || 'there';
@@ -761,7 +761,7 @@ async function appendActivity(entry: {
  */
 export async function getTodaysActions(
   sponsorTmagId: string,
-): Promise<TodayActionItem[]> {
+): Promise<McsTodayActionItem[]> {
   const fourteenDaysAgoIso = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
   const nowIso = new Date().toISOString();
 
@@ -770,7 +770,7 @@ export async function getTodaysActions(
     gatewayCall<{
       documents: Array<{
         prospectId: string;
-        intent: CallbackIntent;
+        intent: McsCallbackIntent;
         createdAt: string;
       }>;
     }>('mongodb', 'query', {
@@ -780,7 +780,7 @@ export async function getTodaysActions(
       sort: { createdAt: -1 },
       limit: 200,
     }),
-    gatewayCall<{ documents: CrmFollowUpRecord[] }>('mongodb', 'query', {
+    gatewayCall<{ documents: McsCrmFollowUpRecord[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: FOLLOWUPS_COLLECTION,
       filter: { sponsorTmagId, clearedAt: null, dueAt: { $lte: nowIso } },
@@ -824,7 +824,7 @@ export async function getTodaysActions(
   }
 
   // 1. Callbacks — one entry per prospect (most recent intent).
-  const callbackItems: TodayActionItem[] = [];
+  const callbackItems: McsTodayActionItem[] = [];
   const seenCallback = new Set<string>();
   for (const cb of callbacksRes.documents ?? []) {
     if (seenCallback.has(cb.prospectId)) continue;
@@ -843,7 +843,7 @@ export async function getTodaysActions(
   }
 
   // 2. Follow-ups that are due (dueAt <= now, not cleared).
-  const followupItems: TodayActionItem[] = [];
+  const followupItems: McsTodayActionItem[] = [];
   for (const f of followUpsRes.documents ?? []) {
     const info = prospectInfo.get(f.prospectId);
     if (!info) continue;
@@ -860,7 +860,7 @@ export async function getTodaysActions(
 
   // 3. Drafts (sentAt null AND state 'minted'). Anything beyond minted has
   // implicitly had the link sent already (the prospect engaged with it).
-  const draftItems: TodayActionItem[] = [];
+  const draftItems: McsTodayActionItem[] = [];
   for (const p of prospectsRes.documents ?? []) {
     if (p.sentAt) continue;
     if (p.state !== 'minted') continue;
@@ -879,7 +879,7 @@ export async function getTodaysActions(
 
   // Priority order: callbacks > follow-ups > drafts. Within each source,
   // sort newest-first by `at`.
-  const byAtDesc = (a: TodayActionItem, b: TodayActionItem) =>
+  const byAtDesc = (a: McsTodayActionItem, b: McsTodayActionItem) =>
     a.at < b.at ? 1 : a.at > b.at ? -1 : 0;
 
   return [
@@ -981,7 +981,7 @@ export async function baCreateProspect(
   prospectId: string;
   token: string;
   inviteUrl: string;
-  row: AdminProspectDirectoryRow;
+  row: McsAdminProspectDirectoryRow;
 }> {
   const actor = await baActor(sponsorTmagId);
   // sponsorTmagId forced from session — the body never carries it (3.5).
@@ -1007,7 +1007,7 @@ export async function baEditProspect(
   prospectId: string,
   sponsorTmagId: string,
   input: BaEditProspectInput,
-): Promise<{ prospectId: string; row: AdminProspectDirectoryRow }> {
+): Promise<{ prospectId: string; row: McsAdminProspectDirectoryRow }> {
   // Ownership first: a BA edits only their own prospect. assertOwnership
   // throws CrmError('prospect_not_found' | 'sponsor_mismatch') which the
   // route maps to 404 / 403 without leaking which prospect belongs to whom.

@@ -10,14 +10,14 @@
  * empties a pre-P4.7 corpus. Only present-and-bad metadata is guarded (fail-closed on presence).
  */
 
-import type { KnowledgeId } from './ids.js';
+import type { McsKnowledgeId } from './ids.js';
 
 /** Explicit lifecycle signal, distinct from the approved/active retrieval status. */
-export type KnowledgeFreshnessLifecycle = 'current' | 'deprecated' | 'superseded';
+export type McsKnowledgeFreshnessLifecycle = 'current' | 'deprecated' | 'superseded';
 
 /** Optional freshness descriptor carried on a `KnowledgeReference`. */
-export interface KnowledgeFreshness {
-  lifecycle?: KnowledgeFreshnessLifecycle;
+export interface McsKnowledgeFreshness {
+  lifecycle?: McsKnowledgeFreshnessLifecycle;
   /** ISO-8601. Not yet effective when `now < effectiveAt`. */
   effectiveAt?: string;
   /** ISO-8601. Used with a policy `maxAgeDays` to decide staleness. */
@@ -25,14 +25,14 @@ export interface KnowledgeFreshness {
   /** ISO-8601. Expired when `now > expiresAt`. */
   expiresAt?: string;
   /** The replacement item when this one is superseded (provenance). */
-  supersededBy?: KnowledgeId;
+  supersededBy?: McsKnowledgeId;
 }
 
 /**
  * Retrieval-time freshness policy carried on an `ApprovedKnowledgeQueryRequest`. All exclusion
  * flags default to `true` at the guard; `maxAgeDays` is off unless set.
  */
-export interface KnowledgeFreshnessPolicy {
+export interface McsKnowledgeFreshnessPolicy {
   /** Evaluation instant (ISO-8601); defaults to the adapter clock when absent. */
   asOf?: string;
   excludeDeprecated?: boolean;
@@ -49,7 +49,7 @@ export interface KnowledgeFreshnessPolicy {
 }
 
 /** Why a reference failed the freshness guard (or `fresh` when it passed). */
-export type KnowledgeFreshnessVerdict =
+export type McsKnowledgeFreshnessVerdict =
   | 'fresh'
   | 'deprecated'
   | 'superseded'

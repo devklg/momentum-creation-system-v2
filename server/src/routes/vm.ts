@@ -8,12 +8,12 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import type {
-  LeadBatchListResponse,
-  LeadBatchResponse,
-  VMCampaignListResponse,
-  VMCampaignProviderMode,
-  VMCampaignResponse,
-  ImportBulkLeadsResponse,
+  McsLeadBatchListResponse,
+  McsLeadBatchResponse,
+  McsVMCampaignListResponse,
+  McsVMCampaignProviderMode,
+  McsVMCampaignResponse,
+  McsImportBulkLeadsResponse,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
@@ -33,7 +33,7 @@ import { BulkLeadError, importBulkLeads } from '../domain/bulkLeads.js';
 
 export const vmRoutes: Router = Router();
 
-const PROVIDERS: readonly VMCampaignProviderMode[] = [
+const PROVIDERS: readonly McsVMCampaignProviderMode[] = [
   'manual_csv',
   'leadsrain_style_adapter',
   'slybroadcast_style_adapter',
@@ -51,7 +51,7 @@ const CreateBatchSchema = z.object({
 const CreateCampaignSchema = z.object({
   leadBatchId: z.string().min(4).max(120),
   name: z.string().min(1).max(160),
-  provider: z.enum(PROVIDERS as [VMCampaignProviderMode, ...VMCampaignProviderMode[]]).default('manual_csv'),
+  provider: z.enum(PROVIDERS as [McsVMCampaignProviderMode, ...McsVMCampaignProviderMode[]]).default('manual_csv'),
   voicemailAudioId: z.string().min(1).max(120).nullable().optional(),
   smsTemplateId: z.string().min(1).max(120).nullable().optional(),
   emailTemplateId: z.string().min(1).max(120).nullable().optional(),
@@ -104,7 +104,7 @@ vmRoutes.get('/batches', requireAuth, requireSteveComplete, async (req, res) => 
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
     const batches = await listLeadBatchesForOwner(tmagId);
-    const body: LeadBatchListResponse = { ok: true, batches };
+    const body: McsLeadBatchListResponse = { ok: true, batches };
     return res.status(200).json(body);
   } catch (err) {
     return sendVmError(res, err);
@@ -124,7 +124,7 @@ vmRoutes.post('/batches', requireAuth, requireSteveComplete, async (req, res) =>
       sponsorTmagId: tmagId,
       ...parsed.data,
     });
-    const body: LeadBatchResponse = { ok: true, batch };
+    const body: McsLeadBatchResponse = { ok: true, batch };
     return res.status(201).json(body);
   } catch (err) {
     return sendVmError(res, err);
@@ -136,7 +136,7 @@ vmRoutes.get('/batches/:batchId', requireAuth, requireSteveComplete, async (req,
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
     const batch = await findLeadBatchForOwner(routeParam(req, 'batchId'), tmagId);
-    const body: LeadBatchResponse = { ok: true, batch };
+    const body: McsLeadBatchResponse = { ok: true, batch };
     return res.status(200).json(body);
   } catch (err) {
     return sendVmError(res, err);
@@ -148,7 +148,7 @@ vmRoutes.get('/campaigns', requireAuth, requireSteveComplete, async (req, res) =
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
     const campaigns = await listVMCampaignsForOwner(tmagId);
-    const body: VMCampaignListResponse = { ok: true, campaigns };
+    const body: McsVMCampaignListResponse = { ok: true, campaigns };
     return res.status(200).json(body);
   } catch (err) {
     return sendVmError(res, err);
@@ -174,7 +174,7 @@ vmRoutes.post('/campaigns', requireAuth, requireSteveComplete, async (req, res) 
       emailTemplateId: parsed.data.emailTemplateId ?? null,
       scheduledAt: parsed.data.scheduledAt ?? null,
     });
-    const body: VMCampaignResponse = { ok: true, campaign };
+    const body: McsVMCampaignResponse = { ok: true, campaign };
     return res.status(201).json(body);
   } catch (err) {
     return sendVmError(res, err);
@@ -186,7 +186,7 @@ vmRoutes.get('/campaigns/:campaignId', requireAuth, requireSteveComplete, async 
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
     const campaign = await findVMCampaignForOwner(routeParam(req, 'campaignId'), tmagId);
-    const body: VMCampaignResponse = { ok: true, campaign };
+    const body: McsVMCampaignResponse = { ok: true, campaign };
     return res.status(200).json(body);
   } catch (err) {
     return sendVmError(res, err);
@@ -208,7 +208,7 @@ vmRoutes.post('/batches/:batchId/import', requireAuth, requireSteveComplete, asy
       vmCampaignId: parsed.data.vmCampaignId,
       leads: parsed.data.leads,
     });
-    const body: ImportBulkLeadsResponse = {
+    const body: McsImportBulkLeadsResponse = {
       ok: true,
       batch: result.batch,
       campaign: result.campaign,

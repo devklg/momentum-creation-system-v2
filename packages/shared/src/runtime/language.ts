@@ -1,6 +1,6 @@
-export type RuntimeLanguage = 'en' | 'es';
+export type McsRuntimeLanguage = 'en' | 'es';
 
-export type RuntimeLanguageFallbackReason =
+export type McsRuntimeLanguageFallbackReason =
   | 'same_language_unavailable'
   | 'template_unavailable'
   | 'translation_unavailable'
@@ -8,7 +8,7 @@ export type RuntimeLanguageFallbackReason =
   | 'language_neutral_template'
   | 'clarification_required';
 
-export type RuntimeTranslationStatus =
+export type McsRuntimeTranslationStatus =
   | 'not_required'
   | 'same_language'
   | 'human_reviewed_translation'
@@ -16,26 +16,26 @@ export type RuntimeTranslationStatus =
   | 'language_neutral_template'
   | 'clarification_required';
 
-export interface RuntimeLanguageContext {
-  primary: RuntimeLanguage;
-  detectedFromInput?: RuntimeLanguage;
-  userPreference?: RuntimeLanguage;
-  fallback?: RuntimeLanguage;
-  fallbackReason?: RuntimeLanguageFallbackReason;
+export interface McsRuntimeLanguageContext {
+  primary: McsRuntimeLanguage;
+  detectedFromInput?: McsRuntimeLanguage;
+  userPreference?: McsRuntimeLanguage;
+  fallback?: McsRuntimeLanguage;
+  fallbackReason?: McsRuntimeLanguageFallbackReason;
   translationAllowed: boolean;
-  translationStatus: RuntimeTranslationStatus;
+  translationStatus: McsRuntimeTranslationStatus;
   machineTranslationUsed: boolean;
   humanReviewed: boolean;
 }
 
-export interface RuntimeLanguageMetadata {
-  language: RuntimeLanguage;
-  detectedLanguage?: RuntimeLanguage;
-  fallbackLanguage?: RuntimeLanguage;
-  fallbackReason?: RuntimeLanguageFallbackReason;
-  translationStatus: RuntimeTranslationStatus;
+export interface McsRuntimeLanguageMetadata {
+  language: McsRuntimeLanguage;
+  detectedLanguage?: McsRuntimeLanguage;
+  fallbackLanguage?: McsRuntimeLanguage;
+  fallbackReason?: McsRuntimeLanguageFallbackReason;
+  translationStatus: McsRuntimeTranslationStatus;
   machineTranslationUsed: boolean;
   humanReviewed: boolean;
 }
 
-export type BrowserSpeechLocale = 'en-US' | 'es-US' | 'es-MX' | 'es-ES';
+export type McsBrowserSpeechLocale = 'en-US' | 'es-US' | 'es-MX' | 'es-ES';

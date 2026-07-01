@@ -32,27 +32,27 @@
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
-  FastStartMarkStateResponse,
-  FastStartModuleId,
-  FastStartModuleState,
-  FastStartModuleStatus,
-  FastStartProgressRecord,
-  FastStartProgressResponse,
+  McsFastStartMarkStateResponse,
+  McsFastStartModuleId,
+  McsFastStartModuleState,
+  McsFastStartModuleStatus,
+  McsFastStartProgressRecord,
+  McsFastStartProgressResponse,
 } from '@momentum/shared';
-import { FAST_START_MODULES } from '@momentum/shared';
+import { MCS_FAST_START_MODULES } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const PROGRESS_COLLECTION = 'fast_start_progress';
 const PROSPECTS_COLLECTION = 'prospects';
 const CHROMA_COLLECTION = 'mcs_training_progress';
 
-const VALID_MODULE_IDS: readonly FastStartModuleId[] = [1, 2, 3, 4, 5];
+const VALID_MODULE_IDS: readonly McsFastStartModuleId[] = [1, 2, 3, 4, 5];
 
-export function isValidModuleId(n: unknown): n is FastStartModuleId {
-  return typeof n === 'number' && VALID_MODULE_IDS.includes(n as FastStartModuleId);
+export function isValidModuleId(n: unknown): n is McsFastStartModuleId {
+  return typeof n === 'number' && VALID_MODULE_IDS.includes(n as McsFastStartModuleId);
 }
 
-function compositeId(tmagId: string, moduleId: FastStartModuleId): string {
+function compositeId(tmagId: string, moduleId: McsFastStartModuleId): string {
   return `${tmagId}__module-${moduleId}`;
 }
 
@@ -97,9 +97,9 @@ async function ensureProgressCollection(): Promise<void> {
 
 async function findProgress(
   tmagId: string,
-  moduleId: FastStartModuleId,
-): Promise<FastStartProgressRecord | null> {
-  const data = await gatewayCall<{ documents?: FastStartProgressRecord[] }>(
+  moduleId: McsFastStartModuleId,
+): Promise<McsFastStartProgressRecord | null> {
+  const data = await gatewayCall<{ documents?: McsFastStartProgressRecord[] }>(
     'mongodb',
     'query',
     {
@@ -112,8 +112,8 @@ async function findProgress(
   return data.documents?.[0] ?? null;
 }
 
-async function findAllProgress(tmagId: string): Promise<FastStartProgressRecord[]> {
-  const data = await gatewayCall<{ documents?: FastStartProgressRecord[] }>(
+async function findAllProgress(tmagId: string): Promise<McsFastStartProgressRecord[]> {
+  const data = await gatewayCall<{ documents?: McsFastStartProgressRecord[] }>(
     'mongodb',
     'query',
     {
@@ -147,16 +147,16 @@ async function countSentInvitations(tmagId: string): Promise<number> {
  */
 export async function getFastStartProgress(
   tmagId: string,
-): Promise<FastStartProgressResponse> {
+): Promise<McsFastStartProgressResponse> {
   const [rows, invitationsSent] = await Promise.all([
     findAllProgress(tmagId),
     countSentInvitations(tmagId),
   ]);
 
-  const byModule = new Map<FastStartModuleId, FastStartProgressRecord>();
+  const byModule = new Map<McsFastStartModuleId, McsFastStartProgressRecord>();
   for (const r of rows) byModule.set(r.moduleId, r);
 
-  const modules: FastStartModuleStatus[] = FAST_START_MODULES.map((m) => {
+  const modules: McsFastStartModuleStatus[] = MCS_FAST_START_MODULES.map((m) => {
     const row = byModule.get(m.id);
     if (!row) {
       return {
@@ -185,8 +185,8 @@ export async function getFastStartProgress(
  * ────────────────────────────────────────────────────────────────── */
 
 function isBackwardTransition(
-  from: FastStartModuleState,
-  to: FastStartModuleState,
+  from: McsFastStartModuleState,
+  to: McsFastStartModuleState,
 ): boolean {
   if (from === 'completed' && to !== 'completed') return true;
   if (from === 'in_progress' && to === 'not_started') return true;
@@ -201,10 +201,10 @@ function isBackwardTransition(
  */
 export async function markFastStartModuleState(args: {
   tmagId: string;
-  moduleId: FastStartModuleId;
-  to: Exclude<FastStartModuleState, 'not_started'>;
+  moduleId: McsFastStartModuleId;
+  to: Exclude<McsFastStartModuleState, 'not_started'>;
   occurredAt: string;
-}): Promise<FastStartMarkStateResponse> {
+}): Promise<McsFastStartMarkStateResponse> {
   const { tmagId, moduleId, to, occurredAt } = args;
   const existing = await findProgress(tmagId, moduleId);
 
@@ -215,7 +215,7 @@ export async function markFastStartModuleState(args: {
     const startedAt = occurredAt;
     const completedAt = to === 'completed' ? occurredAt : null;
 
-    const doc: FastStartProgressRecord = {
+    const doc: McsFastStartProgressRecord = {
       _id,
       tmagId,
       moduleId,

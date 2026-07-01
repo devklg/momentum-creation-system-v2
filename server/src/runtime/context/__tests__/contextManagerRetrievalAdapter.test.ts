@@ -3,17 +3,17 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type {
-  ApprovedKnowledgeQueryRequest,
+  McsApprovedKnowledgeQueryRequest,
   TmagId,
-  ContextPacketId,
-  ContextRequestId,
-  KnowledgeId,
-  KnowledgeReference,
-  RuntimeRequestScope,
-  SessionId,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsContextPacketId,
+  McsContextRequestId,
+  McsKnowledgeId,
+  McsKnowledgeReference,
+  McsRuntimeRequestScope,
+  McsSessionId,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
@@ -28,17 +28,17 @@ import { TEAM_MAGNIFICENT_KEY, TEAM_MAGNIFICENT_NAME } from '../validation.js';
 const thisDir = dirname(fileURLToPath(import.meta.url));
 const adapterSource = readFileSync(resolve(thisDir, '../contextManagerRetrievalAdapter.ts'), 'utf8');
 
-function baScope(): RuntimeRequestScope {
+function baScope(): McsRuntimeRequestScope {
   return {
-    tenantId: 'tenant_team_magnificent' as TenantId,
-    teamId: 'team_magnificent' as TeamId,
+    tenantId: 'tenant_team_magnificent' as McsTenantId,
+    teamId: 'team_magnificent' as McsTeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
     tmagId: 'TMAG-20260101-ABC123' as TmagId,
   };
 }
 
-function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): ApprovedKnowledgeQueryRequest {
+function request(overrides: Partial<McsApprovedKnowledgeQueryRequest> = {}): McsApprovedKnowledgeQueryRequest {
   return {
     schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
     scope: baScope(),
@@ -50,19 +50,19 @@ function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): Approv
   };
 }
 
-function ref(id: string, over: Partial<KnowledgeReference> = {}): KnowledgeReference {
+function ref(id: string, over: Partial<McsKnowledgeReference> = {}): McsKnowledgeReference {
   return {
-    knowledgeId: `k_${id}` as KnowledgeId,
+    knowledgeId: `k_${id}` as McsKnowledgeId,
     domain: 'training',
     status: 'approved',
     language: 'en',
     translationStatus: 'same_language',
-    sourceId: `src_${id}` as SourceId,
+    sourceId: `src_${id}` as McsSourceId,
     ...over,
   };
 }
 
-function providerReturning(refs: readonly KnowledgeReference[]): ApprovedKnowledgeProvider {
+function providerReturning(refs: readonly McsKnowledgeReference[]): ApprovedKnowledgeProvider {
   return { async listApprovedKnowledge() { return refs; } };
 }
 
@@ -86,7 +86,7 @@ describe('ContextManagerRetrievalAdapter — approved-only inclusion', () => {
 
   it('defensively excludes a non-approved reference and never returns it', async () => {
     // Provider misbehaves and leaks a candidate; the adapter must drop + record it.
-    const leaked = ref('bad', { status: 'candidate' as KnowledgeReference['status'] });
+    const leaked = ref('bad', { status: 'candidate' as McsKnowledgeReference['status'] });
     const adapter = createContextManagerRetrievalAdapter(providerReturning([ref('1'), leaked]));
     const result = await adapter.retrieveApprovedKnowledge(request());
     expect(result.references.map((r) => r.knowledgeId)).toEqual(['k_1']);
@@ -142,7 +142,7 @@ describe('ContextManagerRetrievalAdapter — fail-closed degradation', () => {
   it('rejects a malformed request (caller bug), not degrades', async () => {
     const adapter = createContextManagerRetrievalAdapter(providerReturning([ref('1')]));
     await expect(
-      adapter.retrieveApprovedKnowledge(request({ language: 'fr' as ApprovedKnowledgeQueryRequest['language'] })),
+      adapter.retrieveApprovedKnowledge(request({ language: 'fr' as McsApprovedKnowledgeQueryRequest['language'] })),
     ).rejects.toBeInstanceOf(ApprovedKnowledgeQueryValidationError);
   });
 });
@@ -171,18 +171,18 @@ describe('toContextReferences — feeds buildContextPacket as approved knowledge
     const knowledgeReferences = toContextReferences(result);
 
     const input: ContextPacketBuildInput = {
-      packetId: 'ctx_packet_p44_1' as ContextPacketId,
-      requestId: 'ctx_req_p44_1' as ContextRequestId,
+      packetId: 'ctx_packet_p44_1' as McsContextPacketId,
+      requestId: 'ctx_req_p44_1' as McsContextRequestId,
       tenant: {
-        tenantId: 'tenant_team_magnificent' as TenantId,
+        tenantId: 'tenant_team_magnificent' as McsTenantId,
         tenantName: 'Team Magnificent Tenant',
         brandName: TEAM_MAGNIFICENT_NAME,
         environment: 'development',
       },
-      team: { teamId: 'team_magnificent' as TeamId, teamKey: TEAM_MAGNIFICENT_KEY, teamName: TEAM_MAGNIFICENT_NAME },
+      team: { teamId: 'team_magnificent' as McsTeamId, teamKey: TEAM_MAGNIFICENT_KEY, teamName: TEAM_MAGNIFICENT_NAME },
       ba: {
-        tenantId: 'tenant_team_magnificent' as TenantId,
-        teamId: 'team_magnificent' as TeamId,
+        tenantId: 'tenant_team_magnificent' as McsTenantId,
+        teamId: 'team_magnificent' as McsTeamId,
         teamKey: TEAM_MAGNIFICENT_KEY,
         teamName: TEAM_MAGNIFICENT_NAME,
         tmagId: 'TMAG-20260101-ABC123' as TmagId,
@@ -197,7 +197,7 @@ describe('toContextReferences — feeds buildContextPacket as approved knowledge
           canUseBrowserText: true,
         },
       },
-      session: { sessionId: 'sess_p44_1' as SessionId, mode: 'browser_text', status: 'active', taskType: 'training_support', startedAt: new Date(0).toISOString() },
+      session: { sessionId: 'sess_p44_1' as McsSessionId, mode: 'browser_text', status: 'active', taskType: 'training_support', startedAt: new Date(0).toISOString() },
       agentKey: 'michael_magnificent',
       objective: 'training_support',
       language: {
@@ -209,7 +209,7 @@ describe('toContextReferences — feeds buildContextPacket as approved knowledge
         humanReviewed: true,
       },
       knowledgeReferences,
-      provenance: { assembledBy: 'context_manager', requestId: 'ctx_req_p44_1' as ContextRequestId, componentVersion: 's1.5' },
+      provenance: { assembledBy: 'context_manager', requestId: 'ctx_req_p44_1' as McsContextRequestId, componentVersion: 's1.5' },
     };
 
     const packet = buildContextPacket(input);

@@ -14,23 +14,23 @@
  */
 
 import type {
-  CallbackIntent,
-  CallbackRequestPayload,
-  CallbackRequestResponse,
-  ComProspectCopy,
-  EnrolledResponse,
-  ExpiredResponse,
-  ProspectLoginRedeemPayload,
-  ProspectLoginRedeemResponse,
-  ProspectLoginStartPayload,
-  ProspectLoginStartResponse,
-  TeamStatsResponse,
-  TokenState,
-  VideoEventKind,
-  VideoEventPayload,
-  VideoEventResponse,
-  WebinarReservationPayload,
-  WebinarReservationResponse,
+  McsCallbackIntent,
+  McsCallbackRequestPayload,
+  McsCallbackRequestResponse,
+  McsComProspectCopy,
+  McsEnrolledResponse,
+  McsExpiredResponse,
+  McsProspectLoginRedeemPayload,
+  McsProspectLoginRedeemResponse,
+  McsProspectLoginStartPayload,
+  McsProspectLoginStartResponse,
+  McsTeamStatsResponse,
+  McsTokenState,
+  McsVideoEventKind,
+  McsVideoEventPayload,
+  McsVideoEventResponse,
+  McsWebinarReservationPayload,
+  McsWebinarReservationResponse,
 } from '@momentum/shared';
 
 export interface ResolvedProspect {
@@ -54,7 +54,7 @@ export interface ResolvedBA {
 
 export interface ResolveTokenResponse {
   token: string;
-  state: TokenState;
+  state: McsTokenState;
   prospect: ResolvedProspect;
   ba: ResolvedBA;
   videoUrl: string;
@@ -78,7 +78,7 @@ export interface ResolveTokenResponse {
    * Optional/null-tolerant: an older server or a master-content read failure
    * leaves it absent, and every consumer falls back to its built-in copy.
    */
-  copy?: ComProspectCopy | null;
+  copy?: McsComProspectCopy | null;
 }
 
 /**
@@ -98,14 +98,14 @@ export interface ResolveTokenResponse {
  */
 export type ResolveTokenError =
   | { kind: 'invalid_token' }
-  | { kind: 'expired'; expiredAt: string; ba: ExpiredResponse['ba'] }
-  | { kind: 'enrolled'; ba: EnrolledResponse['ba'] }
+  | { kind: 'expired'; expiredAt: string; ba: McsExpiredResponse['ba'] }
+  | { kind: 'enrolled'; ba: McsEnrolledResponse['ba'] }
   | { kind: 'network' };
 
 export type VideoEventError =
   | { kind: 'invalid_token' }
-  | { kind: 'expired'; expiredAt: string; ba: ExpiredResponse['ba'] }
-  | { kind: 'enrolled'; ba: EnrolledResponse['ba'] }
+  | { kind: 'expired'; expiredAt: string; ba: McsExpiredResponse['ba'] }
+  | { kind: 'enrolled'; ba: McsEnrolledResponse['ba'] }
   | { kind: 'network' };
 
 export async function resolveToken(
@@ -132,7 +132,7 @@ async function resolveTokenAt(
 
     if (res.status === 404) return { ok: false, error: { kind: 'invalid_token' } };
     if (res.status === 410) {
-      const body = (await res.json().catch(() => ({}))) as Partial<ExpiredResponse>;
+      const body = (await res.json().catch(() => ({}))) as Partial<McsExpiredResponse>;
       return {
         ok: false,
         error: {
@@ -143,7 +143,7 @@ async function resolveTokenAt(
       };
     }
     if (res.status === 409) {
-      const body = (await res.json().catch(() => ({}))) as Partial<EnrolledResponse>;
+      const body = (await res.json().catch(() => ({}))) as Partial<McsEnrolledResponse>;
       return {
         ok: false,
         error: {
@@ -169,25 +169,25 @@ async function resolveTokenAt(
  */
 export async function postVideoEvent(
   token: string,
-  kind: VideoEventKind,
-): Promise<{ ok: true; data: VideoEventResponse } | { ok: false; error: VideoEventError }> {
+  kind: McsVideoEventKind,
+): Promise<{ ok: true; data: McsVideoEventResponse } | { ok: false; error: VideoEventError }> {
   return postVideoEventAt('/api/p', token, kind);
 }
 
 export async function postRvmVideoEvent(
   token: string,
-  kind: VideoEventKind,
-): Promise<{ ok: true; data: VideoEventResponse } | { ok: false; error: VideoEventError }> {
+  kind: McsVideoEventKind,
+): Promise<{ ok: true; data: McsVideoEventResponse } | { ok: false; error: VideoEventError }> {
   return postVideoEventAt('/api/rvm', token, kind);
 }
 
 async function postVideoEventAt(
   apiBase: '/api/p' | '/api/rvm',
   token: string,
-  kind: VideoEventKind,
-): Promise<{ ok: true; data: VideoEventResponse } | { ok: false; error: VideoEventError }> {
+  kind: McsVideoEventKind,
+): Promise<{ ok: true; data: McsVideoEventResponse } | { ok: false; error: VideoEventError }> {
   try {
-    const payload: VideoEventPayload = { kind };
+    const payload: McsVideoEventPayload = { kind };
     const res = await fetch(`${apiBase}/${encodeURIComponent(token)}/video-event`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -196,7 +196,7 @@ async function postVideoEventAt(
 
     if (res.status === 404) return { ok: false, error: { kind: 'invalid_token' } };
     if (res.status === 410) {
-      const body = (await res.json().catch(() => ({}))) as Partial<ExpiredResponse>;
+      const body = (await res.json().catch(() => ({}))) as Partial<McsExpiredResponse>;
       return {
         ok: false,
         error: {
@@ -207,7 +207,7 @@ async function postVideoEventAt(
       };
     }
     if (res.status === 409) {
-      const body = (await res.json().catch(() => ({}))) as Partial<EnrolledResponse>;
+      const body = (await res.json().catch(() => ({}))) as Partial<McsEnrolledResponse>;
       return {
         ok: false,
         error: {
@@ -218,7 +218,7 @@ async function postVideoEventAt(
     }
     if (!res.ok) return { ok: false, error: { kind: 'network' } };
 
-    const data = (await res.json()) as VideoEventResponse;
+    const data = (await res.json()) as McsVideoEventResponse;
     return { ok: true, data };
   } catch {
     return { ok: false, error: { kind: 'network' } };
@@ -232,11 +232,11 @@ async function postVideoEventAt(
 export type CallbackRequestError =
   | { kind: 'invalid_intent' }
   | { kind: 'invalid_token' }
-  | { kind: 'expired'; expiredAt: string; ba: ExpiredResponse['ba'] }
-  | { kind: 'enrolled'; ba: EnrolledResponse['ba'] }
+  | { kind: 'expired'; expiredAt: string; ba: McsExpiredResponse['ba'] }
+  | { kind: 'enrolled'; ba: McsEnrolledResponse['ba'] }
   | { kind: 'network' };
 
-export type { CallbackIntent, CallbackRequestResponse };
+export type { McsCallbackIntent, McsCallbackRequestResponse };
 
 /**
  * Submit the Section 10 callback request. Two intents only:
@@ -254,18 +254,18 @@ export type { CallbackIntent, CallbackRequestResponse };
  */
 export async function postCallbackRequest(
   token: string,
-  intent: CallbackIntent,
+  intent: McsCallbackIntent,
 ): Promise<
-  { ok: true; data: CallbackRequestResponse } | { ok: false; error: CallbackRequestError }
+  { ok: true; data: McsCallbackRequestResponse } | { ok: false; error: CallbackRequestError }
 > {
   return postCallbackRequestAt('/api/p', token, intent);
 }
 
 export async function postRvmCallbackRequest(
   token: string,
-  intent: CallbackIntent,
+  intent: McsCallbackIntent,
 ): Promise<
-  { ok: true; data: CallbackRequestResponse } | { ok: false; error: CallbackRequestError }
+  { ok: true; data: McsCallbackRequestResponse } | { ok: false; error: CallbackRequestError }
 > {
   return postCallbackRequestAt('/api/rvm', token, intent);
 }
@@ -273,12 +273,12 @@ export async function postRvmCallbackRequest(
 async function postCallbackRequestAt(
   apiBase: '/api/p' | '/api/rvm',
   token: string,
-  intent: CallbackIntent,
+  intent: McsCallbackIntent,
 ): Promise<
-  { ok: true; data: CallbackRequestResponse } | { ok: false; error: CallbackRequestError }
+  { ok: true; data: McsCallbackRequestResponse } | { ok: false; error: CallbackRequestError }
 > {
   try {
-    const payload: CallbackRequestPayload = { intent };
+    const payload: McsCallbackRequestPayload = { intent };
     const res = await fetch(`${apiBase}/${encodeURIComponent(token)}/callback-request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -288,7 +288,7 @@ async function postCallbackRequestAt(
     if (res.status === 400) return { ok: false, error: { kind: 'invalid_intent' } };
     if (res.status === 404) return { ok: false, error: { kind: 'invalid_token' } };
     if (res.status === 410) {
-      const body = (await res.json().catch(() => ({}))) as Partial<ExpiredResponse>;
+      const body = (await res.json().catch(() => ({}))) as Partial<McsExpiredResponse>;
       return {
         ok: false,
         error: {
@@ -299,7 +299,7 @@ async function postCallbackRequestAt(
       };
     }
     if (res.status === 409) {
-      const body = (await res.json().catch(() => ({}))) as Partial<EnrolledResponse>;
+      const body = (await res.json().catch(() => ({}))) as Partial<McsEnrolledResponse>;
       return {
         ok: false,
         error: {
@@ -310,7 +310,7 @@ async function postCallbackRequestAt(
     }
     if (!res.ok) return { ok: false, error: { kind: 'network' } };
 
-    const data = (await res.json()) as CallbackRequestResponse;
+    const data = (await res.json()) as McsCallbackRequestResponse;
     return { ok: true, data };
   } catch {
     return { ok: false, error: { kind: 'network' } };
@@ -326,11 +326,11 @@ export type WebinarReservationError =
   | { kind: 'invalid_email' }
   | { kind: 'no_upcoming_event' }
   | { kind: 'invalid_token' }
-  | { kind: 'expired'; expiredAt: string; ba: ExpiredResponse['ba'] }
-  | { kind: 'enrolled'; ba: EnrolledResponse['ba'] }
+  | { kind: 'expired'; expiredAt: string; ba: McsExpiredResponse['ba'] }
+  | { kind: 'enrolled'; ba: McsEnrolledResponse['ba'] }
   | { kind: 'network' };
 
-export type { WebinarReservationResponse };
+export type { McsWebinarReservationResponse };
 
 /**
  * Submit a webinar reservation for the next upcoming Team Magnificent
@@ -344,18 +344,18 @@ export type { WebinarReservationResponse };
  */
 export async function postWebinarReservation(
   token: string,
-  payload: WebinarReservationPayload,
+  payload: McsWebinarReservationPayload,
 ): Promise<
-  { ok: true; data: WebinarReservationResponse } | { ok: false; error: WebinarReservationError }
+  { ok: true; data: McsWebinarReservationResponse } | { ok: false; error: WebinarReservationError }
 > {
   return postWebinarReservationAt('/api/p', token, payload);
 }
 
 export async function postRvmWebinarReservation(
   token: string,
-  payload: WebinarReservationPayload,
+  payload: McsWebinarReservationPayload,
 ): Promise<
-  { ok: true; data: WebinarReservationResponse } | { ok: false; error: WebinarReservationError }
+  { ok: true; data: McsWebinarReservationResponse } | { ok: false; error: WebinarReservationError }
 > {
   return postWebinarReservationAt('/api/rvm', token, payload);
 }
@@ -363,9 +363,9 @@ export async function postRvmWebinarReservation(
 async function postWebinarReservationAt(
   apiBase: '/api/p' | '/api/rvm',
   token: string,
-  payload: WebinarReservationPayload,
+  payload: McsWebinarReservationPayload,
 ): Promise<
-  { ok: true; data: WebinarReservationResponse } | { ok: false; error: WebinarReservationError }
+  { ok: true; data: McsWebinarReservationResponse } | { ok: false; error: WebinarReservationError }
 > {
   try {
     const res = await fetch(`${apiBase}/${encodeURIComponent(token)}/webinar-reserve`, {
@@ -387,7 +387,7 @@ async function postWebinarReservationAt(
       return { ok: false, error: { kind: 'invalid_token' } };
     }
     if (res.status === 410) {
-      const body = (await res.json().catch(() => ({}))) as Partial<ExpiredResponse>;
+      const body = (await res.json().catch(() => ({}))) as Partial<McsExpiredResponse>;
       return {
         ok: false,
         error: {
@@ -398,7 +398,7 @@ async function postWebinarReservationAt(
       };
     }
     if (res.status === 409) {
-      const body = (await res.json().catch(() => ({}))) as Partial<EnrolledResponse>;
+      const body = (await res.json().catch(() => ({}))) as Partial<McsEnrolledResponse>;
       return {
         ok: false,
         error: {
@@ -409,7 +409,7 @@ async function postWebinarReservationAt(
     }
     if (!res.ok) return { ok: false, error: { kind: 'network' } };
 
-    const data = (await res.json()) as WebinarReservationResponse;
+    const data = (await res.json()) as McsWebinarReservationResponse;
     return { ok: true, data };
   } catch {
     return { ok: false, error: { kind: 'network' } };
@@ -422,11 +422,11 @@ async function postWebinarReservationAt(
 
 export type TeamStatsError =
   | { kind: 'invalid_token' }
-  | { kind: 'expired'; expiredAt: string; ba: ExpiredResponse['ba'] }
-  | { kind: 'enrolled'; ba: EnrolledResponse['ba'] }
+  | { kind: 'expired'; expiredAt: string; ba: McsExpiredResponse['ba'] }
+  | { kind: 'enrolled'; ba: McsEnrolledResponse['ba'] }
   | { kind: 'network' };
 
-export type { TeamStatsResponse };
+export type { McsTeamStatsResponse };
 
 /**
  * Fetch live team activity counts for the dashboard Section 5 grid.
@@ -439,20 +439,20 @@ export type { TeamStatsResponse };
  */
 export async function fetchTeamStats(
   token: string,
-): Promise<{ ok: true; data: TeamStatsResponse } | { ok: false; error: TeamStatsError }> {
+): Promise<{ ok: true; data: McsTeamStatsResponse } | { ok: false; error: TeamStatsError }> {
   return fetchTeamStatsAt('/api/p', token);
 }
 
 export async function fetchRvmTeamStats(
   token: string,
-): Promise<{ ok: true; data: TeamStatsResponse } | { ok: false; error: TeamStatsError }> {
+): Promise<{ ok: true; data: McsTeamStatsResponse } | { ok: false; error: TeamStatsError }> {
   return fetchTeamStatsAt('/api/rvm', token);
 }
 
 async function fetchTeamStatsAt(
   apiBase: '/api/p' | '/api/rvm',
   token: string,
-): Promise<{ ok: true; data: TeamStatsResponse } | { ok: false; error: TeamStatsError }> {
+): Promise<{ ok: true; data: McsTeamStatsResponse } | { ok: false; error: TeamStatsError }> {
   try {
     const res = await fetch(`${apiBase}/${encodeURIComponent(token)}/team-stats`, {
       method: 'GET',
@@ -461,7 +461,7 @@ async function fetchTeamStatsAt(
 
     if (res.status === 404) return { ok: false, error: { kind: 'invalid_token' } };
     if (res.status === 410) {
-      const body = (await res.json().catch(() => ({}))) as Partial<ExpiredResponse>;
+      const body = (await res.json().catch(() => ({}))) as Partial<McsExpiredResponse>;
       return {
         ok: false,
         error: {
@@ -472,7 +472,7 @@ async function fetchTeamStatsAt(
       };
     }
     if (res.status === 409) {
-      const body = (await res.json().catch(() => ({}))) as Partial<EnrolledResponse>;
+      const body = (await res.json().catch(() => ({}))) as Partial<McsEnrolledResponse>;
       return {
         ok: false,
         error: {
@@ -483,7 +483,7 @@ async function fetchTeamStatsAt(
     }
     if (!res.ok) return { ok: false, error: { kind: 'network' } };
 
-    const data = (await res.json()) as TeamStatsResponse;
+    const data = (await res.json()) as McsTeamStatsResponse;
     return { ok: true, data };
   } catch {
     return { ok: false, error: { kind: 'network' } };
@@ -522,7 +522,7 @@ export async function postLoginStart(
   phone: string,
 ): Promise<ProspectLoginStartResult> {
   try {
-    const payload: ProspectLoginStartPayload = { phone };
+    const payload: McsProspectLoginStartPayload = { phone };
     const res = await fetch('/api/p/login/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -530,7 +530,7 @@ export async function postLoginStart(
     });
     if (res.status === 429) return { ok: false, error: 'rate_limited' };
     if (!res.ok) return { ok: false, error: 'network' };
-    const data = (await res.json()) as ProspectLoginStartResponse;
+    const data = (await res.json()) as McsProspectLoginStartResponse;
     if (data.ok) return { ok: true };
     return { ok: false, error: 'network' };
   } catch {
@@ -557,7 +557,7 @@ export async function postLoginRedeem(
   linkToken: string,
 ): Promise<ProspectLoginRedeemResult> {
   try {
-    const payload: ProspectLoginRedeemPayload = { linkToken };
+    const payload: McsProspectLoginRedeemPayload = { linkToken };
     const res = await fetch('/api/p/login/redeem', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -566,7 +566,7 @@ export async function postLoginRedeem(
     if (res.status === 429) return { ok: false, error: 'rate_limited' };
     if (res.status === 400) return { ok: false, error: 'invalid_link' };
     if (!res.ok) return { ok: false, error: 'network' };
-    const data = (await res.json()) as ProspectLoginRedeemResponse;
+    const data = (await res.json()) as McsProspectLoginRedeemResponse;
     if (data.ok) return { ok: true, tokenId: data.tokenId };
     return { ok: false, error: 'invalid_link' };
   } catch {

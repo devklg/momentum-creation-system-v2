@@ -45,7 +45,7 @@ import {
   hashPhone,
   normalizePhone,
 } from './prospectAccount.js';
-import type { ProspectMagicLinkRecord } from '@momentum/shared';
+import type { McsProspectMagicLinkRecord } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const MONGO_COLLECTION = 'prospect_magic_links';
@@ -154,7 +154,7 @@ export async function issueLinksForPhone(
 
   for (const account of accounts) {
     const linkToken = randomLinkToken();
-    const record: ProspectMagicLinkRecord = {
+    const record: McsProspectMagicLinkRecord = {
       linkToken,
       accountId: account.accountId,
       tokenId: account.tokenId,
@@ -298,7 +298,7 @@ export async function redeemLink(linkToken: string): Promise<RedeemResult> {
 
   const result = await gatewayCall<{
     documents: Array<
-      ProspectMagicLinkRecord & {
+      McsProspectMagicLinkRecord & {
         smsDeliveryStatus?: string;
         smsDeliveryError?: string | null;
       }
@@ -333,7 +333,7 @@ export async function redeemLink(linkToken: string): Promise<RedeemResult> {
 
   // Re-read to confirm we won the race. If redeemedAt was already
   // stamped by a concurrent redeem, return already_used.
-  const after = await gatewayCall<{ documents: ProspectMagicLinkRecord[] }>(
+  const after = await gatewayCall<{ documents: McsProspectMagicLinkRecord[] }>(
     'mongodb',
     'query',
     {

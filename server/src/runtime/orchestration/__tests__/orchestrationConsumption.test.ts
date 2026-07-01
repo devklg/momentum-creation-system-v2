@@ -1,18 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import type {
-  AgentId,
+  McsAgentId,
   TmagId,
-  ContextPacketId,
-  ContextRequestId,
-  CorrelationId,
-  IdempotencyKey,
-  KnowledgeId,
-  RequestId,
-  RuntimeEventId,
-  SessionId,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsContextPacketId,
+  McsContextRequestId,
+  McsCorrelationId,
+  McsIdempotencyKey,
+  McsKnowledgeId,
+  McsRequestId,
+  McsRuntimeEventId,
+  McsSessionId,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   buildContextPacket,
@@ -28,19 +28,19 @@ import { consumeContextPacket } from '../consumption.js';
 
 function baseEvent(): RuntimeAgentEventEnvelope {
   return {
-    eventId: 'evt_consume_ref_001' as RuntimeEventId,
+    eventId: 'evt_consume_ref_001' as McsRuntimeEventId,
     eventType: 'context.packet.created',
     schemaVersion: AGENT_EVENT_V1_SCHEMA_VERSION,
-    tenantId: 'tenant_team_magnificent' as TenantId,
-    teamId: 'team_magnificent' as TeamId,
+    tenantId: 'tenant_team_magnificent' as McsTenantId,
+    teamId: 'team_magnificent' as McsTeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
     tmagId: 'TMAG-CONSUME-001' as TmagId,
     agentKey: 'michael_magnificent',
-    agentId: 'agent_instance_michael_default' as AgentId,
-    sessionId: 'session_consume_001' as SessionId,
-    correlationId: 'corr_consume_001' as CorrelationId,
-    idempotencyKey: 'context-packet:session_consume_001:created' as IdempotencyKey,
+    agentId: 'agent_instance_michael_default' as McsAgentId,
+    sessionId: 'session_consume_001' as McsSessionId,
+    correlationId: 'corr_consume_001' as McsCorrelationId,
+    idempotencyKey: 'context-packet:session_consume_001:created' as McsIdempotencyKey,
     source: 'context_manager',
     payload: { packetId: 'ctx_consume_001' },
     occurredAt: '2026-06-28T12:00:00.000Z',
@@ -48,7 +48,7 @@ function baseEvent(): RuntimeAgentEventEnvelope {
     actor: { actorType: 'system', actorId: 'context_manager' },
     provenance: {
       emittedBy: 'context_manager',
-      requestId: 'ctx_consume_req_001' as RequestId,
+      requestId: 'ctx_consume_req_001' as McsRequestId,
       componentVersion: 's1.4',
     },
   };
@@ -56,22 +56,22 @@ function baseEvent(): RuntimeAgentEventEnvelope {
 
 function baseInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextPacketBuildInput {
   return {
-    packetId: 'ctx_consume_001' as ContextPacketId,
-    requestId: 'ctx_consume_req_001' as ContextRequestId,
+    packetId: 'ctx_consume_001' as McsContextPacketId,
+    requestId: 'ctx_consume_req_001' as McsContextRequestId,
     tenant: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
       tenantName: 'Team Magnificent Tenant',
       brandName: 'Team Magnificent',
       environment: 'development',
     },
     team: {
-      teamId: 'team_magnificent' as TeamId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
     },
     ba: {
-      tenantId: 'tenant_team_magnificent' as TenantId,
-      teamId: 'team_magnificent' as TeamId,
+      tenantId: 'tenant_team_magnificent' as McsTenantId,
+      teamId: 'team_magnificent' as McsTeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
       tmagId: 'TMAG-CONSUME-001' as TmagId,
@@ -87,14 +87,14 @@ function baseInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextPac
       },
     },
     session: {
-      sessionId: 'session_consume_001' as SessionId,
+      sessionId: 'session_consume_001' as McsSessionId,
       mode: 'browser_text',
       status: 'active',
       taskType: 'training_support',
       startedAt: '2026-06-28T11:59:00.000Z',
     },
     agentKey: 'michael_magnificent',
-    agentId: 'agent_instance_michael_default' as AgentId,
+    agentId: 'agent_instance_michael_default' as McsAgentId,
     objective: 'prepare a training support turn',
     language: {
       primary: 'en',
@@ -106,8 +106,8 @@ function baseInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextPac
     },
     knowledgeReferences: [
       {
-        sourceId: 'knowledge_approved_001' as SourceId,
-        knowledgeId: 'knowledge_approved_001' as KnowledgeId,
+        sourceId: 'knowledge_approved_001' as McsSourceId,
+        knowledgeId: 'knowledge_approved_001' as McsKnowledgeId,
         kind: 'approved_knowledge',
         title: 'Approved training rule',
         summary: 'Approved guidance for the training support turn.',
@@ -126,7 +126,7 @@ function baseInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextPac
     excludedKnowledge: [],
     provenance: {
       assembledBy: 'context_manager',
-      requestId: 'ctx_consume_req_001' as ContextRequestId,
+      requestId: 'ctx_consume_req_001' as McsContextRequestId,
       componentVersion: 's1.5',
       traceId: 'trace_consume_001',
     },
@@ -179,7 +179,7 @@ describe('S2.1 Context Packet consumption', () => {
     const packet = buildContextPacket(
       baseInput({
         agentKey: 'steve_success',
-        agentId: 'agent_instance_steve_default' as AgentId,
+        agentId: 'agent_instance_steve_default' as McsAgentId,
         session: {
           ...baseInput().session,
           taskType: 'training_support',

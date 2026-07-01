@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type {
-  AgentKey,
-  RuntimeEventId,
+  McsAgentKey,
+  McsRuntimeEventId,
 } from '@momentum/shared/runtime';
 import type {
   CreateRuntimeEventEnvelopeInput,
@@ -16,7 +16,7 @@ export const AGENT_EVENT_V1_SCHEMA_VERSION = 'agent_event.v1' as const;
 export const TEAM_MAGNIFICENT_KEY = 'team_magnificent' as const;
 export const TEAM_MAGNIFICENT_NAME = 'Team Magnificent' as const;
 
-const AGENT_KEYS = ['steve_success', 'michael_magnificent', 'ivory'] as const satisfies readonly AgentKey[];
+const AGENT_KEYS = ['steve_success', 'michael_magnificent', 'ivory'] as const satisfies readonly McsAgentKey[];
 
 const SEMANTIC_AGENT_ID_VALUES = new Set<string>([
   ...AGENT_KEYS,
@@ -73,7 +73,7 @@ export function createRuntimeEventEnvelope<TPayload = Record<string, unknown>>(
   const now = clock.now().toISOString();
   const event: unknown = {
     ...input,
-    eventId: input.eventId ?? (`evt_${randomUUID()}` as RuntimeEventId),
+    eventId: input.eventId ?? (`evt_${randomUUID()}` as McsRuntimeEventId),
     schemaVersion: AGENT_EVENT_V1_SCHEMA_VERSION,
     occurredAt: input.occurredAt ?? now,
     recordedAt: input.recordedAt ?? now,
@@ -210,7 +210,7 @@ function validateAgentIdentity(
   const agentKey = event.agentKey;
   const agentId = event.agentId;
 
-  if (agentKey !== undefined && !AGENT_KEYS.includes(agentKey as AgentKey)) {
+  if (agentKey !== undefined && !AGENT_KEYS.includes(agentKey as McsAgentKey)) {
     errors.push(error('agentKey', 'invalid_agent_key', 'agentKey must be a semantic runtime registry identity.'));
   }
 

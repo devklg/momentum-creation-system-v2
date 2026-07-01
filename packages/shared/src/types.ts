@@ -3,7 +3,7 @@
  * Kept thin in Phase 0 â€” expand as Phase 1+ surfaces ship.
  */
 
-export type IsoTimestamp = string;
+export type McsIsoTimestamp = string;
 
 /** Token lifecycle states per COM Design Section E.1.
  *
@@ -13,7 +13,7 @@ export type IsoTimestamp = string;
  * create after video_complete. Both can exist for the same prospect
  * simultaneously (Chat #105 spec amendment).
  */
-export type TokenState =
+export type McsTokenState =
   | 'minted'
   | 'clicked'
   | 'video_started'
@@ -44,7 +44,7 @@ export type TokenState =
  * port shipped. Server, client, and SMS templating all branch on this
  * discriminator.
  */
-export type CallbackIntent =
+export type McsCallbackIntent =
   | 'interested_tell_me_more'
   | 'have_questions'
   | 'ready_to_join';
@@ -56,8 +56,8 @@ export type CallbackIntent =
  * the inviting BA server-side; sponsor immutability (locked-spec 3.5)
  * means the request body cannot influence which BA gets notified.
  */
-export interface CallbackRequestPayload {
-  intent: CallbackIntent;
+export interface McsCallbackRequestPayload {
+  intent: McsCallbackIntent;
 }
 
 /**
@@ -66,11 +66,11 @@ export interface CallbackRequestPayload {
  * back so the client can show "submitted at HH:MM" if Kevin ever wants
  * it; for now the UI just confirms the submission landed.
  */
-export interface CallbackRequestResponse {
+export interface McsCallbackRequestResponse {
   ok: true;
-  intent: CallbackIntent;
+  intent: McsCallbackIntent;
   baFirstName: string;
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
 }
 
 /**
@@ -80,19 +80,19 @@ export interface CallbackRequestResponse {
  * prospect is what the BA cockpit surfaces; older records remain on the
  * activity timeline.
  */
-export interface CallbackRequestRecord {
+export interface McsCallbackRequestRecord {
   callbackRequestId: string;
   token: string;
   prospectId: string;
   sponsorTmagId: string;
-  intent: CallbackIntent;
-  createdAt: IsoTimestamp;
+  intent: McsCallbackIntent;
+  createdAt: McsIsoTimestamp;
   smsDeliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
   smsDeliveryError: string | null;
 }
 
 /** Three-stack write result returned by the gateway. */
-export interface TripleStackWriteResult {
+export interface McsTripleStackWriteResult {
   mongo: { ok: boolean; insertedCount?: number };
   neo4j: { ok: boolean; counters?: Record<string, number> };
   chroma: { ok: boolean; verified?: boolean };
@@ -103,7 +103,7 @@ export interface TripleStackWriteResult {
  * Country is captured from day one for international rollout per
  * locked-spec Part 4.4. Use ISO 3166-1 alpha-2 codes ('US', 'CA', 'GB').
  */
-export interface ProspectLocation {
+export interface McsProspectLocation {
   city: string;
   stateOrRegion: string;
   country: string;
@@ -116,24 +116,24 @@ export interface ProspectLocation {
  * the customer-conversion metric without expanding scope into customer
  * tracking; the actual customer relationship lives in THREE International.
  */
-export interface ProspectRecord {
+export interface McsProspectRecord {
   prospectId: string;
   firstName: string;
   lastName: string;
   lastInitial: string;
-  location: ProspectLocation;
+  location: McsProspectLocation;
   phone: string | null;
   email: string | null;
   sponsorTmagId: string;
-  state: TokenState;
+  state: McsTokenState;
   positionNumber: number | null;
-  placedAt: IsoTimestamp | null;
+  placedAt: McsIsoTimestamp | null;
   becameCustomer: boolean;
-  becameCustomerAt: IsoTimestamp | null;
+  becameCustomerAt: McsIsoTimestamp | null;
   customerNote: string | null;
-  createdAt: IsoTimestamp;
-  updatedAt: IsoTimestamp;
-  expiresAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
+  updatedAt: McsIsoTimestamp;
+  expiresAt: McsIsoTimestamp;
 }
 
 /**
@@ -141,14 +141,14 @@ export interface ProspectRecord {
  * (31 chars, no 0/1/I/O/L). One prospect can have multiple tokens over time
  * if a BA re-invites them (cooldown rule locked-spec Part 5, still open).
  */
-export interface InviteTokenRecord {
+export interface McsInviteTokenRecord {
   token: string;
   prospectId: string;
   sponsorTmagId: string;
-  state: TokenState;
-  createdAt: IsoTimestamp;
-  clickedAt: IsoTimestamp | null;
-  expiresAt: IsoTimestamp;
+  state: McsTokenState;
+  createdAt: McsIsoTimestamp;
+  clickedAt: McsIsoTimestamp | null;
+  expiresAt: McsIsoTimestamp;
 }
 
 /**
@@ -156,7 +156,7 @@ export interface InviteTokenRecord {
  * progresses through Dr. Dan's 17-minute video. Only 'complete' triggers
  * holding-tank placement (locked-spec Part 4.5).
  */
-export type VideoEventKind =
+export type McsVideoEventKind =
   | 'started'
   | 'quarter'
   | 'half'
@@ -170,13 +170,13 @@ export type VideoEventKind =
  * 8-week consideration window (locked-spec Part 3.7) but the assigned
  * position is preserved as a vacant slot â€” #348 does not become #347.
  */
-export interface PoolPlacement {
+export interface McsPoolPlacement {
   prospectId: string;
   sponsorTmagId: string;
   positionNumber: number;
-  placedAt: IsoTimestamp;
-  expiresAt: IsoTimestamp;
-  flushedAt: IsoTimestamp | null;
+  placedAt: McsIsoTimestamp;
+  expiresAt: McsIsoTimestamp;
+  flushedAt: McsIsoTimestamp | null;
   flushReason: 'enrolled' | 'expired' | 'archived' | null;
 }
 
@@ -185,10 +185,10 @@ export interface PoolPlacement {
  * to the .com client with the assigned position; the client transitions
  * the render from presentation page to dashboard.
  */
-export interface PlaceProspectResult {
+export interface McsPlaceProspectResult {
   prospectId: string;
   positionNumber: number;
-  placedAt: IsoTimestamp;
+  placedAt: McsIsoTimestamp;
   alreadyPlaced: boolean;
 }
 
@@ -197,19 +197,19 @@ export interface PlaceProspectResult {
  * Replaying any kind is idempotent â€” the server only transitions forward,
  * never backward, in the token lifecycle.
  */
-export interface VideoEventPayload {
-  kind: VideoEventKind;
+export interface McsVideoEventPayload {
+  kind: McsVideoEventKind;
 }
 
 /**
  * Response from POST /api/p/:token/video-event. positionNumber is non-null
  * only when this event resulted in (or already resulted in) placement.
  */
-export interface VideoEventResponse {
+export interface McsVideoEventResponse {
   token: string;
-  state: TokenState;
+  state: McsTokenState;
   positionNumber: number | null;
-  placedAt: IsoTimestamp | null;
+  placedAt: McsIsoTimestamp | null;
 }
 
 /**
@@ -217,9 +217,9 @@ export interface VideoEventResponse {
  * Both prospect and BA are always present â€” the .com surface is never
  * anonymous per locked-spec Part 3.9.
  */
-export interface ResolvedTokenPayload {
+export interface McsResolvedTokenPayload {
   token: string;
-  state: TokenState;
+  state: McsTokenState;
   prospect: {
     firstName: string;
     lastInitial: string;
@@ -227,8 +227,8 @@ export interface ResolvedTokenPayload {
     stateOrRegion: string;
     country: string;
     positionNumber: number | null;
-    placedAt: IsoTimestamp | null;
-    expiresAt: IsoTimestamp;
+    placedAt: McsIsoTimestamp | null;
+    expiresAt: McsIsoTimestamp;
   };
   ba: {
     tmagId: string;
@@ -250,7 +250,7 @@ export interface ResolvedTokenPayload {
    */
   nextEvent: {
     eventId: string;
-    scheduledFor: IsoTimestamp;
+    scheduledFor: McsIsoTimestamp;
     hosts: string[];
   } | null;
 }
@@ -269,7 +269,7 @@ export interface ResolvedTokenPayload {
  * No phone field: the prospect already has the BA's number from the
  * original invitation. Carrying it again here would be noise.
  */
-export interface EnrolledResponse {
+export interface McsEnrolledResponse {
   error: 'enrolled';
   ba: {
     firstName: string;
@@ -300,9 +300,9 @@ export interface EnrolledResponse {
  * formats for display and uses the same string in `tel:` links and SMS
  * draft helpers. Null only if the BA has no phone on record.
  */
-export interface ExpiredResponse {
+export interface McsExpiredResponse {
   error: 'expired';
-  expiredAt: IsoTimestamp;
+  expiredAt: McsIsoTimestamp;
   ba: {
     firstName: string;
     lastInitial: string;
@@ -342,13 +342,13 @@ export interface ExpiredResponse {
  * of `PlacementEvent`. Same shape both places so the React ticker
  * renders snapshot entries and live entries through one code path.
  */
-export interface PlacementTickerEntry {
+export interface McsPlacementTickerEntry {
   positionNumber: number;
   firstName: string;
   lastInitial: string;
   city: string;
   stateOrRegion: string;
-  placedAt: IsoTimestamp;
+  placedAt: McsIsoTimestamp;
 }
 
 /**
@@ -357,9 +357,9 @@ export interface PlacementTickerEntry {
  * its own beneath-you count, plus the most recent N placements to
  * seed the position-stack ticker without a separate fetch.
  */
-export interface HoldingTankSnapshot {
+export interface McsHoldingTankSnapshot {
   globalMaxPosition: number;
-  recent: PlacementTickerEntry[];
+  recent: McsPlacementTickerEntry[];
 }
 
 /**
@@ -368,7 +368,7 @@ export interface HoldingTankSnapshot {
  * beneath-you counter by 1 if positionNumber > their own position.
  * The entry is prepended to the position-stack ticker.
  */
-export interface PlacementEvent extends PlacementTickerEntry {
+export interface McsPlacementEvent extends McsPlacementTickerEntry {
   /** Globally-unique id, used as the SSE `id:` field for resumability. */
   eventId: string;
 }
@@ -396,14 +396,14 @@ export interface PlacementEvent extends PlacementTickerEntry {
  * seat for. Hosts default to Kevin + Paul (locked-spec 1.14).
  * Status is upgraded by the seeding job/admin tool, not by reservation.
  */
-export interface WebinarEvent {
+export interface McsWebinarEvent {
   eventId: string;
-  scheduledFor: IsoTimestamp;
+  scheduledFor: McsIsoTimestamp;
   hosts: string[];
   zoomUrl: string | null;
   durationMinutes: number;
   status: 'upcoming' | 'past' | 'cancelled';
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
 }
 
 /**
@@ -412,7 +412,7 @@ export interface WebinarEvent {
  * else (eventId, prospectId, sponsorTmagId) is resolved server-side
  * from the token. Sponsor immutability (locked-spec 3.5) holds.
  */
-export interface WebinarReservationPayload {
+export interface McsWebinarReservationPayload {
   name: string;
   email: string;
 }
@@ -423,14 +423,14 @@ export interface WebinarReservationPayload {
  * card using `scheduledFor` + `baFirstName` so the prospect knows
  * who's following up with the Zoom link.
  */
-export interface WebinarReservationResponse {
+export interface McsWebinarReservationResponse {
   ok: true;
   reservationId: string;
   eventId: string;
-  scheduledFor: IsoTimestamp;
+  scheduledFor: McsIsoTimestamp;
   baFirstName: string;
   emailSent: boolean;
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
 }
 
 /**
@@ -442,7 +442,7 @@ export interface WebinarReservationResponse {
  * configured per locked-spec Part 5) until the provider is wired.
  * 'queued'/'sent'/'failed' come online when the provider lands.
  */
-export interface WebinarReservationRecord {
+export interface McsWebinarReservationRecord {
   reservationId: string;
   eventId: string;
   token: string;
@@ -450,7 +450,7 @@ export interface WebinarReservationRecord {
   sponsorTmagId: string;
   name: string;
   email: string;
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
   emailDeliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
   emailDeliveryError: string | null;
   smsDeliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
@@ -472,12 +472,12 @@ export interface WebinarReservationRecord {
  *   claim, no rank claim, no placement promise. They demonstrate real
  *   recruiting activity in real time and are safe for .com surfaces.
  */
-export interface TeamStatsResponse {
+export interface McsTeamStatsResponse {
   basActive24h: number;
   invitationsSentToday: number;
   newPlacements24h: number;
   recruitmentVelocityPct: number;
-  computedAt: IsoTimestamp;
+  computedAt: McsIsoTimestamp;
 }
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -509,7 +509,7 @@ export interface TeamStatsResponse {
  *   - ivory        â†’ Ivory (who-do-you-know agent) drafted it
  *   - scriptmaker  â†’ ScriptMaker drafted it from a product video
  */
-export type InvitationSource = 'self' | 'ivory' | 'scriptmaker';
+export type McsInvitationSource = 'self' | 'ivory' | 'scriptmaker';
 
 /**
  * BA-submitted invitation form (Chat #119 field lock, extended Chat #120).
@@ -526,7 +526,7 @@ export type InvitationSource = 'self' | 'ivory' | 'scriptmaker';
  * backward-compatible with the standalone /log path, but the plain form
  * always sends them.
  */
-export interface CreateInvitationPayload {
+export interface McsCreateInvitationPayload {
   firstName: string;
   lastName: string;
   email: string | null;
@@ -538,7 +538,7 @@ export interface CreateInvitationPayload {
   /** The invitation text the BA will send. Stored, never auto-sent. */
   message?: string | null;
   /** Who composed `message`. Route defaults to 'self' when omitted. */
-  source?: InvitationSource;
+  source?: McsInvitationSource;
   /** Optional BA-authored context, used by Ivory relationship-first invites. */
   relationshipReason?: string | null;
 }
@@ -547,17 +547,17 @@ export interface CreateInvitationPayload {
  * Response from POST /api/invitations. Carries the fully-substituted
  * prospect link the BA shares (https://teammagnificent.com/p/{token}).
  */
-export interface CreateInvitationResponse {
+export interface McsCreateInvitationResponse {
   ok: true;
   prospectId: string;
   token: string;
   inviteUrl: string;
-  createdAt: IsoTimestamp;
-  expiresAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
+  expiresAt: McsIsoTimestamp;
   /** Echo of the stored message + source (Chat #120), so the page can
    *  show the BA exactly what was saved alongside the link. */
   message: string | null;
-  source: InvitationSource;
+  source: McsInvitationSource;
   relationshipReason: string | null;
 }
 
@@ -565,10 +565,10 @@ export interface CreateInvitationResponse {
  * Response from POST /api/invitations/:prospectId/sent ("I sent this").
  * alreadySent is true on idempotent replays.
  */
-export interface MarkInvitationSentResponse {
+export interface McsMarkInvitationSentResponse {
   ok: true;
   prospectId: string;
-  sentAt: IsoTimestamp;
+  sentAt: McsIsoTimestamp;
   alreadySent: boolean;
 }
 
@@ -582,18 +582,18 @@ export interface MarkInvitationSentResponse {
  *   - video_completed      â†’ prospect finished Dr. Dan's video (placement).
  *   - callback_requested   â†’ prospect submitted a callback CTA.
  */
-export type InvitationActivityKind =
+export type McsInvitationActivityKind =
   | 'invitation_sent'
   | 'video_completed'
   | 'callback_requested';
 
-export interface InvitationActivityEntry {
+export interface McsInvitationActivityEntry {
   activityId: string;
   prospectId: string;
   sponsorTmagId: string;
-  kind: InvitationActivityKind;
+  kind: McsInvitationActivityKind;
   note: string;
-  at: IsoTimestamp;
+  at: McsIsoTimestamp;
 }
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -633,7 +633,7 @@ export interface InvitationActivityEntry {
  * the action a BA most needs to see; 'enrolled' and 'expired' are terminal
  * and outrank everything.
  */
-export type InviteDisplayStatus =
+export type McsInviteDisplayStatus =
   | 'draft'
   | 'sent'
   | 'opened'
@@ -646,7 +646,7 @@ export type InviteDisplayStatus =
  * One row in the BA's My Invites list. A flattened, display-ready view of
  * a prospect the BA invited â€” the cockpit's primary unit.
  */
-export interface InviteSummary {
+export interface McsInviteSummary {
   prospectId: string;
   token: string;
   firstName: string;
@@ -654,23 +654,23 @@ export interface InviteSummary {
   city: string;
   stateOrRegion: string;
   /** Token lifecycle rail state (raw). */
-  tokenState: TokenState;
+  tokenState: McsTokenState;
   /** Computed display status the cockpit badges on the row. */
-  status: InviteDisplayStatus;
+  status: McsInviteDisplayStatus;
   /** Pool position once placed; null before video_complete. */
   positionNumber: number | null;
   /** Most recent callback intent, if the prospect raised a hand. */
-  latestCallbackIntent: CallbackIntent | null;
+  latestCallbackIntent: McsCallbackIntent | null;
   /** The stored invitation message + who composed it (Chat #120). */
   message: string | null;
-  source: InvitationSource;
+  source: McsInvitationSource;
   /** Optional relationship context captured by Ivory before drafting. */
   relationshipReason?: string | null;
   /** Whether the BA has confirmed they sent the link. */
-  sentAt: IsoTimestamp | null;
+  sentAt: McsIsoTimestamp | null;
   becameCustomer: boolean;
-  createdAt: IsoTimestamp;
-  expiresAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
+  expiresAt: McsIsoTimestamp;
 }
 
 /**
@@ -678,11 +678,11 @@ export interface InviteSummary {
  * first, plus the per-prospect activity timeline keyed by prospectId so
  * the cockpit can expand a row without a second round trip.
  */
-export interface MyInvitesResponse {
+export interface McsMyInvitesResponse {
   ok: true;
-  invites: InviteSummary[];
+  invites: McsInviteSummary[];
   /** activityByProspect[prospectId] = chronological activity for that prospect. */
-  activityByProspect: Record<string, InvitationActivityEntry[]>;
+  activityByProspect: Record<string, McsInvitationActivityEntry[]>;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -694,7 +694,7 @@ export interface MyInvitesResponse {
  * without scoring, qualifying, ranking, auto-sending, or widening ownership.
  */
 
-export type ProspectLifecycleStage =
+export type McsProspectLifecycleStage =
   | 'draft'
   | 'sent_unopened'
   | 'clicked'
@@ -709,7 +709,7 @@ export type ProspectLifecycleStage =
   | 'expired'
   | 'archived';
 
-export type ProspectNextActionKind =
+export type McsProspectNextActionKind =
   | 'send_invite'
   | 'call_now'
   | 'reply_to_callback'
@@ -721,7 +721,7 @@ export type ProspectNextActionKind =
   | 'wait'
   | 'none';
 
-export type ProspectNextActionScriptKind =
+export type McsProspectNextActionScriptKind =
   | 'initial_send'
   | 'callback_reply'
   | 'clicked_no_watch'
@@ -730,16 +730,16 @@ export type ProspectNextActionScriptKind =
   | 'reinvite'
   | 'later_reconnect';
 
-export interface ProspectNextAction {
-  kind: ProspectNextActionKind;
+export interface McsProspectNextAction {
+  kind: McsProspectNextActionKind;
   label: string;
   reason: string;
   priority: 0 | 1 | 2 | 3 | 4 | 5;
-  dueAt: IsoTimestamp | null;
-  scriptKind: ProspectNextActionScriptKind | null;
+  dueAt: McsIsoTimestamp | null;
+  scriptKind: McsProspectNextActionScriptKind | null;
 }
 
-export type ProspectLastSignalKind =
+export type McsProspectLastSignalKind =
   | 'created'
   | 'sent'
   | 'opened'
@@ -754,60 +754,60 @@ export type ProspectLastSignalKind =
   | 'expired'
   | 'archived';
 
-export interface ProspectLastSignal {
-  kind: ProspectLastSignalKind;
+export interface McsProspectLastSignal {
+  kind: McsProspectLastSignalKind;
   label: string;
-  at: IsoTimestamp;
+  at: McsIsoTimestamp;
 }
 
-export interface ProspectMomentumCrmSummary {
-  disposition: CrmDisposition | null;
-  followUpDueAt: IsoTimestamp | null;
+export interface McsProspectMomentumCrmSummary {
+  disposition: McsCrmDisposition | null;
+  followUpDueAt: McsIsoTimestamp | null;
   followUpIsDue: boolean;
   noteCount: number;
-  latestNoteAt: IsoTimestamp | null;
+  latestNoteAt: McsIsoTimestamp | null;
 }
 
-export interface ProspectMomentumRow {
+export interface McsProspectMomentumRow {
   prospectId: string;
   token: string;
   firstName: string;
   lastInitial: string;
   city: string;
   stateOrRegion: string;
-  source: InvitationSource;
+  source: McsInvitationSource;
   /** Optional relationship context captured by Ivory before drafting. */
   relationshipReason?: string | null;
-  lifecycle: ProspectLifecycleStage;
-  tokenState: TokenState;
+  lifecycle: McsProspectLifecycleStage;
+  tokenState: McsTokenState;
   videoProgressPct: 0 | 25 | 50 | 75 | 100 | null;
-  clickedAt: IsoTimestamp | null;
-  sentAt: IsoTimestamp | null;
-  createdAt: IsoTimestamp;
-  expiresAt: IsoTimestamp;
+  clickedAt: McsIsoTimestamp | null;
+  sentAt: McsIsoTimestamp | null;
+  createdAt: McsIsoTimestamp;
+  expiresAt: McsIsoTimestamp;
   positionNumber: number | null;
-  placedAt: IsoTimestamp | null;
-  latestCallbackIntent: CallbackIntent | null;
-  crm: ProspectMomentumCrmSummary;
-  lastSignal: ProspectLastSignal;
-  nextAction: ProspectNextAction;
+  placedAt: McsIsoTimestamp | null;
+  latestCallbackIntent: McsCallbackIntent | null;
+  crm: McsProspectMomentumCrmSummary;
+  lastSignal: McsProspectLastSignal;
+  nextAction: McsProspectNextAction;
 }
 
-export interface ProspectFocusQueueItem {
+export interface McsProspectFocusQueueItem {
   prospectId: string;
   firstName: string;
   lastInitial: string;
-  lifecycle: ProspectLifecycleStage;
-  source: InvitationSource;
-  lastSignal: ProspectLastSignal;
-  nextAction: ProspectNextAction;
+  lifecycle: McsProspectLifecycleStage;
+  source: McsInvitationSource;
+  lastSignal: McsProspectLastSignal;
+  nextAction: McsProspectNextAction;
 }
 
-export interface ProspectMomentumViewerResponse {
+export interface McsProspectMomentumViewerResponse {
   ok: true;
-  generatedAt: IsoTimestamp;
-  focusQueue: ProspectFocusQueueItem[];
-  rows: ProspectMomentumRow[];
+  generatedAt: McsIsoTimestamp;
+  focusQueue: McsProspectFocusQueueItem[];
+  rows: McsProspectMomentumRow[];
   lifecycleGaps: string[];
 }
 
@@ -816,7 +816,7 @@ export interface ProspectMomentumViewerResponse {
  * shows above My Invites, plus the My Sponsor card data. Counts are the
  * BA's own funnel only (sponsorTmagId = session tmagId).
  */
-export interface CockpitSummaryResponse {
+export interface McsCockpitSummaryResponse {
   ok: true;
   baFirstName: string;
   /** My Sponsor card. Null for founders (no upline) per locked-spec 1.2. */
@@ -875,7 +875,7 @@ export interface CockpitSummaryResponse {
  * completion event, the real build item per Chat #118). `productName` is
  * the anchor ScriptMaker drafts around.
  */
-export interface LibraryVideo {
+export interface McsLibraryVideo {
   videoId: string;
   youtubeId: string;
   title: string;
@@ -900,7 +900,7 @@ export interface LibraryVideo {
  * sponsorTmagId is NOT in the payload â€” the route derives it from the session
  * (locked-spec 3.5), same as the spine.
  */
-export interface ScriptMakerDraftPayload {
+export interface McsScriptMakerDraftPayload {
   /** The product the draft is anchored to (e.g. 'GLP-THREE'). */
   productName: string;
   /** The video that played, for context the model can reference. */
@@ -923,7 +923,7 @@ export interface ScriptMakerDraftPayload {
  * `degraded` is true when the LLM was unavailable (key not yet wired) and
  * the server returned a neutral fallback so the surface still works.
  */
-export interface ScriptMakerDraftResponse {
+export interface McsScriptMakerDraftResponse {
   ok: true;
   draft: string;
   productName: string;
@@ -956,7 +956,7 @@ export interface ScriptMakerDraftResponse {
  * or webinar_reserve â€” those affirmative actions are the consent
  * signal to copy prospects.phone into the account row.
  */
-export interface ProspectAccountRecord {
+export interface McsProspectAccountRecord {
   accountId: string;
   prospectId: string;
   /** The original invite token. Re-entry resolves to this token only. */
@@ -969,10 +969,10 @@ export interface ProspectAccountRecord {
    *  Set at invite mint so a prospect can return via phone + code even before
    *  any consent signal. */
   reentryCode: string;
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
   /** Aligned with the token's expiresAt (3.7 â€” the 8-week flush). */
-  expiresAt: IsoTimestamp;
-  lastLoginAt: IsoTimestamp | null;
+  expiresAt: McsIsoTimestamp;
+  lastLoginAt: McsIsoTimestamp | null;
 }
 
 /**
@@ -980,15 +980,15 @@ export interface ProspectAccountRecord {
  * The linkToken is the credential â€” knowledge of it grants a session.
  * 15-minute TTL, single-use (redeemedAt stamped on redeem).
  */
-export interface ProspectMagicLinkRecord {
+export interface McsProspectMagicLinkRecord {
   linkToken: string;
   accountId: string;
   /** Carried for fast redirect after redeem. */
   tokenId: string;
-  issuedAt: IsoTimestamp;
+  issuedAt: McsIsoTimestamp;
   /** issuedAt + 15min. */
-  expiresAt: IsoTimestamp;
-  redeemedAt: IsoTimestamp | null;
+  expiresAt: McsIsoTimestamp;
+  redeemedAt: McsIsoTimestamp | null;
   /** SHA-256 of the requesting phone â€” supports rate-limit audit without storing raw phones twice. */
   requestPhoneHash: string;
 }
@@ -997,7 +997,7 @@ export interface ProspectMagicLinkRecord {
  * Request body for POST /api/p/login/start.
  * Phone is required and is the only field.
  */
-export interface ProspectLoginStartPayload {
+export interface McsProspectLoginStartPayload {
   /** Caller-supplied phone. Server normalizes to E.164 before lookup. */
   phone: string;
 }
@@ -1012,14 +1012,14 @@ export interface ProspectLoginStartPayload {
  * This prevents anyone holding a phone book from probing the system
  * for prospect presence.
  */
-export interface ProspectLoginStartResponse {
+export interface McsProspectLoginStartResponse {
   ok: true;
 }
 
 /**
  * Request body for POST /api/p/login/redeem.
  */
-export interface ProspectLoginRedeemPayload {
+export interface McsProspectLoginRedeemPayload {
   linkToken: string;
 }
 
@@ -1029,7 +1029,7 @@ export interface ProspectLoginRedeemPayload {
  * mcs_prospect_session cookie (scoped to .teammagnificent.com) in
  * the same response â€” the body just confirms the target.
  */
-export interface ProspectLoginRedeemResponse {
+export interface McsProspectLoginRedeemResponse {
   ok: true;
   tokenId: string;
 }
@@ -1039,7 +1039,7 @@ export interface ProspectLoginRedeemResponse {
  * both error shapes â€” "this link has expired or already been used"
  * â€” to avoid leaking which case occurred.
  */
-export interface ProspectLoginRedeemError {
+export interface McsProspectLoginRedeemError {
   ok: false;
   error: 'invalid_link' | 'expired_link' | 'already_used';
 }
@@ -1071,7 +1071,7 @@ export interface ProspectLoginRedeemError {
  * the `actor` discriminator below so filtering by role doesn't need
  * a nested predicate on every read.
  */
-export type AuditActorRole = 'admin' | 'ba' | 'system' | 'prospect' | 'anonymous';
+export type McsAuditActorRole = 'admin' | 'ba' | 'system' | 'prospect' | 'anonymous';
 
 /**
  * Discriminated actor. The kind aligns with `AuditActorRole`. For
@@ -1079,7 +1079,7 @@ export type AuditActorRole = 'admin' | 'ba' | 'system' | 'prospect' | 'anonymous
  * 'webinar-seeder'). For 'anonymous' the actor is unidentifiable â€”
  * used for /admin-gate denials and unauthenticated probes.
  */
-export type AuditActor =
+export type McsAuditActor =
   | { kind: 'admin'; tmagId: string; displayName: string }
   | { kind: 'ba'; tmagId: string; displayName: string }
   | { kind: 'system'; label: string }
@@ -1095,7 +1095,7 @@ export type AuditActor =
  * 'none' is the legal value when the action is system-level and
  * doesn't act on a discrete record (e.g. boot, config reload).
  */
-export type AuditEntityKind =
+export type McsAuditEntityKind =
   | 'brand_ambassador'
   | 'invite_token'
   | 'prospect'
@@ -1111,8 +1111,8 @@ export type AuditEntityKind =
   | 'audit_entry'
   | 'none';
 
-export interface AuditEntity {
-  kind: AuditEntityKind;
+export interface McsAuditEntity {
+  kind: McsAuditEntityKind;
   id: string;
   displayLabel: string | null;
 }
@@ -1122,14 +1122,14 @@ export interface AuditEntity {
  * Core Dashboard's "needs Kevin" widget. 'critical' is reserved for
  * sponsor overrides, compliance violations, and admin-gate breaches.
  */
-export type AuditSeverity = 'info' | 'warn' | 'critical';
+export type McsAuditSeverity = 'info' | 'warn' | 'critical';
 
 /**
  * Optional request-trace context. Captured for every /admin request
  * and every API mutation; omitted for system-internal events that
  * have no HTTP envelope (cron jobs, boot routines).
  */
-export interface AuditContext {
+export interface McsAuditContext {
   ip: string | null;
   userAgent: string | null;
   route: string | null;
@@ -1162,19 +1162,19 @@ export interface AuditContext {
  * Append-only invariant: writers MUST NOT update or delete entries.
  * The store has no exported mutator helper â€” only `appendAuditEntry`.
  */
-export interface AuditLogEntry {
+export interface McsAuditLogEntry {
   entryId: string;
-  timestamp: IsoTimestamp;
-  createdAt: IsoTimestamp;
-  role: AuditActorRole;
-  actor: AuditActor;
+  timestamp: McsIsoTimestamp;
+  createdAt: McsIsoTimestamp;
+  role: McsAuditActorRole;
+  actor: McsAuditActor;
   action: string;
-  entity: AuditEntity;
-  severity: AuditSeverity;
+  entity: McsAuditEntity;
+  severity: McsAuditSeverity;
   before: Record<string, unknown> | null;
   after: Record<string, unknown> | null;
   reason: string | null;
-  context: AuditContext | null;
+  context: McsAuditContext | null;
   linkedTranscriptId: string | null;
 }
 
@@ -1183,16 +1183,16 @@ export interface AuditLogEntry {
  * `entryId` and `createdAt`; everything else comes from the caller.
  * `timestamp` defaults to now on the server if the caller omits it.
  */
-export interface AppendAuditEntryInput {
-  timestamp?: IsoTimestamp;
-  actor: AuditActor;
+export interface McsAppendAuditEntryInput {
+  timestamp?: McsIsoTimestamp;
+  actor: McsAuditActor;
   action: string;
-  entity: AuditEntity;
-  severity?: AuditSeverity;
+  entity: McsAuditEntity;
+  severity?: McsAuditSeverity;
   before?: Record<string, unknown> | null;
   after?: Record<string, unknown> | null;
   reason?: string | null;
-  context?: AuditContext | null;
+  context?: McsAuditContext | null;
   linkedTranscriptId?: string | null;
 }
 
@@ -1203,18 +1203,18 @@ export interface AppendAuditEntryInput {
  * just happened?". Cursor is the last entry's `entryId` from the
  * previous page; pass it back as `before` to fetch the next page.
  */
-export interface AuditQueryFilters {
+export interface McsAuditQueryFilters {
   actorTmagId?: string;
-  role?: AuditActorRole;
+  role?: McsAuditActorRole;
   action?: string;
   actionPrefix?: string;
-  entityKind?: AuditEntityKind;
+  entityKind?: McsAuditEntityKind;
   entityId?: string;
-  severity?: AuditSeverity;
+  severity?: McsAuditSeverity;
   /** ISO timestamp â€” inclusive lower bound on entry.timestamp. */
-  from?: IsoTimestamp;
+  from?: McsIsoTimestamp;
   /** ISO timestamp â€” exclusive upper bound on entry.timestamp. */
-  to?: IsoTimestamp;
+  to?: McsIsoTimestamp;
   /** Pagination cursor: entryId from the previous page. */
   before?: string;
   /** Page size, clamped server-side. */
@@ -1225,19 +1225,19 @@ export interface AuditQueryFilters {
  * Response from GET /api/admin/audit. Reverse-chronological. Cursor
  * is null when the page is the last page.
  */
-export interface AuditListResponse {
+export interface McsAuditListResponse {
   ok: true;
-  entries: AuditLogEntry[];
+  entries: McsAuditLogEntry[];
   nextCursor: string | null;
-  appliedFilters: AuditQueryFilters;
+  appliedFilters: McsAuditQueryFilters;
 }
 
 /**
  * Response from GET /api/admin/audit/:entryId. 404 if not found.
  */
-export interface AuditEntryResponse {
+export interface McsAuditEntryResponse {
   ok: true;
-  entry: AuditLogEntry;
+  entry: McsAuditLogEntry;
 }
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // IVORY + GENERATOR (Chat #131 â€” wireframe Â§3.4)
@@ -1264,7 +1264,7 @@ export interface AuditEntryResponse {
  * Mirrors the standard warm-market category set BAs actually use; keep this
  * small and stable â€” the coach prompts reference these categories by name.
  */
-export type IvoryCategory =
+export type McsIvoryCategory =
   | 'family'
   | 'close_friend'
   | 'work'
@@ -1282,7 +1282,7 @@ export type IvoryCategory =
  * scorer. The one programmatic transition is newâ†’invited, which fires when
  * Generator mints an invite for the name (still a BA action, just relayed).
  */
-export type IvoryStatus =
+export type McsIvoryStatus =
   | 'new'
   | 'invited'
   | 'customer'
@@ -1294,7 +1294,7 @@ export type IvoryStatus =
  * The share angle the BA most likely uses for this person (Generator hint
  * + coach context). 'unspecified' is the default for newly-added names.
  */
-export type IvoryAngle =
+export type McsIvoryAngle =
   | 'do_the_business'
   | 'make_money'
   | 'lose_fat'
@@ -1306,16 +1306,16 @@ export type IvoryAngle =
  * a partial display ("Marcus L.") is cheap; full lastName stays on the
  * record for the BA's own reference.
  */
-export interface IvoryName {
+export interface McsIvoryName {
   ivoryId: string;
   tmagId: string;
   firstName: string;
   lastName: string;
   lastInitial: string;
   notes: string;
-  categories: IvoryCategory[];
-  preferredAngle: IvoryAngle;
-  status: IvoryStatus;
+  categories: McsIvoryCategory[];
+  preferredAngle: McsIvoryAngle;
+  status: McsIvoryStatus;
   /** prospectId of the most recent invite for this name, if any. */
   lastProspectId: string | null;
   /** ISO timestamp of any status/edit change â€” sort key for the roster view. */
@@ -1325,38 +1325,38 @@ export interface IvoryName {
 }
 
 /** POST /api/ivory request body. */
-export interface CreateIvoryNamePayload {
+export interface McsCreateIvoryNamePayload {
   firstName: string;
   lastName: string;
   notes?: string;
-  categories?: IvoryCategory[];
-  preferredAngle?: IvoryAngle;
+  categories?: McsIvoryCategory[];
+  preferredAngle?: McsIvoryAngle;
 }
 
 /** PATCH /api/ivory/:ivoryId request body. */
-export interface UpdateIvoryNamePayload {
+export interface McsUpdateIvoryNamePayload {
   firstName?: string;
   lastName?: string;
   notes?: string;
-  categories?: IvoryCategory[];
-  preferredAngle?: IvoryAngle;
+  categories?: McsIvoryCategory[];
+  preferredAngle?: McsIvoryAngle;
 }
 
 /** PATCH /api/ivory/:ivoryId/status request body. */
-export interface UpdateIvoryStatusPayload {
-  status: IvoryStatus;
+export interface McsUpdateIvoryStatusPayload {
+  status: McsIvoryStatus;
 }
 
 /** GET /api/ivory 200 response. */
-export interface ListIvoryNamesResponse {
+export interface McsListIvoryNamesResponse {
   ok: true;
-  names: IvoryName[];
+  names: McsIvoryName[];
 }
 
 /** Single-record success response shared by POST/PATCH/DELETE. */
-export interface IvoryNameResponse {
+export interface McsIvoryNameResponse {
   ok: true;
-  name: IvoryName;
+  name: McsIvoryName;
 }
 
 /**
@@ -1364,8 +1364,8 @@ export interface IvoryNameResponse {
  * BA reflects on to recall names from their own memory. It never names
  * specific people, never scores anyone, never speaks comp/income/medical.
  */
-export interface IvoryCoachPayload {
-  angle: IvoryAngle;
+export interface McsIvoryCoachPayload {
+  angle: McsIvoryAngle;
   /** Anchor the coaching on a specific product video, if one is in context. */
   productName?: string | null;
   /** Current roster size â€” coach uses it to tune tone (e.g. encourage adds). */
@@ -1380,7 +1380,7 @@ export interface IvoryCoachPayload {
  * the LLM was unavailable and an evergreen deterministic fallback was used
  * (mirrors ScriptMaker's pattern â€” the surface works before the key lands).
  */
-export interface IvoryCoachResponse {
+export interface McsIvoryCoachResponse {
   ok: true;
   coaching: string;
   prompts: string[];
@@ -1394,13 +1394,13 @@ export interface IvoryCoachResponse {
  * why that person came to mind. Ivory drafts copy only; it never scores,
  * qualifies, sends, or chooses people autonomously.
  */
-export interface IvoryInvitationDraftPayload {
+export interface McsIvoryInvitationDraftPayload {
   ivoryId: string;
   relationshipReason: string;
   productName?: string | null;
 }
 
-export interface IvoryInvitationDraftResponse {
+export interface McsIvoryInvitationDraftResponse {
   ok: true;
   draft: string;
   degraded: boolean;
@@ -1412,7 +1412,7 @@ export interface IvoryInvitationDraftResponse {
  * The BA-edited message and real CRM fields mint through the existing
  * invitation spine with source='ivory'. No placeholder CRM facts are allowed.
  */
-export interface IvoryInvitationMintPayload {
+export interface McsIvoryInvitationMintPayload {
   ivoryId: string;
   relationshipReason: string;
   message: string;
@@ -1422,7 +1422,7 @@ export interface IvoryInvitationMintPayload {
   email?: string | null;
 }
 
-export interface IvoryInvitationMintResponse {
+export interface McsIvoryInvitationMintResponse {
   ok: true;
   ivoryId: string;
   prospectId: string;
@@ -1442,12 +1442,12 @@ export interface IvoryInvitationMintResponse {
  * "on Tuesday I worked Visage / lose-fat across these 6 names, minted 6
  * tokens." The run never owns identity; the spine does.
  */
-export interface GeneratorRun {
+export interface McsGeneratorRun {
   runId: string;
   tmagId: string;
   productKey: string;
   productName: string;
-  angle: IvoryAngle;
+  angle: McsIvoryAngle;
   selectedIvoryIds: string[];
   invitations: Array<{
     ivoryId: string;
@@ -1461,23 +1461,23 @@ export interface GeneratorRun {
 }
 
 /** POST /api/ivory/generator/run request body. */
-export interface CreateGeneratorRunPayload {
+export interface McsCreateGeneratorRunPayload {
   productKey: string;
-  angle: IvoryAngle;
+  angle: McsIvoryAngle;
   /** Optional pre-selection â€” the BA can multi-select before pressing Start. */
   selectedIvoryIds?: string[];
 }
 
 /** POST /api/ivory/generator/run 200 response. */
-export interface CreateGeneratorRunResponse {
+export interface McsCreateGeneratorRunResponse {
   ok: true;
-  run: GeneratorRun;
+  run: McsGeneratorRun;
 }
 
 /** GET /api/ivory/generator/run/:runId 200 response. */
-export interface GeneratorRunResponse {
+export interface McsGeneratorRunResponse {
   ok: true;
-  run: GeneratorRun;
+  run: McsGeneratorRun;
 }
 
 /**
@@ -1488,7 +1488,7 @@ export interface GeneratorRunResponse {
  * to the run's invitations[]. The BA copies the link and texts it from
  * their own phone â€” the spine never auto-sends (locked-spec 1.13 / 3.6).
  */
-export interface GeneratorInvitePayload {
+export interface McsGeneratorInvitePayload {
   ivoryId: string;
   /** Optional invitation message (mirrors /api/invitations message field). */
   message?: string | null;
@@ -1501,9 +1501,9 @@ export interface GeneratorInvitePayload {
 }
 
 /** POST /api/ivory/generator/run/:runId/invite 200 response. */
-export interface GeneratorInviteResponse {
+export interface McsGeneratorInviteResponse {
   ok: true;
-  run: GeneratorRun;
+  run: McsGeneratorRun;
   /** The single invitation just minted, surfaced for immediate copy. */
   invitation: {
     ivoryId: string;
@@ -1545,7 +1545,7 @@ export interface GeneratorInviteResponse {
 
 /** The ONE canonical prospect disposition (snake_case; unifies the former
  * CrmDisposition + CrmDisposition — F2/F3). */
-export type CrmDisposition =
+export type McsCrmDisposition =
   | 'new_brand_ambassador'
   | 'new_customer'
   | 'interested'
@@ -1556,7 +1556,7 @@ export type CrmDisposition =
   | 'do_not_contact';
 
 /** The core dispositions in BA-action-priority order (for UI rendering). */
-export const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
+export const MCS_CRM_DISPOSITIONS: readonly McsCrmDisposition[] = [
   'new_brand_ambassador',
   'new_customer',
   'interested',
@@ -1570,12 +1570,12 @@ export const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
  * thinking. One prospect can carry many notes; the cockpit renders them
  * newest-first.
  */
-export interface CrmNoteRecord {
+export interface McsCrmNoteRecord {
   noteId: string;
   prospectId: string;
   sponsorTmagId: string;
   text: string;
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
 }
 
 /**
@@ -1583,12 +1583,12 @@ export interface CrmNoteRecord {
  * replaces the previous one (latest wins). Clearing sets clearedAt â€” the
  * record stays for audit, but Today's Actions filters it out.
  */
-export interface CrmFollowUpRecord {
+export interface McsCrmFollowUpRecord {
   prospectId: string;
   sponsorTmagId: string;
-  dueAt: IsoTimestamp;
-  createdAt: IsoTimestamp;
-  clearedAt: IsoTimestamp | null;
+  dueAt: McsIsoTimestamp;
+  createdAt: McsIsoTimestamp;
+  clearedAt: McsIsoTimestamp | null;
 }
 
 /**
@@ -1596,36 +1596,36 @@ export interface CrmFollowUpRecord {
  * matters; the cockpit shows one pill. Stored as its own record so a future
  * surface can audit the change history without us editing the prospect doc.
  */
-export interface CrmDispositionRecord {
+export interface McsCrmDispositionRecord {
   prospectId: string;
   sponsorTmagId: string;
-  disposition: CrmDisposition;
-  updatedAt: IsoTimestamp;
+  disposition: McsCrmDisposition;
+  updatedAt: McsIsoTimestamp;
 }
 
 /** POST /api/crm/:prospectId/notes â€” append a note. */
-export interface CreateNotePayload {
+export interface McsCreateNotePayload {
   text: string;
 }
 
-export interface CreateNoteResponse {
+export interface McsCreateNoteResponse {
   ok: true;
-  note: CrmNoteRecord;
+  note: McsCrmNoteRecord;
 }
 
 /** POST /api/crm/:prospectId/followup â€” set or replace the active follow-up. */
-export interface SetFollowUpPayload {
+export interface McsSetFollowUpPayload {
   /** ISO timestamp. Must be in the future. */
-  dueAt: IsoTimestamp;
+  dueAt: McsIsoTimestamp;
 }
 
-export interface SetFollowUpResponse {
+export interface McsSetFollowUpResponse {
   ok: true;
-  followUp: CrmFollowUpRecord;
+  followUp: McsCrmFollowUpRecord;
 }
 
 /** DELETE /api/crm/:prospectId/followup â€” clear the active follow-up. */
-export interface ClearFollowUpResponse {
+export interface McsClearFollowUpResponse {
   ok: true;
 }
 
@@ -1633,13 +1633,13 @@ export interface ClearFollowUpResponse {
  * POST /api/crm/:prospectId/disposition â€” set or clear the disposition.
  * `null` clears the tag (prospect has no current disposition).
  */
-export interface SetDispositionPayload {
-  disposition: CrmDisposition | null;
+export interface McsSetDispositionPayload {
+  disposition: McsCrmDisposition | null;
 }
 
-export interface SetDispositionResponse {
+export interface McsSetDispositionResponse {
   ok: true;
-  disposition: CrmDisposition | null;
+  disposition: McsCrmDisposition | null;
 }
 
 /**
@@ -1650,12 +1650,12 @@ export interface SetDispositionResponse {
  * `reinviteAvailableAt` is null when the BA can re-invite right now. When
  * non-null, the cockpit disables the button and renders "available {at}".
  */
-export interface ProspectCrmBundle {
+export interface McsProspectCrmBundle {
   prospectId: string;
-  notes: CrmNoteRecord[];
-  followUp: CrmFollowUpRecord | null;
-  disposition: CrmDisposition | null;
-  reinviteAvailableAt: IsoTimestamp | null;
+  notes: McsCrmNoteRecord[];
+  followUp: McsCrmFollowUpRecord | null;
+  disposition: McsCrmDisposition | null;
+  reinviteAvailableAt: McsIsoTimestamp | null;
   /** Current editable identity fields (Chat #141), so the cockpit edit form
    *  prefills from the same fetch the row already does on expand. The list
    *  display shows first name + last initial only (privacy-minimal); the
@@ -1673,9 +1673,9 @@ export interface ProspectCrmBundle {
   };
 }
 
-export interface CrmBundleResponse {
+export interface McsCrmBundleResponse {
   ok: true;
-  bundle: ProspectCrmBundle;
+  bundle: McsProspectCrmBundle;
 }
 
 /**
@@ -1687,23 +1687,23 @@ export interface CrmBundleResponse {
  * `at` is the timestamp the action surfaced (callback time / follow-up
  * dueAt / mint time). The cockpit sorts by it (newest-first).
  */
-export type TodayActionKind = 'callback' | 'followup' | 'draft';
+export type McsTodayActionKind = 'callback' | 'followup' | 'draft';
 
-export interface TodayActionItem {
-  kind: TodayActionKind;
+export interface McsTodayActionItem {
+  kind: McsTodayActionKind;
   prospectId: string;
   firstName: string;
   lastInitial: string;
-  at: IsoTimestamp;
+  at: McsIsoTimestamp;
   /** Set when kind = 'callback'; null otherwise. */
-  intent: CallbackIntent | null;
+  intent: McsCallbackIntent | null;
   /** Set when kind = 'followup'; null otherwise. */
-  followUpDueAt: IsoTimestamp | null;
+  followUpDueAt: McsIsoTimestamp | null;
 }
 
-export interface TodaysActionsResponse {
+export interface McsTodaysActionsResponse {
   ok: true;
-  actions: TodayActionItem[];
+  actions: McsTodayActionItem[];
 }
 
 /**
@@ -1715,31 +1715,31 @@ export interface TodaysActionsResponse {
  * yet marked the original sent (sentAt null), reinvite is forbidden â€” the
  * BA should use the existing "I sent this" path.
  */
-export interface ReinviteResponse {
+export interface McsReinviteResponse {
   ok: true;
   prospectId: string;
   token: string;
   inviteUrl: string;
-  sentAt: IsoTimestamp;
-  expiresAt: IsoTimestamp;
+  sentAt: McsIsoTimestamp;
+  expiresAt: McsIsoTimestamp;
   /** True when a fresh token was minted (the previous one had expired). */
   fresh: boolean;
 }
 
-export interface ReinviteCooldownError {
+export interface McsReinviteCooldownError {
   ok: false;
   error: 'cooldown';
   /** Timestamp the BA can next re-invite this prospect. */
-  availableAt: IsoTimestamp;
+  availableAt: McsIsoTimestamp;
 }
 
-export interface ReinviteUnsentError {
+export interface McsReinviteUnsentError {
   ok: false;
   /** The prospect has never been marked sent â€” use "I sent this" instead. */
   error: 'not_yet_sent';
 }
 
-export interface ReinviteTerminalError {
+export interface McsReinviteTerminalError {
   ok: false;
   /** Cannot re-invite an enrolled prospect. */
   error: 'enrolled';
@@ -1775,10 +1775,10 @@ export interface ReinviteTerminalError {
  */
 
 /** Module identifier â€” a stable integer 1..5 per locked TASK ordering. */
-export type FastStartModuleId = 1 | 2 | 3 | 4 | 5;
+export type McsFastStartModuleId = 1 | 2 | 3 | 4 | 5;
 
 /** Per-module lifecycle. Sequential in the UI, not hard-gated. */
-export type FastStartModuleState =
+export type McsFastStartModuleState =
   | 'not_started'
   | 'in_progress'
   | 'completed';
@@ -1788,17 +1788,17 @@ export type FastStartModuleState =
  * write inserts on first touch and updates state thereafter â€” domain
  * branches on existence per the gateway upsert quirk.
  */
-export interface FastStartProgressRecord {
+export interface McsFastStartProgressRecord {
   /** Composite id `${tmagId}__${moduleId}` for idempotent triple-stack writes. */
   _id: string;
   tmagId: string;
-  moduleId: FastStartModuleId;
-  state: FastStartModuleState;
-  startedAt: IsoTimestamp | null;
-  completedAt: IsoTimestamp | null;
+  moduleId: McsFastStartModuleId;
+  state: McsFastStartModuleState;
+  startedAt: McsIsoTimestamp | null;
+  completedAt: McsIsoTimestamp | null;
   /** Updated on every state transition. */
-  updatedAt: IsoTimestamp;
-  createdAt: IsoTimestamp;
+  updatedAt: McsIsoTimestamp;
+  createdAt: McsIsoTimestamp;
 }
 
 /**
@@ -1807,11 +1807,11 @@ export interface FastStartProgressRecord {
  * server from FAST_START_MODULES below. Only the lifecycle fields come
  * from persistence.
  */
-export interface FastStartModuleStatus {
-  moduleId: FastStartModuleId;
-  state: FastStartModuleState;
-  startedAt: IsoTimestamp | null;
-  completedAt: IsoTimestamp | null;
+export interface McsFastStartModuleStatus {
+  moduleId: McsFastStartModuleId;
+  state: McsFastStartModuleState;
+  startedAt: McsIsoTimestamp | null;
+  completedAt: McsIsoTimestamp | null;
 }
 
 /**
@@ -1826,9 +1826,9 @@ export interface FastStartModuleStatus {
  * spine (prospects.sentAt) at read time â€” Fast Start does not duplicate
  * the count.
  */
-export interface FastStartProgressResponse {
+export interface McsFastStartProgressResponse {
   ok: true;
-  modules: FastStartModuleStatus[];
+  modules: McsFastStartModuleStatus[];
   invitationsSent: number;
   complete: boolean;
 }
@@ -1838,17 +1838,17 @@ export interface FastStartProgressResponse {
  * Transitions are forward-only (not_started â†’ in_progress â†’ completed);
  * the server rejects backward writes idempotently with the current state.
  */
-export interface FastStartMarkStatePayload {
-  state: Exclude<FastStartModuleState, 'not_started'>;
+export interface McsFastStartMarkStatePayload {
+  state: Exclude<McsFastStartModuleState, 'not_started'>;
 }
 
 /** POST response â€” echoes the resulting status the hub re-renders against. */
-export interface FastStartMarkStateResponse {
+export interface McsFastStartMarkStateResponse {
   ok: true;
-  moduleId: FastStartModuleId;
-  state: FastStartModuleState;
-  startedAt: IsoTimestamp | null;
-  completedAt: IsoTimestamp | null;
+  moduleId: McsFastStartModuleId;
+  state: McsFastStartModuleState;
+  startedAt: McsIsoTimestamp | null;
+  completedAt: McsIsoTimestamp | null;
 }
 
 /**
@@ -1858,8 +1858,8 @@ export interface FastStartMarkStateResponse {
  * Order is fixed and load-bearing â€” never reorder; append-only if a
  * Module 6 ever ships (the wireframe currently stops at 5).
  */
-export const FAST_START_MODULES: readonly {
-  id: FastStartModuleId;
+export const MCS_FAST_START_MODULES: readonly {
+  id: McsFastStartModuleId;
   slug: 'product' | 'comp-layer-1' | 'binary' | 'prospect-list' | 'team';
   eyebrow: string;
   title: string;
@@ -1911,18 +1911,18 @@ export const FAST_START_MODULES: readonly {
  * on per topic) is OPEN — the conservative defaults below are flagged in
  * the chat heartbeat for Kevin to confirm or amend.
  */
-export interface BANotifChannelMix {
+export interface McsBANotifChannelMix {
   sms: boolean;
   email: boolean;
   inApp: boolean;
 }
 
-export interface BANotifPrefs {
-  callbackRequested: BANotifChannelMix;
-  webinarReserved: BANotifChannelMix;
-  newSponsoredBA: BANotifChannelMix;
-  steveDiscoveryComplete: BANotifChannelMix;
-  poolMovement: BANotifChannelMix;
+export interface McsBANotifPrefs {
+  callbackRequested: McsBANotifChannelMix;
+  webinarReserved: McsBANotifChannelMix;
+  newSponsoredBA: McsBANotifChannelMix;
+  steveDiscoveryComplete: McsBANotifChannelMix;
+  poolMovement: McsBANotifChannelMix;
 }
 
 /**
@@ -1940,7 +1940,7 @@ export interface BANotifPrefs {
  *   - Email defaults off everywhere until Resend's domain is verified
  *     (locked-spec Part 5, Resend dormant until Namecheap DNS lands).
  */
-export const BA_NOTIF_DEFAULTS: BANotifPrefs = {
+export const MCS_BA_NOTIF_DEFAULTS: McsBANotifPrefs = {
   callbackRequested: { sms: true, email: false, inApp: true },
   webinarReserved: { sms: true, email: false, inApp: true },
   newSponsoredBA: { sms: false, email: false, inApp: true },
@@ -1965,7 +1965,7 @@ export interface TmagProfile {
   phone: string;
   timezone: string;
   photoUrl: string | null;
-  notifPrefs: BANotifPrefs;
+  notifPrefs: McsBANotifPrefs;
 
   // Read-only (wf_0072)
   tmagId: string;
@@ -1995,22 +1995,22 @@ export interface TmagProfilePatch {
   lastName?: string;
   timezone?: string;
   photoUrl?: string | null;
-  notifPrefs?: Partial<BANotifPrefs>;
+  notifPrefs?: Partial<McsBANotifPrefs>;
 }
 
 /** GET /api/profile envelope. */
-export interface ProfileGetResponse {
+export interface McsProfileGetResponse {
   ok: true;
   profile: TmagProfile;
 }
 
 /** Generic mutation envelope used by every /profile mutation route. */
-export type ProfileMutationResponse =
+export type McsProfileMutationResponse =
   | { ok: true }
   | { ok: false; error: string };
 
 /** POST /api/profile/password body — argon2id rehash on success. */
-export interface ProfilePasswordBody {
+export interface McsProfilePasswordBody {
   currentPassword: string;
   newPassword: string;
 }
@@ -2022,10 +2022,10 @@ export interface ProfilePasswordBody {
  * persists (emailDeliveryStatus='skipped') so dev can complete the flow
  * by reading the code off the challenge row.
  */
-export interface ProfileEmailStartBody {
+export interface McsProfileEmailStartBody {
   newEmail: string;
 }
-export interface ProfileEmailVerifyBody {
+export interface McsProfileEmailVerifyBody {
   code: string;
 }
 
@@ -2036,10 +2036,10 @@ export interface ProfileEmailVerifyBody {
  * via Telnyx SMS. Pending phone is not written to the BA record until
  * /verify succeeds.
  */
-export interface ProfilePhoneStartBody {
+export interface McsProfilePhoneStartBody {
   newPhone: string;
 }
-export interface ProfilePhoneVerifyBody {
+export interface McsProfilePhoneVerifyBody {
   code: string;
 }
 
@@ -2048,7 +2048,7 @@ export interface ProfilePhoneVerifyBody {
  * (`email_change_challenges`, `phone_change_challenges`). 6-digit numeric
  * code, 15-minute TTL, single-use.
  */
-export interface ProfileChangeChallengeRecord {
+export interface McsProfileChangeChallengeRecord {
   challengeId: string;
   tmagId: string;
   channel: 'email' | 'phone';
@@ -2056,9 +2056,9 @@ export interface ProfileChangeChallengeRecord {
   target: string;
   /** SHA-256 of the code — never store the raw code. */
   codeHash: string;
-  issuedAt: IsoTimestamp;
-  expiresAt: IsoTimestamp;
-  redeemedAt: IsoTimestamp | null;
+  issuedAt: McsIsoTimestamp;
+  expiresAt: McsIsoTimestamp;
+  redeemedAt: McsIsoTimestamp | null;
   /** Channel dispatch outcome — mirrors the prospect magic-link convention. */
   deliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
   deliveryError: string | null;
@@ -2072,7 +2072,7 @@ export interface ProfileChangeChallengeRecord {
 // be read without reintroducing any live route.
 
 /** UI phase of the interview surface (distinct from the schedule status). */
-export type MichaelInterviewPhase =
+export type McsMichaelInterviewPhase =
   | 'awaiting_call'      // wf_0038 — scheduled, before/at slot, gold pill
   | 'call_in_progress'   // wf_0039 — call.answered fired, teal pill, live transcript
   | 'complete'           // wf_0040 — call.hangup after answered, gold check
@@ -2081,7 +2081,7 @@ export type MichaelInterviewPhase =
   | 'stt_failed';        // wf_0041 — call completed but transcript ingest failed
 
 /** One speaker turn (or partial turn) in the live transcript. Append-only. */
-export interface MichaelTranscriptChunk {
+export interface McsMichaelTranscriptChunk {
   /** Monotonic order within the call. Stamped server-side at ingest. */
   sequence: number;
   /** Which side of the line. 'ba' = the new Brand Ambassador on the phone. */
@@ -2096,7 +2096,7 @@ export interface MichaelTranscriptChunk {
  *  The 5 specific prompts are open per wireframe §3.2 DEP — the artifact
  *  carries whatever the scoring worker submits. UI renders all answers
  *  generically without hardcoding question text. */
-export interface MichaelInterviewAnswer {
+export interface McsMichaelInterviewAnswer {
   /** Stable id for the question (e.g. "q1_why_now"). */
   questionId: string;
   /** The prompt Michael read aloud, captured for sponsor readback. */
@@ -2110,7 +2110,7 @@ export interface MichaelInterviewAnswer {
 
 /** Aggregate scoring summary across the interview. Surfaced on the sponsor's
  *  upline cockpit card so the sponsor can lead with the BA's actual context. */
-export interface MichaelScoringSummary {
+export interface McsMichaelScoringSummary {
   /** Coarse overall read. null = not enough signal. */
   overallTone: 'positive' | 'neutral' | 'guarded' | null;
   /** Highlight tags the sponsor should know first (3–5 entries typical). */
@@ -2122,25 +2122,25 @@ export interface MichaelScoringSummary {
 /** Authoritative completed-interview record. Triple-stacked at ingest.
  *  sponsorTmagId is stamped server-side from the BA record — NEVER from the
  *  scoring worker payload (locked-spec 3.5). */
-export interface MichaelInterviewArtifact {
+export interface McsMichaelInterviewArtifact {
   tmagId: string;
   /** Stamped server-side from team_magnificent_members.sponsorTmagId at ingest. Immutable. */
   sponsorTmagId: string | null;
   callSid: string | null;
   startedAt: string | null;
   completedAt: string | null;
-  transcript: MichaelTranscriptChunk[];
-  answers: MichaelInterviewAnswer[];
-  scoring: MichaelScoringSummary;
+  transcript: McsMichaelTranscriptChunk[];
+  answers: McsMichaelInterviewAnswer[];
+  scoring: McsMichaelScoringSummary;
   /** Optional pointer to call recording (Telnyx storage URL). */
   audioUrl: string | null;
 }
 
 /** LEGACY — retired Michael interview view.
  *  Michael no longer schedules or interviews; no active route serves this. */
-export interface MichaelInterviewView {
+export interface McsMichaelInterviewView {
   tmagId: string;
-  phase: MichaelInterviewPhase;
+  phase: McsMichaelInterviewPhase;
   /** ISO slot start, BA's local TZ for rendering applied client-side. */
   scheduledFor: string | null;
   timezone: string | null;
@@ -2150,9 +2150,9 @@ export interface MichaelInterviewView {
   };
   /** Hydration snapshot for SSE — chunks already received. The stream pushes
    *  only NEW chunks after the connection opens. */
-  transcript: MichaelTranscriptChunk[];
+  transcript: McsMichaelTranscriptChunk[];
   /** Present only when phase === 'complete'. */
-  artifact: MichaelInterviewArtifact | null;
+  artifact: McsMichaelInterviewArtifact | null;
   /** Whether the BA flagged "wrong number — this isn't me" from wf_0038.
    *  Server records the flag and Kevin's admin surface picks it up; the BA
    *  just sees a "we've been notified" confirmation. */
@@ -2160,14 +2160,14 @@ export interface MichaelInterviewView {
 }
 
 /** LEGACY — retired Michael transcript SSE event envelope. */
-export type MichaelInterviewSseEvent =
-  | { type: 'snapshot'; chunks: MichaelTranscriptChunk[]; phase: MichaelInterviewPhase }
-  | { type: 'chunk'; chunk: MichaelTranscriptChunk }
-  | { type: 'phase'; phase: MichaelInterviewPhase }
+export type McsMichaelInterviewSseEvent =
+  | { type: 'snapshot'; chunks: McsMichaelTranscriptChunk[]; phase: McsMichaelInterviewPhase }
+  | { type: 'chunk'; chunk: McsMichaelTranscriptChunk }
+  | { type: 'phase'; phase: McsMichaelInterviewPhase }
   | { type: 'heartbeat' };
 
 /** LEGACY — retired sponsor-only Michael interview card data. */
-export interface MichaelCockpitCardData {
+export interface McsMichaelCockpitCardData {
   /** The downline BA the card is about. */
   downlineTmagId: string;
   /** First name only — keeps the card scannable and consistent with locked-spec
@@ -2176,9 +2176,9 @@ export interface MichaelCockpitCardData {
   /** ISO completion time, sponsor's timezone applied client-side. */
   completedAt: string;
   /** All five (or however many) answers, rendered as a sponsor-readable list. */
-  answers: MichaelInterviewAnswer[];
+  answers: McsMichaelInterviewAnswer[];
   /** Aggregate read for the sponsor's lead-with-context move. */
-  scoring: MichaelScoringSummary;
+  scoring: McsMichaelScoringSummary;
   /** Optional audio link (Telnyx recording URL or short-lived signed URL). */
   audioUrl: string | null;
   /** Provenance literal — kept verbatim from the artifact. */
@@ -2186,21 +2186,21 @@ export interface MichaelCockpitCardData {
 }
 
 /** LEGACY — retired Michael worker scoring payload. */
-export interface MichaelScoringIngestPayload {
+export interface McsMichaelScoringIngestPayload {
   tmagId: string;
   callSid: string;
   startedAt: string;
   completedAt: string;
-  transcript: MichaelTranscriptChunk[];
-  answers: MichaelInterviewAnswer[];
-  scoring: MichaelScoringSummary;
+  transcript: McsMichaelTranscriptChunk[];
+  answers: McsMichaelInterviewAnswer[];
+  scoring: McsMichaelScoringSummary;
   audioUrl: string | null;
 }
 
 /** LEGACY — retired Michael transcript chunk ingest payload. */
-export interface MichaelTranscriptChunkIngestPayload {
+export interface McsMichaelTranscriptChunkIngestPayload {
   callSid: string;
-  chunk: Omit<MichaelTranscriptChunk, 'sequence'>;
+  chunk: Omit<McsMichaelTranscriptChunk, 'sequence'>;
 }
 
 /* ─── #134 Admin core dashboard ─── */
@@ -2225,7 +2225,7 @@ export interface MichaelTranscriptChunkIngestPayload {
  */
 
 /** Top-row tile identifier. Drives drilldown routing and SSE highlighting. */
-export type AdminDashboardTile =
+export type McsAdminDashboardTile =
   | 'active_bas'
   | 'prospects_in_flow'
   | 'queue_movement'
@@ -2238,7 +2238,7 @@ export type AdminDashboardTile =
  * server-side against the locked rule above; the client cannot widen by
  * passing leader status in the body.
  */
-export interface AdminDashboardFilter {
+export interface McsAdminDashboardFilter {
   /** Restrict to one BA's slice (their prospects, their training, etc.). */
   tmagId: string | null;
   /**
@@ -2253,7 +2253,7 @@ export interface AdminDashboardFilter {
  * Master metrics row — the five tiles at the top of the dashboard
  * (wf_0077). Each field corresponds to one tile.
  */
-export interface AdminDashboardMetrics {
+export interface McsAdminDashboardMetrics {
   /** count(team_magnificent_members WHERE lastLoginAt >= now-24h), filter-scoped. */
   activeBaCount: number;
   /** count(team_magnificent_members), filter-scoped. The denominator for activity. */
@@ -2283,14 +2283,14 @@ export interface AdminDashboardMetrics {
    */
   trainingCompletionPct: number | null;
   /** ISO timestamp when this snapshot was computed (server-side). */
-  computedAt: IsoTimestamp;
+  computedAt: McsIsoTimestamp;
 }
 
 /** GET /api/admin/dashboard/metrics?tmagId=&leaderGroup= response. */
-export interface AdminDashboardMetricsResponse {
+export interface McsAdminDashboardMetricsResponse {
   ok: true;
-  metrics: AdminDashboardMetrics;
-  appliedFilter: AdminDashboardFilter;
+  metrics: McsAdminDashboardMetrics;
+  appliedFilter: McsAdminDashboardFilter;
   /**
    * Honest note about the leader detection gap (binary qualification not
    * mirrored locally). Rendered in the filter bar so Kevin always knows
@@ -2300,7 +2300,7 @@ export interface AdminDashboardMetricsResponse {
 }
 
 /** One BA, for the filter-bar dropdown. */
-export interface AdminBaFilterOption {
+export interface McsAdminBaFilterOption {
   tmagId: string;
   fullName: string;
   /** True if this BA is in the current leader set (curated ∪ system). */
@@ -2308,45 +2308,45 @@ export interface AdminBaFilterOption {
 }
 
 /** One leader-group option with its current count. */
-export interface AdminLeaderGroupOption {
-  value: AdminDashboardFilter['leaderGroup'];
+export interface McsAdminLeaderGroupOption {
+  value: McsAdminDashboardFilter['leaderGroup'];
   label: string;
   count: number;
 }
 
 /** GET /api/admin/dashboard/filters response — populates the filter bar. */
-export interface AdminDashboardFiltersResponse {
+export interface McsAdminDashboardFiltersResponse {
   ok: true;
-  bas: AdminBaFilterOption[];
-  leaderGroups: AdminLeaderGroupOption[];
+  bas: McsAdminBaFilterOption[];
+  leaderGroups: McsAdminLeaderGroupOption[];
   /** Same honest note as on metrics — duplicated so the filter bar can render it standalone. */
   leaderDetectionNote: string;
 }
 
 /* Drilldown rows — one shape per tile (wf_0078). */
 
-export interface AdminActiveBaRow {
+export interface McsAdminActiveBaRow {
   tmagId: string;
   fullName: string;
-  lastLoginAt: IsoTimestamp;
+  lastLoginAt: McsIsoTimestamp;
   prospectsInFlow: number;
 }
 
-export interface AdminProspectInFlowRow {
+export interface McsAdminProspectInFlowRow {
   prospectId: string;
   firstName: string;
   lastInitial: string;
   city: string;
   stateOrRegion: string;
-  state: TokenState;
+  state: McsTokenState;
   positionNumber: number | null;
   sponsorTmagId: string;
   sponsorName: string;
-  placedAt: IsoTimestamp | null;
-  expiresAt: IsoTimestamp;
+  placedAt: McsIsoTimestamp | null;
+  expiresAt: McsIsoTimestamp;
 }
 
-export interface AdminQueueMovementRow {
+export interface McsAdminQueueMovementRow {
   kind: 'placement' | 'flush';
   prospectId: string;
   firstName: string;
@@ -2354,22 +2354,22 @@ export interface AdminQueueMovementRow {
   positionNumber: number;
   sponsorTmagId: string;
   sponsorName: string;
-  at: IsoTimestamp;
+  at: McsIsoTimestamp;
   /** 'enrolled' | 'expired' | 'archived' on flush; null on placement. */
   flushReason: 'enrolled' | 'expired' | 'archived' | null;
 }
 
-export interface AdminEnrollmentRow {
+export interface McsAdminEnrollmentRow {
   prospectId: string;
   firstName: string;
   lastInitial: string;
   positionNumber: number;
   sponsorTmagId: string;
   sponsorName: string;
-  enrolledAt: IsoTimestamp;
+  enrolledAt: McsIsoTimestamp;
 }
 
-export interface AdminTrainingRow {
+export interface McsAdminTrainingRow {
   tmagId: string;
   fullName: string;
   /** Count of modules in `completed` state, 0..5. */
@@ -2377,36 +2377,36 @@ export interface AdminTrainingRow {
   /** Whether (modulesCompleted === 5). */
   fastStartComplete: boolean;
   /** Most recent touch across any Fast Start module; null if untouched. */
-  lastTouchedAt: IsoTimestamp | null;
+  lastTouchedAt: McsIsoTimestamp | null;
 }
 
-export type AdminDrilldownPayload =
-  | { tile: 'active_bas'; rows: AdminActiveBaRow[] }
-  | { tile: 'prospects_in_flow'; rows: AdminProspectInFlowRow[] }
-  | { tile: 'queue_movement'; rows: AdminQueueMovementRow[] }
-  | { tile: 'enrollments'; rows: AdminEnrollmentRow[] }
-  | { tile: 'training'; rows: AdminTrainingRow[] };
+export type McsAdminDrilldownPayload =
+  | { tile: 'active_bas'; rows: McsAdminActiveBaRow[] }
+  | { tile: 'prospects_in_flow'; rows: McsAdminProspectInFlowRow[] }
+  | { tile: 'queue_movement'; rows: McsAdminQueueMovementRow[] }
+  | { tile: 'enrollments'; rows: McsAdminEnrollmentRow[] }
+  | { tile: 'training'; rows: McsAdminTrainingRow[] };
 
 /** GET /api/admin/dashboard/drilldown?tile=&tmagId=&leaderGroup= response. */
-export interface AdminDrilldownResponse {
+export interface McsAdminDrilldownResponse {
   ok: true;
-  payload: AdminDrilldownPayload;
-  appliedFilter: AdminDashboardFilter;
-  computedAt: IsoTimestamp;
+  payload: McsAdminDrilldownPayload;
+  appliedFilter: McsAdminDashboardFilter;
+  computedAt: McsIsoTimestamp;
 }
 
 /* Live event stream (wf_0080). */
 
 /** Common event metadata across live-stream events. */
-export interface AdminLiveEventBase {
+export interface McsAdminLiveEventBase {
   /** Globally-unique id used as the SSE `id:` field for resumability. */
   eventId: string;
   /** ISO timestamp the event was emitted. */
-  at: IsoTimestamp;
+  at: McsIsoTimestamp;
 }
 
 /** Live placement event — fans out from poolEvents.subscribePlacements. */
-export interface AdminLivePlacementEvent extends AdminLiveEventBase {
+export interface McsAdminLivePlacementEvent extends McsAdminLiveEventBase {
   kind: 'placement';
   positionNumber: number;
   firstName: string;
@@ -2416,24 +2416,24 @@ export interface AdminLivePlacementEvent extends AdminLiveEventBase {
 }
 
 /** Live audit-log entry — surfaced from poll-based tail of audit_log. */
-export interface AdminLiveAuditEvent extends AdminLiveEventBase {
+export interface McsAdminLiveAuditEvent extends McsAdminLiveEventBase {
   kind: 'audit_entry';
   action: string;
-  role: AuditActorRole;
+  role: McsAuditActorRole;
   actorLabel: string;
   entityLabel: string;
-  severity: AuditSeverity;
+  severity: McsAuditSeverity;
 }
 
-export type AdminLiveEvent = AdminLivePlacementEvent | AdminLiveAuditEvent;
+export type McsAdminLiveEvent = McsAdminLivePlacementEvent | McsAdminLiveAuditEvent;
 
 /**
  * Initial SSE snapshot — sent once on connect with the most-recent events
  * so the stream renders populated immediately rather than waiting for the
  * next live event.
  */
-export interface AdminLiveSnapshot {
-  events: AdminLiveEvent[];
+export interface McsAdminLiveSnapshot {
+  events: McsAdminLiveEvent[];
 }
 
 /* ─── #134 Cockpit Today's Actions ─────────────────────────────────────────
@@ -2460,7 +2460,7 @@ export interface AdminLiveSnapshot {
  */
 
 /** The three kinds of action the cockpit surfaces, in urgency order. */
-export type CockpitActionKind = 'callback' | 'followup' | 'expiring';
+export type McsCockpitActionKind = 'callback' | 'followup' | 'expiring';
 
 /**
  * One item on the cockpit's Today's Actions card. Discriminated by `kind`
@@ -2469,30 +2469,30 @@ export type CockpitActionKind = 'callback' | 'followup' | 'expiring';
  * expiresAt. `at` is the timestamp the cockpit sorts on inside a tier
  * (callback.createdAt, followup.dueAt, prospect.expiresAt).
  */
-export type CockpitActionItem =
+export type McsCockpitActionItem =
   | {
       kind: 'callback';
       prospectId: string;
       firstName: string;
       lastInitial: string;
-      at: IsoTimestamp;
-      intent: CallbackIntent | null;
+      at: McsIsoTimestamp;
+      intent: McsCallbackIntent | null;
     }
   | {
       kind: 'followup';
       prospectId: string;
       firstName: string;
       lastInitial: string;
-      at: IsoTimestamp;
-      followUpDueAt: IsoTimestamp;
+      at: McsIsoTimestamp;
+      followUpDueAt: McsIsoTimestamp;
     }
   | {
       kind: 'expiring';
       prospectId: string;
       firstName: string;
       lastInitial: string;
-      at: IsoTimestamp;
-      expiresAt: IsoTimestamp;
+      at: McsIsoTimestamp;
+      expiresAt: McsIsoTimestamp;
     };
 
 /**
@@ -2501,9 +2501,9 @@ export type CockpitActionItem =
  * windows). `biasPrompt` is the copy the empty state renders — server-
  * supplied so locked-spec 1.9 wording lives in one place.
  */
-export interface CockpitTodaysActionsResponse {
+export interface McsCockpitTodaysActionsResponse {
   ok: true;
-  actions: CockpitActionItem[];
+  actions: McsCockpitActionItem[];
   /** Empty-state bias copy (locked-spec 1.9). Always present. */
   biasPrompt: string;
 }
@@ -2536,7 +2536,7 @@ export interface CockpitTodaysActionsResponse {
  * preview shell or any consumer that needs to distinguish do so
  * without parsing the token format.
  */
-export interface PreviewResolvedTokenPayload extends ResolvedTokenPayload {
+export interface McsPreviewResolvedTokenPayload extends McsResolvedTokenPayload {
   preview: true;
 }
 
@@ -2566,7 +2566,7 @@ export interface PreviewResolvedTokenPayload extends ResolvedTokenPayload {
  */
 
 /** One row in the admin BA directory (Section C.1) — the 15 columns the table renders. */
-export interface AdminBaDirectoryRow {
+export interface McsAdminBaDirectoryRow {
   tmagId: string;
   threeBaId: string;
   fullName: string;
@@ -2581,21 +2581,21 @@ export interface AdminBaDirectoryRow {
   originalSponsorTmagId: string | null;
   originalSponsorName: string | null;
   /** Signed-up timestamp. */
-  joinedAt: IsoTimestamp;
+  joinedAt: McsIsoTimestamp;
   /** When the BA accepted the welcome commitment (J.3). Null = not yet. */
-  welcomeAcceptedAt: IsoTimestamp | null;
+  welcomeAcceptedAt: McsIsoTimestamp | null;
   /** Most recent login. Null = never. */
-  lastLoginAt: IsoTimestamp | null;
+  lastLoginAt: McsIsoTimestamp | null;
   /** Trailing 72h personal-invite count (C.2). */
   twoInSeventyTwoCount: number;
   /** Start of the rolling 72h window — for hover tooltip. */
-  twoInSeventyTwoWindowStart: IsoTimestamp;
+  twoInSeventyTwoWindowStart: McsIsoTimestamp;
   /** 0..100 integer (C.3). Computed from filled profile fields. */
   profileCompletenessPct: number;
   /** Lifetime invite-token count for this BA. */
   personalInvitesCount: number;
   /** Oldest open (not-cleared) follow-up dueAt across this BA's prospects. Null = none open. */
-  oldestOpenFollowUpDueAt: IsoTimestamp | null;
+  oldestOpenFollowUpDueAt: McsIsoTimestamp | null;
   /** Fast Start modules completed (0..5). */
   trainingModulesCompleted: number;
   /** True when all five modules done. */
@@ -2603,7 +2603,7 @@ export interface AdminBaDirectoryRow {
   /** Operational status. 'active'/'inactive' derive from lastLoginAt; 'suspended' is a future flag. */
   status: 'active' | 'inactive' | 'suspended';
   /** Max of lastLoginAt / welcomeAcceptedAt. */
-  lastActivityAt: IsoTimestamp | null;
+  lastActivityAt: McsIsoTimestamp | null;
   /** System-detected leader badge (currently always false — see leaderDetectionNote). */
   systemDetectedLeader: boolean;
   /** Kevin-curated leader badge (admin toggle on row + profile drawer). */
@@ -2613,16 +2613,16 @@ export interface AdminBaDirectoryRow {
   deleted: boolean;
 }
 
-export interface AdminBaDirectoryResponse {
+export interface McsAdminBaDirectoryResponse {
   ok: true;
   count: number;
-  rows: AdminBaDirectoryRow[];
+  rows: McsAdminBaDirectoryRow[];
   /** Honest disclosure — binary qualification not mirrored locally yet. */
   leaderDetectionNote: string;
 }
 
 /** One sponsor-override entry on a BA's history. Append-only. */
-export interface AdminSponsorOverrideEntry {
+export interface McsAdminSponsorOverrideEntry {
   overrideId: string;
   tmagId: string;
   previousSponsorTmagId: string;
@@ -2630,66 +2630,66 @@ export interface AdminSponsorOverrideEntry {
   requestingTmagId: string;
   reason: string;
   performedByTmagId: string;
-  performedAt: IsoTimestamp;
+  performedAt: McsIsoTimestamp;
   /** entryId from the 4.J audit substrate this override wrote to. */
   auditEntryId: string;
 }
 
 /** Kevin-only note about a BA, append-only. */
-export interface AdminBaNoteEntry {
+export interface McsAdminBaNoteEntry {
   noteId: string;
   tmagId: string;
   text: string;
   authorTmagId: string;
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
 }
 
 /** Full BA profile bundle for the slide-out drawer (C.4). */
-export interface AdminBaProfileBundle {
-  row: AdminBaDirectoryRow;
-  sponsorOverrideHistory: AdminSponsorOverrideEntry[];
-  notes: AdminBaNoteEntry[];
+export interface McsAdminBaProfileBundle {
+  row: McsAdminBaDirectoryRow;
+  sponsorOverrideHistory: McsAdminSponsorOverrideEntry[];
+  notes: McsAdminBaNoteEntry[];
 }
 
-export interface AdminBaProfileResponse {
+export interface McsAdminBaProfileResponse {
   ok: true;
-  profile: AdminBaProfileBundle;
+  profile: McsAdminBaProfileBundle;
 }
 
 /** POST /api/admin/bas/:tmagId/sponsor-override body. */
-export interface AdminSponsorOverridePayload {
+export interface McsAdminSponsorOverridePayload {
   requestingTmagId: string;
   newSponsorTmagId: string;
   reason: string;
 }
 
-export interface AdminSponsorOverrideResponse {
+export interface McsAdminSponsorOverrideResponse {
   ok: true;
-  override: AdminSponsorOverrideEntry;
-  row: AdminBaDirectoryRow;
+  override: McsAdminSponsorOverrideEntry;
+  row: McsAdminBaDirectoryRow;
 }
 
 /** POST /api/admin/bas/:tmagId/leader-tag body — toggle curated badge. */
-export interface AdminLeaderTagPayload {
+export interface McsAdminLeaderTagPayload {
   curated: boolean;
   /** Optional reason — surfaced in the audit entry. */
   reason?: string;
 }
 
-export interface AdminLeaderTagResponse {
+export interface McsAdminLeaderTagResponse {
   ok: true;
   tmagId: string;
   curated: boolean;
 }
 
 /** POST /api/admin/bas/:tmagId/notes body — append a Kevin-only note. */
-export interface AdminBaNotePayload {
+export interface McsAdminBaNotePayload {
   text: string;
 }
 
-export interface AdminBaNoteResponse {
+export interface McsAdminBaNoteResponse {
   ok: true;
-  note: AdminBaNoteEntry;
+  note: McsAdminBaNoteEntry;
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -2721,7 +2721,7 @@ export interface AdminBaNoteResponse {
  * `became_customer` is set from the prospect's `becameCustomer` flag, not the
  * placement.
  */
-export type ProspectStatus =
+export type McsProspectStatus =
   | 'pending'
   | 'enrolled_iii'
   | 'became_customer'
@@ -2735,7 +2735,7 @@ export type ProspectStatus =
  * Column ordering matches the brief; UI may reorder visually but the
  * server payload is canonical.
  */
-export interface AdminProspectDirectoryRow {
+export interface McsAdminProspectDirectoryRow {
   prospectId: string;
   /** Column 1: first + last (full name for admin, not first+initial). */
   firstName: string;
@@ -2747,7 +2747,7 @@ export interface AdminProspectDirectoryRow {
    *  TokenState 'video_quarter'/'video_half'/'video_three_quarter'. The
    *  client translates for display; the wire shape stays TokenState +
    *  any non-token signal layered on top. */
-  presentationStatus: AdminProspectPresentationStatus;
+  presentationStatus: McsAdminProspectPresentationStatus;
   /** Column 4: monotonic pool position; null pre-placement. */
   positionNumber: number | null;
   /** Column 5: the sponsor-routed URL Kevin can sandbox-preview. */
@@ -2756,11 +2756,11 @@ export interface AdminProspectDirectoryRow {
    *  build an admin-preview href without re-parsing the URL. */
   token: string;
   /** Column 6: token mint date. */
-  firstContactAt: IsoTimestamp;
+  firstContactAt: McsIsoTimestamp;
   /** Column 7: most recent activity (date + event-kind label). */
   mostRecentActivity: {
-    at: IsoTimestamp;
-    eventKind: AdminProspectActivityEventKind;
+    at: McsIsoTimestamp;
+    eventKind: McsAdminProspectActivityEventKind;
     label: string;
   };
   /** Column 8: days in holding tank since video_complete; null pre-placement. */
@@ -2769,9 +2769,9 @@ export interface AdminProspectDirectoryRow {
    *  as a boolean system flag. Computed from activity-recency threshold:
    *  most-recent-activity + locked threshold (currently 7 days). Null
    *  when not applicable (enrolled, expired, or no activity yet). */
-  followUpNeededBy: IsoTimestamp | null;
+  followUpNeededBy: McsIsoTimestamp | null;
   /** Column 10: registration handoff state with THREE (derived; see type). */
-  prospectStatus: ProspectStatus;
+  prospectStatus: McsProspectStatus;
   /** Soft-delete lifecycle (Chat #138/#141). True when removed from the
    *  directory (reversible). The table may dim / tag deleted rows; the
    *  holding-tank position is untouched by delete. */
@@ -2790,8 +2790,8 @@ export interface AdminProspectDirectoryRow {
  *   - 'webinar_reserved' surfaces when a webinar reservation exists and
  *     state is still video_complete.
  */
-export type AdminProspectPresentationStatus =
-  | TokenState
+export type McsAdminProspectPresentationStatus =
+  | McsTokenState
   | 'callback_requested'
   | 'webinar_reserved';
 
@@ -2801,11 +2801,11 @@ export type AdminProspectPresentationStatus =
  * in the query string. Rows are unsorted at wire level; the client sorts
  * per column-click.
  */
-export interface AdminProspectDirectoryResponse {
+export interface McsAdminProspectDirectoryResponse {
   ok: true;
-  rows: AdminProspectDirectoryRow[];
-  appliedFilter: AdminDashboardFilter;
-  computedAt: IsoTimestamp;
+  rows: McsAdminProspectDirectoryRow[];
+  appliedFilter: McsAdminDashboardFilter;
+  computedAt: McsIsoTimestamp;
   /** Same honest note from B.2 — duplicated so the directory can render
    *  it standalone if the user lands here before visiting /dashboard. */
   leaderDetectionNote: string;
@@ -2820,7 +2820,7 @@ export interface AdminProspectDirectoryResponse {
  * remains the source of truth; the timeline is a per-prospect derived
  * view.
  */
-export type AdminProspectActivityEventKind =
+export type McsAdminProspectActivityEventKind =
   | 'token_minted'
   | 'link_clicked'
   | 'video_started'
@@ -2839,11 +2839,11 @@ export type AdminProspectActivityEventKind =
   | 'admin_force_enroll'
   | 'admin_kevin_note';
 
-export interface AdminProspectActivityEvent {
+export interface McsAdminProspectActivityEvent {
   eventId: string;
   /** When the event happened (wall-clock). */
-  at: IsoTimestamp;
-  kind: AdminProspectActivityEventKind;
+  at: McsIsoTimestamp;
+  kind: McsAdminProspectActivityEventKind;
   /** Free-form label for the row: "Clicked link", "Manual flush by Kevin". */
   label: string;
   /** Source IP for link-click events (duplicate-tab detection); null otherwise. */
@@ -2859,11 +2859,11 @@ export interface AdminProspectActivityEvent {
  * own notes on the prospect (those live in the cockpit, NOT in this
  * payload). Append-only — no edit, no delete.
  */
-export interface AdminProspectKevinNote {
+export interface McsAdminProspectKevinNote {
   noteId: string;
   prospectId: string;
   body: string;
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
   /** The admin who wrote the note (today: Kevin; tomorrow: any /admin BA). */
   createdByTmagId: string;
   createdByDisplayName: string;
@@ -2881,7 +2881,7 @@ export interface AdminProspectKevinNote {
  * panel surfaces the discrepancy as a warning row — the drift detector
  * the brief explicitly names.
  */
-export interface AdminProspectDetail {
+export interface McsAdminProspectDetail {
   prospectId: string;
   firstName: string;
   lastName: string;
@@ -2891,64 +2891,64 @@ export interface AdminProspectDetail {
   deleted: boolean;
   phone: string | null;
   email: string | null;
-  location: ProspectLocation;
+  location: McsProspectLocation;
   sponsorTmagIdAtMint: string;
   sponsorTmagIdNow: string;
   sponsorNameNow: string;
   positionNumber: number | null;
-  placedAt: IsoTimestamp | null;
-  state: TokenState;
-  presentationStatus: AdminProspectPresentationStatus;
-  prospectStatus: ProspectStatus;
+  placedAt: McsIsoTimestamp | null;
+  state: McsTokenState;
+  presentationStatus: McsAdminProspectPresentationStatus;
+  prospectStatus: McsProspectStatus;
   /** Token details. `tokenTruncated` is the head of the token for display
    *  (full token never shown — the prospect URL is the sandbox surface). */
   token: {
     tokenTruncated: string;
     prospectUrl: string;
-    mintedAt: IsoTimestamp;
-    expiresAt: IsoTimestamp;
-    currentState: TokenState;
+    mintedAt: McsIsoTimestamp;
+    expiresAt: McsIsoTimestamp;
+    currentState: McsTokenState;
   };
   callback: {
     callbackRequestId: string;
-    intent: CallbackIntent;
-    submittedAt: IsoTimestamp;
+    intent: McsCallbackIntent;
+    submittedAt: McsIsoTimestamp;
   } | null;
   webinar: {
     reservationId: string;
     eventId: string;
-    scheduledFor: IsoTimestamp;
-    reservedAt: IsoTimestamp;
+    scheduledFor: McsIsoTimestamp;
+    reservedAt: McsIsoTimestamp;
   } | null;
   enrollment: {
-    markedAt: IsoTimestamp;
+    markedAt: McsIsoTimestamp;
     markedByTmagId: string;
     forceEnrolledByAdmin: boolean;
   } | null;
-  activity: AdminProspectActivityEvent[];
-  kevinNotes: AdminProspectKevinNote[];
+  activity: McsAdminProspectActivityEvent[];
+  kevinNotes: McsAdminProspectKevinNote[];
 }
 
-export interface AdminProspectDetailResponse {
+export interface McsAdminProspectDetailResponse {
   ok: true;
-  detail: AdminProspectDetail;
+  detail: McsAdminProspectDetail;
 }
 
 /**
  * Add-note request — POST /api/admin/prospects/:prospectId/notes.
  * Body fields are append-only: there is no edit / delete surface.
  */
-export interface AdminProspectAddNoteRequest {
+export interface McsAdminProspectAddNoteRequest {
   body: string;
 }
-export interface AdminProspectAddNoteResponse {
+export interface McsAdminProspectAddNoteResponse {
   ok: true;
-  note: AdminProspectKevinNote;
+  note: McsAdminProspectKevinNote;
 }
 
 /* ─── D.4 interventions ─────────────────────────────────────────── */
 
-export type AdminProspectInterventionKind =
+export type McsAdminProspectInterventionKind =
   | 'move'
   | 'reassign_sponsor'
   | 'manual_flush'
@@ -2960,25 +2960,25 @@ export type AdminProspectInterventionKind =
  * common base IS the `requestingTmagId` + `reason` pair. Both required;
  * locked-spec 2.4 calls for `reason` on every critical override.
  */
-export interface AdminProspectInterventionBase {
+export interface McsAdminProspectInterventionBase {
   /** The BA who requested the emergency intervention from Kevin. */
   requestingTmagId: string;
   /** Free-text reason in Kevin's words; required, min 8 chars. */
   reason: string;
 }
 
-export interface AdminProspectMoveRequest extends AdminProspectInterventionBase {
+export interface McsAdminProspectMoveRequest extends McsAdminProspectInterventionBase {
   /** The BA the prospect is moved TO (the new inviting BA). */
   toTmagId: string;
 }
 
-export interface AdminProspectReassignSponsorRequest extends AdminProspectInterventionBase {
+export interface McsAdminProspectReassignSponsorRequest extends McsAdminProspectInterventionBase {
   /** The BA who becomes the sponsor of record on the prospect. */
   newSponsorTmagId: string;
 }
 
-export type AdminProspectManualFlushRequest = AdminProspectInterventionBase;
-export type AdminProspectForceEnrollRequest = AdminProspectInterventionBase;
+export type McsAdminProspectManualFlushRequest = McsAdminProspectInterventionBase;
+export type McsAdminProspectForceEnrollRequest = McsAdminProspectInterventionBase;
 
 /**
  * Every intervention returns the same envelope: the audit entry that
@@ -2986,12 +2986,12 @@ export type AdminProspectForceEnrollRequest = AdminProspectInterventionBase;
  * the refreshed directory row for this prospect (so the client can
  * patch the table in place without a full directory refetch).
  */
-export interface AdminProspectInterventionResponse {
+export interface McsAdminProspectInterventionResponse {
   ok: true;
-  kind: AdminProspectInterventionKind;
+  kind: McsAdminProspectInterventionKind;
   prospectId: string;
   auditEntryId: string;
-  refreshedRow: AdminProspectDirectoryRow;
+  refreshedRow: McsAdminProspectDirectoryRow;
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -3006,10 +3006,10 @@ export interface AdminProspectInterventionResponse {
  * ───────────────────────────────────────────────────────────────── */
 
 /** The Kevin-settable .com position-stack window (E.3). Default 10. */
-export type QueueVisibleWindow = 5 | 10 | 20;
+export type McsQueueVisibleWindow = 5 | 10 | 20;
 
 /** Today's queue movement (E.1). All counts UTC-day-bounded. */
-export interface QueueDepthMovement {
+export interface McsQueueDepthMovement {
   /** Total prospects currently in the holding tank (placed and not flushed). */
   currentDepth: number;
   /** Placements minted today (UTC). */
@@ -3022,37 +3022,37 @@ export interface QueueDepthMovement {
   todaysEnrollments: number;
   /** placements − expirations − manualFlushes − enrollments. */
   netMovement: number;
-  computedAt: IsoTimestamp;
+  computedAt: McsIsoTimestamp;
 }
 
 /** Monotonic position numbers (E.2). */
-export interface QueueNumbers {
+export interface McsQueueNumbers {
   /** Max positionNumber minted today (UTC). 0 if no placements yet today. */
   highestToday: number;
   /** Lifetime highest position ever minted (== pool_counters.current). */
   highestEver: number;
   /** Count of flushed placements (their slots are vacant in the visible line). */
   vacantSlots: number;
-  computedAt: IsoTimestamp;
+  computedAt: McsIsoTimestamp;
 }
 
 /**
  * Single day in the growth sparkline (E.4). `date` is YYYY-MM-DD UTC.
  * `count` is new placements that day.
  */
-export interface QueueGrowthBucket {
+export interface McsQueueGrowthBucket {
   date: string;
   count: number;
 }
 
 /** E.4 — TM overall growth movement (no comp math, no binary detail). */
-export interface QueueGrowthSparkline {
+export interface McsQueueGrowthSparkline {
   rolling7: number;
   rolling30: number;
   /** Lifetime placements (== pool_counters.current). */
   lifetime: number;
   /** 30 daily buckets oldest→newest. Empty days are zero-filled. */
-  daily30: QueueGrowthBucket[];
+  daily30: McsQueueGrowthBucket[];
 }
 
 /**
@@ -3060,24 +3060,24 @@ export interface QueueGrowthSparkline {
  * attached. When `found:false`, the position has been minted (≤ highestEver)
  * but the slot is vacant (flushed) OR the number has not been minted yet.
  */
-export interface QueueLookupResult {
+export interface McsQueueLookupResult {
   position: number;
   found: boolean;
   /** True when the slot was once filled and is now vacant (flushed). */
   vacant: boolean;
-  prospect: QueueLookupProspect | null;
+  prospect: McsQueueLookupProspect | null;
 }
 
-export interface QueueLookupProspect {
+export interface McsQueueLookupProspect {
   prospectId: string;
   firstName: string;
   lastName: string;
-  state: TokenState;
-  placedAt: IsoTimestamp;
+  state: McsTokenState;
+  placedAt: McsIsoTimestamp;
   sponsorTmagId: string;
   city: string;
   stateOrRegion: string;
-  flushedAt: IsoTimestamp | null;
+  flushedAt: McsIsoTimestamp | null;
   flushReason: 'enrolled' | 'expired' | 'archived' | null;
   /** Cross-section deep-link locked with Agent D: /prospects?prospectId=<id>. */
   deepLink: string;
@@ -3088,14 +3088,14 @@ export interface QueueLookupProspect {
  * city). Same event source as the .com ticker; the difference is the
  * projection. `deepLink` points to Agent D's D.2 detail panel.
  */
-export interface AdminTickerEntry {
+export interface McsAdminTickerEntry {
   positionNumber: number;
   prospectId: string;
   firstName: string;
   lastName: string;
   city: string;
   stateOrRegion: string;
-  placedAt: IsoTimestamp;
+  placedAt: McsIsoTimestamp;
   sponsorTmagId: string;
   deepLink: string;
 }
@@ -3105,7 +3105,7 @@ export interface AdminTickerEntry {
  * window and any other queue knobs Kevin can change. Every change
  * append-only audited (action='admin.queue.rule.changed').
  */
-export interface QueueRule {
+export interface McsQueueRule {
   key: string;
   label: string;
   description: string;
@@ -3114,48 +3114,48 @@ export interface QueueRule {
   defaultValue: number | string | boolean;
   unit: string | null;
   /** Last audited change; null if untouched (still at default). */
-  lastChangedAt: IsoTimestamp | null;
+  lastChangedAt: McsIsoTimestamp | null;
   lastChangedBy: string | null;
 }
 
 /** E.1 + E.2 + E.4 in a single fetch (admin queue page bootstrap). */
-export interface QueueOversightSummary {
-  depthMovement: QueueDepthMovement;
-  numbers: QueueNumbers;
-  growth: QueueGrowthSparkline;
-  visibleWindow: QueueVisibleWindow;
-  computedAt: IsoTimestamp;
+export interface McsQueueOversightSummary {
+  depthMovement: McsQueueDepthMovement;
+  numbers: McsQueueNumbers;
+  growth: McsQueueGrowthSparkline;
+  visibleWindow: McsQueueVisibleWindow;
+  computedAt: McsIsoTimestamp;
 }
 
 /* HTTP response envelopes — match the {ok:true, …} shape used by /admin. */
 
-export interface QueueOversightSummaryResponse {
+export interface McsQueueOversightSummaryResponse {
   ok: true;
-  summary: QueueOversightSummary;
+  summary: McsQueueOversightSummary;
 }
 
-export interface QueueLookupResponse {
+export interface McsQueueLookupResponse {
   ok: true;
-  result: QueueLookupResult;
+  result: McsQueueLookupResult;
 }
 
-export interface QueueVisibleWindowResponse {
+export interface McsQueueVisibleWindowResponse {
   ok: true;
-  value: QueueVisibleWindow;
-  defaultValue: QueueVisibleWindow;
-  lastChangedAt: IsoTimestamp | null;
+  value: McsQueueVisibleWindow;
+  defaultValue: McsQueueVisibleWindow;
+  lastChangedAt: McsIsoTimestamp | null;
   lastChangedBy: string | null;
 }
 
-export interface QueueAdminTickerResponse {
+export interface McsQueueAdminTickerResponse {
   ok: true;
-  entries: AdminTickerEntry[];
+  entries: McsAdminTickerEntry[];
   globalMaxPosition: number;
 }
 
-export interface QueueRulesResponse {
+export interface McsQueueRulesResponse {
   ok: true;
-  rules: QueueRule[];
+  rules: McsQueueRule[];
 }
 
 /**
@@ -3163,10 +3163,10 @@ export interface QueueRulesResponse {
  * Mirrors AdminLivePlacementEvent but un-anonymized (carries
  * lastName + prospectId for click-through to D.2).
  */
-export interface AdminQueueTickerSseEvent {
+export interface McsAdminQueueTickerSseEvent {
   kind: 'admin_queue_placement';
   eventId: string;
-  at: IsoTimestamp;
+  at: McsIsoTimestamp;
   positionNumber: number;
   prospectId: string;
   firstName: string;
@@ -3178,9 +3178,9 @@ export interface AdminQueueTickerSseEvent {
 }
 
 /** Snapshot payload sent at SSE connection open for the admin ticker. */
-export interface AdminQueueTickerSnapshot {
+export interface McsAdminQueueTickerSnapshot {
   globalMaxPosition: number;
-  recent: AdminTickerEntry[];
+  recent: McsAdminTickerEntry[];
 }
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -3207,13 +3207,13 @@ export interface AdminQueueTickerSnapshot {
  * `suspended` flag deriveStatus() already understands: suspended = benched
  * but present; deleted = pulled from the active roster, restorable.
  */
-export interface AdminSoftDeleteState {
+export interface McsAdminSoftDeleteState {
   deleted: boolean;
-  deletedAt: IsoTimestamp | null;
+  deletedAt: McsIsoTimestamp | null;
   deletedReason: string | null;
   deletedByTmagId: string | null;
   /** Stamped on restore so the audit pair is legible on the record too. */
-  restoredAt: IsoTimestamp | null;
+  restoredAt: McsIsoTimestamp | null;
   restoredByTmagId: string | null;
 }
 
@@ -3226,7 +3226,7 @@ export interface AdminSoftDeleteState {
  * BA is a roster mirror entry, not a login. (If the person later signs up
  * through the normal access-code flow, that path owns credential creation.)
  */
-export interface AdminCreateBaPayload {
+export interface McsAdminCreateBaPayload {
   firstName: string;
   lastName: string;
   threeBaId: string;
@@ -3240,10 +3240,10 @@ export interface AdminCreateBaPayload {
   reason: string;
 }
 
-export interface AdminCreateBaResponse {
+export interface McsAdminCreateBaResponse {
   ok: true;
   tmagId: string;
-  row: AdminBaDirectoryRow;
+  row: McsAdminBaDirectoryRow;
 }
 
 /* ── BA edit ────────────────────────────────────────────────────────── */
@@ -3256,7 +3256,7 @@ export interface AdminCreateBaResponse {
  * else. Every supplied field overwrites; omitted fields are untouched.
  * `reason` is required for the paper trail (Chat #138).
  */
-export interface AdminEditBaPayload {
+export interface McsAdminEditBaPayload {
   firstName?: string;
   lastName?: string;
   threeBaId?: string;
@@ -3268,34 +3268,34 @@ export interface AdminEditBaPayload {
   reason: string;
 }
 
-export interface AdminEditBaResponse {
+export interface McsAdminEditBaResponse {
   ok: true;
   tmagId: string;
-  row: AdminBaDirectoryRow;
+  row: McsAdminBaDirectoryRow;
 }
 
 /* ── BA / prospect soft-delete + restore (shared shapes) ────────────── */
 
-export interface AdminSoftDeletePayload {
+export interface McsAdminSoftDeletePayload {
   /** Required paper-trail reason (min 8 chars). */
   reason: string;
 }
 
-export interface AdminRestorePayload {
+export interface McsAdminRestorePayload {
   reason: string;
 }
 
-export interface AdminBaDeleteResponse {
+export interface McsAdminBaDeleteResponse {
   ok: true;
   tmagId: string;
-  deletedAt: IsoTimestamp;
+  deletedAt: McsIsoTimestamp;
 }
 
-export interface AdminBaRestoreResponse {
+export interface McsAdminBaRestoreResponse {
   ok: true;
   tmagId: string;
-  restoredAt: IsoTimestamp;
-  row: AdminBaDirectoryRow;
+  restoredAt: McsIsoTimestamp;
+  row: McsAdminBaDirectoryRow;
 }
 
 /* ── prospect create ────────────────────────────────────────────────── */
@@ -3307,7 +3307,7 @@ export interface AdminBaRestoreResponse {
  * position (Chat #138 — no position picking, no delay; placement follows
  * the same path a real video_complete uses). sponsorTmagId is required.
  */
-export interface AdminCreateProspectPayload {
+export interface McsAdminCreateProspectPayload {
   firstName: string;
   lastName: string;
   city: string;
@@ -3319,7 +3319,7 @@ export interface AdminCreateProspectPayload {
   reason: string;
 }
 
-export interface AdminCreateProspectResponse {
+export interface McsAdminCreateProspectResponse {
   ok: true;
   prospectId: string;
   token: string;
@@ -3332,8 +3332,8 @@ export interface AdminCreateProspectResponse {
    * they earn it, exactly like every other prospect.
    */
   positionNumber: number | null;
-  placedAt: IsoTimestamp | null;
-  row: AdminProspectDirectoryRow;
+  placedAt: McsIsoTimestamp | null;
+  row: McsAdminProspectDirectoryRow;
 }
 
 /* ── prospect edit ──────────────────────────────────────────────────── */
@@ -3343,7 +3343,7 @@ export interface AdminCreateProspectResponse {
  * prospect's sponsor changes only through the D.4 reassign-sponsor
  * intervention (already built). `reason` required for the paper trail.
  */
-export interface AdminEditProspectPayload {
+export interface McsAdminEditProspectPayload {
   firstName?: string;
   lastName?: string;
   city?: string;
@@ -3354,23 +3354,23 @@ export interface AdminEditProspectPayload {
   reason: string;
 }
 
-export interface AdminEditProspectResponse {
+export interface McsAdminEditProspectResponse {
   ok: true;
   prospectId: string;
-  row: AdminProspectDirectoryRow;
+  row: McsAdminProspectDirectoryRow;
 }
 
-export interface AdminProspectDeleteResponse {
+export interface McsAdminProspectDeleteResponse {
   ok: true;
   prospectId: string;
-  deletedAt: IsoTimestamp;
+  deletedAt: McsIsoTimestamp;
 }
 
-export interface AdminProspectRestoreResponse {
+export interface McsAdminProspectRestoreResponse {
   ok: true;
   prospectId: string;
-  restoredAt: IsoTimestamp;
-  row: AdminProspectDirectoryRow;
+  restoredAt: McsIsoTimestamp;
+  row: McsAdminProspectDirectoryRow;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -3387,7 +3387,7 @@ export interface AdminProspectRestoreResponse {
  * ───────────────────────────────────────────────────────────────────────── */
 
 /** The six weighted rubric categories. */
-export type MichaelRubricCategory =
+export type McsMichaelRubricCategory =
   | 'vision'
   | 'commitment'
   | 'coachability'
@@ -3396,7 +3396,7 @@ export type MichaelRubricCategory =
   | 'experience';
 
 /** Max points each category contributes to the 100-point total (the weights). */
-export const MICHAEL_RUBRIC_MAX: Readonly<Record<MichaelRubricCategory, number>> = {
+export const MCS_MICHAEL_RUBRIC_MAX: Readonly<Record<McsMichaelRubricCategory, number>> = {
   vision: 20,
   commitment: 20,
   coachability: 20,
@@ -3407,7 +3407,7 @@ export const MICHAEL_RUBRIC_MAX: Readonly<Record<MichaelRubricCategory, number>>
 
 /** Raw per-category points the scoring worker assigns from the transcript.
  *  Each value is 0..MICHAEL_RUBRIC_MAX[category]; the server clamps and sums. */
-export interface MichaelCategoryScores {
+export interface McsMichaelCategoryScores {
   vision: number;
   commitment: number;
   coachability: number;
@@ -3417,18 +3417,18 @@ export interface MichaelCategoryScores {
 }
 
 /** Legacy classification tiers. Do not produce for new Michael artifacts. */
-export type MichaelClassificationTier =
+export type McsMichaelClassificationTier =
   | 'builder'
   | 'emerging_leader'
   | 'part_time_producer'
   | 'casual_participant';
 
 /** Legacy computed classification. Historical-read only. */
-export interface MichaelClassification {
-  categoryScores: MichaelCategoryScores;
+export interface McsMichaelClassification {
+  categoryScores: McsMichaelCategoryScores;
   /** 0..100, sum of clamped per-category points. */
   weightedTotal: number;
-  tier: MichaelClassificationTier;
+  tier: McsMichaelClassificationTier;
   /** Human label, e.g. "Builder". */
   tierLabel: string;
   /** Score band for the tier, e.g. "85–100". */
@@ -3438,8 +3438,8 @@ export interface MichaelClassification {
 }
 
 /** Legacy band edges for old records. */
-export const MICHAEL_CLASSIFICATION_BANDS: ReadonlyArray<{
-  tier: MichaelClassificationTier;
+export const MCS_MICHAEL_CLASSIFICATION_BANDS: ReadonlyArray<{
+  tier: McsMichaelClassificationTier;
   label: string;
   min: number;
   max: number;
@@ -3451,32 +3451,32 @@ export const MICHAEL_CLASSIFICATION_BANDS: ReadonlyArray<{
 ] as const;
 
 /** Legacy Michael-generated profile. Current Success Profile is Steve-owned. */
-export interface MichaelSuccessProfile {
+export interface McsMichaelSuccessProfile {
   tmagId: string;
-  classification: MichaelClassification;
+  classification: McsMichaelClassification;
   /** One-line read the sponsor leads with, e.g. "Vision-led, time-rich, ready to be coached." */
   headline: string;
   /** What this BA brings — the strongest 1–3 categories rendered as plain reads. */
   strengths: string[];
   /** Where the sponsor should focus support — the lightest 1–3 categories. */
   sponsorFocus: string[];
-  generatedAt: IsoTimestamp;
+  generatedAt: McsIsoTimestamp;
   signedBy: string;
 }
 
 /** Legacy founder-handoff record. New Michael ingests do not create this. */
-export interface MichaelFounderHandoff {
+export interface McsMichaelFounderHandoff {
   handoffId: string;
   tmagId: string;
   baFirstName: string;
   sponsorTmagId: string | null;
   /** Lightweight classification summary (full profile on the linked artifact). */
-  tier: MichaelClassificationTier;
+  tier: McsMichaelClassificationTier;
   tierLabel: string;
   weightedTotal: number;
-  successProfile: MichaelSuccessProfile;
-  completedAt: IsoTimestamp;
-  firedAt: IsoTimestamp;
+  successProfile: McsMichaelSuccessProfile;
+  completedAt: McsIsoTimestamp;
+  firedAt: McsIsoTimestamp;
   /** Founder BA-IDs the handoff was addressed to (from ADMIN_BA_IDS). */
   founderTmagIds: string[];
   /** Whether the new BA's Fast Start gate is open (interview complete). Always
@@ -3490,26 +3490,26 @@ export interface MichaelFounderHandoff {
 }
 
 /** Legacy worker addendum from the retired Michael interview ingest. */
-export interface MichaelScoringCategoryInput {
-  categoryScores: MichaelCategoryScores;
+export interface McsMichaelScoringCategoryInput {
+  categoryScores: McsMichaelCategoryScores;
 }
 
 /** Sponsor cockpit card shape retains nullable legacy fields for compatibility.
  *  Current server returns null for both; Steve-derived training support is the
  *  active Success Profile read. */
-export interface MichaelCockpitCardClassified extends MichaelCockpitCardData {
-  classification: MichaelClassification | null;
-  successProfile: MichaelSuccessProfile | null;
+export interface McsMichaelCockpitCardClassified extends McsMichaelCockpitCardData {
+  classification: McsMichaelClassification | null;
+  successProfile: McsMichaelSuccessProfile | null;
 }
 
 /** LEGACY — retired founder-handoff response. */
-export interface MichaelFounderHandoffListResponse {
+export interface McsMichaelFounderHandoffListResponse {
   ok: true;
-  handoffs: MichaelFounderHandoff[];
+  handoffs: McsMichaelFounderHandoff[];
 }
 
 /** LEGACY — one question in Michael's retired interview backbone. */
-export interface MichaelInterviewScriptQuestion {
+export interface McsMichaelInterviewScriptQuestion {
   id: string;
   /** 1-based question number across the whole interview (1..29). */
   number: number;
@@ -3518,24 +3518,24 @@ export interface MichaelInterviewScriptQuestion {
   /** The prompt Michael leads with (backbone; the LLM expands naturally). */
   prompt: string;
   /** Which rubric category this question primarily informs (null = rapport/none). */
-  category: MichaelRubricCategory | null;
+  category: McsMichaelRubricCategory | null;
 }
 
 /** One of the 9 sections of the New Associate Success Interview. */
-export interface MichaelInterviewScriptSection {
+export interface McsMichaelInterviewScriptSection {
   id: string;
   title: string;
   /** What Michael is listening for in this section. */
   intent: string;
-  questions: MichaelInterviewScriptQuestion[];
+  questions: McsMichaelInterviewScriptQuestion[];
 }
 
 /** LEGACY — retired Michael interview script response. */
-export interface MichaelInterviewScriptResponse {
+export interface McsMichaelInterviewScriptResponse {
   ok: true;
-  sections: MichaelInterviewScriptSection[];
-  rubric: Array<{ category: MichaelRubricCategory; max: number; label: string }>;
-  bands: typeof MICHAEL_CLASSIFICATION_BANDS;
+  sections: McsMichaelInterviewScriptSection[];
+  rubric: Array<{ category: McsMichaelRubricCategory; max: number; label: string }>;
+  bands: typeof MCS_MICHAEL_CLASSIFICATION_BANDS;
 }
 /* ────────────────────────────────────────────────────────────────────────
  * Group orientation scheduler (Chat #147 — wireframe §3.6,
@@ -3562,16 +3562,16 @@ export interface MichaelInterviewScriptResponse {
  */
 
 /** Default seat cap per orientation session (Chat #147). */
-export const ORIENTATION_SESSION_CAPACITY = 10;
+export const MCS_ORIENTATION_SESSION_CAPACITY = 10;
 
 /**
  * A scheduled group orientation session a BA can reserve a seat in. Models
  * WebinarEvent but adds a `capacity` cap and keeps `hosts` assignable (the
  * seeder/admin sets them; founders today, leaders later).
  */
-export interface OrientationSession {
+export interface McsOrientationSession {
   sessionId: string;
-  scheduledFor: IsoTimestamp;
+  scheduledFor: McsIsoTimestamp;
   /** Assignable host display names. Defaults to founders; never hardcoded downstream. */
   hosts: string[];
   /** Hard seat cap. Defaults to ORIENTATION_SESSION_CAPACITY (10). */
@@ -3580,7 +3580,7 @@ export interface OrientationSession {
   /** Optional join link (Zoom etc.); null until set by the host. */
   joinUrl: string | null;
   status: 'upcoming' | 'past' | 'cancelled';
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
 }
 
 /**
@@ -3588,17 +3588,17 @@ export interface OrientationSession {
  * reservation per BA per session; cancellation flips status to 'cancelled'
  * (the row is retained for the audit/roster history, not deleted).
  */
-export interface OrientationReservationRecord {
+export interface McsOrientationReservationRecord {
   reservationId: string;
   sessionId: string;
   /** The reserving BA — read from the authed session, never the request body. */
   tmagId: string;
   /** Snapshot of the BA's display name at reservation time (for the roster). */
   baName: string;
-  scheduledFor: IsoTimestamp;
+  scheduledFor: McsIsoTimestamp;
   status: 'reserved' | 'cancelled';
-  createdAt: IsoTimestamp;
-  cancelledAt: IsoTimestamp | null;
+  createdAt: McsIsoTimestamp;
+  cancelledAt: McsIsoTimestamp | null;
   smsDeliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
   smsDeliveryError: string | null;
 }
@@ -3607,9 +3607,9 @@ export interface OrientationReservationRecord {
  * One available session as the cockpit scheduling card renders it: the
  * session plus its live seat math and whether THIS BA already holds a seat.
  */
-export interface OrientationSessionAvailability {
+export interface McsOrientationSessionAvailability {
   sessionId: string;
-  scheduledFor: IsoTimestamp;
+  scheduledFor: McsIsoTimestamp;
   hosts: string[];
   capacity: number;
   seatsTaken: number;
@@ -3620,42 +3620,42 @@ export interface OrientationSessionAvailability {
 }
 
 /** GET /api/orientation/sessions — the cockpit scheduling card payload. */
-export interface OrientationSessionsResponse {
+export interface McsOrientationSessionsResponse {
   ok: true;
-  sessions: OrientationSessionAvailability[];
+  sessions: McsOrientationSessionAvailability[];
   /** The session id this BA currently holds a seat in, or null. */
   myReservationSessionId: string | null;
 }
 
 /** POST /api/orientation/sessions/:sessionId/reserve response. */
-export interface OrientationReserveResponse {
+export interface McsOrientationReserveResponse {
   ok: true;
   reservationId: string;
   sessionId: string;
-  scheduledFor: IsoTimestamp;
+  scheduledFor: McsIsoTimestamp;
   seatsRemaining: number;
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
 }
 
 /** DELETE /api/orientation/sessions/:sessionId/reserve response. */
-export interface OrientationCancelResponse {
+export interface McsOrientationCancelResponse {
   ok: true;
   sessionId: string;
-  cancelledAt: IsoTimestamp;
+  cancelledAt: McsIsoTimestamp;
 }
 
 /** One BA on a session roster (the founder-facing /admin view). */
-export interface OrientationRosterSeat {
+export interface McsOrientationRosterSeat {
   reservationId: string;
   tmagId: string;
   baName: string;
-  reservedAt: IsoTimestamp;
+  reservedAt: McsIsoTimestamp;
 }
 
 /** A session plus its full roster, for the founder /admin roster view. */
-export interface OrientationSessionWithRoster {
+export interface McsOrientationSessionWithRoster {
   sessionId: string;
-  scheduledFor: IsoTimestamp;
+  scheduledFor: McsIsoTimestamp;
   hosts: string[];
   capacity: number;
   durationMinutes: number;
@@ -3663,18 +3663,18 @@ export interface OrientationSessionWithRoster {
   status: 'upcoming' | 'past' | 'cancelled';
   seatsTaken: number;
   seatsRemaining: number;
-  roster: OrientationRosterSeat[];
+  roster: McsOrientationRosterSeat[];
 }
 
 /** GET /api/admin/orientation/sessions — founder roster view. */
-export interface AdminOrientationSessionsResponse {
+export interface McsAdminOrientationSessionsResponse {
   ok: true;
-  sessions: OrientationSessionWithRoster[];
+  sessions: McsOrientationSessionWithRoster[];
 }
 
 /** POST /api/admin/orientation/sessions — founders seed a new session. */
-export interface AdminCreateOrientationSessionPayload {
-  scheduledFor: IsoTimestamp;
+export interface McsAdminCreateOrientationSessionPayload {
+  scheduledFor: McsIsoTimestamp;
   /** Assignable hosts. Omit/empty → server defaults to the founders. */
   hosts?: string[];
   /** Seat cap. Omit → ORIENTATION_SESSION_CAPACITY (10). */
@@ -3683,9 +3683,9 @@ export interface AdminCreateOrientationSessionPayload {
   joinUrl?: string | null;
 }
 
-export interface AdminCreateOrientationSessionResponse {
+export interface McsAdminCreateOrientationSessionResponse {
   ok: true;
-  session: OrientationSessionWithRoster;
+  session: McsOrientationSessionWithRoster;
 }
 /* ───────────────────────────────────────────────
  * Chat #147 — cockpit + profile edges (seq 22 + seq 23)
@@ -3698,7 +3698,7 @@ export interface AdminCreateOrientationSessionResponse {
  * re-invite message the BA can copy. This does NOT gate or mint — it only
  * generates copy. The BA decides when (and whether) to actually re-invite.
  */
-export interface ReinviteScriptResponse {
+export interface McsReinviteScriptResponse {
   ok: true;
   prospectId: string;
   /** A warm, personal follow-up message. Compliance-safe by construction. */
@@ -3710,7 +3710,7 @@ export interface ReinviteScriptResponse {
  * sponsor is inactive (Chat #147, seq 23). Placement and the immutable
  * sponsor relationship are unchanged — this is only a contact path.
  */
-export interface SponsorFallbackFounder {
+export interface McsSponsorFallbackFounder {
   fullName: string;
   firstName: string;
   phone: string | null;
@@ -3722,9 +3722,9 @@ export interface SponsorFallbackFounder {
  * admin-deleted, or dormant 120+ days. The My Sponsor card ALWAYS still shows
  * the original sponsor; this points the BA to Kevin + Paul for support.
  */
-export interface CockpitSponsorFallback {
+export interface McsCockpitSponsorFallback {
   sponsorInactive: boolean;
-  founders: SponsorFallbackFounder[];
+  founders: McsSponsorFallbackFounder[];
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -3744,7 +3744,7 @@ export interface CockpitSponsorFallback {
  * the `team.invitation.*` template keys in domain/adminTenantArchitecture.ts.
  * Defaults to 'product_anchored' (the product-video front door) when omitted.
  */
-export type ScriptMakerScriptKind =
+export type McsScriptMakerScriptKind =
   | 'default_script'
   | 'product_anchored'
   | 'reconnect'
@@ -3755,8 +3755,8 @@ export type ScriptMakerScriptKind =
  * to ScriptMakerDraftPayload. `scriptKind` picks the seed; `eventDay`/
  * `eventTime` fill the event_invite seed's {{eventDay}}/{{eventTime}} tokens.
  */
-export interface ScriptMakerDraftSelectors {
-  scriptKind?: ScriptMakerScriptKind;
+export interface McsScriptMakerDraftSelectors {
+  scriptKind?: McsScriptMakerScriptKind;
   eventDay?: string | null;
   eventTime?: string | null;
 }
@@ -3777,7 +3777,7 @@ export interface ScriptMakerDraftSelectors {
  * override the prop is absent and the generic hero sub-line carries the
  * page (locked-spec F.2 / 3.9 "inviting BA voice copy").
  */
-export interface ComProspectCopy {
+export interface McsComProspectCopy {
   /** com.presentation.hero — null unless a master override exists. */
   heroBaVoiceCopy: string | null;
   /** com.dashboard.arrival — Section 1 lead. */
@@ -3804,7 +3804,7 @@ export interface ComProspectCopy {
  * Fast Start progress, Ivory roster, invitation spine, and questionnaire.
  */
 
-export type LaunchStepId =
+export type McsLaunchStepId =
   | 'welcome_accepted'
   | 'steve_discovery_completed'
   | 'day_1_started'
@@ -3816,63 +3816,63 @@ export type LaunchStepId =
   | 'questionnaire_submitted'
   | 'sponsor_connection_confirmed';
 
-export type LaunchStepState =
+export type McsLaunchStepState =
   | 'complete'
   | 'current'
   | 'available'
   | 'locked'
   | 'optional';
 
-export interface LaunchStep {
-  id: LaunchStepId;
+export interface McsLaunchStep {
+  id: McsLaunchStepId;
   label: string;
-  state: LaunchStepState;
+  state: McsLaunchStepState;
   source: string;
   href: string | null;
-  completedAt: IsoTimestamp | null;
+  completedAt: McsIsoTimestamp | null;
   detail: string;
 }
 
-export interface LaunchNextAction {
-  stepId: LaunchStepId | null;
+export interface McsLaunchNextAction {
+  stepId: McsLaunchStepId | null;
   label: string;
   href: string | null;
   reason: string;
 }
 
-export interface LaunchSteveState {
-  phase: SteveDiscoveryPhase;
-  completedAt: IsoTimestamp | null;
+export interface McsLaunchSteveState {
+  phase: McsSteveDiscoveryPhase;
+  completedAt: McsIsoTimestamp | null;
 }
 
-export interface LaunchFirstInvitationState {
+export interface McsLaunchFirstInvitationState {
   ivoryNames: number;
   draftedCount: number;
   mintedCount: number;
   sentCount: number;
 }
 
-export interface LaunchFastStartState {
-  day1State: FastStartModuleState;
-  day1StartedAt: IsoTimestamp | null;
-  day1CompletedAt: IsoTimestamp | null;
+export interface McsLaunchFastStartState {
+  day1State: McsFastStartModuleState;
+  day1StartedAt: McsIsoTimestamp | null;
+  day1CompletedAt: McsIsoTimestamp | null;
   complete: boolean;
 }
 
-export interface TeamLaunchCenterResponse {
+export interface McsTeamLaunchCenterResponse {
   ok: true;
-  generatedAt: IsoTimestamp;
+  generatedAt: McsIsoTimestamp;
   baFirstName: string;
   progress: {
     completed: number;
     total: number;
     percent: number;
   };
-  nextAction: LaunchNextAction;
-  steps: LaunchStep[];
-  steve: LaunchSteveState;
-  firstInvitation: LaunchFirstInvitationState;
-  fastStart: LaunchFastStartState;
+  nextAction: McsLaunchNextAction;
+  steps: McsLaunchStep[];
+  steve: McsLaunchSteveState;
+  firstInvitation: McsLaunchFirstInvitationState;
+  fastStart: McsLaunchFastStartState;
   questionnaireSubmitted: boolean;
   launchComplete: boolean;
 }
@@ -3881,11 +3881,11 @@ export interface TeamLaunchCenterResponse {
 // Agent Orchestration Layer
 // -----------------------------------------------------------------------------
 
-export type AgentId = 'michael' | 'ivory' | 'steve' | 'system';
+export type McsAgentId = 'michael' | 'ivory' | 'steve' | 'system';
 
-export type AgentRecommendationPriority = 1 | 2 | 3 | 4 | 5;
+export type McsAgentRecommendationPriority = 1 | 2 | 3 | 4 | 5;
 
-export type AgentRecommendationKind =
+export type McsAgentRecommendationKind =
   | 'complete_steve'
   | 'review_steve_profile'
   | 'follow_up_prospect'
@@ -3893,7 +3893,7 @@ export type AgentRecommendationKind =
   | 'open_daily_actions'
   | 'keep_sharing';
 
-export type AgentSubjectType =
+export type McsAgentSubjectType =
   | 'ba'
   | 'prospect'
   | 'ivory_name'
@@ -3901,29 +3901,29 @@ export type AgentSubjectType =
   | 'daily_actions'
   | 'system';
 
-export interface AgentRecommendation {
+export interface McsAgentRecommendation {
   recommendationId: string;
-  agentId: AgentId;
-  kind: AgentRecommendationKind;
-  priority: AgentRecommendationPriority;
+  agentId: McsAgentId;
+  kind: McsAgentRecommendationKind;
+  priority: McsAgentRecommendationPriority;
   title: string;
   summary: string;
   reason: string;
   ctaLabel: string;
   route: string;
-  subjectType: AgentSubjectType;
+  subjectType: McsAgentSubjectType;
   subjectId: string | null;
-  createdAt: IsoTimestamp;
-  expiresAt: IsoTimestamp | null;
+  createdAt: McsIsoTimestamp;
+  expiresAt: McsIsoTimestamp | null;
 }
 
-export interface AgentRecommendationsResponse {
+export interface McsAgentRecommendationsResponse {
   ok: true;
-  generatedAt: IsoTimestamp;
-  recommendations: AgentRecommendation[];
+  generatedAt: McsIsoTimestamp;
+  recommendations: McsAgentRecommendation[];
 }
 
-export type AgentEventKind =
+export type McsAgentEventKind =
   | 'recommendation_viewed'
   | 'recommendation_actioned'
   | 'recommendation_dismissed'
@@ -3931,32 +3931,32 @@ export type AgentEventKind =
   | 'handoff_started'
   | 'handoff_completed';
 
-export type AgentEventMetadataValue = string | number | boolean | null;
+export type McsAgentEventMetadataValue = string | number | boolean | null;
 
-export interface AgentEvent {
+export interface McsAgentEvent {
   eventId: string;
   tmagId: string;
-  agentId: AgentId;
-  kind: AgentEventKind;
+  agentId: McsAgentId;
+  kind: McsAgentEventKind;
   recommendationId: string | null;
-  subjectType: AgentSubjectType;
+  subjectType: McsAgentSubjectType;
   subjectId: string | null;
-  metadata: Record<string, AgentEventMetadataValue>;
-  createdAt: IsoTimestamp;
+  metadata: Record<string, McsAgentEventMetadataValue>;
+  createdAt: McsIsoTimestamp;
 }
 
-export interface CreateAgentEventPayload {
-  agentId: AgentId;
-  kind: AgentEventKind;
+export interface McsCreateAgentEventPayload {
+  agentId: McsAgentId;
+  kind: McsAgentEventKind;
   recommendationId?: string | null;
-  subjectType?: AgentSubjectType;
+  subjectType?: McsAgentSubjectType;
   subjectId?: string | null;
-  metadata?: Record<string, AgentEventMetadataValue>;
+  metadata?: Record<string, McsAgentEventMetadataValue>;
 }
 
-export interface AgentEventResponse {
+export interface McsAgentEventResponse {
   ok: true;
-  event: AgentEvent;
+  event: McsAgentEvent;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -3987,7 +3987,7 @@ export interface AgentEventResponse {
 /** UI phase of the Steve discovery surface. Steve has no scheduler of its own
  *  (Michael owns scheduling); the phase is derived purely from whether the
  *  discovery artifact exists yet. */
-export type SteveDiscoveryPhase =
+export type McsSteveDiscoveryPhase =
   | 'awaiting_call'
   | 'call_in_progress'
   | 'complete'
@@ -3996,16 +3996,16 @@ export type SteveDiscoveryPhase =
   | 'stt_failed';
 
 /** One speaker turn in Steve's discovery transcript. 'ba' = the new BA. */
-export interface SteveTranscriptChunk {
+export interface McsSteveTranscriptChunk {
   sequence: number;
   speaker: 'steve' | 'ba';
   text: string;
-  occurredAt: IsoTimestamp;
+  occurredAt: McsIsoTimestamp;
 }
 
 /** One discovery question + the BA's answer. NOTE: no scoringTags — Steve
  *  records understanding, never tags or scores. */
-export interface SteveDiscoveryAnswer {
+export interface McsSteveDiscoveryAnswer {
   questionId: string;
   /** The prompt Steve led with (captured for sponsor readback). */
   prompt: string;
@@ -4015,7 +4015,7 @@ export interface SteveDiscoveryAnswer {
 
 /** What a discovery question is gently surfacing. Descriptive grouping only —
  *  it is NOT a rubric category and carries no weight or score. */
-export type SteveDiscoveryFocus =
+export type McsSteveDiscoveryFocus =
   | 'primary_why'
   | 'success_vision'
   | 'learning_style'
@@ -4023,7 +4023,7 @@ export type SteveDiscoveryFocus =
   | 'support_needs';
 
 /** How the BA prefers to take in something new. Descriptive, not ranked. */
-export type SteveLearningModality =
+export type McsSteveLearningModality =
   | 'watching'
   | 'doing'
   | 'step_by_step'
@@ -4032,9 +4032,9 @@ export type SteveLearningModality =
   | 'mixed';
 
 /** The BA's learning style — their own preferences, reflected back. */
-export interface SteveLearningStyle {
+export interface McsSteveLearningStyle {
   /** Preferred way(s) to learn, mapped from the BA's own words. */
-  modalities: SteveLearningModality[];
+  modalities: McsSteveLearningModality[];
   /** How the BA likes feedback when doing something a little wrong. */
   feedbackPreference: string;
   /** Free-text reflection of what helps this person learn best. */
@@ -4042,7 +4042,7 @@ export interface SteveLearningStyle {
 }
 
 /** Channels the BA likes to be reached on. */
-export type SteveContactChannel =
+export type McsSteveContactChannel =
   | 'text'
   | 'call'
   | 'email'
@@ -4051,23 +4051,23 @@ export type SteveContactChannel =
   | 'in_person';
 
 /** How often the BA wants to hear from their sponsor/team. */
-export type SteveContactCadence =
+export type McsSteveContactCadence =
   | 'daily'
   | 'few_times_week'
   | 'weekly'
   | 'as_needed';
 
 /** The BA's communication preferences — their own stated preferences. */
-export interface SteveCommunicationPreferences {
-  preferredChannels: SteveContactChannel[];
-  cadence: SteveContactCadence | null;
+export interface McsSteveCommunicationPreferences {
+  preferredChannels: McsSteveContactChannel[];
+  cadence: McsSteveContactCadence | null;
   /** When the BA is reachable, in their own words. */
   bestTimes: string;
   notes: string;
 }
 
 /** Where the BA wants support early. Reflective, never a judgment of capacity. */
-export interface SteveSupportNeeds {
+export interface McsSteveSupportNeeds {
   /** Areas the BA wants a hand with, mapped to short reads. */
   areas: string[];
   /** Obstacles the BA themselves named. Recorded, not scored. */
@@ -4078,7 +4078,7 @@ export interface SteveSupportNeeds {
 }
 
 /** The BA's deeper, emotional reason for being here — in their own words. */
-export interface StevePrimaryWhy {
+export interface McsStevePrimaryWhy {
   /** The why beneath the surface answer. */
   statement: string;
   /** Who they're doing this for, if named. */
@@ -4088,7 +4088,7 @@ export interface StevePrimaryWhy {
 }
 
 /** The BA's picture of success — in their own words. */
-export interface SteveSuccessVision {
+export interface McsSteveSuccessVision {
   /** Life a year out, as the BA painted it. */
   statement: string;
   /** The one change that would make the biggest difference. */
@@ -4096,7 +4096,7 @@ export interface SteveSuccessVision {
 }
 
 /** One personalized recommendation — supportive preparation, not evaluation. */
-export interface SteveRecommendation {
+export interface McsSteveRecommendation {
   /** Short, actionable, supportive — how to meet this BA where they are. */
   text: string;
   /** Optional pointer to a surface/resource (e.g. '/training/fast-start/product'). */
@@ -4105,59 +4105,59 @@ export interface SteveRecommendation {
 
 /** The generated Success Profile — Steve's synthesis of the discovery. Every
  *  field reflects the BA's own words; nothing here ranks or scores the BA. */
-export interface SteveSuccessProfile {
+export interface McsSteveSuccessProfile {
   tmagId: string;
-  primaryWhy: StevePrimaryWhy;
-  successVision: SteveSuccessVision;
-  learningStyle: SteveLearningStyle;
-  communicationPreferences: SteveCommunicationPreferences;
-  supportNeeds: SteveSupportNeeds;
+  primaryWhy: McsStevePrimaryWhy;
+  successVision: McsSteveSuccessVision;
+  learningStyle: McsSteveLearningStyle;
+  communicationPreferences: McsSteveCommunicationPreferences;
+  supportNeeds: McsSteveSupportNeeds;
   /** How to launch this BA well — personalized first steps. */
-  launchRecommendations: SteveRecommendation[];
+  launchRecommendations: McsSteveRecommendation[];
   /** What training to point them at first, given how they learn. */
-  trainingRecommendations: SteveRecommendation[];
+  trainingRecommendations: McsSteveRecommendation[];
   /** Short context summary Steve hands to Michael for training suggestions.
    *  CONTEXT ONLY — Michael does not schedule or interview. */
   michaelHandoffSummary: string;
-  generatedAt: IsoTimestamp;
+  generatedAt: McsIsoTimestamp;
   signedBy: string;
 }
 
 /** Authoritative completed-discovery record. Triple-stacked at ingest.
  *  sponsorTmagId is stamped server-side from team_magnificent_members — NEVER from the
  *  worker payload (locked-spec 3.5). */
-export interface SteveDiscoveryArtifact {
+export interface McsSteveDiscoveryArtifact {
   tmagId: string;
   sponsorTmagId: string | null;
   callSid: string | null;
-  startedAt: IsoTimestamp | null;
-  completedAt: IsoTimestamp | null;
-  transcript: SteveTranscriptChunk[];
+  startedAt: McsIsoTimestamp | null;
+  completedAt: McsIsoTimestamp | null;
+  transcript: McsSteveTranscriptChunk[];
   /** The raw discovery interview (questions + the BA's answers). */
-  answers: SteveDiscoveryAnswer[];
+  answers: McsSteveDiscoveryAnswer[];
   /** The synthesized Success Profile. */
-  successProfile: SteveSuccessProfile;
+  successProfile: McsSteveSuccessProfile;
   audioUrl: string | null;
 }
 
 /** GET /api/steve/discovery/state response — the BA's own discovery view.
  *  Pre-discovery: phase=awaiting_call, artifact=null. After: phase=complete
  *  + artifact. */
-export interface SteveDiscoveryView {
+export interface McsSteveDiscoveryView {
   tmagId: string;
-  phase: SteveDiscoveryPhase;
-  transcript: SteveTranscriptChunk[];
-  artifact: SteveDiscoveryArtifact | null;
+  phase: McsSteveDiscoveryPhase;
+  transcript: McsSteveTranscriptChunk[];
+  artifact: McsSteveDiscoveryArtifact | null;
 }
 
 /** Sponsor-only card: a downline's Steve Success Profile. Access enforced
  *  server-side (requesting BA must be the downline's sponsor). */
-export interface SteveProfileCard {
+export interface McsSteveProfileCard {
   downlineTmagId: string;
   downlineFirstName: string;
-  completedAt: IsoTimestamp;
-  answers: SteveDiscoveryAnswer[];
-  successProfile: SteveSuccessProfile;
+  completedAt: McsIsoTimestamp;
+  answers: McsSteveDiscoveryAnswer[];
+  successProfile: McsSteveSuccessProfile;
   audioUrl: string | null;
   signedBy: string;
 }
@@ -4167,31 +4167,31 @@ export interface SteveProfileCard {
  *  produced; the server stamps tmagId/sponsorTmagId/generatedAt/signedBy and
  *  assembles the SteveSuccessProfile, then triple-stacks it. sponsorTmagId is
  *  intentionally omitted from this shape (server-stamped). */
-export interface SteveDiscoveryIngestPayload {
+export interface McsSteveDiscoveryIngestPayload {
   tmagId: string;
   callSid: string | null;
-  startedAt: IsoTimestamp;
-  completedAt: IsoTimestamp;
-  transcript: SteveTranscriptChunk[];
-  answers: SteveDiscoveryAnswer[];
+  startedAt: McsIsoTimestamp;
+  completedAt: McsIsoTimestamp;
+  transcript: McsSteveTranscriptChunk[];
+  answers: McsSteveDiscoveryAnswer[];
   audioUrl: string | null;
   /** The understanding Steve produced. The server assembles these into the
    *  SteveSuccessProfile (stamping tmagId, generatedAt, signedBy). */
   profile: {
-    primaryWhy: StevePrimaryWhy;
-    successVision: SteveSuccessVision;
-    learningStyle: SteveLearningStyle;
-    communicationPreferences: SteveCommunicationPreferences;
-    supportNeeds: SteveSupportNeeds;
-    launchRecommendations: SteveRecommendation[];
-    trainingRecommendations: SteveRecommendation[];
+    primaryWhy: McsStevePrimaryWhy;
+    successVision: McsSteveSuccessVision;
+    learningStyle: McsSteveLearningStyle;
+    communicationPreferences: McsSteveCommunicationPreferences;
+    supportNeeds: McsSteveSupportNeeds;
+    launchRecommendations: McsSteveRecommendation[];
+    trainingRecommendations: McsSteveRecommendation[];
     michaelHandoffSummary: string;
   };
 }
 
 /** One question in Steve's discovery backbone, surfaced read-only via
  *  GET /api/steve/discovery/script. */
-export interface SteveDiscoveryScriptQuestion {
+export interface McsSteveDiscoveryScriptQuestion {
   id: string;
   /** 1-based question number across the whole discovery. */
   number: number;
@@ -4199,22 +4199,22 @@ export interface SteveDiscoveryScriptQuestion {
   /** The prompt Steve leads with (backbone; the LLM expands naturally). */
   prompt: string;
   /** What this question gently surfaces (understanding only; never scored). */
-  focus: SteveDiscoveryFocus | null;
+  focus: McsSteveDiscoveryFocus | null;
 }
 
 /** One section of Steve's discovery conversation. */
-export interface SteveDiscoveryScriptSection {
+export interface McsSteveDiscoveryScriptSection {
   id: string;
   title: string;
   /** What Steve is listening for in this section. */
   intent: string;
-  questions: SteveDiscoveryScriptQuestion[];
+  questions: McsSteveDiscoveryScriptQuestion[];
 }
 
 /** GET /api/steve/discovery/script response. */
-export interface SteveDiscoveryScriptResponse {
+export interface McsSteveDiscoveryScriptResponse {
   ok: true;
-  sections: SteveDiscoveryScriptSection[];
+  sections: McsSteveDiscoveryScriptSection[];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -4244,7 +4244,7 @@ export interface SteveDiscoveryScriptResponse {
  * existing PMV `nextAction.reason` so the BA sees one Ivory-flavored phrase
  * ("because Jordan watched the video") not just the generic call-now reason.
  */
-export type IvoryMomentumPriorityReason =
+export type McsIvoryMomentumPriorityReason =
   | 'callback_raised'
   | 'video_watched'
   | 'follow_up_due'
@@ -4262,10 +4262,10 @@ export type IvoryMomentumPriorityReason =
  * existed (legacy data, manual ivoryId-less mint) still appears in the cohort
  * via the source='ivory' filter — we just don't have the warm-market memory.
  */
-export interface IvoryMomentumContext {
+export interface McsIvoryMomentumContext {
   ivoryId: string | null;
-  categories: IvoryCategory[];
-  preferredAngle: IvoryAngle | null;
+  categories: McsIvoryCategory[];
+  preferredAngle: McsIvoryAngle | null;
   /** The BA's saved memory note on the IvoryName record (NOT the invite message). */
   memoryNote: string | null;
   /** The relationshipReason the BA captured at mint time (lives on the prospect). */
@@ -4278,23 +4278,23 @@ export interface IvoryMomentumContext {
  * single derived priority reason. The PMV row is embedded whole — the UI
  * should never recompute lifecycle/nextAction from raw fields, only read it.
  */
-export interface IvoryMomentumRow {
+export interface McsIvoryMomentumRow {
   prospectId: string;
   /** The full PMV row — single source of truth for lifecycle + next action. */
-  pmv: ProspectMomentumRow;
+  pmv: McsProspectMomentumRow;
   /** Ivory-specific relationship context for the BA. */
-  ivory: IvoryMomentumContext;
+  ivory: McsIvoryMomentumContext;
   /**
    * Derived priority reason used to rank the row in the cohort focus queue.
    * Independent from `pmv.nextAction.kind` because the Ivory queue prioritizes
    * relational moments ("Jordan watched") even when PMV would also surface
    * a generic 'call_now'.
    */
-  priorityReason: IvoryMomentumPriorityReason | null;
+  priorityReason: McsIvoryMomentumPriorityReason | null;
 }
 
 /** Cohort-level counts surfaced in the Momentum page header. */
-export interface IvoryMomentumCohortCounts {
+export interface McsIvoryMomentumCohortCounts {
   total: number;
   draft: number;
   sentUnopened: number;
@@ -4309,12 +4309,12 @@ export interface IvoryMomentumCohortCounts {
 }
 
 /** GET /api/ivory/momentum 200 response. BA-scoped. */
-export interface IvoryMomentumViewResponse {
+export interface McsIvoryMomentumViewResponse {
   ok: true;
-  generatedAt: IsoTimestamp;
-  counts: IvoryMomentumCohortCounts;
-  focusQueue: IvoryMomentumRow[];
-  rows: IvoryMomentumRow[];
+  generatedAt: McsIsoTimestamp;
+  counts: McsIvoryMomentumCohortCounts;
+  focusQueue: McsIvoryMomentumRow[];
+  rows: McsIvoryMomentumRow[];
 }
 
 /**
@@ -4324,16 +4324,16 @@ export interface IvoryMomentumViewResponse {
  * follow-up suggestion the BA can adapt and send manually. Optional `ask`
  * lets the BA bias the suggestion ("they said they'd watch this weekend").
  */
-export interface IvoryMomentumSuggestionPayload {
+export interface McsIvoryMomentumSuggestionPayload {
   /** Optional free-form BA prompt to bias the suggestion. */
   ask?: string;
 }
 
 /** POST /api/ivory/momentum/:prospectId/suggest 200 response. */
-export interface IvoryMomentumSuggestionResponse {
+export interface McsIvoryMomentumSuggestionResponse {
   ok: true;
   prospectId: string;
-  lifecycle: ProspectLifecycleStage;
+  lifecycle: McsProspectLifecycleStage;
   /** 1–2 sentence framing the BA reads before the suggestion text. */
   coaching: string;
   /** The suggested follow-up text. BA edits before sending — never auto-sent. */
@@ -4351,14 +4351,14 @@ export interface IvoryMomentumSuggestionResponse {
 // Compliance: BA-language read-back only. No income, no comp math, no placement
 // promises. The sponsor uses this to meet the BA where they are during training.
 
-export interface MichaelTrainingSupportGuidanceSection {
+export interface McsMichaelTrainingSupportGuidanceSection {
   /** Section label, e.g. "How they learn". */
   label: string;
   /** Distilled guidance lines pulled from the BA's own discovery answers. */
   bullets: string[];
 }
 
-export interface MichaelTrainingSupportCard {
+export interface McsMichaelTrainingSupportCard {
   downlineTmagId: string;
   downlineFirstName: string;
   /** Timestamp from Steve's SuccessProfile (generatedAt). */
@@ -4367,9 +4367,9 @@ export interface MichaelTrainingSupportCard {
   primaryWhy: string;
   /** Pass-through of the BA's own success-vision statement. */
   successVision: string;
-  learningStyle: MichaelTrainingSupportGuidanceSection;
-  communication: MichaelTrainingSupportGuidanceSection;
-  supportFocus: MichaelTrainingSupportGuidanceSection;
+  learningStyle: McsMichaelTrainingSupportGuidanceSection;
+  communication: McsMichaelTrainingSupportGuidanceSection;
+  supportFocus: McsMichaelTrainingSupportGuidanceSection;
   /** Pass-through of Steve's training recommendations (verbatim, may be empty). */
   trainingRecommendations: string[];
   /** Pass-through of Steve's one-way handoff summary for Michael / humans. */
@@ -4395,17 +4395,17 @@ export interface MichaelTrainingSupportCard {
 
 export type TmagId = string;
 
-export interface OwnedProspectIdentity {
+export interface McsOwnedProspectIdentity {
   ownerTmagId: TmagId;
   sponsorTmagId: TmagId;
 }
 
-export interface VmLeadIdentity extends OwnedProspectIdentity {
+export interface McsVmLeadIdentity extends McsOwnedProspectIdentity {
   leadBatchId: string;
   vmCampaignId: string;
 }
 
-export type ProspectAcquisitionSource =
+export type McsProspectAcquisitionSource =
   | 'pmv'
   | 'rvm'
   | 'qr'
@@ -4418,7 +4418,7 @@ export type ProspectAcquisitionSource =
   | 'ivory'
   | 'scriptmaker';
 
-export type VmLeadBatchSource =
+export type McsVmLeadBatchSource =
   | 'apache_leads'
   | 'uploaded_csv'
   | 'manual_import'
@@ -4426,14 +4426,14 @@ export type VmLeadBatchSource =
   | 'admin_seed'
   | 'other';
 
-export type VmLeadType =
+export type McsVmLeadType =
   | 'mobile_vm'
   | 'mobile_sms'
   | 'email'
   | 'mixed'
   | 'unknown';
 
-export type LeadBatchStatus =
+export type McsLeadBatchStatus =
   | 'draft'
   | 'processing'
   | 'imported'
@@ -4442,14 +4442,14 @@ export type LeadBatchStatus =
   | 'completed'
   | 'archived';
 
-export type VmCampaignProvider =
+export type McsVmCampaignProvider =
   | 'leadsrain_style_adapter'
   | 'slybroadcast_style_adapter'
   | 'manual_csv'
   | 'future_telecom_adapter'
   | 'none';
 
-export type VmCampaignStatus =
+export type McsVmCampaignStatus =
   | 'draft'
   | 'ready'
   | 'scheduled'
@@ -4460,9 +4460,9 @@ export type VmCampaignStatus =
   | 'cancelled'
   | 'archived';
 
-export type VmDeliveryChannel = 'voicemail' | 'sms' | 'email' | 'manual_export';
+export type McsVmDeliveryChannel = 'voicemail' | 'sms' | 'email' | 'manual_export';
 
-export type VmDeliveryStatus =
+export type McsVmDeliveryStatus =
   | 'queued'
   | 'sent'
   | 'delivered'
@@ -4472,7 +4472,7 @@ export type VmDeliveryStatus =
   | 'suppressed'
   | 'unknown';
 
-export type ProspectCrmStatus =
+export type McsProspectCrmStatus =
   | 'inactive_pre_engagement'
   | 'active'
   | 'needs_follow_up'
@@ -4483,7 +4483,7 @@ export type ProspectCrmStatus =
 
 // CrmDisposition merged into the canonical CrmDisposition (F2/F3).
 
-export type ProspectCrmClosedReason =
+export type McsProspectCrmClosedReason =
   | 'enrolled_as_brand_ambassador'
   | 'became_customer'
   | 'not_interested'
@@ -4493,7 +4493,7 @@ export type ProspectCrmClosedReason =
   | 'invalid_contact'
   | 'admin_closed';
 
-export type ProspectTimelineEventKind =
+export type McsProspectTimelineEventKind =
   | 'crm_created'
   | 'token_created'
   | 'voicemail_sent'
@@ -4522,7 +4522,7 @@ export type ProspectTimelineEventKind =
   | 'archived'
   | 'ownership_corrected';
 
-export type VmLeadLifecycleStatus =
+export type McsVmLeadLifecycleStatus =
   | 'imported'
   | 'validated'
   | 'suppressed'
@@ -4550,7 +4550,7 @@ export type VmLeadLifecycleStatus =
   | 'expired'
   | 'archived';
 
-export const VM_LEAD_LIFECYCLE_STATUSES: readonly VmLeadLifecycleStatus[] = [
+export const MCS_VM_LEAD_LIFECYCLE_STATUSES: readonly McsVmLeadLifecycleStatus[] = [
   'imported',
   'validated',
   'suppressed',
@@ -4579,24 +4579,24 @@ export const VM_LEAD_LIFECYCLE_STATUSES: readonly VmLeadLifecycleStatus[] = [
   'archived',
 ] as const;
 
-export interface LeadBatchRecord extends OwnedProspectIdentity {
+export interface McsLeadBatchRecord extends McsOwnedProspectIdentity {
   leadBatchId: string;
   name: string;
-  source: VmLeadBatchSource;
+  source: McsVmLeadBatchSource;
   sourceLabel: string | null;
   country: string;
-  leadType: VmLeadType;
+  leadType: McsVmLeadType;
   quantityExpected: number;
   quantityImported: number;
   quantitySuppressed: number;
   quantityInvalid: number;
-  status: LeadBatchStatus;
-  createdAt: IsoTimestamp;
-  updatedAt: IsoTimestamp;
-  completedAt: IsoTimestamp | null;
+  status: McsLeadBatchStatus;
+  createdAt: McsIsoTimestamp;
+  updatedAt: McsIsoTimestamp;
+  completedAt: McsIsoTimestamp | null;
 }
 
-export interface BulkLeadRecord extends VmLeadIdentity {
+export interface McsBulkLeadRecord extends McsVmLeadIdentity {
   leadId: string;
   prospectId: string | null;
   token: string | null;
@@ -4607,73 +4607,73 @@ export interface BulkLeadRecord extends VmLeadIdentity {
   city: string | null;
   stateOrRegion: string | null;
   country: string | null;
-  source: VmLeadBatchSource;
-  status: VmLeadLifecycleStatus;
-  activatedAt: IsoTimestamp | null;
-  createdAt: IsoTimestamp;
-  updatedAt: IsoTimestamp;
+  source: McsVmLeadBatchSource;
+  status: McsVmLeadLifecycleStatus;
+  activatedAt: McsIsoTimestamp | null;
+  createdAt: McsIsoTimestamp;
+  updatedAt: McsIsoTimestamp;
 }
 
-export interface VMCampaignRecord extends OwnedProspectIdentity {
+export interface McsVMCampaignRecord extends McsOwnedProspectIdentity {
   vmCampaignId: string;
   leadBatchId: string;
   name: string;
-  provider: VmCampaignProvider;
-  status: VmCampaignStatus;
+  provider: McsVmCampaignProvider;
+  status: McsVmCampaignStatus;
   voicemailAudioId: string | null;
   smsTemplateId: string | null;
   emailTemplateId: string | null;
-  scheduledAt: IsoTimestamp | null;
-  startedAt: IsoTimestamp | null;
-  completedAt: IsoTimestamp | null;
-  createdAt: IsoTimestamp;
-  updatedAt: IsoTimestamp;
+  scheduledAt: McsIsoTimestamp | null;
+  startedAt: McsIsoTimestamp | null;
+  completedAt: McsIsoTimestamp | null;
+  createdAt: McsIsoTimestamp;
+  updatedAt: McsIsoTimestamp;
 }
 
-export interface VMDeliveryEventRecord extends VmLeadIdentity {
+export interface McsVMDeliveryEventRecord extends McsVmLeadIdentity {
   deliveryEventId: string;
   leadId: string;
   prospectId: string | null;
-  channel: VmDeliveryChannel;
-  provider: VmCampaignProvider;
+  channel: McsVmDeliveryChannel;
+  provider: McsVmCampaignProvider;
   providerMessageId: string | null;
-  status: VmDeliveryStatus;
-  occurredAt: IsoTimestamp;
+  status: McsVmDeliveryStatus;
+  occurredAt: McsIsoTimestamp;
   errorCode: string | null;
   errorMessage: string | null;
   metadata: Record<string, string | number | boolean | null>;
 }
 
-export interface ProspectCRMRecord extends OwnedProspectIdentity {
+export interface McsProspectCRMRecord extends McsOwnedProspectIdentity {
   crmRecordId: string;
   prospectId: string;
   leadId: string | null;
   leadBatchId: string | null;
   vmCampaignId: string | null;
-  source: ProspectAcquisitionSource;
-  status: ProspectCrmStatus;
-  disposition: CrmDisposition | null;
-  followUpDueAt: IsoTimestamp | null;
-  closedAt: IsoTimestamp | null;
-  closedReason: ProspectCrmClosedReason | null;
-  createdAt: IsoTimestamp;
-  updatedAt: IsoTimestamp;
+  source: McsProspectAcquisitionSource;
+  status: McsProspectCrmStatus;
+  disposition: McsCrmDisposition | null;
+  followUpDueAt: McsIsoTimestamp | null;
+  closedAt: McsIsoTimestamp | null;
+  closedReason: McsProspectCrmClosedReason | null;
+  createdAt: McsIsoTimestamp;
+  updatedAt: McsIsoTimestamp;
 }
 
-export interface ProspectTimelineEventRecord extends OwnedProspectIdentity {
+export interface McsProspectTimelineEventRecord extends McsOwnedProspectIdentity {
   eventId: string;
   prospectId: string;
   crmRecordId: string | null;
   leadId: string | null;
   leadBatchId: string | null;
   vmCampaignId: string | null;
-  kind: ProspectTimelineEventKind;
+  kind: McsProspectTimelineEventKind;
   title: string;
-  occurredAt: IsoTimestamp;
+  occurredAt: McsIsoTimestamp;
   payload: Record<string, string | number | boolean | null>;
 }
 
-export interface OwnershipCorrectionAuditRecord {
+export interface McsOwnershipCorrectionAuditRecord {
   auditId: string;
   prospectId: string;
   leadId: string | null;
@@ -4683,20 +4683,20 @@ export interface OwnershipCorrectionAuditRecord {
   newSponsorTmagId: TmagId;
   reason: string;
   adminUserId: string;
-  changedAt: IsoTimestamp;
+  changedAt: McsIsoTimestamp;
 }
 
-export interface ProspectCrmHubFilter {
-  source?: ProspectAcquisitionSource | 'all';
-  status?: ProspectCrmStatus | 'all';
-  disposition?: CrmDisposition | 'all';
+export interface McsProspectCrmHubFilter {
+  source?: McsProspectAcquisitionSource | 'all';
+  status?: McsProspectCrmStatus | 'all';
+  disposition?: McsCrmDisposition | 'all';
   campaignId?: string | null;
   leadBatchId?: string | null;
   followUp?: 'due' | 'upcoming' | 'none' | 'all';
   closed?: 'include' | 'exclude' | 'only';
 }
 
-export interface ProspectCrmHubRow extends OwnedProspectIdentity {
+export interface McsProspectCrmHubRow extends McsOwnedProspectIdentity {
   crmRecordId: string;
   prospectId: string;
   leadId: string | null;
@@ -4707,35 +4707,35 @@ export interface ProspectCrmHubRow extends OwnedProspectIdentity {
   city: string | null;
   stateOrRegion: string | null;
   country: string | null;
-  source: ProspectAcquisitionSource;
-  status: ProspectCrmStatus;
-  disposition: CrmDisposition | null;
-  followUpDueAt: IsoTimestamp | null;
-  lastSignal: ProspectTimelineEventKind | null;
-  lastSignalAt: IsoTimestamp | null;
+  source: McsProspectAcquisitionSource;
+  status: McsProspectCrmStatus;
+  disposition: McsCrmDisposition | null;
+  followUpDueAt: McsIsoTimestamp | null;
+  lastSignal: McsProspectTimelineEventKind | null;
+  lastSignalAt: McsIsoTimestamp | null;
   leadBatchId: string | null;
   vmCampaignId: string | null;
 }
 
-export interface ProspectCrmHubListResponse {
+export interface McsProspectCrmHubListResponse {
   ok: true;
-  generatedAt: IsoTimestamp;
-  filters: ProspectCrmHubFilter;
-  rows: ProspectCrmHubRow[];
+  generatedAt: McsIsoTimestamp;
+  filters: McsProspectCrmHubFilter;
+  rows: McsProspectCrmHubRow[];
 }
 
-export interface ProspectCrmHubDetailResponse {
+export interface McsProspectCrmHubDetailResponse {
   ok: true;
-  record: ProspectCRMRecord;
-  timeline: ProspectTimelineEventRecord[];
+  record: McsProspectCRMRecord;
+  timeline: McsProspectTimelineEventRecord[];
 }
 
 // VmLeadLifecycleStatus alias removed (F4) — use VmLeadLifecycleStatus.
-export type ProspectCrmSource = ProspectAcquisitionSource;
+export type McsProspectCrmSource = McsProspectAcquisitionSource;
 // ProspectTimelineEventKind alias removed (F4) — use ProspectTimelineEventKind.
-export type VMCampaignProviderMode = VmCampaignProvider;
+export type McsVMCampaignProviderMode = McsVmCampaignProvider;
 
-export interface CreateLeadBatchPayload {
+export interface McsCreateLeadBatchPayload {
   name: string;
   source: string;
   country?: string;
@@ -4743,17 +4743,17 @@ export interface CreateLeadBatchPayload {
   quantityImported?: number;
 }
 
-export interface CreateVMCampaignPayload {
+export interface McsCreateVMCampaignPayload {
   leadBatchId: string;
   name: string;
-  provider?: VMCampaignProviderMode;
+  provider?: McsVMCampaignProviderMode;
   voicemailAudioId?: string | null;
   smsTemplateId?: string | null;
   emailTemplateId?: string | null;
-  scheduledAt?: IsoTimestamp | null;
+  scheduledAt?: McsIsoTimestamp | null;
 }
 
-export interface ImportBulkLeadPayload {
+export interface McsImportBulkLeadPayload {
   firstName: string;
   lastName: string;
   phone?: string | null;
@@ -4763,91 +4763,91 @@ export interface ImportBulkLeadPayload {
   country?: string;
 }
 
-export interface ImportBulkLeadsPayload {
+export interface McsImportBulkLeadsPayload {
   vmCampaignId: string;
-  leads: ImportBulkLeadPayload[];
+  leads: McsImportBulkLeadPayload[];
 }
 
-export interface LeadBatchResponse {
+export interface McsLeadBatchResponse {
   ok: true;
-  batch: LeadBatchRecord;
+  batch: McsLeadBatchRecord;
 }
 
-export interface LeadBatchListResponse {
+export interface McsLeadBatchListResponse {
   ok: true;
-  batches: LeadBatchRecord[];
+  batches: McsLeadBatchRecord[];
 }
 
-export interface VMCampaignResponse {
+export interface McsVMCampaignResponse {
   ok: true;
-  campaign: VMCampaignRecord;
+  campaign: McsVMCampaignRecord;
 }
 
-export interface VMCampaignListResponse {
+export interface McsVMCampaignListResponse {
   ok: true;
-  campaigns: VMCampaignRecord[];
+  campaigns: McsVMCampaignRecord[];
 }
 
-export interface ImportBulkLeadsResponse {
+export interface McsImportBulkLeadsResponse {
   ok: true;
-  batch: LeadBatchRecord;
-  campaign: VMCampaignRecord;
-  leads: BulkLeadRecord[];
+  batch: McsLeadBatchRecord;
+  campaign: McsVMCampaignRecord;
+  leads: McsBulkLeadRecord[];
 }
 
-export interface ProspectCrmListResponse {
+export interface McsProspectCrmListResponse {
   ok: true;
-  records: ProspectCRMRecord[];
+  records: McsProspectCRMRecord[];
 }
 
-export interface ProspectCrmRecordResponse {
+export interface McsProspectCrmRecordResponse {
   ok: true;
-  record: ProspectCRMRecord;
-  timeline: ProspectTimelineEventRecord[];
+  record: McsProspectCRMRecord;
+  timeline: McsProspectTimelineEventRecord[];
 }
 
-export interface CloseAsNewBaResponse {
+export interface McsCloseAsNewBaResponse {
   ok: true;
-  record: ProspectCRMRecord;
-  closedAt: IsoTimestamp;
+  record: McsProspectCRMRecord;
+  closedAt: McsIsoTimestamp;
 }
 
-export interface RvmResolvedTokenPayload extends ResolvedTokenPayload {
+export interface McsRvmResolvedTokenPayload extends McsResolvedTokenPayload {
   source: 'rvm';
   lead: {
     leadId: string;
     leadBatchId: string;
     vmCampaignId: string;
-    status: VmLeadLifecycleStatus;
+    status: McsVmLeadLifecycleStatus;
   };
   crm: {
     crmRecordId: string;
-    crmStatus: ProspectCrmStatus;
-    disposition: CrmDisposition | null;
+    crmStatus: McsProspectCrmStatus;
+    disposition: McsCrmDisposition | null;
   };
 }
 
-export interface RvmInfoRequestPayload {
+export interface McsRvmInfoRequestPayload {
   note?: string;
 }
 
-export interface RvmInfoRequestResponse {
+export interface McsRvmInfoRequestResponse {
   ok: true;
   prospectId: string;
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
 }
 
-export type AdminVmMetricTone = 'neutral' | 'good' | 'watch' | 'risk';
+export type McsAdminVmMetricTone = 'neutral' | 'good' | 'watch' | 'risk';
 
-export interface AdminVmMetricCard {
+export interface McsAdminVmMetricCard {
   key: string;
   label: string;
   value: number | string;
   detail: string;
-  tone: AdminVmMetricTone;
+  tone: McsAdminVmMetricTone;
 }
 
-export interface AdminVmBaPerformanceRow {
+export interface McsAdminVmBaPerformanceRow {
   tmagId: string;
   baName: string;
   campaignCount: number;
@@ -4863,10 +4863,10 @@ export interface AdminVmBaPerformanceRow {
   infoRequests: number;
   holdingTankEntries: number;
   closedNewBa: number;
-  lastActivityAt: IsoTimestamp | null;
+  lastActivityAt: McsIsoTimestamp | null;
 }
 
-export interface AdminVmBatchHealthRow {
+export interface McsAdminVmBatchHealthRow {
   leadBatchId: string;
   ownerTmagId: string;
   ownerName: string;
@@ -4878,11 +4878,11 @@ export interface AdminVmBatchHealthRow {
   tokenized: number;
   crmCreated: number;
   activated: number;
-  createdAt: IsoTimestamp | null;
-  completedAt: IsoTimestamp | null;
+  createdAt: McsIsoTimestamp | null;
+  completedAt: McsIsoTimestamp | null;
 }
 
-export interface AdminVmCampaignRow {
+export interface McsAdminVmCampaignRow {
   vmCampaignId: string;
   ownerTmagId: string;
   ownerName: string;
@@ -4890,7 +4890,7 @@ export interface AdminVmCampaignRow {
   name: string;
   provider: string;
   status: string;
-  scheduledAt: IsoTimestamp | null;
+  scheduledAt: McsIsoTimestamp | null;
   leadsQueued: number;
   delivered: number;
   deliveryFailed: number;
@@ -4898,10 +4898,10 @@ export interface AdminVmCampaignRow {
   videoCompletions: number;
   callbacks: number;
   closedNewBa: number;
-  createdAt: IsoTimestamp | null;
+  createdAt: McsIsoTimestamp | null;
 }
 
-export interface AdminVmComplianceSummary {
+export interface McsAdminVmComplianceSummary {
   suppressedLeads: number;
   optOuts: number;
   dncFlags: number;
@@ -4912,19 +4912,19 @@ export interface AdminVmComplianceSummary {
   note: string;
 }
 
-export interface AdminVmProviderHealth {
+export interface McsAdminVmProviderHealth {
   provider: string;
   mode: 'stub' | 'manual' | 'dry_run' | 'live';
   status: 'not_configured' | 'healthy' | 'warning' | 'error';
-  lastWebhookAt: IsoTimestamp | null;
+  lastWebhookAt: McsIsoTimestamp | null;
   delivered24h: number;
   failed24h: number;
   note: string;
 }
 
-export type AdminVmHookStatus = 'stubbed' | 'wired' | 'disabled';
+export type McsAdminVmHookStatus = 'stubbed' | 'wired' | 'disabled';
 
-export interface AdminVmNotificationHook {
+export interface McsAdminVmNotificationHook {
   hookId: string;
   trigger:
     | 'vm_lead_activated'
@@ -4939,11 +4939,11 @@ export interface AdminVmNotificationHook {
     | 'event_starting_soon';
   audience: 'owning_ba' | 'admin' | 'team';
   channel: 'in_app' | 'sms' | 'email' | 'team_news';
-  status: AdminVmHookStatus;
+  status: McsAdminVmHookStatus;
   privacyBoundary: string;
 }
 
-export interface AdminVmTeamNewsHook {
+export interface McsAdminVmTeamNewsHook {
   hookId: string;
   source:
     | 'campaign_milestone'
@@ -4951,26 +4951,26 @@ export interface AdminVmTeamNewsHook {
     | 'event_update'
     | 'success_story'
     | 'team_momentum';
-  status: AdminVmHookStatus;
+  status: McsAdminVmHookStatus;
   reviewRequired: boolean;
   note: string;
 }
 
-export interface AdminVmOverviewResponse {
+export interface McsAdminVmOverviewResponse {
   ok: true;
-  generatedAt: IsoTimestamp;
-  cards: AdminVmMetricCard[];
-  baPerformance: AdminVmBaPerformanceRow[];
-  batches: AdminVmBatchHealthRow[];
-  campaigns: AdminVmCampaignRow[];
-  compliance: AdminVmComplianceSummary;
-  providerHealth: AdminVmProviderHealth[];
-  notificationHooks: AdminVmNotificationHook[];
-  teamNewsHooks: AdminVmTeamNewsHook[];
+  generatedAt: McsIsoTimestamp;
+  cards: McsAdminVmMetricCard[];
+  baPerformance: McsAdminVmBaPerformanceRow[];
+  batches: McsAdminVmBatchHealthRow[];
+  campaigns: McsAdminVmCampaignRow[];
+  compliance: McsAdminVmComplianceSummary;
+  providerHealth: McsAdminVmProviderHealth[];
+  notificationHooks: McsAdminVmNotificationHook[];
+  teamNewsHooks: McsAdminVmTeamNewsHook[];
   warnings: string[];
 }
 
-export interface AdminVmOwnershipCorrectionPayload {
+export interface McsAdminVmOwnershipCorrectionPayload {
   leadId?: string | null;
   prospectId?: string | null;
   leadBatchId?: string | null;
@@ -4982,25 +4982,25 @@ export interface AdminVmOwnershipCorrectionPayload {
   reason: string;
 }
 
-export interface AdminVmOwnershipCorrectionResponse {
+export interface McsAdminVmOwnershipCorrectionResponse {
   ok: true;
   applied: false;
   auditEntryId: string;
   note: string;
 }
 
-export interface AdminSuccessProfileSummary {
+export interface McsAdminSuccessProfileSummary {
   tmagId: string;
   baName: string;
   sponsorTmagId: string | null;
-  generatedAt: IsoTimestamp | null;
+  generatedAt: McsIsoTimestamp | null;
   primaryWhy: string | null;
   learningStyle: string[];
   supportAreas: string[];
   signedBy: string | null;
 }
 
-export interface AdminAgentMemoryStatus {
+export interface McsAdminAgentMemoryStatus {
   collection: string;
   purpose: string;
   status: 'present' | 'missing' | 'unknown';
@@ -5008,13 +5008,13 @@ export interface AdminAgentMemoryStatus {
   note: string;
 }
 
-export interface AdminAgentInteractionSummary {
-  agentId: AgentId;
+export interface McsAdminAgentInteractionSummary {
+  agentId: McsAgentId;
   events7d: number;
-  lastEventAt: IsoTimestamp | null;
+  lastEventAt: McsIsoTimestamp | null;
 }
 
-export interface AdminSuccessProfileMemoryBridgeDraft {
+export interface McsAdminSuccessProfileMemoryBridgeDraft {
   tmagId: string;
   ready: boolean;
   base: {
@@ -5023,7 +5023,7 @@ export interface AdminSuccessProfileMemoryBridgeDraft {
     schema_version: 1;
     namespace: 'momentum';
     source: 'momentum_admin_agent_memory_bridge';
-    created_at: IsoTimestamp;
+    created_at: McsIsoTimestamp;
     title: string;
     origin_kind: 'system';
     service_name: 'admin_agent_memory_bridge';
@@ -5034,19 +5034,19 @@ export interface AdminSuccessProfileMemoryBridgeDraft {
   note: string;
 }
 
-export interface AdminAgentOversightResponse {
+export interface McsAdminAgentOversightResponse {
   ok: true;
-  generatedAt: IsoTimestamp;
-  successProfiles: AdminSuccessProfileSummary[];
-  memoryStatus: AdminAgentMemoryStatus[];
-  interactionSummary: AdminAgentInteractionSummary[];
-  bridgeDrafts: AdminSuccessProfileMemoryBridgeDraft[];
+  generatedAt: McsIsoTimestamp;
+  successProfiles: McsAdminSuccessProfileSummary[];
+  memoryStatus: McsAdminAgentMemoryStatus[];
+  interactionSummary: McsAdminAgentInteractionSummary[];
+  bridgeDrafts: McsAdminSuccessProfileMemoryBridgeDraft[];
   warnings: string[];
 }
 
-export type SupportAgentKind = 'ivory' | 'michael' | 'steve_success';
+export type McsSupportAgentKind = 'ivory' | 'michael' | 'steve_success';
 
-export type SupportAgentInteractionKind =
+export type McsSupportAgentInteractionKind =
   | 'invitation_draft'
   | 'followup_draft'
   | 'discovery_interview'
@@ -5056,19 +5056,19 @@ export type SupportAgentInteractionKind =
   | 'vm_campaign_recommendation'
   | 'crm_next_action';
 
-export interface AgentInteractionRecord {
+export interface McsAgentInteractionRecord {
   interactionId: string;
-  agent: SupportAgentKind;
+  agent: McsSupportAgentKind;
   tmagId: TmagId;
   relatedProspectId: string | null;
   relatedCampaignId: string | null;
-  kind: SupportAgentInteractionKind;
+  kind: McsSupportAgentInteractionKind;
   summary: string;
   payload: Record<string, unknown>;
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
 }
 
-export type DailyActionPrimaryFocus =
+export type McsDailyActionPrimaryFocus =
   | 'invite'
   | 'follow_up'
   | 'training'
@@ -5076,27 +5076,27 @@ export type DailyActionPrimaryFocus =
   | 'event'
   | 'launch';
 
-export interface DailyActionPlanItem {
+export interface McsDailyActionPlanItem {
   actionId: string;
   label: string;
   reason: string;
-  priority: AgentRecommendationPriority;
+  priority: McsAgentRecommendationPriority;
   relatedProspectId: string | null;
   relatedCampaignId: string | null;
-  suggestedAgent: SupportAgentKind | null;
-  dueAt: IsoTimestamp | null;
-  completedAt: IsoTimestamp | null;
+  suggestedAgent: McsSupportAgentKind | null;
+  dueAt: McsIsoTimestamp | null;
+  completedAt: McsIsoTimestamp | null;
 }
 
-export interface DailyActionPlan {
+export interface McsDailyActionPlan {
   planId: string;
   tmagId: TmagId;
-  generatedAt: IsoTimestamp;
-  primaryFocus: DailyActionPrimaryFocus;
-  actions: DailyActionPlanItem[];
+  generatedAt: McsIsoTimestamp;
+  primaryFocus: McsDailyActionPrimaryFocus;
+  actions: McsDailyActionPlanItem[];
 }
 
-export interface SuccessProfileAgentContext {
+export interface McsSuccessProfileAgentContext {
   tmagId: TmagId;
   primaryWhy: string | null;
   successVision: string | null;
@@ -5111,7 +5111,7 @@ export interface SuccessProfileAgentContext {
   recommendedOrientationPath: string | null;
   recommendedLaunchPath: string | null;
   recommendedCoachingFocus: string | null;
-  updatedAt: IsoTimestamp;
+  updatedAt: McsIsoTimestamp;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -5163,9 +5163,9 @@ export interface McsRuntimeAuditContext {
 export interface McsRuntimeAuditInput {
   action: McsRuntimeAuditAction;
   runtime: McsRuntimeAuditContext;
-  severity?: AuditSeverity;
+  severity?: McsAuditSeverity;
   reason?: string | null;
-  timestamp?: IsoTimestamp;
+  timestamp?: McsIsoTimestamp;
 }
 
 /**
@@ -5173,7 +5173,7 @@ export interface McsRuntimeAuditInput {
  * substrate) plus the dedicated `runtime` scope block (never overloads
  * `before`/`after`, which stay null for lifecycle markers).
  */
-export interface McsRuntimeAuditLogEntry extends AuditLogEntry {
+export interface McsRuntimeAuditLogEntry extends McsAuditLogEntry {
   runtime: McsRuntimeAuditContext;
 }
 
@@ -5219,7 +5219,7 @@ export interface McsMemoryEnvelope {
   schemaVersion: number;
   namespace: 'momentum';
   source: string;
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
   title: string;
   originKind: 'system';
   serviceName: string;
@@ -5263,7 +5263,7 @@ export interface McsOutcomeRecord extends McsMemoryEnvelope {
   confirmedByTmagId: string;
   prospectId?: string;
   token?: string;
-  outcomeAt: IsoTimestamp;
+  outcomeAt: McsIsoTimestamp;
   note?: string | null;
   supersedesOutcomeId?: string | null;
 }
@@ -5275,7 +5275,7 @@ export interface McsOutcomeInput {
   tenantId: string;
   prospectId?: string;
   token?: string;
-  outcomeAt?: IsoTimestamp;
+  outcomeAt?: McsIsoTimestamp;
   note?: string | null;
   supersedesOutcomeId?: string | null;
 }
@@ -5314,7 +5314,7 @@ export type McsLearningDomain =
 export interface McsLearningCandidateReview {
   decision: 'approved' | 'rejected';
   reviewedByTmagId: string;
-  reviewedAt: IsoTimestamp;
+  reviewedAt: McsIsoTimestamp;
   reason?: string | null;
   approvalReferenceId?: string | null;
 }
@@ -5427,7 +5427,7 @@ export interface McsGraphRagHit {
 /** Aggregate snapshot of the learning loop's health (admin-only). */
 export interface McsLearningObservabilitySnapshot {
   tenantId: string;
-  generatedAt: IsoTimestamp;
+  generatedAt: McsIsoTimestamp;
   runtimeAudit: {
     total: number;
     gateAllowed: number;

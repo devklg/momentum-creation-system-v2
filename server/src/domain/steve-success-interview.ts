@@ -25,16 +25,16 @@
  */
 
 import type {
-  SteveDiscoveryArtifact,
-  SteveDiscoveryIngestPayload,
-  SteveDiscoveryPhase,
-  SteveDiscoveryScriptQuestion,
-  SteveDiscoveryScriptSection,
-  SteveDiscoveryView,
-  SteveDiscoveryFocus,
-  SteveProfileCard,
-  SteveSuccessProfile,
-  SteveTranscriptChunk,
+  McsSteveDiscoveryArtifact,
+  McsSteveDiscoveryIngestPayload,
+  McsSteveDiscoveryPhase,
+  McsSteveDiscoveryScriptQuestion,
+  McsSteveDiscoveryScriptSection,
+  McsSteveDiscoveryView,
+  McsSteveDiscoveryFocus,
+  McsSteveProfileCard,
+  McsSteveSuccessProfile,
+  McsSteveTranscriptChunk,
 } from '@momentum/shared';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
@@ -53,7 +53,7 @@ interface RawSection {
   id: string;
   title: string;
   intent: string;
-  questions: Array<{ id: string; prompt: string; focus: SteveDiscoveryFocus | null }>;
+  questions: Array<{ id: string; prompt: string; focus: McsSteveDiscoveryFocus | null }>;
 }
 
 const RAW_SECTIONS: RawSection[] = [
@@ -213,13 +213,13 @@ const RAW_SECTIONS: RawSection[] = [
 ];
 
 /** The discovery sections with sequential 1..N question numbers assigned. */
-export const STEVE_DISCOVERY_SECTIONS: SteveDiscoveryScriptSection[] = (() => {
+export const STEVE_DISCOVERY_SECTIONS: McsSteveDiscoveryScriptSection[] = (() => {
   let n = 0;
   return RAW_SECTIONS.map((s) => ({
     id: s.id,
     title: s.title,
     intent: s.intent,
-    questions: s.questions.map<SteveDiscoveryScriptQuestion>((q) => ({
+    questions: s.questions.map<McsSteveDiscoveryScriptQuestion>((q) => ({
       id: q.id,
       number: ++n,
       sectionId: s.id,
@@ -230,7 +230,7 @@ export const STEVE_DISCOVERY_SECTIONS: SteveDiscoveryScriptSection[] = (() => {
 })();
 
 /** Flat list of all discovery questions in order. */
-export const STEVE_DISCOVERY_QUESTIONS: SteveDiscoveryScriptQuestion[] =
+export const STEVE_DISCOVERY_QUESTIONS: McsSteveDiscoveryScriptQuestion[] =
   STEVE_DISCOVERY_SECTIONS.flatMap((s) => s.questions);
 
 /**
@@ -303,8 +303,8 @@ const cap = (s: string): string => (s.length > PROFILE_FIELD_CAP ? s.slice(0, PR
 export function assembleSuccessProfile(args: {
   tmagId: string;
   generatedAt: string;
-  profile: SteveDiscoveryIngestPayload['profile'];
-}): SteveSuccessProfile {
+  profile: McsSteveDiscoveryIngestPayload['profile'];
+}): McsSteveSuccessProfile {
   const p = args.profile;
   // Defensively cap the free-text fields to the gateway per-content limit — the
   // transcript/answers are already capped upstream, but a rambling or
@@ -384,7 +384,7 @@ async function ensureDiscoveriesCollection(): Promise<void> {
 // Reads
 // ─────────────────────────────────────────────────────────────────────────
 
-interface PersistedDiscovery extends SteveDiscoveryArtifact {
+interface PersistedDiscovery extends McsSteveDiscoveryArtifact {
   _id: string;
 }
 
@@ -415,7 +415,7 @@ async function getDiscoveryByTmagId(tmagId: string): Promise<PersistedDiscovery 
   return result.documents[0] ?? null;
 }
 
-function stripPersisted(doc: PersistedDiscovery): SteveDiscoveryArtifact {
+function stripPersisted(doc: PersistedDiscovery): McsSteveDiscoveryArtifact {
   return {
     tmagId: doc.tmagId,
     sponsorTmagId: doc.sponsorTmagId,
@@ -429,12 +429,12 @@ function stripPersisted(doc: PersistedDiscovery): SteveDiscoveryArtifact {
   };
 }
 
-function derivePhase(artifact: PersistedDiscovery | null): SteveDiscoveryPhase {
+function derivePhase(artifact: PersistedDiscovery | null): McsSteveDiscoveryPhase {
   return artifact ? 'complete' : 'awaiting_call';
 }
 
 /** Build the BA's own discovery view (self-read). */
-export async function buildDiscoveryView(tmagId: string): Promise<SteveDiscoveryView> {
+export async function buildDiscoveryView(tmagId: string): Promise<McsSteveDiscoveryView> {
   const artifact = await getDiscoveryByTmagId(tmagId);
   return {
     tmagId,
@@ -522,8 +522,8 @@ function artifactToUpdate(a: PersistedDiscovery): Partial<PersistedDiscovery> {
  * write landed.
  */
 export async function ingestDiscoveryArtifact(
-  payload: SteveDiscoveryIngestPayload,
-): Promise<SteveDiscoveryArtifact> {
+  payload: McsSteveDiscoveryIngestPayload,
+): Promise<McsSteveDiscoveryArtifact> {
   const baInfo = await getBaSponsor(payload.tmagId);
   if (!baInfo) {
     throw new DiscoveryIngestError(
@@ -539,7 +539,7 @@ export async function ingestDiscoveryArtifact(
   });
 
   // Defensive truncation — mirror the gateway's 5000-char per-content cap.
-  const transcript: SteveTranscriptChunk[] = payload.transcript.map((c) => ({
+  const transcript: McsSteveTranscriptChunk[] = payload.transcript.map((c) => ({
     ...c,
     text: c.text.slice(0, 5000),
   }));
@@ -666,7 +666,7 @@ export class SponsorAccessError extends Error {
 export async function getProfileCardForSponsor(args: {
   requestingTmagId: string;
   downlineTmagId: string;
-}): Promise<SteveProfileCard> {
+}): Promise<McsSteveProfileCard> {
   const downlineInfo = await getBaSponsor(args.downlineTmagId);
   if (!downlineInfo) {
     throw new SponsorAccessError('NO_DOWNLINE', `No BA record for downlineTmagId=${args.downlineTmagId}.`);

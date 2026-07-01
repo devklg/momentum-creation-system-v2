@@ -32,7 +32,7 @@
  */
 
 import type { PlacementStreamState } from '@/lib/usePlacementStream';
-import type { PlacementTickerEntry } from '@momentum/shared';
+import type { McsPlacementTickerEntry } from '@momentum/shared';
 
 export interface LivePlaceSectionProps {
   prospectFirstName: string;
@@ -153,7 +153,7 @@ export function LivePlaceSection(props: LivePlaceSectionProps) {
 }
 
 function TickerEntry(props: {
-  entry: PlacementTickerEntry;
+  entry: McsPlacementTickerEntry;
   isFresh: boolean;
   ariaHidden?: boolean;
 }) {

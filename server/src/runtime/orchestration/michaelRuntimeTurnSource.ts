@@ -37,14 +37,14 @@
 import { randomUUID } from 'node:crypto';
 import type {
   TmagId,
-  CorrelationId,
-  RequestId,
-  RuntimeLanguage,
-  RuntimeMode,
-  RuntimeTurnId,
-  SessionId,
-  TeamId,
-  TenantId,
+  McsCorrelationId,
+  McsRequestId,
+  McsRuntimeLanguage,
+  McsRuntimeMode,
+  McsRuntimeTurnId,
+  McsSessionId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import { createMichaelRuntimeContextManagerPort } from '../context/index.js';
 import {
@@ -66,13 +66,13 @@ const MICHAEL_TASK_TYPE = 'training_support' as const;
 // Server-side Team Magnificent scope constants (never body-derived). Only the
 // teamKey/teamName are contract-validated; tenant/team ids are opaque non-empty
 // identifiers aligned with the rest of the runtime layer.
-const TENANT_ID = 'tenant_team_magnificent' as TenantId;
-const TEAM_ID = 'team_magnificent' as TeamId;
+const TENANT_ID = 'tenant_team_magnificent' as McsTenantId;
+const TEAM_ID = 'team_magnificent' as McsTeamId;
 
-const SUPPORTED_LANGUAGES: readonly RuntimeLanguage[] = ['en', 'es'];
-const SUPPORTED_MODES: readonly RuntimeMode[] = ['browser_text', 'browser_voice', 'mixed'];
-const DEFAULT_LANGUAGE: RuntimeLanguage = 'en';
-const DEFAULT_MODE: RuntimeMode = 'browser_text';
+const SUPPORTED_LANGUAGES: readonly McsRuntimeLanguage[] = ['en', 'es'];
+const SUPPORTED_MODES: readonly McsRuntimeMode[] = ['browser_text', 'browser_voice', 'mixed'];
+const DEFAULT_LANGUAGE: McsRuntimeLanguage = 'en';
+const DEFAULT_MODE: McsRuntimeMode = 'browser_text';
 
 /**
  * Session-derived BA identity. Carries ONLY what the authenticated session
@@ -84,13 +84,13 @@ export interface CreateMichaelRuntimeTurnForAuthenticatedBaInput {
   /** Authenticated BA id — must be sourced from `req.session.tmagId` only. */
   readonly tmagId: TmagId | string;
   /** BA UI language, server-derived. Defaults to `'en'`. */
-  readonly language?: RuntimeLanguage;
+  readonly language?: McsRuntimeLanguage;
   /** BA runtime transport mode, server-derived. Defaults to `'browser_text'`. */
-  readonly mode?: RuntimeMode;
+  readonly mode?: McsRuntimeMode;
   /** Optional server-derived session id (traceability only). */
-  readonly sessionId?: SessionId | string;
+  readonly sessionId?: McsSessionId | string;
   /** Optional server-derived correlation id (traceability only). */
-  readonly correlationId?: CorrelationId | string;
+  readonly correlationId?: McsCorrelationId | string;
 }
 
 export interface MichaelRuntimeTurnSourceIssue {
@@ -158,14 +158,14 @@ export async function createMichaelRuntimeTurnForAuthenticatedBa(
     typeof input.sessionId === 'string' && input.sessionId.trim().length > 0
       ? input.sessionId
       : `michael_session_${randomUUID()}`
-  ) as SessionId;
+  ) as McsSessionId;
   const correlationId = (
     typeof input.correlationId === 'string' && input.correlationId.trim().length > 0
       ? input.correlationId
       : `michael_corr_${randomUUID()}`
-  ) as CorrelationId;
-  const requestId = `michael_req_${randomUUID()}` as RequestId;
-  const turnId = `michael_turn_${randomUUID()}` as RuntimeTurnId;
+  ) as McsCorrelationId;
+  const requestId = `michael_req_${randomUUID()}` as McsRequestId;
+  const turnId = `michael_turn_${randomUUID()}` as McsRuntimeTurnId;
 
   const identity: AgentRuntimeAdapterDispatchIdentity = {
     scope: {

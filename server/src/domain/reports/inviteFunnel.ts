@@ -21,13 +21,13 @@ import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
-  AdminDashboardFilter,
-  AdminInviteFunnelPerBaRow,
-  AdminInviteFunnelPerBaSort,
-  AdminInviteFunnelReport,
-  AdminInviteFunnelStageCount,
-  AdminReportMeta,
-  AdminReportTimeRange,
+  McsAdminDashboardFilter,
+  McsAdminInviteFunnelPerBaRow,
+  McsAdminInviteFunnelPerBaSort,
+  McsAdminInviteFunnelReport,
+  McsAdminInviteFunnelStageCount,
+  McsAdminReportMeta,
+  McsAdminReportTimeRange,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -80,12 +80,12 @@ function pct(num: number, den: number): number | null {
 }
 
 export async function buildInviteFunnelReport(
-  filter: AdminDashboardFilter,
-  range: AdminReportTimeRange,
-  perBaSort: AdminInviteFunnelPerBaSort = 'completes',
+  filter: McsAdminDashboardFilter,
+  range: McsAdminReportTimeRange,
+  perBaSort: McsAdminInviteFunnelPerBaSort = 'completes',
 ): Promise<{
-  result: AdminInviteFunnelReport;
-  meta: Omit<AdminReportMeta, 'title'>;
+  result: McsAdminInviteFunnelReport;
+  meta: Omit<McsAdminReportMeta, 'title'>;
 }> {
   const scopedTmagIds = await resolveScopedTmagIds(filter);
 
@@ -110,7 +110,7 @@ export async function buildInviteFunnelReport(
   const videoStarted = tokens.filter((t) => reached(t, 'video_started')).length;
   const videoComplete = tokens.filter((t) => reached(t, 'video_complete')).length;
 
-  const stages: AdminInviteFunnelStageCount[] = [
+  const stages: McsAdminInviteFunnelStageCount[] = [
     { stage: 'minted', tokens: minted, conversionFromMint: minted === 0 ? null : 1 },
     { stage: 'clicked', tokens: clicked, conversionFromMint: pct(clicked, minted) === null ? null : clicked / minted },
     { stage: 'video_started', tokens: videoStarted, conversionFromMint: pct(videoStarted, minted) === null ? null : videoStarted / minted },
@@ -184,7 +184,7 @@ export async function buildInviteFunnelReport(
     }
   }
 
-  let perBa: AdminInviteFunnelPerBaRow[] = perTmagIds.map((id) => {
+  let perBa: McsAdminInviteFunnelPerBaRow[] = perTmagIds.map((id) => {
     const s = baStats.get(id)!;
     return {
       tmagId: id,
@@ -215,7 +215,7 @@ export async function buildInviteFunnelReport(
     }
   });
 
-  const result: AdminInviteFunnelReport = {
+  const result: McsAdminInviteFunnelReport = {
     totals: {
       minted,
       clicked,

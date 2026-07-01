@@ -1,8 +1,8 @@
 import type {
-  AgentKey,
+  McsAgentKey,
   TmagId,
-  ContextPacketV1,
-  RuntimeLanguage,
+  McsContextPacketV1,
+  McsRuntimeLanguage,
 } from '@momentum/shared/runtime';
 
 export type ContextPacketValidationCode =
@@ -32,7 +32,7 @@ export interface ContextPacketValidationIssue {
 export type ContextPacketValidationResult =
   | {
       ok: true;
-      packet: ContextPacketV1;
+      packet: McsContextPacketV1;
       errors: [];
     }
   | {
@@ -41,9 +41,9 @@ export type ContextPacketValidationResult =
     };
 
 export interface ContextPacketFoundationRequest {
-  agentKey: AgentKey;
+  agentKey: McsAgentKey;
   tmagId: TmagId;
-  language: RuntimeLanguage;
+  language: McsRuntimeLanguage;
   objective: string;
 }
 
@@ -51,6 +51,6 @@ export interface ContextPacketFoundationBoundary {
   assembledBy: 'context_manager';
   agentsMayRetrieveDirectly: false;
   candidateKnowledgeIncludedByDefault: false;
-  supportedLanguages: readonly RuntimeLanguage[];
+  supportedLanguages: readonly McsRuntimeLanguage[];
   requiredRuntimeRuleIds: readonly string[];
 }

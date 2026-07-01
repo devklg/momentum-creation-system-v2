@@ -13,8 +13,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type {
-  QueueOversightSummary,
-  QueueOversightSummaryResponse,
+  McsQueueOversightSummary,
+  McsQueueOversightSummaryResponse,
 } from '@momentum/shared';
 import { QueueDepthPanel } from '@/components/queue-oversight/QueueDepthPanel';
 import { QueueNumbersPanel } from '@/components/queue-oversight/QueueNumbersPanel';
@@ -24,7 +24,7 @@ import { AdminTickerPanel } from '@/components/queue-oversight/AdminTickerPanel'
 import { QueueRulesPanel } from '@/components/queue-oversight/QueueRulesPanel';
 
 export function QueuePage() {
-  const [summary, setSummary] = useState<QueueOversightSummary | null>(null);
+  const [summary, setSummary] = useState<McsQueueOversightSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -33,7 +33,7 @@ export function QueuePage() {
     setErr(null);
     try {
       const res = await fetch('/api/admin/queue/summary', { credentials: 'include' });
-      const data = (await res.json()) as QueueOversightSummaryResponse & { error?: string };
+      const data = (await res.json()) as McsQueueOversightSummaryResponse & { error?: string };
       if (!data.ok) {
         setErr(data.error ?? 'Could not load queue summary.');
         return;

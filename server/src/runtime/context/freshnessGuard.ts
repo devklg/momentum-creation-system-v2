@@ -20,9 +20,9 @@
  */
 
 import type {
-  KnowledgeFreshnessPolicy,
-  KnowledgeFreshnessVerdict,
-  KnowledgeReference,
+  McsKnowledgeFreshnessPolicy,
+  McsKnowledgeFreshnessVerdict,
+  McsKnowledgeReference,
 } from '@momentum/shared/runtime';
 
 /** Effective policy with the P4.7 defaults applied. */
@@ -38,7 +38,7 @@ interface EffectiveFreshnessPolicy {
 const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 const KNOWN_LIFECYCLES: readonly string[] = ['current', 'deprecated', 'superseded'];
 
-function effectivePolicy(policy: KnowledgeFreshnessPolicy | undefined): EffectiveFreshnessPolicy {
+function effectivePolicy(policy: McsKnowledgeFreshnessPolicy | undefined): EffectiveFreshnessPolicy {
   const maxAgeDays = policy?.maxAgeDays;
   return {
     excludeDeprecated: policy?.excludeDeprecated ?? true,
@@ -66,10 +66,10 @@ function parseIso(value: string | undefined): number | null {
  * always `fresh`.
  */
 export function evaluateFreshness(
-  reference: KnowledgeReference,
-  policy: KnowledgeFreshnessPolicy | undefined,
+  reference: McsKnowledgeReference,
+  policy: McsKnowledgeFreshnessPolicy | undefined,
   now: Date,
-): KnowledgeFreshnessVerdict {
+): McsKnowledgeFreshnessVerdict {
   const freshness = reference.freshness;
   if (!freshness) return 'fresh';
 
@@ -109,8 +109,8 @@ export function evaluateFreshness(
 }
 
 export function isFresh(
-  reference: KnowledgeReference,
-  policy: KnowledgeFreshnessPolicy | undefined,
+  reference: McsKnowledgeReference,
+  policy: McsKnowledgeFreshnessPolicy | undefined,
   now: Date,
 ): boolean {
   return evaluateFreshness(reference, policy, now) === 'fresh';
@@ -118,19 +118,19 @@ export function isFresh(
 
 /** Keep only references that pass the freshness guard. */
 export function filterFresh(
-  references: readonly KnowledgeReference[],
-  policy: KnowledgeFreshnessPolicy | undefined,
+  references: readonly McsKnowledgeReference[],
+  policy: McsKnowledgeFreshnessPolicy | undefined,
   now: Date,
-): KnowledgeReference[] {
+): McsKnowledgeReference[] {
   return references.filter((reference) => isFresh(reference, policy, now));
 }
 
 /** A non-fresh freshness verdict — the reasons a reference is guarded out. */
-export type FreshnessExclusionVerdict = Exclude<KnowledgeFreshnessVerdict, 'fresh'>;
+export type FreshnessExclusionVerdict = Exclude<McsKnowledgeFreshnessVerdict, 'fresh'>;
 
 export interface FreshnessClassification {
   /** References that passed the guard, in input order. */
-  fresh: KnowledgeReference[];
+  fresh: McsKnowledgeReference[];
   /** Count of guarded-out references per non-fresh verdict (absent verdicts omitted). */
   excluded: Partial<Record<FreshnessExclusionVerdict, number>>;
 }
@@ -141,11 +141,11 @@ export interface FreshnessClassification {
  * (P4.8) at no extra evaluation cost.
  */
 export function classifyFreshness(
-  references: readonly KnowledgeReference[],
-  policy: KnowledgeFreshnessPolicy | undefined,
+  references: readonly McsKnowledgeReference[],
+  policy: McsKnowledgeFreshnessPolicy | undefined,
   now: Date,
 ): FreshnessClassification {
-  const fresh: KnowledgeReference[] = [];
+  const fresh: McsKnowledgeReference[] = [];
   const excluded: Partial<Record<FreshnessExclusionVerdict, number>> = {};
   for (const reference of references) {
     const verdict = evaluateFreshness(reference, policy, now);

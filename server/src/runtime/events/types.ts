@@ -1,11 +1,11 @@
 import type {
-  AgentEventEnvelope,
-  AgentEventSource,
-  AgentEventType,
-  AgentKey,
-  AgentId,
+  McsAgentEventEnvelope,
+  McsAgentEventSource,
+  McsAgentEventType,
+  McsAgentKey,
+  McsAgentId,
   TmagId,
-  RequestId,
+  McsRequestId,
 } from '@momentum/shared/runtime';
 
 export type RuntimeEventActorType = 'ba' | 'agent' | 'system' | 'admin' | 'subscriber';
@@ -14,20 +14,20 @@ export interface RuntimeEventActor {
   actorType: RuntimeEventActorType;
   actorId: string;
   tmagId?: TmagId;
-  agentKey?: AgentKey;
-  agentId?: AgentId;
+  agentKey?: McsAgentKey;
+  agentId?: McsAgentId;
 }
 
 export interface RuntimeEventProvenance {
   emittedBy: string;
-  requestId?: RequestId;
+  requestId?: McsRequestId;
   componentVersion?: string;
   traceId?: string;
 }
 
 export type RuntimeAgentEventEnvelope<TPayload = Record<string, unknown>> =
-  AgentEventEnvelope<TPayload> & {
-    agentId?: AgentId;
+  McsAgentEventEnvelope<TPayload> & {
+    agentId?: McsAgentId;
     actor: RuntimeEventActor;
     provenance: RuntimeEventProvenance;
   };
@@ -63,5 +63,5 @@ export interface RuntimeEventClock {
   now(): Date;
 }
 
-export type RuntimeEventSource = AgentEventSource;
-export type RuntimeEventType = AgentEventType;
+export type RuntimeEventSource = McsAgentEventSource;
+export type RuntimeEventType = McsAgentEventType;

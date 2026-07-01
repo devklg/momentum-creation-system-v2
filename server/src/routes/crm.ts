@@ -24,19 +24,19 @@
 
 import { Router } from 'express';
 import type {
-  ClearFollowUpResponse,
-  CreateNotePayload,
-  CreateNoteResponse,
-  CrmBundleResponse,
-  ReinviteResponse,
-  ReinviteScriptResponse,
-  ReinviteTerminalError,
-  ReinviteUnsentError,
-  SetDispositionPayload,
-  SetDispositionResponse,
-  SetFollowUpPayload,
-  SetFollowUpResponse,
-  TodaysActionsResponse,
+  McsClearFollowUpResponse,
+  McsCreateNotePayload,
+  McsCreateNoteResponse,
+  McsCrmBundleResponse,
+  McsReinviteResponse,
+  McsReinviteScriptResponse,
+  McsReinviteTerminalError,
+  McsReinviteUnsentError,
+  McsSetDispositionPayload,
+  McsSetDispositionResponse,
+  McsSetFollowUpPayload,
+  McsSetFollowUpResponse,
+  McsTodaysActionsResponse,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
@@ -95,7 +95,7 @@ crmRoutes.get('/today', requireAuth, requireSteveComplete, async (req, res) => {
 
   try {
     const actions = await getTodaysActions(sponsorTmagId);
-    const payload: TodaysActionsResponse = { ok: true, actions };
+    const payload: McsTodaysActionsResponse = { ok: true, actions };
     return res.status(200).json(payload);
   } catch (err) {
     return sendCrmError(res, err);
@@ -113,7 +113,7 @@ crmRoutes.get('/:prospectId', requireAuth, requireSteveComplete, async (req, res
 
   try {
     const bundle = await getCrmBundle(prospectId, sponsorTmagId);
-    const payload: CrmBundleResponse = { ok: true, bundle };
+    const payload: McsCrmBundleResponse = { ok: true, bundle };
     return res.status(200).json(payload);
   } catch (err) {
     return sendCrmError(res, err);
@@ -133,12 +133,12 @@ crmRoutes.post(
     const prospectId = getProspectId(req);
     if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
 
-    const body = req.body as Partial<CreateNotePayload> | undefined;
+    const body = req.body as Partial<McsCreateNotePayload> | undefined;
     const text = typeof body?.text === 'string' ? body.text : '';
 
     try {
       const note = await addNote(prospectId, sponsorTmagId, text);
-      const payload: CreateNoteResponse = { ok: true, note };
+      const payload: McsCreateNoteResponse = { ok: true, note };
       return res.status(201).json(payload);
     } catch (err) {
       return sendCrmError(res, err);
@@ -159,13 +159,13 @@ crmRoutes.post(
     const prospectId = getProspectId(req);
     if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
 
-    const body = req.body as Partial<SetFollowUpPayload> | undefined;
+    const body = req.body as Partial<McsSetFollowUpPayload> | undefined;
     const dueAt = typeof body?.dueAt === 'string' ? body.dueAt : '';
     if (!dueAt) return res.status(400).json({ ok: false, error: 'missing_due_at' });
 
     try {
       const followUp = await setFollowUp(prospectId, sponsorTmagId, dueAt);
-      const payload: SetFollowUpResponse = { ok: true, followUp };
+      const payload: McsSetFollowUpResponse = { ok: true, followUp };
       return res.status(200).json(payload);
     } catch (err) {
       return sendCrmError(res, err);
@@ -188,7 +188,7 @@ crmRoutes.delete(
 
     try {
       await clearFollowUp(prospectId, sponsorTmagId);
-      const payload: ClearFollowUpResponse = { ok: true };
+      const payload: McsClearFollowUpResponse = { ok: true };
       return res.status(200).json(payload);
     } catch (err) {
       return sendCrmError(res, err);
@@ -209,7 +209,7 @@ crmRoutes.post(
     const prospectId = getProspectId(req);
     if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
 
-    const body = req.body as Partial<SetDispositionPayload> | undefined;
+    const body = req.body as Partial<McsSetDispositionPayload> | undefined;
     // Distinguish "absent" from "explicitly null". The route treats undefined
     // as a missing field (400) and null as an explicit clear.
     if (body === undefined || !('disposition' in body)) {
@@ -219,7 +219,7 @@ crmRoutes.post(
 
     try {
       const disposition = await setDisposition(prospectId, sponsorTmagId, dispo);
-      const payload: SetDispositionResponse = { ok: true, disposition };
+      const payload: McsSetDispositionResponse = { ok: true, disposition };
       return res.status(200).json(payload);
     } catch (err) {
       return sendCrmError(res, err);
@@ -241,16 +241,16 @@ crmRoutes.post(
     if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
 
     try {
-      const result: ReinviteResponse = await reinvite(prospectId, sponsorTmagId);
+      const result: McsReinviteResponse = await reinvite(prospectId, sponsorTmagId);
       return res.status(200).json(result);
     } catch (err) {
       // No cooldown gate (Chat #147, seq 23) — the BA decides timing.
       if (err instanceof CrmError && err.code === 'not_yet_sent') {
-        const body: ReinviteUnsentError = { ok: false, error: 'not_yet_sent' };
+        const body: McsReinviteUnsentError = { ok: false, error: 'not_yet_sent' };
         return res.status(409).json(body);
       }
       if (err instanceof CrmError && err.code === 'enrolled') {
-        const body: ReinviteTerminalError = { ok: false, error: 'enrolled' };
+        const body: McsReinviteTerminalError = { ok: false, error: 'enrolled' };
         return res.status(409).json(body);
       }
       return sendCrmError(res, err);
@@ -276,7 +276,7 @@ crmRoutes.post(
     if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
 
     try {
-      const result: ReinviteScriptResponse = await reinviteScript(prospectId, sponsorTmagId);
+      const result: McsReinviteScriptResponse = await reinviteScript(prospectId, sponsorTmagId);
       return res.status(200).json(result);
     } catch (err) {
       return sendCrmError(res, err);

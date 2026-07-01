@@ -48,10 +48,10 @@ import { sendEmail, ResendConfigError, ResendError } from '../services/resend.js
 import type {
   TmagProfile,
   TmagProfilePatch,
-  BANotifPrefs,
-  ProfileChangeChallengeRecord,
+  McsBANotifPrefs,
+  McsProfileChangeChallengeRecord,
 } from '@momentum/shared';
-import { BA_NOTIF_DEFAULTS } from '@momentum/shared';
+import { MCS_BA_NOTIF_DEFAULTS } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const BA_COLLECTION = 'team_magnificent_members';
@@ -64,7 +64,7 @@ const CHALLENGE_TTL_MS = 15 * 60 * 1000;
 interface BAExtras {
   /** Photo URL added Chat #134; older records may not have it. */
   photoUrl?: string | null;
-  notifPrefs?: BANotifPrefs;
+  notifPrefs?: McsBANotifPrefs;
   pendingEmail?: string | null;
   pendingPhone?: string | null;
 }
@@ -82,23 +82,23 @@ function hashCode(code: string): string {
   return createHash('sha256').update(code, 'utf8').digest('hex');
 }
 
-function mergeNotifPrefs(stored: BANotifPrefs | undefined): BANotifPrefs {
+function mergeNotifPrefs(stored: McsBANotifPrefs | undefined): McsBANotifPrefs {
   // Defensive merge: a stored record from a pre-#134 BA has no notifPrefs;
   // a record from a partial save may be missing a topic added later. Always
   // resolve to the full shape so the UI never has to defend against undef.
-  if (!stored) return BA_NOTIF_DEFAULTS;
-  const legacy = stored as Partial<BANotifPrefs> & {
-    michaelComplete?: BANotifPrefs['steveDiscoveryComplete'];
+  if (!stored) return MCS_BA_NOTIF_DEFAULTS;
+  const legacy = stored as Partial<McsBANotifPrefs> & {
+    michaelComplete?: McsBANotifPrefs['steveDiscoveryComplete'];
   };
   return {
-    callbackRequested: { ...BA_NOTIF_DEFAULTS.callbackRequested, ...(stored.callbackRequested ?? {}) },
-    webinarReserved: { ...BA_NOTIF_DEFAULTS.webinarReserved, ...(stored.webinarReserved ?? {}) },
-    newSponsoredBA: { ...BA_NOTIF_DEFAULTS.newSponsoredBA, ...(stored.newSponsoredBA ?? {}) },
+    callbackRequested: { ...MCS_BA_NOTIF_DEFAULTS.callbackRequested, ...(stored.callbackRequested ?? {}) },
+    webinarReserved: { ...MCS_BA_NOTIF_DEFAULTS.webinarReserved, ...(stored.webinarReserved ?? {}) },
+    newSponsoredBA: { ...MCS_BA_NOTIF_DEFAULTS.newSponsoredBA, ...(stored.newSponsoredBA ?? {}) },
     steveDiscoveryComplete: {
-      ...BA_NOTIF_DEFAULTS.steveDiscoveryComplete,
+      ...MCS_BA_NOTIF_DEFAULTS.steveDiscoveryComplete,
       ...(legacy.steveDiscoveryComplete ?? legacy.michaelComplete ?? {}),
     },
-    poolMovement: { ...BA_NOTIF_DEFAULTS.poolMovement, ...(stored.poolMovement ?? {}) },
+    poolMovement: { ...MCS_BA_NOTIF_DEFAULTS.poolMovement, ...(stored.poolMovement ?? {}) },
   };
 }
 
@@ -175,7 +175,7 @@ export async function patchProfile(
   }
   if (patch.notifPrefs !== undefined) {
     const existing = mergeNotifPrefs((current as typeof current & BAExtras).notifPrefs);
-    set.notifPrefs = { ...existing, ...patch.notifPrefs } satisfies BANotifPrefs;
+    set.notifPrefs = { ...existing, ...patch.notifPrefs } satisfies McsBANotifPrefs;
   }
 
   if (Object.keys(set).length > 0) {
@@ -281,7 +281,7 @@ export async function changePassword(
 
 /* ─── Challenge flow (email + phone) ─── */
 
-async function persistChallenge(rec: ProfileChangeChallengeRecord): Promise<void> {
+async function persistChallenge(rec: McsProfileChangeChallengeRecord): Promise<void> {
   await gatewayCall('mongodb', 'insert', {
     database: MONGO_DB,
     collection: CHALLENGES_COLLECTION,
@@ -319,8 +319,8 @@ async function clearPendingTarget(
 async function findLatestActiveChallenge(
   tmagId: string,
   channel: 'email' | 'phone',
-): Promise<ProfileChangeChallengeRecord | null> {
-  const r = await gatewayCall<{ documents: ProfileChangeChallengeRecord[] }>(
+): Promise<McsProfileChangeChallengeRecord | null> {
+  const r = await gatewayCall<{ documents: McsProfileChangeChallengeRecord[] }>(
     'mongodb',
     'query',
     {
@@ -376,7 +376,7 @@ export async function startEmailChange(
     }
   }
 
-  const record: ProfileChangeChallengeRecord = {
+  const record: McsProfileChangeChallengeRecord = {
     challengeId,
     tmagId,
     channel: 'email',

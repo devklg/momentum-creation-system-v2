@@ -18,13 +18,13 @@
  */
 
 import type {
-  ApprovedKnowledgeQueryResult,
-  DegradedContextState,
-  KnowledgeDomain,
-  KnowledgeId,
-  KnowledgeReference,
-  RuntimeLanguage,
-  SourceId,
+  McsApprovedKnowledgeQueryResult,
+  McsDegradedContextState,
+  McsKnowledgeDomain,
+  McsKnowledgeId,
+  McsKnowledgeReference,
+  McsRuntimeLanguage,
+  McsSourceId,
 } from '@momentum/shared/runtime';
 import { resolveSafeFallbackState, safeFallbackFromResult } from './safeFallback.js';
 
@@ -34,10 +34,10 @@ export type NextTrainingStepReasonCode = 'next_uncompleted' | 'all_completed' | 
 
 /** A content-free pointer to the next approved step — identifiers and position only. */
 export interface NextTrainingStep {
-  knowledgeId: KnowledgeId;
-  sourceId: SourceId;
-  domain: KnowledgeDomain;
-  language: RuntimeLanguage;
+  knowledgeId: McsKnowledgeId;
+  sourceId: McsSourceId;
+  domain: McsKnowledgeDomain;
+  language: McsRuntimeLanguage;
   /** 0-based position in the approved sequence. */
   stepIndex: number;
   totalSteps: number;
@@ -52,16 +52,16 @@ export interface NextTrainingStepResolution {
   /** Approved items in the sequence. */
   totalCount: number;
   /** Present iff `status === 'unavailable'`. */
-  safeFallback?: DegradedContextState;
+  safeFallback?: McsDegradedContextState;
 }
 
 export interface NextTrainingStepInput {
-  result: ApprovedKnowledgeQueryResult;
-  completedKnowledgeIds?: readonly KnowledgeId[];
+  result: McsApprovedKnowledgeQueryResult;
+  completedKnowledgeIds?: readonly McsKnowledgeId[];
 }
 
 /** The P4.9 safe fallback for a degraded (or defensively empty-ok) retrieval. */
-function unavailableFallback(result: ApprovedKnowledgeQueryResult): DegradedContextState {
+function unavailableFallback(result: McsApprovedKnowledgeQueryResult): McsDegradedContextState {
   const bridged = safeFallbackFromResult(result);
   if (bridged) return bridged.degraded;
   // Defensive: an `ok` result with zero references cannot arise from the adapter, but a pure
@@ -77,9 +77,9 @@ function unavailableFallback(result: ApprovedKnowledgeQueryResult): DegradedCont
 }
 
 /** De-duplicate references by `knowledgeId` (first occurrence wins) → the distinct sequence. */
-function distinctSequence(references: readonly KnowledgeReference[]): KnowledgeReference[] {
-  const seen = new Set<KnowledgeId>();
-  const sequence: KnowledgeReference[] = [];
+function distinctSequence(references: readonly McsKnowledgeReference[]): McsKnowledgeReference[] {
+  const seen = new Set<McsKnowledgeId>();
+  const sequence: McsKnowledgeReference[] = [];
   for (const reference of references) {
     if (seen.has(reference.knowledgeId)) continue;
     seen.add(reference.knowledgeId);

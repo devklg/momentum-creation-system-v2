@@ -1,11 +1,11 @@
-import type { AgentKey } from './agents.js';
-import type { AgentEventEnvelope } from './events.js';
-import type { ContextPacketV1 } from './context-packets.js';
-import type { BaRuntimeScope } from './identity.js';
+import type { McsAgentKey } from './agents.js';
+import type { McsAgentEventEnvelope } from './events.js';
+import type { McsContextPacketV1 } from './context-packets.js';
+import type { McsBaRuntimeScope } from './identity.js';
 
-export type RuntimeQaStatus = 'PASS' | 'LIMITED' | 'FAIL';
+export type McsRuntimeQaStatus = 'PASS' | 'LIMITED' | 'FAIL';
 
-export type RuntimeQaCategory =
+export type McsRuntimeQaCategory =
   | 'team_magnificent_scope'
   | 'runtime_event_envelope'
   | 'context_packet_schema'
@@ -16,35 +16,35 @@ export type RuntimeQaCategory =
   | 'rollback_flags'
   | 'language_support';
 
-export interface RuntimeQaAssertion {
+export interface McsRuntimeQaAssertion {
   assertionId: string;
-  category: RuntimeQaCategory;
-  status: RuntimeQaStatus;
+  category: McsRuntimeQaCategory;
+  status: McsRuntimeQaStatus;
   summary: string;
   evidence?: string[];
   limitations?: string[];
 }
 
-export interface RuntimeQaFixtureScope extends BaRuntimeScope {
-  agentKey?: AgentKey;
+export interface McsRuntimeQaFixtureScope extends McsBaRuntimeScope {
+  agentKey?: McsAgentKey;
 }
 
-export interface RuntimeEventEnvelopeFixture<TPayload = Record<string, unknown>> {
+export interface McsRuntimeEventEnvelopeFixture<TPayload = Record<string, unknown>> {
   fixtureId: string;
-  event: AgentEventEnvelope<TPayload>;
+  event: McsAgentEventEnvelope<TPayload>;
 }
 
-export interface ContextPacketFixture {
+export interface McsContextPacketFixture {
   fixtureId: string;
-  packet: ContextPacketV1;
+  packet: McsContextPacketV1;
 }
 
-export interface RuntimeVerificationReportShape {
+export interface McsRuntimeVerificationReportShape {
   reportId: string;
-  status: RuntimeQaStatus;
+  status: McsRuntimeQaStatus;
   commandsRun: string[];
   environmentFlags: Record<string, string>;
-  assertions: RuntimeQaAssertion[];
+  assertions: McsRuntimeQaAssertion[];
   failures: string[];
   limitations: string[];
   recommendation: string;

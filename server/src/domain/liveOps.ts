@@ -36,16 +36,16 @@ import {
 } from '../services/poolEvents.js';
 import { instrumentedGatewayCall, latencyPercentiles } from '../services/gatewayLatency.js';
 import type {
-  AdminDashboardFilter,
-  AdminFunnelKind,
-  AdminFunnelResponse,
-  AdminFunnelStage,
-  AdminGrowthCard,
-  AdminGrowthCardsResponse,
-  AdminLiveGridResponse,
-  AdminLiveGridSlot,
-  AdminLiveUsageSample,
-  TokenState,
+  McsAdminDashboardFilter,
+  McsAdminFunnelKind,
+  McsAdminFunnelResponse,
+  McsAdminFunnelStage,
+  McsAdminGrowthCard,
+  McsAdminGrowthCardsResponse,
+  McsAdminLiveGridResponse,
+  McsAdminLiveGridSlot,
+  McsAdminLiveUsageSample,
+  McsTokenState,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -85,7 +85,7 @@ interface ProspectDoc {
   lastInitial?: string;
   location?: { city?: string; stateOrRegion?: string };
   sponsorTmagId: string;
-  state: TokenState;
+  state: McsTokenState;
 }
 
 interface MichaelDoc {
@@ -112,7 +112,7 @@ interface ActivityDoc {
  * out today), placements are the only event stream we have — surfacing
  * them under the contract's `eventsPerMinute` field is the honest call.
  */
-export function getUsageSample(): AdminLiveUsageSample {
+export function getUsageSample(): McsAdminLiveUsageSample {
   const { p50, p95 } = latencyPercentiles();
   return {
     sampledAt: new Date().toISOString(),
@@ -185,11 +185,11 @@ async function aggregateCount(
 }
 
 async function buildCard(
-  window: AdminGrowthCard['window'],
+  window: McsAdminGrowthCard['window'],
   scopedTmagIds: string[] | null,
   windowMs: number,
   now: number,
-): Promise<AdminGrowthCard> {
+): Promise<McsAdminGrowthCard> {
   const currentFrom = new Date(now - windowMs).toISOString();
   const currentTo = new Date(now).toISOString();
   const previousFrom = new Date(now - 2 * windowMs).toISOString();
@@ -212,8 +212,8 @@ async function buildCard(
 }
 
 export async function getGrowthCards(
-  filter: AdminDashboardFilter,
-): Promise<AdminGrowthCardsResponse> {
+  filter: McsAdminDashboardFilter,
+): Promise<McsAdminGrowthCardsResponse> {
   const scopedTmagIds = await resolveScopedTmagIds(filter);
   const now = Date.now();
 
@@ -232,7 +232,7 @@ export async function getGrowthCards(
 
 /* ─── H.3 · Live grid ─────────────────────────────────────────────── */
 
-function ageBucketOf(ageDays: number): AdminLiveGridSlot['ageBucket'] {
+function ageBucketOf(ageDays: number): McsAdminLiveGridSlot['ageBucket'] {
   // Thresholds from the contract: 0–6 fresh, 7–20 warming, 21–41 aging,
   // 42–56 stale. Anything past 56 still buckets as 'stale' (placements
   // older than the 56-day cap should have been flushed already; if one
@@ -244,8 +244,8 @@ function ageBucketOf(ageDays: number): AdminLiveGridSlot['ageBucket'] {
 }
 
 export async function getLiveGrid(
-  filter: AdminDashboardFilter,
-): Promise<AdminLiveGridResponse> {
+  filter: McsAdminDashboardFilter,
+): Promise<McsAdminLiveGridResponse> {
   const scopedTmagIds = await resolveScopedTmagIds(filter);
   const sponsorScope =
     scopedTmagIds === null ? {} : { sponsorTmagId: { $in: scopedTmagIds } };
@@ -298,7 +298,7 @@ export async function getLiveGrid(
   );
 
   const now = Date.now();
-  const slots: AdminLiveGridSlot[] = placements.map((p) => {
+  const slots: McsAdminLiveGridSlot[] = placements.map((p) => {
     const prospect = prospectById.get(p.prospectId);
     const sponsor = sponsorById.get(p.sponsorTmagId);
     const ageDays = Math.max(
@@ -349,7 +349,7 @@ export async function getLiveGrid(
  * current state remains in the funnel rail (matching the same approach
  * the dashboard takes).
  */
-const PROSPECT_STAGES: ReadonlyArray<{ key: TokenState; label: string }> = [
+const PROSPECT_STAGES: ReadonlyArray<{ key: McsTokenState; label: string }> = [
   { key: 'minted', label: 'Minted' },
   { key: 'clicked', label: 'Clicked' },
   { key: 'video_started', label: 'Video started' },
@@ -357,7 +357,7 @@ const PROSPECT_STAGES: ReadonlyArray<{ key: TokenState; label: string }> = [
   { key: 'enrolled', label: 'Enrolled' },
 ];
 
-const PROSPECT_STAGE_ORDER: ReadonlyArray<TokenState> = [
+const PROSPECT_STAGE_ORDER: ReadonlyArray<McsTokenState> = [
   'minted',
   'clicked',
   'video_started',
@@ -368,7 +368,7 @@ const PROSPECT_STAGE_ORDER: ReadonlyArray<TokenState> = [
   'enrolled',
 ];
 
-function stateOrdinal(state: TokenState): number {
+function stateOrdinal(state: McsTokenState): number {
   const idx = PROSPECT_STAGE_ORDER.indexOf(state);
   return idx === -1 ? -1 : idx;
 }
@@ -379,13 +379,13 @@ const PROSPECT_STAGE_THRESHOLDS = PROSPECT_STAGES.map((s) =>
 );
 
 async function buildProspectFunnel(
-  filter: AdminDashboardFilter,
-): Promise<AdminFunnelResponse> {
+  filter: McsAdminDashboardFilter,
+): Promise<McsAdminFunnelResponse> {
   const scopedTmagIds = await resolveScopedTmagIds(filter);
   const sponsorScope =
     scopedTmagIds === null ? {} : { sponsorTmagId: { $in: scopedTmagIds } };
 
-  const res = await instrumentedGatewayCall<{ documents: Array<{ state: TokenState }> }>(
+  const res = await instrumentedGatewayCall<{ documents: Array<{ state: McsTokenState }> }>(
     'mongodb',
     'query',
     {
@@ -412,7 +412,7 @@ async function buildProspectFunnel(
   }
 
   const first = counts[0] ?? 0;
-  const stages: AdminFunnelStage[] = PROSPECT_STAGES.map((s, i) => ({
+  const stages: McsAdminFunnelStage[] = PROSPECT_STAGES.map((s, i) => ({
     key: s.key,
     label: s.label,
     count: counts[i] ?? 0,
@@ -450,8 +450,8 @@ const BA_STAGES = [
 ] as const;
 
 async function buildBaActivationFunnel(
-  filter: AdminDashboardFilter,
-): Promise<AdminFunnelResponse> {
+  filter: McsAdminDashboardFilter,
+): Promise<McsAdminFunnelResponse> {
   const scopedTmagIds = await resolveScopedTmagIds(filter);
 
   const baFilter: Record<string, unknown> = { deleted: { $ne: true } };
@@ -544,7 +544,7 @@ async function buildBaActivationFunnel(
 
   const counts = [signedUp, welcomed, steve, invited, videoComplete, enrolled];
   const first = counts[0] ?? 0;
-  const stages: AdminFunnelStage[] = BA_STAGES.map((s, i) => ({
+  const stages: McsAdminFunnelStage[] = BA_STAGES.map((s, i) => ({
     key: s.key,
     label: s.label,
     count: counts[i] ?? 0,
@@ -560,9 +560,9 @@ async function buildBaActivationFunnel(
 }
 
 export async function getFunnel(
-  kind: AdminFunnelKind,
-  filter: AdminDashboardFilter,
-): Promise<AdminFunnelResponse> {
+  kind: McsAdminFunnelKind,
+  filter: McsAdminDashboardFilter,
+): Promise<McsAdminFunnelResponse> {
   return kind === 'prospect'
     ? buildProspectFunnel(filter)
     : buildBaActivationFunnel(filter);

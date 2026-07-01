@@ -25,15 +25,15 @@
 import { randomUUID } from 'node:crypto';
 import type {
   TmagId,
-  ContextPacketId,
-  ContextPacketRequest,
-  ContextPacketV1,
-  ContextRequestId,
-  RuntimeMode,
-  RuntimeRequestScope,
-  TeamId,
-  TenantContext,
-  TenantId,
+  McsContextPacketId,
+  McsContextPacketRequest,
+  McsContextPacketV1,
+  McsContextRequestId,
+  McsRuntimeMode,
+  McsRuntimeRequestScope,
+  McsTeamId,
+  McsTenantContext,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   TEAM_MAGNIFICENT_KEY,
@@ -51,8 +51,8 @@ const OBJECTIVE = 'training_support' as const;
 // Server-side Team Magnificent scope constants (never body-derived). Only the
 // teamKey/teamName are contract-validated; tenant/team ids are opaque non-empty
 // identifiers aligned with the rest of the runtime layer.
-const TENANT_ID = 'tenant_team_magnificent' as TenantId;
-const TEAM_ID = 'team_magnificent' as TeamId;
+const TENANT_ID = 'tenant_team_magnificent' as McsTenantId;
+const TEAM_ID = 'team_magnificent' as McsTeamId;
 const TENANT_NAME = 'Team Magnificent Tenant';
 
 /**
@@ -64,7 +64,7 @@ export interface MichaelRuntimeContextFoundationInput {
   /** Authenticated BA id — sourced from the session only. */
   readonly tmagId: TmagId;
   /** BA runtime transport mode, server-derived. */
-  readonly mode: RuntimeMode;
+  readonly mode: McsRuntimeMode;
   /** ISO timestamp anchoring the assembled session context. */
   readonly createdAt: string;
 }
@@ -83,12 +83,12 @@ export function createMichaelRuntimeContextManagerPort(
   return {
     assembledBy: 'context_manager',
     async requestContextPacket(
-      _scope: RuntimeRequestScope,
-      request: ContextPacketRequest,
-    ): Promise<ContextPacketV1> {
+      _scope: McsRuntimeRequestScope,
+      request: McsContextPacketRequest,
+    ): Promise<McsContextPacketV1> {
       return buildContextPacket({
-        packetId: `ctx_packet_${randomUUID()}` as ContextPacketId,
-        requestId: request.requestId as unknown as ContextRequestId,
+        packetId: `ctx_packet_${randomUUID()}` as McsContextPacketId,
+        requestId: request.requestId as unknown as McsContextRequestId,
         tenant: {
           tenantId: TENANT_ID,
           tenantName: TENANT_NAME,
@@ -146,7 +146,7 @@ export function createMichaelRuntimeContextManagerPort(
   };
 }
 
-function resolveEnvironment(): TenantContext['environment'] {
+function resolveEnvironment(): McsTenantContext['environment'] {
   const env = process.env.NODE_ENV;
   if (env === 'production') return 'production';
   if (env === 'staging') return 'staging';

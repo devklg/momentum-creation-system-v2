@@ -46,11 +46,11 @@ import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
 import { findBAByTmagId, type BARecord } from './ba.js';
 import type {
-  AdminBaDirectoryRow,
-  AdminBaNoteEntry,
-  AdminBaProfileBundle,
-  AdminSponsorOverrideEntry,
-  IsoTimestamp,
+  McsAdminBaDirectoryRow,
+  McsAdminBaNoteEntry,
+  McsAdminBaProfileBundle,
+  McsAdminSponsorOverrideEntry,
+  McsIsoTimestamp,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -183,7 +183,7 @@ function deriveStatus(ba: BARecordWithExtras): 'active' | 'inactive' | 'suspende
   return since <= ACTIVE_LOGIN_WINDOW_MS ? 'active' : 'inactive';
 }
 
-function maxIso(...values: Array<string | null | undefined>): IsoTimestamp | null {
+function maxIso(...values: Array<string | null | undefined>): McsIsoTimestamp | null {
   let best: string | null = null;
   for (const v of values) {
     if (!v) continue;
@@ -234,7 +234,7 @@ async function fetchAllPaged<T>(
  */
 export async function listBADirectory(
   limit = 500,
-): Promise<{ rows: AdminBaDirectoryRow[]; leaderDetectionNote: string }> {
+): Promise<{ rows: McsAdminBaDirectoryRow[]; leaderDetectionNote: string }> {
   // 1. Pull the BA roster (newest first, capped).
   const baRaw = await gatewayCall<{ documents: BARecordWithExtras[] }>(
     'mongodb',
@@ -358,7 +358,7 @@ export async function listBADirectory(
   for (const t of tags) curatedByTmagId.set(t.tmagId, t.curated);
 
   // 9. Assemble rows.
-  const rows: AdminBaDirectoryRow[] = bas.map((ba) => {
+  const rows: McsAdminBaDirectoryRow[] = bas.map((ba) => {
     const completedMods = completedModulesByTmagId.get(ba.tmagId) ?? 0;
     const welcomeAt = welcomeByTmagId.get(ba.tmagId) ?? null;
     const originalSponsorTmagId =
@@ -403,7 +403,7 @@ export async function listBADirectory(
 /** Build the C.4 profile bundle for one BA. */
 export async function getTmagProfileBundle(
   tmagId: string,
-): Promise<AdminBaProfileBundle | null> {
+): Promise<McsAdminBaProfileBundle | null> {
   // Reuse listBADirectory's projection so the table row + drawer row are
   // identical (the directory limit is enough for typical use; if the
   // target BA is outside the window, fall through to a focused build).
@@ -465,7 +465,7 @@ export async function getTmagProfileBundle(
 
 async function fetchOverrideHistory(
   tmagId: string,
-): Promise<AdminSponsorOverrideEntry[]> {
+): Promise<McsAdminSponsorOverrideEntry[]> {
   const r = await gatewayCall<{ documents: SponsorOverrideRecord[] }>(
     'mongodb',
     'query',
@@ -490,7 +490,7 @@ async function fetchOverrideHistory(
   }));
 }
 
-async function fetchBaNotes(tmagId: string): Promise<AdminBaNoteEntry[]> {
+async function fetchBaNotes(tmagId: string): Promise<McsAdminBaNoteEntry[]> {
   const r = await gatewayCall<{ documents: BaNoteRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: BA_NOTES_COLLECTION,
@@ -522,7 +522,7 @@ export async function applySponsorOverride(args: {
   reason: string;
   performedByTmagId: string;
   performedByDisplayName: string;
-}): Promise<{ ok: true; entry: AdminSponsorOverrideEntry } | { ok: false; error: SponsorOverrideError }> {
+}): Promise<{ ok: true; entry: McsAdminSponsorOverrideEntry } | { ok: false; error: SponsorOverrideError }> {
   const ba = (await findBAByTmagId(args.tmagId)) as BARecordWithExtras | null;
   if (!ba) return { ok: false, error: { kind: 'ba_not_found' } };
 
@@ -659,7 +659,7 @@ export async function applySponsorOverride(args: {
     },
   });
 
-  const entry: AdminSponsorOverrideEntry = {
+  const entry: McsAdminSponsorOverrideEntry = {
     overrideId,
     tmagId: args.tmagId,
     previousSponsorTmagId,
@@ -736,7 +736,7 @@ export async function appendBaNote(args: {
   text: string;
   authorTmagId: string;
   authorDisplayName: string;
-}): Promise<AdminBaNoteEntry> {
+}): Promise<McsAdminBaNoteEntry> {
   const noteId = mintNoteId();
   const createdAt = new Date().toISOString();
   const record: BaNoteRecord = {

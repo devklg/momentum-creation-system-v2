@@ -23,10 +23,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type {
-  AdminDashboardFilter,
-  AdminDashboardFiltersResponse,
-  AdminProspectDirectoryResponse,
-  AdminProspectDirectoryRow,
+  McsAdminDashboardFilter,
+  McsAdminDashboardFiltersResponse,
+  McsAdminProspectDirectoryResponse,
+  McsAdminProspectDirectoryRow,
 } from '@momentum/shared';
 import { FilterBar } from '@/components/dashboard/FilterBar';
 import { DirectoryTable } from '@/components/prospect-oversight/DirectoryTable';
@@ -37,7 +37,7 @@ import {
   type ProspectCrudResponse,
 } from '@/components/prospect-oversight/ProspectCrudModal';
 
-const DEFAULT_FILTER: AdminDashboardFilter = { tmagId: null, leaderGroup: 'all' };
+const DEFAULT_FILTER: McsAdminDashboardFilter = { tmagId: null, leaderGroup: 'all' };
 
 function readProspectIdParam(): string | null {
   if (typeof window === 'undefined') return null;
@@ -56,9 +56,9 @@ function writeProspectIdParam(prospectId: string | null): void {
 }
 
 export function ProspectsPage() {
-  const [filter, setFilter] = useState<AdminDashboardFilter>(DEFAULT_FILTER);
-  const [options, setOptions] = useState<AdminDashboardFiltersResponse | null>(null);
-  const [rows, setRows] = useState<AdminProspectDirectoryRow[] | null>(null);
+  const [filter, setFilter] = useState<McsAdminDashboardFilter>(DEFAULT_FILTER);
+  const [options, setOptions] = useState<McsAdminDashboardFiltersResponse | null>(null);
+  const [rows, setRows] = useState<McsAdminProspectDirectoryRow[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [selectedProspectId, setSelectedProspectId] = useState<string | null>(
@@ -73,7 +73,7 @@ export function ProspectsPage() {
         const res = await fetch('/api/admin/prospects/filters', {
           credentials: 'include',
         });
-        const data = (await res.json()) as AdminDashboardFiltersResponse & {
+        const data = (await res.json()) as McsAdminDashboardFiltersResponse & {
           error?: string;
         };
         if (!data.ok) {
@@ -87,7 +87,7 @@ export function ProspectsPage() {
     })();
   }, []);
 
-  const loadRows = useCallback(async (f: AdminDashboardFilter) => {
+  const loadRows = useCallback(async (f: McsAdminDashboardFilter) => {
     setLoading(true);
     setErr(null);
     try {
@@ -97,7 +97,7 @@ export function ProspectsPage() {
       const res = await fetch(`/api/admin/prospects?${params.toString()}`, {
         credentials: 'include',
       });
-      const data = (await res.json()) as AdminProspectDirectoryResponse & {
+      const data = (await res.json()) as McsAdminProspectDirectoryResponse & {
         error?: string;
       };
       if (!data.ok) {
@@ -123,7 +123,7 @@ export function ProspectsPage() {
 
   // Apply a single refreshed row in-place after an intervention; avoids
   // a full directory refetch.
-  const handleRowRefreshed = useCallback((updated: AdminProspectDirectoryRow) => {
+  const handleRowRefreshed = useCallback((updated: McsAdminProspectDirectoryRow) => {
     setRows((prev) =>
       prev ? prev.map((r) => (r.prospectId === updated.prospectId ? updated : r)) : prev,
     );

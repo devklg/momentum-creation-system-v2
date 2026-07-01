@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type {
-  ApprovedKnowledgeQueryRequest,
-  ApprovedKnowledgeQueryResult,
+  McsApprovedKnowledgeQueryRequest,
+  McsApprovedKnowledgeQueryResult,
   TmagId,
-  KnowledgeId,
-  RuntimeRequestScope,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsKnowledgeId,
+  McsRuntimeRequestScope,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
@@ -18,17 +18,17 @@ import {
 } from '../approvedKnowledgeQueryContract.js';
 import { TEAM_MAGNIFICENT_KEY, TEAM_MAGNIFICENT_NAME } from '../validation.js';
 
-function baScope(): RuntimeRequestScope {
+function baScope(): McsRuntimeRequestScope {
   return {
-    tenantId: 'tenant_team_magnificent' as TenantId,
-    teamId: 'team_magnificent' as TeamId,
+    tenantId: 'tenant_team_magnificent' as McsTenantId,
+    teamId: 'team_magnificent' as McsTeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
     tmagId: 'TMAG-20260101-ABC123' as TmagId,
   };
 }
 
-function validRequest(): ApprovedKnowledgeQueryRequest {
+function validRequest(): McsApprovedKnowledgeQueryRequest {
   return {
     schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
     scope: baScope(),
@@ -42,22 +42,22 @@ function validRequest(): ApprovedKnowledgeQueryRequest {
 
 function approvedReference(id: string) {
   return {
-    knowledgeId: `k_${id}` as KnowledgeId,
+    knowledgeId: `k_${id}` as McsKnowledgeId,
     domain: 'training' as const,
     status: 'approved' as const,
     language: 'en' as const,
     translationStatus: 'same_language' as const,
-    sourceId: `src_${id}` as SourceId,
+    sourceId: `src_${id}` as McsSourceId,
   };
 }
 
-function okResult(): ApprovedKnowledgeQueryResult {
+function okResult(): McsApprovedKnowledgeQueryResult {
   return {
     schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
     status: 'ok',
     scope: baScope(),
     references: [approvedReference('1'), approvedReference('2')],
-    excluded: [{ sourceId: 'src_cand_1' as SourceId, reason: 'candidate_not_approved' }],
+    excluded: [{ sourceId: 'src_cand_1' as McsSourceId, reason: 'candidate_not_approved' }],
     metadata: {
       approvedCount: 2,
       candidateExcludedCount: 1,
@@ -72,7 +72,7 @@ function okResult(): ApprovedKnowledgeQueryResult {
   };
 }
 
-function degradedResult(): ApprovedKnowledgeQueryResult {
+function degradedResult(): McsApprovedKnowledgeQueryResult {
   return {
     schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
     status: 'degraded',
@@ -219,7 +219,7 @@ describe('ApprovedKnowledgeQueryResult validation', () => {
   it('rejects an unknown exclusion reason', () => {
     const bad = okResult();
     // @ts-expect-error — forbidden reason injected on purpose.
-    bad.excluded = [{ sourceId: 'src_x' as SourceId, reason: 'just_because' }];
+    bad.excluded = [{ sourceId: 'src_x' as McsSourceId, reason: 'just_because' }];
     const result = validateApprovedKnowledgeQueryResult(bad);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.errors.some((e) => e.code === 'excluded_invalid')).toBe(true);

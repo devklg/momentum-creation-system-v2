@@ -30,12 +30,12 @@ import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import {
-  ORIENTATION_SESSION_CAPACITY,
-  type OrientationReservationRecord,
-  type OrientationSession,
-  type OrientationSessionAvailability,
-  type OrientationSessionWithRoster,
-  type OrientationRosterSeat,
+  MCS_ORIENTATION_SESSION_CAPACITY,
+  type McsOrientationReservationRecord,
+  type McsOrientationSession,
+  type McsOrientationSessionAvailability,
+  type McsOrientationSessionWithRoster,
+  type McsOrientationRosterSeat,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -89,8 +89,8 @@ export async function ensureOrientationCollection(): Promise<void> {
 /** A single upcoming session by id, or null if missing/cancelled/past. */
 export async function findSessionById(
   sessionId: string,
-): Promise<OrientationSession | null> {
-  const result = await gatewayCall<{ documents: OrientationSession[] }>(
+): Promise<McsOrientationSession | null> {
+  const result = await gatewayCall<{ documents: McsOrientationSession[] }>(
     'mongodb',
     'query',
     {
@@ -104,9 +104,9 @@ export async function findSessionById(
 }
 
 /** All upcoming sessions (status upcoming, in the future), soonest first. */
-export async function listUpcomingSessions(): Promise<OrientationSession[]> {
+export async function listUpcomingSessions(): Promise<McsOrientationSession[]> {
   const now = new Date().toISOString();
-  const result = await gatewayCall<{ documents: OrientationSession[] }>(
+  const result = await gatewayCall<{ documents: McsOrientationSession[] }>(
     'mongodb',
     'query',
     {
@@ -121,8 +121,8 @@ export async function listUpcomingSessions(): Promise<OrientationSession[]> {
 }
 
 /** All sessions (any status), newest-scheduled first — for the founder view. */
-export async function listAllSessions(): Promise<OrientationSession[]> {
-  const result = await gatewayCall<{ documents: OrientationSession[] }>(
+export async function listAllSessions(): Promise<McsOrientationSession[]> {
+  const result = await gatewayCall<{ documents: McsOrientationSession[] }>(
     'mongodb',
     'query',
     {
@@ -139,9 +139,9 @@ export async function listAllSessions(): Promise<OrientationSession[]> {
 /** Active (status:'reserved') reservations for a set of session ids. */
 async function reservedForSessions(
   sessionIds: string[],
-): Promise<OrientationReservationRecord[]> {
+): Promise<McsOrientationReservationRecord[]> {
   if (sessionIds.length === 0) return [];
-  const result = await gatewayCall<{ documents: OrientationReservationRecord[] }>(
+  const result = await gatewayCall<{ documents: McsOrientationReservationRecord[] }>(
     'mongodb',
     'query',
     {
@@ -158,8 +158,8 @@ async function reservedForSessions(
 /** The BA's own active reservations (status:'reserved'), newest first. */
 async function myReservedReservations(
   tmagId: string,
-): Promise<OrientationReservationRecord[]> {
-  const result = await gatewayCall<{ documents: OrientationReservationRecord[] }>(
+): Promise<McsOrientationReservationRecord[]> {
+  const result = await gatewayCall<{ documents: McsOrientationReservationRecord[] }>(
     'mongodb',
     'query',
     {
@@ -179,7 +179,7 @@ async function myReservedReservations(
  * session id the BA currently holds (a BA holds at most one active seat).
  */
 export async function getSessionAvailabilityForBA(tmagId: string): Promise<{
-  sessions: OrientationSessionAvailability[];
+  sessions: McsOrientationSessionAvailability[];
   myReservationSessionId: string | null;
 }> {
   const sessions = await listUpcomingSessions();
@@ -199,9 +199,9 @@ export async function getSessionAvailabilityForBA(tmagId: string): Promise<{
   const myReservationSessionId =
     sessions.find((s) => mineBySession.has(s.sessionId))?.sessionId ?? null;
 
-  const availability: OrientationSessionAvailability[] = sessions.map((s) => {
+  const availability: McsOrientationSessionAvailability[] = sessions.map((s) => {
     const seatsTaken = takenBySession.get(s.sessionId) ?? 0;
-    const capacity = s.capacity ?? ORIENTATION_SESSION_CAPACITY;
+    const capacity = s.capacity ?? MCS_ORIENTATION_SESSION_CAPACITY;
     return {
       sessionId: s.sessionId,
       scheduledFor: s.scheduledFor,
@@ -222,12 +222,12 @@ export async function getSessionAvailabilityForBA(tmagId: string): Promise<{
  * reserved BAs. One reservation read covers all sessions.
  */
 export async function listSessionsWithRosters(): Promise<
-  OrientationSessionWithRoster[]
+  McsOrientationSessionWithRoster[]
 > {
   const sessions = await listAllSessions();
   const reserved = await reservedForSessions(sessions.map((s) => s.sessionId));
 
-  const rosterBySession = new Map<string, OrientationRosterSeat[]>();
+  const rosterBySession = new Map<string, McsOrientationRosterSeat[]>();
   for (const r of reserved) {
     (rosterBySession.get(r.sessionId) ?? rosterBySession.set(r.sessionId, []).get(r.sessionId)!).push({
       reservationId: r.reservationId,
@@ -239,7 +239,7 @@ export async function listSessionsWithRosters(): Promise<
 
   return sessions.map((s) => {
     const roster = rosterBySession.get(s.sessionId) ?? [];
-    const capacity = s.capacity ?? ORIENTATION_SESSION_CAPACITY;
+    const capacity = s.capacity ?? MCS_ORIENTATION_SESSION_CAPACITY;
     return {
       sessionId: s.sessionId,
       scheduledFor: s.scheduledFor,
@@ -258,12 +258,12 @@ export async function listSessionsWithRosters(): Promise<
 /** Project one session into the founder roster shape (post-create echo). */
 export async function getSessionWithRoster(
   sessionId: string,
-): Promise<OrientationSessionWithRoster | null> {
+): Promise<McsOrientationSessionWithRoster | null> {
   const session = await findSessionById(sessionId);
   if (!session) return null;
   const reserved = await reservedForSessions([sessionId]);
-  const capacity = session.capacity ?? ORIENTATION_SESSION_CAPACITY;
-  const roster: OrientationRosterSeat[] = reserved.map((r) => ({
+  const capacity = session.capacity ?? MCS_ORIENTATION_SESSION_CAPACITY;
+  const roster: McsOrientationRosterSeat[] = reserved.map((r) => ({
     reservationId: r.reservationId,
     tmagId: r.tmagId,
     baName: r.baName,
@@ -301,7 +301,7 @@ export interface CreateOrientationSessionInput {
  */
 export async function createOrientationSession(
   input: CreateOrientationSessionInput,
-): Promise<OrientationSession> {
+): Promise<McsOrientationSession> {
   await ensureOrientationCollection();
 
   const createdAt = new Date().toISOString();
@@ -310,11 +310,11 @@ export async function createOrientationSession(
   const sessionId = `orientation_${randomUUID()}`;
   const hosts =
     input.hosts && input.hosts.length > 0 ? input.hosts : ORIENTATION_DEFAULT_HOSTS;
-  const capacity = input.capacity ?? ORIENTATION_SESSION_CAPACITY;
+  const capacity = input.capacity ?? MCS_ORIENTATION_SESSION_CAPACITY;
   const durationMinutes = input.durationMinutes ?? ORIENTATION_DURATION_MINUTES;
   const joinUrl = input.joinUrl ?? null;
 
-  const session: OrientationSession = {
+  const session: McsOrientationSession = {
     sessionId,
     scheduledFor: input.scheduledFor,
     hosts,
@@ -405,7 +405,7 @@ export async function reserveSeat(
     return { ok: false, error: { kind: 'session_not_bookable' } };
   }
 
-  const capacity = session.capacity ?? ORIENTATION_SESSION_CAPACITY;
+  const capacity = session.capacity ?? MCS_ORIENTATION_SESSION_CAPACITY;
 
   // The BA's existing active seats. If they already hold THIS session, return
   // it idempotently; if they hold a DIFFERENT one, make them cancel first.
@@ -488,7 +488,7 @@ export async function reserveSeat(
 
   // Best-effort confirmation SMS to the BA (reuses the §2.6 mechanic). Dormant
   // when Telnyx is unconfigured — recorded 'skipped', never blocks the booking.
-  let smsDeliveryStatus: OrientationReservationRecord['smsDeliveryStatus'] = 'queued';
+  let smsDeliveryStatus: McsOrientationReservationRecord['smsDeliveryStatus'] = 'queued';
   let smsDeliveryError: string | null = null;
   if (!input.baPhone) {
     smsDeliveryStatus = 'skipped';

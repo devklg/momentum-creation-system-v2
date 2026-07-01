@@ -3,11 +3,11 @@
  * Source: docs/locked-spec.md "Compliance — never on `.com`" section.
  */
 
-export const COMPLIANCE_FRAME = 
+export const MCS_COMPLIANCE_FRAME = 
   'it shows really how it works, and people are signing up' as const;
 
 /** What .com surfaces NEVER do. */
-export const NEVER_ON_COM = [
+export const MCS_NEVER_ON_COM = [
   'Income claims or earnings projections',
   'Placement or queue-position-equals-leg-position promises',
   'AI prospecting (Michael is BA-facing only)',
@@ -18,7 +18,7 @@ export const NEVER_ON_COM = [
 ] as const;
 
 /** Disclaimer rendered at the bottom of every .com surface. Verbatim from locked-spec.md. */
-export const COM_DISCLAIMER =
+export const MCS_COM_DISCLAIMER =
   'Queue positions and momentum displays demonstrate team activity in real time and ' +
   'do not guarantee any final placement, compensation, or earnings outcome. ' +
   'Market figures cited from public sources are for context only. ' +

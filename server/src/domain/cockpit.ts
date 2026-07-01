@@ -25,31 +25,31 @@ import { buildDiscoveryView } from './steve-success-interview.js';
 import { getFastStartProgress } from './training.js';
 import { questionnaireExists } from './questionnaire.js';
 import type {
-  CallbackIntent,
-  CockpitSponsorFallback,
-  CockpitActionItem,
-  CockpitSummaryResponse,
-  CockpitTodaysActionsResponse,
-  CrmDisposition,
-  CrmFollowUpRecord,
-  InvitationActivityEntry,
-  InviteDisplayStatus,
-  InviteTokenRecord,
-  InviteSummary,
-  MyInvitesResponse,
-  ProspectFocusQueueItem,
-  ProspectLastSignal,
-  ProspectLifecycleStage,
-  ProspectMomentumCrmSummary,
-  ProspectMomentumRow,
-  ProspectMomentumViewerResponse,
-  ProspectNextAction,
-  SponsorFallbackFounder,
-  LaunchNextAction,
-  LaunchStep,
-  LaunchStepId,
-  TeamLaunchCenterResponse,
-  TokenState,
+  McsCallbackIntent,
+  McsCockpitSponsorFallback,
+  McsCockpitActionItem,
+  McsCockpitSummaryResponse,
+  McsCockpitTodaysActionsResponse,
+  McsCrmDisposition,
+  McsCrmFollowUpRecord,
+  McsInvitationActivityEntry,
+  McsInviteDisplayStatus,
+  McsInviteTokenRecord,
+  McsInviteSummary,
+  McsMyInvitesResponse,
+  McsProspectFocusQueueItem,
+  McsProspectLastSignal,
+  McsProspectLifecycleStage,
+  McsProspectMomentumCrmSummary,
+  McsProspectMomentumRow,
+  McsProspectMomentumViewerResponse,
+  McsProspectNextAction,
+  McsSponsorFallbackFounder,
+  McsLaunchNextAction,
+  McsLaunchStep,
+  McsLaunchStepId,
+  McsTeamLaunchCenterResponse,
+  McsTokenState,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -112,7 +112,7 @@ function isSponsorInactive(sp: BARecord): boolean {
  * co_leader), so a leader added later (extensible host model, 3.3) is picked
  * up automatically. Founder role sorts before co_leader so Kevin leads.
  */
-async function getFounderContacts(): Promise<SponsorFallbackFounder[]> {
+async function getFounderContacts(): Promise<McsSponsorFallbackFounder[]> {
   const res = await gatewayCall<{ documents: Array<BARecord & BaLifecycleExtras> }>(
     'mongodb',
     'query',
@@ -147,7 +147,7 @@ interface ProspectDoc {
   lastInitial?: string;
   location?: { city?: string; stateOrRegion?: string; country?: string };
   sponsorTmagId: string;
-  state: TokenState;
+  state: McsTokenState;
   positionNumber: number | null;
   becameCustomer?: boolean;
   createdAt: string;
@@ -156,7 +156,7 @@ interface ProspectDoc {
   sentAt?: string | null;
   token?: string;
   message?: string | null;
-  source?: InviteSummary['source'];
+  source?: McsInviteSummary['source'];
   placedAt?: string | null;
   updatedAt?: string | null;
   deleted?: boolean;
@@ -166,18 +166,18 @@ interface ProspectDoc {
 
 interface CallbackDoc {
   prospectId: string;
-  intent: CallbackIntent;
+  intent: McsCallbackIntent;
   createdAt: string;
 }
 
-interface TokenProjectionDoc extends InviteTokenRecord {
+interface TokenProjectionDoc extends McsInviteTokenRecord {
   updatedAt?: string | null;
 }
 
 interface DispositionDoc {
   prospectId: string;
   sponsorTmagId: string;
-  disposition: CrmDisposition | null;
+  disposition: McsCrmDisposition | null;
   updatedAt: string;
 }
 
@@ -193,10 +193,10 @@ interface NoteDoc {
  * then sent, then draft.
  */
 function computeStatus(
-  tokenState: TokenState,
+  tokenState: McsTokenState,
   sentAt: string | null,
   hasCallback: boolean,
-): InviteDisplayStatus {
+): McsInviteDisplayStatus {
   if (tokenState === 'enrolled') return 'enrolled';
   if (tokenState === 'expired') return 'expired';
   if (hasCallback) return 'callback';
@@ -214,7 +214,7 @@ function computeStatus(
   return sentAt ? 'sent' : 'draft';
 }
 
-const VIDEO_PROGRESS_BY_STATE: Record<TokenState, ProspectMomentumRow['videoProgressPct']> = {
+const VIDEO_PROGRESS_BY_STATE: Record<McsTokenState, McsProspectMomentumRow['videoProgressPct']> = {
   minted: null,
   clicked: null,
   video_started: 0,
@@ -226,7 +226,7 @@ const VIDEO_PROGRESS_BY_STATE: Record<TokenState, ProspectMomentumRow['videoProg
   expired: null,
 };
 
-const LAST_SIGNAL_LABEL: Record<ProspectLastSignal['kind'], string> = {
+const LAST_SIGNAL_LABEL: Record<McsProspectLastSignal['kind'], string> = {
   created: 'Invitation created',
   sent: 'Invitation sent',
   opened: 'Link opened',
@@ -263,9 +263,9 @@ function currentTokenForProspect(
 function lifecycleFor(input: {
   prospect: ProspectDoc;
   token: TokenProjectionDoc | null;
-  latestCallbackIntent: CallbackIntent | null;
+  latestCallbackIntent: McsCallbackIntent | null;
   nowMs: number;
-}): ProspectLifecycleStage {
+}): McsProspectLifecycleStage {
   const { prospect, token, latestCallbackIntent, nowMs } = input;
   const tokenState = token?.state ?? prospect.state;
   const expiresAtMs = new Date(prospect.expiresAt).getTime();
@@ -300,7 +300,7 @@ function lifecycleFor(input: {
   }
 }
 
-function tokenSignalKind(state: TokenState): ProspectLastSignal['kind'] | null {
+function tokenSignalKind(state: McsTokenState): McsProspectLastSignal['kind'] | null {
   switch (state) {
     case 'clicked':
       return 'opened';
@@ -319,8 +319,8 @@ function tokenSignalKind(state: TokenState): ProspectLastSignal['kind'] | null {
   }
 }
 
-function chooseLastSignal(candidates: Array<ProspectLastSignal | null>): ProspectLastSignal {
-  const real = candidates.filter((c): c is ProspectLastSignal => c !== null);
+function chooseLastSignal(candidates: Array<McsProspectLastSignal | null>): McsProspectLastSignal {
+  const real = candidates.filter((c): c is McsProspectLastSignal => c !== null);
   real.sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
   return real[0] ?? {
     kind: 'created',
@@ -333,9 +333,9 @@ function buildLastSignal(input: {
   prospect: ProspectDoc;
   token: TokenProjectionDoc | null;
   latestCallback: CallbackDoc | null;
-  latestActivity: InvitationActivityEntry | null;
-  lifecycle: ProspectLifecycleStage;
-}): ProspectLastSignal {
+  latestActivity: McsInvitationActivityEntry | null;
+  lifecycle: McsProspectLifecycleStage;
+}): McsProspectLastSignal {
   const { prospect, token, latestCallback, latestActivity, lifecycle } = input;
   const tokenKind = token ? tokenSignalKind(token.state) : null;
   const tokenAt =
@@ -446,12 +446,12 @@ function isDue(iso: string | null | undefined, nowMs: number): boolean {
 }
 
 function nextActionFor(input: {
-  lifecycle: ProspectLifecycleStage;
+  lifecycle: McsProspectLifecycleStage;
   prospect: ProspectDoc;
-  crm: ProspectMomentumCrmSummary;
-  lastSignal: ProspectLastSignal;
+  crm: McsProspectMomentumCrmSummary;
+  lastSignal: McsProspectLastSignal;
   nowMs: number;
-}): ProspectNextAction {
+}): McsProspectNextAction {
   const { lifecycle, prospect, crm, lastSignal, nowMs } = input;
   const name = prospect.firstName;
 
@@ -575,7 +575,7 @@ function nextActionFor(input: {
   };
 }
 
-function focusQueueFromRows(rows: ProspectMomentumRow[]): ProspectFocusQueueItem[] {
+function focusQueueFromRows(rows: McsProspectMomentumRow[]): McsProspectFocusQueueItem[] {
   return rows
     .filter((row) => row.nextAction.priority > 0)
     .sort((a, b) => {
@@ -612,8 +612,8 @@ function focusQueueFromRows(rows: ProspectMomentumRow[]): ProspectFocusQueueItem
  * returned keyed by prospectId so the cockpit can expand a row inline.
  */
 export async function listInvitesForBA(tmagId: string): Promise<{
-  invites: InviteSummary[];
-  activityByProspect: Record<string, InvitationActivityEntry[]>;
+  invites: McsInviteSummary[];
+  activityByProspect: Record<string, McsInvitationActivityEntry[]>;
 }> {
   // 1. The BA's prospects, newest first. Soft-deleted prospects (Chat #141)
   // are excluded — the BA has no restore (admin-only), so a removed prospect
@@ -646,7 +646,7 @@ export async function listInvitesForBA(tmagId: string): Promise<{
       limit: 2000,
     },
   );
-  const latestIntentByProspect = new Map<string, CallbackIntent>();
+  const latestIntentByProspect = new Map<string, McsCallbackIntent>();
   for (const cb of callbackRes.documents ?? []) {
     if (!latestIntentByProspect.has(cb.prospectId)) {
       latestIntentByProspect.set(cb.prospectId, cb.intent);
@@ -655,7 +655,7 @@ export async function listInvitesForBA(tmagId: string): Promise<{
 
   // 3. Activity timeline for this BA, grouped per prospect, oldest-first so
   //    the cockpit renders it top-to-bottom chronologically.
-  const activityRes = await gatewayCall<{ documents: InvitationActivityEntry[] }>(
+  const activityRes = await gatewayCall<{ documents: McsInvitationActivityEntry[] }>(
     'mongodb',
     'query',
     {
@@ -666,13 +666,13 @@ export async function listInvitesForBA(tmagId: string): Promise<{
       limit: 5000,
     },
   );
-  const activityByProspect: Record<string, InvitationActivityEntry[]> = {};
+  const activityByProspect: Record<string, McsInvitationActivityEntry[]> = {};
   for (const a of activityRes.documents ?? []) {
     (activityByProspect[a.prospectId] ??= []).push(a);
   }
 
   // Flatten each prospect into a display-ready InviteSummary.
-  const invites: InviteSummary[] = prospects.map((p) => {
+  const invites: McsInviteSummary[] = prospects.map((p) => {
     const sentAt = p.sentAt ?? null;
     const latestCallbackIntent = latestIntentByProspect.get(p.prospectId) ?? null;
     const status = computeStatus(p.state, sentAt, latestCallbackIntent !== null);
@@ -709,7 +709,7 @@ export async function listInvitesForBA(tmagId: string): Promise<{
  */
 export async function getProspectMomentumViewer(
   tmagId: string,
-): Promise<ProspectMomentumViewerResponse> {
+): Promise<McsProspectMomentumViewerResponse> {
   const generatedAt = new Date().toISOString();
   const nowMs = Date.now();
 
@@ -743,14 +743,14 @@ export async function getProspectMomentumViewer(
       sort: { createdAt: -1 },
       limit: 2000,
     }),
-    gatewayCall<{ documents: InvitationActivityEntry[] }>('mongodb', 'query', {
+    gatewayCall<{ documents: McsInvitationActivityEntry[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: ACTIVITY_COLLECTION,
       filter: { sponsorTmagId: tmagId },
       sort: { at: -1 },
       limit: 5000,
     }),
-    gatewayCall<{ documents: CrmFollowUpRecord[] }>('mongodb', 'query', {
+    gatewayCall<{ documents: McsCrmFollowUpRecord[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: FOLLOWUPS_COLLECTION,
       filter: { sponsorTmagId: tmagId, clearedAt: null },
@@ -787,21 +787,21 @@ export async function getProspectMomentumViewer(
     }
   }
 
-  const latestActivityByProspect = new Map<string, InvitationActivityEntry>();
+  const latestActivityByProspect = new Map<string, McsInvitationActivityEntry>();
   for (const a of activityRes.documents ?? []) {
     if (!latestActivityByProspect.has(a.prospectId)) {
       latestActivityByProspect.set(a.prospectId, a);
     }
   }
 
-  const followUpByProspect = new Map<string, CrmFollowUpRecord>();
+  const followUpByProspect = new Map<string, McsCrmFollowUpRecord>();
   for (const f of followUpsRes.documents ?? []) {
     if (!followUpByProspect.has(f.prospectId)) {
       followUpByProspect.set(f.prospectId, f);
     }
   }
 
-  const dispositionByProspect = new Map<string, CrmDisposition | null>();
+  const dispositionByProspect = new Map<string, McsCrmDisposition | null>();
   for (const d of dispositionRes.documents ?? []) {
     if (!dispositionByProspect.has(d.prospectId)) {
       dispositionByProspect.set(d.prospectId, d.disposition ?? null);
@@ -818,7 +818,7 @@ export async function getProspectMomentumViewer(
     notesByProspect.set(n.prospectId, current);
   }
 
-  const rows: ProspectMomentumRow[] = (prospectsRes.documents ?? []).map((p) => {
+  const rows: McsProspectMomentumRow[] = (prospectsRes.documents ?? []).map((p) => {
     const token = currentTokenForProspect(p, tokensByToken, tokensByProspect);
     const tokenState = token?.state ?? p.state;
     const latestCallback = latestCallbackByProspect.get(p.prospectId) ?? null;
@@ -827,7 +827,7 @@ export async function getProspectMomentumViewer(
       count: 0,
       latestNoteAt: null,
     };
-    const crm: ProspectMomentumCrmSummary = {
+    const crm: McsProspectMomentumCrmSummary = {
       disposition: dispositionByProspect.get(p.prospectId) ?? null,
       followUpDueAt: followUp?.dueAt ?? null,
       followUpIsDue: isDue(followUp?.dueAt, nowMs),
@@ -924,7 +924,7 @@ async function countCollection(collection: string, filter: Record<string, unknow
 }
 
 function buildLaunchStep(args: {
-  id: LaunchStepId;
+  id: McsLaunchStepId;
   label: string;
   complete: boolean;
   current?: boolean;
@@ -934,8 +934,8 @@ function buildLaunchStep(args: {
   completedAt?: string | null;
   source: string;
   detail: string;
-}): LaunchStep {
-  const state: LaunchStep['state'] = args.complete
+}): McsLaunchStep {
+  const state: McsLaunchStep['state'] = args.complete
     ? 'complete'
     : args.optional
       ? 'optional'
@@ -955,7 +955,7 @@ function buildLaunchStep(args: {
   };
 }
 
-function nextActionFromSteps(steps: LaunchStep[], launchComplete: boolean): LaunchNextAction {
+function nextActionFromSteps(steps: McsLaunchStep[], launchComplete: boolean): McsLaunchNextAction {
   const active = steps.find((step) => step.state === 'current')
     ?? steps.find((step) => step.state === 'available');
   if (active) {
@@ -987,7 +987,7 @@ function nextActionFromSteps(steps: LaunchStep[], launchComplete: boolean): Laun
  * first cockpit viewport. This deliberately reads existing durable sources
  * instead of writing a parallel launch-state record.
  */
-export async function getTeamLaunchCenter(tmagId: string): Promise<TeamLaunchCenterResponse> {
+export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunchCenterResponse> {
   const [ba, commitmentAcceptedAt, steve, fastStart, questionnaireSubmitted, ivoryNames] =
     await Promise.all([
       findBAByTmagId(tmagId),
@@ -1017,7 +1017,7 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<TeamLaunchCen
   const firstInviteSent = sentCount > 0;
   const ivoryStarted = ivoryNames > 0;
 
-  const steps: LaunchStep[] = [
+  const steps: McsLaunchStep[] = [
     buildLaunchStep({
       id: 'welcome_accepted',
       label: 'Accept the Team Magnificent welcome',
@@ -1185,13 +1185,13 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<TeamLaunchCen
  */
 export async function getCockpitTodaysActions(
   tmagId: string,
-): Promise<CockpitTodaysActionsResponse> {
+): Promise<McsCockpitTodaysActionsResponse> {
   const pmv = await getProspectMomentumViewer(tmagId);
   const nowMs = Date.now();
   const callbackLookbackIso = new Date(nowMs - CALLBACK_LOOKBACK_MS).toISOString();
   const expiringHorizonIso = new Date(nowMs + EXPIRING_WINDOW_MS).toISOString();
 
-  const callbackItems: CockpitActionItem[] = pmv.rows
+  const callbackItems: McsCockpitActionItem[] = pmv.rows
     .filter(
       (row) =>
         row.nextAction.kind === 'reply_to_callback' &&
@@ -1209,7 +1209,7 @@ export async function getCockpitTodaysActions(
 
   const callbackSet = new Set(callbackItems.map((item) => item.prospectId));
 
-  const followupItems: CockpitActionItem[] = pmv.rows
+  const followupItems: McsCockpitActionItem[] = pmv.rows
     .filter(
       (row) =>
         row.nextAction.kind === 'follow_up_due' &&
@@ -1228,7 +1228,7 @@ export async function getCockpitTodaysActions(
 
   const followupSet = new Set(followupItems.map((item) => item.prospectId));
 
-  const expiringItems: CockpitActionItem[] = pmv.rows
+  const expiringItems: McsCockpitActionItem[] = pmv.rows
     .filter((row) => {
       if (callbackSet.has(row.prospectId) || followupSet.has(row.prospectId)) {
         return false;
@@ -1256,7 +1256,7 @@ export async function getCockpitTodaysActions(
 }
 
 /** Convenience wrapper shaping the full GET /api/cockpit/invites response. */
-export async function getMyInvites(tmagId: string): Promise<MyInvitesResponse> {
+export async function getMyInvites(tmagId: string): Promise<McsMyInvitesResponse> {
   const { invites, activityByProspect } = await listInvitesForBA(tmagId);
   return { ok: true, invites, activityByProspect };
 }
@@ -1268,7 +1268,7 @@ export async function getMyInvites(tmagId: string): Promise<MyInvitesResponse> {
  */
 export async function getCockpitSummary(
   tmagId: string,
-): Promise<CockpitSummaryResponse & { sponsorFallback: CockpitSponsorFallback | null }> {
+): Promise<McsCockpitSummaryResponse & { sponsorFallback: McsCockpitSponsorFallback | null }> {
   const ba = await findBAByTmagId(tmagId);
   const { invites } = await listInvitesForBA(tmagId);
 
@@ -1280,8 +1280,8 @@ export async function getCockpitSummary(
   // dormant 120d+), we also surface Kevin + Paul as the support/contact
   // fallback. Placement and the immutable sponsor relationship are untouched —
   // this is a contact path only.
-  let sponsor: CockpitSummaryResponse['sponsor'] = null;
-  let sponsorFallback: CockpitSponsorFallback | null = null;
+  let sponsor: McsCockpitSummaryResponse['sponsor'] = null;
+  let sponsorFallback: McsCockpitSponsorFallback | null = null;
   if (ba?.sponsorTmagId) {
     const sp = await findBAByTmagId(ba.sponsorTmagId);
     if (sp) {

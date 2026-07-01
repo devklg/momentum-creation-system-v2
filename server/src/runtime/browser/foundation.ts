@@ -1,25 +1,25 @@
 import { createHash } from 'node:crypto';
 import type {
-  AgentEventType,
-  AgentKey,
+  McsAgentEventType,
+  McsAgentKey,
   TmagId,
-  BrowserInterimTranscript,
-  BrowserRuntimeSessionScope,
-  BrowserSpeechLocale,
-  BrowserTextTurnWirePayload,
-  BrowserTranscriptTurn,
-  BrowserVoiceAgentTurnWirePayload,
-  BrowserVoiceState,
-  ContextPacketId,
-  ContextPacketV1,
-  CorrelationId,
-  IdempotencyKey,
-  RuntimeLanguage,
-  RuntimeMode,
-  RuntimeResponseId,
-  RuntimeTurnId,
-  SessionId,
-  TranscriptTurnId,
+  McsBrowserInterimTranscript,
+  McsBrowserRuntimeSessionScope,
+  McsBrowserSpeechLocale,
+  McsBrowserTextTurnWirePayload,
+  McsBrowserTranscriptTurn,
+  McsBrowserVoiceAgentTurnWirePayload,
+  McsBrowserVoiceState,
+  McsContextPacketId,
+  McsContextPacketV1,
+  McsCorrelationId,
+  McsIdempotencyKey,
+  McsRuntimeLanguage,
+  McsRuntimeMode,
+  McsRuntimeResponseId,
+  McsRuntimeTurnId,
+  McsSessionId,
+  McsTranscriptTurnId,
 } from '@momentum/shared/runtime';
 import {
   TEAM_MAGNIFICENT_KEY,
@@ -40,13 +40,13 @@ import type {
 export const BROWSER_RUNTIME_SURFACE = 'team' as const;
 export const BROWSER_RUNTIME_ALLOWED_SURFACE = 'apps/team' as const;
 export const TEXT_FALLBACK_REQUIRED = true as const;
-export const SUPPORTED_BROWSER_RUNTIME_LANGUAGES = ['en', 'es'] as const satisfies readonly RuntimeLanguage[];
+export const SUPPORTED_BROWSER_RUNTIME_LANGUAGES = ['en', 'es'] as const satisfies readonly McsRuntimeLanguage[];
 export const BROWSER_RUNTIME_SUPPORTED_LANGUAGES = SUPPORTED_BROWSER_RUNTIME_LANGUAGES;
 export const BROWSER_RUNTIME_AGENT_KEYS = [
   'steve_success',
   'michael_magnificent',
   'ivory',
-] as const satisfies readonly AgentKey[];
+] as const satisfies readonly McsAgentKey[];
 export const BROWSER_RUNTIME_MODES = ['browser_voice', 'browser_text', 'mixed'] as const;
 export const MICROPHONE_PERMISSION_POLICY = 'after_explicit_ba_action_only' as const;
 export const INTERNAL_BROWSER_RUNTIME_EVENT_SOURCES = [
@@ -56,7 +56,7 @@ export const INTERNAL_BROWSER_RUNTIME_EVENT_SOURCES = [
 export const BROWSER_SPEECH_LOCALES_BY_LANGUAGE = {
   en: ['en-US'],
   es: ['es-US', 'es-MX', 'es-ES'],
-} as const satisfies Record<RuntimeLanguage, readonly BrowserSpeechLocale[]>;
+} as const satisfies Record<McsRuntimeLanguage, readonly McsBrowserSpeechLocale[]>;
 export const speechLanguageMap = BROWSER_SPEECH_LOCALES_BY_LANGUAGE;
 
 export type BrowserRuntimeSurface = typeof BROWSER_RUNTIME_SURFACE;
@@ -80,37 +80,37 @@ export interface MicrophonePermissionBoundary {
 }
 
 export interface BrowserRuntimeLanguageSelection {
-  language: RuntimeLanguage;
-  recognitionLocales: readonly BrowserSpeechLocale[];
-  synthesisLocales: readonly BrowserSpeechLocale[];
-  selectedLocale: BrowserSpeechLocale;
+  language: McsRuntimeLanguage;
+  recognitionLocales: readonly McsBrowserSpeechLocale[];
+  synthesisLocales: readonly McsBrowserSpeechLocale[];
+  selectedLocale: McsBrowserSpeechLocale;
   textFallbackAvailable: true;
 }
 
-export interface BrowserRuntimeSessionIdentity extends BrowserRuntimeSessionScope {
+export interface BrowserRuntimeSessionIdentity extends McsBrowserRuntimeSessionScope {
   surface: BrowserRuntimeSurface;
   textFallbackAvailable: true;
   microphonePermission: MicrophonePermissionBoundary;
-  correlationId: CorrelationId;
+  correlationId: McsCorrelationId;
   currentState?: string;
 }
 
 export interface BrowserContextPacketHandoff {
-  packetId: ContextPacketId;
-  status: ContextPacketV1['packetStatus'];
-  contextPacket: ContextPacketV1;
-  sessionId: SessionId;
-  agentKey: AgentKey;
-  language: RuntimeLanguage;
-  mode: RuntimeMode;
+  packetId: McsContextPacketId;
+  status: McsContextPacketV1['packetStatus'];
+  contextPacket: McsContextPacketV1;
+  sessionId: McsSessionId;
+  agentKey: McsAgentKey;
+  language: McsRuntimeLanguage;
+  mode: McsRuntimeMode;
   tmagId: TmagId;
 }
 
 export interface BrowserTextTurn {
   kind: 'text_turn';
-  turnId: RuntimeTurnId;
+  turnId: McsRuntimeTurnId;
   session: BrowserRuntimeSessionIdentity;
-  textPayload: BrowserTextTurnWirePayload;
+  textPayload: McsBrowserTextTurnWirePayload;
   context: BrowserContextPacketHandoff;
   submittedAt: string;
 }
@@ -118,26 +118,26 @@ export interface BrowserTextTurn {
 export interface BrowserVoiceTranscriptTurn {
   kind: 'voice_transcript_turn';
   session: BrowserRuntimeSessionIdentity;
-  transcript: BrowserTranscriptTurn;
-  voicePayload: BrowserVoiceAgentTurnWirePayload;
+  transcript: McsBrowserTranscriptTurn;
+  voicePayload: McsBrowserVoiceAgentTurnWirePayload;
   context: BrowserContextPacketHandoff;
 }
 
 export interface BrowserInterimTranscriptTurn {
   kind: 'interim_transcript';
   session: BrowserRuntimeSessionIdentity;
-  transcript: BrowserInterimTranscript;
-  voiceState: Extract<BrowserVoiceState, 'listening' | 'processing' | 'text_fallback'>;
+  transcript: McsBrowserInterimTranscript;
+  voiceState: Extract<McsBrowserVoiceState, 'listening' | 'processing' | 'text_fallback'>;
 }
 
 export interface BrowserAgentResponseTurn {
   kind: 'agent_response_turn';
-  responseId: RuntimeResponseId;
+  responseId: McsRuntimeResponseId;
   session: BrowserRuntimeSessionIdentity;
-  contextPacketId: ContextPacketId;
+  contextPacketId: McsContextPacketId;
   text: string;
   outputMode: 'text' | 'voice_text';
-  language: RuntimeLanguage;
+  language: McsRuntimeLanguage;
   textFallbackAvailable: true;
   receivedAt: string;
   suggestedActionIds?: readonly string[];
@@ -145,12 +145,12 @@ export interface BrowserAgentResponseTurn {
 
 export interface BrowserRuntimeEventInput<TPayload extends Record<string, unknown>> {
   session: BrowserRuntimeSessionIdentity;
-  eventType: Extract<AgentEventType, `browser_voice.${string}` | `browser_text.${string}`>;
-  idempotencyKey: IdempotencyKey;
+  eventType: Extract<McsAgentEventType, `browser_voice.${string}` | `browser_text.${string}`>;
+  idempotencyKey: McsIdempotencyKey;
   payload: TPayload;
   occurredAt?: string;
   clock?: RuntimeEventClock;
-  contextPacketId?: ContextPacketId;
+  contextPacketId?: McsContextPacketId;
 }
 
 export class BrowserVoiceTextBoundaryError extends Error {
@@ -210,11 +210,11 @@ export function validateBrowserVoiceTextSessionFoundation(
     errors.push(validationIssue('teamKey', 'invalid_scope', 'Browser runtime requires Team Magnificent scope.'));
   }
 
-  if (!BROWSER_RUNTIME_AGENT_KEYS.includes(candidate.agentKey as AgentKey)) {
+  if (!BROWSER_RUNTIME_AGENT_KEYS.includes(candidate.agentKey as McsAgentKey)) {
     errors.push(validationIssue('agentKey', 'invalid_agent', 'agentKey must be a semantic runtime registry identity.'));
   }
 
-  if (!BROWSER_RUNTIME_SUPPORTED_LANGUAGES.includes(candidate.language as RuntimeLanguage)) {
+  if (!BROWSER_RUNTIME_SUPPORTED_LANGUAGES.includes(candidate.language as McsRuntimeLanguage)) {
     errors.push(validationIssue('language', 'invalid_language', 'language must be en or es.'));
   }
 
@@ -252,7 +252,7 @@ export function validateBrowserVoiceTextSessionFoundation(
 export function createBrowserTextFallbackTurn(
   session: BrowserVoiceTextSessionFoundation,
   text: string,
-): BrowserTextTurnWirePayload {
+): McsBrowserTextTurnWirePayload {
   assertBrowserVoiceTextSessionFoundation(session);
   return {
     tenantId: session.tenantId,
@@ -272,8 +272,8 @@ export function createBrowserTextFallbackTurn(
 }
 
 export function finalizeBrowserVoiceTurn(
-  transcript: BrowserTranscriptTurn,
-): BrowserVoiceAgentTurnWirePayload {
+  transcript: McsBrowserTranscriptTurn,
+): McsBrowserVoiceAgentTurnWirePayload {
   const result = validateBrowserVoiceTranscript(transcript);
   if (!result.ok) {
     throw new BrowserVoiceTextValidationError('Invalid browser voice transcript.', result.errors);
@@ -323,7 +323,7 @@ export function createBrowserRuntimeEventEnvelope(
 
   return createBrowserRuntimeEvent({
     session,
-    eventType: input.eventType as Extract<AgentEventType, `browser_voice.${string}` | `browser_text.${string}`>,
+    eventType: input.eventType as Extract<McsAgentEventType, `browser_voice.${string}` | `browser_text.${string}`>,
     idempotencyKey: input.idempotencyKey,
     payload: input.payload,
     occurredAt: input.occurredAt,
@@ -357,13 +357,13 @@ export function createMicrophonePermissionBoundary(input: {
 }
 
 export function createLanguageSelection(input: {
-  language: RuntimeLanguage;
-  preferredLocale?: BrowserSpeechLocale;
+  language: McsRuntimeLanguage;
+  preferredLocale?: McsBrowserSpeechLocale;
 }): BrowserRuntimeLanguageSelection {
   assertSupportedLanguage(input.language);
   const recognitionLocales = BROWSER_SPEECH_LOCALES_BY_LANGUAGE[input.language];
   const selectedLocale =
-    input.preferredLocale && (recognitionLocales as readonly BrowserSpeechLocale[]).includes(input.preferredLocale)
+    input.preferredLocale && (recognitionLocales as readonly McsBrowserSpeechLocale[]).includes(input.preferredLocale)
       ? input.preferredLocale
       : recognitionLocales[0];
 
@@ -428,7 +428,7 @@ export function assertBrowserRuntimeSessionIdentity(
 
 export function createContextPacketHandoff(
   session: BrowserRuntimeSessionIdentity,
-  contextPacket: ContextPacketV1,
+  contextPacket: McsContextPacketV1,
 ): BrowserContextPacketHandoff {
   assertBrowserRuntimeSessionIdentity(session);
 
@@ -470,8 +470,8 @@ export function createContextPacketHandoff(
 
 export function createTextTurn(input: {
   session: BrowserRuntimeSessionIdentity;
-  contextPacket: ContextPacketV1;
-  turnId: RuntimeTurnId;
+  contextPacket: McsContextPacketV1;
+  turnId: McsRuntimeTurnId;
   text: string;
   submittedAt: string;
   metadata?: Record<string, unknown>;
@@ -508,15 +508,15 @@ export function createTextTurn(input: {
 
 export function createVoiceTranscriptTurn(input: {
   session: BrowserRuntimeSessionIdentity;
-  contextPacket: ContextPacketV1;
-  transcriptTurnId: TranscriptTurnId;
+  contextPacket: McsContextPacketV1;
+  transcriptTurnId: McsTranscriptTurnId;
   originalText: string;
   correctedText?: string;
   confidence?: number;
-  browserLocale?: BrowserSpeechLocale | string;
+  browserLocale?: McsBrowserSpeechLocale | string;
   capturedAt: string;
   correctedAt?: string;
-  emittedEventId?: BrowserTranscriptTurn['emittedEventId'];
+  emittedEventId?: McsBrowserTranscriptTurn['emittedEventId'];
   metadata?: Record<string, unknown>;
 }): BrowserVoiceTranscriptTurn {
   if (!input.session.microphonePermission.canListen) {
@@ -531,7 +531,7 @@ export function createVoiceTranscriptTurn(input: {
   const finalText = normalizeText(input.correctedText ?? input.originalText, 'voice_transcript_empty');
   const transcriptHash = hashTranscript(finalText);
   const corrected = input.correctedText !== undefined && input.correctedText !== input.originalText;
-  const transcript: BrowserTranscriptTurn = {
+  const transcript: McsBrowserTranscriptTurn = {
     tenantId: input.session.tenantId,
     teamId: input.session.teamId,
     teamKey: input.session.teamKey,
@@ -620,8 +620,8 @@ export function createInterimTranscript(input: {
 
 export function createAgentResponseTurn(input: {
   session: BrowserRuntimeSessionIdentity;
-  contextPacket: ContextPacketV1;
-  responseId: RuntimeResponseId;
+  contextPacket: McsContextPacketV1;
+  responseId: McsRuntimeResponseId;
   text: string;
   outputMode: 'text' | 'voice_text';
   receivedAt: string;
@@ -688,7 +688,7 @@ export function createBrowserRuntimeEvent<TPayload extends Record<string, unknow
   );
 }
 
-function assertSupportedLanguage(language: RuntimeLanguage): void {
+function assertSupportedLanguage(language: McsRuntimeLanguage): void {
   if (!SUPPORTED_BROWSER_RUNTIME_LANGUAGES.includes(language)) {
     throw new BrowserVoiceTextBoundaryError(
       'unsupported_language',
@@ -697,7 +697,7 @@ function assertSupportedLanguage(language: RuntimeLanguage): void {
   }
 }
 
-function assertSupportedMode(mode: RuntimeMode): void {
+function assertSupportedMode(mode: McsRuntimeMode): void {
   if (mode !== 'browser_text' && mode !== 'browser_voice' && mode !== 'mixed') {
     throw new BrowserVoiceTextBoundaryError(
       'unsupported_browser_runtime_mode',
@@ -725,8 +725,8 @@ function hashTranscript(text: string): string {
 }
 
 function validateBrowserVoiceTranscript(
-  transcript: BrowserTranscriptTurn,
-): BrowserVoiceTextValidationResult<BrowserTranscriptTurn> {
+  transcript: McsBrowserTranscriptTurn,
+): BrowserVoiceTextValidationResult<McsBrowserTranscriptTurn> {
   const sessionResult = validateBrowserVoiceTextSessionFoundation({
     tenantId: transcript.tenantId,
     teamId: transcript.teamId,

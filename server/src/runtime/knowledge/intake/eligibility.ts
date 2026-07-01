@@ -8,19 +8,19 @@
  */
 
 import type {
-  KnowledgeChunk,
-  KnowledgeChunkEligibilityRequest,
-  RuntimeScope,
+  McsKnowledgeChunk,
+  McsKnowledgeChunkEligibilityRequest,
+  McsRuntimeScope,
 } from '@momentum/shared/runtime';
 
 function isTeamMagnificentTeamScope(
-  scope: RuntimeScope,
-): scope is Extract<RuntimeScope, { teamKey: 'team_magnificent' }> {
+  scope: McsRuntimeScope,
+): scope is Extract<McsRuntimeScope, { teamKey: 'team_magnificent' }> {
   return (scope as { teamKey?: string }).teamKey === 'team_magnificent';
 }
 
 /** A chunk scope serves a request scope when same tenant/team and BA-compatible. */
-function scopeServesRequest(chunkScope: RuntimeScope, requestScope: RuntimeScope): boolean {
+function scopeServesRequest(chunkScope: McsRuntimeScope, requestScope: McsRuntimeScope): boolean {
   if (!isTeamMagnificentTeamScope(chunkScope)) return false;
   if (!isTeamMagnificentTeamScope(requestScope)) return false;
   if (chunkScope.tenantId !== requestScope.tenantId) return false;
@@ -33,8 +33,8 @@ function scopeServesRequest(chunkScope: RuntimeScope, requestScope: RuntimeScope
 }
 
 export function isChunkRetrievalEligible(
-  chunk: KnowledgeChunk,
-  request: KnowledgeChunkEligibilityRequest,
+  chunk: McsKnowledgeChunk,
+  request: McsKnowledgeChunkEligibilityRequest,
 ): boolean {
   if (chunk.status !== 'active') return false;
   if (!chunk.retrievalEligible) return false;
@@ -45,8 +45,8 @@ export function isChunkRetrievalEligible(
 }
 
 export function filterRetrievalEligible(
-  chunks: readonly KnowledgeChunk[],
-  request: KnowledgeChunkEligibilityRequest,
-): KnowledgeChunk[] {
+  chunks: readonly McsKnowledgeChunk[],
+  request: McsKnowledgeChunkEligibilityRequest,
+): McsKnowledgeChunk[] {
   return chunks.filter((chunk) => isChunkRetrievalEligible(chunk, request));
 }

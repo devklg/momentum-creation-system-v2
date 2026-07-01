@@ -35,17 +35,17 @@ import {
   subscribePlacements,
 } from '../../services/poolEvents.js';
 import type {
-  AdminDashboardFilter,
-  AdminDashboardFiltersResponse,
-  AdminDashboardMetricsResponse,
-  AdminDrilldownResponse,
-  AdminLiveAuditEvent,
-  AdminLiveEvent,
-  AdminLivePlacementEvent,
-  AdminLiveSnapshot,
-  AuditActor,
-  AuditLogEntry,
-  PlacementEvent,
+  McsAdminDashboardFilter,
+  McsAdminDashboardFiltersResponse,
+  McsAdminDashboardMetricsResponse,
+  McsAdminDrilldownResponse,
+  McsAdminLiveAuditEvent,
+  McsAdminLiveEvent,
+  McsAdminLivePlacementEvent,
+  McsAdminLiveSnapshot,
+  McsAuditActor,
+  McsAuditLogEntry,
+  McsPlacementEvent,
 } from '@momentum/shared';
 
 export const adminDashboardRoutes: Router = express.Router();
@@ -57,7 +57,7 @@ const FilterSchema = z.object({
   leaderGroup: z.enum(['all', 'leaders_only', 'non_leaders']).optional(),
 });
 
-function parseFilter(req: Request): AdminDashboardFilter {
+function parseFilter(req: Request): McsAdminDashboardFilter {
   const parsed = FilterSchema.parse({
     tmagId: typeof req.query.tmagId === 'string' ? req.query.tmagId : undefined,
     leaderGroup:
@@ -69,7 +69,7 @@ function parseFilter(req: Request): AdminDashboardFilter {
   };
 }
 
-function adminActorFromRequest(req: Request): AuditActor {
+function adminActorFromRequest(req: Request): McsAuditActor {
   const session = req.session!;
   const displayName =
     (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
@@ -79,7 +79,7 @@ function adminActorFromRequest(req: Request): AuditActor {
 /* ─── GET /metrics ────────────────────────────────────────────────── */
 
 adminDashboardRoutes.get('/metrics', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -109,7 +109,7 @@ adminDashboardRoutes.get('/metrics', requireAdmin, async (req, res) => {
       },
     });
 
-    const body: AdminDashboardMetricsResponse = {
+    const body: McsAdminDashboardMetricsResponse = {
       ok: true,
       metrics,
       appliedFilter: filter,
@@ -143,7 +143,7 @@ adminDashboardRoutes.get('/filters', requireAdmin, async (req, res) => {
       },
     });
 
-    const body: AdminDashboardFiltersResponse = {
+    const body: McsAdminDashboardFiltersResponse = {
       ok: true,
       bas,
       leaderGroups,
@@ -171,7 +171,7 @@ const DrilldownSchema = z.object({
 });
 
 adminDashboardRoutes.get('/drilldown', requireAdmin, async (req, res) => {
-  let filter: AdminDashboardFilter;
+  let filter: McsAdminDashboardFilter;
   let tile: (typeof TILE_VALUES)[number];
   try {
     filter = parseFilter(req);
@@ -202,7 +202,7 @@ adminDashboardRoutes.get('/drilldown', requireAdmin, async (req, res) => {
       },
     });
 
-    const body: AdminDrilldownResponse = {
+    const body: McsAdminDrilldownResponse = {
       ok: true,
       payload,
       appliedFilter: filter,
@@ -235,7 +235,7 @@ function sseFrame(event: string, data: unknown, id?: string): string {
   return lines.join('\n');
 }
 
-function placementToLiveEvent(p: PlacementEvent): AdminLivePlacementEvent {
+function placementToLiveEvent(p: McsPlacementEvent): McsAdminLivePlacementEvent {
   return {
     kind: 'placement',
     eventId: p.eventId,
@@ -248,7 +248,7 @@ function placementToLiveEvent(p: PlacementEvent): AdminLivePlacementEvent {
   };
 }
 
-function auditEntryToLiveEvent(e: AuditLogEntry): AdminLiveAuditEvent {
+function auditEntryToLiveEvent(e: McsAuditLogEntry): McsAdminLiveAuditEvent {
   const actor = e.actor;
   let actorLabel: string;
   switch (actor.kind) {
@@ -313,7 +313,7 @@ adminDashboardRoutes.get('/stream', requireAdmin, async (req: Request, res: Resp
   // Placements are real-time only — they show up via the subscription below.
   try {
     const { entries } = await queryAuditEntries({ limit: SSE_SNAPSHOT_LIMIT });
-    const snapshot: AdminLiveSnapshot = {
+    const snapshot: McsAdminLiveSnapshot = {
       events: entries.map(auditEntryToLiveEvent),
     };
     res.write(sseFrame('snapshot', snapshot));
@@ -322,9 +322,9 @@ adminDashboardRoutes.get('/stream', requireAdmin, async (req: Request, res: Resp
   }
 
   // Live placement fan-out — already a process-wide EventEmitter.
-  const placementSub = subscribePlacements((event: PlacementEvent) => {
+  const placementSub = subscribePlacements((event: McsPlacementEvent) => {
     try {
-      const liveEvent: AdminLiveEvent = placementToLiveEvent(event);
+      const liveEvent: McsAdminLiveEvent = placementToLiveEvent(event);
       res.write(sseFrame(liveEvent.kind, liveEvent, liveEvent.eventId));
     } catch {
       // closed socket — teardown handler will catch and detach.

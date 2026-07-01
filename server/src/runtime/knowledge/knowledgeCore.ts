@@ -1,16 +1,16 @@
 import type {
-  KnowledgeCandidateReference,
-  KnowledgeReference,
-  RuntimeRequestScope,
+  McsKnowledgeCandidateReference,
+  McsKnowledgeReference,
+  McsRuntimeRequestScope,
 } from '@momentum/shared/runtime';
 import { defineRuntimeBoundary } from '../common.js';
 import type { BackendRuntimeBoundaryDescriptor } from '../common.js';
 
 export interface KnowledgeCoreBoundaryPort {
-  listApprovedKnowledge(scope: RuntimeRequestScope): Promise<readonly KnowledgeReference[]>;
+  listApprovedKnowledge(scope: McsRuntimeRequestScope): Promise<readonly McsKnowledgeReference[]>;
   listCandidateKnowledgeForReview(
-    scope: RuntimeRequestScope,
-  ): Promise<readonly KnowledgeCandidateReference[]>;
+    scope: McsRuntimeRequestScope,
+  ): Promise<readonly McsKnowledgeCandidateReference[]>;
 }
 
 export const knowledgeCoreBoundary = defineRuntimeBoundary({

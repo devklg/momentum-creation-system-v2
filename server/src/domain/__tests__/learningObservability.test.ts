@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { computeLearningObservabilitySnapshot } from '../learningObservability.js';
 import type {
-  AuditLogEntry,
+  McsAuditLogEntry,
   McsLearningCandidateRecord,
   McsOutcomeRecord,
 } from '@momentum/shared';
@@ -10,7 +10,7 @@ import type {
 
 const GEN_AT = '2026-07-01T12:00:00.000Z';
 
-function auditEntry(action: string): AuditLogEntry {
+function auditEntry(action: string): McsAuditLogEntry {
   return {
     entryId: `audit_${action}`,
     timestamp: GEN_AT,

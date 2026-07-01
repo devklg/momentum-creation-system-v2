@@ -1,18 +1,18 @@
 import type {
-  AgentEventEnvelope,
-  EmitRuntimeEventRequest,
-  EmitRuntimeEventResponse,
+  McsAgentEventEnvelope,
+  McsEmitRuntimeEventRequest,
+  McsEmitRuntimeEventResponse,
 } from '@momentum/shared/runtime';
 import { defineRuntimeBoundary } from '../common.js';
 import type { BackendRuntimeBoundaryDescriptor } from '../common.js';
 
 export interface EventRuntimeBoundaryPort {
   emitEvent<TPayload extends Record<string, unknown>>(
-    request: EmitRuntimeEventRequest<TPayload>,
-  ): Promise<EmitRuntimeEventResponse<TPayload>>;
+    request: McsEmitRuntimeEventRequest<TPayload>,
+  ): Promise<McsEmitRuntimeEventResponse<TPayload>>;
   readEventEnvelope<TPayload extends Record<string, unknown>>(
-    eventId: AgentEventEnvelope<TPayload>['eventId'],
-  ): Promise<AgentEventEnvelope<TPayload> | null>;
+    eventId: McsAgentEventEnvelope<TPayload>['eventId'],
+  ): Promise<McsAgentEventEnvelope<TPayload> | null>;
 }
 
 export const eventRuntimeBoundary = defineRuntimeBoundary({

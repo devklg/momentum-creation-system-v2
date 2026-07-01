@@ -9,14 +9,14 @@
  */
 
 import type {
-  AdminDashboardFilter,
-  AdminDashboardFiltersResponse,
+  McsAdminDashboardFilter,
+  McsAdminDashboardFiltersResponse,
 } from '@momentum/shared';
 
 interface Props {
-  filter: AdminDashboardFilter;
-  options: AdminDashboardFiltersResponse | null;
-  onChange: (next: AdminDashboardFilter) => void;
+  filter: McsAdminDashboardFilter;
+  options: McsAdminDashboardFiltersResponse | null;
+  onChange: (next: McsAdminDashboardFilter) => void;
 }
 
 export function FilterBar({ filter, options, onChange }: Props) {
@@ -57,7 +57,7 @@ export function FilterBar({ filter, options, onChange }: Props) {
             onChange={(e) =>
               onChange({
                 ...filter,
-                leaderGroup: e.target.value as AdminDashboardFilter['leaderGroup'],
+                leaderGroup: e.target.value as McsAdminDashboardFilter['leaderGroup'],
               })
             }
             className="w-full bg-ink border border-line rounded px-2 py-1.5 text-sm text-cream font-mono"

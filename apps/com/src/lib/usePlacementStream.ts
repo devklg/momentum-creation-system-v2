@@ -22,9 +22,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type {
-  HoldingTankSnapshot,
-  PlacementEvent,
-  PlacementTickerEntry,
+  McsHoldingTankSnapshot,
+  McsPlacementEvent,
+  McsPlacementTickerEntry,
 } from '@momentum/shared';
 
 /** Max ticker entries to retain in memory. Locked-spec 4.4: 20–40 visible. */
@@ -38,7 +38,7 @@ export interface PlacementStreamState {
   /** Highest position number observed across the whole team. */
   globalMaxPosition: number;
   /** Most-recent placements newest first (capped at MAX_TICKER_ENTRIES). */
-  ticker: PlacementTickerEntry[];
+  ticker: McsPlacementTickerEntry[];
   /** True if the EventSource is in an errored state right now. */
   errored: boolean;
 }
@@ -70,7 +70,7 @@ export function usePlacementStream(
 
     const onSnapshot = (evt: MessageEvent<string>) => {
       try {
-        const payload = JSON.parse(evt.data) as HoldingTankSnapshot;
+        const payload = JSON.parse(evt.data) as McsHoldingTankSnapshot;
         setState({
           connecting: false,
           connected: true,
@@ -85,7 +85,7 @@ export function usePlacementStream(
 
     const onPlacement = (evt: MessageEvent<string>) => {
       try {
-        const event = JSON.parse(evt.data) as PlacementEvent;
+        const event = JSON.parse(evt.data) as McsPlacementEvent;
         setState((prev) => {
           // De-dup by positionNumber in case a server reconnect causes a
           // brief replay (rare; defensive).

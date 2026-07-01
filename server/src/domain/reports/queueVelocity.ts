@@ -19,11 +19,11 @@ import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
-  AdminDashboardFilter,
-  AdminQueueVelocityDay,
-  AdminQueueVelocityReport,
-  AdminReportMeta,
-  AdminReportTimeRange,
+  McsAdminDashboardFilter,
+  McsAdminQueueVelocityDay,
+  McsAdminQueueVelocityReport,
+  McsAdminReportMeta,
+  McsAdminReportTimeRange,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -45,11 +45,11 @@ function avg(values: number[]): number | null {
 }
 
 export async function buildQueueVelocityReport(
-  filter: AdminDashboardFilter,
-  range: AdminReportTimeRange,
+  filter: McsAdminDashboardFilter,
+  range: McsAdminReportTimeRange,
 ): Promise<{
-  result: AdminQueueVelocityReport;
-  meta: Omit<AdminReportMeta, 'title'>;
+  result: McsAdminQueueVelocityReport;
+  meta: Omit<McsAdminReportMeta, 'title'>;
 }> {
   const scopedTmagIds = await resolveScopedTmagIds(filter);
 
@@ -96,7 +96,7 @@ export async function buildQueueVelocityReport(
   }
 
   const allDays = new Set<string>([...placedByDay.keys(), ...flushedByDay.keys()]);
-  const days: AdminQueueVelocityDay[] = [...allDays].sort().map((date) => {
+  const days: McsAdminQueueVelocityDay[] = [...allDays].sort().map((date) => {
     const placements = placedByDay.get(date) ?? 0;
     const flushBucket = flushedByDay.get(date) ?? { total: 0, enrolled: 0 };
     return {
@@ -120,7 +120,7 @@ export async function buildQueueVelocityReport(
   const last7Enr = days.slice(-7).map((d) => d.enrollments);
   const last30Enr = days.slice(-30).map((d) => d.enrollments);
 
-  const result: AdminQueueVelocityReport = {
+  const result: McsAdminQueueVelocityReport = {
     totals: {
       placements: totalPlacements,
       flushes: totalFlushes,

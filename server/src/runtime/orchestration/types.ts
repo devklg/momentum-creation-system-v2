@@ -1,22 +1,22 @@
 import type {
-  AgentAllowedOutput,
-  AgentKey,
+  McsAgentAllowedOutput,
+  McsAgentKey,
   TmagId,
-  ContextPacketRequest,
-  ContextPacketV1,
-  CorrelationId,
-  GuidedActionId,
-  OutcomeId,
-  RequestId,
-  RuntimeOutcomeReference,
-  RuntimeRequestScope,
-  RuntimeLanguage,
-  RuntimeMode,
-  RuntimeTaskType,
-  RuntimeTurnId,
-  SessionId,
+  McsContextPacketRequest,
+  McsContextPacketV1,
+  McsCorrelationId,
+  McsGuidedActionId,
+  McsOutcomeId,
+  McsRequestId,
+  McsRuntimeOutcomeReference,
+  McsRuntimeRequestScope,
+  McsRuntimeLanguage,
+  McsRuntimeMode,
+  McsRuntimeTaskType,
+  McsRuntimeTurnId,
+  McsSessionId,
 } from '@momentum/shared/runtime';
-import type { BaRuntimeScope } from '@momentum/shared/runtime';
+import type { McsBaRuntimeScope } from '@momentum/shared/runtime';
 import type { RuntimeAgentEventEnvelope } from '../events/index.js';
 
 /**
@@ -52,17 +52,17 @@ export type AgentEventFamily = 'steve' | 'michael' | 'ivory';
  * implemented in a later slice. It contains no behavior, prompts, or templates.
  */
 export interface AgentOrchestrationDescriptor {
-  agentKey: AgentKey;
+  agentKey: McsAgentKey;
   displayName: string;
   primaryDomain: 'success' | 'training' | 'relationship';
   roleSummary: string;
   /** Objectives, expressed as the validated packet `session.taskType`. */
-  allowedTaskTypes: readonly RuntimeTaskType[];
-  supportedModes: readonly RuntimeMode[];
-  supportedLanguages: readonly RuntimeLanguage[];
+  allowedTaskTypes: readonly McsRuntimeTaskType[];
+  supportedModes: readonly McsRuntimeMode[];
+  supportedLanguages: readonly McsRuntimeLanguage[];
   guardrailSet: readonly string[];
   requiresContextPacket: true;
-  allowedOutputs: readonly AgentAllowedOutput[];
+  allowedOutputs: readonly McsAgentAllowedOutput[];
   forbiddenOutputs: readonly string[];
   eventFamily: AgentEventFamily;
   guidedActionCategories: readonly string[];
@@ -86,7 +86,7 @@ export interface ContextPacketConsumptionIssue {
 
 export interface ConsumeContextPacketInput {
   /** The agent the orchestrator believes it is running this turn for. */
-  expectedAgentKey: AgentKey;
+  expectedAgentKey: McsAgentKey;
   /** The unknown/untrusted packet returned by the Context Manager. */
   packet: unknown;
   /**
@@ -99,24 +99,24 @@ export interface ConsumeContextPacketInput {
 
 export interface ContextPacketConsumptionResult {
   decision: ContextPacketConsumptionDecision;
-  expectedAgentKey: AgentKey;
-  packetAgentKey?: AgentKey;
-  taskType?: RuntimeTaskType;
-  packetStatus?: ContextPacketV1['packetStatus'];
+  expectedAgentKey: McsAgentKey;
+  packetAgentKey?: McsAgentKey;
+  taskType?: McsRuntimeTaskType;
+  packetStatus?: McsContextPacketV1['packetStatus'];
   /** Safe to pass to the agent only when decision is proceed or degraded. */
-  packet?: ContextPacketV1;
+  packet?: McsContextPacketV1;
   issues: ContextPacketConsumptionIssue[];
 }
 
 /** Identity carried through every orchestration session and turn. */
 export interface OrchestrationSessionIdentity {
-  scope: BaRuntimeScope;
-  sessionId: SessionId;
-  agentKey: AgentKey;
-  mode: RuntimeMode;
-  language: RuntimeLanguage;
-  correlationId: CorrelationId;
-  requestId?: RequestId;
+  scope: McsBaRuntimeScope;
+  sessionId: McsSessionId;
+  agentKey: McsAgentKey;
+  mode: McsRuntimeMode;
+  language: McsRuntimeLanguage;
+  correlationId: McsCorrelationId;
+  requestId?: McsRequestId;
 }
 
 export interface OrchestrationSessionState extends OrchestrationSessionIdentity {
@@ -131,7 +131,7 @@ export interface CreateAgentSessionInput extends OrchestrationSessionIdentity {
 
 export interface PlanAgentTurnInput {
   identity: OrchestrationSessionIdentity;
-  turnId: RuntimeTurnId;
+  turnId: McsRuntimeTurnId;
   /** Untrusted packet returned by the Context Manager for this turn. */
   packet: unknown;
   requireSubstantive?: boolean;
@@ -146,20 +146,20 @@ export interface PlanAgentTurnInput {
 export interface ContextManagerRequestPort {
   readonly assembledBy: 'context_manager';
   requestContextPacket(
-    scope: RuntimeRequestScope,
-    request: ContextPacketRequest,
+    scope: McsRuntimeRequestScope,
+    request: McsContextPacketRequest,
   ): Promise<unknown>;
 }
 
 export interface BuildContextPacketRequestInput {
   identity: OrchestrationSessionIdentity;
-  turnId: RuntimeTurnId;
-  taskType: RuntimeTaskType;
+  turnId: McsRuntimeTurnId;
+  taskType: McsRuntimeTaskType;
 }
 
 export interface ContextPacketRequestBundle {
-  scope: RuntimeRequestScope;
-  request: ContextPacketRequest;
+  scope: McsRuntimeRequestScope;
+  request: McsContextPacketRequest;
 }
 
 export interface RequestContextPacketForTurnInput extends BuildContextPacketRequestInput {
@@ -175,10 +175,10 @@ export interface ContextPacketRequestIssue {
 
 export interface ContextPacketRequestWiringResult {
   decision: ContextPacketConsumptionDecision;
-  agentKey: AgentKey;
+  agentKey: McsAgentKey;
   behavior: 'not_implemented';
-  request: ContextPacketRequest;
-  scope: RuntimeRequestScope;
+  request: McsContextPacketRequest;
+  scope: McsRuntimeRequestScope;
   response?: unknown;
   consumption: ContextPacketConsumptionResult;
   events: RuntimeAgentEventEnvelope[];
@@ -190,10 +190,10 @@ export interface ContextPacketRequestWiringResult {
 
 export type OrchestrationDraftContentScope = 'substantive' | 'limited';
 
-export interface OrchestrationOutcomeDraftEnvelope extends RuntimeOutcomeReference {
+export interface OrchestrationOutcomeDraftEnvelope extends McsRuntimeOutcomeReference {
   schemaVersion: 'orchestration_outcome_draft.v1';
   envelopeKind: 'outcome_draft';
-  turnId: RuntimeTurnId;
+  turnId: McsRuntimeTurnId;
   category: string;
   contentScope: OrchestrationDraftContentScope;
   summary: string;
@@ -203,16 +203,16 @@ export interface OrchestrationOutcomeDraftEnvelope extends RuntimeOutcomeReferen
   agentResponseGenerated: false;
 }
 
-export interface OrchestrationGuidedActionDraftEnvelope extends BaRuntimeScope {
+export interface OrchestrationGuidedActionDraftEnvelope extends McsBaRuntimeScope {
   schemaVersion: 'orchestration_guided_action_draft.v1';
   envelopeKind: 'guided_action_draft';
-  guidedActionId: GuidedActionId;
-  sessionId: SessionId;
-  agentKey: AgentKey;
-  taskType: RuntimeTaskType;
-  language: RuntimeLanguage;
-  contextPacketId?: ContextPacketV1['packetId'];
-  turnId: RuntimeTurnId;
+  guidedActionId: McsGuidedActionId;
+  sessionId: McsSessionId;
+  agentKey: McsAgentKey;
+  taskType: McsRuntimeTaskType;
+  language: McsRuntimeLanguage;
+  contextPacketId?: McsContextPacketV1['packetId'];
+  turnId: McsRuntimeTurnId;
   category: string;
   title: string;
   instruction: string;
@@ -229,14 +229,14 @@ export interface OrchestrationGuidedActionDraftEnvelope extends BaRuntimeScope {
 
 export interface DraftOutcomeGuidedActionInput {
   identity: OrchestrationSessionIdentity;
-  turnId: RuntimeTurnId;
+  turnId: McsRuntimeTurnId;
   consumption: ContextPacketConsumptionResult;
   createdAt?: string;
 }
 
 export interface OutcomeGuidedActionDraftResult {
   decision: ContextPacketConsumptionDecision;
-  agentKey: AgentKey;
+  agentKey: McsAgentKey;
   behavior: 'not_implemented';
   outcomeDrafts: OrchestrationOutcomeDraftEnvelope[];
   guidedActionDrafts: OrchestrationGuidedActionDraftEnvelope[];
@@ -253,8 +253,8 @@ export interface ComposeOrchestrationTurnInput extends BuildContextPacketRequest
 
 export interface OrchestrationTurnCompositionResult {
   decision: ContextPacketConsumptionDecision;
-  agentKey: AgentKey;
-  turnId: RuntimeTurnId;
+  agentKey: McsAgentKey;
+  turnId: McsRuntimeTurnId;
   behavior: 'not_implemented';
   contextRequestResult: ContextPacketRequestWiringResult;
   outcomeGuidedActionResult: OutcomeGuidedActionDraftResult;
@@ -283,7 +283,7 @@ export interface DispatchAgentRuntimeAdapterInput
 export interface AgentRuntimeAdapterDispatchRejection {
   decision: 'reject';
   agentKey: unknown;
-  turnId: RuntimeTurnId;
+  turnId: McsRuntimeTurnId;
   behavior: 'not_implemented';
   issues: ContextPacketRequestIssue[];
   events: [];
@@ -303,8 +303,8 @@ export type AgentRuntimeAdapterDispatchResult =
 
 export interface RuntimeTurnCoordinatorInput {
   identity?: AgentRuntimeAdapterDispatchIdentity;
-  turnId?: RuntimeTurnId;
-  taskType?: RuntimeTaskType;
+  turnId?: McsRuntimeTurnId;
+  taskType?: McsRuntimeTaskType;
   contextManager?: ContextManagerRequestPort;
   requireSubstantive?: boolean;
   createdAt?: string;
@@ -313,7 +313,7 @@ export interface RuntimeTurnCoordinatorInput {
 export interface RuntimeTurnCoordinatorRejection {
   decision: 'reject';
   agentKey: unknown;
-  turnId?: RuntimeTurnId;
+  turnId?: McsRuntimeTurnId;
   behavior: 'not_implemented';
   issues: ContextPacketRequestIssue[];
   events: [];
@@ -346,7 +346,7 @@ export type RuntimeTurnFixtureScenarioType =
 export interface RuntimeTurnFixtureScenarioOptions {
   scenario: RuntimeTurnFixtureScenarioType;
   agentKey?: unknown;
-  taskType?: RuntimeTaskType;
+  taskType?: McsRuntimeTaskType;
   requireSubstantive?: boolean;
   createdAt?: string;
 }
@@ -371,8 +371,8 @@ export interface RuntimeTurnFixtureHarnessResult {
   input: RuntimeTurnCoordinatorInput;
   result: RuntimeTurnCoordinatorResult;
   contextCalls: Array<{
-    scope: RuntimeRequestScope;
-    request: ContextPacketRequest;
+    scope: McsRuntimeRequestScope;
+    request: McsContextPacketRequest;
   }>;
   eventPersistence: 'disabled';
   outcomePersistence: 'disabled';
@@ -421,7 +421,7 @@ export interface MichaelRuntimeResponseFixtureScenarioMetadata {
   runtimeTurnStatus: MichaelRuntimeTurnOutcomeStatus;
   runtimeScenario: RuntimeTurnFixtureScenarioType;
   agentKey: unknown;
-  taskType: RuntimeTaskType;
+  taskType: McsRuntimeTaskType;
   fixtureOnly: true;
   persistence: 'disabled';
   agentResponseGenerated: false;
@@ -469,8 +469,8 @@ export type MichaelRuntimeAdapterContractDecision =
 
 export interface MichaelRuntimeAdapterContractInput {
   identity: AgentRuntimeAdapterDispatchIdentity;
-  turnId: RuntimeTurnId;
-  taskType: RuntimeTaskType;
+  turnId: McsRuntimeTurnId;
+  taskType: McsRuntimeTaskType;
   runtimeTurn: RuntimeTurnFixtureHarnessResult;
   turnClarity?: 'clear' | 'ambiguous';
   language?: unknown;
@@ -487,7 +487,7 @@ export interface MichaelRuntimeAdapterRuntimeTurnSummary {
   scenario: RuntimeTurnFixtureScenarioType;
   decision: ContextPacketConsumptionDecision | RuntimeTurnCoordinatorRejection['decision'];
   agentKey: unknown;
-  taskType?: RuntimeTaskType;
+  taskType?: McsRuntimeTaskType;
   packetStatus?: MichaelResponseContextPacketStatus;
   contextManagerInjected: boolean;
 }
@@ -496,7 +496,7 @@ export interface MichaelRuntimeAdapterContractResult {
   decision: MichaelRuntimeAdapterContractDecision;
   agentKey: 'michael_magnificent';
   taskType: 'training_support';
-  turnId: RuntimeTurnId;
+  turnId: McsRuntimeTurnId;
   selectionReason: string;
   blockedReasonCodes: string[];
   runtimeTurnStatus: MichaelRuntimeTurnOutcomeStatus;
@@ -534,7 +534,7 @@ export type MichaelResponseValidationStatus =
   MichaelResponseSafetyValidationStatus;
 
 export type MichaelResponseContextPacketStatus =
-  | ContextPacketV1['packetStatus']
+  | McsContextPacketV1['packetStatus']
   | 'missing'
   | 'rejected';
 
@@ -559,9 +559,9 @@ export interface MichaelResponseContractV1 {
   responseType: MichaelResponseType;
   agentKey: 'michael_magnificent';
   taskType: 'training_support';
-  sessionId: SessionId;
-  turnId: RuntimeTurnId;
-  correlationId: CorrelationId;
+  sessionId: McsSessionId;
+  turnId: McsRuntimeTurnId;
+  correlationId: McsCorrelationId;
   contextPacketStatus: MichaelResponseContextPacketStatus;
   language: 'en' | 'es';
   text: string;
@@ -621,7 +621,7 @@ export type MichaelResponseValidationResult =
  */
 export interface OrchestrationTurnPlan {
   decision: ContextPacketConsumptionDecision;
-  agentKey: AgentKey;
+  agentKey: McsAgentKey;
   behavior: 'not_implemented';
   consumption: ContextPacketConsumptionResult;
   /** Non-persistent event envelopes captured for this turn. */
@@ -645,7 +645,7 @@ export interface AgentOrchestrationBoundaryDescriptor {
   notes: readonly string[];
 }
 
-export type { TmagId, OutcomeId, RuntimeTurnId };
+export type { TmagId, McsOutcomeId, McsRuntimeTurnId };
 
 // ───────────────────────────────────────────────────────────────────────────
 // S2.17 — Michael response catalog (inert, controlled, returned-only).
@@ -790,9 +790,9 @@ export interface DeriveMichaelSelectionRequestFromRuntimeTurnInput {
   /** Defaults to runtimeTurn.input.identity when omitted. */
   readonly identity?: AgentRuntimeAdapterDispatchIdentity;
   /** Defaults to runtimeTurn.input.turnId when omitted. */
-  readonly turnId?: RuntimeTurnId;
+  readonly turnId?: McsRuntimeTurnId;
   /** Defaults to runtimeTurn.input.taskType when omitted. */
-  readonly taskType?: RuntimeTaskType;
+  readonly taskType?: McsRuntimeTaskType;
   readonly turnClarity?: 'clear' | 'ambiguous';
   readonly intent?: MichaelRuntimeAdapterContractIntent;
   readonly language?: unknown;

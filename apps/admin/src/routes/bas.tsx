@@ -27,13 +27,13 @@ import { DirectoryTable } from '@/components/ba-oversight/directory-table';
 import { ProfileDrawer } from '@/components/ba-oversight/profile-drawer';
 import { BaCrudModal, type BaCrudResponse } from '@/components/ba-oversight/ba-crud-modal';
 import type {
-  AdminBaDirectoryResponse,
-  AdminBaDirectoryRow,
-  AdminLeaderTagResponse,
+  McsAdminBaDirectoryResponse,
+  McsAdminBaDirectoryRow,
+  McsAdminLeaderTagResponse,
 } from '@momentum/shared';
 
 export function BAsPage() {
-  const [rows, setRows] = useState<AdminBaDirectoryRow[] | null>(null);
+  const [rows, setRows] = useState<McsAdminBaDirectoryRow[] | null>(null);
   const [leaderNote, setLeaderNote] = useState<string>('');
   const [err, setErr] = useState<string | null>(null);
   const [filterText, setFilterText] = useState('');
@@ -45,7 +45,7 @@ export function BAsPage() {
     setErr(null);
     try {
       const res = await fetch('/api/admin/bas', { credentials: 'include' });
-      const data = (await res.json()) as AdminBaDirectoryResponse & { error?: string };
+      const data = (await res.json()) as McsAdminBaDirectoryResponse & { error?: string };
       if (!data.ok) {
         setErr(data.error ?? 'Could not load directory.');
         return;
@@ -61,7 +61,7 @@ export function BAsPage() {
     void load();
   }, [load]);
 
-  function onRowChanged(next: AdminBaDirectoryRow) {
+  function onRowChanged(next: McsAdminBaDirectoryRow) {
     setRows((prev) =>
       prev ? prev.map((r) => (r.tmagId === next.tmagId ? next : r)) : prev,
     );
@@ -85,7 +85,7 @@ export function BAsPage() {
         },
       );
       const data = (await res.json()) as
-        | AdminLeaderTagResponse
+        | McsAdminLeaderTagResponse
         | { ok: false; error: string };
       if (!data.ok) {
         setErr(data.error || 'Leader tag update failed.');

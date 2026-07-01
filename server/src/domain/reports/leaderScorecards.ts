@@ -21,11 +21,11 @@ import { gatewayCall } from '../../services/gateway.js';
 import { listLeaderTmagIds, resolveScopedTmagIds, LEADER_DETECTION_NOTE } from '../adminMetrics.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
-  AdminDashboardFilter,
-  AdminLeaderScorecardReport,
-  AdminLeaderScorecardRow,
-  AdminReportMeta,
-  AdminReportTimeRange,
+  McsAdminDashboardFilter,
+  McsAdminLeaderScorecardReport,
+  McsAdminLeaderScorecardRow,
+  McsAdminReportMeta,
+  McsAdminReportTimeRange,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -61,11 +61,11 @@ interface ActivityDoc {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export async function buildLeaderScorecardReport(
-  filter: AdminDashboardFilter,
-  range: AdminReportTimeRange,
+  filter: McsAdminDashboardFilter,
+  range: McsAdminReportTimeRange,
 ): Promise<{
-  result: AdminLeaderScorecardReport;
-  meta: Omit<AdminReportMeta, 'title'>;
+  result: McsAdminLeaderScorecardReport;
+  meta: Omit<McsAdminReportMeta, 'title'>;
 }> {
   // Leaders, then intersect with the dashboard filter scope so the same
   // tmagId / leaderGroup narrowing applies. If the scope excludes all leaders
@@ -75,7 +75,7 @@ export async function buildLeaderScorecardReport(
   const leaderIds = scoped === null ? leaders : leaders.filter((id) => scoped.includes(id));
 
   if (leaderIds.length === 0) {
-    const meta: Omit<AdminReportMeta, 'title'> = {
+    const meta: Omit<McsAdminReportMeta, 'title'> = {
       reportKey: 'leader_scorecards',
       generatedAt: new Date().toISOString(),
       appliedFilter: filter,
@@ -143,7 +143,7 @@ export async function buildLeaderScorecardReport(
     videoMap.set(a.sponsorTmagId, (videoMap.get(a.sponsorTmagId) ?? 0) + 1);
   }
 
-  const rows: AdminLeaderScorecardRow[] = leaderIds.map((id) => {
+  const rows: McsAdminLeaderScorecardRow[] = leaderIds.map((id) => {
     const b = baLookup.get(id);
     return {
       tmagId: id,
@@ -156,7 +156,7 @@ export async function buildLeaderScorecardReport(
     };
   });
 
-  const result: AdminLeaderScorecardReport = {
+  const result: McsAdminLeaderScorecardReport = {
     leaderCount: rows.length,
     rows,
     provenanceNote: PROVENANCE,

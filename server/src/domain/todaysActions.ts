@@ -36,10 +36,10 @@
 
 import { gatewayCall } from '../services/gateway.js';
 import type {
-  CallbackIntent,
-  CockpitActionItem,
-  CockpitTodaysActionsResponse,
-  CrmFollowUpRecord,
+  McsCallbackIntent,
+  McsCockpitActionItem,
+  McsCockpitTodaysActionsResponse,
+  McsCrmFollowUpRecord,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -58,7 +58,7 @@ export const BIAS_PROMPT = 'Who are you sharing with today?';
 
 interface CallbackDoc {
   prospectId: string;
-  intent: CallbackIntent;
+  intent: McsCallbackIntent;
   createdAt: string;
 }
 
@@ -84,7 +84,7 @@ interface ProspectDoc {
  */
 export async function getCockpitTodaysActions(
   sponsorTmagId: string,
-): Promise<CockpitTodaysActionsResponse> {
+): Promise<McsCockpitTodaysActionsResponse> {
   const now = Date.now();
   const nowIso = new Date(now).toISOString();
   const callbackLookbackIso = new Date(now - CALLBACK_LOOKBACK_MS).toISOString();
@@ -98,7 +98,7 @@ export async function getCockpitTodaysActions(
       sort: { createdAt: -1 },
       limit: 200,
     }),
-    gatewayCall<{ documents: CrmFollowUpRecord[] }>('mongodb', 'query', {
+    gatewayCall<{ documents: McsCrmFollowUpRecord[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: FOLLOWUPS_COLLECTION,
       filter: { sponsorTmagId, clearedAt: null, dueAt: { $lte: nowIso } },
@@ -137,7 +137,7 @@ export async function getCockpitTodaysActions(
   }
 
   // 1. Callbacks — collapse to latest per prospect.
-  const callbackItems: CockpitActionItem[] = [];
+  const callbackItems: McsCockpitActionItem[] = [];
   const seenCallback = new Set<string>();
   for (const cb of callbacksRes.documents ?? []) {
     if (seenCallback.has(cb.prospectId)) continue;
@@ -157,7 +157,7 @@ export async function getCockpitTodaysActions(
   // 2. Follow-ups due — already filtered server-side by dueAt <= now and
   // clearedAt null. Suppress the row when the same prospect is already on
   // the callback list (a raised hand subsumes the follow-up nudge).
-  const followupItems: CockpitActionItem[] = [];
+  const followupItems: McsCockpitActionItem[] = [];
   for (const f of followupsRes.documents ?? []) {
     if (seenCallback.has(f.prospectId)) continue;
     const info = prospectInfo.get(f.prospectId);
@@ -176,7 +176,7 @@ export async function getCockpitTodaysActions(
   // the horizon. Skip if already surfaced as callback or followup so the
   // same person doesn't show twice on one card.
   const followupSet = new Set(followupItems.map((i) => i.prospectId));
-  const expiringItems: CockpitActionItem[] = [];
+  const expiringItems: McsCockpitActionItem[] = [];
   for (const p of prospectsRes.documents ?? []) {
     if (p.state === 'enrolled' || p.state === 'expired') continue;
     if (!p.expiresAt) continue;

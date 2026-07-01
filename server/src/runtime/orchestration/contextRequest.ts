@@ -1,7 +1,7 @@
 import type {
-  AgentKey,
-  ContextPacketRequest,
-  RuntimeRequestScope,
+  McsAgentKey,
+  McsContextPacketRequest,
+  McsRuntimeRequestScope,
 } from '@momentum/shared/runtime';
 import type { RuntimeAgentEventEnvelope } from '../events/index.js';
 import { consumeContextPacket } from './consumption.js';
@@ -37,15 +37,15 @@ export function buildContextPacketRequest(
   const { identity, turnId, taskType } = input;
   const requestId =
     identity.requestId ??
-    (`ctx_req_${identity.sessionId}_${turnId}` as ContextPacketRequest['requestId']);
+    (`ctx_req_${identity.sessionId}_${turnId}` as McsContextPacketRequest['requestId']);
 
-  const scope: RuntimeRequestScope = {
+  const scope: McsRuntimeRequestScope = {
     ...identity.scope,
     requestId,
     sessionId: identity.sessionId,
   };
 
-  const request: ContextPacketRequest = {
+  const request: McsContextPacketRequest = {
     requestId,
     sessionId: identity.sessionId,
     agentKey: identity.agentKey,
@@ -244,9 +244,9 @@ export async function requestContextPacketForTurn(
 }
 
 function rejectedResult(
-  agentKey: AgentKey,
-  request: ContextPacketRequest,
-  scope: RuntimeRequestScope,
+  agentKey: McsAgentKey,
+  request: McsContextPacketRequest,
+  scope: McsRuntimeRequestScope,
   issues: ContextPacketRequestIssue[],
   events: RuntimeAgentEventEnvelope[],
   notes: string[],

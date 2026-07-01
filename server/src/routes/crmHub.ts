@@ -8,9 +8,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import type {
-  CloseAsNewBaResponse,
-  ProspectCrmListResponse,
-  ProspectCrmRecordResponse,
+  McsCloseAsNewBaResponse,
+  McsProspectCrmListResponse,
+  McsProspectCrmRecordResponse,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
@@ -62,7 +62,7 @@ crmHubRoutes.get('/prospects', requireAuth, requireSteveComplete, async (req, re
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
     const records = await listCrmRecordsForOwner(tmagId, includeClosed(req));
-    const body: ProspectCrmListResponse = { ok: true, records };
+    const body: McsProspectCrmListResponse = { ok: true, records };
     return res.status(200).json(body);
   } catch (err) {
     return sendCrmHubError(res, err);
@@ -76,7 +76,7 @@ crmHubRoutes.get('/prospects/:prospectId', requireAuth, requireSteveComplete, as
     const prospectId = routeParam(req, 'prospectId');
     const record = await getOwnerScopedCrmRecord(prospectId, tmagId);
     const timeline = await listTimelineForProspect(prospectId, tmagId);
-    const body: ProspectCrmRecordResponse = { ok: true, record, timeline };
+    const body: McsProspectCrmRecordResponse = { ok: true, record, timeline };
     return res.status(200).json(body);
   } catch (err) {
     return sendCrmHubError(res, err);
@@ -107,7 +107,7 @@ crmHubRoutes.post(
         actor: { kind: 'ba', tmagId, displayName },
         reason: parsed.data.reason,
       });
-      const body: CloseAsNewBaResponse = {
+      const body: McsCloseAsNewBaResponse = {
         ok: true,
         record,
         closedAt: record.closedAt ?? new Date().toISOString(),

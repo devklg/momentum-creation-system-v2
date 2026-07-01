@@ -10,12 +10,12 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { AdminLiveEvent, AdminLiveSnapshot } from '@momentum/shared';
+import type { McsAdminLiveEvent, McsAdminLiveSnapshot } from '@momentum/shared';
 
 const MAX_VISIBLE = 80;
 
 export function LiveEventStream() {
-  const [events, setEvents] = useState<AdminLiveEvent[]>([]);
+  const [events, setEvents] = useState<McsAdminLiveEvent[]>([]);
   const [status, setStatus] = useState<'connecting' | 'open' | 'closed'>('connecting');
   const esRef = useRef<EventSource | null>(null);
 
@@ -28,7 +28,7 @@ export function LiveEventStream() {
 
     es.addEventListener('snapshot', (ev) => {
       try {
-        const snap = JSON.parse((ev as MessageEvent).data) as AdminLiveSnapshot;
+        const snap = JSON.parse((ev as MessageEvent).data) as McsAdminLiveSnapshot;
         setEvents(snap.events.slice(0, MAX_VISIBLE));
       } catch {
         // ignore malformed frame
@@ -37,7 +37,7 @@ export function LiveEventStream() {
 
     const onLive = (ev: MessageEvent) => {
       try {
-        const live = JSON.parse(ev.data) as AdminLiveEvent;
+        const live = JSON.parse(ev.data) as McsAdminLiveEvent;
         setEvents((prev) => {
           // de-dupe by eventId (the snapshot may overlap with the tail)
           if (prev.some((e) => e.eventId === live.eventId)) return prev;
@@ -99,7 +99,7 @@ export function LiveEventStream() {
   );
 }
 
-function EventLine({ event }: { event: AdminLiveEvent }) {
+function EventLine({ event }: { event: McsAdminLiveEvent }) {
   if (event.kind === 'placement') {
     return (
       <p className="text-sm text-cream truncate">
@@ -120,7 +120,7 @@ function EventLine({ event }: { event: AdminLiveEvent }) {
   );
 }
 
-function KindPill({ kind }: { kind: AdminLiveEvent['kind'] }) {
+function KindPill({ kind }: { kind: McsAdminLiveEvent['kind'] }) {
   const cls =
     kind === 'placement'
       ? 'text-teal border-teal/30 bg-teal/[0.08]'

@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type {
   TmagId,
-  CorrelationId,
-  IdempotencyKey,
-  SessionId,
-  TeamId,
-  TenantId,
-  TranscriptTurnId,
+  McsCorrelationId,
+  McsIdempotencyKey,
+  McsSessionId,
+  McsTeamId,
+  McsTenantId,
+  McsTranscriptTurnId,
 } from '@momentum/shared/runtime';
 import {
   MICROPHONE_PERMISSION_POLICY,
@@ -18,10 +18,10 @@ import {
   validateBrowserVoiceTextSessionFoundation,
 } from '../index.js';
 
-const tenantId = 'tenant_tm' as TenantId;
-const teamId = 'team_tm' as TeamId;
+const tenantId = 'tenant_tm' as McsTenantId;
+const teamId = 'team_tm' as McsTeamId;
 const tmagId = 'ba_tm_001' as TmagId;
-const sessionId = 'session_browser_test' as SessionId;
+const sessionId = 'session_browser_test' as McsSessionId;
 
 const validSession = {
   tenantId,
@@ -90,7 +90,7 @@ describe('browser voice/text foundation compatibility', () => {
       agentKey: 'michael_magnificent',
       mode: 'browser_voice',
       language: 'en',
-      transcriptTurnId: 'transcript_test' as TranscriptTurnId,
+      transcriptTurnId: 'transcript_test' as McsTranscriptTurnId,
       inputMode: 'voice',
       originalText: 'How do I explain the journal?',
       finalText: 'How do I explain the journal?',
@@ -116,8 +116,8 @@ describe('browser voice/text foundation compatibility', () => {
       eventType: 'browser_voice.final_transcript',
       sessionId,
       agentKey: 'michael_magnificent',
-      correlationId: 'corr_browser_test' as CorrelationId,
-      idempotencyKey: 'idem_browser_test' as IdempotencyKey,
+      correlationId: 'corr_browser_test' as McsCorrelationId,
+      idempotencyKey: 'idem_browser_test' as McsIdempotencyKey,
       occurredAt: '2026-06-28T12:00:00.000Z',
       payload: {
         transcriptTurnId: 'transcript_test',

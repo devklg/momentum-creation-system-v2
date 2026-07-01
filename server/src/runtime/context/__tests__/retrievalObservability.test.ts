@@ -3,17 +3,17 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type {
-  ApprovedKnowledgeQueryRequest,
+  McsApprovedKnowledgeQueryRequest,
   TmagId,
-  KnowledgeFreshness,
-  KnowledgeId,
-  KnowledgeReference,
-  RuntimeLanguage,
-  RuntimeRequestScope,
-  RuntimeTranslationStatus,
-  SourceId,
-  TeamId,
-  TenantId,
+  McsKnowledgeFreshness,
+  McsKnowledgeId,
+  McsKnowledgeReference,
+  McsRuntimeLanguage,
+  McsRuntimeRequestScope,
+  McsRuntimeTranslationStatus,
+  McsSourceId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
@@ -45,36 +45,36 @@ const EXPECTED_KEYS = new Set([
   'candidateExcludedSourceIds',
 ]);
 
-function scope(): RuntimeRequestScope {
+function scope(): McsRuntimeRequestScope {
   return {
-    tenantId: 'tenant_team_magnificent' as TenantId,
-    teamId: 'team_magnificent' as TeamId,
+    tenantId: 'tenant_team_magnificent' as McsTenantId,
+    teamId: 'team_magnificent' as McsTeamId,
     teamKey: 'team_magnificent',
     teamName: 'Team Magnificent',
     tmagId: 'TMAG-P48-001' as TmagId,
-    requestId: 'req_p48_001' as ApprovedKnowledgeQueryRequest['scope']['requestId'],
+    requestId: 'req_p48_001' as McsApprovedKnowledgeQueryRequest['scope']['requestId'],
   };
 }
 
 interface KOpts {
-  language?: RuntimeLanguage;
-  translationStatus?: RuntimeTranslationStatus;
-  freshness?: KnowledgeFreshness;
+  language?: McsRuntimeLanguage;
+  translationStatus?: McsRuntimeTranslationStatus;
+  freshness?: McsKnowledgeFreshness;
 }
 
-function knowledge(id: string, opts: KOpts = {}): KnowledgeReference {
+function knowledge(id: string, opts: KOpts = {}): McsKnowledgeReference {
   return {
-    knowledgeId: `knowledge_p48_${id}` as KnowledgeId,
+    knowledgeId: `knowledge_p48_${id}` as McsKnowledgeId,
     domain: 'training',
     status: 'approved',
     language: opts.language ?? 'en',
     translationStatus: opts.translationStatus ?? 'same_language',
-    sourceId: `source_p48_${id}` as SourceId,
+    sourceId: `source_p48_${id}` as McsSourceId,
     ...(opts.freshness ? { freshness: opts.freshness } : {}),
   };
 }
 
-function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): ApprovedKnowledgeQueryRequest {
+function request(overrides: Partial<McsApprovedKnowledgeQueryRequest> = {}): McsApprovedKnowledgeQueryRequest {
   return {
     schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
     scope: scope(),
@@ -85,7 +85,7 @@ function request(overrides: Partial<ApprovedKnowledgeQueryRequest> = {}): Approv
   };
 }
 
-function providerReturning(references: readonly KnowledgeReference[]): ApprovedKnowledgeProvider {
+function providerReturning(references: readonly McsKnowledgeReference[]): ApprovedKnowledgeProvider {
   return { async listApprovedKnowledge() { return references; } };
 }
 

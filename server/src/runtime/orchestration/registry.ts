@@ -1,4 +1,4 @@
-import type { AgentKey, RuntimeTaskType } from '@momentum/shared/runtime';
+import type { McsAgentKey, McsRuntimeTaskType } from '@momentum/shared/runtime';
 import type { AgentOrchestrationDescriptor } from './types.js';
 
 /**
@@ -193,20 +193,20 @@ const IVORY: AgentOrchestrationDescriptor = {
 };
 
 export const AGENT_ORCHESTRATION_REGISTRY: Readonly<
-  Record<AgentKey, AgentOrchestrationDescriptor>
+  Record<McsAgentKey, AgentOrchestrationDescriptor>
 > = {
   steve_success: STEVE_SUCCESS,
   michael_magnificent: MICHAEL_MAGNIFICENT,
   ivory: IVORY,
 };
 
-export const ORCHESTRATION_AGENT_KEYS: readonly AgentKey[] = [
+export const ORCHESTRATION_AGENT_KEYS: readonly McsAgentKey[] = [
   'steve_success',
   'michael_magnificent',
   'ivory',
 ];
 
-export function getAgentDescriptor(agentKey: AgentKey): AgentOrchestrationDescriptor {
+export function getAgentDescriptor(agentKey: McsAgentKey): AgentOrchestrationDescriptor {
   // Guard against an agentKey cast from an external boundary (deserialized JSON,
   // a removed/typo'd key). The Record type reports this as always-present, but
   // at runtime an unknown key yields undefined and would crash every caller on
@@ -218,13 +218,13 @@ export function getAgentDescriptor(agentKey: AgentKey): AgentOrchestrationDescri
   return descriptor;
 }
 
-export function isKnownAgentKey(value: unknown): value is AgentKey {
+export function isKnownAgentKey(value: unknown): value is McsAgentKey {
   return (
     value === 'steve_success' || value === 'michael_magnificent' || value === 'ivory'
   );
 }
 
-export function isTaskTypeAllowed(agentKey: AgentKey, taskType: RuntimeTaskType): boolean {
+export function isTaskTypeAllowed(agentKey: McsAgentKey, taskType: McsRuntimeTaskType): boolean {
   // Unknown agentKey → not allowed, rather than a TypeError on undefined.
   const descriptor = AGENT_ORCHESTRATION_REGISTRY[agentKey];
   return descriptor ? descriptor.allowedTaskTypes.includes(taskType) : false;

@@ -28,24 +28,24 @@
 
 import { Router } from 'express';
 import type {
-  CreateGeneratorRunPayload,
-  CreateGeneratorRunResponse,
-  CreateIvoryNamePayload,
-  GeneratorInvitePayload,
-  GeneratorInviteResponse,
-  GeneratorRunResponse,
-  IvoryCategory,
-  IvoryCoachPayload,
-  IvoryCoachResponse,
-  IvoryInvitationDraftPayload,
-  IvoryInvitationDraftResponse,
-  IvoryInvitationMintPayload,
-  IvoryInvitationMintResponse,
-  IvoryNameResponse,
-  IvoryStatus,
-  ListIvoryNamesResponse,
-  UpdateIvoryNamePayload,
-  UpdateIvoryStatusPayload,
+  McsCreateGeneratorRunPayload,
+  McsCreateGeneratorRunResponse,
+  McsCreateIvoryNamePayload,
+  McsGeneratorInvitePayload,
+  McsGeneratorInviteResponse,
+  McsGeneratorRunResponse,
+  McsIvoryCategory,
+  McsIvoryCoachPayload,
+  McsIvoryCoachResponse,
+  McsIvoryInvitationDraftPayload,
+  McsIvoryInvitationDraftResponse,
+  McsIvoryInvitationMintPayload,
+  McsIvoryInvitationMintResponse,
+  McsIvoryNameResponse,
+  McsIvoryStatus,
+  McsListIvoryNamesResponse,
+  McsUpdateIvoryNamePayload,
+  McsUpdateIvoryStatusPayload,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
@@ -78,9 +78,9 @@ import {
   IvoryMomentumValidationError,
 } from '../domain/ivory-momentum.js';
 import type {
-  IvoryMomentumSuggestionPayload,
-  IvoryMomentumSuggestionResponse,
-  IvoryMomentumViewResponse,
+  McsIvoryMomentumSuggestionPayload,
+  McsIvoryMomentumSuggestionResponse,
+  McsIvoryMomentumViewResponse,
 } from '@momentum/shared';
 
 export const ivoryRoutes: Router = Router();
@@ -119,7 +119,7 @@ ivoryRoutes.get(
     if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
     try {
       const names = await listIvoryNamesForBA(tmagId);
-      const body: ListIvoryNamesResponse = { ok: true, names };
+      const body: McsListIvoryNamesResponse = { ok: true, names };
       return res.status(200).json(body);
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -137,7 +137,7 @@ ivoryRoutes.post(
     const tmagId = req.session?.tmagId;
     if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
-    const body = req.body as Partial<CreateIvoryNamePayload>;
+    const body = req.body as Partial<McsCreateIvoryNamePayload>;
     const firstName = requiredStr(body?.firstName);
     const lastName = requiredStr(body?.lastName);
     if (!firstName || firstName.length > NAME_MAX) {
@@ -151,7 +151,7 @@ ivoryRoutes.post(
       return res.status(400).json({ ok: false, error: 'notes_too_long' });
     }
     const categories = Array.isArray(body?.categories)
-      ? (body.categories.filter((c) => typeof c === 'string') as IvoryCategory[])
+      ? (body.categories.filter((c) => typeof c === 'string') as McsIvoryCategory[])
       : undefined;
 
     try {
@@ -162,7 +162,7 @@ ivoryRoutes.post(
         categories,
         preferredAngle: body?.preferredAngle,
       });
-      const out: IvoryNameResponse = { ok: true, name };
+      const out: McsIvoryNameResponse = { ok: true, name };
       return res.status(201).json(out);
     } catch (err) {
       if (err instanceof IvoryValidationError) {
@@ -186,7 +186,7 @@ ivoryRoutes.patch(
     const ivoryId = paramStr(req.params.ivoryId);
     if (!ivoryId) return res.status(400).json({ ok: false, error: 'missing_ivory_id' });
 
-    const body = req.body as Partial<UpdateIvoryNamePayload>;
+    const body = req.body as Partial<McsUpdateIvoryNamePayload>;
     if (typeof body?.firstName === 'string' && body.firstName.length > NAME_MAX) {
       return res.status(400).json({ ok: false, error: 'invalid_first_name' });
     }
@@ -205,7 +205,7 @@ ivoryRoutes.patch(
         categories: body?.categories,
         preferredAngle: body?.preferredAngle,
       });
-      const out: IvoryNameResponse = { ok: true, name };
+      const out: McsIvoryNameResponse = { ok: true, name };
       return res.status(200).json(out);
     } catch (err) {
       if (err instanceof IvoryNotFoundError) {
@@ -235,15 +235,15 @@ ivoryRoutes.patch(
     const ivoryId = paramStr(req.params.ivoryId);
     if (!ivoryId) return res.status(400).json({ ok: false, error: 'missing_ivory_id' });
 
-    const body = req.body as Partial<UpdateIvoryStatusPayload>;
+    const body = req.body as Partial<McsUpdateIvoryStatusPayload>;
     const status = body?.status;
     if (typeof status !== 'string') {
       return res.status(400).json({ ok: false, error: 'invalid_status' });
     }
 
     try {
-      const name = await updateIvoryStatus(ivoryId, tmagId, status as IvoryStatus);
-      const out: IvoryNameResponse = { ok: true, name };
+      const name = await updateIvoryStatus(ivoryId, tmagId, status as McsIvoryStatus);
+      const out: McsIvoryNameResponse = { ok: true, name };
       return res.status(200).json(out);
     } catch (err) {
       if (err instanceof IvoryNotFoundError) {
@@ -302,7 +302,7 @@ ivoryRoutes.post(
     const tmagId = req.session?.tmagId;
     if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
-    const body = req.body as Partial<IvoryCoachPayload>;
+    const body = req.body as Partial<McsIvoryCoachPayload>;
     const angle = body?.angle ?? 'unspecified';
     const ask = typeof body?.ask === 'string' ? body.ask : '';
     if (ask.length > ASK_MAX) {
@@ -324,7 +324,7 @@ ivoryRoutes.post(
         rosterSize,
         ask,
       });
-      const out: IvoryCoachResponse = result;
+      const out: McsIvoryCoachResponse = result;
       return res.status(200).json(out);
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -346,7 +346,7 @@ ivoryRoutes.post(
     const tmagId = req.session?.tmagId;
     if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
-    const body = req.body as Partial<IvoryInvitationDraftPayload>;
+    const body = req.body as Partial<McsIvoryInvitationDraftPayload>;
     const ivoryId = requiredStr(body?.ivoryId);
     const relationshipReason = requiredStr(body?.relationshipReason);
     if (!ivoryId) return res.status(400).json({ ok: false, error: 'invalid_ivory_id' });
@@ -367,7 +367,7 @@ ivoryRoutes.post(
         relationshipReason,
         productName,
       });
-      const out: IvoryInvitationDraftResponse = result;
+      const out: McsIvoryInvitationDraftResponse = result;
       return res.status(200).json(out);
     } catch (err) {
       if (err instanceof IvoryNotFoundError) {
@@ -394,7 +394,7 @@ ivoryRoutes.post(
     const tmagId = req.session?.tmagId;
     if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
-    const body = req.body as Partial<IvoryInvitationMintPayload>;
+    const body = req.body as Partial<McsIvoryInvitationMintPayload>;
     const ivoryId = requiredStr(body?.ivoryId);
     const relationshipReason = requiredStr(body?.relationshipReason);
     const message = requiredStr(body?.message);
@@ -432,7 +432,7 @@ ivoryRoutes.post(
         phone,
         email,
       });
-      const out: IvoryInvitationMintResponse = result;
+      const out: McsIvoryInvitationMintResponse = result;
       return res.status(201).json(out);
     } catch (err) {
       if (err instanceof IvoryNotFoundError) {
@@ -463,7 +463,7 @@ ivoryRoutes.post(
     const tmagId = req.session?.tmagId;
     if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
-    const body = req.body as Partial<CreateGeneratorRunPayload>;
+    const body = req.body as Partial<McsCreateGeneratorRunPayload>;
     const productKey = requiredStr(body?.productKey);
     const angle = body?.angle ?? 'unspecified';
     if (!productKey) {
@@ -479,7 +479,7 @@ ivoryRoutes.post(
         angle,
         selectedIvoryIds,
       });
-      const out: CreateGeneratorRunResponse = { ok: true, run };
+      const out: McsCreateGeneratorRunResponse = { ok: true, run };
       return res.status(201).json(out);
     } catch (err) {
       if (err instanceof GeneratorValidationError) {
@@ -505,7 +505,7 @@ ivoryRoutes.get(
 
     try {
       const run = await getGeneratorRun(runId, tmagId);
-      const out: GeneratorRunResponse = { ok: true, run };
+      const out: McsGeneratorRunResponse = { ok: true, run };
       return res.status(200).json(out);
     } catch (err) {
       if (err instanceof GeneratorNotFoundError) {
@@ -532,7 +532,7 @@ ivoryRoutes.post(
     const runId = paramStr(req.params.runId);
     if (!runId) return res.status(400).json({ ok: false, error: 'missing_run_id' });
 
-    const body = req.body as Partial<GeneratorInvitePayload>;
+    const body = req.body as Partial<McsGeneratorInvitePayload>;
     const ivoryId = requiredStr(body?.ivoryId);
     if (!ivoryId) {
       return res.status(400).json({ ok: false, error: 'invalid_ivory_id' });
@@ -555,7 +555,7 @@ ivoryRoutes.post(
         phone,
         email,
       });
-      const out: GeneratorInviteResponse = {
+      const out: McsGeneratorInviteResponse = {
         ok: true,
         run: result.run,
         invitation: {
@@ -611,7 +611,7 @@ ivoryRoutes.get(
     if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
     try {
       const view = await getIvoryMomentumView(tmagId);
-      const out: IvoryMomentumViewResponse = view;
+      const out: McsIvoryMomentumViewResponse = view;
       return res.status(200).json(out);
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -634,7 +634,7 @@ ivoryRoutes.post(
       return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
     }
 
-    const body = req.body as Partial<IvoryMomentumSuggestionPayload>;
+    const body = req.body as Partial<McsIvoryMomentumSuggestionPayload>;
     const ask = typeof body?.ask === 'string' ? body.ask : '';
     if (ask.length > ASK_MAX) {
       return res.status(400).json({ ok: false, error: 'ask_too_long' });
@@ -642,7 +642,7 @@ ivoryRoutes.post(
 
     try {
       const result = await suggestIvoryMomentumFollowUp(tmagId, prospectId, { ask });
-      const out: IvoryMomentumSuggestionResponse = result;
+      const out: McsIvoryMomentumSuggestionResponse = result;
       return res.status(200).json(out);
     } catch (err) {
       if (err instanceof IvoryMomentumNotFoundError) {

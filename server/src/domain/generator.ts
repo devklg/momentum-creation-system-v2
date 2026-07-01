@@ -38,14 +38,14 @@ import { randomUUID } from 'node:crypto';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import {
-  PRODUCT_KEYS,
+  MCS_PRODUCT_KEYS,
   findProductByKey,
-  type CatalogProduct,
+  type McsCatalogProduct,
 } from '@momentum/shared';
 import type {
-  CreateGeneratorRunPayload,
-  GeneratorRun,
-  IvoryAngle,
+  McsCreateGeneratorRunPayload,
+  McsGeneratorRun,
+  McsIvoryAngle,
 } from '@momentum/shared';
 import { createInvitation } from './invitations.js';
 import { normalizePhone } from './prospectAccount.js';
@@ -60,7 +60,7 @@ const MONGO_DB = 'momentum';
 const RUNS_COLLECTION = 'generator_runs';
 const CHROMA_COLLECTION = 'mcs_ivory';
 
-const ALLOWED_ANGLES: ReadonlySet<IvoryAngle> = new Set([
+const ALLOWED_ANGLES: ReadonlySet<McsIvoryAngle> = new Set([
   'do_the_business',
   'make_money',
   'lose_fat',
@@ -88,8 +88,8 @@ export class GeneratorOwnershipError extends Error {
   }
 }
 
-function validateProduct(productKey: string): CatalogProduct {
-  if (!PRODUCT_KEYS.has(productKey)) {
+function validateProduct(productKey: string): McsCatalogProduct {
+  if (!MCS_PRODUCT_KEYS.has(productKey)) {
     throw new GeneratorValidationError('invalid_product_key');
   }
   const product = findProductByKey(productKey);
@@ -97,7 +97,7 @@ function validateProduct(productKey: string): CatalogProduct {
   return product;
 }
 
-function validateAngle(angle: IvoryAngle): IvoryAngle {
+function validateAngle(angle: McsIvoryAngle): McsIvoryAngle {
   if (!ALLOWED_ANGLES.has(angle)) {
     throw new GeneratorValidationError('invalid_angle');
   }
@@ -110,8 +110,8 @@ function validateAngle(angle: IvoryAngle): IvoryAngle {
  */
 export async function createGeneratorRun(
   tmagId: string,
-  input: CreateGeneratorRunPayload,
-): Promise<GeneratorRun> {
+  input: McsCreateGeneratorRunPayload,
+): Promise<McsGeneratorRun> {
   const product = validateProduct(input.productKey);
   const angle = validateAngle(input.angle);
   const preselected = input.selectedIvoryIds ?? [];
@@ -136,7 +136,7 @@ export async function createGeneratorRun(
   const runId = `genrun_${randomUUID()}`;
   const now = new Date().toISOString();
 
-  const run: GeneratorRun = {
+  const run: McsGeneratorRun = {
     runId,
     tmagId,
     productKey: product.productKey,
@@ -190,10 +190,10 @@ export async function createGeneratorRun(
 export async function getGeneratorRun(
   runId: string,
   tmagId: string,
-): Promise<GeneratorRun> {
+): Promise<McsGeneratorRun> {
   const res = await gatewayCall<{
     count: number;
-    documents: Array<GeneratorRun & { _id?: unknown }>;
+    documents: Array<McsGeneratorRun & { _id?: unknown }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: RUNS_COLLECTION,
@@ -205,7 +205,7 @@ export async function getGeneratorRun(
   if (doc.tmagId !== tmagId) throw new GeneratorOwnershipError(runId);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { _id, ...rest } = doc;
-  return rest as unknown as GeneratorRun;
+  return rest as unknown as McsGeneratorRun;
 }
 
 export interface MintForRunInput {
@@ -220,7 +220,7 @@ export interface MintForRunInput {
 }
 
 export interface MintForRunResult {
-  run: GeneratorRun;
+  run: McsGeneratorRun;
   prospectId: string;
   token: string;
   inviteUrl: string;

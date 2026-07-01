@@ -8,20 +8,20 @@
  */
 
 import type {
-  AdminDashboardFilter,
-  AdminFunnelKind,
-  AdminFunnelResponse,
-  AdminGrowthCardsResponse,
-  AdminLiveGridResponse,
-  AdminLiveGridSlot,
-  AdminLiveUsageSample,
+  McsAdminDashboardFilter,
+  McsAdminFunnelKind,
+  McsAdminFunnelResponse,
+  McsAdminGrowthCardsResponse,
+  McsAdminLiveGridResponse,
+  McsAdminLiveGridSlot,
+  McsAdminLiveUsageSample,
 } from '@momentum/shared';
 
 const NOW = () => new Date().toISOString();
 
 /** H.1 — one usage sample, plausibly recent. Used as the initial render
  *  fallback when SSE hasn't delivered its first snapshot yet. */
-export function mockUsageSample(): AdminLiveUsageSample {
+export function mockUsageSample(): McsAdminLiveUsageSample {
   return {
     sampledAt: NOW(),
     activeDashboardViewers: 7,
@@ -34,7 +34,7 @@ export function mockUsageSample(): AdminLiveUsageSample {
 
 /** H.2 — growth cards across all three windows. Deltas are mixed
  *  (positive, negative, zero) so all rendering branches are visible. */
-export function mockGrowthCards(filter: AdminDashboardFilter): AdminGrowthCardsResponse {
+export function mockGrowthCards(filter: McsAdminDashboardFilter): McsAdminGrowthCardsResponse {
   return {
     appliedFilter: filter,
     generatedAt: NOW(),
@@ -72,7 +72,7 @@ export function mockGrowthCards(filter: AdminDashboardFilter): AdminGrowthCardsR
 
 /** H.3 — every age bucket represented so the color treatment is
  *  visible end-to-end. 24 slots is enough to exercise wrapping. */
-export function mockLiveGrid(filter: AdminDashboardFilter): AdminLiveGridResponse {
+export function mockLiveGrid(filter: McsAdminDashboardFilter): McsAdminLiveGridResponse {
   const FIRST_NAMES = [
     'Alice',
     'Brandon',
@@ -101,7 +101,7 @@ export function mockLiveGrid(filter: AdminDashboardFilter): AdminLiveGridRespons
     ['TMAG-20260118-MN78OP', 'Devon Chen'],
   ];
   const BUCKET_DAYS: Array<{
-    bucket: AdminLiveGridSlot['ageBucket'];
+    bucket: McsAdminLiveGridSlot['ageBucket'];
     days: number;
   }> = [
     { bucket: 'fresh', days: 0 },
@@ -118,7 +118,7 @@ export function mockLiveGrid(filter: AdminDashboardFilter): AdminLiveGridRespons
     { bucket: 'stale', days: 55 },
   ];
 
-  const slots: AdminLiveGridSlot[] = [];
+  const slots: McsAdminLiveGridSlot[] = [];
   for (let i = 0; i < 24; i += 1) {
     const bucketSeed = BUCKET_DAYS[i % BUCKET_DAYS.length]!;
     const placedAt = new Date(Date.now() - bucketSeed.days * 24 * 60 * 60 * 1000).toISOString();
@@ -151,9 +151,9 @@ export function mockLiveGrid(filter: AdminDashboardFilter): AdminLiveGridRespons
 
 /** H.4 — both funnel shapes, both monotonically decreasing for clean visuals. */
 export function mockFunnel(
-  kind: AdminFunnelKind,
-  filter: AdminDashboardFilter,
-): AdminFunnelResponse {
+  kind: McsAdminFunnelKind,
+  filter: McsAdminDashboardFilter,
+): McsAdminFunnelResponse {
   if (kind === 'prospect') {
     const counts = [842, 612, 489, 318, 41];
     return {

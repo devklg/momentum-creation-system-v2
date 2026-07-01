@@ -52,9 +52,9 @@ import {
   closeProspectSession,
 } from '../services/prospectSession.js';
 import type {
-  ProspectLoginRedeemError,
-  ProspectLoginRedeemResponse,
-  ProspectLoginStartResponse,
+  McsProspectLoginRedeemError,
+  McsProspectLoginRedeemResponse,
+  McsProspectLoginStartResponse,
 } from '@momentum/shared';
 
 export const prospectLoginRoutes: Router = Router();
@@ -128,7 +128,7 @@ const StartBody = z.object({
   phone: z.string().min(4).max(40),
 });
 
-const OPAQUE_OK: ProspectLoginStartResponse = { ok: true };
+const OPAQUE_OK: McsProspectLoginStartResponse = { ok: true };
 
 prospectLoginRoutes.post('/start', async (req, res) => {
   const ip = clientIp(req);
@@ -194,7 +194,7 @@ const RedeemBody = z.object({
     .regex(/^[A-Za-z0-9_-]+$/),
 });
 
-const GENERIC_REDEEM_ERROR: ProspectLoginRedeemError = {
+const GENERIC_REDEEM_ERROR: McsProspectLoginRedeemError = {
   ok: false,
   error: 'invalid_link',
 };
@@ -235,7 +235,7 @@ prospectLoginRoutes.post('/redeem', async (req, res) => {
       accountExpiresAt: account.expiresAt,
     });
 
-    const response: ProspectLoginRedeemResponse = {
+    const response: McsProspectLoginRedeemResponse = {
       ok: true,
       tokenId: result.tokenId,
     };
@@ -290,7 +290,7 @@ prospectLoginRoutes.post('/code', async (req, res) => {
       sponsorTmagId: account.sponsorTmagId,
       accountExpiresAt: account.expiresAt,
     });
-    const response: ProspectLoginRedeemResponse = {
+    const response: McsProspectLoginRedeemResponse = {
       ok: true,
       tokenId: account.tokenId,
     };

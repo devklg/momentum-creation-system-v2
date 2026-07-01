@@ -16,12 +16,12 @@
 
 import { useEffect, useState } from 'react';
 import type {
-  BroadcastAudiencePreset,
-  BroadcastAudiencePreview,
-  BroadcastChannel,
-  BroadcastEnqueueResponse,
-  BroadcastRecord,
-  BroadcastTemplate,
+  McsBroadcastAudiencePreset,
+  McsBroadcastAudiencePreview,
+  McsBroadcastChannel,
+  McsBroadcastEnqueueResponse,
+  McsBroadcastRecord,
+  McsBroadcastTemplate,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { useAdminAuth } from '@/lib/auth';
@@ -31,7 +31,7 @@ import { ChannelSelector } from '@/components/admin/broadcast/ChannelSelector';
 import { Composer } from '@/components/admin/broadcast/Composer';
 import { SendTestButton } from '@/components/admin/broadcast/SendTestButton';
 
-const EMPTY_TEMPLATE: BroadcastTemplate = {
+const EMPTY_TEMPLATE: McsBroadcastTemplate = {
   smsText: '',
   emailSubject: '',
   emailText: '',
@@ -39,14 +39,14 @@ const EMPTY_TEMPLATE: BroadcastTemplate = {
 
 export function BroadcastPage() {
   const { me } = useAdminAuth();
-  const [channel, setChannel] = useState<BroadcastChannel>('sms');
-  const [preset, setPreset] = useState<BroadcastAudiencePreset>('all');
+  const [channel, setChannel] = useState<McsBroadcastChannel>('sms');
+  const [preset, setPreset] = useState<McsBroadcastAudiencePreset>('all');
   const [customTmagIds, setCustomTmagIds] = useState<string[]>([]);
-  const [template, setTemplate] = useState<BroadcastTemplate>(EMPTY_TEMPLATE);
-  const [preview, setPreview] = useState<BroadcastAudiencePreview | null>(null);
+  const [template, setTemplate] = useState<McsBroadcastTemplate>(EMPTY_TEMPLATE);
+  const [preview, setPreview] = useState<McsBroadcastAudiencePreview | null>(null);
 
   const [activeBroadcastId, setActiveBroadcastId] = useState<string | null>(null);
-  const [recent, setRecent] = useState<BroadcastRecord[] | null>(null);
+  const [recent, setRecent] = useState<McsBroadcastRecord[] | null>(null);
 
   const [confirmText, setConfirmText] = useState('');
   const [enqueuing, setEnqueuing] = useState(false);
@@ -67,7 +67,7 @@ export function BroadcastPage() {
         const res = await fetch('/api/admin/broadcast/list', { credentials: 'include' });
         const data = (await res.json()) as {
           ok: boolean;
-          broadcasts?: BroadcastRecord[];
+          broadcasts?: McsBroadcastRecord[];
           error?: string;
         };
         if (data.ok) setRecent(data.broadcasts ?? []);
@@ -112,7 +112,7 @@ export function BroadcastPage() {
           },
         }),
       });
-      const data = (await res.json()) as BroadcastEnqueueResponse & {
+      const data = (await res.json()) as McsBroadcastEnqueueResponse & {
         error?: string;
         issues?: string[];
       };
@@ -245,7 +245,7 @@ function RecentList({
   recent,
   onOpen,
 }: {
-  recent: BroadcastRecord[];
+  recent: McsBroadcastRecord[];
   onOpen: (id: string) => void;
 }) {
   if (recent.length === 0) return null;

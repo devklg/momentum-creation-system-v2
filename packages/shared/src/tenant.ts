@@ -1,43 +1,43 @@
-import type { AuditSeverity, IsoTimestamp } from './types.js';
+import type { McsAuditSeverity, McsIsoTimestamp } from './types.js';
 
-export type TenantSurface = 'com' | 'team' | 'admin' | 'system';
+export type McsTenantSurface = 'com' | 'team' | 'admin' | 'system';
 
-export const TENANT_SURFACES: readonly TenantSurface[] = [
+export const MCS_TENANT_SURFACES: readonly McsTenantSurface[] = [
   'com',
   'team',
   'admin',
   'system',
 ] as const;
 
-export type TenantComplianceMode = 'fail_closed';
+export type McsTenantComplianceMode = 'fail_closed';
 
-export type TenantRoleKey =
+export type McsTenantRoleKey =
   | 'founder_admin'
   | 'leader'
   | 'brand_ambassador'
   | 'prospect'
   | 'system';
 
-export interface TenantSettings {
+export interface McsTenantSettings {
   tenantId: string;
   tenantName: string;
   publicComDomain: string;
   teamDomain: string;
   adminDomain: string;
-  complianceMode: TenantComplianceMode;
+  complianceMode: McsTenantComplianceMode;
   contentInheritanceMode: 'code_default_master_override';
-  updatedAt: IsoTimestamp | null;
+  updatedAt: McsIsoTimestamp | null;
   updatedBy: string | null;
 }
 
-export interface TenantSettingsVersion extends TenantSettings {
+export interface McsTenantSettingsVersion extends McsTenantSettings {
   settingsVersionId: string;
   version: number;
   reason: string;
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
 }
 
-export type TenantTemplateKey =
+export type McsTenantTemplateKey =
   | 'com.presentation.hero'
   | 'com.dashboard.callback_cta'
   // F.5 remaining .com dashboard sections (six locked sections; callback_cta
@@ -62,31 +62,31 @@ export type TenantTemplateKey =
   | 'team.ivory.coach_prompt'
   | 'admin.broadcast.sms';
 
-export interface TenantTemplateDefinition {
-  templateKey: TenantTemplateKey;
+export interface McsTenantTemplateDefinition {
+  templateKey: McsTenantTemplateKey;
   label: string;
-  surface: TenantSurface;
+  surface: McsTenantSurface;
   description: string;
   tokens: string[];
   defaultContent: string;
   editable: boolean;
 }
 
-export interface TenantTemplateVersion {
+export interface McsTenantTemplateVersion {
   templateVersionId: string;
   tenantId: string;
-  templateKey: TenantTemplateKey;
-  surface: TenantSurface;
+  templateKey: McsTenantTemplateKey;
+  surface: McsTenantSurface;
   label: string;
   content: string;
   version: number;
   source: 'code_default' | 'master_override';
-  createdAt: IsoTimestamp;
+  createdAt: McsIsoTimestamp;
   createdBy: string | null;
   reason: string;
 }
 
-export type TenantPermissionKey =
+export type McsTenantPermissionKey =
   | 'admin.dashboard.view'
   | 'admin.audit.view'
   | 'admin.tenant.view'
@@ -98,20 +98,20 @@ export type TenantPermissionKey =
   | 'prospect.page.view'
   | 'system.persistence.write';
 
-export interface TenantRolePermission {
-  permission: TenantPermissionKey;
+export interface McsTenantRolePermission {
+  permission: McsTenantPermissionKey;
   label: string;
   allowed: boolean;
 }
 
-export interface TenantRoleMatrixRow {
-  role: TenantRoleKey;
+export interface McsTenantRoleMatrixRow {
+  role: McsTenantRoleKey;
   label: string;
   description: string;
-  permissions: TenantRolePermission[];
+  permissions: McsTenantRolePermission[];
 }
 
-export interface TenantInheritanceLayer {
+export interface McsTenantInheritanceLayer {
   order: number;
   layer: string;
   owner: string;
@@ -119,72 +119,72 @@ export interface TenantInheritanceLayer {
   canOverride: boolean;
 }
 
-export interface TenantComplianceIssue {
+export interface McsTenantComplianceIssue {
   ruleId: string;
-  severity: AuditSeverity;
+  severity: McsAuditSeverity;
   action: 'block' | 'warn' | 'log';
   message: string;
   matchedText: string | null;
 }
 
-export interface TenantComplianceValidation {
+export interface McsTenantComplianceValidation {
   ok: boolean;
-  surface: TenantSurface;
-  checkedAt: IsoTimestamp;
-  issues: TenantComplianceIssue[];
+  surface: McsTenantSurface;
+  checkedAt: McsIsoTimestamp;
+  issues: McsTenantComplianceIssue[];
 }
 
-export interface TenantOverview {
-  settings: TenantSettings;
-  templates: TenantTemplateVersion[];
-  templateDefinitions: TenantTemplateDefinition[];
-  roleMatrix: TenantRoleMatrixRow[];
-  inheritance: TenantInheritanceLayer[];
+export interface McsTenantOverview {
+  settings: McsTenantSettings;
+  templates: McsTenantTemplateVersion[];
+  templateDefinitions: McsTenantTemplateDefinition[];
+  roleMatrix: McsTenantRoleMatrixRow[];
+  inheritance: McsTenantInheritanceLayer[];
   compliance: {
-    mode: TenantComplianceMode;
+    mode: McsTenantComplianceMode;
     severityMapping: Array<{
-      action: TenantComplianceIssue['action'];
-      severity: AuditSeverity;
+      action: McsTenantComplianceIssue['action'];
+      severity: McsAuditSeverity;
       meaning: string;
     }>;
   };
 }
 
-export interface TenantOverviewResponse {
+export interface McsTenantOverviewResponse {
   ok: true;
-  overview: TenantOverview;
+  overview: McsTenantOverview;
 }
 
-export interface UpdateTenantSettingsPayload {
+export interface McsUpdateTenantSettingsPayload {
   settings: Pick<
-    TenantSettings,
+    McsTenantSettings,
     'tenantName' | 'publicComDomain' | 'teamDomain' | 'adminDomain'
   >;
   reason: string;
 }
 
-export interface UpdateTenantSettingsResponse {
+export interface McsUpdateTenantSettingsResponse {
   ok: true;
-  settings: TenantSettings;
+  settings: McsTenantSettings;
 }
 
-export interface SaveTenantTemplatePayload {
+export interface McsSaveTenantTemplatePayload {
   content: string;
   reason: string;
 }
 
-export interface SaveTenantTemplateResponse {
+export interface McsSaveTenantTemplateResponse {
   ok: true;
-  template: TenantTemplateVersion;
-  validation: TenantComplianceValidation;
+  template: McsTenantTemplateVersion;
+  validation: McsTenantComplianceValidation;
 }
 
-export interface ValidateTenantTemplatePayload {
-  surface: TenantSurface;
+export interface McsValidateTenantTemplatePayload {
+  surface: McsTenantSurface;
   content: string;
 }
 
-export interface ValidateTenantTemplateResponse {
+export interface McsValidateTenantTemplateResponse {
   ok: true;
-  validation: TenantComplianceValidation;
+  validation: McsTenantComplianceValidation;
 }

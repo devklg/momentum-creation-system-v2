@@ -18,13 +18,13 @@ import {
   validateMasterContent,
 } from '../../domain/adminTenantArchitecture.js';
 import type {
-  AuditActor,
-  TenantOverviewResponse,
-  TenantSurface,
-  TenantTemplateKey,
-  UpdateTenantSettingsResponse,
-  SaveTenantTemplateResponse,
-  ValidateTenantTemplateResponse,
+  McsAuditActor,
+  McsTenantOverviewResponse,
+  McsTenantSurface,
+  McsTenantTemplateKey,
+  McsUpdateTenantSettingsResponse,
+  McsSaveTenantTemplateResponse,
+  McsValidateTenantTemplateResponse,
 } from '@momentum/shared';
 
 export const adminTenantRoutes: Router = express.Router();
@@ -32,8 +32,8 @@ export const adminTenantRoutes: Router = express.Router();
 const SurfaceSchema = z.enum(['com', 'team', 'admin', 'system']);
 const TemplateKeySchema = z.enum(
   TENANT_TEMPLATE_DEFINITIONS.map((d) => d.templateKey) as [
-    TenantTemplateKey,
-    ...TenantTemplateKey[],
+    McsTenantTemplateKey,
+    ...McsTenantTemplateKey[],
   ],
 );
 
@@ -57,7 +57,7 @@ const ValidateBody = z.object({
   content: z.string().max(20_000),
 });
 
-function adminActorFromRequest(req: Request): AuditActor & { kind: 'admin' } {
+function adminActorFromRequest(req: Request): McsAuditActor & { kind: 'admin' } {
   const session = req.session!;
   const displayName =
     (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
@@ -91,7 +91,7 @@ adminTenantRoutes.get('/overview', requireAdmin, async (req, res) => {
       context: baseContext(req, '/api/admin/tenant/overview', 'GET'),
     });
 
-    const body: TenantOverviewResponse = { ok: true, overview };
+    const body: McsTenantOverviewResponse = { ok: true, overview };
     res.json(body);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
@@ -134,7 +134,7 @@ adminTenantRoutes.patch('/settings', requireAdmin, async (req, res) => {
     });
 
     const verified = (await getTenantOverview()).settings;
-    const body: UpdateTenantSettingsResponse = { ok: true, settings: verified };
+    const body: McsUpdateTenantSettingsResponse = { ok: true, settings: verified };
     res.json(body);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
@@ -154,10 +154,10 @@ adminTenantRoutes.post('/templates/validate', requireAdmin, async (req, res) => 
   }
 
   const validation = validateMasterContent(
-    parsed.data.surface as TenantSurface,
+    parsed.data.surface as McsTenantSurface,
     parsed.data.content,
   );
-  const body: ValidateTenantTemplateResponse = { ok: true, validation };
+  const body: McsValidateTenantTemplateResponse = { ok: true, validation };
   res.json(body);
 });
 
@@ -213,7 +213,7 @@ adminTenantRoutes.put('/templates/:templateKey', requireAdmin, async (req, res) 
       ),
     });
 
-    const response: SaveTenantTemplateResponse = {
+    const response: McsSaveTenantTemplateResponse = {
       ok: true,
       template: result.after,
       validation: result.validation,

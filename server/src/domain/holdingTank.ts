@@ -34,11 +34,11 @@
 import { gatewayCall } from '../services/gateway.js';
 import { publishPlacement } from '../services/poolEvents.js';
 import type {
-  HoldingTankSnapshot,
-  PlaceProspectResult,
-  PlacementEvent,
-  PlacementTickerEntry,
-  PoolPlacement,
+  McsHoldingTankSnapshot,
+  McsPlaceProspectResult,
+  McsPlacementEvent,
+  McsPlacementTickerEntry,
+  McsPoolPlacement,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -130,8 +130,8 @@ async function incrementPoolCounter(): Promise<number> {
  * prospect has not been placed yet. Used for the idempotency check
  * inside placeProspect.
  */
-export async function findPlacementByProspectId(prospectId: string): Promise<PoolPlacement | null> {
-  const result = await gatewayCall<{ documents: PoolPlacement[] }>('mongodb', 'query', {
+export async function findPlacementByProspectId(prospectId: string): Promise<McsPoolPlacement | null> {
+  const result = await gatewayCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
     filter: { prospectId },
@@ -171,7 +171,7 @@ export interface PlaceProspectInput {
  * acceptable per the monotonicity contract — wasted positions are an
  * expected outcome of error recovery, not a bug.
  */
-export async function placeProspect(input: PlaceProspectInput): Promise<PlaceProspectResult> {
+export async function placeProspect(input: PlaceProspectInput): Promise<McsPlaceProspectResult> {
   // Idempotency check first — cheapest path is no-op.
   const existing = await findPlacementByProspectId(input.prospectId);
   if (existing) {
@@ -190,7 +190,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<PlacePro
   // 2. Insert placement record. _id = prospectId for one-placement-per-
   //    prospect invariant; if a second writer raced to here, duplicate-
   //    key surfaces as a gateway error — we catch and return the row.
-  const placement: PoolPlacement = {
+  const placement: McsPoolPlacement = {
     prospectId: input.prospectId,
     sponsorTmagId: input.sponsorTmagId,
     positionNumber,
@@ -287,7 +287,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<PlacePro
   //    viewer receives the placement live (Chat #114 dashboard port).
   //    Fan-out is fire-and-forget; persistence already committed in steps
   //    1–5. If no viewers are subscribed, the publish is a no-op.
-  const placementEvent: PlacementEvent = {
+  const placementEvent: McsPlacementEvent = {
     eventId: `placement_evt_${input.prospectId}_${placedAt}`,
     positionNumber,
     firstName: input.firstName,
@@ -319,7 +319,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<PlacePro
  */
 export async function buildHoldingTankSnapshot(
   recentLimit: number,
-): Promise<HoldingTankSnapshot> {
+): Promise<McsHoldingTankSnapshot> {
   const [globalMaxPosition, recent] = await Promise.all([
     readPoolCounter(),
     listRecentPlacements(recentLimit),
@@ -354,7 +354,7 @@ async function readPoolCounter(): Promise<number> {
  */
 async function listRecentPlacements(
   limit: number,
-): Promise<PlacementTickerEntry[]> {
+): Promise<McsPlacementTickerEntry[]> {
   // We need first name + last initial + city/state for ticker render, but
   // those live on the prospect record, not the placement record. The most
   // economical path at v1 scale is a query against the prospect collection
@@ -384,7 +384,7 @@ async function listRecentPlacements(
 
   return result.documents
     .filter((d) => typeof d.positionNumber === 'number' && typeof d.placedAt === 'string')
-    .map<PlacementTickerEntry>((d) => ({
+    .map<McsPlacementTickerEntry>((d) => ({
       positionNumber: d.positionNumber,
       firstName: d.firstName,
       lastInitial:
@@ -439,7 +439,7 @@ export async function listProspectsAgedBeyond(
   nowMs: number = Date.now(),
 ): Promise<AgedPlacement[]> {
   const cutoff = windowCutoffIso(weeks, nowMs);
-  const result = await gatewayCall<{ documents: PoolPlacement[] }>('mongodb', 'query', {
+  const result = await gatewayCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
     filter: {

@@ -24,16 +24,16 @@
 
 import { Router } from 'express';
 import type {
-  CallbackIntent,
-  CallbackRequestPayload,
-  CallbackRequestResponse,
-  EnrolledResponse,
-  ExpiredResponse,
-  ResolvedTokenPayload,
-  VideoEventKind,
-  VideoEventPayload,
-  VideoEventResponse,
-  TokenState,
+  McsCallbackIntent,
+  McsCallbackRequestPayload,
+  McsCallbackRequestResponse,
+  McsEnrolledResponse,
+  McsExpiredResponse,
+  McsResolvedTokenPayload,
+  McsVideoEventKind,
+  McsVideoEventPayload,
+  McsVideoEventResponse,
+  McsTokenState,
 } from '@momentum/shared';
 import {
   findTokenRecord,
@@ -60,12 +60,12 @@ import {
   interpolateMasterContent,
 } from '../services/masterContent.js';
 import type {
-  ComProspectCopy,
-  HoldingTankSnapshot,
-  PlacementEvent,
-  TeamStatsResponse,
-  WebinarReservationPayload,
-  WebinarReservationResponse,
+  McsComProspectCopy,
+  McsHoldingTankSnapshot,
+  McsPlacementEvent,
+  McsTeamStatsResponse,
+  McsWebinarReservationPayload,
+  McsWebinarReservationResponse,
 } from '@momentum/shared';
 
 export const prospectTokenRoutes: Router = Router();
@@ -117,7 +117,7 @@ function phoneToE164(raw: string | null | undefined): string | null {
  * Build the locked-spec Part 4.9 410 expired payload from a BA record.
  * Phone is normalized to E.164 raw; null if the BA has no phone on record.
  */
-function buildExpiredResponse(ba: BARecord, expiredAt: string): ExpiredResponse {
+function buildExpiredResponse(ba: BARecord, expiredAt: string): McsExpiredResponse {
   return {
     error: 'expired',
     expiredAt,
@@ -133,7 +133,7 @@ function buildExpiredResponse(ba: BARecord, expiredAt: string): ExpiredResponse 
  * Build the locked-spec Part 4.9 409 enrolled payload from a BA record.
  * No phone (prospect already has the BA's number from the original invite).
  */
-function buildEnrolledResponse(ba: BARecord): EnrolledResponse {
+function buildEnrolledResponse(ba: BARecord): McsEnrolledResponse {
   return {
     error: 'enrolled',
     ba: {
@@ -182,7 +182,7 @@ async function resolveComProspectCopy(args: {
   baFirstName: string;
   baFullName: string;
   positionNumber: number | null;
-}): Promise<ComProspectCopy | null> {
+}): Promise<McsComProspectCopy | null> {
   const values: Record<string, string | number | null | undefined> = {
     prospectFirstName: args.prospectFirstName,
     baFirstName: args.baFirstName,
@@ -280,7 +280,7 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
       return res.status(404).json({ error: 'invalid_token' });
     }
 
-    const payload: ResolvedTokenPayload = {
+    const payload: McsResolvedTokenPayload = {
       token: tokenRecord.token,
       state: open.state,
       prospect: {
@@ -364,7 +364,7 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
  *   field can influence which leg/sponsor a placement belongs to.
  */
 
-const VIDEO_EVENT_KINDS: readonly VideoEventKind[] = [
+const VIDEO_EVENT_KINDS: readonly McsVideoEventKind[] = [
   'started',
   'quarter',
   'half',
@@ -373,7 +373,7 @@ const VIDEO_EVENT_KINDS: readonly VideoEventKind[] = [
 ];
 
 /** Map each milestone to the token state it transitions toward. */
-const KIND_TO_STATE: Record<VideoEventKind, TokenState> = {
+const KIND_TO_STATE: Record<McsVideoEventKind, McsTokenState> = {
   started: 'video_started',
   quarter: 'video_quarter',
   half: 'video_half',
@@ -383,7 +383,7 @@ const KIND_TO_STATE: Record<VideoEventKind, TokenState> = {
 
 prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
   const { token } = req.params;
-  const body = req.body as Partial<VideoEventPayload>;
+  const body = req.body as Partial<McsVideoEventPayload>;
 
   if (!token || token.length < 4) {
     return res.status(404).json({ error: 'invalid_token' });
@@ -495,7 +495,7 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
       placedAt = prospect?.placedAt ?? null;
     }
 
-    const response: VideoEventResponse = {
+    const response: McsVideoEventResponse = {
       token,
       state: transition.state,
       positionNumber,
@@ -547,7 +547,7 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
  * over time, and the token continues its own funnel rail unaffected.
  */
 
-const CALLBACK_INTENTS: readonly CallbackIntent[] = [
+const CALLBACK_INTENTS: readonly McsCallbackIntent[] = [
   'interested_tell_me_more',
   'have_questions',
   'ready_to_join',
@@ -555,7 +555,7 @@ const CALLBACK_INTENTS: readonly CallbackIntent[] = [
 
 prospectTokenRoutes.post('/:token/callback-request', async (req, res) => {
   const { token } = req.params;
-  const body = req.body as Partial<CallbackRequestPayload>;
+  const body = req.body as Partial<McsCallbackRequestPayload>;
 
   if (!token || token.length < 4) {
     return res.status(404).json({ error: 'invalid_token' });
@@ -632,7 +632,7 @@ prospectTokenRoutes.post('/:token/callback-request', async (req, res) => {
       }
     }
 
-    const response: CallbackRequestResponse = {
+    const response: McsCallbackRequestResponse = {
       ok: true,
       intent: body.intent,
       baFirstName: ba.firstName,
@@ -733,7 +733,7 @@ prospectTokenRoutes.get('/:token/stream', async (req, res) => {
 
   // Send the initial snapshot.
   try {
-    const snapshot: HoldingTankSnapshot = await buildHoldingTankSnapshot(
+    const snapshot: McsHoldingTankSnapshot = await buildHoldingTankSnapshot(
       SSE_SNAPSHOT_RECENT_LIMIT,
     );
     res.write(sseFrame('snapshot', snapshot));
@@ -746,7 +746,7 @@ prospectTokenRoutes.get('/:token/stream', async (req, res) => {
   }
 
   // Subscribe to live placements; serialize each one onto the wire.
-  const sub = subscribePlacements((event: PlacementEvent) => {
+  const sub = subscribePlacements((event: McsPlacementEvent) => {
     try {
       res.write(sseFrame('placement', event, event.eventId));
     } catch {
@@ -811,7 +811,7 @@ function looksLikeEmail(raw: unknown): raw is string {
 
 prospectTokenRoutes.post('/:token/webinar-reserve', async (req, res) => {
   const { token } = req.params;
-  const body = req.body as Partial<WebinarReservationPayload>;
+  const body = req.body as Partial<McsWebinarReservationPayload>;
 
   if (!token || token.length < 4) {
     return res.status(404).json({ error: 'invalid_token' });
@@ -870,7 +870,7 @@ prospectTokenRoutes.post('/:token/webinar-reserve', async (req, res) => {
       email,
     });
 
-    const response: WebinarReservationResponse = {
+    const response: McsWebinarReservationResponse = {
       ok: true,
       reservationId: result.reservationId,
       eventId: nextEvent.eventId,
@@ -937,7 +937,7 @@ prospectTokenRoutes.get('/:token/team-stats', async (req, res) => {
     }
 
     const stats = await computeTeamStats();
-    const payload: TeamStatsResponse = {
+    const payload: McsTeamStatsResponse = {
       basActive24h: stats.basActive24h,
       invitationsSentToday: stats.invitationsSentToday,
       newPlacements24h: stats.newPlacements24h,

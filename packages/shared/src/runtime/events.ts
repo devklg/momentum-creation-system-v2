@@ -1,20 +1,20 @@
-import type { AgentKey, RuntimeMode, RuntimeTaskType } from './agents.js';
+import type { McsAgentKey, McsRuntimeMode, McsRuntimeTaskType } from './agents.js';
 import type {
-  CausationId,
-  ContextPacketId,
-  CorrelationId,
-  IdempotencyKey,
-  RuntimeEventId,
-  RuntimeResponseId,
-  RuntimeTurnId,
-  SessionId,
+  McsCausationId,
+  McsContextPacketId,
+  McsCorrelationId,
+  McsIdempotencyKey,
+  McsRuntimeEventId,
+  McsRuntimeResponseId,
+  McsRuntimeTurnId,
+  McsSessionId,
 } from './ids.js';
-import type { RuntimeScope } from './identity.js';
-import type { RuntimeLanguage } from './language.js';
+import type { McsRuntimeScope } from './identity.js';
+import type { McsRuntimeLanguage } from './language.js';
 
-export type AgentEventSchemaVersion = 'agent_event.v1';
+export type McsAgentEventSchemaVersion = 'agent_event.v1';
 
-export type BrowserVoiceEventType =
+export type McsBrowserVoiceEventType =
   | 'browser_voice.capability_checked'
   | 'browser_voice.permission_requested'
   | 'browser_voice.permission_granted'
@@ -29,7 +29,7 @@ export type BrowserVoiceEventType =
   | 'browser_voice.fallback_to_text'
   | 'browser_voice.error';
 
-export type BrowserTextEventType =
+export type McsBrowserTextEventType =
   | 'browser_text.session.started'
   | 'browser_text.message.created'
   | 'browser_text.message.submitted'
@@ -37,7 +37,7 @@ export type BrowserTextEventType =
   | 'browser_text.fallback_from_voice'
   | 'browser_text.error';
 
-export type AgentRuntimeEventType =
+export type McsAgentRuntimeEventType =
   | 'agent.session.created'
   | 'agent.session.started'
   | 'agent.session.paused'
@@ -59,7 +59,7 @@ export type AgentRuntimeEventType =
   | 'agent.invitation_link.created'
   | 'agent.output_guardrail.blocked';
 
-export type ContextManagerEventType =
+export type McsContextManagerEventType =
   | 'context.requested'
   | 'context.validation.completed'
   | 'context.retrieval.started'
@@ -74,30 +74,30 @@ export type ContextManagerEventType =
   | 'context.language.fallback_used'
   | 'context.audit.recorded';
 
-export type KnowledgeEventType =
+export type McsKnowledgeEventType =
   | `knowledge.${string}`
   | `knowledge_core.${string}`
   | `knowledge_ingestion.${string}`;
 
-export type JournalEventType = `journal.${string}`;
-export type GuidedActionEventType = `guided_action.${string}`;
-export type LearningEventType = `learning.${string}`;
-export type ExternalRuntimeEventType = `external.${string}`;
-export type SystemEventType = `system.${string}`;
+export type McsJournalEventType = `journal.${string}`;
+export type McsGuidedActionEventType = `guided_action.${string}`;
+export type McsLearningEventType = `learning.${string}`;
+export type McsExternalRuntimeEventType = `external.${string}`;
+export type McsSystemEventType = `system.${string}`;
 
-export type AgentEventType =
-  | BrowserVoiceEventType
-  | BrowserTextEventType
-  | AgentRuntimeEventType
-  | ContextManagerEventType
-  | KnowledgeEventType
-  | JournalEventType
-  | GuidedActionEventType
-  | LearningEventType
-  | ExternalRuntimeEventType
-  | SystemEventType;
+export type McsAgentEventType =
+  | McsBrowserVoiceEventType
+  | McsBrowserTextEventType
+  | McsAgentRuntimeEventType
+  | McsContextManagerEventType
+  | McsKnowledgeEventType
+  | McsJournalEventType
+  | McsGuidedActionEventType
+  | McsLearningEventType
+  | McsExternalRuntimeEventType
+  | McsSystemEventType;
 
-export type AgentEventSource =
+export type McsAgentEventSource =
   | 'browser_voice_runtime'
   | 'browser_text_runtime'
   | 'agent_runtime'
@@ -111,65 +111,65 @@ export type AgentEventSource =
   | 'implementation_test'
   | 'system';
 
-export type AgentEventEnvelope<TPayload = Record<string, unknown>> = RuntimeScope & {
-  eventId: RuntimeEventId;
-  eventType: AgentEventType;
-  schemaVersion: AgentEventSchemaVersion;
-  agentKey?: AgentKey;
-  sessionId?: SessionId;
-  correlationId: CorrelationId;
-  causationId?: CausationId;
-  idempotencyKey: IdempotencyKey;
-  source: AgentEventSource;
+export type McsAgentEventEnvelope<TPayload = Record<string, unknown>> = McsRuntimeScope & {
+  eventId: McsRuntimeEventId;
+  eventType: McsAgentEventType;
+  schemaVersion: McsAgentEventSchemaVersion;
+  agentKey?: McsAgentKey;
+  sessionId?: McsSessionId;
+  correlationId: McsCorrelationId;
+  causationId?: McsCausationId;
+  idempotencyKey: McsIdempotencyKey;
+  source: McsAgentEventSource;
   payload: TPayload;
   occurredAt: string;
   recordedAt: string;
   metadata?: Record<string, unknown>;
 };
 
-export type EmitRuntimeEventRequest<TPayload = Record<string, unknown>> = RuntimeScope & {
-  eventType: AgentEventType;
-  agentKey?: AgentKey;
-  sessionId?: SessionId;
-  correlationId?: CorrelationId;
-  causationId?: CausationId;
-  idempotencyKey: IdempotencyKey;
-  source: AgentEventSource;
+export type McsEmitRuntimeEventRequest<TPayload = Record<string, unknown>> = McsRuntimeScope & {
+  eventType: McsAgentEventType;
+  agentKey?: McsAgentKey;
+  sessionId?: McsSessionId;
+  correlationId?: McsCorrelationId;
+  causationId?: McsCausationId;
+  idempotencyKey: McsIdempotencyKey;
+  source: McsAgentEventSource;
   payload: TPayload;
   occurredAt?: string;
   metadata?: Record<string, unknown>;
 };
 
-export interface EmitRuntimeEventResponse<TPayload = Record<string, unknown>> {
-  event: AgentEventEnvelope<TPayload>;
+export interface McsEmitRuntimeEventResponse<TPayload = Record<string, unknown>> {
+  event: McsAgentEventEnvelope<TPayload>;
   idempotentReplay: boolean;
 }
 
-export interface AgentSessionCreatedPayload {
-  sessionId: SessionId;
-  agentKey: AgentKey;
-  language: RuntimeLanguage;
-  mode: RuntimeMode;
-  taskType: RuntimeTaskType;
+export interface McsAgentSessionCreatedPayload {
+  sessionId: McsSessionId;
+  agentKey: McsAgentKey;
+  language: McsRuntimeLanguage;
+  mode: McsRuntimeMode;
+  taskType: McsRuntimeTaskType;
 }
 
-export interface AgentTurnReceivedPayload {
-  sessionId: SessionId;
-  turnId: RuntimeTurnId;
-  agentKey: AgentKey;
-  language: RuntimeLanguage;
-  mode: RuntimeMode;
+export interface McsAgentTurnReceivedPayload {
+  sessionId: McsSessionId;
+  turnId: McsRuntimeTurnId;
+  agentKey: McsAgentKey;
+  language: McsRuntimeLanguage;
+  mode: McsRuntimeMode;
   turnSequence: number;
   stateKey: string;
 }
 
-export interface AgentTurnRespondedPayload {
-  sessionId: SessionId;
-  responseId: RuntimeResponseId;
-  agentKey: AgentKey;
-  language: RuntimeLanguage;
+export interface McsAgentTurnRespondedPayload {
+  sessionId: McsSessionId;
+  responseId: McsRuntimeResponseId;
+  agentKey: McsAgentKey;
+  language: McsRuntimeLanguage;
   stateKey: string;
   outputMode: 'text' | 'voice_text';
-  contextPacketId: ContextPacketId;
+  contextPacketId: McsContextPacketId;
   suggestedActionIds?: string[];
 }

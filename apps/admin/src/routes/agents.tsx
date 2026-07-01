@@ -3,10 +3,10 @@
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
-import type { AdminAgentOversightResponse } from '@momentum/shared';
+import type { McsAdminAgentOversightResponse } from '@momentum/shared';
 
 export function AgentsPage() {
-  const [data, setData] = useState<AdminAgentOversightResponse | null>(null);
+  const [data, setData] = useState<McsAdminAgentOversightResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
@@ -18,7 +18,7 @@ export function AgentsPage() {
         const res = await fetch('/api/admin/agents/overview', {
           credentials: 'include',
         });
-        const body = (await res.json()) as AdminAgentOversightResponse & {
+        const body = (await res.json()) as McsAdminAgentOversightResponse & {
           error?: string;
         };
         if (!res.ok || !body.ok) {

@@ -24,14 +24,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type {
-  AdminProspectActivityEvent,
-  AdminProspectDetail,
-  AdminProspectDetailResponse,
-  AdminProspectDirectoryRow,
-  AdminProspectInterventionKind,
-  AdminProspectInterventionResponse,
-  AdminProspectKevinNote,
-  ResolvedTokenPayload,
+  McsAdminProspectActivityEvent,
+  McsAdminProspectDetail,
+  McsAdminProspectDetailResponse,
+  McsAdminProspectDirectoryRow,
+  McsAdminProspectInterventionKind,
+  McsAdminProspectInterventionResponse,
+  McsAdminProspectKevinNote,
+  McsResolvedTokenPayload,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { InterventionModal } from '@/components/prospect-oversight/InterventionModal';
@@ -44,13 +44,13 @@ import {
 interface Props {
   prospectId: string;
   onClose: () => void;
-  onRowRefreshed: (row: AdminProspectDirectoryRow) => void;
+  onRowRefreshed: (row: McsAdminProspectDirectoryRow) => void;
 }
 
-type SandboxPreview = ResolvedTokenPayload & { sandbox: true };
+type SandboxPreview = McsResolvedTokenPayload & { sandbox: true };
 
 export function DetailPanel({ prospectId, onClose, onRowRefreshed }: Props) {
-  const [detail, setDetail] = useState<AdminProspectDetail | null>(null);
+  const [detail, setDetail] = useState<McsAdminProspectDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [preview, setPreview] = useState<SandboxPreview | null>(null);
@@ -60,7 +60,7 @@ export function DetailPanel({ prospectId, onClose, onRowRefreshed }: Props) {
   const [noteSaving, setNoteSaving] = useState(false);
   const [noteErr, setNoteErr] = useState<string | null>(null);
   const [activeIntervention, setActiveIntervention] =
-    useState<AdminProspectInterventionKind | null>(null);
+    useState<McsAdminProspectInterventionKind | null>(null);
   const [crudMode, setCrudMode] = useState<ProspectCrudMode | null>(null);
 
   const loadDetail = useCallback(async () => {
@@ -70,7 +70,7 @@ export function DetailPanel({ prospectId, onClose, onRowRefreshed }: Props) {
       const res = await fetch(`/api/admin/prospects/${encodeURIComponent(prospectId)}`, {
         credentials: 'include',
       });
-      const data = (await res.json()) as AdminProspectDetailResponse & {
+      const data = (await res.json()) as McsAdminProspectDetailResponse & {
         error?: string;
       };
       if (!data.ok) {
@@ -126,7 +126,7 @@ export function DetailPanel({ prospectId, onClose, onRowRefreshed }: Props) {
         },
       );
       const data = (await res.json()) as
-        | { ok: true; note: AdminProspectKevinNote }
+        | { ok: true; note: McsAdminProspectKevinNote }
         | { ok: false; error: string };
       if (!data.ok) {
         setNoteErr(data.error);
@@ -144,7 +144,7 @@ export function DetailPanel({ prospectId, onClose, onRowRefreshed }: Props) {
   }, [noteDraft, prospectId]);
 
   const handleInterventionDone = useCallback(
-    (resp: AdminProspectInterventionResponse) => {
+    (resp: McsAdminProspectInterventionResponse) => {
       // Refresh directory row in place.
       onRowRefreshed(resp.refreshedRow);
       // Refetch detail to pick up the new audit-log event + state changes.
@@ -343,7 +343,7 @@ function KV({
 
 /* ─── identity + sponsor drift ──────────────────────────────────── */
 
-function IdentitySection({ detail }: { detail: AdminProspectDetail }) {
+function IdentitySection({ detail }: { detail: McsAdminProspectDetail }) {
   const drift = detail.sponsorTmagIdAtMint !== detail.sponsorTmagIdNow;
   return (
     <Section eyebrow="Identity">
@@ -394,7 +394,7 @@ function TokenSection({
   previewErr,
   onTogglePreview,
 }: {
-  detail: AdminProspectDetail;
+  detail: McsAdminProspectDetail;
   previewOpen: boolean;
   preview: SandboxPreview | null;
   previewErr: string | null;
@@ -487,7 +487,7 @@ function TokenSection({
 
 /* ─── activity timeline ─────────────────────────────────────────── */
 
-function ActivityTimeline({ events }: { events: AdminProspectActivityEvent[] }) {
+function ActivityTimeline({ events }: { events: McsAdminProspectActivityEvent[] }) {
   if (events.length === 0) {
     return (
       <Section eyebrow="Activity timeline">
@@ -529,7 +529,7 @@ function ActivityTimeline({ events }: { events: AdminProspectActivityEvent[] }) 
   );
 }
 
-function isAdminEvent(kind: AdminProspectActivityEvent['kind']): boolean {
+function isAdminEvent(kind: McsAdminProspectActivityEvent['kind']): boolean {
   return kind.startsWith('admin_');
 }
 
@@ -543,7 +543,7 @@ function KevinNotesSection({
   saving,
   error,
 }: {
-  notes: AdminProspectKevinNote[];
+  notes: McsAdminProspectKevinNote[];
   draft: string;
   onDraftChange: (v: string) => void;
   onAdd: () => void;
@@ -631,7 +631,7 @@ function InterventionLauncher({
   onSelect,
   terminalState,
 }: {
-  onSelect: (kind: AdminProspectInterventionKind) => void;
+  onSelect: (kind: McsAdminProspectInterventionKind) => void;
   terminalState: boolean;
 }) {
   return (

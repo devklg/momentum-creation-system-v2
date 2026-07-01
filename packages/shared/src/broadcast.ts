@@ -48,7 +48,7 @@
  *   custom      — Kevin pastes specific TM BA IDs; the server validates
  *                 and filters non-existent / opted-out entries.
  */
-export type BroadcastAudiencePreset =
+export type McsBroadcastAudiencePreset =
   | 'all'
   | 'first_72h'
   | 'leaders'
@@ -56,7 +56,7 @@ export type BroadcastAudiencePreset =
   | 'custom';
 
 /** Channel for one broadcast. SMS-only and email-only are both valid. */
-export type BroadcastChannel = 'sms' | 'email' | 'both';
+export type McsBroadcastChannel = 'sms' | 'email' | 'both';
 
 /* ─── G.1 · Template ───────────────────────────────────────────── */
 
@@ -74,7 +74,7 @@ export type BroadcastChannel = 'sms' | 'email' | 'both';
  * Unknown tokens render as empty strings (we never echo `{{foo}}` to a
  * recipient — that leaks template internals).
  */
-export interface BroadcastTemplate {
+export interface McsBroadcastTemplate {
   /** SMS body (1200 char cap). Null when channel === 'email'. */
   smsText: string | null;
   /** Email subject (140 char cap). Null when channel === 'sms'. */
@@ -103,10 +103,10 @@ export interface BroadcastTemplate {
  *                completedAt at this transition.
  *   failed     — pre-flight validation failed; no recipient rows exist
  */
-export type BroadcastStatus = 'queued' | 'sending' | 'complete' | 'failed';
+export type McsBroadcastStatus = 'queued' | 'sending' | 'complete' | 'failed';
 
 /** Per-recipient delivery state (one row per recipient × channel). */
-export type BroadcastRecipientStatus =
+export type McsBroadcastRecipientStatus =
   | 'queued'
   | 'sending'
   | 'sent'
@@ -115,7 +115,7 @@ export type BroadcastRecipientStatus =
   | 'skipped_no_address';
 
 /** A broadcast as stored. The canonical row in `broadcasts`. */
-export interface BroadcastRecord {
+export interface McsBroadcastRecord {
   broadcastId: string;
   /** TM BA ID of the sending admin (always Kevin or another ADMIN_BA_ID). */
   createdByTmagId: string;
@@ -126,14 +126,14 @@ export interface BroadcastRecord {
    * Audit severity is 'info' for test, 'critical' for full sends.
    */
   isTestSend: boolean;
-  audiencePreset: BroadcastAudiencePreset;
+  audiencePreset: McsBroadcastAudiencePreset;
   /** Only populated when audiencePreset === 'custom'. */
   customAudienceTmagIds: string[] | null;
-  channel: BroadcastChannel;
-  template: BroadcastTemplate;
+  channel: McsBroadcastChannel;
+  template: McsBroadcastTemplate;
   /** Count of recipient rows actually enqueued (post-exclusion). */
   recipientCount: number;
-  status: BroadcastStatus;
+  status: McsBroadcastStatus;
   /** ISO when every recipient row reached a terminal state. */
   completedAt: string | null;
 }
@@ -149,7 +149,7 @@ export interface BroadcastRecord {
  * row — the channel field on the row narrows what the worker actually
  * sends).
  */
-export interface BroadcastRecipientRow {
+export interface McsBroadcastRecipientRow {
   /** Composite id: `${broadcastId}::${recipientTmagId}`. */
   rowId: string;
   broadcastId: string;
@@ -158,14 +158,14 @@ export interface BroadcastRecipientRow {
   recipientFirstName: string;
   recipientEmail: string | null;
   recipientPhone: string | null;
-  channel: BroadcastChannel;
+  channel: McsBroadcastChannel;
   /** Rendered SMS body (interpolated). Null when channel === 'email'. */
   smsRendered: string | null;
   /** Rendered email subject. Null when channel === 'sms'. */
   emailSubjectRendered: string | null;
   /** Rendered email text body. Null when channel === 'sms'. */
   emailTextRendered: string | null;
-  status: BroadcastRecipientStatus;
+  status: McsBroadcastRecipientStatus;
   /** Telnyx message id. Set when SMS succeeds. */
   smsMessageId: string | null;
   /** Resend message id. Set when email succeeds. */
@@ -195,11 +195,11 @@ export interface BroadcastRecipientRow {
  *   'kevin_added'   — Kevin or another admin manually excluded the BA
  *                     via a future /admin tool; for now, direct insert
  */
-export type BroadcastOptoutReason = 'stop_keyword' | 'kevin_added';
+export type McsBroadcastOptoutReason = 'stop_keyword' | 'kevin_added';
 
-export interface BroadcastOptoutRow {
+export interface McsBroadcastOptoutRow {
   tmagId: string;
-  reason: BroadcastOptoutReason;
+  reason: McsBroadcastOptoutReason;
   addedAt: string;
   /** Phone number that texted STOP, when reason === 'stop_keyword'. */
   sourcePhone: string | null;
@@ -217,8 +217,8 @@ export interface BroadcastOptoutRow {
  * `excludedBySTOP` is broken out so Kevin can SEE the guardrail
  * working ("12 BAs, 1 excluded by STOP" reads honest, not buried).
  */
-export interface BroadcastAudiencePreview {
-  preset: BroadcastAudiencePreset;
+export interface McsBroadcastAudiencePreview {
+  preset: McsBroadcastAudiencePreset;
   /** Total BAs the preset would address before STOP exclusion. */
   totalCandidates: number;
   /** Count removed by the STOP exclusion list. */
@@ -242,9 +242,9 @@ export interface BroadcastAudiencePreview {
   provenanceNote: string | null;
 }
 
-export interface BroadcastAudiencePreviewResponse {
+export interface McsBroadcastAudiencePreviewResponse {
   ok: true;
-  preview: BroadcastAudiencePreview;
+  preview: McsBroadcastAudiencePreview;
 }
 
 /* ─── G.4 / G.5 · Send / status responses ──────────────────────── */
@@ -254,15 +254,15 @@ export interface BroadcastAudiencePreviewResponse {
  * audience server-side; the client never enumerates third-party
  * recipients.
  */
-export interface BroadcastEnqueueRequest {
-  audiencePreset: BroadcastAudiencePreset;
+export interface McsBroadcastEnqueueRequest {
+  audiencePreset: McsBroadcastAudiencePreset;
   /** Required when audiencePreset === 'custom'; ignored otherwise. */
   customAudienceTmagIds?: string[];
-  channel: BroadcastChannel;
-  template: BroadcastTemplate;
+  channel: McsBroadcastChannel;
+  template: McsBroadcastTemplate;
 }
 
-export interface BroadcastEnqueueResponse {
+export interface McsBroadcastEnqueueResponse {
   ok: true;
   broadcastId: string;
   recipientCount: number;
@@ -276,23 +276,23 @@ export interface BroadcastEnqueueResponse {
  * indirection — Kevin is waiting for the result), and audits with
  * severity='info'.
  */
-export interface BroadcastSendTestRequest {
-  channel: BroadcastChannel;
-  template: BroadcastTemplate;
+export interface McsBroadcastSendTestRequest {
+  channel: McsBroadcastChannel;
+  template: McsBroadcastTemplate;
 }
 
-export interface BroadcastSendTestResponse {
+export interface McsBroadcastSendTestResponse {
   ok: true;
   broadcastId: string;
   /** The single recipient row, post-render, post-send. */
-  recipient: BroadcastRecipientRow;
+  recipient: McsBroadcastRecipientRow;
 }
 
 /**
  * G.5 status view — what the BroadcastStatus component polls. Counts
  * are derived from the recipient rows; the worker advances them.
  */
-export interface BroadcastStatusCounts {
+export interface McsBroadcastStatusCounts {
   queued: number;
   sending: number;
   sent: number;
@@ -301,17 +301,17 @@ export interface BroadcastStatusCounts {
   skippedNoAddress: number;
 }
 
-export interface BroadcastStatusResponse {
+export interface McsBroadcastStatusResponse {
   ok: true;
-  broadcast: BroadcastRecord;
-  counts: BroadcastStatusCounts;
+  broadcast: McsBroadcastRecord;
+  counts: McsBroadcastStatusCounts;
   /** Most recent 50 rows for the in-flight view, newest first. */
-  recentRows: BroadcastRecipientRow[];
+  recentRows: McsBroadcastRecipientRow[];
 }
 
 /* ─── Endpoint paths (single source of truth) ──────────────────── */
 
-export const ADMIN_BROADCAST_PATHS = {
+export const MCS_ADMIN_BROADCAST_PATHS = {
   /** GET — G.2 audience live count (query: preset, channel, customAudienceTmagIds[]) */
   audience: '/api/admin/broadcast/audience',
   /** POST — G.4 send-test-to-Kevin (one recipient, inline) */
@@ -326,7 +326,7 @@ export const ADMIN_BROADCAST_PATHS = {
 
 /* ─── Composer-side constraints (mirrored server validation) ───── */
 
-export const BROADCAST_LIMITS = {
+export const MCS_BROADCAST_LIMITS = {
   smsMaxChars: 1200,
   emailSubjectMaxChars: 140,
   emailTextMaxChars: 20_000,
@@ -337,7 +337,7 @@ export const BROADCAST_LIMITS = {
  * Tokens the server recognizes during interpolation. Anything not in
  * this set renders as empty (we don't echo `{{unknown}}` to recipients).
  */
-export const BROADCAST_INTERPOLATION_TOKENS = [
+export const MCS_BROADCAST_INTERPOLATION_TOKENS = [
   '{{firstName}}',
   '{{lastName}}',
   '{{fullName}}',

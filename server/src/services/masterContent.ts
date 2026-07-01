@@ -26,7 +26,7 @@ import {
   getTenantTemplate,
   TENANT_TEMPLATE_DEFINITIONS,
 } from '../domain/adminTenantArchitecture.js';
-import type { TenantTemplateKey, TenantTemplateVersion } from '@momentum/shared';
+import type { McsTenantTemplateKey, McsTenantTemplateVersion } from '@momentum/shared';
 
 const TENANT_ID = 'team-magnificent';
 
@@ -36,7 +36,7 @@ const TENANT_ID = 'team-magnificent';
  * fails. Mirrors the shape of a persisted TenantTemplateVersion so consumers
  * can treat both paths uniformly.
  */
-function codeDefaultVersion(templateKey: TenantTemplateKey): TenantTemplateVersion {
+function codeDefaultVersion(templateKey: McsTenantTemplateKey): McsTenantTemplateVersion {
   const def = TENANT_TEMPLATE_DEFINITIONS.find((t) => t.templateKey === templateKey);
   if (!def) throw new Error(`unknown_template_key: ${templateKey}`);
   return {
@@ -61,8 +61,8 @@ function codeDefaultVersion(templateKey: TenantTemplateKey): TenantTemplateVersi
  * you only need the copy string.
  */
 export async function readMasterTemplate(
-  templateKey: TenantTemplateKey,
-): Promise<TenantTemplateVersion> {
+  templateKey: McsTenantTemplateKey,
+): Promise<McsTenantTemplateVersion> {
   try {
     return await getTenantTemplate(templateKey);
   } catch {
@@ -76,7 +76,7 @@ export async function readMasterTemplate(
  * consumers make in place of their hardcoded copy constants.
  */
 export async function readMasterContent(
-  templateKey: TenantTemplateKey,
+  templateKey: McsTenantTemplateKey,
 ): Promise<string> {
   return (await readMasterTemplate(templateKey)).content;
 }

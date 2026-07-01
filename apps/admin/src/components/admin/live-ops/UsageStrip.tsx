@@ -10,11 +10,11 @@
  * null for either latency, the tile shows "—" and a faint hint.
  */
 
-import type { AdminLiveUsageSample } from '@momentum/shared';
+import type { McsAdminLiveUsageSample } from '@momentum/shared';
 import type { UsageStreamStatus } from './useUsageStream';
 
 interface Props {
-  sample: AdminLiveUsageSample | null;
+  sample: McsAdminLiveUsageSample | null;
   status: UsageStreamStatus;
   lastHeartbeatAt: string | null;
 }

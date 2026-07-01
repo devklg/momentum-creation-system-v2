@@ -25,7 +25,7 @@ import type {
   McsRuntimeAuditDraftKind,
   McsRuntimeAuditLogEntry,
 } from '@momentum/shared';
-import type { AgentKey } from '@momentum/shared/runtime';
+import type { McsAgentKey } from '@momentum/shared/runtime';
 import { appendRuntimeAuditEntry } from '../domain/auditLog.js';
 import { coordinateRuntimeTurn } from './orchestration/turnCoordinator.js';
 import type {
@@ -34,7 +34,7 @@ import type {
 } from './orchestration/types.js';
 
 /** Map the orchestration agent key to the runtime-audit agent label (exhaustive). */
-export function agentKeyToRuntimeAuditAgent(agentKey: AgentKey): McsRuntimeAuditAgent {
+export function agentKeyToRuntimeAuditAgent(agentKey: McsAgentKey): McsRuntimeAuditAgent {
   switch (agentKey) {
     case 'steve_success':
       return 'steve';

@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import type {
-  AgentId,
+  McsAgentId,
   TmagId,
-  CausationId,
-  CorrelationId,
-  IdempotencyKey,
-  RequestId,
-  RuntimeEventId,
-  SessionId,
-  TeamId,
-  TenantId,
+  McsCausationId,
+  McsCorrelationId,
+  McsIdempotencyKey,
+  McsRequestId,
+  McsRuntimeEventId,
+  McsSessionId,
+  McsTeamId,
+  McsTenantId,
 } from '@momentum/shared/runtime';
 import {
   AGENT_EVENT_V1_SCHEMA_VERSION,
@@ -23,20 +23,20 @@ import {
 } from '../index.js';
 
 const baseEvent: RuntimeAgentEventEnvelope = {
-  eventId: 'evt_test_001' as RuntimeEventId,
+  eventId: 'evt_test_001' as McsRuntimeEventId,
   eventType: 'agent.session.created',
   schemaVersion: AGENT_EVENT_V1_SCHEMA_VERSION,
-  tenantId: 'tenant_team_magnificent' as TenantId,
-  teamId: 'team_magnificent' as TeamId,
+  tenantId: 'tenant_team_magnificent' as McsTenantId,
+  teamId: 'team_magnificent' as McsTeamId,
   teamKey: TEAM_MAGNIFICENT_KEY,
   teamName: TEAM_MAGNIFICENT_NAME,
   tmagId: 'TMAG-TEST-001' as TmagId,
   agentKey: 'michael_magnificent',
-  agentId: 'agent_instance_michael_default' as AgentId,
-  sessionId: 'session_test_001' as SessionId,
-  correlationId: 'corr_session_test_001' as CorrelationId,
-  causationId: 'evt_parent_001' as CausationId,
-  idempotencyKey: 'agent-session:session_test_001:created' as IdempotencyKey,
+  agentId: 'agent_instance_michael_default' as McsAgentId,
+  sessionId: 'session_test_001' as McsSessionId,
+  correlationId: 'corr_session_test_001' as McsCorrelationId,
+  causationId: 'evt_parent_001' as McsCausationId,
+  idempotencyKey: 'agent-session:session_test_001:created' as McsIdempotencyKey,
   source: 'agent_runtime',
   payload: {
     sessionId: 'session_test_001',
@@ -54,11 +54,11 @@ const baseEvent: RuntimeAgentEventEnvelope = {
     actorType: 'agent',
     actorId: 'agent_instance_michael_default',
     agentKey: 'michael_magnificent',
-    agentId: 'agent_instance_michael_default' as AgentId,
+    agentId: 'agent_instance_michael_default' as McsAgentId,
   },
   provenance: {
     emittedBy: 'runtime_event_foundation_test',
-    requestId: 'req_test_001' as RequestId,
+    requestId: 'req_test_001' as McsRequestId,
     componentVersion: 's1.4',
   },
 };

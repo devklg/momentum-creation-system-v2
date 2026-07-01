@@ -7,15 +7,15 @@
  */
 
 import type {
-  AdminDashboardMetrics,
-  AdminDashboardTile,
+  McsAdminDashboardMetrics,
+  McsAdminDashboardTile,
 } from '@momentum/shared';
 
 interface Props {
-  metrics: AdminDashboardMetrics | null;
+  metrics: McsAdminDashboardMetrics | null;
   loading: boolean;
-  activeTile: AdminDashboardTile | null;
-  onSelectTile: (tile: AdminDashboardTile) => void;
+  activeTile: McsAdminDashboardTile | null;
+  onSelectTile: (tile: McsAdminDashboardTile) => void;
 }
 
 export function MetricsRow({ metrics, loading, activeTile, onSelectTile }: Props) {
@@ -75,7 +75,7 @@ export function MetricsRow({ metrics, loading, activeTile, onSelectTile }: Props
 }
 
 interface TileProps {
-  tile: AdminDashboardTile;
+  tile: McsAdminDashboardTile;
   eyebrow: string;
   value: string;
   sub: string;

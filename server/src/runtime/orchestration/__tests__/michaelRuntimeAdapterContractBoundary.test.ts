@@ -1,4 +1,4 @@
-import type { RuntimeTaskType } from '@momentum/shared/runtime';
+import type { McsRuntimeTaskType } from '@momentum/shared/runtime';
 import { describe, expect, it } from 'vitest';
 import { runRuntimeTurnFixtureScenario } from '../fixtures/runtimeTurnHarness.js';
 import { runMichaelRuntimeAdapterContract } from '../michaelRuntimeAdapterContract.js';
@@ -15,7 +15,7 @@ import type {
 type ContractCase = {
   readonly scenario: RuntimeTurnFixtureScenarioType;
   readonly agentKey?: unknown;
-  readonly taskType?: RuntimeTaskType;
+  readonly taskType?: McsRuntimeTaskType;
   readonly language?: unknown;
   readonly intent?: 'clear_training_support' | 'ambiguous_training_support';
   readonly mutateRuntimeTurn?: (
@@ -30,7 +30,7 @@ const wrongTaskTypes = [
   'journal_teaching',
   'session_resume',
   'guided_action_review',
-] as const satisfies readonly RuntimeTaskType[];
+] as const satisfies readonly McsRuntimeTaskType[];
 
 const adapterContractCases: readonly ContractCase[] = [
   { scenario: 'accepted_complete', intent: 'clear_training_support' },

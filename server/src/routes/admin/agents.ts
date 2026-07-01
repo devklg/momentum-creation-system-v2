@@ -11,11 +11,11 @@ import express, { type Request, type Router } from 'express';
 import { requireAdmin } from '../../middleware/requireAuth.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
 import { buildAdminAgentOversight } from '../../domain/adminAgentMemory.js';
-import type { AuditActor } from '@momentum/shared';
+import type { McsAuditActor } from '@momentum/shared';
 
 export const adminAgentsRoutes: Router = express.Router();
 
-function adminActorFromRequest(req: Request): AuditActor & { kind: 'admin' } {
+function adminActorFromRequest(req: Request): McsAuditActor & { kind: 'admin' } {
   const session = req.session!;
   const displayName =
     (session as unknown as { fullName?: string }).fullName ?? session.tmagId;

@@ -1,4 +1,4 @@
-import type { RuntimeTaskType } from '@momentum/shared/runtime';
+import type { McsRuntimeTaskType } from '@momentum/shared/runtime';
 import { describe, expect, it } from 'vitest';
 import {
   createRuntimeTurnFixtureHarness,
@@ -42,7 +42,7 @@ function expectReturnedOnlyInert(result: RuntimeTurnFixtureHarnessResult): void 
   expect(Object.hasOwn(result.result, 'responseText')).toBe(false);
 }
 
-async function acceptedComplete(agentKey: unknown, taskType: RuntimeTaskType) {
+async function acceptedComplete(agentKey: unknown, taskType: McsRuntimeTaskType) {
   return runRuntimeTurnFixtureScenario({
     scenario: 'accepted_complete',
     agentKey,

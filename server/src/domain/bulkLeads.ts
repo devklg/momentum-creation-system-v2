@@ -18,14 +18,14 @@ import {
 import { findVMCampaignForOwner } from './vmCampaigns.js';
 import { markLeadBatchImported } from './vmLeadBatches.js';
 import type {
-  BulkLeadRecord,
-  ImportBulkLeadPayload,
-  InviteTokenRecord,
-  LeadBatchRecord,
-  ProspectLocation,
-  ProspectRecord,
-  VmLeadBatchSource,
-  VMCampaignRecord,
+  McsBulkLeadRecord,
+  McsImportBulkLeadPayload,
+  McsInviteTokenRecord,
+  McsLeadBatchRecord,
+  McsProspectLocation,
+  McsProspectRecord,
+  McsVmLeadBatchSource,
+  McsVMCampaignRecord,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -46,13 +46,13 @@ export interface ImportBulkLeadsInput {
   sponsorTmagId: string;
   leadBatchId: string;
   vmCampaignId: string;
-  leads: ImportBulkLeadPayload[];
+  leads: McsImportBulkLeadPayload[];
 }
 
 export interface ImportBulkLeadsResult {
-  batch: LeadBatchRecord;
-  campaign: VMCampaignRecord;
-  leads: BulkLeadRecord[];
+  batch: McsLeadBatchRecord;
+  campaign: McsVMCampaignRecord;
+  leads: McsBulkLeadRecord[];
 }
 
 function nonEmpty(raw: string | undefined | null): string {
@@ -70,8 +70,8 @@ async function createBulkLeadRecord(input: {
   leadBatchId: string;
   vmCampaignId: string;
   source: string;
-  lead: ImportBulkLeadPayload;
-}): Promise<BulkLeadRecord> {
+  lead: McsImportBulkLeadPayload;
+}): Promise<McsBulkLeadRecord> {
   const firstName = nonEmpty(input.lead.firstName);
   const lastName = nonEmpty(input.lead.lastName);
   const city = nonEmpty(input.lead.city);
@@ -85,10 +85,10 @@ async function createBulkLeadRecord(input: {
   const leadId = `lead_${randomUUID()}`;
   const prospectId = `prospect_${randomUUID()}`;
   const token = await mintUniqueToken();
-  const location: ProspectLocation = { city, stateOrRegion, country };
+  const location: McsProspectLocation = { city, stateOrRegion, country };
   const lastInitial = lastInitialOf(lastName);
 
-  const prospect: ProspectRecord = {
+  const prospect: McsProspectRecord = {
     prospectId,
     firstName,
     lastName,
@@ -162,7 +162,7 @@ async function createBulkLeadRecord(input: {
     },
   });
 
-  const tokenRecord: InviteTokenRecord = {
+  const tokenRecord: McsInviteTokenRecord = {
     token,
     prospectId,
     sponsorTmagId: input.sponsorTmagId,
@@ -208,7 +208,7 @@ async function createBulkLeadRecord(input: {
     },
   });
 
-  const bulkLead: BulkLeadRecord = {
+  const bulkLead: McsBulkLeadRecord = {
     leadId,
     leadBatchId: input.leadBatchId,
     vmCampaignId: input.vmCampaignId,
@@ -223,7 +223,7 @@ async function createBulkLeadRecord(input: {
     city,
     stateOrRegion,
     country,
-    source: input.source as VmLeadBatchSource,
+    source: input.source as McsVmLeadBatchSource,
     status: 'token_created',
     activatedAt: null,
     createdAt: now,
@@ -320,7 +320,7 @@ export async function importBulkLeads(
     throw new BulkLeadError('campaign_batch_mismatch');
   }
 
-  const created: BulkLeadRecord[] = [];
+  const created: McsBulkLeadRecord[] = [];
   for (const lead of input.leads) {
     const record = await createBulkLeadRecord({
       ownerTmagId: input.ownerTmagId,
@@ -341,8 +341,8 @@ export async function importBulkLeads(
   return { batch, campaign, leads: created };
 }
 
-export async function findBulkLeadByToken(token: string): Promise<BulkLeadRecord | null> {
-  const result = await gatewayCall<{ documents: BulkLeadRecord[] }>('mongodb', 'query', {
+export async function findBulkLeadByToken(token: string): Promise<McsBulkLeadRecord | null> {
+  const result = await gatewayCall<{ documents: McsBulkLeadRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: BULK_LEADS_COLLECTION,
     filter: { token },

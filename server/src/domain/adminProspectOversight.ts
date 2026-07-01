@@ -43,32 +43,32 @@ import { findProspectById } from './prospects.js';
 import { TOKEN_TTL_MS } from './tokens.js';
 import { findPlacementByProspectId } from './holdingTank.js';
 import type {
-  AdminBaFilterOption,
-  AdminDashboardFilter,
-  AdminProspectActivityEvent,
-  AdminProspectActivityEventKind,
-  AdminProspectAddNoteResponse,
-  AdminProspectDetail,
-  AdminProspectDirectoryRow,
-  AdminProspectForceEnrollRequest,
-  AdminProspectInterventionKind,
-  AdminProspectInterventionResponse,
-  AdminProspectKevinNote,
-  AdminProspectManualFlushRequest,
-  AdminProspectMoveRequest,
-  AdminProspectPresentationStatus,
-  AdminProspectReassignSponsorRequest,
-  ProspectStatus,
-  AuditActor,
-  AuditContext,
-  CallbackRequestRecord,
-  InviteTokenRecord,
-  IsoTimestamp,
-  PoolPlacement,
-  ProspectRecord,
-  ResolvedTokenPayload,
-  TokenState,
-  WebinarReservationRecord,
+  McsAdminBaFilterOption,
+  McsAdminDashboardFilter,
+  McsAdminProspectActivityEvent,
+  McsAdminProspectActivityEventKind,
+  McsAdminProspectAddNoteResponse,
+  McsAdminProspectDetail,
+  McsAdminProspectDirectoryRow,
+  McsAdminProspectForceEnrollRequest,
+  McsAdminProspectInterventionKind,
+  McsAdminProspectInterventionResponse,
+  McsAdminProspectKevinNote,
+  McsAdminProspectManualFlushRequest,
+  McsAdminProspectMoveRequest,
+  McsAdminProspectPresentationStatus,
+  McsAdminProspectReassignSponsorRequest,
+  McsProspectStatus,
+  McsAuditActor,
+  McsAuditContext,
+  McsCallbackRequestRecord,
+  McsInviteTokenRecord,
+  McsIsoTimestamp,
+  McsPoolPlacement,
+  McsProspectRecord,
+  McsResolvedTokenPayload,
+  McsTokenState,
+  McsWebinarReservationRecord,
 } from '@momentum/shared';
 import { randomUUID } from 'node:crypto';
 
@@ -116,7 +116,7 @@ interface BaDoc {
   binaryQualified?: boolean;
 }
 
-interface ProspectDoc extends ProspectRecord {
+interface ProspectDoc extends McsProspectRecord {
   /** Inviting BA at mint time (sponsorTmagIdAtMint). Optional because legacy
    *  rows predate the field — fall back to sponsorTmagId in projection. */
   sponsorTmagIdAtMint?: string;
@@ -126,7 +126,7 @@ interface ProspectDoc extends ProspectRecord {
   deletedReason?: string | null;
 }
 
-interface NoteDoc extends AdminProspectKevinNote {
+interface NoteDoc extends McsAdminProspectKevinNote {
   _id?: unknown;
 }
 
@@ -139,7 +139,7 @@ interface NoteDoc extends AdminProspectKevinNote {
  * sponsorTmagId-in clause.
  */
 async function resolveScopedTmagIds(
-  filter: AdminDashboardFilter,
+  filter: McsAdminDashboardFilter,
 ): Promise<string[] | null> {
   if (filter.tmagId) return [filter.tmagId];
   if (filter.leaderGroup === 'all') return null;
@@ -176,8 +176,8 @@ async function loadBaNameMap(): Promise<Map<string, string>> {
 /* ─── status & derived-field helpers ────────────────────────────── */
 
 export function deriveProspectStatus(
-  placement: PoolPlacement | null,
-): ProspectStatus {
+  placement: McsPoolPlacement | null,
+): McsProspectStatus {
   if (!placement) return 'pending';
   if (!placement.flushedAt) return 'pending';
   switch (placement.flushReason) {
@@ -193,10 +193,10 @@ export function deriveProspectStatus(
 }
 
 export function derivePresentationStatus(
-  state: TokenState,
+  state: McsTokenState,
   hasCallback: boolean,
   hasWebinar: boolean,
-): AdminProspectPresentationStatus {
+): McsAdminProspectPresentationStatus {
   if (state === 'video_complete') {
     if (hasWebinar) return 'webinar_reserved';
     if (hasCallback) return 'callback_requested';
@@ -204,13 +204,13 @@ export function derivePresentationStatus(
   return state;
 }
 
-function daysBetween(fromIso: IsoTimestamp, toMs: number): number {
+function daysBetween(fromIso: McsIsoTimestamp, toMs: number): number {
   const fromMs = new Date(fromIso).getTime();
   return Math.floor((toMs - fromMs) / ONE_DAY_MS);
 }
 
 function deriveDaysInHoldingTank(
-  placement: PoolPlacement | null,
+  placement: McsPoolPlacement | null,
   nowMs: number,
 ): number | null {
   if (!placement) return null;
@@ -219,9 +219,9 @@ function deriveDaysInHoldingTank(
 }
 
 function deriveFollowUpNeededBy(
-  prospect: ProspectRecord,
-  placement: PoolPlacement | null,
-): IsoTimestamp | null {
+  prospect: McsProspectRecord,
+  placement: McsPoolPlacement | null,
+): McsIsoTimestamp | null {
   // Terminal states have no follow-up cadence.
   if (prospect.state === 'enrolled' || prospect.state === 'expired') return null;
   // If the placement is flushed, the prospect is off the active follow-up
@@ -232,7 +232,7 @@ function deriveFollowUpNeededBy(
   return new Date(anchorMs + FOLLOW_UP_THRESHOLD_MS).toISOString();
 }
 
-function eventKindForState(state: TokenState): AdminProspectActivityEventKind {
+function eventKindForState(state: McsTokenState): McsAdminProspectActivityEventKind {
   switch (state) {
     case 'minted':
       return 'token_minted';
@@ -255,7 +255,7 @@ function eventKindForState(state: TokenState): AdminProspectActivityEventKind {
   }
 }
 
-function labelForState(state: TokenState): string {
+function labelForState(state: McsTokenState): string {
   switch (state) {
     case 'minted':
       return 'Token minted';
@@ -297,9 +297,9 @@ function truncatedToken(token: string): string {
  * (Kevin-scale; rows are dozens to low thousands at v1).
  */
 export async function listDirectoryRows(
-  filter: AdminDashboardFilter,
+  filter: McsAdminDashboardFilter,
   nowMs: number = Date.now(),
-): Promise<AdminProspectDirectoryRow[]> {
+): Promise<McsAdminProspectDirectoryRow[]> {
   const scopedTmagIds = await resolveScopedTmagIds(filter);
   const baNames = await loadBaNameMap();
 
@@ -325,10 +325,10 @@ export async function listDirectoryRows(
   const prospectIds = prospects.map((p) => p.prospectId);
 
   const [placements, tokens, callbacks, webinars] = await Promise.all([
-    queryByProspectIds<PoolPlacement>(COLL_PLACEMENTS, prospectIds),
-    queryByProspectIds<InviteTokenRecord>(COLL_TOKENS, prospectIds),
-    queryByProspectIds<CallbackRequestRecord>(COLL_CALLBACKS, prospectIds),
-    queryByProspectIds<WebinarReservationRecord>(COLL_WEBINARS, prospectIds),
+    queryByProspectIds<McsPoolPlacement>(COLL_PLACEMENTS, prospectIds),
+    queryByProspectIds<McsInviteTokenRecord>(COLL_TOKENS, prospectIds),
+    queryByProspectIds<McsCallbackRequestRecord>(COLL_CALLBACKS, prospectIds),
+    queryByProspectIds<McsWebinarReservationRecord>(COLL_WEBINARS, prospectIds),
   ]);
 
   const placementByProspect = indexBy(placements, (p) => p.prospectId);
@@ -336,7 +336,7 @@ export async function listDirectoryRows(
   const callbackByProspect = latestByProspect(callbacks, (c) => c.createdAt);
   const webinarByProspect = latestByProspect(webinars, (w) => w.createdAt);
 
-  return prospects.map<AdminProspectDirectoryRow>((p) => {
+  return prospects.map<McsAdminProspectDirectoryRow>((p) => {
     const placement = placementByProspect.get(p.prospectId) ?? null;
     const token = tokenByProspect.get(p.prospectId) ?? null;
     const callback = callbackByProspect.get(p.prospectId) ?? null;
@@ -379,8 +379,8 @@ export async function listDirectoryRows(
  * can render either response unchanged.
  */
 export async function getDirectoryFilterOptions(): Promise<{
-  bas: AdminBaFilterOption[];
-  leaderGroups: { value: AdminDashboardFilter['leaderGroup']; label: string; count: number }[];
+  bas: McsAdminBaFilterOption[];
+  leaderGroups: { value: McsAdminDashboardFilter['leaderGroup']; label: string; count: number }[];
   leaderDetectionNote: string;
 }> {
   const [allBasResult, leaderIds] = await Promise.all([
@@ -395,7 +395,7 @@ export async function getDirectoryFilterOptions(): Promise<{
   const leaderSet = new Set(leaderIds);
   const docs = allBasResult.documents ?? [];
 
-  const bas: AdminBaFilterOption[] = docs.map((d) => ({
+  const bas: McsAdminBaFilterOption[] = docs.map((d) => ({
     tmagId: d.tmagId,
     fullName: `${d.firstName} ${d.lastName}`,
     isLeader: leaderSet.has(d.tmagId),
@@ -420,15 +420,15 @@ export async function getDirectoryFilterOptions(): Promise<{
  */
 export async function buildDetailPayload(
   prospectId: string,
-): Promise<AdminProspectDetail | null> {
+): Promise<McsAdminProspectDetail | null> {
   const prospect = (await findProspectById(prospectId)) as ProspectDoc | null;
   if (!prospect) return null;
 
   const [placement, callbacks, webinars, tokens, baNames, notes] = await Promise.all([
     findPlacementByProspectId(prospectId),
-    listByProspectId<CallbackRequestRecord>(COLL_CALLBACKS, prospectId),
-    listByProspectId<WebinarReservationRecord>(COLL_WEBINARS, prospectId),
-    listByProspectId<InviteTokenRecord>(COLL_TOKENS, prospectId),
+    listByProspectId<McsCallbackRequestRecord>(COLL_CALLBACKS, prospectId),
+    listByProspectId<McsWebinarReservationRecord>(COLL_WEBINARS, prospectId),
+    listByProspectId<McsInviteTokenRecord>(COLL_TOKENS, prospectId),
     loadBaNameMap(),
     listByProspectId<NoteDoc>(COLL_NOTES, prospectId, { createdAt: 1 }),
   ]);
@@ -439,7 +439,7 @@ export async function buildDetailPayload(
 
   const sponsorTmagIdAtMint = prospect.sponsorTmagIdAtMint ?? token?.sponsorTmagId ?? prospect.sponsorTmagId;
 
-  const activity: AdminProspectActivityEvent[] = buildActivityTimeline({
+  const activity: McsAdminProspectActivityEvent[] = buildActivityTimeline({
     prospect,
     token,
     placement,
@@ -511,7 +511,7 @@ export async function buildDetailPayload(
       : null,
     enrollment,
     activity,
-    kevinNotes: notes.map<AdminProspectKevinNote>((n) => ({
+    kevinNotes: notes.map<McsAdminProspectKevinNote>((n) => ({
       noteId: n.noteId,
       prospectId: n.prospectId,
       body: n.body,
@@ -535,12 +535,12 @@ export async function buildDetailPayload(
  */
 function buildActivityTimeline(input: {
   prospect: ProspectDoc;
-  token: InviteTokenRecord | null;
-  placement: PoolPlacement | null;
-  callbacks: CallbackRequestRecord[];
-  webinars: WebinarReservationRecord[];
-}): AdminProspectActivityEvent[] {
-  const events: AdminProspectActivityEvent[] = [];
+  token: McsInviteTokenRecord | null;
+  placement: McsPoolPlacement | null;
+  callbacks: McsCallbackRequestRecord[];
+  webinars: McsWebinarReservationRecord[];
+}): McsAdminProspectActivityEvent[] {
+  const events: McsAdminProspectActivityEvent[] = [];
 
   // 1. Token mint
   if (input.token) {
@@ -680,11 +680,11 @@ function buildActivityTimeline(input: {
  */
 export async function synthesizeAdminSandboxPreview(
   prospectId: string,
-): Promise<(ResolvedTokenPayload & { sandbox: true }) | null> {
+): Promise<(McsResolvedTokenPayload & { sandbox: true }) | null> {
   const prospect = await findProspectById(prospectId);
   if (!prospect) return null;
 
-  const tokens = await listByProspectId<InviteTokenRecord>(COLL_TOKENS, prospectId);
+  const tokens = await listByProspectId<McsInviteTokenRecord>(COLL_TOKENS, prospectId);
   const token = pickLatest(tokens, (t) => t.createdAt);
   if (!token) return null;
 
@@ -744,13 +744,13 @@ export async function synthesizeAdminSandboxPreview(
 
 export async function listProspectNotes(
   prospectId: string,
-): Promise<AdminProspectKevinNote[]> {
+): Promise<McsAdminProspectKevinNote[]> {
   const notes = await listByProspectId<NoteDoc>(
     COLL_NOTES,
     prospectId,
     { createdAt: 1 },
   );
-  return notes.map<AdminProspectKevinNote>((n) => ({
+  return notes.map<McsAdminProspectKevinNote>((n) => ({
     noteId: n.noteId,
     prospectId: n.prospectId,
     body: n.body,
@@ -763,12 +763,12 @@ export async function listProspectNotes(
 export async function appendProspectNote(input: {
   prospectId: string;
   body: string;
-  actor: AuditActor & { kind: 'admin' };
-  context: AuditContext | null;
-}): Promise<AdminProspectAddNoteResponse> {
+  actor: McsAuditActor & { kind: 'admin' };
+  context: McsAuditContext | null;
+}): Promise<McsAdminProspectAddNoteResponse> {
   const noteId = `note_${randomUUID()}`;
   const createdAt = new Date().toISOString();
-  const note: AdminProspectKevinNote = {
+  const note: McsAdminProspectKevinNote = {
     noteId,
     prospectId: input.prospectId,
     body: input.body,
@@ -838,8 +838,8 @@ async function loadInterventionContext(input: {
   requestingTmagId: string;
   requireToTmagId?: string;
 }): Promise<{
-  prospect: ProspectRecord;
-  placement: PoolPlacement | null;
+  prospect: McsProspectRecord;
+  placement: McsPoolPlacement | null;
   requestingBa: BaDoc;
   toBa: BaDoc | null;
 }> {
@@ -882,14 +882,14 @@ export class InterventionError extends Error {
  * the prospect so the client can patch the table in place. Single-row
  * projection — reuses the directory derivation helpers.
  */
-export async function refreshRowFor(prospectId: string): Promise<AdminProspectDirectoryRow> {
+export async function refreshRowFor(prospectId: string): Promise<McsAdminProspectDirectoryRow> {
   const baNames = await loadBaNameMap();
   const [prospect, placement, tokens, callbacks, webinars] = await Promise.all([
     findProspectById(prospectId),
     findPlacementByProspectId(prospectId),
-    listByProspectId<InviteTokenRecord>(COLL_TOKENS, prospectId),
-    listByProspectId<CallbackRequestRecord>(COLL_CALLBACKS, prospectId),
-    listByProspectId<WebinarReservationRecord>(COLL_WEBINARS, prospectId),
+    listByProspectId<McsInviteTokenRecord>(COLL_TOKENS, prospectId),
+    listByProspectId<McsCallbackRequestRecord>(COLL_CALLBACKS, prospectId),
+    listByProspectId<McsWebinarReservationRecord>(COLL_WEBINARS, prospectId),
   ]);
   if (!prospect) {
     throw new InterventionError('prospect_not_found_after_write', 500);
@@ -936,10 +936,10 @@ export async function refreshRowFor(prospectId: string): Promise<AdminProspectDi
  */
 export async function executeMoveIntervention(input: {
   prospectId: string;
-  body: AdminProspectMoveRequest;
-  actor: AuditActor & { kind: 'admin' };
-  context: AuditContext | null;
-}): Promise<AdminProspectInterventionResponse> {
+  body: McsAdminProspectMoveRequest;
+  actor: McsAuditActor & { kind: 'admin' };
+  context: McsAuditContext | null;
+}): Promise<McsAdminProspectInterventionResponse> {
   validateInterventionBase(input.body);
   if (!input.body.toTmagId || input.body.toTmagId.length < 2) {
     throw new InterventionError('invalid_toTmagId', 400);
@@ -1030,10 +1030,10 @@ export async function executeMoveIntervention(input: {
  */
 export async function executeReassignSponsorIntervention(input: {
   prospectId: string;
-  body: AdminProspectReassignSponsorRequest;
-  actor: AuditActor & { kind: 'admin' };
-  context: AuditContext | null;
-}): Promise<AdminProspectInterventionResponse> {
+  body: McsAdminProspectReassignSponsorRequest;
+  actor: McsAuditActor & { kind: 'admin' };
+  context: McsAuditContext | null;
+}): Promise<McsAdminProspectInterventionResponse> {
   validateInterventionBase(input.body);
   if (!input.body.newSponsorTmagId || input.body.newSponsorTmagId.length < 2) {
     throw new InterventionError('invalid_newSponsorTmagId', 400);
@@ -1133,10 +1133,10 @@ export async function executeReassignSponsorIntervention(input: {
  */
 export async function executeManualFlushIntervention(input: {
   prospectId: string;
-  body: AdminProspectManualFlushRequest;
-  actor: AuditActor & { kind: 'admin' };
-  context: AuditContext | null;
-}): Promise<AdminProspectInterventionResponse> {
+  body: McsAdminProspectManualFlushRequest;
+  actor: McsAuditActor & { kind: 'admin' };
+  context: McsAuditContext | null;
+}): Promise<McsAdminProspectInterventionResponse> {
   validateInterventionBase(input.body);
   const ctx = await loadInterventionContext({
     prospectId: input.prospectId,
@@ -1181,7 +1181,7 @@ export async function executeManualFlushIntervention(input: {
     params: { prospectId: input.prospectId, now },
   });
 
-  const afterPlacement: PoolPlacement = {
+  const afterPlacement: McsPoolPlacement = {
     ...ctx.placement,
     flushedAt: now,
     flushReason: 'archived',
@@ -1223,10 +1223,10 @@ export async function executeManualFlushIntervention(input: {
  */
 export async function executeForceEnrollIntervention(input: {
   prospectId: string;
-  body: AdminProspectForceEnrollRequest;
-  actor: AuditActor & { kind: 'admin' };
-  context: AuditContext | null;
-}): Promise<AdminProspectInterventionResponse> {
+  body: McsAdminProspectForceEnrollRequest;
+  actor: McsAuditActor & { kind: 'admin' };
+  context: McsAuditContext | null;
+}): Promise<McsAdminProspectInterventionResponse> {
   validateInterventionBase(input.body);
   const ctx = await loadInterventionContext({
     prospectId: input.prospectId,
@@ -1272,7 +1272,7 @@ export async function executeForceEnrollIntervention(input: {
     });
   }
 
-  const afterPlacement: PoolPlacement | null = ctx.placement
+  const afterPlacement: McsPoolPlacement | null = ctx.placement
     ? { ...ctx.placement, flushedAt: now, flushReason: 'enrolled' }
     : null;
   const after = snapshotProspect(
@@ -1320,8 +1320,8 @@ function validateInterventionBase(body: {
 }
 
 function snapshotProspect(
-  prospect: ProspectRecord,
-  placement: PoolPlacement | null,
+  prospect: McsProspectRecord,
+  placement: McsPoolPlacement | null,
 ): Record<string, unknown> {
   return {
     prospectId: prospect.prospectId,
@@ -1401,7 +1401,7 @@ function pickLatest<T>(rows: T[], whenOf: (row: T) => string): T | null {
 /* ─── re-exports for the route layer ────────────────────────────── */
 
 export type {
-  AdminProspectInterventionKind,
+  McsAdminProspectInterventionKind,
 };
 
 // LEADER_DETECTION_NOTE re-export for the route layer (so it can stamp

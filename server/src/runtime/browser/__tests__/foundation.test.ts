@@ -3,20 +3,20 @@ import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type {
-  AgentKey,
+  McsAgentKey,
   TmagId,
-  ContextPacketId,
-  ContextRequestId,
-  CorrelationId,
-  IdempotencyKey,
-  RuntimeResponseId,
-  RuntimeTurnId,
-  SessionId,
-  TeamId,
-  TenantId,
-  TranscriptTurnId,
+  McsContextPacketId,
+  McsContextRequestId,
+  McsCorrelationId,
+  McsIdempotencyKey,
+  McsRuntimeResponseId,
+  McsRuntimeTurnId,
+  McsSessionId,
+  McsTeamId,
+  McsTenantId,
+  McsTranscriptTurnId,
 } from '@momentum/shared/runtime';
-import type { ContextPacketV1 } from '@momentum/shared/runtime';
+import type { McsContextPacketV1 } from '@momentum/shared/runtime';
 import { validateRuntimeEventEnvelope } from '../../events/index.js';
 import {
   BROWSER_SPEECH_LOCALES_BY_LANGUAGE,
@@ -81,12 +81,12 @@ function expectNoMatches(files: Array<{ relativePath: string; text: string }>, p
   expect(matches, matches.join('\n')).toEqual([]);
 }
 
-const tenantId = 'tenant_team_magnificent' as TenantId;
-const teamId = 'team_magnificent' as TeamId;
+const tenantId = 'tenant_team_magnificent' as McsTenantId;
+const teamId = 'team_magnificent' as McsTeamId;
 const tmagId = 'TMAG-TEST-S16' as TmagId;
-const sessionId = 'session_s16_browser' as SessionId;
-const agentKey = 'michael_magnificent' as AgentKey;
-const correlationId = 'corr_s16_browser' as CorrelationId;
+const sessionId = 'session_s16_browser' as McsSessionId;
+const agentKey = 'michael_magnificent' as McsAgentKey;
+const correlationId = 'corr_s16_browser' as McsCorrelationId;
 
 function browserSession(mode: 'browser_text' | 'browser_voice' | 'mixed' = 'browser_voice') {
   return createBrowserRuntimeSessionIdentity({
@@ -107,11 +107,11 @@ function browserSession(mode: 'browser_text' | 'browser_voice' | 'mixed' = 'brow
   });
 }
 
-function contextPacket(session = browserSession()): ContextPacketV1 {
+function contextPacket(session = browserSession()): McsContextPacketV1 {
   return {
     schemaVersion: 'context_packet.v1',
-    packetId: 'ctx_packet_s16_browser' as ContextPacketId,
-    requestId: 'ctx_request_s16_browser' as ContextRequestId,
+    packetId: 'ctx_packet_s16_browser' as McsContextPacketId,
+    requestId: 'ctx_request_s16_browser' as McsContextRequestId,
     createdAt: '2026-06-28T12:00:00.000Z',
     packetStatus: 'complete',
     tenant: {
@@ -175,8 +175,8 @@ function contextPacket(session = browserSession()): ContextPacketV1 {
     guidedActions: [],
     exclusions: [],
     retrievalAudit: {
-      requestId: 'ctx_request_s16_browser' as ContextRequestId,
-      packetId: 'ctx_packet_s16_browser' as ContextPacketId,
+      requestId: 'ctx_request_s16_browser' as McsContextRequestId,
+      packetId: 'ctx_packet_s16_browser' as McsContextPacketId,
       requestedScopes: ['team_magnificent'],
       includedKnowledgeIds: [],
       includedPrivateContextIds: [],
@@ -244,14 +244,14 @@ describe('S1.6 browser voice/text foundation', () => {
     const textTurn = createTextTurn({
       session,
       contextPacket: packet,
-      turnId: 'turn_text_s16' as RuntimeTurnId,
+      turnId: 'turn_text_s16' as McsRuntimeTurnId,
       text: 'What should I do next?',
       submittedAt: '2026-06-28T12:01:00.000Z',
     });
     const responseTurn = createAgentResponseTurn({
       session,
       contextPacket: packet,
-      responseId: 'response_s16' as RuntimeResponseId,
+      responseId: 'response_s16' as McsRuntimeResponseId,
       text: 'Start with the next training step.',
       outputMode: 'text',
       receivedAt: '2026-06-28T12:01:01.000Z',
@@ -276,7 +276,7 @@ describe('S1.6 browser voice/text foundation', () => {
     const finalTurn = createVoiceTranscriptTurn({
       session,
       contextPacket: packet,
-      transcriptTurnId: 'transcript_s16' as TranscriptTurnId,
+      transcriptTurnId: 'transcript_s16' as McsTranscriptTurnId,
       originalText: 'What is my next step',
       correctedText: 'What is my next step?',
       confidence: 0.92,
@@ -302,12 +302,12 @@ describe('S1.6 browser voice/text foundation', () => {
     const event = createBrowserRuntimeEvent({
       session,
       eventType: 'browser_voice.final_transcript',
-      idempotencyKey: 'browser_voice:session_s16_browser:transcript_s16' as IdempotencyKey,
+      idempotencyKey: 'browser_voice:session_s16_browser:transcript_s16' as McsIdempotencyKey,
       payload: {
         transcriptTurnId: 'transcript_s16',
         transcriptHash: 'hash_only',
       },
-      contextPacketId: 'ctx_packet_s16_browser' as ContextPacketId,
+      contextPacketId: 'ctx_packet_s16_browser' as McsContextPacketId,
       clock: { now: () => new Date('2026-06-28T12:03:00.000Z') },
     });
     const validation = validateRuntimeEventEnvelope(event);

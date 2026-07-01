@@ -27,12 +27,12 @@ import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { monthKey, rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
-  AdminActivationCohort,
-  AdminActivationReport,
-  AdminActivationRow,
-  AdminDashboardFilter,
-  AdminReportMeta,
-  AdminReportTimeRange,
+  McsAdminActivationCohort,
+  McsAdminActivationReport,
+  McsAdminActivationRow,
+  McsAdminDashboardFilter,
+  McsAdminReportMeta,
+  McsAdminReportTimeRange,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -90,9 +90,9 @@ function firstByBa(docs: ActivityDoc[], kind: string): Map<string, string> {
 }
 
 export async function buildBaActivationReport(
-  filter: AdminDashboardFilter,
-  range: AdminReportTimeRange,
-): Promise<{ result: AdminActivationReport; meta: Omit<AdminReportMeta, 'title'> }> {
+  filter: McsAdminDashboardFilter,
+  range: McsAdminReportTimeRange,
+): Promise<{ result: McsAdminActivationReport; meta: Omit<McsAdminReportMeta, 'title'> }> {
   const scopedTmagIds = await resolveScopedTmagIds(filter);
 
   // BA set: scope + soft-delete exclusion + (for flat windows) signup-date
@@ -164,7 +164,7 @@ export async function buildBaActivationReport(
     if (!cur || p.flushedAt < cur) firstEnroll.set(p.sponsorTmagId, p.flushedAt);
   }
 
-  const rows: AdminActivationRow[] = bas.map((b) => {
+  const rows: McsAdminActivationRow[] = bas.map((b) => {
     const firstInviteAt = firstInvite.get(b.tmagId) ?? null;
     return {
       tmagId: b.tmagId,
@@ -180,7 +180,7 @@ export async function buildBaActivationReport(
   });
 
   // Cohort rollup by signup month.
-  const cohortMap = new Map<string, AdminActivationCohort>();
+  const cohortMap = new Map<string, McsAdminActivationCohort>();
   for (const r of rows) {
     const key = monthKey(r.signupAt);
     const c =
@@ -208,7 +208,7 @@ export async function buildBaActivationReport(
     .map((r) => r.daysSignupToFirstInvite)
     .filter((d): d is number => d !== null);
 
-  const result: AdminActivationReport = {
+  const result: McsAdminActivationReport = {
     totals: {
       signups: rows.length,
       reachedFirstInvite: rows.filter((r) => r.firstInviteAt).length,
@@ -232,9 +232,9 @@ export async function buildBaActivationReport(
 }
 
 async function emptyMeta(
-  filter: AdminDashboardFilter,
-  range: AdminReportTimeRange,
-): Promise<Omit<AdminReportMeta, 'title'>> {
+  filter: McsAdminDashboardFilter,
+  range: McsAdminReportTimeRange,
+): Promise<Omit<McsAdminReportMeta, 'title'>> {
   return {
     reportKey: 'ba_activation',
     generatedAt: new Date().toISOString(),

@@ -20,14 +20,14 @@
  */
 
 import type {
-  ApprovedKnowledgeExcludedItem,
-  ApprovedKnowledgeExclusionReason,
-  ApprovedKnowledgeQueryDegradeReason,
-  ApprovedKnowledgeQueryRequest,
-  ApprovedKnowledgeQueryResult,
-  KnowledgeDomain,
-  KnowledgeReference,
-  RuntimeLanguage,
+  McsApprovedKnowledgeExcludedItem,
+  McsApprovedKnowledgeExclusionReason,
+  McsApprovedKnowledgeQueryDegradeReason,
+  McsApprovedKnowledgeQueryRequest,
+  McsApprovedKnowledgeQueryResult,
+  McsKnowledgeDomain,
+  McsKnowledgeReference,
+  McsRuntimeLanguage,
 } from '@momentum/shared/runtime';
 import { TEAM_MAGNIFICENT_KEY, TEAM_MAGNIFICENT_NAME } from './validation.js';
 
@@ -41,18 +41,18 @@ export const KNOWLEDGE_DOMAINS = [
   'organizational',
   'system',
   'governance',
-] as const satisfies readonly KnowledgeDomain[];
+] as const satisfies readonly McsKnowledgeDomain[];
 
 /** Reference statuses that may appear in a result — approved/active ONLY. */
 export const APPROVED_REFERENCE_STATUSES = ['approved', 'active'] as const;
 
-export const APPROVED_KNOWLEDGE_SUPPORTED_LANGUAGES = ['en', 'es'] as const satisfies readonly RuntimeLanguage[];
+export const APPROVED_KNOWLEDGE_SUPPORTED_LANGUAGES = ['en', 'es'] as const satisfies readonly McsRuntimeLanguage[];
 
 export const APPROVED_KNOWLEDGE_EXCLUSION_REASONS = [
   'candidate_not_approved',
   'queued_for_review',
   'not_review_workflow',
-] as const satisfies readonly ApprovedKnowledgeExclusionReason[];
+] as const satisfies readonly McsApprovedKnowledgeExclusionReason[];
 
 export const APPROVED_KNOWLEDGE_DEGRADE_REASONS = [
   'knowledge_unavailable',
@@ -60,7 +60,7 @@ export const APPROVED_KNOWLEDGE_DEGRADE_REASONS = [
   'language_unavailable',
   'scope_empty',
   'retrieval_timeout',
-] as const satisfies readonly ApprovedKnowledgeQueryDegradeReason[];
+] as const satisfies readonly McsApprovedKnowledgeQueryDegradeReason[];
 
 export type ApprovedKnowledgeQueryValidationCode =
   | 'invalid_object'
@@ -86,11 +86,11 @@ export interface ApprovedKnowledgeQueryValidationIssue {
 }
 
 export type ApprovedKnowledgeQueryRequestValidationResult =
-  | { ok: true; request: ApprovedKnowledgeQueryRequest; errors: [] }
+  | { ok: true; request: McsApprovedKnowledgeQueryRequest; errors: [] }
   | { ok: false; errors: ApprovedKnowledgeQueryValidationIssue[] };
 
 export type ApprovedKnowledgeQueryResultValidationResult =
-  | { ok: true; result: ApprovedKnowledgeQueryResult; errors: [] }
+  | { ok: true; result: McsApprovedKnowledgeQueryResult; errors: [] }
   | { ok: false; errors: ApprovedKnowledgeQueryValidationIssue[] };
 
 export class ApprovedKnowledgeQueryValidationError extends Error {
@@ -124,7 +124,7 @@ export function validateApprovedKnowledgeQueryRequest(
 
   validateDomains(candidate.domains, errors);
 
-  if (!APPROVED_KNOWLEDGE_SUPPORTED_LANGUAGES.includes(candidate.language as RuntimeLanguage)) {
+  if (!APPROVED_KNOWLEDGE_SUPPORTED_LANGUAGES.includes(candidate.language as McsRuntimeLanguage)) {
     errors.push(issue('language', 'language_invalid', 'language must be en or es.'));
   }
 
@@ -137,7 +137,7 @@ export function validateApprovedKnowledgeQueryRequest(
   }
 
   if (errors.length > 0) return { ok: false, errors };
-  return { ok: true, request: candidate as unknown as ApprovedKnowledgeQueryRequest, errors: [] };
+  return { ok: true, request: candidate as unknown as McsApprovedKnowledgeQueryRequest, errors: [] };
 }
 
 export function validateApprovedKnowledgeQueryResult(
@@ -165,12 +165,12 @@ export function validateApprovedKnowledgeQueryResult(
   validateDegradeConsistency(candidate, references, errors);
 
   if (errors.length > 0) return { ok: false, errors };
-  return { ok: true, result: candidate as unknown as ApprovedKnowledgeQueryResult, errors: [] };
+  return { ok: true, result: candidate as unknown as McsApprovedKnowledgeQueryResult, errors: [] };
 }
 
 export function assertApprovedKnowledgeQueryResult(
   candidate: unknown,
-): asserts candidate is ApprovedKnowledgeQueryResult {
+): asserts candidate is McsApprovedKnowledgeQueryResult {
   const result = validateApprovedKnowledgeQueryResult(candidate);
   if (!result.ok) {
     throw new ApprovedKnowledgeQueryValidationError(
@@ -206,7 +206,7 @@ function validateDomains(value: unknown, errors: ApprovedKnowledgeQueryValidatio
     return;
   }
   value.forEach((domain, index) => {
-    if (!KNOWLEDGE_DOMAINS.includes(domain as KnowledgeDomain)) {
+    if (!KNOWLEDGE_DOMAINS.includes(domain as McsKnowledgeDomain)) {
       errors.push(issue(`domains.${index}`, 'domains_invalid', `domains.${index} is not a known knowledge domain.`));
     }
   });
@@ -215,7 +215,7 @@ function validateDomains(value: unknown, errors: ApprovedKnowledgeQueryValidatio
 function validateResultReferences(
   value: unknown,
   errors: ApprovedKnowledgeQueryValidationIssue[],
-): KnowledgeReference[] {
+): McsKnowledgeReference[] {
   if (!Array.isArray(value)) {
     errors.push(issue('references', 'references_invalid', 'references must be an array.'));
     return [];
@@ -232,7 +232,7 @@ function validateResultReferences(
     if (typeof reference.sourceId !== 'string' || reference.sourceId.trim().length === 0) {
       errors.push(issue(`references.${index}.sourceId`, 'references_invalid', 'sourceId is required.'));
     }
-    if (!KNOWLEDGE_DOMAINS.includes(reference.domain as KnowledgeDomain)) {
+    if (!KNOWLEDGE_DOMAINS.includes(reference.domain as McsKnowledgeDomain)) {
       errors.push(issue(`references.${index}.domain`, 'references_invalid', 'reference.domain must be a known knowledge domain.'));
     }
     // The load-bearing governance check: ONLY approved/active may be returned.
@@ -245,13 +245,13 @@ function validateResultReferences(
     }
   });
 
-  return value as KnowledgeReference[];
+  return value as McsKnowledgeReference[];
 }
 
 function validateExcluded(
   value: unknown,
   errors: ApprovedKnowledgeQueryValidationIssue[],
-): ApprovedKnowledgeExcludedItem[] {
+): McsApprovedKnowledgeExcludedItem[] {
   if (!Array.isArray(value)) {
     errors.push(issue('excluded', 'excluded_invalid', 'excluded must be an array (may be empty).'));
     return [];
@@ -265,18 +265,18 @@ function validateExcluded(
     if (typeof item.sourceId !== 'string' || item.sourceId.trim().length === 0) {
       errors.push(issue(`excluded.${index}.sourceId`, 'excluded_invalid', 'excluded.sourceId is required.'));
     }
-    if (!APPROVED_KNOWLEDGE_EXCLUSION_REASONS.includes(item.reason as ApprovedKnowledgeExclusionReason)) {
+    if (!APPROVED_KNOWLEDGE_EXCLUSION_REASONS.includes(item.reason as McsApprovedKnowledgeExclusionReason)) {
       errors.push(issue(`excluded.${index}.reason`, 'excluded_invalid', 'excluded.reason must be a known exclusion reason.'));
     }
   });
 
-  return value as ApprovedKnowledgeExcludedItem[];
+  return value as McsApprovedKnowledgeExcludedItem[];
 }
 
 function validateResultMetadata(
   value: unknown,
-  references: KnowledgeReference[],
-  excluded: ApprovedKnowledgeExcludedItem[],
+  references: McsKnowledgeReference[],
+  excluded: McsApprovedKnowledgeExcludedItem[],
   errors: ApprovedKnowledgeQueryValidationIssue[],
 ): void {
   if (!isRecord(value)) {
@@ -296,7 +296,7 @@ function validateResultMetadata(
     errors.push(issue('metadata.candidateExcludedCount', 'count_mismatch', 'metadata.candidateExcludedCount must equal excluded.length.'));
   }
 
-  if (!isRecord(value.language) || !APPROVED_KNOWLEDGE_SUPPORTED_LANGUAGES.includes(value.language.language as RuntimeLanguage)) {
+  if (!isRecord(value.language) || !APPROVED_KNOWLEDGE_SUPPORTED_LANGUAGES.includes(value.language.language as McsRuntimeLanguage)) {
     errors.push(issue('metadata.language', 'metadata_invalid', 'metadata.language is required with a supported language.'));
   }
 
@@ -305,7 +305,7 @@ function validateResultMetadata(
       errors.push(issue('metadata.degradeReasons', 'metadata_invalid', 'metadata.degradeReasons must be a non-empty array when present.'));
     } else {
       value.degradeReasons.forEach((reason, index) => {
-        if (!APPROVED_KNOWLEDGE_DEGRADE_REASONS.includes(reason as ApprovedKnowledgeQueryDegradeReason)) {
+        if (!APPROVED_KNOWLEDGE_DEGRADE_REASONS.includes(reason as McsApprovedKnowledgeQueryDegradeReason)) {
           errors.push(issue(`metadata.degradeReasons.${index}`, 'metadata_invalid', 'unknown degrade reason.'));
         }
       });
@@ -315,7 +315,7 @@ function validateResultMetadata(
 
 function validateDegradeConsistency(
   candidate: Record<string, unknown>,
-  references: KnowledgeReference[],
+  references: McsKnowledgeReference[],
   errors: ApprovedKnowledgeQueryValidationIssue[],
 ): void {
   const metadata = isRecord(candidate.metadata) ? candidate.metadata : undefined;

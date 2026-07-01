@@ -6,10 +6,10 @@
  * triple-stack/embedding indexing is Phase 8 (DB write-freeze; ACR-0008 implementation gate).
  */
 
-import type { KnowledgeChunk, KnowledgeId, KnowledgeIndexRecord } from '@momentum/shared/runtime';
+import type { McsKnowledgeChunk, McsKnowledgeId, McsKnowledgeIndexRecord } from '@momentum/shared/runtime';
 import { deriveIndexRecordId, deriveKnowledgeId } from './ids.js';
 
-export function buildIndexRecord(chunk: KnowledgeChunk): KnowledgeIndexRecord {
+export function buildIndexRecord(chunk: McsKnowledgeChunk): McsKnowledgeIndexRecord {
   const eligible = chunk.status === 'active' && chunk.retrievalEligible;
   return {
     indexRecordId: deriveIndexRecordId(chunk.chunkId),
@@ -27,11 +27,11 @@ export function buildIndexRecord(chunk: KnowledgeChunk): KnowledgeIndexRecord {
       sourceVersion: chunk.sourceVersion,
     },
     retrievalKey: `${chunk.domain}:${chunk.language}:${chunk.chunkId}`,
-    knowledgeId: deriveKnowledgeId(chunk.chunkId) as KnowledgeId,
+    knowledgeId: deriveKnowledgeId(chunk.chunkId) as McsKnowledgeId,
     status: eligible ? 'indexed' : 'excluded',
   };
 }
 
-export function buildIndexRecords(chunks: readonly KnowledgeChunk[]): KnowledgeIndexRecord[] {
+export function buildIndexRecords(chunks: readonly McsKnowledgeChunk[]): McsKnowledgeIndexRecord[] {
   return chunks.map(buildIndexRecord);
 }

@@ -11,10 +11,10 @@
  */
 
 import type {
-  KnowledgeChunk,
-  KnowledgeIndexRecord,
-  ParsedKnowledgeDocument,
-  RawKnowledgeSource,
+  McsKnowledgeChunk,
+  McsKnowledgeIndexRecord,
+  McsParsedKnowledgeDocument,
+  McsRawKnowledgeSource,
 } from '@momentum/shared/runtime';
 import { parseRawKnowledgeSource } from './parser.js';
 import { chunkParsedDocument, type ChunkOptions } from './chunker.js';
@@ -22,14 +22,14 @@ import { buildIndexRecords } from './indexRecord.js';
 
 export interface KnowledgeIntakeResult {
   /** The raw source, unchanged — authority and traceability anchor. */
-  source: RawKnowledgeSource;
-  document: ParsedKnowledgeDocument;
-  chunks: KnowledgeChunk[];
-  indexRecords: KnowledgeIndexRecord[];
+  source: McsRawKnowledgeSource;
+  document: McsParsedKnowledgeDocument;
+  chunks: McsKnowledgeChunk[];
+  indexRecords: McsKnowledgeIndexRecord[];
 }
 
 export function ingestRawKnowledgeSource(
-  source: RawKnowledgeSource,
+  source: McsRawKnowledgeSource,
   options: ChunkOptions = {},
 ): KnowledgeIntakeResult {
   const document = parseRawKnowledgeSource(source);

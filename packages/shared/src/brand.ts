@@ -5,7 +5,7 @@
  */
 
 // ------- Color palette -------
-export const colors = {
+export const mcsColors = {
   ink: '#0A0A0A',
   ink2: '#0F0F0F',
   gold: '#C9A84C',
@@ -17,23 +17,23 @@ export const colors = {
   line: 'rgba(245, 239, 230, 0.12)',
 } as const;
 
-export type ColorToken = keyof typeof colors;
+export type McsColorToken = keyof typeof mcsColors;
 
 // ------- Brand roles -------
-export const brandRoles = {
-  identity: colors.gold,
-  ceremony: colors.goldBright,
-  live: colors.teal,
-  action: colors.teal,
-  progress: colors.teal,
-  surface: colors.ink2,
-  copy: colors.cream,
+export const mcsBrandRoles = {
+  identity: mcsColors.gold,
+  ceremony: mcsColors.goldBright,
+  live: mcsColors.teal,
+  action: mcsColors.teal,
+  progress: mcsColors.teal,
+  surface: mcsColors.ink2,
+  copy: mcsColors.cream,
 } as const;
 
-export type BrandRole = keyof typeof brandRoles;
+export type McsBrandRole = keyof typeof mcsBrandRoles;
 
 // ------- Logo assets -------
-export const logoAssets = {
+export const mcsLogoAssets = {
   navbar: {
     path: 'assets/logos/logo_navbar.png',
     cssVariable: '--tm-logo-navbar',
@@ -66,10 +66,10 @@ export const logoAssets = {
   },
 } as const;
 
-export type LogoAsset = keyof typeof logoAssets;
+export type McsLogoAsset = keyof typeof mcsLogoAssets;
 
 // ------- Shared primitive class contracts -------
-export const brandPrimitiveClasses = {
+export const mcsBrandPrimitiveClasses = {
   logo: {
     root: 'tm-logo',
     navbar: 'tm-logo tm-logo--navbar',
@@ -128,13 +128,13 @@ export const brandPrimitiveClasses = {
   },
 } as const;
 
-export type BrandPrimitive = keyof typeof brandPrimitiveClasses;
+export type McsBrandPrimitive = keyof typeof mcsBrandPrimitiveClasses;
 
 // ------- Typography -------
-export const fonts = {
+export const mcsFonts = {
   display: "'Bebas Neue', sans-serif",
   body: "'DM Sans', sans-serif",
   mono: "'DM Mono', 'JetBrains Mono', monospace",
 } as const;
 
-export type FontToken = keyof typeof fonts;
+export type McsFontToken = keyof typeof mcsFonts;

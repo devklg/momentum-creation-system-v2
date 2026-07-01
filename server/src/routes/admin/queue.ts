@@ -40,22 +40,22 @@ import {
 } from '../../domain/adminQueueOversight.js';
 import { subscribePlacements } from '../../services/poolEvents.js';
 import type {
-  AdminQueueTickerSnapshot,
-  AdminQueueTickerSseEvent,
-  AdminTickerEntry,
-  AuditActor,
-  PlacementEvent,
-  QueueAdminTickerResponse,
-  QueueLookupResponse,
-  QueueOversightSummaryResponse,
-  QueueRulesResponse,
-  QueueVisibleWindow,
-  QueueVisibleWindowResponse,
+  McsAdminQueueTickerSnapshot,
+  McsAdminQueueTickerSseEvent,
+  McsAdminTickerEntry,
+  McsAuditActor,
+  McsPlacementEvent,
+  McsQueueAdminTickerResponse,
+  McsQueueLookupResponse,
+  McsQueueOversightSummaryResponse,
+  McsQueueRulesResponse,
+  McsQueueVisibleWindow,
+  McsQueueVisibleWindowResponse,
 } from '@momentum/shared';
 
 export const adminQueueRoutes: Router = express.Router();
 
-function adminActorFromRequest(req: Request): AuditActor {
+function adminActorFromRequest(req: Request): McsAuditActor {
   const session = req.session!;
   const displayName =
     (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
@@ -88,7 +88,7 @@ adminQueueRoutes.get('/summary', requireAdmin, async (req, res) => {
       context: baseContext(req, '/api/admin/queue/summary', 'GET'),
     });
 
-    const body: QueueOversightSummaryResponse = { ok: true, summary };
+    const body: McsQueueOversightSummaryResponse = { ok: true, summary };
     res.json(body);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
@@ -133,7 +133,7 @@ adminQueueRoutes.get('/lookup', requireAdmin, async (req, res) => {
       context: baseContext(req, '/api/admin/queue/lookup', 'GET'),
     });
 
-    const body: QueueLookupResponse = { ok: true, result };
+    const body: McsQueueLookupResponse = { ok: true, result };
     res.json(body);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
@@ -161,7 +161,7 @@ adminQueueRoutes.get('/visible-window', requireAdmin, async (req, res) => {
       context: baseContext(req, '/api/admin/queue/visible-window', 'GET'),
     });
 
-    const body: QueueVisibleWindowResponse = {
+    const body: McsQueueVisibleWindowResponse = {
       ok: true,
       value: setting.value,
       defaultValue: setting.defaultValue,
@@ -194,7 +194,7 @@ adminQueueRoutes.put('/visible-window', requireAdmin, async (req, res) => {
 
   try {
     const { before, after } = await setVisibleWindow({
-      value: parsed.data.value as QueueVisibleWindow,
+      value: parsed.data.value as McsQueueVisibleWindow,
       actorTmagId: req.session!.tmagId,
     });
 
@@ -223,7 +223,7 @@ adminQueueRoutes.put('/visible-window', requireAdmin, async (req, res) => {
       );
     }
 
-    const body: QueueVisibleWindowResponse = {
+    const body: McsQueueVisibleWindowResponse = {
       ok: true,
       value: verified.value,
       defaultValue: verified.defaultValue,
@@ -266,7 +266,7 @@ adminQueueRoutes.get('/ticker', requireAdmin, async (req, res) => {
       context: baseContext(req, '/api/admin/queue/ticker', 'GET'),
     });
 
-    const body: QueueAdminTickerResponse = {
+    const body: McsQueueAdminTickerResponse = {
       ok: true,
       entries,
       globalMaxPosition,
@@ -293,7 +293,7 @@ function sseFrame(event: string, data: unknown, id?: string): string {
   return lines.join('\n');
 }
 
-function tickerEntryToSseEvent(entry: AdminTickerEntry): AdminQueueTickerSseEvent {
+function tickerEntryToSseEvent(entry: McsAdminTickerEntry): McsAdminQueueTickerSseEvent {
   return {
     kind: 'admin_queue_placement',
     eventId: `admin_queue_evt_${entry.prospectId}_${entry.placedAt}`,
@@ -329,7 +329,7 @@ adminQueueRoutes.get('/ticker/stream', requireAdmin, async (req: Request, res: R
   // Initial snapshot — most-recent placements (real names).
   try {
     const { entries, globalMaxPosition } = await listAdminTicker(SSE_SNAPSHOT_LIMIT);
-    const snapshot: AdminQueueTickerSnapshot = { globalMaxPosition, recent: entries };
+    const snapshot: McsAdminQueueTickerSnapshot = { globalMaxPosition, recent: entries };
     res.write(sseFrame('snapshot', snapshot));
   } catch (err) {
     res.write(`: snapshot_error ${(err as Error).message}\n\n`);
@@ -338,7 +338,7 @@ adminQueueRoutes.get('/ticker/stream', requireAdmin, async (req: Request, res: R
   // Live fan-out — subscribe to the SAME process-wide placement bus the
   // .com ticker uses. On each event, async-enrich with the real lastName
   // and re-emit as an admin_queue_placement frame.
-  const placementSub = subscribePlacements((event: PlacementEvent) => {
+  const placementSub = subscribePlacements((event: McsPlacementEvent) => {
     void (async () => {
       try {
         // The placement event from the bus carries positionNumber, firstName,
@@ -419,7 +419,7 @@ adminQueueRoutes.get('/rules', requireAdmin, async (req, res) => {
       context: baseContext(req, '/api/admin/queue/rules', 'GET'),
     });
 
-    const body: QueueRulesResponse = { ok: true, rules };
+    const body: McsQueueRulesResponse = { ok: true, rules };
     res.json(body);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';

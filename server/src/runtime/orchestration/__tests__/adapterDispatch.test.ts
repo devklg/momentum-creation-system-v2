@@ -1,4 +1,4 @@
-import type { AgentKey, RuntimeTaskType } from '@momentum/shared/runtime';
+import type { McsAgentKey, McsRuntimeTaskType } from '@momentum/shared/runtime';
 import { describe, expect, it } from 'vitest';
 import {
   dispatchAgentRuntimeAdapter,
@@ -27,7 +27,7 @@ function expectDispatchRejection(
 
 async function dispatchFixtureTurn(
   agentKey: AgentRuntimeAdapterDispatchIdentity['agentKey'],
-  taskType: RuntimeTaskType,
+  taskType: McsRuntimeTaskType,
 ) {
   const fixture = createContextManagerFixture('complete');
   const result = await dispatchAgentRuntimeAdapter({
@@ -181,7 +181,7 @@ describe('S2.6 inert adapter dispatch boundary', () => {
       ['steve_success', 'success_interview'],
       ['michael_magnificent', 'training_support'],
       ['ivory', 'relationship_coaching'],
-    ] satisfies Array<[AgentKey, RuntimeTaskType]>) {
+    ] satisfies Array<[McsAgentKey, McsRuntimeTaskType]>) {
       const { result } = await dispatchFixtureTurn(agentKey, taskType);
 
       expectComposedResult(result);

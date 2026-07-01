@@ -8,14 +8,14 @@
  */
 
 import type {
-  DetectedSection,
-  KnowledgeChunk,
-  KnowledgeChunkStatus,
-  KnowledgeSurfaceScope,
-  ParsedKnowledgeDocument,
-  RawKnowledgeSource,
+  McsDetectedSection,
+  McsKnowledgeChunk,
+  McsKnowledgeChunkStatus,
+  McsKnowledgeSurfaceScope,
+  McsParsedKnowledgeDocument,
+  McsRawKnowledgeSource,
 } from '@momentum/shared/runtime';
-import type { AgentKey, KnowledgeDomain } from '@momentum/shared/runtime';
+import type { McsAgentKey, McsKnowledgeDomain } from '@momentum/shared/runtime';
 import { deriveChunkId } from './ids.js';
 
 export const DEFAULT_MAX_CHUNK_CHARS = 1200;
@@ -23,8 +23,8 @@ export const DEFAULT_MAX_CHUNK_CHARS = 1200;
 /** Optional classification applied to every chunk of a source. Deterministic defaults below. */
 export interface KnowledgeIntakeClassification {
   topicTags?: readonly string[];
-  agentScopes?: readonly AgentKey[];
-  surfaceScopes?: readonly KnowledgeSurfaceScope[];
+  agentScopes?: readonly McsAgentKey[];
+  surfaceScopes?: readonly McsKnowledgeSurfaceScope[];
 }
 
 export interface ChunkOptions {
@@ -39,7 +39,7 @@ interface Span {
 }
 
 /** Map a knowledge domain to the agents that own it; unowned domains are visible to all. */
-function defaultAgentScopes(domain: KnowledgeDomain): readonly AgentKey[] {
+function defaultAgentScopes(domain: McsKnowledgeDomain): readonly McsAgentKey[] {
   switch (domain) {
     case 'success':
       return ['steve_success'];
@@ -53,7 +53,7 @@ function defaultAgentScopes(domain: KnowledgeDomain): readonly AgentKey[] {
 }
 
 /** Map a raw-source status to the derived chunk status. */
-function chunkStatusFromSource(status: RawKnowledgeSource['status']): KnowledgeChunkStatus {
+function chunkStatusFromSource(status: McsRawKnowledgeSource['status']): McsKnowledgeChunkStatus {
   return status; // 'active' | 'deprecated' | 'archived' | 'rejected' are shared between the two
 }
 
@@ -144,21 +144,21 @@ function splitSection(sectionText: string, max: number): Span[] {
 }
 
 export function chunkParsedDocument(
-  source: RawKnowledgeSource,
-  document: ParsedKnowledgeDocument,
+  source: McsRawKnowledgeSource,
+  document: McsParsedKnowledgeDocument,
   options: ChunkOptions = {},
-): KnowledgeChunk[] {
+): McsKnowledgeChunk[] {
   if (document.parseStatus === 'parse_failed') return [];
 
   const max = options.maxChunkChars ?? DEFAULT_MAX_CHUNK_CHARS;
   const classification = options.classification ?? {};
   const topicTags = classification.topicTags ?? [];
   const agentScopes = classification.agentScopes ?? defaultAgentScopes(source.domain);
-  const surfaceScopes: readonly KnowledgeSurfaceScope[] = classification.surfaceScopes ?? ['team'];
+  const surfaceScopes: readonly McsKnowledgeSurfaceScope[] = classification.surfaceScopes ?? ['team'];
   const status = chunkStatusFromSource(source.status);
   const retrievalEligible = status === 'active';
 
-  const chunks: KnowledgeChunk[] = [];
+  const chunks: McsKnowledgeChunk[] = [];
   let chunkIndex = 0;
 
   for (const section of document.detectedSections) {
@@ -194,7 +194,7 @@ export function chunkParsedDocument(
 }
 
 /** A heading-only section still yields one (empty-body) chunk so the heading is addressable. */
-function piecesForSection(section: DetectedSection, max: number): Span[] {
+function piecesForSection(section: McsDetectedSection, max: number): Span[] {
   const pieces = splitSection(section.text, max);
   if (pieces.length > 0) return pieces;
   if (section.heading !== null) return [{ text: '', start: 0, end: 0 }];

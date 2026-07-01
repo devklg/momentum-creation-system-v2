@@ -31,9 +31,9 @@ import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import type {
-  CallbackIntent,
-  CallbackRequestRecord,
-  IsoTimestamp,
+  McsCallbackIntent,
+  McsCallbackRequestRecord,
+  McsIsoTimestamp,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -48,13 +48,13 @@ export interface CreateCallbackRequestInput {
   sponsorTmagId: string;
   baFirstName: string;
   baPhone: string | null;
-  intent: CallbackIntent;
+  intent: McsCallbackIntent;
 }
 
 export interface CreateCallbackRequestResult {
   callbackRequestId: string;
-  createdAt: IsoTimestamp;
-  smsDeliveryStatus: CallbackRequestRecord['smsDeliveryStatus'];
+  createdAt: McsIsoTimestamp;
+  smsDeliveryStatus: McsCallbackRequestRecord['smsDeliveryStatus'];
   smsDeliveryError: string | null;
 }
 
@@ -64,7 +64,7 @@ export interface CreateCallbackRequestResult {
  * rendered in Section 10 of tm-video-presentation; if a label changes,
  * change it here too.
  */
-export function intentLabel(intent: CallbackIntent): string {
+export function intentLabel(intent: McsCallbackIntent): string {
   switch (intent) {
     case 'interested_tell_me_more':
       return "interested \u2014 tell me more";
@@ -106,7 +106,7 @@ export async function createCallbackRequest(
 
   // 1. Triple-stack write.
   const baseRecord: Omit<
-    CallbackRequestRecord,
+    McsCallbackRequestRecord,
     'smsDeliveryStatus' | 'smsDeliveryError'
   > = {
     callbackRequestId,
@@ -159,7 +159,7 @@ export async function createCallbackRequest(
   });
 
   // 2. Telnyx SMS. Best-effort. We always return success to the prospect.
-  let smsDeliveryStatus: CallbackRequestRecord['smsDeliveryStatus'] = 'queued';
+  let smsDeliveryStatus: McsCallbackRequestRecord['smsDeliveryStatus'] = 'queued';
   let smsDeliveryError: string | null = null;
 
   if (!input.baPhone) {

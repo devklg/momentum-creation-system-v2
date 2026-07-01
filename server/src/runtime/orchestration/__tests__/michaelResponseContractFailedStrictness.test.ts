@@ -1,4 +1,4 @@
-import type { RuntimeTaskType } from '@momentum/shared/runtime';
+import type { McsRuntimeTaskType } from '@momentum/shared/runtime';
 import { describe, expect, it } from 'vitest';
 import {
   MICHAEL_RESPONSE_CATALOG,
@@ -29,7 +29,7 @@ import type {
 // ---------------------------------------------------------------------------
 type ContractInputOverrides = {
   readonly scenario?: RuntimeTurnFixtureScenarioType;
-  readonly taskType?: RuntimeTaskType;
+  readonly taskType?: McsRuntimeTaskType;
 };
 
 async function runContract(

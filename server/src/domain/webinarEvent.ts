@@ -13,7 +13,7 @@
  */
 
 import { gatewayCall } from '../services/gateway.js';
-import type { WebinarEvent } from '@momentum/shared';
+import type { McsWebinarEvent } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const MONGO_COLLECTION = 'webinar_events';
@@ -24,9 +24,9 @@ const MONGO_COLLECTION = 'webinar_events';
  * gracefully degrades to a static "check back soon" tile in the null
  * case rather than rendering a broken countdown.
  */
-export async function findNextUpcomingEvent(): Promise<WebinarEvent | null> {
+export async function findNextUpcomingEvent(): Promise<McsWebinarEvent | null> {
   const now = new Date().toISOString();
-  const result = await gatewayCall<{ documents: WebinarEvent[] }>(
+  const result = await gatewayCall<{ documents: McsWebinarEvent[] }>(
     'mongodb',
     'query',
     {
@@ -45,8 +45,8 @@ export async function findNextUpcomingEvent(): Promise<WebinarEvent | null> {
  * exist or has been cancelled. Used by the reservation route to
  * validate the prospect is reserving against a real upcoming event.
  */
-export async function findEventById(eventId: string): Promise<WebinarEvent | null> {
-  const result = await gatewayCall<{ documents: WebinarEvent[] }>(
+export async function findEventById(eventId: string): Promise<McsWebinarEvent | null> {
+  const result = await gatewayCall<{ documents: McsWebinarEvent[] }>(
     'mongodb',
     'query',
     {

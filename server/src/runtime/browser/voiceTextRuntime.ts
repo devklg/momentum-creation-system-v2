@@ -1,27 +1,27 @@
 import type {
-  BrowserInterimTranscript,
-  BrowserTextTurnWirePayload,
-  BrowserTranscriptTurn,
-  BrowserVoiceAgentTurnWirePayload,
-  BrowserVoiceState,
-  RuntimeRequestScope,
+  McsBrowserInterimTranscript,
+  McsBrowserTextTurnWirePayload,
+  McsBrowserTranscriptTurn,
+  McsBrowserVoiceAgentTurnWirePayload,
+  McsBrowserVoiceState,
+  McsRuntimeRequestScope,
 } from '@momentum/shared/runtime';
 import { defineRuntimeBoundary } from '../common.js';
 import type { BackendRuntimeBoundaryDescriptor } from '../common.js';
 
 export interface BrowserVoiceTextRuntimeBoundaryPort {
   finalizeVoiceTurn(
-    scope: RuntimeRequestScope,
-    transcript: BrowserTranscriptTurn,
-  ): Promise<BrowserVoiceAgentTurnWirePayload>;
+    scope: McsRuntimeRequestScope,
+    transcript: McsBrowserTranscriptTurn,
+  ): Promise<McsBrowserVoiceAgentTurnWirePayload>;
   acceptTextTurn(
-    scope: RuntimeRequestScope,
-    turn: BrowserTextTurnWirePayload,
-  ): Promise<BrowserTextTurnWirePayload>;
+    scope: McsRuntimeRequestScope,
+    turn: McsBrowserTextTurnWirePayload,
+  ): Promise<McsBrowserTextTurnWirePayload>;
   captureInterimTranscript?(
-    scope: RuntimeRequestScope,
-    transcript: BrowserInterimTranscript,
-  ): Promise<BrowserVoiceState>;
+    scope: McsRuntimeRequestScope,
+    transcript: McsBrowserInterimTranscript,
+  ): Promise<McsBrowserVoiceState>;
 }
 
 export const browserVoiceTextRuntimeBoundary = defineRuntimeBoundary({

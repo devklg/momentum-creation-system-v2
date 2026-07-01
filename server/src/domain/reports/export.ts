@@ -24,22 +24,22 @@
  */
 
 import type {
-  AdminActivationReport,
-  AdminEnrollmentReport,
-  AdminFollowUpReport,
-  AdminInviteFunnelReport,
-  AdminLeaderScorecardReport,
-  AdminQueueVelocityReport,
-  AdminReportKey,
-  AdminReportMeta,
-  AdminTrainingReport,
+  McsAdminActivationReport,
+  McsAdminEnrollmentReport,
+  McsAdminFollowUpReport,
+  McsAdminInviteFunnelReport,
+  McsAdminLeaderScorecardReport,
+  McsAdminQueueVelocityReport,
+  McsAdminReportKey,
+  McsAdminReportMeta,
+  McsAdminTrainingReport,
 } from '@momentum/shared';
 import { applyRedaction } from '../../services/piiRedact.js';
 
 export interface ExportInput<R> {
-  reportKey: AdminReportKey;
+  reportKey: McsAdminReportKey;
   result: R;
-  meta: Omit<AdminReportMeta, 'reportKey'> | AdminReportMeta;
+  meta: Omit<McsAdminReportMeta, 'reportKey'> | McsAdminReportMeta;
   redact: boolean;
 }
 
@@ -73,13 +73,13 @@ function timestampForFilename(iso: string): string {
   return iso.replace(/[-:.]/g, '').replace(/(\d{8}T\d{6})\d*Z?/, '$1Z');
 }
 
-export function buildFilename(reportKey: AdminReportKey, generatedAt: string): string {
+export function buildFilename(reportKey: McsAdminReportKey, generatedAt: string): string {
   return `${reportKey}-${timestampForFilename(generatedAt)}.csv`;
 }
 
 /* ─── Header block (every report) ────────────────────────────── */
 
-function headerLines(reportKey: AdminReportKey, meta: ExportInput<unknown>['meta'], redact: boolean): string[] {
+function headerLines(reportKey: McsAdminReportKey, meta: ExportInput<unknown>['meta'], redact: boolean): string[] {
   const lines: string[] = [];
   lines.push(csvRow(['Report', reportKey]));
   lines.push(csvRow(['Generated at', meta.generatedAt]));
@@ -111,7 +111,7 @@ function emitRow<T extends Record<string, unknown>>(
 /* ─── 1 · BA activation ──────────────────────────────────────── */
 
 function serializeActivation(
-  result: AdminActivationReport,
+  result: McsAdminActivationReport,
   meta: ExportInput<unknown>['meta'],
   redact: boolean,
 ): { csv: string; rowCount: number } {
@@ -166,7 +166,7 @@ function serializeActivation(
 /* ─── 2 · Training completion ────────────────────────────────── */
 
 function serializeTraining(
-  result: AdminTrainingReport,
+  result: McsAdminTrainingReport,
   meta: ExportInput<unknown>['meta'],
   redact: boolean,
 ): { csv: string; rowCount: number } {
@@ -213,7 +213,7 @@ function serializeTraining(
 /* ─── 3 · Invite-to-presentation movement ────────────────────── */
 
 function serializeInviteFunnel(
-  result: AdminInviteFunnelReport,
+  result: McsAdminInviteFunnelReport,
   meta: ExportInput<unknown>['meta'],
   redact: boolean,
 ): { csv: string; rowCount: number } {
@@ -263,7 +263,7 @@ function serializeInviteFunnel(
 /* ─── 4 · Queue velocity ─────────────────────────────────────── */
 
 function serializeQueueVelocity(
-  result: AdminQueueVelocityReport,
+  result: McsAdminQueueVelocityReport,
   meta: ExportInput<unknown>['meta'],
   redact: boolean,
 ): { csv: string; rowCount: number } {
@@ -296,7 +296,7 @@ function serializeQueueVelocity(
 /* ─── 5 · Enrollment completion ──────────────────────────────── */
 
 function serializeEnrollment(
-  result: AdminEnrollmentReport,
+  result: McsAdminEnrollmentReport,
   meta: ExportInput<unknown>['meta'],
   redact: boolean,
 ): { csv: string; rowCount: number } {
@@ -343,7 +343,7 @@ function serializeEnrollment(
 /* ─── 6 · Follow-up aging ────────────────────────────────────── */
 
 function serializeFollowUp(
-  result: AdminFollowUpReport,
+  result: McsAdminFollowUpReport,
   meta: ExportInput<unknown>['meta'],
   redact: boolean,
 ): { csv: string; rowCount: number } {
@@ -386,7 +386,7 @@ function serializeFollowUp(
 /* ─── 9 · Leader scorecards ──────────────────────────────────── */
 
 function serializeLeaderScorecards(
-  result: AdminLeaderScorecardReport,
+  result: McsAdminLeaderScorecardReport,
   meta: ExportInput<unknown>['meta'],
   redact: boolean,
 ): { csv: string; rowCount: number } {
@@ -422,49 +422,49 @@ function serializeLeaderScorecards(
 /* ─── Public surface — one entry point per report ─────────────── */
 
 export function exportBaActivation(
-  input: ExportInput<AdminActivationReport>,
+  input: ExportInput<McsAdminActivationReport>,
 ): ExportOutput {
   const { csv, rowCount } = serializeActivation(input.result, input.meta, input.redact);
   return { csv, rowCount, filename: buildFilename('ba_activation', input.meta.generatedAt) };
 }
 
 export function exportTraining(
-  input: ExportInput<AdminTrainingReport>,
+  input: ExportInput<McsAdminTrainingReport>,
 ): ExportOutput {
   const { csv, rowCount } = serializeTraining(input.result, input.meta, input.redact);
   return { csv, rowCount, filename: buildFilename('training_completion', input.meta.generatedAt) };
 }
 
 export function exportInviteFunnel(
-  input: ExportInput<AdminInviteFunnelReport>,
+  input: ExportInput<McsAdminInviteFunnelReport>,
 ): ExportOutput {
   const { csv, rowCount } = serializeInviteFunnel(input.result, input.meta, input.redact);
   return { csv, rowCount, filename: buildFilename('invite_to_presentation', input.meta.generatedAt) };
 }
 
 export function exportQueueVelocity(
-  input: ExportInput<AdminQueueVelocityReport>,
+  input: ExportInput<McsAdminQueueVelocityReport>,
 ): ExportOutput {
   const { csv, rowCount } = serializeQueueVelocity(input.result, input.meta, input.redact);
   return { csv, rowCount, filename: buildFilename('queue_velocity', input.meta.generatedAt) };
 }
 
 export function exportEnrollment(
-  input: ExportInput<AdminEnrollmentReport>,
+  input: ExportInput<McsAdminEnrollmentReport>,
 ): ExportOutput {
   const { csv, rowCount } = serializeEnrollment(input.result, input.meta, input.redact);
   return { csv, rowCount, filename: buildFilename('enrollment_completion', input.meta.generatedAt) };
 }
 
 export function exportFollowUp(
-  input: ExportInput<AdminFollowUpReport>,
+  input: ExportInput<McsAdminFollowUpReport>,
 ): ExportOutput {
   const { csv, rowCount } = serializeFollowUp(input.result, input.meta, input.redact);
   return { csv, rowCount, filename: buildFilename('follow_up_aging', input.meta.generatedAt) };
 }
 
 export function exportLeaderScorecards(
-  input: ExportInput<AdminLeaderScorecardReport>,
+  input: ExportInput<McsAdminLeaderScorecardReport>,
 ): ExportOutput {
   const { csv, rowCount } = serializeLeaderScorecards(input.result, input.meta, input.redact);
   return { csv, rowCount, filename: buildFilename('leader_scorecards', input.meta.generatedAt) };

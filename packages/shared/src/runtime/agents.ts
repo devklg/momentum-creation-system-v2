@@ -1,21 +1,21 @@
-import type { AgentId, SessionId, TemplateId } from './ids.js';
-import type { RuntimeLanguage } from './language.js';
+import type { McsAgentId, McsSessionId, McsTemplateId } from './ids.js';
+import type { McsRuntimeLanguage } from './language.js';
 
-export type AgentKey = 'steve_success' | 'michael_magnificent' | 'ivory';
+export type McsAgentKey = 'steve_success' | 'michael_magnificent' | 'ivory';
 
-export type AgentDisplayName = 'Steve Success' | 'Michael Magnificent' | 'Ivory';
+export type McsAgentDisplayName = 'Steve Success' | 'Michael Magnificent' | 'Ivory';
 
-export type AgentDomain = 'success' | 'training' | 'relationship';
+export type McsAgentDomain = 'success' | 'training' | 'relationship';
 
-export type RuntimeMode = 'browser_voice' | 'browser_text' | 'mixed';
+export type McsRuntimeMode = 'browser_voice' | 'browser_text' | 'mixed';
 
-export type AgentRuntimeMode =
+export type McsAgentRuntimeMode =
   | 'guided_specialist'
   | 'interview_specialist'
   | 'training_specialist'
   | 'relationship_specialist';
 
-export type AgentSessionStatus =
+export type McsAgentSessionStatus =
   | 'created'
   | 'active'
   | 'paused'
@@ -23,7 +23,7 @@ export type AgentSessionStatus =
   | 'failed'
   | 'cancelled';
 
-export type RuntimeTaskType =
+export type McsRuntimeTaskType =
   | 'success_interview'
   | 'training_support'
   | 'journal_teaching'
@@ -32,7 +32,7 @@ export type RuntimeTaskType =
   | 'session_resume'
   | 'guided_action_review';
 
-export type AgentAllowedOutput =
+export type McsAgentAllowedOutput =
   | 'interview_question'
   | 'teaching_explanation'
   | 'journal_prompt'
@@ -44,7 +44,7 @@ export type AgentAllowedOutput =
   | 'next_step_prompt'
   | 'reflection_prompt';
 
-export type RuntimeToolKey =
+export type McsRuntimeToolKey =
   | 'build_context_packet'
   | 'append_conversation_turn'
   | 'create_journal_entry'
@@ -56,35 +56,35 @@ export type RuntimeToolKey =
   | 'prepare_editable_invitation_draft'
   | 'mint_invitation_link_if_approved_by_ba';
 
-export interface AgentRegistryEntry {
-  agentKey: AgentKey;
-  displayName: AgentDisplayName;
-  primaryDomain: AgentDomain;
+export interface McsAgentRegistryEntry {
+  agentKey: McsAgentKey;
+  displayName: McsAgentDisplayName;
+  primaryDomain: McsAgentDomain;
   roleSummary: string;
-  supportedLanguages: RuntimeLanguage[];
-  supportedModes: RuntimeMode[];
-  defaultTemplateIds: Record<RuntimeLanguage, TemplateId>;
-  allowedTools: RuntimeToolKey[];
+  supportedLanguages: McsRuntimeLanguage[];
+  supportedModes: McsRuntimeMode[];
+  defaultTemplateIds: Record<McsRuntimeLanguage, McsTemplateId>;
+  allowedTools: McsRuntimeToolKey[];
   prohibitedBehaviors: string[];
   active: boolean;
 }
 
-export interface AgentRuntimeInstanceConfig {
-  agentId: AgentId;
-  agentKey: AgentKey;
+export interface McsAgentRuntimeInstanceConfig {
+  agentId: McsAgentId;
+  agentKey: McsAgentKey;
   active: boolean;
-  sessionId?: SessionId;
+  sessionId?: McsSessionId;
   metadata?: Record<string, unknown>;
 }
 
-export interface AgentContext {
-  agentKey: AgentKey;
-  agentId?: AgentId;
-  displayName: AgentDisplayName;
-  primaryDomain: AgentDomain;
+export interface McsAgentContext {
+  agentKey: McsAgentKey;
+  agentId?: McsAgentId;
+  displayName: McsAgentDisplayName;
+  primaryDomain: McsAgentDomain;
   roleSummary: string;
-  allowedOutputs: AgentAllowedOutput[];
+  allowedOutputs: McsAgentAllowedOutput[];
   prohibitedOutputs: string[];
-  agentRuntimeMode: AgentRuntimeMode;
+  agentRuntimeMode: McsAgentRuntimeMode;
   contextUsageInstruction: string;
 }

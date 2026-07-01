@@ -6,10 +6,10 @@
  * sparkline. Locked Chat #85.
  */
 
-import type { QueueGrowthSparkline } from '@momentum/shared';
+import type { McsQueueGrowthSparkline } from '@momentum/shared';
 
 interface Props {
-  growth: QueueGrowthSparkline | null;
+  growth: McsQueueGrowthSparkline | null;
   loading: boolean;
 }
 

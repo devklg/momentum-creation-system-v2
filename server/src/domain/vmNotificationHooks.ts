@@ -8,11 +8,11 @@
  */
 
 import type {
-  AdminVmNotificationHook,
-  AdminVmTeamNewsHook,
+  McsAdminVmNotificationHook,
+  McsAdminVmTeamNewsHook,
 } from '@momentum/shared';
 
-export function listVmNotificationHooks(): AdminVmNotificationHook[] {
+export function listVmNotificationHooks(): McsAdminVmNotificationHook[] {
   return [
     {
       hookId: 'vm.lead_activated.owner_ba',
@@ -97,7 +97,7 @@ export function listVmNotificationHooks(): AdminVmNotificationHook[] {
   ];
 }
 
-export function listVmTeamNewsHooks(): AdminVmTeamNewsHook[] {
+export function listVmTeamNewsHooks(): McsAdminVmTeamNewsHook[] {
   return [
     {
       hookId: 'team_news.vm_campaign_milestone',

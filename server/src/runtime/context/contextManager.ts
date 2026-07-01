@@ -1,32 +1,32 @@
 import type {
-  AgentAllowedOutput,
-  AgentContext,
-  AgentDisplayName,
-  AgentDomain,
-  AgentId,
-  AgentKey,
-  AgentRuntimeMode,
-  ApprovedKnowledgeContextItem,
-  BaContext,
-  ContextExclusion,
-  ContextPacketId,
-  ContextPacketRequest,
-  ContextPacketSchemaVersion,
-  ContextPacketStatus,
-  ContextPacketV1,
-  ContextRequestId,
-  DegradedContextState,
-  Guardrail,
-  KnowledgeId,
-  RequestId,
-  RuntimeLanguage,
-  RuntimeRequestScope,
-  RuntimeRule,
-  RuntimeTranslationStatus,
-  SessionContext,
-  SourceId,
-  TeamContext,
-  TenantContext,
+  McsAgentAllowedOutput,
+  McsAgentContext,
+  McsAgentDisplayName,
+  McsAgentDomain,
+  McsAgentId,
+  McsAgentKey,
+  McsAgentRuntimeMode,
+  McsApprovedKnowledgeContextItem,
+  McsBaContext,
+  McsContextExclusion,
+  McsContextPacketId,
+  McsContextPacketRequest,
+  McsContextPacketSchemaVersion,
+  McsContextPacketStatus,
+  McsContextPacketV1,
+  McsContextRequestId,
+  McsDegradedContextState,
+  McsGuardrail,
+  McsKnowledgeId,
+  McsRequestId,
+  McsRuntimeLanguage,
+  McsRuntimeRequestScope,
+  McsRuntimeRule,
+  McsRuntimeTranslationStatus,
+  McsSessionContext,
+  McsSourceId,
+  McsTeamContext,
+  McsTenantContext,
 } from '@momentum/shared/runtime';
 import { defineRuntimeBoundary } from '../common.js';
 import type { BackendRuntimeBoundaryDescriptor } from '../common.js';
@@ -37,26 +37,26 @@ import {
 } from '../events/index.js';
 import type { RuntimeAgentEventEnvelope } from '../events/index.js';
 
-export const CONTEXT_PACKET_V1_SCHEMA_VERSION = 'context_packet.v1' as const satisfies ContextPacketSchemaVersion;
+export const CONTEXT_PACKET_V1_SCHEMA_VERSION = 'context_packet.v1' as const satisfies McsContextPacketSchemaVersion;
 export const CONTEXT_MANAGER_COMPONENT = 'context_manager' as const;
 
-const AGENT_KEYS = ['steve_success', 'michael_magnificent', 'ivory'] as const satisfies readonly AgentKey[];
-const AGENT_DISPLAY_NAMES: Record<AgentKey, AgentDisplayName> = {
+const AGENT_KEYS = ['steve_success', 'michael_magnificent', 'ivory'] as const satisfies readonly McsAgentKey[];
+const AGENT_DISPLAY_NAMES: Record<McsAgentKey, McsAgentDisplayName> = {
   steve_success: 'Steve Success',
   michael_magnificent: 'Michael Magnificent',
   ivory: 'Ivory',
 };
-const AGENT_DOMAINS: Record<AgentKey, AgentDomain> = {
+const AGENT_DOMAINS: Record<McsAgentKey, McsAgentDomain> = {
   steve_success: 'success',
   michael_magnificent: 'training',
   ivory: 'relationship',
 };
-const AGENT_RUNTIME_MODES: Record<AgentKey, AgentRuntimeMode> = {
+const AGENT_RUNTIME_MODES: Record<McsAgentKey, McsAgentRuntimeMode> = {
   steve_success: 'interview_specialist',
   michael_magnificent: 'training_specialist',
   ivory: 'relationship_specialist',
 };
-const DEFAULT_ALLOWED_OUTPUTS: readonly AgentAllowedOutput[] = [
+const DEFAULT_ALLOWED_OUTPUTS: readonly McsAgentAllowedOutput[] = [
   'clarifying_question',
   'teaching_explanation',
   'next_step_prompt',
@@ -67,17 +67,17 @@ export type ContextReferenceKind = 'approved_knowledge' | 'graph' | 'vector' | '
 export type ContextReferenceStatus = 'approved' | 'candidate' | 'review_only';
 
 export interface ContextReference {
-  sourceId: SourceId | string;
+  sourceId: McsSourceId | string;
   kind: ContextReferenceKind;
   title?: string;
   summary: string;
   status: ContextReferenceStatus;
-  knowledgeId?: KnowledgeId;
+  knowledgeId?: McsKnowledgeId;
   score?: number;
   // P4.6 — delivered language + honest translation marking for this reference. Optional and
   // backward-compatible: absent ⇒ defaults to en/same_language (pre-P4.6 behavior).
-  language?: RuntimeLanguage;
-  translationStatus?: RuntimeTranslationStatus;
+  language?: McsRuntimeLanguage;
+  translationStatus?: McsRuntimeTranslationStatus;
 }
 
 export interface ContextConstraint {
@@ -88,32 +88,32 @@ export interface ContextConstraint {
 
 export interface ContextPacketProvenance {
   assembledBy: typeof CONTEXT_MANAGER_COMPONENT;
-  requestId: RequestId | ContextRequestId;
+  requestId: McsRequestId | McsContextRequestId;
   componentVersion: 's1.5';
   traceId?: string;
 }
 
 export interface ContextPacketBuildInput {
-  packetId: ContextPacketId;
-  requestId: ContextRequestId;
-  tenant: TenantContext;
-  team: TeamContext;
-  ba: BaContext;
-  session: SessionContext;
-  agentKey: AgentKey;
-  agentId?: AgentId;
+  packetId: McsContextPacketId;
+  requestId: McsContextRequestId;
+  tenant: McsTenantContext;
+  team: McsTeamContext;
+  ba: McsBaContext;
+  session: McsSessionContext;
+  agentKey: McsAgentKey;
+  agentId?: McsAgentId;
   objective: string;
-  language: ContextPacketV1['language'];
-  approvedKnowledge?: ApprovedKnowledgeContextItem[];
+  language: McsContextPacketV1['language'];
+  approvedKnowledge?: McsApprovedKnowledgeContextItem[];
   knowledgeReferences?: ContextReference[];
   graphContextReferences?: ContextReference[];
   vectorContextReferences?: ContextReference[];
   eventContextReferences?: RuntimeAgentEventEnvelope[];
   constraints?: ContextConstraint[];
-  excludedKnowledge?: ContextExclusion[];
-  degraded?: DegradedContextState;
+  excludedKnowledge?: McsContextExclusion[];
+  degraded?: McsDegradedContextState;
   provenance: ContextPacketProvenance;
-  packetStatus?: ContextPacketStatus;
+  packetStatus?: McsContextPacketStatus;
   authorizeCandidateKnowledge?: boolean;
   createdAt?: string;
   expiresAt?: string;
@@ -128,7 +128,7 @@ export interface ContextPacketValidationIssue {
 export type ContextPacketValidationResult =
   | {
       ok: true;
-      packet: ContextPacketV1;
+      packet: McsContextPacketV1;
       errors: [];
     }
   | {
@@ -148,9 +148,9 @@ export class ContextPacketValidationError extends Error {
 
 export interface ContextManagerBoundaryPort {
   buildContextPacket(
-    scope: RuntimeRequestScope,
-    request: ContextPacketRequest,
-  ): Promise<ContextPacketV1>;
+    scope: McsRuntimeRequestScope,
+    request: McsContextPacketRequest,
+  ): Promise<McsContextPacketV1>;
 }
 
 export const contextManagerBoundary = defineRuntimeBoundary({
@@ -168,7 +168,7 @@ export const contextManagerBoundary = defineRuntimeBoundary({
   ],
 } satisfies BackendRuntimeBoundaryDescriptor<'context_manager'>);
 
-export function buildContextPacket(input: ContextPacketBuildInput): ContextPacketV1 {
+export function buildContextPacket(input: ContextPacketBuildInput): McsContextPacketV1 {
   const buildValidation = validateContextPacketBuildInput(input);
   if (buildValidation.length > 0) {
     throw new ContextPacketValidationError(
@@ -199,9 +199,9 @@ export function buildContextPacket(input: ContextPacketBuildInput): ContextPacke
     (input.vectorContextReferences?.length ?? 0) > 0 ? 'semantic_search' : undefined,
     (input.eventContextReferences?.length ?? 0) > 0 ? 'session_history' : undefined,
     'rule_inclusion',
-  ].filter((value): value is ContextPacketV1['retrievalAudit']['retrievalMethods'][number] => Boolean(value));
+  ].filter((value): value is McsContextPacketV1['retrievalAudit']['retrievalMethods'][number] => Boolean(value));
 
-  const packet: ContextPacketV1 = {
+  const packet: McsContextPacketV1 = {
     schemaVersion: CONTEXT_PACKET_V1_SCHEMA_VERSION,
     packetId: input.packetId,
     requestId: input.requestId,
@@ -285,7 +285,7 @@ export function buildContextPacket(input: ContextPacketBuildInput): ContextPacke
   return packet;
 }
 
-function defaultDegradedState(packetStatus: ContextPacketStatus): DegradedContextState | undefined {
+function defaultDegradedState(packetStatus: McsContextPacketStatus): McsDegradedContextState | undefined {
   if (packetStatus === 'complete') return undefined;
 
   return {
@@ -320,12 +320,12 @@ export function validateContextPacket(packet: unknown): ContextPacketValidationR
 
   return {
     ok: true,
-    packet: packet as unknown as ContextPacketV1,
+    packet: packet as unknown as McsContextPacketV1,
     errors: [],
   };
 }
 
-export function assertValidContextPacket(packet: unknown): asserts packet is ContextPacketV1 {
+export function assertValidContextPacket(packet: unknown): asserts packet is McsContextPacketV1 {
   const result = validateContextPacket(packet);
   if (!result.ok) {
     throw new ContextPacketValidationError(
@@ -364,7 +364,7 @@ function validateContextPacketBuildInput(input: ContextPacketBuildInput): Contex
   return errors;
 }
 
-function buildAgentContext(agentKey: AgentKey, agentId: AgentId | undefined, objective: string): AgentContext {
+function buildAgentContext(agentKey: McsAgentKey, agentId: McsAgentId | undefined, objective: string): McsAgentContext {
   return {
     agentKey,
     agentId,
@@ -382,7 +382,7 @@ function buildAgentContext(agentKey: AgentKey, agentId: AgentId | undefined, obj
   };
 }
 
-function buildRuntimeRules(agentKey: AgentKey, objective: string): RuntimeRule[] {
+function buildRuntimeRules(agentKey: McsAgentKey, objective: string): McsRuntimeRule[] {
   return [
     {
       ruleId: 'context_manager_only_assembler',
@@ -411,7 +411,7 @@ function buildRuntimeRules(agentKey: AgentKey, objective: string): RuntimeRule[]
   ];
 }
 
-function buildGuardrails(agentKey: AgentKey): Guardrail[] {
+function buildGuardrails(agentKey: McsAgentKey): McsGuardrail[] {
   return [
     {
       guardrailId: 'team_magnificent_scope_required',
@@ -431,12 +431,12 @@ function buildGuardrails(agentKey: AgentKey): Guardrail[] {
   ];
 }
 
-function approvedKnowledgeFromReferences(references: ContextReference[]): ApprovedKnowledgeContextItem[] {
+function approvedKnowledgeFromReferences(references: ContextReference[]): McsApprovedKnowledgeContextItem[] {
   return references
     .filter((reference) => reference.kind === 'approved_knowledge')
     .filter((reference) => reference.status === 'approved')
     .map((reference) => ({
-      knowledgeId: (reference.knowledgeId ?? reference.sourceId) as KnowledgeId,
+      knowledgeId: (reference.knowledgeId ?? reference.sourceId) as McsKnowledgeId,
       title: reference.title ?? String(reference.sourceId),
       summary: reference.summary,
       status: 'active',
@@ -446,7 +446,7 @@ function approvedKnowledgeFromReferences(references: ContextReference[]): Approv
       // marked machine_translation_marked here, never presented as native.
       language: reference.language ?? 'en',
       sourceTraceability: {
-        sourceId: reference.sourceId as SourceId,
+        sourceId: reference.sourceId as McsSourceId,
         sourceType: 'approved_knowledge',
         title: reference.title,
       },
@@ -460,7 +460,7 @@ function approvedKnowledgeFromReferences(references: ContextReference[]): Approv
     }));
 }
 
-function excludedReferencesFor(references: ContextReference[]): ContextExclusion[] {
+function excludedReferencesFor(references: ContextReference[]): McsContextExclusion[] {
   return references
     .filter((reference) => reference.status === 'candidate' || reference.status === 'review_only')
     .map((reference) => ({
@@ -472,8 +472,8 @@ function excludedReferencesFor(references: ContextReference[]): ContextExclusion
 
 function retrievalItemsFromReferences(
   references: ContextReference[],
-  method: ContextPacketV1['retrievalAudit']['retrievalMethods'][number],
-): ContextPacketV1['retrievalAudit']['includedItems'] {
+  method: McsContextPacketV1['retrievalAudit']['retrievalMethods'][number],
+): McsContextPacketV1['retrievalAudit']['includedItems'] {
   return references.map((reference) => ({
     sourceId: reference.sourceId,
     method,
@@ -510,7 +510,7 @@ function validateTenantTeamBaScope(packet: Record<string, unknown>, errors: Cont
   if (!isRecord(packet.team)) {
     errors.push(issue('team', 'team_required', 'team is required.'));
   } else {
-    validateTeamMagnificentTeam(packet.team as unknown as TeamContext, errors, 'team');
+    validateTeamMagnificentTeam(packet.team as unknown as McsTeamContext, errors, 'team');
   }
 
   if (!isRecord(packet.ba)) {
@@ -518,10 +518,10 @@ function validateTenantTeamBaScope(packet: Record<string, unknown>, errors: Cont
     return;
   }
 
-  validateTeamMagnificentBaScope(packet.ba as unknown as BaContext, errors, 'ba');
+  validateTeamMagnificentBaScope(packet.ba as unknown as McsBaContext, errors, 'ba');
 }
 
-function validateTeamMagnificentTeam(team: Partial<TeamContext>, errors: ContextPacketValidationIssue[], path: string): void {
+function validateTeamMagnificentTeam(team: Partial<McsTeamContext>, errors: ContextPacketValidationIssue[], path: string): void {
   requireString(team, 'teamId', errors, `${path}.teamId`);
   if (team.teamKey !== TEAM_MAGNIFICENT_KEY) {
     errors.push(issue(`${path}.teamKey`, 'team_magnificent_scope_required', 'teamKey must be team_magnificent.'));
@@ -531,7 +531,7 @@ function validateTeamMagnificentTeam(team: Partial<TeamContext>, errors: Context
   }
 }
 
-function validateTeamMagnificentBaScope(ba: Partial<BaContext>, errors: ContextPacketValidationIssue[], path: string): void {
+function validateTeamMagnificentBaScope(ba: Partial<McsBaContext>, errors: ContextPacketValidationIssue[], path: string): void {
   requireString(ba, 'tmagId', errors, `${path}.tmagId`);
   requireString(ba, 'tenantId', errors, `${path}.tenantId`);
   requireString(ba, 'teamId', errors, `${path}.teamId`);
@@ -551,13 +551,13 @@ function validateAgentContext(value: unknown, errors: ContextPacketValidationIss
 
   validateAgentKey(value.agentKey, errors, 'agent.agentKey');
   validateOptionalString(value, 'agentId', errors, 'agent.agentId');
-  if (value.agentId !== undefined && AGENT_KEYS.includes(value.agentId as AgentKey)) {
+  if (value.agentId !== undefined && AGENT_KEYS.includes(value.agentId as McsAgentKey)) {
     errors.push(issue('agent.agentId', 'agent_id_must_not_be_semantic_key', 'agentId must be the configured runtime/database instance identity, not the semantic agentKey.'));
   }
 }
 
 function validateAgentKey(value: unknown, errors: ContextPacketValidationIssue[], path: string): void {
-  if (!AGENT_KEYS.includes(value as AgentKey)) {
+  if (!AGENT_KEYS.includes(value as McsAgentKey)) {
     errors.push(issue(path, 'invalid_agent_key', 'agentKey must be a semantic runtime registry identity.'));
   }
 }

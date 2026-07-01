@@ -9,12 +9,12 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import type {
-  CallbackIntent,
-  CallbackRequestResponse,
-  RvmInfoRequestResponse,
-  RvmResolvedTokenPayload,
-  VideoEventKind,
-  VideoEventResponse,
+  McsCallbackIntent,
+  McsCallbackRequestResponse,
+  McsRvmInfoRequestResponse,
+  McsRvmResolvedTokenPayload,
+  McsVideoEventKind,
+  McsVideoEventResponse,
 } from '@momentum/shared';
 import {
   findTokenRecord,
@@ -91,7 +91,7 @@ rvmRoutes.get('/:token', async (req, res) => {
   const token = req.params.token ?? '';
   if (token.length < 4) return res.status(404).json({ error: 'invalid_token' });
   try {
-    const payload: RvmResolvedTokenPayload = await resolveRvmToken(token);
+    const payload: McsRvmResolvedTokenPayload = await resolveRvmToken(token);
     return res.status(200).json(payload);
   } catch (err) {
     return sendRvmError(res, err);
@@ -117,9 +117,9 @@ rvmRoutes.post('/:token/video-event', async (req, res) => {
     return res.status(400).json({ error: 'invalid_kind', issues: parsed.error.issues });
   }
   try {
-    const result: VideoEventResponse = await recordRvmVideoEvent(
+    const result: McsVideoEventResponse = await recordRvmVideoEvent(
       token,
-      parsed.data.kind as VideoEventKind,
+      parsed.data.kind as McsVideoEventKind,
     );
     return res.status(200).json(result);
   } catch (err) {
@@ -144,7 +144,7 @@ rvmRoutes.post('/:token/callback-request', async (req, res) => {
       sponsorTmagId: ctx.tokenRecord.sponsorTmagId,
       baFirstName: ctx.ba.firstName,
       baPhone: ctx.ba.phone || null,
-      intent: parsed.data.intent as CallbackIntent,
+      intent: parsed.data.intent as McsCallbackIntent,
     });
 
     await applyCrmLifecycleEvent(
@@ -154,9 +154,9 @@ rvmRoutes.post('/:token/callback-request', async (req, res) => {
       { token, leadId: ctx.bulkLead.leadId, intent: parsed.data.intent },
     );
 
-    const body: CallbackRequestResponse = {
+    const body: McsCallbackRequestResponse = {
       ok: true,
-      intent: parsed.data.intent as CallbackIntent,
+      intent: parsed.data.intent as McsCallbackIntent,
       baFirstName: ctx.ba.firstName,
       createdAt: result.createdAt,
     };
@@ -182,7 +182,7 @@ rvmRoutes.post('/:token/info-request', async (req, res) => {
       'RVM prospect requested more information.',
       { token, leadId: ctx.bulkLead.leadId, note: parsed.data.note ?? null },
     );
-    const body: RvmInfoRequestResponse = {
+    const body: McsRvmInfoRequestResponse = {
       ok: true,
       prospectId: ctx.prospect.prospectId,
       createdAt,

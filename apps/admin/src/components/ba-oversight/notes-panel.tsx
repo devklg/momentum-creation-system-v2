@@ -9,14 +9,14 @@
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import type {
-  AdminBaNoteEntry,
-  AdminBaNoteResponse,
+  McsAdminBaNoteEntry,
+  McsAdminBaNoteResponse,
 } from '@momentum/shared';
 
 interface Props {
   tmagId: string;
-  notes: AdminBaNoteEntry[];
-  onAppended: (note: AdminBaNoteEntry) => void;
+  notes: McsAdminBaNoteEntry[];
+  onAppended: (note: McsAdminBaNoteEntry) => void;
 }
 
 export function NotesPanel({ tmagId, notes, onAppended }: Props) {
@@ -40,7 +40,7 @@ export function NotesPanel({ tmagId, notes, onAppended }: Props) {
         },
       );
       const data = (await res.json()) as
-        | AdminBaNoteResponse
+        | McsAdminBaNoteResponse
         | { ok: false; error: string };
       if (!data.ok) {
         setErr(data.error || 'Could not append note.');

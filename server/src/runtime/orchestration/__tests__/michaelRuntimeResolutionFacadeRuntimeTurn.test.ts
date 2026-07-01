@@ -1,4 +1,4 @@
-import type { RuntimeTaskType } from '@momentum/shared/runtime';
+import type { McsRuntimeTaskType } from '@momentum/shared/runtime';
 import { describe, expect, it } from 'vitest';
 import {
   MICHAEL_RESPONSE_CATALOG,
@@ -16,7 +16,7 @@ import type {
 type TurnOverrides = {
   readonly scenario?: RuntimeTurnFixtureScenarioType;
   readonly agentKey?: unknown;
-  readonly taskType?: RuntimeTaskType;
+  readonly taskType?: McsRuntimeTaskType;
   readonly language?: unknown;
   readonly intent?: 'clear_training_support' | 'ambiguous_training_support';
   readonly mutateRuntimeTurn?: (

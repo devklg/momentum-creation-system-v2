@@ -13,13 +13,13 @@ import {
   listVmTeamNewsHooks,
 } from './vmNotificationHooks.js';
 import type {
-  AdminVmBaPerformanceRow,
-  AdminVmBatchHealthRow,
-  AdminVmCampaignRow,
-  AdminVmComplianceSummary,
-  AdminVmMetricCard,
-  AdminVmOverviewResponse,
-  AdminVmProviderHealth,
+  McsAdminVmBaPerformanceRow,
+  McsAdminVmBatchHealthRow,
+  McsAdminVmCampaignRow,
+  McsAdminVmComplianceSummary,
+  McsAdminVmMetricCard,
+  McsAdminVmOverviewResponse,
+  McsAdminVmProviderHealth,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -205,7 +205,7 @@ function buildCards(args: {
   campaigns: VmCampaignDoc[];
   batches: LeadBatchDoc[];
   crm: CrmRecordDoc[];
-}): AdminVmMetricCard[] {
+}): McsAdminVmMetricCard[] {
   const leadsImported = args.leads.length;
   const activated = args.leads.filter((l) =>
     isOneOf(l.status, ['activated', 'info_requested', 'callback_requested', 'presentation_started', 'presentation_completed', 'dashboard_entered', 'holding_tank', 'closed_new_brand_ambassador']),
@@ -260,7 +260,7 @@ function buildCards(args: {
   ];
 }
 
-function buildBaRows(sources: AdminVmSources): AdminVmBaPerformanceRow[] {
+function buildBaRows(sources: AdminVmSources): McsAdminVmBaPerformanceRow[] {
   const baById = new Map(sources.bas.map((b) => [b.tmagId, b]));
   const ownerIds = new Set<string>();
   for (const b of sources.batches) if (b.ownerTmagId) ownerIds.add(b.ownerTmagId);
@@ -324,7 +324,7 @@ function buildBaRows(sources: AdminVmSources): AdminVmBaPerformanceRow[] {
   );
 
   return Array.from(ownerIds)
-    .map((tmagId): AdminVmBaPerformanceRow => {
+    .map((tmagId): McsAdminVmBaPerformanceRow => {
       const leadsImported = leadsByOwner.get(tmagId) ?? 0;
       const activated = activatedByOwner.get(tmagId) ?? 0;
       const videoStarts = startsByOwner.get(tmagId) ?? 0;
@@ -357,7 +357,7 @@ function buildBaRows(sources: AdminVmSources): AdminVmBaPerformanceRow[] {
     .slice(0, RECENT_LIMIT);
 }
 
-function buildBatchRows(sources: AdminVmSources): AdminVmBatchHealthRow[] {
+function buildBatchRows(sources: AdminVmSources): McsAdminVmBatchHealthRow[] {
   const baById = new Map(sources.bas.map((b) => [b.tmagId, b]));
   return sources.batches.slice(0, RECENT_LIMIT).map((batch) => {
     const batchId = batch.leadBatchId ?? 'unknown_batch';
@@ -382,7 +382,7 @@ function buildBatchRows(sources: AdminVmSources): AdminVmBatchHealthRow[] {
   });
 }
 
-function buildCampaignRows(sources: AdminVmSources): AdminVmCampaignRow[] {
+function buildCampaignRows(sources: AdminVmSources): McsAdminVmCampaignRow[] {
   const baById = new Map(sources.bas.map((b) => [b.tmagId, b]));
   return sources.campaigns.slice(0, RECENT_LIMIT).map((campaign) => {
     const campaignId = campaign.vmCampaignId ?? 'unknown_campaign';
@@ -415,7 +415,7 @@ function buildCampaignRows(sources: AdminVmSources): AdminVmCampaignRow[] {
   });
 }
 
-function buildComplianceSummary(sources: AdminVmSources): AdminVmComplianceSummary {
+function buildComplianceSummary(sources: AdminVmSources): McsAdminVmComplianceSummary {
   const suppressedLeads = sources.leads.filter((l) => l.status === 'suppressed').length;
   const byKind = countBy(sources.suppressions, (s) => s.kind ?? s.status);
   return {
@@ -430,7 +430,7 @@ function buildComplianceSummary(sources: AdminVmSources): AdminVmComplianceSumma
   };
 }
 
-function buildProviderHealth(sources: AdminVmSources): AdminVmProviderHealth[] {
+function buildProviderHealth(sources: AdminVmSources): McsAdminVmProviderHealth[] {
   const providerNames = new Set<string>();
   for (const c of sources.campaigns) providerNames.add(c.provider ?? 'manual');
   for (const d of sources.delivery) providerNames.add(d.provider ?? 'manual');
@@ -462,7 +462,7 @@ function buildProviderHealth(sources: AdminVmSources): AdminVmProviderHealth[] {
   });
 }
 
-export async function buildAdminVmOverview(): Promise<AdminVmOverviewResponse> {
+export async function buildAdminVmOverview(): Promise<McsAdminVmOverviewResponse> {
   const sources = await loadSources();
   return {
     ok: true,
