@@ -125,7 +125,7 @@ export async function canConductWorkbook(args: {
     'query',
     {
       database: 'momentum',
-      collection: 'brand_ambassadors',
+      collection: 'team_magnificent_members',
       filter: { tmagId: args.forTmagId },
       limit: 1,
     },
@@ -375,7 +375,7 @@ export async function finalizeWorkbook(args: {
   // dashboards can filter without joining.
   await gatewayCall('mongodb', 'update', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
+    collection: 'team_magnificent_members',
     filter: { tmagId: current.forTmagId },
     update: {
       $set: {

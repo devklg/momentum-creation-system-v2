@@ -1952,7 +1952,7 @@ export const BA_NOTIF_DEFAULTS: BANotifPrefs = {
  * carries them so the page can render the read-only card without a second
  * fetch.
  */
-export interface BAProfile {
+export interface TmagProfile {
   // Editable (wf_0071)
   firstName: string;
   lastName: string;
@@ -1985,7 +1985,7 @@ export interface BAProfile {
  * /api/profile/password. None of {sponsor, tmagId, threeBaId,
  * accessCodeHeld} appear here by design.
  */
-export interface BAProfilePatch {
+export interface TmagProfilePatch {
   firstName?: string;
   lastName?: string;
   timezone?: string;
@@ -1996,7 +1996,7 @@ export interface BAProfilePatch {
 /** GET /api/profile envelope. */
 export interface ProfileGetResponse {
   ok: true;
-  profile: BAProfile;
+  profile: TmagProfile;
 }
 
 /** Generic mutation envelope used by every /profile mutation route. */
@@ -2119,7 +2119,7 @@ export interface MichaelScoringSummary {
  *  scoring worker payload (locked-spec 3.5). */
 export interface MichaelInterviewArtifact {
   tmagId: string;
-  /** Stamped server-side from brand_ambassadors.sponsorTmagId at ingest. Immutable. */
+  /** Stamped server-side from team_magnificent_members.sponsorTmagId at ingest. Immutable. */
   sponsorTmagId: string | null;
   callSid: string | null;
   startedAt: string | null;
@@ -2211,7 +2211,7 @@ export interface MichaelTranscriptChunkIngestPayload {
  * Leader detection (locked-spec Part 5):
  *   leader = (binary-qualified) AND (>= 5 personally enrolled)
  *
- * Personally-enrolled is computable here (count of BAs in brand_ambassadors
+ * Personally-enrolled is computable here (count of BAs in team_magnificent_members
  * with sponsorTmagId = candidate.tmagId). Binary qualification lives upstream
  * in THREE and is not mirrored locally yet. Until it is, the system-detected
  * leader set is empty — the dashboard surfaces this honestly via
@@ -2249,9 +2249,9 @@ export interface AdminDashboardFilter {
  * (wf_0077). Each field corresponds to one tile.
  */
 export interface AdminDashboardMetrics {
-  /** count(brand_ambassadors WHERE lastLoginAt >= now-24h), filter-scoped. */
+  /** count(team_magnificent_members WHERE lastLoginAt >= now-24h), filter-scoped. */
   activeBaCount: number;
-  /** count(brand_ambassadors), filter-scoped. The denominator for activity. */
+  /** count(team_magnificent_members), filter-scoped. The denominator for activity. */
   totalBaCount: number;
   /**
    * count(pool_placements WHERE flushedAt IS NULL), filter-scoped by
@@ -2540,7 +2540,7 @@ export interface PreviewResolvedTokenPayload extends ResolvedTokenPayload {
  * ─────────────────────────────────────────────────────────────────
  *
  * The Kevin-only Brand Ambassador directory + per-BA profile drawer +
- * sponsor override flow. Server reads aggregate from brand_ambassadors +
+ * sponsor override flow. Server reads aggregate from team_magnificent_members +
  * access_codes + ba_commitments + invite_tokens + crm_followups +
  * fast_start_progress + steve_discoveries; writes (override / leader
  * tag / notes) each append a 4.J audit entry.
@@ -2716,7 +2716,7 @@ export interface AdminBaNoteResponse {
  * The mapping is documented in claude-notes-admin-d.md so the integrator
  * sees the assumption explicitly.
  */
-export type AdminProspectRegistrationHandoffState =
+export type ProspectStatus =
   | 'pending'
   | 'enrolled'
   | 'no_show'
@@ -2766,7 +2766,7 @@ export interface AdminProspectDirectoryRow {
    *  when not applicable (enrolled, expired, or no activity yet). */
   followUpNeededBy: IsoTimestamp | null;
   /** Column 10: registration handoff state with THREE (derived; see type). */
-  registrationHandoffState: AdminProspectRegistrationHandoffState;
+  prospectStatus: ProspectStatus;
   /** Soft-delete lifecycle (Chat #138/#141). True when removed from the
    *  directory (reversible). The table may dim / tag deleted rows; the
    *  holding-tank position is untouched by delete. */
@@ -2894,7 +2894,7 @@ export interface AdminProspectDetail {
   placedAt: IsoTimestamp | null;
   state: TokenState;
   presentationStatus: AdminProspectPresentationStatus;
-  registrationHandoffState: AdminProspectRegistrationHandoffState;
+  prospectStatus: ProspectStatus;
   /** Token details. `tokenTruncated` is the head of the token for display
    *  (full token never shown — the prospect URL is the sandbox surface). */
   token: {
@@ -4119,7 +4119,7 @@ export interface SteveSuccessProfile {
 }
 
 /** Authoritative completed-discovery record. Triple-stacked at ingest.
- *  sponsorTmagId is stamped server-side from brand_ambassadors — NEVER from the
+ *  sponsorTmagId is stamped server-side from team_magnificent_members — NEVER from the
  *  worker payload (locked-spec 3.5). */
 export interface SteveDiscoveryArtifact {
   tmagId: string;

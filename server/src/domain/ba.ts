@@ -60,7 +60,7 @@ function mintTmagId(): string {
 export async function emailExists(email: string): Promise<boolean> {
   const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
+    collection: 'team_magnificent_members',
     filter: { email },
     limit: 1,
   });
@@ -70,7 +70,7 @@ export async function emailExists(email: string): Promise<boolean> {
 export async function threeBaIdExists(threeBaId: string): Promise<boolean> {
   const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
+    collection: 'team_magnificent_members',
     filter: { threeBaId },
     limit: 1,
   });
@@ -85,7 +85,7 @@ export async function threeBaIdExists(threeBaId: string): Promise<boolean> {
 export async function findBAByTmagId(tmagId: string): Promise<BARecord | null> {
   const result = await gatewayCall<{ documents: BARecord[] }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
+    collection: 'team_magnificent_members',
     filter: { tmagId },
     limit: 1,
   });
@@ -107,7 +107,7 @@ export async function recordLogin(tmagId: string): Promise<void> {
   try {
     await gatewayCall('mongodb', 'update', {
       database: 'momentum',
-      collection: 'brand_ambassadors',
+      collection: 'team_magnificent_members',
       filter: { tmagId },
       update: { $set: { lastLoginAt: at } },
     });
@@ -137,7 +137,7 @@ export interface BAListItem {
 export async function listAllBAsForAdmin(limit = 500): Promise<BAListItem[]> {
   const raw = await gatewayCall<{ documents: BARecord[] }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
+    collection: 'team_magnificent_members',
     filter: {},
     sort: { createdAt: -1 },
     limit,
@@ -163,7 +163,7 @@ export async function listAllBAsForAdmin(limit = 500): Promise<BAListItem[]> {
   if (missingSponsors.size > 0) {
     const sponsorLookup = await gatewayCall<{ documents: BARecord[] }>('mongodb', 'query', {
       database: 'momentum',
-      collection: 'brand_ambassadors',
+      collection: 'team_magnificent_members',
       filter: { tmagId: { $in: Array.from(missingSponsors) } },
       limit: missingSponsors.size,
     });
@@ -207,7 +207,7 @@ export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): 
 
   await tripleStackWrite({
     id: tmagId,
-    mongoCollection: 'brand_ambassadors',
+    mongoCollection: 'team_magnificent_members',
     mongoDoc: { ...record },
     neo4j: {
       cypher:

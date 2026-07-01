@@ -46,15 +46,15 @@ import { appendAuditEntry } from './auditLog.js';
 import { findBAByTmagId } from './ba.js';
 import { sendEmail, ResendConfigError, ResendError } from '../services/resend.js';
 import type {
-  BAProfile,
-  BAProfilePatch,
+  TmagProfile,
+  TmagProfilePatch,
   BANotifPrefs,
   ProfileChangeChallengeRecord,
 } from '@momentum/shared';
 import { BA_NOTIF_DEFAULTS } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const BA_COLLECTION = 'brand_ambassadors';
+const BA_COLLECTION = 'team_magnificent_members';
 const ACCESS_CODES_COLLECTION = 'access_codes';
 const CHALLENGES_COLLECTION = 'profile_change_challenges';
 
@@ -112,7 +112,7 @@ async function findActiveCodeForBA(tmagId: string): Promise<string | null> {
   return r.documents[0]?.code ?? null;
 }
 
-export async function getProfileForBA(tmagId: string): Promise<BAProfile | null> {
+export async function getProfileForBA(tmagId: string): Promise<TmagProfile | null> {
   const ba = await findBAByTmagId(tmagId);
   if (!ba) return null;
   const extras = ba as typeof ba & BAExtras;
@@ -155,8 +155,8 @@ export async function getProfileForBA(tmagId: string): Promise<BAProfile | null>
  */
 export async function patchProfile(
   tmagId: string,
-  patch: BAProfilePatch,
-): Promise<BAProfile> {
+  patch: TmagProfilePatch,
+): Promise<TmagProfile> {
   const current = await findBAByTmagId(tmagId);
   if (!current) throw new Error('BA not found');
 

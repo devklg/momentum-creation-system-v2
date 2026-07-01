@@ -33,7 +33,7 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COLL_BAS = 'brand_ambassadors';
+const COLL_BAS = 'team_magnificent_members';
 const COLL_FAST_START = 'fast_start_progress';
 
 const ORIENTATION_PROVENANCE =

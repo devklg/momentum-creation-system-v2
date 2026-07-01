@@ -58,7 +58,7 @@ import type {
   AdminProspectMoveRequest,
   AdminProspectPresentationStatus,
   AdminProspectReassignSponsorRequest,
-  AdminProspectRegistrationHandoffState,
+  ProspectStatus,
   AuditActor,
   AuditContext,
   CallbackRequestRecord,
@@ -77,7 +77,7 @@ import { randomUUID } from 'node:crypto';
 const MONGO_DB = 'momentum';
 const COLL_PROSPECTS = 'prospects';
 const COLL_PLACEMENTS = 'pool_placements';
-const COLL_BAS = 'brand_ambassadors';
+const COLL_BAS = 'team_magnificent_members';
 const COLL_TOKENS = 'invite_tokens';
 const COLL_CALLBACKS = 'callback_requests';
 const COLL_WEBINARS = 'webinar_reservations';
@@ -175,9 +175,9 @@ async function loadBaNameMap(): Promise<Map<string, string>> {
 
 /* ─── status & derived-field helpers ────────────────────────────── */
 
-export function deriveRegistrationHandoffState(
+export function deriveProspectStatus(
   placement: PoolPlacement | null,
-): AdminProspectRegistrationHandoffState {
+): ProspectStatus {
   if (!placement) return 'pending';
   if (!placement.flushedAt) return 'pending';
   switch (placement.flushReason) {
@@ -367,7 +367,7 @@ export async function listDirectoryRows(
       },
       daysInHoldingTank: deriveDaysInHoldingTank(placement, nowMs),
       followUpNeededBy: deriveFollowUpNeededBy(p, placement),
-      registrationHandoffState: deriveRegistrationHandoffState(placement),
+      prospectStatus: deriveProspectStatus(placement),
       deleted: p.deleted === true,
     };
   });
@@ -478,7 +478,7 @@ export async function buildDetailPayload(
       !!callback,
       !!webinar,
     ),
-    registrationHandoffState: deriveRegistrationHandoffState(placement),
+    prospectStatus: deriveProspectStatus(placement),
     token: token
       ? {
           tokenTruncated: truncatedToken(token.token),
@@ -921,7 +921,7 @@ export async function refreshRowFor(prospectId: string): Promise<AdminProspectDi
     },
     daysInHoldingTank: deriveDaysInHoldingTank(placement, nowMs),
     followUpNeededBy: deriveFollowUpNeededBy(prospect, placement),
-    registrationHandoffState: deriveRegistrationHandoffState(placement),
+    prospectStatus: deriveProspectStatus(placement),
     deleted: (prospect as ProspectDoc).deleted === true,
   };
 }

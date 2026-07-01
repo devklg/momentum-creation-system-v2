@@ -33,7 +33,7 @@ import type {
 const MONGO_DB = 'momentum';
 const COLL_TOKENS = 'invite_tokens';
 const COLL_ACTIVITY = 'invitation_activity';
-const COLL_BAS = 'brand_ambassadors';
+const COLL_BAS = 'team_magnificent_members';
 
 const PROVENANCE =
   'Invite-funnel data note (Chat #143): mint → click → video_started → ' +

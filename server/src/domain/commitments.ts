@@ -84,7 +84,7 @@ export async function markWelcomeSeen(tmagId: string): Promise<void> {
   const seenAt = new Date().toISOString();
   await gatewayCall('mongodb', 'update', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
+    collection: 'team_magnificent_members',
     filter: { tmagId },
     update: { $set: { welcome_seen: true, welcome_seen_at: seenAt } },
   });
@@ -94,7 +94,7 @@ export async function markCommitmentAccepted(tmagId: string): Promise<void> {
   const acceptedAt = new Date().toISOString();
   await gatewayCall('mongodb', 'update', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
+    collection: 'team_magnificent_members',
     filter: { tmagId },
     update: { $set: { commitment_accepted: true, commitment_accepted_at: acceptedAt } },
   });
@@ -113,7 +113,7 @@ export interface BaProfile {
 export async function findBaById(tmagId: string): Promise<BaProfile | null> {
   const result = await gatewayCall<{ documents: BaProfile[] }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
+    collection: 'team_magnificent_members',
     filter: { tmagId },
     limit: 1,
   });

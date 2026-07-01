@@ -13,7 +13,7 @@
  *
  * Filter parsing identical to the rest of /admin — `resolveScopedTmagIds`
  * yields the scoped BA set; null means "no narrowing." Filter targets:
- *   - brand_ambassadors  → `tmagId` field
+ *   - team_magnificent_members  → `tmagId` field
  *   - pool_placements    → `sponsorTmagId` field
  *
  * Compliance: H is /admin-only, so the prospect-facing prohibitions
@@ -49,7 +49,7 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COLL_BAS = 'brand_ambassadors';
+const COLL_BAS = 'team_magnificent_members';
 const COLL_PLACEMENTS = 'pool_placements';
 const COLL_PROSPECTS = 'prospects';
 const COLL_STEVE = 'steve_discoveries';
@@ -432,7 +432,7 @@ async function buildProspectFunnel(
  * first_invite_sent → first_video_complete → first_enrollment.
  *
  * Reuses the same source set as `buildBaActivationReport`:
- *   brand_ambassadors  (signup, welcomedAt)
+ *   team_magnificent_members  (signup, welcomedAt)
  *   steve_discoveries  (completedAt rows)
  *   invitation_activity (kind 'invitation_sent' / 'video_completed', per-sponsor)
  *   pool_placements    (flushReason='enrolled', per-sponsor)

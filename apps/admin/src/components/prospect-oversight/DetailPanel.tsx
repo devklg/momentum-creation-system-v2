@@ -380,7 +380,7 @@ function IdentitySection({ detail }: { detail: AdminProspectDetail }) {
         v={detail.placedAt ? formatDateTime(detail.placedAt) : '—'}
       />
       <KV k="State" v={detail.state} mono />
-      <KV k="Handoff state" v={detail.registrationHandoffState} mono />
+      <KV k="Handoff state" v={detail.prospectStatus} mono />
     </Section>
   );
 }

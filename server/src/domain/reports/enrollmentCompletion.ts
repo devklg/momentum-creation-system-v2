@@ -31,7 +31,7 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLL_PLACEMENTS = 'pool_placements';
-const COLL_BAS = 'brand_ambassadors';
+const COLL_BAS = 'team_magnificent_members';
 
 interface PlacementDoc {
   sponsorTmagId: string;

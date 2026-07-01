@@ -213,8 +213,8 @@ export function InterventionModal({ kind, detail, onClose, onDone }: Props) {
               />
               <Diff
                 label="Handoff"
-                before={detail.registrationHandoffState}
-                after={afterHandoff(kind, detail.registrationHandoffState)}
+                before={detail.prospectStatus}
+                after={afterHandoff(kind, detail.prospectStatus)}
               />
             </div>
 
@@ -300,7 +300,7 @@ function BeforeBlock({ detail }: { detail: AdminProspectDetail }) {
         label="Position"
         v={detail.positionNumber !== null ? `#${detail.positionNumber}` : '—'}
       />
-      <Row label="Handoff" v={detail.registrationHandoffState} />
+      <Row label="Handoff" v={detail.prospectStatus} />
     </div>
   );
 }
@@ -367,7 +367,7 @@ function afterState(
 
 function afterHandoff(
   kind: AdminProspectInterventionKind,
-  current: AdminProspectDetail['registrationHandoffState'],
+  current: AdminProspectDetail['prospectStatus'],
 ): string {
   if (kind === 'manual_flush') return 'withdrew';
   if (kind === 'force_enroll') return 'enrolled';

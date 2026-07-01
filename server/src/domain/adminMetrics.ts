@@ -11,12 +11,12 @@
  *   leader = (binary-qualified) AND (>= 5 personally enrolled)
  *
  * Binary qualification lives upstream in THREE and is NOT mirrored into
- * `brand_ambassadors` today. Until it is, the system-detected leader set
+ * `team_magnificent_members` today. Until it is, the system-detected leader set
  * is the empty set — see `LEADER_DETECTION_NOTE`. We intentionally do NOT
  * substitute a heuristic (e.g. "≥5 personally enrolled alone") because the
  * locked rule is AND, not OR, and TASK-134 explicitly forbids inventing
  * one. Kevin-curated leaders will land alongside wireframe 4.C's leader
- * toggle on `brand_ambassadors.kevinTaggedLeader`; until then that set is
+ * toggle on `team_magnificent_members.kevinTaggedLeader`; until then that set is
  * also empty. The two sets union into `leaders_only`.
  *
  * Compliance: regulated surface (inside .team, Kevin-only via
@@ -46,7 +46,7 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COLL_BAS = 'brand_ambassadors';
+const COLL_BAS = 'team_magnificent_members';
 const COLL_PLACEMENTS = 'pool_placements';
 const COLL_FAST_START = 'fast_start_progress';
 

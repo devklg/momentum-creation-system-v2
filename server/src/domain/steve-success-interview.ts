@@ -396,7 +396,7 @@ async function getBaSponsor(tmagId: string): Promise<{
     documents: { tmagId: string; sponsorTmagId?: string | null; firstName?: string }[];
   }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
+    collection: 'team_magnificent_members',
     filter: { tmagId },
     limit: 1,
   });
@@ -517,7 +517,7 @@ function artifactToUpdate(a: PersistedDiscovery): Partial<PersistedDiscovery> {
 /**
  * Persist a completed discovery. Triple-stacked (Mongo + Neo4j + Chroma) and
  * idempotent on tmagId — a re-ingest replaces the prior artifact. sponsorTmagId is
- * stamped from brand_ambassadors and is NEVER taken from the payload
+ * stamped from team_magnificent_members and is NEVER taken from the payload
  * (locked-spec 3.5). Reads the Mongo row back before returning to confirm the
  * write landed.
  */

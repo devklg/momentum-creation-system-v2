@@ -41,7 +41,7 @@ interface NotifPrefs {
 type NotifTopic = keyof NotifPrefs;
 type NotifChannel = keyof ChannelMix;
 
-interface BAProfile {
+interface TmagProfile {
   firstName: string;
   lastName: string;
   email: string;
@@ -59,7 +59,7 @@ interface BAProfile {
 
 interface ProfileGetResponse {
   ok: true;
-  profile: BAProfile;
+  profile: TmagProfile;
 }
 
 const TOPIC_LABELS: Record<NotifTopic, string> = {
@@ -77,7 +77,7 @@ const CHANNEL_LABELS: Record<NotifChannel, string> = {
 };
 
 export function ProfilePage() {
-  const [profile, setProfile] = useState<BAProfile | null>(null);
+  const [profile, setProfile] = useState<TmagProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -147,7 +147,7 @@ export default ProfilePage;
 
 /* ─── Identity (read-only) ─── */
 
-function IdentityCard({ profile }: { profile: BAProfile }) {
+function IdentityCard({ profile }: { profile: TmagProfile }) {
   return (
     <ProfileSection
       eyebrow="IDENTITY"
@@ -179,7 +179,7 @@ function ReadOnlyRow({ label, value }: { label: string; value: string }) {
 
 /* ─── Photo ─── */
 
-function PhotoEditor({ profile, onSaved }: { profile: BAProfile; onSaved: () => Promise<void> }) {
+function PhotoEditor({ profile, onSaved }: { profile: TmagProfile; onSaved: () => Promise<void> }) {
   const [url, setUrl] = useState(profile.photoUrl ?? '');
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
@@ -242,7 +242,7 @@ function PhotoEditor({ profile, onSaved }: { profile: BAProfile; onSaved: () => 
 
 /* ─── Name ─── */
 
-function NameEditor({ profile, onSaved }: { profile: BAProfile; onSaved: () => Promise<void> }) {
+function NameEditor({ profile, onSaved }: { profile: TmagProfile; onSaved: () => Promise<void> }) {
   const [firstName, setFirstName] = useState(profile.firstName);
   const [lastName, setLastName] = useState(profile.lastName);
   const [saving, setSaving] = useState(false);
@@ -328,7 +328,7 @@ function TimezoneEditor({
   profile,
   onSaved,
 }: {
-  profile: BAProfile;
+  profile: TmagProfile;
   onSaved: () => Promise<void>;
 }) {
   const all = useMemo(getBrowserTimezones, []);
@@ -398,7 +398,7 @@ function EmailChanger({
   profile,
   onSaved,
 }: {
-  profile: BAProfile;
+  profile: TmagProfile;
   onSaved: () => Promise<void>;
 }) {
   const [newEmail, setNewEmail] = useState('');
@@ -545,7 +545,7 @@ function PhoneChanger({
   profile,
   onSaved,
 }: {
-  profile: BAProfile;
+  profile: TmagProfile;
   onSaved: () => Promise<void>;
 }) {
   const [newPhone, setNewPhone] = useState('');
@@ -774,7 +774,7 @@ function NotifPrefsEditor({
   profile,
   onSaved,
 }: {
-  profile: BAProfile;
+  profile: TmagProfile;
   onSaved: () => Promise<void>;
 }) {
   const [prefs, setPrefs] = useState<NotifPrefs>(profile.notifPrefs);

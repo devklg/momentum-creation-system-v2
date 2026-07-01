@@ -33,7 +33,7 @@ function makeGatewayImpl(store: Store, opts: GatewayOpts = {}) {
   return async (tool: string, action: string, params: AnyRec): Promise<unknown> => {
     if (tool === 'mongodb' && action === 'query') {
       const col = params.collection;
-      if (col === 'brand_ambassadors') return { documents: store.ba ? [store.ba] : [] };
+      if (col === 'team_magnificent_members') return { documents: store.ba ? [store.ba] : [] };
       if (col === 'steve_discoveries') {
         return { documents: store.discovery ? [store.discovery] : [] };
       }

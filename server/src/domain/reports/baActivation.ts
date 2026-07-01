@@ -6,7 +6,7 @@
  * first invite, first prospect to video_complete, first enrollment.
  *
  * Data sources (all confirmed live, Chat #143):
- *   brand_ambassadors  — tmagId, firstName/lastName, createdAt (signup),
+ *   team_magnificent_members  — tmagId, firstName/lastName, createdAt (signup),
  *                         welcomedAt (welcome-accept commitment)
  *   steve_discoveries  — SD-<tmagId>, completedAt (discovery completion)
  *   invitation_activity— kind 'invitation_sent' / 'video_completed', at,
@@ -36,7 +36,7 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COLL_BAS = 'brand_ambassadors';
+const COLL_BAS = 'team_magnificent_members';
 const COLL_STEVE = 'steve_discoveries';
 const COLL_ACTIVITY = 'invitation_activity';
 const COLL_PLACEMENTS = 'pool_placements';

@@ -7,7 +7,7 @@
  * and the 4.J audit substrate.
  *
  *   READ
- *     brand_ambassadors          identity + sponsor + lastLoginAt
+ *     team_magnificent_members          identity + sponsor + lastLoginAt
  *     access_codes               the BA's owned TMAG-XXXX code (one per BA, 2.3)
  *     ba_commitments             welcome completion (J.3)
  *     invite_tokens              2-in-72 count + lifetime invite count
@@ -18,7 +18,7 @@
  *     admin_ba_notes             Kevin-private append-only notes (C.4)
  *
  *   WRITE
- *     applySponsorOverride       NEW override row + brand_ambassadors patch
+ *     applySponsorOverride       NEW override row + team_magnificent_members patch
  *                                + 4.J audit entry (severity 'critical')
  *     setCuratedLeaderTag        upsert (manual existence branch — gateway
  *                                doesn't honor upsert) + 4.J audit ('info')
@@ -54,7 +54,7 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const BA_COLLECTION = 'brand_ambassadors';
+const BA_COLLECTION = 'team_magnificent_members';
 const ACCESS_CODES_COLLECTION = 'access_codes';
 const COMMITMENTS_COLLECTION = 'ba_commitments';
 const TOKENS_COLLECTION = 'invite_tokens';
@@ -401,7 +401,7 @@ export async function listBADirectory(
 }
 
 /** Build the C.4 profile bundle for one BA. */
-export async function getBAProfileBundle(
+export async function getTmagProfileBundle(
   tmagId: string,
 ): Promise<AdminBaProfileBundle | null> {
   // Reuse listBADirectory's projection so the table row + drawer row are

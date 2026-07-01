@@ -28,7 +28,7 @@
  *   - emailExists (ba.ts) is the single email-uniqueness authority.
  *   - applySponsorOverride (adminBaOversight.ts) owns every sponsor change.
  *   - appendAuditEntry (auditLog.ts) is the only audit writer.
- *   - The returned AdminBaDirectoryRow is re-read through getBAProfileBundle
+ *   - The returned AdminBaDirectoryRow is re-read through getTmagProfileBundle
  *     so the create/edit/restore row matches the directory + drawer.
  */
 
@@ -36,7 +36,7 @@ import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
 import { emailExists, type BARecord } from './ba.js';
-import { getBAProfileBundle } from './adminBaOversight.js';
+import { getTmagProfileBundle } from './adminBaOversight.js';
 import type {
   AdminBaDirectoryRow,
   AdminCreateBaPayload,
@@ -47,7 +47,7 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const BA_COLLECTION = 'brand_ambassadors';
+const BA_COLLECTION = 'team_magnificent_members';
 const MIN_REASON_LEN = 8;
 
 /** Actor performing the mutation. Always Kevin in v1, carried explicitly so
@@ -109,7 +109,7 @@ async function findBAByTmagIdAnyState(tmagId: string): Promise<BARecordMaybeDele
 
 /** Re-read the directory row so responses match the directory/drawer. */
 async function readRow(tmagId: string): Promise<AdminBaDirectoryRow | null> {
-  const bundle = await getBAProfileBundle(tmagId);
+  const bundle = await getTmagProfileBundle(tmagId);
   return bundle?.row ?? null;
 }
 

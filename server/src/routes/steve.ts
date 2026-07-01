@@ -104,7 +104,7 @@ steveRoutes.get(
         'query',
         {
           database: 'momentum',
-          collection: 'brand_ambassadors',
+          collection: 'team_magnificent_members',
           filter: { tmagId },
           limit: 1,
         },

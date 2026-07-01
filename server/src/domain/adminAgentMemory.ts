@@ -20,7 +20,7 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COLL_BAS = 'brand_ambassadors';
+const COLL_BAS = 'team_magnificent_members';
 const COLL_STEVE = 'steve_discoveries';
 const COLL_AGENT_EVENTS = 'agent_events';
 const COLL_OUTBOX = 'projection_outbox';

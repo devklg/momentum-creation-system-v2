@@ -24,7 +24,7 @@ import { listAllBAsForAdmin } from '../../domain/ba.js';
 import {
   appendBaNote,
   applySponsorOverride,
-  getBAProfileBundle,
+  getTmagProfileBundle,
   listBADirectory,
   setCuratedLeaderTag,
 } from '../../domain/adminBaOversight.js';
@@ -82,7 +82,7 @@ adminBasRoutes.get('/:tmagId', requireAdmin, async (req: Request, res: Response)
     return;
   }
   try {
-    const profile = await getBAProfileBundle(parsed.data.tmagId);
+    const profile = await getTmagProfileBundle(parsed.data.tmagId);
     if (!profile) {
       res.status(404).json({ ok: false, error: 'BA not found.' });
       return;
@@ -140,7 +140,7 @@ adminBasRoutes.post(
         return;
       }
       // Refresh the row so the table can update in place.
-      const bundle = await getBAProfileBundle(params.data.tmagId);
+      const bundle = await getTmagProfileBundle(params.data.tmagId);
       const responseBody: AdminSponsorOverrideResponse = {
         ok: true,
         override: result.entry,

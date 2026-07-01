@@ -116,7 +116,7 @@ export class TrainingSupportAccessError extends Error {
 async function getTeamMagnificentMember(tmagId: string): Promise<TeamMagnificentMemberLookup | null> {
   const result = await gatewayCall<{ documents: TeamMagnificentMemberLookup[] }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
+    collection: 'team_magnificent_members',
     filter: { tmagId },
     limit: 1,
   });

@@ -256,7 +256,7 @@ export async function markQuestionnaireComplete(tmagId: string): Promise<void> {
   const completedAt = new Date().toISOString();
   await gatewayCall('mongodb', 'update', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
+    collection: 'team_magnificent_members',
     filter: { tmagId },
     update: {
       $set: {

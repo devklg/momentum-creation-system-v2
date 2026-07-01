@@ -57,7 +57,7 @@ const PROSPECTS_COLLECTION = 'prospects';
 const TOKENS_COLLECTION = 'invite_tokens';
 const ACTIVITY_COLLECTION = 'invitation_activity';
 const CALLBACK_COLLECTION = 'callback_requests';
-const BA_COLLECTION = 'brand_ambassadors';
+const BA_COLLECTION = 'team_magnificent_members';
 const FOLLOWUPS_COLLECTION = 'crm_followups';
 const DISPOSITIONS_COLLECTION = 'crm_dispositions';
 const NOTES_COLLECTION = 'crm_notes';
@@ -108,7 +108,7 @@ function isSponsorInactive(sp: BARecord): boolean {
 
 /**
  * The founders (Kevin + Paul) as the support/contact fallback. Sourced from
- * the brand_ambassadors records seeded by seed-founders.ts (role founder /
+ * the team_magnificent_members records seeded by seed-founders.ts (role founder /
  * co_leader), so a leader added later (extensible host model, 3.3) is picked
  * up automatically. Founder role sorts before co_leader so Kevin leads.
  */
@@ -1137,7 +1137,7 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<TeamLaunchCen
       optional: true,
       href: '/cockpit#sponsor',
       completedAt: null,
-      source: 'brand_ambassadors.sponsorTmagId; confirmation not separately tracked',
+      source: 'team_magnificent_members.sponsorTmagId; confirmation not separately tracked',
       detail: 'Your immutable sponsor card stays visible; confirm connection directly with your sponsor.',
     }),
   ];

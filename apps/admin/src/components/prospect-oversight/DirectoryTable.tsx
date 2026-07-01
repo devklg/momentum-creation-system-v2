@@ -16,7 +16,7 @@ import { useMemo, useState } from 'react';
 import type {
   AdminProspectDirectoryRow,
   AdminProspectPresentationStatus,
-  AdminProspectRegistrationHandoffState,
+  ProspectStatus,
 } from '@momentum/shared';
 
 type SortDir = 'asc' | 'desc';
@@ -213,7 +213,7 @@ export function DirectoryTable({ rows, loading, onSelectProspect }: Props) {
                 )}
               </Td>
               <Td>
-                <HandoffPill state={row.registrationHandoffState} />
+                <ProspectStatusPill state={row.prospectStatus} />
               </Td>
             </tr>
           ))}
@@ -280,10 +280,10 @@ function StatusPill({ status }: { status: AdminProspectPresentationStatus }) {
   );
 }
 
-function HandoffPill({
+function ProspectStatusPill({
   state,
 }: {
-  state: AdminProspectRegistrationHandoffState;
+  state: ProspectStatus;
 }) {
   const tone =
     state === 'enrolled'
@@ -378,7 +378,7 @@ function compareRows(
     case 'followUp':
       return flip * compareNullableIso(a.followUpNeededBy, b.followUpNeededBy);
     case 'handoff':
-      return flip * a.registrationHandoffState.localeCompare(b.registrationHandoffState);
+      return flip * a.prospectStatus.localeCompare(b.prospectStatus);
   }
 }
 

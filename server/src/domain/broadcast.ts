@@ -196,7 +196,7 @@ export async function resolveAudience(
 
 async function filterAtRisk(allBas: BAListItem[], nowMs: number): Promise<BAListItem[]> {
   // Need lastLoginAt — listAllBAsForAdmin returned the projected list (no
-  // lastLoginAt field). Query brand_ambassadors for the raw docs scoped to
+  // lastLoginAt field). Query team_magnificent_members for the raw docs scoped to
   // baIds older than 7d to avoid pulling the whole roster twice.
   const olderThan7d = allBas.filter((b) => {
     const t = Date.parse(b.joinedAt);
@@ -208,7 +208,7 @@ async function filterAtRisk(allBas: BAListItem[], nowMs: number): Promise<BAList
     documents: Array<{ tmagId: string; lastLoginAt: string | null }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
-    collection: 'brand_ambassadors',
+    collection: 'team_magnificent_members',
     filter: { tmagId: { $in: olderThan7d.map((b) => b.tmagId) } },
     projection: { tmagId: 1, lastLoginAt: 1 },
     limit: olderThan7d.length,
