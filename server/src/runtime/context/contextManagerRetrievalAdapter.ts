@@ -40,6 +40,7 @@ import {
   assertApprovedKnowledgeQueryResult,
   validateApprovedKnowledgeQueryRequest,
 } from './approvedKnowledgeQueryContract.js';
+import { resolveLanguageSelection } from './languageAwareRetrieval.js';
 
 /**
  * Narrowed approved-knowledge provider. Intentionally `Pick<…, 'listApprovedKnowledge'>` so
@@ -102,18 +103,19 @@ export function createContextManagerRetrievalAdapter(
         statusDomainKept.push(reference);
       }
 
-      // P4.4 retrieves same-language only; language FALLBACK selection is deferred to P4.6.
-      // The `allowLanguageFallback` flag is carried by the contract but not yet exercised.
-      const languageKept = statusDomainKept.filter((reference) => reference.language === request.language);
+      // P4.6 — language-aware selection over the status/domain-filtered references. The resolver
+      // honors `allowLanguageFallback`, applies the priority ladder (same-language → human/native
+      // fallback → MARKED machine translation → language-neutral), and marks the batch honestly.
+      const selection = resolveLanguageSelection(statusDomainKept, request);
 
-      if (languageKept.length === 0) {
+      if (selection.status === 'degraded') {
         const reason: ApprovedKnowledgeQueryDegradeReason =
-          statusDomainKept.length > 0 ? 'language_unavailable' : 'no_approved_match';
+          statusDomainKept.length > 0 ? (selection.degradeReason ?? 'language_unavailable') : 'no_approved_match';
         return degradedResult(request, [reason], excluded);
       }
 
       const limited =
-        request.maxResults !== undefined ? languageKept.slice(0, request.maxResults) : languageKept;
+        request.maxResults !== undefined ? selection.references.slice(0, request.maxResults) : selection.references;
 
       const result: ApprovedKnowledgeQueryResult = {
         schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
@@ -125,7 +127,7 @@ export function createContextManagerRetrievalAdapter(
           approvedCount: limited.length,
           candidateExcludedCount: excluded.length,
           candidateExcluded: true,
-          language: sameLanguageMetadata(request),
+          language: selection.language,
         },
       };
 
@@ -144,6 +146,12 @@ export function createContextManagerRetrievalAdapter(
  * The `summary` is a deterministic structural descriptor derived from the reference
  * identity/domain — body enrichment (real knowledge text) is a downstream slice (P4.5+);
  * the corpus is not wired yet (P4.3 audit §8).
+ *
+ * P4.6: each reference carries its OWN real `language` and `translationStatus` — never the
+ * batch value — so a machine translation (even one already in the primary language) can never
+ * be assembled into the packet as native (`same_language`). The resolver guarantees a single
+ * homogeneous quality tier, so per-item marking and the batch metadata agree; per-item is used
+ * here as defense-in-depth against ever laundering a marking.
  */
 export function toContextReferences(result: ApprovedKnowledgeQueryResult): ContextReference[] {
   if (result.status === 'degraded') return [];
@@ -153,6 +161,8 @@ export function toContextReferences(result: ApprovedKnowledgeQueryResult): Conte
     status: 'approved',
     knowledgeId: reference.knowledgeId,
     summary: structuralSummary(reference.domain, reference.knowledgeId),
+    language: reference.language,
+    translationStatus: reference.translationStatus,
   }));
 }
 

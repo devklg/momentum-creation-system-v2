@@ -19,8 +19,10 @@ import type {
   Guardrail,
   KnowledgeId,
   RequestId,
+  RuntimeLanguage,
   RuntimeRequestScope,
   RuntimeRule,
+  RuntimeTranslationStatus,
   SessionContext,
   SourceId,
   TeamContext,
@@ -72,6 +74,10 @@ export interface ContextReference {
   status: ContextReferenceStatus;
   knowledgeId?: KnowledgeId;
   score?: number;
+  // P4.6 — delivered language + honest translation marking for this reference. Optional and
+  // backward-compatible: absent ⇒ defaults to en/same_language (pre-P4.6 behavior).
+  language?: RuntimeLanguage;
+  translationStatus?: RuntimeTranslationStatus;
 }
 
 export interface ContextConstraint {
@@ -435,7 +441,10 @@ function approvedKnowledgeFromReferences(references: ContextReference[]): Approv
       summary: reference.summary,
       status: 'active',
       governanceStatus: 'approved',
-      language: 'en',
+      // P4.6 — honor the delivered language + translation marking; default to en/same_language
+      // when absent so pre-P4.6 callers are unchanged. A machine-translated fallback item is
+      // marked machine_translation_marked here, never presented as native.
+      language: reference.language ?? 'en',
       sourceTraceability: {
         sourceId: reference.sourceId as SourceId,
         sourceType: 'approved_knowledge',
@@ -445,8 +454,8 @@ function approvedKnowledgeFromReferences(references: ContextReference[]): Approv
         retrievalMethod: 'direct_reference',
         reasonCodes: ['agent_task_match'],
         score: reference.score,
-        language: 'en',
-        translationStatus: 'same_language',
+        language: reference.language ?? 'en',
+        translationStatus: reference.translationStatus ?? 'same_language',
       },
     }));
 }
