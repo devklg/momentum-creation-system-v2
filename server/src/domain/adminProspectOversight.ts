@@ -182,11 +182,11 @@ export function deriveProspectStatus(
   if (!placement.flushedAt) return 'pending';
   switch (placement.flushReason) {
     case 'enrolled':
-      return 'enrolled';
+      return 'enrolled_iii';
     case 'expired':
-      return 'no_show';
+      return 'declined';
     case 'archived':
-      return 'withdrew';
+      return 'declined';
     default:
       return 'pending';
   }

@@ -2706,21 +2706,21 @@ export interface AdminBaNoteResponse {
  */
 
 /**
- * D.1 column 10 — registration handoff state with THREE. Derived from
- * the pool placement row's flush state (no separate handoff column
- * exists on prospects today):
+ * D.1 column 10 — the prospect's resolution status (a read-only MIRROR, not a
+ * handoff the app manages; THREE owns enrollment). One concept shared with
+ * `McsOutcomeKind` (P7.16 §1a). Derived from the pool placement's flush state:
  *   - placement still active (flushedAt=null)             → 'pending'
- *   - flushReason='enrolled'                              → 'enrolled'
- *   - flushReason='expired'                               → 'no_show'
- *   - flushReason='archived' (admin-flushed early)        → 'withdrew'
- * The mapping is documented in claude-notes-admin-d.md so the integrator
- * sees the assumption explicitly.
+ *   - flushReason='enrolled'  (enrolled into III = member) → 'enrolled_iii'
+ *   - flushReason='expired'                                → 'declined'
+ *   - flushReason='archived' (admin-flushed early)         → 'declined'
+ * `became_customer` is set from the prospect's `becameCustomer` flag, not the
+ * placement.
  */
 export type ProspectStatus =
   | 'pending'
-  | 'enrolled'
-  | 'no_show'
-  | 'withdrew';
+  | 'enrolled_iii'
+  | 'became_customer'
+  | 'declined';
 
 /**
  * One row in the D.1 directory. The 10 columns the brief enumerates,

@@ -18,7 +18,7 @@
  * the provenance line shrinks accordingly. This keeps faith with the locked
  * spec (Part 6 — no drift) while delivering a usable artifact now.
  *
- * Compliance: /admin-only surface (Kevin via ADMIN_BA_IDS). Aggregate
+ * Compliance: /admin-only surface (Kevin via ADMIN_TMAG_IDS). Aggregate
  * operational metrics, no prospect/BA scoring, no income ranking (ADMIN I.5).
  */
 

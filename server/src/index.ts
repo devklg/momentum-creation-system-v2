@@ -263,7 +263,7 @@ await ensureChromaCollections();
 app.listen(env.SERVER_PORT, () => {
   // eslint-disable-next-line no-console
   console.log(
-    `[momentum-server] listening on :${env.SERVER_PORT} (${env.NODE_ENV}) â€” admin BA IDs configured: ${env.ADMIN_BA_IDS.length}`,
+    `[momentum-server] listening on :${env.SERVER_PORT} (${env.NODE_ENV}) â€” admin BA IDs configured: ${env.ADMIN_TMAG_IDS.length}`,
   );
 });
 

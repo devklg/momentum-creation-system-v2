@@ -20,7 +20,7 @@
  * also empty. The two sets union into `leaders_only`.
  *
  * Compliance: regulated surface (inside .team, Kevin-only via
- * ADMIN_BA_IDS), so the locked-spec 3.10 prospect-facing prohibitions do
+ * ADMIN_TMAG_IDS), so the locked-spec 3.10 prospect-facing prohibitions do
  * not bind here — CV / cycle / rank math is technically permitted on /admin.
  * The dashboard scope, however, is OPERATIONAL (activity, funnel, queue),
  * not earnings, per TASK-134.

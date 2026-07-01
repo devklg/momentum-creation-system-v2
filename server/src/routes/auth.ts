@@ -205,7 +205,7 @@ authRoutes.get('/me', requireAuth, async (req: Request, res: Response) => {
       return;
     }
     const isAdmin =
-      env.ADMIN_BA_IDS.includes(ba.tmagId) || env.ADMIN_BA_IDS.includes(ba.threeBaId);
+      env.ADMIN_TMAG_IDS.includes(ba.tmagId) || env.ADMIN_TMAG_IDS.includes(ba.threeBaId);
 
     res.json({
       ok: true,

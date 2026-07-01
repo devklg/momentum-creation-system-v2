@@ -9,7 +9,7 @@
  *   GET  /sessions   every session (any status) with its roster
  *   POST /sessions   create a new session (assignable hosts, cap default 10)
  *
- * Gating: requireAdmin (Kevin-only via ADMIN_BA_IDS). Each request appends an
+ * Gating: requireAdmin (Kevin-only via ADMIN_TMAG_IDS). Each request appends an
  * audit entry through the 4.J substrate, matching the rest of /admin.
  */
 

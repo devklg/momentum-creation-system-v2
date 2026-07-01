@@ -5,7 +5,7 @@
  * decoded session claims to req.session. Responds 401 if missing/invalid.
  *
  * `requireAdmin` — same as requireAuth, then enforces the BA-ID gate from
- * ADMIN_BA_IDS env. Match -> next. No match -> hard 403 with a generic error
+ * ADMIN_TMAG_IDS env. Match -> next. No match -> hard 403 with a generic error
  * (no indication that /admin exists). Logs the attempt for the audit trail.
  *
  * Per ADMIN Design Section A.2 (Locked Chat #85).
@@ -63,8 +63,8 @@ export async function requireAdmin(
   }
 
   const allowed =
-    env.ADMIN_BA_IDS.includes(claims.threeBaId) ||
-    env.ADMIN_BA_IDS.includes(claims.tmagId);
+    env.ADMIN_TMAG_IDS.includes(claims.threeBaId) ||
+    env.ADMIN_TMAG_IDS.includes(claims.tmagId);
 
   if (!allowed) {
     // Audit-log the denied attempt (per ADMIN Design A.2). Best-effort; never

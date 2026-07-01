@@ -286,11 +286,11 @@ function ProspectStatusPill({
   state: ProspectStatus;
 }) {
   const tone =
-    state === 'enrolled'
+    state === 'enrolled_iii'
       ? 'text-teal border-teal/40'
-      : state === 'no_show'
-        ? 'text-cream-faint border-line'
-        : state === 'withdrew'
+      : state === 'became_customer'
+        ? 'text-gold border-gold/40'
+        : state === 'declined'
           ? 'text-red-400 border-red-400/40'
           : 'text-cream-mute border-line';
   return (

@@ -23,7 +23,7 @@
  * Filter contract — server-enforced, narrowing only. Matches B.2
  * exactly so the same FilterBar component can target either route.
  *
- * Compliance: this surface is /admin-gated (Kevin-only via ADMIN_BA_IDS).
+ * Compliance: this surface is /admin-gated (Kevin-only via ADMIN_TMAG_IDS).
  * The intervention paths are critical-severity overrides per locked-spec
  * 2.4: reason is required (min 8 chars), requestingTmagId is required.
  */

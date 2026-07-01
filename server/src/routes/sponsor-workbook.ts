@@ -9,7 +9,7 @@
  *                             classification + first actions.
  *
  * Authorization: requireAuth + the session's tmagId must equal the target BA's
- * sponsorTmagId (canConductWorkbook). Admins from ADMIN_BA_IDS bypass the
+ * sponsorTmagId (canConductWorkbook). Admins from ADMIN_TMAG_IDS bypass the
  * sponsor check — allowed for any BA. Anyone else gets 403.
  *
  * Per Chat #22 / Chat #103 architecture: this is the 30-45 min partnership
@@ -39,8 +39,8 @@ export const sponsorWorkbookRoutes: Router = express.Router();
 
 function isAdmin(session: { tmagId: string; threeBaId: string }): boolean {
   return (
-    env.ADMIN_BA_IDS.includes(session.threeBaId) ||
-    env.ADMIN_BA_IDS.includes(session.tmagId)
+    env.ADMIN_TMAG_IDS.includes(session.threeBaId) ||
+    env.ADMIN_TMAG_IDS.includes(session.tmagId)
   );
 }
 
