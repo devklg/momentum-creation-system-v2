@@ -285,6 +285,8 @@ Registry `CHROMA_COLLECTIONS` (26 base + Phase 7). Record: `id`==Mongo `_id`; `d
 
 **Nomenclature (one concept, one name, cased per layer — Kevin):** both camelCase and snake_case are used, **chosen by the software layer** — camelCase for TypeScript / app data / Mongo `momentum`; snake_case for the gateway-memory family / snake-case surfaces (P10 §3.6). The invariant is **consistency**: a concept has exactly ONE canonical name; casing is a deterministic transform of it (`tmagId` ⇄ `tmag_id` = same concept). Never two different names for the same thing (Chat #135 drift class; `DECISION_governed_dedicated_stack_founding_principle` §3.2).
 
+**Naming & concept drift audit:** the full sweep of same-concept-many-names / `ba`-that-means-member / duplicate-enum / handoff-drift findings is in **`organization/FINDING_naming_concept_drift_audit.md`** — the canonical names every new store adopts from birth. Highlights: the member id has **~25 names** (→ `tmagId`/`<role>TmagId`); a **registration-handoff state machine** (`AdminProspectRegistrationHandoffState`) contradicts the mandatory no-handoff rule; two aliased duplicate types; overlapping funnel-event enums.
+
 **Open reconciliations (P10 §5 — fix before tightening):**
 1. Neo4j `BA` vs `BrandAmbassador` → one canonical **member** label (per membership decision).
 2. `ProspectCRMRecord` vs `ProspectCrmRecord` casing.
