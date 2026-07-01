@@ -29,7 +29,7 @@ The load-bearing constraint: **GraphRAG runs on the app's dedicated triple-stack
 - **Not** the gateway's GraphRAG. No `quadstack.write`, no `universal_gateway`, no `chat_number`/`chat_registry_id` on app records, no gateway runtime dependency (ACR-0007).
 - **Not** a knowledge-approval mechanism. GraphRAG only **retrieves** approved knowledge; it never approves. No agent may approve knowledge, and candidates (P7.5, review-only) are never indexed into active GraphRAG collections.
 - **Not** an agent-writable store. Agents query through the Context Manager; they never write graph/vector records directly.
-- **Not** `.com`-surfaced; no income/compensation/cycle/placement, no PII beyond opaque ids, no raw transcript/LLM bodies.
+- **Not** `.com`/prospect-surfaced; no **prospect-facing** income *claims* / projections / commission figures / cycle math / placement promises, no individual/personal comp *values*, no guarantees, no PII beyond opaque ids, no raw transcript/LLM bodies. **Team-facing comp-plan *education* IS allowed** — it is organizational/training knowledge Michael's learning template teaches from (compliance boundary = audience, not topic — P7.15 §2a).
 
 ---
 
@@ -116,7 +116,7 @@ Writes originate only from the server's Knowledge Evolution / GraphRAG service b
 6. **384-dim embedding parity** with `model` + `model_version` provenance; both client checks enforced.
 7. **Specific-verb relationships only**; `MERGE` on `{id}`; MATCH-anchor + read-back for graph legs.
 8. **No agent writes; Context Manager sole assembler.** Agents never read or write GraphRAG stores directly.
-9. **No excluded data** — no `.com` exposure, no income/compensation/cycle/placement, no PII beyond opaque ids, no raw transcript/LLM bodies.
+9. **No excluded data (audience boundary, P7.15 §2a)** — no `.com`/prospect exposure, no prospect-facing income *claims*/projections/commission/cycle/placement, no individual comp *values*, no guarantees, no PII beyond opaque ids, no raw transcript/LLM bodies. **Team-facing comp-plan education is allowed** (it is the training knowledge the learning template teaches from).
 10. **Team Magnificent + tenant scope** on every record and every retrieval.
 
 ---
