@@ -66,7 +66,9 @@ Two enums for one concept: `CrmDisposition` (`types.ts:1546`, **hyphen** `new-ba
 
 This contradicts a **mandatory** locked-spec rule (`docs/locked-spec.md:323`): *"The system has no programmatic registration handoff to THREE. No registration routes. No registration handoff state machine."* — and `docs/AGENT-BRIEFING.md:64`: *"There is no registration/handoff/* route family — that was Codex drift, dropped."*
 
-**Action:** this type must not propagate to any new store. If it is really an **admin-side mirror** of a prospect's III enrollment status (which THREE owns), rename it to say so — e.g., `AdminProspectEnrollmentMirrorState` — and never a "handoff." If it is dead drift, remove it. Flag for Kevin.
+**Action:** this type must not propagate to any new store. If it is really an **admin-side mirror** of a prospect's III enrollment status (which THREE owns), rename it to say so — and never a "handoff." If it is dead drift, remove it.
+
+**RESOLUTION (Kevin, 2026-07-01): rename to "prospect status" — keep the readout, drop the "handoff" framing.** It is a derived, read-only admin **status readout** (the app mirrors, never manages a handoff — consistent with the no-handoff rule). Rename the type `AdminProspectRegistrationHandoffState` → **`ProspectStatus`** (field/UI column "Handoff State" → **"Prospect status"**); remove all `registrationHandoff*` naming (`registrationHandoffState`, `deriveRegistrationHandoffState`, `HandoffPill`, etc.). States unchanged: `pending · enrolled · no_show · withdrew`. Executes in the app-wide reconciliation migration (server `adminProspectOversight.ts` + `apps/admin` UI + shared types). **Reconciliation caveat (one-concept-one-name):** confirm this "prospect status" (enrollment outcome) stays *distinct and clearly named* vs the existing `TokenState` (funnel lifecycle) and `ProspectCrmStatus` (CRM pipeline) — three real, different prospect dimensions that must not collapse into one ambiguous "status."
 
 ---
 
