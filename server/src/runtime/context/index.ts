@@ -73,3 +73,12 @@ export type {
   RetrievalStageCounts,
   RetrievalObservabilityScope,
 } from './retrievalObservability.js';
+
+// P4.9 — Approved-Knowledge Safe Fallback Upgrade: map a fail-closed retrieval degrade into a
+// reason-specific, safe, compliant DegradedContextState for the packet. Pure; assembles no packet.
+export {
+  SAFE_FALLBACK_BASE_DIRECTIVE,
+  resolveSafeFallbackState,
+  safeFallbackFromResult,
+} from './safeFallback.js';
+export type { SafeFallbackInput, SafeFallbackPacketInput } from './safeFallback.js';
