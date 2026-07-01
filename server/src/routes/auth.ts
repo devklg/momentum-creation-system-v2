@@ -5,13 +5,21 @@ import { findAccessCode } from '../domain/access-codes.js';
 import { emailExists, threeBaIdExists, registerBA, findBAByBaId, recordLogin } from '../domain/ba.js';
 import { signSession, setSessionCookie, clearSessionCookie } from '../services/session.js';
 import { requireAuth } from '../middleware/requireAuth.js';
+import { ipRateLimit, type RateLimitConfig } from '../middleware/rateLimit.js';
 import { env } from '../env.js';
 
 export const authRoutes: Router = express.Router();
 
+// P10 H2 — per-IP throttles. Windows chosen to stop automated abuse
+// (brute-force, account-spam, code-enumeration) without impeding a human
+// retrying a typo. In-memory / single-instance (see middleware/rateLimit.ts).
+const LOGIN_LIMIT: RateLimitConfig = { windowMs: 15 * 60 * 1000, max: 10 };
+const REGISTER_LIMIT: RateLimitConfig = { windowMs: 60 * 60 * 1000, max: 5 };
+const VERIFY_LIMIT: RateLimitConfig = { windowMs: 15 * 60 * 1000, max: 20 };
+
 const VerifyBody = z.object({ code: z.string().min(2).max(32) });
 
-authRoutes.post('/verify-code', async (req: Request, res: Response) => {
+authRoutes.post('/verify-code', ipRateLimit('auth_verify', VERIFY_LIMIT), async (req: Request, res: Response) => {
   const parsed = VerifyBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ ok: false, error: 'Invalid request' });
@@ -56,7 +64,7 @@ const RegisterBody = z.object({
   termsAccepted: z.literal(true),
 });
 
-authRoutes.post('/register', async (req: Request, res: Response) => {
+authRoutes.post('/register', ipRateLimit('auth_register', REGISTER_LIMIT), async (req: Request, res: Response) => {
   const parsed = RegisterBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ ok: false, error: 'Invalid input. Please check the form and try again.' });
@@ -124,7 +132,7 @@ const LoginBody = z.object({
   password: z.string().min(1).max(200),
 });
 
-authRoutes.post('/login', async (req: Request, res: Response) => {
+authRoutes.post('/login', ipRateLimit('auth_login', LOGIN_LIMIT), async (req: Request, res: Response) => {
   const parsed = LoginBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ ok: false, error: 'Invalid input.' });
