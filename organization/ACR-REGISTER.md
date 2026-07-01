@@ -24,6 +24,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0006 | Canonical ACR Register Reconciliation          | MOMENTUM_ACR_SYSTEM.md         | Proposed | v1.1           |
 | ACR-0007 | Runtime Persistence Direct — Gateway Is Dev Tooling Only | locked-spec §3.14 / KNOWLEDGE_CORE_RUNTIME.md | Approved | v1.1 |
 | ACR-0008 | Knowledge Library Intake Model — Source Classification / Author Fast-Lane / Media Storage | KNOWLEDGE_INGESTION_PROTOCOL.md | Approved | v1.1 |
+| ACR-0009 | Cloud Approved-Knowledge Retrieval with Local Embedding Authority | KNOWLEDGE_CORE_RUNTIME.md / DEPLOYMENT_GUIDE.md | Approved | v1.2 |
 
 ---
 
