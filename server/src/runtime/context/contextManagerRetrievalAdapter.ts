@@ -41,6 +41,7 @@ import {
   validateApprovedKnowledgeQueryRequest,
 } from './approvedKnowledgeQueryContract.js';
 import { resolveLanguageSelection } from './languageAwareRetrieval.js';
+import { filterFresh } from './freshnessGuard.js';
 
 /**
  * Narrowed approved-knowledge provider. Intentionally `Pick<…, 'listApprovedKnowledge'>` so
@@ -48,6 +49,15 @@ import { resolveLanguageSelection } from './languageAwareRetrieval.js';
  * knowledge is structurally unreachable from the retrieval path.
  */
 export type ApprovedKnowledgeProvider = Pick<KnowledgeCoreBoundaryPort, 'listApprovedKnowledge'>;
+
+/**
+ * P4.7 — optional adapter options. `now` injects the clock for the freshness guard so
+ * expiry/staleness evaluation is deterministic in tests; it defaults to the system clock. The
+ * request's `freshness.asOf`, when a valid timestamp, overrides this per call.
+ */
+export interface ContextManagerRetrievalAdapterOptions {
+  now?: () => Date;
+}
 
 export interface ContextManagerRetrievalAdapter {
   /**
@@ -66,7 +76,9 @@ export interface ContextManagerRetrievalAdapter {
  */
 export function createContextManagerRetrievalAdapter(
   provider: ApprovedKnowledgeProvider,
+  options: ContextManagerRetrievalAdapterOptions = {},
 ): ContextManagerRetrievalAdapter {
+  const clock = options.now ?? (() => new Date());
   return {
     async retrieveApprovedKnowledge(request) {
       const validation = validateApprovedKnowledgeQueryRequest(request);
@@ -103,14 +115,21 @@ export function createContextManagerRetrievalAdapter(
         statusDomainKept.push(reference);
       }
 
-      // P4.6 — language-aware selection over the status/domain-filtered references. The resolver
-      // honors `allowLanguageFallback`, applies the priority ladder (same-language → human/native
-      // fallback → MARKED machine translation → language-neutral), and marks the batch honestly.
-      const selection = resolveLanguageSelection(statusDomainKept, request);
+      // P4.7 — freshness/deprecation guard. Runs before language selection (freshness is
+      // language-independent). A stale/deprecated/superseded/expired/not-yet-effective reference
+      // is a non-match (dropped like out-of-domain); a reference without freshness metadata is
+      // always current. The guard resolves `freshness.asOf` (when valid) over the injected clock.
+      const freshKept = filterFresh(statusDomainKept, request.freshness, clock());
+
+      // P4.6 — language-aware selection over the status/domain/freshness-filtered references. The
+      // resolver honors `allowLanguageFallback`, applies the priority ladder (same-language →
+      // human/native fallback → MARKED machine translation → language-neutral), and marks the
+      // batch honestly.
+      const selection = resolveLanguageSelection(freshKept, request);
 
       if (selection.status === 'degraded') {
         const reason: ApprovedKnowledgeQueryDegradeReason =
-          statusDomainKept.length > 0 ? (selection.degradeReason ?? 'language_unavailable') : 'no_approved_match';
+          freshKept.length > 0 ? (selection.degradeReason ?? 'language_unavailable') : 'no_approved_match';
         return degradedResult(request, [reason], excluded);
       }
 
