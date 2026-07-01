@@ -88,7 +88,7 @@ pnpm seed:webinar-events              # idempotent rolling-8-week webinar seeder
 pnpm setup:founder-access             # founder access scaffolding
 ```
 
-There is no test runner wired in this repo yet — verification happens via `pnpm typecheck` and end-to-end manual flows against the running dev server.
+The `server` package has a wired vitest suite (`server/vitest.config.ts`; run `pnpm --filter @momentum/server test`) — 80+ `*.test.ts` files under `server/src`. The client workspaces (`apps/com`, `apps/team`, `apps/admin`) and `packages/shared` have no test runner yet; for those, verification happens via `pnpm typecheck` and end-to-end manual flows against the running dev server.
 
 ## High-level architecture
 
