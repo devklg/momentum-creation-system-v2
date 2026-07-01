@@ -33,6 +33,33 @@ Everything below is scoped to this identity: BA-owned records carry the member i
 | `ba_workbooks` | `workbookId` | `workbookId`·`forBaId`·`forThreeBaId`·`conductedByBaId`·`status(draft\|final)`·`version`·timestamps | for-member ← conducted-by sponsor | Sponsor-led 20-Q interview; draft→final. |
 | `profile_change_challenges` | `challengeId` | `challengeId`·`baId`·`channel(email\|phone)`·`target`·`codeHash`·`issuedAt`·`expiresAt` | → member | 15-min single-use email/phone verification codes. |
 
+### 1a. Field detail — the membership record (`brand_ambassadors`)
+
+The load-bearing identity record, field by field (`tmag`-renamed names shown; current code uses the `tm*`/`ba*` pre-migration names).
+
+| Field | Type | Req | Notes |
+|---|---|---|---|
+| `tmagId` (`baId`) | string | ✓ | **Canonical member id + login** (`TMAG-YYYYMMDD-XXXXXX`). |
+| `threeBaId` | string | ✓ | III International BA id — **mirrored attribute**, never authenticates. |
+| `threeUsername` | string | ✓ | III username (mirror). |
+| `firstName`·`lastName`·`email`·`phone`·`timezone` | string | ✓ | Profile (editable via `/api/profile`). |
+| `createdAt` | ISO string | ✓ | Enrollment into Team Magnificent. |
+| `passwordHash` | string\|null | – | Login secret; null until set. |
+| `sponsorTmagId` (`sponsorBaId`) | string\|null | – | **Immutable** — the member who sponsored them (their upline). |
+| `sponsorThreeBaId` | string\|null | – | Sponsor's III id (mirror). |
+| `accessCodeUsed` | string\|null | – | The `TMAG-XXXX` code they signed up with (→ resolves sponsor). |
+| `accessCodeHeld` | string\|null | – | **Their own** `TMAG-XXXX` code to sponsor others (one for life; Kevin issues). |
+| `lastLoginAt` | ISO string\|null | – | Session tracking. |
+| `photoUrl` | string\|null | – | Avatar. |
+| `notifPrefs` | object | – | Per-channel notification mix. |
+| `pendingEmail`·`pendingPhone` | string\|null | – | In-flight verified-change targets. |
+| onboarding flags | mixed | – | `welcome_seen`·`commitment_accepted`·`questionnaire_complete`·`workbook_complete`·`partnership_classification` (polymorphic `$set`). |
+| founder fields | mixed | – | `role`·`welcomedAt`·`onboardingState` (founders TMAG-01/02). |
+
+`access_codes`: `code`(`TMAG-XXXX`, PK) · `sponsorTmagId` · `sponsorThreeBaId` · `sponsorFirstName` · `sponsorLastName` · `createdAt` · `active`(bool). One active code per member for life; **only Kevin mints**; reused for everyone they sponsor.
+
+**Eligibility invariant (membership decision):** a `brand_ambassadors` row may only exist for someone who is already an enrolled III BA (`threeBaId` present) in Kevin's downline (sponsor chain resolves to a member). Enforcement of that gate is the deferred reidentification migration (§9).
+
 ---
 
 ## 2. MongoDB — Group B · Prospect / Token / Pool / CRM (14)
@@ -53,6 +80,21 @@ Everything below is scoped to this identity: BA-owned records carry the member i
 | `crm_dispositions` | `crmdispo_<prospectId>_<sponsorBaId>` | `prospectId`·`sponsorBaId`·`updatedAt` | → prospect, → member | Current disposition tag per (prospect, member). |
 | `prospect_crm_records` | `crm_<prospectId>` | `crmRecordId`·`prospectId`·`ownerTmBaId`·`sponsorTmBaId`·`source`·`status`·timestamps | → prospect, owner/sponsor member | VM/RVM lead-campaign CRM layer. |
 | `prospect_timeline_events` | `eventId` | `eventId`·`prospectId`·`ownerTmBaId`·`sponsorTmBaId`·`kind`·`title`·`occurredAt` | → prospect | Append-only VM-aware CRM timeline (~30 kinds). |
+
+### 2a. Token lifecycle & pool mechanic (the funnel's spine)
+
+**Invite-token state machine** (`invite_tokens.state` — forward-only, the authoritative rail; `prospects.state` mirrors it):
+
+```
+minted → clicked → video_started → video_quarter → video_half
+       → video_three_quarter → video_complete → enrolled | expired
+```
+- Position in the **one shared team-wide pool** is anchored at `video_complete` and is **monotonic** — flushes vacate slots but never renumber (`pool_placements.positionNumber`).
+- Terminal states: **`enrolled`** (409 `EnrolledResponse`) and **`expired`** (410 `ExpiredResponse`). Lazy-flush happens at read time in `/api/p/:token`.
+- Separate prospect signals (not token states): a **callback request** (`callback_requests`, intent enum below) and a **webinar reservation** (`webinar_reservations`). Real-time dashboard updates via SSE (`poolEvents`).
+- `becameCustomer` on `prospects` is a distinct flag (customer, not enrolled BA).
+
+**Sponsor immutability:** `prospects.sponsorBaId` / `invite_tokens.sponsorBaId` are stamped when the token is minted and **never recomputed**. Any route accepting a `sponsorBaId` in the body must reject it (the one exception is Kevin's audited admin override → `admin_sponsor_overrides`).
 
 ---
 
@@ -170,6 +212,26 @@ Registry `CHROMA_COLLECTIONS` (26 base + Phase 7). Record: `id`==Mongo `_id`; `d
 - **Agents/admin:** `mcs_ivory · mcs_agent_events · mcs_audit_log · admin_prospect_notes · audit_log`(sponsor-override mirror) · `mcs_tenant_settings · mcs_master_content · mcs_broadcasts`
 - **VM:** `mcs_vm_lead_batches · mcs_vm_leads · mcs_vm_campaigns · mcs_vm_delivery_events`
 - **Phase 7 memory:** `mcs_outcomes` · `mcs_learning_candidates_review`(review-only) · 10× `mcs_<domain>_knowledge_<lang>`(active)
+
+---
+
+## 8a. Enum reference (closed sets — code-grounded)
+
+| Enum | Values |
+|---|---|
+| **Token / prospect state** | `minted · clicked · video_started · video_quarter · video_half · video_three_quarter · video_complete · enrolled · expired` |
+| **Prospect callback intent** | `interested_tell_me_more · have_questions · ready_to_join` (`ready_to_join` only on the post-video dashboard) |
+| **CRM disposition** | `new-ba · new-customer · interested · not-interested · later` |
+| **Workbook status** | `draft · final` |
+| **Pool flush reason** | `enrolled · expired · archived` |
+| **Outcome kind** (R1) | `webinar_attended · callback_completed · orientation_attended · became_customer · enrolled_three · declined · no_show` |
+| **Candidate status** (R2) | `detected · in_review · approved · rejected · superseded` |
+| **Learning domain** (R2/R3) | `success · training · relationship · performance · organizational` |
+| **Language** | `en · es` |
+| **GraphRAG type** (R3) | `graphrag_record · graphrag_chunk` |
+| **Runtime audit action** (R0) | `runtime.turn.{opened,draft_emitted,closed} · runtime.gate.{allowed,denied} · runtime.persistence.{enabled,disabled}` |
+| **Audit severity** | `info · warn · critical` |
+| **Persistence mode** (S1.3) | `gateway · direct` |
 
 ---
 

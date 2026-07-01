@@ -71,6 +71,28 @@
 <tr><td><code>profile_change_challenges</code></td><td><code>challengeId</code></td><td><code>challengeId·baId·channel(email|phone)·target·codeHash·issuedAt·expiresAt</code></td><td>→ member</td><td>15-min single-use email/phone verification.</td></tr>
 </tbody></table>
 
+<h3>1a. Field detail — the membership record (<code>brand_ambassadors</code>)</h3>
+<p class="meta">The load-bearing identity record (<code>tmag</code>-renamed names shown; current code uses the <code>tm*</code>/<code>ba*</code> pre-migration names).</p>
+<table><thead><tr><th>Field</th><th>Type</th><th>Req</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>tmagId</code> (<code>baId</code>)</td><td>string</td><td>✓</td><td><strong>Canonical member id + login</strong> (<code>TMAG-YYYYMMDD-XXXXXX</code>).</td></tr>
+<tr><td><code>threeBaId</code></td><td>string</td><td>✓</td><td>III International BA id — <strong>mirrored attribute</strong>, never authenticates.</td></tr>
+<tr><td><code>threeUsername</code></td><td>string</td><td>✓</td><td>III username (mirror).</td></tr>
+<tr><td><code>firstName·lastName·email·phone·timezone</code></td><td>string</td><td>✓</td><td>Profile (editable via <code>/api/profile</code>).</td></tr>
+<tr><td><code>createdAt</code></td><td>ISO string</td><td>✓</td><td>Enrollment into Team Magnificent.</td></tr>
+<tr><td><code>passwordHash</code></td><td>string|null</td><td>–</td><td>Login secret; null until set.</td></tr>
+<tr><td><code>sponsorTmagId</code> (<code>sponsorBaId</code>)</td><td>string|null</td><td>–</td><td><strong>Immutable</strong> — the sponsoring member (upline).</td></tr>
+<tr><td><code>sponsorThreeBaId</code></td><td>string|null</td><td>–</td><td>Sponsor's III id (mirror).</td></tr>
+<tr><td><code>accessCodeUsed</code></td><td>string|null</td><td>–</td><td>The <code>TMAG-XXXX</code> code they signed up with (→ resolves sponsor).</td></tr>
+<tr><td><code>accessCodeHeld</code></td><td>string|null</td><td>–</td><td><strong>Their own</strong> <code>TMAG-XXXX</code> code to sponsor others (one for life; Kevin issues).</td></tr>
+<tr><td><code>lastLoginAt</code></td><td>ISO string|null</td><td>–</td><td>Session tracking.</td></tr>
+<tr><td><code>notifPrefs</code></td><td>object</td><td>–</td><td>Per-channel notification mix.</td></tr>
+<tr><td><code>pendingEmail·pendingPhone</code></td><td>string|null</td><td>–</td><td>In-flight verified-change targets.</td></tr>
+<tr><td>onboarding flags</td><td>mixed</td><td>–</td><td><code>welcome_seen·commitment_accepted·questionnaire_complete·workbook_complete·partnership_classification</code>.</td></tr>
+<tr><td>founder fields</td><td>mixed</td><td>–</td><td><code>role·welcomedAt·onboardingState</code> (founders TMAG-01/02).</td></tr>
+</tbody></table>
+<p class="meta"><code>access_codes</code>: <code>code(TMAG-XXXX,PK)·sponsorTmagId·sponsorThreeBaId·sponsorFirstName·sponsorLastName·createdAt·active</code>. One active code/member for life; <strong>only Kevin mints</strong>.</p>
+<div class="note"><strong>Eligibility invariant:</strong> a <code>brand_ambassadors</code> row may only exist for someone already an enrolled III BA (<code>threeBaId</code> present) in Kevin's downline (sponsor chain resolves to a member). Gate enforcement = deferred reidentification migration (§9).</div>
+
 <h2><span class="num">2</span> MongoDB · Group B — Prospect / Token / Pool / CRM <span class="meta">(14)</span></h2>
 <table><thead><tr><th>Collection</th><th>_id</th><th>Core fields</th><th>Relationships</th><th>Purpose</th></tr></thead><tbody>
 <tr><td><code>prospects</code></td><td>ObjectId (<code>prospectId</code>)</td><td><code>prospectId·firstName·lastName·location·sponsorBaId·state·becameCustomer·token·source</code></td><td>sponsored-by member (<strong>immutable</strong>); has token/placement</td><td>The invited person; funnel record.</td></tr>
@@ -88,6 +110,18 @@
 <tr><td><code>prospect_crm_records</code></td><td><code>crm_&lt;prospectId&gt;</code></td><td><code>crmRecordId·prospectId·ownerTmBaId·sponsorTmBaId·source·status</code></td><td>→ prospect, owner/sponsor member</td><td>VM/RVM lead-campaign CRM layer.</td></tr>
 <tr><td><code>prospect_timeline_events</code></td><td><code>eventId</code></td><td><code>eventId·prospectId·ownerTmBaId·kind·title·occurredAt</code></td><td>→ prospect</td><td>Append-only VM-aware CRM timeline.</td></tr>
 </tbody></table>
+
+<h3>2a. Token lifecycle &amp; pool mechanic (the funnel's spine)</h3>
+<p class="meta"><strong>Invite-token state machine</strong> (<code>invite_tokens.state</code> — forward-only, authoritative; <code>prospects.state</code> mirrors it):</p>
+<pre>minted → clicked → video_started → video_quarter → video_half
+       → video_three_quarter → video_complete → enrolled | expired</pre>
+<ul>
+  <li>Pool position anchored at <code>video_complete</code>, <strong>monotonic</strong> — flushes vacate slots, never renumber (<code>pool_placements.positionNumber</code>).</li>
+  <li>Terminal: <strong>enrolled</strong> (409) / <strong>expired</strong> (410). Lazy-flush at read time in <code>/api/p/:token</code>.</li>
+  <li>Separate signals (not token states): callback request (<code>callback_requests</code>) + webinar reservation (<code>webinar_reservations</code>). SSE dashboard updates via <code>poolEvents</code>.</li>
+  <li><code>becameCustomer</code> is a distinct flag (customer ≠ enrolled BA).</li>
+</ul>
+<div class="note"><strong>Sponsor immutability:</strong> <code>sponsorBaId</code> is stamped when the token is minted and never recomputed. Routes must reject a body <code>sponsorBaId</code>. One exception: Kevin's audited admin override (<code>admin_sponsor_overrides</code>).</div>
 
 <h2><span class="num">3</span> MongoDB · Group C — Webinar / Orientation / Training / Steve <span class="meta">(6)</span></h2>
 <table><thead><tr><th>Collection</th><th>_id</th><th>Core fields</th><th>Relationships</th><th>Purpose</th></tr></thead><tbody>
@@ -168,6 +202,23 @@
   <li><strong>VM:</strong> <code>mcs_vm_lead_batches · mcs_vm_leads · mcs_vm_campaigns · mcs_vm_delivery_events</code></li>
   <li><strong>Phase 7 memory:</strong> <code>mcs_outcomes · mcs_learning_candidates_review(review-only) · 10× mcs_&lt;domain&gt;_knowledge_&lt;lang&gt;(active)</code></li>
 </ul>
+
+<h2><span class="num">8a</span> Enum reference (closed sets — code-grounded)</h2>
+<table><thead><tr><th>Enum</th><th>Values</th></tr></thead><tbody>
+<tr><td><strong>Token / prospect state</strong></td><td><code>minted · clicked · video_started · video_quarter · video_half · video_three_quarter · video_complete · enrolled · expired</code></td></tr>
+<tr><td><strong>Prospect callback intent</strong></td><td><code>interested_tell_me_more · have_questions · ready_to_join</code> (<code>ready_to_join</code> only on post-video dashboard)</td></tr>
+<tr><td><strong>CRM disposition</strong></td><td><code>new-ba · new-customer · interested · not-interested · later</code></td></tr>
+<tr><td><strong>Workbook status</strong></td><td><code>draft · final</code></td></tr>
+<tr><td><strong>Pool flush reason</strong></td><td><code>enrolled · expired · archived</code></td></tr>
+<tr><td><strong>Outcome kind (R1)</strong></td><td><code>webinar_attended · callback_completed · orientation_attended · became_customer · enrolled_three · declined · no_show</code></td></tr>
+<tr><td><strong>Candidate status (R2)</strong></td><td><code>detected · in_review · approved · rejected · superseded</code></td></tr>
+<tr><td><strong>Learning domain (R2/R3)</strong></td><td><code>success · training · relationship · performance · organizational</code></td></tr>
+<tr><td><strong>Language</strong></td><td><code>en · es</code></td></tr>
+<tr><td><strong>GraphRAG type (R3)</strong></td><td><code>graphrag_record · graphrag_chunk</code></td></tr>
+<tr><td><strong>Runtime audit action (R0)</strong></td><td><code>runtime.turn.{opened,draft_emitted,closed} · runtime.gate.{allowed,denied} · runtime.persistence.{enabled,disabled}</code></td></tr>
+<tr><td><strong>Audit severity</strong></td><td><code>info · warn · critical</code></td></tr>
+<tr><td><strong>Persistence mode (S1.3)</strong></td><td><code>gateway · direct</code></td></tr>
+</tbody></table>
 
 <h2><span class="num">9</span> Open reconciliations (fix before tightening)</h2>
 <ul>
