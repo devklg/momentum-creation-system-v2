@@ -36,7 +36,7 @@ So the agent's *content* is human-approved organizational knowledge, not model m
 
 ### 2.3 Gated-LLM layer — *how it phrases, within the rails*
 Where an LLM is used (ScriptMaker/Ivory; `ANTHROPIC_API_KEY`, **wired-dormant**), its job is narrow: phrase within the template using the approved Context Packet. It is bounded by:
-- **compliance fail-closed** — noncompliant output is refused at script-time and render-time (income/comp/cycle/placement, AI-language on `.com`, THREE branding, etc.),
+- **compliance fail-closed, by audience (§2a)** — **prospect-facing** output is refused if it carries income claims / projections / commission / cycle / placement, AI-language, or THREE branding; and — for **any** audience — no output may **promise or guarantee an individual a specific result**. (Team-facing comp-plan education is allowed.)
 - **no free authority** — it cannot choose new questions, new claims, or new knowledge; it works inside the contract + packet.
 
 Unconstrained generation is the risk the whole structure exists to prevent.
@@ -47,13 +47,15 @@ Unconstrained generation is the risk the whole structure exists to prevent.
 
 **Templates are the road the agents operate on** — the structured track for an interaction; the agent travels back and forth along it (the conversational exchange) and cannot drive off-road. Three named roads, one per agent:
 
-| Template (road) | The road *for* | Agent | Filled with (approved knowledge) | Compliance |
-|---|---|---|---|---|
-| **Learning template** | coaching/training a BA through development (Fast Start, ongoing) | **Michael** | approved training / coaching knowledge | BA-facing; no income/comp/cycle claims |
-| **Interviewing template** | the structured discovery / success interview — asking the approved questions | **Steve** | approved question sets → `steve_discoveries.successProfile` | BA-facing |
-| **Invitation template** | helping a BA craft a *compliant* invitation to a prospect | **Ivory / ScriptMaker** | approved, compliant invitation scripts (WDYK) | **HIGHEST** — nearest the prospect / `.com` edge; no income/placement/AI-language/THREE branding; ScriptMaker fails closed |
+| Template (road) | The road *for* | Agent | Audience | Filled with (approved knowledge) | Compliance |
+|---|---|---|---|---|---|
+| **Learning template** | coaching/training a BA through development, **including teaching the compensation plan itself** (Fast Start, ongoing) | **Michael** | **Team member** | approved training / coaching / **comp-plan** knowledge | Talking about money is *the point* here. **No individual income/result guarantees or promises** — but comp-plan education is expected. |
+| **Interviewing template** | the structured discovery / success interview — asking the approved questions | **Steve** | **Team member** | approved question sets → `steve_discoveries.successProfile` | May discuss money / the team-membership side. **Never promise or guarantee anyone a specific outcome.** |
+| **Invitation template** | helping a BA craft a *compliant* invitation to a prospect | **Ivory / ScriptMaker** | **Prospect (→ `.com`)** | approved, compliant invitation scripts (WDYK) | **HIGHEST** — full `.com` compliance: no income claims / projections / commission figures / cycle math / placement promises, no AI-language, no THREE branding. ScriptMaker fails closed. |
 
-Every road obeys §1: the template bounds the back-and-forth, the Context Manager fills it with human-approved knowledge, the LLM (when enabled) only phrases within the lanes, and a *better road* (a better question or script) is a **candidate Kevin approves** before any agent drives it. The **invitation road carries the tightest guardrails** because it is closest to the prospect and the `.com` compliance boundary.
+**Compliance boundary = audience, not topic (Kevin, 2026-07-01).** The strict "no income/earnings/commission/cycle/placement" rules are the **prospect-facing (`.com`) compliance** — they do **not** apply to team-member-facing agents. On the **team side**, Michael teaches the compensation plan and money is discussed openly; the only universal rule is **never promise or guarantee a specific income/result to any individual.** On the **prospect side**, the full `.com` compliance applies. The invitation road carries the tightest guardrails precisely because it is the one pointed at prospects.
+
+Every road obeys §1: the template bounds the back-and-forth, the Context Manager fills it with human-approved knowledge, the LLM (when enabled) only phrases within the lanes, and a *better road* (a better question or script) is a **candidate Kevin approves** before any agent drives it.
 
 *(Agent↔template pairing to confirm with Kevin; the taxonomy itself — learning / interviewing / invitation — is set.)*
 
