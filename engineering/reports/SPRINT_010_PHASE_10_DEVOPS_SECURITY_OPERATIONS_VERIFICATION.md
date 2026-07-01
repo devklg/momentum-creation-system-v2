@@ -205,6 +205,8 @@ Tabulated per item in §3–§12. Notable MED items: `verify-code` leaks sponsor
 
 **Recommendations (planning).** Author a consolidated **Production Release Checklist** as a new `engineering/reports/P10_*` doc (docs-only, in-scope): env-contract diffs, infra/topology decision gate, bring `server-gateway-mcp-v2` under VCS, `.com` compliance pass, flip `USE_MOCKS` + smoke `/api/admin/live-ops/*`, dormant-feature activation decisions, reverse-proxy/TLS + process supervision, rollback procedure, and the P10.1 branch-protection confirmation. **Do not assert production readiness** — the topology open-question is a genuine blocker only Kevin can resolve.
 
+> **✅ DELIVERED (2026-06-30):** the checklist now exists at `engineering/reports/P10_PRODUCTION_RELEASE_CHECKLIST.md` — a go/no-go artifact with per-item owner + source refs, six named blockers (B1–B6), and a final sign-off table currently reading **🔴 NO-GO**. It asserts no readiness; every production-affecting item is owner-gated.
+
 ---
 
 ## 12. P10.10 — Phase 10 Closeout
@@ -212,6 +214,7 @@ Tabulated per item in §3–§12. Notable MED items: `verify-code` leaks sponsor
 This report is the Phase 10 deliverable. Closeout status:
 
 - ✅ All ten backlog items audited; findings recorded with file:line references and severity.
+- ✅ **P10.9 deliverable authored** — `engineering/reports/P10_PRODUCTION_RELEASE_CHECKLIST.md` (consolidated go/no-go, currently 🔴 NO-GO).
 - ✅ Documentation-only; all writes within allowed paths; no code/CI/`.env`/secret edits.
 - ✅ Standing prohibitions verified held (§13).
 - ⏳ **Gates** — see §14 (run results appended).
