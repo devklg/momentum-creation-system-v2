@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>P7.13 — Phase 7 Schema Catalog</title>
+<style>
+  :root {
+    --gold: #facc15;
+    --blue: #3b82f6;
+    --purple: #8a2be2;
+    --ink: #14161c;
+    --muted: #5b616e;
+    --line: #e4e7ee;
+    --soft: #f6f7fb;
+    --code: #f0f1f6;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    color: var(--ink);
+    background: #fff;
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: .1px;
+  }
+  .page { max-width: 980px; margin: 0 auto; padding: 40px 44px 64px; }
+
+  header.doc {
+    border-top: 6px solid var(--gold);
+    padding-top: 22px;
+    margin-bottom: 8px;
+  }
+  .kicker {
+    font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--purple);
+  }
+  h1 {
+    font-size: 30px; line-height: 1.15; margin: 6px 0 10px; font-weight: 800; letter-spacing: -.3px;
+  }
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    color: #7a5c00; background: var(--gold); border-radius: 999px; padding: 4px 12px; vertical-align: middle;
+  }
+  .meta { color: var(--muted); font-size: 13px; margin: 10px 0 0; }
+  .meta code { background: var(--code); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+  h2 {
+    font-size: 19px; font-weight: 800; margin: 40px 0 6px; padding-bottom: 6px;
+    border-bottom: 2px solid var(--line); letter-spacing: -.2px;
+  }
+  h2 .num {
+    display: inline-block; min-width: 26px; color: var(--blue); font-weight: 900;
+  }
+  p { margin: 10px 0; }
+  .lead { color: #2c3038; }
+
+  code, .mono {
+    font-family: "SFMono-Regular", "JetBrains Mono", "DejaVu Sans Mono", Consolas, monospace;
+    font-size: 12.5px;
+  }
+  p code, td code, li code { background: var(--code); padding: 1px 5px; border-radius: 4px; white-space: nowrap; }
+
+  table {
+    width: 100%; border-collapse: collapse; margin: 14px 0 4px; font-size: 13px;
+    border: 1px solid var(--line);
+  }
+  thead th {
+    text-align: left; background: var(--ink); color: #fff; font-weight: 700; font-size: 12px;
+    letter-spacing: .3px; padding: 9px 11px;
+  }
+  tbody td { padding: 9px 11px; border-top: 1px solid var(--line); vertical-align: top; }
+  tbody tr:nth-child(even) { background: var(--soft); }
+  td:first-child { white-space: nowrap; }
+
+  .rung {
+    display: inline-block; font-weight: 800; font-size: 11px; padding: 1px 7px; border-radius: 4px;
+    color: #fff;
+  }
+  .r0 { background: #64748b; } .r1 { background: var(--blue); }
+  .r2 { background: var(--purple); } .r3 { background: #0d9488; }
+
+  ul { margin: 10px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+
+  .note {
+    background: var(--soft); border-left: 4px solid var(--gold); border-radius: 0 6px 6px 0;
+    padding: 12px 16px; margin: 16px 0; font-size: 13.5px;
+  }
+  .callout-off {
+    display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .5px;
+    color: #0f5132; background: #d1e7dd; border-radius: 4px; padding: 1px 7px;
+  }
+
+  footer.doc {
+    margin-top: 48px; padding-top: 14px; border-top: 2px solid var(--line);
+    color: var(--muted); font-size: 12px;
+  }
+
+  @media print {
+    .page { max-width: none; padding: 0 8mm; }
+    body { font-size: 11.5px; }
+    h2 { margin-top: 20px; page-break-after: avoid; }
+    table, tr, .note { page-break-inside: avoid; }
+    thead { display: table-header-group; }
+    a { color: inherit; text-decoration: none; }
+    @page { margin: 14mm 10mm; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="doc">
+  <div class="kicker">Momentum Creation System V2 &middot; Phase 7</div>
+  <h1>P7.13 — Phase 7 Schema Catalog <span class="badge">Drafted · Not Applied</span></h1>
+  <p class="meta">
+    Outcomes, Persistence, Learning &amp; GraphRAG &nbsp;·&nbsp;
+    Branch <code>feature/phase-07-outcomes-learning-graphrag</code> &nbsp;·&nbsp;
+    Single-page review surface — every model / collection / label + purpose, so the whole schema
+    surface can be reviewed before anything is created in a store.
+  </p>
+  <p class="meta" style="margin-top:6px">
+    <strong>Membership-first identity:</strong> the app is exclusively for <strong>Team Magnificent members</strong>
+    (an enrolled III International BA in Kevin's downline). Every record is scoped to Team Magnificent
+    membership (<code>teamKey</code> + the member id <code>baId</code>). See
+    <code>DECISION_team_magnificent_membership_canonical_identity</code>.
+  </p>
+</header>
+
+<h2><span class="num">0</span> How to read this</h2>
+<p class="lead">
+  Everything below is <strong>built as code but not applied to any store.</strong> Mongo models live in
+  <code>phase7Models.ts</code>; Neo4j statements in <code>phase7Constraints.ts</code>; Chroma names in
+  <code>chromaCollections.ts</code>. Each is drafted + unit-tested but not wired into the live apply path.
+  When the full surface is reviewed, application is a per-store step (P7.12 §5).
+</p>
+<div class="note">
+  <strong>Shared app-memory envelope</strong> on every memory record (P7.3 §4.2) —
+  <strong>membership-first</strong>:
+  <code>id</code> · <code>type</code> · <code>schemaVersion</code> · <code>namespace('momentum')</code> ·
+  <code>source</code> · <code>createdAt</code> (ISO string) · <code>title</code> ·
+  <code>originKind('system')</code> · <code>serviceName</code> · <code>tenantId</code> ·
+  <code>teamKey('team_magnificent')</code>, optional <code>baId</code> (= the Team Magnificent
+  <strong>member</strong> id <code>tmagId</code>, value <code>TMAG-…</code>), <code>derivedFrom[]</code>. Every record is scoped to
+  Team Magnificent membership. Gateway-only fields
+  (<code>chat_number</code>, <code>chat_registry_id</code>, <code>universal_gateway</code>) are never present.
+</div>
+
+<h2><span class="num">1</span> MongoDB — collections (database <code>momentum</code>)</h2>
+<table>
+  <thead><tr><th>Collection</th><th>Rung</th><th>Key (<code>_id</code>)</th><th>Required-core (beyond envelope)</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>mcs_audit_log</code></td><td><span class="rung r0">R0</span></td><td><code>entryId</code></td>
+      <td><em>(4.J substrate)</em> + optional <code>runtime</code> block</td>
+      <td>Canonical append-only audit; R0 adds runtime turn/gate markers (metadata only, no body).</td>
+    </tr>
+    <tr>
+      <td><code>mcs_outcomes</code></td><td><span class="rung r1">R1</span></td><td><code>id</code> (<code>mcsoutcome_&lt;hash&gt;</code>)</td>
+      <td><code>kind</code> (7-enum) · <code>confirmedByBaId</code> · <code>outcomeAt</code></td>
+      <td>BA-confirmed real-world outcomes; <code>enrolled_three</code> is a THREE mirror, not a handoff. Append-only correction chain.</td>
+    </tr>
+    <tr>
+      <td><code>mcs_learning_candidates</code></td><td><span class="rung r2">R2</span></td><td><code>id</code> (<code>mcslearn_&lt;hash&gt;</code>)</td>
+      <td><code>status</code> (5-enum) · <code>domain</code> (5-enum) · <code>language</code> · <code>proposedSummary</code> · <code>sourceOutcomeIds[]</code> · <code>sourceSignalIds[]</code> · optional <code>review</code></td>
+      <td>Review-only proposed learning; <strong>no agent may approve</strong> (starts <code>detected</code>; only a human review sets approved/rejected).</td>
+    </tr>
+    <tr>
+      <td><code>mcs_graphrag_records</code></td><td><span class="rung r3">R3</span></td><td><code>id</code> (<code>mcsgraph_&lt;kobj&gt;_v&lt;n&gt;_&lt;lang&gt;</code>)</td>
+      <td><code>knowledgeObjectId</code> · <code>version</code> (int) · <code>domain</code> · <code>language</code> · <code>summary</code> · <code>model</code> · <code>modelVersion</code> · <code>retrievalReady</code> (bool)</td>
+      <td>Derived-memory index of active knowledge for GraphRAG retrieval.</td>
+    </tr>
+  </tbody>
+</table>
+<p class="meta">First-pass validator posture (all): <code>required</code> = core above; <code>additionalProperties:true</code>;
+  ISO-string timestamps (never <code>Date</code>); field enums enforced client-side on direct writes.
+  Tighten to <code>additionalProperties:false</code> per-collection after a soak (P10 §5/§8).</p>
+
+<h2><span class="num">2</span> Neo4j — new Phase 7 labels</h2>
+<table>
+  <thead><tr><th>Label</th><th>Constraint (unique)</th><th>Indexes</th><th>Relationships (specific verbs)</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>Outcome</code></td><td><code>id</code></td><td><code>baId</code></td>
+      <td><code>-[:CONFIRMED_BY]-&gt;(:BrandAmbassador)</code>, <code>-[:ABOUT_PROSPECT]-&gt;(:Prospect)</code>, <code>-[:SUPERSEDES]-&gt;(:Outcome)</code>, <code>-[:SCOPED_TO]-&gt;(:TeamMagnificent)</code></td>
+      <td>R1 outcome lineage + team scope.</td></tr>
+    <tr><td><code>LearningCandidate</code></td><td><code>id</code></td><td><code>status</code></td>
+      <td><code>-[:DERIVED_FROM]-&gt;(:Outcome)</code>, <code>-[:SCOPED_TO]-&gt;(:TeamMagnificent)</code></td>
+      <td>R2 candidate provenance + team scope.</td></tr>
+    <tr><td><code>Knowledge</code></td><td><code>id</code></td><td><code>retrievalReady</code></td>
+      <td><code>-[:SCOPED_TO]-&gt;(:TeamMagnificent)</code></td>
+      <td>R3 active-knowledge nodes.</td></tr>
+    <tr><td><code>TeamMagnificent</code></td><td><code>teamKey</code></td><td>—</td>
+      <td><em>(target of <code>:SCOPED_TO</code>)</em></td>
+      <td>Single team scope node.</td></tr>
+    <tr><td><code>AuditEntry</code></td><td><code>entryId</code> <em>(P10 §6 set)</em></td><td><code>entityId</code></td>
+      <td><code>-[:ACTED_FOR]-&gt;(:BrandAmbassador)</code> (R0)</td>
+      <td>Shared 4.J audit; constraint applied with the P10 canonical set.</td></tr>
+  </tbody>
+</table>
+<p class="meta">Prereq: <code>BA</code> vs <code>BrandAmbassador</code> label reconciliation (P10 §5.1) before the
+  <code>:CONFIRMED_BY</code> / <code>:ACTED_FOR</code> edges are constrained.</p>
+
+<h2><span class="num">3</span> ChromaDB — collections (<code>mcs_</code>-prefixed, 384-dim all-MiniLM-L6-v2)</h2>
+<table>
+  <thead><tr><th>Collection(s)</th><th>Rung</th><th>Kind</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>mcs_audit_log</code></td><td><span class="rung r0">R0</span></td><td>active</td>
+      <td>Runtime + admin audit semantic search (no body).</td></tr>
+    <tr><td><code>mcs_outcomes</code></td><td><span class="rung r1">R1</span></td><td>active</td>
+      <td>Outcome semantic index (scope summary, no PII).</td></tr>
+    <tr><td><code>mcs_learning_candidates_review</code></td><td><span class="rung r2">R2</span></td><td><strong>review-only</strong></td>
+      <td>Candidate embeddings, <strong>disjoint from active knowledge</strong> — never retrieved as guidance.</td></tr>
+    <tr><td><code>mcs_{success,training,relationship,performance,organizational}_knowledge_{en,es}</code> (10)</td>
+      <td><span class="rung r3">R3</span></td><td><strong>active</strong></td>
+      <td>Per-domain-per-language active-knowledge retrieval; only <code>retrievalReady:true</code> served.</td></tr>
+  </tbody>
+</table>
+<p class="meta">Record contract (P10 §7.2): <code>id</code> == Mongo <code>_id</code>; <code>document</code> = short summary;
+  flat <code>metadata</code> with required <code>kind</code> + scope ids + ISO timestamps + <code>model</code>/<code>modelVersion</code>.
+  Convention-enforced by writers (Chroma has no schema validation).</p>
+
+<h2><span class="num">4</span> Kill-switch flags <span class="callout-off">all default OFF</span></h2>
+<table>
+  <thead><tr><th>Flag</th><th>Rung</th></tr></thead>
+  <tbody>
+    <tr><td><code>RUNTIME_AUDIT_PERSISTENCE_ENABLED</code></td><td><span class="rung r0">R0</span></td></tr>
+    <tr><td><code>OUTCOME_CAPTURE_PERSISTENCE_ENABLED</code></td><td><span class="rung r1">R1</span></td></tr>
+    <tr><td><code>LEARNING_CANDIDATE_PERSISTENCE_ENABLED</code></td><td><span class="rung r2">R2</span></td></tr>
+    <tr><td><code>GRAPHRAG_PERSISTENCE_ENABLED</code></td><td><span class="rung r3">R3</span></td></tr>
+  </tbody>
+</table>
+<p class="meta">Plus the S1.3 direct-mode master switch <code>PERSISTENCE_DIRECT_ENABLED</code> + per-store
+  <code>PERSISTENCE_&lt;STORE&gt;_MODE</code> (unchanged).</p>
+
+<h2><span class="num">5</span> Enum reference (closed sets)</h2>
+<ul>
+  <li><strong>Outcome kind:</strong> <code>webinar_attended</code> · <code>callback_completed</code> · <code>orientation_attended</code> · <code>became_customer</code> · <code>enrolled_three</code> · <code>declined</code> · <code>no_show</code></li>
+  <li><strong>Candidate status:</strong> <code>detected</code> · <code>in_review</code> · <code>approved</code> · <code>rejected</code> · <code>superseded</code></li>
+  <li><strong>Learning domain:</strong> <code>success</code> · <code>training</code> · <code>relationship</code> · <code>performance</code> · <code>organizational</code></li>
+  <li><strong>Language:</strong> <code>en</code> · <code>es</code></li>
+  <li><strong>GraphRAG type:</strong> <code>graphrag_record</code> · <code>graphrag_chunk</code></li>
+  <li><strong>Memory type:</strong> <code>outcome</code> · <code>learning_candidate</code> · <code>graphrag_record</code> · <code>graphrag_chunk</code></li>
+  <li><strong>Runtime audit action:</strong> <code>runtime.turn.{opened,draft_emitted,closed}</code> · <code>runtime.gate.{allowed,denied}</code> · <code>runtime.persistence.{enabled,disabled}</code></li>
+</ul>
+
+<h2><span class="num">6</span> Apply readiness</h2>
+<p>
+  When §1–§5 are reviewed and you want to create the schemas in the stores, the order (P7.12 §5) is:
+</p>
+<ul>
+  <li>Provision services → wire <code>phase7Models.ts</code> into <code>registry.ts</code> + run <code>apply.ts</code> (Mongo <code>$jsonSchema</code>)</li>
+  <li>Iterate <code>PHASE7_NEO4J_SCHEMA</code> via the neo4j adapter (constraints / indexes)</li>
+  <li>Confirm the Chroma registry ensured at boot</li>
+  <li>Per-store read-back → then per-rung canary (R0 first)</li>
+</ul>
+<p>Every step is reversible (validators drop to permissive; constraints <code>DROP … IF EXISTS</code>; flags flip off).</p>
+<div class="note">
+  <strong>Nothing in this catalog is applied.</strong> It is the review surface; application is your call,
+  per store, per collection.
+</div>
+
+<footer class="doc">
+  Momentum Creation System V2 · Phase 7 · P7.13 Schema Catalog · rendered from
+  <code>engineering/reports/P7_13_SCHEMA_CATALOG.md</code> · Team Magnificent
+</footer>
+
+</div>
+</body>
+</html>
