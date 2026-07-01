@@ -130,6 +130,20 @@ This is exactly the cost this pre-launch plan avoids — which is why doing it *
 
 ---
 
+## 8a. Execution status (branch `refactor/reidentification-tmag-migration`)
+
+**Done + green (typecheck 5/5, 1334 tests, pushed):**
+- `e4f8f57` — member id `*BaId → *TmagId` app-wide (206 files, ~2,632 renames); `threeBaId` kept.
+- `aa20b3c` — `TMBA-→TMAG-` values; Neo4j `BrandAmbassador→TeamMagnificentMember`; disposition `ba→brand_ambassador` values; access code `TM-→TMAG-`.
+- `8505120` — collection `brand_ambassadors→team_magnificent_members`; `BAProfile→TmagProfile`; `AdminProspectRegistrationHandoffState→ProspectStatus` (+`deriveProspectStatus`, `ProspectStatusPill`).
+- `25dd1ed` — `ProspectStatus` values → `pending·enrolled_iii·became_customer·declined`; auth `ADMIN_BA_IDS→ADMIN_TMAG_IDS` + env value.
+
+**Remaining (their own follow-ups):**
+1. **CRM disposition type-merge** — `CrmDisposition` (hyphen, 5) + `ProspectCrmDisposition` (underscore, 8) → ONE canonical snake_case type. Values partly aligned; merging the two *types* (used by different collections with different value sets) needs a design pass on the unified set. **Needs Kevin.**
+2. **Aliased-type collapse (F4)** — `BulkLeadStatus`=`VmLeadLifecycleStatus`, `ProspectTimelineKind`=`ProspectTimelineEventKind` → one name, drop alias.
+3. **App-wide `mcs`/`tmag` prefix standardization** — Kevin authorized as a **separate event**: `mcs` for system/persistence types, `tmag` for member-identity types (`TmagProfile` done as the seed). ~300 types; runs as its own branch.
+4. **M6 store provisioning** — ops (stand up Mongo@30000 / Neo4j@7710 / Chroma@8200 + apply canonical `$jsonSchema`/constraints); not a code step.
+
 ## 9. Bottom line
 
 Because we are **pre-launch**, the whole reidentification is a **code-first rename + fresh canonical provisioning** — one reviewable branch, reversible by git + reprovision, gated by typecheck and the test suite. Every target is already decided and listed (§6). Execute it before the stores are provisioned and the app opens, and MCS V2 launches with **one name for everything, from birth** — no drift, no live-data migration ever needed.
