@@ -324,7 +324,7 @@ export function assembleSuccessProfile(args: {
 let discoveriesCollectionBootstrap: Promise<void> | null = null;
 async function ensureDiscoveriesCollection(): Promise<void> {
   if (discoveriesCollectionBootstrap) return discoveriesCollectionBootstrap;
-  discoveriesCollectionBootstrap = (async () => {
+  const bootstrap = (async () => {
     const existing = await gatewayCall<{ collections?: Array<{ name: string }> }>(
       'chromadb',
       'list_collections',
@@ -337,7 +337,18 @@ async function ensureDiscoveriesCollection(): Promise<void> {
       metadata: { agent: 'steve', purpose: 'Steve new-BA discovery & success profiles' },
     });
   })();
-  return discoveriesCollectionBootstrap;
+  discoveriesCollectionBootstrap = bootstrap;
+  try {
+    await bootstrap;
+  } catch (err) {
+    // Do NOT cache a rejected promise: a single transient gateway/Chroma blip
+    // would otherwise poison every future ingest until process restart. Clear
+    // the cache so the next call retries and can self-heal.
+    if (discoveriesCollectionBootstrap === bootstrap) {
+      discoveriesCollectionBootstrap = null;
+    }
+    throw err;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -521,30 +532,18 @@ export async function ingestDiscoveryArtifact(
     audioUrl: payload.audioUrl,
   };
 
-  // Upsert: branch on existence (mongodb.update does not honor upsert per
-  // tripleStack.ts gotchas).
-  const existing = await getDiscoveryByBaId(payload.baId);
-  if (existing) {
-    await gatewayCall('mongodb', 'update', {
-      database: 'momentum',
-      collection: DISCOVERIES_COLLECTION,
-      filter: { _id: id },
-      update: { $set: artifactToUpdate(artifact) },
-    });
-    const cy = discoveryCypher(artifact);
-    await gatewayCall('neo4j', 'cypher', { query: cy.cypher, params: cy.params });
-  } else {
+  const cy = discoveryCypher(artifact);
+
+  // Chroma add() upserts (it maps to the Chroma upsert endpoint), so re-writing
+  // the same id REFRESHES the semantic doc rather than duplicating it.
+  const upsertChromaDoc = async (): Promise<void> => {
     await ensureDiscoveriesCollection();
-    const cy = discoveryCypher(artifact);
-    await tripleStackWrite({
-      id,
-      mongoCollection: DISCOVERIES_COLLECTION,
-      mongoDoc: { ...artifact },
-      neo4j: { cypher: cy.cypher, params: cy.params },
-      chroma: {
-        collection: CHROMA_DISCOVERIES,
-        document: chromaDocForDiscovery(artifact),
-        metadata: {
+    await gatewayCall('chromadb', 'add', {
+      collection: CHROMA_DISCOVERIES,
+      ids: [id],
+      documents: [chromaDocForDiscovery(artifact)],
+      metadatas: [
+        {
           discoveryId: id,
           baId: artifact.baId,
           sponsorBaId: artifact.sponsorBaId ?? '',
@@ -552,14 +551,67 @@ export async function ingestDiscoveryArtifact(
           completedAt: artifact.completedAt ?? '',
           kind: 'steve_discovery',
         },
-      },
+      ],
     });
+  };
+
+  // Update path (existing row, or a TOCTOU-raced insert): refresh ALL THREE
+  // stores. The prior code updated Mongo + Neo4j only, leaving the Chroma
+  // semantic doc pinned to the FIRST version on every re-ingest.
+  const updateAllStores = async (): Promise<void> => {
+    await gatewayCall('mongodb', 'update', {
+      database: 'momentum',
+      collection: DISCOVERIES_COLLECTION,
+      filter: { _id: id },
+      update: { $set: artifactToUpdate(artifact) },
+    });
+    await gatewayCall('neo4j', 'cypher', { query: cy.cypher, params: cy.params });
+    await upsertChromaDoc();
+  };
+
+  // Upsert: branch on existence (mongodb.update does not honor upsert per
+  // tripleStack.ts gotchas).
+  const existing = await getDiscoveryByBaId(payload.baId);
+  if (existing) {
+    await updateAllStores();
+  } else {
+    try {
+      await ensureDiscoveriesCollection();
+      await tripleStackWrite({
+        id,
+        mongoCollection: DISCOVERIES_COLLECTION,
+        mongoDoc: { ...artifact },
+        neo4j: { cypher: cy.cypher, params: cy.params },
+        chroma: {
+          collection: CHROMA_DISCOVERIES,
+          document: chromaDocForDiscovery(artifact),
+          metadata: {
+            discoveryId: id,
+            baId: artifact.baId,
+            sponsorBaId: artifact.sponsorBaId ?? '',
+            callSid: artifact.callSid ?? '',
+            completedAt: artifact.completedAt ?? '',
+            kind: 'steve_discovery',
+          },
+        },
+      });
+    } catch (err) {
+      // TOCTOU: a concurrent ingest for the same baId may have inserted the row
+      // between the existence check above and this insert, so the insert fails
+      // on a duplicate _id. Re-check and fall back to the update path so a
+      // logically idempotent re-ingest converges instead of 500-ing.
+      const raced = await getDiscoveryByBaId(payload.baId);
+      if (!raced) throw err;
+      await updateAllStores();
+    }
   }
 
   // Read-back verification (VERIFY BEFORE DONE): confirm the Mongo row landed
-  // before reporting success. Fail loud if it did not.
+  // AND that this write's content actually applied. Checking existence alone
+  // would pass even when an update silently modified nothing (0 matched/modified
+  // without throwing), so also assert completedAt reflects THIS artifact.
   const readback = await getDiscoveryByBaId(payload.baId);
-  if (!readback || readback._id !== id) {
+  if (!readback || readback._id !== id || readback.completedAt !== artifact.completedAt) {
     throw new DiscoveryIngestError(
       'READBACK_FAILED',
       `Discovery for baId=${payload.baId} did not read back after write.`,
