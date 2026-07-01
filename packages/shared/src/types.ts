@@ -5179,3 +5179,90 @@ export interface AppendRuntimeAuditEntryInput {
 export interface RuntimeAuditLogEntry extends AuditLogEntry {
   runtime: RuntimeAuditContext;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · App-memory envelope (P7.3 §4.2) — shared by R1 (outcomes),
+// R2 (learning candidates), R3 (GraphRAG).
+//
+// The app-scoped replacement for the deprecated gateway `quadstack.write` base
+// envelope. App memory is app data in the `momentum` namespace, written through
+// the app-direct tripleStackWrite seam (NEVER the Universal Gateway; ACR-0007).
+// It preserves the Chat #135 anti-drift discipline (shared id, canonical typed
+// envelope, deterministic ids, banned aliases) WITHOUT the gateway-only fields
+// (`chat_number`, `chat_registry_id`, `namespace: universal_gateway`), which are
+// forbidden on app records. All Phase 7 app memory is server-derived, so
+// `originKind` is always 'system' and there is no `chat_number`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Canonical memory/lineage record types on the app's dedicated stack. */
+export type McsMemoryType =
+  | 'outcome'
+  | 'learning_candidate'
+  | 'graphrag_record'
+  | 'graphrag_chunk';
+
+/**
+ * The app-memory envelope. camelCase (app-data convention, P10 §3.6). `id` is
+ * shared across all three stores (Mongo `_id` / Neo4j `{id}` / Chroma id).
+ * Banned on any app record: `chat_number`, `chat_registry_id`,
+ * `namespace: 'universal_gateway'`, and the `date`/`timestamp`/`chat`/
+ * `synced_chat`/`start_time` aliases.
+ */
+export interface McsMemoryEnvelope {
+  id: string;
+  type: McsMemoryType;
+  schemaVersion: number;
+  namespace: 'momentum';
+  source: string;
+  createdAt: IsoTimestamp;
+  title: string;
+  originKind: 'system';
+  serviceName: string;
+  tenantId: string;
+  baId?: string;
+  derivedFrom?: string[];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · R1 — Outcome capture (P7.4).
+//
+// A BA-CONFIRMED, BA-scoped, team-scoped real-world outcome. The BA is the
+// source of truth; the app records the confirmation — it never infers, scores,
+// ranks, or qualifies an outcome. `enrolled_three` is a MIRROR of a BA report,
+// never a programmatic THREE enrollment or handoff. No `.com` exposure; no
+// income/compensation/cycle/placement values; no PII beyond opaque ids.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Closed, enumerated outcome kinds. A new kind is a schema change, not free text. */
+export type McsOutcomeKind =
+  | 'webinar_attended'
+  | 'callback_completed'
+  | 'orientation_attended'
+  | 'became_customer'
+  | 'enrolled_three'
+  | 'declined'
+  | 'no_show';
+
+/** A persisted outcome record: app-memory envelope + outcome fields (P7.4 §4.2). */
+export interface McsOutcomeRecord extends McsMemoryEnvelope {
+  type: 'outcome';
+  kind: McsOutcomeKind;
+  confirmedByBaId: string;
+  prospectId?: string;
+  token?: string;
+  outcomeAt: IsoTimestamp;
+  note?: string | null;
+  supersedesOutcomeId?: string | null;
+}
+
+/** Input to `appendOutcome`. The domain layer stamps id/envelope; BA supplies the fact. */
+export interface AppendOutcomeInput {
+  kind: McsOutcomeKind;
+  confirmedByBaId: string;
+  tenantId: string;
+  prospectId?: string;
+  token?: string;
+  outcomeAt?: IsoTimestamp;
+  note?: string | null;
+  supersedesOutcomeId?: string | null;
+}

@@ -215,6 +215,11 @@ const Env = z.object({
   // rung (runtime audit only) without redeploy. Higher rungs (outcomes/learning/
   // GraphRAG) stay off regardless of this flag.
   RUNTIME_AUDIT_PERSISTENCE_ENABLED: EnvBoolean.default(false),
+  // Phase 7 · R1 canary kill-switch (P7.1 §6 / P7.4). When false (default) the
+  // outcome-capture writer `appendOutcome` is a no-op. Stays independent of R0 —
+  // outcomes cannot be enabled until runtime audit (R0) is proven, but the flags
+  // are separate so each rung is turned on and killed on its own.
+  OUTCOME_CAPTURE_PERSISTENCE_ENABLED: EnvBoolean.default(false),
 });
 
 export const env = Env.parse(process.env);
