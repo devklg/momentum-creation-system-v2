@@ -37,7 +37,7 @@ async function loadOutcomes(enabled: boolean) {
 
 function input(overrides: Partial<AppendOutcomeInput> = {}): AppendOutcomeInput {
   return {
-    kind: 'webinar_attended',
+    kind: 'enrolled_iii',
     confirmedByTmagId: 'TMAG-1',
     tenantId: 'team_magnificent',
     prospectId: 'P1',
@@ -126,13 +126,13 @@ describe('Phase 7 R1 — app-memory envelope + scope', () => {
 });
 
 describe('Phase 7 R1 — THREE authority + no scoring', () => {
-  it('records enrolled_three as a plain mirror record (no handoff, no score/rank fields)', async () => {
+  it('records enrolled_iii as a plain mirror record (no handoff, no score/rank fields)', async () => {
     mocks.gatewayCall.mockImplementation(defaultGateway());
     const outcomes = await loadOutcomes(true);
 
-    const result = (await outcomes.appendOutcome(input({ kind: 'enrolled_three' })))!;
+    const result = (await outcomes.appendOutcome(input({ kind: 'enrolled_iii' })))!;
 
-    expect(result.kind).toBe('enrolled_three');
+    expect(result.kind).toBe('enrolled_iii');
     for (const banned of ['score', 'rank', 'qualification', 'commission', 'income', 'placement']) {
       expect(result).not.toHaveProperty(banned);
     }
@@ -141,7 +141,7 @@ describe('Phase 7 R1 — THREE authority + no scoring', () => {
 
 describe('Phase 7 R1 — deterministic id, idempotency, correction chain', () => {
   it('is idempotent — a retried confirmation returns the existing row, no double-write', async () => {
-    const existing = { id: 'mcsoutcome_existing', kind: 'webinar_attended', type: 'outcome' };
+    const existing = { id: 'mcsoutcome_existing', kind: 'enrolled_iii', type: 'outcome' };
     mocks.gatewayCall.mockImplementation(defaultGateway(existing));
     const outcomes = await loadOutcomes(true);
 
@@ -151,30 +151,30 @@ describe('Phase 7 R1 — deterministic id, idempotency, correction chain', () =>
     expect(mocks.tripleStackWrite).not.toHaveBeenCalled();
   });
 
-  it('once-per-(scope,BA) kinds get a stable id independent of outcomeAt', async () => {
+  it('a terminal outcome gets a stable id independent of outcomeAt (once per scope+kind+BA)', async () => {
     const outcomes = await loadOutcomes(true);
     const a = outcomes.deterministicOutcomeId({
-      kind: 'webinar_attended', confirmedByTmagId: 'TMAG-1', prospectId: 'P1',
+      kind: 'enrolled_iii', confirmedByTmagId: 'TMAG-1', prospectId: 'P1',
       outcomeAt: '2026-07-01T00:00:00.000Z',
     });
     const b = outcomes.deterministicOutcomeId({
-      kind: 'webinar_attended', confirmedByTmagId: 'TMAG-1', prospectId: 'P1',
+      kind: 'enrolled_iii', confirmedByTmagId: 'TMAG-1', prospectId: 'P1',
       outcomeAt: '2026-08-09T09:09:09.000Z',
     });
     expect(a).toBe(b);
   });
 
-  it('multi-occurrence kinds (callback_completed) fold outcomeAt into the id', async () => {
+  it('a different outcome kind for the same prospect gets a distinct id (non-exclusive resolutions)', async () => {
     const outcomes = await loadOutcomes(true);
-    const a = outcomes.deterministicOutcomeId({
-      kind: 'callback_completed', confirmedByTmagId: 'TMAG-1', prospectId: 'P1',
+    const customer = outcomes.deterministicOutcomeId({
+      kind: 'became_customer', confirmedByTmagId: 'TMAG-1', prospectId: 'P1',
       outcomeAt: '2026-07-01T00:00:00.000Z',
     });
-    const b = outcomes.deterministicOutcomeId({
-      kind: 'callback_completed', confirmedByTmagId: 'TMAG-1', prospectId: 'P1',
+    const enrolled = outcomes.deterministicOutcomeId({
+      kind: 'enrolled_iii', confirmedByTmagId: 'TMAG-1', prospectId: 'P1',
       outcomeAt: '2026-07-02T00:00:00.000Z',
     });
-    expect(a).not.toBe(b);
+    expect(customer).not.toBe(enrolled);
   });
 
   it('a correction (supersedesOutcomeId) writes a new record and links the chain', async () => {

@@ -80,7 +80,7 @@ describe('Phase 7 P7.11 — learning observability aggregation', () => {
     });
     expect(snap.runtimeAudit).toEqual({ total: 0, gateAllowed: 0, gateDenied: 0, gateDenyRate: 0 });
     expect(snap.outcomes.total).toBe(0);
-    expect(snap.outcomes.byKind.enrolled_three).toBe(0);
+    expect(snap.outcomes.byKind.enrolled_iii).toBe(0);
     expect(snap.learningCandidates.approvalRate).toBe(0);
   });
 
@@ -109,12 +109,12 @@ describe('Phase 7 P7.11 — learning observability aggregation', () => {
       tenantId: 'team_magnificent',
       generatedAt: GEN_AT,
       runtimeAuditEntries: [],
-      outcomes: [outcome('webinar_attended'), outcome('webinar_attended'), outcome('enrolled_three')],
+      outcomes: [outcome('became_customer'), outcome('became_customer'), outcome('enrolled_iii')],
       candidates: [],
     });
     expect(snap.outcomes.total).toBe(3);
-    expect(snap.outcomes.byKind.webinar_attended).toBe(2);
-    expect(snap.outcomes.byKind.enrolled_three).toBe(1);
+    expect(snap.outcomes.byKind.became_customer).toBe(2);
+    expect(snap.outcomes.byKind.enrolled_iii).toBe(1);
     expect(snap.outcomes.byKind.declined).toBe(0);
   });
 

@@ -21,13 +21,10 @@ import type {
 } from '@momentum/shared';
 
 const OUTCOME_KINDS: readonly McsOutcomeKind[] = [
-  'webinar_attended',
-  'callback_completed',
-  'orientation_attended',
+  'pending',
+  'enrolled_iii',
   'became_customer',
-  'enrolled_three',
   'declined',
-  'no_show',
 ];
 
 function emptyOutcomeCounts(): Record<McsOutcomeKind, number> {

@@ -43,12 +43,12 @@ const SCHEMA_VERSION = 1;
 const MAX_NOTE_CHARS = 2000;
 
 /**
- * Kinds where more than one outcome per (prospect, BA) is legitimate — the
- * deterministic id folds in `outcomeAt` for these so two distinct callbacks do
- * not collide. Every other kind is once-per-(scope, BA): a retried confirmation
- * is a no-op, not a duplicate (P7.4 §4.3).
+ * Terminal outcomes are once-per-(scope, kind, BA): a retried confirmation is a
+ * no-op, not a duplicate; a *changed* resolution supersedes (append-only, §5.7).
+ * No outcome kind is multi-occurrence — milestones (which can repeat) live in the
+ * event log, not here (P7.16 §1a).
  */
-const MULTI_OCCURRENCE_KINDS: ReadonlySet<McsOutcomeKind> = new Set(['callback_completed']);
+const MULTI_OCCURRENCE_KINDS: ReadonlySet<McsOutcomeKind> = new Set<McsOutcomeKind>();
 
 export class OutcomeValidationError extends Error {
   constructor(message: string) {

@@ -52,21 +52,19 @@ Every outcome record travels the **one** path from P7.3 §3: `tripleStackWrite()
 
 ## 4. Schema
 
-### 4.1 Outcome kinds (enumerated — additive)
+### 4.1 Outcome kinds — the terminal RESOLUTION (P7.16 §1a)
+
+An outcome is **how a prospect resolved**, not a journey milestone. Milestones (watched video, attended webinar, completed callback, no-show) live in the **event log**, not here. The outcome is a small closed set:
 
 ```ts
-// Proposed for a future append to packages/shared/src/types.ts (impl slice, post-approval).
 export type McsOutcomeKind =
-  | 'webinar_attended'      // prospect attended a reserved webinar
-  | 'callback_completed'    // a requested callback happened
-  | 'orientation_attended'  // BA attended orientation
-  | 'became_customer'       // prospect became a product customer (mirror of a BA-reported fact)
-  | 'enrolled_three'        // prospect enrolled in THREE off-app (BA-reported MIRROR, not a handoff)
-  | 'declined'              // prospect declined / opted out (BA-reported)
-  | 'no_show';              // reserved but did not attend
+  | 'pending'          // not yet resolved (default; usually not recorded)
+  | 'enrolled_iii'     // enrolled into III International = became a Brand Ambassador (→ a Team Magnificent member)
+  | 'became_customer'  // became a product customer (NOT a member; non-exclusive with enrolled_iii)
+  | 'declined';        // said no / did not convert
 ```
 
-The set is **closed and enumerated** — a new kind is a schema change through a decision, never free text. No kind carries a numeric result, a score, or a rank.
+The set is **closed and enumerated** — a new kind is a schema change through a decision, never free text. No kind carries a numeric result, a score, or a rank. `enrolled_iii` and `became_customer` are **non-exclusive** (a customer may later enroll); the current resolution is whichever is furthest along. This is the **same resolution concept** as the F6 `ProspectStatus` (they unify to one enum).
 
 ### 4.2 Outcome record (app-memory envelope + fields)
 
@@ -99,7 +97,7 @@ export interface McsOutcomeRecord extends McsMemoryEnvelope {
 2. **Single app-direct path** via `tripleStackWrite` (P7.3 §3). All-three-or-fail; fail-before-Mongo; read-back on first-of-family during canary. **No gateway.**
 3. **App-memory envelope** (P7.3 §4.2) stamped; passes the `mcs_outcomes` `$jsonSchema` governed door.
 4. **Scope stamped** — `tenantId` + `confirmedByBaId` on every record; `prospectId`/`token` where applicable.
-5. **THREE is authority.** `enrolled_three` is a mirror of a BA report, never a programmatic enrollment or handoff. No registration-handoff route.
+5. **THREE is authority.** `enrolled_iii` (enrolled into III International = became a Brand Ambassador) is a mirror of a BA report, never a programmatic enrollment or handoff. No registration-handoff route.
 6. **No excluded data** — no income/compensation/cycle/placement, no `.com` exposure, no transcript/LLM bodies, no PII beyond opaque ids.
 7. **Append-only with correction chain.** Outcomes are not edited in place; a correction writes a new record with `supersedesOutcomeId` pointing at the prior (Neo4j `(:Outcome)-[:SUPERSEDES]->(:Outcome)`), so history is preserved.
 8. **No agent writes.** Server domain layer owns the write boundary; routes stay thin. Context Manager remains the sole Context Packet assembler.
@@ -134,6 +132,6 @@ export interface McsOutcomeRecord extends McsMemoryEnvelope {
 
 ## 9. Open decisions for Kevin
 
-1. **`no_show` vs absence-of-attendance** — persist `no_show` as an explicit BA-confirmed outcome (recommended, for clean derivation), or infer non-attendance from the absence of `webinar_attended` (rejected — that would be an agent-derived judgement)? Recommend explicit.
+1. **Milestones vs outcome (RESOLVED, P7.16 §1a)** — journey milestones (`webinar_attended`, `callback_completed`, `orientation_attended`, `no_show`) are **not** outcomes; they live in the event log. The outcome enum is the terminal resolution only (`pending · enrolled_iii · became_customer · declined`), which unifies with the F6 `ProspectStatus`.
 2. **Correction window** — is there a time limit after which an outcome can no longer be superseded, or is the correction chain open indefinitely (recommended, append-only, matching audit/decision discipline)?
 3. **Retention** — keep outcomes indefinitely (recommended; small, metadata-only, feeds learning) or apply a rolling window?

@@ -56,15 +56,7 @@ export function buildOutcomeSchema(): Schema<MongoDocument> {
       kind: {
         type: String,
         required: true,
-        enum: [
-          'webinar_attended',
-          'callback_completed',
-          'orientation_attended',
-          'became_customer',
-          'enrolled_three',
-          'declined',
-          'no_show',
-        ],
+        enum: ['pending', 'enrolled_iii', 'became_customer', 'declined'],
       },
       confirmedByTmagId: { type: String, required: true },
       outcomeAt: { type: String, required: true },

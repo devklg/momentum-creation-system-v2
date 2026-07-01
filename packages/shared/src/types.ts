@@ -5245,14 +5245,19 @@ export interface McsMemoryEnvelope {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Closed, enumerated outcome kinds. A new kind is a schema change, not free text. */
+/**
+ * Terminal outcome — how a prospect RESOLVED (P7.16 §1a). Small closed set; NOT
+ * the journey milestones (watched video, attended webinar, …) which live in the
+ * event log. `enrolled_iii` = enrolled into III International = became a Brand
+ * Ambassador (→ a Team Magnificent member in Kevin's downline). `became_customer`
+ * = a product customer (not a member). The two are non-exclusive (a customer may
+ * later enroll). `pending` = not yet resolved.
+ */
 export type McsOutcomeKind =
-  | 'webinar_attended'
-  | 'callback_completed'
-  | 'orientation_attended'
+  | 'pending'
+  | 'enrolled_iii'
   | 'became_customer'
-  | 'enrolled_three'
-  | 'declined'
-  | 'no_show';
+  | 'declined';
 
 /** A persisted outcome record: app-memory envelope + outcome fields (P7.4 §4.2). */
 export interface McsOutcomeRecord extends McsMemoryEnvelope {

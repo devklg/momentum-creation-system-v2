@@ -68,6 +68,10 @@ This is the **resolution** dimension (§3.3). It is **not** the same as "attende
 
 Note: `enrolled_iii` and `became_customer` are **not strictly exclusive** — a customer may later enroll. Order is allowed (`became_customer → enrolled_iii`); the *current* terminal outcome is whichever is furthest along.
 
+**Terminology precision (Kevin, 2026-07-01):** `enrolled_iii` = **enrolled into III International = became a Brand Ambassador (BA)**. A **"member"** specifically means a **member of Team Magnificent (TMag)** — the app-level identity (`tmagId`) that results from being a BA in Kevin's downline. BA is the III-level event; member is the TMag-level identity.
+
+**This outcome set unifies with F6 `ProspectStatus`.** "How did the prospect resolve" is one concept — `pending · enrolled_iii · became_customer · declined` — not two enums. The F6 rename (`AdminProspectRegistrationHandoffState → ProspectStatus`) and this outcome enum reconcile to the **same** set in the migration (one-concept-one-name). **Applied now:** R1 `McsOutcomeKind` was reshaped to this closed set while un-applied (`mcs_outcomes` born canonical).
+
 ---
 
 ## 2. Phase B — Member onboarding journey (starts at `enrolled`)
@@ -115,7 +119,7 @@ Same milestone vocabulary for (1)+(2); a separate, tiny **outcome** enum for (3)
 ## 5. Open decisions for Kevin
 
 1. **Video milestones granularity** — keep 25/50/75/complete (recommended — the pool + engagement logic already uses them), or collapse to started/completed?
-2. **`enrolled` wording** — the crossover milestone name: `enrolled` (recommended, matches the funnel) vs `signed_up` vs `became_member`. All mean "became a new Brand Ambassador / Team Mag member."
+2. **`enrolled` wording — RESOLVED:** the crossover outcome is **`enrolled_iii`** (enrolled into III International = became a Brand Ambassador). "Member" = TMag member (the resulting identity). Milestone A12 may stay `enrolled` on the funnel rail; the *outcome* is `enrolled_iii`.
 3. **Customer track** — is `became_customer` a milestone on the *same* journey, or a separate customer journey? (Recommend same journey, distinct terminal-ish milestone, since a customer may still enroll later.)
 
 ---
