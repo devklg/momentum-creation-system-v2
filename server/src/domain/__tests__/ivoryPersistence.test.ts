@@ -45,6 +45,9 @@ function defaultGateway(record: AnyRec | null = { ...IVORY_RECORD }) {
       }
       return { count: 0, documents: [] };
     }
+    if (tool === 'mongodb' && action === 'update') {
+      return { matchedCount: 1, modifiedCount: 1 };
+    }
     return {};
   };
 }
@@ -74,6 +77,9 @@ describe('Ivory persistence fixes', () => {
     mocks.gatewayCall.mockImplementation(async (tool: string, action: string, _params: AnyRec) => {
       if (tool === 'mongodb' && action === 'query') {
         return { count: 1, documents: [{ ...IVORY_RECORD }] };
+      }
+      if (tool === 'mongodb' && action === 'update') {
+        return { matchedCount: 1 };
       }
       if (tool === 'neo4j' && action === 'cypher') {
         throw new Error('neo4j bolt transient failure');
@@ -152,5 +158,70 @@ describe('Ivory persistence fixes', () => {
     const params = chromaAdd?.[2] as AnyRec;
     expect(params).toMatchObject({ collection: 'mcs_ivory', ids: ['ivory_1'] });
     expect(String((params.documents as string[])[0])).toContain('brand new note');
+  });
+
+  it('deferred #1: updateIvoryStatus rejects a bare "invited" transition', async () => {
+    mocks.gatewayCall.mockImplementation(defaultGateway());
+    const ivory = await loadIvory();
+
+    await expect(
+      ivory.updateIvoryStatus('ivory_1', 'TMBA-1', 'invited' as never),
+    ).rejects.toBeInstanceOf(ivory.IvoryValidationError);
+  });
+
+  it('deferred #2: updateIvoryStatus throws NotFound when the row vanished (0-match)', async () => {
+    mocks.gatewayCall.mockImplementation(async (tool: string, action: string, _p: AnyRec) => {
+      if (tool === 'mongodb' && action === 'query') {
+        return { count: 1, documents: [{ ...IVORY_RECORD }] };
+      }
+      if (tool === 'mongodb' && action === 'update') return { matchedCount: 0 };
+      return {};
+    });
+    const ivory = await loadIvory();
+
+    await expect(
+      ivory.updateIvoryStatus('ivory_1', 'TMBA-1', 'customer' as never),
+    ).rejects.toBeInstanceOf(ivory.IvoryNotFoundError);
+  });
+
+  it('deferred #2: updateIvoryName throws NotFound on a 0-match update', async () => {
+    mocks.gatewayCall.mockImplementation(async (tool: string, action: string, _p: AnyRec) => {
+      if (tool === 'mongodb' && action === 'query') {
+        return { count: 1, documents: [{ ...IVORY_RECORD }] };
+      }
+      if (tool === 'mongodb' && action === 'update') return { matchedCount: 0 };
+      return {};
+    });
+    const ivory = await loadIvory();
+
+    await expect(
+      ivory.updateIvoryName('ivory_1', 'TMBA-1', { notes: 'x' } as never),
+    ).rejects.toBeInstanceOf(ivory.IvoryNotFoundError);
+  });
+
+  it('deferred #2: markIvoryInvited throws NotFound on a 0-match update', async () => {
+    mocks.gatewayCall.mockImplementation(async (tool: string, action: string, _p: AnyRec) => {
+      if (tool === 'mongodb' && action === 'query') {
+        return { count: 1, documents: [{ ...IVORY_RECORD }] };
+      }
+      if (tool === 'mongodb' && action === 'update') return { matchedCount: 0 };
+      return {};
+    });
+    const ivory = await loadIvory();
+
+    await expect(
+      ivory.markIvoryInvited('ivory_1', 'TMBA-1', 'P1'),
+    ).rejects.toBeInstanceOf(ivory.IvoryNotFoundError);
+  });
+
+  it('deferred #6: ANGLE_LABEL is a single shared canonical map', async () => {
+    const { ANGLE_LABEL } = await import('../ivoryAngle.js');
+    expect(ANGLE_LABEL.make_money).toBe('a real way to make money');
+    expect(Object.keys(ANGLE_LABEL).sort()).toEqual([
+      'do_the_business',
+      'lose_fat',
+      'make_money',
+      'unspecified',
+    ]);
   });
 });

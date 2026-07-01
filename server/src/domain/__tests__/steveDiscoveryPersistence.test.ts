@@ -176,4 +176,35 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     const artifact = await steve.ingestDiscoveryArtifact(makePayload());
     expect(artifact.baId).toBe('TMBA-1');
   });
+
+  it('assembleSuccessProfile caps long free-text fields to 5000 chars', async () => {
+    const steve = await loadSteve();
+    const long = 'x'.repeat(6000);
+    const profile = steve.assembleSuccessProfile({
+      baId: 'TMBA-1',
+      generatedAt: '2026-07-01T00:00:00.000Z',
+      profile: {
+        primaryWhy: { statement: long, who: 'kids', whyNow: 'now' },
+        successVision: { statement: long, oneBigChange: 'time' },
+        learningStyle: { modalities: ['doing'], feedbackPreference: 'direct', notes: long },
+        communicationPreferences: {
+          preferredChannels: ['text'],
+          cadence: 'weekly',
+          bestTimes: 'eve',
+          notes: '',
+        },
+        supportNeeds: { areas: [long], potentialObstacles: [], helpStyle: 'ask', notes: long },
+        launchRecommendations: [{ text: long, href: null }],
+        trainingRecommendations: [],
+        michaelHandoffSummary: long,
+      },
+    } as never);
+
+    expect(profile.primaryWhy.statement.length).toBe(5000);
+    expect(profile.successVision.statement.length).toBe(5000);
+    expect(profile.supportNeeds.notes.length).toBe(5000);
+    expect(profile.supportNeeds.areas[0]?.length).toBe(5000);
+    expect(profile.launchRecommendations[0]?.text.length).toBe(5000);
+    expect(profile.michaelHandoffSummary.length).toBe(5000);
+  });
 });

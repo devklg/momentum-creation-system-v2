@@ -296,22 +296,51 @@ export function buildSteveSystemPrompt(args: { baFirstName: string }): string {
  * copies the BA's own reads through verbatim. It does NOT derive, weigh,
  * re-order by importance, or grade anything.
  */
+/** Gateway per-content cap (mirrors the transcript/answer truncation upstream). */
+const PROFILE_FIELD_CAP = 5000;
+const cap = (s: string): string => (s.length > PROFILE_FIELD_CAP ? s.slice(0, PROFILE_FIELD_CAP) : s);
+
 export function assembleSuccessProfile(args: {
   baId: string;
   generatedAt: string;
   profile: SteveDiscoveryIngestPayload['profile'];
 }): SteveSuccessProfile {
   const p = args.profile;
+  // Defensively cap the free-text fields to the gateway per-content limit — the
+  // transcript/answers are already capped upstream, but a rambling or
+  // over-generated profile statement could otherwise 413 or be silently
+  // truncated by the gateway.
   return {
     baId: args.baId,
-    primaryWhy: p.primaryWhy,
-    successVision: p.successVision,
-    learningStyle: p.learningStyle,
-    communicationPreferences: p.communicationPreferences,
-    supportNeeds: p.supportNeeds,
-    launchRecommendations: p.launchRecommendations,
-    trainingRecommendations: p.trainingRecommendations,
-    michaelHandoffSummary: p.michaelHandoffSummary,
+    primaryWhy: {
+      statement: cap(p.primaryWhy.statement),
+      who: cap(p.primaryWhy.who),
+      whyNow: cap(p.primaryWhy.whyNow),
+    },
+    successVision: {
+      statement: cap(p.successVision.statement),
+      oneBigChange: cap(p.successVision.oneBigChange),
+    },
+    learningStyle: {
+      ...p.learningStyle,
+      feedbackPreference: cap(p.learningStyle.feedbackPreference),
+      notes: cap(p.learningStyle.notes),
+    },
+    communicationPreferences: {
+      ...p.communicationPreferences,
+      bestTimes: cap(p.communicationPreferences.bestTimes),
+      notes: cap(p.communicationPreferences.notes),
+    },
+    supportNeeds: {
+      ...p.supportNeeds,
+      areas: p.supportNeeds.areas.map(cap),
+      potentialObstacles: p.supportNeeds.potentialObstacles.map(cap),
+      helpStyle: cap(p.supportNeeds.helpStyle),
+      notes: cap(p.supportNeeds.notes),
+    },
+    launchRecommendations: p.launchRecommendations.map((r) => ({ ...r, text: cap(r.text) })),
+    trainingRecommendations: p.trainingRecommendations.map((r) => ({ ...r, text: cap(r.text) })),
+    michaelHandoffSummary: cap(p.michaelHandoffSummary),
     generatedAt: args.generatedAt,
     signedBy: STEVE_SIGNED_BY,
   };
