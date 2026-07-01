@@ -29,6 +29,7 @@
     "clean": "pnpm -r exec rm -rf dist node_modules"
   },
   "devDependencies": {
+    "docx": "9.7.1",
     "ts-morph": "28.0.0",
     "typescript": "^5.5.4"
   }
