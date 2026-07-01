@@ -9,10 +9,12 @@
  * Replay defense: reject if the timestamp is more than 5 minutes old.
  * Public key: env.TELNYX_PUBLIC_KEY (base64-encoded, from Mission Control Portal).
  *
- * Dev fallback: if TELNYX_PUBLIC_KEY is empty, signature verification is
- * SKIPPED and a warning is logged. This lets local development / ngrok
- * replays work without portal config. NEVER deploy production without
- * TELNYX_PUBLIC_KEY set — the server boot log surfaces the missing key.
+ * Key-missing behavior (P10 H4):
+ *   - development/test: if TELNYX_PUBLIC_KEY is empty, signature verification is
+ *     SKIPPED with a warning, so local/ngrok replays work without portal config.
+ *   - production: an empty TELNYX_PUBLIC_KEY FAILS CLOSED — the request is
+ *     rejected with 401 rather than accepted unsigned. The env boot log also
+ *     warns when the key is missing in production.
  *
  * Express's default express.json() parses the body before middlewares get a
  * chance to see the raw bytes. The route that uses this middleware MUST be
@@ -122,7 +124,22 @@ export function verifyTelnyxWebhook(
       res.status(401).json({ ok: false, error: 'Signature verification failed.' });
       return;
     }
+  } else if (process.env.NODE_ENV === 'production') {
+    // P10 H4 — fail closed in production: a missing key must never mean
+    // "accept unsigned". Read NODE_ENV at call time (like the runtime kill
+    // switches) so deploy-mode changes take effect without a rebuild and so
+    // this branch is unit-testable. The env-boot warning surfaces the same
+    // misconfiguration at startup.
+    // eslint-disable-next-line no-console
+    console.error(
+      '[telnyx-webhook] TELNYX_PUBLIC_KEY not set in production — rejecting webhook.',
+    );
+    res
+      .status(401)
+      .json({ ok: false, error: 'Webhook verification not configured.' });
+    return;
   } else {
+    // Dev only: skip with a warning so local/ngrok replays work.
     // eslint-disable-next-line no-console
     console.warn(
       '[telnyx-webhook] TELNYX_PUBLIC_KEY not set — signature verification SKIPPED. Dev only.',
