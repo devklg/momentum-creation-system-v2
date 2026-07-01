@@ -18,12 +18,12 @@ import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
 import type {
   AuditActor,
-  BulkLeadStatus,
+  VmLeadLifecycleStatus,
   ProspectCRMRecord,
   ProspectCrmSource,
   ProspectCrmStatus,
   ProspectTimelineEventRecord,
-  ProspectTimelineKind,
+  ProspectTimelineEventKind,
 } from '@momentum/shared';
 
 type ProspectCRMDocument = ProspectCRMRecord & { token: string | null };
@@ -61,7 +61,7 @@ interface TimelineInput {
   crmRecordId?: string | null;
   ownerTmagId: string;
   sponsorTmagId: string;
-  kind: ProspectTimelineKind;
+  kind: ProspectTimelineEventKind;
   note: string;
   metadata?: Record<string, unknown>;
   createdAt?: string;
@@ -88,7 +88,7 @@ function crmIdForProspect(prospectId: string): string {
   return `crm_${prospectId}`;
 }
 
-function bulkLeadStatusFor(kind: ProspectTimelineKind): BulkLeadStatus | null {
+function bulkLeadStatusFor(kind: ProspectTimelineEventKind): VmLeadLifecycleStatus | null {
   switch (kind) {
     case 'link_clicked':
       return 'link_clicked';
@@ -117,7 +117,7 @@ function bulkLeadStatusFor(kind: ProspectTimelineKind): BulkLeadStatus | null {
   }
 }
 
-function crmStatusFor(kind: ProspectTimelineKind): ProspectCrmStatus | null {
+function crmStatusFor(kind: ProspectTimelineEventKind): ProspectCrmStatus | null {
   switch (kind) {
     case 'link_clicked':
     case 'activated':
@@ -370,7 +370,7 @@ export async function createOrUpdateCrmRecordForToken(
 
 export async function applyCrmLifecycleEvent(
   prospectId: string,
-  kind: ProspectTimelineKind,
+  kind: ProspectTimelineEventKind,
   note: string,
   metadata: Record<string, unknown> = {},
 ): Promise<ProspectCRMDocument> {

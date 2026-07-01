@@ -75,9 +75,9 @@ const NOTE_MAX = 2000;
 /** All five disposition tags Kevin locked. Server-side validation list. */
 const VALID_DISPOSITIONS: ReadonlySet<CrmDisposition> = new Set([
   'new_brand_ambassador',
-  'new-customer',
+  'new_customer',
   'interested',
-  'not-interested',
+  'not_interested',
   'later',
 ]);
 

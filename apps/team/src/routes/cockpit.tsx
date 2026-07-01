@@ -161,25 +161,25 @@ interface MarkInvitationSentResponse {
 
 type CrmDisposition =
   | 'new_brand_ambassador'
-  | 'new-customer'
+  | 'new_customer'
   | 'interested'
-  | 'not-interested'
+  | 'not_interested'
   | 'later';
 
 const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
   'new_brand_ambassador',
-  'new-customer',
+  'new_customer',
   'interested',
   'later',
-  'not-interested',
+  'not_interested',
 ];
 
 const DISPOSITION_LABEL: Record<CrmDisposition, string> = {
   'new_brand_ambassador': 'New BA',
-  'new-customer': 'New customer',
+  'new_customer': 'New customer',
   interested: 'Interested',
   later: 'Later',
-  'not-interested': 'Not interested',
+  'not_interested': 'Not interested',
 };
 
 interface CrmNoteRecord {
