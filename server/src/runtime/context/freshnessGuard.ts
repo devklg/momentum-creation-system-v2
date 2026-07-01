@@ -124,3 +124,36 @@ export function filterFresh(
 ): KnowledgeReference[] {
   return references.filter((reference) => isFresh(reference, policy, now));
 }
+
+/** A non-fresh freshness verdict — the reasons a reference is guarded out. */
+export type FreshnessExclusionVerdict = Exclude<KnowledgeFreshnessVerdict, 'fresh'>;
+
+export interface FreshnessClassification {
+  /** References that passed the guard, in input order. */
+  fresh: KnowledgeReference[];
+  /** Count of guarded-out references per non-fresh verdict (absent verdicts omitted). */
+  excluded: Partial<Record<FreshnessExclusionVerdict, number>>;
+}
+
+/**
+ * Classify references in a single pass: the fresh set plus a tally of why the rest were guarded
+ * out. Equivalent to `filterFresh` for the fresh set; adds the exclusion tally for observability
+ * (P4.8) at no extra evaluation cost.
+ */
+export function classifyFreshness(
+  references: readonly KnowledgeReference[],
+  policy: KnowledgeFreshnessPolicy | undefined,
+  now: Date,
+): FreshnessClassification {
+  const fresh: KnowledgeReference[] = [];
+  const excluded: Partial<Record<FreshnessExclusionVerdict, number>> = {};
+  for (const reference of references) {
+    const verdict = evaluateFreshness(reference, policy, now);
+    if (verdict === 'fresh') {
+      fresh.push(reference);
+    } else {
+      excluded[verdict] = (excluded[verdict] ?? 0) + 1;
+    }
+  }
+  return { fresh, excluded };
+}

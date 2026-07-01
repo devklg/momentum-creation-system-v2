@@ -57,4 +57,19 @@ export {
 export type {
   ApprovedKnowledgeProvider,
   ContextManagerRetrievalAdapter,
+  ContextManagerRetrievalAdapterOptions,
+  RetrievalObservabilitySink,
 } from './contextManagerRetrievalAdapter.js';
+
+// P4.8 — Knowledge Retrieval Observability: a content-free record emitted per retrieval call via
+// an opt-in sink. Pure builder; no persistence, no Gateway, no LLM.
+export {
+  KNOWLEDGE_RETRIEVAL_OBSERVABILITY_SCHEMA_VERSION,
+  buildRetrievalObservabilityRecord,
+} from './retrievalObservability.js';
+export type {
+  RetrievalObservabilityRecord,
+  RetrievalObservabilityInput,
+  RetrievalStageCounts,
+  RetrievalObservabilityScope,
+} from './retrievalObservability.js';
