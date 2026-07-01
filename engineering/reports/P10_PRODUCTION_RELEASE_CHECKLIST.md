@@ -28,7 +28,7 @@ This is the single authoritative **go/no-go** artifact for shipping MCS V2 to pr
 | # | Blocker | Section | Owner | Status |
 |---|---|---|---|---|
 | B1 | Production topology **DECIDED** (InterServer VPS + Atlas/Aura/Chroma Cloud + hosted embeddings, direct writes); execution pending | §2 | Kevin | 🟡 decided, execution pending |
-| B2 | Branch protection on `main` cannot be confirmed enforced | §3 | Kevin (GitHub UI) | 🔴 open |
+| B2 | Branch protection: required `gates` check **confirmed enabled** on `main` (owner, 2026-06-30); auxiliary protections to confirm | §3 | Kevin (GitHub UI) | 🟢 core enforced |
 | B3 | Auth endpoints unthrottled (H2); placeholder `JWT_SECRET` passes validation (H3); Telnyx webhook fail-open (H4) | §4 | Kevin | 🔴 open |
 | B4 | H1 outbox-drain **live smoke test** not yet run against the app's dedicated triple-stack | §5 | Kevin / next session | 🔴 open |
 | B5 | `.com` compliance pass not re-run against the release build | §7 | Kevin + Agent | 🔴 open |
@@ -61,12 +61,15 @@ The *decision* is made; **execution** remains (these move B1 from decide → do)
 
 ## 3. BLOCKER B2 — Branch protection & change governance (owner-only)
 
-Finding **H5** / P10.1. Enforcement is unverifiable from inside the repo; every source marks it as pending owner action.
+Finding **H5** / P10.1. Recorded in **`engineering/reports/P10_BRANCH_PROTECTION_SETTINGS.md`**.
 
-- [ ] On `main` (GitHub UI): **require the `gates` status check**, require branches up-to-date, require PR before merge, block force-push and deletion; consider linear history. *(Kevin, owner-only)*
-- [ ] Record the confirmed settings in an in-repo doc so declared state is auditable. *(Agent, docs-only — can be done once Kevin reports the settings)*
+- [x] **Required `gates` status check enabled on `main`** — owner-confirmed 2026-06-30. This closes H5's core gap (the CI gate is enforced, not just declared).
+- [ ] Confirm the auxiliary protections on `main`: require PR before merge, require branches up-to-date, block force-push, block deletion. *(Kevin, owner-only)*
+- [x] Record the confirmed settings in an in-repo doc so declared state is auditable. *(done — see the settings record above)*
 - [ ] (Optional, gated) Add `CODEOWNERS` and extend the pre-push hook to include server tests. *(Kevin — propose in isolated PR)*
 - [ ] Governance live: changes flow through the ACR process + decision ledger (`ROADMAP.md:192`). *(Kevin)*
+
+> ⚠️ Protection pins the exact check-name `gates`; renaming the CI job silently vacates the gate. Keep the name stable.
 
 ---
 
@@ -161,7 +164,7 @@ Release is **GO** only when every blocker in §1 is `[x]` and the owner signs be
 | Gate | Status | Signed (owner) | Date |
 |---|---|---|---|
 | B1 topology resolved | 🟡 decided; execution pending | | 2026-06-30 |
-| B2 branch protection enforced | 🔴 | | |
+| B2 branch protection enforced | 🟢 `gates` required (aux to confirm) | | 2026-06-30 |
 | B3 security hardening applied | 🔴 | | |
 | B4 H1 live smoke passed + backup plan | 🔴 | | |
 | B5 `.com` compliance pass | 🔴 | | |
