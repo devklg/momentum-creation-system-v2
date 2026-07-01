@@ -209,6 +209,12 @@ const Env = z.object({
   PERSISTENCE_DIRECT_ENABLED: EnvBoolean.default(false),
   // GPU embedder is required for Chroma direct writes; there is no CPU fallback.
   GPU_EMBEDDER_REQUIRED: EnvBoolean.default(true),
+  // Phase 7 · R0 canary kill-switch (P7.1 §6 / P7.2). When false (default) the
+  // runtime audit writer `appendRuntimeAuditEntry` is a no-op — the runtime turn
+  // lifecycle is NOT persisted. Flipping to true enables the first persistence
+  // rung (runtime audit only) without redeploy. Higher rungs (outcomes/learning/
+  // GraphRAG) stay off regardless of this flag.
+  RUNTIME_AUDIT_PERSISTENCE_ENABLED: EnvBoolean.default(false),
 });
 
 export const env = Env.parse(process.env);

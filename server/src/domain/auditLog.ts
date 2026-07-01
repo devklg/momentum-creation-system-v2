@@ -27,15 +27,20 @@
  */
 
 import { randomBytes } from 'node:crypto';
+import { env } from '../env.js';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
   AppendAuditEntryInput,
+  AppendRuntimeAuditEntryInput,
   AuditActor,
   AuditEntity,
   AuditLogEntry,
   AuditQueryFilters,
   AuditActorRole,
+  AuditSeverity,
+  RuntimeAuditAction,
+  RuntimeAuditLogEntry,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -281,4 +286,195 @@ export async function findAuditEntry(entryId: string): Promise<AuditLogEntry | n
     limit: 1,
   });
   return result.documents?.[0] ?? null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · R0 — Runtime audit persistence (P7.2 schema / P7.3 §3 write contract).
+//
+// A thin extension of the substrate above for the AGENT-RUNTIME turn lifecycle
+// (Michael/Steve/Ivory turns, gate decisions, draft-emission markers). Same
+// canonical `mcs_audit_log` triple-stack, same append-only invariant, same
+// app-direct tripleStackWrite seam (NO Universal Gateway; ACR-0007). Differences
+// from the admin substrate:
+//   - metadata only: no before/after body EVER (lifecycle markers, not mutations);
+//   - carries a dedicated `runtime` scope block (ids only — no content, no PII);
+//   - idempotent on (turnId, action): a retried turn-open never double-writes;
+//   - canary-gated by RUNTIME_AUDIT_PERSISTENCE_ENABLED (default OFF → no-op).
+//
+// This is a WIRED-DORMANT writer. It is intentionally NOT called from the inert
+// S2.7 turn coordinator (whose governance boundary forbids persistence). Live
+// wiring into a real turn path is a later, separately-approved activation step.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MAX_RUNTIME_REASON_CHARS = 500;
+
+/** True iff the R0 runtime-audit canary is enabled (P7.1 §6 kill-switch). */
+export function runtimeAuditPersistenceEnabled(): boolean {
+  return env.RUNTIME_AUDIT_PERSISTENCE_ENABLED;
+}
+
+/**
+ * Default severity per action (P7.2 §3.2): gate denials are expected traffic
+ * (`warn`), persistence-flag flips are `critical`, everything else `info`.
+ */
+function runtimeSeverityFor(action: RuntimeAuditAction): AuditSeverity {
+  if (action === 'runtime.gate.denied') return 'warn';
+  if (action === 'runtime.persistence.enabled' || action === 'runtime.persistence.disabled') {
+    return 'critical';
+  }
+  return 'info';
+}
+
+/**
+ * Idempotency lookup for the (turnId, action) dedup key. The gateway `update`
+ * path does not honor upsert, so the writer branches on existence instead
+ * (documented gotcha at the top of tripleStack.ts).
+ */
+export async function findRuntimeAuditEntry(
+  turnId: string,
+  action: RuntimeAuditAction,
+): Promise<RuntimeAuditLogEntry | null> {
+  const result = await gatewayCall<{ documents: RuntimeAuditLogEntry[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: COLLECTION,
+    filter: { action, 'runtime.turnId': turnId },
+    limit: 1,
+  });
+  return result.documents?.[0] ?? null;
+}
+
+/**
+ * Append a runtime audit event. Returns the persisted row, the existing row on a
+ * dedup hit, or `null` when the canary is disabled (no write attempted).
+ *
+ * Invariants (P7.2 §6): append-only, metadata-only (no before/after), all-three
+ * -or-fail via tripleStackWrite, deterministic dedup on (turnId, action), tenant
+ * + BA + agent scope on every row, no agent-authored writes.
+ */
+export async function appendRuntimeAuditEntry(
+  input: AppendRuntimeAuditEntryInput,
+): Promise<RuntimeAuditLogEntry | null> {
+  if (!runtimeAuditPersistenceEnabled()) return null;
+
+  const { runtime, action } = input;
+
+  // Idempotent on (turnId, action): a retried lifecycle marker is a no-op.
+  const existing = await findRuntimeAuditEntry(runtime.turnId, action);
+  if (existing) return existing;
+
+  const now = new Date().toISOString();
+  const timestamp = input.timestamp ?? now;
+  const entryId = mintEntryId(timestamp);
+  const reason = input.reason ? input.reason.slice(0, MAX_RUNTIME_REASON_CHARS) : null;
+
+  // Actor is the runtime agent acting as a system principal — never a BA-authored
+  // write. Entity is the turn itself; kind stays 'none' (no new AuditEntityKind
+  // member — append-only) and the `runtime.*` action prefix isolates the read.
+  const actor: AuditActor = { kind: 'system', label: `runtime:${runtime.agent}` };
+  const entity: AuditEntity = {
+    kind: 'none',
+    id: runtime.turnId,
+    displayLabel: `${runtime.agent} turn`,
+  };
+
+  const entry: RuntimeAuditLogEntry = {
+    entryId,
+    timestamp,
+    createdAt: now,
+    role: 'system',
+    actor,
+    action,
+    entity,
+    severity: input.severity ?? runtimeSeverityFor(action),
+    before: null, // metadata-only marker — never a body
+    after: null,
+    reason,
+    context: null,
+    linkedTranscriptId: null,
+    runtime,
+  };
+
+  const cypher = buildRuntimeCypher(entry);
+
+  await tripleStackWrite({
+    id: entryId,
+    mongoCollection: COLLECTION,
+    mongoDoc: { ...entry, _id: undefined } as Record<string, unknown>,
+    neo4j: cypher,
+    chroma: {
+      collection: CHROMA_COLLECTION,
+      document: runtimeSemanticDocument(entry),
+      metadata: {
+        action: entry.action,
+        role: entry.role,
+        entityKind: entry.entity.kind,
+        severity: entry.severity,
+        timestamp: entry.timestamp,
+        turnId: runtime.turnId,
+        correlationId: runtime.correlationId,
+        agent: runtime.agent,
+        tenantId: runtime.tenantId,
+        baId: runtime.baId,
+      },
+    },
+  });
+
+  return entry;
+}
+
+/** Semantic blob for Chroma — scope + action only, never a body. */
+function runtimeSemanticDocument(entry: RuntimeAuditLogEntry): string {
+  const { runtime } = entry;
+  const parts = [
+    `action=${entry.action}`,
+    `agent=${runtime.agent}`,
+    `turn=${runtime.turnId}`,
+    `ba=${runtime.baId}`,
+    `tenant=${runtime.tenantId}`,
+    `severity=${entry.severity}`,
+  ];
+  if (runtime.gate) parts.push(`gate=${runtime.gate}`);
+  if (runtime.draftKind) parts.push(`draftKind=${runtime.draftKind}`);
+  if (entry.reason) parts.push(`reason=${entry.reason}`);
+  return parts.join(' | ');
+}
+
+/**
+ * Neo4j leg: stamp the runtime turn on the AuditEntry node and link to the
+ * BrandAmbassador on whose behalf the turn ran (when that node exists). MERGE on
+ * {entryId}; specific verb only (:ACTED_FOR). No generic relationships.
+ */
+function buildRuntimeCypher(
+  entry: RuntimeAuditLogEntry,
+): { cypher: string; params?: Record<string, unknown> } {
+  const { runtime } = entry;
+  return {
+    cypher: `
+      MERGE (a:AuditEntry {entryId: $entryId})
+      SET a += {
+        entryId: $entryId, timestamp: datetime($timestamp), action: $action,
+        role: $role, severity: $severity, agent: $agent, turnId: $turnId,
+        correlationId: $correlationId, tenantId: $tenantId, gate: $gate
+      }
+      WITH a
+      OPTIONAL MATCH (ba:BrandAmbassador {baId: $baId})
+      FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END |
+        MERGE (a)-[:ACTED_FOR]->(ba)
+      )
+      RETURN a.entryId AS entryId
+    `,
+    params: {
+      entryId: entry.entryId,
+      timestamp: entry.timestamp,
+      action: entry.action,
+      role: entry.role,
+      severity: entry.severity,
+      agent: runtime.agent,
+      turnId: runtime.turnId,
+      correlationId: runtime.correlationId,
+      tenantId: runtime.tenantId,
+      gate: runtime.gate,
+      baId: runtime.baId,
+    },
+  };
 }

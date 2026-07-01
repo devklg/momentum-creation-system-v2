@@ -5116,3 +5116,66 @@ export interface SuccessProfileAgentContext {
   recommendedCoachingFocus: string | null;
   updatedAt: IsoTimestamp;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · R0 — Runtime audit persistence (P7.2 schema / P7.3 write contract).
+//
+// Append-only extension of the 4.J audit substrate. A runtime audit event is a
+// turn-lifecycle / gate-decision marker: which agent, on whose behalf, in which
+// turn, made which transition — NEVER what was said. No body, no transcript, no
+// PII beyond opaque ids. Persisted through the app-direct tripleStackWrite seam
+// into the canonical `mcs_audit_log` substrate (NOT the Universal Gateway;
+// ACR-0007). Writer: `appendRuntimeAuditEntry` in server/src/domain/auditLog.ts,
+// canary-gated by RUNTIME_AUDIT_PERSISTENCE_ENABLED (default off).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** The internal runtime agents a runtime audit event can attribute a turn to. */
+export type RuntimeAuditAgent = 'michael' | 'steve' | 'ivory';
+
+/** Which kind of draft an emission event refers to (content is NOT stored). */
+export type RuntimeAuditDraftKind = 'outcome' | 'guided_action';
+
+/**
+ * Runtime audit actions (P7.2 §3.2). `domain.entity.action` convention with a
+ * `runtime` domain so the read surface isolates them by `actionPrefix: 'runtime.'`.
+ */
+export type RuntimeAuditAction =
+  | 'runtime.turn.opened'
+  | 'runtime.turn.draft_emitted'
+  | 'runtime.turn.closed'
+  | 'runtime.gate.allowed'
+  | 'runtime.gate.denied'
+  | 'runtime.persistence.enabled'
+  | 'runtime.persistence.disabled';
+
+/**
+ * Runtime scope carried alongside a runtime audit entry (P7.2 §3.3). Ids only —
+ * no body, no content, no PII. `turnId`+`action` form the idempotency dedup key.
+ */
+export interface RuntimeAuditContext {
+  turnId: string;
+  correlationId: string;
+  agent: RuntimeAuditAgent;
+  baId: string;
+  tenantId: string;
+  gate: string | null;
+  draftKind: RuntimeAuditDraftKind | null;
+}
+
+/** Input to `appendRuntimeAuditEntry`. `reason` is a capped gate-denial cause only. */
+export interface AppendRuntimeAuditEntryInput {
+  action: RuntimeAuditAction;
+  runtime: RuntimeAuditContext;
+  severity?: AuditSeverity;
+  reason?: string | null;
+  timestamp?: IsoTimestamp;
+}
+
+/**
+ * The persisted runtime audit row: a base `AuditLogEntry` (append-only 4.J
+ * substrate) plus the dedicated `runtime` scope block (never overloads
+ * `before`/`after`, which stay null for lifecycle markers).
+ */
+export interface RuntimeAuditLogEntry extends AuditLogEntry {
+  runtime: RuntimeAuditContext;
+}
