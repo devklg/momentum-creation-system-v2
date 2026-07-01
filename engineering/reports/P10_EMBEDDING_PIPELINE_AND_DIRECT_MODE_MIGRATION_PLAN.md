@@ -59,7 +59,8 @@ This is a **batch ingestion job**, not an inline request-path change. Embeddings
 ### 4.1 The pipeline
 - Runs on the **GPU host** (the VPS has no GPU). Reads the **approved-knowledge corpus** from Mongo, embeds each item with the local GPU embedder (MiniLM 384-dim), and **upserts** the vectors to Chroma Cloud (the adapter's `add` already upserts by stable id → idempotent re-runs).
 - **Schedule: every 12 hours.** Cron or a scheduled worker on the GPU host.
-- **Optional immediate publish:** an on-demand trigger that embeds + publishes a specific critical update without waiting for the batch tick.
+- **Freshness contract:** the BA-facing knowledge base is **at most ~12h stale** — the acceptable staleness SLA for approved knowledge. Newly-approved items appear at the next batch tick.
+- **Optional immediate publish:** an on-demand trigger that embeds + publishes a specific critical update right away, bypassing the 12h wait — the escape hatch when 12h is too slow.
 - **No silent degradation:** keep the existing rule — if the GPU embedder is unreachable, the batch fails loud and retries next tick rather than publishing bad/empty vectors.
 
 ### 4.2 The crux open question — query-time embedding ⚠️
