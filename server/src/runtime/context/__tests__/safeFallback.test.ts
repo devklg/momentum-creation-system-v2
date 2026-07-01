@@ -97,7 +97,7 @@ function scope(): RuntimeRequestScope {
     teamId: 'team_magnificent' as TeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
-    tmagId: 'TMBA-P49-001' as TmagId,
+    tmagId: 'TMAG-P49-001' as TmagId,
   };
 }
 
@@ -141,7 +141,7 @@ function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextP
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      tmagId: 'TMBA-P49-001' as TmagId,
+      tmagId: 'TMAG-P49-001' as TmagId,
       journalEnabled: false,
       languagePreference: 'en',
       permissions: {

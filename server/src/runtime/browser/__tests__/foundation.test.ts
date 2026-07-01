@@ -83,7 +83,7 @@ function expectNoMatches(files: Array<{ relativePath: string; text: string }>, p
 
 const tenantId = 'tenant_team_magnificent' as TenantId;
 const teamId = 'team_magnificent' as TeamId;
-const tmagId = 'TMBA-TEST-S16' as TmagId;
+const tmagId = 'TMAG-TEST-S16' as TmagId;
 const sessionId = 'session_s16_browser' as SessionId;
 const agentKey = 'michael_magnificent' as AgentKey;
 const correlationId = 'corr_s16_browser' as CorrelationId;
@@ -264,7 +264,7 @@ describe('S1.6 browser voice/text foundation', () => {
 
     expect(() =>
       createContextPacketHandoff(
-        { ...session, tmagId: 'TMBA-OTHER' as TmagId },
+        { ...session, tmagId: 'TMAG-OTHER' as TmagId },
         packet,
       ),
     ).toThrow(/Context Packet handoff must match/);

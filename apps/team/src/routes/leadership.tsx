@@ -50,7 +50,7 @@ const LEADER_CREDIBILITY: LeaderCredibilityContent = {
     'Team Magnificent is led by the people who built it — and who walk the exact path they ask you to walk.',
   leaders: [
     {
-      tmagId: 'TMBA-FOUNDER-KEVIN',
+      tmagId: 'TMAG-FOUNDER-KEVIN',
       name: 'Kevin L. Gardner',
       role: 'Founder',
       initials: 'KG',
@@ -63,7 +63,7 @@ const LEADER_CREDIBILITY: LeaderCredibilityContent = {
       ],
     },
     {
-      tmagId: 'TMBA-FOUNDER-PAUL',
+      tmagId: 'TMAG-FOUNDER-PAUL',
       name: 'Paul Barrios',
       role: 'Co-Leader',
       initials: 'PB',

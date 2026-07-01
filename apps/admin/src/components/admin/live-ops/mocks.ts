@@ -95,10 +95,10 @@ export function mockLiveGrid(filter: AdminDashboardFilter): AdminLiveGridRespons
     ['Mesa', 'AZ'],
   ];
   const SPONSORS: Array<[string, string]> = [
-    ['TMBA-20251101-AB12CD', 'Kevin Gardner'],
-    ['TMBA-20251104-EF34GH', 'Paul Mwangi'],
-    ['TMBA-20260112-IJ56KL', 'Marisol Vega'],
-    ['TMBA-20260118-MN78OP', 'Devon Chen'],
+    ['TMAG-20251101-AB12CD', 'Kevin Gardner'],
+    ['TMAG-20251104-EF34GH', 'Paul Mwangi'],
+    ['TMAG-20260112-IJ56KL', 'Marisol Vega'],
+    ['TMAG-20260118-MN78OP', 'Devon Chen'],
   ];
   const BUCKET_DAYS: Array<{
     bucket: AdminLiveGridSlot['ageBucket'];

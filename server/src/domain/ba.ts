@@ -54,7 +54,7 @@ function mintTmagId(): string {
   const now = new Date();
   const ymd = now.toISOString().slice(0, 10).replace(/-/g, '');
   const r = Math.random().toString(36).slice(2, 8).toUpperCase();
-  return `TMBA-${ymd}-${r}`;
+  return `TMAG-${ymd}-${r}`;
 }
 
 export async function emailExists(email: string): Promise<boolean> {

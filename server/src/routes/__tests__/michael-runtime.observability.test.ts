@@ -30,7 +30,7 @@ import {
   resetMichaelRuntimeObservabilityForTests,
 } from '../../services/michaelRuntimeObservability.js';
 
-const SESSION_BA_ID = 'TMBA-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
 
 const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
@@ -160,7 +160,7 @@ describe('S3.11 Michael runtime route — observability counter wiring', () => {
   it('4. body tmagId override increments bodyBaOverrideRejections only (now via CLIENT_RUNTIME_INPUT_NOT_ALLOWED)', async () => {
     enableRouteAndResponse();
     const res = mockRes();
-    await handleMichaelRuntimeResolve(mockReq({ tmagId: 'TMBA-EVIL-000000' }), res);
+    await handleMichaelRuntimeResolve(mockReq({ tmagId: 'TMAG-EVIL-000000' }), res);
 
     expect(res.statusCode).toBe(400);
     expect(res.body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');

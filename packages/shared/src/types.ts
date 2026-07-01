@@ -1544,7 +1544,7 @@ export interface GeneratorInviteResponse {
  */
 
 export type CrmDisposition =
-  | 'new-ba'
+  | 'new_brand_ambassador'
   | 'new-customer'
   | 'interested'
   | 'not-interested'
@@ -1552,7 +1552,7 @@ export type CrmDisposition =
 
 /** All five dispositions in BA-action-priority order (for UI rendering). */
 export const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
-  'new-ba',
+  'new_brand_ambassador',
   'new-customer',
   'interested',
   'later',
@@ -1965,7 +1965,7 @@ export interface BAProfile {
   // Read-only (wf_0072)
   tmagId: string;
   threeBaId: string;
-  /** The BA's own TM-XXXX code (one per BA for life — 2.3). null if Kevin hasn't issued one yet. */
+  /** The BA's own TMAG-XXXX code (one per BA for life — 2.3). null if Kevin hasn't issued one yet. */
   accessCodeHeld: string | null;
   sponsor: {
     tmagId: string;
@@ -2567,7 +2567,7 @@ export interface AdminBaDirectoryRow {
   fullName: string;
   email: string | null;
   phone: string | null;
-  /** TM-XXXX code this BA owns (one per BA for life, 2.3). Null if Kevin hasn't issued one. */
+  /** TMAG-XXXX code this BA owns (one per BA for life, 2.3). Null if Kevin hasn't issued one. */
   accessCodeOwned: string | null;
   /** Current sponsor (post-override if one was applied; otherwise the original). */
   sponsorTmagId: string | null;
@@ -4477,7 +4477,7 @@ export type ProspectCrmStatus =
   | 'closed';
 
 export type ProspectCrmDisposition =
-  | 'new_ba'
+  | 'new_brand_ambassador'
   | 'new_customer'
   | 'interested'
   | 'not_interested'
@@ -4487,7 +4487,7 @@ export type ProspectCrmDisposition =
   | 'do_not_contact';
 
 export type ProspectCrmClosedReason =
-  | 'enrolled_as_ba'
+  | 'enrolled_as_brand_ambassador'
   | 'became_customer'
   | 'not_interested'
   | 'do_not_contact'
@@ -4517,7 +4517,7 @@ export type ProspectTimelineEventKind =
   | 'follow_up_set'
   | 'follow_up_cleared'
   | 'disposition_changed'
-  | 'closed_new_ba'
+  | 'closed_new_brand_ambassador'
   | 'closed_new_customer'
   | 'closed_not_interested'
   | 'closed_later'
@@ -4546,7 +4546,7 @@ export type VmLeadLifecycleStatus =
   | 'presentation_completed'
   | 'dashboard_entered'
   | 'holding_tank'
-  | 'closed_new_ba'
+  | 'closed_new_brand_ambassador'
   | 'closed_new_customer'
   | 'closed_not_interested'
   | 'closed_later'
@@ -4574,7 +4574,7 @@ export const VM_LEAD_LIFECYCLE_STATUSES: readonly VmLeadLifecycleStatus[] = [
   'presentation_completed',
   'dashboard_entered',
   'holding_tank',
-  'closed_new_ba',
+  'closed_new_brand_ambassador',
   'closed_new_customer',
   'closed_not_interested',
   'closed_later',

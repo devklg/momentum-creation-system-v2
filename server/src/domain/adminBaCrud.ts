@@ -77,11 +77,11 @@ type BARecordMaybeDeleted = BARecord &
   };
 
 function mintTmagId(): string {
-  // Same format as ba.ts mintTmagId — TMBA-YYYYMMDD-<6 alphanum>.
+  // Same format as ba.ts mintTmagId — TMAG-YYYYMMDD-<6 alphanum>.
   const now = new Date();
   const ymd = now.toISOString().slice(0, 10).replace(/-/g, '');
   const r = Math.random().toString(36).slice(2, 8).toUpperCase();
-  return `TMBA-${ymd}-${r}`;
+  return `TMAG-${ymd}-${r}`;
 }
 
 function isDeleted(ba: BARecordMaybeDeleted): boolean {

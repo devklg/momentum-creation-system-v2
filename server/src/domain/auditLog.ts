@@ -135,7 +135,7 @@ export async function appendAuditEntry(input: AppendAuditEntryInput): Promise<Au
 
   // Neo4j: stamp the entry node and link out by actor kind. We don't
   // create generic Actor / Entity nodes — instead we connect to the
-  // existing BrandAmbassador node when the actor is a BA/admin, since
+  // existing TeamMagnificentMember node when the actor is a BA/admin, since
   // those already exist in the graph. For prospect / system / anonymous
   // the entry stands alone (still traversable by action / timestamp).
   const cypher = buildCypher(entry);
@@ -183,7 +183,7 @@ function buildCypher(
         MERGE (a:AuditEntry {entryId: $entryId})
         SET a += {${baseProps}}
         WITH a
-        OPTIONAL MATCH (ba:BrandAmbassador {tmagId: $actorTmagId})
+        OPTIONAL MATCH (ba:TeamMagnificentMember {tmagId: $actorTmagId})
         FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END |
           MERGE (a)-[:ACTED_BY]->(ba)
         )
@@ -441,7 +441,7 @@ function runtimeSemanticDocument(entry: McsRuntimeAuditLogEntry): string {
 
 /**
  * Neo4j leg: stamp the runtime turn on the AuditEntry node and link to the
- * BrandAmbassador on whose behalf the turn ran (when that node exists). MERGE on
+ * TeamMagnificentMember on whose behalf the turn ran (when that node exists). MERGE on
  * {entryId}; specific verb only (:ACTED_FOR). No generic relationships.
  */
 function buildRuntimeCypher(
@@ -457,7 +457,7 @@ function buildRuntimeCypher(
         correlationId: $correlationId, tenantId: $tenantId, gate: $gate
       }
       WITH a
-      OPTIONAL MATCH (ba:BrandAmbassador {tmagId: $tmagId})
+      OPTIONAL MATCH (ba:TeamMagnificentMember {tmagId: $tmagId})
       FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END |
         MERGE (a)-[:ACTED_FOR]->(ba)
       )

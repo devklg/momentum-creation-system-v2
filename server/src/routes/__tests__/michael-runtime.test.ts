@@ -19,7 +19,7 @@ import { validateMichaelResponseContract } from '../../runtime/orchestration/ind
  * here.
  */
 
-const SESSION_BA_ID = 'TMBA-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
 
 const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
@@ -120,10 +120,10 @@ const FORBIDDEN_TRACE_KEYS = [
 // the former body-BA-scope keys PLUS the broader server-owned forbidden set
 // (client-supplied turn, Context Packet, identifiers, tokens, …).
 const FORBIDDEN_BODY_CASES: ReadonlyArray<readonly [string, Record<string, unknown>]> = [
-  ['tmagId', { tmagId: 'TMBA-EVIL-000000' }],
-  ['sponsorTmagId', { sponsorTmagId: 'TMBA-EVIL-000000' }],
-  ['targetTmagId', { targetTmagId: 'TMBA-EVIL-000000' }],
-  ['downlineTmagId', { downlineTmagId: 'TMBA-EVIL-000000' }],
+  ['tmagId', { tmagId: 'TMAG-EVIL-000000' }],
+  ['sponsorTmagId', { sponsorTmagId: 'TMAG-EVIL-000000' }],
+  ['targetTmagId', { targetTmagId: 'TMAG-EVIL-000000' }],
+  ['downlineTmagId', { downlineTmagId: 'TMAG-EVIL-000000' }],
   ['turn', { turn: { identity: {}, taskType: 'training_support' } }],
   ['runtimeTurn', { runtimeTurn: { scenario: 'accepted_degraded' } }],
   ['contextPacket', { contextPacket: { approvedKnowledge: [] } }],

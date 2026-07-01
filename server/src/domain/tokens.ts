@@ -6,7 +6,7 @@
  *
  * Token format (Chat #104 locked):
  *   - 12 characters from the access-code alphabet (31 chars, no 0/1/I/O/L).
- *   - Same alphabet as TM-XXXX access codes for one convention across the
+ *   - Same alphabet as TMAG-XXXX access codes for one convention across the
  *     system. ~10^18 combinations, plenty for invite scale.
  *
  * Lifecycle (locked-spec Part 3.7 + COM Design Section E.1):

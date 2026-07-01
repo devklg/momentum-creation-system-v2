@@ -96,8 +96,8 @@ export const PHASE7_NEO4J_SCHEMA: readonly Neo4jSchemaStatement[] = [
 ];
 
 /**
- * Dependency note: the `(:Outcome)-[:CONFIRMED_BY]->(:BrandAmbassador)` edge
- * assumes the `BA` vs `BrandAmbassador` label reconciliation (P10 §5.1) is
+ * Dependency note: the `(:Outcome)-[:CONFIRMED_BY]->(:TeamMagnificentMember)` edge
+ * assumes the `BA` vs `TeamMagnificentMember` label reconciliation (P10 §5.1) is
  * settled before these are applied; and `AuditEntry.entryId` (R0) is part of the
  * P10 §6 canonical constraint set applied alongside this, not duplicated here.
  */

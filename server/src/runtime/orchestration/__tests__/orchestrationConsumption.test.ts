@@ -35,7 +35,7 @@ function baseEvent(): RuntimeAgentEventEnvelope {
     teamId: 'team_magnificent' as TeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
-    tmagId: 'TMBA-CONSUME-001' as TmagId,
+    tmagId: 'TMAG-CONSUME-001' as TmagId,
     agentKey: 'michael_magnificent',
     agentId: 'agent_instance_michael_default' as AgentId,
     sessionId: 'session_consume_001' as SessionId,
@@ -74,7 +74,7 @@ function baseInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextPac
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      tmagId: 'TMBA-CONSUME-001' as TmagId,
+      tmagId: 'TMAG-CONSUME-001' as TmagId,
       journalEnabled: true,
       languagePreference: 'en',
       permissions: {

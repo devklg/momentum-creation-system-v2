@@ -7,7 +7,7 @@
  * #125 when the founder hit /register, which is signup-only).
  *
  * Identity contract (auth.ts): TM BA ID + password. ONLY the TM BA ID
- * (TMBA-...) authenticates — THREE BA ID and email are operational facts on
+ * (TMAG-...) authenticates — THREE BA ID and email are operational facts on
  * the record, not credentials. New BAs are auto-sessioned at /register and
  * never see this page; this is for returning BAs and founders.
  *
@@ -99,7 +99,7 @@ export function LoginPage() {
               id="tmagId"
               value={tmagId}
               onChange={(e) => setTmagId(e.target.value)}
-              placeholder="TMBA-..."
+              placeholder="TMAG-..."
               autoComplete="username"
               autoCapitalize="characters"
               spellCheck={false}

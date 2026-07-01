@@ -149,7 +149,7 @@ export function RegisterPage() {
               id="code"
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder="TM-XXXX"
+              placeholder="TMAG-XXXX"
               maxLength={12}
               autoComplete="off"
             />

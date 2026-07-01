@@ -208,17 +208,17 @@ function buildCards(args: {
 }): AdminVmMetricCard[] {
   const leadsImported = args.leads.length;
   const activated = args.leads.filter((l) =>
-    isOneOf(l.status, ['activated', 'info_requested', 'callback_requested', 'presentation_started', 'presentation_completed', 'dashboard_entered', 'holding_tank', 'closed_new_ba']),
+    isOneOf(l.status, ['activated', 'info_requested', 'callback_requested', 'presentation_started', 'presentation_completed', 'dashboard_entered', 'holding_tank', 'closed_new_brand_ambassador']),
   ).length;
   const completed = args.leads.filter((l) =>
-    isOneOf(l.status, ['presentation_completed', 'dashboard_entered', 'holding_tank', 'closed_new_ba']),
+    isOneOf(l.status, ['presentation_completed', 'dashboard_entered', 'holding_tank', 'closed_new_brand_ambassador']),
   ).length;
   const callbacks = args.leads.filter((l) => l.status === 'callback_requested').length +
     args.crm.filter((r) => r.status === 'callback_requested').length;
   const closedNewBa = args.crm.filter((r) =>
-    r.disposition === 'new_ba' ||
-    r.closedReason === 'enrolled_as_ba' ||
-    r.status === 'closed_new_ba',
+    r.disposition === 'new_brand_ambassador' ||
+    r.closedReason === 'enrolled_as_brand_ambassador' ||
+    r.status === 'closed_new_brand_ambassador',
   ).length;
 
   return [
@@ -283,7 +283,7 @@ function buildBaRows(sources: AdminVmSources): AdminVmBaPerformanceRow[] {
     'presentation_completed',
     'dashboard_entered',
     'holding_tank',
-    'closed_new_ba',
+    'closed_new_brand_ambassador',
   ]);
   const activatedByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, [
     'activated',
@@ -293,7 +293,7 @@ function buildBaRows(sources: AdminVmSources): AdminVmBaPerformanceRow[] {
     'presentation_completed',
     'dashboard_entered',
     'holding_tank',
-    'closed_new_ba',
+    'closed_new_brand_ambassador',
   ]);
   const startsByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, [
     'presentation_started',
@@ -303,22 +303,22 @@ function buildBaRows(sources: AdminVmSources): AdminVmBaPerformanceRow[] {
     'presentation_completed',
     'dashboard_entered',
     'holding_tank',
-    'closed_new_ba',
+    'closed_new_brand_ambassador',
   ]);
   const completionsByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, [
     'presentation_completed',
     'dashboard_entered',
     'holding_tank',
-    'closed_new_ba',
+    'closed_new_brand_ambassador',
   ]);
   const callbacksByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, ['callback_requested']);
   const infoByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, ['info_requested']);
   const holdingByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, ['holding_tank']);
   const closedByOwner = countBy(
     sources.crm.filter((r) =>
-      r.disposition === 'new_ba' ||
-      r.closedReason === 'enrolled_as_ba' ||
-      r.status === 'closed_new_ba',
+      r.disposition === 'new_brand_ambassador' ||
+      r.closedReason === 'enrolled_as_brand_ambassador' ||
+      r.status === 'closed_new_brand_ambassador',
     ),
     (r) => r.ownerTmagId,
   );
@@ -403,12 +403,12 @@ function buildCampaignRows(sources: AdminVmSources): AdminVmCampaignRow[] {
       delivered: delivery.filter((d) => isOneOf(d.status, ['delivered', 'sent', 'complete'])).length,
       deliveryFailed: delivery.filter((d) => isOneOf(d.status, ['failed', 'error', 'bounced'])).length,
       activated: leads.filter((l) => isOneOf(l.status, ['activated', 'info_requested', 'callback_requested', 'presentation_started', 'presentation_completed', 'holding_tank'])).length,
-      videoCompletions: leads.filter((l) => isOneOf(l.status, ['presentation_completed', 'dashboard_entered', 'holding_tank', 'closed_new_ba'])).length,
+      videoCompletions: leads.filter((l) => isOneOf(l.status, ['presentation_completed', 'dashboard_entered', 'holding_tank', 'closed_new_brand_ambassador'])).length,
       callbacks: leads.filter((l) => l.status === 'callback_requested').length,
       closedNewBa: crm.filter((r) =>
-        r.disposition === 'new_ba' ||
-        r.closedReason === 'enrolled_as_ba' ||
-        r.status === 'closed_new_ba',
+        r.disposition === 'new_brand_ambassador' ||
+        r.closedReason === 'enrolled_as_brand_ambassador' ||
+        r.status === 'closed_new_brand_ambassador',
       ).length,
       createdAt: campaign.createdAt ?? null,
     };

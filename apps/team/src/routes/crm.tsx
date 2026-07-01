@@ -35,7 +35,7 @@ type TokenState =
 type InvitationSource = 'self' | 'ivory' | 'scriptmaker' | 'vm' | 'rvm';
 
 type CrmDisposition =
-  | 'new-ba'
+  | 'new_brand_ambassador'
   | 'new-customer'
   | 'interested'
   | 'not-interested'

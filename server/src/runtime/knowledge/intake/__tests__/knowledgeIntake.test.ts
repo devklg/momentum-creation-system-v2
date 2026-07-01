@@ -37,7 +37,7 @@ function scope(): RuntimeRequestScope {
     teamId: 'team_magnificent' as TeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
-    tmagId: 'TMBA-P45A-001' as TmagId,
+    tmagId: 'TMAG-P45A-001' as TmagId,
   };
 }
 
@@ -62,7 +62,7 @@ function source(overrides: Partial<RawKnowledgeSource> = {}): RawKnowledgeSource
     sourceType: 'tm_training_page',
     format: 'markdown',
     originalContent: MARKDOWN_SOURCE,
-    createdBy: 'TM-01',
+    createdBy: 'TMAG-01',
     createdAt: '2026-06-30T12:00:00.000Z',
     language: 'en',
     domain: 'training',
@@ -99,7 +99,7 @@ function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextP
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      tmagId: 'TMBA-P45A-001' as TmagId,
+      tmagId: 'TMAG-P45A-001' as TmagId,
       journalEnabled: false,
       languagePreference: 'en',
       permissions: {
@@ -291,7 +291,7 @@ describe('P4.5A knowledge intake — eligibility predicate', () => {
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      tmagId: 'TMBA-OTHER-999' as TmagId,
+      tmagId: 'TMAG-OTHER-999' as TmagId,
     };
     expect(isChunkRetrievalEligible(activeChunk(), eligibilityRequest({ scope: otherScope }))).toBe(false);
   });

@@ -1,7 +1,7 @@
 /**
- * /access-codes — mint and list TM-XXXX access codes.
+ * /access-codes — mint and list TMAG-XXXX access codes.
  *
- * Format locked Chat #94: TM-XXXX, 4 chars, 31-character alphabet excluding
+ * Format locked Chat #94: TMAG-XXXX, 4 chars, 31-character alphabet excluding
  * 0/O, 1/I, L. One code per BA, owned for life, never reassigned. Codes are
  * reused by the same BA for every new BA they sponsor.
  *
@@ -129,7 +129,7 @@ export function AccessCodesPage() {
       </p>
       <h1 className="font-display text-[36px] leading-none mb-2">Access Codes</h1>
       <p className="text-cream-mute text-sm mb-10 max-w-2xl">
-        Mint a TM-XXXX code for a Brand Ambassador. The BA reuses this same code for every new
+        Mint a TMAG-XXXX code for a Brand Ambassador. The BA reuses this same code for every new
         BA they sponsor. Format: 4 characters from a 31-character alphabet (no 0/O, no 1/I, no L).
         One code per BA — if the BA already owns one, the mint returns the existing code.
       </p>
@@ -143,7 +143,7 @@ export function AccessCodesPage() {
               id="sponsorTmagId"
               value={sponsorTmagId}
               onChange={(e) => setSponsorTmagId(e.target.value)}
-              placeholder="TMBA-XXXX..."
+              placeholder="TMAG-XXXX..."
               required
               disabled={minting}
             />

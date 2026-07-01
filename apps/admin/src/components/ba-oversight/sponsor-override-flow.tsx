@@ -127,7 +127,7 @@ export function SponsorOverrideFlow({ row, onCancel, onApplied }: Props) {
                 id="requestingTmagId"
                 value={requestingTmagId}
                 onChange={(e) => setRequestingTmagId(e.target.value)}
-                placeholder="TMBA-..."
+                placeholder="TMAG-..."
                 required
               />
               <p className="text-[11px] font-mono text-cream-faint mt-1">
@@ -140,7 +140,7 @@ export function SponsorOverrideFlow({ row, onCancel, onApplied }: Props) {
                 id="newSponsorTmagId"
                 value={newSponsorTmagId}
                 onChange={(e) => setNewSponsorTmagId(e.target.value)}
-                placeholder="TMBA-..."
+                placeholder="TMAG-..."
                 required
               />
               <p className="text-[11px] font-mono text-cream-faint mt-1">

@@ -25,7 +25,7 @@ import type {
  * Returned-only; nothing here mutates production state or persists.
  */
 
-const SESSION_BA_ID = 'TMBA-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
 
 function expectOk(
   result: CreateMichaelRuntimeTurnForAuthenticatedBaResult,
@@ -91,9 +91,9 @@ describe('S3.10 Michael runtime turn source — createMichaelRuntimeTurnForAuthe
       tmagId: SESSION_BA_ID,
       // None of these exist on the input type; passed via `as` to prove the
       // function reads only `tmagId` and cannot be steered by body authority.
-      sponsorTmagId: 'TMBA-EVIL-000001',
-      targetTmagId: 'TMBA-EVIL-000002',
-      downlineTmagId: 'TMBA-EVIL-000003',
+      sponsorTmagId: 'TMAG-EVIL-000001',
+      targetTmagId: 'TMAG-EVIL-000002',
+      downlineTmagId: 'TMAG-EVIL-000003',
       token: 'prospect-token-xyz',
     } as unknown as CreateMichaelRuntimeTurnForAuthenticatedBaInput;
 
@@ -103,9 +103,9 @@ describe('S3.10 Michael runtime turn source — createMichaelRuntimeTurnForAuthe
     // The scope tmagId is the session tmagId — never any of the injected ids.
     expect(result.input.identity.scope.tmagId).toBe(SESSION_BA_ID);
     const serialized = JSON.stringify(result.input);
-    expect(serialized).not.toContain('TMBA-EVIL-000001');
-    expect(serialized).not.toContain('TMBA-EVIL-000002');
-    expect(serialized).not.toContain('TMBA-EVIL-000003');
+    expect(serialized).not.toContain('TMAG-EVIL-000001');
+    expect(serialized).not.toContain('TMAG-EVIL-000002');
+    expect(serialized).not.toContain('TMAG-EVIL-000003');
     expect(serialized).not.toContain('prospect-token-xyz');
   });
 

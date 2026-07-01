@@ -209,7 +209,7 @@ export function BaCrudModal({ mode, row, onClose, onDone }: Props) {
                   id="sponsorTmagId"
                   value={form.sponsorTmagId}
                   onChange={(e) => set('sponsorTmagId', e.target.value)}
-                  placeholder="TMBA-…"
+                  placeholder="TMAG-…"
                 />
               </div>
             )}

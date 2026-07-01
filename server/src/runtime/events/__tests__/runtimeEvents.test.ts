@@ -30,7 +30,7 @@ const baseEvent: RuntimeAgentEventEnvelope = {
   teamId: 'team_magnificent' as TeamId,
   teamKey: TEAM_MAGNIFICENT_KEY,
   teamName: TEAM_MAGNIFICENT_NAME,
-  tmagId: 'TMBA-TEST-001' as TmagId,
+  tmagId: 'TMAG-TEST-001' as TmagId,
   agentKey: 'michael_magnificent',
   agentId: 'agent_instance_michael_default' as AgentId,
   sessionId: 'session_test_001' as SessionId,

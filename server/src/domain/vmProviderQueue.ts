@@ -228,7 +228,7 @@ async function vmAudit(input: {
         'MERGE (e:VmAuditEvent {auditId: $id}) ' +
         'SET e.action = $action, e.entityId = $entityId, e.ownerTmagId = $ownerTmagId, e.createdAt = datetime($createdAt) ' +
         'WITH e ' +
-        'OPTIONAL MATCH (ba:BrandAmbassador {tmagId: $ownerTmagId}) ' +
+        'OPTIONAL MATCH (ba:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
         'FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END | MERGE (ba)-[:HAS_VM_AUDIT]->(e))',
       params: {
         action: input.action,
@@ -536,7 +536,7 @@ async function upsertImportedLead(
         'MERGE (l:VmLead {leadId: $id}) ' +
         'SET l.ownerTmagId = $ownerTmagId, l.sponsorTmagId = $sponsorTmagId, l.status = $status, l.createdAt = datetime($createdAt) ' +
         'WITH l ' +
-        'OPTIONAL MATCH (ba:BrandAmbassador {tmagId: $ownerTmagId}) ' +
+        'OPTIONAL MATCH (ba:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
         'FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END | MERGE (ba)-[:OWNS_VM_LEAD]->(l))',
       params: {
         ownerTmagId: lead.ownerTmagId,

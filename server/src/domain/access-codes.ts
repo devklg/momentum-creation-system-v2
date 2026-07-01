@@ -7,7 +7,7 @@
 import { gatewayCall } from '../services/gateway.js';
 
 export interface AccessCodeRecord {
-  _id: string; // the code itself, e.g. "TM-01"
+  _id: string; // the code itself, e.g. "TMAG-01"
   code: string;
   sponsorTmagId: string; // Team Magnificent BA ID of the sponsor
   sponsorThreeBaId: string; // sponsor's THREE International BA ID

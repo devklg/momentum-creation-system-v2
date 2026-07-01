@@ -26,7 +26,7 @@ function scope(): RuntimeRequestScope {
     teamId: 'team_magnificent' as TeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
-    tmagId: 'TMBA-P410-001' as TmagId,
+    tmagId: 'TMAG-P410-001' as TmagId,
   };
 }
 

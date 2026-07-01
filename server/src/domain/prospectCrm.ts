@@ -110,8 +110,8 @@ function bulkLeadStatusFor(kind: ProspectTimelineKind): BulkLeadStatus | null {
       return 'presentation_completed';
     case 'holding_tank':
       return 'holding_tank';
-    case 'closed_new_ba':
-      return 'closed_new_ba';
+    case 'closed_new_brand_ambassador':
+      return 'closed_new_brand_ambassador';
     default:
       return null;
   }
@@ -134,7 +134,7 @@ function crmStatusFor(kind: ProspectTimelineKind): ProspectCrmStatus | null {
       return 'presentation_completed';
     case 'holding_tank':
       return 'holding_tank';
-    case 'closed_new_ba':
+    case 'closed_new_brand_ambassador':
       return 'closed';
     default:
       return null;
@@ -443,13 +443,13 @@ export async function closeCrmAsNewBa(input: {
   reason: string;
 }): Promise<ProspectCRMRecord> {
   const record = await getOwnerScopedCrmRecord(input.prospectId, input.ownerTmagId);
-  if (record.status === 'closed' && record.disposition === 'new_ba') return record;
+  if (record.status === 'closed' && record.disposition === 'new_brand_ambassador') return record;
 
   const closedAt = new Date().toISOString();
   const patch: Partial<ProspectCRMDocument> = {
     status: 'closed',
-    disposition: 'new_ba',
-    closedReason: 'enrolled_as_ba',
+    disposition: 'new_brand_ambassador',
+    closedReason: 'enrolled_as_brand_ambassador',
     closedAt,
     updatedAt: closedAt,
   };
@@ -477,7 +477,7 @@ export async function closeCrmAsNewBa(input: {
       database: MONGO_DB,
       collection: BULK_LEADS_COLLECTION,
       filter: { leadId: record.leadId },
-      update: { $set: { status: 'closed_new_ba', updatedAt: closedAt } },
+      update: { $set: { status: 'closed_new_brand_ambassador', updatedAt: closedAt } },
     });
   }
   await gatewayCall('neo4j', 'cypher', {
@@ -492,8 +492,8 @@ export async function closeCrmAsNewBa(input: {
       crmRecordId: record.crmRecordId,
       prospectId: record.prospectId,
       status: 'closed',
-      disposition: 'new_ba',
-      closedReason: 'enrolled_as_ba',
+      disposition: 'new_brand_ambassador',
+      closedReason: 'enrolled_as_brand_ambassador',
       closedAt,
       state: 'enrolled',
     },
@@ -504,7 +504,7 @@ export async function closeCrmAsNewBa(input: {
     crmRecordId: record.crmRecordId,
     ownerTmagId: record.ownerTmagId,
     sponsorTmagId: record.sponsorTmagId,
-    kind: 'closed_new_ba',
+    kind: 'closed_new_brand_ambassador',
     note: 'CRM record closed because the prospect enrolled as a Brand Ambassador.',
     metadata: { reason: input.reason },
     createdAt: closedAt,
@@ -526,8 +526,8 @@ export async function closeCrmAsNewBa(input: {
     },
     after: {
       status: 'closed',
-      disposition: 'new_ba',
-      closedReason: 'enrolled_as_ba',
+      disposition: 'new_brand_ambassador',
+      closedReason: 'enrolled_as_brand_ambassador',
       tokenState: 'enrolled',
     },
     reason: input.reason,

@@ -1,9 +1,9 @@
 /**
- * Access codes domain (TM-XXXX).
+ * Access codes domain (TMAG-XXXX).
  *
- * Locked Chat #94: width = TM-XXXX (4 chars, ~1.6M codes).
+ * Locked Chat #94: width = TMAG-XXXX (4 chars, ~1.6M codes).
  * Per Signup Architecture Section D:
- *   - Pattern: TM-XXXX where XXXX is uppercase alphanumeric.
+ *   - Pattern: TMAG-XXXX where XXXX is uppercase alphanumeric.
  *   - Generation is admin-only; code is assigned to a single BA at mint.
  *   - First use does NOT consume the code — it stays active for the BA's
  *     entire downline.
@@ -26,7 +26,7 @@ const CODE_LEN = 4;
 const MAX_GEN_ATTEMPTS = 8;
 
 function randomCode(): string {
-  let out = 'TM-';
+  let out = 'TMAG-';
   for (let i = 0; i < CODE_LEN; i++) {
     out += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
   }
@@ -76,7 +76,7 @@ export async function mintAccessCode(
   let code: string | null = null;
   if (input.explicit) {
     const ex = input.explicit.trim().toUpperCase();
-    if (!/^TM-[A-Z0-9-]{2,8}$/.test(ex)) {
+    if (!/^TMAG-[A-Z0-9-]{2,8}$/.test(ex)) {
       throw new Error(`Invalid explicit code shape: ${ex}`);
     }
     if (await codeExists(ex)) {

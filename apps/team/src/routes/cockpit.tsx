@@ -160,14 +160,14 @@ interface MarkInvitationSentResponse {
 // _types_ts6059_chat120). Keep in sync with shared CRM types added Chat #132.
 
 type CrmDisposition =
-  | 'new-ba'
+  | 'new_brand_ambassador'
   | 'new-customer'
   | 'interested'
   | 'not-interested'
   | 'later';
 
 const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
-  'new-ba',
+  'new_brand_ambassador',
   'new-customer',
   'interested',
   'later',
@@ -175,7 +175,7 @@ const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
 ];
 
 const DISPOSITION_LABEL: Record<CrmDisposition, string> = {
-  'new-ba': 'New BA',
+  'new_brand_ambassador': 'New BA',
   'new-customer': 'New customer',
   interested: 'Interested',
   later: 'Later',

@@ -66,7 +66,7 @@ export interface LeaderCredibilityContent {
 }
 
 const KEVIN: LeaderProfile = {
-  tmagId: 'TMBA-FOUNDER-KEVIN',
+  tmagId: 'TMAG-FOUNDER-KEVIN',
   name: 'Kevin L. Gardner',
   role: 'Founder',
   initials: 'KG',
@@ -80,7 +80,7 @@ const KEVIN: LeaderProfile = {
 };
 
 const PAUL: LeaderProfile = {
-  tmagId: 'TMBA-FOUNDER-PAUL',
+  tmagId: 'TMAG-FOUNDER-PAUL',
   name: 'Paul Barrios',
   role: 'Co-Leader',
   initials: 'PB',

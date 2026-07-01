@@ -127,7 +127,7 @@ export function AuditPage() {
           <Input
             value={draft.actorTmagId}
             onChange={(e) => setDraft({ ...draft, actorTmagId: e.target.value })}
-            placeholder="TMBA-…"
+            placeholder="TMAG-…"
           />
         </Field>
         <Field label="Action (prefix)">

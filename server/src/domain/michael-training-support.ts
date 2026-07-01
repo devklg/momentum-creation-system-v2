@@ -91,7 +91,7 @@ interface PersistedSteveDiscovery {
   successProfile: SuccessProfile;
 }
 
-interface BrandAmbassadorLookup {
+interface TeamMagnificentMemberLookup {
   tmagId: string;
   sponsorTmagId?: string | null;
   firstName?: string | null;
@@ -113,8 +113,8 @@ export class TrainingSupportAccessError extends Error {
 // Reads
 // ─────────────────────────────────────────────────────────────────────────
 
-async function getBrandAmbassador(tmagId: string): Promise<BrandAmbassadorLookup | null> {
-  const result = await gatewayCall<{ documents: BrandAmbassadorLookup[] }>('mongodb', 'query', {
+async function getTeamMagnificentMember(tmagId: string): Promise<TeamMagnificentMemberLookup | null> {
+  const result = await gatewayCall<{ documents: TeamMagnificentMemberLookup[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'brand_ambassadors',
     filter: { tmagId },
@@ -239,7 +239,7 @@ export async function getTrainingSupportCardForSponsor(args: {
   requestingTmagId: string;
   downlineTmagId: string;
 }): Promise<MichaelTrainingSupportCard> {
-  const downline = await getBrandAmbassador(args.downlineTmagId);
+  const downline = await getTeamMagnificentMember(args.downlineTmagId);
   if (!downline) {
     throw new TrainingSupportAccessError(
       'NO_DOWNLINE',

@@ -119,7 +119,7 @@ authRoutes.post('/register', ipRateLimit('auth_register', REGISTER_LIMIT), async
 /**
  * POST /api/auth/login — single login surface used by both .team and admin.
  *
- * Identity contract: TM BA ID + password. ONLY the TM BA ID (TMBA-...)
+ * Identity contract: TM BA ID + password. ONLY the TM BA ID (TMAG-...)
  * authenticates. THREE BA ID and email are tracked on the BA record but are
  * not login identifiers — they're operational facts, not credentials.
  *

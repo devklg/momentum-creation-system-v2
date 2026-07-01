@@ -76,7 +76,7 @@ export function LoginPage() {
               id="tmagId"
               value={tmagId}
               onChange={(e) => setTmagId(e.target.value)}
-              placeholder="TMBA-XXXX"
+              placeholder="TMAG-XXXX"
               autoComplete="username"
               required
               disabled={submitting}

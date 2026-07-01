@@ -445,7 +445,7 @@ export async function enqueueBroadcast(
         'SET b.createdAt = datetime($createdAt), b.channel = $channel, ' +
         '    b.audiencePreset = $audiencePreset, b.recipientCount = $recipientCount ' +
         'WITH b ' +
-        'MATCH (a:BrandAmbassador {tmagId: $createdByTmagId}) ' +
+        'MATCH (a:TeamMagnificentMember {tmagId: $createdByTmagId}) ' +
         'MERGE (b)-[:SENT_BY]->(a)',
       params: {
         broadcastId,
@@ -589,7 +589,7 @@ export async function prepareSendTest(
         'SET b.createdAt = datetime($createdAt), b.channel = $channel, ' +
         '    b.audiencePreset = $audiencePreset, b.isTestSend = true, b.recipientCount = 1 ' +
         'WITH b ' +
-        'MATCH (a:BrandAmbassador {tmagId: $createdByTmagId}) ' +
+        'MATCH (a:TeamMagnificentMember {tmagId: $createdByTmagId}) ' +
         'MERGE (b)-[:SENT_BY]->(a)',
       params: {
         broadcastId,

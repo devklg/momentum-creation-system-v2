@@ -21,7 +21,7 @@ import { validateMichaelResponseContract } from '../../runtime/orchestration/ind
  *                            trace omitted unless the trace flag is on.
  */
 
-const SESSION_BA_ID = 'TMBA-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
 
 const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
@@ -124,9 +124,9 @@ describe('S3.11 server-owned Michael runtime turn — end-to-end contract', () =
   });
 
   it.each([
-    ['tmagId', { tmagId: 'TMBA-EVIL-000000' }],
-    ['sponsorTmagId', { sponsorTmagId: 'TMBA-EVIL-000000' }],
-    ['targetTmagId', { targetTmagId: 'TMBA-EVIL-000000' }],
+    ['tmagId', { tmagId: 'TMAG-EVIL-000000' }],
+    ['sponsorTmagId', { sponsorTmagId: 'TMAG-EVIL-000000' }],
+    ['targetTmagId', { targetTmagId: 'TMAG-EVIL-000000' }],
     ['turn', { turn: {} }],
     ['runtimeTurn', { runtimeTurn: {} }],
     ['contextPacket', { contextPacket: {} }],

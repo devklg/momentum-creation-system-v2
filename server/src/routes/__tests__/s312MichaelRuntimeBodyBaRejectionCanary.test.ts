@@ -16,7 +16,7 @@ import {
  * Express port, no supertest, no persistence, no logging of request bodies.
  */
 
-const SESSION_BA_ID = 'TMBA-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
 
 const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
@@ -156,10 +156,10 @@ describe('S3.12 forbidden runtime input payloads', () => {
 
 describe('S3.12 forbidden BA/prospect/session authority payloads', () => {
   it.each([
-    ['tmagId', { tmagId: 'TMBA-EVIL-000001' }],
-    ['sponsorTmagId', { sponsorTmagId: 'TMBA-EVIL-SPONSOR' }],
-    ['targetTmagId', { targetTmagId: 'TMBA-EVIL-TARGET' }],
-    ['downlineTmagId', { downlineTmagId: 'TMBA-EVIL-DOWNLINE' }],
+    ['tmagId', { tmagId: 'TMAG-EVIL-000001' }],
+    ['sponsorTmagId', { sponsorTmagId: 'TMAG-EVIL-SPONSOR' }],
+    ['targetTmagId', { targetTmagId: 'TMAG-EVIL-TARGET' }],
+    ['downlineTmagId', { downlineTmagId: 'TMAG-EVIL-DOWNLINE' }],
     ['prospectId', { prospectId: 'PROSPECT-EVIL' }],
     ['prospectToken', { prospectToken: 'TOKEN-EVIL' }],
     ['token', { token: 'TOKEN-EVIL' }],
@@ -184,7 +184,7 @@ describe('S3.12 forbidden BA/prospect/session authority payloads', () => {
 
 describe('S3.12 mixed forbidden payloads and malformed language', () => {
   it.each([
-    ['English plus tmagId', { language: 'en', tmagId: 'TMBA-EVIL-000001' }],
+    ['English plus tmagId', { language: 'en', tmagId: 'TMAG-EVIL-000001' }],
     ['Spanish plus contextPacket', { language: 'es', contextPacket: {} }],
     ['English plus turn', { language: 'en', turn: {} }],
   ] as ReadonlyArray<readonly [string, Record<string, unknown>]> )(

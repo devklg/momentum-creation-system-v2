@@ -8,7 +8,7 @@
  *
  * Closed-state dispositions (BAs who already enrolled, etc.) are excluded
  * via a configurable closed-set. The current vocabulary only includes
- * 'new-ba' (terminal: prospect became BA), so that's the only one excluded
+ * 'new_brand_ambassador' (terminal: prospect became BA), so that's the only one excluded
  * today; broader vocabulary filtering will refine once disposition values
  * are finalized in code.
  */
@@ -31,7 +31,7 @@ const MONGO_DB = 'momentum';
 const COLL_DISPO = 'crm_dispositions';
 
 /** Disposition values that close a prospect; excluded from open follow-up aging. */
-const CLOSED_DISPOSITIONS = new Set(['new-ba']);
+const CLOSED_DISPOSITIONS = new Set(['new_brand_ambassador']);
 
 const PROVENANCE =
   'Follow-up data note (Chat #143): The spec asks for OPEN follow-up ' +

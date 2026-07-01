@@ -234,7 +234,7 @@ export async function markFastStartModuleState(args: {
       mongoDoc: doc as unknown as Record<string, unknown>,
       neo4j: {
         cypher:
-          'MERGE (b:BrandAmbassador {tmagId: $tmagId}) ' +
+          'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
           'MERGE (p:FastStartProgress {progressId: $id}) ' +
           'SET p.tmagId = $tmagId, p.moduleId = $moduleId, p.state = $state, ' +
           '    p.startedAt = $startedAt, p.completedAt = $completedAt, ' +

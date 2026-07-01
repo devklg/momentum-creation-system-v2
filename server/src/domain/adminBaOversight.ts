@@ -8,7 +8,7 @@
  *
  *   READ
  *     brand_ambassadors          identity + sponsor + lastLoginAt
- *     access_codes               the BA's owned TM-XXXX code (one per BA, 2.3)
+ *     access_codes               the BA's owned TMAG-XXXX code (one per BA, 2.3)
  *     ba_commitments             welcome completion (J.3)
  *     invite_tokens              2-in-72 count + lifetime invite count
  *     crm_followups              oldest open follow-up due date

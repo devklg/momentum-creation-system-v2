@@ -34,7 +34,7 @@ function baScope(): RuntimeRequestScope {
     teamId: 'team_magnificent' as TeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
-    tmagId: 'TMBA-20260101-ABC123' as TmagId,
+    tmagId: 'TMAG-20260101-ABC123' as TmagId,
   };
 }
 
@@ -185,7 +185,7 @@ describe('toContextReferences — feeds buildContextPacket as approved knowledge
         teamId: 'team_magnificent' as TeamId,
         teamKey: TEAM_MAGNIFICENT_KEY,
         teamName: TEAM_MAGNIFICENT_NAME,
-        tmagId: 'TMBA-20260101-ABC123' as TmagId,
+        tmagId: 'TMAG-20260101-ABC123' as TmagId,
         journalEnabled: false,
         languagePreference: 'en',
         permissions: {

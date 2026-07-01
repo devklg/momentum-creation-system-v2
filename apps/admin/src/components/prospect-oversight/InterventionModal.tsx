@@ -148,7 +148,7 @@ export function InterventionModal({ kind, detail, onClose, onDone }: Props) {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, requestingTmagId: e.target.value }))
                 }
-                placeholder="TMBA-…"
+                placeholder="TMAG-…"
               />
             </div>
 
@@ -159,7 +159,7 @@ export function InterventionModal({ kind, detail, onClose, onDone }: Props) {
                   id="targetBa"
                   value={targetBaValue}
                   onChange={(e) => setTargetBa(e.target.value)}
-                  placeholder="TMBA-…"
+                  placeholder="TMAG-…"
                 />
               </div>
             )}
