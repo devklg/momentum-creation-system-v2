@@ -27,7 +27,7 @@ This is the single authoritative **go/no-go** artifact for shipping MCS V2 to pr
 
 | # | Blocker | Section | Owner | Status |
 |---|---|---|---|---|
-| B1 | Production topology **DECIDED** (InterServer VPS + Atlas/Aura/Chroma Cloud + hosted embeddings, direct writes); execution pending | §2 | Kevin | 🟡 decided, execution pending |
+| B1 | Production topology **DECIDED** (InterServer VPS + Atlas/Aura direct + Chroma Cloud for approved knowledge + local-GPU batch embeddings); execution pending | §2 | Kevin | 🟡 decided, execution pending |
 | B2 | Branch protection: required `gates` check **confirmed enabled** on `main` (owner, 2026-06-30); auxiliary protections to confirm | §3 | Kevin (GitHub UI) | 🟢 core enforced |
 | B3 | Auth endpoints unthrottled (H2); placeholder `JWT_SECRET` passes validation (H3); Telnyx webhook fail-open (H4) | §4 | Kevin | 🔴 open |
 | B4 | H1 outbox-drain **live smoke test** not yet run — dedicated stack now **exists**; gated only by schema creation + write-freeze | §5 | Kevin (create/approve schemas) | 🔴 open |
@@ -43,13 +43,13 @@ Non-blocking-but-required-for-a-mature-release items (CI matrix, vuln scanning, 
 **Decision (resolves the open questions in `DEPLOYMENT_GUIDE.md:261-267`):** production runs on an **InterServer Linux VPS** for the app tier with **managed cloud data services**. Full record + implications: **`engineering/reports/P10_PRODUCTION_TOPOLOGY_DECISION.md`**.
 
 - App/API host: InterServer Linux VPS — Express API (7700), `.com`, `.team`, `/admin`, Caddy/Nginx + TLS.
-- Data: **MongoDB Atlas**, **Neo4j Aura**, **Chroma Cloud** (or hosted vector), **OpenAI/hosted embeddings** (no local GPU).
+- Data: **MongoDB Atlas** + **Neo4j Aura** (direct writes); **Chroma Cloud** for BA-facing approved knowledge, fed by a **local-GPU batch embedding pipeline** (MiniLM 384-dim, every 12h + optional immediate publish). No hosted/OpenAI embeddings.
 - App writes **directly** to the stores; the Universal Gateway is **dev tooling only**, not in the prod runtime path.
 
 The *decision* is made; **execution** remains (these move B1 from decide → do):
 
 - [ ] Provision Atlas / Aura / Chroma Cloud; capture connection strings as VPS-only secrets. *(Kevin)*
-- [ ] Choose hosted embeddings model + dimension; add `OPENAI_API_KEY`/`EMBEDDINGS_MODEL` to `env.ts` + `.env.example`; implement fail-closed hosted-embeddings path in the embedder adapter. ⚠️ 1536-dim (OpenAI) vs 384-dim (local MiniLM) — standardize from the start on the fresh dedicated stack. *(code slice)*
+- [ ] Add Chroma Cloud auth (`CHROMA_API_KEY`/`CHROMA_TENANT`/`CHROMA_DATABASE`) to `env.ts` + `.env.example`; build the local-GPU batch embedding/publish pipeline (12h + immediate publish); decide query-time embedding (migration plan §4.2). Embeddings stay 384-dim MiniLM — no dimension change. *(code slice)*
 - [ ] Confirm direct-adapter coverage for all write paths; flip `PERSISTENCE_DIRECT_ENABLED=true` + all `PERSISTENCE_*_MODE=direct`. *(code/config)*
 - [ ] Stand up the VPS: Node ≥22, pnpm 9, Caddy/Nginx + TLS, pm2/systemd for API + workers. *(Kevin — see §9)*
 - [ ] Raise the ACR (managed-cloud hosting + hosted-embeddings provider; direct-persistence already ACR-0007) and log it in the decision ledger. *(Kevin)*
