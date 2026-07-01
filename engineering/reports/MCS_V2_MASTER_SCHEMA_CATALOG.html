@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MCS V2 — Master Schema Catalog</title>
+<style>
+  :root{--gold:#facc15;--blue:#3b82f6;--purple:#8a2be2;--ink:#14161c;--muted:#5b616e;--line:#e4e7ee;--soft:#f6f7fb;--code:#f0f1f6;}
+  *{box-sizing:border-box;} html{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  body{margin:0;color:var(--ink);background:#fff;font:14px/1.5 -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
+  .page{max-width:1100px;margin:0 auto;padding:36px 40px 60px;}
+  header.doc{border-top:6px solid var(--gold);padding-top:20px;margin-bottom:6px;}
+  .kicker{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--purple);}
+  h1{font-size:28px;line-height:1.15;margin:6px 0 8px;font-weight:800;letter-spacing:-.3px;}
+  .badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#7a5c00;background:var(--gold);border-radius:999px;padding:4px 12px;vertical-align:middle;}
+  .meta{color:var(--muted);font-size:12.5px;margin:8px 0 0;}
+  .meta code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:11.5px;}
+  h2{font-size:18px;font-weight:800;margin:34px 0 4px;padding-bottom:6px;border-bottom:2px solid var(--line);letter-spacing:-.2px;}
+  h2 .num{display:inline-block;min-width:24px;color:var(--blue);font-weight:900;}
+  h3{font-size:14px;margin:16px 0 4px;color:#2c3038;}
+  p{margin:9px 0;} .lead{color:#2c3038;}
+  code,.mono{font-family:"SFMono-Regular","JetBrains Mono",Consolas,monospace;font-size:11.5px;}
+  p code,td code,li code{background:var(--code);padding:1px 4px;border-radius:4px;}
+  table{width:100%;border-collapse:collapse;margin:12px 0 4px;font-size:11.8px;border:1px solid var(--line);}
+  thead th{text-align:left;background:var(--ink);color:#fff;font-weight:700;font-size:11px;letter-spacing:.2px;padding:7px 9px;}
+  tbody td{padding:7px 9px;border-top:1px solid var(--line);vertical-align:top;}
+  tbody tr:nth-child(even){background:var(--soft);}
+  td:first-child{white-space:nowrap;}
+  ul{margin:8px 0;padding-left:20px;} li{margin:3px 0;}
+  pre{background:var(--soft);border-left:4px solid var(--blue);border-radius:0 6px 6px 0;padding:10px 14px;overflow-x:auto;font-size:11.5px;line-height:1.5;}
+  .note{background:var(--soft);border-left:4px solid var(--gold);border-radius:0 6px 6px 0;padding:11px 15px;margin:14px 0;font-size:12.5px;}
+  .rung{display:inline-block;font-weight:800;font-size:10.5px;padding:1px 6px;border-radius:4px;color:#fff;}
+  .r0{background:#64748b;}.r1{background:var(--blue);}.r2{background:var(--purple);}.r3{background:#0d9488;}
+  footer.doc{margin-top:44px;padding-top:12px;border-top:2px solid var(--line);color:var(--muted);font-size:11.5px;}
+  @media print{.page{max-width:none;padding:0 6mm;}body{font-size:10px;}h2{margin-top:16px;page-break-after:avoid;}table,tr,.note,pre{page-break-inside:avoid;}thead{display:table-header-group;}@page{margin:12mm 8mm;}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="doc">
+  <div class="kicker">Momentum Creation System V2 &middot; Team Magnificent</div>
+  <h1>MCS V2 — Master Schema Catalog <span class="badge">Review · Not Applied</span></h1>
+  <p class="meta">Every Mongo collection, Neo4j label, and Chroma collection — key, core fields, relationships, purpose.
+    MongoDB <code>momentum</code>@30000 (49 app + 3 memory) · Neo4j@7710 (~37 labels) · ChromaDB@8200 (<code>mcs_*</code>).
+    Reflects code + approved decisions; stores not yet schema-applied.</p>
+</header>
+
+<h2><span class="num">0</span> Identity &amp; membership — the spine</h2>
+<div class="note">
+  <strong>The app is exclusively for Team Magnificent members.</strong> A member is an <strong>enrolled III International BA in Kevin's downline</strong>
+  (III enrollment + downline are hard preconditions; every member IS an enrolled III BA — no member-without-III-BA state).
+  THREE is upstream authority for enrollment/genealogy; the app <strong>mirrors</strong> the downline slice, never overrides.
+</div>
+<ul>
+  <li><strong>Member id (canonical):</strong> <code>tmagId</code> = <code>TMAG-YYYYMMDD-XXXXXX</code> — the sole login identifier.</li>
+  <li><strong>III mirror (required attribute):</strong> <code>threeBaId</code> (+ <code>threeUsername</code>, status) — never authenticates.</li>
+  <li><strong>Sponsor (immutable):</strong> captured at signup; must be a member; founders <code>TMAG-01</code> (Kevin) / <code>TMAG-02</code> (Paul) are roots.</li>
+  <li><strong>Membership graph:</strong> the downline sponsor tree (§7).</li>
+</ul>
+<div class="note"><strong>Naming — <code>tmag</code> is the Team Magnificent token</strong> (decision 2026-07-01): member id <code>tmagId</code> (<code>TMAG-…</code>), access code <code>TMAG-XXXX</code>, and <strong>every <code>tm*</code> identifier renames to <code>tmag*</code></strong>. The tables below still show the current pre-migration <code>tm*</code>/<code>TMBA-</code>/<code>TM-</code> names as they exist in code today; the rename of live field names + persisted id values executes in the one governed reidentification migration (§9).</div>
+
+<h2><span class="num">1</span> MongoDB · Group A — Identity / Access <span class="meta">(6)</span></h2>
+<table><thead><tr><th>Collection</th><th>_id</th><th>Core fields</th><th>Relationships</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>brand_ambassadors</code></td><td><code>baId</code></td><td><code>baId·threeBaId·threeUsername·firstName·lastName·email·phone·timezone·createdAt</code>; <code>passwordHash·sponsorBaId·accessCodeUsed·lastLoginAt</code>; onboarding flags</td><td>sponsored-by → member; holds one access_code; owns prospects/CRM/training</td><td><strong>Master member identity + login.</strong> Most polymorphic — <code>additionalProperties:true</code>.</td></tr>
+<tr><td><code>access_codes</code></td><td><code>code</code></td><td><code>code·sponsorBaId·sponsorThreeBaId·sponsorFirstName·sponsorLastName·createdAt·active</code></td><td>belongs to one member; mints new members</td><td>One <code>TM-XXXX</code> code/member for life; reused for everyone they sponsor. <strong>Only Kevin mints.</strong></td></tr>
+<tr><td><code>ba_commitments</code></td><td><code>commitmentId</code></td><td><code>commitmentId·baId·threeBaId·email·version·acceptedAt</code></td><td>→ member</td><td>One-click commitment acceptance (audit-grade).</td></tr>
+<tr><td><code>ba_questionnaires</code></td><td><code>questionnaireId</code></td><td><code>questionnaireId·baId·threeBaId·version·submittedAt</code> + 21 enum answers</td><td>→ member</td><td>Self-serve interview.</td></tr>
+<tr><td><code>ba_workbooks</code></td><td><code>workbookId</code></td><td><code>workbookId·forBaId·conductedByBaId·status(draft|final)·version</code>·timestamps</td><td>for-member ← conducted-by sponsor</td><td>Sponsor-led 20-Q interview; draft→final.</td></tr>
+<tr><td><code>profile_change_challenges</code></td><td><code>challengeId</code></td><td><code>challengeId·baId·channel(email|phone)·target·codeHash·issuedAt·expiresAt</code></td><td>→ member</td><td>15-min single-use email/phone verification.</td></tr>
+</tbody></table>
+
+<h2><span class="num">2</span> MongoDB · Group B — Prospect / Token / Pool / CRM <span class="meta">(14)</span></h2>
+<table><thead><tr><th>Collection</th><th>_id</th><th>Core fields</th><th>Relationships</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>prospects</code></td><td>ObjectId (<code>prospectId</code>)</td><td><code>prospectId·firstName·lastName·location·sponsorBaId·state·becameCustomer·token·source</code></td><td>sponsored-by member (<strong>immutable</strong>); has token/placement</td><td>The invited person; funnel record.</td></tr>
+<tr><td><code>invite_tokens</code></td><td><code>token</code></td><td><code>token·prospectId·sponsorBaId·state·createdAt·expiresAt</code></td><td>→ prospect, → member</td><td>Opaque 12-char token; forward-only lifecycle rail.</td></tr>
+<tr><td><code>invitation_activity</code></td><td>ObjectId (<code>activityId</code>)</td><td><code>activityId·prospectId·sponsorBaId·kind·note·at</code></td><td>→ prospect, → member</td><td>Append-only BA-side timeline.</td></tr>
+<tr><td><code>pool_counters</code></td><td><code>'tm_team_pool'</code></td><td><code>current·createdAt</code></td><td>—</td><td>Single-row monotonic team counter.</td></tr>
+<tr><td><code>pool_placements</code></td><td><code>prospectId</code></td><td><code>prospectId·sponsorBaId·positionNumber·placedAt·expiresAt·flushedAt</code></td><td>→ prospect, → member</td><td>One placement/prospect; monotonic slot, never renumbered.</td></tr>
+<tr><td><code>prospect_accounts</code></td><td><code>accountId</code></td><td><code>accountId·prospectId·tokenId·sponsorBaId·reentryCode</code></td><td>→ prospect/token</td><td>Durable prospect re-entry account.</td></tr>
+<tr><td><code>prospect_magic_links</code></td><td><code>linkToken</code></td><td><code>linkToken·accountId·tokenId·issuedAt·expiresAt·smsDeliveryStatus</code></td><td>→ account</td><td>Single-use 60-min SMS re-entry.</td></tr>
+<tr><td><code>prospect_sessions</code></td><td><code>sessionId</code></td><td><code>sessionId·accountId·prospectId·tokenId·sponsorBaId</code></td><td>→ account</td><td>Opaque <code>.com</code> session. Mongo-only.</td></tr>
+<tr><td><code>callback_requests</code></td><td><code>callbackRequestId</code></td><td><code>callbackRequestId·token·prospectId·sponsorBaId·intent·smsDeliveryStatus</code></td><td>→ prospect, → member</td><td>Prospect "raised hand".</td></tr>
+<tr><td><code>crm_notes</code></td><td><code>noteId</code></td><td><code>noteId·prospectId·sponsorBaId·text·createdAt</code></td><td>→ prospect, → member</td><td>BA-private append-only notes.</td></tr>
+<tr><td><code>crm_followups</code></td><td><code>followUpId</code></td><td><code>followUpId·prospectId·sponsorBaId·dueAt·clearedAt</code></td><td>→ prospect, → member</td><td>One active reminder per (prospect, member).</td></tr>
+<tr><td><code>crm_dispositions</code></td><td><code>crmdispo_&lt;p&gt;_&lt;ba&gt;</code></td><td><code>prospectId·sponsorBaId·updatedAt</code></td><td>→ prospect, → member</td><td>Current disposition tag.</td></tr>
+<tr><td><code>prospect_crm_records</code></td><td><code>crm_&lt;prospectId&gt;</code></td><td><code>crmRecordId·prospectId·ownerTmBaId·sponsorTmBaId·source·status</code></td><td>→ prospect, owner/sponsor member</td><td>VM/RVM lead-campaign CRM layer.</td></tr>
+<tr><td><code>prospect_timeline_events</code></td><td><code>eventId</code></td><td><code>eventId·prospectId·ownerTmBaId·kind·title·occurredAt</code></td><td>→ prospect</td><td>Append-only VM-aware CRM timeline.</td></tr>
+</tbody></table>
+
+<h2><span class="num">3</span> MongoDB · Group C — Webinar / Orientation / Training / Steve <span class="meta">(6)</span></h2>
+<table><thead><tr><th>Collection</th><th>_id</th><th>Core fields</th><th>Relationships</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>webinar_events</code></td><td><code>eventId</code></td><td><code>eventId·scheduledFor·hosts[]·durationMinutes·status</code></td><td>← reservations</td><td>Scheduled prospect webinars.</td></tr>
+<tr><td><code>webinar_reservations</code></td><td><code>reservationId</code></td><td><code>reservationId·eventId·token·prospectId·sponsorBaId·name·email·*DeliveryStatus</code></td><td>→ event, → prospect</td><td>Prospect seat reservations.</td></tr>
+<tr><td><code>orientation_sessions</code></td><td><code>sessionId</code></td><td><code>sessionId·scheduledFor·hosts[]·capacity·durationMinutes·status</code></td><td>← reservations</td><td>BA group orientation (cap 10).</td></tr>
+<tr><td><code>orientation_reservations</code></td><td><code>reservationId</code></td><td><code>reservationId·sessionId·baId·baName·scheduledFor·status</code></td><td>→ session, → member</td><td>BA seat reservations.</td></tr>
+<tr><td><code>fast_start_progress</code></td><td><code>&lt;baId&gt;__module-&lt;n&gt;</code></td><td><code>baId·moduleId·state</code>·timestamps</td><td>→ member</td><td>Per-member-per-module training state.</td></tr>
+<tr><td><code>steve_discoveries</code></td><td><code>SD-&lt;baId&gt;</code></td><td><code>baId·successProfile</code></td><td>→ member</td><td>Discovery &amp; Success Interview (1/member).</td></tr>
+</tbody></table>
+
+<h2><span class="num">4</span> MongoDB · Group D — Agents / Governance / Audit / Admin <span class="meta">(12)</span></h2>
+<table><thead><tr><th>Collection</th><th>_id</th><th>Core fields</th><th>Relationships</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>agent_events</code></td><td>ObjectId (<code>eventId</code>)</td><td><code>eventId·baId·agentId·kind·createdAt</code></td><td>→ member</td><td>Agent-interaction audit trail.</td></tr>
+<tr><td><code>generator_runs</code></td><td><code>runId</code></td><td><code>runId·baId·productKey·productName·angle</code></td><td>→ member</td><td>WDYK Generator sessions.</td></tr>
+<tr><td><code>ivory_names</code></td><td><code>ivoryId</code></td><td><code>ivoryId·baId·firstName·lastName·categories[]·status</code></td><td>→ member</td><td>BA-private warm-market roster.</td></tr>
+<tr><td><code>mcs_audit_log</code></td><td><code>entryId</code></td><td><code>entryId·timestamp·role·actor·action·entity·severity</code> + R0 <code>runtime</code></td><td>→ member (ACTED_BY/ACTED_FOR)</td><td><strong>Canonical append-only audit substrate.</strong></td></tr>
+<tr><td><code>projection_outbox</code></td><td><code>outboxId</code></td><td><code>outboxId·tier·target·entityId·payload·status·attempts·nextAttemptAt</code></td><td>→ any entity</td><td>Durable retry queue for lagging projections (H1).</td></tr>
+<tr><td><code>tenant_settings_versions</code></td><td><code>settingsVersionId</code></td><td><code>settingsVersionId·version·reason·tenantId·complianceMode</code></td><td>→ tenant</td><td>Append-only tenant settings history.</td></tr>
+<tr><td><code>master_content_versions</code></td><td><code>templateVersionId</code></td><td><code>templateVersionId·tenantId·templateKey·surface·version</code></td><td>→ tenant</td><td>Append-only master-content overrides.</td></tr>
+<tr><td><code>admin_settings</code></td><td>human key</td><td><code>value</code></td><td>—</td><td>Single-row-per-key admin config.</td></tr>
+<tr><td><code>admin_sponsor_overrides</code></td><td><code>overrideId</code></td><td><code>overrideId·baId·previousSponsorBaId·newSponsorBaId·requestingBaId·reason·performedByBaId·auditEntryId</code></td><td>→ member(s)</td><td>Append-only sponsor-override history (the one sponsor exception).</td></tr>
+<tr><td><code>admin_curated_leader_tags</code></td><td><code>curated_&lt;baId&gt;</code></td><td><code>baId·curated·setByBaId·setAt</code></td><td>→ member</td><td>Curated-leader badge.</td></tr>
+<tr><td><code>admin_ba_notes</code></td><td><code>noteId</code></td><td><code>noteId·baId·text·authorBaId·createdAt</code></td><td>→ member</td><td>Kevin-private BA notes.</td></tr>
+<tr><td><code>admin_prospect_notes</code></td><td><code>noteId</code></td><td><code>noteId·prospectId·body·createdByBaId</code></td><td>→ prospect</td><td>Kevin-private prospect notes (triple-stacked).</td></tr>
+</tbody></table>
+
+<h2><span class="num">5</span> MongoDB · Group E — Voicemail (VM/RVM) / Broadcast <span class="meta">(11)</span></h2>
+<table><thead><tr><th>Collection</th><th>_id</th><th>Core fields</th><th>Relationships</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>vm_lead_batches</code></td><td><code>leadBatchId</code></td><td><code>leadBatchId·ownerTmBaId·sponsorTmBaId·name·source·country·leadType·status</code></td><td>owner member</td><td>BA-owned acquisition batch.</td></tr>
+<tr><td><code>vm_campaigns</code></td><td><code>vmCampaignId</code></td><td><code>vmCampaignId·ownerTmBaId·leadBatchId·name·provider·status</code></td><td>→ batch, owner member</td><td>BA-owned campaign.</td></tr>
+<tr><td><code>vm_bulk_leads</code></td><td><code>leadId</code></td><td><code>leadId·leadBatchId·ownerTmBaId·status</code></td><td>→ batch/campaign</td><td>Imported leads. ⚠️ two divergent writers.</td></tr>
+<tr><td><code>vm_queue_jobs</code></td><td><code>jobId</code></td><td><code>jobId·kind·status·attempts·availableAt</code></td><td>—</td><td>Durable VM work queue.</td></tr>
+<tr><td><code>vm_delivery_events</code></td><td><code>eventId</code></td><td><code>eventId·provider·leadId·vmCampaignId·ownerTmBaId·status·dryRun·attempt</code></td><td>→ lead/campaign</td><td>VM send/webhook history. ⚠️ runtime ≠ typed contract.</td></tr>
+<tr><td><code>vm_provider_webhook_events</code></td><td><code>webhookEventId</code></td><td><code>webhookEventId·provider·payload·status</code></td><td>—</td><td>Raw webhook ingestion.</td></tr>
+<tr><td><code>vm_audit_events</code></td><td><code>auditId</code></td><td><code>auditId·action·entityId·summary</code></td><td>→ VM entity</td><td>Append-only VM operational audit.</td></tr>
+<tr><td><code>vm_suppression_list</code></td><td>⚠️ undetermined</td><td><code>ownerTmBaId</code> + (<code>normalizedPhone|normalizedEmail</code>)</td><td>owner member</td><td>Do-not-contact list. <strong>Shape unconfirmed — don't schema yet.</strong></td></tr>
+<tr><td><code>broadcasts</code></td><td><code>broadcastId</code></td><td><code>broadcastId·createdByBaId·isTestSend·audiencePreset·channel·template·recipientCount·status</code></td><td>→ recipients</td><td>Kevin-only broadcast master.</td></tr>
+<tr><td><code>broadcast_recipients</code></td><td><code>&lt;bc&gt;::&lt;baId&gt;</code></td><td><code>rowId·broadcastId·recipientBaId·channel·status·attempts·queuedAt</code></td><td>→ broadcast, → member</td><td>One row/recipient.</td></tr>
+<tr><td><code>broadcast_optouts</code></td><td><code>baId</code></td><td><code>baId·reason·addedAt</code></td><td>→ member</td><td>Global permanent STOP list.</td></tr>
+</tbody></table>
+
+<h2><span class="num">6</span> MongoDB · Group F — Memory / Learning (Phase 7)</h2>
+<table><thead><tr><th>Collection</th><th>Rung</th><th>_id</th><th>Core (+ membership-scoped envelope)</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>mcs_audit_log</code></td><td><span class="rung r0">R0</span></td><td><code>entryId</code></td><td>+ <code>runtime</code> block</td><td>Runtime turn/gate audit.</td></tr>
+<tr><td><code>mcs_outcomes</code></td><td><span class="rung r1">R1</span></td><td><code>id</code></td><td><code>kind·confirmedByBaId·outcomeAt</code></td><td>BA-confirmed outcomes; <code>enrolled_three</code> = THREE mirror.</td></tr>
+<tr><td><code>mcs_learning_candidates</code></td><td><span class="rung r2">R2</span></td><td><code>id</code></td><td><code>status·domain·language·proposedSummary·sourceOutcomeIds[]·review?</code></td><td>Review-only; <strong>no agent may approve</strong>.</td></tr>
+<tr><td><code>mcs_graphrag_records</code></td><td><span class="rung r3">R3</span></td><td><code>id</code></td><td><code>knowledgeObjectId·version·domain·language·summary·model·retrievalReady</code></td><td>Active-knowledge retrieval index.</td></tr>
+</tbody></table>
+<p class="meta">App-memory envelope (all): <code>id·type·schemaVersion·namespace('momentum')·source·createdAt·title·originKind('system')·serviceName·tenantId·teamKey('team_magnificent')</code> + <code>baId</code>(member)·<code>derivedFrom[]</code>.</p>
+
+<h2><span class="num">7</span> Neo4j — labels, constraints, relationships (~37 @7710)</h2>
+<h3>7.1 Identity / membership graph (the spine)</h3>
+<pre>(:BrandAmbassador {baId})                              // canonical MEMBER node (label split → reconcile to ONE)
+(:BrandAmbassador)-[:SPONSORED_BY]-&gt;(:BrandAmbassador)  // the downline tree (immutable)
+(:BrandAmbassador)-[:MEMBER_OF]-&gt;(:TeamMagnificent {teamKey})
+(:BrandAmbassador)-[:HOLDS_CODE]-&gt;(:AccessCode {code})
+(:AccessCode)-[:MINTED_MEMBER]-&gt;(:BrandAmbassador)</pre>
+<h3>7.2 Prospect / funnel graph</h3>
+<pre>(:Prospect {prospectId})-[:SPONSORED_BY]-&gt;(:BrandAmbassador)   // immutable
+(:Prospect)-[:HAS_TOKEN]-&gt;(:InviteToken {token})
+(:Prospect)-[:IN_HOLDING_TANK {position}]-&gt;(:Pool {id})
+(:Prospect)-[:RESERVED_WEBINAR]-&gt;(:WebinarEvent {eventId})
+(:BrandAmbassador)-[:RESERVED_ORIENTATION]-&gt;(:OrientationSession {sessionId})</pre>
+<h3>7.3 Memory / learning graph (Phase 7)</h3>
+<pre>(:AuditEntry)-[:ACTED_BY|:ACTED_FOR]-&gt;(:BrandAmbassador)
+(:Outcome {id})-[:CONFIRMED_BY]-&gt;(:BrandAmbassador)  -[:ABOUT_PROSPECT]-&gt;(:Prospect)
+(:Outcome)-[:SUPERSEDES]-&gt;(:Outcome)  -[:SCOPED_TO]-&gt;(:TeamMagnificent)
+(:LearningCandidate {id})-[:DERIVED_FROM]-&gt;(:Outcome)  -[:SCOPED_TO]-&gt;(:TeamMagnificent)
+(:Knowledge {id})-[:SCOPED_TO]-&gt;(:TeamMagnificent)  -[:SUPERSEDES]-&gt;(:Knowledge)</pre>
+<p class="meta"><strong>Business label constraint keys:</strong> Prospect.prospectId · InviteToken.token · AccessCode.code · Pool.id · Questionnaire · Commitment · Workbook · SteveDiscovery · OrientationSession · WebinarEvent · CrmNote · ProspectCRMRecord · ProspectAccount · AdminProspectNote · SponsorOverride · AuditEntry · AgentEvent · IvoryName · Broadcast · Tenant · LeadBatch · VMCampaign · BulkLead · VmDeliveryEvent (+ more). <strong>Reconcile first:</strong> <code>BA</code> vs <code>BrandAmbassador</code>; <code>ProspectCRMRecord</code> casing.</p>
+
+<h2><span class="num">8</span> ChromaDB — collections (<code>mcs_</code>-prefixed, 384-dim @8200)</h2>
+<ul>
+  <li><strong>Identity/onboarding:</strong> <code>mcs_access_codes · mcs_commitments · mcs_ba_questionnaires · mcs_ba_workbooks · mcs_steve_discoveries · mcs_training_progress · mcs_brand_ambassadors</code></li>
+  <li><strong>Prospect/funnel:</strong> <code>mcs_invitations · mcs_callback_requests · mcs_pool_events · mcs_prospect_accounts · mcs_prospect_magic_links · mcs_webinar_reservations · mcs_prospect_crm · mcs_prospect_timeline</code></li>
+  <li><strong>Agents/admin:</strong> <code>mcs_ivory · mcs_agent_events · mcs_audit_log · admin_prospect_notes · audit_log(override mirror) · mcs_tenant_settings · mcs_master_content · mcs_broadcasts</code></li>
+  <li><strong>VM:</strong> <code>mcs_vm_lead_batches · mcs_vm_leads · mcs_vm_campaigns · mcs_vm_delivery_events</code></li>
+  <li><strong>Phase 7 memory:</strong> <code>mcs_outcomes · mcs_learning_candidates_review(review-only) · 10× mcs_&lt;domain&gt;_knowledge_&lt;lang&gt;(active)</code></li>
+</ul>
+
+<h2><span class="num">9</span> Open reconciliations (fix before tightening)</h2>
+<ul>
+  <li>Neo4j <code>BA</code> vs <code>BrandAmbassador</code> → one canonical <strong>member</strong> label.</li>
+  <li><code>ProspectCRMRecord</code> vs <code>ProspectCrmRecord</code> casing.</li>
+  <li><code>vm_bulk_leads</code> two divergent writers; <code>vm_delivery_events</code> runtime ≠ typed contract.</li>
+  <li>Delivery-timestamp drift; 4 VM collections lack shared types; <code>vm_suppression_list</code> shape unconfirmed.</li>
+  <li><code>_id</code>=natural-key standardization for <code>prospects</code>/<code>invitation_activity</code>/<code>agent_events</code>.</li>
+  <li><strong>Deferred:</strong> app-wide reidentification + membership-eligibility enforcement (separate governed migration).</li>
+</ul>
+
+<div class="note"><strong>Nothing here is applied.</strong> This catalog is the review surface; applying schemas/constraints/validators is per-store, per-collection, reversible, Kevin-approved. Fields can be added/changed under governance — this is the baseline to change against.</div>
+
+<footer class="doc">Momentum Creation System V2 · Master Schema Catalog · rendered from
+  <code>engineering/reports/MCS_V2_MASTER_SCHEMA_CATALOG.md</code> · Team Magnificent</footer>
+
+</div>
+</body>
+</html>

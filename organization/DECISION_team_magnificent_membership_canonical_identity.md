@@ -32,9 +32,23 @@ Membership is earned through THREE, in this strict order:
 
 ---
 
+## 2a. Naming — `tmag` is the Team Magnificent token (Kevin, 2026-07-01)
+
+The Team Magnificent brand token in identifiers is **`tmag`** (not `tm`). Canonical names:
+
+- **Member id field: `tmagId`** (camelCase, app convention); value format **`TMAG-YYYYMMDD-XXXXXX`**.
+- **Access code:** **`TMAG-XXXX`** (was `TM-XXXX`).
+- **Founders:** **`TMAG-01`** (Kevin), **`TMAG-02`** (Paul).
+- **Every `tm*`/`Tm*` identifier renames to `tmag*`:** `tmBaId → tmagId`, `ownerTmBaId → ownerTmagId`, `sponsorTmBaId → sponsorTmagId`, etc.
+- `teamKey: 'team_magnificent'` and `tenantId` are spelled out — unchanged.
+
+*(Open micro-decision: `tmagId` camelCase [recommended, app-consistent] vs literal `tmag_id` snake_case. Confirm.)*
+
+**This is part of the deferred app-wide reidentification migration (§5):** the `TMBA-…` / `TM-XXXX` **values already persisted** and the `tm*` field names across 49 collections + auth (`ADMIN_BA_IDS`, login) are renamed under one governed migration — not piecemeal. Docs/catalogs adopt `tmag` now; live code/data migrate together.
+
 ## 3. The identity model
 
-- **Canonical id:** the **TM member id** = the existing `TMBA-YYYYMMDD-XXXXXX` id (already the sole login identifier). "TMBA" is literally *Team Magnificent BA* — the member id and the login are one and the same.
+- **Canonical id:** the **TM member id** = **`tmagId`**, value `TMAG-YYYYMMDD-XXXXXX` (the sole login identifier; supersedes the `TMBA-…` form under the reidentification migration). The member id and the login are one and the same.
 - **Required mirrored attribute:** `threeBaId` (+ `threeUsername`, III status) — the member's THREE identity, mirrored from the upstream authority, present on every member because §2.1 makes it a precondition. Never authenticates.
 - **Sponsor:** immutable, captured at signup; must itself be a Team Magnificent member (a member in Kevin's downline). Founders (Kevin TM-01, Paul TM-02) are the roots.
 - **Membership graph:** the downline sponsor tree within Team Magnificent — `(:TeamMagnificentMember)-[:SPONSORED_BY]->(:TeamMagnificentMember)` and `(:TeamMagnificentMember)-[:MEMBER_OF]->(:TeamMagnificent)`.
@@ -44,14 +58,14 @@ Membership is earned through THREE, in this strict order:
 
 ## 4. Naming reconciliation (option A — additive, low-churn)
 
-Approved posture: **reframe, do not mass-rename.**
+Approved posture: **reframe to the `tmag` member identity** (§2a); the mechanical rename executes in the one governed reidentification migration, not piecemeal.
 
-- The physical id stays `baId` (it already IS the TM member id); it is documented and treated as **the Team Magnificent member id** everywhere.
+- The canonical member id is **`tmagId`** (value `TMAG-…`). The current `baId`/`tmBaId` fields and `TMBA-…` values are the pre-migration form; they rename to `tmagId`/`TMAG-…` under §5.
 - The app-context word "BA" means **Team Magnificent member**; the THREE role is called out explicitly as `threeBaId` / "III BA" when the upstream role is meant.
 - Resolve the open **`BA` vs `BrandAmbassador` Neo4j label split** (P10 §5.1) by choosing **one canonical member label**. This decision sets the intent (a single membership identity); the mechanical label pick + migration is executed under that reconciliation.
 - Every persisted record carries the **membership scope** (`tenantId` + `teamKey: 'team_magnificent'`) plus the member id.
 
-A full `baId → memberId` rename across 49 collections + shared types (option B) is **not** adopted — the gain is cosmetic and the migration risk is high.
+A generic `baId → memberId` rename is not adopted; the chosen rename is **brand-specific** — `baId`/`tmBaId → tmagId` (§2a) — executed as one governed migration (§5), never piecemeal across the app.
 
 ---
 
