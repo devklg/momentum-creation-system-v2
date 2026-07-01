@@ -5266,3 +5266,77 @@ export interface AppendOutcomeInput {
   note?: string | null;
   supersedesOutcomeId?: string | null;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · R2 — Learning candidate pipeline (P7.5).
+//
+// A learning candidate is a PROPOSED, not-yet-approved unit of organizational
+// learning derived from runtime signals / R1 outcomes. It is stored REVIEW-ONLY
+// (separate from active knowledge collections) and is NEVER active knowledge.
+// The one hard invariant: NO AGENT MAY APPROVE KNOWLEDGE. Only a human reviewer
+// transitions a candidate to approved/rejected; agents/pipelines can only
+// produce 'detected' candidates. There is no auto-promotion path.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Candidate lifecycle. No `auto_approved`; no agent-drivable path to `approved`. */
+export type McsLearningCandidateStatus =
+  | 'detected'
+  | 'in_review'
+  | 'approved'
+  | 'rejected'
+  | 'superseded';
+
+/** Knowledge domains a candidate can belong to (KNOWLEDGE_EVOLUTION_RUNTIME §5.4). */
+export type McsLearningDomain =
+  | 'success'
+  | 'training'
+  | 'relationship'
+  | 'performance'
+  | 'organizational';
+
+/**
+ * A human review decision. `reviewedByBaId` is a HUMAN reviewer id — never an
+ * agent id. Written once; a changed decision supersedes with a new candidate.
+ */
+export interface McsCandidateReview {
+  decision: 'approved' | 'rejected';
+  reviewedByBaId: string;
+  reviewedAt: IsoTimestamp;
+  reason?: string | null;
+  approvalReferenceId?: string | null;
+}
+
+/** A persisted learning candidate: app-memory envelope + candidate fields (P7.5 §4.2). */
+export interface McsLearningCandidateRecord extends McsMemoryEnvelope {
+  type: 'learning_candidate';
+  status: McsLearningCandidateStatus;
+  domain: McsLearningDomain;
+  language: 'en' | 'es';
+  proposedSummary: string;
+  sourceOutcomeIds: string[];
+  sourceSignalIds: string[];
+  teamKey: 'team_magnificent';
+  review?: McsCandidateReview | null;
+  supersedesCandidateId?: string | null;
+}
+
+/** Input to `appendLearningCandidate`. Always produces a `detected` candidate. */
+export interface AppendLearningCandidateInput {
+  tenantId: string;
+  domain: McsLearningDomain;
+  language: 'en' | 'es';
+  proposedSummary: string;
+  sourceOutcomeIds?: string[];
+  sourceSignalIds?: string[];
+  baId?: string;
+  supersedesCandidateId?: string | null;
+}
+
+/** Input to `reviewLearningCandidate` — a HUMAN review decision (P7.5 §5.1). */
+export interface ReviewLearningCandidateInput {
+  candidateId: string;
+  decision: 'approved' | 'rejected';
+  reviewedByBaId: string;
+  reason?: string | null;
+  approvalReferenceId?: string | null;
+}

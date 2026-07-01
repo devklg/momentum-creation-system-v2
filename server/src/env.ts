@@ -220,6 +220,11 @@ const Env = z.object({
   // outcomes cannot be enabled until runtime audit (R0) is proven, but the flags
   // are separate so each rung is turned on and killed on its own.
   OUTCOME_CAPTURE_PERSISTENCE_ENABLED: EnvBoolean.default(false),
+  // Phase 7 · R2 canary kill-switch (P7.1 §6 / P7.5). When false (default) the
+  // learning-candidate writer/review are no-ops. Candidates are review-only and
+  // NEVER active knowledge; no agent may approve — enabling this flag only turns
+  // on candidate CAPTURE + the human review-decision recorder, nothing else.
+  LEARNING_CANDIDATE_PERSISTENCE_ENABLED: EnvBoolean.default(false),
 });
 
 export const env = Env.parse(process.env);

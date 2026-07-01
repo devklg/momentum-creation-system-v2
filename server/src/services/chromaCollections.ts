@@ -62,6 +62,7 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_prospect_crm', // domain/vmSchemas.ts, future CRM hub writes
   'mcs_prospect_timeline', // domain/vmSchemas.ts, future prospect timeline writes
   'mcs_outcomes', // domain/outcomes.ts (Phase 7 R1 — BA-confirmed outcome capture)
+  'mcs_learning_candidates_review', // domain/learningCandidates.ts (Phase 7 R2 — REVIEW-ONLY, never active knowledge)
 ] as const;
 
 /** Thrown by the write-time guard when a Chroma collection is absent. */
