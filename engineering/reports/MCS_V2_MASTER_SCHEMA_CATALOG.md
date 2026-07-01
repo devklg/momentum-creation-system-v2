@@ -148,6 +148,50 @@ minted → clicked → video_started → video_quarter → video_half
 
 ---
 
+### 5a. Deep dive — VM/RVM acquisition + Prospect CRM
+
+The least-settled group (P10 §5.3 divergent writers). Authoritative source: `server/src/domain/vmSchemas.ts` (`VM_SCHEMA_DEFINITIONS` centralizes collection names, indexes, graph). Ringless-voicemail / SMS / email outreach to **BA-owned** acquisition leads, feeding a per-prospect CRM.
+
+**The pipeline (owner-scoped end to end):**
+```
+vm_lead_batches (BA imports a batch) → vm_bulk_leads (per lead, dedupe/suppress)
+  → vm_campaigns (BA schedules; adminApprovedForLiveDelivery gates live send)
+  → vm_delivery_events (per send/webhook: voicemail|sms|email|manual_export)
+  → prospect_crm_records (per prospect: status + disposition + follow-up)
+  → prospect_timeline_events (append-only ~26-kind activity log)
+```
+
+**Collections (7) — key · owner-scope · indexes · Neo4j graph:**
+
+| Collection | `_id` | Owner-scope + core | Indexes | Neo4j (label · rels) |
+|---|---|---|---|---|
+| `vm_lead_batches` | `leadBatchId` | `ownerTmagId`·`sponsorTmagId`·`name`·`source`·`country`·`leadType`·`status`·timestamps | `{owner,status,createdAt}`·`{sponsor,createdAt}` | `LeadBatch` · `OWNS_LEAD_BATCH`,`SPONSORS_LEAD_BATCH` |
+| `vm_bulk_leads` | `leadId` | `leadBatchId`·`ownerTmagId`·`vmCampaignId`·`status`·`dedupeKey`·contact·`createdAt` | `{batch,status}`·`{campaign,status}`·`{owner,createdAt}`·`{owner,dedupeKey}` | `BulkLead` · `CONTAINS_LEAD`,`TARGETS_LEAD`,`OWNS_LEAD` |
+| `vm_campaigns` | `vmCampaignId` | `ownerTmagId`·`sponsorTmagId`·`leadBatchId`·`name`·`provider`·`status`·`adminApprovedForLiveDelivery`·timestamps | `{owner,status,createdAt}`·`{batch,createdAt}` | `VMCampaign` · `USES_LEAD_BATCH`,`OWNS_VM_CAMPAIGN` |
+| `vm_delivery_events` | `eventId` | `provider`·`leadId`·`vmCampaignId`·`ownerTmagId`·`channel`·`status`·`dryRun`·`attempt`·`createdAt` | `{campaign,status}` | `VMDeliveryEvent` · `DELIVERED_TO_LEAD`,`BELONGS_TO_CAMPAIGN` |
+| `prospect_crm_records` | `crm_<prospectId>` | `crmRecordId`·`prospectId`·`ownerTmagId`·`sponsorTmagId`·`source`·`status`·`disposition`·`closedReason`·`followUpDueAt`·timestamps | `{owner,status,followUpDueAt}`·`{campaign,status}`·`{batch,status}` | `ProspectCRMRecord` · `OWNS_CRM_RECORD`,`CRM_RECORD_FOR` |
+| `prospect_timeline_events` | `eventId` | `prospectId`·`ownerTmagId`·`sponsorTmagId`·`kind`·`title`·`occurredAt` | `{prospect,owner}(occurredAt)` | `ProspectTimelineEvent` · `HAS_TIMELINE_EVENT`,`TRIGGERED_BY_BA` |
+| `prospect_ownership_corrections` | *(undetermined)* | `ownerTmagId`·`prospectId`·correction fields | — | `OwnershipCorrection` · `CORRECTED_OWNERSHIP`,`FROM_OWNER`,`TO_OWNER` |
+
+**VM/RVM enums (code-grounded):**
+- **Campaign status:** `draft · ready · scheduled · dry_run · running · paused · completed · cancelled · archived`
+- **Delivery channel:** `voicemail · sms · email · manual_export`
+- **Delivery status:** `queued · sent · delivered · failed · skipped · opted_out · suppressed · unknown`
+- **CRM status:** `inactive_pre_engagement · active · needs_follow_up · watching · presentation_completed · holding_tank · closed`
+- **CRM disposition** (VM — note underscore variant vs Group B hyphen variant): `new_ba · new_customer · interested · not_interested · later · no_response · wrong_number · do_not_contact`
+- **CRM closed reason:** `enrolled_as_ba · became_customer · not_interested · do_not_contact · expired · duplicate · invalid_contact · admin_closed`
+- **Lead lifecycle status** (`vm_bulk_leads`): `imported · validated · suppressed · crm_created · token_created · queued · voicemail_sent · sms_sent · email_sent · link_clicked · activated · info_requested · callback_requested · presentation_started/25/50/75/completed · …`
+- **Timeline event kind** (~26): `crm_created · token_created · voicemail_sent · sms_sent · email_sent · link_clicked · activated · info_requested · callback_requested · presentation_started/25/50/75/completed · dashboard_entered · holding_tank · note_added · follow_up_set/cleared · disposition_changed · closed_new_ba/new_customer/not_interested/later · expired · archived · ownership_corrected`
+
+**Reconciliations to close before schema-tightening (P10 §5.3/5.4):**
+1. **`vm_bulk_leads` two divergent writers** — `bulkLeads.ts` (`lead_<uuid>`, `VmLeadLifecycleStatus`, mints token+prospect) vs `vmProviderQueue.ts` (`vmlead_<uuid>`, `VmLeadStatus`, dedupe/suppress fields). Different id-prefix + status enum + field-set in one collection → unify or split before a strict schema.
+2. **`vm_delivery_events` runtime ≠ typed contract** — writer emits `{eventId, details, dryRun, attempt}`; `VMDeliveryEventRecord` declares `{deliveryEventId, channel, occurredAt, metadata}`. Pick canonical.
+3. **CRM disposition two spellings** — hyphen `new-ba` (`CrmDisposition`, Group B `crm_dispositions`) vs underscore `new_ba` (`ProspectCrmDisposition`, VM `prospect_crm_records`). One-concept-one-name → reconcile to a single spelling (nomenclature rule §9).
+4. **4 VM collections lack `@momentum/shared` types**; `vm_suppression_list` shape unconfirmed; `prospect_ownership_corrections` `_id` undetermined (possibly inert) — confirm writers before schema.
+5. **Neo4j `BA` label** — `vmSchemas.ts` uses `BA` (not `BrandAmbassador`); the §9 label reconciliation applies here (collapse to the one canonical member label).
+
+---
+
 ## 6. MongoDB — Group F · Memory / Learning (Phase 7 — R0–R3)
 
 See `P7_13_SCHEMA_CATALOG` for full detail. Summary:

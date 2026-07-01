@@ -164,6 +164,42 @@
 <tr><td><code>broadcast_optouts</code></td><td><code>baId</code></td><td><code>baId·reason·addedAt</code></td><td>→ member</td><td>Global permanent STOP list.</td></tr>
 </tbody></table>
 
+<h3>5a. Deep dive — VM/RVM acquisition + Prospect CRM</h3>
+<p class="meta">The least-settled group (P10 §5.3 divergent writers). Authoritative source: <code>server/src/domain/vmSchemas.ts</code>. Ringless-voicemail / SMS / email outreach to <strong>BA-owned</strong> acquisition leads, feeding a per-prospect CRM.</p>
+<pre>vm_lead_batches (BA imports) → vm_bulk_leads (per lead, dedupe/suppress)
+  → vm_campaigns (BA schedules; adminApprovedForLiveDelivery gates live send)
+  → vm_delivery_events (per send/webhook: voicemail|sms|email|manual_export)
+  → prospect_crm_records (status + disposition + follow-up)
+  → prospect_timeline_events (append-only ~26-kind activity log)</pre>
+<table><thead><tr><th>Collection</th><th>_id</th><th>Owner-scope + core</th><th>Indexes</th><th>Neo4j (label · rels)</th></tr></thead><tbody>
+<tr><td><code>vm_lead_batches</code></td><td><code>leadBatchId</code></td><td><code>ownerTmagId·sponsorTmagId·name·source·country·leadType·status</code></td><td><code>{owner,status,createdAt}·{sponsor,createdAt}</code></td><td><code>LeadBatch</code> · OWNS_LEAD_BATCH, SPONSORS_LEAD_BATCH</td></tr>
+<tr><td><code>vm_bulk_leads</code></td><td><code>leadId</code></td><td><code>leadBatchId·ownerTmagId·vmCampaignId·status·dedupeKey·contact</code></td><td><code>{batch,status}·{campaign,status}·{owner,createdAt}·{owner,dedupeKey}</code></td><td><code>BulkLead</code> · CONTAINS_LEAD, TARGETS_LEAD, OWNS_LEAD</td></tr>
+<tr><td><code>vm_campaigns</code></td><td><code>vmCampaignId</code></td><td><code>ownerTmagId·leadBatchId·name·provider·status·adminApprovedForLiveDelivery</code></td><td><code>{owner,status,createdAt}·{batch,createdAt}</code></td><td><code>VMCampaign</code> · USES_LEAD_BATCH, OWNS_VM_CAMPAIGN</td></tr>
+<tr><td><code>vm_delivery_events</code></td><td><code>eventId</code></td><td><code>provider·leadId·vmCampaignId·ownerTmagId·channel·status·dryRun·attempt</code></td><td><code>{campaign,status}</code></td><td><code>VMDeliveryEvent</code> · DELIVERED_TO_LEAD, BELONGS_TO_CAMPAIGN</td></tr>
+<tr><td><code>prospect_crm_records</code></td><td><code>crm_&lt;prospectId&gt;</code></td><td><code>crmRecordId·prospectId·ownerTmagId·source·status·disposition·closedReason·followUpDueAt</code></td><td><code>{owner,status,followUpDueAt}·{campaign,status}·{batch,status}</code></td><td><code>ProspectCRMRecord</code> · OWNS_CRM_RECORD, CRM_RECORD_FOR</td></tr>
+<tr><td><code>prospect_timeline_events</code></td><td><code>eventId</code></td><td><code>prospectId·ownerTmagId·sponsorTmagId·kind·title·occurredAt</code></td><td><code>{prospect,owner}(occurredAt)</code></td><td><code>ProspectTimelineEvent</code> · HAS_TIMELINE_EVENT, TRIGGERED_BY_BA</td></tr>
+<tr><td><code>prospect_ownership_corrections</code></td><td><em>undetermined</em></td><td><code>ownerTmagId·prospectId·correction fields</code></td><td>—</td><td><code>OwnershipCorrection</code> · CORRECTED_OWNERSHIP, FROM_OWNER, TO_OWNER</td></tr>
+</tbody></table>
+<h4 style="margin:14px 0 2px;font-size:13px;">VM/RVM enums (code-grounded)</h4>
+<table><thead><tr><th>Enum</th><th>Values</th></tr></thead><tbody>
+<tr><td><strong>Campaign status</strong></td><td><code>draft · ready · scheduled · dry_run · running · paused · completed · cancelled · archived</code></td></tr>
+<tr><td><strong>Delivery channel</strong></td><td><code>voicemail · sms · email · manual_export</code></td></tr>
+<tr><td><strong>Delivery status</strong></td><td><code>queued · sent · delivered · failed · skipped · opted_out · suppressed · unknown</code></td></tr>
+<tr><td><strong>CRM status</strong></td><td><code>inactive_pre_engagement · active · needs_follow_up · watching · presentation_completed · holding_tank · closed</code></td></tr>
+<tr><td><strong>CRM disposition</strong> (underscore variant)</td><td><code>new_ba · new_customer · interested · not_interested · later · no_response · wrong_number · do_not_contact</code></td></tr>
+<tr><td><strong>CRM closed reason</strong></td><td><code>enrolled_as_ba · became_customer · not_interested · do_not_contact · expired · duplicate · invalid_contact · admin_closed</code></td></tr>
+<tr><td><strong>Lead lifecycle</strong></td><td><code>imported · validated · suppressed · crm_created · token_created · queued · voicemail_sent · sms_sent · email_sent · link_clicked · activated · info_requested · callback_requested · presentation_*</code></td></tr>
+<tr><td><strong>Timeline kind</strong> (~26)</td><td><code>crm_created · token_created · voicemail/sms/email_sent · link_clicked · activated · info_requested · callback_requested · presentation_started/25/50/75/completed · dashboard_entered · holding_tank · note_added · follow_up_set/cleared · disposition_changed · closed_* · expired · archived · ownership_corrected</code></td></tr>
+</tbody></table>
+<div class="note"><strong>Reconcile before tightening (P10 §5.3/5.4):</strong>
+<ul style="margin:6px 0 0;">
+<li><code>vm_bulk_leads</code> <strong>two divergent writers</strong> — <code>bulkLeads.ts</code> (<code>lead_&lt;uuid&gt;</code>, lifecycle status, mints token+prospect) vs <code>vmProviderQueue.ts</code> (<code>vmlead_&lt;uuid&gt;</code>, VmLeadStatus, dedupe/suppress). Unify or split.</li>
+<li><code>vm_delivery_events</code> runtime ≠ typed contract (writer <code>{eventId,details,dryRun,attempt}</code> vs typed <code>{deliveryEventId,channel,occurredAt,metadata}</code>).</li>
+<li>CRM disposition <strong>two spellings</strong>: hyphen <code>new-ba</code> (Group B) vs underscore <code>new_ba</code> (VM) → one canonical name.</li>
+<li>4 VM collections lack shared types; <code>vm_suppression_list</code> / <code>prospect_ownership_corrections</code> shapes unconfirmed.</li>
+<li>Neo4j <code>BA</code> label here → collapse to the one canonical member label (§9).</li>
+</ul></div>
+
 <h2><span class="num">6</span> MongoDB · Group F — Memory / Learning (Phase 7)</h2>
 <table><thead><tr><th>Collection</th><th>Rung</th><th>_id</th><th>Core (+ membership-scoped envelope)</th><th>Purpose</th></tr></thead><tbody>
 <tr><td><code>mcs_audit_log</code></td><td><span class="rung r0">R0</span></td><td><code>entryId</code></td><td>+ <code>runtime</code> block</td><td>Runtime turn/gate audit.</td></tr>
