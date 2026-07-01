@@ -40,6 +40,13 @@ import {
   assertApprovedKnowledgeQueryResult,
   validateApprovedKnowledgeQueryRequest,
 } from './approvedKnowledgeQueryContract.js';
+import { resolveLanguageSelection } from './languageAwareRetrieval.js';
+import { classifyFreshness } from './freshnessGuard.js';
+import {
+  buildRetrievalObservabilityRecord,
+  type RetrievalObservabilityInput,
+  type RetrievalObservabilityRecord,
+} from './retrievalObservability.js';
 
 /**
  * Narrowed approved-knowledge provider. Intentionally `Pick<…, 'listApprovedKnowledge'>` so
@@ -47,6 +54,23 @@ import {
  * knowledge is structurally unreachable from the retrieval path.
  */
 export type ApprovedKnowledgeProvider = Pick<KnowledgeCoreBoundaryPort, 'listApprovedKnowledge'>;
+
+/** P4.8 — retrieval observability sink. Receives one content-free record per retrieval call. */
+export type RetrievalObservabilitySink = (record: RetrievalObservabilityRecord) => void;
+
+/**
+ * Optional adapter options.
+ * - `now` (P4.7) injects the clock for the freshness guard so expiry/staleness evaluation is
+ *   deterministic in tests; it defaults to the system clock. The request's `freshness.asOf`,
+ *   when a valid timestamp, overrides this per call.
+ * - `onRetrievalObservability` (P4.8) receives a content-free observability record on every
+ *   outcome. Absent ⇒ nothing is built or emitted (zero overhead, behavior identical to
+ *   pre-P4.8). A throwing sink never corrupts the returned result.
+ */
+export interface ContextManagerRetrievalAdapterOptions {
+  now?: () => Date;
+  onRetrievalObservability?: RetrievalObservabilitySink;
+}
 
 export interface ContextManagerRetrievalAdapter {
   /**
@@ -65,7 +89,10 @@ export interface ContextManagerRetrievalAdapter {
  */
 export function createContextManagerRetrievalAdapter(
   provider: ApprovedKnowledgeProvider,
+  options: ContextManagerRetrievalAdapterOptions = {},
 ): ContextManagerRetrievalAdapter {
+  const clock = options.now ?? (() => new Date());
+  const sink = options.onRetrievalObservability;
   return {
     async retrieveApprovedKnowledge(request) {
       const validation = validateApprovedKnowledgeQueryRequest(request);
@@ -83,7 +110,18 @@ export function createContextManagerRetrievalAdapter(
         raw = await provider.listApprovedKnowledge(request.scope);
       } catch {
         // Fail-closed: any boundary failure/timeout degrades to empty approved knowledge.
-        return degradedResult(request, ['knowledge_unavailable'], []);
+        const result = degradedResult(request, ['knowledge_unavailable'], []);
+        emitObservability(sink, {
+          request,
+          result,
+          rawCount: 0,
+          statusDomainKeptCount: 0,
+          freshKeptCount: 0,
+          freshnessExclusions: {},
+          candidateExcludedSourceIds: [],
+          observedAt: sink ? clock().toISOString() : undefined,
+        });
+        return result;
       }
 
       const excluded: ApprovedKnowledgeExcludedItem[] = [];
@@ -102,18 +140,53 @@ export function createContextManagerRetrievalAdapter(
         statusDomainKept.push(reference);
       }
 
-      // P4.4 retrieves same-language only; language FALLBACK selection is deferred to P4.6.
-      // The `allowLanguageFallback` flag is carried by the contract but not yet exercised.
-      const languageKept = statusDomainKept.filter((reference) => reference.language === request.language);
+      // Sample the freshness clock AFTER the provider await (pre-P4.8 timing), and derive
+      // observedAt from the same instant. Both are only needed from here on.
+      const now = clock();
+      const observedAt = sink ? now.toISOString() : undefined;
 
-      if (languageKept.length === 0) {
+      // P4.7 — freshness/deprecation guard. Runs before language selection (freshness is
+      // language-independent). A stale/deprecated/superseded/expired/not-yet-effective reference
+      // is a non-match (dropped like out-of-domain); a reference without freshness metadata is
+      // always current. The guard resolves `freshness.asOf` (when valid) over the injected clock.
+      // P4.8 — classify (not just filter) so the freshness-exclusion tally is available for the
+      // observability record in the same pass.
+      const { fresh: freshKept, excluded: freshnessExclusions } = classifyFreshness(
+        statusDomainKept,
+        request.freshness,
+        now,
+      );
+
+      const candidateExcludedSourceIds = excluded.map((item) => item.sourceId);
+      const emit = (result: ApprovedKnowledgeQueryResult): void => {
+        emitObservability(sink, {
+          request,
+          result,
+          rawCount: raw.length,
+          statusDomainKeptCount: statusDomainKept.length,
+          freshKeptCount: freshKept.length,
+          freshnessExclusions,
+          candidateExcludedSourceIds,
+          observedAt,
+        });
+      };
+
+      // P4.6 — language-aware selection over the status/domain/freshness-filtered references. The
+      // resolver honors `allowLanguageFallback`, applies the priority ladder (same-language →
+      // human/native fallback → MARKED machine translation → language-neutral), and marks the
+      // batch honestly.
+      const selection = resolveLanguageSelection(freshKept, request);
+
+      if (selection.status === 'degraded') {
         const reason: ApprovedKnowledgeQueryDegradeReason =
-          statusDomainKept.length > 0 ? 'language_unavailable' : 'no_approved_match';
-        return degradedResult(request, [reason], excluded);
+          freshKept.length > 0 ? (selection.degradeReason ?? 'language_unavailable') : 'no_approved_match';
+        const result = degradedResult(request, [reason], excluded);
+        emit(result);
+        return result;
       }
 
       const limited =
-        request.maxResults !== undefined ? languageKept.slice(0, request.maxResults) : languageKept;
+        request.maxResults !== undefined ? selection.references.slice(0, request.maxResults) : selection.references;
 
       const result: ApprovedKnowledgeQueryResult = {
         schemaVersion: APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
@@ -125,14 +198,34 @@ export function createContextManagerRetrievalAdapter(
           approvedCount: limited.length,
           candidateExcludedCount: excluded.length,
           candidateExcluded: true,
-          language: sameLanguageMetadata(request),
+          language: selection.language,
         },
       };
 
       assertApprovedKnowledgeQueryResult(result);
+      emit(result);
       return result;
     },
   };
+}
+
+/** Build and emit the observability record, isolating any sink exception from retrieval. */
+function emitObservability(
+  sink: RetrievalObservabilitySink | undefined,
+  input: RetrievalObservabilityInput,
+): void {
+  if (!sink) return;
+  let record: RetrievalObservabilityRecord;
+  try {
+    record = buildRetrievalObservabilityRecord(input);
+  } catch {
+    return; // never let observability construction corrupt retrieval
+  }
+  try {
+    sink(record);
+  } catch {
+    // A throwing sink must not change the returned result.
+  }
 }
 
 /**
@@ -144,6 +237,12 @@ export function createContextManagerRetrievalAdapter(
  * The `summary` is a deterministic structural descriptor derived from the reference
  * identity/domain — body enrichment (real knowledge text) is a downstream slice (P4.5+);
  * the corpus is not wired yet (P4.3 audit §8).
+ *
+ * P4.6: each reference carries its OWN real `language` and `translationStatus` — never the
+ * batch value — so a machine translation (even one already in the primary language) can never
+ * be assembled into the packet as native (`same_language`). The resolver guarantees a single
+ * homogeneous quality tier, so per-item marking and the batch metadata agree; per-item is used
+ * here as defense-in-depth against ever laundering a marking.
  */
 export function toContextReferences(result: ApprovedKnowledgeQueryResult): ContextReference[] {
   if (result.status === 'degraded') return [];
@@ -153,6 +252,8 @@ export function toContextReferences(result: ApprovedKnowledgeQueryResult): Conte
     status: 'approved',
     knowledgeId: reference.knowledgeId,
     summary: structuralSummary(reference.domain, reference.knowledgeId),
+    language: reference.language,
+    translationStatus: reference.translationStatus,
   }));
 }
 

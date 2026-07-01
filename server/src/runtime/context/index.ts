@@ -57,4 +57,40 @@ export {
 export type {
   ApprovedKnowledgeProvider,
   ContextManagerRetrievalAdapter,
+  ContextManagerRetrievalAdapterOptions,
+  RetrievalObservabilitySink,
 } from './contextManagerRetrievalAdapter.js';
+
+// P4.8 — Knowledge Retrieval Observability: a content-free record emitted per retrieval call via
+// an opt-in sink. Pure builder; no persistence, no Gateway, no LLM.
+export {
+  KNOWLEDGE_RETRIEVAL_OBSERVABILITY_SCHEMA_VERSION,
+  buildRetrievalObservabilityRecord,
+} from './retrievalObservability.js';
+export type {
+  RetrievalObservabilityRecord,
+  RetrievalObservabilityInput,
+  RetrievalStageCounts,
+  RetrievalObservabilityScope,
+} from './retrievalObservability.js';
+
+// P4.9 — Approved-Knowledge Safe Fallback Upgrade: map a fail-closed retrieval degrade into a
+// reason-specific, safe, compliant DegradedContextState for the packet. Pure; assembles no packet.
+export {
+  SAFE_FALLBACK_BASE_DIRECTIVE,
+  resolveSafeFallbackState,
+  safeFallbackFromResult,
+} from './safeFallback.js';
+export type { SafeFallbackInput, SafeFallbackPacketInput } from './safeFallback.js';
+
+// P4.10 — Next Training Step Resolution: deterministically select the agent's next step over the
+// approved-knowledge retrieval result; fail-closed to the P4.9 safe fallback. Pure; selects,
+// never generates; assembles no packet.
+export { resolveNextTrainingStep } from './nextTrainingStep.js';
+export type {
+  NextTrainingStep,
+  NextTrainingStepInput,
+  NextTrainingStepResolution,
+  NextTrainingStepStatus,
+  NextTrainingStepReasonCode,
+} from './nextTrainingStep.js';
