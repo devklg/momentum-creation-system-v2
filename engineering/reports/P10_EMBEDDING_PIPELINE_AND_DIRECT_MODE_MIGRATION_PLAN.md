@@ -44,9 +44,12 @@ INGESTION — GPU host (Kevin's machine, RTX 4070 Ti):
 RUNTIME — InterServer VPS (no GPU):
   Express API ─┬─► MongoDB Atlas   (direct write, mongoose)
                ├─► Neo4j Aura      (direct write, neo4j-driver)
-               └─► Chroma Cloud    (BA-facing approved-knowledge retrieval / read + query)
+               ├─► CPU MiniLM query-embedder (co-located, 384-dim) ─► embeds the BA's query text
+               └─► Chroma Cloud    (search stored vectors ← query vector; BA-facing approved knowledge)
   PERSISTENCE_DIRECT_ENABLED=true; PERSISTENCE_{MONGO,NEO4J}_MODE=direct
 ```
+
+Embedding split: **bulk/corpus embedding = local GPU** (heavy, batch, no CPU fallback); **query embedding = CPU MiniLM on InterServer** (tiny, real-time, explicit approved service). Both run the same locked `model_version`.
 
 Note the asymmetry for Chroma: **writes** to Chroma Cloud come from the batch pipeline (Workstream A), **reads/queries** come from the app at runtime (Workstream B). Chroma document vectors are never written on the app's request path.
 
@@ -63,13 +66,36 @@ This is a **batch ingestion job**, not an inline request-path change. Embeddings
 - **Optional immediate publish:** an on-demand trigger that embeds + publishes a specific critical update right away, bypassing the 12h wait — the escape hatch when 12h is too slow.
 - **No silent degradation:** keep the existing rule — if the GPU embedder is unreachable, the batch fails loud and retries next tick rather than publishing bad/empty vectors.
 
-### 4.2 The crux open question — query-time embedding ⚠️
-BA-facing retrieval must embed the **query text** to search Chroma Cloud, and query vectors MUST come from the **same model/space** as the stored vectors (MiniLM 384-dim) — you cannot query a MiniLM collection with a different model's vectors. The GPU is on the local host; the app is on the VPS. So one of these must be decided:
-- **(a) VPS → local GPU call-back:** the app calls the local GPU embedder over the network for each query. Simplest reuse, but makes prod retrieval depend on the home machine's availability/latency.
-- **(b) Co-located query embedder:** run a small MiniLM embedder next to the VPS for query-only embedding (CPU MiniLM is viable for single-query latency). This is a *deliberate* query-path embedder, not the forbidden silent CPU fallback of the GPU write pipeline.
-- **(c) Cache/precompute:** if BA queries are bounded/templated, precompute their embeddings in the batch — likely too restrictive for free-text retrieval.
+### 4.2 Query-time embedding — ✅ DECIDED (2026-06-30)
 
-**Recommendation:** (b) — a dedicated small MiniLM query-embedder co-located with the API keeps retrieval self-contained on the VPS and avoids a home-machine runtime dependency, while the heavy corpus embedding stays on the GPU in batch. Confirm with Kevin.
+BA-facing retrieval must embed the **query text** to search Chroma Cloud, and query vectors MUST come from the **same model/space** as the stored vectors (MiniLM 384-dim) — you cannot query a MiniLM collection with a different model's vectors.
+
+**Decision:** a **co-located CPU MiniLM query-embedder** runs alongside the API on the VPS. Rationale (Kevin): each request is one short question, not a whole library, so CPU latency is fine for query embedding. This is an **explicit, approved CPU service — not a silent fallback.**
+
+**The "no CPU fallback" rule is scoped, not dropped:**
+- **Bulk / corpus embedding** (the 12h batch on the GPU host) — GPU only, **no CPU fallback**, fail loud (unchanged).
+- **Production query embedding** — an explicit approved **CPU** MiniLM service. It still **fails closed** if that service is unreachable (no degraded/empty vectors); running on CPU is a deliberate design choice, not a fallback.
+
+**Contract (query-embedder and GPU corpus-embedder both speak this):**
+
+```
+POST /embeddings
+{ "texts": ["How do I invite my first two people?"] }
+```
+```
+{
+  "embeddings": [[/* …384 floats… */]],
+  "dimensions": 384,
+  "model": "all-MiniLM-L6-v2",
+  "model_version": "locked-checksum"
+}
+```
+
+This extends the current `chroma/embedder.ts` response (`{embeddings, dimensions, count}`) with **`model`** and **`model_version`**. The `model_version` is a **locked checksum** of the model weights.
+
+**Model-parity guard (new validation).** The client must assert, on every response: `dimensions === 384`, `model === 'all-MiniLM-L6-v2'`, and `model_version === <the expected locked checksum>`. A mismatch **fails closed** — because a different model *version* can produce subtly different 384-dim vectors that silently degrade retrieval quality against a corpus embedded with the other version. The corpus batch pipeline and the query-embedder must run the **same locked `model_version`**; when the model is ever updated, both must move together and the corpus must be re-embedded. This parity check is added to `chroma/embedder.ts`'s validation (today it only checks the dimension).
+
+The CPU query-embedder is drop-in compatible with the existing client — the query path just points at its URL (env `QUERY_EMBEDDER_URL`; see §6).
 
 ### 4.3 Where it plugs in
 - Reuse `chroma/embedder.ts` (`embed`) and `chroma/adapter.ts` (`add`/upsert, `query`). No dimension change.
@@ -113,7 +139,9 @@ Before flipping flags, confirm the **direct adapters cover every write path** cu
 | `CHROMA_URL` | Chroma Cloud base | account host |
 | `CHROMA_API_KEY` | Chroma Cloud auth | new — header on every request |
 | `CHROMA_TENANT` / `CHROMA_DATABASE` | account tenant/db | replace hardcoded defaults |
-| `GPU_EMBEDDER_URL` | local GPU embedder | **kept** — batch pipeline + (option a/b) query embedder |
+| `GPU_EMBEDDER_URL` | local GPU embedder | **kept** — the 12h batch corpus pipeline (GPU host) |
+| `QUERY_EMBEDDER_URL` | CPU MiniLM query-embedder on the VPS | new — runtime query embedding; same `/embeddings` contract |
+| `EMBEDDER_MODEL_VERSION` | expected locked model checksum | new — parity guard; query-embedder + corpus publisher must match |
 | `PERSISTENCE_DIRECT_ENABLED` | master switch → `true` | Mongo/Neo4j |
 | `PERSISTENCE_{MONGO,NEO4J}_MODE` | → `direct` | flip incrementally |
 | _(pipeline)_ embed-publish schedule / immediate-publish config | 12h cadence + on-demand | on the GPU host |
@@ -126,16 +154,17 @@ Before flipping flags, confirm the **direct adapters cover every write path** cu
 
 - **ACR:** raise one in `organization/ACR-REGISTER.md` covering managed-cloud hosting (Atlas/Aura), Chroma Cloud for approved knowledge, and the batch embedding/publish pipeline. Direct-persistence itself is already **ACR-0007**; this extends it. Log in the decision ledger.
 - **Write-freeze:** the dedicated stack exists but has **no schemas yet**; do not write real data to Atlas/Aura/Chroma-Cloud until MCS V2 schemas exist/are approved (`[[mcs-v2-db-write-freeze]]`). Build + dry-run against throwaway collections is fine.
-- **Recommended order:** decide §4.2 query-embedding → B.1 Chroma Cloud auth → B.2 Mongo/Neo4j coverage audit → schemas (unblocks writes) → staged flip (B.3) → Workstream A pipeline + first corpus publish → H1 smoke (release-checklist B4).
+- **Recommended order:** stand up the CPU query-embedder + add the §4.2 model-parity guard → B.1 Chroma Cloud auth → B.2 Mongo/Neo4j coverage audit → schemas (unblocks writes) → staged flip (B.3) → Workstream A pipeline + first corpus publish → H1 smoke (release-checklist B4).
 
 ---
 
 ## 8. Open decisions for Kevin
 
-1. **Query-time embedding (§4.2)** — call-back to local GPU (a), co-located MiniLM query embedder (b, recommended), or precompute (c). This is the crux; retrieval design depends on it.
+1. ~~Query-time embedding~~ — ✅ **DECIDED (§4.2):** co-located CPU MiniLM query-embedder on InterServer; bulk stays GPU/local; two fail-closed checks (`dimensions===384`, `model_version` matches the local publisher).
 2. **Batch host + scheduler** — confirm the pipeline runs on the GPU machine; cron vs scheduled worker; and the exact 12h window.
 3. **Immediate-publish trigger** — admin UI action vs CLI/script.
 4. **Approved-knowledge source of truth** — which Mongo collection + status marks an item "approved & publishable" for the pipeline to read.
+5. **`model_version` locking** — how the locked checksum is produced/distributed so the GPU corpus publisher and the CPU query-embedder provably match.
 
 ---
 

@@ -67,7 +67,7 @@ The direct adapters already exist (ACR-0007 / Option C / S1.3) and are gated OFF
 ### 3.2 Embeddings — local GPU batch pipeline (no dimension change)
 - Embeddings **stay on the local GPU** (all-MiniLM-L6-v2, **384-dim**, `CLAUDE.md`) — **no** OpenAI/hosted provider and **no** dimension change. Chroma Cloud collections are created at 384-dim.
 - The GPU host runs a **batch pipeline every 12h** that embeds the approved-knowledge corpus and publishes vectors to Chroma Cloud, plus an **optional immediate-publish** path for critical updates. This decouples embedding from the VPS request path (which has no GPU).
-- **Open sub-decision — query-time embedding:** BA-facing retrieval must embed the query in the *same* 384-dim MiniLM space; the GPU is local while the app is on the VPS. Options (call-back to local GPU / co-located MiniLM query-embedder / precompute) are in the migration plan §4.2. Recommendation there: a co-located query-embedder.
+- **Query-time embedding — DECIDED:** a co-located **CPU MiniLM query-embedder** on InterServer embeds the BA's query in the same 384-dim space (each request is one short question, so CPU is fine). Explicit approved service, not a silent fallback; bulk/corpus embedding stays on the local GPU. Two fail-closed checks: `dimensions===384` and `model_version` matches the local publisher. Detail in migration plan §4.2.
 - The repo's "never silently degrade" rule holds: the batch fails loud if the GPU embedder is unreachable rather than publishing bad vectors.
 
 ### 3.3 Governance
