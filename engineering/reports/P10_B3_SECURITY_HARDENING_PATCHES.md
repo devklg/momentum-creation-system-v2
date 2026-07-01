@@ -1,8 +1,8 @@
-# P10 B3 — Security Hardening Proposed Patches (H2 / H3 / H4)
+# P10 B3 — Security Hardening Patch Record (H2 / H3 / H4)
 
 **Phase:** 10 — DevOps, Security, Environments, and Operations
 **Blocker:** B3 (release-checklist §4) — auth/session & webhook hardening.
-**Status:** 🔧 **PROPOSED — NOT APPLIED.** This is a security-audit document. No code in this worktree is changed by it. Applying these patches is a **production-affecting code slice** requiring Kevin's approval and a properly-scoped worktree (this worktree's Allowed Files are docs/reports only — `server/src/*` is out of scope here).
+**Status:** ✅ **APPLIED ON `main` FOR CORE H2/H3/H4.** This began as the security-audit patch plan. P10.11 reconciliation verified the core hardening landed through PR #88 / merge `9d0e00c` (implementation commit `165eb01`) and is present on `main`.
 **Author:** Claude Code (Instance 2), Phase 10 worktree
 **Date:** 2026-06-30
 **Source findings:** verification report H2 (`routes/auth.ts`), H3 (`env.ts` / `.env.example`), H4 (`middleware/verifyTelnyxWebhook.ts`). All line anchors were read from the live worktree at HEAD `bf2575a`.
@@ -11,9 +11,19 @@
 
 ## 0. How to use this doc
 
-Each patch below is copy-paste-ready against the current code. Apply in a dedicated worktree/branch (e.g. `feature/phase-10-b3-security-hardening`), run the gates in §5, add the tests in §4, then open a PR for Kevin. Nothing here sends, calls an LLM, adds a route family, or writes to a store — it only *hardens* existing surfaces. Every change is behind `NODE_ENV==='production'` or is a pure 429 throttle, so dev behavior is unchanged except the throttles.
+This document is now the implementation record for the B3 security hardening. The patch text below is preserved as the reviewed plan; the applied files are:
 
-**Order:** H3 and H4 are the smallest and highest-value (a few lines each, fail-fast at boot). H2 is the largest (a new reusable limiter + three route wires). Apply H3 → H4 → H2.
+- `server/src/middleware/rateLimit.ts`
+- `server/src/routes/auth.ts`
+- `server/src/env.ts`
+- `server/src/middleware/verifyTelnyxWebhook.ts`
+- `server/src/__tests__/env.prod-assertion.test.ts`
+- `server/src/middleware/__tests__/rateLimit.test.ts`
+- `server/src/middleware/__tests__/verifyTelnyxWebhook.prod.test.ts`
+
+Nothing here sends, calls an LLM, adds a route family, or writes to a store — it only hardens existing surfaces. The remaining non-core privacy/security follow-ons stay in `P10_PRODUCTION_RELEASE_CHECKLIST.md` §4.
+
+**Applied order:** H3/H4 production config hardening plus H2 shared limiter/auth-route wiring.
 
 ---
 

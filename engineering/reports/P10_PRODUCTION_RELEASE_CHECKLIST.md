@@ -19,7 +19,7 @@ This is the single authoritative **go/no-go** artifact for shipping MCS V2 to pr
 - **Owner = Agent (docs)** items are docs-only and may be executed inside this worktree without further approval.
 - This checklist **does not certify readiness.** It is a gate. Do not proceed to a real deploy while any **BLOCKER** row is unchecked.
 
-> **Current verdict: 🔴 NO-GO.** At least four blockers are open (topology H9, branch protection H5, security hardening H2/H3/H4, data-integrity smoke H1). See §1.
+> **Current verdict: 🔴 NO-GO.** P10.11 reconciliation confirms B3's core H2/H3/H4 hardening has landed, but release still waits on B1 execution, B4 schema + live H1 smoke, B5 `.com` compliance pass, and B6 live-ops mock removal. See §1.
 
 ---
 
@@ -29,7 +29,7 @@ This is the single authoritative **go/no-go** artifact for shipping MCS V2 to pr
 |---|---|---|---|---|
 | B1 | Production topology **DECIDED** (InterServer VPS + Atlas/Aura direct + Chroma Cloud for approved knowledge + local-GPU batch embeddings); execution pending | §2 | Kevin | 🟡 decided, execution pending |
 | B2 | Branch protection: required `gates` check **confirmed enabled** on `main` (owner, 2026-06-30); auxiliary protections to confirm | §3 | Kevin (GitHub UI) | 🟢 core enforced |
-| B3 | Auth endpoints unthrottled (H2); placeholder `JWT_SECRET` passes validation (H3); Telnyx webhook fail-open (H4) | §4 | Kevin | 🔴 open |
+| B3 | Auth endpoints throttled (H2), production `JWT_SECRET` placeholder rejected (H3), Telnyx webhook fail-closed in production (H4) | §4 | Kevin | 🟢 core applied |
 | B4 | H1 outbox-drain **live smoke test** not yet run — dedicated stack now **exists**; gated only by schema creation + write-freeze | §5 | Kevin (create/approve schemas) | 🔴 open |
 | B5 | `.com` compliance pass not re-run against the release build | §7 | Kevin + Agent | 🔴 open |
 | B6 | `USE_MOCKS = true` in `apps/admin/src/routes/live-ops.tsx` would ship mock telemetry | §7 | Kevin | 🔴 open |
@@ -73,15 +73,16 @@ Finding **H5** / P10.1. Recorded in **`engineering/reports/P10_BRANCH_PROTECTION
 
 ---
 
-## 4. BLOCKER B3 — Security hardening before public exposure (owner-only, production-affecting)
+## 4. B3 — Security hardening before public exposure (core applied; follow-ons remain)
 
-All three are HIGH findings and change production behavior, so they are Kevin-gated. Listed with the smallest-safe implementation each.
+P10.11 reconciliation verified the core HIGH findings are applied on `main` via PR #88 / merge `9d0e00c` (implementation commit `165eb01`):
 
-> **📄 Copy-paste-ready patches drafted:** `engineering/reports/P10_B3_SECURITY_HARDENING_PATCHES.md` — H2 (shared rate-limiter + auth wires), H3 (JWT_SECRET prod assertion), H4 (fail-closed Telnyx verify), plus tests and gates. **Proposed, not applied** — apply in a dedicated `server/src` slice (out of scope for this docs worktree).
+> **📄 Historical patch record:** `engineering/reports/P10_B3_SECURITY_HARDENING_PATCHES.md` began as the proposed patch plan; it is now marked applied for H2/H3/H4. Keep it as the implementation trail and test checklist.
 
-- [ ] **H3 — Boot-time production assertion rejecting the placeholder `JWT_SECRET`** (`.env.example:53` 36-char placeholder passes `min(16)`). Reject known-default / low-entropy secret when `NODE_ENV==='production'`. *(Kevin)*
-- [ ] **H4 — Fail-closed Telnyx webhook verification in production** — require `TELNYX_PUBLIC_KEY` (and `VM_WEBHOOK_SHARED_SECRET` if VM live-delivery is enabled) when `NODE_ENV==='production'`; do not skip verification on empty key in prod (`verifyTelnyxWebhook.ts:99-130`). *(Kevin)*
-- [ ] **H2 — Rate-limit `/api/auth/login`, `/register`, `/verify-code`** (reuse the `p-login.ts` sliding-window limiter or `express-rate-limit`). *(Kevin)*
+- [x] **H3 — Boot-time production assertion rejecting the placeholder `JWT_SECRET`** (`server/src/env.ts`) — rejects known-default / low-entropy secrets when `NODE_ENV==='production'`.
+- [x] **H4 — Fail-closed Telnyx webhook verification in production** (`server/src/middleware/verifyTelnyxWebhook.ts`) — empty `TELNYX_PUBLIC_KEY` rejects webhook requests in production instead of accepting unsigned payloads.
+- [x] **H2 — Rate-limit `/api/auth/login`, `/register`, `/verify-code`** (`server/src/middleware/rateLimit.ts`, `server/src/routes/auth.ts`) — in-memory per-IP throttles now protect all three auth endpoints.
+- [x] Regression coverage added: `server/src/__tests__/env.prod-assertion.test.ts`, `server/src/middleware/__tests__/rateLimit.test.ts`, and `server/src/middleware/__tests__/verifyTelnyxWebhook.prod.test.ts`.
 - [ ] Slim + throttle `/verify-code` so it stops disclosing sponsor full name + `sponsorThreeBaId` to unauthenticated callers (P10.4/P10.5 MED). *(Kevin)*
 - [ ] Fix the magic-link **cleartext bearer-token log** on SMS failure — drop `linkToken`, log `phoneHash`/`accountId` (`prospectMagicLink.ts:252-255`). *(Kevin — smallest blast radius of the security items)*
 - [ ] Set `app.set('trust proxy', …)` to match the reverse-proxy topology so per-IP limits and audit IPs are correct (P10.4 MED). *(Kevin, ties to §9)*
@@ -165,7 +166,7 @@ Release is **GO** only when every blocker in §1 is `[x]` and the owner signs be
 |---|---|---|---|
 | B1 topology resolved | 🟡 decided; execution pending | | 2026-06-30 |
 | B2 branch protection enforced | 🟢 `gates` required (aux to confirm) | | 2026-06-30 |
-| B3 security hardening applied | 🔴 | | |
+| B3 security hardening applied | 🟢 core H2/H3/H4 applied; follow-ons remain | | 2026-07-01 |
 | B4 H1 live smoke passed + backup plan | 🔴 | | |
 | B5 `.com` compliance pass | 🔴 | | |
 | B6 live-ops mocks off | 🔴 | | |
