@@ -113,7 +113,9 @@
 
 1. **Canonical member label = `TeamMagnificentMember` — RESOLVED.** A Brand Ambassador is a **THREE International** role and does **not** by itself make someone a Team Magnificent member; the app's entity is the **member** (a BA in Kevin's downline). So the Neo4j label is `TeamMagnificentMember`, `-[:MEMBER_OF]->(:TeamMagnificent)` (the team node). **Consequence:** the `brand_ambassadors` **collection is misnamed** (it holds members) → rename to `mcs_members`; the `BrandAmbassador` label + `brand_ambassadors` naming are dropped app-wide. `threeBaId` remains the person's BA credential (attribute, not the entity).
 2. **`ProspectStatus` = the outcome set — RESOLVED.** `pending · enrolled_iii · became_customer · declined` (enroll / decline / customer / pending). One concept shared with `McsOutcomeKind`.
-3. **Append-only suspension — pending confirm.** The rule is a *parallel-work* merge-collision guard (append-only `types.ts` / `index.ts`). The migration renames existing exports, so it needs the rule suspended **for this single serialized branch** — safe iff no other worktree edits those files concurrently. Confirm yes.
+3. **Append-only suspension — RESOLVED (Kevin: yes).** The rule (a *parallel-work* merge-collision guard on `types.ts` / `index.ts`) is **suspended for the single serialized reidentification branch**. The migration may rename existing exports directly, provided no other worktree edits those files concurrently while it runs.
+
+**All decisions closed → the plan is execution-ready.** Executing it edits `server/src/**` and `apps/**` app-wide, so it runs as its own **approved app-wide branch** (beyond this Phase 7 design worktree's charter), per §0–§6.
 
 ---
 
