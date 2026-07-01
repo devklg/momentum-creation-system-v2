@@ -30,7 +30,7 @@ This is the single authoritative **go/no-go** artifact for shipping MCS V2 to pr
 | B1 | Production topology **DECIDED** (InterServer VPS + Atlas/Aura/Chroma Cloud + hosted embeddings, direct writes); execution pending | §2 | Kevin | 🟡 decided, execution pending |
 | B2 | Branch protection: required `gates` check **confirmed enabled** on `main` (owner, 2026-06-30); auxiliary protections to confirm | §3 | Kevin (GitHub UI) | 🟢 core enforced |
 | B3 | Auth endpoints unthrottled (H2); placeholder `JWT_SECRET` passes validation (H3); Telnyx webhook fail-open (H4) | §4 | Kevin | 🔴 open |
-| B4 | H1 outbox-drain **live smoke test** not yet run against the app's dedicated triple-stack | §5 | Kevin / next session | 🔴 open |
+| B4 | H1 outbox-drain **live smoke test** not yet run — dedicated stack now **exists**; gated only by schema creation + write-freeze | §5 | Kevin (create/approve schemas) | 🔴 open |
 | B5 | `.com` compliance pass not re-run against the release build | §7 | Kevin + Agent | 🔴 open |
 | B6 | `USE_MOCKS = true` in `apps/admin/src/routes/live-ops.tsx` would ship mock telemetry | §7 | Kevin | 🔴 open |
 
@@ -93,7 +93,7 @@ All three are HIGH findings and change production behavior, so they are Kevin-ga
 ## 5. BLOCKER B4 — Data integrity & operational readiness
 
 - [x] **H1 code fix shipped** — `drainProjectionOutbox()` is now scheduled at boot + 30s interval (PR #72 → `main`, regression test present). *(Verification report §15)*
-- [ ] **H1 live smoke test** against the app's **dedicated** Neo4j/Mongo/Chroma — procedure in verification report §15. Deferred until that instance exists; the write-freeze (`[[mcs-v2-db-write-freeze]]`) means no writes to MCS V2 stores until schemas are approved. *(Kevin / next session — BLOCKER for GO)*
+- [ ] **H1 live smoke test** against the app's **dedicated** Neo4j/Mongo/Chroma — procedure in verification report §15. The dedicated stack **now exists** (2026-06-30); the remaining gate is **schema creation + approval** — the write-freeze (`[[mcs-v2-db-write-freeze]]`) still bars writes to MCS V2 stores until schemas are in place. Once schemas exist, run the smoke. *(Kevin: create/approve schemas → then smoke — BLOCKER for GO)*
 - [ ] **Backup & restore** — no tooling exists (finding H, P10.7). Author a backup PLAN (cadence, retention, off-host, Mongo as RPO anchor with Neo4j/Chroma as rebuildable projections) and a restore runbook + RPO/RTO. *(Plan = Agent docs-once B1 known; execution = Kevin)*
 - [ ] Deployment, real-time, and **rollback** procedures verified (`ROADMAP.md:190`) — see §9. *(Kevin)*
 
