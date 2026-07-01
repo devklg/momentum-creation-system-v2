@@ -82,3 +82,15 @@ export {
   safeFallbackFromResult,
 } from './safeFallback.js';
 export type { SafeFallbackInput, SafeFallbackPacketInput } from './safeFallback.js';
+
+// P4.10 — Next Training Step Resolution: deterministically select the agent's next step over the
+// approved-knowledge retrieval result; fail-closed to the P4.9 safe fallback. Pure; selects,
+// never generates; assembles no packet.
+export { resolveNextTrainingStep } from './nextTrainingStep.js';
+export type {
+  NextTrainingStep,
+  NextTrainingStepInput,
+  NextTrainingStepResolution,
+  NextTrainingStepStatus,
+  NextTrainingStepReasonCode,
+} from './nextTrainingStep.js';
