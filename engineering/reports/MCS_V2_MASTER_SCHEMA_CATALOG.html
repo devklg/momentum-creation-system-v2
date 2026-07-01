@@ -59,6 +59,7 @@
   <li><strong>Membership graph:</strong> the downline sponsor tree (§7).</li>
 </ul>
 <div class="note"><strong>Naming — <code>tmag</code> is the Team Magnificent token</strong> (decision 2026-07-01): member id <code>tmagId</code> (<code>TMAG-…</code>), access code <code>TMAG-XXXX</code>, and <strong>every <code>tm*</code> identifier renames to <code>tmag*</code></strong>. The tables below still show the current pre-migration <code>tm*</code>/<code>TMBA-</code>/<code>TM-</code> names as they exist in code today; the rename of live field names + persisted id values executes in the one governed reidentification migration (§9).</div>
+<div class="note"><strong>Nomenclature — one concept, one name, cased per layer:</strong> both camelCase and snake_case are used, chosen by the software layer (camelCase for TS / app data / Mongo <code>momentum</code>; snake_case for the gateway-memory family, P10 §3.6). A concept has exactly ONE canonical name; casing is a deterministic transform (<code>tmagId</code> ⇄ <code>tmag_id</code> = same concept). <strong>Never two different names for the same thing.</strong></div>
 
 <h2><span class="num">1</span> MongoDB · Group A — Identity / Access <span class="meta">(6)</span></h2>
 <table><thead><tr><th>Collection</th><th>_id</th><th>Core fields</th><th>Relationships</th><th>Purpose</th></tr></thead><tbody>

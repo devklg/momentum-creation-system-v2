@@ -36,13 +36,16 @@ Membership is earned through THREE, in this strict order:
 
 The Team Magnificent brand token in identifiers is **`tmag`** (not `tm`). Canonical names:
 
-- **Member id field: `tmagId`** (camelCase, app convention); value format **`TMAG-YYYYMMDD-XXXXXX`**.
+- **Member id concept: `tmag id`** — ONE canonical concept, cased per software layer (see §2b): **`tmagId`** in camelCase contexts (TS / app-data / Mongo `momentum`), **`tmag_id`** in snake_case contexts (the gateway-memory family / snake-case APIs). Same concept, deterministic casing — never a second name.
+- **Value format:** **`TMAG-YYYYMMDD-XXXXXX`**.
 - **Access code:** **`TMAG-XXXX`** (was `TM-XXXX`).
 - **Founders:** **`TMAG-01`** (Kevin), **`TMAG-02`** (Paul).
-- **Every `tm*`/`Tm*` identifier renames to `tmag*`:** `tmBaId → tmagId`, `ownerTmBaId → ownerTmagId`, `sponsorTmBaId → sponsorTmagId`, etc.
+- **Every `tm*`/`Tm*` identifier renames to `tmag*`:** `tmBaId → tmagId` / `tmag_id`, `ownerTmBaId → ownerTmagId`, `sponsorTmBaId → sponsorTmagId`, etc.
 - `teamKey: 'team_magnificent'` and `tenantId` are spelled out — unchanged.
 
-*(Open micro-decision: `tmagId` camelCase [recommended, app-consistent] vs literal `tmag_id` snake_case. Confirm.)*
+## 2b. Nomenclature rule — one concept, one name, cased per layer (Kevin)
+
+**Both camelCase and snake_case are used, chosen by the software layer** — camelCase for TypeScript / app data / Mongo `momentum`; snake_case for the gateway-memory family and snake-case surfaces (already codified in P10 §3.6). **The invariant is consistency:** a concept has exactly ONE canonical name, and casing is a deterministic transform of that one name across contexts. We never have two different names for the same thing (the Chat #135 drift class; `DECISION_governed_dedicated_stack_founding_principle` §3.2 "one-concept-one-name"). So `tmagId` ⇄ `tmag_id` are the same concept; `tmMemberId`, `memberTmagId`, or any variant for the same thing are forbidden.
 
 **This is part of the deferred app-wide reidentification migration (§5):** the `TMBA-…` / `TM-XXXX` **values already persisted** and the `tm*` field names across 49 collections + auth (`ADMIN_BA_IDS`, login) are renamed under one governed migration — not piecemeal. Docs/catalogs adopt `tmag` now; live code/data migrate together.
 
