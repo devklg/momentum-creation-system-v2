@@ -20,6 +20,7 @@
 import type { RuntimeRequestScope } from './identity.js';
 import type { RuntimeLanguage, RuntimeLanguageMetadata } from './language.js';
 import type { KnowledgeDomain, KnowledgeReference } from './knowledge.js';
+import type { KnowledgeFreshnessPolicy } from './knowledge-freshness.js';
 
 /** Schema version for the approved-knowledge query contract. */
 export type ApprovedKnowledgeQuerySchemaVersion = 'approved_knowledge_query.v1';
@@ -64,6 +65,12 @@ export interface ApprovedKnowledgeQueryRequest {
   allowLanguageFallback?: boolean;
   /** Optional soft cap on returned references; the boundary may return fewer. */
   maxResults?: number;
+  /**
+   * Optional P4.7 freshness/deprecation policy. Absent ⇒ safe defaults (exclude
+   * deprecated/superseded/expired/not-yet-effective); a reference with no freshness metadata is
+   * always treated as current, so the default policy changes nothing for a pre-P4.7 corpus.
+   */
+  freshness?: KnowledgeFreshnessPolicy;
 }
 
 /**
