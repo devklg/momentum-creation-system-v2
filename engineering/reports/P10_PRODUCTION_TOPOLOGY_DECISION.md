@@ -86,7 +86,7 @@ The direct adapters already exist (ACR-0007 / Option C / S1.3) and are gated OFF
 - [ ] Raise the ACR (hosting + embeddings) and log the decision in the ledger.
 - [ ] (Hygiene) Bring `server-gateway-mcp-v2` under VCS even though it's no longer a prod dependency.
 
-These roll into release-checklist §9 (build/deploy mechanics) and §7 (env contract).
+These roll into release-checklist §9 (build/deploy mechanics) and §7 (env contract). The execution detail for the persistence + embeddings pieces is planned in **`engineering/reports/P10_HOSTED_EMBEDDINGS_DIRECT_MODE_MIGRATION_PLAN.md`**.
 
 ---
 
