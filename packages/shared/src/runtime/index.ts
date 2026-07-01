@@ -8,3 +8,6 @@ export type * from './browser-runtime.js';
 export type * from './knowledge.js';
 export type * from './outcomes.js';
 export type * from './qa.js';
+export type * from './knowledge-query.js';
+export type * from './knowledge-intake.js';
+export type * from './knowledge-freshness.js';
