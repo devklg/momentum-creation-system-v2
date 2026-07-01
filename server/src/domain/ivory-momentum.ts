@@ -33,13 +33,13 @@
 import { gatewayCall } from '../services/gateway.js';
 import { getProspectMomentumViewer } from './cockpit.js';
 import { listIvoryNamesForBA } from './ivory.js';
+import { ANGLE_LABEL } from './ivoryAngle.js';
 import {
   complete,
   AnthropicConfigError,
   AnthropicError,
 } from '../services/anthropic.js';
 import type {
-  IvoryAngle,
   IvoryMomentumCohortCounts,
   IvoryMomentumContext,
   IvoryMomentumPriorityReason,
@@ -264,7 +264,12 @@ export async function getIvoryMomentumView(
       const ats = a.pmv.lastSignal.at;
       const bts = b.pmv.lastSignal.at;
       if (ats !== bts) return ats < bts ? 1 : -1;
-      return a.pmv.createdAt < b.pmv.createdAt ? 1 : -1;
+      if (a.pmv.createdAt !== b.pmv.createdAt) {
+        return a.pmv.createdAt < b.pmv.createdAt ? 1 : -1;
+      }
+      // Fully equal — return 0 so the comparator is antisymmetric (a stable,
+      // deterministic order for tied rows instead of implementation-defined).
+      return 0;
     })
     .slice(0, 12);
 
@@ -311,13 +316,6 @@ async function assertProspectOwnership(
     throw new IvoryMomentumOwnershipError(prospectId);
   }
 }
-
-const ANGLE_LABEL: Record<IvoryAngle, string> = {
-  do_the_business: 'doing the business with you',
-  make_money: 'opening a real way to make money',
-  lose_fat: 'losing fat or feeling better',
-  unspecified: 'no specific angle yet',
-};
 
 const LIFECYCLE_DESCRIPTION: Record<ProspectLifecycleStage, string> = {
   draft: 'You have a minted invitation that has not been marked sent yet.',

@@ -50,7 +50,9 @@ export async function tripleStackWrite(input: TripleStackInput): Promise<TripleS
   });
 
   // 2. Neo4j (optional). Gateway action: neo4j.cypher with { query, params }.
-  let neo4jOk = true;
+  // `ok` means "this leg executed successfully" — false when skipped (no input),
+  // never a silent true. A real leg failure throws above and never reaches here.
+  let neo4jOk = false;
   let neo4jCounters: Record<string, number> | undefined;
   if (input.neo4j) {
     const data = await gatewayCall<{ summary?: { counters?: Record<string, number> } }>('neo4j', 'cypher', {
@@ -62,7 +64,7 @@ export async function tripleStackWrite(input: TripleStackInput): Promise<TripleS
   }
 
   // 3. ChromaDB (optional). Collection must already exist; create at boot.
-  let chromaOk = true;
+  let chromaOk = false;
   if (input.chroma) {
     await gatewayCall('chromadb', 'add', {
       collection: input.chroma.collection,
@@ -70,6 +72,7 @@ export async function tripleStackWrite(input: TripleStackInput): Promise<TripleS
       documents: [input.chroma.document],
       metadatas: [input.chroma.metadata ?? {}],
     });
+    chromaOk = true;
   }
 
   return {
