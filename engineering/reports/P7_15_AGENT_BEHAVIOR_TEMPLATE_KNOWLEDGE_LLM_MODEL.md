@@ -43,6 +43,46 @@ Unconstrained generation is the risk the whole structure exists to prevent.
 
 ---
 
+## 2a. Template taxonomy — the "roads" (Kevin, 2026-07-01)
+
+**Templates are the road the agents operate on** — the structured track for an interaction; the agent travels back and forth along it (the conversational exchange) and cannot drive off-road. Three named roads, one per agent:
+
+| Template (road) | The road *for* | Agent | Filled with (approved knowledge) | Compliance |
+|---|---|---|---|---|
+| **Learning template** | coaching/training a BA through development (Fast Start, ongoing) | **Michael** | approved training / coaching knowledge | BA-facing; no income/comp/cycle claims |
+| **Interviewing template** | the structured discovery / success interview — asking the approved questions | **Steve** | approved question sets → `steve_discoveries.successProfile` | BA-facing |
+| **Invitation template** | helping a BA craft a *compliant* invitation to a prospect | **Ivory / ScriptMaker** | approved, compliant invitation scripts (WDYK) | **HIGHEST** — nearest the prospect / `.com` edge; no income/placement/AI-language/THREE branding; ScriptMaker fails closed |
+
+Every road obeys §1: the template bounds the back-and-forth, the Context Manager fills it with human-approved knowledge, the LLM (when enabled) only phrases within the lanes, and a *better road* (a better question or script) is a **candidate Kevin approves** before any agent drives it. The **invitation road carries the tightest guardrails** because it is closest to the prospect and the `.com` compliance boundary.
+
+*(Agent↔template pairing to confirm with Kevin; the taxonomy itself — learning / interviewing / invitation — is set.)*
+
+## 2b. The knowledge base is the operating system (Kevin, 2026-07-01)
+
+Templates are an **open, extensible set**. New agent types get **new templates (roads)** in the future — and **every template, for every agent, pulls from the SAME governed knowledge base.** That single shared knowledge base is the **operating system of the operation**: the one substrate everything composes on.
+
+The OS mapping:
+
+| OS concept | MCS V2 |
+|---|---|
+| Kernel / OS | the one governed **knowledge base** (approved, versioned, measured) |
+| Applications / roads | **templates** (learning · interviewing · invitation · …future) |
+| Processes | **agents** (Michael · Steve · Ivory · …future) |
+| Loader / scheduler | the **Context Manager** (assembles each agent's Context Packet) |
+| Permission system | **Kevin's approval** (nothing runs unapproved) |
+| Telemetry | the **learning-measurement layer** (P7.14) |
+
+Why this is the beauty of it:
+- **Add without forking.** A new agent + a new template plugs in and draws the same approved knowledge — no parallel knowledge silo, no re-governance.
+- **One truth.** Every agent speaks from the same approved knowledge base, so they never contradict each other.
+- **One gate.** Compliance and approval are governed **once**, at the knowledge base — not re-implemented per agent.
+- **Compounding learning.** A single approved improvement to the knowledge base makes **every** agent that pulls from it better at once — learning compounds across the whole operation instead of per-agent.
+- **Extensible by design.** The taxonomy (learning/interviewing/invitation) is the start, not the ceiling.
+
+This is why the knowledge base — not any one agent — is the center of gravity: govern it, measure it, improve it, and the whole fleet of agents improves with it.
+
+---
+
 ## 3. The approval gate covers BOTH knowledge AND templates/questions
 
 This is the crux, and the answer to "where does approval come from" (P7.5):
