@@ -53,6 +53,21 @@ Ordered milestones (a person is a **prospect** here — a non-BA going through t
 
 **A12 is the crossover.** Note the drift it exposes: *the same event* is called `enrolled` (TokenState), `enrolled_three` (outcome), and `new_brand_ambassador` (disposition). Canon: **one milestone, `enrolled` → the person becomes a member.** (`became_customer` is a *separate* milestone — a customer is not a member.)
 
+### 1a. Terminal OUTCOME — the small closed set (Kevin, 2026-07-01)
+
+**Milestones ≠ outcome.** The many milestones above are the *events along the road*; the **outcome** is how the prospect ultimately **resolved**, and that is only **two or three choices** (+ "pending" while still in motion):
+
+| Outcome | Meaning | = milestone |
+|---|---|---|
+| `pending` | still in the journey, not resolved | — |
+| `enrolled_iii` | **enrolled into III International** (became a Brand Ambassador = Team Mag member) | A12 |
+| `became_customer` | became a **product customer** (uses product; may or may not also enroll) | A11 |
+| `declined` | said no / did not convert | A13 |
+
+This is the **resolution** dimension (§3.3). It is **not** the same as "attended a webinar" — that's a milestone (A9). This corrects the R1 `McsOutcomeKind`, which wrongly mixed **milestones** (`webinar_attended`, `callback_completed`, `orientation_attended`, `no_show`) in with **outcomes** (`enrolled_three`, `became_customer`, `declined`): the milestones move to the event log (§1), the **outcome enum collapses to the closed set above.**
+
+Note: `enrolled_iii` and `became_customer` are **not strictly exclusive** — a customer may later enroll. Order is allowed (`became_customer → enrolled_iii`); the *current* terminal outcome is whichever is furthest along.
+
 ---
 
 ## 2. Phase B — Member onboarding journey (starts at `enrolled`)
@@ -80,9 +95,9 @@ The canon separates cleanly into three *different* questions, so they never coll
 
 1. **Where are they? (lifecycle/state)** — the current position on the funnel rail (`TokenState`) or onboarding step. *Point-in-time.*
 2. **What happened? (events)** — the append-only timeline of milestones above (`ProspectTimelineEventKind`). *History.*
-3. **How did it end / stand? (status/outcome)** — the rollup (`ProspectStatus`: pending/enrolled/no_show/withdrew) and the BA-confirmed outcomes (`McsOutcomeKind`). *Result.*
+3. **How did it resolve? (outcome)** — the **small closed set** (§1a): `pending · enrolled_iii · became_customer · declined`. *Result.* (Not the milestone log; a milestone like `webinar_attended` is *not* an outcome.)
 
-Same milestone vocabulary, three views — not three vocabularies.
+Same milestone vocabulary for (1)+(2); a separate, tiny **outcome** enum for (3) — not three sprawling vocabularies.
 
 ---
 
@@ -92,7 +107,8 @@ Same milestone vocabulary, three views — not three vocabularies.
 2. **`enrolled` unification** — collapse `enrolled` / `enrolled_three` / `new_brand_ambassador` to the one crossover milestone (the person becomes a member). Keep `became_customer` separate.
 3. **`VmLeadLifecycleStatus` derives from** the canon (or is dropped in favor of it) rather than maintaining a parallel ~18-value list (F4/F5).
 4. **`ProspectTimelineEventKind`** stays as the *event log*, but its values are drawn from the canon (no synonyms).
-5. Executes in the reconciliation migration; the **new stores use canonical milestone names from birth.**
+5. **Split `McsOutcomeKind` (R1)** — move the *milestones* (`webinar_attended`, `callback_completed`, `orientation_attended`, `no_show`) into the event log (§1); the **outcome** enum collapses to the closed set `pending · enrolled_iii · became_customer · declined` (§1a). This changes the Phase 7 R1 `mcs_outcomes` record shape — **do it now, while un-applied.**
+6. Executes in the reconciliation migration; the **new stores use canonical milestone + outcome names from birth.**
 
 ---
 
