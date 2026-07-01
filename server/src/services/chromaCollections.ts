@@ -61,6 +61,21 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_vm_delivery_events', // domain/vmSchemas.ts, future provider event writes
   'mcs_prospect_crm', // domain/vmSchemas.ts, future CRM hub writes
   'mcs_prospect_timeline', // domain/vmSchemas.ts, future prospect timeline writes
+  'mcs_outcomes', // domain/outcomes.ts (Phase 7 R1 — BA-confirmed outcome capture)
+  'mcs_learning_candidates_review', // domain/learningCandidates.ts (Phase 7 R2 — REVIEW-ONLY, never active knowledge)
+  // Phase 7 R3 — GraphRAG ACTIVE-knowledge collections (per domain × language,
+  // P7.6 §3.1). Disjoint from the review-only candidate collection above; only
+  // retrieval-ready approved knowledge is indexed here. domain/graphrag.ts.
+  'mcs_success_knowledge_en',
+  'mcs_success_knowledge_es',
+  'mcs_training_knowledge_en',
+  'mcs_training_knowledge_es',
+  'mcs_relationship_knowledge_en',
+  'mcs_relationship_knowledge_es',
+  'mcs_performance_knowledge_en',
+  'mcs_performance_knowledge_es',
+  'mcs_organizational_knowledge_en',
+  'mcs_organizational_knowledge_es',
 ] as const;
 
 /** Thrown by the write-time guard when a Chroma collection is absent. */

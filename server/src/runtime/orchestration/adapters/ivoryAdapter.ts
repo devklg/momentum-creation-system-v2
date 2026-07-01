@@ -24,9 +24,11 @@ export async function runIvoryRuntimeAdapter(
     },
   };
 
-  if (!isIvoryRuntimeTaskAllowed(input.taskType)) {
-    return composeOrchestrationTurn(ivoryInput);
-  }
-
+  // Task-type admissibility is enforced downstream by composeOrchestrationTurn
+  // (a disallowed objective composes to decision:'reject' with an
+  // 'invalid_objective' issue — see ivoryAdapter.test.ts). The previous
+  // `if (!isIvoryRuntimeTaskAllowed(...))` branch here was dead: both arms
+  // returned the same composition. `isIvoryRuntimeTaskAllowed` remains exported
+  // for callers that want to pre-check before dispatching.
   return composeOrchestrationTurn(ivoryInput);
 }

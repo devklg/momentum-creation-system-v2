@@ -1,0 +1,210 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mocks = vi.hoisted(() => ({
+  gatewayCall: vi.fn(),
+  tripleStackWrite: vi.fn(),
+}));
+
+vi.mock('../../services/gateway.js', () => ({
+  gatewayCall: mocks.gatewayCall,
+}));
+
+vi.mock('../../services/tripleStack.js', () => ({
+  tripleStackWrite: mocks.tripleStackWrite,
+}));
+
+type AnyRec = Record<string, unknown>;
+
+interface Store {
+  ba: AnyRec | null;
+  discovery: (AnyRec & { _id: string }) | null;
+}
+
+interface GatewayOpts {
+  /** list_collections throws on the first N calls, then succeeds. */
+  listCollectionsFailFirst?: number;
+  /** mongodb.update becomes a no-op (does not apply $set) — simulates a
+   *  silently-modified-nothing update. */
+  updateNoop?: boolean;
+}
+
+function makeGatewayImpl(store: Store, opts: GatewayOpts = {}) {
+  let listCalls = 0;
+  return async (tool: string, action: string, params: AnyRec): Promise<unknown> => {
+    if (tool === 'mongodb' && action === 'query') {
+      const col = params.collection;
+      if (col === 'brand_ambassadors') return { documents: store.ba ? [store.ba] : [] };
+      if (col === 'steve_discoveries') {
+        return { documents: store.discovery ? [store.discovery] : [] };
+      }
+      return { documents: [] };
+    }
+    if (tool === 'mongodb' && action === 'update') {
+      if (!opts.updateNoop && store.discovery) {
+        const set = (params.update as AnyRec | undefined)?.$set as AnyRec | undefined;
+        store.discovery = { ...store.discovery, ...(set ?? {}) };
+      }
+      return { matchedCount: 1 };
+    }
+    if (tool === 'neo4j' && action === 'cypher') return {};
+    if (tool === 'chromadb' && action === 'list_collections') {
+      listCalls += 1;
+      if (opts.listCollectionsFailFirst && listCalls <= opts.listCollectionsFailFirst) {
+        throw new Error('chroma list_collections transient failure');
+      }
+      return { collections: [{ name: 'mcs_steve_discoveries' }] };
+    }
+    if (tool === 'chromadb' && action === 'create_collection') return {};
+    if (tool === 'chromadb' && action === 'add') return { ok: true };
+    return {};
+  };
+}
+
+function makePayload(overrides: AnyRec = {}) {
+  return {
+    baId: 'TMBA-1',
+    callSid: 'CA-1',
+    startedAt: '2026-07-01T00:00:00.000Z',
+    completedAt: '2026-07-01T00:10:00.000Z',
+    transcript: [
+      { sequence: 1, speaker: 'steve', text: 'hi', occurredAt: '2026-07-01T00:00:01.000Z' },
+    ],
+    answers: [{ questionId: 'q_welcome_intro', prompt: 'p', answerText: 'a' }],
+    audioUrl: null,
+    profile: {
+      primaryWhy: { statement: 'family', who: 'kids', whyNow: 'now' },
+      successVision: { statement: 'freedom', oneBigChange: 'time' },
+      learningStyle: { modalities: ['doing'], feedbackPreference: 'direct', notes: '' },
+      communicationPreferences: {
+        preferredChannels: ['text'],
+        cadence: 'weekly',
+        bestTimes: 'evenings',
+        notes: '',
+      },
+      supportNeeds: { areas: ['tech'], potentialObstacles: ['time'], helpStyle: 'ask', notes: '' },
+      launchRecommendations: [],
+      trainingRecommendations: [],
+      michaelHandoffSummary: '',
+    },
+    ...overrides,
+  } as never;
+}
+
+const BA = { baId: 'TMBA-1', sponsorBaId: 'TMBA-0', firstName: 'Kev' };
+
+async function loadSteve() {
+  return import('../steve-success-interview.js');
+}
+
+beforeEach(() => {
+  vi.resetModules();
+  mocks.gatewayCall.mockReset();
+  mocks.tripleStackWrite.mockReset();
+});
+
+describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
+  it('re-ingest (existing row) refreshes the Chroma semantic doc', async () => {
+    const store: Store = {
+      ba: { ...BA },
+      discovery: { _id: 'SD-TMBA-1', baId: 'TMBA-1', completedAt: '2026-06-01T00:00:00.000Z' },
+    };
+    mocks.gatewayCall.mockImplementation(makeGatewayImpl(store));
+    const steve = await loadSteve();
+
+    await steve.ingestDiscoveryArtifact(makePayload());
+
+    const chromaAdd = mocks.gatewayCall.mock.calls.find(
+      ([tool, action]) => tool === 'chromadb' && action === 'add',
+    );
+    expect(chromaAdd).toBeDefined();
+    expect(chromaAdd?.[2]).toMatchObject({
+      collection: 'mcs_steve_discoveries',
+      ids: ['SD-TMBA-1'],
+    });
+  });
+
+  it('read-back throws READBACK_FAILED when the update did not apply content', async () => {
+    const store: Store = {
+      ba: { ...BA },
+      discovery: { _id: 'SD-TMBA-1', baId: 'TMBA-1', completedAt: '2026-06-01T00:00:00.000Z' },
+    };
+    // updateNoop: the row exists but completedAt never advances to this ingest.
+    mocks.gatewayCall.mockImplementation(makeGatewayImpl(store, { updateNoop: true }));
+    const steve = await loadSteve();
+
+    await expect(steve.ingestDiscoveryArtifact(makePayload())).rejects.toMatchObject({
+      code: 'READBACK_FAILED',
+    });
+  });
+
+  it('TOCTOU: a raced duplicate insert falls back to the update path (no throw)', async () => {
+    const store: Store = { ba: { ...BA }, discovery: null };
+    mocks.gatewayCall.mockImplementation(makeGatewayImpl(store));
+    // Simulate a concurrent writer: tripleStackWrite lands the row then the
+    // insert rejects on the duplicate _id.
+    mocks.tripleStackWrite.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
+      store.discovery = { _id: input.id, ...input.mongoDoc };
+      throw new Error('E11000 duplicate key');
+    });
+    const steve = await loadSteve();
+
+    const artifact = await steve.ingestDiscoveryArtifact(makePayload());
+    expect(artifact.baId).toBe('TMBA-1');
+
+    const updateCall = mocks.gatewayCall.mock.calls.find(
+      ([tool, action]) => tool === 'mongodb' && action === 'update',
+    );
+    expect(updateCall).toBeDefined();
+  });
+
+  it('bootstrap self-heals: a transient list_collections failure does not poison later ingests', async () => {
+    const store: Store = { ba: { ...BA }, discovery: null };
+    mocks.gatewayCall.mockImplementation(
+      makeGatewayImpl(store, { listCollectionsFailFirst: 1 }),
+    );
+    mocks.tripleStackWrite.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
+      store.discovery = { _id: input.id, ...input.mongoDoc };
+      return { mongo: { ok: true }, neo4j: { ok: true }, chroma: { ok: true, verified: true } };
+    });
+    const steve = await loadSteve();
+
+    // First ingest fails inside ensureDiscoveriesCollection.
+    await expect(steve.ingestDiscoveryArtifact(makePayload())).rejects.toThrow(
+      /list_collections/,
+    );
+    // Second ingest must succeed — the rejected bootstrap promise was NOT cached.
+    const artifact = await steve.ingestDiscoveryArtifact(makePayload());
+    expect(artifact.baId).toBe('TMBA-1');
+  });
+
+  it('assembleSuccessProfile caps long free-text fields to 5000 chars', async () => {
+    const steve = await loadSteve();
+    const long = 'x'.repeat(6000);
+    const profile = steve.assembleSuccessProfile({
+      baId: 'TMBA-1',
+      generatedAt: '2026-07-01T00:00:00.000Z',
+      profile: {
+        primaryWhy: { statement: long, who: 'kids', whyNow: 'now' },
+        successVision: { statement: long, oneBigChange: 'time' },
+        learningStyle: { modalities: ['doing'], feedbackPreference: 'direct', notes: long },
+        communicationPreferences: {
+          preferredChannels: ['text'],
+          cadence: 'weekly',
+          bestTimes: 'eve',
+          notes: '',
+        },
+        supportNeeds: { areas: [long], potentialObstacles: [], helpStyle: 'ask', notes: long },
+        launchRecommendations: [{ text: long, href: null }],
+        trainingRecommendations: [],
+        michaelHandoffSummary: long,
+      },
+    } as never);
+
+    expect(profile.primaryWhy.statement.length).toBe(5000);
+    expect(profile.successVision.statement.length).toBe(5000);
+    expect(profile.supportNeeds.notes.length).toBe(5000);
+    expect(profile.supportNeeds.areas[0]?.length).toBe(5000);
+    expect(profile.launchRecommendations[0]?.text.length).toBe(5000);
+    expect(profile.michaelHandoffSummary.length).toBe(5000);
+  });
+});

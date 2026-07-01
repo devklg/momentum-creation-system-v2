@@ -5116,3 +5116,338 @@ export interface SuccessProfileAgentContext {
   recommendedCoachingFocus: string | null;
   updatedAt: IsoTimestamp;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · R0 — Runtime audit persistence (P7.2 schema / P7.3 write contract).
+//
+// Append-only extension of the 4.J audit substrate. A runtime audit event is a
+// turn-lifecycle / gate-decision marker: which agent, on whose behalf, in which
+// turn, made which transition — NEVER what was said. No body, no transcript, no
+// PII beyond opaque ids. Persisted through the app-direct tripleStackWrite seam
+// into the canonical `mcs_audit_log` substrate (NOT the Universal Gateway;
+// ACR-0007). Writer: `appendRuntimeAuditEntry` in server/src/domain/auditLog.ts,
+// canary-gated by RUNTIME_AUDIT_PERSISTENCE_ENABLED (default off).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** The internal runtime agents a runtime audit event can attribute a turn to. */
+export type McsRuntimeAuditAgent = 'michael' | 'steve' | 'ivory';
+
+/** Which kind of draft an emission event refers to (content is NOT stored). */
+export type McsRuntimeAuditDraftKind = 'outcome' | 'guided_action';
+
+/**
+ * Runtime audit actions (P7.2 §3.2). `domain.entity.action` convention with a
+ * `runtime` domain so the read surface isolates them by `actionPrefix: 'runtime.'`.
+ */
+export type McsRuntimeAuditAction =
+  | 'runtime.turn.opened'
+  | 'runtime.turn.draft_emitted'
+  | 'runtime.turn.closed'
+  | 'runtime.gate.allowed'
+  | 'runtime.gate.denied'
+  | 'runtime.persistence.enabled'
+  | 'runtime.persistence.disabled';
+
+/**
+ * Runtime scope carried alongside a runtime audit entry (P7.2 §3.3). Ids only —
+ * no body, no content, no PII. `turnId`+`action` form the idempotency dedup key.
+ */
+export interface McsRuntimeAuditContext {
+  turnId: string;
+  correlationId: string;
+  agent: McsRuntimeAuditAgent;
+  tmagId: string;
+  tenantId: string;
+  gate: string | null;
+  draftKind: McsRuntimeAuditDraftKind | null;
+}
+
+/** Input to `appendRuntimeAuditEntry`. `reason` is a capped gate-denial cause only. */
+export interface McsRuntimeAuditInput {
+  action: McsRuntimeAuditAction;
+  runtime: McsRuntimeAuditContext;
+  severity?: AuditSeverity;
+  reason?: string | null;
+  timestamp?: IsoTimestamp;
+}
+
+/**
+ * The persisted runtime audit row: a base `AuditLogEntry` (append-only 4.J
+ * substrate) plus the dedicated `runtime` scope block (never overloads
+ * `before`/`after`, which stay null for lifecycle markers).
+ */
+export interface McsRuntimeAuditLogEntry extends AuditLogEntry {
+  runtime: McsRuntimeAuditContext;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · App-memory envelope (P7.3 §4.2) — shared by R1 (outcomes),
+// R2 (learning candidates), R3 (GraphRAG).
+//
+// The app-scoped replacement for the deprecated gateway `quadstack.write` base
+// envelope. App memory is app data in the `momentum` namespace, written through
+// the app-direct tripleStackWrite seam (NEVER the Universal Gateway; ACR-0007).
+// It preserves the Chat #135 anti-drift discipline (shared id, canonical typed
+// envelope, deterministic ids, banned aliases) WITHOUT the gateway-only fields
+// (`chat_number`, `chat_registry_id`, `namespace: universal_gateway`), which are
+// forbidden on app records. All Phase 7 app memory is server-derived, so
+// `originKind` is always 'system' and there is no `chat_number`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Canonical memory/lineage record types on the app's dedicated stack. */
+export type McsMemoryType =
+  | 'outcome'
+  | 'learning_candidate'
+  | 'graphrag_record'
+  | 'graphrag_chunk';
+
+/**
+ * The app-memory envelope. camelCase (app-data convention, P10 §3.6). `id` is
+ * shared across all three stores (Mongo `_id` / Neo4j `{id}` / Chroma id).
+ *
+ * Membership-first scope (DECISION_team_magnificent_membership_canonical_identity):
+ * every record is scoped to Team Magnificent membership — `tenantId` + the
+ * `teamKey: 'team_magnificent'` team scope, plus `tmagId` = the Team Magnificent
+ * MEMBER id (value `TMAG-…`, the login). The app is exclusively for TM members (an
+ * enrolled III International BA in Kevin's downline); the THREE BA role is a
+ * mirrored attribute of the member, never the identity.
+ *
+ * Banned on any app record: `chat_number`, `chat_registry_id`,
+ * `namespace: 'universal_gateway'`, and the `date`/`timestamp`/`chat`/
+ * `synced_chat`/`start_time` aliases.
+ */
+export interface McsMemoryEnvelope {
+  id: string;
+  type: McsMemoryType;
+  schemaVersion: number;
+  namespace: 'momentum';
+  source: string;
+  createdAt: IsoTimestamp;
+  title: string;
+  originKind: 'system';
+  serviceName: string;
+  tenantId: string;
+  /** Team Magnificent membership scope — the single tenant/team the app serves. */
+  teamKey: 'team_magnificent';
+  /** The Team Magnificent member id `tmagId` (value `TMAG-…`), when the record is member-scoped. */
+  tmagId?: string;
+  derivedFrom?: string[];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · R1 — Outcome capture (P7.4).
+//
+// A BA-CONFIRMED, BA-scoped, team-scoped real-world outcome. The BA is the
+// source of truth; the app records the confirmation — it never infers, scores,
+// ranks, or qualifies an outcome. `enrolled_three` is a MIRROR of a BA report,
+// never a programmatic THREE enrollment or handoff. No `.com` exposure; no
+// income/compensation/cycle/placement values; no PII beyond opaque ids.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Closed, enumerated outcome kinds. A new kind is a schema change, not free text. */
+/**
+ * Terminal outcome — how a prospect RESOLVED (P7.16 §1a). Small closed set; NOT
+ * the journey milestones (watched video, attended webinar, …) which live in the
+ * event log. `enrolled_iii` = enrolled into III International = became a Brand
+ * Ambassador (→ a Team Magnificent member in Kevin's downline). `became_customer`
+ * = a product customer (not a member). The two are non-exclusive (a customer may
+ * later enroll). `pending` = not yet resolved.
+ */
+export type McsOutcomeKind =
+  | 'pending'
+  | 'enrolled_iii'
+  | 'became_customer'
+  | 'declined';
+
+/** A persisted outcome record: app-memory envelope + outcome fields (P7.4 §4.2). */
+export interface McsOutcomeRecord extends McsMemoryEnvelope {
+  type: 'outcome';
+  kind: McsOutcomeKind;
+  confirmedByTmagId: string;
+  prospectId?: string;
+  token?: string;
+  outcomeAt: IsoTimestamp;
+  note?: string | null;
+  supersedesOutcomeId?: string | null;
+}
+
+/** Input to `appendOutcome`. The domain layer stamps id/envelope; BA supplies the fact. */
+export interface McsOutcomeInput {
+  kind: McsOutcomeKind;
+  confirmedByTmagId: string;
+  tenantId: string;
+  prospectId?: string;
+  token?: string;
+  outcomeAt?: IsoTimestamp;
+  note?: string | null;
+  supersedesOutcomeId?: string | null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · R2 — Learning candidate pipeline (P7.5).
+//
+// A learning candidate is a PROPOSED, not-yet-approved unit of organizational
+// learning derived from runtime signals / R1 outcomes. It is stored REVIEW-ONLY
+// (separate from active knowledge collections) and is NEVER active knowledge.
+// The one hard invariant: NO AGENT MAY APPROVE KNOWLEDGE. Only a human reviewer
+// transitions a candidate to approved/rejected; agents/pipelines can only
+// produce 'detected' candidates. There is no auto-promotion path.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Candidate lifecycle. No `auto_approved`; no agent-drivable path to `approved`. */
+export type McsLearningCandidateStatus =
+  | 'detected'
+  | 'in_review'
+  | 'approved'
+  | 'rejected'
+  | 'superseded';
+
+/** Knowledge domains a candidate can belong to (KNOWLEDGE_EVOLUTION_RUNTIME §5.4). */
+export type McsLearningDomain =
+  | 'success'
+  | 'training'
+  | 'relationship'
+  | 'performance'
+  | 'organizational';
+
+/**
+ * A human review decision. `reviewedByTmagId` is a HUMAN reviewer id — never an
+ * agent id. Written once; a changed decision supersedes with a new candidate.
+ */
+export interface McsLearningCandidateReview {
+  decision: 'approved' | 'rejected';
+  reviewedByTmagId: string;
+  reviewedAt: IsoTimestamp;
+  reason?: string | null;
+  approvalReferenceId?: string | null;
+}
+
+/** A persisted learning candidate: app-memory envelope + candidate fields (P7.5 §4.2). */
+export interface McsLearningCandidateRecord extends McsMemoryEnvelope {
+  type: 'learning_candidate';
+  status: McsLearningCandidateStatus;
+  domain: McsLearningDomain;
+  language: 'en' | 'es';
+  proposedSummary: string;
+  sourceOutcomeIds: string[];
+  sourceSignalIds: string[];
+  review?: McsLearningCandidateReview | null;
+  supersedesCandidateId?: string | null;
+}
+
+/** Input to `appendLearningCandidate`. Always produces a `detected` candidate. */
+export interface McsLearningCandidateInput {
+  tenantId: string;
+  domain: McsLearningDomain;
+  language: 'en' | 'es';
+  proposedSummary: string;
+  sourceOutcomeIds?: string[];
+  sourceSignalIds?: string[];
+  tmagId?: string;
+  supersedesCandidateId?: string | null;
+}
+
+/** Input to `reviewLearningCandidate` — a HUMAN review decision (P7.5 §5.1). */
+export interface McsLearningCandidateReviewInput {
+  candidateId: string;
+  decision: 'approved' | 'rejected';
+  reviewedByTmagId: string;
+  reason?: string | null;
+  approvalReferenceId?: string | null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · R3 — GraphRAG (P7.6).
+//
+// Derived-memory records + retrieval over the app's OWN dedicated stores,
+// app-direct. A GraphRAG record indexes an ACTIVE, approved Knowledge Object for
+// semantic recall (Chroma) stitched to lineage (Neo4j) by the shared id. NO
+// Universal Gateway, no `quadstack.write`, no `universal_gateway` (ACR-0007).
+// Only records with `retrievalReady: true` and an active knowledge object are
+// served; superseded/archived/review-only records are excluded. The Context
+// Manager is the sole caller — agents never read/write GraphRAG stores directly.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Embedding model — all app vectors are 384-dim all-MiniLM-L6-v2 (P10 §7.3). */
+export type McsEmbeddingModel = 'all-MiniLM-L6-v2';
+
+/** A persisted GraphRAG derived-memory record: app-memory envelope + fields (P7.6 §4). */
+export interface McsGraphRagRecord extends McsMemoryEnvelope {
+  type: 'graphrag_record' | 'graphrag_chunk';
+  knowledgeObjectId: string;
+  version: number;
+  domain: McsLearningDomain;
+  language: 'en' | 'es';
+  summary: string;
+  model: McsEmbeddingModel;
+  modelVersion: string;
+  retrievalReady: boolean;
+}
+
+/** Input to `appendGraphRagRecord`. */
+export interface McsGraphRagInput {
+  knowledgeObjectId: string;
+  version: number;
+  tenantId: string;
+  domain: McsLearningDomain;
+  language: 'en' | 'es';
+  summary: string;
+  modelVersion: string;
+  title?: string;
+  type?: 'graphrag_record' | 'graphrag_chunk';
+  retrievalReady?: boolean;
+  derivedFrom?: string[];
+}
+
+/** A GraphRAG retrieval query (issued only by the Context Manager). */
+export interface McsGraphRagQuery {
+  tenantId: string;
+  domain: McsLearningDomain;
+  language: 'en' | 'es';
+  queryText: string;
+  topK?: number;
+}
+
+/** One retrieval hit — the shared id stitches Chroma/Neo4j/Mongo. */
+export interface McsGraphRagHit {
+  id: string;
+  knowledgeObjectId: string;
+  version: number;
+  summary: string;
+  distance: number | null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · P7.11 — Learning observability (aggregate metrics).
+//
+// AGGREGATE metrics over the persisted R0-R2 rungs, for the admin surface only.
+// Never a manual review queue, never `.com`-surfaced. Pure counts + rates — no
+// PII, no scoring/ranking of BAs or prospects. Consumes the runtime-audit /
+// outcome / learning-candidate records; the fetch path is the existing admin
+// read surface (activation step).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Aggregate snapshot of the learning loop's health (admin-only). */
+export interface McsLearningObservabilitySnapshot {
+  tenantId: string;
+  generatedAt: IsoTimestamp;
+  runtimeAudit: {
+    total: number;
+    gateAllowed: number;
+    gateDenied: number;
+    /** denials ÷ (allowed + denied); 0 when no gate events. */
+    gateDenyRate: number;
+  };
+  outcomes: {
+    total: number;
+    byKind: Record<McsOutcomeKind, number>;
+  };
+  learningCandidates: {
+    total: number;
+    detected: number;
+    approved: number;
+    rejected: number;
+    /** approvals ÷ (approved + rejected); 0 when nothing reviewed. */
+    approvalRate: number;
+  };
+}

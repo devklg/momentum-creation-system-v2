@@ -209,6 +209,26 @@ const Env = z.object({
   PERSISTENCE_DIRECT_ENABLED: EnvBoolean.default(false),
   // GPU embedder is required for Chroma direct writes; there is no CPU fallback.
   GPU_EMBEDDER_REQUIRED: EnvBoolean.default(true),
+  // Phase 7 · R0 canary kill-switch (P7.1 §6 / P7.2). When false (default) the
+  // runtime audit writer `appendRuntimeAuditEntry` is a no-op — the runtime turn
+  // lifecycle is NOT persisted. Flipping to true enables the first persistence
+  // rung (runtime audit only) without redeploy. Higher rungs (outcomes/learning/
+  // GraphRAG) stay off regardless of this flag.
+  RUNTIME_AUDIT_PERSISTENCE_ENABLED: EnvBoolean.default(false),
+  // Phase 7 · R1 canary kill-switch (P7.1 §6 / P7.4). When false (default) the
+  // outcome-capture writer `appendOutcome` is a no-op. Stays independent of R0 —
+  // outcomes cannot be enabled until runtime audit (R0) is proven, but the flags
+  // are separate so each rung is turned on and killed on its own.
+  OUTCOME_CAPTURE_PERSISTENCE_ENABLED: EnvBoolean.default(false),
+  // Phase 7 · R2 canary kill-switch (P7.1 §6 / P7.5). When false (default) the
+  // learning-candidate writer/review are no-ops. Candidates are review-only and
+  // NEVER active knowledge; no agent may approve — enabling this flag only turns
+  // on candidate CAPTURE + the human review-decision recorder, nothing else.
+  LEARNING_CANDIDATE_PERSISTENCE_ENABLED: EnvBoolean.default(false),
+  // Phase 7 · R3 canary kill-switch (P7.1 §6 / P7.6). When false (default) the
+  // GraphRAG writer + retrieval are no-ops. Only active, retrieval-ready,
+  // approved knowledge is ever served; candidates/superseded/archived excluded.
+  GRAPHRAG_PERSISTENCE_ENABLED: EnvBoolean.default(false),
 });
 
 export const env = Env.parse(process.env);
