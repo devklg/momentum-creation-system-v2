@@ -41,7 +41,12 @@ import {
   validateApprovedKnowledgeQueryRequest,
 } from './approvedKnowledgeQueryContract.js';
 import { resolveLanguageSelection } from './languageAwareRetrieval.js';
-import { filterFresh } from './freshnessGuard.js';
+import { classifyFreshness } from './freshnessGuard.js';
+import {
+  buildRetrievalObservabilityRecord,
+  type RetrievalObservabilityInput,
+  type RetrievalObservabilityRecord,
+} from './retrievalObservability.js';
 
 /**
  * Narrowed approved-knowledge provider. Intentionally `Pick<…, 'listApprovedKnowledge'>` so
@@ -50,13 +55,21 @@ import { filterFresh } from './freshnessGuard.js';
  */
 export type ApprovedKnowledgeProvider = Pick<KnowledgeCoreBoundaryPort, 'listApprovedKnowledge'>;
 
+/** P4.8 — retrieval observability sink. Receives one content-free record per retrieval call. */
+export type RetrievalObservabilitySink = (record: RetrievalObservabilityRecord) => void;
+
 /**
- * P4.7 — optional adapter options. `now` injects the clock for the freshness guard so
- * expiry/staleness evaluation is deterministic in tests; it defaults to the system clock. The
- * request's `freshness.asOf`, when a valid timestamp, overrides this per call.
+ * Optional adapter options.
+ * - `now` (P4.7) injects the clock for the freshness guard so expiry/staleness evaluation is
+ *   deterministic in tests; it defaults to the system clock. The request's `freshness.asOf`,
+ *   when a valid timestamp, overrides this per call.
+ * - `onRetrievalObservability` (P4.8) receives a content-free observability record on every
+ *   outcome. Absent ⇒ nothing is built or emitted (zero overhead, behavior identical to
+ *   pre-P4.8). A throwing sink never corrupts the returned result.
  */
 export interface ContextManagerRetrievalAdapterOptions {
   now?: () => Date;
+  onRetrievalObservability?: RetrievalObservabilitySink;
 }
 
 export interface ContextManagerRetrievalAdapter {
@@ -79,6 +92,7 @@ export function createContextManagerRetrievalAdapter(
   options: ContextManagerRetrievalAdapterOptions = {},
 ): ContextManagerRetrievalAdapter {
   const clock = options.now ?? (() => new Date());
+  const sink = options.onRetrievalObservability;
   return {
     async retrieveApprovedKnowledge(request) {
       const validation = validateApprovedKnowledgeQueryRequest(request);
@@ -96,7 +110,18 @@ export function createContextManagerRetrievalAdapter(
         raw = await provider.listApprovedKnowledge(request.scope);
       } catch {
         // Fail-closed: any boundary failure/timeout degrades to empty approved knowledge.
-        return degradedResult(request, ['knowledge_unavailable'], []);
+        const result = degradedResult(request, ['knowledge_unavailable'], []);
+        emitObservability(sink, {
+          request,
+          result,
+          rawCount: 0,
+          statusDomainKeptCount: 0,
+          freshKeptCount: 0,
+          freshnessExclusions: {},
+          candidateExcludedSourceIds: [],
+          observedAt: sink ? clock().toISOString() : undefined,
+        });
+        return result;
       }
 
       const excluded: ApprovedKnowledgeExcludedItem[] = [];
@@ -115,11 +140,36 @@ export function createContextManagerRetrievalAdapter(
         statusDomainKept.push(reference);
       }
 
+      // Sample the freshness clock AFTER the provider await (pre-P4.8 timing), and derive
+      // observedAt from the same instant. Both are only needed from here on.
+      const now = clock();
+      const observedAt = sink ? now.toISOString() : undefined;
+
       // P4.7 — freshness/deprecation guard. Runs before language selection (freshness is
       // language-independent). A stale/deprecated/superseded/expired/not-yet-effective reference
       // is a non-match (dropped like out-of-domain); a reference without freshness metadata is
       // always current. The guard resolves `freshness.asOf` (when valid) over the injected clock.
-      const freshKept = filterFresh(statusDomainKept, request.freshness, clock());
+      // P4.8 — classify (not just filter) so the freshness-exclusion tally is available for the
+      // observability record in the same pass.
+      const { fresh: freshKept, excluded: freshnessExclusions } = classifyFreshness(
+        statusDomainKept,
+        request.freshness,
+        now,
+      );
+
+      const candidateExcludedSourceIds = excluded.map((item) => item.sourceId);
+      const emit = (result: ApprovedKnowledgeQueryResult): void => {
+        emitObservability(sink, {
+          request,
+          result,
+          rawCount: raw.length,
+          statusDomainKeptCount: statusDomainKept.length,
+          freshKeptCount: freshKept.length,
+          freshnessExclusions,
+          candidateExcludedSourceIds,
+          observedAt,
+        });
+      };
 
       // P4.6 — language-aware selection over the status/domain/freshness-filtered references. The
       // resolver honors `allowLanguageFallback`, applies the priority ladder (same-language →
@@ -130,7 +180,9 @@ export function createContextManagerRetrievalAdapter(
       if (selection.status === 'degraded') {
         const reason: ApprovedKnowledgeQueryDegradeReason =
           freshKept.length > 0 ? (selection.degradeReason ?? 'language_unavailable') : 'no_approved_match';
-        return degradedResult(request, [reason], excluded);
+        const result = degradedResult(request, [reason], excluded);
+        emit(result);
+        return result;
       }
 
       const limited =
@@ -151,9 +203,29 @@ export function createContextManagerRetrievalAdapter(
       };
 
       assertApprovedKnowledgeQueryResult(result);
+      emit(result);
       return result;
     },
   };
+}
+
+/** Build and emit the observability record, isolating any sink exception from retrieval. */
+function emitObservability(
+  sink: RetrievalObservabilitySink | undefined,
+  input: RetrievalObservabilityInput,
+): void {
+  if (!sink) return;
+  let record: RetrievalObservabilityRecord;
+  try {
+    record = buildRetrievalObservabilityRecord(input);
+  } catch {
+    return; // never let observability construction corrupt retrieval
+  }
+  try {
+    sink(record);
+  } catch {
+    // A throwing sink must not change the returned result.
+  }
 }
 
 /**
