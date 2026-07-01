@@ -1543,20 +1543,25 @@ export interface GeneratorInviteResponse {
  * for a callback") and carries no income/placement language.
  */
 
+/** The ONE canonical prospect disposition (snake_case; unifies the former
+ * CrmDisposition + CrmDisposition — F2/F3). */
 export type CrmDisposition =
   | 'new_brand_ambassador'
-  | 'new-customer'
+  | 'new_customer'
   | 'interested'
-  | 'not-interested'
-  | 'later';
+  | 'not_interested'
+  | 'later'
+  | 'no_response'
+  | 'wrong_number'
+  | 'do_not_contact';
 
-/** All five dispositions in BA-action-priority order (for UI rendering). */
+/** The core dispositions in BA-action-priority order (for UI rendering). */
 export const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
   'new_brand_ambassador',
-  'new-customer',
+  'new_customer',
   'interested',
   'later',
-  'not-interested',
+  'not_interested',
 ] as const;
 
 /**
@@ -4476,15 +4481,7 @@ export type ProspectCrmStatus =
   | 'holding_tank'
   | 'closed';
 
-export type ProspectCrmDisposition =
-  | 'new_brand_ambassador'
-  | 'new_customer'
-  | 'interested'
-  | 'not_interested'
-  | 'later'
-  | 'no_response'
-  | 'wrong_number'
-  | 'do_not_contact';
+// CrmDisposition merged into the canonical CrmDisposition (F2/F3).
 
 export type ProspectCrmClosedReason =
   | 'enrolled_as_brand_ambassador'
@@ -4655,7 +4652,7 @@ export interface ProspectCRMRecord extends OwnedProspectIdentity {
   vmCampaignId: string | null;
   source: ProspectAcquisitionSource;
   status: ProspectCrmStatus;
-  disposition: ProspectCrmDisposition | null;
+  disposition: CrmDisposition | null;
   followUpDueAt: IsoTimestamp | null;
   closedAt: IsoTimestamp | null;
   closedReason: ProspectCrmClosedReason | null;
@@ -4692,7 +4689,7 @@ export interface OwnershipCorrectionAuditRecord {
 export interface ProspectCrmHubFilter {
   source?: ProspectAcquisitionSource | 'all';
   status?: ProspectCrmStatus | 'all';
-  disposition?: ProspectCrmDisposition | 'all';
+  disposition?: CrmDisposition | 'all';
   campaignId?: string | null;
   leadBatchId?: string | null;
   followUp?: 'due' | 'upcoming' | 'none' | 'all';
@@ -4712,7 +4709,7 @@ export interface ProspectCrmHubRow extends OwnedProspectIdentity {
   country: string | null;
   source: ProspectAcquisitionSource;
   status: ProspectCrmStatus;
-  disposition: ProspectCrmDisposition | null;
+  disposition: CrmDisposition | null;
   followUpDueAt: IsoTimestamp | null;
   lastSignal: ProspectTimelineEventKind | null;
   lastSignalAt: IsoTimestamp | null;
@@ -4733,9 +4730,9 @@ export interface ProspectCrmHubDetailResponse {
   timeline: ProspectTimelineEventRecord[];
 }
 
-export type BulkLeadStatus = VmLeadLifecycleStatus;
+// VmLeadLifecycleStatus alias removed (F4) — use VmLeadLifecycleStatus.
 export type ProspectCrmSource = ProspectAcquisitionSource;
-export type ProspectTimelineKind = ProspectTimelineEventKind;
+// ProspectTimelineEventKind alias removed (F4) — use ProspectTimelineEventKind.
 export type VMCampaignProviderMode = VmCampaignProvider;
 
 export interface CreateLeadBatchPayload {
@@ -4821,12 +4818,12 @@ export interface RvmResolvedTokenPayload extends ResolvedTokenPayload {
     leadId: string;
     leadBatchId: string;
     vmCampaignId: string;
-    status: BulkLeadStatus;
+    status: VmLeadLifecycleStatus;
   };
   crm: {
     crmRecordId: string;
     crmStatus: ProspectCrmStatus;
-    disposition: ProspectCrmDisposition | null;
+    disposition: CrmDisposition | null;
   };
 }
 

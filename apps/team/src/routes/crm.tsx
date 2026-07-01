@@ -36,9 +36,9 @@ type InvitationSource = 'self' | 'ivory' | 'scriptmaker' | 'vm' | 'rvm';
 
 type CrmDisposition =
   | 'new_brand_ambassador'
-  | 'new-customer'
+  | 'new_customer'
   | 'interested'
-  | 'not-interested'
+  | 'not_interested'
   | 'later';
 
 type ProspectLifecycleStage =
