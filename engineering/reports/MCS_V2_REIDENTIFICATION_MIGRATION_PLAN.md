@@ -27,7 +27,7 @@
 | D | **Outcome = terminal resolution** `pending · enrolled_iii · became_customer · declined`; **milestones → event log**; webinar attendance `yes/no/missed/rescheduled` + `scheduledFor`/`rescheduledTo`. | F5, P7.16 |
 | E | **Aliased duplicate types** collapsed (`BulkLeadStatus`, `ProspectTimelineKind`); overlapping funnel enums unified. | F4/F5 |
 | F | **One-name convention** — `Mcs`/`mcs` prefix always applied; one root; collections plural / types singular; casing per layer — applied app-wide. | governed-stack §3.2 |
-| G | **Neo4j** `BA` vs `BrandAmbassador` → one canonical **member** label; `ProspectCRMRecord` casing → one; apply constraints/indexes. | P10 §5.1/§6, P7.12 §3 |
+| G | **Member entity rename** — the app models a **Team Magnificent member**, not a "brand ambassador" (BA = a THREE role, not app membership): `brand_ambassadors → mcs_members`; Neo4j `BA`/`BrandAmbassador → TeamMagnificentMember`; `ProspectCRMRecord` casing → one; apply constraints/indexes. `threeBaId` stays as the person's III credential. | Kevin, P10 §5.1/§6, P7.12 §3 |
 | H | **Auth cutover** — `ADMIN_BA_IDS` values `TMBA- → TMAG-`; login/session identifier. | tmag decision |
 
 ---
@@ -103,17 +103,17 @@
 - **Member id:** `baId → tmagId`; `sponsorBaId → sponsorTmagId`; `ownerTmBaId → ownerTmagId`; `sponsorTmBaId → sponsorTmagId`; `confirmedByBaId → confirmedByTmagId`; `reviewedByBaId → reviewedByTmagId`; `requestingBaId → requestingTmagId`; `performedByBaId → performedByTmagId`; `authorBaId → authorTmagId`; `recipientBaId → recipientTmagId`; `createdByBaId → createdByTmagId`; `previousSponsorBaId → previousSponsorTmagId`; `newSponsorBaId → newSponsorTmagId`; `downlineBaId → downlineTmagId`; `founderBaId → founderTmagId`; `markedByBaId → markedByTmagId`; `deletedByBaId → deletedByTmagId`; `restoredByBaId → restoredByTmagId`; `actorBaId → actorTmagId`; `setByBaId → setByTmagId`; `toBaId → toTmagId`; `conductedByBaId → conductedByTmagId`; `forBaId → forTmagId`; `tmBaId → tmagId`; `old/newOwnerTmBaId → old/newOwnerTmagId`; `old/newSponsorTmBaId → old/newSponsorTmagId`. **Keep:** `threeBaId`, `threeUsername`.
 - **Values:** `TMBA-… → TMAG-…`; `TM-XXXX → TMAG-XXXX`; `TM-01/02 → TMAG-01/02`.
 - **Disposition:** one enum `new_brand_ambassador · new_customer · interested · not_interested · later · no_response · wrong_number · do_not_contact`; closed-reason `enrolled_as_brand_ambassador`, `closed_new_brand_ambassador`.
-- **Prospect status:** `AdminProspectRegistrationHandoffState → ProspectStatus`; `registrationHandoffState → prospectStatus`; `deriveRegistrationHandoffState → deriveProspectStatus`; `HandoffPill → ProspectStatusPill`.
+- **Prospect status:** `AdminProspectRegistrationHandoffState → ProspectStatus` with values `pending · enrolled_iii · became_customer · declined`; `registrationHandoffState → prospectStatus`; `deriveRegistrationHandoffState → deriveProspectStatus`; `HandoffPill → ProspectStatusPill`.
 - **Outcome:** `McsOutcomeKind = pending · enrolled_iii · became_customer · declined` (already applied in Phase 7); milestones live in `ProspectTimelineEventKind` (canonical), not the outcome enum.
-- **Neo4j label:** `BA` + `BrandAmbassador` → one canonical member label (decision pending name — recommend `BrandAmbassador`, since it is the more descriptive; edges repoint).
+- **Member entity (the app's canonical identity — NOT "brand ambassador"):** Mongo collection `brand_ambassadors → mcs_members`; Neo4j label `BA` + `BrandAmbassador → TeamMagnificentMember`; `-[:MEMBER_OF]->(:TeamMagnificent)`. `threeBaId`/`threeUsername` remain the person's III BA credential (attribute). All `BrandAmbassador`/`brand_ambassador` naming for the app user is dropped in favor of **member**.
 
 ---
 
-## 7. Open decisions to close before executing
+## 7. Decisions (Kevin, 2026-07-01)
 
-1. **The one canonical Neo4j member label name** — `BrandAmbassador` (recommended) vs `BA` vs `TeamMagnificentMember`.
-2. **`ProspectStatus` value set** — reuse the outcome set (`pending · enrolled_iii · became_customer · declined`) vs keep the F6 set (`pending · enrolled · no_show · withdrew`). Recommend unifying to the outcome set.
-3. **Append-only suspension** — confirm the append-only shared-file rule is suspended for this single serialized migration branch (yes/no).
+1. **Canonical member label = `TeamMagnificentMember` — RESOLVED.** A Brand Ambassador is a **THREE International** role and does **not** by itself make someone a Team Magnificent member; the app's entity is the **member** (a BA in Kevin's downline). So the Neo4j label is `TeamMagnificentMember`, `-[:MEMBER_OF]->(:TeamMagnificent)` (the team node). **Consequence:** the `brand_ambassadors` **collection is misnamed** (it holds members) → rename to `mcs_members`; the `BrandAmbassador` label + `brand_ambassadors` naming are dropped app-wide. `threeBaId` remains the person's BA credential (attribute, not the entity).
+2. **`ProspectStatus` = the outcome set — RESOLVED.** `pending · enrolled_iii · became_customer · declined` (enroll / decline / customer / pending). One concept shared with `McsOutcomeKind`.
+3. **Append-only suspension — pending confirm.** The rule is a *parallel-work* merge-collision guard (append-only `types.ts` / `index.ts`). The migration renames existing exports, so it needs the rule suspended **for this single serialized branch** — safe iff no other worktree edits those files concurrently. Confirm yes.
 
 ---
 

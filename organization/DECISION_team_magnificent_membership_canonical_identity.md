@@ -16,7 +16,9 @@ Aligns to / folds into: `P10_MCS_V2_SCHEMA_DESIGN.md` §5.1 (BA vs BrandAmbassad
 
 The canonical identity of Momentum Creation System V2 is **Team Magnificent membership**, not "Brand Ambassador in general." The app exists **exclusively** for Team Magnificent members. Everything the app authenticates, scopes, and persists is anchored to the **member**, and every member belongs to the single tenant **Team Magnificent** (Kevin's brand).
 
-"BA" is a **role in THREE International** (the upstream authority). "Team Magnificent member" is the **app identity**. They are related but not the same: the app is for members, not for BAs at large.
+"BA" is a **role in THREE International** (the upstream authority). "Team Magnificent member" is the **app identity**. They are related but **not the same**: the app is for members, not for BAs at large.
+
+**Sharpened (Kevin, 2026-07-01):** a Brand Ambassador is someone from THREE International — being a BA does **not** by itself make them a Team Magnificent member. A member is a BA **in Kevin's downline**. So **the app's canonical entity is the MEMBER**, and a person's BA identity is an **attribute** (`threeBaId`), not the entity. Consequence: the entity is named **member**, never "brand ambassador" — the `brand_ambassadors` collection (`→ mcs_members`) and the `BrandAmbassador` Neo4j label (`→ TeamMagnificentMember`) are misnomers, corrected in the reidentification migration.
 
 ---
 
