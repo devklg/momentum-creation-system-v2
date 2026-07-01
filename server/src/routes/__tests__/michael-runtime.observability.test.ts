@@ -30,7 +30,7 @@ import {
   resetMichaelRuntimeObservabilityForTests,
 } from '../../services/michaelRuntimeObservability.js';
 
-const SESSION_BA_ID = 'TMBA-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
 
 const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
@@ -91,10 +91,10 @@ function mockRes() {
 function mockReq(
   body: Record<string, unknown> = {},
   withSession = true,
-  sessionBaId: string = SESSION_BA_ID,
+  sessionTmagId: string = SESSION_BA_ID,
 ) {
   return {
-    ...(withSession ? { session: { baId: sessionBaId } } : {}),
+    ...(withSession ? { session: { tmagId: sessionTmagId } } : {}),
     body,
   } as any;
 }
@@ -157,10 +157,10 @@ describe('S3.11 Michael runtime route — observability counter wiring', () => {
     expect(c.missingTurnRejections).toBe(0);
   });
 
-  it('4. body baId override increments bodyBaOverrideRejections only (now via CLIENT_RUNTIME_INPUT_NOT_ALLOWED)', async () => {
+  it('4. body tmagId override increments bodyBaOverrideRejections only (now via CLIENT_RUNTIME_INPUT_NOT_ALLOWED)', async () => {
     enableRouteAndResponse();
     const res = mockRes();
-    await handleMichaelRuntimeResolve(mockReq({ baId: 'TMBA-EVIL-000000' }), res);
+    await handleMichaelRuntimeResolve(mockReq({ tmagId: 'TMAG-EVIL-000000' }), res);
 
     expect(res.statusCode).toBe(400);
     expect(res.body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
@@ -204,10 +204,10 @@ describe('S3.11 Michael runtime route — observability counter wiring', () => {
     expect(c.facadeFailures).toBe(0);
   });
 
-  it('6. a downstream turn-source failure (whitespace session baId) increments facadeFailures only; 422 unchanged', async () => {
+  it('6. a downstream turn-source failure (whitespace session tmagId) increments facadeFailures only; 422 unchanged', async () => {
     enableRouteAndResponse();
     const res = mockRes();
-    // Whitespace session baId passes the 401 guard but the server-owned turn
+    // Whitespace session tmagId passes the 401 guard but the server-owned turn
     // source fails closed -> deterministic 422 facade-failure path.
     await handleMichaelRuntimeResolve(mockReq({}, true, '   '), res);
 

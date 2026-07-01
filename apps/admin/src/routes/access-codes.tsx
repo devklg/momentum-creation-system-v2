@@ -1,13 +1,13 @@
 /**
- * /access-codes — mint and list TM-XXXX access codes.
+ * /access-codes — mint and list TMAG-XXXX access codes.
  *
- * Format locked Chat #94: TM-XXXX, 4 chars, 31-character alphabet excluding
+ * Format locked Chat #94: TMAG-XXXX, 4 chars, 31-character alphabet excluding
  * 0/O, 1/I, L. One code per BA, owned for life, never reassigned. Codes are
  * reused by the same BA for every new BA they sponsor.
  *
  * Server contract:
  *  - GET  /api/admin/access-codes → { ok, count, codes: AccessCodeListItem[] }
- *  - POST /api/admin/access-codes { sponsorBaId, sponsorThreeBaId,
+ *  - POST /api/admin/access-codes { sponsorTmagId, sponsorThreeBaId,
  *      sponsorFirstName, sponsorLastName, note?, explicit? } → { ok, code }
  *
  * Server enforces alphabet, length, uniqueness, one-per-BA invariant, and
@@ -21,7 +21,7 @@ import { Label } from '@/components/ui/label';
 
 interface AccessCode {
   code: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   sponsorThreeBaId: string;
   sponsorFirstName: string;
   sponsorLastName: string;
@@ -48,7 +48,7 @@ export function AccessCodesPage() {
   const [codes, setCodes] = useState<AccessCode[] | null>(null);
   const [loadErr, setLoadErr] = useState<string | null>(null);
 
-  const [sponsorBaId, setSponsorBaId] = useState('');
+  const [sponsorTmagId, setSponsorTmagId] = useState('');
   const [sponsorThreeBaId, setSponsorThreeBaId] = useState('');
   const [sponsorFirstName, setSponsorFirstName] = useState('');
   const [sponsorLastName, setSponsorLastName] = useState('');
@@ -79,7 +79,7 @@ export function AccessCodesPage() {
 
   const canMint =
     !minting &&
-    sponsorBaId.trim().length > 0 &&
+    sponsorTmagId.trim().length > 0 &&
     sponsorThreeBaId.trim().length > 0 &&
     sponsorFirstName.trim().length > 0 &&
     sponsorLastName.trim().length > 0;
@@ -95,7 +95,7 @@ export function AccessCodesPage() {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sponsorBaId: sponsorBaId.trim(),
+          sponsorTmagId: sponsorTmagId.trim(),
           sponsorThreeBaId: sponsorThreeBaId.trim(),
           sponsorFirstName: sponsorFirstName.trim(),
           sponsorLastName: sponsorLastName.trim(),
@@ -108,7 +108,7 @@ export function AccessCodesPage() {
         return;
       }
       setJustMinted(data.code);
-      setSponsorBaId('');
+      setSponsorTmagId('');
       setSponsorThreeBaId('');
       setSponsorFirstName('');
       setSponsorLastName('');
@@ -129,7 +129,7 @@ export function AccessCodesPage() {
       </p>
       <h1 className="font-display text-[36px] leading-none mb-2">Access Codes</h1>
       <p className="text-cream-mute text-sm mb-10 max-w-2xl">
-        Mint a TM-XXXX code for a Brand Ambassador. The BA reuses this same code for every new
+        Mint a TMAG-XXXX code for a Brand Ambassador. The BA reuses this same code for every new
         BA they sponsor. Format: 4 characters from a 31-character alphabet (no 0/O, no 1/I, no L).
         One code per BA — if the BA already owns one, the mint returns the existing code.
       </p>
@@ -138,12 +138,12 @@ export function AccessCodesPage() {
         <h2 className="font-display text-[20px] text-cream mb-5">Mint a new code</h2>
         <form onSubmit={handleMint} className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl">
           <div>
-            <Label htmlFor="sponsorBaId">Sponsor BA ID (Team Magnificent)</Label>
+            <Label htmlFor="sponsorTmagId">Sponsor BA ID (Team Magnificent)</Label>
             <Input
-              id="sponsorBaId"
-              value={sponsorBaId}
-              onChange={(e) => setSponsorBaId(e.target.value)}
-              placeholder="TMBA-XXXX..."
+              id="sponsorTmagId"
+              value={sponsorTmagId}
+              onChange={(e) => setSponsorTmagId(e.target.value)}
+              placeholder="TMAG-XXXX..."
               required
               disabled={minting}
             />
@@ -248,7 +248,7 @@ export function AccessCodesPage() {
                       {c.sponsorFirstName} {c.sponsorLastName}
                     </Td>
                     <Td>
-                      <span className="font-mono text-cream-mute">{c.sponsorBaId}</span>
+                      <span className="font-mono text-cream-mute">{c.sponsorTmagId}</span>
                     </Td>
                     <Td>
                       <span className="font-mono text-cream-mute">{c.sponsorThreeBaId}</span>

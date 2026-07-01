@@ -30,7 +30,7 @@ interface ListResponse {
 
 interface FilterDraft {
   role: '' | AuditActorRole;
-  actorBaId: string;
+  actorTmagId: string;
   action: string;
   entityKind: '' | AuditEntityKind;
   entityId: string;
@@ -41,7 +41,7 @@ interface FilterDraft {
 
 const EMPTY_FILTERS: FilterDraft = {
   role: '',
-  actorBaId: '',
+  actorTmagId: '',
   action: '',
   entityKind: '',
   entityId: '',
@@ -125,9 +125,9 @@ export function AuditPage() {
         </Field>
         <Field label="Actor BA ID">
           <Input
-            value={draft.actorBaId}
-            onChange={(e) => setDraft({ ...draft, actorBaId: e.target.value })}
-            placeholder="TMBA-…"
+            value={draft.actorTmagId}
+            onChange={(e) => setDraft({ ...draft, actorTmagId: e.target.value })}
+            placeholder="TMAG-…"
           />
         </Field>
         <Field label="Action (prefix)">
@@ -325,7 +325,7 @@ function actorDisplay(actor: AuditActor): string {
   switch (actor.kind) {
     case 'admin':
     case 'ba':
-      return `${actor.displayName} · ${actor.baId}`;
+      return `${actor.displayName} · ${actor.tmagId}`;
     case 'prospect':
       return `${actor.displayName} · ${actor.prospectId}`;
     case 'system':
@@ -350,7 +350,7 @@ function formatTimestamp(ts: string): string {
 function buildQueryString(f: FilterDraft, before: string | null): string {
   const p = new URLSearchParams();
   if (f.role) p.set('role', f.role);
-  if (f.actorBaId) p.set('actorBaId', f.actorBaId);
+  if (f.actorTmagId) p.set('actorTmagId', f.actorTmagId);
   if (f.action) p.set('actionPrefix', f.action);
   if (f.entityKind) p.set('entityKind', f.entityKind);
   if (f.entityId) p.set('entityId', f.entityId);

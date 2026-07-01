@@ -5,7 +5,7 @@
  * companion to the cockpit My Invites view. Pulls from the same read path
  * the cockpit uses (listInvitesForBA), so the print matches the screen and
  * stays sponsor-scoped: a BA can only ever print their own prospects
- * (locked-spec 3.5 — the baId comes from the session, never the request).
+ * (locked-spec 3.5 — the tmagId comes from the session, never the request).
  *
  * Compliance (locked-spec 3.10): this is a .team BA-facing artifact. It
  * shows funnel status (draft/sent/opened/watched/callback/enrolled/expired)
@@ -15,7 +15,7 @@
  */
 
 import { listInvitesForBA } from './cockpit.js';
-import { findBAByBaId } from './ba.js';
+import { findBAByTmagId } from './ba.js';
 import { buildPdfToBuffer, type TableColumn } from '../services/pdfReport.js';
 import type { InviteSummary, InviteDisplayStatus } from '@momentum/shared';
 
@@ -51,13 +51,13 @@ export interface CockpitPrintResult {
  * Build the BA prospect-list PDF for one BA. Returns the buffer plus the
  * verifiability fields (timestamp + source hash) the route logs to audit.
  */
-export async function buildCockpitProspectListPdf(baId: string): Promise<CockpitPrintResult> {
+export async function buildCockpitProspectListPdf(tmagId: string): Promise<CockpitPrintResult> {
   const [ba, { invites }] = await Promise.all([
-    findBAByBaId(baId),
-    listInvitesForBA(baId),
+    findBAByTmagId(tmagId),
+    listInvitesForBA(tmagId),
   ]);
 
-  const baName = ba ? `${ba.firstName} ${ba.lastName}` : baId;
+  const baName = ba ? `${ba.firstName} ${ba.lastName}` : tmagId;
   // Newest first matches the cockpit's on-screen order (listInvitesForBA
   // already sorts by createdAt desc).
   const rows = invites;
@@ -105,7 +105,7 @@ export async function buildCockpitProspectListPdf(baId: string): Promise<Cockpit
   );
 
   const safeName = baName.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-  const filename = `prospects-${safeName || baId}-${generatedAt.slice(0, 10)}.pdf`;
+  const filename = `prospects-${safeName || tmagId}-${generatedAt.slice(0, 10)}.pdf`;
 
   return { buffer, generatedAt, sourceHash, filename, prospectCount: rows.length };
 }

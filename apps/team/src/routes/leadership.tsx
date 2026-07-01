@@ -27,7 +27,7 @@ import { useNavigate } from 'react-router-dom';
 // ── Local mirror of packages/shared/src/leaders.ts (LEADER_CREDIBILITY) ──────
 
 interface LeaderProfile {
-  baId: string;
+  tmagId: string;
   name: string;
   role: string;
   initials: string;
@@ -50,7 +50,7 @@ const LEADER_CREDIBILITY: LeaderCredibilityContent = {
     'Team Magnificent is led by the people who built it — and who walk the exact path they ask you to walk.',
   leaders: [
     {
-      baId: 'TMBA-FOUNDER-KEVIN',
+      tmagId: 'TMAG-FOUNDER-KEVIN',
       name: 'Kevin L. Gardner',
       role: 'Founder',
       initials: 'KG',
@@ -63,7 +63,7 @@ const LEADER_CREDIBILITY: LeaderCredibilityContent = {
       ],
     },
     {
-      baId: 'TMBA-FOUNDER-PAUL',
+      tmagId: 'TMAG-FOUNDER-PAUL',
       name: 'Paul Barrios',
       role: 'Co-Leader',
       initials: 'PB',
@@ -106,7 +106,7 @@ export function LeadershipPage() {
         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
           {leaders.map((leader) => (
             <article
-              key={leader.baId}
+              key={leader.tmagId}
               className="bg-cream/[0.02] border border-gold/25 rounded-md p-7 flex flex-col gap-5"
             >
               <div className="flex items-center gap-4">

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type {
-  BaId,
+  TmagId,
   CorrelationId,
   IdempotencyKey,
   SessionId,
@@ -20,7 +20,7 @@ import {
 
 const tenantId = 'tenant_tm' as TenantId;
 const teamId = 'team_tm' as TeamId;
-const baId = 'ba_tm_001' as BaId;
+const tmagId = 'ba_tm_001' as TmagId;
 const sessionId = 'session_browser_test' as SessionId;
 
 const validSession = {
@@ -28,7 +28,7 @@ const validSession = {
   teamId,
   teamKey: 'team_magnificent',
   teamName: 'Team Magnificent',
-  baId,
+  tmagId,
   sessionId,
   agentKey: 'michael_magnificent',
   language: 'en',
@@ -73,7 +73,7 @@ describe('browser voice/text foundation compatibility', () => {
     const turn = createBrowserTextFallbackTurn(validSession, 'I need help practicing my invitation.');
 
     expect(turn.mode).toBe('browser_text');
-    expect(turn.baId).toBe(baId);
+    expect(turn.tmagId).toBe(tmagId);
     expect(turn.teamKey).toBe('team_magnificent');
     expect(turn.text).toContain('invitation');
     expect(turn.metadata?.textFallbackAvailable).toBe(true);
@@ -85,7 +85,7 @@ describe('browser voice/text foundation compatibility', () => {
       teamId,
       teamKey: 'team_magnificent',
       teamName: 'Team Magnificent',
-      baId,
+      tmagId,
       sessionId,
       agentKey: 'michael_magnificent',
       mode: 'browser_voice',
@@ -112,7 +112,7 @@ describe('browser voice/text foundation compatibility', () => {
       teamId,
       teamKey: 'team_magnificent',
       teamName: 'Team Magnificent',
-      baId,
+      tmagId,
       eventType: 'browser_voice.final_transcript',
       sessionId,
       agentKey: 'michael_magnificent',

@@ -5,7 +5,7 @@ import { env } from '../env.js';
 const secret = new TextEncoder().encode(env.JWT_SECRET);
 
 export interface SessionClaims {
-  baId: string;
+  tmagId: string;
   threeBaId: string;
   email: string;
 }

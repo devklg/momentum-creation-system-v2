@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type {
   ApprovedKnowledgeExcludedItem,
   ApprovedKnowledgeQueryRequest,
-  BaId,
+  TmagId,
   ContextExclusion,
   ContextExclusionReason,
   ContextPacketId,
@@ -30,7 +30,7 @@ function scope(): RuntimeRequestScope {
     teamId: 'team_magnificent' as TeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
-    baId: 'TMBA-P45-001' as BaId,
+    tmagId: 'TMAG-P45-001' as TmagId,
   };
 }
 
@@ -107,7 +107,7 @@ function packetInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextP
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      baId: 'TMBA-P45-001' as BaId,
+      tmagId: 'TMAG-P45-001' as TmagId,
       journalEnabled: false,
       languagePreference: 'en',
       permissions: {

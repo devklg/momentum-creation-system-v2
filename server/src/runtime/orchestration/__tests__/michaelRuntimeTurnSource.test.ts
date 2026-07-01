@@ -14,8 +14,8 @@ import type {
  * (`createMichaelRuntimeTurnForAuthenticatedBa`). It is the future replacement
  * for the route's client-supplied `body.turn`. These tests prove it is:
  *
- *  - server-owned / session-scoped — BA scope comes from `input.baId` only;
- *  - fail-closed — missing baId / unsupported language|mode return typed issues,
+ *  - server-owned / session-scoped — BA scope comes from `input.tmagId` only;
+ *  - fail-closed — missing tmagId / unsupported language|mode return typed issues,
  *    never throw, never emit a turn;
  *  - inert — produced turn has `agentResponseGenerated === false` and every
  *    persistence axis `'disabled'`;
@@ -25,7 +25,7 @@ import type {
  * Returned-only; nothing here mutates production state or persists.
  */
 
-const SESSION_BA_ID = 'TMBA-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
 
 function expectOk(
   result: CreateMichaelRuntimeTurnForAuthenticatedBaResult,
@@ -41,7 +41,7 @@ function expectFacadeOk(
 
 describe('S3.10 Michael runtime turn source — createMichaelRuntimeTurnForAuthenticatedBa', () => {
   it('1. accepts a session-derived BA identity and returns { ok:true, input }', async () => {
-    const result = await createMichaelRuntimeTurnForAuthenticatedBa({ baId: SESSION_BA_ID });
+    const result = await createMichaelRuntimeTurnForAuthenticatedBa({ tmagId: SESSION_BA_ID });
 
     expectOk(result);
     expect(result.input).toBeDefined();
@@ -50,7 +50,7 @@ describe('S3.10 Michael runtime turn source — createMichaelRuntimeTurnForAuthe
     expect(result.input.runtimeTurn).toBeDefined();
   });
 
-  it('2. rejects a missing baId with { ok:false, issues } and never throws', async () => {
+  it('2. rejects a missing tmagId with { ok:false, issues } and never throws', async () => {
     let result: CreateMichaelRuntimeTurnForAuthenticatedBaResult | undefined;
     await expect(
       (async () => {
@@ -63,54 +63,54 @@ describe('S3.10 Michael runtime turn source — createMichaelRuntimeTurnForAuthe
     expect(result!.ok).toBe(false);
     if (!result!.ok) {
       expect(result!.issues.length).toBeGreaterThan(0);
-      const baIssue = result!.issues.find((i) => i.path === 'baId');
+      const baIssue = result!.issues.find((i) => i.path === 'tmagId');
       expect(baIssue).toBeDefined();
       expect(baIssue!.code).toBe('missing_session_ba_id');
     }
   });
 
-  it('3. rejects an empty/whitespace baId (fails closed, does not throw)', async () => {
-    const result = await createMichaelRuntimeTurnForAuthenticatedBa({ baId: '   ' });
+  it('3. rejects an empty/whitespace tmagId (fails closed, does not throw)', async () => {
+    const result = await createMichaelRuntimeTurnForAuthenticatedBa({ tmagId: '   ' });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.issues.some((i) => i.path === 'baId')).toBe(true);
+      expect(result.issues.some((i) => i.path === 'tmagId')).toBe(true);
     }
   });
 
-  it('4. identity scope baId === the session baId passed in (rejection of body authority is by-construction)', async () => {
-    const result = await createMichaelRuntimeTurnForAuthenticatedBa({ baId: SESSION_BA_ID });
+  it('4. identity scope tmagId === the session tmagId passed in (rejection of body authority is by-construction)', async () => {
+    const result = await createMichaelRuntimeTurnForAuthenticatedBa({ tmagId: SESSION_BA_ID });
 
     expectOk(result);
-    // The function reads ONLY input.baId — the produced scope is anchored to it.
-    expect(result.input.identity.scope.baId).toBe(SESSION_BA_ID);
+    // The function reads ONLY input.tmagId — the produced scope is anchored to it.
+    expect(result.input.identity.scope.tmagId).toBe(SESSION_BA_ID);
   });
 
-  it('5. ignores any extra/body-authority props — only input.baId is read (sponsorBaId/targetBaId/token have no path)', async () => {
+  it('5. ignores any extra/body-authority props — only input.tmagId is read (sponsorTmagId/targetTmagId/token have no path)', async () => {
     const polluted = {
-      baId: SESSION_BA_ID,
+      tmagId: SESSION_BA_ID,
       // None of these exist on the input type; passed via `as` to prove the
-      // function reads only `baId` and cannot be steered by body authority.
-      sponsorBaId: 'TMBA-EVIL-000001',
-      targetBaId: 'TMBA-EVIL-000002',
-      downlineBaId: 'TMBA-EVIL-000003',
+      // function reads only `tmagId` and cannot be steered by body authority.
+      sponsorTmagId: 'TMAG-EVIL-000001',
+      targetTmagId: 'TMAG-EVIL-000002',
+      downlineTmagId: 'TMAG-EVIL-000003',
       token: 'prospect-token-xyz',
     } as unknown as CreateMichaelRuntimeTurnForAuthenticatedBaInput;
 
     const result = await createMichaelRuntimeTurnForAuthenticatedBa(polluted);
 
     expectOk(result);
-    // The scope baId is the session baId — never any of the injected ids.
-    expect(result.input.identity.scope.baId).toBe(SESSION_BA_ID);
+    // The scope tmagId is the session tmagId — never any of the injected ids.
+    expect(result.input.identity.scope.tmagId).toBe(SESSION_BA_ID);
     const serialized = JSON.stringify(result.input);
-    expect(serialized).not.toContain('TMBA-EVIL-000001');
-    expect(serialized).not.toContain('TMBA-EVIL-000002');
-    expect(serialized).not.toContain('TMBA-EVIL-000003');
+    expect(serialized).not.toContain('TMAG-EVIL-000001');
+    expect(serialized).not.toContain('TMAG-EVIL-000002');
+    expect(serialized).not.toContain('TMAG-EVIL-000003');
     expect(serialized).not.toContain('prospect-token-xyz');
   });
 
   it('6. produced input carries agentKey michael_magnificent and taskType training_support', async () => {
-    const result = await createMichaelRuntimeTurnForAuthenticatedBa({ baId: SESSION_BA_ID });
+    const result = await createMichaelRuntimeTurnForAuthenticatedBa({ tmagId: SESSION_BA_ID });
 
     expectOk(result);
     expect(result.input.identity.agentKey).toBe('michael_magnificent');
@@ -118,7 +118,7 @@ describe('S3.10 Michael runtime turn source — createMichaelRuntimeTurnForAuthe
   });
 
   it('7. runtimeTurn invariants: agentResponseGenerated === false and every persistence axis disabled', async () => {
-    const result = await createMichaelRuntimeTurnForAuthenticatedBa({ baId: SESSION_BA_ID });
+    const result = await createMichaelRuntimeTurnForAuthenticatedBa({ tmagId: SESSION_BA_ID });
 
     expectOk(result);
     const turn = result.input.runtimeTurn;
@@ -132,7 +132,7 @@ describe('S3.10 Michael runtime turn source — createMichaelRuntimeTurnForAuthe
   });
 
   it('8. FACADE COMPATIBILITY: the ok:true input resolves through resolveMichaelRuntimeTurnResponse to the degraded safe_fallback fixture', async () => {
-    const source = await createMichaelRuntimeTurnForAuthenticatedBa({ baId: SESSION_BA_ID });
+    const source = await createMichaelRuntimeTurnForAuthenticatedBa({ tmagId: SESSION_BA_ID });
     expectOk(source);
 
     const resolved = resolveMichaelRuntimeTurnResponse(source.input);
@@ -151,7 +151,7 @@ describe('S3.10 Michael runtime turn source — createMichaelRuntimeTurnForAuthe
 
   it('9. FACADE COMPATIBILITY (es): an es session resolves to the es safe_fallback sibling', async () => {
     const source = await createMichaelRuntimeTurnForAuthenticatedBa({
-      baId: SESSION_BA_ID,
+      tmagId: SESSION_BA_ID,
       language: 'es',
     });
     expectOk(source);
@@ -170,7 +170,7 @@ describe('S3.10 Michael runtime turn source — createMichaelRuntimeTurnForAuthe
     await expect(
       (async () => {
         result = await createMichaelRuntimeTurnForAuthenticatedBa({
-          baId: SESSION_BA_ID,
+          tmagId: SESSION_BA_ID,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           language: 'fr' as any,
         });
@@ -190,7 +190,7 @@ describe('S3.10 Michael runtime turn source — createMichaelRuntimeTurnForAuthe
 
   it('11. fail-closed: an unsupported mode returns typed issues and never throws', async () => {
     const result = await createMichaelRuntimeTurnForAuthenticatedBa({
-      baId: SESSION_BA_ID,
+      tmagId: SESSION_BA_ID,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mode: 'telephony' as any,
     });
@@ -204,8 +204,8 @@ describe('S3.10 Michael runtime turn source — createMichaelRuntimeTurnForAuthe
   });
 
   it('12. determinism: two calls with the same identity produce structurally equivalent adapter input (modulo generated ids)', async () => {
-    const a = await createMichaelRuntimeTurnForAuthenticatedBa({ baId: SESSION_BA_ID });
-    const b = await createMichaelRuntimeTurnForAuthenticatedBa({ baId: SESSION_BA_ID });
+    const a = await createMichaelRuntimeTurnForAuthenticatedBa({ tmagId: SESSION_BA_ID });
+    const b = await createMichaelRuntimeTurnForAuthenticatedBa({ tmagId: SESSION_BA_ID });
 
     expectOk(a);
     expectOk(b);

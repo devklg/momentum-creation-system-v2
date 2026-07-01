@@ -40,7 +40,7 @@ export function Leadership() {
 
         <div className="tm-leadership__grid">
           {leaders.map((leader, idx) => (
-            <article key={leader.baId} className="tm-leadership__card">
+            <article key={leader.tmagId} className="tm-leadership__card">
               <span className="tm-leadership__index" aria-hidden="true">
                 {String(idx + 1).padStart(2, "0")}
               </span>

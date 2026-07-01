@@ -39,7 +39,7 @@
  *   all         — every BA on the team
  *   first_72h   — BAs whose signup is within the last 72 hours
  *                 (the cohort Kevin most often wants to nudge)
- *   leaders     — `listLeaderBaIds()` from adminMetrics: Kevin-curated ∪
+ *   leaders     — `listLeaderTmagIds()` from adminMetrics: Kevin-curated ∪
  *                 system-detected (binary-qualified + ≥5 personal enrollments)
  *   at_risk     — BAs created >7 days ago with no recent login AND no
  *                 Michael completion. The structural "needs Kevin" set.
@@ -118,7 +118,7 @@ export type BroadcastRecipientStatus =
 export interface BroadcastRecord {
   broadcastId: string;
   /** TM BA ID of the sending admin (always Kevin or another ADMIN_BA_ID). */
-  createdByBaId: string;
+  createdByTmagId: string;
   createdByDisplayName: string;
   createdAt: string;
   /**
@@ -128,7 +128,7 @@ export interface BroadcastRecord {
   isTestSend: boolean;
   audiencePreset: BroadcastAudiencePreset;
   /** Only populated when audiencePreset === 'custom'. */
-  customAudienceBaIds: string[] | null;
+  customAudienceTmagIds: string[] | null;
   channel: BroadcastChannel;
   template: BroadcastTemplate;
   /** Count of recipient rows actually enqueued (post-exclusion). */
@@ -150,10 +150,10 @@ export interface BroadcastRecord {
  * sends).
  */
 export interface BroadcastRecipientRow {
-  /** Composite id: `${broadcastId}::${recipientBaId}`. */
+  /** Composite id: `${broadcastId}::${recipientTmagId}`. */
   rowId: string;
   broadcastId: string;
-  recipientBaId: string;
+  recipientTmagId: string;
   recipientFullName: string;
   recipientFirstName: string;
   recipientEmail: string | null;
@@ -198,7 +198,7 @@ export interface BroadcastRecipientRow {
 export type BroadcastOptoutReason = 'stop_keyword' | 'kevin_added';
 
 export interface BroadcastOptoutRow {
-  baId: string;
+  tmagId: string;
   reason: BroadcastOptoutReason;
   addedAt: string;
   /** Phone number that texted STOP, when reason === 'stop_keyword'. */
@@ -257,7 +257,7 @@ export interface BroadcastAudiencePreviewResponse {
 export interface BroadcastEnqueueRequest {
   audiencePreset: BroadcastAudiencePreset;
   /** Required when audiencePreset === 'custom'; ignored otherwise. */
-  customAudienceBaIds?: string[];
+  customAudienceTmagIds?: string[];
   channel: BroadcastChannel;
   template: BroadcastTemplate;
 }
@@ -312,7 +312,7 @@ export interface BroadcastStatusResponse {
 /* ─── Endpoint paths (single source of truth) ──────────────────── */
 
 export const ADMIN_BROADCAST_PATHS = {
-  /** GET — G.2 audience live count (query: preset, channel, customAudienceBaIds[]) */
+  /** GET — G.2 audience live count (query: preset, channel, customAudienceTmagIds[]) */
   audience: '/api/admin/broadcast/audience',
   /** POST — G.4 send-test-to-Kevin (one recipient, inline) */
   sendTest: '/api/admin/broadcast/test',
@@ -330,7 +330,7 @@ export const BROADCAST_LIMITS = {
   smsMaxChars: 1200,
   emailSubjectMaxChars: 140,
   emailTextMaxChars: 20_000,
-  customAudienceMaxBaIds: 500,
+  customAudienceMaxTmagIds: 500,
 } as const;
 
 /**

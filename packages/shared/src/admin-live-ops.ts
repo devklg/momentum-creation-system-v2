@@ -101,7 +101,7 @@ export interface AdminLiveGridSlot {
   prospectLastInitial: string;
   prospectCity: string;
   prospectStateOrRegion: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   sponsorFullName: string;
   placedAt: string;
   ageDays: number; // floor((now − placedAt) / 24h)

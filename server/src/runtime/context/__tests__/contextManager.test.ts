@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type {
   AgentId,
-  BaId,
+  TmagId,
   ContextPacketId,
   ContextRequestId,
   CorrelationId,
@@ -41,7 +41,7 @@ function baseEvent(): RuntimeAgentEventEnvelope {
     teamId: 'team_magnificent' as TeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
-    baId: 'TMBA-CONTEXT-001' as BaId,
+    tmagId: 'TMAG-CONTEXT-001' as TmagId,
     agentKey: 'michael_magnificent',
     agentId: 'agent_instance_michael_default' as AgentId,
     sessionId: 'session_context_001' as SessionId,
@@ -85,7 +85,7 @@ function baseInput(overrides: Partial<ContextPacketBuildInput> = {}): ContextPac
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      baId: 'TMBA-CONTEXT-001' as BaId,
+      tmagId: 'TMAG-CONTEXT-001' as TmagId,
       journalEnabled: true,
       languagePreference: 'en',
       permissions: {
@@ -208,7 +208,7 @@ describe('S1.5 context packet foundation', () => {
     }
   });
 
-  it('enforces Team Magnificent BA scope when baId exists', () => {
+  it('enforces Team Magnificent BA scope when tmagId exists', () => {
     const input = baseInput({
       ba: {
         ...baseInput().ba,

@@ -55,7 +55,7 @@ const Env = z.object({
    */
   PROSPECT_BASE_URL: z.string().url().default('http://localhost:7701'),
 
-  ADMIN_BA_IDS: z
+  ADMIN_TMAG_IDS: z
     .string()
     .default('')
     .transform((s) =>

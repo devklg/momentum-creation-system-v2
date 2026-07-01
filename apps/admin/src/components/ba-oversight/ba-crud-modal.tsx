@@ -9,7 +9,7 @@
  *
  * Distinct from SponsorOverrideFlow on purpose:
  *   - CRUD never touches sponsor. Sponsor changes route ONLY through the
- *     C.5 override flow (locked-spec 3.5). 'create' takes a sponsorBaId
+ *     C.5 override flow (locked-spec 3.5). 'create' takes a sponsorTmagId
  *     because it STAMPS it immutably from birth; it can never CHANGE one.
  *     'edit' has no sponsor field at all.
  *   - 'create' is a roster mirror entry, NO password (the access-code
@@ -58,7 +58,7 @@ interface FormState {
   phone: string;
   timezone: string;
   marketRegion: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   reason: string;
 }
 
@@ -81,7 +81,7 @@ function initialForm(mode: BaCrudMode, row: AdminBaDirectoryRow | null): FormSta
       phone: row.phone ?? '',
       timezone: '',
       marketRegion: '',
-      sponsorBaId: '',
+      sponsorTmagId: '',
       reason: '',
     };
   }
@@ -94,7 +94,7 @@ function initialForm(mode: BaCrudMode, row: AdminBaDirectoryRow | null): FormSta
     phone: '',
     timezone: '',
     marketRegion: '',
-    sponsorBaId: '',
+    sponsorTmagId: '',
     reason: '',
   };
 }
@@ -127,7 +127,7 @@ export function BaCrudModal({ mode, row, onClose, onDone }: Props) {
     form.lastName.trim().length >= 1 &&
     form.threeBaId.trim().length >= 1 &&
     form.threeUsername.trim().length >= 1 &&
-    form.sponsorBaId.trim().length >= 2;
+    form.sponsorTmagId.trim().length >= 2;
 
   const canSubmit = reasonOk && (mode === 'create' ? createOk : true);
 
@@ -204,12 +204,12 @@ export function BaCrudModal({ mode, row, onClose, onDone }: Props) {
 
             {mode === 'create' && (
               <div>
-                <Label htmlFor="sponsorBaId">Sponsor BA ID (stamped immutably from birth)</Label>
+                <Label htmlFor="sponsorTmagId">Sponsor BA ID (stamped immutably from birth)</Label>
                 <Input
-                  id="sponsorBaId"
-                  value={form.sponsorBaId}
-                  onChange={(e) => set('sponsorBaId', e.target.value)}
-                  placeholder="TMBA-…"
+                  id="sponsorTmagId"
+                  value={form.sponsorTmagId}
+                  onChange={(e) => set('sponsorTmagId', e.target.value)}
+                  placeholder="TMAG-…"
                 />
               </div>
             )}
@@ -220,7 +220,7 @@ export function BaCrudModal({ mode, row, onClose, onDone }: Props) {
                   {mode === 'delete' ? 'Removing' : 'Restoring'}
                 </p>
                 <Row label="Name" v={row.fullName} />
-                <Row label="BA ID" v={row.baId} />
+                <Row label="BA ID" v={row.tmagId} />
                 <Row label="THREE" v={row.threeBaId} />
               </div>
             )}
@@ -271,7 +271,7 @@ export function BaCrudModal({ mode, row, onClose, onDone }: Props) {
               <div className="border border-line rounded-md p-3 text-sm space-y-1">
                 <Row label="Name" v={`${form.firstName} ${form.lastName}`} />
                 <Row label="THREE" v={`${form.threeBaId} \u00b7 ${form.threeUsername}`} />
-                <Row label="Sponsor" v={form.sponsorBaId} />
+                <Row label="Sponsor" v={form.sponsorTmagId} />
                 <p className="text-[11px] font-mono text-teal/80 mt-1">
                   TM mirror entry — no THREE enrolment, no password set.
                 </p>
@@ -341,7 +341,7 @@ async function callApi(
 ): Promise<ApiResult<BaCrudOkData>> {
   const reason = form.reason.trim();
   const base = '/api/admin/bas';
-  const id = row ? encodeURIComponent(row.baId) : '';
+  const id = row ? encodeURIComponent(row.tmagId) : '';
 
   if (mode === 'create') {
     return request<AdminCreateBaResponse>(base, 'POST', {
@@ -349,7 +349,7 @@ async function callApi(
       lastName: form.lastName.trim(),
       threeBaId: form.threeBaId.trim(),
       threeUsername: form.threeUsername.trim(),
-      sponsorBaId: form.sponsorBaId.trim(),
+      sponsorTmagId: form.sponsorTmagId.trim(),
       email: form.email.trim() || null,
       phone: form.phone.trim() || null,
       timezone: form.timezone.trim() || null,

@@ -5,7 +5,7 @@
  * decoded session claims to req.session. Responds 401 if missing/invalid.
  *
  * `requireAdmin` — same as requireAuth, then enforces the BA-ID gate from
- * ADMIN_BA_IDS env. Match -> next. No match -> hard 403 with a generic error
+ * ADMIN_TMAG_IDS env. Match -> next. No match -> hard 403 with a generic error
  * (no indication that /admin exists). Logs the attempt for the audit trail.
  *
  * Per ADMIN Design Section A.2 (Locked Chat #85).
@@ -63,15 +63,15 @@ export async function requireAdmin(
   }
 
   const allowed =
-    env.ADMIN_BA_IDS.includes(claims.threeBaId) ||
-    env.ADMIN_BA_IDS.includes(claims.baId);
+    env.ADMIN_TMAG_IDS.includes(claims.threeBaId) ||
+    env.ADMIN_TMAG_IDS.includes(claims.tmagId);
 
   if (!allowed) {
     // Audit-log the denied attempt (per ADMIN Design A.2). Best-effort; never
     // block the response on logging.
     // eslint-disable-next-line no-console
     console.warn(
-      `[admin-gate] DENIED baId=${claims.baId} threeBaId=${claims.threeBaId} path=${req.path} ua="${req.get('user-agent') ?? ''}"`,
+      `[admin-gate] DENIED tmagId=${claims.tmagId} threeBaId=${claims.threeBaId} path=${req.path} ua="${req.get('user-agent') ?? ''}"`,
     );
     res.status(403).json({ ok: false, error: 'Not found.' });
     return;

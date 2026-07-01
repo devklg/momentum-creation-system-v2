@@ -25,7 +25,7 @@
  *
  * SPONSOR AUTHORITY: enforced server-side, mirrors getProfileCardForSponsor
  * (steve-success-interview.ts).
- * — only the direct sponsor (downline.sponsorBaId === requestingBaId) can read.
+ * — only the direct sponsor (downline.sponsorTmagId === requestingTmagId) can read.
  */
 
 import type { MichaelTrainingSupportCard, MichaelTrainingSupportGuidanceSection } from '@momentum/shared';
@@ -71,7 +71,7 @@ interface SuccessProfileSupportNeeds {
 }
 
 interface SuccessProfile {
-  baId: string;
+  tmagId: string;
   primaryWhy: SuccessProfilePrimaryWhy;
   successVision: SuccessProfileSuccessVision;
   learningStyle: SuccessProfileLearningStyle;
@@ -85,15 +85,15 @@ interface SuccessProfile {
 
 interface PersistedSteveDiscovery {
   _id: string;
-  baId: string;
-  sponsorBaId: string | null;
+  tmagId: string;
+  sponsorTmagId: string | null;
   completedAt?: string | null;
   successProfile: SuccessProfile;
 }
 
-interface BrandAmbassadorLookup {
-  baId: string;
-  sponsorBaId?: string | null;
+interface TeamMagnificentMemberLookup {
+  tmagId: string;
+  sponsorTmagId?: string | null;
   firstName?: string | null;
 }
 
@@ -113,18 +113,18 @@ export class TrainingSupportAccessError extends Error {
 // Reads
 // ─────────────────────────────────────────────────────────────────────────
 
-async function getBrandAmbassador(baId: string): Promise<BrandAmbassadorLookup | null> {
-  const result = await gatewayCall<{ documents: BrandAmbassadorLookup[] }>('mongodb', 'query', {
+async function getTeamMagnificentMember(tmagId: string): Promise<TeamMagnificentMemberLookup | null> {
+  const result = await gatewayCall<{ documents: TeamMagnificentMemberLookup[] }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
-    filter: { baId },
+    collection: 'team_magnificent_members',
+    filter: { tmagId },
     limit: 1,
   });
   return result.documents[0] ?? null;
 }
 
-async function getSteveDiscoveryByBaId(
-  baId: string,
+async function getSteveDiscoveryByTmagId(
+  tmagId: string,
 ): Promise<PersistedSteveDiscovery | null> {
   const result = await gatewayCall<{ documents: PersistedSteveDiscovery[] }>(
     'mongodb',
@@ -132,7 +132,7 @@ async function getSteveDiscoveryByBaId(
     {
       database: 'momentum',
       collection: STEVE_DISCOVERIES_COLLECTION,
-      filter: { baId },
+      filter: { tmagId },
       limit: 1,
     },
   );
@@ -201,13 +201,13 @@ function deriveSupportFocus(sn: SuccessProfileSupportNeeds): MichaelTrainingSupp
  * one auditable place.
  */
 export function projectSuccessProfileToCard(args: {
-  downlineBaId: string;
+  downlineTmagId: string;
   downlineFirstName: string;
   profile: SuccessProfile;
 }): MichaelTrainingSupportCard {
   const p = args.profile;
   return {
-    downlineBaId: args.downlineBaId,
+    downlineTmagId: args.downlineTmagId,
     downlineFirstName: args.downlineFirstName,
     derivedFromSteveAt: p.generatedAt,
     primaryWhy: trimToNonEmpty(p.primaryWhy?.statement),
@@ -227,8 +227,8 @@ export function projectSuccessProfileToCard(args: {
 
 /**
  * Sponsor-only fetch of a downline's Michael training-support card.
- * Authoritative check is server-side: requestingBaId must equal the
- * downline's sponsorBaId. Throws TrainingSupportAccessError with a `code`
+ * Authoritative check is server-side: requestingTmagId must equal the
+ * downline's sponsorTmagId. Throws TrainingSupportAccessError with a `code`
  * the route layer maps to 403 / 404.
  *
  *   NO_DOWNLINE       → no BA record at all          (404)
@@ -236,24 +236,24 @@ export function projectSuccessProfileToCard(args: {
  *   NO_PROFILE        → no Steve discovery yet       (404)
  */
 export async function getTrainingSupportCardForSponsor(args: {
-  requestingBaId: string;
-  downlineBaId: string;
+  requestingTmagId: string;
+  downlineTmagId: string;
 }): Promise<MichaelTrainingSupportCard> {
-  const downline = await getBrandAmbassador(args.downlineBaId);
+  const downline = await getTeamMagnificentMember(args.downlineTmagId);
   if (!downline) {
     throw new TrainingSupportAccessError(
       'NO_DOWNLINE',
-      `No BA record for downlineBaId=${args.downlineBaId}.`,
+      `No BA record for downlineTmagId=${args.downlineTmagId}.`,
     );
   }
-  if (!downline.sponsorBaId || downline.sponsorBaId !== args.requestingBaId) {
+  if (!downline.sponsorTmagId || downline.sponsorTmagId !== args.requestingTmagId) {
     throw new TrainingSupportAccessError(
       'NOT_SPONSOR',
       'Only the direct sponsor can read this training-support card.',
     );
   }
 
-  const discovery = await getSteveDiscoveryByBaId(args.downlineBaId);
+  const discovery = await getSteveDiscoveryByTmagId(args.downlineTmagId);
   if (!discovery || !discovery.successProfile) {
     throw new TrainingSupportAccessError(
       'NO_PROFILE',
@@ -262,7 +262,7 @@ export async function getTrainingSupportCardForSponsor(args: {
   }
 
   return projectSuccessProfileToCard({
-    downlineBaId: args.downlineBaId,
+    downlineTmagId: args.downlineTmagId,
     downlineFirstName: trimToNonEmpty(downline.firstName),
     profile: discovery.successProfile,
   });

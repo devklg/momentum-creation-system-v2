@@ -22,7 +22,7 @@
  *     pre-Chat-#97 whitelist already anticipated this with
  *     '/api/training/day-1'; we add the fast-start equivalents.
  *
- * Sponsor immutability (locked-spec 3.5): baId comes from req.session,
+ * Sponsor immutability (locked-spec 3.5): tmagId comes from req.session,
  * NEVER from the request body. Nothing a client can send can write to
  * another BA's progress.
  */
@@ -47,13 +47,13 @@ export const trainingRoutes: Router = Router();
  * Whitelisted (Module 1 hub render is pre-Steve accessible).
  * ────────────────────────────────────────────────────────────────── */
 trainingRoutes.get('/fast-start/progress', requireAuth, async (req, res) => {
-  const baId = req.session?.baId;
-  if (!baId) {
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) {
     res.status(401).json({ ok: false, error: 'Not authenticated.' });
     return;
   }
   try {
-    const payload = await getFastStartProgress(baId);
+    const payload = await getFastStartProgress(tmagId);
     res.status(200).json(payload);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -81,8 +81,8 @@ trainingRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) {
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) {
       res.status(401).json({ ok: false, error: 'Not authenticated.' });
       return;
     }
@@ -103,7 +103,7 @@ trainingRoutes.post(
 
     try {
       const result = await markFastStartModuleState({
-        baId,
+        tmagId,
         moduleId,
         to,
         occurredAt: new Date().toISOString(),

@@ -4,13 +4,13 @@
  * Returns a PreviewResolvedTokenPayload for the authed session BA. The
  * payload is shaped identically to a real ResolvedTokenPayload (so the
  * .com surface components render it unchanged) but flagged `preview: true`
- * and carries a sentinel token `PREVIEW-<baId>` that no real invite token
+ * and carries a sentinel token `PREVIEW-<tmagId>` that no real invite token
  * will ever match.
  *
  * SANDBOX INVARIANT (the verify-by-read-back contract):
  *   - This route performs ZERO writes. No prospect record. No invite-token
  *     record. No pool placement. No counter increment. No SSE emit. No SMS.
- *   - Reads are limited to findBAByBaId, findNextUpcomingEvent, and a
+ *   - Reads are limited to findBAByTmagId, findNextUpcomingEvent, and a
  *     point-read of the pool counter (for the dashboard's "next position"
  *     card). All three are pure reads.
  *   - Downstream /api/p/<sentinel>/* calls from the .com components 404
@@ -40,7 +40,7 @@ previewRoutes.get(
       return res.status(401).json({ ok: false, error: 'Not authenticated.' });
     }
     try {
-      const payload = await synthesizePreviewPayload(session.baId);
+      const payload = await synthesizePreviewPayload(session.tmagId);
       if (!payload) {
         return res.status(404).json({ ok: false, error: 'session_ba_not_found' });
       }

@@ -62,7 +62,7 @@ function createReq(extra?: {
   query?: Record<string, unknown>;
 }): Request {
   return {
-    session: { baId: 'TMBA-20240101-ABCDEF' },
+    session: { tmagId: 'TMAG-20240101-ABCDEF' },
     body: { ...(extra?.body ?? {}) },
     query: extra?.query ?? {},
   } as unknown as Request;

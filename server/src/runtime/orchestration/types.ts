@@ -1,7 +1,7 @@
 import type {
   AgentAllowedOutput,
   AgentKey,
-  BaId,
+  TmagId,
   ContextPacketRequest,
   ContextPacketV1,
   CorrelationId,
@@ -645,7 +645,7 @@ export interface AgentOrchestrationBoundaryDescriptor {
   notes: readonly string[];
 }
 
-export type { BaId, OutcomeId, RuntimeTurnId };
+export type { TmagId, OutcomeId, RuntimeTurnId };
 
 // ───────────────────────────────────────────────────────────────────────────
 // S2.17 — Michael response catalog (inert, controlled, returned-only).

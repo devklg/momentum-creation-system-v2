@@ -350,7 +350,7 @@ export async function saveTenantSettings(input: {
     complianceMode: 'fail_closed',
     contentInheritanceMode: 'code_default_master_override',
     updatedAt: now,
-    updatedBy: input.actor.baId,
+    updatedBy: input.actor.tmagId,
   };
 
   const version: TenantSettingsVersion = {
@@ -386,7 +386,7 @@ export async function saveTenantSettings(input: {
       metadata: {
         tenantId: TENANT_ID,
         version: version.version,
-        updatedBy: input.actor.baId,
+        updatedBy: input.actor.tmagId,
       },
     },
   });
@@ -454,7 +454,7 @@ export async function saveTenantTemplate(input: {
     version: before.source === 'code_default' ? 1 : before.version + 1,
     source: 'master_override',
     createdAt: now,
-    createdBy: input.actor.baId,
+    createdBy: input.actor.tmagId,
     reason: input.reason,
   };
 

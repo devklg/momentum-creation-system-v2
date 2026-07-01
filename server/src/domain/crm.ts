@@ -8,11 +8,11 @@
  *
  * Collections:
  *   crm_notes              one doc per note, append-only
- *   crm_followups          one ACTIVE row per (prospectId, sponsorBaId);
+ *   crm_followups          one ACTIVE row per (prospectId, sponsorTmagId);
  *                          replaced on set, clearedAt-stamped on clear
- *   crm_dispositions       one row per (prospectId, sponsorBaId), latest wins
+ *   crm_dispositions       one row per (prospectId, sponsorTmagId), latest wins
  *
- * Sponsor immutability (locked-spec 3.5): every function takes sponsorBaId
+ * Sponsor immutability (locked-spec 3.5): every function takes sponsorTmagId
  * from the route's session and assertOwnership() runs against the prospect
  * before any mutation. A BA cannot read or write another BA's prospect's
  * CRM, ever.
@@ -38,7 +38,7 @@ import { randomUUID } from 'node:crypto';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
-import { findBAByBaId } from './ba.js';
+import { findBAByTmagId } from './ba.js';
 import {
   adminCreateProspect,
   adminEditProspect,
@@ -74,7 +74,7 @@ const NOTE_MAX = 2000;
 
 /** All five disposition tags Kevin locked. Server-side validation list. */
 const VALID_DISPOSITIONS: ReadonlySet<CrmDisposition> = new Set([
-  'new-ba',
+  'new_brand_ambassador',
   'new-customer',
   'interested',
   'not-interested',
@@ -92,7 +92,7 @@ export class CrmError extends Error {
 
 interface ProspectGuardDoc {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   state: string;
   token?: string;
   sentAt?: string | null;
@@ -123,11 +123,11 @@ async function fetchProspect(prospectId: string): Promise<ProspectGuardDoc | nul
  */
 async function assertOwnership(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): Promise<ProspectGuardDoc> {
   const doc = await fetchProspect(prospectId);
   if (!doc) throw new CrmError('prospect_not_found');
-  if (doc.sponsorBaId !== sponsorBaId) throw new CrmError('sponsor_mismatch');
+  if (doc.sponsorTmagId !== sponsorTmagId) throw new CrmError('sponsor_mismatch');
   return doc;
 }
 
@@ -135,21 +135,21 @@ async function assertOwnership(
 
 export async function addNote(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
   text: string,
 ): Promise<CrmNoteRecord> {
   const trimmed = text.trim();
   if (!trimmed) throw new CrmError('empty_note');
   if (trimmed.length > NOTE_MAX) throw new CrmError('note_too_long');
 
-  await assertOwnership(prospectId, sponsorBaId);
+  await assertOwnership(prospectId, sponsorTmagId);
 
   const noteId = `crmnote_${randomUUID()}`;
   const createdAt = new Date().toISOString();
   const record: CrmNoteRecord = {
     noteId,
     prospectId,
-    sponsorBaId,
+    sponsorTmagId,
     text: trimmed,
     createdAt,
   };
@@ -161,20 +161,20 @@ export async function addNote(
     neo4j: {
       // BA WROTE_NOTE Note ABOUT Prospect — graph reflects ownership.
       cypher:
-        'MERGE (b:BA {baId: $sponsorBaId}) ' +
+        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
         'MERGE (p:Prospect {prospectId: $prospectId}) ' +
-        'CREATE (n:CrmNote {noteId: $id, text: $text, at: $createdAt, sponsorBaId: $sponsorBaId}) ' +
+        'CREATE (n:CrmNote {noteId: $id, text: $text, at: $createdAt, sponsorTmagId: $sponsorTmagId}) ' +
         'CREATE (b)-[:WROTE_NOTE]->(n) ' +
         'CREATE (n)-[:ABOUT]->(p)',
-      params: { sponsorBaId, prospectId, text: trimmed, createdAt },
+      params: { sponsorTmagId, prospectId, text: trimmed, createdAt },
     },
     chroma: {
       collection: CHROMA_COLLECTION,
-      document: `crm note (BA ${sponsorBaId} about prospect ${prospectId}): ${trimmed}`,
+      document: `crm note (BA ${sponsorTmagId} about prospect ${prospectId}): ${trimmed}`,
       metadata: {
         kind: 'crm_note',
         prospectId,
-        sponsorBaId,
+        sponsorTmagId,
         at: createdAt,
       },
     },
@@ -185,7 +185,7 @@ export async function addNote(
 
 export async function listNotes(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): Promise<CrmNoteRecord[]> {
   const res = await gatewayCall<{ documents: CrmNoteRecord[] }>(
     'mongodb',
@@ -193,7 +193,7 @@ export async function listNotes(
     {
       database: MONGO_DB,
       collection: NOTES_COLLECTION,
-      filter: { prospectId, sponsorBaId },
+      filter: { prospectId, sponsorTmagId },
       sort: { createdAt: -1 },
       limit: 200,
     },
@@ -210,7 +210,7 @@ export async function listNotes(
  */
 export async function setFollowUp(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
   dueAt: string,
 ): Promise<CrmFollowUpRecord> {
   // Validate: ISO timestamp, in the future.
@@ -218,9 +218,9 @@ export async function setFollowUp(
   if (Number.isNaN(dueMs)) throw new CrmError('invalid_due_at');
   if (dueMs <= Date.now()) throw new CrmError('due_at_in_past');
 
-  await assertOwnership(prospectId, sponsorBaId);
+  await assertOwnership(prospectId, sponsorTmagId);
 
-  const existing = await getActiveFollowUp(prospectId, sponsorBaId);
+  const existing = await getActiveFollowUp(prospectId, sponsorTmagId);
   const dueAtIso = new Date(dueMs).toISOString();
   const now = new Date().toISOString();
 
@@ -229,18 +229,18 @@ export async function setFollowUp(
     await gatewayCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: FOLLOWUPS_COLLECTION,
-      filter: { prospectId, sponsorBaId, clearedAt: null },
+      filter: { prospectId, sponsorTmagId, clearedAt: null },
       update: { $set: { dueAt: dueAtIso, updatedAt: now } },
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (b:BA {baId: $sponsorBaId})-[r:HAS_FOLLOWUP]->(p:Prospect {prospectId: $prospectId}) ' +
+        'MATCH (b:BA {tmagId: $sponsorTmagId})-[r:HAS_FOLLOWUP]->(p:Prospect {prospectId: $prospectId}) ' +
         'SET r.dueAt = $dueAt, r.updatedAt = $now',
-      params: { sponsorBaId, prospectId, dueAt: dueAtIso, now },
+      params: { sponsorTmagId, prospectId, dueAt: dueAtIso, now },
     });
     return {
       prospectId,
-      sponsorBaId,
+      sponsorTmagId,
       dueAt: dueAtIso,
       createdAt: existing.createdAt,
       clearedAt: null,
@@ -252,7 +252,7 @@ export async function setFollowUp(
   const followUpId = `crmfup_${randomUUID()}`;
   const record: CrmFollowUpRecord = {
     prospectId,
-    sponsorBaId,
+    sponsorTmagId,
     dueAt: dueAtIso,
     createdAt: now,
     clearedAt: null,
@@ -264,19 +264,19 @@ export async function setFollowUp(
     mongoDoc: { followUpId, ...record },
     neo4j: {
       cypher:
-        'MERGE (b:BA {baId: $sponsorBaId}) ' +
+        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
         'MERGE (p:Prospect {prospectId: $prospectId}) ' +
         'MERGE (b)-[r:HAS_FOLLOWUP]->(p) ' +
         'SET r.dueAt = $dueAt, r.createdAt = $createdAt, r.followUpId = $id',
-      params: { sponsorBaId, prospectId, dueAt: dueAtIso, createdAt: now },
+      params: { sponsorTmagId, prospectId, dueAt: dueAtIso, createdAt: now },
     },
     chroma: {
       collection: CHROMA_COLLECTION,
-      document: `crm follow-up set (BA ${sponsorBaId} -> prospect ${prospectId}) due ${dueAtIso}`,
+      document: `crm follow-up set (BA ${sponsorTmagId} -> prospect ${prospectId}) due ${dueAtIso}`,
       metadata: {
         kind: 'crm_followup_set',
         prospectId,
-        sponsorBaId,
+        sponsorTmagId,
         dueAt: dueAtIso,
         at: now,
       },
@@ -288,7 +288,7 @@ export async function setFollowUp(
 
 export async function getActiveFollowUp(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): Promise<CrmFollowUpRecord | null> {
   const res = await gatewayCall<{ documents: CrmFollowUpRecord[] }>(
     'mongodb',
@@ -296,7 +296,7 @@ export async function getActiveFollowUp(
     {
       database: MONGO_DB,
       collection: FOLLOWUPS_COLLECTION,
-      filter: { prospectId, sponsorBaId, clearedAt: null },
+      filter: { prospectId, sponsorTmagId, clearedAt: null },
       limit: 1,
     },
   );
@@ -305,25 +305,25 @@ export async function getActiveFollowUp(
 
 export async function clearFollowUp(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): Promise<void> {
-  await assertOwnership(prospectId, sponsorBaId);
+  await assertOwnership(prospectId, sponsorTmagId);
 
-  const existing = await getActiveFollowUp(prospectId, sponsorBaId);
+  const existing = await getActiveFollowUp(prospectId, sponsorTmagId);
   if (!existing) return; // idempotent
 
   const clearedAt = new Date().toISOString();
   await gatewayCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: FOLLOWUPS_COLLECTION,
-    filter: { prospectId, sponsorBaId, clearedAt: null },
+    filter: { prospectId, sponsorTmagId, clearedAt: null },
     update: { $set: { clearedAt } },
   });
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (b:BA {baId: $sponsorBaId})-[r:HAS_FOLLOWUP]->(p:Prospect {prospectId: $prospectId}) ' +
+      'MATCH (b:BA {tmagId: $sponsorTmagId})-[r:HAS_FOLLOWUP]->(p:Prospect {prospectId: $prospectId}) ' +
       'DELETE r',
-    params: { sponsorBaId, prospectId },
+    params: { sponsorTmagId, prospectId },
   });
 }
 
@@ -331,16 +331,16 @@ export async function clearFollowUp(
 
 export async function setDisposition(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
   disposition: CrmDisposition | null,
 ): Promise<CrmDisposition | null> {
   if (disposition !== null && !VALID_DISPOSITIONS.has(disposition)) {
     throw new CrmError('invalid_disposition');
   }
 
-  await assertOwnership(prospectId, sponsorBaId);
+  await assertOwnership(prospectId, sponsorTmagId);
 
-  const existing = await getDisposition(prospectId, sponsorBaId);
+  const existing = await getDisposition(prospectId, sponsorTmagId);
   const now = new Date().toISOString();
 
   // Clear path
@@ -349,14 +349,14 @@ export async function setDisposition(
     await gatewayCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: DISPOSITIONS_COLLECTION,
-      filter: { prospectId, sponsorBaId },
+      filter: { prospectId, sponsorTmagId },
       update: { $set: { disposition: null, updatedAt: now } },
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (b:BA {baId: $sponsorBaId})-[r:DISPOSED]->(p:Prospect {prospectId: $prospectId}) ' +
+        'MATCH (b:BA {tmagId: $sponsorTmagId})-[r:DISPOSED]->(p:Prospect {prospectId: $prospectId}) ' +
         'DELETE r',
-      params: { sponsorBaId, prospectId },
+      params: { sponsorTmagId, prospectId },
     });
     return null;
   }
@@ -366,24 +366,24 @@ export async function setDisposition(
     await gatewayCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: DISPOSITIONS_COLLECTION,
-      filter: { prospectId, sponsorBaId },
+      filter: { prospectId, sponsorTmagId },
       update: { $set: { disposition, updatedAt: now } },
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MERGE (b:BA {baId: $sponsorBaId}) ' +
+        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
         'MERGE (p:Prospect {prospectId: $prospectId}) ' +
         'MERGE (b)-[r:DISPOSED]->(p) ' +
         'SET r.disposition = $disposition, r.updatedAt = $now',
-      params: { sponsorBaId, prospectId, disposition, now },
+      params: { sponsorTmagId, prospectId, disposition, now },
     });
     return disposition;
   }
 
-  const dispoId = `crmdispo_${prospectId}_${sponsorBaId}`;
+  const dispoId = `crmdispo_${prospectId}_${sponsorTmagId}`;
   const record: CrmDispositionRecord = {
     prospectId,
-    sponsorBaId,
+    sponsorTmagId,
     disposition,
     updatedAt: now,
   };
@@ -393,19 +393,19 @@ export async function setDisposition(
     mongoDoc: { ...record },
     neo4j: {
       cypher:
-        'MERGE (b:BA {baId: $sponsorBaId}) ' +
+        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
         'MERGE (p:Prospect {prospectId: $prospectId}) ' +
         'MERGE (b)-[r:DISPOSED]->(p) ' +
         'SET r.disposition = $disposition, r.updatedAt = $now',
-      params: { sponsorBaId, prospectId, disposition, now },
+      params: { sponsorTmagId, prospectId, disposition, now },
     },
     chroma: {
       collection: CHROMA_COLLECTION,
-      document: `crm disposition '${disposition}' (BA ${sponsorBaId} -> prospect ${prospectId})`,
+      document: `crm disposition '${disposition}' (BA ${sponsorTmagId} -> prospect ${prospectId})`,
       metadata: {
         kind: 'crm_disposition_set',
         prospectId,
-        sponsorBaId,
+        sponsorTmagId,
         disposition,
         at: now,
       },
@@ -416,7 +416,7 @@ export async function setDisposition(
 
 export async function getDisposition(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): Promise<CrmDisposition | null> {
   const res = await gatewayCall<{ documents: Array<{ disposition: CrmDisposition | null }> }>(
     'mongodb',
@@ -424,7 +424,7 @@ export async function getDisposition(
     {
       database: MONGO_DB,
       collection: DISPOSITIONS_COLLECTION,
-      filter: { prospectId, sponsorBaId },
+      filter: { prospectId, sponsorTmagId },
       limit: 1,
     },
   );
@@ -441,14 +441,14 @@ export async function getDisposition(
  */
 export async function getCrmBundle(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): Promise<ProspectCrmBundle> {
-  const prospect = await assertOwnership(prospectId, sponsorBaId);
+  const prospect = await assertOwnership(prospectId, sponsorTmagId);
 
   const [notes, followUp, disposition] = await Promise.all([
-    listNotes(prospectId, sponsorBaId),
-    getActiveFollowUp(prospectId, sponsorBaId),
-    getDisposition(prospectId, sponsorBaId),
+    listNotes(prospectId, sponsorTmagId),
+    getActiveFollowUp(prospectId, sponsorTmagId),
+    getDisposition(prospectId, sponsorTmagId),
   ]);
 
   // Editable identity fields (Chat #141). assertOwnership's guard doc is
@@ -520,9 +520,9 @@ async function fetchFullProspectForEdit(prospectId: string): Promise<{
  */
 export async function reinvite(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): Promise<ReinviteResponse> {
-  const prospect = await assertOwnership(prospectId, sponsorBaId);
+  const prospect = await assertOwnership(prospectId, sponsorTmagId);
 
   if (prospect.state === 'enrolled') {
     throw new CrmError('enrolled');
@@ -560,7 +560,7 @@ export async function reinvite(
           _id: token,
           token,
           prospectId,
-          sponsorBaId,
+          sponsorTmagId,
           state: 'minted',
           createdAt: now,
           clickedAt: null,
@@ -572,7 +572,7 @@ export async function reinvite(
       query:
         'MERGE (t:InviteToken {token: $token}) ' +
         'SET t.prospectId = $prospectId, ' +
-        '    t.sponsorBaId = $sponsorBaId, ' +
+        '    t.sponsorTmagId = $sponsorTmagId, ' +
         '    t.state = $state, ' +
         '    t.createdAt = $createdAt, ' +
         '    t.expiresAt = $expiresAt ' +
@@ -582,7 +582,7 @@ export async function reinvite(
       params: {
         token,
         prospectId,
-        sponsorBaId,
+        sponsorTmagId,
         state: 'minted',
         createdAt: now,
         expiresAt: newExpiresAt,
@@ -624,7 +624,7 @@ export async function reinvite(
   // distinguishing note (locked-spec HARD RULE: don't widen the union).
   await appendActivity({
     prospectId,
-    sponsorBaId,
+    sponsorTmagId,
     kind: 'invitation_sent',
     note: fresh
       ? 'BA re-invited (minted a fresh link; previous had expired).'
@@ -661,9 +661,9 @@ export async function reinvite(
  */
 export async function reinviteScript(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): Promise<ReinviteScriptResponse> {
-  const prospect = await assertOwnership(prospectId, sponsorBaId);
+  const prospect = await assertOwnership(prospectId, sponsorTmagId);
 
   const name = (prospect.firstName ?? '').trim() || 'there';
   const link = prospect.token
@@ -695,7 +695,7 @@ export async function reinviteScript(
  */
 async function appendActivity(entry: {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   kind: 'invitation_sent';
   note: string;
   at: string;
@@ -707,7 +707,7 @@ async function appendActivity(entry: {
     mongoDoc: {
       activityId,
       prospectId: entry.prospectId,
-      sponsorBaId: entry.sponsorBaId,
+      sponsorTmagId: entry.sponsorTmagId,
       kind: entry.kind,
       note: entry.note,
       at: entry.at,
@@ -732,7 +732,7 @@ async function appendActivity(entry: {
       metadata: {
         kind: entry.kind,
         prospectId: entry.prospectId,
-        sponsorBaId: entry.sponsorBaId,
+        sponsorTmagId: entry.sponsorTmagId,
         at: entry.at,
       },
     },
@@ -760,7 +760,7 @@ async function appendActivity(entry: {
  * not sent"). Safe to render on the BA-facing cockpit.
  */
 export async function getTodaysActions(
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): Promise<TodayActionItem[]> {
   const fourteenDaysAgoIso = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
   const nowIso = new Date().toISOString();
@@ -776,14 +776,14 @@ export async function getTodaysActions(
     }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: CALLBACK_COLLECTION,
-      filter: { sponsorBaId, createdAt: { $gte: fourteenDaysAgoIso } },
+      filter: { sponsorTmagId, createdAt: { $gte: fourteenDaysAgoIso } },
       sort: { createdAt: -1 },
       limit: 200,
     }),
     gatewayCall<{ documents: CrmFollowUpRecord[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: FOLLOWUPS_COLLECTION,
-      filter: { sponsorBaId, clearedAt: null, dueAt: { $lte: nowIso } },
+      filter: { sponsorTmagId, clearedAt: null, dueAt: { $lte: nowIso } },
       sort: { dueAt: -1 },
       limit: 200,
     }),
@@ -800,7 +800,7 @@ export async function getTodaysActions(
     }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: PROSPECTS_COLLECTION,
-      filter: { sponsorBaId, deleted: { $ne: true } },
+      filter: { sponsorTmagId, deleted: { $ne: true } },
       sort: { createdAt: -1 },
       limit: 1000,
     }),
@@ -897,7 +897,7 @@ export async function getTodaysActions(
 // adminProspectCrud.ts ("the shared machines", Chat #141 decision). These
 // wrappers do three things and nothing more:
 //
-//   1. Force sponsorBaId from the session (locked-spec 3.5 — never the body).
+//   1. Force sponsorTmagId from the session (locked-spec 3.5 — never the body).
 //   2. Enforce ownership on edit/delete/restore via the existing
 //      assertOwnership() guard, so a BA can never touch another BA's
 //      prospect (3.5 "no strays"). Create needs no ownership check — the
@@ -921,13 +921,13 @@ export async function getTodaysActions(
 // is recording directly, and it behaves identically downstream.
 
 /** Resolve the calling BA's audit actor. Display name from the BA record;
- * falls back to the baId if the record is somehow nameless. */
-async function baActor(sponsorBaId: string): Promise<CrudActor> {
-  const ba = await findBAByBaId(sponsorBaId);
+ * falls back to the tmagId if the record is somehow nameless. */
+async function baActor(sponsorTmagId: string): Promise<CrudActor> {
+  const ba = await findBAByTmagId(sponsorTmagId);
   const displayName = ba
-    ? `${ba.firstName ?? ''} ${ba.lastName ?? ''}`.trim() || sponsorBaId
-    : sponsorBaId;
-  return { kind: 'ba', baId: sponsorBaId, displayName };
+    ? `${ba.firstName ?? ''} ${ba.lastName ?? ''}`.trim() || sponsorTmagId
+    : sponsorTmagId;
+  return { kind: 'ba', tmagId: sponsorTmagId, displayName };
 }
 
 /**
@@ -950,7 +950,7 @@ function crmErrorFromCrud(error: AdminProspectCrudError): CrmError {
 }
 
 /** Fields a BA may supply when creating a prospect from the cockpit.
- * sponsorBaId is intentionally absent — it is forced from the session. */
+ * sponsorTmagId is intentionally absent — it is forced from the session. */
 export interface BaCreateProspectInput {
   firstName: string;
   lastName: string;
@@ -975,7 +975,7 @@ export interface BaEditProspectInput {
 }
 
 export async function baCreateProspect(
-  sponsorBaId: string,
+  sponsorTmagId: string,
   input: BaCreateProspectInput,
 ): Promise<{
   prospectId: string;
@@ -983,8 +983,8 @@ export async function baCreateProspect(
   inviteUrl: string;
   row: AdminProspectDirectoryRow;
 }> {
-  const actor = await baActor(sponsorBaId);
-  // sponsorBaId forced from session — the body never carries it (3.5).
+  const actor = await baActor(sponsorTmagId);
+  // sponsorTmagId forced from session — the body never carries it (3.5).
   const result = await adminCreateProspect(
     {
       firstName: input.firstName,
@@ -992,7 +992,7 @@ export async function baCreateProspect(
       city: input.city,
       stateOrRegion: input.stateOrRegion,
       country: input.country,
-      sponsorBaId,
+      sponsorTmagId,
       phone: input.phone ?? null,
       email: input.email ?? null,
       reason: input.reason,
@@ -1005,15 +1005,15 @@ export async function baCreateProspect(
 
 export async function baEditProspect(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
   input: BaEditProspectInput,
 ): Promise<{ prospectId: string; row: AdminProspectDirectoryRow }> {
   // Ownership first: a BA edits only their own prospect. assertOwnership
   // throws CrmError('prospect_not_found' | 'sponsor_mismatch') which the
   // route maps to 404 / 403 without leaking which prospect belongs to whom.
-  await assertOwnership(prospectId, sponsorBaId);
+  await assertOwnership(prospectId, sponsorTmagId);
 
-  const actor = await baActor(sponsorBaId);
+  const actor = await baActor(sponsorTmagId);
   const result = await adminEditProspect(
     prospectId,
     {
@@ -1034,11 +1034,11 @@ export async function baEditProspect(
 
 export async function baSoftDeleteProspect(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
   reason: string,
 ): Promise<{ prospectId: string; deletedAt: string }> {
-  await assertOwnership(prospectId, sponsorBaId);
-  const actor = await baActor(sponsorBaId);
+  await assertOwnership(prospectId, sponsorTmagId);
+  const actor = await baActor(sponsorTmagId);
   const result = await adminSoftDeleteProspect(prospectId, { reason }, actor);
   if (!result.ok) throw crmErrorFromCrud(result.error);
   return result.value;

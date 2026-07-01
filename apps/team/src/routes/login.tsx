@@ -7,7 +7,7 @@
  * #125 when the founder hit /register, which is signup-only).
  *
  * Identity contract (auth.ts): TM BA ID + password. ONLY the TM BA ID
- * (TMBA-...) authenticates — THREE BA ID and email are operational facts on
+ * (TMAG-...) authenticates — THREE BA ID and email are operational facts on
  * the record, not credentials. New BAs are auto-sessioned at /register and
  * never see this page; this is for returning BAs and founders.
  *
@@ -30,18 +30,18 @@ import { Label } from '@/components/ui/label';
 
 interface LoginResponse {
   ok: true;
-  baId: string;
+  tmagId: string;
 }
 
 export function LoginPage() {
   const navigate = useNavigate();
 
-  const [baId, setBaId] = useState('');
+  const [tmagId, setTmagId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const ready = baId.trim() !== '' && password !== '' && !submitting;
+  const ready = tmagId.trim() !== '' && password !== '' && !submitting;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -53,7 +53,7 @@ export function LoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ baId: baId.trim(), password }),
+        body: JSON.stringify({ tmagId: tmagId.trim(), password }),
       });
       const body = (await res.json()) as LoginResponse | { ok: false; error?: string };
       if (!res.ok || !body.ok) {
@@ -94,12 +94,12 @@ export function LoginPage() {
 
         <form onSubmit={handleSubmit} autoComplete="on" className="space-y-3.5">
           <div>
-            <Label htmlFor="baId">BA ID</Label>
+            <Label htmlFor="tmagId">BA ID</Label>
             <Input
-              id="baId"
-              value={baId}
-              onChange={(e) => setBaId(e.target.value)}
-              placeholder="TMBA-..."
+              id="tmagId"
+              value={tmagId}
+              onChange={(e) => setTmagId(e.target.value)}
+              placeholder="TMAG-..."
               autoComplete="username"
               autoCapitalize="characters"
               spellCheck={false}

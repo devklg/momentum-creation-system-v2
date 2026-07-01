@@ -16,9 +16,9 @@
  * index.ts canonical pattern). A BA cannot mint invitations until Michael
  * onboarding is complete.
  *
- * Sponsor immutability (locked-spec 3.5): sponsorBaId is read from
- * req.session.baId — the authed session — NEVER from the request body. Any
- * sponsorBaId in the body is ignored. This is enforced here at the route
+ * Sponsor immutability (locked-spec 3.5): sponsorTmagId is read from
+ * req.session.tmagId — the authed session — NEVER from the request body. Any
+ * sponsorTmagId in the body is ignored. This is enforced here at the route
  * layer, the single point where the session identity is authoritative.
  *
  * Compliance (locked-spec 3.10, 1.13): the spine mints the link; it does NOT
@@ -78,12 +78,12 @@ const RELATIONSHIP_REASON_MAX = 600;
 
 /**
  * Build the domain input from the request body + the authed session BA.
- * sponsorBaId comes from the session ONLY (locked-spec 3.5). Returns a
+ * sponsorTmagId comes from the session ONLY (locked-spec 3.5). Returns a
  * validation error string, or the input object.
  */
 function buildInput(
   body: Partial<CreateInvitationPayload>,
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): { error: string } | { input: CreateInvitationInput } {
   const firstName = requiredStr(body?.firstName);
   const lastName = requiredStr(body?.lastName);
@@ -117,7 +117,7 @@ function buildInput(
 
   return {
     input: {
-      sponsorBaId,
+      sponsorTmagId,
       firstName,
       lastName,
       email: optionalStr(body?.email),
@@ -137,10 +137,10 @@ function buildInput(
  * Returns 201 with the substituted prospect link.
  */
 invitationRoutes.post('/', requireAuth, requireSteveComplete, async (req, res) => {
-  const sponsorBaId = req.session?.baId;
-  if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const sponsorTmagId = req.session?.tmagId;
+  if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
-  const built = buildInput(req.body as Partial<CreateInvitationPayload>, sponsorBaId);
+  const built = buildInput(req.body as Partial<CreateInvitationPayload>, sponsorTmagId);
   if ('error' in built) {
     return res.status(400).json({ ok: false, error: built.error });
   }
@@ -193,8 +193,8 @@ invitationRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const sponsorBaId = req.session?.baId;
-    if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const sponsorTmagId = req.session?.tmagId;
+    if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const prospectId = Array.isArray(req.params.prospectId)
       ? req.params.prospectId[0]
@@ -202,7 +202,7 @@ invitationRoutes.post(
     if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
 
     try {
-      const result = await markInvitationSent(prospectId, sponsorBaId);
+      const result = await markInvitationSent(prospectId, sponsorTmagId);
       const response: MarkInvitationSentResponse = {
         ok: true,
         prospectId,
@@ -235,10 +235,10 @@ invitationRoutes.post(
  * Returns 201 with the same link payload as the mint route.
  */
 invitationRoutes.post('/log', requireAuth, requireSteveComplete, async (req, res) => {
-  const sponsorBaId = req.session?.baId;
-  if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const sponsorTmagId = req.session?.tmagId;
+  if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
-  const built = buildInput(req.body as Partial<CreateInvitationPayload>, sponsorBaId);
+  const built = buildInput(req.body as Partial<CreateInvitationPayload>, sponsorTmagId);
   if ('error' in built) {
     return res.status(400).json({ ok: false, error: built.error });
   }

@@ -8,13 +8,13 @@
  *
  * Closed-state dispositions (BAs who already enrolled, etc.) are excluded
  * via a configurable closed-set. The current vocabulary only includes
- * 'new-ba' (terminal: prospect became BA), so that's the only one excluded
+ * 'new_brand_ambassador' (terminal: prospect became BA), so that's the only one excluded
  * today; broader vocabulary filtering will refine once disposition values
  * are finalized in code.
  */
 
 import { gatewayCall } from '../../services/gateway.js';
-import { resolveScopedBaIds } from '../adminMetrics.js';
+import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
@@ -31,7 +31,7 @@ const MONGO_DB = 'momentum';
 const COLL_DISPO = 'crm_dispositions';
 
 /** Disposition values that close a prospect; excluded from open follow-up aging. */
-const CLOSED_DISPOSITIONS = new Set(['new-ba']);
+const CLOSED_DISPOSITIONS = new Set(['new_brand_ambassador']);
 
 const PROVENANCE =
   'Follow-up data note (Chat #143): The spec asks for OPEN follow-up ' +
@@ -43,7 +43,7 @@ const PROVENANCE =
 
 interface DispoDoc {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   disposition: string;
   updatedAt: string;
 }
@@ -67,10 +67,10 @@ export async function buildFollowUpReport(
   result: AdminFollowUpReport;
   meta: Omit<AdminReportMeta, 'title'>;
 }> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
 
   const dispoFilter: Record<string, unknown> = {};
-  if (scopedBaIds !== null) dispoFilter.sponsorBaId = { $in: scopedBaIds };
+  if (scopedTmagIds !== null) dispoFilter.sponsorTmagId = { $in: scopedTmagIds };
   Object.assign(dispoFilter, rangeClause('updatedAt', range));
 
   const res = await gatewayCall<{ documents: DispoDoc[] }>('mongodb', 'query', {
@@ -88,7 +88,7 @@ export async function buildFollowUpReport(
       const age = ageDays(d.updatedAt, nowMs);
       return {
         prospectId: d.prospectId,
-        sponsorBaId: d.sponsorBaId,
+        sponsorTmagId: d.sponsorTmagId,
         disposition: d.disposition,
         lastUpdatedAt: d.updatedAt,
         ageDays: age,

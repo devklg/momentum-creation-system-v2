@@ -342,7 +342,7 @@ function validateContextPacketBuildInput(input: ContextPacketBuildInput): Contex
   requireString(input, 'requestId', errors);
   requireString(input.tenant, 'tenantId', errors, 'tenant.tenantId');
   requireString(input.team, 'teamId', errors, 'team.teamId');
-  requireString(input.ba, 'baId', errors, 'ba.baId');
+  requireString(input.ba, 'tmagId', errors, 'ba.tmagId');
   validateTeamMagnificentBaScope(input.ba, errors, 'ba');
   validateTeamMagnificentTeam(input.team, errors, 'team');
   validateAgentKey(input.agentKey, errors, 'agentKey');
@@ -416,7 +416,7 @@ function buildGuardrails(agentKey: AgentKey): Guardrail[] {
     {
       guardrailId: 'team_magnificent_scope_required',
       appliesTo: agentKey,
-      instruction: 'When baId is present, tenant/team/BA scope must remain Team Magnificent scoped.',
+      instruction: 'When tmagId is present, tenant/team/BA scope must remain Team Magnificent scoped.',
       severity: 'critical',
       category: 'runtime_boundary',
       reason: 'Cross-team context leakage is forbidden.',
@@ -532,7 +532,7 @@ function validateTeamMagnificentTeam(team: Partial<TeamContext>, errors: Context
 }
 
 function validateTeamMagnificentBaScope(ba: Partial<BaContext>, errors: ContextPacketValidationIssue[], path: string): void {
-  requireString(ba, 'baId', errors, `${path}.baId`);
+  requireString(ba, 'tmagId', errors, `${path}.tmagId`);
   requireString(ba, 'tenantId', errors, `${path}.tenantId`);
   requireString(ba, 'teamId', errors, `${path}.teamId`);
   if (ba.teamKey !== TEAM_MAGNIFICENT_KEY) {

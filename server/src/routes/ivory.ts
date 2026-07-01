@@ -8,7 +8,7 @@
  *   app.use('/api/ivory', ivoryRoutes);   // BA-FACING GATED block
  *
  * Every route applies (requireAuth, requireSteveComplete) per the
- * canonical pattern. baId comes from the session, never from the body or
+ * canonical pattern. tmagId comes from the session, never from the body or
  * the URL — Ivory is BA-private and the spine enforces it.
  *
  * Endpoints:
@@ -115,10 +115,10 @@ ivoryRoutes.get(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
     try {
-      const names = await listIvoryNamesForBA(baId);
+      const names = await listIvoryNamesForBA(tmagId);
       const body: ListIvoryNamesResponse = { ok: true, names };
       return res.status(200).json(body);
     } catch (err) {
@@ -134,8 +134,8 @@ ivoryRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const body = req.body as Partial<CreateIvoryNamePayload>;
     const firstName = requiredStr(body?.firstName);
@@ -155,7 +155,7 @@ ivoryRoutes.post(
       : undefined;
 
     try {
-      const name = await createIvoryName(baId, {
+      const name = await createIvoryName(tmagId, {
         firstName,
         lastName,
         notes,
@@ -180,8 +180,8 @@ ivoryRoutes.patch(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const ivoryId = paramStr(req.params.ivoryId);
     if (!ivoryId) return res.status(400).json({ ok: false, error: 'missing_ivory_id' });
@@ -198,7 +198,7 @@ ivoryRoutes.patch(
     }
 
     try {
-      const name = await updateIvoryName(ivoryId, baId, {
+      const name = await updateIvoryName(ivoryId, tmagId, {
         firstName: body?.firstName,
         lastName: body?.lastName,
         notes: body?.notes,
@@ -229,8 +229,8 @@ ivoryRoutes.patch(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const ivoryId = paramStr(req.params.ivoryId);
     if (!ivoryId) return res.status(400).json({ ok: false, error: 'missing_ivory_id' });
@@ -242,7 +242,7 @@ ivoryRoutes.patch(
     }
 
     try {
-      const name = await updateIvoryStatus(ivoryId, baId, status as IvoryStatus);
+      const name = await updateIvoryStatus(ivoryId, tmagId, status as IvoryStatus);
       const out: IvoryNameResponse = { ok: true, name };
       return res.status(200).json(out);
     } catch (err) {
@@ -267,14 +267,14 @@ ivoryRoutes.delete(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const ivoryId = paramStr(req.params.ivoryId);
     if (!ivoryId) return res.status(400).json({ ok: false, error: 'missing_ivory_id' });
 
     try {
-      await deleteIvoryName(ivoryId, baId);
+      await deleteIvoryName(ivoryId, tmagId);
       return res.status(200).json({ ok: true });
     } catch (err) {
       if (err instanceof IvoryNotFoundError) {
@@ -299,8 +299,8 @@ ivoryRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const body = req.body as Partial<IvoryCoachPayload>;
     const angle = body?.angle ?? 'unspecified';
@@ -343,8 +343,8 @@ ivoryRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const body = req.body as Partial<IvoryInvitationDraftPayload>;
     const ivoryId = requiredStr(body?.ivoryId);
@@ -362,7 +362,7 @@ ivoryRoutes.post(
     }
 
     try {
-      const result = await draftIvoryInvitation(baId, {
+      const result = await draftIvoryInvitation(tmagId, {
         ivoryId,
         relationshipReason,
         productName,
@@ -391,8 +391,8 @@ ivoryRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const body = req.body as Partial<IvoryInvitationMintPayload>;
     const ivoryId = requiredStr(body?.ivoryId);
@@ -423,7 +423,7 @@ ivoryRoutes.post(
     if (!phone) return res.status(400).json({ ok: false, error: 'phone_required' });
 
     try {
-      const result = await mintIvoryInvitation(baId, {
+      const result = await mintIvoryInvitation(tmagId, {
         ivoryId,
         relationshipReason,
         message,
@@ -460,8 +460,8 @@ ivoryRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const body = req.body as Partial<CreateGeneratorRunPayload>;
     const productKey = requiredStr(body?.productKey);
@@ -474,7 +474,7 @@ ivoryRoutes.post(
       : [];
 
     try {
-      const run = await createGeneratorRun(baId, {
+      const run = await createGeneratorRun(tmagId, {
         productKey,
         angle,
         selectedIvoryIds,
@@ -497,14 +497,14 @@ ivoryRoutes.get(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const runId = paramStr(req.params.runId);
     if (!runId) return res.status(400).json({ ok: false, error: 'missing_run_id' });
 
     try {
-      const run = await getGeneratorRun(runId, baId);
+      const run = await getGeneratorRun(runId, tmagId);
       const out: GeneratorRunResponse = { ok: true, run };
       return res.status(200).json(out);
     } catch (err) {
@@ -526,8 +526,8 @@ ivoryRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const runId = paramStr(req.params.runId);
     if (!runId) return res.status(400).json({ ok: false, error: 'missing_run_id' });
@@ -547,7 +547,7 @@ ivoryRoutes.post(
     try {
       const result = await mintInvitationForRun({
         runId,
-        baId,
+        tmagId,
         ivoryId,
         message,
         city,
@@ -599,7 +599,7 @@ ivoryRoutes.post(
 // never disagree with what /cockpit shows; enriches each Ivory-sourced row
 // with the BA's warm-market context (categories, angle, memory note).
 // All handlers apply (requireAuth, requireSteveComplete) per the
-// canonical pattern. baId is read from the session, never the body.
+// canonical pattern. tmagId is read from the session, never the body.
 // ───────────────────────────────────────────────────────────────────────
 
 ivoryRoutes.get(
@@ -607,10 +607,10 @@ ivoryRoutes.get(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
     try {
-      const view = await getIvoryMomentumView(baId);
+      const view = await getIvoryMomentumView(tmagId);
       const out: IvoryMomentumViewResponse = view;
       return res.status(200).json(out);
     } catch (err) {
@@ -626,8 +626,8 @@ ivoryRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const prospectId = paramStr(req.params.prospectId);
     if (!prospectId) {
@@ -641,7 +641,7 @@ ivoryRoutes.post(
     }
 
     try {
-      const result = await suggestIvoryMomentumFollowUp(baId, prospectId, { ask });
+      const result = await suggestIvoryMomentumFollowUp(tmagId, prospectId, { ask });
       const out: IvoryMomentumSuggestionResponse = result;
       return res.status(200).json(out);
     } catch (err) {

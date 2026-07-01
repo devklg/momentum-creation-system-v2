@@ -71,7 +71,7 @@ interface SteveRecommendation {
 }
 
 interface SteveSuccessProfile {
-  baId: string;
+  tmagId: string;
   primaryWhy: StevePrimaryWhy;
   successVision: SteveSuccessVision;
   learningStyle: SteveLearningStyle;
@@ -85,8 +85,8 @@ interface SteveSuccessProfile {
 }
 
 interface SteveDiscoveryArtifact {
-  baId: string;
-  sponsorBaId: string | null;
+  tmagId: string;
+  sponsorTmagId: string | null;
   callSid: string | null;
   startedAt: string | null;
   completedAt: string | null;
@@ -96,7 +96,7 @@ interface SteveDiscoveryArtifact {
 }
 
 interface SteveDiscoveryView {
-  baId: string;
+  tmagId: string;
   phase: SteveDiscoveryPhase;
   artifact: SteveDiscoveryArtifact | null;
 }

@@ -6,16 +6,16 @@
  * first invite, first prospect to video_complete, first enrollment.
  *
  * Data sources (all confirmed live, Chat #143):
- *   brand_ambassadors  — baId, firstName/lastName, createdAt (signup),
+ *   team_magnificent_members  — tmagId, firstName/lastName, createdAt (signup),
  *                         welcomedAt (welcome-accept commitment)
- *   steve_discoveries  — SD-<baId>, completedAt (discovery completion)
+ *   steve_discoveries  — SD-<tmagId>, completedAt (discovery completion)
  *   invitation_activity— kind 'invitation_sent' / 'video_completed', at,
- *                         sponsorBaId (first-invite / first-video-complete)
- *   pool_placements    — flushReason 'enrolled', flushedAt, sponsorBaId
+ *                         sponsorTmagId (first-invite / first-video-complete)
+ *   pool_placements    — flushReason 'enrolled', flushedAt, sponsorTmagId
  *                         (first enrollment a BA drove)
  *
- * Scope: reuses the dashboard filter (baId + leaderGroup) via the shared
- * resolveScopedBaIds. Time range: signup cohort window (BA createdAt). For
+ * Scope: reuses the dashboard filter (tmagId + leaderGroup) via the shared
+ * resolveScopedTmagIds. Time range: signup cohort window (BA createdAt). For
  * flat presets the window narrows the BA set by signup date; for by_month
  * it spans lifetime and buckets. Soft-deleted BAs are excluded.
  *
@@ -23,7 +23,7 @@
  */
 
 import { gatewayCall } from '../../services/gateway.js';
-import { resolveScopedBaIds } from '../adminMetrics.js';
+import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { monthKey, rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
@@ -36,13 +36,13 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COLL_BAS = 'brand_ambassadors';
+const COLL_BAS = 'team_magnificent_members';
 const COLL_STEVE = 'steve_discoveries';
 const COLL_ACTIVITY = 'invitation_activity';
 const COLL_PLACEMENTS = 'pool_placements';
 
 interface BaDoc {
-  baId: string;
+  tmagId: string;
   firstName: string;
   lastName: string;
   createdAt: string;
@@ -50,16 +50,16 @@ interface BaDoc {
   deleted?: boolean;
 }
 interface SteveDiscoveryDoc {
-  baId: string;
+  tmagId: string;
   completedAt: string | null;
 }
 interface ActivityDoc {
-  sponsorBaId: string;
+  sponsorTmagId: string;
   kind: string;
   at: string;
 }
 interface PlacementDoc {
-  sponsorBaId: string;
+  sponsorTmagId: string;
   flushedAt: string | null;
   flushReason: 'enrolled' | 'expired' | 'archived' | null;
 }
@@ -78,13 +78,13 @@ function median(values: number[]): number | null {
     : sorted[mid]!;
 }
 
-/** Build a map baId -> earliest `at` for activity docs of a given kind. */
+/** Build a map tmagId -> earliest `at` for activity docs of a given kind. */
 function firstByBa(docs: ActivityDoc[], kind: string): Map<string, string> {
   const out = new Map<string, string>();
   for (const d of docs) {
     if (d.kind !== kind) continue;
-    const cur = out.get(d.sponsorBaId);
-    if (!cur || d.at < cur) out.set(d.sponsorBaId, d.at);
+    const cur = out.get(d.sponsorTmagId);
+    if (!cur || d.at < cur) out.set(d.sponsorTmagId, d.at);
   }
   return out;
 }
@@ -93,12 +93,12 @@ export async function buildBaActivationReport(
   filter: AdminDashboardFilter,
   range: AdminReportTimeRange,
 ): Promise<{ result: AdminActivationReport; meta: Omit<AdminReportMeta, 'title'> }> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
 
   // BA set: scope + soft-delete exclusion + (for flat windows) signup-date
   // narrowing. by_month / lifetime leave the window open.
   const baFilter: Record<string, unknown> = { deleted: { $ne: true } };
-  if (scopedBaIds !== null) baFilter.baId = { $in: scopedBaIds };
+  if (scopedTmagIds !== null) baFilter.tmagId = { $in: scopedTmagIds };
   Object.assign(baFilter, rangeClause('createdAt', range));
 
   const basRes = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
@@ -109,7 +109,7 @@ export async function buildBaActivationReport(
     limit: 50_000,
   });
   const bas = basRes.documents ?? [];
-  const baIds = bas.map((b) => b.baId);
+  const baIds = bas.map((b) => b.tmagId);
 
   if (baIds.length === 0) {
     const meta = await emptyMeta(filter, range);
@@ -133,25 +133,25 @@ export async function buildBaActivationReport(
     gatewayCall<{ documents: SteveDiscoveryDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_STEVE,
-      filter: { baId: { $in: baIds }, completedAt: { $ne: null } },
+      filter: { tmagId: { $in: baIds }, completedAt: { $ne: null } },
       limit: baIds.length,
     }),
     gatewayCall<{ documents: ActivityDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_ACTIVITY,
-      filter: { sponsorBaId: { $in: baIds }, kind: { $in: ['invitation_sent', 'video_completed'] } },
+      filter: { sponsorTmagId: { $in: baIds }, kind: { $in: ['invitation_sent', 'video_completed'] } },
       limit: 200_000,
     }),
     gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
-      filter: { sponsorBaId: { $in: baIds }, flushReason: 'enrolled' },
+      filter: { sponsorTmagId: { $in: baIds }, flushReason: 'enrolled' },
       limit: 200_000,
     }),
   ]);
 
   const steveByBa = new Map(
-    (steveRes.documents ?? []).map((m) => [m.baId, m.completedAt]),
+    (steveRes.documents ?? []).map((m) => [m.tmagId, m.completedAt]),
   );
   const activity = activityRes.documents ?? [];
   const firstInvite = firstByBa(activity, 'invitation_sent');
@@ -160,21 +160,21 @@ export async function buildBaActivationReport(
   const firstEnroll = new Map<string, string>();
   for (const p of enrollRes.documents ?? []) {
     if (!p.flushedAt) continue;
-    const cur = firstEnroll.get(p.sponsorBaId);
-    if (!cur || p.flushedAt < cur) firstEnroll.set(p.sponsorBaId, p.flushedAt);
+    const cur = firstEnroll.get(p.sponsorTmagId);
+    if (!cur || p.flushedAt < cur) firstEnroll.set(p.sponsorTmagId, p.flushedAt);
   }
 
   const rows: AdminActivationRow[] = bas.map((b) => {
-    const firstInviteAt = firstInvite.get(b.baId) ?? null;
+    const firstInviteAt = firstInvite.get(b.tmagId) ?? null;
     return {
-      baId: b.baId,
+      tmagId: b.tmagId,
       fullName: `${b.firstName} ${b.lastName}`.trim(),
       signupAt: b.createdAt,
       welcomeAcceptedAt: b.welcomedAt ?? null,
-      steveDiscoveryCompletedAt: steveByBa.get(b.baId) ?? null,
+      steveDiscoveryCompletedAt: steveByBa.get(b.tmagId) ?? null,
       firstInviteAt,
-      firstVideoCompleteAt: firstVideo.get(b.baId) ?? null,
-      firstEnrollmentAt: firstEnroll.get(b.baId) ?? null,
+      firstVideoCompleteAt: firstVideo.get(b.tmagId) ?? null,
+      firstEnrollmentAt: firstEnroll.get(b.tmagId) ?? null,
       daysSignupToFirstInvite: firstInviteAt ? daysBetween(b.createdAt, firstInviteAt) : null,
     };
   });

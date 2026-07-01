@@ -235,7 +235,7 @@ export function DetailPanel({ prospectId, onClose, onRowRefreshed }: Props) {
             {detail.enrollment && (
               <Section eyebrow="Enrollment">
                 <KV k="Marked at" v={formatDateTime(detail.enrollment.markedAt)} />
-                <KV k="Marked by BA" v={detail.enrollment.markedByBaId} mono />
+                <KV k="Marked by BA" v={detail.enrollment.markedByTmagId} mono />
                 <KV
                   k="Source"
                   v={
@@ -344,7 +344,7 @@ function KV({
 /* ─── identity + sponsor drift ──────────────────────────────────── */
 
 function IdentitySection({ detail }: { detail: AdminProspectDetail }) {
-  const drift = detail.sponsorBaIdAtMint !== detail.sponsorBaIdNow;
+  const drift = detail.sponsorTmagIdAtMint !== detail.sponsorTmagIdNow;
   return (
     <Section eyebrow="Identity">
       <KV
@@ -359,10 +359,10 @@ function IdentitySection({ detail }: { detail: AdminProspectDetail }) {
       />
       <KV
         k="Sponsor now"
-        v={`${detail.sponsorNameNow} · ${detail.sponsorBaIdNow}`}
+        v={`${detail.sponsorNameNow} · ${detail.sponsorTmagIdNow}`}
         mono={false}
       />
-      <KV k="Sponsor at mint" v={detail.sponsorBaIdAtMint} mono tone={drift ? 'warn' : 'mute'} />
+      <KV k="Sponsor at mint" v={detail.sponsorTmagIdAtMint} mono tone={drift ? 'warn' : 'mute'} />
       {drift && (
         <div className="mt-1 px-3 py-2 border border-red-400/40 rounded text-[12px] text-red-400">
           Sponsor drift detected. The inviting BA on the original token does
@@ -380,7 +380,7 @@ function IdentitySection({ detail }: { detail: AdminProspectDetail }) {
         v={detail.placedAt ? formatDateTime(detail.placedAt) : '—'}
       />
       <KV k="State" v={detail.state} mono />
-      <KV k="Handoff state" v={detail.registrationHandoffState} mono />
+      <KV k="Handoff state" v={detail.prospectStatus} mono />
     </Section>
   );
 }
@@ -459,7 +459,7 @@ function TokenSection({
               <KV k="Expires" v={formatDateTime(preview.prospect.expiresAt)} />
               <KV
                 k="Inviting BA"
-                v={`${preview.ba.fullName} · ${preview.ba.baId}`}
+                v={`${preview.ba.fullName} · ${preview.ba.tmagId}`}
               />
               <KV k="Video" v={preview.videoUrl} mono />
               <KV

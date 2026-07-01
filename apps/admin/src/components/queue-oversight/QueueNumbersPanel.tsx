@@ -189,7 +189,7 @@ function LookupResultView({ result }: { result: QueueLookupResult }) {
           ) : null}
         </p>
         <p className="text-[12px] font-mono text-cream-mute">
-          placed {new Date(p.placedAt).toLocaleString()} · sponsor {p.sponsorBaId}
+          placed {new Date(p.placedAt).toLocaleString()} · sponsor {p.sponsorTmagId}
         </p>
         <a
           href={p.deepLink}

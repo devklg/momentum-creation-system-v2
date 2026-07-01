@@ -9,7 +9,7 @@
  *
  * The snapshot exposes only evaluated booleans and aggregate counts — no PII,
  * no tokens, no IDs, no raw env strings. Kevin-only via requireAdmin
- * (ADMIN_BA_IDS). Not BA-facing, never on `.com`.
+ * (ADMIN_TMAG_IDS). Not BA-facing, never on `.com`.
  *
  *   GET /observability   { ok: true, michaelRuntime: <snapshot> }
  */

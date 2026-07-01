@@ -52,7 +52,7 @@ export function captureOrchestrationEvent(
     teamId: identity.scope.teamId,
     teamKey: identity.scope.teamKey,
     teamName: identity.scope.teamName,
-    baId: identity.scope.baId,
+    tmagId: identity.scope.tmagId,
     agentKey: identity.agentKey,
     sessionId: identity.sessionId,
     correlationId: identity.correlationId,

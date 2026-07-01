@@ -22,8 +22,8 @@ export class LeadBatchError extends Error {
 }
 
 export interface CreateLeadBatchInput {
-  ownerTmBaId: string;
-  sponsorTmBaId: string;
+  ownerTmagId: string;
+  sponsorTmagId: string;
   name: string;
   source: string;
   country: string;
@@ -35,8 +35,8 @@ export async function createLeadBatch(input: CreateLeadBatchInput): Promise<Lead
   const now = new Date().toISOString();
   const batch: LeadBatchRecord = {
     leadBatchId: `batch_${randomUUID()}`,
-    ownerTmBaId: input.ownerTmBaId,
-    sponsorTmBaId: input.sponsorTmBaId,
+    ownerTmagId: input.ownerTmagId,
+    sponsorTmagId: input.sponsorTmagId,
     name: input.name,
     source: input.source as VmLeadBatchSource,
     sourceLabel: input.source,
@@ -58,14 +58,14 @@ export async function createLeadBatch(input: CreateLeadBatchInput): Promise<Lead
     mongoDoc: { ...batch },
     neo4j: {
       cypher:
-        'MERGE (b:BA {baId: $ownerTmBaId}) ' +
+        'MERGE (b:BA {tmagId: $ownerTmagId}) ' +
         'CREATE (lb:LeadBatch {leadBatchId: $id, name: $name, source: $source, ' +
-        '  country: $country, leadType: $leadType, ownerTmBaId: $ownerTmBaId, ' +
-        '  sponsorTmBaId: $sponsorTmBaId, status: $status, createdAt: $createdAt}) ' +
+        '  country: $country, leadType: $leadType, ownerTmagId: $ownerTmagId, ' +
+        '  sponsorTmagId: $sponsorTmagId, status: $status, createdAt: $createdAt}) ' +
         'CREATE (b)-[:OWNS_LEAD_BATCH]->(lb)',
       params: {
-        ownerTmBaId: batch.ownerTmBaId,
-        sponsorTmBaId: batch.sponsorTmBaId,
+        ownerTmagId: batch.ownerTmagId,
+        sponsorTmagId: batch.sponsorTmagId,
         name: batch.name,
         source: batch.source,
         country: batch.country,
@@ -77,12 +77,12 @@ export async function createLeadBatch(input: CreateLeadBatchInput): Promise<Lead
     chroma: {
       collection: CHROMA_COLLECTION,
       document:
-        `Lead batch ${batch.name} from ${batch.source}; owner ${batch.ownerTmBaId}; ` +
+        `Lead batch ${batch.name} from ${batch.source}; owner ${batch.ownerTmagId}; ` +
         `${batch.quantityImported} ${batch.leadType} leads in ${batch.country}.`,
       metadata: {
         kind: 'lead_batch_created',
         leadBatchId: batch.leadBatchId,
-        ownerTmBaId: batch.ownerTmBaId,
+        ownerTmagId: batch.ownerTmagId,
         source: batch.source,
         country: batch.country,
         createdAt: now,
@@ -95,12 +95,12 @@ export async function createLeadBatch(input: CreateLeadBatchInput): Promise<Lead
 
 export async function findLeadBatchForOwner(
   leadBatchId: string,
-  ownerTmBaId: string,
+  ownerTmagId: string,
 ): Promise<LeadBatchRecord> {
   const result = await gatewayCall<{ documents: LeadBatchRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
-    filter: { leadBatchId, ownerTmBaId },
+    filter: { leadBatchId, ownerTmagId },
     limit: 1,
   });
   const batch = result.documents?.[0];
@@ -108,11 +108,11 @@ export async function findLeadBatchForOwner(
   return batch;
 }
 
-export async function listLeadBatchesForOwner(ownerTmBaId: string): Promise<LeadBatchRecord[]> {
+export async function listLeadBatchesForOwner(ownerTmagId: string): Promise<LeadBatchRecord[]> {
   const result = await gatewayCall<{ documents: LeadBatchRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
-    filter: { ownerTmBaId },
+    filter: { ownerTmagId },
     sort: { createdAt: -1 },
     limit: 500,
   });
@@ -121,10 +121,10 @@ export async function listLeadBatchesForOwner(ownerTmBaId: string): Promise<Lead
 
 export async function markLeadBatchImported(
   leadBatchId: string,
-  ownerTmBaId: string,
+  ownerTmagId: string,
   importedCount: number,
 ): Promise<LeadBatchRecord> {
-  const batch = await findLeadBatchForOwner(leadBatchId, ownerTmBaId);
+  const batch = await findLeadBatchForOwner(leadBatchId, ownerTmagId);
   const now = new Date().toISOString();
   const quantityImported = batch.quantityImported + importedCount;
   const patch = {
@@ -137,17 +137,17 @@ export async function markLeadBatchImported(
   await gatewayCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: COLLECTION,
-    filter: { leadBatchId, ownerTmBaId },
+    filter: { leadBatchId, ownerTmagId },
     update: { $set: patch },
   });
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (lb:LeadBatch {leadBatchId: $leadBatchId, ownerTmBaId: $ownerTmBaId}) ' +
+      'MATCH (lb:LeadBatch {leadBatchId: $leadBatchId, ownerTmagId: $ownerTmagId}) ' +
       'SET lb.quantityImported = $quantityImported, lb.status = $status, ' +
       '    lb.updatedAt = $updatedAt, lb.completedAt = $completedAt',
     params: {
       leadBatchId,
-      ownerTmBaId,
+      ownerTmagId,
       quantityImported,
       status: patch.status,
       updatedAt: now,

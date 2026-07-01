@@ -19,7 +19,7 @@
  *     preserves positionNumber. Flush sets flushedAt + flushReason on the
  *     placement row; neighboring positions are NEVER renumbered.
  *   - Sponsor immutability (locked-spec 3.5): only an admin reassign-
- *     sponsor / move intervention may change the prospect's sponsorBaId,
+ *     sponsor / move intervention may change the prospect's sponsorTmagId,
  *     and every such change is audit-logged with before/after/reason.
  *   - Every mutation appends one AuditLogEntry via the 4.J substrate.
  *
@@ -29,16 +29,16 @@
  *
  * Ownership boundary: this domain file is owned by Agent D (TASK-admin-d.md
  * file list). It MUST NOT call into other domain files' private functions
- * — only the documented exports. Reuses listLeaderBaIds from adminMetrics
+ * — only the documented exports. Reuses listLeaderTmagIds from adminMetrics
  * (already exported) for leaderGroup scope resolution; replicates the
- * filter-resolution logic locally because adminMetrics.resolveScopedBaIds
+ * filter-resolution logic locally because adminMetrics.resolveScopedTmagIds
  * is private to that file.
  */
 
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
-import { listLeaderBaIds, LEADER_DETECTION_NOTE } from './adminMetrics.js';
+import { listLeaderTmagIds, LEADER_DETECTION_NOTE } from './adminMetrics.js';
 import { findProspectById } from './prospects.js';
 import { TOKEN_TTL_MS } from './tokens.js';
 import { findPlacementByProspectId } from './holdingTank.js';
@@ -58,7 +58,7 @@ import type {
   AdminProspectMoveRequest,
   AdminProspectPresentationStatus,
   AdminProspectReassignSponsorRequest,
-  AdminProspectRegistrationHandoffState,
+  ProspectStatus,
   AuditActor,
   AuditContext,
   CallbackRequestRecord,
@@ -77,7 +77,7 @@ import { randomUUID } from 'node:crypto';
 const MONGO_DB = 'momentum';
 const COLL_PROSPECTS = 'prospects';
 const COLL_PLACEMENTS = 'pool_placements';
-const COLL_BAS = 'brand_ambassadors';
+const COLL_BAS = 'team_magnificent_members';
 const COLL_TOKENS = 'invite_tokens';
 const COLL_CALLBACKS = 'callback_requests';
 const COLL_WEBINARS = 'webinar_reservations';
@@ -109,7 +109,7 @@ const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/1IZiV7RXdCY';
 /* ─── document shapes (private; mirror gateway result rows) ─────── */
 
 interface BaDoc {
-  baId: string;
+  tmagId: string;
   firstName: string;
   lastName: string;
   kevinTaggedLeader?: boolean;
@@ -117,9 +117,9 @@ interface BaDoc {
 }
 
 interface ProspectDoc extends ProspectRecord {
-  /** Inviting BA at mint time (sponsorBaIdAtMint). Optional because legacy
-   *  rows predate the field — fall back to sponsorBaId in projection. */
-  sponsorBaIdAtMint?: string;
+  /** Inviting BA at mint time (sponsorTmagIdAtMint). Optional because legacy
+   *  rows predate the field — fall back to sponsorTmagId in projection. */
+  sponsorTmagIdAtMint?: string;
   /** Soft-delete lifecycle (Chat #138/#141). Absent === not deleted. */
   deleted?: boolean;
   deletedAt?: string | null;
@@ -134,17 +134,17 @@ interface NoteDoc extends AdminProspectKevinNote {
 
 /**
  * Resolve the set of BA IDs the filter narrows to. Mirrors
- * adminMetrics.resolveScopedBaIds (which is private). Returns null when
+ * adminMetrics.resolveScopedTmagIds (which is private). Returns null when
  * the filter is unrestricted so downstream queries can omit the
- * sponsorBaId-in clause.
+ * sponsorTmagId-in clause.
  */
-async function resolveScopedBaIds(
+async function resolveScopedTmagIds(
   filter: AdminDashboardFilter,
 ): Promise<string[] | null> {
-  if (filter.baId) return [filter.baId];
+  if (filter.tmagId) return [filter.tmagId];
   if (filter.leaderGroup === 'all') return null;
 
-  const leaders = await listLeaderBaIds();
+  const leaders = await listLeaderTmagIds();
   if (filter.leaderGroup === 'leaders_only') return leaders;
 
   const allBas = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
@@ -154,7 +154,7 @@ async function resolveScopedBaIds(
     limit: 50_000,
   });
   const leaderSet = new Set(leaders);
-  return (allBas.documents ?? []).map((b) => b.baId).filter((id) => !leaderSet.has(id));
+  return (allBas.documents ?? []).map((b) => b.tmagId).filter((id) => !leaderSet.has(id));
 }
 
 /* ─── BA name resolver ──────────────────────────────────────────── */
@@ -168,25 +168,25 @@ async function loadBaNameMap(): Promise<Map<string, string>> {
   });
   const map = new Map<string, string>();
   for (const doc of result.documents ?? []) {
-    map.set(doc.baId, `${doc.firstName} ${doc.lastName}`);
+    map.set(doc.tmagId, `${doc.firstName} ${doc.lastName}`);
   }
   return map;
 }
 
 /* ─── status & derived-field helpers ────────────────────────────── */
 
-export function deriveRegistrationHandoffState(
+export function deriveProspectStatus(
   placement: PoolPlacement | null,
-): AdminProspectRegistrationHandoffState {
+): ProspectStatus {
   if (!placement) return 'pending';
   if (!placement.flushedAt) return 'pending';
   switch (placement.flushReason) {
     case 'enrolled':
-      return 'enrolled';
+      return 'enrolled_iii';
     case 'expired':
-      return 'no_show';
+      return 'declined';
     case 'archived':
-      return 'withdrew';
+      return 'declined';
     default:
       return 'pending';
   }
@@ -300,13 +300,13 @@ export async function listDirectoryRows(
   filter: AdminDashboardFilter,
   nowMs: number = Date.now(),
 ): Promise<AdminProspectDirectoryRow[]> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
   const baNames = await loadBaNameMap();
 
   const prospectFilter: Record<string, unknown> = {};
-  if (scopedBaIds) {
-    if (scopedBaIds.length === 0) return [];
-    prospectFilter.sponsorBaId = { $in: scopedBaIds };
+  if (scopedTmagIds) {
+    if (scopedTmagIds.length === 0) return [];
+    prospectFilter.sponsorTmagId = { $in: scopedTmagIds };
   }
   const prospectsResult = await gatewayCall<{ documents: ProspectDoc[] }>(
     'mongodb',
@@ -349,8 +349,8 @@ export async function listDirectoryRows(
       prospectId: p.prospectId,
       firstName: p.firstName,
       lastName: p.lastName,
-      sponsorBaId: p.sponsorBaId,
-      sponsorName: baNames.get(p.sponsorBaId) ?? p.sponsorBaId,
+      sponsorTmagId: p.sponsorTmagId,
+      sponsorName: baNames.get(p.sponsorTmagId) ?? p.sponsorTmagId,
       presentationStatus: derivePresentationStatus(
         p.state,
         !!callback,
@@ -367,7 +367,7 @@ export async function listDirectoryRows(
       },
       daysInHoldingTank: deriveDaysInHoldingTank(placement, nowMs),
       followUpNeededBy: deriveFollowUpNeededBy(p, placement),
-      registrationHandoffState: deriveRegistrationHandoffState(placement),
+      prospectStatus: deriveProspectStatus(placement),
       deleted: p.deleted === true,
     };
   });
@@ -390,15 +390,15 @@ export async function getDirectoryFilterOptions(): Promise<{
       filter: {},
       limit: 50_000,
     }),
-    listLeaderBaIds(),
+    listLeaderTmagIds(),
   ]);
   const leaderSet = new Set(leaderIds);
   const docs = allBasResult.documents ?? [];
 
   const bas: AdminBaFilterOption[] = docs.map((d) => ({
-    baId: d.baId,
+    tmagId: d.tmagId,
     fullName: `${d.firstName} ${d.lastName}`,
-    isLeader: leaderSet.has(d.baId),
+    isLeader: leaderSet.has(d.tmagId),
   }));
 
   return {
@@ -437,7 +437,7 @@ export async function buildDetailPayload(
   const webinar = pickLatest(webinars, (w) => w.createdAt);
   const token = pickLatest(tokens, (t) => t.createdAt);
 
-  const sponsorBaIdAtMint = prospect.sponsorBaIdAtMint ?? token?.sponsorBaId ?? prospect.sponsorBaId;
+  const sponsorTmagIdAtMint = prospect.sponsorTmagIdAtMint ?? token?.sponsorTmagId ?? prospect.sponsorTmagId;
 
   const activity: AdminProspectActivityEvent[] = buildActivityTimeline({
     prospect,
@@ -451,7 +451,7 @@ export async function buildDetailPayload(
     placement?.flushReason === 'enrolled' && placement.flushedAt
       ? {
           markedAt: placement.flushedAt,
-          markedByBaId: prospect.sponsorBaId,
+          markedByTmagId: prospect.sponsorTmagId,
           // True when the admin issued force_enroll. Detected by looking
           // at the activity timeline for an admin_force_enroll event after
           // the flush. Cheap because activity is already built.
@@ -467,9 +467,9 @@ export async function buildDetailPayload(
     phone: prospect.phone,
     email: prospect.email,
     location: prospect.location,
-    sponsorBaIdAtMint,
-    sponsorBaIdNow: prospect.sponsorBaId,
-    sponsorNameNow: baNames.get(prospect.sponsorBaId) ?? prospect.sponsorBaId,
+    sponsorTmagIdAtMint,
+    sponsorTmagIdNow: prospect.sponsorTmagId,
+    sponsorNameNow: baNames.get(prospect.sponsorTmagId) ?? prospect.sponsorTmagId,
     positionNumber: prospect.positionNumber ?? null,
     placedAt: prospect.placedAt ?? null,
     state: prospect.state,
@@ -478,7 +478,7 @@ export async function buildDetailPayload(
       !!callback,
       !!webinar,
     ),
-    registrationHandoffState: deriveRegistrationHandoffState(placement),
+    prospectStatus: deriveProspectStatus(placement),
     token: token
       ? {
           tokenTruncated: truncatedToken(token.token),
@@ -516,7 +516,7 @@ export async function buildDetailPayload(
       prospectId: n.prospectId,
       body: n.body,
       createdAt: n.createdAt,
-      createdByBaId: n.createdByBaId,
+      createdByTmagId: n.createdByTmagId,
       createdByDisplayName: n.createdByDisplayName,
     })),
   };
@@ -551,7 +551,7 @@ function buildActivityTimeline(input: {
       label: 'Invite token minted',
       ip: null,
       referrer: null,
-      details: { sponsorBaIdAtMint: input.token.sponsorBaId },
+      details: { sponsorTmagIdAtMint: input.token.sponsorTmagId },
     });
   } else {
     events.push({
@@ -610,7 +610,7 @@ function buildActivityTimeline(input: {
       referrer: null,
       details: {
         positionNumber: input.placement.positionNumber,
-        sponsorBaId: input.placement.sponsorBaId,
+        sponsorTmagId: input.placement.sponsorTmagId,
       },
     });
   }
@@ -691,7 +691,7 @@ export async function synthesizeAdminSandboxPreview(
   const baResult = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
-    filter: { baId: prospect.sponsorBaId },
+    filter: { tmagId: prospect.sponsorTmagId },
     limit: 1,
   });
   const baDoc = baResult.documents?.[0];
@@ -721,11 +721,11 @@ export async function synthesizeAdminSandboxPreview(
       expiresAt: prospect.expiresAt,
     },
     ba: {
-      baId: prospect.sponsorBaId,
+      tmagId: prospect.sponsorTmagId,
       firstName: baDoc?.firstName ?? '—',
       lastName: baDoc?.lastName ?? '',
       lastInitial: (baDoc?.lastName ?? '').charAt(0).toUpperCase(),
-      fullName: baDoc ? `${baDoc.firstName} ${baDoc.lastName}` : prospect.sponsorBaId,
+      fullName: baDoc ? `${baDoc.firstName} ${baDoc.lastName}` : prospect.sponsorTmagId,
     },
     videoUrl: DR_DAN_VIDEO_URL,
     webinar: WEBINAR_COPY,
@@ -755,7 +755,7 @@ export async function listProspectNotes(
     prospectId: n.prospectId,
     body: n.body,
     createdAt: n.createdAt,
-    createdByBaId: n.createdByBaId,
+    createdByTmagId: n.createdByTmagId,
     createdByDisplayName: n.createdByDisplayName,
   }));
 }
@@ -773,7 +773,7 @@ export async function appendProspectNote(input: {
     prospectId: input.prospectId,
     body: input.body,
     createdAt,
-    createdByBaId: input.actor.baId,
+    createdByTmagId: input.actor.tmagId,
     createdByDisplayName: input.actor.displayName,
   };
 
@@ -786,14 +786,14 @@ export async function appendProspectNote(input: {
         'MERGE (p:Prospect {prospectId: $prospectId}) ' +
         'MERGE (n:AdminProspectNote {noteId: $noteId}) ' +
         'SET n.body = $body, n.createdAt = datetime($createdAt), ' +
-        '    n.createdByBaId = $createdByBaId ' +
+        '    n.createdByTmagId = $createdByTmagId ' +
         'MERGE (n)-[:NOTE_ON]->(p)',
       params: {
         prospectId: input.prospectId,
         noteId,
         body: input.body,
         createdAt,
-        createdByBaId: input.actor.baId,
+        createdByTmagId: input.actor.tmagId,
       },
     },
     chroma: {
@@ -804,7 +804,7 @@ export async function appendProspectNote(input: {
         kind: 'admin_prospect_note',
         prospectId: input.prospectId,
         noteId,
-        createdByBaId: input.actor.baId,
+        createdByTmagId: input.actor.tmagId,
         createdAt,
       },
     },
@@ -827,7 +827,7 @@ export async function appendProspectNote(input: {
 
 /**
  * Pre-flight check shared by every intervention: the prospect must exist
- * AND the requestingBaId must exist as a BA AND, where applicable, the
+ * AND the requestingTmagId must exist as a BA AND, where applicable, the
  * target BA must exist.
  *
  * Throws on validation failure with a stable code the route layer
@@ -835,8 +835,8 @@ export async function appendProspectNote(input: {
  */
 async function loadInterventionContext(input: {
   prospectId: string;
-  requestingBaId: string;
-  requireToBaId?: string;
+  requestingTmagId: string;
+  requireToTmagId?: string;
 }): Promise<{
   prospect: ProspectRecord;
   placement: PoolPlacement | null;
@@ -846,22 +846,22 @@ async function loadInterventionContext(input: {
   const [prospect, placement, requestingBa, toBa] = await Promise.all([
     findProspectById(input.prospectId),
     findPlacementByProspectId(input.prospectId),
-    findBaDoc(input.requestingBaId),
-    input.requireToBaId ? findBaDoc(input.requireToBaId) : Promise.resolve(null),
+    findBaDoc(input.requestingTmagId),
+    input.requireToTmagId ? findBaDoc(input.requireToTmagId) : Promise.resolve(null),
   ]);
   if (!prospect) throw new InterventionError('prospect_not_found', 404);
   if (!requestingBa)
     throw new InterventionError('requesting_ba_not_found', 400);
-  if (input.requireToBaId && !toBa)
+  if (input.requireToTmagId && !toBa)
     throw new InterventionError('target_ba_not_found', 400);
   return { prospect, placement, requestingBa, toBa };
 }
 
-async function findBaDoc(baId: string): Promise<BaDoc | null> {
+async function findBaDoc(tmagId: string): Promise<BaDoc | null> {
   const r = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
-    filter: { baId },
+    filter: { tmagId },
     limit: 1,
   });
   return r.documents?.[0] ?? null;
@@ -903,8 +903,8 @@ export async function refreshRowFor(prospectId: string): Promise<AdminProspectDi
     prospectId: prospect.prospectId,
     firstName: prospect.firstName,
     lastName: prospect.lastName,
-    sponsorBaId: prospect.sponsorBaId,
-    sponsorName: baNames.get(prospect.sponsorBaId) ?? prospect.sponsorBaId,
+    sponsorTmagId: prospect.sponsorTmagId,
+    sponsorName: baNames.get(prospect.sponsorTmagId) ?? prospect.sponsorTmagId,
     presentationStatus: derivePresentationStatus(
       prospect.state,
       !!callback,
@@ -921,16 +921,16 @@ export async function refreshRowFor(prospectId: string): Promise<AdminProspectDi
     },
     daysInHoldingTank: deriveDaysInHoldingTank(placement, nowMs),
     followUpNeededBy: deriveFollowUpNeededBy(prospect, placement),
-    registrationHandoffState: deriveRegistrationHandoffState(placement),
+    prospectStatus: deriveProspectStatus(placement),
     deleted: (prospect as ProspectDoc).deleted === true,
   };
 }
 
 /**
  * D.4 · MOVE — change the inviting BA on the prospect record. Position
- * number preserved (monotonic). Pool placement's sponsorBaId is also
+ * number preserved (monotonic). Pool placement's sponsorTmagId is also
  * updated so the placement's "owned by" matches the prospect. Token
- * row's sponsorBaId is NOT changed — sponsorBaIdAtMint (3.5) stays
+ * row's sponsorTmagId is NOT changed — sponsorTmagIdAtMint (3.5) stays
  * pinned to whoever minted the original invite; the drift detector in
  * D.2 will surface the discrepancy as intended.
  */
@@ -941,16 +941,16 @@ export async function executeMoveIntervention(input: {
   context: AuditContext | null;
 }): Promise<AdminProspectInterventionResponse> {
   validateInterventionBase(input.body);
-  if (!input.body.toBaId || input.body.toBaId.length < 2) {
-    throw new InterventionError('invalid_toBaId', 400);
+  if (!input.body.toTmagId || input.body.toTmagId.length < 2) {
+    throw new InterventionError('invalid_toTmagId', 400);
   }
   const ctx = await loadInterventionContext({
     prospectId: input.prospectId,
-    requestingBaId: input.body.requestingBaId,
-    requireToBaId: input.body.toBaId,
+    requestingTmagId: input.body.requestingTmagId,
+    requireToTmagId: input.body.toTmagId,
   });
 
-  if (ctx.prospect.sponsorBaId === input.body.toBaId) {
+  if (ctx.prospect.sponsorTmagId === input.body.toTmagId) {
     throw new InterventionError('no_op_same_inviting_ba', 400);
   }
 
@@ -962,7 +962,7 @@ export async function executeMoveIntervention(input: {
     collection: COLL_PROSPECTS,
     filter: { prospectId: input.prospectId },
     update: {
-      $set: { sponsorBaId: input.body.toBaId, updatedAt: now },
+      $set: { sponsorTmagId: input.body.toTmagId, updatedAt: now },
     },
   });
   if (ctx.placement) {
@@ -970,29 +970,29 @@ export async function executeMoveIntervention(input: {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: { prospectId: input.prospectId },
-      update: { $set: { sponsorBaId: input.body.toBaId, updatedAt: now } },
+      update: { $set: { sponsorTmagId: input.body.toTmagId, updatedAt: now } },
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
         'MATCH (p:Prospect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:Pool) ' +
-        'SET r.sponsorBaId = $toBaId',
-      params: { prospectId: input.prospectId, toBaId: input.body.toBaId },
+        'SET r.sponsorTmagId = $toTmagId',
+      params: { prospectId: input.prospectId, toTmagId: input.body.toTmagId },
     });
   }
   await gatewayCall('neo4j', 'cypher', {
     query:
       'MERGE (p:Prospect {prospectId: $prospectId}) ' +
-      'SET p.sponsorBaId = $toBaId ' +
+      'SET p.sponsorTmagId = $toTmagId ' +
       'WITH p ' +
-      'MERGE (b:BA {baId: $toBaId}) ' +
+      'MERGE (b:BA {tmagId: $toTmagId}) ' +
       'MERGE (p)-[:INVITED_BY]->(b)',
-    params: { prospectId: input.prospectId, toBaId: input.body.toBaId },
+    params: { prospectId: input.prospectId, toTmagId: input.body.toTmagId },
   });
 
   const after = snapshotProspect(
-    { ...ctx.prospect, sponsorBaId: input.body.toBaId, updatedAt: now },
+    { ...ctx.prospect, sponsorTmagId: input.body.toTmagId, updatedAt: now },
     ctx.placement
-      ? { ...ctx.placement, sponsorBaId: input.body.toBaId }
+      ? { ...ctx.placement, sponsorTmagId: input.body.toTmagId }
       : null,
   );
 
@@ -1023,7 +1023,7 @@ export async function executeMoveIntervention(input: {
 }
 
 /**
- * D.4 · REASSIGN-SPONSOR — change the prospect's sponsorBaId. Same
+ * D.4 · REASSIGN-SPONSOR — change the prospect's sponsorTmagId. Same
  * field mutation as MOVE but a distinct audit-action so Kevin's intent
  * survives in the log (3.5 override vs. pipeline reshuffle). Position
  * preserved.
@@ -1035,15 +1035,15 @@ export async function executeReassignSponsorIntervention(input: {
   context: AuditContext | null;
 }): Promise<AdminProspectInterventionResponse> {
   validateInterventionBase(input.body);
-  if (!input.body.newSponsorBaId || input.body.newSponsorBaId.length < 2) {
-    throw new InterventionError('invalid_newSponsorBaId', 400);
+  if (!input.body.newSponsorTmagId || input.body.newSponsorTmagId.length < 2) {
+    throw new InterventionError('invalid_newSponsorTmagId', 400);
   }
   const ctx = await loadInterventionContext({
     prospectId: input.prospectId,
-    requestingBaId: input.body.requestingBaId,
-    requireToBaId: input.body.newSponsorBaId,
+    requestingTmagId: input.body.requestingTmagId,
+    requireToTmagId: input.body.newSponsorTmagId,
   });
-  if (ctx.prospect.sponsorBaId === input.body.newSponsorBaId) {
+  if (ctx.prospect.sponsorTmagId === input.body.newSponsorTmagId) {
     throw new InterventionError('no_op_same_sponsor', 400);
   }
 
@@ -1055,7 +1055,7 @@ export async function executeReassignSponsorIntervention(input: {
     collection: COLL_PROSPECTS,
     filter: { prospectId: input.prospectId },
     update: {
-      $set: { sponsorBaId: input.body.newSponsorBaId, updatedAt: now },
+      $set: { sponsorTmagId: input.body.newSponsorTmagId, updatedAt: now },
     },
   });
   if (ctx.placement) {
@@ -1063,39 +1063,39 @@ export async function executeReassignSponsorIntervention(input: {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: { prospectId: input.prospectId },
-      update: { $set: { sponsorBaId: input.body.newSponsorBaId, updatedAt: now } },
+      update: { $set: { sponsorTmagId: input.body.newSponsorTmagId, updatedAt: now } },
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
         'MATCH (p:Prospect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:Pool) ' +
-        'SET r.sponsorBaId = $newSponsorBaId',
+        'SET r.sponsorTmagId = $newSponsorTmagId',
       params: {
         prospectId: input.prospectId,
-        newSponsorBaId: input.body.newSponsorBaId,
+        newSponsorTmagId: input.body.newSponsorTmagId,
       },
     });
   }
   await gatewayCall('neo4j', 'cypher', {
     query:
       'MERGE (p:Prospect {prospectId: $prospectId}) ' +
-      'SET p.sponsorBaId = $newSponsorBaId ' +
+      'SET p.sponsorTmagId = $newSponsorTmagId ' +
       'WITH p ' +
-      'MERGE (b:BA {baId: $newSponsorBaId}) ' +
+      'MERGE (b:BA {tmagId: $newSponsorTmagId}) ' +
       'MERGE (p)-[:SPONSORED_BY]->(b)',
     params: {
       prospectId: input.prospectId,
-      newSponsorBaId: input.body.newSponsorBaId,
+      newSponsorTmagId: input.body.newSponsorTmagId,
     },
   });
 
   const after = snapshotProspect(
     {
       ...ctx.prospect,
-      sponsorBaId: input.body.newSponsorBaId,
+      sponsorTmagId: input.body.newSponsorTmagId,
       updatedAt: now,
     },
     ctx.placement
-      ? { ...ctx.placement, sponsorBaId: input.body.newSponsorBaId }
+      ? { ...ctx.placement, sponsorTmagId: input.body.newSponsorTmagId }
       : null,
   );
 
@@ -1140,7 +1140,7 @@ export async function executeManualFlushIntervention(input: {
   validateInterventionBase(input.body);
   const ctx = await loadInterventionContext({
     prospectId: input.prospectId,
-    requestingBaId: input.body.requestingBaId,
+    requestingTmagId: input.body.requestingTmagId,
   });
   if (ctx.placement?.flushedAt) {
     throw new InterventionError('placement_already_flushed', 400);
@@ -1230,7 +1230,7 @@ export async function executeForceEnrollIntervention(input: {
   validateInterventionBase(input.body);
   const ctx = await loadInterventionContext({
     prospectId: input.prospectId,
-    requestingBaId: input.body.requestingBaId,
+    requestingTmagId: input.body.requestingTmagId,
   });
   if (ctx.prospect.state === 'enrolled') {
     throw new InterventionError('prospect_already_enrolled', 400);
@@ -1308,11 +1308,11 @@ export async function executeForceEnrollIntervention(input: {
 /* ─── shared helpers ────────────────────────────────────────────── */
 
 function validateInterventionBase(body: {
-  requestingBaId: string;
+  requestingTmagId: string;
   reason: string;
 }): void {
-  if (!body.requestingBaId || body.requestingBaId.length < 2) {
-    throw new InterventionError('invalid_requestingBaId', 400);
+  if (!body.requestingTmagId || body.requestingTmagId.length < 2) {
+    throw new InterventionError('invalid_requestingTmagId', 400);
   }
   if (!body.reason || body.reason.trim().length < 8) {
     throw new InterventionError('reason_required_min_8_chars', 400);
@@ -1325,7 +1325,7 @@ function snapshotProspect(
 ): Record<string, unknown> {
   return {
     prospectId: prospect.prospectId,
-    sponsorBaId: prospect.sponsorBaId,
+    sponsorTmagId: prospect.sponsorTmagId,
     state: prospect.state,
     positionNumber: prospect.positionNumber,
     placedAt: prospect.placedAt,
@@ -1333,7 +1333,7 @@ function snapshotProspect(
     placement: placement
       ? {
           positionNumber: placement.positionNumber,
-          sponsorBaId: placement.sponsorBaId,
+          sponsorTmagId: placement.sponsorTmagId,
           placedAt: placement.placedAt,
           flushedAt: placement.flushedAt,
           flushReason: placement.flushReason,

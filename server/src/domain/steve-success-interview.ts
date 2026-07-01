@@ -292,7 +292,7 @@ export function buildSteveSystemPrompt(args: { baFirstName: string }): string {
 
 /**
  * Assemble the SteveSuccessProfile from the worker's understanding inputs.
- * Pure structural assembly — it stamps baId, generatedAt, and signedBy and
+ * Pure structural assembly — it stamps tmagId, generatedAt, and signedBy and
  * copies the BA's own reads through verbatim. It does NOT derive, weigh,
  * re-order by importance, or grade anything.
  */
@@ -301,7 +301,7 @@ const PROFILE_FIELD_CAP = 5000;
 const cap = (s: string): string => (s.length > PROFILE_FIELD_CAP ? s.slice(0, PROFILE_FIELD_CAP) : s);
 
 export function assembleSuccessProfile(args: {
-  baId: string;
+  tmagId: string;
   generatedAt: string;
   profile: SteveDiscoveryIngestPayload['profile'];
 }): SteveSuccessProfile {
@@ -311,7 +311,7 @@ export function assembleSuccessProfile(args: {
   // over-generated profile statement could otherwise 413 or be silently
   // truncated by the gateway.
   return {
-    baId: args.baId,
+    tmagId: args.tmagId,
     primaryWhy: {
       statement: cap(p.primaryWhy.statement),
       who: cap(p.primaryWhy.who),
@@ -388,28 +388,28 @@ interface PersistedDiscovery extends SteveDiscoveryArtifact {
   _id: string;
 }
 
-async function getBaSponsor(baId: string): Promise<{
-  sponsorBaId: string | null;
+async function getBaSponsor(tmagId: string): Promise<{
+  sponsorTmagId: string | null;
   firstName: string;
 } | null> {
   const result = await gatewayCall<{
-    documents: { baId: string; sponsorBaId?: string | null; firstName?: string }[];
+    documents: { tmagId: string; sponsorTmagId?: string | null; firstName?: string }[];
   }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
-    filter: { baId },
+    collection: 'team_magnificent_members',
+    filter: { tmagId },
     limit: 1,
   });
   const doc = result.documents[0];
   if (!doc) return null;
-  return { sponsorBaId: doc.sponsorBaId ?? null, firstName: doc.firstName ?? '' };
+  return { sponsorTmagId: doc.sponsorTmagId ?? null, firstName: doc.firstName ?? '' };
 }
 
-async function getDiscoveryByBaId(baId: string): Promise<PersistedDiscovery | null> {
+async function getDiscoveryByTmagId(tmagId: string): Promise<PersistedDiscovery | null> {
   const result = await gatewayCall<{ documents: PersistedDiscovery[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: DISCOVERIES_COLLECTION,
-    filter: { baId },
+    filter: { tmagId },
     limit: 1,
   });
   return result.documents[0] ?? null;
@@ -417,8 +417,8 @@ async function getDiscoveryByBaId(baId: string): Promise<PersistedDiscovery | nu
 
 function stripPersisted(doc: PersistedDiscovery): SteveDiscoveryArtifact {
   return {
-    baId: doc.baId,
-    sponsorBaId: doc.sponsorBaId,
+    tmagId: doc.tmagId,
+    sponsorTmagId: doc.sponsorTmagId,
     callSid: doc.callSid,
     startedAt: doc.startedAt,
     completedAt: doc.completedAt,
@@ -434,18 +434,18 @@ function derivePhase(artifact: PersistedDiscovery | null): SteveDiscoveryPhase {
 }
 
 /** Build the BA's own discovery view (self-read). */
-export async function buildDiscoveryView(baId: string): Promise<SteveDiscoveryView> {
-  const artifact = await getDiscoveryByBaId(baId);
+export async function buildDiscoveryView(tmagId: string): Promise<SteveDiscoveryView> {
+  const artifact = await getDiscoveryByTmagId(tmagId);
   return {
-    baId,
+    tmagId,
     phase: derivePhase(artifact),
     transcript: artifact ? artifact.transcript : [],
     artifact: artifact ? stripPersisted(artifact) : null,
   };
 }
 
-export async function isSteveDiscoveryComplete(baId: string): Promise<boolean> {
-  const artifact = await getDiscoveryByBaId(baId);
+export async function isSteveDiscoveryComplete(tmagId: string): Promise<boolean> {
+  const artifact = await getDiscoveryByTmagId(tmagId);
   return derivePhase(artifact) === 'complete';
 }
 
@@ -465,19 +465,19 @@ function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Recor
   // preserving the shared BA and sponsor visibility shape.
   return {
     cypher:
-      'MERGE (b:BA {baId: $baId}) ' +
+      'MERGE (b:BA {tmagId: $tmagId}) ' +
       'MERGE (d:SteveDiscovery {discoveryId: $id}) ' +
       'SET d.completedAt = $completedAt, d.callSid = $callSid, d.audioUrl = $audioUrl, ' +
       '    d.signedBy = $signedBy ' +
       'MERGE (b)-[:HAD_STEVE_DISCOVERY]->(d) ' +
-      'WITH d, $sponsorBaId AS sponsorId ' +
+      'WITH d, $sponsorTmagId AS sponsorId ' +
       'WHERE sponsorId IS NOT NULL ' +
-      'MERGE (s:BA {baId: sponsorId}) ' +
+      'MERGE (s:BA {tmagId: sponsorId}) ' +
       'MERGE (d)-[:VISIBLE_TO_SPONSOR]->(s)',
     params: {
       id: a._id,
-      baId: a.baId,
-      sponsorBaId: a.sponsorBaId,
+      tmagId: a.tmagId,
+      sponsorTmagId: a.sponsorTmagId,
       completedAt: a.completedAt,
       callSid: a.callSid,
       audioUrl: a.audioUrl,
@@ -491,7 +491,7 @@ function chromaDocForDiscovery(a: PersistedDiscovery): string {
   const learn = sp.learningStyle.modalities.join(', ');
   const channels = sp.communicationPreferences.preferredChannels.join(', ');
   return [
-    `Steve discovery completed for BA ${a.baId}.`,
+    `Steve discovery completed for BA ${a.tmagId}.`,
     `Primary why: ${sp.primaryWhy.statement}.`,
     `Success vision: ${sp.successVision.statement}.`,
     `Learns by: ${learn}. Prefers contact via: ${channels}.`,
@@ -503,7 +503,7 @@ function chromaDocForDiscovery(a: PersistedDiscovery): string {
 
 function artifactToUpdate(a: PersistedDiscovery): Partial<PersistedDiscovery> {
   return {
-    sponsorBaId: a.sponsorBaId,
+    sponsorTmagId: a.sponsorTmagId,
     callSid: a.callSid,
     startedAt: a.startedAt,
     completedAt: a.completedAt,
@@ -516,24 +516,24 @@ function artifactToUpdate(a: PersistedDiscovery): Partial<PersistedDiscovery> {
 
 /**
  * Persist a completed discovery. Triple-stacked (Mongo + Neo4j + Chroma) and
- * idempotent on baId — a re-ingest replaces the prior artifact. sponsorBaId is
- * stamped from brand_ambassadors and is NEVER taken from the payload
+ * idempotent on tmagId — a re-ingest replaces the prior artifact. sponsorTmagId is
+ * stamped from team_magnificent_members and is NEVER taken from the payload
  * (locked-spec 3.5). Reads the Mongo row back before returning to confirm the
  * write landed.
  */
 export async function ingestDiscoveryArtifact(
   payload: SteveDiscoveryIngestPayload,
 ): Promise<SteveDiscoveryArtifact> {
-  const baInfo = await getBaSponsor(payload.baId);
+  const baInfo = await getBaSponsor(payload.tmagId);
   if (!baInfo) {
     throw new DiscoveryIngestError(
       'NO_BA',
-      `No BA record for baId=${payload.baId}; cannot ingest discovery.`,
+      `No BA record for tmagId=${payload.tmagId}; cannot ingest discovery.`,
     );
   }
 
   const successProfile = assembleSuccessProfile({
-    baId: payload.baId,
+    tmagId: payload.tmagId,
     generatedAt: payload.completedAt,
     profile: payload.profile,
   });
@@ -544,11 +544,11 @@ export async function ingestDiscoveryArtifact(
     text: c.text.slice(0, 5000),
   }));
 
-  const id = `SD-${payload.baId}`;
+  const id = `SD-${payload.tmagId}`;
   const artifact: PersistedDiscovery = {
     _id: id,
-    baId: payload.baId,
-    sponsorBaId: baInfo.sponsorBaId, // server-stamped (3.5)
+    tmagId: payload.tmagId,
+    sponsorTmagId: baInfo.sponsorTmagId, // server-stamped (3.5)
     callSid: payload.callSid,
     startedAt: payload.startedAt,
     completedAt: payload.completedAt,
@@ -574,8 +574,8 @@ export async function ingestDiscoveryArtifact(
       metadatas: [
         {
           discoveryId: id,
-          baId: artifact.baId,
-          sponsorBaId: artifact.sponsorBaId ?? '',
+          tmagId: artifact.tmagId,
+          sponsorTmagId: artifact.sponsorTmagId ?? '',
           callSid: artifact.callSid ?? '',
           completedAt: artifact.completedAt ?? '',
           kind: 'steve_discovery',
@@ -600,7 +600,7 @@ export async function ingestDiscoveryArtifact(
 
   // Upsert: branch on existence (mongodb.update does not honor upsert per
   // tripleStack.ts gotchas).
-  const existing = await getDiscoveryByBaId(payload.baId);
+  const existing = await getDiscoveryByTmagId(payload.tmagId);
   if (existing) {
     await updateAllStores();
   } else {
@@ -616,8 +616,8 @@ export async function ingestDiscoveryArtifact(
           document: chromaDocForDiscovery(artifact),
           metadata: {
             discoveryId: id,
-            baId: artifact.baId,
-            sponsorBaId: artifact.sponsorBaId ?? '',
+            tmagId: artifact.tmagId,
+            sponsorTmagId: artifact.sponsorTmagId ?? '',
             callSid: artifact.callSid ?? '',
             completedAt: artifact.completedAt ?? '',
             kind: 'steve_discovery',
@@ -625,11 +625,11 @@ export async function ingestDiscoveryArtifact(
         },
       });
     } catch (err) {
-      // TOCTOU: a concurrent ingest for the same baId may have inserted the row
+      // TOCTOU: a concurrent ingest for the same tmagId may have inserted the row
       // between the existence check above and this insert, so the insert fails
       // on a duplicate _id. Re-check and fall back to the update path so a
       // logically idempotent re-ingest converges instead of 500-ing.
-      const raced = await getDiscoveryByBaId(payload.baId);
+      const raced = await getDiscoveryByTmagId(payload.tmagId);
       if (!raced) throw err;
       await updateAllStores();
     }
@@ -639,11 +639,11 @@ export async function ingestDiscoveryArtifact(
   // AND that this write's content actually applied. Checking existence alone
   // would pass even when an update silently modified nothing (0 matched/modified
   // without throwing), so also assert completedAt reflects THIS artifact.
-  const readback = await getDiscoveryByBaId(payload.baId);
+  const readback = await getDiscoveryByTmagId(payload.tmagId);
   if (!readback || readback._id !== id || readback.completedAt !== artifact.completedAt) {
     throw new DiscoveryIngestError(
       'READBACK_FAILED',
-      `Discovery for baId=${payload.baId} did not read back after write.`,
+      `Discovery for tmagId=${payload.tmagId} did not read back after write.`,
     );
   }
 
@@ -662,20 +662,20 @@ export class SponsorAccessError extends Error {
 }
 
 /** Sponsor-only fetch of a downline's Steve profile card. Authoritative check
- *  is server-side: requestingBaId must equal the downline's sponsorBaId. */
+ *  is server-side: requestingTmagId must equal the downline's sponsorTmagId. */
 export async function getProfileCardForSponsor(args: {
-  requestingBaId: string;
-  downlineBaId: string;
+  requestingTmagId: string;
+  downlineTmagId: string;
 }): Promise<SteveProfileCard> {
-  const downlineInfo = await getBaSponsor(args.downlineBaId);
+  const downlineInfo = await getBaSponsor(args.downlineTmagId);
   if (!downlineInfo) {
-    throw new SponsorAccessError('NO_DOWNLINE', `No BA record for downlineBaId=${args.downlineBaId}.`);
+    throw new SponsorAccessError('NO_DOWNLINE', `No BA record for downlineTmagId=${args.downlineTmagId}.`);
   }
-  if (!downlineInfo.sponsorBaId || downlineInfo.sponsorBaId !== args.requestingBaId) {
+  if (!downlineInfo.sponsorTmagId || downlineInfo.sponsorTmagId !== args.requestingTmagId) {
     throw new SponsorAccessError('NOT_SPONSOR', 'Only the direct sponsor can read this profile.');
   }
 
-  const artifact = await getDiscoveryByBaId(args.downlineBaId);
+  const artifact = await getDiscoveryByTmagId(args.downlineTmagId);
   if (!artifact) {
     throw new SponsorAccessError('NO_ARTIFACT', 'Discovery is not complete yet for this BA.');
   }
@@ -684,7 +684,7 @@ export async function getProfileCardForSponsor(args: {
   }
 
   return {
-    downlineBaId: args.downlineBaId,
+    downlineTmagId: args.downlineTmagId,
     downlineFirstName: downlineInfo.firstName,
     completedAt: artifact.completedAt,
     answers: artifact.answers,

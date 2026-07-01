@@ -21,7 +21,7 @@ import { validateMichaelResponseContract } from '../../runtime/orchestration/ind
  *                            trace omitted unless the trace flag is on.
  */
 
-const SESSION_BA_ID = 'TMBA-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
 
 const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
@@ -71,10 +71,10 @@ function mockRes() {
 function mockReq(
   body: Record<string, unknown> = {},
   withSession = true,
-  sessionBaId: string = SESSION_BA_ID,
+  sessionTmagId: string = SESSION_BA_ID,
 ) {
   return {
-    ...(withSession ? { session: { baId: sessionBaId } } : {}),
+    ...(withSession ? { session: { tmagId: sessionTmagId } } : {}),
     body,
   } as any;
 }
@@ -124,9 +124,9 @@ describe('S3.11 server-owned Michael runtime turn — end-to-end contract', () =
   });
 
   it.each([
-    ['baId', { baId: 'TMBA-EVIL-000000' }],
-    ['sponsorBaId', { sponsorBaId: 'TMBA-EVIL-000000' }],
-    ['targetBaId', { targetBaId: 'TMBA-EVIL-000000' }],
+    ['tmagId', { tmagId: 'TMAG-EVIL-000000' }],
+    ['sponsorTmagId', { sponsorTmagId: 'TMAG-EVIL-000000' }],
+    ['targetTmagId', { targetTmagId: 'TMAG-EVIL-000000' }],
     ['turn', { turn: {} }],
     ['runtimeTurn', { runtimeTurn: {} }],
     ['contextPacket', { contextPacket: {} }],
@@ -188,7 +188,7 @@ describe('S3.11 server-owned Michael runtime turn — end-to-end contract', () =
     expect(res.body.ok).toBe(false);
   });
 
-  it('9. a downstream turn-source failure (whitespace session baId) maps to 422 without throwing', async () => {
+  it('9. a downstream turn-source failure (whitespace session tmagId) maps to 422 without throwing', async () => {
     enableRouteAndResponse();
     const res = mockRes();
 

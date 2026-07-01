@@ -13,7 +13,7 @@ export const COMMITMENT_VERSION = 'v1_2026_05_18';
 
 export interface CommitmentRecord {
   commitmentId: string;
-  baId: string;
+  tmagId: string;
   threeBaId: string;
   email: string;
   version: string;
@@ -22,11 +22,11 @@ export interface CommitmentRecord {
   userAgent: string | null;
 }
 
-export async function commitmentExists(baId: string): Promise<boolean> {
+export async function commitmentExists(tmagId: string): Promise<boolean> {
   const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'ba_commitments',
-    filter: { baId },
+    filter: { tmagId },
     limit: 1,
   });
   return result.count > 0;
@@ -36,10 +36,10 @@ export async function recordCommitment(
   input: Omit<CommitmentRecord, 'commitmentId' | 'acceptedAt' | 'version'>,
 ): Promise<CommitmentRecord> {
   const acceptedAt = new Date().toISOString();
-  const commitmentId = `commit_${input.baId}_${Date.now().toString(36)}`;
+  const commitmentId = `commit_${input.tmagId}_${Date.now().toString(36)}`;
   const record: CommitmentRecord = {
     commitmentId,
-    baId: input.baId,
+    tmagId: input.tmagId,
     threeBaId: input.threeBaId,
     email: input.email,
     version: COMMITMENT_VERSION,
@@ -54,21 +54,21 @@ export async function recordCommitment(
     mongoDoc: record as unknown as Record<string, unknown>,
     neo4j: {
       cypher:
-        'MERGE (n:BA {baId: $baId}) ' +
+        'MERGE (n:BA {tmagId: $tmagId}) ' +
         'MERGE (c:Commitment {commitmentId: $id}) ' +
         'SET c.version = $version, c.acceptedAt = $acceptedAt ' +
         'MERGE (n)-[:ACCEPTED]->(c)',
       params: {
-        baId: input.baId,
+        tmagId: input.tmagId,
         version: COMMITMENT_VERSION,
         acceptedAt,
       },
     },
     chroma: {
       collection: 'mcs_commitments',
-      document: `BA ${input.baId} (${input.email}) accepted Team Magnificent commitment ${COMMITMENT_VERSION} at ${acceptedAt}.`,
+      document: `BA ${input.tmagId} (${input.email}) accepted Team Magnificent commitment ${COMMITMENT_VERSION} at ${acceptedAt}.`,
       metadata: {
-        baId: input.baId,
+        tmagId: input.tmagId,
         threeBaId: input.threeBaId,
         version: COMMITMENT_VERSION,
         acceptedAt,
@@ -80,28 +80,28 @@ export async function recordCommitment(
   return record;
 }
 
-export async function markWelcomeSeen(baId: string): Promise<void> {
+export async function markWelcomeSeen(tmagId: string): Promise<void> {
   const seenAt = new Date().toISOString();
   await gatewayCall('mongodb', 'update', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
-    filter: { baId },
+    collection: 'team_magnificent_members',
+    filter: { tmagId },
     update: { $set: { welcome_seen: true, welcome_seen_at: seenAt } },
   });
 }
 
-export async function markCommitmentAccepted(baId: string): Promise<void> {
+export async function markCommitmentAccepted(tmagId: string): Promise<void> {
   const acceptedAt = new Date().toISOString();
   await gatewayCall('mongodb', 'update', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
-    filter: { baId },
+    collection: 'team_magnificent_members',
+    filter: { tmagId },
     update: { $set: { commitment_accepted: true, commitment_accepted_at: acceptedAt } },
   });
 }
 
 export interface BaProfile {
-  baId: string;
+  tmagId: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -110,11 +110,11 @@ export interface BaProfile {
   commitment_accepted?: boolean;
 }
 
-export async function findBaById(baId: string): Promise<BaProfile | null> {
+export async function findBaById(tmagId: string): Promise<BaProfile | null> {
   const result = await gatewayCall<{ documents: BaProfile[] }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
-    filter: { baId },
+    collection: 'team_magnificent_members',
+    filter: { tmagId },
     limit: 1,
   });
   return result.documents.length > 0 ? result.documents[0] ?? null : null;

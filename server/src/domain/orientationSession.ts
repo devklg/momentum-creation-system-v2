@@ -11,7 +11,7 @@
  *
  * Key difference from the webinar (which is prospect-facing, uncapped, and
  * reserved via /api/p/:token): orientation reservations are BA-facing. The
- * reserving party is the authed BA, capacity is capped at 10, and baId is read
+ * reserving party is the authed BA, capacity is capped at 10, and tmagId is read
  * from the session — never from a request body (mirrors the cockpit's
  * sponsor-immutability discipline, locked-spec 3.5).
  *
@@ -157,7 +157,7 @@ async function reservedForSessions(
 
 /** The BA's own active reservations (status:'reserved'), newest first. */
 async function myReservedReservations(
-  baId: string,
+  tmagId: string,
 ): Promise<OrientationReservationRecord[]> {
   const result = await gatewayCall<{ documents: OrientationReservationRecord[] }>(
     'mongodb',
@@ -165,7 +165,7 @@ async function myReservedReservations(
     {
       database: MONGO_DB,
       collection: RESERVATIONS_COLLECTION,
-      filter: { baId, status: 'reserved' },
+      filter: { tmagId, status: 'reserved' },
       sort: { createdAt: -1 },
       limit: 100,
     },
@@ -178,7 +178,7 @@ async function myReservedReservations(
  * seat math and whether THIS BA already holds a seat. Also returns the single
  * session id the BA currently holds (a BA holds at most one active seat).
  */
-export async function getSessionAvailabilityForBA(baId: string): Promise<{
+export async function getSessionAvailabilityForBA(tmagId: string): Promise<{
   sessions: OrientationSessionAvailability[];
   myReservationSessionId: string | null;
 }> {
@@ -190,7 +190,7 @@ export async function getSessionAvailabilityForBA(baId: string): Promise<{
   const mineBySession = new Set<string>();
   for (const r of reserved) {
     takenBySession.set(r.sessionId, (takenBySession.get(r.sessionId) ?? 0) + 1);
-    if (r.baId === baId) mineBySession.add(r.sessionId);
+    if (r.tmagId === tmagId) mineBySession.add(r.sessionId);
   }
 
   // A BA's single active seat may sit in a session that is upcoming; the card
@@ -231,7 +231,7 @@ export async function listSessionsWithRosters(): Promise<
   for (const r of reserved) {
     (rosterBySession.get(r.sessionId) ?? rosterBySession.set(r.sessionId, []).get(r.sessionId)!).push({
       reservationId: r.reservationId,
-      baId: r.baId,
+      tmagId: r.tmagId,
       baName: r.baName,
       reservedAt: r.createdAt,
     });
@@ -265,7 +265,7 @@ export async function getSessionWithRoster(
   const capacity = session.capacity ?? ORIENTATION_SESSION_CAPACITY;
   const roster: OrientationRosterSeat[] = reserved.map((r) => ({
     reservationId: r.reservationId,
-    baId: r.baId,
+    tmagId: r.tmagId,
     baName: r.baName,
     reservedAt: r.createdAt,
   }));
@@ -370,7 +370,7 @@ export type ReserveSeatError =
 
 export interface ReserveSeatInput {
   sessionId: string;
-  baId: string;
+  tmagId: string;
   baName: string;
   /** BA phone for the best-effort confirmation SMS; null skips the send. */
   baPhone: string | null;
@@ -409,7 +409,7 @@ export async function reserveSeat(
 
   // The BA's existing active seats. If they already hold THIS session, return
   // it idempotently; if they hold a DIFFERENT one, make them cancel first.
-  const mine = await myReservedReservations(input.baId);
+  const mine = await myReservedReservations(input.tmagId);
   const here = mine.find((r) => r.sessionId === input.sessionId);
   if (here) {
     const seatsTaken = (await reservedForSessions([input.sessionId])).length;
@@ -447,7 +447,7 @@ export async function reserveSeat(
     mongoDoc: {
       reservationId,
       sessionId: input.sessionId,
-      baId: input.baId,
+      tmagId: input.tmagId,
       baName: input.baName,
       scheduledFor: session.scheduledFor,
       status: 'reserved',
@@ -458,13 +458,13 @@ export async function reserveSeat(
     },
     neo4j: {
       cypher:
-        'MERGE (b:BA {baId: $baId}) ' +
+        'MERGE (b:BA {tmagId: $tmagId}) ' +
         'MERGE (e:OrientationSession {sessionId: $sessionId}) ' +
         'CREATE (b)-[r:RESERVED_ORIENTATION {' +
         '  reservationId: $reservationId, createdAt: $createdAt' +
         '}]->(e)',
       params: {
-        baId: input.baId,
+        tmagId: input.tmagId,
         sessionId: input.sessionId,
         reservationId,
         createdAt,
@@ -473,13 +473,13 @@ export async function reserveSeat(
     chroma: {
       collection: CHROMA_COLLECTION,
       document:
-        `${input.baName} (${input.baId}) reserved an orientation seat for ` +
+        `${input.baName} (${input.tmagId}) reserved an orientation seat for ` +
         `session ${input.sessionId} scheduled ${session.scheduledFor} at ${createdAt}.`,
       metadata: {
         kind: 'orientation_reservation',
         reservationId,
         sessionId: input.sessionId,
-        baId: input.baId,
+        tmagId: input.tmagId,
         scheduledFor: session.scheduledFor,
         createdAt,
       },
@@ -555,9 +555,9 @@ export type CancelSeatResult =
  */
 export async function cancelSeat(
   sessionId: string,
-  baId: string,
+  tmagId: string,
 ): Promise<CancelSeatResult> {
-  const mine = await myReservedReservations(baId);
+  const mine = await myReservedReservations(tmagId);
   const here = mine.find((r) => r.sessionId === sessionId);
   if (!here) return { ok: false, error: 'not_reserved' };
 
@@ -573,9 +573,9 @@ export async function cancelSeat(
   try {
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (:BA {baId: $baId})-[r:RESERVED_ORIENTATION {reservationId: $reservationId}]->(:OrientationSession) ' +
+        'MATCH (:BA {tmagId: $tmagId})-[r:RESERVED_ORIENTATION {reservationId: $reservationId}]->(:OrientationSession) ' +
         'SET r.status = "cancelled", r.cancelledAt = $cancelledAt',
-      params: { baId, reservationId: here.reservationId, cancelledAt },
+      params: { tmagId, reservationId: here.reservationId, cancelledAt },
     });
   } catch (err) {
     // eslint-disable-next-line no-console

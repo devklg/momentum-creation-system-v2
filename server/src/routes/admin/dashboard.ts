@@ -12,7 +12,7 @@
  *   GET  /stream       SSE live event stream (wf_0080)
  *
  * Filter contract — server-enforced, narrowing only. The client passes
- * baId and leaderGroup in the query string; the server resolves the
+ * tmagId and leaderGroup in the query string; the server resolves the
  * scoped BA set and applies it identically to metrics + drilldown.
  *
  * SSE shape mirrors `/api/p/:token/stream` (the dashboard SSE) — same
@@ -53,18 +53,18 @@ export const adminDashboardRoutes: Router = express.Router();
 /* ─── shared filter parsing ───────────────────────────────────────── */
 
 const FilterSchema = z.object({
-  baId: z.string().min(2).max(80).optional(),
+  tmagId: z.string().min(2).max(80).optional(),
   leaderGroup: z.enum(['all', 'leaders_only', 'non_leaders']).optional(),
 });
 
 function parseFilter(req: Request): AdminDashboardFilter {
   const parsed = FilterSchema.parse({
-    baId: typeof req.query.baId === 'string' ? req.query.baId : undefined,
+    tmagId: typeof req.query.tmagId === 'string' ? req.query.tmagId : undefined,
     leaderGroup:
       typeof req.query.leaderGroup === 'string' ? req.query.leaderGroup : undefined,
   });
   return {
-    baId: parsed.baId ?? null,
+    tmagId: parsed.tmagId ?? null,
     leaderGroup: parsed.leaderGroup ?? 'all',
   };
 }
@@ -72,8 +72,8 @@ function parseFilter(req: Request): AdminDashboardFilter {
 function adminActorFromRequest(req: Request): AuditActor {
   const session = req.session!;
   const displayName =
-    (session as unknown as { fullName?: string }).fullName ?? session.baId;
-  return { kind: 'admin', baId: session.baId, displayName };
+    (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
+  return { kind: 'admin', tmagId: session.tmagId, displayName };
 }
 
 /* ─── GET /metrics ────────────────────────────────────────────────── */
@@ -96,7 +96,7 @@ adminDashboardRoutes.get('/metrics', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.dashboard.metrics.viewed',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { filter, metrics: { computedAt: metrics.computedAt } },
       reason: null,
@@ -131,7 +131,7 @@ adminDashboardRoutes.get('/filters', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.dashboard.filters.viewed',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       reason: null,
       context: {
@@ -189,7 +189,7 @@ adminDashboardRoutes.get('/drilldown', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: `admin.dashboard.drilldown.${tile}.viewed`,
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { filter, tile, rowCount: rowCountOf(payload) },
       reason: null,
@@ -254,7 +254,7 @@ function auditEntryToLiveEvent(e: AuditLogEntry): AdminLiveAuditEvent {
   switch (actor.kind) {
     case 'admin':
     case 'ba':
-      actorLabel = `${actor.displayName} · ${actor.baId}`;
+      actorLabel = `${actor.displayName} · ${actor.tmagId}`;
       break;
     case 'prospect':
       actorLabel = `${actor.displayName} · ${actor.prospectId}`;
@@ -290,7 +290,7 @@ adminDashboardRoutes.get('/stream', requireAdmin, async (req: Request, res: Resp
   await appendAuditEntry({
     actor: adminActorFromRequest(req),
     action: 'admin.dashboard.stream.opened',
-    entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+    entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
     severity: 'info',
     reason: null,
     context: {
@@ -372,11 +372,11 @@ adminDashboardRoutes.get('/stream', requireAdmin, async (req: Request, res: Resp
     clearInterval(auditTail);
     placementSub.unsubscribe();
     // eslint-disable-next-line no-console
-    console.log(`[admin-dashboard-stream] closed ${streamId} baId=${req.session!.baId}`);
+    console.log(`[admin-dashboard-stream] closed ${streamId} tmagId=${req.session!.tmagId}`);
   };
   req.on('close', teardown);
   req.on('aborted', teardown);
 
   // eslint-disable-next-line no-console
-  console.log(`[admin-dashboard-stream] opened ${streamId} baId=${req.session!.baId}`);
+  console.log(`[admin-dashboard-stream] opened ${streamId} tmagId=${req.session!.tmagId}`);
 });

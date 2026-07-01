@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type {
   ApprovedKnowledgeQueryRequest,
-  BaId,
+  TmagId,
   KnowledgeDomain,
   KnowledgeFreshness,
   KnowledgeId,
@@ -48,7 +48,7 @@ function scope(): RuntimeRequestScope {
     teamId: 'team_magnificent' as TeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
-    baId: 'TMBA-P411-001' as BaId,
+    tmagId: 'TMAG-P411-001' as TmagId,
   };
 }
 
@@ -105,7 +105,7 @@ function packetInput(language: RuntimeLanguage, overrides: Partial<ContextPacket
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      baId: 'TMBA-P411-001' as BaId,
+      tmagId: 'TMAG-P411-001' as TmagId,
       journalEnabled: false,
       languagePreference: language,
       permissions: {
@@ -281,7 +281,7 @@ describe('P4.11 canary — Scenario 3: excluded knowledge never enters the Conte
       sourceType: 'note',
       format: 'markdown',
       originalContent: '   \n\t  \n',
-      createdBy: 'TM-01',
+      createdBy: 'TMAG-01',
       createdAt: '2026-06-30T12:00:00.000Z',
       language: 'en',
       domain: 'training',

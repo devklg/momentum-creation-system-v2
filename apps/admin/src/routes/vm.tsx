@@ -15,10 +15,10 @@ interface CorrectionForm {
   prospectId: string;
   leadBatchId: string;
   vmCampaignId: string;
-  oldOwnerTmBaId: string;
-  newOwnerTmBaId: string;
-  oldSponsorTmBaId: string;
-  newSponsorTmBaId: string;
+  oldOwnerTmagId: string;
+  newOwnerTmagId: string;
+  oldSponsorTmagId: string;
+  newSponsorTmagId: string;
   reason: string;
 }
 
@@ -27,10 +27,10 @@ const EMPTY_CORRECTION: CorrectionForm = {
   prospectId: '',
   leadBatchId: '',
   vmCampaignId: '',
-  oldOwnerTmBaId: '',
-  newOwnerTmBaId: '',
-  oldSponsorTmBaId: '',
-  newSponsorTmBaId: '',
+  oldOwnerTmagId: '',
+  newOwnerTmagId: '',
+  oldSponsorTmagId: '',
+  newSponsorTmagId: '',
   reason: '',
 };
 
@@ -74,10 +74,10 @@ export function VmPage() {
         prospectId: correction.prospectId.trim() || null,
         leadBatchId: correction.leadBatchId.trim() || null,
         vmCampaignId: correction.vmCampaignId.trim() || null,
-        oldOwnerTmBaId: correction.oldOwnerTmBaId.trim(),
-        newOwnerTmBaId: correction.newOwnerTmBaId.trim(),
-        oldSponsorTmBaId: correction.oldSponsorTmBaId.trim(),
-        newSponsorTmBaId: correction.newSponsorTmBaId.trim(),
+        oldOwnerTmagId: correction.oldOwnerTmagId.trim(),
+        newOwnerTmagId: correction.newOwnerTmagId.trim(),
+        oldSponsorTmagId: correction.oldSponsorTmagId.trim(),
+        newSponsorTmagId: correction.newSponsorTmagId.trim(),
         reason: correction.reason.trim(),
       };
       const res = await fetch('/api/admin/vm/ownership-correction', {
@@ -178,10 +178,10 @@ export function VmPage() {
                       </tr>
                     ) : (
                       topBaRows.map((row) => (
-                        <tr key={row.tmBaId} className="border-t border-line/50">
+                        <tr key={row.tmagId} className="border-t border-line/50">
                           <td className="px-3 py-2">
                             <p className="text-cream">{row.baName}</p>
-                            <p className="font-mono text-[11px] text-cream-faint">{row.tmBaId}</p>
+                            <p className="font-mono text-[11px] text-cream-faint">{row.tmagId}</p>
                           </td>
                           <td className="px-3 py-2 text-right">{row.leadsImported}</td>
                           <td className="px-3 py-2 text-right">
@@ -317,10 +317,10 @@ export function VmPage() {
               <InputField label="Prospect ID" value={correction.prospectId} onChange={(v) => setCorrection({ ...correction, prospectId: v })} />
               <InputField label="Batch ID" value={correction.leadBatchId} onChange={(v) => setCorrection({ ...correction, leadBatchId: v })} />
               <InputField label="Campaign ID" value={correction.vmCampaignId} onChange={(v) => setCorrection({ ...correction, vmCampaignId: v })} />
-              <InputField label="Old owner TM ID" value={correction.oldOwnerTmBaId} onChange={(v) => setCorrection({ ...correction, oldOwnerTmBaId: v })} />
-              <InputField label="New owner TM ID" value={correction.newOwnerTmBaId} onChange={(v) => setCorrection({ ...correction, newOwnerTmBaId: v })} />
-              <InputField label="Old sponsor TM ID" value={correction.oldSponsorTmBaId} onChange={(v) => setCorrection({ ...correction, oldSponsorTmBaId: v })} />
-              <InputField label="New sponsor TM ID" value={correction.newSponsorTmBaId} onChange={(v) => setCorrection({ ...correction, newSponsorTmBaId: v })} />
+              <InputField label="Old owner TM ID" value={correction.oldOwnerTmagId} onChange={(v) => setCorrection({ ...correction, oldOwnerTmagId: v })} />
+              <InputField label="New owner TM ID" value={correction.newOwnerTmagId} onChange={(v) => setCorrection({ ...correction, newOwnerTmagId: v })} />
+              <InputField label="Old sponsor TM ID" value={correction.oldSponsorTmagId} onChange={(v) => setCorrection({ ...correction, oldSponsorTmagId: v })} />
+              <InputField label="New sponsor TM ID" value={correction.newSponsorTmagId} onChange={(v) => setCorrection({ ...correction, newSponsorTmagId: v })} />
             </div>
             <label className="block mb-3">
               <span className="block font-mono text-[10px] tracking-label text-cream-faint uppercase mb-1">

@@ -13,7 +13,7 @@
  *     texts it from their own phone (locked-spec 1.13).
  *
  * RUN LIFECYCLE:
- *   - createGeneratorRun({ baId, productKey, angle, selectedIvoryIds? })
+ *   - createGeneratorRun({ tmagId, productKey, angle, selectedIvoryIds? })
  *     opens a run keyed by genrun_${uuid}. Status is implicit — runs are
  *     append-only; a run "ends" when the BA navigates away. We persist
  *     enough to reconstruct the timeline ("on Tue you worked Visage/
@@ -21,11 +21,11 @@
  *   - mintInvitationForRun({ runId, ivoryId, ... }) mints exactly one
  *     /p/{token}, updates the Ivory name to status='invited' +
  *     lastProspectId, and appends to run.invitations[].
- *   - getGeneratorRun(runId, baId) fetches the run; the UI uses it to
+ *   - getGeneratorRun(runId, tmagId) fetches the run; the UI uses it to
  *     restore state after a refresh.
  *
  * PERSISTENCE:
- *   - Mongo: `generator_runs` (one doc per run, baId-scoped).
+ *   - Mongo: `generator_runs` (one doc per run, tmagId-scoped).
  *   - Neo4j: (:BA)-[:RAN_GENERATOR]->(:GeneratorRun) — useful for "show
  *     me every product I've ever run" timelines later.
  *   - Chroma: `mcs_ivory` (shared with Ivory roster events). Each run
@@ -109,7 +109,7 @@ function validateAngle(angle: IvoryAngle): IvoryAngle {
  * belonging to this BA so the UI cannot smuggle a foreign id in.
  */
 export async function createGeneratorRun(
-  baId: string,
+  tmagId: string,
   input: CreateGeneratorRunPayload,
 ): Promise<GeneratorRun> {
   const product = validateProduct(input.productKey);
@@ -121,7 +121,7 @@ export async function createGeneratorRun(
   // a 400 if any id is foreign.
   for (const ivoryId of preselected) {
     try {
-      await getIvoryName(ivoryId, baId);
+      await getIvoryName(ivoryId, tmagId);
     } catch (err) {
       if (err instanceof IvoryNotFoundError) {
         throw new GeneratorValidationError('unknown_ivory_id');
@@ -138,7 +138,7 @@ export async function createGeneratorRun(
 
   const run: GeneratorRun = {
     runId,
-    baId,
+    tmagId,
     productKey: product.productKey,
     productName: product.productName,
     angle,
@@ -154,13 +154,13 @@ export async function createGeneratorRun(
     mongoDoc: { ...run },
     neo4j: {
       cypher:
-        'MERGE (b:BA {baId: $baId}) ' +
+        'MERGE (b:BA {tmagId: $tmagId}) ' +
         'CREATE (r:GeneratorRun {' +
         '  runId: $id, productKey: $productKey, angle: $angle, createdAt: $createdAt' +
         '}) ' +
         'MERGE (b)-[:RAN_GENERATOR]->(r)',
       params: {
-        baId,
+        tmagId,
         productKey: product.productKey,
         angle,
         createdAt: now,
@@ -169,13 +169,13 @@ export async function createGeneratorRun(
     chroma: {
       collection: CHROMA_COLLECTION,
       document:
-        `BA ${baId} opened a Generator run on ${product.productName} ` +
+        `BA ${tmagId} opened a Generator run on ${product.productName} ` +
         `(angle: ${angle}) with ${preselected.length} pre-selected names ` +
         `at ${now}.`,
       metadata: {
         kind: 'generator_run_started',
         runId,
-        baId,
+        tmagId,
         productKey: product.productKey,
         angle,
         createdAt: now,
@@ -189,7 +189,7 @@ export async function createGeneratorRun(
 /** Fetch a Generator run, enforcing BA ownership. */
 export async function getGeneratorRun(
   runId: string,
-  baId: string,
+  tmagId: string,
 ): Promise<GeneratorRun> {
   const res = await gatewayCall<{
     count: number;
@@ -202,7 +202,7 @@ export async function getGeneratorRun(
   });
   const doc = res.documents[0];
   if (!doc) throw new GeneratorNotFoundError(runId);
-  if (doc.baId !== baId) throw new GeneratorOwnershipError(runId);
+  if (doc.tmagId !== tmagId) throw new GeneratorOwnershipError(runId);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { _id, ...rest } = doc;
   return rest as unknown as GeneratorRun;
@@ -210,7 +210,7 @@ export async function getGeneratorRun(
 
 export interface MintForRunInput {
   runId: string;
-  baId: string;
+  tmagId: string;
   ivoryId: string;
   message?: string | null;
   city?: string;
@@ -234,7 +234,7 @@ export interface MintForRunResult {
  * Order of operations:
  *   1. Load the run + the Ivory name. Ownership guarded on both.
  *   2. Call createInvitation() — the spine triple-stacks the prospect +
- *      token, source='ivory'. Sponsor is the run's baId (sponsor immutability,
+ *      token, source='ivory'. Sponsor is the run's tmagId (sponsor immutability,
  *      locked-spec 3.5 — derived from session at the route layer, not the body).
  *   3. markIvoryInvited() — flips status to 'invited' + stamps lastProspectId
  *      on the Ivory record. This also adds the (:IvoryName)-[:INVITED_AS]
@@ -249,8 +249,8 @@ export interface MintForRunResult {
 export async function mintInvitationForRun(
   input: MintForRunInput,
 ): Promise<MintForRunResult> {
-  const run = await getGeneratorRun(input.runId, input.baId);
-  const name = await getIvoryName(input.ivoryId, input.baId);
+  const run = await getGeneratorRun(input.runId, input.tmagId);
+  const name = await getIvoryName(input.ivoryId, input.tmagId);
   const city = (input.city ?? '').trim();
   const stateOrRegion = (input.stateOrRegion ?? '').trim();
   const phone = (input.phone ?? '').trim();
@@ -260,7 +260,7 @@ export async function mintInvitationForRun(
   if (!normalizePhone(phone)) throw new GeneratorValidationError('phone_invalid');
 
   const created = await createInvitation({
-    sponsorBaId: input.baId,
+    sponsorTmagId: input.tmagId,
     firstName: name.firstName,
     lastName: name.lastName,
     email: input.email ?? null,
@@ -273,7 +273,7 @@ export async function mintInvitationForRun(
     relationshipReason: null,
   });
 
-  await markIvoryInvited(input.ivoryId, input.baId, created.prospectId);
+  await markIvoryInvited(input.ivoryId, input.tmagId, created.prospectId);
 
   const now = new Date().toISOString();
   const newEntry = {

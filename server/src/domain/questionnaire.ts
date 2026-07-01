@@ -83,7 +83,7 @@ export interface QuestionnaireSubmission {
 
 export interface QuestionnaireRecord extends QuestionnaireSubmission {
   questionnaireId: string;
-  baId: string;
+  tmagId: string;
   threeBaId: string;
   version: string;
   submittedAt: string;
@@ -97,11 +97,11 @@ export interface QuestionnaireRecord extends QuestionnaireSubmission {
  * surfaces (the sponsor workbook surface, for example, requires the
  * questionnaire to exist before it renders).
  */
-export async function questionnaireExists(baId: string): Promise<boolean> {
+export async function questionnaireExists(tmagId: string): Promise<boolean> {
   const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'ba_questionnaires',
-    filter: { baId },
+    filter: { tmagId },
     limit: 1,
   });
   return result.count > 0;
@@ -116,7 +116,7 @@ export async function questionnaireExists(baId: string): Promise<boolean> {
  *     BA's responses while running the 20-question conversation).
  */
 export async function getQuestionnaire(
-  baId: string,
+  tmagId: string,
 ): Promise<QuestionnaireRecord | null> {
   const result = await gatewayCall<{ documents: QuestionnaireRecord[] }>(
     'mongodb',
@@ -124,7 +124,7 @@ export async function getQuestionnaire(
     {
       database: 'momentum',
       collection: 'ba_questionnaires',
-      filter: { baId },
+      filter: { tmagId },
       limit: 1,
     },
   );
@@ -143,18 +143,18 @@ export async function getQuestionnaire(
  */
 export async function recordQuestionnaire(
   input: QuestionnaireSubmission & {
-    baId: string;
+    tmagId: string;
     threeBaId: string;
     ipAddress: string | null;
     userAgent: string | null;
   },
 ): Promise<QuestionnaireRecord> {
   const submittedAt = new Date().toISOString();
-  const questionnaireId = `quest_${input.baId}_${Date.now().toString(36)}`;
+  const questionnaireId = `quest_${input.tmagId}_${Date.now().toString(36)}`;
 
   const record: QuestionnaireRecord = {
     questionnaireId,
-    baId: input.baId,
+    tmagId: input.tmagId,
     threeBaId: input.threeBaId,
     version: QUESTIONNAIRE_VERSION,
     submittedAt,
@@ -186,7 +186,7 @@ export async function recordQuestionnaire(
   // Build a rich Chroma document — every free-text answer goes in so the
   // sponsor can semantic-search across submissions later.
   const chromaDocument = [
-    `BA ${input.baId} (${input.email}) submitted Team Magnificent interview questionnaire ${QUESTIONNAIRE_VERSION} at ${submittedAt}.`,
+    `BA ${input.tmagId} (${input.email}) submitted Team Magnificent interview questionnaire ${QUESTIONNAIRE_VERSION} at ${submittedAt}.`,
     `City: ${input.city}. Sponsor named: ${input.sponsor}. Employment: ${input.employmentStatus}.`,
     `Biggest win (last 3 years): ${input.biggestWin}`,
     `Why now: ${input.whyNow}`,
@@ -208,14 +208,14 @@ export async function recordQuestionnaire(
       // BA -[:SUBMITTED]-> Questionnaire pattern. Sponsor cockpit views
       // walk this edge to surface the questionnaire alongside the BA.
       cypher:
-        'MERGE (b:BA {baId: $baId}) ' +
+        'MERGE (b:BA {tmagId: $tmagId}) ' +
         'MERGE (q:Questionnaire {questionnaireId: $id}) ' +
         'SET q.version = $version, q.submittedAt = $submittedAt, ' +
         'q.weeklyHours = $weeklyHours, q.investmentReady = $investmentReady, ' +
         'q.nwmExperience = $nwmExperience, q.employmentStatus = $employmentStatus ' +
         'MERGE (b)-[:SUBMITTED]->(q)',
       params: {
-        baId: input.baId,
+        tmagId: input.tmagId,
         version: QUESTIONNAIRE_VERSION,
         submittedAt,
         weeklyHours: input.weeklyHours,
@@ -229,7 +229,7 @@ export async function recordQuestionnaire(
       document: chromaDocument,
       metadata: {
         questionnaireId,
-        baId: input.baId,
+        tmagId: input.tmagId,
         threeBaId: input.threeBaId,
         version: QUESTIONNAIRE_VERSION,
         submittedAt,
@@ -252,12 +252,12 @@ export async function recordQuestionnaire(
  * `questionnaire_complete` without needing to join across collections.
  * Same pattern as markCommitmentAccepted / markWelcomeSeen.
  */
-export async function markQuestionnaireComplete(baId: string): Promise<void> {
+export async function markQuestionnaireComplete(tmagId: string): Promise<void> {
   const completedAt = new Date().toISOString();
   await gatewayCall('mongodb', 'update', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
-    filter: { baId },
+    collection: 'team_magnificent_members',
+    filter: { tmagId },
     update: {
       $set: {
         questionnaire_complete: true,

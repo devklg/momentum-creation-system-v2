@@ -19,7 +19,7 @@ import { validateMichaelResponseContract } from '../../runtime/orchestration/ind
  * here.
  */
 
-const SESSION_BA_ID = 'TMBA-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
 
 const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
@@ -72,16 +72,16 @@ function mockRes() {
 /**
  * Build a server-owned request. The body is whatever the client sends (the
  * route accepts only `{}` or `{ language }`); session identity is server-owned.
- * Pass `withSession=false` to drop the session, or a custom `sessionBaId` (e.g.
+ * Pass `withSession=false` to drop the session, or a custom `sessionTmagId` (e.g.
  * whitespace) to exercise the downstream turn-source failure path.
  */
 function mockReq(
   body: Record<string, unknown> = {},
   withSession = true,
-  sessionBaId: string = SESSION_BA_ID,
+  sessionTmagId: string = SESSION_BA_ID,
 ) {
   return {
-    ...(withSession ? { session: { baId: sessionBaId } } : {}),
+    ...(withSession ? { session: { tmagId: sessionTmagId } } : {}),
     body,
   } as any;
 }
@@ -120,10 +120,10 @@ const FORBIDDEN_TRACE_KEYS = [
 // the former body-BA-scope keys PLUS the broader server-owned forbidden set
 // (client-supplied turn, Context Packet, identifiers, tokens, …).
 const FORBIDDEN_BODY_CASES: ReadonlyArray<readonly [string, Record<string, unknown>]> = [
-  ['baId', { baId: 'TMBA-EVIL-000000' }],
-  ['sponsorBaId', { sponsorBaId: 'TMBA-EVIL-000000' }],
-  ['targetBaId', { targetBaId: 'TMBA-EVIL-000000' }],
-  ['downlineBaId', { downlineBaId: 'TMBA-EVIL-000000' }],
+  ['tmagId', { tmagId: 'TMAG-EVIL-000000' }],
+  ['sponsorTmagId', { sponsorTmagId: 'TMAG-EVIL-000000' }],
+  ['targetTmagId', { targetTmagId: 'TMAG-EVIL-000000' }],
+  ['downlineTmagId', { downlineTmagId: 'TMAG-EVIL-000000' }],
   ['turn', { turn: { identity: {}, taskType: 'training_support' } }],
   ['runtimeTurn', { runtimeTurn: { scenario: 'accepted_degraded' } }],
   ['contextPacket', { contextPacket: { approvedKnowledge: [] } }],
@@ -172,7 +172,7 @@ describe('S3.11 Michael runtime route handler — server-owned turn', () => {
     expect(res.body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
   });
 
-  it('4. rejects a missing session baId with 401 (server-owned body)', async () => {
+  it('4. rejects a missing session tmagId with 401 (server-owned body)', async () => {
     enableRouteAndResponse();
     const res = mockRes();
     await handleMichaelRuntimeResolve(mockReq({}, false), res);
@@ -268,11 +268,11 @@ describe('S3.11 Michael runtime route handler — server-owned turn', () => {
     expect(typeof res.body.response.text).toBe('string');
   });
 
-  it('12. maps a downstream turn-source failure (whitespace session baId) to a deterministic 422 without throwing', async () => {
+  it('12. maps a downstream turn-source failure (whitespace session tmagId) to a deterministic 422 without throwing', async () => {
     enableRouteAndResponse();
     const res = mockRes();
 
-    // A whitespace session baId is truthy (passes the 401 guard) but the
+    // A whitespace session tmagId is truthy (passes the 401 guard) but the
     // server-owned turn source trims it to '' and fails closed -> 422.
     await expect(
       handleMichaelRuntimeResolve(mockReq({}, true, '   '), res),

@@ -33,7 +33,7 @@ function makeGatewayImpl(store: Store, opts: GatewayOpts = {}) {
   return async (tool: string, action: string, params: AnyRec): Promise<unknown> => {
     if (tool === 'mongodb' && action === 'query') {
       const col = params.collection;
-      if (col === 'brand_ambassadors') return { documents: store.ba ? [store.ba] : [] };
+      if (col === 'team_magnificent_members') return { documents: store.ba ? [store.ba] : [] };
       if (col === 'steve_discoveries') {
         return { documents: store.discovery ? [store.discovery] : [] };
       }
@@ -62,7 +62,7 @@ function makeGatewayImpl(store: Store, opts: GatewayOpts = {}) {
 
 function makePayload(overrides: AnyRec = {}) {
   return {
-    baId: 'TMBA-1',
+    tmagId: 'TMAG-1',
     callSid: 'CA-1',
     startedAt: '2026-07-01T00:00:00.000Z',
     completedAt: '2026-07-01T00:10:00.000Z',
@@ -90,7 +90,7 @@ function makePayload(overrides: AnyRec = {}) {
   } as never;
 }
 
-const BA = { baId: 'TMBA-1', sponsorBaId: 'TMBA-0', firstName: 'Kev' };
+const BA = { tmagId: 'TMAG-1', sponsorTmagId: 'TMAG-0', firstName: 'Kev' };
 
 async function loadSteve() {
   return import('../steve-success-interview.js');
@@ -106,7 +106,7 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
   it('re-ingest (existing row) refreshes the Chroma semantic doc', async () => {
     const store: Store = {
       ba: { ...BA },
-      discovery: { _id: 'SD-TMBA-1', baId: 'TMBA-1', completedAt: '2026-06-01T00:00:00.000Z' },
+      discovery: { _id: 'SD-TMAG-1', tmagId: 'TMAG-1', completedAt: '2026-06-01T00:00:00.000Z' },
     };
     mocks.gatewayCall.mockImplementation(makeGatewayImpl(store));
     const steve = await loadSteve();
@@ -119,14 +119,14 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     expect(chromaAdd).toBeDefined();
     expect(chromaAdd?.[2]).toMatchObject({
       collection: 'mcs_steve_discoveries',
-      ids: ['SD-TMBA-1'],
+      ids: ['SD-TMAG-1'],
     });
   });
 
   it('read-back throws READBACK_FAILED when the update did not apply content', async () => {
     const store: Store = {
       ba: { ...BA },
-      discovery: { _id: 'SD-TMBA-1', baId: 'TMBA-1', completedAt: '2026-06-01T00:00:00.000Z' },
+      discovery: { _id: 'SD-TMAG-1', tmagId: 'TMAG-1', completedAt: '2026-06-01T00:00:00.000Z' },
     };
     // updateNoop: the row exists but completedAt never advances to this ingest.
     mocks.gatewayCall.mockImplementation(makeGatewayImpl(store, { updateNoop: true }));
@@ -149,7 +149,7 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     const steve = await loadSteve();
 
     const artifact = await steve.ingestDiscoveryArtifact(makePayload());
-    expect(artifact.baId).toBe('TMBA-1');
+    expect(artifact.tmagId).toBe('TMAG-1');
 
     const updateCall = mocks.gatewayCall.mock.calls.find(
       ([tool, action]) => tool === 'mongodb' && action === 'update',
@@ -174,14 +174,14 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     );
     // Second ingest must succeed — the rejected bootstrap promise was NOT cached.
     const artifact = await steve.ingestDiscoveryArtifact(makePayload());
-    expect(artifact.baId).toBe('TMBA-1');
+    expect(artifact.tmagId).toBe('TMAG-1');
   });
 
   it('assembleSuccessProfile caps long free-text fields to 5000 chars', async () => {
     const steve = await loadSteve();
     const long = 'x'.repeat(6000);
     const profile = steve.assembleSuccessProfile({
-      baId: 'TMBA-1',
+      tmagId: 'TMAG-1',
       generatedAt: '2026-07-01T00:00:00.000Z',
       profile: {
         primaryWhy: { statement: long, who: 'kids', whyNow: 'now' },

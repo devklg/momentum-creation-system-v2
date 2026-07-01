@@ -16,7 +16,7 @@
  *     prospect is told their BA will follow up with the link.
  *
  * Sponsor immutability (locked-spec 3.5):
- *   - sponsorBaId is read from the token record only. The request body
+ *   - sponsorTmagId is read from the token record only. The request body
  *     carries no BA fields.
  */
 
@@ -39,7 +39,7 @@ export interface CreateWebinarReservationInput {
   prospectId: string;
   prospectFirstName: string;
   prospectLastInitial: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   baFirstName: string;
   baPhone: string | null;
   eventId: string;
@@ -182,7 +182,7 @@ export async function createWebinarReservation(
     eventId: input.eventId,
     token: input.token,
     prospectId: input.prospectId,
-    sponsorBaId: input.sponsorBaId,
+    sponsorTmagId: input.sponsorTmagId,
     name: input.name,
     email: input.email,
     createdAt,
@@ -219,13 +219,13 @@ export async function createWebinarReservation(
         `${input.prospectFirstName} ${input.prospectLastInitial}. ` +
         `reserved a seat for webinar ${input.eventId} ` +
         `scheduled ${input.scheduledFor} · ` +
-        `invited by ${input.sponsorBaId} at ${createdAt}`,
+        `invited by ${input.sponsorTmagId} at ${createdAt}`,
       metadata: {
         kind: 'webinar_reservation',
         reservationId,
         eventId: input.eventId,
         prospectId: input.prospectId,
-        sponsorBaId: input.sponsorBaId,
+        sponsorTmagId: input.sponsorTmagId,
         scheduledFor: input.scheduledFor,
         createdAt,
       },

@@ -187,19 +187,19 @@ function validateTeamMagnificentScope(
   event: Record<string, unknown>,
   errors: RuntimeEventValidationIssue[],
 ): void {
-  const hasBaId = typeof event.baId === 'string' && event.baId.trim().length > 0;
+  const hasTmagId = typeof event.tmagId === 'string' && event.tmagId.trim().length > 0;
   const hasTeamId = typeof event.teamId === 'string' && event.teamId.trim().length > 0;
 
-  if (hasBaId && !hasTeamId) {
-    errors.push(error('teamId', 'team_scope_required', 'teamId is required whenever baId is present.'));
+  if (hasTmagId && !hasTeamId) {
+    errors.push(error('teamId', 'team_scope_required', 'teamId is required whenever tmagId is present.'));
   }
 
-  if (hasBaId && event.teamKey !== TEAM_MAGNIFICENT_KEY) {
-    errors.push(error('teamKey', 'team_magnificent_scope_required', 'baId events must include teamKey team_magnificent.'));
+  if (hasTmagId && event.teamKey !== TEAM_MAGNIFICENT_KEY) {
+    errors.push(error('teamKey', 'team_magnificent_scope_required', 'tmagId events must include teamKey team_magnificent.'));
   }
 
-  if (hasBaId && event.teamName !== TEAM_MAGNIFICENT_NAME) {
-    errors.push(error('teamName', 'team_magnificent_scope_required', 'baId events must include teamName Team Magnificent.'));
+  if (hasTmagId && event.teamName !== TEAM_MAGNIFICENT_NAME) {
+    errors.push(error('teamName', 'team_magnificent_scope_required', 'tmagId events must include teamName Team Magnificent.'));
   }
 }
 
@@ -256,8 +256,8 @@ function validateActor(
 
   requireString(actor, 'actorId', errors, 'actor.actorId');
 
-  if (actor.actorType === 'ba' && event.baId !== actor.baId) {
-    errors.push(error('actor.baId', 'actor_scope_mismatch', 'BA actors must include the same baId as the event envelope.'));
+  if (actor.actorType === 'ba' && event.tmagId !== actor.tmagId) {
+    errors.push(error('actor.tmagId', 'actor_scope_mismatch', 'BA actors must include the same tmagId as the event envelope.'));
   }
 
   if (actor.actorType === 'agent') {

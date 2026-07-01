@@ -11,7 +11,7 @@ export const STANDING_RULE_THREE_AUTHORITATIVE =
 export const STANDING_RULE_SPONSOR_IMMUTABLE =
   'The sponsor BA is captured at the moment the invite token is minted (for prospects) ' +
   'or at the moment the access code is used (for BAs) and is never recomputed. ' +
-  'Any route accepting sponsorBaId as input must reject it and use the token-derived ' +
+  'Any route accepting sponsorTmagId as input must reject it and use the token-derived ' +
   'or code-derived value instead.';
 
 export const STANDING_RULE_NO_PROGRAMMATIC_THREE_HANDOFF =

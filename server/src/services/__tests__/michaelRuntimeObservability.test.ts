@@ -258,7 +258,7 @@ describe('S3.6 michaelRuntimeObservability module', () => {
       'sessionId',
       'turnId',
       'correlationId',
-      'baId',
+      'tmagId',
       'email',
       'phone',
       'prospect',

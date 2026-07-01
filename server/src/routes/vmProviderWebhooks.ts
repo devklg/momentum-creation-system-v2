@@ -36,8 +36,8 @@ const LeadRowSchema = z.object({
 const JsonImportBody = z.object({
   leadBatchId: z.string().min(3).max(160),
   vmCampaignId: z.string().min(3).max(160),
-  ownerTmBaId: z.string().min(2).max(80),
-  sponsorTmBaId: z.string().min(2).max(80),
+  ownerTmagId: z.string().min(2).max(80),
+  sponsorTmagId: z.string().min(2).max(80),
   sourceLabel: z.string().min(2).max(120).default('manual_csv'),
   rows: z.array(LeadRowSchema).min(1).max(10_000),
 });
@@ -45,8 +45,8 @@ const JsonImportBody = z.object({
 const CsvImportQuery = z.object({
   leadBatchId: z.string().min(3).max(160),
   vmCampaignId: z.string().min(3).max(160),
-  ownerTmBaId: z.string().min(2).max(80),
-  sponsorTmBaId: z.string().min(2).max(80),
+  ownerTmagId: z.string().min(2).max(80),
+  sponsorTmagId: z.string().min(2).max(80),
   sourceLabel: z.string().min(2).max(120).default('manual_csv'),
 });
 
@@ -71,7 +71,7 @@ vmProviderWebhookRoutes.post('/manual-csv/import', requireAdmin, async (req: Req
     const result = await createManualImportJobs({
       ...parsed.data,
       rows: parsed.data.rows,
-      createdBy: req.session?.baId ?? 'admin',
+      createdBy: req.session?.tmagId ?? 'admin',
     });
     res.status(202).json({ ok: true, ...result });
   } catch (err) {
@@ -95,7 +95,7 @@ vmProviderWebhookRoutes.post(
       const result = await createManualImportJobs({
         ...query.data,
         rows,
-        createdBy: req.session?.baId ?? 'admin',
+        createdBy: req.session?.tmagId ?? 'admin',
       });
       res.status(202).json({ ok: true, ...result });
     } catch (err) {

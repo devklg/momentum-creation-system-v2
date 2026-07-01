@@ -7,11 +7,11 @@
  *   3. THIS surface         (T+24-72h) — sponsor-led 30-45 min conversation
  *
  * Authorization: a sponsor can only conduct the workbook for a BA whose
- * sponsorBaId == sponsor's baId. Admins can conduct for anyone. Enforcement
+ * sponsorTmagId == sponsor's tmagId. Admins can conduct for anyone. Enforcement
  * lives in the route layer (canConductWorkbook).
  *
  * Lifecycle:
- *   - Sponsor opens /sponsor/interview-workbook/{baId} → GET draft (or create).
+ *   - Sponsor opens /sponsor/interview-workbook/{tmagId} → GET draft (or create).
  *   - Sponsor saves notes incrementally (autosave) → PUT /draft with merged notes.
  *   - Sponsor finalizes → POST /finalize with classification + first actions.
  *     Triple-stack write fires here, not on every autosave (Chroma docs would
@@ -70,10 +70,10 @@ export interface WorkbookNotes {
 export interface WorkbookRecord {
   workbookId: string;
   /** The BA being interviewed. */
-  forBaId: string;
+  forTmagId: string;
   forThreeBaId: string;
   /** The sponsor conducting the interview. */
-  conductedByBaId: string;
+  conductedByTmagId: string;
   conductedByName: string;
   status: WorkbookStatus;
   version: string;
@@ -112,31 +112,31 @@ const EMPTY_NOTES: WorkbookNotes = {
 };
 
 /**
- * Authorization predicate. The sponsor's baId must equal the target BA's
- * sponsorBaId for the workbook to be permitted. Admin override happens at
+ * Authorization predicate. The sponsor's tmagId must equal the target BA's
+ * sponsorTmagId for the workbook to be permitted. Admin override happens at
  * the route layer; this function is for the sponsor case.
  */
 export async function canConductWorkbook(args: {
-  sponsorBaId: string;
-  forBaId: string;
+  sponsorTmagId: string;
+  forTmagId: string;
 }): Promise<boolean> {
-  const result = await gatewayCall<{ documents: { sponsorBaId?: string }[] }>(
+  const result = await gatewayCall<{ documents: { sponsorTmagId?: string }[] }>(
     'mongodb',
     'query',
     {
       database: 'momentum',
-      collection: 'brand_ambassadors',
-      filter: { baId: args.forBaId },
+      collection: 'team_magnificent_members',
+      filter: { tmagId: args.forTmagId },
       limit: 1,
     },
   );
   const ba = result.documents[0];
   if (!ba) return false;
-  return ba.sponsorBaId === args.sponsorBaId;
+  return ba.sponsorTmagId === args.sponsorTmagId;
 }
 
 export async function getWorkbook(
-  forBaId: string,
+  forTmagId: string,
 ): Promise<WorkbookRecord | null> {
   const result = await gatewayCall<{ documents: WorkbookRecord[] }>(
     'mongodb',
@@ -144,7 +144,7 @@ export async function getWorkbook(
     {
       database: 'momentum',
       collection: 'ba_workbooks',
-      filter: { forBaId },
+      filter: { forTmagId },
       limit: 1,
     },
   );
@@ -157,18 +157,18 @@ export async function getWorkbook(
  * — those fire on finalize).
  */
 export async function createWorkbookDraft(args: {
-  forBaId: string;
+  forTmagId: string;
   forThreeBaId: string;
-  conductedByBaId: string;
+  conductedByTmagId: string;
   conductedByName: string;
 }): Promise<WorkbookRecord> {
   const now = new Date().toISOString();
-  const workbookId = `wbook_${args.forBaId}_${Date.now().toString(36)}`;
+  const workbookId = `wbook_${args.forTmagId}_${Date.now().toString(36)}`;
   const record: WorkbookRecord = {
     workbookId,
-    forBaId: args.forBaId,
+    forTmagId: args.forTmagId,
     forThreeBaId: args.forThreeBaId,
-    conductedByBaId: args.conductedByBaId,
+    conductedByTmagId: args.conductedByTmagId,
     conductedByName: args.conductedByName,
     status: 'draft',
     version: WORKBOOK_VERSION,
@@ -304,16 +304,16 @@ export async function finalizeWorkbook(args: {
   // a property on the workbook node so an upline cockpit can MATCH on it.
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MERGE (s:BA {baId: $sponsorBaId}) ' +
-      'MERGE (b:BA {baId: $forBaId}) ' +
+      'MERGE (s:BA {tmagId: $sponsorTmagId}) ' +
+      'MERGE (b:BA {tmagId: $forTmagId}) ' +
       'MERGE (w:Workbook {workbookId: $workbookId}) ' +
       'SET w.status = $status, w.classification = $classification, ' +
       'w.version = $version, w.finalizedAt = $finalizedAt ' +
       'MERGE (s)-[:CONDUCTED]->(w) ' +
       'MERGE (w)-[:FOR]->(b)',
     params: {
-      sponsorBaId: current.conductedByBaId,
-      forBaId: current.forBaId,
+      sponsorTmagId: current.conductedByTmagId,
+      forTmagId: current.forTmagId,
       workbookId: args.workbookId,
       status: 'final',
       classification: args.classification,
@@ -326,7 +326,7 @@ export async function finalizeWorkbook(args: {
   // retrieve coaching context across past partnerships ("show me BAs I
   // classified gogetter whose biggest fear was rejection").
   const chromaDoc = [
-    `Workbook conducted by ${current.conductedByName} (BA ${current.conductedByBaId}) for BA ${current.forBaId} (THREE ${current.forThreeBaId}) at ${finalizedAt}.`,
+    `Workbook conducted by ${current.conductedByName} (BA ${current.conductedByTmagId}) for BA ${current.forTmagId} (THREE ${current.forThreeBaId}) at ${finalizedAt}.`,
     `Classification: ${args.classification.toUpperCase()}.`,
     `Partnership notes: ${args.partnershipNotes}`,
     `First actions assigned: ${args.firstActions.join(' | ')}`,
@@ -360,9 +360,9 @@ export async function finalizeWorkbook(args: {
     metadatas: [
       {
         workbookId: args.workbookId,
-        forBaId: current.forBaId,
+        forTmagId: current.forTmagId,
         forThreeBaId: current.forThreeBaId,
-        conductedByBaId: current.conductedByBaId,
+        conductedByTmagId: current.conductedByTmagId,
         classification: args.classification,
         version: WORKBOOK_VERSION,
         finalizedAt,
@@ -375,8 +375,8 @@ export async function finalizeWorkbook(args: {
   // dashboards can filter without joining.
   await gatewayCall('mongodb', 'update', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
-    filter: { baId: current.forBaId },
+    collection: 'team_magnificent_members',
+    filter: { tmagId: current.forTmagId },
     update: {
       $set: {
         workbook_complete: true,

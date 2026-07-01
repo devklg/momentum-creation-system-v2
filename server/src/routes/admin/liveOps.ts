@@ -4,7 +4,7 @@
  * Thin Express layer mirroring `routes/admin/reporting.ts`:
  *   - requireAdmin on every handler (founders bypass Michael; H is /admin-
  *     only and never reachable for non-admin BAs).
- *   - parseFilter narrows-only — baId + leaderGroup.
+ *   - parseFilter narrows-only — tmagId + leaderGroup.
  *   - appendAuditEntry once per request (J.4 substrate).
  *
  * Four leaves:
@@ -48,18 +48,18 @@ import type {
 export const adminLiveOpsRoutes: Router = express.Router();
 
 const FilterSchema = z.object({
-  baId: z.string().min(2).max(80).optional(),
+  tmagId: z.string().min(2).max(80).optional(),
   leaderGroup: z.enum(['all', 'leaders_only', 'non_leaders']).optional(),
 });
 
 function parseFilter(req: Request): AdminDashboardFilter {
   const parsed = FilterSchema.parse({
-    baId: typeof req.query.baId === 'string' ? req.query.baId : undefined,
+    tmagId: typeof req.query.tmagId === 'string' ? req.query.tmagId : undefined,
     leaderGroup:
       typeof req.query.leaderGroup === 'string' ? req.query.leaderGroup : undefined,
   });
   return {
-    baId: parsed.baId ?? null,
+    tmagId: parsed.tmagId ?? null,
     leaderGroup: parsed.leaderGroup ?? 'all',
   };
 }
@@ -67,8 +67,8 @@ function parseFilter(req: Request): AdminDashboardFilter {
 function adminActorFromRequest(req: Request): AuditActor & { kind: 'admin' } {
   const session = req.session!;
   const displayName =
-    (session as unknown as { fullName?: string }).fullName ?? session.baId;
-  return { kind: 'admin', baId: session.baId, displayName };
+    (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
+  return { kind: 'admin', tmagId: session.tmagId, displayName };
 }
 
 function badFilter(res: Response, err: z.ZodError): void {
@@ -94,7 +94,7 @@ adminLiveOpsRoutes.get('/growth', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.live_ops.growth.read',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: {
         filter,
@@ -135,7 +135,7 @@ adminLiveOpsRoutes.get('/grid', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.live_ops.grid.read',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: {
         filter,
@@ -180,7 +180,7 @@ adminLiveOpsRoutes.get('/funnel', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.live_ops.funnel.read',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: {
         filter,
@@ -275,7 +275,7 @@ adminLiveOpsRoutes.get('/usage/stream', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.live_ops.usage_stream.opened',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { initialSample: lastSample },
       reason: null,
@@ -316,7 +316,7 @@ adminLiveOpsRoutes.get('/usage/stream', requireAdmin, async (req, res) => {
     decrementAdminSessions();
     // eslint-disable-next-line no-console
     console.log(
-      `[admin-live-ops-stream] closed ${streamId} baId=${req.session!.baId}`,
+      `[admin-live-ops-stream] closed ${streamId} tmagId=${req.session!.tmagId}`,
     );
   };
   req.on('close', teardown);
@@ -324,6 +324,6 @@ adminLiveOpsRoutes.get('/usage/stream', requireAdmin, async (req, res) => {
 
   // eslint-disable-next-line no-console
   console.log(
-    `[admin-live-ops-stream] opened ${streamId} baId=${req.session!.baId}`,
+    `[admin-live-ops-stream] opened ${streamId} tmagId=${req.session!.tmagId}`,
   );
 });

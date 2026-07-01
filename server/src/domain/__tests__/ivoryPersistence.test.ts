@@ -22,7 +22,7 @@ type AnyRec = Record<string, unknown>;
 
 const IVORY_RECORD = {
   ivoryId: 'ivory_1',
-  baId: 'TMBA-1',
+  tmagId: 'TMAG-1',
   firstName: 'Dana',
   lastName: 'Smith',
   lastInitial: 'S',
@@ -88,7 +88,7 @@ describe('Ivory persistence fixes', () => {
     });
     const ivory = await loadIvory();
 
-    const res = await ivory.mintIvoryInvitation('TMBA-1', {
+    const res = await ivory.mintIvoryInvitation('TMAG-1', {
       ivoryId: 'ivory_1',
       relationshipReason: 'old friend',
       message: 'Hey Dana',
@@ -107,7 +107,7 @@ describe('Ivory persistence fixes', () => {
     mocks.gatewayCall.mockImplementation(defaultGateway());
     const ivory = await loadIvory();
 
-    await ivory.markIvoryInvited('ivory_1', 'TMBA-1', 'P1');
+    await ivory.markIvoryInvited('ivory_1', 'TMAG-1', 'P1');
 
     const neo = mocks.gatewayCall.mock.calls.find(
       ([tool, action]) => tool === 'neo4j' && action === 'cypher',
@@ -128,7 +128,7 @@ describe('Ivory persistence fixes', () => {
     const ivory = await loadIvory();
 
     await expect(
-      ivory.createIvoryName('TMBA-1', { firstName: 'Dana', lastName: 'Smith' } as never),
+      ivory.createIvoryName('TMAG-1', { firstName: 'Dana', lastName: 'Smith' } as never),
     ).rejects.toThrow(/neo4j leg failed/);
 
     const del = mocks.gatewayCall.mock.calls.find(
@@ -149,7 +149,7 @@ describe('Ivory persistence fixes', () => {
     mocks.gatewayCall.mockImplementation(defaultGateway());
     const ivory = await loadIvory();
 
-    await ivory.updateIvoryName('ivory_1', 'TMBA-1', { notes: 'brand new note' } as never);
+    await ivory.updateIvoryName('ivory_1', 'TMAG-1', { notes: 'brand new note' } as never);
 
     const chromaAdd = mocks.gatewayCall.mock.calls.find(
       ([tool, action]) => tool === 'chromadb' && action === 'add',
@@ -165,7 +165,7 @@ describe('Ivory persistence fixes', () => {
     const ivory = await loadIvory();
 
     await expect(
-      ivory.updateIvoryStatus('ivory_1', 'TMBA-1', 'invited' as never),
+      ivory.updateIvoryStatus('ivory_1', 'TMAG-1', 'invited' as never),
     ).rejects.toBeInstanceOf(ivory.IvoryValidationError);
   });
 
@@ -180,7 +180,7 @@ describe('Ivory persistence fixes', () => {
     const ivory = await loadIvory();
 
     await expect(
-      ivory.updateIvoryStatus('ivory_1', 'TMBA-1', 'customer' as never),
+      ivory.updateIvoryStatus('ivory_1', 'TMAG-1', 'customer' as never),
     ).rejects.toBeInstanceOf(ivory.IvoryNotFoundError);
   });
 
@@ -195,7 +195,7 @@ describe('Ivory persistence fixes', () => {
     const ivory = await loadIvory();
 
     await expect(
-      ivory.updateIvoryName('ivory_1', 'TMBA-1', { notes: 'x' } as never),
+      ivory.updateIvoryName('ivory_1', 'TMAG-1', { notes: 'x' } as never),
     ).rejects.toBeInstanceOf(ivory.IvoryNotFoundError);
   });
 
@@ -210,7 +210,7 @@ describe('Ivory persistence fixes', () => {
     const ivory = await loadIvory();
 
     await expect(
-      ivory.markIvoryInvited('ivory_1', 'TMBA-1', 'P1'),
+      ivory.markIvoryInvited('ivory_1', 'TMAG-1', 'P1'),
     ).rejects.toBeInstanceOf(ivory.IvoryNotFoundError);
   });
 

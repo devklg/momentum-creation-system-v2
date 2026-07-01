@@ -19,7 +19,7 @@ import {
   transitionTokenState,
 } from './tokens.js';
 import { findProspectById, lastInitialOf } from './prospects.js';
-import { findBAByBaId } from './ba.js';
+import { findBAByTmagId } from './ba.js';
 import { findBulkLeadByToken } from './bulkLeads.js';
 import {
   applyCrmLifecycleEvent,
@@ -75,7 +75,7 @@ export async function resolveRvmToken(token: string): Promise<RvmResolvedTokenPa
   const open = await markTokenOpened(token);
   const [prospect, ba, nextEvent] = await Promise.all([
     findProspectById(tokenRecord.prospectId),
-    findBAByBaId(tokenRecord.sponsorBaId),
+    findBAByTmagId(tokenRecord.sponsorTmagId),
     findNextUpcomingEvent(),
   ]);
   if (!prospect || !ba) throw new RvmTokenError('invalid_token');
@@ -85,8 +85,8 @@ export async function resolveRvmToken(token: string): Promise<RvmResolvedTokenPa
     crm = await createOrUpdateCrmRecordForToken({
       prospectId: prospect.prospectId,
       token,
-      ownerTmBaId: bulkLead.ownerTmBaId,
-      sponsorTmBaId: bulkLead.sponsorTmBaId,
+      ownerTmagId: bulkLead.ownerTmagId,
+      sponsorTmagId: bulkLead.sponsorTmagId,
       source: 'rvm',
       leadId: bulkLead.leadId,
       leadBatchId: bulkLead.leadBatchId,
@@ -122,7 +122,7 @@ export async function resolveRvmToken(token: string): Promise<RvmResolvedTokenPa
       expiresAt: prospect.expiresAt,
     },
     ba: {
-      baId: ba.baId,
+      tmagId: ba.tmagId,
       firstName: ba.firstName,
       lastName: ba.lastName,
       lastInitial: ba.lastName.charAt(0).toUpperCase(),
@@ -186,7 +186,7 @@ export async function recordRvmVideoEvent(
   if (kind === 'complete') {
     const result = await placeProspect({
       prospectId: prospect.prospectId,
-      sponsorBaId: tokenRecord.sponsorBaId,
+      sponsorTmagId: tokenRecord.sponsorTmagId,
       prospectExpiresAt: prospect.expiresAt,
       firstName: prospect.firstName,
       lastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),

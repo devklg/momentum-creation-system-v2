@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 
 export function LoginPage() {
   const { status, refresh } = useAdminAuth();
-  const [baId, setBaId] = useState('');
+  const [tmagId, setTmagId] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export function LoginPage() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ baId: baId.trim(), password }),
+        body: JSON.stringify({ tmagId: tmagId.trim(), password }),
       });
       const data = (await res.json()) as { ok: boolean; error?: string };
       if (!data.ok) {
@@ -71,12 +71,12 @@ export function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="baId">TM BA ID</Label>
+            <Label htmlFor="tmagId">TM BA ID</Label>
             <Input
-              id="baId"
-              value={baId}
-              onChange={(e) => setBaId(e.target.value)}
-              placeholder="TMBA-XXXX"
+              id="tmagId"
+              value={tmagId}
+              onChange={(e) => setTmagId(e.target.value)}
+              placeholder="TMAG-XXXX"
               autoComplete="username"
               required
               disabled={submitting}

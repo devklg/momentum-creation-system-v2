@@ -9,8 +9,8 @@
 import type { OwnedProspectIdentity, VmLeadIdentity } from '@momentum/shared';
 
 export const CLIENT_OWNERSHIP_OVERRIDE_FIELDS = [
-  'ownerTmBaId',
-  'sponsorTmBaId',
+  'ownerTmagId',
+  'sponsorTmagId',
   'leadBatchId',
   'vmCampaignId',
 ] as const;
@@ -56,10 +56,10 @@ export function assertOwnedProspectIdentity(
   value: unknown,
 ): asserts value is OwnedProspectIdentity {
   if (!isRecord(value)) throw new VmOwnershipError('ownership_not_object');
-  if (!hasNonEmptyString(value, 'ownerTmBaId')) {
+  if (!hasNonEmptyString(value, 'ownerTmagId')) {
     throw new VmOwnershipError('missing_owner_tm_ba_id');
   }
-  if (!hasNonEmptyString(value, 'sponsorTmBaId')) {
+  if (!hasNonEmptyString(value, 'sponsorTmagId')) {
     throw new VmOwnershipError('missing_sponsor_tm_ba_id');
   }
 }
@@ -81,19 +81,19 @@ export function assertSameProspectOwner(
   expected: OwnedProspectIdentity,
   actual: OwnedProspectIdentity,
 ): void {
-  if (expected.ownerTmBaId !== actual.ownerTmBaId) {
+  if (expected.ownerTmagId !== actual.ownerTmagId) {
     throw new VmOwnershipError('owner_tm_ba_mismatch');
   }
-  if (expected.sponsorTmBaId !== actual.sponsorTmBaId) {
+  if (expected.sponsorTmagId !== actual.sponsorTmagId) {
     throw new VmOwnershipError('sponsor_tm_ba_mismatch');
   }
 }
 
-export function buildBaOwnedIdentity(tmBaId: string): OwnedProspectIdentity {
-  const normalized = tmBaId.trim();
+export function buildBaOwnedIdentity(tmagId: string): OwnedProspectIdentity {
+  const normalized = tmagId.trim();
   if (!normalized) throw new VmOwnershipError('missing_tm_ba_id');
   return {
-    ownerTmBaId: normalized,
-    sponsorTmBaId: normalized,
+    ownerTmagId: normalized,
+    sponsorTmagId: normalized,
   };
 }

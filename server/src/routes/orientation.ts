@@ -14,14 +14,14 @@
  * Gating: requireAuth + requireSteveComplete — the BA-facing gated pattern
  * (a BA reaches the cockpit, and thus this card, only after Michael completes).
  *
- * Identity discipline (locked-spec 3.5): baId comes from req.session — never a
+ * Identity discipline (locked-spec 3.5): tmagId comes from req.session — never a
  * query param or body. The BA can only ever book/cancel their OWN seat.
  */
 
 import { Router } from 'express';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
-import { findBAByBaId } from '../domain/ba.js';
+import { findBAByTmagId } from '../domain/ba.js';
 import {
   cancelSeat,
   getSessionAvailabilityForBA,
@@ -41,11 +41,11 @@ orientationRoutes.get(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
     try {
       const { sessions, myReservationSessionId } =
-        await getSessionAvailabilityForBA(baId);
+        await getSessionAvailabilityForBA(tmagId);
       const body: OrientationSessionsResponse = {
         ok: true,
         sessions,
@@ -66,8 +66,8 @@ orientationRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const sessionId = String(req.params.sessionId ?? '');
     if (sessionId.length < 4 || sessionId.length > 120) {
@@ -75,12 +75,12 @@ orientationRoutes.post(
     }
 
     try {
-      const ba = await findBAByBaId(baId);
+      const ba = await findBAByTmagId(tmagId);
       if (!ba) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
       const result = await reserveSeat({
         sessionId,
-        baId,
+        tmagId,
         baName: `${ba.firstName} ${ba.lastName}`.trim(),
         baPhone: ba.phone ?? null,
       });
@@ -118,14 +118,14 @@ orientationRoutes.delete(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const sessionId = String(req.params.sessionId ?? '');
     if (!sessionId) return res.status(400).json({ ok: false, error: 'invalid_session_id' });
 
     try {
-      const result = await cancelSeat(sessionId, baId);
+      const result = await cancelSeat(sessionId, tmagId);
       if (!result.ok) {
         return res.status(404).json({ ok: false, error: result.error });
       }

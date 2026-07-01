@@ -7,7 +7,7 @@
  * with the latest server state.
  *
  * Hard locks honored:
- *   - Sponsor, threeBaId, tmBaId, accessCodeHeld render as read-only
+ *   - Sponsor, threeBaId, tmagId, accessCodeHeld render as read-only
  *     fields with no edit affordance. The server PATCH schema rejects
  *     these fields if they ever appear in a body.
  *   - First/last name edits warn the BA that the change is audited.
@@ -41,7 +41,7 @@ interface NotifPrefs {
 type NotifTopic = keyof NotifPrefs;
 type NotifChannel = keyof ChannelMix;
 
-interface BAProfile {
+interface TmagProfile {
   firstName: string;
   lastName: string;
   email: string;
@@ -49,17 +49,17 @@ interface BAProfile {
   timezone: string;
   photoUrl: string | null;
   notifPrefs: NotifPrefs;
-  tmBaId: string;
+  tmagId: string;
   threeBaId: string;
   accessCodeHeld: string | null;
-  sponsor: { baId: string; threeBaId: string; fullName: string };
+  sponsor: { tmagId: string; threeBaId: string; fullName: string };
   pendingEmail: string | null;
   pendingPhone: string | null;
 }
 
 interface ProfileGetResponse {
   ok: true;
-  profile: BAProfile;
+  profile: TmagProfile;
 }
 
 const TOPIC_LABELS: Record<NotifTopic, string> = {
@@ -77,7 +77,7 @@ const CHANNEL_LABELS: Record<NotifChannel, string> = {
 };
 
 export function ProfilePage() {
-  const [profile, setProfile] = useState<BAProfile | null>(null);
+  const [profile, setProfile] = useState<TmagProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -126,7 +126,7 @@ export function ProfilePage() {
             {profile.firstName} {profile.lastName}
           </h1>
           <p className="text-[13px] text-cream-mute mt-1.5 font-mono">
-            {profile.tmBaId}
+            {profile.tmagId}
           </p>
         </header>
 
@@ -147,7 +147,7 @@ export default ProfilePage;
 
 /* ─── Identity (read-only) ─── */
 
-function IdentityCard({ profile }: { profile: BAProfile }) {
+function IdentityCard({ profile }: { profile: TmagProfile }) {
   return (
     <ProfileSection
       eyebrow="IDENTITY"
@@ -158,7 +158,7 @@ function IdentityCard({ profile }: { profile: BAProfile }) {
         <ReadOnlyRow label="Sponsor" value={profile.sponsor.fullName || '—'} />
         <ReadOnlyRow label="Sponsor THREE BA ID" value={profile.sponsor.threeBaId || '—'} />
         <ReadOnlyRow label="Your THREE BA ID" value={profile.threeBaId || '—'} />
-        <ReadOnlyRow label="Your TM BA ID" value={profile.tmBaId} />
+        <ReadOnlyRow label="Your TM BA ID" value={profile.tmagId} />
         <ReadOnlyRow
           label="Your access code"
           value={profile.accessCodeHeld ?? 'Not yet issued by Kevin'}
@@ -179,7 +179,7 @@ function ReadOnlyRow({ label, value }: { label: string; value: string }) {
 
 /* ─── Photo ─── */
 
-function PhotoEditor({ profile, onSaved }: { profile: BAProfile; onSaved: () => Promise<void> }) {
+function PhotoEditor({ profile, onSaved }: { profile: TmagProfile; onSaved: () => Promise<void> }) {
   const [url, setUrl] = useState(profile.photoUrl ?? '');
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
@@ -242,7 +242,7 @@ function PhotoEditor({ profile, onSaved }: { profile: BAProfile; onSaved: () => 
 
 /* ─── Name ─── */
 
-function NameEditor({ profile, onSaved }: { profile: BAProfile; onSaved: () => Promise<void> }) {
+function NameEditor({ profile, onSaved }: { profile: TmagProfile; onSaved: () => Promise<void> }) {
   const [firstName, setFirstName] = useState(profile.firstName);
   const [lastName, setLastName] = useState(profile.lastName);
   const [saving, setSaving] = useState(false);
@@ -328,7 +328,7 @@ function TimezoneEditor({
   profile,
   onSaved,
 }: {
-  profile: BAProfile;
+  profile: TmagProfile;
   onSaved: () => Promise<void>;
 }) {
   const all = useMemo(getBrowserTimezones, []);
@@ -398,7 +398,7 @@ function EmailChanger({
   profile,
   onSaved,
 }: {
-  profile: BAProfile;
+  profile: TmagProfile;
   onSaved: () => Promise<void>;
 }) {
   const [newEmail, setNewEmail] = useState('');
@@ -545,7 +545,7 @@ function PhoneChanger({
   profile,
   onSaved,
 }: {
-  profile: BAProfile;
+  profile: TmagProfile;
   onSaved: () => Promise<void>;
 }) {
   const [newPhone, setNewPhone] = useState('');
@@ -774,7 +774,7 @@ function NotifPrefsEditor({
   profile,
   onSaved,
 }: {
-  profile: BAProfile;
+  profile: TmagProfile;
   onSaved: () => Promise<void>;
 }) {
   const [prefs, setPrefs] = useState<NotifPrefs>(profile.notifPrefs);

@@ -62,7 +62,7 @@ const ENTITY_KIND_VALUES: readonly AuditEntityKind[] = [
 ];
 
 const QuerySchema = z.object({
-  actorBaId: z.string().min(2).max(80).optional(),
+  actorTmagId: z.string().min(2).max(80).optional(),
   role: z.enum(ROLE_VALUES as [AuditActorRole, ...AuditActorRole[]]).optional(),
   action: z.string().min(1).max(120).optional(),
   actionPrefix: z.string().min(1).max(120).optional(),

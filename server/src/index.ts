@@ -189,7 +189,7 @@ app.use('/api/cockpit', cockpitRoutes);
 // companion to /api/cockpit/*: notes, follow-up reminders, dispositions,
 // re-invite, and the Today's Actions card (derived from existing pipeline).
 // Each handler applies (requireAuth, requireSteveComplete) internally;
-// every mutation runs assertOwnership(prospectId, session.baId) first so a
+// every mutation runs assertOwnership(prospectId, session.tmagId) first so a
 // BA can only read or write their OWN prospects (locked-spec 3.5).
 app.use('/api/crm', crmRoutes);
 app.use('/api/crm-hub', crmHubRoutes);
@@ -221,7 +221,7 @@ app.use('/api/training', trainingRoutes);
 // BA profile / settings (Chat #134, wireframe 3.8). Handlers apply
 // requireAuth + requireSteveComplete internally; /api/profile is also
 // in the Steve gate whitelist so a BA mid-onboarding can still set timezone
-// and notif prefs. All reads/writes scoped to req.session.baId (3.5).
+// and notif prefs. All reads/writes scoped to req.session.tmagId (3.5).
 app.use('/api/profile', profileRoutes);
 
 // Replicated .com preview (Chat #134, wireframe 3.7). Sandboxed token
@@ -234,7 +234,7 @@ app.use('/api/preview', previewRoutes);
 // Group orientation scheduler (Chat #147, wireframe §3.6). BA-facing cockpit
 // scheduling card: a post-Steve BA sees available group sessions, books one
 // seat (cap 10), and can cancel. Handlers apply (requireAuth +
-// requireSteveComplete) internally; baId is read from the session, never the
+// requireSteveComplete) internally; tmagId is read from the session, never the
 // body (locked-spec 3.5). REUSES the §2.6 webinar event/reservation pattern.
 app.use('/api/orientation', orientationRoutes);
 
@@ -263,7 +263,7 @@ await ensureChromaCollections();
 app.listen(env.SERVER_PORT, () => {
   // eslint-disable-next-line no-console
   console.log(
-    `[momentum-server] listening on :${env.SERVER_PORT} (${env.NODE_ENV}) â€” admin BA IDs configured: ${env.ADMIN_BA_IDS.length}`,
+    `[momentum-server] listening on :${env.SERVER_PORT} (${env.NODE_ENV}) â€” admin BA IDs configured: ${env.ADMIN_TMAG_IDS.length}`,
   );
 });
 

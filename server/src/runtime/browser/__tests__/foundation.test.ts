@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type {
   AgentKey,
-  BaId,
+  TmagId,
   ContextPacketId,
   ContextRequestId,
   CorrelationId,
@@ -83,7 +83,7 @@ function expectNoMatches(files: Array<{ relativePath: string; text: string }>, p
 
 const tenantId = 'tenant_team_magnificent' as TenantId;
 const teamId = 'team_magnificent' as TeamId;
-const baId = 'TMBA-TEST-S16' as BaId;
+const tmagId = 'TMAG-TEST-S16' as TmagId;
 const sessionId = 'session_s16_browser' as SessionId;
 const agentKey = 'michael_magnificent' as AgentKey;
 const correlationId = 'corr_s16_browser' as CorrelationId;
@@ -94,7 +94,7 @@ function browserSession(mode: 'browser_text' | 'browser_voice' | 'mixed' = 'brow
     teamId,
     teamKey: 'team_magnificent',
     teamName: 'Team Magnificent',
-    baId,
+    tmagId,
     sessionId,
     agentKey,
     mode,
@@ -130,7 +130,7 @@ function contextPacket(session = browserSession()): ContextPacketV1 {
       teamId: session.teamId,
       teamKey: session.teamKey,
       teamName: session.teamName,
-      baId: session.baId,
+      tmagId: session.tmagId,
       journalEnabled: true,
       languagePreference: session.language,
       permissions: {
@@ -206,7 +206,7 @@ describe('S1.6 browser voice/text foundation', () => {
     expect(session.surface).toBe('team');
     expect(session.teamKey).toBe('team_magnificent');
     expect(session.teamName).toBe('Team Magnificent');
-    expect(session.baId).toBe(baId);
+    expect(session.tmagId).toBe(tmagId);
 
     expect(() =>
       assertBrowserRuntimeSessionIdentity({
@@ -264,7 +264,7 @@ describe('S1.6 browser voice/text foundation', () => {
 
     expect(() =>
       createContextPacketHandoff(
-        { ...session, baId: 'TMBA-OTHER' as BaId },
+        { ...session, tmagId: 'TMAG-OTHER' as TmagId },
         packet,
       ),
     ).toThrow(/Context Packet handoff must match/);

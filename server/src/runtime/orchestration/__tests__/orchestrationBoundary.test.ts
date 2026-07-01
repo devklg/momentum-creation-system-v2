@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type {
   AgentId,
-  BaId,
+  TmagId,
   ContextPacketId,
   ContextRequestId,
   CorrelationId,
@@ -107,7 +107,7 @@ function identity(): OrchestrationSessionIdentity {
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      baId: 'TMBA-ORCH-001' as BaId,
+      tmagId: 'TMAG-ORCH-001' as TmagId,
     },
     sessionId: 'session_orch_001' as SessionId,
     agentKey: 'michael_magnificent',
@@ -137,7 +137,7 @@ function validInput(): ContextPacketBuildInput {
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      baId: 'TMBA-ORCH-001' as BaId,
+      tmagId: 'TMAG-ORCH-001' as TmagId,
       journalEnabled: true,
       languagePreference: 'en',
       permissions: {

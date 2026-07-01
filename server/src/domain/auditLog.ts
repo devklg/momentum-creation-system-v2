@@ -87,7 +87,7 @@ function actorLabel(actor: AuditActor): string {
   switch (actor.kind) {
     case 'admin':
     case 'ba':
-      return `${actor.kind}:${actor.displayName} (${actor.baId})`;
+      return `${actor.kind}:${actor.displayName} (${actor.tmagId})`;
     case 'prospect':
       return `prospect:${actor.displayName} (${actor.prospectId})`;
     case 'system':
@@ -135,7 +135,7 @@ export async function appendAuditEntry(input: AppendAuditEntryInput): Promise<Au
 
   // Neo4j: stamp the entry node and link out by actor kind. We don't
   // create generic Actor / Entity nodes — instead we connect to the
-  // existing BrandAmbassador node when the actor is a BA/admin, since
+  // existing TeamMagnificentMember node when the actor is a BA/admin, since
   // those already exist in the graph. For prospect / system / anonymous
   // the entry stands alone (still traversable by action / timestamp).
   const cypher = buildCypher(entry);
@@ -177,13 +177,13 @@ function buildCypher(
   };
 
   if (entry.actor.kind === 'admin' || entry.actor.kind === 'ba') {
-    params.actorBaId = entry.actor.baId;
+    params.actorTmagId = entry.actor.tmagId;
     return {
       cypher: `
         MERGE (a:AuditEntry {entryId: $entryId})
         SET a += {${baseProps}}
         WITH a
-        OPTIONAL MATCH (ba:BrandAmbassador {baId: $actorBaId})
+        OPTIONAL MATCH (ba:TeamMagnificentMember {tmagId: $actorTmagId})
         FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END |
           MERGE (a)-[:ACTED_BY]->(ba)
         )
@@ -218,9 +218,9 @@ function buildMongoFilter(filters: AuditQueryFilters): Record<string, unknown> {
   if (filters.entityId) f['entity.id'] = filters.entityId;
   if (filters.severity) f.severity = filters.severity;
 
-  if (filters.actorBaId) {
-    // The actor.baId field lives on admin/ba shapes only. Match both.
-    f['actor.baId'] = filters.actorBaId;
+  if (filters.actorTmagId) {
+    // The actor.tmagId field lives on admin/ba shapes only. Match both.
+    f['actor.tmagId'] = filters.actorTmagId;
   }
 
   const ts: Record<string, unknown> = {};
@@ -441,7 +441,7 @@ function runtimeSemanticDocument(entry: McsRuntimeAuditLogEntry): string {
 
 /**
  * Neo4j leg: stamp the runtime turn on the AuditEntry node and link to the
- * BrandAmbassador on whose behalf the turn ran (when that node exists). MERGE on
+ * TeamMagnificentMember on whose behalf the turn ran (when that node exists). MERGE on
  * {entryId}; specific verb only (:ACTED_FOR). No generic relationships.
  */
 function buildRuntimeCypher(
@@ -457,7 +457,7 @@ function buildRuntimeCypher(
         correlationId: $correlationId, tenantId: $tenantId, gate: $gate
       }
       WITH a
-      OPTIONAL MATCH (ba:BrandAmbassador {baId: $tmagId})
+      OPTIONAL MATCH (ba:TeamMagnificentMember {tmagId: $tmagId})
       FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END |
         MERGE (a)-[:ACTED_FOR]->(ba)
       )

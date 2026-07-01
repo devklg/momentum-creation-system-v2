@@ -35,7 +35,7 @@ import {
   resolveAudience,
 } from '../../domain/broadcast.js';
 import { dispatchOne } from '../../services/broadcastQueue.js';
-import { findBAByBaId } from '../../domain/ba.js';
+import { findBAByTmagId } from '../../domain/ba.js';
 import type {
   AuditActor,
   BroadcastAudiencePreviewResponse,
@@ -59,7 +59,7 @@ const TemplateSchema = z.object({
 
 const EnqueueBodySchema = z.object({
   audiencePreset: PresetSchema,
-  customAudienceBaIds: z.array(z.string().min(2).max(80)).optional(),
+  customAudienceTmagIds: z.array(z.string().min(2).max(80)).optional(),
   channel: ChannelSchema,
   template: TemplateSchema,
 });
@@ -76,13 +76,13 @@ async function adminActorFromRequest(
   // Resolve a friendly display name. The session may carry `fullName`;
   // fall back to looking up the BA record.
   let displayName =
-    (session as unknown as { fullName?: string }).fullName ?? session.baId;
-  if (displayName === session.baId) {
-    const ba = await findBAByBaId(session.baId);
-    if (ba) displayName = `${ba.firstName} ${ba.lastName}`.trim() || session.baId;
+    (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
+  if (displayName === session.tmagId) {
+    const ba = await findBAByTmagId(session.tmagId);
+    if (ba) displayName = `${ba.firstName} ${ba.lastName}`.trim() || session.tmagId;
   }
   return {
-    actor: { kind: 'admin', baId: session.baId, displayName },
+    actor: { kind: 'admin', tmagId: session.tmagId, displayName },
     displayName,
   };
 }
@@ -96,15 +96,15 @@ adminBroadcastRoutes.get('/audience', requireAdmin, async (req: Request, res: Re
     res.status(400).json({ ok: false, error: 'Invalid preset or channel.' });
     return;
   }
-  const customRaw = req.query.customBaIds;
-  let customAudienceBaIds: string[] | null = null;
+  const customRaw = req.query.customTmagIds;
+  let customAudienceTmagIds: string[] | null = null;
   if (typeof customRaw === 'string' && customRaw.length > 0) {
-    customAudienceBaIds = customRaw
+    customAudienceTmagIds = customRaw
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
   } else if (Array.isArray(customRaw)) {
-    customAudienceBaIds = customRaw
+    customAudienceTmagIds = customRaw
       .map((s) => (typeof s === 'string' ? s.trim() : ''))
       .filter(Boolean);
   }
@@ -113,7 +113,7 @@ adminBroadcastRoutes.get('/audience', requireAdmin, async (req: Request, res: Re
     const { preview } = await resolveAudience(
       presetParse.data,
       channelParse.data,
-      customAudienceBaIds,
+      customAudienceTmagIds,
     );
     const body: BroadcastAudiencePreviewResponse = { ok: true, preview };
     res.json(body);
@@ -214,7 +214,7 @@ adminBroadcastRoutes.post('/', requireAdmin, async (req: Request, res: Response)
     const { broadcast, recipientCount, excludedBySTOP } = await enqueueBroadcast(
       {
         audiencePreset: body.data.audiencePreset,
-        customAudienceBaIds: body.data.customAudienceBaIds,
+        customAudienceTmagIds: body.data.customAudienceTmagIds,
         channel: body.data.channel,
         template: body.data.template,
       },

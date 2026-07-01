@@ -17,7 +17,7 @@
  *     BA cockpit alert is the canonical surface anyway.
  *
  * Sponsor immutability (locked-spec Part 3.5):
- *   - sponsorBaId is read from the token record only. The request body
+ *   - sponsorTmagId is read from the token record only. The request body
  *     carries no BA fields; it cannot influence routing.
  *
  * Compliance (locked-spec Part 3.10):
@@ -45,7 +45,7 @@ export interface CreateCallbackRequestInput {
   prospectId: string;
   prospectFirstName: string;
   prospectLastInitial: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   baFirstName: string;
   baPhone: string | null;
   intent: CallbackIntent;
@@ -112,7 +112,7 @@ export async function createCallbackRequest(
     callbackRequestId,
     token: input.token,
     prospectId: input.prospectId,
-    sponsorBaId: input.sponsorBaId,
+    sponsorTmagId: input.sponsorTmagId,
     intent: input.intent,
     createdAt,
   };
@@ -128,7 +128,7 @@ export async function createCallbackRequest(
     neo4j: {
       cypher:
         'MERGE (p:Prospect {prospectId: $prospectId}) ' +
-        'MERGE (b:BA {baId: $sponsorBaId}) ' +
+        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
         'CREATE (p)-[r:REQUESTED_CALLBACK {' +
         '  callbackRequestId: $id, ' +
         '  intent: $intent, ' +
@@ -136,7 +136,7 @@ export async function createCallbackRequest(
         '}]->(b)',
       params: {
         prospectId: input.prospectId,
-        sponsorBaId: input.sponsorBaId,
+        sponsorTmagId: input.sponsorTmagId,
         intent: input.intent,
         createdAt,
       },
@@ -146,12 +146,12 @@ export async function createCallbackRequest(
       document:
         `${input.prospectFirstName} ${input.prospectLastInitial}. ` +
         `requested callback (${intentLabel(input.intent)}) · ` +
-        `invited by ${input.sponsorBaId} at ${createdAt}`,
+        `invited by ${input.sponsorTmagId} at ${createdAt}`,
       metadata: {
         kind: 'callback_request',
         callbackRequestId,
         prospectId: input.prospectId,
-        sponsorBaId: input.sponsorBaId,
+        sponsorTmagId: input.sponsorTmagId,
         intent: input.intent,
         createdAt,
       },

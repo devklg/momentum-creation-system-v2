@@ -41,9 +41,9 @@ interface SortState {
 interface Props {
   rows: AdminBaDirectoryRow[];
   filterText: string;
-  onOpenProfile: (baId: string) => void;
-  onToggleCurated: (baId: string, next: boolean) => void;
-  togglePendingBaId: string | null;
+  onOpenProfile: (tmagId: string) => void;
+  onToggleCurated: (tmagId: string, next: boolean) => void;
+  togglePendingTmagId: string | null;
 }
 
 export function DirectoryTable({
@@ -51,7 +51,7 @@ export function DirectoryTable({
   filterText,
   onOpenProfile,
   onToggleCurated,
-  togglePendingBaId,
+  togglePendingTmagId,
 }: Props) {
   const [sort, setSort] = useState<SortState>({ key: 'joinedAt', dir: 'desc' });
 
@@ -61,11 +61,11 @@ export function DirectoryTable({
     return rows.filter((r) => {
       const haystack = [
         r.fullName,
-        r.baId,
+        r.tmagId,
         r.threeBaId,
         r.email ?? '',
         r.sponsorName ?? '',
-        r.sponsorBaId ?? '',
+        r.sponsorTmagId ?? '',
         r.accessCodeOwned ?? '',
       ]
         .join(' ')
@@ -196,11 +196,11 @@ export function DirectoryTable({
         </thead>
         <tbody>
           {sorted.map((r) => (
-            <tr key={r.baId} className="border-t border-line hover:bg-cream/[0.015]">
+            <tr key={r.tmagId} className="border-t border-line hover:bg-cream/[0.015]">
               <Td>
                 <button
                   type="button"
-                  onClick={() => onOpenProfile(r.baId)}
+                  onClick={() => onOpenProfile(r.tmagId)}
                   className="text-cream hover:text-gold transition-colors text-left"
                 >
                   {r.fullName}
@@ -209,7 +209,7 @@ export function DirectoryTable({
               <Td>
                 <button
                   type="button"
-                  onClick={() => onOpenProfile(r.baId)}
+                  onClick={() => onOpenProfile(r.tmagId)}
                   className="font-mono text-cream-mute hover:text-gold transition-colors"
                 >
                   {r.threeBaId}
@@ -226,10 +226,10 @@ export function DirectoryTable({
                 {r.sponsorName ? (
                   <span>
                     <span className="text-cream">{r.sponsorName}</span>
-                    {r.originalSponsorBaId && r.originalSponsorName && (
+                    {r.originalSponsorTmagId && r.originalSponsorName && (
                       <span
                         className="ml-2 text-[10px] font-mono text-gold/70 uppercase tracking-label"
-                        title={`Original sponsor: ${r.originalSponsorName} (${r.originalSponsorBaId})`}
+                        title={`Original sponsor: ${r.originalSponsorName} (${r.originalSponsorTmagId})`}
                       >
                         override
                       </span>
@@ -328,14 +328,14 @@ export function DirectoryTable({
                   )}
                   <button
                     type="button"
-                    disabled={togglePendingBaId === r.baId}
-                    onClick={() => onToggleCurated(r.baId, !r.curatedLeader)}
+                    disabled={togglePendingTmagId === r.tmagId}
+                    onClick={() => onToggleCurated(r.tmagId, !r.curatedLeader)}
                     className={[
                       'text-[10px] font-mono px-1.5 py-0.5 rounded uppercase tracking-label border transition-colors',
                       r.curatedLeader
                         ? 'border-teal/40 text-teal bg-teal/[0.06] hover:border-teal/70'
                         : 'border-line text-cream-faint hover:text-cream hover:border-cream-mute',
-                      togglePendingBaId === r.baId ? 'opacity-50 cursor-wait' : '',
+                      togglePendingTmagId === r.tmagId ? 'opacity-50 cursor-wait' : '',
                     ].join(' ')}
                     title={
                       r.curatedLeader

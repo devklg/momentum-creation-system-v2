@@ -103,10 +103,10 @@ describe('S3.12 michael-runtime body allowlist and rejection boundary', () => {
     ['turn'],
     ['runtimeTurn'],
     ['contextPacket'],
-    ['baId'],
-    ['sponsorBaId'],
-    ['targetBaId'],
-    ['downlineBaId'],
+    ['tmagId'],
+    ['sponsorTmagId'],
+    ['targetTmagId'],
+    ['downlineTmagId'],
     ['prospectId'],
     ['prospectToken'],
   ])('3. route does not trust body.%s', (field) => {
@@ -115,10 +115,10 @@ describe('S3.12 michael-runtime body allowlist and rejection boundary', () => {
     expect(pattern.test(stripped), `body.${field} must not be read`).toBe(false);
   });
 
-  it('4. route still derives BA from req.session.baId only', () => {
+  it('4. route still derives BA from req.session.tmagId only', () => {
     const route = sourceWithoutCommentsOrStrings(readSourceFile(routeFilePath).text);
-    expect(route).toContain('req.session?.baId');
-    expect(/\bcreateMichaelRuntimeTurnForAuthenticatedBa\s*\(\s*\{[\s\S]*?baId\s*:\s*sessionBaId/.test(route)).toBe(
+    expect(route).toContain('req.session?.tmagId');
+    expect(/\bcreateMichaelRuntimeTurnForAuthenticatedBa\s*\(\s*\{[\s\S]*?tmagId\s*:\s*sessionTmagId/.test(route)).toBe(
       true,
     );
   });
@@ -198,7 +198,7 @@ describe('S3.12 .team card request-body boundary', () => {
   it('12. support card sends no turn/runtimeTurn/contextPacket or BA/prospect/session authority', () => {
     const stripped = sourceWithoutCommentsOrStrings(readSourceFile(cardFilePath).text);
     const forbidden =
-      /\b(?:turn|runtimeTurn|contextPacket|baId|sponsorBaId|targetBaId|downlineBaId|prospectId|prospectToken|token|sessionId|turnId|correlationId|requestId|retrieval|gateway|graph|approvedKnowledge|candidateKnowledge)\b/;
+      /\b(?:turn|runtimeTurn|contextPacket|tmagId|sponsorTmagId|targetTmagId|downlineTmagId|prospectId|prospectToken|token|sessionId|turnId|correlationId|requestId|retrieval|gateway|graph|approvedKnowledge|candidateKnowledge)\b/;
     expect(forbidden.test(stripped), 'forbidden body field token present in card code').toBe(false);
   });
 

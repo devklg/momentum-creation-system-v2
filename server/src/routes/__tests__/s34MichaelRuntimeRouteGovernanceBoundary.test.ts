@@ -252,9 +252,9 @@ describe('S3.4 Michael runtime route static governance boundary', () => {
   it('#21 derives BA scope from the session and rejects body-supplied runtime input (incl. BA authority) via CLIENT_RUNTIME_INPUT_NOT_ALLOWED', () => {
     const route = readSourceFile(routeFilePath).text;
     // BA scope is session-derived, never body-derived (sponsor immutability).
-    expect(route).toContain('req.session?.baId');
+    expect(route).toContain('req.session?.tmagId');
     // S3.11 server-owned body rule SUBSUMES the old body-BA-scope rejection: any
-    // non-`language` field — including baId/sponsorBaId/targetBaId — is rejected
+    // non-`language` field — including tmagId/sponsorTmagId/targetTmagId — is rejected
     // with the single broader code.
     expect(route).toContain('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
     // The retired reason codes are gone (no weakening — the rule got broader).
@@ -264,7 +264,7 @@ describe('S3.4 Michael runtime route static governance boundary', () => {
     // the self-documenting forbidden-key comment cannot trip this.
     const stripped = sourceWithoutCommentsOrStrings(route);
     expect(
-      /\b(?:req\.body|body)\.(?:baId|sponsorBaId|targetBaId|downlineBaId|prospectId)\b/.test(stripped),
+      /\b(?:req\.body|body)\.(?:tmagId|sponsorTmagId|targetTmagId|downlineTmagId|prospectId)\b/.test(stripped),
       'no body BA-authority read in code',
     ).toBe(false);
   });

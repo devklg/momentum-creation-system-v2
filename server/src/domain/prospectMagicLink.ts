@@ -110,11 +110,11 @@ export interface IssueLinkResult {
 export interface IssueLinkInput {
   rawPhone: string;
   /**
-   * Resolves a sponsor BA's first name for a given baId. The route
+   * Resolves a sponsor BA's first name for a given tmagId. The route
    * layer injects this so this domain stays decoupled from the BA
    * domain (avoids a circular import).
    */
-  resolveBaFirstName: (baId: string) => Promise<string | null>;
+  resolveBaFirstName: (tmagId: string) => Promise<string | null>;
   /**
    * Base URL the SMS link points at. The route builds this from
    * the request's Host header so dev / staging / prod all work
@@ -224,7 +224,7 @@ export async function issueLinksForPhone(
     // the multi-token case).
     let baFirstName = 'your sponsor';
     try {
-      const resolved = await input.resolveBaFirstName(account.sponsorBaId);
+      const resolved = await input.resolveBaFirstName(account.sponsorTmagId);
       if (resolved) baFirstName = resolved;
     } catch {
       // Fallback to the generic copy on lookup failure; not a blocker.

@@ -7,7 +7,7 @@
  * how to stay in touch, where to focus support, and any recommendations Steve
  * surfaced from the discovery conversation.
  *
- * Access is enforced SERVER-SIDE — GET /api/michael/training-support/:downlineBaId
+ * Access is enforced SERVER-SIDE — GET /api/michael/training-support/:downlineTmagId
  * returns 403 with code=NOT_SPONSOR unless the requesting session's BA is the
  * direct sponsor of the downline. This component never receives card data for a
  * downline the user isn't entitled to read.
@@ -32,7 +32,7 @@ interface MichaelTrainingSupportGuidanceSection {
 }
 
 interface MichaelTrainingSupportCardData {
-  downlineBaId: string;
+  downlineTmagId: string;
   downlineFirstName: string;
   derivedFromSteveAt: string;
   primaryWhy: string;
@@ -48,7 +48,7 @@ interface MichaelTrainingSupportCardData {
 // ── Component ──────────────────────────────────────────────────────────────
 
 interface MichaelTrainingSupportCardProps {
-  downlineBaId: string;
+  downlineTmagId: string;
 }
 
 type CardState =
@@ -59,14 +59,14 @@ type CardState =
   | { kind: 'ready'; card: MichaelTrainingSupportCardData };
 
 export function MichaelTrainingSupportCard({
-  downlineBaId,
+  downlineTmagId,
 }: MichaelTrainingSupportCardProps) {
   const [state, setState] = useState<CardState>({ kind: 'loading' });
 
   const load = useCallback(async () => {
     try {
       const res = await fetch(
-        `/api/michael/training-support/${encodeURIComponent(downlineBaId)}`,
+        `/api/michael/training-support/${encodeURIComponent(downlineTmagId)}`,
         { credentials: 'include' },
       );
       if (res.status === 403) {
@@ -96,7 +96,7 @@ export function MichaelTrainingSupportCard({
       const msg = err instanceof Error ? err.message : 'unknown';
       setState({ kind: 'error', message: `Network error: ${msg}` });
     }
-  }, [downlineBaId]);
+  }, [downlineTmagId]);
 
   useEffect(() => {
     void load();
@@ -149,7 +149,7 @@ export function MichaelTrainingSupportCard({
         </span>
       </div>
       <h3 className="font-display text-[22px] text-cream leading-tight mb-1">
-        {card.downlineFirstName || card.downlineBaId}
+        {card.downlineFirstName || card.downlineTmagId}
       </h3>
       <p className="font-mono tracking-[0.18em] text-[11px] text-gold mb-5 uppercase">
         How to support their training

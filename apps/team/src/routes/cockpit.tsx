@@ -85,7 +85,7 @@ type InvitationActivityKind =
 interface InvitationActivityEntry {
   activityId: string;
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   kind: InvitationActivityKind;
   note: string;
   at: string;
@@ -160,14 +160,14 @@ interface MarkInvitationSentResponse {
 // _types_ts6059_chat120). Keep in sync with shared CRM types added Chat #132.
 
 type CrmDisposition =
-  | 'new-ba'
+  | 'new_brand_ambassador'
   | 'new-customer'
   | 'interested'
   | 'not-interested'
   | 'later';
 
 const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
-  'new-ba',
+  'new_brand_ambassador',
   'new-customer',
   'interested',
   'later',
@@ -175,7 +175,7 @@ const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
 ];
 
 const DISPOSITION_LABEL: Record<CrmDisposition, string> = {
-  'new-ba': 'New BA',
+  'new_brand_ambassador': 'New BA',
   'new-customer': 'New customer',
   interested: 'Interested',
   later: 'Later',
@@ -185,14 +185,14 @@ const DISPOSITION_LABEL: Record<CrmDisposition, string> = {
 interface CrmNoteRecord {
   noteId: string;
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   text: string;
   createdAt: string;
 }
 
 interface CrmFollowUpRecord {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   dueAt: string;
   createdAt: string;
   clearedAt: string | null;

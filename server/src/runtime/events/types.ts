@@ -4,7 +4,7 @@ import type {
   AgentEventType,
   AgentKey,
   AgentId,
-  BaId,
+  TmagId,
   RequestId,
 } from '@momentum/shared/runtime';
 
@@ -13,7 +13,7 @@ export type RuntimeEventActorType = 'ba' | 'agent' | 'system' | 'admin' | 'subsc
 export interface RuntimeEventActor {
   actorType: RuntimeEventActorType;
   actorId: string;
-  baId?: BaId;
+  tmagId?: TmagId;
   agentKey?: AgentKey;
   agentId?: AgentId;
 }

@@ -50,7 +50,7 @@ export function AdminTickerPanel() {
           city: event.city,
           stateOrRegion: event.stateOrRegion,
           placedAt: event.at,
-          sponsorBaId: event.sponsorBaId,
+          sponsorTmagId: event.sponsorTmagId,
           deepLink: event.deepLink,
         };
         setEntries((prev) => {

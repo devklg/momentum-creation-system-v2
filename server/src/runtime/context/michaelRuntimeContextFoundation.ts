@@ -7,7 +7,7 @@
  * (`server/src/runtime/orchestration/michaelRuntimeTurnSource.ts`) injects the
  * port returned here instead of assembling a packet itself.
  *
- * The factory takes SESSION-DERIVED BA identity only (baId, transport mode, the
+ * The factory takes SESSION-DERIVED BA identity only (tmagId, transport mode, the
  * turn's createdAt) and returns a production `ContextManagerRequestPort`:
  *
  *  - `assembledBy: 'context_manager'` — the only sanctioned assembler;
@@ -24,7 +24,7 @@
 
 import { randomUUID } from 'node:crypto';
 import type {
-  BaId,
+  TmagId,
   ContextPacketId,
   ContextPacketRequest,
   ContextPacketV1,
@@ -57,12 +57,12 @@ const TENANT_NAME = 'Team Magnificent Tenant';
 
 /**
  * Session-derived inputs needed to assemble the degraded Michael packet. Carries
- * ONLY server-derived identity — no body baId/sponsorBaId/targetBaId, no
+ * ONLY server-derived identity — no body tmagId/sponsorTmagId/targetTmagId, no
  * prospect/session token, no client-supplied packet or raw retrieval output.
  */
 export interface MichaelRuntimeContextFoundationInput {
   /** Authenticated BA id — sourced from the session only. */
-  readonly baId: BaId;
+  readonly tmagId: TmagId;
   /** BA runtime transport mode, server-derived. */
   readonly mode: RuntimeMode;
   /** ISO timestamp anchoring the assembled session context. */
@@ -78,7 +78,7 @@ export interface MichaelRuntimeContextFoundationInput {
 export function createMichaelRuntimeContextManagerPort(
   input: MichaelRuntimeContextFoundationInput,
 ): ContextManagerRequestPort {
-  const { baId, mode, createdAt } = input;
+  const { tmagId, mode, createdAt } = input;
 
   return {
     assembledBy: 'context_manager',
@@ -105,7 +105,7 @@ export function createMichaelRuntimeContextManagerPort(
           teamId: TEAM_ID,
           teamKey: TEAM_MAGNIFICENT_KEY,
           teamName: TEAM_MAGNIFICENT_NAME,
-          baId,
+          tmagId,
           journalEnabled: false,
           languagePreference: request.language,
           permissions: {

@@ -41,7 +41,7 @@ export function BroadcastPage() {
   const { me } = useAdminAuth();
   const [channel, setChannel] = useState<BroadcastChannel>('sms');
   const [preset, setPreset] = useState<BroadcastAudiencePreset>('all');
-  const [customBaIds, setCustomBaIds] = useState<string[]>([]);
+  const [customTmagIds, setCustomTmagIds] = useState<string[]>([]);
   const [template, setTemplate] = useState<BroadcastTemplate>(EMPTY_TEMPLATE);
   const [preview, setPreview] = useState<BroadcastAudiencePreview | null>(null);
 
@@ -103,7 +103,7 @@ export function BroadcastPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           audiencePreset: preset,
-          customAudienceBaIds: preset === 'custom' ? customBaIds : undefined,
+          customAudienceTmagIds: preset === 'custom' ? customTmagIds : undefined,
           channel,
           template: {
             smsText: template.smsText || null,
@@ -165,9 +165,9 @@ export function BroadcastPage() {
           <AudienceSelector
             preset={preset}
             channel={channel}
-            customBaIds={customBaIds}
+            customTmagIds={customTmagIds}
             onPresetChange={setPreset}
-            onCustomChange={setCustomBaIds}
+            onCustomChange={setCustomTmagIds}
             onPreviewChange={setPreview}
           />
 

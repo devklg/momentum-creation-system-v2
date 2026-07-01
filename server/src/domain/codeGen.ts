@@ -1,9 +1,9 @@
 /**
- * Access codes domain (TM-XXXX).
+ * Access codes domain (TMAG-XXXX).
  *
- * Locked Chat #94: width = TM-XXXX (4 chars, ~1.6M codes).
+ * Locked Chat #94: width = TMAG-XXXX (4 chars, ~1.6M codes).
  * Per Signup Architecture Section D:
- *   - Pattern: TM-XXXX where XXXX is uppercase alphanumeric.
+ *   - Pattern: TMAG-XXXX where XXXX is uppercase alphanumeric.
  *   - Generation is admin-only; code is assigned to a single BA at mint.
  *   - First use does NOT consume the code — it stays active for the BA's
  *     entire downline.
@@ -26,7 +26,7 @@ const CODE_LEN = 4;
 const MAX_GEN_ATTEMPTS = 8;
 
 function randomCode(): string {
-  let out = 'TM-';
+  let out = 'TMAG-';
   for (let i = 0; i < CODE_LEN; i++) {
     out += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
   }
@@ -43,23 +43,23 @@ async function codeExists(code: string): Promise<boolean> {
   return result.count > 0;
 }
 
-export async function baOwnsACode(baId: string): Promise<AccessCodeRecord | null> {
+export async function baOwnsACode(tmagId: string): Promise<AccessCodeRecord | null> {
   const result = await gatewayCall<{ documents: AccessCodeRecord[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'access_codes',
-    filter: { sponsorBaId: baId, active: true },
+    filter: { sponsorTmagId: tmagId, active: true },
     limit: 1,
   });
   return result.documents.length > 0 ? result.documents[0] ?? null : null;
 }
 
 export interface MintAccessCodeInput {
-  sponsorBaId: string;
+  sponsorTmagId: string;
   sponsorThreeBaId: string;
   sponsorFirstName: string;
   sponsorLastName: string;
   note?: string;
-  mintedByBaId: string;
+  mintedByTmagId: string;
   /** Optional explicit code (e.g. for seeding TM-01, TM-07). Must be unique. */
   explicit?: string;
 }
@@ -68,7 +68,7 @@ export async function mintAccessCode(
   input: MintAccessCodeInput,
 ): Promise<AccessCodeRecord> {
   // Enforce "one code per BA" — if this BA already owns an active code, return it.
-  const existing = await baOwnsACode(input.sponsorBaId);
+  const existing = await baOwnsACode(input.sponsorTmagId);
   if (existing) {
     return existing;
   }
@@ -76,7 +76,7 @@ export async function mintAccessCode(
   let code: string | null = null;
   if (input.explicit) {
     const ex = input.explicit.trim().toUpperCase();
-    if (!/^TM-[A-Z0-9-]{2,8}$/.test(ex)) {
+    if (!/^TMAG-[A-Z0-9-]{2,8}$/.test(ex)) {
       throw new Error(`Invalid explicit code shape: ${ex}`);
     }
     if (await codeExists(ex)) {
@@ -100,7 +100,7 @@ export async function mintAccessCode(
   const record: AccessCodeRecord = {
     _id: code,
     code,
-    sponsorBaId: input.sponsorBaId,
+    sponsorTmagId: input.sponsorTmagId,
     sponsorThreeBaId: input.sponsorThreeBaId,
     sponsorFirstName: input.sponsorFirstName,
     sponsorLastName: input.sponsorLastName,
@@ -111,27 +111,27 @@ export async function mintAccessCode(
   await tripleStackWrite({
     id: code,
     mongoCollection: 'access_codes',
-    mongoDoc: { ...record, note: input.note ?? null, mintedByBaId: input.mintedByBaId },
+    mongoDoc: { ...record, note: input.note ?? null, mintedByTmagId: input.mintedByTmagId },
     neo4j: {
       // The owning BA may or may not exist yet in our graph (early seeds);
       // MERGE makes both edge endpoints safe.
       cypher:
-        'MERGE (b:BA {baId: $sponsorBaId}) ' +
+        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
         'MERGE (c:AccessCode {code: $id}) ' +
         'SET c.active = true, c.createdAt = $createdAt, c.sponsorThreeBaId = $sponsorThreeBaId ' +
         'MERGE (b)-[:USES]->(c)',
       params: {
-        sponsorBaId: input.sponsorBaId,
+        sponsorTmagId: input.sponsorTmagId,
         sponsorThreeBaId: input.sponsorThreeBaId,
         createdAt,
       },
     },
     chroma: {
       collection: 'mcs_access_codes',
-      document: `Access code ${code} minted ${createdAt}, assigned to ${input.sponsorFirstName} ${input.sponsorLastName} (BA ${input.sponsorBaId} / THREE ${input.sponsorThreeBaId}). ${input.note ?? ''}`.trim(),
+      document: `Access code ${code} minted ${createdAt}, assigned to ${input.sponsorFirstName} ${input.sponsorLastName} (BA ${input.sponsorTmagId} / THREE ${input.sponsorThreeBaId}). ${input.note ?? ''}`.trim(),
       metadata: {
         code,
-        sponsorBaId: input.sponsorBaId,
+        sponsorTmagId: input.sponsorTmagId,
         sponsorThreeBaId: input.sponsorThreeBaId,
         kind: 'access_code',
         createdAt,
@@ -144,7 +144,7 @@ export async function mintAccessCode(
 
 export interface AccessCodeListItem {
   code: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   sponsorThreeBaId: string;
   sponsorFirstName: string;
   sponsorLastName: string;

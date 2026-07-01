@@ -18,7 +18,7 @@
  * pipeline is quiet.
  *
  * Sponsor immutability (locked-spec 3.5): the BA id is the authed session
- * baId — every query filters on it; nothing in a request body can widen
+ * tmagId — every query filters on it; nothing in a request body can widen
  * the result set to another BA's pipeline.
  *
  * Compliance (locked-spec 3.10): BA-facing surface only. Action labels are
@@ -83,7 +83,7 @@ interface ProspectDoc {
  *   - within expiring: nearest expiresAt first (closest to closing wins)
  */
 export async function getCockpitTodaysActions(
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): Promise<CockpitTodaysActionsResponse> {
   const now = Date.now();
   const nowIso = new Date(now).toISOString();
@@ -94,21 +94,21 @@ export async function getCockpitTodaysActions(
     gatewayCall<{ documents: CallbackDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: CALLBACK_COLLECTION,
-      filter: { sponsorBaId, createdAt: { $gte: callbackLookbackIso } },
+      filter: { sponsorTmagId, createdAt: { $gte: callbackLookbackIso } },
       sort: { createdAt: -1 },
       limit: 200,
     }),
     gatewayCall<{ documents: CrmFollowUpRecord[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: FOLLOWUPS_COLLECTION,
-      filter: { sponsorBaId, clearedAt: null, dueAt: { $lte: nowIso } },
+      filter: { sponsorTmagId, clearedAt: null, dueAt: { $lte: nowIso } },
       sort: { dueAt: 1 },
       limit: 200,
     }),
     gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: PROSPECTS_COLLECTION,
-      filter: { sponsorBaId },
+      filter: { sponsorTmagId },
       sort: { expiresAt: 1 },
       limit: 1000,
     }),

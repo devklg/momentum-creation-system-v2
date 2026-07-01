@@ -7,9 +7,9 @@
  * one short "what to say next" suggestion the BA can adapt and send manually.
  *
  * Single-source-of-truth composition:
- *   getProspectMomentumViewer(baId)  →  canonical PMV rows + nextAction model
+ *   getProspectMomentumViewer(tmagId)  →  canonical PMV rows + nextAction model
  *     +
- *   listIvoryNamesForBA(baId)        →  warm-market context (categories, angle,
+ *   listIvoryNamesForBA(tmagId)        →  warm-market context (categories, angle,
  *                                       memory note) keyed by lastProspectId
  *     =
  *   IvoryMomentumViewResponse        →  cohort-filtered, context-enriched rows
@@ -20,9 +20,9 @@
  *   - scores or ranks the prospect as a person (compliance — locked-spec 3.10);
  *   - speaks income, comp, placement, cycles, medical claims (3.10/3.11).
  *
- * Ownership: every read filters on req.session.baId. The PMV projection is
- * already sponsorBaId-scoped; the Ivory roster query is baId-scoped; the
- * single-prospect suggest path validates that the prospect's sponsorBaId
+ * Ownership: every read filters on req.session.tmagId. The PMV projection is
+ * already sponsorTmagId-scoped; the Ivory roster query is tmagId-scoped; the
+ * single-prospect suggest path validates that the prospect's sponsorTmagId
  * matches the session BA before any LLM call.
  *
  * Dormant-aware: when ANTHROPIC_API_KEY is unset OR the API errors, the
@@ -232,11 +232,11 @@ function buildCohortCounts(rows: IvoryMomentumRow[]): IvoryMomentumCohortCounts 
  * every Ivory-sourced row. Cohort filter is `pmv.source === 'ivory'`.
  */
 export async function getIvoryMomentumView(
-  baId: string,
+  tmagId: string,
 ): Promise<IvoryMomentumViewResponse> {
   const [pmv, ivoryNames] = await Promise.all([
-    getProspectMomentumViewer(baId),
-    listIvoryNamesForBA(baId),
+    getProspectMomentumViewer(tmagId),
+    listIvoryNamesForBA(tmagId),
   ]);
 
   const byLastProspectId = new Map<string, IvoryName>();
@@ -288,17 +288,17 @@ export async function getIvoryMomentumView(
 
 interface ProspectOwnershipDoc {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
 }
 
 /**
  * Confirm the prospect belongs to the authed BA. The PMV projection is already
- * sponsorBaId-scoped, but the suggest path lets the route accept a prospectId
+ * sponsorTmagId-scoped, but the suggest path lets the route accept a prospectId
  * from the URL — defense-in-depth is cheap and locked-spec 3.5 demands it.
  */
 async function assertProspectOwnership(
   prospectId: string,
-  baId: string,
+  tmagId: string,
 ): Promise<void> {
   const res = await gatewayCall<{ documents: ProspectOwnershipDoc[] }>(
     'mongodb',
@@ -312,7 +312,7 @@ async function assertProspectOwnership(
   );
   const doc = res.documents?.[0];
   if (!doc) throw new IvoryMomentumNotFoundError(prospectId);
-  if (doc.sponsorBaId !== baId) {
+  if (doc.sponsorTmagId !== tmagId) {
     throw new IvoryMomentumOwnershipError(prospectId);
   }
 }
@@ -512,7 +512,7 @@ const ASK_MAX = 600;
  * shows. Degrades to a deterministic suggestion when the LLM is unavailable.
  */
 export async function suggestIvoryMomentumFollowUp(
-  baId: string,
+  tmagId: string,
   prospectId: string,
   input: IvoryMomentumSuggestionPayload,
 ): Promise<IvoryMomentumSuggestionResponse> {
@@ -524,11 +524,11 @@ export async function suggestIvoryMomentumFollowUp(
     throw new IvoryMomentumValidationError('ask_too_long');
   }
 
-  await assertProspectOwnership(prospectId, baId);
+  await assertProspectOwnership(prospectId, tmagId);
 
   // Reuse the canonical PMV projection so the suggest path NEVER disagrees
   // with the cockpit's lifecycle/lastSignal. Same call the cohort view makes.
-  const pmv = await getProspectMomentumViewer(baId);
+  const pmv = await getProspectMomentumViewer(tmagId);
   const row = pmv.rows.find((r) => r.prospectId === prospectId);
   if (!row) throw new IvoryMomentumNotFoundError(prospectId);
   if (row.source !== 'ivory') {
@@ -538,7 +538,7 @@ export async function suggestIvoryMomentumFollowUp(
   // Re-pull the Ivory link so we have the full memory note + categories +
   // angle. The cohort view already does this, but the suggest path may be
   // called directly without the cohort having been computed in the same tick.
-  const ivoryNames = await listIvoryNamesForBA(baId);
+  const ivoryNames = await listIvoryNamesForBA(tmagId);
   const byLastProspectId = new Map<string, IvoryName>();
   for (const name of ivoryNames) {
     if (name.lastProspectId) byLastProspectId.set(name.lastProspectId, name);

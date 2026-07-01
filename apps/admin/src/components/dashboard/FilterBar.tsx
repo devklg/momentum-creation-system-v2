@@ -32,17 +32,17 @@ export function FilterBar({ filter, options, onChange }: Props) {
             Brand Ambassador
           </label>
           <select
-            value={filter.baId ?? ''}
+            value={filter.tmagId ?? ''}
             onChange={(e) =>
-              onChange({ ...filter, baId: e.target.value === '' ? null : e.target.value })
+              onChange({ ...filter, tmagId: e.target.value === '' ? null : e.target.value })
             }
             className="w-full bg-ink border border-line rounded px-2 py-1.5 text-sm text-cream font-mono"
           >
             <option value="">All BAs</option>
             {(options?.bas ?? []).map((b) => (
-              <option key={b.baId} value={b.baId}>
+              <option key={b.tmagId} value={b.tmagId}>
                 {b.fullName}
-                {b.isLeader ? ' · ★' : ''} · {b.baId}
+                {b.isLeader ? ' · ★' : ''} · {b.tmagId}
               </option>
             ))}
           </select>

@@ -6,7 +6,7 @@
  * timeline; this module reads it all back for the BA-facing cockpit.
  *
  * Sponsor immutability (locked-spec 3.5): every query here filters on the
- * authed session BA's baId. The route passes req.session.baId; nothing in a
+ * authed session BA's tmagId. The route passes req.session.tmagId; nothing in a
  * request body can widen the result set to another BA's prospects.
  *
  * Compliance (locked-spec 3.10): this is a .team BA-facing surface, NOT .com.
@@ -19,7 +19,7 @@
  */
 
 import { gatewayCall } from '../services/gateway.js';
-import { findBAByBaId, type BARecord } from './ba.js';
+import { findBAByTmagId, type BARecord } from './ba.js';
 import { lastInitialOf } from './prospects.js';
 import { buildDiscoveryView } from './steve-success-interview.js';
 import { getFastStartProgress } from './training.js';
@@ -57,7 +57,7 @@ const PROSPECTS_COLLECTION = 'prospects';
 const TOKENS_COLLECTION = 'invite_tokens';
 const ACTIVITY_COLLECTION = 'invitation_activity';
 const CALLBACK_COLLECTION = 'callback_requests';
-const BA_COLLECTION = 'brand_ambassadors';
+const BA_COLLECTION = 'team_magnificent_members';
 const FOLLOWUPS_COLLECTION = 'crm_followups';
 const DISPOSITIONS_COLLECTION = 'crm_dispositions';
 const NOTES_COLLECTION = 'crm_notes';
@@ -108,7 +108,7 @@ function isSponsorInactive(sp: BARecord): boolean {
 
 /**
  * The founders (Kevin + Paul) as the support/contact fallback. Sourced from
- * the brand_ambassadors records seeded by seed-founders.ts (role founder /
+ * the team_magnificent_members records seeded by seed-founders.ts (role founder /
  * co_leader), so a leader added later (extensible host model, 3.3) is picked
  * up automatically. Founder role sorts before co_leader so Kevin leads.
  */
@@ -146,7 +146,7 @@ interface ProspectDoc {
   lastName: string;
   lastInitial?: string;
   location?: { city?: string; stateOrRegion?: string; country?: string };
-  sponsorBaId: string;
+  sponsorTmagId: string;
   state: TokenState;
   positionNumber: number | null;
   becameCustomer?: boolean;
@@ -176,7 +176,7 @@ interface TokenProjectionDoc extends InviteTokenRecord {
 
 interface DispositionDoc {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   disposition: CrmDisposition | null;
   updatedAt: string;
 }
@@ -603,15 +603,15 @@ function focusQueueFromRows(rows: ProspectMomentumRow[]): ProspectFocusQueueItem
  * The BA's My Invites list + the per-prospect activity timeline.
  *
  * Three reads, all scoped to the session BA:
- *   1. prospects where sponsorBaId = baId (newest first)
- *   2. callback_requests where sponsorBaId = baId (to mark raised hands +
+ *   1. prospects where sponsorTmagId = tmagId (newest first)
+ *   2. callback_requests where sponsorTmagId = tmagId (to mark raised hands +
  *      surface the latest intent per prospect)
- *   3. invitation_activity where sponsorBaId = baId (grouped per prospect)
+ *   3. invitation_activity where sponsorTmagId = tmagId (grouped per prospect)
  *
  * No genealogy traversal, no other BA's data. The activity timeline is
  * returned keyed by prospectId so the cockpit can expand a row inline.
  */
-export async function listInvitesForBA(baId: string): Promise<{
+export async function listInvitesForBA(tmagId: string): Promise<{
   invites: InviteSummary[];
   activityByProspect: Record<string, InvitationActivityEntry[]>;
 }> {
@@ -625,7 +625,7 @@ export async function listInvitesForBA(baId: string): Promise<{
     {
       database: MONGO_DB,
       collection: PROSPECTS_COLLECTION,
-      filter: { sponsorBaId: baId, deleted: { $ne: true } },
+      filter: { sponsorTmagId: tmagId, deleted: { $ne: true } },
       sort: { createdAt: -1 },
       limit: 1000,
     },
@@ -641,7 +641,7 @@ export async function listInvitesForBA(baId: string): Promise<{
     {
       database: MONGO_DB,
       collection: CALLBACK_COLLECTION,
-      filter: { sponsorBaId: baId },
+      filter: { sponsorTmagId: tmagId },
       sort: { createdAt: -1 },
       limit: 2000,
     },
@@ -661,7 +661,7 @@ export async function listInvitesForBA(baId: string): Promise<{
     {
       database: MONGO_DB,
       collection: ACTIVITY_COLLECTION,
-      filter: { sponsorBaId: baId },
+      filter: { sponsorTmagId: tmagId },
       sort: { at: 1 },
       limit: 5000,
     },
@@ -702,13 +702,13 @@ export async function listInvitesForBA(baId: string): Promise<{
 /**
  * GET /api/cockpit/pmv read model.
  *
- * All reads are sponsorBaId-scoped to the authed BA. The projection joins the
+ * All reads are sponsorTmagId-scoped to the authed BA. The projection joins the
  * canonical token rail with the prospect record because partial video states
  * live on invite_tokens until video_complete mirrors placement fields back to
  * prospects.
  */
 export async function getProspectMomentumViewer(
-  baId: string,
+  tmagId: string,
 ): Promise<ProspectMomentumViewerResponse> {
   const generatedAt = new Date().toISOString();
   const nowMs = Date.now();
@@ -725,49 +725,49 @@ export async function getProspectMomentumViewer(
     gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: PROSPECTS_COLLECTION,
-      filter: { sponsorBaId: baId },
+      filter: { sponsorTmagId: tmagId },
       sort: { createdAt: -1 },
       limit: 1000,
     }),
     gatewayCall<{ documents: TokenProjectionDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: TOKENS_COLLECTION,
-      filter: { sponsorBaId: baId },
+      filter: { sponsorTmagId: tmagId },
       sort: { createdAt: -1 },
       limit: 2000,
     }),
     gatewayCall<{ documents: CallbackDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: CALLBACK_COLLECTION,
-      filter: { sponsorBaId: baId },
+      filter: { sponsorTmagId: tmagId },
       sort: { createdAt: -1 },
       limit: 2000,
     }),
     gatewayCall<{ documents: InvitationActivityEntry[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: ACTIVITY_COLLECTION,
-      filter: { sponsorBaId: baId },
+      filter: { sponsorTmagId: tmagId },
       sort: { at: -1 },
       limit: 5000,
     }),
     gatewayCall<{ documents: CrmFollowUpRecord[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: FOLLOWUPS_COLLECTION,
-      filter: { sponsorBaId: baId, clearedAt: null },
+      filter: { sponsorTmagId: tmagId, clearedAt: null },
       sort: { dueAt: 1 },
       limit: 1000,
     }),
     gatewayCall<{ documents: DispositionDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: DISPOSITIONS_COLLECTION,
-      filter: { sponsorBaId: baId },
+      filter: { sponsorTmagId: tmagId },
       sort: { updatedAt: -1 },
       limit: 1000,
     }),
     gatewayCall<{ documents: NoteDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: NOTES_COLLECTION,
-      filter: { sponsorBaId: baId },
+      filter: { sponsorTmagId: tmagId },
       sort: { createdAt: -1 },
       limit: 5000,
     }),
@@ -901,11 +901,11 @@ interface BaWelcomeExtras {
   commitment_accepted_at?: string | null;
 }
 
-async function getLatestCommitmentAcceptedAt(baId: string): Promise<string | null> {
+async function getLatestCommitmentAcceptedAt(tmagId: string): Promise<string | null> {
   const result = await gatewayCall<{ documents?: CommitmentDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COMMITMENTS_COLLECTION,
-    filter: { baId },
+    filter: { tmagId },
     sort: { acceptedAt: -1 },
     limit: 1,
   });
@@ -987,18 +987,18 @@ function nextActionFromSteps(steps: LaunchStep[], launchComplete: boolean): Laun
  * first cockpit viewport. This deliberately reads existing durable sources
  * instead of writing a parallel launch-state record.
  */
-export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCenterResponse> {
+export async function getTeamLaunchCenter(tmagId: string): Promise<TeamLaunchCenterResponse> {
   const [ba, commitmentAcceptedAt, steve, fastStart, questionnaireSubmitted, ivoryNames] =
     await Promise.all([
-      findBAByBaId(baId),
-      getLatestCommitmentAcceptedAt(baId),
-      buildDiscoveryView(baId),
-      getFastStartProgress(baId),
-      questionnaireExists(baId),
-      countCollection(IVORY_COLLECTION, { baId }),
+      findBAByTmagId(tmagId),
+      getLatestCommitmentAcceptedAt(tmagId),
+      buildDiscoveryView(tmagId),
+      getFastStartProgress(tmagId),
+      questionnaireExists(tmagId),
+      countCollection(IVORY_COLLECTION, { tmagId }),
     ]);
 
-  const { invites } = await listInvitesForBA(baId);
+  const { invites } = await listInvitesForBA(tmagId);
   const baExtras = ba as (BARecord & BaWelcomeExtras) | null;
   const welcomeAcceptedAt =
     commitmentAcceptedAt ??
@@ -1074,7 +1074,7 @@ export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCente
       current: steveComplete && !ivoryStarted,
       href: '/ivory',
       completedAt: null,
-      source: 'ivory_names count by baId',
+      source: 'ivory_names count by tmagId',
       detail: ivoryStarted
         ? 'Your private warm-market list has names in it.'
         : 'Use Ivory to write down the people you already know. It does not prospect for you.',
@@ -1125,7 +1125,7 @@ export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCente
       available: steveComplete && !questionnaireSubmitted,
       href: '/onboarding/questionnaire',
       completedAt: null,
-      source: 'ba_questionnaires existence by baId',
+      source: 'ba_questionnaires existence by tmagId',
       detail: questionnaireSubmitted
         ? 'Your sponsor can review your questionnaire.'
         : 'Give your sponsor context for coaching and workbook follow-up.',
@@ -1137,7 +1137,7 @@ export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCente
       optional: true,
       href: '/cockpit#sponsor',
       completedAt: null,
-      source: 'brand_ambassadors.sponsorBaId; confirmation not separately tracked',
+      source: 'team_magnificent_members.sponsorTmagId; confirmation not separately tracked',
       detail: 'Your immutable sponsor card stays visible; confirm connection directly with your sponsor.',
     }),
   ];
@@ -1184,9 +1184,9 @@ export async function getTeamLaunchCenter(baId: string): Promise<TeamLaunchCente
  * the PMV Focus Queue use the same deterministic priority model.
  */
 export async function getCockpitTodaysActions(
-  baId: string,
+  tmagId: string,
 ): Promise<CockpitTodaysActionsResponse> {
-  const pmv = await getProspectMomentumViewer(baId);
+  const pmv = await getProspectMomentumViewer(tmagId);
   const nowMs = Date.now();
   const callbackLookbackIso = new Date(nowMs - CALLBACK_LOOKBACK_MS).toISOString();
   const expiringHorizonIso = new Date(nowMs + EXPIRING_WINDOW_MS).toISOString();
@@ -1256,8 +1256,8 @@ export async function getCockpitTodaysActions(
 }
 
 /** Convenience wrapper shaping the full GET /api/cockpit/invites response. */
-export async function getMyInvites(baId: string): Promise<MyInvitesResponse> {
-  const { invites, activityByProspect } = await listInvitesForBA(baId);
+export async function getMyInvites(tmagId: string): Promise<MyInvitesResponse> {
+  const { invites, activityByProspect } = await listInvitesForBA(tmagId);
   return { ok: true, invites, activityByProspect };
 }
 
@@ -1267,10 +1267,10 @@ export async function getMyInvites(baId: string): Promise<MyInvitesResponse> {
  * disagree with what the BA sees in the rows below.
  */
 export async function getCockpitSummary(
-  baId: string,
+  tmagId: string,
 ): Promise<CockpitSummaryResponse & { sponsorFallback: CockpitSponsorFallback | null }> {
-  const ba = await findBAByBaId(baId);
-  const { invites } = await listInvitesForBA(baId);
+  const ba = await findBAByTmagId(tmagId);
+  const { invites } = await listInvitesForBA(tmagId);
 
   // My Sponsor card. Founders (TM-01/TM-02) have no upline (locked-spec 1.2)
   // — sponsor is null and the cockpit renders a founder treatment.
@@ -1282,8 +1282,8 @@ export async function getCockpitSummary(
   // this is a contact path only.
   let sponsor: CockpitSummaryResponse['sponsor'] = null;
   let sponsorFallback: CockpitSponsorFallback | null = null;
-  if (ba?.sponsorBaId) {
-    const sp = await findBAByBaId(ba.sponsorBaId);
+  if (ba?.sponsorTmagId) {
+    const sp = await findBAByTmagId(ba.sponsorTmagId);
     if (sp) {
       sponsor = {
         fullName: `${sp.firstName} ${sp.lastName}`.trim(),

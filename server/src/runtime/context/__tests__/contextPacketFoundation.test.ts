@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type {
   AgentId,
-  BaId,
+  TmagId,
   ContextPacketId,
   ContextPacketV1,
   ContextRequestId,
@@ -25,7 +25,7 @@ import {
 
 const tenantId = 'tenant_tm' as TenantId;
 const teamId = 'team_tm' as TeamId;
-const baId = 'ba_tm_001' as BaId;
+const tmagId = 'ba_tm_001' as TmagId;
 const packetId = 'ctxpkt_test' as ContextPacketId;
 const requestId = 'ctxreq_test' as ContextRequestId;
 const sessionId = 'session_test' as SessionId;
@@ -55,7 +55,7 @@ function makePacket(overrides: Partial<ContextPacketV1> = {}): ContextPacketV1 {
       teamId,
       teamKey: 'team_magnificent',
       teamName: 'Team Magnificent',
-      baId,
+      tmagId,
       journalEnabled: true,
       languagePreference: 'en',
       permissions: {
@@ -132,7 +132,7 @@ function makePacket(overrides: Partial<ContextPacketV1> = {}): ContextPacketV1 {
       items: [
         {
           contextId: 'private_context_test',
-          ownerBaId: baId,
+          ownerTmagId: tmagId,
           summary: 'Private context summary.',
           language: 'en',
           sourceTraceability: {
@@ -147,7 +147,7 @@ function makePacket(overrides: Partial<ContextPacketV1> = {}): ContextPacketV1 {
       items: [
         {
           relationshipContextId: 'relationship_test' as RelationshipContextId,
-          ownerBaId: baId,
+          ownerTmagId: tmagId,
           summary: 'Relationship context summary.',
           personSensitive: true,
           language: 'en',
@@ -160,7 +160,7 @@ function makePacket(overrides: Partial<ContextPacketV1> = {}): ContextPacketV1 {
       entries: [
         {
           journalEntryId: 'journal_test' as JournalEntryId,
-          ownerBaId: baId,
+          ownerTmagId: tmagId,
           summary: 'Journal summary.',
           language: 'en',
           selectedForReview: false,
@@ -182,7 +182,7 @@ function makePacket(overrides: Partial<ContextPacketV1> = {}): ContextPacketV1 {
     guidedActions: [
       {
         guidedActionId: 'guided_test' as GuidedActionId,
-        ownerBaId: baId,
+        ownerTmagId: tmagId,
         title: 'Practice sharing',
         status: 'suggested',
       },
@@ -299,7 +299,7 @@ describe('context packet foundation', () => {
         items: [
           {
             contextId: 'other_private_context',
-            ownerBaId: 'ba_other' as BaId,
+            ownerTmagId: 'ba_other' as TmagId,
             summary: 'Wrong BA private context.',
             language: 'en',
             sourceTraceability: {

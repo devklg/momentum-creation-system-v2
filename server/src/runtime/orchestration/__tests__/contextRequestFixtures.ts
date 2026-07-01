@@ -1,7 +1,7 @@
 import type {
   AgentId,
   AgentKey,
-  BaId,
+  TmagId,
   ContextPacketId,
   ContextRequestId,
   CorrelationId,
@@ -49,7 +49,7 @@ export function requestIdentity(
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      baId: 'TMBA-S2-2-001' as BaId,
+      tmagId: 'TMAG-S2-2-001' as TmagId,
     },
     sessionId: 'session_s2_2_001' as SessionId,
     agentKey: 'michael_magnificent',
@@ -132,7 +132,7 @@ function contextPacketInputForRequest(
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      baId: 'TMBA-S2-2-001' as BaId,
+      tmagId: 'TMAG-S2-2-001' as TmagId,
       journalEnabled: true,
       languagePreference: request.language,
       permissions: {

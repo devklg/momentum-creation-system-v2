@@ -67,7 +67,7 @@ export const PHASE7_NEO4J_INDEXES: readonly Neo4jSchemaStatement[] = [
   {
     name: 'outcome_ba',
     label: 'Outcome',
-    cypher: 'CREATE INDEX outcome_ba IF NOT EXISTS FOR (o:Outcome) ON (o.baId)',
+    cypher: 'CREATE INDEX outcome_ba IF NOT EXISTS FOR (o:Outcome) ON (o.tmagId)',
     drop: 'DROP INDEX outcome_ba IF EXISTS',
     purpose: 'BA-scoped outcome lookups.',
   },
@@ -96,8 +96,8 @@ export const PHASE7_NEO4J_SCHEMA: readonly Neo4jSchemaStatement[] = [
 ];
 
 /**
- * Dependency note: the `(:Outcome)-[:CONFIRMED_BY]->(:BrandAmbassador)` edge
- * assumes the `BA` vs `BrandAmbassador` label reconciliation (P10 §5.1) is
+ * Dependency note: the `(:Outcome)-[:CONFIRMED_BY]->(:TeamMagnificentMember)` edge
+ * assumes the `BA` vs `TeamMagnificentMember` label reconciliation (P10 §5.1) is
  * settled before these are applied; and `AuditEntry.entryId` (R0) is part of the
  * P10 §6 canonical constraint set applied alongside this, not duplicated here.
  */

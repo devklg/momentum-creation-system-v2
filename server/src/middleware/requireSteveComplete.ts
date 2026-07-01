@@ -49,7 +49,7 @@ export async function requireSteveComplete(
   }
 
   try {
-    const done = await isSteveDiscoveryComplete(session.baId);
+    const done = await isSteveDiscoveryComplete(session.tmagId);
     if (!done) {
       res.status(403).json({
         ok: false,

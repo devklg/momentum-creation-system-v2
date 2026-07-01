@@ -17,7 +17,7 @@ import { describe, expect, it } from 'vitest';
 //
 // Why stripping matters here: the card's documentation comments LEGITIMATELY
 // mention banned words to explain why they are absent — e.g. "never includes
-// baId / sponsorBaId / targetBaId / downlineBaId / prospectId", "never writes
+// tmagId / sponsorTmagId / targetTmagId / downlineTmagId / prospectId", "never writes
 // localStorage / sessionStorage / IndexedDB", "no income / placement / cycle
 // language", "the redacted trace is NEVER shown". Those defensive doc-comment
 // prohibitions (and string literals) must not trip a wiring regex, so the
@@ -139,12 +139,12 @@ describe('S3.9 Michael runtime support card static governance boundary', () => {
     );
   });
 
-  it('#2 request never sends body-authority id fields (baId/sponsorBaId/targetBaId/downlineBaId/prospectId)', () => {
+  it('#2 request never sends body-authority id fields (tmagId/sponsorTmagId/targetTmagId/downlineTmagId/prospectId)', () => {
     // Comments/strings stripped first: the header doc-comment legitimately lists
     // these identifiers to explain they are NOT sent. Only an actual code token
     // (e.g. a request-body field) can trip this scan. The word `turn` is allowed
     // and is intentionally NOT in this list.
-    const forbidden = /\b(?:baId|sponsorBaId|targetBaId|downlineBaId|prospectId)\b/;
+    const forbidden = /\b(?:tmagId|sponsorTmagId|targetTmagId|downlineTmagId|prospectId)\b/;
     const matches = matchingCodeTokenLines(cardFiles(), forbidden);
     expect(matches, matches.join('\n')).toEqual([]);
   });

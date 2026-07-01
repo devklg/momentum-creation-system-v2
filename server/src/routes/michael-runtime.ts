@@ -10,7 +10,7 @@
  * `body.turn`. The request body must be server-owned: the ONLY accepted field is
  * optional `language` ('en' | 'es'). Any other key — or a malformed `language`
  * value — is rejected with 400 `CLIENT_RUNTIME_INPUT_NOT_ALLOWED`. This merges the
- * old body-BA-scope rejection (`baId`/`sponsorBaId`/`targetBaId`) into one broader
+ * old body-BA-scope rejection (`tmagId`/`sponsorTmagId`/`targetTmagId`) into one broader
  * rule. A valid client request is `{}` or `{ "language": "en" | "es" }`.
  *
  * The turn is produced by the S3.10 server-owned turn source
@@ -23,7 +23,7 @@
  * Context Packet itself, touches a store/Gateway/retrieval helper, or imports the
  * S2.13 test-only harness.
  *
- * Sponsor immutability (locked-spec 3.5): BA scope comes from req.session.baId,
+ * Sponsor immutability (locked-spec 3.5): BA scope comes from req.session.tmagId,
  * never the request body. Body-supplied runtime input (incl. BA authority) is
  * rejected before any work.
  */
@@ -91,8 +91,8 @@ export async function handleMichaelRuntimeResolve(
 
   // Server-owned body validation. Reject ANY field that is not exactly
   // `language`, and reject a `language` value that is not 'en' or 'es'. This
-  // single rule subsumes the old body-BA-scope rejection — body baId/sponsorBaId/
-  // targetBaId (and turn/contextPacket/token/sessionId/etc.) now all yield
+  // single rule subsumes the old body-BA-scope rejection — body tmagId/sponsorTmagId/
+  // targetTmagId (and turn/contextPacket/token/sessionId/etc.) now all yield
   // CLIENT_RUNTIME_INPUT_NOT_ALLOWED.
   const body = (req.body ?? {}) as Record<string, unknown>;
   let validatedLanguage: 'en' | 'es' | undefined;
@@ -118,8 +118,8 @@ export async function handleMichaelRuntimeResolve(
     validatedLanguage = body.language as 'en' | 'es';
   }
 
-  const sessionBaId = req.session?.baId;
-  if (!sessionBaId) {
+  const sessionTmagId = req.session?.tmagId;
+  if (!sessionTmagId) {
     return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   }
 
@@ -129,7 +129,7 @@ export async function handleMichaelRuntimeResolve(
   let created: Awaited<ReturnType<typeof createMichaelRuntimeTurnForAuthenticatedBa>>;
   try {
     created = await createMichaelRuntimeTurnForAuthenticatedBa({
-      baId: sessionBaId,
+      tmagId: sessionTmagId,
       language: validatedLanguage,
     });
   } catch {

@@ -87,7 +87,7 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
       return;
     }
     if (!lead.normalizedPhone) {
-      await updateLeadStatus(lead.leadId, 'delivery_dry_run', { reason: 'no_phone', ownerTmBaId: lead.ownerTmBaId });
+      await updateLeadStatus(lead.leadId, 'delivery_dry_run', { reason: 'no_phone', ownerTmagId: lead.ownerTmagId });
       await completeVmJob(job.jobId, `Lead ${lead.leadId} has no phone; delivery skipped.`);
       return;
     }
@@ -111,7 +111,7 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
       provider: result.provider,
       leadId: lead.leadId,
       vmCampaignId: lead.vmCampaignId,
-      ownerTmBaId: lead.ownerTmBaId,
+      ownerTmagId: lead.ownerTmagId,
       status: result.status,
       providerMessageId: result.providerMessageId,
       providerStatus: result.status,
@@ -126,7 +126,7 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
         : result.status === 'dry_run'
           ? 'delivery_dry_run'
           : result.status;
-    await updateLeadStatus(lead.leadId, nextStatus, { ownerTmBaId: lead.ownerTmBaId });
+    await updateLeadStatus(lead.leadId, nextStatus, { ownerTmagId: lead.ownerTmagId });
     await completeVmJob(job.jobId, `Delivery processed for VM lead ${lead.leadId}: ${result.status}.`);
   } catch (err) {
     await failVmJob(job, err instanceof Error ? err.message : String(err));

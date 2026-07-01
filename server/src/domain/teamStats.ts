@@ -6,7 +6,7 @@
  * Locked Chat #115 — metric definitions per Kevin's lock:
  *
  *   basActive24h
- *     count(brand_ambassadors WHERE lastLoginAt > now - 24h)
+ *     count(team_magnificent_members WHERE lastLoginAt > now - 24h)
  *     Active = logged into .team in the last 24 hours.
  *     Soft caveat: this number will read low until the .team cockpit
  *     ships and BAs log in regularly. That's truth, not a bug.
@@ -21,8 +21,8 @@
  *     Rolling 24-hour window, not calendar-day.
  *
  *   recruitmentVelocityPct
- *     this7d = count(brand_ambassadors WHERE createdAt > now - 7d)
- *     prior7d = count(brand_ambassadors WHERE createdAt BETWEEN now-14d AND now-7d)
+ *     this7d = count(team_magnificent_members WHERE createdAt > now - 7d)
+ *     prior7d = count(team_magnificent_members WHERE createdAt BETWEEN now-14d AND now-7d)
  *     velocity = ((this7d - prior7d) / max(1, prior7d)) * 100
  *     Signed integer (rounded). Positive = team is accelerating;
  *     negative = team is decelerating. When prior7d = 0, we cap the
@@ -106,7 +106,7 @@ export async function computeTeamStats(): Promise<TeamStats> {
 
   const [basActive24h, invitationsSentToday, newPlacements24h, this7d, prior7d] =
     await Promise.all([
-      countByMatch('brand_ambassadors', {
+      countByMatch('team_magnificent_members', {
         lastLoginAt: { $gte: twentyFourHoursAgo },
       }),
       countByMatch('invite_tokens', {
@@ -115,10 +115,10 @@ export async function computeTeamStats(): Promise<TeamStats> {
       countByMatch('pool_placements', {
         placedAt: { $gte: twentyFourHoursAgo },
       }),
-      countByMatch('brand_ambassadors', {
+      countByMatch('team_magnificent_members', {
         createdAt: { $gte: sevenDaysAgo },
       }),
-      countByMatch('brand_ambassadors', {
+      countByMatch('team_magnificent_members', {
         createdAt: { $gte: fourteenDaysAgo, $lt: sevenDaysAgo },
       }),
     ]);

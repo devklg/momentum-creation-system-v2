@@ -68,7 +68,7 @@ export function AdminShell() {
                 Signed in
               </p>
               <p className="text-sm text-cream mb-3">{me.fullName}</p>
-              <p className="text-[11px] font-mono text-cream-mute mb-3">{me.baId}</p>
+              <p className="text-[11px] font-mono text-cream-mute mb-3">{me.tmagId}</p>
               <Button variant="outline" size="sm" onClick={() => void logout()}>
                 Sign Out
               </Button>

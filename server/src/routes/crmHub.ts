@@ -2,7 +2,7 @@
  * /api/crm-hub — dedicated ProspectCRMRecord reads/writes.
  *
  * This is additive to the existing /api/crm note/follow-up/disposition API.
- * Every BA read/write is scoped by req.session.baId.
+ * Every BA read/write is scoped by req.session.tmagId.
  */
 
 import { Router } from 'express';
@@ -14,7 +14,7 @@ import type {
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
-import { findBAByBaId } from '../domain/ba.js';
+import { findBAByTmagId } from '../domain/ba.js';
 import {
   ProspectCrmError,
   closeCrmAsNewBa,
@@ -29,8 +29,8 @@ const CloseSchema = z.object({
   reason: z.string().min(8).max(1000),
 });
 
-function sessionBaId(req: import('express').Request): string | null {
-  return req.session?.baId ?? null;
+function sessionTmagId(req: import('express').Request): string | null {
+  return req.session?.tmagId ?? null;
 }
 
 function includeClosed(req: import('express').Request): boolean {
@@ -58,10 +58,10 @@ function sendCrmHubError(res: import('express').Response, err: unknown) {
 }
 
 crmHubRoutes.get('/prospects', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = sessionBaId(req);
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = sessionTmagId(req);
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
-    const records = await listCrmRecordsForOwner(baId, includeClosed(req));
+    const records = await listCrmRecordsForOwner(tmagId, includeClosed(req));
     const body: ProspectCrmListResponse = { ok: true, records };
     return res.status(200).json(body);
   } catch (err) {
@@ -70,12 +70,12 @@ crmHubRoutes.get('/prospects', requireAuth, requireSteveComplete, async (req, re
 });
 
 crmHubRoutes.get('/prospects/:prospectId', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = sessionBaId(req);
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = sessionTmagId(req);
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
     const prospectId = routeParam(req, 'prospectId');
-    const record = await getOwnerScopedCrmRecord(prospectId, baId);
-    const timeline = await listTimelineForProspect(prospectId, baId);
+    const record = await getOwnerScopedCrmRecord(prospectId, tmagId);
+    const timeline = await listTimelineForProspect(prospectId, tmagId);
     const body: ProspectCrmRecordResponse = { ok: true, record, timeline };
     return res.status(200).json(body);
   } catch (err) {
@@ -88,8 +88,8 @@ crmHubRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = sessionBaId(req);
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = sessionTmagId(req);
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const parsed = CloseSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -97,14 +97,14 @@ crmHubRoutes.post(
     }
 
     try {
-      const ba = await findBAByBaId(baId);
+      const ba = await findBAByTmagId(tmagId);
       const displayName = ba
-        ? `${ba.firstName ?? ''} ${ba.lastName ?? ''}`.trim() || baId
-        : baId;
+        ? `${ba.firstName ?? ''} ${ba.lastName ?? ''}`.trim() || tmagId
+        : tmagId;
       const record = await closeCrmAsNewBa({
         prospectId: routeParam(req, 'prospectId'),
-        ownerTmBaId: baId,
-        actor: { kind: 'ba', baId, displayName },
+        ownerTmagId: tmagId,
+        actor: { kind: 'ba', tmagId, displayName },
         reason: parsed.data.reason,
       });
       const body: CloseAsNewBaResponse = {

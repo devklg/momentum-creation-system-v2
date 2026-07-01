@@ -37,7 +37,7 @@ import {
   type ProspectCrudResponse,
 } from '@/components/prospect-oversight/ProspectCrudModal';
 
-const DEFAULT_FILTER: AdminDashboardFilter = { baId: null, leaderGroup: 'all' };
+const DEFAULT_FILTER: AdminDashboardFilter = { tmagId: null, leaderGroup: 'all' };
 
 function readProspectIdParam(): string | null {
   if (typeof window === 'undefined') return null;
@@ -92,7 +92,7 @@ export function ProspectsPage() {
     setErr(null);
     try {
       const params = new URLSearchParams();
-      if (f.baId) params.set('baId', f.baId);
+      if (f.tmagId) params.set('tmagId', f.tmagId);
       if (f.leaderGroup) params.set('leaderGroup', f.leaderGroup);
       const res = await fetch(`/api/admin/prospects?${params.toString()}`, {
         credentials: 'include',
