@@ -154,6 +154,26 @@ function sanitizeStatus(input: IvoryStatus): IvoryStatus {
  * the roster view, the graph, and semantic search all see it immediately.
  * Status defaults to 'new'; the BA bumps it as they take action.
  */
+/**
+ * The Chroma semantic doc for an Ivory name. Shared by create and update so the
+ * embedding text can never drift between the two write paths.
+ */
+function ivoryChromaDoc(r: {
+  firstName: string;
+  lastInitial: string;
+  baId: string;
+  categories: readonly string[];
+  preferredAngle: string;
+  notes: string;
+}): string {
+  return (
+    `${r.firstName} ${r.lastInitial}. — warm-market name for BA ${r.baId}. ` +
+    `Categories: ${r.categories.join(', ') || 'unspecified'}. ` +
+    `Preferred angle: ${r.preferredAngle}. ` +
+    (r.notes ? `Notes: ${r.notes}.` : 'No notes yet.')
+  );
+}
+
 export async function createIvoryName(
   baId: string,
   input: CreateIvoryNamePayload,
@@ -186,47 +206,64 @@ export async function createIvoryName(
     updatedAt: now,
   };
 
-  await tripleStackWrite({
-    id: ivoryId,
-    mongoCollection: IVORY_COLLECTION,
-    mongoDoc: { ...record },
-    neo4j: {
-      cypher:
-        'MERGE (b:BA {baId: $baId}) ' +
-        'MERGE (n:IvoryName {ivoryId: $id}) ' +
-        'SET n.baId = $baId, ' +
-        '    n.firstName = $firstName, ' +
-        '    n.lastInitial = $lastInitial, ' +
-        '    n.status = $status, ' +
-        '    n.preferredAngle = $preferredAngle, ' +
-        '    n.createdAt = $createdAt ' +
-        'MERGE (b)-[r:KNOWS]->(n) ' +
-        'SET r.since = $createdAt',
-      params: {
-        baId,
-        firstName,
-        lastInitial,
-        status: 'new',
-        preferredAngle,
-        createdAt: now,
+  try {
+    await tripleStackWrite({
+      id: ivoryId,
+      mongoCollection: IVORY_COLLECTION,
+      mongoDoc: { ...record },
+      neo4j: {
+        cypher:
+          'MERGE (b:BA {baId: $baId}) ' +
+          'MERGE (n:IvoryName {ivoryId: $id}) ' +
+          'SET n.baId = $baId, ' +
+          '    n.firstName = $firstName, ' +
+          '    n.lastInitial = $lastInitial, ' +
+          '    n.status = $status, ' +
+          '    n.preferredAngle = $preferredAngle, ' +
+          '    n.createdAt = $createdAt ' +
+          'MERGE (b)-[r:KNOWS]->(n) ' +
+          'SET r.since = $createdAt',
+        params: {
+          baId,
+          firstName,
+          lastInitial,
+          status: 'new',
+          preferredAngle,
+          createdAt: now,
+        },
       },
-    },
-    chroma: {
-      collection: CHROMA_COLLECTION,
-      document:
-        `${firstName} ${lastInitial}. — warm-market name for BA ${baId}. ` +
-        `Categories: ${categories.join(', ') || 'unspecified'}. ` +
-        `Preferred angle: ${preferredAngle}. ` +
-        (notes ? `Notes: ${notes}.` : 'No notes yet.'),
-      metadata: {
-        kind: 'ivory_name_created',
-        ivoryId,
-        baId,
-        preferredAngle,
-        createdAt: now,
+      chroma: {
+        collection: CHROMA_COLLECTION,
+        document: ivoryChromaDoc(record),
+        metadata: {
+          kind: 'ivory_name_created',
+          ivoryId,
+          baId,
+          preferredAngle,
+          createdAt: now,
+        },
       },
-    },
-  });
+    });
+  } catch (err) {
+    // Compensation: tripleStackWrite has no rollback. If the Mongo insert
+    // committed but a later leg (Neo4j/Chroma) threw, best-effort delete the
+    // orphaned row so a client retry (which mints a fresh ivoryId) does not
+    // accumulate half-written duplicates.
+    try {
+      await gatewayCall('mongodb', 'delete', {
+        database: MONGO_DB,
+        collection: IVORY_COLLECTION,
+        filter: { ivoryId },
+      });
+      await gatewayCall('neo4j', 'cypher', {
+        query: 'MATCH (n:IvoryName {ivoryId: $ivoryId}) DETACH DELETE n',
+        params: { ivoryId },
+      });
+    } catch {
+      // Swallow cleanup failure; surface the original write error below.
+    }
+    throw err;
+  }
 
   return record;
 }
@@ -350,6 +387,25 @@ export async function updateIvoryName(
     },
   });
 
+  // Refresh the Chroma semantic doc so search reflects the edited fields (add
+  // upserts on the stable ivoryId). Mongo + Neo4j alone left mcs_ivory pinned to
+  // the create-time firstName/categories/angle/notes. Status-only transitions
+  // do not touch these fields, so only the name-edit path needs this refresh.
+  await gatewayCall('chromadb', 'add', {
+    collection: CHROMA_COLLECTION,
+    ids: [ivoryId],
+    documents: [ivoryChromaDoc(next)],
+    metadatas: [
+      {
+        kind: 'ivory_name_created',
+        ivoryId,
+        baId,
+        preferredAngle,
+        createdAt: existing.createdAt,
+      },
+    ],
+  });
+
   return next;
 }
 
@@ -430,8 +486,11 @@ export async function markIvoryInvited(
   await gatewayCall('neo4j', 'cypher', {
     query:
       'MATCH (n:IvoryName {ivoryId: $ivoryId}) ' +
-      'MATCH (p:Prospect {prospectId: $prospectId}) ' +
       'SET n.status = $status, n.lastProspectId = $prospectId, n.updatedAt = $updatedAt ' +
+      // MERGE (not MATCH) the prospect: a missing/lagging Prospect node must not
+      // silently no-op the whole statement, which previously left the graph node
+      // stale ('new', no edge) while Mongo had already committed 'invited'.
+      'MERGE (p:Prospect {prospectId: $prospectId}) ' +
       'MERGE (n)-[r:INVITED_AS]->(p) ' +
       'SET r.at = $updatedAt',
     params: {
@@ -842,7 +901,21 @@ export async function mintIvoryInvitation(
     relationshipReason,
   });
 
-  await markIvoryInvited(input.ivoryId, baId, created.prospectId);
+  // The invitation is already minted and LIVE at this point. Do NOT let a
+  // failure to stamp the Ivory roster linkage fail the whole mint — that would
+  // make the BA retry and mint a SECOND live token for the same person. Record
+  // the linkage best-effort; a failure is logged for later reconciliation.
+  try {
+    await markIvoryInvited(input.ivoryId, baId, created.prospectId);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `[ivory.mint] invite minted (prospectId=${created.prospectId}) but Ivory ` +
+        `linkage failed for ivoryId=${input.ivoryId}: ${
+          err instanceof Error ? err.message : 'unknown'
+        }`,
+    );
+  }
 
   return {
     ok: true,

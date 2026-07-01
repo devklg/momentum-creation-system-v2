@@ -207,7 +207,15 @@ export const ORCHESTRATION_AGENT_KEYS: readonly AgentKey[] = [
 ];
 
 export function getAgentDescriptor(agentKey: AgentKey): AgentOrchestrationDescriptor {
-  return AGENT_ORCHESTRATION_REGISTRY[agentKey];
+  // Guard against an agentKey cast from an external boundary (deserialized JSON,
+  // a removed/typo'd key). The Record type reports this as always-present, but
+  // at runtime an unknown key yields undefined and would crash every caller on
+  // property access — fail loud with a clear error instead.
+  const descriptor = AGENT_ORCHESTRATION_REGISTRY[agentKey];
+  if (!descriptor) {
+    throw new Error(`getAgentDescriptor: unknown agentKey "${String(agentKey)}"`);
+  }
+  return descriptor;
 }
 
 export function isKnownAgentKey(value: unknown): value is AgentKey {
@@ -217,7 +225,9 @@ export function isKnownAgentKey(value: unknown): value is AgentKey {
 }
 
 export function isTaskTypeAllowed(agentKey: AgentKey, taskType: RuntimeTaskType): boolean {
-  return AGENT_ORCHESTRATION_REGISTRY[agentKey].allowedTaskTypes.includes(taskType);
+  // Unknown agentKey → not allowed, rather than a TypeError on undefined.
+  const descriptor = AGENT_ORCHESTRATION_REGISTRY[agentKey];
+  return descriptor ? descriptor.allowedTaskTypes.includes(taskType) : false;
 }
 
 export function listOrchestrationDescriptors(): readonly AgentOrchestrationDescriptor[] {
