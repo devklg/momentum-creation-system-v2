@@ -195,7 +195,7 @@
 <ul style="margin:6px 0 0;">
 <li><code>vm_bulk_leads</code> <strong>two divergent writers</strong> — <code>bulkLeads.ts</code> (<code>lead_&lt;uuid&gt;</code>, lifecycle status, mints token+prospect) vs <code>vmProviderQueue.ts</code> (<code>vmlead_&lt;uuid&gt;</code>, VmLeadStatus, dedupe/suppress). Unify or split.</li>
 <li><code>vm_delivery_events</code> runtime ≠ typed contract (writer <code>{eventId,details,dryRun,attempt}</code> vs typed <code>{deliveryEventId,channel,occurredAt,metadata}</code>).</li>
-<li>CRM disposition <strong>two spellings</strong>: hyphen <code>new-ba</code> (Group B) vs underscore <code>new_ba</code> (VM) → one canonical name.</li>
+<li>CRM disposition — <strong>DECIDED (Kevin): one canonical enum, tmag-flavored.</strong> Collapse hyphen <code>new-ba</code> (Group B) + underscore <code>new_ba</code> (VM) to ONE snake_case enum, and <strong><code>new_ba</code> → <code>new_tmag_member</code></strong> (+ closed-reason <code>enrolled_as_ba</code> → <code>enrolled_as_tmag_member</code>). Canonical: <code>new_tmag_member · new_customer · interested · not_interested · later · no_response · wrong_number · do_not_contact</code>. Code + persisted-data rename → reconciliation migration.</li>
 <li>4 VM collections lack shared types; <code>vm_suppression_list</code> / <code>prospect_ownership_corrections</code> shapes unconfirmed.</li>
 <li>Neo4j <code>BA</code> label here → collapse to the one canonical member label (§9).</li>
 </ul></div>
