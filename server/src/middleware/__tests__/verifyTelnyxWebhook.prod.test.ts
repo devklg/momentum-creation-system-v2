@@ -1,30 +1,32 @@
 /**
  * P10 H4 — Telnyx webhook fail-closed-in-production tests.
  *
- * env.TELNYX_PUBLIC_KEY is empty in the test env (setupEnv only stubs NODE_ENV
- * + JWT_SECRET), so every case here exercises the "no public key" branch. The
- * middleware reads process.env.NODE_ENV at call time, so we flip it per test
- * (snapshot/restore, no module reset needed).
+ * env.ts loads the developer's real .env at import time, so these tests import
+ * the middleware only after stubbing TELNYX_PUBLIC_KEY='' for the process. That
+ * keeps local secrets from changing which branch the test exercises.
  *
  * The replay-window check runs first and is unchanged, so each request carries
  * a fresh, valid telnyx-timestamp.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { NextFunction, Request, Response } from 'express';
-import { verifyTelnyxWebhook } from '../verifyTelnyxWebhook.js';
-
-let originalNodeEnv: string | undefined;
-
-beforeEach(() => {
-  originalNodeEnv = process.env.NODE_ENV;
-});
 
 afterEach(() => {
-  if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
-  else process.env.NODE_ENV = originalNodeEnv;
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+  vi.resetModules();
 });
+
+async function loadVerifyTelnyxWebhook(nodeEnv: 'production' | 'development') {
+  vi.resetModules();
+  vi.unstubAllEnvs();
+  vi.stubEnv('NODE_ENV', nodeEnv);
+  vi.stubEnv('JWT_SECRET', 'S3cure-random-secret-value-that-is-well-over-32-chars');
+  vi.stubEnv('TELNYX_PUBLIC_KEY', '');
+  const mod = await import('../verifyTelnyxWebhook.js');
+  return mod.verifyTelnyxWebhook;
+}
 
 function freshTimestamp(): string {
   return Math.floor(Date.now() / 1000).toString();
@@ -53,10 +55,11 @@ function mockRes() {
 }
 
 describe('verifyTelnyxWebhook — key missing', () => {
-  it('production: rejects with 401 (fail closed) and does not call next()', () => {
-    process.env.NODE_ENV = 'production';
-    // Silence the expected error log.
+  it('production: rejects with 401 (fail closed) and does not call next()', async () => {
+    // Silence the expected env boot warning + middleware error log.
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const verifyTelnyxWebhook = await loadVerifyTelnyxWebhook('production');
 
     const body = Buffer.from(JSON.stringify({ data: { event_type: 'call.initiated' } }));
     const req = mockReq(body, { 'telnyx-timestamp': freshTimestamp() });
@@ -70,9 +73,9 @@ describe('verifyTelnyxWebhook — key missing', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('development: skips verification with a warning and passes through', () => {
-    process.env.NODE_ENV = 'development';
+  it('development: skips verification with a warning and passes through', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const verifyTelnyxWebhook = await loadVerifyTelnyxWebhook('development');
 
     const body = Buffer.from(JSON.stringify({ data: { event_type: 'call.initiated' } }));
     const req = mockReq(body, { 'telnyx-timestamp': freshTimestamp() });
