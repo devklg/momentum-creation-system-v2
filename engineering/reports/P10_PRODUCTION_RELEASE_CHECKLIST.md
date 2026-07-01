@@ -66,6 +66,8 @@ Finding **H5** / P10.1. Enforcement is unverifiable from inside the repo; every 
 
 All three are HIGH findings and change production behavior, so they are Kevin-gated. Listed with the smallest-safe implementation each.
 
+> **📄 Copy-paste-ready patches drafted:** `engineering/reports/P10_B3_SECURITY_HARDENING_PATCHES.md` — H2 (shared rate-limiter + auth wires), H3 (JWT_SECRET prod assertion), H4 (fail-closed Telnyx verify), plus tests and gates. **Proposed, not applied** — apply in a dedicated `server/src` slice (out of scope for this docs worktree).
+
 - [ ] **H3 — Boot-time production assertion rejecting the placeholder `JWT_SECRET`** (`.env.example:53` 36-char placeholder passes `min(16)`). Reject known-default / low-entropy secret when `NODE_ENV==='production'`. *(Kevin)*
 - [ ] **H4 — Fail-closed Telnyx webhook verification in production** — require `TELNYX_PUBLIC_KEY` (and `VM_WEBHOOK_SHARED_SECRET` if VM live-delivery is enabled) when `NODE_ENV==='production'`; do not skip verification on empty key in prod (`verifyTelnyxWebhook.ts:99-130`). *(Kevin)*
 - [ ] **H2 — Rate-limit `/api/auth/login`, `/register`, `/verify-code`** (reuse the `p-login.ts` sliding-window limiter or `express-rate-limit`). *(Kevin)*
