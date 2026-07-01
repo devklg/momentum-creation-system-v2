@@ -25,7 +25,7 @@
  *
  * Compliance: this surface is /admin-gated (Kevin-only via ADMIN_BA_IDS).
  * The intervention paths are critical-severity overrides per locked-spec
- * 2.4: reason is required (min 8 chars), requestingBaId is required.
+ * 2.4: reason is required (min 8 chars), requestingTmagId is required.
  */
 
 import express, { type Request, type Response, type Router } from 'express';
@@ -74,18 +74,18 @@ export const adminProspectsRoutes: Router = express.Router();
 /* ─── shared parsing helpers ────────────────────────────────────── */
 
 const FilterSchema = z.object({
-  baId: z.string().min(2).max(80).optional(),
+  tmagId: z.string().min(2).max(80).optional(),
   leaderGroup: z.enum(['all', 'leaders_only', 'non_leaders']).optional(),
 });
 
 function parseFilter(req: Request): AdminDashboardFilter {
   const parsed = FilterSchema.parse({
-    baId: typeof req.query.baId === 'string' ? req.query.baId : undefined,
+    tmagId: typeof req.query.tmagId === 'string' ? req.query.tmagId : undefined,
     leaderGroup:
       typeof req.query.leaderGroup === 'string' ? req.query.leaderGroup : undefined,
   });
   return {
-    baId: parsed.baId ?? null,
+    tmagId: parsed.tmagId ?? null,
     leaderGroup: parsed.leaderGroup ?? 'all',
   };
 }
@@ -95,8 +95,8 @@ function adminActorFromRequest(
 ): AuditActor & { kind: 'admin' } {
   const session = req.session!;
   const displayName =
-    (session as unknown as { fullName?: string }).fullName ?? session.baId;
-  return { kind: 'admin', baId: session.baId, displayName };
+    (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
+  return { kind: 'admin', tmagId: session.tmagId, displayName };
 }
 
 function contextFromRequest(req: Request, route: string, method: string): AuditContext {
@@ -130,7 +130,7 @@ adminProspectsRoutes.get('/', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.prospects.directory.viewed',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { filter, rowCount: rows.length },
       reason: null,
@@ -160,7 +160,7 @@ adminProspectsRoutes.get('/filters', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.prospects.filters.viewed',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       reason: null,
       context: contextFromRequest(req, '/api/admin/prospects/filters', 'GET'),
@@ -326,9 +326,9 @@ adminProspectsRoutes.post('/:prospectId/notes', requireAdmin, async (req, res) =
 /* ─── POST /:prospectId/move ────────────────────────────────────── */
 
 const MoveSchema = z.object({
-  requestingBaId: z.string().min(2).max(80),
+  requestingTmagId: z.string().min(2).max(80),
   reason: z.string().min(8).max(2000),
-  toBaId: z.string().min(2).max(80),
+  toTmagId: z.string().min(2).max(80),
 });
 
 adminProspectsRoutes.post('/:prospectId/move', requireAdmin, (req, res) =>
@@ -347,9 +347,9 @@ adminProspectsRoutes.post('/:prospectId/move', requireAdmin, (req, res) =>
 /* ─── POST /:prospectId/reassign-sponsor ─────────────────────── */
 
 const ReassignSchema = z.object({
-  requestingBaId: z.string().min(2).max(80),
+  requestingTmagId: z.string().min(2).max(80),
   reason: z.string().min(8).max(2000),
-  newSponsorBaId: z.string().min(2).max(80),
+  newSponsorTmagId: z.string().min(2).max(80),
 });
 
 adminProspectsRoutes.post(
@@ -380,7 +380,7 @@ adminProspectsRoutes.post(
 /* ─── POST /:prospectId/manual-flush ────────────────────────── */
 
 const FlushSchema = z.object({
-  requestingBaId: z.string().min(2).max(80),
+  requestingTmagId: z.string().min(2).max(80),
   reason: z.string().min(8).max(2000),
 });
 
@@ -409,7 +409,7 @@ adminProspectsRoutes.post('/:prospectId/manual-flush', requireAdmin, (req, res) 
 /* ─── POST /:prospectId/force-enroll ────────────────────────── */
 
 const ForceEnrollSchema = z.object({
-  requestingBaId: z.string().min(2).max(80),
+  requestingTmagId: z.string().min(2).max(80),
   reason: z.string().min(8).max(2000),
 });
 
@@ -545,7 +545,7 @@ const CreateProspectSchema = z.object({
   city: z.string().min(1).max(120),
   stateOrRegion: z.string().min(1).max(120),
   country: z.string().min(2).max(60).optional(),
-  sponsorBaId: z.string().min(2).max(80),
+  sponsorTmagId: z.string().min(2).max(80),
   phone: z.string().max(40).nullish(),
   email: z.string().email().max(200).nullish(),
   reason: z.string().min(8).max(2000),
@@ -590,7 +590,7 @@ adminProspectsRoutes.post('/', requireAdmin, async (req, res) => {
         city: payload.city,
         stateOrRegion: payload.stateOrRegion,
         country: payload.country,
-        sponsorBaId: payload.sponsorBaId,
+        sponsorTmagId: payload.sponsorTmagId,
         phone: payload.phone ?? null,
         email: payload.email ?? null,
         reason: payload.reason,
@@ -748,7 +748,7 @@ adminProspectsRoutes.post('/flush-expired', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.prospects.flush_expired',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { weeks, flushedCount: result.flushedCount, cutoff: result.cutoff },
       reason: payload.reason,

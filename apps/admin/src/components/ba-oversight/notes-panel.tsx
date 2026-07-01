@@ -2,7 +2,7 @@
  * C.4 — Kevin's private notes about a BA. Append-only.
  *
  * Free-text textarea + Append button. Posts to
- * POST /api/admin/bas/:baId/notes. The server stamps the note id, the
+ * POST /api/admin/bas/:tmagId/notes. The server stamps the note id, the
  * authoring admin BA, and the createdAt. Audit-logged as info severity.
  */
 
@@ -14,12 +14,12 @@ import type {
 } from '@momentum/shared';
 
 interface Props {
-  baId: string;
+  tmagId: string;
   notes: AdminBaNoteEntry[];
   onAppended: (note: AdminBaNoteEntry) => void;
 }
 
-export function NotesPanel({ baId, notes, onAppended }: Props) {
+export function NotesPanel({ tmagId, notes, onAppended }: Props) {
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -31,7 +31,7 @@ export function NotesPanel({ baId, notes, onAppended }: Props) {
     setSubmitting(true);
     try {
       const res = await fetch(
-        `/api/admin/bas/${encodeURIComponent(baId)}/notes`,
+        `/api/admin/bas/${encodeURIComponent(tmagId)}/notes`,
         {
           method: 'POST',
           credentials: 'include',
@@ -94,7 +94,7 @@ export function NotesPanel({ baId, notes, onAppended }: Props) {
             >
               <p className="text-cream whitespace-pre-wrap">{n.text}</p>
               <p className="text-[10px] font-mono tracking-label uppercase text-cream-faint mt-2">
-                {new Date(n.createdAt).toLocaleString()} · {n.authorBaId}
+                {new Date(n.createdAt).toLocaleString()} · {n.authorTmagId}
               </p>
             </li>
           ))}

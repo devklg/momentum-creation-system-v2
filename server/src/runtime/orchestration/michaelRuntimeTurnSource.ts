@@ -5,7 +5,7 @@
  * authenticated BA from SESSION-DERIVED identity ONLY. It is:
  *
  *  - server-owned   — BA scope comes from the authenticated session, never the
- *                     request body (no body baId/sponsorBaId/targetBaId, no
+ *                     request body (no body tmagId/sponsorTmagId/targetTmagId, no
  *                     prospect/session token, no client-supplied Context Packet
  *                     or raw retrieval output; the signature cannot even carry
  *                     them);
@@ -36,7 +36,7 @@
 
 import { randomUUID } from 'node:crypto';
 import type {
-  BaId,
+  TmagId,
   CorrelationId,
   RequestId,
   RuntimeLanguage,
@@ -76,13 +76,13 @@ const DEFAULT_MODE: RuntimeMode = 'browser_text';
 
 /**
  * Session-derived BA identity. Carries ONLY what the authenticated session
- * supplies. There is intentionally no field for a body baId/sponsorBaId/
- * targetBaId, a prospect/session token, or a client-supplied Context Packet /
+ * supplies. There is intentionally no field for a body tmagId/sponsorTmagId/
+ * targetTmagId, a prospect/session token, or a client-supplied Context Packet /
  * raw retrieval output — the turn source cannot accept them by construction.
  */
 export interface CreateMichaelRuntimeTurnForAuthenticatedBaInput {
-  /** Authenticated BA id — must be sourced from `req.session.baId` only. */
-  readonly baId: BaId | string;
+  /** Authenticated BA id — must be sourced from `req.session.tmagId` only. */
+  readonly tmagId: TmagId | string;
   /** BA UI language, server-derived. Defaults to `'en'`. */
   readonly language?: RuntimeLanguage;
   /** BA runtime transport mode, server-derived. Defaults to `'browser_text'`. */
@@ -122,10 +122,10 @@ export async function createMichaelRuntimeTurnForAuthenticatedBa(
 ): Promise<CreateMichaelRuntimeTurnForAuthenticatedBaResult> {
   const issues: MichaelRuntimeTurnSourceIssue[] = [];
 
-  const baId = typeof input.baId === 'string' ? input.baId.trim() : '';
-  if (baId.length === 0) {
+  const tmagId = typeof input.tmagId === 'string' ? input.tmagId.trim() : '';
+  if (tmagId.length === 0) {
     issues.push({
-      path: 'baId',
+      path: 'tmagId',
       code: 'missing_session_ba_id',
       message: 'A session-derived BA id is required to build a Michael runtime turn.',
     });
@@ -173,7 +173,7 @@ export async function createMichaelRuntimeTurnForAuthenticatedBa(
       teamId: TEAM_ID,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      baId: baId as BaId,
+      tmagId: tmagId as TmagId,
     },
     sessionId,
     agentKey: MICHAEL_AGENT_KEY,
@@ -188,7 +188,7 @@ export async function createMichaelRuntimeTurnForAuthenticatedBa(
   // This is NOT the S2.13 fixture port; the context layer owns assembly and
   // returns a degraded, candidate-excluded packet from session identity alone.
   const contextManager = createMichaelRuntimeContextManagerPort({
-    baId: baId as BaId,
+    tmagId: tmagId as TmagId,
     mode,
     createdAt,
   });

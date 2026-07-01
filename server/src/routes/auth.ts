@@ -2,7 +2,7 @@ import express, { type Request, type Response, type Router } from 'express';
 import argon2 from 'argon2';
 import { z } from 'zod';
 import { findAccessCode } from '../domain/access-codes.js';
-import { emailExists, threeBaIdExists, registerBA, findBAByBaId, recordLogin } from '../domain/ba.js';
+import { emailExists, threeBaIdExists, registerBA, findBAByTmagId, recordLogin } from '../domain/ba.js';
 import { signSession, setSessionCookie, clearSessionCookie } from '../services/session.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { ipRateLimit, type RateLimitConfig } from '../middleware/rateLimit.js';
@@ -104,12 +104,12 @@ authRoutes.post('/register', ipRateLimit('auth_register', REGISTER_LIMIT), async
     );
 
     const token = await signSession(
-      { baId: ba.baId, threeBaId: ba.threeBaId, email: ba.email },
+      { tmagId: ba.tmagId, threeBaId: ba.threeBaId, email: ba.email },
       env.JWT_TTL_REMEMBER_DAYS,
     );
     setSessionCookie(res, token);
 
-    res.json({ ok: true, baId: ba.baId });
+    res.json({ ok: true, tmagId: ba.tmagId });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Registration failed: ${msg}` });
@@ -123,12 +123,12 @@ authRoutes.post('/register', ipRateLimit('auth_register', REGISTER_LIMIT), async
  * authenticates. THREE BA ID and email are tracked on the BA record but are
  * not login identifiers — they're operational facts, not credentials.
  *
- * On success: sets the session cookie and returns { ok: true, baId }.
+ * On success: sets the session cookie and returns { ok: true, tmagId }.
  * On failure: returns 401 with a generic error (no "user not found" vs
  * "wrong password" distinction — standard credential-stuffing defense).
  */
 const LoginBody = z.object({
-  baId: z.string().min(1).max(80),
+  tmagId: z.string().min(1).max(80),
   password: z.string().min(1).max(200),
 });
 
@@ -138,10 +138,10 @@ authRoutes.post('/login', ipRateLimit('auth_login', LOGIN_LIMIT), async (req: Re
     res.status(400).json({ ok: false, error: 'Invalid input.' });
     return;
   }
-  const { baId, password } = parsed.data;
+  const { tmagId, password } = parsed.data;
 
   try {
-    const ba = await findBAByBaId(baId.trim());
+    const ba = await findBAByTmagId(tmagId.trim());
     if (!ba) {
       res.status(401).json({ ok: false, error: 'Invalid credentials.' });
       return;
@@ -159,16 +159,16 @@ authRoutes.post('/login', ipRateLimit('auth_login', LOGIN_LIMIT), async (req: Re
     }
 
     const token = await signSession(
-      { baId: ba.baId, threeBaId: ba.threeBaId, email: ba.email },
+      { tmagId: ba.tmagId, threeBaId: ba.threeBaId, email: ba.email },
       env.JWT_TTL_REMEMBER_DAYS,
     );
     setSessionCookie(res, token);
 
     // Stamp lastLoginAt for team-stats "active 24h" computation (Chat #115).
     // Best-effort — a failure here does not block the login response.
-    void recordLogin(ba.baId);
+    void recordLogin(ba.tmagId);
 
-    res.json({ ok: true, baId: ba.baId });
+    res.json({ ok: true, tmagId: ba.tmagId });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Login failed: ${msg}` });
@@ -187,7 +187,7 @@ authRoutes.post('/logout', async (_req: Request, res: Response) => {
 /**
  * GET /api/auth/me — returns the current BA's identity + admin flag.
  *
- * Shape: { ok, me: { baId, threeBaId, fullName, email, isAdmin } }
+ * Shape: { ok, me: { tmagId, threeBaId, fullName, email, isAdmin } }
  *
  * Used by both .team and admin clients. The admin client reads `isAdmin` to
  * decide whether to render the shell or the forbidden state. The server's
@@ -199,18 +199,18 @@ authRoutes.post('/logout', async (_req: Request, res: Response) => {
 authRoutes.get('/me', requireAuth, async (req: Request, res: Response) => {
   const session = req.session!;
   try {
-    const ba = await findBAByBaId(session.baId);
+    const ba = await findBAByTmagId(session.tmagId);
     if (!ba) {
       res.status(401).json({ ok: false, error: 'Session references missing BA.' });
       return;
     }
     const isAdmin =
-      env.ADMIN_BA_IDS.includes(ba.baId) || env.ADMIN_BA_IDS.includes(ba.threeBaId);
+      env.ADMIN_BA_IDS.includes(ba.tmagId) || env.ADMIN_BA_IDS.includes(ba.threeBaId);
 
     res.json({
       ok: true,
       me: {
-        baId: ba.baId,
+        tmagId: ba.tmagId,
         threeBaId: ba.threeBaId,
         fullName: `${ba.firstName} ${ba.lastName}`.trim(),
         email: ba.email,

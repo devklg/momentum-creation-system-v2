@@ -21,7 +21,7 @@ import type {
 interface AudienceSelectorProps {
   preset: BroadcastAudiencePreset;
   channel: BroadcastChannel;
-  customBaIds: string[];
+  customTmagIds: string[];
   onPresetChange: (next: BroadcastAudiencePreset) => void;
   onCustomChange: (next: string[]) => void;
   onPreviewChange: (preview: BroadcastAudiencePreview | null) => void;
@@ -38,7 +38,7 @@ const PRESETS: Array<{ value: BroadcastAudiencePreset; label: string; hint: stri
 export function AudienceSelector({
   preset,
   channel,
-  customBaIds,
+  customTmagIds,
   onPresetChange,
   onCustomChange,
   onPreviewChange,
@@ -46,7 +46,7 @@ export function AudienceSelector({
   const [preview, setPreview] = useState<BroadcastAudiencePreview | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [customText, setCustomText] = useState(customBaIds.join(', '));
+  const [customText, setCustomText] = useState(customTmagIds.join(', '));
 
   // Refresh the preview when preset / channel / custom set changes.
   useEffect(() => {
@@ -58,8 +58,8 @@ export function AudienceSelector({
         const params = new URLSearchParams();
         params.set('preset', preset);
         params.set('channel', channel);
-        if (preset === 'custom' && customBaIds.length > 0) {
-          params.set('customBaIds', customBaIds.join(','));
+        if (preset === 'custom' && customTmagIds.length > 0) {
+          params.set('customTmagIds', customTmagIds.join(','));
         }
         const res = await fetch(`/api/admin/broadcast/audience?${params.toString()}`, {
           credentials: 'include',
@@ -87,7 +87,7 @@ export function AudienceSelector({
     return () => {
       cancelled = true;
     };
-  }, [preset, channel, customBaIds, onPreviewChange]);
+  }, [preset, channel, customTmagIds, onPreviewChange]);
 
   const handleCustomBlur = () => {
     const ids = customText

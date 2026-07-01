@@ -2,13 +2,13 @@
  * Fast Start Training — per-BA module progress domain
  * (feat/fast-start-training · wireframe 3.5).
  *
- * One record per (baId, moduleId). Forward-only state transitions:
+ * One record per (tmagId, moduleId). Forward-only state transitions:
  *   not_started → in_progress → completed
  * Backward writes are rejected idempotently (the route returns the
  * current state without erroring) so a double-click on "mark complete"
  * after the user navigates back is safe.
  *
- * Sponsor immutability (locked-spec 3.5): every write stamps baId from
+ * Sponsor immutability (locked-spec 3.5): every write stamps tmagId from
  * the authed session (passed in by the route layer). Nothing in a body
  * can target another BA's progress.
  *
@@ -25,7 +25,7 @@
  *   complete = (every module status === 'completed') AND
  *              (invitationsSent >= 1)
  * invitationsSent is read from the Chat #119 spine — we cross-check
- * the prospects collection for sponsorBaId=baId AND sentAt IS NOT NULL.
+ * the prospects collection for sponsorTmagId=tmagId AND sentAt IS NOT NULL.
  * Fast Start does not duplicate the count.
  */
 
@@ -52,8 +52,8 @@ export function isValidModuleId(n: unknown): n is FastStartModuleId {
   return typeof n === 'number' && VALID_MODULE_IDS.includes(n as FastStartModuleId);
 }
 
-function compositeId(baId: string, moduleId: FastStartModuleId): string {
-  return `${baId}__module-${moduleId}`;
+function compositeId(tmagId: string, moduleId: FastStartModuleId): string {
+  return `${tmagId}__module-${moduleId}`;
 }
 
 /* ──────────────────────────────────────────────────────────────────
@@ -96,7 +96,7 @@ async function ensureProgressCollection(): Promise<void> {
  * ────────────────────────────────────────────────────────────────── */
 
 async function findProgress(
-  baId: string,
+  tmagId: string,
   moduleId: FastStartModuleId,
 ): Promise<FastStartProgressRecord | null> {
   const data = await gatewayCall<{ documents?: FastStartProgressRecord[] }>(
@@ -105,35 +105,35 @@ async function findProgress(
     {
       database: MONGO_DB,
       collection: PROGRESS_COLLECTION,
-      filter: { baId, moduleId },
+      filter: { tmagId, moduleId },
       limit: 1,
     },
   );
   return data.documents?.[0] ?? null;
 }
 
-async function findAllProgress(baId: string): Promise<FastStartProgressRecord[]> {
+async function findAllProgress(tmagId: string): Promise<FastStartProgressRecord[]> {
   const data = await gatewayCall<{ documents?: FastStartProgressRecord[] }>(
     'mongodb',
     'query',
     {
       database: MONGO_DB,
       collection: PROGRESS_COLLECTION,
-      filter: { baId },
+      filter: { tmagId },
       limit: 10,
     },
   );
   return data.documents ?? [];
 }
 
-async function countSentInvitations(baId: string): Promise<number> {
+async function countSentInvitations(tmagId: string): Promise<number> {
   const data = await gatewayCall<{ count?: number; documents?: unknown[] }>(
     'mongodb',
     'query',
     {
       database: MONGO_DB,
       collection: PROSPECTS_COLLECTION,
-      filter: { sponsorBaId: baId, sentAt: { $ne: null } },
+      filter: { sponsorTmagId: tmagId, sentAt: { $ne: null } },
       limit: 1,
     },
   );
@@ -146,11 +146,11 @@ async function countSentInvitations(baId: string): Promise<number> {
  * `not_started` for modules with no row yet) + the invitation cross-check.
  */
 export async function getFastStartProgress(
-  baId: string,
+  tmagId: string,
 ): Promise<FastStartProgressResponse> {
   const [rows, invitationsSent] = await Promise.all([
-    findAllProgress(baId),
-    countSentInvitations(baId),
+    findAllProgress(tmagId),
+    countSentInvitations(tmagId),
   ]);
 
   const byModule = new Map<FastStartModuleId, FastStartProgressRecord>();
@@ -200,24 +200,24 @@ function isBackwardTransition(
  * after a back-button revisit is harmless.
  */
 export async function markFastStartModuleState(args: {
-  baId: string;
+  tmagId: string;
   moduleId: FastStartModuleId;
   to: Exclude<FastStartModuleState, 'not_started'>;
   occurredAt: string;
 }): Promise<FastStartMarkStateResponse> {
-  const { baId, moduleId, to, occurredAt } = args;
-  const existing = await findProgress(baId, moduleId);
+  const { tmagId, moduleId, to, occurredAt } = args;
+  const existing = await findProgress(tmagId, moduleId);
 
   // ── First touch: insert via triple-stack ────────────────────────────
   if (!existing) {
     await ensureProgressCollection();
-    const _id = compositeId(baId, moduleId);
+    const _id = compositeId(tmagId, moduleId);
     const startedAt = occurredAt;
     const completedAt = to === 'completed' ? occurredAt : null;
 
     const doc: FastStartProgressRecord = {
       _id,
-      baId,
+      tmagId,
       moduleId,
       state: to,
       startedAt,
@@ -226,7 +226,7 @@ export async function markFastStartModuleState(args: {
       createdAt: occurredAt,
     };
 
-    const chromaDoc = `BA ${baId} ${to} Fast Start module ${moduleId}`;
+    const chromaDoc = `BA ${tmagId} ${to} Fast Start module ${moduleId}`;
 
     await tripleStackWrite({
       id: _id,
@@ -234,14 +234,14 @@ export async function markFastStartModuleState(args: {
       mongoDoc: doc as unknown as Record<string, unknown>,
       neo4j: {
         cypher:
-          'MERGE (b:BrandAmbassador {baId: $baId}) ' +
+          'MERGE (b:BrandAmbassador {tmagId: $tmagId}) ' +
           'MERGE (p:FastStartProgress {progressId: $id}) ' +
-          'SET p.baId = $baId, p.moduleId = $moduleId, p.state = $state, ' +
+          'SET p.tmagId = $tmagId, p.moduleId = $moduleId, p.state = $state, ' +
           '    p.startedAt = $startedAt, p.completedAt = $completedAt, ' +
           '    p.updatedAt = $updatedAt, p.createdAt = $createdAt ' +
           'MERGE (b)-[:HAS_PROGRESS]->(p)',
         params: {
-          baId,
+          tmagId,
           moduleId,
           state: to,
           startedAt,
@@ -254,7 +254,7 @@ export async function markFastStartModuleState(args: {
         collection: CHROMA_COLLECTION,
         document: chromaDoc,
         metadata: {
-          baId,
+          tmagId,
           moduleId,
           state: to,
           updatedAt: occurredAt,

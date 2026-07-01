@@ -1,7 +1,7 @@
 /**
  * /api/vm — BA-owned VM lead batch and campaign API.
  *
- * Owner/sponsor identity comes only from req.session.baId. Client payloads
+ * Owner/sponsor identity comes only from req.session.tmagId. Client payloads
  * cannot override ownership.
  */
 
@@ -73,8 +73,8 @@ const ImportLeadsSchema = z.object({
   leads: z.array(ImportLeadSchema).min(1).max(500),
 });
 
-function sessionBaId(req: import('express').Request): string | null {
-  return req.session?.baId ?? null;
+function sessionTmagId(req: import('express').Request): string | null {
+  return req.session?.tmagId ?? null;
 }
 
 function routeParam(req: import('express').Request, name: string): string {
@@ -100,10 +100,10 @@ function sendVmError(res: import('express').Response, err: unknown) {
 }
 
 vmRoutes.get('/batches', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = sessionBaId(req);
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = sessionTmagId(req);
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
-    const batches = await listLeadBatchesForOwner(baId);
+    const batches = await listLeadBatchesForOwner(tmagId);
     const body: LeadBatchListResponse = { ok: true, batches };
     return res.status(200).json(body);
   } catch (err) {
@@ -112,16 +112,16 @@ vmRoutes.get('/batches', requireAuth, requireSteveComplete, async (req, res) => 
 });
 
 vmRoutes.post('/batches', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = sessionBaId(req);
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = sessionTmagId(req);
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   const parsed = CreateBatchSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ ok: false, error: 'invalid_payload', issues: parsed.error.issues });
   }
   try {
     const batch = await createLeadBatch({
-      ownerTmBaId: baId,
-      sponsorTmBaId: baId,
+      ownerTmagId: tmagId,
+      sponsorTmagId: tmagId,
       ...parsed.data,
     });
     const body: LeadBatchResponse = { ok: true, batch };
@@ -132,10 +132,10 @@ vmRoutes.post('/batches', requireAuth, requireSteveComplete, async (req, res) =>
 });
 
 vmRoutes.get('/batches/:batchId', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = sessionBaId(req);
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = sessionTmagId(req);
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
-    const batch = await findLeadBatchForOwner(routeParam(req, 'batchId'), baId);
+    const batch = await findLeadBatchForOwner(routeParam(req, 'batchId'), tmagId);
     const body: LeadBatchResponse = { ok: true, batch };
     return res.status(200).json(body);
   } catch (err) {
@@ -144,10 +144,10 @@ vmRoutes.get('/batches/:batchId', requireAuth, requireSteveComplete, async (req,
 });
 
 vmRoutes.get('/campaigns', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = sessionBaId(req);
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = sessionTmagId(req);
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
-    const campaigns = await listVMCampaignsForOwner(baId);
+    const campaigns = await listVMCampaignsForOwner(tmagId);
     const body: VMCampaignListResponse = { ok: true, campaigns };
     return res.status(200).json(body);
   } catch (err) {
@@ -156,16 +156,16 @@ vmRoutes.get('/campaigns', requireAuth, requireSteveComplete, async (req, res) =
 });
 
 vmRoutes.post('/campaigns', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = sessionBaId(req);
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = sessionTmagId(req);
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   const parsed = CreateCampaignSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ ok: false, error: 'invalid_payload', issues: parsed.error.issues });
   }
   try {
     const campaign = await createVMCampaign({
-      ownerTmBaId: baId,
-      sponsorTmBaId: baId,
+      ownerTmagId: tmagId,
+      sponsorTmagId: tmagId,
       leadBatchId: parsed.data.leadBatchId,
       name: parsed.data.name,
       provider: parsed.data.provider,
@@ -182,10 +182,10 @@ vmRoutes.post('/campaigns', requireAuth, requireSteveComplete, async (req, res) 
 });
 
 vmRoutes.get('/campaigns/:campaignId', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = sessionBaId(req);
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = sessionTmagId(req);
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
-    const campaign = await findVMCampaignForOwner(routeParam(req, 'campaignId'), baId);
+    const campaign = await findVMCampaignForOwner(routeParam(req, 'campaignId'), tmagId);
     const body: VMCampaignResponse = { ok: true, campaign };
     return res.status(200).json(body);
   } catch (err) {
@@ -194,16 +194,16 @@ vmRoutes.get('/campaigns/:campaignId', requireAuth, requireSteveComplete, async 
 });
 
 vmRoutes.post('/batches/:batchId/import', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = sessionBaId(req);
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = sessionTmagId(req);
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   const parsed = ImportLeadsSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ ok: false, error: 'invalid_payload', issues: parsed.error.issues });
   }
   try {
     const result = await importBulkLeads({
-      ownerTmBaId: baId,
-      sponsorTmBaId: baId,
+      ownerTmagId: tmagId,
+      sponsorTmagId: tmagId,
       leadBatchId: routeParam(req, 'batchId'),
       vmCampaignId: parsed.data.vmCampaignId,
       leads: parsed.data.leads,

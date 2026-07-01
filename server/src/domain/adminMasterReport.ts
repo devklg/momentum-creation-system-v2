@@ -47,7 +47,7 @@ const PROVENANCE_NOTE =
 
 function fmtFilterScope(filter: AdminDashboardFilter): string {
   const parts: string[] = [];
-  parts.push(filter.baId ? `BA: ${filter.baId}` : 'All BAs');
+  parts.push(filter.tmagId ? `BA: ${filter.tmagId}` : 'All BAs');
   const lg = filter.leaderGroup;
   if (lg && lg !== 'all') {
     parts.push(lg === 'leaders_only' ? 'Leaders only' : 'Non-leaders');
@@ -242,7 +242,7 @@ export async function buildMasterReportPdf(
     },
   );
 
-  const scope = filter.baId ? `-${filter.baId}` : '-all';
+  const scope = filter.tmagId ? `-${filter.tmagId}` : '-all';
   const filename = `master-report${scope}-${generatedAt.slice(0, 10)}.pdf`;
 
   return { buffer, generatedAt, sourceHash, filename };

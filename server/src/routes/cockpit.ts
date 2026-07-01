@@ -16,7 +16,7 @@
  * requireAuth + requireSteveComplete.
  *
  * Sponsor immutability (locked-spec 3.5): the BA id is read from
- * req.session.baId — the authed session — NEVER from a query param or body.
+ * req.session.tmagId — the authed session — NEVER from a query param or body.
  * The domain filters every read on that id, so a BA can only ever see their
  * own prospects.
  */
@@ -40,11 +40,11 @@ export const cockpitRoutes: Router = Router();
  * it reads Michael status without unlocking the operational PMV early.
  */
 cockpitRoutes.get('/launch', requireAuth, async (req, res) => {
-  const baId = req.session?.baId;
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   try {
-    const payload = await getTeamLaunchCenter(baId);
+    const payload = await getTeamLaunchCenter(tmagId);
     return res.status(200).json(payload);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -58,11 +58,11 @@ cockpitRoutes.get('/launch', requireAuth, async (req, res) => {
  * per-prospect activity timeline keyed by prospectId.
  */
 cockpitRoutes.get('/invites', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = req.session?.baId;
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   try {
-    const payload = await getMyInvites(baId);
+    const payload = await getMyInvites(tmagId);
     return res.status(200).json(payload);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -75,11 +75,11 @@ cockpitRoutes.get('/invites', requireAuth, requireSteveComplete, async (req, res
  * GET /api/cockpit/summary — headline funnel counts + the My Sponsor card.
  */
 cockpitRoutes.get('/summary', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = req.session?.baId;
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   try {
-    const payload = await getCockpitSummary(baId);
+    const payload = await getCockpitSummary(tmagId);
     return res.status(200).json(payload);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -95,11 +95,11 @@ cockpitRoutes.get('/summary', requireAuth, requireSteveComplete, async (req, res
  * cockpit Today's Actions card uses. Read-only; no outreach is sent.
  */
 cockpitRoutes.get('/pmv', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = req.session?.baId;
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   try {
-    const payload = await getProspectMomentumViewer(baId);
+    const payload = await getProspectMomentumViewer(tmagId);
     return res.status(200).json(payload);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -118,11 +118,11 @@ cockpitRoutes.get(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     try {
-      const payload = await getCockpitTodaysActions(baId);
+      const payload = await getCockpitTodaysActions(tmagId);
       return res.status(200).json(payload);
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -144,11 +144,11 @@ cockpitRoutes.get(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     try {
-      const { buffer, filename } = await buildCockpitProspectListPdf(baId);
+      const { buffer, filename } = await buildCockpitProspectListPdf(tmagId);
       res.status(200);
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);

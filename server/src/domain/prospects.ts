@@ -7,8 +7,8 @@
  * prospect record and the token record atomically (triple-stack).
  *
  * Sponsor immutability (locked-spec Part 3.5):
- *   - sponsorBaId is stamped at creation and never recomputed.
- *   - Routes accepting prospect updates must reject any sponsorBaId in the
+ *   - sponsorTmagId is stamped at creation and never recomputed.
+ *   - Routes accepting prospect updates must reject any sponsorTmagId in the
  *     request body and use the existing record value.
  *
  * Customer conversion tags (locked-spec Part 1.17):
@@ -33,7 +33,7 @@ export interface NewProspectInput {
   firstName: string;
   lastName: string;
   location: ProspectLocation;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   phone?: string | null;
   email?: string | null;
   createdAt: string;

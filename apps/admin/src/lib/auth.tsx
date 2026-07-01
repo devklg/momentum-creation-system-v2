@@ -13,7 +13,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 export interface AdminMe {
-  baId: string;
+  tmagId: string;
   threeBaId: string;
   fullName: string;
   email: string;

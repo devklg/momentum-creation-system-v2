@@ -7,11 +7,11 @@
  *   GET  /api/steve/discovery/script  → the discovery backbone (read-only ref)
  *
  * Worker ↔ server (machine-to-machine, STEVE_WORKER_SECRET guarded):
- *   GET  /api/steve/discovery/system-prompt?baId=...  → system prompt string
+ *   GET  /api/steve/discovery/system-prompt?tmagId=...  → system prompt string
  *   POST /api/steve/discovery/ingest                  → persist the artifact
  *
  * Sponsor-only:
- *   GET  /api/steve/discovery/profile/:downlineBaId   → downline's profile card
+ *   GET  /api/steve/discovery/profile/:downlineTmagId   → downline's profile card
  *
  * Compliance: BA-facing only, never prospect-facing, never on .com. No income
  * or placement language anywhere (locked-spec 3.10/3.12). Steve never scores or
@@ -62,7 +62,7 @@ steveRoutes.get(
   async (req: Request, res: Response) => {
     const session = req.session!;
     try {
-      const view = await buildDiscoveryView(session.baId);
+      const view = await buildDiscoveryView(session.tmagId);
       res.json({ ok: true, view });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'unknown';
@@ -80,7 +80,7 @@ steveRoutes.get(
   },
 );
 
-/** GET /api/steve/discovery/system-prompt?baId=... — worker → server.
+/** GET /api/steve/discovery/system-prompt?tmagId=... — worker → server.
  *  Returns the resolved Steve system prompt for the external voice worker.
  *  Always 200 with a non-empty system string (buildSteveSystemPrompt is
  *  self-contained and never throws). */
@@ -89,9 +89,9 @@ steveRoutes.get(
   async (req: Request, res: Response) => {
     if (!requireSteveWorker(req, res)) return;
 
-    const baId = typeof req.query.baId === 'string' ? req.query.baId.trim() : '';
-    if (!baId) {
-      res.status(400).json({ ok: false, error: 'Provide baId.' });
+    const tmagId = typeof req.query.tmagId === 'string' ? req.query.tmagId.trim() : '';
+    if (!tmagId) {
+      res.status(400).json({ ok: false, error: 'Provide tmagId.' });
       return;
     }
 
@@ -105,7 +105,7 @@ steveRoutes.get(
         {
           database: 'momentum',
           collection: 'brand_ambassadors',
-          filter: { baId },
+          filter: { tmagId },
           limit: 1,
         },
       );
@@ -115,19 +115,19 @@ steveRoutes.get(
     }
 
     const system = buildSteveSystemPrompt({ baFirstName: firstName || 'there' });
-    res.json({ ok: true, baId, system });
+    res.json({ ok: true, tmagId, system });
   },
 );
 
 /** POST /api/steve/discovery/ingest — worker → server. Persists the completed
- *  discovery artifact. Triple-stacked; sponsorBaId server-stamped. */
+ *  discovery artifact. Triple-stacked; sponsorTmagId server-stamped. */
 const Recommendation = z.object({
   text: z.string(),
   href: z.string().nullable().optional(),
 });
 
 const IngestBody = z.object({
-  baId: z.string().min(1),
+  tmagId: z.string().min(1),
   callSid: z.string().nullable(),
   startedAt: z.string().min(10),
   completedAt: z.string().min(10),
@@ -203,7 +203,7 @@ steveRoutes.post(
       const normalizeRecs = (recs: Array<{ text: string; href?: string | null }>) =>
         recs.map((r) => ({ text: r.text, href: r.href ?? null }));
       const artifact = await ingestDiscoveryArtifact({
-        baId: data.baId,
+        tmagId: data.tmagId,
         callSid: data.callSid,
         startedAt: data.startedAt,
         completedAt: data.completedAt,
@@ -218,8 +218,8 @@ steveRoutes.post(
       });
       // eslint-disable-next-line no-console
       console.log(
-        `[audit] steve_discovery_ingested baId=${artifact.baId} sponsor=${
-          artifact.sponsorBaId ?? 'none'
+        `[audit] steve_discovery_ingested tmagId=${artifact.tmagId} sponsor=${
+          artifact.sponsorTmagId ?? 'none'
         } answers=${artifact.answers.length}`,
       );
       res.json({ ok: true, artifact });
@@ -235,24 +235,24 @@ steveRoutes.post(
   },
 );
 
-/** GET /api/steve/discovery/profile/:downlineBaId — sponsor-only.
+/** GET /api/steve/discovery/profile/:downlineTmagId — sponsor-only.
  *  The direct sponsor reads a downline's Steve Success Profile. Authoritative
  *  check is server-side; 403 if not the direct sponsor. */
 steveRoutes.get(
-  '/discovery/profile/:downlineBaId',
+  '/discovery/profile/:downlineTmagId',
   requireAuth,
   requireSteveComplete,
   async (req: Request, res: Response) => {
     const session = req.session!;
-    const downlineBaId = String(req.params.downlineBaId ?? '');
-    if (!downlineBaId) {
-      res.status(400).json({ ok: false, error: 'Missing downlineBaId.' });
+    const downlineTmagId = String(req.params.downlineTmagId ?? '');
+    if (!downlineTmagId) {
+      res.status(400).json({ ok: false, error: 'Missing downlineTmagId.' });
       return;
     }
     try {
       const card = await getProfileCardForSponsor({
-        requestingBaId: session.baId,
-        downlineBaId,
+        requestingTmagId: session.tmagId,
+        downlineTmagId,
       });
       res.json({ ok: true, card });
     } catch (err) {

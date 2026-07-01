@@ -45,7 +45,7 @@ export interface ResolvedProspect {
 }
 
 export interface ResolvedBA {
-  baId: string;
+  tmagId: string;
   firstName: string;
   lastName: string;
   lastInitial: string;

@@ -256,7 +256,7 @@ export function OrientationPage() {
                       </span>
                       <span className="text-cream">{seat.baName}</span>
                       <span className="font-mono text-[10px] text-cream-faint tracking-label">
-                        {seat.baId}
+                        {seat.tmagId}
                       </span>
                       <span className="font-mono text-[10px] text-cream-faint tracking-label ml-auto">
                         booked {fmt(seat.reservedAt)}

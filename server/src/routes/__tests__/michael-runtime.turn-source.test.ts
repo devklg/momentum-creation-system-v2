@@ -124,26 +124,26 @@ function mockRes() {
 function mockReq(
   body: Record<string, unknown> = {},
   withSession = true,
-  sessionBaId: string = SESSION_BA_ID,
+  sessionTmagId: string = SESSION_BA_ID,
 ) {
   return {
-    ...(withSession ? { session: { baId: sessionBaId } } : {}),
+    ...(withSession ? { session: { tmagId: sessionTmagId } } : {}),
     body,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
 }
 
 describe('S3.11 route behavior — empty body drives the server-owned turn', () => {
-  it('4. rejects a forbidden body baId with 400 CLIENT_RUNTIME_INPUT_NOT_ALLOWED (sponsor immutability)', async () => {
+  it('4. rejects a forbidden body tmagId with 400 CLIENT_RUNTIME_INPUT_NOT_ALLOWED (sponsor immutability)', async () => {
     enableRouteAndResponse();
     const res = mockRes();
-    await handleMichaelRuntimeResolve(mockReq({ baId: 'TMBA-EVIL-000000' }), res);
+    await handleMichaelRuntimeResolve(mockReq({ tmagId: 'TMBA-EVIL-000000' }), res);
 
     expect(res.statusCode).toBe(400);
     expect(res.body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
   });
 
-  it('5. rejects a missing session baId with 401', async () => {
+  it('5. rejects a missing session tmagId with 401', async () => {
     enableRouteAndResponse();
     const res = mockRes();
     await handleMichaelRuntimeResolve(mockReq({}, false), res);

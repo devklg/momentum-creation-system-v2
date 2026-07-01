@@ -159,7 +159,7 @@ export function DirectoryTable({ rows, loading, onSelectProspect }: Props) {
                 <div className="leading-tight">
                   <div className="text-cream">{row.sponsorName}</div>
                   <div className="text-[11px] font-mono text-cream-faint">
-                    {row.sponsorBaId}
+                    {row.sponsorTmagId}
                   </div>
                 </div>
               </Td>

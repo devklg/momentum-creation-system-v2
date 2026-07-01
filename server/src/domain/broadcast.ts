@@ -25,8 +25,8 @@
 import { randomBytes } from 'node:crypto';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
-import { findBAByBaId, listAllBAsForAdmin, type BAListItem } from './ba.js';
-import { listLeaderBaIds } from './adminMetrics.js';
+import { findBAByTmagId, listAllBAsForAdmin, type BAListItem } from './ba.js';
+import { listLeaderTmagIds } from './adminMetrics.js';
 import { appendAuditEntry } from './auditLog.js';
 import type {
   BroadcastAudiencePreset,
@@ -72,7 +72,7 @@ export const LEADER_NOTE =
 /* ─── opt-out list ─────────────────────────────────────────────── */
 
 /** Load the global STOP/optout set. Used everywhere audience is resolved. */
-export async function loadOptoutBaIds(): Promise<Set<string>> {
+export async function loadOptoutTmagIds(): Promise<Set<string>> {
   const result = await gatewayCall<{ documents: BroadcastOptoutRow[] }>(
     'mongodb',
     'query',
@@ -83,7 +83,7 @@ export async function loadOptoutBaIds(): Promise<Set<string>> {
       limit: 50_000,
     },
   );
-  return new Set((result.documents ?? []).map((r) => r.baId));
+  return new Set((result.documents ?? []).map((r) => r.tmagId));
 }
 
 /**
@@ -92,7 +92,7 @@ export async function loadOptoutBaIds(): Promise<Set<string>> {
  * Telnyx inbound-SMS webhook can call it when a STOP keyword arrives.
  */
 export async function appendBroadcastOptout(input: {
-  baId: string;
+  tmagId: string;
   reason: BroadcastOptoutReason;
   sourcePhone?: string | null;
   note?: string | null;
@@ -103,7 +103,7 @@ export async function appendBroadcastOptout(input: {
     {
       database: MONGO_DB,
       collection: COLL_OPTOUTS,
-      filter: { baId: input.baId },
+      filter: { tmagId: input.tmagId },
       limit: 1,
     },
   );
@@ -111,7 +111,7 @@ export async function appendBroadcastOptout(input: {
     return existing.documents[0];
   }
   const row: BroadcastOptoutRow = {
-    baId: input.baId,
+    tmagId: input.tmagId,
     reason: input.reason,
     addedAt: new Date().toISOString(),
     sourcePhone: input.sourcePhone ?? null,
@@ -120,7 +120,7 @@ export async function appendBroadcastOptout(input: {
   await gatewayCall('mongodb', 'insert', {
     database: MONGO_DB,
     collection: COLL_OPTOUTS,
-    documents: [{ _id: input.baId, ...row }],
+    documents: [{ _id: input.tmagId, ...row }],
   });
   return row;
 }
@@ -134,9 +134,9 @@ export async function appendBroadcastOptout(input: {
 export async function resolveAudience(
   preset: BroadcastAudiencePreset,
   channel: BroadcastChannel,
-  customAudienceBaIds: string[] | null,
+  customAudienceTmagIds: string[] | null,
 ): Promise<{ recipients: BAListItem[]; preview: BroadcastAudiencePreview }> {
-  const optouts = await loadOptoutBaIds();
+  const optouts = await loadOptoutTmagIds();
   const allBas = await listAllBAsForAdmin(50_000);
 
   let candidates: BAListItem[];
@@ -155,8 +155,8 @@ export async function resolveAudience(
       break;
     }
     case 'leaders': {
-      const leaderIds = new Set(await listLeaderBaIds());
-      candidates = allBas.filter((b) => leaderIds.has(b.baId));
+      const leaderIds = new Set(await listLeaderTmagIds());
+      candidates = allBas.filter((b) => leaderIds.has(b.tmagId));
       provenanceNote = LEADER_NOTE;
       break;
     }
@@ -167,14 +167,14 @@ export async function resolveAudience(
       break;
     }
     case 'custom': {
-      const set = new Set(customAudienceBaIds ?? []);
-      candidates = allBas.filter((b) => set.has(b.baId));
+      const set = new Set(customAudienceTmagIds ?? []);
+      candidates = allBas.filter((b) => set.has(b.tmagId));
       break;
     }
   }
 
   const totalCandidates = candidates.length;
-  const eligible = candidates.filter((b) => !optouts.has(b.baId));
+  const eligible = candidates.filter((b) => !optouts.has(b.tmagId));
   const excludedBySTOP = totalCandidates - eligible.length;
 
   const wantsEmail = channel === 'email' || channel === 'both';
@@ -205,21 +205,21 @@ async function filterAtRisk(allBas: BAListItem[], nowMs: number): Promise<BAList
   if (olderThan7d.length === 0) return [];
 
   const result = await gatewayCall<{
-    documents: Array<{ baId: string; lastLoginAt: string | null }>;
+    documents: Array<{ tmagId: string; lastLoginAt: string | null }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: 'brand_ambassadors',
-    filter: { baId: { $in: olderThan7d.map((b) => b.baId) } },
-    projection: { baId: 1, lastLoginAt: 1 },
+    filter: { tmagId: { $in: olderThan7d.map((b) => b.tmagId) } },
+    projection: { tmagId: 1, lastLoginAt: 1 },
     limit: olderThan7d.length,
   });
-  const lastByBaId = new Map<string, string | null>();
+  const lastByTmagId = new Map<string, string | null>();
   for (const d of result.documents ?? []) {
-    lastByBaId.set(d.baId, d.lastLoginAt ?? null);
+    lastByTmagId.set(d.tmagId, d.lastLoginAt ?? null);
   }
   const loginCutoff = nowMs - MS_14D;
   return olderThan7d.filter((b) => {
-    const last = lastByBaId.get(b.baId);
+    const last = lastByTmagId.get(b.tmagId);
     if (!last) return true;
     const t = Date.parse(last);
     return !Number.isFinite(t) || t < loginCutoff;
@@ -313,8 +313,8 @@ function mintBroadcastId(isTest: boolean): string {
   return `${isTest ? 'btest' : 'bcast'}_${ts}_${rand}`;
 }
 
-function recipientRowId(broadcastId: string, baId: string): string {
-  return `${broadcastId}::${baId}`;
+function recipientRowId(broadcastId: string, tmagId: string): string {
+  return `${broadcastId}::${tmagId}`;
 }
 
 /* ─── render a recipient row ──────────────────────────────────── */
@@ -349,9 +349,9 @@ function renderRecipient(
     (wantsSms && !ba.phone && (!wantsEmail || !ba.email));
 
   return {
-    rowId: recipientRowId(broadcastId, ba.baId),
+    rowId: recipientRowId(broadcastId, ba.tmagId),
     broadcastId,
-    recipientBaId: ba.baId,
+    recipientTmagId: ba.tmagId,
     recipientFullName: ba.fullName,
     recipientFirstName: firstName ?? '',
     recipientEmail: ba.email,
@@ -394,13 +394,13 @@ export async function enqueueBroadcast(
   validateTemplate(request.channel, request.template);
 
   if (request.audiencePreset === 'custom') {
-    const list = request.customAudienceBaIds ?? [];
+    const list = request.customAudienceTmagIds ?? [];
     if (list.length === 0) {
       throw new BroadcastValidationError(['Custom audience requires at least one BA ID.']);
     }
-    if (list.length > BROADCAST_LIMITS.customAudienceMaxBaIds) {
+    if (list.length > BROADCAST_LIMITS.customAudienceMaxTmagIds) {
       throw new BroadcastValidationError([
-        `Custom audience exceeds ${BROADCAST_LIMITS.customAudienceMaxBaIds} BA IDs.`,
+        `Custom audience exceeds ${BROADCAST_LIMITS.customAudienceMaxTmagIds} BA IDs.`,
       ]);
     }
   }
@@ -408,7 +408,7 @@ export async function enqueueBroadcast(
   const { recipients, preview } = await resolveAudience(
     request.audiencePreset,
     request.channel,
-    request.customAudienceBaIds ?? null,
+    request.customAudienceTmagIds ?? null,
   );
 
   if (recipients.length === 0) {
@@ -421,13 +421,13 @@ export async function enqueueBroadcast(
   const now = new Date().toISOString();
   const broadcast: BroadcastRecord = {
     broadcastId,
-    createdByBaId: actor.baId,
+    createdByTmagId: actor.tmagId,
     createdByDisplayName: actorDisplayName,
     createdAt: now,
     isTestSend: false,
     audiencePreset: request.audiencePreset,
-    customAudienceBaIds:
-      request.audiencePreset === 'custom' ? request.customAudienceBaIds ?? [] : null,
+    customAudienceTmagIds:
+      request.audiencePreset === 'custom' ? request.customAudienceTmagIds ?? [] : null,
     channel: request.channel,
     template: request.template,
     recipientCount: recipients.length,
@@ -445,7 +445,7 @@ export async function enqueueBroadcast(
         'SET b.createdAt = datetime($createdAt), b.channel = $channel, ' +
         '    b.audiencePreset = $audiencePreset, b.recipientCount = $recipientCount ' +
         'WITH b ' +
-        'MATCH (a:BrandAmbassador {baId: $createdByBaId}) ' +
+        'MATCH (a:BrandAmbassador {tmagId: $createdByTmagId}) ' +
         'MERGE (b)-[:SENT_BY]->(a)',
       params: {
         broadcastId,
@@ -453,7 +453,7 @@ export async function enqueueBroadcast(
         channel: broadcast.channel,
         audiencePreset: broadcast.audiencePreset,
         recipientCount: broadcast.recipientCount,
-        createdByBaId: actor.baId,
+        createdByTmagId: actor.tmagId,
       },
     },
     chroma: {
@@ -544,20 +544,20 @@ export async function prepareSendTest(
 ): Promise<{ broadcast: BroadcastRecord; row: BroadcastRecipientRow }> {
   validateTemplate(request.channel, request.template);
 
-  const ba = await findBAByBaId(actor.baId);
+  const ba = await findBAByTmagId(actor.tmagId);
   if (!ba) {
     throw new BroadcastValidationError([
-      `Sending admin BA record not found for baId=${actor.baId}; cannot send test.`,
+      `Sending admin BA record not found for tmagId=${actor.tmagId}; cannot send test.`,
     ]);
   }
   const listItem: BAListItem = {
-    baId: ba.baId,
+    tmagId: ba.tmagId,
     threeBaId: ba.threeBaId,
     fullName: `${ba.firstName} ${ba.lastName}`.trim(),
     email: ba.email ?? null,
     phone: ba.phone ?? null,
     timezone: ba.timezone ?? null,
-    sponsorBaId: ba.sponsorBaId ?? null,
+    sponsorTmagId: ba.sponsorTmagId ?? null,
     sponsorName: null,
     joinedAt: ba.createdAt,
   };
@@ -566,12 +566,12 @@ export async function prepareSendTest(
   const now = new Date().toISOString();
   const broadcast: BroadcastRecord = {
     broadcastId,
-    createdByBaId: actor.baId,
+    createdByTmagId: actor.tmagId,
     createdByDisplayName: actorDisplayName,
     createdAt: now,
     isTestSend: true,
     audiencePreset: 'custom',
-    customAudienceBaIds: [actor.baId],
+    customAudienceTmagIds: [actor.tmagId],
     channel: request.channel,
     template: request.template,
     recipientCount: 1,
@@ -589,14 +589,14 @@ export async function prepareSendTest(
         'SET b.createdAt = datetime($createdAt), b.channel = $channel, ' +
         '    b.audiencePreset = $audiencePreset, b.isTestSend = true, b.recipientCount = 1 ' +
         'WITH b ' +
-        'MATCH (a:BrandAmbassador {baId: $createdByBaId}) ' +
+        'MATCH (a:BrandAmbassador {tmagId: $createdByTmagId}) ' +
         'MERGE (b)-[:SENT_BY]->(a)',
       params: {
         broadcastId,
         createdAt: now,
         channel: broadcast.channel,
         audiencePreset: broadcast.audiencePreset,
-        createdByBaId: actor.baId,
+        createdByTmagId: actor.tmagId,
       },
     },
     chroma: {

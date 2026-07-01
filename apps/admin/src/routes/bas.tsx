@@ -5,12 +5,12 @@
  *
  * Reads:
  *   GET /api/admin/bas               → directory rows (15 columns)
- *   GET /api/admin/bas/:baId         → profile bundle (drawer)
+ *   GET /api/admin/bas/:tmagId         → profile bundle (drawer)
  *
  * Writes:
- *   POST /api/admin/bas/:baId/sponsor-override   (C.5, critical audit)
- *   POST /api/admin/bas/:baId/leader-tag         (curated badge toggle)
- *   POST /api/admin/bas/:baId/notes              (Kevin-only append-only)
+ *   POST /api/admin/bas/:tmagId/sponsor-override   (C.5, critical audit)
+ *   POST /api/admin/bas/:tmagId/leader-tag         (curated badge toggle)
+ *   POST /api/admin/bas/:tmagId/notes              (Kevin-only append-only)
  *
  * Compliance discipline (Chat #89):
  *   - No algorithmic flagging in the table. No score columns. Kevin reads
@@ -37,8 +37,8 @@ export function BAsPage() {
   const [leaderNote, setLeaderNote] = useState<string>('');
   const [err, setErr] = useState<string | null>(null);
   const [filterText, setFilterText] = useState('');
-  const [openBaId, setOpenBaId] = useState<string | null>(null);
-  const [togglePendingBaId, setTogglePendingBaId] = useState<string | null>(null);
+  const [openTmagId, setOpenTmagId] = useState<string | null>(null);
+  const [togglePendingTmagId, setTogglePendingTmagId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
   const load = useCallback(async () => {
@@ -63,7 +63,7 @@ export function BAsPage() {
 
   function onRowChanged(next: AdminBaDirectoryRow) {
     setRows((prev) =>
-      prev ? prev.map((r) => (r.baId === next.baId ? next : r)) : prev,
+      prev ? prev.map((r) => (r.tmagId === next.tmagId ? next : r)) : prev,
     );
   }
 
@@ -72,11 +72,11 @@ export function BAsPage() {
     void load();
   }
 
-  async function onToggleCurated(baId: string, next: boolean) {
-    setTogglePendingBaId(baId);
+  async function onToggleCurated(tmagId: string, next: boolean) {
+    setTogglePendingTmagId(tmagId);
     try {
       const res = await fetch(
-        `/api/admin/bas/${encodeURIComponent(baId)}/leader-tag`,
+        `/api/admin/bas/${encodeURIComponent(tmagId)}/leader-tag`,
         {
           method: 'POST',
           credentials: 'include',
@@ -94,14 +94,14 @@ export function BAsPage() {
       setRows((prev) =>
         prev
           ? prev.map((r) =>
-              r.baId === baId ? { ...r, curatedLeader: data.curated } : r,
+              r.tmagId === tmagId ? { ...r, curatedLeader: data.curated } : r,
             )
           : prev,
       );
     } catch (e) {
       setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
     } finally {
-      setTogglePendingBaId(null);
+      setTogglePendingTmagId(null);
     }
   }
 
@@ -148,16 +148,16 @@ export function BAsPage() {
         <DirectoryTable
           rows={rows}
           filterText={filterText}
-          onOpenProfile={setOpenBaId}
+          onOpenProfile={setOpenTmagId}
           onToggleCurated={(id, next) => void onToggleCurated(id, next)}
-          togglePendingBaId={togglePendingBaId}
+          togglePendingTmagId={togglePendingTmagId}
         />
       )}
 
-      {openBaId && (
+      {openTmagId && (
         <ProfileDrawer
-          baId={openBaId}
-          onClose={() => setOpenBaId(null)}
+          tmagId={openTmagId}
+          onClose={() => setOpenTmagId(null)}
           onRowChanged={onRowChanged}
         />
       )}

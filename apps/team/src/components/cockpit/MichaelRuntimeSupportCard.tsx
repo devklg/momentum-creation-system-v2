@@ -8,7 +8,7 @@
  * sends, calls, schedules, or prospects on the BA's behalf.
  *
  * BA scope is enforced SERVER-SIDE. POST /api/michael-runtime/resolve derives
- * the BA from req.session.baId and rejects any body-supplied BA authority
+ * the BA from req.session.tmagId and rejects any body-supplied BA authority
  * (sponsor immutability, locked-spec 3.5). This component never sends a BA id —
  * the request body carries at most `{ language }` and nothing else.
  *
@@ -95,8 +95,8 @@ export type MichaelRuntimeResult =
  *
  * The server owns the runtime turn entirely (S3.10). This helper sends ONLY an
  * optional `{ language }` UI hint — and an empty body `{}` when no hint is
- * given. It NEVER sends turn / runtimeTurn / contextPacket / baId / sponsorBaId
- * / targetBaId / downlineBaId / prospectId / token / sessionId / turnId /
+ * given. It NEVER sends turn / runtimeTurn / contextPacket / tmagId / sponsorTmagId
+ * / targetTmagId / downlineTmagId / prospectId / token / sessionId / turnId /
  * correlationId or any other BA-authority or id field. It reads only the safe
  * subset of a 200 response: it never reads or stores `trace`, IDs, safety, or
  * persistence internals, never writes localStorage / sessionStorage /

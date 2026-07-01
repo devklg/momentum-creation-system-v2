@@ -6,7 +6,7 @@
  *   - No prospect record. No invite token. No pool placement.
  *   - No alert SMS. No SSE event. No counter increment.
  *
- * The token field is a deterministic sentinel `PREVIEW-<baId>` that no
+ * The token field is a deterministic sentinel `PREVIEW-<tmagId>` that no
  * real minted token will ever collide with. Real invite tokens are 12
  * chars from a 31-char alphabet excluding 0/1/I/O/L (per access-codes
  * format); this sentinel is upper+digit+dash, prefixed `PREVIEW-`, and
@@ -15,7 +15,7 @@
  * 404 against this sentinel — which is exactly what the sandbox demands.
  *
  * Reads from MongoDB are limited to pure-read look-ups:
- *   - findBAByBaId(session.baId)       the inviting BA on the rendered page
+ *   - findBAByTmagId(session.tmagId)       the inviting BA on the rendered page
  *   - findNextUpcomingEvent()           the dashboard's countdown target
  *   - readPoolCounter() (best-effort)   so the dashboard position card
  *                                       shows a believable "next position"
@@ -27,7 +27,7 @@
  */
 
 import { gatewayCall } from '../services/gateway.js';
-import { findBAByBaId } from './ba.js';
+import { findBAByTmagId } from './ba.js';
 import { findNextUpcomingEvent } from './webinarEvent.js';
 import { TEAM_POOL_ID } from './holdingTank.js';
 import type { PreviewResolvedTokenPayload } from '@momentum/shared';
@@ -89,14 +89,14 @@ async function readPoolCounterForPreview(): Promise<number> {
  * Synthesize the preview payload from the authed BA's id.
  *
  * Returns null only when the BA record itself is missing (the session
- * baId points at a deleted/never-existed record). The route layer maps
+ * tmagId points at a deleted/never-existed record). The route layer maps
  * that to a 404 — callers must already be authed past requireAuth +
  * requireSteveComplete to reach here.
  */
 export async function synthesizePreviewPayload(
-  sessionBaId: string,
+  sessionTmagId: string,
 ): Promise<PreviewResolvedTokenPayload | null> {
-  const ba = await findBAByBaId(sessionBaId);
+  const ba = await findBAByTmagId(sessionTmagId);
   if (!ba) return null;
 
   const [nextEvent, currentMax] = await Promise.all([
@@ -114,7 +114,7 @@ export async function synthesizePreviewPayload(
   const previewPosition = currentMax + 1;
 
   return {
-    token: `${PREVIEW_TOKEN_PREFIX}${ba.baId}`,
+    token: `${PREVIEW_TOKEN_PREFIX}${ba.tmagId}`,
     state: 'video_complete',
     prospect: {
       firstName: SAMPLE_PROSPECT.firstName,
@@ -127,7 +127,7 @@ export async function synthesizePreviewPayload(
       expiresAt: expiresAtIso,
     },
     ba: {
-      baId: ba.baId,
+      tmagId: ba.tmagId,
       firstName: ba.firstName,
       lastName: ba.lastName,
       lastInitial: ba.lastName.charAt(0).toUpperCase(),

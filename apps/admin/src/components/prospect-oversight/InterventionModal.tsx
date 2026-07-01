@@ -4,11 +4,11 @@
  * 'force_enroll'.
  *
  * Every kind requires:
- *   - requestingBaId (the BA who asked Kevin to intervene)
+ *   - requestingTmagId (the BA who asked Kevin to intervene)
  *   - reason         (min 8 chars; surfaced in the critical audit entry)
  * Two kinds also require a target BA:
- *   - move           → toBaId
- *   - reassign_sponsor → newSponsorBaId
+ *   - move           → toTmagId
+ *   - reassign_sponsor → newSponsorTmagId
  *
  * UX scaffold:
  *   - Confirmation step shows the BEFORE snapshot (current sponsor /
@@ -38,19 +38,19 @@ interface Props {
 }
 
 interface FormState {
-  requestingBaId: string;
+  requestingTmagId: string;
   reason: string;
   /** Used by 'move'. */
-  toBaId: string;
+  toTmagId: string;
   /** Used by 'reassign_sponsor'. */
-  newSponsorBaId: string;
+  newSponsorTmagId: string;
 }
 
 const EMPTY_FORM: FormState = {
-  requestingBaId: '',
+  requestingTmagId: '',
   reason: '',
-  toBaId: '',
-  newSponsorBaId: '',
+  toTmagId: '',
+  newSponsorTmagId: '',
 };
 
 export function InterventionModal({ kind, detail, onClose, onDone }: Props) {
@@ -62,14 +62,14 @@ export function InterventionModal({ kind, detail, onClose, onDone }: Props) {
   const description = DESCRIPTION[kind];
   const requiresTargetBa = kind === 'move' || kind === 'reassign_sponsor';
   const targetBaLabel = kind === 'move' ? 'New inviting BA ID' : 'New sponsor BA ID';
-  const targetBaValue = kind === 'move' ? form.toBaId : form.newSponsorBaId;
+  const targetBaValue = kind === 'move' ? form.toTmagId : form.newSponsorTmagId;
 
   const setTargetBa = (v: string) => {
-    setForm((f) => (kind === 'move' ? { ...f, toBaId: v } : { ...f, newSponsorBaId: v }));
+    setForm((f) => (kind === 'move' ? { ...f, toTmagId: v } : { ...f, newSponsorTmagId: v }));
   };
 
   const canSubmit =
-    form.requestingBaId.trim().length >= 2 &&
+    form.requestingTmagId.trim().length >= 2 &&
     form.reason.trim().length >= 8 &&
     (!requiresTargetBa || targetBaValue.trim().length >= 2);
 
@@ -88,11 +88,11 @@ export function InterventionModal({ kind, detail, onClose, onDone }: Props) {
     try {
       const path = PATH[kind];
       const body: Record<string, string> = {
-        requestingBaId: form.requestingBaId.trim(),
+        requestingTmagId: form.requestingTmagId.trim(),
         reason: form.reason.trim(),
       };
-      if (kind === 'move') body.toBaId = form.toBaId.trim();
-      if (kind === 'reassign_sponsor') body.newSponsorBaId = form.newSponsorBaId.trim();
+      if (kind === 'move') body.toTmagId = form.toTmagId.trim();
+      if (kind === 'reassign_sponsor') body.newSponsorTmagId = form.newSponsorTmagId.trim();
 
       const res = await fetch(
         `/api/admin/prospects/${encodeURIComponent(detail.prospectId)}/${path}`,
@@ -141,12 +141,12 @@ export function InterventionModal({ kind, detail, onClose, onDone }: Props) {
             <BeforeBlock detail={detail} />
 
             <div>
-              <Label htmlFor="requestingBaId">Requesting BA ID</Label>
+              <Label htmlFor="requestingTmagId">Requesting BA ID</Label>
               <Input
-                id="requestingBaId"
-                value={form.requestingBaId}
+                id="requestingTmagId"
+                value={form.requestingTmagId}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, requestingBaId: e.target.value }))
+                  setForm((f) => ({ ...f, requestingTmagId: e.target.value }))
                 }
                 placeholder="TMBA-…"
               />
@@ -199,7 +199,7 @@ export function InterventionModal({ kind, detail, onClose, onDone }: Props) {
             </p>
 
             <div className="border border-line rounded-md p-3 text-sm space-y-1">
-              <Diff label="Sponsor BA" before={detail.sponsorBaIdNow} after={afterSponsor(kind, detail, form)} />
+              <Diff label="Sponsor BA" before={detail.sponsorTmagIdNow} after={afterSponsor(kind, detail, form)} />
               <Diff
                 label="State"
                 before={detail.state}
@@ -224,7 +224,7 @@ export function InterventionModal({ kind, detail, onClose, onDone }: Props) {
               </p>
               <p className="text-cream whitespace-pre-wrap">{form.reason}</p>
               <p className="text-[11px] font-mono text-cream-faint mt-2">
-                Requesting BA: {form.requestingBaId}
+                Requesting BA: {form.requestingTmagId}
               </p>
             </div>
 
@@ -294,7 +294,7 @@ function BeforeBlock({ detail }: { detail: AdminProspectDetail }) {
       <p className="text-[11px] font-mono tracking-label uppercase text-cream-faint mb-2">
         Before
       </p>
-      <Row label="Sponsor BA" v={`${detail.sponsorNameNow} · ${detail.sponsorBaIdNow}`} />
+      <Row label="Sponsor BA" v={`${detail.sponsorNameNow} · ${detail.sponsorTmagIdNow}`} />
       <Row label="State" v={detail.state} />
       <Row
         label="Position"
@@ -351,9 +351,9 @@ function afterSponsor(
   detail: AdminProspectDetail,
   form: FormState,
 ): string {
-  if (kind === 'move') return form.toBaId || detail.sponsorBaIdNow;
-  if (kind === 'reassign_sponsor') return form.newSponsorBaId || detail.sponsorBaIdNow;
-  return detail.sponsorBaIdNow;
+  if (kind === 'move') return form.toTmagId || detail.sponsorTmagIdNow;
+  if (kind === 'reassign_sponsor') return form.newSponsorTmagId || detail.sponsorTmagIdNow;
+  return detail.sponsorTmagIdNow;
 }
 
 function afterState(

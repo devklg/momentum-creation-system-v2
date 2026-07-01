@@ -65,10 +65,10 @@ export const LEADER_DETECTION_NOTE =
   'leaders are pending wireframe 4.C (leader-tag toggle).';
 
 interface BaDoc {
-  baId: string;
+  tmagId: string;
   firstName: string;
   lastName: string;
-  sponsorBaId: string | null;
+  sponsorTmagId: string | null;
   createdAt: string;
   lastLoginAt: string | null;
   /** Future field — written by 4.C leader-tag toggle. Treated as false when absent. */
@@ -79,7 +79,7 @@ interface BaDoc {
 
 interface PlacementDoc {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   positionNumber: number;
   placedAt: string;
   expiresAt: string;
@@ -93,7 +93,7 @@ interface ProspectDoc {
   lastName: string;
   lastInitial?: string;
   location?: { city?: string; stateOrRegion?: string };
-  sponsorBaId: string;
+  sponsorTmagId: string;
   state: TokenState;
   positionNumber: number | null;
   placedAt: string | null;
@@ -101,7 +101,7 @@ interface ProspectDoc {
 }
 
 interface FastStartDoc {
-  baId: string;
+  tmagId: string;
   moduleId: 1 | 2 | 3 | 4 | 5;
   state: 'not_started' | 'in_progress' | 'completed';
   startedAt: string | null;
@@ -112,20 +112,20 @@ interface FastStartDoc {
 /**
  * Resolve the set of BA IDs the filter narrows to. Returns null when the
  * filter is unrestricted (matches every BA) so downstream queries can skip
- * adding a `baId IN […]` clause.
+ * adding a `tmagId IN […]` clause.
  *
  * Honors the locked leader rule (Part 5). When binary-qualified mirroring
  * and/or 4.C curated tags land, this function changes shape; callers don't.
  */
-export async function resolveScopedBaIds(filter: AdminDashboardFilter): Promise<string[] | null> {
-  if (filter.baId) {
-    return [filter.baId];
+export async function resolveScopedTmagIds(filter: AdminDashboardFilter): Promise<string[] | null> {
+  if (filter.tmagId) {
+    return [filter.tmagId];
   }
   if (filter.leaderGroup === 'all') {
     return null;
   }
 
-  const leaders = await listLeaderBaIds();
+  const leaders = await listLeaderTmagIds();
   if (filter.leaderGroup === 'leaders_only') {
     return leaders;
   }
@@ -137,14 +137,14 @@ export async function resolveScopedBaIds(filter: AdminDashboardFilter): Promise<
     limit: 50_000,
   });
   const leaderSet = new Set(leaders);
-  return (allBas.documents ?? []).map((b) => b.baId).filter((id) => !leaderSet.has(id));
+  return (allBas.documents ?? []).map((b) => b.tmagId).filter((id) => !leaderSet.has(id));
 }
 
 /**
  * The current leader set per locked-spec Part 5. Empty until binary
  * qualification is mirrored and/or curated tags ship.
  */
-export async function listLeaderBaIds(): Promise<string[]> {
+export async function listLeaderTmagIds(): Promise<string[]> {
   const result = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
@@ -166,12 +166,12 @@ export async function listLeaderBaIds(): Promise<string[]> {
   const out: string[] = [];
   for (const ba of candidates) {
     if (ba.kevinTaggedLeader) {
-      out.push(ba.baId);
+      out.push(ba.tmagId);
       continue;
     }
     if (ba.binaryQualified) {
-      const personalCount = await countMatch(COLL_BAS, { sponsorBaId: ba.baId });
-      if (personalCount >= 5) out.push(ba.baId);
+      const personalCount = await countMatch(COLL_BAS, { sponsorTmagId: ba.tmagId });
+      if (personalCount >= 5) out.push(ba.tmagId);
     }
   }
   return out;
@@ -195,9 +195,9 @@ async function countMatch(collection: string, match: Record<string, unknown>): P
 export async function computeAdminDashboardMetrics(
   filter: AdminDashboardFilter,
 ): Promise<AdminDashboardMetrics> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
-  const baScope = scopedBaIds === null ? {} : { baId: { $in: scopedBaIds } };
-  const sponsorScope = scopedBaIds === null ? {} : { sponsorBaId: { $in: scopedBaIds } };
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
+  const baScope = scopedTmagIds === null ? {} : { tmagId: { $in: scopedTmagIds } };
+  const sponsorScope = scopedTmagIds === null ? {} : { sponsorTmagId: { $in: scopedTmagIds } };
 
   const now = new Date();
   const twentyFourHoursAgo = new Date(now.getTime() - MS_24H).toISOString();
@@ -227,7 +227,7 @@ export async function computeAdminDashboardMetrics(
       flushedAt: { $gte: twentyFourHoursAgo },
       flushReason: 'enrolled',
     }),
-    countBasWithCompleteFastStart(scopedBaIds),
+    countBasWithCompleteFastStart(scopedTmagIds),
   ]);
 
   const trainingCompletionPct =
@@ -252,12 +252,12 @@ export async function computeAdminDashboardMetrics(
 
 /**
  * Count of BAs (scoped) with all five Fast Start modules in `completed`.
- * Pipeline: $match → $group baId → $match (count===5) → $count.
+ * Pipeline: $match → $group tmagId → $match (count===5) → $count.
  */
-async function countBasWithCompleteFastStart(scopedBaIds: string[] | null): Promise<number> {
+async function countBasWithCompleteFastStart(scopedTmagIds: string[] | null): Promise<number> {
   const match: Record<string, unknown> = { state: 'completed' };
-  if (scopedBaIds !== null) {
-    match.baId = { $in: scopedBaIds };
+  if (scopedTmagIds !== null) {
+    match.tmagId = { $in: scopedTmagIds };
   }
   const result = await gatewayCall<{ results?: Array<{ total?: number }> }>(
     'mongodb',
@@ -267,7 +267,7 @@ async function countBasWithCompleteFastStart(scopedBaIds: string[] | null): Prom
       collection: COLL_FAST_START,
       pipeline: [
         { $match: match },
-        { $group: { _id: '$baId', completed: { $sum: 1 } } },
+        { $group: { _id: '$tmagId', completed: { $sum: 1 } } },
         { $match: { completed: 5 } },
         { $count: 'total' },
       ],
@@ -290,13 +290,13 @@ export async function getFilterOptions(): Promise<{
   });
   const docs = all.documents ?? [];
 
-  const leaderIds = await listLeaderBaIds();
+  const leaderIds = await listLeaderTmagIds();
   const leaderSet = new Set(leaderIds);
 
   const bas: AdminBaFilterOption[] = docs.map((b) => ({
-    baId: b.baId,
+    tmagId: b.tmagId,
     fullName: `${b.firstName} ${b.lastName}`.trim(),
-    isLeader: leaderSet.has(b.baId),
+    isLeader: leaderSet.has(b.tmagId),
   }));
 
   const totalBas = docs.length;
@@ -318,26 +318,26 @@ export async function buildDrilldown(
   tile: AdminDrilldownPayload['tile'],
   filter: AdminDashboardFilter,
 ): Promise<AdminDrilldownPayload> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
 
   switch (tile) {
     case 'active_bas':
-      return { tile, rows: await drilldownActiveBas(scopedBaIds) };
+      return { tile, rows: await drilldownActiveBas(scopedTmagIds) };
     case 'prospects_in_flow':
-      return { tile, rows: await drilldownProspectsInFlow(scopedBaIds) };
+      return { tile, rows: await drilldownProspectsInFlow(scopedTmagIds) };
     case 'queue_movement':
-      return { tile, rows: await drilldownQueueMovement(scopedBaIds) };
+      return { tile, rows: await drilldownQueueMovement(scopedTmagIds) };
     case 'enrollments':
-      return { tile, rows: await drilldownEnrollments(scopedBaIds) };
+      return { tile, rows: await drilldownEnrollments(scopedTmagIds) };
     case 'training':
-      return { tile, rows: await drilldownTraining(scopedBaIds) };
+      return { tile, rows: await drilldownTraining(scopedTmagIds) };
   }
 }
 
-async function drilldownActiveBas(scopedBaIds: string[] | null): Promise<AdminActiveBaRow[]> {
+async function drilldownActiveBas(scopedTmagIds: string[] | null): Promise<AdminActiveBaRow[]> {
   const twentyFourHoursAgo = new Date(Date.now() - MS_24H).toISOString();
   const filter: Record<string, unknown> = { lastLoginAt: { $gte: twentyFourHoursAgo } };
-  if (scopedBaIds !== null) filter.baId = { $in: scopedBaIds };
+  if (scopedTmagIds !== null) filter.tmagId = { $in: scopedTmagIds };
 
   const res = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
@@ -352,12 +352,12 @@ async function drilldownActiveBas(scopedBaIds: string[] | null): Promise<AdminAc
   // at v1 size, easy to swap for a single $group when we cross the line.
   const counts = await Promise.all(
     bas.map((b) =>
-      countMatch(COLL_PLACEMENTS, { sponsorBaId: b.baId, flushedAt: null }),
+      countMatch(COLL_PLACEMENTS, { sponsorTmagId: b.tmagId, flushedAt: null }),
     ),
   );
 
   return bas.map((b, i) => ({
-    baId: b.baId,
+    tmagId: b.tmagId,
     fullName: `${b.firstName} ${b.lastName}`.trim(),
     lastLoginAt: b.lastLoginAt ?? '',
     prospectsInFlow: counts[i] ?? 0,
@@ -365,11 +365,11 @@ async function drilldownActiveBas(scopedBaIds: string[] | null): Promise<AdminAc
 }
 
 async function drilldownProspectsInFlow(
-  scopedBaIds: string[] | null,
+  scopedTmagIds: string[] | null,
 ): Promise<AdminProspectInFlowRow[]> {
   // In-flow = a placement exists AND it hasn't flushed.
   const placeFilter: Record<string, unknown> = { flushedAt: null };
-  if (scopedBaIds !== null) placeFilter.sponsorBaId = { $in: scopedBaIds };
+  if (scopedTmagIds !== null) placeFilter.sponsorTmagId = { $in: scopedTmagIds };
 
   const placements = await gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
@@ -382,7 +382,7 @@ async function drilldownProspectsInFlow(
   if (docs.length === 0) return [];
 
   const prospectIds = docs.map((p) => p.prospectId);
-  const sponsorIds = Array.from(new Set(docs.map((p) => p.sponsorBaId)));
+  const sponsorIds = Array.from(new Set(docs.map((p) => p.sponsorTmagId)));
 
   const [prospects, sponsors] = await Promise.all([
     gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
@@ -394,14 +394,14 @@ async function drilldownProspectsInFlow(
     gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_BAS,
-      filter: { baId: { $in: sponsorIds } },
+      filter: { tmagId: { $in: sponsorIds } },
       limit: sponsorIds.length,
     }),
   ]);
 
   const prospectById = new Map((prospects.documents ?? []).map((p) => [p.prospectId, p]));
   const sponsorName = new Map(
-    (sponsors.documents ?? []).map((b) => [b.baId, `${b.firstName} ${b.lastName}`.trim()]),
+    (sponsors.documents ?? []).map((b) => [b.tmagId, `${b.firstName} ${b.lastName}`.trim()]),
   );
 
   return docs.map((p): AdminProspectInFlowRow => {
@@ -414,8 +414,8 @@ async function drilldownProspectsInFlow(
       stateOrRegion: prospect?.location?.stateOrRegion ?? '—',
       state: prospect?.state ?? 'minted',
       positionNumber: p.positionNumber,
-      sponsorBaId: p.sponsorBaId,
-      sponsorName: sponsorName.get(p.sponsorBaId) ?? p.sponsorBaId,
+      sponsorTmagId: p.sponsorTmagId,
+      sponsorName: sponsorName.get(p.sponsorTmagId) ?? p.sponsorTmagId,
       placedAt: p.placedAt,
       expiresAt: p.expiresAt,
     };
@@ -423,13 +423,13 @@ async function drilldownProspectsInFlow(
 }
 
 async function drilldownQueueMovement(
-  scopedBaIds: string[] | null,
+  scopedTmagIds: string[] | null,
 ): Promise<AdminQueueMovementRow[]> {
   const twentyFourHoursAgo = new Date(Date.now() - MS_24H).toISOString();
 
-  const scope: Record<string, unknown> = scopedBaIds === null
+  const scope: Record<string, unknown> = scopedTmagIds === null
     ? {}
-    : { sponsorBaId: { $in: scopedBaIds } };
+    : { sponsorTmagId: { $in: scopedTmagIds } };
 
   const [placements, flushes] = await Promise.all([
     gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
@@ -452,7 +452,7 @@ async function drilldownQueueMovement(
   if (allDocs.length === 0) return [];
 
   const prospectIds = Array.from(new Set(allDocs.map((p) => p.prospectId)));
-  const sponsorIds = Array.from(new Set(allDocs.map((p) => p.sponsorBaId)));
+  const sponsorIds = Array.from(new Set(allDocs.map((p) => p.sponsorTmagId)));
 
   const [prospects, sponsors] = await Promise.all([
     gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
@@ -464,14 +464,14 @@ async function drilldownQueueMovement(
     gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_BAS,
-      filter: { baId: { $in: sponsorIds } },
+      filter: { tmagId: { $in: sponsorIds } },
       limit: sponsorIds.length,
     }),
   ]);
 
   const prospectById = new Map((prospects.documents ?? []).map((p) => [p.prospectId, p]));
   const sponsorName = new Map(
-    (sponsors.documents ?? []).map((b) => [b.baId, `${b.firstName} ${b.lastName}`.trim()]),
+    (sponsors.documents ?? []).map((b) => [b.tmagId, `${b.firstName} ${b.lastName}`.trim()]),
   );
 
   const placementRows: AdminQueueMovementRow[] = (placements.documents ?? []).map((p) => {
@@ -482,8 +482,8 @@ async function drilldownQueueMovement(
       firstName: prospect?.firstName ?? '—',
       lastInitial: prospect?.lastInitial ?? (prospect?.lastName?.[0] ?? '·'),
       positionNumber: p.positionNumber,
-      sponsorBaId: p.sponsorBaId,
-      sponsorName: sponsorName.get(p.sponsorBaId) ?? p.sponsorBaId,
+      sponsorTmagId: p.sponsorTmagId,
+      sponsorName: sponsorName.get(p.sponsorTmagId) ?? p.sponsorTmagId,
       at: p.placedAt,
       flushReason: null,
     };
@@ -497,8 +497,8 @@ async function drilldownQueueMovement(
       firstName: prospect?.firstName ?? '—',
       lastInitial: prospect?.lastInitial ?? (prospect?.lastName?.[0] ?? '·'),
       positionNumber: p.positionNumber,
-      sponsorBaId: p.sponsorBaId,
-      sponsorName: sponsorName.get(p.sponsorBaId) ?? p.sponsorBaId,
+      sponsorTmagId: p.sponsorTmagId,
+      sponsorName: sponsorName.get(p.sponsorTmagId) ?? p.sponsorTmagId,
       at: p.flushedAt ?? p.placedAt,
       flushReason: p.flushReason,
     };
@@ -510,14 +510,14 @@ async function drilldownQueueMovement(
 }
 
 async function drilldownEnrollments(
-  scopedBaIds: string[] | null,
+  scopedTmagIds: string[] | null,
 ): Promise<AdminEnrollmentRow[]> {
   const twentyFourHoursAgo = new Date(Date.now() - MS_24H).toISOString();
   const filter: Record<string, unknown> = {
     flushedAt: { $gte: twentyFourHoursAgo },
     flushReason: 'enrolled',
   };
-  if (scopedBaIds !== null) filter.sponsorBaId = { $in: scopedBaIds };
+  if (scopedTmagIds !== null) filter.sponsorTmagId = { $in: scopedTmagIds };
 
   const res = await gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
@@ -530,7 +530,7 @@ async function drilldownEnrollments(
   if (docs.length === 0) return [];
 
   const prospectIds = docs.map((p) => p.prospectId);
-  const sponsorIds = Array.from(new Set(docs.map((p) => p.sponsorBaId)));
+  const sponsorIds = Array.from(new Set(docs.map((p) => p.sponsorTmagId)));
 
   const [prospects, sponsors] = await Promise.all([
     gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
@@ -542,14 +542,14 @@ async function drilldownEnrollments(
     gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_BAS,
-      filter: { baId: { $in: sponsorIds } },
+      filter: { tmagId: { $in: sponsorIds } },
       limit: sponsorIds.length,
     }),
   ]);
 
   const prospectById = new Map((prospects.documents ?? []).map((p) => [p.prospectId, p]));
   const sponsorName = new Map(
-    (sponsors.documents ?? []).map((b) => [b.baId, `${b.firstName} ${b.lastName}`.trim()]),
+    (sponsors.documents ?? []).map((b) => [b.tmagId, `${b.firstName} ${b.lastName}`.trim()]),
   );
 
   return docs.map((p): AdminEnrollmentRow => {
@@ -559,16 +559,16 @@ async function drilldownEnrollments(
       firstName: prospect?.firstName ?? '—',
       lastInitial: prospect?.lastInitial ?? (prospect?.lastName?.[0] ?? '·'),
       positionNumber: p.positionNumber,
-      sponsorBaId: p.sponsorBaId,
-      sponsorName: sponsorName.get(p.sponsorBaId) ?? p.sponsorBaId,
+      sponsorTmagId: p.sponsorTmagId,
+      sponsorName: sponsorName.get(p.sponsorTmagId) ?? p.sponsorTmagId,
       enrolledAt: p.flushedAt ?? p.placedAt,
     };
   });
 }
 
-async function drilldownTraining(scopedBaIds: string[] | null): Promise<AdminTrainingRow[]> {
+async function drilldownTraining(scopedTmagIds: string[] | null): Promise<AdminTrainingRow[]> {
   const baFilter: Record<string, unknown> = {};
-  if (scopedBaIds !== null) baFilter.baId = { $in: scopedBaIds };
+  if (scopedTmagIds !== null) baFilter.tmagId = { $in: scopedTmagIds };
 
   const bas = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
@@ -580,30 +580,30 @@ async function drilldownTraining(scopedBaIds: string[] | null): Promise<AdminTra
   const baDocs = bas.documents ?? [];
   if (baDocs.length === 0) return [];
 
-  const baIds = baDocs.map((b) => b.baId);
+  const baIds = baDocs.map((b) => b.tmagId);
   const progress = await gatewayCall<{ documents: FastStartDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_FAST_START,
-    filter: { baId: { $in: baIds } },
+    filter: { tmagId: { $in: baIds } },
     limit: baIds.length * 5,
   });
 
   // Reduce progress docs to (modulesCompleted, lastTouchedAt) per BA.
   const stats = new Map<string, { completed: number; lastTouchedAt: string | null }>();
   for (const p of progress.documents ?? []) {
-    const cur = stats.get(p.baId) ?? { completed: 0, lastTouchedAt: null };
+    const cur = stats.get(p.tmagId) ?? { completed: 0, lastTouchedAt: null };
     if (p.state === 'completed') cur.completed += 1;
     const touch = p.updatedAt;
     if (touch && (!cur.lastTouchedAt || touch > cur.lastTouchedAt)) {
       cur.lastTouchedAt = touch;
     }
-    stats.set(p.baId, cur);
+    stats.set(p.tmagId, cur);
   }
 
   return baDocs.map((b): AdminTrainingRow => {
-    const s = stats.get(b.baId) ?? { completed: 0, lastTouchedAt: null };
+    const s = stats.get(b.tmagId) ?? { completed: 0, lastTouchedAt: null };
     return {
-      baId: b.baId,
+      tmagId: b.tmagId,
       fullName: `${b.firstName} ${b.lastName}`.trim(),
       modulesCompleted: s.completed,
       fastStartComplete: s.completed === 5,

@@ -2,14 +2,14 @@
  * /api/sponsor/workbook routes — sponsor-led BA Interview Workbook.
  *
  * Three endpoints:
- *   GET    /:baId           - Returns the workbook (creates draft if absent)
+ *   GET    /:tmagId           - Returns the workbook (creates draft if absent)
  *                             AND the BA's questionnaire for context.
- *   PUT    /:baId/draft     - Incremental autosave. Mongo-only, no triple-stack.
- *   POST   /:baId/finalize  - Irrevocable. Triple-stack write. Requires
+ *   PUT    /:tmagId/draft     - Incremental autosave. Mongo-only, no triple-stack.
+ *   POST   /:tmagId/finalize  - Irrevocable. Triple-stack write. Requires
  *                             classification + first actions.
  *
- * Authorization: requireAuth + the session's baId must equal the target BA's
- * sponsorBaId (canConductWorkbook). Admins from ADMIN_BA_IDS bypass the
+ * Authorization: requireAuth + the session's tmagId must equal the target BA's
+ * sponsorTmagId (canConductWorkbook). Admins from ADMIN_BA_IDS bypass the
  * sponsor check — allowed for any BA. Anyone else gets 403.
  *
  * Per Chat #22 / Chat #103 architecture: this is the 30-45 min partnership
@@ -23,7 +23,7 @@ import express, {
 } from 'express';
 import { env } from '../env.js';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { findBAByBaId } from '../domain/ba.js';
+import { findBAByTmagId } from '../domain/ba.js';
 import {
   canConductWorkbook,
   createWorkbookDraft,
@@ -37,23 +37,23 @@ import { getQuestionnaire } from '../domain/questionnaire.js';
 
 export const sponsorWorkbookRoutes: Router = express.Router();
 
-function isAdmin(session: { baId: string; threeBaId: string }): boolean {
+function isAdmin(session: { tmagId: string; threeBaId: string }): boolean {
   return (
     env.ADMIN_BA_IDS.includes(session.threeBaId) ||
-    env.ADMIN_BA_IDS.includes(session.baId)
+    env.ADMIN_BA_IDS.includes(session.tmagId)
   );
 }
 
 async function authorizeSponsor(
   req: Request,
   res: Response,
-  forBaId: string,
+  forTmagId: string,
 ): Promise<boolean> {
   const session = req.session!;
   if (isAdmin(session)) return true;
   const allowed = await canConductWorkbook({
-    sponsorBaId: session.baId,
-    forBaId,
+    sponsorTmagId: session.tmagId,
+    forTmagId,
   });
   if (!allowed) {
     res.status(403).json({
@@ -66,55 +66,55 @@ async function authorizeSponsor(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GET /:baId
+// GET /:tmagId
 // Returns:
 //   - workbook (draft auto-created if absent)
 //   - questionnaire (so the sponsor has context to run the call)
 //   - ba (basic identity)
 // ──────────────────────────────────────────────────────────────────────────────
 sponsorWorkbookRoutes.get(
-  '/:baId',
+  '/:tmagId',
   requireAuth,
   async (req: Request, res: Response) => {
-    const rawBaId = req.params.baId;
-    const forBaId = typeof rawBaId === 'string' ? rawBaId : '';
-    if (!forBaId) {
-      res.status(400).json({ ok: false, error: 'baId path param required.' });
+    const rawTmagId = req.params.tmagId;
+    const forTmagId = typeof rawTmagId === 'string' ? rawTmagId : '';
+    if (!forTmagId) {
+      res.status(400).json({ ok: false, error: 'tmagId path param required.' });
       return;
     }
-    if (!(await authorizeSponsor(req, res, forBaId))) return;
+    if (!(await authorizeSponsor(req, res, forTmagId))) return;
 
     try {
-      const ba = await findBAByBaId(forBaId);
+      const ba = await findBAByTmagId(forTmagId);
       if (!ba) {
         res.status(404).json({ ok: false, error: 'BA not found.' });
         return;
       }
 
-      let workbook = await getWorkbook(forBaId);
+      let workbook = await getWorkbook(forTmagId);
       if (!workbook) {
         const session = req.session!;
         // Sponsor's own name for the audit trail.
-        const sponsor = await findBAByBaId(session.baId);
+        const sponsor = await findBAByTmagId(session.tmagId);
         const conductedByName = sponsor
           ? `${sponsor.firstName} ${sponsor.lastName}`.trim()
           : 'Unknown Sponsor';
         workbook = await createWorkbookDraft({
-          forBaId,
+          forTmagId,
           forThreeBaId: ba.threeBaId,
-          conductedByBaId: session.baId,
+          conductedByTmagId: session.tmagId,
           conductedByName,
         });
       }
 
-      const questionnaire = await getQuestionnaire(forBaId);
+      const questionnaire = await getQuestionnaire(forTmagId);
 
       res.json({
         ok: true,
         workbook,
         questionnaire,
         ba: {
-          baId: ba.baId,
+          tmagId: ba.tmagId,
           threeBaId: ba.threeBaId,
           firstName: ba.firstName,
           lastName: ba.lastName,
@@ -131,7 +131,7 @@ sponsorWorkbookRoutes.get(
 );
 
 // ──────────────────────────────────────────────────────────────────────────────
-// PUT /:baId/draft — incremental autosave
+// PUT /:tmagId/draft — incremental autosave
 // ──────────────────────────────────────────────────────────────────────────────
 const CLASSIFICATIONS: ReadonlyArray<Classification> = ['gogetter', 'consumer'];
 
@@ -169,19 +169,19 @@ function asPartialNotes(input: unknown): Partial<WorkbookNotes> | null {
 }
 
 sponsorWorkbookRoutes.put(
-  '/:baId/draft',
+  '/:tmagId/draft',
   requireAuth,
   async (req: Request, res: Response) => {
-    const rawBaId = req.params.baId;
-    const forBaId = typeof rawBaId === 'string' ? rawBaId : '';
-    if (!forBaId) {
-      res.status(400).json({ ok: false, error: 'baId path param required.' });
+    const rawTmagId = req.params.tmagId;
+    const forTmagId = typeof rawTmagId === 'string' ? rawTmagId : '';
+    if (!forTmagId) {
+      res.status(400).json({ ok: false, error: 'tmagId path param required.' });
       return;
     }
-    if (!(await authorizeSponsor(req, res, forBaId))) return;
+    if (!(await authorizeSponsor(req, res, forTmagId))) return;
 
     try {
-      const workbook = await getWorkbook(forBaId);
+      const workbook = await getWorkbook(forTmagId);
       if (!workbook) {
         res
           .status(404)
@@ -236,22 +236,22 @@ sponsorWorkbookRoutes.put(
 );
 
 // ──────────────────────────────────────────────────────────────────────────────
-// POST /:baId/finalize — irrevocable, triple-stack
+// POST /:tmagId/finalize — irrevocable, triple-stack
 // ──────────────────────────────────────────────────────────────────────────────
 sponsorWorkbookRoutes.post(
-  '/:baId/finalize',
+  '/:tmagId/finalize',
   requireAuth,
   async (req: Request, res: Response) => {
-    const rawBaId = req.params.baId;
-    const forBaId = typeof rawBaId === 'string' ? rawBaId : '';
-    if (!forBaId) {
-      res.status(400).json({ ok: false, error: 'baId path param required.' });
+    const rawTmagId = req.params.tmagId;
+    const forTmagId = typeof rawTmagId === 'string' ? rawTmagId : '';
+    if (!forTmagId) {
+      res.status(400).json({ ok: false, error: 'tmagId path param required.' });
       return;
     }
-    if (!(await authorizeSponsor(req, res, forBaId))) return;
+    if (!(await authorizeSponsor(req, res, forTmagId))) return;
 
     try {
-      const workbook = await getWorkbook(forBaId);
+      const workbook = await getWorkbook(forTmagId);
       if (!workbook) {
         res
           .status(404)
@@ -307,7 +307,7 @@ sponsorWorkbookRoutes.post(
 
       // eslint-disable-next-line no-console
       console.log(
-        `[audit] workbook_finalized forBaId=${forBaId} workbookId=${workbook.workbookId} classification=${classification} conductedBy=${workbook.conductedByBaId}`,
+        `[audit] workbook_finalized forTmagId=${forTmagId} workbookId=${workbook.workbookId} classification=${classification} conductedBy=${workbook.conductedByTmagId}`,
       );
 
       res.json({ ok: true, workbook: finalized });

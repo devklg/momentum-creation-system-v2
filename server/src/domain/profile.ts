@@ -8,7 +8,7 @@
  * Field discipline:
  *   - Editable (wf_0071): firstName, lastName, email, phone, password,
  *     photoUrl, timezone, notifPrefs.
- *   - Read-only (wf_0072): sponsor, threeBaId, tmBaId, accessCodeHeld.
+ *   - Read-only (wf_0072): sponsor, threeBaId, tmagId, accessCodeHeld.
  *     These fields never appear in any PATCH body; the route layer rejects
  *     them at parse time and the read shape carries them so the page can
  *     render the read-only card in one fetch.
@@ -43,7 +43,7 @@ import argon2 from 'argon2';
 import { createHash, randomInt, randomBytes } from 'node:crypto';
 import { gatewayCall } from '../services/gateway.js';
 import { appendAuditEntry } from './auditLog.js';
-import { findBAByBaId } from './ba.js';
+import { findBAByTmagId } from './ba.js';
 import { sendEmail, ResendConfigError, ResendError } from '../services/resend.js';
 import type {
   BAProfile,
@@ -102,24 +102,24 @@ function mergeNotifPrefs(stored: BANotifPrefs | undefined): BANotifPrefs {
   };
 }
 
-async function findActiveCodeForBA(baId: string): Promise<string | null> {
+async function findActiveCodeForBA(tmagId: string): Promise<string | null> {
   const r = await gatewayCall<{ documents: Array<{ code: string }> }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: ACCESS_CODES_COLLECTION,
-    filter: { sponsorBaId: baId, active: true },
+    filter: { sponsorTmagId: tmagId, active: true },
     limit: 1,
   });
   return r.documents[0]?.code ?? null;
 }
 
-export async function getProfileForBA(baId: string): Promise<BAProfile | null> {
-  const ba = await findBAByBaId(baId);
+export async function getProfileForBA(tmagId: string): Promise<BAProfile | null> {
+  const ba = await findBAByTmagId(tmagId);
   if (!ba) return null;
   const extras = ba as typeof ba & BAExtras;
 
   const [accessCodeHeld, sponsor] = await Promise.all([
-    findActiveCodeForBA(baId),
-    ba.sponsorBaId ? findBAByBaId(ba.sponsorBaId) : Promise.resolve(null),
+    findActiveCodeForBA(tmagId),
+    ba.sponsorTmagId ? findBAByTmagId(ba.sponsorTmagId) : Promise.resolve(null),
   ]);
 
   const sponsorFullName = sponsor
@@ -134,11 +134,11 @@ export async function getProfileForBA(baId: string): Promise<BAProfile | null> {
     timezone: ba.timezone,
     photoUrl: extras.photoUrl ?? null,
     notifPrefs: mergeNotifPrefs(extras.notifPrefs),
-    tmBaId: ba.baId,
+    tmagId: ba.tmagId,
     threeBaId: ba.threeBaId,
     accessCodeHeld,
     sponsor: {
-      baId: ba.sponsorBaId,
+      tmagId: ba.sponsorTmagId,
       threeBaId: ba.sponsorThreeBaId,
       fullName: sponsorFullName,
     },
@@ -154,10 +154,10 @@ export async function getProfileForBA(baId: string): Promise<BAProfile | null> {
  * First/last name changes append an audit entry with before/after.
  */
 export async function patchProfile(
-  baId: string,
+  tmagId: string,
   patch: BAProfilePatch,
 ): Promise<BAProfile> {
-  const current = await findBAByBaId(baId);
+  const current = await findBAByTmagId(tmagId);
   if (!current) throw new Error('BA not found');
 
   const set: Record<string, unknown> = {};
@@ -182,7 +182,7 @@ export async function patchProfile(
     await gatewayCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: BA_COLLECTION,
-      filter: { baId },
+      filter: { tmagId },
       update: { $set: set },
     });
 
@@ -193,8 +193,8 @@ export async function patchProfile(
       const nextLast = (set.lastName as string | undefined) ?? current.lastName;
       await gatewayCall('neo4j', 'cypher', {
         query:
-          'MATCH (n:BA {baId: $baId}) SET n.firstName = $firstName, n.lastName = $lastName',
-        params: { baId, firstName: nextFirst, lastName: nextLast },
+          'MATCH (n:BA {tmagId: $tmagId}) SET n.firstName = $firstName, n.lastName = $lastName',
+        params: { tmagId, firstName: nextFirst, lastName: nextLast },
       });
     }
   }
@@ -208,13 +208,13 @@ export async function patchProfile(
     await appendAuditEntry({
       actor: {
         kind: 'ba',
-        baId,
+        tmagId,
         displayName: `${current.firstName} ${current.lastName}`.trim(),
       },
       action: 'ba.profile.name_change',
       entity: {
         kind: 'brand_ambassador',
-        id: baId,
+        id: tmagId,
         displayLabel: `${current.firstName} ${current.lastName}`.trim(),
       },
       severity: 'info',
@@ -226,7 +226,7 @@ export async function patchProfile(
     });
   }
 
-  const next = await getProfileForBA(baId);
+  const next = await getProfileForBA(tmagId);
   if (!next) throw new Error('BA disappeared after patch');
   return next;
 }
@@ -236,11 +236,11 @@ export type PasswordResult =
   | { ok: false; error: 'current_password_wrong' };
 
 export async function changePassword(
-  baId: string,
+  tmagId: string,
   currentPassword: string,
   newPassword: string,
 ): Promise<PasswordResult> {
-  const ba = await findBAByBaId(baId);
+  const ba = await findBAByTmagId(tmagId);
   if (!ba) return { ok: false, error: 'current_password_wrong' };
 
   let valid = false;
@@ -255,20 +255,20 @@ export async function changePassword(
   await gatewayCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
-    filter: { baId },
+    filter: { tmagId },
     update: { $set: { passwordHash: newHash } },
   });
 
   await appendAuditEntry({
     actor: {
       kind: 'ba',
-      baId,
+      tmagId,
       displayName: `${ba.firstName} ${ba.lastName}`.trim(),
     },
     action: 'ba.profile.password_change',
     entity: {
       kind: 'brand_ambassador',
-      id: baId,
+      id: tmagId,
       displayLabel: `${ba.firstName} ${ba.lastName}`.trim(),
     },
     severity: 'info',
@@ -290,7 +290,7 @@ async function persistChallenge(rec: ProfileChangeChallengeRecord): Promise<void
 }
 
 async function stampPendingTarget(
-  baId: string,
+  tmagId: string,
   channel: 'email' | 'phone',
   target: string,
 ): Promise<void> {
@@ -298,26 +298,26 @@ async function stampPendingTarget(
   await gatewayCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
-    filter: { baId },
+    filter: { tmagId },
     update: { $set: { [field]: target } },
   });
 }
 
 async function clearPendingTarget(
-  baId: string,
+  tmagId: string,
   channel: 'email' | 'phone',
 ): Promise<void> {
   const field = channel === 'email' ? 'pendingEmail' : 'pendingPhone';
   await gatewayCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
-    filter: { baId },
+    filter: { tmagId },
     update: { $set: { [field]: null } },
   });
 }
 
 async function findLatestActiveChallenge(
-  baId: string,
+  tmagId: string,
   channel: 'email' | 'phone',
 ): Promise<ProfileChangeChallengeRecord | null> {
   const r = await gatewayCall<{ documents: ProfileChangeChallengeRecord[] }>(
@@ -326,7 +326,7 @@ async function findLatestActiveChallenge(
     {
       database: MONGO_DB,
       collection: CHALLENGES_COLLECTION,
-      filter: { baId, channel, redeemedAt: null },
+      filter: { tmagId, channel, redeemedAt: null },
       sort: { issuedAt: -1 },
       limit: 1,
     },
@@ -341,7 +341,7 @@ export type StartChallengeResult = {
 };
 
 export async function startEmailChange(
-  baId: string,
+  tmagId: string,
   newEmail: string,
 ): Promise<StartChallengeResult> {
   const code = mintNumericCode();
@@ -378,7 +378,7 @@ export async function startEmailChange(
 
   const record: ProfileChangeChallengeRecord = {
     challengeId,
-    baId,
+    tmagId,
     channel: 'email',
     target: newEmail,
     codeHash: hashCode(code),
@@ -389,7 +389,7 @@ export async function startEmailChange(
     deliveryError,
   };
   await persistChallenge(record);
-  await stampPendingTarget(baId, 'email', newEmail);
+  await stampPendingTarget(tmagId, 'email', newEmail);
 
   return { ok: true, challengeId, deliveryStatus };
 }
@@ -405,10 +405,10 @@ export async function startEmailChange(
  * so unlike email there's no graph update — Mongo + audit only.
  */
 export async function setPhone(
-  baId: string,
+  tmagId: string,
   newPhone: string,
 ): Promise<{ ok: true; phone: string } | { ok: false; error: 'ba_not_found' }> {
-  const ba = await findBAByBaId(baId);
+  const ba = await findBAByTmagId(tmagId);
   if (!ba) return { ok: false, error: 'ba_not_found' };
 
   const next = newPhone.trim();
@@ -418,20 +418,20 @@ export async function setPhone(
   await gatewayCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
-    filter: { baId },
+    filter: { tmagId },
     update: { $set: { phone: next, pendingPhone: null } },
   });
 
   await appendAuditEntry({
     actor: {
       kind: 'ba',
-      baId,
+      tmagId,
       displayName: `${ba.firstName} ${ba.lastName}`.trim(),
     },
     action: 'ba.profile.phone_change',
     entity: {
       kind: 'brand_ambassador',
-      id: baId,
+      id: tmagId,
       displayLabel: `${ba.firstName} ${ba.lastName}`.trim(),
     },
     severity: 'info',
@@ -447,11 +447,11 @@ export type VerifyResult =
   | { ok: false; error: 'no_pending_challenge' | 'code_invalid' | 'code_expired' };
 
 async function verifyChallenge(
-  baId: string,
+  tmagId: string,
   channel: 'email' | 'phone',
   code: string,
 ): Promise<VerifyResult> {
-  const row = await findLatestActiveChallenge(baId, channel);
+  const row = await findLatestActiveChallenge(tmagId, channel);
   if (!row) return { ok: false, error: 'no_pending_challenge' };
 
   const expiresAtMs = new Date(row.expiresAt).getTime();
@@ -475,13 +475,13 @@ async function verifyChallenge(
 }
 
 export async function completeEmailChange(
-  baId: string,
+  tmagId: string,
   code: string,
 ): Promise<VerifyResult> {
-  const ba = await findBAByBaId(baId);
+  const ba = await findBAByTmagId(tmagId);
   if (!ba) return { ok: false, error: 'no_pending_challenge' };
 
-  const result = await verifyChallenge(baId, 'email', code);
+  const result = await verifyChallenge(tmagId, 'email', code);
   if (!result.ok) return result;
 
   const before = { email: ba.email };
@@ -490,26 +490,26 @@ export async function completeEmailChange(
   await gatewayCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
-    filter: { baId },
+    filter: { tmagId },
     update: { $set: { email: result.appliedTo } },
   });
   // Keep Neo4j BA node email aligned (used by genealogy queries).
   await gatewayCall('neo4j', 'cypher', {
-    query: 'MATCH (n:BA {baId: $baId}) SET n.email = $email',
-    params: { baId, email: result.appliedTo },
+    query: 'MATCH (n:BA {tmagId: $tmagId}) SET n.email = $email',
+    params: { tmagId, email: result.appliedTo },
   });
-  await clearPendingTarget(baId, 'email');
+  await clearPendingTarget(tmagId, 'email');
 
   await appendAuditEntry({
     actor: {
       kind: 'ba',
-      baId,
+      tmagId,
       displayName: `${ba.firstName} ${ba.lastName}`.trim(),
     },
     action: 'ba.profile.email_change',
     entity: {
       kind: 'brand_ambassador',
-      id: baId,
+      id: tmagId,
       displayLabel: `${ba.firstName} ${ba.lastName}`.trim(),
     },
     severity: 'info',

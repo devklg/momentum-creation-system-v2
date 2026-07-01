@@ -58,7 +58,7 @@ export const acquisitionProvider: RinglessVoicemailProvider = {
         campaignId: payload.campaignId,
         metadata: {
           leadId: payload.lead.leadId,
-          ownerTmBaId: payload.lead.ownerTmBaId,
+          ownerTmagId: payload.lead.ownerTmagId,
         },
       }),
     });

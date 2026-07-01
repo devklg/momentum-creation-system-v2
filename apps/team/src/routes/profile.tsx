@@ -7,7 +7,7 @@
  * with the latest server state.
  *
  * Hard locks honored:
- *   - Sponsor, threeBaId, tmBaId, accessCodeHeld render as read-only
+ *   - Sponsor, threeBaId, tmagId, accessCodeHeld render as read-only
  *     fields with no edit affordance. The server PATCH schema rejects
  *     these fields if they ever appear in a body.
  *   - First/last name edits warn the BA that the change is audited.
@@ -49,10 +49,10 @@ interface BAProfile {
   timezone: string;
   photoUrl: string | null;
   notifPrefs: NotifPrefs;
-  tmBaId: string;
+  tmagId: string;
   threeBaId: string;
   accessCodeHeld: string | null;
-  sponsor: { baId: string; threeBaId: string; fullName: string };
+  sponsor: { tmagId: string; threeBaId: string; fullName: string };
   pendingEmail: string | null;
   pendingPhone: string | null;
 }
@@ -126,7 +126,7 @@ export function ProfilePage() {
             {profile.firstName} {profile.lastName}
           </h1>
           <p className="text-[13px] text-cream-mute mt-1.5 font-mono">
-            {profile.tmBaId}
+            {profile.tmagId}
           </p>
         </header>
 
@@ -158,7 +158,7 @@ function IdentityCard({ profile }: { profile: BAProfile }) {
         <ReadOnlyRow label="Sponsor" value={profile.sponsor.fullName || '—'} />
         <ReadOnlyRow label="Sponsor THREE BA ID" value={profile.sponsor.threeBaId || '—'} />
         <ReadOnlyRow label="Your THREE BA ID" value={profile.threeBaId || '—'} />
-        <ReadOnlyRow label="Your TM BA ID" value={profile.tmBaId} />
+        <ReadOnlyRow label="Your TM BA ID" value={profile.tmagId} />
         <ReadOnlyRow
           label="Your access code"
           value={profile.accessCodeHeld ?? 'Not yet issued by Kevin'}

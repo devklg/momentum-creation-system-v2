@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 //
 // Why stripping matters here: the turn source's documentation comments
 // LEGITIMATELY mention banned identifiers to explain why they are absent —
-// e.g. "no body baId/sponsorBaId/targetBaId", "imports NO store/Gateway/
+// e.g. "no body tmagId/sponsorTmagId/targetTmagId", "imports NO store/Gateway/
 // GraphRAG/retrieval client", "NEVER imports the S2.13 test harness". Those
 // defensive doc-comment prohibitions (and string literals) must not trip a
 // wiring regex, so the code-token scans strip comments AND strings first.
@@ -247,16 +247,16 @@ describe('S3.10 turn source LLM/telephony-free boundary', () => {
 
 // ---------------------------------------------------------------------------
 // GROUP D — server-owned identity ONLY. The single accepted identity is the
-// session baId; no body-authority field (sponsorBaId/targetBaId/downlineBaId/
-// prospectId/prospectToken) may appear as a code token. `baId` alone is the
+// session tmagId; no body-authority field (sponsorTmagId/targetTmagId/downlineTmagId/
+// prospectId/prospectToken) may appear as a code token. `tmagId` alone is the
 // allowed session field and is intentionally NOT in this list.
 // ---------------------------------------------------------------------------
 describe('S3.10 turn source body-authority boundary', () => {
-  it('#13 accepts no body-authority id fields (sponsorBaId/targetBaId/downlineBaId/prospectId/prospectToken)', () => {
+  it('#13 accepts no body-authority id fields (sponsorTmagId/targetTmagId/downlineTmagId/prospectId/prospectToken)', () => {
     // Comments/strings stripped first: the header doc-comment legitimately lists
     // these identifiers to explain they are NOT accepted. Only a real code token
-    // (a field name / property access) can trip this scan. `baId` is allowed.
-    const forbidden = /\b(?:sponsorBaId|targetBaId|downlineBaId|prospectId|prospectToken)\b/;
+    // (a field name / property access) can trip this scan. `tmagId` is allowed.
+    const forbidden = /\b(?:sponsorTmagId|targetTmagId|downlineTmagId|prospectId|prospectToken)\b/;
     const matches = matchingCodeTokenLines(turnSourceFiles(), forbidden);
     expect(matches, matches.join('\n')).toEqual([]);
   });

@@ -7,8 +7,8 @@
  * without replacing those existing reads.
  *
  * Ownership contract:
- *   - ownerTmBaId and sponsorTmBaId are stamped server-side only.
- *   - BA reads/writes filter by ownerTmBaId from the session.
+ *   - ownerTmagId and sponsorTmagId are stamped server-side only.
+ *   - BA reads/writes filter by ownerTmagId from the session.
  *   - client payloads never carry owner/sponsor authority.
  */
 
@@ -47,8 +47,8 @@ export class ProspectCrmError extends Error {
 interface CreateOrUpdateCrmInput {
   prospectId: string;
   token: string;
-  ownerTmBaId: string;
-  sponsorTmBaId: string;
+  ownerTmagId: string;
+  sponsorTmagId: string;
   source: ProspectCrmSource;
   leadId?: string | null;
   leadBatchId?: string | null;
@@ -59,8 +59,8 @@ interface CreateOrUpdateCrmInput {
 interface TimelineInput {
   prospectId: string;
   crmRecordId?: string | null;
-  ownerTmBaId: string;
-  sponsorTmBaId: string;
+  ownerTmagId: string;
+  sponsorTmagId: string;
   kind: ProspectTimelineKind;
   note: string;
   metadata?: Record<string, unknown>;
@@ -164,10 +164,10 @@ export async function findCrmRecordByToken(token: string): Promise<ProspectCRMDo
 }
 
 export async function listCrmRecordsForOwner(
-  ownerTmBaId: string,
+  ownerTmagId: string,
   includeClosed = false,
 ): Promise<ProspectCRMRecord[]> {
-  const filter: Record<string, unknown> = { ownerTmBaId };
+  const filter: Record<string, unknown> = { ownerTmagId };
   if (!includeClosed) filter.status = { $ne: 'closed' };
   const result = await gatewayCall<{ documents: ProspectCRMRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
@@ -181,7 +181,7 @@ export async function listCrmRecordsForOwner(
 
 export async function listTimelineForProspect(
   prospectId: string,
-  ownerTmBaId: string,
+  ownerTmagId: string,
 ): Promise<ProspectTimelineEventRecord[]> {
   const result = await gatewayCall<{ documents: ProspectTimelineEventRecord[] }>(
     'mongodb',
@@ -189,7 +189,7 @@ export async function listTimelineForProspect(
     {
       database: MONGO_DB,
       collection: TIMELINE_COLLECTION,
-      filter: { prospectId, ownerTmBaId },
+      filter: { prospectId, ownerTmagId },
       sort: { occurredAt: 1 },
       limit: 500,
     },
@@ -209,8 +209,8 @@ export async function appendProspectTimelineEvent(
     leadId: null,
     leadBatchId: null,
     vmCampaignId: null,
-    ownerTmBaId: input.ownerTmBaId,
-    sponsorTmBaId: input.sponsorTmBaId,
+    ownerTmagId: input.ownerTmagId,
+    sponsorTmagId: input.sponsorTmagId,
     kind: input.kind,
     title: input.note,
     occurredAt: createdAt,
@@ -226,7 +226,7 @@ export async function appendProspectTimelineEvent(
         'MERGE (p:Prospect {prospectId: $prospectId}) ' +
         'CREATE (e:ProspectTimelineEvent {' +
         '  eventId: $id, kind: $kind, title: $title, occurredAt: $occurredAt, ' +
-        '  ownerTmBaId: $ownerTmBaId, sponsorTmBaId: $sponsorTmBaId' +
+        '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId' +
         '}) ' +
         'CREATE (p)-[:HAS_TIMELINE_EVENT]->(e)',
       params: {
@@ -234,20 +234,20 @@ export async function appendProspectTimelineEvent(
         kind: record.kind,
         title: record.title,
         occurredAt: record.occurredAt,
-        ownerTmBaId: record.ownerTmBaId,
-        sponsorTmBaId: record.sponsorTmBaId,
+        ownerTmagId: record.ownerTmagId,
+        sponsorTmagId: record.sponsorTmagId,
       },
     },
     chroma: {
       collection: TIMELINE_CHROMA_COLLECTION,
       document:
         `${record.kind}: ${record.title} ` +
-        `(prospect ${record.prospectId}, owner ${record.ownerTmBaId}) at ${createdAt}`,
+        `(prospect ${record.prospectId}, owner ${record.ownerTmagId}) at ${createdAt}`,
       metadata: {
         kind: record.kind,
         prospectId: record.prospectId,
-        ownerTmBaId: record.ownerTmBaId,
-        sponsorTmBaId: record.sponsorTmBaId,
+        ownerTmagId: record.ownerTmagId,
+        sponsorTmagId: record.sponsorTmagId,
         createdAt,
       },
     },
@@ -298,8 +298,8 @@ export async function createOrUpdateCrmRecordForToken(
     leadBatchId: input.leadBatchId ?? null,
     vmCampaignId: input.vmCampaignId ?? null,
     token: input.token,
-    ownerTmBaId: input.ownerTmBaId,
-    sponsorTmBaId: input.sponsorTmBaId,
+    ownerTmagId: input.ownerTmagId,
+    sponsorTmagId: input.sponsorTmagId,
     source: input.source,
     status: 'inactive_pre_engagement',
     disposition: null,
@@ -316,13 +316,13 @@ export async function createOrUpdateCrmRecordForToken(
     mongoDoc: { ...record },
     neo4j: {
       cypher:
-        'MERGE (b:BA {baId: $ownerTmBaId}) ' +
+        'MERGE (b:BA {tmagId: $ownerTmagId}) ' +
         'MERGE (p:Prospect {prospectId: $prospectId}) ' +
         'MERGE (c:ProspectCRMRecord {crmRecordId: $id}) ' +
         'SET c += {' +
         '  prospectId: $prospectId, token: $token, source: $source, ' +
-        '  status: $status, ownerTmBaId: $ownerTmBaId, ' +
-        '  sponsorTmBaId: $sponsorTmBaId, createdAt: $createdAt, updatedAt: $updatedAt' +
+        '  status: $status, ownerTmagId: $ownerTmagId, ' +
+        '  sponsorTmagId: $sponsorTmagId, createdAt: $createdAt, updatedAt: $updatedAt' +
         '} ' +
         'MERGE (b)-[:OWNS_CRM_RECORD]->(c) ' +
         'MERGE (c)-[:FOR_PROSPECT]->(p)',
@@ -331,8 +331,8 @@ export async function createOrUpdateCrmRecordForToken(
         token: record.token,
         source: record.source,
         status: record.status,
-        ownerTmBaId: record.ownerTmBaId,
-        sponsorTmBaId: record.sponsorTmBaId,
+        ownerTmagId: record.ownerTmagId,
+        sponsorTmagId: record.sponsorTmagId,
         createdAt: record.createdAt,
         updatedAt: record.updatedAt,
       },
@@ -341,13 +341,13 @@ export async function createOrUpdateCrmRecordForToken(
       collection: CRM_CHROMA_COLLECTION,
       document:
         `CRM record created for prospect ${record.prospectId} from ${record.source}; ` +
-        `owner ${record.ownerTmBaId}, sponsor ${record.sponsorTmBaId}, token ${record.token}.`,
+        `owner ${record.ownerTmagId}, sponsor ${record.sponsorTmagId}, token ${record.token}.`,
       metadata: {
         kind: 'crm_record_created',
         prospectId: record.prospectId,
         token: record.token,
-        ownerTmBaId: record.ownerTmBaId,
-        sponsorTmBaId: record.sponsorTmBaId,
+        ownerTmagId: record.ownerTmagId,
+        sponsorTmagId: record.sponsorTmagId,
         source: record.source,
         createdAt: now,
       },
@@ -357,8 +357,8 @@ export async function createOrUpdateCrmRecordForToken(
   await appendProspectTimelineEvent({
     prospectId: record.prospectId,
     crmRecordId: record.crmRecordId,
-    ownerTmBaId: record.ownerTmBaId,
-    sponsorTmBaId: record.sponsorTmBaId,
+    ownerTmagId: record.ownerTmagId,
+    sponsorTmagId: record.sponsorTmagId,
     kind: 'crm_created',
     note: `CRM record created from ${record.source} token creation.`,
     metadata: { token: record.token, source: record.source },
@@ -415,8 +415,8 @@ export async function applyCrmLifecycleEvent(
   await appendProspectTimelineEvent({
     prospectId,
     crmRecordId: record.crmRecordId,
-    ownerTmBaId: record.ownerTmBaId,
-    sponsorTmBaId: record.sponsorTmBaId,
+    ownerTmagId: record.ownerTmagId,
+    sponsorTmagId: record.sponsorTmagId,
     kind,
     note,
     metadata,
@@ -428,21 +428,21 @@ export async function applyCrmLifecycleEvent(
 
 export async function getOwnerScopedCrmRecord(
   prospectId: string,
-  ownerTmBaId: string,
+  ownerTmagId: string,
 ): Promise<ProspectCRMDocument> {
   const record = await findCrmRecordByProspectId(prospectId);
   if (!record) throw new ProspectCrmError('crm_record_not_found');
-  if (record.ownerTmBaId !== ownerTmBaId) throw new ProspectCrmError('owner_mismatch');
+  if (record.ownerTmagId !== ownerTmagId) throw new ProspectCrmError('owner_mismatch');
   return record;
 }
 
 export async function closeCrmAsNewBa(input: {
   prospectId: string;
-  ownerTmBaId: string;
+  ownerTmagId: string;
   actor: AuditActor;
   reason: string;
 }): Promise<ProspectCRMRecord> {
-  const record = await getOwnerScopedCrmRecord(input.prospectId, input.ownerTmBaId);
+  const record = await getOwnerScopedCrmRecord(input.prospectId, input.ownerTmagId);
   if (record.status === 'closed' && record.disposition === 'new_ba') return record;
 
   const closedAt = new Date().toISOString();
@@ -502,8 +502,8 @@ export async function closeCrmAsNewBa(input: {
   await appendProspectTimelineEvent({
     prospectId: record.prospectId,
     crmRecordId: record.crmRecordId,
-    ownerTmBaId: record.ownerTmBaId,
-    sponsorTmBaId: record.sponsorTmBaId,
+    ownerTmagId: record.ownerTmagId,
+    sponsorTmagId: record.sponsorTmagId,
     kind: 'closed_new_ba',
     note: 'CRM record closed because the prospect enrolled as a Brand Ambassador.',
     metadata: { reason: input.reason },
@@ -538,10 +538,10 @@ export async function closeCrmAsNewBa(input: {
 
 export async function recordOwnershipCorrectionAudit(input: {
   prospectId: string;
-  oldOwnerTmBaId: string;
-  newOwnerTmBaId: string;
-  oldSponsorTmBaId: string;
-  newSponsorTmBaId: string;
+  oldOwnerTmagId: string;
+  newOwnerTmagId: string;
+  oldSponsorTmagId: string;
+  newSponsorTmagId: string;
   reason: string;
   actor: AuditActor;
 }): Promise<void> {
@@ -555,12 +555,12 @@ export async function recordOwnershipCorrectionAudit(input: {
     },
     severity: 'critical',
     before: {
-      ownerTmBaId: input.oldOwnerTmBaId,
-      sponsorTmBaId: input.oldSponsorTmBaId,
+      ownerTmagId: input.oldOwnerTmagId,
+      sponsorTmagId: input.oldSponsorTmagId,
     },
     after: {
-      ownerTmBaId: input.newOwnerTmBaId,
-      sponsorTmBaId: input.newSponsorTmBaId,
+      ownerTmagId: input.newOwnerTmagId,
+      sponsorTmagId: input.newSponsorTmagId,
     },
     reason: input.reason,
   });
@@ -568,15 +568,15 @@ export async function recordOwnershipCorrectionAudit(input: {
   await appendProspectTimelineEvent({
     prospectId: input.prospectId,
     crmRecordId: crmIdForProspect(input.prospectId),
-    ownerTmBaId: input.newOwnerTmBaId,
-    sponsorTmBaId: input.newSponsorTmBaId,
+    ownerTmagId: input.newOwnerTmagId,
+    sponsorTmagId: input.newSponsorTmagId,
     kind: 'ownership_corrected',
     note: 'Admin ownership correction was audited.',
     metadata: {
-      oldOwnerTmBaId: input.oldOwnerTmBaId,
-      newOwnerTmBaId: input.newOwnerTmBaId,
-      oldSponsorTmBaId: input.oldSponsorTmBaId,
-      newSponsorTmBaId: input.newSponsorTmBaId,
+      oldOwnerTmagId: input.oldOwnerTmagId,
+      newOwnerTmagId: input.newOwnerTmagId,
+      oldSponsorTmagId: input.oldSponsorTmagId,
+      newSponsorTmagId: input.newSponsorTmagId,
     },
   });
 }

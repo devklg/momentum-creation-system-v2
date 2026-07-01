@@ -41,15 +41,15 @@ export const manualCsvProvider: RinglessVoicemailProvider = {
   },
 };
 
-export function buildManualCsv(leads: Array<{ normalizedPhone: string | null; firstName: string | null; lastName: string | null; token: string | null; ownerTmBaId: string; leadId: string }>, baseUrl: string): string {
-  const headers = ['leadId', 'phone', 'firstName', 'lastName', 'rvmLink', 'ownerTmBaId'];
+export function buildManualCsv(leads: Array<{ normalizedPhone: string | null; firstName: string | null; lastName: string | null; token: string | null; ownerTmagId: string; leadId: string }>, baseUrl: string): string {
+  const headers = ['leadId', 'phone', 'firstName', 'lastName', 'rvmLink', 'ownerTmagId'];
   const rows = leads.map((lead) => [
     lead.leadId,
     lead.normalizedPhone ?? '',
     lead.firstName ?? '',
     lead.lastName ?? '',
     lead.token ? `${baseUrl}/rvm/${lead.token}` : '',
-    lead.ownerTmBaId,
+    lead.ownerTmagId,
   ]);
   return [headers, ...rows].map((row) => row.map(csvEscape).join(',')).join('\n');
 }

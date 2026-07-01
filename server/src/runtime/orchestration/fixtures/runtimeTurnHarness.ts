@@ -1,7 +1,7 @@
 import type {
   AgentId,
   AgentKey,
-  BaId,
+  TmagId,
   ContextPacketRequest,
   ContextRequestId,
   CorrelationId,
@@ -126,7 +126,7 @@ function identityForScenario(agentKey: unknown): AgentRuntimeAdapterDispatchIden
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      baId: 'TMBA-S2-8-001' as BaId,
+      tmagId: 'TMBA-S2-8-001' as TmagId,
     },
     sessionId: DEFAULT_SESSION_ID,
     agentKey,
@@ -266,7 +266,7 @@ function createFixtureContextPacket(
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      baId: 'TMBA-S2-8-001' as BaId,
+      tmagId: 'TMBA-S2-8-001' as TmagId,
       journalEnabled: true,
       languagePreference: request.language,
       permissions: {

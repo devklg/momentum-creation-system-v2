@@ -11,11 +11,11 @@
  * are emitted in UTC YYYY-MM-DD; missing days (no activity) are skipped
  * rather than zero-filled (cleaner for the table; consumers fill if needed).
  *
- * Scope: AdminDashboardFilter via resolveScopedBaIds.
+ * Scope: AdminDashboardFilter via resolveScopedTmagIds.
  */
 
 import { gatewayCall } from '../../services/gateway.js';
-import { resolveScopedBaIds } from '../adminMetrics.js';
+import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
@@ -30,7 +30,7 @@ const MONGO_DB = 'momentum';
 const COLL_PLACEMENTS = 'pool_placements';
 
 interface PlacementDoc {
-  sponsorBaId: string;
+  sponsorTmagId: string;
   placedAt: string;
   flushedAt: string | null;
   flushReason: 'enrolled' | 'expired' | 'archived' | null;
@@ -51,10 +51,10 @@ export async function buildQueueVelocityReport(
   result: AdminQueueVelocityReport;
   meta: Omit<AdminReportMeta, 'title'>;
 }> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
 
   const scopeClause: Record<string, unknown> = {};
-  if (scopedBaIds !== null) scopeClause.sponsorBaId = { $in: scopedBaIds };
+  if (scopedTmagIds !== null) scopeClause.sponsorTmagId = { $in: scopedTmagIds };
 
   // Two independent pulls: placedAt-narrowed and flushedAt-narrowed.
   // Same scope clause; different date field. Lifetime = pull all, no narrow.

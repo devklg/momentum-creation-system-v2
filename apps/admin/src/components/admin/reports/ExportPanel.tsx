@@ -94,7 +94,7 @@ export function ExportPanel({ filter }: ExportPanelProps) {
       const params = new URLSearchParams();
       params.set('format', 'csv');
       params.set('redact', choice === 'redacted' ? 'true' : 'false');
-      if (filter?.baId) params.set('baId', filter.baId);
+      if (filter?.tmagId) params.set('tmagId', filter.tmagId);
       if (filter?.leaderGroup && filter.leaderGroup !== 'all') {
         params.set('leaderGroup', filter.leaderGroup);
       }

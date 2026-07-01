@@ -15,7 +15,7 @@
  * Redaction: every data row passes through `applyRedaction` in
  * services/piiRedact.ts. The four PII fields (prospectFirstName,
  * prospectLastName, phone, email) are rewritten when redact=true; the
- * remaining fields (city, prospectId, tokenId, sponsorBaId,
+ * remaining fields (city, prospectId, tokenId, sponsorTmagId,
  * sponsorFullName, BA fullName) pass through verbatim per Chat #144.
  *
  * Filename convention: `<reportKey>-<UTC-timestamp>.csv` — the report
@@ -87,7 +87,7 @@ function headerLines(reportKey: AdminReportKey, meta: ExportInput<unknown>['meta
   if (meta.range.fromIso) lines.push(csvRow(['Range from', meta.range.fromIso]));
   lines.push(csvRow(['Range to', meta.range.toIso]));
   const filter = meta.appliedFilter;
-  lines.push(csvRow(['Filter · BA', filter.baId ?? 'All BAs']));
+  lines.push(csvRow(['Filter · BA', filter.tmagId ?? 'All BAs']));
   lines.push(csvRow(['Filter · Leader group', filter.leaderGroup ?? 'all']));
   lines.push(csvRow(['Source hash', meta.sourceHash]));
   lines.push(csvRow(['Redaction', redact ? 'redacted' : 'raw']));
@@ -143,7 +143,7 @@ function serializeActivation(
 
   if (result.rows.length > 0) {
     const cols = [
-      'baId',
+      'tmagId',
       'fullName',
       'signupAt',
       'welcomeAcceptedAt',
@@ -189,7 +189,7 @@ function serializeTraining(
 
   if (result.rows.length > 0) {
     const cols = [
-      'baId',
+      'tmagId',
       'fullName',
       'signupAt',
       'modulesCompleted',
@@ -240,7 +240,7 @@ function serializeInviteFunnel(
 
   if (result.perBa.length > 0) {
     const cols = [
-      'baId',
+      'tmagId',
       'fullName',
       'minted',
       'clicked',
@@ -311,7 +311,7 @@ function serializeEnrollment(
   rowCount += 4;
 
   if (result.perBa.length > 0) {
-    const cols = ['baId', 'fullName', 'enrollments'] as const;
+    const cols = ['tmagId', 'fullName', 'enrollments'] as const;
     lines.push(...section('Per-BA', cols));
     for (const r of result.perBa) {
       lines.push(emitRow(r as unknown as Record<string, unknown>, cols as readonly string[], redact));
@@ -365,7 +365,7 @@ function serializeFollowUp(
   if (result.rows.length > 0) {
     const cols = [
       'prospectId',
-      'sponsorBaId',
+      'sponsorTmagId',
       'disposition',
       'lastUpdatedAt',
       'ageDays',
@@ -399,7 +399,7 @@ function serializeLeaderScorecards(
 
   if (result.rows.length > 0) {
     const cols = [
-      'baId',
+      'tmagId',
       'fullName',
       'signupAt',
       'personalEnrollments',

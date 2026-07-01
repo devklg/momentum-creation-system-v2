@@ -50,7 +50,7 @@ interface PreviewWirePayload {
     expiresAt: string;
   };
   ba: {
-    baId: string;
+    tmagId: string;
     firstName: string;
     lastName: string;
     lastInitial: string;

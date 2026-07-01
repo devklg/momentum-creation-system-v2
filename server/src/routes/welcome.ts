@@ -32,22 +32,22 @@ export const welcomeRoutes: Router = express.Router();
 welcomeRoutes.post('/load', requireAuth, async (req: Request, res: Response) => {
   const session = req.session!;
   try {
-    const ba = await findBaById(session.baId);
+    const ba = await findBaById(session.tmagId);
     if (!ba) {
       res.status(404).json({ ok: false, error: 'BA record not found.' });
       return;
     }
-    await markWelcomeSeen(session.baId);
+    await markWelcomeSeen(session.tmagId);
 
     // Audit-log markers — written as console for now; will move to an
     // append-only audit collection in Phase 5 (ADMIN J).
     // eslint-disable-next-line no-console
     console.log(
-      `[audit] welcome_screen_displayed baId=${session.baId} threeBaId=${session.threeBaId}`,
+      `[audit] welcome_screen_displayed tmagId=${session.tmagId} threeBaId=${session.threeBaId}`,
     );
     // eslint-disable-next-line no-console
     console.log(
-      `[audit] welcome_load_deferred_actions baId=${session.baId} michael_call=DEFERRED_J4 welcome_email=DEFERRED_E6`,
+      `[audit] welcome_load_deferred_actions tmagId=${session.tmagId} michael_call=DEFERRED_J4 welcome_email=DEFERRED_E6`,
     );
 
     res.json({ ok: true, baFirstName: ba.firstName });
@@ -60,9 +60,9 @@ welcomeRoutes.post('/load', requireAuth, async (req: Request, res: Response) => 
 welcomeRoutes.post('/accept', requireAuth, async (req: Request, res: Response) => {
   const session = req.session!;
   try {
-    if (await commitmentExists(session.baId)) {
+    if (await commitmentExists(session.tmagId)) {
       // Idempotent: re-accepting is a no-op. Mirror BA-flag in case it drifted.
-      await markCommitmentAccepted(session.baId);
+      await markCommitmentAccepted(session.tmagId);
       res.json({ ok: true, alreadyAccepted: true });
       return;
     }
@@ -74,18 +74,18 @@ welcomeRoutes.post('/accept', requireAuth, async (req: Request, res: Response) =
     const userAgent = req.get('user-agent') ?? null;
 
     const record = await recordCommitment({
-      baId: session.baId,
+      tmagId: session.tmagId,
       threeBaId: session.threeBaId,
       email: session.email,
       ipAddress,
       userAgent,
     });
 
-    await markCommitmentAccepted(session.baId);
+    await markCommitmentAccepted(session.tmagId);
 
     // eslint-disable-next-line no-console
     console.log(
-      `[audit] welcome_commitment_accepted baId=${session.baId} commitmentId=${record.commitmentId} version=${record.version}`,
+      `[audit] welcome_commitment_accepted tmagId=${session.tmagId} commitmentId=${record.commitmentId} version=${record.version}`,
     );
 
     res.json({ ok: true, commitmentId: record.commitmentId });

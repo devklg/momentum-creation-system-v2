@@ -36,7 +36,7 @@
  *     separate manual 8-week flush (flushExpiredPlacements). Severity
  *     `info` (#140) — reversible and routine.
  *
- *   RESTORE: clears deleted, stamps restoredAt/restoredByBaId. Severity
+ *   RESTORE: clears deleted, stamps restoredAt/restoredByTmagId. Severity
  *     `info`.
  *
  * Delegation, not duplication:
@@ -50,7 +50,7 @@
 import { gatewayCall } from '../services/gateway.js';
 import { appendAuditEntry } from './auditLog.js';
 import { createInvitation } from './invitations.js';
-import { findBAByBaId } from './ba.js';
+import { findBAByTmagId } from './ba.js';
 import { refreshRowFor } from './adminProspectOversight.js';
 import type {
   AdminProspectDirectoryRow,
@@ -139,14 +139,14 @@ export async function adminCreateProspect(
   }
 
   // Sponsor must resolve to a real BA. Stamped immutably by createInvitation.
-  const sponsor = await findBAByBaId(payload.sponsorBaId);
+  const sponsor = await findBAByTmagId(payload.sponsorTmagId);
   if (!sponsor) return { ok: false, error: { kind: 'sponsor_not_found' } };
 
   // MINT ONLY. Identical to the regular BA-minted flow. No placement here —
   // placement + SMS + video tracking happen later through the existing
   // /api/p/:token/video-event path when the video is completed.
   const created = await createInvitation({
-    sponsorBaId: payload.sponsorBaId,
+    sponsorTmagId: payload.sponsorTmagId,
     firstName: payload.firstName,
     lastName: payload.lastName,
     email: payload.email ?? null,
@@ -171,7 +171,7 @@ export async function adminCreateProspect(
     after: {
       prospectId: created.prospectId,
       token: created.token,
-      sponsorBaId: payload.sponsorBaId,
+      sponsorTmagId: payload.sponsorTmagId,
       state: 'minted',
     },
     reason: payload.reason,
@@ -314,7 +314,7 @@ export async function adminSoftDeleteProspect(
     deleted: true,
     deletedAt,
     deletedReason: payload.reason,
-    deletedByBaId: actor.baId,
+    deletedByTmagId: actor.tmagId,
   };
 
   await gatewayCall('mongodb', 'update', {
@@ -360,8 +360,8 @@ export async function adminRestoreProspect(
   const patch: Partial<AdminSoftDeleteState> = {
     deleted: false,
     restoredAt,
-    restoredByBaId: actor.baId,
-    // deletedAt / deletedReason / deletedByBaId LEFT as the historical record.
+    restoredByTmagId: actor.tmagId,
+    // deletedAt / deletedReason / deletedByTmagId LEFT as the historical record.
   };
 
   await gatewayCall('mongodb', 'update', {

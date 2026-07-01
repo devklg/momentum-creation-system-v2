@@ -99,8 +99,8 @@ export interface VmBulkLeadRecord {
   importJobId: string;
   leadBatchId: string;
   vmCampaignId: string;
-  ownerTmBaId: string;
-  sponsorTmBaId: string;
+  ownerTmagId: string;
+  sponsorTmagId: string;
   sourceLabel: string;
   sourceLeadId: string | null;
   firstName: string | null;
@@ -128,7 +128,7 @@ export interface VmDeliveryEventRecord {
   provider: VmProviderKey;
   leadId: string;
   vmCampaignId: string;
-  ownerTmBaId: string;
+  ownerTmagId: string;
   status: string;
   providerMessageId: string | null;
   providerStatus: string | null;
@@ -141,8 +141,8 @@ export interface VmDeliveryEventRecord {
 export interface CreateImportJobInput {
   leadBatchId: string;
   vmCampaignId: string;
-  ownerTmBaId: string;
-  sponsorTmBaId: string;
+  ownerTmagId: string;
+  sponsorTmagId: string;
   sourceLabel: string;
   rows: VmImportLeadRow[];
   createdBy: string;
@@ -152,8 +152,8 @@ interface ImportChunkPayload extends Record<string, unknown> {
   importJobId: string;
   leadBatchId: string;
   vmCampaignId: string;
-  ownerTmBaId: string;
-  sponsorTmBaId: string;
+  ownerTmagId: string;
+  sponsorTmagId: string;
   sourceLabel: string;
   chunkIndex: number;
   rows: VmImportLeadRow[];
@@ -186,18 +186,18 @@ function hashDedupe(parts: string[]): string {
   return createHash('sha256').update(parts.join('|')).digest('hex').slice(0, 32);
 }
 
-function leadDedupeKey(ownerTmBaId: string, phone: string | null, email: string | null): string {
-  return hashDedupe([ownerTmBaId, phone ?? '', email ?? '']);
+function leadDedupeKey(ownerTmagId: string, phone: string | null, email: string | null): string {
+  return hashDedupe([ownerTmagId, phone ?? '', email ?? '']);
 }
 
 function assertOwnership(input: {
-  ownerTmBaId?: string | null;
-  sponsorTmBaId?: string | null;
+  ownerTmagId?: string | null;
+  sponsorTmagId?: string | null;
   leadBatchId?: string | null;
   vmCampaignId?: string | null;
 }): void {
-  if (!input.ownerTmBaId) throw new Error('ownerTmBaId_required');
-  if (!input.sponsorTmBaId) throw new Error('sponsorTmBaId_required');
+  if (!input.ownerTmagId) throw new Error('ownerTmagId_required');
+  if (!input.sponsorTmagId) throw new Error('sponsorTmagId_required');
   if (!input.leadBatchId) throw new Error('leadBatchId_required');
   if (!input.vmCampaignId) throw new Error('vmCampaignId_required');
 }
@@ -205,7 +205,7 @@ function assertOwnership(input: {
 async function vmAudit(input: {
   action: string;
   entityId: string;
-  ownerTmBaId: string | null;
+  ownerTmagId: string | null;
   summary: string;
   payload?: Record<string, unknown>;
 }): Promise<void> {
@@ -218,7 +218,7 @@ async function vmAudit(input: {
       auditId: id,
       action: input.action,
       entityId: input.entityId,
-      ownerTmBaId: input.ownerTmBaId,
+      ownerTmagId: input.ownerTmagId,
       summary: input.summary,
       payload: input.payload ?? {},
       createdAt: at,
@@ -226,14 +226,14 @@ async function vmAudit(input: {
     neo4j: {
       cypher:
         'MERGE (e:VmAuditEvent {auditId: $id}) ' +
-        'SET e.action = $action, e.entityId = $entityId, e.ownerTmBaId = $ownerTmBaId, e.createdAt = datetime($createdAt) ' +
+        'SET e.action = $action, e.entityId = $entityId, e.ownerTmagId = $ownerTmagId, e.createdAt = datetime($createdAt) ' +
         'WITH e ' +
-        'OPTIONAL MATCH (ba:BrandAmbassador {baId: $ownerTmBaId}) ' +
+        'OPTIONAL MATCH (ba:BrandAmbassador {tmagId: $ownerTmagId}) ' +
         'FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END | MERGE (ba)-[:HAS_VM_AUDIT]->(e))',
       params: {
         action: input.action,
         entityId: input.entityId,
-        ownerTmBaId: input.ownerTmBaId,
+        ownerTmagId: input.ownerTmagId,
         createdAt: at,
       },
     },
@@ -244,7 +244,7 @@ async function vmAudit(input: {
         kind: 'vm_audit',
         action: input.action,
         entityId: input.entityId,
-        ownerTmBaId: input.ownerTmBaId,
+        ownerTmagId: input.ownerTmagId,
         createdAt: at,
       },
     },
@@ -334,7 +334,7 @@ export async function claimVmJobs(
     await vmAudit({
       action: 'vm.queue.claimed',
       entityId: job.jobId,
-      ownerTmBaId: ownerFromPayload(job.payload),
+      ownerTmagId: ownerFromPayload(job.payload),
       summary: `Claimed ${job.kind} job ${job.jobId}.`,
       payload: { kind: job.kind, attempt: job.attempts + 1 },
     });
@@ -344,7 +344,7 @@ export async function claimVmJobs(
 }
 
 function ownerFromPayload(payload: Record<string, unknown>): string | null {
-  const owner = payload.ownerTmBaId;
+  const owner = payload.ownerTmagId;
   return typeof owner === 'string' ? owner : null;
 }
 
@@ -367,7 +367,7 @@ export async function completeVmJob(jobId: string, note: string): Promise<void> 
   await vmAudit({
     action: 'vm.queue.completed',
     entityId: jobId,
-    ownerTmBaId: null,
+    ownerTmagId: null,
     summary: note,
   });
 }
@@ -397,7 +397,7 @@ export async function failVmJob(job: VmQueueJob, reason: string): Promise<void> 
   await vmAudit({
     action: terminal ? 'vm.queue.dead_lettered' : 'vm.queue.retry_scheduled',
     entityId: job.jobId,
-    ownerTmBaId: ownerFromPayload(job.payload),
+    ownerTmagId: ownerFromPayload(job.payload),
     summary: `${job.kind} job ${terminal ? 'dead-lettered' : 'scheduled for retry'}: ${reason}`,
     payload: { kind: job.kind, attempts: job.attempts, maxAttempts: job.maxAttempts },
   });
@@ -418,8 +418,8 @@ export async function createManualImportJobs(input: CreateImportJobInput): Promi
       importJobId,
       leadBatchId: input.leadBatchId,
       vmCampaignId: input.vmCampaignId,
-      ownerTmBaId: input.ownerTmBaId,
-      sponsorTmBaId: input.sponsorTmBaId,
+      ownerTmagId: input.ownerTmagId,
+      sponsorTmagId: input.sponsorTmagId,
       sourceLabel: input.sourceLabel,
       chunkIndex: Math.floor(i / IMPORT_CHUNK_SIZE),
       rows: chunk,
@@ -429,7 +429,7 @@ export async function createManualImportJobs(input: CreateImportJobInput): Promi
   await vmAudit({
     action: 'vm.import.queued',
     entityId: importJobId,
-    ownerTmBaId: input.ownerTmBaId,
+    ownerTmagId: input.ownerTmagId,
     summary: `Queued VM manual import ${importJobId} with ${rows.length} rows.`,
     payload: {
       leadBatchId: input.leadBatchId,
@@ -476,11 +476,11 @@ async function upsertImportedLead(
   if (row.email && !normalizedEmail) validationIssues.push('invalid_email');
   if (!normalizedPhone && !normalizedEmail) validationIssues.push('missing_contact_channel');
 
-  const dedupeKey = leadDedupeKey(payload.ownerTmBaId, normalizedPhone, normalizedEmail);
+  const dedupeKey = leadDedupeKey(payload.ownerTmagId, normalizedPhone, normalizedEmail);
   const existing = await gatewayCall<{ documents: VmBulkLeadRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: LEADS_COLLECTION,
-    filter: { ownerTmBaId: payload.ownerTmBaId, dedupeKey },
+    filter: { ownerTmagId: payload.ownerTmagId, dedupeKey },
     limit: 1,
   });
 
@@ -488,7 +488,7 @@ async function upsertImportedLead(
     await vmAudit({
       action: 'vm.lead.duplicate_skipped',
       entityId: existing.documents[0].leadId,
-      ownerTmBaId: payload.ownerTmBaId,
+      ownerTmagId: payload.ownerTmagId,
       summary: `Skipped duplicate VM lead in batch ${payload.leadBatchId}.`,
       payload: { importJobId: payload.importJobId, dedupeKey },
     });
@@ -503,8 +503,8 @@ async function upsertImportedLead(
     importJobId: payload.importJobId,
     leadBatchId: payload.leadBatchId,
     vmCampaignId: payload.vmCampaignId,
-    ownerTmBaId: payload.ownerTmBaId,
-    sponsorTmBaId: payload.sponsorTmBaId,
+    ownerTmagId: payload.ownerTmagId,
+    sponsorTmagId: payload.sponsorTmagId,
     sourceLabel: payload.sourceLabel,
     sourceLeadId: row.sourceLeadId?.trim() || null,
     firstName: row.firstName?.trim() || null,
@@ -534,13 +534,13 @@ async function upsertImportedLead(
     neo4j: {
       cypher:
         'MERGE (l:VmLead {leadId: $id}) ' +
-        'SET l.ownerTmBaId = $ownerTmBaId, l.sponsorTmBaId = $sponsorTmBaId, l.status = $status, l.createdAt = datetime($createdAt) ' +
+        'SET l.ownerTmagId = $ownerTmagId, l.sponsorTmagId = $sponsorTmagId, l.status = $status, l.createdAt = datetime($createdAt) ' +
         'WITH l ' +
-        'OPTIONAL MATCH (ba:BrandAmbassador {baId: $ownerTmBaId}) ' +
+        'OPTIONAL MATCH (ba:BrandAmbassador {tmagId: $ownerTmagId}) ' +
         'FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END | MERGE (ba)-[:OWNS_VM_LEAD]->(l))',
       params: {
-        ownerTmBaId: lead.ownerTmBaId,
-        sponsorTmBaId: lead.sponsorTmBaId,
+        ownerTmagId: lead.ownerTmagId,
+        sponsorTmagId: lead.sponsorTmagId,
         status: lead.status,
         createdAt: lead.createdAt,
       },
@@ -549,11 +549,11 @@ async function upsertImportedLead(
       collection: CHROMA_COLLECTION,
       document:
         `VM lead ${lead.firstName ?? ''} ${lead.lastName ?? ''} ` +
-        `from ${lead.city ?? 'unknown city'} imported for ${lead.ownerTmBaId}.`,
+        `from ${lead.city ?? 'unknown city'} imported for ${lead.ownerTmagId}.`,
       metadata: {
         kind: 'vm_lead_imported',
         leadId,
-        ownerTmBaId: lead.ownerTmBaId,
+        ownerTmagId: lead.ownerTmagId,
         vmCampaignId: lead.vmCampaignId,
         status: lead.status,
         createdAt: lead.createdAt,
@@ -593,7 +593,7 @@ async function isLeadSuppressed(lead: VmBulkLeadRecord): Promise<boolean> {
   const result = await gatewayCall<{ count?: number; documents?: unknown[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: SUPPRESSION_COLLECTION,
-    filter: { ownerTmBaId: { $in: [lead.ownerTmBaId, 'global'] }, $or: clauses },
+    filter: { ownerTmagId: { $in: [lead.ownerTmagId, 'global'] }, $or: clauses },
     limit: 1,
   });
   return (result.count ?? result.documents?.length ?? 0) > 0;
@@ -623,8 +623,8 @@ export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Prom
       tokenKind: 'rvm',
       prospectId: null,
       leadId: lead.leadId,
-      sponsorBaId: lead.sponsorTmBaId,
-      ownerTmBaId: lead.ownerTmBaId,
+      sponsorTmagId: lead.sponsorTmagId,
+      ownerTmagId: lead.ownerTmagId,
       leadBatchId: lead.leadBatchId,
       vmCampaignId: lead.vmCampaignId,
       state: 'minted',
@@ -635,23 +635,23 @@ export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Prom
     neo4j: {
       cypher:
         'MERGE (t:InviteToken {token: $id}) ' +
-        'SET t.tokenKind = "rvm", t.leadId = $leadId, t.ownerTmBaId = $ownerTmBaId, t.sponsorBaId = $sponsorTmBaId, t.state = "minted", t.createdAt = datetime($createdAt) ' +
+        'SET t.tokenKind = "rvm", t.leadId = $leadId, t.ownerTmagId = $ownerTmagId, t.sponsorTmagId = $sponsorTmagId, t.state = "minted", t.createdAt = datetime($createdAt) ' +
         'WITH t MATCH (l:VmLead {leadId: $leadId}) MERGE (t)-[:FOR_VM_LEAD]->(l)',
       params: {
         leadId: lead.leadId,
-        ownerTmBaId: lead.ownerTmBaId,
-        sponsorTmBaId: lead.sponsorTmBaId,
+        ownerTmagId: lead.ownerTmagId,
+        sponsorTmagId: lead.sponsorTmagId,
         createdAt: now,
       },
     },
     chroma: {
       collection: CHROMA_COLLECTION,
-      document: `RVM token minted for VM lead ${lead.leadId} owned by ${lead.ownerTmBaId}.`,
+      document: `RVM token minted for VM lead ${lead.leadId} owned by ${lead.ownerTmagId}.`,
       metadata: {
         kind: 'rvm_token_created',
         leadId: lead.leadId,
         token,
-        ownerTmBaId: lead.ownerTmBaId,
+        ownerTmagId: lead.ownerTmagId,
         createdAt: now,
       },
     },
@@ -688,8 +688,8 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
       crmRecordId,
       prospectId: null,
       leadId: lead.leadId,
-      ownerTmBaId: lead.ownerTmBaId,
-      sponsorTmBaId: lead.sponsorTmBaId,
+      ownerTmagId: lead.ownerTmagId,
+      sponsorTmagId: lead.sponsorTmagId,
       source: 'rvm',
       sourceLabel: lead.sourceLabel,
       leadBatchId: lead.leadBatchId,
@@ -706,11 +706,11 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
     neo4j: {
       cypher:
         'MERGE (c:ProspectCrmRecord {crmRecordId: $id}) ' +
-        'SET c.leadId = $leadId, c.ownerTmBaId = $ownerTmBaId, c.status = "inactive_pre_engagement", c.createdAt = datetime($createdAt) ' +
+        'SET c.leadId = $leadId, c.ownerTmagId = $ownerTmagId, c.status = "inactive_pre_engagement", c.createdAt = datetime($createdAt) ' +
         'WITH c MATCH (l:VmLead {leadId: $leadId}) MERGE (l)-[:HAS_CRM_RECORD]->(c)',
       params: {
         leadId: lead.leadId,
-        ownerTmBaId: lead.ownerTmBaId,
+        ownerTmagId: lead.ownerTmagId,
         createdAt: now,
       },
     },
@@ -721,7 +721,7 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
         kind: 'vm_crm_created',
         leadId: lead.leadId,
         crmRecordId,
-        ownerTmBaId: lead.ownerTmBaId,
+        ownerTmagId: lead.ownerTmagId,
         createdAt: now,
       },
     },
@@ -762,7 +762,7 @@ export async function updateLeadStatus(
   await vmAudit({
     action: 'vm.lead.status_changed',
     entityId: leadId,
-    ownerTmBaId: typeof extra.ownerTmBaId === 'string' ? extra.ownerTmBaId : null,
+    ownerTmagId: typeof extra.ownerTmagId === 'string' ? extra.ownerTmagId : null,
     summary: `VM lead ${leadId} changed to ${status}.`,
     payload: { status, ...extra },
   });
@@ -868,7 +868,7 @@ export async function processWebhookEvent(job: VmQueueJob<{ webhookEventId: stri
         provider: event.provider,
         leadId,
         vmCampaignId: lead.vmCampaignId,
-        ownerTmBaId: lead.ownerTmBaId,
+        ownerTmagId: lead.ownerTmagId,
         status: 'provider_webhook',
         providerMessageId: typeof event.payload.providerMessageId === 'string' ? event.payload.providerMessageId : null,
         providerStatus,

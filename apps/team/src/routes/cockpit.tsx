@@ -85,7 +85,7 @@ type InvitationActivityKind =
 interface InvitationActivityEntry {
   activityId: string;
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   kind: InvitationActivityKind;
   note: string;
   at: string;
@@ -185,14 +185,14 @@ const DISPOSITION_LABEL: Record<CrmDisposition, string> = {
 interface CrmNoteRecord {
   noteId: string;
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   text: string;
   createdAt: string;
 }
 
 interface CrmFollowUpRecord {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   dueAt: string;
   createdAt: string;
   clearedAt: string | null;

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type {
   ApprovedKnowledgeQueryRequest,
-  BaId,
+  TmagId,
   ContextPacketId,
   ContextRequestId,
   KnowledgeId,
@@ -34,7 +34,7 @@ function baScope(): RuntimeRequestScope {
     teamId: 'team_magnificent' as TeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
-    baId: 'TMBA-20260101-ABC123' as BaId,
+    tmagId: 'TMBA-20260101-ABC123' as TmagId,
   };
 }
 
@@ -185,7 +185,7 @@ describe('toContextReferences — feeds buildContextPacket as approved knowledge
         teamId: 'team_magnificent' as TeamId,
         teamKey: TEAM_MAGNIFICENT_KEY,
         teamName: TEAM_MAGNIFICENT_NAME,
-        baId: 'TMBA-20260101-ABC123' as BaId,
+        tmagId: 'TMBA-20260101-ABC123' as TmagId,
         journalEnabled: false,
         languagePreference: 'en',
         permissions: {

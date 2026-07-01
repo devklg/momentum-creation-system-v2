@@ -19,7 +19,7 @@ import { listAccessCodes, mintAccessCode } from '../../domain/codeGen.js';
 export const adminAccessCodesRoutes: Router = express.Router();
 
 const MintBody = z.object({
-  sponsorBaId: z.string().min(2).max(80),
+  sponsorTmagId: z.string().min(2).max(80),
   sponsorThreeBaId: z.string().min(1).max(40),
   sponsorFirstName: z.string().min(1).max(80),
   sponsorLastName: z.string().min(1).max(80),
@@ -41,18 +41,18 @@ adminAccessCodesRoutes.post('/', requireAdmin, async (req: Request, res: Respons
   const session = req.session!;
   try {
     const record = await mintAccessCode({
-      sponsorBaId: parsed.data.sponsorBaId.trim(),
+      sponsorTmagId: parsed.data.sponsorTmagId.trim(),
       sponsorThreeBaId: parsed.data.sponsorThreeBaId.trim(),
       sponsorFirstName: parsed.data.sponsorFirstName.trim(),
       sponsorLastName: parsed.data.sponsorLastName.trim(),
       note: parsed.data.note,
       explicit: parsed.data.explicit,
-      mintedByBaId: session.baId,
+      mintedByTmagId: session.tmagId,
     });
 
     // eslint-disable-next-line no-console
     console.log(
-      `[audit] access_code_minted code=${record.code} sponsorBaId=${record.sponsorBaId} by=${session.baId}`,
+      `[audit] access_code_minted code=${record.code} sponsorTmagId=${record.sponsorTmagId} by=${session.tmagId}`,
     );
 
     res.json({ ok: true, code: record });

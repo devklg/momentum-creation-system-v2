@@ -36,7 +36,7 @@
 
 export interface LeaderProfile {
   /** Stable BA id (matches seed-founders.ts). */
-  baId: string;
+  tmagId: string;
   /** Full display name. */
   name: string;
   /** Short role label — "Founder" / "Co-Leader". */
@@ -66,7 +66,7 @@ export interface LeaderCredibilityContent {
 }
 
 const KEVIN: LeaderProfile = {
-  baId: 'TMBA-FOUNDER-KEVIN',
+  tmagId: 'TMBA-FOUNDER-KEVIN',
   name: 'Kevin L. Gardner',
   role: 'Founder',
   initials: 'KG',
@@ -80,7 +80,7 @@ const KEVIN: LeaderProfile = {
 };
 
 const PAUL: LeaderProfile = {
-  baId: 'TMBA-FOUNDER-PAUL',
+  tmagId: 'TMBA-FOUNDER-PAUL',
   name: 'Paul Barrios',
   role: 'Co-Leader',
   initials: 'PB',

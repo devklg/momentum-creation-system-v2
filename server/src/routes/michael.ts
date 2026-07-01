@@ -16,25 +16,25 @@ import {
 
 export const michaelRoutes: Router = express.Router();
 
-/** GET /api/michael/training-support/:downlineBaId — sponsor-only.
+/** GET /api/michael/training-support/:downlineTmagId — sponsor-only.
  *  Sponsor reads derived training-support suggestions for a downline BA.
  *  Authoritative access check is server-side; 403 if not the direct sponsor,
  *  404 if no downline or no Steve discovery yet. */
 michaelRoutes.get(
-  '/training-support/:downlineBaId',
+  '/training-support/:downlineTmagId',
   requireAuth,
   requireSteveComplete,
   async (req: Request, res: Response) => {
     const session = req.session!;
-    const downlineBaId = String(req.params.downlineBaId ?? '');
-    if (!downlineBaId) {
-      res.status(400).json({ ok: false, error: 'Missing downlineBaId.' });
+    const downlineTmagId = String(req.params.downlineTmagId ?? '');
+    if (!downlineTmagId) {
+      res.status(400).json({ ok: false, error: 'Missing downlineTmagId.' });
       return;
     }
     try {
       const card = await getTrainingSupportCardForSponsor({
-        requestingBaId: session.baId,
-        downlineBaId,
+        requestingTmagId: session.tmagId,
+        downlineTmagId,
       });
       res.json({ ok: true, card });
     } catch (err) {

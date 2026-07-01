@@ -36,14 +36,14 @@ const RECENT_LIMIT = 500;
 const MS_24H = 24 * 60 * 60 * 1000;
 
 interface BaDoc {
-  baId: string;
+  tmagId: string;
   firstName?: string;
   lastName?: string;
 }
 
 interface LeadBatchDoc {
   leadBatchId?: string;
-  ownerTmBaId?: string;
+  ownerTmagId?: string;
   source?: string;
   status?: string;
   quantityImported?: number;
@@ -55,8 +55,8 @@ interface BulkLeadDoc {
   leadId?: string;
   leadBatchId?: string;
   vmCampaignId?: string;
-  ownerTmBaId?: string;
-  sponsorTmBaId?: string;
+  ownerTmagId?: string;
+  sponsorTmagId?: string;
   status?: string;
   activatedAt?: string | null;
   createdAt?: string;
@@ -65,7 +65,7 @@ interface BulkLeadDoc {
 
 interface VmCampaignDoc {
   vmCampaignId?: string;
-  ownerTmBaId?: string;
+  ownerTmagId?: string;
   leadBatchId?: string | null;
   name?: string;
   provider?: string;
@@ -76,7 +76,7 @@ interface VmCampaignDoc {
 
 interface DeliveryEventDoc {
   vmCampaignId?: string;
-  ownerTmBaId?: string;
+  ownerTmagId?: string;
   provider?: string;
   status?: string;
   kind?: string;
@@ -84,8 +84,8 @@ interface DeliveryEventDoc {
 }
 
 interface CrmRecordDoc {
-  ownerTmBaId?: string;
-  sponsorTmBaId?: string;
+  ownerTmagId?: string;
+  sponsorTmagId?: string;
   leadId?: string | null;
   leadBatchId?: string | null;
   vmCampaignId?: string | null;
@@ -261,17 +261,17 @@ function buildCards(args: {
 }
 
 function buildBaRows(sources: AdminVmSources): AdminVmBaPerformanceRow[] {
-  const baById = new Map(sources.bas.map((b) => [b.baId, b]));
+  const baById = new Map(sources.bas.map((b) => [b.tmagId, b]));
   const ownerIds = new Set<string>();
-  for (const b of sources.batches) if (b.ownerTmBaId) ownerIds.add(b.ownerTmBaId);
-  for (const c of sources.campaigns) if (c.ownerTmBaId) ownerIds.add(c.ownerTmBaId);
-  for (const l of sources.leads) if (l.ownerTmBaId) ownerIds.add(l.ownerTmBaId);
-  for (const r of sources.crm) if (r.ownerTmBaId) ownerIds.add(r.ownerTmBaId);
+  for (const b of sources.batches) if (b.ownerTmagId) ownerIds.add(b.ownerTmagId);
+  for (const c of sources.campaigns) if (c.ownerTmagId) ownerIds.add(c.ownerTmagId);
+  for (const l of sources.leads) if (l.ownerTmagId) ownerIds.add(l.ownerTmagId);
+  for (const r of sources.crm) if (r.ownerTmagId) ownerIds.add(r.ownerTmagId);
 
-  const campaignsByOwner = countBy(sources.campaigns, (c) => c.ownerTmBaId);
-  const batchesByOwner = countBy(sources.batches, (b) => b.ownerTmBaId);
-  const leadsByOwner = countBy(sources.leads, (l) => l.ownerTmBaId);
-  const contactedByOwner = countByStatus(sources.leads, (l) => l.ownerTmBaId, [
+  const campaignsByOwner = countBy(sources.campaigns, (c) => c.ownerTmagId);
+  const batchesByOwner = countBy(sources.batches, (b) => b.ownerTmagId);
+  const leadsByOwner = countBy(sources.leads, (l) => l.ownerTmagId);
+  const contactedByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, [
     'voicemail_sent',
     'sms_sent',
     'email_sent',
@@ -285,7 +285,7 @@ function buildBaRows(sources: AdminVmSources): AdminVmBaPerformanceRow[] {
     'holding_tank',
     'closed_new_ba',
   ]);
-  const activatedByOwner = countByStatus(sources.leads, (l) => l.ownerTmBaId, [
+  const activatedByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, [
     'activated',
     'info_requested',
     'callback_requested',
@@ -295,7 +295,7 @@ function buildBaRows(sources: AdminVmSources): AdminVmBaPerformanceRow[] {
     'holding_tank',
     'closed_new_ba',
   ]);
-  const startsByOwner = countByStatus(sources.leads, (l) => l.ownerTmBaId, [
+  const startsByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, [
     'presentation_started',
     'presentation_25',
     'presentation_50',
@@ -305,51 +305,51 @@ function buildBaRows(sources: AdminVmSources): AdminVmBaPerformanceRow[] {
     'holding_tank',
     'closed_new_ba',
   ]);
-  const completionsByOwner = countByStatus(sources.leads, (l) => l.ownerTmBaId, [
+  const completionsByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, [
     'presentation_completed',
     'dashboard_entered',
     'holding_tank',
     'closed_new_ba',
   ]);
-  const callbacksByOwner = countByStatus(sources.leads, (l) => l.ownerTmBaId, ['callback_requested']);
-  const infoByOwner = countByStatus(sources.leads, (l) => l.ownerTmBaId, ['info_requested']);
-  const holdingByOwner = countByStatus(sources.leads, (l) => l.ownerTmBaId, ['holding_tank']);
+  const callbacksByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, ['callback_requested']);
+  const infoByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, ['info_requested']);
+  const holdingByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, ['holding_tank']);
   const closedByOwner = countBy(
     sources.crm.filter((r) =>
       r.disposition === 'new_ba' ||
       r.closedReason === 'enrolled_as_ba' ||
       r.status === 'closed_new_ba',
     ),
-    (r) => r.ownerTmBaId,
+    (r) => r.ownerTmagId,
   );
 
   return Array.from(ownerIds)
-    .map((tmBaId): AdminVmBaPerformanceRow => {
-      const leadsImported = leadsByOwner.get(tmBaId) ?? 0;
-      const activated = activatedByOwner.get(tmBaId) ?? 0;
-      const videoStarts = startsByOwner.get(tmBaId) ?? 0;
-      const videoCompletions = completionsByOwner.get(tmBaId) ?? 0;
+    .map((tmagId): AdminVmBaPerformanceRow => {
+      const leadsImported = leadsByOwner.get(tmagId) ?? 0;
+      const activated = activatedByOwner.get(tmagId) ?? 0;
+      const videoStarts = startsByOwner.get(tmagId) ?? 0;
+      const videoCompletions = completionsByOwner.get(tmagId) ?? 0;
       let lastActivityAt: string | null = null;
       for (const lead of sources.leads) {
-        if (lead.ownerTmBaId !== tmBaId) continue;
+        if (lead.ownerTmagId !== tmagId) continue;
         lastActivityAt = maxIso(lastActivityAt, lead.lastActivityAt ?? lead.activatedAt ?? lead.createdAt ?? null);
       }
       return {
-        tmBaId,
-        baName: fullName(baById.get(tmBaId), tmBaId),
-        campaignCount: campaignsByOwner.get(tmBaId) ?? 0,
-        batchCount: batchesByOwner.get(tmBaId) ?? 0,
+        tmagId,
+        baName: fullName(baById.get(tmagId), tmagId),
+        campaignCount: campaignsByOwner.get(tmagId) ?? 0,
+        batchCount: batchesByOwner.get(tmagId) ?? 0,
         leadsImported,
-        leadsContacted: contactedByOwner.get(tmBaId) ?? 0,
+        leadsContacted: contactedByOwner.get(tmagId) ?? 0,
         activated,
         activationRate: pct(activated, leadsImported),
         videoStarts,
         videoCompletions,
         completionRate: pct(videoCompletions, videoStarts),
-        callbacks: callbacksByOwner.get(tmBaId) ?? 0,
-        infoRequests: infoByOwner.get(tmBaId) ?? 0,
-        holdingTankEntries: holdingByOwner.get(tmBaId) ?? 0,
-        closedNewBa: closedByOwner.get(tmBaId) ?? 0,
+        callbacks: callbacksByOwner.get(tmagId) ?? 0,
+        infoRequests: infoByOwner.get(tmagId) ?? 0,
+        holdingTankEntries: holdingByOwner.get(tmagId) ?? 0,
+        closedNewBa: closedByOwner.get(tmagId) ?? 0,
         lastActivityAt,
       };
     })
@@ -358,15 +358,15 @@ function buildBaRows(sources: AdminVmSources): AdminVmBaPerformanceRow[] {
 }
 
 function buildBatchRows(sources: AdminVmSources): AdminVmBatchHealthRow[] {
-  const baById = new Map(sources.bas.map((b) => [b.baId, b]));
+  const baById = new Map(sources.bas.map((b) => [b.tmagId, b]));
   return sources.batches.slice(0, RECENT_LIMIT).map((batch) => {
     const batchId = batch.leadBatchId ?? 'unknown_batch';
-    const owner = batch.ownerTmBaId ?? 'unknown_owner';
+    const owner = batch.ownerTmagId ?? 'unknown_owner';
     const leads = sources.leads.filter((l) => l.leadBatchId === batchId);
     const crm = sources.crm.filter((r) => r.leadBatchId === batchId);
     return {
       leadBatchId: batchId,
-      ownerTmBaId: owner,
+      ownerTmagId: owner,
       ownerName: fullName(baById.get(owner), owner),
       source: batch.source ?? 'unknown',
       status: batch.status ?? 'unknown',
@@ -383,16 +383,16 @@ function buildBatchRows(sources: AdminVmSources): AdminVmBatchHealthRow[] {
 }
 
 function buildCampaignRows(sources: AdminVmSources): AdminVmCampaignRow[] {
-  const baById = new Map(sources.bas.map((b) => [b.baId, b]));
+  const baById = new Map(sources.bas.map((b) => [b.tmagId, b]));
   return sources.campaigns.slice(0, RECENT_LIMIT).map((campaign) => {
     const campaignId = campaign.vmCampaignId ?? 'unknown_campaign';
-    const owner = campaign.ownerTmBaId ?? 'unknown_owner';
+    const owner = campaign.ownerTmagId ?? 'unknown_owner';
     const leads = sources.leads.filter((l) => l.vmCampaignId === campaignId);
     const delivery = sources.delivery.filter((d) => d.vmCampaignId === campaignId);
     const crm = sources.crm.filter((r) => r.vmCampaignId === campaignId);
     return {
       vmCampaignId: campaignId,
-      ownerTmBaId: owner,
+      ownerTmagId: owner,
       ownerName: fullName(baById.get(owner), owner),
       leadBatchId: campaign.leadBatchId ?? null,
       name: campaign.name ?? campaignId,

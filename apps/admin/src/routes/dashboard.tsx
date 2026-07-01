@@ -27,7 +27,7 @@ import { MetricsRow } from '@/components/dashboard/MetricsRow';
 import { DrilldownPanel } from '@/components/dashboard/DrilldownPanel';
 import { LiveEventStream } from '@/components/dashboard/LiveEventStream';
 
-const DEFAULT_FILTER: AdminDashboardFilter = { baId: null, leaderGroup: 'all' };
+const DEFAULT_FILTER: AdminDashboardFilter = { tmagId: null, leaderGroup: 'all' };
 
 export function DashboardPage() {
   const [filter, setFilter] = useState<AdminDashboardFilter>(DEFAULT_FILTER);
@@ -60,7 +60,7 @@ export function DashboardPage() {
     setErr(null);
     try {
       const params = new URLSearchParams();
-      if (f.baId) params.set('baId', f.baId);
+      if (f.tmagId) params.set('tmagId', f.tmagId);
       if (f.leaderGroup) params.set('leaderGroup', f.leaderGroup);
       const res = await fetch(`/api/admin/dashboard/metrics?${params.toString()}`, {
         credentials: 'include',

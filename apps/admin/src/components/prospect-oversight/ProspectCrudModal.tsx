@@ -7,7 +7,7 @@
  * Distinct from the D.4 InterventionModal on purpose:
  *   - CRUD never touches sponsor. Sponsor changes route ONLY through the
  *     D.4 reassign_sponsor intervention (locked-spec 3.5). 'create' takes a
- *     sponsorBaId because it STAMPS it immutably at mint; it can never CHANGE
+ *     sponsorTmagId because it STAMPS it immutably at mint; it can never CHANGE
  *     one. 'edit' has no sponsor field at all.
  *   - 'create' is MINT-ONLY (Chat #140-A): a real /p/{token} is minted, no
  *     placement, no position. Position is earned later at video_complete.
@@ -59,7 +59,7 @@ interface FormState {
   country: string;
   phone: string;
   email: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   reason: string;
 }
 
@@ -73,7 +73,7 @@ function initialForm(mode: ProspectCrudMode, detail: AdminProspectDetail | null)
       country: detail.location?.country ?? 'US',
       phone: detail.phone ?? '',
       email: detail.email ?? '',
-      sponsorBaId: '',
+      sponsorTmagId: '',
       reason: '',
     };
   }
@@ -85,7 +85,7 @@ function initialForm(mode: ProspectCrudMode, detail: AdminProspectDetail | null)
     country: 'US',
     phone: '',
     email: '',
-    sponsorBaId: '',
+    sponsorTmagId: '',
     reason: '',
   };
 }
@@ -119,7 +119,7 @@ export function ProspectCrudModal({ mode, detail, onClose, onDone }: Props) {
     form.lastName.trim().length >= 1 &&
     form.city.trim().length >= 1 &&
     form.stateOrRegion.trim().length >= 1 &&
-    form.sponsorBaId.trim().length >= 2;
+    form.sponsorTmagId.trim().length >= 2;
 
   const canSubmit = reasonOk && (mode === 'create' ? createOk : true);
 
@@ -193,11 +193,11 @@ export function ProspectCrudModal({ mode, detail, onClose, onDone }: Props) {
 
             {mode === 'create' && (
               <div>
-                <Label htmlFor="sponsorBaId">Sponsor BA ID (stamped immutably)</Label>
+                <Label htmlFor="sponsorTmagId">Sponsor BA ID (stamped immutably)</Label>
                 <Input
-                  id="sponsorBaId"
-                  value={form.sponsorBaId}
-                  onChange={(e) => set('sponsorBaId', e.target.value)}
+                  id="sponsorTmagId"
+                  value={form.sponsorTmagId}
+                  onChange={(e) => set('sponsorTmagId', e.target.value)}
                   placeholder="TMBA-…"
                 />
               </div>
@@ -266,7 +266,7 @@ export function ProspectCrudModal({ mode, detail, onClose, onDone }: Props) {
                 <Row label="Name" v={`${form.firstName} ${form.lastName}`} />
                 <Row label="Location" v={`${form.city}, ${form.stateOrRegion} \u00b7 ${form.country}`} />
                 <Row label="Phone" v={form.phone || '\u2014'} />
-                <Row label="Sponsor" v={form.sponsorBaId} />
+                <Row label="Sponsor" v={form.sponsorTmagId} />
                 <p className="text-[11px] font-mono text-teal/80 mt-1">
                   Mint only — no placement, no position assigned now.
                 </p>
@@ -354,7 +354,7 @@ async function callApi(
       city: form.city.trim(),
       stateOrRegion: form.stateOrRegion.trim(),
       country: form.country.trim() || undefined,
-      sponsorBaId: form.sponsorBaId.trim(),
+      sponsorTmagId: form.sponsorTmagId.trim(),
       phone: form.phone.trim() || null,
       email: form.email.trim() || null,
       reason,

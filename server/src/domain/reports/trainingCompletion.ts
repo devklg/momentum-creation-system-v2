@@ -13,7 +13,7 @@
  *     tracking surface, wireframe .team 3.6, is unbuilt). orientationCompletedAt
  *     is null for everyone until that lands. Stated in provenanceNote.
  *
- * Scope: reuses the dashboard filter via resolveScopedBaIds. Soft-deleted
+ * Scope: reuses the dashboard filter via resolveScopedTmagIds. Soft-deleted
  * BAs excluded. Time range narrows the BA set by signup date (createdAt)
  * for flat presets; by_month/lifetime span all.
  *
@@ -21,7 +21,7 @@
  */
 
 import { gatewayCall } from '../../services/gateway.js';
-import { resolveScopedBaIds } from '../adminMetrics.js';
+import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
@@ -44,14 +44,14 @@ const ORIENTATION_PROVENANCE =
   'orientation completion is null for everyone until that surface lands.';
 
 interface BaDoc {
-  baId: string;
+  tmagId: string;
   firstName: string;
   lastName: string;
   createdAt: string;
   deleted?: boolean;
 }
 interface FastStartDoc {
-  baId: string;
+  tmagId: string;
   moduleId: 1 | 2 | 3 | 4 | 5;
   state: 'not_started' | 'in_progress' | 'completed';
   completedAt: string | null;
@@ -71,10 +71,10 @@ export async function buildTrainingReport(
   filter: AdminDashboardFilter,
   range: AdminReportTimeRange,
 ): Promise<{ result: AdminTrainingReport; meta: Omit<AdminReportMeta, 'title'> }> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
 
   const baFilter: Record<string, unknown> = { deleted: { $ne: true } };
-  if (scopedBaIds !== null) baFilter.baId = { $in: scopedBaIds };
+  if (scopedTmagIds !== null) baFilter.tmagId = { $in: scopedTmagIds };
   Object.assign(baFilter, rangeClause('createdAt', range));
 
   const basRes = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
@@ -85,7 +85,7 @@ export async function buildTrainingReport(
     limit: 50_000,
   });
   const bas = basRes.documents ?? [];
-  const baIds = bas.map((b) => b.baId);
+  const baIds = bas.map((b) => b.tmagId);
 
   // Module completion stats per BA (collection may be empty — handled).
   const progressByBa = new Map<string, Map<number, string | null>>();
@@ -95,19 +95,19 @@ export async function buildTrainingReport(
     const progRes = await gatewayCall<{ documents: FastStartDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_FAST_START,
-      filter: { baId: { $in: baIds }, state: 'completed' },
+      filter: { tmagId: { $in: baIds }, state: 'completed' },
       limit: baIds.length * 5,
     });
     for (const p of progRes.documents ?? []) {
-      const m = progressByBa.get(p.baId) ?? new Map<number, string | null>();
+      const m = progressByBa.get(p.tmagId) ?? new Map<number, string | null>();
       m.set(p.moduleId, p.completedAt);
-      progressByBa.set(p.baId, m);
+      progressByBa.set(p.tmagId, m);
       moduleCompletedCount.set(p.moduleId, (moduleCompletedCount.get(p.moduleId) ?? 0) + 1);
     }
   }
 
   const rows: AdminTrainingReportRow[] = bas.map((b) => {
-    const mods = progressByBa.get(b.baId) ?? new Map<number, string | null>();
+    const mods = progressByBa.get(b.tmagId) ?? new Map<number, string | null>();
     const modulesCompleted = mods.size;
     const fastStartComplete = modulesCompleted === 5;
     // Fast Start completion time = the latest module completedAt, when all 5 done.
@@ -117,7 +117,7 @@ export async function buildTrainingReport(
       fastStartCompletedAt = times.length ? times.sort().at(-1)! : null;
     }
     return {
-      baId: b.baId,
+      tmagId: b.tmagId,
       fullName: `${b.firstName} ${b.lastName}`.trim(),
       signupAt: b.createdAt,
       modulesCompleted,

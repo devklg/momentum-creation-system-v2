@@ -38,7 +38,7 @@ type IvoryAngle =
 
 interface IvoryName {
   ivoryId: string;
-  baId: string;
+  tmagId: string;
   firstName: string;
   lastName: string;
   lastInitial: string;

@@ -16,7 +16,7 @@
  *
  *   city          — granularity is state-level; city alone is not PII
  *   prospectId, tokenId — opaque ids
- *   sponsorBaId, sponsorFullName — BAs are Team Magnificent members,
+ *   sponsorTmagId, sponsorFullName — BAs are Team Magnificent members,
  *                                  not third-party PII
  *
  * Empty / null / non-string values pass through unchanged. The redactor

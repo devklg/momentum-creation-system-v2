@@ -67,7 +67,7 @@ export const PHASE7_NEO4J_INDEXES: readonly Neo4jSchemaStatement[] = [
   {
     name: 'outcome_ba',
     label: 'Outcome',
-    cypher: 'CREATE INDEX outcome_ba IF NOT EXISTS FOR (o:Outcome) ON (o.baId)',
+    cypher: 'CREATE INDEX outcome_ba IF NOT EXISTS FOR (o:Outcome) ON (o.tmagId)',
     drop: 'DROP INDEX outcome_ba IF EXISTS',
     purpose: 'BA-scoped outcome lookups.',
   },

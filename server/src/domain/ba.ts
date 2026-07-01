@@ -25,7 +25,7 @@ export interface NewBAInput {
 }
 
 export interface BARecord {
-  baId: string;
+  tmagId: string;
   threeBaId: string;
   threeUsername: string;
   firstName: string;
@@ -35,7 +35,7 @@ export interface BARecord {
   /** IANA timezone (e.g. "America/Los_Angeles"). Drives Michael scheduling. */
   timezone: string;
   passwordHash: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   sponsorThreeBaId: string;
   accessCodeUsed: string;
   createdAt: string;
@@ -49,7 +49,7 @@ export interface BARecord {
   lastLoginAt: string | null;
 }
 
-function mintBaId(): string {
+function mintTmagId(): string {
   // Format: TM-YYYYMMDD-<6 random alphanum>. Stable, sortable, easy to read.
   const now = new Date();
   const ymd = now.toISOString().slice(0, 10).replace(/-/g, '');
@@ -82,11 +82,11 @@ export async function threeBaIdExists(threeBaId: string): Promise<boolean> {
  * system (locked Chat #102). THREE BA ID and email live on the record but
  * never resolve to a session.
  */
-export async function findBAByBaId(baId: string): Promise<BARecord | null> {
+export async function findBAByTmagId(tmagId: string): Promise<BARecord | null> {
   const result = await gatewayCall<{ documents: BARecord[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'brand_ambassadors',
-    filter: { baId },
+    filter: { tmagId },
     limit: 1,
   });
   return result.documents.length > 0 ? result.documents[0] ?? null : null;
@@ -102,18 +102,18 @@ export async function findBAByBaId(baId: string): Promise<BARecord | null> {
  * Mongo write fails the user is still authenticated; the stat is just
  * slightly less accurate for that BA until their next login.
  */
-export async function recordLogin(baId: string): Promise<void> {
+export async function recordLogin(tmagId: string): Promise<void> {
   const at = new Date().toISOString();
   try {
     await gatewayCall('mongodb', 'update', {
       database: 'momentum',
       collection: 'brand_ambassadors',
-      filter: { baId },
+      filter: { tmagId },
       update: { $set: { lastLoginAt: at } },
     });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error('[recordLogin] best-effort update failed', { baId, err });
+    console.error('[recordLogin] best-effort update failed', { tmagId, err });
   }
 }
 
@@ -123,13 +123,13 @@ export async function recordLogin(baId: string): Promise<void> {
  * THREE. This is the operational mirror per ADMIN Design Section C.
  */
 export interface BAListItem {
-  baId: string;
+  tmagId: string;
   threeBaId: string;
   fullName: string;
   email: string | null;
   phone: string | null;
   timezone: string | null;
-  sponsorBaId: string | null;
+  sponsorTmagId: string | null;
   sponsorName: string | null;
   joinedAt: string;
 }
@@ -144,52 +144,52 @@ export async function listAllBAsForAdmin(limit = 500): Promise<BAListItem[]> {
   });
   const bas = raw.documents ?? [];
 
-  // Build a baId -> fullName map from the same result set so the sponsor name
+  // Build a tmagId -> fullName map from the same result set so the sponsor name
   // resolves without an extra query when the sponsor is also in the list
   // (the common case once the team has any depth).
-  const nameByBaId = new Map<string, string>();
+  const nameByTmagId = new Map<string, string>();
   for (const b of bas) {
-    nameByBaId.set(b.baId, `${b.firstName} ${b.lastName}`.trim());
+    nameByTmagId.set(b.tmagId, `${b.firstName} ${b.lastName}`.trim());
   }
 
   // Any sponsors not in the result window get a follow-up batch lookup so the
   // sponsor column is correct even when the upline pre-dates the page.
   const missingSponsors = new Set<string>();
   for (const b of bas) {
-    if (b.sponsorBaId && !nameByBaId.has(b.sponsorBaId)) {
-      missingSponsors.add(b.sponsorBaId);
+    if (b.sponsorTmagId && !nameByTmagId.has(b.sponsorTmagId)) {
+      missingSponsors.add(b.sponsorTmagId);
     }
   }
   if (missingSponsors.size > 0) {
     const sponsorLookup = await gatewayCall<{ documents: BARecord[] }>('mongodb', 'query', {
       database: 'momentum',
       collection: 'brand_ambassadors',
-      filter: { baId: { $in: Array.from(missingSponsors) } },
+      filter: { tmagId: { $in: Array.from(missingSponsors) } },
       limit: missingSponsors.size,
     });
     for (const s of sponsorLookup.documents ?? []) {
-      nameByBaId.set(s.baId, `${s.firstName} ${s.lastName}`.trim());
+      nameByTmagId.set(s.tmagId, `${s.firstName} ${s.lastName}`.trim());
     }
   }
 
   return bas.map((b) => ({
-    baId: b.baId,
+    tmagId: b.tmagId,
     threeBaId: b.threeBaId,
     fullName: `${b.firstName} ${b.lastName}`.trim(),
     email: b.email ?? null,
     phone: b.phone ?? null,
     timezone: b.timezone ?? null,
-    sponsorBaId: b.sponsorBaId ?? null,
-    sponsorName: b.sponsorBaId ? nameByBaId.get(b.sponsorBaId) ?? null : null,
+    sponsorTmagId: b.sponsorTmagId ?? null,
+    sponsorName: b.sponsorTmagId ? nameByTmagId.get(b.sponsorTmagId) ?? null : null,
     joinedAt: b.createdAt,
   }));
 }
 
 export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): Promise<BARecord> {
   const passwordHash = await argon2.hash(input.passwordPlain, { type: argon2.argon2id });
-  const baId = mintBaId();
+  const tmagId = mintTmagId();
   const record: BARecord = {
-    baId,
+    tmagId,
     threeBaId: input.threeBaId,
     threeUsername: input.threeUsername,
     firstName: input.firstName,
@@ -198,7 +198,7 @@ export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): 
     phone: input.phone,
     timezone: input.timezone,
     passwordHash,
-    sponsorBaId: sponsor.sponsorBaId,
+    sponsorTmagId: sponsor.sponsorTmagId,
     sponsorThreeBaId: sponsor.sponsorThreeBaId,
     accessCodeUsed: sponsor.code,
     createdAt: new Date().toISOString(),
@@ -206,17 +206,17 @@ export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): 
   };
 
   await tripleStackWrite({
-    id: baId,
+    id: tmagId,
     mongoCollection: 'brand_ambassadors',
     mongoDoc: { ...record },
     neo4j: {
       cypher:
-        'MERGE (s:BA {baId: $sponsorBaId}) MERGE (n:BA {baId: $id}) ' +
+        'MERGE (s:BA {tmagId: $sponsorTmagId}) MERGE (n:BA {tmagId: $id}) ' +
         'SET n.threeBaId = $threeBaId, n.email = $email, n.firstName = $firstName, ' +
         'n.lastName = $lastName, n.timezone = $timezone ' +
         'MERGE (n)-[:SPONSORED_BY]->(s)',
       params: {
-        sponsorBaId: sponsor.sponsorBaId,
+        sponsorTmagId: sponsor.sponsorTmagId,
         threeBaId: input.threeBaId,
         email: input.email,
         firstName: input.firstName,

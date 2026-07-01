@@ -25,10 +25,10 @@
  *      cleanup will piggyback whenever the cron-based flush ships.
  *
  * Sponsor immutability (3.5):
- *   sponsorBaId is stamped from the invite token at row creation
+ *   sponsorTmagId is stamped from the invite token at row creation
  *   and is NEVER recomputed or overwritten — re-entry by phone
  *   resolves back to the ORIGINAL inviting BA, never a different one.
- *   No route accepts sponsorBaId as input.
+ *   No route accepts sponsorTmagId as input.
  *
  * Multi-token edge case (3.17):
  *   A single phone may be tied to more than one active account if
@@ -53,7 +53,7 @@ const CHROMA_COLLECTION = 'mcs_prospect_accounts';
 export interface CreateProspectAccountInput {
   prospectId: string;
   tokenId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   /** BA-supplied phone, set at mint (#148). Optional only so the legacy
    *  idempotent video-complete call site still type-checks. */
   phone?: string | null;
@@ -226,7 +226,7 @@ export async function createProspectAccount(
     accountId,
     prospectId: input.prospectId,
     tokenId: input.tokenId,
-    sponsorBaId: input.sponsorBaId,
+    sponsorTmagId: input.sponsorTmagId,
     phone: input.phone ?? null,
     reentryCode: input.reentryCode ?? '',
     createdAt,
@@ -244,18 +244,18 @@ export async function createProspectAccount(
           'MERGE (a:ProspectAccount {accountId: $accountId}) ' +
           'SET a.prospectId = $prospectId, ' +
           '    a.tokenId = $tokenId, ' +
-          '    a.sponsorBaId = $sponsorBaId, ' +
+          '    a.sponsorTmagId = $sponsorTmagId, ' +
           '    a.createdAt = $createdAt, ' +
           '    a.expiresAt = $expiresAt ' +
           'MERGE (t:InviteToken {token: $tokenId}) ' +
           'MERGE (a)-[:KEYS]->(t) ' +
-          'MERGE (b:BA {baId: $sponsorBaId}) ' +
+          'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
           'MERGE (a)-[:SPONSORED_BY]->(b)',
         params: {
           accountId,
           prospectId: input.prospectId,
           tokenId: input.tokenId,
-          sponsorBaId: input.sponsorBaId,
+          sponsorTmagId: input.sponsorTmagId,
           createdAt,
           expiresAt: input.tokenExpiresAt,
         },
@@ -264,14 +264,14 @@ export async function createProspectAccount(
         collection: CHROMA_COLLECTION,
         document:
           `prospect account created for prospect ${input.prospectId} ` +
-          `(token ${input.tokenId}) · sponsor ${input.sponsorBaId} ` +
+          `(token ${input.tokenId}) · sponsor ${input.sponsorTmagId} ` +
           `· expires ${input.tokenExpiresAt}`,
         metadata: {
           kind: 'prospect_account_created',
           accountId,
           prospectId: input.prospectId,
           tokenId: input.tokenId,
-          sponsorBaId: input.sponsorBaId,
+          sponsorTmagId: input.sponsorTmagId,
           createdAt,
           expiresAt: input.tokenExpiresAt,
         },

@@ -47,18 +47,18 @@ import type {
 export const adminReportingRoutes: Router = express.Router();
 
 const FilterSchema = z.object({
-  baId: z.string().min(2).max(80).optional(),
+  tmagId: z.string().min(2).max(80).optional(),
   leaderGroup: z.enum(['all', 'leaders_only', 'non_leaders']).optional(),
 });
 
 function parseFilter(req: Request): AdminDashboardFilter {
   const parsed = FilterSchema.parse({
-    baId: typeof req.query.baId === 'string' ? req.query.baId : undefined,
+    tmagId: typeof req.query.tmagId === 'string' ? req.query.tmagId : undefined,
     leaderGroup:
       typeof req.query.leaderGroup === 'string' ? req.query.leaderGroup : undefined,
   });
   return {
-    baId: parsed.baId ?? null,
+    tmagId: parsed.tmagId ?? null,
     leaderGroup: parsed.leaderGroup ?? 'all',
   };
 }
@@ -79,8 +79,8 @@ function parseRange(req: Request): AdminReportTimeRange {
 function adminActorFromRequest(req: Request): AuditActor & { kind: 'admin' } {
   const session = req.session!;
   const displayName =
-    (session as unknown as { fullName?: string }).fullName ?? session.baId;
-  return { kind: 'admin', baId: session.baId, displayName };
+    (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
+  return { kind: 'admin', tmagId: session.tmagId, displayName };
 }
 
 /* ─── GET /master-report.pdf — I.3 ───────────────────────── */
@@ -105,7 +105,7 @@ adminReportingRoutes.get('/master-report.pdf', requireAdmin, async (req, res) =>
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.reporting.master_report.generated',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { filter, generatedAt, sourceHash, byteLength: buffer.length },
       reason: null,
@@ -150,7 +150,7 @@ adminReportingRoutes.get('/activation', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.reporting.ba_activation.generated',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: {
         filter,
@@ -200,7 +200,7 @@ adminReportingRoutes.get('/training', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.reporting.training_completion.generated',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: {
         filter,
@@ -254,7 +254,7 @@ adminReportingRoutes.get('/invite-funnel', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.reporting.invite_to_presentation.generated',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: {
         filter,
@@ -303,7 +303,7 @@ adminReportingRoutes.get('/queue-velocity', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.reporting.queue_velocity.generated',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { filter, range, generatedAt: meta.generatedAt, sourceHash: meta.sourceHash, days: result.days.length },
       reason: null,
@@ -333,7 +333,7 @@ adminReportingRoutes.get('/enrollment-completion', requireAdmin, async (req, res
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.reporting.enrollment_completion.generated',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { filter, range, generatedAt: meta.generatedAt, sourceHash: meta.sourceHash, enrollments: result.totals.enrollments },
       reason: null,
@@ -363,7 +363,7 @@ adminReportingRoutes.get('/follow-up-aging', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.reporting.follow_up_aging.generated',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { filter, range, generatedAt: meta.generatedAt, sourceHash: meta.sourceHash, prospects: result.totals.prospects },
       reason: null,
@@ -393,7 +393,7 @@ adminReportingRoutes.get('/leader-scorecards', requireAdmin, async (req, res) =>
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.reporting.leader_scorecards.generated',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { filter, range, generatedAt: meta.generatedAt, sourceHash: meta.sourceHash, leaderCount: result.leaderCount },
       reason: null,
@@ -416,7 +416,7 @@ adminReportingRoutes.get('/leader-scorecards', requireAdmin, async (req, res) =>
  *
  * Audit (per brief #144 / locked-spec 4.J):
  *   action  = 'admin.report_export'
- *   entity  = { kind: 'admin_session', id: actor.baId } — the export is a
+ *   entity  = { kind: 'admin_session', id: actor.tmagId } — the export is a
  *             session-scoped read; the reportKey + redact + rowCount live
  *             in `after` so the audit drill-in shows them
  *   severity= 'info'
@@ -454,7 +454,7 @@ async function auditExport(
   await appendAuditEntry({
     actor: adminActorFromRequest(req),
     action: 'admin.report_export',
-    entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+    entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
     severity: 'info',
     after: { reportKey, redact, rowCount, sourceHash, generatedAt, format: 'csv' },
     reason: null,

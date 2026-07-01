@@ -205,7 +205,7 @@ describe('S3.6 admin Michael runtime observability endpoint', () => {
       'sessionId',
       'turnId',
       'correlationId',
-      'baId',
+      'tmagId',
       'email',
       'phone',
       'prospect',

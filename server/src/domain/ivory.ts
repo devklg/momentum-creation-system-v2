@@ -6,7 +6,7 @@
  *   1. ROSTER. CRUD over IvoryName records — the persistent list of people
  *      a BA knows and might invite. Triple-stacked (Mongo + Neo4j + Chroma)
  *      exactly like the invitation spine. BA-private — every read is scoped
- *      to the authed BA by baId. The record carries categories, notes,
+ *      to the authed BA by tmagId. The record carries categories, notes,
  *      preferred angle, status, and a back-ref to the last prospect token
  *      minted for the name (Generator updates this).
  *
@@ -18,9 +18,9 @@
  *      turn carries angle + roster size + BA's ask.
  *
  * Persistence:
- *   - Mongo collection: `ivory_names` (team-wide, every doc has `baId`
+ *   - Mongo collection: `ivory_names` (team-wide, every doc has `tmagId`
  *     and every query filters on it — same pattern as `prospects`).
- *   - Neo4j: (:BA {baId})-[:KNOWS]->(:IvoryName {ivoryId, ...}). A later
+ *   - Neo4j: (:BA {tmagId})-[:KNOWS]->(:IvoryName {ivoryId, ...}). A later
  *     conversion to a /p/{token} adds (:IvoryName)-[:INVITED_AS]->(:Prospect).
  *   - Chroma collection: `mcs_ivory`. Bootstrap once via
  *     `pnpm --filter @momentum/server bootstrap:ivory` (CK-04 pattern). The
@@ -162,13 +162,13 @@ function sanitizeStatus(input: IvoryStatus): IvoryStatus {
 function ivoryChromaDoc(r: {
   firstName: string;
   lastInitial: string;
-  baId: string;
+  tmagId: string;
   categories: readonly string[];
   preferredAngle: string;
   notes: string;
 }): string {
   return (
-    `${r.firstName} ${r.lastInitial}. — warm-market name for BA ${r.baId}. ` +
+    `${r.firstName} ${r.lastInitial}. — warm-market name for BA ${r.tmagId}. ` +
     `Categories: ${r.categories.join(', ') || 'unspecified'}. ` +
     `Preferred angle: ${r.preferredAngle}. ` +
     (r.notes ? `Notes: ${r.notes}.` : 'No notes yet.')
@@ -176,7 +176,7 @@ function ivoryChromaDoc(r: {
 }
 
 export async function createIvoryName(
-  baId: string,
+  tmagId: string,
   input: CreateIvoryNamePayload,
 ): Promise<IvoryName> {
   const firstName = input.firstName.trim();
@@ -193,7 +193,7 @@ export async function createIvoryName(
 
   const record: IvoryName = {
     ivoryId,
-    baId,
+    tmagId,
     firstName,
     lastName,
     lastInitial,
@@ -214,9 +214,9 @@ export async function createIvoryName(
       mongoDoc: { ...record },
       neo4j: {
         cypher:
-          'MERGE (b:BA {baId: $baId}) ' +
+          'MERGE (b:BA {tmagId: $tmagId}) ' +
           'MERGE (n:IvoryName {ivoryId: $id}) ' +
-          'SET n.baId = $baId, ' +
+          'SET n.tmagId = $tmagId, ' +
           '    n.firstName = $firstName, ' +
           '    n.lastInitial = $lastInitial, ' +
           '    n.status = $status, ' +
@@ -225,7 +225,7 @@ export async function createIvoryName(
           'MERGE (b)-[r:KNOWS]->(n) ' +
           'SET r.since = $createdAt',
         params: {
-          baId,
+          tmagId,
           firstName,
           lastInitial,
           status: 'new',
@@ -239,7 +239,7 @@ export async function createIvoryName(
         metadata: {
           kind: 'ivory_name_created',
           ivoryId,
-          baId,
+          tmagId,
           preferredAngle,
           createdAt: now,
         },
@@ -274,14 +274,14 @@ export async function createIvoryName(
  * roster sizes are expected to fit comfortably in one fetch (<500 names per
  * BA). If that assumption breaks, add a server-side limit/offset.
  */
-export async function listIvoryNamesForBA(baId: string): Promise<IvoryName[]> {
+export async function listIvoryNamesForBA(tmagId: string): Promise<IvoryName[]> {
   const res = await gatewayCall<{
     count: number;
     documents: Array<IvoryName & { _id?: unknown }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: IVORY_COLLECTION,
-    filter: { baId },
+    filter: { tmagId },
     sort: { lastTouchedAt: -1 },
     limit: 1000,
   });
@@ -292,7 +292,7 @@ export async function listIvoryNamesForBA(baId: string): Promise<IvoryName[]> {
 /** Fetch one Ivory record by id, enforcing BA ownership. */
 export async function getIvoryName(
   ivoryId: string,
-  baId: string,
+  tmagId: string,
 ): Promise<IvoryName> {
   const res = await gatewayCall<{
     count: number;
@@ -306,7 +306,7 @@ export async function getIvoryName(
 
   const doc = res.documents[0];
   if (!doc) throw new IvoryNotFoundError(ivoryId);
-  if (doc.baId !== baId) throw new IvoryOwnershipError(ivoryId);
+  if (doc.tmagId !== tmagId) throw new IvoryOwnershipError(ivoryId);
   return stripMongoMeta(doc);
 }
 
@@ -316,10 +316,10 @@ export async function getIvoryName(
  */
 export async function updateIvoryName(
   ivoryId: string,
-  baId: string,
+  tmagId: string,
   patch: UpdateIvoryNamePayload,
 ): Promise<IvoryName> {
-  const existing = await getIvoryName(ivoryId, baId);
+  const existing = await getIvoryName(ivoryId, tmagId);
   const now = new Date().toISOString();
 
   const firstName =
@@ -404,7 +404,7 @@ export async function updateIvoryName(
       {
         kind: 'ivory_name_created',
         ivoryId,
-        baId,
+        tmagId,
         preferredAngle,
         createdAt: existing.createdAt,
       },
@@ -424,7 +424,7 @@ export async function updateIvoryName(
  */
 export async function updateIvoryStatus(
   ivoryId: string,
-  baId: string,
+  tmagId: string,
   status: IvoryStatus,
 ): Promise<IvoryName> {
   const validated = sanitizeStatus(status);
@@ -435,7 +435,7 @@ export async function updateIvoryStatus(
     // momentum/cockpit projections assume cannot happen. Route it through mint.
     throw new IvoryValidationError('status_invited_requires_mint');
   }
-  const existing = await getIvoryName(ivoryId, baId);
+  const existing = await getIvoryName(ivoryId, tmagId);
   const now = new Date().toISOString();
   const next: IvoryName = {
     ...existing,
@@ -473,10 +473,10 @@ export async function updateIvoryStatus(
  */
 export async function markIvoryInvited(
   ivoryId: string,
-  baId: string,
+  tmagId: string,
   prospectId: string,
 ): Promise<IvoryName> {
-  const existing = await getIvoryName(ivoryId, baId);
+  const existing = await getIvoryName(ivoryId, tmagId);
   const now = new Date().toISOString();
   const next: IvoryName = {
     ...existing,
@@ -532,10 +532,10 @@ export async function markIvoryInvited(
  */
 export async function deleteIvoryName(
   ivoryId: string,
-  baId: string,
+  tmagId: string,
 ): Promise<void> {
   // Ownership check (also throws IvoryNotFoundError if missing).
-  await getIvoryName(ivoryId, baId);
+  await getIvoryName(ivoryId, tmagId);
 
   await gatewayCall('mongodb', 'delete', {
     database: MONGO_DB,
@@ -816,10 +816,10 @@ function buildInvitationDraftUserTurn(input: {
 }
 
 export async function draftIvoryInvitation(
-  baId: string,
+  tmagId: string,
   input: IvoryInvitationDraftPayload,
 ): Promise<IvoryInvitationDraftResponse> {
-  const name = await getIvoryName(input.ivoryId, baId);
+  const name = await getIvoryName(input.ivoryId, tmagId);
   const relationshipReason = cleanRelationshipReason(input.relationshipReason);
   const productName =
     typeof input.productName === 'string' && input.productName.trim()
@@ -876,10 +876,10 @@ export async function draftIvoryInvitation(
 }
 
 export async function mintIvoryInvitation(
-  baId: string,
+  tmagId: string,
   input: IvoryInvitationMintPayload,
 ): Promise<IvoryInvitationMintResponse> {
-  const name = await getIvoryName(input.ivoryId, baId);
+  const name = await getIvoryName(input.ivoryId, tmagId);
   const relationshipReason = cleanRelationshipReason(input.relationshipReason);
   const message = input.message.trim();
   const city = input.city.trim();
@@ -902,7 +902,7 @@ export async function mintIvoryInvitation(
   if (!normalizePhone(phone)) throw new IvoryValidationError('phone_invalid');
 
   const created = await createInvitation({
-    sponsorBaId: baId,
+    sponsorTmagId: tmagId,
     firstName: name.firstName,
     lastName: name.lastName,
     email,
@@ -920,7 +920,7 @@ export async function mintIvoryInvitation(
   // make the BA retry and mint a SECOND live token for the same person. Record
   // the linkage best-effort; a failure is logged for later reconciliation.
   try {
-    await markIvoryInvited(input.ivoryId, baId, created.prospectId);
+    await markIvoryInvited(input.ivoryId, tmagId, created.prospectId);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(

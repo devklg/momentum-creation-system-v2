@@ -9,7 +9,7 @@
  * of domain/holdingTank.ts placeProspect.
  *
  * Sponsor immutability (locked-spec Part 3.5):
- *   - sponsorBaId is stamped from the AUTHED SESSION BA at the route layer,
+ *   - sponsorTmagId is stamped from the AUTHED SESSION BA at the route layer,
  *     never from the request body. createInvitation receives it as an
  *     argument and stamps it onto every artifact (prospect, token, both
  *     Neo4j edges, both Chroma events). It is never recomputed.
@@ -78,12 +78,12 @@ function genReentryCode(len = 6): string {
 }
 
 /**
- * Input to createInvitation. sponsorBaId is supplied by the route from the
+ * Input to createInvitation. sponsorTmagId is supplied by the route from the
  * authed session — it is NOT part of the BA-submitted form and must never be
  * read from the request body (locked-spec 3.5).
  */
 export interface CreateInvitationInput {
-  sponsorBaId: string;
+  sponsorTmagId: string;
   firstName: string;
   lastName: string;
   email: string | null;
@@ -107,7 +107,7 @@ export interface CreateInvitationInput {
 export interface CreateInvitationResult {
   prospectId: string;
   token: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   /** App-generated re-entry code (#148), shown on-page for the prospect. */
   reentryCode: string;
   createdAt: string;
@@ -180,7 +180,7 @@ export async function createInvitation(
     location,
     phone: input.phone ?? null,
     email: input.email ?? null,
-    sponsorBaId: input.sponsorBaId,
+    sponsorTmagId: input.sponsorTmagId,
     state: 'minted',
     positionNumber: null,
     placedAt: null,
@@ -208,9 +208,9 @@ export async function createInvitation(
       relationshipReason,
     },
     neo4j: {
-      // BA INVITED prospect. sponsorBaId stamped immutably here.
+      // BA INVITED prospect. sponsorTmagId stamped immutably here.
       cypher:
-        'MERGE (b:BA {baId: $sponsorBaId}) ' +
+        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
         'MERGE (p:Prospect {prospectId: $id}) ' +
         'SET p.firstName = $firstName, ' +
         '    p.lastInitial = $lastInitial, ' +
@@ -218,13 +218,13 @@ export async function createInvitation(
         '    p.stateOrRegion = $stateOrRegion, ' +
         '    p.country = $country, ' +
         '    p.state = $state, ' +
-        '    p.sponsorBaId = $sponsorBaId, ' +
+        '    p.sponsorTmagId = $sponsorTmagId, ' +
         '    p.relationshipReason = $relationshipReason, ' +
         '    p.createdAt = $createdAt ' +
         'MERGE (b)-[r:INVITED]->(p) ' +
         'SET r.token = $token, r.createdAt = $createdAt',
       params: {
-        sponsorBaId: input.sponsorBaId,
+        sponsorTmagId: input.sponsorTmagId,
         firstName: input.firstName,
         lastInitial,
         city: input.city,
@@ -240,14 +240,14 @@ export async function createInvitation(
       collection: CHROMA_COLLECTION,
       document:
         `${input.firstName} ${lastInitial}. from ${input.city}, ` +
-        `${input.stateOrRegion} invited by ${input.sponsorBaId} ` +
+        `${input.stateOrRegion} invited by ${input.sponsorTmagId} ` +
         `at ${createdAt} (token ${token})` +
         (relationshipReason ? `. Relationship context: ${relationshipReason}` : ''),
       metadata: {
         kind: 'invitation_created',
         prospectId,
         token,
-        sponsorBaId: input.sponsorBaId,
+        sponsorTmagId: input.sponsorTmagId,
         city: input.city,
         stateOrRegion: input.stateOrRegion,
         source: input.source,
@@ -263,7 +263,7 @@ export async function createInvitation(
   const tokenRecord: InviteTokenRecord = {
     token,
     prospectId,
-    sponsorBaId: input.sponsorBaId,
+    sponsorTmagId: input.sponsorTmagId,
     state: 'minted',
     createdAt,
     clickedAt: null,
@@ -280,7 +280,7 @@ export async function createInvitation(
     query:
       'MERGE (t:InviteToken {token: $token}) ' +
       'SET t.prospectId = $prospectId, ' +
-      '    t.sponsorBaId = $sponsorBaId, ' +
+      '    t.sponsorTmagId = $sponsorTmagId, ' +
       '    t.state = $state, ' +
       '    t.createdAt = $createdAt, ' +
       '    t.expiresAt = $expiresAt ' +
@@ -290,7 +290,7 @@ export async function createInvitation(
     params: {
       token,
       prospectId,
-      sponsorBaId: input.sponsorBaId,
+      sponsorTmagId: input.sponsorTmagId,
       state: 'minted',
       createdAt,
       expiresAt,
@@ -304,8 +304,8 @@ export async function createInvitation(
   await createOrUpdateCrmRecordForToken({
     prospectId,
     token,
-    ownerTmBaId: input.sponsorBaId,
-    sponsorTmBaId: input.sponsorBaId,
+    ownerTmagId: input.sponsorTmagId,
+    sponsorTmagId: input.sponsorTmagId,
     source: crmSourceForInvitation(input.source),
     leadId: null,
     leadBatchId: null,
@@ -322,7 +322,7 @@ export async function createInvitation(
   await createProspectAccount({
     prospectId,
     tokenId: token,
-    sponsorBaId: input.sponsorBaId,
+    sponsorTmagId: input.sponsorTmagId,
     tokenExpiresAt: expiresAt,
     phone: normalizePhone(input.phone),
     reentryCode,
@@ -331,7 +331,7 @@ export async function createInvitation(
   return {
     prospectId,
     token,
-    sponsorBaId: input.sponsorBaId,
+    sponsorTmagId: input.sponsorTmagId,
     reentryCode,
     createdAt,
     expiresAt,
@@ -350,7 +350,7 @@ export async function createInvitation(
  */
 async function appendActivity(entry: {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   kind: InvitationActivityEntry['kind'];
   note: string;
   at: string;
@@ -362,7 +362,7 @@ async function appendActivity(entry: {
     mongoDoc: {
       activityId,
       prospectId: entry.prospectId,
-      sponsorBaId: entry.sponsorBaId,
+      sponsorTmagId: entry.sponsorTmagId,
       kind: entry.kind,
       note: entry.note,
       at: entry.at,
@@ -387,7 +387,7 @@ async function appendActivity(entry: {
       metadata: {
         kind: entry.kind,
         prospectId: entry.prospectId,
-        sponsorBaId: entry.sponsorBaId,
+        sponsorTmagId: entry.sponsorTmagId,
         at: entry.at,
       },
     },
@@ -407,10 +407,10 @@ async function appendActivity(entry: {
  */
 export async function markInvitationSent(
   prospectId: string,
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): Promise<{ sentAt: string; alreadySent: boolean }> {
   const existing = await gatewayCall<{
-    documents: Array<{ sentAt?: string | null; sponsorBaId?: string }>;
+    documents: Array<{ sentAt?: string | null; sponsorTmagId?: string }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PROSPECTS_COLLECTION,
@@ -420,10 +420,10 @@ export async function markInvitationSent(
   const doc = existing.documents[0];
   if (!doc) throw new Error('prospect_not_found');
 
-  // Sponsor immutability guard: the caller's sponsorBaId must match the
-  // record's. The route already derives sponsorBaId from the session, so a
+  // Sponsor immutability guard: the caller's sponsorTmagId must match the
+  // record's. The route already derives sponsorTmagId from the session, so a
   // mismatch means a BA is trying to act on another BA's prospect.
-  if (doc.sponsorBaId && doc.sponsorBaId !== sponsorBaId) {
+  if (doc.sponsorTmagId && doc.sponsorTmagId !== sponsorTmagId) {
     throw new Error('sponsor_mismatch');
   }
 
@@ -441,7 +441,7 @@ export async function markInvitationSent(
 
   await appendActivity({
     prospectId,
-    sponsorBaId,
+    sponsorTmagId,
     kind: 'invitation_sent',
     note: 'BA confirmed the invitation link was sent.',
     at: sentAt,
@@ -473,7 +473,7 @@ export async function logExternalInvite(
 
   await appendActivity({
     prospectId: created.prospectId,
-    sponsorBaId: input.sponsorBaId,
+    sponsorTmagId: input.sponsorTmagId,
     kind: 'invitation_sent',
     note: 'BA logged an invitation already sent (standalone path).',
     at: sentAt,
@@ -502,7 +502,7 @@ export async function logExternalInvite(
  */
 export async function alertBaVideoCompleted(input: {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   prospectFirstName: string;
   prospectLastInitial: string;
   positionNumber: number;
@@ -514,7 +514,7 @@ export async function alertBaVideoCompleted(input: {
   try {
     await appendActivity({
       prospectId: input.prospectId,
-      sponsorBaId: input.sponsorBaId,
+      sponsorTmagId: input.sponsorTmagId,
       kind: 'video_completed',
       note: `${input.prospectFirstName} ${input.prospectLastInitial}. finished the video (placed #${input.positionNumber}).`,
       at,

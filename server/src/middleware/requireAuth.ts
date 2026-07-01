@@ -64,14 +64,14 @@ export async function requireAdmin(
 
   const allowed =
     env.ADMIN_BA_IDS.includes(claims.threeBaId) ||
-    env.ADMIN_BA_IDS.includes(claims.baId);
+    env.ADMIN_BA_IDS.includes(claims.tmagId);
 
   if (!allowed) {
     // Audit-log the denied attempt (per ADMIN Design A.2). Best-effort; never
     // block the response on logging.
     // eslint-disable-next-line no-console
     console.warn(
-      `[admin-gate] DENIED baId=${claims.baId} threeBaId=${claims.threeBaId} path=${req.path} ua="${req.get('user-agent') ?? ''}"`,
+      `[admin-gate] DENIED tmagId=${claims.tmagId} threeBaId=${claims.threeBaId} path=${req.path} ua="${req.get('user-agent') ?? ''}"`,
     );
     res.status(403).json({ ok: false, error: 'Not found.' });
     return;

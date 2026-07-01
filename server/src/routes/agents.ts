@@ -27,12 +27,12 @@ agentRoutes.get(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     try {
       const payload: AgentRecommendationsResponse =
-        await getAgentRecommendations(baId);
+        await getAgentRecommendations(tmagId);
       return res.status(200).json(payload);
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -47,12 +47,12 @@ agentRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     try {
       const event = await recordAgentEvent(
-        baId,
+        tmagId,
         (req.body ?? {}) as CreateAgentEventPayload,
       );
       const payload: AgentEventResponse = { ok: true, event };

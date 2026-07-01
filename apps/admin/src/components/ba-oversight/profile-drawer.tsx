@@ -2,7 +2,7 @@
  * C.4 — Brand Ambassador profile drawer.
  *
  * Slide-out drawer from the right of the directory table. Loads the full
- * profile bundle from GET /api/admin/bas/:baId. Sections (top-to-bottom):
+ * profile bundle from GET /api/admin/bas/:tmagId. Sections (top-to-bottom):
  *
  *   1. Identity (name / BA IDs / contact / signed-up / last activity / status)
  *   2. Sponsor (current + override history; link to C.5 override flow)
@@ -32,12 +32,12 @@ import { NotesPanel } from './notes-panel';
 import { BaCrudModal, type BaCrudMode, type BaCrudResponse } from './ba-crud-modal';
 
 interface Props {
-  baId: string;
+  tmagId: string;
   onClose: () => void;
   onRowChanged: (row: AdminBaDirectoryRow) => void;
 }
 
-export function ProfileDrawer({ baId, onClose, onRowChanged }: Props) {
+export function ProfileDrawer({ tmagId, onClose, onRowChanged }: Props) {
   const [bundle, setBundle] = useState<AdminBaProfileBundle | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [overrideOpen, setOverrideOpen] = useState(false);
@@ -46,12 +46,12 @@ export function ProfileDrawer({ baId, onClose, onRowChanged }: Props) {
   useEffect(() => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [baId]);
+  }, [tmagId]);
 
   async function load() {
     setErr(null);
     try {
-      const res = await fetch(`/api/admin/bas/${encodeURIComponent(baId)}`, {
+      const res = await fetch(`/api/admin/bas/${encodeURIComponent(tmagId)}`, {
         credentials: 'include',
       });
       const data = (await res.json()) as AdminBaProfileResponse & { error?: string };
@@ -118,7 +118,7 @@ export function ProfileDrawer({ baId, onClose, onRowChanged }: Props) {
             </h2>
             {bundle && (
               <p className="text-[11px] font-mono text-cream-mute mt-1">
-                {bundle.row.baId} · THREE {bundle.row.threeBaId}
+                {bundle.row.tmagId} · THREE {bundle.row.threeBaId}
               </p>
             )}
           </div>
@@ -198,20 +198,20 @@ export function ProfileDrawer({ baId, onClose, onRowChanged }: Props) {
                   <>
                     <span className="text-cream">{bundle.row.sponsorName}</span>{' '}
                     <span className="font-mono text-cream-mute text-[11px]">
-                      {bundle.row.sponsorBaId}
+                      {bundle.row.sponsorTmagId}
                     </span>
                   </>
                 ) : (
                   <span className="text-cream-faint">— root —</span>
                 )}
               </KV>
-              {bundle.row.originalSponsorBaId && (
+              {bundle.row.originalSponsorTmagId && (
                 <KV label="Original">
                   <span className="text-cream-mute">
-                    {bundle.row.originalSponsorName ?? bundle.row.originalSponsorBaId}
+                    {bundle.row.originalSponsorName ?? bundle.row.originalSponsorTmagId}
                   </span>{' '}
                   <span className="font-mono text-cream-faint text-[11px]">
-                    {bundle.row.originalSponsorBaId}
+                    {bundle.row.originalSponsorTmagId}
                   </span>
                   <span className="ml-2 text-[10px] font-mono text-gold/70 uppercase tracking-label">
                     historical record
@@ -231,11 +231,11 @@ export function ProfileDrawer({ baId, onClose, onRowChanged }: Props) {
                       >
                         <p className="font-mono text-cream-mute">
                           {formatDateTime(o.performedAt)} · requested by{' '}
-                          <span className="text-cream">{o.requestingBaId}</span>
+                          <span className="text-cream">{o.requestingTmagId}</span>
                         </p>
                         <p className="text-cream-mute mt-1">
-                          {o.previousSponsorBaId} →{' '}
-                          <span className="text-cream">{o.newSponsorBaId}</span>
+                          {o.previousSponsorTmagId} →{' '}
+                          <span className="text-cream">{o.newSponsorTmagId}</span>
                         </p>
                         <p className="text-cream mt-2 whitespace-pre-wrap">{o.reason}</p>
                         <p className="text-[10px] font-mono text-cream-faint mt-2 tracking-label uppercase">
@@ -325,7 +325,7 @@ export function ProfileDrawer({ baId, onClose, onRowChanged }: Props) {
 
             <Section title="Kevin notes (append-only)">
               <NotesPanel
-                baId={bundle.row.baId}
+                tmagId={bundle.row.tmagId}
                 notes={bundle.notes}
                 onAppended={onNoteAppended}
               />

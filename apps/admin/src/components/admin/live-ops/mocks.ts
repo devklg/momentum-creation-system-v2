@@ -133,7 +133,7 @@ export function mockLiveGrid(filter: AdminDashboardFilter): AdminLiveGridRespons
       prospectLastInitial: lastInitial,
       prospectCity: city,
       prospectStateOrRegion: region,
-      sponsorBaId: sponsorId,
+      sponsorTmagId: sponsorId,
       sponsorFullName: sponsorName,
       placedAt,
       ageDays: bucketSeed.days,

@@ -14,7 +14,7 @@
  */
 
 import { gatewayCall } from '../../services/gateway.js';
-import { resolveScopedBaIds } from '../adminMetrics.js';
+import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
@@ -43,7 +43,7 @@ const PROVENANCE =
 
 interface DispoDoc {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   disposition: string;
   updatedAt: string;
 }
@@ -67,10 +67,10 @@ export async function buildFollowUpReport(
   result: AdminFollowUpReport;
   meta: Omit<AdminReportMeta, 'title'>;
 }> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
 
   const dispoFilter: Record<string, unknown> = {};
-  if (scopedBaIds !== null) dispoFilter.sponsorBaId = { $in: scopedBaIds };
+  if (scopedTmagIds !== null) dispoFilter.sponsorTmagId = { $in: scopedTmagIds };
   Object.assign(dispoFilter, rangeClause('updatedAt', range));
 
   const res = await gatewayCall<{ documents: DispoDoc[] }>('mongodb', 'query', {
@@ -88,7 +88,7 @@ export async function buildFollowUpReport(
       const age = ageDays(d.updatedAt, nowMs);
       return {
         prospectId: d.prospectId,
-        sponsorBaId: d.sponsorBaId,
+        sponsorTmagId: d.sponsorTmagId,
         disposition: d.disposition,
         lastUpdatedAt: d.updatedAt,
         ageDays: age,

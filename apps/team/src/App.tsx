@@ -48,7 +48,7 @@ export function App() {
       <Route path="/training/fast-start/prospect-list" element={<ModuleProspectListPage />} />
       <Route path="/training/fast-start/team" element={<ModuleTeamPage />} />
       <Route path="/onboarding/questionnaire" element={<QuestionnairePage />} />
-      <Route path="/sponsor/interview-workbook/:baId" element={<SponsorWorkbookPage />} />
+      <Route path="/sponsor/interview-workbook/:tmagId" element={<SponsorWorkbookPage />} />
       <Route path="/preview" element={<PreviewPage />} />
       <Route
         path="*"

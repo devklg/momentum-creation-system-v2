@@ -1,4 +1,4 @@
-import type { BaId, RequestId, SessionId, TeamId, TenantId } from './ids.js';
+import type { TmagId, RequestId, SessionId, TeamId, TenantId } from './ids.js';
 
 export type RuntimeEnvironment = 'development' | 'staging' | 'production';
 
@@ -10,7 +10,7 @@ export interface TenantRuntimeScope {
   teamId?: never;
   teamKey?: never;
   teamName?: never;
-  baId?: never;
+  tmagId?: never;
 }
 
 export interface TeamMagnificentScope {
@@ -18,7 +18,7 @@ export interface TeamMagnificentScope {
   teamId: TeamId;
   teamKey: TeamMagnificentTeamKey;
   teamName: TeamMagnificentTeamName;
-  baId?: never;
+  tmagId?: never;
 }
 
 export interface BaRuntimeScope {
@@ -26,7 +26,7 @@ export interface BaRuntimeScope {
   teamId: TeamId;
   teamKey: TeamMagnificentTeamKey;
   teamName: TeamMagnificentTeamName;
-  baId: BaId;
+  tmagId: TmagId;
 }
 
 export type RuntimeScope = TenantRuntimeScope | TeamMagnificentScope | BaRuntimeScope;

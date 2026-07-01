@@ -30,7 +30,7 @@ export const KNOWLEDGE_RETRIEVAL_OBSERVABILITY_SCHEMA_VERSION =
 export interface RetrievalObservabilityScope {
   tenantId: string;
   teamId?: string;
-  baId?: string;
+  tmagId?: string;
   requestId?: string;
   sessionId?: string;
 }
@@ -83,13 +83,13 @@ function scopeProjection(scope: RuntimeRequestScope): RetrievalObservabilityScop
   const record = scope as {
     tenantId: string;
     teamId?: string;
-    baId?: string;
+    tmagId?: string;
     requestId?: string;
     sessionId?: string;
   };
   const projection: RetrievalObservabilityScope = { tenantId: record.tenantId };
   if (record.teamId !== undefined) projection.teamId = record.teamId;
-  if (record.baId !== undefined) projection.baId = record.baId;
+  if (record.tmagId !== undefined) projection.tmagId = record.tmagId;
   if (record.requestId !== undefined) projection.requestId = record.requestId;
   if (record.sessionId !== undefined) projection.sessionId = record.sessionId;
   return projection;

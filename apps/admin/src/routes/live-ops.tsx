@@ -49,7 +49,7 @@ import {
 const USE_MOCKS = true;
 
 const POLL_INTERVAL_MS = 30_000;
-const DEFAULT_FILTER: AdminDashboardFilter = { baId: null, leaderGroup: 'all' };
+const DEFAULT_FILTER: AdminDashboardFilter = { tmagId: null, leaderGroup: 'all' };
 
 export function LiveOpsPage() {
   const [filter, setFilter] = useState<AdminDashboardFilter>(DEFAULT_FILTER);
@@ -246,7 +246,7 @@ export function LiveOpsPage() {
 
 function filterToQuery(f: AdminDashboardFilter): URLSearchParams {
   const params = new URLSearchParams();
-  if (f.baId) params.set('baId', f.baId);
+  if (f.tmagId) params.set('tmagId', f.tmagId);
   if (f.leaderGroup) params.set('leaderGroup', f.leaderGroup);
   return params;
 }

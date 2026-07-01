@@ -21,7 +21,7 @@ import { describe, expect, it } from 'vitest';
 //
 // Why stripping matters here: both source files carry documentation comments
 // that LEGITIMATELY enumerate the banned identifiers/words to explain why they
-// are absent (e.g. "never sends turn / runtimeTurn / contextPacket / baId …",
+// are absent (e.g. "never sends turn / runtimeTurn / contextPacket / tmagId …",
 // "no LLM is called, no voice path exists", "the redacted trace is NEVER
 // shown"). Those defensive doc-comment prohibitions — and string literals —
 // must not trip a wiring regex, so the code-token scans strip comments AND
@@ -163,10 +163,10 @@ describe('S3.13 Michael runtime support card UI-leak boundary', () => {
     { n: 3, field: 'turn' },
     { n: 4, field: 'runtimeTurn' },
     { n: 5, field: 'contextPacket' },
-    { n: 6, field: 'baId' },
-    { n: 7, field: 'sponsorBaId' },
-    { n: 8, field: 'targetBaId' },
-    { n: 9, field: 'downlineBaId' },
+    { n: 6, field: 'tmagId' },
+    { n: 7, field: 'sponsorTmagId' },
+    { n: 8, field: 'targetTmagId' },
+    { n: 9, field: 'downlineTmagId' },
     { n: 10, field: 'prospectId' },
     { n: 11, field: 'prospectToken' },
     { n: 12, field: 'sessionId' },

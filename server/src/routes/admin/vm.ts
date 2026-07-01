@@ -22,8 +22,8 @@ export const adminVmRoutes: Router = express.Router();
 function adminActorFromRequest(req: Request): AuditActor & { kind: 'admin' } {
   const session = req.session!;
   const displayName =
-    (session as unknown as { fullName?: string }).fullName ?? session.baId;
-  return { kind: 'admin', baId: session.baId, displayName };
+    (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
+  return { kind: 'admin', tmagId: session.tmagId, displayName };
 }
 
 adminVmRoutes.get('/overview', requireAdmin, async (req, res) => {
@@ -33,7 +33,7 @@ adminVmRoutes.get('/overview', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.vm.overview.viewed',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: {
         generatedAt: payload.generatedAt,
@@ -63,10 +63,10 @@ const OwnershipCorrectionSchema = z.object({
   prospectId: z.string().trim().min(1).nullable().optional(),
   leadBatchId: z.string().trim().min(1).nullable().optional(),
   vmCampaignId: z.string().trim().min(1).nullable().optional(),
-  oldOwnerTmBaId: z.string().trim().min(2),
-  newOwnerTmBaId: z.string().trim().min(2),
-  oldSponsorTmBaId: z.string().trim().min(2),
-  newSponsorTmBaId: z.string().trim().min(2),
+  oldOwnerTmagId: z.string().trim().min(2),
+  newOwnerTmagId: z.string().trim().min(2),
+  oldSponsorTmagId: z.string().trim().min(2),
+  newSponsorTmagId: z.string().trim().min(2),
   reason: z.string().trim().min(12).max(1000),
 }).refine(
   (payload) => payload.leadId || payload.prospectId || payload.leadBatchId || payload.vmCampaignId,
@@ -105,12 +105,12 @@ adminVmRoutes.post('/ownership-correction', requireAdmin, async (req, res) => {
       },
       severity: 'critical',
       before: {
-        ownerTmBaId: payload.oldOwnerTmBaId,
-        sponsorTmBaId: payload.oldSponsorTmBaId,
+        ownerTmagId: payload.oldOwnerTmagId,
+        sponsorTmagId: payload.oldSponsorTmagId,
       },
       after: {
-        ownerTmBaId: payload.newOwnerTmBaId,
-        sponsorTmBaId: payload.newSponsorTmBaId,
+        ownerTmagId: payload.newOwnerTmagId,
+        sponsorTmagId: payload.newSponsorTmagId,
         leadId: payload.leadId ?? null,
         prospectId: payload.prospectId ?? null,
         leadBatchId: payload.leadBatchId ?? null,

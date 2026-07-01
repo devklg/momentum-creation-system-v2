@@ -27,7 +27,7 @@
  *     redundant but it's cheap).
  *
  * Sponsor immutability (3.5):
- *   Every link issued points at an account whose sponsorBaId was
+ *   Every link issued points at an account whose sponsorTmagId was
  *   stamped from the inviting token at video_complete and never
  *   recomputed. The redeem path opens a session bound to that
  *   account; the resulting /p/{token} resolve uses the token's
@@ -37,7 +37,7 @@
 
 import { Router, type Request } from 'express';
 import { z } from 'zod';
-import { findBAByBaId } from '../domain/ba.js';
+import { findBAByTmagId } from '../domain/ba.js';
 import { findAccountById, findAccountByPhoneAndCode } from '../domain/prospectAccount.js';
 import {
   hashPhone,
@@ -159,8 +159,8 @@ prospectLoginRoutes.post('/start', async (req, res) => {
 
   // Resolve BA first name without circular-importing the BA domain
   // into the magic-link domain.
-  const resolveBaFirstName = async (baId: string): Promise<string | null> => {
-    const ba = await findBAByBaId(baId);
+  const resolveBaFirstName = async (tmagId: string): Promise<string | null> => {
+    const ba = await findBAByTmagId(tmagId);
     return ba?.firstName ?? null;
   };
 
@@ -218,7 +218,7 @@ prospectLoginRoutes.post('/redeem', async (req, res) => {
       return res.status(400).json(GENERIC_REDEEM_ERROR);
     }
 
-    // Look up the account to pull sponsorBaId + accountExpiresAt onto
+    // Look up the account to pull sponsorTmagId + accountExpiresAt onto
     // the session row. Missing account here means the magic link
     // resolved cleanly but the underlying account row is gone — treat
     // as invalid_link (the link is dead).
@@ -231,7 +231,7 @@ prospectLoginRoutes.post('/redeem', async (req, res) => {
       accountId: account.accountId,
       prospectId: account.prospectId,
       tokenId: account.tokenId,
-      sponsorBaId: account.sponsorBaId,
+      sponsorTmagId: account.sponsorTmagId,
       accountExpiresAt: account.expiresAt,
     });
 
@@ -287,7 +287,7 @@ prospectLoginRoutes.post('/code', async (req, res) => {
       accountId: account.accountId,
       prospectId: account.prospectId,
       tokenId: account.tokenId,
-      sponsorBaId: account.sponsorBaId,
+      sponsorTmagId: account.sponsorTmagId,
       accountExpiresAt: account.expiresAt,
     });
     const response: ProspectLoginRedeemResponse = {

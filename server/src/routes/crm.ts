@@ -16,9 +16,9 @@
  * Gating: requireAuth + requireSteveComplete on every handler — BA-facing
  * gated routes per server/index.ts canonical pattern.
  *
- * Sponsor immutability (locked-spec 3.5): sponsorBaId comes from
- * req.session.baId ONLY; the domain's assertOwnership() verifies the
- * prospect belongs to that BA before any mutation. A sponsorBaId in the
+ * Sponsor immutability (locked-spec 3.5): sponsorTmagId comes from
+ * req.session.tmagId ONLY; the domain's assertOwnership() verifies the
+ * prospect belongs to that BA before any mutation. A sponsorTmagId in the
  * body is ignored. Cross-BA writes are impossible by construction.
  */
 
@@ -90,11 +90,11 @@ function getProspectId(req: import('express').Request): string {
 // ── GET /api/crm/today ────────────────────────────────────────────────────
 
 crmRoutes.get('/today', requireAuth, requireSteveComplete, async (req, res) => {
-  const sponsorBaId = req.session?.baId;
-  if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const sponsorTmagId = req.session?.tmagId;
+  if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   try {
-    const actions = await getTodaysActions(sponsorBaId);
+    const actions = await getTodaysActions(sponsorTmagId);
     const payload: TodaysActionsResponse = { ok: true, actions };
     return res.status(200).json(payload);
   } catch (err) {
@@ -105,14 +105,14 @@ crmRoutes.get('/today', requireAuth, requireSteveComplete, async (req, res) => {
 // ── GET /api/crm/:prospectId ──────────────────────────────────────────────
 
 crmRoutes.get('/:prospectId', requireAuth, requireSteveComplete, async (req, res) => {
-  const sponsorBaId = req.session?.baId;
-  if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const sponsorTmagId = req.session?.tmagId;
+  if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   const prospectId = getProspectId(req);
   if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
 
   try {
-    const bundle = await getCrmBundle(prospectId, sponsorBaId);
+    const bundle = await getCrmBundle(prospectId, sponsorTmagId);
     const payload: CrmBundleResponse = { ok: true, bundle };
     return res.status(200).json(payload);
   } catch (err) {
@@ -127,8 +127,8 @@ crmRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const sponsorBaId = req.session?.baId;
-    if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const sponsorTmagId = req.session?.tmagId;
+    if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const prospectId = getProspectId(req);
     if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
@@ -137,7 +137,7 @@ crmRoutes.post(
     const text = typeof body?.text === 'string' ? body.text : '';
 
     try {
-      const note = await addNote(prospectId, sponsorBaId, text);
+      const note = await addNote(prospectId, sponsorTmagId, text);
       const payload: CreateNoteResponse = { ok: true, note };
       return res.status(201).json(payload);
     } catch (err) {
@@ -153,8 +153,8 @@ crmRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const sponsorBaId = req.session?.baId;
-    if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const sponsorTmagId = req.session?.tmagId;
+    if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const prospectId = getProspectId(req);
     if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
@@ -164,7 +164,7 @@ crmRoutes.post(
     if (!dueAt) return res.status(400).json({ ok: false, error: 'missing_due_at' });
 
     try {
-      const followUp = await setFollowUp(prospectId, sponsorBaId, dueAt);
+      const followUp = await setFollowUp(prospectId, sponsorTmagId, dueAt);
       const payload: SetFollowUpResponse = { ok: true, followUp };
       return res.status(200).json(payload);
     } catch (err) {
@@ -180,14 +180,14 @@ crmRoutes.delete(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const sponsorBaId = req.session?.baId;
-    if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const sponsorTmagId = req.session?.tmagId;
+    if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const prospectId = getProspectId(req);
     if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
 
     try {
-      await clearFollowUp(prospectId, sponsorBaId);
+      await clearFollowUp(prospectId, sponsorTmagId);
       const payload: ClearFollowUpResponse = { ok: true };
       return res.status(200).json(payload);
     } catch (err) {
@@ -203,8 +203,8 @@ crmRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const sponsorBaId = req.session?.baId;
-    if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const sponsorTmagId = req.session?.tmagId;
+    if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const prospectId = getProspectId(req);
     if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
@@ -218,7 +218,7 @@ crmRoutes.post(
     const dispo = body.disposition ?? null;
 
     try {
-      const disposition = await setDisposition(prospectId, sponsorBaId, dispo);
+      const disposition = await setDisposition(prospectId, sponsorTmagId, dispo);
       const payload: SetDispositionResponse = { ok: true, disposition };
       return res.status(200).json(payload);
     } catch (err) {
@@ -234,14 +234,14 @@ crmRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const sponsorBaId = req.session?.baId;
-    if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const sponsorTmagId = req.session?.tmagId;
+    if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const prospectId = getProspectId(req);
     if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
 
     try {
-      const result: ReinviteResponse = await reinvite(prospectId, sponsorBaId);
+      const result: ReinviteResponse = await reinvite(prospectId, sponsorTmagId);
       return res.status(200).json(result);
     } catch (err) {
       // No cooldown gate (Chat #147, seq 23) — the BA decides timing.
@@ -269,14 +269,14 @@ crmRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const sponsorBaId = req.session?.baId;
-    if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const sponsorTmagId = req.session?.tmagId;
+    if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
     const prospectId = getProspectId(req);
     if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
 
     try {
-      const result: ReinviteScriptResponse = await reinviteScript(prospectId, sponsorBaId);
+      const result: ReinviteScriptResponse = await reinviteScript(prospectId, sponsorTmagId);
       return res.status(200).json(result);
     } catch (err) {
       return sendCrmError(res, err);
@@ -287,7 +287,7 @@ crmRoutes.post(
 // ── BA-scoped prospect CRUD (Chat #141) ─────────────────────────────────────
 //
 // create / edit / soft-delete / restore for a BA's OWN prospects. The domain
-// wrappers (crm.ts) force sponsorBaId from the session, run assertOwnership
+// wrappers (crm.ts) force sponsorTmagId from the session, run assertOwnership
 // on edit/delete/restore, and delegate the real work to the shared
 // adminProspectCrud engine with a { kind:'ba' } actor. These routes only
 // validate input and map errors — same requireAuth + requireSteveComplete
@@ -316,8 +316,8 @@ function nullableString(v: unknown): string | null | undefined {
 // ── POST /api/crm  (create — mint only) ──────────────────────────────────
 
 crmRoutes.post('/', requireAuth, requireSteveComplete, async (req, res) => {
-  const sponsorBaId = req.session?.baId;
-  if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const sponsorTmagId = req.session?.tmagId;
+  if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   const body = (req.body ?? {}) as Record<string, unknown>;
   const firstName = trimmedString(body.firstName);
@@ -337,7 +337,7 @@ crmRoutes.post('/', requireAuth, requireSteveComplete, async (req, res) => {
   }
 
   try {
-    const created = await baCreateProspect(sponsorBaId, {
+    const created = await baCreateProspect(sponsorTmagId, {
       firstName,
       lastName,
       city,
@@ -362,8 +362,8 @@ crmRoutes.post('/', requireAuth, requireSteveComplete, async (req, res) => {
 // ── PUT /api/crm/:prospectId  (edit ordinary fields) ─────────────────────
 
 crmRoutes.put('/:prospectId', requireAuth, requireSteveComplete, async (req, res) => {
-  const sponsorBaId = req.session?.baId;
-  if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const sponsorTmagId = req.session?.tmagId;
+  if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   const prospectId = getProspectId(req);
   if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
@@ -375,7 +375,7 @@ crmRoutes.put('/:prospectId', requireAuth, requireSteveComplete, async (req, res
   }
 
   try {
-    const result = await baEditProspect(prospectId, sponsorBaId, {
+    const result = await baEditProspect(prospectId, sponsorTmagId, {
       firstName: optionalString(body.firstName),
       lastName: optionalString(body.lastName),
       city: optionalString(body.city),
@@ -394,8 +394,8 @@ crmRoutes.put('/:prospectId', requireAuth, requireSteveComplete, async (req, res
 // ── DELETE /api/crm/:prospectId  (soft delete — tank untouched) ────────────
 
 crmRoutes.delete('/:prospectId', requireAuth, requireSteveComplete, async (req, res) => {
-  const sponsorBaId = req.session?.baId;
-  if (!sponsorBaId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const sponsorTmagId = req.session?.tmagId;
+  if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   const prospectId = getProspectId(req);
   if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
@@ -407,7 +407,7 @@ crmRoutes.delete('/:prospectId', requireAuth, requireSteveComplete, async (req, 
   }
 
   try {
-    const result = await baSoftDeleteProspect(prospectId, sponsorBaId, reason);
+    const result = await baSoftDeleteProspect(prospectId, sponsorTmagId, reason);
     return res.status(200).json({
       ok: true,
       prospectId: result.prospectId,

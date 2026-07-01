@@ -81,8 +81,8 @@ scriptmakerRoutes.post(
   requireAuth,
   requireSteveComplete,
   async (req, res) => {
-    const baId = req.session?.baId;
-    if (!baId) {
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) {
       return res.status(401).json({ ok: false, error: 'Not authenticated.' });
     }
 

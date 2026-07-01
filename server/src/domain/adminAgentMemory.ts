@@ -32,10 +32,10 @@ interface PersistedSteveDiscovery extends SteveDiscoveryArtifact {
 }
 
 interface BaDoc {
-  baId: string;
+  tmagId: string;
   firstName?: string;
   lastName?: string;
-  sponsorBaId?: string | null;
+  sponsorTmagId?: string | null;
 }
 
 interface AgentEventDoc {
@@ -104,13 +104,13 @@ function summarizeSuccessProfiles(
   discoveries: PersistedSteveDiscovery[],
   bas: BaDoc[],
 ): AdminSuccessProfileSummary[] {
-  const baById = new Map(bas.map((b) => [b.baId, b]));
+  const baById = new Map(bas.map((b) => [b.tmagId, b]));
   return discoveries.map((d) => {
     const profile = d.successProfile;
     return {
-      baId: d.baId,
-      baName: baName(baById.get(d.baId), d.baId),
-      sponsorBaId: d.sponsorBaId ?? baById.get(d.baId)?.sponsorBaId ?? null,
+      tmagId: d.tmagId,
+      baName: baName(baById.get(d.tmagId), d.tmagId),
+      sponsorTmagId: d.sponsorTmagId ?? baById.get(d.tmagId)?.sponsorTmagId ?? null,
       generatedAt: profile.generatedAt ?? d.completedAt ?? null,
       primaryWhy: profile.primaryWhy?.statement ?? null,
       learningStyle: profile.learningStyle?.modalities ?? [],
@@ -188,14 +188,14 @@ function memoryStatus(args: {
 
 function bridgeDraft(discovery: PersistedSteveDiscovery): AdminSuccessProfileMemoryBridgeDraft {
   const now = new Date().toISOString();
-  const id = `graphrag_success_profile_${discovery.baId}`;
+  const id = `graphrag_success_profile_${discovery.tmagId}`;
   const profile = discovery.successProfile;
   const learning = profile.learningStyle.modalities.join(', ') || 'not captured';
   const support = profile.supportNeeds.areas.join(', ') || 'not captured';
   const primaryWhy = profile.primaryWhy.statement || 'not captured';
 
   return {
-    baId: discovery.baId,
+    tmagId: discovery.tmagId,
     ready: true,
     base: {
       id,
@@ -204,12 +204,12 @@ function bridgeDraft(discovery: PersistedSteveDiscovery): AdminSuccessProfileMem
       namespace: 'momentum',
       source: 'momentum_admin_agent_memory_bridge',
       created_at: now,
-      title: `Success Profile agent memory for ${discovery.baId}`,
+      title: `Success Profile agent memory for ${discovery.tmagId}`,
       origin_kind: 'system',
       service_name: 'admin_agent_memory_bridge',
     },
     semanticDocument: [
-      `Success Profile for BA ${discovery.baId}.`,
+      `Success Profile for BA ${discovery.tmagId}.`,
       `Primary why: ${primaryWhy}.`,
       `Learning style: ${learning}.`,
       `Support areas: ${support}.`,

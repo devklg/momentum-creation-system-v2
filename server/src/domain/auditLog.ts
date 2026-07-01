@@ -87,7 +87,7 @@ function actorLabel(actor: AuditActor): string {
   switch (actor.kind) {
     case 'admin':
     case 'ba':
-      return `${actor.kind}:${actor.displayName} (${actor.baId})`;
+      return `${actor.kind}:${actor.displayName} (${actor.tmagId})`;
     case 'prospect':
       return `prospect:${actor.displayName} (${actor.prospectId})`;
     case 'system':
@@ -177,13 +177,13 @@ function buildCypher(
   };
 
   if (entry.actor.kind === 'admin' || entry.actor.kind === 'ba') {
-    params.actorBaId = entry.actor.baId;
+    params.actorTmagId = entry.actor.tmagId;
     return {
       cypher: `
         MERGE (a:AuditEntry {entryId: $entryId})
         SET a += {${baseProps}}
         WITH a
-        OPTIONAL MATCH (ba:BrandAmbassador {baId: $actorBaId})
+        OPTIONAL MATCH (ba:BrandAmbassador {tmagId: $actorTmagId})
         FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END |
           MERGE (a)-[:ACTED_BY]->(ba)
         )
@@ -218,9 +218,9 @@ function buildMongoFilter(filters: AuditQueryFilters): Record<string, unknown> {
   if (filters.entityId) f['entity.id'] = filters.entityId;
   if (filters.severity) f.severity = filters.severity;
 
-  if (filters.actorBaId) {
-    // The actor.baId field lives on admin/ba shapes only. Match both.
-    f['actor.baId'] = filters.actorBaId;
+  if (filters.actorTmagId) {
+    // The actor.tmagId field lives on admin/ba shapes only. Match both.
+    f['actor.tmagId'] = filters.actorTmagId;
   }
 
   const ts: Record<string, unknown> = {};
@@ -457,7 +457,7 @@ function buildRuntimeCypher(
         correlationId: $correlationId, tenantId: $tenantId, gate: $gate
       }
       WITH a
-      OPTIONAL MATCH (ba:BrandAmbassador {baId: $tmagId})
+      OPTIONAL MATCH (ba:BrandAmbassador {tmagId: $tmagId})
       FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END |
         MERGE (a)-[:ACTED_FOR]->(ba)
       )

@@ -11,10 +11,10 @@
  * Wire shapes come from `@momentum/shared` (`admin-live-ops.ts`). H-UI
  * and this file share that contract; nothing else.
  *
- * Filter parsing identical to the rest of /admin — `resolveScopedBaIds`
+ * Filter parsing identical to the rest of /admin — `resolveScopedTmagIds`
  * yields the scoped BA set; null means "no narrowing." Filter targets:
- *   - brand_ambassadors  → `baId` field
- *   - pool_placements    → `sponsorBaId` field
+ *   - brand_ambassadors  → `tmagId` field
+ *   - pool_placements    → `sponsorTmagId` field
  *
  * Compliance: H is /admin-only, so the prospect-facing prohibitions
  * (locked-spec 3.10) do not bind here. We surface per-prospect identity
@@ -28,7 +28,7 @@
  * scales we may add a 5–10s cache on the JSON endpoints.
  */
 
-import { resolveScopedBaIds } from './adminMetrics.js';
+import { resolveScopedTmagIds } from './adminMetrics.js';
 import {
   activeAdminSessionCount,
   activePlacementSubscriberCount,
@@ -61,7 +61,7 @@ const MS_30D = 30 * MS_24H;
 const GRID_LIMIT = 5000;
 
 interface BaDoc {
-  baId: string;
+  tmagId: string;
   firstName: string;
   lastName: string;
   createdAt: string;
@@ -71,7 +71,7 @@ interface BaDoc {
 
 interface PlacementDoc {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   positionNumber: number;
   placedAt: string;
   flushedAt: string | null;
@@ -84,18 +84,18 @@ interface ProspectDoc {
   lastName: string;
   lastInitial?: string;
   location?: { city?: string; stateOrRegion?: string };
-  sponsorBaId: string;
+  sponsorTmagId: string;
   state: TokenState;
 }
 
 interface MichaelDoc {
-  baId: string;
+  tmagId: string;
   completedAt: string | null;
   status?: string;
 }
 
 interface ActivityDoc {
-  sponsorBaId: string;
+  sponsorTmagId: string;
   kind: string;
   at: string;
 }
@@ -135,18 +135,18 @@ interface WindowCount {
 /**
  * Count one window's worth of activity (BAs created, placements made,
  * enrollments). All three counts are scoped by the filter:
- *   - BAs:           `baId` ∈ scopedBaIds
- *   - placements:    `sponsorBaId` ∈ scopedBaIds
- *   - enrollments:   `sponsorBaId` ∈ scopedBaIds, flushReason='enrolled'
+ *   - BAs:           `tmagId` ∈ scopedTmagIds
+ *   - placements:    `sponsorTmagId` ∈ scopedTmagIds
+ *   - enrollments:   `sponsorTmagId` ∈ scopedTmagIds, flushReason='enrolled'
  */
 async function countWindow(
-  scopedBaIds: string[] | null,
+  scopedTmagIds: string[] | null,
   fromIso: string,
   toIso: string,
 ): Promise<WindowCount> {
-  const baScope = scopedBaIds === null ? {} : { baId: { $in: scopedBaIds } };
+  const baScope = scopedTmagIds === null ? {} : { tmagId: { $in: scopedTmagIds } };
   const sponsorScope =
-    scopedBaIds === null ? {} : { sponsorBaId: { $in: scopedBaIds } };
+    scopedTmagIds === null ? {} : { sponsorTmagId: { $in: scopedTmagIds } };
 
   const [basAdded, prospectsPlaced, enrollments] = await Promise.all([
     aggregateCount(COLL_BAS, {
@@ -186,7 +186,7 @@ async function aggregateCount(
 
 async function buildCard(
   window: AdminGrowthCard['window'],
-  scopedBaIds: string[] | null,
+  scopedTmagIds: string[] | null,
   windowMs: number,
   now: number,
 ): Promise<AdminGrowthCard> {
@@ -196,8 +196,8 @@ async function buildCard(
   const previousTo = currentFrom;
 
   const [current, previous] = await Promise.all([
-    countWindow(scopedBaIds, currentFrom, currentTo),
-    countWindow(scopedBaIds, previousFrom, previousTo),
+    countWindow(scopedTmagIds, currentFrom, currentTo),
+    countWindow(scopedTmagIds, previousFrom, previousTo),
   ]);
 
   return {
@@ -214,13 +214,13 @@ async function buildCard(
 export async function getGrowthCards(
   filter: AdminDashboardFilter,
 ): Promise<AdminGrowthCardsResponse> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
   const now = Date.now();
 
   const [card24h, card7d, card30d] = await Promise.all([
-    buildCard('24h', scopedBaIds, MS_24H, now),
-    buildCard('7d', scopedBaIds, MS_7D, now),
-    buildCard('30d', scopedBaIds, MS_30D, now),
+    buildCard('24h', scopedTmagIds, MS_24H, now),
+    buildCard('7d', scopedTmagIds, MS_7D, now),
+    buildCard('30d', scopedTmagIds, MS_30D, now),
   ]);
 
   return {
@@ -246,9 +246,9 @@ function ageBucketOf(ageDays: number): AdminLiveGridSlot['ageBucket'] {
 export async function getLiveGrid(
   filter: AdminDashboardFilter,
 ): Promise<AdminLiveGridResponse> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
   const sponsorScope =
-    scopedBaIds === null ? {} : { sponsorBaId: { $in: scopedBaIds } };
+    scopedTmagIds === null ? {} : { sponsorTmagId: { $in: scopedTmagIds } };
 
   const placementsRes = await instrumentedGatewayCall<{ documents: PlacementDoc[] }>(
     'mongodb',
@@ -273,7 +273,7 @@ export async function getLiveGrid(
   }
 
   const prospectIds = placements.map((p) => p.prospectId);
-  const sponsorIds = Array.from(new Set(placements.map((p) => p.sponsorBaId)));
+  const sponsorIds = Array.from(new Set(placements.map((p) => p.sponsorTmagId)));
 
   const [prospectsRes, sponsorsRes] = await Promise.all([
     instrumentedGatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
@@ -285,7 +285,7 @@ export async function getLiveGrid(
     instrumentedGatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_BAS,
-      filter: { baId: { $in: sponsorIds } },
+      filter: { tmagId: { $in: sponsorIds } },
       limit: sponsorIds.length,
     }),
   ]);
@@ -294,13 +294,13 @@ export async function getLiveGrid(
     (prospectsRes.documents ?? []).map((p) => [p.prospectId, p]),
   );
   const sponsorById = new Map(
-    (sponsorsRes.documents ?? []).map((b) => [b.baId, b]),
+    (sponsorsRes.documents ?? []).map((b) => [b.tmagId, b]),
   );
 
   const now = Date.now();
   const slots: AdminLiveGridSlot[] = placements.map((p) => {
     const prospect = prospectById.get(p.prospectId);
-    const sponsor = sponsorById.get(p.sponsorBaId);
+    const sponsor = sponsorById.get(p.sponsorTmagId);
     const ageDays = Math.max(
       0,
       Math.floor((now - new Date(p.placedAt).getTime()) / MS_24H),
@@ -315,10 +315,10 @@ export async function getLiveGrid(
       prospectLastInitial: lastInitial,
       prospectCity: prospect?.location?.city ?? '—',
       prospectStateOrRegion: prospect?.location?.stateOrRegion ?? '—',
-      sponsorBaId: p.sponsorBaId,
+      sponsorTmagId: p.sponsorTmagId,
       sponsorFullName: sponsor
         ? `${sponsor.firstName} ${sponsor.lastName}`.trim()
-        : p.sponsorBaId,
+        : p.sponsorTmagId,
       placedAt: p.placedAt,
       ageDays,
       ageBucket: ageBucketOf(ageDays),
@@ -381,9 +381,9 @@ const PROSPECT_STAGE_THRESHOLDS = PROSPECT_STAGES.map((s) =>
 async function buildProspectFunnel(
   filter: AdminDashboardFilter,
 ): Promise<AdminFunnelResponse> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
   const sponsorScope =
-    scopedBaIds === null ? {} : { sponsorBaId: { $in: scopedBaIds } };
+    scopedTmagIds === null ? {} : { sponsorTmagId: { $in: scopedTmagIds } };
 
   const res = await instrumentedGatewayCall<{ documents: Array<{ state: TokenState }> }>(
     'mongodb',
@@ -452,10 +452,10 @@ const BA_STAGES = [
 async function buildBaActivationFunnel(
   filter: AdminDashboardFilter,
 ): Promise<AdminFunnelResponse> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
 
   const baFilter: Record<string, unknown> = { deleted: { $ne: true } };
-  if (scopedBaIds !== null) baFilter.baId = { $in: scopedBaIds };
+  if (scopedTmagIds !== null) baFilter.tmagId = { $in: scopedTmagIds };
 
   const basRes = await instrumentedGatewayCall<{ documents: BaDoc[] }>(
     'mongodb',
@@ -468,7 +468,7 @@ async function buildBaActivationFunnel(
     },
   );
   const bas = basRes.documents ?? [];
-  const baIds = bas.map((b) => b.baId);
+  const baIds = bas.map((b) => b.tmagId);
 
   if (baIds.length === 0) {
     return {
@@ -488,14 +488,14 @@ async function buildBaActivationFunnel(
     instrumentedGatewayCall<{ documents: MichaelDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_STEVE,
-      filter: { baId: { $in: baIds }, completedAt: { $ne: null } },
+      filter: { tmagId: { $in: baIds }, completedAt: { $ne: null } },
       limit: baIds.length,
     }),
     instrumentedGatewayCall<{ documents: ActivityDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_ACTIVITY,
       filter: {
-        sponsorBaId: { $in: baIds },
+        sponsorTmagId: { $in: baIds },
         kind: { $in: ['invitation_sent', 'video_completed'] },
       },
       limit: 200_000,
@@ -503,7 +503,7 @@ async function buildBaActivationFunnel(
     instrumentedGatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
-      filter: { sponsorBaId: { $in: baIds }, flushReason: 'enrolled' },
+      filter: { sponsorTmagId: { $in: baIds }, flushReason: 'enrolled' },
       limit: 200_000,
     }),
   ]);
@@ -511,20 +511,20 @@ async function buildBaActivationFunnel(
   const steveDone = new Set(
     (steveRes.documents ?? [])
       .filter((m) => m.completedAt)
-      .map((m) => m.baId),
+      .map((m) => m.tmagId),
   );
 
   const firstInvite = new Set<string>();
   const firstVideo = new Set<string>();
   for (const a of activityRes.documents ?? []) {
-    if (a.kind === 'invitation_sent') firstInvite.add(a.sponsorBaId);
-    else if (a.kind === 'video_completed') firstVideo.add(a.sponsorBaId);
+    if (a.kind === 'invitation_sent') firstInvite.add(a.sponsorTmagId);
+    else if (a.kind === 'video_completed') firstVideo.add(a.sponsorTmagId);
   }
 
   const firstEnroll = new Set(
     (enrollRes.documents ?? [])
       .filter((p) => p.flushedAt)
-      .map((p) => p.sponsorBaId),
+      .map((p) => p.sponsorTmagId),
   );
 
   let signedUp = 0;
@@ -536,10 +536,10 @@ async function buildBaActivationFunnel(
   for (const ba of bas) {
     signedUp += 1;
     if (ba.welcomedAt) welcomed += 1;
-    if (steveDone.has(ba.baId)) steve += 1;
-    if (firstInvite.has(ba.baId)) invited += 1;
-    if (firstVideo.has(ba.baId)) videoComplete += 1;
-    if (firstEnroll.has(ba.baId)) enrolled += 1;
+    if (steveDone.has(ba.tmagId)) steve += 1;
+    if (firstInvite.has(ba.tmagId)) invited += 1;
+    if (firstVideo.has(ba.tmagId)) videoComplete += 1;
+    if (firstEnroll.has(ba.tmagId)) enrolled += 1;
   }
 
   const counts = [signedUp, welcomed, steve, invited, videoComplete, enrolled];

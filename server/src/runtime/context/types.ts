@@ -1,6 +1,6 @@
 import type {
   AgentKey,
-  BaId,
+  TmagId,
   ContextPacketV1,
   RuntimeLanguage,
 } from '@momentum/shared/runtime';
@@ -42,7 +42,7 @@ export type ContextPacketValidationResult =
 
 export interface ContextPacketFoundationRequest {
   agentKey: AgentKey;
-  baId: BaId;
+  tmagId: TmagId;
   language: RuntimeLanguage;
   objective: string;
 }

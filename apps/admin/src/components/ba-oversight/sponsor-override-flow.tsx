@@ -12,9 +12,9 @@
  *     - Before / after side-by-side
  *     - Kevin must re-confirm
  *
- * On submit: POST /api/admin/bas/:baId/sponsor-override → triple-stack
+ * On submit: POST /api/admin/bas/:tmagId/sponsor-override → triple-stack
  * write + critical-severity audit entry. Original sponsor remains on the
- * BA record as historical (server stamps `originalSponsorBaId` only on
+ * BA record as historical (server stamps `originalSponsorTmagId` only on
  * the first override so re-overrides don't drift the original away).
  */
 
@@ -41,25 +41,25 @@ type Phase = 'form' | 'confirm' | 'submitting';
 
 export function SponsorOverrideFlow({ row, onCancel, onApplied }: Props) {
   const [phase, setPhase] = useState<Phase>('form');
-  const [requestingBaId, setRequestingBaId] = useState(row.baId);
-  const [newSponsorBaId, setNewSponsorBaId] = useState('');
+  const [requestingTmagId, setRequestingTmagId] = useState(row.tmagId);
+  const [newSponsorTmagId, setNewSponsorTmagId] = useState('');
   const [reason, setReason] = useState('');
   const [err, setErr] = useState<string | null>(null);
 
   const canProceed =
-    requestingBaId.trim().length > 0 &&
-    newSponsorBaId.trim().length > 0 &&
-    newSponsorBaId.trim() !== row.sponsorBaId &&
+    requestingTmagId.trim().length > 0 &&
+    newSponsorTmagId.trim().length > 0 &&
+    newSponsorTmagId.trim() !== row.sponsorTmagId &&
     reason.trim().length >= 8;
 
   function onFormSubmit(e: FormEvent) {
     e.preventDefault();
     setErr(null);
-    if (newSponsorBaId.trim() === row.baId) {
+    if (newSponsorTmagId.trim() === row.tmagId) {
       setErr('A BA cannot sponsor themselves.');
       return;
     }
-    if (newSponsorBaId.trim() === row.sponsorBaId) {
+    if (newSponsorTmagId.trim() === row.sponsorTmagId) {
       setErr('New sponsor is the same as the current sponsor — nothing to change.');
       return;
     }
@@ -71,14 +71,14 @@ export function SponsorOverrideFlow({ row, onCancel, onApplied }: Props) {
     setErr(null);
     try {
       const res = await fetch(
-        `/api/admin/bas/${encodeURIComponent(row.baId)}/sponsor-override`,
+        `/api/admin/bas/${encodeURIComponent(row.tmagId)}/sponsor-override`,
         {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            requestingBaId: requestingBaId.trim(),
-            newSponsorBaId: newSponsorBaId.trim(),
+            requestingTmagId: requestingTmagId.trim(),
+            newSponsorTmagId: newSponsorTmagId.trim(),
             reason: reason.trim(),
           }),
         },
@@ -122,11 +122,11 @@ export function SponsorOverrideFlow({ row, onCancel, onApplied }: Props) {
         {phase === 'form' && (
           <form onSubmit={onFormSubmit} className="px-6 py-5 space-y-4">
             <div>
-              <Label htmlFor="requestingBaId">Requesting BA ID</Label>
+              <Label htmlFor="requestingTmagId">Requesting BA ID</Label>
               <Input
-                id="requestingBaId"
-                value={requestingBaId}
-                onChange={(e) => setRequestingBaId(e.target.value)}
+                id="requestingTmagId"
+                value={requestingTmagId}
+                onChange={(e) => setRequestingTmagId(e.target.value)}
                 placeholder="TMBA-..."
                 required
               />
@@ -135,11 +135,11 @@ export function SponsorOverrideFlow({ row, onCancel, onApplied }: Props) {
               </p>
             </div>
             <div>
-              <Label htmlFor="newSponsorBaId">New sponsor BA ID</Label>
+              <Label htmlFor="newSponsorTmagId">New sponsor BA ID</Label>
               <Input
-                id="newSponsorBaId"
-                value={newSponsorBaId}
-                onChange={(e) => setNewSponsorBaId(e.target.value)}
+                id="newSponsorTmagId"
+                value={newSponsorTmagId}
+                onChange={(e) => setNewSponsorTmagId(e.target.value)}
                 placeholder="TMBA-..."
                 required
               />
@@ -148,7 +148,7 @@ export function SponsorOverrideFlow({ row, onCancel, onApplied }: Props) {
                 <span className="text-cream-mute">
                   {row.sponsorName ?? '— root —'}
                 </span>{' '}
-                <span className="font-mono">{row.sponsorBaId ?? ''}</span>
+                <span className="font-mono">{row.sponsorTmagId ?? ''}</span>
               </p>
             </div>
             <div>
@@ -187,7 +187,7 @@ export function SponsorOverrideFlow({ row, onCancel, onApplied }: Props) {
                 <p className="text-[11px] font-mono text-cream-mute mb-1">Sponsor BA</p>
                 <p className="text-cream">{row.sponsorName ?? '— root —'}</p>
                 <p className="font-mono text-cream-mute text-[12px]">
-                  {row.sponsorBaId ?? '—'}
+                  {row.sponsorTmagId ?? '—'}
                 </p>
               </div>
               <div className="border border-gold/40 bg-gold/[0.04] rounded-md p-4">
@@ -195,7 +195,7 @@ export function SponsorOverrideFlow({ row, onCancel, onApplied }: Props) {
                   After
                 </p>
                 <p className="text-[11px] font-mono text-cream-mute mb-1">Sponsor BA</p>
-                <p className="text-cream">{newSponsorBaId.trim()}</p>
+                <p className="text-cream">{newSponsorTmagId.trim()}</p>
               </div>
             </div>
 
@@ -206,7 +206,7 @@ export function SponsorOverrideFlow({ row, onCancel, onApplied }: Props) {
               <p className="text-cream whitespace-pre-wrap">{reason.trim()}</p>
               <p className="text-[11px] font-mono text-cream-mute mt-3">
                 Requested by{' '}
-                <span className="text-cream">{requestingBaId.trim()}</span>
+                <span className="text-cream">{requestingTmagId.trim()}</span>
               </p>
             </div>
 

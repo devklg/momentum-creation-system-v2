@@ -4,7 +4,7 @@ export type RuntimeBrand<TValue, TBrand extends string> = TValue & {
 
 export type TenantId = RuntimeBrand<string, 'TenantId'>;
 export type TeamId = RuntimeBrand<string, 'TeamId'>;
-export type BaId = RuntimeBrand<string, 'BaId'>;
+export type TmagId = RuntimeBrand<string, 'TmagId'>;
 export type AgentId = RuntimeBrand<string, 'AgentId'>;
 export type RequestId = RuntimeBrand<string, 'RequestId'>;
 export type SessionId = RuntimeBrand<string, 'SessionId'>;

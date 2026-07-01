@@ -1,6 +1,6 @@
 import type {
   AgentKey,
-  BaId,
+  TmagId,
   ContextPacketV1,
   RuntimeLanguage,
 } from '@momentum/shared/runtime';
@@ -164,7 +164,7 @@ function validateBa(value: unknown, errors: ContextPacketValidationIssue[]): voi
 
   requireString(value, 'tenantId', errors, 'ba.tenantId');
   requireString(value, 'teamId', errors, 'ba.teamId');
-  requireString(value, 'baId', errors, 'ba.baId');
+  requireString(value, 'tmagId', errors, 'ba.tmagId');
   if (value.teamKey !== TEAM_MAGNIFICENT_KEY) {
     errors.push(error('ba.teamKey', 'ba_scope_invalid', 'ba.teamKey must be team_magnificent.'));
   }
@@ -260,31 +260,31 @@ function validateApprovedKnowledge(value: unknown, errors: ContextPacketValidati
 }
 
 function validatePrivateContext(packet: Record<string, unknown>, errors: ContextPacketValidationIssue[]): void {
-  const baId = packetBaId(packet);
+  const tmagId = packetTmagId(packet);
   const section = packet.privateContext;
   if (!isRecord(section) || !Array.isArray(section.items)) return;
 
   section.items.forEach((item, index) => {
-    if (isRecord(item) && item.ownerBaId !== baId) {
-      errors.push(error(`privateContext.items.${index}.ownerBaId`, 'private_context_scope_mismatch', 'Private context owner must match packet BA.'));
+    if (isRecord(item) && item.ownerTmagId !== tmagId) {
+      errors.push(error(`privateContext.items.${index}.ownerTmagId`, 'private_context_scope_mismatch', 'Private context owner must match packet BA.'));
     }
   });
 }
 
 function validateRelationshipContext(packet: Record<string, unknown>, errors: ContextPacketValidationIssue[]): void {
-  const baId = packetBaId(packet);
+  const tmagId = packetTmagId(packet);
   const section = packet.relationshipContext;
   if (!isRecord(section) || !Array.isArray(section.items)) return;
 
   section.items.forEach((item, index) => {
-    if (isRecord(item) && item.ownerBaId !== baId) {
-      errors.push(error(`relationshipContext.items.${index}.ownerBaId`, 'relationship_context_scope_mismatch', 'Relationship context owner must match packet BA.'));
+    if (isRecord(item) && item.ownerTmagId !== tmagId) {
+      errors.push(error(`relationshipContext.items.${index}.ownerTmagId`, 'relationship_context_scope_mismatch', 'Relationship context owner must match packet BA.'));
     }
   });
 }
 
 function validateJournalContext(packet: Record<string, unknown>, errors: ContextPacketValidationIssue[]): void {
-  const baId = packetBaId(packet);
+  const tmagId = packetTmagId(packet);
   const section = packet.journalContext;
   if (!isRecord(section) || !Array.isArray(section.entries)) return;
 
@@ -293,8 +293,8 @@ function validateJournalContext(packet: Record<string, unknown>, errors: Context
   }
 
   section.entries.forEach((item, index) => {
-    if (isRecord(item) && item.ownerBaId !== baId) {
-      errors.push(error(`journalContext.entries.${index}.ownerBaId`, 'journal_context_scope_mismatch', 'Journal context owner must match packet BA.'));
+    if (isRecord(item) && item.ownerTmagId !== tmagId) {
+      errors.push(error(`journalContext.entries.${index}.ownerTmagId`, 'journal_context_scope_mismatch', 'Journal context owner must match packet BA.'));
     }
   });
 }
@@ -329,8 +329,8 @@ function validateDegradedState(packet: Record<string, unknown>, errors: ContextP
   }
 }
 
-function packetBaId(packet: Record<string, unknown>): BaId | undefined {
-  return isRecord(packet.ba) ? (packet.ba.baId as BaId | undefined) : undefined;
+function packetTmagId(packet: Record<string, unknown>): TmagId | undefined {
+  return isRecord(packet.ba) ? (packet.ba.tmagId as TmagId | undefined) : undefined;
 }
 
 function validateIsoTimestamp(value: unknown, path: string, errors: ContextPacketValidationIssue[]): void {

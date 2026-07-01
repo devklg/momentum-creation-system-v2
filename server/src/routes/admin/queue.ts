@@ -58,8 +58,8 @@ export const adminQueueRoutes: Router = express.Router();
 function adminActorFromRequest(req: Request): AuditActor {
   const session = req.session!;
   const displayName =
-    (session as unknown as { fullName?: string }).fullName ?? session.baId;
-  return { kind: 'admin', baId: session.baId, displayName };
+    (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
+  return { kind: 'admin', tmagId: session.tmagId, displayName };
 }
 
 function baseContext(req: Request, route: string, method: string) {
@@ -81,7 +81,7 @@ adminQueueRoutes.get('/summary', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.queue.summary.viewed',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { computedAt: summary.computedAt },
       reason: null,
@@ -195,7 +195,7 @@ adminQueueRoutes.put('/visible-window', requireAdmin, async (req, res) => {
   try {
     const { before, after } = await setVisibleWindow({
       value: parsed.data.value as QueueVisibleWindow,
-      actorBaId: req.session!.baId,
+      actorTmagId: req.session!.tmagId,
     });
 
     await appendAuditEntry({
@@ -259,7 +259,7 @@ adminQueueRoutes.get('/ticker', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.queue.ticker.viewed',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { limit, returned: entries.length, globalMaxPosition },
       reason: null,
@@ -304,7 +304,7 @@ function tickerEntryToSseEvent(entry: AdminTickerEntry): AdminQueueTickerSseEven
     lastName: entry.lastName,
     city: entry.city,
     stateOrRegion: entry.stateOrRegion,
-    sponsorBaId: entry.sponsorBaId,
+    sponsorTmagId: entry.sponsorTmagId,
     deepLink: entry.deepLink,
   };
 }
@@ -313,7 +313,7 @@ adminQueueRoutes.get('/ticker/stream', requireAdmin, async (req: Request, res: R
   await appendAuditEntry({
     actor: adminActorFromRequest(req),
     action: 'admin.queue.ticker.stream.opened',
-    entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+    entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
     severity: 'info',
     reason: null,
     context: baseContext(req, '/api/admin/queue/ticker/stream', 'GET'),
@@ -344,7 +344,7 @@ adminQueueRoutes.get('/ticker/stream', requireAdmin, async (req: Request, res: R
         // The placement event from the bus carries positionNumber, firstName,
         // lastInitial, city, stateOrRegion, placedAt — but NOT prospectId or
         // lastName (anonymized for the .com surface). Look up the placement
-        // by positionNumber to recover prospectId + sponsorBaId, then load
+        // by positionNumber to recover prospectId + sponsorTmagId, then load
         // the prospect for the full lastName. Acceptable round-trip cost at
         // single-viewer admin scale.
         const placement = await lookupPlacementByPosition(event.positionNumber);
@@ -353,7 +353,7 @@ adminQueueRoutes.get('/ticker/stream', requireAdmin, async (req: Request, res: R
           placement.prospectId,
           event.positionNumber,
           event.placedAt,
-          placement.sponsorBaId,
+          placement.sponsorTmagId,
         );
         if (!enriched) return;
         const wire = tickerEntryToSseEvent(enriched);
@@ -377,12 +377,12 @@ adminQueueRoutes.get('/ticker/stream', requireAdmin, async (req: Request, res: R
     clearInterval(heartbeat);
     placementSub.unsubscribe();
     // eslint-disable-next-line no-console
-    console.log(`[admin-queue-stream] closed ${streamId} baId=${req.session!.baId}`);
+    console.log(`[admin-queue-stream] closed ${streamId} tmagId=${req.session!.tmagId}`);
   };
   req.on('close', teardown);
   req.on('aborted', teardown);
   // eslint-disable-next-line no-console
-  console.log(`[admin-queue-stream] opened ${streamId} baId=${req.session!.baId}`);
+  console.log(`[admin-queue-stream] opened ${streamId} tmagId=${req.session!.tmagId}`);
 });
 
 // Small Mongo lookup colocated with the SSE handler (the only caller). Kept
@@ -391,9 +391,9 @@ import { gatewayCall } from '../../services/gateway.js';
 
 async function lookupPlacementByPosition(
   positionNumber: number,
-): Promise<{ prospectId: string; sponsorBaId: string } | null> {
+): Promise<{ prospectId: string; sponsorTmagId: string } | null> {
   const result = await gatewayCall<{
-    documents: Array<{ prospectId: string; sponsorBaId: string }>;
+    documents: Array<{ prospectId: string; sponsorTmagId: string }>;
   }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'pool_placements',
@@ -412,7 +412,7 @@ adminQueueRoutes.get('/rules', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.queue.rules.viewed',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { count: rules.length },
       reason: null,
@@ -457,7 +457,7 @@ adminQueueRoutes.put('/rules/:key', requireAdmin, async (req, res) => {
     const { rule, before, after } = await setQueueRule({
       key: params.data.key,
       value: body.data.value,
-      actorBaId: req.session!.baId,
+      actorTmagId: req.session!.tmagId,
     });
 
     await appendAuditEntry({

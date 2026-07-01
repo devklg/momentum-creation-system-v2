@@ -140,14 +140,14 @@ function buildProspectRoute(item: ProspectFocusQueueItem): string {
 }
 
 export async function getAgentRecommendations(
-  baId: string,
+  tmagId: string,
 ): Promise<AgentRecommendationsResponse> {
   const generatedAt = new Date().toISOString();
   const [pmv, todaysActions, ivoryNames, steveView] = await Promise.all([
-    getProspectMomentumViewer(baId),
-    getCockpitTodaysActions(baId),
-    listIvoryNamesForBA(baId),
-    buildDiscoveryView(baId),
+    getProspectMomentumViewer(tmagId),
+    getCockpitTodaysActions(tmagId),
+    listIvoryNamesForBA(tmagId),
+    buildDiscoveryView(tmagId),
   ]);
 
   const recommendations: AgentRecommendation[] = [];
@@ -184,7 +184,7 @@ export async function getAgentRecommendations(
         ctaLabel: 'Open cockpit',
         route: '/cockpit',
         subjectType: 'daily_actions',
-        subjectId: baId,
+        subjectId: tmagId,
         createdAt: generatedAt,
       }),
     );
@@ -257,7 +257,7 @@ export async function getAgentRecommendations(
 }
 
 export async function recordAgentEvent(
-  baId: string,
+  tmagId: string,
   input: CreateAgentEventPayload,
 ): Promise<AgentEvent> {
   if (!isAgentId(input.agentId)) {
@@ -285,7 +285,7 @@ export async function recordAgentEvent(
 
   const event: AgentEvent = {
     eventId,
-    baId,
+    tmagId,
     agentId: input.agentId,
     kind: input.kind,
     recommendationId,
@@ -301,9 +301,9 @@ export async function recordAgentEvent(
     mongoDoc: { ...event },
     neo4j: {
       cypher:
-        'MERGE (b:BA {baId: $baId}) ' +
+        'MERGE (b:BA {tmagId: $tmagId}) ' +
         'CREATE (e:AgentEvent {eventId: $id}) ' +
-        'SET e.baId = $baId, ' +
+        'SET e.tmagId = $tmagId, ' +
         '    e.agentId = $agentId, ' +
         '    e.kind = $kind, ' +
         '    e.recommendationId = $recommendationId, ' +
@@ -312,7 +312,7 @@ export async function recordAgentEvent(
         '    e.createdAt = $createdAt ' +
         'MERGE (b)-[:RECORDED_AGENT_EVENT]->(e)',
       params: {
-        baId,
+        tmagId,
         agentId: event.agentId,
         kind: event.kind,
         recommendationId: event.recommendationId,
@@ -324,11 +324,11 @@ export async function recordAgentEvent(
     chroma: {
       collection: EVENTS_CHROMA_COLLECTION,
       document:
-        `Agent event ${event.kind} by BA ${baId}. Agent: ${event.agentId}. ` +
+        `Agent event ${event.kind} by BA ${tmagId}. Agent: ${event.agentId}. ` +
         `Subject: ${event.subjectType}${event.subjectId ? ` ${event.subjectId}` : ''}.`,
       metadata: {
         kind: event.kind,
-        baId,
+        tmagId,
         agentId: event.agentId,
         recommendationId: event.recommendationId,
         subjectType: event.subjectType,

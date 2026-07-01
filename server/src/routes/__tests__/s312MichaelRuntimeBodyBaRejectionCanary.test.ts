@@ -75,10 +75,10 @@ function mockRes() {
 function mockReq(
   body: Record<string, unknown> = {},
   withSession = true,
-  sessionBaId: string = SESSION_BA_ID,
+  sessionTmagId: string = SESSION_BA_ID,
 ) {
   return {
-    ...(withSession ? { session: { baId: sessionBaId } } : {}),
+    ...(withSession ? { session: { tmagId: sessionTmagId } } : {}),
     body,
   } as any;
 }
@@ -156,10 +156,10 @@ describe('S3.12 forbidden runtime input payloads', () => {
 
 describe('S3.12 forbidden BA/prospect/session authority payloads', () => {
   it.each([
-    ['baId', { baId: 'TMBA-EVIL-000001' }],
-    ['sponsorBaId', { sponsorBaId: 'TMBA-EVIL-SPONSOR' }],
-    ['targetBaId', { targetBaId: 'TMBA-EVIL-TARGET' }],
-    ['downlineBaId', { downlineBaId: 'TMBA-EVIL-DOWNLINE' }],
+    ['tmagId', { tmagId: 'TMBA-EVIL-000001' }],
+    ['sponsorTmagId', { sponsorTmagId: 'TMBA-EVIL-SPONSOR' }],
+    ['targetTmagId', { targetTmagId: 'TMBA-EVIL-TARGET' }],
+    ['downlineTmagId', { downlineTmagId: 'TMBA-EVIL-DOWNLINE' }],
     ['prospectId', { prospectId: 'PROSPECT-EVIL' }],
     ['prospectToken', { prospectToken: 'TOKEN-EVIL' }],
     ['token', { token: 'TOKEN-EVIL' }],
@@ -184,7 +184,7 @@ describe('S3.12 forbidden BA/prospect/session authority payloads', () => {
 
 describe('S3.12 mixed forbidden payloads and malformed language', () => {
   it.each([
-    ['English plus baId', { language: 'en', baId: 'TMBA-EVIL-000001' }],
+    ['English plus tmagId', { language: 'en', tmagId: 'TMBA-EVIL-000001' }],
     ['Spanish plus contextPacket', { language: 'es', contextPacket: {} }],
     ['English plus turn', { language: 'en', turn: {} }],
   ] as ReadonlyArray<readonly [string, Record<string, unknown>]> )(

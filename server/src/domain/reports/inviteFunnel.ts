@@ -9,7 +9,7 @@
  * Per-state timestamps for video_started are not stored, so
  * video_started→video_complete duration is not computed (provenanceNote).
  *
- * Scope: AdminDashboardFilter (baId + leaderGroup) via resolveScopedBaIds.
+ * Scope: AdminDashboardFilter (tmagId + leaderGroup) via resolveScopedTmagIds.
  * Time range narrows tokens by createdAt (mint time).
  *
  * Compliance (ADMIN I.5): operational — prospect-cohort counts, no per-
@@ -17,7 +17,7 @@
  */
 
 import { gatewayCall } from '../../services/gateway.js';
-import { resolveScopedBaIds } from '../adminMetrics.js';
+import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
@@ -49,7 +49,7 @@ const STATE_ORDER: TokenState[] = ['minted', 'clicked', 'video_started', 'video_
 interface TokenDoc {
   token: string;
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   state: TokenState;
   createdAt: string;
   clickedAt: string | null;
@@ -60,7 +60,7 @@ interface VideoActivityDoc {
   at: string;
 }
 interface BaDoc {
-  baId: string;
+  tmagId: string;
   firstName: string;
   lastName: string;
   deleted?: boolean;
@@ -87,10 +87,10 @@ export async function buildInviteFunnelReport(
   result: AdminInviteFunnelReport;
   meta: Omit<AdminReportMeta, 'title'>;
 }> {
-  const scopedBaIds = await resolveScopedBaIds(filter);
+  const scopedTmagIds = await resolveScopedTmagIds(filter);
 
   const tokenFilter: Record<string, unknown> = {};
-  if (scopedBaIds !== null) tokenFilter.sponsorBaId = { $in: scopedBaIds };
+  if (scopedTmagIds !== null) tokenFilter.sponsorTmagId = { $in: scopedTmagIds };
   Object.assign(tokenFilter, rangeClause('createdAt', range));
 
   const tokensRes = await gatewayCall<{ documents: TokenDoc[] }>('mongodb', 'query', {
@@ -161,33 +161,33 @@ export async function buildInviteFunnelReport(
   >();
   for (const t of tokens) {
     const s =
-      baStats.get(t.sponsorBaId) ?? { minted: 0, clicked: 0, videoStarted: 0, videoComplete: 0 };
+      baStats.get(t.sponsorTmagId) ?? { minted: 0, clicked: 0, videoStarted: 0, videoComplete: 0 };
     s.minted += 1;
     if (reached(t, 'clicked')) s.clicked += 1;
     if (reached(t, 'video_started')) s.videoStarted += 1;
     if (reached(t, 'video_complete')) s.videoComplete += 1;
-    baStats.set(t.sponsorBaId, s);
+    baStats.set(t.sponsorTmagId, s);
   }
 
   // Resolve names for the BAs that have any minted token (zero-mints already hidden).
-  const perBaIds = [...baStats.keys()];
+  const perTmagIds = [...baStats.keys()];
   const baNameLookup = new Map<string, string>();
-  if (perBaIds.length > 0) {
+  if (perTmagIds.length > 0) {
     const basRes = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_BAS,
-      filter: { baId: { $in: perBaIds }, deleted: { $ne: true } },
-      limit: perBaIds.length,
+      filter: { tmagId: { $in: perTmagIds }, deleted: { $ne: true } },
+      limit: perTmagIds.length,
     });
     for (const b of basRes.documents ?? []) {
-      baNameLookup.set(b.baId, `${b.firstName} ${b.lastName}`.trim());
+      baNameLookup.set(b.tmagId, `${b.firstName} ${b.lastName}`.trim());
     }
   }
 
-  let perBa: AdminInviteFunnelPerBaRow[] = perBaIds.map((id) => {
+  let perBa: AdminInviteFunnelPerBaRow[] = perTmagIds.map((id) => {
     const s = baStats.get(id)!;
     return {
-      baId: id,
+      tmagId: id,
       fullName: baNameLookup.get(id) ?? id,
       minted: s.minted,
       clicked: s.clicked,

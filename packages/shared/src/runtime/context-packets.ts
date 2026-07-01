@@ -151,7 +151,7 @@ export interface ApprovedKnowledgeContextItem {
 
 export interface PrivateContextItem {
   contextId: string;
-  ownerBaId: BaContext['baId'];
+  ownerTmagId: BaContext['tmagId'];
   summary: string;
   language: RuntimeLanguage;
   sourceTraceability: SourceTraceability;
@@ -165,7 +165,7 @@ export interface PrivateContextSection {
 
 export interface JournalContextItem {
   journalEntryId: JournalEntryId;
-  ownerBaId: BaContext['baId'];
+  ownerTmagId: BaContext['tmagId'];
   summary: string;
   language: RuntimeLanguage;
   selectedForReview: boolean;
@@ -179,7 +179,7 @@ export interface JournalContextSection {
 
 export interface RelationshipContextItem {
   relationshipContextId: RelationshipContextId;
-  ownerBaId: BaContext['baId'];
+  ownerTmagId: BaContext['tmagId'];
   summary: string;
   personSensitive: true;
   language: RuntimeLanguage;
@@ -206,7 +206,7 @@ export interface SessionHistorySection {
 
 export interface GuidedActionContextItem {
   guidedActionId: GuidedActionId;
-  ownerBaId: BaContext['baId'];
+  ownerTmagId: BaContext['tmagId'];
   title: string;
   status: 'suggested' | 'accepted' | 'completed' | 'dismissed';
   sourceKnowledgeIds?: KnowledgeId[];

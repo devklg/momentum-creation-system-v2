@@ -96,7 +96,7 @@ export async function getVisibleWindow(): Promise<VisibleWindowSetting> {
 
 export interface SetVisibleWindowInput {
   value: QueueVisibleWindow;
-  actorBaId: string;
+  actorTmagId: string;
 }
 
 /**
@@ -111,7 +111,7 @@ export async function setVisibleWindow(
   await upsertAdminSetting(VISIBLE_WINDOW_DOC_ID, {
     value: input.value,
     updatedAt: new Date().toISOString(),
-    updatedBy: input.actorBaId,
+    updatedBy: input.actorTmagId,
   });
   const after = (await getVisibleWindow()).value;
   if (after !== input.value) {
@@ -175,7 +175,7 @@ export async function listQueueRules(): Promise<QueueRule[]> {
 export interface SetQueueRuleInput {
   key: string;
   value: number;
-  actorBaId: string;
+  actorTmagId: string;
 }
 
 export interface SetQueueRuleResult {
@@ -204,7 +204,7 @@ export async function setQueueRule(
   await upsertAdminSetting(spec.docId, {
     value: input.value,
     updatedAt: new Date().toISOString(),
-    updatedBy: input.actorBaId,
+    updatedBy: input.actorTmagId,
   });
 
   const afterRules = await listQueueRules();
@@ -269,7 +269,7 @@ interface PlacementRow {
   placedAt: string;
   flushedAt: string | null;
   flushReason: 'enrolled' | 'expired' | 'archived' | null;
-  sponsorBaId: string;
+  sponsorTmagId: string;
 }
 
 async function countPlacements(filter: Record<string, unknown>): Promise<number> {
@@ -413,7 +413,7 @@ export async function lookupByPosition(
         ? {
             ...prospect,
             placedAt: placement.placedAt,
-            sponsorBaId: placement.sponsorBaId,
+            sponsorTmagId: placement.sponsorTmagId,
             flushedAt: placement.flushedAt,
             flushReason: placement.flushReason,
             deepLink: buildProspectDeepLink(placement.prospectId),
@@ -434,7 +434,7 @@ export async function lookupByPosition(
     prospect: {
       ...prospect,
       placedAt: placement.placedAt,
-      sponsorBaId: placement.sponsorBaId,
+      sponsorTmagId: placement.sponsorTmagId,
       flushedAt: null,
       flushReason: null,
       deepLink: buildProspectDeepLink(placement.prospectId),
@@ -453,7 +453,7 @@ interface ProspectRow {
 
 async function loadProspect(prospectId: string): Promise<Omit<
   QueueLookupProspect,
-  'placedAt' | 'sponsorBaId' | 'flushedAt' | 'flushReason' | 'deepLink'
+  'placedAt' | 'sponsorTmagId' | 'flushedAt' | 'flushReason' | 'deepLink'
 > | null> {
   const result = await gatewayCall<{ documents: ProspectRow[] }>(
     'mongodb',
@@ -582,7 +582,7 @@ export async function listAdminTicker(limit: number): Promise<{
       city: prospect.city,
       stateOrRegion: prospect.stateOrRegion,
       placedAt: p.placedAt,
-      sponsorBaId: p.sponsorBaId,
+      sponsorTmagId: p.sponsorTmagId,
       deepLink: buildProspectDeepLink(p.prospectId),
     });
   }
@@ -601,7 +601,7 @@ export async function enrichPlacementForAdmin(
   prospectId: string,
   positionNumber: number,
   placedAt: IsoTimestamp,
-  sponsorBaId: string,
+  sponsorTmagId: string,
 ): Promise<AdminTickerEntry | null> {
   const prospect = await loadProspect(prospectId);
   if (!prospect) return null;
@@ -613,7 +613,7 @@ export async function enrichPlacementForAdmin(
     city: prospect.city,
     stateOrRegion: prospect.stateOrRegion,
     placedAt,
-    sponsorBaId,
+    sponsorTmagId,
     deepLink: buildProspectDeepLink(prospectId),
   };
 }

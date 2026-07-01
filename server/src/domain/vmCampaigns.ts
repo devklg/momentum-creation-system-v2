@@ -26,8 +26,8 @@ export class VMCampaignError extends Error {
 }
 
 export interface CreateVMCampaignInput {
-  ownerTmBaId: string;
-  sponsorTmBaId: string;
+  ownerTmagId: string;
+  sponsorTmagId: string;
   leadBatchId: string;
   name: string;
   provider: VMCampaignProviderMode;
@@ -40,13 +40,13 @@ export interface CreateVMCampaignInput {
 export async function createVMCampaign(
   input: CreateVMCampaignInput,
 ): Promise<VMCampaignRecord> {
-  await findLeadBatchForOwner(input.leadBatchId, input.ownerTmBaId);
+  await findLeadBatchForOwner(input.leadBatchId, input.ownerTmagId);
 
   const now = new Date().toISOString();
   const campaign: VMCampaignRecord = {
     vmCampaignId: `vm_${randomUUID()}`,
-    ownerTmBaId: input.ownerTmBaId,
-    sponsorTmBaId: input.sponsorTmBaId,
+    ownerTmagId: input.ownerTmagId,
+    sponsorTmagId: input.sponsorTmagId,
     leadBatchId: input.leadBatchId,
     name: input.name,
     provider: input.provider,
@@ -67,16 +67,16 @@ export async function createVMCampaign(
     mongoDoc: { ...campaign },
     neo4j: {
       cypher:
-        'MERGE (b:BA {baId: $ownerTmBaId}) ' +
+        'MERGE (b:BA {tmagId: $ownerTmagId}) ' +
         'MERGE (lb:LeadBatch {leadBatchId: $leadBatchId}) ' +
         'CREATE (vm:VMCampaign {vmCampaignId: $id, name: $name, provider: $provider, ' +
-        '  status: $status, ownerTmBaId: $ownerTmBaId, sponsorTmBaId: $sponsorTmBaId, ' +
+        '  status: $status, ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, ' +
         '  createdAt: $createdAt, updatedAt: $updatedAt}) ' +
         'CREATE (b)-[:OWNS_VM_CAMPAIGN]->(vm) ' +
         'CREATE (vm)-[:USES_LEAD_BATCH]->(lb)',
       params: {
-        ownerTmBaId: campaign.ownerTmBaId,
-        sponsorTmBaId: campaign.sponsorTmBaId,
+        ownerTmagId: campaign.ownerTmagId,
+        sponsorTmagId: campaign.sponsorTmagId,
         leadBatchId: campaign.leadBatchId,
         name: campaign.name,
         provider: campaign.provider,
@@ -88,13 +88,13 @@ export async function createVMCampaign(
     chroma: {
       collection: CHROMA_COLLECTION,
       document:
-        `VM campaign ${campaign.name}; owner ${campaign.ownerTmBaId}; ` +
+        `VM campaign ${campaign.name}; owner ${campaign.ownerTmagId}; ` +
         `batch ${campaign.leadBatchId}; provider ${campaign.provider}; status ${campaign.status}.`,
       metadata: {
         kind: 'vm_campaign_created',
         vmCampaignId: campaign.vmCampaignId,
         leadBatchId: campaign.leadBatchId,
-        ownerTmBaId: campaign.ownerTmBaId,
+        ownerTmagId: campaign.ownerTmagId,
         provider: campaign.provider,
         createdAt: now,
       },
@@ -106,12 +106,12 @@ export async function createVMCampaign(
 
 export async function findVMCampaignForOwner(
   vmCampaignId: string,
-  ownerTmBaId: string,
+  ownerTmagId: string,
 ): Promise<VMCampaignRecord> {
   const result = await gatewayCall<{ documents: VMCampaignRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
-    filter: { vmCampaignId, ownerTmBaId },
+    filter: { vmCampaignId, ownerTmagId },
     limit: 1,
   });
   const campaign = result.documents?.[0];
@@ -120,12 +120,12 @@ export async function findVMCampaignForOwner(
 }
 
 export async function listVMCampaignsForOwner(
-  ownerTmBaId: string,
+  ownerTmagId: string,
 ): Promise<VMCampaignRecord[]> {
   const result = await gatewayCall<{ documents: VMCampaignRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
-    filter: { ownerTmBaId },
+    filter: { ownerTmagId },
     sort: { createdAt: -1 },
     limit: 500,
   });

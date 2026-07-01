@@ -22,7 +22,7 @@ import {
   transitionTokenState,
 } from '../domain/tokens.js';
 import { findProspectById, lastInitialOf } from '../domain/prospects.js';
-import { findBAByBaId } from '../domain/ba.js';
+import { findBAByTmagId } from '../domain/ba.js';
 import { findBulkLeadByToken } from '../domain/bulkLeads.js';
 import { createCallbackRequest } from '../domain/callbackRequest.js';
 import {
@@ -53,7 +53,7 @@ interface RvmRequestContext {
   tokenRecord: NonNullable<Awaited<ReturnType<typeof findTokenRecord>>>;
   bulkLead: NonNullable<Awaited<ReturnType<typeof findBulkLeadByToken>>>;
   prospect: NonNullable<Awaited<ReturnType<typeof findProspectById>>>;
-  ba: NonNullable<Awaited<ReturnType<typeof findBAByBaId>>>;
+  ba: NonNullable<Awaited<ReturnType<typeof findBAByTmagId>>>;
 }
 
 function sendRvmError(res: import('express').Response, err: unknown) {
@@ -81,7 +81,7 @@ async function resolveRvmRequestContext(token: string): Promise<RvmRequestContex
   }
   const [prospect, ba] = await Promise.all([
     findProspectById(tokenRecord.prospectId),
-    findBAByBaId(tokenRecord.sponsorBaId),
+    findBAByTmagId(tokenRecord.sponsorTmagId),
   ]);
   if (!prospect || !ba) throw new RvmTokenError('invalid_token');
   return { tokenRecord, bulkLead, prospect, ba };
@@ -141,7 +141,7 @@ rvmRoutes.post('/:token/callback-request', async (req, res) => {
       prospectId: ctx.prospect.prospectId,
       prospectFirstName: ctx.prospect.firstName,
       prospectLastInitial: ctx.prospect.lastInitial || lastInitialOf(ctx.prospect.lastName),
-      sponsorBaId: ctx.tokenRecord.sponsorBaId,
+      sponsorTmagId: ctx.tokenRecord.sponsorTmagId,
       baFirstName: ctx.ba.firstName,
       baPhone: ctx.ba.phone || null,
       intent: parsed.data.intent as CallbackIntent,

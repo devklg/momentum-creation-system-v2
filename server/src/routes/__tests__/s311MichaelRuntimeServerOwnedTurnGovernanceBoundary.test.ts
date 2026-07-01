@@ -11,10 +11,10 @@ import { describe, expect, it } from 'vitest';
 //
 // What S3.11 changed: the route NO LONGER reads a client-supplied `body.turn`.
 // The request body is server-owned — the ONLY accepted field is optional
-// `language` ('en'|'es'); any other key (incl. baId/sponsorBaId/targetBaId,
+// `language` ('en'|'es'); any other key (incl. tmagId/sponsorTmagId/targetTmagId,
 // turn, runtimeTurn, contextPacket, token, sessionId, …) is rejected with 400
 // `CLIENT_RUNTIME_INPUT_NOT_ALLOWED`. The route builds the turn entirely
-// server-side from `req.session.baId` via the S3.10 turn source
+// server-side from `req.session.tmagId` via the S3.10 turn source
 // (`createMichaelRuntimeTurnForAuthenticatedBa`), then resolves it through the
 // inert S2.20 facade (`resolveMichaelRuntimeTurnResponse`). The card calls the
 // route LIVE on mount via the renamed helper `resolveMichaelRuntimeTrainingStep`
@@ -146,13 +146,13 @@ describe('S3.11 michael-runtime route server-owned turn boundary', () => {
     expect(calls.length, calls.join('\n')).toBeGreaterThan(0);
   });
 
-  it('#4 derives BA scope from req.session.baId (never from the body)', () => {
+  it('#4 derives BA scope from req.session.tmagId (never from the body)', () => {
     const route = readSourceFile(routeFilePath).text;
-    expect(route).toContain('req.session?.baId');
+    expect(route).toContain('req.session?.tmagId');
     // No body BA-authority read (comments + strings stripped).
     const stripped = sourceWithoutCommentsOrStrings(route);
     expect(
-      /\b(?:req\.body|body)\.(?:baId|sponsorBaId|targetBaId|downlineBaId|prospectId)\b/.test(stripped),
+      /\b(?:req\.body|body)\.(?:tmagId|sponsorTmagId|targetTmagId|downlineTmagId|prospectId)\b/.test(stripped),
       'no body BA-authority read',
     ).toBe(false);
   });
@@ -236,7 +236,7 @@ describe('S3.11 .team card server-owned turn boundary', () => {
     // The body is exactly `opts?.language ? { language } : {}` — never a turn,
     // Context Packet, or BA-authority / id field.
     const forbidden =
-      /\b(?:baId|sponsorBaId|targetBaId|downlineBaId|prospectId|runtimeTurn|contextPacket|sessionId|turnId|correlationId)\b/;
+      /\b(?:tmagId|sponsorTmagId|targetTmagId|downlineTmagId|prospectId|runtimeTurn|contextPacket|sessionId|turnId|correlationId)\b/;
     expect(forbidden.test(stripped), 'no forbidden body fields in card code').toBe(false);
     // The body literal references `language` only.
     expect(/\blanguage\b/.test(stripped), 'language hint present').toBe(true);

@@ -99,7 +99,7 @@ export interface AdminReportResponse<Result> {
  * signup → first invitation_sent.
  */
 export interface AdminActivationRow {
-  baId: string;
+  tmagId: string;
   fullName: string;
   signupAt: string;
   welcomeAcceptedAt: string | null;
@@ -148,7 +148,7 @@ export interface AdminActivationReport {
  * report's provenanceNote.
  */
 export interface AdminTrainingReportRow {
-  baId: string;
+  tmagId: string;
   fullName: string;
   signupAt: string;
   modulesCompleted: number; // 0–5
@@ -200,7 +200,7 @@ export interface AdminInviteFunnelStageCount {
 export type AdminInviteFunnelPerBaSort = 'completes' | 'mints' | 'completion_pct';
 
 export interface AdminInviteFunnelPerBaRow {
-  baId: string;
+  tmagId: string;
   fullName: string;
   minted: number;
   clicked: number;
@@ -270,7 +270,7 @@ export interface AdminQueueVelocityReport {
  * flushReason='enrolled' and flushedAt).
  */
 export interface AdminEnrollmentPerBa {
-  baId: string;
+  tmagId: string;
   fullName: string;
   enrollments: number;
 }
@@ -315,7 +315,7 @@ export interface AdminFollowUpBucketCount {
 
 export interface AdminFollowUpRow {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   disposition: string;
   lastUpdatedAt: string;
   ageDays: number;
@@ -342,7 +342,7 @@ export interface AdminFollowUpReport {
  * to the leader.
  */
 export interface AdminLeaderScorecardRow {
-  baId: string;
+  tmagId: string;
   fullName: string;
   signupAt: string;
   personalEnrollments: number;

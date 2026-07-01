@@ -34,7 +34,7 @@ describe('S2.2 Context Packet request wiring', () => {
     });
     expect(bundle.scope.requestId).toBe(bundle.request.requestId);
     expect(bundle.scope.sessionId).toBe(identity.sessionId);
-    expect(bundle.scope.baId).toBe(identity.scope.baId);
+    expect(bundle.scope.tmagId).toBe(identity.scope.tmagId);
   });
 
   it('requests, validates, and consumes a valid Context Packet response', async () => {

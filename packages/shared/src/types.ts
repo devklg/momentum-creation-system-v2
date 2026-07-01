@@ -84,7 +84,7 @@ export interface CallbackRequestRecord {
   callbackRequestId: string;
   token: string;
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   intent: CallbackIntent;
   createdAt: IsoTimestamp;
   smsDeliveryStatus: 'queued' | 'sent' | 'failed' | 'skipped';
@@ -124,7 +124,7 @@ export interface ProspectRecord {
   location: ProspectLocation;
   phone: string | null;
   email: string | null;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   state: TokenState;
   positionNumber: number | null;
   placedAt: IsoTimestamp | null;
@@ -144,7 +144,7 @@ export interface ProspectRecord {
 export interface InviteTokenRecord {
   token: string;
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   state: TokenState;
   createdAt: IsoTimestamp;
   clickedAt: IsoTimestamp | null;
@@ -172,7 +172,7 @@ export type VideoEventKind =
  */
 export interface PoolPlacement {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   positionNumber: number;
   placedAt: IsoTimestamp;
   expiresAt: IsoTimestamp;
@@ -231,7 +231,7 @@ export interface ResolvedTokenPayload {
     expiresAt: IsoTimestamp;
   };
   ba: {
-    baId: string;
+    tmagId: string;
     firstName: string;
     lastName: string;
     lastInitial: string;
@@ -409,7 +409,7 @@ export interface WebinarEvent {
 /**
  * Request body for POST /api/p/:token/webinar-reserve.
  * Name + email are the only fields the prospect provides; everything
- * else (eventId, prospectId, sponsorBaId) is resolved server-side
+ * else (eventId, prospectId, sponsorTmagId) is resolved server-side
  * from the token. Sponsor immutability (locked-spec 3.5) holds.
  */
 export interface WebinarReservationPayload {
@@ -447,7 +447,7 @@ export interface WebinarReservationRecord {
   eventId: string;
   token: string;
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   name: string;
   email: string;
   createdAt: IsoTimestamp;
@@ -494,7 +494,7 @@ export interface TeamStatsResponse {
  * decision). The token rail describes what the PROSPECT did; "sent" is a
  * BA-side fact and lives parallel to the rail so the two never collide.
  *
- * Sponsor immutability (locked-spec 3.5): sponsorBaId is stamped from the
+ * Sponsor immutability (locked-spec 3.5): sponsorTmagId is stamped from the
  * authed session BA at the route layer, never from the request body.
  */
 
@@ -515,7 +515,7 @@ export type InvitationSource = 'self' | 'ivory' | 'scriptmaker';
  * BA-submitted invitation form (Chat #119 field lock, extended Chat #120).
  * first/last name, email, phone, city, state â€” all flow onto the prospect
  * record so the CRM export carries them and city/state render on the
- * dashboard ticker. sponsorBaId is NOT in this payload; the route derives
+ * dashboard ticker. sponsorTmagId is NOT in this payload; the route derives
  * it from the session.
  *
  * `message` (Chat #120) is the invitation text the BA will send. It is
@@ -590,7 +590,7 @@ export type InvitationActivityKind =
 export interface InvitationActivityEntry {
   activityId: string;
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   kind: InvitationActivityKind;
   note: string;
   at: IsoTimestamp;
@@ -606,7 +606,7 @@ export interface InvitationActivityEntry {
  * invited, that prospect's current status, and the per-prospect activity.
  *
  * Sponsor immutability (locked-spec 3.5): the cockpit reads ONLY the
- * authed session BA's own prospects (filter sponsorBaId = session baId).
+ * authed session BA's own prospects (filter sponsorTmagId = session tmagId).
  * No request input can widen the set to another BA's prospects.
  *
  * Compliance (locked-spec 3.10): this is a BA-FACING surface inside .team,
@@ -814,7 +814,7 @@ export interface ProspectMomentumViewerResponse {
 /**
  * Response from GET /api/cockpit/summary. The headline counts the cockpit
  * shows above My Invites, plus the My Sponsor card data. Counts are the
- * BA's own funnel only (sponsorBaId = session baId).
+ * BA's own funnel only (sponsorTmagId = session tmagId).
  */
 export interface CockpitSummaryResponse {
   ok: true;
@@ -897,7 +897,7 @@ export interface LibraryVideo {
  * The BA names the prospect (firstName + optional context the BA knows)
  * and identifies the product video that just played. ScriptMaker writes a
  * personalized, compliance-clean invitation draft anchored to that product.
- * sponsorBaId is NOT in the payload â€” the route derives it from the session
+ * sponsorTmagId is NOT in the payload â€” the route derives it from the session
  * (locked-spec 3.5), same as the spine.
  */
 export interface ScriptMakerDraftPayload {
@@ -940,7 +940,7 @@ export interface ScriptMakerDraftResponse {
  * account row; Layer 3 is the /p/login SMS magic-link surface on .com.
  *
  * Sponsor immutability (3.5) is the load-bearing invariant: every
- * record below stamps sponsorBaId from the inviting token and is
+ * record below stamps sponsorTmagId from the inviting token and is
  * not writable thereafter â€” re-entry resolves to the ORIGINAL token
  * and ORIGINAL inviting BA, never a different one. A phone may be
  * tied to multiple active tokens (rare but legal); a /p/login/start
@@ -962,7 +962,7 @@ export interface ProspectAccountRecord {
   /** The original invite token. Re-entry resolves to this token only. */
   tokenId: string;
   /** Stamped from the token at creation; immutable thereafter (3.5). */
-  sponsorBaId: string;
+  sponsorTmagId: string;
   /** E.164 â€” null until callback/webinar consent signal fires. */
   phone: string | null;
   /** App-generated re-entry credential (#148): 6-char, unambiguous alphabet.
@@ -1080,8 +1080,8 @@ export type AuditActorRole = 'admin' | 'ba' | 'system' | 'prospect' | 'anonymous
  * used for /admin-gate denials and unauthenticated probes.
  */
 export type AuditActor =
-  | { kind: 'admin'; baId: string; displayName: string }
-  | { kind: 'ba'; baId: string; displayName: string }
+  | { kind: 'admin'; tmagId: string; displayName: string }
+  | { kind: 'ba'; tmagId: string; displayName: string }
   | { kind: 'system'; label: string }
   | { kind: 'prospect'; prospectId: string; displayName: string }
   | { kind: 'anonymous'; ip: string | null };
@@ -1204,7 +1204,7 @@ export interface AppendAuditEntryInput {
  * previous page; pass it back as `before` to fetch the next page.
  */
 export interface AuditQueryFilters {
-  actorBaId?: string;
+  actorTmagId?: string;
   role?: AuditActorRole;
   action?: string;
   actionPrefix?: string;
@@ -1301,14 +1301,14 @@ export type IvoryAngle =
   | 'unspecified';
 
 /**
- * The Ivory roster record. One per (baId, person). BA-private â€” never
+ * The Ivory roster record. One per (tmagId, person). BA-private â€” never
  * surfaced cross-BA. lastInitial is derived from lastName at write time so
  * a partial display ("Marcus L.") is cheap; full lastName stays on the
  * record for the BA's own reference.
  */
 export interface IvoryName {
   ivoryId: string;
-  baId: string;
+  tmagId: string;
   firstName: string;
   lastName: string;
   lastInitial: string;
@@ -1444,7 +1444,7 @@ export interface IvoryInvitationMintResponse {
  */
 export interface GeneratorRun {
   runId: string;
-  baId: string;
+  tmagId: string;
   productKey: string;
   productName: string;
   angle: IvoryAngle;
@@ -1533,7 +1533,7 @@ export interface GeneratorInviteResponse {
  * null) has no cooldown â€” that path is just the existing "I sent this".
  *
  * Sponsor immutability (locked-spec 3.5): every CRM record carries the
- * authed session BA's baId and every read/write filters on it. A note,
+ * authed session BA's tmagId and every read/write filters on it. A note,
  * follow-up, or disposition belongs to ONE (prospect, BA) pair â€” if two
  * BAs ever shared a prospect (today they can't), each would have their own
  * private CRM.
@@ -1568,7 +1568,7 @@ export const CRM_DISPOSITIONS: readonly CrmDisposition[] = [
 export interface CrmNoteRecord {
   noteId: string;
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   text: string;
   createdAt: IsoTimestamp;
 }
@@ -1580,7 +1580,7 @@ export interface CrmNoteRecord {
  */
 export interface CrmFollowUpRecord {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   dueAt: IsoTimestamp;
   createdAt: IsoTimestamp;
   clearedAt: IsoTimestamp | null;
@@ -1593,7 +1593,7 @@ export interface CrmFollowUpRecord {
  */
 export interface CrmDispositionRecord {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   disposition: CrmDisposition;
   updatedAt: IsoTimestamp;
 }
@@ -1761,7 +1761,7 @@ export interface ReinviteTerminalError {
  * requireSteveComplete.ts.
  *
  * Sponsor immutability (locked-spec 3.5): progress records are stamped
- * with the authed session baId; nothing in a request body can write to
+ * with the authed session tmagId; nothing in a request body can write to
  * a different BA's progress.
  *
  * Completion: all 5 modules `completed` AND >= 1 invitation sent
@@ -1779,14 +1779,14 @@ export type FastStartModuleState =
   | 'completed';
 
 /**
- * Stored progress record. One row per (baId, moduleId). The triple-stack
+ * Stored progress record. One row per (tmagId, moduleId). The triple-stack
  * write inserts on first touch and updates state thereafter â€” domain
  * branches on existence per the gateway upsert quirk.
  */
 export interface FastStartProgressRecord {
-  /** Composite id `${baId}__${moduleId}` for idempotent triple-stack writes. */
+  /** Composite id `${tmagId}__${moduleId}` for idempotent triple-stack writes. */
   _id: string;
-  baId: string;
+  tmagId: string;
   moduleId: FastStartModuleId;
   state: FastStartModuleState;
   startedAt: IsoTimestamp | null;
@@ -1947,7 +1947,7 @@ export const BA_NOTIF_DEFAULTS: BANotifPrefs = {
 /**
  * GET /api/profile response — the authed BA's full profile shape.
  *
- * Sponsor + threeBaId + tmBaId + accessCodeHeld are READ-ONLY (locked-spec
+ * Sponsor + threeBaId + tmagId + accessCodeHeld are READ-ONLY (locked-spec
  * 3.5 / 2.3) and the PATCH surface intentionally omits them. The read shape
  * carries them so the page can render the read-only card without a second
  * fetch.
@@ -1963,12 +1963,12 @@ export interface BAProfile {
   notifPrefs: BANotifPrefs;
 
   // Read-only (wf_0072)
-  tmBaId: string;
+  tmagId: string;
   threeBaId: string;
   /** The BA's own TM-XXXX code (one per BA for life — 2.3). null if Kevin hasn't issued one yet. */
   accessCodeHeld: string | null;
   sponsor: {
-    baId: string;
+    tmagId: string;
     threeBaId: string;
     fullName: string;
   };
@@ -1982,7 +1982,7 @@ export interface BAProfile {
  * PATCH /api/profile body — partial updates of directly-editable fields.
  * Email and phone changes go through /api/profile/email/* and
  * /api/profile/phone/* (challenge + verify). Password change goes through
- * /api/profile/password. None of {sponsor, tmBaId, threeBaId,
+ * /api/profile/password. None of {sponsor, tmagId, threeBaId,
  * accessCodeHeld} appear here by design.
  */
 export interface BAProfilePatch {
@@ -2045,7 +2045,7 @@ export interface ProfilePhoneVerifyBody {
  */
 export interface ProfileChangeChallengeRecord {
   challengeId: string;
-  baId: string;
+  tmagId: string;
   channel: 'email' | 'phone';
   /** Target address/number the code was dispatched to. */
   target: string;
@@ -2115,12 +2115,12 @@ export interface MichaelScoringSummary {
 }
 
 /** Authoritative completed-interview record. Triple-stacked at ingest.
- *  sponsorBaId is stamped server-side from the BA record — NEVER from the
+ *  sponsorTmagId is stamped server-side from the BA record — NEVER from the
  *  scoring worker payload (locked-spec 3.5). */
 export interface MichaelInterviewArtifact {
-  baId: string;
-  /** Stamped server-side from brand_ambassadors.sponsorBaId at ingest. Immutable. */
-  sponsorBaId: string | null;
+  tmagId: string;
+  /** Stamped server-side from brand_ambassadors.sponsorTmagId at ingest. Immutable. */
+  sponsorTmagId: string | null;
   callSid: string | null;
   startedAt: string | null;
   completedAt: string | null;
@@ -2134,7 +2134,7 @@ export interface MichaelInterviewArtifact {
 /** LEGACY — retired Michael interview view.
  *  Michael no longer schedules or interviews; no active route serves this. */
 export interface MichaelInterviewView {
-  baId: string;
+  tmagId: string;
   phase: MichaelInterviewPhase;
   /** ISO slot start, BA's local TZ for rendering applied client-side. */
   scheduledFor: string | null;
@@ -2164,7 +2164,7 @@ export type MichaelInterviewSseEvent =
 /** LEGACY — retired sponsor-only Michael interview card data. */
 export interface MichaelCockpitCardData {
   /** The downline BA the card is about. */
-  downlineBaId: string;
+  downlineTmagId: string;
   /** First name only — keeps the card scannable and consistent with locked-spec
    *  3.6 (BA-to-BA off-app norms). */
   downlineFirstName: string;
@@ -2182,7 +2182,7 @@ export interface MichaelCockpitCardData {
 
 /** LEGACY — retired Michael worker scoring payload. */
 export interface MichaelScoringIngestPayload {
-  baId: string;
+  tmagId: string;
   callSid: string;
   startedAt: string;
   completedAt: string;
@@ -2212,7 +2212,7 @@ export interface MichaelTranscriptChunkIngestPayload {
  *   leader = (binary-qualified) AND (>= 5 personally enrolled)
  *
  * Personally-enrolled is computable here (count of BAs in brand_ambassadors
- * with sponsorBaId = candidate.baId). Binary qualification lives upstream
+ * with sponsorTmagId = candidate.tmagId). Binary qualification lives upstream
  * in THREE and is not mirrored locally yet. Until it is, the system-detected
  * leader set is empty — the dashboard surfaces this honestly via
  * `leaderDetectionNote`. A Kevin-curated set will arrive with wireframe
@@ -2235,7 +2235,7 @@ export type AdminDashboardTile =
  */
 export interface AdminDashboardFilter {
   /** Restrict to one BA's slice (their prospects, their training, etc.). */
-  baId: string | null;
+  tmagId: string | null;
   /**
    * 'all'           — no leader-status restriction.
    * 'leaders_only'  — system-detected ∪ Kevin-curated.
@@ -2255,7 +2255,7 @@ export interface AdminDashboardMetrics {
   totalBaCount: number;
   /**
    * count(pool_placements WHERE flushedAt IS NULL), filter-scoped by
-   * sponsorBaId when the filter narrows to a BA / leader group.
+   * sponsorTmagId when the filter narrows to a BA / leader group.
    */
   prospectsInFlow: number;
   /** Net queue movement in the last 24h: placements minus flushes. */
@@ -2281,7 +2281,7 @@ export interface AdminDashboardMetrics {
   computedAt: IsoTimestamp;
 }
 
-/** GET /api/admin/dashboard/metrics?baId=&leaderGroup= response. */
+/** GET /api/admin/dashboard/metrics?tmagId=&leaderGroup= response. */
 export interface AdminDashboardMetricsResponse {
   ok: true;
   metrics: AdminDashboardMetrics;
@@ -2296,7 +2296,7 @@ export interface AdminDashboardMetricsResponse {
 
 /** One BA, for the filter-bar dropdown. */
 export interface AdminBaFilterOption {
-  baId: string;
+  tmagId: string;
   fullName: string;
   /** True if this BA is in the current leader set (curated ∪ system). */
   isLeader: boolean;
@@ -2321,7 +2321,7 @@ export interface AdminDashboardFiltersResponse {
 /* Drilldown rows — one shape per tile (wf_0078). */
 
 export interface AdminActiveBaRow {
-  baId: string;
+  tmagId: string;
   fullName: string;
   lastLoginAt: IsoTimestamp;
   prospectsInFlow: number;
@@ -2335,7 +2335,7 @@ export interface AdminProspectInFlowRow {
   stateOrRegion: string;
   state: TokenState;
   positionNumber: number | null;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   sponsorName: string;
   placedAt: IsoTimestamp | null;
   expiresAt: IsoTimestamp;
@@ -2347,7 +2347,7 @@ export interface AdminQueueMovementRow {
   firstName: string;
   lastInitial: string;
   positionNumber: number;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   sponsorName: string;
   at: IsoTimestamp;
   /** 'enrolled' | 'expired' | 'archived' on flush; null on placement. */
@@ -2359,13 +2359,13 @@ export interface AdminEnrollmentRow {
   firstName: string;
   lastInitial: string;
   positionNumber: number;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   sponsorName: string;
   enrolledAt: IsoTimestamp;
 }
 
 export interface AdminTrainingRow {
-  baId: string;
+  tmagId: string;
   fullName: string;
   /** Count of modules in `completed` state, 0..5. */
   modulesCompleted: number;
@@ -2382,7 +2382,7 @@ export type AdminDrilldownPayload =
   | { tile: 'enrollments'; rows: AdminEnrollmentRow[] }
   | { tile: 'training'; rows: AdminTrainingRow[] };
 
-/** GET /api/admin/dashboard/drilldown?tile=&baId=&leaderGroup= response. */
+/** GET /api/admin/dashboard/drilldown?tile=&tmagId=&leaderGroup= response. */
 export interface AdminDrilldownResponse {
   ok: true;
   payload: AdminDrilldownPayload;
@@ -2522,7 +2522,7 @@ export interface CockpitTodaysActionsResponse {
  *   - No BA alert SMS
  *
  * Mechanism: the synthesized token field carries a sentinel string
- * `PREVIEW-<baId>` that no real invite token will ever match (real
+ * `PREVIEW-<tmagId>` that no real invite token will ever match (real
  * tokens are 12 chars from a 31-char alphabet excluding 0/1/I/O/L;
  * this sentinel is upper+digit+dash, prefixed `PREVIEW-`, and longer
  * than 12). Any downstream /api/p/<sentinel>/* call from the .com
@@ -2562,7 +2562,7 @@ export interface PreviewResolvedTokenPayload extends ResolvedTokenPayload {
 
 /** One row in the admin BA directory (Section C.1) — the 15 columns the table renders. */
 export interface AdminBaDirectoryRow {
-  baId: string;
+  tmagId: string;
   threeBaId: string;
   fullName: string;
   email: string | null;
@@ -2570,10 +2570,10 @@ export interface AdminBaDirectoryRow {
   /** TM-XXXX code this BA owns (one per BA for life, 2.3). Null if Kevin hasn't issued one. */
   accessCodeOwned: string | null;
   /** Current sponsor (post-override if one was applied; otherwise the original). */
-  sponsorBaId: string | null;
+  sponsorTmagId: string | null;
   sponsorName: string | null;
   /** Original sponsor at signup — present ONLY when a C.5 override changed it. */
-  originalSponsorBaId: string | null;
+  originalSponsorTmagId: string | null;
   originalSponsorName: string | null;
   /** Signed-up timestamp. */
   joinedAt: IsoTimestamp;
@@ -2619,12 +2619,12 @@ export interface AdminBaDirectoryResponse {
 /** One sponsor-override entry on a BA's history. Append-only. */
 export interface AdminSponsorOverrideEntry {
   overrideId: string;
-  baId: string;
-  previousSponsorBaId: string;
-  newSponsorBaId: string;
-  requestingBaId: string;
+  tmagId: string;
+  previousSponsorTmagId: string;
+  newSponsorTmagId: string;
+  requestingTmagId: string;
   reason: string;
-  performedByBaId: string;
+  performedByTmagId: string;
   performedAt: IsoTimestamp;
   /** entryId from the 4.J audit substrate this override wrote to. */
   auditEntryId: string;
@@ -2633,9 +2633,9 @@ export interface AdminSponsorOverrideEntry {
 /** Kevin-only note about a BA, append-only. */
 export interface AdminBaNoteEntry {
   noteId: string;
-  baId: string;
+  tmagId: string;
   text: string;
-  authorBaId: string;
+  authorTmagId: string;
   createdAt: IsoTimestamp;
 }
 
@@ -2651,10 +2651,10 @@ export interface AdminBaProfileResponse {
   profile: AdminBaProfileBundle;
 }
 
-/** POST /api/admin/bas/:baId/sponsor-override body. */
+/** POST /api/admin/bas/:tmagId/sponsor-override body. */
 export interface AdminSponsorOverridePayload {
-  requestingBaId: string;
-  newSponsorBaId: string;
+  requestingTmagId: string;
+  newSponsorTmagId: string;
   reason: string;
 }
 
@@ -2664,7 +2664,7 @@ export interface AdminSponsorOverrideResponse {
   row: AdminBaDirectoryRow;
 }
 
-/** POST /api/admin/bas/:baId/leader-tag body — toggle curated badge. */
+/** POST /api/admin/bas/:tmagId/leader-tag body — toggle curated badge. */
 export interface AdminLeaderTagPayload {
   curated: boolean;
   /** Optional reason — surfaced in the audit entry. */
@@ -2673,11 +2673,11 @@ export interface AdminLeaderTagPayload {
 
 export interface AdminLeaderTagResponse {
   ok: true;
-  baId: string;
+  tmagId: string;
   curated: boolean;
 }
 
-/** POST /api/admin/bas/:baId/notes body — append a Kevin-only note. */
+/** POST /api/admin/bas/:tmagId/notes body — append a Kevin-only note. */
 export interface AdminBaNotePayload {
   text: string;
 }
@@ -2699,9 +2699,9 @@ export interface AdminBaNoteResponse {
  *   - NO prospect score, income-potential rank, qualification rating,
  *     or AI coaching anywhere in this surface (D.3 negation).
  *   - Every mutation appends one AuditLogEntry with before/after,
- *     requestingBaId, reason, timestamp.
+ *     requestingTmagId, reason, timestamp.
  *   - Monotonic queue is sacred: flush vacates a slot; move keeps
- *     the same positionNumber, only sponsorBaId changes.
+ *     the same positionNumber, only sponsorTmagId changes.
  *   - Reuses AdminDashboardFilter (B.2) verbatim — narrowing only.
  */
 
@@ -2735,8 +2735,8 @@ export interface AdminProspectDirectoryRow {
   /** Column 1: first + last (full name for admin, not first+initial). */
   firstName: string;
   lastName: string;
-  /** Column 2: inviting BA — current sponsorBaId on the prospect record. */
-  sponsorBaId: string;
+  /** Column 2: inviting BA — current sponsorTmagId on the prospect record. */
+  sponsorTmagId: string;
   sponsorName: string;
   /** Column 3: lifecycle state. 'video_25'/'video_50'/'video_75' map to
    *  TokenState 'video_quarter'/'video_half'/'video_three_quarter'. The
@@ -2792,7 +2792,7 @@ export type AdminProspectPresentationStatus =
 
 /**
  * Server response — GET /api/admin/prospects.
- * Filter is reused verbatim from B.2; the client passes baId + leaderGroup
+ * Filter is reused verbatim from B.2; the client passes tmagId + leaderGroup
  * in the query string. Rows are unsorted at wire level; the client sorts
  * per column-click.
  */
@@ -2860,7 +2860,7 @@ export interface AdminProspectKevinNote {
   body: string;
   createdAt: IsoTimestamp;
   /** The admin who wrote the note (today: Kevin; tomorrow: any /admin BA). */
-  createdByBaId: string;
+  createdByTmagId: string;
   createdByDisplayName: string;
 }
 
@@ -2869,9 +2869,9 @@ export interface AdminProspectKevinNote {
  * Identity + activity timeline + token + sponsor drift + (optional)
  * callback/webinar/enrollment details + Kevin notes.
  *
- * Sponsor-drift detector: `sponsorBaIdAtMint` is the sponsorBaId stamped
+ * Sponsor-drift detector: `sponsorTmagIdAtMint` is the sponsorTmagId stamped
  * on the original invite token at mint time (locked-spec 3.5). It MUST
- * equal `sponsorBaIdNow` on every prospect unless an admin reassign-
+ * equal `sponsorTmagIdNow` on every prospect unless an admin reassign-
  * sponsor intervention has been applied. When they differ, the detail
  * panel surfaces the discrepancy as a warning row — the drift detector
  * the brief explicitly names.
@@ -2887,8 +2887,8 @@ export interface AdminProspectDetail {
   phone: string | null;
   email: string | null;
   location: ProspectLocation;
-  sponsorBaIdAtMint: string;
-  sponsorBaIdNow: string;
+  sponsorTmagIdAtMint: string;
+  sponsorTmagIdNow: string;
   sponsorNameNow: string;
   positionNumber: number | null;
   placedAt: IsoTimestamp | null;
@@ -2917,7 +2917,7 @@ export interface AdminProspectDetail {
   } | null;
   enrollment: {
     markedAt: IsoTimestamp;
-    markedByBaId: string;
+    markedByTmagId: string;
     forceEnrolledByAdmin: boolean;
   } | null;
   activity: AdminProspectActivityEvent[];
@@ -2952,24 +2952,24 @@ export type AdminProspectInterventionKind =
 /**
  * Shared base for every intervention request. The intervention router
  * branches on the URL path, so `kind` is not in the body — but the
- * common base IS the `requestingBaId` + `reason` pair. Both required;
+ * common base IS the `requestingTmagId` + `reason` pair. Both required;
  * locked-spec 2.4 calls for `reason` on every critical override.
  */
 export interface AdminProspectInterventionBase {
   /** The BA who requested the emergency intervention from Kevin. */
-  requestingBaId: string;
+  requestingTmagId: string;
   /** Free-text reason in Kevin's words; required, min 8 chars. */
   reason: string;
 }
 
 export interface AdminProspectMoveRequest extends AdminProspectInterventionBase {
   /** The BA the prospect is moved TO (the new inviting BA). */
-  toBaId: string;
+  toTmagId: string;
 }
 
 export interface AdminProspectReassignSponsorRequest extends AdminProspectInterventionBase {
   /** The BA who becomes the sponsor of record on the prospect. */
-  newSponsorBaId: string;
+  newSponsorTmagId: string;
 }
 
 export type AdminProspectManualFlushRequest = AdminProspectInterventionBase;
@@ -3069,7 +3069,7 @@ export interface QueueLookupProspect {
   lastName: string;
   state: TokenState;
   placedAt: IsoTimestamp;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   city: string;
   stateOrRegion: string;
   flushedAt: IsoTimestamp | null;
@@ -3091,7 +3091,7 @@ export interface AdminTickerEntry {
   city: string;
   stateOrRegion: string;
   placedAt: IsoTimestamp;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   deepLink: string;
 }
 
@@ -3168,7 +3168,7 @@ export interface AdminQueueTickerSseEvent {
   lastName: string;
   city: string;
   stateOrRegion: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   deepLink: string;
 }
 
@@ -3206,16 +3206,16 @@ export interface AdminSoftDeleteState {
   deleted: boolean;
   deletedAt: IsoTimestamp | null;
   deletedReason: string | null;
-  deletedByBaId: string | null;
+  deletedByTmagId: string | null;
   /** Stamped on restore so the audit pair is legible on the record too. */
   restoredAt: IsoTimestamp | null;
-  restoredByBaId: string | null;
+  restoredByTmagId: string | null;
 }
 
 /* ── BA create ──────────────────────────────────────────────────────── */
 
 /**
- * Admin-create a BA. sponsorBaId is REQUIRED (Chat #138) and is stamped as
+ * Admin-create a BA. sponsorTmagId is REQUIRED (Chat #138) and is stamped as
  * the original/immutable sponsor from birth — there is no signup
  * transaction to derive it from. No password is set here: an admin-created
  * BA is a roster mirror entry, not a login. (If the person later signs up
@@ -3226,7 +3226,7 @@ export interface AdminCreateBaPayload {
   lastName: string;
   threeBaId: string;
   threeUsername: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   email?: string | null;
   phone?: string | null;
   timezone?: string | null;
@@ -3237,7 +3237,7 @@ export interface AdminCreateBaPayload {
 
 export interface AdminCreateBaResponse {
   ok: true;
-  baId: string;
+  tmagId: string;
   row: AdminBaDirectoryRow;
 }
 
@@ -3265,7 +3265,7 @@ export interface AdminEditBaPayload {
 
 export interface AdminEditBaResponse {
   ok: true;
-  baId: string;
+  tmagId: string;
   row: AdminBaDirectoryRow;
 }
 
@@ -3282,13 +3282,13 @@ export interface AdminRestorePayload {
 
 export interface AdminBaDeleteResponse {
   ok: true;
-  baId: string;
+  tmagId: string;
   deletedAt: IsoTimestamp;
 }
 
 export interface AdminBaRestoreResponse {
   ok: true;
-  baId: string;
+  tmagId: string;
   restoredAt: IsoTimestamp;
   row: AdminBaDirectoryRow;
 }
@@ -3300,7 +3300,7 @@ export interface AdminBaRestoreResponse {
  * a real /p/{token} is minted with sponsor locked at mint, then the
  * prospect is placed in the team-wide holding tank at the NEXT monotonic
  * position (Chat #138 — no position picking, no delay; placement follows
- * the same path a real video_complete uses). sponsorBaId is required.
+ * the same path a real video_complete uses). sponsorTmagId is required.
  */
 export interface AdminCreateProspectPayload {
   firstName: string;
@@ -3308,7 +3308,7 @@ export interface AdminCreateProspectPayload {
   city: string;
   stateOrRegion: string;
   country?: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   phone?: string | null;
   email?: string | null;
   reason: string;
@@ -3447,7 +3447,7 @@ export const MICHAEL_CLASSIFICATION_BANDS: ReadonlyArray<{
 
 /** Legacy Michael-generated profile. Current Success Profile is Steve-owned. */
 export interface MichaelSuccessProfile {
-  baId: string;
+  tmagId: string;
   classification: MichaelClassification;
   /** One-line read the sponsor leads with, e.g. "Vision-led, time-rich, ready to be coached." */
   headline: string;
@@ -3462,9 +3462,9 @@ export interface MichaelSuccessProfile {
 /** Legacy founder-handoff record. New Michael ingests do not create this. */
 export interface MichaelFounderHandoff {
   handoffId: string;
-  baId: string;
+  tmagId: string;
   baFirstName: string;
-  sponsorBaId: string | null;
+  sponsorTmagId: string | null;
   /** Lightweight classification summary (full profile on the linked artifact). */
   tier: MichaelClassificationTier;
   tierLabel: string;
@@ -3473,7 +3473,7 @@ export interface MichaelFounderHandoff {
   completedAt: IsoTimestamp;
   firedAt: IsoTimestamp;
   /** Founder BA-IDs the handoff was addressed to (from ADMIN_BA_IDS). */
-  founderBaIds: string[];
+  founderTmagIds: string[];
   /** Whether the new BA's Fast Start gate is open (interview complete). Always
    *  true at handoff time — recorded for the founder's at-a-glance readiness. */
   fastStartReady: boolean;
@@ -3553,7 +3553,7 @@ export interface MichaelInterviewScriptResponse {
  *     is unbounded, and the reserving party is a prospect.
  *   - Orientation reservations are BA-facing (the new BA reserves their own
  *     seat from the authed .team session), capacity is capped at 10, and the
- *     reserving party is the BA. baId is read from the session, never the body.
+ *     reserving party is the BA. tmagId is read from the session, never the body.
  */
 
 /** Default seat cap per orientation session (Chat #147). */
@@ -3587,7 +3587,7 @@ export interface OrientationReservationRecord {
   reservationId: string;
   sessionId: string;
   /** The reserving BA — read from the authed session, never the request body. */
-  baId: string;
+  tmagId: string;
   /** Snapshot of the BA's display name at reservation time (for the roster). */
   baName: string;
   scheduledFor: IsoTimestamp;
@@ -3642,7 +3642,7 @@ export interface OrientationCancelResponse {
 /** One BA on a session roster (the founder-facing /admin view). */
 export interface OrientationRosterSeat {
   reservationId: string;
-  baId: string;
+  tmagId: string;
   baName: string;
   reservedAt: IsoTimestamp;
 }
@@ -3930,7 +3930,7 @@ export type AgentEventMetadataValue = string | number | boolean | null;
 
 export interface AgentEvent {
   eventId: string;
-  baId: string;
+  tmagId: string;
   agentId: AgentId;
   kind: AgentEventKind;
   recommendationId: string | null;
@@ -4101,7 +4101,7 @@ export interface SteveRecommendation {
 /** The generated Success Profile — Steve's synthesis of the discovery. Every
  *  field reflects the BA's own words; nothing here ranks or scores the BA. */
 export interface SteveSuccessProfile {
-  baId: string;
+  tmagId: string;
   primaryWhy: StevePrimaryWhy;
   successVision: SteveSuccessVision;
   learningStyle: SteveLearningStyle;
@@ -4119,11 +4119,11 @@ export interface SteveSuccessProfile {
 }
 
 /** Authoritative completed-discovery record. Triple-stacked at ingest.
- *  sponsorBaId is stamped server-side from brand_ambassadors — NEVER from the
+ *  sponsorTmagId is stamped server-side from brand_ambassadors — NEVER from the
  *  worker payload (locked-spec 3.5). */
 export interface SteveDiscoveryArtifact {
-  baId: string;
-  sponsorBaId: string | null;
+  tmagId: string;
+  sponsorTmagId: string | null;
   callSid: string | null;
   startedAt: IsoTimestamp | null;
   completedAt: IsoTimestamp | null;
@@ -4139,7 +4139,7 @@ export interface SteveDiscoveryArtifact {
  *  Pre-discovery: phase=awaiting_call, artifact=null. After: phase=complete
  *  + artifact. */
 export interface SteveDiscoveryView {
-  baId: string;
+  tmagId: string;
   phase: SteveDiscoveryPhase;
   transcript: SteveTranscriptChunk[];
   artifact: SteveDiscoveryArtifact | null;
@@ -4148,7 +4148,7 @@ export interface SteveDiscoveryView {
 /** Sponsor-only card: a downline's Steve Success Profile. Access enforced
  *  server-side (requesting BA must be the downline's sponsor). */
 export interface SteveProfileCard {
-  downlineBaId: string;
+  downlineTmagId: string;
   downlineFirstName: string;
   completedAt: IsoTimestamp;
   answers: SteveDiscoveryAnswer[];
@@ -4159,11 +4159,11 @@ export interface SteveProfileCard {
 
 /** Worker → server payload on POST /api/steve/discovery/ingest. The worker
  *  conducts the conversation and supplies the discovery + the understanding it
- *  produced; the server stamps baId/sponsorBaId/generatedAt/signedBy and
- *  assembles the SteveSuccessProfile, then triple-stacks it. sponsorBaId is
+ *  produced; the server stamps tmagId/sponsorTmagId/generatedAt/signedBy and
+ *  assembles the SteveSuccessProfile, then triple-stacks it. sponsorTmagId is
  *  intentionally omitted from this shape (server-stamped). */
 export interface SteveDiscoveryIngestPayload {
-  baId: string;
+  tmagId: string;
   callSid: string | null;
   startedAt: IsoTimestamp;
   completedAt: IsoTimestamp;
@@ -4171,7 +4171,7 @@ export interface SteveDiscoveryIngestPayload {
   answers: SteveDiscoveryAnswer[];
   audioUrl: string | null;
   /** The understanding Steve produced. The server assembles these into the
-   *  SteveSuccessProfile (stamping baId, generatedAt, signedBy). */
+   *  SteveSuccessProfile (stamping tmagId, generatedAt, signedBy). */
   profile: {
     primaryWhy: StevePrimaryWhy;
     successVision: SteveSuccessVision;
@@ -4228,7 +4228,7 @@ export interface SteveDiscoveryScriptResponse {
 //      never a placement/income claim) with a neutral fallback when
 //      ANTHROPIC_API_KEY is unset.
 //
-// Everything is BA-scoped (sponsorBaId = session baId, ownership enforced on
+// Everything is BA-scoped (sponsorTmagId = session tmagId, ownership enforced on
 // the IvoryName side). The agent NEVER auto-sends, never scores prospects, and
 // never speaks comp/income/medical (locked-spec 3.10/3.11) — it's a reflection
 // surface for manual follow-up, modeled on Ivory's coach posture.
@@ -4354,7 +4354,7 @@ export interface MichaelTrainingSupportGuidanceSection {
 }
 
 export interface MichaelTrainingSupportCard {
-  downlineBaId: string;
+  downlineTmagId: string;
   downlineFirstName: string;
   /** Timestamp from Steve's SuccessProfile (generatedAt). */
   derivedFromSteveAt: string;
@@ -4382,17 +4382,17 @@ export interface MichaelTrainingSupportCard {
  * visible immediately, but Holding Tank visibility still requires the existing
  * video_complete placement rule.
  *
- * Ownership invariant: every lead/prospect record carries ownerTmBaId and
- * sponsorTmBaId. VM leads also carry leadBatchId and vmCampaignId. Client
+ * Ownership invariant: every lead/prospect record carries ownerTmagId and
+ * sponsorTmagId. VM leads also carry leadBatchId and vmCampaignId. Client
  * payloads must not provide or override those ownership fields; routes stamp
  * them from the authenticated BA, token, or audited admin correction.
  */
 
-export type TmBaId = string;
+export type TmagId = string;
 
 export interface OwnedProspectIdentity {
-  ownerTmBaId: TmBaId;
-  sponsorTmBaId: TmBaId;
+  ownerTmagId: TmagId;
+  sponsorTmagId: TmagId;
 }
 
 export interface VmLeadIdentity extends OwnedProspectIdentity {
@@ -4680,10 +4680,10 @@ export interface OwnershipCorrectionAuditRecord {
   auditId: string;
   prospectId: string;
   leadId: string | null;
-  oldOwnerTmBaId: TmBaId;
-  newOwnerTmBaId: TmBaId;
-  oldSponsorTmBaId: TmBaId;
-  newSponsorTmBaId: TmBaId;
+  oldOwnerTmagId: TmagId;
+  newOwnerTmagId: TmagId;
+  oldSponsorTmagId: TmagId;
+  newSponsorTmagId: TmagId;
   reason: string;
   adminUserId: string;
   changedAt: IsoTimestamp;
@@ -4851,7 +4851,7 @@ export interface AdminVmMetricCard {
 }
 
 export interface AdminVmBaPerformanceRow {
-  tmBaId: string;
+  tmagId: string;
   baName: string;
   campaignCount: number;
   batchCount: number;
@@ -4871,7 +4871,7 @@ export interface AdminVmBaPerformanceRow {
 
 export interface AdminVmBatchHealthRow {
   leadBatchId: string;
-  ownerTmBaId: string;
+  ownerTmagId: string;
   ownerName: string;
   source: string;
   status: string;
@@ -4887,7 +4887,7 @@ export interface AdminVmBatchHealthRow {
 
 export interface AdminVmCampaignRow {
   vmCampaignId: string;
-  ownerTmBaId: string;
+  ownerTmagId: string;
   ownerName: string;
   leadBatchId: string | null;
   name: string;
@@ -4978,10 +4978,10 @@ export interface AdminVmOwnershipCorrectionPayload {
   prospectId?: string | null;
   leadBatchId?: string | null;
   vmCampaignId?: string | null;
-  oldOwnerTmBaId: string;
-  newOwnerTmBaId: string;
-  oldSponsorTmBaId: string;
-  newSponsorTmBaId: string;
+  oldOwnerTmagId: string;
+  newOwnerTmagId: string;
+  oldSponsorTmagId: string;
+  newSponsorTmagId: string;
   reason: string;
 }
 
@@ -4993,9 +4993,9 @@ export interface AdminVmOwnershipCorrectionResponse {
 }
 
 export interface AdminSuccessProfileSummary {
-  baId: string;
+  tmagId: string;
   baName: string;
-  sponsorBaId: string | null;
+  sponsorTmagId: string | null;
   generatedAt: IsoTimestamp | null;
   primaryWhy: string | null;
   learningStyle: string[];
@@ -5018,7 +5018,7 @@ export interface AdminAgentInteractionSummary {
 }
 
 export interface AdminSuccessProfileMemoryBridgeDraft {
-  baId: string;
+  tmagId: string;
   ready: boolean;
   base: {
     id: string;
@@ -5062,7 +5062,7 @@ export type SupportAgentInteractionKind =
 export interface AgentInteractionRecord {
   interactionId: string;
   agent: SupportAgentKind;
-  tmBaId: TmBaId;
+  tmagId: TmagId;
   relatedProspectId: string | null;
   relatedCampaignId: string | null;
   kind: SupportAgentInteractionKind;
@@ -5093,14 +5093,14 @@ export interface DailyActionPlanItem {
 
 export interface DailyActionPlan {
   planId: string;
-  tmBaId: TmBaId;
+  tmagId: TmagId;
   generatedAt: IsoTimestamp;
   primaryFocus: DailyActionPrimaryFocus;
   actions: DailyActionPlanItem[];
 }
 
 export interface SuccessProfileAgentContext {
-  tmBaId: TmBaId;
+  tmagId: TmagId;
   primaryWhy: string | null;
   successVision: string | null;
   learningStyle: {

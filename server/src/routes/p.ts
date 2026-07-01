@@ -19,7 +19,7 @@
  * No auth required. The token IS the identity surface; if a leaked token
  * gives a third party the page, they see exactly what the prospect would see
  * (COM Design Section E.3). Sponsor immutability is enforced at the data
- * layer — this endpoint never accepts a sponsorBaId input (locked-spec 3.5).
+ * layer — this endpoint never accepts a sponsorTmagId input (locked-spec 3.5).
  */
 
 import { Router } from 'express';
@@ -42,7 +42,7 @@ import {
   transitionTokenState,
 } from '../domain/tokens.js';
 import { findProspectById, lastInitialOf } from '../domain/prospects.js';
-import { findBAByBaId, type BARecord } from '../domain/ba.js';
+import { findBAByTmagId, type BARecord } from '../domain/ba.js';
 import { buildHoldingTankSnapshot, placeProspect } from '../domain/holdingTank.js';
 import { createCallbackRequest } from '../domain/callbackRequest.js';
 import { alertBaVideoCompleted } from '../domain/invitations.js';
@@ -147,15 +147,15 @@ function buildEnrolledResponse(ba: BARecord): EnrolledResponse {
 /**
  * Resolve a token's sponsoring BA, used by every 409/410 branch in every
  * route in this module. Sponsor immutability (locked-spec 3.5): the BA is
- * looked up from the token record's sponsorBaId only — never from the
+ * looked up from the token record's sponsorTmagId only — never from the
  * request body, query, or headers.
  *
  * Returns null only when the BA record is genuinely missing — callers
  * fall through to 404 rather than rendering a sponsorless page (locked-
  * spec 3.9, never anonymous; Part 5 sponsor-leaves question still open).
  */
-async function findSponsorBA(sponsorBaId: string): Promise<BARecord | null> {
-  return findBAByBaId(sponsorBaId);
+async function findSponsorBA(sponsorTmagId: string): Promise<BARecord | null> {
+  return findBAByTmagId(sponsorTmagId);
 }
 
 /**
@@ -235,7 +235,7 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
 
     // ─── 409 enrolled ─── locked-spec Part 4.9 Branch 4
     if (tokenRecord.state === 'enrolled') {
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(409).json(buildEnrolledResponse(ba));
     }
@@ -247,7 +247,7 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
     // BEFORE responding so the read path is self-healing and the flush
     // is a real lifecycle event — not a synthetic per-request error.
     if (tokenRecord.state === 'expired') {
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
@@ -256,7 +256,7 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
       // transitionTokenState is idempotent and forward-only; if a parallel
       // request raced ahead, the second call is a no-op.
       await transitionTokenState(token, 'expired');
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
@@ -265,7 +265,7 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
 
     const [prospect, ba, nextEvent] = await Promise.all([
       findProspectById(tokenRecord.prospectId),
-      findBAByBaId(tokenRecord.sponsorBaId),
+      findBAByTmagId(tokenRecord.sponsorTmagId),
       findNextUpcomingEvent(),
     ]);
 
@@ -294,7 +294,7 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
         expiresAt: prospect.expiresAt,
       },
       ba: {
-        baId: ba.baId,
+        tmagId: ba.tmagId,
         firstName: ba.firstName,
         lastName: ba.lastName,
         lastInitial: ba.lastName.charAt(0).toUpperCase(),
@@ -360,7 +360,7 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
  *   placeProspect is itself idempotent on prospectId.
  *
  * Sponsor immutability (locked-spec Part 3.5):
- *   sponsorBaId is read exclusively from the token record. No request
+ *   sponsorTmagId is read exclusively from the token record. No request
  *   field can influence which leg/sponsor a placement belongs to.
  */
 
@@ -398,20 +398,20 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
 
     // ─── 409 enrolled ─── locked-spec Part 4.9 Branch 4
     if (tokenRecord.state === 'enrolled') {
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(409).json(buildEnrolledResponse(ba));
     }
 
     // ─── 410 expired ─── locked-spec Part 4.9 Branch 3 + lazy-flush rule
     if (tokenRecord.state === 'expired') {
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
     if (isTokenExpired(tokenRecord)) {
       await transitionTokenState(token, 'expired');
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
@@ -438,7 +438,7 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
 
       const result = await placeProspect({
         prospectId: prospect.prospectId,
-        sponsorBaId: tokenRecord.sponsorBaId,
+        sponsorTmagId: tokenRecord.sponsorTmagId,
         prospectExpiresAt: prospect.expiresAt,
         firstName: prospect.firstName,
         lastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),
@@ -460,7 +460,7 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
         await createProspectAccount({
           prospectId: prospect.prospectId,
           tokenId: tokenRecord.token,
-          sponsorBaId: tokenRecord.sponsorBaId,
+          sponsorTmagId: tokenRecord.sponsorTmagId,
           tokenExpiresAt: tokenRecord.expiresAt,
         });
       } catch (err) {
@@ -472,14 +472,14 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
       }
 
       // Chat #119: fire the BA alert ONLY on first placement (never on
-      // idempotent replays). The BA is read from the token's sponsorBaId
+      // idempotent replays). The BA is read from the token's sponsorTmagId
       // (locked-spec 3.5); alert is best-effort and never blocks the
       // 200 response to the prospect.
       if (!result.alreadyPlaced) {
-        const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+        const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
         await alertBaVideoCompleted({
           prospectId: prospect.prospectId,
-          sponsorBaId: tokenRecord.sponsorBaId,
+          sponsorTmagId: tokenRecord.sponsorTmagId,
           prospectFirstName: prospect.firstName,
           prospectLastInitial:
             prospect.lastInitial || lastInitialOf(prospect.lastName),
@@ -570,27 +570,27 @@ prospectTokenRoutes.post('/:token/callback-request', async (req, res) => {
 
     // ─── 409 enrolled ─── locked-spec Part 4.9 Branch 4
     if (tokenRecord.state === 'enrolled') {
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(409).json(buildEnrolledResponse(ba));
     }
 
     // ─── 410 expired ─── locked-spec Part 4.9 Branch 3 + lazy-flush rule
     if (tokenRecord.state === 'expired') {
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
     if (isTokenExpired(tokenRecord)) {
       await transitionTokenState(token, 'expired');
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
 
     const [prospect, ba] = await Promise.all([
       findProspectById(tokenRecord.prospectId),
-      findBAByBaId(tokenRecord.sponsorBaId),
+      findBAByTmagId(tokenRecord.sponsorTmagId),
     ]);
     if (!prospect) {
       return res.status(404).json({ error: 'invalid_token' });
@@ -607,7 +607,7 @@ prospectTokenRoutes.post('/:token/callback-request', async (req, res) => {
       prospectId: prospect.prospectId,
       prospectFirstName: prospect.firstName,
       prospectLastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),
-      sponsorBaId: tokenRecord.sponsorBaId,
+      sponsorTmagId: tokenRecord.sponsorTmagId,
       baFirstName: ba.firstName,
       baPhone: ba.phone || null,
       intent: body.intent,
@@ -707,18 +707,18 @@ prospectTokenRoutes.get('/:token/stream', async (req, res) => {
   if (!tokenRecord) return res.status(404).json({ error: 'invalid_token' });
 
   if (tokenRecord.state === 'enrolled') {
-    const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+    const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
     if (!ba) return res.status(404).json({ error: 'invalid_token' });
     return res.status(409).json(buildEnrolledResponse(ba));
   }
   if (tokenRecord.state === 'expired') {
-    const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+    const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
     if (!ba) return res.status(404).json({ error: 'invalid_token' });
     return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
   }
   if (isTokenExpired(tokenRecord)) {
     await transitionTokenState(token, 'expired');
-    const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+    const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
     if (!ba) return res.status(404).json({ error: 'invalid_token' });
     return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
   }
@@ -830,25 +830,25 @@ prospectTokenRoutes.post('/:token/webinar-reserve', async (req, res) => {
     if (!tokenRecord) return res.status(404).json({ error: 'invalid_token' });
 
     if (tokenRecord.state === 'enrolled') {
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(409).json(buildEnrolledResponse(ba));
     }
     if (tokenRecord.state === 'expired') {
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
     if (isTokenExpired(tokenRecord)) {
       await transitionTokenState(token, 'expired');
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
 
     const [prospect, ba, nextEvent] = await Promise.all([
       findProspectById(tokenRecord.prospectId),
-      findBAByBaId(tokenRecord.sponsorBaId),
+      findBAByTmagId(tokenRecord.sponsorTmagId),
       findNextUpcomingEvent(),
     ]);
     if (!prospect) return res.status(404).json({ error: 'invalid_token' });
@@ -860,7 +860,7 @@ prospectTokenRoutes.post('/:token/webinar-reserve', async (req, res) => {
       prospectId: prospect.prospectId,
       prospectFirstName: prospect.firstName,
       prospectLastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),
-      sponsorBaId: tokenRecord.sponsorBaId,
+      sponsorTmagId: tokenRecord.sponsorTmagId,
       baFirstName: ba.firstName,
       baPhone: ba.phone || null,
       eventId: nextEvent.eventId,
@@ -920,18 +920,18 @@ prospectTokenRoutes.get('/:token/team-stats', async (req, res) => {
     if (!tokenRecord) return res.status(404).json({ error: 'invalid_token' });
 
     if (tokenRecord.state === 'enrolled') {
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(409).json(buildEnrolledResponse(ba));
     }
     if (tokenRecord.state === 'expired') {
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
     if (isTokenExpired(tokenRecord)) {
       await transitionTokenState(token, 'expired');
-      const ba = await findSponsorBA(tokenRecord.sponsorBaId);
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
       if (!ba) return res.status(404).json({ error: 'invalid_token' });
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }

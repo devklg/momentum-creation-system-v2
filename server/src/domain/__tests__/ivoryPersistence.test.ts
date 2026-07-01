@@ -22,7 +22,7 @@ type AnyRec = Record<string, unknown>;
 
 const IVORY_RECORD = {
   ivoryId: 'ivory_1',
-  baId: 'TMBA-1',
+  tmagId: 'TMBA-1',
   firstName: 'Dana',
   lastName: 'Smith',
   lastInitial: 'S',

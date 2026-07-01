@@ -10,8 +10,8 @@
  * genealogy/comp. THREE remains the final authority.
  *
  * Lock decisions honored here (Chat #138 + Chat #140):
- *   - CREATE: sponsorBaId REQUIRED, stamped as original/immutable from birth
- *     (sponsorBaId === originalSponsorBaId at creation). No password — an
+ *   - CREATE: sponsorTmagId REQUIRED, stamped as original/immutable from birth
+ *     (sponsorTmagId === originalSponsorTmagId at creation). No password — an
  *     admin-created BA is a roster mirror entry, not a login. Unique email
  *     enforced (a soft-deleted BA's email stays claimed).
  *   - EDIT: ordinary fields only. The sponsor field has exactly ONE mutation
@@ -21,7 +21,7 @@
  *   - DELETE: SOFT. A `deleted` lifecycle state distinct from `suspended`,
  *     reason required, fully reversible. Severity `info` (#140) — reversible
  *     and routine; only sponsor override is `critical`.
- *   - RESTORE: clears deleted, stamps restoredAt/restoredByBaId. Severity
+ *   - RESTORE: clears deleted, stamps restoredAt/restoredByTmagId. Severity
  *     `info`.
  *
  * Delegation, not duplication:
@@ -53,7 +53,7 @@ const MIN_REASON_LEN = 8;
 /** Actor performing the mutation. Always Kevin in v1, carried explicitly so
  * the audit entry names a real admin and never a synthetic one. */
 export interface AdminActor {
-  baId: string;
+  tmagId: string;
   displayName: string;
 }
 
@@ -72,12 +72,12 @@ type Result<T> = { ok: true; value: T } | { ok: false; error: AdminBaCrudError }
 /** A normally-registered BA has no soft-delete block; absent === not deleted. */
 type BARecordMaybeDeleted = BARecord &
   Partial<AdminSoftDeleteState> & {
-    originalSponsorBaId?: string | null;
+    originalSponsorTmagId?: string | null;
     originalSponsorThreeBaId?: string | null;
   };
 
-function mintBaId(): string {
-  // Same format as ba.ts mintBaId — TMBA-YYYYMMDD-<6 alphanum>.
+function mintTmagId(): string {
+  // Same format as ba.ts mintTmagId — TMBA-YYYYMMDD-<6 alphanum>.
   const now = new Date();
   const ymd = now.toISOString().slice(0, 10).replace(/-/g, '');
   const r = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -97,19 +97,19 @@ function validReason(reason: string | undefined | null): boolean {
  * deleted rows for the state checks and for restore, so we query the
  * collection directly with no deleted filter.
  */
-async function findBAByBaIdAnyState(baId: string): Promise<BARecordMaybeDeleted | null> {
+async function findBAByTmagIdAnyState(tmagId: string): Promise<BARecordMaybeDeleted | null> {
   const result = await gatewayCall<{ documents: BARecordMaybeDeleted[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
-    filter: { baId },
+    filter: { tmagId },
     limit: 1,
   });
   return result.documents?.[0] ?? null;
 }
 
 /** Re-read the directory row so responses match the directory/drawer. */
-async function readRow(baId: string): Promise<AdminBaDirectoryRow | null> {
-  const bundle = await getBAProfileBundle(baId);
+async function readRow(tmagId: string): Promise<AdminBaDirectoryRow | null> {
+  const bundle = await getBAProfileBundle(tmagId);
   return bundle?.row ?? null;
 }
 
@@ -118,12 +118,12 @@ async function readRow(baId: string): Promise<AdminBaDirectoryRow | null> {
 export async function adminCreateBa(
   payload: AdminCreateBaPayload,
   actor: AdminActor,
-): Promise<Result<{ baId: string; row: AdminBaDirectoryRow }>> {
+): Promise<Result<{ tmagId: string; row: AdminBaDirectoryRow }>> {
   if (!validReason(payload.reason)) return { ok: false, error: { kind: 'reason_too_short' } };
 
   // Sponsor must resolve to a real, non-deleted BA. Sponsor immutability
   // (locked-spec 3.5): this becomes BOTH current and original sponsor.
-  const sponsor = await findBAByBaIdAnyState(payload.sponsorBaId);
+  const sponsor = await findBAByTmagIdAnyState(payload.sponsorTmagId);
   if (!sponsor || isDeleted(sponsor)) return { ok: false, error: { kind: 'sponsor_not_found' } };
 
   // Unique email only when supplied. A soft-deleted BA's email stays claimed
@@ -133,21 +133,21 @@ export async function adminCreateBa(
     return { ok: false, error: { kind: 'email_taken' } };
   }
 
-  const baId = mintBaId();
+  const tmagId = mintTmagId();
   const createdAt = new Date().toISOString();
 
   const softDelete: AdminSoftDeleteState = {
     deleted: false,
     deletedAt: null,
     deletedReason: null,
-    deletedByBaId: null,
+    deletedByTmagId: null,
     restoredAt: null,
-    restoredByBaId: null,
+    restoredByTmagId: null,
   };
 
   // No password: mirror entry, not a login.
   const record: BARecordMaybeDeleted = {
-    baId,
+    tmagId,
     threeBaId: payload.threeBaId,
     threeUsername: payload.threeUsername,
     firstName: payload.firstName,
@@ -156,29 +156,29 @@ export async function adminCreateBa(
     phone: payload.phone?.trim() || '',
     timezone: payload.timezone?.trim() || '',
     passwordHash: '',
-    sponsorBaId: sponsor.baId,
+    sponsorTmagId: sponsor.tmagId,
     sponsorThreeBaId: sponsor.threeBaId,
     accessCodeUsed: '',
     createdAt,
     lastLoginAt: null,
-    originalSponsorBaId: sponsor.baId,
+    originalSponsorTmagId: sponsor.tmagId,
     originalSponsorThreeBaId: sponsor.threeBaId,
     ...softDelete,
     ...(payload.marketRegion?.trim() ? { marketRegion: payload.marketRegion.trim() } : {}),
   } as BARecordMaybeDeleted;
 
   await tripleStackWrite({
-    id: baId,
+    id: tmagId,
     mongoCollection: BA_COLLECTION,
     mongoDoc: { ...record },
     neo4j: {
       cypher:
-        'MERGE (s:BA {baId: $sponsorBaId}) MERGE (n:BA {baId: $id}) ' +
+        'MERGE (s:BA {tmagId: $sponsorTmagId}) MERGE (n:BA {tmagId: $id}) ' +
         'SET n.threeBaId = $threeBaId, n.email = $email, n.firstName = $firstName, ' +
         'n.lastName = $lastName, n.timezone = $timezone ' +
         'MERGE (n)-[:SPONSORED_BY]->(s)',
       params: {
-        sponsorBaId: sponsor.baId,
+        sponsorTmagId: sponsor.tmagId,
         threeBaId: payload.threeBaId,
         email: email,
         firstName: payload.firstName,
@@ -189,34 +189,34 @@ export async function adminCreateBa(
   });
 
   await appendAuditEntry({
-    actor: { kind: 'admin', baId: actor.baId, displayName: actor.displayName },
+    actor: { kind: 'admin', tmagId: actor.tmagId, displayName: actor.displayName },
     action: 'admin.ba.create',
     entity: {
       kind: 'brand_ambassador',
-      id: baId,
+      id: tmagId,
       displayLabel: `${payload.firstName} ${payload.lastName}`.trim(),
     },
     severity: 'info',
     before: null,
-    after: { baId, sponsorBaId: sponsor.baId, threeBaId: payload.threeBaId, email },
+    after: { tmagId, sponsorTmagId: sponsor.tmagId, threeBaId: payload.threeBaId, email },
     reason: payload.reason,
   });
 
-  const row = await readRow(baId);
+  const row = await readRow(tmagId);
   if (!row) return { ok: false, error: { kind: 'row_unavailable' } };
-  return { ok: true, value: { baId, row } };
+  return { ok: true, value: { tmagId, row } };
 }
 
 /* ── edit ──────────────────────────────────────────── */
 
 export async function adminEditBa(
-  baId: string,
+  tmagId: string,
   payload: AdminEditBaPayload,
   actor: AdminActor,
-): Promise<Result<{ baId: string; row: AdminBaDirectoryRow }>> {
+): Promise<Result<{ tmagId: string; row: AdminBaDirectoryRow }>> {
   if (!validReason(payload.reason)) return { ok: false, error: { kind: 'reason_too_short' } };
 
-  const ba = await findBAByBaIdAnyState(baId);
+  const ba = await findBAByTmagIdAnyState(tmagId);
   if (!ba) return { ok: false, error: { kind: 'ba_not_found' } };
   // #140 lock: cannot edit a record that is off the roster. Restore first.
   if (isDeleted(ba)) return { ok: false, error: { kind: 'ba_deleted' } };
@@ -262,16 +262,16 @@ export async function adminEditBa(
   await gatewayCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
-    filter: { baId },
+    filter: { tmagId },
     update: { $set: set },
   });
 
   await appendAuditEntry({
-    actor: { kind: 'admin', baId: actor.baId, displayName: actor.displayName },
+    actor: { kind: 'admin', tmagId: actor.tmagId, displayName: actor.displayName },
     action: 'admin.ba.edit',
     entity: {
       kind: 'brand_ambassador',
-      id: baId,
+      id: tmagId,
       displayLabel: `${ba.firstName} ${ba.lastName}`.trim(),
     },
     severity: 'info',
@@ -280,21 +280,21 @@ export async function adminEditBa(
     reason: payload.reason,
   });
 
-  const row = await readRow(baId);
+  const row = await readRow(tmagId);
   if (!row) return { ok: false, error: { kind: 'row_unavailable' } };
-  return { ok: true, value: { baId, row } };
+  return { ok: true, value: { tmagId, row } };
 }
 
 /* ── soft delete ───────────────────────────────────── */
 
 export async function adminSoftDeleteBa(
-  baId: string,
+  tmagId: string,
   payload: AdminSoftDeletePayload,
   actor: AdminActor,
-): Promise<Result<{ baId: string; deletedAt: string }>> {
+): Promise<Result<{ tmagId: string; deletedAt: string }>> {
   if (!validReason(payload.reason)) return { ok: false, error: { kind: 'reason_too_short' } };
 
-  const ba = await findBAByBaIdAnyState(baId);
+  const ba = await findBAByTmagIdAnyState(tmagId);
   if (!ba) return { ok: false, error: { kind: 'ba_not_found' } };
   if (isDeleted(ba)) return { ok: false, error: { kind: 'ba_deleted' } };
 
@@ -303,22 +303,22 @@ export async function adminSoftDeleteBa(
     deleted: true,
     deletedAt,
     deletedReason: payload.reason,
-    deletedByBaId: actor.baId,
+    deletedByTmagId: actor.tmagId,
   };
 
   await gatewayCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
-    filter: { baId },
+    filter: { tmagId },
     update: { $set: patch },
   });
 
   await appendAuditEntry({
-    actor: { kind: 'admin', baId: actor.baId, displayName: actor.displayName },
+    actor: { kind: 'admin', tmagId: actor.tmagId, displayName: actor.displayName },
     action: 'admin.ba.delete',
     entity: {
       kind: 'brand_ambassador',
-      id: baId,
+      id: tmagId,
       displayLabel: `${ba.firstName} ${ba.lastName}`.trim(),
     },
     severity: 'info',
@@ -327,19 +327,19 @@ export async function adminSoftDeleteBa(
     reason: payload.reason,
   });
 
-  return { ok: true, value: { baId, deletedAt } };
+  return { ok: true, value: { tmagId, deletedAt } };
 }
 
 /* ── restore ──────────────────────────────────────── */
 
 export async function adminRestoreBa(
-  baId: string,
+  tmagId: string,
   payload: AdminRestorePayload,
   actor: AdminActor,
-): Promise<Result<{ baId: string; restoredAt: string; row: AdminBaDirectoryRow }>> {
+): Promise<Result<{ tmagId: string; restoredAt: string; row: AdminBaDirectoryRow }>> {
   if (!validReason(payload.reason)) return { ok: false, error: { kind: 'reason_too_short' } };
 
-  const ba = await findBAByBaIdAnyState(baId);
+  const ba = await findBAByTmagIdAnyState(tmagId);
   if (!ba) return { ok: false, error: { kind: 'ba_not_found' } };
   if (!isDeleted(ba)) return { ok: false, error: { kind: 'ba_not_deleted' } };
 
@@ -347,23 +347,23 @@ export async function adminRestoreBa(
   const patch: Partial<AdminSoftDeleteState> = {
     deleted: false,
     restoredAt,
-    restoredByBaId: actor.baId,
-    // deletedAt / deletedReason / deletedByBaId LEFT as the historical record.
+    restoredByTmagId: actor.tmagId,
+    // deletedAt / deletedReason / deletedByTmagId LEFT as the historical record.
   };
 
   await gatewayCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
-    filter: { baId },
+    filter: { tmagId },
     update: { $set: patch },
   });
 
   await appendAuditEntry({
-    actor: { kind: 'admin', baId: actor.baId, displayName: actor.displayName },
+    actor: { kind: 'admin', tmagId: actor.tmagId, displayName: actor.displayName },
     action: 'admin.ba.restore',
     entity: {
       kind: 'brand_ambassador',
-      id: baId,
+      id: tmagId,
       displayLabel: `${ba.firstName} ${ba.lastName}`.trim(),
     },
     severity: 'info',
@@ -372,7 +372,7 @@ export async function adminRestoreBa(
     reason: payload.reason,
   });
 
-  const row = await readRow(baId);
+  const row = await readRow(tmagId);
   if (!row) return { ok: false, error: { kind: 'row_unavailable' } };
-  return { ok: true, value: { baId, restoredAt, row } };
+  return { ok: true, value: { tmagId, restoredAt, row } };
 }

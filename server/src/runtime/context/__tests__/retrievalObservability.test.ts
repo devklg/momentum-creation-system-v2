@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type {
   ApprovedKnowledgeQueryRequest,
-  BaId,
+  TmagId,
   KnowledgeFreshness,
   KnowledgeId,
   KnowledgeReference,
@@ -51,7 +51,7 @@ function scope(): RuntimeRequestScope {
     teamId: 'team_magnificent' as TeamId,
     teamKey: 'team_magnificent',
     teamName: 'Team Magnificent',
-    baId: 'TMBA-P48-001' as BaId,
+    tmagId: 'TMBA-P48-001' as TmagId,
     requestId: 'req_p48_001' as ApprovedKnowledgeQueryRequest['scope']['requestId'],
   };
 }
@@ -112,7 +112,7 @@ describe('P4.8 retrieval observability — emission through the adapter', () => 
     expect(record.schemaVersion).toBe(KNOWLEDGE_RETRIEVAL_OBSERVABILITY_SCHEMA_VERSION);
     expect(record.observedAt).toBe(NOW.toISOString());
     expect(record.outcome).toBe('ok');
-    expect(record.scope).toEqual({ tenantId: 'tenant_team_magnificent', teamId: 'team_magnificent', baId: 'TMBA-P48-001', requestId: 'req_p48_001' });
+    expect(record.scope).toEqual({ tenantId: 'tenant_team_magnificent', teamId: 'team_magnificent', tmagId: 'TMBA-P48-001', requestId: 'req_p48_001' });
     expect(record.stageCounts).toEqual({ raw: 2, candidateExcluded: 0, statusDomainKept: 2, freshKept: 2, selected: 2 });
     expect(record.selectedKnowledgeIds).toEqual(['knowledge_p48_a', 'knowledge_p48_b']);
     // Content-free by construction: only the sanctioned keys, no summary/text/body/content.

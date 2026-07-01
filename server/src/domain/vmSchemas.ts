@@ -63,7 +63,7 @@ export interface VmCollectionSchemaDefinition<TRecord> {
   notes: readonly string[];
 }
 
-const OWNERSHIP_FIELDS = ['ownerTmBaId', 'sponsorTmBaId'] as const;
+const OWNERSHIP_FIELDS = ['ownerTmagId', 'sponsorTmagId'] as const;
 const VM_LEAD_FIELDS = [...OWNERSHIP_FIELDS, 'leadBatchId', 'vmCampaignId'] as const;
 
 export const VM_SCHEMA_DEFINITIONS = {
@@ -87,8 +87,8 @@ export const VM_SCHEMA_DEFINITIONS = {
     ],
     indexes: [
       { name: 'unique_leadBatchId', keys: { leadBatchId: 1 }, unique: true },
-      { name: 'owner_status_createdAt', keys: { ownerTmBaId: 1, status: 1, createdAt: -1 } },
-      { name: 'sponsor_createdAt', keys: { sponsorTmBaId: 1, createdAt: -1 } },
+      { name: 'owner_status_createdAt', keys: { ownerTmagId: 1, status: 1, createdAt: -1 } },
+      { name: 'sponsor_createdAt', keys: { sponsorTmagId: 1, createdAt: -1 } },
     ],
     graph: {
       nodeLabels: ['LeadBatch', 'BA'],
@@ -116,9 +116,9 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'unique_leadId', keys: { leadId: 1 }, unique: true },
       { name: 'batch_status', keys: { leadBatchId: 1, status: 1 } },
       { name: 'campaign_status', keys: { vmCampaignId: 1, status: 1 } },
-      { name: 'owner_createdAt', keys: { ownerTmBaId: 1, createdAt: -1 } },
-      { name: 'phone_owner', keys: { phone: 1, ownerTmBaId: 1 } },
-      { name: 'email_owner', keys: { email: 1, ownerTmBaId: 1 } },
+      { name: 'owner_createdAt', keys: { ownerTmagId: 1, createdAt: -1 } },
+      { name: 'phone_owner', keys: { phone: 1, ownerTmagId: 1 } },
+      { name: 'email_owner', keys: { email: 1, ownerTmagId: 1 } },
     ],
     graph: {
       nodeLabels: ['BulkLead', 'LeadBatch', 'VMCampaign', 'BA'],
@@ -146,7 +146,7 @@ export const VM_SCHEMA_DEFINITIONS = {
     ],
     indexes: [
       { name: 'unique_vmCampaignId', keys: { vmCampaignId: 1 }, unique: true },
-      { name: 'owner_status_createdAt', keys: { ownerTmBaId: 1, status: 1, createdAt: -1 } },
+      { name: 'owner_status_createdAt', keys: { ownerTmagId: 1, status: 1, createdAt: -1 } },
       { name: 'batch_createdAt', keys: { leadBatchId: 1, createdAt: -1 } },
     ],
     graph: {
@@ -201,8 +201,8 @@ export const VM_SCHEMA_DEFINITIONS = {
     ],
     indexes: [
       { name: 'unique_crmRecordId', keys: { crmRecordId: 1 }, unique: true },
-      { name: 'unique_owner_prospect', keys: { ownerTmBaId: 1, prospectId: 1 }, unique: true },
-      { name: 'owner_status_followup', keys: { ownerTmBaId: 1, status: 1, followUpDueAt: 1 } },
+      { name: 'unique_owner_prospect', keys: { ownerTmagId: 1, prospectId: 1 }, unique: true },
+      { name: 'owner_status_followup', keys: { ownerTmagId: 1, status: 1, followUpDueAt: 1 } },
       { name: 'campaign_status', keys: { vmCampaignId: 1, status: 1 } },
       { name: 'batch_status', keys: { leadBatchId: 1, status: 1 } },
     ],
@@ -231,7 +231,7 @@ export const VM_SCHEMA_DEFINITIONS = {
     indexes: [
       { name: 'unique_eventId', keys: { eventId: 1 }, unique: true },
       { name: 'prospect_occurredAt', keys: { prospectId: 1, occurredAt: -1 } },
-      { name: 'owner_kind_occurredAt', keys: { ownerTmBaId: 1, kind: 1, occurredAt: -1 } },
+      { name: 'owner_kind_occurredAt', keys: { ownerTmagId: 1, kind: 1, occurredAt: -1 } },
       { name: 'campaign_kind', keys: { vmCampaignId: 1, kind: 1 } },
     ],
     graph: {
@@ -249,10 +249,10 @@ export const VM_SCHEMA_DEFINITIONS = {
     recordExample: null,
     requiredFields: [
       'auditId',
-      'oldOwnerTmBaId',
-      'newOwnerTmBaId',
-      'oldSponsorTmBaId',
-      'newSponsorTmBaId',
+      'oldOwnerTmagId',
+      'newOwnerTmagId',
+      'oldSponsorTmagId',
+      'newSponsorTmagId',
       'reason',
       'adminUserId',
       'changedAt',

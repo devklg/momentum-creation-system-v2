@@ -28,7 +28,7 @@ export function listVmNotificationHooks(): AdminVmNotificationHook[] {
       audience: 'owning_ba',
       channel: 'in_app',
       status: 'stubbed',
-      privacyBoundary: 'Click alerts route by ownerTmBaId stamped on the token.',
+      privacyBoundary: 'Click alerts route by ownerTmagId stamped on the token.',
     },
     {
       hookId: 'vm.presentation_started.owner_ba',
@@ -52,7 +52,7 @@ export function listVmNotificationHooks(): AdminVmNotificationHook[] {
       audience: 'owning_ba',
       channel: 'sms',
       status: 'stubbed',
-      privacyBoundary: 'Callback routing resolves from ownerTmBaId, not request body.',
+      privacyBoundary: 'Callback routing resolves from ownerTmagId, not request body.',
     },
     {
       hookId: 'vm.info_requested.owner_ba',

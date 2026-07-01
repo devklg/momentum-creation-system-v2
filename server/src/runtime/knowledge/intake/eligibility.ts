@@ -26,10 +26,10 @@ function scopeServesRequest(chunkScope: RuntimeScope, requestScope: RuntimeScope
   if (chunkScope.tenantId !== requestScope.tenantId) return false;
   if (chunkScope.teamId !== requestScope.teamId) return false;
 
-  const chunkBaId = (chunkScope as { baId?: string }).baId;
-  if (chunkBaId === undefined) return true; // team-level chunk serves any BA in the team
-  const requestBaId = (requestScope as { baId?: string }).baId;
-  return chunkBaId === requestBaId; // BA-level chunk serves only that BA
+  const chunkTmagId = (chunkScope as { tmagId?: string }).tmagId;
+  if (chunkTmagId === undefined) return true; // team-level chunk serves any BA in the team
+  const requestTmagId = (requestScope as { tmagId?: string }).tmagId;
+  return chunkTmagId === requestTmagId; // BA-level chunk serves only that BA
 }
 
 export function isChunkRetrievalEligible(

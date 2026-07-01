@@ -2,8 +2,8 @@
  * /api/profile/* — the BA's own profile / settings surface (wireframe 3.8).
  *
  * All routes scoped to the authed session BA (locked-spec 3.5). The BA ID
- * is read from req.session.baId and NEVER from a body/param. No route on
- * this file accepts sponsor / tmBaId / threeBaId / accessCodeHeld in a
+ * is read from req.session.tmagId and NEVER from a body/param. No route on
+ * this file accepts sponsor / tmagId / threeBaId / accessCodeHeld in a
  * mutation body — those fields are read-only by spec (2.3, 3.5) and the
  * zod schemas use .strict() so any attempt to send them is rejected.
  *
@@ -83,11 +83,11 @@ const PhoneSetBody = z
   .strict();
 
 profileRoutes.get('/', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = req.session?.baId;
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   try {
-    const profile = await getProfileForBA(baId);
+    const profile = await getProfileForBA(tmagId);
     if (!profile) return res.status(404).json({ ok: false, error: 'profile_not_found' });
     const payload: ProfileGetResponse = { ok: true, profile };
     return res.status(200).json(payload);
@@ -99,8 +99,8 @@ profileRoutes.get('/', requireAuth, requireSteveComplete, async (req, res) => {
 });
 
 profileRoutes.patch('/', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = req.session?.baId;
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   const parsed = PatchBody.safeParse(req.body);
   if (!parsed.success) {
@@ -108,7 +108,7 @@ profileRoutes.patch('/', requireAuth, requireSteveComplete, async (req, res) => 
   }
 
   try {
-    const profile = await patchProfile(baId, parsed.data);
+    const profile = await patchProfile(tmagId, parsed.data);
     const payload: ProfileGetResponse = { ok: true, profile };
     return res.status(200).json(payload);
   } catch (err) {
@@ -119,8 +119,8 @@ profileRoutes.patch('/', requireAuth, requireSteveComplete, async (req, res) => 
 });
 
 profileRoutes.post('/password', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = req.session?.baId;
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   const parsed = PasswordBody.safeParse(req.body);
   if (!parsed.success) {
@@ -129,7 +129,7 @@ profileRoutes.post('/password', requireAuth, requireSteveComplete, async (req, r
 
   try {
     const result = await changePassword(
-      baId,
+      tmagId,
       parsed.data.currentPassword,
       parsed.data.newPassword,
     );
@@ -145,8 +145,8 @@ profileRoutes.post('/password', requireAuth, requireSteveComplete, async (req, r
 });
 
 profileRoutes.post('/email/start', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = req.session?.baId;
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   const parsed = EmailStartBody.safeParse(req.body);
   if (!parsed.success) {
@@ -154,7 +154,7 @@ profileRoutes.post('/email/start', requireAuth, requireSteveComplete, async (req
   }
 
   try {
-    const result = await startEmailChange(baId, parsed.data.newEmail.trim().toLowerCase());
+    const result = await startEmailChange(tmagId, parsed.data.newEmail.trim().toLowerCase());
     return res.status(200).json({ ok: true, deliveryStatus: result.deliveryStatus });
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -164,8 +164,8 @@ profileRoutes.post('/email/start', requireAuth, requireSteveComplete, async (req
 });
 
 profileRoutes.post('/email/verify', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = req.session?.baId;
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   const parsed = EmailVerifyBody.safeParse(req.body);
   if (!parsed.success) {
@@ -173,7 +173,7 @@ profileRoutes.post('/email/verify', requireAuth, requireSteveComplete, async (re
   }
 
   try {
-    const result = await completeEmailChange(baId, parsed.data.code);
+    const result = await completeEmailChange(tmagId, parsed.data.code);
     if (!result.ok) {
       return res.status(400).json({ ok: false, error: result.error });
     }
@@ -189,8 +189,8 @@ profileRoutes.post('/email/verify', requireAuth, requireSteveComplete, async (re
 // the typed number in a modal, then POSTs here. requireAuth ensures it's the
 // session BA; the domain audits the swap.
 profileRoutes.post('/phone', requireAuth, requireSteveComplete, async (req, res) => {
-  const baId = req.session?.baId;
-  if (!baId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
   const parsed = PhoneSetBody.safeParse(req.body);
   if (!parsed.success) {
@@ -198,7 +198,7 @@ profileRoutes.post('/phone', requireAuth, requireSteveComplete, async (req, res)
   }
 
   try {
-    const result = await setPhone(baId, parsed.data.newPhone.trim());
+    const result = await setPhone(tmagId, parsed.data.newPhone.trim());
     if (!result.ok) {
       return res.status(404).json({ ok: false, error: result.error });
     }

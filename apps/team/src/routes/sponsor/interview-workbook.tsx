@@ -1,5 +1,5 @@
 /**
- * /sponsor/interview-workbook/:baId
+ * /sponsor/interview-workbook/:tmagId
  *
  * Stage 3 of the three-stage onboarding spine (Chat #22, ported Chat #103):
  * the 30-45 min sponsor-led partnership conversation. The sponsor walks in
@@ -58,9 +58,9 @@ type Classification = 'gogetter' | 'consumer' | null;
 
 interface Workbook {
   workbookId: string;
-  forBaId: string;
+  forTmagId: string;
   forThreeBaId: string;
-  conductedByBaId: string;
+  conductedByTmagId: string;
   conductedByName: string;
   status: 'draft' | 'final';
   version: string;
@@ -97,7 +97,7 @@ interface QuestionnaireSnapshot {
 }
 
 interface BAIdentity {
-  baId: string;
+  tmagId: string;
   threeBaId: string;
   firstName: string;
   lastName: string;
@@ -353,7 +353,7 @@ const EMPTY_NOTES: Notes = SECTIONS.flatMap((s) => s.questions).reduce(
 // ────────────────────────────────────────────────────────────────────────────
 
 export function SponsorWorkbookPage() {
-  const { baId } = useParams<{ baId: string }>();
+  const { tmagId } = useParams<{ tmagId: string }>();
   const navigate = useNavigate();
   const [load, setLoad] = useState<LoadState>({ kind: 'loading' });
   const [notes, setNotes] = useState<Notes>(EMPTY_NOTES);
@@ -370,14 +370,14 @@ export function SponsorWorkbookPage() {
 
   // Initial load
   useEffect(() => {
-    if (!baId) {
-      setLoad({ kind: 'err', reason: 'No baId in URL.' });
+    if (!tmagId) {
+      setLoad({ kind: 'err', reason: 'No tmagId in URL.' });
       return;
     }
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/sponsor/workbook/${encodeURIComponent(baId)}`, {
+        const res = await fetch(`/api/sponsor/workbook/${encodeURIComponent(tmagId)}`, {
           credentials: 'include',
         });
         const body = await res.json();
@@ -407,7 +407,7 @@ export function SponsorWorkbookPage() {
     return () => {
       cancelled = true;
     };
-  }, [baId]);
+  }, [tmagId]);
 
   // Debounced autosave (drafts only, never finals)
   function scheduleSave(payload: {
@@ -416,13 +416,13 @@ export function SponsorWorkbookPage() {
     firstActions?: string[];
     partnershipNotes?: string;
   }) {
-    if (isReadOnly || !baId) return;
+    if (isReadOnly || !tmagId) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     setAutosave('saving');
     saveTimer.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `/api/sponsor/workbook/${encodeURIComponent(baId)}/draft`,
+          `/api/sponsor/workbook/${encodeURIComponent(tmagId)}/draft`,
           {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -475,7 +475,7 @@ export function SponsorWorkbookPage() {
   }
 
   async function handleFinalize() {
-    if (!baId || finalizing) return;
+    if (!tmagId || finalizing) return;
     if (!classification) {
       setFinalizeErr('Pick gogetter or consumer before finalizing.');
       return;
@@ -496,7 +496,7 @@ export function SponsorWorkbookPage() {
     setFinalizeErr(null);
     try {
       const res = await fetch(
-        `/api/sponsor/workbook/${encodeURIComponent(baId)}/finalize`,
+        `/api/sponsor/workbook/${encodeURIComponent(tmagId)}/finalize`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -629,7 +629,7 @@ function TopStrip({
           Interview with {ba.firstName} {ba.lastName}
         </h1>
         <p className="font-mono text-[12px] text-cream-mute mt-2">
-          BA {ba.baId} · THREE {ba.threeBaId} · {ba.email}
+          BA {ba.tmagId} · THREE {ba.threeBaId} · {ba.email}
         </p>
       </div>
       <div className="text-right space-y-2">

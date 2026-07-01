@@ -142,7 +142,7 @@ export async function findPlacementByProspectId(prospectId: string): Promise<Poo
 
 export interface PlaceProspectInput {
   prospectId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   /** Prospect's expiresAt is copied onto the placement for fast flush sweeps. */
   prospectExpiresAt: string;
   /** First name + last initial used in the ChromaDB event document. */
@@ -192,7 +192,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<PlacePro
   //    key surfaces as a gateway error — we catch and return the row.
   const placement: PoolPlacement = {
     prospectId: input.prospectId,
-    sponsorBaId: input.sponsorBaId,
+    sponsorTmagId: input.sponsorTmagId,
     positionNumber,
     placedAt,
     expiresAt: input.prospectExpiresAt,
@@ -231,13 +231,13 @@ export async function placeProspect(input: PlaceProspectInput): Promise<PlacePro
       'MERGE (p)-[r:IN_HOLDING_TANK]->(pool) ' +
       'SET r.position = $position, ' +
       '    r.placedAt = $placedAt, ' +
-      '    r.sponsorBaId = $sponsorBaId',
+      '    r.sponsorTmagId = $sponsorTmagId',
     params: {
       poolId: TEAM_POOL_ID,
       prospectId: input.prospectId,
       position: positionNumber,
       placedAt,
-      sponsorBaId: input.sponsorBaId,
+      sponsorTmagId: input.sponsorTmagId,
     },
   });
 
@@ -248,7 +248,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<PlacePro
   const eventDoc =
     `#${positionNumber} ${input.firstName} ${input.lastInitial}. ` +
     `from ${input.city}, ${input.stateOrRegion} · ` +
-    `invited by ${input.sponsorBaId} at ${placedAt}`;
+    `invited by ${input.sponsorTmagId} at ${placedAt}`;
   await gatewayCall('chromadb', 'add', {
     collection: CHROMA_COLLECTION,
     ids: [eventId],
@@ -257,7 +257,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<PlacePro
       {
         kind: 'placement',
         prospectId: input.prospectId,
-        sponsorBaId: input.sponsorBaId,
+        sponsorTmagId: input.sponsorTmagId,
         positionNumber,
         placedAt,
         city: input.city,
@@ -423,7 +423,7 @@ function windowCutoffIso(weeks: number, nowMs: number): string {
 export interface AgedPlacement {
   prospectId: string;
   positionNumber: number;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   placedAt: string;
   /** Whole weeks the prospect has been in the tank (floor). */
   weeksInTank: number;
@@ -452,7 +452,7 @@ export async function listProspectsAgedBeyond(
   return (result.documents ?? []).map<AgedPlacement>((p) => ({
     prospectId: p.prospectId,
     positionNumber: p.positionNumber,
-    sponsorBaId: p.sponsorBaId,
+    sponsorTmagId: p.sponsorTmagId,
     placedAt: p.placedAt,
     weeksInTank: Math.floor((nowMs - new Date(p.placedAt).getTime()) / ONE_WEEK_MS),
   }));

@@ -19,7 +19,7 @@
  *     records that may co-exist after placement.
  *
  * Sponsor immutability:
- *   - sponsorBaId stamped at mint, never recomputed (locked-spec Part 3.5).
+ *   - sponsorTmagId stamped at mint, never recomputed (locked-spec Part 3.5).
  */
 
 import { gatewayCall } from '../services/gateway.js';

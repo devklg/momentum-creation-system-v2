@@ -97,10 +97,10 @@ describe('resolveMichaelRuntimeTrainingStep — server-owned request contract', 
 
     const body = lastPostedBody();
     const forbidden = [
-      'baId',
-      'sponsorBaId',
-      'targetBaId',
-      'downlineBaId',
+      'tmagId',
+      'sponsorTmagId',
+      'targetTmagId',
+      'downlineTmagId',
       'prospectId',
       'token',
       'sessionId',

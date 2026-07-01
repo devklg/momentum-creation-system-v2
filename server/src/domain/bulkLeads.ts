@@ -42,8 +42,8 @@ export class BulkLeadError extends Error {
 }
 
 export interface ImportBulkLeadsInput {
-  ownerTmBaId: string;
-  sponsorTmBaId: string;
+  ownerTmagId: string;
+  sponsorTmagId: string;
   leadBatchId: string;
   vmCampaignId: string;
   leads: ImportBulkLeadPayload[];
@@ -65,8 +65,8 @@ function normalizedOptional(raw: string | undefined | null): string | null {
 }
 
 async function createBulkLeadRecord(input: {
-  ownerTmBaId: string;
-  sponsorTmBaId: string;
+  ownerTmagId: string;
+  sponsorTmagId: string;
   leadBatchId: string;
   vmCampaignId: string;
   source: string;
@@ -96,7 +96,7 @@ async function createBulkLeadRecord(input: {
     location,
     phone: normalizedOptional(input.lead.phone),
     email: normalizedOptional(input.lead.email),
-    sponsorBaId: input.sponsorTmBaId,
+    sponsorTmagId: input.sponsorTmagId,
     state: 'minted',
     positionNumber: null,
     placedAt: null,
@@ -113,8 +113,8 @@ async function createBulkLeadRecord(input: {
     mongoCollection: PROSPECTS_COLLECTION,
     mongoDoc: {
       ...prospect,
-      ownerTmBaId: input.ownerTmBaId,
-      sponsorTmBaId: input.sponsorTmBaId,
+      ownerTmagId: input.ownerTmagId,
+      sponsorTmagId: input.sponsorTmagId,
       token,
       source: 'rvm',
       leadId,
@@ -125,14 +125,14 @@ async function createBulkLeadRecord(input: {
     },
     neo4j: {
       cypher:
-        'MERGE (b:BA {baId: $ownerTmBaId}) ' +
+        'MERGE (b:BA {tmagId: $ownerTmagId}) ' +
         'CREATE (p:Prospect {prospectId: $id, firstName: $firstName, lastInitial: $lastInitial, ' +
         '  city: $city, stateOrRegion: $stateOrRegion, country: $country, state: $state, ' +
-        '  ownerTmBaId: $ownerTmBaId, sponsorTmBaId: $sponsorTmBaId, source: $source, createdAt: $createdAt}) ' +
+        '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, source: $source, createdAt: $createdAt}) ' +
         'CREATE (b)-[:OWNS_RVM_PROSPECT]->(p)',
       params: {
-        ownerTmBaId: input.ownerTmBaId,
-        sponsorTmBaId: input.sponsorTmBaId,
+        ownerTmagId: input.ownerTmagId,
+        sponsorTmagId: input.sponsorTmagId,
         firstName,
         lastInitial,
         city,
@@ -147,14 +147,14 @@ async function createBulkLeadRecord(input: {
       collection: CHROMA_COLLECTION,
       document:
         `RVM prospect ${firstName} ${lastInitial}. from ${city}, ${stateOrRegion}; ` +
-        `owner ${input.ownerTmBaId}; batch ${input.leadBatchId}; campaign ${input.vmCampaignId}.`,
+        `owner ${input.ownerTmagId}; batch ${input.leadBatchId}; campaign ${input.vmCampaignId}.`,
       metadata: {
         kind: 'rvm_prospect_created',
         prospectId,
         leadId,
         token,
-        ownerTmBaId: input.ownerTmBaId,
-        sponsorTmBaId: input.sponsorTmBaId,
+        ownerTmagId: input.ownerTmagId,
+        sponsorTmagId: input.sponsorTmagId,
         leadBatchId: input.leadBatchId,
         vmCampaignId: input.vmCampaignId,
         createdAt: now,
@@ -165,7 +165,7 @@ async function createBulkLeadRecord(input: {
   const tokenRecord: InviteTokenRecord = {
     token,
     prospectId,
-    sponsorBaId: input.sponsorTmBaId,
+    sponsorTmagId: input.sponsorTmagId,
     state: 'minted',
     createdAt: now,
     clickedAt: null,
@@ -178,8 +178,8 @@ async function createBulkLeadRecord(input: {
       {
         _id: token,
         ...tokenRecord,
-        ownerTmBaId: input.ownerTmBaId,
-        sponsorTmBaId: input.sponsorTmBaId,
+        ownerTmagId: input.ownerTmagId,
+        sponsorTmagId: input.sponsorTmagId,
         source: 'rvm',
         leadId,
         leadBatchId: input.leadBatchId,
@@ -190,8 +190,8 @@ async function createBulkLeadRecord(input: {
   await gatewayCall('neo4j', 'cypher', {
     query:
       'MERGE (t:InviteToken {token: $token}) ' +
-      'SET t.prospectId = $prospectId, t.sponsorBaId = $sponsorTmBaId, ' +
-      '    t.ownerTmBaId = $ownerTmBaId, t.state = $state, t.source = $source, ' +
+      'SET t.prospectId = $prospectId, t.sponsorTmagId = $sponsorTmagId, ' +
+      '    t.ownerTmagId = $ownerTmagId, t.state = $state, t.source = $source, ' +
       '    t.createdAt = $createdAt, t.expiresAt = $expiresAt ' +
       'WITH t ' +
       'MATCH (p:Prospect {prospectId: $prospectId}) ' +
@@ -199,8 +199,8 @@ async function createBulkLeadRecord(input: {
     params: {
       token,
       prospectId,
-      ownerTmBaId: input.ownerTmBaId,
-      sponsorTmBaId: input.sponsorTmBaId,
+      ownerTmagId: input.ownerTmagId,
+      sponsorTmagId: input.sponsorTmagId,
       state: 'minted',
       source: 'rvm',
       createdAt: now,
@@ -214,8 +214,8 @@ async function createBulkLeadRecord(input: {
     vmCampaignId: input.vmCampaignId,
     prospectId,
     token,
-    ownerTmBaId: input.ownerTmBaId,
-    sponsorTmBaId: input.sponsorTmBaId,
+    ownerTmagId: input.ownerTmagId,
+    sponsorTmagId: input.sponsorTmagId,
     firstName,
     lastName,
     phone: prospect.phone,
@@ -240,7 +240,7 @@ async function createBulkLeadRecord(input: {
         'MERGE (vm:VMCampaign {vmCampaignId: $vmCampaignId}) ' +
         'MERGE (p:Prospect {prospectId: $prospectId}) ' +
         'CREATE (lead:BulkLead {leadId: $id, token: $token, status: $status, ' +
-        '  ownerTmBaId: $ownerTmBaId, sponsorTmBaId: $sponsorTmBaId, createdAt: $createdAt}) ' +
+        '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, createdAt: $createdAt}) ' +
         'CREATE (lb)-[:CONTAINS_LEAD]->(lead) ' +
         'CREATE (vm)-[:TARGETS_LEAD]->(lead) ' +
         'CREATE (lead)-[:BECAME_PROSPECT_RECORD]->(p)',
@@ -250,8 +250,8 @@ async function createBulkLeadRecord(input: {
         prospectId: bulkLead.prospectId,
         token: bulkLead.token,
         status: bulkLead.status,
-        ownerTmBaId: bulkLead.ownerTmBaId,
-        sponsorTmBaId: bulkLead.sponsorTmBaId,
+        ownerTmagId: bulkLead.ownerTmagId,
+        sponsorTmagId: bulkLead.sponsorTmagId,
         createdAt: now,
       },
     },
@@ -259,13 +259,13 @@ async function createBulkLeadRecord(input: {
       collection: CHROMA_COLLECTION,
       document:
         `Bulk RVM lead ${firstName} ${lastInitial}. imported with token ${token}; ` +
-        `owner ${input.ownerTmBaId}; campaign ${input.vmCampaignId}.`,
+        `owner ${input.ownerTmagId}; campaign ${input.vmCampaignId}.`,
       metadata: {
         kind: 'bulk_lead_imported',
         leadId,
         prospectId,
         token,
-        ownerTmBaId: input.ownerTmBaId,
+        ownerTmagId: input.ownerTmagId,
         leadBatchId: input.leadBatchId,
         vmCampaignId: input.vmCampaignId,
         createdAt: now,
@@ -276,8 +276,8 @@ async function createBulkLeadRecord(input: {
   const crm = await createOrUpdateCrmRecordForToken({
     prospectId,
     token,
-    ownerTmBaId: input.ownerTmBaId,
-    sponsorTmBaId: input.sponsorTmBaId,
+    ownerTmagId: input.ownerTmagId,
+    sponsorTmagId: input.sponsorTmagId,
     source: 'rvm',
     leadId,
     leadBatchId: input.leadBatchId,
@@ -288,8 +288,8 @@ async function createBulkLeadRecord(input: {
   await appendProspectTimelineEvent({
     prospectId,
     crmRecordId: crm.crmRecordId,
-    ownerTmBaId: input.ownerTmBaId,
-    sponsorTmBaId: input.sponsorTmBaId,
+    ownerTmagId: input.ownerTmagId,
+    sponsorTmagId: input.sponsorTmagId,
     kind: 'token_created',
     note: 'RVM lead imported as an inactive acquisition record.',
     metadata: { leadId, leadBatchId: input.leadBatchId, vmCampaignId: input.vmCampaignId },
@@ -298,8 +298,8 @@ async function createBulkLeadRecord(input: {
   await appendProspectTimelineEvent({
     prospectId,
     crmRecordId: crm.crmRecordId,
-    ownerTmBaId: input.ownerTmBaId,
-    sponsorTmBaId: input.sponsorTmBaId,
+    ownerTmagId: input.ownerTmagId,
+    sponsorTmagId: input.sponsorTmagId,
     kind: 'token_created',
     note: 'RVM token created. CRM-visible; not placed in the holding tank.',
     metadata: { leadId, token },
@@ -315,7 +315,7 @@ export async function importBulkLeads(
   if (input.leads.length === 0) throw new BulkLeadError('no_leads');
   if (input.leads.length > 500) throw new BulkLeadError('too_many_leads');
 
-  const campaign = await findVMCampaignForOwner(input.vmCampaignId, input.ownerTmBaId);
+  const campaign = await findVMCampaignForOwner(input.vmCampaignId, input.ownerTmagId);
   if (campaign.leadBatchId !== input.leadBatchId) {
     throw new BulkLeadError('campaign_batch_mismatch');
   }
@@ -323,8 +323,8 @@ export async function importBulkLeads(
   const created: BulkLeadRecord[] = [];
   for (const lead of input.leads) {
     const record = await createBulkLeadRecord({
-      ownerTmBaId: input.ownerTmBaId,
-      sponsorTmBaId: input.sponsorTmBaId,
+      ownerTmagId: input.ownerTmagId,
+      sponsorTmagId: input.sponsorTmagId,
       leadBatchId: input.leadBatchId,
       vmCampaignId: input.vmCampaignId,
       source: campaign.provider,
@@ -335,7 +335,7 @@ export async function importBulkLeads(
 
   const batch = await markLeadBatchImported(
     input.leadBatchId,
-    input.ownerTmBaId,
+    input.ownerTmagId,
     created.length,
   );
   return { batch, campaign, leads: created };

@@ -225,7 +225,7 @@ function buildOutcomeCypher(
       MERGE (t:TeamMagnificent {teamKey: 'team_magnificent'})
       MERGE (o)-[:SCOPED_TO]->(t)
       WITH o
-      OPTIONAL MATCH (ba:BrandAmbassador {baId: $tmagId})
+      OPTIONAL MATCH (ba:BrandAmbassador {tmagId: $tmagId})
       FOREACH (_ IN CASE WHEN ba IS NULL THEN [] ELSE [1] END |
         MERGE (o)-[:CONFIRMED_BY]->(ba)
       )

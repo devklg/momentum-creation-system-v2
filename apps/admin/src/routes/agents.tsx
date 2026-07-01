@@ -71,7 +71,7 @@ export function AgentsPage() {
               <DenseTable
                 headers={['BA', 'Primary Why', 'Learning', 'Support', 'Signed']}
                 rows={data.successProfiles.slice(0, 20).map((profile) => [
-                  `${profile.baName} · ${profile.baId}`,
+                  `${profile.baName} · ${profile.tmagId}`,
                   profile.primaryWhy ?? 'not captured',
                   profile.learningStyle.join(', ') || 'not captured',
                   profile.supportAreas.join(', ') || 'not captured',
@@ -122,7 +122,7 @@ export function AgentsPage() {
                   data.bridgeDrafts.map((draft) => (
                     <div key={draft.base.id} className="border border-line p-3">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="font-mono text-xs text-cream">{draft.baId}</p>
+                        <p className="font-mono text-xs text-cream">{draft.tmagId}</p>
                         <span className="font-mono text-[10px] tracking-label uppercase text-gold">
                           {draft.requiredWritePath}
                         </span>

@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import type {
   AgentEventType,
   AgentKey,
-  BaId,
+  TmagId,
   BrowserInterimTranscript,
   BrowserRuntimeSessionScope,
   BrowserSpeechLocale,
@@ -103,7 +103,7 @@ export interface BrowserContextPacketHandoff {
   agentKey: AgentKey;
   language: RuntimeLanguage;
   mode: RuntimeMode;
-  baId: BaId;
+  tmagId: TmagId;
 }
 
 export interface BrowserTextTurn {
@@ -203,7 +203,7 @@ export function validateBrowserVoiceTextSessionFoundation(
 
   requireString(candidate, 'tenantId', errors);
   requireString(candidate, 'teamId', errors);
-  requireString(candidate, 'baId', errors);
+  requireString(candidate, 'tmagId', errors);
   requireString(candidate, 'sessionId', errors);
 
   if (candidate.teamKey !== TEAM_MAGNIFICENT_KEY || candidate.teamName !== TEAM_MAGNIFICENT_NAME) {
@@ -259,7 +259,7 @@ export function createBrowserTextFallbackTurn(
     teamId: session.teamId,
     teamKey: session.teamKey,
     teamName: session.teamName,
-    baId: session.baId,
+    tmagId: session.tmagId,
     text: normalizeText(text, 'text_turn_empty'),
     language: session.language,
     mode: 'browser_text',
@@ -285,7 +285,7 @@ export function finalizeBrowserVoiceTurn(
     teamId: transcript.teamId,
     teamKey: transcript.teamKey,
     teamName: transcript.teamName,
-    baId: transcript.baId,
+    tmagId: transcript.tmagId,
     text: transcript.finalText,
     language: transcript.language,
     mode: 'browser_voice',
@@ -309,7 +309,7 @@ export function createBrowserRuntimeEventEnvelope(
     teamId: input.teamId,
     teamKey: input.teamKey,
     teamName: input.teamName,
-    baId: input.baId,
+    tmagId: input.tmagId,
     sessionId: input.sessionId,
     agentKey: input.agentKey,
     mode: input.eventType.startsWith('browser_text.') ? 'browser_text' : 'browser_voice',
@@ -412,7 +412,7 @@ export function assertBrowserRuntimeSessionIdentity(
 
   assertNonEmpty('tenantId', session.tenantId);
   assertNonEmpty('teamId', session.teamId);
-  assertNonEmpty('baId', session.baId);
+  assertNonEmpty('tmagId', session.tmagId);
   assertNonEmpty('sessionId', session.sessionId);
   assertNonEmpty('agentKey', session.agentKey);
   assertSupportedMode(session.mode);
@@ -444,7 +444,7 @@ export function createContextPacketHandoff(
     contextPacket.team.teamId !== session.teamId ||
     contextPacket.team.teamKey !== session.teamKey ||
     contextPacket.team.teamName !== session.teamName ||
-    contextPacket.ba.baId !== session.baId ||
+    contextPacket.ba.tmagId !== session.tmagId ||
     contextPacket.session.sessionId !== session.sessionId ||
     contextPacket.session.mode !== session.mode ||
     contextPacket.agent.agentKey !== session.agentKey ||
@@ -464,7 +464,7 @@ export function createContextPacketHandoff(
     agentKey: session.agentKey,
     language: session.language,
     mode: session.mode,
-    baId: session.baId,
+    tmagId: session.tmagId,
   };
 }
 
@@ -490,7 +490,7 @@ export function createTextTurn(input: {
       teamId: input.session.teamId,
       teamKey: input.session.teamKey,
       teamName: input.session.teamName,
-      baId: input.session.baId,
+      tmagId: input.session.tmagId,
       text,
       language: input.session.language,
       mode: 'browser_text',
@@ -536,7 +536,7 @@ export function createVoiceTranscriptTurn(input: {
     teamId: input.session.teamId,
     teamKey: input.session.teamKey,
     teamName: input.session.teamName,
-    baId: input.session.baId,
+    tmagId: input.session.tmagId,
     sessionId: input.session.sessionId,
     agentKey: input.session.agentKey,
     mode: 'browser_voice',
@@ -566,7 +566,7 @@ export function createVoiceTranscriptTurn(input: {
       teamId: input.session.teamId,
       teamKey: input.session.teamKey,
       teamName: input.session.teamName,
-      baId: input.session.baId,
+      tmagId: input.session.tmagId,
       text: finalText,
       language: input.session.language,
       mode: 'browser_voice',
@@ -606,7 +606,7 @@ export function createInterimTranscript(input: {
       teamId: input.session.teamId,
       teamKey: input.session.teamKey,
       teamName: input.session.teamName,
-      baId: input.session.baId,
+      tmagId: input.session.tmagId,
       sessionId: input.session.sessionId,
       agentKey: input.session.agentKey,
       mode: input.session.mode,
@@ -658,7 +658,7 @@ export function createBrowserRuntimeEvent<TPayload extends Record<string, unknow
       teamId: input.session.teamId,
       teamKey: input.session.teamKey,
       teamName: input.session.teamName,
-      baId: input.session.baId,
+      tmagId: input.session.tmagId,
       agentKey: input.session.agentKey,
       sessionId: input.session.sessionId,
       eventType: input.eventType,
@@ -677,8 +677,8 @@ export function createBrowserRuntimeEvent<TPayload extends Record<string, unknow
       },
       actor: {
         actorType: 'ba',
-        actorId: input.session.baId,
-        baId: input.session.baId,
+        actorId: input.session.tmagId,
+        tmagId: input.session.tmagId,
       },
       provenance: {
         emittedBy: 'browser_voice_text_foundation',
@@ -732,7 +732,7 @@ function validateBrowserVoiceTranscript(
     teamId: transcript.teamId,
     teamKey: transcript.teamKey,
     teamName: transcript.teamName,
-    baId: transcript.baId,
+    tmagId: transcript.tmagId,
     sessionId: transcript.sessionId,
     agentKey: transcript.agentKey,
     language: transcript.language,

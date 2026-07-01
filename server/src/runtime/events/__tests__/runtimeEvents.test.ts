@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type {
   AgentId,
-  BaId,
+  TmagId,
   CausationId,
   CorrelationId,
   IdempotencyKey,
@@ -30,7 +30,7 @@ const baseEvent: RuntimeAgentEventEnvelope = {
   teamId: 'team_magnificent' as TeamId,
   teamKey: TEAM_MAGNIFICENT_KEY,
   teamName: TEAM_MAGNIFICENT_NAME,
-  baId: 'TMBA-TEST-001' as BaId,
+  tmagId: 'TMBA-TEST-001' as TmagId,
   agentKey: 'michael_magnificent',
   agentId: 'agent_instance_michael_default' as AgentId,
   sessionId: 'session_test_001' as SessionId,
@@ -140,7 +140,7 @@ describe('runtime event foundation', () => {
     expect(errorCodes(missingIdempotency)).toContain('required');
   });
 
-  it('enforces Team Magnificent scope when baId exists', () => {
+  it('enforces Team Magnificent scope when tmagId exists', () => {
     const result = validateRuntimeEventEnvelope({
       ...baseEvent,
       teamKey: undefined,

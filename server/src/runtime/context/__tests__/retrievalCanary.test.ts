@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type {
   ApprovedKnowledgeQueryRequest,
-  BaId,
+  TmagId,
   KnowledgeDomain,
   KnowledgeFreshness,
   KnowledgeId,
@@ -48,7 +48,7 @@ function scope(): RuntimeRequestScope {
     teamId: 'team_magnificent' as TeamId,
     teamKey: TEAM_MAGNIFICENT_KEY,
     teamName: TEAM_MAGNIFICENT_NAME,
-    baId: 'TMBA-P411-001' as BaId,
+    tmagId: 'TMBA-P411-001' as TmagId,
   };
 }
 
@@ -105,7 +105,7 @@ function packetInput(language: RuntimeLanguage, overrides: Partial<ContextPacket
       teamId: 'team_magnificent' as TeamId,
       teamKey: TEAM_MAGNIFICENT_KEY,
       teamName: TEAM_MAGNIFICENT_NAME,
-      baId: 'TMBA-P411-001' as BaId,
+      tmagId: 'TMBA-P411-001' as TmagId,
       journalEnabled: false,
       languagePreference: language,
       permissions: {

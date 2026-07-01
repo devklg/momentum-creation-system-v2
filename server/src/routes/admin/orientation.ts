@@ -34,8 +34,8 @@ export const adminOrientationRoutes: Router = express.Router();
 function adminActorFromRequest(req: Request): AuditActor & { kind: 'admin' } {
   const session = req.session!;
   const displayName =
-    (session as unknown as { fullName?: string }).fullName ?? session.baId;
-  return { kind: 'admin', baId: session.baId, displayName };
+    (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
+  return { kind: 'admin', tmagId: session.tmagId, displayName };
 }
 
 function contextFromRequest(req: Request, route: string, method: string): AuditContext {
@@ -57,7 +57,7 @@ adminOrientationRoutes.get('/sessions', requireAdmin, async (req, res) => {
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.orientation.sessions.viewed',
-      entity: { kind: 'admin_session', id: req.session!.baId, displayLabel: null },
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
       after: { sessionCount: sessions.length },
       reason: null,

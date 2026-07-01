@@ -2,10 +2,10 @@
  * /api/admin/bas — Brand Ambassador oversight (wireframe 4.C · locked-spec 4.C).
  *
  *   GET    /                          C.1 directory (15-column row per BA)
- *   GET    /:baId                     C.4 profile bundle (drawer)
- *   POST   /:baId/sponsor-override    C.5 sponsor override (friction-heavy, audited)
- *   POST   /:baId/leader-tag          C.4 toggle Kevin-curated leader badge
- *   POST   /:baId/notes               C.4 append Kevin-only note (append-only)
+ *   GET    /:tmagId                     C.4 profile bundle (drawer)
+ *   POST   /:tmagId/sponsor-override    C.5 sponsor override (friction-heavy, audited)
+ *   POST   /:tmagId/leader-tag          C.4 toggle Kevin-curated leader badge
+ *   POST   /:tmagId/notes               C.4 append Kevin-only note (append-only)
  *
  * All routes are admin-gated by `requireAdmin`. Compliance discipline lives
  * in `domain/adminBaOversight.ts`; this file is the thin route layer.
@@ -71,18 +71,18 @@ adminBasRoutes.get('/', requireAdmin, async (req: Request, res: Response) => {
   }
 });
 
-const BaIdParams = z.object({
-  baId: z.string().min(2).max(80),
+const TmagIdParams = z.object({
+  tmagId: z.string().min(2).max(80),
 });
 
-adminBasRoutes.get('/:baId', requireAdmin, async (req: Request, res: Response) => {
-  const parsed = BaIdParams.safeParse(req.params);
+adminBasRoutes.get('/:tmagId', requireAdmin, async (req: Request, res: Response) => {
+  const parsed = TmagIdParams.safeParse(req.params);
   if (!parsed.success) {
-    res.status(400).json({ ok: false, error: 'Invalid baId.' });
+    res.status(400).json({ ok: false, error: 'Invalid tmagId.' });
     return;
   }
   try {
-    const profile = await getBAProfileBundle(parsed.data.baId);
+    const profile = await getBAProfileBundle(parsed.data.tmagId);
     if (!profile) {
       res.status(404).json({ ok: false, error: 'BA not found.' });
       return;
@@ -96,18 +96,18 @@ adminBasRoutes.get('/:baId', requireAdmin, async (req: Request, res: Response) =
 });
 
 const SponsorOverrideBody = z.object({
-  requestingBaId: z.string().min(2).max(80),
-  newSponsorBaId: z.string().min(2).max(80),
+  requestingTmagId: z.string().min(2).max(80),
+  newSponsorTmagId: z.string().min(2).max(80),
   reason: z.string().trim().min(8).max(2000),
 });
 
 adminBasRoutes.post(
-  '/:baId/sponsor-override',
+  '/:tmagId/sponsor-override',
   requireAdmin,
   async (req: Request, res: Response) => {
-    const params = BaIdParams.safeParse(req.params);
+    const params = TmagIdParams.safeParse(req.params);
     if (!params.success) {
-      res.status(400).json({ ok: false, error: 'Invalid baId.' });
+      res.status(400).json({ ok: false, error: 'Invalid tmagId.' });
       return;
     }
     const body = SponsorOverrideBody.safeParse(req.body);
@@ -122,11 +122,11 @@ adminBasRoutes.post(
     const session = req.session!;
     try {
       const result = await applySponsorOverride({
-        baId: params.data.baId,
-        requestingBaId: body.data.requestingBaId,
-        newSponsorBaId: body.data.newSponsorBaId,
+        tmagId: params.data.tmagId,
+        requestingTmagId: body.data.requestingTmagId,
+        newSponsorTmagId: body.data.newSponsorTmagId,
         reason: body.data.reason,
-        performedByBaId: session.baId,
+        performedByTmagId: session.tmagId,
         performedByDisplayName: session.email,
       });
       if (!result.ok) {
@@ -140,13 +140,13 @@ adminBasRoutes.post(
         return;
       }
       // Refresh the row so the table can update in place.
-      const bundle = await getBAProfileBundle(params.data.baId);
+      const bundle = await getBAProfileBundle(params.data.tmagId);
       const responseBody: AdminSponsorOverrideResponse = {
         ok: true,
         override: result.entry,
         row:
           bundle?.row ??
-          (await listBADirectory(2000)).rows.find((r) => r.baId === params.data.baId)!,
+          (await listBADirectory(2000)).rows.find((r) => r.tmagId === params.data.tmagId)!,
       };
       res.json(responseBody);
     } catch (err) {
@@ -162,12 +162,12 @@ const LeaderTagBody = z.object({
 });
 
 adminBasRoutes.post(
-  '/:baId/leader-tag',
+  '/:tmagId/leader-tag',
   requireAdmin,
   async (req: Request, res: Response) => {
-    const params = BaIdParams.safeParse(req.params);
+    const params = TmagIdParams.safeParse(req.params);
     if (!params.success) {
-      res.status(400).json({ ok: false, error: 'Invalid baId.' });
+      res.status(400).json({ ok: false, error: 'Invalid tmagId.' });
       return;
     }
     const body = LeaderTagBody.safeParse(req.body);
@@ -178,15 +178,15 @@ adminBasRoutes.post(
     const session = req.session!;
     try {
       await setCuratedLeaderTag({
-        baId: params.data.baId,
+        tmagId: params.data.tmagId,
         curated: body.data.curated,
-        setByBaId: session.baId,
+        setByTmagId: session.tmagId,
         setByDisplayName: session.email,
         reason: body.data.reason,
       });
       const responseBody: AdminLeaderTagResponse = {
         ok: true,
-        baId: params.data.baId,
+        tmagId: params.data.tmagId,
         curated: body.data.curated,
       };
       res.json(responseBody);
@@ -202,12 +202,12 @@ const NoteBody = z.object({
 });
 
 adminBasRoutes.post(
-  '/:baId/notes',
+  '/:tmagId/notes',
   requireAdmin,
   async (req: Request, res: Response) => {
-    const params = BaIdParams.safeParse(req.params);
+    const params = TmagIdParams.safeParse(req.params);
     if (!params.success) {
-      res.status(400).json({ ok: false, error: 'Invalid baId.' });
+      res.status(400).json({ ok: false, error: 'Invalid tmagId.' });
       return;
     }
     const body = NoteBody.safeParse(req.body);
@@ -218,9 +218,9 @@ adminBasRoutes.post(
     const session = req.session!;
     try {
       const note = await appendBaNote({
-        baId: params.data.baId,
+        tmagId: params.data.tmagId,
         text: body.data.text,
-        authorBaId: session.baId,
+        authorTmagId: session.tmagId,
         authorDisplayName: session.email,
       });
       const responseBody: AdminBaNoteResponse = { ok: true, note };
@@ -241,22 +241,22 @@ adminBasRoutes.post(
  * the actor, call, and map the domain Result to HTTP.
  *
  *   POST   /                create a BA (sponsor stamped immutable, no pwd)
- *   PATCH  /:baId           edit ordinary fields (sponsor NOT editable here)
- *   DELETE /:baId           soft delete (reversible, reason required)
- *   POST   /:baId/restore   restore a soft-deleted BA
+ *   PATCH  /:tmagId           edit ordinary fields (sponsor NOT editable here)
+ *   DELETE /:tmagId           soft delete (reversible, reason required)
+ *   POST   /:tmagId/restore   restore a soft-deleted BA
  *
- * Route order: GET /:baId and POST /:baId/<verb> already exist above.
+ * Route order: GET /:tmagId and POST /:tmagId/<verb> already exist above.
  * /restore is a distinct second segment; PATCH and DELETE are new verbs on
- * /:baId with no existing collision.
+ * /:tmagId with no existing collision.
  * ═══════════════════════════════════════════════════════════════════ */
 
 /** Build the admin actor from the session, mirroring the prospect routes:
- * prefer a full name when present, else fall back to email/baId. */
+ * prefer a full name when present, else fall back to email/tmagId. */
 function adminActor(req: Request): AdminActor {
   const session = req.session!;
   const displayName =
-    (session as unknown as { fullName?: string }).fullName ?? session.email ?? session.baId;
-  return { baId: session.baId, displayName };
+    (session as unknown as { fullName?: string }).fullName ?? session.email ?? session.tmagId;
+  return { tmagId: session.tmagId, displayName };
 }
 
 /** Map a domain CRUD error to an HTTP status. */
@@ -283,7 +283,7 @@ const CreateBaBody = z.object({
   lastName: z.string().trim().min(1).max(120),
   threeBaId: z.string().trim().min(1).max(80),
   threeUsername: z.string().trim().min(1).max(120),
-  sponsorBaId: z.string().trim().min(2).max(80),
+  sponsorTmagId: z.string().trim().min(2).max(80),
   email: z.string().trim().email().max(200).optional(),
   phone: z.string().trim().max(40).optional(),
   timezone: z.string().trim().max(80).optional(),
@@ -324,7 +324,7 @@ adminBasRoutes.post('/', requireAdmin, async (req: Request, res: Response) => {
         lastName: body.data.lastName,
         threeBaId: body.data.threeBaId,
         threeUsername: body.data.threeUsername,
-        sponsorBaId: body.data.sponsorBaId,
+        sponsorTmagId: body.data.sponsorTmagId,
         email: body.data.email ?? null,
         phone: body.data.phone ?? null,
         timezone: body.data.timezone ?? null,
@@ -337,19 +337,19 @@ adminBasRoutes.post('/', requireAdmin, async (req: Request, res: Response) => {
       res.status(baCrudErrorStatus(result.error)).json({ ok: false, error: result.error.kind });
       return;
     }
-    res.status(201).json({ ok: true, baId: result.value.baId, row: result.value.row });
+    res.status(201).json({ ok: true, tmagId: result.value.tmagId, row: result.value.row });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Create failed: ${msg}` });
   }
 });
 
-/* ─── PATCH /:baId  (edit — sponsor not editable here) ───────────── */
+/* ─── PATCH /:tmagId  (edit — sponsor not editable here) ───────────── */
 
-adminBasRoutes.patch('/:baId', requireAdmin, async (req: Request, res: Response) => {
-  const params = BaIdParams.safeParse(req.params);
+adminBasRoutes.patch('/:tmagId', requireAdmin, async (req: Request, res: Response) => {
+  const params = TmagIdParams.safeParse(req.params);
   if (!params.success) {
-    res.status(400).json({ ok: false, error: 'Invalid baId.' });
+    res.status(400).json({ ok: false, error: 'Invalid tmagId.' });
     return;
   }
   const body = EditBaBody.safeParse(req.body);
@@ -358,24 +358,24 @@ adminBasRoutes.patch('/:baId', requireAdmin, async (req: Request, res: Response)
     return;
   }
   try {
-    const result = await adminEditBa(params.data.baId, body.data, adminActor(req));
+    const result = await adminEditBa(params.data.tmagId, body.data, adminActor(req));
     if (!result.ok) {
       res.status(baCrudErrorStatus(result.error)).json({ ok: false, error: result.error.kind });
       return;
     }
-    res.json({ ok: true, baId: result.value.baId, row: result.value.row });
+    res.json({ ok: true, tmagId: result.value.tmagId, row: result.value.row });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Edit failed: ${msg}` });
   }
 });
 
-/* ─── DELETE /:baId  (soft delete) ───────────────────────────── */
+/* ─── DELETE /:tmagId  (soft delete) ───────────────────────────── */
 
-adminBasRoutes.delete('/:baId', requireAdmin, async (req: Request, res: Response) => {
-  const params = BaIdParams.safeParse(req.params);
+adminBasRoutes.delete('/:tmagId', requireAdmin, async (req: Request, res: Response) => {
+  const params = TmagIdParams.safeParse(req.params);
   if (!params.success) {
-    res.status(400).json({ ok: false, error: 'Invalid baId.' });
+    res.status(400).json({ ok: false, error: 'Invalid tmagId.' });
     return;
   }
   const body = ReasonOnlyBody.safeParse(req.body);
@@ -384,24 +384,24 @@ adminBasRoutes.delete('/:baId', requireAdmin, async (req: Request, res: Response
     return;
   }
   try {
-    const result = await adminSoftDeleteBa(params.data.baId, body.data, adminActor(req));
+    const result = await adminSoftDeleteBa(params.data.tmagId, body.data, adminActor(req));
     if (!result.ok) {
       res.status(baCrudErrorStatus(result.error)).json({ ok: false, error: result.error.kind });
       return;
     }
-    res.json({ ok: true, baId: result.value.baId, deletedAt: result.value.deletedAt });
+    res.json({ ok: true, tmagId: result.value.tmagId, deletedAt: result.value.deletedAt });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Delete failed: ${msg}` });
   }
 });
 
-/* ─── POST /:baId/restore ───────────────────────────────────── */
+/* ─── POST /:tmagId/restore ───────────────────────────────────── */
 
-adminBasRoutes.post('/:baId/restore', requireAdmin, async (req: Request, res: Response) => {
-  const params = BaIdParams.safeParse(req.params);
+adminBasRoutes.post('/:tmagId/restore', requireAdmin, async (req: Request, res: Response) => {
+  const params = TmagIdParams.safeParse(req.params);
   if (!params.success) {
-    res.status(400).json({ ok: false, error: 'Invalid baId.' });
+    res.status(400).json({ ok: false, error: 'Invalid tmagId.' });
     return;
   }
   const body = ReasonOnlyBody.safeParse(req.body);
@@ -410,14 +410,14 @@ adminBasRoutes.post('/:baId/restore', requireAdmin, async (req: Request, res: Re
     return;
   }
   try {
-    const result = await adminRestoreBa(params.data.baId, body.data, adminActor(req));
+    const result = await adminRestoreBa(params.data.tmagId, body.data, adminActor(req));
     if (!result.ok) {
       res.status(baCrudErrorStatus(result.error)).json({ ok: false, error: result.error.kind });
       return;
     }
     res.json({
       ok: true,
-      baId: result.value.baId,
+      tmagId: result.value.tmagId,
       restoredAt: result.value.restoredAt,
       row: result.value.row,
     });

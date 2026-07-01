@@ -45,7 +45,7 @@ export interface ProspectSessionRow {
   accountId: string;
   prospectId: string;
   tokenId: string;
-  sponsorBaId: string;
+  sponsorTmagId: string;
   createdAt: string;
   expiresAt: string;
 }
@@ -93,7 +93,7 @@ export async function openProspectSession(
     accountId: string;
     prospectId: string;
     tokenId: string;
-    sponsorBaId: string;
+    sponsorTmagId: string;
     /** Account's expiresAt — the session ceiling. */
     accountExpiresAt: string;
   },
@@ -106,7 +106,7 @@ export async function openProspectSession(
     accountId: input.accountId,
     prospectId: input.prospectId,
     tokenId: input.tokenId,
-    sponsorBaId: input.sponsorBaId,
+    sponsorTmagId: input.sponsorTmagId,
     createdAt,
     expiresAt: input.accountExpiresAt,
   };

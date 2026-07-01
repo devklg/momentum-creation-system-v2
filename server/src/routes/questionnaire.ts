@@ -44,7 +44,7 @@ questionnaireRoutes.get(
   async (req: Request, res: Response) => {
     const session = req.session!;
     try {
-      const record = await getQuestionnaire(session.baId);
+      const record = await getQuestionnaire(session.tmagId);
       if (!record) {
         res.json({ ok: true, submitted: false });
         return;
@@ -74,7 +74,7 @@ questionnaireRoutes.post(
     const session = req.session!;
     // eslint-disable-next-line no-console
     console.log(
-      `[audit] questionnaire_screen_displayed baId=${session.baId} threeBaId=${session.threeBaId}`,
+      `[audit] questionnaire_screen_displayed tmagId=${session.tmagId} threeBaId=${session.threeBaId}`,
     );
     res.json({ ok: true });
   },
@@ -204,9 +204,9 @@ questionnaireRoutes.post(
     try {
       // Idempotency: if already submitted, return the existing record
       // without re-writing. Mirror BA-flag in case it drifted.
-      if (await questionnaireExists(session.baId)) {
-        await markQuestionnaireComplete(session.baId);
-        const existing = await getQuestionnaire(session.baId);
+      if (await questionnaireExists(session.tmagId)) {
+        await markQuestionnaireComplete(session.tmagId);
+        const existing = await getQuestionnaire(session.tmagId);
         res.json({
           ok: true,
           alreadySubmitted: true,
@@ -231,17 +231,17 @@ questionnaireRoutes.post(
 
       const record = await recordQuestionnaire({
         ...validation.value,
-        baId: session.baId,
+        tmagId: session.tmagId,
         threeBaId: session.threeBaId,
         ipAddress,
         userAgent,
       });
 
-      await markQuestionnaireComplete(session.baId);
+      await markQuestionnaireComplete(session.tmagId);
 
       // eslint-disable-next-line no-console
       console.log(
-        `[audit] questionnaire_submitted baId=${session.baId} questionnaireId=${record.questionnaireId} version=${record.version}`,
+        `[audit] questionnaire_submitted tmagId=${session.tmagId} questionnaireId=${record.questionnaireId} version=${record.version}`,
       );
 
       res.json({

@@ -5,20 +5,20 @@
  * activity (last 30 days). For Kevin's coaching only — ADMIN I.5 explicitly
  * forbids ever showing a leader their own scorecard.
  *
- * Leader detection: reuses listLeaderBaIds() from adminMetrics.ts, which is
+ * Leader detection: reuses listLeaderTmagIds() from adminMetrics.ts, which is
  * empty by design today and MUST stay empty until THREE binary-qualified +
  * personally-enrolled ≥5 data mirrors in (Chat #100; LEADER_DETECTION_NOTE).
  * No algorithmic heuristic is permitted. An empty list is the correct,
  * honest output; the report says so.
  *
- * "Team" for downstream activity = prospects whose sponsorBaId is the leader
+ * "Team" for downstream activity = prospects whose sponsorTmagId is the leader
  * (the people the leader directly enrolled). This honors the structural
  * threshold: a leader's directly-enrolled people are the population whose
  * activity the leader is coaching.
  */
 
 import { gatewayCall } from '../../services/gateway.js';
-import { listLeaderBaIds, resolveScopedBaIds, LEADER_DETECTION_NOTE } from '../adminMetrics.js';
+import { listLeaderTmagIds, resolveScopedTmagIds, LEADER_DETECTION_NOTE } from '../adminMetrics.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
   AdminDashboardFilter,
@@ -35,25 +35,25 @@ const COLL_ACTIVITY = 'invitation_activity';
 
 const PROVENANCE =
   'Leader scorecards (Chat #143): per ADMIN I.5, Kevin-only — never shown to ' +
-  'the leader themselves. Leader set comes from listLeaderBaIds() (Chat #100 ' +
+  'the leader themselves. Leader set comes from listLeaderTmagIds() (Chat #100 ' +
   'definition: THREE binary-qualified AND ≥5 personal enrollments). The set ' +
   'is empty today by design until THREE qualification data mirrors in; no ' +
   'algorithmic heuristic is permitted. An empty list is the correct output.';
 
 interface BaDoc {
-  baId: string;
+  tmagId: string;
   firstName: string;
   lastName: string;
   createdAt: string;
   deleted?: boolean;
 }
 interface PlacementDoc {
-  sponsorBaId: string;
+  sponsorTmagId: string;
   flushedAt: string | null;
   flushReason: 'enrolled' | 'expired' | 'archived' | null;
 }
 interface ActivityDoc {
-  sponsorBaId: string;
+  sponsorTmagId: string;
   kind: string;
   at: string;
 }
@@ -68,10 +68,10 @@ export async function buildLeaderScorecardReport(
   meta: Omit<AdminReportMeta, 'title'>;
 }> {
   // Leaders, then intersect with the dashboard filter scope so the same
-  // baId / leaderGroup narrowing applies. If the scope excludes all leaders
+  // tmagId / leaderGroup narrowing applies. If the scope excludes all leaders
   // (e.g. leaderGroup='non_leaders'), the result is honestly empty.
-  const leaders = await listLeaderBaIds();
-  const scoped = await resolveScopedBaIds(filter);
+  const leaders = await listLeaderTmagIds();
+  const scoped = await resolveScopedTmagIds(filter);
   const leaderIds = scoped === null ? leaders : leaders.filter((id) => scoped.includes(id));
 
   if (leaderIds.length === 0) {
@@ -96,11 +96,11 @@ export async function buildLeaderScorecardReport(
   const basRes = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
-    filter: { baId: { $in: leaderIds }, deleted: { $ne: true } },
+    filter: { tmagId: { $in: leaderIds }, deleted: { $ne: true } },
     limit: leaderIds.length,
   });
   const baLookup = new Map<string, BaDoc>();
-  for (const b of basRes.documents ?? []) baLookup.set(b.baId, b);
+  for (const b of basRes.documents ?? []) baLookup.set(b.tmagId, b);
 
   const cutoff30 = new Date(Date.now() - 30 * DAY_MS).toISOString();
 
@@ -109,44 +109,44 @@ export async function buildLeaderScorecardReport(
     gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
-      filter: { sponsorBaId: { $in: leaderIds }, flushReason: 'enrolled' },
+      filter: { sponsorTmagId: { $in: leaderIds }, flushReason: 'enrolled' },
       limit: 200_000,
     }),
     gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
-      filter: { sponsorBaId: { $in: leaderIds }, placedAt: { $gte: cutoff30 } },
+      filter: { sponsorTmagId: { $in: leaderIds }, placedAt: { $gte: cutoff30 } },
       limit: 200_000,
     }),
     gatewayCall<{ documents: ActivityDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_ACTIVITY,
-      filter: { sponsorBaId: { $in: leaderIds }, kind: 'video_completed', at: { $gte: cutoff30 } },
+      filter: { sponsorTmagId: { $in: leaderIds }, kind: 'video_completed', at: { $gte: cutoff30 } },
       limit: 200_000,
     }),
   ]);
 
   const enrollMap = new Map<string, number>();
   for (const p of enrollLifetime.documents ?? []) {
-    enrollMap.set(p.sponsorBaId, (enrollMap.get(p.sponsorBaId) ?? 0) + 1);
+    enrollMap.set(p.sponsorTmagId, (enrollMap.get(p.sponsorTmagId) ?? 0) + 1);
   }
   const recentEnrollMap = new Map<string, number>();
   const placedMap = new Map<string, number>();
   for (const p of placements30.documents ?? []) {
-    placedMap.set(p.sponsorBaId, (placedMap.get(p.sponsorBaId) ?? 0) + 1);
+    placedMap.set(p.sponsorTmagId, (placedMap.get(p.sponsorTmagId) ?? 0) + 1);
     if (p.flushReason === 'enrolled' && p.flushedAt && p.flushedAt >= cutoff30) {
-      recentEnrollMap.set(p.sponsorBaId, (recentEnrollMap.get(p.sponsorBaId) ?? 0) + 1);
+      recentEnrollMap.set(p.sponsorTmagId, (recentEnrollMap.get(p.sponsorTmagId) ?? 0) + 1);
     }
   }
   const videoMap = new Map<string, number>();
   for (const a of videoComplete30.documents ?? []) {
-    videoMap.set(a.sponsorBaId, (videoMap.get(a.sponsorBaId) ?? 0) + 1);
+    videoMap.set(a.sponsorTmagId, (videoMap.get(a.sponsorTmagId) ?? 0) + 1);
   }
 
   const rows: AdminLeaderScorecardRow[] = leaderIds.map((id) => {
     const b = baLookup.get(id);
     return {
-      baId: id,
+      tmagId: id,
       fullName: b ? `${b.firstName} ${b.lastName}`.trim() : id,
       signupAt: b?.createdAt ?? '',
       personalEnrollments: enrollMap.get(id) ?? 0,

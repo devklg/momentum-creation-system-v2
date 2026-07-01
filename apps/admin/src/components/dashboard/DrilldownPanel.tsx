@@ -34,7 +34,7 @@ export function DrilldownPanel({ tile, filter, onClose }: Props) {
     setErr(null);
     const params = new URLSearchParams();
     params.set('tile', tile);
-    if (filter.baId) params.set('baId', filter.baId);
+    if (filter.tmagId) params.set('tmagId', filter.tmagId);
     if (filter.leaderGroup) params.set('leaderGroup', filter.leaderGroup);
 
     void (async () => {
@@ -57,7 +57,7 @@ export function DrilldownPanel({ tile, filter, onClose }: Props) {
         setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
       }
     })();
-  }, [tile, filter.baId, filter.leaderGroup, filter]);
+  }, [tile, filter.tmagId, filter.leaderGroup, filter]);
 
   return (
     <section className="border border-line rounded-md mb-6 overflow-hidden">
@@ -120,8 +120,8 @@ function DrilldownBody({ payload }: { payload: AdminDrilldownPayload }) {
       return (
         <Table headers={['BA ID', 'Name', 'Last login', 'In-flow']}>
           {payload.rows.map((r) => (
-            <tr key={r.baId} className="border-t border-line">
-              <Td><Mono>{r.baId}</Mono></Td>
+            <tr key={r.tmagId} className="border-t border-line">
+              <Td><Mono>{r.tmagId}</Mono></Td>
               <Td>{r.fullName}</Td>
               <Td className="text-cream-mute">{fmtDateTime(r.lastLoginAt)}</Td>
               <Td className="text-cream">{r.prospectsInFlow}</Td>
@@ -188,8 +188,8 @@ function DrilldownBody({ payload }: { payload: AdminDrilldownPayload }) {
       return (
         <Table headers={['BA ID', 'Name', 'Modules', 'Complete', 'Last touched']}>
           {payload.rows.map((r) => (
-            <tr key={r.baId} className="border-t border-line">
-              <Td><Mono>{r.baId}</Mono></Td>
+            <tr key={r.tmagId} className="border-t border-line">
+              <Td><Mono>{r.tmagId}</Mono></Td>
               <Td>{r.fullName}</Td>
               <Td><Mono>{r.modulesCompleted}/5</Mono></Td>
               <Td>
