@@ -15,11 +15,14 @@ import type {
   ContextPacketStatus,
   ContextPacketV1,
   ContextRequestId,
+  DegradedContextState,
   Guardrail,
   KnowledgeId,
   RequestId,
+  RuntimeLanguage,
   RuntimeRequestScope,
   RuntimeRule,
+  RuntimeTranslationStatus,
   SessionContext,
   SourceId,
   TeamContext,
@@ -71,6 +74,10 @@ export interface ContextReference {
   status: ContextReferenceStatus;
   knowledgeId?: KnowledgeId;
   score?: number;
+  // P4.6 — delivered language + honest translation marking for this reference. Optional and
+  // backward-compatible: absent ⇒ defaults to en/same_language (pre-P4.6 behavior).
+  language?: RuntimeLanguage;
+  translationStatus?: RuntimeTranslationStatus;
 }
 
 export interface ContextConstraint {
@@ -104,6 +111,7 @@ export interface ContextPacketBuildInput {
   eventContextReferences?: RuntimeAgentEventEnvelope[];
   constraints?: ContextConstraint[];
   excludedKnowledge?: ContextExclusion[];
+  degraded?: DegradedContextState;
   provenance: ContextPacketProvenance;
   packetStatus?: ContextPacketStatus;
   authorizeCandidateKnowledge?: boolean;
@@ -175,6 +183,8 @@ export function buildContextPacket(input: ContextPacketBuildInput): ContextPacke
     ...(input.graphContextReferences ?? []),
     ...(input.vectorContextReferences ?? []),
   ]);
+  const packetStatus = input.packetStatus ?? 'complete';
+  const degraded = input.degraded ?? defaultDegradedState(packetStatus);
   const explicitExclusions = input.excludedKnowledge ?? [];
   const exclusions = [
     ...explicitExclusions,
@@ -197,7 +207,7 @@ export function buildContextPacket(input: ContextPacketBuildInput): ContextPacke
     requestId: input.requestId,
     createdAt,
     expiresAt: input.expiresAt,
-    packetStatus: input.packetStatus ?? 'complete',
+    packetStatus,
     tenant: input.tenant,
     team: input.team,
     ba: input.ba,
@@ -244,7 +254,7 @@ export function buildContextPacket(input: ContextPacketBuildInput): ContextPacke
       candidateKnowledgeIncluded: false,
       candidateKnowledgeExcluded: true,
       privateJournalIncluded: false,
-      degraded: input.packetStatus === 'degraded',
+      degraded: packetStatus !== 'complete',
       includedItems: [
         ...retrievalItemsFromReferences(input.knowledgeReferences ?? [], 'direct_reference'),
         ...retrievalItemsFromReferences(input.graphContextReferences ?? [], 'graph_expansion'),
@@ -258,6 +268,7 @@ export function buildContextPacket(input: ContextPacketBuildInput): ContextPacke
       ],
       exclusions,
     },
+    degraded,
     metadata: {
       generatedBy: CONTEXT_MANAGER_COMPONENT,
       environment: input.tenant.environment,
@@ -272,6 +283,16 @@ export function buildContextPacket(input: ContextPacketBuildInput): ContextPacke
 
   assertValidContextPacket(packet);
   return packet;
+}
+
+function defaultDegradedState(packetStatus: ContextPacketStatus): DegradedContextState | undefined {
+  if (packetStatus === 'complete') return undefined;
+
+  return {
+    reasons: ['knowledge_unavailable'],
+    safeFallbackInstruction: 'Proceed only with packet identity, runtime rules, guardrails, and clarifying questions; do not infer missing knowledge.',
+    missingSections: ['approvedKnowledge'],
+  };
 }
 
 export function validateContextPacket(packet: unknown): ContextPacketValidationResult {
@@ -420,7 +441,10 @@ function approvedKnowledgeFromReferences(references: ContextReference[]): Approv
       summary: reference.summary,
       status: 'active',
       governanceStatus: 'approved',
-      language: 'en',
+      // P4.6 — honor the delivered language + translation marking; default to en/same_language
+      // when absent so pre-P4.6 callers are unchanged. A machine-translated fallback item is
+      // marked machine_translation_marked here, never presented as native.
+      language: reference.language ?? 'en',
       sourceTraceability: {
         sourceId: reference.sourceId as SourceId,
         sourceType: 'approved_knowledge',
@@ -430,8 +454,8 @@ function approvedKnowledgeFromReferences(references: ContextReference[]): Approv
         retrievalMethod: 'direct_reference',
         reasonCodes: ['agent_task_match'],
         score: reference.score,
-        language: 'en',
-        translationStatus: 'same_language',
+        language: reference.language ?? 'en',
+        translationStatus: reference.translationStatus ?? 'same_language',
       },
     }));
 }
