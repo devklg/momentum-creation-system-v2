@@ -5401,3 +5401,38 @@ export interface GraphRagRetrievalHit {
   summary: string;
   distance: number | null;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 7 · P7.11 — Learning observability (aggregate metrics).
+//
+// AGGREGATE metrics over the persisted R0-R2 rungs, for the admin surface only.
+// Never a manual review queue, never `.com`-surfaced. Pure counts + rates — no
+// PII, no scoring/ranking of BAs or prospects. Consumes the runtime-audit /
+// outcome / learning-candidate records; the fetch path is the existing admin
+// read surface (activation step).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Aggregate snapshot of the learning loop's health (admin-only). */
+export interface LearningObservabilitySnapshot {
+  tenantId: string;
+  generatedAt: IsoTimestamp;
+  runtimeAudit: {
+    total: number;
+    gateAllowed: number;
+    gateDenied: number;
+    /** denials ÷ (allowed + denied); 0 when no gate events. */
+    gateDenyRate: number;
+  };
+  outcomes: {
+    total: number;
+    byKind: Record<McsOutcomeKind, number>;
+  };
+  learningCandidates: {
+    total: number;
+    detected: number;
+    approved: number;
+    rejected: number;
+    /** approvals ÷ (approved + rejected); 0 when nothing reviewed. */
+    approvalRate: number;
+  };
+}
