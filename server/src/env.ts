@@ -213,3 +213,42 @@ const Env = z.object({
 
 export const env = Env.parse(process.env);
 export type Env = z.infer<typeof Env>;
+
+// ─── P10 H3/H4 — production configuration hardening ───────────────────────
+// Fail fast at boot rather than silently running an insecure production config.
+if (env.NODE_ENV === 'production') {
+  const KNOWN_PLACEHOLDER_SECRETS = new Set([
+    'replace-me-with-a-long-random-string',
+    'changeme',
+    'secret',
+    'your-secret-here',
+  ]);
+  if (
+    KNOWN_PLACEHOLDER_SECRETS.has(env.JWT_SECRET) ||
+    env.JWT_SECRET.length < 32
+  ) {
+    throw new Error(
+      '[env] JWT_SECRET is a known placeholder or too short (<32 chars) for ' +
+        'production. Generate a strong secret, e.g. `openssl rand -base64 48`.',
+    );
+  }
+
+  // Webhook signing key: warn (not hard-fail) so a deploy that intentionally
+  // runs without inbound webhooks can still boot. The verifyTelnyxWebhook
+  // middleware fails CLOSED at request time when the key is missing in
+  // production, so a forged webhook is rejected regardless of this warning.
+  if (!env.TELNYX_PUBLIC_KEY) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[env] TELNYX_PUBLIC_KEY is not set in production — Telnyx webhooks will ' +
+        'be rejected (fail-closed) until it is configured.',
+    );
+  }
+  if (env.VM_LIVE_DELIVERY_ENABLED && !env.VM_WEBHOOK_SHARED_SECRET) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[env] VM_LIVE_DELIVERY_ENABLED=true but VM_WEBHOOK_SHARED_SECRET is ' +
+        'unset — inbound VM provider webhooks will not be authenticated.',
+    );
+  }
+}

@@ -205,6 +205,8 @@ Tabulated per item in §3–§12. Notable MED items: `verify-code` leaks sponsor
 
 **Recommendations (planning).** Author a consolidated **Production Release Checklist** as a new `engineering/reports/P10_*` doc (docs-only, in-scope): env-contract diffs, infra/topology decision gate, bring `server-gateway-mcp-v2` under VCS, `.com` compliance pass, flip `USE_MOCKS` + smoke `/api/admin/live-ops/*`, dormant-feature activation decisions, reverse-proxy/TLS + process supervision, rollback procedure, and the P10.1 branch-protection confirmation. **Do not assert production readiness** — the topology open-question is a genuine blocker only Kevin can resolve.
 
+> **✅ DELIVERED (2026-06-30):** the checklist now exists at `engineering/reports/P10_PRODUCTION_RELEASE_CHECKLIST.md` — a go/no-go artifact with per-item owner + source refs, six named blockers (B1–B6), and a final sign-off table currently reading **🔴 NO-GO**. It asserts no readiness; every production-affecting item is owner-gated.
+
 ---
 
 ## 12. P10.10 — Phase 10 Closeout
@@ -212,6 +214,7 @@ Tabulated per item in §3–§12. Notable MED items: `verify-code` leaks sponsor
 This report is the Phase 10 deliverable. Closeout status:
 
 - ✅ All ten backlog items audited; findings recorded with file:line references and severity.
+- ✅ **P10.9 deliverable authored** — `engineering/reports/P10_PRODUCTION_RELEASE_CHECKLIST.md` (consolidated go/no-go, currently 🔴 NO-GO).
 - ✅ Documentation-only; all writes within allowed paths; no code/CI/`.env`/secret edits.
 - ✅ Standing prohibitions verified held (§13).
 - ⏳ **Gates** — see §14 (run results appended).
@@ -267,3 +270,33 @@ This phase changed documentation only; gates are run for honest verification of 
 **All required gates green** on `feature/phase-10-devops-security-operations` at Base SHA `0550d32`. Note: the test count (1091, all under `server/`) corrects the earlier stale figure and confirms the test runner is fully wired (see §4 note).
 
 > Local environment ran Node v24.15.0; CI pins Node 22 (`ci.yml:36`). The Windows-only / single-Node coverage gap (H6) means CI does not exercise this exact local toolchain — gates passing here does not substitute for the proposed matrix.
+
+---
+
+## 15. H1 follow-up — projection-outbox drain worker + live smoke test
+
+**Status of H1:** ⚠️ **NOT closed.** The code fix has shipped to `main`; the live-gateway smoke test that confirms the drain actually replays projections is still **PENDING** (see below).
+
+### What shipped (PR #72, merged to `main` as `5251aed`)
+The H1 correctness bug — `drainProjectionOutbox()` defined but never scheduled, so the durable retry queue was never drained and Neo4j/Chroma silently drifted from authoritative Mongo — has been fixed in code:
+
+- `startProjectionOutboxWorker()` / `stopProjectionOutboxWorker()` added to `server/src/services/projectionOutbox.ts`, mirroring the `broadcastQueue` worker shape (idempotent start, single in-flight tick, drain once at boot then every 30s; `drain` fn injectable for testing).
+- Wired into server boot in `server/src/index.ts` alongside the other `start*Worker()` calls.
+- Regression test `server/src/services/__tests__/projectionOutbox.worker.test.ts` (5 cases): boot+interval drain, idempotency, `stop()`, tick-failure resilience, and a **wiring guard** asserting boot actually calls the worker (guards the exact "defined but never called" bug).
+- CI `gates` green; server suite 86 files / 1096 tests (+5).
+
+**This proves the scheduling/wiring, not the drain against live stores.** The regression test injects a stub drain and never touches the Universal Gateway, so the actual replay path (`replay()` → Neo4j `cypher` / Chroma `add` → row delete, plus the backoff/dead-letter path) remains unverified end-to-end.
+
+### Why the smoke test is deferred
+The app is moving to its **own dedicated triple-stack, separate from INTERVECTOR**. This smoke test must run against the **app's fresh, dedicated Neo4j** (and its Mongo/Chroma), not the current shared instance. That instance does not exist yet, so the smoke test runs **next session, not tonight**.
+
+### Smoke-test procedure (to run against the app's dedicated triple-stack)
+1. **Boot the server** (`pnpm dev:server`) and confirm the startup log line:
+   `[projection-outbox] worker started — interval=30000ms, limit=50`
+2. **Seed a due, landable row** — insert one `projection_outbox` document (`momentum` DB) with `status:'pending'`, `nextAttemptAt` ≤ now, and a valid `neo4j` or `chroma` payload for an `entityId` that exists.
+3. **Within ~30s**, expect `[projection-outbox] drain: scanned=… landed=1 …`; confirm the row is **deleted** from `projection_outbox` and the projection now exists in the target store.
+4. **Dead-letter path (optional but recommended):** seed a row whose payload targets a non-existent collection/entity so `replay()` fails; confirm it re-enqueues with backoff and, after `maxAttempts` (8), flips to `status:'failed'` and emits `[projection-outbox][ALERT] DEAD-LETTER …`.
+
+**Caveat:** per CLAUDE.md, Chroma writes require the Maxwell GPU embedding service on `localhost:8300`. If it is down, the Chroma leg of a drain fails and exercises the retry/dead-letter path rather than landing — account for that when interpreting step 3/4 against a chroma payload.
+
+**Result: PENDING — to be run against the app's dedicated Neo4j once that instance exists.** H1 stays open until this smoke test passes.

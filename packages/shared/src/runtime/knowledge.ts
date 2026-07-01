@@ -1,5 +1,6 @@
 import type { RuntimeLanguage, RuntimeTranslationStatus } from './language.js';
 import type { KnowledgeCandidateId, KnowledgeId, SourceId } from './ids.js';
+import type { KnowledgeFreshness } from './knowledge-freshness.js';
 
 export type KnowledgeDomain =
   | 'success'
@@ -26,6 +27,9 @@ export interface KnowledgeReference {
   language: RuntimeLanguage;
   translationStatus: RuntimeTranslationStatus;
   sourceId: SourceId;
+  // P4.7 — optional freshness/deprecation descriptor. Absent ⇒ treated as current (a reference
+  // without this field behaves exactly as pre-P4.7).
+  freshness?: KnowledgeFreshness;
 }
 
 export interface KnowledgeCandidateReference {
