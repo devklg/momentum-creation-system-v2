@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AppendGraphRagRecordInput, GraphRagRetrievalQuery } from '@momentum/shared';
+import type { McsGraphRagInput, McsGraphRagQuery } from '@momentum/shared';
 
 /** Phase 7 · R3 — GraphRAG writer + retrieval tests (P7.6). */
 
@@ -21,7 +21,7 @@ async function load(enabled: boolean) {
   return import('../graphrag.js');
 }
 
-function writeInput(overrides: Partial<AppendGraphRagRecordInput> = {}): AppendGraphRagRecordInput {
+function writeInput(overrides: Partial<McsGraphRagInput> = {}): McsGraphRagInput {
   return {
     knowledgeObjectId: 'kobj_1',
     version: 3,
@@ -35,7 +35,7 @@ function writeInput(overrides: Partial<AppendGraphRagRecordInput> = {}): AppendG
   };
 }
 
-function retrievalQuery(overrides: Partial<GraphRagRetrievalQuery> = {}): GraphRagRetrievalQuery {
+function retrievalQuery(overrides: Partial<McsGraphRagQuery> = {}): McsGraphRagQuery {
   return {
     tenantId: 'team_magnificent',
     domain: 'performance',

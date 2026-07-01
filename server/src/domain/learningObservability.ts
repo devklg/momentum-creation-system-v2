@@ -14,7 +14,7 @@
 
 import type {
   AuditLogEntry,
-  LearningObservabilitySnapshot,
+  McsLearningObservabilitySnapshot,
   McsLearningCandidateRecord,
   McsOutcomeKind,
   McsOutcomeRecord,
@@ -41,7 +41,7 @@ function rate(numerator: number, denominator: number): number {
   return denominator > 0 ? numerator / denominator : 0;
 }
 
-export interface LearningObservabilityInput {
+export interface McsLearningObservabilityInput {
   tenantId: string;
   generatedAt: string;
   runtimeAuditEntries: readonly AuditLogEntry[];
@@ -54,8 +54,8 @@ export interface LearningObservabilityInput {
  * this function does not fetch, does not persist, and has no side effects.
  */
 export function computeLearningObservabilitySnapshot(
-  input: LearningObservabilityInput,
-): LearningObservabilitySnapshot {
+  input: McsLearningObservabilityInput,
+): McsLearningObservabilitySnapshot {
   // ── R0 runtime audit: gate allow/deny over the runtime.* action namespace ──
   let gateAllowed = 0;
   let gateDenied = 0;

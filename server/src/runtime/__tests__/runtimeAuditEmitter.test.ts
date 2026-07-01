@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { RuntimeAuditContext } from '@momentum/shared';
+import type { McsRuntimeAuditContext } from '@momentum/shared';
 
 /**
  * Phase 7 · R0 activation wiring tests (P7.7). Verifies the emitter calls the
@@ -20,7 +20,7 @@ vi.mock('../orchestration/turnCoordinator.js', () => ({
   coordinateRuntimeTurn: mocks.coordinateRuntimeTurn,
 }));
 
-const CTX: RuntimeAuditContext = {
+const CTX: McsRuntimeAuditContext = {
   turnId: 't1',
   correlationId: 'c1',
   agent: 'michael',

@@ -27,10 +27,10 @@ import { env } from '../env.js';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
-  AppendLearningCandidateInput,
-  McsCandidateReview,
+  McsLearningCandidateInput,
+  McsLearningCandidateReview,
   McsLearningCandidateRecord,
-  ReviewLearningCandidateInput,
+  McsLearningCandidateReviewInput,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -104,7 +104,7 @@ function candidateSemanticDocument(record: McsLearningCandidateRecord): string {
  * canary is off.
  */
 export async function appendLearningCandidate(
-  input: AppendLearningCandidateInput,
+  input: McsLearningCandidateInput,
 ): Promise<McsLearningCandidateRecord | null> {
   if (!learningCandidatePersistenceEnabled()) return null;
 
@@ -186,7 +186,7 @@ export async function appendLearningCandidate(
  *     must supersede with a new candidate — reviews are written once).
  */
 export async function reviewLearningCandidate(
-  input: ReviewLearningCandidateInput,
+  input: McsLearningCandidateReviewInput,
 ): Promise<McsLearningCandidateRecord | null> {
   if (!learningCandidatePersistenceEnabled()) return null;
 
@@ -210,7 +210,7 @@ export async function reviewLearningCandidate(
   }
 
   const now = new Date().toISOString();
-  const review: McsCandidateReview = {
+  const review: McsLearningCandidateReview = {
     decision: input.decision,
     reviewedByTmagId: input.reviewedByTmagId,
     reviewedAt: now,

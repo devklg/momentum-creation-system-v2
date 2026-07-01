@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AppendRuntimeAuditEntryInput, RuntimeAuditContext } from '@momentum/shared';
+import type { McsRuntimeAuditInput, McsRuntimeAuditContext } from '@momentum/shared';
 
 /**
  * Phase 7 · R0 — runtime audit persistence writer tests (P7.2 / P7.3).
@@ -24,7 +24,7 @@ vi.mock('../../services/tripleStack.js', () => ({
 
 type AnyRec = Record<string, unknown>;
 
-const RUNTIME: RuntimeAuditContext = {
+const RUNTIME: McsRuntimeAuditContext = {
   turnId: 'turn_abc',
   correlationId: 'corr_1',
   agent: 'michael',
@@ -62,7 +62,7 @@ afterEach(() => {
   else process.env.RUNTIME_AUDIT_PERSISTENCE_ENABLED = ORIGINAL_FLAG;
 });
 
-function input(overrides: Partial<AppendRuntimeAuditEntryInput> = {}): AppendRuntimeAuditEntryInput {
+function input(overrides: Partial<McsRuntimeAuditInput> = {}): McsRuntimeAuditInput {
   return { action: 'runtime.turn.opened', runtime: RUNTIME, ...overrides };
 }
 

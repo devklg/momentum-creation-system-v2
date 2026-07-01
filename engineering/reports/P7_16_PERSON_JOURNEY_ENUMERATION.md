@@ -53,6 +53,21 @@ Ordered milestones (a person is a **prospect** here — a non-BA going through t
 
 **A12 is the crossover.** Note the drift it exposes: *the same event* is called `enrolled` (TokenState), `enrolled_three` (outcome), and `new_brand_ambassador` (disposition). Canon: **one milestone, `enrolled` → the person becomes a member.** (`became_customer` is a *separate* milestone — a customer is not a member.)
 
+**Webinar attendance status (Kevin, 2026-07-01).** A reserved webinar (A8) resolves its attendance to **one of three** — a milestone *status* on the event, **not** a terminal outcome:
+
+| Value | Meaning |
+|---|---|
+| `yes` | attended the webinar |
+| `missed` | reserved a seat but didn't show (no-show) |
+| `no` | did not attend (never reserved / declined the webinar) |
+| `rescheduled` | moved to a new webinar time → points to a **new** `scheduledFor` |
+
+Timestamps on the reservation:
+- `scheduledFor` — the datetime they were **supposed to attend**.
+- `rescheduledTo` — set when `status = rescheduled`; the **new** datetime (a reschedule can chain: each move updates `scheduledFor` and stamps the prior → a timeline of scheduled → rescheduled → attended/missed).
+
+This lives on the webinar reservation / event log (A8→A9), not in the terminal `McsOutcomeKind`. Same pattern applies to orientation attendance.
+
 ### 1a. Terminal OUTCOME — the small closed set (Kevin, 2026-07-01)
 
 **Milestones ≠ outcome.** The many milestones above are the *events along the road*; the **outcome** is how the prospect ultimately **resolved**, and that is only **two or three choices** (+ "pending" while still in motion):

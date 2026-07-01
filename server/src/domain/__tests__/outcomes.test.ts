@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AppendOutcomeInput } from '@momentum/shared';
+import type { McsOutcomeInput } from '@momentum/shared';
 
 /**
  * Phase 7 · R1 — outcome capture writer tests (P7.4).
@@ -35,7 +35,7 @@ async function loadOutcomes(enabled: boolean) {
   return import('../outcomes.js');
 }
 
-function input(overrides: Partial<AppendOutcomeInput> = {}): AppendOutcomeInput {
+function input(overrides: Partial<McsOutcomeInput> = {}): McsOutcomeInput {
   return {
     kind: 'enrolled_iii',
     confirmedByTmagId: 'TMAG-1',

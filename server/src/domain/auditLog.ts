@@ -32,15 +32,15 @@ import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
   AppendAuditEntryInput,
-  AppendRuntimeAuditEntryInput,
+  McsRuntimeAuditInput,
   AuditActor,
   AuditEntity,
   AuditLogEntry,
   AuditQueryFilters,
   AuditActorRole,
   AuditSeverity,
-  RuntimeAuditAction,
-  RuntimeAuditLogEntry,
+  McsRuntimeAuditAction,
+  McsRuntimeAuditLogEntry,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -317,7 +317,7 @@ export function runtimeAuditPersistenceEnabled(): boolean {
  * Default severity per action (P7.2 §3.2): gate denials are expected traffic
  * (`warn`), persistence-flag flips are `critical`, everything else `info`.
  */
-function runtimeSeverityFor(action: RuntimeAuditAction): AuditSeverity {
+function runtimeSeverityFor(action: McsRuntimeAuditAction): AuditSeverity {
   if (action === 'runtime.gate.denied') return 'warn';
   if (action === 'runtime.persistence.enabled' || action === 'runtime.persistence.disabled') {
     return 'critical';
@@ -332,9 +332,9 @@ function runtimeSeverityFor(action: RuntimeAuditAction): AuditSeverity {
  */
 export async function findRuntimeAuditEntry(
   turnId: string,
-  action: RuntimeAuditAction,
-): Promise<RuntimeAuditLogEntry | null> {
-  const result = await gatewayCall<{ documents: RuntimeAuditLogEntry[] }>('mongodb', 'query', {
+  action: McsRuntimeAuditAction,
+): Promise<McsRuntimeAuditLogEntry | null> {
+  const result = await gatewayCall<{ documents: McsRuntimeAuditLogEntry[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { action, 'runtime.turnId': turnId },
@@ -352,8 +352,8 @@ export async function findRuntimeAuditEntry(
  * + BA + agent scope on every row, no agent-authored writes.
  */
 export async function appendRuntimeAuditEntry(
-  input: AppendRuntimeAuditEntryInput,
-): Promise<RuntimeAuditLogEntry | null> {
+  input: McsRuntimeAuditInput,
+): Promise<McsRuntimeAuditLogEntry | null> {
   if (!runtimeAuditPersistenceEnabled()) return null;
 
   const { runtime, action } = input;
@@ -377,7 +377,7 @@ export async function appendRuntimeAuditEntry(
     displayLabel: `${runtime.agent} turn`,
   };
 
-  const entry: RuntimeAuditLogEntry = {
+  const entry: McsRuntimeAuditLogEntry = {
     entryId,
     timestamp,
     createdAt: now,
@@ -423,7 +423,7 @@ export async function appendRuntimeAuditEntry(
 }
 
 /** Semantic blob for Chroma — scope + action only, never a body. */
-function runtimeSemanticDocument(entry: RuntimeAuditLogEntry): string {
+function runtimeSemanticDocument(entry: McsRuntimeAuditLogEntry): string {
   const { runtime } = entry;
   const parts = [
     `action=${entry.action}`,
@@ -445,7 +445,7 @@ function runtimeSemanticDocument(entry: RuntimeAuditLogEntry): string {
  * {entryId}; specific verb only (:ACTED_FOR). No generic relationships.
  */
 function buildRuntimeCypher(
-  entry: RuntimeAuditLogEntry,
+  entry: McsRuntimeAuditLogEntry,
 ): { cypher: string; params?: Record<string, unknown> } {
   const { runtime } = entry;
   return {

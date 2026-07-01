@@ -20,10 +20,10 @@
  */
 
 import type {
-  RuntimeAuditAgent,
-  RuntimeAuditContext,
-  RuntimeAuditDraftKind,
-  RuntimeAuditLogEntry,
+  McsRuntimeAuditAgent,
+  McsRuntimeAuditContext,
+  McsRuntimeAuditDraftKind,
+  McsRuntimeAuditLogEntry,
 } from '@momentum/shared';
 import type { AgentKey } from '@momentum/shared/runtime';
 import { appendRuntimeAuditEntry } from '../domain/auditLog.js';
@@ -34,7 +34,7 @@ import type {
 } from './orchestration/types.js';
 
 /** Map the orchestration agent key to the runtime-audit agent label (exhaustive). */
-export function agentKeyToRuntimeAuditAgent(agentKey: AgentKey): RuntimeAuditAgent {
+export function agentKeyToRuntimeAuditAgent(agentKey: AgentKey): McsRuntimeAuditAgent {
   switch (agentKey) {
     case 'steve_success':
       return 'steve';
@@ -46,20 +46,20 @@ export function agentKeyToRuntimeAuditAgent(agentKey: AgentKey): RuntimeAuditAge
 }
 
 /** A turn began. */
-export function emitTurnOpened(ctx: RuntimeAuditContext): Promise<RuntimeAuditLogEntry | null> {
+export function emitTurnOpened(ctx: McsRuntimeAuditContext): Promise<McsRuntimeAuditLogEntry | null> {
   return appendRuntimeAuditEntry({ action: 'runtime.turn.opened', runtime: ctx });
 }
 
 /** A turn completed. */
-export function emitTurnClosed(ctx: RuntimeAuditContext): Promise<RuntimeAuditLogEntry | null> {
+export function emitTurnClosed(ctx: McsRuntimeAuditContext): Promise<McsRuntimeAuditLogEntry | null> {
   return appendRuntimeAuditEntry({ action: 'runtime.turn.closed', runtime: ctx });
 }
 
 /** An outcome / guided-action draft was returned (content is NOT stored). */
 export function emitDraftEmitted(
-  ctx: RuntimeAuditContext,
-  draftKind: RuntimeAuditDraftKind,
-): Promise<RuntimeAuditLogEntry | null> {
+  ctx: McsRuntimeAuditContext,
+  draftKind: McsRuntimeAuditDraftKind,
+): Promise<McsRuntimeAuditLogEntry | null> {
   return appendRuntimeAuditEntry({
     action: 'runtime.turn.draft_emitted',
     runtime: { ...ctx, draftKind },
@@ -68,18 +68,18 @@ export function emitDraftEmitted(
 
 /** A gate (steve/michael/activation) passed. Called by the auth middleware layer. */
 export function emitGateAllowed(
-  ctx: RuntimeAuditContext,
+  ctx: McsRuntimeAuditContext,
   gate: string,
-): Promise<RuntimeAuditLogEntry | null> {
+): Promise<McsRuntimeAuditLogEntry | null> {
   return appendRuntimeAuditEntry({ action: 'runtime.gate.allowed', runtime: { ...ctx, gate } });
 }
 
 /** A gate blocked the turn. `reason` is the capped gate-denial cause. */
 export function emitGateDenied(
-  ctx: RuntimeAuditContext,
+  ctx: McsRuntimeAuditContext,
   gate: string,
   reason?: string | null,
-): Promise<RuntimeAuditLogEntry | null> {
+): Promise<McsRuntimeAuditLogEntry | null> {
   return appendRuntimeAuditEntry({
     action: 'runtime.gate.denied',
     runtime: { ...ctx, gate },
@@ -99,7 +99,7 @@ export function emitGateDenied(
  */
 export async function coordinateRuntimeTurnAudited(
   input: RuntimeTurnCoordinatorInput,
-  ctx: RuntimeAuditContext,
+  ctx: McsRuntimeAuditContext,
 ): Promise<RuntimeTurnCoordinatorResult> {
   await emitTurnOpened(ctx);
 

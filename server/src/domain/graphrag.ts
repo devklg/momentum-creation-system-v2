@@ -24,9 +24,9 @@ import { env } from '../env.js';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
-  AppendGraphRagRecordInput,
-  GraphRagRetrievalHit,
-  GraphRagRetrievalQuery,
+  McsGraphRagInput,
+  McsGraphRagHit,
+  McsGraphRagQuery,
   McsEmbeddingModel,
   McsGraphRagRecord,
   McsLearningDomain,
@@ -78,7 +78,7 @@ function deterministicRecordId(input: {
  * record, or `null` when the canary is off.
  */
 export async function appendGraphRagRecord(
-  input: AppendGraphRagRecordInput,
+  input: McsGraphRagInput,
 ): Promise<McsGraphRagRecord | null> {
   if (!graphRagPersistenceEnabled()) return null;
 
@@ -157,8 +157,8 @@ export async function appendGraphRagRecord(
  * Returns `[]` when the canary is off.
  */
 export async function retrieveGraphRag(
-  query: GraphRagRetrievalQuery,
-): Promise<GraphRagRetrievalHit[]> {
+  query: McsGraphRagQuery,
+): Promise<McsGraphRagHit[]> {
   if (!graphRagPersistenceEnabled()) return [];
 
   if (!query.tenantId) {
@@ -194,7 +194,7 @@ export async function retrieveGraphRag(
       version: typeof meta.version === 'number' ? meta.version : Number(meta.version ?? 0),
       summary: docs[i] ?? '',
       distance: typeof dists[i] === 'number' ? (dists[i] as number) : null,
-    } satisfies GraphRagRetrievalHit;
+    } satisfies McsGraphRagHit;
   });
 }
 

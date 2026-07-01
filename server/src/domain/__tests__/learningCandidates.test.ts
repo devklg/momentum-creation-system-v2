@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AppendLearningCandidateInput } from '@momentum/shared';
+import type { McsLearningCandidateInput } from '@momentum/shared';
 
 /**
  * Phase 7 · R2 — learning candidate pipeline tests (P7.5).
@@ -35,7 +35,7 @@ async function load(enabled: boolean) {
   return import('../learningCandidates.js');
 }
 
-function input(overrides: Partial<AppendLearningCandidateInput> = {}): AppendLearningCandidateInput {
+function input(overrides: Partial<McsLearningCandidateInput> = {}): McsLearningCandidateInput {
   return {
     tenantId: 'team_magnificent',
     domain: 'performance',

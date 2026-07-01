@@ -29,7 +29,7 @@ import { env } from '../env.js';
 import { gatewayCall } from '../services/gateway.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
-  AppendOutcomeInput,
+  McsOutcomeInput,
   McsOutcomeKind,
   McsOutcomeRecord,
 } from '@momentum/shared';
@@ -122,7 +122,7 @@ export async function findOutcome(id: string): Promise<McsOutcomeRecord | null> 
  * usable prospect/token scope — an outcome with no subject is meaningless.
  */
 export async function appendOutcome(
-  input: AppendOutcomeInput,
+  input: McsOutcomeInput,
 ): Promise<McsOutcomeRecord | null> {
   if (!outcomeCapturePersistenceEnabled()) return null;
 

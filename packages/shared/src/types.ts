@@ -5130,16 +5130,16 @@ export interface SuccessProfileAgentContext {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** The internal runtime agents a runtime audit event can attribute a turn to. */
-export type RuntimeAuditAgent = 'michael' | 'steve' | 'ivory';
+export type McsRuntimeAuditAgent = 'michael' | 'steve' | 'ivory';
 
 /** Which kind of draft an emission event refers to (content is NOT stored). */
-export type RuntimeAuditDraftKind = 'outcome' | 'guided_action';
+export type McsRuntimeAuditDraftKind = 'outcome' | 'guided_action';
 
 /**
  * Runtime audit actions (P7.2 §3.2). `domain.entity.action` convention with a
  * `runtime` domain so the read surface isolates them by `actionPrefix: 'runtime.'`.
  */
-export type RuntimeAuditAction =
+export type McsRuntimeAuditAction =
   | 'runtime.turn.opened'
   | 'runtime.turn.draft_emitted'
   | 'runtime.turn.closed'
@@ -5152,20 +5152,20 @@ export type RuntimeAuditAction =
  * Runtime scope carried alongside a runtime audit entry (P7.2 §3.3). Ids only —
  * no body, no content, no PII. `turnId`+`action` form the idempotency dedup key.
  */
-export interface RuntimeAuditContext {
+export interface McsRuntimeAuditContext {
   turnId: string;
   correlationId: string;
-  agent: RuntimeAuditAgent;
+  agent: McsRuntimeAuditAgent;
   tmagId: string;
   tenantId: string;
   gate: string | null;
-  draftKind: RuntimeAuditDraftKind | null;
+  draftKind: McsRuntimeAuditDraftKind | null;
 }
 
 /** Input to `appendRuntimeAuditEntry`. `reason` is a capped gate-denial cause only. */
-export interface AppendRuntimeAuditEntryInput {
-  action: RuntimeAuditAction;
-  runtime: RuntimeAuditContext;
+export interface McsRuntimeAuditInput {
+  action: McsRuntimeAuditAction;
+  runtime: McsRuntimeAuditContext;
   severity?: AuditSeverity;
   reason?: string | null;
   timestamp?: IsoTimestamp;
@@ -5176,8 +5176,8 @@ export interface AppendRuntimeAuditEntryInput {
  * substrate) plus the dedicated `runtime` scope block (never overloads
  * `before`/`after`, which stay null for lifecycle markers).
  */
-export interface RuntimeAuditLogEntry extends AuditLogEntry {
-  runtime: RuntimeAuditContext;
+export interface McsRuntimeAuditLogEntry extends AuditLogEntry {
+  runtime: McsRuntimeAuditContext;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -5272,7 +5272,7 @@ export interface McsOutcomeRecord extends McsMemoryEnvelope {
 }
 
 /** Input to `appendOutcome`. The domain layer stamps id/envelope; BA supplies the fact. */
-export interface AppendOutcomeInput {
+export interface McsOutcomeInput {
   kind: McsOutcomeKind;
   confirmedByTmagId: string;
   tenantId: string;
@@ -5314,7 +5314,7 @@ export type McsLearningDomain =
  * A human review decision. `reviewedByTmagId` is a HUMAN reviewer id — never an
  * agent id. Written once; a changed decision supersedes with a new candidate.
  */
-export interface McsCandidateReview {
+export interface McsLearningCandidateReview {
   decision: 'approved' | 'rejected';
   reviewedByTmagId: string;
   reviewedAt: IsoTimestamp;
@@ -5331,12 +5331,12 @@ export interface McsLearningCandidateRecord extends McsMemoryEnvelope {
   proposedSummary: string;
   sourceOutcomeIds: string[];
   sourceSignalIds: string[];
-  review?: McsCandidateReview | null;
+  review?: McsLearningCandidateReview | null;
   supersedesCandidateId?: string | null;
 }
 
 /** Input to `appendLearningCandidate`. Always produces a `detected` candidate. */
-export interface AppendLearningCandidateInput {
+export interface McsLearningCandidateInput {
   tenantId: string;
   domain: McsLearningDomain;
   language: 'en' | 'es';
@@ -5348,7 +5348,7 @@ export interface AppendLearningCandidateInput {
 }
 
 /** Input to `reviewLearningCandidate` — a HUMAN review decision (P7.5 §5.1). */
-export interface ReviewLearningCandidateInput {
+export interface McsLearningCandidateReviewInput {
   candidateId: string;
   decision: 'approved' | 'rejected';
   reviewedByTmagId: string;
@@ -5385,7 +5385,7 @@ export interface McsGraphRagRecord extends McsMemoryEnvelope {
 }
 
 /** Input to `appendGraphRagRecord`. */
-export interface AppendGraphRagRecordInput {
+export interface McsGraphRagInput {
   knowledgeObjectId: string;
   version: number;
   tenantId: string;
@@ -5400,7 +5400,7 @@ export interface AppendGraphRagRecordInput {
 }
 
 /** A GraphRAG retrieval query (issued only by the Context Manager). */
-export interface GraphRagRetrievalQuery {
+export interface McsGraphRagQuery {
   tenantId: string;
   domain: McsLearningDomain;
   language: 'en' | 'es';
@@ -5409,7 +5409,7 @@ export interface GraphRagRetrievalQuery {
 }
 
 /** One retrieval hit — the shared id stitches Chroma/Neo4j/Mongo. */
-export interface GraphRagRetrievalHit {
+export interface McsGraphRagHit {
   id: string;
   knowledgeObjectId: string;
   version: number;
@@ -5428,7 +5428,7 @@ export interface GraphRagRetrievalHit {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Aggregate snapshot of the learning loop's health (admin-only). */
-export interface LearningObservabilitySnapshot {
+export interface McsLearningObservabilitySnapshot {
   tenantId: string;
   generatedAt: IsoTimestamp;
   runtimeAudit: {
