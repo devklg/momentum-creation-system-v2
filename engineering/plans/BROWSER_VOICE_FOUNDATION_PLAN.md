@@ -249,6 +249,43 @@ Browser Voice/Text must not assemble context, retrieve knowledge, approve knowle
 
 ---
 
+## 11a. La'Mont Local Voice Provider Addendum
+
+Recorded 2026-07-01: La'Mont is the approved Windows-local voice companion for
+MCS V2. This extends the provider strategy without replacing browser voice/text
+or text fallback.
+
+Provider model:
+
+```text
+browser_text       typed input inside .team
+browser_voice      browser speech recognition/synthesis where available
+lamont_voice       La'Mont local STT/TTS companion
+mixed              BA can move between voice and text without losing session
+```
+
+La'Mont belongs to the same `.team` internal runtime boundary. It may provide
+speech-to-text and text-to-speech for Steve, Michael, Ivory, admin capture, and
+future BA-facing agent workflows. It is not an agent, not a Context Manager,
+not a persistence adapter, and not a knowledge approval path.
+
+La'Mont-originated transcripts must enter MCS as authenticated runtime turns or
+interview artifacts. MCS owns session identity, member scope, persistence,
+Context Packet assembly, knowledge ingestion, learning signals, and audit.
+Text fallback remains mandatory.
+
+Implementation must preserve these exclusions:
+
+- no `.com` / prospect-facing La'Mont voice integration;
+- no hidden microphone capture;
+- no direct MongoDB, Neo4j, ChromaDB, or GraphRAG writes from La'Mont;
+- no knowledge approval by La'Mont or by the learning pipeline;
+- no bypass of MCS authentication, `team_magnificent` scope, or session IDs.
+
+Related decision: `organization/DECISION_lamont_local_voice_layer.md`.
+
+---
+
 ## 12. Telnyx Boundary
 
 Telnyx is external telephony only.

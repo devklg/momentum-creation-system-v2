@@ -209,6 +209,35 @@ All agents share common infrastructure:
 * Permission registry
 * Escalation registry
 
+## Local Voice Layer — La'Mont
+
+La'Mont is the approved local voice layer for MCS V2. La'Mont is **not** an
+agent and does not make decisions, retrieve context, approve knowledge, or write
+to stores. It is a Windows-local companion app that provides speech-to-text and
+text-to-speech for authenticated BA-facing workflows.
+
+La'Mont may serve Steve, Michael, Ivory, admin capture, and future BA-facing
+agent workflows as a reusable voice input/output provider. The integration must
+be system-wide rather than hard-coded to one interview surface.
+
+Boundary:
+
+```text
+La'Mont local STT/TTS
+  -> authenticated MCS runtime turn/interview endpoint
+  -> Agent Runtime
+  -> Context Manager
+  -> governed persistence / knowledge ingestion / learning pipeline
+```
+
+MCS remains the system of record. MCS owns authentication, member scope,
+session identity, persistence, Context Packet assembly, GraphRAG/knowledge
+ingestion, audit, and approval gates. La'Mont must never become prospect-facing
+on `.com`, must never capture audio invisibly, must never bypass text fallback,
+and must never write directly to MongoDB, Neo4j, ChromaDB, or GraphRAG.
+
+Related decision: `organization/DECISION_lamont_local_voice_layer.md`.
+
 Agents must not create private data islands.
 
 Every persistent agent action must be represented in the shared governance architecture.

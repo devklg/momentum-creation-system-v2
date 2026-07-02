@@ -128,6 +128,7 @@ Must include:
 - language selector
 - optional browser TTS
 - no Telnyx/PSTN imports
+- La'Mont local voice provider contract for Windows-local STT/TTS, additive to browser voice/text and text fallback
 
 ### Phase 6 - Agent Runtime Backend and UI
 
@@ -142,6 +143,7 @@ Must include:
 - journal prompt support
 - Ivory editable draft support
 - no auto-send
+- shared voice-provider handling so Steve, Michael, Ivory, and future BA-facing agents can accept La'Mont-originated final transcripts and return response text for optional La'Mont TTS
 
 ### Phase 7 - Momentum Journal
 
@@ -169,6 +171,7 @@ Must include:
 - candidate creation
 - review-only indexing
 - graph lineage
+- La'Mont-originated raw transcripts enter only through authenticated MCS runtime/interview endpoints and are preserved before summarization or structured extraction
 
 ### Phase 9 - Learning Pipeline
 
@@ -180,6 +183,7 @@ Must include:
 - learning cannot approve knowledge
 - private journal exclusion unless selected
 - bilingual parity signals
+- La'Mont-originated transcript/outcome signals are eligible only after MCS has scoped them to the authenticated member/session/agent; learning may use them for proposals but never for automatic approval
 
 ### Phase 10 - Knowledge Evolution
 
@@ -212,6 +216,7 @@ Must include:
 - Every BA-scoped runtime record must include Team Magnificent scope.
 - Agents must not query MongoDB, Chroma, Neo4j, or GraphRAG directly.
 - Internal runtime voice must use browser voice/text, not Telnyx.
+- La'Mont is approved as a local internal voice provider for `.team`; it does not replace text fallback, does not run on `.com`, and never writes directly to stores.
 - Telnyx remains external only.
 - Ivory drafts remain editable and BA-owned.
 - Knowledge Candidates are review-only.
