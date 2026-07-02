@@ -124,6 +124,36 @@ Design notes:
   print adds formatted output, not a new data path.
 - Print events audit-logged (who printed what scope, when).
 
+## GAP 4 — 3-way call requests + leader/group calendars
+
+**Kevin, 2026-07-02:** (1) 3-way request calendar and scheduling for the new
+BA; (2) group calendars as the group grows — leaders publish their
+availability for their PERSONAL TEAM.
+
+Shape:
+1. **3-way request flow** — the new BA requests a 3-way (BA + upline leader +
+   prospect): pick the prospect from their CRM, see the leader's published
+   availability, book a slot. The call itself stays a human conversation
+   (off-app, §3.6 spirit); the app schedules, reminds (SMS signal per the
+   channels doctrine), and logs the outcome into the prospect timeline —
+   an ingestion-covered encounter per Ruling 9.
+2. **Leader availability / group calendars** — a leader maintains an
+   availability calendar VISIBLE TO THEIR DOWNLINE SUBTREE: scope resolved by
+   the sponsorTmagId chain (Ruling 3 — the downline-membership test is the
+   ONLY genealogy fact, and it is exactly the right scoping primitive here).
+   As the team grows, each qualifying leader (Chat #100 leader threshold)
+   publishes for their own people; Kevin/Paul publish team-wide.
+3. **Schema surface (sketch):** `tmag_leader_availability` (leaderTmagId ·
+   recurring windows · exceptions) + `tmag_threeway_requests` (requestId ·
+   requestingTmagId · leaderTmagId · prospectId · slot ·
+   status(requested|confirmed|completed|no_show|rescheduled) · outcome note).
+   Triple-stack per canon; Chroma `mcs_` forms; TmagThreewayRequest label.
+4. **Ties to an existing open decision:** locked Part 5 “Orientation
+   scheduling mechanism (J.10)” — this gap generalizes it: ONE scheduling
+   subsystem (availability + slot booking) should serve orientation seats,
+   3-ways, and future leader coaching — decide J.10 and this together, not
+   as two scheduling systems.
+
 ---
 
 ## Awaiting further gaps from Kevin (session in progress)
