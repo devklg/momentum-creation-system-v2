@@ -384,7 +384,7 @@ Kevin sees aggregated metrics on enforcement in `/admin` Live Operations and Rep
 
 Steve conducts the New BA Discovery & Success Interview and is the **sole interviewer** in the system — the canonical 36-question / 11-section script. Steve creates the Success Profile and does **not** score, rank, classify, predict, or label the BA. The Success Profile is descriptive support context only: goals, why, current situation, experience, questions, training interests, available time, learning style, concerns, and Who Do You Know progress.
 
-Michael Magnificent is the **Training Agent and Daily Success Coach**. He no longer interviews — interviewing is Steve's alone — and he does not score, rank, or classify anyone; that scaffolding is retired entirely. Michael is a BA-facing voice agent (LiveKit-on-Telnyx, STT→LLM→TTS) who picks up Steve's Success Profile and supports both learning and daily rhythm: he teaches Layer 1 (two legs, find two people, the team grows beneath you, your sponsor helps with the rest), answers questions, reinforces the training curriculum, builds confidence, recommends manageable daily actions, and prepares the BA for orientation and Launch Center action — meeting each BA the way Steve's profile says works for them.
+Michael Magnificent is the **Training Agent and Daily Success Coach**. He no longer interviews — interviewing is Steve's alone — and he does not score, rank, or classify anyone; that scaffolding is retired entirely. Michael is a BA-facing agent in the **`.team` browser runtime — browser voice, browser text, or mixed mode** (S1.6 Browser Voice/Text Foundation; Telnyx is excluded from the internal browser runtime) who picks up Steve's Success Profile and supports both learning and daily rhythm: he teaches Layer 1 (two legs, find two people, the team grows beneath you, your sponsor helps with the rest), answers questions, reinforces the training curriculum, builds confidence, recommends manageable daily actions, and prepares the BA for orientation and Launch Center action — meeting each BA the way Steve's profile says works for them.
 
 Michael is BA-facing only. **Michael is never prospect-facing. Michael never appears on `.com`.** Michael does not interview, score, classify, handle objections, pitch, or qualify. Everyone receives the same opportunity, tools, training, and support; actions and outcomes determine results.
 
@@ -392,9 +392,11 @@ Comp plan is deferred until the new BA has signed two people and earned enough c
 
 *Amended 2026-06-24: Steve is the sole success interviewer; Michael is repurposed from interviewer/scorer to the Training Agent and Daily Success Coach; all Michael interview and scoring/classification logic is retired from the code.*
 
+*Amended 2026-07-02 (Kevin): the agent interaction surface changed from phone calls to **browser-based** — Steve's interview and Michael's coaching happen in the `.team` browser runtime (voice, text, or mixed; English/Spanish), per the S1.6 Browser Voice/Text Foundation. Telnyx carries no internal agent runtime traffic.*
+
 ## 3.13  Communication
 
-- **Telnyx** for SMS to BAs (callback alerts, signal events) and outbound voice (Michael's calls). Pattern proven.
+- **Telnyx** for SMS — BA callback alerts and signal events, and prospect magic-link delivery (3.17). ~~Outbound voice (Michael's calls)~~ — *superseded 2026-07-02: agent interaction (Steve, Michael, Ivory) is browser-based voice/text/mixed inside `.team` per S1.6; Telnyx is excluded from the internal browser runtime.*
 - **Email provider TBD** — Resend, Postmark, SendGrid, or SES. Open question, picked when wiring. Carried forward from Signup Architecture E.6.
 
 ## 3.14  Persistence
