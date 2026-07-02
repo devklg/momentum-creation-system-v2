@@ -195,6 +195,12 @@ const Env = z.object({
   NEO4J_USERNAME: z.string().default('neo4j'),
   NEO4J_PASSWORD: z.string().default(''),
   CHROMA_URL: z.string().url().default('http://localhost:8200'),
+  /** Chroma tenant — 'default_tenant' locally; the tenant UUID on Chroma Cloud. */
+  CHROMA_TENANT: z.string().default('default_tenant'),
+  /** Chroma database — 'default_database' locally; named database on Chroma Cloud. */
+  CHROMA_DATABASE: z.string().default('default_database'),
+  /** Chroma Cloud API key (x-chroma-token). Empty locally — header omitted. */
+  CHROMA_API_KEY: z.string().default(''),
   GPU_EMBEDDER_URL: z.string().url().default('http://localhost:8300'),
 
   // Per-store persistence mode. Direct is the default and the only supported
