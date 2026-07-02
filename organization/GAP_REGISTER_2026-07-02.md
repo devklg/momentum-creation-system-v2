@@ -60,9 +60,8 @@ every never-on-.com rule then applies to the public faces of .team
 subdomains); (c) parallel subdomains per domain (.com public / .team
 private). Kevin's phrasing leans (b); NOT yet ruled.
 
-**VERIFY:** `teammagnificent.team` domain registration status (record shows
-`.com` at Namecheap; `.team` is load-bearing for this design and for the
-locked spec's surface naming).
+**VERIFIED 2026-07-02:** `teammagnificent.team` is registered (resolves to
+Namecheap parking, 192.64.119.237) — ready for wildcard DNS at build time.
 
 ## GAP 2 — Member entitlement model (Kevin-granted module access)
 
