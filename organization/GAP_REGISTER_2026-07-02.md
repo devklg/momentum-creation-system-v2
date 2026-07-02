@@ -77,6 +77,31 @@ Needed: an entitlements field/collection on the member (first entitlement:
 (lead-ownership continuity — multiple members building with RVM under their
 own ownerTmagId).
 
+## GAP 3 — Printing (/admin + member CRM prospect list)
+
+**Kevin, 2026-07-02:** printing in `/admin`, and a printable list of
+prospects in the CRM.
+
+Two surfaces:
+1. **Member cockpit CRM → printable prospect list** — the working call sheet:
+   name, city/state, disposition, follow-up due, last activity; filtered to
+   the member's own prospects (scope = their attributed slice, per Gap 1).
+   Print-formatted view (print CSS and/or PDF), member-initiated.
+2. **`/admin` print views** — Kevin-side printable output for admin surfaces
+   (member roster, prospects, reports — exact surface list to be enumerated
+   at build).
+
+Design notes:
+- Printing is an EXPORT class — ties directly to the locked-spec Part 5 open
+  decision “Export PII redaction — per-export confirmation always, or
+  persistent show-me-everything preference for Kevin” (ADMIN J.5.10). That
+  ruling should be made alongside this build; member-side prints are
+  PII-bearing by nature (their own prospects' contact data — permissible,
+  but audit-worthy).
+- A CRM CSV export already exists in the design lineage (locked §4.4 note);
+  print adds formatted output, not a new data path.
+- Print events audit-logged (who printed what scope, when).
+
 ---
 
 ## Awaiting further gaps from Kevin (session in progress)
