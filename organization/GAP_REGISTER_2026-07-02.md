@@ -101,7 +101,11 @@ Two surfaces:
    outputs the already-compliant draft — print is a rendering, never a
    bypass. Ties to Ruling 8/12c: an agent template (the road) can DECLARE
    its printable outputs, making printables a first-class template property
-   rather than per-feature bolt-ons.
+   rather than per-feature bolt-ons. **Steve prints the member's WHY** —
+   captured in the member's own words during discovery; the printable WHY
+   card is 10-step orientation Step 1 (“emotional barrier of exit”) made
+   physical: posted where the member sees it daily, especially where the
+   phone work happens. The belief-erosion antidote (locked §1.14) in print.
 
 Design notes:
 - Printing is an EXPORT class — ties directly to the locked-spec Part 5 open
