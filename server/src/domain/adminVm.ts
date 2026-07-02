@@ -14,7 +14,7 @@ import {
 } from './vmNotificationHooks.js';
 import type {
   McsAdminVmBaPerformanceRow,
-  McsAdminVmBatchHealthRow,
+  McsAdminVmLeadOwnerHealthRow,
   McsAdminVmCampaignRow,
   McsAdminVmComplianceSummary,
   McsAdminVmMetricCard,
@@ -24,7 +24,7 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLL_BAS = 'team_magnificent_members';
-const COLL_BATCHES = 'tmag_vm_lead_batches';
+const COLL_LEAD_OWNERS = 'tmag_vm_lead_owners';
 const COLL_LEADS = 'tmag_vm_bulk_leads';
 const COLL_CAMPAIGNS = 'tmag_vm_campaigns';
 const COLL_DELIVERY = 'tmag_vm_delivery_events';
@@ -41,8 +41,8 @@ interface BaDoc {
   lastName?: string;
 }
 
-interface LeadBatchDoc {
-  leadBatchId?: string;
+interface LeadOwnerDoc {
+  leadOwnerId?: string;
   ownerTmagId?: string;
   source?: string;
   status?: string;
@@ -53,7 +53,7 @@ interface LeadBatchDoc {
 
 interface BulkLeadDoc {
   leadId?: string;
-  leadBatchId?: string;
+  leadOwnerId?: string;
   vmCampaignId?: string;
   ownerTmagId?: string;
   sponsorTmagId?: string;
@@ -66,7 +66,7 @@ interface BulkLeadDoc {
 interface VmCampaignDoc {
   vmCampaignId?: string;
   ownerTmagId?: string;
-  leadBatchId?: string | null;
+  leadOwnerId?: string | null;
   name?: string;
   provider?: string;
   status?: string;
@@ -87,7 +87,7 @@ interface CrmRecordDoc {
   ownerTmagId?: string;
   sponsorTmagId?: string;
   leadId?: string | null;
-  leadBatchId?: string | null;
+  leadOwnerId?: string | null;
   vmCampaignId?: string | null;
   source?: string;
   status?: string;
@@ -105,7 +105,7 @@ interface SuppressionDoc {
 interface AdminVmSources {
   warnings: string[];
   bas: BaDoc[];
-  batches: LeadBatchDoc[];
+  leadOwners: LeadOwnerDoc[];
   leads: BulkLeadDoc[];
   campaigns: VmCampaignDoc[];
   delivery: DeliveryEventDoc[];
@@ -186,10 +186,10 @@ function countByStatus<T extends { status?: string }>(
 
 async function loadSources(): Promise<AdminVmSources> {
   const warnings: string[] = [];
-  const [bas, batches, leads, campaigns, delivery, crm, suppressions] =
+  const [bas, leadOwners, leads, campaigns, delivery, crm, suppressions] =
     await Promise.all([
       safeQuery<BaDoc>(COLL_BAS, warnings, {}, 50_000),
-      safeQuery<LeadBatchDoc>(COLL_BATCHES, warnings, {}, QUERY_LIMIT, { createdAt: -1 }),
+      safeQuery<LeadOwnerDoc>(COLL_LEAD_OWNERS, warnings, {}, QUERY_LIMIT, { createdAt: -1 }),
       safeQuery<BulkLeadDoc>(COLL_LEADS, warnings, {}, QUERY_LIMIT),
       safeQuery<VmCampaignDoc>(COLL_CAMPAIGNS, warnings, {}, QUERY_LIMIT, { createdAt: -1 }),
       safeQuery<DeliveryEventDoc>(COLL_DELIVERY, warnings, {}, QUERY_LIMIT),
@@ -197,13 +197,13 @@ async function loadSources(): Promise<AdminVmSources> {
       safeQuery<SuppressionDoc>(COLL_SUPPRESSIONS, warnings, {}, QUERY_LIMIT),
     ]);
 
-  return { warnings, bas, batches, leads, campaigns, delivery, crm, suppressions };
+  return { warnings, bas, leadOwners, leads, campaigns, delivery, crm, suppressions };
 }
 
 function buildCards(args: {
   leads: BulkLeadDoc[];
   campaigns: VmCampaignDoc[];
-  batches: LeadBatchDoc[];
+  leadOwners: LeadOwnerDoc[];
   crm: CrmRecordDoc[];
 }): McsAdminVmMetricCard[] {
   const leadsImported = args.leads.length;
@@ -226,7 +226,7 @@ function buildCards(args: {
       key: 'campaigns',
       label: 'VM Campaigns',
       value: args.campaigns.length,
-      detail: `${args.batches.length} lead batches visible`,
+      detail: `${args.leadOwners.length} lead owners visible`,
       tone: 'neutral',
     },
     {
@@ -263,13 +263,13 @@ function buildCards(args: {
 function buildBaRows(sources: AdminVmSources): McsAdminVmBaPerformanceRow[] {
   const baById = new Map(sources.bas.map((b) => [b.tmagId, b]));
   const ownerIds = new Set<string>();
-  for (const b of sources.batches) if (b.ownerTmagId) ownerIds.add(b.ownerTmagId);
+  for (const b of sources.leadOwners) if (b.ownerTmagId) ownerIds.add(b.ownerTmagId);
   for (const c of sources.campaigns) if (c.ownerTmagId) ownerIds.add(c.ownerTmagId);
   for (const l of sources.leads) if (l.ownerTmagId) ownerIds.add(l.ownerTmagId);
   for (const r of sources.crm) if (r.ownerTmagId) ownerIds.add(r.ownerTmagId);
 
   const campaignsByOwner = countBy(sources.campaigns, (c) => c.ownerTmagId);
-  const batchesByOwner = countBy(sources.batches, (b) => b.ownerTmagId);
+  const leadOwnersByOwner = countBy(sources.leadOwners, (b) => b.ownerTmagId);
   const leadsByOwner = countBy(sources.leads, (l) => l.ownerTmagId);
   const contactedByOwner = countByStatus(sources.leads, (l) => l.ownerTmagId, [
     'voicemail_sent',
@@ -338,7 +338,7 @@ function buildBaRows(sources: AdminVmSources): McsAdminVmBaPerformanceRow[] {
         tmagId,
         baName: fullName(baById.get(tmagId), tmagId),
         campaignCount: campaignsByOwner.get(tmagId) ?? 0,
-        batchCount: batchesByOwner.get(tmagId) ?? 0,
+        leadOwnerCount: leadOwnersByOwner.get(tmagId) ?? 0,
         leadsImported,
         leadsContacted: contactedByOwner.get(tmagId) ?? 0,
         activated,
@@ -357,27 +357,27 @@ function buildBaRows(sources: AdminVmSources): McsAdminVmBaPerformanceRow[] {
     .slice(0, RECENT_LIMIT);
 }
 
-function buildBatchRows(sources: AdminVmSources): McsAdminVmBatchHealthRow[] {
+function buildLeadOwnerRows(sources: AdminVmSources): McsAdminVmLeadOwnerHealthRow[] {
   const baById = new Map(sources.bas.map((b) => [b.tmagId, b]));
-  return sources.batches.slice(0, RECENT_LIMIT).map((batch) => {
-    const batchId = batch.leadBatchId ?? 'unknown_batch';
-    const owner = batch.ownerTmagId ?? 'unknown_owner';
-    const leads = sources.leads.filter((l) => l.leadBatchId === batchId);
-    const crm = sources.crm.filter((r) => r.leadBatchId === batchId);
+  return sources.leadOwners.slice(0, RECENT_LIMIT).map((leadOwner) => {
+    const leadOwnerId = leadOwner.leadOwnerId ?? 'unknown_lead_owner';
+    const owner = leadOwner.ownerTmagId ?? 'unknown_owner';
+    const leads = sources.leads.filter((l) => l.leadOwnerId === leadOwnerId);
+    const crm = sources.crm.filter((r) => r.leadOwnerId === leadOwnerId);
     return {
-      leadBatchId: batchId,
+      leadOwnerId,
       ownerTmagId: owner,
       ownerName: fullName(baById.get(owner), owner),
-      source: batch.source ?? 'unknown',
-      status: batch.status ?? 'unknown',
-      quantityImported: batch.quantityImported ?? leads.length,
+      source: leadOwner.source ?? 'unknown',
+      status: leadOwner.status ?? 'unknown',
+      quantityImported: leadOwner.quantityImported ?? leads.length,
       validated: leads.filter((l) => isOneOf(l.status, ['validated', 'crm_created', 'token_created', 'queued', 'voicemail_sent', 'activated'])).length,
       suppressed: leads.filter((l) => l.status === 'suppressed').length,
       tokenized: leads.filter((l) => isOneOf(l.status, ['token_created', 'queued', 'voicemail_sent', 'link_clicked', 'activated'])).length,
       crmCreated: crm.length,
       activated: leads.filter((l) => isOneOf(l.status, ['activated', 'info_requested', 'callback_requested', 'presentation_started', 'presentation_completed', 'holding_tank'])).length,
-      createdAt: batch.createdAt ?? null,
-      completedAt: batch.completedAt ?? null,
+      createdAt: leadOwner.createdAt ?? null,
+      completedAt: leadOwner.completedAt ?? null,
     };
   });
 }
@@ -394,7 +394,7 @@ function buildCampaignRows(sources: AdminVmSources): McsAdminVmCampaignRow[] {
       vmCampaignId: campaignId,
       ownerTmagId: owner,
       ownerName: fullName(baById.get(owner), owner),
-      leadBatchId: campaign.leadBatchId ?? null,
+      leadOwnerId: campaign.leadOwnerId ?? null,
       name: campaign.name ?? campaignId,
       provider: campaign.provider ?? 'manual',
       status: campaign.status ?? 'unknown',
@@ -469,7 +469,7 @@ export async function buildAdminVmOverview(): Promise<McsAdminVmOverviewResponse
     generatedAt: new Date().toISOString(),
     cards: buildCards(sources),
     baPerformance: buildBaRows(sources),
-    batches: buildBatchRows(sources),
+    leadOwners: buildLeadOwnerRows(sources),
     campaigns: buildCampaignRows(sources),
     compliance: buildComplianceSummary(sources),
     providerHealth: buildProviderHealth(sources),

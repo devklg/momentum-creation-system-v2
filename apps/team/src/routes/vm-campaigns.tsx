@@ -1,7 +1,7 @@
 /**
  * /vm-campaigns - BA-facing VM campaign workspace.
  *
- * UI-only shell for contact batches, campaign setup, dry-run/manual delivery,
+ * UI-only shell for lead-owner lists, campaign setup, dry-run/manual delivery,
  * and engagement analytics. No live VM/SMS/email send is triggered here.
  */
 
@@ -26,8 +26,8 @@ import { Label } from '@/components/ui/label';
 type CampaignStatus = 'draft' | 'ready' | 'dry_run' | 'paused' | 'complete';
 type ProviderMode = 'manual_csv' | 'leadsrain_style' | 'slybroadcast_style';
 
-interface LeadBatchDraft {
-  batchId: string;
+interface LeadOwnerDraft {
+  leadOwnerId: string;
   name: string;
   source: string;
   country: string;
@@ -38,7 +38,7 @@ interface LeadBatchDraft {
 interface VmCampaignDraft {
   campaignId: string;
   name: string;
-  batchId: string;
+  leadOwnerId: string;
   provider: ProviderMode;
   status: CampaignStatus;
   voicemailScript: string;
@@ -82,8 +82,8 @@ const EMPTY_METRICS: VmCampaignDraft['metrics'] = {
   closed: 0,
 };
 
-const EXAMPLE_BATCH: LeadBatchDraft = {
-  batchId: 'batch_demo_contact_list',
+const EXAMPLE_BATCH: LeadOwnerDraft = {
+  leadOwnerId: 'leadowner_demo_contact_list',
   name: 'Personal VM test list',
   source: 'Manual upload',
   country: 'US',
@@ -94,7 +94,7 @@ const EXAMPLE_BATCH: LeadBatchDraft = {
 const EXAMPLE_CAMPAIGN: VmCampaignDraft = {
   campaignId: 'vm_campaign_draft_001',
   name: 'First VM Campaign',
-  batchId: EXAMPLE_BATCH.batchId,
+  leadOwnerId: EXAMPLE_BATCH.leadOwnerId,
   provider: 'manual_csv',
   status: 'draft',
   voicemailScript:
@@ -113,12 +113,12 @@ function numberFmt(n: number): string {
 
 export function VmCampaignsPage() {
   const navigate = useNavigate();
-  const [batches, setBatches] = useState<LeadBatchDraft[]>([EXAMPLE_BATCH]);
+  const [leadOwners, setLeadOwners] = useState<LeadOwnerDraft[]>([EXAMPLE_BATCH]);
   const [campaigns, setCampaigns] = useState<VmCampaignDraft[]>([EXAMPLE_CAMPAIGN]);
   const [selectedId, setSelectedId] = useState(EXAMPLE_CAMPAIGN.campaignId);
 
   const selected = campaigns.find((c) => c.campaignId === selectedId) ?? campaigns[0]!;
-  const selectedBatch = batches.find((b) => b.batchId === selected.batchId) ?? null;
+  const selectedLeadOwner = leadOwners.find((b) => b.leadOwnerId === selected.leadOwnerId) ?? null;
 
   const totals = useMemo(
     () =>
@@ -134,15 +134,15 @@ export function VmCampaignsPage() {
     [campaigns],
   );
 
-  function addBatch(batch: LeadBatchDraft) {
-    setBatches((prev) => [batch, ...prev]);
+  function addLeadOwner(leadOwner: LeadOwnerDraft) {
+    setLeadOwners((prev) => [leadOwner, ...prev]);
     setCampaigns((prev) =>
       prev.map((c) =>
         c.campaignId === selectedId
           ? {
               ...c,
-              batchId: batch.batchId,
-              metrics: { ...c.metrics, imported: batch.quantity, queued: batch.quantity },
+              leadOwnerId: leadOwner.leadOwnerId,
+              metrics: { ...c.metrics, imported: leadOwner.quantity, queued: leadOwner.quantity },
             }
           : c,
       ),
@@ -160,7 +160,7 @@ export function VmCampaignsPage() {
       ...EXAMPLE_CAMPAIGN,
       campaignId: `vm_campaign_${Date.now()}`,
       name: `VM Campaign ${campaigns.length + 1}`,
-      batchId: batches[0]?.batchId ?? EXAMPLE_BATCH.batchId,
+      leadOwnerId: leadOwners[0]?.leadOwnerId ?? EXAMPLE_BATCH.leadOwnerId,
       metrics: { ...EMPTY_METRICS },
     };
     setCampaigns((prev) => [next, ...prev]);
@@ -239,16 +239,16 @@ export function VmCampaignsPage() {
               </ul>
             </section>
 
-            <BatchImportCard onAddBatch={addBatch} />
+            <LeadOwnerImportCard onAddLeadOwner={addLeadOwner} />
           </aside>
 
           <section className="space-y-6">
             <CampaignBuilder
               campaign={selected}
-              batches={batches}
+              leadOwners={leadOwners}
               onPatch={patchSelected}
             />
-            <CampaignAnalytics campaign={selected} batch={selectedBatch} />
+            <CampaignAnalytics campaign={selected} leadOwner={selectedLeadOwner} />
           </section>
         </div>
       </div>
@@ -286,10 +286,10 @@ function Metric({
   );
 }
 
-function BatchImportCard({
-  onAddBatch,
+function LeadOwnerImportCard({
+  onAddLeadOwner,
 }: {
-  onAddBatch: (batch: LeadBatchDraft) => void;
+  onAddLeadOwner: (leadOwner: LeadOwnerDraft) => void;
 }) {
   const [name, setName] = useState('Personal VM test list');
   const [source, setSource] = useState('Manual upload');
@@ -306,9 +306,9 @@ function BatchImportCard({
   function submit(e: FormEvent) {
     e.preventDefault();
     const qty = Math.max(0, Number.parseInt(quantity, 10) || 0);
-    onAddBatch({
-      batchId: `batch_${Date.now()}`,
-      name: name.trim() || 'Untitled contact batch',
+    onAddLeadOwner({
+      leadOwnerId: `leadowner_${Date.now()}`,
+      name: name.trim() || 'Untitled lead-owner list',
       source: source.trim() || 'Manual upload',
       country: country.trim().toUpperCase() || 'US',
       quantity: qty,
@@ -322,14 +322,14 @@ function BatchImportCard({
       <div className="mb-4 flex items-center gap-2">
         <FileUp className="h-4 w-4 text-gold" aria-hidden="true" />
         <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-cream-mute">
-          Contact batch
+          Lead-owner list
         </p>
       </div>
 
       <form onSubmit={submit} className="space-y-3">
         <div>
-          <Label htmlFor="batchName">Batch name</Label>
-          <Input id="batchName" value={name} onChange={(e) => setName(e.target.value)} />
+          <Label htmlFor="leadOwnerName">List name</Label>
+          <Input id="leadOwnerName" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -364,11 +364,11 @@ function BatchImportCard({
           type="submit"
           className="w-full border border-cream/15 bg-cream/[0.05] text-cream hover:border-gold/40 font-mono text-[12px] tracking-[0.04em]"
         >
-          Save batch draft
+          Save lead-owner draft
         </Button>
         {saved && (
           <p className="font-mono text-[11px] tracking-[0.04em] text-teal">
-            Batch draft attached.
+            Lead-owner draft attached.
           </p>
         )}
       </form>
@@ -378,11 +378,11 @@ function BatchImportCard({
 
 function CampaignBuilder({
   campaign,
-  batches,
+  leadOwners,
   onPatch,
 }: {
   campaign: VmCampaignDraft;
-  batches: LeadBatchDraft[];
+  leadOwners: LeadOwnerDraft[];
   onPatch: (patch: Partial<VmCampaignDraft>) => void;
 }) {
   return (
@@ -424,16 +424,16 @@ function CampaignBuilder({
         </div>
 
         <div>
-          <Label htmlFor="batch">Contact batch</Label>
+          <Label htmlFor="leadOwner">Lead-owner list</Label>
           <select
-            id="batch"
-            value={campaign.batchId}
-            onChange={(e) => onPatch({ batchId: e.target.value })}
+            id="leadOwner"
+            value={campaign.leadOwnerId}
+            onChange={(e) => onPatch({ leadOwnerId: e.target.value })}
             className="h-12 w-full rounded-md border border-line bg-ink-2 px-3 text-cream"
           >
-            {batches.map((batch) => (
-              <option key={batch.batchId} value={batch.batchId}>
-                {batch.name}
+            {leadOwners.map((leadOwner) => (
+              <option key={leadOwner.leadOwnerId} value={leadOwner.leadOwnerId}>
+                {leadOwner.name}
               </option>
             ))}
           </select>
@@ -527,13 +527,13 @@ function TemplateBox({
 
 function CampaignAnalytics({
   campaign,
-  batch,
+  leadOwner,
 }: {
   campaign: VmCampaignDraft;
-  batch: LeadBatchDraft | null;
+  leadOwner: LeadOwnerDraft | null;
 }) {
   const rows = [
-    { label: 'Imported', value: batch?.quantity ?? campaign.metrics.imported },
+    { label: 'Imported', value: leadOwner?.quantity ?? campaign.metrics.imported },
     { label: 'Queued', value: campaign.metrics.queued },
     { label: 'Contacted', value: campaign.metrics.contacted },
     { label: 'Clicked', value: campaign.metrics.clicked },
@@ -552,7 +552,7 @@ function CampaignAnalytics({
             Analytics
           </p>
           <p className="mt-2 text-[14px] leading-[1.55] text-cream-mute">
-            {batch?.name ?? 'No batch selected'} / {batch?.fileName ?? 'manual draft'}
+            {leadOwner?.name ?? 'No lead owner selected'} / {leadOwner?.fileName ?? 'manual draft'}
           </p>
         </div>
         <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-cream-faint">

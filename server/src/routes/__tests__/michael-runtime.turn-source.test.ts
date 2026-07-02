@@ -73,7 +73,7 @@ describe('S3.11 route is wired to the server-owned turn source (static)', () => 
 // ---------------------------------------------------------------------------
 // GROUP B — BEHAVIORAL: the empty-body request drives the server-owned turn.
 // ---------------------------------------------------------------------------
-const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-ABC234';
 
 const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',

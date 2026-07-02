@@ -1,5 +1,5 @@
 /**
- * /api/vm — BA-owned VM lead batch and campaign API.
+ * /api/vm — BA-owned VM lead owner and campaign API.
  *
  * Owner/sponsor identity comes only from req.session.tmagId. Client payloads
  * cannot override ownership.
@@ -8,8 +8,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import type {
-  McsLeadBatchListResponse,
-  McsLeadBatchResponse,
+  McsLeadOwnerListResponse,
+  McsLeadOwnerResponse,
   McsVMCampaignListResponse,
   McsVMCampaignProviderMode,
   McsVMCampaignResponse,
@@ -18,11 +18,11 @@ import type {
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
-  LeadBatchError,
-  createLeadBatch,
-  findLeadBatchForOwner,
-  listLeadBatchesForOwner,
-} from '../domain/vmLeadBatches.js';
+  LeadOwnerError,
+  createLeadOwner,
+  findLeadOwnerForOwner,
+  listLeadOwnersForOwner,
+} from '../domain/vmLeadOwners.js';
 import {
   VMCampaignError,
   createVMCampaign,
@@ -40,7 +40,7 @@ const PROVIDERS: readonly McsVMCampaignProviderMode[] = [
   'future_telecom_adapter',
 ];
 
-const CreateBatchSchema = z.object({
+const CreateLeadOwnerSchema = z.object({
   name: z.string().min(1).max(160),
   source: z.string().min(1).max(120),
   country: z.string().min(2).max(2).default('US'),
@@ -49,7 +49,7 @@ const CreateBatchSchema = z.object({
 });
 
 const CreateCampaignSchema = z.object({
-  leadBatchId: z.string().min(4).max(120),
+  leadOwnerId: z.string().min(4).max(120),
   name: z.string().min(1).max(160),
   provider: z.enum(PROVIDERS as [McsVMCampaignProviderMode, ...McsVMCampaignProviderMode[]]).default('manual_csv'),
   voicemailAudioId: z.string().min(1).max(120).nullable().optional(),
@@ -84,12 +84,12 @@ function routeParam(req: import('express').Request, name: string): string {
 
 function sendVmError(res: import('express').Response, err: unknown) {
   if (
-    err instanceof LeadBatchError ||
+    err instanceof LeadOwnerError ||
     err instanceof VMCampaignError ||
     err instanceof BulkLeadError
   ) {
     const status =
-      err.code.endsWith('_not_found') || err.code === 'campaign_batch_mismatch'
+      err.code.endsWith('_not_found') || err.code === 'campaign_lead_owner_mismatch'
         ? 404
         : 400;
     return res.status(status).json({ ok: false, error: err.code });
@@ -99,49 +99,55 @@ function sendVmError(res: import('express').Response, err: unknown) {
   return res.status(500).json({ ok: false, error: 'server_error' });
 }
 
-vmRoutes.get('/batches', requireAuth, requireSteveComplete, async (req, res) => {
+async function listLeadOwnersHandler(req: import('express').Request, res: import('express').Response) {
   const tmagId = sessionTmagId(req);
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
-    const batches = await listLeadBatchesForOwner(tmagId);
-    const body: McsLeadBatchListResponse = { ok: true, batches };
+    const leadOwners = await listLeadOwnersForOwner(tmagId);
+    const body: McsLeadOwnerListResponse = { ok: true, leadOwners };
     return res.status(200).json(body);
   } catch (err) {
     return sendVmError(res, err);
   }
-});
+}
 
-vmRoutes.post('/batches', requireAuth, requireSteveComplete, async (req, res) => {
+vmRoutes.get('/lead-owners', requireAuth, requireSteveComplete, listLeadOwnersHandler);
+
+async function createLeadOwnerHandler(req: import('express').Request, res: import('express').Response) {
   const tmagId = sessionTmagId(req);
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
-  const parsed = CreateBatchSchema.safeParse(req.body);
+  const parsed = CreateLeadOwnerSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ ok: false, error: 'invalid_payload', issues: parsed.error.issues });
   }
   try {
-    const batch = await createLeadBatch({
+    const leadOwner = await createLeadOwner({
       ownerTmagId: tmagId,
       sponsorTmagId: tmagId,
       ...parsed.data,
     });
-    const body: McsLeadBatchResponse = { ok: true, batch };
+    const body: McsLeadOwnerResponse = { ok: true, leadOwner };
     return res.status(201).json(body);
   } catch (err) {
     return sendVmError(res, err);
   }
-});
+}
 
-vmRoutes.get('/batches/:batchId', requireAuth, requireSteveComplete, async (req, res) => {
+vmRoutes.post('/lead-owners', requireAuth, requireSteveComplete, createLeadOwnerHandler);
+
+async function getLeadOwnerHandler(req: import('express').Request, res: import('express').Response) {
   const tmagId = sessionTmagId(req);
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
-    const batch = await findLeadBatchForOwner(routeParam(req, 'batchId'), tmagId);
-    const body: McsLeadBatchResponse = { ok: true, batch };
+    const leadOwner = await findLeadOwnerForOwner(routeParam(req, 'leadOwnerId'), tmagId);
+    const body: McsLeadOwnerResponse = { ok: true, leadOwner };
     return res.status(200).json(body);
   } catch (err) {
     return sendVmError(res, err);
   }
-});
+}
+
+vmRoutes.get('/lead-owners/:leadOwnerId', requireAuth, requireSteveComplete, getLeadOwnerHandler);
 
 vmRoutes.get('/campaigns', requireAuth, requireSteveComplete, async (req, res) => {
   const tmagId = sessionTmagId(req);
@@ -166,7 +172,7 @@ vmRoutes.post('/campaigns', requireAuth, requireSteveComplete, async (req, res) 
     const campaign = await createVMCampaign({
       ownerTmagId: tmagId,
       sponsorTmagId: tmagId,
-      leadBatchId: parsed.data.leadBatchId,
+      leadOwnerId: parsed.data.leadOwnerId,
       name: parsed.data.name,
       provider: parsed.data.provider,
       voicemailAudioId: parsed.data.voicemailAudioId ?? null,
@@ -193,7 +199,7 @@ vmRoutes.get('/campaigns/:campaignId', requireAuth, requireSteveComplete, async 
   }
 });
 
-vmRoutes.post('/batches/:batchId/import', requireAuth, requireSteveComplete, async (req, res) => {
+async function importLeadOwnerLeadsHandler(req: import('express').Request, res: import('express').Response) {
   const tmagId = sessionTmagId(req);
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   const parsed = ImportLeadsSchema.safeParse(req.body);
@@ -204,13 +210,13 @@ vmRoutes.post('/batches/:batchId/import', requireAuth, requireSteveComplete, asy
     const result = await importBulkLeads({
       ownerTmagId: tmagId,
       sponsorTmagId: tmagId,
-      leadBatchId: routeParam(req, 'batchId'),
+      leadOwnerId: routeParam(req, 'leadOwnerId'),
       vmCampaignId: parsed.data.vmCampaignId,
       leads: parsed.data.leads,
     });
     const body: McsImportBulkLeadsResponse = {
       ok: true,
-      batch: result.batch,
+      leadOwner: result.leadOwner,
       campaign: result.campaign,
       leads: result.leads,
     };
@@ -218,4 +224,6 @@ vmRoutes.post('/batches/:batchId/import', requireAuth, requireSteveComplete, asy
   } catch (err) {
     return sendVmError(res, err);
   }
-});
+}
+
+vmRoutes.post('/lead-owners/:leadOwnerId/import', requireAuth, requireSteveComplete, importLeadOwnerLeadsHandler);

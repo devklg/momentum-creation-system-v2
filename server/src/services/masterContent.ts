@@ -5,9 +5,9 @@
  * INSTEAD of their hardcoded copy constants. It resolves a template's current
  * content through the master-content inheritance chain:
  *
- *   code default  →  master override (master_content_versions, latest version)
+ *   code default  →  master override (tmag_content_templates, latest version)
  *
- * Today (Wave 1) saved overrides land in `master_content_versions` but the
+ * Today (Wave 1) saved overrides land in `tmag_content_templates` but the
  * consumers still read code defaults, so a saved override is functionally
  * inert. This helper is the leg that makes inheritance *able* to inherit; the
  * actual consumer rewires are Wave 2 (inherit-com / inherit-scriptmaker /

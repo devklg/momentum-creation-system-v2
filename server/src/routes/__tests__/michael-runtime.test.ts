@@ -19,7 +19,7 @@ import { validateMichaelResponseContract } from '../../runtime/orchestration/ind
  * here.
  */
 
-const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-ABC234';
 
 const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',

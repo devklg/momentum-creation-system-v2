@@ -433,7 +433,7 @@ async function buildProspectFunnel(
  *
  * Reuses the same source set as `buildBaActivationReport`:
  *   team_magnificent_members  (signup, welcomedAt)
- *   steve_discoveries  (completedAt rows)
+ *   tmag_steve_success_interview  (completedAt rows)
  *   invitation_activity (kind 'invitation_sent' / 'video_completed', per-sponsor)
  *   pool_placements    (flushReason='enrolled', per-sponsor)
  *

@@ -34,7 +34,7 @@ const LeadRowSchema = z.object({
 });
 
 const JsonImportBody = z.object({
-  leadBatchId: z.string().min(3).max(160),
+  leadOwnerId: z.string().min(3).max(160),
   vmCampaignId: z.string().min(3).max(160),
   ownerTmagId: z.string().min(2).max(80),
   sponsorTmagId: z.string().min(2).max(80),
@@ -43,7 +43,7 @@ const JsonImportBody = z.object({
 });
 
 const CsvImportQuery = z.object({
-  leadBatchId: z.string().min(3).max(160),
+  leadOwnerId: z.string().min(3).max(160),
   vmCampaignId: z.string().min(3).max(160),
   ownerTmagId: z.string().min(2).max(80),
   sponsorTmagId: z.string().min(2).max(80),

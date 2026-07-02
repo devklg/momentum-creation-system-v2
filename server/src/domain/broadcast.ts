@@ -49,7 +49,7 @@ const MONGO_DB = 'momentum';
 const COLL_BROADCASTS = 'broadcasts';
 const COLL_RECIPIENTS = 'broadcast_recipients';
 const COLL_OPTOUTS = 'broadcast_optouts';
-const CHROMA_BROADCASTS = 'tmag_broadcasts';
+const CHROMA_BROADCASTS = 'mcs_broadcasts';
 
 const MS_72H = 72 * 60 * 60 * 1000;
 const MS_7D = 7 * 24 * 60 * 60 * 1000;

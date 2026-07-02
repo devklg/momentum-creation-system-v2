@@ -9,7 +9,7 @@
 
 import type {
   McsBulkLeadRecord,
-  McsLeadBatchRecord,
+  McsLeadOwnerRecord,
   McsProspectCRMRecord,
   McsProspectTimelineEventRecord,
   McsVMCampaignRecord,
@@ -20,7 +20,7 @@ export const VM_SCHEMA_VERSION = 'vm-lead-campaign.v1';
 export const VM_MONGO_DB = 'momentum';
 
 export const VM_COLLECTIONS = {
-  leadBatches: 'tmag_vm_lead_batches',
+  leadOwners: 'tmag_vm_lead_owners',
   bulkLeads: 'tmag_vm_bulk_leads',
   campaigns: 'tmag_vm_campaigns',
   deliveryEvents: 'tmag_vm_delivery_events',
@@ -30,12 +30,12 @@ export const VM_COLLECTIONS = {
 } as const;
 
 export const VM_CHROMA_COLLECTIONS = {
-  leadBatches: 'tmag_vm_lead_batches',
-  bulkLeads: 'tmag_vm_bulk_leads',
-  campaigns: 'tmag_vm_campaigns',
-  deliveryEvents: 'tmag_vm_delivery_events',
-  prospectCrm: 'tmag_prospect_crm_records',
-  prospectTimeline: 'tmag_prospect_timeline_events',
+  leadOwners: 'mcs_vm_lead_owners',
+  bulkLeads: 'mcs_vm_bulk_leads',
+  campaigns: 'mcs_vm_campaigns',
+  deliveryEvents: 'mcs_vm_delivery_events',
+  prospectCrm: 'mcs_prospect_crm_records',
+  prospectTimeline: 'mcs_prospect_timeline_events',
 } as const;
 
 export type VmCollectionKey = keyof typeof VM_COLLECTIONS;
@@ -64,16 +64,16 @@ export interface VmCollectionSchemaDefinition<TRecord> {
 }
 
 const OWNERSHIP_FIELDS = ['ownerTmagId', 'sponsorTmagId'] as const;
-const VM_LEAD_FIELDS = [...OWNERSHIP_FIELDS, 'leadBatchId', 'vmCampaignId'] as const;
+const VM_LEAD_FIELDS = [...OWNERSHIP_FIELDS, 'leadOwnerId', 'vmCampaignId'] as const;
 
 export const VM_SCHEMA_DEFINITIONS = {
-  leadBatches: {
-    key: 'leadBatches',
-    collection: VM_COLLECTIONS.leadBatches,
-    chromaCollection: VM_CHROMA_COLLECTIONS.leadBatches,
+  leadOwners: {
+    key: 'leadOwners',
+    collection: VM_COLLECTIONS.leadOwners,
+    chromaCollection: VM_CHROMA_COLLECTIONS.leadOwners,
     recordExample: null,
     requiredFields: [
-      'leadBatchId',
+      'leadOwnerId',
       ...OWNERSHIP_FIELDS,
       'name',
       'source',
@@ -86,19 +86,19 @@ export const VM_SCHEMA_DEFINITIONS = {
       'updatedAt',
     ],
     indexes: [
-      { name: 'unique_leadBatchId', keys: { leadBatchId: 1 }, unique: true },
+      { name: 'unique_leadOwnerId', keys: { leadOwnerId: 1 }, unique: true },
       { name: 'owner_status_createdAt', keys: { ownerTmagId: 1, status: 1, createdAt: -1 } },
       { name: 'sponsor_createdAt', keys: { sponsorTmagId: 1, createdAt: -1 } },
     ],
     graph: {
-      nodeLabels: ['TmagLeadBatch', 'TeamMagnificentMember'],
-      relationshipTypes: ['OWNS_LEAD_BATCH', 'SPONSORS_LEAD_BATCH'],
+      nodeLabels: ['TmagVmLeadOwner', 'TeamMagnificentMember'],
+      relationshipTypes: ['OWNS_VM_LEAD_OWNER', 'SPONSORS_VM_LEAD_OWNER'],
     },
     notes: [
-      'A batch is owned by exactly one BA by TM BA ID.',
-      'Batch import does not create Holding Tank visibility.',
+      'A lead-owner record is owned by exactly one member by TMAG ID.',
+      'Lead-owner import does not create Holding Tank visibility.',
     ],
-  } satisfies VmCollectionSchemaDefinition<McsLeadBatchRecord>,
+  } satisfies VmCollectionSchemaDefinition<McsLeadOwnerRecord>,
   bulkLeads: {
     key: 'bulkLeads',
     collection: VM_COLLECTIONS.bulkLeads,
@@ -114,18 +114,18 @@ export const VM_SCHEMA_DEFINITIONS = {
     ],
     indexes: [
       { name: 'unique_leadId', keys: { leadId: 1 }, unique: true },
-      { name: 'batch_status', keys: { leadBatchId: 1, status: 1 } },
+      { name: 'lead_owner_status', keys: { leadOwnerId: 1, status: 1 } },
       { name: 'campaign_status', keys: { vmCampaignId: 1, status: 1 } },
       { name: 'owner_createdAt', keys: { ownerTmagId: 1, createdAt: -1 } },
       { name: 'phone_owner', keys: { phone: 1, ownerTmagId: 1 } },
       { name: 'email_owner', keys: { email: 1, ownerTmagId: 1 } },
     ],
     graph: {
-      nodeLabels: ['TmagBulkLead', 'TmagLeadBatch', 'TmagVmCampaign', 'TeamMagnificentMember'],
+      nodeLabels: ['TmagVmBulkLead', 'TmagVmLeadOwner', 'TmagVmCampaign', 'TeamMagnificentMember'],
       relationshipTypes: ['CONTAINS_LEAD', 'TARGETS_LEAD', 'OWNS_LEAD'],
     },
     notes: [
-      'VM leads require leadBatchId and vmCampaignId in addition to ownership fields.',
+      'VM leads require leadOwnerId and vmCampaignId in addition to ownership fields.',
       'Imported leads are acquisition records until engagement activates them.',
     ],
   } satisfies VmCollectionSchemaDefinition<McsBulkLeadRecord>,
@@ -137,7 +137,7 @@ export const VM_SCHEMA_DEFINITIONS = {
     requiredFields: [
       'vmCampaignId',
       ...OWNERSHIP_FIELDS,
-      'leadBatchId',
+      'leadOwnerId',
       'name',
       'provider',
       'status',
@@ -147,11 +147,11 @@ export const VM_SCHEMA_DEFINITIONS = {
     indexes: [
       { name: 'unique_vmCampaignId', keys: { vmCampaignId: 1 }, unique: true },
       { name: 'owner_status_createdAt', keys: { ownerTmagId: 1, status: 1, createdAt: -1 } },
-      { name: 'batch_createdAt', keys: { leadBatchId: 1, createdAt: -1 } },
+      { name: 'lead_owner_createdAt', keys: { leadOwnerId: 1, createdAt: -1 } },
     ],
     graph: {
-      nodeLabels: ['TmagVmCampaign', 'TmagLeadBatch', 'TeamMagnificentMember'],
-      relationshipTypes: ['USES_LEAD_BATCH', 'OWNS_VM_CAMPAIGN'],
+      nodeLabels: ['TmagVmCampaign', 'TmagVmLeadOwner', 'TeamMagnificentMember'],
+      relationshipTypes: ['USES_VM_LEAD_OWNER', 'OWNS_VM_CAMPAIGN'],
     },
     notes: [
       'Provider is abstract; live sending remains gated by later provider/queue code.',
@@ -178,7 +178,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'provider_message', keys: { providerMessageId: 1, provider: 1 } },
     ],
     graph: {
-      nodeLabels: ['TmagVmDeliveryEvent', 'TmagBulkLead', 'TmagVmCampaign'],
+      nodeLabels: ['TmagVmDeliveryEvent', 'TmagVmBulkLead', 'TmagVmCampaign'],
       relationshipTypes: ['DELIVERED_TO_LEAD', 'BELONGS_TO_CAMPAIGN'],
     },
     notes: [
@@ -204,7 +204,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'unique_owner_prospect', keys: { ownerTmagId: 1, prospectId: 1 }, unique: true },
       { name: 'owner_status_followup', keys: { ownerTmagId: 1, status: 1, followUpDueAt: 1 } },
       { name: 'campaign_status', keys: { vmCampaignId: 1, status: 1 } },
-      { name: 'batch_status', keys: { leadBatchId: 1, status: 1 } },
+      { name: 'lead_owner_status', keys: { leadOwnerId: 1, status: 1 } },
     ],
     graph: {
       nodeLabels: ['TmagProspectCrmRecord', 'TmagProspect', 'TeamMagnificentMember'],
@@ -264,7 +264,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'admin_changedAt', keys: { adminUserId: 1, changedAt: -1 } },
     ],
     graph: {
-      nodeLabels: ['TmagOwnershipCorrection', 'TeamMagnificentMember', 'TmagProspect', 'TmagBulkLead'],
+      nodeLabels: ['TmagOwnershipCorrection', 'TeamMagnificentMember', 'TmagProspect', 'TmagVmBulkLead'],
       relationshipTypes: ['CORRECTED_OWNERSHIP', 'FROM_OWNER', 'TO_OWNER'],
     },
     notes: [

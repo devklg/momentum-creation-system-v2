@@ -8,7 +8,7 @@
  * Data sources (all confirmed live, Chat #143):
  *   team_magnificent_members  — tmagId, firstName/lastName, createdAt (signup),
  *                         welcomedAt (welcome-accept commitment)
- *   steve_discoveries  — SD-<tmagId>, completedAt (discovery completion)
+ *   tmag_steve_success_interview  — SD-<tmagId>, completedAt (discovery completion)
  *   invitation_activity— kind 'invitation_sent' / 'video_completed', at,
  *                         sponsorTmagId (first-invite / first-video-complete)
  *   pool_placements    — flushReason 'enrolled', flushedAt, sponsorTmagId

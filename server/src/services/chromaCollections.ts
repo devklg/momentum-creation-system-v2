@@ -38,36 +38,37 @@ import { persistenceCall } from './persistence/dispatch.js';
  * mirrors a `chroma: { collection: ... }` / `chromadb.add` site in server/src.
  */
 export const CHROMA_COLLECTIONS: readonly string[] = [
-  'tmag_prospect_invitation_activity', // domain/invitations.ts, domain/crm.ts
-  'tmag_prospect_callback_requests', // domain/callbackRequest.ts
-  'tmag_prospect_htank_events', // domain/holdingTank.ts
-  'tmag_ivory_prospect_names', // domain/ivory.ts, domain/generator.ts
+  'mcs_prospect_invitation_activity', // domain/invitations.ts, domain/crm.ts
+  'mcs_prospect_callback_requests', // domain/callbackRequest.ts
+  'mcs_prospect_htank_events', // domain/holdingTank.ts
+  'mcs_ivory_prospect_names', // domain/ivory.ts, domain/generator.ts
   'mcs_audit_log', // domain/auditLog.ts + domain/adminBaOversight.ts (sponsor-override audit)
-  'tmag_admin_prospect_notes', // domain/adminProspectOversight.ts
-  'tmag_steve_success_interview', // domain/steve-success-interview.ts (Steve discovery + success profiles)
-  'tmag_access_codes', // domain/codeGen.ts
-  'tmag_commitments', // domain/commitments.ts
-  'tmag_questionnaires', // domain/questionnaire.ts
-  'tmag_workbooks', // domain/workbook.ts
-  'tmag_broadcasts', // domain/broadcast.ts
+  'mcs_admin_prospect_notes', // domain/adminProspectOversight.ts
+  'mcs_steve_success_interview', // domain/steve-success-interview.ts (Steve discovery + success profiles)
+  'mcs_access_codes', // domain/codeGen.ts
+  'mcs_commitments', // domain/commitments.ts
+  'mcs_questionnaires', // domain/questionnaire.ts (retired historical writer)
+  'mcs_workbooks', // domain/workbook.ts
+  'mcs_broadcasts', // domain/broadcast.ts
   'mcs_tenant_settings', // domain/adminTenantArchitecture.ts (settings)
-  'tmag_content_templates', // domain/adminTenantArchitecture.ts (templates)
-  'tmag_prospect_htank_accounts', // domain/prospectAccount.ts
-  'tmag_prospect_magic_links', // domain/prospectMagicLink.ts
-  'tmag_prospect_webinar_reservations', // domain/webinarReservation.ts
-  'tmag_fast_start_progress', // domain/training.ts (also lazy-bootstrapped there)
-  // Agent events split per agent (Rev2). Writer derives tmag_agent_<agentId>_events.
-  'tmag_agent_ivory_events', // domain/agents/orchestrator.ts
-  'tmag_agent_michael_events',
-  'tmag_agent_steve_events',
-  'tmag_agent_system_events',
-  'tmag_agent_templates', // NEW — agent operating templates (roads); registered, writer TBD
-  'tmag_vm_lead_batches', // domain/vmSchemas.ts, future VM batch writes
-  'tmag_vm_bulk_leads', // domain/vmSchemas.ts, future VM lead writes
-  'tmag_vm_campaigns', // domain/vmSchemas.ts, future VM campaign writes
-  'tmag_vm_delivery_events', // domain/vmSchemas.ts, future provider event writes
-  'tmag_prospect_crm_records', // domain/vmSchemas.ts, future CRM hub writes
-  'tmag_prospect_timeline_events', // domain/vmSchemas.ts, future prospect timeline writes
+  'mcs_content_templates', // domain/adminTenantArchitecture.ts (templates)
+  'mcs_prospect_htank_accounts', // domain/prospectAccount.ts
+  'mcs_prospect_magic_links', // domain/prospectMagicLink.ts
+  'mcs_prospect_webinar_reservations', // domain/webinarReservation.ts
+  'mcs_new_member_orientation_reservations', // domain/orientationSession.ts
+  'mcs_fast_start_progress', // domain/training.ts (also lazy-bootstrapped there)
+  // Agent events split per agent (Rev3). Writer derives mcs_agent_<agentId>_events.
+  'mcs_agent_ivory_events', // domain/agents/orchestrator.ts
+  'mcs_agent_michael_events',
+  'mcs_agent_steve_events',
+  'mcs_agent_system_events',
+  'mcs_agent_templates', // agent operating templates (roads); registered, writer TBD
+  'mcs_vm_lead_owners', // domain/vmSchemas.ts, future VM owner writes
+  'mcs_vm_bulk_leads', // domain/vmSchemas.ts, future VM lead writes
+  'mcs_vm_campaigns', // domain/vmSchemas.ts, future VM campaign writes
+  'mcs_vm_delivery_events', // domain/vmSchemas.ts, future provider event writes
+  'mcs_prospect_crm_records', // domain/vmSchemas.ts, future CRM hub writes
+  'mcs_prospect_timeline_events', // domain/vmSchemas.ts, future prospect timeline writes
   'mcs_outcomes', // domain/outcomes.ts (Phase 7 R1 — BA-confirmed outcome capture)
   'mcs_learning_candidates_review', // domain/learningCandidates.ts (Phase 7 R2 — REVIEW-ONLY, never active knowledge)
   // Phase 7 R3 — GraphRAG ACTIVE-knowledge collections (per domain × language,

@@ -17,7 +17,7 @@ import { tripleStackWrite } from '../services/tripleStack.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 
 const MONGO_DB = 'momentum';
-const CHROMA_COLLECTION = 'tmag_vm_campaigns';
+const CHROMA_COLLECTION = 'mcs_vm_campaigns';
 
 const LEADS_COLLECTION = 'tmag_vm_bulk_leads';
 const QUEUE_COLLECTION = 'tmag_vm_queue_jobs';
@@ -97,7 +97,7 @@ export interface VmQueueJob<TPayload extends Record<string, unknown> = Record<st
 export interface VmBulkLeadRecord {
   leadId: string;
   importJobId: string;
-  leadBatchId: string;
+  leadOwnerId: string;
   vmCampaignId: string;
   ownerTmagId: string;
   sponsorTmagId: string;
@@ -139,7 +139,7 @@ export interface VmDeliveryEventRecord {
 }
 
 export interface CreateImportJobInput {
-  leadBatchId: string;
+  leadOwnerId: string;
   vmCampaignId: string;
   ownerTmagId: string;
   sponsorTmagId: string;
@@ -150,7 +150,7 @@ export interface CreateImportJobInput {
 
 interface ImportChunkPayload extends Record<string, unknown> {
   importJobId: string;
-  leadBatchId: string;
+  leadOwnerId: string;
   vmCampaignId: string;
   ownerTmagId: string;
   sponsorTmagId: string;
@@ -193,12 +193,12 @@ function leadDedupeKey(ownerTmagId: string, phone: string | null, email: string 
 function assertOwnership(input: {
   ownerTmagId?: string | null;
   sponsorTmagId?: string | null;
-  leadBatchId?: string | null;
+  leadOwnerId?: string | null;
   vmCampaignId?: string | null;
 }): void {
   if (!input.ownerTmagId) throw new Error('ownerTmagId_required');
   if (!input.sponsorTmagId) throw new Error('sponsorTmagId_required');
-  if (!input.leadBatchId) throw new Error('leadBatchId_required');
+  if (!input.leadOwnerId) throw new Error('leadOwnerId_required');
   if (!input.vmCampaignId) throw new Error('vmCampaignId_required');
 }
 
@@ -416,7 +416,7 @@ export async function createManualImportJobs(input: CreateImportJobInput): Promi
     const chunk = rows.slice(i, i + IMPORT_CHUNK_SIZE);
     await enqueueVmJob<ImportChunkPayload>('import_validate', {
       importJobId,
-      leadBatchId: input.leadBatchId,
+      leadOwnerId: input.leadOwnerId,
       vmCampaignId: input.vmCampaignId,
       ownerTmagId: input.ownerTmagId,
       sponsorTmagId: input.sponsorTmagId,
@@ -432,7 +432,7 @@ export async function createManualImportJobs(input: CreateImportJobInput): Promi
     ownerTmagId: input.ownerTmagId,
     summary: `Queued VM manual import ${importJobId} with ${rows.length} rows.`,
     payload: {
-      leadBatchId: input.leadBatchId,
+      leadOwnerId: input.leadOwnerId,
       vmCampaignId: input.vmCampaignId,
       sourceLabel: input.sourceLabel,
       chunksQueued: Math.ceil(rows.length / IMPORT_CHUNK_SIZE),
@@ -489,19 +489,19 @@ async function upsertImportedLead(
       action: 'vm.lead.duplicate_skipped',
       entityId: existing.documents[0].leadId,
       ownerTmagId: payload.ownerTmagId,
-      summary: `Skipped duplicate VM lead in batch ${payload.leadBatchId}.`,
+      summary: `Skipped duplicate VM lead for lead owner ${payload.leadOwnerId}.`,
       payload: { importJobId: payload.importJobId, dedupeKey },
     });
     return { lead: existing.documents[0], created: false };
   }
 
   const now = new Date().toISOString();
-  const leadId = `vmlead_${randomUUID()}`;
+  const leadId = `lead_${randomUUID()}`;
   const status: VmLeadStatus = validationIssues.length > 0 ? 'invalid' : 'imported';
   const lead: VmBulkLeadRecord = {
     leadId,
     importJobId: payload.importJobId,
-    leadBatchId: payload.leadBatchId,
+    leadOwnerId: payload.leadOwnerId,
     vmCampaignId: payload.vmCampaignId,
     ownerTmagId: payload.ownerTmagId,
     sponsorTmagId: payload.sponsorTmagId,
@@ -533,7 +533,7 @@ async function upsertImportedLead(
     mongoDoc: lead as unknown as Record<string, unknown>,
     neo4j: {
       cypher:
-        'MERGE (l:TmagVmLead {leadId: $id}) ' +
+        'MERGE (l:TmagVmBulkLead {leadId: $id}) ' +
         'SET l.ownerTmagId = $ownerTmagId, l.sponsorTmagId = $sponsorTmagId, l.status = $status, l.createdAt = datetime($createdAt) ' +
         'WITH l ' +
         'OPTIONAL MATCH (ba:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
@@ -625,7 +625,7 @@ export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Prom
       leadId: lead.leadId,
       sponsorTmagId: lead.sponsorTmagId,
       ownerTmagId: lead.ownerTmagId,
-      leadBatchId: lead.leadBatchId,
+      leadOwnerId: lead.leadOwnerId,
       vmCampaignId: lead.vmCampaignId,
       state: 'minted',
       createdAt: now,
@@ -636,7 +636,7 @@ export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Prom
       cypher:
         'MERGE (t:TmagInviteToken {token: $id}) ' +
         'SET t.tokenKind = "rvm", t.leadId = $leadId, t.ownerTmagId = $ownerTmagId, t.sponsorTmagId = $sponsorTmagId, t.state = "minted", t.createdAt = datetime($createdAt) ' +
-        'WITH t MATCH (l:TmagVmLead {leadId: $leadId}) MERGE (t)-[:FOR_VM_LEAD]->(l)',
+        'WITH t MATCH (l:TmagVmBulkLead {leadId: $leadId}) MERGE (t)-[:FOR_VM_LEAD]->(l)',
       params: {
         leadId: lead.leadId,
         ownerTmagId: lead.ownerTmagId,
@@ -692,7 +692,7 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
       sponsorTmagId: lead.sponsorTmagId,
       source: 'rvm',
       sourceLabel: lead.sourceLabel,
-      leadBatchId: lead.leadBatchId,
+      leadOwnerId: lead.leadOwnerId,
       vmCampaignId: lead.vmCampaignId,
       token: lead.token,
       status: 'inactive_pre_engagement',
@@ -707,7 +707,7 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
       cypher:
         'MERGE (c:TmagProspectCrmRecord {crmRecordId: $id}) ' +
         'SET c.leadId = $leadId, c.ownerTmagId = $ownerTmagId, c.status = "inactive_pre_engagement", c.createdAt = datetime($createdAt) ' +
-        'WITH c MATCH (l:TmagVmLead {leadId: $leadId}) MERGE (l)-[:HAS_CRM_RECORD]->(c)',
+        'WITH c MATCH (l:TmagVmBulkLead {leadId: $leadId}) MERGE (l)-[:HAS_CRM_RECORD]->(c)',
       params: {
         leadId: lead.leadId,
         ownerTmagId: lead.ownerTmagId,
@@ -783,7 +783,7 @@ export async function recordDeliveryEvent(input: Omit<VmDeliveryEventRecord, 'ev
       cypher:
         'MERGE (e:TmagVmDeliveryEvent {eventId: $id}) ' +
         'SET e.provider = $provider, e.status = $status, e.leadId = $leadId, e.createdAt = datetime($createdAt) ' +
-        'WITH e MATCH (l:TmagVmLead {leadId: $leadId}) MERGE (l)-[:HAS_VM_DELIVERY_EVENT]->(e)',
+        'WITH e MATCH (l:TmagVmBulkLead {leadId: $leadId}) MERGE (l)-[:HAS_VM_DELIVERY_EVENT]->(e)',
       params: {
         provider: event.provider,
         status: event.status,

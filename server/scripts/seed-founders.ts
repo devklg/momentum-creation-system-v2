@@ -1,17 +1,17 @@
 /**
  * Seed Team Magnificent's two founders:
- *   - TM-01 → Kevin L. Gardner   (THREE BA ID 1845964)
- *   - TM-02 → Paul Barrios       (THREE BA ID 892390)
+ *   - TMAG-KEVN → Kevin L. Gardner   (THREE BA ID 1845964)
+ *   - TMAG-PAUB → Paul Barrios       (THREE BA ID 892390)
  *
  * Writes each founder to TWO places (triple-stack each):
- *   1. `access_codes` — so the code resolves on signup (.team /register)
- *   2. `brand_ambassadors` — so admin lists, sponsor lookups, and BA-to-BA
+ *   1. `tmag_access_codes` — so the code resolves on signup (.team /register)
+ *   2. `team_magnificent_members` — so admin lists, sponsor lookups, and BA-to-BA
  *      genealogy edges have real records to bind to.
  *
  * Neo4j edges seeded:
- *   - (kevin:BA {baId})-[:USES]->(:AccessCode {code:'TM-01'})
- *   - (paul:BA {baId})-[:USES]->(:AccessCode {code:'TM-02'})
- *   - (paul:BA)-[:SPONSORED_BY]->(kevin:BA)        ← Paul is Kevin's enroller
+ *   - (kevin:TeamMagnificentMember {tmagId})-[:HOLDS_CODE]->(:TmagAccessCode {code:'TMAG-KEVN'})
+ *   - (paul:TeamMagnificentMember {tmagId})-[:HOLDS_CODE]->(:TmagAccessCode {code:'TMAG-PAUB'})
+ *   - (paul:TeamMagnificentMember)-[:SPONSORED_BY]->(kevin:TeamMagnificentMember)
  *
  * Idempotent — safe to re-run. Skips any record whose _id already exists.
  *
@@ -22,8 +22,8 @@ import { persistenceCall } from '../src/services/persistence/dispatch.js';
 import { tripleStackWrite } from '../src/services/tripleStack.js';
 
 interface FounderSeed {
-  baId: string;            // TM-internal BA id (stable, never changes)
-  code: string;            // their access code (TM-01 / TM-02)
+  tmagId: string;          // TM-internal member id (stable, never changes)
+  code: string;            // their Rev 3 access code (TMAG-XXXX)
   threeBaId: string;
   threeUsername: string;
   firstName: string;
@@ -33,13 +33,13 @@ interface FounderSeed {
   /** IANA timezone (e.g. "America/Los_Angeles"). Drives Michael scheduling. */
   timezone: string;
   role: 'founder' | 'co_leader';
-  sponsorBaId: string | null;      // null = root of the tree
+  sponsorTmagId: string | null;    // null = root of the tree
   sponsorThreeBaId: string | null;
 }
 
 const KEVIN: FounderSeed = {
-  baId: 'TMBA-FOUNDER-KEVIN',
-  code: 'TM-01',
+  tmagId: 'TMAG-01',
+  code: 'TMAG-KEVN',
   threeBaId: '1845964',
   threeUsername: 'devkev',
   firstName: 'Kevin',
@@ -48,13 +48,13 @@ const KEVIN: FounderSeed = {
   phone: '+13233519758',
   timezone: 'America/Los_Angeles',
   role: 'founder',
-  sponsorBaId: null,
+  sponsorTmagId: null,
   sponsorThreeBaId: null,
 };
 
 const PAUL: FounderSeed = {
-  baId: 'TMBA-FOUNDER-PAUL',
-  code: 'TM-02',
+  tmagId: 'TMAG-02',
+  code: 'TMAG-PAUB',
   threeBaId: '892390',
   threeUsername: 'paulbarrios',
   firstName: 'Paul',
@@ -64,7 +64,7 @@ const PAUL: FounderSeed = {
   // Confirmed Chat #98: Paul is in Pacific timezone (same as Kevin).
   timezone: 'America/Los_Angeles',
   role: 'co_leader',
-  sponsorBaId: KEVIN.baId,
+  sponsorTmagId: KEVIN.tmagId,
   sponsorThreeBaId: KEVIN.threeBaId,
 };
 
@@ -84,17 +84,17 @@ async function docExists(
 }
 
 async function seedBaRecord(f: FounderSeed): Promise<void> {
-  if (await docExists('brand_ambassadors', { baId: f.baId })) {
-    console.log(`[seed] BA ${f.baId} (${f.firstName} ${f.lastName}) — exists, skip`);
+  if (await docExists('team_magnificent_members', { tmagId: f.tmagId })) {
+    console.log(`[seed] member ${f.tmagId} (${f.firstName} ${f.lastName}) — exists, skip`);
     return;
   }
 
   const createdAt = new Date().toISOString();
   await tripleStackWrite({
-    id: f.baId,
-    mongoCollection: 'brand_ambassadors',
+    id: f.tmagId,
+    mongoCollection: 'team_magnificent_members',
     mongoDoc: {
-      baId: f.baId,
+      tmagId: f.tmagId,
       threeBaId: f.threeBaId,
       threeUsername: f.threeUsername,
       firstName: f.firstName,
@@ -103,22 +103,23 @@ async function seedBaRecord(f: FounderSeed): Promise<void> {
       phone: f.phone,
       timezone: f.timezone,
       role: f.role,
-      sponsorBaId: f.sponsorBaId,
+      sponsorTmagId: f.sponsorTmagId,
       sponsorThreeBaId: f.sponsorThreeBaId,
       // Founders have no password hash (they don't sign up via .team /register);
       // when Kevin/Paul log in, auth will recognize them by THREE BA ID + a
       // founder-issued credential path. Leave as null for now.
       passwordHash: null,
       accessCodeUsed: null,   // founders did not enter through a code
+      accessCodeHeld: f.code,
       welcomedAt: createdAt,
       onboardingState: 'completed',
       createdAt,
     },
     neo4j: {
-      // MERGE makes this idempotent. If sponsorBaId is set, also link upline.
-      cypher: f.sponsorBaId
-        ? `MERGE (s:BA {baId: $sponsorBaId})
-           MERGE (n:BA {baId: $id})
+      // MERGE makes this idempotent. If sponsorTmagId is set, also link upline.
+      cypher: f.sponsorTmagId
+        ? `MERGE (s:TeamMagnificentMember {tmagId: $sponsorTmagId})
+           MERGE (n:TeamMagnificentMember {tmagId: $id})
            SET n.threeBaId = $threeBaId,
                n.email = $email,
                n.firstName = $firstName,
@@ -127,7 +128,7 @@ async function seedBaRecord(f: FounderSeed): Promise<void> {
                n.role = $role,
                n.founder = true
            MERGE (n)-[:SPONSORED_BY]->(s)`
-        : `MERGE (n:BA {baId: $id})
+        : `MERGE (n:TeamMagnificentMember {tmagId: $id})
            SET n.threeBaId = $threeBaId,
                n.email = $email,
                n.firstName = $firstName,
@@ -136,7 +137,7 @@ async function seedBaRecord(f: FounderSeed): Promise<void> {
                n.role = $role,
                n.founder = true`,
       params: {
-        sponsorBaId: f.sponsorBaId,
+        sponsorTmagId: f.sponsorTmagId,
         threeBaId: f.threeBaId,
         email: f.email,
         firstName: f.firstName,
@@ -146,12 +147,12 @@ async function seedBaRecord(f: FounderSeed): Promise<void> {
       },
     },
     chroma: {
-      collection: 'mcs_brand_ambassadors',
-      document: `Founder BA ${f.firstName} ${f.lastName} (BA ${f.baId} / THREE ${f.threeBaId}) — role: ${f.role}, timezone: ${f.timezone}. Access code ${f.code}.`,
+      collection: 'mcs_members',
+      document: `Founder member ${f.firstName} ${f.lastName} (${f.tmagId} / THREE ${f.threeBaId}) — role: ${f.role}, timezone: ${f.timezone}. Access code ${f.code}.`,
       metadata: {
-        baId: f.baId,
+        tmagId: f.tmagId,
         threeBaId: f.threeBaId,
-        kind: 'brand_ambassador_founder',
+        kind: 'team_magnificent_member_founder',
         role: f.role,
         timezone: f.timezone,
         createdAt,
@@ -159,11 +160,11 @@ async function seedBaRecord(f: FounderSeed): Promise<void> {
     },
   });
 
-  console.log(`[seed] BA ${f.baId} (${f.firstName} ${f.lastName}) — inserted`);
+  console.log(`[seed] member ${f.tmagId} (${f.firstName} ${f.lastName}) — inserted`);
 }
 
 async function seedAccessCode(f: FounderSeed): Promise<void> {
-  if (await docExists('access_codes', { code: f.code })) {
+  if (await docExists('tmag_access_codes', { code: f.code })) {
     console.log(`[seed] code ${f.code} — exists, skip`);
     return;
   }
@@ -171,39 +172,40 @@ async function seedAccessCode(f: FounderSeed): Promise<void> {
   const createdAt = new Date().toISOString();
   await tripleStackWrite({
     id: f.code,
-    mongoCollection: 'access_codes',
+    mongoCollection: 'tmag_access_codes',
     mongoDoc: {
       code: f.code,
-      sponsorBaId: f.baId,
+      sponsorTmagId: f.tmagId,
       sponsorThreeBaId: f.threeBaId,
       sponsorFirstName: f.firstName,
       sponsorLastName: f.lastName,
       active: true,
       note: `Founder seed (${f.role})`,
-      mintedByBaId: KEVIN.baId, // Kevin is the minter of record for both founder codes
+      mintedByTmagId: KEVIN.tmagId, // Kevin is the minter of record for both founder codes
+      mintedVia: 'kevin',
       createdAt,
     },
     neo4j: {
       cypher:
-        `MERGE (b:BA {baId: $sponsorBaId})
-         MERGE (c:AccessCode {code: $id})
+        `MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId})
+         MERGE (c:TmagAccessCode {code: $id})
          SET c.active = true,
              c.createdAt = $createdAt,
              c.sponsorThreeBaId = $sponsorThreeBaId,
              c.founder = true
-         MERGE (b)-[:USES]->(c)`,
+         MERGE (b)-[:HOLDS_CODE]->(c)`,
       params: {
-        sponsorBaId: f.baId,
+        sponsorTmagId: f.tmagId,
         sponsorThreeBaId: f.threeBaId,
         createdAt,
       },
     },
     chroma: {
       collection: 'mcs_access_codes',
-      document: `Access code ${f.code} (FOUNDER SEED) — assigned to ${f.firstName} ${f.lastName} (BA ${f.baId} / THREE ${f.threeBaId}).`,
+      document: `Access code ${f.code} (FOUNDER SEED) — assigned to ${f.firstName} ${f.lastName} (${f.tmagId} / THREE ${f.threeBaId}).`,
       metadata: {
         code: f.code,
-        sponsorBaId: f.baId,
+        sponsorTmagId: f.tmagId,
         sponsorThreeBaId: f.threeBaId,
         kind: 'access_code',
         founder: true,

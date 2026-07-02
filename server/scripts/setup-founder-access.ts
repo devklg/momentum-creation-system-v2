@@ -2,11 +2,11 @@
  * Founder access setup - Kevin only.
  *
  * Two things stand between the founder and the .team app:
- *   1. passwordHash is null on TMBA-FOUNDER-KEVIN, so login fails.
- *   2. There is no steve_discoveries row, so the Steve gate keeps protected
+ *   1. passwordHash is null on TMAG-01, so login fails.
+ *   2. There is no tmag_steve_success_interview row, so the Steve gate keeps protected
  *      routes closed.
  *
- * This script fixes both for TMBA-FOUNDER-KEVIN only:
+ * This script fixes both for TMAG-01 only:
  *   - Sets a real argon2id passwordHash from FOUNDER_PASSWORD.
  *   - Seeds a clearly flagged Steve discovery artifact through the same
  *     ingest path the live worker uses, so Mongo + Neo4j + Chroma stay aligned.
@@ -25,10 +25,10 @@ import type { SteveDiscoveryIngestPayload } from '@momentum/shared';
 import { ingestDiscoveryArtifact } from '../src/domain/steve-success-interview.js';
 import { persistenceCall } from '../src/services/persistence/dispatch.js';
 
-const FOUNDER_BA_ID = 'TMBA-FOUNDER-KEVIN';
+const FOUNDER_TMAG_ID = 'TMAG-01';
 
 interface BARow {
-  baId: string;
+  tmagId: string;
   firstName?: string;
   lastName?: string;
   passwordHash?: string | null;
@@ -45,14 +45,14 @@ async function setFounderPassword(): Promise<void> {
 
   const found = await persistenceCall<{ documents: BARow[]; count: number }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
-    filter: { baId: FOUNDER_BA_ID },
+    collection: 'team_magnificent_members',
+    filter: { tmagId: FOUNDER_TMAG_ID },
     limit: 1,
   });
   const ba = found.documents[0];
   if (!ba) {
     throw new Error(
-      `No brand_ambassadors record for ${FOUNDER_BA_ID}. ` +
+      `No team_magnificent_members record for ${FOUNDER_TMAG_ID}. ` +
         'Run `pnpm --filter @momentum/server seed:founders` first.',
     );
   }
@@ -61,14 +61,14 @@ async function setFounderPassword(): Promise<void> {
 
   await persistenceCall('mongodb', 'update', {
     database: 'momentum',
-    collection: 'brand_ambassadors',
-    filter: { baId: FOUNDER_BA_ID },
+    collection: 'team_magnificent_members',
+    filter: { tmagId: FOUNDER_TMAG_ID },
     update: { $set: { passwordHash } },
   });
 
   const had = ba.passwordHash ? 'rotated existing' : 'set (was null)';
   console.log(
-    `[founder-access] password ${had} for ${FOUNDER_BA_ID} ` +
+    `[founder-access] password ${had} for ${FOUNDER_TMAG_ID} ` +
       `(${ba.firstName ?? '?'} ${ba.lastName ?? ''}). Hash written to Mongo.`,
   );
 }
@@ -76,7 +76,7 @@ async function setFounderPassword(): Promise<void> {
 async function seedCompletedSteveDiscovery(): Promise<void> {
   const nowIso = new Date().toISOString();
   const seedPayload: SteveDiscoveryIngestPayload = {
-    baId: FOUNDER_BA_ID,
+    baId: FOUNDER_TMAG_ID,
     callSid: 'seed-founder-access',
     startedAt: nowIso,
     completedAt: nowIso,
@@ -142,14 +142,14 @@ async function seedCompletedSteveDiscovery(): Promise<void> {
   };
 
   await ingestDiscoveryArtifact(seedPayload);
-  console.log(`[founder-access] steve_discoveries row SD-${FOUNDER_BA_ID} seeded. Gate will open.`);
+  console.log(`[founder-access] tmag_steve_success_interview row SD-${FOUNDER_TMAG_ID} seeded. Gate will open.`);
 }
 
 async function main(): Promise<void> {
-  console.log(`[founder-access] begin - target ${FOUNDER_BA_ID} (Kevin only; Paul untouched)`);
+  console.log(`[founder-access] begin - target ${FOUNDER_TMAG_ID} (Kevin only; Paul untouched)`);
   await setFounderPassword();
   await seedCompletedSteveDiscovery();
-  console.log('[founder-access] done. Log in at .team with baId TMBA-FOUNDER-KEVIN + your password.');
+  console.log('[founder-access] done. Log in at .team with tmagId TMAG-01 + your password.');
 }
 
 main().catch((err) => {

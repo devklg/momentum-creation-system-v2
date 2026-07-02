@@ -11,7 +11,7 @@ import type { McsOwnedProspectIdentity, McsVmLeadIdentity } from '@momentum/shar
 export const CLIENT_OWNERSHIP_OVERRIDE_FIELDS = [
   'ownerTmagId',
   'sponsorTmagId',
-  'leadBatchId',
+  'leadOwnerId',
   'vmCampaignId',
 ] as const;
 
@@ -69,7 +69,7 @@ export function assertVmLeadIdentity(
 ): asserts value is McsVmLeadIdentity {
   assertOwnedProspectIdentity(value);
   if (!isRecord(value)) throw new VmOwnershipError('ownership_not_object');
-  if (!hasNonEmptyString(value, 'leadBatchId')) {
+  if (!hasNonEmptyString(value, 'leadOwnerId')) {
     throw new VmOwnershipError('missing_lead_batch_id');
   }
   if (!hasNonEmptyString(value, 'vmCampaignId')) {

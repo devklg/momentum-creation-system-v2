@@ -89,7 +89,7 @@ export async function resolveRvmToken(token: string): Promise<McsRvmResolvedToke
       sponsorTmagId: bulkLead.sponsorTmagId,
       source: 'rvm',
       leadId: bulkLead.leadId,
-      leadBatchId: bulkLead.leadBatchId,
+      leadOwnerId: bulkLead.leadOwnerId,
       vmCampaignId: bulkLead.vmCampaignId,
     });
   }
@@ -139,7 +139,7 @@ export async function resolveRvmToken(token: string): Promise<McsRvmResolvedToke
       : null,
     lead: {
       leadId: bulkLead.leadId,
-      leadBatchId: bulkLead.leadBatchId,
+      leadOwnerId: bulkLead.leadOwnerId,
       vmCampaignId: bulkLead.vmCampaignId,
       status: bulkLead.status,
     },

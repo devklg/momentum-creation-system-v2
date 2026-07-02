@@ -2,13 +2,13 @@
  * Michael Training Support — sponsor-facing projection of Steve's SuccessProfile.
  *
  * READ-ONLY. This module owns no collections of its own. Steve (the new-BA
- * discovery agent) persists `steve_discoveries` with a SuccessProfile; this
+ * discovery agent) persists `tmag_steve_success_interview` with a SuccessProfile; this
  * module reads that artifact on demand and DERIVES a sponsor-facing training-
  * support card — "how to support this downline's training" — projecting the
  * BA's own discovery answers into actionable guidance for their direct sponsor.
  *
  * RELATIONSHIP TO STEVE: this module DOES NOT IMPLEMENT STEVE and never
- * mutates `steve_discoveries`. The user-prompt contract is "assume Steve
+ * mutates `tmag_steve_success_interview`. The user-prompt contract is "assume Steve
  * outputs SuccessProfile" — the SuccessProfile shape declared below is the
  * minimum surface this code reads. When Steve's branch lands, his canonical
  * @momentum/shared types will be the source of truth; the shape below is

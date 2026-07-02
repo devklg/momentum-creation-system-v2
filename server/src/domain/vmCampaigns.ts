@@ -8,7 +8,7 @@
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
-import { findLeadBatchForOwner } from './vmLeadBatches.js';
+import { findLeadOwnerForOwner } from './vmLeadOwners.js';
 import type {
   McsVMCampaignProviderMode,
   McsVMCampaignRecord,
@@ -16,7 +16,7 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLLECTION = 'tmag_vm_campaigns';
-const CHROMA_COLLECTION = 'tmag_vm_campaigns';
+const CHROMA_COLLECTION = 'mcs_vm_campaigns';
 
 export class VMCampaignError extends Error {
   constructor(public readonly code: string) {
@@ -28,7 +28,7 @@ export class VMCampaignError extends Error {
 export interface CreateVMCampaignInput {
   ownerTmagId: string;
   sponsorTmagId: string;
-  leadBatchId: string;
+  leadOwnerId: string;
   name: string;
   provider: McsVMCampaignProviderMode;
   voicemailAudioId: string | null;
@@ -40,14 +40,14 @@ export interface CreateVMCampaignInput {
 export async function createVMCampaign(
   input: CreateVMCampaignInput,
 ): Promise<McsVMCampaignRecord> {
-  await findLeadBatchForOwner(input.leadBatchId, input.ownerTmagId);
+  await findLeadOwnerForOwner(input.leadOwnerId, input.ownerTmagId);
 
   const now = new Date().toISOString();
   const campaign: McsVMCampaignRecord = {
     vmCampaignId: `vm_${randomUUID()}`,
     ownerTmagId: input.ownerTmagId,
     sponsorTmagId: input.sponsorTmagId,
-    leadBatchId: input.leadBatchId,
+    leadOwnerId: input.leadOwnerId,
     name: input.name,
     provider: input.provider,
     status: input.scheduledAt ? 'scheduled' : 'draft',
@@ -68,16 +68,16 @@ export async function createVMCampaign(
     neo4j: {
       cypher:
         'MERGE (b:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
-        'MERGE (lb:TmagLeadBatch {leadBatchId: $leadBatchId}) ' +
+        'MERGE (lb:TmagVmLeadOwner {leadOwnerId: $leadOwnerId}) ' +
         'CREATE (vm:TmagVmCampaign {vmCampaignId: $id, name: $name, provider: $provider, ' +
         '  status: $status, ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, ' +
         '  createdAt: $createdAt, updatedAt: $updatedAt}) ' +
         'CREATE (b)-[:OWNS_VM_CAMPAIGN]->(vm) ' +
-        'CREATE (vm)-[:USES_LEAD_BATCH]->(lb)',
+        'CREATE (vm)-[:USES_VM_LEAD_OWNER]->(lb)',
       params: {
         ownerTmagId: campaign.ownerTmagId,
         sponsorTmagId: campaign.sponsorTmagId,
-        leadBatchId: campaign.leadBatchId,
+        leadOwnerId: campaign.leadOwnerId,
         name: campaign.name,
         provider: campaign.provider,
         status: campaign.status,
@@ -89,11 +89,11 @@ export async function createVMCampaign(
       collection: CHROMA_COLLECTION,
       document:
         `VM campaign ${campaign.name}; owner ${campaign.ownerTmagId}; ` +
-        `batch ${campaign.leadBatchId}; provider ${campaign.provider}; status ${campaign.status}.`,
+        `lead owner ${campaign.leadOwnerId}; provider ${campaign.provider}; status ${campaign.status}.`,
       metadata: {
         kind: 'vm_campaign_created',
         vmCampaignId: campaign.vmCampaignId,
-        leadBatchId: campaign.leadBatchId,
+        leadOwnerId: campaign.leadOwnerId,
         ownerTmagId: campaign.ownerTmagId,
         provider: campaign.provider,
         createdAt: now,

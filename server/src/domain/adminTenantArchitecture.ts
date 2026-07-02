@@ -29,7 +29,7 @@ const MONGO_DB = 'momentum';
 const SETTINGS_COLLECTION = 'tenant_settings_versions';
 const TEMPLATE_COLLECTION = 'tmag_content_templates';
 const SETTINGS_CHROMA = 'mcs_tenant_settings';
-const TEMPLATE_CHROMA = 'tmag_content_templates';
+const TEMPLATE_CHROMA = 'mcs_content_templates';
 const TENANT_ID = 'team-magnificent';
 
 const DEFAULT_SETTINGS: McsTenantSettings = {

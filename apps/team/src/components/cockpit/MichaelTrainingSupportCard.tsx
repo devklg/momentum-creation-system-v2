@@ -2,7 +2,7 @@
  * Michael Training Support card (feature/michael-training-support).
  *
  * Sponsor-only render of a downline BA's training-support guidance — projected
- * from Steve's SuccessProfile (steve_discoveries) by the server. The sponsor
+ * from Steve's SuccessProfile (tmag_steve_success_interview) by the server. The sponsor
  * uses this to meet the new BA where they are during training: how they learn,
  * how to stay in touch, where to focus support, and any recommendations Steve
  * surfaced from the discovery conversation.
