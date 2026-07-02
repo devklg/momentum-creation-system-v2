@@ -253,6 +253,49 @@ Consequences:
 
 ---
 
+## Ruling 11 — Rev 2 canonical schema list ADOPTED as baseline
+
+Kevin's edited `MCS_V2_CANONICAL_SCHEMAS.docx` (Rev 2, folding his 2026-07-01
+review) is the canonical provisioning baseline. It establishes: semantic
+grouping inside `tmag_` (`tmag_prospect_*`, `tmag_prospect_htank_*`,
+`tmag_new_member_*`, `tmag_agent_*`, `tmag_vm_*`, `tmag_admin_*`); the
+per-agent event split; **`tmag_agent_templates`** as a NEW first-class
+collection (the agent operating system); `master_content_versions` →
+`tmag_content_templates`; `tmag_prospect_callback_requests` (raise-hand
+signal); the member entity carries the FULL name — Mongo
+`team_magnificent_members`, Neo4j **`TeamMagnificentMember`** + a
+`TeamMagnificent` team-scope node (supersedes the `TmagMember` proposal in
+Ruling 10 c3); BOTH CRM layers kept as named layers (member-private CRM +
+VM lead-campaign CRM); VM unify — ONE `tmag_vm_bulk_leads` with one `leadId`;
+`tmag_vm_delivery_events` merged canonical shape (eventId · provider · leadId
+· vmCampaignId · ownerTmagId · channel · status · dryRun · attempt); memory
+layer canonized (mcs_outcomes / mcs_learning_candidates / mcs_graphrag_records
++ TmagOutcome/TmagLearningCandidate/TmagKnowledge provenance, SCOPED_TO
+TeamMagnificent, no agent may approve); SYSTEM exceptions `mcs_audit_log` +
+`tenant_settings_versions`.
+
+Superseded inside Rev 2 by today's rulings (corrected in Rev 3): §0 id format
+→ date-free `TMAG-XXXXXX` (Ruling 2); `tmag_questionnaires` removed — retired
+into Steve, two-stage spine (Ruling 6).
+
+## Ruling 12 — Rev 2's three confirms answered (Kevin, 2026-07-02)
+
+(a) **Chroma = `mcs_` on every collection** — reaffirms Ruling 10 over Rev 2
+§3's mirror-the-Mongo-names draft. Store-deterministic transform: one base
+name, prefix per store (Mongo `tmag_access_codes` ⇄ Chroma
+`mcs_access_codes`; member collection ⇄ `mcs_members`).
+(b) **`tmag_vm_lead_batches` → `tmag_vm_lead_owners`** — the record tracks
+WHOSE leads these are; multiple members will build with the RVM system.
+Reference field `leadBatchId` → `leadOwnerId` proposed under the same
+reidentification migration (Kevin may veto the field rename at signature).
+(c) **`tmag_agent_templates` and `tmag_content_templates` stay SEPARATE.**
+Canonical distinction (Kevin, verbatim intent): “the template is the road
+that the agent travels on” — agent templates are operating roads;
+content templates are versioned served copy. Different concepts, different
+collections.
+
+---
+
 ## Open items in this review
 
 - Remaining catalog groups: prospects/invitations · CRM · agents/runtime · VM ·
