@@ -154,6 +154,25 @@ on requireSteveComplete in code), or (c) keep as optional. Awaiting Kevin.
 
 ---
 
+## Ruling 7 — Group B funnel spine: RATIFIED
+
+Kevin, 2026-07-02: the prospect funnel mechanics were designed and locked in
+prior sessions and are RATIFIED as encoded in the schema — the tmag prospect
+record, the opaque-token identity surface, the forward-only token lifecycle
+(minted → clicked → video milestones → video_complete → enrolled | expired,
+plus declined/customer signals), the holding tank / one shared team pool with
+monotonic never-renumbered positions, prospect re-entry (account → magic link
+→ session), and sponsor immutability with the single audited admin override.
+
+Still open from Group B (technical hygiene, folded into the §5/§9 pass):
+- Two CRM layers (warm-market crm_* vs VM-era prospect_crm_records/timeline)
+  — intended layering or converge (one-concept-one-name).
+- `_id` stragglers (`prospects`, `invitation_activity`) — §9 decision 1.
+- `prospect_sessions` Mongo-only — accepted as the named ephemeral exception
+  unless Kevin objects.
+
+---
+
 ## Open items in this review
 
 - Remaining catalog groups: prospects/invitations · CRM · agents/runtime · VM ·
