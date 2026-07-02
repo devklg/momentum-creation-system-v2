@@ -1,14 +1,11 @@
 /**
- * S1.3 per-store persistence mode flags (ACR-0007 / Option C).
+ * Per-store persistence mode flags (ACR-0007 / ACR-0009).
  *
- * A store is dispatched DIRECT only when BOTH:
- *   - PERSISTENCE_DIRECT_ENABLED is true (master safety switch), AND
- *   - that store's PERSISTENCE_<STORE>_MODE is 'direct'.
- * Otherwise the store stays on the Gateway HTTP path (the default).
- *
- * Defaults ship with PERSISTENCE_DIRECT_ENABLED=false, so resolveMode()
- * returns 'gateway' for every store and runtime behavior is unchanged until a
- * separately approved cutover flips the master flag and per-store mode.
+ * DIRECT is the only supported runtime dispatch mode. The former Gateway HTTP
+ * fallback was retired by ACR-0009: when a store resolves to 'gateway' (legacy
+ * .env, or the master switch off), services/gateway.ts fails LOUD at dispatch
+ * instead of routing through developer tooling. These flags therefore act as
+ * boot/dispatch validation plus a kill switch, not a routing choice.
  */
 import { env } from '../../env.js';
 

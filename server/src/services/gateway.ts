@@ -1,22 +1,22 @@
 /**
- * Universal Gateway client. All persistence happens through this.
- * Single endpoint: POST {GATEWAY_URL}/execute with { tool, action, params }.
- * The gateway fans writes to MongoDB + Neo4j + ChromaDB so a single logical
- * operation lands in all three stores. See docs/locked-spec.md.
+ * Persistence dispatch client — DIRECT-ONLY (ACR-0007 / ACR-0009).
+ *
+ * Every persistence call lands on the app's own direct adapters
+ * (services/persistence/{mongo,neo4j,chroma}) against the dedicated governed
+ * stack (Mongo :30000 · Neo4j :7710 · Chroma :8200). There is NO runtime path
+ * to the Universal Gateway: Gateway V2 (localhost:2526) is MCP developer
+ * tooling for AI agents only and is never a production runtime dependency.
+ * The former Gateway HTTP fallback was retired by ACR-0009 (2026-07-01);
+ * a store whose persistence mode is not 'direct' now fails LOUD at dispatch
+ * instead of silently routing through developer tooling.
+ *
+ * The exported names (`gatewayCall`, `GatewayError`) are preserved solely so
+ * the ~405 historical call sites keep compiling and their error guards keep
+ * matching (ACR-0007 Part B incremental pattern). A repo-wide rename to
+ * `persistenceCall` / `PersistenceError` is tracked as a Phase 11 follow-up.
  */
 
-import { fetch } from 'undici';
-import { env } from '../env.js';
 import { isDirect, type PersistenceStore } from './persistence/flags.js';
-
-export interface GatewayResponse<T = unknown> {
-  success: boolean;
-  tool: string;
-  action: string;
-  data: T;
-  error?: string;
-  executionTime?: number;
-}
 
 export class GatewayError extends Error {
   constructor(
@@ -39,6 +39,12 @@ function persistenceStoreForTool(tool: string): PersistenceStore | undefined {
       return undefined;
   }
 }
+
+const STORE_MODE_ENV_NAME: Record<PersistenceStore, string> = {
+  mongodb: 'PERSISTENCE_MONGO_MODE',
+  neo4j: 'PERSISTENCE_NEO4J_MODE',
+  chromadb: 'PERSISTENCE_CHROMA_MODE',
+};
 
 async function directPersistenceCall<T>(
   store: PersistenceStore,
@@ -72,32 +78,22 @@ export async function gatewayCall<T = unknown>(
   params: Record<string, unknown>,
 ): Promise<T> {
   const directStore = persistenceStoreForTool(tool);
-  if (directStore && isDirect(directStore)) {
-    return directPersistenceCall<T>(directStore, action, params);
+  if (!directStore) {
+    throw new GatewayError(
+      tool,
+      action,
+      'runtime Gateway calls are retired (ACR-0007/ACR-0009) — the Universal ' +
+        'Gateway is developer tooling only, and no runtime tool maps to it',
+    );
   }
-
-  const res = await fetch(`${env.GATEWAY_URL}/execute`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tool, action, params }),
-  });
-
-  if (!res.ok) {
-    // Surface the gateway's own error message (e.g. "The resource already
-    // exists"), not just the HTTP status — callers' error guards depend on it.
-    let detail = `HTTP ${res.status} ${res.statusText}`;
-    try {
-      const errBody = (await res.json()) as { error?: string; message?: string };
-      detail = errBody?.error ?? errBody?.message ?? detail;
-    } catch {
-      /* non-JSON error body — keep the HTTP status */
-    }
-    throw new GatewayError(tool, action, detail);
+  if (!isDirect(directStore)) {
+    throw new GatewayError(
+      directStore,
+      action,
+      `persistence mode for '${directStore}' is not 'direct' — the Gateway HTTP ` +
+        `fallback is retired (ACR-0009). Set PERSISTENCE_DIRECT_ENABLED=true and ` +
+        `${STORE_MODE_ENV_NAME[directStore]}=direct.`,
+    );
   }
-
-  const body = (await res.json()) as GatewayResponse<T>;
-  if (!body.success) {
-    throw new GatewayError(tool, action, body.error ?? 'unknown error');
-  }
-  return body.data;
+  return directPersistenceCall<T>(directStore, action, params);
 }

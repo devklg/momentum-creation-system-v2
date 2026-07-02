@@ -165,8 +165,8 @@ describe('S2.12 Michael response contract static governance boundary', () => {
     const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
     expect(gatewayClient).toContain('export async function gatewayCall');
     expect(gatewayClient).toContain('directPersistenceCall');
-    expect(gatewayClient).toContain('/execute');
-    expect(gatewayClient).toContain('GATEWAY_URL');
+    expect(gatewayClient).not.toContain('/execute');
+    expect(gatewayClient).not.toContain('GATEWAY_URL');
   });
 
   it('does not introduce telephony, persistence activation, automation, prospect scoring, route handlers, or knowledge approval', () => {

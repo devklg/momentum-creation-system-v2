@@ -154,12 +154,12 @@ describe('S2.15 Michael runtime adapter contract static governance boundary', ()
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('preserves the Gateway fallback client outside the contract source', () => {
+  it('verifies the Gateway HTTP fallback stays retired (ACR-0009) outside the contract source', () => {
     const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
     expect(gatewayClient).toContain('export async function gatewayCall');
     expect(gatewayClient).toContain('directPersistenceCall');
-    expect(gatewayClient).toContain('/execute');
-    expect(gatewayClient).toContain('GATEWAY_URL');
+    expect(gatewayClient).not.toContain('/execute');
+    expect(gatewayClient).not.toContain('GATEWAY_URL');
   });
 
   it('does not introduce Steve, Ivory, telephony, persistence activation, automation, scoring, qualification, compensation math, or knowledge approval', () => {

@@ -270,7 +270,7 @@ app.listen(env.SERVER_PORT, () => {
 // ADMIN Section G — broadcast delivery worker (Chat #144). Tails
 // `broadcast_recipients` for queued rows and dispatches via Telnyx + Resend.
 // Idempotent: safe even if invoked outside the listen callback (start order
-// doesn't matter — the worker queries the gateway, not the listening port).
+// doesn't matter — the worker queries the stores directly, not the listening port).
 void startBroadcastWorker();
 void startVmImportWorker();
 void startVmDeliveryWorker();

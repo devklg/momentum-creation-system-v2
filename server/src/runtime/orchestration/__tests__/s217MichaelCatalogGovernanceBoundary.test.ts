@@ -298,10 +298,10 @@ describe('S2.17 Michael response catalog static governance boundary', () => {
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#18 preserves the Gateway fallback client outside the S2.17 surface', () => {
+  it('#18 verifies the Gateway HTTP fallback stays retired (ACR-0009) outside the S2.17 surface', () => {
     const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
     expect(gatewayClient).toContain('export async function gatewayCall');
-    expect(gatewayClient).toContain('GATEWAY_URL');
+    expect(gatewayClient).not.toContain('GATEWAY_URL');
   });
 
   it('#19 does not introduce event persistence / outbox / replay / subscriber / event API code', () => {

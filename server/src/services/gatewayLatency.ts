@@ -1,10 +1,12 @@
 /**
- * Universal Gateway latency probe (/admin Live Operations H.1).
+ * Persistence latency probe (/admin Live Operations H.1).
  *
- * Provides a thin instrumented wrapper around `gatewayCall` plus an
+ * Provides a thin instrumented wrapper around `gatewayCall` — which since
+ * ACR-0009 dispatches ONLY to the direct persistence adapters — plus an
  * in-memory rolling 60s window of latency samples. The /admin Live Ops
  * H.1 usage strip reads `latencyPercentiles()` to fill the
- * `gatewayLatencyMsP50 / P95` fields on `AdminLiveUsageSample`.
+ * `gatewayLatencyMsP50 / P95` fields on `AdminLiveUsageSample` (field names
+ * kept for shared-type stability; they now measure direct-store round trips).
  *
  * Scope honesty: today the only callers of `instrumentedGatewayCall`
  * are the H domain functions themselves (domain/liveOps.ts). That means

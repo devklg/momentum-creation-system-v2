@@ -1,8 +1,11 @@
 /**
- * Triple-stack write helper. Wraps three sequential gateway calls so a single
- * logical write lands in MongoDB + Neo4j + ChromaDB. No DB is optional.
+ * Triple-stack write helper. Wraps three sequential DIRECT-adapter calls
+ * (services/persistence — ACR-0007/ACR-0009; the Universal Gateway is dev
+ * tooling only) so a single logical write lands in MongoDB + Neo4j + ChromaDB.
+ * No DB is optional.
  *
- * Known gateway bugs to respect:
+ * Adapter API contract notes (inherited from the legacy gateway era — the
+ * direct adapters mirror the same action contract):
  *   - MongoDB `update` action does NOT honor `upsert:true` — branch on existence.
  *   - Neo4j BA constraint requires email uniqueness; write `null` for missing optional fields.
  *   - ChromaDB add() does not auto-create collections; ensure collection exists first.

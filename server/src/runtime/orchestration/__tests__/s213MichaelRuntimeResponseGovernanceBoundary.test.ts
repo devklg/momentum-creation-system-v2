@@ -151,12 +151,12 @@ describe('S2.13 Michael runtime response fixture integration static governance b
     expect(comMatches, comMatches.join('\n')).toEqual([]);
   });
 
-  it('preserves Gateway fallback client source outside S2.13 changes', () => {
+  it('verifies the Gateway HTTP fallback stays retired (ACR-0009) outside S2.13 changes', () => {
     const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
     expect(gatewayClient).toContain('export async function gatewayCall');
     expect(gatewayClient).toContain('directPersistenceCall');
-    expect(gatewayClient).toContain('/execute');
-    expect(gatewayClient).toContain('GATEWAY_URL');
+    expect(gatewayClient).not.toContain('/execute');
+    expect(gatewayClient).not.toContain('GATEWAY_URL');
   });
 
   it('does not introduce telephony, event activation, outcome/action persistence, automation, scoring, or knowledge approval', () => {

@@ -2,7 +2,7 @@
 
 **Team Magnificent Marketing Momentum Creation System.** Founded by Kevin L. Gardner, co-led with Paul Barrios, operating inside THREE International around GLP-THREE.
 
-Three clients, one server, one gateway.
+Three clients, one server, one governed triple-stack.
 
 ## Surfaces
 
@@ -15,7 +15,7 @@ Three clients, one server, one gateway.
 
 ## Architecture
 
-Every persistent write fans to MongoDB + Neo4j + ChromaDB through Universal Gateway V2 at `localhost:2526`. THREE International is the final authority on sponsorship, enrollment, placement, and compensation — this system mirrors THREE for operational visibility, never overrides it. Gateway V2 is the MCS V2 standard; see `docs/UNIVERSAL_GATEWAY_V2_STANDARD.md`.
+Every persistent write lands in MongoDB + Neo4j + ChromaDB **directly**, through the server's own persistence adapters (`server/src/services/persistence/`) — Mongo `:30000`, Neo4j `:7710`, Chroma `:8200` (the dedicated governed stack). Per **ACR-0007**, the Universal Gateway V2 (`localhost:2526`) is **developer tooling only** — an MCP server for AI agents (Claude Desktop, Claude Code, Codex) that saves tokens during development; it is never a production runtime dependency and is not part of the app's persistence path. THREE International is the final authority on sponsorship, enrollment, placement, and compensation — this system mirrors THREE for operational visibility, never overrides it. See `organization/ACR-0007-runtime-persistence-direct-not-gateway.md` and `docs/UNIVERSAL_GATEWAY_V2_STANDARD.md`.
 
 For full architecture, see `docs/locked-spec.md` (condensed authoritative reference) and the five design `.docx` files in `docs/`.
 
@@ -41,11 +41,11 @@ No income claims. No placement promises. No AI prospecting (Michael is BA-facing
 ## Development
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev:all
 ```
 
-Runs server (7700) and all three clients (7701/7702/7703) in parallel.
+Runs server (7700) and all three clients (7701/7702/7703) in parallel. Requires Node ≥22 and pnpm ≥9 (`packageManager: pnpm@9.15.0`). `pnpm dev` runs only server + team.
 
 ## License
 

@@ -140,12 +140,12 @@ describe('S2.6 adapter dispatch static governance boundary', () => {
     expect(comMatches, comMatches.join('\n')).toEqual([]);
   });
 
-  it('preserves the Gateway fallback client outside dispatch source', () => {
+  it('verifies the Gateway HTTP fallback stays retired (ACR-0009) outside dispatch source', () => {
     const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
     expect(gatewayClient).toContain('export async function gatewayCall');
     expect(gatewayClient).toContain('directPersistenceCall');
-    expect(gatewayClient).toContain('/execute');
-    expect(gatewayClient).toContain('GATEWAY_URL');
+    expect(gatewayClient).not.toContain('/execute');
+    expect(gatewayClient).not.toContain('GATEWAY_URL');
   });
 
   it('does not introduce telephony, event activation, persistence, automation, prospect scoring, or response generation in dispatch', () => {

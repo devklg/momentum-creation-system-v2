@@ -29,6 +29,9 @@
  */
 
 import { gatewayCall } from './gateway.js';
+// NOTE (ACR-0009): despite the historical name, gatewayCall dispatches ONLY to
+// the direct persistence adapters — these boot/write guards run against the
+// dedicated Chroma stack directly, never through the Universal Gateway.
 
 /**
  * Every ChromaDB collection the server writes to. Grep anchor: each entry
@@ -161,8 +164,7 @@ export async function ensureChromaCollections(): Promise<void> {
       await gatewayCall('chromadb', 'create_collection', {
         name,
         metadata: {
-          chat_number: 147,
-          project: 'momentum_creation_system_v1',
+          project: 'momentum_creation_system_v2',
           purpose: 'auto-created by boot-time triple-stack collection assertion',
         },
       });

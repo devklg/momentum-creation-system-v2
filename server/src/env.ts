@@ -44,8 +44,6 @@ const Env = z.object({
   SERVER_PORT: z.coerce.number().int().positive().default(7700),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
-  GATEWAY_URL: z.string().url().default('http://localhost:2526/api'),
-
   /**
    * Base URL minted /p/{token} prospect links are built on (#145). Dev
    * default is the local .com app (localhost:7701) so links resolve without
@@ -187,26 +185,28 @@ const Env = z.object({
   VM_ACQUISITION_PROVIDER_API_URL: z.string().url().optional(),
   VM_ACQUISITION_PROVIDER_API_KEY: z.string().default(''),
 
-  // ─── S1.3 direct-persistence (ACR-0007 / Option C) ───────────────────────
-  // Additive and fully defaulted: the server boots unchanged in gateway mode.
-  // Direct adapters connect only when a per-store *_MODE is 'direct' AND
-  // PERSISTENCE_DIRECT_ENABLED is true. The Gateway HTTP path stays the default
-  // runtime persistence path until a later, separately approved cutover.
-  MONGODB_URI: z.string().default('mongodb://127.0.0.1:28000'),
+  // ─── Direct persistence — THE ONLY runtime path (ACR-0007 / ACR-0009) ────
+  // Defaults target the dedicated governed stack. The former Gateway HTTP
+  // fallback is retired: a store whose mode is not 'direct' fails LOUD at
+  // dispatch (services/gateway.ts) — there is no silent fallback of any kind.
+  // The 'gateway' enum value is retained only so a legacy .env is rejected
+  // with a clear error instead of a Zod parse failure.
+  MONGODB_URI: z.string().default('mongodb://127.0.0.1:30000'),
   MONGODB_DB: z.string().default('momentum'),
-  NEO4J_URI: z.string().default('bolt://127.0.0.1:7687'),
+  NEO4J_URI: z.string().default('bolt://127.0.0.1:7710'),
   NEO4J_USERNAME: z.string().default('neo4j'),
   NEO4J_PASSWORD: z.string().default(''),
-  CHROMA_URL: z.string().url().default('http://localhost:8100'),
+  CHROMA_URL: z.string().url().default('http://localhost:8200'),
   GPU_EMBEDDER_URL: z.string().url().default('http://localhost:8300'),
 
-  // Per-store cutover flags (S1_3_IMPLEMENTATION_BREAKDOWN §9). Default 'gateway'.
-  PERSISTENCE_MONGO_MODE: z.enum(['gateway', 'direct']).default('gateway'),
-  PERSISTENCE_NEO4J_MODE: z.enum(['gateway', 'direct']).default('gateway'),
-  PERSISTENCE_CHROMA_MODE: z.enum(['gateway', 'direct']).default('gateway'),
-  // Master safety switch: even if a *_MODE is 'direct', direct dispatch is only
-  // active when this is true. Lets Phase 0/1 land without changing runtime.
-  PERSISTENCE_DIRECT_ENABLED: EnvBoolean.default(false),
+  // Per-store persistence mode. Direct is the default and the only supported
+  // runtime mode (ACR-0009); 'gateway' is a refused legacy value.
+  PERSISTENCE_MONGO_MODE: z.enum(['gateway', 'direct']).default('direct'),
+  PERSISTENCE_NEO4J_MODE: z.enum(['gateway', 'direct']).default('direct'),
+  PERSISTENCE_CHROMA_MODE: z.enum(['gateway', 'direct']).default('direct'),
+  // Master switch, default ON. Turning it off no longer re-routes anything —
+  // it makes persistence dispatch fail loud (kill switch semantics).
+  PERSISTENCE_DIRECT_ENABLED: EnvBoolean.default(true),
   // GPU embedder is required for Chroma direct writes; there is no CPU fallback.
   GPU_EMBEDDER_REQUIRED: EnvBoolean.default(true),
   // Phase 7 · R0 canary kill-switch (P7.1 §6 / P7.2). When false (default) the

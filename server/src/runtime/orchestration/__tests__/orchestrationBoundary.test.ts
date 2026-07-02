@@ -229,8 +229,8 @@ describe('S2.1 orchestration import boundary', () => {
   it('confirms the Gateway fallback client remains present and unchanged by orchestration', () => {
     const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
     expect(gatewayClient).toContain('export async function gatewayCall');
-    expect(gatewayClient).toContain('/execute');
-    expect(gatewayClient).toContain('GATEWAY_URL');
+    expect(gatewayClient).not.toContain('/execute');
+    expect(gatewayClient).not.toContain('GATEWAY_URL');
   });
 
   it('keeps the orchestration boundary descriptor inert', () => {
