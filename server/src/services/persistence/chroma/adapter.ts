@@ -1,7 +1,7 @@
 import { fetch } from 'undici';
 import { PersistenceError } from '../dispatch.js';
 import { embed } from './embedder.js';
-import { chromaCollectionsUrl } from './connection.js';
+import { chromaCollectionsUrl, chromaHeaders } from './connection.js';
 
 interface ChromaCollection {
   id?: string;
@@ -57,7 +57,8 @@ function normalizeCollections(body: unknown): ChromaCollection[] {
 }
 
 async function request(path: string, init?: Parameters<typeof fetch>[1]): Promise<unknown> {
-  const res = await fetch(path, init);
+  const headers = chromaHeaders((init?.headers ?? {}) as Record<string, string>);
+  const res = await fetch(path, { ...init, headers });
   if (!res.ok) {
     throw new Error(`HTTP ${res.status} ${res.statusText}`);
   }
