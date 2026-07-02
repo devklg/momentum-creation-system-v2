@@ -6,6 +6,7 @@
  */
 
 import { persistenceCall } from '../src/services/persistence/dispatch.js';
+import { connectMongo } from '../src/services/persistence/mongo/connection.js';
 
 interface SeedCode {
   code: string;
@@ -33,6 +34,7 @@ const CODES: SeedCode[] = [
 ];
 
 async function main(): Promise<void> {
+  await connectMongo();
   for (const c of CODES) {
     const existing = await persistenceCall<{ count: number }>('mongodb', 'query', {
       database: 'momentum',

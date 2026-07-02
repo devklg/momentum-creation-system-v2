@@ -28,6 +28,7 @@
  */
 
 import { persistenceCall } from '../src/services/persistence/dispatch.js';
+import { connectMongo } from '../src/services/persistence/mongo/connection.js';
 import { tripleStackWrite } from '../src/services/tripleStack.js';
 import { env } from '../src/env.js';
 import {
@@ -78,6 +79,7 @@ async function eventExists(eventId: string): Promise<boolean> {
 }
 
 async function main(): Promise<void> {
+  await connectMongo();
   const registerUrl = env.WEBINAR_REGISTER_URL;
   if (!registerUrl) {
     // eslint-disable-next-line no-console

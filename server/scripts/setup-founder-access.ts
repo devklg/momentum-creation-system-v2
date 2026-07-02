@@ -24,6 +24,7 @@ import argon2 from 'argon2';
 import type { SteveDiscoveryIngestPayload } from '@momentum/shared';
 import { ingestDiscoveryArtifact } from '../src/domain/steve-success-interview.js';
 import { persistenceCall } from '../src/services/persistence/dispatch.js';
+import { connectMongo } from '../src/services/persistence/mongo/connection.js';
 
 const FOUNDER_TMAG_ID = 'TMAG-01';
 
@@ -146,6 +147,7 @@ async function seedCompletedSteveDiscovery(): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  await connectMongo();
   console.log(`[founder-access] begin - target ${FOUNDER_TMAG_ID} (Kevin only; Paul untouched)`);
   await setFounderPassword();
   await seedCompletedSteveDiscovery();

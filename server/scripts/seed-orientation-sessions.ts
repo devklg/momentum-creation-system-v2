@@ -18,6 +18,7 @@
  */
 
 import { persistenceCall } from '../src/services/persistence/dispatch.js';
+import { connectMongo } from '../src/services/persistence/mongo/connection.js';
 import {
   createOrientationSession,
   ensureOrientationCollection,
@@ -48,6 +49,7 @@ async function sessionExistsAt(scheduledFor: string): Promise<boolean> {
 }
 
 async function main(): Promise<void> {
+  await connectMongo();
   await ensureOrientationCollection();
 
   const now = new Date();
