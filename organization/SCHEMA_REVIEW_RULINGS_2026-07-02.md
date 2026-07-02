@@ -223,6 +223,36 @@ Canonized as the enforcement arm of Ruling 8 (Continuous Discovery):
 
 ---
 
+## Ruling 10 — Prefix canon: store-deterministic (Mongo=tmag_, Chroma=mcs_, Neo4j=Tmag*)
+
+Kevin, 2026-07-02: the prefix is determined by the STORE, not the concept
+class:
+- **MongoDB (Mongoose): `tmag_`** — team operational data.
+- **ChromaDB: `mcs_` — EVERY collection** — the system's semantic layer.
+- **Neo4j: `Tmag*` labels** — the relationship store; team-branded labels
+  because "we really want to have great edges."
+
+Composes with the one-concept-one-name / cased-per-layer law (identity
+decision §2b): one canonical concept name, deterministic per-store transform —
+e.g. Mongo `tmag_commitments` ⇄ Chroma `mcs_commitments` ⇄ Neo4j
+`(:TmagCommitment)`. Prefixing is now mechanical, never a judgment call.
+
+Consequences:
+1. PR #108's Chroma renames (→ `tmag_`) reverse to `mcs_` under the
+   reidentification migration (stores write-frozen/near-empty — cheap now).
+   The `CHROMA_COLLECTIONS` registry updates in the same migration.
+2. Resolves the Ruling 4 drift flag: member collection = **`tmag_members`**
+   (Mongo) / `mcs_members` (Chroma).
+3. Neo4j member label canonical form: **`TmagMember`** (per the Tmag* scheme;
+   supersedes the `TeamMagnificentMember` spelling in the identity decision
+   doc — pending Kevin's veto). All §6.1 constraint labels adopt Tmag*.
+4. Knowledge collections (`mcs_*_knowledge_*`), `mcs_audit_log`,
+   `mcs_outcomes`, `mcs_learning_candidates_review` are ALREADY compliant on
+   the Chroma side.
+5. Executes under the ONE reidentification migration — not piecemeal.
+
+---
+
 ## Open items in this review
 
 - Remaining catalog groups: prospects/invitations · CRM · agents/runtime · VM ·
