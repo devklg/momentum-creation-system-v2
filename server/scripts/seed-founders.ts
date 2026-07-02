@@ -19,6 +19,7 @@
  */
 
 import { persistenceCall } from '../src/services/persistence/dispatch.js';
+import { connectMongo } from '../src/services/persistence/mongo/connection.js';
 import { tripleStackWrite } from '../src/services/tripleStack.js';
 
 interface FounderSeed {
@@ -218,6 +219,7 @@ async function seedAccessCode(f: FounderSeed): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  await connectMongo();
   console.log('[seed] founders — begin');
   console.log('[seed] order: BA records first, then access codes (codes reference BAs)');
 

@@ -12,7 +12,7 @@
 
 import { persistenceCall } from '../src/services/persistence/dispatch.js';
 
-const CHROMA_COLLECTION = 'mcs_ivory';
+const CHROMA_COLLECTION = 'mcs_ivory_prospect_names';
 
 async function main(): Promise<void> {
   try {

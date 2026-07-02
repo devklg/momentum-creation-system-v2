@@ -96,7 +96,9 @@ export const CHROMA_COLLECTIONS = [
   // Prospect / funnel
   'mcs_prospect_invitation_activity','mcs_prospect_callback_requests','mcs_prospect_htank_events','mcs_prospect_magic_links','mcs_prospect_webinar_reservations','mcs_prospect_crm_records','mcs_prospect_timeline_events',
   // Agents / templates / admin
-  'mcs_agent_ivory_events','mcs_agent_michael_events','mcs_agent_steve_events','mcs_agent_templates','mcs_ivory_prospect_names','mcs_audit_log','mcs_content_templates','mcs_broadcasts',
+  'mcs_agent_ivory_events','mcs_agent_michael_events','mcs_agent_steve_events','mcs_agent_system_events','mcs_agent_templates','mcs_ivory_prospect_names','mcs_audit_log','mcs_content_templates','mcs_broadcasts','mcs_admin_prospect_notes','mcs_tenant_settings',
+  // Prospect extras with living writers (runtime write-guard reconciliation 2026-07-02)
+  'mcs_prospect_htank_accounts','mcs_new_member_orientation_reservations','mcs_webinar_events',
   // VM
   'mcs_vm_lead_owners','mcs_vm_bulk_leads','mcs_vm_campaigns','mcs_vm_delivery_events',
   // Memory / learning
