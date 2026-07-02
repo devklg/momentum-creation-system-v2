@@ -44,7 +44,7 @@ import { MCS_FAST_START_MODULES } from '@momentum/shared';
 const MONGO_DB = 'momentum';
 const PROGRESS_COLLECTION = 'tmag_fast_start_progress';
 const PROSPECTS_COLLECTION = 'tmag_prospects';
-const CHROMA_COLLECTION = 'mcs_training_progress';
+const CHROMA_COLLECTION = 'tmag_fast_start_progress';
 
 const VALID_MODULE_IDS: readonly McsFastStartModuleId[] = [1, 2, 3, 4, 5];
 

@@ -34,8 +34,8 @@ const TIMELINE_COLLECTION = 'tmag_prospect_timeline_events';
 const PROSPECTS_COLLECTION = 'tmag_prospects';
 const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
 const BULK_LEADS_COLLECTION = 'tmag_vm_bulk_leads';
-const CRM_CHROMA_COLLECTION = 'mcs_prospect_crm';
-const TIMELINE_CHROMA_COLLECTION = 'mcs_prospect_timeline';
+const CRM_CHROMA_COLLECTION = 'tmag_prospect_crm_records';
+const TIMELINE_CHROMA_COLLECTION = 'tmag_prospect_timeline_events';
 
 export class ProspectCrmError extends Error {
   constructor(public readonly code: string) {

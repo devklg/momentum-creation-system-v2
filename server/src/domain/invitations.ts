@@ -62,7 +62,7 @@ const MONGO_DB = 'momentum';
 const PROSPECTS_COLLECTION = 'tmag_prospects';
 const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
 const ACTIVITY_COLLECTION = 'tmag_prospect_invitation_activity';
-const CHROMA_COLLECTION = 'mcs_invitations';
+const CHROMA_COLLECTION = 'tmag_prospect_invitation_activity';
 
 /**
  * Re-entry code alphabet (#148): unambiguous - no I, O, 0, 1. A prospect

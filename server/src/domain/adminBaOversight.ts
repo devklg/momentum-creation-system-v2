@@ -648,7 +648,7 @@ export async function applySponsorOverride(args: {
       },
     },
     chroma: {
-      collection: 'audit_log',
+      collection: 'mcs_audit_log',
       document: `sponsor override tmagId=${args.tmagId} previous=${previousSponsorTmagId} new=${args.newSponsorTmagId} requestedBy=${args.requestingTmagId} reason="${args.reason}"`,
       metadata: {
         action: 'admin.sponsor.override',

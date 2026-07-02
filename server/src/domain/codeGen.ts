@@ -127,7 +127,7 @@ export async function mintAccessCode(
       },
     },
     chroma: {
-      collection: 'mcs_access_codes',
+      collection: 'tmag_access_codes',
       document: `Access code ${code} minted ${createdAt}, assigned to ${input.sponsorFirstName} ${input.sponsorLastName} (BA ${input.sponsorTmagId} / THREE ${input.sponsorThreeBaId}). ${input.note ?? ''}`.trim(),
       metadata: {
         code,

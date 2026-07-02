@@ -38,7 +38,7 @@ import type {
 
 const MONGO_DB = 'momentum';
 const MONGO_COLLECTION = 'tmag_prospect_callback_requests';
-const CHROMA_COLLECTION = 'mcs_callback_requests';
+const CHROMA_COLLECTION = 'tmag_prospect_callback_requests';
 
 export interface CreateCallbackRequestInput {
   token: string;

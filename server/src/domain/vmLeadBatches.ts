@@ -12,7 +12,7 @@ import type { McsLeadBatchRecord, McsVmLeadBatchSource, McsVmLeadType } from '@m
 
 const MONGO_DB = 'momentum';
 const COLLECTION = 'tmag_vm_lead_batches';
-const CHROMA_COLLECTION = 'mcs_vm_lead_batches';
+const CHROMA_COLLECTION = 'tmag_vm_lead_batches';
 
 export class LeadBatchError extends Error {
   constructor(public readonly code: string) {

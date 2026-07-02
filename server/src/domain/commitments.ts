@@ -65,7 +65,7 @@ export async function recordCommitment(
       },
     },
     chroma: {
-      collection: 'mcs_commitments',
+      collection: 'tmag_commitments',
       document: `BA ${input.tmagId} (${input.email}) accepted Team Magnificent commitment ${COMMITMENT_VERSION} at ${acceptedAt}.`,
       metadata: {
         tmagId: input.tmagId,

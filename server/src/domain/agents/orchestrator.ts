@@ -34,8 +34,8 @@ import {
 import { listIvoryNamesForBA } from '../ivory.js';
 import { buildDiscoveryView } from '../steve-success-interview.js';
 
-const EVENTS_COLLECTION = 'agent_events';
-const EVENTS_CHROMA_COLLECTION = 'mcs_agent_events';
+// Agent events are written per-agent (Rev2 split): the collection name is derived
+// from the event's agentId — `tmag_agent_<agentId>_events` — same name across stores.
 
 const AGENT_IDS: readonly McsAgentId[] = ['michael', 'ivory', 'steve', 'system'];
 const EVENT_KINDS: readonly McsAgentEventKind[] = [
@@ -295,9 +295,10 @@ export async function recordAgentEvent(
     createdAt: now,
   };
 
+  const agentEventsCollection = `tmag_agent_${event.agentId}_events`;
   await tripleStackWrite({
     id: eventId,
-    mongoCollection: EVENTS_COLLECTION,
+    mongoCollection: agentEventsCollection,
     mongoDoc: { ...event },
     neo4j: {
       cypher:
@@ -322,7 +323,7 @@ export async function recordAgentEvent(
       },
     },
     chroma: {
-      collection: EVENTS_CHROMA_COLLECTION,
+      collection: agentEventsCollection,
       document:
         `Agent event ${event.kind} by BA ${tmagId}. Agent: ${event.agentId}. ` +
         `Subject: ${event.subjectType}${event.subjectId ? ` ${event.subjectId}` : ''}.`,

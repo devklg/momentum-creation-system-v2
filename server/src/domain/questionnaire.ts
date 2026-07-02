@@ -100,7 +100,7 @@ export interface QuestionnaireRecord extends QuestionnaireSubmission {
 export async function questionnaireExists(tmagId: string): Promise<boolean> {
   const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'ba_questionnaires',
+    collection: 'tmag_questionnaires',
     filter: { tmagId },
     limit: 1,
   });
@@ -123,7 +123,7 @@ export async function getQuestionnaire(
     'query',
     {
       database: 'momentum',
-      collection: 'ba_questionnaires',
+      collection: 'tmag_questionnaires',
       filter: { tmagId },
       limit: 1,
     },
@@ -202,7 +202,7 @@ export async function recordQuestionnaire(
 
   await tripleStackWrite({
     id: questionnaireId,
-    mongoCollection: 'ba_questionnaires',
+    mongoCollection: 'tmag_questionnaires',
     mongoDoc: record as unknown as Record<string, unknown>,
     neo4j: {
       // BA -[:SUBMITTED]-> Questionnaire pattern. Sponsor cockpit views
@@ -225,7 +225,7 @@ export async function recordQuestionnaire(
       },
     },
     chroma: {
-      collection: 'mcs_ba_questionnaires',
+      collection: 'tmag_questionnaires',
       document: chromaDocument,
       metadata: {
         questionnaireId,

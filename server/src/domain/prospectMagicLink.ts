@@ -49,7 +49,7 @@ import type { McsProspectMagicLinkRecord } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const MONGO_COLLECTION = 'tmag_prospect_magic_links';
-const CHROMA_COLLECTION = 'mcs_prospect_magic_links';
+const CHROMA_COLLECTION = 'tmag_prospect_magic_links';
 
 /**
  * Click window: how long an issued link stays redeemable (Kevin,

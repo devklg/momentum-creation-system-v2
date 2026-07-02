@@ -17,7 +17,7 @@ import { tripleStackWrite } from '../services/tripleStack.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 
 const MONGO_DB = 'momentum';
-const CHROMA_COLLECTION = 'mcs_vm_campaigns';
+const CHROMA_COLLECTION = 'tmag_vm_campaigns';
 
 const LEADS_COLLECTION = 'tmag_vm_bulk_leads';
 const QUEUE_COLLECTION = 'tmag_vm_queue_jobs';

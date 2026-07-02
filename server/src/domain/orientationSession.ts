@@ -41,7 +41,7 @@ import {
 const MONGO_DB = 'momentum';
 const SESSIONS_COLLECTION = 'tmag_new_member_orientation_sessions';
 const RESERVATIONS_COLLECTION = 'tmag_new_member_orientation_reservations';
-const CHROMA_COLLECTION = 'mcs_orientation';
+const CHROMA_COLLECTION = 'tmag_new_member_orientation_reservations';
 
 /** Default hosts when none are assigned (founders today; extensible later). */
 export const ORIENTATION_DEFAULT_HOSTS = ['Kevin Gardner', 'Paul Barrios'];

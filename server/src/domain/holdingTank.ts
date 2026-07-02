@@ -44,7 +44,7 @@ import type {
 const MONGO_DB = 'momentum';
 const COUNTERS_COLLECTION = 'tmag_prospect_htank_counters';
 const PLACEMENTS_COLLECTION = 'tmag_prospect_htank_placements';
-const CHROMA_COLLECTION = 'mcs_pool_events';
+const CHROMA_COLLECTION = 'tmag_prospect_htank_events';
 
 /** Single-row counter document id. The pool is team-wide (Chat #84). */
 export const TEAM_POOL_ID = 'tm_team_pool';

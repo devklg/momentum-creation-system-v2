@@ -73,7 +73,7 @@ import { normalizePhone } from './prospectAccount.js';
 
 const MONGO_DB = 'momentum';
 const IVORY_COLLECTION = 'tmag_ivory_prospect_names';
-const CHROMA_COLLECTION = 'mcs_ivory';
+const CHROMA_COLLECTION = 'tmag_ivory_prospect_names';
 
 const ALLOWED_CATEGORIES: ReadonlySet<McsIvoryCategory> = new Set([
   'family',

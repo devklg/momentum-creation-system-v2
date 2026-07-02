@@ -16,7 +16,7 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLLECTION = 'tmag_vm_campaigns';
-const CHROMA_COLLECTION = 'mcs_vm_campaigns';
+const CHROMA_COLLECTION = 'tmag_vm_campaigns';
 
 export class VMCampaignError extends Error {
   constructor(public readonly code: string) {

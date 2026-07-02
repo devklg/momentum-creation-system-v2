@@ -67,7 +67,7 @@ const CALLBACK_COLLECTION = 'tmag_prospect_callback_requests';
 const NOTES_COLLECTION = 'tmag_prospect_crm_notes';
 const FOLLOWUPS_COLLECTION = 'tmag_prospect_crm_followups';
 const DISPOSITIONS_COLLECTION = 'tmag_prospect_crm_dispositions';
-const CHROMA_COLLECTION = 'mcs_invitations';
+const CHROMA_COLLECTION = 'tmag_prospect_invitation_activity';
 
 /** Max note length — generous for a free-form journal entry. */
 const NOTE_MAX = 2000;

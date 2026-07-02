@@ -156,7 +156,7 @@ describe('Ivory persistence fixes', () => {
     );
     expect(chromaAdd).toBeDefined();
     const params = chromaAdd?.[2] as AnyRec;
-    expect(params).toMatchObject({ collection: 'mcs_ivory', ids: ['ivory_1'] });
+    expect(params).toMatchObject({ collection: 'tmag_ivory_prospect_names', ids: ['ivory_1'] });
     expect(String((params.documents as string[])[0])).toContain('brand new note');
   });
 

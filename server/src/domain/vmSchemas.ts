@@ -30,12 +30,12 @@ export const VM_COLLECTIONS = {
 } as const;
 
 export const VM_CHROMA_COLLECTIONS = {
-  leadBatches: 'mcs_vm_lead_batches',
-  bulkLeads: 'mcs_vm_leads',
-  campaigns: 'mcs_vm_campaigns',
-  deliveryEvents: 'mcs_vm_delivery_events',
-  prospectCrm: 'mcs_prospect_crm',
-  prospectTimeline: 'mcs_prospect_timeline',
+  leadBatches: 'tmag_vm_lead_batches',
+  bulkLeads: 'tmag_vm_bulk_leads',
+  campaigns: 'tmag_vm_campaigns',
+  deliveryEvents: 'tmag_vm_delivery_events',
+  prospectCrm: 'tmag_prospect_crm_records',
+  prospectTimeline: 'tmag_prospect_timeline_events',
 } as const;
 
 export type VmCollectionKey = keyof typeof VM_COLLECTIONS;
