@@ -296,6 +296,25 @@ collections.
 
 ---
 
+## Ruling 13 — Lead-ownership continuity (RVM → funnel handoff)
+
+Kevin, 2026-07-02: `ownerTmagId` is the single ownership thread through the
+entire RVM journey — purchased (tmag_vm_lead_owners) → imported
+(tmag_vm_bulk_leads.ownerTmagId) → dropped (tmag_vm_campaigns) → clicked →
+video presentation. **At `video_complete`, the lead becomes the OWNING
+member's prospect: the minted prospect's `sponsorTmagId` = the lead's
+`ownerTmagId`** (immutable from that point per the sponsor-immutability law),
+and the prospect is placed into the holding tank under that member. The RVM
+feeder converges on the identical Ruling 7 funnel spine; no gap exists where
+a lead can be orphaned or claimed by another member.
+
+Holding-tank store coverage confirmed: Mongo ×3
+(htank_counters/placements/accounts) · Chroma ×1 (mcs_prospect_htank_events
+— semantic event log; counters/positions have no semantic content to embed)
+· Neo4j IN_HOLDING_TANK(position) → TmagPool.
+
+---
+
 ## Open items in this review
 
 - Remaining catalog groups: prospects/invitations · CRM · agents/runtime · VM ·

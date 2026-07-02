@@ -18,6 +18,8 @@ Genealogy scope (Ruling 3): the only genealogy fact in this app is downline memb
 
 Onboarding spine (Ruling 6): **two stages** — Steve Discovery & Success Interview (the setup baseline) → sponsor-led workbook call. The self-serve questionnaire is retired (folded into Steve; its 21 fields gap-mapped into Steve's script; historical rows preserved, no validators). Ongoing discovery accrues via the runtime pipeline (Rulings 8–9): all agents interview; every encounter that creates something new has an ingestion mechanism.
 
+Lead-ownership continuity (Ruling 13): `ownerTmagId` is the single thread through the RVM journey — lead owner → imported lead → campaign → click → video. **At `video_complete` the lead becomes the OWNING member's prospect** (`sponsorTmagId` = `ownerTmagId`, immutable) and is placed into the holding tank under that member; the RVM feeder converges on the same funnel spine as warm-market invites.
+
 ## 1 · MongoDB — collections (database momentum)
 
 ### A · Identity / Access
@@ -88,7 +90,7 @@ Onboarding spine (Ruling 6): **two stages** — Steve Discovery & Success Interv
 |---|---|---|---|
 | `tmag_vm_lead_owners` | `leadOwnerId` | leadOwnerId · ownerTmagId · sponsorTmagId · name · source · country · leadType · status | **Renamed from vm_lead_batches (Ruling 12b): tracks WHOSE leads these are** — multiple members build with the RVM system. Reference field `leadBatchId` → `leadOwnerId` in the same migration. |
 | `tmag_vm_campaigns` | `vmCampaignId` | vmCampaignId · ownerTmagId · leadOwnerId · name · provider · status · adminApprovedForLiveDelivery | Member-owned VM campaign. |
-| `tmag_vm_bulk_leads` | `leadId` | leadId · leadOwnerId · ownerTmagId · vmCampaignId · status · dedupeKey | Imported VM/RVM leads — **ONE unified collection, one id format, one lead one journey** (Ruling 11; Apache Leads lineage: imported → dropped-to → responded → qualified → prospect). |
+| `tmag_vm_bulk_leads` | `leadId` | leadId · leadOwnerId · ownerTmagId · vmCampaignId · status · dedupeKey | Imported VM/RVM leads — **ONE unified collection, one id format, one lead one journey** (Ruling 11; Apache Leads lineage: imported → dropped-to → responded → qualified → prospect). At `video_complete` the handoff fires: prospect minted with `sponsorTmagId` = this lead's `ownerTmagId`, placed into the holding tank (Ruling 13). |
 | `tmag_vm_queue_jobs` | `jobId` | jobId · kind · status · attempts · availableAt | Durable VM work queue. |
 | `tmag_vm_delivery_events` | `eventId` | eventId · provider · leadId · vmCampaignId · ownerTmagId · channel · status · dryRun · attempt | VM send/webhook history — merged canonical shape (Ruling 11). |
 | `tmag_vm_provider_webhook_events` | `webhookEventId` | webhookEventId · provider · payload · status | Raw webhook ingestion. |
