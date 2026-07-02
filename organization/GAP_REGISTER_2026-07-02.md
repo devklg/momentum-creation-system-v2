@@ -91,6 +91,18 @@ Two surfaces:
    (member roster, prospects, reports — exact surface list to be enumerated
    at build).
 
+3. **Agent-generated printables (Kevin, same session):** agents produce
+   print-ready artifacts — Michael's daily to-do / success actions as a
+   printable daily card, training tips as tip sheets, and the actual invite
+   (ScriptMaker draft) as printed text. Natural extension: Steve's Success
+   Profile printed by the SPONSOR as prep for the workbook call (the human
+   conversation works from paper). Compliance holds automatically: invites
+   are validated at draft time (§3.11 script-time enforcement), so printing
+   outputs the already-compliant draft — print is a rendering, never a
+   bypass. Ties to Ruling 8/12c: an agent template (the road) can DECLARE
+   its printable outputs, making printables a first-class template property
+   rather than per-feature bolt-ons.
+
 Design notes:
 - Printing is an EXPORT class — ties directly to the locked-spec Part 5 open
   decision “Export PII redaction — per-export confirmation always, or
