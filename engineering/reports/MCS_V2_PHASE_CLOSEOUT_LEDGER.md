@@ -33,7 +33,7 @@ Legend: ✅ closed/delivered · 📋 planned (documented, owner-gated, not appli
 | B1 | Production topology | 🟡 **decided**, execution pending | Kevin | `P10_PRODUCTION_TOPOLOGY_DECISION.md` — InterServer VPS + Atlas/Aura direct + Chroma Cloud (approved knowledge) + local-GPU batch embeddings. |
 | B2 | Branch protection | 🟢 **core enforced** (aux to confirm) | Kevin | `gates` required, confirmed + proven; `P10_BRANCH_PROTECTION_SETTINGS.md`. |
 | B3 | Security hardening (H2/H3/H4) | 🟢 **implemented + merged** | — | PR #88 on `main`; 3 test files; `P10_B3_SECURITY_HARDENING_PATCHES.md`. |
-| B4 | H1 live smoke + backup | 🟡 **schema APPROVED — write-freeze LIFTED**, execution queued | Kevin | Canonical schema Rev 3 **signed & dated by Kevin 2026-07-02** (`MCS_V2_CANONICAL_SCHEMAS_REV3.md`; rulings 1–13 in `organization/SCHEMA_REVIEW_RULINGS_2026-07-02.md`). Remaining: apply validators/constraints/registry (moderate, reversible) + reidentification migration → then H1 smoke + backup. |
+| B4 | H1 live smoke + backup | 🟢 **COMPLETE (local)** 2026-07-02 | Kevin | Schema signed → stores provisioned to Rev 3 (PR #114: Chroma 37, Neo4j 50 constraints, Mongo 53 validators) → reidentification migration merged (PR #115) → **H1 live smoke PASS** (holding-tank domain, all three legs, direct mode, GPU embeddings, exit 0) → backup snapshot tool built + first snapshot taken. Production repeat rides B1/B6: run the same provisioning + smoke against Atlas/Aura/Chroma Cloud; enable managed backups. |
 | B5 | `.com` compliance pass | 🔴 open | Kevin | Manual walk of the release build (checklist §7.2). |
 | B6 | Live-ops mocks (`USE_MOCKS`) | 🔴 open | Kevin | Code slice to flip + smoke `/api/admin/live-ops/*`. |
 
