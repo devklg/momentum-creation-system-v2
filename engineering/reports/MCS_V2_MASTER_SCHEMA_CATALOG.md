@@ -107,7 +107,7 @@ minted → clicked → video_started → video_quarter → video_half
 | `orientation_sessions` | `sessionId` | `sessionId`·`scheduledFor`·`hosts[]`·`capacity`·`durationMinutes`·`status` | ← reservations | BA group orientation (cap 10). |
 | `orientation_reservations` | `reservationId` | `reservationId`·`sessionId`·`baId`·`baName`·`scheduledFor`·`status`·`smsDeliveryStatus` | → session, → member | BA seat reservations (soft-cancel). |
 | `fast_start_progress` | `<baId>__module-<moduleId>` | `baId`·`moduleId`·`state`·timestamps | → member | Per-member-per-module training state. |
-| `steve_discoveries` | `SD-<baId>` | `baId`·`successProfile` | → member | Discovery & Success Interview (1/member). |
+| `steve_discoveries` | `SD-<baId>` | `baId`·`successProfile` | → member | Discovery & Success Interview — **the setup BASELINE** (1/member, ratified Ruling 8). Ongoing discovery accrues via the agent runtime pipeline (events → outcomes → review-only candidates → approved knowledge), never by rewriting this artifact: all support agents interview continuously (Continuous Discovery doctrine). |
 
 ---
 

@@ -173,6 +173,32 @@ Still open from Group B (technical hygiene, folded into the §5/§9 pass):
 
 ---
 
+## Ruling 8 — Continuous Discovery doctrine (+ Group C Steve key ratified)
+
+Kevin, 2026-07-02 (verbatim intent): in reality ALL support agents are
+interviewing — for training, inviting, helping the member — so the knowledge
+base grows. Steve's initial interview is the SETUP for success; discovery is
+ONGOING, depending on where the member is and what they need.
+
+Canonized as the Continuous Discovery doctrine:
+1. **`steve_discoveries` stays one-per-member (`SD-<memberId>`)** — it is the
+   setup BASELINE Success Profile, written once in the member's own words.
+   Ratified; no versioning of the baseline.
+2. **The living picture = baseline + ongoing discovery**, which accrues
+   through the existing runtime pipeline — agent events → BA-confirmed
+   outcomes (R1) → learning candidates (R2, review-only) → Kevin's review →
+   active knowledge (R3/GraphRAG) → Context Manager packets. Every agent
+   (Steve, Michael, Ivory, future agents) is a discovery surface.
+3. **Guardrails unchanged and load-bearing:** agents interview and PROPOSE;
+   they never approve knowledge (candidates are review-only). Member-specific
+   understanding stays scoped to that member; only generalizable lessons
+   graduate to team-wide knowledge through review. Journal privacy holds.
+4. Framing consequence: the runtime layer's purpose statement should carry
+   this doctrine ("all agents interview; Steve sets up; discovery never
+   stops") so future agents are designed as discovery surfaces by default.
+
+---
+
 ## Open items in this review
 
 - Remaining catalog groups: prospects/invitations · CRM · agents/runtime · VM ·
