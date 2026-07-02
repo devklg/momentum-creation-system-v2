@@ -2,3 +2,6 @@ packages:
   - 'apps/*'
   - 'server'
   - 'packages/*'
+allowBuilds:
+  argon2: true
+  esbuild: true
