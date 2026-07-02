@@ -39,7 +39,7 @@ Membership is earned through THREE, in this strict order:
 The Team Magnificent brand token in identifiers is **`tmag`** (not `tm`). Canonical names:
 
 - **Member id concept: `tmag id`** — ONE canonical concept, cased per software layer (see §2b): **`tmagId`** in camelCase contexts (TS / app-data / Mongo `momentum`), **`tmag_id`** in snake_case contexts (the gateway-memory family / snake-case APIs). Same concept, deterministic casing — never a second name.
-- **Value format:** **`TMAG-YYYYMMDD-XXXXXX`**.
+- **Value format:** ~~`TMAG-YYYYMMDD-XXXXXX`~~ **AMENDED 2026-07-02 (Kevin, schema review Ruling 2): `TMAG-XXXXXX` — date-free, six crypto-random ambiguity-free characters; enrollment date lives only in `createdAt`. See `SCHEMA_REVIEW_RULINGS_2026-07-02.md`.**
 - **Access code:** **`TMAG-XXXX`** (was `TM-XXXX`).
 - **Founders:** **`TMAG-01`** (Kevin), **`TMAG-02`** (Paul).
 - **Every `tm*`/`Tm*` identifier renames to `tmag*`:** `tmBaId → tmagId` / `tmag_id`, `ownerTmBaId → ownerTmagId`, `sponsorTmBaId → sponsorTmagId`, etc.
