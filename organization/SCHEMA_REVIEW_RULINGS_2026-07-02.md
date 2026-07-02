@@ -102,7 +102,38 @@ Group A access-code model confirmed with a staged issuance path (Kevin,
 
 ---
 
-## Ruling 6 (OPEN) + directive — Commitments vs Questionnaire vs Steve
+## Ruling 6 — RESOLVED: Questionnaire folds into Steve's interview
+
+Kevin, 2026-07-02: the self-serve questionnaire predates Steve and is
+RETIRED as a separate onboarding stage — folded into Steve's Discovery &
+Success Interview. Rationale (Kevin, verbatim intent): "the real point of
+this is to interview and ask questions so that we can determine how to best
+support the member's success, and asking questions is the only way to
+determine what's so." Steve IS that purpose; the questionnaire was its
+pre-Steve form.
+
+Consequences:
+1. Onboarding spine becomes TWO stages: Steve discovery → sponsor workbook
+   call. The sponsor-prep purpose moves to Steve's Success Profile (the
+   sponsor-only profile read already exists).
+2. The mentorship gate on Steve-complete (`requireSteveComplete`) is now
+   canon, not drift.
+3. **Gap analysis required before retiring the form:** map the 21
+   questionnaire fields (employmentStatus, weeklyHours, coachability,
+   nwmExperience, go-getter indicators, biggestWin, whyNow, …) against
+   Steve's 36-question/11-section script; absorb any uncovered questions
+   into Steve's script so no support-relevant signal is lost.
+4. Schema: NO validators authored for the questionnaire collection; it is
+   deprecated. Existing submissions are preserved (Non-Destructive Rule) as
+   historical records — no deletion.
+5. Implementation follow-ups (gated slices, Kevin merges): retire
+   `/api/onboarding/questionnaire` route + team UI wizard; reconcile the
+   onboarding-spine references (TEAM Design C.5, questionnaire.ts header,
+   wireframe) to the two-stage spine.
+
+---
+
+## Ruling 6-directive (executed) — doc clarity + commitment content
 
 Directive executed (Kevin, 2026-07-02): the catalog now states plainly that
 `commitments` is the click-acknowledge ACCEPTANCE record of The Team
