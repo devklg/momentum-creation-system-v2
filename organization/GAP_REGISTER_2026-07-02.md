@@ -108,6 +108,12 @@ Two surfaces:
    phone work happens. The belief-erosion antidote (locked §1.14) in print.
 
 Design notes:
+- **Context (Kevin, 2026-07-02):** the 10-step orientation (locked §4.5) is
+  the OUTLINE of the new-member orientation — the curriculum of the live
+  `tmag_new_member_orientation_sessions` (cap 10, Kevin/Paul hosting);
+  `/training/10-steps` is the shared visual aid during the call and the
+  permanent reference after. Natural printable: the 10-step outline as the
+  orientation handout (print before the call, notes on paper during it).
 - Printing is an EXPORT class — ties directly to the locked-spec Part 5 open
   decision “Export PII redaction — per-export confirmation always, or
   persistent show-me-everything preference for Kevin” (ADMIN J.5.10). That
