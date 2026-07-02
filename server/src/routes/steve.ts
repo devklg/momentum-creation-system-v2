@@ -31,7 +31,7 @@ import {
   DiscoveryIngestError,
   SponsorAccessError,
 } from '../domain/steve-success-interview.js';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 
 export const steveRoutes: Router = express.Router();
 
@@ -99,7 +99,7 @@ steveRoutes.get(
     // greeting rather than blocking the call.
     let firstName = '';
     try {
-      const baLookup = await gatewayCall<{ documents: { firstName?: string }[] }>(
+      const baLookup = await persistenceCall<{ documents: { firstName?: string }[] }>(
         'mongodb',
         'query',
         {

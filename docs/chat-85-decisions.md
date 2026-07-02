@@ -51,7 +51,7 @@ Full team genealogy mirror lives only on `/admin` — Kevin's operational tool, 
 
 - `.team` design document — login, signup (already in Signup & Architecture), welcome, Michael interview UI, Fast Start Guide, 10-step orientation, invitation generator, BA cockpit (per scope above), replicated .com preview, profile/settings
 - `/admin` design document — Kevin-only. Code generator, code management, full team genealogy mirror, discrepancy review against THREE, BA list, holding tank cross-team view, Michael transcripts, audit log
-- Excalidraw integration not yet exercised — Kevin confirmed it's available via universal-gateway; future diagram regeneration goes there
+- Excalidraw integration not yet exercised — Kevin confirmed it's available via universal-external tooling; future diagram regeneration goes there
 - Existing `momentum-creation-system` repo (10 commits of wrong-shaped earlier build) decision: salvage / archive / delete
 
 ## Open questions carried forward into Section H of the COM design

@@ -15,8 +15,8 @@
  * Tier-1 lives in tieredWrite.ts; durable retry for Tier-2/3 lives here.
  *
  * Storage: one MongoDB collection `projection_outbox` in the app database.
- * The drain uses only insert / query / delete gateway actions (each verified
- * against the live gateway this session), so a retry is delete-then-insert
+ * The drain uses only insert / query / delete PERSISTENCE actions (each verified
+ * against the live PERSISTENCE this session), so a retry is delete-then-insert
  * rather than an in-place update — fully idempotent and built only on primitives
  * we trust. An update-based version is a later micro-optimization, not needed.
  *
@@ -25,7 +25,7 @@
  *   { entityId: 1 }                    // trace a record's pending projections
  */
 
-import { gatewayCall } from './gateway.js';
+import { persistenceCall } from './persistence/dispatch.js';
 import { assertChromaCollectionExists } from './chromaCollections.js';
 
 const OUTBOX_DB = 'momentum';
@@ -143,7 +143,7 @@ export async function enqueueProjection(input: EnqueueProjectionInput): Promise<
     createdAt: ts,
     updatedAt: ts,
   };
-  await gatewayCall('mongodb', 'insert', {
+  await persistenceCall('mongodb', 'insert', {
     database: OUTBOX_DB,
     collection: OUTBOX_COLLECTION,
     documents: [record],
@@ -155,12 +155,12 @@ export async function enqueueProjection(input: EnqueueProjectionInput): Promise<
 async function replay(record: OutboxRecord): Promise<void> {
   if (record.target === 'neo4j') {
     const p = record.payload as Neo4jProjectionPayload;
-    await gatewayCall('neo4j', 'cypher', {
+    await persistenceCall('neo4j', 'cypher', {
       query: p.cypher,
       params: { id: record.entityId, ...(p.params ?? {}) },
     });
     if (p.verifyCypher) {
-      const data = await gatewayCall<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
+      const data = await persistenceCall<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
         query: p.verifyCypher,
         params: { id: record.entityId, ...(p.verifyParams ?? {}) },
       });
@@ -171,7 +171,7 @@ async function replay(record: OutboxRecord): Promise<void> {
   }
   const c = record.payload as ChromaProjectionPayload;
   await assertChromaCollectionExists(c.collection);
-  await gatewayCall('chromadb', 'add', {
+  await persistenceCall('chromadb', 'add', {
     collection: c.collection,
     ids: [record.entityId],
     documents: [c.document],
@@ -181,7 +181,7 @@ async function replay(record: OutboxRecord): Promise<void> {
 
 /** Remove an outbox row by id (used after a successful replay). */
 async function deleteRow(outboxId: string): Promise<void> {
-  await gatewayCall('mongodb', 'delete', {
+  await persistenceCall('mongodb', 'delete', {
     database: OUTBOX_DB,
     collection: OUTBOX_COLLECTION,
     filter: { _id: outboxId },
@@ -208,7 +208,7 @@ async function bumpOrDeadLetter(record: OutboxRecord, error: string): Promise<bo
     updatedAt: ts,
   };
   await deleteRow(record._id);
-  await gatewayCall('mongodb', 'insert', {
+  await persistenceCall('mongodb', 'insert', {
     database: OUTBOX_DB,
     collection: OUTBOX_COLLECTION,
     documents: [next],
@@ -235,7 +235,7 @@ async function fetchDue(
   now: string,
 ): Promise<OutboxRecord[]> {
   if (limit <= 0) return [];
-  const data = await gatewayCall<{ documents?: OutboxRecord[] }>('mongodb', 'query', {
+  const data = await persistenceCall<{ documents?: OutboxRecord[] }>('mongodb', 'query', {
     database: OUTBOX_DB,
     collection: OUTBOX_COLLECTION,
     filter: { status: 'pending', priority, nextAttemptAt: { $lte: now } },
@@ -283,7 +283,7 @@ export async function drainProjectionOutbox(opts?: { limit?: number }): Promise<
 // tick, drain once at boot (so a backlog from a previous run lands promptly)
 // then on a fixed interval. The first retry backoff is 1 minute, so a 30s tick
 // catches due rows without busy-waiting. `drain` is injectable purely so the
-// scheduler can be unit-tested without touching the gateway.
+// scheduler can be unit-tested without touching the PERSISTENCE.
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const DRAIN_INTERVAL_MS = 30_000;

@@ -325,7 +325,7 @@ function createFixtureContextPacket(
       {
         ruleId: 'agent_store_access_forbidden',
         category: 'knowledge_boundary',
-        instruction: 'Agents must not query underlying knowledge or gateway systems.',
+        instruction: 'Agents must not query underlying knowledge or PERSISTENCE systems.',
         required: true,
         appliesTo: 'all_agents',
       },

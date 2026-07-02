@@ -1,6 +1,6 @@
 import { pathToFileURL } from 'node:url';
 import { env } from '../env.js';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { getVmProvider } from '../services/vmProviders/index.js';
 import {
   claimVmJobs,
@@ -134,7 +134,7 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
 }
 
 async function findCampaign(vmCampaignId: string): Promise<VmCampaignDoc | null> {
-  const result = await gatewayCall<{ documents: VmCampaignDoc[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: VmCampaignDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: CAMPAIGNS_COLLECTION,
     filter: { vmCampaignId },

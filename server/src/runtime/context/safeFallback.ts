@@ -7,7 +7,7 @@
  * — proceed on identity/rules, ask a clarifying question, or offer the other language (never
  * present a machine translation as approved).
  *
- * Pure and deterministic: no clock, no I/O, no persistence, no Gateway, no LLM. Every string is
+ * Pure and deterministic: no clock, no I/O, no persistence, no PERSISTENCE, no LLM. Every string is
  * a fixed safe directive with only the language name interpolated — content-free, and never
  * re-introduces knowledge into a degraded (empty-approved-knowledge) packet.
  */

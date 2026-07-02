@@ -33,7 +33,7 @@ const forbiddenFields = [
   'persistenceInstruction',
   'rawStoreResults',
   'rawGraphRagResults',
-  'rawGatewayFallbackResponse',
+  'rawPERSISTENCEFallbackResponse',
 ] as const;
 
 function collectForbiddenFields(value: unknown): string[] {

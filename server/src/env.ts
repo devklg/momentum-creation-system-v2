@@ -150,7 +150,7 @@ const Env = z.object({
 
   /**
    * Anthropic API key (sk-ant-...) for the LLM-backed invitation front doors
-   * — ScriptMaker (Chat #122) and Ivory (later). The gateway has NO LLM
+   * — ScriptMaker (Chat #122) and Ivory (later). The PERSISTENCE has NO LLM
    * connector (confirmed Chat #118 via list_tools), so these call the
    * Anthropic Messages API DIRECTLY. From console.anthropic.com > API Keys.
    *
@@ -186,11 +186,9 @@ const Env = z.object({
   VM_ACQUISITION_PROVIDER_API_KEY: z.string().default(''),
 
   // ─── Direct persistence — THE ONLY runtime path (ACR-0007 / ACR-0009) ────
-  // Defaults target the dedicated governed stack. The former Gateway HTTP
-  // fallback is retired: a store whose mode is not 'direct' fails LOUD at
-  // dispatch (services/gateway.ts) — there is no silent fallback of any kind.
-  // The 'gateway' enum value is retained only so a legacy .env is rejected
-  // with a clear error instead of a Zod parse failure.
+  // Defaults target the dedicated governed stack. A store whose mode is not
+  // 'direct' fails LOUD at env validation or dispatch; there is no silent
+  // fallback of any kind.
   MONGODB_URI: z.string().default('mongodb://127.0.0.1:30000'),
   MONGODB_DB: z.string().default('momentum'),
   NEO4J_URI: z.string().default('bolt://127.0.0.1:7710'),
@@ -200,10 +198,10 @@ const Env = z.object({
   GPU_EMBEDDER_URL: z.string().url().default('http://localhost:8300'),
 
   // Per-store persistence mode. Direct is the default and the only supported
-  // runtime mode (ACR-0009); 'gateway' is a refused legacy value.
-  PERSISTENCE_MONGO_MODE: z.enum(['gateway', 'direct']).default('direct'),
-  PERSISTENCE_NEO4J_MODE: z.enum(['gateway', 'direct']).default('direct'),
-  PERSISTENCE_CHROMA_MODE: z.enum(['gateway', 'direct']).default('direct'),
+  // runtime mode (ACR-0009).
+  PERSISTENCE_MONGO_MODE: z.literal('direct').default('direct'),
+  PERSISTENCE_NEO4J_MODE: z.literal('direct').default('direct'),
+  PERSISTENCE_CHROMA_MODE: z.literal('direct').default('direct'),
   // Master switch, default ON. Turning it off no longer re-routes anything —
   // it makes persistence dispatch fail loud (kill switch semantics).
   PERSISTENCE_DIRECT_ENABLED: EnvBoolean.default(true),

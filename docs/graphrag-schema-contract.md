@@ -3,9 +3,9 @@
 > Adapted from Chat #135's `GraphRAG-Schema-Reference-Chat135.docx` and
 > `amb_chat135_graphrag_schema_research`.
 >
-> Scope of this file: Universal Gateway memory, provenance, lineage, and
+> Scope of this file: external MCP tooling memory, provenance, lineage, and
 > derived GraphRAG records.
-> Gateway-owned mirror: `D:/server-gateway-mcp/docs/GRAPHRAG-SCHEMA-CONTRACT.md`.
+> External-tooling mirror: `external MCP tooling repo/docs/GRAPHRAG-SCHEMA-CONTRACT.md`.
 >
 > This does not authorize destructive cleanup, database merging, or legacy
 > migration.
@@ -18,7 +18,7 @@ same concept was being written with different field names, timestamps, database
 names, and Neo4j labels. That drift made exact retrieval fail even when the data
 was present.
 
-The fix is a small enforced schema that every new Universal Gateway memory or
+The fix is a small enforced schema that every new external MCP tooling memory or
 lineage record can inherit.
 GraphRAG needs three things to stay useful:
 
@@ -29,15 +29,15 @@ GraphRAG needs three things to stay useful:
 
 ## Current Baseline
 
-Universal Gateway already has useful pieces:
+external MCP tooling already has useful pieces:
 
-- `D:/server-gateway-mcp/gateway-core/src/connectors/QuadStackConnector.js`
-  is the gateway-wide fan-out choke point. It can require MongoDB, Neo4j, and
+- `external MCP tooling repo/tooling-core/src/connectors/QuadStackConnector.js`
+  is the tooling-wide fan-out choke point. It can require MongoDB, Neo4j, and
   ChromaDB legs, but it does not yet validate or inject a canonical envelope.
-- `D:/server-gateway-mcp/gateway-core/src/services/graphSchema.js` defines an
+- `external MCP tooling repo/tooling-core/src/services/graphSchema.js` defines an
   older MCP-tool graph schema around `MCPServer`, `Tool`, `Category`,
   `Service`, `Technology`, and `UseCase`.
-- `D:/server-gateway-mcp/gateway-core/src/services/vectorCollections.js`
+- `external MCP tooling repo/tooling-core/src/services/vectorCollections.js`
   defines older Chroma collections for MCP documentation and learnings.
 - `docs/chat-registry-authority.md` is now the identity authority for Claude
   chats, Codex threads, imports, handoffs, and derived memory. Handoffs attach
@@ -47,10 +47,10 @@ The missing piece is a universal contract for all forward writes.
 
 ## Chat Identity Authority
 
-For chat-origin memory, the Universal Gateway Chat Registry is authoritative:
+For chat-origin memory, the external MCP tooling Chat Registry is authoritative:
 
 ```text
-MongoDB: universal_gateway.chat_registry
+MongoDB: agent_operations.chat_registry
 Neo4j:   (:ChatRegistry {id})
 Chroma:  chat_registry
 ```
@@ -62,7 +62,7 @@ be confidently mapped yet, write `chat_number: null`,
 thread id, title, and import lineage.
 
 Claude and Codex are the active chat providers. ARCHIE is a Claude transcript
-import pipeline. Perry is a handoff/summarization tool. Ulyses is a gateway
+import pipeline. Perry is a handoff/summarization tool. Ulyses is an external tooling
 specialist role/tool when invoked. GraphRAG is a derived search/memory layer.
 Those tools/layers have no autonomous session identity and no authority over
 chat numbering.
@@ -82,9 +82,9 @@ Until Kevin reopens database cleanup:
 
 This contract governs new writes and future migration design.
 
-## Universal Gateway Base Envelope
+## external MCP tooling Base Envelope
 
-Every new Universal Gateway memory/lineage record should carry this envelope in
+Every new external MCP tooling memory/lineage record should carry this envelope in
 MongoDB, Neo4j, and Chroma metadata.
 
 | Field | Type | Rule |
@@ -92,7 +92,7 @@ MongoDB, Neo4j, and Chroma metadata.
 | `id` | string | Canonical id shared across all stores. Mongo `_id`, Neo4j `id`, Chroma id all match. |
 | `type` | string enum | Memory/lineage type, not a UI label. Example: `conversation`, `decision`, `handoff`, `document`. |
 | `schema_version` | int | Starts at `1`. Increment only through a decision. |
-| `namespace` | string | Memory namespace. Example: `universal_gateway`, `chat_history`, `research_library`. |
+| `namespace` | string | Memory namespace. Example: `agent_operations`, `chat_history`, `research_library`. |
 | `source` | string | Writer, importer, or source system. Example: `perry`, `archie`, `codex_thread_import`. |
 | `created_at` | ISO string | UTC `...Z`. No `date`, `timestamp`, or `start_time` aliases for new writes. |
 | `title` | string | Human-readable label for search and admin views. |
@@ -109,9 +109,9 @@ missing chat numbers on chat-origin records.
 | `system` | `job_id` or `service_name`. |
 | `import` | `import_batch_id` and source file or collection. |
 
-## Universal Gateway Canonical Types
+## external MCP tooling Canonical Types
 
-These are global types the gateway can use across memory namespaces.
+These are global types the external tooling can use across memory namespaces.
 
 Records:
 
@@ -211,7 +211,7 @@ plus compact memory filters.
   id,
   type,
   schema_version: 1,
-  namespace: "universal_gateway",
+  namespace: "agent_operations",
   source,
   created_at,
   title,
@@ -227,7 +227,7 @@ Chroma documents should be short semantic summaries, not JSON dumps.
 
 ### Lexical Layer
 
-Use this for source material across the whole gateway: transcripts, handoffs,
+Use this for source material across the whole external tooling layer: transcripts, handoffs,
 decisions, uploaded references, generated documents, tool docs, and imported
 conversations.
 
@@ -262,15 +262,15 @@ references.
 
 ### Phase 1: Contract Only
 
-This file and the gateway-owned mirror are Phase 1. They give agents one
+This file and the tooling-owned mirror are Phase 1. They give agents one
 schema target for memory records.
 
-### Phase 2: Gateway Envelope Validator
+### Phase 2: external MCP tooling Envelope Validator
 
-Add a small schema service in Universal Gateway, for example:
+Add a small schema service in external MCP tooling, for example:
 
 ```text
-D:/server-gateway-mcp/gateway-core/src/services/graphRecordSchema.js
+external MCP tooling repo/tooling-core/src/services/graphRecordSchema.js
 ```
 
 Responsibilities:
@@ -320,7 +320,7 @@ When `enforce_schema` is true, QuadStack should:
 - Fail before Mongo if the schema is invalid.
 
 After enough callers migrate, `enforce_schema` can become the default for
-Universal Gateway memory and lineage writes.
+external MCP tooling memory and lineage writes.
 
 ### Phase 4: New Memory Writes Only
 
@@ -343,7 +343,7 @@ These should be decided before enforcement:
 1. Whether `Conversation` should be introduced in this repo or reserved for
    the shared memory layer. This contract keeps `Handoff` and `Decision` in
    repo scope and leaves `Conversation` to the shared layer.
-2. Whether Universal Gateway should expose a new `graphrecord.write` connector
+2. Whether external MCP tooling should expose a new `graphrecord.write` connector
    or keep enforcement inside `quadstack.write`. This contract recommends
    `quadstack.write` first because it is already the fan-out choke point.
 

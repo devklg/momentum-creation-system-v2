@@ -373,9 +373,9 @@ describe('S3.13 michael-runtime route UI-leak regression boundary', () => {
     expect(used.length, 'requireSteveComplete referenced').toBeGreaterThan(0);
   });
 
-  it('#37 imports no store / Gateway / GraphRAG / retrieval helper', () => {
+  it('#37 imports no store / PERSISTENCE / GraphRAG / retrieval helper', () => {
     const pattern =
-      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/gateway|gatewayFallback|\/tripleStack|rawRetrieval|retrievalHelper|directRetrieval|\/retrieval\b)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/PERSISTENCE|PERSISTENCEFallback|\/tripleStack|rawRetrieval|retrievalHelper|directRetrieval|\/retrieval\b)[^'"]*['"]/i;
     const matches = matchingImportLines(routeFiles(), pattern);
     expect(matches, matches.join('\n')).toEqual([]);
   });
@@ -406,7 +406,7 @@ describe('S3.13 michael-runtime route UI-leak regression boundary', () => {
 
   it('#40 introduces no persistence write shapes (.insert/.update/.save/.create / tripleStack)', () => {
     const pattern =
-      /\.(?:insert|update|save|create)\s*\(|\b(?:tripleStackWrite|tripleStack|gatewayCall|directPersistenceCall)\b/i;
+      /\.(?:insert|update|save|create)\s*\(|\b(?:tripleStackWrite|tripleStack|persistenceCall|directStoreCall)\b/i;
     const matches = matchingCodeTokenLines(routeFiles(), pattern);
     expect(matches, matches.join('\n')).toEqual([]);
   });

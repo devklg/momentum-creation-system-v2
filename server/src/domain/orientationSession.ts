@@ -20,13 +20,13 @@
  *   - Neo4j (:TmagOrientationSession) / (:TeamMagnificentMember)-[:RESERVED_ORIENTATION]->(session)
  *   - ChromaDB `mcs_orientation` semantic log (collection bootstrapped lazily)
  *
- * Gateway quirks respected (see services/tripleStack.ts): Mongo query param is
+ * PERSISTENCE quirks respected (see services/tripleStack.ts): Mongo query param is
  * `filter:` not `query:`; `update` does not honor upsert; Chroma add() needs
  * the collection to exist first.
  */
 
 import { randomUUID } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import {
@@ -67,7 +67,7 @@ export async function ensureOrientationCollection(): Promise<void> {
   if (collectionBootstrap) return collectionBootstrap;
   collectionBootstrap = (async () => {
     try {
-      await gatewayCall('chromadb', 'create_collection', {
+      await persistenceCall('chromadb', 'create_collection', {
         name: CHROMA_COLLECTION,
         metadata: {
           chat_number: 147,
@@ -90,7 +90,7 @@ export async function ensureOrientationCollection(): Promise<void> {
 export async function findSessionById(
   sessionId: string,
 ): Promise<McsOrientationSession | null> {
-  const result = await gatewayCall<{ documents: McsOrientationSession[] }>(
+  const result = await persistenceCall<{ documents: McsOrientationSession[] }>(
     'mongodb',
     'query',
     {
@@ -106,7 +106,7 @@ export async function findSessionById(
 /** All upcoming sessions (status upcoming, in the future), soonest first. */
 export async function listUpcomingSessions(): Promise<McsOrientationSession[]> {
   const now = new Date().toISOString();
-  const result = await gatewayCall<{ documents: McsOrientationSession[] }>(
+  const result = await persistenceCall<{ documents: McsOrientationSession[] }>(
     'mongodb',
     'query',
     {
@@ -122,7 +122,7 @@ export async function listUpcomingSessions(): Promise<McsOrientationSession[]> {
 
 /** All sessions (any status), newest-scheduled first — for the founder view. */
 export async function listAllSessions(): Promise<McsOrientationSession[]> {
-  const result = await gatewayCall<{ documents: McsOrientationSession[] }>(
+  const result = await persistenceCall<{ documents: McsOrientationSession[] }>(
     'mongodb',
     'query',
     {
@@ -141,7 +141,7 @@ async function reservedForSessions(
   sessionIds: string[],
 ): Promise<McsOrientationReservationRecord[]> {
   if (sessionIds.length === 0) return [];
-  const result = await gatewayCall<{ documents: McsOrientationReservationRecord[] }>(
+  const result = await persistenceCall<{ documents: McsOrientationReservationRecord[] }>(
     'mongodb',
     'query',
     {
@@ -159,7 +159,7 @@ async function reservedForSessions(
 async function myReservedReservations(
   tmagId: string,
 ): Promise<McsOrientationReservationRecord[]> {
-  const result = await gatewayCall<{ documents: McsOrientationReservationRecord[] }>(
+  const result = await persistenceCall<{ documents: McsOrientationReservationRecord[] }>(
     'mongodb',
     'query',
     {
@@ -521,7 +521,7 @@ export async function reserveSeat(
     }
   }
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: RESERVATIONS_COLLECTION,
     filter: { _id: reservationId },
@@ -562,7 +562,7 @@ export async function cancelSeat(
   if (!here) return { ok: false, error: 'not_reserved' };
 
   const cancelledAt = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: RESERVATIONS_COLLECTION,
     filter: { _id: here.reservationId },
@@ -571,7 +571,7 @@ export async function cancelSeat(
 
   // Mirror the cancellation into Neo4j so the graph roster stays truthful.
   try {
-    await gatewayCall('neo4j', 'cypher', {
+    await persistenceCall('neo4j', 'cypher', {
       query:
         'MATCH (:TeamMagnificentMember {tmagId: $tmagId})-[r:RESERVED_ORIENTATION {reservationId: $reservationId}]->(:TmagOrientationSession) ' +
         'SET r.status = "cancelled", r.cancelledAt = $cancelledAt',

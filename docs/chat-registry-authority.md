@@ -1,4 +1,4 @@
-# Gateway Chat Registry Authority
+# external MCP tooling Chat Registry Authority
 
 > Phase 0 correction after Chat #135+ memory audit. This file supersedes any
 > claim that ARCHIE, Perry, `session_handoffs`, or GraphRAG search is the
@@ -9,7 +9,7 @@
 The canonical chat/session authority is:
 
 ```text
-MongoDB: universal_gateway.chat_registry
+MongoDB: agent_operations.chat_registry
 Neo4j:   (:ChatRegistry {id})
 Chroma:  chat_registry
 ```
@@ -38,11 +38,11 @@ Do not collapse these concepts:
 |---|---|---|
 | Provider | `claude`, `codex`, `chatgpt` | Creates the original conversation/thread. |
 | Importer/tool | `archie_browser_console`, `codex_thread_import`, `perry_handoff` | Moves or summarizes provider content. |
-| Registry | `universal_gateway.chat_registry` | Assigns canonical identity and chat number. |
+| Registry | `agent_operations.chat_registry` | Assigns canonical identity and chat number. |
 | Memory | Chroma/GraphRAG/Neo4j derived views | Searchable mirrors, never identity authority. |
 
 Claude and Codex are the active chat providers. ARCHIE is a Claude transcript
-import pipeline. Perry is a handoff/summarization tool. Ulyses is a gateway
+import pipeline. Perry is a handoff/summarization tool. Ulyses is an external tooling
 specialist role/tool when invoked. Those tools/layers have no autonomous session
 identity and no authority over chat numbering.
 
@@ -57,7 +57,7 @@ interface ChatRegistryEntry {
 
   chat_number: number | null;
   chat_number_source:
-    | 'gateway_auto'
+    | 'tooling_auto'
     | 'provider_native'
     | 'migration_inferred'
     | 'kevin_override'

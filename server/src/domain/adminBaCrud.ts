@@ -32,7 +32,7 @@
  *     so the create/edit/restore row matches the directory + drawer.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
 import { emailExists, type BARecord } from './ba.js';
@@ -98,7 +98,7 @@ function validReason(reason: string | undefined | null): boolean {
  * collection directly with no deleted filter.
  */
 async function findBAByTmagIdAnyState(tmagId: string): Promise<BARecordMaybeDeleted | null> {
-  const result = await gatewayCall<{ documents: BARecordMaybeDeleted[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: BARecordMaybeDeleted[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
     filter: { tmagId },
@@ -259,7 +259,7 @@ export async function adminEditBa(
     }
   }
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
     filter: { tmagId },
@@ -306,7 +306,7 @@ export async function adminSoftDeleteBa(
     deletedByTmagId: actor.tmagId,
   };
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
     filter: { tmagId },
@@ -351,7 +351,7 @@ export async function adminRestoreBa(
     // deletedAt / deletedReason / deletedByTmagId LEFT as the historical record.
   };
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
     filter: { tmagId },

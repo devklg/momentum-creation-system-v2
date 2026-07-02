@@ -24,23 +24,9 @@
  * Run:  node server/scripts/seed-decisions.mjs   (from repo root)
  */
 
-const GATEWAY_BASE = (process.env.GATEWAY_URL || 'http://localhost:2526/api').replace(/\/$/, '');
-const GATEWAY = `${GATEWAY_BASE}/execute`;
-const DB = 'momentum';
-const COLL = 'decisions';
+import { closeMomentumMongo, momentumCollection } from './lib/momentum-mongo.mjs';
 
-async function gw(tool, action, params) {
-  const res = await fetch(GATEWAY, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tool, action, params }),
-  });
-  const json = await res.json();
-  if (json.success === false && !json.data) {
-    throw new Error(`${tool}.${action} failed: ${JSON.stringify(json)}`);
-  }
-  return json;
-}
+const COLL = 'decisions';
 
 const DECISIONS = [
   // ---- superseded originals (kept for history) ----
@@ -195,34 +181,35 @@ const DECISIONS = [
 ];
 
 async function main() {
+  const collection = await momentumCollection(COLL);
   let seq = 1;
   const now = new Date().toISOString();
   const docs = DECISIONS.map((d) => ({ ...d, seq: seq++, ledger_written_at: now }));
 
-  for (const d of docs) {
-    await gw('mongodb', 'delete', { database: DB, collection: COLL, filter: { _id: d._id } });
-  }
-  await gw('mongodb', 'insert', { database: DB, collection: COLL, documents: docs });
-  await gw('mongodb', 'delete', { database: DB, collection: COLL, filter: { _id: 'dec_seed_probe' } });
+  await collection.deleteMany({ _id: { $in: docs.map((d) => d._id) } });
+  await collection.insertMany(docs);
+  await collection.deleteOne({ _id: 'dec_seed_probe' });
 
-  const back = await gw('mongodb', 'aggregate', {
-    database: DB, collection: COLL,
-    pipeline: [
+  const back = await collection
+    .aggregate([
       { $match: { status: 'active' } },
       { $sort: { seq: 1 } },
       { $project: { _id: 1, seq: 1, topic: 1, status: 1, supersedes: 1 } },
-    ],
-  });
-  const all = await gw('mongodb', 'aggregate', {
-    database: DB, collection: COLL, pipeline: [{ $count: 'total' }],
-  });
+    ])
+    .toArray();
+  const all = await collection.aggregate([{ $count: 'total' }]).toArray();
 
   console.log('=== LEDGER SEEDED ===');
-  console.log('total rows:', JSON.stringify(all.data.results));
-  console.log('active rows:', back.data.results.length);
-  for (const r of back.data.results) {
+  console.log('total rows:', JSON.stringify(all));
+  console.log('active rows:', back.length);
+  for (const r of back) {
     console.log(`  seq ${r.seq}  ${r.topic}  (${r._id})${r.supersedes ? '  <- supersedes ' + r.supersedes : ''}`);
   }
+  await closeMomentumMongo();
 }
 
-main().catch((e) => { console.error('SEED FAILED:', e); process.exit(1); });
+main().catch(async (e) => {
+  await closeMomentumMongo().catch(() => undefined);
+  console.error('SEED FAILED:', e);
+  process.exit(1);
+});

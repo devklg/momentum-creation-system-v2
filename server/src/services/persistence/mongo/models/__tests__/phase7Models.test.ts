@@ -39,7 +39,7 @@ describe('Phase 7 P7.12 — governed doors (first-pass $jsonSchema)', () => {
     expect((js.properties.createdAt as { bsonType: string }).bsonType).toBe('string');
     expect((js.properties.outcomeAt as { bsonType: string }).bsonType).toBe('string');
     expect((js.properties.schemaVersion as { bsonType: string[] }).bsonType).toEqual(NUMBER_BSON);
-    // No gateway-only fields are declared on the app door.
+    // No PERSISTENCE-only fields are declared on the app door.
     expect(js.properties).not.toHaveProperty('chat_number');
     expect(js.properties).not.toHaveProperty('chat_registry_id');
   });

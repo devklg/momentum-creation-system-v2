@@ -18,7 +18,7 @@
  * Usage:  pnpm --filter @momentum/server backfill:founder-timezones
  */
 
-import { gatewayCall } from '../src/services/gateway.js';
+import { persistenceCall } from '../src/services/persistence/dispatch.js';
 
 interface FounderBackfill {
   baId: string;
@@ -61,7 +61,7 @@ interface BAReadback {
 }
 
 async function readBaFromMongo(baId: string): Promise<BAReadback | null> {
-  const result = await gatewayCall<{ documents: BAReadback[] }>(
+  const result = await persistenceCall<{ documents: BAReadback[] }>(
     'mongodb',
     'query',
     {
@@ -75,7 +75,7 @@ async function readBaFromMongo(baId: string): Promise<BAReadback | null> {
 }
 
 async function readTzFromNeo4j(baId: string): Promise<string | null> {
-  const result = await gatewayCall<{ records: Array<{ tz?: string | null }> }>(
+  const result = await persistenceCall<{ records: Array<{ tz?: string | null }> }>(
     'neo4j',
     'cypher',
     {
@@ -94,7 +94,7 @@ interface ChromaGetResult {
 
 async function readTzFromChroma(baId: string): Promise<string | null> {
   try {
-    const result = await gatewayCall<ChromaGetResult>('chromadb', 'get', {
+    const result = await persistenceCall<ChromaGetResult>('chromadb', 'get', {
       collection: 'mcs_brand_ambassadors',
       ids: [baId],
     });
@@ -126,7 +126,7 @@ async function backfillOne(f: FounderBackfill): Promise<void> {
   );
 
   // 1. MongoDB: $set timezone.
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: 'momentum',
     collection: 'brand_ambassadors',
     filter: { baId: f.baId },
@@ -134,20 +134,18 @@ async function backfillOne(f: FounderBackfill): Promise<void> {
   });
 
   // 2. Neo4j: SET n.timezone on the BA node.
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query: 'MATCH (n:BA {baId: $baId}) SET n.timezone = $timezone RETURN n.baId',
     params: { baId: f.baId, timezone: f.timezone },
   });
 
-  // 3. ChromaDB: gateway `chromadb.add` does NOT upsert by ID through the
-  //    current connector path — calling add on an existing id is a silent
-  //    no-op for the document text and metadata (the ID stays, the payload
-  //    does not refresh). Pattern: delete-by-id first, then add. Idempotent
-  //    in aggregate because the surrounding code only runs this branch when
-  //    Mongo confirmed the record had a missing/wrong timezone.
+  // 3. ChromaDB: delete-by-id first, then add so the document text and
+  //    metadata refresh deterministically. Idempotent in aggregate because
+  //    the surrounding code only runs this branch when Mongo confirmed the
+  //    record had a missing/wrong timezone.
   const createdAt = new Date().toISOString();
   try {
-    await gatewayCall('chromadb', 'delete', {
+    await persistenceCall('chromadb', 'delete', {
       collection: 'mcs_brand_ambassadors',
       ids: [f.baId],
     });
@@ -157,7 +155,7 @@ async function backfillOne(f: FounderBackfill): Promise<void> {
     const msg = err instanceof Error ? err.message : 'unknown';
     console.log(`[backfill] ${tag} — chroma delete soft-fail: ${msg}`);
   }
-  await gatewayCall('chromadb', 'add', {
+  await persistenceCall('chromadb', 'add', {
     collection: 'mcs_brand_ambassadors',
     ids: [f.baId],
     documents: [

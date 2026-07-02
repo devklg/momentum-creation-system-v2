@@ -10,8 +10,8 @@
  * Pacific calendar date (see webinarCadence.ts), so a slot that already
  * exists in `webinar_events` is skipped rather than duplicated. This is
  * how the rolling window is maintained: re-run periodically and only the
- * newly-in-horizon slots get written. (Gateway `update` does not honor
- * upsert per the holding-tank lesson, so we query-then-insert.)
+ * newly-in-horizon slots get written. We query-then-insert so idempotency is
+ * explicit.
  *
  * Triple-stack per write (Rule 1):
  *   - Mongo `webinar_events` — the document the dashboard reads via
@@ -27,7 +27,7 @@
  * Usage:  pnpm --filter @momentum/server seed:webinar-events
  */
 
-import { gatewayCall } from '../src/services/gateway.js';
+import { persistenceCall } from '../src/services/persistence/dispatch.js';
 import { tripleStackWrite } from '../src/services/tripleStack.js';
 import { env } from '../src/env.js';
 import {
@@ -44,7 +44,7 @@ const HOSTS = ['Kevin Gardner', 'Paul Barrios'];
 /** Ensure the ChromaDB collection exists before any add(). */
 async function ensureChromaCollection(): Promise<void> {
   try {
-    await gatewayCall('chromadb', 'create_collection', {
+    await persistenceCall('chromadb', 'create_collection', {
       name: CHROMA_COLLECTION,
       metadata: {
         chat_number: 116,
@@ -64,7 +64,7 @@ async function ensureChromaCollection(): Promise<void> {
 
 /** Does an event with this id already exist in Mongo? (idempotency check) */
 async function eventExists(eventId: string): Promise<boolean> {
-  const result = await gatewayCall<{ documents: Array<{ eventId: string }> }>(
+  const result = await persistenceCall<{ documents: Array<{ eventId: string }> }>(
     'mongodb',
     'query',
     {

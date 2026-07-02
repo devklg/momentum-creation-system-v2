@@ -22,13 +22,13 @@
  *
  * No update / delete is exported. The append-only invariant is
  * enforced by what this module does NOT expose, not by a hook on
- * the storage layer — the gateway will happily delete if asked, so
+ * the storage layer — the PERSISTENCE will happily delete if asked, so
  * the discipline lives in the caller surface (this file).
  */
 
 import { randomBytes } from 'node:crypto';
 import { env } from '../env.js';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
   McsAppendAuditEntryInput,
@@ -64,7 +64,7 @@ function roleOfActor(actor: McsAuditActor): McsAuditActorRole {
 }
 
 /**
- * Cap snapshot blobs so a rogue caller can't blow out gateway
+ * Cap snapshot blobs so a rogue caller can't blow out PERSISTENCE
  * payload limits. 4KB per snapshot is plenty for sponsor overrides
  * and rule diffs; anything bigger is almost certainly a leak.
  */
@@ -209,7 +209,7 @@ function buildMongoFilter(filters: McsAuditQueryFilters): Record<string, unknown
   if (filters.role) f.role = filters.role;
   if (filters.action) f.action = filters.action;
   if (filters.actionPrefix && !filters.action) {
-    // Mongo regex anchored at start. Escaped because the gateway passes
+    // Mongo regex anchored at start. Escaped because the PERSISTENCE passes
     // the value through verbatim and we don't want unintended pattern semantics.
     const safe = filters.actionPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     f.action = { $regex: `^${safe}` };
@@ -258,7 +258,7 @@ export async function queryAuditEntries(
     }
   }
 
-  const result = await gatewayCall<{ documents: McsAuditLogEntry[]; count: number }>(
+  const result = await persistenceCall<{ documents: McsAuditLogEntry[]; count: number }>(
     'mongodb',
     'query',
     {
@@ -279,7 +279,7 @@ export async function queryAuditEntries(
 }
 
 export async function findAuditEntry(entryId: string): Promise<McsAuditLogEntry | null> {
-  const result = await gatewayCall<{ documents: McsAuditLogEntry[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsAuditLogEntry[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { entryId },
@@ -294,7 +294,7 @@ export async function findAuditEntry(entryId: string): Promise<McsAuditLogEntry 
 // A thin extension of the substrate above for the AGENT-RUNTIME turn lifecycle
 // (Michael/Steve/Ivory turns, gate decisions, draft-emission markers). Same
 // canonical `mcs_audit_log` triple-stack, same append-only invariant, same
-// app-direct tripleStackWrite seam (NO Universal Gateway; ACR-0007). Differences
+// app-direct tripleStackWrite seam (NO external MCP tool server; ACR-0007). Differences
 // from the admin substrate:
 //   - metadata only: no before/after body EVER (lifecycle markers, not mutations);
 //   - carries a dedicated `runtime` scope block (ids only — no content, no PII);
@@ -326,7 +326,7 @@ function runtimeSeverityFor(action: McsRuntimeAuditAction): McsAuditSeverity {
 }
 
 /**
- * Idempotency lookup for the (turnId, action) dedup key. The gateway `update`
+ * Idempotency lookup for the (turnId, action) dedup key. The PERSISTENCE `update`
  * path does not honor upsert, so the writer branches on existence instead
  * (documented gotcha at the top of tripleStack.ts).
  */
@@ -334,7 +334,7 @@ export async function findRuntimeAuditEntry(
   turnId: string,
   action: McsRuntimeAuditAction,
 ): Promise<McsRuntimeAuditLogEntry | null> {
-  const result = await gatewayCall<{ documents: McsRuntimeAuditLogEntry[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsRuntimeAuditLogEntry[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { action, 'runtime.turnId': turnId },

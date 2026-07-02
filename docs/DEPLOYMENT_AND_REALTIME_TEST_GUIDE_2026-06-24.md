@@ -2,6 +2,13 @@
 
 Date: 2026-06-24
 
+> **Superseded persistence detail (2026-07-02, ACR-0009):** this dated guide
+> predates retirement of the retired HTTP persistence fallback. Current app
+> runtime persistence is direct to the dedicated MCS MongoDB, Neo4j, and ChromaDB
+> stack. external MCP tooling remains MCP/developer tooling and operator access,
+> not the app persistence edge or app memory layer. Any `retired tool-server URL env var` references
+> below are historical.
+
 Purpose: give Kevin a practical way to see the app running, understand what it does in real time, and test the workflows that matter before any team rollout.
 
 This guide assumes the repo is:
@@ -18,7 +25,7 @@ Verified before this guide:
 - `pnpm build` passes
 - API boots on `7700`
 - `/api/health` returns healthy
-- Universal Gateway V2 is healthy on `2526`
+- external MCP tooling is healthy on `2526`
 - ChromaDB is reachable on `8100`
 - GPU FastAPI embedding service is reachable on `8300`
 - Chroma boot guard sees all 28 app collections
@@ -42,7 +49,7 @@ Use this sequence for a normal local demo:
 
 | Order | When | What to run | Keep it running? |
 |---:|---|---|---|
-| 1 | Before starting the app, once per Windows session | Universal Gateway V2 startup script | Yes |
+| 1 | Before starting the app, once per Windows session | external MCP tooling startup script | Yes |
 | 2 | After infrastructure starts | Health checks and port checks | No |
 | 3 | First setup, or after dependency changes | `pnpm install`, `pnpm typecheck`, `pnpm build` | No |
 | 4 | First setup, after database reset, or when you need fresh demo data | Seed commands | No |
@@ -56,7 +63,7 @@ cd D:\momentum-creation-system-v2
 pnpm dev:all
 ```
 
-If Codex or Claude is already using Gateway V2 successfully, the gateway is probably already running. In that case, do not start Gateway V2 again. Just verify the infrastructure ports, then start the app with `pnpm dev:all`.
+If Codex or Claude is already using external MCP tooling successfully, the external tooling is probably already running. In that case, do not start external MCP tooling again. Just verify the infrastructure ports, then start the app with `pnpm dev:all`.
 
 Only rerun the install/build/seed commands when you changed code, pulled new repo changes, reset data, or need to verify the app before deployment.
 
@@ -66,7 +73,7 @@ Use this while running the app. Check one status per row and write notes for any
 
 | Area | Item to verify | Working | Not working | Notes |
 |---|---|---|---|---|
-| Infrastructure | Gateway V2 health responds on `2526` | [ ] | [ ] | |
+| Infrastructure | external MCP tooling health responds on `2526` | [ ] | [ ] | |
 | Infrastructure | MongoDB is listening on `28000` | [ ] | [ ] | |
 | Infrastructure | Neo4j Bolt is listening on `7687` | [ ] | [ ] | |
 | Infrastructure | ChromaDB is listening on `8100` | [ ] | [ ] | |
@@ -92,9 +99,9 @@ Use this while running the app. Check one status per row and write notes for any
 | Admin | Admin dashboard loads | [ ] | [ ] | |
 | Admin | Live Ops uses real data, not mocks | [ ] | [ ] | Known item to verify/fix |
 | Admin | Tenant URL-structure panel exists | [ ] | [ ] | Known missing item |
-| Persistence | App writes reach MongoDB through Gateway V2 | [ ] | [ ] | |
-| Persistence | App writes reach Neo4j through Gateway V2 | [ ] | [ ] | |
-| Persistence | App writes reach ChromaDB through Gateway V2 | [ ] | [ ] | |
+| Persistence | App writes reach MongoDB through external MCP tooling | [ ] | [ ] | |
+| Persistence | App writes reach Neo4j through external MCP tooling | [ ] | [ ] | |
+| Persistence | App writes reach ChromaDB through external MCP tooling | [ ] | [ ] | |
 | Communications | Resend email is skipped or active as configured | [ ] | [ ] | |
 | Communications | Telnyx SMS/calling is skipped or active as configured | [ ] | [ ] | |
 
@@ -104,27 +111,27 @@ This step is not app startup. This step means: make sure the background services
 
 Required background services:
 
-- Universal Gateway V2: `http://localhost:2526/api`
-- Gateway dashboard: `http://localhost:3102`
+- external MCP tooling: `http://localhost:2526/api`
+- external MCP tooling dashboard: `http://localhost:3102`
 - MongoDB: `localhost:28000`
 - Neo4j Bolt: `localhost:7687`
 - ChromaDB: `http://localhost:8100`
 - GPU FastAPI embedding service: `http://127.0.0.1:8300`
 
-The app does not use Mongoose. All MongoDB reads/writes go through the Universal Gateway V2 MongoDB connector.
+The app does not use Mongoose. All MongoDB reads/writes go through the external MCP tooling MongoDB connector.
 
 If all of these services are already running, skip the startup script and go to Step 2.
 
-Only run the V2 startup script if Gateway V2, MongoDB, Neo4j, ChromaDB, or the embedding service is not already running.
+Only run the V2 startup script if external MCP tooling, MongoDB, Neo4j, ChromaDB, or the embedding service is not already running.
 
-Gateway V2 path:
+external MCP tooling path:
 
-`D:\server-gateway-mcp-v2`
+`D:\external-mcp-tooling`
 
 Startup script outside this repo:
 
 ```powershell
-D:\server-gateway-mcp-v2\START-ALL-SERVICES-V2.bat
+D:\external-mcp-tooling\START-ALL-SERVICES-V2.bat
 ```
 
 Then verify:
@@ -140,7 +147,7 @@ Expected ports:
 
 | Port | Service |
 |---:|---|
-| 2526 | Universal Gateway V2 |
+| 2526 | external MCP tooling |
 | 28000 | MongoDB |
 | 7687 | Neo4j Bolt |
 | 7700 | Express API |
@@ -166,7 +173,7 @@ Local `.env` should include:
 
 ```dotenv
 SERVER_PORT=7700
-GATEWAY_URL=http://localhost:2526/api
+retired tool-server URL env var=http://localhost:2526/api
 PROSPECT_BASE_URL=http://localhost:7701
 CORS_ORIGINS=http://localhost:7701,http://localhost:7702,http://localhost:7703
 JWT_COOKIE_DOMAIN=localhost
@@ -269,7 +276,7 @@ Production `.env` must include:
 ```dotenv
 NODE_ENV=production
 SERVER_PORT=7700
-GATEWAY_URL=<production gateway v2 api url>
+retired tool-server URL env var=<production external tooling v2 api url>
 PROSPECT_BASE_URL=https://teammagnificent.com
 CORS_ORIGINS=https://teammagnificent.com,https://teammagnificent.team,https://admin.teammagnificent.team
 JWT_COOKIE_DOMAIN=.teammagnificent.team
@@ -349,12 +356,12 @@ Use this as the live walkthrough checklist. Each item should be tested with the 
 
 ## Data Store Ownership Correction
 
-Universal Gateway V2 does not contain MongoDB collections, Neo4j nodes, or ChromaDB collections. Gateway V2 is the connector/execution layer. The data itself lives in MongoDB, Neo4j, and ChromaDB.
+external MCP tooling does not contain MongoDB collections, Neo4j nodes, or ChromaDB collections. external MCP tooling is the connector/execution layer. The data itself lives in MongoDB, Neo4j, and ChromaDB.
 
 - MongoDB collections live in MongoDB on `localhost:28000`
 - Neo4j graph labels and relationships live in Neo4j on `localhost:7687`
 - ChromaDB vector collections live in ChromaDB on `localhost:8100`
-- Gateway V2 reaches those stores through the `mongodb`, `neo4j`, and `chromadb` connectors on `localhost:2526`
+- external MCP tooling reaches those stores through the `mongodb`, `neo4j`, and `chromadb` connectors on `localhost:2526`
 
 The printable HTML version includes the detailed MongoDB, ChromaDB, and Neo4j schema inventory.
 
@@ -364,7 +371,7 @@ This is the master feature list for review. "Functional" means the feature exist
 
 | Area | Feature | Surface / Route | Status | What to test |
 |---|---|---|---|---|
-| Infrastructure | Universal Gateway V2 connector access to persistence stores | `server/src/services/gateway.ts` | Functional | Gateway health on `2526`, app reads/writes through `/api/execute` |
+| Infrastructure | external MCP tooling connector access to persistence stores | `server/src/services/persistence/dispatch.ts` | Functional | external MCP tooling health on `2526`, app reads/writes through `/api/execute` |
 | Infrastructure | Triple-stack write helper | `server/src/services/tripleStack.ts` | Functional | Writes land in MongoDB, Neo4j, ChromaDB |
 | Infrastructure | Chroma collection boot guard | `server/src/services/chromaCollections.ts` | Functional | Server boot logs all 28 collections present |
 | Infrastructure | API health | `/api/health` | Functional | `http://localhost:7700/api/health` returns `{ ok: true }` |
@@ -431,7 +438,7 @@ Pass criteria: every required service responds before testing the app.
 
 - [ ] `http://localhost:2526/health` returns healthy
 - [ ] `http://127.0.0.1:8300/health` returns healthy
-- [ ] Gateway V2 `chromadb` connector can list the real ChromaDB collections
+- [ ] external MCP tooling `chromadb` connector can list the real ChromaDB collections
 - [ ] API `http://localhost:7700/api/health` returns `{ ok: true }`
 - [ ] `pnpm typecheck` passes
 - [ ] `pnpm build` passes
@@ -668,7 +675,7 @@ Then test:
 - [ ] Active admin sessions increments
 - [ ] Active dashboard viewers increments when a prospect dashboard is open
 - [ ] Events/min updates after placement
-- [ ] Gateway p50/p95 latency displays
+- [ ] external MCP tooling p50/p95 latency displays
 - [ ] Growth cards load real counts
 - [ ] Holding-tank grid loads real placements
 - [ ] Funnel toggles between prospect and BA activation
@@ -768,5 +775,5 @@ These do not block local review:
 - Resend live email until domain verification
 - Telnyx live calls/SMS until keys/webhook are confirmed
 - Real provider integration for VM acquisition beyond manual/placeholder mode
-- Putting `D:/server-gateway-mcp-v2` into its own repo
+- Putting `external MCP tooling repo` into its own repo
 - Reconciling stale historical docs after the app review

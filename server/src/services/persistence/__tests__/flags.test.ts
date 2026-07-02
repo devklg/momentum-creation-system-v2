@@ -5,29 +5,29 @@ import {
 } from '../flags.js';
 
 describe('persistence flags', () => {
-  const mixedConfig: PersistenceFlagConfig = {
+  const directConfig: PersistenceFlagConfig = {
     directEnabled: true,
     storeModes: {
       mongodb: 'direct',
-      neo4j: 'gateway',
+      neo4j: 'direct',
       chromadb: 'direct',
     },
   };
 
-  it('keeps every store on gateway when the master direct flag is disabled', () => {
+  it('disables every store when the master direct flag is disabled', () => {
     const disabledConfig: PersistenceFlagConfig = {
-      ...mixedConfig,
+      ...directConfig,
       directEnabled: false,
     };
 
-    expect(resolveModeFromConfig(disabledConfig, 'mongodb')).toBe('gateway');
-    expect(resolveModeFromConfig(disabledConfig, 'neo4j')).toBe('gateway');
-    expect(resolveModeFromConfig(disabledConfig, 'chromadb')).toBe('gateway');
+    expect(resolveModeFromConfig(disabledConfig, 'mongodb')).toBe('disabled');
+    expect(resolveModeFromConfig(disabledConfig, 'neo4j')).toBe('disabled');
+    expect(resolveModeFromConfig(disabledConfig, 'chromadb')).toBe('disabled');
   });
 
-  it('allows per-store mixed mode only when direct mode is globally enabled', () => {
-    expect(resolveModeFromConfig(mixedConfig, 'mongodb')).toBe('direct');
-    expect(resolveModeFromConfig(mixedConfig, 'neo4j')).toBe('gateway');
-    expect(resolveModeFromConfig(mixedConfig, 'chromadb')).toBe('direct');
+  it('keeps every store direct when direct mode is globally enabled', () => {
+    expect(resolveModeFromConfig(directConfig, 'mongodb')).toBe('direct');
+    expect(resolveModeFromConfig(directConfig, 'neo4j')).toBe('direct');
+    expect(resolveModeFromConfig(directConfig, 'chromadb')).toBe('direct');
   });
 });

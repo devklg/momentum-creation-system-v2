@@ -19,7 +19,7 @@
  */
 
 import { tripleStackWrite } from '../services/tripleStack.js';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 
 export const QUESTIONNAIRE_VERSION = 'v1_2026_05_19';
 
@@ -98,7 +98,7 @@ export interface QuestionnaireRecord extends QuestionnaireSubmission {
  * questionnaire to exist before it renders).
  */
 export async function questionnaireExists(tmagId: string): Promise<boolean> {
-  const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
+  const result = await persistenceCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'tmag_questionnaires',
     filter: { tmagId },
@@ -118,7 +118,7 @@ export async function questionnaireExists(tmagId: string): Promise<boolean> {
 export async function getQuestionnaire(
   tmagId: string,
 ): Promise<QuestionnaireRecord | null> {
-  const result = await gatewayCall<{ documents: QuestionnaireRecord[] }>(
+  const result = await persistenceCall<{ documents: QuestionnaireRecord[] }>(
     'mongodb',
     'query',
     {
@@ -254,7 +254,7 @@ export async function recordQuestionnaire(
  */
 export async function markQuestionnaireComplete(tmagId: string): Promise<void> {
   const completedAt = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: { tmagId },

@@ -221,11 +221,11 @@ describe('toContextReferences — feeds buildContextPacket as approved knowledge
 });
 
 describe('ContextManagerRetrievalAdapter — store-free boundary', () => {
-  it('imports no store/Gateway/persistence client and calls no store primitive', () => {
+  it('imports no store/PERSISTENCE/persistence client and calls no store primitive', () => {
     const forbiddenImport =
-      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j-driver|chromadb|graph-?rag|\/services\/gateway|\/services\/persistence|\/persistence\/|gatewayFallback|gateway-fallback)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j-driver|chromadb|graph-?rag|\/services\/PERSISTENCE|\/services\/persistence|\/persistence\/|PERSISTENCEFallback|PERSISTENCE-fallback)[^'"]*['"]/i;
     const forbiddenCall =
-      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|gatewayCall|tripleStackWrite|directPersistenceCall)\s*\(/;
+      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|persistenceCall|tripleStackWrite|directStoreCall)\s*\(/;
     expect(adapterSource).not.toMatch(forbiddenImport);
     expect(adapterSource).not.toMatch(forbiddenCall);
   });

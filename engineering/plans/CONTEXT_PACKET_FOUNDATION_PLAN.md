@@ -9,8 +9,8 @@ Known governance facts:
 
 - S1.3 Runtime Persistence Direct Adapter Migration is CLOSED / VERIFIED.
 - Direct persistence is verified for MongoDB, Neo4j, and ChromaDB.
-- Gateway HTTP fallback remains in place.
-- Gateway fallback removal is not approved.
+- Gateway HTTP persistence fallback was later retired by ACR-0009.
+- Universal Gateway remains MCP/developer tooling, not app runtime persistence.
 - Remaining Sprint 1 work is planning/governance only.
 
 ---
@@ -55,7 +55,7 @@ Out of scope:
 - changes to ratified runtime documents;
 - organization governance record changes;
 - `.com` prospect-facing changes;
-- Gateway fallback removal;
+- reintroducing Universal Gateway as an app runtime persistence dependency;
 - Sprint 2 implementation;
 - Momentum redesign.
 
@@ -389,7 +389,7 @@ This S1.5 work is accepted when:
 - Test strategy is defined.
 - Risks and mitigations are included.
 - S1.3 CLOSED / VERIFIED and direct persistence verification facts are referenced.
-- Gateway HTTP fallback remains in place, and fallback removal is explicitly not approved.
+- Gateway HTTP persistence fallback status is superseded by ACR-0009.
 - The plan confirms no production code was changed.
 - The plan confirms no ratified documents were modified.
 

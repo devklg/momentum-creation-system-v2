@@ -8,7 +8,7 @@ import { MICHAEL_RESPONSE_CATALOG } from '../michaelResponseCatalog.js';
 // S3.3 — Static governance boundary for the Michael response-contract hardening
 // slice (Spanish lexical guardrails). The Spanish guardrails added to
 // michaelResponseContract.ts are PURE, in-process text validation: they must
-// introduce no persistence, no gateway/retrieval, no LLM, and no route wiring.
+// introduce no persistence, no PERSISTENCE/retrieval, no LLM, and no route wiring.
 //
 // This mirrors the static-scan style of
 // s220MichaelRuntimeResolutionFacadeGovernanceBoundary.test.ts: source is read
@@ -121,10 +121,10 @@ describe('S3.3 Michael response-contract hardening static governance boundary', 
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#5 does not import a Gateway client / retrieval helper, or call gatewayCall', () => {
+  it('#5 does not import a persistence dispatch client / retrieval helper, or call persistenceCall', () => {
     const importPattern =
-      /\bfrom\s+['"][^'"]*(?:\/services\/gateway|gatewayFallback|gateway-fallback|tripleStack|rawRetrieval|retrievalHelper|directRetrieval|\/retrieval\b)[^'"]*['"]/i;
-    const callPattern = /\b(?:gatewayCall|directPersistenceCall|buildContextPacket)\s*\(/;
+      /\bfrom\s+['"][^'"]*(?:\/services\/PERSISTENCE|PERSISTENCEFallback|PERSISTENCE-fallback|tripleStack|rawRetrieval|retrievalHelper|directRetrieval|\/retrieval\b)[^'"]*['"]/i;
+    const callPattern = /\b(?:persistenceCall|directStoreCall|buildContextPacket)\s*\(/;
     const matches = [
       ...matchingImportLines(contractFiles(), importPattern),
       ...matchingCodeTokenLines(contractFiles(), callPattern),

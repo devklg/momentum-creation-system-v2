@@ -35,7 +35,7 @@
  * is private to that file.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
 import { listLeaderTmagIds, LEADER_DETECTION_NOTE } from './adminMetrics.js';
@@ -106,7 +106,7 @@ const WEBINAR_COPY = {
 
 const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/1IZiV7RXdCY';
 
-/* ─── document shapes (private; mirror gateway result rows) ─────── */
+/* ─── document shapes (private; mirror PERSISTENCE result rows) ─────── */
 
 interface BaDoc {
   tmagId: string;
@@ -147,7 +147,7 @@ async function resolveScopedTmagIds(
   const leaders = await listLeaderTmagIds();
   if (filter.leaderGroup === 'leaders_only') return leaders;
 
-  const allBas = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+  const allBas = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
     filter: {},
@@ -160,7 +160,7 @@ async function resolveScopedTmagIds(
 /* ─── BA name resolver ──────────────────────────────────────────── */
 
 async function loadBaNameMap(): Promise<Map<string, string>> {
-  const result = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
     filter: {},
@@ -308,7 +308,7 @@ export async function listDirectoryRows(
     if (scopedTmagIds.length === 0) return [];
     prospectFilter.sponsorTmagId = { $in: scopedTmagIds };
   }
-  const prospectsResult = await gatewayCall<{ documents: ProspectDoc[] }>(
+  const prospectsResult = await persistenceCall<{ documents: ProspectDoc[] }>(
     'mongodb',
     'query',
     {
@@ -384,7 +384,7 @@ export async function getDirectoryFilterOptions(): Promise<{
   leaderDetectionNote: string;
 }> {
   const [allBasResult, leaderIds] = await Promise.all([
-    gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_BAS,
       filter: {},
@@ -688,7 +688,7 @@ export async function synthesizeAdminSandboxPreview(
   const token = pickLatest(tokens, (t) => t.createdAt);
   if (!token) return null;
 
-  const baResult = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+  const baResult = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
     filter: { tmagId: prospect.sponsorTmagId },
@@ -696,7 +696,7 @@ export async function synthesizeAdminSandboxPreview(
   });
   const baDoc = baResult.documents?.[0];
 
-  const eventResult = await gatewayCall<{
+  const eventResult = await persistenceCall<{
     documents: Array<{ eventId: string; scheduledFor: string; hosts?: string[] }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
@@ -858,7 +858,7 @@ async function loadInterventionContext(input: {
 }
 
 async function findBaDoc(tmagId: string): Promise<BaDoc | null> {
-  const r = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+  const r = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
     filter: { tmagId },
@@ -957,7 +957,7 @@ export async function executeMoveIntervention(input: {
   const before = snapshotProspect(ctx.prospect, ctx.placement);
 
   const now = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: COLL_PROSPECTS,
     filter: { prospectId: input.prospectId },
@@ -966,20 +966,20 @@ export async function executeMoveIntervention(input: {
     },
   });
   if (ctx.placement) {
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: { prospectId: input.prospectId },
       update: { $set: { sponsorTmagId: input.body.toTmagId, updatedAt: now } },
     });
-    await gatewayCall('neo4j', 'cypher', {
+    await persistenceCall('neo4j', 'cypher', {
       query:
         'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
         'SET r.sponsorTmagId = $toTmagId',
       params: { prospectId: input.prospectId, toTmagId: input.body.toTmagId },
     });
   }
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
       'SET p.sponsorTmagId = $toTmagId ' +
@@ -1050,7 +1050,7 @@ export async function executeReassignSponsorIntervention(input: {
   const before = snapshotProspect(ctx.prospect, ctx.placement);
 
   const now = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: COLL_PROSPECTS,
     filter: { prospectId: input.prospectId },
@@ -1059,13 +1059,13 @@ export async function executeReassignSponsorIntervention(input: {
     },
   });
   if (ctx.placement) {
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: { prospectId: input.prospectId },
       update: { $set: { sponsorTmagId: input.body.newSponsorTmagId, updatedAt: now } },
     });
-    await gatewayCall('neo4j', 'cypher', {
+    await persistenceCall('neo4j', 'cypher', {
       query:
         'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
         'SET r.sponsorTmagId = $newSponsorTmagId',
@@ -1075,7 +1075,7 @@ export async function executeReassignSponsorIntervention(input: {
       },
     });
   }
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
       'SET p.sponsorTmagId = $newSponsorTmagId ' +
@@ -1154,7 +1154,7 @@ export async function executeManualFlushIntervention(input: {
   const before = snapshotProspect(ctx.prospect, ctx.placement);
 
   const now = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: COLL_PLACEMENTS,
     filter: { prospectId: input.prospectId },
@@ -1166,7 +1166,7 @@ export async function executeManualFlushIntervention(input: {
       },
     },
   });
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: COLL_PROSPECTS,
     filter: { prospectId: input.prospectId },
@@ -1174,7 +1174,7 @@ export async function executeManualFlushIntervention(input: {
       $set: { state: 'expired', updatedAt: now },
     },
   });
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
       'SET r.flushedAt = datetime($now), r.flushReason = "archived"',
@@ -1242,7 +1242,7 @@ export async function executeForceEnrollIntervention(input: {
   const before = snapshotProspect(ctx.prospect, ctx.placement);
 
   const now = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: COLL_PROSPECTS,
     filter: { prospectId: input.prospectId },
@@ -1252,7 +1252,7 @@ export async function executeForceEnrollIntervention(input: {
   });
 
   if (ctx.placement) {
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: { prospectId: input.prospectId },
@@ -1264,7 +1264,7 @@ export async function executeForceEnrollIntervention(input: {
         },
       },
     });
-    await gatewayCall('neo4j', 'cypher', {
+    await persistenceCall('neo4j', 'cypher', {
       query:
         'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
         'SET r.flushedAt = datetime($now), r.flushReason = "enrolled"',
@@ -1347,7 +1347,7 @@ async function queryByProspectIds<T>(
   prospectIds: string[],
 ): Promise<T[]> {
   if (prospectIds.length === 0) return [];
-  const result = await gatewayCall<{ documents: T[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: T[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection,
     filter: { prospectId: { $in: prospectIds } },
@@ -1361,7 +1361,7 @@ async function listByProspectId<T>(
   prospectId: string,
   sort: Record<string, 1 | -1> = { createdAt: -1 },
 ): Promise<T[]> {
-  const result = await gatewayCall<{ documents: T[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: T[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection,
     filter: { prospectId },

@@ -260,10 +260,10 @@ During mixed mode:
 - Inspect projection outbox for pending/dead-letter rows.
 - Do not rewrite caller sites as rollback.
 
-After gateway runtime path removal:
+After gateway runtime path removal (completed by ACR-0009):
 
 - Rollback requires reverting the removal commit.
-- Do not remove gateway runtime path until all direct adapters pass verification and Kevin approves the final cutover.
+- Do not reintroduce the gateway runtime path; all direct adapters passed verification and Kevin approved the final cutover in ACR-0009.
 
 Data rollback:
 

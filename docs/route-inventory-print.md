@@ -50,7 +50,7 @@ Source checked: current React route files in `apps/*/src/App.tsx` and Express AP
 ## Shared API Routes
 
 39. `GET /api/health` - Basic server health check.
-40. `GET /api/health/gateway` - Universal Gateway connectivity health check.
+40. `GET /api/health/persistence` - external MCP tooling connectivity health check.
 
 41. `POST /api/auth/verify-code` - Validate an access code before registration.
 42. `POST /api/auth/register` - Create a BA account.

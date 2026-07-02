@@ -27,8 +27,8 @@ export function mockUsageSample(): McsAdminLiveUsageSample {
     activeDashboardViewers: 7,
     activeAdminSessions: 1,
     eventsPerMinute: 23,
-    gatewayLatencyMsP50: 18,
-    gatewayLatencyMsP95: 64,
+    persistenceLatencyMsP50: 18,
+    persistenceLatencyMsP95: 64,
   };
 }
 

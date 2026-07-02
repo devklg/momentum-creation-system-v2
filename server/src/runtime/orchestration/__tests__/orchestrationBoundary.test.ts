@@ -189,9 +189,9 @@ function validInput(): ContextPacketBuildInput {
 }
 
 describe('S2.1 orchestration import boundary', () => {
-  it('does not import stores, direct adapters, GraphRAG, or Gateway fallback clients', () => {
+  it('does not import stores, direct adapters, GraphRAG, or legacy fallback clients', () => {
     const forbidden =
-      /\bfrom\s+['"](?:mongoose|mongodb|neo4j-driver|chromadb|[^'"]*\/services\/gateway\.js|[^'"]*\/services\/persistence\/[^'"]*|[^'"]*graph-?rag[^'"]*|[^'"]*retrieval[^'"]*)['"]|new\s+MongoClient\b|mongoose\.connect\b|neo4j\.driver\b|ChromaClient\b|gatewayCall\b|tripleStackWrite\b|rawRetrieval\b|retrievalHelper\b|directRetrieval\b/i;
+      /\bfrom\s+['"](?:mongoose|mongodb|neo4j-driver|chromadb|[^'"]*\/services\/PERSISTENCE\.js|[^'"]*\/services\/persistence\/[^'"]*|[^'"]*graph-?rag[^'"]*|[^'"]*retrieval[^'"]*)['"]|new\s+MongoClient\b|mongoose\.connect\b|neo4j\.driver\b|ChromaClient\b|persistenceCall\b|tripleStackWrite\b|rawRetrieval\b|retrievalHelper\b|directRetrieval\b/i;
     const matches = matchingLines(forbidden);
     expect(matches, matches.join('\n')).toEqual([]);
   });
@@ -226,11 +226,11 @@ describe('S2.1 orchestration import boundary', () => {
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('confirms the Gateway fallback client remains present and unchanged by orchestration', () => {
-    const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
-    expect(gatewayClient).toContain('export async function gatewayCall');
-    expect(gatewayClient).not.toContain('/execute');
-    expect(gatewayClient).not.toContain('GATEWAY_URL');
+  it('confirms the legacy fallback client remains present and unchanged by orchestration', () => {
+    const persistenceClient = readFileSync(resolve(repoRoot, 'server/src/services/persistence/dispatch.ts'), 'utf8');
+    expect(persistenceClient).toContain('export async function persistenceCall');
+    expect(persistenceClient).not.toContain('/execute');
+    expect(persistenceClient).not.toContain('PERSISTENCE_URL');
   });
 
   it('keeps the orchestration boundary descriptor inert', () => {

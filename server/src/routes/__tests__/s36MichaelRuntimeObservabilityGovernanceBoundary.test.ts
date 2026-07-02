@@ -149,10 +149,10 @@ describe('S3.6 observability service static governance boundary', () => {
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#6 does not import a Gateway/tripleStack client (or call gatewayCall/tripleStackWrite)', () => {
+  it('#6 does not import a PERSISTENCE/tripleStack client (or call persistenceCall/tripleStackWrite)', () => {
     const importPattern =
-      /\bfrom\s+['"][^'"]*(?:\/services\/gateway|gatewayFallback|gateway-fallback|\/tripleStack)[^'"]*['"]/i;
-    const callPattern = /\b(?:gatewayCall|tripleStackWrite|directPersistenceCall)\s*\(/;
+      /\bfrom\s+['"][^'"]*(?:\/services\/PERSISTENCE|PERSISTENCEFallback|PERSISTENCE-fallback|\/tripleStack)[^'"]*['"]/i;
+    const callPattern = /\b(?:persistenceCall|tripleStackWrite|directStoreCall)\s*\(/;
     const matches = [
       ...matchingImportLines(serviceFiles(), importPattern),
       ...matchingCodeTokenLines(serviceFiles(), callPattern),
@@ -299,9 +299,9 @@ describe('S3.6 admin observability route static governance boundary', () => {
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#21 does not import a Mongo/Neo4j/Chroma/GraphRAG/Gateway store client', () => {
+  it('#21 does not import a Mongo/Neo4j/Chroma/GraphRAG/PERSISTENCE store client', () => {
     const pattern =
-      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/gateway|\/tripleStack)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/PERSISTENCE|\/tripleStack)[^'"]*['"]/i;
     const matches = matchingImportLines(adminRouteFiles(), pattern);
     expect(matches, matches.join('\n')).toEqual([]);
   });
@@ -380,7 +380,7 @@ describe('S3.6 wired runtime route static governance boundary', () => {
     ).toBe(true);
     // Negative: no store / persistence / LLM / telephony imports were added.
     const forbidden =
-      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/gateway|\/tripleStack|openai|anthropic|@anthropic-ai|telnyx)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/PERSISTENCE|\/tripleStack|openai|anthropic|@anthropic-ai|telnyx)[^'"]*['"]/i;
     const matches = matchingImportLines(routeFiles(), forbidden);
     expect(matches, matches.join('\n')).toEqual([]);
   });

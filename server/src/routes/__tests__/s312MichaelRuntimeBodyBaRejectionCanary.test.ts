@@ -135,7 +135,7 @@ describe('S3.12 forbidden runtime input payloads', () => {
     ['runtimeTurn', { runtimeTurn: {} }],
     ['contextPacket', { contextPacket: {} }],
     ['retrieval', { retrieval: {} }],
-    ['gateway', { gateway: {} }],
+    ['PERSISTENCE', { PERSISTENCE: {} }],
     ['graph', { graph: {} }],
     ['approvedKnowledge', { approvedKnowledge: [] }],
     ['candidateKnowledge', { candidateKnowledge: [] }],

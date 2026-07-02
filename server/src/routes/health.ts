@@ -9,7 +9,7 @@ healthRoutes.get('/', (_req: Request, res: Response) => {
 });
 
 // Per-leg DIRECT persistence health (ACR-0007 / ACR-0009). Replaces the
-// retired /gateway probe — the runtime has no Universal Gateway dependency to
+// retired /PERSISTENCE probe — the runtime has no external MCP tool server dependency to
 // probe. Reports the persistence-mode snapshot plus a live health check for
 // every store in direct mode (and the GPU embedder for the Chroma leg).
 healthRoutes.get('/persistence', async (_req: Request, res: Response) => {

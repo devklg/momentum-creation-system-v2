@@ -32,7 +32,7 @@
  * state — all captured at mint so the CRM export carries them and city/state
  * render on the dashboard ticker.
  *
- * Gateway bugs respected (per tripleStack.ts header + Chat #105/#118):
+ * PERSISTENCE bugs respected (per tripleStack.ts header + Chat #105/#118):
  *   - mongo `update` has no working upsert → branch on existence (here we
  *     only insert-new, so not hit on the create path).
  *   - mongo query param is `filter`, not `query`.
@@ -42,7 +42,7 @@
 
 import { randomUUID, randomInt } from 'node:crypto';
 import { env } from '../env.js';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { createProspectAccount, normalizePhone } from './prospectAccount.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
@@ -270,13 +270,13 @@ export async function createInvitation(
     expiresAt,
   };
 
-  await gatewayCall('mongodb', 'insert', {
+  await persistenceCall('mongodb', 'insert', {
     database: MONGO_DB,
     collection: TOKENS_COLLECTION,
     documents: [{ _id: token, ...tokenRecord }],
   });
 
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MERGE (t:TmagInviteToken {token: $token}) ' +
       'SET t.prospectId = $prospectId, ' +
@@ -409,7 +409,7 @@ export async function markInvitationSent(
   prospectId: string,
   sponsorTmagId: string,
 ): Promise<{ sentAt: string; alreadySent: boolean }> {
-  const existing = await gatewayCall<{
+  const existing = await persistenceCall<{
     documents: Array<{ sentAt?: string | null; sponsorTmagId?: string }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
@@ -432,7 +432,7 @@ export async function markInvitationSent(
   }
 
   const sentAt = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: PROSPECTS_COLLECTION,
     filter: { prospectId },
@@ -464,7 +464,7 @@ export async function logExternalInvite(
   const created = await createInvitation(input);
   const sentAt = created.createdAt;
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: PROSPECTS_COLLECTION,
     filter: { prospectId: created.prospectId },

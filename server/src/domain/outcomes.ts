@@ -3,7 +3,7 @@
  *
  * Persists a BA-CONFIRMED, BA-scoped, team-scoped real-world outcome through the
  * single app-direct tripleStackWrite seam into the app's own dedicated stores
- * (Mongo `momentum` / Neo4j / Chroma `mcs_outcomes`). NO Universal Gateway, NO
+ * (Mongo `momentum` / Neo4j / Chroma `mcs_outcomes`). NO external MCP tool server, NO
  * `quadstack.write` (ACR-0007). An outcome is memory-class, so it carries the
  * app-memory envelope (McsMemoryEnvelope) and is guarded — when direct mode is
  * cut over — by the collection's Mongoose + $jsonSchema governed door.
@@ -26,7 +26,7 @@
 
 import { createHash } from 'node:crypto';
 import { env } from '../env.js';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
   McsOutcomeInput,
@@ -104,7 +104,7 @@ function outcomeSemanticDocument(record: McsOutcomeRecord): string {
 
 /** Idempotency / correction lookup by deterministic id. */
 export async function findOutcome(id: string): Promise<McsOutcomeRecord | null> {
-  const result = await gatewayCall<{ documents: McsOutcomeRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsOutcomeRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { id },

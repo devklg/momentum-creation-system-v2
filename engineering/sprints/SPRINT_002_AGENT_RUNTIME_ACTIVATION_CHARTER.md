@@ -6,11 +6,17 @@
 - Architecture version: v1.0 frozen
 - Approval: Kevin L. Gardner approved Sprint 2 planning after Sprint 1 closeout
 
+> **Supersession note (2026-07-02, ACR-0009):** this charter predates Kevin's
+> approved retirement of the Gateway HTTP persistence fallback. Treat any older
+> Gateway fallback language below as historical Sprint 2 planning context, not
+> current architecture. Gateway is MCP/developer tooling; app runtime persistence
+> is direct to the MCS stack.
+
 ## 1. Authorization
 
 Sprint 1 - Platform Alignment is CLOSED / VERIFIED.
 
-The v1.0 frozen architecture remains unchanged. This charter authorizes Sprint 2 planning only. It does not authorize implementation, production route activation, event persistence activation, Gateway fallback removal, ratified-document edits, or `.com` prospect-facing changes.
+The v1.0 frozen architecture remains unchanged. This charter authorizes Sprint 2 planning only. It does not authorize implementation, production route activation, event persistence activation, reintroducing Universal Gateway as an app runtime dependency, ratified-document edits, or `.com` prospect-facing changes.
 
 ## 2. Sprint 2 Objective
 
@@ -224,8 +230,8 @@ This charter does not authorize:
 - replay jobs;
 - subscribers;
 - event API activation;
-- Gateway fallback removal;
-- direct agent access to MongoDB, Neo4j, ChromaDB, GraphRAG, direct adapters, or Gateway fallback clients;
+- Universal Gateway app-runtime dependency;
+- direct agent access to MongoDB, Neo4j, ChromaDB, GraphRAG, direct adapters, or Gateway clients;
 - `.com` prospect-facing edits;
 - ratified-document edits;
 - Telnyx/PSTN/call-control integration for internal browser voice/text runtime;
@@ -256,7 +262,7 @@ Each deliverable must restate its non-actions and must not modify ratified archi
 
 Sprint 2 begins with this charter only.
 
-The next step after this charter is planning document creation under the approved scope. Implementation, route activation, event persistence activation, Gateway fallback removal, and any `.com` or ratified-document change require separate Kevin approval.
+The next step after this charter is planning document creation under the approved scope. Implementation, route activation, event persistence activation, Universal Gateway app-runtime dependency, and any `.com` or ratified-document change require separate Kevin approval.
 
 No production code was changed by this charter.
 

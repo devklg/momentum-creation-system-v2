@@ -7,7 +7,7 @@
  */
 
 import { tripleStackWrite } from '../services/tripleStack.js';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 
 export const COMMITMENT_VERSION = 'v1_2026_05_18';
 
@@ -23,7 +23,7 @@ export interface CommitmentRecord {
 }
 
 export async function commitmentExists(tmagId: string): Promise<boolean> {
-  const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
+  const result = await persistenceCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'tmag_commitments',
     filter: { tmagId },
@@ -82,7 +82,7 @@ export async function recordCommitment(
 
 export async function markWelcomeSeen(tmagId: string): Promise<void> {
   const seenAt = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: { tmagId },
@@ -92,7 +92,7 @@ export async function markWelcomeSeen(tmagId: string): Promise<void> {
 
 export async function markCommitmentAccepted(tmagId: string): Promise<void> {
   const acceptedAt = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: { tmagId },
@@ -111,7 +111,7 @@ export interface BaProfile {
 }
 
 export async function findBaById(tmagId: string): Promise<BaProfile | null> {
-  const result = await gatewayCall<{ documents: BaProfile[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: BaProfile[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: { tmagId },

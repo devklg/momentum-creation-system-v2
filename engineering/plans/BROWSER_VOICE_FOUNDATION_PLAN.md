@@ -20,8 +20,8 @@ The foundation must preserve these facts:
 
 - S1.3 Runtime Persistence Direct Adapter Migration is CLOSED / VERIFIED.
 - Direct persistence is verified for MongoDB, Neo4j, and ChromaDB.
-- Gateway HTTP fallback remains in place.
-- Gateway fallback removal is not approved.
+- Gateway HTTP persistence fallback was later retired by ACR-0009.
+- Universal Gateway remains MCP/developer tooling, not app runtime persistence.
 - Remaining Sprint 1 work is planning/governance only.
 
 ---
@@ -54,7 +54,7 @@ The following are explicitly out of scope for S1.6:
 - Runtime Event Service implementation.
 - Knowledge Ingestion implementation.
 - Persistence adapter changes.
-- Gateway fallback removal.
+- Reintroducing Universal Gateway as an app runtime persistence dependency.
 - Telnyx integration for internal browser runtime.
 - `.com` prospect-facing changes.
 - Momentum redesign.
@@ -444,7 +444,7 @@ S1.6 planning is accepted when:
 - The plan includes the full agent interaction flow from BA opening runtime through outcome capture.
 - The plan states Telnyx is external telephony only and not used for internal browser runtime.
 - The plan covers privacy, consent, session identity, `baId` scoping, accessibility, browser compatibility, runtime events, Context Packets, QA harness expectations, risks, and mitigations.
-- The plan references S1.3 CLOSED / VERIFIED status, direct MongoDB/Neo4j/ChromaDB verification, Gateway HTTP fallback preservation, and the fact that Gateway fallback removal is not approved.
+- The plan references S1.3 CLOSED / VERIFIED status, direct MongoDB/Neo4j/ChromaDB verification, and ACR-0009's later Gateway HTTP fallback retirement.
 - The plan confirms remaining Sprint 1 work is planning/governance only.
 - No production code was changed.
 - No ratified documents were modified.
@@ -461,8 +461,8 @@ No organization governance records were modified by S1.6.
 
 No `.com` prospect-facing surfaces were modified by S1.6.
 
-Gateway HTTP fallback remains in place.
+Gateway HTTP persistence fallback status is superseded by ACR-0009.
 
-Gateway fallback removal remains not approved.
+Universal Gateway remains MCP/developer tooling, not app runtime persistence.
 
 Sprint 2 was not started.

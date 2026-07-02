@@ -1,10 +1,10 @@
 /**
  * Triple-stack write helper. Wraps three sequential DIRECT-adapter calls
- * (services/persistence — ACR-0007/ACR-0009; the Universal Gateway is dev
+ * (services/persistence — ACR-0007/ACR-0009; the external MCP tool server is dev
  * tooling only) so a single logical write lands in MongoDB + Neo4j + ChromaDB.
  * No DB is optional.
  *
- * Adapter API contract notes (inherited from the legacy gateway era — the
+ * Adapter API contract notes (inherited from the legacy PERSISTENCE era — the
  * direct adapters mirror the same action contract):
  *   - MongoDB `update` action does NOT honor `upsert:true` — branch on existence.
  *   - Neo4j BA constraint requires email uniqueness; write `null` for missing optional fields.
@@ -12,7 +12,7 @@
  *   - MongoDB query action uses parameter name `filter`, not `query`.
  */
 
-import { gatewayCall } from './gateway.js';
+import { persistenceCall } from './persistence/dispatch.js';
 import { assertChromaCollectionExists } from './chromaCollections.js';
 import type { McsTripleStackWriteResult } from '@momentum/shared';
 
@@ -46,19 +46,19 @@ export async function tripleStackWrite(input: TripleStackInput): Promise<McsTrip
   }
 
   // 1. Mongo insert. Use the shared `id` field as the document's _id-equivalent.
-  const mongoData = await gatewayCall<{ insertedCount?: number }>('mongodb', 'insert', {
+  const mongoData = await persistenceCall<{ insertedCount?: number }>('mongodb', 'insert', {
     database,
     collection: input.mongoCollection,
     documents: [{ _id: input.id, ...input.mongoDoc }],
   });
 
-  // 2. Neo4j (optional). Gateway action: neo4j.cypher with { query, params }.
+  // 2. Neo4j (optional). PERSISTENCE action: neo4j.cypher with { query, params }.
   // `ok` means "this leg executed successfully" — false when skipped (no input),
   // never a silent true. A real leg failure throws above and never reaches here.
   let neo4jOk = false;
   let neo4jCounters: Record<string, number> | undefined;
   if (input.neo4j) {
-    const data = await gatewayCall<{ summary?: { counters?: Record<string, number> } }>('neo4j', 'cypher', {
+    const data = await persistenceCall<{ summary?: { counters?: Record<string, number> } }>('neo4j', 'cypher', {
       query: input.neo4j.cypher,
       params: { id: input.id, ...(input.neo4j.params ?? {}) },
     });
@@ -69,7 +69,7 @@ export async function tripleStackWrite(input: TripleStackInput): Promise<McsTrip
   // 3. ChromaDB (optional). Collection must already exist; create at boot.
   let chromaOk = false;
   if (input.chroma) {
-    await gatewayCall('chromadb', 'add', {
+    await persistenceCall('chromadb', 'add', {
       collection: input.chroma.collection,
       ids: [input.id],
       documents: [input.chroma.document],

@@ -10,7 +10,7 @@ Status: PLANNING ONLY
 
 ## Scope
 
-This plan defines the QA harness strategy for Sprint 1 and future runtime implementation. It does not create test code, production code, runtime modules, Gateway fallback removal work, or ratified document edits.
+This plan defines the QA harness strategy for Sprint 1 and future runtime implementation. It does not create test code, production code, runtime modules, Universal Gateway runtime-dependency work, or ratified document edits.
 
 S1.3 Runtime Persistence Direct Adapter Migration is CLOSED / VERIFIED. The current verified runtime state is:
 
@@ -21,7 +21,7 @@ PERSISTENCE_NEO4J_MODE=direct
 PERSISTENCE_CHROMA_MODE=direct
 ```
 
-Gateway HTTP fallback remains in place and must be tested as preserved until Kevin separately approves fallback removal.
+ACR-0009 later retired the Gateway HTTP persistence fallback. Current QA should verify that Universal Gateway is not reintroduced as an app runtime persistence dependency.
 
 ## QA Harness Strategy
 
@@ -127,16 +127,16 @@ Initial assertions:
 - Persistence writes remain centralized behind service boundaries.
 - Store access tests should fail on direct import or direct client creation inside agent modules.
 
-### Gateway Fallback Preservation
+### Universal Gateway Runtime-Dependency Guard
 
-Purpose: prove the Gateway HTTP fallback remains available while direct persistence is active.
+Purpose: prove Universal Gateway is not reintroduced as app runtime persistence while direct persistence is active.
 
 Initial assertions:
 
-- `gatewayCall(tool, action, params)` can route to fallback when master or per-store flags require Gateway mode.
-- Direct HTTP Gateway calls still succeed for representative read/list operations.
-- Unsupported tools fail safely through the existing `GatewayError` compatibility surface.
-- No test assumes fallback removal.
+- `gatewayCall(tool, action, params)` dispatches app runtime persistence to direct adapters only.
+- Direct HTTP Gateway calls may still succeed for MCP/operator tooling, but app runtime tests do not depend on them.
+- Unsupported app-runtime persistence tools fail safely through the existing `GatewayError` compatibility surface.
+- No test assumes Universal Gateway is an app runtime dependency.
 
 ### Direct Persistence Adapter Health
 
@@ -218,7 +218,7 @@ Future verification reports under `engineering/reports/` must include:
 - Confirmation of non-actions:
   - no production code beyond the approved workstream,
   - no ratified document edits,
-  - no Gateway fallback removal unless separately approved,
+  - no Universal Gateway runtime dependency unless separately approved,
   - no `.com` prospect-surface changes unless separately approved.
 - Recommendation for the next governance-safe action.
 
@@ -241,13 +241,13 @@ FAIL:
 - The command exits nonzero.
 - An assertion fails.
 - A required dependency is present but behaves incompatibly.
-- A boundary is violated, such as direct agent store access, Telnyx import into internal browser runtime, missing Team Magnificent scope, missing rollback behavior, or Gateway fallback breakage.
+- A boundary is violated, such as direct agent store access, Telnyx import into internal browser runtime, missing Team Magnificent scope, missing rollback behavior, or reintroduction of Universal Gateway as app runtime persistence.
 
 ## Explicit Non-Actions
 
 - No production code.
 - No ratified document edits.
-- No Gateway fallback removal.
+- No Universal Gateway runtime dependency.
 - No `.com` prospect-surface changes.
 - No new runtime architecture implementation.
 - No new test code in this planning step.

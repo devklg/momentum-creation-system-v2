@@ -14,11 +14,11 @@
  * message. It makes no income/placement claim — status is funnel progress,
  * never earnings.
  *
- * Read pattern mirrors domain/ba.ts: gatewayCall('mongodb','query',{filter,
- * sort,limit}); Mongo query param is `filter`, not `query` (gateway quirk).
+ * Read pattern mirrors domain/ba.ts: persistenceCall('mongodb','query',{filter,
+ * sort,limit}); Mongo query param is `filter`, not `query` (PERSISTENCE quirk).
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { findBAByTmagId, type BARecord } from './ba.js';
 import { lastInitialOf } from './prospects.js';
 import { buildDiscoveryView } from './steve-success-interview.js';
@@ -113,7 +113,7 @@ function isSponsorInactive(sp: BARecord): boolean {
  * up automatically. Founder role sorts before co_leader so Kevin leads.
  */
 async function getFounderContacts(): Promise<McsSponsorFallbackFounder[]> {
-  const res = await gatewayCall<{ documents: Array<BARecord & BaLifecycleExtras> }>(
+  const res = await persistenceCall<{ documents: Array<BARecord & BaLifecycleExtras> }>(
     'mongodb',
     'query',
     {
@@ -619,7 +619,7 @@ export async function listInvitesForBA(tmagId: string): Promise<{
   // are excluded — the BA has no restore (admin-only), so a removed prospect
   // drops out of the cockpit entirely. $ne:true matches both absent and
   // false, so legacy rows without the field still show.
-  const prospectsRes = await gatewayCall<{ documents: ProspectDoc[] }>(
+  const prospectsRes = await persistenceCall<{ documents: ProspectDoc[] }>(
     'mongodb',
     'query',
     {
@@ -635,7 +635,7 @@ export async function listInvitesForBA(tmagId: string): Promise<{
   // 2. Callback requests for this BA. Build a per-prospect "latest intent"
   //    map: callbacks come back newest-first, so the first one we see per
   //    prospect is the latest.
-  const callbackRes = await gatewayCall<{ documents: CallbackDoc[] }>(
+  const callbackRes = await persistenceCall<{ documents: CallbackDoc[] }>(
     'mongodb',
     'query',
     {
@@ -655,7 +655,7 @@ export async function listInvitesForBA(tmagId: string): Promise<{
 
   // 3. Activity timeline for this BA, grouped per prospect, oldest-first so
   //    the cockpit renders it top-to-bottom chronologically.
-  const activityRes = await gatewayCall<{ documents: McsInvitationActivityEntry[] }>(
+  const activityRes = await persistenceCall<{ documents: McsInvitationActivityEntry[] }>(
     'mongodb',
     'query',
     {
@@ -722,49 +722,49 @@ export async function getProspectMomentumViewer(
     dispositionRes,
     notesRes,
   ] = await Promise.all([
-    gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: PROSPECTS_COLLECTION,
       filter: { sponsorTmagId: tmagId },
       sort: { createdAt: -1 },
       limit: 1000,
     }),
-    gatewayCall<{ documents: TokenProjectionDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: TokenProjectionDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: TOKENS_COLLECTION,
       filter: { sponsorTmagId: tmagId },
       sort: { createdAt: -1 },
       limit: 2000,
     }),
-    gatewayCall<{ documents: CallbackDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: CallbackDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: CALLBACK_COLLECTION,
       filter: { sponsorTmagId: tmagId },
       sort: { createdAt: -1 },
       limit: 2000,
     }),
-    gatewayCall<{ documents: McsInvitationActivityEntry[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: McsInvitationActivityEntry[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: ACTIVITY_COLLECTION,
       filter: { sponsorTmagId: tmagId },
       sort: { at: -1 },
       limit: 5000,
     }),
-    gatewayCall<{ documents: McsCrmFollowUpRecord[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: McsCrmFollowUpRecord[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: FOLLOWUPS_COLLECTION,
       filter: { sponsorTmagId: tmagId, clearedAt: null },
       sort: { dueAt: 1 },
       limit: 1000,
     }),
-    gatewayCall<{ documents: DispositionDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: DispositionDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: DISPOSITIONS_COLLECTION,
       filter: { sponsorTmagId: tmagId },
       sort: { updatedAt: -1 },
       limit: 1000,
     }),
-    gatewayCall<{ documents: NoteDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: NoteDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: NOTES_COLLECTION,
       filter: { sponsorTmagId: tmagId },
@@ -902,7 +902,7 @@ interface BaWelcomeExtras {
 }
 
 async function getLatestCommitmentAcceptedAt(tmagId: string): Promise<string | null> {
-  const result = await gatewayCall<{ documents?: CommitmentDoc[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents?: CommitmentDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COMMITMENTS_COLLECTION,
     filter: { tmagId },
@@ -913,7 +913,7 @@ async function getLatestCommitmentAcceptedAt(tmagId: string): Promise<string | n
 }
 
 async function countCollection(collection: string, filter: Record<string, unknown>): Promise<number> {
-  const result = await gatewayCall<{ count?: number; documents?: unknown[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ count?: number; documents?: unknown[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection,
     filter,

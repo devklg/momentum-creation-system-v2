@@ -12,7 +12,7 @@
  */
 
 import { createHash, randomUUID } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 
@@ -307,7 +307,7 @@ export async function claimVmJobs(
   limit: number,
 ): Promise<VmQueueJob[]> {
   const now = new Date().toISOString();
-  const result = await gatewayCall<{ documents: VmQueueJob[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: VmQueueJob[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: QUEUE_COLLECTION,
     filter: { kind: { $in: kinds }, status: 'queued', availableAt: { $lte: now } },
@@ -318,7 +318,7 @@ export async function claimVmJobs(
   const claimed: VmQueueJob[] = [];
   for (const job of result.documents ?? []) {
     const lockedAt = new Date().toISOString();
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: QUEUE_COLLECTION,
       filter: { jobId: job.jobId, status: 'queued' },
@@ -350,7 +350,7 @@ function ownerFromPayload(payload: Record<string, unknown>): string | null {
 
 export async function completeVmJob(jobId: string, note: string): Promise<void> {
   const at = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: QUEUE_COLLECTION,
     filter: { jobId },
@@ -379,7 +379,7 @@ export async function failVmJob(job: VmQueueJob, reason: string): Promise<void> 
   const status: VmQueueJobStatus = terminal ? 'dead_lettered' : 'queued';
   const availableAt = terminal ? job.availableAt : new Date(Date.now() + delayMs).toISOString();
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: QUEUE_COLLECTION,
     filter: { jobId: job.jobId },
@@ -477,7 +477,7 @@ async function upsertImportedLead(
   if (!normalizedPhone && !normalizedEmail) validationIssues.push('missing_contact_channel');
 
   const dedupeKey = leadDedupeKey(payload.ownerTmagId, normalizedPhone, normalizedEmail);
-  const existing = await gatewayCall<{ documents: VmBulkLeadRecord[] }>('mongodb', 'query', {
+  const existing = await persistenceCall<{ documents: VmBulkLeadRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: LEADS_COLLECTION,
     filter: { ownerTmagId: payload.ownerTmagId, dedupeKey },
@@ -590,7 +590,7 @@ async function isLeadSuppressed(lead: VmBulkLeadRecord): Promise<boolean> {
   if (lead.normalizedPhone) clauses.push({ normalizedPhone: lead.normalizedPhone });
   if (lead.normalizedEmail) clauses.push({ normalizedEmail: lead.normalizedEmail });
   if (clauses.length === 0) return true;
-  const result = await gatewayCall<{ count?: number; documents?: unknown[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ count?: number; documents?: unknown[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: SUPPRESSION_COLLECTION,
     filter: { ownerTmagId: { $in: [lead.ownerTmagId, 'global'] }, $or: clauses },
@@ -657,7 +657,7 @@ export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Prom
     },
   });
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: LEADS_COLLECTION,
     filter: { leadId: lead.leadId },
@@ -727,7 +727,7 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
     },
   });
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: LEADS_COLLECTION,
     filter: { leadId: lead.leadId },
@@ -738,7 +738,7 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
 }
 
 export async function findLead(leadId: string): Promise<VmBulkLeadRecord | null> {
-  const result = await gatewayCall<{ documents: VmBulkLeadRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: VmBulkLeadRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: LEADS_COLLECTION,
     filter: { leadId },
@@ -753,7 +753,7 @@ export async function updateLeadStatus(
   extra: Record<string, unknown> = {},
 ): Promise<void> {
   const at = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: LEADS_COLLECTION,
     filter: { leadId },
@@ -846,7 +846,7 @@ export async function recordProviderWebhook(input: {
 }
 
 export async function processWebhookEvent(job: VmQueueJob<{ webhookEventId: string; provider: VmProviderKey }>): Promise<void> {
-  const result = await gatewayCall<{ documents: Array<{ payload: Record<string, unknown>; provider: VmProviderKey }> }>(
+  const result = await persistenceCall<{ documents: Array<{ payload: Record<string, unknown>; provider: VmProviderKey }> }>(
     'mongodb',
     'query',
     {
@@ -880,7 +880,7 @@ export async function processWebhookEvent(job: VmQueueJob<{ webhookEventId: stri
   }
 
   const at = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: WEBHOOK_EVENTS_COLLECTION,
     filter: { webhookEventId: job.payload.webhookEventId },
@@ -890,7 +890,7 @@ export async function processWebhookEvent(job: VmQueueJob<{ webhookEventId: stri
 }
 
 export async function listDeliveryRowsForManualExport(campaignId: string): Promise<VmBulkLeadRecord[]> {
-  const result = await gatewayCall<{ documents: VmBulkLeadRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: VmBulkLeadRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: LEADS_COLLECTION,
     filter: {

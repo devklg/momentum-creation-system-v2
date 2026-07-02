@@ -74,7 +74,7 @@ describe('projection-outbox drain worker (Phase 10 audit H1 regression)', () => 
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const drain = vi
       .fn<() => Promise<DrainSummary>>()
-      .mockRejectedValueOnce(new Error('gateway down'))
+      .mockRejectedValueOnce(new Error('PERSISTENCE down'))
       .mockResolvedValue(emptySummary());
 
     startProjectionOutboxWorker({ intervalMs: 1000, drain });

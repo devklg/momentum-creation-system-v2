@@ -4,11 +4,11 @@ import type { McsGraphRagInput, McsGraphRagQuery } from '@momentum/shared';
 /** Phase 7 · R3 — GraphRAG writer + retrieval tests (P7.6). */
 
 const mocks = vi.hoisted(() => ({
-  gatewayCall: vi.fn(),
+  persistenceCall: vi.fn(),
   tripleStackWrite: vi.fn(),
 }));
 
-vi.mock('../../services/gateway.js', () => ({ gatewayCall: mocks.gatewayCall }));
+vi.mock('../../services/persistence/dispatch.js', () => ({ persistenceCall: mocks.persistenceCall }));
 vi.mock('../../services/tripleStack.js', () => ({ tripleStackWrite: mocks.tripleStackWrite }));
 
 type AnyRec = Record<string, unknown>;
@@ -46,7 +46,7 @@ function retrievalQuery(overrides: Partial<McsGraphRagQuery> = {}): McsGraphRagQ
 }
 
 beforeEach(() => {
-  mocks.gatewayCall.mockReset();
+  mocks.persistenceCall.mockReset();
   mocks.tripleStackWrite.mockReset();
 });
 
@@ -62,7 +62,7 @@ describe('Phase 7 R3 — canary gate', () => {
     expect(await m.appendGraphRagRecord(writeInput())).toBeNull();
     expect(await m.retrieveGraphRag(retrievalQuery())).toEqual([]);
     expect(mocks.tripleStackWrite).not.toHaveBeenCalled();
-    expect(mocks.gatewayCall).not.toHaveBeenCalled();
+    expect(mocks.persistenceCall).not.toHaveBeenCalled();
   });
 });
 
@@ -86,7 +86,7 @@ describe('Phase 7 R3 — active-collection routing + isolation', () => {
     expect(((call.chroma as AnyRec).metadata as AnyRec).retrievalReady).toBe(true);
   });
 
-  it('stamps the app-memory envelope with no gateway-only fields', async () => {
+  it('stamps the app-memory envelope with no PERSISTENCE-only fields', async () => {
     const m = await load(true);
     const record = (await m.appendGraphRagRecord(writeInput()))!;
     expect(record.namespace).toBe('momentum');
@@ -106,7 +106,7 @@ describe('Phase 7 R3 — active-collection routing + isolation', () => {
 
 describe('Phase 7 R3 — retrieval-ready gate', () => {
   it('applies a hard retrievalReady:true + tenant filter on the active collection', async () => {
-    mocks.gatewayCall.mockResolvedValue({
+    mocks.persistenceCall.mockResolvedValue({
       ids: [['mcsgraph_kobj_1_v3_en']],
       documents: [['Orientation within 48h correlates with faster launch.']],
       distances: [[0.12]],
@@ -116,7 +116,7 @@ describe('Phase 7 R3 — retrieval-ready gate', () => {
 
     const hits = await m.retrieveGraphRag(retrievalQuery());
 
-    const call = mocks.gatewayCall.mock.calls[0]!;
+    const call = mocks.persistenceCall.mock.calls[0]!;
     expect(call[0]).toBe('chromadb');
     expect(call[1]).toBe('query');
     const params = call[2] as AnyRec;
@@ -129,7 +129,7 @@ describe('Phase 7 R3 — retrieval-ready gate', () => {
   });
 
   it('returns [] cleanly when the active collection has no ready matches', async () => {
-    mocks.gatewayCall.mockResolvedValue({ ids: [[]], documents: [[]], distances: [[]], metadatas: [[]] });
+    mocks.persistenceCall.mockResolvedValue({ ids: [[]], documents: [[]], distances: [[]], metadatas: [[]] });
     const m = await load(true);
     expect(await m.retrieveGraphRag(retrievalQuery())).toEqual([]);
   });

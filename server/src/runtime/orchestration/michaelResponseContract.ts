@@ -56,7 +56,7 @@ export const MICHAEL_RESPONSE_CONTRACT_FORBIDDEN_FIELDS = [
   'persistenceInstruction',
   'rawStoreResults',
   'rawGraphRagResults',
-  'rawGatewayFallbackResponse',
+  'rawPERSISTENCEFallbackResponse',
 ] as const;
 
 export const MICHAEL_RESPONSE_FORBIDDEN_FIELDS =

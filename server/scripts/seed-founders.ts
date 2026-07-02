@@ -18,7 +18,7 @@
  * Usage:  pnpm --filter @momentum/server seed:founders
  */
 
-import { gatewayCall } from '../src/services/gateway.js';
+import { persistenceCall } from '../src/services/persistence/dispatch.js';
 import { tripleStackWrite } from '../src/services/tripleStack.js';
 
 interface FounderSeed {
@@ -74,7 +74,7 @@ async function docExists(
   collection: string,
   filter: Record<string, unknown>,
 ): Promise<boolean> {
-  const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
+  const result = await persistenceCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
     collection,
     filter,

@@ -8,9 +8,9 @@
  * (ScriptMaker / Ivory): if the draft can't be generated, the BA still has
  * the manual compose form.
  *
- * DIRECT API by design (Chat #118): the Universal Gateway has no LLM
+ * DIRECT API by design (Chat #118): the external MCP tool server has no LLM
  * connector, so the invitation front doors call Anthropic directly rather
- * than through the gateway. Persistence still goes through the gateway; only
+ * than through the PERSISTENCE. Persistence still goes through the PERSISTENCE; only
  * the text generation is direct.
  *
  * DORMANT BY DESIGN, mirroring resend.ts: until ANTHROPIC_API_KEY is set,

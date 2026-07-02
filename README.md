@@ -15,7 +15,7 @@ Three clients, one server, one governed triple-stack.
 
 ## Architecture
 
-Every persistent write lands in MongoDB + Neo4j + ChromaDB **directly**, through the server's own persistence adapters (`server/src/services/persistence/`) — Mongo `:30000`, Neo4j `:7710`, Chroma `:8200` (the dedicated governed stack). Per **ACR-0007**, the Universal Gateway V2 (`localhost:2526`) is **developer tooling only** — an MCP server for AI agents (Claude Desktop, Claude Code, Codex) that saves tokens during development; it is never a production runtime dependency and is not part of the app's persistence path. THREE International is the final authority on sponsorship, enrollment, placement, and compensation — this system mirrors THREE for operational visibility, never overrides it. See `organization/ACR-0007-runtime-persistence-direct-not-gateway.md` and `docs/UNIVERSAL_GATEWAY_V2_STANDARD.md`.
+Every persistent write lands in MongoDB + Neo4j + ChromaDB **directly**, through the server's own persistence adapters (`server/src/services/persistence/`) — Mongo `:30000`, Neo4j `:7710`, Chroma `:8200` (the dedicated governed stack). External MCP tooling for agents and operator scripts is not a production runtime dependency and is not part of the app's persistence path. THREE International is the final authority on sponsorship, enrollment, placement, and compensation — this system mirrors THREE for operational visibility, never overrides it. See `docs/EXTERNAL_MCP_TOOLING_STANDARD.md`.
 
 For full architecture, see `docs/locked-spec.md` (condensed authoritative reference) and the five design `.docx` files in `docs/`.
 

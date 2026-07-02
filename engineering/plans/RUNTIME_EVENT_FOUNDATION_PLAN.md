@@ -8,6 +8,12 @@ Architecture version: v1.0 frozen
 
 Status: PLANNING ONLY
 
+> **Supersession note (2026-07-02, ACR-0009):** this plan predates Kevin's
+> approved retirement of the Gateway HTTP persistence fallback. Treat any
+> fallback-preservation language below as historical planning context, not
+> current architecture. Gateway is MCP/developer tooling; app runtime persistence
+> is direct to the MCS stack.
+
 ## 1. Purpose
 
 This plan defines the foundation for Momentum runtime events before production event code is implemented.
@@ -20,8 +26,8 @@ This plan aligns with the ratified runtime event model in `runtime/AGENT_EVENT_M
 
 - S1.3 Runtime Persistence Direct Adapter Migration is CLOSED / VERIFIED.
 - Direct persistence is verified for MongoDB, Neo4j, and ChromaDB.
-- Gateway HTTP fallback remains in place.
-- Gateway fallback removal is not approved.
+- Gateway HTTP persistence fallback was later retired by ACR-0009.
+- Universal Gateway remains MCP/developer tooling, not app runtime persistence.
 - Remaining Sprint 1 work is planning/governance only.
 - This S1.4 document does not approve Sprint 2 or production runtime implementation.
 
@@ -41,7 +47,7 @@ Out of scope:
 - No ratified document edits.
 - No organization governance record edits.
 - No `.com` prospect-facing changes.
-- No Gateway fallback removal.
+- No new Universal Gateway runtime dependency.
 - No Sprint 2 implementation.
 - No redesign of Momentum runtime architecture.
 - No new agent behavior implementation.
@@ -153,7 +159,7 @@ Event names must remain completed facts. Commands such as "send SMS", "approve k
 - Subscribers process outbox items asynchronously and idempotently.
 - Failed subscribers do not mutate the original event.
 - Retries must be bounded and observable; exhausted items move to an inspectable failed/dead-letter state.
-- Gateway HTTP fallback remains available through the verified S1.3 fallback path, but the approved runtime target is direct persistence.
+- Gateway HTTP persistence fallback status is superseded by ACR-0009; the approved runtime target is direct persistence.
 
 ## 10. Replay Boundaries
 
@@ -227,13 +233,13 @@ ChromaDB:
 - Should not index every raw event blindly.
 - Receives privacy-screened projections through subscribers using the direct Chroma path verified in S1.3.
 
-Direct persistence is verified for all three stores under S1.3. Gateway fallback remains present and must not be removed in this workstream.
+Direct persistence is verified for all three stores under S1.3. ACR-0009 later retired the Gateway HTTP persistence fallback.
 
 ## 14. Agent Store Access Rule
 
 Agents do not write directly to MongoDB, Neo4j, or ChromaDB.
 
-Agents emit runtime facts through the Runtime Event Service and access context through the Context Manager. Store writes are owned by runtime services and subscribers. Agent modules must not import Mongoose models, Neo4j drivers, Chroma adapters, direct persistence clients, or Gateway fallback clients.
+Agents emit runtime facts through the Runtime Event Service and access context through the Context Manager. Store writes are owned by runtime services and subscribers. Agent modules must not import Mongoose models, Neo4j drivers, Chroma adapters, direct persistence clients, or Gateway clients.
 
 ## 15. Team Magnificent Scoping Rules
 
@@ -320,7 +326,7 @@ This S1.4 plan is accepted when:
 - It defines validation and test strategy.
 - It lists risks and mitigations.
 - It acknowledges S1.3 is CLOSED / VERIFIED and direct persistence is verified for MongoDB, Neo4j, and ChromaDB.
-- It confirms Gateway HTTP fallback remains in place and fallback removal is not approved.
+- It confirms direct app persistence and is superseded by ACR-0009 for Gateway HTTP fallback retirement.
 - It confirms no production code was changed.
 - It confirms no ratified documents were modified.
 

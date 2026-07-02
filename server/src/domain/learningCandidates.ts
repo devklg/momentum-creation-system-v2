@@ -7,7 +7,7 @@
  * (Mongo `momentum` mcs_learning_candidates / Neo4j `(:TmagLearningCandidate)` /
  * Chroma `mcs_learning_candidates_review`) — a collection DISJOINT from active
  * knowledge, so the Context Manager never retrieves a candidate as guidance.
- * No Universal Gateway, no `quadstack.write` (ACR-0007).
+ * No external MCP tool server, no `quadstack.write` (ACR-0007).
  *
  * THE HARD INVARIANT (P7.5 §5.1): NO AGENT MAY APPROVE KNOWLEDGE.
  *   - `appendLearningCandidate` ALWAYS produces a `detected` candidate. It has
@@ -24,7 +24,7 @@
 
 import { createHash } from 'node:crypto';
 import { env } from '../env.js';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
   McsLearningCandidateInput,
@@ -79,7 +79,7 @@ export function deterministicCandidateId(input: {
 export async function findLearningCandidate(
   id: string,
 ): Promise<McsLearningCandidateRecord | null> {
-  const result = await gatewayCall<{ documents: McsLearningCandidateRecord[] }>(
+  const result = await persistenceCall<{ documents: McsLearningCandidateRecord[] }>(
     'mongodb',
     'query',
     { database: MONGO_DB, collection: COLLECTION, filter: { id }, limit: 1 },
@@ -220,7 +220,7 @@ export async function reviewLearningCandidate(
   const status = input.decision === 'approved' ? 'approved' : 'rejected';
 
   // Mongo: set the review block + status (branch-on-existence already done above).
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { id: input.candidateId },
@@ -228,7 +228,7 @@ export async function reviewLearningCandidate(
   });
 
   // Neo4j: reflect the terminal status + reviewer on the candidate node.
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query: `
       MERGE (c:TmagLearningCandidate {id: $id})
       SET c.status = $status, c.reviewDecision = $decision,

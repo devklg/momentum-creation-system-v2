@@ -1,16 +1,14 @@
 /**
  * Per-store persistence mode flags (ACR-0007 / ACR-0009).
  *
- * DIRECT is the only supported runtime dispatch mode. The former Gateway HTTP
- * fallback was retired by ACR-0009: when a store resolves to 'gateway' (legacy
- * .env, or the master switch off), services/gateway.ts fails LOUD at dispatch
- * instead of routing through developer tooling. These flags therefore act as
+ * DIRECT is the only supported runtime dispatch mode. If the master switch is
+ * off, persistence is disabled loudly at dispatch. These flags therefore act as
  * boot/dispatch validation plus a kill switch, not a routing choice.
  */
 import { env } from '../../env.js';
 
 export type PersistenceStore = 'mongodb' | 'neo4j' | 'chromadb';
-export type PersistenceMode = 'gateway' | 'direct';
+export type PersistenceMode = 'disabled' | 'direct';
 
 const STORE_MODE_ENV: Record<PersistenceStore, PersistenceMode> = {
   mongodb: env.PERSISTENCE_MONGO_MODE,
@@ -29,7 +27,7 @@ export function resolveModeFromConfig(
   config: PersistenceFlagConfig,
   store: PersistenceStore,
 ): PersistenceMode {
-  if (!config.directEnabled) return 'gateway';
+  if (!config.directEnabled) return 'disabled';
   return config.storeModes[store];
 }
 

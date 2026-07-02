@@ -101,7 +101,7 @@ Name: ________________________________    Date: ____________________
 92. [ ] POST /api/crm/:prospectId/reinvite-script
 93. [ ] GET /api/crm/today
 94. [ ] GET /api/health
-95. [ ] GET /api/health/gateway
+95. [ ] GET /api/health/persistence
 96. [ ] POST /api/invitations
 97. [ ] POST /api/invitations/:prospectId/sent
 98. [ ] POST /api/invitations/log

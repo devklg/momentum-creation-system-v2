@@ -47,7 +47,7 @@
  *   - Sponsor changes belong to D.4 interventions; never duplicated here.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { appendAuditEntry } from './auditLog.js';
 import { createInvitation } from './invitations.js';
 import { findBAByTmagId } from './ba.js';
@@ -114,7 +114,7 @@ function validReason(reason: string | undefined | null): boolean {
 async function findProspectByIdAnyState(
   prospectId: string,
 ): Promise<ProspectRecordMaybeDeleted | null> {
-  const result = await gatewayCall<{ documents: ProspectRecordMaybeDeleted[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: ProspectRecordMaybeDeleted[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PROSPECTS_COLLECTION,
     filter: { prospectId },
@@ -264,7 +264,7 @@ export async function adminEditProspect(
   const now = new Date().toISOString();
   set.updatedAt = now;
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: PROSPECTS_COLLECTION,
     filter: { prospectId },
@@ -317,7 +317,7 @@ export async function adminSoftDeleteProspect(
     deletedByTmagId: actor.tmagId,
   };
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: PROSPECTS_COLLECTION,
     filter: { prospectId },
@@ -364,7 +364,7 @@ export async function adminRestoreProspect(
     // deletedAt / deletedReason / deletedByTmagId LEFT as the historical record.
   };
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: PROSPECTS_COLLECTION,
     filter: { prospectId },

@@ -5,10 +5,10 @@
  * module reads the existing Steve discovery artifacts and prepares
  * schema-enforced GraphRAG bridge drafts without writing them through the
  * repo-local tripleStack helper. Real memory writes must use Universal
- * Gateway quadstack.write with enforce_schema=true.
+ * PERSISTENCE quadstack.write with enforce_schema=true.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import type {
   McsAdminAgentInteractionSummary,
   McsAdminAgentMemoryStatus,
@@ -61,7 +61,7 @@ async function safeQuery<T>(
   limit = 50_000,
 ): Promise<T[]> {
   try {
-    const result = await gatewayCall<{ documents?: T[] }>('mongodb', 'query', {
+    const result = await persistenceCall<{ documents?: T[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection,
       filter,
@@ -80,7 +80,7 @@ async function safeQuery<T>(
 
 async function listChromaCollections(warnings: string[]): Promise<Set<string> | null> {
   try {
-    const result = await gatewayCall<{ collections?: Array<{ name?: string }> }>(
+    const result = await persistenceCall<{ collections?: Array<{ name?: string }> }>(
       'chromadb',
       'list_collections',
       {},
@@ -229,7 +229,7 @@ function bridgeDraft(discovery: PersistedSteveDiscovery): McsAdminSuccessProfile
     requiredWritePath: 'quadstack.write',
     options: { require: ['mongo', 'neo4j', 'chroma'], enforce_schema: true },
     note:
-      'Draft only. Persist with Universal Gateway quadstack.write and enforce_schema=true; do not use repo-local tripleStackWrite for new GraphRAG lineage records.',
+      'Draft only. Persist with external MCP tool server quadstack.write and enforce_schema=true; do not use repo-local tripleStackWrite for new GraphRAG lineage records.',
   };
 }
 

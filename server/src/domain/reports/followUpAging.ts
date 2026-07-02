@@ -13,7 +13,7 @@
  * are finalized in code.
  */
 
-import { gatewayCall } from '../../services/gateway.js';
+import { persistenceCall } from '../../services/persistence/dispatch.js';
 import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
@@ -73,7 +73,7 @@ export async function buildFollowUpReport(
   if (scopedTmagIds !== null) dispoFilter.sponsorTmagId = { $in: scopedTmagIds };
   Object.assign(dispoFilter, rangeClause('updatedAt', range));
 
-  const res = await gatewayCall<{ documents: DispoDoc[] }>('mongodb', 'query', {
+  const res = await persistenceCall<{ documents: DispoDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_DISPO,
     filter: dispoFilter,

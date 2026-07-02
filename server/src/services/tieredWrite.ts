@@ -33,7 +33,7 @@
  * admin CRUD paths, Ivory/Michael/training) is contract §13 items 2–5.
  */
 
-import { gatewayCall } from './gateway.js';
+import { persistenceCall } from './persistence/dispatch.js';
 import { assertChromaCollectionExists, ChromaCollectionMissingError } from './chromaCollections.js';
 import {
   enqueueProjection,
@@ -131,7 +131,7 @@ function database(input: TieredWriteInput): string {
 
 /** Read the just-inserted Mongo doc back by _id. True iff it is present. */
 async function verifyMongoLanded(db: string, collection: string, id: string): Promise<boolean> {
-  const data = await gatewayCall<{ count?: number; documents?: unknown[] }>('mongodb', 'query', {
+  const data = await persistenceCall<{ count?: number; documents?: unknown[] }>('mongodb', 'query', {
     database: db,
     collection,
     filter: { _id: id },
@@ -143,7 +143,7 @@ async function verifyMongoLanded(db: string, collection: string, id: string): Pr
 /** Compensating delete of a Mongo doc by _id. Throws HalfWriteError if it can't. */
 async function rollbackMongo(db: string, collection: string, id: string): Promise<void> {
   try {
-    const data = await gatewayCall<{ deletedCount?: number }>('mongodb', 'delete', {
+    const data = await persistenceCall<{ deletedCount?: number }>('mongodb', 'delete', {
       database: db,
       collection,
       filter: { _id: id },
@@ -162,7 +162,7 @@ async function runNeo4j(
   write: TieredNeo4jWrite,
   id: string,
 ): Promise<{ counters?: Record<string, number>; verified: boolean }> {
-  const data = await gatewayCall<{
+  const data = await persistenceCall<{
     records?: Array<Record<string, unknown>>;
     summary?: { counters?: Record<string, number> };
   }>('neo4j', 'cypher', {
@@ -171,7 +171,7 @@ async function runNeo4j(
   });
   const counters = data.summary?.counters;
   if (!write.verifyCypher) return { counters, verified: false };
-  const check = await gatewayCall<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
+  const check = await persistenceCall<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
     query: write.verifyCypher,
     params: { id, ...(write.verifyParams ?? {}) },
   });
@@ -219,7 +219,7 @@ export async function tieredWrite(input: TieredWriteInput): Promise<TieredWriteR
   }
 
   // 1. Mongo insert — always, first.
-  await gatewayCall('mongodb', 'insert', {
+  await persistenceCall('mongodb', 'insert', {
     database: db,
     collection: input.mongoCollection,
     documents: [{ _id: input.id, ...input.mongoDoc }],
@@ -300,7 +300,7 @@ async function projectChromaDurable(
   const chroma = input.chroma!;
   try {
     await assertChromaCollectionExists(chroma.collection);
-    await gatewayCall('chromadb', 'add', {
+    await persistenceCall('chromadb', 'add', {
       collection: chroma.collection,
       ids: [input.id],
       documents: [chroma.document],

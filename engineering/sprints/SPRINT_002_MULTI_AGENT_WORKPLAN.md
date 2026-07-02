@@ -7,6 +7,12 @@
 - Coordinator: Sprint 2 Multi-Agent Planning Coordinator
 - Charter: `engineering/sprints/SPRINT_002_AGENT_RUNTIME_ACTIVATION_CHARTER.md`
 
+> **Supersession note (2026-07-02, ACR-0009):** this planning snapshot predates
+> Kevin's approved retirement of the Gateway HTTP persistence fallback. Treat any
+> older Gateway fallback language below as historical Sprint 2 planning context,
+> not current architecture. Gateway is MCP/developer tooling; app runtime
+> persistence is direct to the MCS stack.
+
 ## 1. Purpose
 
 This workplan coordinates parallel planning lanes for Sprint 2 - Agent Runtime Activation.
@@ -369,7 +375,7 @@ Hard non-actions:
 - no implementation;
 - no route mounting;
 - no event persistence activation;
-- no Gateway fallback removal.
+- no Universal Gateway app-runtime dependency.
 
 ## 5. Parallel Dependency Map
 
@@ -394,7 +400,7 @@ After all lane plans exist, the coordinator should create an integration review 
 - no lane authorizes implementation;
 - no lane modifies ratified documents;
 - no lane modifies production code;
-- no lane removes Gateway fallback;
+- no lane reintroduces Universal Gateway as app runtime persistence;
 - no lane modifies `.com`;
 - no lane mounts `/api/runtime/*`;
 - no lane activates event persistence, outbox, replay, subscribers, or event APIs;
@@ -420,7 +426,7 @@ No ratified documents were modified by this workplan.
 
 No `.com` prospect-facing surfaces were modified by this workplan.
 
-Gateway fallback remains in place.
+Gateway HTTP persistence fallback status is superseded by ACR-0009.
 
 No `/api/runtime/*` route was mounted.
 

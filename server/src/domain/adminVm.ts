@@ -7,7 +7,7 @@
  * explicit warnings while those agents are still landing.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import {
   listVmNotificationHooks,
   listVmTeamNewsHooks,
@@ -142,7 +142,7 @@ async function safeQuery<T>(
   sort?: Record<string, 1 | -1>,
 ): Promise<T[]> {
   try {
-    const result = await gatewayCall<{ documents?: T[] }>('mongodb', 'query', {
+    const result = await persistenceCall<{ documents?: T[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection,
       filter,

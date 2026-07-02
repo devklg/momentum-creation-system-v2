@@ -373,7 +373,7 @@ function buildAgentContext(agentKey: McsAgentKey, agentId: McsAgentId | undefine
     roleSummary: `${AGENT_DISPLAY_NAMES[agentKey]} consumes a validated Context Packet for ${objective}.`,
     allowedOutputs: [...DEFAULT_ALLOWED_OUTPUTS],
     prohibitedOutputs: [
-      'Do not query MongoDB, Neo4j, ChromaDB, GraphRAG, direct adapters, or Gateway clients directly.',
+      'Do not query MongoDB, Neo4j, ChromaDB, GraphRAG, direct adapters, or persistence dispatch clients directly.',
       'Do not include candidate or review-only knowledge unless a future approved workflow explicitly authorizes it.',
       'Do not persist context packets or emit events from the Context Manager builder.',
     ],
@@ -395,7 +395,7 @@ function buildRuntimeRules(agentKey: McsAgentKey, objective: string): McsRuntime
     {
       ruleId: 'agent_store_access_forbidden',
       category: 'knowledge_boundary',
-      instruction: 'Agents must not query MongoDB, Neo4j, ChromaDB, GraphRAG, direct adapters, or Gateway fallback clients directly.',
+      instruction: 'Agents must not query MongoDB, Neo4j, ChromaDB, GraphRAG, direct adapters, or legacy fallback clients directly.',
       required: true,
       appliesTo: 'all_agents',
       reason: 'Store access remains behind approved runtime service boundaries.',

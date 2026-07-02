@@ -12,7 +12,7 @@
  *   manual seeding from /admin until cadence is decided.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import type { McsWebinarEvent } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -26,7 +26,7 @@ const MONGO_COLLECTION = 'tmag_prospect_webinar_events';
  */
 export async function findNextUpcomingEvent(): Promise<McsWebinarEvent | null> {
   const now = new Date().toISOString();
-  const result = await gatewayCall<{ documents: McsWebinarEvent[] }>(
+  const result = await persistenceCall<{ documents: McsWebinarEvent[] }>(
     'mongodb',
     'query',
     {
@@ -46,7 +46,7 @@ export async function findNextUpcomingEvent(): Promise<McsWebinarEvent | null> {
  * validate the prospect is reserving against a real upcoming event.
  */
 export async function findEventById(eventId: string): Promise<McsWebinarEvent | null> {
-  const result = await gatewayCall<{ documents: McsWebinarEvent[] }>(
+  const result = await persistenceCall<{ documents: McsWebinarEvent[] }>(
     'mongodb',
     'query',
     {

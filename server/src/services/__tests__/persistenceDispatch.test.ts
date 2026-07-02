@@ -21,9 +21,9 @@ vi.mock('../persistence/chroma/adapter.js', () => ({
 function stubPersistenceEnv(
   options: {
     directEnabled?: boolean;
-    mongoMode?: 'gateway' | 'direct';
-    neo4jMode?: 'gateway' | 'direct';
-    chromaMode?: 'gateway' | 'direct';
+    mongoMode?: 'direct';
+    neo4jMode?: 'direct';
+    chromaMode?: 'direct';
   } = {},
 ): void {
   vi.stubEnv('NODE_ENV', 'test');
@@ -34,33 +34,33 @@ function stubPersistenceEnv(
   vi.stubEnv('PERSISTENCE_CHROMA_MODE', options.chromaMode ?? 'direct');
 }
 
-async function loadGateway(
+async function loadPersistenceDispatch(
   options: Parameters<typeof stubPersistenceEnv>[0] = {},
-): Promise<typeof import('../gateway.js')> {
+): Promise<typeof import('../persistence/dispatch.js')> {
   vi.resetModules();
   stubPersistenceEnv(options);
-  return import('../gateway.js');
+  return import('../persistence/dispatch.js');
 }
 
-describe('direct-only persistence dispatcher (ACR-0009 — Gateway HTTP path retired)', () => {
+describe('direct-only persistence dispatcher (ACR-0009)', () => {
   beforeEach(() => {
     vi.unstubAllEnvs();
     vi.clearAllMocks();
   });
 
   it('dispatches every store to its direct adapter', async () => {
-    const { gatewayCall } = await loadGateway();
+    const { persistenceCall } = await loadPersistenceDispatch();
     mocks.mongoAdapter.mockResolvedValue({ via: 'mongo-direct' });
     mocks.neo4jAdapter.mockResolvedValue({ via: 'neo4j-direct' });
     mocks.chromaAdapter.mockResolvedValue({ via: 'chroma-direct' });
 
-    await expect(gatewayCall('mongodb', 'query', { collection: 'c' })).resolves.toEqual({
+    await expect(persistenceCall('mongodb', 'query', { collection: 'c' })).resolves.toEqual({
       via: 'mongo-direct',
     });
-    await expect(gatewayCall('neo4j', 'cypher', { query: 'RETURN 1' })).resolves.toEqual({
+    await expect(persistenceCall('neo4j', 'cypher', { query: 'RETURN 1' })).resolves.toEqual({
       via: 'neo4j-direct',
     });
-    await expect(gatewayCall('chromadb', 'search', { collection: 'c' })).resolves.toEqual({
+    await expect(persistenceCall('chromadb', 'search', { collection: 'c' })).resolves.toEqual({
       via: 'chroma-direct',
     });
 
@@ -69,11 +69,11 @@ describe('direct-only persistence dispatcher (ACR-0009 — Gateway HTTP path ret
     expect(mocks.chromaAdapter).toHaveBeenCalledWith('search', { collection: 'c' });
   });
 
-  it('refuses non-persistence tools — the Universal Gateway is developer tooling only', async () => {
-    const { gatewayCall } = await loadGateway();
+  it('refuses non-persistence tools', async () => {
+    const { persistenceCall } = await loadPersistenceDispatch();
 
-    await expect(gatewayCall('email', 'send', { id: 'x' })).rejects.toMatchObject({
-      name: 'GatewayError',
+    await expect(persistenceCall('email', 'send', { id: 'x' })).rejects.toMatchObject({
+      name: 'PersistenceError',
       tool: 'email',
       action: 'send',
     });
@@ -82,46 +82,35 @@ describe('direct-only persistence dispatcher (ACR-0009 — Gateway HTTP path ret
     expect(mocks.chromaAdapter).not.toHaveBeenCalled();
   });
 
-  it('fails loud when a store is not in direct mode — no silent fallback of any kind', async () => {
-    const { gatewayCall } = await loadGateway({ neo4jMode: 'gateway' });
-
-    await expect(gatewayCall('neo4j', 'cypher', { query: 'RETURN 1' })).rejects.toMatchObject({
-      name: 'GatewayError',
-      tool: 'neo4j',
-      action: 'cypher',
-    });
-    expect(mocks.neo4jAdapter).not.toHaveBeenCalled();
-  });
-
   it('fails loud when the master direct flag is disabled', async () => {
-    const { gatewayCall } = await loadGateway({ directEnabled: false });
+    const { persistenceCall } = await loadPersistenceDispatch({ directEnabled: false });
 
-    await expect(gatewayCall('mongodb', 'query', { collection: 'c' })).rejects.toMatchObject({
-      name: 'GatewayError',
+    await expect(persistenceCall('mongodb', 'query', { collection: 'c' })).rejects.toMatchObject({
+      name: 'PersistenceError',
       tool: 'mongodb',
       action: 'query',
     });
     expect(mocks.mongoAdapter).not.toHaveBeenCalled();
   });
 
-  it('wraps direct adapter failures in the existing GatewayError contract', async () => {
-    const { gatewayCall } = await loadGateway();
+  it('wraps direct adapter failures in the existing PersistenceError contract', async () => {
+    const { persistenceCall } = await loadPersistenceDispatch();
     mocks.mongoAdapter.mockRejectedValue(new Error('adapter exploded'));
 
-    await expect(gatewayCall('mongodb', 'query', { collection: 'c' })).rejects.toMatchObject({
-      name: 'GatewayError',
+    await expect(persistenceCall('mongodb', 'query', { collection: 'c' })).rejects.toMatchObject({
+      name: 'PersistenceError',
       tool: 'mongodb',
       action: 'query',
-      message: '[gateway:mongodb.query] adapter exploded',
+      message: '[persistence:mongodb.query] adapter exploded',
     });
   });
 
-  it('preserves the caller-facing gatewayCall(tool, action, params) contract unchanged', async () => {
-    const { gatewayCall } = await loadGateway();
+  it('preserves the caller-facing persistenceCall(tool, action, params) contract unchanged', async () => {
+    const { persistenceCall } = await loadPersistenceDispatch();
     const params = { collection: 'caller_contract', filter: { id: 'one' } };
     mocks.mongoAdapter.mockResolvedValue({ documents: [], count: 0 });
 
-    await gatewayCall('mongodb', 'query', params);
+    await persistenceCall('mongodb', 'query', params);
 
     expect(mocks.mongoAdapter).toHaveBeenCalledWith('query', params);
   });

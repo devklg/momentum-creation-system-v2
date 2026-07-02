@@ -9,7 +9,7 @@
  * `buildContextPacket()` already accepts.
  *
  * Hard invariants (Phase 4 charter §5/§11):
- *  - Depends ONLY on an injected provider; constructs no store/Gateway/retrieval client and
+ *  - Depends ONLY on an injected provider; constructs no store/PERSISTENCE/retrieval client and
  *    imports none. Persists nothing.
  *  - Calls ONLY `listApprovedKnowledge`. It cannot see `listCandidateKnowledgeForReview` —
  *    the provider type is narrowed so candidate/review-only knowledge is unreachable here.

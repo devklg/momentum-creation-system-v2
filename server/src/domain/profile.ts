@@ -41,7 +41,7 @@
 
 import argon2 from 'argon2';
 import { createHash, randomInt, randomBytes } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { appendAuditEntry } from './auditLog.js';
 import { findBAByTmagId } from './ba.js';
 import { sendEmail, ResendConfigError, ResendError } from '../services/resend.js';
@@ -103,7 +103,7 @@ function mergeNotifPrefs(stored: McsBANotifPrefs | undefined): McsBANotifPrefs {
 }
 
 async function findActiveCodeForBA(tmagId: string): Promise<string | null> {
-  const r = await gatewayCall<{ documents: Array<{ code: string }> }>('mongodb', 'query', {
+  const r = await persistenceCall<{ documents: Array<{ code: string }> }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: ACCESS_CODES_COLLECTION,
     filter: { sponsorTmagId: tmagId, active: true },
@@ -179,7 +179,7 @@ export async function patchProfile(
   }
 
   if (Object.keys(set).length > 0) {
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: BA_COLLECTION,
       filter: { tmagId },
@@ -191,7 +191,7 @@ export async function patchProfile(
     if (set.firstName !== undefined || set.lastName !== undefined) {
       const nextFirst = (set.firstName as string | undefined) ?? current.firstName;
       const nextLast = (set.lastName as string | undefined) ?? current.lastName;
-      await gatewayCall('neo4j', 'cypher', {
+      await persistenceCall('neo4j', 'cypher', {
         query:
           'MATCH (n:TeamMagnificentMember {tmagId: $tmagId}) SET n.firstName = $firstName, n.lastName = $lastName',
         params: { tmagId, firstName: nextFirst, lastName: nextLast },
@@ -252,7 +252,7 @@ export async function changePassword(
   if (!valid) return { ok: false, error: 'current_password_wrong' };
 
   const newHash = await argon2.hash(newPassword, { type: argon2.argon2id });
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
     filter: { tmagId },
@@ -282,7 +282,7 @@ export async function changePassword(
 /* ─── Challenge flow (email + phone) ─── */
 
 async function persistChallenge(rec: McsProfileChangeChallengeRecord): Promise<void> {
-  await gatewayCall('mongodb', 'insert', {
+  await persistenceCall('mongodb', 'insert', {
     database: MONGO_DB,
     collection: CHALLENGES_COLLECTION,
     documents: [{ _id: rec.challengeId, ...rec }],
@@ -295,7 +295,7 @@ async function stampPendingTarget(
   target: string,
 ): Promise<void> {
   const field = channel === 'email' ? 'pendingEmail' : 'pendingPhone';
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
     filter: { tmagId },
@@ -308,7 +308,7 @@ async function clearPendingTarget(
   channel: 'email' | 'phone',
 ): Promise<void> {
   const field = channel === 'email' ? 'pendingEmail' : 'pendingPhone';
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
     filter: { tmagId },
@@ -320,7 +320,7 @@ async function findLatestActiveChallenge(
   tmagId: string,
   channel: 'email' | 'phone',
 ): Promise<McsProfileChangeChallengeRecord | null> {
-  const r = await gatewayCall<{ documents: McsProfileChangeChallengeRecord[] }>(
+  const r = await persistenceCall<{ documents: McsProfileChangeChallengeRecord[] }>(
     'mongodb',
     'query',
     {
@@ -415,7 +415,7 @@ export async function setPhone(
   const before = { phone: ba.phone };
   const after = { phone: next };
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
     filter: { tmagId },
@@ -464,7 +464,7 @@ async function verifyChallenge(
   }
 
   const redeemedAt = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: CHALLENGES_COLLECTION,
     filter: { challengeId: row.challengeId, redeemedAt: null },
@@ -487,14 +487,14 @@ export async function completeEmailChange(
   const before = { email: ba.email };
   const after = { email: result.appliedTo };
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
     filter: { tmagId },
     update: { $set: { email: result.appliedTo } },
   });
   // Keep Neo4j BA node email aligned (used by genealogy queries).
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query: 'MATCH (n:TeamMagnificentMember {tmagId: $tmagId}) SET n.email = $email',
     params: { tmagId, email: result.appliedTo },
   });

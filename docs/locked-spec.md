@@ -401,7 +401,7 @@ Comp plan is deferred until the new BA has signed two people and earned enough c
 
 Every write hits **MongoDB + Neo4j + ChromaDB** in the same logical operation. No store is optional. No store is deferred. The architecture is built to handle the volume in 1.10 from day one. The runtime accesses these three stores **directly**, through dedicated adapters and service layers (Mongoose models, Neo4j graph services, Chroma embedding/collection services) — consistent with the ratified Runtime layer (`KNOWLEDGE_CORE_RUNTIME.md`, `AGENT_EVENT_MODEL.md`).
 
-The MCP Universal Gateway V2 (`D:/server-gateway-mcp-v2`, `localhost:2526`) is **developer tooling only** — used by Claude Desktop, Claude Code, Codex, and Codex CLI to reach the stores during build sessions — and is **never a production runtime dependency**. (Reconciled 2026-06-27: an earlier draft of this section described persistence as routed "via Universal Gateway V2," which conflicted with the ratified Runtime layer; the direct-store statement above is controlling. The current server still routes through the gateway at 405 call sites — that is implementation debt scheduled for migration under Sprint 1 item S1.3, not the target architecture.)
+External MCP tooling is **developer tooling only** — used by Claude Desktop, Claude Code, Codex, and Codex CLI to reach the stores during build sessions — and is **never a production runtime dependency**. (Reconciled 2026-07-02: an earlier draft of this section described persistence as routed through external tooling, which conflicted with the ratified Runtime layer; the direct-store statement above is controlling. ACR-0009 retired the HTTP persistence fallback. `persistenceCall()` is the app's direct persistence dispatch name and does not call external MCP tooling.)
 
 ## 3.15  Brand tokens
 
@@ -650,7 +650,7 @@ Phone is E.164 (raw, no formatting). The client formats for display and uses the
 
 The enrolled view's deliberate brevity honors the locked-spec 3.6 BA-to-BA, off-app handoff. The new BA's access to `.team` comes through a separately-issued access code from Kevin per locked-spec 2.3 — not through the prospect-facing `/p/{token}` URL. Adding a register link would re-introduce the programmatic THREE handoff Chat #84 explicitly dropped.
 
-**Branch 5 (out-of-band) — 500 server_error.** Unexpected gateway/DB failure. The client shows an F.4 / F.6-style soft degrade (the dashboard's live counters and stack already degrade gracefully per F.4; the presentation page falls back to a minimal retry surface).
+**Branch 5 (out-of-band) — 500 server_error.** Unexpected persistence or database failure. The client shows an F.4 / F.6-style soft degrade (the dashboard's live counters and stack already degrade gracefully per F.4; the presentation page falls back to a minimal retry surface).
 
 ### Sponsor immutability in all branches
 

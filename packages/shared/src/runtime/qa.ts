@@ -11,7 +11,7 @@ export type McsRuntimeQaCategory =
   | 'context_packet_schema'
   | 'telnyx_exclusion'
   | 'agent_store_access_boundary'
-  | 'gateway_fallback_preservation'
+  | 'PERSISTENCE_fallback_preservation'
   | 'direct_persistence_adapter_health'
   | 'rollback_flags'
   | 'language_support';

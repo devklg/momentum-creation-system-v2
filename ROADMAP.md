@@ -57,7 +57,7 @@ Agent order (M3–M5) follows Implementation Package 001: Michael first (Momentu
 **Scope:**
 
 - pnpm workspace, Node ≥ 22, TypeScript strict baseline.
-- MongoDB, Neo4j, Chroma, and GraphRAG service boundaries reachable through the Universal Gateway.
+- MongoDB, Neo4j, Chroma, and GraphRAG service boundaries reachable through approved direct app services and external operator tooling where appropriate.
 - Shared runtime types and Team Magnificent identity scope.
 - `agent_event.v1` event service + outbox skeleton.
 
@@ -200,7 +200,7 @@ They are not substitutes for the M1-M9 sequence above.
 
 | Priority | Item | Status |
 | -------- | ---- | ------ |
-| High | Fork and customize Handy as a Windows-native FluidVoice-style dictation app for Kevin's workflow. Start from Handy's open-source cross-platform dictation base, then add Kevin-specific profiles for Codex prompts, Claude prompts, email/messages, cleanup rules, and optional Universal Gateway/MCP action mode. | Queued after MCS V2 implementation |
+| High | Fork and customize Handy as a Windows-native FluidVoice-style dictation app for Kevin's workflow. Start from Handy's open-source cross-platform dictation base, then add Kevin-specific profiles for Codex prompts, Claude prompts, email/messages, cleanup rules, and optional MCP action mode. | Queued after MCS V2 implementation |
 
 ---
 

@@ -21,7 +21,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import { sendEmail, ResendConfigError, ResendError } from '../services/resend.js';
@@ -298,7 +298,7 @@ export async function createWebinarReservation(
   }
 
   // 4. Patch SMS + email outcomes.
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: MONGO_COLLECTION,
     filter: { _id: reservationId },

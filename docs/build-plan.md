@@ -4,12 +4,12 @@ No time estimates. Phases ship in order. Each phase ends with a working delivera
 
 ## Phase 0 — Scaffolding (current)
 
-Fresh repo, monorepo layout, locked-spec docs, gateway client wired, first triple-stack write.
+Fresh repo, monorepo layout, locked-spec docs, persistence dispatch client wired, first triple-stack write.
 
 **Build:**
 - npm workspaces: `apps/com`, `apps/team`, `server`, `packages/shared`
 - Brand tokens and compliance constants in `packages/shared`
-- Gateway client in `server/src/services/tripleStack.ts`
+- persistence dispatch client in `server/src/services/tripleStack.ts`
 - Initial commit and push to `devklg/momentum-creation-system`
 
 **Acceptance:**
@@ -31,7 +31,7 @@ The complete prospect demonstration end to end. This is the part Kevin has been 
 - `apps/com` Vite client with seven pages: public landing, `/p/{token}` (two states), `/p/{token}/sent`, expired/invalid, system error, 404
 
 **Acceptance:**
-- A token minted by the gateway resolves to a BA replicated site at `/p/{token}` pre-placement
+- A token minted by the external tooling resolves to a BA replicated site at `/p/{token}` pre-placement
 - `POST /api/p/:token/video-complete` writes a pool entry with a monotonic position, triple-stack
 - The dashboard at `/p/{token}` post-placement renders all six locked sections
 - `/p/{token}/sent` confirms after `POST /api/p/:token/callback-request`

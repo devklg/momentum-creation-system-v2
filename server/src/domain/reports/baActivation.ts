@@ -22,7 +22,7 @@
  * Compliance (ADMIN I.5): activation is operational — no scoring, no ranking.
  */
 
-import { gatewayCall } from '../../services/gateway.js';
+import { persistenceCall } from '../../services/persistence/dispatch.js';
 import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { monthKey, rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
@@ -101,7 +101,7 @@ export async function buildBaActivationReport(
   if (scopedTmagIds !== null) baFilter.tmagId = { $in: scopedTmagIds };
   Object.assign(baFilter, rangeClause('createdAt', range));
 
-  const basRes = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+  const basRes = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
     filter: baFilter,
@@ -130,19 +130,19 @@ export async function buildBaActivationReport(
 
   // Pull the three milestone sources scoped to exactly this BA set.
   const [steveRes, activityRes, enrollRes] = await Promise.all([
-    gatewayCall<{ documents: SteveDiscoveryDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: SteveDiscoveryDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_STEVE,
       filter: { tmagId: { $in: baIds }, completedAt: { $ne: null } },
       limit: baIds.length,
     }),
-    gatewayCall<{ documents: ActivityDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: ActivityDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_ACTIVITY,
       filter: { sponsorTmagId: { $in: baIds }, kind: { $in: ['invitation_sent', 'video_completed'] } },
       limit: 200_000,
     }),
-    gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: { sponsorTmagId: { $in: baIds }, flushReason: 'enrolled' },

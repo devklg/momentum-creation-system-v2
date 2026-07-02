@@ -59,9 +59,9 @@ describe('backend runtime boundary skeleton', () => {
     }
   });
 
-  it('keeps runtime skeleton files away from direct stores, direct adapters, and Gateway clients', () => {
+  it('keeps runtime skeleton files away from direct stores, direct adapters, and persistence dispatch clients', () => {
     const forbidden =
-      /\bfrom\s+['"](?:mongoose|mongodb|neo4j-driver|chromadb|.*\/services\/gateway\.js|.*\/services\/persistence\/.*)['"]|new\s+MongoClient\b|mongoose\.connect\b|neo4j\.driver\b|ChromaClient\b|gatewayCall\b|tripleStackWrite\b/;
+      /\bfrom\s+['"](?:mongoose|mongodb|neo4j-driver|chromadb|.*\/services\/PERSISTENCE\.js|.*\/services\/persistence\/.*)['"]|new\s+MongoClient\b|mongoose\.connect\b|neo4j\.driver\b|ChromaClient\b|persistenceCall\b|tripleStackWrite\b/;
     const matches = collectRuntimeFiles().flatMap((file) =>
       file.text
         .split(/\r?\n/)

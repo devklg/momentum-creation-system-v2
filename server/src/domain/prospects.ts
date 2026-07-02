@@ -22,7 +22,7 @@
  *   - Set in the holding-tank domain, not here.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import type { McsProspectRecord, McsProspectLocation } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -45,7 +45,7 @@ export function lastInitialOf(lastName: string): string {
 }
 
 export async function findProspectById(prospectId: string): Promise<McsProspectRecord | null> {
-  const result = await gatewayCall<{ documents: McsProspectRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsProspectRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PROSPECTS_COLLECTION,
     filter: { prospectId },

@@ -17,24 +17,10 @@
  */
 
 import { readFile } from 'node:fs/promises';
+import { closeMomentumMongo, momentumCollection } from './lib/momentum-mongo.mjs';
 
-const GATEWAY_BASE = (process.env.GATEWAY_URL || 'http://localhost:2526/api').replace(/\/$/, '');
-const GATEWAY = `${GATEWAY_BASE}/execute`;
-const DB = 'momentum';
 const COLL = 'work_queue_leaves';
 const WIREFRAME = 'docs/project-wireframe.md';
-
-async function gw(tool, action, params) {
-  const res = await fetch(GATEWAY, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tool, action, params }),
-  });
-  const json = await res.json();
-  if (json.success === false && !json.data) {
-    throw new Error(`${tool}.${action} failed: ${JSON.stringify(json)}`);
-  }
-  return json;
-}
 
 const STATUS = { 'x': 'done', '~': 'partial', ' ': 'pending' };
 
@@ -88,48 +74,44 @@ async function main() {
     });
   }
 
+  const collection = await momentumCollection(COLL);
+
   // Idempotent: wipe then insert.
-  const existing = await gw('mongodb', 'aggregate', {
-    database: DB, collection: COLL, pipeline: [{ $project: { _id: 1 } }],
-  }).catch(() => ({ data: { results: [] } }));
-  for (const r of existing.data.results) {
-    await gw('mongodb', 'delete', { database: DB, collection: COLL, filter: { _id: r._id } });
-  }
+  await collection.deleteMany({});
 
   const now = new Date().toISOString();
   const docs = leaves.map((l) => ({ ...l, synced_at: now, source: WIREFRAME, synced_chat: 147 }));
   // Insert in batches to keep payloads small.
   const BATCH = 40;
   for (let i = 0; i < docs.length; i += BATCH) {
-    await gw('mongodb', 'insert', {
-      database: DB, collection: COLL, documents: docs.slice(i, i + BATCH),
-    });
+    await collection.insertMany(docs.slice(i, i + BATCH));
   }
 
   // Read back.
-  const total = await gw('mongodb', 'aggregate', {
-    database: DB, collection: COLL, pipeline: [{ $count: 't' }],
-  });
-  const byStatus = await gw('mongodb', 'aggregate', {
-    database: DB, collection: COLL,
-    pipeline: [{ $group: { _id: '$status', n: { $sum: 1 } } }, { $sort: { _id: 1 } }],
-  });
-  const bySurface = await gw('mongodb', 'aggregate', {
-    database: DB, collection: COLL,
-    pipeline: [
+  const total = await collection.aggregate([{ $count: 't' }]).toArray();
+  const byStatus = await collection
+    .aggregate([{ $group: { _id: '$status', n: { $sum: 1 } } }, { $sort: { _id: 1 } }])
+    .toArray();
+  const bySurface = await collection
+    .aggregate([
       { $group: { _id: { s: '$surface', st: '$status' }, n: { $sum: 1 } } },
       { $sort: { '_id.s': 1, '_id.st': 1 } },
-    ],
-  });
+    ])
+    .toArray();
 
   console.log('=== LEAF QUEUE SYNCED FROM WIREFRAME ===');
   console.log('source:', WIREFRAME);
-  console.log('total leaves:', JSON.stringify(total.data.results));
-  console.log('by status:', JSON.stringify(byStatus.data.results));
+  console.log('total leaves:', JSON.stringify(total));
+  console.log('by status:', JSON.stringify(byStatus));
   console.log('\nby surface x status:');
-  for (const r of bySurface.data.results) {
+  for (const r of bySurface) {
     console.log(`  ${r._id.s.padEnd(8)} ${r._id.st.padEnd(7)} ${r.n}`);
   }
+  await closeMomentumMongo();
 }
 
-main().catch((e) => { console.error('SYNC FAILED:', e); process.exit(1); });
+main().catch(async (e) => {
+  await closeMomentumMongo().catch(() => undefined);
+  console.error('SYNC FAILED:', e);
+  process.exit(1);
+});

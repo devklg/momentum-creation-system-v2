@@ -28,16 +28,16 @@ function codeLinesMatching(fileName: string, pattern: RegExp): string[] {
 }
 
 describe('P4.6 static language-aware-retrieval governance boundary', () => {
-  it('imports no store, Gateway, persistence, or LLM client', () => {
+  it('imports no store, PERSISTENCE, persistence, or LLM client', () => {
     const forbidden =
-      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j-driver|chromadb|gridfs)(?:$|\/|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/gateway|\/services\/persistence|\/persistence\/|tripleStack|quadstack|anthropic|openai)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j-driver|chromadb|gridfs)(?:$|\/|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/PERSISTENCE|\/services\/persistence|\/persistence\/|tripleStack|quadstack|anthropic|openai)[^'"]*['"]/i;
     const matches = P46_PRODUCTION_FILES.flatMap((file) => codeLinesMatching(file, forbidden));
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('calls no direct store, Gateway, translation-engine, or LLM helper', () => {
+  it('calls no direct store, PERSISTENCE, translation-engine, or LLM helper', () => {
     const forbidden =
-      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|gatewayCall|tripleStackWrite|graphRag|graphrag|translateText|machineTranslate|generateText|createCompletion|chatCompletion|embedText|createEmbedding)\b/i;
+      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|persistenceCall|tripleStackWrite|graphRag|graphrag|translateText|machineTranslate|generateText|createCompletion|chatCompletion|embedText|createEmbedding)\b/i;
     const matches = P46_PRODUCTION_FILES.flatMap((file) => codeLinesMatching(file, forbidden));
     expect(matches, matches.join('\n')).toEqual([]);
   });

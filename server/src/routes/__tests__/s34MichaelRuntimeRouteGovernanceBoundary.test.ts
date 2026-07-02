@@ -171,10 +171,10 @@ describe('S3.4 Michael runtime route static governance boundary', () => {
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#11 does not import a Gateway fallback client (or call gatewayCall)', () => {
+  it('#11 does not import a legacy fallback client (or call persistenceCall)', () => {
     const importPattern =
-      /\bfrom\s+['"][^'"]*(?:\/services\/gateway|gatewayFallback|gateway-fallback|\/tripleStack)[^'"]*['"]/i;
-    const callPattern = /\b(?:gatewayCall|tripleStackWrite|directPersistenceCall)\s*\(/;
+      /\bfrom\s+['"][^'"]*(?:\/services\/PERSISTENCE|PERSISTENCEFallback|PERSISTENCE-fallback|\/tripleStack)[^'"]*['"]/i;
+    const callPattern = /\b(?:persistenceCall|tripleStackWrite|directStoreCall)\s*\(/;
     const matches = [
       ...matchingImportLines(routeFiles(), importPattern),
       ...matchingCodeTokenLines(routeFiles(), callPattern),

@@ -23,7 +23,7 @@
  *     at integration time (see claude-notes-admin-e.md for contract).
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import type {
   McsAdminTickerEntry,
   McsIsoTimestamp,
@@ -221,7 +221,7 @@ export async function setQueueRule(
 /* ─── admin_settings storage primitives ───────────────────────────── */
 
 async function readAdminSetting(docId: string): Promise<AdminSettingDoc | null> {
-  const result = await gatewayCall<{ documents: AdminSettingDoc[] }>(
+  const result = await persistenceCall<{ documents: AdminSettingDoc[] }>(
     'mongodb',
     'query',
     {
@@ -238,11 +238,11 @@ async function upsertAdminSetting(
   docId: string,
   fields: AdminSettingDoc,
 ): Promise<void> {
-  // The gateway's mongo.update does NOT honor upsert:true (preserved at
+  // The PERSISTENCE's mongo.update does NOT honor upsert:true (preserved at
   // top of tripleStack.ts). Branch on existence.
   const existing = await readAdminSetting(docId);
   if (existing) {
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: ADMIN_SETTINGS_COLLECTION,
       filter: { _id: docId },
@@ -250,7 +250,7 @@ async function upsertAdminSetting(
     });
     return;
   }
-  await gatewayCall('mongodb', 'insert', {
+  await persistenceCall('mongodb', 'insert', {
     database: MONGO_DB,
     collection: ADMIN_SETTINGS_COLLECTION,
     documents: [{ _id: docId, ...fields }],
@@ -273,14 +273,14 @@ interface PlacementRow {
 }
 
 async function countPlacements(filter: Record<string, unknown>): Promise<number> {
-  const result = await gatewayCall<{ count: number; documents: PlacementRow[] }>(
+  const result = await persistenceCall<{ count: number; documents: PlacementRow[] }>(
     'mongodb',
     'query',
     {
       database: MONGO_DB,
       collection: PLACEMENTS_COLLECTION,
       filter,
-      // We rely on count returned by the gateway; large filters cap docs
+      // We rely on count returned by the PERSISTENCE; large filters cap docs
       // server-side but the count is authoritative. Limit 1 to keep the
       // round-trip small.
       limit: 1,
@@ -338,7 +338,7 @@ export async function computeQueueNumbers(): Promise<McsQueueNumbers> {
 
   const [highestEver, highestTodayRows, vacantSlots] = await Promise.all([
     readPoolCounter(),
-    gatewayCall<{ documents: Array<{ positionNumber: number }> }>(
+    persistenceCall<{ documents: Array<{ positionNumber: number }> }>(
       'mongodb',
       'query',
       {
@@ -363,7 +363,7 @@ export async function computeQueueNumbers(): Promise<McsQueueNumbers> {
 }
 
 async function readPoolCounter(): Promise<number> {
-  const result = await gatewayCall<{ documents: Array<{ current: number }> }>(
+  const result = await persistenceCall<{ documents: Array<{ current: number }> }>(
     'mongodb',
     'query',
     {
@@ -385,7 +385,7 @@ export async function lookupByPosition(
     return { position, found: false, vacant: false, prospect: null };
   }
 
-  const placementRes = await gatewayCall<{
+  const placementRes = await persistenceCall<{
     documents: Array<PlacementRow & { expiresAt?: string }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
@@ -455,7 +455,7 @@ async function loadProspect(prospectId: string): Promise<Omit<
   McsQueueLookupProspect,
   'placedAt' | 'sponsorTmagId' | 'flushedAt' | 'flushReason' | 'deepLink'
 > | null> {
-  const result = await gatewayCall<{ documents: ProspectRow[] }>(
+  const result = await persistenceCall<{ documents: ProspectRow[] }>(
     'mongodb',
     'query',
     {
@@ -507,7 +507,7 @@ async function buildDailyBuckets(
   const upperExclusive = new Date(endUtcDay);
   upperExclusive.setUTCDate(upperExclusive.getUTCDate() + 1);
 
-  const result = await gatewayCall<{
+  const result = await persistenceCall<{
     documents: Array<{ placedAt: string }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
@@ -557,7 +557,7 @@ export async function listAdminTicker(limit: number): Promise<{
   const safeLimit = Math.max(1, Math.min(limit, 200));
   const [globalMaxPosition, placements] = await Promise.all([
     readPoolCounter(),
-    gatewayCall<{ documents: Array<PlacementRow & { _id?: string }> }>(
+    persistenceCall<{ documents: Array<PlacementRow & { _id?: string }> }>(
       'mongodb',
       'query',
       {

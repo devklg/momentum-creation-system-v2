@@ -19,7 +19,7 @@ PERSISTENCE_NEO4J_MODE=direct
 PERSISTENCE_CHROMA_MODE=direct
 ```
 
-MongoDB, Neo4j, and ChromaDB are verified through direct runtime adapter paths. The Gateway HTTP fallback remains in place and must not be removed without separate Kevin approval. Caller sites were not rewritten. Ratified architecture documents and `.com` prospect-facing surfaces were not modified. Closeout governance record: `engineering/reports/S1_3_CLOSEOUT_GOVERNANCE_RECORD.md`.
+MongoDB, Neo4j, and ChromaDB are verified through direct runtime adapter paths. Gateway HTTP persistence fallback was later retired by ACR-0009; Universal Gateway remains MCP/developer tooling, not app runtime persistence. Caller sites were not rewritten. Ratified architecture documents and `.com` prospect-facing surfaces were not modified. Closeout governance record: `engineering/reports/S1_3_CLOSEOUT_GOVERNANCE_RECORD.md`.
 
 ## Objective
 
@@ -95,7 +95,7 @@ S1.3 execution is CLOSED / VERIFIED as of 2026-06-27:
 - Generated Mongo `$jsonSchema` validator determinism verified.
 - GPU embedder required behavior verified.
 - No CPU fallback verified.
-- Gateway HTTP fallback preserved.
+- Gateway HTTP fallback was preserved at this checkpoint; ACR-0009 later retired it.
 - Rollback flags verified.
 - Existing caller sites preserved behind the `gatewayCall(tool, action, params)` seam.
 
@@ -105,7 +105,7 @@ Acceptance:
 - No architecture redesign (this aligns implementation to the already-ratified v1.0 architecture).
 - Triple-stack semantics preserved (all three stores per write, read-back verified).
 - Code execution completed under ACR-0007 gates; Kevin approvals and merges recorded through the S1.3 verification reports.
-- Gateway fallback removal remains out of scope and not approved.
+- Gateway HTTP persistence fallback retirement is superseded by ACR-0009.
 
 ### S1.4 Runtime Event Foundation Plan
 

@@ -11,18 +11,20 @@ function config(
   return { directEnabled, storeModes };
 }
 
-describe('mixed-mode triple-stack readiness', () => {
-  it('supports staged per-store cutover without requiring caller rewrites', () => {
-    const phase0 = config({ mongodb: 'gateway', neo4j: 'gateway', chromadb: 'gateway' });
-    const mongoOnly = config({ mongodb: 'direct', neo4j: 'gateway', chromadb: 'gateway' });
-    const graphAndMongo = config({ mongodb: 'direct', neo4j: 'direct', chromadb: 'gateway' });
+describe('direct-only triple-stack readiness', () => {
+  it('keeps caller rewrites unnecessary while every store remains direct', () => {
     const fullDirect = config({ mongodb: 'direct', neo4j: 'direct', chromadb: 'direct' });
 
-    expect(resolveModeFromConfig(phase0, 'mongodb')).toBe('gateway');
-    expect(resolveModeFromConfig(mongoOnly, 'mongodb')).toBe('direct');
-    expect(resolveModeFromConfig(mongoOnly, 'neo4j')).toBe('gateway');
-    expect(resolveModeFromConfig(graphAndMongo, 'neo4j')).toBe('direct');
-    expect(resolveModeFromConfig(graphAndMongo, 'chromadb')).toBe('gateway');
+    expect(resolveModeFromConfig(fullDirect, 'mongodb')).toBe('direct');
+    expect(resolveModeFromConfig(fullDirect, 'neo4j')).toBe('direct');
     expect(resolveModeFromConfig(fullDirect, 'chromadb')).toBe('direct');
+  });
+
+  it('uses disabled as the explicit kill-switch mode', () => {
+    const disabled = config({ mongodb: 'direct', neo4j: 'direct', chromadb: 'direct' }, false);
+
+    expect(resolveModeFromConfig(disabled, 'mongodb')).toBe('disabled');
+    expect(resolveModeFromConfig(disabled, 'neo4j')).toBe('disabled');
+    expect(resolveModeFromConfig(disabled, 'chromadb')).toBe('disabled');
   });
 });

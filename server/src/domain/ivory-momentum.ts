@@ -30,7 +30,7 @@
  * degraded=true (mirrors ivoryCoach / scriptmaker behavior).
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { getProspectMomentumViewer } from './cockpit.js';
 import { listIvoryNamesForBA } from './ivory.js';
 import { ANGLE_LABEL } from './ivoryAngle.js';
@@ -300,7 +300,7 @@ async function assertProspectOwnership(
   prospectId: string,
   tmagId: string,
 ): Promise<void> {
-  const res = await gatewayCall<{ documents: ProspectOwnershipDoc[] }>(
+  const res = await persistenceCall<{ documents: ProspectOwnershipDoc[] }>(
     'mongodb',
     'query',
     {

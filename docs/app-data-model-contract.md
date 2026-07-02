@@ -5,7 +5,7 @@
 > CRM, Ivory, content, broadcasts, audit, and operational records.
 >
 > This is the app-side companion to `docs/graphrag-schema-contract.md` (which
-> governs only the Universal Gateway memory/knowledge layer). Where that file
+> governs only the external MCP tooling memory/knowledge layer). Where that file
 > governs *memory*, this file governs the *business records the app writes*.
 >
 > Status: **DRAFT for Kevin's approval.** It documents the current real state
@@ -123,7 +123,7 @@ Replace fire-once `tripleStackWrite` with a tiered writer:
 
 1. **One app database: `momentum`.** All app collections live here. The
    hyphen/underscore duplicate *databases* (`team-magnificent` vs
-   `team_magnificent`, `universal-gateway` vs `universal_gateway`, etc.) are
+   `team_magnificent`, `external-mcp-tooling` vs `agent_operations`, etc.) are
    memory/infra-layer drift, frozen by the GraphRAG contract's non-destructive
    rule — out of scope here, leave them.
 2. **Collection names: bare `snake_case`, singular-domain plural** (e.g.
@@ -164,8 +164,8 @@ Grounded in live introspection on the date of writing:
 | Legacy app DB | `momentum_creation_system` (188 KB) separate from `momentum` | Confirm it's v1 leftover, then leave frozen (non-destructive rule) or archive on Kevin's word. |
 
 Note: `session_handoffs` exists in `momentum` **and** is the canonical memory
-record in `universal_gateway`. Per your standing rule the canonical query
-targets `universal_gateway.session_handoffs`; the `momentum` copy is drift and
+record in `agent_operations`. Per your standing rule the canonical query
+targets `agent_operations.session_handoffs`; the `momentum` copy is drift and
 should not be written to by app code.
 
 ## 5. Entity catalog
@@ -295,7 +295,7 @@ default. Only entities that earn a graph edge or a semantic search are projected
 
 **`work_queue` / `work_queue_leaves`** — internal build/work-queue state. Mongo only; operational, not graph/search.
 
-**`decisions`** — the app-side decision ledger (distinct from the gateway memory `decisions`). id `decisionId`; index `createdAt`. Keep, but confirm it isn't duplicating the memory-layer decision store.
+**`decisions`** — the app-side decision ledger (distinct from the external tooling memory `decisions`). id `decisionId`; index `createdAt`. Keep, but confirm it isn't duplicating the memory-layer decision store.
 
 ## 6. Neo4j graph model (derived) + the drift to fix
 
@@ -425,7 +425,7 @@ because the collections are near-empty:
    `mcs_master_content`.
 4. **`decisions` collection: KEEP (verified by read).** `momentum.decisions`
    holds 30 real project-decision records with supersession tracking (e.g.
-   `dec_flush_adaptive`→`dec_flush_fixed`); `universal_gateway.decisions` is
+   `dec_flush_adaptive`→`dec_flush_fixed`); `agent_operations.decisions` is
    empty. Not a duplicate — it is the project decision ledger. Keep as-is.
 5. **`momentum_creation_system` legacy DB: leave frozen** (non-destructive
    rule); revisit/archive later on Kevin's word.
@@ -449,7 +449,7 @@ rediscovered one file at a time.
 | **Training** (`training.ts`) | Per-BA Fast Start trail, feeds the training agent | BEST FILE — real writes, forward-only, idempotent, **correct `:BrandAmbassador`**; same fire-once + phantom-MERGE gap; `fast_start_progress` empty only because no BA has run | `training.ts` `MERGE (b:BrandAmbassador)` |
 | **Master content** (`masterContent.ts`) | Agents read copy via `code default → master override` | Read leg exists w/ good fallback; **consumers still read hardcoded defaults — saved overrides functionally inert** until Wave 2 rewires | `masterContent.ts` header: "a saved override is functionally inert" |
 | **CRM** (`crm.ts`) | BA-private notes/followups/dispositions on the graph | Notes triple-stack; **followup/disposition updates Mongo-then-separate-Neo4j (most desync-prone surface)**; `:BA` drift throughout | `crm.ts` 229/235, 316/322, 349/355 |
-| **Holding tank** (`holdingTank.ts`) | Prospect placed in the one team pool | Placement is **three separate gatewayCalls, not even tripleStackWrite**; edge is `IN_HOLDING_TANK` (contract said `PLACED_IN`) | `holdingTank.ts` 204/227/252 |
+| **Holding tank** (`holdingTank.ts`) | Prospect placed in the one team pool | Placement is **three separate persistenceCalls, not even tripleStackWrite**; edge is `IN_HOLDING_TANK` (contract said `PLACED_IN`) | `holdingTank.ts` 204/227/252 |
 
 ## 13. Finish-work list (finite; ordered for a clean launch)
 

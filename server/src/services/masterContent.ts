@@ -15,8 +15,8 @@
  * once it lands and freezes, Wave 2 can start.
  *
  * RESILIENCE CONTRACT: live consumer surfaces must never hard-fail on a
- * gateway/Mongo hiccup. getTenantTemplate() already falls back to the code
- * default when no override exists, but it THROWS if the gateway query itself
+ * PERSISTENCE/Mongo hiccup. getTenantTemplate() already falls back to the code
+ * default when no override exists, but it THROWS if the PERSISTENCE query itself
  * fails. This wrapper catches that and returns the code default, so a
  * master-content read degrades to the safe baseline shipped with the app
  * rather than 500ing the prospect page or the BA cockpit.
@@ -32,7 +32,7 @@ const TENANT_ID = 'team-magnificent';
 
 /**
  * The code-default version for a template — the safe baseline shipped with the
- * app. Returned when there is no master override OR when the gateway read
+ * app. Returned when there is no master override OR when the PERSISTENCE read
  * fails. Mirrors the shape of a persisted TenantTemplateVersion so consumers
  * can treat both paths uniformly.
  */

@@ -78,16 +78,16 @@ function matchingImportLines(pattern: RegExp): string[] {
 }
 
 describe('S2.4 static orchestration governance boundary', () => {
-  it('does not import MongoDB, Neo4j, ChromaDB, GraphRAG, persistence, Gateway, or retrieval clients', () => {
+  it('does not import MongoDB, Neo4j, ChromaDB, GraphRAG, persistence, or retrieval clients', () => {
     const forbiddenImports =
-      /\bfrom\s+['"][^'"]*(?:^|\/|\\|@)(?:mongoose|mongodb|neo4j-driver|chromadb)(?:$|\/|\\|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/gateway|\/services\/persistence|\/persistence\/|\/services\/[^'"]*adapter|retrieval|gatewayFallback|gateway-fallback)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:^|\/|\\|@)(?:mongoose|mongodb|neo4j-driver|chromadb)(?:$|\/|\\|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/persistence|\/persistence\/|\/services\/[^'"]*adapter|retrieval|legacyFallback|legacy-fallback)[^'"]*['"]/i;
     const matches = matchingImportLines(forbiddenImports);
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('does not call direct store, GraphRAG, Gateway fallback, adapter, or raw retrieval helpers', () => {
+  it('does not call direct store, GraphRAG, persistence dispatch, adapter, or raw retrieval helpers', () => {
     const forbiddenCalls =
-      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|gatewayCall|tripleStackWrite|mongoAdapter|neo4jAdapter|chromaAdapter|graphRag|graphrag|gatewayFallback|rawRetrieval|retrievalHelper|directRetrieval)\b/i;
+      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|persistenceCall|tripleStackWrite|mongoAdapter|neo4jAdapter|chromaAdapter|graphRag|graphrag|legacyFallback|rawRetrieval|retrievalHelper|directRetrieval)\b/i;
     const matches = matchingCodeLines(orchestrationProductionFiles(), forbiddenCalls);
     expect(matches, matches.join('\n')).toEqual([]);
   });
@@ -126,12 +126,15 @@ describe('S2.4 static orchestration governance boundary', () => {
     expect(comMatches, comMatches.join('\n')).toEqual([]);
   });
 
-  it('verifies the Gateway HTTP fallback stays retired (ACR-0009) outside orchestration', () => {
-    const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
-    expect(gatewayClient).toContain('export async function gatewayCall');
-    expect(gatewayClient).toContain('directPersistenceCall');
-    expect(gatewayClient).not.toContain('/execute');
-    expect(gatewayClient).not.toContain('GATEWAY_URL');
+  it('verifies persistence dispatch stays direct-only outside orchestration', () => {
+    const persistenceClient = readFileSync(
+      resolve(repoRoot, 'server/src/services/persistence/dispatch.ts'),
+      'utf8',
+    );
+    expect(persistenceClient).toContain('export async function persistenceCall');
+    expect(persistenceClient).toContain('directStoreCall');
+    expect(persistenceClient).not.toContain('/execute');
+    expect(persistenceClient).not.toContain(['GATE', 'WAY_URL'].join(''));
   });
 
   it('does not introduce Telnyx, PSTN, or call-control wiring in orchestration', () => {

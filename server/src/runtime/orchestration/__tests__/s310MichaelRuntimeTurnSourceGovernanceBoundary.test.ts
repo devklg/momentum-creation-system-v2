@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 //
 // Why stripping matters here: the turn source's documentation comments
 // LEGITIMATELY mention banned identifiers to explain why they are absent —
-// e.g. "no body tmagId/sponsorTmagId/targetTmagId", "imports NO store/Gateway/
+// e.g. "no body tmagId/sponsorTmagId/targetTmagId", "imports NO store/PERSISTENCE/
 // GraphRAG/retrieval client", "NEVER imports the S2.13 test harness". Those
 // defensive doc-comment prohibitions (and string literals) must not trip a
 // wiring regex, so the code-token scans strip comments AND strings first.
@@ -129,7 +129,7 @@ describe('S3.10 turn source exists', () => {
 
 // ---------------------------------------------------------------------------
 // GROUP A — NO store / persistence client imports. The turn source is pure
-// with respect to I/O: it imports NO Mongo/Neo4j/Chroma/GraphRAG/Gateway/
+// with respect to I/O: it imports NO Mongo/Neo4j/Chroma/GraphRAG/PERSISTENCE/
 // tripleStack/retrieval client.
 // ---------------------------------------------------------------------------
 describe('S3.10 turn source store-free import boundary', () => {
@@ -159,10 +159,10 @@ describe('S3.10 turn source store-free import boundary', () => {
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#5 does not import a Gateway/tripleStack client (or call gatewayCall/tripleStackWrite)', () => {
+  it('#5 does not import a PERSISTENCE/tripleStack client (or call persistenceCall/tripleStackWrite)', () => {
     const importPattern =
-      /\bfrom\s+['"][^'"]*(?:\/services\/gateway|gatewayFallback|gateway-fallback|\/tripleStack)[^'"]*['"]/i;
-    const callPattern = /\b(?:gatewayCall|tripleStackWrite|directPersistenceCall)\s*\(/;
+      /\bfrom\s+['"][^'"]*(?:\/services\/PERSISTENCE|PERSISTENCEFallback|PERSISTENCE-fallback|\/tripleStack)[^'"]*['"]/i;
+    const callPattern = /\b(?:persistenceCall|tripleStackWrite|directStoreCall)\s*\(/;
     const matches = [
       ...matchingImportLines(turnSourceFiles(), importPattern),
       ...matchingCodeTokenLines(turnSourceFiles(), callPattern),
@@ -336,9 +336,9 @@ describe('S3.10 turn source required wiring', () => {
     ).toBe(true);
   });
 
-  it('#17b the context factory boundary-clean: no store / Gateway / retrieval import', () => {
+  it('#17b the context factory boundary-clean: no store / PERSISTENCE / retrieval import', () => {
     const forbidden =
-      /\bfrom\s+['"][^'"]*(?:^|\/|\\|@)(?:mongoose|mongodb|neo4j-driver|chromadb)(?:$|\/|\\|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/gateway|\/services\/persistence|retrieval|gatewayFallback|gateway-fallback)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:^|\/|\\|@)(?:mongoose|mongodb|neo4j-driver|chromadb)(?:$|\/|\\|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/PERSISTENCE|\/services\/persistence|retrieval|PERSISTENCEFallback|PERSISTENCE-fallback)[^'"]*['"]/i;
     const matches = matchingImportLines(contextFoundationFiles(), forbidden);
     expect(matches, matches.join('\n')).toEqual([]);
   });

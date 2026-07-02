@@ -66,19 +66,19 @@ describe('P4.11 static retrieval-canary governance boundary', () => {
     expect(collectFiles('apps/com/src', ['.ts', '.tsx', '.js', '.jsx']).length).toBeGreaterThan(0);
   });
 
-  it('the context retrieval layer imports no store, Gateway, or LLM client', () => {
+  it('the context retrieval layer imports no store, PERSISTENCE, or LLM client', () => {
     const forbidden =
-      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j-driver|chromadb|gridfs)(?:$|\/|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/gateway|\/services\/persistence|\/persistence\/|tripleStack|quadstack|anthropic|openai)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j-driver|chromadb|gridfs)(?:$|\/|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/PERSISTENCE|\/services\/persistence|\/persistence\/|tripleStack|quadstack|anthropic|openai)[^'"]*['"]/i;
     const found = matches(contextFiles(), forbidden);
     expect(found, found.join('\n')).toEqual([]);
   });
 
-  it('makes no direct store / Gateway / triple-stack write call', () => {
+  it('makes no direct store / PERSISTENCE / triple-stack write call', () => {
     // Call/instantiation syntax only — not prose. The runtime-rule guardrail STRINGS in
-    // contextManager.ts legitimately name MongoDB/Neo4j/ChromaDB/GraphRAG/Gateway as
+    // contextManager.ts legitimately name MongoDB/Neo4j/ChromaDB/GraphRAG/PERSISTENCE as
     // prohibitions; those must not trip this check.
     const forbidden =
-      /\bnew\s+MongoClient\b|\bmongoose\.connect\b|\bneo4j\.driver\b|\bnew\s+ChromaClient\b|\bgatewayCall\s*\(|\btripleStackWrite\s*\(|\bquadstack\.\w+\s*\(|\bnew\s+GridFSBucket\b/i;
+      /\bnew\s+MongoClient\b|\bmongoose\.connect\b|\bneo4j\.driver\b|\bnew\s+ChromaClient\b|\bpersistenceCall\s*\(|\btripleStackWrite\s*\(|\bquadstack\.\w+\s*\(|\bnew\s+GridFSBucket\b/i;
     const found = matches(contextFiles(), forbidden);
     expect(found, found.join('\n')).toEqual([]);
   });

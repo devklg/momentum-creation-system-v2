@@ -29,7 +29,7 @@
  * Fast Start does not duplicate the count.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
   McsFastStartMarkStateResponse,
@@ -76,7 +76,7 @@ async function ensureProgressCollection(): Promise<void> {
   if (collectionBootstrap) return collectionBootstrap;
   collectionBootstrap = (async () => {
     try {
-      await gatewayCall('chromadb', 'create_collection', {
+      await persistenceCall('chromadb', 'create_collection', {
         name: CHROMA_COLLECTION,
         metadata: {
           branch: 'feat/fast-start-training',
@@ -99,7 +99,7 @@ async function findProgress(
   tmagId: string,
   moduleId: McsFastStartModuleId,
 ): Promise<McsFastStartProgressRecord | null> {
-  const data = await gatewayCall<{ documents?: McsFastStartProgressRecord[] }>(
+  const data = await persistenceCall<{ documents?: McsFastStartProgressRecord[] }>(
     'mongodb',
     'query',
     {
@@ -113,7 +113,7 @@ async function findProgress(
 }
 
 async function findAllProgress(tmagId: string): Promise<McsFastStartProgressRecord[]> {
-  const data = await gatewayCall<{ documents?: McsFastStartProgressRecord[] }>(
+  const data = await persistenceCall<{ documents?: McsFastStartProgressRecord[] }>(
     'mongodb',
     'query',
     {
@@ -127,7 +127,7 @@ async function findAllProgress(tmagId: string): Promise<McsFastStartProgressReco
 }
 
 async function countSentInvitations(tmagId: string): Promise<number> {
-  const data = await gatewayCall<{ count?: number; documents?: unknown[] }>(
+  const data = await persistenceCall<{ count?: number; documents?: unknown[] }>(
     'mongodb',
     'query',
     {
@@ -286,7 +286,7 @@ export async function markFastStartModuleState(args: {
   const startedAt = existing.startedAt ?? occurredAt;
   const completedAt = to === 'completed' ? occurredAt : existing.completedAt;
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: PROGRESS_COLLECTION,
     filter: { _id: existing._id },
@@ -300,7 +300,7 @@ export async function markFastStartModuleState(args: {
     },
   });
 
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MATCH (p:TmagFastStartProgress {progressId: $id}) ' +
       'SET p.state = $state, p.startedAt = $startedAt, ' +

@@ -162,7 +162,7 @@ Built now:
 
 Partial, dormant, or operationally dependent:
 
-1. [ ] Gateway/DB stack must be verified on current local port `2526`.
+1. [ ] Persistence/DB stack must be verified on current local port `2526`.
 2. [ ] Resend domain verification is still a launch dependency for email delivery.
 3. [ ] Telnyx credentials and webhook signing should be validated against current env.
 4. [ ] Anthropic key presence should be checked for live agent-backed flows.
@@ -182,7 +182,7 @@ Partial, dormant, or operationally dependent:
 7. [ ] Start server and all apps with the intended dev command.
 8. [ ] Confirm API health route responds.
 9. [ ] Confirm `.com`, `.team`, and `/admin` apps load in browser.
-10. [ ] Confirm Gateway access uses port `2526`.
+10. [ ] Confirm external MCP tooling access uses port `2526`.
 
 ### `.com` Prospect Surface
 
@@ -347,7 +347,7 @@ Partial, dormant, or operationally dependent:
 151. [ ] Verify MongoDB connectivity.
 152. [ ] Verify Neo4j connectivity.
 153. [ ] Verify ChromaDB connectivity.
-154. [ ] Verify Gateway connectivity on port `2526`.
+154. [ ] Verify external MCP tooling connectivity on port `2526`.
 155. [ ] Verify Telnyx credentials and signatures.
 156. [ ] Verify Resend domain and sender.
 157. [ ] Verify Anthropic key if live agent surfaces are enabled.

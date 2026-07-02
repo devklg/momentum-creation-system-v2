@@ -62,7 +62,7 @@ export const prospectLoginRoutes: Router = Router();
 // ─── Rate limiter ────────────────────────────────────────────────────
 //
 // In-memory sliding-window counter. Single-instance only; if/when the
-// server scales horizontally this moves to Redis via the gateway.
+// server scales horizontally this moves to Redis via the PERSISTENCE.
 // Each key tracks an array of hit timestamps within the window.
 
 interface RateLimitConfig {

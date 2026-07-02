@@ -15,7 +15,7 @@
  *  - A `degraded` result must say why (`degradeReasons`) — it is the fail-closed signal the
  *    Context Manager uses to assemble an empty-approved-knowledge packet rather than error.
  *
- * This module performs NO retrieval and imports NO store/Gateway/adapter client. It is a
+ * This module performs NO retrieval and imports NO store/PERSISTENCE/adapter client. It is a
  * pure contract guard consumed by the P4.4 Context Manager Retrieval Adapter and its tests.
  */
 

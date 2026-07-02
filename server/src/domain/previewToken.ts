@@ -26,7 +26,7 @@
  * the inviting BA, with a sample prospect).
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { findBAByTmagId } from './ba.js';
 import { findNextUpcomingEvent } from './webinarEvent.js';
 import { TEAM_POOL_ID } from './holdingTank.js';
@@ -68,7 +68,7 @@ const SAMPLE_PROSPECT = {
  */
 async function readPoolCounterForPreview(): Promise<number> {
   try {
-    const result = await gatewayCall<{ documents: Array<{ current: number }> }>(
+    const result = await persistenceCall<{ documents: Array<{ current: number }> }>(
       'mongodb',
       'query',
       {

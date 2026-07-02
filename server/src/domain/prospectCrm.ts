@@ -13,7 +13,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
 import type {
@@ -144,7 +144,7 @@ function crmStatusFor(kind: McsProspectTimelineEventKind): McsProspectCrmStatus 
 export async function findCrmRecordByProspectId(
   prospectId: string,
 ): Promise<ProspectCRMDocument | null> {
-  const result = await gatewayCall<{ documents: ProspectCRMDocument[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: ProspectCRMDocument[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: CRM_COLLECTION,
     filter: { prospectId },
@@ -154,7 +154,7 @@ export async function findCrmRecordByProspectId(
 }
 
 export async function findCrmRecordByToken(token: string): Promise<ProspectCRMDocument | null> {
-  const result = await gatewayCall<{ documents: ProspectCRMDocument[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: ProspectCRMDocument[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: CRM_COLLECTION,
     filter: { token },
@@ -169,7 +169,7 @@ export async function listCrmRecordsForOwner(
 ): Promise<McsProspectCRMRecord[]> {
   const filter: Record<string, unknown> = { ownerTmagId };
   if (!includeClosed) filter.status = { $ne: 'closed' };
-  const result = await gatewayCall<{ documents: McsProspectCRMRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsProspectCRMRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: CRM_COLLECTION,
     filter,
@@ -183,7 +183,7 @@ export async function listTimelineForProspect(
   prospectId: string,
   ownerTmagId: string,
 ): Promise<McsProspectTimelineEventRecord[]> {
-  const result = await gatewayCall<{ documents: McsProspectTimelineEventRecord[] }>(
+  const result = await persistenceCall<{ documents: McsProspectTimelineEventRecord[] }>(
     'mongodb',
     'query',
     {
@@ -271,13 +271,13 @@ export async function createOrUpdateCrmRecordForToken(
       source: input.source,
       updatedAt: now,
     };
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: CRM_COLLECTION,
       filter: { crmRecordId: existing.crmRecordId },
       update: { $set: patch },
     });
-    await gatewayCall('neo4j', 'cypher', {
+    await persistenceCall('neo4j', 'cypher', {
       query:
         'MATCH (c:TmagProspectCrmRecord {crmRecordId: $crmRecordId}) ' +
         'SET c.token = $token, c.source = $source, c.updatedAt = $updatedAt',
@@ -383,13 +383,13 @@ export async function applyCrmLifecycleEvent(
   const patch: Partial<McsProspectCRMRecord> = { updatedAt: now };
   if (nextStatus) patch.status = nextStatus;
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: CRM_COLLECTION,
     filter: { crmRecordId: record.crmRecordId },
     update: { $set: patch },
   });
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MATCH (c:TmagProspectCrmRecord {crmRecordId: $crmRecordId}) ' +
       'SET c.status = $status, c.updatedAt = $updatedAt',
@@ -404,7 +404,7 @@ export async function applyCrmLifecycleEvent(
   if (record.leadId && bulkStatus) {
     const set: Record<string, unknown> = { status: bulkStatus, updatedAt: now };
     if (kind === 'activated') set.activatedAt = now;
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: BULK_LEADS_COLLECTION,
       filter: { leadId: record.leadId },
@@ -454,33 +454,33 @@ export async function closeCrmAsNewBa(input: {
     updatedAt: closedAt,
   };
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: CRM_COLLECTION,
     filter: { crmRecordId: record.crmRecordId },
     update: { $set: patch },
   });
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: PROSPECTS_COLLECTION,
     filter: { prospectId: record.prospectId },
     update: { $set: { state: 'enrolled', updatedAt: closedAt } },
   });
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: TOKENS_COLLECTION,
     filter: { token: record.token },
     update: { $set: { state: 'enrolled', updatedAt: closedAt } },
   });
   if (record.leadId) {
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: BULK_LEADS_COLLECTION,
       filter: { leadId: record.leadId },
       update: { $set: { status: 'closed_new_brand_ambassador', updatedAt: closedAt } },
     });
   }
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MATCH (c:TmagProspectCrmRecord {crmRecordId: $crmRecordId}) ' +
       'SET c.status = $status, c.disposition = $disposition, ' +

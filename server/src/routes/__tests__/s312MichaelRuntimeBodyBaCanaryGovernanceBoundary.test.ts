@@ -151,9 +151,9 @@ describe('S3.12 michael-runtime body allowlist and rejection boundary', () => {
 });
 
 describe('S3.12 michael-runtime forbidden dependency boundary', () => {
-  it('7. route imports no stores / Gateway / GraphRAG / retrieval helpers', () => {
+  it('7. route imports no stores / PERSISTENCE / GraphRAG / retrieval helpers', () => {
     const pattern =
-      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/gateway|gatewayFallback|\/tripleStack|rawRetrieval|retrievalHelper|directRetrieval|approvedKnowledge|candidateKnowledge|\/retrieval\b)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/PERSISTENCE|PERSISTENCEFallback|\/tripleStack|rawRetrieval|retrievalHelper|directRetrieval|approvedKnowledge|candidateKnowledge|\/retrieval\b)[^'"]*['"]/i;
     const matches = matchingImportLines(routeFiles(), pattern);
     expect(matches, matches.join('\n')).toEqual([]);
   });
@@ -174,7 +174,7 @@ describe('S3.12 michael-runtime forbidden dependency boundary', () => {
 
   it('10. route performs no persistence writes', () => {
     const pattern =
-      /\.(?:insert|update|save|create)\s*\(|\b(?:tripleStackWrite|gatewayCall|directPersistenceCall)\s*\(/i;
+      /\.(?:insert|update|save|create)\s*\(|\b(?:tripleStackWrite|persistenceCall|directStoreCall)\s*\(/i;
     const matches = matchingCodeTokenLines(routeFiles(), pattern);
     expect(matches, matches.join('\n')).toEqual([]);
   });
@@ -198,7 +198,7 @@ describe('S3.12 .team card request-body boundary', () => {
   it('12. support card sends no turn/runtimeTurn/contextPacket or BA/prospect/session authority', () => {
     const stripped = sourceWithoutCommentsOrStrings(readSourceFile(cardFilePath).text);
     const forbidden =
-      /\b(?:turn|runtimeTurn|contextPacket|tmagId|sponsorTmagId|targetTmagId|downlineTmagId|prospectId|prospectToken|token|sessionId|turnId|correlationId|requestId|retrieval|gateway|graph|approvedKnowledge|candidateKnowledge)\b/;
+      /\b(?:turn|runtimeTurn|contextPacket|tmagId|sponsorTmagId|targetTmagId|downlineTmagId|prospectId|prospectToken|token|sessionId|turnId|correlationId|requestId|retrieval|PERSISTENCE|graph|approvedKnowledge|candidateKnowledge)\b/;
     expect(forbidden.test(stripped), 'forbidden body field token present in card code').toBe(false);
   });
 

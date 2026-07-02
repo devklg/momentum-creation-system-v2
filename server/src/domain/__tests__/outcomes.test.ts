@@ -9,18 +9,18 @@ import type { McsOutcomeInput } from '@momentum/shared';
  */
 
 const mocks = vi.hoisted(() => ({
-  gatewayCall: vi.fn(),
+  persistenceCall: vi.fn(),
   tripleStackWrite: vi.fn(),
 }));
 
-vi.mock('../../services/gateway.js', () => ({ gatewayCall: mocks.gatewayCall }));
+vi.mock('../../services/persistence/dispatch.js', () => ({ persistenceCall: mocks.persistenceCall }));
 vi.mock('../../services/tripleStack.js', () => ({ tripleStackWrite: mocks.tripleStackWrite }));
 
 type AnyRec = Record<string, unknown>;
 
 const ORIGINAL_FLAG = process.env.OUTCOME_CAPTURE_PERSISTENCE_ENABLED;
 
-function defaultGateway(existing: AnyRec | null = null) {
+function defaultPersistence(existing: AnyRec | null = null) {
   return async (tool: string, action: string, _params: AnyRec): Promise<unknown> => {
     if (tool === 'mongodb' && action === 'query') {
       return { count: existing ? 1 : 0, documents: existing ? [existing] : [] };
@@ -47,7 +47,7 @@ function input(overrides: Partial<McsOutcomeInput> = {}): McsOutcomeInput {
 }
 
 beforeEach(() => {
-  mocks.gatewayCall.mockReset();
+  mocks.persistenceCall.mockReset();
   mocks.tripleStackWrite.mockReset();
 });
 
@@ -65,11 +65,11 @@ describe('Phase 7 R1 — outcome capture canary gate', () => {
 
     expect(result).toBeNull();
     expect(mocks.tripleStackWrite).not.toHaveBeenCalled();
-    expect(mocks.gatewayCall).not.toHaveBeenCalled();
+    expect(mocks.persistenceCall).not.toHaveBeenCalled();
   });
 
   it('writes through the app-direct triple-stack into mcs_outcomes when ON', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const outcomes = await loadOutcomes(true);
 
     const result = await outcomes.appendOutcome(input());
@@ -83,8 +83,8 @@ describe('Phase 7 R1 — outcome capture canary gate', () => {
 });
 
 describe('Phase 7 R1 — app-memory envelope + scope', () => {
-  it('stamps the app-memory envelope (momentum namespace, system origin, no gateway fields)', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+  it('stamps the app-memory envelope (momentum namespace, system origin, no PERSISTENCE fields)', async () => {
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const outcomes = await loadOutcomes(true);
 
     const result = (await outcomes.appendOutcome(input()))!;
@@ -97,7 +97,7 @@ describe('Phase 7 R1 — app-memory envelope + scope', () => {
     expect(result.tenantId).toBe('team_magnificent');
     expect(result.teamKey).toBe('team_magnificent');
     expect(result.tmagId).toBe('TMAG-1');
-    // No gateway-only fields leaked onto the app record.
+    // No PERSISTENCE-only fields leaked onto the app record.
     expect(result).not.toHaveProperty('chat_number');
     expect(result).not.toHaveProperty('chat_registry_id');
   });
@@ -113,7 +113,7 @@ describe('Phase 7 R1 — app-memory envelope + scope', () => {
   });
 
   it('caps the optional note and never stores a body field', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const outcomes = await loadOutcomes(true);
 
     const result = (await outcomes.appendOutcome(input({ note: 'x'.repeat(5000) })))!;
@@ -127,7 +127,7 @@ describe('Phase 7 R1 — app-memory envelope + scope', () => {
 
 describe('Phase 7 R1 — THREE authority + no scoring', () => {
   it('records enrolled_iii as a plain mirror record (no handoff, no score/rank fields)', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const outcomes = await loadOutcomes(true);
 
     const result = (await outcomes.appendOutcome(input({ kind: 'enrolled_iii' })))!;
@@ -142,7 +142,7 @@ describe('Phase 7 R1 — THREE authority + no scoring', () => {
 describe('Phase 7 R1 — deterministic id, idempotency, correction chain', () => {
   it('is idempotent — a retried confirmation returns the existing row, no double-write', async () => {
     const existing = { id: 'mcsoutcome_existing', kind: 'enrolled_iii', type: 'outcome' };
-    mocks.gatewayCall.mockImplementation(defaultGateway(existing));
+    mocks.persistenceCall.mockImplementation(defaultPersistence(existing));
     const outcomes = await loadOutcomes(true);
 
     const result = (await outcomes.appendOutcome(input()))!;
@@ -178,7 +178,7 @@ describe('Phase 7 R1 — deterministic id, idempotency, correction chain', () =>
   });
 
   it('a correction (supersedesOutcomeId) writes a new record and links the chain', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway({ id: 'whatever' }));
+    mocks.persistenceCall.mockImplementation(defaultPersistence({ id: 'whatever' }));
     const outcomes = await loadOutcomes(true);
 
     const result = (await outcomes.appendOutcome(

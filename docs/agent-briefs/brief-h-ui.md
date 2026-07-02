@@ -17,7 +17,7 @@ from the H-server endpoints defined by `packages/shared/src/admin-live-ops.ts`.
 Leaves you ship (build-checklist #111–114):
 
 - **H.1** Real-time usage strip across the top — active dashboard viewers,
-  events/min, gateway p50/p95 — SSE-driven, updates live
+  events/min, persistence p50/p95 — SSE-driven, updates live
 - **H.2** Growth stat cards — three cards (24h / 7d / 30d) with deltas
 - **H.3** Holding-tank live grid — every active placement, colored by age,
   click a slot to deep-link into the existing 4.D prospect detail panel

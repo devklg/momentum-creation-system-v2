@@ -49,7 +49,7 @@ export type {
 
 // P4.4 — Context Manager Retrieval Adapter: the sole runtime edge that obtains approved
 // knowledge through the injected Knowledge Core boundary and maps it to ContextReferences
-// for buildContextPacket(). Fail-closed; constructs no store/Gateway client.
+// for buildContextPacket(). Fail-closed; constructs no store/persistence dispatch client.
 export {
   createContextManagerRetrievalAdapter,
   toContextReferences,
@@ -62,7 +62,7 @@ export type {
 } from './contextManagerRetrievalAdapter.js';
 
 // P4.8 — Knowledge Retrieval Observability: a content-free record emitted per retrieval call via
-// an opt-in sink. Pure builder; no persistence, no Gateway, no LLM.
+// an opt-in sink. Pure builder; no persistence, no PERSISTENCE, no LLM.
 export {
   KNOWLEDGE_RETRIEVAL_OBSERVABILITY_SCHEMA_VERSION,
   buildRetrievalObservabilityRecord,

@@ -8,18 +8,18 @@ import type { McsLearningCandidateInput } from '@momentum/shared';
  */
 
 const mocks = vi.hoisted(() => ({
-  gatewayCall: vi.fn(),
+  persistenceCall: vi.fn(),
   tripleStackWrite: vi.fn(),
 }));
 
-vi.mock('../../services/gateway.js', () => ({ gatewayCall: mocks.gatewayCall }));
+vi.mock('../../services/persistence/dispatch.js', () => ({ persistenceCall: mocks.persistenceCall }));
 vi.mock('../../services/tripleStack.js', () => ({ tripleStackWrite: mocks.tripleStackWrite }));
 
 type AnyRec = Record<string, unknown>;
 
 const ORIGINAL_FLAG = process.env.LEARNING_CANDIDATE_PERSISTENCE_ENABLED;
 
-function gatewayReturning(candidate: AnyRec | null = null) {
+function persistenceReturning(candidate: AnyRec | null = null) {
   return async (tool: string, action: string, _params: AnyRec): Promise<unknown> => {
     if (tool === 'mongodb' && action === 'query') {
       return { count: candidate ? 1 : 0, documents: candidate ? [candidate] : [] };
@@ -47,7 +47,7 @@ function input(overrides: Partial<McsLearningCandidateInput> = {}): McsLearningC
 }
 
 beforeEach(() => {
-  mocks.gatewayCall.mockReset();
+  mocks.persistenceCall.mockReset();
   mocks.tripleStackWrite.mockReset();
 });
 
@@ -65,7 +65,7 @@ describe('Phase 7 R2 — canary gate + review-only isolation', () => {
   });
 
   it('writes to the REVIEW-ONLY chroma collection, never an active-knowledge one', async () => {
-    mocks.gatewayCall.mockImplementation(gatewayReturning());
+    mocks.persistenceCall.mockImplementation(persistenceReturning());
     const m = await load(true);
 
     await m.appendLearningCandidate(input());
@@ -78,7 +78,7 @@ describe('Phase 7 R2 — canary gate + review-only isolation', () => {
 
 describe('Phase 7 R2 — no agent approval, no auto-promotion', () => {
   it('appendLearningCandidate ALWAYS creates a detected candidate (no status param)', async () => {
-    mocks.gatewayCall.mockImplementation(gatewayReturning());
+    mocks.persistenceCall.mockImplementation(persistenceReturning());
     const m = await load(true);
 
     const result = (await m.appendLearningCandidate(input()))!;
@@ -106,8 +106,8 @@ describe('Phase 7 R2 — no agent approval, no auto-promotion', () => {
 
 describe('Phase 7 R2 — human review transition', () => {
   it('a human reviewer approves a detected candidate (status → approved, review recorded)', async () => {
-    mocks.gatewayCall.mockImplementation(
-      gatewayReturning({ id: 'mcslearn_1', status: 'detected', review: null, type: 'learning_candidate' }),
+    mocks.persistenceCall.mockImplementation(
+      persistenceReturning({ id: 'mcslearn_1', status: 'detected', review: null, type: 'learning_candidate' }),
     );
     const m = await load(true);
 
@@ -120,15 +120,15 @@ describe('Phase 7 R2 — human review transition', () => {
 
     expect(result.status).toBe('approved');
     expect(result.review!.reviewedByTmagId).toBe('TMAG-KEVIN');
-    const update = mocks.gatewayCall.mock.calls.find(
+    const update = mocks.persistenceCall.mock.calls.find(
       ([tool, action]) => tool === 'mongodb' && action === 'update',
     );
     expect(update).toBeDefined();
   });
 
   it('refuses to re-review an already-reviewed candidate (must supersede instead)', async () => {
-    mocks.gatewayCall.mockImplementation(
-      gatewayReturning({
+    mocks.persistenceCall.mockImplementation(
+      persistenceReturning({
         id: 'mcslearn_1',
         status: 'approved',
         review: { decision: 'approved', reviewedByTmagId: 'TMAG-KEVIN', reviewedAt: '2026-07-01T00:00:00.000Z' },
@@ -142,7 +142,7 @@ describe('Phase 7 R2 — human review transition', () => {
   });
 
   it('throws NotFound when reviewing a candidate that does not exist', async () => {
-    mocks.gatewayCall.mockImplementation(gatewayReturning(null));
+    mocks.persistenceCall.mockImplementation(persistenceReturning(null));
     const m = await load(true);
 
     await expect(
