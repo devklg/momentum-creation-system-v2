@@ -77,7 +77,7 @@ async function setFounderPassword(): Promise<void> {
 async function seedCompletedSteveDiscovery(): Promise<void> {
   const nowIso = new Date().toISOString();
   const seedPayload: SteveDiscoveryIngestPayload = {
-    baId: FOUNDER_TMAG_ID,
+    tmagId: FOUNDER_TMAG_ID,
     callSid: 'seed-founder-access',
     startedAt: nowIso,
     completedAt: nowIso,
