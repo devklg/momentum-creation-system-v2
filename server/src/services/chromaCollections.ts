@@ -41,7 +41,7 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_ivory', // domain/ivory.ts, domain/generator.ts
   'mcs_audit_log', // domain/auditLog.ts
   'audit_log', // domain/adminBaOversight.ts (sponsor-override audit line)
-  'admin_prospect_notes', // domain/adminProspectOversight.ts
+  'tmag_admin_prospect_notes', // domain/adminProspectOversight.ts
   'mcs_steve_discoveries', // domain/steve-success-interview.ts (Steve discovery + success profiles)
   'mcs_access_codes', // domain/codeGen.ts
   'mcs_commitments', // domain/commitments.ts

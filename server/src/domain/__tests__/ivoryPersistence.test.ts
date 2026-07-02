@@ -40,7 +40,7 @@ const IVORY_RECORD = {
 function defaultGateway(record: AnyRec | null = { ...IVORY_RECORD }) {
   return async (tool: string, action: string, params: AnyRec): Promise<unknown> => {
     if (tool === 'mongodb' && action === 'query') {
-      if (params.collection === 'ivory_names') {
+      if (params.collection === 'tmag_ivory_prospect_names') {
         return { count: record ? 1 : 0, documents: record ? [record] : [] };
       }
       return { count: 0, documents: [] };
@@ -141,7 +141,7 @@ describe('Ivory persistence fixes', () => {
         String((p as AnyRec).query).includes('DETACH DELETE'),
     );
     expect(del).toBeDefined();
-    expect(del?.[2]).toMatchObject({ collection: 'ivory_names' });
+    expect(del?.[2]).toMatchObject({ collection: 'tmag_ivory_prospect_names' });
     expect(detach).toBeDefined();
   });
 

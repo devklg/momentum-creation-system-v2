@@ -60,13 +60,13 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const PROSPECTS_COLLECTION = 'prospects';
-const TOKENS_COLLECTION = 'invite_tokens';
-const ACTIVITY_COLLECTION = 'invitation_activity';
-const CALLBACK_COLLECTION = 'callback_requests';
-const NOTES_COLLECTION = 'crm_notes';
-const FOLLOWUPS_COLLECTION = 'crm_followups';
-const DISPOSITIONS_COLLECTION = 'crm_dispositions';
+const PROSPECTS_COLLECTION = 'tmag_prospects';
+const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
+const ACTIVITY_COLLECTION = 'tmag_prospect_invitation_activity';
+const CALLBACK_COLLECTION = 'tmag_prospect_callback_requests';
+const NOTES_COLLECTION = 'tmag_prospect_crm_notes';
+const FOLLOWUPS_COLLECTION = 'tmag_prospect_crm_followups';
+const DISPOSITIONS_COLLECTION = 'tmag_prospect_crm_dispositions';
 const CHROMA_COLLECTION = 'mcs_invitations';
 
 /** Max note length — generous for a free-form journal entry. */

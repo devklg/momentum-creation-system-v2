@@ -55,8 +55,8 @@ import { MCS_BA_NOTIF_DEFAULTS } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const BA_COLLECTION = 'team_magnificent_members';
-const ACCESS_CODES_COLLECTION = 'access_codes';
-const CHALLENGES_COLLECTION = 'profile_change_challenges';
+const ACCESS_CODES_COLLECTION = 'tmag_access_codes';
+const CHALLENGES_COLLECTION = 'tmag_profile_change_challenges';
 
 /** 15 minutes — long enough for the user to switch apps and copy the code. */
 const CHALLENGE_TTL_MS = 15 * 60 * 1000;

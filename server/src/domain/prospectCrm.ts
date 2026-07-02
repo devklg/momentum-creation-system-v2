@@ -29,11 +29,11 @@ import type {
 type ProspectCRMDocument = McsProspectCRMRecord & { token: string | null };
 
 const MONGO_DB = 'momentum';
-const CRM_COLLECTION = 'prospect_crm_records';
-const TIMELINE_COLLECTION = 'prospect_timeline_events';
-const PROSPECTS_COLLECTION = 'prospects';
-const TOKENS_COLLECTION = 'invite_tokens';
-const BULK_LEADS_COLLECTION = 'vm_bulk_leads';
+const CRM_COLLECTION = 'tmag_prospect_crm_records';
+const TIMELINE_COLLECTION = 'tmag_prospect_timeline_events';
+const PROSPECTS_COLLECTION = 'tmag_prospects';
+const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
+const BULK_LEADS_COLLECTION = 'tmag_vm_bulk_leads';
 const CRM_CHROMA_COLLECTION = 'mcs_prospect_crm';
 const TIMELINE_CHROMA_COLLECTION = 'mcs_prospect_timeline';
 

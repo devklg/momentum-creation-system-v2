@@ -40,10 +40,10 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const PLACEMENTS_COLLECTION = 'pool_placements';
-const COUNTERS_COLLECTION = 'pool_counters';
-const PROSPECTS_COLLECTION = 'prospects';
-const ADMIN_SETTINGS_COLLECTION = 'admin_settings';
+const PLACEMENTS_COLLECTION = 'tmag_prospect_htank_placements';
+const COUNTERS_COLLECTION = 'tmag_prospect_htank_counters';
+const PROSPECTS_COLLECTION = 'tmag_prospects';
+const ADMIN_SETTINGS_COLLECTION = 'tmag_admin_settings';
 const TEAM_POOL_ID = 'tm_team_pool';
 
 /** Cross-section deep-link locked with Agent D — see TASK-admin-e.md. */

@@ -39,8 +39,8 @@ import {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const SESSIONS_COLLECTION = 'orientation_sessions';
-const RESERVATIONS_COLLECTION = 'orientation_reservations';
+const SESSIONS_COLLECTION = 'tmag_new_member_orientation_sessions';
+const RESERVATIONS_COLLECTION = 'tmag_new_member_orientation_reservations';
 const CHROMA_COLLECTION = 'mcs_orientation';
 
 /** Default hosts when none are assigned (founders today; extensible later). */

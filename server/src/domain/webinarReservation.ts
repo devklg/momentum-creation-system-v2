@@ -31,7 +31,7 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const MONGO_COLLECTION = 'webinar_reservations';
+const MONGO_COLLECTION = 'tmag_prospect_webinar_reservations';
 const CHROMA_COLLECTION = 'mcs_webinar_reservations';
 
 export interface CreateWebinarReservationInput {

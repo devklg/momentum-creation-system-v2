@@ -37,9 +37,9 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLL_BAS = 'team_magnificent_members';
-const COLL_STEVE = 'steve_discoveries';
-const COLL_ACTIVITY = 'invitation_activity';
-const COLL_PLACEMENTS = 'pool_placements';
+const COLL_STEVE = 'tmag_steve_success_interview';
+const COLL_ACTIVITY = 'tmag_prospect_invitation_activity';
+const COLL_PLACEMENTS = 'tmag_prospect_htank_placements';
 
 interface BaDoc {
   tmagId: string;

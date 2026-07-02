@@ -26,7 +26,7 @@ import { gatewayCall } from '../services/gateway.js';
 import type { McsInviteTokenRecord, McsTokenState } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const TOKENS_COLLECTION = 'invite_tokens';
+const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
 
 const ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 const TOKEN_LEN = 12;

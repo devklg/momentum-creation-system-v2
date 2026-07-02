@@ -42,8 +42,8 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COUNTERS_COLLECTION = 'pool_counters';
-const PLACEMENTS_COLLECTION = 'pool_placements';
+const COUNTERS_COLLECTION = 'tmag_prospect_htank_counters';
+const PLACEMENTS_COLLECTION = 'tmag_prospect_htank_placements';
 const CHROMA_COLLECTION = 'mcs_pool_events';
 
 /** Single-row counter document id. The pool is team-wide (Chat #84). */
@@ -271,7 +271,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
   //    re-querying pool_placements. State stays in lockstep with the token.
   await gatewayCall('mongodb', 'update', {
     database: MONGO_DB,
-    collection: 'prospects',
+    collection: 'tmag_prospects',
     filter: { prospectId: input.prospectId },
     update: {
       $set: {
@@ -372,7 +372,7 @@ async function listRecentPlacements(
     }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
-    collection: 'prospects',
+    collection: 'tmag_prospects',
     filter: {
       state: 'video_complete',
       positionNumber: { $ne: null },
@@ -509,7 +509,7 @@ export async function flushExpiredPlacements(
       // 2. Prospect funnel record — mirror to 'expired'.
       await gatewayCall('mongodb', 'update', {
         database: MONGO_DB,
-        collection: 'prospects',
+        collection: 'tmag_prospects',
         filter: { prospectId: c.prospectId },
         update: { $set: { state: 'expired', updatedAt: flushedAt } },
       });

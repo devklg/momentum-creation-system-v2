@@ -57,7 +57,7 @@ import {
 } from './ivory.js';
 
 const MONGO_DB = 'momentum';
-const RUNS_COLLECTION = 'generator_runs';
+const RUNS_COLLECTION = 'tmag_invitation_generator_runs';
 const CHROMA_COLLECTION = 'mcs_ivory';
 
 const ALLOWED_ANGLES: ReadonlySet<McsIvoryAngle> = new Set([

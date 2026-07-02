@@ -30,8 +30,8 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLL_BAS = 'team_magnificent_members';
-const COLL_PLACEMENTS = 'pool_placements';
-const COLL_ACTIVITY = 'invitation_activity';
+const COLL_PLACEMENTS = 'tmag_prospect_htank_placements';
+const COLL_ACTIVITY = 'tmag_prospect_invitation_activity';
 
 const PROVENANCE =
   'Leader scorecards (Chat #143): per ADMIN I.5, Kevin-only — never shown to ' +

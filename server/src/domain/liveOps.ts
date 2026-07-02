@@ -50,10 +50,10 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLL_BAS = 'team_magnificent_members';
-const COLL_PLACEMENTS = 'pool_placements';
-const COLL_PROSPECTS = 'prospects';
-const COLL_STEVE = 'steve_discoveries';
-const COLL_ACTIVITY = 'invitation_activity';
+const COLL_PLACEMENTS = 'tmag_prospect_htank_placements';
+const COLL_PROSPECTS = 'tmag_prospects';
+const COLL_STEVE = 'tmag_steve_success_interview';
+const COLL_ACTIVITY = 'tmag_prospect_invitation_activity';
 
 const MS_24H = 24 * 60 * 60 * 1000;
 const MS_7D = 7 * MS_24H;

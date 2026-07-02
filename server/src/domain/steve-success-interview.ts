@@ -42,7 +42,7 @@ import { tripleStackWrite } from '../services/tripleStack.js';
 /** Provenance literal stamped on Steve artifacts. */
 export const STEVE_SIGNED_BY = 'Steve Success · New BA Discovery & Success Interview';
 
-const DISCOVERIES_COLLECTION = 'steve_discoveries';
+const DISCOVERIES_COLLECTION = 'tmag_steve_success_interview';
 const CHROMA_DISCOVERIES = 'mcs_steve_discoveries';
 
 // ─────────────────────────────────────────────────────────────────────────

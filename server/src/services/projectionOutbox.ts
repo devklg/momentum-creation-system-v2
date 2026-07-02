@@ -29,7 +29,7 @@ import { gatewayCall } from './gateway.js';
 import { assertChromaCollectionExists } from './chromaCollections.js';
 
 const OUTBOX_DB = 'momentum';
-const OUTBOX_COLLECTION = 'projection_outbox';
+const OUTBOX_COLLECTION = 'tmag_projection_outbox';
 
 /** Max replay attempts before a projection is dead-lettered + alerted. */
 const MAX_ATTEMPTS = 8;

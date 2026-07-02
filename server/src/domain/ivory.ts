@@ -72,7 +72,7 @@ import { ANGLE_LABEL } from './ivoryAngle.js';
 import { normalizePhone } from './prospectAccount.js';
 
 const MONGO_DB = 'momentum';
-const IVORY_COLLECTION = 'ivory_names';
+const IVORY_COLLECTION = 'tmag_ivory_prospect_names';
 const CHROMA_COLLECTION = 'mcs_ivory';
 
 const ALLOWED_CATEGORIES: ReadonlySet<McsIvoryCategory> = new Set([

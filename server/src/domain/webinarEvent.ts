@@ -16,7 +16,7 @@ import { gatewayCall } from '../services/gateway.js';
 import type { McsWebinarEvent } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const MONGO_COLLECTION = 'webinar_events';
+const MONGO_COLLECTION = 'tmag_prospect_webinar_events';
 
 /**
  * Return the next upcoming event (earliest scheduledFor still in the

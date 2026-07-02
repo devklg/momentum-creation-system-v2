@@ -53,16 +53,16 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const PROSPECTS_COLLECTION = 'prospects';
-const TOKENS_COLLECTION = 'invite_tokens';
-const ACTIVITY_COLLECTION = 'invitation_activity';
-const CALLBACK_COLLECTION = 'callback_requests';
+const PROSPECTS_COLLECTION = 'tmag_prospects';
+const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
+const ACTIVITY_COLLECTION = 'tmag_prospect_invitation_activity';
+const CALLBACK_COLLECTION = 'tmag_prospect_callback_requests';
 const BA_COLLECTION = 'team_magnificent_members';
-const FOLLOWUPS_COLLECTION = 'crm_followups';
-const DISPOSITIONS_COLLECTION = 'crm_dispositions';
-const NOTES_COLLECTION = 'crm_notes';
-const COMMITMENTS_COLLECTION = 'ba_commitments';
-const IVORY_COLLECTION = 'ivory_names';
+const FOLLOWUPS_COLLECTION = 'tmag_prospect_crm_followups';
+const DISPOSITIONS_COLLECTION = 'tmag_prospect_crm_dispositions';
+const NOTES_COLLECTION = 'tmag_prospect_crm_notes';
+const COMMITMENTS_COLLECTION = 'tmag_commitments';
+const IVORY_COLLECTION = 'tmag_ivory_prospect_names';
 
 /**
  * Sponsor-inactive dormancy window for the founder fallback (Chat #147, seq 23,

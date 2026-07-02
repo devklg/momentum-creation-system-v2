@@ -75,15 +75,15 @@ import { randomUUID } from 'node:crypto';
 /* ─── constants ─────────────────────────────────────────────────── */
 
 const MONGO_DB = 'momentum';
-const COLL_PROSPECTS = 'prospects';
-const COLL_PLACEMENTS = 'pool_placements';
+const COLL_PROSPECTS = 'tmag_prospects';
+const COLL_PLACEMENTS = 'tmag_prospect_htank_placements';
 const COLL_BAS = 'team_magnificent_members';
-const COLL_TOKENS = 'invite_tokens';
-const COLL_CALLBACKS = 'callback_requests';
-const COLL_WEBINARS = 'webinar_reservations';
-const COLL_NOTES = 'admin_prospect_notes';
-const COLL_WEBINAR_EVENTS = 'webinar_events';
-const CHROMA_NOTES_COLLECTION = 'admin_prospect_notes';
+const COLL_TOKENS = 'tmag_prospect_invite_tokens';
+const COLL_CALLBACKS = 'tmag_prospect_callback_requests';
+const COLL_WEBINARS = 'tmag_prospect_webinar_reservations';
+const COLL_NOTES = 'tmag_admin_prospect_notes';
+const COLL_WEBINAR_EVENTS = 'tmag_prospect_webinar_events';
+const CHROMA_NOTES_COLLECTION = 'tmag_admin_prospect_notes';
 
 /** Follow-up-needed-by threshold (locked-spec follow-up cadence). */
 const FOLLOW_UP_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000;

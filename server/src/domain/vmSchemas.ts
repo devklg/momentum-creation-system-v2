@@ -20,13 +20,13 @@ export const VM_SCHEMA_VERSION = 'vm-lead-campaign.v1';
 export const VM_MONGO_DB = 'momentum';
 
 export const VM_COLLECTIONS = {
-  leadBatches: 'vm_lead_batches',
-  bulkLeads: 'vm_bulk_leads',
-  campaigns: 'vm_campaigns',
-  deliveryEvents: 'vm_delivery_events',
-  prospectCrm: 'prospect_crm_records',
-  prospectTimeline: 'prospect_timeline_events',
-  ownershipCorrections: 'prospect_ownership_corrections',
+  leadBatches: 'tmag_vm_lead_batches',
+  bulkLeads: 'tmag_vm_bulk_leads',
+  campaigns: 'tmag_vm_campaigns',
+  deliveryEvents: 'tmag_vm_delivery_events',
+  prospectCrm: 'tmag_prospect_crm_records',
+  prospectTimeline: 'tmag_prospect_timeline_events',
+  ownershipCorrections: 'tmag_prospect_ownership_corrections',
 } as const;
 
 export const VM_CHROMA_COLLECTIONS = {

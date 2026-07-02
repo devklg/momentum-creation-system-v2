@@ -30,7 +30,7 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COLL_PLACEMENTS = 'pool_placements';
+const COLL_PLACEMENTS = 'tmag_prospect_htank_placements';
 const COLL_BAS = 'team_magnificent_members';
 
 interface PlacementDoc {

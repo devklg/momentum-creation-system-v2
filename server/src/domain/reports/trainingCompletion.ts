@@ -34,7 +34,7 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLL_BAS = 'team_magnificent_members';
-const COLL_FAST_START = 'fast_start_progress';
+const COLL_FAST_START = 'tmag_fast_start_progress';
 
 const ORIENTATION_PROVENANCE =
   'Training data note (Chat #143): Fast Start completion reads from ' +

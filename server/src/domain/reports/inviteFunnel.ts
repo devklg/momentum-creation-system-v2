@@ -31,8 +31,8 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COLL_TOKENS = 'invite_tokens';
-const COLL_ACTIVITY = 'invitation_activity';
+const COLL_TOKENS = 'tmag_prospect_invite_tokens';
+const COLL_ACTIVITY = 'tmag_prospect_invitation_activity';
 const COLL_BAS = 'team_magnificent_members';
 
 const PROVENANCE =

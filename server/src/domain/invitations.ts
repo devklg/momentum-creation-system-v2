@@ -59,9 +59,9 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const PROSPECTS_COLLECTION = 'prospects';
-const TOKENS_COLLECTION = 'invite_tokens';
-const ACTIVITY_COLLECTION = 'invitation_activity';
+const PROSPECTS_COLLECTION = 'tmag_prospects';
+const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
+const ACTIVITY_COLLECTION = 'tmag_prospect_invitation_activity';
 const CHROMA_COLLECTION = 'mcs_invitations';
 
 /**

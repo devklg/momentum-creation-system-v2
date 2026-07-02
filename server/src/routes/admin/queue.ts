@@ -396,7 +396,7 @@ async function lookupPlacementByPosition(
     documents: Array<{ prospectId: string; sponsorTmagId: string }>;
   }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'pool_placements',
+    collection: 'tmag_prospect_htank_placements',
     filter: { positionNumber },
     limit: 1,
   });

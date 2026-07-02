@@ -25,7 +25,7 @@ export interface CommitmentRecord {
 export async function commitmentExists(tmagId: string): Promise<boolean> {
   const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'ba_commitments',
+    collection: 'tmag_commitments',
     filter: { tmagId },
     limit: 1,
   });
@@ -50,7 +50,7 @@ export async function recordCommitment(
 
   await tripleStackWrite({
     id: commitmentId,
-    mongoCollection: 'ba_commitments',
+    mongoCollection: 'tmag_commitments',
     mongoDoc: record as unknown as Record<string, unknown>,
     neo4j: {
       cypher:

@@ -29,9 +29,9 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const BULK_LEADS_COLLECTION = 'vm_bulk_leads';
-const PROSPECTS_COLLECTION = 'prospects';
-const TOKENS_COLLECTION = 'invite_tokens';
+const BULK_LEADS_COLLECTION = 'tmag_vm_bulk_leads';
+const PROSPECTS_COLLECTION = 'tmag_prospects';
+const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
 const CHROMA_COLLECTION = 'mcs_vm_leads';
 
 export class BulkLeadError extends Error {

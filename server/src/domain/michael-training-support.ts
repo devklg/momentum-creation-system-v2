@@ -35,7 +35,7 @@ import { gatewayCall } from '../services/gateway.js';
 export const MICHAEL_TRAINING_SUPPORT_SIGNED_BY =
   'Michael Training Support · derived from Steve Success Profile';
 
-const STEVE_DISCOVERIES_COLLECTION = 'steve_discoveries';
+const STEVE_DISCOVERIES_COLLECTION = 'tmag_steve_success_interview';
 
 // ─────────────────────────────────────────────────────────────────────────
 // Narrow local Steve shape (structural subset). Steve's own branch owns the

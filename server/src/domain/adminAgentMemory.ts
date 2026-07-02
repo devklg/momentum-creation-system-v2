@@ -21,9 +21,9 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLL_BAS = 'team_magnificent_members';
-const COLL_STEVE = 'steve_discoveries';
+const COLL_STEVE = 'tmag_steve_success_interview';
 const COLL_AGENT_EVENTS = 'agent_events';
-const COLL_OUTBOX = 'projection_outbox';
+const COLL_OUTBOX = 'tmag_projection_outbox';
 const CHROMA_STEVE = 'mcs_steve_discoveries';
 const CHROMA_AGENT_EVENTS = 'mcs_agent_events';
 

@@ -19,14 +19,14 @@ import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 const MONGO_DB = 'momentum';
 const CHROMA_COLLECTION = 'mcs_vm_campaigns';
 
-const LEADS_COLLECTION = 'vm_bulk_leads';
-const QUEUE_COLLECTION = 'vm_queue_jobs';
-const DELIVERY_EVENTS_COLLECTION = 'vm_delivery_events';
-const WEBHOOK_EVENTS_COLLECTION = 'vm_provider_webhook_events';
-const CRM_COLLECTION = 'prospect_crm_records';
-const TOKENS_COLLECTION = 'invite_tokens';
-const AUDIT_COLLECTION = 'vm_audit_events';
-const SUPPRESSION_COLLECTION = 'vm_suppression_list';
+const LEADS_COLLECTION = 'tmag_vm_bulk_leads';
+const QUEUE_COLLECTION = 'tmag_vm_queue_jobs';
+const DELIVERY_EVENTS_COLLECTION = 'tmag_vm_delivery_events';
+const WEBHOOK_EVENTS_COLLECTION = 'tmag_vm_provider_webhook_events';
+const CRM_COLLECTION = 'tmag_prospect_crm_records';
+const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
+const AUDIT_COLLECTION = 'tmag_vm_audit_events';
+const SUPPRESSION_COLLECTION = 'tmag_vm_suppression_list';
 
 const DEFAULT_MAX_ATTEMPTS = 3;
 const IMPORT_CHUNK_SIZE = 500;

@@ -28,7 +28,7 @@ import { gatewayCall } from './gateway.js';
 import { env } from '../env.js';
 
 const MONGO_DB = 'momentum';
-const SESSIONS_COLLECTION = 'prospect_sessions';
+const SESSIONS_COLLECTION = 'tmag_prospect_sessions';
 
 const COOKIE_NAME = 'mcs_prospect_session';
 

@@ -73,7 +73,7 @@ async function readPoolCounterForPreview(): Promise<number> {
       'query',
       {
         database: 'momentum',
-        collection: 'pool_counters',
+        collection: 'tmag_prospect_htank_counters',
         filter: { _id: TEAM_POOL_ID },
         limit: 1,
       },

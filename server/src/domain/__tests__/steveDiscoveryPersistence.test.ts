@@ -34,7 +34,7 @@ function makeGatewayImpl(store: Store, opts: GatewayOpts = {}) {
     if (tool === 'mongodb' && action === 'query') {
       const col = params.collection;
       if (col === 'team_magnificent_members') return { documents: store.ba ? [store.ba] : [] };
-      if (col === 'steve_discoveries') {
+      if (col === 'tmag_steve_success_interview') {
         return { documents: store.discovery ? [store.discovery] : [] };
       }
       return { documents: [] };
