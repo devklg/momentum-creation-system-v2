@@ -15,6 +15,21 @@ lives in four artifacts. Use them. Do not ask Kevin "what's next" — it is writ
 | `momentum.decisions` (Mongo) | **DECISION LEDGER.** Append-only currency layer. | Resolve "which version is current?": `{topic:X, status:"active"}`. |
 | `docs/build-checklist.html` | Printable B/W checklist, 114 numbered items. | Hand to Kevin to print/track. |
 
+## Current adjacent project: La'Mont
+
+La'Mont is Kevin's Windows-local voice companion for MCS V2. It is not in this
+monorepo because it is a desktop app, not a web workspace package.
+
+- La'Mont repo: `D:/handy-dictation`
+- MCS relationship: local `lamont_voice` provider for authenticated `.team`
+  agent runtime turns
+- Start here before searching: `docs/LAMONT-VOICE-LAYER.md`
+- Authoritative decision: `organization/DECISION_lamont_local_voice_layer.md`
+
+Do not treat La'Mont as an MCS agent, Context Manager, knowledge approver, or
+database writer. MCS owns auth, member scope, context, persistence, GraphRAG,
+learning governance, and audit.
+
 ## The one rule (this is what keeps it from rotting)
 
 **The wireframe is the SOURCE. The queues are its MIRROR.**

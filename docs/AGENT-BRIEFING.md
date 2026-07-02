@@ -82,6 +82,14 @@
 - Express API server (port 7700), shared package at `packages/shared/`, monorepo with pnpm 9 workspaces
 - Stack: Vite 6 + React 19 + TypeScript 5.5 + Tailwind 3 + shadcn primitives + Express 4 + jose + argon2 + zod + undici
 
+**La'Mont local voice layer.** La'Mont is the Windows desktop voice companion in
+`D:/handy-dictation`. It is not part of the MCS monorepo and is not an agent.
+MCS should treat it as a local `lamont_voice` provider for authenticated `.team`
+agent runtime turns: La'Mont handles local STT/TTS, while MCS owns auth,
+session/member scope, context, persistence, knowledge ingestion, and governance.
+Start with `docs/LAMONT-VOICE-LAYER.md` and
+`organization/DECISION_lamont_local_voice_layer.md` before changing voice code.
+
 **Token lifecycle states:** `minted → clicked → video_started → video_quarter → video_half → video_three_quarter → video_complete → callback_requested | webinar_reserved → enrolled | expired`. Position assigned at `video_complete`. Flush triggers: enrolled or 8-week expiry.
 
 **Access codes.** Format: `TM-XXXX` (4-char, 31-char alphabet excluding 0/O/1/I/L — ~924k codes). Generated only by Kevin from /admin. Each code is permanently tied to one BA who reuses it for every BA they sponsor. Sponsor binding is set at code resolution at signup, immutable thereafter.

@@ -16,10 +16,22 @@ Before writing code in this repo, read in this order:
 
 The five `.docx` design files (`Team-Magnificent-ADMIN-Design.docx`, `Team-Magnificent-COM-Design.docx`, `Team-Magnificent-TEAM-Design.docx`, `Team-Magnificent-App-Description.docx`, `Team-Magnificent-Signup-Architecture.docx`) are the surface-level design references — read the one that covers the surface you're changing.
 
+**La'Mont voice layer — read when voice, dictation, STT, TTS, Steve, Michael,
+Ivory, interviews, or local Windows companion work is mentioned.** La'Mont is a
+separate desktop app at `D:/handy-dictation`, not a package in this monorepo.
+Treat it as the local `lamont_voice` provider for authenticated `.team` agent
+runtime turns. MCS owns auth, session/member scope, Context Manager retrieval,
+persistence, GraphRAG/knowledge ingestion, learning governance, and audit.
+Start with `docs/LAMONT-VOICE-LAYER.md`, then
+`organization/DECISION_lamont_local_voice_layer.md`. Do not search for La'Mont
+only under `apps/`, `server/`, or `packages/`; the implementation repo is
+outside MCS.
+
 Additional reference material in [docs/](docs/) — pull these in when relevant, not by default:
 
 - `chat-XX-decisions.md` and `chat84-vs-docs.md`, `chat-94-locked-spec-rewrite.txt` — historical record of decisions from past chat sessions. Useful when "why was this done this way" matters and the answer isn't in `build-registry.md`.
 - `page-inventory.md` — canonical list of routes/pages per surface.
+- `LAMONT-VOICE-LAYER.md` — locator and boundary for the separate La'Mont desktop repo (`D:/handy-dictation`) and its role as the MCS local voice provider.
 - `dashboard-prototype.md` — early prototype notes for the prospect dashboard (still a useful intent reference).
 - `Team-Magnificent-App-Style-Guide.html` — rendered style guide; brand truth lives in [packages/shared/src/brand.ts](packages/shared/src/brand.ts), this is the visual companion.
 - `build-*.cjs`, `render-flow.cjs` — generators that produce the `.docx` design files from source. Don't edit the `.docx` directly; edit the source and regen.
