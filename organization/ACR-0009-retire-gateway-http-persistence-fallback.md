@@ -43,7 +43,7 @@ Complete ACR-0007. The S1.3 migration (Option C) deliberately preserved a Gatewa
 
 ## Follow-ups (Phase 11)
 
-- Repo-wide rename `gatewayCall` → `persistenceCall`, `GatewayError` → `PersistenceError`, file `gateway.ts` → `persistence/dispatch.ts` (mechanical, gated PR).
+- ~~Repo-wide rename `gatewayCall` → `persistenceCall`~~ ✅ **EXECUTED 2026-07-02** — Codex slice merged to `main` (`86c390a`): `services/gateway.ts` → `services/persistence/dispatch.ts`, `gatewayLatency.ts` → `persistenceLatency.ts`, dispatch test renamed, `UNIVERSAL_GATEWAY_V2_STANDARD.md` → `EXTERNAL_MCP_TOOLING_STANDARD.md`; boundary tests repointed; gates green (1,334). ACR-0009 is now FULLY executed.
 - Rename shared-type fields `gatewayLatencyMsP50/P95` (append-only shared types — needs its own slice).
 - Wire `/api/health/persistence` into a real readiness probe + alert sink (H7).
 
