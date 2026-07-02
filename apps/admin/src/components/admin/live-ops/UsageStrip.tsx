@@ -2,8 +2,8 @@
  * H.1 — Real-time usage strip. Four tiles across the top of /live-ops:
  *   • Dashboard viewers  · active .com prospect-dashboard SSE subscribers
  *   • Events / min       · pool placements + audit tail combined
- *   • Gateway p50        · last-60s round-trip
- *   • Gateway p95        · last-60s round-trip
+ *   • Persistence p50        · last-60s round-trip
+ *   • Persistence p95        · last-60s round-trip
  *
  * The connection pill in the header pulses (per locked-spec 3.15 — "the
  * usage strip pulses; everything else is calm"). When the contract sends
@@ -50,23 +50,23 @@ export function UsageStrip({ sample, status, lastHeartbeatAt }: Props) {
           sub={sample ? 'placements + audit · last 60s' : 'awaiting first frame'}
         />
         <Tile
-          eyebrow="Gateway p50"
-          value={sample ? fmtLatency(sample.gatewayLatencyMsP50) : '—'}
+          eyebrow="Persistence p50"
+          value={sample ? fmtLatency(sample.persistenceLatencyMsP50) : '—'}
           sub={
             sample === null
               ? 'awaiting first frame'
-              : sample.gatewayLatencyMsP50 === null
+              : sample.persistenceLatencyMsP50 === null
                 ? 'no calls in last 60s'
                 : 'round-trip · last 60s'
           }
         />
         <Tile
-          eyebrow="Gateway p95"
-          value={sample ? fmtLatency(sample.gatewayLatencyMsP95) : '—'}
+          eyebrow="Persistence p95"
+          value={sample ? fmtLatency(sample.persistenceLatencyMsP95) : '—'}
           sub={
             sample === null
               ? 'awaiting first frame'
-              : sample.gatewayLatencyMsP95 === null
+              : sample.persistenceLatencyMsP95 === null
                 ? 'no calls in last 60s'
                 : 'round-trip · last 60s'
           }

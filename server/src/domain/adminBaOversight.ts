@@ -20,7 +20,7 @@
  *   WRITE
  *     applySponsorOverride       NEW override row + team_magnificent_members patch
  *                                + 4.J audit entry (severity 'critical')
- *     setCuratedLeaderTag        upsert (manual existence branch — gateway
+ *     setCuratedLeaderTag        upsert (manual existence branch — PERSISTENCE
  *                                doesn't honor upsert) + 4.J audit ('info')
  *     appendBaNote               NEW note row + 4.J audit ('info')
  *
@@ -41,7 +41,7 @@
  */
 
 import { randomBytes } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
 import { findBAByTmagId, type BARecord } from './ba.js';
@@ -198,7 +198,7 @@ async function fetchAllPaged<T>(
   filter: Record<string, unknown>,
   pageSize = 1000,
 ): Promise<T[]> {
-  // The gateway has no cursor; we page by ascending _id. For now `filter`
+  // The PERSISTENCE has no cursor; we page by ascending _id. For now `filter`
   // is the same across pages; the BA roster is small enough that a single
   // bounded query (limit 2000) is fine, but the paged primitive is here so
   // the join collections can grow without changing the call sites.
@@ -206,7 +206,7 @@ async function fetchAllPaged<T>(
   let offset = 0;
   let lastBatchSize = pageSize;
   while (lastBatchSize === pageSize && offset < 50_000) {
-    const res = await gatewayCall<{ documents: T[]; count?: number }>(
+    const res = await persistenceCall<{ documents: T[]; count?: number }>(
       'mongodb',
       'query',
       {
@@ -236,7 +236,7 @@ export async function listBADirectory(
   limit = 500,
 ): Promise<{ rows: McsAdminBaDirectoryRow[]; leaderDetectionNote: string }> {
   // 1. Pull the BA roster (newest first, capped).
-  const baRaw = await gatewayCall<{ documents: BARecordWithExtras[] }>(
+  const baRaw = await persistenceCall<{ documents: BARecordWithExtras[] }>(
     'mongodb',
     'query',
     {
@@ -270,7 +270,7 @@ export async function listBADirectory(
     }
   }
   if (missingSponsors.size > 0) {
-    const r = await gatewayCall<{ documents: BARecord[] }>('mongodb', 'query', {
+    const r = await persistenceCall<{ documents: BARecord[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: BA_COLLECTION,
       filter: { tmagId: { $in: Array.from(missingSponsors) } },
@@ -306,7 +306,7 @@ export async function listBADirectory(
 
   // 5. Invite tokens — pull all for this batch, then compute lifetime count
   // + 2-in-72 client-side. (BA count × tokens-per-BA is small at v1 scale;
-  // when it isn't, the gateway grows aggregation and this becomes a $match
+  // when it isn't, the PERSISTENCE grows aggregation and this becomes a $match
   // + $group.)
   const tokens = await fetchAllPaged<TokenLite>(
     MONGO_DB,
@@ -466,7 +466,7 @@ export async function getTmagProfileBundle(
 async function fetchOverrideHistory(
   tmagId: string,
 ): Promise<McsAdminSponsorOverrideEntry[]> {
-  const r = await gatewayCall<{ documents: SponsorOverrideRecord[] }>(
+  const r = await persistenceCall<{ documents: SponsorOverrideRecord[] }>(
     'mongodb',
     'query',
     {
@@ -491,7 +491,7 @@ async function fetchOverrideHistory(
 }
 
 async function fetchBaNotes(tmagId: string): Promise<McsAdminBaNoteEntry[]> {
-  const r = await gatewayCall<{ documents: BaNoteRecord[] }>('mongodb', 'query', {
+  const r = await persistenceCall<{ documents: BaNoteRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: BA_NOTES_COLLECTION,
     filter: { tmagId },
@@ -558,7 +558,7 @@ export async function applySponsorOverride(args: {
 
   // 1. Apply the patch to the BA record. originalSponsorTmagId is stamped
   // only the first time so re-overrides don't drift the original away.
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: BA_COLLECTION,
     filter: { tmagId: args.tmagId },
@@ -683,8 +683,8 @@ export async function setCuratedLeaderTag(args: {
 }): Promise<void> {
   const setAt = new Date().toISOString();
 
-  // Gateway doesn't honor upsert — branch on existence ourselves.
-  const existing = await gatewayCall<{ documents: CuratedLeaderTagRecord[] }>(
+  // PERSISTENCE doesn't honor upsert — branch on existence ourselves.
+  const existing = await persistenceCall<{ documents: CuratedLeaderTagRecord[] }>(
     'mongodb',
     'query',
     {
@@ -697,14 +697,14 @@ export async function setCuratedLeaderTag(args: {
   const prior = existing.documents?.[0]?.curated ?? false;
 
   if (existing.documents && existing.documents.length > 0) {
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: CURATED_LEADER_TAGS_COLLECTION,
       filter: { tmagId: args.tmagId },
       update: { $set: { curated: args.curated, setByTmagId: args.setByTmagId, setAt } },
     });
   } else {
-    await gatewayCall('mongodb', 'insert', {
+    await persistenceCall('mongodb', 'insert', {
       database: MONGO_DB,
       collection: CURATED_LEADER_TAGS_COLLECTION,
       documents: [
@@ -747,7 +747,7 @@ export async function appendBaNote(args: {
     createdAt,
   };
 
-  await gatewayCall('mongodb', 'insert', {
+  await persistenceCall('mongodb', 'insert', {
     database: MONGO_DB,
     collection: BA_NOTES_COLLECTION,
     documents: [{ _id: noteId, ...record }],

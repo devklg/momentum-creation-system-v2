@@ -1,12 +1,11 @@
 <#
   Ensures the Maxwell FastAPI GPU embedding service is healthy before MCS V2
-  starts. Chroma writes through Universal Gateway V2 depend on this service.
+  starts. Direct Chroma writes depend on this service.
 #>
 
 $ErrorActionPreference = 'Stop'
 
 $HealthUrl = 'http://127.0.0.1:8300/health'
-$GatewayUrl = 'http://localhost:2526/api'
 $Wrapper = 'D:\agents\doc-parser\gpu-embeddings-service\autostart-gpu-service.ps1'
 
 function Test-GpuHealth {
@@ -18,18 +17,8 @@ function Test-GpuHealth {
   }
 }
 
-function Enable-GatewayChroma {
-  try {
-    Invoke-WebRequest -Uri "$GatewayUrl/tools/chromadb/enable" -Method Post -UseBasicParsing -TimeoutSec 8 -ErrorAction Stop | Out-Null
-    Write-Host "[mcs-v2] Gateway 2526 chromadb active"
-  } catch {
-    Write-Host "[mcs-v2] Gateway 2526 chromadb enable skipped: $($_.Exception.Message)"
-  }
-}
-
 if (Test-GpuHealth) {
   Write-Host '[mcs-v2] GPU embedding service healthy on 8300'
-  Enable-GatewayChroma
   exit 0
 }
 
@@ -46,5 +35,3 @@ if ($LASTEXITCODE -ne 0) {
 if (-not (Test-GpuHealth)) {
   throw 'GPU embedding service still unhealthy after startup wrapper'
 }
-
-Enable-GatewayChroma

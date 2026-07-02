@@ -26,6 +26,6 @@ export const agentRuntimeBoundary = defineRuntimeBoundary({
   sharedContractImport: '@momentum/shared/runtime',
   notes: [
     'Agent execution boundary placeholder only; no Steve, Michael, Ivory, or future agent behavior is activated.',
-    'Agents receive validated Context Packets and approved tools, never raw persistence clients or Gateway access.',
+    'Agents receive validated Context Packets and approved tools, never raw persistence clients or PERSISTENCE access.',
   ],
 } satisfies BackendRuntimeBoundaryDescriptor<'agent_runtime'>);

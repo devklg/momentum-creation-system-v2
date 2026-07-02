@@ -259,7 +259,7 @@ describe('S1.5 context packet foundation', () => {
     );
 
     expect(packet.agent.prohibitedOutputs.join('\n')).toContain('Do not query MongoDB');
-    expect(agentRuntimeSource).not.toMatch(/mongoose|mongodb|neo4j-driver|chromadb|gatewayCall|persistence\/(?:mongo|neo4j|chroma)/);
+    expect(agentRuntimeSource).not.toMatch(/mongoose|mongodb|neo4j-driver|chromadb|persistenceCall|persistence\/(?:mongo|neo4j|chroma)/);
   });
 
   it('rejects packets not assembled by the Context Manager', () => {

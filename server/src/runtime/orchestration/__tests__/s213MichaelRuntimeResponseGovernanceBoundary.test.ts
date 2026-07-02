@@ -109,16 +109,16 @@ function matchingImportLines(files: readonly SourceFile[], pattern: RegExp): str
 }
 
 describe('S2.13 Michael runtime response fixture integration static governance boundary', () => {
-  it('does not import stores, GraphRAG, direct adapters, Gateway fallback clients, or retrieval helpers', () => {
+  it('does not import stores, GraphRAG, direct adapters, legacy fallback clients, or retrieval helpers', () => {
     const forbiddenImports =
-      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j-driver|chromadb|graph-?rag|\/services\/gateway|\/services\/persistence|\/persistence\/|gatewayFallback|gateway-fallback|rawRetrieval|retrievalHelper|directRetrieval|retrieval)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j-driver|chromadb|graph-?rag|\/services\/PERSISTENCE|\/services\/persistence|\/persistence\/|PERSISTENCEFallback|PERSISTENCE-fallback|rawRetrieval|retrievalHelper|directRetrieval|retrieval)[^'"]*['"]/i;
     const matches = matchingImportLines(integrationFiles, forbiddenImports);
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('does not call store, GraphRAG, Context Packet builder, retrieval, persistence, or Gateway fallback APIs', () => {
+  it('does not call store, GraphRAG, Context Packet builder, retrieval, persistence, or legacy fallback APIs', () => {
     const forbiddenCalls =
-      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|gatewayCall|directPersistenceCall|tripleStackWrite|mongoAdapter|neo4jAdapter|chromaAdapter|graphRag|graphrag|gatewayFallback|rawRetrieval|retrievalHelper|directRetrieval|fetchKnowledge|queryKnowledge|retrieveContext|buildContextPacket|prepareContextPacketFoundation|persist\w*|save\w*|\w+Repository|\w+Store)\s*(?:\(|\.)/i;
+      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|persistenceCall|directStoreCall|tripleStackWrite|mongoAdapter|neo4jAdapter|chromaAdapter|graphRag|graphrag|PERSISTENCEFallback|rawRetrieval|retrievalHelper|directRetrieval|fetchKnowledge|queryKnowledge|retrieveContext|buildContextPacket|prepareContextPacketFoundation|persist\w*|save\w*|\w+Repository|\w+Store)\s*(?:\(|\.)/i;
     const matches = matchingLines(integrationFiles, forbiddenCalls);
     expect(matches, matches.join('\n')).toEqual([]);
   });
@@ -151,12 +151,12 @@ describe('S2.13 Michael runtime response fixture integration static governance b
     expect(comMatches, comMatches.join('\n')).toEqual([]);
   });
 
-  it('preserves Gateway fallback client source outside S2.13 changes', () => {
-    const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
-    expect(gatewayClient).toContain('export async function gatewayCall');
-    expect(gatewayClient).toContain('directPersistenceCall');
-    expect(gatewayClient).toContain('/execute');
-    expect(gatewayClient).toContain('GATEWAY_URL');
+  it('verifies the legacy HTTP fallback stays retired (ACR-0009) outside S2.13 changes', () => {
+    const persistenceClient = readFileSync(resolve(repoRoot, 'server/src/services/persistence/dispatch.ts'), 'utf8');
+    expect(persistenceClient).toContain('export async function persistenceCall');
+    expect(persistenceClient).toContain('directStoreCall');
+    expect(persistenceClient).not.toContain('/execute');
+    expect(persistenceClient).not.toContain('PERSISTENCE_URL');
   });
 
   it('does not introduce telephony, event activation, outcome/action persistence, automation, scoring, or knowledge approval', () => {

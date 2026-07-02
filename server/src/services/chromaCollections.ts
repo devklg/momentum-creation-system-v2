@@ -21,14 +21,17 @@
  *      register it here), it throws BEFORE Mongo lands — failing loud on the
  *      Chroma leg instead of orphaning a Mongo row. Backed by an in-process
  *      cache seeded by the boot ensure, so the steady-state hot path makes no
- *      extra gateway calls.
+ *      extra PERSISTENCE calls.
  *
  * SINGLE SOURCE OF TRUTH: when a new domain writes to a new Chroma collection,
  * add its name here. Anything written but not registered will be caught loud
  * by layer 2 on first use rather than silently half-writing.
  */
 
-import { gatewayCall } from './gateway.js';
+import { persistenceCall } from './persistence/dispatch.js';
+// NOTE (ACR-0009): despite the historical name, persistenceCall dispatches ONLY to
+// the direct persistence adapters — these boot/write guards run against the
+// dedicated Chroma stack directly, never through the external MCP tool server.
 
 /**
  * Every ChromaDB collection the server writes to. Grep anchor: each entry
@@ -98,7 +101,7 @@ export class ChromaCollectionMissingError extends Error {
 const known = new Set<string>();
 
 async function fetchExistingCollections(): Promise<string[]> {
-  const data = await gatewayCall<{
+  const data = await persistenceCall<{
     count?: number;
     collections?: Array<{ name?: string }>;
   }>('chromadb', 'list_collections', {});
@@ -108,7 +111,7 @@ async function fetchExistingCollections(): Promise<string[]> {
 }
 
 /**
- * Refresh the in-process cache from the gateway. Returns the set of names that
+ * Refresh the in-process cache from the PERSISTENCE. Returns the set of names that
  * currently exist. Cheap-ish (one list call); used at boot and on cache miss.
  */
 async function refreshKnown(): Promise<Set<string>> {
@@ -122,10 +125,10 @@ async function refreshKnown(): Promise<Set<string>> {
  * missing ones (idempotent) so the triple-stack never half-writes for lack of
  * a collection. Logs loudly which collections were created vs already present.
  *
- * Non-fatal if the gateway itself is unreachable at boot — that is a distinct
- * failure class (gateway down ≠ collection missing) and should not brick the
+ * Non-fatal if the PERSISTENCE itself is unreachable at boot — that is a distinct
+ * failure class (PERSISTENCE down ≠ collection missing) and should not brick the
  * API server's startup; the write-time guard still protects every write once
- * the gateway is back.
+ * the PERSISTENCE is back.
  */
 export async function ensureChromaCollections(): Promise<void> {
   let existing: Set<string>;
@@ -134,7 +137,7 @@ export async function ensureChromaCollections(): Promise<void> {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.warn(
-      `[chroma-boot] could not list collections (gateway unreachable?) — ` +
+      `[chroma-boot] could not list collections (PERSISTENCE unreachable?) — ` +
         `skipping ensure; write-time guard remains active. ${
           err instanceof Error ? err.message : String(err)
         }`,
@@ -158,11 +161,10 @@ export async function ensureChromaCollections(): Promise<void> {
 
   for (const name of missing) {
     try {
-      await gatewayCall('chromadb', 'create_collection', {
+      await persistenceCall('chromadb', 'create_collection', {
         name,
         metadata: {
-          chat_number: 147,
-          project: 'momentum_creation_system_v1',
+          project: 'momentum_creation_system_v2',
           purpose: 'auto-created by boot-time triple-stack collection assertion',
         },
       });
@@ -192,7 +194,7 @@ export async function ensureChromaCollections(): Promise<void> {
  * collection is absent — failing loud instead of letting Mongo land alone.
  *
  * Cache-first: a hit (the steady state after the boot ensure) is free. On a
- * miss it refreshes once from the gateway — covering collections created at
+ * miss it refreshes once from the PERSISTENCE — covering collections created at
  * runtime (e.g. training's lazy bootstrap) — and only throws if still absent.
  */
 export async function assertChromaCollectionExists(collection: string): Promise<void> {

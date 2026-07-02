@@ -3,8 +3,8 @@
 Report date: 2026-06-27
 Author: Claude (Chief Governance Architect)
 Sprint: 1 (Platform Alignment), item S1.3
-Governs / governed by: **ACR-0007 (Approved 2026-06-27)** — runtime persistence is direct Mongo/Neo4j/Chroma; the Universal Gateway is developer tooling only.
-Status: **Planning document only. No production code in this artifact.** Code execution runs under ACR-0007's gates (Implementing → Verified with persistence read-back → Merged; Kevin merges).
+Governs / governed by: **ACR-0007 (Approved 2026-06-27)** and **ACR-0009 (Implemented 2026-07-02)** — runtime persistence is direct Mongo/Neo4j/Chroma; the Universal Gateway is developer tooling only.
+Status: **Planning document superseded by implementation.** ACR-0009 retired the Gateway HTTP persistence fallback; this artifact remains as migration history.
 
 ---
 
@@ -14,9 +14,9 @@ Move the production runtime's persistence from gateway-routed HTTP calls to **di
 
 ---
 
-## 2. Current state (verified on disk)
+## 2. Historical starting state (verified on disk 2026-06-27)
 
-All persistence funnels through one function: `gatewayCall(tool, action, params)` in `server/src/services/gateway.ts`, which POSTs `{ tool, action, params }` to `${GATEWAY_URL}/execute` (`http://localhost:2526/api`, the MCP gateway). Reach: **405 call sites across 63 files**, plus the two write helpers and the outbox that wrap it:
+At the start of the migration, all persistence funneled through one function: `gatewayCall(tool, action, params)` in `server/src/services/gateway.ts`, which POSTed `{ tool, action, params }` to `${GATEWAY_URL}/execute` (`http://localhost:2526/api`, the MCP gateway). Reach: **405 call sites across 63 files**, plus the two write helpers and the outbox that wrap it. ACR-0009 later repointed this seam to direct adapters only and removed the runtime `GATEWAY_URL` dependency:
 
 - `services/tripleStack.ts` — `tripleStackWrite()` wraps three calls: `gatewayCall('mongodb','insert',…)`, `gatewayCall('neo4j','cypher',…)`, `gatewayCall('chromadb','add',…)`.
 - `services/tieredWrite.ts` — `tieredWrite()` (+ `writeGraphCritical/Knowledge/Operational`) adds per-tier failure policy, Mongo read-back (`verifyMongoLanded` → `mongodb.query` with `filter`), compensating rollback (`mongodb.delete`), and Neo4j read-back (`neo4j.cypher` verify). Knowledge/operational projections defer to `projectionOutbox.ts` (durable retry, also via `gatewayCall`).

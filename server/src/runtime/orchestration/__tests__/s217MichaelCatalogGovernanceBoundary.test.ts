@@ -183,10 +183,10 @@ describe('S2.17 Michael response catalog static governance boundary', () => {
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#6 does not import a Gateway fallback client (or call gatewayCall)', () => {
+  it('#6 does not import a legacy fallback client (or call persistenceCall)', () => {
     const importPattern =
-      /\bfrom\s+['"][^'"]*(?:\/services\/gateway|gatewayFallback|gateway-fallback)[^'"]*['"]/i;
-    const callPattern = /\bgatewayCall\s*\(|\bdirectPersistenceCall\s*\(/;
+      /\bfrom\s+['"][^'"]*(?:\/services\/PERSISTENCE|PERSISTENCEFallback|PERSISTENCE-fallback)[^'"]*['"]/i;
+    const callPattern = /\bpersistenceCall\s*\(|\bdirectStoreCall\s*\(/;
     const matches = [
       ...matchingImportLines(s217SurfaceFiles(), importPattern),
       ...matchingCodeTokenLines(s217SurfaceFiles(), callPattern),
@@ -298,10 +298,10 @@ describe('S2.17 Michael response catalog static governance boundary', () => {
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#18 preserves the Gateway fallback client outside the S2.17 surface', () => {
-    const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
-    expect(gatewayClient).toContain('export async function gatewayCall');
-    expect(gatewayClient).toContain('GATEWAY_URL');
+  it('#18 verifies the legacy HTTP fallback stays retired (ACR-0009) outside the S2.17 surface', () => {
+    const persistenceClient = readFileSync(resolve(repoRoot, 'server/src/services/persistence/dispatch.ts'), 'utf8');
+    expect(persistenceClient).toContain('export async function persistenceCall');
+    expect(persistenceClient).not.toContain('PERSISTENCE_URL');
   });
 
   it('#19 does not introduce event persistence / outbox / replay / subscriber / event API code', () => {

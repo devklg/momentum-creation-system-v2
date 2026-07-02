@@ -28,7 +28,7 @@ import { runRuntimeTurnFixtureScenario } from '../fixtures/runtimeTurnHarness.js
 // `runMichaelRuntimeAdapterContract` from './michaelRuntimeAdapterContract.js'.
 // That is an internal, already-inert ORCHESTRATION module — NOT a forbidden
 // direct data adapter. The direct-persistence-adapter scan below targets only
-// mongo/neo4j/chroma adapters, `/services/*adapter`, gateway-fallback, and
+// mongo/neo4j/chroma adapters, `/services/*adapter`, PERSISTENCE-fallback, and
 // retrieval helpers — never a bare /adapter/ token — so this import is allowed.
 //
 // S2.4-trap avoidance #2: the derivation and the selector carry defensive
@@ -222,10 +222,10 @@ describe('S2.19 Michael response selection-request derivation static governance 
     );
   });
 
-  it('#6 does not import a Gateway fallback client (or call gatewayCall)', () => {
+  it('#6 does not import a legacy fallback client (or call persistenceCall)', () => {
     const importPattern =
-      /\bfrom\s+['"][^'"]*(?:\/services\/gateway|gatewayFallback|gateway-fallback)[^'"]*['"]/i;
-    const callPattern = /\bgatewayCall\s*\(|\bdirectPersistenceCall\s*\(/;
+      /\bfrom\s+['"][^'"]*(?:\/services\/PERSISTENCE|PERSISTENCEFallback|PERSISTENCE-fallback)[^'"]*['"]/i;
+    const callPattern = /\bpersistenceCall\s*\(|\bdirectStoreCall\s*\(/;
     const matches = [
       ...matchingImportLines(s219SurfaceFiles(), importPattern),
       ...matchingCodeTokenLines(s219SurfaceFiles(), callPattern),
@@ -337,10 +337,10 @@ describe('S2.19 Michael response selection-request derivation static governance 
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#18 preserves the Gateway fallback client outside the S2.19 surface', () => {
-    const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
-    expect(gatewayClient).toContain('export async function gatewayCall');
-    expect(gatewayClient).toContain('GATEWAY_URL');
+  it('#18 verifies the legacy HTTP fallback stays retired (ACR-0009) outside the S2.19 surface', () => {
+    const persistenceClient = readFileSync(resolve(repoRoot, 'server/src/services/persistence/dispatch.ts'), 'utf8');
+    expect(persistenceClient).toContain('export async function persistenceCall');
+    expect(persistenceClient).not.toContain('PERSISTENCE_URL');
   });
 
   it('#19 does not introduce event persistence / outbox / replay / subscriber / event API code', () => {

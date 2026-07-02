@@ -1,5 +1,5 @@
 import { fetch } from 'undici';
-import { GatewayError } from '../../gateway.js';
+import { PersistenceError } from '../dispatch.js';
 import { embed } from './embedder.js';
 import { chromaCollectionsUrl } from './connection.js';
 
@@ -30,7 +30,7 @@ interface ChromaQueryResponse {
   distances?: number[][];
 }
 
-interface GatewayChromaQueryResult {
+interface PERSISTENCEChromaQueryResult {
   collection: string;
   query?: string;
   n_results: number;
@@ -72,19 +72,19 @@ export async function listCollections(): Promise<{ collections: ChromaCollection
 export async function getCollection(name: string): Promise<ChromaCollection> {
   const { collections } = await listCollections();
   const found = collections.find((c) => c.name === name || c.id === name);
-  if (!found) throw new GatewayError('chromadb', 'get_collection', `collection not found: ${name}`);
+  if (!found) throw new PersistenceError('chromadb', 'get_collection', `collection not found: ${name}`);
   return found;
 }
 
 function collectionEndpoint(collection: ChromaCollection, suffix: string): string {
   const id = collection.id ?? collection.name;
-  if (!id) throw new GatewayError('chromadb', suffix, 'collection has no id or name');
+  if (!id) throw new PersistenceError('chromadb', suffix, 'collection has no id or name');
   return `${chromaCollectionsUrl()}/${encodeURIComponent(id)}/${suffix}`;
 }
 
 export async function createCollection(params: ChromaParams): Promise<unknown> {
   const name = params.name ?? params.collection;
-  if (!name) throw new GatewayError('chromadb', 'create_collection', 'collection name required');
+  if (!name) throw new PersistenceError('chromadb', 'create_collection', 'collection name required');
   return request(chromaCollectionsUrl(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -93,11 +93,11 @@ export async function createCollection(params: ChromaParams): Promise<unknown> {
 }
 
 export async function add(params: ChromaParams): Promise<{ ok: true; count: number }> {
-  if (!params.collection) throw new GatewayError('chromadb', 'add', 'collection required');
+  if (!params.collection) throw new PersistenceError('chromadb', 'add', 'collection required');
   const ids = params.ids ?? [];
   const documents = params.documents ?? [];
   if (ids.length !== documents.length) {
-    throw new GatewayError('chromadb', 'add', '`ids` and `documents` length mismatch');
+    throw new PersistenceError('chromadb', 'add', '`ids` and `documents` length mismatch');
   }
   const collection = await getCollection(params.collection);
   const embeddings = await embed(documents);
@@ -115,10 +115,10 @@ export async function add(params: ChromaParams): Promise<{ ok: true; count: numb
 }
 
 export async function query(params: ChromaParams): Promise<unknown> {
-  if (!params.collection) throw new GatewayError('chromadb', 'query_with_filter', 'collection required');
+  if (!params.collection) throw new PersistenceError('chromadb', 'query_with_filter', 'collection required');
   const queryTexts = params.query_texts ?? (params.query ? [params.query] : []);
   if (queryTexts.length === 0) {
-    throw new GatewayError('chromadb', 'query_with_filter', 'query text required');
+    throw new PersistenceError('chromadb', 'query_with_filter', 'query text required');
   }
   const collection = await getCollection(params.collection);
   const queryEmbeddings = await embed(queryTexts);
@@ -133,7 +133,7 @@ export async function query(params: ChromaParams): Promise<unknown> {
   });
 }
 
-function flattenFirstQueryResult(body: unknown): GatewayChromaQueryResult['results'] {
+function flattenFirstQueryResult(body: unknown): PERSISTENCEChromaQueryResult['results'] {
   const response = body as ChromaQueryResponse;
   return {
     ids: response.ids?.[0] ?? [],
@@ -143,14 +143,14 @@ function flattenFirstQueryResult(body: unknown): GatewayChromaQueryResult['resul
   };
 }
 
-export async function queryGatewayShape(
+export async function queryPERSISTENCEShape(
   params: ChromaParams,
   options: { includeQuery: boolean },
-): Promise<GatewayChromaQueryResult> {
-  if (!params.collection) throw new GatewayError('chromadb', 'query_with_filter', 'collection required');
+): Promise<PERSISTENCEChromaQueryResult> {
+  if (!params.collection) throw new PersistenceError('chromadb', 'query_with_filter', 'collection required');
   const queryText = params.query_texts?.[0] ?? params.query;
   if (!queryText) {
-    throw new GatewayError('chromadb', 'query_with_filter', 'query text required');
+    throw new PersistenceError('chromadb', 'query_with_filter', 'query text required');
   }
   const body = await query(params);
   return {
@@ -177,14 +177,14 @@ export async function chromaAdapter(
       case 'add':
         return await add(p);
       case 'search':
-        return await queryGatewayShape(p, { includeQuery: true });
+        return await queryPERSISTENCEShape(p, { includeQuery: true });
       case 'query_with_filter':
-        return await queryGatewayShape(p, { includeQuery: false });
+        return await queryPERSISTENCEShape(p, { includeQuery: false });
       default:
-        throw new GatewayError('chromadb', action, `unsupported chromadb action: ${action}`);
+        throw new PersistenceError('chromadb', action, `unsupported chromadb action: ${action}`);
     }
   } catch (err) {
-    if (err instanceof GatewayError) throw err;
-    throw new GatewayError('chromadb', action, err instanceof Error ? err.message : String(err));
+    if (err instanceof PersistenceError) throw err;
+    throw new PersistenceError('chromadb', action, err instanceof Error ? err.message : String(err));
   }
 }

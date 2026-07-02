@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  gatewayCall: vi.fn(),
+  persistenceCall: vi.fn(),
   tripleStackWrite: vi.fn(),
   createInvitation: vi.fn(),
 }));
 
-vi.mock('../../services/gateway.js', () => ({
-  gatewayCall: mocks.gatewayCall,
+vi.mock('../../services/persistence/dispatch.js', () => ({
+  persistenceCall: mocks.persistenceCall,
 }));
 
 vi.mock('../../services/tripleStack.js', () => ({
@@ -36,8 +36,8 @@ const IVORY_RECORD = {
   updatedAt: '2026-06-01T00:00:00.000Z',
 };
 
-/** Default gateway impl: returns the seeded ivory record for queries, ok for the rest. */
-function defaultGateway(record: AnyRec | null = { ...IVORY_RECORD }) {
+/** Default PERSISTENCE impl: returns the seeded ivory record for queries, ok for the rest. */
+function defaultPersistence(record: AnyRec | null = { ...IVORY_RECORD }) {
   return async (tool: string, action: string, params: AnyRec): Promise<unknown> => {
     if (tool === 'mongodb' && action === 'query') {
       if (params.collection === 'tmag_ivory_prospect_names') {
@@ -58,7 +58,7 @@ async function loadIvory() {
 
 beforeEach(() => {
   vi.resetModules();
-  mocks.gatewayCall.mockReset();
+  mocks.persistenceCall.mockReset();
   mocks.tripleStackWrite.mockReset();
   mocks.createInvitation.mockReset();
 });
@@ -74,7 +74,7 @@ describe('Ivory persistence fixes', () => {
       message: 'Hey Dana',
     });
     // getIvoryName query returns the record; the neo4j leg of markIvoryInvited throws.
-    mocks.gatewayCall.mockImplementation(async (tool: string, action: string, _params: AnyRec) => {
+    mocks.persistenceCall.mockImplementation(async (tool: string, action: string, _params: AnyRec) => {
       if (tool === 'mongodb' && action === 'query') {
         return { count: 1, documents: [{ ...IVORY_RECORD }] };
       }
@@ -104,12 +104,12 @@ describe('Ivory persistence fixes', () => {
   });
 
   it('#3 markIvoryInvited SETs status before MERGE-ing the prospect node', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const ivory = await loadIvory();
 
     await ivory.markIvoryInvited('ivory_1', 'TMAG-1', 'P1');
 
-    const neo = mocks.gatewayCall.mock.calls.find(
+    const neo = mocks.persistenceCall.mock.calls.find(
       ([tool, action]) => tool === 'neo4j' && action === 'cypher',
     );
     expect(neo).toBeDefined();
@@ -123,7 +123,7 @@ describe('Ivory persistence fixes', () => {
   });
 
   it('#5 createIvoryName compensates the orphaned row when the write fails', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     mocks.tripleStackWrite.mockRejectedValue(new Error('neo4j leg failed after mongo insert'));
     const ivory = await loadIvory();
 
@@ -131,10 +131,10 @@ describe('Ivory persistence fixes', () => {
       ivory.createIvoryName('TMAG-1', { firstName: 'Dana', lastName: 'Smith' } as never),
     ).rejects.toThrow(/neo4j leg failed/);
 
-    const del = mocks.gatewayCall.mock.calls.find(
+    const del = mocks.persistenceCall.mock.calls.find(
       ([tool, action]) => tool === 'mongodb' && action === 'delete',
     );
-    const detach = mocks.gatewayCall.mock.calls.find(
+    const detach = mocks.persistenceCall.mock.calls.find(
       ([tool, action, p]) =>
         tool === 'neo4j' &&
         action === 'cypher' &&
@@ -146,12 +146,12 @@ describe('Ivory persistence fixes', () => {
   });
 
   it('#6 updateIvoryName refreshes the Chroma doc with the edited fields', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const ivory = await loadIvory();
 
     await ivory.updateIvoryName('ivory_1', 'TMAG-1', { notes: 'brand new note' } as never);
 
-    const chromaAdd = mocks.gatewayCall.mock.calls.find(
+    const chromaAdd = mocks.persistenceCall.mock.calls.find(
       ([tool, action]) => tool === 'chromadb' && action === 'add',
     );
     expect(chromaAdd).toBeDefined();
@@ -161,7 +161,7 @@ describe('Ivory persistence fixes', () => {
   });
 
   it('deferred #1: updateIvoryStatus rejects a bare "invited" transition', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const ivory = await loadIvory();
 
     await expect(
@@ -170,7 +170,7 @@ describe('Ivory persistence fixes', () => {
   });
 
   it('deferred #2: updateIvoryStatus throws NotFound when the row vanished (0-match)', async () => {
-    mocks.gatewayCall.mockImplementation(async (tool: string, action: string, _p: AnyRec) => {
+    mocks.persistenceCall.mockImplementation(async (tool: string, action: string, _p: AnyRec) => {
       if (tool === 'mongodb' && action === 'query') {
         return { count: 1, documents: [{ ...IVORY_RECORD }] };
       }
@@ -185,7 +185,7 @@ describe('Ivory persistence fixes', () => {
   });
 
   it('deferred #2: updateIvoryName throws NotFound on a 0-match update', async () => {
-    mocks.gatewayCall.mockImplementation(async (tool: string, action: string, _p: AnyRec) => {
+    mocks.persistenceCall.mockImplementation(async (tool: string, action: string, _p: AnyRec) => {
       if (tool === 'mongodb' && action === 'query') {
         return { count: 1, documents: [{ ...IVORY_RECORD }] };
       }
@@ -200,7 +200,7 @@ describe('Ivory persistence fixes', () => {
   });
 
   it('deferred #2: markIvoryInvited throws NotFound on a 0-match update', async () => {
-    mocks.gatewayCall.mockImplementation(async (tool: string, action: string, _p: AnyRec) => {
+    mocks.persistenceCall.mockImplementation(async (tool: string, action: string, _p: AnyRec) => {
       if (tool === 'mongodb' && action === 'query') {
         return { count: 1, documents: [{ ...IVORY_RECORD }] };
       }

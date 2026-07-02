@@ -26,10 +26,10 @@ HEAD at write: `d20741f` (Chat #146). Reconciled Chat #147 (Category-A decisions
 ## 0 Â· FOUNDATION (infra + shared)
 
 - [x] Monorepo scaffold â€” apps/com, apps/team, apps/admin, server, packages/shared (#92)
-- [x] Triple-stack persistence: MongoDB + Neo4j + ChromaDB — services/tripleStack.ts, gateway.ts (#93). NOTE (2026-06-27): target architecture is direct store access per locked-spec §3.14; current helpers route through the MCP gateway (dev tooling) and are the migration target for Sprint 1 S1.3.
+- [x] Triple-stack persistence: MongoDB + Neo4j + ChromaDB — services/tripleStack.ts, persistence/dispatch.ts (#93). NOTE (2026-07-02): runtime persistence is direct store access per locked-spec §3.14; the old HTTP persistence path is retired.
 - [x] Shared package â€” brand.ts, compliance.ts, rules.ts, types.ts (#92,#110)
 - [x] Decision ledger + master work queue + this wireframe (#129)
-- [x] LLM layer (direct Anthropic Messages API, NOT through gateway, #118) â€” services/anthropic.ts; ScriptMaker + Ivory consume it. VERIFIED LIVE #145: ANTHROPIC_API_KEY landed in root .env, server restarted, Ivory Coach returned input-specific questions (typed "i went to oru" produced 7 ORU-specific prompts, impossible from the evergreen fallback). Key live, complete() reaching the API end to end.
+- [x] LLM layer (direct Anthropic Messages API, NOT through external tooling, #118) â€” services/anthropic.ts; ScriptMaker + Ivory consume it. VERIFIED LIVE #145: ANTHROPIC_API_KEY landed in root .env, server restarted, Ivory Coach returned input-specific questions (typed "i went to oru" produced 7 ORU-specific prompts, impossible from the evergreen fallback). Key live, complete() reaching the API end to end.
   - [x] anthropic.ts transport + dormant-aware fallback (default claude-haiku-4-5-20251001; prompt-caching on stable prefix)
   - [x] Ivory coaching consumer (#131/#132 â€” coach surfaces WDYK prompts; evergreen fallback when key unset; VERIFIED firing real LLM #145)
   - [x] Michael Training Agent + Daily Success Coach artifact consumer (#134/#147 reconciled 2026-06-24 — server/src/domain/michaelScoring.ts, triple-stacked, sponsor-stamped, no classification)
@@ -224,7 +224,7 @@ Nine surfaces. Build order per ADMIN J.6: gate -> audit log -> Core -> BA/Prospe
 - DEP: flush window (RESOLVED fixed-8wk); position-stack window (open â€” VisibleWindowPanel lets Kevin set it live)
 
 ### 4.H Live Operations  `[x]` (Section H — build 6th; shipped Chat #144 fan-out)
-- [x] Real-time usage strip (active dashboard viewers, events/min, gateway p50/p95, active admin sessions) via SSE — UsageStrip.tsx + useUsageStream.ts hook (H.1, snapshot+heartbeat at 30s); server services/gatewayLatency.ts + services/poolEvents.ts extended additively (eventsInLastMinute / activeAdminSessions counters added; original public API unchanged); GET /api/admin/live-ops/usage/stream
+- [x] Real-time usage strip (active dashboard viewers, events/min, persistence p50/p95, active admin sessions) via SSE — UsageStrip.tsx + useUsageStream.ts hook (H.1, snapshot+heartbeat at 30s); server services/persistenceLatency.ts + services/poolEvents.ts extended additively (eventsInLastMinute / activeAdminSessions counters added; original public API unchanged); GET /api/admin/live-ops/usage/stream
 - [x] Growth stat cards 24h / 7d / 30d with previous-window deltas (BAs added, prospects placed, enrollments) — GrowthCards.tsx; GET /api/admin/live-ops/growth
 - [x] Holding-tank live grid (color by age bucket fresh/warming/aging/stale, hover detail, click → /admin/prospects?prospectId={id} deep-link) — HoldingTankGrid.tsx; GET /api/admin/live-ops/grid
 - [x] Toggleable conversion funnels (prospect funnel: mint→click→video_started→video_complete→enrolled; BA activation funnel: signed_up→welcomed→michael_done→first_invite→first_video_complete→first_enrollment) — ConversionFunnel.tsx; GET /api/admin/live-ops/funnel?kind=prospect|ba_activation

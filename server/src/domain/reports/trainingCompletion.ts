@@ -20,7 +20,7 @@
  * Compliance (ADMIN I.5): operational — no scoring, no ranking.
  */
 
-import { gatewayCall } from '../../services/gateway.js';
+import { persistenceCall } from '../../services/persistence/dispatch.js';
 import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
@@ -77,7 +77,7 @@ export async function buildTrainingReport(
   if (scopedTmagIds !== null) baFilter.tmagId = { $in: scopedTmagIds };
   Object.assign(baFilter, rangeClause('createdAt', range));
 
-  const basRes = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+  const basRes = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
     filter: baFilter,
@@ -92,7 +92,7 @@ export async function buildTrainingReport(
   const moduleCompletedCount = new Map<number, number>([[1, 0], [2, 0], [3, 0], [4, 0], [5, 0]]);
 
   if (baIds.length > 0) {
-    const progRes = await gatewayCall<{ documents: FastStartDoc[] }>('mongodb', 'query', {
+    const progRes = await persistenceCall<{ documents: FastStartDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_FAST_START,
       filter: { tmagId: { $in: baIds }, state: 'completed' },

@@ -9,7 +9,7 @@
 There is **ONE** canonical chat identity location:
 
 ```
-MongoDB  ->  database: universal_gateway   collection: chat_registry
+MongoDB  ->  database: agent_operations   collection: chat_registry
 ```
 
 `session_handoffs` is no longer the identity authority. It is the canonical
@@ -23,7 +23,7 @@ See [chat-registry-authority.md](chat-registry-authority.md).
 |------------------|---------|------|
 | `_id`            | string  | MUST be `handoff_chat_{N}` |
 | `chat_number`    | int     | MUST equal `{N}` |
-| `chat_registry_id` | string | MUST point to `universal_gateway.chat_registry.id` |
+| `chat_registry_id` | string | MUST point to `agent_operations.chat_registry.id` |
 | `created_at`     | string  | ISO-8601 UTC, `...Z` |
 | `updated_at`     | string  | ISO-8601 UTC, `...Z` |
 | `title`          | string  | `Chat #{N} — <what shipped>` |

@@ -187,16 +187,16 @@ describe('S3.11 michael-runtime route server-owned turn boundary', () => {
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#8 imports no store / Gateway / GraphRAG / retrieval client', () => {
+  it('#8 imports no store / PERSISTENCE / GraphRAG / retrieval client', () => {
     const pattern =
-      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/gateway|gatewayFallback|\/tripleStack|rawRetrieval|retrievalHelper|directRetrieval|\/retrieval\b)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/PERSISTENCE|PERSISTENCEFallback|\/tripleStack|rawRetrieval|retrievalHelper|directRetrieval|\/retrieval\b)[^'"]*['"]/i;
     const matches = matchingImportLines(routeFiles(), pattern);
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
   it('#9 introduces no persistence write call shapes', () => {
     const pattern =
-      /\.(?:insert|update|save|create)\s*\(|\b(?:tripleStackWrite|gatewayCall|directPersistenceCall)\s*\(/i;
+      /\.(?:insert|update|save|create)\s*\(|\b(?:tripleStackWrite|persistenceCall|directStoreCall)\s*\(/i;
     const matches = matchingCodeTokenLines(routeFiles(), pattern);
     expect(matches, matches.join('\n')).toEqual([]);
   });

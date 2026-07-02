@@ -2,7 +2,7 @@
  * Knowledge intake pipeline (Phase 4 — P4.5A).
  *
  * Pure, inert orchestration of: parse → chunk → index. It returns the preserved raw source
- * alongside the derived document/chunks/index records. It performs NO persistence, NO Gateway
+ * alongside the derived document/chunks/index records. It performs NO persistence, NO PERSISTENCE
  * call, NO LLM. It is called only by tests (and, later, by an approved Phase 8 boundary).
  *
  *   Kevin adds knowledge → raw source preserved → parsed/normalized → sectioned → chunked

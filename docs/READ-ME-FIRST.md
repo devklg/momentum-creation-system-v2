@@ -30,7 +30,7 @@ disease this system was built to cure.
 ## Precedence (when sources disagree)
 
 decision ledger (currency) > `docs/locked-spec.md` (state) > design docs >
-`docs/build-registry.md` > git log > Gateway chat registry > handoffs.
+`docs/build-registry.md` > git log > agent chat registry > handoffs.
 
 `KEVIN-CONTEXT.md` / `THE-KEY` are NOT session-start reads under current settings.
 Pull a specific doc only when the work needs it.
@@ -54,7 +54,7 @@ Pull a specific doc only when the work needs it.
   SurrealDB contract: action `create` (not `query`-with-params), param `id`, e.g.
   `id:"session_handoff:chat_NNN"`; `session_handoff` table exists in `team_magnificent/parallel_test`.
 
-## Gateway gotchas (cost time every session until known)
+## External tooling gotchas (cost time every session until known)
 
 - desktop-commander run action toggles between `start_process` and `execute_command` — if one errors "Action not found", use the other.
 - PowerShell: use `;` not `&&`; `Out-File -Encoding utf8` writes a BOM that breaks `JSON.parse` (strip `/^\uFEFF/`).

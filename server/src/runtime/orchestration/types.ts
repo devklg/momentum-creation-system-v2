@@ -817,7 +817,7 @@ export interface MichaelRuntimeResolutionClassification {
 
 /**
  * Inert, returned-only resolution trace. Contains ONLY redacted, controlled
- * metadata: no raw Context Packet, no raw retrieval/store/GraphRAG/Gateway
+ * metadata: no raw Context Packet, no raw retrieval/store/GraphRAG/PERSISTENCE
  * output, no generated text, no tokens / request IDs / session IDs / PII.
  */
 export interface MichaelRuntimeResolutionTrace {

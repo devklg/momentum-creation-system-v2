@@ -2,7 +2,7 @@
  * S3.6 — Michael runtime route observability (in-memory aggregate counters ONLY).
  *
  * In-memory only: plain module-level integer counters. NO persistence, NO file
- * writes, NO MongoDB/Neo4j/ChromaDB/GraphRAG/Gateway, NO LLM. Counters reset to
+ * writes, NO MongoDB/Neo4j/ChromaDB/GraphRAG/PERSISTENCE, NO LLM. Counters reset to
  * zero on every process restart. Aggregate counts ONLY — this module stores no
  * request body, no response body, no trace, no Context Packet, no PII, and no
  * tokens or session/turn/correlation IDs.

@@ -15,7 +15,7 @@
  * Time range narrows enrollment events by flushedAt.
  */
 
-import { gatewayCall } from '../../services/gateway.js';
+import { persistenceCall } from '../../services/persistence/dispatch.js';
 import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { monthKey, rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
@@ -70,7 +70,7 @@ export async function buildEnrollmentReport(
   };
   if (scopedTmagIds !== null) placementsFilter.sponsorTmagId = { $in: scopedTmagIds };
 
-  const placementsRes = await gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
+  const placementsRes = await persistenceCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_PLACEMENTS,
     filter: placementsFilter,
@@ -84,7 +84,7 @@ export async function buildEnrollmentReport(
   const baIds = [...new Set(enrollments.map((e) => e.sponsorTmagId))];
   const baLookup = new Map<string, BaDoc>();
   if (baIds.length > 0) {
-    const basRes = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+    const basRes = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_BAS,
       filter: { tmagId: { $in: baIds }, deleted: { $ne: true } },

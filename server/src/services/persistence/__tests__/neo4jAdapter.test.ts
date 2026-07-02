@@ -21,7 +21,7 @@ describe('Neo4j direct adapter', () => {
     vi.clearAllMocks();
   });
 
-  it('normalizes driver records into the gateway-compatible cypher shape', async () => {
+  it('normalizes driver records into the PERSISTENCE-compatible cypher shape', async () => {
     const { neo4jAdapter } = await import('../neo4j/adapter.js');
     mocks.session.run.mockResolvedValue({
       records: [

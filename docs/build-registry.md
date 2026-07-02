@@ -8,8 +8,8 @@
 3. `docs/project-wireframe.md` — build decomposition + per-leaf status (#129)
 4. This file (`docs/build-registry.md`) — artifact index
 5. Git log on `github.com/devklg/momentum-creation-system-v1`
-6. Gateway chat registry in MongoDB `universal_gateway.chat_registry`
-7. Handoffs in MongoDB `universal_gateway.session_handoffs` (artifact lookup, not identity authority)
+6. Agent chat registry (artifact lookup, not app identity authority)
+7. Handoffs (artifact lookup, not app identity authority)
 
 **How to read the status column:**
 - `drafted` — exists as a prototype or working copy, not yet reviewed by Kevin
@@ -67,7 +67,7 @@
 
 | Artifact | Where it lives | Status | Chat Locked | Supersedes | Notes |
 |---|---|---|---|---|---|
-| Express boot + env loader + gateway client + triple-stack helper | `server/src/` | live | #92 | — | Foundation. `findRepoRoot` walks up to `pnpm-workspace.yaml` marker. |
+| Express boot + env loader + persistence dispatch client + triple-stack helper | `server/src/` | live | #92 | — | Foundation. `findRepoRoot` walks up to `pnpm-workspace.yaml` marker. |
 | `POST /api/auth/verify-code` | `server/src/routes/auth.ts` | live | #92 | — | Live access-code validation, debounced from client. |
 | `POST /api/auth/register` | `server/src/routes/auth.ts` | live | #92 | — | 10-step sequence per Signup Architecture A.4. Argon2 password hash, TMBA-YYYYMMDD-XXXXXX BA ID, sponsor immutability at step 2, JWT cookie scoped to `.teammagnificent.team`. |
 | `server/src/domain/access-codes.ts` | `server/src/domain/` | live | #92 | — | `findAccessCode`. |
@@ -160,12 +160,12 @@
 
 | Artifact | Where it lives | Status | Chat Locked | Supersedes | Notes |
 |---|---|---|---|---|---|
-| Port allocation 7700–7799 reserved for MCS | `D:/server-gateway-mcp/PORT-REGISTRY.md` (changelog 2026-05-18) | live | #92 | — | 7700 server / 7701 com / 7702 team / 7703 admin. |
+| Port allocation 7700–7799 reserved for MCS | `external port registry` (changelog 2026-05-18) | live | #92 | — | 7700 server / 7701 com / 7702 team / 7703 admin. |
 | GitHub repo `devklg/momentum-creation-system-v1` (private, main) | https://github.com/devklg/momentum-creation-system-v1 | live | #92 | `devklg/momentum-creation-system` (abandoned) | 11 commits as of Chat #111, latest `8216311`. |
-| MongoDB `momentum.access_codes` (TM-01 + TM-02 + TM-TEST seeded) | MongoDB universal_gateway | live | #97 | #92 placeholder | TM-01 Kevin, TM-02 Paul, TM-TEST for end-to-end testing. |
-| Neo4j BA graph (founders + test BA, SPONSORED_BY edges, 5 camelCase constraints) | Neo4j on Universal Gateway | live | #97 | Onboarding OS residue (cleaned #94) | Constraints: `ba_baId_unique`, `ba_threeBaId_unique`, `ba_email_unique`, `accesscode_code_unique`, `commitment_id_unique`. |
+| MongoDB `momentum.access_codes` (TM-01 + TM-02 + TM-TEST seeded) | MongoDB `momentum` | live | #97 | #92 placeholder | TM-01 Kevin, TM-02 Paul, TM-TEST for end-to-end testing. |
+| Neo4j BA graph (founders + test BA, SPONSORED_BY edges, 5 camelCase constraints) | Neo4j dedicated app stack | live | #97 | Onboarding OS residue (cleaned #94) | Constraints: `ba_baId_unique`, `ba_threeBaId_unique`, `ba_email_unique`, `accesscode_code_unique`, `commitment_id_unique`. |
 | ChromaDB MCS collections (`mcs_commitments`, `mcs_access_codes`) | ChromaDB localhost:8100 | live | #94 | — | Bootstrapped during welcome flow build. |
-| Maxwell GPU embedding service autostart (Windows Task Scheduler) | `D:/agents/doc-parser/gpu-embeddings-service/` | live | #92 | — | Triggers on user logon. Required for ChromaDB writes through gateway. |
+| Maxwell GPU embedding service autostart (Windows Task Scheduler) | `D:/agents/doc-parser/gpu-embeddings-service/` | live | #92 | — | Triggers on user logon. Required for ChromaDB writes through external tooling. |
 | `.gitignore` includes `.handoff/` | `D:/momentum-creation-system-v1/.gitignore` | live | #111 | — | Per-session Perry write/verify files stay local. |
 
 ---

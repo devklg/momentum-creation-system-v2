@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type { McsLeadBatchRecord, McsVmLeadBatchSource, McsVmLeadType } from '@momentum/shared';
 
@@ -97,7 +97,7 @@ export async function findLeadBatchForOwner(
   leadBatchId: string,
   ownerTmagId: string,
 ): Promise<McsLeadBatchRecord> {
-  const result = await gatewayCall<{ documents: McsLeadBatchRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsLeadBatchRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { leadBatchId, ownerTmagId },
@@ -109,7 +109,7 @@ export async function findLeadBatchForOwner(
 }
 
 export async function listLeadBatchesForOwner(ownerTmagId: string): Promise<McsLeadBatchRecord[]> {
-  const result = await gatewayCall<{ documents: McsLeadBatchRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsLeadBatchRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { ownerTmagId },
@@ -134,13 +134,13 @@ export async function markLeadBatchImported(
     completedAt: now,
   };
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { leadBatchId, ownerTmagId },
     update: { $set: patch },
   });
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MATCH (lb:TmagLeadBatch {leadBatchId: $leadBatchId, ownerTmagId: $ownerTmagId}) ' +
       'SET lb.quantityImported = $quantityImported, lb.status = $status, ' +

@@ -5,7 +5,7 @@
 
 import argon2 from 'argon2';
 import { tripleStackWrite } from '../services/tripleStack.js';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import type { AccessCodeRecord } from './access-codes.js';
 
 export interface NewBAInput {
@@ -58,7 +58,7 @@ function mintTmagId(): string {
 }
 
 export async function emailExists(email: string): Promise<boolean> {
-  const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
+  const result = await persistenceCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: { email },
@@ -68,7 +68,7 @@ export async function emailExists(email: string): Promise<boolean> {
 }
 
 export async function threeBaIdExists(threeBaId: string): Promise<boolean> {
-  const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
+  const result = await persistenceCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: { threeBaId },
@@ -83,7 +83,7 @@ export async function threeBaIdExists(threeBaId: string): Promise<boolean> {
  * never resolve to a session.
  */
 export async function findBAByTmagId(tmagId: string): Promise<BARecord | null> {
-  const result = await gatewayCall<{ documents: BARecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: BARecord[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: { tmagId },
@@ -105,7 +105,7 @@ export async function findBAByTmagId(tmagId: string): Promise<BARecord | null> {
 export async function recordLogin(tmagId: string): Promise<void> {
   const at = new Date().toISOString();
   try {
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: 'momentum',
       collection: 'team_magnificent_members',
       filter: { tmagId },
@@ -135,7 +135,7 @@ export interface BAListItem {
 }
 
 export async function listAllBAsForAdmin(limit = 500): Promise<BAListItem[]> {
-  const raw = await gatewayCall<{ documents: BARecord[] }>('mongodb', 'query', {
+  const raw = await persistenceCall<{ documents: BARecord[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: {},
@@ -161,7 +161,7 @@ export async function listAllBAsForAdmin(limit = 500): Promise<BAListItem[]> {
     }
   }
   if (missingSponsors.size > 0) {
-    const sponsorLookup = await gatewayCall<{ documents: BARecord[] }>('mongodb', 'query', {
+    const sponsorLookup = await persistenceCall<{ documents: BARecord[] }>('mongodb', 'query', {
       database: 'momentum',
       collection: 'team_magnificent_members',
       filter: { tmagId: { $in: Array.from(missingSponsors) } },

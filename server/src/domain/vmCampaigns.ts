@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { findLeadBatchForOwner } from './vmLeadBatches.js';
 import type {
@@ -108,7 +108,7 @@ export async function findVMCampaignForOwner(
   vmCampaignId: string,
   ownerTmagId: string,
 ): Promise<McsVMCampaignRecord> {
-  const result = await gatewayCall<{ documents: McsVMCampaignRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsVMCampaignRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { vmCampaignId, ownerTmagId },
@@ -122,7 +122,7 @@ export async function findVMCampaignForOwner(
 export async function listVMCampaignsForOwner(
   ownerTmagId: string,
 ): Promise<McsVMCampaignRecord[]> {
-  const result = await gatewayCall<{ documents: McsVMCampaignRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsVMCampaignRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { ownerTmagId },

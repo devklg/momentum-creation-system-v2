@@ -81,9 +81,9 @@ to MongoDB and re-projected.
 
 **Rule 1.2.2** — Operate on actual state, never assumed state. Before asserting a
 store, agent, or service is down, the administrator must attempt the operation
-and read the real error. The gateway and the three primary stores
-(Mongo/Neo4j/Chroma) are the most reliable components; "down" is a hypothesis to
-test, not a status to announce.
+and read the real error. The three primary app stores (Mongo/Neo4j/Chroma), the
+GPU embedding service, and the external MCP tooling surface are reliable
+components; "down" is a hypothesis to test, not a status to announce.
 
 **Rule 1.2.3** — Never report an administrative action complete without reading
 the result back. A write is not done until it is verified in the store.
@@ -122,11 +122,11 @@ first-class configuration.
    .com / .team / admin  |   Application (server, 7700) |
         requests  ------>|   pnpm monorepo, TypeScript  |
                          +---------------+--------------+
-                                         | all writes via
+                                         | app-runtime writes via
                                          v
                          +------------------------------+
-                         |   Universal Gateway (v2)     |  one write fans out
-                         |   POST /execute              |  under tiered policy
+                         | Direct persistence adapters  |  writes/projections
+                         | server/src/services/*        |  under tiered policy
                          +---+--------+--------+--------+
                              |        |        |
              +---------------+        |        +---------------+
@@ -147,6 +147,10 @@ first-class configuration.
      |  SurrealDB    |  available; NOT a source of truth, NOT in launch write
      | (experiments) |  path (contract section 8). No app fact may live only here.
      +---------------+
+
+     external MCP tool server (2526 / dashboard 3102) sits beside the app as
+     MCP/developer tooling for agents and operator scripts. It is not the app
+     runtime persistence edge and not the app memory layer.
 ```
 
 **Store roles (Multi-DB Governance, Article III):**
@@ -159,8 +163,8 @@ first-class configuration.
 | GPU embedding service | 384-dim vectors for every Chroma write; never silent CPU fallback | service health on `/health` |
 | SurrealDB | Experimental; out of the launch write path | confirm no app fact is Surreal-only |
 
-**Configuration of record (environment):** gateway v2, MongoDB database
-`momentum` (app) — distinct from `universal_gateway` (memory/ops, not app data),
+**Configuration of record (environment):** external tooling v2, MongoDB database
+`momentum` (app) — distinct from the external agent-operations store (not app data),
 Neo4j single graph, ChromaDB v2 API, GPU embedding service required healthy
 before any embedding work. Exact host/port values are environment configuration
 owned in deployment config, not duplicated here as law; an administrator verifies
@@ -708,7 +712,7 @@ read-back (Rule 1.2.3). Schedules/owners marked `[SET BY KEVIN]` are pending.
 
 | # | Procedure | Pass criterion |
 | --- | --- | --- |
-| D1 | Probe store health: Mongo (`momentum` query), Neo4j (count query), Chroma (heartbeat), gateway (`/execute` echo). | All four respond. |
+| D1 | Probe store health: Mongo (`momentum` query), Neo4j (count query), Chroma (heartbeat), external tooling (`/execute` echo). | All four respond. |
 | D2 | Probe GPU embedding `/health`. | `gpu_available = true`. If false, halt embedding, alert owner. |
 | D3 | Drain/inspect `projection_outbox`: pending count, oldest `nextAttemptAt`, any `status:'failed'` (dead-letter). | No dead-letters; backlog within `[SET BY KEVIN]`. |
 | D4 | Review SEV-1/SEV-2 incidents opened in last 24h. | All triaged. |
@@ -756,7 +760,7 @@ read-back (Rule 1.2.3). Schedules/owners marked `[SET BY KEVIN]` are pending.
 
 | Target | Signal | Healthy | Owner action if not |
 | --- | --- | --- | --- |
-| Gateway | `/execute` responds | 2xx | Section 16.5 |
+| External MCP tooling | `/execute` responds | 2xx | Section 16.5 |
 | MongoDB | query latency / availability | responsive | Section 16.1 |
 | Neo4j | count query, integrity errors | responsive, zero phantom | Section 16.2 |
 | ChromaDB | heartbeat, collection count | responsive, == 4 | Section 16.3 |
@@ -789,7 +793,7 @@ inspection. Treat as SEV-2 (an agent's graph/semantic view is missing a fact).
 ### 14.4 Observability principles
 
 - Prefer probing the live system over trusting a remembered status.
-- Alerts must be actionable and name the cause; the gateway returns real errors —
+- Alerts must be actionable and name the cause; external tooling returns real errors —
   read them.
 - The owner is not the integrity check: monitoring must surface problems without
   the owner having to ask.
@@ -838,7 +842,7 @@ source of truth, re-project, verify. Never "fix" a projection directly.
 
 | Symptom | Likely cause | Action |
 | --- | --- | --- |
-| Write appears lost | wrong database (`universal_gateway` vs `momentum`) | confirm `momentum`; re-read by `_id` |
+| Write appears lost | wrong database or store family | confirm `momentum`; re-read by `_id` |
 | Query returns nothing expected | filter param shape | use `filter`; verify with a known `_id` |
 | Duplicate-key error | unique index working as intended | confirm canonical id; do not bypass the index |
 
@@ -865,12 +869,12 @@ source of truth, re-project, verify. Never "fix" a projection directly.
 | `/health` gpu_available false | service down / GPU not bound | restart the service; **do not** accept CPU fallback; alert owner |
 | Embeddings present but low quality | silent CPU fallback occurred | halt, restart on GPU, re-embed affected ids |
 
-### 16.5 Universal Gateway
+### 16.5 external MCP tooling
 
 | Symptom | Likely cause | Action |
 | --- | --- | --- |
 | Action "not found" | wrong action/param name | inspect available actions; correct parameter names |
-| Tool "not found" | wrong tool key | confirm tool name; the gateway is up ~always — suspect the call, not the gateway |
+| Tool "not found" | wrong tool key | confirm tool name; the external tooling service is up almost always — suspect the call first |
 | Empty/odd result | param-shape mismatch | re-verify against a known-good call before retrying |
 
 ---
@@ -991,8 +995,11 @@ platform does not score prospects.
 - Per-prospect ownership is enforced server-side; no request input widens a BA's
   visible set.
 - Interview visibility is gated by `VISIBLE_TO_SPONSOR`, enforced at read.
-- Cross-store admin access goes through the gateway; direct store credentials are
-  restricted to the owner/deployment.
+- Cross-store app administration uses the application server and direct
+  persistence adapters. external MCP tooling may be used by authorized
+  owner/operator tooling for inspection, repair, and agent memory, but it is not
+  the app runtime path. Direct store credentials are restricted to the
+  owner/deployment.
 
 ### 19.4 Prohibited administrative actions (security)
 
@@ -1073,7 +1080,7 @@ holistic, never a single metric; Art. I.2 — momentum is movement).
 
 | KPI | Target |
 | --- | --- |
-| Store/gateway availability | `[SET BY KEVIN]` |
+| Store/tooling availability | `[SET BY KEVIN]` |
 | GPU embedding `/health` uptime | `[SET BY KEVIN]` |
 | Projection lag (outbox oldest pending) | `[SET BY KEVIN]` |
 | Dead-lettered projections | 0 |
@@ -1101,7 +1108,8 @@ never a single number (Foundation Art. VII.2).
 
 | Integration | Contract |
 | --- | --- |
-| Universal Gateway | All store access via `POST /execute`; actions/params verified before use; real errors surfaced |
+| Direct app persistence adapters | App runtime store access uses dedicated MongoDB, Neo4j, and ChromaDB adapters; writes read back and real errors surface |
+| external MCP tooling | MCP/developer tooling and authorized operator scripts; not app runtime persistence |
 | GPU embedding service | 384-dim MiniLM; `/health` must report GPU available before embedding; no CPU fallback |
 | Tiered writer / outbox | All new/migrated writes route through the tier appropriate to the record |
 

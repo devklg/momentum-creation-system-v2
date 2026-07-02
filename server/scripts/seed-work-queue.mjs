@@ -24,22 +24,9 @@
  * Run:  node server/scripts/seed-work-queue.mjs   (from repo root)
  */
 
-const GATEWAY_BASE = (process.env.GATEWAY_URL || 'http://localhost:2526/api').replace(/\/$/, '');
-const GATEWAY = `${GATEWAY_BASE}/execute`;
-const DB = 'momentum';
-const COLL = 'work_queue';
+import { closeMomentumMongo, momentumCollection } from './lib/momentum-mongo.mjs';
 
-async function gw(tool, action, params) {
-  const res = await fetch(GATEWAY, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tool, action, params }),
-  });
-  const json = await res.json();
-  if (json.success === false && !json.data) {
-    throw new Error(`${tool}.${action} failed: ${JSON.stringify(json)}`);
-  }
-  return json;
-}
+const COLL = 'work_queue';
 
 const Q = [
   // ============ FOUNDATION / SHARED (built) ============
@@ -47,8 +34,8 @@ const Q = [
     title: 'Monorepo scaffold (apps/com, apps/team, apps/admin, server, packages/shared)',
     evidence: 'apps/* + server/ + packages/ on disk; #92', note: 'Vite6+React19+TS5.5, pnpm9, ports 7700-7703.', deps: [] },
   { id: 'wq_triple_stack', surface: 'infra', order: 11, status: 'done',
-    title: 'Triple-stack persistence via Universal Gateway',
-    evidence: 'server/src/services/tripleStack.ts + gateway.ts; #93', note: 'Mongo+Neo4j+Chroma all required.', deps: [] },
+    title: 'Triple-stack persistence via direct adapters',
+    evidence: 'server/src/services/tripleStack.ts + persistence/dispatch.ts; #93', note: 'Mongo+Neo4j+Chroma all required.', deps: [] },
   { id: 'wq_shared_pkg', surface: 'shared', order: 12, status: 'done',
     title: 'Shared brand/compliance/rules/types package',
     evidence: 'packages/shared/src/{brand,compliance,rules,types}.ts; #92,#110', note: '', deps: [] },
@@ -115,7 +102,7 @@ const Q = [
     title: 'IVORY: WDYK coach surface + persistent tagged warm-market roster (was wq_03)',
     evidence: 'NOT on disk; ScriptMaker header defers WDYK to Ivory; verified #129', note: 'Standalone /ivory + feeder into the generator. Persistent roster triple-stacked, tagged by product+angle, mark invited/customer/BA/not-interested/follow-up. Does NOT call/text/score (compliance). LLM coaching UNBLOCKED (ANTHROPIC_API_KEY in root .env).', deps: ['llm_layer'] },
   { id: 'wq_llm_layer', surface: 'infra', order: 47, status: 'partial',
-    title: 'LLM layer through the gateway (Ivory -> ScriptMaker -> Michael)',
+    title: 'LLM layer through direct Anthropic integration (Ivory -> ScriptMaker -> Michael)',
     evidence: 'server services/anthropic.ts present; key in root .env', note: 'ScriptMaker consumes it (dormant-aware fallback). Ivory coaching + Michael Training Agent + Daily Success Coach consumers PENDING.', deps: [] },
 
   { id: 'wq_fast_start', surface: 'team', order: 50, status: 'partial',
@@ -185,45 +172,43 @@ const Q = [
 ];
 
 async function main() {
+  const collection = await momentumCollection(COLL);
+
   // Wipe old wq_* rows (the 9-row sketch + any prior).
-  const existing = await gw('mongodb', 'aggregate', {
-    database: DB, collection: COLL, pipeline: [{ $project: { _id: 1 } }],
-  });
-  for (const r of existing.data.results) {
-    await gw('mongodb', 'delete', { database: DB, collection: COLL, filter: { _id: r._id } });
-  }
+  await collection.deleteMany({});
 
   const now = new Date().toISOString();
   const docs = Q.map((d) => ({ ...d, _id: d.id, seeded_at: now, seeded_chat: 129 }));
-  await gw('mongodb', 'insert', { database: DB, collection: COLL, documents: docs });
+  await collection.insertMany(docs);
 
   // Read back: counts by status.
-  const byStatus = await gw('mongodb', 'aggregate', {
-    database: DB, collection: COLL,
-    pipeline: [
+  const byStatus = await collection
+    .aggregate([
       { $group: { _id: '$status', n: { $sum: 1 } } },
       { $sort: { _id: 1 } },
-    ],
-  });
-  const total = await gw('mongodb', 'aggregate', {
-    database: DB, collection: COLL, pipeline: [{ $count: 't' }],
-  });
-  const pendingActive = await gw('mongodb', 'aggregate', {
-    database: DB, collection: COLL,
-    pipeline: [
+    ])
+    .toArray();
+  const total = await collection.aggregate([{ $count: 't' }]).toArray();
+  const pendingActive = await collection
+    .aggregate([
       { $match: { status: { $in: ['pending', 'partial'] } } },
       { $sort: { order: 1 } },
       { $project: { _id: 1, surface: 1, status: 1, title: 1 } },
-    ],
-  });
+    ])
+    .toArray();
 
   console.log('=== MASTER WORK QUEUE SEEDED ===');
-  console.log('total items:', JSON.stringify(total.data.results));
-  console.log('by status:', JSON.stringify(byStatus.data.results));
+  console.log('total items:', JSON.stringify(total));
+  console.log('by status:', JSON.stringify(byStatus));
   console.log('\n--- NOT-DONE (pending/partial), in order ---');
-  for (const r of pendingActive.data.results) {
+  for (const r of pendingActive) {
     console.log(`  [${r.status.toUpperCase().padEnd(7)}] ${r.surface.padEnd(6)} ${r.title}`);
   }
+  await closeMomentumMongo();
 }
 
-main().catch((e) => { console.error('SEED FAILED:', e); process.exit(1); });
+main().catch(async (e) => {
+  await closeMomentumMongo().catch(() => undefined);
+  console.error('SEED FAILED:', e);
+  process.exit(1);
+});

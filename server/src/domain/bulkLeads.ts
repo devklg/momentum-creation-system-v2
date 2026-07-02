@@ -7,7 +7,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 import { lastInitialOf } from './prospects.js';
@@ -171,7 +171,7 @@ async function createBulkLeadRecord(input: {
     clickedAt: null,
     expiresAt,
   };
-  await gatewayCall('mongodb', 'insert', {
+  await persistenceCall('mongodb', 'insert', {
     database: MONGO_DB,
     collection: TOKENS_COLLECTION,
     documents: [
@@ -187,7 +187,7 @@ async function createBulkLeadRecord(input: {
       },
     ],
   });
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MERGE (t:TmagInviteToken {token: $token}) ' +
       'SET t.prospectId = $prospectId, t.sponsorTmagId = $sponsorTmagId, ' +
@@ -342,7 +342,7 @@ export async function importBulkLeads(
 }
 
 export async function findBulkLeadByToken(token: string): Promise<McsBulkLeadRecord | null> {
-  const result = await gatewayCall<{ documents: McsBulkLeadRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsBulkLeadRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: BULK_LEADS_COLLECTION,
     filter: { token },

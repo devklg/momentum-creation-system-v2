@@ -75,8 +75,8 @@ const forbiddenReturnedKeys = [
   'surrealResult',
   'rawGraphRagResults',
   'graphRagResults',
-  'rawGatewayFallbackResponse',
-  'gatewayFallbackResponse',
+  'rawPERSISTENCEFallbackResponse',
+  'PERSISTENCEFallbackResponse',
   'sendMessage',
   'callProspect',
   'scheduleCall',
@@ -91,13 +91,13 @@ const forbiddenReturnedText = [
   'retrievalAudit',
   'rawStoreResults',
   'rawGraphRagResults',
-  'rawGatewayFallbackResponse',
+  'rawPERSISTENCEFallbackResponse',
   'rawRetrieval',
   'MongoDB',
   'Neo4j',
   'ChromaDB',
   'GraphRAG',
-  'Gateway fallback',
+  'legacy fallback',
 ] as const;
 
 async function runContract(input: ContractCase): Promise<MichaelRuntimeAdapterContractResult> {
@@ -197,7 +197,7 @@ describe('S2.15 Michael runtime adapter contract boundary', () => {
     }
   });
 
-  it('never returns raw Context Packet, store, GraphRAG, Gateway, or retrieval output', async () => {
+  it('never returns raw Context Packet, store, GraphRAG, PERSISTENCE, or retrieval output', async () => {
     for (const input of adapterContractCases) {
       const result = await runContract(input);
 

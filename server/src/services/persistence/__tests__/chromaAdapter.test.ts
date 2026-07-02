@@ -52,7 +52,7 @@ describe('Chroma direct adapter', () => {
     });
   });
 
-  it('normalizes direct search responses to the Gateway caller-facing shape', async () => {
+  it('normalizes direct search responses to the PERSISTENCE caller-facing shape', async () => {
     const { chromaAdapter } = await import('../chroma/adapter.js');
     mocks.embed.mockResolvedValue([[0.4, 0.5, 0.6]]);
     mocks.fetch
@@ -89,7 +89,7 @@ describe('Chroma direct adapter', () => {
     expect(String(mocks.fetch.mock.calls[1]?.[0])).toContain('/collections/col-1/query');
   });
 
-  it('normalizes direct query_with_filter responses to the Gateway caller-facing shape', async () => {
+  it('normalizes direct query_with_filter responses to the PERSISTENCE caller-facing shape', async () => {
     const { chromaAdapter } = await import('../chroma/adapter.js');
     mocks.embed.mockResolvedValue([[0.7, 0.8, 0.9]]);
     mocks.fetch

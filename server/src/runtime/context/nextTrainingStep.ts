@@ -6,7 +6,7 @@
  * content-free pointer (identifiers + position); a degraded/empty retrieval yields `unavailable`
  * plus the P4.9 safe fallback, never a guessed step.
  *
- * Pure and deterministic: no clock, no I/O, no persistence, no LLM, no Gateway. It assembles no
+ * Pure and deterministic: no clock, no I/O, no persistence, no LLM, no PERSISTENCE. It assembles no
  * packet (the Context Manager remains the sole assembler).
  *
  * PRECONDITION: `result` must be the COMPLETE approved sequence for the objective. Do NOT set

@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  gatewayCall: vi.fn(),
+  persistenceCall: vi.fn(),
   assertChromaCollectionExists: vi.fn(),
 }));
 
-vi.mock('../gateway.js', () => ({ gatewayCall: mocks.gatewayCall }));
+vi.mock('../persistence/dispatch.js', () => ({ persistenceCall: mocks.persistenceCall }));
 vi.mock('../chromaCollections.js', () => ({
   assertChromaCollectionExists: mocks.assertChromaCollectionExists,
 }));
@@ -13,9 +13,9 @@ vi.mock('../chromaCollections.js', () => ({
 import { tripleStackWrite } from '../tripleStack.js';
 
 beforeEach(() => {
-  mocks.gatewayCall.mockReset();
+  mocks.persistenceCall.mockReset();
   mocks.assertChromaCollectionExists.mockReset();
-  mocks.gatewayCall.mockResolvedValue({ insertedCount: 1 });
+  mocks.persistenceCall.mockResolvedValue({ insertedCount: 1 });
   mocks.assertChromaCollectionExists.mockResolvedValue(undefined);
 });
 

@@ -53,20 +53,20 @@
     <tr><td>Admin</td><td><code>apps/admin</code></td><td><code>http://localhost:7703</code></td><td>Kevin only — login</td></tr>
     <tr><td>API server</td><td><code>server</code></td><td><code>http://localhost:7700/api</code></td><td>Shared backend</td></tr>
   </table>
-  <p class="small">Ports are fixed (<code>strictPort</code>). The v2 Universal Gateway runs on <code>localhost:2526</code> (NOT 2525 — that is the v1 gateway).</p>
+  <p class="small">Ports are fixed (<code>strictPort</code>). The v2 external MCP tooling runs on <code>localhost:2526</code> for MCP/developer tooling (NOT 2525 — that is the v1 external tooling); the app runtime writes directly to its own stores.</p>
 
   <h2>2. Prerequisites (must be up first)</h2>
   <table>
     <tr><th>Service</th><th>Where</th><th>Needed for</th></tr>
-    <tr><td>Universal Gateway v2</td><td><code>localhost:2526</code></td><td>All data reads/writes (Mongo/Neo4j/Chroma/Surreal fan-out)</td></tr>
-    <tr><td>MongoDB / Neo4j / ChromaDB / SurrealDB</td><td>via the gateway</td><td>Persistence</td></tr>
+    <tr><td>MongoDB / Neo4j / ChromaDB</td><td>direct app stack from <code>.env</code></td><td>Runtime persistence</td></tr>
     <tr><td>GPU embedding service</td><td><code>localhost:8300</code></td><td>ChromaDB writes (384-dim)</td></tr>
+    <tr><td>external MCP tool server</td><td><code>localhost:2526</code></td><td>MCP/developer tooling and operator scripts, not app runtime persistence</td></tr>
     <tr><td>Node + pnpm</td><td>local</td><td>Node 24 confirmed present</td></tr>
   </table>
 
   <h2>3. Run it locally</h2>
   <ol>
-    <li><span class="chk"></span><strong>Environment file</strong> — <span class="ok">already done.</span> <code>.env</code> exists at the repo root with a 256-bit <code>JWT_SECRET</code>, <code>ADMIN_BA_IDS=TMBA-FOUNDER-KEVIN</code>, and <code>GATEWAY_URL=http://localhost:2526/api</code>.</li>
+    <li><span class="chk"></span><strong>Environment file</strong> — <span class="ok">already done.</span> <code>.env</code> exists at the repo root with a 256-bit <code>JWT_SECRET</code>, <code>ADMIN_BA_IDS=TMBA-FOUNDER-KEVIN</code>, and direct persistence values for MongoDB, Neo4j, ChromaDB, and the GPU embedder.</li>
     <li><span class="chk"></span><strong>Free port 7700.</strong> Another process currently holds it, and all three front-ends are hard-wired to call the API there, so v2’s server must own 7700. Identify and stop the occupant (or decide it is the one to keep).
       <pre class="step-cmd">Get-NetTCPConnection -LocalPort 7700 -State Listen |
   ForEach-Object { Get-Process -Id $_.OwningProcess } | Format-List Id,Path</pre></li>
@@ -102,7 +102,7 @@ pnpm --filter @momentum/server bootstrap:ivory</pre>
     <tr><td>All 154 API routes</td><td class="ok">Mounted &amp; responding (verified by full sweep)</td></tr>
     <tr><td>Tasks 1–8 (UX redesign)</td><td class="ok">Merged to <code>main</code></td></tr>
     <tr><td>Task 9 (QA/compliance)</td><td class="ok">Merged into <code>main</code>; historical branch warning is superseded</td></tr>
-    <tr><td>Gateway health route</td><td class="warn">Reports 503 — false negative (pings unsupported <code>mongodb:ping</code>); real gateway calls work</td></tr>
+    <tr><td>External MCP tooling health route</td><td class="warn">Reports 503 in older probes — false negative (pings unsupported <code>mongodb:ping</code>); real external tooling tooling calls work and are separate from app runtime persistence</td></tr>
     <tr><td>Michael interview (4 routes)</td><td class="warn">503 until <code>ANTHROPIC_API_KEY</code> is set (LLM dependency)</td></tr>
     <tr><td>Ivory / ScriptMaker (LLM)</td><td class="warn">Degrade to manual until <code>ANTHROPIC_API_KEY</code> is set</td></tr>
     <tr><td>Email (Resend)</td><td class="warn">Dormant — not configured; sends are skipped/logged</td></tr>
@@ -117,7 +117,7 @@ pnpm --filter @momentum/server bootstrap:ivory</pre>
     <li><span class="chk"></span><strong>Provision the host</strong> (VPS — InterServer or your Quasar VPS). Install Docker + Docker Compose.</li>
     <li><span class="chk"></span><strong>Managed data layer:</strong> MongoDB Atlas as the authoritative store, Neo4j Aura for the genealogy graph; decide Chroma + Surreal hosting. MongoDB stays the single write authority.</li>
     <li><span class="chk"></span><strong>Reverse proxy + TLS:</strong> Caddy in front of the apps for automatic HTTPS.</li>
-    <li><span class="chk"></span><strong>Production secrets/env:</strong> real <code>JWT_SECRET</code>, set <code>JWT_COOKIE_DOMAIN=.teammagnificent.team</code>, <code>ADMIN_BA_IDS</code>, <code>GATEWAY_URL</code>, <code>PROSPECT_BASE_URL=https://teammagnificent.com</code>.</li>
+    <li><span class="chk"></span><strong>Production secrets/env:</strong> real <code>JWT_SECRET</code>, set <code>JWT_COOKIE_DOMAIN=.teammagnificent.team</code>, <code>ADMIN_BA_IDS</code>, direct store URLs/credentials, GPU embedder URL, <code>PROSPECT_BASE_URL=https://teammagnificent.com</code>.</li>
     <li><span class="chk"></span><strong>Turn on the dormant integrations:</strong> verify <code>teammagnificent.com</code> in Resend (DNS) for email; add Telnyx keys for Michael’s calls; add <code>ANTHROPIC_API_KEY</code> for Michael/Ivory/ScriptMaker.</li>
     <li><span class="chk"></span><strong>DNS:</strong> point <code>teammagnificent.com</code> → com, <code>teammagnificent.team</code> → team, <code>admin.teammagnificent.team</code> → admin (Namecheap).</li>
     <li><span class="chk"></span><strong>Seed founders + access</strong> on production; smoke-test login on each surface.</li>
@@ -125,7 +125,7 @@ pnpm --filter @momentum/server bootstrap:ivory</pre>
     <li><span class="chk"></span><strong>Onboard the team:</strong> issue access codes, walk the welcome → Michael → Launch Center flow.</li>
   </ol>
 
-  <div class="foot">Momentum Creation System v2 — internal run/deploy guide. Ports, gateway (2526), and route status verified against the live repo on 2026-06-20. Phase-2 specifics are a target plan to confirm.</div>
+  <div class="foot">Momentum Creation System v2 — internal run/deploy guide. Ports, External MCP tooling (2526), and route status verified against the live repo on 2026-06-20; persistence model superseded by ACR-0009 on 2026-07-02. Phase-2 specifics are a target plan to confirm.</div>
 
 </div>
 </body>

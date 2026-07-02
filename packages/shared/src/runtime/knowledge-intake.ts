@@ -3,7 +3,7 @@
  *
  * Store-agnostic TYPE contracts for transforming a raw source Kevin adds into retrieval
  * units the Context Manager can place into a `context_packet.v1`. These are types only — no
- * persistence, no Gateway, no LLM. They conform to and extend the ratified
+ * persistence, no PERSISTENCE, no LLM. They conform to and extend the ratified
  * `KNOWLEDGE_INGESTION_PROTOCOL` / `KNOWLEDGE_CORE_RUNTIME` and ACR-0008 (author fast-lane).
  *
  * Contract (see engineering/reports/P4_5A_KNOWLEDGE_INTAKE_PARSING_CONTRACT.md):

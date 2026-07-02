@@ -29,7 +29,7 @@
  */
 
 import type { McsMichaelTrainingSupportCard, McsMichaelTrainingSupportGuidanceSection } from '@momentum/shared';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 
 /** Provenance literal stamped on the derived training-support card. */
 export const MICHAEL_TRAINING_SUPPORT_SIGNED_BY =
@@ -114,7 +114,7 @@ export class TrainingSupportAccessError extends Error {
 // ─────────────────────────────────────────────────────────────────────────
 
 async function getTeamMagnificentMember(tmagId: string): Promise<TeamMagnificentMemberLookup | null> {
-  const result = await gatewayCall<{ documents: TeamMagnificentMemberLookup[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: TeamMagnificentMemberLookup[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: { tmagId },
@@ -126,7 +126,7 @@ async function getTeamMagnificentMember(tmagId: string): Promise<TeamMagnificent
 async function getSteveDiscoveryByTmagId(
   tmagId: string,
 ): Promise<PersistedSteveDiscovery | null> {
-  const result = await gatewayCall<{ documents: PersistedSteveDiscovery[] }>(
+  const result = await persistenceCall<{ documents: PersistedSteveDiscovery[] }>(
     'mongodb',
     'query',
     {

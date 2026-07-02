@@ -2,7 +2,7 @@
  * In-memory sliding-window rate limiter (shared middleware) — P10 H2.
  *
  * Single-instance only: the counter lives in this process. If/when the server
- * scales horizontally this moves to Redis via the gateway. Extracted from the
+ * scales horizontally this moves to Redis via the PERSISTENCE. Extracted from the
  * per-route limiter proven in routes/p-login.ts so the auth and prospect paths
  * share one implementation.
  *

@@ -17,7 +17,7 @@
  *     this generator produces fresh codes for new BAs going forward.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type { AccessCodeRecord } from './access-codes.js';
 
@@ -34,7 +34,7 @@ function randomCode(): string {
 }
 
 async function codeExists(code: string): Promise<boolean> {
-  const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
+  const result = await persistenceCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'tmag_access_codes',
     filter: { code },
@@ -44,7 +44,7 @@ async function codeExists(code: string): Promise<boolean> {
 }
 
 export async function baOwnsACode(tmagId: string): Promise<AccessCodeRecord | null> {
-  const result = await gatewayCall<{ documents: AccessCodeRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: AccessCodeRecord[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'tmag_access_codes',
     filter: { sponsorTmagId: tmagId, active: true },
@@ -156,7 +156,7 @@ export interface AccessCodeListItem {
 export async function listAccessCodes(
   limit = 100,
 ): Promise<AccessCodeListItem[]> {
-  const result = await gatewayCall<{ documents: AccessCodeListItem[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: AccessCodeListItem[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'tmag_access_codes',
     filter: {},

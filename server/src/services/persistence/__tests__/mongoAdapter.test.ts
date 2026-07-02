@@ -28,7 +28,7 @@ describe('Mongo direct adapter', () => {
     vi.clearAllMocks();
   });
 
-  it('returns gateway-compatible insert response shapes', async () => {
+  it('returns PERSISTENCE-compatible insert response shapes', async () => {
     const { mongoAdapter } = await import('../mongo/adapter.js');
     mocks.fakeModel.insertMany.mockResolvedValue([
       { toObject: () => ({ _id: 'one' }) },
@@ -46,7 +46,7 @@ describe('Mongo direct adapter', () => {
     });
   });
 
-  it('returns gateway-compatible query/update/delete/aggregate shapes', async () => {
+  it('returns PERSISTENCE-compatible query/update/delete/aggregate shapes', async () => {
     const { mongoAdapter } = await import('../mongo/adapter.js');
     const queryChain = {
       exec: vi.fn().mockResolvedValue([{ _id: 'one' }]),

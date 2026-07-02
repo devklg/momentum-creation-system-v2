@@ -173,7 +173,7 @@ async function findSponsorBA(sponsorTmagId: string): Promise<BARecord | null> {
  *
  * RESILIENCE (locked brief §4): the prospect page must never 500 on a
  * master-content read. readMasterContent/readMasterTemplate already degrade to
- * the code default on any gateway/Mongo failure; this wrapper additionally
+ * the code default on any PERSISTENCE/Mongo failure; this wrapper additionally
  * catches anything unexpected and returns null so the client simply renders
  * its built-in fallback copy.
  */

@@ -6,6 +6,12 @@
 - Architecture version: v1.0 frozen
 - Lane: Sprint 2 QA and governance gates
 
+> **Supersession note (2026-07-02, ACR-0009):** this plan predates Kevin's
+> approved retirement of the Gateway HTTP persistence fallback. Treat any
+> fallback-preservation language below as historical planning context, not
+> current architecture. Gateway is MCP/developer tooling; app runtime persistence
+> is direct to the MCS stack.
+
 ## 1. Objective
 
 Define the checks required before Sprint 2 agent runtime implementation can be approved.
@@ -38,7 +44,7 @@ Sprint 2 implementation approval must include checks proving:
 
 - ratified documents were not modified unless separately approved;
 - `.com` prospect-facing surfaces were not modified;
-- Gateway fallback remains present;
+- Universal Gateway is not reintroduced as an app runtime dependency;
 - `/api/runtime/*` is not mounted unless separately approved;
 - event persistence is not activated unless separately approved;
 - outbox, replay, subscribers, and event APIs are not activated unless separately approved;
@@ -179,7 +185,7 @@ Future Sprint 2 implementation closeout should require:
 - static boundary checks pass;
 - no unapproved ratified-doc changes;
 - no unapproved `.com` changes;
-- no unapproved Gateway fallback removal;
+- no unapproved Universal Gateway runtime dependency;
 - no unapproved `/api/runtime/*` mount;
 - no unapproved event persistence activation;
 - branch is merged through protected `main`;

@@ -233,8 +233,8 @@ function sampleEquals(
     a.activeDashboardViewers === b.activeDashboardViewers &&
     a.activeAdminSessions === b.activeAdminSessions &&
     a.eventsPerMinute === b.eventsPerMinute &&
-    a.gatewayLatencyMsP50 === b.gatewayLatencyMsP50 &&
-    a.gatewayLatencyMsP95 === b.gatewayLatencyMsP95
+    a.persistenceLatencyMsP50 === b.persistenceLatencyMsP50 &&
+    a.persistenceLatencyMsP95 === b.persistenceLatencyMsP95
   );
 }
 

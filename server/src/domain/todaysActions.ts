@@ -30,11 +30,11 @@
  * /api/crm/today. This module's third bucket is the #134 spec change:
  * expiring (not draft).
  *
- * Gateway quirks (per tripleStack.ts header):
+ * PERSISTENCE quirks (per tripleStack.ts header):
  *   - mongodb.query filter param is `filter`, returns {count, documents}
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import type {
   McsCallbackIntent,
   McsCockpitActionItem,
@@ -91,21 +91,21 @@ export async function getCockpitTodaysActions(
   const expiringHorizonIso = new Date(now + EXPIRING_WINDOW_MS).toISOString();
 
   const [callbacksRes, followupsRes, prospectsRes] = await Promise.all([
-    gatewayCall<{ documents: CallbackDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: CallbackDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: CALLBACK_COLLECTION,
       filter: { sponsorTmagId, createdAt: { $gte: callbackLookbackIso } },
       sort: { createdAt: -1 },
       limit: 200,
     }),
-    gatewayCall<{ documents: McsCrmFollowUpRecord[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: McsCrmFollowUpRecord[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: FOLLOWUPS_COLLECTION,
       filter: { sponsorTmagId, clearedAt: null, dueAt: { $lte: nowIso } },
       sort: { dueAt: 1 },
       limit: 200,
     }),
-    gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: PROSPECTS_COLLECTION,
       filter: { sponsorTmagId },

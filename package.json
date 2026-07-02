@@ -2,7 +2,7 @@
   "name": "momentum-creation-system-v2",
   "private": true,
   "version": "0.0.0",
-  "description": "Team Magnificent Marketing Momentum Creation System — three clients (.com prospect-facing, .team BA-facing, admin Kevin-only), one server, one gateway.",
+  "description": "Team Magnificent Marketing Momentum Creation System — three clients (.com prospect-facing, .team BA-facing, admin Kevin-only), one server, direct persistence.",
   "author": "Kevin L. Gardner",
   "license": "UNLICENSED",
   "engines": {

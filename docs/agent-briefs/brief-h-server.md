@@ -35,7 +35,7 @@ Leaves you ship (build-checklist #111–114):
   events/min and a counter for `activeAdminSessions`; pattern after the
   existing `activePlacementSubscriberCount`. Additive only. Do NOT change the
   existing public API — H-UI doesn't read this file.)
-- `server/src/services/gatewayLatency.ts` (NEW — wraps gateway calls to
+- `server/src/services/persistenceLatency.ts` (NEW — wraps external tooling calls to
   record p50/p95 over a 60s rolling window; tiny module, in-memory only)
 - `server/src/server.ts` (EXTEND — mount the new router under `/api/admin`)
 
@@ -90,7 +90,7 @@ Likely candidates that may need provenance notes:
 - **eventsPerMinute** — if no centralized event firehose exists yet, count
   placements/min via `poolEvents` and call it placements-per-minute in the
   note. Adjust the response key only if the contract allows.
-- **gatewayLatencyMs** — if you can't wrap every gateway call cleanly,
+- **persistenceLatencyMs** — if you can't wrap every external tooling call cleanly,
   start with the calls in `tripleStack.ts` and call out the scope.
 - **BA-activation funnel stages without timestamps** — same pattern as
   `reporting.ts` Report #1 (which already handles this); reuse.

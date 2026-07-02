@@ -69,7 +69,7 @@ describe('S2.12 Michael response guardrails', () => {
       'persistenceInstruction',
       'rawStoreResults',
       'rawGraphRagResults',
-      'rawGatewayFallbackResponse',
+      'rawPERSISTENCEFallbackResponse',
     ]) {
       expectForbidden(field, true);
     }

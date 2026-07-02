@@ -24,7 +24,7 @@
  *                     failure it returns a deterministic typed-issues result —
  *                     it never throws, never persists, never emits a partial
  *                     unsafe turn;
- *  - boundary-clean — it imports NO store/Gateway/GraphRAG/retrieval client and
+ *  - boundary-clean — it imports NO store/PERSISTENCE/GraphRAG/retrieval client and
  *                     NEVER imports the S2.13 test harness (`fixtures/`). It
  *                     calls no LLM and generates no text.
  *
@@ -112,7 +112,7 @@ export type CreateMichaelRuntimeTurnForAuthenticatedBaResult =
 /**
  * Build a degraded, fail-closed Michael runtime turn for the authenticated BA.
  *
- * Pure with respect to I/O: no persistence, no LLM, no store/Gateway/retrieval
+ * Pure with respect to I/O: no persistence, no LLM, no store/PERSISTENCE/retrieval
  * access. Packet assembly is delegated to the sanctioned context-layer factory
  * (`createMichaelRuntimeContextManagerPort`), whose port is injected into the
  * turn coordinator with empty approved knowledge.
@@ -184,7 +184,7 @@ export async function createMichaelRuntimeTurnForAuthenticatedBa(
   };
 
   // Production Context Manager port — assembled by the sanctioned context-layer
-  // factory with empty approved knowledge (no store, no retrieval, no Gateway).
+  // factory with empty approved knowledge (no store, no retrieval, no PERSISTENCE).
   // This is NOT the S2.13 fixture port; the context layer owns assembly and
   // returns a degraded, candidate-excluded packet from session identity alone.
   const contextManager = createMichaelRuntimeContextManagerPort({

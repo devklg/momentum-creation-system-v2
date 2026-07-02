@@ -70,7 +70,7 @@ export interface DraftInvitationResult {
  * base language through readMasterContent() from one of these master-content
  * templates — Kevin overrides them tenant-wide in the admin editor and the
  * change flows here with no code edit. readMasterContent() never throws: on a
- * gateway/Mongo failure it returns the code default (the safe baseline shipped
+ * PERSISTENCE/Mongo failure it returns the code default (the safe baseline shipped
  * in domain/adminTenantArchitecture.ts), so ScriptMaker degrades, never 500s.
  */
 const SCRIPT_KIND_KEYS: Record<McsScriptMakerScriptKind, McsTenantTemplateKey> = {

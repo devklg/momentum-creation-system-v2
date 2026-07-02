@@ -20,9 +20,9 @@ import { runRuntimeTurnFixtureScenario } from '../fixtures/runtimeTurnHarness.js
 // S2.4-trap avoidance #1: the facade legitimately imports the internal,
 // already-inert ORCHESTRATION modules `./michaelResponseContract.js`,
 // `./michaelResponseCatalogSelector.js`, `./michaelResponseSelectionRequest.js`
-// and `./types.js`. None is a forbidden direct data adapter / gateway client /
+// and `./types.js`. None is a forbidden direct data adapter / persistence dispatch client /
 // retrieval helper, so the direct-persistence-adapter scan below targets only
-// mongo/neo4j/chroma adapters, `/services/*adapter`, gateway-fallback, and
+// mongo/neo4j/chroma adapters, `/services/*adapter`, PERSISTENCE-fallback, and
 // retrieval helpers — never a bare /adapter/ token. (The selection-request
 // module the facade pulls in transitively imports michaelRuntimeAdapterContract,
 // but that import lives on a different source surface; the facade source scanned
@@ -231,10 +231,10 @@ describe('S2.20 Michael runtime resolution facade static governance boundary', (
     ).toBe(false);
   });
 
-  it('#6 does not import a Gateway fallback client (or call gatewayCall)', () => {
+  it('#6 does not import a legacy fallback client (or call persistenceCall)', () => {
     const importPattern =
-      /\bfrom\s+['"][^'"]*(?:\/services\/gateway|gatewayFallback|gateway-fallback)[^'"]*['"]/i;
-    const callPattern = /\bgatewayCall\s*\(|\bdirectPersistenceCall\s*\(/;
+      /\bfrom\s+['"][^'"]*(?:\/services\/PERSISTENCE|PERSISTENCEFallback|PERSISTENCE-fallback)[^'"]*['"]/i;
+    const callPattern = /\bpersistenceCall\s*\(|\bdirectStoreCall\s*\(/;
     const matches = [
       ...matchingImportLines(s220SurfaceFiles(), importPattern),
       ...matchingCodeTokenLines(s220SurfaceFiles(), callPattern),
@@ -346,10 +346,10 @@ describe('S2.20 Michael runtime resolution facade static governance boundary', (
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('#18 preserves the Gateway fallback client outside the S2.20 surface', () => {
-    const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
-    expect(gatewayClient).toContain('export async function gatewayCall');
-    expect(gatewayClient).toContain('GATEWAY_URL');
+  it('#18 verifies the legacy HTTP fallback stays retired (ACR-0009) outside the S2.20 surface', () => {
+    const persistenceClient = readFileSync(resolve(repoRoot, 'server/src/services/persistence/dispatch.ts'), 'utf8');
+    expect(persistenceClient).toContain('export async function persistenceCall');
+    expect(persistenceClient).not.toContain('PERSISTENCE_URL');
   });
 
   it('#19 does not introduce event persistence / outbox / replay / subscriber / event API code', () => {
@@ -499,10 +499,10 @@ describe('S2.20 Michael runtime resolution facade static governance boundary', (
       'chroma',
       'graphRag',
       'graphrag',
-      'gateway',
+      'toolServer',
       'rawStoreResults',
       'rawGraphRagResults',
-      'rawGatewayFallbackResponse',
+      'rawToolServerResponse',
       'token',
       'requestId',
       'sessionId',

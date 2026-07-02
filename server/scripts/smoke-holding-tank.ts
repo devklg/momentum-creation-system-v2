@@ -12,7 +12,7 @@
  *   5. Cleans up all smoke-prefixed records.
  */
 
-import { gatewayCall } from '../src/services/gateway.js';
+import { persistenceCall } from '../src/services/persistence/dispatch.js';
 import { placeProspect, findPlacementByProspectId, TEAM_POOL_ID } from '../src/domain/holdingTank.js';
 
 const SMOKE_PROSPECT_ID = `smoke_prospect_${Date.now()}`;
@@ -22,7 +22,7 @@ const MONGO_DB = 'momentum';
 async function seed(): Promise<void> {
   const now = new Date().toISOString();
   const expiresAt = new Date(Date.now() + 8 * 7 * 24 * 60 * 60 * 1000).toISOString();
-  await gatewayCall('mongodb', 'insert', {
+  await persistenceCall('mongodb', 'insert', {
     database: MONGO_DB,
     collection: 'prospects',
     documents: [
@@ -51,17 +51,17 @@ async function seed(): Promise<void> {
 }
 
 async function cleanup(): Promise<void> {
-  await gatewayCall('mongodb', 'delete', {
+  await persistenceCall('mongodb', 'delete', {
     database: MONGO_DB,
     collection: 'prospects',
     filter: { _id: SMOKE_PROSPECT_ID },
   }).catch(() => {});
-  await gatewayCall('mongodb', 'delete', {
+  await persistenceCall('mongodb', 'delete', {
     database: MONGO_DB,
     collection: 'pool_placements',
     filter: { _id: SMOKE_PROSPECT_ID },
   }).catch(() => {});
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query: 'MATCH (p:Prospect {prospectId: $id})-[r:IN_HOLDING_TANK]->() DELETE r, p',
     params: { id: SMOKE_PROSPECT_ID },
   }).catch(() => {});
@@ -107,7 +107,7 @@ async function main(): Promise<void> {
   console.log('  placement:', placement);
 
   console.log('[smoke] verify neo4j relationship');
-  const neo = await gatewayCall<{ records: Array<{ position: number; placedAt: string }> }>('neo4j', 'cypher', {
+  const neo = await persistenceCall<{ records: Array<{ position: number; placedAt: string }> }>('neo4j', 'cypher', {
     query:
       'MATCH (p:Prospect {prospectId: $id})-[r:IN_HOLDING_TANK]->(pool:Pool {id: $poolId}) ' +
       'RETURN r.position AS position, r.placedAt AS placedAt',
@@ -117,7 +117,7 @@ async function main(): Promise<void> {
   if (!neo.records.length) throw new Error('neo4j relationship missing');
 
   console.log('[smoke] verify chroma event');
-  const chroma = await gatewayCall<{ ids: string[][]; documents: string[][] }>('chromadb', 'query', {
+  const chroma = await persistenceCall<{ ids: string[][]; documents: string[][] }>('chromadb', 'query', {
     collection: 'mcs_pool_events',
     where: { prospectId: SMOKE_PROSPECT_ID },
     n_results: 5,

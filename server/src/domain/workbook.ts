@@ -25,7 +25,7 @@
  */
 
 import { tripleStackWrite } from '../services/tripleStack.js';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 
 export const WORKBOOK_VERSION = 'v1_2026_05_19';
 
@@ -120,7 +120,7 @@ export async function canConductWorkbook(args: {
   sponsorTmagId: string;
   forTmagId: string;
 }): Promise<boolean> {
-  const result = await gatewayCall<{ documents: { sponsorTmagId?: string }[] }>(
+  const result = await persistenceCall<{ documents: { sponsorTmagId?: string }[] }>(
     'mongodb',
     'query',
     {
@@ -138,7 +138,7 @@ export async function canConductWorkbook(args: {
 export async function getWorkbook(
   forTmagId: string,
 ): Promise<WorkbookRecord | null> {
-  const result = await gatewayCall<{ documents: WorkbookRecord[] }>(
+  const result = await persistenceCall<{ documents: WorkbookRecord[] }>(
     'mongodb',
     'query',
     {
@@ -181,7 +181,7 @@ export async function createWorkbookDraft(args: {
     finalizedAt: null,
   };
 
-  await gatewayCall('mongodb', 'insert', {
+  await persistenceCall('mongodb', 'insert', {
     database: 'momentum',
     collection: 'tmag_workbooks',
     documents: [{ _id: workbookId, ...record }],
@@ -204,7 +204,7 @@ export async function saveWorkbookDraft(args: {
   firstActions?: string[];
   partnershipNotes?: string;
 }): Promise<WorkbookRecord | null> {
-  const existing = await gatewayCall<{ documents: WorkbookRecord[] }>(
+  const existing = await persistenceCall<{ documents: WorkbookRecord[] }>(
     'mongodb',
     'query',
     {
@@ -231,7 +231,7 @@ export async function saveWorkbookDraft(args: {
   if (args.firstActions !== undefined) $set.firstActions = args.firstActions;
   if (args.partnershipNotes !== undefined) $set.partnershipNotes = args.partnershipNotes;
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: 'momentum',
     collection: 'tmag_workbooks',
     filter: { workbookId: args.workbookId },
@@ -266,7 +266,7 @@ export async function finalizeWorkbook(args: {
   partnershipNotes: string;
   notes: Partial<WorkbookNotes>;
 }): Promise<WorkbookRecord | null> {
-  const existing = await gatewayCall<{ documents: WorkbookRecord[] }>(
+  const existing = await persistenceCall<{ documents: WorkbookRecord[] }>(
     'mongodb',
     'query',
     {
@@ -283,7 +283,7 @@ export async function finalizeWorkbook(args: {
   const mergedNotes: WorkbookNotes = { ...current.notes, ...args.notes };
   const finalizedAt = new Date().toISOString();
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: 'momentum',
     collection: 'tmag_workbooks',
     filter: { workbookId: args.workbookId },
@@ -302,7 +302,7 @@ export async function finalizeWorkbook(args: {
 
   // Graph: sponsor -[:CONDUCTED]-> workbook -[:FOR]-> BA. Classification is
   // a property on the workbook node so an upline cockpit can MATCH on it.
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MERGE (s:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
       'MERGE (b:TeamMagnificentMember {tmagId: $forTmagId}) ' +
@@ -353,7 +353,7 @@ export async function finalizeWorkbook(args: {
     `Q20 sell me on you: ${mergedNotes.q20_sell_me_on_you}`,
   ].join('\n');
 
-  await gatewayCall('chromadb', 'add', {
+  await persistenceCall('chromadb', 'add', {
     collection: 'tmag_workbooks',
     ids: [args.workbookId],
     documents: [chromaDoc],
@@ -373,7 +373,7 @@ export async function finalizeWorkbook(args: {
 
   // Mirror the partnership classification on the BA record so upline
   // dashboards can filter without joining.
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: { tmagId: current.forTmagId },

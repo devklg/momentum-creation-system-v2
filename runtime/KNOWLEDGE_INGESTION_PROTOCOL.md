@@ -3641,7 +3641,7 @@ Momentum learns because experience is captured carefully.
 
 Momentum improves because knowledge is prepared responsibly.
 
-The Knowledge Ingestion Protocol is the runtime gateway from experience to organizational learning.
+The Knowledge Ingestion Protocol is the runtime bridge from experience to organizational learning.
 
 ---
 

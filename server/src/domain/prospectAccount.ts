@@ -39,7 +39,7 @@
  */
 
 import { createHash, randomUUID } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
   McsIsoTimestamp,
@@ -114,7 +114,7 @@ export function normalizePhone(raw: string | null | undefined): string | null {
 export async function findAccountByTokenId(
   tokenId: string,
 ): Promise<McsProspectAccountRecord | null> {
-  const result = await gatewayCall<{ documents: McsProspectAccountRecord[] }>(
+  const result = await persistenceCall<{ documents: McsProspectAccountRecord[] }>(
     'mongodb',
     'query',
     {
@@ -140,7 +140,7 @@ export async function findAccountsByPhone(
   e164: string,
   nowMs: number = Date.now(),
 ): Promise<McsProspectAccountRecord[]> {
-  const result = await gatewayCall<{ documents: McsProspectAccountRecord[] }>(
+  const result = await persistenceCall<{ documents: McsProspectAccountRecord[] }>(
     'mongodb',
     'query',
     {
@@ -163,7 +163,7 @@ export async function findAccountsByPhone(
 export async function findAccountById(
   accountId: string,
 ): Promise<McsProspectAccountRecord | null> {
-  const result = await gatewayCall<{ documents: McsProspectAccountRecord[] }>(
+  const result = await persistenceCall<{ documents: McsProspectAccountRecord[] }>(
     'mongodb',
     'query',
     {
@@ -195,7 +195,7 @@ export async function findAccountByPhoneAndCode(
   code: string,
   nowMs: number = Date.now(),
 ): Promise<McsProspectAccountRecord | null> {
-  const result = await gatewayCall<{ documents: McsProspectAccountRecord[] }>(
+  const result = await persistenceCall<{ documents: McsProspectAccountRecord[] }>(
     'mongodb',
     'query',
     {
@@ -332,7 +332,7 @@ export async function attachPhoneOnConsent(
     return;
   }
   if (account.phone === phone) return; // idempotent no-op
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: MONGO_COLLECTION,
     filter: { accountId: account.accountId },
@@ -352,7 +352,7 @@ export async function attachPhoneOnConsent(
  */
 export async function recordLogin(accountId: string): Promise<void> {
   try {
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: MONGO_COLLECTION,
       filter: { accountId },
@@ -375,7 +375,7 @@ export async function recordLogin(accountId: string): Promise<void> {
  * when the sweep ships.
  */
 export async function deleteAccountByTokenId(tokenId: string): Promise<void> {
-  await gatewayCall('mongodb', 'delete', {
+  await persistenceCall('mongodb', 'delete', {
     database: MONGO_DB,
     collection: MONGO_COLLECTION,
     filter: { tokenId },

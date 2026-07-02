@@ -3,7 +3,7 @@
  *
  * The four H leaves from project-wireframe.md / build-checklist:
  *   H.1  Real-time usage strip   — active .team/.com sessions, events/min,
- *                                  gateway p50/p95 over the last minute
+ *                                  Persistence p50/p95 over the last minute
  *   H.2  Growth stat cards       — BAs and prospects added in 24h / 7d / 30d
  *   H.3  Holding-tank live grid  — every active placement slot, colored by
  *                                  age in tank, click to open prospect panel
@@ -41,17 +41,17 @@ import type { McsAdminDashboardFilter } from './types.js';
  * channel — useful as a sanity check (it should be ≥ 1 whenever the
  * strip is rendering for Kevin).
  *
- * `gatewayLatencyMsP50/P95` is the Universal Gateway round-trip latency
- * measured server-side over the last 60 seconds; null when no calls
- * happened in that window.
+ * `persistenceLatencyMsP50/P95` is direct persistence round-trip latency
+ * measured server-side over the last 60 seconds; null when no calls happened
+ * in that window.
  */
 export interface McsAdminLiveUsageSample {
   sampledAt: string; // ISO-8601
   activeDashboardViewers: number;
   activeAdminSessions: number;
   eventsPerMinute: number;
-  gatewayLatencyMsP50: number | null;
-  gatewayLatencyMsP95: number | null;
+  persistenceLatencyMsP50: number | null;
+  persistenceLatencyMsP95: number | null;
 }
 
 /** SSE event kinds on GET /api/admin/live-ops/usage/stream. */

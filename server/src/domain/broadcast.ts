@@ -16,14 +16,14 @@
  * rows write through `tripleStackWrite`. ChromaDB indexes the SMS / email
  * body so a future audit search ("what did Kevin send about X?") works.
  *
- * Mongo gateway gotchas baked in below (see services/tripleStack.ts):
+ * Mongo PERSISTENCE gotchas baked in below (see services/tripleStack.ts):
  *   - `mongodb.insert`  needs `documents:` (plural array)
  *   - `mongodb.update`  is non-upsert; we branch on existence
  *   - `mongodb.query`   parameter is `filter:`; returns { count, documents }
  */
 
 import { randomBytes } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { findBAByTmagId, listAllBAsForAdmin, type BAListItem } from './ba.js';
 import { listLeaderTmagIds } from './adminMetrics.js';
@@ -73,7 +73,7 @@ export const LEADER_NOTE =
 
 /** Load the global STOP/optout set. Used everywhere audience is resolved. */
 export async function loadOptoutTmagIds(): Promise<Set<string>> {
-  const result = await gatewayCall<{ documents: McsBroadcastOptoutRow[] }>(
+  const result = await persistenceCall<{ documents: McsBroadcastOptoutRow[] }>(
     'mongodb',
     'query',
     {
@@ -97,7 +97,7 @@ export async function appendBroadcastOptout(input: {
   sourcePhone?: string | null;
   note?: string | null;
 }): Promise<McsBroadcastOptoutRow> {
-  const existing = await gatewayCall<{ documents: McsBroadcastOptoutRow[]; count: number }>(
+  const existing = await persistenceCall<{ documents: McsBroadcastOptoutRow[]; count: number }>(
     'mongodb',
     'query',
     {
@@ -117,7 +117,7 @@ export async function appendBroadcastOptout(input: {
     sourcePhone: input.sourcePhone ?? null,
     note: input.note ?? null,
   };
-  await gatewayCall('mongodb', 'insert', {
+  await persistenceCall('mongodb', 'insert', {
     database: MONGO_DB,
     collection: COLL_OPTOUTS,
     documents: [{ _id: input.tmagId, ...row }],
@@ -204,7 +204,7 @@ async function filterAtRisk(allBas: BAListItem[], nowMs: number): Promise<BAList
   });
   if (olderThan7d.length === 0) return [];
 
-  const result = await gatewayCall<{
+  const result = await persistenceCall<{
     documents: Array<{ tmagId: string; lastLoginAt: string | null }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
@@ -468,7 +468,7 @@ export async function enqueueBroadcast(
     },
   });
 
-  // Per-recipient row inserts in batches (Mongo gateway limit safety).
+  // Per-recipient row inserts in batches (Mongo PERSISTENCE limit safety).
   const rows = recipients.map((ba) =>
     renderRecipient(broadcastId, ba, request.channel, request.template, actorDisplayName),
   );
@@ -506,7 +506,7 @@ async function insertRecipientRows(rows: McsBroadcastRecipientRow[]): Promise<vo
   const BATCH = 200;
   for (let i = 0; i < rows.length; i += BATCH) {
     const slice = rows.slice(i, i + BATCH);
-    await gatewayCall('mongodb', 'insert', {
+    await persistenceCall('mongodb', 'insert', {
       database: MONGO_DB,
       collection: COLL_RECIPIENTS,
       documents: slice.map((r) => ({ _id: r.rowId, ...r })),
@@ -636,7 +636,7 @@ export async function prepareSendTest(
 /* ─── per-recipient state advance (worker hooks) ─────────────── */
 
 export async function markRecipientSending(rowId: string): Promise<void> {
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: COLL_RECIPIENTS,
     filter: { _id: rowId },
@@ -664,7 +664,7 @@ export async function markRecipientResult(
   if (patch.emailMessageId !== undefined) set.emailMessageId = patch.emailMessageId;
   if (patch.failureReason !== undefined) set.failureReason = patch.failureReason;
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: COLL_RECIPIENTS,
     filter: { _id: rowId },
@@ -675,7 +675,7 @@ export async function markRecipientResult(
 /* ─── status (G.5 polling) ─────────────────────────────────────── */
 
 export async function getBroadcastById(broadcastId: string): Promise<McsBroadcastRecord | null> {
-  const result = await gatewayCall<{ documents: McsBroadcastRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsBroadcastRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BROADCASTS,
     filter: { broadcastId },
@@ -685,7 +685,7 @@ export async function getBroadcastById(broadcastId: string): Promise<McsBroadcas
 }
 
 export async function listRecentBroadcasts(limit = 20): Promise<McsBroadcastRecord[]> {
-  const result = await gatewayCall<{ documents: McsBroadcastRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsBroadcastRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BROADCASTS,
     filter: {},
@@ -696,7 +696,7 @@ export async function listRecentBroadcasts(limit = 20): Promise<McsBroadcastReco
 }
 
 export async function getBroadcastCounts(broadcastId: string): Promise<McsBroadcastStatusCounts> {
-  const result = await gatewayCall<{ documents: McsBroadcastRecipientRow[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsBroadcastRecipientRow[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_RECIPIENTS,
     filter: { broadcastId },
@@ -740,7 +740,7 @@ export async function listRecentRecipientRows(
   broadcastId: string,
   limit = 50,
 ): Promise<McsBroadcastRecipientRow[]> {
-  const result = await gatewayCall<{ documents: McsBroadcastRecipientRow[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsBroadcastRecipientRow[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_RECIPIENTS,
     filter: { broadcastId },
@@ -754,7 +754,7 @@ export async function listRecentRecipientRows(
  * Pull queued rows for the worker. Capped to keep transport bursts sane.
  */
 export async function claimQueuedRows(limit = 10): Promise<McsBroadcastRecipientRow[]> {
-  const result = await gatewayCall<{ documents: McsBroadcastRecipientRow[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsBroadcastRecipientRow[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_RECIPIENTS,
     filter: { status: 'queued' },
@@ -769,7 +769,7 @@ export async function claimQueuedRows(limit = 10): Promise<McsBroadcastRecipient
  * crash/restart mid-flight doesn't permanently strand them.
  */
 export async function resetStuckSendingRows(): Promise<number> {
-  const stuck = await gatewayCall<{ documents: McsBroadcastRecipientRow[]; count: number }>(
+  const stuck = await persistenceCall<{ documents: McsBroadcastRecipientRow[]; count: number }>(
     'mongodb',
     'query',
     {
@@ -780,7 +780,7 @@ export async function resetStuckSendingRows(): Promise<number> {
     },
   );
   for (const row of stuck.documents ?? []) {
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: COLL_RECIPIENTS,
       filter: { _id: row.rowId },
@@ -812,7 +812,7 @@ export async function reconcileBroadcastStatus(broadcastId: string): Promise<Mcs
   if (next === broadcast.status && broadcast.completedAt) return broadcast;
   const completedAt = next === 'complete' ? new Date().toISOString() : broadcast.completedAt;
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: COLL_BROADCASTS,
     filter: { broadcastId },

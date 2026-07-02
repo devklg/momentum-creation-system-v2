@@ -16,7 +16,7 @@
  * prospect scoring, no ranking.
  */
 
-import { gatewayCall } from '../../services/gateway.js';
+import { persistenceCall } from '../../services/persistence/dispatch.js';
 import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
@@ -93,7 +93,7 @@ export async function buildInviteFunnelReport(
   if (scopedTmagIds !== null) tokenFilter.sponsorTmagId = { $in: scopedTmagIds };
   Object.assign(tokenFilter, rangeClause('createdAt', range));
 
-  const tokensRes = await gatewayCall<{ documents: TokenDoc[] }>('mongodb', 'query', {
+  const tokensRes = await persistenceCall<{ documents: TokenDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_TOKENS,
     filter: tokenFilter,
@@ -128,7 +128,7 @@ export async function buildInviteFunnelReport(
   const completedClicked = tokens.filter((t) => reached(t, 'video_complete') && t.clickedAt);
   if (completedClicked.length > 0) {
     const prospectList = completedClicked.map((t) => t.prospectId);
-    const actRes = await gatewayCall<{ documents: VideoActivityDoc[] }>(
+    const actRes = await persistenceCall<{ documents: VideoActivityDoc[] }>(
       'mongodb',
       'query',
       {
@@ -173,7 +173,7 @@ export async function buildInviteFunnelReport(
   const perTmagIds = [...baStats.keys()];
   const baNameLookup = new Map<string, string>();
   if (perTmagIds.length > 0) {
-    const basRes = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+    const basRes = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_BAS,
       filter: { tmagId: { $in: perTmagIds }, deleted: { $ne: true } },

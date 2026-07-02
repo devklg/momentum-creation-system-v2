@@ -231,8 +231,8 @@ describe('P4.8 static observability governance boundary', () => {
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/^\s*\/\/.*$/gm, '');
 
-  it('imports no store, Gateway, or LLM client and reads no ambient clock', () => {
-    expect(/from\s+['"][^'"]*(?:mongoose|mongodb|neo4j-driver|chromadb|\/services\/gateway|anthropic|openai)/i.test(source)).toBe(false);
+  it('imports no store, PERSISTENCE, or LLM client and reads no ambient clock', () => {
+    expect(/from\s+['"][^'"]*(?:mongoose|mongodb|neo4j-driver|chromadb|\/services\/PERSISTENCE|anthropic|openai)/i.test(source)).toBe(false);
     expect(/\bDate\.now\s*\(/.test(source)).toBe(false);
     expect(/\bnew\s+Date\s*\(/.test(source)).toBe(false);
   });

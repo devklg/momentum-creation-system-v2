@@ -235,7 +235,7 @@ describe('S3.11 michael-runtime route static regression boundary', () => {
 
   it('#12 did not add store / persistence / LLM imports', () => {
     const forbidden =
-      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/gateway|\/tripleStack|openai|anthropic|@anthropic-ai|telnyx)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/PERSISTENCE|\/tripleStack|openai|anthropic|@anthropic-ai|telnyx)[^'"]*['"]/i;
     const matches = matchingImportLines(routeFiles(), forbidden);
     expect(matches, matches.join('\n')).toEqual([]);
   });

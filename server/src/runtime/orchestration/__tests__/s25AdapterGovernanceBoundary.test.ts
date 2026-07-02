@@ -94,16 +94,16 @@ function matchingImportLines(files: SourceFile[], pattern: RegExp): string[] {
 }
 
 describe('S2.5 inert adapter static governance boundary', () => {
-  it('keeps adapter imports away from stores, GraphRAG, Gateway fallback, direct adapters, and retrieval helpers', () => {
+  it('keeps adapter imports away from stores, GraphRAG, legacy fallback, direct adapters, and retrieval helpers', () => {
     const forbiddenImports =
-      /\bfrom\s+['"][^'"]*(?:^|\/|\\|@)(?:mongoose|mongodb|neo4j-driver|chromadb)(?:$|\/|\\|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/gateway|\/services\/persistence|\/persistence\/|\/adapters?\/|\/adapter(?:\.js)?|gatewayFallback|gateway-fallback|rawRetrieval|retrievalHelper|directRetrieval|retrieval)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:^|\/|\\|@)(?:mongoose|mongodb|neo4j-driver|chromadb)(?:$|\/|\\|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/PERSISTENCE|\/services\/persistence|\/persistence\/|\/adapters?\/|\/adapter(?:\.js)?|PERSISTENCEFallback|PERSISTENCE-fallback|rawRetrieval|retrievalHelper|directRetrieval|retrieval)[^'"]*['"]/i;
     const matches = matchingImportLines(adapterProductionFiles(), forbiddenImports);
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('keeps adapter executable code away from direct stores, GraphRAG, Gateway fallback, and raw retrieval calls', () => {
+  it('keeps adapter executable code away from direct stores, GraphRAG, legacy fallback, and raw retrieval calls', () => {
     const forbiddenCalls =
-      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|gatewayCall|directPersistenceCall|tripleStackWrite|mongoAdapter|neo4jAdapter|chromaAdapter|graphRag|graphrag|gatewayFallback|rawRetrieval|retrievalHelper|directRetrieval|fetchKnowledge|queryKnowledge|retrieveContext)\s*(?:\(|\.)?/i;
+      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|persistenceCall|directStoreCall|tripleStackWrite|mongoAdapter|neo4jAdapter|chromaAdapter|graphRag|graphrag|PERSISTENCEFallback|rawRetrieval|retrievalHelper|directRetrieval|fetchKnowledge|queryKnowledge|retrieveContext)\s*(?:\(|\.)?/i;
     const matches = matchingLines(adapterProductionFiles(), forbiddenCalls);
     expect(matches, matches.join('\n')).toEqual([]);
   });
@@ -142,12 +142,12 @@ describe('S2.5 inert adapter static governance boundary', () => {
     expect(comMatches, comMatches.join('\n')).toEqual([]);
   });
 
-  it('preserves the Gateway fallback client outside adapter source', () => {
-    const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
-    expect(gatewayClient).toContain('export async function gatewayCall');
-    expect(gatewayClient).toContain('directPersistenceCall');
-    expect(gatewayClient).toContain('/execute');
-    expect(gatewayClient).toContain('GATEWAY_URL');
+  it('verifies the legacy HTTP fallback stays retired (ACR-0009) outside adapter source', () => {
+    const persistenceClient = readFileSync(resolve(repoRoot, 'server/src/services/persistence/dispatch.ts'), 'utf8');
+    expect(persistenceClient).toContain('export async function persistenceCall');
+    expect(persistenceClient).toContain('directStoreCall');
+    expect(persistenceClient).not.toContain('/execute');
+    expect(persistenceClient).not.toContain('PERSISTENCE_URL');
   });
 
   it('does not introduce Telnyx, PSTN, or call-control behavior in adapter source', () => {

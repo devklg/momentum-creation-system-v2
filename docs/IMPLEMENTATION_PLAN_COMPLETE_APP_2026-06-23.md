@@ -49,9 +49,9 @@ VERIFY (audit items 1–10):
 - `pnpm install` → `pnpm typecheck` → `pnpm build` → `git diff --check`.
 - Boot server + all apps; confirm API health route responds.
 - Confirm `.com`, `.team`, `/admin` all load in browser.
-- Confirm Universal Gateway V2 is reachable on port **2526**. This is the settled MCS V2 standard.
+- Confirm external MCP tooling is reachable on port **2526**. This is the settled MCS V2 standard.
 
-**Exit criteria:** clean build, three apps load, API health green, gateway answers. No red here moves forward.
+**Exit criteria:** clean build, three apps load, API health green, external tooling answers. No red here moves forward.
 
 ---
 
@@ -62,7 +62,7 @@ Everything here is actual missing/stubbed code. File paths are from the current 
 ### 1.1 Live Ops real data (VERIFY + 1-line flip — the build is DONE)
 Correction (2026-06-23, verified against tree): the "H-server" is the server
 side of /admin Section H Live Operations, and it is **already built and
-mounted** — `server/src/domain/liveOps.ts` (570 lines, real gateway queries
+mounted** — `server/src/domain/liveOps.ts` (570 lines, real external tooling queries
 against `brand_ambassadors`, `pool_placements`, `prospects`,
 `michael_schedules`, `invitation_activity`), `server/src/routes/admin/liveOps.ts`,
 imported in `server/src/index.ts`. The four endpoints (H.1 usage SSE, H.2 growth,
@@ -180,7 +180,7 @@ Run each surface, desktop + mobile. These are the largest blocks of the checklis
 
 ### 7.2 Launch operations (final gate)
 - Production `.env` for server, `.com`, `.team`, `/admin`; cookie domain + CORS; `ADMIN_BA_IDS` allowlist. (Items 145–150.)
-- Connectivity: MongoDB, Neo4j, ChromaDB, Gateway @ 2526, Telnyx, Resend, Anthropic (if live agents), VM provider. (Items 151–158.)
+- Connectivity: MongoDB, Neo4j, ChromaDB, external MCP tooling @ 2526, Telnyx, Resend, Anthropic (if live agents), VM provider. (Items 151–158.)
 - Final desktop smoke across all three; final mobile smoke on `.com`/`.team`; final admin-viewport smoke. (Items 159–161.)
 - Confirm no uncommitted production changes; record branch, commit, deployment tags. (Items 162–163.)
 

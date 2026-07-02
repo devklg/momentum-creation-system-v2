@@ -21,7 +21,7 @@ import type {
  *  - generate Steve/Michael/Ivory output (behavior is not implemented);
  *  - mount routes or expose a runtime HTTP API surface;
  *  - persist sessions, turns, or events;
- *  - query stores, GraphRAG, adapters, or Gateway clients;
+ *  - query stores, GraphRAG, adapters, or persistence dispatch clients;
  *  - assemble Context Packets (Context Manager remains the only assembler).
  */
 

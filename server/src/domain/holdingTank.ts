@@ -31,7 +31,7 @@
  *     * Network glitches that re-deliver the same event.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { publishPlacement } from '../services/poolEvents.js';
 import type {
   McsHoldingTankSnapshot,
@@ -52,7 +52,7 @@ export const TEAM_POOL_ID = 'tm_team_pool';
 /**
  * Atomically increment the team pool counter and return the new value.
  *
- * Gateway bug worked around: the mongo `update` action does not honor
+ * PERSISTENCE bug worked around: the mongo `update` action does not honor
  * `upsert:true`. We branch on existence: if the counter doc is missing
  * we insert it at 1; otherwise we $inc and re-read.
  *
@@ -64,9 +64,9 @@ export const TEAM_POOL_ID = 'tm_team_pool';
  */
 async function incrementPoolCounter(): Promise<number> {
   // Try $inc first. If counter doc exists, this is the entire happy path.
-  // The gateway returns matchedCount/modifiedCount; we then read to learn
+  // The PERSISTENCE returns matchedCount/modifiedCount; we then read to learn
   // the new value.
-  const incResult = await gatewayCall<{ matchedCount?: number; modifiedCount?: number }>(
+  const incResult = await persistenceCall<{ matchedCount?: number; modifiedCount?: number }>(
     'mongodb',
     'update',
     {
@@ -78,7 +78,7 @@ async function incrementPoolCounter(): Promise<number> {
   );
 
   if ((incResult.matchedCount ?? 0) > 0) {
-    const after = await gatewayCall<{ documents: Array<{ current: number }> }>('mongodb', 'query', {
+    const after = await persistenceCall<{ documents: Array<{ current: number }> }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COUNTERS_COLLECTION,
       filter: { _id: TEAM_POOL_ID },
@@ -94,7 +94,7 @@ async function incrementPoolCounter(): Promise<number> {
   // Counter doc missing — seed at 1. Catch duplicate-key in case a
   // concurrent placement seeded it first; fall back to $inc.
   try {
-    await gatewayCall('mongodb', 'insert', {
+    await persistenceCall('mongodb', 'insert', {
       database: MONGO_DB,
       collection: COUNTERS_COLLECTION,
       documents: [{ _id: TEAM_POOL_ID, current: 1, createdAt: new Date().toISOString() }],
@@ -102,7 +102,7 @@ async function incrementPoolCounter(): Promise<number> {
     return 1;
   } catch (err) {
     // Concurrent insert won the race. Re-enter the $inc path once.
-    const retry = await gatewayCall<{ matchedCount?: number }>('mongodb', 'update', {
+    const retry = await persistenceCall<{ matchedCount?: number }>('mongodb', 'update', {
       database: MONGO_DB,
       collection: COUNTERS_COLLECTION,
       filter: { _id: TEAM_POOL_ID },
@@ -111,7 +111,7 @@ async function incrementPoolCounter(): Promise<number> {
     if ((retry.matchedCount ?? 0) === 0) {
       throw new Error(`pool_counter_seed_collision: ${(err as Error).message}`);
     }
-    const after = await gatewayCall<{ documents: Array<{ current: number }> }>('mongodb', 'query', {
+    const after = await persistenceCall<{ documents: Array<{ current: number }> }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COUNTERS_COLLECTION,
       filter: { _id: TEAM_POOL_ID },
@@ -131,7 +131,7 @@ async function incrementPoolCounter(): Promise<number> {
  * inside placeProspect.
  */
 export async function findPlacementByProspectId(prospectId: string): Promise<McsPoolPlacement | null> {
-  const result = await gatewayCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
     filter: { prospectId },
@@ -189,7 +189,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
 
   // 2. Insert placement record. _id = prospectId for one-placement-per-
   //    prospect invariant; if a second writer raced to here, duplicate-
-  //    key surfaces as a gateway error — we catch and return the row.
+  //    key surfaces as a PERSISTENCE error — we catch and return the row.
   const placement: McsPoolPlacement = {
     prospectId: input.prospectId,
     sponsorTmagId: input.sponsorTmagId,
@@ -201,7 +201,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
   };
 
   try {
-    await gatewayCall('mongodb', 'insert', {
+    await persistenceCall('mongodb', 'insert', {
       database: MONGO_DB,
       collection: PLACEMENTS_COLLECTION,
       documents: [{ _id: input.prospectId, ...placement }],
@@ -224,7 +224,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
 
   // 3. Neo4j: MERGE prospect + pool nodes, MERGE the relationship with
   //    position. MERGE on the relationship is idempotent in case of retry.
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MERGE (pool:TmagPool {id: $poolId}) ' +
       'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
@@ -249,7 +249,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
     `#${positionNumber} ${input.firstName} ${input.lastInitial}. ` +
     `from ${input.city}, ${input.stateOrRegion} · ` +
     `invited by ${input.sponsorTmagId} at ${placedAt}`;
-  await gatewayCall('chromadb', 'add', {
+  await persistenceCall('chromadb', 'add', {
     collection: CHROMA_COLLECTION,
     ids: [eventId],
     documents: [eventDoc],
@@ -269,7 +269,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
   // 5. Mirror position + placedAt + state onto the prospect record so the
   //    next GET /api/p/:token resolve carries the assigned position without
   //    re-querying pool_placements. State stays in lockstep with the token.
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: 'tmag_prospects',
     filter: { prospectId: input.prospectId },
@@ -333,7 +333,7 @@ export async function buildHoldingTankSnapshot(
  * have happened ever).
  */
 async function readPoolCounter(): Promise<number> {
-  const result = await gatewayCall<{ documents: Array<{ current: number }> }>(
+  const result = await persistenceCall<{ documents: Array<{ current: number }> }>(
     'mongodb',
     'query',
     {
@@ -361,7 +361,7 @@ async function listRecentPlacements(
   // filtered to state=video_complete with the right projection + sort.
   // When pool_placements is large enough to dominate, this becomes a
   // single $lookup aggregation or a denormalized field on placement.
-  const result = await gatewayCall<{
+  const result = await persistenceCall<{
     documents: Array<{
       firstName: string;
       lastInitial?: string;
@@ -439,7 +439,7 @@ export async function listProspectsAgedBeyond(
   nowMs: number = Date.now(),
 ): Promise<AgedPlacement[]> {
   const cutoff = windowCutoffIso(weeks, nowMs);
-  const result = await gatewayCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
     filter: {
@@ -499,7 +499,7 @@ export async function flushExpiredPlacements(
     const flushedAt = new Date().toISOString();
     try {
       // 1. Placement row — flush stamp. Position untouched.
-      await gatewayCall('mongodb', 'update', {
+      await persistenceCall('mongodb', 'update', {
         database: MONGO_DB,
         collection: PLACEMENTS_COLLECTION,
         filter: { prospectId: c.prospectId, flushedAt: null },
@@ -507,7 +507,7 @@ export async function flushExpiredPlacements(
       });
 
       // 2. Prospect funnel record — mirror to 'expired'.
-      await gatewayCall('mongodb', 'update', {
+      await persistenceCall('mongodb', 'update', {
         database: MONGO_DB,
         collection: 'tmag_prospects',
         filter: { prospectId: c.prospectId },
@@ -516,7 +516,7 @@ export async function flushExpiredPlacements(
 
       // 3. Neo4j tank edge — mark flushed, preserve the position. We do NOT
       //    delete the relationship: graph walks still see the vacated slot.
-      await gatewayCall('neo4j', 'cypher', {
+      await persistenceCall('neo4j', 'cypher', {
         query:
           'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
           'SET r.flushedAt = $flushedAt, r.flushReason = $flushReason',

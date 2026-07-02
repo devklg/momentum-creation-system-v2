@@ -37,7 +37,7 @@
  */
 
 import { randomBytes } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import {
@@ -256,7 +256,7 @@ export async function issueLinksForPhone(
     }
 
     // Stamp the SMS outcome onto the link row.
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: MONGO_COLLECTION,
       filter: { linkToken },
@@ -296,7 +296,7 @@ export async function redeemLink(linkToken: string): Promise<RedeemResult> {
     return { ok: false, error: 'invalid_link' };
   }
 
-  const result = await gatewayCall<{
+  const result = await persistenceCall<{
     documents: Array<
       McsProspectMagicLinkRecord & {
         smsDeliveryStatus?: string;
@@ -324,7 +324,7 @@ export async function redeemLink(linkToken: string): Promise<RedeemResult> {
   // resolve to the same account — single-use is preserved because
   // subsequent reads see redeemedAt non-null.
   const redeemedAt = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: MONGO_COLLECTION,
     filter: { linkToken, redeemedAt: null },
@@ -333,7 +333,7 @@ export async function redeemLink(linkToken: string): Promise<RedeemResult> {
 
   // Re-read to confirm we won the race. If redeemedAt was already
   // stamped by a concurrent redeem, return already_used.
-  const after = await gatewayCall<{ documents: McsProspectMagicLinkRecord[] }>(
+  const after = await persistenceCall<{ documents: McsProspectMagicLinkRecord[] }>(
     'mongodb',
     'query',
     {

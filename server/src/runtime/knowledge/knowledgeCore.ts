@@ -23,7 +23,7 @@ export const knowledgeCoreBoundary = defineRuntimeBoundary({
   persistenceAccess: 'service_boundary_only',
   sharedContractImport: '@momentum/shared/runtime',
   notes: [
-    'Approved knowledge access boundary only; no database, adapter, or Gateway import is allowed here.',
+    'Approved knowledge access boundary only; no database, adapter, or PERSISTENCE import is allowed here.',
     'Future implementations must return scoped shared runtime knowledge contracts through service-owned persistence.',
   ],
 } satisfies BackendRuntimeBoundaryDescriptor<'knowledge_core'>);

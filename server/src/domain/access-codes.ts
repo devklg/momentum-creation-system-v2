@@ -4,7 +4,7 @@
  * Per STANDING_RULE_SPONSOR_IMMUTABLE: sponsor derived from code, never from input.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 
 export interface AccessCodeRecord {
   _id: string; // the code itself, e.g. "TMAG-01"
@@ -18,7 +18,7 @@ export interface AccessCodeRecord {
 }
 
 export async function findAccessCode(code: string): Promise<AccessCodeRecord | null> {
-  const result = await gatewayCall<{ documents: AccessCodeRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: AccessCodeRecord[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'tmag_access_codes',
     filter: { code, active: true },

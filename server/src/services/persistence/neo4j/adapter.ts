@@ -1,17 +1,17 @@
 /**
  * Neo4j direct adapter (S1.3 Phase 1, ACR-0007 / Option C).
  *
- * Behavioral parity with the gateway's `neo4j` tool: action `cypher` with
+ * Behavioral parity with the PERSISTENCE's `neo4j` tool: action `cypher` with
  * `{ query, params }` returns `{ records, summary: { counters } }`. Neo4j
  * Integer values are normalized to JS numbers (or strings when out of safe
- * range) so callers see the same plain shapes the gateway returned.
+ * range) so callers see the same plain shapes the PERSISTENCE returned.
  *
- * Errors are surfaced through GatewayError(tool, action, message) so caller
+ * Errors are surfaced through PersistenceError(tool, action, message) so caller
  * error guards keep working unchanged.
  */
 import neo4j from 'neo4j-driver';
 import { getNeo4jDriver } from './connection.js';
-import { GatewayError } from '../../gateway.js';
+import { PersistenceError } from '../dispatch.js';
 
 /** Normalize Neo4j driver values (Integer, Node/Relationship, arrays, maps) to plain JS. */
 function normalizeValue(value: unknown): unknown {
@@ -53,7 +53,7 @@ export interface Neo4jCypherResult {
 
 export async function neo4jCypher(input: Neo4jCypherParams): Promise<Neo4jCypherResult> {
   if (!input || typeof input.query !== 'string') {
-    throw new GatewayError('neo4j', 'cypher', 'cypher requires a string `query`');
+    throw new PersistenceError('neo4j', 'cypher', 'cypher requires a string `query`');
   }
   const session = getNeo4jDriver().session();
   try {
@@ -70,13 +70,13 @@ export async function neo4jCypher(input: Neo4jCypherParams): Promise<Neo4jCypher
         : {};
     return { records, summary: { counters } };
   } catch (err) {
-    throw new GatewayError('neo4j', 'cypher', err instanceof Error ? err.message : String(err));
+    throw new PersistenceError('neo4j', 'cypher', err instanceof Error ? err.message : String(err));
   } finally {
     await session.close();
   }
 }
 
-/** Dispatch by action, mirroring the gateway's `neo4j` tool surface. */
+/** Dispatch by action, mirroring the PERSISTENCE's `neo4j` tool surface. */
 export async function neo4jAdapter(
   action: string,
   params: Record<string, unknown>,
@@ -85,6 +85,6 @@ export async function neo4jAdapter(
     case 'cypher':
       return neo4jCypher(params as unknown as Neo4jCypherParams);
     default:
-      throw new GatewayError('neo4j', action, `unsupported neo4j action: ${action}`);
+      throw new PersistenceError('neo4j', action, `unsupported neo4j action: ${action}`);
   }
 }

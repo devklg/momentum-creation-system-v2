@@ -6,6 +6,13 @@ env contract (`server/src/env.ts`), and a live probe of every dependency and
 the current `.env`. Where a value below says "verified," it was read from the
 running system, not assumed.
 
+> **Persistence supersession (2026-07-02, ACR-0009):** This guide was originally
+> verified before the retired HTTP persistence fallback was retired. For current
+> runtime persistence, the app writes directly to the dedicated MCS MongoDB,
+> Neo4j, and ChromaDB stack through server adapters. external MCP tool server remains
+> MCP/developer tooling and operator access, not the app persistence edge or app
+> memory layer.
+
 This complements `docs/RUN_GUIDE.html`. If they ever disagree, trust this file
 for the run/verify steps and reconcile RUN_GUIDE.
 
@@ -17,10 +24,10 @@ Dependencies — all UP right now:
 
 | Layer | Endpoint | Status |
 |---|---|---|
-| Universal Gateway V2 | `http://localhost:2526/api` | UP (proven via Mongo/Neo4j calls; note: `/api/health` returns 404, that path just doesn't exist — the gateway itself answers) |
-| MongoDB (`momentum`) | via gateway | UP — 40 collections, `work_queue_leaves` synced |
-| Neo4j | via gateway | UP — 67,874 nodes |
-| ChromaDB | `localhost:8100` (v2 API) | UP — heartbeat 200 |
+| external MCP tool server | `http://localhost:2526/api` | UP for MCP/developer tooling only (not app runtime persistence) |
+| MongoDB (`momentum`) | direct app stack (`MONGODB_URI`) | UP — 40 collections, `work_queue_leaves` synced at the time of the original snapshot |
+| Neo4j | direct app stack (`NEO4J_URI`) | UP — 67,874 nodes at the time of the original snapshot |
+| ChromaDB | direct app stack (`CHROMA_URL`) | UP — heartbeat 200 at the time of the original snapshot |
 | GPU embedding service | `127.0.0.1:8300` | UP — CUDA, RTX 4070 Ti, `gpu_available=true` |
 
 App surfaces — DOWN (not started; this is why you haven't seen it):
@@ -36,7 +43,7 @@ App surfaces — DOWN (not started; this is why you haven't seen it):
 
 - `JWT_SECRET` — set (43 chars). Boot will succeed (this is the only hard-required value).
 - `ADMIN_BA_IDS` — `TMBA-FOUNDER-KEVIN`. You can enter `/admin`.
-- `GATEWAY_URL` — `http://localhost:2526/api`. Correct.
+- Direct persistence env — `MONGODB_URI`, `NEO4J_URI`, `CHROMA_URL`, and `GPU_EMBEDDER_URL`. Current templates default to direct mode; `retired tool-server URL env var` is not a runtime env var.
 - `WEBINAR_REGISTER_URL` — set (real Zoom link).
 - `ANTHROPIC_API_KEY` — SET (108 chars). ScriptMaker + Ivory LLM drafts are LIVE, not dormant.
 - `TELNYX_API_KEY` — SET (58 chars). Telnyx outbound calling is configured — real calls are possible. Treat call flows with care in dev.
@@ -49,19 +56,22 @@ Bottom line: nothing is blocking a local run. Start the surfaces and you'll see 
 
 ## 1. Architecture at a Glance
 
-One Express API server, three Vite/React clients, one persistence edge (Gateway
-V2) fronting the triple-stack, plus a GPU embedding service.
+One Express API server, three Vite/React clients, a direct app triple-stack,
+plus a GPU embedding service. external MCP tool server is available beside the app
+for MCP/developer tooling and operator scripts.
 
 ```
   Browser
     | .com 7701    .team 7702    /admin 7703
     v
-  Express API  ──►  Universal Gateway V2 (2526)  ──►  MongoDB + Neo4j + ChromaDB
+  Express API  ──►  MongoDB + Neo4j + ChromaDB
      7700                    │
                              └──►  GPU embeddings (8300)
+
+  Claude/Codex/operator scripts ──► external MCP tool server (2526)
 ```
 
-- Every app data write goes through the triple-stack helper (`tripleStackWrite()`) via the gateway. The gateway must be up before the API is useful.
+- Every app data write goes through the triple-stack helper (`tripleStackWrite()`) and direct store adapters. The app API does not require external MCP tooling to be up for runtime persistence.
 - `appendAuditEntry()` is the audit primitive; `createInvitation()` mints prospect tokens.
 
 ---
@@ -71,7 +81,7 @@ V2) fronting the triple-stack, plus a GPU embedding service.
 ### 2.1 Prerequisites (confirm once)
 
 - Node >= 22, pnpm >= 9 (repo pins `pnpm@9.15.0`).
-- Dependencies up: Gateway 2526, Chroma 8100, GPU 8300, and Mongo+Neo4j behind the gateway. Per the snapshot above, all are currently up. `pnpm dev*` auto-runs `ensure:gpu` to start the GPU service if it's down.
+- Dependencies up: direct MongoDB, direct Neo4j, direct ChromaDB, and GPU 8300. External MCP tooling 2526 is useful for MCP/operator inspection but is not required for app runtime persistence. `pnpm dev*` auto-runs `ensure:gpu` to start the GPU service if it's down.
 - A `.env` at the repo root. Yours exists and is boot-ready (see snapshot).
 
 ### 2.2 Install (first run or after dependency changes)
@@ -118,13 +128,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .logs\probe-health.ps1
 ```
 
 Expect: GPU 8300 → 200 healthy; Chroma 8100 v2 → 200 heartbeat. For the
-gateway, the truest check is a real tool call (it answers Mongo/Neo4j queries)
+external tooling, the truest check is a real tool call (it answers Mongo/Neo4j queries)
 rather than `/api/health`, which 404s by design.
 
 ### 3.2 API server (7700)
 
 After `pnpm dev:all`, watch the server log for a clean boot (no Zod env error,
-no gateway connection error). Then:
+no external tooling connection error). Then:
 
 ```
 curl http://localhost:7700/api/health
@@ -228,7 +238,7 @@ pnpm --filter @momentum/server setup:founder-access
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Server exits at boot with a Zod error | A required env failed validation (most often `JWT_SECRET` < 16 chars) | Set a valid value in `.env`. Yours is currently fine (43 chars). |
-| API up but every data action errors | Gateway 2526 unreachable | Confirm the gateway process; run a gateway tool call. The app's persistence edge is the gateway, not a direct DB driver. |
+| API up but every data action errors | Direct MongoDB, Neo4j, ChromaDB, or GPU embedding service unreachable | Confirm the direct persistence env values, probe each store, and read the server error. External MCP tooling 2526 is not the app runtime persistence edge. |
 | Embedding/Chroma operations fail | GPU 8300 down or Chroma 8100 down | `pnpm ensure:gpu` (or start the GPU service manually); confirm Chroma heartbeat. Never accept a silent CPU fallback. |
 | Port already in use | Orphaned `node` watcher | `Get-Process node | Stop-Process -Force`, then restart. |
 | `/admin` rejects you | `ADMIN_BA_IDS` doesn't include your BA ID | Confirm `ADMIN_BA_IDS=TMBA-FOUNDER-KEVIN` in `.env`. |
@@ -260,11 +270,11 @@ What changes vs local:
 
 Open questions to resolve before deploying (do not assume):
 
-1. WHERE does the triple-stack live in prod? The gateway, MongoDB, Neo4j, ChromaDB, and the GPU embedding service currently run on your local Windows machine. The Quasar VPS has no RTX 4070 Ti. Decide: does the VPS reach back to your machine's gateway, does prod run a separate gateway + DB stack, and what happens to GPU embeddings without the GPU? This is the single biggest unsettled item.
+1. WHERE does the app triple-stack live in prod? MongoDB, Neo4j, ChromaDB, and the GPU embedding service currently run locally for development. The Quasar VPS has no RTX 4070 Ti. Decide whether prod runs its own DB/vector stack, reaches a dedicated hosted stack, or uses another GPU embedding path. external MCP tool server is not the production persistence answer.
 2. Reverse proxy + TLS: nginx/Caddy config mapping the three domains/subdomains to the three client bundles + `/api` to 7700; certificates.
 3. Process supervision: pm2/systemd for the API and the VM/broadcast workers.
-4. Secrets: production `.env` on the VPS (never committed) — JWT secret, gateway URL, and any activated keys.
-5. `D:/server-gateway-mcp-v2` is currently outside version control — bring it into a repo before it becomes a deploy dependency.
+4. Secrets: production `.env` on the VPS (never committed) — JWT secret, direct store credentials/URLs, GPU embedder URL, and any activated keys.
+5. The external MCP tooling repo is currently outside version control. Keep it versioned/operable for MCP and operator tooling, but do not make it an app deploy dependency.
 
 Recommendation: get the full local smoke (Sections 3–4) green first, settle
 question 1 explicitly, then build the prod runbook from a known-good base.

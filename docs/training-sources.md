@@ -6,8 +6,8 @@
 >
 > **Build repo:** `D:/momentum-creation-system-v1/` (`devklg/momentum-creation-system-v1`)
 > **Training content repo:** `D:/team-magnificent-training/` (publishes to `devklg.github.io/team-magnificent-training/`)
-> **Chat identity:** Mongo `universal_gateway.chat_registry` is the authority.
-> Handoffs live in `universal_gateway.session_handoffs` as attached artifacts,
+> **Chat identity:** Mongo `agent_operations.chat_registry` is the authority.
+> Handoffs live in `agent_operations.session_handoffs` as attached artifacts,
 > not as the source of chat numbering. This file was harvested in Chat #129 and
 > committed in Chat #135; verify current continuity through the registry first,
 > then read the linked handoff when needed.

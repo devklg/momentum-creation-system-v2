@@ -105,16 +105,16 @@ function matchingImportLines(files: readonly SourceFile[], pattern: RegExp): str
 }
 
 describe('S2.15 Michael runtime adapter contract static governance boundary', () => {
-  it('keeps contract imports away from stores, GraphRAG, direct persistence adapters, Gateway fallback clients, raw retrieval helpers, and LLM providers', () => {
+  it('keeps contract imports away from stores, GraphRAG, direct persistence adapters, legacy fallback clients, raw retrieval helpers, and LLM providers', () => {
     const forbiddenImports =
-      /\bfrom\s+['"][^'"]*(?:^|\/|\\|@)(?:mongoose|mongodb|neo4j-driver|chromadb|openai|anthropic|@anthropic-ai)(?:$|\/|\\|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/gateway|\/services\/persistence|\/persistence\/|\/services\/[^'"]*adapter|\/adapters?\/(?:mongo|neo4j|chroma|persistence)|gatewayFallback|gateway-fallback|rawRetrieval|retrievalHelper|directRetrieval|retrieval|\/services\/anthropic|\/services\/openai)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:^|\/|\\|@)(?:mongoose|mongodb|neo4j-driver|chromadb|openai|anthropic|@anthropic-ai)(?:$|\/|\\|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/PERSISTENCE|\/services\/persistence|\/persistence\/|\/services\/[^'"]*adapter|\/adapters?\/(?:mongo|neo4j|chroma|persistence)|PERSISTENCEFallback|PERSISTENCE-fallback|rawRetrieval|retrievalHelper|directRetrieval|retrieval|\/services\/anthropic|\/services\/openai)[^'"]*['"]/i;
     const matches = matchingImportLines(contractSource(), forbiddenImports);
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('keeps contract executable code away from store clients, GraphRAG, Gateway fallback, direct persistence, retrieval, Context Packet assembly, and LLM calls', () => {
+  it('keeps contract executable code away from store clients, GraphRAG, legacy fallback, direct persistence, retrieval, Context Packet assembly, and LLM calls', () => {
     const forbiddenCalls =
-      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|gatewayCall|directPersistenceCall|tripleStackWrite|mongoAdapter|neo4jAdapter|chromaAdapter|graphRag|graphrag|gatewayFallback|rawRetrieval|retrievalHelper|directRetrieval|fetchKnowledge|queryKnowledge|retrieveContext|searchKnowledge|buildContextPacket|prepareContextPacketFoundation|ContextPacketBuildInput|openai|anthropic|claude|chatCompletion|responses\.create|messages\.create|complete)\s*(?:\(|\.)?/i;
+      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|persistenceCall|directStoreCall|tripleStackWrite|mongoAdapter|neo4jAdapter|chromaAdapter|graphRag|graphrag|PERSISTENCEFallback|rawRetrieval|retrievalHelper|directRetrieval|fetchKnowledge|queryKnowledge|retrieveContext|searchKnowledge|buildContextPacket|prepareContextPacketFoundation|ContextPacketBuildInput|openai|anthropic|claude|chatCompletion|responses\.create|messages\.create|complete)\s*(?:\(|\.)?/i;
     const matches = matchingCodeTokenLines(contractSource(), forbiddenCalls);
     expect(matches, matches.join('\n')).toEqual([]);
   });
@@ -154,12 +154,12 @@ describe('S2.15 Michael runtime adapter contract static governance boundary', ()
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('preserves the Gateway fallback client outside the contract source', () => {
-    const gatewayClient = readFileSync(resolve(repoRoot, 'server/src/services/gateway.ts'), 'utf8');
-    expect(gatewayClient).toContain('export async function gatewayCall');
-    expect(gatewayClient).toContain('directPersistenceCall');
-    expect(gatewayClient).toContain('/execute');
-    expect(gatewayClient).toContain('GATEWAY_URL');
+  it('verifies the legacy HTTP fallback stays retired (ACR-0009) outside the contract source', () => {
+    const persistenceClient = readFileSync(resolve(repoRoot, 'server/src/services/persistence/dispatch.ts'), 'utf8');
+    expect(persistenceClient).toContain('export async function persistenceCall');
+    expect(persistenceClient).toContain('directStoreCall');
+    expect(persistenceClient).not.toContain('/execute');
+    expect(persistenceClient).not.toContain('PERSISTENCE_URL');
   });
 
   it('does not introduce Steve, Ivory, telephony, persistence activation, automation, scoring, qualification, compensation math, or knowledge approval', () => {

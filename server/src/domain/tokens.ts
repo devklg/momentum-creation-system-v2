@@ -22,7 +22,7 @@
  *   - sponsorTmagId stamped at mint, never recomputed (locked-spec Part 3.5).
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import type { McsInviteTokenRecord, McsTokenState } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -44,7 +44,7 @@ function randomToken(): string {
 }
 
 async function tokenExists(token: string): Promise<boolean> {
-  const result = await gatewayCall<{ count?: number; documents?: unknown[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ count?: number; documents?: unknown[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: TOKENS_COLLECTION,
     filter: { token },
@@ -63,7 +63,7 @@ export async function mintUniqueToken(): Promise<string> {
 }
 
 export async function findTokenRecord(token: string): Promise<McsInviteTokenRecord | null> {
-  const result = await gatewayCall<{ documents: McsInviteTokenRecord[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: McsInviteTokenRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: TOKENS_COLLECTION,
     filter: { token },
@@ -131,7 +131,7 @@ export async function transitionTokenState(
     return { state: record.state, changed: false };
   }
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: TOKENS_COLLECTION,
     filter: { token },
@@ -169,7 +169,7 @@ export async function markTokenOpened(
   if (shouldStampClick) set.clickedAt = clickedAt;
   if (shouldAdvanceState) set.state = 'clicked';
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: TOKENS_COLLECTION,
     filter: { token },

@@ -36,7 +36,7 @@ import type {
   McsSteveSuccessProfile,
   McsSteveTranscriptChunk,
 } from '@momentum/shared';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 
 /** Provenance literal stamped on Steve artifacts. */
@@ -296,7 +296,7 @@ export function buildSteveSystemPrompt(args: { baFirstName: string }): string {
  * copies the BA's own reads through verbatim. It does NOT derive, weigh,
  * re-order by importance, or grade anything.
  */
-/** Gateway per-content cap (mirrors the transcript/answer truncation upstream). */
+/** Per-content cap (mirrors the transcript/answer truncation upstream). */
 const PROFILE_FIELD_CAP = 5000;
 const cap = (s: string): string => (s.length > PROFILE_FIELD_CAP ? s.slice(0, PROFILE_FIELD_CAP) : s);
 
@@ -306,10 +306,10 @@ export function assembleSuccessProfile(args: {
   profile: McsSteveDiscoveryIngestPayload['profile'];
 }): McsSteveSuccessProfile {
   const p = args.profile;
-  // Defensively cap the free-text fields to the gateway per-content limit — the
+  // Defensively cap the free-text fields to the app per-content limit — the
   // transcript/answers are already capped upstream, but a rambling or
   // over-generated profile statement could otherwise 413 or be silently
-  // truncated by the gateway.
+  // truncated by persistence storage.
   return {
     tmagId: args.tmagId,
     primaryWhy: {
@@ -354,14 +354,14 @@ let discoveriesCollectionBootstrap: Promise<void> | null = null;
 async function ensureDiscoveriesCollection(): Promise<void> {
   if (discoveriesCollectionBootstrap) return discoveriesCollectionBootstrap;
   const bootstrap = (async () => {
-    const existing = await gatewayCall<{ collections?: Array<{ name: string }> }>(
+    const existing = await persistenceCall<{ collections?: Array<{ name: string }> }>(
       'chromadb',
       'list_collections',
       {},
     );
     const present = (existing?.collections ?? []).some((c) => c.name === CHROMA_DISCOVERIES);
     if (present) return;
-    await gatewayCall('chromadb', 'create_collection', {
+    await persistenceCall('chromadb', 'create_collection', {
       name: CHROMA_DISCOVERIES,
       metadata: { agent: 'steve', purpose: 'Steve new-BA discovery & success profiles' },
     });
@@ -370,7 +370,7 @@ async function ensureDiscoveriesCollection(): Promise<void> {
   try {
     await bootstrap;
   } catch (err) {
-    // Do NOT cache a rejected promise: a single transient gateway/Chroma blip
+    // Do NOT cache a rejected promise: a single transient persistence/Chroma blip
     // would otherwise poison every future ingest until process restart. Clear
     // the cache so the next call retries and can self-heal.
     if (discoveriesCollectionBootstrap === bootstrap) {
@@ -392,7 +392,7 @@ async function getBaSponsor(tmagId: string): Promise<{
   sponsorTmagId: string | null;
   firstName: string;
 } | null> {
-  const result = await gatewayCall<{
+  const result = await persistenceCall<{
     documents: { tmagId: string; sponsorTmagId?: string | null; firstName?: string }[];
   }>('mongodb', 'query', {
     database: 'momentum',
@@ -406,7 +406,7 @@ async function getBaSponsor(tmagId: string): Promise<{
 }
 
 async function getDiscoveryByTmagId(tmagId: string): Promise<PersistedDiscovery | null> {
-  const result = await gatewayCall<{ documents: PersistedDiscovery[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: PersistedDiscovery[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: DISCOVERIES_COLLECTION,
     filter: { tmagId },
@@ -538,7 +538,7 @@ export async function ingestDiscoveryArtifact(
     profile: payload.profile,
   });
 
-  // Defensive truncation — mirror the gateway's 5000-char per-content cap.
+  // Defensive truncation — mirror the app's 5000-char per-content cap.
   const transcript: McsSteveTranscriptChunk[] = payload.transcript.map((c) => ({
     ...c,
     text: c.text.slice(0, 5000),
@@ -567,7 +567,7 @@ export async function ingestDiscoveryArtifact(
   // the same id REFRESHES the semantic doc rather than duplicating it.
   const upsertChromaDoc = async (): Promise<void> => {
     await ensureDiscoveriesCollection();
-    await gatewayCall('chromadb', 'add', {
+    await persistenceCall('chromadb', 'add', {
       collection: CHROMA_DISCOVERIES,
       ids: [id],
       documents: [chromaDocForDiscovery(artifact)],
@@ -588,13 +588,13 @@ export async function ingestDiscoveryArtifact(
   // stores. The prior code updated Mongo + Neo4j only, leaving the Chroma
   // semantic doc pinned to the FIRST version on every re-ingest.
   const updateAllStores = async (): Promise<void> => {
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: 'momentum',
       collection: DISCOVERIES_COLLECTION,
       filter: { _id: id },
       update: { $set: artifactToUpdate(artifact) },
     });
-    await gatewayCall('neo4j', 'cypher', { query: cy.cypher, params: cy.params });
+    await persistenceCall('neo4j', 'cypher', { query: cy.cypher, params: cy.params });
     await upsertChromaDoc();
   };
 

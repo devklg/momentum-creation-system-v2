@@ -7,7 +7,7 @@
  * `.com`-surfaced. No PII, no scoring/ranking of BAs or prospects.
  *
  * The aggregation is a PURE function of the records handed to it, so it is fully
- * deterministic and testable and carries no assumption about gateway count /
+ * deterministic and testable and carries no assumption about PERSISTENCE count /
  * aggregate query semantics. Loading the records (via the existing admin read
  * surface) and mounting the read is the activation step — not done here.
  */

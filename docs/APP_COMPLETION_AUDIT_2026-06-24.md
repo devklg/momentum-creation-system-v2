@@ -2,6 +2,12 @@
 
 Date: 2026-06-24
 
+> **Supersession note (2026-07-02, ACR-0009):** this audit predates retirement
+> of the retired HTTP persistence fallback. Current app runtime persistence is
+> direct to the dedicated MCS MongoDB, Neo4j, and ChromaDB stack. Universal
+> external MCP tooling remains MCP/developer tooling and operator access, not the app
+> persistence edge or app memory layer.
+
 ## Basis
 
 This audit uses the current repo, the source-of-truth wireframe, the Mongo work queue mirror, a fresh API-free graphify structural graph, and local runtime verification.
@@ -9,12 +15,12 @@ This audit uses the current repo, the source-of-truth wireframe, the Mongo work 
 Evidence checked:
 
 - `docs/project-wireframe.md`
-- MongoDB `momentum.work_queue_leaves` through Universal Gateway V2
+- MongoDB `momentum.work_queue_leaves` through external MCP tooling
 - Fresh graphify output in `graphify-out/`
 - `pnpm typecheck`
 - `pnpm build`
 - API server boot + `/api/health`
-- Gateway V2, ChromaDB, and GPU FastAPI runtime status
+- external MCP tooling, ChromaDB, and GPU FastAPI runtime status
 
 The fresh graphify run was API-free. It did not use Anthropic, OpenAI, or any external LLM key. It produced a deterministic code/AST graph only:
 
@@ -26,7 +32,7 @@ The fresh graphify run was API-free. It did not use Anthropic, OpenAI, or any ex
 
 ## Executive Summary
 
-The app is no longer a scaffold. It is a broad working monorepo with three clients, one Express API, Universal Gateway V2 persistence, Chroma collection boot guards, BA onboarding, prospect presentation/dashboard flows, invitation generation, Ivory, ScriptMaker, Steve discovery, Michael training/daily-success support, Fast Start, orientation, admin oversight, tenant/master-content, reporting, broadcast, VM campaign infrastructure, and audit controls.
+The app is no longer a scaffold. It is a broad working monorepo with three clients, one Express API, external MCP tooling persistence, Chroma collection boot guards, BA onboarding, prospect presentation/dashboard flows, invitation generation, Ivory, ScriptMaker, Steve discovery, Michael training/daily-success support, Fast Start, orientation, admin oversight, tenant/master-content, reporting, broadcast, VM campaign infrastructure, and audit controls.
 
 The formal build map says the app is almost complete:
 
@@ -48,7 +54,7 @@ The code audit found one additional launch-readiness issue not reflected as a pe
 
 Verified working:
 
-- Universal Gateway V2: `http://localhost:2526/api`
+- external MCP tooling: `http://localhost:2526/api`
 - ChromaDB: `localhost:8100`
 - GPU FastAPI embedding service: `127.0.0.1:8300`
 - API server booted cleanly on `7700`
@@ -62,25 +68,25 @@ Not running by default after the audit:
 - `7700` API server was stopped after verification
 - `7701`, `7702`, `7703` client dev servers were not started in this pass
 
-Gateway V2 caveats:
+external MCP tooling caveats:
 
 - MongoDB, Neo4j, and ChromaDB are connected
 - SurrealDB is currently erroring
 - Gmail connector is currently erroring
-- Gateway V2 does not expose the old V1 `perry`, `quadstack`, or `universal-gateway` meta-tool
-- `D:/server-gateway-mcp-v2` is still outside version control
+- external MCP tooling does not expose the old V1 `perry`, `quadstack`, or `external-mcp-tooling` meta-tool
+- `external MCP tooling repo` is still outside version control
 
 ## Graph Findings
 
 The fresh graph confirms the app's core abstractions:
 
-- `gatewayCall()` is the central persistence dependency
+- `persistenceCall()` was the central persistence dependency at the time of this audit; after ACR-0009 it remains only as a direct-adapter compatibility dispatch name
 - `tripleStackWrite()` is the central app write helper
 - `appendAuditEntry()` is the central audit/control primitive
 - `findBAByBaId()` is a shared identity lookup dependency
 - `createInvitation()` is a key production-line function
 
-This matches the intended architecture: one server, three clients, Gateway V2 as the persistence edge, and audit/triple-stack as the load-bearing substrate.
+Current architecture after ACR-0009: one server, three clients, direct app triple-stack persistence, and audit/triple-stack as the load-bearing substrate. external MCP tooling is MCP/developer tooling, not the persistence edge.
 
 ## Surface Completion
 
@@ -92,7 +98,7 @@ Built:
 
 - pnpm workspace with `apps/com`, `apps/team`, `apps/admin`, `server`, `packages/shared`
 - Shared brand, compliance, rules, and types
-- Gateway V2 client
+- external MCP tooling client
 - Triple-stack helper
 - Chroma collection registry and boot/write guards
 - Decision ledger and queue sync scripts
@@ -100,8 +106,8 @@ Built:
 
 Remaining:
 
-- Commit the Universal Gateway V2 standardization changes and graph refresh
-- Put `D:/server-gateway-mcp-v2` into a repo when Kevin is ready
+- Commit the external MCP tooling standardization changes and graph refresh
+- Put `external MCP tooling repo` into a repo when Kevin is ready
 
 ### Prospect `.com`
 
@@ -296,7 +302,7 @@ Completion step:
 
 Before calling the app complete for real users:
 
-- Commit Gateway V2 standardization and graph refresh
+- Commit external MCP tooling standardization and graph refresh
 - Flip Live Ops off mocks and smoke `/admin/live-ops`
 - Add Tenant F.3 URL panel
 - Activate Resend domain/API key or explicitly accept SMS-only launch
@@ -333,4 +339,4 @@ The app is approximately complete from a build-map perspective. The remaining wo
 4. Reconcile stale docs.
 5. Run a full end-to-end browser smoke before launch.
 
-The architecture now aligns with the updated Steve/Michael philosophy and the Universal Gateway V2 standard.
+The architecture now aligns with the updated Steve/Michael philosophy and the external MCP tooling standard.

@@ -10,7 +10,7 @@ Assigned tool: Claude Code (Claude Code Instance 5)
 4. Paste ORCHESTRATOR_PROMPT_DESIGN.md into the agent.
 5. THIS IS A DESIGN RUN. No runtime code (server/src/**). Phase 6 runs concurrently and owns
    the persistence seam — do NOT touch it. Produce only P7_* design docs/contracts.
-6. PRIMARY TASK: revise P7.3 to kill the gateway 'quadstack.write' Path B (ACR-0007 violation);
+6. PRIMARY TASK: revise P7.3 to kill the external-tooling `quadstack.write` Path B (ACR-0007 violation);
    collapse memory/lineage writes onto the app-direct seam into the dedicated stores.
 7. Build ON the existing untracked P7_1/P7_2/P7_3 drafts already in this worktree.
 8. Do not browse GitHub. Do not work outside this phase.

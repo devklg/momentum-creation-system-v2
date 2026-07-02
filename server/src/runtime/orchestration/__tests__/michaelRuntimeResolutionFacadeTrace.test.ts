@@ -15,7 +15,7 @@ import type {
 // built explicitly from controlled, redacted metadata — it NEVER spreads the
 // response or any raw upstream payload. It therefore contains only inert
 // classification metadata: no raw Context Packet, no raw retrieval/store/
-// GraphRAG/Gateway output, no generated text, no tokens / request IDs / session
+// GraphRAG/PERSISTENCE output, no generated text, no tokens / request IDs / session
 // IDs / PII, and no automatic-action fields. persistence stays 'disabled' and
 // agentResponseGenerated stays false. No route, no LLM, no persistence.
 // ───────────────────────────────────────────────────────────────────────────
@@ -89,10 +89,10 @@ const FORBIDDEN_STORE_KEYS = [
   'chroma',
   'graphRag',
   'graphrag',
-  'gateway',
+  'PERSISTENCE',
   'rawStoreResults',
   'rawGraphRagResults',
-  'rawGatewayFallbackResponse',
+  'rawPERSISTENCEFallbackResponse',
 ];
 const FORBIDDEN_TEXT_KEYS = ['text', 'generatedText', 'message', 'prospectFacingMessage'];
 const FORBIDDEN_IDENTITY_KEYS = [
@@ -214,8 +214,8 @@ describe('S2.20 Michael resolution facade — trace inertness / redaction', () =
     }
   });
 
-  // ── 9. No raw store / GraphRAG / Gateway output anywhere in the trace. ─────
-  it('does not contain raw store/GraphRAG/Gateway output', async () => {
+  // ── 9. No raw store / GraphRAG / PERSISTENCE output anywhere in the trace. ─────
+  it('does not contain raw store/GraphRAG/PERSISTENCE output', async () => {
     for (const testCase of TRACE_CASES) {
       const keys = allKeysOf(expectTrace(await resolveCase(testCase)));
       expectNoForbiddenKeys(keys, FORBIDDEN_STORE_KEYS, testCase.name);

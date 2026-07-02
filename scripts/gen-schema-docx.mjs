@@ -138,7 +138,7 @@ const enums = [
   ['Learning domain', 'success · training · relationship · performance · organizational'],
   ['Language', 'en · es'],
   ['Runtime audit action', 'runtime.turn.{opened,draft_emitted,closed} · runtime.gate.{allowed,denied} · runtime.persistence.{enabled,disabled}'],
-  ['Persistence mode', 'gateway · direct'],
+  ['Persistence mode', 'direct'],
 ];
 
 const W = ['24', '13', '40', '23'];

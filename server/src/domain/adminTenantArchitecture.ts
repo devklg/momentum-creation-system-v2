@@ -8,7 +8,7 @@
  */
 
 import { randomBytes } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
   McsAuditActor,
@@ -304,7 +304,7 @@ export async function getTenantOverview(): Promise<McsTenantOverview> {
 }
 
 export async function getTenantSettings(): Promise<McsTenantSettings> {
-  const result = await gatewayCall<{ documents: McsTenantSettingsVersion[] }>(
+  const result = await persistenceCall<{ documents: McsTenantSettingsVersion[] }>(
     'mongodb',
     'query',
     {
@@ -406,7 +406,7 @@ export async function getTenantTemplate(
   templateKey: McsTenantTemplateKey,
 ): Promise<McsTenantTemplateVersion> {
   const def = findTemplateDefinition(templateKey);
-  const result = await gatewayCall<{ documents: McsTenantTemplateVersion[] }>(
+  const result = await persistenceCall<{ documents: McsTenantTemplateVersion[] }>(
     'mongodb',
     'query',
     {
@@ -578,7 +578,7 @@ function findTemplateDefinition(templateKey: McsTenantTemplateKey): McsTenantTem
 }
 
 async function getLatestSettingsVersionNumber(): Promise<number> {
-  const result = await gatewayCall<{ documents: Array<{ version?: number }> }>(
+  const result = await persistenceCall<{ documents: Array<{ version?: number }> }>(
     'mongodb',
     'query',
     {

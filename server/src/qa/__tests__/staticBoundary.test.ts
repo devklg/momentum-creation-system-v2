@@ -81,14 +81,16 @@ describe('Sprint 1 static boundary checks', () => {
     );
   });
 
-  it('preserves the Gateway HTTP fallback path while direct persistence is enabled', () => {
-    const gateway = serverFiles.find((file) => file.relativePath === 'server/src/services/gateway.ts');
+  it('keeps the persistence client direct-only (ACR-0009)', () => {
+    const persistence = serverFiles.find(
+      (file) => file.relativePath === 'server/src/services/persistence/dispatch.ts',
+    );
 
-    expect(gateway).toBeDefined();
-    expect(gateway?.text).toContain('fetch(`${env.GATEWAY_URL}/execute`');
-    expect(gateway?.text).toContain('body: JSON.stringify({ tool, action, params })');
-    expect(gateway?.text).toContain('export class GatewayError');
-    expect(gateway?.text).toContain('if (directStore && isDirect(directStore))');
+    expect(persistence).toBeDefined();
+    expect(persistence?.text).not.toContain(['GATE', 'WAY_URL'].join(''));
+    expect(persistence?.text).not.toContain("from 'undici'");
+    expect(persistence?.text).toContain('export class PersistenceError');
+    expect(persistence?.text).toContain('directStoreCall');
   });
 
   it('keeps Browser Voice/Text imports and mounts out of the .com prospect surface', () => {

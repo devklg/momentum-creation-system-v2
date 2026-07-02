@@ -27,7 +27,7 @@
  *     coach is the only call path that does NOT triple-stack — coaching
  *     prompts are throwaway output, not a persistent record.
  *
- * Gateway gotchas respected:
+ * PERSISTENCE gotchas respected:
  *   - mongodb.insert takes documents:[] (already wrapped by tripleStackWrite).
  *   - mongodb.query uses filter:, returns {count, documents}.
  *   - mongodb.update does not honor upsert — we branch on existence.
@@ -41,7 +41,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import {
   complete,
@@ -251,12 +251,12 @@ export async function createIvoryName(
     // orphaned row so a client retry (which mints a fresh ivoryId) does not
     // accumulate half-written duplicates.
     try {
-      await gatewayCall('mongodb', 'delete', {
+      await persistenceCall('mongodb', 'delete', {
         database: MONGO_DB,
         collection: IVORY_COLLECTION,
         filter: { ivoryId },
       });
-      await gatewayCall('neo4j', 'cypher', {
+      await persistenceCall('neo4j', 'cypher', {
         query: 'MATCH (n:TmagIvoryName {ivoryId: $ivoryId}) DETACH DELETE n',
         params: { ivoryId },
       });
@@ -275,7 +275,7 @@ export async function createIvoryName(
  * BA). If that assumption breaks, add a server-side limit/offset.
  */
 export async function listIvoryNamesForBA(tmagId: string): Promise<McsIvoryName[]> {
-  const res = await gatewayCall<{
+  const res = await persistenceCall<{
     count: number;
     documents: Array<McsIvoryName & { _id?: unknown }>;
   }>('mongodb', 'query', {
@@ -294,7 +294,7 @@ export async function getIvoryName(
   ivoryId: string,
   tmagId: string,
 ): Promise<McsIvoryName> {
-  const res = await gatewayCall<{
+  const res = await persistenceCall<{
     count: number;
     documents: Array<McsIvoryName & { _id?: unknown }>;
   }>('mongodb', 'query', {
@@ -352,7 +352,7 @@ export async function updateIvoryName(
     updatedAt: now,
   };
 
-  const updateRes = await gatewayCall<{ matchedCount?: number }>('mongodb', 'update', {
+  const updateRes = await persistenceCall<{ matchedCount?: number }>('mongodb', 'update', {
     database: MONGO_DB,
     collection: IVORY_COLLECTION,
     filter: { ivoryId },
@@ -376,7 +376,7 @@ export async function updateIvoryName(
 
   // Mirror display fields onto the graph node so cypher walks return current
   // names without a Mongo round-trip.
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MATCH (n:TmagIvoryName {ivoryId: $ivoryId}) ' +
       'SET n.firstName = $firstName, ' +
@@ -396,7 +396,7 @@ export async function updateIvoryName(
   // upserts on the stable ivoryId). Mongo + Neo4j alone left mcs_ivory pinned to
   // the create-time firstName/categories/angle/notes. Status-only transitions
   // do not touch these fields, so only the name-edit path needs this refresh.
-  await gatewayCall('chromadb', 'add', {
+  await persistenceCall('chromadb', 'add', {
     collection: CHROMA_COLLECTION,
     ids: [ivoryId],
     documents: [ivoryChromaDoc(next)],
@@ -444,7 +444,7 @@ export async function updateIvoryStatus(
     updatedAt: now,
   };
 
-  const updateRes = await gatewayCall<{ matchedCount?: number }>('mongodb', 'update', {
+  const updateRes = await persistenceCall<{ matchedCount?: number }>('mongodb', 'update', {
     database: MONGO_DB,
     collection: IVORY_COLLECTION,
     filter: { ivoryId },
@@ -456,7 +456,7 @@ export async function updateIvoryStatus(
     throw new IvoryNotFoundError(ivoryId);
   }
 
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MATCH (n:TmagIvoryName {ivoryId: $ivoryId}) ' +
       'SET n.status = $status, n.updatedAt = $updatedAt',
@@ -486,7 +486,7 @@ export async function markIvoryInvited(
     updatedAt: now,
   };
 
-  const updateRes = await gatewayCall<{ matchedCount?: number }>('mongodb', 'update', {
+  const updateRes = await persistenceCall<{ matchedCount?: number }>('mongodb', 'update', {
     database: MONGO_DB,
     collection: IVORY_COLLECTION,
     filter: { ivoryId },
@@ -504,7 +504,7 @@ export async function markIvoryInvited(
     throw new IvoryNotFoundError(ivoryId);
   }
 
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MATCH (n:TmagIvoryName {ivoryId: $ivoryId}) ' +
       'SET n.status = $status, n.lastProspectId = $prospectId, n.updatedAt = $updatedAt ' +
@@ -537,13 +537,13 @@ export async function deleteIvoryName(
   // Ownership check (also throws IvoryNotFoundError if missing).
   await getIvoryName(ivoryId, tmagId);
 
-  await gatewayCall('mongodb', 'delete', {
+  await persistenceCall('mongodb', 'delete', {
     database: MONGO_DB,
     collection: IVORY_COLLECTION,
     filter: { ivoryId },
   });
 
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query: 'MATCH (n:TmagIvoryName {ivoryId: $ivoryId}) DETACH DELETE n',
     params: { ivoryId },
   });
@@ -692,7 +692,7 @@ function parseCoachJson(raw: string): { coaching: string; prompts: string[] } | 
  * The override lets Kevin re-voice Ivory from /admin WITHOUT a redeploy, while
  * the scaffolding stays immovable so a voice edit can never break the JSON
  * contract or the compliance rules. `readMasterContent()` already falls back to
- * the code default on any gateway/Mongo failure (never throws), so the system
+ * the code default on any PERSISTENCE/Mongo failure (never throws), so the system
  * prompt is never empty or partial — the code default is the guaranteed
  * baseline. The scaffolding leads so it remains the stable cacheable prefix.
  *

@@ -17,8 +17,8 @@
  *
  * The envelope core is shared by all three (P7.3 §4.2 app-memory envelope):
  *   id, type, schemaVersion, namespace, source, createdAt, title, originKind,
- *   serviceName, tenantId — all required. Gateway-only fields (chat_number,
- *   chat_registry_id, universal_gateway) are never declared here; the app writer
+ *   serviceName, tenantId — all required. PERSISTENCE-only fields (chat_number,
+ *   chat_registry_id, universal_PERSISTENCE) are never declared here; the app writer
  *   never emits them, and the tighten step (additionalProperties:false) rejects
  *   them at the door.
  */

@@ -30,9 +30,9 @@ Additional reference material in [docs/](docs/) — pull these in when relevant,
 
 The wireframe is the source; everything else is a mirror. When sources disagree, the precedence (from `docs/READ-ME-FIRST.md`) is:
 
-> decision ledger (currency) > `docs/locked-spec.md` (state) > design docs > `docs/build-registry.md` > git log > Gateway chat registry > handoffs.
+> decision ledger (currency) > `docs/locked-spec.md` (state) > design docs > `docs/build-registry.md` > git log > agent chat registry > handoffs.
 
-Three Mongo collections back this up — query them via the Universal Gateway, don't try to read the wireframe by hand when you need a list:
+Three Mongo collections back this up — query them through approved agent tooling, don't try to read the wireframe by hand when you need a list:
 
 - `momentum.work_queue_leaves` — 1 row per leaf in `docs/project-wireframe.md`. Pull next work with `{status:"pending", surface:"team"}` sorted by `seq`. Regenerated from the wireframe by `node server/scripts/sync-queue-from-wireframe.mjs`; never hand-edit it independently of the wireframe.
 - `momentum.decisions` — append-only decision ledger. Resolve "which version is current?" with `{topic:X, status:"active"}`. The `handoff-contract` row (`_id=dec_handoff_contract`) is the canonical example.
@@ -40,9 +40,9 @@ Three Mongo collections back this up — query them via the Universal Gateway, d
 
 **When you finish a leaf:** (1) tick the checkbox in `docs/project-wireframe.md`, (2) run `node server/scripts/sync-queue-from-wireframe.mjs` to regenerate the leaf queue, (3) run `node server/scripts/build-checklist.mjs` to regenerate the printable checklist. Don't tick the queue separately — that drift is exactly the disease this system was built to cure.
 
-**Chat registry authority:** canonical chat/thread identity lives in MongoDB `universal_gateway.chat_registry`, mirrored to Neo4j `(:ChatRegistry {id})` and Chroma `chat_registry`. Claude chats, Codex threads, ARCHIE transcripts, Perry handoffs, decisions, learning notes, and GraphRAG memory must link to a registry row. Claude and Codex are the active chat providers. Perry and `session_handoffs` are handoff tools/layers, ARCHIE is a Claude transcript import pipeline, Ulyses is a gateway specialist role/tool when invoked, and GraphRAG is derived memory. Those tools/layers have no autonomous session identity and no authority over chat numbering. See `docs/chat-registry-authority.md`.
+**Chat registry authority:** canonical chat/thread identity lives in the external agent-operations registry, mirrored to graph and vector stores for retrieval. Claude chats, Codex threads, ARCHIE transcripts, Perry handoffs, decisions, learning notes, and derived memory must link to a registry row. Claude and Codex are the active chat providers. Perry and `session_handoffs` are handoff tools/layers, ARCHIE is a Claude transcript import pipeline, specialist tools are invoked roles/tools, and GraphRAG is derived memory. Those tools/layers have no autonomous session identity and no authority over chat numbering. See `docs/chat-registry-authority.md`.
 
-**Session handoff:** every handoff writes to MongoDB `universal_gateway.session_handoffs`, with `_id: handoff_chat_{N}`, matching numeric `chat_number: {N}`, and `chat_registry_id`. The contract is `docs/handoff-contract.md`; if a handoff conflicts with `chat_registry`, the registry wins and the handoff is evidence to reconcile.
+**Session handoff:** every handoff writes to the external agent-operations handoff store, with `_id: handoff_chat_{N}`, matching numeric `chat_number: {N}`, and `chat_registry_id`. The contract is `docs/handoff-contract.md`; if a handoff conflicts with `chat_registry`, the registry wins and the handoff is evidence to reconcile.
 
 ## Worktree / parallel-branch model
 
@@ -92,7 +92,7 @@ There is no test runner wired in this repo yet — verification happens via `pnp
 
 ## High-level architecture
 
-### Three clients, one server, one gateway
+### Three clients, one server, direct persistence
 
 | Surface | Workspace | Port | Audience |
 |---|---|---|---|
@@ -106,17 +106,17 @@ Each Vite client proxies `/api → localhost:7700`. JWT cookie is scoped to `.te
 
 ### Server layout
 
-`server/src/` is split: `routes/` (thin Express handlers), `domain/` (pure logic — cockpit projections, schedule windows, code gen, holding-tank), `services/` (wrappers for external systems — gateway, telnyx, anthropic, resend, JWT session, in-process SSE pub/sub), `middleware/` (auth, michael-gate, telnyx-verify, og-injection). Runtime is `tsx watch` — edits hot-reload directly; don't compile-then-run.
+`server/src/` is split: `routes/` (thin Express handlers), `domain/` (pure logic — cockpit projections, schedule windows, code gen, holding-tank), `services/` (direct persistence adapters plus wrappers for telnyx, anthropic, resend, JWT session, in-process SSE pub/sub), `middleware/` (auth, michael-gate, telnyx-verify, og-injection). Runtime is `tsx watch` — edits hot-reload directly; don't compile-then-run.
 
 ### The triple-stack persistence rule
 
-**Every persistent write hits MongoDB + Neo4j + ChromaDB via Universal Gateway V2 at `localhost:2526`.** None of the three is optional. The canonical helper is `tripleStackWrite()` in [server/src/services/tripleStack.ts](server/src/services/tripleStack.ts), which calls the single-endpoint gateway client [server/src/services/gateway.ts](server/src/services/gateway.ts). When adding new persistent state, write through this helper — do not call individual stores directly. Gateway V2 lives at `D:/server-gateway-mcp-v2` and is the MCS V2 standard even though it is not currently tracked in this repo.
+**Every app-runtime persistent write lands in the dedicated MCS MongoDB + Neo4j + ChromaDB stack through direct server adapters.** None of the three is optional. The canonical helper is `tripleStackWrite()` in [server/src/services/tripleStack.ts](server/src/services/tripleStack.ts), which calls the dispatch surface in [server/src/services/persistence/dispatch.ts](server/src/services/persistence/dispatch.ts). When adding new persistent app state, write through the app helper/adapters; do not route app runtime writes through external MCP tooling.
 
-**GraphRAG schema protocol (Chat #135+):** every new Universal Gateway memory/lineage write — GraphRAG records, handoffs, decisions, learning notes, transcripts, imports, and derived memory — must use the gateway's schema-enforced `quadstack.write` path with `options.require: ["mongo","neo4j","chroma"]` and `options.enforce_schema: true`. The write must include the canonical `base` envelope from [docs/graphrag-schema-contract.md](docs/graphrag-schema-contract.md): `id`, `type`, `schema_version`, `namespace`, `source`, `created_at`, `title`, and `origin_kind`, plus the origin-specific field (`chat_number`, `job_id`/`service_name`, or `import_batch_id`). Do not create ad hoc `date`, `timestamp`, `chat`, `synced_chat`, or `start_time` aliases on memory records. If the gateway rejects a memory schema write, fix the payload rather than bypassing enforcement.
+**Agent-memory/tooling protocol (Chat #135+):** when Codex/Claude/operator tooling writes external agent memory or lineage records — handoffs, decisions, learning notes, transcripts, imports, derived agent memory — use the schema-enforced multi-store write path required by the agent tooling layer. The write must include the canonical `base` envelope from [docs/graphrag-schema-contract.md](docs/graphrag-schema-contract.md): `id`, `type`, `schema_version`, `namespace`, `source`, `created_at`, `title`, and `origin_kind`, plus the origin-specific field (`chat_number`, `job_id`/`service_name`, or `import_batch_id`). Do not create ad hoc `date`, `timestamp`, `chat`, `synced_chat`, or `start_time` aliases on memory records. This protocol governs external agent memory, not app-runtime persistence.
 
 **Registry numbering rule:** `chat_number` is integer-only. Never put task slugs, dates, or provider titles in `chat_number`. If a Claude/Codex record cannot be proven, register it with `chat_number: null`, `registration_status: "needs_reconciliation"`, provider/thread metadata, and provenance. Kevin corrections are audited overrides, not the normal source of numbering.
 
-Known gateway gotchas (preserved at the top of `tripleStack.ts`):
+Known external-tooling gotchas (for MCP/operator calls, not app runtime dispatch):
 - `mongodb.insert` takes `documents:` (plural array), not `document:`
 - `mongodb.update` does **not** honor `upsert: true` — branch on existence
 - `mongodb.query` parameter is `filter:`, not `query:`; returns `{count, documents}` not the array directly

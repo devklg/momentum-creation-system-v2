@@ -387,12 +387,12 @@ adminQueueRoutes.get('/ticker/stream', requireAdmin, async (req: Request, res: R
 
 // Small Mongo lookup colocated with the SSE handler (the only caller). Kept
 // here to avoid widening adminQueueOversight's surface for a one-shot helper.
-import { gatewayCall } from '../../services/gateway.js';
+import { persistenceCall } from '../../services/persistence/dispatch.js';
 
 async function lookupPlacementByPosition(
   positionNumber: number,
 ): Promise<{ prospectId: string; sponsorTmagId: string } | null> {
-  const result = await gatewayCall<{
+  const result = await persistenceCall<{
     documents: Array<{ prospectId: string; sponsorTmagId: string }>;
   }>('mongodb', 'query', {
     database: 'momentum',

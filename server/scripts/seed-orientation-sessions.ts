@@ -9,7 +9,7 @@
  * convenience path.
  *
  * Idempotent — safe to re-run. A slot whose scheduledFor already has a session
- * is skipped (gateway `update` does not honor upsert, so we query-then-create).
+ * is skipped. We query-then-create so idempotency is explicit.
  *
  * Triple-stack per write via createOrientationSession() (Mongo + Neo4j +
  * Chroma `mcs_orientation`, collection bootstrapped lazily in the domain).
@@ -17,7 +17,7 @@
  * Usage:  pnpm --filter @momentum/server seed:orientation-sessions
  */
 
-import { gatewayCall } from '../src/services/gateway.js';
+import { persistenceCall } from '../src/services/persistence/dispatch.js';
 import {
   createOrientationSession,
   ensureOrientationCollection,
@@ -34,7 +34,7 @@ const SESSIONS_COLLECTION = 'orientation_sessions';
 
 /** Does a session already exist at this exact slot time? (idempotency check) */
 async function sessionExistsAt(scheduledFor: string): Promise<boolean> {
-  const result = await gatewayCall<{ documents: Array<{ scheduledFor: string }> }>(
+  const result = await persistenceCall<{ documents: Array<{ scheduledFor: string }> }>(
     'mongodb',
     'query',
     {

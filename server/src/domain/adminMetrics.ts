@@ -2,7 +2,7 @@
  * Admin Core Dashboard — domain layer (locked-spec 4.B, wireframe 4.B,
  * leaves wf_0077–wf_0080).
  *
- * Reads-only against the gateway-backed Mongo collections; this surface
+ * Reads-only against the PERSISTENCE-backed Mongo collections; this surface
  * never writes (other than the audit-entry the route handler appends per
  * /admin request via the 4.J substrate). The companion route file
  * `routes/admin/dashboard.ts` is the thin Express layer over these.
@@ -30,7 +30,7 @@
  * team scales we may want a 30–60s cache; flagged for future.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import type {
   McsAdminActiveBaRow,
   McsAdminDashboardFilter,
@@ -130,7 +130,7 @@ export async function resolveScopedTmagIds(filter: McsAdminDashboardFilter): Pro
     return leaders;
   }
   // non_leaders: complement against the full roster.
-  const allBas = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+  const allBas = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
     filter: {},
@@ -145,7 +145,7 @@ export async function resolveScopedTmagIds(filter: McsAdminDashboardFilter): Pro
  * qualification is mirrored and/or curated tags ship.
  */
 export async function listLeaderTmagIds(): Promise<string[]> {
-  const result = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
     filter: {
@@ -179,7 +179,7 @@ export async function listLeaderTmagIds(): Promise<string[]> {
 
 /** Aggregate $match + $count helper. Returns 0 on empty pipelines. */
 async function countMatch(collection: string, match: Record<string, unknown>): Promise<number> {
-  const result = await gatewayCall<{ results?: Array<{ total?: number }> }>(
+  const result = await persistenceCall<{ results?: Array<{ total?: number }> }>(
     'mongodb',
     'aggregate',
     {
@@ -259,7 +259,7 @@ async function countBasWithCompleteFastStart(scopedTmagIds: string[] | null): Pr
   if (scopedTmagIds !== null) {
     match.tmagId = { $in: scopedTmagIds };
   }
-  const result = await gatewayCall<{ results?: Array<{ total?: number }> }>(
+  const result = await persistenceCall<{ results?: Array<{ total?: number }> }>(
     'mongodb',
     'aggregate',
     {
@@ -281,7 +281,7 @@ export async function getFilterOptions(): Promise<{
   bas: McsAdminBaFilterOption[];
   leaderGroups: McsAdminLeaderGroupOption[];
 }> {
-  const all = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+  const all = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
     filter: {},
@@ -339,7 +339,7 @@ async function drilldownActiveBas(scopedTmagIds: string[] | null): Promise<McsAd
   const filter: Record<string, unknown> = { lastLoginAt: { $gte: twentyFourHoursAgo } };
   if (scopedTmagIds !== null) filter.tmagId = { $in: scopedTmagIds };
 
-  const res = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+  const res = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
     filter,
@@ -371,7 +371,7 @@ async function drilldownProspectsInFlow(
   const placeFilter: Record<string, unknown> = { flushedAt: null };
   if (scopedTmagIds !== null) placeFilter.sponsorTmagId = { $in: scopedTmagIds };
 
-  const placements = await gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
+  const placements = await persistenceCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_PLACEMENTS,
     filter: placeFilter,
@@ -385,13 +385,13 @@ async function drilldownProspectsInFlow(
   const sponsorIds = Array.from(new Set(docs.map((p) => p.sponsorTmagId)));
 
   const [prospects, sponsors] = await Promise.all([
-    gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: 'tmag_prospects',
       filter: { prospectId: { $in: prospectIds } },
       limit: prospectIds.length,
     }),
-    gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_BAS,
       filter: { tmagId: { $in: sponsorIds } },
@@ -432,14 +432,14 @@ async function drilldownQueueMovement(
     : { sponsorTmagId: { $in: scopedTmagIds } };
 
   const [placements, flushes] = await Promise.all([
-    gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: { ...scope, placedAt: { $gte: twentyFourHoursAgo } },
       sort: { placedAt: -1 },
       limit: DRILLDOWN_LIMIT,
     }),
-    gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: { ...scope, flushedAt: { $gte: twentyFourHoursAgo } },
@@ -455,13 +455,13 @@ async function drilldownQueueMovement(
   const sponsorIds = Array.from(new Set(allDocs.map((p) => p.sponsorTmagId)));
 
   const [prospects, sponsors] = await Promise.all([
-    gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: 'tmag_prospects',
       filter: { prospectId: { $in: prospectIds } },
       limit: prospectIds.length,
     }),
-    gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_BAS,
       filter: { tmagId: { $in: sponsorIds } },
@@ -519,7 +519,7 @@ async function drilldownEnrollments(
   };
   if (scopedTmagIds !== null) filter.sponsorTmagId = { $in: scopedTmagIds };
 
-  const res = await gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
+  const res = await persistenceCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_PLACEMENTS,
     filter,
@@ -533,13 +533,13 @@ async function drilldownEnrollments(
   const sponsorIds = Array.from(new Set(docs.map((p) => p.sponsorTmagId)));
 
   const [prospects, sponsors] = await Promise.all([
-    gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: 'tmag_prospects',
       filter: { prospectId: { $in: prospectIds } },
       limit: prospectIds.length,
     }),
-    gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_BAS,
       filter: { tmagId: { $in: sponsorIds } },
@@ -570,7 +570,7 @@ async function drilldownTraining(scopedTmagIds: string[] | null): Promise<McsAdm
   const baFilter: Record<string, unknown> = {};
   if (scopedTmagIds !== null) baFilter.tmagId = { $in: scopedTmagIds };
 
-  const bas = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+  const bas = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
     filter: baFilter,
@@ -581,7 +581,7 @@ async function drilldownTraining(scopedTmagIds: string[] | null): Promise<McsAdm
   if (baDocs.length === 0) return [];
 
   const baIds = baDocs.map((b) => b.tmagId);
-  const progress = await gatewayCall<{ documents: FastStartDoc[] }>('mongodb', 'query', {
+  const progress = await persistenceCall<{ documents: FastStartDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_FAST_START,
     filter: { tmagId: { $in: baIds } },

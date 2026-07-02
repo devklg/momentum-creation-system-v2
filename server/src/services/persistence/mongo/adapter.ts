@@ -1,5 +1,5 @@
 import { env } from '../../../env.js';
-import { GatewayError } from '../../gateway.js';
+import { PersistenceError } from '../dispatch.js';
 import { connectMongo, getMongoConnection } from './connection.js';
 import { getMongoModel, type MongoDocument } from './models/registry.js';
 import type { PipelineStage } from 'mongoose';
@@ -22,7 +22,7 @@ function database(params: MongoParams): string {
 
 function collection(params: MongoParams, action: string): string {
   if (!params.collection) {
-    throw new GatewayError('mongodb', action, 'mongodb action requires `collection`');
+    throw new PersistenceError('mongodb', action, 'mongodb action requires `collection`');
   }
   return params.collection;
 }
@@ -43,7 +43,7 @@ export async function mongoInsert(params: MongoParams): Promise<{
 }> {
   const docs = params.documents ?? [];
   if (!Array.isArray(docs)) {
-    throw new GatewayError('mongodb', 'insert', '`documents` must be an array');
+    throw new PersistenceError('mongodb', 'insert', '`documents` must be an array');
   }
   const model = getMongoModel(database(params), collection(params, 'insert'));
   const inserted = await model.insertMany(docs, { ordered: true });
@@ -104,7 +104,7 @@ export async function mongoListCollections(params: MongoParams): Promise<{
 }> {
   await connectMongo();
   const db = getMongoConnection(database(params)).db;
-  if (!db) throw new GatewayError('mongodb', 'list_collections', 'database is not connected');
+  if (!db) throw new PersistenceError('mongodb', 'list_collections', 'database is not connected');
   const collections = (await db.listCollections().toArray()).map((c) => ({ name: c.name }));
   return { collections, count: collections.length };
 }
@@ -112,7 +112,7 @@ export async function mongoListCollections(params: MongoParams): Promise<{
 export async function mongoPing(params: MongoParams): Promise<{ ok: true }> {
   await connectMongo();
   const db = getMongoConnection(database(params)).db;
-  if (!db) throw new GatewayError('mongodb', 'ping', 'database is not connected');
+  if (!db) throw new PersistenceError('mongodb', 'ping', 'database is not connected');
   await db.admin().ping();
   return { ok: true };
 }
@@ -139,10 +139,10 @@ export async function mongoAdapter(
       case 'ping':
         return await mongoPing(p);
       default:
-        throw new GatewayError('mongodb', action, `unsupported mongodb action: ${action}`);
+        throw new PersistenceError('mongodb', action, `unsupported mongodb action: ${action}`);
     }
   } catch (err) {
-    if (err instanceof GatewayError) throw err;
-    throw new GatewayError('mongodb', action, err instanceof Error ? err.message : String(err));
+    if (err instanceof PersistenceError) throw err;
+    throw new PersistenceError('mongodb', action, err instanceof Error ? err.message : String(err));
   }
 }

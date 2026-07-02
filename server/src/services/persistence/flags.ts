@@ -1,19 +1,14 @@
 /**
- * S1.3 per-store persistence mode flags (ACR-0007 / Option C).
+ * Per-store persistence mode flags (ACR-0007 / ACR-0009).
  *
- * A store is dispatched DIRECT only when BOTH:
- *   - PERSISTENCE_DIRECT_ENABLED is true (master safety switch), AND
- *   - that store's PERSISTENCE_<STORE>_MODE is 'direct'.
- * Otherwise the store stays on the Gateway HTTP path (the default).
- *
- * Defaults ship with PERSISTENCE_DIRECT_ENABLED=false, so resolveMode()
- * returns 'gateway' for every store and runtime behavior is unchanged until a
- * separately approved cutover flips the master flag and per-store mode.
+ * DIRECT is the only supported runtime dispatch mode. If the master switch is
+ * off, persistence is disabled loudly at dispatch. These flags therefore act as
+ * boot/dispatch validation plus a kill switch, not a routing choice.
  */
 import { env } from '../../env.js';
 
 export type PersistenceStore = 'mongodb' | 'neo4j' | 'chromadb';
-export type PersistenceMode = 'gateway' | 'direct';
+export type PersistenceMode = 'disabled' | 'direct';
 
 const STORE_MODE_ENV: Record<PersistenceStore, PersistenceMode> = {
   mongodb: env.PERSISTENCE_MONGO_MODE,
@@ -32,7 +27,7 @@ export function resolveModeFromConfig(
   config: PersistenceFlagConfig,
   store: PersistenceStore,
 ): PersistenceMode {
-  if (!config.directEnabled) return 'gateway';
+  if (!config.directEnabled) return 'disabled';
   return config.storeModes[store];
 }
 

@@ -4,7 +4,7 @@
  * Read-only Kevin/Admin shell for Steve/Michael/Ivory support context. This
  * does not expose Success Profile fields to the BA editable profile and does
  * not perform GraphRAG writes from the repo server. Bridge rows are drafts that
- * name the required schema-enforced Universal Gateway quadstack path.
+ * name the required schema-enforced external MCP tool server quadstack path.
  */
 
 import express, { type Request, type Router } from 'express';

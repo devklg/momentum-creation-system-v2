@@ -35,7 +35,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import {
   MCS_PRODUCT_KEYS,
@@ -191,7 +191,7 @@ export async function getGeneratorRun(
   runId: string,
   tmagId: string,
 ): Promise<McsGeneratorRun> {
-  const res = await gatewayCall<{
+  const res = await persistenceCall<{
     count: number;
     documents: Array<McsGeneratorRun & { _id?: unknown }>;
   }>('mongodb', 'query', {
@@ -285,7 +285,7 @@ export async function mintInvitationForRun(
   };
   const updatedInvitations = [...run.invitations, newEntry];
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: RUNS_COLLECTION,
     filter: { runId: input.runId },

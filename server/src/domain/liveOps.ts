@@ -23,7 +23,7 @@
  *
  * Performance: at v1 team size every aggregate is sub-millisecond; the
  * usage strip ticks at 1s and reads tiny in-memory structures (zero
- * gateway hits). Growth/grid/funnel each issue 3–4 parallel gateway
+ * persistence hits). Growth/grid/funnel each issue 3–4 parallel persistence
  * queries; cheap enough for the foreseeable future. When the team
  * scales we may add a 5–10s cache on the JSON endpoints.
  */
@@ -34,7 +34,7 @@ import {
   activePlacementSubscriberCount,
   eventsInLastMinute,
 } from '../services/poolEvents.js';
-import { instrumentedGatewayCall, latencyPercentiles } from '../services/gatewayLatency.js';
+import { instrumentedPersistenceCall, latencyPercentiles } from '../services/persistenceLatency.js';
 import type {
   McsAdminDashboardFilter,
   McsAdminFunnelKind,
@@ -104,7 +104,7 @@ interface ActivityDoc {
 
 /**
  * Build one usage-strip snapshot. Synchronous in spirit — reads only the
- * in-memory ring buffers in `poolEvents` and `gatewayLatency`. No gateway
+ * in-memory ring buffers in `poolEvents` and `persistenceLatency`. No persistence
  * hits here; called at 1s cadence by the SSE handler.
  *
  * `eventsPerMinute` is the count of placements published in the last 60s.
@@ -119,8 +119,8 @@ export function getUsageSample(): McsAdminLiveUsageSample {
     activeDashboardViewers: activePlacementSubscriberCount(),
     activeAdminSessions: activeAdminSessionCount(),
     eventsPerMinute: eventsInLastMinute(),
-    gatewayLatencyMsP50: p50,
-    gatewayLatencyMsP95: p95,
+    persistenceLatencyMsP50: p50,
+    persistenceLatencyMsP95: p95,
   };
 }
 
@@ -172,7 +172,7 @@ async function aggregateCount(
   collection: string,
   match: Record<string, unknown>,
 ): Promise<number> {
-  const result = await instrumentedGatewayCall<{ results?: Array<{ total?: number }> }>(
+  const result = await instrumentedPersistenceCall<{ results?: Array<{ total?: number }> }>(
     'mongodb',
     'aggregate',
     {
@@ -250,7 +250,7 @@ export async function getLiveGrid(
   const sponsorScope =
     scopedTmagIds === null ? {} : { sponsorTmagId: { $in: scopedTmagIds } };
 
-  const placementsRes = await instrumentedGatewayCall<{ documents: PlacementDoc[] }>(
+  const placementsRes = await instrumentedPersistenceCall<{ documents: PlacementDoc[] }>(
     'mongodb',
     'query',
     {
@@ -276,13 +276,13 @@ export async function getLiveGrid(
   const sponsorIds = Array.from(new Set(placements.map((p) => p.sponsorTmagId)));
 
   const [prospectsRes, sponsorsRes] = await Promise.all([
-    instrumentedGatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
+    instrumentedPersistenceCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PROSPECTS,
       filter: { prospectId: { $in: prospectIds } },
       limit: prospectIds.length,
     }),
-    instrumentedGatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+    instrumentedPersistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_BAS,
       filter: { tmagId: { $in: sponsorIds } },
@@ -385,7 +385,7 @@ async function buildProspectFunnel(
   const sponsorScope =
     scopedTmagIds === null ? {} : { sponsorTmagId: { $in: scopedTmagIds } };
 
-  const res = await instrumentedGatewayCall<{ documents: Array<{ state: McsTokenState }> }>(
+  const res = await instrumentedPersistenceCall<{ documents: Array<{ state: McsTokenState }> }>(
     'mongodb',
     'query',
     {
@@ -457,7 +457,7 @@ async function buildBaActivationFunnel(
   const baFilter: Record<string, unknown> = { deleted: { $ne: true } };
   if (scopedTmagIds !== null) baFilter.tmagId = { $in: scopedTmagIds };
 
-  const basRes = await instrumentedGatewayCall<{ documents: BaDoc[] }>(
+  const basRes = await instrumentedPersistenceCall<{ documents: BaDoc[] }>(
     'mongodb',
     'query',
     {
@@ -485,13 +485,13 @@ async function buildBaActivationFunnel(
   }
 
   const [steveRes, activityRes, enrollRes] = await Promise.all([
-    instrumentedGatewayCall<{ documents: MichaelDoc[] }>('mongodb', 'query', {
+    instrumentedPersistenceCall<{ documents: MichaelDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_STEVE,
       filter: { tmagId: { $in: baIds }, completedAt: { $ne: null } },
       limit: baIds.length,
     }),
-    instrumentedGatewayCall<{ documents: ActivityDoc[] }>('mongodb', 'query', {
+    instrumentedPersistenceCall<{ documents: ActivityDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_ACTIVITY,
       filter: {
@@ -500,7 +500,7 @@ async function buildBaActivationFunnel(
       },
       limit: 200_000,
     }),
-    instrumentedGatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
+    instrumentedPersistenceCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: { sponsorTmagId: { $in: baIds }, flushReason: 'enrolled' },

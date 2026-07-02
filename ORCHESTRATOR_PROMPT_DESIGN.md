@@ -46,7 +46,7 @@ for Phase 6 to land and a separate approval.
    "docs(phase-10): MCS V2 schema design (Mongo/Neo4j/Chroma) — the B4/write-freeze linchpin".
    P7 persistence governance MUST align to this canonical schema, not invent a parallel one.
 3. Governance already ratified (read, align to, do not contradict):
-   - organization/ACR-0007 (Runtime persistence is DIRECT; Universal Gateway is dev tooling, NOT a runtime dependency)
+   - organization/ACR-0007 (Runtime persistence is DIRECT; external MCP tooling is NOT a runtime dependency)
    - organization/DECISION_governed_dedicated_stack_founding_principle.md (governed-from-birth: Mongoose+$jsonSchema, one-concept-one-name, governed door only)
    - organization/FINDING_chroma_boot_naming_drift.md (audit_log vs mcs_audit_log duplicate + unprefixed names)
    - SCHEMA_GOVERNANCE.md, MULTI_DB_AGENT_LEARNING_GOVERNANCE.md (Page 5 canonical collections/labels)
@@ -55,14 +55,14 @@ for Phase 6 to land and a separate approval.
 P7_3_TRIPLE_STACK_WRITE_CONTRACT.md currently defines TWO write paths:
   - Path A: tripleStackWrite (correct — goes through the app-direct persistence seam).
   - Path B: `quadstack.write` with enforce_schema, for memory/lineage — routes through the
-    Universal Gateway's QuadStackConnector using the docs/graphrag-schema-contract.md schema,
-    which is scoped "Universal Gateway memory" (chat_number/chat_registry/namespace universal_gateway).
-Path B makes the app's agent memory layer DEPEND ON THE GATEWAY — this VIOLATES ACR-0007.
+    external tooling's multi-store connector using the docs/graphrag-schema-contract.md schema,
+    which is scoped to external agent memory (chat_number/chat_registry/tooling namespace).
+Path B makes the app's agent memory layer depend on external tooling — this VIOLATES ACR-0007.
 Your job (design only): REVISE the P7.3 contract so Path B is COLLAPSED onto the app-direct seam:
   - Memory/lineage/outcome writes go through the SAME persist()/tripleStackWrite direct path,
     into the app's OWN dedicated stores (Mongo momentum @30000, Neo4j @7710, Chroma mcs_* @8200),
     Mongoose + $jsonSchema enforced, read-back verified per leg.
-  - NO quadstack.write anywhere in app runtime. The gateway is dev tooling only.
+  - NO quadstack.write anywhere in app runtime. External MCP tooling is not an app runtime dependency.
   - Align every collection/label/field name to the canonical schema (commit f976dd3) and fix the
     naming drift noted in FINDING_chroma_boot_naming_drift.md (one canonical audit collection,
     all mcs_* prefixed).
@@ -101,7 +101,7 @@ Standing prohibitions (always in force):
 - Agent A — Readiness: verify base, gate, and that the 3 P7 drafts + schema commit f976dd3 are present.
 - Agent B — Architecture: revise P7.3 (kill Path B), finalize P7.1/P7.2, draft P7.4-P7.6 contracts.
 - Agent C — Documentation: write the contracts as authoritative design docs; deprecate Path B with rationale.
-- Agent D — Governance: verify every contract aligns to ACR-0007 + canonical schema + governed-from-birth; no gateway in any app path.
+- Agent D — Governance: verify every contract aligns to ACR-0007 + canonical schema + governed-from-birth; no external-tooling dependency in any app path.
 - Agent E — Final Verification: reconcile, run `pnpm typecheck` (docs-only run), write final report.
 
 ## Required Gates (design/docs run)

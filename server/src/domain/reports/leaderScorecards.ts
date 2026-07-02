@@ -17,7 +17,7 @@
  * activity the leader is coaching.
  */
 
-import { gatewayCall } from '../../services/gateway.js';
+import { persistenceCall } from '../../services/persistence/dispatch.js';
 import { listLeaderTmagIds, resolveScopedTmagIds, LEADER_DETECTION_NOTE } from '../adminMetrics.js';
 import { hashSourceData } from '../../services/pdfReport.js';
 import type {
@@ -93,7 +93,7 @@ export async function buildLeaderScorecardReport(
   }
 
   // Resolve leader names.
-  const basRes = await gatewayCall<{ documents: BaDoc[] }>('mongodb', 'query', {
+  const basRes = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
     filter: { tmagId: { $in: leaderIds }, deleted: { $ne: true } },
@@ -106,19 +106,19 @@ export async function buildLeaderScorecardReport(
 
   // Lifetime personal enrollments + last-30d placements/enrollments per leader.
   const [enrollLifetime, placements30, videoComplete30] = await Promise.all([
-    gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: { sponsorTmagId: { $in: leaderIds }, flushReason: 'enrolled' },
       limit: 200_000,
     }),
-    gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: { sponsorTmagId: { $in: leaderIds }, placedAt: { $gte: cutoff30 } },
       limit: 200_000,
     }),
-    gatewayCall<{ documents: ActivityDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: ActivityDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_ACTIVITY,
       filter: { sponsorTmagId: { $in: leaderIds }, kind: 'video_completed', at: { $gte: cutoff30 } },

@@ -23,7 +23,7 @@
 import argon2 from 'argon2';
 import type { SteveDiscoveryIngestPayload } from '@momentum/shared';
 import { ingestDiscoveryArtifact } from '../src/domain/steve-success-interview.js';
-import { gatewayCall } from '../src/services/gateway.js';
+import { persistenceCall } from '../src/services/persistence/dispatch.js';
 
 const FOUNDER_BA_ID = 'TMBA-FOUNDER-KEVIN';
 
@@ -43,7 +43,7 @@ async function setFounderPassword(): Promise<void> {
     );
   }
 
-  const found = await gatewayCall<{ documents: BARow[]; count: number }>('mongodb', 'query', {
+  const found = await persistenceCall<{ documents: BARow[]; count: number }>('mongodb', 'query', {
     database: 'momentum',
     collection: 'brand_ambassadors',
     filter: { baId: FOUNDER_BA_ID },
@@ -59,7 +59,7 @@ async function setFounderPassword(): Promise<void> {
 
   const passwordHash = await argon2.hash(plain, { type: argon2.argon2id });
 
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: 'momentum',
     collection: 'brand_ambassadors',
     filter: { baId: FOUNDER_BA_ID },

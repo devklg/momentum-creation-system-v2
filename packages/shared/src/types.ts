@@ -91,7 +91,7 @@ export interface McsCallbackRequestRecord {
   smsDeliveryError: string | null;
 }
 
-/** Three-stack write result returned by the gateway. */
+/** Three-stack write result returned by the PERSISTENCE. */
 export interface McsTripleStackWriteResult {
   mongo: { ok: boolean; insertedCount?: number };
   neo4j: { ok: boolean; counters?: Record<string, number> };
@@ -1786,7 +1786,7 @@ export type McsFastStartModuleState =
 /**
  * Stored progress record. One row per (tmagId, moduleId). The triple-stack
  * write inserts on first touch and updates state thereafter â€” domain
- * branches on existence per the gateway upsert quirk.
+ * branches on existence per the PERSISTENCE upsert quirk.
  */
 export interface McsFastStartProgressRecord {
   /** Composite id `${tmagId}__${moduleId}` for idempotent triple-stack writes. */
@@ -5121,7 +5121,7 @@ export interface McsSuccessProfileAgentContext {
 // turn-lifecycle / gate-decision marker: which agent, on whose behalf, in which
 // turn, made which transition — NEVER what was said. No body, no transcript, no
 // PII beyond opaque ids. Persisted through the app-direct tripleStackWrite seam
-// into the canonical `mcs_audit_log` substrate (NOT the Universal Gateway;
+// into the canonical `mcs_audit_log` substrate (NOT the external MCP tool server;
 // ACR-0007). Writer: `appendRuntimeAuditEntry` in server/src/domain/auditLog.ts,
 // canary-gated by RUNTIME_AUDIT_PERSISTENCE_ENABLED (default off).
 // ─────────────────────────────────────────────────────────────────────────────
@@ -5181,12 +5181,12 @@ export interface McsRuntimeAuditLogEntry extends McsAuditLogEntry {
 // Phase 7 · App-memory envelope (P7.3 §4.2) — shared by R1 (outcomes),
 // R2 (learning candidates), R3 (GraphRAG).
 //
-// The app-scoped replacement for the deprecated gateway `quadstack.write` base
+// The app-scoped replacement for the deprecated PERSISTENCE `quadstack.write` base
 // envelope. App memory is app data in the `momentum` namespace, written through
-// the app-direct tripleStackWrite seam (NEVER the Universal Gateway; ACR-0007).
+// the app-direct tripleStackWrite seam (NEVER the external MCP tool server; ACR-0007).
 // It preserves the Chat #135 anti-drift discipline (shared id, canonical typed
-// envelope, deterministic ids, banned aliases) WITHOUT the gateway-only fields
-// (`chat_number`, `chat_registry_id`, `namespace: universal_gateway`), which are
+// envelope, deterministic ids, banned aliases) WITHOUT the PERSISTENCE-only fields
+// (`chat_number`, `chat_registry_id`, `namespace: universal_PERSISTENCE`), which are
 // forbidden on app records. All Phase 7 app memory is server-derived, so
 // `originKind` is always 'system' and there is no `chat_number`.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -5210,7 +5210,7 @@ export type McsMemoryType =
  * mirrored attribute of the member, never the identity.
  *
  * Banned on any app record: `chat_number`, `chat_registry_id`,
- * `namespace: 'universal_gateway'`, and the `date`/`timestamp`/`chat`/
+ * `namespace: 'universal_PERSISTENCE'`, and the `date`/`timestamp`/`chat`/
  * `synced_chat`/`start_time` aliases.
  */
 export interface McsMemoryEnvelope {
@@ -5359,7 +5359,7 @@ export interface McsLearningCandidateReviewInput {
 // Derived-memory records + retrieval over the app's OWN dedicated stores,
 // app-direct. A GraphRAG record indexes an ACTIVE, approved Knowledge Object for
 // semantic recall (Chroma) stitched to lineage (Neo4j) by the shared id. NO
-// Universal Gateway, no `quadstack.write`, no `universal_gateway` (ACR-0007).
+// external MCP tool server, no `quadstack.write`, no `universal_PERSISTENCE` (ACR-0007).
 // Only records with `retrievalReady: true` and an active knowledge object are
 // served; superseded/archived/review-only records are excluded. The Context
 // Manager is the sole caller — agents never read/write GraphRAG stores directly.

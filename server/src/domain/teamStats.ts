@@ -43,7 +43,7 @@
  *   to cache the result for 30-60 seconds; flagged for future.
  */
 
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 
 export interface TeamStats {
   /** BAs who logged into .team in the last 24h. */
@@ -76,7 +76,7 @@ async function countByMatch(
   collection: string,
   matchFilter: Record<string, unknown>,
 ): Promise<number> {
-  const result = await gatewayCall<{ results?: Array<{ total?: number }> }>(
+  const result = await persistenceCall<{ results?: Array<{ total?: number }> }>(
     'mongodb',
     'aggregate',
     {

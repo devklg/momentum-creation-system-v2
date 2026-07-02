@@ -24,7 +24,7 @@
 
 import { randomBytes } from 'node:crypto';
 import type { CookieOptions, Request, Response } from 'express';
-import { gatewayCall } from './gateway.js';
+import { persistenceCall } from './persistence/dispatch.js';
 import { env } from '../env.js';
 
 const MONGO_DB = 'momentum';
@@ -111,7 +111,7 @@ export async function openProspectSession(
     expiresAt: input.accountExpiresAt,
   };
 
-  await gatewayCall('mongodb', 'insert', {
+  await persistenceCall('mongodb', 'insert', {
     database: MONGO_DB,
     collection: SESSIONS_COLLECTION,
     documents: [{ _id: sessionId, ...row }],
@@ -149,7 +149,7 @@ export async function readProspectSession(
   ];
   if (!sessionId || typeof sessionId !== 'string') return null;
 
-  const result = await gatewayCall<{ documents: ProspectSessionRow[] }>(
+  const result = await persistenceCall<{ documents: ProspectSessionRow[] }>(
     'mongodb',
     'query',
     {
@@ -179,7 +179,7 @@ export async function closeProspectSession(
   sessionId: string,
 ): Promise<void> {
   try {
-    await gatewayCall('mongodb', 'delete', {
+    await persistenceCall('mongodb', 'delete', {
       database: MONGO_DB,
       collection: SESSIONS_COLLECTION,
       filter: { sessionId },

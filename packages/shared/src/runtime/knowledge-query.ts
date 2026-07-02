@@ -9,7 +9,7 @@
  *    and queued-for-review knowledge is NEVER carried in a result — it is excluded and
  *    only COUNTED in result metadata.
  *  - The query is scoped to a Team Magnificent tenant/team/BA `RuntimeRequestScope`.
- *  - No store/Gateway/adapter type leaks into this contract. It is the boundary between
+ *  - No store/PERSISTENCE/adapter type leaks into this contract. It is the boundary between
  *    "what the Context Manager wants" and "what the Knowledge Core returns", nothing more.
  *  - It performs NO retrieval itself. It is a type contract; the P4.4 adapter consumes it.
  *

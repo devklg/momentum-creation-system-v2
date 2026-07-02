@@ -8,7 +8,13 @@ Architecture version: v1.0 frozen
 
 Status: Planning only. No production code is changed by this document.
 
-Related status: S1.3 Runtime Persistence Direct Adapter Migration is CLOSED / VERIFIED. MongoDB, Neo4j, and ChromaDB are verified direct. Gateway HTTP fallback remains in place. Gateway fallback removal is not approved. Remaining Sprint 1 work is planning/governance only.
+Related status: S1.3 Runtime Persistence Direct Adapter Migration is CLOSED / VERIFIED. MongoDB, Neo4j, and ChromaDB are verified direct. ACR-0009 later retired the Gateway HTTP persistence fallback. Remaining Sprint 1 work is planning/governance only.
+
+> **Supersession note (2026-07-02, ACR-0009):** this plan predates Kevin's
+> approved retirement of the Gateway HTTP persistence fallback. Treat any
+> fallback-preservation language below as historical planning context, not
+> current architecture. Gateway is MCP/developer tooling; app runtime persistence
+> is direct to the MCS stack.
 
 ## 1. Purpose
 
@@ -140,13 +146,13 @@ Runtime modules use approved service boundaries:
 
 Persistence access remains behind approved adapters/services. The runtime layer may call service functions, but it must not import driver clients, Mongoose models, Neo4j drivers, Chroma direct clients, or Gateway clients as a shortcut.
 
-Gateway fallback remains in place and is not removed. S1.3 verified direct MongoDB, Neo4j, and ChromaDB access, but fallback removal is not approved in S1.2. Any future removal requires separate governance and explicit approval.
+ACR-0009 later retired the Gateway HTTP persistence fallback. Runtime modules still must not call `gatewayCall()` or persistence drivers directly; they must use approved services and adapters.
 
 ## 7. Relationship To Existing Services
 
 ### `gatewayCall()`
 
-`gatewayCall(tool, action, params)` is the compatibility seam used by current persistence callers. After S1.3, it can dispatch to verified direct adapters where flags allow, while preserving the Gateway HTTP fallback path.
+`gatewayCall(tool, action, params)` is the compatibility seam used by current persistence callers. After ACR-0009, it dispatches to verified direct adapters only; it does not call the Universal Gateway HTTP path.
 
 Runtime modules should not call `gatewayCall()` directly. They should call higher-level services that express intent, such as knowledge retrieval, context building, event recording, or domain operations.
 
@@ -312,7 +318,7 @@ Future implementation should include tests for:
 - client-supplied `baId` is rejected or ignored
 - `/api/runtime/*` is auth-gated and never mounted for `.com`
 - Telnyx imports are absent from Browser Voice/Text Runtime
-- Gateway fallback remains callable when persistence flags require it
+- Universal Gateway HTTP fallback is absent from app runtime dispatch after ACR-0009
 - direct persistence remains available for verified stores
 - projection outbox handles deferred Neo4j/Chroma projections
 - runtime events are append-only and idempotent
@@ -372,7 +378,7 @@ This S1.2 planning work is accepted when:
 - The plan states agents must not access MongoDB, Neo4j, or ChromaDB directly.
 - The plan states agents consume memory only through Context Manager and Context Packet.
 - The plan keeps persistence behind approved adapters/services.
-- The plan preserves Gateway fallback and states fallback removal is not approved.
+- The plan preserves the direct app persistence boundary and is superseded by ACR-0009 for Gateway HTTP fallback retirement.
 - The plan relates the boundary to `gatewayCall()`, `tripleStackWrite()`, `tieredWrite()`, `projectionOutbox`, and direct persistence adapters.
 - The plan relates the boundary to Knowledge Core, Context Manager, Agent Runtime, Event Runtime, Browser Voice/Text Runtime, and QA Harness.
 - The plan separates internal runtime from external integrations.
@@ -390,8 +396,8 @@ Confirmed in this planning artifact:
 
 - S1.3 Runtime Persistence Direct Adapter Migration is CLOSED / VERIFIED.
 - MongoDB, Neo4j, and ChromaDB are verified direct.
-- Gateway HTTP fallback remains in place.
-- Gateway fallback removal is not approved.
+- Gateway HTTP persistence fallback was later retired by ACR-0009.
+- Universal Gateway remains MCP/developer tooling, not app runtime persistence.
 - Remaining Sprint 1 work is planning/governance only.
 - No production code was changed by this S1.2 plan.
 - No ratified documents were modified by this S1.2 plan.

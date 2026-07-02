@@ -16,7 +16,7 @@
  *    `packetStatus: 'degraded'`. This is the knowledge-honest, store-free packet
  *    the inert S2.20 facade deterministically resolves to the pre-authored
  *    `safe_fallback` response;
- *  - boundary-clean — it imports NO store/Gateway/GraphRAG/retrieval client and
+ *  - boundary-clean — it imports NO store/PERSISTENCE/GraphRAG/retrieval client and
  *    never persists. It depends only on the context layer plus shared types, and
  *    type-only imports the port shape from the orchestration layer (erased at
  *    runtime — no reverse runtime dependency).
@@ -73,7 +73,7 @@ export interface MichaelRuntimeContextFoundationInput {
  * Build the production Context Manager request port for a degraded, fail-closed
  * Michael runtime turn. The returned port assembles an empty-approved-knowledge,
  * candidate-excluded `context_packet.v1` from session identity alone — no store,
- * no retrieval, no Gateway. This is the ONLY place Michael packet assembly lives.
+ * no retrieval, no PERSISTENCE. This is the ONLY place Michael packet assembly lives.
  */
 export function createMichaelRuntimeContextManagerPort(
   input: MichaelRuntimeContextFoundationInput,

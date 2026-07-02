@@ -4,7 +4,7 @@
  * Derived-memory WRITES + RETRIEVAL over the app's OWN dedicated stores,
  * app-direct. A GraphRAG record indexes an ACTIVE, approved Knowledge Object for
  * semantic recall (Chroma) stitched to lineage (Neo4j) by a shared id. NO
- * Universal Gateway, no `quadstack.write`, no `universal_gateway` (ACR-0007).
+ * external MCP tool server, no `quadstack.write`, no `universal_PERSISTENCE` (ACR-0007).
  *
  * Invariants (P7.6 §6):
  *   - App-direct only; app-memory envelope; shared id across all three stores.
@@ -21,7 +21,7 @@
  */
 
 import { env } from '../env.js';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type {
   McsGraphRagInput,
@@ -167,7 +167,7 @@ export async function retrieveGraphRag(
   const topK = Math.max(1, Math.min(query.topK ?? DEFAULT_TOP_K, MAX_TOP_K));
   const collection = activeKnowledgeCollection(query.domain, query.language);
 
-  const result = await gatewayCall<{
+  const result = await persistenceCall<{
     ids?: string[][];
     documents?: string[][];
     distances?: number[][];

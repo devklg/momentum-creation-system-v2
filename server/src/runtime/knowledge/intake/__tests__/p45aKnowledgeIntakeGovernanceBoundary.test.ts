@@ -63,16 +63,16 @@ describe('P4.5A static knowledge-intake governance boundary', () => {
     expect(intakeProductionFiles().length).toBeGreaterThan(0);
   });
 
-  it('does not import MongoDB, Neo4j, ChromaDB, GraphRAG, GridFS, Gateway, or persistence clients', () => {
+  it('does not import MongoDB, Neo4j, ChromaDB, GraphRAG, GridFS, PERSISTENCE, or persistence clients', () => {
     const forbidden =
-      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j-driver|chromadb|gridfs)(?:$|\/|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/gateway|\/services\/persistence|\/persistence\/|tripleStack|quadstack)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j-driver|chromadb|gridfs)(?:$|\/|['"])|\bfrom\s+['"][^'"]*(?:graph-?rag|\/services\/PERSISTENCE|\/services\/persistence|\/persistence\/|tripleStack|quadstack)[^'"]*['"]/i;
     const matches = matchingCodeLines(intakeProductionFiles(), forbidden);
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('does not call direct store, Gateway, or triple/quad-stack write helpers', () => {
+  it('does not call direct store, PERSISTENCE, or triple/quad-stack write helpers', () => {
     const forbidden =
-      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|gatewayCall|tripleStackWrite|quadstack|graphRag|graphrag|GridFSBucket)\b/i;
+      /\b(?:new\s+MongoClient|mongoose\.connect|neo4j\.driver|new\s+ChromaClient|persistenceCall|tripleStackWrite|quadstack|graphRag|graphrag|GridFSBucket)\b/i;
     const matches = matchingCodeLines(intakeProductionFiles(), forbidden);
     expect(matches, matches.join('\n')).toEqual([]);
   });

@@ -5,7 +5,7 @@
  * Usage:  pnpm --filter @momentum/server seed:codes
  */
 
-import { gatewayCall } from '../src/services/gateway.js';
+import { persistenceCall } from '../src/services/persistence/dispatch.js';
 
 interface SeedCode {
   code: string;
@@ -34,7 +34,7 @@ const CODES: SeedCode[] = [
 
 async function main(): Promise<void> {
   for (const c of CODES) {
-    const existing = await gatewayCall<{ count: number }>('mongodb', 'query', {
+    const existing = await persistenceCall<{ count: number }>('mongodb', 'query', {
       database: 'momentum',
       collection: 'access_codes',
       filter: { code: c.code },
@@ -46,7 +46,7 @@ async function main(): Promise<void> {
       continue;
     }
 
-    await gatewayCall('mongodb', 'insert', {
+    await persistenceCall('mongodb', 'insert', {
       database: 'momentum',
       collection: 'access_codes',
       documents: [{ _id: c.code, ...c, active: true, createdAt: new Date().toISOString() }],

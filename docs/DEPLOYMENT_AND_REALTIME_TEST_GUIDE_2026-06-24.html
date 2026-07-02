@@ -190,6 +190,10 @@
   <hr class="rule">
 
   <div class="note">
+    <strong>Superseded persistence detail (2026-07-02, ACR-0009):</strong> this dated guide predates retirement of the retired HTTP persistence fallback. Current app runtime persistence is direct to the dedicated MCS MongoDB, Neo4j, and ChromaDB stack. external MCP tooling remains MCP/developer tooling and operator access, not the app persistence edge or app memory layer. Any <code>retired tool-server URL env var</code> references below are historical.
+  </div>
+
+  <div class="note">
     <strong>Purpose:</strong> give Kevin a practical way to see the app running, understand what it does in real time, and test the workflows that matter before any team rollout.
   </div>
   <div class="note">
@@ -206,7 +210,7 @@
     <li><code>pnpm build</code> passes</li>
     <li>API boots on <code>7700</code></li>
     <li><code>/api/health</code> returns healthy</li>
-    <li>Universal Gateway V2 is healthy on <code>2526</code></li>
+    <li>external MCP tooling is healthy on <code>2526</code></li>
     <li>ChromaDB is reachable on <code>8100</code></li>
     <li>GPU FastAPI embedding service is reachable on <code>8300</code></li>
     <li>Chroma boot guard sees all 28 app collections</li>
@@ -225,7 +229,7 @@
   <p>Use this sequence for a normal local demo.</p>
   <table id="startup-sequence-table">
     <tr><th>Order</th><th>When</th><th>What to run</th><th>Keep it running?</th></tr>
-    <tr><td>1</td><td>Before starting the app, once per Windows session</td><td>Universal Gateway V2 startup script</td><td>Yes</td></tr>
+    <tr><td>1</td><td>Before starting the app, once per Windows session</td><td>external MCP tooling startup script</td><td>Yes</td></tr>
     <tr><td>2</td><td>After infrastructure starts</td><td>Health checks and port checks</td><td>No</td></tr>
     <tr><td>3</td><td>First setup, or after dependency changes</td><td><code>pnpm install</code>, <code>pnpm typecheck</code>, <code>pnpm build</code></td><td>No</td></tr>
     <tr><td>4</td><td>First setup, after database reset, or when fresh demo data is needed</td><td>Seed commands</td><td>No</td></tr>
@@ -235,14 +239,14 @@
   <p class="small">Daily local demo shortcut after setup is complete:</p>
   <pre>cd D:\momentum-creation-system-v2
 pnpm dev:all</pre>
-  <p class="small">If Codex or Claude is already using Gateway V2 successfully, the gateway is probably already running. In that case, do not start Gateway V2 again. Verify the infrastructure ports, then start the app with <code>pnpm dev:all</code>.</p>
+  <p class="small">If Codex or Claude is already using external MCP tooling successfully, the external tooling is probably already running. In that case, do not start external MCP tooling again. Verify the infrastructure ports, then start the app with <code>pnpm dev:all</code>.</p>
   <p class="small">Only rerun the install/build/seed commands when code changed, repo changes were pulled, data was reset, or the app needs formal verification before deployment.</p>
 
   <h3>Live Working Checklist</h3>
   <p>Use this while running the app. Check one status per row and type notes for anything that fails.</p>
   <table id="live-working-checklist">
     <tr><th>Area</th><th>Item to verify</th><th>Working</th><th>Not working</th><th>Notes</th></tr>
-    <tr><td>Infrastructure</td><td>Gateway V2 health responds on <code>2526</code></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 1"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 1"></td><td><textarea class="note-input" aria-label="Notes row 1" placeholder="Type notes here"></textarea></td></tr>
+    <tr><td>Infrastructure</td><td>external MCP tooling health responds on <code>2526</code></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 1"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 1"></td><td><textarea class="note-input" aria-label="Notes row 1" placeholder="Type notes here"></textarea></td></tr>
     <tr><td>Infrastructure</td><td>MongoDB is listening on <code>28000</code></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 2"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 2"></td><td><textarea class="note-input" aria-label="Notes row 2" placeholder="Type notes here"></textarea></td></tr>
     <tr><td>Infrastructure</td><td>Neo4j Bolt is listening on <code>7687</code></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 3"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 3"></td><td><textarea class="note-input" aria-label="Notes row 3" placeholder="Type notes here"></textarea></td></tr>
     <tr><td>Infrastructure</td><td>ChromaDB is listening on <code>8100</code></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 4"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 4"></td><td><textarea class="note-input" aria-label="Notes row 4" placeholder="Type notes here"></textarea></td></tr>
@@ -268,9 +272,9 @@ pnpm dev:all</pre>
     <tr><td>Admin</td><td>Admin dashboard loads</td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 24"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 24"></td><td><textarea class="note-input" aria-label="Notes row 24" placeholder="Type notes here"></textarea></td></tr>
     <tr><td>Admin</td><td>Live Ops uses real data, not mocks</td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 25"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 25"></td><td><textarea class="note-input" aria-label="Notes row 25" placeholder="Type notes here">Known item to verify/fix</textarea></td></tr>
     <tr><td>Admin</td><td>Tenant URL-structure panel exists</td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 26"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 26"></td><td><textarea class="note-input" aria-label="Notes row 26" placeholder="Type notes here">Known missing item</textarea></td></tr>
-    <tr><td>Persistence</td><td>App writes reach MongoDB through Gateway V2</td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 27"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 27"></td><td><textarea class="note-input" aria-label="Notes row 27" placeholder="Type notes here"></textarea></td></tr>
-    <tr><td>Persistence</td><td>App writes reach Neo4j through Gateway V2</td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 28"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 28"></td><td><textarea class="note-input" aria-label="Notes row 28" placeholder="Type notes here"></textarea></td></tr>
-    <tr><td>Persistence</td><td>App writes reach ChromaDB through Gateway V2</td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 29"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 29"></td><td><textarea class="note-input" aria-label="Notes row 29" placeholder="Type notes here"></textarea></td></tr>
+    <tr><td>Persistence</td><td>App writes reach MongoDB through external MCP tooling</td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 27"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 27"></td><td><textarea class="note-input" aria-label="Notes row 27" placeholder="Type notes here"></textarea></td></tr>
+    <tr><td>Persistence</td><td>App writes reach Neo4j through external MCP tooling</td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 28"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 28"></td><td><textarea class="note-input" aria-label="Notes row 28" placeholder="Type notes here"></textarea></td></tr>
+    <tr><td>Persistence</td><td>App writes reach ChromaDB through external MCP tooling</td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 29"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 29"></td><td><textarea class="note-input" aria-label="Notes row 29" placeholder="Type notes here"></textarea></td></tr>
     <tr><td>Communications</td><td>Resend email is skipped or active as configured</td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 30"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 30"></td><td><textarea class="note-input" aria-label="Notes row 30" placeholder="Type notes here"></textarea></td></tr>
     <tr><td>Communications</td><td>Telnyx SMS/calling is skipped or active as configured</td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Working row 31"></td><td class="status-cell"><input class="check-input" type="checkbox" aria-label="Not working row 31"></td><td><textarea class="note-input" aria-label="Notes row 31" placeholder="Type notes here"></textarea></td></tr>
   </table>
@@ -278,17 +282,17 @@ pnpm dev:all</pre>
   <p>This step is not app startup. This step means: make sure the background services the app depends on are already running.</p>
   <table>
     <tr><th>Service</th><th>URL / Port</th></tr>
-    <tr><td>Universal Gateway V2 API</td><td><code>http://localhost:2526/api</code></td></tr>
-    <tr><td>Gateway dashboard</td><td><code>http://localhost:3102</code></td></tr>
+    <tr><td>external MCP tooling API</td><td><code>http://localhost:2526/api</code></td></tr>
+    <tr><td>external MCP tooling dashboard</td><td><code>http://localhost:3102</code></td></tr>
     <tr><td>MongoDB</td><td><code>localhost:28000</code></td></tr>
     <tr><td>Neo4j Bolt</td><td><code>localhost:7687</code></td></tr>
     <tr><td>ChromaDB</td><td><code>http://localhost:8100</code></td></tr>
     <tr><td>GPU FastAPI embeddings</td><td><code>http://127.0.0.1:8300</code></td></tr>
   </table>
-  <p class="small">The app does not use Mongoose. MongoDB access goes through Universal Gateway V2's MongoDB connector; Neo4j access goes through the gateway's Neo4j connector.</p>
+  <p class="small">The app does not use Mongoose. MongoDB access goes through external MCP tooling's MongoDB connector; Neo4j access goes through the external tooling Neo4j connector.</p>
   <p class="small">If all of these services are already running, skip the startup script and go to Step 2.</p>
-  <p class="small">Only run this script if Gateway V2, MongoDB, Neo4j, ChromaDB, or the embedding service is not already running:</p>
-  <pre>D:\server-gateway-mcp-v2\START-ALL-SERVICES-V2.bat</pre>
+  <p class="small">Only run this script if external MCP tooling, MongoDB, Neo4j, ChromaDB, or the embedding service is not already running:</p>
+  <pre>D:\external-mcp-tooling\START-ALL-SERVICES-V2.bat</pre>
   <p class="small">PowerShell verification:</p>
   <pre>Invoke-RestMethod http://localhost:2526/health
 Invoke-RestMethod http://127.0.0.1:8300/health</pre>
@@ -296,7 +300,7 @@ Invoke-RestMethod http://127.0.0.1:8300/health</pre>
   <h3>2. Check Ports</h3>
   <table>
     <tr><th>Port</th><th>Service</th></tr>
-    <tr><td>2526</td><td>Universal Gateway V2</td></tr>
+    <tr><td>2526</td><td>external MCP tooling</td></tr>
     <tr><td>28000</td><td>MongoDB</td></tr>
     <tr><td>7687</td><td>Neo4j Bolt</td></tr>
     <tr><td>7700</td><td>Express API</td></tr>
@@ -312,7 +316,7 @@ Invoke-RestMethod http://127.0.0.1:8300/health</pre>
 
   <h3>3. Confirm Local .env</h3>
   <pre>SERVER_PORT=7700
-GATEWAY_URL=http://localhost:2526/api
+retired tool-server URL env var=http://localhost:2526/api
 PROSPECT_BASE_URL=http://localhost:7701
 CORS_ORIGINS=http://localhost:7701,http://localhost:7702,http://localhost:7703
 JWT_COOKIE_DOMAIN=localhost
@@ -355,7 +359,7 @@ pnpm --filter @momentum/server seed:orientation-sessions</pre>
   <h3>Production Environment</h3>
   <pre>NODE_ENV=production
 SERVER_PORT=7700
-GATEWAY_URL=&lt;production gateway v2 api url&gt;
+retired tool-server URL env var=&lt;production external tooling v2 api url&gt;
 PROSPECT_BASE_URL=https://teammagnificent.com
 CORS_ORIGINS=https://teammagnificent.com,https://teammagnificent.team,https://admin.teammagnificent.team
 JWT_COOKIE_DOMAIN=.teammagnificent.team
@@ -385,20 +389,20 @@ pnpm --filter @momentum/server start</pre>
 
   <h2 class="break-before">Data Stores & Schema Inventory</h2>
   <div class="note">
-    <strong>Important correction:</strong> Universal Gateway V2 does not contain MongoDB collections, Neo4j nodes, or ChromaDB collections. Gateway V2 is the connector and execution layer. The data lives inside MongoDB, Neo4j, and ChromaDB.
+    <strong>Important correction:</strong> external MCP tooling does not contain MongoDB collections, Neo4j nodes, or ChromaDB collections. external MCP tooling is the connector and execution layer. The data lives inside MongoDB, Neo4j, and ChromaDB.
   </div>
 
   <h3>Where The Data Actually Lives</h3>
   <table>
     <tr><th>Store</th><th>Owns</th><th>Local address</th><th>How the app reaches it</th><th>Dashboard note</th></tr>
-    <tr><td>MongoDB</td><td>Operational document collections</td><td><code>localhost:28000</code></td><td>Gateway V2 <code>mongodb</code> connector</td><td>Collections belong to MongoDB, not the gateway dashboard</td></tr>
-    <tr><td>Neo4j</td><td>Graph nodes and relationships</td><td><code>localhost:7687</code></td><td>Gateway V2 <code>neo4j</code> connector</td><td>Graph labels/relationships belong to Neo4j Browser/Bloom</td></tr>
-    <tr><td>ChromaDB</td><td>Vector collections, documents, metadata, embeddings</td><td><code>localhost:8100</code></td><td>Gateway V2 <code>chromadb</code> connector</td><td>Chroma collections may not appear in the gateway dashboard UI</td></tr>
-    <tr><td>FastAPI embeddings</td><td>Embedding generation for Chroma writes</td><td><code>127.0.0.1:8300</code></td><td>Called by the Chroma/gateway write path</td><td>Not a database</td></tr>
+    <tr><td>MongoDB</td><td>Operational document collections</td><td><code>localhost:28000</code></td><td>external MCP tooling <code>mongodb</code> connector</td><td>Collections belong to MongoDB, not the external tooling dashboard</td></tr>
+    <tr><td>Neo4j</td><td>Graph nodes and relationships</td><td><code>localhost:7687</code></td><td>external MCP tooling <code>neo4j</code> connector</td><td>Graph labels/relationships belong to Neo4j Browser/Bloom</td></tr>
+    <tr><td>ChromaDB</td><td>Vector collections, documents, metadata, embeddings</td><td><code>localhost:8100</code></td><td>external MCP tooling <code>chromadb</code> connector</td><td>Chroma collections may not appear in the external tooling dashboard UI</td></tr>
+    <tr><td>FastAPI embeddings</td><td>Embedding generation for Chroma writes</td><td><code>127.0.0.1:8300</code></td><td>Called by the Chroma/external tooling write path</td><td>Not a database</td></tr>
   </table>
 
   <h3>Connector Verification Commands</h3>
-  <p class="small">These commands prove Gateway V2 can reach the real stores. They do not mean Gateway V2 owns the collections.</p>
+  <p class="small">These commands prove external MCP tooling can reach the real stores. They do not mean external MCP tooling owns the collections.</p>
   <pre>$body = @{ tool='chromadb'; action='list_collections'; params=@{} } | ConvertTo-Json -Depth 10
 Invoke-RestMethod -Method Post -Uri 'http://localhost:2526/api/execute' -ContentType 'application/json' -Body $body</pre>
   <pre>$body = @{ tool='mongodb'; action='list_collections'; params=@{ database='momentum' } } | ConvertTo-Json -Depth 10
@@ -2364,7 +2368,7 @@ Invoke-RestMethod -Method Post -Uri 'http://localhost:2526/api/execute' -Content
 
   <table>
     <tr><th>Area</th><th>Feature</th><th>Where</th><th>Status</th></tr>
-    <tr><td>Infrastructure</td><td>Universal Gateway V2 connector access to persistence stores</td><td><code>gateway.ts</code></td><td>Functional</td></tr>
+    <tr><td>Infrastructure</td><td>external MCP tooling connector access to persistence stores</td><td><code>persistence/dispatch.ts</code></td><td>Functional</td></tr>
     <tr><td>Infrastructure</td><td>Triple-stack write helper</td><td><code>tripleStack.ts</code></td><td>Functional</td></tr>
     <tr><td>Infrastructure</td><td>Chroma collection boot guard</td><td><code>chromaCollections.ts</code></td><td>Functional</td></tr>
     <tr><td>Infrastructure</td><td>API health</td><td><code>/api/health</code></td><td>Functional</td></tr>
@@ -2430,9 +2434,9 @@ Invoke-RestMethod -Method Post -Uri 'http://localhost:2526/api/execute' -Content
 
   <h3>A. Infrastructure Smoke</h3>
   <ul class="checklist">
-    <li>Gateway V2 health returns healthy</li>
+    <li>external MCP tooling health returns healthy</li>
     <li>GPU FastAPI health returns healthy</li>
-    <li>Gateway V2 <code>chromadb</code> connector can list the real ChromaDB collections</li>
+    <li>external MCP tooling <code>chromadb</code> connector can list the real ChromaDB collections</li>
     <li>API health returns <code>{ ok: true }</code></li>
     <li><code>pnpm typecheck</code> passes</li>
     <li><code>pnpm build</code> passes</li>
@@ -2582,7 +2586,7 @@ Invoke-RestMethod -Method Post -Uri 'http://localhost:2526/api/execute' -Content
     <li>Active admin sessions increments</li>
     <li>Active dashboard viewers increments when prospect dashboard is open</li>
     <li>Events/min updates after placement</li>
-    <li>Gateway p50/p95 latency displays</li>
+    <li>external MCP tooling p50/p95 latency displays</li>
     <li>Growth cards load real counts</li>
     <li>Holding-tank grid loads real placements</li>
     <li>Funnel toggles between prospect and BA activation</li>
@@ -2640,7 +2644,7 @@ Invoke-RestMethod -Method Post -Uri 'http://localhost:2526/api/execute' -Content
     <li>Resend live email until domain verification</li>
     <li>Telnyx live calls/SMS until keys/webhook are confirmed</li>
     <li>Real provider integration for VM acquisition beyond manual/placeholder mode</li>
-    <li>Putting <code>D:\server-gateway-mcp-v2</code> into its own repo</li>
+    <li>Putting <code>D:\external-mcp-tooling</code> into its own repo</li>
     <li>Reconciling stale historical docs after the app review</li>
   </ul>
 

@@ -20,7 +20,7 @@
  * S2.20 inert facade (`resolveMichaelRuntimeTurnResponse`), which returns a
  * pre-authored, contract-validated fixture BY REFERENCE plus a redacted trace.
  * The route NEVER generates text, calls an LLM, persists anything, assembles a
- * Context Packet itself, touches a store/Gateway/retrieval helper, or imports the
+ * Context Packet itself, touches a store/PERSISTENCE/retrieval helper, or imports the
  * S2.13 test-only harness.
  *
  * Sponsor immutability (locked-spec 3.5): BA scope comes from req.session.tmagId,

@@ -10,12 +10,12 @@ import type { McsRuntimeAuditInput, McsRuntimeAuditContext } from '@momentum/sha
  */
 
 const mocks = vi.hoisted(() => ({
-  gatewayCall: vi.fn(),
+  persistenceCall: vi.fn(),
   tripleStackWrite: vi.fn(),
 }));
 
-vi.mock('../../services/gateway.js', () => ({
-  gatewayCall: mocks.gatewayCall,
+vi.mock('../../services/persistence/dispatch.js', () => ({
+  persistenceCall: mocks.persistenceCall,
 }));
 
 vi.mock('../../services/tripleStack.js', () => ({
@@ -37,7 +37,7 @@ const RUNTIME: McsRuntimeAuditContext = {
 const ORIGINAL_FLAG = process.env.RUNTIME_AUDIT_PERSISTENCE_ENABLED;
 
 /** No existing entry for the dedup lookup by default; writes succeed. */
-function defaultGateway(existing: AnyRec | null = null) {
+function defaultPersistence(existing: AnyRec | null = null) {
   return async (tool: string, action: string, _params: AnyRec): Promise<unknown> => {
     if (tool === 'mongodb' && action === 'query') {
       return { count: existing ? 1 : 0, documents: existing ? [existing] : [] };
@@ -53,7 +53,7 @@ async function loadAudit(enabled: boolean) {
 }
 
 beforeEach(() => {
-  mocks.gatewayCall.mockReset();
+  mocks.persistenceCall.mockReset();
   mocks.tripleStackWrite.mockReset();
 });
 
@@ -75,11 +75,11 @@ describe('Phase 7 R0 — appendRuntimeAuditEntry canary gate', () => {
 
     expect(result).toBeNull();
     expect(mocks.tripleStackWrite).not.toHaveBeenCalled();
-    expect(mocks.gatewayCall).not.toHaveBeenCalled();
+    expect(mocks.persistenceCall).not.toHaveBeenCalled();
   });
 
   it('writes through the triple-stack when the flag is ON', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const audit = await loadAudit(true);
     expect(audit.runtimeAuditPersistenceEnabled()).toBe(true);
 
@@ -96,7 +96,7 @@ describe('Phase 7 R0 — appendRuntimeAuditEntry canary gate', () => {
 
 describe('Phase 7 R0 — metadata-only + scope invariants', () => {
   it('never persists a before/after body — lifecycle markers only', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const audit = await loadAudit(true);
 
     const result = await audit.appendRuntimeAuditEntry(input());
@@ -109,7 +109,7 @@ describe('Phase 7 R0 — metadata-only + scope invariants', () => {
   });
 
   it('stamps tenant + BA + agent scope and a system actor (never a BA-authored write)', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const audit = await loadAudit(true);
 
     const result = await audit.appendRuntimeAuditEntry(input());
@@ -124,7 +124,7 @@ describe('Phase 7 R0 — metadata-only + scope invariants', () => {
   });
 
   it('caps the gate-denial reason and defaults denial severity to warn', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const audit = await loadAudit(true);
 
     const result = await audit.appendRuntimeAuditEntry(
@@ -140,7 +140,7 @@ describe('Phase 7 R0 — metadata-only + scope invariants', () => {
   });
 
   it('marks a persistence-flag flip as critical', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const audit = await loadAudit(true);
 
     const result = await audit.appendRuntimeAuditEntry(input({ action: 'runtime.persistence.enabled' }));
@@ -158,7 +158,7 @@ describe('Phase 7 R0 — idempotency on (turnId, action)', () => {
       before: null,
       after: null,
     };
-    mocks.gatewayCall.mockImplementation(defaultGateway(existing));
+    mocks.persistenceCall.mockImplementation(defaultPersistence(existing));
     const audit = await loadAudit(true);
 
     const result = await audit.appendRuntimeAuditEntry(input());
@@ -168,12 +168,12 @@ describe('Phase 7 R0 — idempotency on (turnId, action)', () => {
   });
 
   it('queries the dedup key by action + runtime.turnId', async () => {
-    mocks.gatewayCall.mockImplementation(defaultGateway());
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
     const audit = await loadAudit(true);
 
     await audit.appendRuntimeAuditEntry(input());
 
-    const query = mocks.gatewayCall.mock.calls.find(
+    const query = mocks.persistenceCall.mock.calls.find(
       ([tool, action]) => tool === 'mongodb' && action === 'query',
     );
     expect(query).toBeDefined();

@@ -3,7 +3,7 @@
  *
  * Additive, inert utilities that turn a raw source Kevin adds into retrieval units the Context
  * Manager can consume via the EXISTING P4.4 adapter / P4.5 packet assembly. Pure functions
- * only — no persistence, no Gateway, no LLM, no routes. See:
+ * only — no persistence, no PERSISTENCE, no LLM, no routes. See:
  *   engineering/reports/P4_5A_KNOWLEDGE_INTAKE_PARSING_CONTRACT.md
  */
 

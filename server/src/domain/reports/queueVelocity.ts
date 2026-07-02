@@ -14,7 +14,7 @@
  * Scope: AdminDashboardFilter via resolveScopedTmagIds.
  */
 
-import { gatewayCall } from '../../services/gateway.js';
+import { persistenceCall } from '../../services/persistence/dispatch.js';
 import { resolveScopedTmagIds } from '../adminMetrics.js';
 import { rangeClause } from './timeRange.js';
 import { hashSourceData } from '../../services/pdfReport.js';
@@ -66,13 +66,13 @@ export async function buildQueueVelocityReport(
   };
 
   const [placedRes, flushedRes] = await Promise.all([
-    gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: placementsFilter,
       limit: 200_000,
     }),
-    gatewayCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: PlacementDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: COLL_PLACEMENTS,
       filter: flushesFilter,

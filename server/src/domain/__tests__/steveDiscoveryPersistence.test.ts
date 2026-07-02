@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  gatewayCall: vi.fn(),
+  persistenceCall: vi.fn(),
   tripleStackWrite: vi.fn(),
 }));
 
-vi.mock('../../services/gateway.js', () => ({
-  gatewayCall: mocks.gatewayCall,
+vi.mock('../../services/persistence/dispatch.js', () => ({
+  persistenceCall: mocks.persistenceCall,
 }));
 
 vi.mock('../../services/tripleStack.js', () => ({
@@ -20,7 +20,7 @@ interface Store {
   discovery: (AnyRec & { _id: string }) | null;
 }
 
-interface GatewayOpts {
+interface PersistenceOpts {
   /** list_collections throws on the first N calls, then succeeds. */
   listCollectionsFailFirst?: number;
   /** mongodb.update becomes a no-op (does not apply $set) — simulates a
@@ -28,7 +28,7 @@ interface GatewayOpts {
   updateNoop?: boolean;
 }
 
-function makeGatewayImpl(store: Store, opts: GatewayOpts = {}) {
+function makePersistenceImpl(store: Store, opts: PersistenceOpts = {}) {
   let listCalls = 0;
   return async (tool: string, action: string, params: AnyRec): Promise<unknown> => {
     if (tool === 'mongodb' && action === 'query') {
@@ -98,7 +98,7 @@ async function loadSteve() {
 
 beforeEach(() => {
   vi.resetModules();
-  mocks.gatewayCall.mockReset();
+  mocks.persistenceCall.mockReset();
   mocks.tripleStackWrite.mockReset();
 });
 
@@ -108,12 +108,12 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
       ba: { ...BA },
       discovery: { _id: 'SD-TMAG-1', tmagId: 'TMAG-1', completedAt: '2026-06-01T00:00:00.000Z' },
     };
-    mocks.gatewayCall.mockImplementation(makeGatewayImpl(store));
+    mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
     const steve = await loadSteve();
 
     await steve.ingestDiscoveryArtifact(makePayload());
 
-    const chromaAdd = mocks.gatewayCall.mock.calls.find(
+    const chromaAdd = mocks.persistenceCall.mock.calls.find(
       ([tool, action]) => tool === 'chromadb' && action === 'add',
     );
     expect(chromaAdd).toBeDefined();
@@ -129,7 +129,7 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
       discovery: { _id: 'SD-TMAG-1', tmagId: 'TMAG-1', completedAt: '2026-06-01T00:00:00.000Z' },
     };
     // updateNoop: the row exists but completedAt never advances to this ingest.
-    mocks.gatewayCall.mockImplementation(makeGatewayImpl(store, { updateNoop: true }));
+    mocks.persistenceCall.mockImplementation(makePersistenceImpl(store, { updateNoop: true }));
     const steve = await loadSteve();
 
     await expect(steve.ingestDiscoveryArtifact(makePayload())).rejects.toMatchObject({
@@ -139,7 +139,7 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
 
   it('TOCTOU: a raced duplicate insert falls back to the update path (no throw)', async () => {
     const store: Store = { ba: { ...BA }, discovery: null };
-    mocks.gatewayCall.mockImplementation(makeGatewayImpl(store));
+    mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
     // Simulate a concurrent writer: tripleStackWrite lands the row then the
     // insert rejects on the duplicate _id.
     mocks.tripleStackWrite.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
@@ -151,7 +151,7 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     const artifact = await steve.ingestDiscoveryArtifact(makePayload());
     expect(artifact.tmagId).toBe('TMAG-1');
 
-    const updateCall = mocks.gatewayCall.mock.calls.find(
+    const updateCall = mocks.persistenceCall.mock.calls.find(
       ([tool, action]) => tool === 'mongodb' && action === 'update',
     );
     expect(updateCall).toBeDefined();
@@ -159,8 +159,8 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
 
   it('bootstrap self-heals: a transient list_collections failure does not poison later ingests', async () => {
     const store: Store = { ba: { ...BA }, discovery: null };
-    mocks.gatewayCall.mockImplementation(
-      makeGatewayImpl(store, { listCollectionsFailFirst: 1 }),
+    mocks.persistenceCall.mockImplementation(
+      makePersistenceImpl(store, { listCollectionsFailFirst: 1 }),
     );
     mocks.tripleStackWrite.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
       store.discovery = { _id: input.id, ...input.mongoDoc };

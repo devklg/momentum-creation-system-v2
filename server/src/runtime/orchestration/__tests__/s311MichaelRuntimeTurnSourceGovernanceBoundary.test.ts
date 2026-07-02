@@ -16,7 +16,7 @@ import { describe, expect, it } from 'vitest';
 // 'context_manager'`; the orchestration turn source assembles NOTHING — it
 // injects the context-layer port and references neither `buildContextPacket` nor
 // `ContextPacketBuildInput` (consistent with S2.1 / S2.4). Both modules are
-// boundary-clean (no store / Gateway / GraphRAG / retrieval / harness import)
+// boundary-clean (no store / PERSISTENCE / GraphRAG / retrieval / harness import)
 // and preserve the degraded, fail-closed, non-persistent, response-free posture.
 //
 // Mirrors the proven static-scan style of the sibling orchestration boundary
@@ -166,12 +166,12 @@ describe('S3.11 Context Packet assembly stays in the context layer', () => {
 });
 
 // ---------------------------------------------------------------------------
-// GROUP B — boundary-clean: no store / Gateway / GraphRAG / retrieval / harness.
+// GROUP B — boundary-clean: no store / PERSISTENCE / GraphRAG / retrieval / harness.
 // ---------------------------------------------------------------------------
 describe('S3.11 turn-source / foundation boundary cleanliness', () => {
-  it('#5 neither module imports a store / Gateway / GraphRAG / retrieval client', () => {
+  it('#5 neither module imports a store / PERSISTENCE / GraphRAG / retrieval client', () => {
     const pattern =
-      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/gateway|gatewayFallback|gateway-fallback|\/tripleStack|rawRetrieval|retrievalHelper|directRetrieval|\/retrieval\b)[^'"]*['"]/i;
+      /\bfrom\s+['"][^'"]*(?:mongoose|mongodb|neo4j|chromadb|chroma-client|graph-?rag|\/services\/PERSISTENCE|PERSISTENCEFallback|PERSISTENCE-fallback|\/tripleStack|rawRetrieval|retrievalHelper|directRetrieval|\/retrieval\b)[^'"]*['"]/i;
     const matches = matchingImportLines(bothFiles(), pattern);
     expect(matches, matches.join('\n')).toEqual([]);
   });
@@ -191,7 +191,7 @@ describe('S3.11 turn-source / foundation boundary cleanliness', () => {
 
   it('#7 neither module introduces persistence write or LLM call shapes', () => {
     const pattern =
-      /\.(?:insert|update|save)\s*\(|\b(?:tripleStackWrite|gatewayCall|chatCompletion|createChatCompletion)\s*\(|messages\.create\s*\(/i;
+      /\.(?:insert|update|save)\s*\(|\b(?:tripleStackWrite|persistenceCall|chatCompletion|createChatCompletion)\s*\(|messages\.create\s*\(/i;
     const matches = matchingCodeTokenLines(bothFiles(), pattern);
     expect(matches, matches.join('\n')).toEqual([]);
   });

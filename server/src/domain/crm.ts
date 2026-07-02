@@ -26,7 +26,7 @@
  * re-send yet. A re-invite SCRIPT button (reinviteScript) surfaces ready-to-
  * send copy; it never gates the re-invite.
  *
- * Gateway quirks (per tripleStack.ts header):
+ * PERSISTENCE quirks (per tripleStack.ts header):
  *   - mongodb.query filter param is `filter`, returns {count, documents}
  *   - mongodb.update has no working upsert — branch on existence
  *   - mongodb.insert wants `documents:` array
@@ -35,7 +35,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import { gatewayCall } from '../services/gateway.js';
+import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 import { findBAByTmagId } from './ba.js';
@@ -102,7 +102,7 @@ interface ProspectGuardDoc {
 }
 
 async function fetchProspect(prospectId: string): Promise<ProspectGuardDoc | null> {
-  const res = await gatewayCall<{ documents: ProspectGuardDoc[] }>(
+  const res = await persistenceCall<{ documents: ProspectGuardDoc[] }>(
     'mongodb',
     'query',
     {
@@ -187,7 +187,7 @@ export async function listNotes(
   prospectId: string,
   sponsorTmagId: string,
 ): Promise<McsCrmNoteRecord[]> {
-  const res = await gatewayCall<{ documents: McsCrmNoteRecord[] }>(
+  const res = await persistenceCall<{ documents: McsCrmNoteRecord[] }>(
     'mongodb',
     'query',
     {
@@ -226,13 +226,13 @@ export async function setFollowUp(
 
   if (existing) {
     // Replace in place — keep createdAt as the original ask.
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: FOLLOWUPS_COLLECTION,
       filter: { prospectId, sponsorTmagId, clearedAt: null },
       update: { $set: { dueAt: dueAtIso, updatedAt: now } },
     });
-    await gatewayCall('neo4j', 'cypher', {
+    await persistenceCall('neo4j', 'cypher', {
       query:
         'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-[r:HAS_FOLLOWUP]->(p:TmagProspect {prospectId: $prospectId}) ' +
         'SET r.dueAt = $dueAt, r.updatedAt = $now',
@@ -290,7 +290,7 @@ export async function getActiveFollowUp(
   prospectId: string,
   sponsorTmagId: string,
 ): Promise<McsCrmFollowUpRecord | null> {
-  const res = await gatewayCall<{ documents: McsCrmFollowUpRecord[] }>(
+  const res = await persistenceCall<{ documents: McsCrmFollowUpRecord[] }>(
     'mongodb',
     'query',
     {
@@ -313,13 +313,13 @@ export async function clearFollowUp(
   if (!existing) return; // idempotent
 
   const clearedAt = new Date().toISOString();
-  await gatewayCall('mongodb', 'update', {
+  await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: FOLLOWUPS_COLLECTION,
     filter: { prospectId, sponsorTmagId, clearedAt: null },
     update: { $set: { clearedAt } },
   });
-  await gatewayCall('neo4j', 'cypher', {
+  await persistenceCall('neo4j', 'cypher', {
     query:
       'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-[r:HAS_FOLLOWUP]->(p:TmagProspect {prospectId: $prospectId}) ' +
       'DELETE r',
@@ -346,13 +346,13 @@ export async function setDisposition(
   // Clear path
   if (disposition === null) {
     if (!existing) return null;
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: DISPOSITIONS_COLLECTION,
       filter: { prospectId, sponsorTmagId },
       update: { $set: { disposition: null, updatedAt: now } },
     });
-    await gatewayCall('neo4j', 'cypher', {
+    await persistenceCall('neo4j', 'cypher', {
       query:
         'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-[r:DISPOSED]->(p:TmagProspect {prospectId: $prospectId}) ' +
         'DELETE r',
@@ -363,13 +363,13 @@ export async function setDisposition(
 
   // Set path
   if (existing) {
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: DISPOSITIONS_COLLECTION,
       filter: { prospectId, sponsorTmagId },
       update: { $set: { disposition, updatedAt: now } },
     });
-    await gatewayCall('neo4j', 'cypher', {
+    await persistenceCall('neo4j', 'cypher', {
       query:
         'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
         'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
@@ -418,7 +418,7 @@ export async function getDisposition(
   prospectId: string,
   sponsorTmagId: string,
 ): Promise<McsCrmDisposition | null> {
-  const res = await gatewayCall<{ documents: Array<{ disposition: McsCrmDisposition | null }> }>(
+  const res = await persistenceCall<{ documents: Array<{ disposition: McsCrmDisposition | null }> }>(
     'mongodb',
     'query',
     {
@@ -488,7 +488,7 @@ async function fetchFullProspectForEdit(prospectId: string): Promise<{
   email: string | null;
   location?: { city: string; stateOrRegion: string; country: string };
 } | null> {
-  const res = await gatewayCall<{
+  const res = await persistenceCall<{
     documents: Array<{
       firstName: string;
       lastName: string;
@@ -552,7 +552,7 @@ export async function reinvite(
     expiresAt = newExpiresAt;
 
     // 1. Insert the fresh token record.
-    await gatewayCall('mongodb', 'insert', {
+    await persistenceCall('mongodb', 'insert', {
       database: MONGO_DB,
       collection: TOKENS_COLLECTION,
       documents: [
@@ -568,7 +568,7 @@ export async function reinvite(
         },
       ],
     });
-    await gatewayCall('neo4j', 'cypher', {
+    await persistenceCall('neo4j', 'cypher', {
       query:
         'MERGE (t:TmagInviteToken {token: $token}) ' +
         'SET t.prospectId = $prospectId, ' +
@@ -590,7 +590,7 @@ export async function reinvite(
     });
 
     // 2. Repoint the prospect doc + reset funnel state.
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: PROSPECTS_COLLECTION,
       filter: { prospectId },
@@ -604,7 +604,7 @@ export async function reinvite(
         },
       },
     });
-    await gatewayCall('neo4j', 'cypher', {
+    await persistenceCall('neo4j', 'cypher', {
       query:
         'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
         'SET p.state = $state, p.updatedAt = $now',
@@ -612,7 +612,7 @@ export async function reinvite(
     });
   } else {
     // Same token, fresh sentAt only.
-    await gatewayCall('mongodb', 'update', {
+    await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
       collection: PROSPECTS_COLLECTION,
       filter: { prospectId },
@@ -767,7 +767,7 @@ export async function getTodaysActions(
 
   // Fan out three reads.
   const [callbacksRes, followUpsRes, prospectsRes] = await Promise.all([
-    gatewayCall<{
+    persistenceCall<{
       documents: Array<{
         prospectId: string;
         intent: McsCallbackIntent;
@@ -780,14 +780,14 @@ export async function getTodaysActions(
       sort: { createdAt: -1 },
       limit: 200,
     }),
-    gatewayCall<{ documents: McsCrmFollowUpRecord[] }>('mongodb', 'query', {
+    persistenceCall<{ documents: McsCrmFollowUpRecord[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection: FOLLOWUPS_COLLECTION,
       filter: { sponsorTmagId, clearedAt: null, dueAt: { $lte: nowIso } },
       sort: { dueAt: -1 },
       limit: 200,
     }),
-    gatewayCall<{
+    persistenceCall<{
       documents: Array<{
         prospectId: string;
         firstName: string;

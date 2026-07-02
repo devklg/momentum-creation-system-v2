@@ -14,7 +14,7 @@ S1.3 Runtime Persistence Direct Adapter Migration is CLOSED / VERIFIED.
 
 MongoDB, Neo4j, and ChromaDB are now verified through direct runtime adapter paths.
 
-Gateway HTTP fallback remains in place and must not be removed by this workstream.
+ACR-0009 later retired the Gateway HTTP persistence fallback. Universal Gateway remains MCP/developer tooling, not app runtime persistence.
 
 Remaining Sprint 1 work is planning/governance only. This document does not begin Sprint 2, redesign Momentum, edit ratified documents, modify governance records, or touch `.com` prospect-facing surfaces.
 
@@ -41,7 +41,7 @@ Out of scope:
 
 - Production runtime implementation.
 - MongoDB, Neo4j, ChromaDB, Mongoose, Chroma, or Neo4j driver code.
-- Gateway fallback removal.
+- Reintroducing Universal Gateway as an app runtime persistence dependency.
 - New server routes.
 - Agent behavior, prompts, or LLM integration.
 - `.com` prospect-facing changes.
