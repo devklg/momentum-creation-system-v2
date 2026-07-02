@@ -33,7 +33,7 @@ Legend: ✅ closed/delivered · 📋 planned (documented, owner-gated, not appli
 | B1 | Production topology | 🟡 **decided**, execution pending | Kevin | `P10_PRODUCTION_TOPOLOGY_DECISION.md` — InterServer VPS + Atlas/Aura direct + Chroma Cloud (approved knowledge) + local-GPU batch embeddings. |
 | B2 | Branch protection | 🟢 **core enforced** (aux to confirm) | Kevin | `gates` required, confirmed + proven; `P10_BRANCH_PROTECTION_SETTINGS.md`. |
 | B3 | Security hardening (H2/H3/H4) | 🟢 **implemented + merged** | — | PR #88 on `main`; 3 test files; `P10_B3_SECURITY_HARDENING_PATCHES.md`. |
-| B4 | H1 live smoke + backup | 🔴 gated on **schema creation** | Kevin | Stack exists; blocked by write-freeze until schemas applied. `P10_MCS_V2_SCHEMA_DESIGN.md` drafted. |
+| B4 | H1 live smoke + backup | 🟡 **schema APPROVED — write-freeze LIFTED**, execution queued | Kevin | Canonical schema Rev 3 **signed & dated by Kevin 2026-07-02** (`MCS_V2_CANONICAL_SCHEMAS_REV3.md`; rulings 1–13 in `organization/SCHEMA_REVIEW_RULINGS_2026-07-02.md`). Remaining: apply validators/constraints/registry (moderate, reversible) + reidentification migration → then H1 smoke + backup. |
 | B5 | `.com` compliance pass | 🔴 open | Kevin | Manual walk of the release build (checklist §7.2). |
 | B6 | Live-ops mocks (`USE_MOCKS`) | 🔴 open | Kevin | Code slice to flip + smoke `/api/admin/live-ops/*`. |
 
@@ -73,8 +73,8 @@ Legend: ✅ closed/delivered · 📋 planned (documented, owner-gated, not appli
 
 Ordered by what unblocks the most:
 
-1. **Approve the schema design** (`P10_MCS_V2_SCHEMA_DESIGN.md`) + its §9 decisions → **lifts the write-freeze** → unblocks B4 (H1 smoke) and the direct-mode data cutover.
-2. **Prerequisite reconciliations** before tightening validators (schema doc §5): Neo4j `BA`/`BrandAmbassador` label split, `ProspectCRMRecord` casing, `vm_bulk_leads` two writers, `vm_delivery_events` runtime≠contract, delivery-timestamp drift, 4 VM collections lacking shared types.
+1. ~~**Approve the schema design**~~ ✅ **DONE 2026-07-02** — Kevin signed & dated Canonical Schema Rev 3 (all §9 decisions + rulings 1–13 resolved) → **write-freeze LIFTED** → B4 execution and the data-layer work below are unblocked.
+2. **Prerequisite reconciliations** before tightening validators — all now RULED (Rev 3): member label collapse (→ `TeamMagnificentMember`), `ProspectCRMRecord` casing, `vm_bulk_leads` UNIFIED, `vm_delivery_events` merged canonical shape, delivery-timestamp drift, 4 VM collections lacking shared types — execute in the reidentification migration + provisioning slice.
 3. **Build slices:** CPU query-embedder + model-parity guard; Chroma Cloud auth (`CHROMA_API_KEY`/tenant/db); local-GPU batch publish pipeline; apply Mongo validators + Neo4j constraints/indexes.
 4. **Cutover:** flip `PERSISTENCE_DIRECT_ENABLED` + Mongo/Neo4j `*_MODE=direct` (per-store, reversible) after the coverage audit.
 5. **B5** `.com` compliance pass; **B6** flip `USE_MOCKS` + smoke live-ops.
