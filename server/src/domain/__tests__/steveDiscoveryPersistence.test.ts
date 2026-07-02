@@ -34,7 +34,7 @@ function makeGatewayImpl(store: Store, opts: GatewayOpts = {}) {
     if (tool === 'mongodb' && action === 'query') {
       const col = params.collection;
       if (col === 'team_magnificent_members') return { documents: store.ba ? [store.ba] : [] };
-      if (col === 'steve_discoveries') {
+      if (col === 'tmag_steve_success_interview') {
         return { documents: store.discovery ? [store.discovery] : [] };
       }
       return { documents: [] };
@@ -52,7 +52,7 @@ function makeGatewayImpl(store: Store, opts: GatewayOpts = {}) {
       if (opts.listCollectionsFailFirst && listCalls <= opts.listCollectionsFailFirst) {
         throw new Error('chroma list_collections transient failure');
       }
-      return { collections: [{ name: 'mcs_steve_discoveries' }] };
+      return { collections: [{ name: 'tmag_steve_success_interview' }] };
     }
     if (tool === 'chromadb' && action === 'create_collection') return {};
     if (tool === 'chromadb' && action === 'add') return { ok: true };
@@ -118,7 +118,7 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     );
     expect(chromaAdd).toBeDefined();
     expect(chromaAdd?.[2]).toMatchObject({
-      collection: 'mcs_steve_discoveries',
+      collection: 'tmag_steve_success_interview',
       ids: ['SD-TMAG-1'],
     });
   });

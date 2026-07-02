@@ -36,7 +36,7 @@ function randomCode(): string {
 async function codeExists(code: string): Promise<boolean> {
   const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'access_codes',
+    collection: 'tmag_access_codes',
     filter: { code },
     limit: 1,
   });
@@ -46,7 +46,7 @@ async function codeExists(code: string): Promise<boolean> {
 export async function baOwnsACode(tmagId: string): Promise<AccessCodeRecord | null> {
   const result = await gatewayCall<{ documents: AccessCodeRecord[] }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'access_codes',
+    collection: 'tmag_access_codes',
     filter: { sponsorTmagId: tmagId, active: true },
     limit: 1,
   });
@@ -110,14 +110,14 @@ export async function mintAccessCode(
 
   await tripleStackWrite({
     id: code,
-    mongoCollection: 'access_codes',
+    mongoCollection: 'tmag_access_codes',
     mongoDoc: { ...record, note: input.note ?? null, mintedByTmagId: input.mintedByTmagId },
     neo4j: {
       // The owning BA may or may not exist yet in our graph (early seeds);
       // MERGE makes both edge endpoints safe.
       cypher:
-        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
-        'MERGE (c:AccessCode {code: $id}) ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
+        'MERGE (c:TmagAccessCode {code: $id}) ' +
         'SET c.active = true, c.createdAt = $createdAt, c.sponsorThreeBaId = $sponsorThreeBaId ' +
         'MERGE (b)-[:USES]->(c)',
       params: {
@@ -127,7 +127,7 @@ export async function mintAccessCode(
       },
     },
     chroma: {
-      collection: 'mcs_access_codes',
+      collection: 'tmag_access_codes',
       document: `Access code ${code} minted ${createdAt}, assigned to ${input.sponsorFirstName} ${input.sponsorLastName} (BA ${input.sponsorTmagId} / THREE ${input.sponsorThreeBaId}). ${input.note ?? ''}`.trim(),
       metadata: {
         code,
@@ -158,7 +158,7 @@ export async function listAccessCodes(
 ): Promise<AccessCodeListItem[]> {
   const result = await gatewayCall<{ documents: AccessCodeListItem[] }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'access_codes',
+    collection: 'tmag_access_codes',
     filter: {},
     sort: { createdAt: -1 },
     limit,

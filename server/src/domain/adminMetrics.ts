@@ -47,8 +47,8 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLL_BAS = 'team_magnificent_members';
-const COLL_PLACEMENTS = 'pool_placements';
-const COLL_FAST_START = 'fast_start_progress';
+const COLL_PLACEMENTS = 'tmag_prospect_htank_placements';
+const COLL_FAST_START = 'tmag_fast_start_progress';
 
 const MS_24H = 24 * 60 * 60 * 1000;
 
@@ -387,7 +387,7 @@ async function drilldownProspectsInFlow(
   const [prospects, sponsors] = await Promise.all([
     gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
-      collection: 'prospects',
+      collection: 'tmag_prospects',
       filter: { prospectId: { $in: prospectIds } },
       limit: prospectIds.length,
     }),
@@ -457,7 +457,7 @@ async function drilldownQueueMovement(
   const [prospects, sponsors] = await Promise.all([
     gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
-      collection: 'prospects',
+      collection: 'tmag_prospects',
       filter: { prospectId: { $in: prospectIds } },
       limit: prospectIds.length,
     }),
@@ -535,7 +535,7 @@ async function drilldownEnrollments(
   const [prospects, sponsors] = await Promise.all([
     gatewayCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
       database: MONGO_DB,
-      collection: 'prospects',
+      collection: 'tmag_prospects',
       filter: { prospectId: { $in: prospectIds } },
       limit: prospectIds.length,
     }),

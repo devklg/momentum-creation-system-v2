@@ -20,7 +20,7 @@ export interface AccessCodeRecord {
 export async function findAccessCode(code: string): Promise<AccessCodeRecord | null> {
   const result = await gatewayCall<{ documents: AccessCodeRecord[] }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'access_codes',
+    collection: 'tmag_access_codes',
     filter: { code, active: true },
     limit: 1,
   });

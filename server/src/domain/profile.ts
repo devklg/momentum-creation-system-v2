@@ -55,8 +55,8 @@ import { MCS_BA_NOTIF_DEFAULTS } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const BA_COLLECTION = 'team_magnificent_members';
-const ACCESS_CODES_COLLECTION = 'access_codes';
-const CHALLENGES_COLLECTION = 'profile_change_challenges';
+const ACCESS_CODES_COLLECTION = 'tmag_access_codes';
+const CHALLENGES_COLLECTION = 'tmag_profile_change_challenges';
 
 /** 15 minutes — long enough for the user to switch apps and copy the code. */
 const CHALLENGE_TTL_MS = 15 * 60 * 1000;
@@ -193,7 +193,7 @@ export async function patchProfile(
       const nextLast = (set.lastName as string | undefined) ?? current.lastName;
       await gatewayCall('neo4j', 'cypher', {
         query:
-          'MATCH (n:BA {tmagId: $tmagId}) SET n.firstName = $firstName, n.lastName = $lastName',
+          'MATCH (n:TeamMagnificentMember {tmagId: $tmagId}) SET n.firstName = $firstName, n.lastName = $lastName',
         params: { tmagId, firstName: nextFirst, lastName: nextLast },
       });
     }
@@ -495,7 +495,7 @@ export async function completeEmailChange(
   });
   // Keep Neo4j BA node email aligned (used by genealogy queries).
   await gatewayCall('neo4j', 'cypher', {
-    query: 'MATCH (n:BA {tmagId: $tmagId}) SET n.email = $email',
+    query: 'MATCH (n:TeamMagnificentMember {tmagId: $tmagId}) SET n.email = $email',
     params: { tmagId, email: result.appliedTo },
   });
   await clearPendingTarget(tmagId, 'email');

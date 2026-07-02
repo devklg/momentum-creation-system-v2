@@ -28,7 +28,7 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COLL_DISPO = 'crm_dispositions';
+const COLL_DISPO = 'tmag_prospect_crm_dispositions';
 
 /** Disposition values that close a prospect; excluded from open follow-up aging. */
 const CLOSED_DISPOSITIONS = new Set(['new_brand_ambassador']);

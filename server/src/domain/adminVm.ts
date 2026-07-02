@@ -24,12 +24,12 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLL_BAS = 'team_magnificent_members';
-const COLL_BATCHES = 'vm_lead_batches';
-const COLL_LEADS = 'vm_bulk_leads';
-const COLL_CAMPAIGNS = 'vm_campaigns';
-const COLL_DELIVERY = 'vm_delivery_events';
-const COLL_CRM = 'prospect_crm_records';
-const COLL_SUPPRESSIONS = 'vm_suppression_list';
+const COLL_BATCHES = 'tmag_vm_lead_batches';
+const COLL_LEADS = 'tmag_vm_bulk_leads';
+const COLL_CAMPAIGNS = 'tmag_vm_campaigns';
+const COLL_DELIVERY = 'tmag_vm_delivery_events';
+const COLL_CRM = 'tmag_prospect_crm_records';
+const COLL_SUPPRESSIONS = 'tmag_vm_suppression_list';
 
 const QUERY_LIMIT = 200_000;
 const RECENT_LIMIT = 500;

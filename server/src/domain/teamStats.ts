@@ -109,10 +109,10 @@ export async function computeTeamStats(): Promise<TeamStats> {
       countByMatch('team_magnificent_members', {
         lastLoginAt: { $gte: twentyFourHoursAgo },
       }),
-      countByMatch('invite_tokens', {
+      countByMatch('tmag_prospect_invite_tokens', {
         createdAt: { $gte: todayUtcMidnight },
       }),
-      countByMatch('pool_placements', {
+      countByMatch('tmag_prospect_htank_placements', {
         placedAt: { $gte: twentyFourHoursAgo },
       }),
       countByMatch('team_magnificent_members', {

@@ -17,7 +17,7 @@
  *
  * Triple-stack per write (Rule 1):
  *   - Mongo `orientation_sessions` / `orientation_reservations`
- *   - Neo4j (:OrientationSession) / (:BA)-[:RESERVED_ORIENTATION]->(session)
+ *   - Neo4j (:TmagOrientationSession) / (:TeamMagnificentMember)-[:RESERVED_ORIENTATION]->(session)
  *   - ChromaDB `mcs_orientation` semantic log (collection bootstrapped lazily)
  *
  * Gateway quirks respected (see services/tripleStack.ts): Mongo query param is
@@ -39,9 +39,9 @@ import {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const SESSIONS_COLLECTION = 'orientation_sessions';
-const RESERVATIONS_COLLECTION = 'orientation_reservations';
-const CHROMA_COLLECTION = 'mcs_orientation';
+const SESSIONS_COLLECTION = 'tmag_new_member_orientation_sessions';
+const RESERVATIONS_COLLECTION = 'tmag_new_member_orientation_reservations';
+const CHROMA_COLLECTION = 'tmag_new_member_orientation_reservations';
 
 /** Default hosts when none are assigned (founders today; extensible later). */
 export const ORIENTATION_DEFAULT_HOSTS = ['Kevin Gardner', 'Paul Barrios'];
@@ -331,7 +331,7 @@ export async function createOrientationSession(
     mongoDoc: { ...session },
     neo4j: {
       cypher:
-        'MERGE (e:OrientationSession {sessionId: $sessionId}) ' +
+        'MERGE (e:TmagOrientationSession {sessionId: $sessionId}) ' +
         'SET e.scheduledFor = $scheduledFor, e.status = $status, ' +
         '    e.capacity = $capacity, e.durationMinutes = $durationMinutes, ' +
         '    e.hosts = $hosts',
@@ -458,8 +458,8 @@ export async function reserveSeat(
     },
     neo4j: {
       cypher:
-        'MERGE (b:BA {tmagId: $tmagId}) ' +
-        'MERGE (e:OrientationSession {sessionId: $sessionId}) ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
+        'MERGE (e:TmagOrientationSession {sessionId: $sessionId}) ' +
         'CREATE (b)-[r:RESERVED_ORIENTATION {' +
         '  reservationId: $reservationId, createdAt: $createdAt' +
         '}]->(e)',
@@ -573,7 +573,7 @@ export async function cancelSeat(
   try {
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (:BA {tmagId: $tmagId})-[r:RESERVED_ORIENTATION {reservationId: $reservationId}]->(:OrientationSession) ' +
+        'MATCH (:TeamMagnificentMember {tmagId: $tmagId})-[r:RESERVED_ORIENTATION {reservationId: $reservationId}]->(:TmagOrientationSession) ' +
         'SET r.status = "cancelled", r.cancelledAt = $cancelledAt',
       params: { tmagId, reservationId: here.reservationId, cancelledAt },
     });

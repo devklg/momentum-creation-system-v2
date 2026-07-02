@@ -75,15 +75,15 @@ import { randomUUID } from 'node:crypto';
 /* ─── constants ─────────────────────────────────────────────────── */
 
 const MONGO_DB = 'momentum';
-const COLL_PROSPECTS = 'prospects';
-const COLL_PLACEMENTS = 'pool_placements';
+const COLL_PROSPECTS = 'tmag_prospects';
+const COLL_PLACEMENTS = 'tmag_prospect_htank_placements';
 const COLL_BAS = 'team_magnificent_members';
-const COLL_TOKENS = 'invite_tokens';
-const COLL_CALLBACKS = 'callback_requests';
-const COLL_WEBINARS = 'webinar_reservations';
-const COLL_NOTES = 'admin_prospect_notes';
-const COLL_WEBINAR_EVENTS = 'webinar_events';
-const CHROMA_NOTES_COLLECTION = 'admin_prospect_notes';
+const COLL_TOKENS = 'tmag_prospect_invite_tokens';
+const COLL_CALLBACKS = 'tmag_prospect_callback_requests';
+const COLL_WEBINARS = 'tmag_prospect_webinar_reservations';
+const COLL_NOTES = 'tmag_admin_prospect_notes';
+const COLL_WEBINAR_EVENTS = 'tmag_prospect_webinar_events';
+const CHROMA_NOTES_COLLECTION = 'tmag_admin_prospect_notes';
 
 /** Follow-up-needed-by threshold (locked-spec follow-up cadence). */
 const FOLLOW_UP_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000;
@@ -783,8 +783,8 @@ export async function appendProspectNote(input: {
     mongoDoc: { ...note },
     neo4j: {
       cypher:
-        'MERGE (p:Prospect {prospectId: $prospectId}) ' +
-        'MERGE (n:AdminProspectNote {noteId: $noteId}) ' +
+        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
+        'MERGE (n:TmagAdminProspectNote {noteId: $noteId}) ' +
         'SET n.body = $body, n.createdAt = datetime($createdAt), ' +
         '    n.createdByTmagId = $createdByTmagId ' +
         'MERGE (n)-[:NOTE_ON]->(p)',
@@ -974,17 +974,17 @@ export async function executeMoveIntervention(input: {
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (p:Prospect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:Pool) ' +
+        'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
         'SET r.sponsorTmagId = $toTmagId',
       params: { prospectId: input.prospectId, toTmagId: input.body.toTmagId },
     });
   }
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MERGE (p:Prospect {prospectId: $prospectId}) ' +
+      'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
       'SET p.sponsorTmagId = $toTmagId ' +
       'WITH p ' +
-      'MERGE (b:BA {tmagId: $toTmagId}) ' +
+      'MERGE (b:TeamMagnificentMember {tmagId: $toTmagId}) ' +
       'MERGE (p)-[:INVITED_BY]->(b)',
     params: { prospectId: input.prospectId, toTmagId: input.body.toTmagId },
   });
@@ -1067,7 +1067,7 @@ export async function executeReassignSponsorIntervention(input: {
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (p:Prospect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:Pool) ' +
+        'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
         'SET r.sponsorTmagId = $newSponsorTmagId',
       params: {
         prospectId: input.prospectId,
@@ -1077,10 +1077,10 @@ export async function executeReassignSponsorIntervention(input: {
   }
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MERGE (p:Prospect {prospectId: $prospectId}) ' +
+      'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
       'SET p.sponsorTmagId = $newSponsorTmagId ' +
       'WITH p ' +
-      'MERGE (b:BA {tmagId: $newSponsorTmagId}) ' +
+      'MERGE (b:TeamMagnificentMember {tmagId: $newSponsorTmagId}) ' +
       'MERGE (p)-[:SPONSORED_BY]->(b)',
     params: {
       prospectId: input.prospectId,
@@ -1176,7 +1176,7 @@ export async function executeManualFlushIntervention(input: {
   });
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (p:Prospect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:Pool) ' +
+      'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
       'SET r.flushedAt = datetime($now), r.flushReason = "archived"',
     params: { prospectId: input.prospectId, now },
   });
@@ -1266,7 +1266,7 @@ export async function executeForceEnrollIntervention(input: {
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (p:Prospect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:Pool) ' +
+        'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
         'SET r.flushedAt = datetime($now), r.flushReason = "enrolled"',
       params: { prospectId: input.prospectId, now },
     });

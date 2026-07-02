@@ -42,9 +42,9 @@ import type {
 import { MCS_FAST_START_MODULES } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const PROGRESS_COLLECTION = 'fast_start_progress';
-const PROSPECTS_COLLECTION = 'prospects';
-const CHROMA_COLLECTION = 'mcs_training_progress';
+const PROGRESS_COLLECTION = 'tmag_fast_start_progress';
+const PROSPECTS_COLLECTION = 'tmag_prospects';
+const CHROMA_COLLECTION = 'tmag_fast_start_progress';
 
 const VALID_MODULE_IDS: readonly McsFastStartModuleId[] = [1, 2, 3, 4, 5];
 
@@ -235,7 +235,7 @@ export async function markFastStartModuleState(args: {
       neo4j: {
         cypher:
           'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
-          'MERGE (p:FastStartProgress {progressId: $id}) ' +
+          'MERGE (p:TmagFastStartProgress {progressId: $id}) ' +
           'SET p.tmagId = $tmagId, p.moduleId = $moduleId, p.state = $state, ' +
           '    p.startedAt = $startedAt, p.completedAt = $completedAt, ' +
           '    p.updatedAt = $updatedAt, p.createdAt = $createdAt ' +
@@ -302,7 +302,7 @@ export async function markFastStartModuleState(args: {
 
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (p:FastStartProgress {progressId: $id}) ' +
+      'MATCH (p:TmagFastStartProgress {progressId: $id}) ' +
       'SET p.state = $state, p.startedAt = $startedAt, ' +
       '    p.completedAt = $completedAt, p.updatedAt = $updatedAt',
     params: {

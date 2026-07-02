@@ -53,7 +53,7 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const PROSPECTS_COLLECTION = 'prospects';
+const PROSPECTS_COLLECTION = 'tmag_prospects';
 
 // ───────────────────────────────────────────────────────────────────────
 // Errors

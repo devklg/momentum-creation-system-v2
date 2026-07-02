@@ -55,14 +55,14 @@ import type {
 
 const MONGO_DB = 'momentum';
 const BA_COLLECTION = 'team_magnificent_members';
-const ACCESS_CODES_COLLECTION = 'access_codes';
-const COMMITMENTS_COLLECTION = 'ba_commitments';
-const TOKENS_COLLECTION = 'invite_tokens';
-const FOLLOWUPS_COLLECTION = 'crm_followups';
-const FAST_START_COLLECTION = 'fast_start_progress';
-const OVERRIDES_COLLECTION = 'admin_sponsor_overrides';
-const CURATED_LEADER_TAGS_COLLECTION = 'admin_curated_leader_tags';
-const BA_NOTES_COLLECTION = 'admin_ba_notes';
+const ACCESS_CODES_COLLECTION = 'tmag_access_codes';
+const COMMITMENTS_COLLECTION = 'tmag_commitments';
+const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
+const FOLLOWUPS_COLLECTION = 'tmag_prospect_crm_followups';
+const FAST_START_COLLECTION = 'tmag_fast_start_progress';
+const OVERRIDES_COLLECTION = 'tmag_admin_sponsor_overrides';
+const CURATED_LEADER_TAGS_COLLECTION = 'tmag_admin_curated_leader_tags';
+const BA_NOTES_COLLECTION = 'tmag_admin_member_notes';
 
 /** Honest disclosure — same wording the Core Dashboard uses (Chat #134). */
 export const LEADER_DETECTION_NOTE =
@@ -627,10 +627,10 @@ export async function applySponsorOverride(args: {
     mongoDoc: { ...record },
     neo4j: {
       cypher: `
-        MERGE (n:BA {tmagId: $tmagId})
-        MERGE (newS:BA {tmagId: $newSponsorTmagId})
-        MERGE (prevS:BA {tmagId: $previousSponsorTmagId})
-        MERGE (o:SponsorOverride {overrideId: $id})
+        MERGE (n:TeamMagnificentMember {tmagId: $tmagId})
+        MERGE (newS:TeamMagnificentMember {tmagId: $newSponsorTmagId})
+        MERGE (prevS:TeamMagnificentMember {tmagId: $previousSponsorTmagId})
+        MERGE (o:TmagSponsorOverride {overrideId: $id})
         SET o.performedAt = datetime($performedAt),
             o.reason = $reason,
             o.auditEntryId = $auditEntryId
@@ -648,7 +648,7 @@ export async function applySponsorOverride(args: {
       },
     },
     chroma: {
-      collection: 'audit_log',
+      collection: 'mcs_audit_log',
       document: `sponsor override tmagId=${args.tmagId} previous=${previousSponsorTmagId} new=${args.newSponsorTmagId} requestedBy=${args.requestingTmagId} reason="${args.reason}"`,
       metadata: {
         action: 'admin.sponsor.override',

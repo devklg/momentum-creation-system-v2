@@ -25,7 +25,7 @@ export interface CommitmentRecord {
 export async function commitmentExists(tmagId: string): Promise<boolean> {
   const result = await gatewayCall<{ count: number }>('mongodb', 'query', {
     database: 'momentum',
-    collection: 'ba_commitments',
+    collection: 'tmag_commitments',
     filter: { tmagId },
     limit: 1,
   });
@@ -50,12 +50,12 @@ export async function recordCommitment(
 
   await tripleStackWrite({
     id: commitmentId,
-    mongoCollection: 'ba_commitments',
+    mongoCollection: 'tmag_commitments',
     mongoDoc: record as unknown as Record<string, unknown>,
     neo4j: {
       cypher:
-        'MERGE (n:BA {tmagId: $tmagId}) ' +
-        'MERGE (c:Commitment {commitmentId: $id}) ' +
+        'MERGE (n:TeamMagnificentMember {tmagId: $tmagId}) ' +
+        'MERGE (c:TmagCommitment {commitmentId: $id}) ' +
         'SET c.version = $version, c.acceptedAt = $acceptedAt ' +
         'MERGE (n)-[:ACCEPTED]->(c)',
       params: {
@@ -65,7 +65,7 @@ export async function recordCommitment(
       },
     },
     chroma: {
-      collection: 'mcs_commitments',
+      collection: 'tmag_commitments',
       document: `BA ${input.tmagId} (${input.email}) accepted Team Magnificent commitment ${COMMITMENT_VERSION} at ${acceptedAt}.`,
       metadata: {
         tmagId: input.tmagId,

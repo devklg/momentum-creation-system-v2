@@ -14,7 +14,7 @@ import {
 } from '../domain/vmProviderQueue.js';
 
 const MONGO_DB = 'momentum';
-const CAMPAIGNS_COLLECTION = 'vm_campaigns';
+const CAMPAIGNS_COLLECTION = 'tmag_vm_campaigns';
 const TICK_MS = 1000;
 const BATCH = 10;
 

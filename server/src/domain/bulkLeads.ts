@@ -29,10 +29,10 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const BULK_LEADS_COLLECTION = 'vm_bulk_leads';
-const PROSPECTS_COLLECTION = 'prospects';
-const TOKENS_COLLECTION = 'invite_tokens';
-const CHROMA_COLLECTION = 'mcs_vm_leads';
+const BULK_LEADS_COLLECTION = 'tmag_vm_bulk_leads';
+const PROSPECTS_COLLECTION = 'tmag_prospects';
+const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
+const CHROMA_COLLECTION = 'tmag_vm_bulk_leads';
 
 export class BulkLeadError extends Error {
   constructor(public readonly code: string) {
@@ -125,8 +125,8 @@ async function createBulkLeadRecord(input: {
     },
     neo4j: {
       cypher:
-        'MERGE (b:BA {tmagId: $ownerTmagId}) ' +
-        'CREATE (p:Prospect {prospectId: $id, firstName: $firstName, lastInitial: $lastInitial, ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
+        'CREATE (p:TmagProspect {prospectId: $id, firstName: $firstName, lastInitial: $lastInitial, ' +
         '  city: $city, stateOrRegion: $stateOrRegion, country: $country, state: $state, ' +
         '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, source: $source, createdAt: $createdAt}) ' +
         'CREATE (b)-[:OWNS_RVM_PROSPECT]->(p)',
@@ -189,12 +189,12 @@ async function createBulkLeadRecord(input: {
   });
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MERGE (t:InviteToken {token: $token}) ' +
+      'MERGE (t:TmagInviteToken {token: $token}) ' +
       'SET t.prospectId = $prospectId, t.sponsorTmagId = $sponsorTmagId, ' +
       '    t.ownerTmagId = $ownerTmagId, t.state = $state, t.source = $source, ' +
       '    t.createdAt = $createdAt, t.expiresAt = $expiresAt ' +
       'WITH t ' +
-      'MATCH (p:Prospect {prospectId: $prospectId}) ' +
+      'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
       'MERGE (t)-[:FOR_PROSPECT]->(p)',
     params: {
       token,
@@ -236,10 +236,10 @@ async function createBulkLeadRecord(input: {
     mongoDoc: { ...bulkLead },
     neo4j: {
       cypher:
-        'MERGE (lb:LeadBatch {leadBatchId: $leadBatchId}) ' +
-        'MERGE (vm:VMCampaign {vmCampaignId: $vmCampaignId}) ' +
-        'MERGE (p:Prospect {prospectId: $prospectId}) ' +
-        'CREATE (lead:BulkLead {leadId: $id, token: $token, status: $status, ' +
+        'MERGE (lb:TmagLeadBatch {leadBatchId: $leadBatchId}) ' +
+        'MERGE (vm:TmagVmCampaign {vmCampaignId: $vmCampaignId}) ' +
+        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
+        'CREATE (lead:TmagBulkLead {leadId: $id, token: $token, status: $status, ' +
         '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, createdAt: $createdAt}) ' +
         'CREATE (lb)-[:CONTAINS_LEAD]->(lead) ' +
         'CREATE (vm)-[:TARGETS_LEAD]->(lead) ' +

@@ -5,7 +5,7 @@
  *   - Mongo `webinar_reservations` stores each reservation with a
  *     stable reservationId. Multiple reservations per prospect over
  *     time are allowed (each reservation is for a specific event).
- *   - Neo4j writes (:Prospect)-[:RESERVED_WEBINAR {eventId, at}]->(:WebinarEvent)
+ *   - Neo4j writes (:TmagProspect)-[:RESERVED_WEBINAR {eventId, at}]->(:TmagWebinarEvent)
  *     so the BA cockpit can walk the graph for raised hands.
  *   - ChromaDB `mcs_webinar_reservations` records a semantically
  *     searchable event for /admin live operations.
@@ -31,8 +31,8 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const MONGO_COLLECTION = 'webinar_reservations';
-const CHROMA_COLLECTION = 'mcs_webinar_reservations';
+const MONGO_COLLECTION = 'tmag_prospect_webinar_reservations';
+const CHROMA_COLLECTION = 'tmag_prospect_webinar_reservations';
 
 export interface CreateWebinarReservationInput {
   token: string;
@@ -200,8 +200,8 @@ export async function createWebinarReservation(
     },
     neo4j: {
       cypher:
-        'MERGE (p:Prospect {prospectId: $prospectId}) ' +
-        'MERGE (e:WebinarEvent {eventId: $eventId}) ' +
+        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
+        'MERGE (e:TmagWebinarEvent {eventId: $eventId}) ' +
         'CREATE (p)-[r:RESERVED_WEBINAR {' +
         '  reservationId: $reservationId, ' +
         '  createdAt: $createdAt' +

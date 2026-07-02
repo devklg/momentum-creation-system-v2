@@ -43,9 +43,9 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const PROSPECTS_COLLECTION = 'prospects';
-const CALLBACK_COLLECTION = 'callback_requests';
-const FOLLOWUPS_COLLECTION = 'crm_followups';
+const PROSPECTS_COLLECTION = 'tmag_prospects';
+const CALLBACK_COLLECTION = 'tmag_prospect_callback_requests';
+const FOLLOWUPS_COLLECTION = 'tmag_prospect_crm_followups';
 
 /** 7 days — how far ahead an expiring window counts as "today's concern". */
 const EXPIRING_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;

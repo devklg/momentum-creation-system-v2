@@ -47,8 +47,8 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const MONGO_COLLECTION = 'prospect_accounts';
-const CHROMA_COLLECTION = 'mcs_prospect_accounts';
+const MONGO_COLLECTION = 'tmag_prospect_htank_accounts';
+const CHROMA_COLLECTION = 'tmag_prospect_htank_accounts';
 
 export interface CreateProspectAccountInput {
   prospectId: string;
@@ -241,15 +241,15 @@ export async function createProspectAccount(
       mongoDoc: { ...record },
       neo4j: {
         cypher:
-          'MERGE (a:ProspectAccount {accountId: $accountId}) ' +
+          'MERGE (a:TmagProspectAccount {accountId: $accountId}) ' +
           'SET a.prospectId = $prospectId, ' +
           '    a.tokenId = $tokenId, ' +
           '    a.sponsorTmagId = $sponsorTmagId, ' +
           '    a.createdAt = $createdAt, ' +
           '    a.expiresAt = $expiresAt ' +
-          'MERGE (t:InviteToken {token: $tokenId}) ' +
+          'MERGE (t:TmagInviteToken {token: $tokenId}) ' +
           'MERGE (a)-[:KEYS]->(t) ' +
-          'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
+          'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
           'MERGE (a)-[:SPONSORED_BY]->(b)',
         params: {
           accountId,

@@ -20,8 +20,8 @@
  * Persistence:
  *   - Mongo collection: `ivory_names` (team-wide, every doc has `tmagId`
  *     and every query filters on it — same pattern as `prospects`).
- *   - Neo4j: (:BA {tmagId})-[:KNOWS]->(:IvoryName {ivoryId, ...}). A later
- *     conversion to a /p/{token} adds (:IvoryName)-[:INVITED_AS]->(:Prospect).
+ *   - Neo4j: (:TeamMagnificentMember {tmagId})-[:KNOWS]->(:TmagIvoryName {ivoryId, ...}). A later
+ *     conversion to a /p/{token} adds (:TmagIvoryName)-[:INVITED_AS]->(:TmagProspect).
  *   - Chroma collection: `mcs_ivory`. Bootstrap once via
  *     `pnpm --filter @momentum/server bootstrap:ivory` (CK-04 pattern). The
  *     coach is the only call path that does NOT triple-stack — coaching
@@ -72,8 +72,8 @@ import { ANGLE_LABEL } from './ivoryAngle.js';
 import { normalizePhone } from './prospectAccount.js';
 
 const MONGO_DB = 'momentum';
-const IVORY_COLLECTION = 'ivory_names';
-const CHROMA_COLLECTION = 'mcs_ivory';
+const IVORY_COLLECTION = 'tmag_ivory_prospect_names';
+const CHROMA_COLLECTION = 'tmag_ivory_prospect_names';
 
 const ALLOWED_CATEGORIES: ReadonlySet<McsIvoryCategory> = new Set([
   'family',
@@ -214,8 +214,8 @@ export async function createIvoryName(
       mongoDoc: { ...record },
       neo4j: {
         cypher:
-          'MERGE (b:BA {tmagId: $tmagId}) ' +
-          'MERGE (n:IvoryName {ivoryId: $id}) ' +
+          'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
+          'MERGE (n:TmagIvoryName {ivoryId: $id}) ' +
           'SET n.tmagId = $tmagId, ' +
           '    n.firstName = $firstName, ' +
           '    n.lastInitial = $lastInitial, ' +
@@ -257,7 +257,7 @@ export async function createIvoryName(
         filter: { ivoryId },
       });
       await gatewayCall('neo4j', 'cypher', {
-        query: 'MATCH (n:IvoryName {ivoryId: $ivoryId}) DETACH DELETE n',
+        query: 'MATCH (n:TmagIvoryName {ivoryId: $ivoryId}) DETACH DELETE n',
         params: { ivoryId },
       });
     } catch {
@@ -378,7 +378,7 @@ export async function updateIvoryName(
   // names without a Mongo round-trip.
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (n:IvoryName {ivoryId: $ivoryId}) ' +
+      'MATCH (n:TmagIvoryName {ivoryId: $ivoryId}) ' +
       'SET n.firstName = $firstName, ' +
       '    n.lastInitial = $lastInitial, ' +
       '    n.preferredAngle = $preferredAngle, ' +
@@ -458,7 +458,7 @@ export async function updateIvoryStatus(
 
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (n:IvoryName {ivoryId: $ivoryId}) ' +
+      'MATCH (n:TmagIvoryName {ivoryId: $ivoryId}) ' +
       'SET n.status = $status, n.updatedAt = $updatedAt',
     params: { ivoryId, status: validated, updatedAt: now },
   });
@@ -506,12 +506,12 @@ export async function markIvoryInvited(
 
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (n:IvoryName {ivoryId: $ivoryId}) ' +
+      'MATCH (n:TmagIvoryName {ivoryId: $ivoryId}) ' +
       'SET n.status = $status, n.lastProspectId = $prospectId, n.updatedAt = $updatedAt ' +
       // MERGE (not MATCH) the prospect: a missing/lagging Prospect node must not
       // silently no-op the whole statement, which previously left the graph node
       // stale ('new', no edge) while Mongo had already committed 'invited'.
-      'MERGE (p:Prospect {prospectId: $prospectId}) ' +
+      'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
       'MERGE (n)-[r:INVITED_AS]->(p) ' +
       'SET r.at = $updatedAt',
     params: {
@@ -544,7 +544,7 @@ export async function deleteIvoryName(
   });
 
   await gatewayCall('neo4j', 'cypher', {
-    query: 'MATCH (n:IvoryName {ivoryId: $ivoryId}) DETACH DELETE n',
+    query: 'MATCH (n:TmagIvoryName {ivoryId: $ivoryId}) DETACH DELETE n',
     params: { ivoryId },
   });
 }

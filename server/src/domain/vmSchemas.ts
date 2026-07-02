@@ -20,22 +20,22 @@ export const VM_SCHEMA_VERSION = 'vm-lead-campaign.v1';
 export const VM_MONGO_DB = 'momentum';
 
 export const VM_COLLECTIONS = {
-  leadBatches: 'vm_lead_batches',
-  bulkLeads: 'vm_bulk_leads',
-  campaigns: 'vm_campaigns',
-  deliveryEvents: 'vm_delivery_events',
-  prospectCrm: 'prospect_crm_records',
-  prospectTimeline: 'prospect_timeline_events',
-  ownershipCorrections: 'prospect_ownership_corrections',
+  leadBatches: 'tmag_vm_lead_batches',
+  bulkLeads: 'tmag_vm_bulk_leads',
+  campaigns: 'tmag_vm_campaigns',
+  deliveryEvents: 'tmag_vm_delivery_events',
+  prospectCrm: 'tmag_prospect_crm_records',
+  prospectTimeline: 'tmag_prospect_timeline_events',
+  ownershipCorrections: 'tmag_prospect_ownership_corrections',
 } as const;
 
 export const VM_CHROMA_COLLECTIONS = {
-  leadBatches: 'mcs_vm_lead_batches',
-  bulkLeads: 'mcs_vm_leads',
-  campaigns: 'mcs_vm_campaigns',
-  deliveryEvents: 'mcs_vm_delivery_events',
-  prospectCrm: 'mcs_prospect_crm',
-  prospectTimeline: 'mcs_prospect_timeline',
+  leadBatches: 'tmag_vm_lead_batches',
+  bulkLeads: 'tmag_vm_bulk_leads',
+  campaigns: 'tmag_vm_campaigns',
+  deliveryEvents: 'tmag_vm_delivery_events',
+  prospectCrm: 'tmag_prospect_crm_records',
+  prospectTimeline: 'tmag_prospect_timeline_events',
 } as const;
 
 export type VmCollectionKey = keyof typeof VM_COLLECTIONS;
@@ -91,7 +91,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'sponsor_createdAt', keys: { sponsorTmagId: 1, createdAt: -1 } },
     ],
     graph: {
-      nodeLabels: ['LeadBatch', 'BA'],
+      nodeLabels: ['TmagLeadBatch', 'TeamMagnificentMember'],
       relationshipTypes: ['OWNS_LEAD_BATCH', 'SPONSORS_LEAD_BATCH'],
     },
     notes: [
@@ -121,7 +121,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'email_owner', keys: { email: 1, ownerTmagId: 1 } },
     ],
     graph: {
-      nodeLabels: ['BulkLead', 'LeadBatch', 'VMCampaign', 'BA'],
+      nodeLabels: ['TmagBulkLead', 'TmagLeadBatch', 'TmagVmCampaign', 'TeamMagnificentMember'],
       relationshipTypes: ['CONTAINS_LEAD', 'TARGETS_LEAD', 'OWNS_LEAD'],
     },
     notes: [
@@ -150,7 +150,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'batch_createdAt', keys: { leadBatchId: 1, createdAt: -1 } },
     ],
     graph: {
-      nodeLabels: ['VMCampaign', 'LeadBatch', 'BA'],
+      nodeLabels: ['TmagVmCampaign', 'TmagLeadBatch', 'TeamMagnificentMember'],
       relationshipTypes: ['USES_LEAD_BATCH', 'OWNS_VM_CAMPAIGN'],
     },
     notes: [
@@ -178,7 +178,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'provider_message', keys: { providerMessageId: 1, provider: 1 } },
     ],
     graph: {
-      nodeLabels: ['VMDeliveryEvent', 'BulkLead', 'VMCampaign'],
+      nodeLabels: ['TmagVmDeliveryEvent', 'TmagBulkLead', 'TmagVmCampaign'],
       relationshipTypes: ['DELIVERED_TO_LEAD', 'BELONGS_TO_CAMPAIGN'],
     },
     notes: [
@@ -207,7 +207,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'batch_status', keys: { leadBatchId: 1, status: 1 } },
     ],
     graph: {
-      nodeLabels: ['ProspectCRMRecord', 'Prospect', 'BA'],
+      nodeLabels: ['TmagProspectCrmRecord', 'TmagProspect', 'TeamMagnificentMember'],
       relationshipTypes: ['OWNS_CRM_RECORD', 'CRM_RECORD_FOR'],
     },
     notes: [
@@ -235,7 +235,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'campaign_kind', keys: { vmCampaignId: 1, kind: 1 } },
     ],
     graph: {
-      nodeLabels: ['ProspectTimelineEvent', 'Prospect', 'BA'],
+      nodeLabels: ['TmagProspectTimelineEvent', 'TmagProspect', 'TeamMagnificentMember'],
       relationshipTypes: ['HAS_TIMELINE_EVENT', 'TRIGGERED_BY_BA'],
     },
     notes: [
@@ -264,7 +264,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'admin_changedAt', keys: { adminUserId: 1, changedAt: -1 } },
     ],
     graph: {
-      nodeLabels: ['OwnershipCorrection', 'BA', 'Prospect', 'BulkLead'],
+      nodeLabels: ['TmagOwnershipCorrection', 'TeamMagnificentMember', 'TmagProspect', 'TmagBulkLead'],
       relationshipTypes: ['CORRECTED_OWNERSHIP', 'FROM_OWNER', 'TO_OWNER'],
     },
     notes: [

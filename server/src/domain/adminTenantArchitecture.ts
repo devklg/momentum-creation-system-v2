@@ -27,9 +27,9 @@ import type {
 
 const MONGO_DB = 'momentum';
 const SETTINGS_COLLECTION = 'tenant_settings_versions';
-const TEMPLATE_COLLECTION = 'master_content_versions';
+const TEMPLATE_COLLECTION = 'tmag_content_templates';
 const SETTINGS_CHROMA = 'mcs_tenant_settings';
-const TEMPLATE_CHROMA = 'mcs_master_content';
+const TEMPLATE_CHROMA = 'tmag_content_templates';
 const TENANT_ID = 'team-magnificent';
 
 const DEFAULT_SETTINGS: McsTenantSettings = {
@@ -465,9 +465,9 @@ export async function saveTenantTemplate(input: {
     neo4j: {
       cypher: `
         MERGE (t:Tenant {tenantId: $tenantId})
-        MERGE (m:MasterContent {templateKey: $templateKey})
+        MERGE (m:TmagContentTemplate {templateKey: $templateKey})
         SET m.label = $label, m.surface = $surface
-        MERGE (v:MasterContentVersion {templateVersionId: $id})
+        MERGE (v:TmagContentTemplate {templateVersionId: $id})
         SET v.version = $version,
             v.surface = $surface,
             v.createdAt = datetime($createdAt),

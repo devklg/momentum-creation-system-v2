@@ -31,24 +31,24 @@ export interface Neo4jSchemaStatement {
 export const PHASE7_NEO4J_CONSTRAINTS: readonly Neo4jSchemaStatement[] = [
   {
     name: 'outcome_id',
-    label: 'Outcome',
-    cypher: 'CREATE CONSTRAINT outcome_id IF NOT EXISTS FOR (o:Outcome) REQUIRE o.id IS UNIQUE',
+    label: 'TmagOutcome',
+    cypher: 'CREATE CONSTRAINT outcome_id IF NOT EXISTS FOR (o:TmagOutcome) REQUIRE o.id IS UNIQUE',
     drop: 'DROP CONSTRAINT outcome_id IF EXISTS',
     purpose: 'R1 outcome nodes keyed on the shared app-memory id (Mongo _id == Chroma id).',
   },
   {
     name: 'learning_candidate_id',
-    label: 'LearningCandidate',
+    label: 'TmagLearningCandidate',
     cypher:
-      'CREATE CONSTRAINT learning_candidate_id IF NOT EXISTS FOR (c:LearningCandidate) REQUIRE c.id IS UNIQUE',
+      'CREATE CONSTRAINT learning_candidate_id IF NOT EXISTS FOR (c:TmagLearningCandidate) REQUIRE c.id IS UNIQUE',
     drop: 'DROP CONSTRAINT learning_candidate_id IF EXISTS',
     purpose: 'R2 review-only learning candidates keyed on the shared id.',
   },
   {
     name: 'knowledge_id',
-    label: 'Knowledge',
+    label: 'TmagKnowledge',
     cypher:
-      'CREATE CONSTRAINT knowledge_id IF NOT EXISTS FOR (k:Knowledge) REQUIRE k.id IS UNIQUE',
+      'CREATE CONSTRAINT knowledge_id IF NOT EXISTS FOR (k:TmagKnowledge) REQUIRE k.id IS UNIQUE',
     drop: 'DROP CONSTRAINT knowledge_id IF EXISTS',
     purpose: 'R3 GraphRAG active-knowledge nodes keyed on the shared id.',
   },
@@ -66,24 +66,24 @@ export const PHASE7_NEO4J_CONSTRAINTS: readonly Neo4jSchemaStatement[] = [
 export const PHASE7_NEO4J_INDEXES: readonly Neo4jSchemaStatement[] = [
   {
     name: 'outcome_ba',
-    label: 'Outcome',
-    cypher: 'CREATE INDEX outcome_ba IF NOT EXISTS FOR (o:Outcome) ON (o.tmagId)',
+    label: 'TmagOutcome',
+    cypher: 'CREATE INDEX outcome_ba IF NOT EXISTS FOR (o:TmagOutcome) ON (o.tmagId)',
     drop: 'DROP INDEX outcome_ba IF EXISTS',
     purpose: 'BA-scoped outcome lookups.',
   },
   {
     name: 'candidate_status',
-    label: 'LearningCandidate',
+    label: 'TmagLearningCandidate',
     cypher:
-      'CREATE INDEX candidate_status IF NOT EXISTS FOR (c:LearningCandidate) ON (c.status)',
+      'CREATE INDEX candidate_status IF NOT EXISTS FOR (c:TmagLearningCandidate) ON (c.status)',
     drop: 'DROP INDEX candidate_status IF EXISTS',
     purpose: 'Review-queue lookups by candidate status.',
   },
   {
     name: 'knowledge_ready',
-    label: 'Knowledge',
+    label: 'TmagKnowledge',
     cypher:
-      'CREATE INDEX knowledge_ready IF NOT EXISTS FOR (k:Knowledge) ON (k.retrievalReady)',
+      'CREATE INDEX knowledge_ready IF NOT EXISTS FOR (k:TmagKnowledge) ON (k.retrievalReady)',
     drop: 'DROP INDEX knowledge_ready IF EXISTS',
     purpose: 'Retrieval-ready gate filtering.',
   },
@@ -96,7 +96,7 @@ export const PHASE7_NEO4J_SCHEMA: readonly Neo4jSchemaStatement[] = [
 ];
 
 /**
- * Dependency note: the `(:Outcome)-[:CONFIRMED_BY]->(:TeamMagnificentMember)` edge
+ * Dependency note: the `(:TmagOutcome)-[:CONFIRMED_BY]->(:TeamMagnificentMember)` edge
  * assumes the `BA` vs `TeamMagnificentMember` label reconciliation (P10 §5.1) is
  * settled before these are applied; and `AuditEntry.entryId` (R0) is part of the
  * P10 §6 canonical constraint set applied alongside this, not duplicated here.

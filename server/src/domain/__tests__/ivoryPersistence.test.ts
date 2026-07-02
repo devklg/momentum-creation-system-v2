@@ -40,7 +40,7 @@ const IVORY_RECORD = {
 function defaultGateway(record: AnyRec | null = { ...IVORY_RECORD }) {
   return async (tool: string, action: string, params: AnyRec): Promise<unknown> => {
     if (tool === 'mongodb' && action === 'query') {
-      if (params.collection === 'ivory_names') {
+      if (params.collection === 'tmag_ivory_prospect_names') {
         return { count: record ? 1 : 0, documents: record ? [record] : [] };
       }
       return { count: 0, documents: [] };
@@ -114,12 +114,12 @@ describe('Ivory persistence fixes', () => {
     );
     expect(neo).toBeDefined();
     const query = String((neo?.[2] as AnyRec).query);
-    expect(query).toContain('MERGE (p:Prospect');
-    expect(query).not.toContain('MATCH (p:Prospect');
+    expect(query).toContain('MERGE (p:TmagProspect');
+    expect(query).not.toContain('MATCH (p:TmagProspect');
     // SET on the IvoryName node must precede the prospect MERGE so a missing
     // prospect node cannot no-op the status update.
     expect(query.indexOf('SET n.status')).toBeGreaterThanOrEqual(0);
-    expect(query.indexOf('SET n.status')).toBeLessThan(query.indexOf('MERGE (p:Prospect'));
+    expect(query.indexOf('SET n.status')).toBeLessThan(query.indexOf('MERGE (p:TmagProspect'));
   });
 
   it('#5 createIvoryName compensates the orphaned row when the write fails', async () => {
@@ -141,7 +141,7 @@ describe('Ivory persistence fixes', () => {
         String((p as AnyRec).query).includes('DETACH DELETE'),
     );
     expect(del).toBeDefined();
-    expect(del?.[2]).toMatchObject({ collection: 'ivory_names' });
+    expect(del?.[2]).toMatchObject({ collection: 'tmag_ivory_prospect_names' });
     expect(detach).toBeDefined();
   });
 
@@ -156,7 +156,7 @@ describe('Ivory persistence fixes', () => {
     );
     expect(chromaAdd).toBeDefined();
     const params = chromaAdd?.[2] as AnyRec;
-    expect(params).toMatchObject({ collection: 'mcs_ivory', ids: ['ivory_1'] });
+    expect(params).toMatchObject({ collection: 'tmag_ivory_prospect_names', ids: ['ivory_1'] });
     expect(String((params.documents as string[])[0])).toContain('brand new note');
   });
 

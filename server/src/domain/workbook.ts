@@ -143,7 +143,7 @@ export async function getWorkbook(
     'query',
     {
       database: 'momentum',
-      collection: 'ba_workbooks',
+      collection: 'tmag_workbooks',
       filter: { forTmagId },
       limit: 1,
     },
@@ -183,7 +183,7 @@ export async function createWorkbookDraft(args: {
 
   await gatewayCall('mongodb', 'insert', {
     database: 'momentum',
-    collection: 'ba_workbooks',
+    collection: 'tmag_workbooks',
     documents: [{ _id: workbookId, ...record }],
   });
 
@@ -209,7 +209,7 @@ export async function saveWorkbookDraft(args: {
     'query',
     {
       database: 'momentum',
-      collection: 'ba_workbooks',
+      collection: 'tmag_workbooks',
       filter: { workbookId: args.workbookId },
       limit: 1,
     },
@@ -233,7 +233,7 @@ export async function saveWorkbookDraft(args: {
 
   await gatewayCall('mongodb', 'update', {
     database: 'momentum',
-    collection: 'ba_workbooks',
+    collection: 'tmag_workbooks',
     filter: { workbookId: args.workbookId },
     update: { $set },
   });
@@ -271,7 +271,7 @@ export async function finalizeWorkbook(args: {
     'query',
     {
       database: 'momentum',
-      collection: 'ba_workbooks',
+      collection: 'tmag_workbooks',
       filter: { workbookId: args.workbookId },
       limit: 1,
     },
@@ -285,7 +285,7 @@ export async function finalizeWorkbook(args: {
 
   await gatewayCall('mongodb', 'update', {
     database: 'momentum',
-    collection: 'ba_workbooks',
+    collection: 'tmag_workbooks',
     filter: { workbookId: args.workbookId },
     update: {
       $set: {
@@ -304,9 +304,9 @@ export async function finalizeWorkbook(args: {
   // a property on the workbook node so an upline cockpit can MATCH on it.
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MERGE (s:BA {tmagId: $sponsorTmagId}) ' +
-      'MERGE (b:BA {tmagId: $forTmagId}) ' +
-      'MERGE (w:Workbook {workbookId: $workbookId}) ' +
+      'MERGE (s:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
+      'MERGE (b:TeamMagnificentMember {tmagId: $forTmagId}) ' +
+      'MERGE (w:TmagWorkbook {workbookId: $workbookId}) ' +
       'SET w.status = $status, w.classification = $classification, ' +
       'w.version = $version, w.finalizedAt = $finalizedAt ' +
       'MERGE (s)-[:CONDUCTED]->(w) ' +
@@ -354,7 +354,7 @@ export async function finalizeWorkbook(args: {
   ].join('\n');
 
   await gatewayCall('chromadb', 'add', {
-    collection: 'mcs_ba_workbooks',
+    collection: 'tmag_workbooks',
     ids: [args.workbookId],
     documents: [chromaDoc],
     metadatas: [

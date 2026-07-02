@@ -60,14 +60,14 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const PROSPECTS_COLLECTION = 'prospects';
-const TOKENS_COLLECTION = 'invite_tokens';
-const ACTIVITY_COLLECTION = 'invitation_activity';
-const CALLBACK_COLLECTION = 'callback_requests';
-const NOTES_COLLECTION = 'crm_notes';
-const FOLLOWUPS_COLLECTION = 'crm_followups';
-const DISPOSITIONS_COLLECTION = 'crm_dispositions';
-const CHROMA_COLLECTION = 'mcs_invitations';
+const PROSPECTS_COLLECTION = 'tmag_prospects';
+const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
+const ACTIVITY_COLLECTION = 'tmag_prospect_invitation_activity';
+const CALLBACK_COLLECTION = 'tmag_prospect_callback_requests';
+const NOTES_COLLECTION = 'tmag_prospect_crm_notes';
+const FOLLOWUPS_COLLECTION = 'tmag_prospect_crm_followups';
+const DISPOSITIONS_COLLECTION = 'tmag_prospect_crm_dispositions';
+const CHROMA_COLLECTION = 'tmag_prospect_invitation_activity';
 
 /** Max note length — generous for a free-form journal entry. */
 const NOTE_MAX = 2000;
@@ -161,9 +161,9 @@ export async function addNote(
     neo4j: {
       // BA WROTE_NOTE Note ABOUT Prospect — graph reflects ownership.
       cypher:
-        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
-        'MERGE (p:Prospect {prospectId: $prospectId}) ' +
-        'CREATE (n:CrmNote {noteId: $id, text: $text, at: $createdAt, sponsorTmagId: $sponsorTmagId}) ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
+        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
+        'CREATE (n:TmagCrmNote {noteId: $id, text: $text, at: $createdAt, sponsorTmagId: $sponsorTmagId}) ' +
         'CREATE (b)-[:WROTE_NOTE]->(n) ' +
         'CREATE (n)-[:ABOUT]->(p)',
       params: { sponsorTmagId, prospectId, text: trimmed, createdAt },
@@ -234,7 +234,7 @@ export async function setFollowUp(
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (b:BA {tmagId: $sponsorTmagId})-[r:HAS_FOLLOWUP]->(p:Prospect {prospectId: $prospectId}) ' +
+        'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-[r:HAS_FOLLOWUP]->(p:TmagProspect {prospectId: $prospectId}) ' +
         'SET r.dueAt = $dueAt, r.updatedAt = $now',
       params: { sponsorTmagId, prospectId, dueAt: dueAtIso, now },
     });
@@ -264,8 +264,8 @@ export async function setFollowUp(
     mongoDoc: { followUpId, ...record },
     neo4j: {
       cypher:
-        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
-        'MERGE (p:Prospect {prospectId: $prospectId}) ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
+        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
         'MERGE (b)-[r:HAS_FOLLOWUP]->(p) ' +
         'SET r.dueAt = $dueAt, r.createdAt = $createdAt, r.followUpId = $id',
       params: { sponsorTmagId, prospectId, dueAt: dueAtIso, createdAt: now },
@@ -321,7 +321,7 @@ export async function clearFollowUp(
   });
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (b:BA {tmagId: $sponsorTmagId})-[r:HAS_FOLLOWUP]->(p:Prospect {prospectId: $prospectId}) ' +
+      'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-[r:HAS_FOLLOWUP]->(p:TmagProspect {prospectId: $prospectId}) ' +
       'DELETE r',
     params: { sponsorTmagId, prospectId },
   });
@@ -354,7 +354,7 @@ export async function setDisposition(
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (b:BA {tmagId: $sponsorTmagId})-[r:DISPOSED]->(p:Prospect {prospectId: $prospectId}) ' +
+        'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-[r:DISPOSED]->(p:TmagProspect {prospectId: $prospectId}) ' +
         'DELETE r',
       params: { sponsorTmagId, prospectId },
     });
@@ -371,8 +371,8 @@ export async function setDisposition(
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
-        'MERGE (p:Prospect {prospectId: $prospectId}) ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
+        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
         'MERGE (b)-[r:DISPOSED]->(p) ' +
         'SET r.disposition = $disposition, r.updatedAt = $now',
       params: { sponsorTmagId, prospectId, disposition, now },
@@ -393,8 +393,8 @@ export async function setDisposition(
     mongoDoc: { ...record },
     neo4j: {
       cypher:
-        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
-        'MERGE (p:Prospect {prospectId: $prospectId}) ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
+        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
         'MERGE (b)-[r:DISPOSED]->(p) ' +
         'SET r.disposition = $disposition, r.updatedAt = $now',
       params: { sponsorTmagId, prospectId, disposition, now },
@@ -570,14 +570,14 @@ export async function reinvite(
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MERGE (t:InviteToken {token: $token}) ' +
+        'MERGE (t:TmagInviteToken {token: $token}) ' +
         'SET t.prospectId = $prospectId, ' +
         '    t.sponsorTmagId = $sponsorTmagId, ' +
         '    t.state = $state, ' +
         '    t.createdAt = $createdAt, ' +
         '    t.expiresAt = $expiresAt ' +
         'WITH t ' +
-        'MATCH (p:Prospect {prospectId: $prospectId}) ' +
+        'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
         'MERGE (t)-[:FOR_PROSPECT]->(p)',
       params: {
         token,
@@ -606,7 +606,7 @@ export async function reinvite(
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (p:Prospect {prospectId: $prospectId}) ' +
+        'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
         'SET p.state = $state, p.updatedAt = $now',
       params: { prospectId, state: 'minted', now },
     });
@@ -714,8 +714,8 @@ async function appendActivity(entry: {
     },
     neo4j: {
       cypher:
-        'MATCH (p:Prospect {prospectId: $prospectId}) ' +
-        'CREATE (a:InvitationActivity {' +
+        'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
+        'CREATE (a:TmagInvitationActivity {' +
         '  activityId: $id, kind: $kind, note: $note, at: $at' +
         '}) ' +
         'CREATE (p)-[:HAS_ACTIVITY]->(a)',

@@ -17,16 +17,16 @@ import { tripleStackWrite } from '../services/tripleStack.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 
 const MONGO_DB = 'momentum';
-const CHROMA_COLLECTION = 'mcs_vm_campaigns';
+const CHROMA_COLLECTION = 'tmag_vm_campaigns';
 
-const LEADS_COLLECTION = 'vm_bulk_leads';
-const QUEUE_COLLECTION = 'vm_queue_jobs';
-const DELIVERY_EVENTS_COLLECTION = 'vm_delivery_events';
-const WEBHOOK_EVENTS_COLLECTION = 'vm_provider_webhook_events';
-const CRM_COLLECTION = 'prospect_crm_records';
-const TOKENS_COLLECTION = 'invite_tokens';
-const AUDIT_COLLECTION = 'vm_audit_events';
-const SUPPRESSION_COLLECTION = 'vm_suppression_list';
+const LEADS_COLLECTION = 'tmag_vm_bulk_leads';
+const QUEUE_COLLECTION = 'tmag_vm_queue_jobs';
+const DELIVERY_EVENTS_COLLECTION = 'tmag_vm_delivery_events';
+const WEBHOOK_EVENTS_COLLECTION = 'tmag_vm_provider_webhook_events';
+const CRM_COLLECTION = 'tmag_prospect_crm_records';
+const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
+const AUDIT_COLLECTION = 'tmag_vm_audit_events';
+const SUPPRESSION_COLLECTION = 'tmag_vm_suppression_list';
 
 const DEFAULT_MAX_ATTEMPTS = 3;
 const IMPORT_CHUNK_SIZE = 500;
@@ -225,7 +225,7 @@ async function vmAudit(input: {
     },
     neo4j: {
       cypher:
-        'MERGE (e:VmAuditEvent {auditId: $id}) ' +
+        'MERGE (e:TmagVmAuditEvent {auditId: $id}) ' +
         'SET e.action = $action, e.entityId = $entityId, e.ownerTmagId = $ownerTmagId, e.createdAt = datetime($createdAt) ' +
         'WITH e ' +
         'OPTIONAL MATCH (ba:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
@@ -279,7 +279,7 @@ export async function enqueueVmJob<TPayload extends Record<string, unknown>>(
     mongoDoc: job as unknown as Record<string, unknown>,
     neo4j: {
       cypher:
-        'MERGE (j:VmQueueJob {jobId: $id}) ' +
+        'MERGE (j:TmagVmQueueJob {jobId: $id}) ' +
         'SET j.kind = $kind, j.status = $status, j.availableAt = datetime($availableAt), j.createdAt = datetime($createdAt)',
       params: {
         kind: job.kind,
@@ -533,7 +533,7 @@ async function upsertImportedLead(
     mongoDoc: lead as unknown as Record<string, unknown>,
     neo4j: {
       cypher:
-        'MERGE (l:VmLead {leadId: $id}) ' +
+        'MERGE (l:TmagVmLead {leadId: $id}) ' +
         'SET l.ownerTmagId = $ownerTmagId, l.sponsorTmagId = $sponsorTmagId, l.status = $status, l.createdAt = datetime($createdAt) ' +
         'WITH l ' +
         'OPTIONAL MATCH (ba:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
@@ -634,9 +634,9 @@ export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Prom
     },
     neo4j: {
       cypher:
-        'MERGE (t:InviteToken {token: $id}) ' +
+        'MERGE (t:TmagInviteToken {token: $id}) ' +
         'SET t.tokenKind = "rvm", t.leadId = $leadId, t.ownerTmagId = $ownerTmagId, t.sponsorTmagId = $sponsorTmagId, t.state = "minted", t.createdAt = datetime($createdAt) ' +
-        'WITH t MATCH (l:VmLead {leadId: $leadId}) MERGE (t)-[:FOR_VM_LEAD]->(l)',
+        'WITH t MATCH (l:TmagVmLead {leadId: $leadId}) MERGE (t)-[:FOR_VM_LEAD]->(l)',
       params: {
         leadId: lead.leadId,
         ownerTmagId: lead.ownerTmagId,
@@ -705,9 +705,9 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
     },
     neo4j: {
       cypher:
-        'MERGE (c:ProspectCrmRecord {crmRecordId: $id}) ' +
+        'MERGE (c:TmagProspectCrmRecord {crmRecordId: $id}) ' +
         'SET c.leadId = $leadId, c.ownerTmagId = $ownerTmagId, c.status = "inactive_pre_engagement", c.createdAt = datetime($createdAt) ' +
-        'WITH c MATCH (l:VmLead {leadId: $leadId}) MERGE (l)-[:HAS_CRM_RECORD]->(c)',
+        'WITH c MATCH (l:TmagVmLead {leadId: $leadId}) MERGE (l)-[:HAS_CRM_RECORD]->(c)',
       params: {
         leadId: lead.leadId,
         ownerTmagId: lead.ownerTmagId,
@@ -781,9 +781,9 @@ export async function recordDeliveryEvent(input: Omit<VmDeliveryEventRecord, 'ev
     mongoDoc: event as unknown as Record<string, unknown>,
     neo4j: {
       cypher:
-        'MERGE (e:VmDeliveryEvent {eventId: $id}) ' +
+        'MERGE (e:TmagVmDeliveryEvent {eventId: $id}) ' +
         'SET e.provider = $provider, e.status = $status, e.leadId = $leadId, e.createdAt = datetime($createdAt) ' +
-        'WITH e MATCH (l:VmLead {leadId: $leadId}) MERGE (l)-[:HAS_VM_DELIVERY_EVENT]->(e)',
+        'WITH e MATCH (l:TmagVmLead {leadId: $leadId}) MERGE (l)-[:HAS_VM_DELIVERY_EVENT]->(e)',
       params: {
         provider: event.provider,
         status: event.status,
@@ -827,7 +827,7 @@ export async function recordProviderWebhook(input: {
     },
     neo4j: {
       cypher:
-        'MERGE (w:VmProviderWebhook {webhookEventId: $id}) ' +
+        'MERGE (w:TmagVmProviderWebhook {webhookEventId: $id}) ' +
         'SET w.provider = $provider, w.status = "received", w.createdAt = datetime($createdAt)',
       params: { provider: input.provider, createdAt: now },
     },

@@ -10,7 +10,7 @@
  *     prospectId. Lookup is the idempotency check — if a placement
  *     already exists for this prospect, placeProspect returns it without
  *     incrementing the counter again.
- *   - Neo4j writes (:Prospect)-[:IN_HOLDING_TANK {position}]->(:Pool)
+ *   - Neo4j writes (:TmagProspect)-[:IN_HOLDING_TANK {position}]->(:TmagPool)
  *     so graph queries can walk the pool by position or by BA.
  *   - ChromaDB `mcs_pool_events` records a semantically searchable event
  *     for every placement; useful for /admin live operations and audit.
@@ -42,9 +42,9 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COUNTERS_COLLECTION = 'pool_counters';
-const PLACEMENTS_COLLECTION = 'pool_placements';
-const CHROMA_COLLECTION = 'mcs_pool_events';
+const COUNTERS_COLLECTION = 'tmag_prospect_htank_counters';
+const PLACEMENTS_COLLECTION = 'tmag_prospect_htank_placements';
+const CHROMA_COLLECTION = 'tmag_prospect_htank_events';
 
 /** Single-row counter document id. The pool is team-wide (Chat #84). */
 export const TEAM_POOL_ID = 'tm_team_pool';
@@ -162,7 +162,7 @@ export interface PlaceProspectInput {
  * Otherwise:
  *   1. Increment the team pool counter (atomic Mongo $inc).
  *   2. Insert the placement record into `pool_placements`.
- *   3. MERGE the (:Prospect)-[:IN_HOLDING_TANK]->(:Pool) edge in Neo4j.
+ *   3. MERGE the (:TmagProspect)-[:IN_HOLDING_TANK]->(:TmagPool) edge in Neo4j.
  *   4. Add a placement event to ChromaDB `mcs_pool_events`.
  *   5. Mirror positionNumber + placedAt back onto the prospect record.
  *
@@ -226,8 +226,8 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
   //    position. MERGE on the relationship is idempotent in case of retry.
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MERGE (pool:Pool {id: $poolId}) ' +
-      'MERGE (p:Prospect {prospectId: $prospectId}) ' +
+      'MERGE (pool:TmagPool {id: $poolId}) ' +
+      'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
       'MERGE (p)-[r:IN_HOLDING_TANK]->(pool) ' +
       'SET r.position = $position, ' +
       '    r.placedAt = $placedAt, ' +
@@ -271,7 +271,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
   //    re-querying pool_placements. State stays in lockstep with the token.
   await gatewayCall('mongodb', 'update', {
     database: MONGO_DB,
-    collection: 'prospects',
+    collection: 'tmag_prospects',
     filter: { prospectId: input.prospectId },
     update: {
       $set: {
@@ -372,7 +372,7 @@ async function listRecentPlacements(
     }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
-    collection: 'prospects',
+    collection: 'tmag_prospects',
     filter: {
       state: 'video_complete',
       positionNumber: { $ne: null },
@@ -509,7 +509,7 @@ export async function flushExpiredPlacements(
       // 2. Prospect funnel record — mirror to 'expired'.
       await gatewayCall('mongodb', 'update', {
         database: MONGO_DB,
-        collection: 'prospects',
+        collection: 'tmag_prospects',
         filter: { prospectId: c.prospectId },
         update: { $set: { state: 'expired', updatedAt: flushedAt } },
       });
@@ -518,7 +518,7 @@ export async function flushExpiredPlacements(
       //    delete the relationship: graph walks still see the vacated slot.
       await gatewayCall('neo4j', 'cypher', {
         query:
-          'MATCH (p:Prospect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:Pool) ' +
+          'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
           'SET r.flushedAt = $flushedAt, r.flushReason = $flushReason',
         params: {
           prospectId: c.prospectId,

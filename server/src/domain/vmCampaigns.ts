@@ -15,8 +15,8 @@ import type {
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
-const COLLECTION = 'vm_campaigns';
-const CHROMA_COLLECTION = 'mcs_vm_campaigns';
+const COLLECTION = 'tmag_vm_campaigns';
+const CHROMA_COLLECTION = 'tmag_vm_campaigns';
 
 export class VMCampaignError extends Error {
   constructor(public readonly code: string) {
@@ -67,9 +67,9 @@ export async function createVMCampaign(
     mongoDoc: { ...campaign },
     neo4j: {
       cypher:
-        'MERGE (b:BA {tmagId: $ownerTmagId}) ' +
-        'MERGE (lb:LeadBatch {leadBatchId: $leadBatchId}) ' +
-        'CREATE (vm:VMCampaign {vmCampaignId: $id, name: $name, provider: $provider, ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
+        'MERGE (lb:TmagLeadBatch {leadBatchId: $leadBatchId}) ' +
+        'CREATE (vm:TmagVmCampaign {vmCampaignId: $id, name: $name, provider: $provider, ' +
         '  status: $status, ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, ' +
         '  createdAt: $createdAt, updatedAt: $updatedAt}) ' +
         'CREATE (b)-[:OWNS_VM_CAMPAIGN]->(vm) ' +

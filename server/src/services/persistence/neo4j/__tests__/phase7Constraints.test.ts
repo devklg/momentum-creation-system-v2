@@ -14,10 +14,10 @@ import {
 describe('Phase 7 P7.12 — Neo4j constraints/indexes (data-only)', () => {
   it('covers the four new Phase 7 labels with unique constraints', () => {
     expect(PHASE7_NEO4J_CONSTRAINTS.map((s) => s.label).sort()).toEqual([
-      'Knowledge',
-      'LearningCandidate',
-      'Outcome',
       'TeamMagnificent',
+      'TmagKnowledge',
+      'TmagLearningCandidate',
+      'TmagOutcome',
     ]);
   });
 

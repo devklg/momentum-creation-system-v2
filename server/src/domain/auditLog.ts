@@ -9,8 +9,8 @@
  * (timestamp, entryId). Triple-stacked per locked-spec 3.14:
  *
  *   - MongoDB  `audit_log`              — canonical store
- *   - Neo4j    (:AuditEntry) -[:ACTED_BY]-> (:Actor)
- *              (:AuditEntry) -[:ACTED_ON]-> (:Entity)
+ *   - Neo4j    (:TmagAuditEntry) -[:ACTED_BY]-> (:Actor)
+ *              (:TmagAuditEntry) -[:ACTED_ON]-> (:Entity)
  *   - Chroma   `audit_log`              — semantic search across
  *                                          action + reason + entity blob
  *
@@ -180,7 +180,7 @@ function buildCypher(
     params.actorTmagId = entry.actor.tmagId;
     return {
       cypher: `
-        MERGE (a:AuditEntry {entryId: $entryId})
+        MERGE (a:TmagAuditEntry {entryId: $entryId})
         SET a += {${baseProps}}
         WITH a
         OPTIONAL MATCH (ba:TeamMagnificentMember {tmagId: $actorTmagId})
@@ -195,7 +195,7 @@ function buildCypher(
 
   return {
     cypher: `
-      MERGE (a:AuditEntry {entryId: $entryId})
+      MERGE (a:TmagAuditEntry {entryId: $entryId})
       SET a += {${baseProps}}
       RETURN a.entryId AS entryId
     `,
@@ -450,7 +450,7 @@ function buildRuntimeCypher(
   const { runtime } = entry;
   return {
     cypher: `
-      MERGE (a:AuditEntry {entryId: $entryId})
+      MERGE (a:TmagAuditEntry {entryId: $entryId})
       SET a += {
         entryId: $entryId, timestamp: datetime($timestamp), action: $action,
         role: $role, severity: $severity, agent: $agent, turnId: $turnId,

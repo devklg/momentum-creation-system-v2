@@ -21,11 +21,17 @@ import type {
 
 const MONGO_DB = 'momentum';
 const COLL_BAS = 'team_magnificent_members';
-const COLL_STEVE = 'steve_discoveries';
-const COLL_AGENT_EVENTS = 'agent_events';
-const COLL_OUTBOX = 'projection_outbox';
-const CHROMA_STEVE = 'mcs_steve_discoveries';
-const CHROMA_AGENT_EVENTS = 'mcs_agent_events';
+const COLL_STEVE = 'tmag_steve_success_interview';
+// Agent events are split per agent (Rev2); same name across Mongo + Chroma.
+const AGENT_EVENT_COLLECTIONS = [
+  'tmag_agent_ivory_events',
+  'tmag_agent_michael_events',
+  'tmag_agent_steve_events',
+  'tmag_agent_system_events',
+] as const;
+const AGENT_EVENTS_DISPLAY = 'tmag_agent_{ivory,michael,steve,system}_events';
+const COLL_OUTBOX = 'tmag_projection_outbox';
+const CHROMA_STEVE = 'tmag_steve_success_interview';
 
 interface PersistedSteveDiscovery extends McsSteveDiscoveryArtifact {
   _id: string;
@@ -163,16 +169,21 @@ function memoryStatus(args: {
       note: 'Existing Steve ingest writes here through tripleStackWrite.',
     },
     {
-      collection: COLL_AGENT_EVENTS,
-      purpose: 'Append-only BA-facing agent interaction telemetry.',
+      collection: AGENT_EVENTS_DISPLAY,
+      purpose: 'Append-only BA-facing agent interaction telemetry (split per agent).',
       status: 'present',
       recordCount: args.events.length,
-      note: 'Events come from /api/agents/events.',
+      note: 'Events come from /api/agents/events; routed to tmag_agent_<agentId>_events.',
     },
     {
-      collection: CHROMA_AGENT_EVENTS,
-      purpose: 'Semantic lookup for agent interaction events.',
-      status: chroma === null ? 'unknown' : chroma.has(CHROMA_AGENT_EVENTS) ? 'present' : 'missing',
+      collection: AGENT_EVENTS_DISPLAY,
+      purpose: 'Semantic lookup for agent interaction events (split per agent).',
+      status:
+        chroma === null
+          ? 'unknown'
+          : AGENT_EVENT_COLLECTIONS.every((c) => chroma.has(c))
+            ? 'present'
+            : 'missing',
       recordCount: null,
       note: 'Registered in the Chroma boot guard.',
     },
@@ -227,7 +238,9 @@ export async function buildAdminAgentOversight(): Promise<McsAdminAgentOversight
   const [discoveries, bas, events, outbox, chromaCollections] = await Promise.all([
     safeQuery<PersistedSteveDiscovery>(COLL_STEVE, warnings),
     safeQuery<BaDoc>(COLL_BAS, warnings),
-    safeQuery<AgentEventDoc>(COLL_AGENT_EVENTS, warnings),
+    Promise.all(
+      AGENT_EVENT_COLLECTIONS.map((c) => safeQuery<AgentEventDoc>(c, warnings)),
+    ).then((r) => r.flat()),
     safeQuery<OutboxDoc>(COLL_OUTBOX, warnings),
     listChromaCollections(warnings),
   ]);
