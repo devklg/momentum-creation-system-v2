@@ -28,7 +28,7 @@ import {
   generateUpcomingSlots,
   DEFAULT_HORIZON_WEEKS,
 } from '../src/domain/webinarCadence.js';
-import { ORIENTATION_SESSION_CAPACITY } from '@momentum/shared';
+import { MCS_ORIENTATION_SESSION_CAPACITY } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const SESSIONS_COLLECTION = 'orientation_sessions';
@@ -59,7 +59,7 @@ async function main(): Promise<void> {
   console.log(
     `[seed] generated ${slots.length} Mon/Thu 5pm-Pacific orientation slots over ` +
       `${DEFAULT_HORIZON_WEEKS} weeks from ${now.toISOString()} ` +
-      `(cap ${ORIENTATION_SESSION_CAPACITY}, hosts ${ORIENTATION_DEFAULT_HOSTS.join(' & ')})`,
+      `(cap ${MCS_ORIENTATION_SESSION_CAPACITY}, hosts ${ORIENTATION_DEFAULT_HOSTS.join(' & ')})`,
   );
 
   let created = 0;
