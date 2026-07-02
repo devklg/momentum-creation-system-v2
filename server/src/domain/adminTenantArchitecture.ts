@@ -465,9 +465,9 @@ export async function saveTenantTemplate(input: {
     neo4j: {
       cypher: `
         MERGE (t:Tenant {tenantId: $tenantId})
-        MERGE (m:MasterContent {templateKey: $templateKey})
+        MERGE (m:TmagContentTemplate {templateKey: $templateKey})
         SET m.label = $label, m.surface = $surface
-        MERGE (v:MasterContentVersion {templateVersionId: $id})
+        MERGE (v:TmagContentTemplate {templateVersionId: $id})
         SET v.version = $version,
             v.surface = $surface,
             v.createdAt = datetime($createdAt),

@@ -26,7 +26,7 @@
  *
  * PERSISTENCE:
  *   - Mongo: `generator_runs` (one doc per run, tmagId-scoped).
- *   - Neo4j: (:BA)-[:RAN_GENERATOR]->(:GeneratorRun) — useful for "show
+ *   - Neo4j: (:TeamMagnificentMember)-[:RAN_GENERATOR]->(:TmagGeneratorRun) — useful for "show
  *     me every product I've ever run" timelines later.
  *   - Chroma: `mcs_ivory` (shared with Ivory roster events). Each run
  *     writes a single "started" event; each mint writes nothing new to
@@ -154,8 +154,8 @@ export async function createGeneratorRun(
     mongoDoc: { ...run },
     neo4j: {
       cypher:
-        'MERGE (b:BA {tmagId: $tmagId}) ' +
-        'CREATE (r:GeneratorRun {' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
+        'CREATE (r:TmagGeneratorRun {' +
         '  runId: $id, productKey: $productKey, angle: $angle, createdAt: $createdAt' +
         '}) ' +
         'MERGE (b)-[:RAN_GENERATOR]->(r)',
@@ -237,8 +237,8 @@ export interface MintForRunResult {
  *      token, source='ivory'. Sponsor is the run's tmagId (sponsor immutability,
  *      locked-spec 3.5 — derived from session at the route layer, not the body).
  *   3. markIvoryInvited() — flips status to 'invited' + stamps lastProspectId
- *      on the Ivory record. This also adds the (:IvoryName)-[:INVITED_AS]
- *      ->(:Prospect) edge.
+ *      on the Ivory record. This also adds the (:TmagIvoryName)-[:INVITED_AS]
+ *      ->(:TmagProspect) edge.
  *   4. Append to run.invitations[] in Mongo + update the run's updatedAt.
  *
  * If step 2 succeeds but 3 or 4 fail, we've leaked an unlinked prospect.

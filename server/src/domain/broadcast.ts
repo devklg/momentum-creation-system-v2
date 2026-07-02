@@ -441,7 +441,7 @@ export async function enqueueBroadcast(
     mongoDoc: { ...broadcast },
     neo4j: {
       cypher:
-        'MERGE (b:Broadcast {broadcastId: $broadcastId}) ' +
+        'MERGE (b:TmagBroadcast {broadcastId: $broadcastId}) ' +
         'SET b.createdAt = datetime($createdAt), b.channel = $channel, ' +
         '    b.audiencePreset = $audiencePreset, b.recipientCount = $recipientCount ' +
         'WITH b ' +
@@ -585,7 +585,7 @@ export async function prepareSendTest(
     mongoDoc: { ...broadcast },
     neo4j: {
       cypher:
-        'MERGE (b:Broadcast {broadcastId: $broadcastId}) ' +
+        'MERGE (b:TmagBroadcast {broadcastId: $broadcastId}) ' +
         'SET b.createdAt = datetime($createdAt), b.channel = $channel, ' +
         '    b.audiencePreset = $audiencePreset, b.isTestSend = true, b.recipientCount = 1 ' +
         'WITH b ' +

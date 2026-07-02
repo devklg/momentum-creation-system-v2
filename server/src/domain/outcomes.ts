@@ -216,7 +216,7 @@ function buildOutcomeCypher(
 ): { cypher: string; params?: Record<string, unknown> } {
   return {
     cypher: `
-      MERGE (o:Outcome {id: $id})
+      MERGE (o:TmagOutcome {id: $id})
       SET o += {
         id: $id, kind: $kind, tenantId: $tenantId, tmagId: $tmagId,
         teamKey: 'team_magnificent',
@@ -230,12 +230,12 @@ function buildOutcomeCypher(
         MERGE (o)-[:CONFIRMED_BY]->(ba)
       )
       WITH o
-      OPTIONAL MATCH (p:Prospect {prospectId: $prospectId})
+      OPTIONAL MATCH (p:TmagProspect {prospectId: $prospectId})
       FOREACH (_ IN CASE WHEN p IS NULL THEN [] ELSE [1] END |
         MERGE (o)-[:ABOUT_PROSPECT]->(p)
       )
       WITH o
-      OPTIONAL MATCH (prev:Outcome {id: $supersedesOutcomeId})
+      OPTIONAL MATCH (prev:TmagOutcome {id: $supersedesOutcomeId})
       FOREACH (_ IN CASE WHEN prev IS NULL THEN [] ELSE [1] END |
         MERGE (o)-[:SUPERSEDES]->(prev)
       )

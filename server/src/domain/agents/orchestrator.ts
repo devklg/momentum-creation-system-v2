@@ -301,8 +301,8 @@ export async function recordAgentEvent(
     mongoDoc: { ...event },
     neo4j: {
       cypher:
-        'MERGE (b:BA {tmagId: $tmagId}) ' +
-        'CREATE (e:AgentEvent {eventId: $id}) ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
+        'CREATE (e:TmagAgentEvent {eventId: $id}) ' +
         'SET e.tmagId = $tmagId, ' +
         '    e.agentId = $agentId, ' +
         '    e.kind = $kind, ' +

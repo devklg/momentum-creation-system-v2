@@ -212,7 +212,7 @@ function buildGraphRagCypher(
 ): { cypher: string; params?: Record<string, unknown> } {
   return {
     cypher: `
-      MERGE (k:Knowledge {id: $id})
+      MERGE (k:TmagKnowledge {id: $id})
       SET k += {
         id: $id, knowledgeObjectId: $knowledgeObjectId, version: $version,
         domain: $domain, language: $language, tenantId: $tenantId,

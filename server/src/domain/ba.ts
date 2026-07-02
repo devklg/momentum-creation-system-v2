@@ -211,7 +211,7 @@ export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): 
     mongoDoc: { ...record },
     neo4j: {
       cypher:
-        'MERGE (s:BA {tmagId: $sponsorTmagId}) MERGE (n:BA {tmagId: $id}) ' +
+        'MERGE (s:TeamMagnificentMember {tmagId: $sponsorTmagId}) MERGE (n:TeamMagnificentMember {tmagId: $id}) ' +
         'SET n.threeBaId = $threeBaId, n.email = $email, n.firstName = $firstName, ' +
         'n.lastName = $lastName, n.timezone = $timezone ' +
         'MERGE (n)-[:SPONSORED_BY]->(s)',

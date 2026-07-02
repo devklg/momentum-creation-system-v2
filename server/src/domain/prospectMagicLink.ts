@@ -175,13 +175,13 @@ export async function issueLinksForPhone(
         },
         neo4j: {
           cypher:
-            'MERGE (ml:ProspectMagicLink {linkToken: $linkToken}) ' +
+            'MERGE (ml:TmagProspectMagicLink {linkToken: $linkToken}) ' +
             'SET ml.accountId = $accountId, ' +
             '    ml.tokenId = $tokenId, ' +
             '    ml.issuedAt = $issuedAt, ' +
             '    ml.expiresAt = $expiresAt ' +
             'WITH ml ' +
-            'MATCH (a:ProspectAccount {accountId: $accountId}) ' +
+            'MATCH (a:TmagProspectAccount {accountId: $accountId}) ' +
             'MERGE (ml)-[:ISSUED_FOR]->(a)',
           params: {
             linkToken,

@@ -91,7 +91,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'sponsor_createdAt', keys: { sponsorTmagId: 1, createdAt: -1 } },
     ],
     graph: {
-      nodeLabels: ['LeadBatch', 'BA'],
+      nodeLabels: ['TmagLeadBatch', 'TeamMagnificentMember'],
       relationshipTypes: ['OWNS_LEAD_BATCH', 'SPONSORS_LEAD_BATCH'],
     },
     notes: [
@@ -121,7 +121,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'email_owner', keys: { email: 1, ownerTmagId: 1 } },
     ],
     graph: {
-      nodeLabels: ['BulkLead', 'LeadBatch', 'VMCampaign', 'BA'],
+      nodeLabels: ['TmagBulkLead', 'TmagLeadBatch', 'TmagVmCampaign', 'TeamMagnificentMember'],
       relationshipTypes: ['CONTAINS_LEAD', 'TARGETS_LEAD', 'OWNS_LEAD'],
     },
     notes: [
@@ -150,7 +150,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'batch_createdAt', keys: { leadBatchId: 1, createdAt: -1 } },
     ],
     graph: {
-      nodeLabels: ['VMCampaign', 'LeadBatch', 'BA'],
+      nodeLabels: ['TmagVmCampaign', 'TmagLeadBatch', 'TeamMagnificentMember'],
       relationshipTypes: ['USES_LEAD_BATCH', 'OWNS_VM_CAMPAIGN'],
     },
     notes: [
@@ -178,7 +178,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'provider_message', keys: { providerMessageId: 1, provider: 1 } },
     ],
     graph: {
-      nodeLabels: ['VMDeliveryEvent', 'BulkLead', 'VMCampaign'],
+      nodeLabels: ['TmagVmDeliveryEvent', 'TmagBulkLead', 'TmagVmCampaign'],
       relationshipTypes: ['DELIVERED_TO_LEAD', 'BELONGS_TO_CAMPAIGN'],
     },
     notes: [
@@ -207,7 +207,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'batch_status', keys: { leadBatchId: 1, status: 1 } },
     ],
     graph: {
-      nodeLabels: ['ProspectCRMRecord', 'Prospect', 'BA'],
+      nodeLabels: ['TmagProspectCrmRecord', 'TmagProspect', 'TeamMagnificentMember'],
       relationshipTypes: ['OWNS_CRM_RECORD', 'CRM_RECORD_FOR'],
     },
     notes: [
@@ -235,7 +235,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'campaign_kind', keys: { vmCampaignId: 1, kind: 1 } },
     ],
     graph: {
-      nodeLabels: ['ProspectTimelineEvent', 'Prospect', 'BA'],
+      nodeLabels: ['TmagProspectTimelineEvent', 'TmagProspect', 'TeamMagnificentMember'],
       relationshipTypes: ['HAS_TIMELINE_EVENT', 'TRIGGERED_BY_BA'],
     },
     notes: [
@@ -264,7 +264,7 @@ export const VM_SCHEMA_DEFINITIONS = {
       { name: 'admin_changedAt', keys: { adminUserId: 1, changedAt: -1 } },
     ],
     graph: {
-      nodeLabels: ['OwnershipCorrection', 'BA', 'Prospect', 'BulkLead'],
+      nodeLabels: ['TmagOwnershipCorrection', 'TeamMagnificentMember', 'TmagProspect', 'TmagBulkLead'],
       relationshipTypes: ['CORRECTED_OWNERSHIP', 'FROM_OWNER', 'TO_OWNER'],
     },
     notes: [

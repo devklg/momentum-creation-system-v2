@@ -116,8 +116,8 @@ export async function mintAccessCode(
       // The owning BA may or may not exist yet in our graph (early seeds);
       // MERGE makes both edge endpoints safe.
       cypher:
-        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
-        'MERGE (c:AccessCode {code: $id}) ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
+        'MERGE (c:TmagAccessCode {code: $id}) ' +
         'SET c.active = true, c.createdAt = $createdAt, c.sponsorThreeBaId = $sponsorThreeBaId ' +
         'MERGE (b)-[:USES]->(c)',
       params: {

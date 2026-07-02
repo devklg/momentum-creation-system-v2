@@ -114,12 +114,12 @@ describe('Ivory persistence fixes', () => {
     );
     expect(neo).toBeDefined();
     const query = String((neo?.[2] as AnyRec).query);
-    expect(query).toContain('MERGE (p:Prospect');
-    expect(query).not.toContain('MATCH (p:Prospect');
+    expect(query).toContain('MERGE (p:TmagProspect');
+    expect(query).not.toContain('MATCH (p:TmagProspect');
     // SET on the IvoryName node must precede the prospect MERGE so a missing
     // prospect node cannot no-op the status update.
     expect(query.indexOf('SET n.status')).toBeGreaterThanOrEqual(0);
-    expect(query.indexOf('SET n.status')).toBeLessThan(query.indexOf('MERGE (p:Prospect'));
+    expect(query.indexOf('SET n.status')).toBeLessThan(query.indexOf('MERGE (p:TmagProspect'));
   });
 
   it('#5 createIvoryName compensates the orphaned row when the write fails', async () => {

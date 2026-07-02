@@ -465,14 +465,14 @@ function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Recor
   // preserving the shared BA and sponsor visibility shape.
   return {
     cypher:
-      'MERGE (b:BA {tmagId: $tmagId}) ' +
-      'MERGE (d:SteveDiscovery {discoveryId: $id}) ' +
+      'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
+      'MERGE (d:TmagSteveDiscovery {discoveryId: $id}) ' +
       'SET d.completedAt = $completedAt, d.callSid = $callSid, d.audioUrl = $audioUrl, ' +
       '    d.signedBy = $signedBy ' +
       'MERGE (b)-[:HAD_STEVE_DISCOVERY]->(d) ' +
       'WITH d, $sponsorTmagId AS sponsorId ' +
       'WHERE sponsorId IS NOT NULL ' +
-      'MERGE (s:BA {tmagId: sponsorId}) ' +
+      'MERGE (s:TeamMagnificentMember {tmagId: sponsorId}) ' +
       'MERGE (d)-[:VISIBLE_TO_SPONSOR]->(s)',
     params: {
       id: a._id,

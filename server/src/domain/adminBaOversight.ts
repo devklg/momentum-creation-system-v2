@@ -627,10 +627,10 @@ export async function applySponsorOverride(args: {
     mongoDoc: { ...record },
     neo4j: {
       cypher: `
-        MERGE (n:BA {tmagId: $tmagId})
-        MERGE (newS:BA {tmagId: $newSponsorTmagId})
-        MERGE (prevS:BA {tmagId: $previousSponsorTmagId})
-        MERGE (o:SponsorOverride {overrideId: $id})
+        MERGE (n:TeamMagnificentMember {tmagId: $tmagId})
+        MERGE (newS:TeamMagnificentMember {tmagId: $newSponsorTmagId})
+        MERGE (prevS:TeamMagnificentMember {tmagId: $previousSponsorTmagId})
+        MERGE (o:TmagSponsorOverride {overrideId: $id})
         SET o.performedAt = datetime($performedAt),
             o.reason = $reason,
             o.auditEntryId = $auditEntryId

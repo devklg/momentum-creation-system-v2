@@ -54,8 +54,8 @@ export async function recordCommitment(
     mongoDoc: record as unknown as Record<string, unknown>,
     neo4j: {
       cypher:
-        'MERGE (n:BA {tmagId: $tmagId}) ' +
-        'MERGE (c:Commitment {commitmentId: $id}) ' +
+        'MERGE (n:TeamMagnificentMember {tmagId: $tmagId}) ' +
+        'MERGE (c:TmagCommitment {commitmentId: $id}) ' +
         'SET c.version = $version, c.acceptedAt = $acceptedAt ' +
         'MERGE (n)-[:ACCEPTED]->(c)',
       params: {

@@ -783,8 +783,8 @@ export async function appendProspectNote(input: {
     mongoDoc: { ...note },
     neo4j: {
       cypher:
-        'MERGE (p:Prospect {prospectId: $prospectId}) ' +
-        'MERGE (n:AdminProspectNote {noteId: $noteId}) ' +
+        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
+        'MERGE (n:TmagAdminProspectNote {noteId: $noteId}) ' +
         'SET n.body = $body, n.createdAt = datetime($createdAt), ' +
         '    n.createdByTmagId = $createdByTmagId ' +
         'MERGE (n)-[:NOTE_ON]->(p)',
@@ -974,17 +974,17 @@ export async function executeMoveIntervention(input: {
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (p:Prospect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:Pool) ' +
+        'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
         'SET r.sponsorTmagId = $toTmagId',
       params: { prospectId: input.prospectId, toTmagId: input.body.toTmagId },
     });
   }
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MERGE (p:Prospect {prospectId: $prospectId}) ' +
+      'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
       'SET p.sponsorTmagId = $toTmagId ' +
       'WITH p ' +
-      'MERGE (b:BA {tmagId: $toTmagId}) ' +
+      'MERGE (b:TeamMagnificentMember {tmagId: $toTmagId}) ' +
       'MERGE (p)-[:INVITED_BY]->(b)',
     params: { prospectId: input.prospectId, toTmagId: input.body.toTmagId },
   });
@@ -1067,7 +1067,7 @@ export async function executeReassignSponsorIntervention(input: {
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (p:Prospect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:Pool) ' +
+        'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
         'SET r.sponsorTmagId = $newSponsorTmagId',
       params: {
         prospectId: input.prospectId,
@@ -1077,10 +1077,10 @@ export async function executeReassignSponsorIntervention(input: {
   }
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MERGE (p:Prospect {prospectId: $prospectId}) ' +
+      'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
       'SET p.sponsorTmagId = $newSponsorTmagId ' +
       'WITH p ' +
-      'MERGE (b:BA {tmagId: $newSponsorTmagId}) ' +
+      'MERGE (b:TeamMagnificentMember {tmagId: $newSponsorTmagId}) ' +
       'MERGE (p)-[:SPONSORED_BY]->(b)',
     params: {
       prospectId: input.prospectId,
@@ -1176,7 +1176,7 @@ export async function executeManualFlushIntervention(input: {
   });
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (p:Prospect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:Pool) ' +
+      'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
       'SET r.flushedAt = datetime($now), r.flushReason = "archived"',
     params: { prospectId: input.prospectId, now },
   });
@@ -1266,7 +1266,7 @@ export async function executeForceEnrollIntervention(input: {
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (p:Prospect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:Pool) ' +
+        'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
         'SET r.flushedAt = datetime($now), r.flushReason = "enrolled"',
       params: { prospectId: input.prospectId, now },
     });

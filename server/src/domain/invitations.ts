@@ -210,8 +210,8 @@ export async function createInvitation(
     neo4j: {
       // BA INVITED prospect. sponsorTmagId stamped immutably here.
       cypher:
-        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
-        'MERGE (p:Prospect {prospectId: $id}) ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
+        'MERGE (p:TmagProspect {prospectId: $id}) ' +
         'SET p.firstName = $firstName, ' +
         '    p.lastInitial = $lastInitial, ' +
         '    p.city = $city, ' +
@@ -278,14 +278,14 @@ export async function createInvitation(
 
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MERGE (t:InviteToken {token: $token}) ' +
+      'MERGE (t:TmagInviteToken {token: $token}) ' +
       'SET t.prospectId = $prospectId, ' +
       '    t.sponsorTmagId = $sponsorTmagId, ' +
       '    t.state = $state, ' +
       '    t.createdAt = $createdAt, ' +
       '    t.expiresAt = $expiresAt ' +
       'WITH t ' +
-      'MATCH (p:Prospect {prospectId: $prospectId}) ' +
+      'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
       'MERGE (t)-[:FOR_PROSPECT]->(p)',
     params: {
       token,
@@ -369,8 +369,8 @@ async function appendActivity(entry: {
     },
     neo4j: {
       cypher:
-        'MATCH (p:Prospect {prospectId: $prospectId}) ' +
-        'CREATE (a:InvitationActivity {' +
+        'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
+        'CREATE (a:TmagInvitationActivity {' +
         '  activityId: $id, kind: $kind, note: $note, at: $at' +
         '}) ' +
         'CREATE (p)-[:HAS_ACTIVITY]->(a)',

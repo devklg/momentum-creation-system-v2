@@ -7,7 +7,7 @@
  *     callbackRequestId. Multiple requests per prospect over time are
  *     allowed (Chat #105 spec amendment) — these are independent intent
  *     records, not lifecycle states.
- *   - Neo4j writes (:Prospect)-[:REQUESTED_CALLBACK {intent, at}]->(:BA)
+ *   - Neo4j writes (:TmagProspect)-[:REQUESTED_CALLBACK {intent, at}]->(:TeamMagnificentMember)
  *     so the BA cockpit can walk the graph for raised hands.
  *   - ChromaDB `mcs_callback_requests` records a semantically searchable
  *     event for /admin live operations.
@@ -127,8 +127,8 @@ export async function createCallbackRequest(
     },
     neo4j: {
       cypher:
-        'MERGE (p:Prospect {prospectId: $prospectId}) ' +
-        'MERGE (b:BA {tmagId: $sponsorTmagId}) ' +
+        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
         'CREATE (p)-[r:REQUESTED_CALLBACK {' +
         '  callbackRequestId: $id, ' +
         '  intent: $intent, ' +

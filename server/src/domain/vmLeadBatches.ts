@@ -58,8 +58,8 @@ export async function createLeadBatch(input: CreateLeadBatchInput): Promise<McsL
     mongoDoc: { ...batch },
     neo4j: {
       cypher:
-        'MERGE (b:BA {tmagId: $ownerTmagId}) ' +
-        'CREATE (lb:LeadBatch {leadBatchId: $id, name: $name, source: $source, ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
+        'CREATE (lb:TmagLeadBatch {leadBatchId: $id, name: $name, source: $source, ' +
         '  country: $country, leadType: $leadType, ownerTmagId: $ownerTmagId, ' +
         '  sponsorTmagId: $sponsorTmagId, status: $status, createdAt: $createdAt}) ' +
         'CREATE (b)-[:OWNS_LEAD_BATCH]->(lb)',
@@ -142,7 +142,7 @@ export async function markLeadBatchImported(
   });
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (lb:LeadBatch {leadBatchId: $leadBatchId, ownerTmagId: $ownerTmagId}) ' +
+      'MATCH (lb:TmagLeadBatch {leadBatchId: $leadBatchId, ownerTmagId: $ownerTmagId}) ' +
       'SET lb.quantityImported = $quantityImported, lb.status = $status, ' +
       '    lb.updatedAt = $updatedAt, lb.completedAt = $completedAt',
     params: {

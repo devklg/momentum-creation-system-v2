@@ -193,7 +193,7 @@ export async function patchProfile(
       const nextLast = (set.lastName as string | undefined) ?? current.lastName;
       await gatewayCall('neo4j', 'cypher', {
         query:
-          'MATCH (n:BA {tmagId: $tmagId}) SET n.firstName = $firstName, n.lastName = $lastName',
+          'MATCH (n:TeamMagnificentMember {tmagId: $tmagId}) SET n.firstName = $firstName, n.lastName = $lastName',
         params: { tmagId, firstName: nextFirst, lastName: nextLast },
       });
     }
@@ -495,7 +495,7 @@ export async function completeEmailChange(
   });
   // Keep Neo4j BA node email aligned (used by genealogy queries).
   await gatewayCall('neo4j', 'cypher', {
-    query: 'MATCH (n:BA {tmagId: $tmagId}) SET n.email = $email',
+    query: 'MATCH (n:TeamMagnificentMember {tmagId: $tmagId}) SET n.email = $email',
     params: { tmagId, email: result.appliedTo },
   });
   await clearPendingTarget(tmagId, 'email');

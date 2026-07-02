@@ -235,7 +235,7 @@ export async function markFastStartModuleState(args: {
       neo4j: {
         cypher:
           'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
-          'MERGE (p:FastStartProgress {progressId: $id}) ' +
+          'MERGE (p:TmagFastStartProgress {progressId: $id}) ' +
           'SET p.tmagId = $tmagId, p.moduleId = $moduleId, p.state = $state, ' +
           '    p.startedAt = $startedAt, p.completedAt = $completedAt, ' +
           '    p.updatedAt = $updatedAt, p.createdAt = $createdAt ' +
@@ -302,7 +302,7 @@ export async function markFastStartModuleState(args: {
 
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (p:FastStartProgress {progressId: $id}) ' +
+      'MATCH (p:TmagFastStartProgress {progressId: $id}) ' +
       'SET p.state = $state, p.startedAt = $startedAt, ' +
       '    p.completedAt = $completedAt, p.updatedAt = $updatedAt',
     params: {

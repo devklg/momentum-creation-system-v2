@@ -208,8 +208,8 @@ export async function recordQuestionnaire(
       // BA -[:SUBMITTED]-> Questionnaire pattern. Sponsor cockpit views
       // walk this edge to surface the questionnaire alongside the BA.
       cypher:
-        'MERGE (b:BA {tmagId: $tmagId}) ' +
-        'MERGE (q:Questionnaire {questionnaireId: $id}) ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
+        'MERGE (q:TmagQuestionnaire {questionnaireId: $id}) ' +
         'SET q.version = $version, q.submittedAt = $submittedAt, ' +
         'q.weeklyHours = $weeklyHours, q.investmentReady = $investmentReady, ' +
         'q.nwmExperience = $nwmExperience, q.employmentStatus = $employmentStatus ' +

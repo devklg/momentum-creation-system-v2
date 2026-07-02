@@ -4,7 +4,7 @@
  * A learning candidate is a PROPOSED, not-yet-approved unit of organizational
  * learning derived from runtime signals / R1 outcomes. It is persisted
  * REVIEW-ONLY through the app-direct seam into the app's own dedicated stores
- * (Mongo `momentum` mcs_learning_candidates / Neo4j `(:LearningCandidate)` /
+ * (Mongo `momentum` mcs_learning_candidates / Neo4j `(:TmagLearningCandidate)` /
  * Chroma `mcs_learning_candidates_review`) — a collection DISJOINT from active
  * knowledge, so the Context Manager never retrieves a candidate as guidance.
  * No Universal Gateway, no `quadstack.write` (ACR-0007).
@@ -230,7 +230,7 @@ export async function reviewLearningCandidate(
   // Neo4j: reflect the terminal status + reviewer on the candidate node.
   await gatewayCall('neo4j', 'cypher', {
     query: `
-      MERGE (c:LearningCandidate {id: $id})
+      MERGE (c:TmagLearningCandidate {id: $id})
       SET c.status = $status, c.reviewDecision = $decision,
           c.reviewedByTmagId = $reviewedByTmagId, c.reviewedAt = datetime($reviewedAt)
       RETURN c.id AS id
@@ -256,7 +256,7 @@ function buildCandidateCypher(
 ): { cypher: string; params?: Record<string, unknown> } {
   return {
     cypher: `
-      MERGE (c:LearningCandidate {id: $id})
+      MERGE (c:TmagLearningCandidate {id: $id})
       SET c += {
         id: $id, status: $status, domain: $domain, language: $language,
         tenantId: $tenantId, createdAt: datetime($createdAt)
@@ -265,7 +265,7 @@ function buildCandidateCypher(
       MERGE (c)-[:SCOPED_TO]->(t)
       WITH c
       UNWIND $sourceOutcomeIds AS outcomeId
-      OPTIONAL MATCH (o:Outcome {id: outcomeId})
+      OPTIONAL MATCH (o:TmagOutcome {id: outcomeId})
       FOREACH (_ IN CASE WHEN o IS NULL THEN [] ELSE [1] END |
         MERGE (c)-[:DERIVED_FROM]->(o)
       )

@@ -223,8 +223,8 @@ export async function appendProspectTimelineEvent(
     mongoDoc: { ...record },
     neo4j: {
       cypher:
-        'MERGE (p:Prospect {prospectId: $prospectId}) ' +
-        'CREATE (e:ProspectTimelineEvent {' +
+        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
+        'CREATE (e:TmagProspectTimelineEvent {' +
         '  eventId: $id, kind: $kind, title: $title, occurredAt: $occurredAt, ' +
         '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId' +
         '}) ' +
@@ -279,7 +279,7 @@ export async function createOrUpdateCrmRecordForToken(
     });
     await gatewayCall('neo4j', 'cypher', {
       query:
-        'MATCH (c:ProspectCRMRecord {crmRecordId: $crmRecordId}) ' +
+        'MATCH (c:TmagProspectCrmRecord {crmRecordId: $crmRecordId}) ' +
         'SET c.token = $token, c.source = $source, c.updatedAt = $updatedAt',
       params: {
         crmRecordId: existing.crmRecordId,
@@ -316,9 +316,9 @@ export async function createOrUpdateCrmRecordForToken(
     mongoDoc: { ...record },
     neo4j: {
       cypher:
-        'MERGE (b:BA {tmagId: $ownerTmagId}) ' +
-        'MERGE (p:Prospect {prospectId: $prospectId}) ' +
-        'MERGE (c:ProspectCRMRecord {crmRecordId: $id}) ' +
+        'MERGE (b:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
+        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
+        'MERGE (c:TmagProspectCrmRecord {crmRecordId: $id}) ' +
         'SET c += {' +
         '  prospectId: $prospectId, token: $token, source: $source, ' +
         '  status: $status, ownerTmagId: $ownerTmagId, ' +
@@ -391,7 +391,7 @@ export async function applyCrmLifecycleEvent(
   });
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (c:ProspectCRMRecord {crmRecordId: $crmRecordId}) ' +
+      'MATCH (c:TmagProspectCrmRecord {crmRecordId: $crmRecordId}) ' +
       'SET c.status = $status, c.updatedAt = $updatedAt',
     params: {
       crmRecordId: record.crmRecordId,
@@ -482,11 +482,11 @@ export async function closeCrmAsNewBa(input: {
   }
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MATCH (c:ProspectCRMRecord {crmRecordId: $crmRecordId}) ' +
+      'MATCH (c:TmagProspectCrmRecord {crmRecordId: $crmRecordId}) ' +
       'SET c.status = $status, c.disposition = $disposition, ' +
       '    c.closedReason = $closedReason, c.closedAt = $closedAt, c.updatedAt = $closedAt ' +
       'WITH c ' +
-      'MATCH (p:Prospect {prospectId: $prospectId}) ' +
+      'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
       'SET p.state = $state, p.updatedAt = $closedAt',
     params: {
       crmRecordId: record.crmRecordId,

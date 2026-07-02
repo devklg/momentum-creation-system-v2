@@ -304,9 +304,9 @@ export async function finalizeWorkbook(args: {
   // a property on the workbook node so an upline cockpit can MATCH on it.
   await gatewayCall('neo4j', 'cypher', {
     query:
-      'MERGE (s:BA {tmagId: $sponsorTmagId}) ' +
-      'MERGE (b:BA {tmagId: $forTmagId}) ' +
-      'MERGE (w:Workbook {workbookId: $workbookId}) ' +
+      'MERGE (s:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
+      'MERGE (b:TeamMagnificentMember {tmagId: $forTmagId}) ' +
+      'MERGE (w:TmagWorkbook {workbookId: $workbookId}) ' +
       'SET w.status = $status, w.classification = $classification, ' +
       'w.version = $version, w.finalizedAt = $finalizedAt ' +
       'MERGE (s)-[:CONDUCTED]->(w) ' +
