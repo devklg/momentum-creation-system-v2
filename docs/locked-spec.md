@@ -392,7 +392,7 @@ Comp plan is deferred until the new BA has signed two people and earned enough c
 
 *Amended 2026-06-24: Steve is the sole success interviewer; Michael is repurposed from interviewer/scorer to the Training Agent and Daily Success Coach; all Michael interview and scoring/classification logic is retired from the code.*
 
-*Amended 2026-07-02 (Kevin): the agent interaction surface changed from phone calls to **browser-based** — Steve's interview and Michael's coaching happen in the `.team` browser runtime (voice, text, or mixed; English/Spanish), per the S1.6 Browser Voice/Text Foundation. Telnyx carries no internal agent runtime traffic.*
+*Amended 2026-07-02 (Kevin): the agent interaction surface changed from phone calls to **browser-based** — Steve's interview and Michael's coaching happen in the `.team` browser runtime (voice, text, or mixed; English/Spanish), per the S1.6 Browser Voice/Text Foundation. Telnyx carries no internal agent runtime traffic. Kevin's rationale, verbatim intent: a more elegant, simpler way for the agent to interact — the member activates the agent from their dashboard and communicates via speech or text directly, saving time and energy. Outbound channels (SMS, ringless voicemail, email) continue as signal/notification carriers — invitations to interact — while the conversation itself lives in the dashboard: channels carry signals; the dashboard carries conversations.*
 
 ## 3.13  Communication
 
