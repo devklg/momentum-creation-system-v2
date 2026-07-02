@@ -50,15 +50,16 @@ per-member context, token minting, CRM — all keyed to tmagId.
    future seam for OTHER TEAMS; member replication is a different axis.
    One canon sentence to prevent conflation.
 
-**OPEN RULING (Kevin) — surface doctrine for the subdomain:** a member's
-replicated site serves PROSPECTS, but lives on `.team`, which the locked spec
-defines as the regulated BA surface. Options: (a) subdomain = member's door
-only, prospect-facing share links stay on `.com`; (b) one subdomain serves
-both — public visitors get the §3.8-compliant prospect experience,
-authenticated member gets the cockpit (amends the locked surface doctrine;
-every never-on-.com rule then applies to the public faces of .team
-subdomains); (c) parallel subdomains per domain (.com public / .team
-private). Kevin's phrasing leans (b); NOT yet ruled.
+**RULED (Kevin, 2026-07-02) — surface doctrine:** **member = `.team` /
+prospect = `.com`, and the `.com` is attached to the member.** The member's
+self-contained site lives at `{slug}.teammagnificent.team` (cockpit, agents,
+training — regulated surface). Everything the prospect touches stays on
+`.com`, carrying that member's attribution (sponsorTmagId). The locked-spec
+surface split (§3.1/§3.8/§3.10) is preserved unchanged — it simply gains a
+member dimension, stitched by one slug → one sponsorTmagId across both
+domains. Minor build-time detail left open: the FORM of the evergreen
+prospect entry on `.com` (member subdomain vs `/m/{slug}` path vs
+token-only) — attribution behavior is ruled regardless of form.
 
 **VERIFIED 2026-07-02:** `teammagnificent.team` is registered (resolves to
 Namecheap parking, 192.64.119.237) — ready for wildcard DNS at build time.
