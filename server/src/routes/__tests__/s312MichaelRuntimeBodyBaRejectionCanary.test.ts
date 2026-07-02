@@ -16,7 +16,7 @@ import {
  * Express port, no supertest, no persistence, no logging of request bodies.
  */
 
-const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-ABC234';
 
 const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',

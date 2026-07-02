@@ -37,6 +37,7 @@ import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
 import { emailExists, type BARecord } from './ba.js';
 import { getTmagProfileBundle } from './adminBaOversight.js';
+import { mintUniqueTmagId } from './tmagIds.js';
 import type {
   McsAdminBaDirectoryRow,
   McsAdminCreateBaPayload,
@@ -75,14 +76,6 @@ type BARecordMaybeDeleted = BARecord &
     originalSponsorTmagId?: string | null;
     originalSponsorThreeBaId?: string | null;
   };
-
-function mintTmagId(): string {
-  // Same format as ba.ts mintTmagId — TMAG-YYYYMMDD-<6 alphanum>.
-  const now = new Date();
-  const ymd = now.toISOString().slice(0, 10).replace(/-/g, '');
-  const r = Math.random().toString(36).slice(2, 8).toUpperCase();
-  return `TMAG-${ymd}-${r}`;
-}
 
 function isDeleted(ba: BARecordMaybeDeleted): boolean {
   return ba.deleted === true;
@@ -133,7 +126,7 @@ export async function adminCreateBa(
     return { ok: false, error: { kind: 'email_taken' } };
   }
 
-  const tmagId = mintTmagId();
+  const tmagId = await mintUniqueTmagId();
   const createdAt = new Date().toISOString();
 
   const softDelete: McsAdminSoftDeleteState = {

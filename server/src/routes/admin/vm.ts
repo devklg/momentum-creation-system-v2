@@ -38,7 +38,7 @@ adminVmRoutes.get('/overview', requireAdmin, async (req, res) => {
       after: {
         generatedAt: payload.generatedAt,
         campaigns: payload.campaigns.length,
-        batches: payload.batches.length,
+        leadOwners: payload.leadOwners.length,
         warnings: payload.warnings.length,
       },
       reason: null,
@@ -61,7 +61,7 @@ adminVmRoutes.get('/overview', requireAdmin, async (req, res) => {
 const OwnershipCorrectionSchema = z.object({
   leadId: z.string().trim().min(1).nullable().optional(),
   prospectId: z.string().trim().min(1).nullable().optional(),
-  leadBatchId: z.string().trim().min(1).nullable().optional(),
+  leadOwnerId: z.string().trim().min(1).nullable().optional(),
   vmCampaignId: z.string().trim().min(1).nullable().optional(),
   oldOwnerTmagId: z.string().trim().min(2),
   newOwnerTmagId: z.string().trim().min(2),
@@ -69,7 +69,7 @@ const OwnershipCorrectionSchema = z.object({
   newSponsorTmagId: z.string().trim().min(2),
   reason: z.string().trim().min(12).max(1000),
 }).refine(
-  (payload) => payload.leadId || payload.prospectId || payload.leadBatchId || payload.vmCampaignId,
+  (payload) => payload.leadId || payload.prospectId || payload.leadOwnerId || payload.vmCampaignId,
   {
     message: 'Provide at least one target id.',
     path: ['leadId'],
@@ -98,7 +98,7 @@ adminVmRoutes.post('/ownership-correction', requireAdmin, async (req, res) => {
         id:
           payload.prospectId ??
           payload.leadId ??
-          payload.leadBatchId ??
+          payload.leadOwnerId ??
           payload.vmCampaignId ??
           'unknown',
         displayLabel: null,
@@ -113,7 +113,7 @@ adminVmRoutes.post('/ownership-correction', requireAdmin, async (req, res) => {
         sponsorTmagId: payload.newSponsorTmagId,
         leadId: payload.leadId ?? null,
         prospectId: payload.prospectId ?? null,
-        leadBatchId: payload.leadBatchId ?? null,
+        leadOwnerId: payload.leadOwnerId ?? null,
         vmCampaignId: payload.vmCampaignId ?? null,
         applied: false,
       },

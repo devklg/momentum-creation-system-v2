@@ -95,10 +95,10 @@ export function mockLiveGrid(filter: McsAdminDashboardFilter): McsAdminLiveGridR
     ['Mesa', 'AZ'],
   ];
   const SPONSORS: Array<[string, string]> = [
-    ['TMAG-20251101-AB12CD', 'Kevin Gardner'],
-    ['TMAG-20251104-EF34GH', 'Paul Mwangi'],
-    ['TMAG-20260112-IJ56KL', 'Marisol Vega'],
-    ['TMAG-20260118-MN78OP', 'Devon Chen'],
+    ['TMAG-AB2CD3', 'Kevin Gardner'],
+    ['TMAG-EF34GH', 'Paul Mwangi'],
+    ['TMAG-J56KMN', 'Marisol Vega'],
+    ['TMAG-MN78PQ', 'Devon Chen'],
   ];
   const BUCKET_DAYS: Array<{
     bucket: McsAdminLiveGridSlot['ageBucket'];

@@ -83,7 +83,7 @@ const COLL_CALLBACKS = 'tmag_prospect_callback_requests';
 const COLL_WEBINARS = 'tmag_prospect_webinar_reservations';
 const COLL_NOTES = 'tmag_admin_prospect_notes';
 const COLL_WEBINAR_EVENTS = 'tmag_prospect_webinar_events';
-const CHROMA_NOTES_COLLECTION = 'tmag_admin_prospect_notes';
+const CHROMA_NOTES_COLLECTION = 'mcs_admin_prospect_notes';
 
 /** Follow-up-needed-by threshold (locked-spec follow-up cadence). */
 const FOLLOW_UP_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000;

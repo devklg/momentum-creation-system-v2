@@ -52,7 +52,7 @@ function makePersistenceImpl(store: Store, opts: PersistenceOpts = {}) {
       if (opts.listCollectionsFailFirst && listCalls <= opts.listCollectionsFailFirst) {
         throw new Error('chroma list_collections transient failure');
       }
-      return { collections: [{ name: 'tmag_steve_success_interview' }] };
+      return { collections: [{ name: 'mcs_steve_success_interview' }] };
     }
     if (tool === 'chromadb' && action === 'create_collection') return {};
     if (tool === 'chromadb' && action === 'add') return { ok: true };
@@ -118,7 +118,7 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     );
     expect(chromaAdd).toBeDefined();
     expect(chromaAdd?.[2]).toMatchObject({
-      collection: 'tmag_steve_success_interview',
+      collection: 'mcs_steve_success_interview',
       ids: ['SD-TMAG-1'],
     });
   });

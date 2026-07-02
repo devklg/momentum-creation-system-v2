@@ -22,7 +22,7 @@ import type {
 const MONGO_DB = 'momentum';
 const COLL_BAS = 'team_magnificent_members';
 const COLL_STEVE = 'tmag_steve_success_interview';
-// Agent events are split per agent (Rev2); same name across Mongo + Chroma.
+// Agent events are split per agent in Mongo; Chroma uses the mcs_ prefix.
 const AGENT_EVENT_COLLECTIONS = [
   'tmag_agent_ivory_events',
   'tmag_agent_michael_events',
@@ -31,7 +31,13 @@ const AGENT_EVENT_COLLECTIONS = [
 ] as const;
 const AGENT_EVENTS_DISPLAY = 'tmag_agent_{ivory,michael,steve,system}_events';
 const COLL_OUTBOX = 'tmag_projection_outbox';
-const CHROMA_STEVE = 'tmag_steve_success_interview';
+const CHROMA_STEVE = 'mcs_steve_success_interview';
+const CHROMA_AGENT_EVENT_COLLECTIONS = [
+  'mcs_agent_ivory_events',
+  'mcs_agent_michael_events',
+  'mcs_agent_steve_events',
+  'mcs_agent_system_events',
+] as const;
 
 interface PersistedSteveDiscovery extends McsSteveDiscoveryArtifact {
   _id: string;
@@ -181,7 +187,7 @@ function memoryStatus(args: {
       status:
         chroma === null
           ? 'unknown'
-          : AGENT_EVENT_COLLECTIONS.every((c) => chroma.has(c))
+          : CHROMA_AGENT_EVENT_COLLECTIONS.every((c) => chroma.has(c))
             ? 'present'
             : 'missing',
       recordCount: null,

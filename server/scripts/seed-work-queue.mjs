@@ -45,7 +45,7 @@ const Q = [
 
   // ============ SIGNUP / AUTH (built) ============
   { id: 'wq_access_codes', surface: 'auth', order: 20, status: 'done',
-    title: 'Access codes TM-XXXX (gen + validate + sponsor-immutable)',
+    title: 'Access codes TMAG-XXXX (gen + validate + sponsor-immutable)',
     evidence: 'server domain/codeGen.ts, access-codes.ts; routes/admin/access-codes.ts; #94', note: 'Admin-generated, reusable.', deps: [] },
   { id: 'wq_registration', surface: 'auth', order: 21, status: 'done',
     title: 'BA registration (10-step sequence, argon2, JWT, sponsor lock)',

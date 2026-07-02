@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 interface CorrectionForm {
   leadId: string;
   prospectId: string;
-  leadBatchId: string;
+  leadOwnerId: string;
   vmCampaignId: string;
   oldOwnerTmagId: string;
   newOwnerTmagId: string;
@@ -25,7 +25,7 @@ interface CorrectionForm {
 const EMPTY_CORRECTION: CorrectionForm = {
   leadId: '',
   prospectId: '',
-  leadBatchId: '',
+  leadOwnerId: '',
   vmCampaignId: '',
   oldOwnerTmagId: '',
   newOwnerTmagId: '',
@@ -72,7 +72,7 @@ export function VmPage() {
       const body = {
         leadId: correction.leadId.trim() || null,
         prospectId: correction.prospectId.trim() || null,
-        leadBatchId: correction.leadBatchId.trim() || null,
+        leadOwnerId: correction.leadOwnerId.trim() || null,
         vmCampaignId: correction.vmCampaignId.trim() || null,
         oldOwnerTmagId: correction.oldOwnerTmagId.trim(),
         newOwnerTmagId: correction.newOwnerTmagId.trim(),
@@ -109,7 +109,7 @@ export function VmPage() {
       </p>
       <h1 className="font-display text-[36px] leading-none mb-2">VM Campaigns</h1>
       <p className="text-cream-mute text-sm mb-8 max-w-2xl">
-        Global VM campaign monitoring, BA-by-BA analytics, batch health,
+        Global VM campaign monitoring, BA-by-BA analytics, lead-owner health,
         suppression/compliance summary, and audited ownership-correction intake.
       </p>
 
@@ -224,12 +224,12 @@ export function VmPage() {
 
           <section className="grid grid-cols-2 gap-6 mb-8">
             <SimpleTable
-              title="Lead Batch Monitoring"
-              empty="No lead batches have landed yet."
-              rows={data.batches.slice(0, 10)}
+              title="Lead Owner Monitoring"
+              empty="No lead owners have landed yet."
+              rows={data.leadOwners.slice(0, 10)}
               renderHeader={() => (
                 <tr>
-                  <th className="text-left px-3 py-2">Batch</th>
+                  <th className="text-left px-3 py-2">Lead Owner</th>
                   <th className="text-left px-3 py-2">Owner</th>
                   <th className="text-right px-3 py-2">Imported</th>
                   <th className="text-right px-3 py-2">Suppressed</th>
@@ -237,9 +237,9 @@ export function VmPage() {
                 </tr>
               )}
               renderRow={(row) => (
-                <tr key={row.leadBatchId} className="border-t border-line/50">
+                <tr key={row.leadOwnerId} className="border-t border-line/50">
                   <td className="px-3 py-2">
-                    <p className="text-cream">{row.leadBatchId}</p>
+                    <p className="text-cream">{row.leadOwnerId}</p>
                     <p className="text-[11px] text-cream-faint">{row.status} · {row.source}</p>
                   </td>
                   <td className="px-3 py-2">{row.ownerName}</td>
@@ -315,7 +315,7 @@ export function VmPage() {
             <div className="grid grid-cols-4 gap-3 mb-3">
               <InputField label="Lead ID" value={correction.leadId} onChange={(v) => setCorrection({ ...correction, leadId: v })} />
               <InputField label="Prospect ID" value={correction.prospectId} onChange={(v) => setCorrection({ ...correction, prospectId: v })} />
-              <InputField label="Batch ID" value={correction.leadBatchId} onChange={(v) => setCorrection({ ...correction, leadBatchId: v })} />
+              <InputField label="Lead Owner ID" value={correction.leadOwnerId} onChange={(v) => setCorrection({ ...correction, leadOwnerId: v })} />
               <InputField label="Campaign ID" value={correction.vmCampaignId} onChange={(v) => setCorrection({ ...correction, vmCampaignId: v })} />
               <InputField label="Old owner TM ID" value={correction.oldOwnerTmagId} onChange={(v) => setCorrection({ ...correction, oldOwnerTmagId: v })} />
               <InputField label="New owner TM ID" value={correction.newOwnerTmagId} onChange={(v) => setCorrection({ ...correction, newOwnerTmagId: v })} />

@@ -123,7 +123,7 @@ export async function getQuestionnaire(
     'query',
     {
       database: 'momentum',
-      collection: 'tmag_questionnaires',
+      collection: 'mcs_questionnaires',
       filter: { tmagId },
       limit: 1,
     },
@@ -225,7 +225,7 @@ export async function recordQuestionnaire(
       },
     },
     chroma: {
-      collection: 'tmag_questionnaires',
+      collection: 'mcs_questionnaires',
       document: chromaDocument,
       metadata: {
         questionnaireId,

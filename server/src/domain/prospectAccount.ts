@@ -48,7 +48,7 @@ import type {
 
 const MONGO_DB = 'momentum';
 const MONGO_COLLECTION = 'tmag_prospect_htank_accounts';
-const CHROMA_COLLECTION = 'tmag_prospect_htank_accounts';
+const CHROMA_COLLECTION = 'mcs_prospect_htank_accounts';
 
 export interface CreateProspectAccountInput {
   prospectId: string;

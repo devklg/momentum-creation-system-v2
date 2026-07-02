@@ -1037,7 +1037,7 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
       current: welcomeComplete && !steveComplete,
       href: '/steve/discovery',
       completedAt: steveCompletedAt,
-      source: 'steve_discoveries.completedAt',
+      source: 'tmag_steve_success_interview.completedAt',
       detail: steveComplete
         ? 'Steve discovery is complete.'
         : 'Complete Steve first so your Success Profile can guide the launch path.',

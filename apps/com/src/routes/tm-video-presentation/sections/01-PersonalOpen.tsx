@@ -43,7 +43,7 @@ export interface PersonalOpenProps {
    * 3.9 "inviting BA voice copy"). Optional: rendered as a personal line in
    * the BA's voice when present, omitted otherwise. The master-content read
    * path (services/masterContent.ts) supplies it once Wave-2 inherit-com
-   * wires this surface to read from master_content_versions; until then it is
+   * wires this surface to read from tmag_content_templates; until then it is
    * simply absent and the generic sub-line carries the hero.
    */
   baVoiceCopy?: string;

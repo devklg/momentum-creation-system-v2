@@ -143,7 +143,7 @@ export async function getWorkbook(
     'query',
     {
       database: 'momentum',
-      collection: 'tmag_workbooks',
+      collection: 'mcs_workbooks',
       filter: { forTmagId },
       limit: 1,
     },
@@ -209,7 +209,7 @@ export async function saveWorkbookDraft(args: {
     'query',
     {
       database: 'momentum',
-      collection: 'tmag_workbooks',
+      collection: 'mcs_workbooks',
       filter: { workbookId: args.workbookId },
       limit: 1,
     },

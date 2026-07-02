@@ -58,7 +58,7 @@ import {
 
 const MONGO_DB = 'momentum';
 const RUNS_COLLECTION = 'tmag_invitation_generator_runs';
-const CHROMA_COLLECTION = 'tmag_ivory_prospect_names';
+const CHROMA_COLLECTION = 'mcs_ivory_prospect_names';
 
 const ALLOWED_ANGLES: ReadonlySet<McsIvoryAngle> = new Set([
   'do_the_business',

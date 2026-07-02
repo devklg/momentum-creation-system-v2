@@ -2546,8 +2546,8 @@ export interface McsPreviewResolvedTokenPayload extends McsResolvedTokenPayload 
  *
  * The Kevin-only Brand Ambassador directory + per-BA profile drawer +
  * sponsor override flow. Server reads aggregate from team_magnificent_members +
- * access_codes + ba_commitments + invite_tokens + crm_followups +
- * fast_start_progress + steve_discoveries; writes (override / leader
+ * tmag_access_codes + tmag_commitments + invite_tokens + crm_followups +
+ * fast_start_progress + tmag_steve_success_interview; writes (override / leader
  * tag / notes) each append a 4.J audit entry.
  *
  * Compliance discipline (Chat #89):
@@ -3768,7 +3768,7 @@ export interface McsScriptMakerDraftSelectors {
  * helper is server-only), then carries the finished strings to the client
  * on the GET /api/p/:token payload. The .com renderers consume these in
  * place of their hardcoded copy constants so a Kevin-saved override in
- * master_content_versions actually changes what the prospect sees.
+ * tmag_content_templates actually changes what the prospect sees.
  *
  * Resilience: every field is already a code-default-backed string
  * (readMasterContent never throws). The one nullable field is
@@ -4344,7 +4344,7 @@ export interface McsIvoryMomentumSuggestionResponse {
 
 // ─── feature/michael-training-support ────────────────────────────────────────
 // Sponsor-facing "how to support this downline's training" card. PROJECTION of
-// Steve's already-persisted SuccessProfile (steve_discoveries) — read-only on
+// Steve's already-persisted SuccessProfile (tmag_steve_success_interview) — read-only on
 // each request, no new collection. Steve owns capture; this surface owns
 // presentation of the support guidance to the direct sponsor.
 //
@@ -4388,7 +4388,7 @@ export interface McsMichaelTrainingSupportCard {
  * video_complete placement rule.
  *
  * Ownership invariant: every lead/prospect record carries ownerTmagId and
- * sponsorTmagId. VM leads also carry leadBatchId and vmCampaignId. Client
+ * sponsorTmagId. VM leads also carry leadOwnerId and vmCampaignId. Client
  * payloads must not provide or override those ownership fields; routes stamp
  * them from the authenticated BA, token, or audited admin correction.
  */
@@ -4401,7 +4401,7 @@ export interface McsOwnedProspectIdentity {
 }
 
 export interface McsVmLeadIdentity extends McsOwnedProspectIdentity {
-  leadBatchId: string;
+  leadOwnerId: string;
   vmCampaignId: string;
 }
 
@@ -4418,7 +4418,7 @@ export type McsProspectAcquisitionSource =
   | 'ivory'
   | 'scriptmaker';
 
-export type McsVmLeadBatchSource =
+export type McsVmLeadOwnerSource =
   | 'apache_leads'
   | 'uploaded_csv'
   | 'manual_import'
@@ -4433,7 +4433,7 @@ export type McsVmLeadType =
   | 'mixed'
   | 'unknown';
 
-export type McsLeadBatchStatus =
+export type McsLeadOwnerStatus =
   | 'draft'
   | 'processing'
   | 'imported'
@@ -4579,10 +4579,10 @@ export const MCS_VM_LEAD_LIFECYCLE_STATUSES: readonly McsVmLeadLifecycleStatus[]
   'archived',
 ] as const;
 
-export interface McsLeadBatchRecord extends McsOwnedProspectIdentity {
-  leadBatchId: string;
+export interface McsLeadOwnerRecord extends McsOwnedProspectIdentity {
+  leadOwnerId: string;
   name: string;
-  source: McsVmLeadBatchSource;
+  source: McsVmLeadOwnerSource;
   sourceLabel: string | null;
   country: string;
   leadType: McsVmLeadType;
@@ -4590,7 +4590,7 @@ export interface McsLeadBatchRecord extends McsOwnedProspectIdentity {
   quantityImported: number;
   quantitySuppressed: number;
   quantityInvalid: number;
-  status: McsLeadBatchStatus;
+  status: McsLeadOwnerStatus;
   createdAt: McsIsoTimestamp;
   updatedAt: McsIsoTimestamp;
   completedAt: McsIsoTimestamp | null;
@@ -4607,7 +4607,7 @@ export interface McsBulkLeadRecord extends McsVmLeadIdentity {
   city: string | null;
   stateOrRegion: string | null;
   country: string | null;
-  source: McsVmLeadBatchSource;
+  source: McsVmLeadOwnerSource;
   status: McsVmLeadLifecycleStatus;
   activatedAt: McsIsoTimestamp | null;
   createdAt: McsIsoTimestamp;
@@ -4616,7 +4616,7 @@ export interface McsBulkLeadRecord extends McsVmLeadIdentity {
 
 export interface McsVMCampaignRecord extends McsOwnedProspectIdentity {
   vmCampaignId: string;
-  leadBatchId: string;
+  leadOwnerId: string;
   name: string;
   provider: McsVmCampaignProvider;
   status: McsVmCampaignStatus;
@@ -4648,7 +4648,7 @@ export interface McsProspectCRMRecord extends McsOwnedProspectIdentity {
   crmRecordId: string;
   prospectId: string;
   leadId: string | null;
-  leadBatchId: string | null;
+  leadOwnerId: string | null;
   vmCampaignId: string | null;
   source: McsProspectAcquisitionSource;
   status: McsProspectCrmStatus;
@@ -4665,7 +4665,7 @@ export interface McsProspectTimelineEventRecord extends McsOwnedProspectIdentity
   prospectId: string;
   crmRecordId: string | null;
   leadId: string | null;
-  leadBatchId: string | null;
+  leadOwnerId: string | null;
   vmCampaignId: string | null;
   kind: McsProspectTimelineEventKind;
   title: string;
@@ -4691,7 +4691,7 @@ export interface McsProspectCrmHubFilter {
   status?: McsProspectCrmStatus | 'all';
   disposition?: McsCrmDisposition | 'all';
   campaignId?: string | null;
-  leadBatchId?: string | null;
+  leadOwnerId?: string | null;
   followUp?: 'due' | 'upcoming' | 'none' | 'all';
   closed?: 'include' | 'exclude' | 'only';
 }
@@ -4713,7 +4713,7 @@ export interface McsProspectCrmHubRow extends McsOwnedProspectIdentity {
   followUpDueAt: McsIsoTimestamp | null;
   lastSignal: McsProspectTimelineEventKind | null;
   lastSignalAt: McsIsoTimestamp | null;
-  leadBatchId: string | null;
+  leadOwnerId: string | null;
   vmCampaignId: string | null;
 }
 
@@ -4735,7 +4735,7 @@ export type McsProspectCrmSource = McsProspectAcquisitionSource;
 // ProspectTimelineEventKind alias removed (F4) — use ProspectTimelineEventKind.
 export type McsVMCampaignProviderMode = McsVmCampaignProvider;
 
-export interface McsCreateLeadBatchPayload {
+export interface McsCreateLeadOwnerPayload {
   name: string;
   source: string;
   country?: string;
@@ -4744,7 +4744,7 @@ export interface McsCreateLeadBatchPayload {
 }
 
 export interface McsCreateVMCampaignPayload {
-  leadBatchId: string;
+  leadOwnerId: string;
   name: string;
   provider?: McsVMCampaignProviderMode;
   voicemailAudioId?: string | null;
@@ -4768,14 +4768,14 @@ export interface McsImportBulkLeadsPayload {
   leads: McsImportBulkLeadPayload[];
 }
 
-export interface McsLeadBatchResponse {
+export interface McsLeadOwnerResponse {
   ok: true;
-  batch: McsLeadBatchRecord;
+  leadOwner: McsLeadOwnerRecord;
 }
 
-export interface McsLeadBatchListResponse {
+export interface McsLeadOwnerListResponse {
   ok: true;
-  batches: McsLeadBatchRecord[];
+  leadOwners: McsLeadOwnerRecord[];
 }
 
 export interface McsVMCampaignResponse {
@@ -4790,7 +4790,7 @@ export interface McsVMCampaignListResponse {
 
 export interface McsImportBulkLeadsResponse {
   ok: true;
-  batch: McsLeadBatchRecord;
+  leadOwner: McsLeadOwnerRecord;
   campaign: McsVMCampaignRecord;
   leads: McsBulkLeadRecord[];
 }
@@ -4816,7 +4816,7 @@ export interface McsRvmResolvedTokenPayload extends McsResolvedTokenPayload {
   source: 'rvm';
   lead: {
     leadId: string;
-    leadBatchId: string;
+    leadOwnerId: string;
     vmCampaignId: string;
     status: McsVmLeadLifecycleStatus;
   };
@@ -4851,7 +4851,7 @@ export interface McsAdminVmBaPerformanceRow {
   tmagId: string;
   baName: string;
   campaignCount: number;
-  batchCount: number;
+  leadOwnerCount: number;
   leadsImported: number;
   leadsContacted: number;
   activated: number;
@@ -4866,8 +4866,8 @@ export interface McsAdminVmBaPerformanceRow {
   lastActivityAt: McsIsoTimestamp | null;
 }
 
-export interface McsAdminVmBatchHealthRow {
-  leadBatchId: string;
+export interface McsAdminVmLeadOwnerHealthRow {
+  leadOwnerId: string;
   ownerTmagId: string;
   ownerName: string;
   source: string;
@@ -4886,7 +4886,7 @@ export interface McsAdminVmCampaignRow {
   vmCampaignId: string;
   ownerTmagId: string;
   ownerName: string;
-  leadBatchId: string | null;
+  leadOwnerId: string | null;
   name: string;
   provider: string;
   status: string;
@@ -4961,7 +4961,7 @@ export interface McsAdminVmOverviewResponse {
   generatedAt: McsIsoTimestamp;
   cards: McsAdminVmMetricCard[];
   baPerformance: McsAdminVmBaPerformanceRow[];
-  batches: McsAdminVmBatchHealthRow[];
+  leadOwners: McsAdminVmLeadOwnerHealthRow[];
   campaigns: McsAdminVmCampaignRow[];
   compliance: McsAdminVmComplianceSummary;
   providerHealth: McsAdminVmProviderHealth[];
@@ -4973,7 +4973,7 @@ export interface McsAdminVmOverviewResponse {
 export interface McsAdminVmOwnershipCorrectionPayload {
   leadId?: string | null;
   prospectId?: string | null;
-  leadBatchId?: string | null;
+  leadOwnerId?: string | null;
   vmCampaignId?: string | null;
   oldOwnerTmagId: string;
   newOwnerTmagId: string;

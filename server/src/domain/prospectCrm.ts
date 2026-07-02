@@ -34,8 +34,8 @@ const TIMELINE_COLLECTION = 'tmag_prospect_timeline_events';
 const PROSPECTS_COLLECTION = 'tmag_prospects';
 const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
 const BULK_LEADS_COLLECTION = 'tmag_vm_bulk_leads';
-const CRM_CHROMA_COLLECTION = 'tmag_prospect_crm_records';
-const TIMELINE_CHROMA_COLLECTION = 'tmag_prospect_timeline_events';
+const CRM_CHROMA_COLLECTION = 'mcs_prospect_crm_records';
+const TIMELINE_CHROMA_COLLECTION = 'mcs_prospect_timeline_events';
 
 export class ProspectCrmError extends Error {
   constructor(public readonly code: string) {
@@ -51,7 +51,7 @@ interface CreateOrUpdateCrmInput {
   sponsorTmagId: string;
   source: McsProspectCrmSource;
   leadId?: string | null;
-  leadBatchId?: string | null;
+  leadOwnerId?: string | null;
   vmCampaignId?: string | null;
   createdAt?: string;
 }
@@ -207,7 +207,7 @@ export async function appendProspectTimelineEvent(
     prospectId: input.prospectId,
     crmRecordId: input.crmRecordId ?? null,
     leadId: null,
-    leadBatchId: null,
+    leadOwnerId: null,
     vmCampaignId: null,
     ownerTmagId: input.ownerTmagId,
     sponsorTmagId: input.sponsorTmagId,
@@ -266,7 +266,7 @@ export async function createOrUpdateCrmRecordForToken(
     const patch: Partial<ProspectCRMDocument> = {
       token: input.token,
       leadId: input.leadId ?? existing.leadId,
-      leadBatchId: input.leadBatchId ?? existing.leadBatchId,
+      leadOwnerId: input.leadOwnerId ?? existing.leadOwnerId,
       vmCampaignId: input.vmCampaignId ?? existing.vmCampaignId,
       source: input.source,
       updatedAt: now,
@@ -295,7 +295,7 @@ export async function createOrUpdateCrmRecordForToken(
     crmRecordId: crmIdForProspect(input.prospectId),
     prospectId: input.prospectId,
     leadId: input.leadId ?? null,
-    leadBatchId: input.leadBatchId ?? null,
+    leadOwnerId: input.leadOwnerId ?? null,
     vmCampaignId: input.vmCampaignId ?? null,
     token: input.token,
     ownerTmagId: input.ownerTmagId,

@@ -25,7 +25,7 @@ import type {
  * Returned-only; nothing here mutates production state or persists.
  */
 
-const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-ABC234';
 
 function expectOk(
   result: CreateMichaelRuntimeTurnForAuthenticatedBaResult,

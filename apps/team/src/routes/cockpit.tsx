@@ -759,7 +759,7 @@ export function CockpitPage() {
                 icon={<Megaphone className="h-4 w-4" aria-hidden="true" />}
                 eyebrow="VM Campaigns"
                 title="Prepare a campaign"
-                body="Contact batches, approved message drafts, dry-run status, and engagement counts."
+                body="Lead-owner lists, approved message drafts, dry-run status, and engagement counts."
                 action="Open campaigns"
                 onClick={() => navigate('/vm-campaigns')}
               />

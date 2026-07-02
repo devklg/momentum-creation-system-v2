@@ -16,15 +16,15 @@ import {
   createOrUpdateCrmRecordForToken,
 } from './prospectCrm.js';
 import { findVMCampaignForOwner } from './vmCampaigns.js';
-import { markLeadBatchImported } from './vmLeadBatches.js';
+import { markLeadOwnerImported } from './vmLeadOwners.js';
 import type {
   McsBulkLeadRecord,
   McsImportBulkLeadPayload,
   McsInviteTokenRecord,
-  McsLeadBatchRecord,
+  McsLeadOwnerRecord,
   McsProspectLocation,
   McsProspectRecord,
-  McsVmLeadBatchSource,
+  McsVmLeadOwnerSource,
   McsVMCampaignRecord,
 } from '@momentum/shared';
 
@@ -32,7 +32,7 @@ const MONGO_DB = 'momentum';
 const BULK_LEADS_COLLECTION = 'tmag_vm_bulk_leads';
 const PROSPECTS_COLLECTION = 'tmag_prospects';
 const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
-const CHROMA_COLLECTION = 'tmag_vm_bulk_leads';
+const CHROMA_COLLECTION = 'mcs_vm_bulk_leads';
 
 export class BulkLeadError extends Error {
   constructor(public readonly code: string) {
@@ -44,13 +44,13 @@ export class BulkLeadError extends Error {
 export interface ImportBulkLeadsInput {
   ownerTmagId: string;
   sponsorTmagId: string;
-  leadBatchId: string;
+  leadOwnerId: string;
   vmCampaignId: string;
   leads: McsImportBulkLeadPayload[];
 }
 
 export interface ImportBulkLeadsResult {
-  batch: McsLeadBatchRecord;
+  leadOwner: McsLeadOwnerRecord;
   campaign: McsVMCampaignRecord;
   leads: McsBulkLeadRecord[];
 }
@@ -67,7 +67,7 @@ function normalizedOptional(raw: string | undefined | null): string | null {
 async function createBulkLeadRecord(input: {
   ownerTmagId: string;
   sponsorTmagId: string;
-  leadBatchId: string;
+  leadOwnerId: string;
   vmCampaignId: string;
   source: string;
   lead: McsImportBulkLeadPayload;
@@ -118,7 +118,7 @@ async function createBulkLeadRecord(input: {
       token,
       source: 'rvm',
       leadId,
-      leadBatchId: input.leadBatchId,
+      leadOwnerId: input.leadOwnerId,
       vmCampaignId: input.vmCampaignId,
       sentAt: null,
       message: null,
@@ -147,7 +147,7 @@ async function createBulkLeadRecord(input: {
       collection: CHROMA_COLLECTION,
       document:
         `RVM prospect ${firstName} ${lastInitial}. from ${city}, ${stateOrRegion}; ` +
-        `owner ${input.ownerTmagId}; batch ${input.leadBatchId}; campaign ${input.vmCampaignId}.`,
+        `owner ${input.ownerTmagId}; lead owner ${input.leadOwnerId}; campaign ${input.vmCampaignId}.`,
       metadata: {
         kind: 'rvm_prospect_created',
         prospectId,
@@ -155,7 +155,7 @@ async function createBulkLeadRecord(input: {
         token,
         ownerTmagId: input.ownerTmagId,
         sponsorTmagId: input.sponsorTmagId,
-        leadBatchId: input.leadBatchId,
+        leadOwnerId: input.leadOwnerId,
         vmCampaignId: input.vmCampaignId,
         createdAt: now,
       },
@@ -182,7 +182,7 @@ async function createBulkLeadRecord(input: {
         sponsorTmagId: input.sponsorTmagId,
         source: 'rvm',
         leadId,
-        leadBatchId: input.leadBatchId,
+        leadOwnerId: input.leadOwnerId,
         vmCampaignId: input.vmCampaignId,
       },
     ],
@@ -210,7 +210,7 @@ async function createBulkLeadRecord(input: {
 
   const bulkLead: McsBulkLeadRecord = {
     leadId,
-    leadBatchId: input.leadBatchId,
+    leadOwnerId: input.leadOwnerId,
     vmCampaignId: input.vmCampaignId,
     prospectId,
     token,
@@ -223,7 +223,7 @@ async function createBulkLeadRecord(input: {
     city,
     stateOrRegion,
     country,
-    source: input.source as McsVmLeadBatchSource,
+    source: input.source as McsVmLeadOwnerSource,
     status: 'token_created',
     activatedAt: null,
     createdAt: now,
@@ -236,16 +236,16 @@ async function createBulkLeadRecord(input: {
     mongoDoc: { ...bulkLead },
     neo4j: {
       cypher:
-        'MERGE (lb:TmagLeadBatch {leadBatchId: $leadBatchId}) ' +
+        'MERGE (lb:TmagVmLeadOwner {leadOwnerId: $leadOwnerId}) ' +
         'MERGE (vm:TmagVmCampaign {vmCampaignId: $vmCampaignId}) ' +
         'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
-        'CREATE (lead:TmagBulkLead {leadId: $id, token: $token, status: $status, ' +
+        'CREATE (lead:TmagVmBulkLead {leadId: $id, token: $token, status: $status, ' +
         '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, createdAt: $createdAt}) ' +
         'CREATE (lb)-[:CONTAINS_LEAD]->(lead) ' +
         'CREATE (vm)-[:TARGETS_LEAD]->(lead) ' +
         'CREATE (lead)-[:BECAME_PROSPECT_RECORD]->(p)',
       params: {
-        leadBatchId: bulkLead.leadBatchId,
+        leadOwnerId: bulkLead.leadOwnerId,
         vmCampaignId: bulkLead.vmCampaignId,
         prospectId: bulkLead.prospectId,
         token: bulkLead.token,
@@ -266,7 +266,7 @@ async function createBulkLeadRecord(input: {
         prospectId,
         token,
         ownerTmagId: input.ownerTmagId,
-        leadBatchId: input.leadBatchId,
+        leadOwnerId: input.leadOwnerId,
         vmCampaignId: input.vmCampaignId,
         createdAt: now,
       },
@@ -280,7 +280,7 @@ async function createBulkLeadRecord(input: {
     sponsorTmagId: input.sponsorTmagId,
     source: 'rvm',
     leadId,
-    leadBatchId: input.leadBatchId,
+    leadOwnerId: input.leadOwnerId,
     vmCampaignId: input.vmCampaignId,
     createdAt: now,
   });
@@ -292,7 +292,7 @@ async function createBulkLeadRecord(input: {
     sponsorTmagId: input.sponsorTmagId,
     kind: 'token_created',
     note: 'RVM lead imported as an inactive acquisition record.',
-    metadata: { leadId, leadBatchId: input.leadBatchId, vmCampaignId: input.vmCampaignId },
+    metadata: { leadId, leadOwnerId: input.leadOwnerId, vmCampaignId: input.vmCampaignId },
     createdAt: now,
   });
   await appendProspectTimelineEvent({
@@ -316,8 +316,8 @@ export async function importBulkLeads(
   if (input.leads.length > 500) throw new BulkLeadError('too_many_leads');
 
   const campaign = await findVMCampaignForOwner(input.vmCampaignId, input.ownerTmagId);
-  if (campaign.leadBatchId !== input.leadBatchId) {
-    throw new BulkLeadError('campaign_batch_mismatch');
+  if (campaign.leadOwnerId !== input.leadOwnerId) {
+    throw new BulkLeadError('campaign_lead_owner_mismatch');
   }
 
   const created: McsBulkLeadRecord[] = [];
@@ -325,7 +325,7 @@ export async function importBulkLeads(
     const record = await createBulkLeadRecord({
       ownerTmagId: input.ownerTmagId,
       sponsorTmagId: input.sponsorTmagId,
-      leadBatchId: input.leadBatchId,
+      leadOwnerId: input.leadOwnerId,
       vmCampaignId: input.vmCampaignId,
       source: campaign.provider,
       lead,
@@ -333,12 +333,12 @@ export async function importBulkLeads(
     created.push(record);
   }
 
-  const batch = await markLeadBatchImported(
-    input.leadBatchId,
+  const leadOwner = await markLeadOwnerImported(
+    input.leadOwnerId,
     input.ownerTmagId,
     created.length,
   );
-  return { batch, campaign, leads: created };
+  return { leadOwner, campaign, leads: created };
 }
 
 export async function findBulkLeadByToken(token: string): Promise<McsBulkLeadRecord | null> {

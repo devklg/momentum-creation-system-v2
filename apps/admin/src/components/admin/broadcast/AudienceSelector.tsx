@@ -144,7 +144,7 @@ export function AudienceSelector({
             value={customText}
             onChange={(e) => setCustomText(e.target.value)}
             onBlur={handleCustomBlur}
-            placeholder="TMAG-20260120-XYZ123, TMAG-20260121-ABC456"
+            placeholder="TMAG-XYZ234, TMAG-ABC456"
             rows={3}
             className="w-full bg-ink-2 border border-line text-cream rounded-md px-3.5 py-2 text-sm font-mono placeholder:text-cream/30 focus:outline-none focus:border-gold transition-colors"
           />

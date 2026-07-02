@@ -11,12 +11,13 @@
  *   - Owner is set at generation and never changes.
  *
  * Generation strategy:
- *   - Excludes confusing chars (0/O, 1/I, L). 32-char alphabet, 4 positions =
- *     1,048,576 candidates. Collision check on mint; retry up to 8 times.
- *   - TM-XX (Kevin TM-01, Paul TM-07 etc.) seeded outside this generator;
- *     this generator produces fresh codes for new BAs going forward.
+ *   - Excludes confusing chars (0/O, 1/I, L). 31-char alphabet, 4 positions =
+ *     923,521 candidates. Collision check on mint; retry up to 8 times.
+ *   - Founder/member IDs are separate from access codes. This generator only
+ *     produces Rev 3 access codes.
  */
 
+import { randomInt } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import type { AccessCodeRecord } from './access-codes.js';
@@ -28,7 +29,7 @@ const MAX_GEN_ATTEMPTS = 8;
 function randomCode(): string {
   let out = 'TMAG-';
   for (let i = 0; i < CODE_LEN; i++) {
-    out += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+    out += ALPHABET[randomInt(ALPHABET.length)];
   }
   return out;
 }
@@ -60,7 +61,7 @@ export interface MintAccessCodeInput {
   sponsorLastName: string;
   note?: string;
   mintedByTmagId: string;
-  /** Optional explicit code (e.g. for seeding TM-01, TM-07). Must be unique. */
+  /** Optional explicit code for deterministic seeds. Must be unique. */
   explicit?: string;
 }
 
@@ -76,7 +77,7 @@ export async function mintAccessCode(
   let code: string | null = null;
   if (input.explicit) {
     const ex = input.explicit.trim().toUpperCase();
-    if (!/^TMAG-[A-Z0-9-]{2,8}$/.test(ex)) {
+    if (!/^TMAG-[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{4}$/.test(ex)) {
       throw new Error(`Invalid explicit code shape: ${ex}`);
     }
     if (await codeExists(ex)) {
@@ -127,7 +128,7 @@ export async function mintAccessCode(
       },
     },
     chroma: {
-      collection: 'tmag_access_codes',
+      collection: 'mcs_access_codes',
       document: `Access code ${code} minted ${createdAt}, assigned to ${input.sponsorFirstName} ${input.sponsorLastName} (BA ${input.sponsorTmagId} / THREE ${input.sponsorThreeBaId}). ${input.note ?? ''}`.trim(),
       metadata: {
         code,

@@ -21,7 +21,7 @@ import { validateMichaelResponseContract } from '../../runtime/orchestration/ind
  *                            trace omitted unless the trace flag is on.
  */
 
-const SESSION_BA_ID = 'TMAG-20240101-ABCDEF';
+const SESSION_BA_ID = 'TMAG-ABC234';
 
 const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
