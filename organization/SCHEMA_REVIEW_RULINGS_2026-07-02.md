@@ -199,6 +199,30 @@ Canonized as the Continuous Discovery doctrine:
 
 ---
 
+## Ruling 9 — Ingestion coverage: every encounter that creates, ingests
+
+Kevin, 2026-07-02 (verbatim intent): "we just have to have ingestion
+mechanisms in place for each encounter that creates something new to ingest."
+
+Canonized as the enforcement arm of Ruling 8 (Continuous Discovery):
+1. **Coverage rule:** every agent encounter type that produces something new
+   (understanding, outcome, lesson, artifact) MUST have a defined ingestion
+   mechanism into the pipeline (capture → candidate → review → knowledge).
+   An unmapped encounter type is a defect, not a gap to tolerate.
+2. **Deliverable — Encounter-to-Ingestion Coverage Matrix:** agents ×
+   encounter types × artifact created × ingestion mechanism × landing store,
+   built against the current runtime (Steve ingest endpoint; agent events;
+   R0 turn audit; R1 outcomes; R2 candidates; R3 GraphRAG; knowledge-intake
+   pipeline). Gap analysis on first build.
+3. **Standing gate:** no new agent or new encounter type activates without
+   its coverage-matrix row — added to the agent activation charter pattern
+   alongside the existing kill-switch/observability requirements.
+4. Sequencing unchanged: the R0–R3 persistence rungs stay behind Kevin's
+   kill switches and activate per the Phase 7 governance — this ruling
+   requires the MAP now, not premature flag-flips.
+
+---
+
 ## Open items in this review
 
 - Remaining catalog groups: prospects/invitations · CRM · agents/runtime · VM ·
