@@ -102,6 +102,27 @@ Group A access-code model confirmed with a staged issuance path (Kevin,
 
 ---
 
+## Ruling 6 (OPEN) + directive — Commitments vs Questionnaire vs Steve
+
+Directive executed (Kevin, 2026-07-02): the catalog now states plainly that
+`commitments` is the click-acknowledge ACCEPTANCE record of The Team
+Magnificent Commitment (audit-grade; not an interview), and that
+`questionnaires` is stage 2 of the designed 3-stage onboarding spine
+(Steve conversation → written questionnaire → sponsor workbook), distinct
+from Steve's Success Profile.
+
+**NEW DELIVERABLE (owner: Kevin):** author the actual Team Magnificent
+Commitment text — the substantive agreement the member clicks to accept.
+Code versions the acceptance (`COMMITMENT_VERSION`), but the governed
+commitment copy itself does not yet exist as an artifact. To be written,
+versioned, and referenced by the welcome surface.
+
+**OPEN — Ruling 6:** questionnaire disposition — (a) keep all three stages,
+(b) retire questionnaire in favor of Steve (the mentorship gate already runs
+on requireSteveComplete in code), or (c) keep as optional. Awaiting Kevin.
+
+---
+
 ## Open items in this review
 
 - Remaining catalog groups: prospects/invitations · CRM · agents/runtime · VM ·
