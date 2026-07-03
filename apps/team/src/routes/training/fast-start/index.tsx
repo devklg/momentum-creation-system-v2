@@ -82,13 +82,24 @@ export function FastStartHubPage() {
       <header className="relative z-10 px-6 md:px-10 pt-6 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img src="/logos/logo_icon.png" alt="" aria-hidden="true" className="h-7 w-auto" />
-          <span className="font-display tracking-[0.18em] text-[15px] text-gold">
+          <Link
+            to="/cockpit"
+            className="font-display tracking-[0.18em] text-[15px] text-gold hover:opacity-80"
+          >
             TEAM MAGNIFICENT
-          </span>
+          </Link>
         </div>
-        <span className="font-mono tracking-[0.22em] text-[10px] text-cream-mute uppercase">
-          Fast Start · The First Seven Days
-        </span>
+        <div className="flex items-center gap-6">
+          <span className="font-mono tracking-[0.22em] text-[10px] text-cream-mute uppercase">
+            Fast Start · The First Seven Days
+          </span>
+          <Link
+            to="/cockpit"
+            className="font-mono tracking-[0.22em] text-[10px] text-cream-mute hover:text-gold uppercase"
+          >
+            ← Cockpit
+          </Link>
+        </div>
       </header>
 
       <section className="relative z-10 px-6 pt-14 pb-10">
