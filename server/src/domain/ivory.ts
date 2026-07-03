@@ -775,21 +775,39 @@ function neutralInvitationDraft(input: {
   relationshipReason: string;
   productName?: string | null;
 }): string {
+  // NOTE: deliberately does NOT echo the BA's private relationshipReason —
+  // notes are context for the BA, never copy for the prospect.
   const productLine = input.productName
-    ? `I saw something around ${input.productName} and it made me think of you.`
-    : 'I saw something and it made me think of you.';
+    ? `I came across something around ${input.productName} recently and you were the first person I thought of.`
+    : 'I came across something recently and you were the first person I thought of.';
   return [
-    `Hey ${input.firstName}, ${productLine}`,
-    `The reason you came to mind is ${input.relationshipReason}.`,
-    'No pressure at all, but would you watch this short video and tell me what you think?',
+    `Hey ${input.firstName}! ${productLine}`,
+    "It's a short video — no pressure at all, but I'd genuinely love to hear what you think.",
+    'Can I send it over?',
   ].join(' ');
 }
 
 const INVITATION_DRAFT_SYSTEM = [
   'You are IVORY, a private Team Magnificent invitation companion for a Brand',
-  'Ambassador. The BA has already chosen exactly one person and written why',
-  'that person came to mind. Your only job is to draft one warm invitation',
-  'message the BA can edit and send manually.',
+  'Ambassador (the BA). The BA has already chosen exactly one person and told',
+  'you privately why that person came to mind. Your only job is to draft one',
+  'invitation text message the BA will edit and send from their own phone.',
+  '',
+  'WHAT A GREAT INVITATION IS: it reads like the BA texting a friend — warm,',
+  'specific to the relationship, a little casual, zero salesmanship. It has',
+  'three beats: (1) a natural personal opener that fits how these two people',
+  'actually know each other, (2) "I saw/found something and thought of you"',
+  'with at most a light hint of why, (3) a low-pressure ask to watch a short',
+  'video and say what they think. 2–4 short sentences, 25–60 words. Sound like',
+  'a person, not a brand.',
+  '',
+  'PRIVATE CONTEXT RULE — the most important rule of your craft: everything',
+  'the BA tells you (their notes, the relationship reason, categories, angle)',
+  'is BACKGROUND to help you choose tone and hook. NEVER quote, paraphrase, or',
+  'recite the notes back into the message. The prospect must never be able to',
+  'tell that notes about them exist. If the notes say "single mom, stressed,',
+  'hates her boss," the message says none of that — it just lands like a',
+  'friend who gets her.',
   '',
   'HARD RULES:',
   '- Never score, rank, rate, qualify, or compare the person.',
@@ -797,21 +815,28 @@ const INVITATION_DRAFT_SYSTEM = [
   '- Never mention income, earnings, compensation, cycles, ranks, placement,',
   '  spillover, guarantees, medical outcomes, scarcity, urgency, or guilt.',
   '- Never say the system will send, call, or follow up for the BA.',
-  '- Keep the message personal, short, and conversational.',
-  '- Return ONLY the message text. No preamble, no markdown.',
-].join('\n');
+  '- No links, no video titles, no company pitch — the BA attaches the link.',
+  '- Return ONLY the message text. No preamble, no quotes, no markdown.',
+].join('\n');;
 
 function buildInvitationDraftUserTurn(input: {
   name: McsIvoryName;
   relationshipReason: string;
   productName?: string | null;
 }): string {
+  const categories = input.name.categories?.length
+    ? input.name.categories.join(', ')
+    : 'unspecified';
   return [
-    `Prospect first name: ${input.name.firstName}`,
-    `Relationship context from BA: ${input.relationshipReason}`,
-    input.productName ? `Optional product context: ${input.productName}` : 'Optional product context: none',
+    'PRIVATE BACKGROUND (for your tone and hook selection only — never echoed):',
+    `- Prospect first name: ${input.name.firstName}`,
+    `- How the BA knows them / why they came to mind: ${input.relationshipReason}`,
+    `- Relationship categories: ${categories}`,
+    input.productName
+      ? `- Product context (a light hint at most, never a pitch): ${input.productName}`
+      : '- Product context: none — keep it purely personal.',
     '',
-    'Draft one editable invitation message now.',
+    'Draft the one invitation text now, following your craft.',
   ].join('\n');
 }
 
