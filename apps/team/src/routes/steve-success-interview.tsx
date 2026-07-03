@@ -158,6 +158,51 @@ interface ChatTurn {
   at: string;
 }
 
+/* ─── Browser voice (S1.6 completion) — Web Speech STT/TTS, browser-only,
+       no Telnyx/PSTN per the amended locked spec. The voice layer is purely
+       client-side: speech → text → the SAME /converse endpoint → text →
+       speech. The event-sourced transcript is identical either way. ─── */
+
+interface SpeechAlt {
+  transcript: string;
+}
+interface SpeechResult {
+  0: SpeechAlt;
+  isFinal: boolean;
+}
+interface SpeechEventLike {
+  resultIndex: number;
+  results: { length: number; [index: number]: SpeechResult };
+}
+interface SpeechRec {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((e: SpeechEventLike) => void) | null;
+  onend: (() => void) | null;
+  onerror: ((e: { error?: string }) => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+function speechRecognitionCtor(): (new () => SpeechRec) | null {
+  if (typeof window === 'undefined') return null;
+  const w = window as unknown as {
+    SpeechRecognition?: new () => SpeechRec;
+    webkitSpeechRecognition?: new () => SpeechRec;
+  };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
+/** Strip emoji + markdown emphasis so TTS reads clean sentences. */
+function speakableText(text: string): string {
+  return text
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '')
+    .replace(/\*+/g, '')
+    .trim();
+}
+
 function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> }) {
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [draft, setDraft] = useState('');
@@ -165,9 +210,18 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
+  const [voiceOn, setVoiceOn] = useState(false);
+  const [listening, setListening] = useState(false);
+  const voiceOnRef = useRef(false);
+  const doneRef = useRef(false);
+  const busyRef = useRef(false);
+  const recRef = useRef<SpeechRec | null>(null);
+  const voiceSupported = speechRecognitionCtor() !== null;
+
   const send = useCallback(
     async (message: string) => {
       setBusy(true);
+      busyRef.current = true;
       setError(null);
       try {
         const res = await fetch('/api/steve/discovery/converse', {
@@ -188,6 +242,12 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
           return;
         }
         if (data.turns) setTurns(data.turns);
+        const lastSteve = data.turns?.filter((t) => t.role === 'steve').slice(-1)[0]?.text ?? '';
+        if (data.done) {
+          doneRef.current = true;
+          stopVoice();
+        }
+        if (voiceOnRef.current && lastSteve) speak(lastSteve);
         if (data.extractionPending) {
           setError('Steve is wrapping up your profile — send one more short message to finish.');
         }
@@ -199,6 +259,7 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
         setError(`Network error: ${msg}`);
       } finally {
         setBusy(false);
+        busyRef.current = false;
       }
     },
     [onComplete],
@@ -231,11 +292,83 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
     const message = draft.trim();
     if (!message || busy) return;
     setDraft('');
+    submitMessage(message);
+  }
+
+  function submitMessage(message: string) {
     setTurns((prev) => [
       ...prev,
       { seq: prev.length, role: 'ba', text: message, at: new Date().toISOString() },
     ]);
     void send(message);
+  }
+
+  /* ── voice controls ── */
+
+  function speak(text: string) {
+    if (typeof speechSynthesis === 'undefined') return;
+    speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(speakableText(text));
+    utter.lang = 'en-US';
+    utter.rate = 1.02;
+    utter.onend = () => {
+      if (voiceOnRef.current && !doneRef.current && !busyRef.current) startListening();
+    };
+    speechSynthesis.speak(utter);
+  }
+
+  function startListening() {
+    if (!voiceOnRef.current || doneRef.current) return;
+    const Ctor = speechRecognitionCtor();
+    if (!Ctor) return;
+    try { recRef.current?.abort(); } catch { /* noop */ }
+    const rec = new Ctor();
+    recRef.current = rec;
+    rec.lang = 'en-US';
+    rec.continuous = false;
+    rec.interimResults = true;
+    let finalText = '';
+    rec.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (!r) continue;
+        if (r.isFinal) finalText += r[0].transcript;
+        else interim += r[0].transcript;
+      }
+      setDraft(finalText + interim);
+    };
+    rec.onend = () => {
+      setListening(false);
+      const message = finalText.trim();
+      setDraft('');
+      if (message && !busyRef.current) {
+        submitMessage(message);
+      } else if (voiceOnRef.current && !doneRef.current && !busyRef.current && typeof speechSynthesis !== 'undefined' && !speechSynthesis.speaking) {
+        startListening(); // silence timeout — keep the mic warm, hands-free
+      }
+    };
+    rec.onerror = () => setListening(false);
+    setListening(true);
+    rec.start();
+  }
+
+  function stopVoice() {
+    voiceOnRef.current = false;
+    setVoiceOn(false);
+    setListening(false);
+    try { recRef.current?.abort(); } catch { /* noop */ }
+    if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+  }
+
+  function toggleVoice() {
+    if (voiceOn) {
+      stopVoice();
+      return;
+    }
+    voiceOnRef.current = true;
+    setVoiceOn(true);
+    if (!busy) startListening();
   }
 
   return (
@@ -280,10 +413,24 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
         {error ? <p className="mt-2 text-sm text-red-400">{error}</p> : null}
 
         <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
+          {voiceSupported ? (
+            <button
+              type="button"
+              onClick={toggleVoice}
+              title={voiceOn ? 'Turn voice off' : 'Talk to Steve'}
+              className={
+                voiceOn
+                  ? 'rounded-lg border border-gold bg-gold/20 px-4 py-3 text-sm font-semibold text-gold'
+                  : 'rounded-lg border border-cream/20 bg-black/30 px-4 py-3 text-sm text-cream-mute hover:border-gold hover:text-gold'
+              }
+            >
+              {listening ? '● Listening…' : voiceOn ? '🎙 Voice on' : '🎙 Voice'}
+            </button>
+          ) : null}
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="Type your answer…"
+            placeholder={listening ? 'Listening — just talk…' : 'Type your answer…'}
             disabled={busy}
             className="flex-1 rounded-lg border border-cream/20 bg-black/30 px-4 py-3 text-sm text-cream placeholder:text-cream-mute focus:border-gold focus:outline-none"
           />
