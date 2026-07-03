@@ -31,6 +31,12 @@ import {
   DiscoveryIngestError,
   SponsorAccessError,
 } from '../domain/steve-success-interview.js';
+import {
+  SteveAlreadyCompleteError,
+  converseWithSteve,
+  loadConversation,
+} from '../domain/steveConversationRuntime.js';
+import { AnthropicConfigError } from '../services/anthropic.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 
 export const steveRoutes: Router = express.Router();
@@ -266,3 +272,44 @@ steveRoutes.get(
     }
   },
 );
+
+/** GET /api/steve/discovery/conversation — the BA's own LIVE chat transcript
+ *  (in-flight interview state; the completed artifact lives in /state). */
+steveRoutes.get('/discovery/conversation', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const turns = await loadConversation(req.session!.tmagId);
+    res.json({ ok: true, turns });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Conversation read failed: ${msg}` });
+  }
+});
+
+const ConverseBody = z.object({ message: z.string().max(4000).optional().default('') });
+
+/** POST /api/steve/discovery/converse — one turn of the browser-based
+ *  discovery interview (amended locked spec S1.6: the dashboard carries
+ *  conversations). Empty message = open/greet. done=true once the artifact
+ *  has been ingested (gate opens). */
+steveRoutes.post('/discovery/converse', requireAuth, async (req: Request, res: Response) => {
+  const parsed = ConverseBody.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    res.status(400).json({ ok: false, error: 'Invalid body.' });
+    return;
+  }
+  try {
+    const result = await converseWithSteve(req.session!.tmagId, parsed.data.message);
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    if (err instanceof SteveAlreadyCompleteError) {
+      res.status(409).json({ ok: false, error: 'Discovery already complete.', code: 'ALREADY_COMPLETE' });
+      return;
+    }
+    if (err instanceof AnthropicConfigError) {
+      res.status(503).json({ ok: false, error: 'Steve is not configured on this environment yet.', code: 'LLM_DORMANT' });
+      return;
+    }
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Steve conversation failed: ${msg}` });
+  }
+});
