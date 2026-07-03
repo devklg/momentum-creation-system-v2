@@ -15,8 +15,8 @@
  * TS6059 — same pattern as components/michael/_wire.ts.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 
 /* ─── Local wire shapes (mirror the Steve block in packages/shared/src/types.ts) ─── */
 
@@ -143,12 +143,161 @@ export function SteveSuccessInterviewPage() {
 
   const { view } = state;
   if (view.phase !== 'complete' || !view.artifact) {
-    return (
-      <CenterMessage line="Steve hasn't completed your discovery conversation yet. Once it's done, your Success Profile will appear here." />
-    );
+    return <DiscoveryChat onComplete={load} />;
   }
 
   return <ProfileView artifact={view.artifact} />;
+}
+
+/* ─── In-flight state — the live discovery conversation with Steve ─── */
+
+interface ChatTurn {
+  seq: number;
+  role: 'ba' | 'steve';
+  text: string;
+  at: string;
+}
+
+function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> }) {
+  const [turns, setTurns] = useState<ChatTurn[]>([]);
+  const [draft, setDraft] = useState('');
+  const [busy, setBusy] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
+
+  const send = useCallback(
+    async (message: string) => {
+      setBusy(true);
+      setError(null);
+      try {
+        const res = await fetch('/api/steve/discovery/converse', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ message }),
+        });
+        const data = (await res.json()) as {
+          ok: boolean;
+          error?: string;
+          done?: boolean;
+          extractionPending?: boolean;
+          turns?: ChatTurn[];
+        };
+        if (!data.ok) {
+          setError(data.error ?? 'Steve could not respond. Try again.');
+          return;
+        }
+        if (data.turns) setTurns(data.turns);
+        if (data.extractionPending) {
+          setError('Steve is wrapping up your profile — send one more short message to finish.');
+        }
+        if (data.done) {
+          await onComplete();
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'unknown';
+        setError(`Network error: ${msg}`);
+      } finally {
+        setBusy(false);
+      }
+    },
+    [onComplete],
+  );
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await fetch('/api/steve/discovery/conversation', { credentials: 'include' });
+        const data = (await res.json()) as { ok: boolean; turns?: ChatTurn[] };
+        if (data.ok && data.turns && data.turns.length > 0) {
+          setTurns(data.turns);
+          setBusy(false);
+          return;
+        }
+      } catch {
+        /* fall through to greeting */
+      }
+      await send('');
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [turns, busy]);
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    const message = draft.trim();
+    if (!message || busy) return;
+    setDraft('');
+    setTurns((prev) => [
+      ...prev,
+      { seq: prev.length, role: 'ba', text: message, at: new Date().toISOString() },
+    ]);
+    void send(message);
+  }
+
+  return (
+    <div className="min-h-screen bg-ink text-cream px-6 py-10">
+      <div className="mx-auto flex h-[calc(100vh-5rem)] max-w-2xl flex-col">
+        <header className="mb-4">
+          <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-gold">
+            Steve · New BA Discovery
+          </p>
+          <h1 className="mt-1 text-xl font-semibold">Your discovery conversation</h1>
+          <p className="mt-1 text-sm text-cream-mute">
+            A relaxed get-to-know-you — nothing here is scored or judged. Your answers
+            shape how your sponsor and the team support you.
+          </p>
+        </header>
+
+        <div className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-cream/10 bg-black/20 p-4">
+          {turns.map((t) => (
+            <div
+              key={`${t.seq}-${t.role}`}
+              className={t.role === 'steve' ? 'flex justify-start' : 'flex justify-end'}
+            >
+              <div
+                className={
+                  t.role === 'steve'
+                    ? 'max-w-[85%] whitespace-pre-wrap rounded-lg bg-cream/10 px-4 py-2 text-sm'
+                    : 'max-w-[85%] whitespace-pre-wrap rounded-lg bg-gold/20 px-4 py-2 text-sm'
+                }
+              >
+                {t.text}
+              </div>
+            </div>
+          ))}
+          {busy ? (
+            <p className="text-xs font-mono uppercase tracking-widest text-cream-mute">
+              Steve is typing…
+            </p>
+          ) : null}
+          <div ref={endRef} />
+        </div>
+
+        {error ? <p className="mt-2 text-sm text-red-400">{error}</p> : null}
+
+        <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Type your answer…"
+            disabled={busy}
+            className="flex-1 rounded-lg border border-cream/20 bg-black/30 px-4 py-3 text-sm text-cream placeholder:text-cream-mute focus:border-gold focus:outline-none"
+          />
+          <button
+            type="submit"
+            disabled={busy || !draft.trim()}
+            className="rounded-lg bg-gold px-5 py-3 text-sm font-semibold text-ink disabled:opacity-40"
+          >
+            Send
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 }
 
 /* ─── Complete state — the Success Profile ─── */
