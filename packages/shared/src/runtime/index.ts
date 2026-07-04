@@ -11,3 +11,4 @@ export type * from './qa.js';
 export type * from './knowledge-query.js';
 export type * from './knowledge-intake.js';
 export type * from './knowledge-freshness.js';
+export * from './knowledge-base-schema.js';

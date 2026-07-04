@@ -25,6 +25,7 @@ import { adminTenantRoutes } from './routes/admin/tenant.js';
 import { adminOrientationRoutes } from './routes/admin/orientation.js';
 import { adminVmRoutes } from './routes/admin/vm.js';
 import { adminAgentsRoutes } from './routes/admin/agents.js';
+import { adminKnowledgeRoutes } from './routes/admin/knowledge.js';
 import { adminMichaelRuntimeObservabilityRoutes } from './routes/admin/michael-runtime-observability.js';
 import { startBroadcastWorker } from './services/broadcastQueue.js';
 import { startVmDeliveryWorker } from './workers/vmDeliveryWorker.js';
@@ -78,7 +79,6 @@ app.disable('x-powered-by');
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use('/api/telnyx', telnyxWebhookRoutes);
 
-app.use(express.json({ limit: '256kb' }));
 app.use(cookieParser());
 app.use(
   cors({
@@ -91,6 +91,11 @@ app.use(
     credentials: true,
   }),
 );
+// Kevin-only Knowledge Base upload accepts base64-encoded files. Keep the
+// larger JSON limit scoped to this admin route instead of widening the whole API.
+app.use('/api/admin/knowledge', express.json({ limit: '25mb' }), adminKnowledgeRoutes);
+
+app.use(express.json({ limit: '256kb' }));
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // PRE-GATE ROUTES â€” must NOT use requireSteveComplete.

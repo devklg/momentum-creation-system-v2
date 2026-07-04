@@ -62,4 +62,8 @@ Pull a specific doc only when the work needs it.
 - Chroma: actions are `add` / `query_with_filter` (no `get`); `add` returns `verified:true`.
 - The sandbox `str_replace`/`create_file` tools do NOT touch the D drive — use desktop-commander `write_file`/`edit_block`.
 
+## Current active briefs
+
+- `docs/agent-briefs/knowledge-base-voicebox-context-brief.md` — current Knowledge Base, Context Manager / Dual RAG, and VoiceBox implementation context. Read before modifying agent runtime, knowledge upload, approved knowledge retrieval, or VoiceBox integration.
+
 *Written Chat #129. If this file and reality disagree, fix the wireframe + re-run the syncs.*

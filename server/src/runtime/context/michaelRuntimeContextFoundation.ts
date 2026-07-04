@@ -11,9 +11,11 @@
  * turn's createdAt) and returns a production `ContextManagerRequestPort`:
  *
  *  - `assembledBy: 'context_manager'` — the only sanctioned assembler;
- *  - `requestContextPacket(scope, request)` assembles an empty-approved-knowledge,
+ *  - `requestContextPacket(scope, request)` delegates to the live Planner /
+ *    Executor / Tracer service when `MCS_CONTEXT_MANAGER_LIVE_ENABLED=true`.
+ *    Otherwise it assembles the original empty-approved-knowledge,
  *    candidate/review-only-excluded `context_packet.v1` stamped
- *    `packetStatus: 'degraded'`. This is the knowledge-honest, store-free packet
+ *    `packetStatus: 'degraded'`. This preserves the knowledge-honest fallback
  *    the inert S2.20 facade deterministically resolves to the pre-authored
  *    `safe_fallback` response;
  *  - boundary-clean — it imports NO store/PERSISTENCE/GraphRAG/retrieval client and
@@ -70,10 +72,10 @@ export interface MichaelRuntimeContextFoundationInput {
 }
 
 /**
- * Build the production Context Manager request port for a degraded, fail-closed
- * Michael runtime turn. The returned port assembles an empty-approved-knowledge,
- * candidate-excluded `context_packet.v1` from session identity alone — no store,
- * no retrieval, no PERSISTENCE. This is the ONLY place Michael packet assembly lives.
+ * Build the production Context Manager request port for Michael runtime. This is
+ * the ONLY place Michael packet assembly lives. Live retrieval is opt-in and
+ * stays behind this context-layer port; the orchestration layer still only
+ * injects the port.
  */
 export function createMichaelRuntimeContextManagerPort(
   input: MichaelRuntimeContextFoundationInput,
@@ -83,9 +85,19 @@ export function createMichaelRuntimeContextManagerPort(
   return {
     assembledBy: 'context_manager',
     async requestContextPacket(
-      _scope: McsRuntimeRequestScope,
+      scope: McsRuntimeRequestScope,
       request: McsContextPacketRequest,
     ): Promise<McsContextPacketV1> {
+      if (contextManagerLiveEnabled()) {
+        return requestLiveContextPacket({
+          tmagId,
+          mode,
+          createdAt,
+          scope,
+          request,
+        });
+      }
+
       return buildContextPacket({
         packetId: `ctx_packet_${randomUUID()}` as McsContextPacketId,
         requestId: request.requestId as unknown as McsContextRequestId,
@@ -144,6 +156,36 @@ export function createMichaelRuntimeContextManagerPort(
       });
     },
   };
+}
+
+async function requestLiveContextPacket(input: {
+  readonly tmagId: TmagId;
+  readonly mode: McsRuntimeMode;
+  readonly createdAt: string;
+  readonly scope: McsRuntimeRequestScope;
+  readonly request: McsContextPacketRequest;
+}): Promise<McsContextPacketV1> {
+  const contextManagerModule = await import('./contextManagerService.js');
+  const approvedKnowledgeStoreModule = await import('../../services/knowledge/approvedKnowledgeStore.js');
+
+  const result = await contextManagerModule.createContextManagerService(
+    approvedKnowledgeStoreModule.createStoredApprovedKnowledgeProvider(),
+    {
+      mode: input.mode,
+      createdAt: input.createdAt,
+      maxApprovedKnowledgeResults: 8,
+      ba: {
+        tmagId: input.tmagId,
+        journalEnabled: false,
+        languagePreference: input.request.language,
+      },
+    },
+  ).buildContext({ scope: input.scope, request: input.request });
+  return result.packet;
+}
+
+function contextManagerLiveEnabled(): boolean {
+  return process.env.MCS_CONTEXT_MANAGER_LIVE_ENABLED === 'true';
 }
 
 function resolveEnvironment(): McsTenantContext['environment'] {

@@ -17,6 +17,8 @@ export function chunkToKnowledgeReference(chunk: McsKnowledgeChunk): McsKnowledg
   if (chunk.status !== 'active' || !chunk.retrievalEligible) return null;
   return {
     knowledgeId: deriveKnowledgeId(chunk.chunkId) as McsKnowledgeId,
+    title: chunk.heading ?? `${chunk.domain} knowledge`,
+    summary: chunk.text,
     domain: chunk.domain,
     status: 'active',
     language: chunk.language,

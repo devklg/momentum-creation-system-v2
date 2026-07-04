@@ -15,3 +15,13 @@ export {
 export type {
   BrowserVoiceTextRuntimeBoundaryPort,
 } from './voiceTextRuntime.js';
+export {
+  resolveVoiceboxAgentProfile,
+  synthesizeAgentVoice,
+  voiceboxAgentProfilesFromEnv,
+} from './voiceboxRuntime.js';
+export type {
+  SynthesizeAgentVoiceInput,
+  SynthesizeAgentVoiceResult,
+  VoiceboxAgentProfileMap,
+} from './voiceboxRuntime.js';

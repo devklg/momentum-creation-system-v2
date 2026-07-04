@@ -251,7 +251,8 @@ export function toContextReferences(result: McsApprovedKnowledgeQueryResult): Co
     kind: 'approved_knowledge',
     status: 'approved',
     knowledgeId: reference.knowledgeId,
-    summary: structuralSummary(reference.domain, reference.knowledgeId),
+    title: reference.title,
+    summary: reference.summary ?? structuralSummary(reference.domain, reference.knowledgeId),
     language: reference.language,
     translationStatus: reference.translationStatus,
   }));

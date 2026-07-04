@@ -22,6 +22,8 @@ export type McsKnowledgeLifecycleStatus =
 
 export interface McsKnowledgeReference {
   knowledgeId: McsKnowledgeId;
+  title?: string;
+  summary?: string;
   domain: McsKnowledgeDomain;
   status: Extract<McsKnowledgeLifecycleStatus, 'approved' | 'active'>;
   language: McsRuntimeLanguage;

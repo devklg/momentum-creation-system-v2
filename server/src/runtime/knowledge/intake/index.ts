@@ -24,6 +24,12 @@ export type { ChunkOptions, KnowledgeIntakeClassification } from './chunker.js';
 
 export { isChunkRetrievalEligible, filterRetrievalEligible } from './eligibility.js';
 
+export { resolveKnowledgeAuthority } from './authority.js';
+export type {
+  KnowledgeAuthorityDecision,
+  KnowledgeAuthorityResolution,
+} from './authority.js';
+
 export { chunkToKnowledgeReference, chunksToKnowledgeReferences } from './mapping.js';
 
 export { buildIndexRecord, buildIndexRecords } from './indexRecord.js';

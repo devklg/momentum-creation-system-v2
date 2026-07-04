@@ -94,3 +94,20 @@ export type {
   NextTrainingStepStatus,
   NextTrainingStepReasonCode,
 } from './nextTrainingStep.js';
+
+// Context Manager request service — the Planner / Executor / Tracer boundary that turns a
+// runtime context request into a Context Packet through the injected Knowledge Core boundary.
+export {
+  ContextManagerServiceError,
+  createContextManagerService,
+  createContextManagerServiceFromRetrieval,
+  planContextRequest,
+} from './contextManagerService.js';
+export type {
+  ContextManagerExecutionTrace,
+  ContextManagerPlan,
+  ContextManagerService,
+  ContextManagerServiceInput,
+  ContextManagerServiceOptions,
+  ContextManagerServiceResult,
+} from './contextManagerService.js';
