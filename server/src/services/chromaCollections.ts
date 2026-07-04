@@ -47,6 +47,8 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_steve_success_interview', // domain/steve-success-interview.ts (Steve discovery + success profiles)
   'mcs_access_codes', // domain/codeGen.ts
   'mcs_commitments', // domain/commitments.ts
+  'mcs_knowledge_sources', // services/knowledge/approvedKnowledgeStore.ts (PR #125, canon-renamed)
+  'mcs_knowledge_chunks', // services/knowledge/approvedKnowledgeStore.ts (PR #125, canon-renamed)
   // mcs_questionnaires REMOVED (Ruling 6, 2026-07-02): questionnaire retired into
   // Steve; boot must not resurrect the collection. Historical rows live in Mongo.
   'mcs_workbooks', // domain/workbook.ts
