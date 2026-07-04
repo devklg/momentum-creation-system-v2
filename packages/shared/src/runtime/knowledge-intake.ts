@@ -21,8 +21,18 @@ import type { McsRuntimeScope } from './identity.js';
 import type { McsAgentKey } from './agents.js';
 import type { McsKnowledgeId, McsSourceId } from './ids.js';
 
-/** Parseable intake formats. Owned-text family only in P4.5A (media/reference are Phase 8). */
-export type McsKnowledgeIntakeFormat = 'plain_text' | 'markdown' | 'html';
+/**
+ * Parseable intake formats. Text-like and extracted-file formats all normalize into text before
+ * deterministic parsing; `format` preserves what Kevin uploaded or pasted.
+ */
+export type McsKnowledgeIntakeFormat =
+  | 'plain_text'
+  | 'markdown'
+  | 'csv'
+  | 'json'
+  | 'html'
+  | 'pdf'
+  | 'docx';
 
 /**
  * Semantic origin of an owned-text source (ACR-0008 owned-text family). Owned-media and
@@ -30,6 +40,35 @@ export type McsKnowledgeIntakeFormat = 'plain_text' | 'markdown' | 'html';
  * GridFS / transcription / reference handling that is Phase 8.
  */
 export type McsKnowledgeSourceType = 'tm_training_page' | 'note' | 'owned_text';
+
+/**
+ * Authority provenance for a raw source. Kevin-authored / Kevin-approved material is the
+ * foundation of organizational knowledge. Agent/system-captured material may be useful, but it
+ * starts as candidate knowledge and cannot become active guidance without Kevin approval.
+ */
+export type McsKnowledgeAuthorityKind =
+  | 'kevin_authored'
+  | 'kevin_approved'
+  | 'agent_captured'
+  | 'system_captured'
+  | 'third_party_reference';
+
+export type McsKnowledgeAuthorityStatus =
+  | 'active_authority'
+  | 'candidate_only'
+  | 'rejected'
+  | 'superseded';
+
+export interface McsKnowledgeAuthorityEnvelope {
+  authorityKind: McsKnowledgeAuthorityKind;
+  authorityStatus: McsKnowledgeAuthorityStatus;
+  /** Human-readable authority identity, e.g. Kevin's TMAG id or an agent/system id. */
+  authorityBy: string;
+  /** ISO-8601 timestamp for the authority decision/source capture. */
+  authorityAt: string;
+  /** Optional source/decision reference proving the authority claim. */
+  authorityRef?: string;
+}
 
 /** Lifecycle of a raw source. Only `active` sources yield retrieval-eligible chunks. */
 export type McsRawKnowledgeStatus = 'active' | 'deprecated' | 'archived' | 'rejected';
@@ -48,6 +87,11 @@ export interface McsRawKnowledgeSource {
   /** Optional pointer to an external owned location (e.g. a GitHub training-page path). */
   sourceRef?: string;
   createdBy: string;
+  /**
+   * Optional explicit authority envelope. If absent, the intake layer may still recognize legacy
+   * Kevin-created sources by `createdBy`; all other sources must remain candidate-only.
+   */
+  authority?: McsKnowledgeAuthorityEnvelope;
   /** ISO-8601 timestamp. */
   createdAt: string;
   language: McsRuntimeLanguage;

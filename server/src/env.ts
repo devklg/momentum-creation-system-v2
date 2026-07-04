@@ -233,6 +233,32 @@ const Env = z.object({
   // GraphRAG writer + retrieval are no-ops. Only active, retrieval-ready,
   // approved knowledge is ever served; candidates/superseded/archived excluded.
   GRAPHRAG_PERSISTENCE_ENABLED: EnvBoolean.default(false),
+
+  /**
+   * Context Manager live approved-knowledge retrieval.
+   *
+   * When false, Michael's runtime turn keeps the original degraded,
+   * empty-approved-knowledge packet. When true, the context-layer factory uses
+   * the Planner / Executor / Tracer service over Kevin-approved stored
+   * knowledge in real time. Agents still receive only Context Packets; they do
+   * not get a direct store/retrieval edge.
+   */
+  MCS_CONTEXT_MANAGER_LIVE_ENABLED: EnvBoolean.default(false),
+
+  /**
+   * VoiceBox runtime edge for internal `.team` browser voice output.
+   *
+   * Default OFF. VoiceBox is a server-side browser-audio generation backend,
+   * not a Telnyx/PSTN path and not an external MCP runtime dependency. Agents
+   * may only use it through the server runtime adapter after explicit enable.
+   */
+  VOICEBOX_RUNTIME_ENABLED: EnvBoolean.default(false),
+  VOICEBOX_BASE_URL: z.string().url().default('http://127.0.0.1:17493'),
+  VOICEBOX_CLIENT_ID: z.string().default('mcs-v2'),
+  VOICEBOX_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().max(120000).default(30000),
+  VOICEBOX_STEVE_PROFILE_ID: z.string().default(''),
+  VOICEBOX_MICHAEL_PROFILE_ID: z.string().default(''),
+  VOICEBOX_IVORY_PROFILE_ID: z.string().default(''),
 });
 
 export const env = Env.parse(process.env);

@@ -19,10 +19,13 @@ import type {
 import { parseRawKnowledgeSource } from './parser.js';
 import { chunkParsedDocument, type ChunkOptions } from './chunker.js';
 import { buildIndexRecords } from './indexRecord.js';
+import { resolveKnowledgeAuthority } from './authority.js';
+import type { KnowledgeAuthorityResolution } from './authority.js';
 
 export interface KnowledgeIntakeResult {
   /** The raw source, unchanged — authority and traceability anchor. */
   source: McsRawKnowledgeSource;
+  authority: KnowledgeAuthorityResolution;
   document: McsParsedKnowledgeDocument;
   chunks: McsKnowledgeChunk[];
   indexRecords: McsKnowledgeIndexRecord[];
@@ -32,8 +35,15 @@ export function ingestRawKnowledgeSource(
   source: McsRawKnowledgeSource,
   options: ChunkOptions = {},
 ): KnowledgeIntakeResult {
+  const authority = resolveKnowledgeAuthority(source);
   const document = parseRawKnowledgeSource(source);
-  const chunks = chunkParsedDocument(source, document, options);
+  const chunks = authority.canBecomeActiveGuidance
+    ? chunkParsedDocument(source, document, options)
+    : chunkParsedDocument(
+      { ...source, status: authority.candidateOnly ? 'rejected' : source.status },
+      document,
+      options,
+    );
   const indexRecords = buildIndexRecords(chunks);
-  return { source, document, chunks, indexRecords };
+  return { source, authority, document, chunks, indexRecords };
 }

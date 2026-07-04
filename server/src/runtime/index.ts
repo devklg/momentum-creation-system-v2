@@ -38,8 +38,16 @@ export {
   createBrowserRuntimeEventEnvelope,
   createBrowserTextFallbackTurn,
   finalizeBrowserVoiceTurn,
+  resolveVoiceboxAgentProfile,
   speechLanguageMap,
+  synthesizeAgentVoice,
   validateBrowserVoiceTextSessionFoundation,
+  voiceboxAgentProfilesFromEnv,
+} from './browser/index.js';
+export type {
+  SynthesizeAgentVoiceInput,
+  SynthesizeAgentVoiceResult,
+  VoiceboxAgentProfileMap,
 } from './browser/index.js';
 export {
   contextManagerBoundary,
@@ -65,12 +73,23 @@ export {
   ContextPacketValidationError,
   assertValidContextPacketV1,
   contextPacketFoundationBoundary,
+  createContextManagerService,
+  createContextManagerServiceFromRetrieval,
+  planContextRequest,
   prepareContextPacketFoundation,
   validateContextPacketV1,
 } from './context/index.js';
 export {
   eventRuntimeBoundary,
 } from './events/eventRuntime.js';
+export type {
+  ContextManagerExecutionTrace,
+  ContextManagerPlan,
+  ContextManagerService,
+  ContextManagerServiceInput,
+  ContextManagerServiceOptions,
+  ContextManagerServiceResult,
+} from './context/index.js';
 export type {
   EventRuntimeBoundaryPort,
 } from './events/eventRuntime.js';

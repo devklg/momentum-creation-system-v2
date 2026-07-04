@@ -17,6 +17,7 @@ import {
   ingestRawKnowledgeSource,
   isChunkRetrievalEligible,
   parseRawKnowledgeSource,
+  resolveKnowledgeAuthority,
 } from '../index.js';
 import {
   APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
@@ -190,6 +191,61 @@ describe('P4.5A knowledge intake — parser', () => {
     const document = parseRawKnowledgeSource(source({ originalContent: '   \n\t  \n' }));
     expect(document.parseStatus).toBe('parse_failed');
     expect(chunkParsedDocument(source({ originalContent: '   \n\t  \n' }), document)).toEqual([]);
+  });
+});
+
+describe('P4.5A knowledge intake — Kevin authority foundation', () => {
+  it('treats Kevin-authored sources as active authority', () => {
+    const resolution = resolveKnowledgeAuthority(source({
+      authority: {
+        authorityKind: 'kevin_authored',
+        authorityStatus: 'active_authority',
+        authorityBy: 'TMAG-01',
+        authorityAt: '2026-06-30T12:00:00.000Z',
+      },
+    }));
+
+    expect(resolution).toMatchObject({
+      decision: 'active_authority',
+      canBecomeActiveGuidance: true,
+      candidateOnly: false,
+      reason: 'kevin_authored',
+    });
+  });
+
+  it('keeps agent-captured sources candidate-only until Kevin approves them', () => {
+    const raw = source({
+      createdBy: 'agent:michael',
+      authority: {
+        authorityKind: 'agent_captured',
+        authorityStatus: 'candidate_only',
+        authorityBy: 'agent:michael',
+        authorityAt: '2026-06-30T12:00:00.000Z',
+      },
+    });
+
+    const result = ingestRawKnowledgeSource(raw);
+
+    expect(result.authority).toMatchObject({
+      decision: 'candidate_only',
+      canBecomeActiveGuidance: false,
+      candidateOnly: true,
+    });
+    expect(result.chunks.every((chunk) => chunk.retrievalEligible === false)).toBe(true);
+    expect(chunksToKnowledgeReferences(result.chunks)).toEqual([]);
+  });
+
+  it('preserves legacy Kevin-created sources as active authority', () => {
+    const result = ingestRawKnowledgeSource(source({
+      createdBy: 'Kevin Gardner',
+      authority: undefined,
+    }));
+
+    expect(result.authority).toMatchObject({
+      decision: 'active_authority',
+      reason: 'legacy_kevin_created',
+    });
+    expect(chunksToKnowledgeReferences(result.chunks).length).toBeGreaterThan(0);
   });
 });
 

@@ -24,6 +24,7 @@ const NAV: NavItem[] = [
   { to: '/live-ops', label: 'Live Operations' },
   { to: '/vm', label: 'VM Campaigns' },
   { to: '/agents', label: 'Agent Oversight' },
+  { to: '/knowledge', label: 'Knowledge Base' },
   { to: '/orientation', label: 'Group Orientation' },
   { to: '/audit', label: 'Audit Log' },
   { to: '/tenant', label: 'Tenant Architecture' },
