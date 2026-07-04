@@ -99,6 +99,8 @@ export const CHROMA_COLLECTIONS = [
   'mcs_agent_ivory_events','mcs_agent_michael_events','mcs_agent_steve_events','mcs_agent_system_events','mcs_agent_templates','mcs_ivory_prospect_names','mcs_audit_log','mcs_content_templates','mcs_broadcasts','mcs_admin_prospect_notes','mcs_tenant_settings',
   // Prospect extras with living writers (runtime write-guard reconciliation 2026-07-02)
   'mcs_prospect_htank_accounts','mcs_new_member_orientation_reservations','mcs_webinar_events',
+  // Knowledge base (PR #125 ingestion layer, canon-renamed 2026-07-03)
+  'mcs_knowledge_sources','mcs_knowledge_chunks',
   // VM
   'mcs_vm_lead_owners','mcs_vm_bulk_leads','mcs_vm_campaigns','mcs_vm_delivery_events',
   // Memory / learning

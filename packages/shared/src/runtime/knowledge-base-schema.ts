@@ -26,8 +26,8 @@ import type { McsRuntimeLanguage } from './language.js';
 export const MCS_KNOWLEDGE_BASE_SCHEMA_VERSION = 'knowledge_base.schema.v1' as const;
 export type McsKnowledgeBaseSchemaVersion = typeof MCS_KNOWLEDGE_BASE_SCHEMA_VERSION;
 
-export const MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION = 'runtime_knowledge_sources' as const;
-export const MCS_KNOWLEDGE_BASE_CHUNK_COLLECTION = 'runtime_knowledge_chunks' as const;
+export const MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION = 'mcs_knowledge_sources' as const;
+export const MCS_KNOWLEDGE_BASE_CHUNK_COLLECTION = 'mcs_knowledge_chunks' as const;
 export const MCS_KNOWLEDGE_BASE_SOURCE_NODE_LABEL = 'KnowledgeSource' as const;
 export const MCS_KNOWLEDGE_BASE_CHUNK_NODE_LABEL = 'KnowledgeChunk' as const;
 export const MCS_KNOWLEDGE_BASE_SOURCE_CHUNK_RELATIONSHIP = 'HAS_CHUNK' as const;
