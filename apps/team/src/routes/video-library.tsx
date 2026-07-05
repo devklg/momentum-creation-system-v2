@@ -27,8 +27,9 @@
  *
  * PALETTE: the legacy page used an orange #D4601A accent that is NOT in the
  * locked five-color palette. This port drops it to teal/gold (same cleanup
- * as the #100 10-steps port). THREE branding is fine here — .team is
- * BA-facing; brand isolation (locked-spec 3.8) binds .com only.
+ * as the #100 10-steps port). The visible brand chrome remains Team
+ * Magnificent only; product-company facts stay in product/training
+ * content where they are functional.
  *
  * .team convention (lesson chat120): wire types are declared locally rather
  * than imported from @momentum/shared, whose `src` alias sits outside this
@@ -390,7 +391,7 @@ export function VideoLibraryPage() {
       {/* Hero */}
       <header className="relative overflow-hidden px-6 pt-20 pb-16 text-center">
         <p className="font-mono tracking-wide2 text-[11px] text-teal uppercase mb-4">
-          Team Magnificent · THREE International
+          Team Magnificent
         </p>
         <h1 className="font-display text-[clamp(48px,9vw,96px)] leading-[0.9] text-cream">
           Know your <span className="text-gold-bright">product.</span>

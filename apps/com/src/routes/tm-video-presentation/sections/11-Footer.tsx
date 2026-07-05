@@ -5,7 +5,7 @@
  *   • Handoff B Section 11:
  *     - BA attribution: "Presented to you by {BA_FIRST_NAME} {BA_LAST_NAME}."
  *     - Compass rose logo (inline SVG with gold glow)
- *     - NO THREE branding (locked-spec Part 3.8)
+ *     - NO product-company branding (locked-spec Part 3.8)
  *     - Team Magnificent compliance disclaimer in Team Magnificent's
  *       voice (locked-spec G.5 / 3.8)
  *
@@ -17,8 +17,8 @@
  *      income claims, placement promises, or guarantees of any kind."
  *
  *   • COM Design B.1 Footer: "Team Magnificent wordmark in teal,
- *     URL teammagnificent.com, ... No THREE International branding,
- *     no 'independent promoter tool' disclaimer, no logo other than
+ *     URL teammagnificent.com, ... no product-company branding,
+ *     no third-party promoter-tool disclaimer, no logo other than
  *     Team Magnificent's. No BA name in the footer."
  *
  * Reconciling: B says include BA attribution in the footer; A says

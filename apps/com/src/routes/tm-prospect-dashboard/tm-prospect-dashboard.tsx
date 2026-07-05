@@ -10,7 +10,7 @@
  *   - locked-spec Part 3.10 (compliance — never on .com).
  *   - locked-spec Part 4.4 (live ticker, SSE, monotonic positions).
  *   - locked-spec Part 3.8 (brand isolation — Team Magnificent only,
- *     no THREE branding in footer or anywhere prospect-facing).
+ *     no product-company branding in footer or anywhere prospect-facing).
  *   - Chat #84 correction (Section 4 shows team being built BENEATH
  *     the prospect; the 'ahead-of-you' tile from the prototype was a
  *     pre-Chat-#84 artifact and is dropped here).
@@ -25,9 +25,9 @@
  *   6. YourNextMove     — callback form (3 intents) + webinar tile.
  *
  * Footer drift correction applied per Chat #112 build-state audit:
- *   the prototype's "An operational team inside THREE International"
- *   line VIOLATES locked-spec 3.8. The dashboard footer here carries
- *   the Team Magnificent line only.
+ *   the prototype's company-branded footer line VIOLATES locked-spec
+ *   3.8. The dashboard footer here carries the Team Magnificent line
+ *   only.
  */
 
 import { useEffect, useMemo, useState } from 'react';
