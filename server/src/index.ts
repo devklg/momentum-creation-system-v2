@@ -27,6 +27,8 @@ import { adminVmRoutes } from './routes/admin/vm.js';
 import { adminAgentsRoutes } from './routes/admin/agents.js';
 import { adminKnowledgeRoutes } from './routes/admin/knowledge.js';
 import { adminMichaelRuntimeObservabilityRoutes } from './routes/admin/michael-runtime-observability.js';
+import { adminContentVideoRoutes } from './routes/admin/content-videos.js';
+import { adminHealthRoutes } from './routes/admin/health.js';
 import { startBroadcastWorker } from './services/broadcastQueue.js';
 import { startVmDeliveryWorker } from './workers/vmDeliveryWorker.js';
 import { startVmImportWorker } from './workers/vmImportWorker.js';
@@ -56,7 +58,9 @@ import { trainingRoutes } from './routes/training.js';
 import { profileRoutes } from './routes/profile.js';
 import { previewRoutes } from './routes/preview.js';
 import { orientationRoutes } from './routes/orientation.js';
+import { threeWayRoutes } from './routes/three-way.js';
 import { michaelRuntimeRoutes } from './routes/michael-runtime.js';
+import { contentVideoRoutes } from './routes/content-videos.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -139,6 +143,8 @@ app.use('/api/admin/orientation', adminOrientationRoutes);
 // ADMIN — Sprint 3 S3.6 in-memory Michael runtime observability snapshot.
 // Kevin-only via requireAdmin; pure in-memory read, no persistence, no audit.
 app.use('/api/admin/michael-runtime', adminMichaelRuntimeObservabilityRoutes);
+app.use('/api/admin/content/videos', adminContentVideoRoutes);
+app.use('/api/admin/health', adminHealthRoutes);
 
 // /api/p/* is prospect-facing (apps/com). No auth, no Steve gate. The token
 // itself is the identity surface per COM Design Section E.3.
@@ -243,6 +249,10 @@ app.use('/api/preview', previewRoutes);
 // body (locked-spec 3.5). REUSES the §2.6 webinar event/reservation pattern.
 app.use('/api/orientation', orientationRoutes);
 
+// Three-way call scheduling v1 (BRIEF 5). UPLINE-CHAIN routing is enforced in
+// the route/domain; no leader/admin role gate, only auth + Steve completion.
+app.use('/api/three-way', threeWayRoutes);
+
 // Sprint 3 S3.4 minimal Michael runtime route (gated BA route family). Handler
 // applies (requireAuth + requireSteveComplete) internally and is fail-closed
 // behind the default-off MICHAEL_RUNTIME_* kill switch. Fixtures-only via the
@@ -250,6 +260,7 @@ app.use('/api/orientation', orientationRoutes);
 // /api/michael onboarding route; the reserved bare runtime namespace stays
 // unmounted.
 app.use('/api/michael-runtime', michaelRuntimeRoutes);
+app.use('/api/content', contentVideoRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 

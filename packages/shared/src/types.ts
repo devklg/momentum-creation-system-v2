@@ -114,7 +114,7 @@ export interface McsProspectLocation {
  * Per locked-spec Part 1.17, prospects are one of the two kinds of people
  * the system tracks (BAs are the other). became_customer fields enable
  * the customer-conversion metric without expanding scope into customer
- * tracking; the actual customer relationship lives in THREE International.
+ * tracking; the actual customer relationship lives with THREE, the product company.
  */
 export interface McsProspectRecord {
   prospectId: string;
@@ -1966,6 +1966,7 @@ export interface TmagProfile {
   timezone: string;
   photoUrl: string | null;
   notifPrefs: McsBANotifPrefs;
+  entitlements: string[];
 
   // Read-only (wf_0072)
   tmagId: string;
@@ -2554,7 +2555,7 @@ export interface McsPreviewResolvedTokenPayload extends McsResolvedTokenPayload 
  *   - No algorithmic flagging. Every directory column is a raw count or
  *     a raw timestamp; the UI never compares them to a threshold and
  *     emits a judgment. Kevin reads the numbers.
- *   - THREE International is the upstream authority. The sponsor override
+ *   - THREE is the upstream authority. The sponsor override
  *     mirrors the BA's request — it does NOT push to THREE.
  *   - System-detected leader is a hard rule (binary-qualified ∧ ≥5
  *     personally enrolled). Binary qualification is not mirrored locally
@@ -2608,6 +2609,8 @@ export interface McsAdminBaDirectoryRow {
   systemDetectedLeader: boolean;
   /** Kevin-curated leader badge (admin toggle on row + profile drawer). */
   curatedLeader: boolean;
+  /** Explicit feature entitlements granted by Kevin/admin. */
+  entitlements: string[];
   /** Soft-delete lifecycle (Chat #138/#141), distinct from `status`
    *  'suspended'. True when removed from the roster (reversible). */
   deleted: boolean;
@@ -2680,6 +2683,18 @@ export interface McsAdminLeaderTagResponse {
   ok: true;
   tmagId: string;
   curated: boolean;
+}
+
+export interface McsAdminBaEntitlementsPayload {
+  action: 'grant' | 'revoke';
+  entitlement: 'vm_dialer';
+}
+
+export interface McsAdminBaEntitlementsResponse {
+  ok: true;
+  tmagId: string;
+  entitlements: string[];
+  row: McsAdminBaDirectoryRow | null;
 }
 
 /** POST /api/admin/bas/:tmagId/notes body — append a Kevin-only note. */
@@ -4446,6 +4461,7 @@ export type McsVmCampaignProvider =
   | 'leadsrain_style_adapter'
   | 'slybroadcast_style_adapter'
   | 'manual_csv'
+  | 'telnyx_call_control'
   | 'future_telecom_adapter'
   | 'none';
 
@@ -4621,6 +4637,7 @@ export interface McsVMCampaignRecord extends McsOwnedProspectIdentity {
   provider: McsVmCampaignProvider;
   status: McsVmCampaignStatus;
   voicemailAudioId: string | null;
+  audioUrl: string | null;
   smsTemplateId: string | null;
   emailTemplateId: string | null;
   scheduledAt: McsIsoTimestamp | null;
@@ -4748,6 +4765,7 @@ export interface McsCreateVMCampaignPayload {
   name: string;
   provider?: McsVMCampaignProviderMode;
   voicemailAudioId?: string | null;
+  audioUrl?: string | null;
   smsTemplateId?: string | null;
   emailTemplateId?: string | null;
   scheduledAt?: McsIsoTimestamp | null;
@@ -5206,7 +5224,7 @@ export type McsMemoryType =
  * every record is scoped to Team Magnificent membership — `tenantId` + the
  * `teamKey: 'team_magnificent'` team scope, plus `tmagId` = the Team Magnificent
  * MEMBER id (value `TMAG-…`, the login). The app is exclusively for TM members (an
- * enrolled III International BA in Kevin's downline); the THREE BA role is a
+ * enrolled THREE BA in Kevin's downline); the THREE BA role is a
  * mirrored attribute of the member, never the identity.
  *
  * Banned on any app record: `chat_number`, `chat_registry_id`,
@@ -5245,7 +5263,7 @@ export interface McsMemoryEnvelope {
 /**
  * Terminal outcome — how a prospect RESOLVED (P7.16 §1a). Small closed set; NOT
  * the journey milestones (watched video, attended webinar, …) which live in the
- * event log. `enrolled_iii` = enrolled into III International = became a Brand
+ * event log. `enrolled_iii` = enrolled into THREE = became a Brand
  * Ambassador (→ a Team Magnificent member in Kevin's downline). `became_customer`
  * = a product customer (not a member). The two are non-exclusive (a customer may
  * later enroll). `pending` = not yet resolved.
@@ -5447,4 +5465,181 @@ export interface McsLearningObservabilitySnapshot {
     /** approvals ÷ (approved + rejected); 0 when nothing reviewed. */
     approvalRate: number;
   };
+}
+
+// ----------------------------------------------------------------------------
+// BRIEF 5 - Three-way call scheduling v1.
+//
+// UPLINE-CHAIN routing: a member may book any upline member who has availability
+// set. Availability is owner-local recurring weekly time; bookings store UTC.
+// SMS remains dormant for v1; the in-app calendar rail is the notification
+// surface.
+// ----------------------------------------------------------------------------
+
+export type McsThreeWayDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+export interface McsThreeWayAvailabilityWindow {
+  windowId: string;
+  dayOfWeek: McsThreeWayDayOfWeek;
+  /** Owner-local HH:mm, 24-hour clock. */
+  startTime: string;
+  /** Owner-local HH:mm, 24-hour clock. */
+  endTime: string;
+  active: boolean;
+}
+
+export interface McsThreeWaySponsorAvailabilityRecord {
+  availabilityId: string;
+  ownerTmagId: string;
+  ownerName: string;
+  timezone: string;
+  windows: McsThreeWayAvailabilityWindow[];
+  createdAt: McsIsoTimestamp;
+  updatedAt: McsIsoTimestamp;
+}
+
+export interface McsThreeWayAvailabilitySlot {
+  startAt: McsIsoTimestamp;
+  endAt: McsIsoTimestamp;
+  ownerTimezone: string;
+  localDate: string;
+  localStartTime: string;
+}
+
+export interface McsThreeWayBookableUpline {
+  tmagId: string;
+  fullName: string;
+  firstName: string;
+  phone: string | null;
+  timezone: string;
+  windows: McsThreeWayAvailabilityWindow[];
+  slots: McsThreeWayAvailabilitySlot[];
+}
+
+export interface McsThreeWayAvailabilityResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  horizonDays: number;
+  myAvailability: McsThreeWaySponsorAvailabilityRecord | null;
+  bookableUplines: McsThreeWayBookableUpline[];
+}
+
+export interface McsThreeWaySetAvailabilityPayload {
+  timezone: string;
+  windows: Array<Partial<McsThreeWayAvailabilityWindow>>;
+}
+
+export interface McsThreeWaySetAvailabilityResponse {
+  ok: true;
+  availability: McsThreeWaySponsorAvailabilityRecord;
+}
+
+export type McsThreeWayBookingStatus = 'booked' | 'cancelled';
+
+export interface McsThreeWayBookingRecord {
+  bookingId: string;
+  bookerTmagId: string;
+  bookerName: string;
+  sponsorTmagId: string;
+  sponsorName: string;
+  startAt: McsIsoTimestamp;
+  endAt: McsIsoTimestamp;
+  ownerTimezone: string;
+  bookerTimezone: string | null;
+  prospectNote: string | null;
+  status: McsThreeWayBookingStatus;
+  createdAt: McsIsoTimestamp;
+  cancelledAt: McsIsoTimestamp | null;
+  cancelledByTmagId: string | null;
+  notificationChannel: 'in_app';
+}
+
+export interface McsThreeWayBookingView extends McsThreeWayBookingRecord {
+  myRole: 'booker' | 'sponsor' | 'both';
+}
+
+export interface McsThreeWayBookingsResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  bookings: McsThreeWayBookingView[];
+}
+
+export interface McsThreeWayBookPayload {
+  sponsorTmagId: string;
+  startAt: McsIsoTimestamp;
+  prospectNote?: string | null;
+}
+
+export interface McsThreeWayBookResponse {
+  ok: true;
+  booking: McsThreeWayBookingRecord;
+}
+
+export interface McsThreeWayCancelResponse {
+  ok: true;
+  booking: McsThreeWayBookingRecord;
+}
+
+// Product Gallery / Training Content Videos (Brief 9, 2026-07-04)
+
+export type McsContentVideoAudience = 'member' | 'prospect' | 'both';
+
+export interface McsContentVideoRecord {
+  _id?: string;
+  contentVideoId: string;
+  section: string;
+  title: string;
+  youtubeId: string | null;
+  url: string | null;
+  description: string;
+  sortOrder: number;
+  audience: McsContentVideoAudience;
+  active: boolean;
+  createdAt: string;
+  createdByTmagId: string | null;
+  updatedAt: string;
+  updatedByTmagId: string | null;
+  source: string | null;
+}
+
+export interface McsContentVideoSection {
+  section: string;
+  videos: McsContentVideoRecord[];
+}
+
+export interface McsContentVideosResponse {
+  ok: true;
+  sections: McsContentVideoSection[];
+}
+
+export type McsContentVideosAdminListResponse = McsContentVideosResponse;
+
+export interface McsContentVideoUpsertPayload {
+  section: string;
+  title: string;
+  youtubeId?: string | null;
+  url?: string | null;
+  description: string;
+  sortOrder: number;
+  audience: McsContentVideoAudience;
+  active?: boolean;
+}
+
+export interface McsContentVideoMutationResponse {
+  ok: true;
+  video: McsContentVideoRecord;
+}
+
+export interface McsContentVideoReorderItem {
+  contentVideoId: string;
+  sortOrder: number;
+}
+
+export interface McsContentVideoReorderPayload {
+  items: McsContentVideoReorderItem[];
+}
+
+export interface McsContentVideoReorderResponse {
+  ok: true;
+  videos: McsContentVideoRecord[];
 }

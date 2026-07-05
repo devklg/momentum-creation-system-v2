@@ -44,6 +44,7 @@ import { createHash, randomInt, randomBytes } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { appendAuditEntry } from './auditLog.js';
 import { findBAByTmagId } from './ba.js';
+import { normalizeEntitlements } from './entitlements.js';
 import { sendEmail, ResendConfigError, ResendError } from '../services/resend.js';
 import type {
   TmagProfile,
@@ -57,6 +58,15 @@ const MONGO_DB = 'momentum';
 const BA_COLLECTION = 'team_magnificent_members';
 const ACCESS_CODES_COLLECTION = 'tmag_access_codes';
 const CHALLENGES_COLLECTION = 'tmag_profile_change_challenges';
+
+export interface SponsorQuickAccessCard {
+  fullName: string;
+  firstName: string;
+  lastInitial: string;
+  phone: string | null;
+  bestContactNote: string;
+  whenToCall: string;
+}
 
 /** 15 minutes — long enough for the user to switch apps and copy the code. */
 const CHALLENGE_TTL_MS = 15 * 60 * 1000;
@@ -102,6 +112,27 @@ function mergeNotifPrefs(stored: McsBANotifPrefs | undefined): McsBANotifPrefs {
   };
 }
 
+function lastInitial(name: string): string {
+  return name.trim().slice(0, 1).toUpperCase();
+}
+
+function sponsorQuickCardFromBA(
+  sponsor: NonNullable<Awaited<ReturnType<typeof findBAByTmagId>>>,
+): SponsorQuickAccessCard {
+  const phone = sponsor.phone && sponsor.phone.trim() ? sponsor.phone : null;
+  return {
+    fullName: `${sponsor.firstName} ${sponsor.lastName}`.trim(),
+    firstName: sponsor.firstName,
+    lastInitial: lastInitial(sponsor.lastName),
+    phone,
+    bestContactNote: phone
+      ? 'Best contact: call or text the number on file.'
+      : 'Best contact: connect through your next Team Magnificent touchpoint.',
+    whenToCall:
+      'Call when you are stuck, ready to send your first invitation, or need a quick read before a follow-up.',
+  };
+}
+
 async function findActiveCodeForBA(tmagId: string): Promise<string | null> {
   const r = await persistenceCall<{ documents: Array<{ code: string }> }>('mongodb', 'query', {
     database: MONGO_DB,
@@ -134,6 +165,7 @@ export async function getProfileForBA(tmagId: string): Promise<TmagProfile | nul
     timezone: ba.timezone,
     photoUrl: extras.photoUrl ?? null,
     notifPrefs: mergeNotifPrefs(extras.notifPrefs),
+    entitlements: normalizeEntitlements((ba as unknown as { entitlements?: unknown }).entitlements),
     tmagId: ba.tmagId,
     threeBaId: ba.threeBaId,
     accessCodeHeld,
@@ -145,6 +177,16 @@ export async function getProfileForBA(tmagId: string): Promise<TmagProfile | nul
     pendingEmail: extras.pendingEmail ?? null,
     pendingPhone: extras.pendingPhone ?? null,
   };
+}
+
+export async function getSponsorQuickAccessForBA(
+  tmagId: string,
+): Promise<SponsorQuickAccessCard | null> {
+  const ba = await findBAByTmagId(tmagId);
+  if (!ba?.sponsorTmagId) return null;
+  const sponsor = await findBAByTmagId(ba.sponsorTmagId);
+  if (!sponsor) return null;
+  return sponsorQuickCardFromBA(sponsor);
 }
 
 /**

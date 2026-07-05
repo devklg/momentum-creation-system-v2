@@ -16,6 +16,7 @@ function validatorFor(def) {
   const properties = {};
   for (const [field, spec] of Object.entries(def.props || {})) {
     if (spec.enum) properties[field] = { enum: spec.enum };
+    if (spec.bsonType) properties[field] = { ...(properties[field] || {}), bsonType: spec.bsonType };
   }
   const schema = { bsonType: 'object', required: def.required };
   if (Object.keys(properties).length) schema.properties = properties;

@@ -14,7 +14,7 @@ export const MCS_NEVER_ON_COM = [
   'Compensation cycle math, volume math, or rank math',
   'A current head count of the team (the 100,000 goal is named, the current count is not)',
   'Direct comparison to other teams or other companies',
-  'THREE International branding (logo, name, eyebrow, or footer disclaimer)',
+  'Product-company branding (logo, name, eyebrow, or footer disclaimer)',
 ] as const;
 
 /** Disclaimer rendered at the bottom of every .com surface. Verbatim from locked-spec.md. */

@@ -69,6 +69,8 @@ export interface MichaelRuntimeContextFoundationInput {
   readonly mode: McsRuntimeMode;
   /** ISO timestamp anchoring the assembled session context. */
   readonly createdAt: string;
+  /** Optional server-side turn content used only by the live Context Manager search path. */
+  readonly turnContent?: string;
 }
 
 /**
@@ -80,7 +82,7 @@ export interface MichaelRuntimeContextFoundationInput {
 export function createMichaelRuntimeContextManagerPort(
   input: MichaelRuntimeContextFoundationInput,
 ): ContextManagerRequestPort {
-  const { tmagId, mode, createdAt } = input;
+  const { tmagId, mode, createdAt, turnContent } = input;
 
   return {
     assembledBy: 'context_manager',
@@ -93,6 +95,7 @@ export function createMichaelRuntimeContextManagerPort(
           tmagId,
           mode,
           createdAt,
+          turnContent,
           scope,
           request,
         });
@@ -162,18 +165,25 @@ async function requestLiveContextPacket(input: {
   readonly tmagId: TmagId;
   readonly mode: McsRuntimeMode;
   readonly createdAt: string;
+  readonly turnContent: string | undefined;
   readonly scope: McsRuntimeRequestScope;
   readonly request: McsContextPacketRequest;
 }): Promise<McsContextPacketV1> {
   const contextManagerModule = await import('./contextManagerService.js');
   const approvedKnowledgeStoreModule = await import('../../services/knowledge/approvedKnowledgeStore.js');
+  const storedProvider = approvedKnowledgeStoreModule.createStoredApprovedKnowledgeProvider();
+  const query = deriveMichaelApprovedKnowledgeQuery(input.request, input.turnContent);
 
   const result = await contextManagerModule.createContextManagerService(
-    approvedKnowledgeStoreModule.createStoredApprovedKnowledgeProvider(),
+    {
+      async listApprovedKnowledge(scope) {
+        return storedProvider.searchApprovedKnowledge(scope, query);
+      },
+    },
     {
       mode: input.mode,
       createdAt: input.createdAt,
-      maxApprovedKnowledgeResults: 8,
+      maxApprovedKnowledgeResults: 6,
       ba: {
         tmagId: input.tmagId,
         journalEnabled: false,
@@ -182,6 +192,20 @@ async function requestLiveContextPacket(input: {
     },
   ).buildContext({ scope: input.scope, request: input.request });
   return result.packet;
+}
+
+function deriveMichaelApprovedKnowledgeQuery(
+  request: McsContextPacketRequest,
+  turnContent: string | undefined,
+): string {
+  const normalizedTurn = turnContent?.replace(/\s+/g, ' ').trim();
+  if (normalizedTurn) return normalizedTurn;
+  return [
+    request.agentKey,
+    request.taskType,
+    request.language,
+    'Team Magnificent training support',
+  ].join(' ');
 }
 
 function contextManagerLiveEnabled(): boolean {

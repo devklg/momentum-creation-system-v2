@@ -65,6 +65,40 @@ export function ProfileDrawer({ tmagId, onClose, onRowChanged }: Props) {
     }
   }
 
+  async function toggleVmDialer() {
+    if (!bundle) return;
+    const enabled = bundle.row.entitlements.includes('vm_dialer');
+    setErr(null);
+    try {
+      const res = await fetch(`/api/admin/bas/${encodeURIComponent(bundle.row.tmagId)}/entitlements`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: enabled ? 'revoke' : 'grant',
+          entitlement: 'vm_dialer',
+        }),
+      });
+      const data = (await res.json()) as {
+        ok: boolean;
+        error?: string;
+        row?: McsAdminBaDirectoryRow | null;
+        entitlements?: string[];
+      };
+      if (!data.ok) {
+        setErr(data.error ?? 'Could not update entitlements.');
+        return;
+      }
+      const row =
+        data.row ??
+        ({ ...bundle.row, entitlements: data.entitlements ?? [] } satisfies McsAdminBaDirectoryRow);
+      setBundle((prev) => (prev ? { ...prev, row } : prev));
+      onRowChanged(row);
+    } catch (e) {
+      setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+    }
+  }
+
   function onOverrideApplied(
     nextRow: McsAdminBaDirectoryRow,
     entry: McsAdminSponsorOverrideEntry,
@@ -321,6 +355,23 @@ export function ProfileDrawer({ tmagId, onClose, onRowChanged }: Props) {
               <p className="text-[11px] font-mono text-cream-faint mt-3">
                 Toggle the curated badge directly from the row in the directory.
               </p>
+            </Section>
+
+            <Section
+              title="Entitlements"
+              right={
+                <Button size="sm" variant="outline" onClick={toggleVmDialer}>
+                  {bundle.row.entitlements.includes('vm_dialer') ? 'Disable VM' : 'Enable VM'}
+                </Button>
+              }
+            >
+              <KV label="VM dialer">
+                {bundle.row.entitlements.includes('vm_dialer') ? (
+                  <span className="text-teal">enabled</span>
+                ) : (
+                  <span className="text-cream-faint">not enabled</span>
+                )}
+              </KV>
             </Section>
 
             <Section title="Kevin notes (append-only)">

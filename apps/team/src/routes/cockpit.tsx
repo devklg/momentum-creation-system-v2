@@ -29,6 +29,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bot,
+  CalendarClock,
+  CalendarDays,
   ChevronDown,
   ChevronRight,
   ListChecks,
@@ -43,6 +45,12 @@ import { Button } from '@/components/ui/button';
 import { TrackRecordCard } from '@/components/cockpit/TrackRecordCard';
 import { OrientationCard } from '@/components/cockpit/OrientationCard';
 import { MichaelRuntimeSupportCard } from '@/components/cockpit/MichaelRuntimeSupportCard';
+import { ThreeWayCallWorkspace } from '@/components/cockpit/ThreeWayCallWorkspace';
+import {
+  SponsorQuickCard,
+  type SponsorQuickAccessCard,
+  type CockpitSponsorFallback,
+} from '@/components/SponsorQuickAccess';
 import {
   LaunchCenter,
   type TeamLaunchCenter,
@@ -116,17 +124,6 @@ interface MyInvitesResponse {
   activityByProspect: Record<string, InvitationActivityEntry[]>;
 }
 
-interface SponsorFallbackFounder {
-  fullName: string;
-  firstName: string;
-  phone: string | null;
-}
-
-interface CockpitSponsorFallback {
-  sponsorInactive: boolean;
-  founders: SponsorFallbackFounder[];
-}
-
 interface CockpitSummaryResponse {
   ok: true;
   baFirstName: string;
@@ -147,11 +144,38 @@ interface CockpitSummaryResponse {
   };
 }
 
+interface TeamCalendarEvent {
+  eventId: string;
+  kind: 'webinar';
+  title: string;
+  scheduledFor: string;
+  durationMinutes: number;
+  joinUrl: string | null;
+}
+
+interface TeamCalendarResponse {
+  ok: true;
+  generatedAt: string;
+  timezone: string | null;
+  events: TeamCalendarEvent[];
+  threeWayBookings: Array<{
+    kind: 'three_way_bookings_pending';
+    title: string;
+  }>;
+}
+
 interface MarkInvitationSentResponse {
   ok: true;
   prospectId: string;
   sentAt: string;
   alreadySent: boolean;
+}
+
+interface AuthMeResponse {
+  ok: true;
+  me: {
+    entitlements?: string[];
+  };
 }
 
 // ── CRM write-side wire shapes (mirror packages/shared/src/types.ts) ─────
@@ -418,6 +442,8 @@ const SOURCE_SHORT: Record<InvitationSource, string> = {
   scriptmaker: 'ScriptMaker',
 };
 
+const PMV_INTRO_STORAGE_KEY = 'tm_pmv_intro_dismissed_v1';
+
 function toneClass(tone: 'gold' | 'teal' | 'mute' | 'dim'): string {
   switch (tone) {
     case 'gold':
@@ -453,6 +479,21 @@ function formatActivity(kind: InvitationActivityKind): string {
   }
 }
 
+function formatCalendarTime(iso: string, timezone: string | null): string {
+  try {
+    return new Date(iso).toLocaleString(undefined, {
+      timeZone: timezone ?? undefined,
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  } catch {
+    return iso;
+  }
+}
+
 // ── View state ─────────────────────────────────────────────────────────
 
 type View =
@@ -465,21 +506,27 @@ type View =
       pmv: ProspectMomentumViewerResponse | null;
       invites: InviteSummary[];
       activityByProspect: Record<string, InvitationActivityEntry[]>;
+      entitlements: string[];
     };
 
 export function CockpitPage() {
   const navigate = useNavigate();
   const [view, setView] = useState<View>({ kind: 'loading' });
   const [filter, setFilter] = useState<PmvFilter>('all');
+  const [threeWayOpen, setThreeWayOpen] = useState(false);
   // When the BA clicks an item in Today's Actions, we record the target
   // prospectId here; InviteRow watches for matches and self-expands. We
   // bump a tick so re-clicking the same id (after a manual collapse) still
   // re-opens — the prop change is what triggers the effect inside the row.
   const [forceExpandedId, setForceExpandedId] = useState<string | null>(null);
+  const [showPmvIntro, setShowPmvIntro] = useState(true);
 
   const load = useCallback(async () => {
     try {
-      const launchRes = await fetch('/api/cockpit/launch', { credentials: 'include' });
+      const [launchRes, meRes] = await Promise.all([
+        fetch('/api/cockpit/launch', { credentials: 'include' }),
+        fetch('/api/auth/me', { credentials: 'include' }),
+      ]);
       if (launchRes.status === 401) {
         navigate('/register');
         return;
@@ -489,6 +536,8 @@ export function CockpitPage() {
         return;
       }
       const launch = (await launchRes.json()) as TeamLaunchCenter;
+      const me = meRes.ok ? ((await meRes.json()) as AuthMeResponse) : null;
+      const entitlements = me?.me.entitlements ?? [];
 
       if (launch.steve.phase !== 'complete') {
         setView({
@@ -498,6 +547,7 @@ export function CockpitPage() {
           pmv: null,
           invites: [],
           activityByProspect: {},
+          entitlements,
         });
         return;
       }
@@ -529,6 +579,7 @@ export function CockpitPage() {
         pmv,
         invites: invites.invites,
         activityByProspect: invites.activityByProspect,
+        entitlements,
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'unknown';
@@ -539,6 +590,14 @@ export function CockpitPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    try {
+      setShowPmvIntro(localStorage.getItem(PMV_INTRO_STORAGE_KEY) !== 'dismissed');
+    } catch {
+      setShowPmvIntro(true);
+    }
+  }, []);
 
   // Today's Actions click → record target prospectId; InviteRow self-expands
   // on match. Declared here with the other hooks (ABOVE the early returns)
@@ -561,6 +620,15 @@ export function CockpitPage() {
       }, 0);
     }
   }, [navigate]);
+
+  const dismissPmvIntro = useCallback(() => {
+    setShowPmvIntro(false);
+    try {
+      localStorage.setItem(PMV_INTRO_STORAGE_KEY, 'dismissed');
+    } catch {
+      /* Browser storage may be unavailable; the panel can simply reappear. */
+    }
+  }, []);
 
   // Optimistic patch when "I sent this" succeeds, so the row updates without
   // a full reload. The server is the source of truth; this just mirrors it.
@@ -638,7 +706,7 @@ export function CockpitPage() {
     );
   }
 
-  const { launch, summary, pmv, invites, activityByProspect } = view;
+  const { launch, summary, pmv, invites, activityByProspect, entitlements } = view;
   if (!summary || !pmv) {
     return (
       <Shell>
@@ -679,6 +747,8 @@ export function CockpitPage() {
           Invite someone
         </Button>
       </div>
+
+      {showPmvIntro && <PmvIntroPanel onDismiss={dismissPmvIntro} />}
 
       <CountsStrip counts={summary.counts} />
 
@@ -755,14 +825,16 @@ export function CockpitPage() {
                   });
                 }}
               />
-              <CockpitModuleCard
-                icon={<Megaphone className="h-4 w-4" aria-hidden="true" />}
-                eyebrow="VM Campaigns"
-                title="Prepare a campaign"
-                body="Lead-owner lists, approved message drafts, dry-run status, and engagement counts."
-                action="Open campaigns"
-                onClick={() => navigate('/vm-campaigns')}
-              />
+              {entitlements.includes('vm_dialer') && (
+                <CockpitModuleCard
+                  icon={<Megaphone className="h-4 w-4" aria-hidden="true" />}
+                  eyebrow="VM Campaigns"
+                  title="Prepare a campaign"
+                  body="Lead-owner lists, approved message drafts, dry-run status, and engagement counts."
+                  action="Open campaigns"
+                  onClick={() => navigate('/vm-campaigns')}
+                />
+              )}
               <CockpitModuleCard
                 icon={<MessageSquareText className="h-4 w-4" aria-hidden="true" />}
                 eyebrow="Ivory"
@@ -770,6 +842,14 @@ export function CockpitPage() {
                 body="Warm invitation and follow-up language stays editable before you send it."
                 action="Open Ivory"
                 onClick={() => navigate('/ivory')}
+              />
+              <CockpitModuleCard
+                icon={<PlayCircle className="h-4 w-4" aria-hidden="true" />}
+                eyebrow="Product Gallery"
+                title="Train the product"
+                body="Kevin's editable video gallery for product knowledge and shareable product stories."
+                action="Open gallery"
+                onClick={() => navigate('/video-library')}
               />
             </div>
           </div>
@@ -787,8 +867,11 @@ export function CockpitPage() {
             <SponsorCard
               sponsor={summary.sponsor}
               fallback={summary.sponsorFallback}
+              onBookThreeWay={() => setThreeWayOpen(true)}
             />
           </div>
+          <ThreeWayCallWorkspace open={threeWayOpen} onOpenChange={setThreeWayOpen} />
+          <TeamCalendarCard />
           {/* Group orientation scheduler (Chat #147, wireframe §3.6). Self-
               contained: fetches its own data, books/cancels a seat. */}
           <OrientationCard />
@@ -1003,6 +1086,32 @@ function CountsStrip({
   );
 }
 
+function PmvIntroPanel({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <section className="mb-8 border border-gold/30 bg-gold/[0.045] rounded-md p-5 md:p-6">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div className="max-w-3xl">
+          <p className="font-mono tracking-[0.2em] text-[10px] text-gold uppercase mb-2">
+            PMV orientation
+          </p>
+          <p className="text-cream text-[16px] leading-[1.65]">
+            Your Prospect Momentum Viewer — every person you've invited, exactly
+            where they are in their journey, in real time… You own every
+            relationship; this keeps the next move in front of you.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="font-mono tracking-[0.12em] text-[10px] text-cream-faint hover:text-gold uppercase shrink-0"
+        >
+          Collapse
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function EmptyInvites({ onInvite }: { onInvite: () => void }) {
   return (
     <div className="bg-cream/[0.02] border border-cream/10 rounded-md py-12 px-8 text-center">
@@ -1188,83 +1297,150 @@ function ProgressMeter({ value }: { value: ProspectMomentumRow['videoProgressPct
   );
 }
 
+function quickCardFromSummary(
+  sponsor: CockpitSummaryResponse['sponsor'],
+): SponsorQuickAccessCard | null {
+  if (!sponsor) return null;
+  return {
+    fullName: sponsor.fullName,
+    firstName: sponsor.firstName,
+    lastInitial: sponsor.lastInitial,
+    phone: sponsor.phone,
+    bestContactNote: sponsor.phone
+      ? 'Best contact: call or text the number on file.'
+      : 'Best contact: connect through your next Team Magnificent touchpoint.',
+    whenToCall:
+      'Call when you are stuck, ready to send your first invitation, or need a quick read before a follow-up.',
+  };
+}
+
 function SponsorCard({
   sponsor,
   fallback,
+  onBookThreeWay,
 }: {
   sponsor: CockpitSummaryResponse['sponsor'];
   fallback: CockpitSponsorFallback | null;
+  onBookThreeWay: () => void;
 }) {
-  if (!sponsor) {
-    return (
-      <div className="bg-cream/[0.02] border border-gold/20 rounded-md p-5">
-        <p className="font-display text-[22px] text-gold leading-[1.1] mb-2">
-          You&rsquo;re at the top.
-        </p>
-        <p className="text-cream-mute text-[13px] leading-[1.55]">
-          As a founder of Team Magnificent, the line builds beneath you. Your
-          team looks to you the way a downline looks to a sponsor.
-        </p>
-      </div>
-    );
-  }
-  // Chat #147, seq 23: the card ALWAYS shows the original (immutable) sponsor.
-  // When that sponsor is inactive, we add a founder fallback below — never
-  // replacing the sponsor, only adding a support/contact path.
-  const showFallback = fallback?.sponsorInactive === true && fallback.founders.length > 0;
   return (
-    <div className="bg-cream/[0.02] border border-cream/10 rounded-md p-5">
-      <p className="font-display text-[22px] text-cream leading-[1.1] mb-1">
-        {sponsor.fullName}
-      </p>
-      <p className="text-cream-faint text-[12px] font-mono tracking-[0.06em] mb-3">
-        YOUR SPONSOR
-      </p>
-      {sponsor.phone ? (
-        <a
-          href={`tel:${sponsor.phone}`}
-          className="inline-block text-teal text-[14px] font-mono tracking-[0.04em] hover:underline"
-        >
-          {sponsor.phone}
-        </a>
-      ) : (
-        <p className="text-cream-faint text-[13px] leading-[1.5]">
-          Reach out to {sponsor.firstName} anytime you&rsquo;re stuck — that&rsquo;s
-          what your sponsor is for.
-        </p>
-      )}
+    <div>
+      <SponsorQuickCard
+        sponsor={quickCardFromSummary(sponsor)}
+        fallback={fallback}
+      />
+      <Button
+        type="button"
+        onClick={onBookThreeWay}
+        className="mt-4 w-full bg-gold text-ink hover:bg-gold-bright font-display tracking-[0.06em] text-[15px] px-4 py-4"
+      >
+        <CalendarClock className="mr-2 h-4 w-4" aria-hidden="true" />
+        {sponsor ? 'Book a 3-Way Call' : 'My Availability'}
+      </Button>
+    </div>
+  );
+}
 
-      {showFallback && (
-        <div className="mt-4 pt-4 border-t border-gold/20">
-          <p className="text-cream-mute text-[13px] leading-[1.55] mb-3">
-            {sponsor.firstName} isn&rsquo;t active right now. Until they&rsquo;re
-            back, reach out to a founder of Team Magnificent — they&rsquo;re here
-            to support you directly.
+function TeamCalendarCard() {
+  const [view, setView] = useState<
+    | { kind: 'loading' }
+    | { kind: 'error' }
+    | { kind: 'ready'; data: TeamCalendarResponse }
+  >({ kind: 'loading' });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/cockpit/team-calendar', { credentials: 'include' });
+        if (!res.ok) {
+          if (!cancelled) setView({ kind: 'error' });
+          return;
+        }
+        const data = (await res.json()) as TeamCalendarResponse;
+        if (!cancelled) setView({ kind: 'ready', data });
+      } catch {
+        if (!cancelled) setView({ kind: 'error' });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <div>
+      <SectionLabel>Team Calendar</SectionLabel>
+      <div className="bg-cream/[0.02] border border-cream/10 rounded-md p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded border border-teal/30 bg-teal/[0.06] text-teal">
+            <CalendarDays className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="font-display text-[24px] leading-none text-cream">
+              Upcoming Events
+            </p>
+            <p className="font-mono tracking-[0.08em] text-[10px] text-cream-faint uppercase mt-1">
+              Next 14 days
+            </p>
+          </div>
+        </div>
+
+        {view.kind === 'loading' && (
+          <p className="text-cream-faint font-mono text-[12px] tracking-[0.04em]">
+            Loading calendar...
           </p>
-          <p className="font-mono tracking-[0.12em] text-[10px] text-gold uppercase mb-2">
-            Founder support
+        )}
+        {view.kind === 'error' && (
+          <p className="text-red-400 font-mono text-[12px] tracking-[0.04em]">
+            Could not load the calendar.
           </p>
-          <ul className="space-y-2">
-            {fallback.founders.map((f) => (
-              <li key={f.fullName} className="flex items-baseline justify-between gap-3">
-                <span className="text-cream text-[14px]">{f.fullName}</span>
-                {f.phone ? (
+        )}
+        {view.kind === 'ready' && view.data.events.length === 0 && (
+          <p className="text-cream-faint text-[13px] leading-[1.55]">
+            No team events are scheduled in the next 14 days.
+          </p>
+        )}
+        {view.kind === 'ready' && view.data.events.length > 0 && (
+          <ul className="space-y-3">
+            {view.data.events.map((event) => (
+              <li
+                key={event.eventId}
+                className="border border-cream/10 bg-cream/[0.02] rounded p-3"
+              >
+                <p className="text-cream text-[14px] leading-[1.35]">
+                  {event.title}
+                </p>
+                <p className="font-mono text-[11px] text-cream-faint tracking-[0.04em] mt-1">
+                  {formatCalendarTime(event.scheduledFor, view.data.timezone)}
+                  {' · '}
+                  {event.durationMinutes} min
+                </p>
+                {event.joinUrl && (
                   <a
-                    href={`tel:${f.phone}`}
-                    className="text-teal text-[13px] font-mono tracking-[0.04em] hover:underline"
+                    href={event.joinUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-block mt-2 font-mono tracking-[0.1em] text-[10px] text-teal uppercase hover:underline"
                   >
-                    {f.phone}
+                    Join link
                   </a>
-                ) : (
-                  <span className="text-cream-faint text-[12px] font-mono">
-                    contact in-app
-                  </span>
                 )}
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        )}
+        {view.kind === 'ready' && view.data.threeWayBookings.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-cream/10">
+            <p className="font-mono tracking-[0.12em] text-[10px] text-gold uppercase mb-2">
+              3-way calls
+            </p>
+            <p className="text-cream-faint text-[12px] leading-[1.5]">
+              {view.data.threeWayBookings[0]?.title}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

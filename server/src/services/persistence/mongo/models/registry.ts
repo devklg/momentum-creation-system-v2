@@ -25,7 +25,27 @@ export function createPermissiveCollectionSchema(): Schema<MongoDocument> {
   );
 }
 
-export function getMongoSchema(_collection: string): Schema<MongoDocument> {
+function createTeamMemberSchema(): Schema<MongoDocument> {
+  return new Schema<MongoDocument>(
+    {
+      _id: { type: Schema.Types.Mixed, required: true },
+      tmagId: { type: String },
+      firstName: { type: String },
+      lastName: { type: String },
+      email: { type: String },
+      createdAt: { type: String },
+      entitlements: { type: [String], default: [] },
+    },
+    {
+      strict: false,
+      versionKey: false,
+      minimize: false,
+    },
+  );
+}
+
+export function getMongoSchema(collection: string): Schema<MongoDocument> {
+  if (collection === 'team_magnificent_members') return createTeamMemberSchema();
   return createPermissiveCollectionSchema();
 }
 

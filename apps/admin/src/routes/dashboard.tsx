@@ -26,6 +26,7 @@ import { FilterBar } from '@/components/dashboard/FilterBar';
 import { MetricsRow } from '@/components/dashboard/MetricsRow';
 import { DrilldownPanel } from '@/components/dashboard/DrilldownPanel';
 import { LiveEventStream } from '@/components/dashboard/LiveEventStream';
+import { HealthStatusWidget } from '@/components/dashboard/HealthStatusWidget';
 
 const DEFAULT_FILTER: McsAdminDashboardFilter = { tmagId: null, leaderGroup: 'all' };
 
@@ -103,6 +104,8 @@ export function DashboardPage() {
       )}
 
       <FilterBar filter={filter} options={options} onChange={setFilter} />
+
+      <HealthStatusWidget />
 
       <MetricsRow
         metrics={metrics}

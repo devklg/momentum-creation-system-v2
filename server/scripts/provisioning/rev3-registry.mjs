@@ -24,7 +24,7 @@ export const ENUMS = {
 
 export const MONGO_COLLECTIONS = [
   // A · Identity / Access
-  { name: 'team_magnificent_members', required: ['tmagId','firstName','lastName','email','createdAt'] },
+  { name: 'team_magnificent_members', required: ['tmagId','firstName','lastName','email','createdAt'], props: { entitlements: { bsonType: 'array' } } },
   { name: 'tmag_access_codes', required: ['code','sponsorTmagId','createdAt','active'], props: { mintedVia: { enum: ENUMS.mintedVia } } },
   { name: 'tmag_commitments', required: ['commitmentId','tmagId','version','acceptedAt'] },
   { name: 'tmag_workbooks', required: ['workbookId','forTmagId','conductedByTmagId','status'], props: { status: { enum: ENUMS.workbookStatus } } },
@@ -49,6 +49,8 @@ export const MONGO_COLLECTIONS = [
   { name: 'tmag_prospect_webinar_reservations', required: ['reservationId','eventId','token','prospectId','sponsorTmagId','scheduledFor'], props: { attendance: { enum: ENUMS.attendance } } },
   { name: 'tmag_new_member_orientation_sessions', required: ['sessionId','scheduledFor','capacity','status'] },
   { name: 'tmag_new_member_orientation_reservations', required: ['reservationId','sessionId','tmagId','scheduledFor','status'] },
+  { name: 'tmag_sponsor_availability', required: ['availabilityId','ownerTmagId','timezone','windows','updatedAt'] },
+  { name: 'tmag_three_way_bookings', required: ['bookingId','bookerTmagId','sponsorTmagId','startAt','endAt','status'] },
   { name: 'tmag_fast_start_progress', required: ['tmagId','moduleId','state'] },
   { name: 'tmag_steve_success_interview', required: ['tmagId','successProfile'] },
   // D · Agents / Templates / Governance / Audit / Admin
@@ -57,6 +59,7 @@ export const MONGO_COLLECTIONS = [
   { name: 'tmag_agent_steve_events', required: ['eventId','tmagId','agentId','kind','createdAt'] },
   { name: 'tmag_agent_templates', required: ['templateId','agentKey','templateKind','version'], props: { templateKind: { enum: ENUMS.templateKind } } },
   { name: 'tmag_content_templates', required: ['templateVersionId','tenantId','templateKey','surface','version'] },
+  { name: 'tmag_content_videos', required: ['contentVideoId','section','title','sortOrder','audience'] },
   { name: 'tmag_invitation_generator_runs', required: ['runId','tmagId','productKey'] },
   { name: 'tmag_ivory_prospect_names', required: ['ivoryId','tmagId','firstName','status'] },
   { name: 'mcs_audit_log', required: ['entryId','timestamp','role','actor','action'] },
@@ -78,6 +81,7 @@ export const MONGO_COLLECTIONS = [
   { name: 'tmag_broadcasts', required: ['broadcastId','createdByTmagId','channel','status'] },
   { name: 'tmag_broadcast_recipients', required: ['rowId','broadcastId','recipientTmagId','channel','status'] },
   { name: 'tmag_broadcast_optouts', required: ['tmagId','addedAt'] },
+  { name: 'tmag_health_heartbeat', required: ['heartbeatId','checkedAt','checkedAtEpochMs','source'] },
   // F · Memory / Learning (system)
   { name: 'mcs_outcomes', required: ['kind','confirmedByTmagId','outcomeAt'], props: { kind: { enum: ENUMS.outcomeKind } } },
   { name: 'mcs_learning_candidates', required: ['status','domain','language','proposedSummary'], props: { domain: { enum: ENUMS.learningDomain }, language: { enum: ENUMS.language } } },
@@ -96,9 +100,10 @@ export const CHROMA_COLLECTIONS = [
   // Prospect / funnel
   'mcs_prospect_invitation_activity','mcs_prospect_callback_requests','mcs_prospect_htank_events','mcs_prospect_magic_links','mcs_prospect_webinar_reservations','mcs_prospect_crm_records','mcs_prospect_timeline_events',
   // Agents / templates / admin
-  'mcs_agent_ivory_events','mcs_agent_michael_events','mcs_agent_steve_events','mcs_agent_system_events','mcs_agent_templates','mcs_ivory_prospect_names','mcs_audit_log','mcs_content_templates','mcs_broadcasts','mcs_admin_prospect_notes','mcs_tenant_settings',
+  'mcs_agent_ivory_events','mcs_agent_michael_events','mcs_agent_steve_events','mcs_agent_system_events','mcs_agent_templates','mcs_ivory_prospect_names','mcs_audit_log','mcs_content_templates','mcs_content_videos','mcs_broadcasts','mcs_admin_prospect_notes','mcs_tenant_settings',
+  'mcs_health_heartbeat',
   // Prospect extras with living writers (runtime write-guard reconciliation 2026-07-02)
-  'mcs_prospect_htank_accounts','mcs_new_member_orientation_reservations','mcs_webinar_events',
+  'mcs_prospect_htank_accounts','mcs_new_member_orientation_reservations','mcs_webinar_events','mcs_sponsor_availability','mcs_three_way_bookings',
   // Knowledge base (PR #125 ingestion layer, canon-renamed 2026-07-03)
   'mcs_knowledge_sources','mcs_knowledge_chunks',
   // VM
@@ -126,14 +131,17 @@ export const NEO4J_CONSTRAINTS = [
   ['TmagProspectCrmRecord','crmRecordId'], ['TmagProspectTimelineEvent','eventId'],
   ['TmagWebinarEvent','eventId'], ['TmagWebinarReservation','reservationId'],
   ['TmagOrientationSession','sessionId'], ['TmagOrientationReservation','reservationId'],
+  ['TmagSponsorAvailability','availabilityId'], ['TmagThreeWayBooking','bookingId'],
   ['TmagFastStartProgress','id'], ['TmagSteveSuccessInterview','id'],
   ['TmagAgentIvoryEvent','eventId'], ['TmagAgentMichaelEvent','eventId'], ['TmagAgentSteveEvent','eventId'],
   ['TmagAgentTemplate','templateId'], ['TmagContentTemplate','templateVersionId'], ['TmagInvitationGeneratorRun','runId'],
+  ['TmagContentVideo','contentVideoId'],
   ['TmagIvoryName','ivoryId'], ['TmagAuditEntry','entryId'], ['TmagSponsorOverride','overrideId'],
   ['TmagCuratedLeaderTag','id'], ['TmagAdminMemberNote','noteId'], ['TmagAdminProspectNote','noteId'],
   ['TmagVmLeadOwner','leadOwnerId'], ['TmagVmCampaign','vmCampaignId'], ['TmagVmBulkLead','leadId'],
   ['TmagVmQueueJob','jobId'], ['TmagVmDeliveryEvent','eventId'], ['TmagVmProviderWebhook','webhookEventId'], ['TmagVmAuditEvent','auditId'],
   ['TmagBroadcast','broadcastId'], ['TmagBroadcastRecipient','rowId'], ['TmagBroadcastOptout','tmagId'],
+  ['TmagHealthHeartbeat','heartbeatId'],
   ['TmagOutcome','id'], ['TmagLearningCandidate','id'], ['TmagKnowledge','id'],
 ];
 
@@ -142,4 +150,5 @@ export const NEO4J_INDEXES = [
   ['TmagInviteToken','prospectId'], ['TmagInviteToken','sponsorTmagId'],
   ['TmagVmLeadOwner','ownerTmagId'], ['TmagVmBulkLead','ownerTmagId'],
   ['TmagCrmNote','sponsorTmagId'], ['TeamMagnificentMember','email'], ['TmagAuditEntry','entityId'],
+  ['TmagHealthHeartbeat','checkedAtEpochMs'],
 ];

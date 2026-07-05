@@ -84,6 +84,8 @@ export interface CreateMichaelRuntimeTurnForAuthenticatedBaInput {
   readonly language?: McsRuntimeLanguage;
   /** BA runtime transport mode, server-derived. Defaults to `'browser_text'`. */
   readonly mode?: McsRuntimeMode;
+  /** Optional server-derived user turn content for live Context Manager retrieval. */
+  readonly turnContent?: string;
   /** Optional server-derived session id (traceability only). */
   readonly sessionId?: McsSessionId | string;
   /** Optional server-derived correlation id (traceability only). */
@@ -188,6 +190,7 @@ export async function createMichaelRuntimeTurnForAuthenticatedBa(
     tmagId: tmagId as TmagId,
     mode,
     createdAt,
+    turnContent: typeof input.turnContent === 'string' ? input.turnContent : undefined,
   });
 
   const coordinatorInput: RuntimeTurnCoordinatorInput = {

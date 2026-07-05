@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 
 export default defineConfig({
+  root: __dirname,
   plugins: [react()],
   // Serve repo-wide assets/ as the public root so /logos/*.png resolves to the canonical files.
   publicDir: path.resolve(__dirname, '../../assets'),

@@ -38,6 +38,7 @@ import { persistenceCall } from './persistence/dispatch.js';
  * mirrors a `chroma: { collection: ... }` / `chromadb.add` site in server/src.
  */
 export const CHROMA_COLLECTIONS: readonly string[] = [
+  'mcs_members', // domain/entitlements.ts + founder backfills
   'mcs_prospect_invitation_activity', // domain/invitations.ts, domain/crm.ts
   'mcs_prospect_callback_requests', // domain/callbackRequest.ts
   'mcs_prospect_htank_events', // domain/holdingTank.ts
@@ -54,12 +55,16 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_workbooks', // domain/workbook.ts
   'mcs_webinar_events', // scripts/seed-webinar-events.ts + webinar domain
   'mcs_broadcasts', // domain/broadcast.ts
+  'mcs_health_heartbeat', // domain/healthProbe.ts
   'mcs_tenant_settings', // domain/adminTenantArchitecture.ts (settings)
   'mcs_content_templates', // domain/adminTenantArchitecture.ts (templates)
+  'mcs_content_videos', // domain/contentVideos.ts (Product Gallery)
   'mcs_prospect_htank_accounts', // domain/prospectAccount.ts
   'mcs_prospect_magic_links', // domain/prospectMagicLink.ts
   'mcs_prospect_webinar_reservations', // domain/webinarReservation.ts
   'mcs_new_member_orientation_reservations', // domain/orientationSession.ts
+  'mcs_sponsor_availability', // domain/threeWayCalls.ts
+  'mcs_three_way_bookings', // domain/threeWayCalls.ts
   'mcs_fast_start_progress', // domain/training.ts (also lazy-bootstrapped there)
   // Agent events split per agent (Rev3). Writer derives mcs_agent_<agentId>_events.
   'mcs_agent_ivory_events', // domain/agents/orchestrator.ts

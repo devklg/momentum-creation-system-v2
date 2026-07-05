@@ -1,0 +1,10 @@
+[Unit]
+Description=Team Magnificent MCS v2 production health probe
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/mcs-v2
+EnvironmentFile=/opt/mcs-v2/.env
+ExecStart=/opt/mcs-v2/ops/health-probe.sh

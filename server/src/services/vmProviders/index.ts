@@ -1,11 +1,13 @@
 import { acquisitionProvider } from './acquisitionProvider.js';
 import { manualCsvProvider } from './manualCsv.js';
+import { telnyxCallControlProvider } from './telnyxCallControl.js';
 import type { RinglessVoicemailProvider } from './types.js';
 import type { VmProviderKey } from '../../domain/vmProviderQueue.js';
 
 const providers: Record<VmProviderKey, RinglessVoicemailProvider> = {
   manual_csv: manualCsvProvider,
   acquisition_provider_placeholder: acquisitionProvider,
+  telnyx_call_control: telnyxCallControlProvider,
 };
 
 export function getVmProvider(key: VmProviderKey): RinglessVoicemailProvider {

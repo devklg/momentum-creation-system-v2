@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 type CampaignStatus = 'draft' | 'ready' | 'dry_run' | 'paused' | 'complete';
-type ProviderMode = 'manual_csv' | 'leadsrain_style' | 'slybroadcast_style';
+type ProviderMode = 'manual_csv' | 'telnyx_call_control' | 'leadsrain_style' | 'slybroadcast_style';
 
 interface LeadOwnerDraft {
   leadOwnerId: string;
@@ -40,6 +40,7 @@ interface VmCampaignDraft {
   name: string;
   leadOwnerId: string;
   provider: ProviderMode;
+  audioUrl: string | null;
   status: CampaignStatus;
   voicemailScript: string;
   smsTemplate: string;
@@ -59,6 +60,7 @@ interface VmCampaignDraft {
 
 const PROVIDER_LABEL: Record<ProviderMode, string> = {
   manual_csv: 'Manual CSV',
+  telnyx_call_control: 'Telnyx Call Control',
   leadsrain_style: 'Provider adapter',
   slybroadcast_style: 'Alternate adapter',
 };
@@ -96,6 +98,7 @@ const EXAMPLE_CAMPAIGN: VmCampaignDraft = {
   name: 'First VM Campaign',
   leadOwnerId: EXAMPLE_BATCH.leadOwnerId,
   provider: 'manual_csv',
+  audioUrl: null,
   status: 'draft',
   voicemailScript:
     "Hi, it's {{baFirstName}}. I sent you a quick Team Magnificent video because I thought it might be worth a look. If it speaks to you, tap the link and I will follow up personally.",
@@ -418,9 +421,20 @@ function CampaignBuilder({
             className="h-12 w-full rounded-md border border-line bg-ink-2 px-3 text-cream"
           >
             <option value="manual_csv">Manual CSV</option>
+            <option value="telnyx_call_control">Telnyx Call Control</option>
             <option value="leadsrain_style">Provider adapter</option>
             <option value="slybroadcast_style">Alternate adapter</option>
           </select>
+        </div>
+
+        <div>
+          <Label htmlFor="audioUrl">Audio URL</Label>
+          <Input
+            id="audioUrl"
+            type="url"
+            value={campaign.audioUrl ?? ''}
+            onChange={(e) => onPatch({ audioUrl: e.target.value.trim() || null })}
+          />
         </div>
 
         <div>

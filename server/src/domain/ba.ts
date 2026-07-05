@@ -48,6 +48,8 @@ export interface BARecord {
    * every successful credential verification.
    */
   lastLoginAt: string | null;
+  /** Feature entitlements explicitly granted by Kevin/admin. */
+  entitlements: string[];
 }
 
 export async function emailExists(email: string): Promise<boolean> {
@@ -196,6 +198,7 @@ export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): 
     accessCodeUsed: sponsor.code,
     createdAt: new Date().toISOString(),
     lastLoginAt: null,
+    entitlements: [],
   };
 
   await tripleStackWrite({
@@ -206,7 +209,7 @@ export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): 
       cypher:
         'MERGE (s:TeamMagnificentMember {tmagId: $sponsorTmagId}) MERGE (n:TeamMagnificentMember {tmagId: $id}) ' +
         'SET n.threeBaId = $threeBaId, n.email = $email, n.firstName = $firstName, ' +
-        'n.lastName = $lastName, n.timezone = $timezone ' +
+        'n.lastName = $lastName, n.timezone = $timezone, n.entitlements = $entitlements ' +
         'MERGE (n)-[:SPONSORED_BY]->(s)',
       params: {
         sponsorTmagId: sponsor.sponsorTmagId,
@@ -215,6 +218,7 @@ export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): 
         firstName: input.firstName,
         lastName: input.lastName,
         timezone: input.timezone,
+        entitlements: record.entitlements,
       },
     },
   });

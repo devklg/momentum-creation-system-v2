@@ -19,7 +19,7 @@
  * COMPLIANCE (the strictest surface — .com — governs, so the copy is safe on
  * both): founder credibility is experience, story, and leadership track
  * record ONLY. NO income claims, NO commission/comp math, NO earnings
- * figures, NO THREE International branding (the company name / logo). Naming
+ * figures, NO product-company branding (the company name / logo). Naming
  * the 100,000 goal is permitted (the head COUNT is not). The product name
  * "GLP-THREE" is allowed — it is the product the page already presents.
  *

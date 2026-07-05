@@ -32,6 +32,7 @@ export interface CreateVMCampaignInput {
   name: string;
   provider: McsVMCampaignProviderMode;
   voicemailAudioId: string | null;
+  audioUrl: string | null;
   smsTemplateId: string | null;
   emailTemplateId: string | null;
   scheduledAt: string | null;
@@ -52,6 +53,7 @@ export async function createVMCampaign(
     provider: input.provider,
     status: input.scheduledAt ? 'scheduled' : 'draft',
     voicemailAudioId: input.voicemailAudioId,
+    audioUrl: input.audioUrl,
     smsTemplateId: input.smsTemplateId,
     emailTemplateId: input.emailTemplateId,
     scheduledAt: input.scheduledAt,

@@ -98,6 +98,12 @@ const Env = z.object({
   TELNYX_FROM_NUMBER: z.string().default(''),
 
   /**
+   * Caller ID for VM dialer Call Control traffic. Separate from the legacy
+   * SMS/from number so Kevin's personal live-transfer dialer stays isolated.
+   */
+  TELNYX_DIAL_FROM_NUMBER: z.string().default('+13236931362'),
+
+  /**
    * Optional per-call webhook URL override. If set, included in every dial
    * request so Telnyx routes events here regardless of portal config — useful
    * for dev/staging environments using ngrok. If empty, Telnyx uses the
@@ -178,12 +184,21 @@ const Env = z.object({
    *   1. VM_LIVE_DELIVERY_ENABLED=true
    *   2. the campaign document carrying adminApprovedForLiveDelivery=true
    */
-  VM_PROVIDER_MODE: z.enum(['manual_csv', 'acquisition_provider_placeholder']).default('manual_csv'),
+  VM_PROVIDER_MODE: z.enum(['manual_csv', 'acquisition_provider_placeholder', 'telnyx_call_control']).default('manual_csv'),
   VM_LIVE_DELIVERY_ENABLED: EnvBoolean.default(false),
   VM_DELIVERY_RATE_PER_MINUTE: z.coerce.number().int().positive().max(600).default(60),
   VM_WEBHOOK_SHARED_SECRET: z.string().default(''),
   VM_ACQUISITION_PROVIDER_API_URL: z.string().url().optional(),
   VM_ACQUISITION_PROVIDER_API_KEY: z.string().default(''),
+
+  /**
+   * Production health probe. The systemd timer calls the triple-stack probe
+   * endpoint with this shared secret, then writes the status JSON below.
+   * Empty in dev means the probe endpoint is admin-cookie only.
+   */
+  HEALTH_PROBE_SHARED_SECRET: z.string().default(''),
+  HEALTH_STATUS_PATH: z.string().default('/opt/mcs-v2/ops/health-status.json'),
+  HEALTH_ALERT_STATE_PATH: z.string().default('/opt/mcs-v2/ops/health-alert-state.json'),
 
   // ─── Direct persistence — THE ONLY runtime path (ACR-0007 / ACR-0009) ────
   // Defaults target the dedicated governed stack. A store whose mode is not
