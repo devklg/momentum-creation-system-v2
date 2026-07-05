@@ -185,6 +185,15 @@ const Env = z.object({
   VM_ACQUISITION_PROVIDER_API_URL: z.string().url().optional(),
   VM_ACQUISITION_PROVIDER_API_KEY: z.string().default(''),
 
+  /**
+   * Production health probe. The systemd timer calls the triple-stack probe
+   * endpoint with this shared secret, then writes the status JSON below.
+   * Empty in dev means the probe endpoint is admin-cookie only.
+   */
+  HEALTH_PROBE_SHARED_SECRET: z.string().default(''),
+  HEALTH_STATUS_PATH: z.string().default('/opt/mcs-v2/ops/health-status.json'),
+  HEALTH_ALERT_STATE_PATH: z.string().default('/opt/mcs-v2/ops/health-alert-state.json'),
+
   // ─── Direct persistence — THE ONLY runtime path (ACR-0007 / ACR-0009) ────
   // Defaults target the dedicated governed stack. A store whose mode is not
   // 'direct' fails LOUD at env validation or dispatch; there is no silent
