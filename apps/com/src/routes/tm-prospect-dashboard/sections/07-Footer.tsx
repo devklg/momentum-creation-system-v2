@@ -2,10 +2,10 @@
  * Section 7 — Footer. The dashboard's compliance + brand close.
  *
  * Chat #112 build-state audit drift correction applied:
- *   The dashboard-prototype.html footer line
- *     "An operational team inside THREE International"
+ *   The dashboard-prototype.html footer line that positioned this as
+ *   an operational team inside the product company
  *   VIOLATES locked-spec 3.8 (brand isolation — Team Magnificent only,
- *   no THREE branding on .com). The corrected footer here names Team
+ *   no product-company branding on .com). The corrected footer here names Team
  *   Magnificent only.
  *
  * Compliance disclaimer (locked-spec 3.10 verbatim):
@@ -15,7 +15,7 @@
  *    public sources are for context only. This page contains no
  *    income claims, placement promises, or guarantees of any kind."
  *
- * Note the disclaimer makes NO mention of THREE — the brand isolation
+ * Note the disclaimer names only Team Magnificent — the brand isolation
  * (3.8) and the compliance language (3.10) reinforce each other.
  */
 

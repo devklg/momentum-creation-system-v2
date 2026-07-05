@@ -209,7 +209,7 @@ export function RegisterPage() {
           <div className="flex items-start gap-2.5 pt-2">
             <Checkbox id="terms" checked={terms} onCheckedChange={(v) => setTerms(v === true)} />
             <Label htmlFor="terms" className="text-[13px] normal-case tracking-normal text-cream-mute leading-relaxed mb-0">
-              I confirm my sponsor enrolled me in THREE International first, and I accept the{' '}
+              I confirm my sponsor enrolled me with THREE first, and I accept the{' '}
               <span className="text-gold underline cursor-pointer">Team Magnificent terms</span> and{' '}
               <span className="text-gold underline cursor-pointer">privacy policy</span>.
             </Label>
