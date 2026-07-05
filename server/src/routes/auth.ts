@@ -3,6 +3,7 @@ import argon2 from 'argon2';
 import { z } from 'zod';
 import { findAccessCode } from '../domain/access-codes.js';
 import { emailExists, threeBaIdExists, registerBA, findBAByTmagId, recordLogin } from '../domain/ba.js';
+import { normalizeEntitlements } from '../domain/entitlements.js';
 import { signSession, setSessionCookie, clearSessionCookie } from '../services/session.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { ipRateLimit, type RateLimitConfig } from '../middleware/rateLimit.js';
@@ -214,6 +215,7 @@ authRoutes.get('/me', requireAuth, async (req: Request, res: Response) => {
         threeBaId: ba.threeBaId,
         fullName: `${ba.firstName} ${ba.lastName}`.trim(),
         email: ba.email,
+        entitlements: normalizeEntitlements((ba as unknown as { entitlements?: unknown }).entitlements),
         isAdmin,
       },
     });

@@ -154,6 +154,13 @@ interface MarkInvitationSentResponse {
   alreadySent: boolean;
 }
 
+interface AuthMeResponse {
+  ok: true;
+  me: {
+    entitlements?: string[];
+  };
+}
+
 // ── CRM write-side wire shapes (mirror packages/shared/src/types.ts) ─────
 // Per .team TS6059 convention: API shapes redeclared locally; the shared
 // package remains source-of-truth (see lesson_team_app_cannot_import_shared
@@ -465,6 +472,7 @@ type View =
       pmv: ProspectMomentumViewerResponse | null;
       invites: InviteSummary[];
       activityByProspect: Record<string, InvitationActivityEntry[]>;
+      entitlements: string[];
     };
 
 export function CockpitPage() {
@@ -479,7 +487,10 @@ export function CockpitPage() {
 
   const load = useCallback(async () => {
     try {
-      const launchRes = await fetch('/api/cockpit/launch', { credentials: 'include' });
+      const [launchRes, meRes] = await Promise.all([
+        fetch('/api/cockpit/launch', { credentials: 'include' }),
+        fetch('/api/auth/me', { credentials: 'include' }),
+      ]);
       if (launchRes.status === 401) {
         navigate('/register');
         return;
@@ -489,6 +500,8 @@ export function CockpitPage() {
         return;
       }
       const launch = (await launchRes.json()) as TeamLaunchCenter;
+      const me = meRes.ok ? ((await meRes.json()) as AuthMeResponse) : null;
+      const entitlements = me?.me.entitlements ?? [];
 
       if (launch.steve.phase !== 'complete') {
         setView({
@@ -498,6 +511,7 @@ export function CockpitPage() {
           pmv: null,
           invites: [],
           activityByProspect: {},
+          entitlements,
         });
         return;
       }
@@ -529,6 +543,7 @@ export function CockpitPage() {
         pmv,
         invites: invites.invites,
         activityByProspect: invites.activityByProspect,
+        entitlements,
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'unknown';
@@ -638,7 +653,7 @@ export function CockpitPage() {
     );
   }
 
-  const { launch, summary, pmv, invites, activityByProspect } = view;
+  const { launch, summary, pmv, invites, activityByProspect, entitlements } = view;
   if (!summary || !pmv) {
     return (
       <Shell>
@@ -755,14 +770,16 @@ export function CockpitPage() {
                   });
                 }}
               />
-              <CockpitModuleCard
-                icon={<Megaphone className="h-4 w-4" aria-hidden="true" />}
-                eyebrow="VM Campaigns"
-                title="Prepare a campaign"
-                body="Lead-owner lists, approved message drafts, dry-run status, and engagement counts."
-                action="Open campaigns"
-                onClick={() => navigate('/vm-campaigns')}
-              />
+              {entitlements.includes('vm_dialer') && (
+                <CockpitModuleCard
+                  icon={<Megaphone className="h-4 w-4" aria-hidden="true" />}
+                  eyebrow="VM Campaigns"
+                  title="Prepare a campaign"
+                  body="Lead-owner lists, approved message drafts, dry-run status, and engagement counts."
+                  action="Open campaigns"
+                  onClick={() => navigate('/vm-campaigns')}
+                />
+              )}
               <CockpitModuleCard
                 icon={<MessageSquareText className="h-4 w-4" aria-hidden="true" />}
                 eyebrow="Ivory"

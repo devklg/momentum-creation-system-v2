@@ -45,6 +45,7 @@ import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
 import { findBAByTmagId, type BARecord } from './ba.js';
+import { normalizeEntitlements, setMemberEntitlement, type EntitlementAction } from './entitlements.js';
 import type {
   McsAdminBaDirectoryRow,
   McsAdminBaNoteEntry,
@@ -90,6 +91,7 @@ interface BaRecordExtras {
   bio?: string | null;
   marketRegion?: string | null;
   preferredContact?: string | null;
+  entitlements?: unknown;
   welcome_seen?: boolean;
   welcome_seen_at?: string;
   commitment_accepted?: boolean;
@@ -393,6 +395,7 @@ export async function listBADirectory(
       lastActivityAt,
       systemDetectedLeader: false,
       curatedLeader: curatedByTmagId.get(ba.tmagId) ?? false,
+      entitlements: normalizeEntitlements(ba.entitlements),
       deleted: (ba as unknown as Record<string, unknown>).deleted === true,
     };
   });
@@ -446,6 +449,7 @@ export async function getTmagProfileBundle(
         lastActivityAt: ba.lastLoginAt ?? null,
         systemDetectedLeader: false,
         curatedLeader: false,
+        entitlements: normalizeEntitlements((ba as unknown as { entitlements?: unknown }).entitlements),
         deleted: (ba as unknown as Record<string, unknown>).deleted === true,
       };
     }
@@ -461,6 +465,21 @@ export async function getTmagProfileBundle(
     sponsorOverrideHistory: history,
     notes,
   };
+}
+
+export async function setBaEntitlement(args: {
+  tmagId: string;
+  action: EntitlementAction;
+  performedByTmagId: string;
+  performedByDisplayName: string;
+}): Promise<{ ok: true; entitlements: string[] } | { ok: false; error: 'ba_not_found' }> {
+  return setMemberEntitlement({
+    tmagId: args.tmagId,
+    entitlement: 'vm_dialer',
+    action: args.action,
+    performedByTmagId: args.performedByTmagId,
+    performedByDisplayName: args.performedByDisplayName,
+  });
 }
 
 async function fetchOverrideHistory(

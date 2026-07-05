@@ -32,6 +32,7 @@ interface VmCampaignDoc {
   vmCampaignId: string;
   provider?: VmProviderKey;
   adminApprovedForLiveDelivery?: boolean;
+  audioUrl?: string | null;
 }
 
 export async function startVmDeliveryWorker(): Promise<void> {
@@ -70,12 +71,16 @@ async function tick(): Promise<void> {
 }
 
 async function throttle(): Promise<void> {
-  const minGap = Math.ceil(60_000 / env.VM_DELIVERY_RATE_PER_MINUTE);
+  const minGap = vmDeliveryMinGapMs(env.VM_DELIVERY_RATE_PER_MINUTE);
   const wait = Math.max(0, minGap - (Date.now() - lastDispatchAt));
   if (wait > 0) {
     await new Promise((resolve) => setTimeout(resolve, wait));
   }
   lastDispatchAt = Date.now();
+}
+
+export function vmDeliveryMinGapMs(ratePerMinute: number): number {
+  return Math.ceil(60_000 / ratePerMinute);
 }
 
 async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
@@ -103,6 +108,7 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
       lead,
       tokenUrl,
       campaignId: lead.vmCampaignId,
+      audioUrl: campaign?.audioUrl ?? null,
       dryRun,
       adminApprovedForLiveDelivery,
     });

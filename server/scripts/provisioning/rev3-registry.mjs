@@ -24,7 +24,7 @@ export const ENUMS = {
 
 export const MONGO_COLLECTIONS = [
   // A · Identity / Access
-  { name: 'team_magnificent_members', required: ['tmagId','firstName','lastName','email','createdAt'] },
+  { name: 'team_magnificent_members', required: ['tmagId','firstName','lastName','email','createdAt'], props: { entitlements: { bsonType: 'array' } } },
   { name: 'tmag_access_codes', required: ['code','sponsorTmagId','createdAt','active'], props: { mintedVia: { enum: ENUMS.mintedVia } } },
   { name: 'tmag_commitments', required: ['commitmentId','tmagId','version','acceptedAt'] },
   { name: 'tmag_workbooks', required: ['workbookId','forTmagId','conductedByTmagId','status'], props: { status: { enum: ENUMS.workbookStatus } } },

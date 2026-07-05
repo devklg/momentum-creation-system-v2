@@ -98,6 +98,12 @@ const Env = z.object({
   TELNYX_FROM_NUMBER: z.string().default(''),
 
   /**
+   * Caller ID for VM dialer Call Control traffic. Separate from the legacy
+   * SMS/from number so Kevin's personal live-transfer dialer stays isolated.
+   */
+  TELNYX_DIAL_FROM_NUMBER: z.string().default('+13236931362'),
+
+  /**
    * Optional per-call webhook URL override. If set, included in every dial
    * request so Telnyx routes events here regardless of portal config — useful
    * for dev/staging environments using ngrok. If empty, Telnyx uses the
@@ -178,7 +184,7 @@ const Env = z.object({
    *   1. VM_LIVE_DELIVERY_ENABLED=true
    *   2. the campaign document carrying adminApprovedForLiveDelivery=true
    */
-  VM_PROVIDER_MODE: z.enum(['manual_csv', 'acquisition_provider_placeholder']).default('manual_csv'),
+  VM_PROVIDER_MODE: z.enum(['manual_csv', 'acquisition_provider_placeholder', 'telnyx_call_control']).default('manual_csv'),
   VM_LIVE_DELIVERY_ENABLED: EnvBoolean.default(false),
   VM_DELIVERY_RATE_PER_MINUTE: z.coerce.number().int().positive().max(600).default(60),
   VM_WEBHOOK_SHARED_SECRET: z.string().default(''),
