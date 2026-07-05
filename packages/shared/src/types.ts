@@ -114,7 +114,7 @@ export interface McsProspectLocation {
  * Per locked-spec Part 1.17, prospects are one of the two kinds of people
  * the system tracks (BAs are the other). became_customer fields enable
  * the customer-conversion metric without expanding scope into customer
- * tracking; the actual customer relationship lives in THREE International.
+ * tracking; the actual customer relationship lives with THREE, the product company.
  */
 export interface McsProspectRecord {
   prospectId: string;
@@ -2554,7 +2554,7 @@ export interface McsPreviewResolvedTokenPayload extends McsResolvedTokenPayload 
  *   - No algorithmic flagging. Every directory column is a raw count or
  *     a raw timestamp; the UI never compares them to a threshold and
  *     emits a judgment. Kevin reads the numbers.
- *   - THREE International is the upstream authority. The sponsor override
+ *   - THREE is the upstream authority. The sponsor override
  *     mirrors the BA's request — it does NOT push to THREE.
  *   - System-detected leader is a hard rule (binary-qualified ∧ ≥5
  *     personally enrolled). Binary qualification is not mirrored locally
@@ -5206,7 +5206,7 @@ export type McsMemoryType =
  * every record is scoped to Team Magnificent membership — `tenantId` + the
  * `teamKey: 'team_magnificent'` team scope, plus `tmagId` = the Team Magnificent
  * MEMBER id (value `TMAG-…`, the login). The app is exclusively for TM members (an
- * enrolled III International BA in Kevin's downline); the THREE BA role is a
+ * enrolled THREE BA in Kevin's downline); the THREE BA role is a
  * mirrored attribute of the member, never the identity.
  *
  * Banned on any app record: `chat_number`, `chat_registry_id`,
@@ -5245,7 +5245,7 @@ export interface McsMemoryEnvelope {
 /**
  * Terminal outcome — how a prospect RESOLVED (P7.16 §1a). Small closed set; NOT
  * the journey milestones (watched video, attended webinar, …) which live in the
- * event log. `enrolled_iii` = enrolled into III International = became a Brand
+ * event log. `enrolled_iii` = enrolled into THREE = became a Brand
  * Ambassador (→ a Team Magnificent member in Kevin's downline). `became_customer`
  * = a product customer (not a member). The two are non-exclusive (a customer may
  * later enroll). `pending` = not yet resolved.

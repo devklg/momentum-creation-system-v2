@@ -40,6 +40,31 @@ export async function findNextUpcomingEvent(): Promise<McsWebinarEvent | null> {
   return result.documents[0] ?? null;
 }
 
+export async function listUpcomingWebinarEvents(input?: {
+  horizonDays?: number;
+  limit?: number;
+}): Promise<McsWebinarEvent[]> {
+  const nowMs = Date.now();
+  const now = new Date(nowMs).toISOString();
+  const horizonDays = input?.horizonDays ?? 14;
+  const horizon = new Date(nowMs + horizonDays * 24 * 60 * 60 * 1000).toISOString();
+  const result = await persistenceCall<{ documents: McsWebinarEvent[] }>(
+    'mongodb',
+    'query',
+    {
+      database: MONGO_DB,
+      collection: MONGO_COLLECTION,
+      filter: {
+        status: 'upcoming',
+        scheduledFor: { $gt: now, $lte: horizon },
+      },
+      sort: { scheduledFor: 1 },
+      limit: input?.limit ?? 20,
+    },
+  );
+  return result.documents ?? [];
+}
+
 /**
  * Look up a webinar event by id. Returns null if the event does not
  * exist or has been cancelled. Used by the reservation route to

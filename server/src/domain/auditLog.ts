@@ -143,7 +143,7 @@ export async function appendAuditEntry(input: McsAppendAuditEntryInput): Promise
   await tripleStackWrite({
     id: entryId,
     mongoCollection: COLLECTION,
-    mongoDoc: { ...entry, _id: undefined } as Record<string, unknown>,
+    mongoDoc: { ...entry, _id: entryId } as Record<string, unknown>,
     neo4j: cypher,
     chroma: {
       collection: CHROMA_COLLECTION,
@@ -399,7 +399,7 @@ export async function appendRuntimeAuditEntry(
   await tripleStackWrite({
     id: entryId,
     mongoCollection: COLLECTION,
-    mongoDoc: { ...entry, _id: undefined } as Record<string, unknown>,
+    mongoDoc: { ...entry, _id: entryId } as Record<string, unknown>,
     neo4j: cypher,
     chroma: {
       collection: CHROMA_COLLECTION,
