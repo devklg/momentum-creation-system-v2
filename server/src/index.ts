@@ -27,6 +27,7 @@ import { adminVmRoutes } from './routes/admin/vm.js';
 import { adminAgentsRoutes } from './routes/admin/agents.js';
 import { adminKnowledgeRoutes } from './routes/admin/knowledge.js';
 import { adminMichaelRuntimeObservabilityRoutes } from './routes/admin/michael-runtime-observability.js';
+import { adminContentVideoRoutes } from './routes/admin/content-videos.js';
 import { adminHealthRoutes } from './routes/admin/health.js';
 import { startBroadcastWorker } from './services/broadcastQueue.js';
 import { startVmDeliveryWorker } from './workers/vmDeliveryWorker.js';
@@ -58,6 +59,7 @@ import { profileRoutes } from './routes/profile.js';
 import { previewRoutes } from './routes/preview.js';
 import { orientationRoutes } from './routes/orientation.js';
 import { michaelRuntimeRoutes } from './routes/michael-runtime.js';
+import { contentVideoRoutes } from './routes/content-videos.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -140,6 +142,7 @@ app.use('/api/admin/orientation', adminOrientationRoutes);
 // ADMIN — Sprint 3 S3.6 in-memory Michael runtime observability snapshot.
 // Kevin-only via requireAdmin; pure in-memory read, no persistence, no audit.
 app.use('/api/admin/michael-runtime', adminMichaelRuntimeObservabilityRoutes);
+app.use('/api/admin/content/videos', adminContentVideoRoutes);
 app.use('/api/admin/health', adminHealthRoutes);
 
 // /api/p/* is prospect-facing (apps/com). No auth, no Steve gate. The token
@@ -252,6 +255,7 @@ app.use('/api/orientation', orientationRoutes);
 // /api/michael onboarding route; the reserved bare runtime namespace stays
 // unmounted.
 app.use('/api/michael-runtime', michaelRuntimeRoutes);
+app.use('/api/content', contentVideoRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 

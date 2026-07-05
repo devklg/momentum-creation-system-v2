@@ -18,6 +18,7 @@
  * can build belief in the product before completing discovery.
  */
 
+import { Link } from 'react-router-dom';
 import {
   ModuleScaffold,
   SectionLabel,
@@ -209,6 +210,26 @@ export function ModuleProductPage() {
         will see this play out in Module 2 — for now, just know enrollment packs are the lever new
         people pull on day one.
       </Callout>
+
+      <div className="my-8 border border-gold/35 bg-gold/[0.05] p-5 md:p-6">
+        <div className="font-mono tracking-[0.22em] text-[10px] text-gold uppercase mb-2">
+          Product Knowledge
+        </div>
+        <div className="font-display tracking-[0.05em] text-[24px] text-cream leading-none mb-2">
+          Watch the Product Gallery next.
+        </div>
+        <p className="text-cream-mute text-[14px] leading-[1.65] max-w-[620px]">
+          The Product Gallery holds Kevin's editable video library. Use it to
+          deepen your product belief and find the video that fits the person
+          you are thinking about.
+        </p>
+        <Link
+          to="/video-library"
+          className="inline-flex mt-4 font-mono tracking-[0.16em] text-[10px] text-ink bg-gold hover:bg-gold-bright px-4 py-3 uppercase"
+        >
+          Open Product Gallery
+        </Link>
+      </div>
 
       <SectionLabel>Why this matters before Module 2</SectionLabel>
       <SectionTitle>You can't share what you don't take.</SectionTitle>

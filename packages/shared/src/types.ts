@@ -5448,3 +5448,67 @@ export interface McsLearningObservabilitySnapshot {
     approvalRate: number;
   };
 }
+
+// Product Gallery / Training Content Videos (Brief 9, 2026-07-04)
+
+export type McsContentVideoAudience = 'member' | 'prospect' | 'both';
+
+export interface McsContentVideoRecord {
+  _id?: string;
+  contentVideoId: string;
+  section: string;
+  title: string;
+  youtubeId: string | null;
+  url: string | null;
+  description: string;
+  sortOrder: number;
+  audience: McsContentVideoAudience;
+  active: boolean;
+  createdAt: string;
+  createdByTmagId: string | null;
+  updatedAt: string;
+  updatedByTmagId: string | null;
+  source: string | null;
+}
+
+export interface McsContentVideoSection {
+  section: string;
+  videos: McsContentVideoRecord[];
+}
+
+export interface McsContentVideosResponse {
+  ok: true;
+  sections: McsContentVideoSection[];
+}
+
+export type McsContentVideosAdminListResponse = McsContentVideosResponse;
+
+export interface McsContentVideoUpsertPayload {
+  section: string;
+  title: string;
+  youtubeId?: string | null;
+  url?: string | null;
+  description: string;
+  sortOrder: number;
+  audience: McsContentVideoAudience;
+  active?: boolean;
+}
+
+export interface McsContentVideoMutationResponse {
+  ok: true;
+  video: McsContentVideoRecord;
+}
+
+export interface McsContentVideoReorderItem {
+  contentVideoId: string;
+  sortOrder: number;
+}
+
+export interface McsContentVideoReorderPayload {
+  items: McsContentVideoReorderItem[];
+}
+
+export interface McsContentVideoReorderResponse {
+  ok: true;
+  videos: McsContentVideoRecord[];
+}

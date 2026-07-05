@@ -57,6 +57,7 @@ export const MONGO_COLLECTIONS = [
   { name: 'tmag_agent_steve_events', required: ['eventId','tmagId','agentId','kind','createdAt'] },
   { name: 'tmag_agent_templates', required: ['templateId','agentKey','templateKind','version'], props: { templateKind: { enum: ENUMS.templateKind } } },
   { name: 'tmag_content_templates', required: ['templateVersionId','tenantId','templateKey','surface','version'] },
+  { name: 'tmag_content_videos', required: ['contentVideoId','section','title','sortOrder','audience'] },
   { name: 'tmag_invitation_generator_runs', required: ['runId','tmagId','productKey'] },
   { name: 'tmag_ivory_prospect_names', required: ['ivoryId','tmagId','firstName','status'] },
   { name: 'mcs_audit_log', required: ['entryId','timestamp','role','actor','action'] },
@@ -97,7 +98,7 @@ export const CHROMA_COLLECTIONS = [
   // Prospect / funnel
   'mcs_prospect_invitation_activity','mcs_prospect_callback_requests','mcs_prospect_htank_events','mcs_prospect_magic_links','mcs_prospect_webinar_reservations','mcs_prospect_crm_records','mcs_prospect_timeline_events',
   // Agents / templates / admin
-  'mcs_agent_ivory_events','mcs_agent_michael_events','mcs_agent_steve_events','mcs_agent_system_events','mcs_agent_templates','mcs_ivory_prospect_names','mcs_audit_log','mcs_content_templates','mcs_broadcasts','mcs_admin_prospect_notes','mcs_tenant_settings',
+  'mcs_agent_ivory_events','mcs_agent_michael_events','mcs_agent_steve_events','mcs_agent_system_events','mcs_agent_templates','mcs_ivory_prospect_names','mcs_audit_log','mcs_content_templates','mcs_content_videos','mcs_broadcasts','mcs_admin_prospect_notes','mcs_tenant_settings',
   'mcs_health_heartbeat',
   // Prospect extras with living writers (runtime write-guard reconciliation 2026-07-02)
   'mcs_prospect_htank_accounts','mcs_new_member_orientation_reservations','mcs_webinar_events',
@@ -131,6 +132,7 @@ export const NEO4J_CONSTRAINTS = [
   ['TmagFastStartProgress','id'], ['TmagSteveSuccessInterview','id'],
   ['TmagAgentIvoryEvent','eventId'], ['TmagAgentMichaelEvent','eventId'], ['TmagAgentSteveEvent','eventId'],
   ['TmagAgentTemplate','templateId'], ['TmagContentTemplate','templateVersionId'], ['TmagInvitationGeneratorRun','runId'],
+  ['TmagContentVideo','contentVideoId'],
   ['TmagIvoryName','ivoryId'], ['TmagAuditEntry','entryId'], ['TmagSponsorOverride','overrideId'],
   ['TmagCuratedLeaderTag','id'], ['TmagAdminMemberNote','noteId'], ['TmagAdminProspectNote','noteId'],
   ['TmagVmLeadOwner','leadOwnerId'], ['TmagVmCampaign','vmCampaignId'], ['TmagVmBulkLead','leadId'],

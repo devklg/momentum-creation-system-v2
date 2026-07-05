@@ -823,6 +823,14 @@ export function CockpitPage() {
                 action="Open Ivory"
                 onClick={() => navigate('/ivory')}
               />
+              <CockpitModuleCard
+                icon={<PlayCircle className="h-4 w-4" aria-hidden="true" />}
+                eyebrow="Product Gallery"
+                title="Train the product"
+                body="Kevin's editable video gallery for product knowledge and shareable product stories."
+                action="Open gallery"
+                onClick={() => navigate('/video-library')}
+              />
             </div>
           </div>
         </section>

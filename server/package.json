@@ -14,6 +14,7 @@
     "seed:founders": "tsx scripts/seed-founders.ts",
     "backfill:founder-timezones": "tsx scripts/backfill-founder-timezones.ts",
     "seed:webinar-events": "tsx scripts/seed-webinar-events.ts",
+    "seed:content-videos": "tsx scripts/seed-content-videos.ts",
     "setup:founder-access": "tsx scripts/setup-founder-access.ts",
     "migrate:rev3-reidentification": "node scripts/migrate-reidentification-rev3.mjs",
     "bootstrap:ivory": "tsx scripts/bootstrap-ivory-collection.ts",
