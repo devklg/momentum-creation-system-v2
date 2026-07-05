@@ -8,6 +8,11 @@ import type { BackendRuntimeBoundaryDescriptor } from '../common.js';
 
 export interface KnowledgeCoreBoundaryPort {
   listApprovedKnowledge(scope: McsRuntimeRequestScope): Promise<readonly McsKnowledgeReference[]>;
+  searchApprovedKnowledge(
+    scope: McsRuntimeRequestScope,
+    query: string,
+    k?: number,
+  ): Promise<readonly McsKnowledgeReference[]>;
   listCandidateKnowledgeForReview(
     scope: McsRuntimeRequestScope,
   ): Promise<readonly McsKnowledgeCandidateReference[]>;

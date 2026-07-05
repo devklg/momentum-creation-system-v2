@@ -17,11 +17,14 @@ import type {
   McsAgentKey,
   McsKnowledgeBaseChunkRecord,
   McsKnowledgeBaseSourceRecord,
+  McsKnowledgeChunk,
   McsKnowledgeDomain,
+  McsKnowledgeFreshness,
   McsKnowledgeId,
   McsKnowledgeReference,
   McsRawKnowledgeSource,
   McsRuntimeLanguage,
+  McsRuntimeTranslationStatus,
   McsRuntimeRequestScope,
   McsSourceId,
 } from '@momentum/shared/runtime';
@@ -65,6 +68,18 @@ interface MongoQueryResult {
   documents?: Array<Record<string, unknown>>;
   count?: number;
 }
+
+interface ChromaQueryResult {
+  results?: {
+    ids?: string[];
+    documents?: string[];
+    metadatas?: Array<Record<string, unknown> | null>;
+    distances?: number[];
+  };
+}
+
+const DEFAULT_SEMANTIC_K = 6;
+const MAX_SEMANTIC_K = 12;
 
 export async function createKevinApprovedKnowledgeSource(
   input: CreateKevinApprovedKnowledgeSourceInput,
@@ -212,7 +227,10 @@ export async function createKevinApprovedKnowledgeSource(
   };
 }
 
-export function createStoredApprovedKnowledgeProvider(): Pick<KnowledgeCoreBoundaryPort, 'listApprovedKnowledge'> {
+export function createStoredApprovedKnowledgeProvider(): Pick<
+  KnowledgeCoreBoundaryPort,
+  'listApprovedKnowledge' | 'searchApprovedKnowledge'
+> {
   return {
     async listApprovedKnowledge(scope) {
       const data = await persistenceCall<MongoQueryResult>('mongodb', 'query', {
@@ -229,6 +247,33 @@ export function createStoredApprovedKnowledgeProvider(): Pick<KnowledgeCoreBound
       });
 
       return (data.documents ?? []).flatMap(documentToKnowledgeReference);
+    },
+    async searchApprovedKnowledge(scope, query, k) {
+      const normalizedQuery = normalizeSearchQuery(query);
+      if (!normalizedQuery) return [];
+
+      const limit = normalizeSemanticK(k);
+      let data: ChromaQueryResult;
+      try {
+        data = await persistenceCall<ChromaQueryResult>('chromadb', 'query_with_filter', {
+          collection: KNOWLEDGE_CHUNK_COLLECTION,
+          query: normalizedQuery,
+          n_results: limit,
+          filter: {
+            status: 'active',
+            retrievalEligible: true,
+          },
+        });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(
+          `[knowledge] semantic approved-knowledge search failed through embedder/Chroma; ` +
+            `returning empty references. ${err instanceof Error ? err.message : String(err)}`,
+        );
+        return [];
+      }
+
+      return hydrateSemanticSearchReferences(data, scope);
     },
   };
 }
@@ -248,18 +293,24 @@ function documentToKnowledgeReference(doc: Record<string, unknown>): McsKnowledg
   const domain = doc.domain;
   const language = doc.language;
   const status = doc.status;
+  const retrievalEligible = doc.retrievalEligible;
   if (
     !knowledgeId ||
     !sourceId ||
     !isDomain(domain) ||
     (language !== 'en' && language !== 'es') ||
-    status !== 'active'
+    status !== 'active' ||
+    retrievalEligible === false
   ) {
     return [];
   }
 
   const title = typeof doc.title === 'string' ? doc.title : undefined;
   const summary = typeof doc.summary === 'string' ? doc.summary : undefined;
+  const translationStatus = isTranslationStatus(doc.translationStatus)
+    ? doc.translationStatus
+    : 'same_language';
+  const freshness = extractFreshness(doc);
 
   return [{
     knowledgeId: knowledgeId as McsKnowledgeReference['knowledgeId'],
@@ -268,9 +319,213 @@ function documentToKnowledgeReference(doc: Record<string, unknown>): McsKnowledg
     domain,
     status,
     language,
-    translationStatus: 'same_language',
+    translationStatus,
     sourceId: sourceId as McsKnowledgeReference['sourceId'],
+    ...(freshness ? { freshness } : {}),
   }];
+}
+
+function hydrateSemanticSearchReferences(
+  data: ChromaQueryResult,
+  scope: McsRuntimeRequestScope,
+): McsKnowledgeReference[] {
+  const ids = data.results?.ids ?? [];
+  const documents = data.results?.documents ?? [];
+  const metadatas = data.results?.metadatas ?? [];
+  const references: McsKnowledgeReference[] = [];
+
+  for (let index = 0; index < ids.length; index += 1) {
+    const metadata = metadatas[index] ?? {};
+    if (!isApprovedSearchHit(metadata, scope)) continue;
+
+    const chunk = metadataToKnowledgeChunk({
+      id: ids[index],
+      document: documents[index],
+      metadata,
+      scope,
+    });
+    if (!chunk) continue;
+
+    const [reference] = chunksToKnowledgeReferences([chunk]);
+    if (!reference) continue;
+
+    references.push({
+      ...reference,
+      ...(typeof metadata.title === 'string' && metadata.title.trim().length > 0
+        ? { title: metadata.title }
+        : {}),
+      translationStatus: isTranslationStatus(metadata.translationStatus)
+        ? metadata.translationStatus
+        : reference.translationStatus,
+      ...(extractFreshness(metadata) ? { freshness: extractFreshness(metadata) } : {}),
+    });
+  }
+
+  return references;
+}
+
+function metadataToKnowledgeChunk(input: {
+  id: string | undefined;
+  document: string | undefined;
+  metadata: Record<string, unknown>;
+  scope: McsRuntimeRequestScope;
+}): McsKnowledgeChunk | null {
+  const chunkId = stringValue(input.metadata.chunkId) ?? input.id;
+  const sourceId = stringValue(input.metadata.sourceId);
+  const domain = input.metadata.domain;
+  const language = input.metadata.language;
+  const text = input.document ?? stringValue(input.metadata.summary) ?? stringValue(input.metadata.text);
+  if (
+    !chunkId ||
+    !sourceId ||
+    !text ||
+    !isDomain(domain) ||
+    (language !== 'en' && language !== 'es')
+  ) {
+    return null;
+  }
+
+  return {
+    chunkId,
+    sourceId: sourceId as McsSourceId,
+    documentId: stringValue(input.metadata.documentId) ?? `${sourceId}:document`,
+    sourceVersion: numberValue(input.metadata.sourceVersion) ?? 1,
+    heading: stringValue(input.metadata.heading) ?? stringValue(input.metadata.title) ?? null,
+    text,
+    chunkIndex: numberValue(input.metadata.chunkIndex) ?? 0,
+    language,
+    domain,
+    scope: scopeFromMetadata(input.metadata, input.scope),
+    topicTags: stringArrayValue(input.metadata.topicTags),
+    agentScopes: agentScopesFromMetadata(input.metadata.agentScopes),
+    surfaceScopes: surfaceScopesFromMetadata(input.metadata.surfaceScopes),
+    sourceOffsets: {
+      startOffset: numberValue(input.metadata.startOffset) ?? 0,
+      endOffset: numberValue(input.metadata.endOffset) ?? text.length,
+    },
+    status: 'active',
+    retrievalEligible: input.metadata.retrievalEligible !== false,
+  };
+}
+
+function isApprovedSearchHit(
+  metadata: Record<string, unknown>,
+  scope: McsRuntimeRequestScope,
+): boolean {
+  const status = metadata.status;
+  if (status !== 'active' && status !== 'approved') return false;
+  if (metadata.retrievalEligible === false) return false;
+  if (!metadataScopeMatches(metadata, scope)) return false;
+
+  const authorityStatus = metadata.authorityStatus ?? metadata.authorityDecision;
+  if (
+    authorityStatus !== undefined &&
+    authorityStatus !== 'active_authority' &&
+    authorityStatus !== 'approved'
+  ) {
+    return false;
+  }
+
+  const authority = metadata.authority;
+  if (
+    authority !== undefined &&
+    authority !== 'kevin' &&
+    authority !== 'kevin_authored' &&
+    authority !== 'kevin_approved'
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+function metadataScopeMatches(
+  metadata: Record<string, unknown>,
+  scope: McsRuntimeRequestScope,
+): boolean {
+  const tenantId = stringValue(metadata['scope.tenantId']) ?? stringValue(metadata.tenantId);
+  const teamId = stringValue(metadata['scope.teamId']) ?? stringValue(metadata.teamId);
+  const teamKey = stringValue(metadata['scope.teamKey']) ?? stringValue(metadata.teamKey);
+  const teamName = stringValue(metadata['scope.teamName']) ?? stringValue(metadata.teamName);
+  if (tenantId !== undefined && tenantId !== scope.tenantId) return false;
+  if (teamId !== undefined && teamId !== scope.teamId) return false;
+  if (teamKey !== undefined && teamKey !== scope.teamKey) return false;
+  if (teamName !== undefined && teamName !== scope.teamName) return false;
+  return true;
+}
+
+function scopeFromMetadata(
+  metadata: Record<string, unknown>,
+  fallback: McsRuntimeRequestScope,
+): McsRuntimeRequestScope {
+  const teamScope = teamMagnificentScope();
+  return {
+    tenantId: (stringValue(metadata['scope.tenantId']) ?? stringValue(metadata.tenantId) ?? fallback.tenantId) as McsRuntimeRequestScope['tenantId'],
+    teamId: (stringValue(metadata['scope.teamId']) ?? stringValue(metadata.teamId) ?? fallback.teamId ?? teamScope.teamId) as NonNullable<McsRuntimeRequestScope['teamId']>,
+    teamKey: (stringValue(metadata['scope.teamKey']) ?? stringValue(metadata.teamKey) ?? fallback.teamKey ?? teamScope.teamKey) as NonNullable<McsRuntimeRequestScope['teamKey']>,
+    teamName: (stringValue(metadata['scope.teamName']) ?? stringValue(metadata.teamName) ?? fallback.teamName ?? teamScope.teamName) as NonNullable<McsRuntimeRequestScope['teamName']>,
+    ...(fallback.tmagId ? { tmagId: fallback.tmagId } : {}),
+  };
+}
+
+function normalizeSearchQuery(query: string): string {
+  return query.replace(/\s+/g, ' ').trim();
+}
+
+function normalizeSemanticK(k: number | undefined): number {
+  if (k === undefined) return DEFAULT_SEMANTIC_K;
+  if (!Number.isFinite(k)) return DEFAULT_SEMANTIC_K;
+  return Math.max(1, Math.min(MAX_SEMANTIC_K, Math.floor(k)));
+}
+
+function extractFreshness(record: Record<string, unknown>): McsKnowledgeFreshness | undefined {
+  if (isRecord(record.freshness)) return record.freshness as unknown as McsKnowledgeFreshness;
+  const freshness: McsKnowledgeFreshness = {};
+  if (typeof record.freshnessLifecycle === 'string') freshness.lifecycle = record.freshnessLifecycle as McsKnowledgeFreshness['lifecycle'];
+  if (typeof record.lifecycle === 'string') freshness.lifecycle = record.lifecycle as McsKnowledgeFreshness['lifecycle'];
+  if (typeof record.effectiveAt === 'string') freshness.effectiveAt = record.effectiveAt;
+  if (typeof record.expiresAt === 'string') freshness.expiresAt = record.expiresAt;
+  if (typeof record.updatedAt === 'string') freshness.updatedAt = record.updatedAt;
+  return Object.keys(freshness).length > 0 ? freshness : undefined;
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim().length > 0 ? value : undefined;
+}
+
+function numberValue(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function stringArrayValue(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === 'string');
+}
+
+function agentScopesFromMetadata(value: unknown): McsAgentKey[] {
+  return stringArrayValue(value).filter((item): item is McsAgentKey =>
+    item === 'steve_success' || item === 'michael_magnificent' || item === 'ivory',
+  );
+}
+
+function surfaceScopesFromMetadata(value: unknown): McsKnowledgeChunk['surfaceScopes'] {
+  const scopes = stringArrayValue(value).filter((item): item is McsKnowledgeChunk['surfaceScopes'][number] =>
+    item === 'team' || item === 'admin',
+  );
+  return scopes.length > 0 ? scopes : ['team'];
+}
+
+function isTranslationStatus(value: unknown): value is McsRuntimeTranslationStatus {
+  return value === 'same_language' ||
+    value === 'not_required' ||
+    value === 'human_reviewed_translation' ||
+    value === 'machine_translation_marked' ||
+    value === 'language_neutral_template' ||
+    value === 'clarification_required';
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function teamMagnificentScope(): McsRuntimeRequestScope {
