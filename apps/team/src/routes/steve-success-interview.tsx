@@ -17,6 +17,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 
 /* ─── Local wire shapes (mirror the Steve block in packages/shared/src/types.ts) ─── */
 
@@ -203,11 +204,64 @@ function speakableText(text: string): string {
     .trim();
 }
 
+function choosePreferredVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+  const enUsVoices = voices.filter((voice) => /^en[-_]US/i.test(voice.lang));
+  const candidates = enUsVoices.length ? enUsVoices : voices.filter((voice) => /^en/i.test(voice.lang));
+
+  const scored = candidates
+    .map((voice) => {
+      const name = voice.name.toLowerCase();
+      let score = 0;
+      if (voice.lang.toLowerCase() === 'en-us') score += 8;
+      if (name.includes('natural')) score += 12;
+      if (name.includes('google')) score += 10;
+      if (name.includes('microsoft')) score += 9;
+      if (name.includes('online')) score += 4;
+      if (name.includes('neural')) score += 4;
+      if (name.includes('default')) score -= 3;
+      return { voice, score };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  return scored[0]?.voice ?? null;
+}
+
+function SteveShellHeader({ kicker }: { kicker: string }) {
+  return (
+    <header className="relative z-10 px-6 md:px-10 pt-6 pb-2">
+      <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
+        <Link to="/cockpit" className="flex items-center gap-3">
+          <img src="/logos/logo_icon.png" alt="" aria-hidden="true" className="h-7 w-auto" />
+          <span className="font-display tracking-[0.18em] text-[15px] text-gold hover:opacity-80">
+            TEAM MAGNIFICENT
+          </span>
+        </Link>
+        <div className="flex items-center gap-6">
+          <span className="hidden font-mono tracking-[0.22em] text-[10px] text-cream-mute uppercase sm:inline">
+            {kicker}
+          </span>
+          <Link
+            to="/cockpit"
+            className="font-mono tracking-[0.22em] text-[10px] text-cream-mute hover:text-gold uppercase"
+          >
+            ← Cockpit
+          </Link>
+        </div>
+      </div>
+      <p className="mx-auto mt-4 max-w-4xl text-sm text-cream-mute">
+        Your conversation saves as you go — you can leave and come back.
+      </p>
+    </header>
+  );
+}
+
 function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> }) {
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [introOpen, setIntroOpen] = useState(true);
+  const [preferredVoice, setPreferredVoice] = useState<SpeechSynthesisVoice | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   const [voiceOn, setVoiceOn] = useState(false);
@@ -216,6 +270,9 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
   const doneRef = useRef(false);
   const busyRef = useRef(false);
   const recRef = useRef<SpeechRec | null>(null);
+  const pendingFinalRef = useRef('');
+  const lastSpeechAtRef = useRef(0);
+  const ignoreNextEndRef = useRef(false);
   const voiceSupported = speechRecognitionCtor() !== null;
 
   const send = useCallback(
@@ -272,20 +329,45 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
         const data = (await res.json()) as { ok: boolean; turns?: ChatTurn[] };
         if (data.ok && data.turns && data.turns.length > 0) {
           setTurns(data.turns);
+          setIntroOpen(false);
           setBusy(false);
           return;
         }
       } catch {
-        /* fall through to greeting */
+        /* fall through to ready state */
       }
-      await send('');
+      setBusy(false);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [turns, busy]);
+
+  useEffect(() => {
+    if (typeof speechSynthesis === 'undefined') return undefined;
+
+    const updateVoices = () => setPreferredVoice(choosePreferredVoice(speechSynthesis.getVoices()));
+    updateVoices();
+    speechSynthesis.onvoiceschanged = updateVoices;
+
+    return () => {
+      if (speechSynthesis.onvoiceschanged === updateVoices) {
+        speechSynthesis.onvoiceschanged = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      try {
+        recRef.current?.abort();
+      } catch {
+        /* noop */
+      }
+      if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+    };
+  }, []);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -296,11 +378,18 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
   }
 
   function submitMessage(message: string) {
+    pendingFinalRef.current = '';
     setTurns((prev) => [
       ...prev,
       { seq: prev.length, role: 'ba', text: message, at: new Date().toISOString() },
     ]);
     void send(message);
+  }
+
+  async function startConversation() {
+    if (busy) return;
+    setIntroOpen(false);
+    await send('');
   }
 
   /* ── voice controls ── */
@@ -310,7 +399,9 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
     speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(speakableText(text));
     utter.lang = 'en-US';
-    utter.rate = 1.02;
+    if (preferredVoice) utter.voice = preferredVoice;
+    utter.rate = 1.0;
+    utter.pitch = 0.92;
     utter.onend = () => {
       if (voiceOnRef.current && !doneRef.current && !busyRef.current) startListening();
     };
@@ -319,33 +410,44 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
 
   function startListening() {
     if (!voiceOnRef.current || doneRef.current) return;
+    if (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking) return;
     const Ctor = speechRecognitionCtor();
     if (!Ctor) return;
     try { recRef.current?.abort(); } catch { /* noop */ }
     const rec = new Ctor();
     recRef.current = rec;
     rec.lang = 'en-US';
-    rec.continuous = false;
+    rec.continuous = true;
     rec.interimResults = true;
-    let finalText = '';
+    let sessionFinalText = pendingFinalRef.current;
     rec.onresult = (e) => {
       let interim = '';
+      lastSpeechAtRef.current = Date.now();
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const r = e.results[i];
         if (!r) continue;
-        if (r.isFinal) finalText += r[0].transcript;
+        if (r.isFinal) {
+          sessionFinalText += `${r[0].transcript} `;
+          pendingFinalRef.current = sessionFinalText;
+        }
         else interim += r[0].transcript;
       }
-      setDraft(finalText + interim);
+      setDraft(`${sessionFinalText}${interim}`.trimStart());
     };
     rec.onend = () => {
       setListening(false);
-      const message = finalText.trim();
-      setDraft('');
-      if (message && !busyRef.current) {
+      if (ignoreNextEndRef.current) {
+        ignoreNextEndRef.current = false;
+        return;
+      }
+      const message = pendingFinalRef.current.trim();
+      const quietLongEnough = Date.now() - lastSpeechAtRef.current >= 2500;
+      if (message && quietLongEnough && !busyRef.current) {
+        pendingFinalRef.current = '';
+        setDraft('');
         submitMessage(message);
       } else if (voiceOnRef.current && !doneRef.current && !busyRef.current && typeof speechSynthesis !== 'undefined' && !speechSynthesis.speaking) {
-        startListening(); // silence timeout — keep the mic warm, hands-free
+        startListening();
       }
     };
     rec.onerror = () => setListening(false);
@@ -357,6 +459,9 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
     voiceOnRef.current = false;
     setVoiceOn(false);
     setListening(false);
+    pendingFinalRef.current = '';
+    lastSpeechAtRef.current = 0;
+    ignoreNextEndRef.current = true;
     try { recRef.current?.abort(); } catch { /* noop */ }
     if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
   }
@@ -371,9 +476,23 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
     if (!busy) startListening();
   }
 
+  function sendVoiceDraft() {
+    const message = draft.trim();
+    if (!message || busy) return;
+    ignoreNextEndRef.current = true;
+    try { recRef.current?.abort(); } catch { /* noop */ }
+    setListening(false);
+    setDraft('');
+    pendingFinalRef.current = '';
+    submitMessage(message);
+  }
+
+  const started = turns.length > 0;
+
   return (
-    <div className="min-h-screen bg-ink text-cream px-6 py-10">
-      <div className="mx-auto flex h-[calc(100vh-5rem)] max-w-2xl flex-col">
+    <div className="min-h-screen bg-ink text-cream">
+      <SteveShellHeader kicker="Steve · New BA Discovery" />
+      <div className="mx-auto flex min-h-[calc(100vh-7.5rem)] max-w-2xl flex-col px-6 py-8">
         <header className="mb-4">
           <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-gold">
             Steve · New BA Discovery
@@ -384,6 +503,23 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
             shape how your sponsor and the team support you.
           </p>
         </header>
+
+        {!started || introOpen ? (
+          <IntroPanel
+            started={started}
+            busy={busy}
+            onStart={startConversation}
+            onCollapse={() => setIntroOpen(false)}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIntroOpen(true)}
+            className="mb-3 self-start font-mono text-[10px] uppercase tracking-[0.18em] text-cream-mute hover:text-gold"
+          >
+            Show discovery intro
+          </button>
+        )}
 
         <div className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-cream/10 bg-black/20 p-4">
           {turns.map((t) => (
@@ -417,33 +553,109 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
             <button
               type="button"
               onClick={toggleVoice}
+              disabled={!started || busy}
               title={voiceOn ? 'Turn voice off' : 'Talk to Steve'}
               className={
                 voiceOn
                   ? 'rounded-lg border border-gold bg-gold/20 px-4 py-3 text-sm font-semibold text-gold'
-                  : 'rounded-lg border border-cream/20 bg-black/30 px-4 py-3 text-sm text-cream-mute hover:border-gold hover:text-gold'
+                  : 'rounded-lg border border-cream/20 bg-black/30 px-4 py-3 text-sm text-cream-mute hover:border-gold hover:text-gold disabled:opacity-40'
               }
             >
-              {listening ? '● Listening…' : voiceOn ? '🎙 Voice on' : '🎙 Voice'}
+              {listening ? 'Listening…' : voiceOn ? 'Voice on' : 'Voice'}
             </button>
           ) : null}
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={listening ? 'Listening — just talk…' : 'Type your answer…'}
-            disabled={busy}
+            placeholder={
+              !started
+                ? "Press I'm ready to begin with Steve."
+                : listening
+                  ? 'Listening — just talk…'
+                  : 'Type your answer…'
+            }
+            disabled={busy || !started}
             className="flex-1 rounded-lg border border-cream/20 bg-black/30 px-4 py-3 text-sm text-cream placeholder:text-cream-mute focus:border-gold focus:outline-none"
           />
           <button
             type="submit"
-            disabled={busy || !draft.trim()}
+            disabled={busy || !started || !draft.trim()}
             className="rounded-lg bg-gold px-5 py-3 text-sm font-semibold text-ink disabled:opacity-40"
           >
             Send
           </button>
+          {started && listening && draft.trim() ? (
+            <button
+              type="button"
+              onClick={sendVoiceDraft}
+              className="rounded-lg border border-gold bg-gold/20 px-4 py-3 text-sm font-semibold text-gold"
+            >
+              Done — send
+            </button>
+          ) : null}
         </form>
       </div>
     </div>
+  );
+}
+
+function IntroPanel({
+  started,
+  busy,
+  onStart,
+  onCollapse,
+}: {
+  started: boolean;
+  busy: boolean;
+  onStart: () => void | Promise<void>;
+  onCollapse: () => void;
+}) {
+  return (
+    <section className="mb-5 rounded-lg border border-gold/25 bg-[#111]/95 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.28)]">
+      <img
+        src="/logos/logo_navbar.png"
+        alt="Team Magnificent"
+        className="mb-5 h-auto w-full max-w-[360px]"
+      />
+      <div className="space-y-3 text-sm leading-relaxed text-cream-mute">
+        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-gold">
+          TEAM MAGNIFICENT · NEW MEMBER DISCOVERY
+        </p>
+        <p className="text-lg font-semibold text-cream">Before you build, we listen.</p>
+        <p>
+          Every member of Team Magnificent starts here — not with a pitch, not with a form, but
+          with a conversation…
+        </p>
+        <p>
+          Meet Steve. Steve is Team Magnificent's discovery interviewer — an AI, and we're upfront
+          about that… He never scores you, never ranks you…
+        </p>
+        <p>
+          What happens with your answers: they become your Success Profile… You already belong.
+        </p>
+        <p>Takes about ten minutes. Talk or type. Your conversation saves as you go.</p>
+      </div>
+      <div className="mt-5 flex flex-wrap gap-3">
+        {!started ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onStart}
+            className="rounded-lg bg-gold px-5 py-3 text-sm font-semibold text-ink disabled:opacity-40"
+          >
+            I'm ready — start my conversation
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onCollapse}
+            className="rounded-lg border border-cream/20 bg-black/30 px-5 py-3 text-sm text-cream-mute hover:border-gold hover:text-gold"
+          >
+            Hide intro
+          </button>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -452,8 +664,9 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
 function ProfileView({ artifact }: { artifact: SteveDiscoveryArtifact }) {
   const p = artifact.successProfile;
   return (
-    <div className="min-h-screen bg-ink text-cream px-6 py-12">
-      <div className="mx-auto max-w-2xl">
+    <div className="min-h-screen bg-ink text-cream">
+      <SteveShellHeader kicker="Steve · Success Profile" />
+      <div className="mx-auto max-w-2xl px-6 py-12">
         <header className="mb-10">
           <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-gold">
             Steve · Success Profile
