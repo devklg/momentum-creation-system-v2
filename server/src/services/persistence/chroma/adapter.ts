@@ -115,6 +115,20 @@ export async function add(params: ChromaParams): Promise<{ ok: true; count: numb
   return { ok: true, count: ids.length };
 }
 
+export async function deleteRecords(params: ChromaParams): Promise<{ ok: true }> {
+  if (!params.collection) throw new PersistenceError('chromadb', 'delete', 'collection required');
+  const collection = await getCollection(params.collection);
+  await request(collectionEndpoint(collection, 'delete'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ...(params.ids ? { ids: params.ids } : {}),
+      ...(params.where ?? params.filter ? { where: params.where ?? params.filter } : {}),
+    }),
+  });
+  return { ok: true };
+}
+
 export async function query(params: ChromaParams): Promise<unknown> {
   if (!params.collection) throw new PersistenceError('chromadb', 'query_with_filter', 'collection required');
   const queryTexts = params.query_texts ?? (params.query ? [params.query] : []);
@@ -177,6 +191,8 @@ export async function chromaAdapter(
         return await createCollection(p);
       case 'add':
         return await add(p);
+      case 'delete':
+        return await deleteRecords(p);
       case 'search':
         return await queryPERSISTENCEShape(p, { includeQuery: true });
       case 'query_with_filter':

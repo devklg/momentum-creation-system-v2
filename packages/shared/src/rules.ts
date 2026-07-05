@@ -3,7 +3,7 @@
  */
 
 export const MCS_STANDING_RULE_THREE_AUTHORITATIVE =
-  'THREE International is the single source of truth and the final authority on ' +
+  'THREE is the product company and the final authority on ' +
   'sponsorship, enrollment, placement, and compensation. Every record in this system ' +
   'mirrors THREE\u2019s records for operational visibility. If at any point our records ' +
   'differ from THREE\u2019s, we update ours to match.';

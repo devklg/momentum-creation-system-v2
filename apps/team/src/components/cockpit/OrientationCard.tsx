@@ -179,8 +179,7 @@ export function OrientationCard() {
 
         {view.kind === 'ready' && view.data.sessions.length === 0 && (
           <p className="text-cream-faint text-[13px] leading-[1.55]">
-            No sessions are scheduled right now. Your sponsor or the founders
-            will let you know when the next one opens — check back soon.
+            No orientation sessions this week.
           </p>
         )}
 

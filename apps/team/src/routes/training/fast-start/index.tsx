@@ -24,6 +24,10 @@
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  SponsorQuickModal,
+  type SponsorQuickAccessCard,
+} from '@/components/SponsorQuickAccess';
 // Local wire shapes — .team TS6059 convention (see _wire.ts header).
 import {
   FAST_START_MODULES,
@@ -38,6 +42,10 @@ type LoadState =
 
 export function FastStartHubPage() {
   const [state, setState] = useState<LoadState>({ kind: 'loading' });
+  const [sponsorOpen, setSponsorOpen] = useState(false);
+  const [sponsorLoading, setSponsorLoading] = useState(false);
+  const [sponsorError, setSponsorError] = useState<string | null>(null);
+  const [sponsor, setSponsor] = useState<SponsorQuickAccessCard | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,8 +76,37 @@ export function FastStartHubPage() {
   const allModulesComplete = completedCount === 5;
   const fastStartComplete = state.kind === 'ready' ? state.data.complete : false;
 
+  async function openSponsorCard() {
+    setSponsorOpen(true);
+    if (sponsor || sponsorLoading) return;
+    setSponsorLoading(true);
+    setSponsorError(null);
+    try {
+      const res = await fetch('/api/profile/sponsor', { credentials: 'include' });
+      const body = (await res.json()) as
+        | { ok: true; sponsor: SponsorQuickAccessCard | null }
+        | { ok: false; error?: string };
+      if (!res.ok || !body.ok) {
+        setSponsorError('Could not load your sponsor card.');
+        return;
+      }
+      setSponsor(body.sponsor);
+    } catch {
+      setSponsorError('Network error loading your sponsor card.');
+    } finally {
+      setSponsorLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-ink text-cream relative overflow-hidden">
+      <SponsorQuickModal
+        sponsor={sponsor}
+        open={sponsorOpen}
+        loading={sponsorLoading}
+        error={sponsorError}
+        onClose={() => setSponsorOpen(false)}
+      />
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
@@ -120,6 +157,13 @@ export function FastStartHubPage() {
             finish when all five are done <strong className="text-cream">and</strong> you have sent
             at least one invitation. That is the test. That is the start.
           </p>
+          <button
+            type="button"
+            onClick={() => void openSponsorCard()}
+            className="mt-6 inline-flex items-center justify-center bg-cream/[0.06] text-cream hover:bg-cream/[0.1] border border-cream/15 rounded-md font-display tracking-[0.08em] text-[14px] px-5 py-3"
+          >
+            Talk to my sponsor
+          </button>
         </div>
       </section>
 
@@ -184,10 +228,10 @@ export function FastStartHubPage() {
 
       <footer className="relative z-10 bg-black border-t border-line py-7 px-10 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
         <div className="font-display tracking-[0.1em] text-[18px] text-gold">
-          TEAM MAGNIFICENT × THREE INTERNATIONAL
+          TEAM MAGNIFICENT
         </div>
         <div className="font-mono tracking-[0.15em] text-[9px] text-cream-faint uppercase">
-          For Training Purposes Only · Not a guarantee of income · © 2026 iii International LLC
+          For Training Purposes Only · Not a guarantee of income · © 2026 Team Magnificent
         </div>
       </footer>
     </div>

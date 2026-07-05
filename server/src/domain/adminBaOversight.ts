@@ -28,7 +28,7 @@
  *   - No algorithmic flagging. Every directory column is a raw count or a
  *     raw timestamp; the UI never compares them to a threshold and emits a
  *     judgment.
- *   - THREE International is the upstream authority. The sponsor override
+ *   - THREE is the upstream authority. The sponsor override
  *     mirrors the BA's request and updates THIS system's mirror — it does
  *     NOT push to THREE. Original sponsor is preserved on the BA row as
  *     `originalSponsorTmagId` so the drawer can render it as historical
