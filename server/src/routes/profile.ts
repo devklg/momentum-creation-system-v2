@@ -25,6 +25,7 @@ import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
   getProfileForBA,
+  getSponsorQuickAccessForBA,
   patchProfile,
   changePassword,
   startEmailChange,
@@ -94,6 +95,20 @@ profileRoutes.get('/', requireAuth, requireSteveComplete, async (req, res) => {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[GET /api/profile] failed', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
+
+profileRoutes.get('/sponsor', requireAuth, requireSteveComplete, async (req, res) => {
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+  try {
+    const sponsor = await getSponsorQuickAccessForBA(tmagId);
+    return res.status(200).json({ ok: true, sponsor });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[GET /api/profile/sponsor] failed', err);
     return res.status(500).json({ ok: false, error: 'server_error' });
   }
 });

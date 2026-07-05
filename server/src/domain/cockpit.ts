@@ -24,6 +24,7 @@ import { lastInitialOf } from './prospects.js';
 import { buildDiscoveryView } from './steve-success-interview.js';
 import { getFastStartProgress } from './training.js';
 import { questionnaireExists } from './questionnaire.js';
+import { listUpcomingWebinarEvents } from './webinarEvent.js';
 import type {
   McsCallbackIntent,
   McsCockpitSponsorFallback,
@@ -63,6 +64,24 @@ const DISPOSITIONS_COLLECTION = 'tmag_prospect_crm_dispositions';
 const NOTES_COLLECTION = 'tmag_prospect_crm_notes';
 const COMMITMENTS_COLLECTION = 'tmag_commitments';
 const IVORY_COLLECTION = 'tmag_ivory_prospect_names';
+
+interface TeamCalendarResponse {
+  ok: true;
+  generatedAt: string;
+  timezone: string | null;
+  events: Array<{
+    eventId: string;
+    kind: 'webinar';
+    title: string;
+    scheduledFor: string;
+    durationMinutes: number;
+    joinUrl: string | null;
+  }>;
+  threeWayBookings: Array<{
+    kind: 'three_way_bookings_pending';
+    title: string;
+  }>;
+}
 
 /**
  * Sponsor-inactive dormancy window for the founder fallback (Chat #147, seq 23,
@@ -1252,6 +1271,33 @@ export async function getCockpitTodaysActions(
     ok: true,
     actions: [...callbackItems, ...followupItems, ...expiringItems],
     biasPrompt: BIAS_PROMPT,
+  };
+}
+
+export async function getTeamCalendar(tmagId: string): Promise<TeamCalendarResponse> {
+  const [ba, webinarEvents] = await Promise.all([
+    findBAByTmagId(tmagId),
+    listUpcomingWebinarEvents({ horizonDays: 14, limit: 10 }),
+  ]);
+
+  return {
+    ok: true,
+    generatedAt: new Date().toISOString(),
+    timezone: ba?.timezone ?? null,
+    events: webinarEvents.map((event) => ({
+      eventId: event.eventId,
+      kind: 'webinar',
+      title: 'Team Webinar',
+      scheduledFor: event.scheduledFor,
+      durationMinutes: event.durationMinutes,
+      joinUrl: event.zoomUrl,
+    })),
+    threeWayBookings: [
+      {
+        kind: 'three_way_bookings_pending',
+        title: '3-way call bookings will appear here when scheduling lands.',
+      },
+    ],
   };
 }
 

@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Team Magnificent MCS v2 production health probe every 15 minutes
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=15min
+AccuracySec=30s
+Unit=health-probe.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

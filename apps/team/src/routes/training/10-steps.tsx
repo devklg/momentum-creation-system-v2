@@ -219,10 +219,10 @@ export function TenStepsPage() {
       {/* FOOTER */}
       <footer className="relative z-10 bg-black border-t border-line py-7 px-10 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
         <div className="font-display tracking-[0.1em] text-[18px] text-gold">
-          TEAM MAGNIFICENT × THREE INTERNATIONAL
+          TEAM MAGNIFICENT
         </div>
         <div className="font-mono tracking-[0.15em] text-[9px] text-cream-faint uppercase">
-          For Training Purposes Only · Not a guarantee of income · © 2026 iii International LLC
+          For Training Purposes Only · Not a guarantee of income · © 2026 Team Magnificent
         </div>
       </footer>
     </div>
