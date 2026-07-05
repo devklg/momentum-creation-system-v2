@@ -39,7 +39,7 @@ Embeddings in production go through the box's own CPU embedder (`GPU_EMBEDDER_UR
 
 ## 4. Secrets — where they live (values never in this file)
 
-- **`/opt/mcs-v2/.env`** (chmod 600) — the single source of production config: JWT_SECRET, Mongo/Neo4j/Chroma credentials, ANTHROPIC_API_KEY (powers all agents; model default claude-haiku-4-5), TELNYX_* block, CORS_ORIGINS (all 5 https origins — login breaks without it), PROSPECT_BASE_URL=https://teammagnificent.com (invite links break without it), ADMIN_TMAG_IDS=TMAG-01.
+- **`/opt/mcs-v2/.env`** (chmod 600) — the single source of production config: JWT_SECRET, Mongo/Neo4j/Chroma credentials, ANTHROPIC_API_KEY (powers all agents; model default claude-haiku-4-5), TELNYX_* block, CORS_ORIGINS (all 5 https origins — login breaks without it), PROSPECT_BASE_URL=https://teammagnificent.com (invite links break without it), ADMIN_TMAG_IDS=TMAG-01, HEALTH_PROBE_SHARED_SECRET.
 - **Founder login** — TMAG-01 + password: canonical copy in Kevin's password manager; bootstrap copies were `/root/founder-credentials.txt` (VPS) and `D:\founder-credentials.txt` (delete both once stored).
 - **SSH key** — `C:\Users\email\.ssh\mcs_vps` on Kevin's machine. No password SSH.
 - Telnyx API key: portal.telnyx.com → Keys & Credentials (also in .env).
@@ -64,6 +64,51 @@ systemctl is-active mcs-api
 curl -s -o /dev/null -w '%{http_code}\n' https://teammagnificent.com/api/health   # expect 200
 ```
 Server code needs only pull+install+restart (tsx runs from src). App bundles need their build. `journalctl -u mcs-api -n 30 --no-pager` is the first move on any failure.
+
+## 11. Observability — production health probe
+
+`ops/health-probe.sh` is the dumb VPS self-check. It runs from `/opt/mcs-v2/ops`
+on the `health-probe.timer` systemd timer, default every 15 minutes, and writes
+`/opt/mcs-v2/ops/health-status.json`:
+
+```json
+{ "checkedAt": "...", "overall": "green", "checks": [{ "name": "...", "ok": true, "detail": "..." }] }
+```
+
+Checks: `systemctl is-active` for `mcs-api`, `mcs-embedder`, and `nginx`; HTTPS
+200 for `teammagnificent.com`, `teammagnificent.team`, and
+`admin.teammagnificent.team`; `/api/health` returns `ok:true`; root filesystem
+is under 85%; available memory is over 500MB; `teammagnificent.com` TLS has more
+than 20 days left; and the admin health endpoint completes a real
+Mongo+Neo4j+Chroma heartbeat round-trip.
+
+Install or refresh the timer after deploy:
+
+```bash
+cd /opt/mcs-v2
+chmod +x ops/health-probe.sh
+install -m 0644 ops/health-probe.service /etc/systemd/system/health-probe.service
+install -m 0644 ops/health-probe.timer /etc/systemd/system/health-probe.timer
+systemctl daemon-reload
+systemctl enable --now health-probe.timer
+systemctl list-timers health-probe.timer
+```
+
+The triple-stack leg uses `GET /api/admin/health/triple-stack` with
+`x-mcs-health-secret: $HEALTH_PROBE_SHARED_SECRET`; set that secret in
+`/opt/mcs-v2/.env`. Kevin's admin dashboard reads
+`GET /api/admin/health/status`, which only reads the status file. A green-to-red
+transition queues one SMS alert to Kevin through the existing broadcast SMS
+worker; sustained red does not spam.
+
+During planned maintenance:
+
+```bash
+systemctl stop health-probe.timer
+# do the maintenance
+systemctl start health-probe.timer
+systemctl start health-probe.service   # optional immediate refresh
+```
 
 ## 6. Seeded production data (all verified triple-stack)
 
