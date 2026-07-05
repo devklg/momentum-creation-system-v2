@@ -38,6 +38,7 @@ import { persistenceCall } from './persistence/dispatch.js';
  * mirrors a `chroma: { collection: ... }` / `chromadb.add` site in server/src.
  */
 export const CHROMA_COLLECTIONS: readonly string[] = [
+  'mcs_members', // domain/entitlements.ts + founder backfills
   'mcs_prospect_invitation_activity', // domain/invitations.ts, domain/crm.ts
   'mcs_prospect_callback_requests', // domain/callbackRequest.ts
   'mcs_prospect_htank_events', // domain/holdingTank.ts

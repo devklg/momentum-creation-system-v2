@@ -26,6 +26,7 @@ import {
   applySponsorOverride,
   getTmagProfileBundle,
   listBADirectory,
+  setBaEntitlement,
   setCuratedLeaderTag,
 } from '../../domain/adminBaOversight.js';
 import {
@@ -38,6 +39,7 @@ import {
 } from '../../domain/adminBaCrud.js';
 import type {
   McsAdminBaDirectoryResponse,
+  McsAdminBaEntitlementsResponse,
   McsAdminBaNoteResponse,
   McsAdminBaProfileResponse,
   McsAdminLeaderTagResponse,
@@ -160,6 +162,52 @@ const LeaderTagBody = z.object({
   curated: z.boolean(),
   reason: z.string().trim().max(500).optional(),
 });
+
+const EntitlementsBody = z.object({
+  action: z.enum(['grant', 'revoke']),
+  entitlement: z.literal('vm_dialer'),
+});
+
+adminBasRoutes.post(
+  '/:tmagId/entitlements',
+  requireAdmin,
+  async (req: Request, res: Response) => {
+    const params = TmagIdParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ ok: false, error: 'Invalid tmagId.' });
+      return;
+    }
+    const body = EntitlementsBody.safeParse(req.body);
+    if (!body.success) {
+      res.status(400).json({ ok: false, error: 'Invalid entitlement payload.' });
+      return;
+    }
+    const session = req.session!;
+    try {
+      const result = await setBaEntitlement({
+        tmagId: params.data.tmagId,
+        action: body.data.action,
+        performedByTmagId: session.tmagId,
+        performedByDisplayName: session.email,
+      });
+      if (!result.ok) {
+        res.status(404).json({ ok: false, error: result.error });
+        return;
+      }
+      const bundle = await getTmagProfileBundle(params.data.tmagId);
+      const responseBody: McsAdminBaEntitlementsResponse = {
+        ok: true,
+        tmagId: params.data.tmagId,
+        entitlements: result.entitlements,
+        row: bundle?.row ?? null,
+      };
+      res.json(responseBody);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'unknown';
+      res.status(500).json({ ok: false, error: `Entitlement update failed: ${msg}` });
+    }
+  },
+);
 
 adminBasRoutes.post(
   '/:tmagId/leader-tag',

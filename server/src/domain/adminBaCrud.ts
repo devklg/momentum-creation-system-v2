@@ -154,6 +154,7 @@ export async function adminCreateBa(
     accessCodeUsed: '',
     createdAt,
     lastLoginAt: null,
+    entitlements: [],
     originalSponsorTmagId: sponsor.tmagId,
     originalSponsorThreeBaId: sponsor.threeBaId,
     ...softDelete,
@@ -168,7 +169,7 @@ export async function adminCreateBa(
       cypher:
         'MERGE (s:TeamMagnificentMember {tmagId: $sponsorTmagId}) MERGE (n:TeamMagnificentMember {tmagId: $id}) ' +
         'SET n.threeBaId = $threeBaId, n.email = $email, n.firstName = $firstName, ' +
-        'n.lastName = $lastName, n.timezone = $timezone ' +
+        'n.lastName = $lastName, n.timezone = $timezone, n.entitlements = $entitlements ' +
         'MERGE (n)-[:SPONSORED_BY]->(s)',
       params: {
         sponsorTmagId: sponsor.tmagId,
@@ -177,6 +178,7 @@ export async function adminCreateBa(
         firstName: payload.firstName,
         lastName: payload.lastName,
         timezone: payload.timezone?.trim() || null,
+        entitlements: record.entitlements,
       },
     },
   });

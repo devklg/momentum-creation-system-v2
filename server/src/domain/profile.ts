@@ -44,6 +44,7 @@ import { createHash, randomInt, randomBytes } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { appendAuditEntry } from './auditLog.js';
 import { findBAByTmagId } from './ba.js';
+import { normalizeEntitlements } from './entitlements.js';
 import { sendEmail, ResendConfigError, ResendError } from '../services/resend.js';
 import type {
   TmagProfile,
@@ -164,6 +165,7 @@ export async function getProfileForBA(tmagId: string): Promise<TmagProfile | nul
     timezone: ba.timezone,
     photoUrl: extras.photoUrl ?? null,
     notifPrefs: mergeNotifPrefs(extras.notifPrefs),
+    entitlements: normalizeEntitlements((ba as unknown as { entitlements?: unknown }).entitlements),
     tmagId: ba.tmagId,
     threeBaId: ba.threeBaId,
     accessCodeHeld,

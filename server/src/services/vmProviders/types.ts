@@ -4,6 +4,7 @@ export interface VoicemailDropPayload {
   lead: VmBulkLeadRecord;
   tokenUrl: string;
   campaignId: string;
+  audioUrl: string | null;
   dryRun: boolean;
   adminApprovedForLiveDelivery: boolean;
 }

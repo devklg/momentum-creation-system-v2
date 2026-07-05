@@ -17,6 +17,7 @@ import type {
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
+import { requireVmDialerAccess } from '../middleware/requireVmDialerAccess.js';
 import {
   LeadOwnerError,
   createLeadOwner,
@@ -35,6 +36,7 @@ export const vmRoutes: Router = Router();
 
 const PROVIDERS: readonly McsVMCampaignProviderMode[] = [
   'manual_csv',
+  'telnyx_call_control',
   'leadsrain_style_adapter',
   'slybroadcast_style_adapter',
   'future_telecom_adapter',
@@ -53,6 +55,7 @@ const CreateCampaignSchema = z.object({
   name: z.string().min(1).max(160),
   provider: z.enum(PROVIDERS as [McsVMCampaignProviderMode, ...McsVMCampaignProviderMode[]]).default('manual_csv'),
   voicemailAudioId: z.string().min(1).max(120).nullable().optional(),
+  audioUrl: z.string().url().nullable().optional(),
   smsTemplateId: z.string().min(1).max(120).nullable().optional(),
   emailTemplateId: z.string().min(1).max(120).nullable().optional(),
   scheduledAt: z.string().datetime().nullable().optional(),
@@ -111,7 +114,7 @@ async function listLeadOwnersHandler(req: import('express').Request, res: import
   }
 }
 
-vmRoutes.get('/lead-owners', requireAuth, requireSteveComplete, listLeadOwnersHandler);
+vmRoutes.get('/lead-owners', requireAuth, requireSteveComplete, requireVmDialerAccess, listLeadOwnersHandler);
 
 async function createLeadOwnerHandler(req: import('express').Request, res: import('express').Response) {
   const tmagId = sessionTmagId(req);
@@ -133,7 +136,7 @@ async function createLeadOwnerHandler(req: import('express').Request, res: impor
   }
 }
 
-vmRoutes.post('/lead-owners', requireAuth, requireSteveComplete, createLeadOwnerHandler);
+vmRoutes.post('/lead-owners', requireAuth, requireSteveComplete, requireVmDialerAccess, createLeadOwnerHandler);
 
 async function getLeadOwnerHandler(req: import('express').Request, res: import('express').Response) {
   const tmagId = sessionTmagId(req);
@@ -147,9 +150,9 @@ async function getLeadOwnerHandler(req: import('express').Request, res: import('
   }
 }
 
-vmRoutes.get('/lead-owners/:leadOwnerId', requireAuth, requireSteveComplete, getLeadOwnerHandler);
+vmRoutes.get('/lead-owners/:leadOwnerId', requireAuth, requireSteveComplete, requireVmDialerAccess, getLeadOwnerHandler);
 
-vmRoutes.get('/campaigns', requireAuth, requireSteveComplete, async (req, res) => {
+vmRoutes.get('/campaigns', requireAuth, requireSteveComplete, requireVmDialerAccess, async (req, res) => {
   const tmagId = sessionTmagId(req);
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
@@ -161,24 +164,35 @@ vmRoutes.get('/campaigns', requireAuth, requireSteveComplete, async (req, res) =
   }
 });
 
-vmRoutes.post('/campaigns', requireAuth, requireSteveComplete, async (req, res) => {
+vmRoutes.post('/campaigns', requireAuth, requireSteveComplete, requireVmDialerAccess, async (req, res) => {
   const tmagId = sessionTmagId(req);
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   const parsed = CreateCampaignSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ ok: false, error: 'invalid_payload', issues: parsed.error.issues });
   }
+  const data = parsed.data as {
+    leadOwnerId: string;
+    name: string;
+    provider: McsVMCampaignProviderMode;
+    voicemailAudioId?: string | null;
+    audioUrl?: string | null;
+    smsTemplateId?: string | null;
+    emailTemplateId?: string | null;
+    scheduledAt?: string | null;
+  };
   try {
     const campaign = await createVMCampaign({
       ownerTmagId: tmagId,
       sponsorTmagId: tmagId,
-      leadOwnerId: parsed.data.leadOwnerId,
-      name: parsed.data.name,
-      provider: parsed.data.provider,
-      voicemailAudioId: parsed.data.voicemailAudioId ?? null,
-      smsTemplateId: parsed.data.smsTemplateId ?? null,
-      emailTemplateId: parsed.data.emailTemplateId ?? null,
-      scheduledAt: parsed.data.scheduledAt ?? null,
+      leadOwnerId: data.leadOwnerId,
+      name: data.name,
+      provider: data.provider,
+      voicemailAudioId: data.voicemailAudioId ?? null,
+      audioUrl: data.audioUrl ?? null,
+      smsTemplateId: data.smsTemplateId ?? null,
+      emailTemplateId: data.emailTemplateId ?? null,
+      scheduledAt: data.scheduledAt ?? null,
     });
     const body: McsVMCampaignResponse = { ok: true, campaign };
     return res.status(201).json(body);
@@ -187,7 +201,7 @@ vmRoutes.post('/campaigns', requireAuth, requireSteveComplete, async (req, res) 
   }
 });
 
-vmRoutes.get('/campaigns/:campaignId', requireAuth, requireSteveComplete, async (req, res) => {
+vmRoutes.get('/campaigns/:campaignId', requireAuth, requireSteveComplete, requireVmDialerAccess, async (req, res) => {
   const tmagId = sessionTmagId(req);
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
   try {
@@ -226,4 +240,4 @@ async function importLeadOwnerLeadsHandler(req: import('express').Request, res: 
   }
 }
 
-vmRoutes.post('/lead-owners/:leadOwnerId/import', requireAuth, requireSteveComplete, importLeadOwnerLeadsHandler);
+vmRoutes.post('/lead-owners/:leadOwnerId/import', requireAuth, requireSteveComplete, requireVmDialerAccess, importLeadOwnerLeadsHandler);

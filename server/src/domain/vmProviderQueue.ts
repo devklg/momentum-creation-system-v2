@@ -14,6 +14,15 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
+import { env } from '../env.js';
+import {
+  gatherSingleDigit,
+  hangupCall,
+  playbackStart,
+  sendSms,
+  TelnyxConfigError,
+  TelnyxError,
+} from '../services/telnyx.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 
 const MONGO_DB = 'momentum';
@@ -31,7 +40,7 @@ const SUPPRESSION_COLLECTION = 'tmag_vm_suppression_list';
 const DEFAULT_MAX_ATTEMPTS = 3;
 const IMPORT_CHUNK_SIZE = 500;
 
-export type VmProviderKey = 'manual_csv' | 'acquisition_provider_placeholder';
+export type VmProviderKey = 'manual_csv' | 'acquisition_provider_placeholder' | 'telnyx_call_control';
 
 export type VmQueueJobKind =
   | 'import_validate'
@@ -859,6 +868,19 @@ export async function processWebhookEvent(job: VmQueueJob<{ webhookEventId: stri
   const event = result.documents?.[0];
   if (!event) throw new Error('webhook_event_not_found');
 
+  if (event.provider === 'telnyx_call_control') {
+    await processTelnyxCallControlWebhook(event.payload, job.attempts);
+    const at = new Date().toISOString();
+    await persistenceCall('mongodb', 'update', {
+      database: MONGO_DB,
+      collection: WEBHOOK_EVENTS_COLLECTION,
+      filter: { webhookEventId: job.payload.webhookEventId },
+      update: { $set: { status: 'processed', processedAt: at } },
+    });
+    await completeVmJob(job.jobId, `Telnyx webhook ${job.payload.webhookEventId} processed.`);
+    return;
+  }
+
   const leadId = typeof event.payload.leadId === 'string' ? event.payload.leadId : null;
   if (leadId) {
     const lead = await findLead(leadId);
@@ -887,6 +909,162 @@ export async function processWebhookEvent(job: VmQueueJob<{ webhookEventId: stri
     update: { $set: { status: 'processed', processedAt: at } },
   });
   await completeVmJob(job.jobId, `Webhook ${job.payload.webhookEventId} processed.`);
+}
+
+export function decodeTelnyxClientState(value: unknown): Record<string, unknown> {
+  if (typeof value !== 'string' || !value.trim()) return {};
+  try {
+    return JSON.parse(Buffer.from(value, 'base64url').toString('utf8')) as Record<string, unknown>;
+  } catch {
+    try {
+      return JSON.parse(Buffer.from(value, 'base64').toString('utf8')) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  }
+}
+
+function asString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function amdResult(payload: Record<string, unknown>): string {
+  const candidates = [
+    payload.result,
+    payload.status,
+    payload.answering_machine_detection_result,
+    payload.answering_machine_detection,
+    payload.machine_detection_result,
+  ];
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim()) return value.trim().toLowerCase();
+  }
+  return '';
+}
+
+function digitFromPayload(payload: Record<string, unknown>): string | null {
+  const candidates = [payload.digits, payload.digit, payload.dtmf_digit, payload.received_digit];
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim()) return value.trim()[0] ?? null;
+  }
+  return null;
+}
+
+async function processTelnyxCallControlWebhook(payload: Record<string, unknown>, attempt: number): Promise<void> {
+  const clientState = decodeTelnyxClientState(payload.client_state);
+  const leadId = asString(payload.leadId) ?? asString(clientState.leadId);
+  if (!leadId) return;
+  const resolvedLeadId = leadId;
+  const lead = await findLead(leadId);
+  if (!lead) return;
+  const leadRecord = lead;
+
+  const eventType = asString(payload.eventType) ?? 'call.webhook';
+  const callControlId = asString(payload.call_control_id) ?? asString(payload.callControlId);
+  const audioUrl = asString(payload.audioUrl) ?? asString(clientState.audioUrl);
+  const tokenUrl =
+    asString(payload.tokenUrl) ??
+    asString(clientState.tokenUrl) ??
+    (lead.token ? `${env.PROSPECT_BASE_URL.replace(/\/$/, '')}/rvm/${lead.token}` : null);
+
+  async function record(status: string, details: Record<string, unknown> = {}): Promise<void> {
+    await recordDeliveryEvent({
+      provider: 'telnyx_call_control',
+      leadId: resolvedLeadId,
+      vmCampaignId: leadRecord.vmCampaignId,
+      ownerTmagId: leadRecord.ownerTmagId,
+      status,
+      providerMessageId: callControlId,
+      providerStatus: eventType,
+      dryRun: false,
+      attempt,
+      details: { ...payload, clientState, ...details },
+    });
+  }
+
+  if (eventType === 'call.machine.premium.greeting.ended') {
+    if (callControlId && audioUrl) await playbackStart(callControlId, audioUrl);
+    await record('machine_beep_playback_started');
+    return;
+  }
+
+  if (eventType === 'call.playback.ended') {
+    if (callControlId) await hangupCall(callControlId);
+    await updateLeadStatus(leadId, 'voicemail_drop_delivered', { ownerTmagId: lead.ownerTmagId });
+    await record('voicemail_drop_delivered');
+    return;
+  }
+
+  if (eventType === 'call.dtmf.received' || eventType === 'call.gather.ended') {
+    const digit = digitFromPayload(payload);
+    if (digit === '1') {
+      await record('interest_signal', { digit });
+      if (lead.normalizedPhone && tokenUrl) {
+        try {
+          const sms = await sendSms({
+            to: lead.normalizedPhone,
+            text: `Here's your Team Magnificent link: ${tokenUrl}`,
+          });
+          await record('token_link_sms_enqueued', { smsMessageId: sms.messageId });
+        } catch (err) {
+          const transportError =
+            err instanceof TelnyxConfigError || err instanceof TelnyxError
+              ? err.message
+              : err instanceof Error
+                ? err.message
+                : String(err);
+          await record('token_link_sms_failed', { error: transportError });
+        }
+      }
+      await updateLeadStatus(leadId, 'voicemail_drop_delivered', { ownerTmagId: lead.ownerTmagId, interestSignal: true });
+    } else {
+      await record('human_no_interest', { digit: digit ?? null });
+    }
+    if (callControlId) await hangupCall(callControlId);
+    return;
+  }
+
+  const result = amdResult(payload);
+  if (eventType === 'call.machine.premium.detection.ended' || result) {
+    if (['human', 'human_residence', 'human_business', 'live'].includes(result)) {
+      if (callControlId && audioUrl) await gatherSingleDigit({ callControlId, audioUrl, timeoutMs: 8000 });
+      await record('human_answered_gather_started', { amdResult: result });
+      return;
+    }
+    if (['machine', 'machine_start', 'machine_end_beep', 'voicemail', 'answering_machine'].includes(result)) {
+      if (result === 'machine_end_beep' && callControlId && audioUrl) {
+        await playbackStart(callControlId, audioUrl);
+        await record('machine_beep_playback_started', { amdResult: result });
+      } else {
+        await record('machine_detected_waiting_for_beep', { amdResult: result });
+      }
+      return;
+    }
+    if (['not_sure', 'silence', 'fax'].includes(result)) {
+      if (callControlId) await hangupCall(callControlId);
+      await updateLeadStatus(leadId, 'voicemail_drop_failed', { ownerTmagId: lead.ownerTmagId, reason: result });
+      await record('undeliverable', { amdResult: result });
+      return;
+    }
+    if (['no_answer', 'busy'].includes(result)) {
+      await updateLeadStatus(leadId, 'queued', { ownerTmagId: lead.ownerTmagId, retryReason: result });
+      await enqueueVmJob('delivery', { leadId, provider: 'telnyx_call_control' }, { availableAt: new Date(Date.now() + 5 * 60 * 1000).toISOString() });
+      await record('provider_retry_scheduled', { amdResult: result });
+      return;
+    }
+  }
+
+  if (eventType === 'call.hangup') {
+    const cause = asString(payload.hangup_cause)?.toLowerCase() ?? '';
+    if (cause.includes('busy') || cause.includes('no_answer')) {
+      await updateLeadStatus(leadId, 'queued', { ownerTmagId: lead.ownerTmagId, retryReason: cause });
+      await enqueueVmJob('delivery', { leadId, provider: 'telnyx_call_control' }, { availableAt: new Date(Date.now() + 5 * 60 * 1000).toISOString() });
+      await record('provider_retry_scheduled', { hangupCause: cause });
+      return;
+    }
+  }
+
+  await record('provider_webhook');
 }
 
 export async function listDeliveryRowsForManualExport(campaignId: string): Promise<VmBulkLeadRecord[]> {

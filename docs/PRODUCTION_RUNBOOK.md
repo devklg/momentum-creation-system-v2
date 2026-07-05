@@ -117,6 +117,7 @@ Founders TMAG-01 (Kevin) / TMAG-02 (Paul); access codes TMAG-KEVN / TMAG-PAUB / 
 ## 7. Telnyx / SMS / 10DLC — state as of 2026-07-03
 
 - Numbers owned (3): **+13236931362** → voice app `mcs-vm-v2` (id 2995619818075325536, outbound voice profile attached, production webhook) — the future VM-dialer line; **+13234716774** → SMS from-number, bound to messaging profile `MCS-VM-App` (40019f26-11c0-4f7a-b7a0-788e37d3e852), webhook → `https://teammagnificent.com/api/telnyx/webhook`; **+13234026499** free.
+- VM dialer audio v1 is URL-based: nginx should serve `https://teammagnificent.com/vm-audio/` from `/var/www/vm-audio/`; campaign setup stores the HTTPS audio URL and does not upload audio through the app.
 - Webhook Ed25519 signature verification ARMED (TELNYX_PUBLIC_KEY in .env — account-wide key).
 - App send path PROVEN (message accepted end-to-end) but **carrier delivery blocked: 40010 Not 10DLC Registered**.
 - 10DLC brand submitted: id `4b20019f-2a24-78ef-cabd-d44042e2e90b`, status UNVERIFIED — **PARKED: Kevin gets a corrected-spelling EIN Monday** (IRS record says "TEAM MARGNIFICENT" — typo; TCR matches IRS exactly). Then: update/resubmit brand → campaign (Low Volume Mixed; description = account notifications + personally-requested links, opt-in, STOP honored) → assign to MCS-VM-App → re-run SMS smoke.

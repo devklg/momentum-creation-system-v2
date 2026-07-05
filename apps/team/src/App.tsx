@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { RegisterPage } from './routes/register';
 import { LoginPage } from './routes/login';
 import { WelcomePage } from './routes/welcome';
@@ -37,7 +38,7 @@ export function App() {
       <Route path="/ivory" element={<IvoryPage />} />
       <Route path="/ivory/momentum" element={<IvoryMomentumPage />} />
       <Route path="/crm" element={<CrmPage />} />
-      <Route path="/vm-campaigns" element={<VmCampaignsPage />} />
+      <Route path="/vm-campaigns" element={<VmDialerRoute />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/leadership" element={<LeadershipPage />} />
       <Route path="/training/10-steps" element={<TenStepsPage />} />
@@ -60,4 +61,32 @@ export function App() {
       />
     </Routes>
   );
+}
+
+function VmDialerRoute() {
+  const [allowed, setAllowed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch('/api/auth/me', { credentials: 'include' })
+      .then(async (res) => {
+        if (!res.ok) return false;
+        const data = (await res.json()) as { ok?: boolean; me?: { entitlements?: string[] } };
+        return data.ok === true && (data.me?.entitlements ?? []).includes('vm_dialer');
+      })
+      .then((next) => {
+        if (!cancelled) setAllowed(next);
+      })
+      .catch(() => {
+        if (!cancelled) setAllowed(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (allowed === null) {
+    return <div className="min-h-screen bg-ink" />;
+  }
+  return allowed ? <VmCampaignsPage /> : <Navigate to="/cockpit" replace />;
 }

@@ -53,6 +53,7 @@ function ba(input: {
     passwordHash: 'hash',
     sponsorThreeBaId: '',
     accessCodeUsed: 'TM-TEST',
+    entitlements: [],
     createdAt: '2026-07-01T00:00:00.000Z',
     lastLoginAt: null,
   };

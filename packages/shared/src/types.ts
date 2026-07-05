@@ -1966,6 +1966,7 @@ export interface TmagProfile {
   timezone: string;
   photoUrl: string | null;
   notifPrefs: McsBANotifPrefs;
+  entitlements: string[];
 
   // Read-only (wf_0072)
   tmagId: string;
@@ -2608,6 +2609,8 @@ export interface McsAdminBaDirectoryRow {
   systemDetectedLeader: boolean;
   /** Kevin-curated leader badge (admin toggle on row + profile drawer). */
   curatedLeader: boolean;
+  /** Explicit feature entitlements granted by Kevin/admin. */
+  entitlements: string[];
   /** Soft-delete lifecycle (Chat #138/#141), distinct from `status`
    *  'suspended'. True when removed from the roster (reversible). */
   deleted: boolean;
@@ -2680,6 +2683,18 @@ export interface McsAdminLeaderTagResponse {
   ok: true;
   tmagId: string;
   curated: boolean;
+}
+
+export interface McsAdminBaEntitlementsPayload {
+  action: 'grant' | 'revoke';
+  entitlement: 'vm_dialer';
+}
+
+export interface McsAdminBaEntitlementsResponse {
+  ok: true;
+  tmagId: string;
+  entitlements: string[];
+  row: McsAdminBaDirectoryRow | null;
 }
 
 /** POST /api/admin/bas/:tmagId/notes body — append a Kevin-only note. */
@@ -4446,6 +4461,7 @@ export type McsVmCampaignProvider =
   | 'leadsrain_style_adapter'
   | 'slybroadcast_style_adapter'
   | 'manual_csv'
+  | 'telnyx_call_control'
   | 'future_telecom_adapter'
   | 'none';
 
@@ -4621,6 +4637,7 @@ export interface McsVMCampaignRecord extends McsOwnedProspectIdentity {
   provider: McsVmCampaignProvider;
   status: McsVmCampaignStatus;
   voicemailAudioId: string | null;
+  audioUrl: string | null;
   smsTemplateId: string | null;
   emailTemplateId: string | null;
   scheduledAt: McsIsoTimestamp | null;
@@ -4748,6 +4765,7 @@ export interface McsCreateVMCampaignPayload {
   name: string;
   provider?: McsVMCampaignProviderMode;
   voicemailAudioId?: string | null;
+  audioUrl?: string | null;
   smsTemplateId?: string | null;
   emailTemplateId?: string | null;
   scheduledAt?: McsIsoTimestamp | null;
