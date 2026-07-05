@@ -19,8 +19,9 @@
  *     marker the runtime runs a structured-extraction pass over the transcript
  *     and feeds ingestDiscoveryArtifact — playing exactly the worker's role.
  *
- * Compliance posture is inherited wholesale from buildSteveSystemPrompt
- * (never scores, never income/placement talk — locked-spec 3.10/3.12).
+ * Compliance posture is inherited wholesale from buildSteveSystemPrompt:
+ * Steve never makes income/placement claims, while the BA's own stated goals
+ * are captured faithfully as descriptive support context.
  */
 
 import { randomUUID } from 'node:crypto';
@@ -227,7 +228,8 @@ export function splitCompletionMarker(reply: string): { text: string; done: bool
   return { text, done };
 }
 
-function extractionSystem(): string {
+/** Build the extraction instruction. Exported for unit tests. */
+export function extractionSystem(): string {
   const questionList = STEVE_DISCOVERY_QUESTIONS.map(
     (q) => `  ${q.id} (#${q.number}): ${q.prompt}`,
   ).join('\n');
@@ -252,9 +254,13 @@ function extractionSystem(): string {
     '  }',
     '}',
     '',
-    'Rules: recommendations are supportive preparation only — no income,',
-    'placement, or earnings language anywhere. Skip questions the transcript',
-    'never covered. Question ids:',
+    'Rules: recommendations are supportive preparation only — launchRecommendations,',
+    'trainingRecommendations, and michaelHandoffSummary must not contain income,',
+    'placement, or earnings claims. primaryWhy and successVision MUST faithfully',
+    'reflect the BA\'s own words, including any member-stated dollar goals or',
+    'income targets, without reframing them as promises, projections, typical',
+    'results, or Team Magnificent claims. Skip questions the transcript never',
+    'covered. Question ids:',
     questionList,
   ].join('\n');
 }

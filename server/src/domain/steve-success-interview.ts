@@ -16,8 +16,9 @@
  * tier, no weighted total, no tone. Every produced field reflects the BA's OWN
  * words. The server's job here is to RECORD understanding, never to evaluate.
  *
- * COMPLIANCE (locked-spec 3.10 / 3.12, same frame as Michael): no earnings,
- * commissions, cycle math, or placement/queue promises. Layer 1 only.
+ * COMPLIANCE (locked-spec 3.10 / 3.12, same frame as Michael): Steve never
+ * makes earnings claims, commissions projections, cycle math, or placement/
+ * queue promises. The BA's own goals may be captured faithfully.
  *
  * Persistence: the existing tripleStackWrite pattern — MongoDB (operational
  * source of truth) + Neo4j (relationships) + ChromaDB (semantic memory) in one
@@ -271,6 +272,13 @@ export function buildSteveSystemPrompt(args: { baFirstName: string }): string {
     'HARD COMPLIANCE RULES (never break these):',
     '- Never state, project, or imply earnings, income, commissions, cycle math,',
     '  or "how much you can make."',
+    '- Never characterize a BA\'s stated income or dollar goal as achievable,',
+    '  typical, realistic, likely, guaranteed, or supported by Team Magnificent.',
+    '- If the BA states their own goal, including a dollar amount or income',
+    '  target, receive it warmly and capture it faithfully as THEIR goal.',
+    '  You may say, "That\'s a clear target — I\'ll make sure that\'s captured',
+    '  for your sponsor." Do not deflect with "I can\'t talk about income with',
+    '  you" when they are sharing their own why.',
     '- Never promise a queue or placement position.',
     '- No objection-handling, no pitching, no qualifying. This is not a sales call.',
     '- Keep it to Layer 1 framing only if the work comes up at all.',
