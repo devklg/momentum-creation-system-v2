@@ -514,7 +514,7 @@ export function validateMasterContent(
     const blockRules: Array<{ ruleId: string; message: string; pattern: RegExp }> = [
       {
         ruleId: 'com.no_three_branding',
-        message: 'Prospect-facing .com content cannot mention THREE International.',
+        message: 'Prospect-facing .com content cannot mention the product-company brand.',
         pattern: /\bthree(?:\s+international)?\b/i,
       },
       {
