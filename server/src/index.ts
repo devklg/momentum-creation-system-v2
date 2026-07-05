@@ -58,6 +58,7 @@ import { trainingRoutes } from './routes/training.js';
 import { profileRoutes } from './routes/profile.js';
 import { previewRoutes } from './routes/preview.js';
 import { orientationRoutes } from './routes/orientation.js';
+import { threeWayRoutes } from './routes/three-way.js';
 import { michaelRuntimeRoutes } from './routes/michael-runtime.js';
 import { contentVideoRoutes } from './routes/content-videos.js';
 // Imported so the module is part of the build graph and verified by tsc even
@@ -247,6 +248,10 @@ app.use('/api/preview', previewRoutes);
 // requireSteveComplete) internally; tmagId is read from the session, never the
 // body (locked-spec 3.5). REUSES the §2.6 webinar event/reservation pattern.
 app.use('/api/orientation', orientationRoutes);
+
+// Three-way call scheduling v1 (BRIEF 5). UPLINE-CHAIN routing is enforced in
+// the route/domain; no leader/admin role gate, only auth + Steve completion.
+app.use('/api/three-way', threeWayRoutes);
 
 // Sprint 3 S3.4 minimal Michael runtime route (gated BA route family). Handler
 // applies (requireAuth + requireSteveComplete) internally and is fail-closed

@@ -49,6 +49,8 @@ export const MONGO_COLLECTIONS = [
   { name: 'tmag_prospect_webinar_reservations', required: ['reservationId','eventId','token','prospectId','sponsorTmagId','scheduledFor'], props: { attendance: { enum: ENUMS.attendance } } },
   { name: 'tmag_new_member_orientation_sessions', required: ['sessionId','scheduledFor','capacity','status'] },
   { name: 'tmag_new_member_orientation_reservations', required: ['reservationId','sessionId','tmagId','scheduledFor','status'] },
+  { name: 'tmag_sponsor_availability', required: ['availabilityId','ownerTmagId','timezone','windows','updatedAt'] },
+  { name: 'tmag_three_way_bookings', required: ['bookingId','bookerTmagId','sponsorTmagId','startAt','endAt','status'] },
   { name: 'tmag_fast_start_progress', required: ['tmagId','moduleId','state'] },
   { name: 'tmag_steve_success_interview', required: ['tmagId','successProfile'] },
   // D · Agents / Templates / Governance / Audit / Admin
@@ -101,7 +103,7 @@ export const CHROMA_COLLECTIONS = [
   'mcs_agent_ivory_events','mcs_agent_michael_events','mcs_agent_steve_events','mcs_agent_system_events','mcs_agent_templates','mcs_ivory_prospect_names','mcs_audit_log','mcs_content_templates','mcs_content_videos','mcs_broadcasts','mcs_admin_prospect_notes','mcs_tenant_settings',
   'mcs_health_heartbeat',
   // Prospect extras with living writers (runtime write-guard reconciliation 2026-07-02)
-  'mcs_prospect_htank_accounts','mcs_new_member_orientation_reservations','mcs_webinar_events',
+  'mcs_prospect_htank_accounts','mcs_new_member_orientation_reservations','mcs_webinar_events','mcs_sponsor_availability','mcs_three_way_bookings',
   // Knowledge base (PR #125 ingestion layer, canon-renamed 2026-07-03)
   'mcs_knowledge_sources','mcs_knowledge_chunks',
   // VM
@@ -129,6 +131,7 @@ export const NEO4J_CONSTRAINTS = [
   ['TmagProspectCrmRecord','crmRecordId'], ['TmagProspectTimelineEvent','eventId'],
   ['TmagWebinarEvent','eventId'], ['TmagWebinarReservation','reservationId'],
   ['TmagOrientationSession','sessionId'], ['TmagOrientationReservation','reservationId'],
+  ['TmagSponsorAvailability','availabilityId'], ['TmagThreeWayBooking','bookingId'],
   ['TmagFastStartProgress','id'], ['TmagSteveSuccessInterview','id'],
   ['TmagAgentIvoryEvent','eventId'], ['TmagAgentMichaelEvent','eventId'], ['TmagAgentSteveEvent','eventId'],
   ['TmagAgentTemplate','templateId'], ['TmagContentTemplate','templateVersionId'], ['TmagInvitationGeneratorRun','runId'],

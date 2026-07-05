@@ -29,6 +29,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bot,
+  CalendarClock,
   CalendarDays,
   ChevronDown,
   ChevronRight,
@@ -44,6 +45,7 @@ import { Button } from '@/components/ui/button';
 import { TrackRecordCard } from '@/components/cockpit/TrackRecordCard';
 import { OrientationCard } from '@/components/cockpit/OrientationCard';
 import { MichaelRuntimeSupportCard } from '@/components/cockpit/MichaelRuntimeSupportCard';
+import { ThreeWayCallWorkspace } from '@/components/cockpit/ThreeWayCallWorkspace';
 import {
   SponsorQuickCard,
   type SponsorQuickAccessCard,
@@ -503,6 +505,7 @@ export function CockpitPage() {
   const navigate = useNavigate();
   const [view, setView] = useState<View>({ kind: 'loading' });
   const [filter, setFilter] = useState<PmvFilter>('all');
+  const [threeWayOpen, setThreeWayOpen] = useState(false);
   // When the BA clicks an item in Today's Actions, we record the target
   // prospectId here; InviteRow watches for matches and self-expands. We
   // bump a tick so re-clicking the same id (after a manual collapse) still
@@ -847,8 +850,10 @@ export function CockpitPage() {
             <SponsorCard
               sponsor={summary.sponsor}
               fallback={summary.sponsorFallback}
+              onBookThreeWay={() => setThreeWayOpen(true)}
             />
           </div>
+          <ThreeWayCallWorkspace open={threeWayOpen} onOpenChange={setThreeWayOpen} />
           <TeamCalendarCard />
           {/* Group orientation scheduler (Chat #147, wireframe §3.6). Self-
               contained: fetches its own data, books/cancels a seat. */}
@@ -1295,15 +1300,27 @@ function quickCardFromSummary(
 function SponsorCard({
   sponsor,
   fallback,
+  onBookThreeWay,
 }: {
   sponsor: CockpitSummaryResponse['sponsor'];
   fallback: CockpitSponsorFallback | null;
+  onBookThreeWay: () => void;
 }) {
   return (
-    <SponsorQuickCard
-      sponsor={quickCardFromSummary(sponsor)}
-      fallback={fallback}
-    />
+    <div>
+      <SponsorQuickCard
+        sponsor={quickCardFromSummary(sponsor)}
+        fallback={fallback}
+      />
+      <Button
+        type="button"
+        onClick={onBookThreeWay}
+        className="mt-4 w-full bg-gold text-ink hover:bg-gold-bright font-display tracking-[0.06em] text-[15px] px-4 py-4"
+      >
+        <CalendarClock className="mr-2 h-4 w-4" aria-hidden="true" />
+        {sponsor ? 'Book a 3-Way Call' : 'My Availability'}
+      </Button>
+    </div>
   );
 }
 

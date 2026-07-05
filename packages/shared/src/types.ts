@@ -5449,6 +5449,119 @@ export interface McsLearningObservabilitySnapshot {
   };
 }
 
+// ----------------------------------------------------------------------------
+// BRIEF 5 - Three-way call scheduling v1.
+//
+// UPLINE-CHAIN routing: a member may book any upline member who has availability
+// set. Availability is owner-local recurring weekly time; bookings store UTC.
+// SMS remains dormant for v1; the in-app calendar rail is the notification
+// surface.
+// ----------------------------------------------------------------------------
+
+export type McsThreeWayDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+export interface McsThreeWayAvailabilityWindow {
+  windowId: string;
+  dayOfWeek: McsThreeWayDayOfWeek;
+  /** Owner-local HH:mm, 24-hour clock. */
+  startTime: string;
+  /** Owner-local HH:mm, 24-hour clock. */
+  endTime: string;
+  active: boolean;
+}
+
+export interface McsThreeWaySponsorAvailabilityRecord {
+  availabilityId: string;
+  ownerTmagId: string;
+  ownerName: string;
+  timezone: string;
+  windows: McsThreeWayAvailabilityWindow[];
+  createdAt: McsIsoTimestamp;
+  updatedAt: McsIsoTimestamp;
+}
+
+export interface McsThreeWayAvailabilitySlot {
+  startAt: McsIsoTimestamp;
+  endAt: McsIsoTimestamp;
+  ownerTimezone: string;
+  localDate: string;
+  localStartTime: string;
+}
+
+export interface McsThreeWayBookableUpline {
+  tmagId: string;
+  fullName: string;
+  firstName: string;
+  phone: string | null;
+  timezone: string;
+  windows: McsThreeWayAvailabilityWindow[];
+  slots: McsThreeWayAvailabilitySlot[];
+}
+
+export interface McsThreeWayAvailabilityResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  horizonDays: number;
+  myAvailability: McsThreeWaySponsorAvailabilityRecord | null;
+  bookableUplines: McsThreeWayBookableUpline[];
+}
+
+export interface McsThreeWaySetAvailabilityPayload {
+  timezone: string;
+  windows: Array<Partial<McsThreeWayAvailabilityWindow>>;
+}
+
+export interface McsThreeWaySetAvailabilityResponse {
+  ok: true;
+  availability: McsThreeWaySponsorAvailabilityRecord;
+}
+
+export type McsThreeWayBookingStatus = 'booked' | 'cancelled';
+
+export interface McsThreeWayBookingRecord {
+  bookingId: string;
+  bookerTmagId: string;
+  bookerName: string;
+  sponsorTmagId: string;
+  sponsorName: string;
+  startAt: McsIsoTimestamp;
+  endAt: McsIsoTimestamp;
+  ownerTimezone: string;
+  bookerTimezone: string | null;
+  prospectNote: string | null;
+  status: McsThreeWayBookingStatus;
+  createdAt: McsIsoTimestamp;
+  cancelledAt: McsIsoTimestamp | null;
+  cancelledByTmagId: string | null;
+  notificationChannel: 'in_app';
+}
+
+export interface McsThreeWayBookingView extends McsThreeWayBookingRecord {
+  myRole: 'booker' | 'sponsor' | 'both';
+}
+
+export interface McsThreeWayBookingsResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  bookings: McsThreeWayBookingView[];
+}
+
+export interface McsThreeWayBookPayload {
+  sponsorTmagId: string;
+  startAt: McsIsoTimestamp;
+  prospectNote?: string | null;
+}
+
+export interface McsThreeWayBookResponse {
+  ok: true;
+  booking: McsThreeWayBookingRecord;
+}
+
+export interface McsThreeWayCancelResponse {
+  ok: true;
+  booking: McsThreeWayBookingRecord;
+}
+
 // Product Gallery / Training Content Videos (Brief 9, 2026-07-04)
 
 export type McsContentVideoAudience = 'member' | 'prospect' | 'both';
