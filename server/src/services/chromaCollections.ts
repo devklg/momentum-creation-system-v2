@@ -60,6 +60,8 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_prospect_magic_links', // domain/prospectMagicLink.ts
   'mcs_prospect_webinar_reservations', // domain/webinarReservation.ts
   'mcs_new_member_orientation_reservations', // domain/orientationSession.ts
+  'mcs_sponsor_availability', // domain/threeWayCalls.ts
+  'mcs_three_way_bookings', // domain/threeWayCalls.ts
   'mcs_fast_start_progress', // domain/training.ts (also lazy-bootstrapped there)
   // Agent events split per agent (Rev3). Writer derives mcs_agent_<agentId>_events.
   'mcs_agent_ivory_events', // domain/agents/orchestrator.ts

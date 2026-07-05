@@ -29,6 +29,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bot,
+  CalendarClock,
   ChevronDown,
   ChevronRight,
   ListChecks,
@@ -43,6 +44,7 @@ import { Button } from '@/components/ui/button';
 import { TrackRecordCard } from '@/components/cockpit/TrackRecordCard';
 import { OrientationCard } from '@/components/cockpit/OrientationCard';
 import { MichaelRuntimeSupportCard } from '@/components/cockpit/MichaelRuntimeSupportCard';
+import { ThreeWayCallWorkspace } from '@/components/cockpit/ThreeWayCallWorkspace';
 import {
   LaunchCenter,
   type TeamLaunchCenter,
@@ -471,6 +473,7 @@ export function CockpitPage() {
   const navigate = useNavigate();
   const [view, setView] = useState<View>({ kind: 'loading' });
   const [filter, setFilter] = useState<PmvFilter>('all');
+  const [threeWayOpen, setThreeWayOpen] = useState(false);
   // When the BA clicks an item in Today's Actions, we record the target
   // prospectId here; InviteRow watches for matches and self-expands. We
   // bump a tick so re-clicking the same id (after a manual collapse) still
@@ -787,8 +790,10 @@ export function CockpitPage() {
             <SponsorCard
               sponsor={summary.sponsor}
               fallback={summary.sponsorFallback}
+              onBookThreeWay={() => setThreeWayOpen(true)}
             />
           </div>
+          <ThreeWayCallWorkspace open={threeWayOpen} onOpenChange={setThreeWayOpen} />
           {/* Group orientation scheduler (Chat #147, wireframe §3.6). Self-
               contained: fetches its own data, books/cancels a seat. */}
           <OrientationCard />
@@ -1191,9 +1196,11 @@ function ProgressMeter({ value }: { value: ProspectMomentumRow['videoProgressPct
 function SponsorCard({
   sponsor,
   fallback,
+  onBookThreeWay,
 }: {
   sponsor: CockpitSummaryResponse['sponsor'];
   fallback: CockpitSponsorFallback | null;
+  onBookThreeWay: () => void;
 }) {
   if (!sponsor) {
     return (
@@ -1205,6 +1212,14 @@ function SponsorCard({
           As a founder of Team Magnificent, the line builds beneath you. Your
           team looks to you the way a downline looks to a sponsor.
         </p>
+        <Button
+          type="button"
+          onClick={onBookThreeWay}
+          className="mt-4 w-full bg-gold text-ink hover:bg-gold-bright font-display tracking-[0.06em] text-[15px] px-4 py-4"
+        >
+          <CalendarClock className="mr-2 h-4 w-4" aria-hidden="true" />
+          My Availability
+        </Button>
       </div>
     );
   }
@@ -1233,6 +1248,15 @@ function SponsorCard({
           what your sponsor is for.
         </p>
       )}
+
+      <Button
+        type="button"
+        onClick={onBookThreeWay}
+        className="mt-4 w-full bg-gold text-ink hover:bg-gold-bright font-display tracking-[0.06em] text-[15px] px-4 py-4"
+      >
+        <CalendarClock className="mr-2 h-4 w-4" aria-hidden="true" />
+        Book a 3-Way Call
+      </Button>
 
       {showFallback && (
         <div className="mt-4 pt-4 border-t border-gold/20">
