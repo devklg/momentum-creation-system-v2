@@ -182,7 +182,11 @@ export async function getSessionAvailabilityForBA(tmagId: string): Promise<{
   sessions: McsOrientationSessionAvailability[];
   myReservationSessionId: string | null;
 }> {
-  const sessions = await listUpcomingSessions();
+  const nowMs = Date.now();
+  const horizon = new Date(nowMs + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const sessions = (await listUpcomingSessions())
+    .filter((s) => s.scheduledFor <= horizon)
+    .slice(0, 3);
   const sessionIds = sessions.map((s) => s.sessionId);
 
   const reserved = await reservedForSessions(sessionIds);

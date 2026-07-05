@@ -29,6 +29,7 @@ import {
   getCockpitSummary,
   getCockpitTodaysActions,
   getProspectMomentumViewer,
+  getTeamCalendar,
   getTeamLaunchCenter,
 } from '../domain/cockpit.js';
 import { buildCockpitProspectListPdf } from '../domain/cockpitPrint.js';
@@ -127,6 +128,30 @@ cockpitRoutes.get(
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('[GET /api/cockpit/todays-actions] failed', err);
+      return res.status(500).json({ ok: false, error: 'server_error' });
+    }
+  },
+);
+
+/**
+ * GET /api/cockpit/team-calendar — read-only Team Calendar rail. Brief 4
+ * limits this slice to existing webinar events; Brief 5's 3-way bookings will
+ * fill the compatible placeholder returned by the domain.
+ */
+cockpitRoutes.get(
+  '/team-calendar',
+  requireAuth,
+  requireSteveComplete,
+  async (req, res) => {
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+    try {
+      const payload = await getTeamCalendar(tmagId);
+      return res.status(200).json(payload);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[GET /api/cockpit/team-calendar] failed', err);
       return res.status(500).json({ ok: false, error: 'server_error' });
     }
   },
