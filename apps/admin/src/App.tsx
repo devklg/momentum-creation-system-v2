@@ -33,6 +33,7 @@ import { OrientationPage } from '@/routes/orientation';
 import { VmPage } from '@/routes/vm';
 import { AgentsPage } from '@/routes/agents';
 import { KnowledgePage } from '@/routes/knowledge';
+import { ContentVideosPage } from '@/routes/content-videos';
 
 export function App() {
   return (
@@ -80,6 +81,7 @@ function Inner() {
         <Route path="/vm" element={<VmPage />} />
         <Route path="/agents" element={<AgentsPage />} />
         <Route path="/knowledge" element={<KnowledgePage />} />
+        <Route path="/content-videos" element={<ContentVideosPage />} />
         <Route path="/broadcast" element={<BroadcastPage />} />
         <Route
           path="*"
