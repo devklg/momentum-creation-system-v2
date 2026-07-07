@@ -4,8 +4,11 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type {
+  McsAdminVmCampaignProgressResponse,
+  McsAdminVmDialerActionResponse,
   McsAdminVmOverviewResponse,
   McsAdminVmOwnershipCorrectionResponse,
+  McsAdminVmQueueResponse,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +44,11 @@ export function VmPage() {
   const [correction, setCorrection] = useState<CorrectionForm>(EMPTY_CORRECTION);
   const [correctionResult, setCorrectionResult] = useState<string | null>(null);
   const [submittingCorrection, setSubmittingCorrection] = useState(false);
+  const [queue, setQueue] = useState<McsAdminVmQueueResponse | null>(null);
+  const [progress, setProgress] = useState<McsAdminVmCampaignProgressResponse | null>(null);
+  const [selectedCampaignId, setSelectedCampaignId] = useState('');
+  const [actionResult, setActionResult] = useState<string | null>(null);
+  const [actionBusy, setActionBusy] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -54,6 +62,8 @@ export function VmPage() {
           return;
         }
         setData(body);
+        const firstCampaign = body.campaigns[0]?.vmCampaignId ?? '';
+        setSelectedCampaignId((current) => current || firstCampaign);
       } catch (e) {
         setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
       } finally {
@@ -61,6 +71,47 @@ export function VmPage() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadQueue() {
+      try {
+        const res = await fetch('/api/admin/vm/queue', { credentials: 'include' });
+        const body = (await res.json()) as McsAdminVmQueueResponse & { error?: string };
+        if (!cancelled && body.ok) setQueue(body);
+      } catch {
+        // overview remains usable; queue panel renders stale/empty
+      }
+    }
+    void loadQueue();
+    const timer = window.setInterval(() => void loadQueue(), 15000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedCampaignId) {
+      setProgress(null);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(`/api/admin/vm/campaigns/${encodeURIComponent(selectedCampaignId)}/progress`, {
+          credentials: 'include',
+        });
+        const body = (await res.json()) as McsAdminVmCampaignProgressResponse & { error?: string };
+        if (!cancelled && body.ok) setProgress(body);
+      } catch {
+        if (!cancelled) setProgress(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCampaignId, actionResult]);
 
   const topBaRows = useMemo(() => data?.baPerformance.slice(0, 12) ?? [], [data]);
 
@@ -99,6 +150,35 @@ export function VmPage() {
       setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
     } finally {
       setSubmittingCorrection(false);
+    }
+  }
+
+  async function runAction(routeAction: 'pause' | 'resume' | 'retry-failed' | 'cancel') {
+    if (!selectedCampaignId) return;
+    if (
+      (routeAction === 'cancel' || routeAction === 'retry-failed') &&
+      !window.confirm(`Run ${routeAction} for campaign ${selectedCampaignId}?`)
+    ) {
+      return;
+    }
+    setActionBusy(routeAction);
+    setActionResult(null);
+    setErr(null);
+    try {
+      const res = await fetch(
+        `/api/admin/vm/campaigns/${encodeURIComponent(selectedCampaignId)}/${routeAction}`,
+        { method: 'POST', credentials: 'include' },
+      );
+      const result = (await res.json()) as McsAdminVmDialerActionResponse | { ok: false; error: string };
+      if (!result.ok) {
+        setErr(result.error || 'VM action failed.');
+        return;
+      }
+      setActionResult(`${result.action} recorded · ${result.affectedJobs} job(s) affected · ${result.note}`);
+    } catch (e) {
+      setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+    } finally {
+      setActionBusy(null);
     }
   }
 
@@ -152,6 +232,83 @@ export function VmPage() {
                 <p className="text-xs text-cream-mute mt-2">{card.detail}</p>
               </div>
             ))}
+          </section>
+
+          <section className="grid grid-cols-[0.9fr_1.4fr] gap-6 mb-8">
+            <div className="border border-line rounded-md bg-ink-2 p-4">
+              <SectionHeading title="Live Queue State" />
+              <p className="font-mono text-[11px] text-cream-faint uppercase tracking-label mb-3">
+                {queue?.liveDeliveryEnabled ? 'Live delivery enabled' : 'Guarded mode'}
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {(queue?.depthByStatus ?? []).map((row) => (
+                  <Stat key={row.status} label={row.status.replace('_', ' ')} value={row.count} />
+                ))}
+              </div>
+              <div className="mt-4 pt-3 border-t border-line/60 space-y-2">
+                <Stat label="In flight" value={queue?.inFlightCount ?? 'n/a'} />
+                <Stat
+                  label="Oldest queued"
+                  value={queue?.oldestQueuedAgeSeconds === null || queue?.oldestQueuedAgeSeconds === undefined
+                    ? 'n/a'
+                    : `${Math.floor(queue.oldestQueuedAgeSeconds / 60)}m`}
+                />
+                <Stat label="Dead letters" value={queue?.deadLetters.length ?? 'n/a'} />
+              </div>
+            </div>
+
+            <div className="border border-line rounded-md bg-ink-2 p-4">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <SectionHeading title="Campaign Operations" />
+                <select
+                  value={selectedCampaignId}
+                  onChange={(e) => setSelectedCampaignId(e.target.value)}
+                  className="bg-ink border border-line rounded-md px-3 py-2 text-sm text-cream"
+                >
+                  <option value="">Select campaign</option>
+                  {data.campaigns.map((campaign) => (
+                    <option key={campaign.vmCampaignId} value={campaign.vmCampaignId}>
+                      {campaign.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {progress ? (
+                <>
+                  <div className="grid grid-cols-7 gap-2 mb-4">
+                    {Object.entries(progress.totals).map(([key, value]) => (
+                      <div key={key} className="border border-line rounded-md p-2">
+                        <p className="font-mono text-[9px] uppercase tracking-label text-cream-faint">{key}</p>
+                        <p className="font-display text-[22px] leading-none text-cream mt-1">{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {(['pause', 'resume', 'retry-failed', 'cancel'] as const).map((action) => (
+                      <Button
+                        key={action}
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void runAction(action)}
+                        disabled={!!actionBusy}
+                      >
+                        {actionBusy === action ? 'Working…' : action}
+                      </Button>
+                    ))}
+                  </div>
+                  {actionResult && <p className="text-xs text-teal">{actionResult}</p>}
+                  <div className="mt-3 max-h-[120px] overflow-auto text-xs text-cream-mute">
+                    {Object.entries(progress.dispositions).map(([key, value]) => (
+                      <span key={key} className="inline-block mr-3 mb-1">
+                        {key}: <span className="text-cream">{value}</span>
+                      </span>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-cream-mute">Select a campaign to see progress and controls.</p>
+              )}
+            </div>
           </section>
 
           <section className="grid grid-cols-[1.5fr_1fr] gap-6 mb-8">

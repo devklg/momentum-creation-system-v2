@@ -36,9 +36,12 @@ import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
   createMichaelRuntimeTurnForAuthenticatedBa,
-  resolveMichaelRuntimeTurnResponse,
 } from '../runtime/orchestration/index.js';
 import type { MichaelRuntimeAdapterContractInput } from '../runtime/orchestration/index.js';
+import {
+  isMichaelDormantError,
+  michaelConversationRuntime,
+} from '../domain/michael-training-coach.js';
 import {
   michaelRuntimeResponseEnabled,
   michaelRuntimeRouteEnabled,
@@ -175,22 +178,25 @@ export async function handleMichaelRuntimeResolve(
     return res.status(422).json({ ok: false, issues: created.issues });
   }
 
-  // The facade is documented as never-throwing, but is wrapped defensively —
-  // any unexpected throw is mapped to a deterministic failure, never a 500.
-  let result: ReturnType<typeof resolveMichaelRuntimeTurnResponse>;
+  let result: Awaited<ReturnType<typeof michaelConversationRuntime>>;
   try {
-    result = resolveMichaelRuntimeTurnResponse(created.input);
-  } catch {
+    result = await michaelConversationRuntime({
+      adapterInput: created.input,
+      ask: validatedAsk,
+    });
+  } catch (err) {
+    if (isMichaelDormantError(err)) {
+      return res.status(503).json({
+        ok: false,
+        disabled: true,
+        reason: 'michael_runtime_llm_unavailable',
+      });
+    }
     recordMichaelRuntimeFacadeFailure();
     return res.status(422).json({
       ok: false,
       issues: [{ code: 'resolution_error', message: 'Runtime resolution failed.' }],
     });
-  }
-
-  if (!result.ok) {
-    recordMichaelRuntimeFacadeFailure();
-    return res.status(422).json({ ok: false, issues: result.issues });
   }
 
   const payload: {
@@ -199,15 +205,17 @@ export async function handleMichaelRuntimeResolve(
     catalogKey: string;
     response: unknown;
     supportingContext?: readonly MichaelRuntimeSupportingContextItem[];
+    persistence?: unknown;
     trace?: unknown;
   } = {
     ok: true,
-    selectionRequest: result.selectionRequest,
-    catalogKey: result.catalogKey,
+    selectionRequest: created.input,
+    catalogKey: 'generated_michael_training_coach',
     response: result.response,
+    persistence: result.persistence,
   };
 
-  const supportingContext = buildSupportingContext(created.input);
+  const supportingContext = result.supportingContext;
   if (supportingContext.length > 0) {
     payload.supportingContext = supportingContext;
   }
@@ -215,31 +223,15 @@ export async function handleMichaelRuntimeResolve(
   // Axis 3 — trace kill switch. The redacted trace is included ONLY when
   // explicitly enabled.
   if (michaelRuntimeTraceEnabled()) {
-    payload.trace = result.trace;
+    payload.trace = {
+      responseType: result.response.responseType,
+      contextPacketStatus: result.response.contextPacketStatus,
+      persistence: result.persistence,
+    };
   }
 
   recordMichaelRuntimeSuccess();
   return res.status(200).json(payload);
-}
-
-function buildSupportingContext(
-  input: MichaelRuntimeAdapterContractInput,
-): readonly MichaelRuntimeSupportingContextItem[] {
-  const packet =
-    input.runtimeTurn.result.decision === 'proceed'
-      ? input.runtimeTurn.result.consumption.packet
-      : undefined;
-  if (!packet) return [];
-
-  return packet.approvedKnowledge.slice(0, 3).flatMap((item) => {
-    const title = item.title.replace(/\s+/g, ' ').trim();
-    const summary = item.summary.replace(/\s+/g, ' ').trim();
-    if (!title || !summary) return [];
-    return [{
-      title: title.slice(0, 90),
-      summary: summary.slice(0, 220),
-    }];
-  });
 }
 
 michaelRuntimeRoutes.post(

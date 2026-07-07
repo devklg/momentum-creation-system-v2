@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 /**
  * Admin VM oversight read model.
  *
@@ -8,6 +9,8 @@
  */
 
 import { persistenceCall } from '../services/persistence/dispatch.js';
+import { tripleStackWrite } from '../services/tripleStack.js';
+import { env } from '../env.js';
 import {
   listVmNotificationHooks,
   listVmTeamNewsHooks,
@@ -20,6 +23,10 @@ import type {
   McsAdminVmMetricCard,
   McsAdminVmOverviewResponse,
   McsAdminVmProviderHealth,
+  McsAdminVmQueueResponse,
+  McsAdminVmCampaignProgressResponse,
+  McsAdminVmDialerAction,
+  McsAdminVmDialerActionResponse,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -27,7 +34,9 @@ const COLL_BAS = 'team_magnificent_members';
 const COLL_LEAD_OWNERS = 'tmag_vm_lead_owners';
 const COLL_LEADS = 'tmag_vm_bulk_leads';
 const COLL_CAMPAIGNS = 'tmag_vm_campaigns';
+const COLL_QUEUE = 'tmag_vm_queue_jobs';
 const COLL_DELIVERY = 'tmag_vm_delivery_events';
+const COLL_CONTROL = 'tmag_vm_control_actions';
 const COLL_CRM = 'tmag_prospect_crm_records';
 const COLL_SUPPRESSIONS = 'tmag_vm_suppression_list';
 
@@ -81,6 +90,22 @@ interface DeliveryEventDoc {
   status?: string;
   kind?: string;
   createdAt?: string;
+}
+
+interface VmQueueJobDoc {
+  jobId?: string;
+  kind?: string;
+  status?: string;
+  attempts?: number;
+  maxAttempts?: number;
+  availableAt?: string;
+  lockedAt?: string | null;
+  completedAt?: string | null;
+  failedAt?: string | null;
+  failureReason?: string | null;
+  payload?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface CrmRecordDoc {
@@ -476,5 +501,248 @@ export async function buildAdminVmOverview(): Promise<McsAdminVmOverviewResponse
     notificationHooks: listVmNotificationHooks(),
     teamNewsHooks: listVmTeamNewsHooks(),
     warnings: sources.warnings,
+  };
+}
+
+function liveDeliveryEnabled(): boolean {
+  return env.VM_LIVE_DELIVERY_ENABLED === true;
+}
+
+export async function buildAdminVmQueueState(): Promise<McsAdminVmQueueResponse> {
+  const warnings: string[] = [];
+  const jobs = await safeQuery<VmQueueJobDoc>(COLL_QUEUE, warnings, {}, QUERY_LIMIT, { updatedAt: -1 });
+  const statuses = ['queued', 'processing', 'complete', 'failed', 'dead_lettered', 'skipped'] as const;
+  const now = Date.now();
+  const queued = jobs.filter((job) => job.status === 'queued');
+  const oldestQueued = queued
+    .map((job) => Date.parse(job.availableAt ?? job.createdAt ?? ''))
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b)[0];
+
+  return {
+    ok: true,
+    generatedAt: new Date().toISOString(),
+    liveDeliveryEnabled: liveDeliveryEnabled(),
+    depthByStatus: statuses.map((status) => ({
+      status,
+      count: jobs.filter((job) => job.status === status).length,
+    })),
+    oldestQueuedAgeSeconds:
+      oldestQueued === undefined ? null : Math.max(0, Math.floor((now - oldestQueued) / 1000)),
+    inFlightCount: jobs.filter((job) => job.status === 'processing').length,
+    deadLetters: jobs
+      .filter((job) => job.status === 'dead_lettered' || job.status === 'failed')
+      .slice(0, 50)
+      .map((job) => ({
+        jobId: job.jobId ?? 'unknown_job',
+        kind: job.kind ?? 'unknown',
+        attempts: job.attempts ?? 0,
+        maxAttempts: job.maxAttempts ?? 0,
+        failureReason: job.failureReason ?? null,
+        availableAt: job.availableAt ?? job.updatedAt ?? new Date(0).toISOString(),
+        updatedAt: job.updatedAt ?? job.createdAt ?? new Date(0).toISOString(),
+        payload: job.payload ?? {},
+      })),
+    warnings,
+  };
+}
+
+export async function buildAdminVmCampaignProgress(
+  vmCampaignId: string,
+): Promise<McsAdminVmCampaignProgressResponse> {
+  const warnings: string[] = [];
+  const [campaigns, leads, delivery, jobs] = await Promise.all([
+    safeQuery<VmCampaignDoc>(COLL_CAMPAIGNS, warnings, { vmCampaignId }, 1),
+    safeQuery<BulkLeadDoc>(COLL_LEADS, warnings, { vmCampaignId }, QUERY_LIMIT),
+    safeQuery<DeliveryEventDoc>(COLL_DELIVERY, warnings, { vmCampaignId }, QUERY_LIMIT),
+    safeQuery<VmQueueJobDoc>(COLL_QUEUE, warnings, {}, QUERY_LIMIT),
+  ]);
+  const campaign = campaigns[0];
+  const leadIds = new Set(leads.map((lead) => lead.leadId).filter((id): id is string => !!id));
+  const campaignJobs = jobs.filter((job) => {
+    const leadId = job.payload?.leadId;
+    return typeof leadId === 'string' && leadIds.has(leadId);
+  });
+  const dispositionEntries = countBy(delivery, (event) => event.status ?? event.kind ?? 'unknown');
+  const dispositions = Object.fromEntries(dispositionEntries);
+
+  return {
+    ok: true,
+    generatedAt: new Date().toISOString(),
+    vmCampaignId,
+    campaignName: campaign?.name ?? vmCampaignId,
+    status: campaign?.status ?? 'unknown',
+    totals: {
+      leads: leads.length,
+      queued: leads.filter((lead) => isOneOf(lead.status, ['queued', 'voicemail_drop_queued'])).length,
+      sent: delivery.filter((event) => isOneOf(event.status, ['sent', 'voicemail_drop_queued', 'token_link_sms_enqueued'])).length,
+      delivered: delivery.filter((event) => isOneOf(event.status, ['delivered', 'complete', 'voicemail_drop_delivered'])).length,
+      failed: delivery.filter((event) => isOneOf(event.status, ['failed', 'error', 'bounced', 'undeliverable', 'voicemail_drop_failed'])).length,
+      suppressed: leads.filter((lead) => lead.status === 'suppressed').length,
+      retryable: campaignJobs.filter((job) => job.status === 'failed' || job.status === 'dead_lettered').length,
+    },
+    dispositions,
+    warnings,
+  };
+}
+
+async function readControlAction(actionId: string): Promise<{ actionId?: string } | null> {
+  const readback = await persistenceCall<{ documents?: Array<{ actionId?: string }> }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: COLL_CONTROL,
+    filter: { _id: actionId },
+    limit: 1,
+  });
+  return readback.documents?.[0] ?? null;
+}
+
+async function writeVmControlAction(input: {
+  action: McsAdminVmDialerAction;
+  vmCampaignId: string;
+  actorTmagId: string;
+  affectedJobs: number;
+}): Promise<string> {
+  const actionId = `vmctrl_${randomUUID()}`;
+  const createdAt = new Date().toISOString();
+  await tripleStackWrite({
+    id: actionId,
+    mongoCollection: COLL_CONTROL,
+    mongoDoc: {
+      actionId,
+      action: input.action,
+      vmCampaignId: input.vmCampaignId,
+      actorTmagId: input.actorTmagId,
+      affectedJobs: input.affectedJobs,
+      liveDeliveryEnabled: liveDeliveryEnabled(),
+      createdAt,
+    },
+    neo4j: {
+      cypher:
+        'MERGE (a:TmagVmControlAction {actionId: $id}) ' +
+        'SET a.action = $action, a.vmCampaignId = $vmCampaignId, ' +
+        '    a.actorTmagId = $actorTmagId, a.affectedJobs = $affectedJobs, a.createdAt = datetime($createdAt)',
+      params: {
+        action: input.action,
+        vmCampaignId: input.vmCampaignId,
+        actorTmagId: input.actorTmagId,
+        affectedJobs: input.affectedJobs,
+        createdAt,
+      },
+    },
+    chroma: {
+      collection: 'mcs_vm_control_actions',
+      document:
+        `Admin VM control action ${input.action} for campaign ${input.vmCampaignId}; ` +
+        `${input.affectedJobs} queue job(s) affected.`,
+      metadata: {
+        kind: 'vm_control_action',
+        action: input.action,
+        vmCampaignId: input.vmCampaignId,
+        actorTmagId: input.actorTmagId,
+        affectedJobs: input.affectedJobs,
+        createdAt,
+      },
+    },
+  });
+  if (!(await readControlAction(actionId))) throw new Error('vm_control_action_readback_failed');
+  return actionId;
+}
+
+export async function runAdminVmDialerAction(input: {
+  vmCampaignId: string;
+  action: McsAdminVmDialerAction;
+  actorTmagId: string;
+}): Promise<McsAdminVmDialerActionResponse> {
+  const now = new Date().toISOString();
+  let affectedJobs = 0;
+
+  const statusByAction: Partial<Record<McsAdminVmDialerAction, string>> = {
+    pause: 'paused',
+    resume: 'running',
+    cancel: 'cancelled',
+  };
+  const nextStatus = statusByAction[input.action];
+  if (nextStatus) {
+    await persistenceCall('mongodb', 'update', {
+      database: MONGO_DB,
+      collection: COLL_CAMPAIGNS,
+      filter: { vmCampaignId: input.vmCampaignId },
+      update: { $set: { status: nextStatus, updatedAt: now } },
+    });
+  }
+
+  const leads = await safeQuery<BulkLeadDoc>(
+    COLL_LEADS,
+    [],
+    { vmCampaignId: input.vmCampaignId },
+    QUERY_LIMIT,
+  );
+  const leadIds = leads.map((lead) => lead.leadId).filter((id): id is string => !!id);
+
+  if (leadIds.length > 0 && input.action === 'retry_failed') {
+    const result = await persistenceCall<{ modifiedCount?: number }>('mongodb', 'update', {
+      database: MONGO_DB,
+      collection: COLL_QUEUE,
+      filter: {
+        kind: 'delivery',
+        status: { $in: ['failed', 'dead_lettered'] },
+        'payload.leadId': { $in: leadIds },
+      },
+      update: {
+        $set: {
+          status: 'queued',
+          availableAt: now,
+          lockedAt: null,
+          failedAt: null,
+          failureReason: null,
+          updatedAt: now,
+        },
+      },
+      multi: true,
+    });
+    affectedJobs = result.modifiedCount ?? 0;
+  }
+
+  if (leadIds.length > 0 && input.action === 'cancel') {
+    const result = await persistenceCall<{ modifiedCount?: number }>('mongodb', 'update', {
+      database: MONGO_DB,
+      collection: COLL_QUEUE,
+      filter: {
+        kind: 'delivery',
+        status: { $in: ['queued', 'failed', 'dead_lettered'] },
+        'payload.leadId': { $in: leadIds },
+      },
+      update: {
+        $set: {
+          status: 'skipped',
+          completedAt: now,
+          updatedAt: now,
+          failureReason: 'campaign_cancelled',
+        },
+      },
+      multi: true,
+    });
+    affectedJobs = result.modifiedCount ?? 0;
+  }
+
+  const actionId = await writeVmControlAction({
+    action: input.action,
+    vmCampaignId: input.vmCampaignId,
+    actorTmagId: input.actorTmagId,
+    affectedJobs,
+  });
+
+  return {
+    ok: true,
+    actionId,
+    action: input.action,
+    vmCampaignId: input.vmCampaignId,
+    liveDeliveryEnabled: liveDeliveryEnabled(),
+    affectedJobs,
+    readbackVerified: true,
+    note:
+      liveDeliveryEnabled()
+        ? 'Control action recorded. Live provider delivery remains governed by worker/provider gates.'
+        : 'Control action recorded in guarded mode; no real Telnyx drop was triggered.',
   };
 }

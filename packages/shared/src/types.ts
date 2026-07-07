@@ -5016,6 +5016,75 @@ export interface McsAdminVmOwnershipCorrectionResponse {
   note: string;
 }
 
+// VM operational dashboard additions (CDT-006, additive).
+
+export type McsVmQueueJobStatus =
+  | 'queued'
+  | 'processing'
+  | 'complete'
+  | 'failed'
+  | 'dead_lettered'
+  | 'skipped';
+
+export interface McsAdminVmQueueStatusCount {
+  status: McsVmQueueJobStatus;
+  count: number;
+}
+
+export interface McsAdminVmDeadLetterJob {
+  jobId: string;
+  kind: string;
+  attempts: number;
+  maxAttempts: number;
+  failureReason: string | null;
+  availableAt: McsIsoTimestamp;
+  updatedAt: McsIsoTimestamp;
+  payload: Record<string, unknown>;
+}
+
+export interface McsAdminVmQueueResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  liveDeliveryEnabled: boolean;
+  depthByStatus: McsAdminVmQueueStatusCount[];
+  oldestQueuedAgeSeconds: number | null;
+  inFlightCount: number;
+  deadLetters: McsAdminVmDeadLetterJob[];
+  warnings: string[];
+}
+
+export interface McsAdminVmCampaignProgressResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  vmCampaignId: string;
+  campaignName: string;
+  status: string;
+  totals: {
+    leads: number;
+    queued: number;
+    sent: number;
+    delivered: number;
+    failed: number;
+    suppressed: number;
+    retryable: number;
+  };
+  dispositions: Record<string, number>;
+  warnings: string[];
+}
+
+export type McsAdminVmDialerAction = 'pause' | 'resume' | 'retry_failed' | 'cancel';
+
+export interface McsAdminVmDialerActionResponse {
+  ok: true;
+  actionId: string;
+  action: McsAdminVmDialerAction;
+  vmCampaignId: string;
+  liveDeliveryEnabled: boolean;
+  affectedJobs: number;
+  readbackVerified: true;
+  note: string;
+}
+
 export interface McsAdminSuccessProfileSummary {
   tmagId: string;
   baName: string;
@@ -5587,6 +5656,22 @@ export interface McsThreeWayBookResponse {
 export interface McsThreeWayCancelResponse {
   ok: true;
   booking: McsThreeWayBookingRecord;
+}
+
+export interface McsThreeWayBookingDeliveryOutcome {
+  channel: 'sms' | 'email' | 'in_app';
+  recipientRole: 'booker' | 'sponsor';
+  status: 'sent' | 'skipped' | 'failed';
+  providerMessageId: string | null;
+  error: string | null;
+  deliveredAt: McsIsoTimestamp;
+}
+
+export interface McsThreeWayBookingRecord {
+  icsText?: string;
+  notificationDeliveries?: McsThreeWayBookingDeliveryOutcome[];
+  reminderId?: string | null;
+  reminderLeadMinutes?: number | null;
 }
 
 // Product Gallery / Training Content Videos (Brief 9, 2026-07-04)

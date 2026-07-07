@@ -65,17 +65,21 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_new_member_orientation_reservations', // domain/orientationSession.ts
   'mcs_sponsor_availability', // domain/threeWayCalls.ts
   'mcs_three_way_bookings', // domain/threeWayCalls.ts
+  'mcs_three_way_notifications', // domain/threeWayCalls.ts
+  'mcs_three_way_reminders', // domain/threeWayCalls.ts
   'mcs_fast_start_progress', // domain/training.ts (also lazy-bootstrapped there)
   // Agent events split per agent (Rev3). Writer derives mcs_agent_<agentId>_events.
   'mcs_agent_ivory_events', // domain/agents/orchestrator.ts
   'mcs_agent_michael_events',
   'mcs_agent_steve_events',
   'mcs_agent_system_events',
+  'mcs_michael_runtime_turns', // domain/michael-training-coach.ts
   'mcs_agent_templates', // agent operating templates (roads); registered, writer TBD
   'mcs_vm_lead_owners', // domain/vmSchemas.ts, future VM owner writes
   'mcs_vm_bulk_leads', // domain/vmSchemas.ts, future VM lead writes
   'mcs_vm_campaigns', // domain/vmSchemas.ts, future VM campaign writes
   'mcs_vm_delivery_events', // domain/vmSchemas.ts, future provider event writes
+  'mcs_vm_control_actions', // domain/adminVm.ts admin dashboard controls
   'mcs_prospect_crm_records', // domain/vmSchemas.ts, future CRM hub writes
   'mcs_prospect_timeline_events', // domain/vmSchemas.ts, future prospect timeline writes
   'mcs_outcomes', // domain/outcomes.ts (Phase 7 R1 — BA-confirmed outcome capture)

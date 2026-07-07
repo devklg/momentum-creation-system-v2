@@ -17,8 +17,37 @@
  */
 
 import type { Request, Response } from 'express';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { handleMichaelRuntimeResolve } from '../michael-runtime.js';
+
+const mocks = vi.hoisted(() => ({
+  michaelConversationRuntime: vi.fn(async (input: any) => {
+    const language = input?.adapterInput?.language ?? input?.adapterInput?.identity?.language ?? 'en';
+    return {
+      response: {
+        schemaVersion: 'michael_generated_response.v1',
+        responseType: 'next_training_step',
+        language,
+        userMessage: 'Mocked Michael training response.',
+        nextStep: {
+          title: 'Practice the next invitation step',
+          body: 'Use the approved Team Magnificent language and keep the next action simple.',
+        },
+        supportingContext: [],
+        contextPacketStatus: 'complete',
+        agentResponseGenerated: true,
+        persistence: 'triple_stack',
+      },
+      supportingContext: [],
+      persistence: { turnId: 'turn_mock', readbackVerified: true },
+    };
+  }),
+}));
+
+vi.mock('../../domain/michael-training-coach.js', () => ({
+  michaelConversationRuntime: mocks.michaelConversationRuntime,
+  isMichaelDormantError: () => false,
+}));
 
 const ENV_VARS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
@@ -79,6 +108,7 @@ function asBody(res: MockRes): Record<string, unknown> {
 let snapshot: Record<EnvVarName, string | undefined>;
 
 beforeEach(() => {
+  mocks.michaelConversationRuntime.mockClear();
   snapshot = {
     MICHAEL_RUNTIME_ROUTE_ENABLED: process.env.MICHAEL_RUNTIME_ROUTE_ENABLED,
     MICHAEL_RUNTIME_RESPONSE_ENABLED: process.env.MICHAEL_RUNTIME_RESPONSE_ENABLED,
@@ -255,7 +285,7 @@ describe('S3.11 Michael runtime route — three-axis kill switch behavior', () =
     expect(body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
   });
 
-  it('12. enabled success path returns the inert fixture (agentResponseGenerated false, persistence disabled)', async () => {
+  it('12. enabled success path returns generated Michael response metadata and verified persistence', async () => {
     process.env.MICHAEL_RUNTIME_ROUTE_ENABLED = 'true';
     process.env.MICHAEL_RUNTIME_RESPONSE_ENABLED = 'true';
 
@@ -270,7 +300,8 @@ describe('S3.11 Michael runtime route — three-axis kill switch behavior', () =
 
     const response = body.response as Record<string, unknown>;
     expect(response).toBeDefined();
-    expect(response.agentResponseGenerated).toBe(false);
-    expect(response.persistence).toBe('disabled');
+    expect(response.agentResponseGenerated).toBe(true);
+    expect(response.persistence).toBe('triple_stack');
+    expect(body.persistence).toEqual({ turnId: 'turn_mock', readbackVerified: true });
   });
 });
