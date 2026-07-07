@@ -118,12 +118,13 @@ export async function add(params: ChromaParams): Promise<{ ok: true; count: numb
 export async function deleteRecords(params: ChromaParams): Promise<{ ok: true }> {
   if (!params.collection) throw new PersistenceError('chromadb', 'delete', 'collection required');
   const collection = await getCollection(params.collection);
+  const where = normalizeWhere(params.where ?? params.filter);
   await request(collectionEndpoint(collection, 'delete'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       ...(params.ids ? { ids: params.ids } : {}),
-      ...(params.where ?? params.filter ? { where: params.where ?? params.filter } : {}),
+      ...(where ? { where } : {}),
     }),
   });
   return { ok: true };
@@ -143,9 +144,18 @@ export async function query(params: ChromaParams): Promise<unknown> {
     body: JSON.stringify({
       query_embeddings: queryEmbeddings,
       n_results: params.n_results ?? 5,
-      where: params.where ?? params.filter,
+      where: normalizeWhere(params.where ?? params.filter),
     }),
   });
+}
+
+function normalizeWhere(where: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+  if (!where) return undefined;
+  const keys = Object.keys(where);
+  if (keys.length <= 1 || keys.some((key) => key.startsWith('$'))) return where;
+  return {
+    $and: keys.map((key) => ({ [key]: where[key] })),
+  };
 }
 
 function flattenFirstQueryResult(body: unknown): PERSISTENCEChromaQueryResult['results'] {

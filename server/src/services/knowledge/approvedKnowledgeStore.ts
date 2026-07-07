@@ -15,6 +15,7 @@ import {
 } from '@momentum/shared/runtime';
 import type {
   McsAgentKey,
+  McsKnowledgeAuthorityKind,
   McsKnowledgeBaseChunkRecord,
   McsKnowledgeBaseSourceRecord,
   McsKnowledgeChunk,
@@ -53,6 +54,9 @@ export interface CreateKevinApprovedKnowledgeSourceInput {
   upload?: McsKnowledgeBaseSourceRecord['upload'];
   topicTags?: readonly string[];
   agentScopes?: readonly McsAgentKey[];
+  authorityKind?: Extract<McsKnowledgeAuthorityKind, 'kevin_authored' | 'kevin_approved'>;
+  authorityBy?: string;
+  authorityRef?: string;
   createdAt?: string;
 }
 
@@ -95,11 +99,11 @@ export async function createKevinApprovedKnowledgeSource(
     ...(input.sourceRef ? { sourceRef: input.sourceRef } : {}),
     createdBy: input.createdBy,
     authority: {
-      authorityKind: 'kevin_authored',
+      authorityKind: input.authorityKind ?? 'kevin_authored',
       authorityStatus: 'active_authority',
-      authorityBy: input.createdBy,
+      authorityBy: input.authorityBy ?? input.createdBy,
       authorityAt: createdAt,
-      ...(input.sourceRef ? { authorityRef: input.sourceRef } : {}),
+      ...(input.authorityRef || input.sourceRef ? { authorityRef: input.authorityRef ?? input.sourceRef } : {}),
     },
     createdAt,
     language: input.language,
@@ -202,17 +206,33 @@ export async function createKevinApprovedKnowledgeSource(
         },
       },
       chroma: {
-        collection,
+        collection: KNOWLEDGE_CHUNK_COLLECTION,
         document: chunkRecord.text || chunkRecord.heading || source.title,
         metadata: {
           kind: 'knowledge_chunk',
           sourceId: String(chunkRecord.sourceId),
           chunkId: chunkRecord.chunkId,
+          documentId: chunkRecord.documentId,
+          sourceVersion: chunkRecord.sourceVersion,
+          chunkIndex: chunkRecord.chunkIndex,
+          title: chunkRecord.title,
+          heading: chunkRecord.heading ?? undefined,
           domain: chunkRecord.domain,
           language: chunkRecord.language,
           status: chunkRecord.status,
           retrievalEligible: chunkRecord.retrievalEligible,
-          authority: 'kevin',
+          authority: chunkRecord.authorityKind ?? 'kevin',
+          authorityStatus: chunkRecord.authorityStatus,
+          sourceTitle: chunkRecord.sourceTitle,
+          topicTags: chunkRecord.topicTags.join('|'),
+          agentScopes: chunkRecord.agentScopes.join('|'),
+          surfaceScopes: chunkRecord.surfaceScopes.join('|'),
+          'scope.tenantId': chunkRecord.scope.tenantId,
+          'scope.teamId': chunkRecord.scope.teamId,
+          'scope.teamKey': chunkRecord.scope.teamKey,
+          'scope.teamName': chunkRecord.scope.teamName,
+          startOffset: chunkRecord.sourceOffsets.startOffset,
+          endOffset: chunkRecord.sourceOffsets.endOffset,
         },
       },
     });
@@ -498,6 +518,12 @@ function numberValue(value: unknown): number | undefined {
 }
 
 function stringArrayValue(value: unknown): string[] {
+  if (typeof value === 'string') {
+    return value
+      .split(/[|,]/g)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === 'string');
 }
