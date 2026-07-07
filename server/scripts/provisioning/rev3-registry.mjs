@@ -20,6 +20,10 @@ export const ENUMS = {
   workbookStatus: ['draft','final'],
   challengeChannel: ['email','phone'],
   mintedVia: ['kevin','agent'],
+  // ACR-0011 — 5 Point Recruiting Cycle (LOCKED values; mirror of
+  // packages/shared/src/recruiting-cycle.ts — keep in sync).
+  recruitingCycleStatus: ['active','stalled','completed'],
+  recruitingStep: [1,2,3,4,5],
 };
 
 export const MONGO_COLLECTIONS = [
@@ -53,6 +57,11 @@ export const MONGO_COLLECTIONS = [
   { name: 'tmag_three_way_bookings', required: ['bookingId','bookerTmagId','sponsorTmagId','startAt','endAt','status'] },
   { name: 'tmag_fast_start_progress', required: ['tmagId','moduleId','state'] },
   { name: 'tmag_steve_success_interview', required: ['tmagId','successProfile'] },
+  // ACR-0011 · 5 Point Recruiting Cycle — one launch cycle per BA, created on
+  // Steve Discovery completion. camelCase at the store (sibling convention);
+  // fields map 1:1 to ACR §2.4 snake_case. Milestone/attestation fields are
+  // nullable and NOT required (written later via sponsor attestation).
+  { name: 'tmag_recruiting_cycles', required: ['tmagId','enrolledAt','fivePointTargetAt','qbaTargetAt','namesTarget','trancheSize','currentStep','lastActivityAt','status','createdAt','updatedAt'], props: { status: { enum: ENUMS.recruitingCycleStatus }, currentStep: { enum: ENUMS.recruitingStep } } },
   // D · Agents / Templates / Governance / Audit / Admin
   { name: 'tmag_agent_ivory_events', required: ['eventId','tmagId','agentId','kind','createdAt'] },
   { name: 'tmag_agent_michael_events', required: ['eventId','tmagId','agentId','kind','createdAt'] },
@@ -97,6 +106,9 @@ for (const d of ENUMS.learningDomain) for (const l of ENUMS.language) KNOWLEDGE.
 export const CHROMA_COLLECTIONS = [
   // Identity / onboarding
   'mcs_members','mcs_access_codes','mcs_commitments','mcs_workbooks','mcs_steve_success_interview','mcs_fast_start_progress',
+  // ACR-0011 — recruiting-cycle twin: BA why_statement + Michael coaching
+  // touches embed here (384-dim, all-MiniLM-L6-v2) for why-replay retrieval.
+  'mcs_recruiting_cycles',
   // Prospect / funnel
   'mcs_prospect_invitation_activity','mcs_prospect_callback_requests','mcs_prospect_htank_events','mcs_prospect_magic_links','mcs_prospect_webinar_reservations','mcs_prospect_crm_records','mcs_prospect_timeline_events',
   // Agents / templates / admin
@@ -133,6 +145,8 @@ export const NEO4J_CONSTRAINTS = [
   ['TmagOrientationSession','sessionId'], ['TmagOrientationReservation','reservationId'],
   ['TmagSponsorAvailability','availabilityId'], ['TmagThreeWayBooking','bookingId'],
   ['TmagFastStartProgress','id'], ['TmagSteveSuccessInterview','id'],
+  ['TmagRecruitingCycle','tmagId'], // ACR-0011 — cycle projection; ENROLLED edges are the genealogy source
+
   ['TmagAgentIvoryEvent','eventId'], ['TmagAgentMichaelEvent','eventId'], ['TmagAgentSteveEvent','eventId'],
   ['TmagAgentTemplate','templateId'], ['TmagContentTemplate','templateVersionId'], ['TmagInvitationGeneratorRun','runId'],
   ['TmagContentVideo','contentVideoId'],
@@ -150,5 +164,6 @@ export const NEO4J_INDEXES = [
   ['TmagInviteToken','prospectId'], ['TmagInviteToken','sponsorTmagId'],
   ['TmagVmLeadOwner','ownerTmagId'], ['TmagVmBulkLead','ownerTmagId'],
   ['TmagCrmNote','sponsorTmagId'], ['TeamMagnificentMember','email'], ['TmagAuditEntry','entityId'],
+  ['TmagRecruitingCycle','status'], // ACR-0011 — stall-sweep / dashboard queries
   ['TmagHealthHeartbeat','checkedAtEpochMs'],
 ];
