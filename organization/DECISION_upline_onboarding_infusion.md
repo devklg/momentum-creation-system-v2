@@ -8,7 +8,7 @@ Decision Owner: Kevin Gardner
 
 Status: Recorded
 
-Related: ACR-0011 (Proposed), knowledge/upline-legacy-makers-link-inventory.md
+Related: ACR-0011 (Approved 2026-07-07), knowledge/upline-legacy-makers-link-inventory.md
 
 ---
 

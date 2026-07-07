@@ -2,7 +2,9 @@
 
 ## Momentum Creation System V2
 
-Status: Proposed
+Status: Approved
+
+Ratified: Kevin Gardner, 2026-07-07 — approved as written (milestone targets in Michael's supportive framing; stall thresholds 24h/72h stand)
 
 Canonical Authority: LAUNCH_CENTER_ARCHITECTURE.md / CRM_ARCHITECTURE.md
 
