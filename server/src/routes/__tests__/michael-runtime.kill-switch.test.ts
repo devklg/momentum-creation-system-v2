@@ -52,7 +52,7 @@ function createMockRes(): MockRes {
 
 /**
  * Build a server-owned request. The body defaults to `{}` (the only valid client
- * body is `{}` or `{ language }`); `extra.body` lets a test deliberately send a
+ * body is `{}`, `{ language }`, `{ ask }`, or both); `extra.body` lets a test deliberately send a
  * forbidden key to prove the body cannot smuggle configuration. `extra.query`
  * proves query is not a flag source — the handler reads neither query nor body
  * for flags, only process.env.

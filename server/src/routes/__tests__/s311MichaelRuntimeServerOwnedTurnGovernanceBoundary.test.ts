@@ -10,15 +10,15 @@ import { describe, expect, it } from 'vitest';
 // (apps/team/src/components/cockpit/MichaelRuntimeSupportCard.tsx).
 //
 // What S3.11 changed: the route NO LONGER reads a client-supplied `body.turn`.
-// The request body is server-owned — the ONLY accepted field is optional
-// `language` ('en'|'es'); any other key (incl. tmagId/sponsorTmagId/targetTmagId,
+// The request body is server-owned — the accepted fields are optional
+// `language` ('en'|'es') and optional short BA-owned `ask`; any other key (incl. tmagId/sponsorTmagId/targetTmagId,
 // turn, runtimeTurn, contextPacket, token, sessionId, …) is rejected with 400
 // `CLIENT_RUNTIME_INPUT_NOT_ALLOWED`. The route builds the turn entirely
 // server-side from `req.session.tmagId` via the S3.10 turn source
 // (`createMichaelRuntimeTurnForAuthenticatedBa`), then resolves it through the
 // inert S2.20 facade (`resolveMichaelRuntimeTurnResponse`). The card calls the
 // route LIVE on mount via the renamed helper `resolveMichaelRuntimeTrainingStep`
-// (body `{}` or `{ language }`), staying read-only/inert behind the kill switch.
+// (body `{}`, `{ language }`, `{ ask }`, or both), staying read-only/inert behind the kill switch.
 //
 // This file mirrors the proven static-scan style of the s34/s36/s39 boundary
 // tests: production source is read from disk, comments (and, for code-token
@@ -231,15 +231,16 @@ describe('S3.11 michael-runtime route server-owned turn boundary', () => {
 // GROUP B — the `.team` card consumes the server-owned turn (read-only, inert).
 // ---------------------------------------------------------------------------
 describe('S3.11 .team card server-owned turn boundary', () => {
-  it('#13 the renamed helper sends only {} or { language } — no forbidden fields', () => {
+  it('#13 the renamed helper sends only allowed language/ask content — no forbidden fields', () => {
     const stripped = sourceWithoutCommentsOrStrings(readSourceFile(cardFilePath).text);
-    // The body is exactly `opts?.language ? { language } : {}` — never a turn,
-    // Context Packet, or BA-authority / id field.
+    // The body is built from language/ask only — never a turn, packet, or
+    // BA-authority / id field.
     const forbidden =
       /\b(?:tmagId|sponsorTmagId|targetTmagId|downlineTmagId|prospectId|runtimeTurn|contextPacket|sessionId|turnId|correlationId)\b/;
     expect(forbidden.test(stripped), 'no forbidden body fields in card code').toBe(false);
-    // The body literal references `language` only.
+    // The body literal references only allowed request fields.
     expect(/\blanguage\b/.test(stripped), 'language hint present').toBe(true);
+    expect(/\bask\b/.test(stripped), 'ask content cue present').toBe(true);
   });
 
   it('#14 calls the server-owned route and not a bare /api/runtime, admin, or .com surface', () => {

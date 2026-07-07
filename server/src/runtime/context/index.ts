@@ -26,6 +26,15 @@ export {
 export { createMichaelRuntimeContextManagerPort } from './michaelRuntimeContextFoundation.js';
 export type { MichaelRuntimeContextFoundationInput } from './michaelRuntimeContextFoundation.js';
 
+// Steve runtime Context Packet foundation — keeps the already-operational Steve
+// discovery runtime behind a server-assembled Context Manager / approved knowledge path.
+export {
+  createSteveRuntimeContextManagerPort,
+  requestSteveRuntimeContextPacket,
+  steveContextManagerLiveEnabled,
+} from './steveRuntimeContextFoundation.js';
+export type { SteveRuntimeContextFoundationInput } from './steveRuntimeContextFoundation.js';
+
 // P4.2 — Approved Knowledge Query Contract: context-layer guards for the store-agnostic
 // approved_knowledge_query.v1 contract (shared types live in @momentum/shared/runtime).
 export {

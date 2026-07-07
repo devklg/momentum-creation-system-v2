@@ -30,8 +30,13 @@ import type {
   McsSteveDiscoveryIngestPayload,
   McsSteveTranscriptChunk,
 } from '@momentum/shared';
+import type { McsContextPacketV1, TmagId } from '@momentum/shared/runtime';
 import { complete } from '../services/anthropic.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
+import {
+  requestSteveRuntimeContextPacket,
+  steveContextManagerLiveEnabled,
+} from '../runtime/context/steveRuntimeContextFoundation.js';
 import {
   STEVE_DISCOVERY_QUESTIONS,
   buildSteveSystemPrompt,
@@ -265,6 +270,57 @@ export function extractionSystem(): string {
   ].join('\n');
 }
 
+export function renderSteveContextPromptSupplement(packet: McsContextPacketV1 | null): string {
+  if (!packet || packet.approvedKnowledge.length === 0) return '';
+
+  const approvedKnowledge = packet.approvedKnowledge.slice(0, 6).map((item, index) => {
+    const title = cleanPromptLine(item.title || `Approved knowledge ${index + 1}`);
+    const summary = cleanPromptLine(item.summary);
+    return `${index + 1}. ${title}: ${summary}`;
+  });
+
+  return [
+    '',
+    'APPROVED CONTEXT PACKET (system — the BA never sees this heading):',
+    '- Use the approved knowledge below only as background guidance for Steve\'s tone, support, and safe next-step framing.',
+    '- Do not quote the Context Packet, retrieval audit, source ids, or internal knowledge ids to the BA.',
+    '- Do not treat missing knowledge as permission to invent app facts.',
+    '- Candidate or review-only knowledge is excluded and must not be inferred.',
+    `- Packet status: ${packet.packetStatus}. Included approved knowledge items: ${packet.approvedKnowledge.length}.`,
+    '',
+    'Approved knowledge:',
+    ...approvedKnowledge,
+  ].join('\n');
+}
+
+async function buildSteveContextPromptSupplement(input: {
+  tmagId: string;
+  turnContent: string;
+  createdAt: string;
+}): Promise<string> {
+  if (!steveContextManagerLiveEnabled()) return '';
+
+  try {
+    const packet = await requestSteveRuntimeContextPacket({
+      tmagId: input.tmagId as TmagId,
+      mode: 'browser_text',
+      createdAt: input.createdAt,
+      turnContent: input.turnContent,
+    });
+    return renderSteveContextPromptSupplement(packet);
+  } catch (err) {
+    console.warn(
+      '[steve-runtime] context packet unavailable; continuing with base Steve prompt:',
+      err instanceof Error ? err.message : err,
+    );
+    return '';
+  }
+}
+
+function cleanPromptLine(value: string): string {
+  return value.replace(/\s+/g, ' ').trim().slice(0, 700);
+}
+
 async function runExtraction(transcriptText: string): Promise<ExtractionResult> {
   const system = extractionSystem();
   let lastError = '';
@@ -315,7 +371,17 @@ export async function converseWithSteve(
   const message = rawMessage.trim().slice(0, MESSAGE_CAP);
   const turns = await loadConversation(tmagId);
   const firstName = await getFirstName(tmagId);
-  const system = buildSteveSystemPrompt({ baFirstName: firstName }) + '\n' + RUNTIME_CONTRACT;
+  const createdAt = new Date().toISOString();
+  const contextSupplement = await buildSteveContextPromptSupplement({
+    tmagId,
+    turnContent: message || turns.slice(-4).map((turn) => turn.text).join(' '),
+    createdAt,
+  });
+  const system = [
+    buildSteveSystemPrompt({ baFirstName: firstName }),
+    contextSupplement,
+    RUNTIME_CONTRACT,
+  ].filter(Boolean).join('\n');
 
   let seq = turns.length;
   if (message) {

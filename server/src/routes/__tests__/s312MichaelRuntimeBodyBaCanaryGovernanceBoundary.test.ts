@@ -84,12 +84,11 @@ describe('S3.12 body-BA canary target sources exist', () => {
 });
 
 describe('S3.12 michael-runtime body allowlist and rejection boundary', () => {
-  it('1. route allowlists only language', () => {
+  it('1. route allowlists only language and ask', () => {
     const route = sourceWithoutComments(readSourceFile(routeFilePath).text);
-    expect(/ALLOWED_BODY_FIELDS\s*=\s*new Set\(\s*\[\s*['"]language['"]\s*\]\s*\)/.test(route)).toBe(
+    expect(/ALLOWED_BODY_FIELDS\s*=\s*new Set\(\s*\[\s*['"]language['"]\s*,\s*['"]ask['"]\s*\]\s*\)/.test(route)).toBe(
       true,
     );
-    expect(route).not.toMatch(/ALLOWED_BODY_FIELDS\s*=\s*new Set\(\s*\[[^\]]*,[^\]]*\]\s*\)/);
   });
 
   it('2. route rejects unknown body keys before server-owned turn resolution', () => {
@@ -202,11 +201,10 @@ describe('S3.12 .team card request-body boundary', () => {
     expect(forbidden.test(stripped), 'forbidden body field token present in card code').toBe(false);
   });
 
-  it('13. support card request body is only {} or { language }', () => {
+  it('13. support card request body is only allowed language/ask content', () => {
     const cardWithoutStrings = sourceWithoutCommentsOrStrings(readSourceFile(cardFilePath).text);
-    expect(/const\s+body\s*=\s*opts\?\.language\s*\?\s*\{\s*language\s*:\s*opts\.language\s*\}\s*:\s*\{\s*\}/.test(cardWithoutStrings)).toBe(
-      true,
-    );
+    expect(/\.\.\.\(\s*opts\?\.language\s*\?\s*\{\s*language\s*:\s*opts\.language\s*\}\s*:\s*\{\s*\}\s*\)/.test(cardWithoutStrings)).toBe(true);
+    expect(/\.\.\.\(\s*ask\s*\?\s*\{\s*ask\s*\}\s*:\s*\{\s*\}\s*\)/.test(cardWithoutStrings)).toBe(true);
     const cardWithStrings = sourceWithoutComments(readSourceFile(cardFilePath).text);
     expect(cardWithStrings).toContain("'/api/michael-runtime/resolve'");
   });

@@ -3,6 +3,7 @@ import {
   ExtractionSchema,
   extractionSystem,
   parseExtractionJson,
+  renderSteveContextPromptSupplement,
   splitCompletionMarker,
 } from '../steveConversationRuntime.js';
 import { buildSteveSystemPrompt } from '../steve-success-interview.js';
@@ -124,5 +125,23 @@ describe('steveConversationRuntime helpers', () => {
       },
     };
     expect(ExtractionSchema.safeParse(bad).success).toBe(false);
+  });
+
+  it('renders approved Context Packet knowledge as internal Steve prompt guidance', () => {
+    const supplement = renderSteveContextPromptSupplement({
+      packetStatus: 'complete',
+      approvedKnowledge: [
+        {
+          knowledgeId: 'knowledge_steve_context' as never,
+          title: 'Support preferences',
+          summary: 'Use the BA communication preference to help the sponsor meet them well.',
+        },
+      ],
+    } as never);
+
+    expect(supplement).toContain('APPROVED CONTEXT PACKET');
+    expect(supplement).toContain('Support preferences');
+    expect(supplement).toContain('Candidate or review-only knowledge is excluded');
+    expect(supplement).not.toContain('knowledge_steve_context');
   });
 });

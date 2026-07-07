@@ -6,14 +6,16 @@ import { validateMichaelResponseContract } from '../../runtime/orchestration/ind
  * S3.11 — focused end-to-end proof of the SERVER-OWNED Michael runtime contract.
  *
  * The runtime turn is built entirely server-side from the authenticated session.
- * The request body is server-owned: the ONLY accepted field is optional
- * `language` ('en' | 'es'). This file pins the new contract through the exported
+ * The request body is server-owned: the accepted fields are optional `language`
+ * ('en' | 'es') and optional `ask` (short BA-owned training/support text).
+ * This file pins the new contract through the exported
  * ASYNC handler (supertest is not installed; index.ts listens at import):
  *
  *  - `{}`                 -> 200 degraded safe_fallback (EN)
  *  - `{ language: 'es' }` -> 200 degraded safe_fallback (ES sibling)
- *  - any other body field -> 400 CLIENT_RUNTIME_INPUT_NOT_ALLOWED
- *  - malformed `language` -> 400 CLIENT_RUNTIME_INPUT_NOT_ALLOWED
+ *  - `{ ask: '...' }`      -> 200 through the controlled contract
+ *  - any other body field  -> 400 CLIENT_RUNTIME_INPUT_NOT_ALLOWED
+ *  - malformed allowed values -> 400 CLIENT_RUNTIME_INPUT_NOT_ALLOWED
  *  - route flag off       -> 503 michael_runtime_disabled
  *  - response flag off    -> 503 michael_runtime_response_disabled
  *  - turn-source failure  -> 422 (deterministic, never throws)
@@ -123,6 +125,16 @@ describe('S3.11 server-owned Michael runtime turn — end-to-end contract', () =
     expect(res.body.response.language).toBe('en');
   });
 
+  it('3b. { ask } is accepted as BA-owned training/support text', async () => {
+    enableRouteAndResponse();
+    const res = mockRes();
+    await handleMichaelRuntimeResolve(mockReq({ ask: 'What should I practice next?' }), res);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.ok).toBe(true);
+    expect(validateMichaelResponseContract(res.body.response).ok).toBe(true);
+  });
+
   it.each([
     ['tmagId', { tmagId: 'TMAG-EVIL-000000' }],
     ['sponsorTmagId', { sponsorTmagId: 'TMAG-EVIL-000000' }],
@@ -154,6 +166,15 @@ describe('S3.11 server-owned Michael runtime turn — end-to-end contract', () =
     enableRouteAndResponse();
     const res = mockRes();
     await handleMichaelRuntimeResolve(mockReq({ language: 'de' }), res);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
+  });
+
+  it('5b. malformed ask value -> 400 CLIENT_RUNTIME_INPUT_NOT_ALLOWED', async () => {
+    enableRouteAndResponse();
+    const res = mockRes();
+    await handleMichaelRuntimeResolve(mockReq({ ask: 'x'.repeat(501) }), res);
 
     expect(res.statusCode).toBe(400);
     expect(res.body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');

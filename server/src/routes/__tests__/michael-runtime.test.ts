@@ -7,10 +7,10 @@ import { validateMichaelResponseContract } from '../../runtime/orchestration/ind
  *
  * The runtime turn is now built entirely server-side from the authenticated
  * session — the client NO LONGER supplies a `body.turn`. The request body is
- * server-owned: the ONLY accepted field is optional `language` ('en' | 'es').
- * Any other key — or a malformed `language` — is rejected with 400
- * `CLIENT_RUNTIME_INPUT_NOT_ALLOWED`. A valid request body is `{}` or
- * `{ language: 'en' | 'es' }`.
+ * server-owned: the accepted fields are optional `language` ('en' | 'es') and
+ * optional `ask` (a short BA-owned training/support question). Any other key —
+ * or a malformed allowed value — is rejected with 400
+ * `CLIENT_RUNTIME_INPUT_NOT_ALLOWED`.
  *
  * supertest is not installed and `server/src/index.ts` calls `app.listen()` at
  * import, so we exercise `handleMichaelRuntimeResolve(req, res)` directly with
@@ -71,7 +71,7 @@ function mockRes() {
 
 /**
  * Build a server-owned request. The body is whatever the client sends (the
- * route accepts only `{}` or `{ language }`); session identity is server-owned.
+ * route accepts only `{}`, `{ language }`, `{ ask }`, or both); session identity is server-owned.
  * Pass `withSession=false` to drop the session, or a custom `sessionTmagId` (e.g.
  * whitespace) to exercise the downstream turn-source failure path.
  */
@@ -116,7 +116,7 @@ const FORBIDDEN_TRACE_KEYS = [
   'text',
 ] as const;
 
-// Every body key that is NOT exactly `language` must be rejected. This covers
+// Every body key that is NOT exactly `language` or `ask` must be rejected. This covers
 // the former body-BA-scope keys PLUS the broader server-owned forbidden set
 // (client-supplied turn, Context Packet, identifiers, tokens, …).
 const FORBIDDEN_BODY_CASES: ReadonlyArray<readonly [string, Record<string, unknown>]> = [
@@ -170,6 +170,29 @@ describe('S3.11 Michael runtime route handler — server-owned turn', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
+  });
+
+  it('3b. accepts a short BA-owned ask and still resolves through the controlled contract', async () => {
+    enableRouteAndResponse();
+    const res = mockRes();
+    await handleMichaelRuntimeResolve(mockReq({ ask: 'What should I practice today?' }), res);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.ok).toBe(true);
+    expect(validateMichaelResponseContract(res.body.response).ok).toBe(true);
+  });
+
+  it('3c. rejects a non-string or oversized ask with CLIENT_RUNTIME_INPUT_NOT_ALLOWED', async () => {
+    enableRouteAndResponse();
+    const nonString = mockRes();
+    await handleMichaelRuntimeResolve(mockReq({ ask: 123 }), nonString);
+    expect(nonString.statusCode).toBe(400);
+    expect(nonString.body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
+
+    const oversized = mockRes();
+    await handleMichaelRuntimeResolve(mockReq({ ask: 'x'.repeat(501) }), oversized);
+    expect(oversized.statusCode).toBe(400);
+    expect(oversized.body.code).toBe('CLIENT_RUNTIME_INPUT_NOT_ALLOWED');
   });
 
   it('4. rejects a missing session tmagId with 401 (server-owned body)', async () => {

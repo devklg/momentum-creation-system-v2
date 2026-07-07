@@ -7,11 +7,13 @@
  *
  * SERVER-OWNED TURN CONTRACT (S3.11): the runtime turn is built entirely
  * server-side from the authenticated session — the client NO LONGER supplies a
- * `body.turn`. The request body must be server-owned: the ONLY accepted field is
- * optional `language` ('en' | 'es'). Any other key — or a malformed `language`
- * value — is rejected with 400 `CLIENT_RUNTIME_INPUT_NOT_ALLOWED`. This merges the
- * old body-BA-scope rejection (`tmagId`/`sponsorTmagId`/`targetTmagId`) into one broader
- * rule. A valid client request is `{}` or `{ "language": "en" | "es" }`.
+ * `body.turn`. The request body must be server-owned: the ONLY accepted fields
+ * are optional `language` ('en' | 'es') and optional `ask` (a short BA-owned
+ * training/support question). Any other key — or malformed allowed values — is
+ * rejected with 400 `CLIENT_RUNTIME_INPUT_NOT_ALLOWED`. This merges the old
+ * body-BA-scope rejection (`tmagId`/`sponsorTmagId`/`targetTmagId`) into one
+ * broader rule. A valid client request is `{}`, `{ "language": "en" | "es" }`,
+ * `{ "ask": "..." }`, or both.
  *
  * The turn is produced by the S3.10 server-owned turn source
  * (`createMichaelRuntimeTurnForAuthenticatedBa`), which derives BA scope from the
@@ -52,13 +54,18 @@ import {
 
 export const michaelRuntimeRoutes: Router = Router();
 
-// The request body is server-owned: the ONLY accepted field is optional
-// `language`. Everything else (client-supplied turn, Context Packet, retrieval,
-// BA authority, identifiers, tokens, …) is rejected. We allowlist `language` and
-// reject ANY other key, but also name the high-risk forbidden keys explicitly so
-// the boundary is self-documenting.
-const ALLOWED_BODY_FIELDS = new Set(['language']);
+// The request body is server-owned: accepted fields are optional `language` and
+// optional `ask`. Everything else (client-supplied turn, packet, retrieval, BA
+// authority, identifiers, tokens, etc.) is rejected. `ask` is content only: it
+// is sanitized, length-limited, and used only as a Context Manager search cue.
+const ALLOWED_BODY_FIELDS = new Set(['language', 'ask']);
 const SUPPORTED_BODY_LANGUAGES = new Set(['en', 'es']);
+const MAX_ASK_LENGTH = 500;
+
+interface MichaelRuntimeSupportingContextItem {
+  readonly title: string;
+  readonly summary: string;
+}
 
 /**
  * POST /api/michael-runtime/resolve handler. Exported for direct unit testing
@@ -96,6 +103,7 @@ export async function handleMichaelRuntimeResolve(
   // CLIENT_RUNTIME_INPUT_NOT_ALLOWED.
   const body = (req.body ?? {}) as Record<string, unknown>;
   let validatedLanguage: 'en' | 'es' | undefined;
+  let validatedAsk: string | undefined;
   for (const key of Object.keys(body)) {
     if (!ALLOWED_BODY_FIELDS.has(key)) {
       recordMichaelRuntimeBodyBaOverrideRejection();
@@ -117,6 +125,27 @@ export async function handleMichaelRuntimeResolve(
     }
     validatedLanguage = body.language as 'en' | 'es';
   }
+  if (body.ask !== undefined) {
+    if (typeof body.ask !== 'string') {
+      recordMichaelRuntimeBodyBaOverrideRejection();
+      return res.status(400).json({
+        ok: false,
+        error: 'Michael runtime input must be server-owned.',
+        code: 'CLIENT_RUNTIME_INPUT_NOT_ALLOWED',
+      });
+    }
+
+    const normalizedAsk = body.ask.replace(/\s+/g, ' ').trim();
+    if (normalizedAsk.length > MAX_ASK_LENGTH) {
+      recordMichaelRuntimeBodyBaOverrideRejection();
+      return res.status(400).json({
+        ok: false,
+        error: 'Michael runtime input must be server-owned.',
+        code: 'CLIENT_RUNTIME_INPUT_NOT_ALLOWED',
+      });
+    }
+    if (normalizedAsk.length > 0) validatedAsk = normalizedAsk;
+  }
 
   const sessionTmagId = req.session?.tmagId;
   if (!sessionTmagId) {
@@ -131,6 +160,7 @@ export async function handleMichaelRuntimeResolve(
     created = await createMichaelRuntimeTurnForAuthenticatedBa({
       tmagId: sessionTmagId,
       language: validatedLanguage,
+      turnContent: validatedAsk,
     });
   } catch {
     recordMichaelRuntimeFacadeFailure();
@@ -168,6 +198,7 @@ export async function handleMichaelRuntimeResolve(
     selectionRequest: MichaelRuntimeAdapterContractInput | unknown;
     catalogKey: string;
     response: unknown;
+    supportingContext?: readonly MichaelRuntimeSupportingContextItem[];
     trace?: unknown;
   } = {
     ok: true,
@@ -175,6 +206,11 @@ export async function handleMichaelRuntimeResolve(
     catalogKey: result.catalogKey,
     response: result.response,
   };
+
+  const supportingContext = buildSupportingContext(created.input);
+  if (supportingContext.length > 0) {
+    payload.supportingContext = supportingContext;
+  }
 
   // Axis 3 — trace kill switch. The redacted trace is included ONLY when
   // explicitly enabled.
@@ -184,6 +220,26 @@ export async function handleMichaelRuntimeResolve(
 
   recordMichaelRuntimeSuccess();
   return res.status(200).json(payload);
+}
+
+function buildSupportingContext(
+  input: MichaelRuntimeAdapterContractInput,
+): readonly MichaelRuntimeSupportingContextItem[] {
+  const packet =
+    input.runtimeTurn.result.decision === 'proceed'
+      ? input.runtimeTurn.result.consumption.packet
+      : undefined;
+  if (!packet) return [];
+
+  return packet.approvedKnowledge.slice(0, 3).flatMap((item) => {
+    const title = item.title.replace(/\s+/g, ' ').trim();
+    const summary = item.summary.replace(/\s+/g, ' ').trim();
+    if (!title || !summary) return [];
+    return [{
+      title: title.slice(0, 90),
+      summary: summary.slice(0, 220),
+    }];
+  });
 }
 
 michaelRuntimeRoutes.post(

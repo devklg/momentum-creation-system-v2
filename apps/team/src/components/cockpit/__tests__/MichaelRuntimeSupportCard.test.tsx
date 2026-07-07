@@ -7,7 +7,7 @@
  *   1. resolveMichaelRuntimeTrainingStep() — the client helper that calls the
  *      server-owned /api/michael-runtime/resolve route and maps every HTTP
  *      status to a typed, leak-free result. Tests here pin the SERVER-OWNED
- *      request contract (body is at most `{ language }`, never BA authority),
+ *      request contract (body is at most `{ language, ask }`, never BA authority),
  *      the kill-switch mapping (503 → disabled / response_disabled), and the
  *      fail-closed behavior for every non-200 / malformed path.
  *
@@ -21,7 +21,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom/vitest';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import {
   resolveMichaelRuntimeTrainingStep,
   MichaelRuntimeSupportCard,
@@ -37,6 +38,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  cleanup();
   vi.unstubAllGlobals();
 });
 
@@ -90,6 +92,14 @@ describe('resolveMichaelRuntimeTrainingStep — server-owned request contract', 
     expect(lastPostedBody()).toEqual({ language: 'es' });
   });
 
+  it('sends a short BA-owned ask when provided', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(503, { reason: 'michael_runtime_disabled' }));
+
+    await resolveMichaelRuntimeTrainingStep({ ask: '  What should I practice next?  ' });
+
+    expect(lastPostedBody()).toEqual({ ask: 'What should I practice next?' });
+  });
+
   it('NEVER sends BA authority or turn/context fields (sponsor immutability at the UI edge)', async () => {
     fetchMock.mockResolvedValue(jsonResponse(503, { reason: 'michael_runtime_disabled' }));
 
@@ -113,8 +123,8 @@ describe('resolveMichaelRuntimeTrainingStep — server-owned request contract', 
     for (const key of forbidden) {
       expect(body).not.toHaveProperty(key);
     }
-    // Whatever else changes, the body may carry at most `language`.
-    expect(Object.keys(body).every((k) => k === 'language')).toBe(true);
+    // Whatever else changes, the body may carry at most `language` and `ask`.
+    expect(Object.keys(body).every((k) => k === 'language' || k === 'ask')).toBe(true);
   });
 });
 
@@ -218,6 +228,13 @@ describe('resolveMichaelRuntimeTrainingStep — safe response shaping', () => {
             externalSideEffect: false,
           },
         },
+        supportingContext: [
+          {
+            title: 'Training rhythm',
+            summary: 'Use one small action to keep momentum simple.',
+            packetId: 'ctx-should-not-survive',
+          },
+        ],
       }),
     );
 
@@ -234,6 +251,12 @@ describe('resolveMichaelRuntimeTrainingStep — safe response shaping', () => {
           instruction: 'Then practice the intro.',
           label: 'Training',
         },
+        supportingContext: [
+          {
+            title: 'Training rhythm',
+            summary: 'Use one small action to keep momentum simple.',
+          },
+        ],
       },
     });
     // Defense-in-depth: the success payload must not carry any server internal.
@@ -327,6 +350,13 @@ describe('MichaelRuntimeSupportCard — render behavior', () => {
             automaticSending: false,
           },
         },
+        supportingContext: [
+          {
+            title: 'Layer 1',
+            summary: 'Keep the next step simple and BA-owned.',
+            contextPacketId: 'ctx-should-not-render',
+          },
+        ],
       }),
     );
 
@@ -335,6 +365,8 @@ describe('MichaelRuntimeSupportCard — render behavior', () => {
     expect(await screen.findByText('Invite one person')).toBeInTheDocument();
     expect(screen.getByText(/share your link with someone today/i)).toBeInTheDocument();
     expect(screen.getByText(/guidance · en/i)).toBeInTheDocument();
+    expect(screen.getByText('Layer 1')).toBeInTheDocument();
+    expect(screen.getByText(/keep the next step simple/i)).toBeInTheDocument();
 
     // Governance: no ids, trace, or boolean-flag internals reach the DOM.
     expect(screen.queryByText(/sess-should-not-render/)).not.toBeInTheDocument();
@@ -342,6 +374,35 @@ describe('MichaelRuntimeSupportCard — render behavior', () => {
     expect(screen.queryByText(/baOwned/)).not.toBeInTheDocument();
     expect(screen.queryByText(/automaticSending/)).not.toBeInTheDocument();
     expect(screen.queryByText(/redacted/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/ctx-should-not-render/)).not.toBeInTheDocument();
+  });
+
+  it('submits a BA ask from the card without sending authority fields', async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(503, { reason: 'michael_runtime_disabled' }))
+      .mockResolvedValueOnce(
+        jsonResponse(200, {
+          ok: true,
+          response: {
+            responseType: 'safe_fallback',
+            text: 'Keep your training rhythm simple.',
+          },
+        }),
+      );
+
+    render(<MichaelRuntimeSupportCard />);
+    await screen.findByText(/not available yet/i);
+
+    fireEvent.change(screen.getByLabelText(/ask michael about training/i), {
+      target: { value: 'What do I practice?' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /send training question/i }));
+
+    await screen.findByText(/keep your training rhythm simple/i);
+    const body = lastPostedBody();
+    expect(body).toEqual({ ask: 'What do I practice?' });
+    expect(body).not.toHaveProperty('tmagId');
+    expect(body).not.toHaveProperty('contextPacket');
   });
 
   it('shows a generic error with a "Try again" affordance, and re-runs resolve on click', async () => {

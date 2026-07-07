@@ -25,6 +25,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0007 | Runtime Persistence Direct — Gateway Is Dev Tooling Only | locked-spec §3.14 / KNOWLEDGE_CORE_RUNTIME.md | Approved | v1.1 |
 | ACR-0008 | Knowledge Library Intake Model — Source Classification / Author Fast-Lane / Media Storage | KNOWLEDGE_INGESTION_PROTOCOL.md | Approved | v1.1 |
 | ACR-0009 | Retire Gateway HTTP Persistence Fallback — Direct-Only Runtime Dispatch | ACR-0007 / locked-spec §3.14 | Implemented | v1.1 |
+| ACR-0010 | Memory Context Compiler Contract | Context Packet / Knowledge Base runtime contracts | Proposed | v1.2 |
 
 ---
 

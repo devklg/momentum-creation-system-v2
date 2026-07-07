@@ -62,7 +62,7 @@ const AGENT_PRIMARY_DOMAIN: Record<McsAgentKey, McsKnowledgeDomain> = {
 };
 
 const TASK_DOMAIN_HINTS: Record<McsRuntimeTaskType, readonly McsKnowledgeDomain[]> = {
-  success_interview: ['success', 'training', 'governance'],
+  success_interview: ['success', 'training', 'relationship', 'governance'],
   training_support: ['training', 'success', 'governance'],
   journal_teaching: ['training', 'success', 'governance'],
   relationship_coaching: ['relationship', 'training', 'governance'],

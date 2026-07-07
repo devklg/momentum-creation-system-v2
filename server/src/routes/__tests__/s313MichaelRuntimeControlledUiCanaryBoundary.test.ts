@@ -146,14 +146,17 @@ describe('S3.13 Michael runtime support card UI-leak boundary', () => {
     );
   });
 
-  it('#2 helper body is exactly {} or { language } (language-only allowlist)', () => {
-    // The body literal is `opts?.language ? { language: opts.language } : {}` —
-    // the ONLY field it can ever carry is `language`.
+  it('#2 helper body carries only language and ask', () => {
+    // The body literal is composed from optional `language` and optional `ask`;
+    // no authority-bearing field can be added here.
     const code = cardCode();
-    const bodyShape =
-      /opts\?\.language\s*\?\s*\{\s*language\s*:\s*opts\.language\s*\}\s*:\s*\{\s*\}/;
-    expect(bodyShape.test(code), 'language-only body literal present').toBe(true);
+    expect(
+      /\.\.\.\(\s*opts\?\.language\s*\?\s*\{\s*language\s*:\s*opts\.language\s*\}\s*:\s*\{\s*\}\s*\)/.test(code),
+      'language spread present',
+    ).toBe(true);
+    expect(/\.\.\.\(\s*ask\s*\?\s*\{\s*ask\s*\}\s*:\s*\{\s*\}\s*\)/.test(code), 'ask spread present').toBe(true);
     expect(/\blanguage\b/.test(code), 'language hint referenced').toBe(true);
+    expect(/\bask\b/.test(code), 'ask cue referenced').toBe(true);
   });
 
   // #3–#14 — the helper NEVER sends turn / Context-Packet / BA-authority / id
@@ -319,12 +322,12 @@ describe('S3.13 Michael runtime support card UI-leak boundary', () => {
 // GROUP B — the ROUTE (michael-runtime.ts) holds the server-owned contract.
 // ---------------------------------------------------------------------------
 describe('S3.13 michael-runtime route UI-leak regression boundary', () => {
-  it('#31 allowlists ONLY `language` for the request body', () => {
+  it('#31 allowlists ONLY `language` and `ask` for the request body', () => {
     // Scan WITH strings: the allowlist literal IS a string.
     const route = readSourceFile(routeFilePath).text;
     expect(
-      /ALLOWED_BODY_FIELDS\s*=\s*new Set\(\s*\[\s*['"]language['"]\s*\]\s*\)/.test(route),
-      'language-only allowlist Set present',
+      /ALLOWED_BODY_FIELDS\s*=\s*new Set\(\s*\[\s*['"]language['"]\s*,\s*['"]ask['"]\s*\]\s*\)/.test(route),
+      'language/ask allowlist Set present',
     ).toBe(true);
   });
 

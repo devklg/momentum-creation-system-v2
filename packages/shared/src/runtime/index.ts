@@ -11,4 +11,8 @@ export type * from './qa.js';
 export type * from './knowledge-query.js';
 export type * from './knowledge-intake.js';
 export type * from './knowledge-freshness.js';
+export type * from './memory-context-compiler-schema.js';
+export {
+  MCS_MEMORY_CONTEXT_COMPILER_SCHEMA_VERSION,
+} from './memory-context-compiler-schema.js';
 export * from './knowledge-base-schema.js';

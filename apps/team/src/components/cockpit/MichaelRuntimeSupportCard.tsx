@@ -10,7 +10,7 @@
  * BA scope is enforced SERVER-SIDE. POST /api/michael-runtime/resolve derives
  * the BA from req.session.tmagId and rejects any body-supplied BA authority
  * (sponsor immutability, locked-spec 3.5). This component never sends a BA id —
- * the request body carries at most `{ language }` and nothing else.
+ * the request body carries at most `{ language, ask }` and nothing else.
  *
  * Fixtures-only / non-persistent: the runtime route is a one-call consumer of
  * the inert S2.20 resolution facade. It returns a pre-authored, contract-
@@ -23,7 +23,8 @@
  * a Context Packet / turn (forbidden by the S3.9 Critical Data Contract Rule).
  * The S3.10 server-owned turn source RESOLVES this: the server now owns and
  * produces the runtime turn entirely. The client sends NO turn, NO Context
- * Packet, and NO BA authority — at most an optional UI language hint. This S3.11
+ * Packet, and NO BA authority — at most an optional UI language hint plus a
+ * short BA-owned training/support ask. This S3.11
  * wiring therefore safely calls the route LIVE on mount.
  *
  * The card remains read-only and inert. Behind the default-off kill switch the
@@ -44,7 +45,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Bot } from 'lucide-react';
+import type { FormEvent } from 'react';
+import { Bot, Send } from 'lucide-react';
 
 // ── Safe render subset ───────────────────────────────────────────────────────
 // Only the fields a BA is allowed to see. The server response carries far more
@@ -71,6 +73,12 @@ interface MichaelRuntimeSuccessSafe {
   responseType: MichaelRuntimeResponseType;
   language: string;
   nextStep?: MichaelRuntimeNextStepSafe;
+  supportingContext?: MichaelRuntimeSupportingContextSafe[];
+}
+
+interface MichaelRuntimeSupportingContextSafe {
+  title: string;
+  summary: string;
 }
 
 /**
@@ -94,7 +102,7 @@ export type MichaelRuntimeResult =
  * status to a typed, leak-free `MichaelRuntimeResult`.
  *
  * The server owns the runtime turn entirely (S3.10). This helper sends ONLY an
- * optional `{ language }` UI hint — and an empty body `{}` when no hint is
+ * optional `{ language, ask }` cue — and an empty body `{}` when no cue is
  * given. It NEVER sends turn / runtimeTurn / contextPacket / tmagId / sponsorTmagId
  * / targetTmagId / downlineTmagId / prospectId / token / sessionId / turnId /
  * correlationId or any other BA-authority or id field. It reads only the safe
@@ -104,10 +112,13 @@ export type MichaelRuntimeResult =
  */
 export async function resolveMichaelRuntimeTrainingStep(opts?: {
   language?: 'en' | 'es';
+  ask?: string;
 }): Promise<MichaelRuntimeResult> {
-  // Body is an optional UI language hint ONLY — `{}` when absent. No turn, no
-  // Context Packet, no BA-authority / id fields ever.
-  const body = opts?.language ? { language: opts.language } : {};
+  const ask = opts?.ask?.replace(/\s+/g, ' ').trim();
+  const body = {
+    ...(opts?.language ? { language: opts.language } : {}),
+    ...(ask ? { ask } : {}),
+  };
 
   let res: Response;
   try {
@@ -166,6 +177,7 @@ export async function resolveMichaelRuntimeTrainingStep(opts?: {
     language?: unknown;
     nextStep?: unknown;
   };
+  const payloadWithContext = payload as { supportingContext?: unknown };
 
   const responseType = r.responseType;
   const text = typeof r.text === 'string' ? r.text : '';
@@ -182,6 +194,9 @@ export async function resolveMichaelRuntimeTrainingStep(opts?: {
     responseType === 'clarification_question'
   ) {
     const nextStep = extractSafeNextStep(r.nextStep);
+    const supportingContext = extractSafeSupportingContext(
+      payloadWithContext.supportingContext,
+    );
     return {
       kind: 'success',
       data: {
@@ -189,6 +204,7 @@ export async function resolveMichaelRuntimeTrainingStep(opts?: {
         responseType,
         language,
         ...(nextStep ? { nextStep } : {}),
+        ...(supportingContext.length > 0 ? { supportingContext } : {}),
       },
     };
   }
@@ -212,11 +228,30 @@ function extractSafeNextStep(
   return Object.keys(safe).length > 0 ? safe : undefined;
 }
 
+function extractSafeSupportingContext(
+  raw: unknown,
+): MichaelRuntimeSupportingContextSafe[] {
+  if (!Array.isArray(raw)) return [];
+
+  return raw.flatMap((item) => {
+    if (!item || typeof item !== 'object') return [];
+    const candidate = item as { title?: unknown; summary?: unknown };
+    const title = typeof candidate.title === 'string' ? candidate.title.trim() : '';
+    const summary =
+      typeof candidate.summary === 'string' ? candidate.summary.trim() : '';
+    if (!title || !summary) return [];
+    return [{
+      title: title.slice(0, 90),
+      summary: summary.slice(0, 220),
+    }];
+  });
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 /**
  * Read-only card. On mount it calls the server-owned resolve route ONCE (no
- * turn, no Context Packet, no BA authority — at most a language hint). With the
+ * turn, no Context Packet, no BA authority — at most language/ask content). With the
  * flags off (default) the route answers 503 michael_runtime_disabled and the
  * card shows the calm disabled state driven by the REAL endpoint. When Kevin
  * enables route + response, it renders the server's degraded safe_fallback (and
@@ -226,6 +261,7 @@ export function MichaelRuntimeSupportCard() {
   const [result, setResult] = useState<MichaelRuntimeResult>({
     kind: 'loading',
   });
+  const [ask, setAsk] = useState('');
   // Bump to re-run the resolve (manual "try again" affordance, read-only).
   const [attempt, setAttempt] = useState(0);
 
@@ -240,6 +276,16 @@ export function MichaelRuntimeSupportCard() {
       cancelled = true;
     };
   }, [attempt]);
+
+  function submitAsk(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const normalizedAsk = ask.replace(/\s+/g, ' ').trim();
+    if (!normalizedAsk) return;
+    setResult({ kind: 'loading' });
+    void resolveMichaelRuntimeTrainingStep({ ask: normalizedAsk }).then((next) => {
+      setResult(next);
+    });
+  }
 
   return (
     <section
@@ -258,6 +304,23 @@ export function MichaelRuntimeSupportCard() {
         </h3>
       </div>
       {renderRuntimeResult(result)}
+      <form onSubmit={submitAsk} className="mt-4 flex gap-2">
+        <input
+          value={ask}
+          onChange={(event) => setAsk(event.target.value.slice(0, 500))}
+          aria-label="Ask Michael about training"
+          placeholder="Ask about training..."
+          className="min-w-0 flex-1 rounded border border-gold/20 bg-ink/40 px-3 py-2 text-[13px] text-cream placeholder:text-cream-faint focus:border-gold/50 focus:outline-none"
+        />
+        <button
+          type="submit"
+          disabled={!ask.trim() || result.kind === 'loading'}
+          aria-label="Send training question"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded border border-gold/30 bg-gold/[0.08] text-gold transition hover:bg-gold/[0.14] disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <Send className="h-4 w-4" aria-hidden="true" />
+        </button>
+      </form>
       {result.kind === 'error' && (
         <button
           type="button"
@@ -323,7 +386,7 @@ function renderRuntimeResult(result: MichaelRuntimeResult) {
       );
 
     case 'success': {
-      const { text, language, nextStep } = result.data;
+      const { text, language, nextStep, supportingContext } = result.data;
       return (
         <div className="space-y-3">
           {text && (
@@ -354,6 +417,20 @@ function renderRuntimeResult(result: MichaelRuntimeResult) {
           <p className="font-mono tracking-[0.12em] text-[10px] text-cream-faint uppercase">
             Guidance · {language}
           </p>
+          {supportingContext && supportingContext.length > 0 && (
+            <div className="space-y-2 border-t border-gold/15 pt-3">
+              {supportingContext.map((item) => (
+                <div key={`${item.title}:${item.summary}`}>
+                  <p className="font-mono tracking-[0.12em] text-[10px] text-gold uppercase">
+                    {item.title}
+                  </p>
+                  <p className="text-cream-mute text-[12px] leading-[1.45] mt-1">
+                    {item.summary}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       );
     }

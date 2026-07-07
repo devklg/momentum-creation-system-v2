@@ -17,7 +17,7 @@ Source documents (read in this order):
 
 Everything else in this file serves this frame. The architectural rules below are downstream of these principles, not the other way around.
 
-## 1.1  What the Momentum Creation System is
+## 1.1 What the Momentum Creation System is
 
 The Momentum Creation System is a **personal word-of-mouth advertising platform at team scale**, designed to **demonstrate a team literally sharing and building a team**.
 
@@ -25,7 +25,7 @@ It is a tool. It facilitates. It does not cause success. The cause of success is
 
 **Clean operating rule from this:** anything the system does that does not help a real BA share with a real person they know is outside the system's job. Not bad code — outside the job.
 
-## 1.2  Who runs it
+## 1.2 Who runs it
 
 Team Magnificent. Specifically: Kevin L. Gardner's team within THREE International. Rooted at TM-01 (Kevin). Paul Barrios is co-leader. Everyone else in the system is in Kevin's downline.
 
@@ -33,7 +33,7 @@ The Momentum Creation System is **not** a THREE-International-wide tool. It is e
 
 The 100,000 goal named on `.com` is 100,000 qualified BAs on **Team Magnificent**, not 100,000 across THREE International.
 
-## 1.3  Who is the channel
+## 1.3 Who is the channel
 
 Brand Ambassadors. They are **sharers**, not salespeople.
 
@@ -41,7 +41,7 @@ A BA is a person who has decided to share what they believe in with the people t
 
 Vocabulary discipline across every surface: never "leads," never "sales pipeline," never "pitch," never "prospecting" in the cold-outreach sense. Every word protects the frame that a BA is sharing, not selling.
 
-## 1.4  What a BA does
+## 1.4 What a BA does
 
 The BA does one thing: **share the video**.
 
@@ -51,11 +51,11 @@ The prospect does one thing: watch or don't, decide or don't — their call.
 
 The BA moves on to the next.
 
-This is the elegance of the system. The BA does not carry the weight of someone else's decision. They share the information and respect the person enough to let them choose. When a BA's job is *share, then move on*, everything that historically broke network marketing — high-pressure pitches, relationship damage, dread of bringing it up, burnout from chasing — goes away.
+This is the elegance of the system. The BA does not carry the weight of someone else's decision. They share the information and respect the person enough to let them choose. When a BA's job is _share, then move on_, everything that historically broke network marketing — high-pressure pitches, relationship damage, dread of bringing it up, burnout from chasing — goes away.
 
 **The frame in one line:** Share information. Respect the decision. Move on. Repeat.
 
-## 1.5  Why sharing is easy
+## 1.5 Why sharing is easy
 
 Two facts make sharing natural for a BA who has belief:
 
@@ -64,7 +64,7 @@ Two facts make sharing natural for a BA who has belief:
 
 The system does not manufacture belief. It supports belief by keeping the underlying facts in front of the BA constantly. Those facts are real, public, and verifiable (see 1.6).
 
-## 1.6  Why belief is grounded — the market and the product
+## 1.6 Why belief is grounded — the market and the product
 
 The market conditions are real, current, and verifiable:
 
@@ -84,13 +84,13 @@ The product is positioned for exactly this market:
 
 A BA sharing GLP-THREE is showing people they know a natural alternative that's affordable, in a category that needs exactly this, at the moment most of those people need exactly this. The conditions do the convincing work; the BA just shares.
 
-## 1.7  Timing is the asset
+## 1.7 Timing is the asset
 
 The earliest sharers in any wave benefit most. The market is real and expanding fast. The product is real and proven. The team is forming right now.
 
 Mass momentum does not require lots of people when the conditions are this strong. The system makes that timing visible — through the live dashboard, position numbers, and team-wide pool — because timing is a real fact about this market and prospects should see it.
 
-## 1.8  What the system does
+## 1.8 What the system does
 
 The system multiplies what one BA can do:
 
@@ -100,14 +100,14 @@ The system multiplies what one BA can do:
 - The **invitation generator** mints the link and pulls the prospect into the funnel — no manual tracking
 - The **dashboard** does the conviction work after the video — no three-way call
 - The **cockpit** shows the BA who watched, who's interested, who needs a callback — no spreadsheet
-- **Michael** takes the new BA through their first interview — the sponsor is not the sole onboarder
+- **Michael** takes the new BA through training.
 - **The team-wide pool** makes the team's collective sharing visible to every prospect — proof that personal recommendations are happening at scale
 
 Every surface in `.team` serves one purpose: make sharing easier, faster, and more skilled.
 
 The **invitation generator is the production line**. Every minute a BA spends in the cockpit not generating an invitation is a minute the system is not doing its job for them.
 
-## 1.9  Primary action and primary metric
+## 1.9 Primary action and primary metric
 
 - **Primary BA action:** send an invitation
 - **Primary BA metric:** invitations sent per day
@@ -117,7 +117,7 @@ The **invitation generator is the production line**. Every minute a BA spends in
 
 Earnings follow sharing. Every other metric is a lagging indicator. The leading indicator is invitations sent.
 
-## 1.10  Volume goal
+## 1.10 Volume goal
 
 At team scale, **tens of thousands of video shares daily**.
 
@@ -130,13 +130,13 @@ The math:
 
 This is a math problem the system solves once the team reaches scale. **The architecture must handle the volume from day one** — triple-stack writes per event, SSE streams on the dashboard, direct triple-stack persistence. Those were not arbitrary choices.
 
-## 1.11  Outcome optimized
+## 1.11 Outcome optimized
 
 **Speed of duplication.** New BA → first two BAs → fast.
 
 The whole system is organized around helping a new BA get their two people as fast as possible and start building. Two becomes four. Four becomes eight. The team grows. Velocity is the product.
 
-## 1.12  What demonstrates the system
+## 1.12 What demonstrates the system
 
 The Momentum Creation System is designed to **demonstrate a team literally sharing**.
 
@@ -151,13 +151,13 @@ Both ends watch the same demonstration. **The team-wide pool is non-negotiable f
 
 Going viral is hard and rare and unpredictable. The system does not make something go viral. What it does is create the conditions where virality can happen if the team executes consistently — and demonstrate to every prospect in real time that the team is executing.
 
-## 1.13  What protects the channel
+## 1.13 What protects the channel
 
 Word-of-mouth only works when it stays personal. The moment it becomes spam, broadcast, AI-generated outreach, or autodialed pitches, it stops being word-of-mouth and the channel dies.
 
 The compliance rules below (Part 2) protect the channel. **The rules are not bureaucratic — they are operational.** AI prospecting, autodialing, mass send, automated outreach, scripted objection handling, going-for-the-close tactics — those things kill the system. The system refuses them not for compliance theater but because they break the elegance.
 
-## 1.14  Leadership track record is a structural advantage
+## 1.14 Leadership track record is a structural advantage
 
 Team Magnificent's leadership carries real, demonstrated success in binary network marketing:
 
@@ -166,7 +166,7 @@ Team Magnificent's leadership carries real, demonstrated success in binary netwo
 
 These are realized earnings distributed over real timeframes, not theoretical. This is a **structural advantage of the team**, not a personal accomplishment to mention in passing.
 
-Kevin's framing of why this matters: *"We have the real 1% of experience of succeeding. Most people never even come close to this. This opportunity is so rare — I haven't seen anything like this in almost 20 years. They don't come around every day. This is like lightning in a jar."*
+Kevin's framing of why this matters: _"We have the real 1% of experience of succeeding. Most people never even come close to this. This opportunity is so rare — I haven't seen anything like this in almost 20 years. They don't come around every day. This is like lightning in a jar."_
 
 **Why this is structural:** belief transfer is not just from market facts and product science. It is also from real proof that the mechanism (binary, personal sharing, team-building at scale) produces real outcomes for people who execute with discipline. Paul's and Kevin's track records are evidence that the system works. Most teams launching a tool like this have founders who are theorizing; Kevin and Paul are practitioners. That changes what the tool can credibly anchor itself to.
 
@@ -176,9 +176,9 @@ Kevin's framing of why this matters: *"We have the real 1% of experience of succ
 - **Inside `.team`:** appropriate, in a regulated training context. BAs have enrolled under THREE's policies and procedures and consented to comp-plan information. Track records belong somewhere in the BA journey — not in Fast Start Module 2 (Layer 1 only), but in deeper training, in leadership profile pages, or live in the 10-step orientation where Kevin or Paul host.
 - **Live in the 10-step orientation** is probably the highest-leverage placement. Host can qualify in real time, individual-results-vary framing is contextual, regulated training environment.
 
-**The belief-erosion problem this addresses:** a new BA who shares with five people and gets zero responses on day three doesn't lose belief in the market — they lose belief in *themselves*. The market facts (1.6) and product (1.6) are part of the antidote. The lived experience of upline who have done this work and seen it produce real outcomes is the rest of it. Without that anchor, a new BA is borrowing belief alone; with it, they are borrowing belief from people who earned theirs.
+**The belief-erosion problem this addresses:** a new BA who shares with five people and gets zero responses on day three doesn't lose belief in the market — they lose belief in _themselves_. The market facts (1.6) and product (1.6) are part of the antidote. The lived experience of upline who have done this work and seen it produce real outcomes is the rest of it. Without that anchor, a new BA is borrowing belief alone; with it, they are borrowing belief from people who earned theirs.
 
-## 1.15  Current state — a team in motion
+## 1.15 Current state — a team in motion
 
 As of Chat #94 (mid-May 2026), Team Magnificent has **41 active Brand Ambassadors**, recruited in the **16 weeks** since GLP-THREE launched in mid-January 2026. That is approximately 2.6 new BAs per week, every week, for four months. This is well above the typical curve for a 16-week-old NWM team in a brand-new product launch — a team in active motion, being carried by Kevin and Paul as the strongest sharers, with the build infrastructure (invitation generator, Ivory, ScriptMaker, cockpit, Michael) still being assembled.
 
@@ -188,11 +188,11 @@ Leadership concentrating the share volume at this stage is the **natural pattern
 
 **What ships first will help most:** the invitation generator, Ivory, ScriptMaker (lowering the activation threshold for the next batch of BAs and for those of the existing 41 ready to step into rhythm); the cockpit (giving every BA visibility into who they've shared with and who's responded); Michael (capturing each new BA's why at onboarding so sponsors have the context to support them well, with an open design question about retroactive interviews for the existing 41 who joined before Michael existed).
 
-## 1.16  Why the system is being built — the strategic posture
+## 1.16 Why the system is being built — the strategic posture
 
 The Momentum Creation System is **not** being built because the team needs it to grow. The team is already growing. The build exists because Kevin can see what's coming: the wave about to crest on GLP-1 alternatives, the velocity that becomes possible when 41 BAs becomes 400 becomes 4,000, the fundamentally different math when team-building is amplified by technology rather than constrained by hand-effort.
 
-Kevin's words: *"I know what the future holds, and I know if we create this app it will expedite and cause exponential growth because technology will amplify our efforts — leverage."*
+Kevin's words: _"I know what the future holds, and I know if we create this app it will expedite and cause exponential growth because technology will amplify our efforts — leverage."_
 
 This is a **strategic posture, not a reactive one.** Not solving a problem that exists — putting infrastructure in the ground before the moment the team needs it, so when the moment arrives the team scales smoothly instead of cracking under load.
 
@@ -204,9 +204,9 @@ This is a **strategic posture, not a reactive one.** Not solving a problem that 
 2. It positions the team to capture growth that hand-effort alone could not capture (technology as leverage, infrastructure as multiplier).
 3. It does so on a timeline Kevin can see in advance, because 20 years inside binary network marketing lets him recognize the wave before it crests.
 
-**The conviction underneath the build:** Kevin is not asking *will this team grow?* That question is already answered — it is growing, organically, four months in, before the tools exist. Kevin is asking *how big can this team get if the tools are in place when growth compounds?* The only way to find out is to build the tools. The risk is not that the team won't grow. The risk is that growth without infrastructure caps lower than growth with it. The system is the vessel for the lightning that is already in the jar.
+**The conviction underneath the build:** Kevin is not asking _will this team grow?_ That question is already answered — it is growing, organically, four months in, before the tools exist. Kevin is asking _how big can this team get if the tools are in place when growth compounds?_ The only way to find out is to build the tools. The risk is not that the team won't grow. The risk is that growth without infrastructure caps lower than growth with it. The system is the vessel for the lightning that is already in the jar.
 
-## 1.17  What's tracked
+## 1.17 What's tracked
 
 The Momentum Creation System tracks **two kinds of people**:
 
@@ -227,7 +227,7 @@ This tag enables the metric: of N prospects invited by BA X, K became BAs, M bec
 
 # Part 2 — Authority, mirror, and the access-code bridge
 
-## 2.1  THREE International's authority
+## 2.1 THREE International's authority
 
 THREE International is the final authority on:
 
@@ -240,7 +240,7 @@ The Momentum Creation System mirrors THREE's records on these four items, for th
 
 THREE's authority does **not** extend to areas THREE does not track: prospect invitation lifecycle, `/p/{token}` state machine, video completion events, holding tank position numbers (these are our marketing demonstration, not THREE's binary), callback requests, BA training progress, Michael interview transcripts, BA cockpit content, access codes. Those are ours.
 
-## 2.2  How conflict is prevented — the order of operations
+## 2.2 How conflict is prevented — the order of operations
 
 A sponsoring BA signs the new BA up at **THREE International first**, off-app, BA-to-BA, using THREE's own tools. Only after that does the new BA come into Team Magnificent on `.team`, using the access code that points at the right sponsor.
 
@@ -248,7 +248,7 @@ Because the THREE signup precedes the Team Magnificent signup, the Momentum Crea
 
 This is why sponsor immutability is enforceable: the access code resolves sponsor correctly at signup, and there is nothing to change after.
 
-## 2.3  The access code
+## 2.3 The access code
 
 - **Format:** `TM-XXXX` — 4 alphanumeric characters from a 31-character alphabet that excludes visually ambiguous chars (no 0/O, no 1/I, no L). ~924k unique codes.
 - **Ownership:** assigned to a single BA at generation, owned for life. Never reassigned.
@@ -258,7 +258,7 @@ This is why sponsor immutability is enforceable: the access code resolves sponso
 - **Generation:** only Kevin can generate codes, only from `/admin`. No other path.
 - **Closure of Signup Architecture E.1.** Locked Chat #94.
 
-## 2.4  The BA-requested sponsor override
+## 2.4 The BA-requested sponsor override
 
 Kevin's admin override on sponsor (ADMIN Design C.5) and on holding-tank entries (ADMIN Design D.4) is a **discretionary safety lever**, not a routine tool.
 
@@ -273,13 +273,13 @@ Every override is audited because every override is an exception.
 
 # Part 3 — The architecture
 
-## 3.1  Three surfaces
+## 3.1 Three surfaces
 
 - **`teammagnificent.com`** — prospect-facing. One route: `/p/{token}`. Two faces (presentation page pre-`video_complete`, dashboard post-`video_complete`). Detailed in COM Design.
 - **`teammagnificent.team`** — BA-facing. Login, register, welcome, Michael, Fast Start, orientation, invitation generator, cockpit, preview, profile. Detailed in TEAM Design.
 - **`teammagnificent.team/admin/*`** — Kevin-only. Nine surfaces. Mounted inside `.team`, gated by `ADMIN_BA_IDS` env-var allowlist. Detailed in ADMIN Design.
 
-## 3.2  The pool mechanic
+## 3.2 The pool mechanic
 
 Every Brand Ambassador places their prospects into **one shared collective pool** that the entire team sees. There is one pool, not one-per-BA. Every BA's recruiting feeds the pool every prospect sees.
 
@@ -289,7 +289,7 @@ When a holding tank record flushes (enrollment or 8-week expiry), the slot is va
 
 Enrollments resulting from pool entries distribute through THREE's binary structure — but the marketing layer (this system) never names that mechanism on `.com`.
 
-## 3.3  Two-stage placement on `.com`
+## 3.3 Two-stage placement on `.com`
 
 A prospect arrives at `/p/{token}` via the BA's SMS invite.
 
@@ -299,7 +299,7 @@ A prospect arrives at `/p/{token}` via the BA's SMS invite.
 
 The two stages share one URL. The state transition is invisible to the prospect.
 
-## 3.4  The six-section prospect dashboard (locked Chat #82)
+## 3.4 The six-section prospect dashboard (locked Chat #82)
 
 The dashboard renders in this fixed order:
 
@@ -310,27 +310,27 @@ The dashboard renders in this fixed order:
 5. **TM Advantage** — Kevin's quote, the 100,000 mission board, pool grid stats, compounding closer.
 6. **Your Next Move** — "Let's have a real conversation about this unfolding new opportunity." Two CTAs: personal callback from inviting BA (gold, primary) or webinar reservation (teal, secondary).
 
-## 3.5  Sponsor immutability
+## 3.5 Sponsor immutability
 
-Kevin's words: *"in our domain everyone is connected to the correct people and there are no strays."*
+Kevin's words: _"in our domain everyone is connected to the correct people and there are no strays."_
 
 The sponsor BA is captured at the moment the invite token is minted and stamped onto every artifact downstream — the prospect record, every activity event, every pool entry, every callback request. It is **never recomputed**. Even if the BA's own sponsor changes upstream, the prospect's sponsor stays locked to the BA who invited them.
 
 Any route that accepts `sponsorBaId` as input must reject the input and use the token-derived value instead. Any update path that touches `sponsorBaId` must be blocked at the type, route, and audit-log level. The only exception is the audited admin override (2.4).
 
-## 3.6  BA-to-BA enrollment (not programmatic)
+## 3.6 BA-to-BA enrollment (not programmatic)
 
 When a prospect decides to enroll, the inviting BA walks them into THREE through THREE's own tools, off-app, BA-to-BA. **The system has no programmatic registration handoff to THREE.** No registration routes. No registration handoff state machine. Enrollment happens between two humans using THREE's official interface.
 
 After the off-platform enrollment, the BA returns to their cockpit and marks the prospect as enrolled. Kevin then generates the new BA's access code from `/admin` and assigns it. The new BA uses that code to register on `.team`.
 
-## 3.7  The 8-week flush
+## 3.7 The 8-week flush
 
 A holding tank record flushes when the prospect enrolls or when the 8-week consideration window expires. After flush, the position no longer appears in the live line. Monotonic position numbers for prospects above and below are preserved.
 
-The flush is the system's version of *move on*. A prospect who has not decided in 8 weeks does not get chased — they get flushed, gently, without judgment. The inviting BA can re-invite later if the relationship warrants.
+The flush is the system's version of _move on_. A prospect who has not decided in 8 weeks does not get chased — they get flushed, gently, without judgment. The inviting BA can re-invite later if the relationship warrants.
 
-## 3.8  Brand isolation on `.com`
+## 3.8 Brand isolation on `.com`
 
 Locked 2026-05-17. The `.com` surface carries **Team Magnificent branding only**.
 
@@ -338,11 +338,11 @@ No THREE International logo. No THREE International name in any eyebrow, header,
 
 Dr. Dan's credential card names him as **Chief Scientific Officer and Chief Formulator** with his credentials (Caltech PhD, 16 patents, 70+ supplements formulated, 1.3M followers, top-50 podcast). The card does not name his employer. The credentials speak for the science.
 
-The `.com` compliance disclaimer reads in Team Magnificent's voice only: *"Queue positions and momentum displays demonstrate team activity in real time and do not guarantee any final placement, compensation, or earnings outcome. Market figures cited from public sources are for context only. This page contains no income claims, placement promises, or guarantees of any kind."* No mention of THREE.
+The `.com` compliance disclaimer reads in Team Magnificent's voice only: _"Queue positions and momentum displays demonstrate team activity in real time and do not guarantee any final placement, compensation, or earnings outcome. Market figures cited from public sources are for context only. This page contains no income claims, placement promises, or guarantees of any kind."_ No mention of THREE.
 
 THREE International references stay where they are operational: inside `.team` (THREE BA ID at signup, back-office reference in training, comp plan training material), inside `/admin` (genealogy mirror against THREE's records), and inside the design docs in this folder (architectural description). They do not appear on `.com`.
 
-## 3.9  Personalization on `.com`
+## 3.9 Personalization on `.com`
 
 Locked 2026-05-17. The `.com` surface is **never anonymous**.
 
@@ -352,7 +352,7 @@ Both interpolations are server-side at page render. The token resolves the prosp
 
 This rule does not contradict the compliance rules. The page names the inviting BA as the human who invited the prospect — it does **not** claim the inviting BA will be the prospect's binary sponsor in THREE. That decision happens off-app at enrollment time per the team's placement strategy.
 
-## 3.10  Compliance — never on `.com`
+## 3.10 Compliance — never on `.com`
 
 The marketing layer shows reality without making promises. The compensation layer operates inside THREE's regulated structure. The two never overlap on prospect-facing surfaces.
 
@@ -364,13 +364,14 @@ The marketing layer shows reality without making promises. The compensation laye
 - Compensation cycle math, volume math, or rank math
 - A current total head count of the **team or company** — the overall size of the organization (e.g. "we have N,NNN BAs total"). The 100,000 figure is named only as the mission goal; the organization's current total is not shown.
 
-  *This prohibition does not restrict the §3.4 Live Place / Holding Tank momentum mechanic.* The behind-you/beneath-you placement counter and the recent-placements ticker are permitted: they demonstrate real-time **placement activity within the prospect's own pool line** — how the collective is recruiting and where the prospect sits in that motion — not the organization's total size. They reflect real placement events, carry the §3.8 disclaimer verbatim, and remain bound by every other rule in this section: no earnings, compensation, cycle/volume/rank math, and no placement-equals-leg-position promise may attach to them. Where the display implies that joining an active team is advantageous, "benefit" means **positional benefit** — joining a line already in motion, and spillover as a structural mechanic of the binary — and never a representation of money earned. *Disambiguated 2026-06-23, scoped to Holding Tank / Live Place.*
+  _This prohibition does not restrict the §3.4 Live Place / Holding Tank momentum mechanic._ The behind-you/beneath-you placement counter and the recent-placements ticker are permitted: they demonstrate real-time **placement activity within the prospect's own pool line** — how the collective is recruiting and where the prospect sits in that motion — not the organization's total size. They reflect real placement events, carry the §3.8 disclaimer verbatim, and remain bound by every other rule in this section: no earnings, compensation, cycle/volume/rank math, and no placement-equals-leg-position promise may attach to them. Where the display implies that joining an active team is advantageous, "benefit" means **positional benefit** — joining a line already in motion, and spillover as a structural mechanic of the binary — and never a representation of money earned. _Disambiguated 2026-06-23, scoped to Holding Tank / Live Place._
+
 - Direct comparison to other teams or other companies
 - THREE International branding (see 3.8)
 
-Kevin's locked frame: *"it shows really how it works, and people are signing up."*
+Kevin's locked frame: _"it shows really how it works, and people are signing up."_
 
-## 3.11  Compliance enforcement — where it lives
+## 3.11 Compliance enforcement — where it lives
 
 Locked Chat #89. Compliance enforcement does **not** live in `/admin` as a manual review queue for the founder. It lives where it is generated:
 
@@ -380,7 +381,7 @@ Locked Chat #89. Compliance enforcement does **not** live in `/admin` as a manua
 
 Kevin sees aggregated metrics on enforcement in `/admin` Live Operations and Reporting — count of drafts auto-corrected, master content saves blocked, render failures. Not a queue of individual items to triage.
 
-## 3.12  Steve and Michael
+## 3.12 Steve and Michael
 
 Steve conducts the New BA Discovery & Success Interview and is the **sole interviewer** in the system — the canonical 36-question / 11-section script. Steve creates the Success Profile and does **not** score, rank, classify, predict, or label the BA. The Success Profile is descriptive support context only: goals, why, current situation, experience, questions, training interests, available time, learning style, concerns, and Who Do You Know progress.
 
@@ -390,22 +391,22 @@ Michael is BA-facing only. **Michael is never prospect-facing. Michael never app
 
 Comp plan is deferred until the new BA has signed two people and earned enough conviction to want to know more.
 
-*Amended 2026-06-24: Steve is the sole success interviewer; Michael is repurposed from interviewer/scorer to the Training Agent and Daily Success Coach; all Michael interview and scoring/classification logic is retired from the code.*
+_Amended 2026-06-24: Steve is the sole success interviewer; Michael is repurposed from interviewer/scorer to the Training Agent and Daily Success Coach; all Michael interview and scoring/classification logic is retired from the code._
 
-*Amended 2026-07-02 (Kevin): the agent interaction surface changed from phone calls to **browser-based** — Steve's interview and Michael's coaching happen in the `.team` browser runtime (voice, text, or mixed; English/Spanish), per the S1.6 Browser Voice/Text Foundation. Telnyx carries no internal agent runtime traffic. Kevin's rationale, verbatim intent: a more elegant, simpler way for the agent to interact — the member activates the agent from their dashboard and communicates via speech or text directly, saving time and energy. Outbound channels (SMS, ringless voicemail, email) continue as signal/notification carriers — invitations to interact — while the conversation itself lives in the dashboard: channels carry signals; the dashboard carries conversations.*
+_Amended 2026-07-02 (Kevin): the agent interaction surface changed from phone calls to **browser-based** — Steve's interview and Michael's coaching happen in the `.team` browser runtime (voice, text, or mixed; English/Spanish), per the S1.6 Browser Voice/Text Foundation. Telnyx carries no internal agent runtime traffic. Kevin's rationale, verbatim intent: a more elegant, simpler way for the agent to interact — the member activates the agent from their dashboard and communicates via speech or text directly, saving time and energy. Outbound channels (SMS, ringless voicemail, email) continue as signal/notification carriers — invitations to interact — while the conversation itself lives in the dashboard: channels carry signals; the dashboard carries conversations._
 
-## 3.13  Communication
+## 3.13 Communication
 
-- **Telnyx** for SMS — BA callback alerts and signal events, and prospect magic-link delivery (3.17). ~~Outbound voice (Michael's calls)~~ — *superseded 2026-07-02: agent interaction (Steve, Michael, Ivory) is browser-based voice/text/mixed inside `.team` per S1.6; Telnyx is excluded from the internal browser runtime.*
+- **Telnyx** for SMS — BA callback alerts and signal events, and prospect magic-link delivery (3.17). ~~Outbound voice (Michael's calls)~~ — _superseded 2026-07-02: agent interaction (Steve, Michael, Ivory) is browser-based voice/text/mixed inside `.team` per S1.6; Telnyx is excluded from the internal browser runtime._
 - **Email provider TBD** — Resend, Postmark, SendGrid, or SES. Open question, picked when wiring. Carried forward from Signup Architecture E.6.
 
-## 3.14  Persistence
+## 3.14 Persistence
 
 Every write hits **MongoDB + Neo4j + ChromaDB** in the same logical operation. No store is optional. No store is deferred. The architecture is built to handle the volume in 1.10 from day one. The runtime accesses these three stores **directly**, through dedicated adapters and service layers (Mongoose models, Neo4j graph services, Chroma embedding/collection services) — consistent with the ratified Runtime layer (`KNOWLEDGE_CORE_RUNTIME.md`, `AGENT_EVENT_MODEL.md`).
 
 External MCP tooling is **developer tooling only** — used by Claude Desktop, Claude Code, Codex, and Codex CLI to reach the stores during build sessions — and is **never a production runtime dependency**. (Reconciled 2026-07-02: an earlier draft of this section described persistence as routed through external tooling, which conflicted with the ratified Runtime layer; the direct-store statement above is controlling. ACR-0009 retired the HTTP persistence fallback. `persistenceCall()` is the app's direct persistence dispatch name and does not call external MCP tooling.)
 
-## 3.15  Brand tokens
+## 3.15 Brand tokens
 
 - **Ink:** `#0A0A0A`
 - **Gold:** `#C9A84C`
@@ -418,7 +419,7 @@ External MCP tooling is **developer tooling only** — used by Claude Desktop, C
 
 The `.com` site feels alive. Animation is the demonstration, not decoration. The `.team` site is quieter — content, training, operational tooling. `/admin` is quieter still — closer to a back-office terminal than a marketing dashboard.
 
-## 3.16  Invitation form — required fields
+## 3.16 Invitation form — required fields
 
 Locked Chat #125. The invitation generator (`POST /api/invitations`, the mint route) requires: **first name, last name, city, state/region, and mobile phone.** Email is optional.
 
@@ -426,7 +427,7 @@ Locked Chat #125. The invitation generator (`POST /api/invitations`, the mint ro
 
 **Scope.** The requirement is enforced on the mint route only. The standalone `POST /api/invitations/log` path (G.5 — a BA recording an invite they already sent some other way) stays lenient on phone, because it is retroactive record-keeping, not a fresh send. City/state remain required everywhere (they feed the dashboard ticker and the CRM export per 4.4).
 
-## 3.17  Prospect re-entry — the temporary prospect account
+## 3.17 Prospect re-entry — the temporary prospect account
 
 Locked Chat #131. Closes the prospect-re-entry open question from Chat #125 (Part 5). Layer 1 (completion-interrupt fix + presentation↔dashboard navigation) shipped Chat #126. Layer 2 (temporary account) and Layer 3 (`.com` login surface) are described here.
 
@@ -459,20 +460,24 @@ Until the callback consent signal fires, the account exists with `phone=null` an
 **Compliance read — defensible.** A prospect-initiated login is the first prospect-initiated authenticated action in the system. The frame holds: the prospect requests / authenticates to **their own** material (their dashboard, their position number, their BA's contact card), not material about other prospects, the BA's pipeline, or the team's back office. No income claims, no placement promises, no AI prospecting are introduced or amplified by the re-entry path. The channel-protection rule (1.13) is preserved — the SMS is sent only after the prospect has already opted into receiving SMS via the callback or webinar flow.
 
 **Data model.**
+
 - New MongoDB collection: `prospect_accounts`. Fields: `_id` (account id), `prospectId`, `tokenId`, `sponsorBaId` (stamped from token, immutable), `phone` (null until callback/webinar opt-in), `createdAt` (= `video_complete` placement time), `expiresAt` (= 8-week flush boundary of the token), `lastLoginAt` (nullable).
 - New MongoDB collection: `prospect_magic_links`. Fields: `_id` (linkToken), `accountId`, `tokenId`, `issuedAt`, `expiresAt` (`issuedAt + 60min` — the 60-minute click window locked above; an earlier `+15min` here contradicted the locked window and was reconciled 2026-07-02), `redeemedAt` (nullable), `requestPhoneHash` (the SHA-256 of the requesting phone — kept so abuse / rate-limit is auditable without storing raw phones twice).
 - Triple-stack writes per 3.14 — both new collections fan to Mongo + Neo4j + ChromaDB. Neo4j: `(:ProspectAccount)-[:KEYS]->(:InviteToken)` and `(:ProspectAccount)-[:SPONSORED_BY]->(:BrandAmbassador)` for sponsor-trace auditability. Chroma: `mcs_prospect_accounts` (account creation event, indexed for ARCHIE memory but not used for retrieval in any prospect-facing path).
 
 **Routes (server side, new).**
+
 - `POST /api/p/login/start` — body: `{ phone }`. Normalizes, looks up matching active accounts, dispatches one SMS per match via Telnyx, returns the opaque-success response regardless of match count. Rate-limited per IP and per phone-hash.
 - `POST /api/p/login/redeem` — body: `{ linkToken }`. Verifies TTL + not-already-redeemed, stamps `redeemedAt`, opens the `mcs_prospect_session` cookie scoped to `.com`, returns `{ tokenId }` so the client redirects to `/p/{token}`.
 - Middleware: optional `attachProspectSession` reads the cookie and attaches `req.prospectSession` to `/p/{token}` resolves so the client can render returning-prospect UI ("welcome back, [first]").
 
 **Routes (client side, new — `apps/com`).**
+
 - `/p/login` — phone entry form. Posts to `/api/p/login/start`. Confirmation screen on success ("If that phone is on file, you'll receive a text shortly.").
 - `/p/login/r/:linkToken` — redeem page. Posts to `/api/p/login/redeem` on mount, redirects to `/p/{tokenId}` on success or shows the expired/used view on failure.
 
 **Out of scope (do not build in this session).**
+
 - Prospect notification preferences UI (the prospect cannot opt back out of SMS from inside the app — the existing STOP-keyword Telnyx opt-out continues to apply globally).
 - Multi-device / multi-session management.
 - Cross-token "account merge" (no merging — each token has its own account row by design).
@@ -482,15 +487,15 @@ Until the callback consent signal fires, the account exists with `phone=null` an
 
 # Part 4 — Other locked decisions
 
-## 4.1  Welcome commitment
+## 4.1 Welcome commitment
 
 **Click-acknowledge**, not typed signature. The welcome screen captures the BA's acceptance with a single primary action — "I accept. Let's begin." — that triggers a triple-stack write of a commitment record (TEAM Design C.4). Locked Chat #94. Closes TEAM Design J.3.
 
-## 4.2  /cockpit stub
+## 4.2 /cockpit stub
 
 The `/welcome` Continue button routes to `/cockpit`, which is currently a placeholder ("Cockpit coming soon"). The real cockpit per TEAM Design Section H is Phase 4 work. Locked Chat #94.
 
-## 4.3  Component naming — the `/p/{token}` family
+## 4.3 Component naming — the `/p/{token}` family
 
 The single `/p/{token}` URL on `teammagnificent.com` resolves to one of two React components based on token state. Both names locked Chat #99.
 
@@ -499,7 +504,7 @@ The single `/p/{token}` URL on `teammagnificent.com` resolves to one of two Reac
 
 The `tm-` prefix is the canonical component naming convention on the `.com` client. Use it for any future prospect-facing component on this surface.
 
-## 4.4  Section 4 (Live Place) on the prospect dashboard — the ticker
+## 4.4 Section 4 (Live Place) on the prospect dashboard — the ticker
 
 Locked Chat #99. The position stack is **not** a static card list with aging behavior. It is a **continuously animated vertical ticker** — newest entries enter at the bottom, scroll upward, oldest exit at the top, never at rest. Real-time placements injected via SSE join the ticker mid-stream; they do not pause the scroll.
 
@@ -535,7 +540,7 @@ placed_at: ISO8601 timestamp  // for the absolute clock display
 
 Display formatter sub-question deferred: always show country, or show country only when outside the viewing BA's home country. Decided at international rollout time.
 
-## 4.5  10-step orientation curriculum — the new BA's blueprint
+## 4.5 10-step orientation curriculum — the new BA's blueprint
 
 Locked Chat #99. Supersedes the placeholder list in TEAM Design Section F.3.
 
@@ -559,7 +564,7 @@ Locked Chat #99. Supersedes the placeholder list in TEAM Design Section F.3.
 
 Source HTML: `github.com/devklg/team-magnificent-training/blob/main/10-steps.html`. Already on the locked design tokens (Bebas Neue + DM Sans + DM Mono, gold #C9A84C, dark #0A0A0A, teal #2DD4BF) with two minor accent-color drifts to clean up when the page moves into `.team` (`#2ECC71` green and `#D4601A` orange aren't in the locked five-color palette).
 
-## 4.6  OpenGraph card for tm-video-presentation
+## 4.6 OpenGraph card for tm-video-presentation
 
 Locked Chat #99. When a BA shares `teammagnificent.com/p/{token}` via SMS, social, or any link preview, the receiving app reads the OpenGraph metadata from our server. The OpenGraph card is the prospect's first visual handshake with Team Magnificent — before they tap the link.
 
@@ -579,7 +584,7 @@ Locked Chat #99. When a BA shares `teammagnificent.com/p/{token}` via SMS, socia
 
 **Bottle as hero (not Dr. Dan):** Team Magnificent's identity is the team and the product, not Dr. Dan. THREE leads with Dr. Dan because Dr. Dan is THREE's credibility anchor and they own his image rights. Our card leads with the bottle because the bottle is what every BA shares, what every prospect tries, what every transformation references. Dr. Dan appears in the video itself, when the prospect taps and lands — not in the SMS preview.
 
-## 4.7  Design principle — let complete visuals lead
+## 4.7 Design principle — let complete visuals lead
 
 Locked Chat #99, cross-surface (`.com`, `.team`, `/admin`).
 
@@ -594,14 +599,14 @@ Locked Chat #99, cross-surface (`.com`, `.team`, `/admin`).
 
 The instinct to rebuild a complete brand-locked visual into card components is the same instinct that produces AI-slop interfaces — it strips the soul to fit a framework. Resist.
 
-## 4.8  Locked assets
+## 4.8 Locked assets
 
 - **Dr. Dan video URL** — `https://www.youtube.com/embed/89wRvqx1d8M`. Section 3 anchor of tm-video-presentation. Deprecates two prior URLs found in history (`LS0cGIZCs7Y` from the Chat #39 era and `oN8NhkNdAlY` from an older business overview).
 - **Kevin transformation asset** — `luxury-favorite.jpeg`. Section 8 visual of tm-video-presentation. 19 lbs, −1½ neck, −8 belly, −4 waist. Brand-locked palette, "Real People. Real Results." tagline, GLP-THREE bottle center, four product attribute pills.
 - **Hero figure on the 72-hour mission training page** — 32,767 (the running total at Level 14 of the duplication doubling math, 2¹⁵ − 1). Replaces any earlier ambiguity between 14,386 and 32,767.
 - **GLP-THREE product photography** — `D:/TEAM-MAG/assets/` (delivered Chat #99). 28 files including `GLPTHREEE_Bottle_FullLabel_Render_Silo.png` (transparent-background silhouette render — the cleanest asset for compositing into surfaces).
 
-## 4.9  Token lifecycle edge cases — the four return-visit branches
+## 4.9 Token lifecycle edge cases — the four return-visit branches
 
 Locked Chat #110. The `GET /api/p/:token` resolver has four terminal branches that produce a prospect-facing view (or a hand-off-to-BA view). Each is specified here.
 
@@ -612,6 +617,7 @@ Locked Chat #110. The `GET /api/p/:token` resolver has four terminal branches th
 **Branch 3 — 410 expired (F.2).** Token's `expiresAt` has elapsed OR token state is already `expired`. **Lazy-flush rule:** when the resolver encounters a token whose state is non-terminal but whose `expiresAt` is in the past, it transitions the token to `expired` inline (triple-stack write) before returning 410. This makes every read self-healing and the flush a real auditable lifecycle event — not a synthetic per-request error. The cron-based flush scheduler is deferred; lazy-flush covers the read path.
 
 **The 410 payload carries the inviting BA's contact** so the prospect can ask for a re-invite:
+
 ```
 {
   error: 'expired',
@@ -623,17 +629,20 @@ Locked Chat #110. The `GET /api/p/:token` resolver has four terminal branches th
   }
 }
 ```
+
 Phone is E.164 (raw, no formatting). The client formats for display and uses the same string in `tel:` links and SMS draft helpers.
 
 **The F.2 view** is the tap-to-text helper:
+
 - Compass mark, then headline: "This invitation has expired."
 - Body: "Ask **[BA first] [BA last initial].** for a fresh link."
 - Phone displayed as `(323) 555-1234`, wrapped in `<a href="tel:+13235551234">` so mobile taps open the dialer.
-- Secondary action: "Copy a text to **[BA first]**." Clicking copies to clipboard: *"Hi [BA first], the link you sent me expired. Could you send a fresh one?"* The prospect pastes into their own SMS app and sends. The system never sends on the prospect's behalf — locked-spec 1.13 (channel protection) and 3.6 (BA-to-BA, off-app) both hold.
+- Secondary action: "Copy a text to **[BA first]**." Clicking copies to clipboard: _"Hi [BA first], the link you sent me expired. Could you send a fresh one?"_ The prospect pastes into their own SMS app and sends. The system never sends on the prospect's behalf — locked-spec 1.13 (channel protection) and 3.6 (BA-to-BA, off-app) both hold.
 
 **No auto-renew.** The H.7 question is locked closed: the prospect must request, the BA mints fresh from their cockpit. Auto-renewing on click would bypass the BA's decision to extend the consideration window and would silently violate the "share, respect, move on" elegance.
 
 **Branch 4 — 409 enrolled (E.2 return-visit).** Token state is `enrolled`. The prospect has already been walked into THREE off-app and the BA marked them enrolled in their cockpit. The 409 payload carries the inviting BA's full name (no phone — the prospect already has the BA's number from the original invitation):
+
 ```
 {
   error: 'enrolled',
@@ -646,6 +655,7 @@ Phone is E.164 (raw, no formatting). The client formats for display and uses the
 ```
 
 **The E.2 enrolled view** is a brief acknowledgment only:
+
 - Compass mark, headline: "Welcome to Team Magnificent."
 - Body: "You're in. Your sponsor **[BA full name]** will reach out to set up your access code for the team site."
 - No CTA. No link to `/register`. No further programmatic path.
@@ -660,13 +670,13 @@ Every branch reads `sponsorBaId` from the token record only. No request input �
 
 ### Status-code summary
 
-| Code | Meaning | Payload | Client view |
-|------|---------|---------|-------------|
-| 200 | resolved cleanly | ResolvedTokenPayload (state-driven render) | presentation or dashboard |
-| 404 | invalid_token | `{ error }` | F.1 branded message, no BA contact |
-| 409 | enrolled | `{ error, ba: { firstName, lastName, fullName } }` | E.2 brief acknowledgment |
-| 410 | expired | `{ error, expiredAt, ba: { firstName, lastInitial, phoneE164 } }` | F.2 with tap-to-text helper |
-| 500 | server_error | `{ error }` | F.4/F.6 soft degrade |
+| Code | Meaning          | Payload                                                           | Client view                        |
+| ---- | ---------------- | ----------------------------------------------------------------- | ---------------------------------- |
+| 200  | resolved cleanly | ResolvedTokenPayload (state-driven render)                        | presentation or dashboard          |
+| 404  | invalid_token    | `{ error }`                                                       | F.1 branded message, no BA contact |
+| 409  | enrolled         | `{ error, ba: { firstName, lastName, fullName } }`                | E.2 brief acknowledgment           |
+| 410  | expired          | `{ error, expiredAt, ba: { firstName, lastInitial, phoneE164 } }` | F.2 with tap-to-text helper        |
+| 500  | server_error     | `{ error }`                                                       | F.4/F.6 soft degrade               |
 
 ---
 
@@ -674,31 +684,31 @@ Every branch reads `sponsorBaId` from the token record only. No request input �
 
 Decisions still needed from Kevin before the surfaces that depend on them ship:
 
-- ~~**Michael call timing** — immediate on welcome acceptance, or after a short delay so the BA can put the phone down and answer when it rings (TEAM Design J.4)~~ — *SUPERSEDED by the 3.12 amendment (2026-06-24): Michael no longer interviews; the welcome flow routes to Steve's Discovery & Success Interview. The old J.4 question was about the interview call and is void. If a Michael-as-coach introductory call exists at all, its timing is a NEW question to raise fresh — not J.4. Drift struck 2026-07-02.*
-- **Email provider** — ~~Resend, Postmark, SendGrid, or SES (Signup Architecture E.6 / ADMIN J.5.1)~~ — *RESOLVED Chat #116: Resend. Wired in server/src/services/resend.ts (thin transport mirroring telnyx.ts) and consumed by the webinar reservation domain to send the prospect confirmation email with the Zoom link. DORMANT pending teammagnificent.com domain verification in Resend (Namecheap DNS/hosting deferred by Kevin until the app is complete) — until EMAIL_API_KEY is set AND the EMAIL_FROM domain is verified, the email path records emailDeliveryStatus='skipped' and the BA-follow-up SMS stays the live fallback. Sends begin with no code change once both land. Planned from-address webinars@teammagnificent.com. Covers welcome / password-reset / Broadcast on the other surfaces as those wire in.*
-- ~~**Michael's five interview prompts** — Kevin's actual script if drafted, or confirmation of the placeholder list (TEAM Design J.5)~~ — *SUPERSEDED by the 3.12 amendment (2026-06-24): interviewing is Steve's alone (canonical 36-question / 11-section script); all Michael interview logic is retired. Drift struck 2026-07-02.*
-- ~~**10-step orientation curriculum**~~ — *RESOLVED Chat #99.* See Part 4.3.
+- ~~**Michael call timing** — immediate on welcome acceptance, or after a short delay so the BA can put the phone down and answer when it rings (TEAM Design J.4)~~ — _SUPERSEDED by the 3.12 amendment (2026-06-24): Michael no longer interviews; the welcome flow routes to Steve's Discovery & Success Interview. The old J.4 question was about the interview call and is void. If a Michael-as-coach introductory call exists at all, its timing is a NEW question to raise fresh — not J.4. Drift struck 2026-07-02._
+- **Email provider** — ~~Resend, Postmark, SendGrid, or SES (Signup Architecture E.6 / ADMIN J.5.1)~~ — _RESOLVED Chat #116: Resend. Wired in server/src/services/resend.ts (thin transport mirroring telnyx.ts) and consumed by the webinar reservation domain to send the prospect confirmation email with the Zoom link. DORMANT pending teammagnificent.com domain verification in Resend (Namecheap DNS/hosting deferred by Kevin until the app is complete) — until EMAIL_API_KEY is set AND the EMAIL_FROM domain is verified, the email path records emailDeliveryStatus='skipped' and the BA-follow-up SMS stays the live fallback. Sends begin with no code change once both land. Planned from-address webinars@teammagnificent.com. Covers welcome / password-reset / Broadcast on the other surfaces as those wire in._
+- ~~**Michael's five interview prompts** — Kevin's actual script if drafted, or confirmation of the placeholder list (TEAM Design J.5)~~ — _SUPERSEDED by the 3.12 amendment (2026-06-24): interviewing is Steve's alone (canonical 36-question / 11-section script); all Michael interview logic is retired. Drift struck 2026-07-02._
+- ~~**10-step orientation curriculum**~~ — _RESOLVED Chat #99._ See Part 4.3.
 - **Sponsor-leaves card behavior** — auto-roll-up to next active BA in chain, or stay locked to original sponsor with separate escalation contact (TEAM Design J.7)
 - **Phone change verification** — SMS code required like email change, or immediate effect (TEAM Design J.8)
 - **Fast Start gating** — sequential-but-not-gated as current design, or hard-gate certain modules (TEAM Design J.9)
 - **Orientation scheduling mechanism** — Calendly-style embed, custom slot picker, or manual outreach (TEAM Design J.10)
 - **Re-invite cooldown** — limits on how often or how many times an expired prospect can be re-invited (TEAM Design J.11)
 - **Notification preference defaults** — which alerts default to SMS, email, in-app (TEAM Design J.12)
-- ~~**Holding-tank flush window**~~ — *RESOLVED Chat #100: fixed at 8 weeks for everyone. Not adaptive by BA or prospect intent.* (Closes ADMIN J.5.2 / COM H.8.)
-- ~~**Behind-you counter update interval**~~ — *RESOLVED Chat #99: SSE.*
+- ~~**Holding-tank flush window**~~ — _RESOLVED Chat #100: fixed at 8 weeks for everyone. Not adaptive by BA or prospect intent._ (Closes ADMIN J.5.2 / COM H.8.)
+- ~~**Behind-you counter update interval**~~ — _RESOLVED Chat #99: SSE._
 - **Market / geographic tracking** — whether BAs and prospects carry market/region as a tracked dimension (ADMIN J.5.4)
-- ~~**Position stack visible window**~~ — *RESOLVED Chat #99: 20–40 visible entries, continuous vertical ticker, no resting state.* See Part 4.4.
-- ~~**Leader detection threshold values**~~ — *RESOLVED Chat #100: a BA qualifies as a leader when BOTH conditions are true — (1) binary-qualified (one personally sponsored on the left leg, one personally sponsored on the right leg, i.e. the 2-in-72 qualification gate is closed), AND (2) 5 personally enrolled BAs total across both legs. This is a durable structural threshold, not a rolling activity heuristic. No lookback window needed because both conditions are durable states confirmed by THREE enrollment data.* (Closes ADMIN J.5.7-8.)
+- ~~**Position stack visible window**~~ — _RESOLVED Chat #99: 20–40 visible entries, continuous vertical ticker, no resting state._ See Part 4.4.
+- ~~**Leader detection threshold values**~~ — _RESOLVED Chat #100: a BA qualifies as a leader when BOTH conditions are true — (1) binary-qualified (one personally sponsored on the left leg, one personally sponsored on the right leg, i.e. the 2-in-72 qualification gate is closed), AND (2) 5 personally enrolled BAs total across both legs. This is a durable structural threshold, not a rolling activity heuristic. No lookback window needed because both conditions are durable states confirmed by THREE enrollment data._ (Closes ADMIN J.5.7-8.)
 - **Compliance enforcement severity mapping** — block / warn / log per rule (ADMIN J.5.9)
 - **Export PII redaction** — per-export confirmation always, or persistent "show me everything" preference for Kevin (ADMIN J.5.10)
-- **Webinar cadence** — ~~weekly Tuesday 7pm PT, or every 72 hours (COM H.3)~~ — *RESOLVED Chat #116: Mondays and Thursdays at 5:00pm Pacific wall-clock time, year-round (tracks DST — 5pm PDT in summer, 5pm PST in winter), 60-minute sessions, hosted by Kevin + Paul. One persistent recurring Zoom registration link (WEBINAR_REGISTER_URL) for all sessions; the prospect registers per-occurrence on Zoom's page. Seeded as `webinar_events` over a rolling 8-week horizon by `pnpm seed:webinar-events` (server/scripts/seed-webinar-events.ts), DST-correct via per-date America/Los_Angeles offset resolution in server/src/domain/webinarCadence.ts. The dashboard countdown + reservation target resolve from the next actual event via findNextUpcomingEvent(), not a static constant. Re-runnable seeder maintains the window; an auto-replenish cron and a Zoom Server-to-Server OAuth per-occurrence-link sync agent are deferred follow-ons.* (Closes COM H.3.)
-- ~~**Position stack city/state derivation**~~ — *RESOLVED Chat #99: city + state, with country field captured on the prospect record from day one for international rollout.* See Part 4.4.
-- ~~**Expired token auto-renew**~~ — *RESOLVED Chat #110: no auto-renew. An expired `/p/{token}` resolves to a static F.2 expired view with the inviting BA's first name and phone surfaced for the prospect to reach out. The BA mints a fresh token from their cockpit when ready. Keeps the BA in control of the re-invite decision and honors locked-spec 1.4 (share, respect, move on) rather than letting the system silently extend on the prospect's behalf. See Part 4.9 for the resolver behavior.* (Closes COM H.7.)
+- **Webinar cadence** — ~~weekly Tuesday 7pm PT, or every 72 hours (COM H.3)~~ — _RESOLVED Chat #116: Mondays and Thursdays at 5:00pm Pacific wall-clock time, year-round (tracks DST — 5pm PDT in summer, 5pm PST in winter), 60-minute sessions, hosted by Kevin + Paul. One persistent recurring Zoom registration link (WEBINAR_REGISTER_URL) for all sessions; the prospect registers per-occurrence on Zoom's page. Seeded as `webinar_events` over a rolling 8-week horizon by `pnpm seed:webinar-events` (server/scripts/seed-webinar-events.ts), DST-correct via per-date America/Los_Angeles offset resolution in server/src/domain/webinarCadence.ts. The dashboard countdown + reservation target resolve from the next actual event via findNextUpcomingEvent(), not a static constant. Re-runnable seeder maintains the window; an auto-replenish cron and a Zoom Server-to-Server OAuth per-occurrence-link sync agent are deferred follow-ons._ (Closes COM H.3.)
+- ~~**Position stack city/state derivation**~~ — _RESOLVED Chat #99: city + state, with country field captured on the prospect record from day one for international rollout._ See Part 4.4.
+- ~~**Expired token auto-renew**~~ — _RESOLVED Chat #110: no auto-renew. An expired `/p/{token}` resolves to a static F.2 expired view with the inviting BA's first name and phone surfaced for the prospect to reach out. The BA mints a fresh token from their cockpit when ready. Keeps the BA in control of the re-invite decision and honors locked-spec 1.4 (share, respect, move on) rather than letting the system silently extend on the prospect's behalf. See Part 4.9 for the resolver behavior._ (Closes COM H.7.)
 - **Leadership track records inside `.team`** — where and how Paul's 20-year binary career, Kevin's earnings, and other leader track records as they emerge are surfaced to new BAs inside `.team`. Candidates: a leadership section on profile pages, an "about Team Magnificent" page reachable from the cockpit, contextual placement in the 10-step orientation, or a separate Layer 2 training module that opens after a BA has signed their first two people. Never on `.com`. Never as income claims. The principle is locked in Part 1.14; the specific surface placement is the open question. Added Chat #94.
 
 - **Upline site elements to emulate in `.team`** — Kevin visited his upline's website for the first time (Chat #125) and found significant elements worth adapting for `.team` onboarding / Fast Start, starting with a welcome letter. The reference welcome letter PDF is held in the repo as research material (NOT a `.com` production asset — must not be served from `apps/com/public/assets/`; relocate to a docs/research location). Open work: review the upline site + welcome letter and capture which specific elements to adapt into `.team` (welcome/onboarding copy, Fast Start structure, etc.), as notes/spec rather than verbatim copy. Added Chat #125.
 
-- ~~**Prospect re-entry / temporary prospect account**~~ — *RESOLVED Chat #131. See Part 3.17 (the locked specification). Layer 1 (completion-interrupt fix + presentation↔dashboard navigation) shipped Chat #126. Layer 2 (temporary account, phone-keyed, auto-created at `video_complete`) and Layer 3 (`/p/login` SMS-magic-link surface on `.com`) locked in Chat #131 and specified in full at 3.17. Historical context retained below for traceability.*
+- ~~**Prospect re-entry / temporary prospect account**~~ — _RESOLVED Chat #131. See Part 3.17 (the locked specification). Layer 1 (completion-interrupt fix + presentation↔dashboard navigation) shipped Chat #126. Layer 2 (temporary account, phone-keyed, auto-created at `video_complete`) and Layer 3 (`/p/login` SMS-magic-link surface on `.com`) locked in Chat #131 and specified in full at 3.17. Historical context retained below for traceability._
 
   **The problem (surfaced Chat #125, live testing):** the `/p/{token}` SMS link is currently the prospect's ONLY door. A prospect who closes the tab, loses the text, or clears history has no way back. Kevin's framing: the presentation page is not a one-time gate — it is a reference library (Dr. Dan video, dossier, industry stats, and a forthcoming market-intelligence document) that prospects study repeatedly across the multi-week consideration window. "Many people look at the videos 3 to 4 times." Durable, self-serve re-entry is therefore a real need, not a convenience.
 
