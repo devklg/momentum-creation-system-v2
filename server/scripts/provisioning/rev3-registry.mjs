@@ -146,7 +146,6 @@ export const NEO4J_CONSTRAINTS = [
   ['TmagSponsorAvailability','availabilityId'], ['TmagThreeWayBooking','bookingId'],
   ['TmagFastStartProgress','id'], ['TmagSteveSuccessInterview','id'],
   ['TmagRecruitingCycle','tmagId'], // ACR-0011 — cycle projection; ENROLLED edges are the genealogy source
-
   ['TmagAgentIvoryEvent','eventId'], ['TmagAgentMichaelEvent','eventId'], ['TmagAgentSteveEvent','eventId'],
   ['TmagAgentTemplate','templateId'], ['TmagContentTemplate','templateVersionId'], ['TmagInvitationGeneratorRun','runId'],
   ['TmagContentVideo','contentVideoId'],
