@@ -1,5 +1,6 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { TeamNav } from './components/TeamNav';
 import { RegisterPage } from './routes/register';
 import { LoginPage } from './routes/login';
 import { WelcomePage } from './routes/welcome';
@@ -32,25 +33,27 @@ export function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/welcome" element={<WelcomePage />} />
       <Route path="/steve/discovery" element={<SteveSuccessInterviewPage />} />
-      <Route path="/cockpit" element={<CockpitPage />} />
-      <Route path="/invitations" element={<InvitationsPage />} />
-      <Route path="/video-library" element={<VideoLibraryPage />} />
-      <Route path="/ivory" element={<IvoryPage />} />
-      <Route path="/ivory/momentum" element={<IvoryMomentumPage />} />
-      <Route path="/crm" element={<CrmPage />} />
-      <Route path="/vm-campaigns" element={<VmDialerRoute />} />
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/leadership" element={<LeadershipPage />} />
-      <Route path="/training/10-steps" element={<TenStepsPage />} />
-      <Route path="/training/fast-start" element={<FastStartHubPage />} />
-      <Route path="/training/fast-start/product" element={<ModuleProductPage />} />
-      <Route path="/training/fast-start/comp-layer-1" element={<ModuleCompLayer1Page />} />
-      <Route path="/training/fast-start/binary" element={<ModuleBinaryPage />} />
-      <Route path="/training/fast-start/prospect-list" element={<ModuleProspectListPage />} />
-      <Route path="/training/fast-start/team" element={<ModuleTeamPage />} />
-      <Route path="/onboarding/questionnaire" element={<QuestionnairePage />} />
-      <Route path="/sponsor/interview-workbook/:tmagId" element={<SponsorWorkbookPage />} />
-      <Route path="/preview" element={<PreviewPage />} />
+      <Route element={<TeamShell />}>
+        <Route path="/cockpit" element={<CockpitPage />} />
+        <Route path="/invitations" element={<InvitationsPage />} />
+        <Route path="/video-library" element={<VideoLibraryPage />} />
+        <Route path="/ivory" element={<IvoryPage />} />
+        <Route path="/ivory/momentum" element={<IvoryMomentumPage />} />
+        <Route path="/crm" element={<CrmPage />} />
+        <Route path="/vm-campaigns" element={<VmDialerRoute />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/leadership" element={<LeadershipPage />} />
+        <Route path="/training/10-steps" element={<TenStepsPage />} />
+        <Route path="/training/fast-start" element={<FastStartHubPage />} />
+        <Route path="/training/fast-start/product" element={<ModuleProductPage />} />
+        <Route path="/training/fast-start/comp-layer-1" element={<ModuleCompLayer1Page />} />
+        <Route path="/training/fast-start/binary" element={<ModuleBinaryPage />} />
+        <Route path="/training/fast-start/prospect-list" element={<ModuleProspectListPage />} />
+        <Route path="/training/fast-start/team" element={<ModuleTeamPage />} />
+        <Route path="/onboarding/questionnaire" element={<QuestionnairePage />} />
+        <Route path="/sponsor/interview-workbook/:tmagId" element={<SponsorWorkbookPage />} />
+        <Route path="/preview" element={<PreviewPage />} />
+      </Route>
       <Route
         path="*"
         element={
@@ -60,6 +63,20 @@ export function App() {
         }
       />
     </Routes>
+  );
+}
+
+/**
+ * TeamShell — layout wrapper that mounts the shared TeamNav above every
+ * authenticated .team surface. Login/register/welcome and the Steve discovery
+ * interview stay chrome-free (welcome is a ceremony page; Steve is immersive).
+ */
+function TeamShell() {
+  return (
+    <>
+      <TeamNav />
+      <Outlet />
+    </>
   );
 }
 
