@@ -710,7 +710,7 @@ export function CockpitPage() {
   if (!summary || !pmv) {
     return (
       <Shell>
-        <LaunchCenter launch={launch} onNavigate={handleLaunchNavigate} />
+        <LaunchCenter launch={launch} onNavigate={handleLaunchNavigate} defaultExpanded />
         <OperationalPmvLocked onNavigate={handleLaunchNavigate} />
       </Shell>
     );
@@ -725,10 +725,9 @@ export function CockpitPage() {
 
   return (
     <Shell>
-      <LaunchCenter launch={launch} onNavigate={handleLaunchNavigate} />
-
-      {/* Header */}
-      <div id="pmv" className="tm-command-ribbon mb-8 scroll-mt-8">
+      {/* PMV owns the top of the cockpit (locked spec E.2: launch guidance is
+          a rail, not the hero). Header first, launch rail beneath it. */}
+      <div id="pmv" className="tm-command-ribbon mb-6 scroll-mt-8">
         <div>
           <p className="font-mono tracking-[0.22em] text-[11px] text-gold uppercase mb-2">
             Operational PMV
@@ -747,6 +746,8 @@ export function CockpitPage() {
           Invite someone
         </Button>
       </div>
+
+      <LaunchCenter launch={launch} onNavigate={handleLaunchNavigate} />
 
       {showPmvIntro && <PmvIntroPanel onDismiss={dismissPmvIntro} />}
 
@@ -861,7 +862,9 @@ export function CockpitPage() {
             onOpenIvory={() => navigate('/ivory')}
             onOpenTraining={() => navigate('/training/fast-start')}
           />
-          <MichaelRuntimeSupportCard />
+          <div id="michael" className="scroll-mt-8">
+            <MichaelRuntimeSupportCard />
+          </div>
           <div id="sponsor" className="scroll-mt-8">
             <SectionLabel>My Sponsor</SectionLabel>
             <SponsorCard

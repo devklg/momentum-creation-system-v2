@@ -125,7 +125,7 @@ export function WelcomePage() {
             </p>
             <p className="text-cream-mute text-[14px] leading-[1.55] mt-3">
               After this page, the Launch Center will guide your discovery interview with
-              Steve, Day 1, your first invitation, and the questionnaire.
+              Steve, Day 1, and your first invitation.
             </p>
           </div>
         </div>

@@ -13,7 +13,6 @@ import { ModuleCompLayer1Page } from './routes/training/fast-start/comp-layer-1'
 import { ModuleBinaryPage } from './routes/training/fast-start/binary';
 import { ModuleProspectListPage } from './routes/training/fast-start/prospect-list';
 import { ModuleTeamPage } from './routes/training/fast-start/team';
-import { QuestionnairePage } from './routes/onboarding/questionnaire';
 import { SponsorWorkbookPage } from './routes/sponsor/interview-workbook';
 import { InvitationsPage } from './routes/invitations';
 import { VideoLibraryPage } from './routes/video-library';
@@ -50,7 +49,6 @@ export function App() {
         <Route path="/training/fast-start/binary" element={<ModuleBinaryPage />} />
         <Route path="/training/fast-start/prospect-list" element={<ModuleProspectListPage />} />
         <Route path="/training/fast-start/team" element={<ModuleTeamPage />} />
-        <Route path="/onboarding/questionnaire" element={<QuestionnairePage />} />
         <Route path="/sponsor/interview-workbook/:tmagId" element={<SponsorWorkbookPage />} />
         <Route path="/preview" element={<PreviewPage />} />
       </Route>

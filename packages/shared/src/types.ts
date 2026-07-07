@@ -3816,19 +3816,21 @@ export interface McsComProspectCopy {
  * /api/cockpit/launch is a read-only projection that gives a new BA one
  * dominant next action before the cockpit matures into the operational PMV.
  * It reads existing onboarding truth: welcome commitment, Steve discovery,
- * Fast Start progress, Ivory roster, invitation spine, and questionnaire.
+ * Fast Start progress, Ivory roster, invitation spine, and the Michael
+ * interview record (michael_interviews by tmagId; step surfaces only when
+ * the Michael runtime is enabled or a record already exists).
  */
 
 export type McsLaunchStepId =
   | 'welcome_accepted'
   | 'steve_discovery_completed'
+  | 'michael_interview_completed'
   | 'day_1_started'
   | 'day_1_completed'
   | 'who_do_you_know_started'
   | 'first_invitation_drafted'
   | 'first_invitation_minted'
   | 'first_invitation_sent'
-  | 'questionnaire_submitted'
   | 'sponsor_connection_confirmed';
 
 export type McsLaunchStepState =
@@ -3874,6 +3876,13 @@ export interface McsLaunchFastStartState {
   complete: boolean;
 }
 
+export interface McsLaunchMichaelState {
+  /** Michael launch step is surfaced (runtime enabled or a record exists). */
+  enabled: boolean;
+  complete: boolean;
+  completedAt: McsIsoTimestamp | null;
+}
+
 export interface McsTeamLaunchCenterResponse {
   ok: true;
   generatedAt: McsIsoTimestamp;
@@ -3886,9 +3895,9 @@ export interface McsTeamLaunchCenterResponse {
   nextAction: McsLaunchNextAction;
   steps: McsLaunchStep[];
   steve: McsLaunchSteveState;
+  michael: McsLaunchMichaelState;
   firstInvitation: McsLaunchFirstInvitationState;
   fastStart: McsLaunchFastStartState;
-  questionnaireSubmitted: boolean;
   launchComplete: boolean;
 }
 

@@ -23,7 +23,6 @@ import { findBAByTmagId, type BARecord } from './ba.js';
 import { lastInitialOf } from './prospects.js';
 import { buildDiscoveryView } from './steve-success-interview.js';
 import { getFastStartProgress } from './training.js';
-import { questionnaireExists } from './questionnaire.js';
 import { listUpcomingWebinarEvents } from './webinarEvent.js';
 import type {
   McsCallbackIntent,
@@ -64,6 +63,14 @@ const DISPOSITIONS_COLLECTION = 'tmag_prospect_crm_dispositions';
 const NOTES_COLLECTION = 'tmag_prospect_crm_notes';
 const COMMITMENTS_COLLECTION = 'tmag_commitments';
 const IVORY_COLLECTION = 'tmag_ivory_prospect_names';
+/**
+ * Michael's interview records (locked spec: TEAM design D.2/D.3 — Michael
+ * calls every new BA; the cockpit carries the step until the interview is
+ * complete). Written by the Michael voice runtime when it ships; existence
+ * by tmagId is the durable completion source.
+ */
+const MICHAEL_INTERVIEWS_COLLECTION = 'michael_interviews';
+const MICHAEL_LAUNCH_STEP_ENABLED = process.env.MICHAEL_LAUNCH_STEP_ENABLED === 'true';
 
 interface TeamCalendarResponse {
   ok: true;
@@ -1007,13 +1014,13 @@ function nextActionFromSteps(steps: McsLaunchStep[], launchComplete: boolean): M
  * instead of writing a parallel launch-state record.
  */
 export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunchCenterResponse> {
-  const [ba, commitmentAcceptedAt, steve, fastStart, questionnaireSubmitted, ivoryNames] =
+  const [ba, commitmentAcceptedAt, steve, fastStart, michaelInterviewCount, ivoryNames] =
     await Promise.all([
       findBAByTmagId(tmagId),
       getLatestCommitmentAcceptedAt(tmagId),
       buildDiscoveryView(tmagId),
       getFastStartProgress(tmagId),
-      questionnaireExists(tmagId),
+      countCollection(MICHAEL_INTERVIEWS_COLLECTION, { tmagId }),
       countCollection(IVORY_COLLECTION, { tmagId }),
     ]);
 
@@ -1026,6 +1033,8 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
 
   const steveComplete = steve.phase === 'complete';
   const steveCompletedAt = steve.artifact?.completedAt ?? null;
+  const michaelComplete = michaelInterviewCount > 0;
+  const michaelStepEnabled = MICHAEL_LAUNCH_STEP_ENABLED || michaelComplete;
   const day1 = fastStart.modules.find((m) => m.moduleId === 1);
   const day1State = day1?.state ?? 'not_started';
   const day1Started = day1State === 'in_progress' || day1State === 'completed';
@@ -1061,6 +1070,23 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
         ? 'Steve discovery is complete.'
         : 'Complete Steve first so your Success Profile can guide the launch path.',
     }),
+    ...(michaelStepEnabled
+      ? [
+          buildLaunchStep({
+            id: 'michael_interview_completed' as const,
+            label: "Take Michael's onboarding call",
+            complete: michaelComplete,
+            current: steveComplete && !michaelComplete,
+            available: welcomeComplete && !michaelComplete,
+            href: '/cockpit#michael',
+            completedAt: null,
+            source: 'michael_interviews existence by tmagId',
+            detail: michaelComplete
+              ? 'Your Michael interview is complete. Your sponsor has the summary.'
+              : 'Michael calls you for a short voice interview so your sponsor knows how to support you.',
+          }),
+        ]
+      : []),
     buildLaunchStep({
       id: 'day_1_started',
       label: 'Start Day 1 training',
@@ -1137,19 +1163,6 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
         : 'After you personally send the message, mark it sent in the PMV.',
     }),
     buildLaunchStep({
-      id: 'questionnaire_submitted',
-      label: 'Submit your onboarding questionnaire',
-      complete: questionnaireSubmitted,
-      current: firstInviteSent && !questionnaireSubmitted,
-      available: steveComplete && !questionnaireSubmitted,
-      href: '/onboarding/questionnaire',
-      completedAt: null,
-      source: 'ba_questionnaires existence by tmagId',
-      detail: questionnaireSubmitted
-        ? 'Your sponsor can review your questionnaire.'
-        : 'Give your sponsor context for coaching and workbook follow-up.',
-    }),
-    buildLaunchStep({
       id: 'sponsor_connection_confirmed',
       label: 'Connect with your sponsor',
       complete: false,
@@ -1181,6 +1194,11 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
       phase: steve.phase,
       completedAt: steveCompletedAt,
     },
+    michael: {
+      enabled: michaelStepEnabled,
+      complete: michaelComplete,
+      completedAt: null,
+    },
     firstInvitation: {
       ivoryNames,
       draftedCount: mintedCount,
@@ -1193,7 +1211,6 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
       day1CompletedAt: day1?.completedAt ?? null,
       complete: fastStart.complete,
     },
-    questionnaireSubmitted,
     launchComplete,
   };
 }
