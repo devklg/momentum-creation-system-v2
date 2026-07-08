@@ -34,7 +34,7 @@ interface UplineKnowledgeSeedItem {
 // Upline reference corpus — Legacy Makers onboarding hub (rlegacymakers.com),
 // captured 2026-07-07 per DECISION_upline_onboarding_infusion / ACR-0011.
 // Curriculum structure reference only; Team Magnificent authors its own branded versions.
-const UPLINE_ROOT = 'D:/momentum-creation-system-v2/knowledge/upline-legacy-makers';
+const UPLINE_ROOT = 'D:/momentum-creation-system-v2/knowledge/upline-legacy-makers/extracted'; // Docling full-extraction markdown (2026-07-07); originals in parent dir
 const CREATED_BY = 'TMAG-01';
 const AUTHORITY_BY = 'Kevin L. Gardner';
 const INGESTED_AT = new Date().toISOString();
@@ -111,7 +111,7 @@ async function main(): Promise<void> {
 
   try {
     for (const item of ITEMS) {
-      const fullPath = path.resolve(UPLINE_ROOT, item.path);
+      const fullPath = path.resolve(UPLINE_ROOT, item.path.replace(/\.(pdf|docx)$/i, '.md'));
       const sourceRef = `file:${fullPath.replace(/\\/g, '/')}`;
       if (await alreadyIngested(sourceRef)) {
         report.skipped += 1;
