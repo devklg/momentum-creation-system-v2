@@ -12,6 +12,8 @@
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
+import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
+import { sendEmail, ResendConfigError, ResendError } from '../services/resend.js';
 import { findBAByTmagId, type BARecord } from './ba.js';
 import type {
   McsThreeWayAvailabilityResponse,
@@ -29,10 +31,15 @@ const AVAILABILITY_COLLECTION = 'tmag_sponsor_availability';
 const BOOKINGS_COLLECTION = 'tmag_three_way_bookings';
 const AVAILABILITY_CHROMA = 'mcs_sponsor_availability';
 const BOOKINGS_CHROMA = 'mcs_three_way_bookings';
+const NOTIFICATIONS_COLLECTION = 'tmag_three_way_notifications';
+const REMINDERS_COLLECTION = 'tmag_three_way_reminders';
+const NOTIFICATIONS_CHROMA = 'mcs_three_way_notifications';
+const REMINDERS_CHROMA = 'mcs_three_way_reminders';
 const SLOT_MINUTES = 30;
 const HORIZON_DAYS = 14;
 const MAX_UPLINE_DEPTH = 50;
 const MAX_NOTE_LENGTH = 400;
+const REMINDER_LEAD_MINUTES = 30; // [REMINDER LEAD - confirm with Kevin]
 
 type Clock = { hour: number; minute: number };
 type PlainDateTime = {
@@ -166,6 +173,57 @@ function isoPlusMinutes(iso: string, minutes: number): string {
   return new Date(new Date(iso).getTime() + minutes * 60_000).toISOString();
 }
 
+function formatRecipientTime(startAt: string, timeZone: string | null): string {
+  const tz = timeZone || 'America/Los_Angeles';
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  }).format(new Date(startAt));
+}
+
+function escapeIcs(value: string): string {
+  return value
+    .replace(/\\/g, '\\\\')
+    .replace(/\n/g, '\\n')
+    .replace(/,/g, '\\,')
+    .replace(/;/g, '\\;');
+}
+
+function icsDate(iso: string): string {
+  return iso.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+}
+
+function buildThreeWayIcs(record: McsThreeWayBookingRecord, booker: BARecord, sponsor: BARecord): string {
+  const summary = `Team Magnificent three-way call: ${record.bookerName} + ${record.sponsorName}`;
+  const description = record.prospectNote
+    ? `Prospect/context note: ${record.prospectNote}`
+    : 'Team Magnificent three-way call.';
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Team Magnificent//MCS Three Way Calls//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:REQUEST',
+    'BEGIN:VEVENT',
+    `UID:${record.bookingId}@teammagnificent.team`,
+    `DTSTAMP:${icsDate(record.createdAt)}`,
+    `DTSTART:${icsDate(record.startAt)}`,
+    `DTEND:${icsDate(record.endAt)}`,
+    `SUMMARY:${escapeIcs(summary)}`,
+    `DESCRIPTION:${escapeIcs(description)}`,
+    `ORGANIZER;CN=${escapeIcs(record.bookerName)}:mailto:${booker.email}`,
+    `ATTENDEE;CN=${escapeIcs(record.bookerName)};ROLE=REQ-PARTICIPANT:mailto:${booker.email}`,
+    `ATTENDEE;CN=${escapeIcs(record.sponsorName)};ROLE=REQ-PARTICIPANT:mailto:${sponsor.email}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n');
+}
+
 function overlaps(aStart: string, aEnd: string, bStart: string, bEnd: string): boolean {
   return new Date(aStart).getTime() < new Date(bEnd).getTime()
     && new Date(bStart).getTime() < new Date(aEnd).getTime();
@@ -274,6 +332,378 @@ async function readBookingById(bookingId: string): Promise<McsThreeWayBookingRec
     },
   );
   return result.documents[0] ?? null;
+}
+
+async function readNotificationById(notificationId: string): Promise<{ notificationId?: string } | null> {
+  const result = await persistenceCall<{ documents?: Array<{ notificationId?: string }> }>(
+    'mongodb',
+    'query',
+    {
+      database: MONGO_DB,
+      collection: NOTIFICATIONS_COLLECTION,
+      filter: { _id: notificationId },
+      limit: 1,
+    },
+  );
+  return result.documents?.[0] ?? null;
+}
+
+async function readReminderById(
+  reminderId: string,
+): Promise<{ reminderId?: string; status?: string; bookingId?: string } | null> {
+  const result = await persistenceCall<{
+    documents?: Array<{ reminderId?: string; status?: string; bookingId?: string }>;
+  }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: REMINDERS_COLLECTION,
+    filter: { _id: reminderId },
+    limit: 1,
+  });
+  return result.documents?.[0] ?? null;
+}
+
+async function writeThreeWayNotification(input: {
+  booking: McsThreeWayBookingRecord;
+  recipientRole: 'booker' | 'sponsor';
+  recipientTmagId: string;
+  channel: 'sms' | 'email' | 'in_app';
+  status: 'sent' | 'skipped' | 'failed';
+  providerMessageId: string | null;
+  error: string | null;
+  purpose: 'booking_confirmation' | 'booking_cancelled' | 'booking_reminder';
+}): Promise<void> {
+  const deliveredAt = new Date().toISOString();
+  const notificationId = `threeway_note_${randomUUID()}`;
+  await tripleStackWrite({
+    id: notificationId,
+    mongoCollection: NOTIFICATIONS_COLLECTION,
+    mongoDoc: {
+      notificationId,
+      bookingId: input.booking.bookingId,
+      recipientRole: input.recipientRole,
+      recipientTmagId: input.recipientTmagId,
+      channel: input.channel,
+      status: input.status,
+      providerMessageId: input.providerMessageId,
+      error: input.error,
+      purpose: input.purpose,
+      deliveredAt,
+    },
+    neo4j: {
+      cypher:
+        'MERGE (b:TmagThreeWayBooking {bookingId: $bookingId}) ' +
+        'MERGE (n:TmagThreeWayNotification {notificationId: $id}) ' +
+        'SET n.channel = $channel, n.status = $status, n.purpose = $purpose, n.deliveredAt = datetime($deliveredAt) ' +
+        'MERGE (b)-[:HAS_THREE_WAY_NOTIFICATION]->(n)',
+      params: {
+        bookingId: input.booking.bookingId,
+        channel: input.channel,
+        status: input.status,
+        purpose: input.purpose,
+        deliveredAt,
+      },
+    },
+    chroma: {
+      collection: NOTIFICATIONS_CHROMA,
+      document:
+        `Three-way call ${input.purpose} notification ${input.status} by ${input.channel} ` +
+        `for ${input.recipientRole} on booking ${input.booking.bookingId}.`,
+      metadata: {
+        kind: 'three_way_notification',
+        bookingId: input.booking.bookingId,
+        recipientRole: input.recipientRole,
+        channel: input.channel,
+        status: input.status,
+        purpose: input.purpose,
+        deliveredAt,
+      },
+    },
+  });
+  const readback = await readNotificationById(notificationId);
+  if (!readback) throw new Error('three_way_notification_readback_failed');
+}
+
+async function sendThreeWayNotification(input: {
+  booking: McsThreeWayBookingRecord;
+  recipient: BARecord;
+  recipientRole: 'booker' | 'sponsor';
+  otherName: string;
+  purpose: 'booking_confirmation' | 'booking_cancelled' | 'booking_reminder';
+  icsText?: string;
+}): Promise<void> {
+  const localTime = formatRecipientTime(input.booking.startAt, input.recipient.timezone);
+  const isCancel = input.purpose === 'booking_cancelled';
+  const isReminder = input.purpose === 'booking_reminder';
+  const text = isCancel
+    ? `Team Magnificent: your three-way call with ${input.otherName} for ${localTime} was cancelled.`
+    : isReminder
+      ? `Team Magnificent reminder: your three-way call with ${input.otherName} starts at ${localTime}.`
+      : `Team Magnificent: your three-way call with ${input.otherName} is booked for ${localTime}.`;
+
+  if (input.recipient.phone) {
+    try {
+      const result = await sendSms({ to: input.recipient.phone, text });
+      await writeThreeWayNotification({
+        booking: input.booking,
+        recipientRole: input.recipientRole,
+        recipientTmagId: input.recipient.tmagId,
+        channel: 'sms',
+        status: 'sent',
+        providerMessageId: result.messageId,
+        error: null,
+        purpose: input.purpose,
+      });
+    } catch (err) {
+      await writeThreeWayNotification({
+        booking: input.booking,
+        recipientRole: input.recipientRole,
+        recipientTmagId: input.recipient.tmagId,
+        channel: 'sms',
+        status: err instanceof TelnyxConfigError ? 'skipped' : 'failed',
+        providerMessageId: null,
+        error: err instanceof TelnyxConfigError || err instanceof TelnyxError ? err.message : String(err),
+        purpose: input.purpose,
+      });
+    }
+  }
+
+  if (input.recipient.email) {
+    try {
+      const result = await sendEmail({
+        to: input.recipient.email,
+        subject: isCancel
+          ? 'Three-way call cancelled'
+          : isReminder
+            ? 'Three-way call reminder'
+            : 'Three-way call booked',
+        text: `${text}${input.icsText ? `\n\nCalendar invite:\n${input.icsText}` : ''}`,
+      });
+      await writeThreeWayNotification({
+        booking: input.booking,
+        recipientRole: input.recipientRole,
+        recipientTmagId: input.recipient.tmagId,
+        channel: 'email',
+        status: 'sent',
+        providerMessageId: result.messageId,
+        error: null,
+        purpose: input.purpose,
+      });
+    } catch (err) {
+      await writeThreeWayNotification({
+        booking: input.booking,
+        recipientRole: input.recipientRole,
+        recipientTmagId: input.recipient.tmagId,
+        channel: 'email',
+        status: err instanceof ResendConfigError ? 'skipped' : 'failed',
+        providerMessageId: null,
+        error: err instanceof ResendConfigError || err instanceof ResendError ? err.message : String(err),
+        purpose: input.purpose,
+      });
+    }
+  }
+}
+
+async function scheduleThreeWayReminder(
+  booking: McsThreeWayBookingRecord,
+  icsText: string,
+): Promise<string> {
+  const reminderId = `threeway_reminder_${randomUUID()}`;
+  const dueAt = new Date(new Date(booking.startAt).getTime() - REMINDER_LEAD_MINUTES * 60_000).toISOString();
+  const createdAt = new Date().toISOString();
+  await tripleStackWrite({
+    id: reminderId,
+    mongoCollection: REMINDERS_COLLECTION,
+    mongoDoc: {
+      reminderId,
+      bookingId: booking.bookingId,
+      status: 'scheduled',
+      dueAt,
+      leadMinutes: REMINDER_LEAD_MINUTES,
+      leadPolicyNote: '[REMINDER LEAD - confirm with Kevin]',
+      icsText,
+      createdAt,
+      firedAt: null,
+      voidedAt: null,
+    },
+    neo4j: {
+      cypher:
+        'MERGE (b:TmagThreeWayBooking {bookingId: $bookingId}) ' +
+        'MERGE (r:TmagThreeWayReminder {reminderId: $id}) ' +
+        'SET r.status = "scheduled", r.dueAt = datetime($dueAt), r.leadMinutes = $leadMinutes ' +
+        'MERGE (b)-[:HAS_THREE_WAY_REMINDER]->(r)',
+      params: { bookingId: booking.bookingId, dueAt, leadMinutes: REMINDER_LEAD_MINUTES },
+    },
+    chroma: {
+      collection: REMINDERS_CHROMA,
+      document:
+        `Three-way call reminder scheduled for booking ${booking.bookingId} ` +
+        `${REMINDER_LEAD_MINUTES} minutes before ${booking.startAt}.`,
+      metadata: {
+        kind: 'three_way_reminder',
+        bookingId: booking.bookingId,
+        dueAt,
+        status: 'scheduled',
+      },
+    },
+  });
+  const readback = await readReminderById(reminderId);
+  if (!readback) throw new Error('three_way_reminder_readback_failed');
+  return reminderId;
+}
+
+async function updateBookingDeliveryFields(input: {
+  bookingId: string;
+  icsText?: string;
+  reminderId?: string | null;
+  reminderLeadMinutes?: number | null;
+}): Promise<void> {
+  await persistenceCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: BOOKINGS_COLLECTION,
+    filter: { _id: input.bookingId },
+    update: {
+      $set: {
+        ...(input.icsText ? { icsText: input.icsText } : {}),
+        ...(input.reminderId !== undefined ? { reminderId: input.reminderId } : {}),
+        ...(input.reminderLeadMinutes !== undefined ? { reminderLeadMinutes: input.reminderLeadMinutes } : {}),
+      },
+    },
+  });
+  await persistenceCall('neo4j', 'cypher', {
+    query:
+      'MATCH (b:TmagThreeWayBooking {bookingId: $bookingId}) ' +
+      'SET b.icsText = coalesce($icsText, b.icsText), ' +
+      'b.reminderId = $reminderId, b.reminderLeadMinutes = $reminderLeadMinutes',
+    params: {
+      bookingId: input.bookingId,
+      icsText: input.icsText ?? null,
+      reminderId: input.reminderId ?? null,
+      reminderLeadMinutes: input.reminderLeadMinutes ?? null,
+    },
+  });
+  await persistenceCall('chromadb', 'add', {
+    collection: BOOKINGS_CHROMA,
+    ids: [`threeway_booking_delivery_${input.bookingId}`],
+    documents: [
+      `Three-way booking ${input.bookingId} has calendar invite and reminder delivery metadata attached.`,
+    ],
+    metadatas: [{
+      kind: 'three_way_booking_delivery',
+      bookingId: input.bookingId,
+      reminderId: input.reminderId ?? null,
+      reminderLeadMinutes: input.reminderLeadMinutes ?? null,
+    }],
+  });
+  const readback = await readBookingById(input.bookingId);
+  if (!readback) throw new Error('booking_delivery_readback_failed');
+  if (input.reminderId !== undefined && readback.reminderId !== input.reminderId) {
+    throw new Error('booking_delivery_reminder_readback_failed');
+  }
+}
+
+async function voidThreeWayReminder(bookingId: string): Promise<void> {
+  const voidedAt = new Date().toISOString();
+  await persistenceCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: REMINDERS_COLLECTION,
+    filter: { bookingId, status: 'scheduled' },
+    update: { $set: { status: 'voided', voidedAt } },
+    multi: true,
+  });
+  await persistenceCall('neo4j', 'cypher', {
+    query:
+      'MATCH (r:TmagThreeWayReminder)<-[:HAS_THREE_WAY_REMINDER]-(:TmagThreeWayBooking {bookingId: $bookingId}) ' +
+      'WHERE r.status = "scheduled" SET r.status = "voided", r.voidedAt = datetime($voidedAt)',
+    params: { bookingId, voidedAt },
+  });
+  await persistenceCall('chromadb', 'add', {
+    collection: REMINDERS_CHROMA,
+    ids: [`threeway_reminder_void_${bookingId}_${voidedAt}`],
+    documents: [`Three-way call reminders voided for booking ${bookingId} at ${voidedAt}.`],
+    metadatas: [{ kind: 'three_way_reminder_void', bookingId, status: 'voided', voidedAt }],
+  });
+  const remaining = await persistenceCall<{ documents?: Array<{ reminderId?: string }> }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: REMINDERS_COLLECTION,
+    filter: { bookingId, status: 'scheduled' },
+    limit: 1,
+  });
+  if (remaining.documents?.[0]) throw new Error('three_way_reminder_void_readback_failed');
+}
+
+async function markThreeWayReminderFired(reminderId: string): Promise<void> {
+  const firedAt = new Date().toISOString();
+  await persistenceCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: REMINDERS_COLLECTION,
+    filter: { _id: reminderId },
+    update: { $set: { status: 'fired', firedAt } },
+  });
+  await persistenceCall('neo4j', 'cypher', {
+    query:
+      'MATCH (r:TmagThreeWayReminder {reminderId: $reminderId}) ' +
+      'SET r.status = "fired", r.firedAt = datetime($firedAt)',
+    params: { reminderId, firedAt },
+  });
+  await persistenceCall('chromadb', 'add', {
+    collection: REMINDERS_CHROMA,
+    ids: [`threeway_reminder_fired_${reminderId}_${firedAt}`],
+    documents: [`Three-way call reminder ${reminderId} fired at ${firedAt}.`],
+    metadatas: [{ kind: 'three_way_reminder_fired', reminderId, status: 'fired', firedAt }],
+  });
+  const readback = await readReminderById(reminderId);
+  if (readback?.status !== 'fired') throw new Error('three_way_reminder_fired_readback_failed');
+}
+
+export async function processDueThreeWayReminders(now = new Date()): Promise<{
+  scanned: number;
+  fired: number;
+}> {
+  const result = await persistenceCall<{
+    documents?: Array<{ reminderId?: string; bookingId?: string; dueAt?: string }>;
+  }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: REMINDERS_COLLECTION,
+    filter: { status: 'scheduled', dueAt: { $lte: now.toISOString() } },
+    sort: { dueAt: 1 },
+    limit: 25,
+  });
+  const reminders = result.documents ?? [];
+  let fired = 0;
+  for (const reminder of reminders) {
+    if (!reminder.reminderId || !reminder.bookingId) continue;
+    const booking = await readBookingById(reminder.bookingId);
+    if (!booking || booking.status !== 'booked') {
+      await voidThreeWayReminder(reminder.bookingId);
+      continue;
+    }
+    const [booker, sponsor] = await Promise.all([
+      findBAByTmagId(booking.bookerTmagId),
+      findBAByTmagId(booking.sponsorTmagId),
+    ]);
+    if (!booker || !sponsor) continue;
+    await Promise.all([
+      sendThreeWayNotification({
+        booking,
+        recipient: booker,
+        recipientRole: 'booker',
+        otherName: fullName(sponsor),
+        purpose: 'booking_reminder',
+        icsText: booking.icsText,
+      }),
+      sendThreeWayNotification({
+        booking,
+        recipient: sponsor,
+        recipientRole: 'sponsor',
+        otherName: fullName(booker),
+        purpose: 'booking_reminder',
+        icsText: booking.icsText,
+      }),
+    ]);
+    await markThreeWayReminderFired(reminder.reminderId);
+    fired += 1;
+  }
+  return { scanned: reminders.length, fired };
 }
 
 async function activeBookingsForSponsors(
@@ -614,7 +1044,37 @@ export async function createThreeWayBooking(input: {
 
   const readback = await readBookingById(bookingId);
   if (!readback) throw new Error('booking_readback_failed');
-  return { ok: true, booking: readback };
+
+  const icsText = buildThreeWayIcs(readback, booker, sponsor);
+  const reminderId = await scheduleThreeWayReminder(readback, icsText);
+  await updateBookingDeliveryFields({
+    bookingId,
+    icsText,
+    reminderId,
+    reminderLeadMinutes: REMINDER_LEAD_MINUTES,
+  });
+  const enriched = await readBookingById(bookingId);
+  const bookingForDelivery = enriched ?? readback;
+  await Promise.all([
+    sendThreeWayNotification({
+      booking: bookingForDelivery,
+      recipient: booker,
+      recipientRole: 'booker',
+      otherName: fullName(sponsor),
+      purpose: 'booking_confirmation',
+      icsText,
+    }),
+    sendThreeWayNotification({
+      booking: bookingForDelivery,
+      recipient: sponsor,
+      recipientRole: 'sponsor',
+      otherName: fullName(booker),
+      purpose: 'booking_confirmation',
+      icsText,
+    }),
+  ]);
+
+  return { ok: true, booking: enriched ?? readback };
 }
 
 export async function listThreeWayBookings(
@@ -704,5 +1164,28 @@ export async function cancelThreeWayBooking(
 
   const readback = await readBookingById(bookingId);
   if (!readback) throw new Error('booking_cancel_readback_failed');
+  await voidThreeWayReminder(bookingId);
+  const [booker, sponsor] = await Promise.all([
+    findBAByTmagId(booking.bookerTmagId),
+    findBAByTmagId(booking.sponsorTmagId),
+  ]);
+  if (booker && sponsor) {
+    await Promise.all([
+      sendThreeWayNotification({
+        booking: readback,
+        recipient: booker,
+        recipientRole: 'booker',
+        otherName: fullName(sponsor),
+        purpose: 'booking_cancelled',
+      }),
+      sendThreeWayNotification({
+        booking: readback,
+        recipient: sponsor,
+        recipientRole: 'sponsor',
+        otherName: fullName(booker),
+        purpose: 'booking_cancelled',
+      }),
+    ]);
+  }
   return { ok: true, booking: readback };
 }

@@ -52,6 +52,7 @@ import {
   readMasterContent,
   interpolateMasterContent,
 } from '../services/masterContent.js';
+import { createStoredApprovedKnowledgeProvider } from '../services/knowledge/approvedKnowledgeStore.js';
 import { lastInitialOf } from './prospects.js';
 import type {
   McsCreateIvoryNamePayload,
@@ -67,6 +68,12 @@ import type {
   McsIvoryStatus,
   McsUpdateIvoryNamePayload,
 } from '@momentum/shared';
+import type {
+  McsKnowledgeReference,
+  McsRuntimeRequestScope,
+  McsTeamId,
+  McsTenantId,
+} from '@momentum/shared/runtime';
 import { createInvitation } from './invitations.js';
 import { ANGLE_LABEL } from './ivoryAngle.js';
 import { normalizePhone } from './prospectAccount.js';
@@ -74,6 +81,8 @@ import { normalizePhone } from './prospectAccount.js';
 const MONGO_DB = 'momentum';
 const IVORY_COLLECTION = 'tmag_ivory_prospect_names';
 const CHROMA_COLLECTION = 'mcs_ivory_prospect_names';
+const TENANT_ID = 'tenant_team_magnificent';
+const TEAM_ID = 'team_magnificent';
 
 const ALLOWED_CATEGORIES: ReadonlySet<McsIvoryCategory> = new Set([
   'family',
@@ -701,8 +710,63 @@ function parseCoachJson(raw: string): { coaching: string; prompts: string[] } | 
  * note tells the model any leftover `{{placeholder}}` is a stylistic cue, not
  * literal output.
  */
+function ivoryKnowledgeScope(): McsRuntimeRequestScope {
+  return {
+    tenantId: TENANT_ID as McsTenantId,
+    teamId: TEAM_ID as McsTeamId,
+    teamKey: 'team_magnificent',
+    teamName: 'Team Magnificent',
+  };
+}
+
+function buildIvoryKnowledgeQuery(input: McsIvoryCoachPayload): string {
+  return [
+    'Ivory invitation list creation Team Magnificent',
+    input.productName ?? '',
+    ANGLE_LABEL[input.angle],
+    `roster size ${input.rosterSize}`,
+  ].filter(Boolean).join(' ');
+}
+
+function renderApprovedKnowledgeGrounding(refs: readonly McsKnowledgeReference[]): string {
+  if (refs.length === 0) return '';
+  return [
+    '',
+    'APPROVED KNOWLEDGE GROUNDING (system — factual background only):',
+    '- Use these approved Team Magnificent knowledge items as factual grounding.',
+    '- HARD COMPLIANCE RULES above always win over any retrieved wording.',
+    '- Do not mention source ids, retrieval, Chroma, or internal knowledge records.',
+    ...refs.slice(0, 5).map((ref, index) => {
+      const title = (ref.title || `Approved knowledge ${index + 1}`).replace(/\s+/g, ' ').trim();
+      const summary = (ref.summary || '').replace(/\s+/g, ' ').trim();
+      return `${index + 1}. ${title}: ${summary}`.slice(0, 850);
+    }),
+  ].join('\n');
+}
+
+async function getIvoryApprovedKnowledgeGrounding(
+  input: McsIvoryCoachPayload,
+): Promise<string> {
+  try {
+    const provider = createStoredApprovedKnowledgeProvider();
+    const refs = await provider.searchApprovedKnowledge(
+      ivoryKnowledgeScope(),
+      buildIvoryKnowledgeQuery(input),
+      5,
+    );
+    return renderApprovedKnowledgeGrounding(refs);
+  } catch (err) {
+    console.warn(
+      '[ivory.coach] approved knowledge unavailable; continuing prompt-only:',
+      err instanceof Error ? err.message : String(err),
+    );
+    return '';
+  }
+}
+
 async function buildCoachSystem(input: McsIvoryCoachPayload): Promise<string> {
   const voiceTemplate = await readMasterContent('team.ivory.coach_prompt');
+  const grounding = await getIvoryApprovedKnowledgeGrounding(input);
   const voice = interpolateMasterContent(voiceTemplate, {
     productName: input.productName ?? undefined,
     angle: ANGLE_LABEL[input.angle],
@@ -715,6 +779,7 @@ async function buildCoachSystem(input: McsIvoryCoachPayload): Promise<string> {
     'COMPLIANCE RULES and OUTPUT FORMAT above ALWAYS win — any {{placeholder}}',
     'left in the text is a stylistic cue, never literal output):',
     voice,
+    grounding,
   ].join('\n');
 }
 

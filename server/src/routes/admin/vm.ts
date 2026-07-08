@@ -10,8 +10,14 @@ import express, { type Request, type Router } from 'express';
 import { z } from 'zod';
 import { requireAdmin } from '../../middleware/requireAuth.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
-import { buildAdminVmOverview } from '../../domain/adminVm.js';
+import {
+  buildAdminVmCampaignProgress,
+  buildAdminVmOverview,
+  buildAdminVmQueueState,
+  runAdminVmDialerAction,
+} from '../../domain/adminVm.js';
 import type {
+  McsAdminVmDialerAction,
   McsAdminVmOwnershipCorrectionPayload,
   McsAdminVmOwnershipCorrectionResponse,
   McsAuditActor,
@@ -55,6 +61,80 @@ adminVmRoutes.get('/overview', requireAdmin, async (req, res) => {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `VM overview failed: ${msg}` });
+  }
+});
+
+adminVmRoutes.get('/queue', requireAdmin, async (_req, res) => {
+  try {
+    const payload = await buildAdminVmQueueState();
+    res.status(200).json(payload);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `VM queue failed: ${msg}` });
+  }
+});
+
+adminVmRoutes.get('/campaigns/:id/progress', requireAdmin, async (req, res) => {
+  const campaignId = String(req.params.id ?? '').trim();
+  if (!campaignId) {
+    res.status(400).json({ ok: false, error: 'Missing campaign id.' });
+    return;
+  }
+  try {
+    const payload = await buildAdminVmCampaignProgress(campaignId);
+    res.status(200).json(payload);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `VM campaign progress failed: ${msg}` });
+  }
+});
+
+const ACTION_BY_ROUTE: Record<string, McsAdminVmDialerAction> = {
+  pause: 'pause',
+  resume: 'resume',
+  'retry-failed': 'retry_failed',
+  cancel: 'cancel',
+};
+
+adminVmRoutes.post('/campaigns/:id/:action', requireAdmin, async (req, res) => {
+  const campaignId = String(req.params.id ?? '').trim();
+  const routeAction = String(req.params.action ?? '').trim();
+  const action = ACTION_BY_ROUTE[routeAction];
+  if (!campaignId) {
+    res.status(400).json({ ok: false, error: 'Missing campaign id.' });
+    return;
+  }
+  if (!action) {
+    res.status(404).json({ ok: false, error: 'Unknown VM campaign action.' });
+    return;
+  }
+  try {
+    const payload = await runAdminVmDialerAction({
+      vmCampaignId: campaignId,
+      action,
+      actorTmagId: req.session!.tmagId,
+    });
+
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: `admin.vm.${action}`,
+      entity: { kind: 'admin_session', id: campaignId, displayLabel: null },
+      severity: action === 'cancel' ? 'critical' : 'warn',
+      after: payload as unknown as Record<string, unknown>,
+      reason: null,
+      context: {
+        ip: req.ip ?? null,
+        userAgent: req.get('user-agent') ?? null,
+        route: `/api/admin/vm/campaigns/${campaignId}/${routeAction}`,
+        method: 'POST',
+        requestId: null,
+      },
+    });
+
+    res.status(200).json(payload);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `VM action failed: ${msg}` });
   }
 });
 

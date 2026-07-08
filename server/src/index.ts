@@ -33,6 +33,7 @@ import { startBroadcastWorker } from './services/broadcastQueue.js';
 import { startVmDeliveryWorker } from './workers/vmDeliveryWorker.js';
 import { startVmImportWorker } from './workers/vmImportWorker.js';
 import { startVmWebhookWorker } from './workers/vmWebhookWorker.js';
+import { startThreeWayReminderWorker } from './workers/threeWayReminderWorker.js';
 import { startProjectionOutboxWorker } from './services/projectionOutbox.js';
 import { ensureChromaCollections } from './services/chromaCollections.js';
 import {
@@ -291,6 +292,7 @@ void startBroadcastWorker();
 void startVmImportWorker();
 void startVmDeliveryWorker();
 void startVmWebhookWorker();
+startThreeWayReminderWorker();
 // Projection-outbox drain loop (Phase 10 audit H1). The tiered writer enqueues
 // failed Tier-2/3 Neo4j/Chroma projections to a durable Mongo outbox; this
 // worker replays them until they land or are dead-lettered. Without it the

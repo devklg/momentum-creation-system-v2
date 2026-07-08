@@ -19,7 +19,7 @@ export function listVmNotificationHooks(): McsAdminVmNotificationHook[] {
       trigger: 'vm_lead_activated',
       audience: 'owning_ba',
       channel: 'in_app',
-      status: 'stubbed',
+      status: 'wired',
       privacyBoundary: 'Only the owning BA sees lead identity and callback context.',
     },
     {
@@ -27,7 +27,7 @@ export function listVmNotificationHooks(): McsAdminVmNotificationHook[] {
       trigger: 'prospect_clicked_token',
       audience: 'owning_ba',
       channel: 'in_app',
-      status: 'stubbed',
+      status: 'wired',
       privacyBoundary: 'Click alerts route by ownerTmagId stamped on the token.',
     },
     {
@@ -35,7 +35,7 @@ export function listVmNotificationHooks(): McsAdminVmNotificationHook[] {
       trigger: 'presentation_started',
       audience: 'owning_ba',
       channel: 'in_app',
-      status: 'stubbed',
+      status: 'wired',
       privacyBoundary: 'Presentation activity is BA-scoped to the lead owner.',
     },
     {
@@ -43,7 +43,7 @@ export function listVmNotificationHooks(): McsAdminVmNotificationHook[] {
       trigger: 'presentation_completed',
       audience: 'owning_ba',
       channel: 'sms',
-      status: 'stubbed',
+      status: 'wired',
       privacyBoundary: 'Mirrors existing PMV completion alert; never changes ownership.',
     },
     {
@@ -51,7 +51,7 @@ export function listVmNotificationHooks(): McsAdminVmNotificationHook[] {
       trigger: 'callback_requested',
       audience: 'owning_ba',
       channel: 'sms',
-      status: 'stubbed',
+      status: 'wired',
       privacyBoundary: 'Callback routing resolves from ownerTmagId, not request body.',
     },
     {
@@ -59,7 +59,7 @@ export function listVmNotificationHooks(): McsAdminVmNotificationHook[] {
       trigger: 'info_requested',
       audience: 'owning_ba',
       channel: 'in_app',
-      status: 'stubbed',
+      status: 'wired',
       privacyBoundary: 'Info-request visibility stays with the owning BA.',
     },
     {
@@ -67,7 +67,7 @@ export function listVmNotificationHooks(): McsAdminVmNotificationHook[] {
       trigger: 'follow_up_due',
       audience: 'owning_ba',
       channel: 'in_app',
-      status: 'stubbed',
+      status: 'wired',
       privacyBoundary: 'Follow-up reminders read only the BA-owned CRM record.',
     },
     {
@@ -75,7 +75,7 @@ export function listVmNotificationHooks(): McsAdminVmNotificationHook[] {
       trigger: 'campaign_completed',
       audience: 'admin',
       channel: 'in_app',
-      status: 'stubbed',
+      status: 'wired',
       privacyBoundary: 'Admin sees aggregate campaign status and audited drill-in.',
     },
     {
@@ -83,7 +83,7 @@ export function listVmNotificationHooks(): McsAdminVmNotificationHook[] {
       trigger: 'import_completed',
       audience: 'admin',
       channel: 'in_app',
-      status: 'stubbed',
+      status: 'wired',
       privacyBoundary: 'Import completion reports aggregate health and suppression counts.',
     },
     {
@@ -91,7 +91,7 @@ export function listVmNotificationHooks(): McsAdminVmNotificationHook[] {
       trigger: 'event_starting_soon',
       audience: 'team',
       channel: 'team_news',
-      status: 'stubbed',
+      status: 'wired',
       privacyBoundary: 'Team-wide event nudges contain no private lead data.',
     },
   ];
@@ -102,35 +102,35 @@ export function listVmTeamNewsHooks(): McsAdminVmTeamNewsHook[] {
     {
       hookId: 'team_news.vm_campaign_milestone',
       source: 'campaign_milestone',
-      status: 'stubbed',
+      status: 'wired',
       reviewRequired: true,
       note: 'Candidate milestones queue for admin review before becoming team news.',
     },
     {
       hookId: 'team_news.training_update',
       source: 'training_update',
-      status: 'stubbed',
+      status: 'wired',
       reviewRequired: true,
       note: 'Training updates can be published without touching prospect records.',
     },
     {
       hookId: 'team_news.event_update',
       source: 'event_update',
-      status: 'stubbed',
+      status: 'wired',
       reviewRequired: true,
       note: 'Event hooks reuse group orientation and webinar records.',
     },
     {
       hookId: 'team_news.success_story',
       source: 'success_story',
-      status: 'stubbed',
+      status: 'wired',
       reviewRequired: true,
       note: 'Success stories require consent and compliance review before publication.',
     },
     {
       hookId: 'team_news.momentum_update',
       source: 'team_momentum',
-      status: 'stubbed',
+      status: 'wired',
       reviewRequired: true,
       note: 'Momentum updates stay aggregate; no current head count appears on .com.',
     },

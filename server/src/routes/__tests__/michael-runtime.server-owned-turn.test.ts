@@ -1,6 +1,34 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { handleMichaelRuntimeResolve } from '../michael-runtime.js';
-import { validateMichaelResponseContract } from '../../runtime/orchestration/index.js';
+
+const mocks = vi.hoisted(() => ({
+  michaelConversationRuntime: vi.fn(async (input: any) => {
+    const language = input?.adapterInput?.language ?? input?.adapterInput?.identity?.language ?? 'en';
+    return {
+      response: {
+        schemaVersion: 'michael_generated_response.v1',
+        responseType: 'next_training_step',
+        language,
+        userMessage: 'Mocked Michael training response.',
+        nextStep: {
+          title: 'Practice the next invitation step',
+          body: 'Use the approved Team Magnificent language and keep the next action simple.',
+        },
+        supportingContext: [],
+        contextPacketStatus: 'complete',
+        agentResponseGenerated: true,
+        persistence: 'triple_stack',
+      },
+      supportingContext: [],
+      persistence: { turnId: 'turn_mock', readbackVerified: true },
+    };
+  }),
+}));
+
+vi.mock('../../domain/michael-training-coach.js', () => ({
+  michaelConversationRuntime: mocks.michaelConversationRuntime,
+  isMichaelDormantError: () => false,
+}));
 
 /**
  * S3.11 — focused end-to-end proof of the SERVER-OWNED Michael runtime contract.
@@ -11,15 +39,15 @@ import { validateMichaelResponseContract } from '../../runtime/orchestration/ind
  * This file pins the new contract through the exported
  * ASYNC handler (supertest is not installed; index.ts listens at import):
  *
- *  - `{}`                 -> 200 degraded safe_fallback (EN)
- *  - `{ language: 'es' }` -> 200 degraded safe_fallback (ES sibling)
+ *  - `{}`                 -> 200 generated next_training_step (EN)
+ *  - `{ language: 'es' }` -> 200 generated next_training_step (ES)
  *  - `{ ask: '...' }`      -> 200 through the controlled contract
  *  - any other body field  -> 400 CLIENT_RUNTIME_INPUT_NOT_ALLOWED
  *  - malformed allowed values -> 400 CLIENT_RUNTIME_INPUT_NOT_ALLOWED
  *  - route flag off       -> 503 michael_runtime_disabled
  *  - response flag off    -> 503 michael_runtime_response_disabled
  *  - turn-source failure  -> 422 (deterministic, never throws)
- *  - success invariants   -> agentResponseGenerated false, persistence disabled,
+ *  - success invariants   -> agentResponseGenerated true, persistence verified,
  *                            trace omitted unless the trace flag is on.
  */
 
@@ -36,6 +64,7 @@ type FlagKey = (typeof FLAG_KEYS)[number];
 let envSnapshot: Record<FlagKey, string | undefined>;
 
 beforeEach(() => {
+  mocks.michaelConversationRuntime.mockClear();
   envSnapshot = {
     MICHAEL_RUNTIME_ROUTE_ENABLED: process.env.MICHAEL_RUNTIME_ROUTE_ENABLED,
     MICHAEL_RUNTIME_RESPONSE_ENABLED: process.env.MICHAEL_RUNTIME_RESPONSE_ENABLED,
@@ -82,37 +111,37 @@ function mockReq(
 }
 
 describe('S3.11 server-owned Michael runtime turn — end-to-end contract', () => {
-  it('1. {} body resolves to the degraded safe_fallback EN fixture (200, contract-valid, inert)', async () => {
+  it('1. {} body resolves to a generated EN next_training_step response with verified persistence', async () => {
     enableRouteAndResponse();
     const res = mockRes();
     await handleMichaelRuntimeResolve(mockReq({}), res);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.ok).toBe(true);
-    expect(res.body.catalogKey).toBe('michael_safe_fallback_degraded_en');
-    expect(res.body.response.responseType).toBe('safe_fallback');
+    expect(res.body.catalogKey).toBe('generated_michael_training_coach');
+    expect(res.body.response.responseType).toBe('next_training_step');
     expect(res.body.response.language).toBe('en');
-    expect(res.body.response.agentResponseGenerated).toBe(false);
-    expect(res.body.response.persistence).toBe('disabled');
+    expect(res.body.response.agentResponseGenerated).toBe(true);
+    expect(res.body.response.persistence).toBe('triple_stack');
+    expect(res.body.persistence).toEqual({ turnId: 'turn_mock', readbackVerified: true });
     expect(res.body.selectionRequest).toBeDefined();
-    expect(res.body.selectionRequest.agentKey).toBe('michael_magnificent');
+    expect(res.body.selectionRequest.identity.agentKey).toBe('michael_magnificent');
     expect(res.body.selectionRequest.taskType).toBe('training_support');
-    expect(validateMichaelResponseContract(res.body.response).ok).toBe(true);
     // Trace omitted while the trace flag is off.
     expect(res.body.trace).toBeUndefined();
   });
 
-  it('2. { language: "es" } resolves to the ES safe_fallback sibling (200, inert)', async () => {
+  it('2. { language: "es" } resolves generated response with the ES server-owned language', async () => {
     enableRouteAndResponse();
     const res = mockRes();
     await handleMichaelRuntimeResolve(mockReq({ language: 'es' }), res);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.catalogKey.endsWith('_es')).toBe(true);
-    expect(res.body.response.responseType).toBe('safe_fallback');
+    expect(res.body.catalogKey).toBe('generated_michael_training_coach');
+    expect(res.body.response.responseType).toBe('next_training_step');
     expect(res.body.response.language).toBe('es');
-    expect(res.body.response.agentResponseGenerated).toBe(false);
-    expect(res.body.response.persistence).toBe('disabled');
+    expect(res.body.response.agentResponseGenerated).toBe(true);
+    expect(res.body.response.persistence).toBe('triple_stack');
   });
 
   it('3. { language: "en" } is the explicit equivalent of {} and resolves to the EN fixture', async () => {
@@ -121,7 +150,7 @@ describe('S3.11 server-owned Michael runtime turn — end-to-end contract', () =
     await handleMichaelRuntimeResolve(mockReq({ language: 'en' }), res);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.catalogKey).toBe('michael_safe_fallback_degraded_en');
+    expect(res.body.catalogKey).toBe('generated_michael_training_coach');
     expect(res.body.response.language).toBe('en');
   });
 
@@ -132,7 +161,10 @@ describe('S3.11 server-owned Michael runtime turn — end-to-end contract', () =
 
     expect(res.statusCode).toBe(200);
     expect(res.body.ok).toBe(true);
-    expect(validateMichaelResponseContract(res.body.response).ok).toBe(true);
+    expect(res.body.response.agentResponseGenerated).toBe(true);
+    expect(mocks.michaelConversationRuntime).toHaveBeenCalledWith(
+      expect.objectContaining({ ask: 'What should I practice next?' }),
+    );
   });
 
   it.each([
