@@ -23,6 +23,7 @@ type NavItem = { to: string; label: string; end?: boolean };
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/cockpit', label: 'Cockpit' },
+  { to: '/launch', label: 'Launch' },
   { to: '/invitations', label: 'Invitations' },
   { to: '/crm', label: 'CRM' },
   { to: '/ivory', label: 'Ivory', end: true },

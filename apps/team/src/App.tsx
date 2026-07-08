@@ -5,6 +5,7 @@ import { RegisterPage } from './routes/register';
 import { LoginPage } from './routes/login';
 import { WelcomePage } from './routes/welcome';
 import { CockpitPage } from './routes/cockpit';
+import { RecruitingCycleDashboardPage } from './components/launch/RecruitingCycleDashboard';
 import { SteveSuccessInterviewPage } from './routes/steve-success-interview';
 import { TenStepsPage } from './routes/training/10-steps';
 import { FastStartHubPage } from './routes/training/fast-start/index';
@@ -34,6 +35,7 @@ export function App() {
       <Route path="/steve/discovery" element={<SteveSuccessInterviewPage />} />
       <Route element={<TeamShell />}>
         <Route path="/cockpit" element={<CockpitPage />} />
+        <Route path="/launch" element={<RecruitingCycleDashboardPage />} />
         <Route path="/invitations" element={<InvitationsPage />} />
         <Route path="/video-library" element={<VideoLibraryPage />} />
         <Route path="/ivory" element={<IvoryPage />} />
