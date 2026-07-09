@@ -16,6 +16,8 @@ The `knowledge/` folder is a placeholder/orientation location. The canonical aut
 
 There is currently **no** standalone `KNOWLEDGE_LAYER.md` and **no** standalone `KNOWLEDGE_SESSIONS.md` document in the repository. Both are referenced concepts whose authority lives in the documents below.
 
+For current session handoff state, see `CONTINUATION_CONTEXT.md`. It is living operational context, not ratified architecture.
+
 ---
 
 ## Where knowledge authority actually lives
