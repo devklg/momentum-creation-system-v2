@@ -4,6 +4,8 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type {
+  McsAdminVmLiveApprovalPayload,
+  McsAdminVmLiveApprovalResponse,
   McsAdminVmOverviewResponse,
   McsAdminVmOwnershipCorrectionResponse,
 } from '@momentum/shared';
@@ -41,6 +43,7 @@ export function VmPage() {
   const [correction, setCorrection] = useState<CorrectionForm>(EMPTY_CORRECTION);
   const [correctionResult, setCorrectionResult] = useState<string | null>(null);
   const [submittingCorrection, setSubmittingCorrection] = useState(false);
+  const [approvalBusyId, setApprovalBusyId] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -99,6 +102,64 @@ export function VmPage() {
       setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
     } finally {
       setSubmittingCorrection(false);
+    }
+  }
+
+  async function toggleLiveApproval(vmCampaignId: string, approved: boolean) {
+    const verb = approved ? 'approve this campaign for live VM delivery' : 'revoke live VM delivery approval';
+    if (!window.confirm(`Confirm ${verb}?`)) return;
+    if (!data) return;
+
+    const previous = data;
+    const optimistic: McsAdminVmOverviewResponse = {
+      ...data,
+      campaigns: data.campaigns.map((row) =>
+        row.vmCampaignId === vmCampaignId
+          ? { ...row, adminApprovedForLiveDelivery: approved }
+          : row,
+      ),
+    };
+
+    setApprovalBusyId(vmCampaignId);
+    setErr(null);
+    setData(optimistic);
+
+    try {
+      const payload: McsAdminVmLiveApprovalPayload = { vmCampaignId, approved };
+      const res = await fetch(`/api/admin/vm/campaigns/${encodeURIComponent(vmCampaignId)}/live-approval`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const result = (await res.json()) as
+        | McsAdminVmLiveApprovalResponse
+        | { ok: false; error: string };
+      if (!result.ok) {
+        setData(previous);
+        setErr(result.error || 'Live approval update failed.');
+        return;
+      }
+      setData((current) =>
+        current
+          ? {
+              ...current,
+              campaigns: current.campaigns.map((row) =>
+                row.vmCampaignId === result.vmCampaignId
+                  ? {
+                      ...row,
+                      adminApprovedForLiveDelivery: result.adminApprovedForLiveDelivery,
+                    }
+                  : row,
+              ),
+            }
+          : current,
+      );
+    } catch (e) {
+      setData(previous);
+      setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+    } finally {
+      setApprovalBusyId(null);
     }
   }
 
@@ -258,6 +319,7 @@ export function VmPage() {
                 <tr>
                   <th className="text-left px-3 py-2">Campaign</th>
                   <th className="text-left px-3 py-2">Provider</th>
+                  <th className="text-left px-3 py-2">Live</th>
                   <th className="text-right px-3 py-2">Delivered</th>
                   <th className="text-right px-3 py-2">Failed</th>
                   <th className="text-right px-3 py-2">Complete</th>
@@ -270,6 +332,13 @@ export function VmPage() {
                     <p className="text-[11px] text-cream-faint">{row.status} · {row.ownerName}</p>
                   </td>
                   <td className="px-3 py-2">{row.provider}</td>
+                  <td className="px-3 py-2">
+                    <LiveApprovalControl
+                      approved={isLiveApproved(row)}
+                      busy={approvalBusyId === row.vmCampaignId}
+                      onToggle={(approved) => void toggleLiveApproval(row.vmCampaignId, approved)}
+                    />
+                  </td>
                   <td className="px-3 py-2 text-right">{row.delivered}</td>
                   <td className="px-3 py-2 text-right">{row.deliveryFailed}</td>
                   <td className="px-3 py-2 text-right">{row.videoCompletions}</td>
@@ -356,6 +425,50 @@ function Stat({ label, value }: { label: string; value: number | string }) {
     <div className="flex items-center justify-between gap-3">
       <span className="text-sm text-cream-mute">{label}</span>
       <span className="font-mono text-sm text-cream">{value}</span>
+    </div>
+  );
+}
+
+function isLiveApproved(row: McsAdminVmOverviewResponse['campaigns'][number]): boolean {
+  return (
+    'adminApprovedForLiveDelivery' in row &&
+    row.adminApprovedForLiveDelivery === true
+  );
+}
+
+function LiveApprovalControl({
+  approved,
+  busy,
+  onToggle,
+}: {
+  approved: boolean;
+  busy: boolean;
+  onToggle: (approved: boolean) => void;
+}) {
+  return (
+    <div className="flex min-w-[150px] items-center gap-2">
+      <span
+        className={
+          'rounded border px-2 py-1 font-mono text-[9px] uppercase tracking-label ' +
+          (approved
+            ? 'border-teal/40 bg-teal/[0.06] text-teal'
+            : 'border-gold/40 bg-gold/[0.06] text-gold')
+        }
+      >
+        {approved ? 'Live approved' : 'Dry-run'}
+      </span>
+      <Button
+        size="sm"
+        disabled={busy}
+        onClick={() => onToggle(!approved)}
+        className={
+          approved
+            ? 'border border-line bg-transparent text-cream-mute hover:border-red-400/40 hover:text-red-300'
+            : 'border border-teal/30 bg-teal/[0.06] text-teal hover:border-teal/60'
+        }
+      >
+        {busy ? 'Saving…' : approved ? 'Revoke' : 'Approve-live'}
+      </Button>
     </div>
   );
 }
