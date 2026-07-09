@@ -1,6 +1,6 @@
 # Momentum Creation System V2 - Knowledge Base Document Index
 
-Updated: 2026-07-09T01:04:08.817Z
+Updated: 2026-07-09T01:49:39.745Z
 
 Chronological index of knowledge-base source documents. This file is refreshed by the KB ingestion path and can be regenerated with `server/scripts/update-kb-document-index.ts`.
 
@@ -13,14 +13,14 @@ Columns: Number, added-at timestamp, category, corpus, domain, document/file nam
 | Compensation Plan / Business | 5 |
 | Compliance / Policies | 10 |
 | Forms / Admin | 17 |
-| General Training | 28 |
+| General Training | 29 |
 | Product Science / Studies | 7 |
 | Products | 84 |
 | Team Training | 7 |
 | Vision / Strategy | 1 |
 | Wellness Education | 44 |
 
-## Index Update - 2026-07-09T01:04:08.817Z
+## Index Update - 2026-07-09T01:49:39.745Z
 
 | No. | Added At | Category | Corpus | Domain | Document / File | Source Location | Chunks | SourceId |
 | ---: | --- | --- | --- | --- | --- | --- | ---: | --- |
@@ -232,3 +232,5 @@ Columns: Number, added-at timestamp, category, corpus, domain, document/file nam
 | 206 | 2026-07-08T22:07:39.621Z | Team Training | Team Magnificent Training | training | Team Magnificent: Video Library | github:https://github.com/devklg/team-magnificent-training/blob/main/video-library.html | 5 | knowledge_source_507cc56e-8cb2-4730-ac23-0d7f4f2262fc |
 | 207 | 2026-07-08T22:09:07.552Z | Compensation Plan / Business | THREE Corporate Docs | training | THREE Nueva Compensation Plan | file:D:/THREE/compensation/nueva-comp.pdf | 22 | knowledge_source_bc254ce7-f2b2-47f8-86b3-af9f19a31bf9 |
 | 208 | 2026-07-08T22:27:20.194Z | General Training | Other | training | Don Failla — How To Build A Large Successful Multi-Level Marketing Organization (Ch 1–4) | file:D:/foundational-library/how-2-build/how-2-build-ch1-4-docling-fullocr.md | 71 | knowledge_source_1ef13d0b-2cde-4a12-ba8c-4a06ccb0f03c |
+| 209 | 2026-07-09T00:00:00.000Z | General Training | Other | organizational | Memory Gap Solutions for Semantic Context | repo:docs/agent-briefs/memory-gap-solutions-semantic-context.md | 8 | knowledge_source_6d39d7f0-9c82-4f1e-b15a-0f04b57d74ee |
+

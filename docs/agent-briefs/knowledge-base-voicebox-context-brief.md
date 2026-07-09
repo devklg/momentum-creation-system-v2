@@ -112,6 +112,7 @@ Kevin-approved knowledge is the app's authoritative base. Agent/system-captured 
 Protocol file:
 
 - `docs/kb-taxonomy-ingestion-protocol.md`
+- `docs/agent-briefs/memory-gap-solutions-semantic-context.md`
 
 All approved KB ingestion must go through `createKevinApprovedKnowledgeSource()` in
 `server/src/services/knowledge/approvedKnowledgeStore.ts`.

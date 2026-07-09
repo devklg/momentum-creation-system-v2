@@ -72,6 +72,9 @@ export function classifyKnowledgeTaxonomy(input: KnowledgeTaxonomyInput): Knowle
   if (matches(text, ['team-magnificent-training', 'onboarding', '72-hour', 'video library', '10 steps', 'training hub', 'success steps'])) {
     categoryTags.add('team-training');
   }
+  if (matches(text, ['semantic-context', 'semantic context', 'context-manager', 'context manager', 'memory-gap', 'memory gap', 'runtime trace'])) {
+    categoryTags.add('general-training');
+  }
   if (matches(text, ['vision', 'strategic foundation'])) {
     categoryTags.add('vision-strategy');
   }

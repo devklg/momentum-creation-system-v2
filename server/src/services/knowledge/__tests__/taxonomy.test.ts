@@ -43,6 +43,19 @@ describe('knowledge taxonomy', () => {
     expect(compliance.complianceSensitivity).toBe('high');
   });
 
+  it('classifies semantic context memory briefs as general training, not admin forms', () => {
+    const taxonomy = classifyKnowledgeTaxonomy({
+      title: 'Memory Gap Solutions for Semantic Context',
+      sourceRef: 'repo:docs/agent-briefs/memory-gap-solutions-semantic-context.md',
+      domain: 'organizational',
+      topicTags: ['context-manager', 'runtime-trace', 'ivory'],
+    });
+
+    expect(taxonomy.primaryCategory).toBe('general-training');
+    expect(taxonomy.categoryTags).toContain('general-training');
+    expect(taxonomy.categoryTags).not.toContain('forms-admin');
+  });
+
   it('emits Chroma-safe flags and taxonomy filters for runtime hints', () => {
     const hints = inferTaxonomyHints('Visage skincare serum');
     const where = taxonomyFilterFromHints(hints);
