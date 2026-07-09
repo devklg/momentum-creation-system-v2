@@ -48,6 +48,47 @@ async function readJson(res: Awaited<ReturnType<typeof fetch>>): Promise<unknown
   return JSON.parse(text) as unknown;
 }
 
+// Chroma Cloud caps metadata at 32 keys per record. Local Chroma has no cap,
+// so rich ingestion metadata (46+ keys) writes fine locally but 422s on Cloud.
+// This packs metadata to <=32 keys losslessly for retrieval:
+//   1. Drop `kb.*` boolean flags — they duplicate the pipe-delimited *Tags
+//      strings (topicTags/categoryTags/productTags), which stay filterable.
+//   2. If still over, drop `taxonomy*` mirror fields (derived duplicates of
+//      the canonical tag strings).
+//   3. Last resort: keep the 32 highest-value keys (core scope/domain/status
+//      /authority/source/tag fields sort ahead of incidental ones).
+const CHROMA_CLOUD_MAX_METADATA_KEYS = 32;
+const META_KEY_PRIORITY = [
+  'chunkId', 'documentId', 'sourceId', 'sourceTitle', 'title', 'heading',
+  'domain', 'language', 'status', 'retrievalEligible', 'authority', 'authorityStatus',
+  'kind', 'chunkIndex', 'sourceVersion', 'startOffset', 'endOffset',
+  'scope.tenantId', 'scope.teamId', 'scope.teamKey', 'scope.teamName',
+  'agentScopes', 'surfaceScopes',
+  'topicTags', 'categoryTags', 'productTags',
+];
+
+export function fitChromaCloudMetadata(
+  meta: Record<string, unknown> | null | undefined,
+): Record<string, unknown> {
+  if (!meta) return {};
+  let entries = Object.entries(meta);
+  if (entries.length <= CHROMA_CLOUD_MAX_METADATA_KEYS) return meta;
+  // 1. drop kb.* boolean explosion (redundant with *Tags strings)
+  entries = entries.filter(([k]) => !k.startsWith('kb.'));
+  if (entries.length <= CHROMA_CLOUD_MAX_METADATA_KEYS) return Object.fromEntries(entries);
+  // 2. drop taxonomy* mirror fields
+  entries = entries.filter(([k]) => !k.startsWith('taxonomy'));
+  if (entries.length <= CHROMA_CLOUD_MAX_METADATA_KEYS) return Object.fromEntries(entries);
+  // 3. keep highest-value keys by priority, then alphabetical for stability
+  entries.sort(([a], [b]) => {
+    const pa = META_KEY_PRIORITY.indexOf(a);
+    const pb = META_KEY_PRIORITY.indexOf(b);
+    if (pa !== -1 || pb !== -1) return (pa === -1 ? 999 : pa) - (pb === -1 ? 999 : pb);
+    return a.localeCompare(b);
+  });
+  return Object.fromEntries(entries.slice(0, CHROMA_CLOUD_MAX_METADATA_KEYS));
+}
+
 function normalizeCollections(body: unknown): ChromaCollection[] {
   if (Array.isArray(body)) return body as ChromaCollection[];
   if (body && typeof body === 'object' && Array.isArray((body as { collections?: unknown }).collections)) {
@@ -108,7 +149,7 @@ export async function add(params: ChromaParams): Promise<{ ok: true; count: numb
     body: JSON.stringify({
       ids,
       documents,
-      metadatas: params.metadatas ?? documents.map(() => ({})),
+      metadatas: (params.metadatas ?? documents.map(() => ({}))).map(fitChromaCloudMetadata),
       embeddings,
     }),
   });
