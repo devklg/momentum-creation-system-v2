@@ -1,6 +1,10 @@
 /**
  * Bulk RVM lead import domain.
  *
+ * @deprecated The BA import route now uses vmProviderQueue.createManualImportJobs.
+ * This legacy synchronous writer remains only for governed data reconciliation
+ * ownership; do not add new call sites.
+ *
  * Imported leads are acquisition records only. This module mints RVM tokens
  * and creates BA-scoped CRM records immediately, but it never calls
  * placeProspect and never inserts holding-tank rows.

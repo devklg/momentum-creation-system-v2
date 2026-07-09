@@ -11,7 +11,10 @@ import { z } from 'zod';
 import { requireAdmin } from '../../middleware/requireAuth.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
 import { buildAdminVmOverview } from '../../domain/adminVm.js';
+import { findVMCampaignById, setVMCampaignLiveApproval } from '../../domain/vmCampaigns.js';
 import type {
+  McsAdminVmLiveApprovalPayload,
+  McsAdminVmLiveApprovalResponse,
   McsAdminVmOwnershipCorrectionPayload,
   McsAdminVmOwnershipCorrectionResponse,
   McsAuditActor,
@@ -75,6 +78,69 @@ const OwnershipCorrectionSchema = z.object({
     path: ['leadId'],
   },
 );
+
+const LiveApprovalSchema = z.object({
+  vmCampaignId: z.string().trim().min(3).max(160),
+  approved: z.boolean(),
+});
+
+adminVmRoutes.post('/campaigns/:vmCampaignId/live-approval', requireAdmin, async (req, res) => {
+  const parsed = LiveApprovalSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({
+      ok: false,
+      error: 'Invalid live approval payload.',
+      issues: parsed.error.issues,
+    });
+    return;
+  }
+
+  const vmCampaignId = String(req.params.vmCampaignId ?? '');
+  const payload: McsAdminVmLiveApprovalPayload = parsed.data;
+  if (payload.vmCampaignId !== vmCampaignId) {
+    res.status(400).json({ ok: false, error: 'vmCampaignId mismatch.' });
+    return;
+  }
+
+  try {
+    const before = await findVMCampaignById(vmCampaignId);
+    const body: McsAdminVmLiveApprovalResponse = await setVMCampaignLiveApproval({
+      vmCampaignId,
+      approved: payload.approved,
+      adminTmagId: req.session!.tmagId,
+    });
+
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: payload.approved
+        ? 'admin.vm.live_delivery.approved'
+        : 'admin.vm.live_delivery.revoked',
+      entity: { kind: 'prospect', id: vmCampaignId, displayLabel: before.name },
+      severity: payload.approved ? 'critical' : 'info',
+      before: { adminApprovedForLiveDelivery: before.adminApprovedForLiveDelivery === true },
+      after: {
+        adminApprovedForLiveDelivery: body.adminApprovedForLiveDelivery,
+        vmCampaignId,
+      },
+      reason: payload.approved
+        ? 'Admin approved VM campaign for live delivery.'
+        : 'Admin revoked VM campaign live delivery approval.',
+      context: {
+        ip: req.ip ?? null,
+        userAgent: req.get('user-agent') ?? null,
+        route: `/api/admin/vm/campaigns/${vmCampaignId}/live-approval`,
+        method: 'POST',
+        requestId: null,
+      },
+    });
+
+    res.status(200).json(body);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    const status = msg === 'vm_campaign_not_found' ? 404 : 500;
+    res.status(status).json({ ok: false, error: msg });
+  }
+});
 
 adminVmRoutes.post('/ownership-correction', requireAdmin, async (req, res) => {
   const parsed = OwnershipCorrectionSchema.safeParse(req.body);

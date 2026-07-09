@@ -7,11 +7,18 @@ import {
   completeVmJob,
   failVmJob,
   findLead,
+  requeueVmJobWithoutBurningAttempt,
   recordDeliveryEvent,
+  skipVmJob,
   updateLeadStatus,
   type VmProviderKey,
   type VmQueueJob,
 } from '../domain/vmProviderQueue.js';
+import {
+  completeRunningCampaignIfIdle,
+  startScheduledCampaignForWorker,
+} from '../domain/vmCampaigns.js';
+import type { McsVMCampaignRecord } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
 const CAMPAIGNS_COLLECTION = 'tmag_vm_campaigns';
@@ -33,6 +40,10 @@ interface VmCampaignDoc {
   provider?: VmProviderKey;
   adminApprovedForLiveDelivery?: boolean;
   audioUrl?: string | null;
+  status: McsVMCampaignRecord['status'];
+  scheduledAt?: string | null;
+  startedAt?: string | null;
+  completedAt?: string | null;
 }
 
 export async function startVmDeliveryWorker(): Promise<void> {
@@ -83,21 +94,32 @@ export function vmDeliveryMinGapMs(ratePerMinute: number): number {
   return Math.ceil(60_000 / ratePerMinute);
 }
 
+export async function dispatchVmDeliveryJobForTest(job: VmQueueJob<DeliveryPayload>): Promise<void> {
+  await dispatch(job);
+}
+
 async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
   try {
     const lead = await findLead(job.payload.leadId);
     if (!lead) throw new Error('lead_not_found');
+    const campaign = await findCampaign(lead.vmCampaignId);
+    if (!campaign) throw new Error('vm_campaign_not_found');
+
+    const gate = await gateCampaignForDelivery(job, campaign);
+    if (!gate.proceed) return;
+
     if (!lead.token) {
       await completeVmJob(job.jobId, `Lead ${lead.leadId} has no token; delivery skipped.`);
+      await completeRunningCampaignIfIdle(lead.vmCampaignId);
       return;
     }
     if (!lead.normalizedPhone) {
       await updateLeadStatus(lead.leadId, 'delivery_dry_run', { reason: 'no_phone', ownerTmagId: lead.ownerTmagId });
       await completeVmJob(job.jobId, `Lead ${lead.leadId} has no phone; delivery skipped.`);
+      await completeRunningCampaignIfIdle(lead.vmCampaignId);
       return;
     }
 
-    const campaign = await findCampaign(lead.vmCampaignId);
     const providerKey = job.payload.provider ?? campaign?.provider ?? env.VM_PROVIDER_MODE;
     const provider = getVmProvider(providerKey);
     const tokenUrl = `${env.PROSPECT_BASE_URL.replace(/\/$/, '')}/rvm/${lead.token}`;
@@ -134,9 +156,64 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
           : result.status;
     await updateLeadStatus(lead.leadId, nextStatus, { ownerTmagId: lead.ownerTmagId });
     await completeVmJob(job.jobId, `Delivery processed for VM lead ${lead.leadId}: ${result.status}.`);
+    await completeRunningCampaignIfIdle(lead.vmCampaignId);
   } catch (err) {
     await failVmJob(job, err instanceof Error ? err.message : String(err));
   }
+}
+
+async function gateCampaignForDelivery(
+  job: VmQueueJob<DeliveryPayload>,
+  campaign: VmCampaignDoc,
+): Promise<{ proceed: boolean }> {
+  const nowMs = Date.now();
+  switch (campaign.status) {
+    case 'running':
+      return { proceed: true };
+    case 'scheduled': {
+      const scheduledAt = campaign.scheduledAt ? Date.parse(campaign.scheduledAt) : Number.NaN;
+      if (Number.isFinite(scheduledAt) && scheduledAt <= nowMs) {
+        await startScheduledCampaignForWorker(campaign as McsVMCampaignRecord);
+        return { proceed: true };
+      }
+      const availableAt = Number.isFinite(scheduledAt)
+        ? new Date(scheduledAt).toISOString()
+        : new Date(nowMs + 5 * 60_000).toISOString();
+      await requeueVmJobWithoutBurningAttempt(
+        job,
+        availableAt,
+        `Campaign ${campaign.vmCampaignId} is scheduled for ${availableAt}; delivery requeued.`,
+      );
+      return { proceed: false };
+    }
+    case 'draft':
+    case 'ready':
+    case 'dry_run':
+    case 'paused': {
+      const availableAt = new Date(nowMs + 5 * 60_000).toISOString();
+      await requeueVmJobWithoutBurningAttempt(
+        job,
+        availableAt,
+        `Campaign ${campaign.vmCampaignId} status ${campaign.status}; delivery requeued.`,
+      );
+      return { proceed: false };
+    }
+    case 'cancelled':
+    case 'completed':
+    case 'archived':
+      await skipVmJob(
+        job.jobId,
+        `Campaign ${campaign.vmCampaignId} status ${campaign.status}; delivery skipped.`,
+      );
+      return { proceed: false };
+  }
+  const availableAt = new Date(nowMs + 5 * 60_000).toISOString();
+  await requeueVmJobWithoutBurningAttempt(
+    job,
+    availableAt,
+    `Campaign ${campaign.vmCampaignId} status ${campaign.status}; delivery requeued.`,
+  );
+  return { proceed: false };
 }
 
 async function findCampaign(vmCampaignId: string): Promise<VmCampaignDoc | null> {
