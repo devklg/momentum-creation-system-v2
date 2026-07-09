@@ -88,7 +88,11 @@ describe('projection-outbox drain worker (Phase 10 audit H1 regression)', () => 
 
   it('is wired into server boot (the H1 bug was: defined but never called)', () => {
     const indexSrc = readFileSync(resolve(here, '../../index.ts'), 'utf8');
-    expect(indexSrc).toMatch(/import\s*\{\s*startProjectionOutboxWorker\s*\}\s*from\s*['"]\.\/services\/projectionOutbox\.js['"]/);
+    // startProjectionOutboxWorker must be imported from the worker module. Allow
+    // other named imports in the same braces (e.g. stopProjectionOutboxWorker,
+    // added for graceful shutdown) — the guard is that start* is wired, not that
+    // it's the sole import.
+    expect(indexSrc).toMatch(/import\s*\{[^}]*\bstartProjectionOutboxWorker\b[^}]*\}\s*from\s*['"]\.\/services\/projectionOutbox\.js['"]/);
     // A bare call at boot, alongside the other start*Worker() calls.
     expect(indexSrc).toMatch(/startProjectionOutboxWorker\s*\(/);
   });
