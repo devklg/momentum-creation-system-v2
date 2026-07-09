@@ -4,12 +4,11 @@ import { env } from '../env.js';
 import { requireAdmin } from '../middleware/requireAuth.js';
 import {
   createManualImportJobs,
-  listDeliveryRowsForManualExport,
   recordProviderWebhook,
   type VmImportLeadRow,
   type VmProviderKey,
 } from '../domain/vmProviderQueue.js';
-import { buildManualCsv } from '../services/vmProviders/manualCsv.js';
+import { buildManualExportCsv } from '../domain/vmManualExport.js';
 import { listVmProviders } from '../services/vmProviders/index.js';
 
 export const vmProviderWebhookRoutes: Router = express.Router();
@@ -111,8 +110,7 @@ vmProviderWebhookRoutes.get('/manual-csv/export/:campaignId', requireAdmin, asyn
     return;
   }
   try {
-    const rows = await listDeliveryRowsForManualExport(campaignId);
-    const csv = buildManualCsv(rows, env.PROSPECT_BASE_URL.replace(/\/$/, ''));
+    const csv = await buildManualExportCsv(campaignId);
     res
       .status(200)
       .setHeader('Content-Type', 'text/csv; charset=utf-8')

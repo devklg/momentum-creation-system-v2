@@ -211,7 +211,7 @@ function assertOwnership(input: {
   if (!input.vmCampaignId) throw new Error('vmCampaignId_required');
 }
 
-async function vmAudit(input: {
+export async function vmAudit(input: {
   action: string;
   entityId: string;
   ownerTmagId: string | null;
@@ -378,6 +378,60 @@ export async function completeVmJob(jobId: string, note: string): Promise<void> 
     entityId: jobId,
     ownerTmagId: null,
     summary: note,
+  });
+}
+
+export async function skipVmJob(jobId: string, note: string): Promise<void> {
+  const at = new Date().toISOString();
+  await persistenceCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: QUEUE_COLLECTION,
+    filter: { jobId },
+    update: {
+      $set: {
+        status: 'skipped',
+        completedAt: at,
+        lockedAt: null,
+        updatedAt: at,
+        failureReason: note,
+      },
+    },
+  });
+  await vmAudit({
+    action: 'vm.queue.skipped',
+    entityId: jobId,
+    ownerTmagId: null,
+    summary: note,
+  });
+}
+
+export async function requeueVmJobWithoutBurningAttempt(
+  job: VmQueueJob,
+  availableAt: string,
+  note: string,
+): Promise<void> {
+  const at = new Date().toISOString();
+  await persistenceCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: QUEUE_COLLECTION,
+    filter: { jobId: job.jobId },
+    update: {
+      $set: {
+        status: 'queued',
+        lockedAt: null,
+        availableAt,
+        updatedAt: at,
+        failureReason: null,
+      },
+      $inc: { attempts: -1 },
+    },
+  });
+  await vmAudit({
+    action: 'vm.queue.requeued_without_attempt',
+    entityId: job.jobId,
+    ownerTmagId: ownerFromPayload(job.payload),
+    summary: note,
+    payload: { kind: job.kind, availableAt },
   });
 }
 
@@ -742,7 +796,7 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
     filter: { leadId: lead.leadId },
     update: { $set: { crmRecordId, status: 'crm_created', updatedAt: now } },
   });
-  await enqueueVmJob<LeadPayload>('delivery', { leadId: lead.leadId });
+  await enqueueVmJob<LeadPayload>('delivery', { leadId: lead.leadId, vmCampaignId: lead.vmCampaignId });
   await completeVmJob(job.jobId, `CRM record created for VM lead ${lead.leadId}.`);
 }
 
@@ -1067,15 +1121,20 @@ async function processTelnyxCallControlWebhook(payload: Record<string, unknown>,
   await record('provider_webhook');
 }
 
-export async function listDeliveryRowsForManualExport(campaignId: string): Promise<VmBulkLeadRecord[]> {
+export async function listDeliveryRowsForManualExport(
+  campaignId: string,
+  ownerTmagId?: string,
+): Promise<VmBulkLeadRecord[]> {
+  const filter: Record<string, unknown> = {
+    vmCampaignId: campaignId,
+    status: { $in: ['crm_created', 'queued', 'manual_exported', 'delivery_dry_run'] },
+    normalizedPhone: { $ne: null },
+  };
+  if (ownerTmagId) filter.ownerTmagId = ownerTmagId;
   const result = await persistenceCall<{ documents: VmBulkLeadRecord[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: LEADS_COLLECTION,
-    filter: {
-      vmCampaignId: campaignId,
-      status: { $in: ['crm_created', 'queued', 'manual_exported', 'delivery_dry_run'] },
-      normalizedPhone: { $ne: null },
-    },
+    filter,
     sort: { createdAt: 1 },
     limit: 10_000,
   });

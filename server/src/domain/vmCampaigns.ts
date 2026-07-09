@@ -10,9 +10,12 @@ import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { findLeadOwnerForOwner } from './vmLeadOwners.js';
 import type {
+  McsAdminVmLiveApprovalResponse,
+  McsVmCampaignStatusAction,
   McsVMCampaignProviderMode,
   McsVMCampaignRecord,
 } from '@momentum/shared';
+import { vmAudit } from './vmProviderQueue.js';
 
 const MONGO_DB = 'momentum';
 const COLLECTION = 'tmag_vm_campaigns';
@@ -121,6 +124,18 @@ export async function findVMCampaignForOwner(
   return campaign;
 }
 
+export async function findVMCampaignById(vmCampaignId: string): Promise<McsVMCampaignRecord> {
+  const result = await persistenceCall<{ documents: McsVMCampaignRecord[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: COLLECTION,
+    filter: { vmCampaignId },
+    limit: 1,
+  });
+  const campaign = result.documents?.[0];
+  if (!campaign) throw new VMCampaignError('vm_campaign_not_found');
+  return campaign;
+}
+
 export async function listVMCampaignsForOwner(
   ownerTmagId: string,
 ): Promise<McsVMCampaignRecord[]> {
@@ -132,4 +147,190 @@ export async function listVMCampaignsForOwner(
     limit: 500,
   });
   return result.documents ?? [];
+}
+
+type CampaignPatch = Partial<McsVMCampaignRecord> & Record<string, unknown>;
+
+async function persistCampaignPatch(
+  campaign: McsVMCampaignRecord,
+  patch: CampaignPatch,
+  action: string,
+): Promise<McsVMCampaignRecord> {
+  const updatedAt = new Date().toISOString();
+  const next = { ...campaign, ...patch, updatedAt };
+
+  await persistenceCall('mongodb', 'update', {
+    database: MONGO_DB,
+    collection: COLLECTION,
+    filter: { vmCampaignId: campaign.vmCampaignId },
+    update: { $set: { ...patch, updatedAt } },
+  });
+
+  await persistenceCall('neo4j', 'cypher', {
+    query:
+      'MATCH (vm:TmagVmCampaign {vmCampaignId: $vmCampaignId}) ' +
+      'SET vm += $props, vm.updatedAt = datetime($updatedAt)',
+    params: {
+      vmCampaignId: campaign.vmCampaignId,
+      props: { ...patch, updatedAt },
+      updatedAt,
+    },
+  });
+
+  await persistenceCall('chromadb', 'add', {
+    collection: CHROMA_COLLECTION,
+    ids: [campaign.vmCampaignId],
+    documents: [
+      `VM campaign ${next.name}; owner ${next.ownerTmagId}; provider ${next.provider}; status ${next.status}; ${action}.`,
+    ],
+    metadatas: [
+      {
+        kind: 'vm_campaign_updated',
+        vmCampaignId: campaign.vmCampaignId,
+        ownerTmagId: campaign.ownerTmagId,
+        status: next.status,
+        action,
+        updatedAt,
+      },
+    ],
+  });
+
+  return next;
+}
+
+function nextStatusForAction(
+  current: McsVMCampaignRecord,
+  action: McsVmCampaignStatusAction,
+  scheduledAt?: string | null,
+): CampaignPatch {
+  const now = new Date().toISOString();
+  switch (action) {
+    case 'ready':
+      if (current.status !== 'draft') throw new VMCampaignError('illegal_transition');
+      return { status: 'ready', scheduledAt: null };
+    case 'schedule':
+      if (current.status !== 'ready') throw new VMCampaignError('illegal_transition');
+      if (!scheduledAt) throw new VMCampaignError('scheduled_at_required');
+      return { status: 'scheduled', scheduledAt, completedAt: null };
+    case 'start':
+      if (!['ready', 'scheduled', 'paused'].includes(current.status)) {
+        throw new VMCampaignError('illegal_transition');
+      }
+      return {
+        status: 'running',
+        startedAt: current.startedAt ?? now,
+        completedAt: null,
+      };
+    case 'pause':
+      if (current.status !== 'running') throw new VMCampaignError('illegal_transition');
+      return { status: 'paused' };
+    case 'resume':
+      if (current.status !== 'paused') throw new VMCampaignError('illegal_transition');
+      return { status: 'running', startedAt: current.startedAt ?? now, completedAt: null };
+    case 'cancel':
+      if (!['scheduled', 'running', 'paused'].includes(current.status)) {
+        throw new VMCampaignError('illegal_transition');
+      }
+      return { status: 'cancelled', completedAt: now };
+  }
+}
+
+export async function patchVMCampaignStatusForOwner(input: {
+  vmCampaignId: string;
+  ownerTmagId: string;
+  action: McsVmCampaignStatusAction;
+  scheduledAt?: string | null;
+}): Promise<McsVMCampaignRecord> {
+  const current = await findVMCampaignForOwner(input.vmCampaignId, input.ownerTmagId);
+  const beforeStatus = current.status;
+  const patch = nextStatusForAction(current, input.action, input.scheduledAt);
+  const updated = await persistCampaignPatch(current, patch, `status:${input.action}`);
+  await vmAudit({
+    action: 'vm.campaign.status_changed',
+    entityId: current.vmCampaignId,
+    ownerTmagId: current.ownerTmagId,
+    summary: `VM campaign ${current.vmCampaignId} changed from ${beforeStatus} to ${updated.status}.`,
+    payload: {
+      beforeStatus,
+      afterStatus: updated.status,
+      statusAction: input.action,
+      scheduledAt: updated.scheduledAt,
+    },
+  });
+  return updated;
+}
+
+export async function startScheduledCampaignForWorker(
+  campaign: McsVMCampaignRecord,
+): Promise<McsVMCampaignRecord> {
+  const updated = await persistCampaignPatch(
+    campaign,
+    { status: 'running', startedAt: campaign.startedAt ?? new Date().toISOString(), completedAt: null },
+    'worker:start_scheduled',
+  );
+  await vmAudit({
+    action: 'vm.campaign.worker_started',
+    entityId: campaign.vmCampaignId,
+    ownerTmagId: campaign.ownerTmagId,
+    summary: `Scheduled VM campaign ${campaign.vmCampaignId} started by delivery worker.`,
+    payload: { beforeStatus: campaign.status, afterStatus: updated.status },
+  });
+  return updated;
+}
+
+export async function completeRunningCampaignIfIdle(vmCampaignId: string): Promise<void> {
+  const campaign = await findVMCampaignById(vmCampaignId);
+  if (campaign.status !== 'running') return;
+  const result = await persistenceCall<{ results: Array<{ count: number }> }>('mongodb', 'aggregate', {
+    database: MONGO_DB,
+    collection: 'tmag_vm_queue_jobs',
+    pipeline: [
+      {
+        $match: {
+          kind: 'delivery',
+          status: { $in: ['queued', 'processing'] },
+          'payload.vmCampaignId': vmCampaignId,
+        },
+      },
+      { $count: 'count' },
+    ],
+  });
+  const remaining = result.results?.[0]?.count ?? 0;
+  if (remaining > 0) return;
+  const completedAt = new Date().toISOString();
+  const updated = await persistCampaignPatch(
+    campaign,
+    { status: 'completed', completedAt },
+    'worker:complete_idle',
+  );
+  await vmAudit({
+    action: 'vm.campaign.completed',
+    entityId: campaign.vmCampaignId,
+    ownerTmagId: campaign.ownerTmagId,
+    summary: `VM campaign ${campaign.vmCampaignId} completed after all delivery jobs finished.`,
+    payload: { beforeStatus: campaign.status, afterStatus: updated.status, completedAt },
+  });
+}
+
+export async function setVMCampaignLiveApproval(input: {
+  vmCampaignId: string;
+  approved: boolean;
+  adminTmagId: string;
+}): Promise<McsAdminVmLiveApprovalResponse> {
+  const campaign = await findVMCampaignById(input.vmCampaignId);
+  const liveApprovalAt = new Date().toISOString();
+  const updated = await persistCampaignPatch(
+    campaign,
+    {
+      adminApprovedForLiveDelivery: input.approved,
+      liveApprovalBy: input.adminTmagId,
+      liveApprovalAt,
+    },
+    input.approved ? 'admin:live_approved' : 'admin:live_revoked',
+  );
+  return {
+    ok: true,
+    vmCampaignId: updated.vmCampaignId,
+    adminApprovedForLiveDelivery: updated.adminApprovedForLiveDelivery === true,
+  };
 }

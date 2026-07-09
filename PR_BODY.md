@@ -1,18 +1,18 @@
 ## Summary
 
-- Replaced the Team VM campaign mock page with live API-driven lead owner, campaign, import, lifecycle, metrics, lead table, and manual export UI.
-- Added the VM dialer entitlement locked state for `VM_DIALER_NOT_ENABLED`.
-- Added Admin VM campaign live-approval controls with confirmation, optimistic update, and rollback on error.
+- Repointed BA VM imports to the queued provider pipeline and added owner-scoped import status, campaign metrics, leads pagination, and manual CSV export endpoints.
+- Added VM campaign lifecycle persistence/audit helpers plus delivery-worker status gating, scheduled auto-start, no-attempt requeue, skip, and completion sweep.
+- Added admin live-delivery approval endpoint with Mongo/Neo4j/Chroma sync and audit logging.
 
 ## Verification
 
 - `pnpm install --frozen-lockfile`
 - `pnpm typecheck`
 - `pnpm build`
-- `pnpm --filter @momentum/team test`
-- `pnpm --filter @momentum/admin test`
+- `pnpm --filter @momentum/server test`
 
 ## Scope
 
-- UI only: `apps/team/**` and `apps/admin/**`.
-- No server changes.
+- Server only: `server/src/**`
+- No UI changes.
+- Legacy `bulkLeads.importBulkLeads` is quarantined/deprecated; BA import path no longer calls it.
