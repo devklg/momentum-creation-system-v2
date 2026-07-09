@@ -4470,6 +4470,7 @@ export type McsVmCampaignProvider =
   | 'leadsrain_style_adapter'
   | 'slybroadcast_style_adapter'
   | 'manual_csv'
+  | 'acquisition_provider_placeholder'
   | 'telnyx_call_control'
   | 'future_telecom_adapter'
   | 'none';
@@ -4550,10 +4551,18 @@ export type McsProspectTimelineEventKind =
 export type McsVmLeadLifecycleStatus =
   | 'imported'
   | 'validated'
+  | 'invalid'
+  | 'duplicate'
   | 'suppressed'
   | 'crm_created'
   | 'token_created'
   | 'queued'
+  | 'delivery_dry_run'
+  | 'manual_exported'
+  | 'voicemail_drop_queued'
+  | 'voicemail_drop_delivered'
+  | 'voicemail_drop_failed'
+  | 'opted_out'
   | 'voicemail_sent'
   | 'sms_sent'
   | 'email_sent'
@@ -4578,10 +4587,18 @@ export type McsVmLeadLifecycleStatus =
 export const MCS_VM_LEAD_LIFECYCLE_STATUSES: readonly McsVmLeadLifecycleStatus[] = [
   'imported',
   'validated',
+  'invalid',
+  'duplicate',
   'suppressed',
   'crm_created',
   'token_created',
   'queued',
+  'delivery_dry_run',
+  'manual_exported',
+  'voicemail_drop_queued',
+  'voicemail_drop_delivered',
+  'voicemail_drop_failed',
+  'opted_out',
   'voicemail_sent',
   'sms_sent',
   'email_sent',
@@ -4652,22 +4669,111 @@ export interface McsVMCampaignRecord extends McsOwnedProspectIdentity {
   scheduledAt: McsIsoTimestamp | null;
   startedAt: McsIsoTimestamp | null;
   completedAt: McsIsoTimestamp | null;
+  adminApprovedForLiveDelivery?: boolean;
   createdAt: McsIsoTimestamp;
   updatedAt: McsIsoTimestamp;
 }
 
-export interface McsVMDeliveryEventRecord extends McsVmLeadIdentity {
-  deliveryEventId: string;
+export type McsVmCampaignStatusAction = 'ready' | 'schedule' | 'start' | 'pause' | 'resume' | 'cancel';
+
+export interface McsVmCampaignStatusPatchPayload {
+  action: McsVmCampaignStatusAction;
+  scheduledAt?: McsIsoTimestamp | null;
+}
+
+export interface McsVmCampaignStatusPatchResponse {
+  ok: true;
+  campaign: McsVMCampaignRecord;
+}
+
+export type McsVmCampaignMetricStatus =
+  | 'imported'
+  | 'validated'
+  | 'invalid'
+  | 'duplicate'
+  | 'suppressed'
+  | 'token_created'
+  | 'crm_created'
+  | 'queued'
+  | 'delivery_dry_run'
+  | 'manual_exported'
+  | 'voicemail_drop_queued'
+  | 'voicemail_drop_delivered'
+  | 'voicemail_drop_failed'
+  | 'opted_out';
+
+export type McsVmCampaignMetrics = Record<McsVmCampaignMetricStatus, number> & {
+  total: number;
+};
+
+export interface McsVmCampaignMetricsResponse {
+  ok: true;
+  vmCampaignId: string;
+  metrics: McsVmCampaignMetrics;
+}
+
+export interface McsVmCampaignLeadRow {
   leadId: string;
-  prospectId: string | null;
-  channel: McsVmDeliveryChannel;
+  firstName: string | null;
+  lastName: string | null;
+  city: string | null;
+  stateOrRegion: string | null;
+  country: string;
+  normalizedPhone: string | null;
+  normalizedEmail: string | null;
+  status: McsVmCampaignMetricStatus;
+  token: string | null;
+  crmRecordId: string | null;
+  validationIssues: string[];
+  createdAt: McsIsoTimestamp;
+  updatedAt: McsIsoTimestamp;
+}
+
+export interface McsVmCampaignLeadsResponse {
+  ok: true;
+  leads: McsVmCampaignLeadRow[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
+export interface McsVmImportQueuedResponse {
+  ok: true;
+  importJobId: string;
+  chunksQueued: number;
+  rowsAccepted: number;
+}
+
+export interface McsVmImportJobStatusResponse {
+  ok: true;
+  importJobId: string;
+  counts: McsVmCampaignMetrics;
+}
+
+export interface McsAdminVmLiveApprovalPayload {
+  vmCampaignId: string;
+  approved: boolean;
+}
+
+export interface McsAdminVmLiveApprovalResponse {
+  ok: true;
+  vmCampaignId: string;
+  adminApprovedForLiveDelivery: boolean;
+}
+
+export interface McsVMDeliveryEventRecord {
+  eventId: string;
   provider: McsVmCampaignProvider;
+  leadId: string;
+  vmCampaignId: string;
+  ownerTmagId: TmagId;
+  status: string;
   providerMessageId: string | null;
-  status: McsVmDeliveryStatus;
-  occurredAt: McsIsoTimestamp;
-  errorCode: string | null;
-  errorMessage: string | null;
-  metadata: Record<string, string | number | boolean | null>;
+  providerStatus: string | null;
+  dryRun: boolean;
+  attempt: number;
+  details: Record<string, unknown>;
+  createdAt: McsIsoTimestamp;
 }
 
 export interface McsProspectCRMRecord extends McsOwnedProspectIdentity {
