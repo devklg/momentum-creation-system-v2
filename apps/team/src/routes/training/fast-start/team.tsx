@@ -129,6 +129,58 @@ export function ModuleTeamPage() {
         honest</strong>. The binary doesn't reward perfect — it rewards consistent.
       </Callout>
 
+      {/* ── Fast onboarding operating system ───────────────────── */}
+      <SectionLabel>The first 72 hours</SectionLabel>
+      <SectionTitle>Plug them in fast. Do not drown them.</SectionTitle>
+      <Prose>
+        <p>
+          When someone new joins your team, the first three days are not for teaching everything.
+          They are for proving they made a good decision. A new BA needs fast contact, one clear
+          checklist, one small win, and a feeling that they are connected to people who know where
+          they are going.
+        </p>
+        <p>
+          That matters because doubt shows up early. If the new BA gets silence, scattered links, or
+          a mountain of information, they freeze. If they get one next step and one human follow-up,
+          they move. Your job as a sponsor is not to impress them with everything you know. It is to
+          help them take the next action.
+        </p>
+      </Prose>
+
+      <div className="grid grid-cols-3 gap-2 my-8">
+        <DataCard num="72" label="Hours to anchor belief" />
+        <DataCard num="24" label="Hours to make contact" highlight />
+        <DataCard num="1" label="Small visible win" />
+      </div>
+
+      <Callout tone="gold" title="THE FIRST CONTACT RULE">
+        Do not hand a new BA a pile of links and disappear. Get a live conversation, voice note, or
+        clear sponsor check-in on the calendar quickly. Confirm their why, walk the checklist, and
+        set the first action that involves another person.
+      </Callout>
+
+      <div className="bg-[#1A1A1A] border border-line p-6 my-6">
+        <div className="font-mono tracking-[0.22em] text-[10px] text-gold uppercase mb-4">
+          A simple first-week checklist
+        </div>
+        <div className="grid md:grid-cols-2 gap-3">
+          <ChecklistItem text="Confirm their why and best contact rhythm." />
+          <ChecklistItem text="Make sure back-office access and SmartShip are understood." />
+          <ChecklistItem text="Add them to the team community and next live touchpoint." />
+          <ChecklistItem text="Start a warm list before any outside source of names." />
+          <ChecklistItem text="Help them send one clean invitation." />
+          <ChecklistItem text="Create one small visible win in week one." />
+        </div>
+      </div>
+
+      <Prose>
+        <p>
+          Keep the training tight: one script, one tool, one next action. They do not need every
+          product detail this week. They do not need every compensation layer this week. They need
+          to know what to say, who to say it to, where to track it, and who is walking with them.
+        </p>
+      </Prose>
+
       {/* ── Build far-left / far-right ──────────────────────────── */}
       <SectionLabel>The placement habit</SectionLabel>
       <SectionTitle>Far-left, far-right. Balance the org.</SectionTitle>
@@ -163,6 +215,11 @@ export function ModuleTeamPage() {
           You do not need all 10 to say yes. You need 10 attempts to start. By the end of this week,
           the cockpit should have rows in it. By the end of week two, you should know which of those
           rows opened the link — and which ones you are calling next.
+        </p>
+        <p>
+          Coach activity, not moods. A new BA might feel excited and do nothing, or feel discouraged
+          while quietly building real skill. The useful questions are simple: how many people did
+          you invite, who opened or watched, and who needs a follow-up next?
         </p>
       </Prose>
 
@@ -221,11 +278,25 @@ export function ModuleTeamPage() {
           is the small thing, done twice, taught to your two, and then again. Numbers + duplication
           + a system that doesn't break = a binary that pays.
         </p>
+        <p>
+          The test of this system is whether the person you sponsor can sponsor someone else without
+          you being on every call. Use the checklist. Use the scripts. Use the cockpit. Duplicate
+          the system, not your personality.
+        </p>
         <p className="text-gold font-display tracking-[0.06em] text-[20px] mt-6">
           Mark this complete. Send your first invitation. Welcome to the team.
         </p>
       </Prose>
     </ModuleScaffold>
+  );
+}
+
+function ChecklistItem({ text }: { text: string }) {
+  return (
+    <div className="flex items-start gap-3 border border-line/70 bg-black/20 p-3">
+      <div className="mt-1 w-2.5 h-2.5 rounded-full bg-teal flex-shrink-0" />
+      <div className="text-cream-mute text-[13px] leading-[1.55] font-light">{text}</div>
+    </div>
   );
 }
 

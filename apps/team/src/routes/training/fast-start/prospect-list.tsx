@@ -58,6 +58,13 @@ export function ModuleProspectListPage() {
         <em>have the chance</em> to decide. Everyone deserves to hear about this.
       </Callout>
 
+      <Callout tone="teal" title="WARM LIST FIRST">
+        Before you chase any outside source of names, write down the people already in your life:
+        family, friends, customers, co-workers, neighbors, people from church, fitness, school,
+        social media, and past business relationships. Sort them. Do not spam them. Your first skill
+        is learning how to invite people who already know your name.
+      </Callout>
+
       {/* ── The mindset ─────────────────────────────────────────── */}
       <SectionLabel>The mindset</SectionLabel>
       <SectionTitle>You are sharing, not selling.</SectionTitle>
