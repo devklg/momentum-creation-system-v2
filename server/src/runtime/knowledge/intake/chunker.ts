@@ -70,35 +70,58 @@ function splitParagraphs(text: string): Span[] {
   return segments.filter((segment) => segment.text.trim().length > 0);
 }
 
-/** Hard-split an oversize segment on word boundaries, keeping each window within `max`. */
+/** Hard-split an oversize segment on word boundaries, keeping each window within `max`.
+ * Falls back to fixed-width character windows when a single "word" (e.g. an unbroken
+ * table row or URL) is itself longer than `max`, so no window can ever exceed `max`. */
 function hardSplit(segment: Span, max: number): Span[] {
-  const words: Span[] = [];
+  const windows: Span[] = [];
   const wordRegex = /\S+/g;
+  const words: { start: number; end: number }[] = [];
   let match: RegExpExecArray | null;
   while ((match = wordRegex.exec(segment.text)) !== null) {
     words.push({
-      text: match[0],
       start: segment.start + match.index,
       end: segment.start + match.index + match[0].length,
     });
   }
   if (words.length === 0) return [];
 
-  const windows: Span[] = [];
-  const first = words[0]!;
-  let curStart = first.start;
-  let curEnd = first.end;
+  let curStart = words[0]!.start;
+  let curEnd = words[0]!.end;
+  const pushWindow = (start: number, end: number): void => {
+    // Guarantee: no emitted window exceeds `max`. Character-slice anything that does.
+    let s = start;
+    while (end - s > max) {
+      windows.push({ text: '', start: s, end: s + max });
+      s += max;
+    }
+    if (end > s) windows.push({ text: '', start: s, end });
+  };
+
+  // Seed with the first word, which itself may exceed `max`.
+  if (curEnd - curStart > max) {
+    pushWindow(curStart, curEnd);
+    curStart = curEnd; // consumed
+  }
   for (let index = 1; index < words.length; index += 1) {
     const word = words[index]!;
-    if (word.end - curStart > max) {
-      windows.push({ text: '', start: curStart, end: curEnd });
+    if (curStart === curEnd) {
+      // previous window fully flushed by an oversize word; start fresh
       curStart = word.start;
       curEnd = word.end;
+      if (curEnd - curStart > max) { pushWindow(curStart, curEnd); curStart = curEnd; }
+      continue;
+    }
+    if (word.end - curStart > max) {
+      pushWindow(curStart, curEnd);
+      curStart = word.start;
+      curEnd = word.end;
+      if (curEnd - curStart > max) { pushWindow(curStart, curEnd); curStart = curEnd; }
     } else {
       curEnd = word.end;
     }
   }
-  windows.push({ text: '', start: curStart, end: curEnd });
+  if (curEnd > curStart) pushWindow(curStart, curEnd);
   return windows;
 }
 
@@ -164,29 +187,41 @@ export function chunkParsedDocument(
   for (const section of document.detectedSections) {
     const pieces = piecesForSection(section, max);
     for (const piece of pieces) {
-      const chunkId = deriveChunkId(source.sourceId, source.version, chunkIndex);
-      chunks.push({
-        chunkId,
-        sourceId: source.sourceId,
-        documentId: document.documentId,
-        sourceVersion: source.version,
-        heading: section.heading,
-        text: piece.text,
-        chunkIndex,
-        language: source.language,
-        domain: source.domain,
-        scope: source.scope,
-        topicTags,
-        agentScopes,
-        surfaceScopes,
-        sourceOffsets: {
-          startOffset: section.startOffset + piece.start,
-          endOffset: section.startOffset + piece.end,
-        },
-        status,
-        retrievalEligible,
-      });
-      chunkIndex += 1;
+      // Final hard guarantee: never emit a chunk whose text exceeds `max`.
+      // Any upstream drift is clamped here by character-slicing the piece.
+      const subPieces: { text: string; start: number; end: number }[] =
+        piece.text.length > max
+          ? Array.from({ length: Math.ceil(piece.text.length / max) }, (_, i) => ({
+              text: piece.text.slice(i * max, (i + 1) * max),
+              start: piece.start + i * max,
+              end: Math.min(piece.start + (i + 1) * max, piece.end),
+            }))
+          : [piece];
+      for (const sub of subPieces) {
+        const chunkId = deriveChunkId(source.sourceId, source.version, chunkIndex);
+        chunks.push({
+          chunkId,
+          sourceId: source.sourceId,
+          documentId: document.documentId,
+          sourceVersion: source.version,
+          heading: section.heading,
+          text: sub.text,
+          chunkIndex,
+          language: source.language,
+          domain: source.domain,
+          scope: source.scope,
+          topicTags,
+          agentScopes,
+          surfaceScopes,
+          sourceOffsets: {
+            startOffset: section.startOffset + sub.start,
+            endOffset: section.startOffset + sub.end,
+          },
+          status,
+          retrievalEligible,
+        });
+        chunkIndex += 1;
+      }
     }
   }
 

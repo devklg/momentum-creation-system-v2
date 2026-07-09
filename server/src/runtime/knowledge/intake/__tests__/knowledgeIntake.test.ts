@@ -305,6 +305,25 @@ describe('P4.5A knowledge intake — chunker & traceability', () => {
       expect(chunk.heading).toBe('Big');
     }
   });
+
+  it('bounds chunks even when a single unbreakable token exceeds max (regression: 53KB table chunk)', () => {
+    // A giant token with no whitespace or paragraph breaks — e.g. a wide markdown
+    // table row or long URL — previously slipped through hardSplit and produced one
+    // oversize chunk that 422'd on Chroma Cloud's 16KB per-document limit.
+    const giantToken = 'x'.repeat(5000);
+    const withMixed = `# Table\n\n${giantToken}\n\n${'col '.repeat(300).trim()}\n\n${giantToken}${giantToken}`;
+    const { chunks } = ingestRawKnowledgeSource(
+      source({ originalContent: withMixed }),
+      { maxChunkChars: 200 },
+    );
+    expect(chunks.length).toBeGreaterThan(1);
+    for (const chunk of chunks) {
+      expect(chunk.text.length).toBeLessThanOrEqual(200);
+    }
+    // reassembling the pieces must lose no characters from the oversize content
+    const totalChars = chunks.reduce((sum, c) => sum + c.text.length, 0);
+    expect(totalChars).toBeGreaterThan(giantToken.length);
+  });
 });
 
 describe('P4.5A knowledge intake — eligibility predicate', () => {
