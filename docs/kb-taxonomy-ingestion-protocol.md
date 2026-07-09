@@ -222,6 +222,7 @@ Current traced runtimes:
 
 - Michael runtime: `server/src/routes/michael-runtime.ts`
 - Steve discovery runtime: `server/src/domain/steveConversationRuntime.ts`
+- Ivory coach / invitation draft runtime: `server/src/domain/ivory.ts`
 
 Trace records must not store raw user prompts, generated responses, or full KB
 content. They store packet/source IDs, approved knowledge IDs, source IDs,

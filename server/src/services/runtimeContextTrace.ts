@@ -21,7 +21,7 @@ export interface RuntimeContextTraceRecord {
   schemaVersion: typeof RUNTIME_CONTEXT_TRACE_SCHEMA_VERSION;
   agentKey: McsAgentKey;
   taskType: McsRuntimeTaskType;
-  runtimeSurface: 'michael-runtime' | 'steve-discovery';
+  runtimeSurface: 'michael-runtime' | 'steve-discovery' | 'ivory-coach' | 'ivory-invitation-draft';
   tmagId: TmagId | string;
   contextPacketId: string | null;
   contextRequestId: string | null;

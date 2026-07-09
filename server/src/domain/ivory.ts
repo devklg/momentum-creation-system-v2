@@ -70,6 +70,15 @@ import type {
 import { createInvitation } from './invitations.js';
 import { ANGLE_LABEL } from './ivoryAngle.js';
 import { normalizePhone } from './prospectAccount.js';
+import type {
+  McsContextPacketV1,
+  TmagId,
+} from '@momentum/shared/runtime';
+import {
+  requestIvoryRuntimeContextPacket,
+  type IvoryRuntimeContextTaskType,
+} from '../runtime/context/ivoryRuntimeContextFoundation.js';
+import { appendRuntimeContextTrace } from '../services/runtimeContextTrace.js';
 
 const MONGO_DB = 'momentum';
 const IVORY_COLLECTION = 'tmag_ivory_prospect_names';
@@ -701,7 +710,10 @@ function parseCoachJson(raw: string): { coaching: string; prompts: string[] } | 
  * note tells the model any leftover `{{placeholder}}` is a stylistic cue, not
  * literal output.
  */
-async function buildCoachSystem(input: McsIvoryCoachPayload): Promise<string> {
+async function buildCoachSystem(
+  input: McsIvoryCoachPayload,
+  contextPacket?: McsContextPacketV1 | null,
+): Promise<string> {
   const voiceTemplate = await readMasterContent('team.ivory.coach_prompt');
   const voice = interpolateMasterContent(voiceTemplate, {
     productName: input.productName ?? undefined,
@@ -710,6 +722,7 @@ async function buildCoachSystem(input: McsIvoryCoachPayload): Promise<string> {
   });
   return [
     COACH_SYSTEM_PREFIX,
+    renderIvoryContextPromptSupplement(contextPacket),
     '',
     'ADMIN VOICE & FRAMING (tunable; adopt this tone and intent, but the HARD',
     'COMPLIANCE RULES and OUTPUT FORMAT above ALWAYS win — any {{placeholder}}',
@@ -718,12 +731,39 @@ async function buildCoachSystem(input: McsIvoryCoachPayload): Promise<string> {
   ].join('\n');
 }
 
+interface IvoryCoachRuntimeInput extends McsIvoryCoachPayload {
+  tmagId?: string;
+}
+
 export async function ivoryCoach(
-  input: McsIvoryCoachPayload,
+  input: IvoryCoachRuntimeInput,
 ): Promise<McsIvoryCoachResponse> {
+  const createdAt = new Date().toISOString();
+  const queryHint = buildCoachContextQuery(input);
+  const contextPacket = input.tmagId
+    ? await requestIvoryContextPacketSafely({
+        tmagId: input.tmagId,
+        taskType: 'relationship_coaching',
+        queryHint,
+        createdAt,
+      })
+    : null;
+  if (input.tmagId) {
+    await traceIvoryContextUse({
+      tmagId: input.tmagId,
+      taskType: 'relationship_coaching',
+      runtimeSurface: 'ivory-coach',
+      packet: contextPacket,
+      queryHint,
+      routeDecision: contextPacket?.packetStatus ?? 'context_unavailable',
+      responseType: 'reflection_prompt',
+      createdAt,
+    });
+  }
+
   try {
     const { text } = await complete({
-      system: await buildCoachSystem(input),
+      system: await buildCoachSystem(input, contextPacket),
       messages: [{ role: 'user', content: buildCoachUserTurn(input) }],
       maxTokens: 700,
     });
@@ -850,10 +890,35 @@ export async function draftIvoryInvitation(
     typeof input.productName === 'string' && input.productName.trim()
       ? input.productName.trim()
       : null;
+  const createdAt = new Date().toISOString();
+  const queryHint = buildInvitationDraftContextQuery({
+    name,
+    relationshipReason,
+    productName,
+  });
+  const contextPacket = await requestIvoryContextPacketSafely({
+    tmagId,
+    taskType: 'invitation_drafting',
+    queryHint,
+    createdAt,
+  });
+  await traceIvoryContextUse({
+    tmagId,
+    taskType: 'invitation_drafting',
+    runtimeSurface: 'ivory-invitation-draft',
+    packet: contextPacket,
+    queryHint,
+    routeDecision: contextPacket?.packetStatus ?? 'context_unavailable',
+    responseType: 'editable_invitation_draft',
+    createdAt,
+  });
 
   try {
     const { text } = await complete({
-      system: INVITATION_DRAFT_SYSTEM,
+      system: [
+        INVITATION_DRAFT_SYSTEM,
+        renderIvoryContextPromptSupplement(contextPacket),
+      ].join('\n\n'),
       messages: [
         {
           role: 'user',
@@ -898,6 +963,106 @@ export async function draftIvoryInvitation(
     }
     throw err;
   }
+}
+
+function buildCoachContextQuery(input: McsIvoryCoachPayload): string {
+  return [
+    'Ivory relationship coaching',
+    ANGLE_LABEL[input.angle],
+    input.productName ? `product ${input.productName}` : '',
+    input.ask,
+  ].filter(Boolean).join(' ');
+}
+
+function buildInvitationDraftContextQuery(input: {
+  name: McsIvoryName;
+  relationshipReason: string;
+  productName?: string | null;
+}): string {
+  return [
+    'Ivory invitation drafting',
+    input.productName ? `product ${input.productName}` : '',
+    input.name.categories.join(' '),
+    input.name.preferredAngle,
+    input.relationshipReason,
+  ].filter(Boolean).join(' ');
+}
+
+async function requestIvoryContextPacketSafely(input: {
+  tmagId: string;
+  taskType: IvoryRuntimeContextTaskType;
+  queryHint: string;
+  createdAt: string;
+}): Promise<McsContextPacketV1 | null> {
+  try {
+    return await requestIvoryRuntimeContextPacket({
+      tmagId: input.tmagId as TmagId,
+      mode: 'browser_text',
+      taskType: input.taskType,
+      createdAt: input.createdAt,
+      turnContent: input.queryHint,
+    });
+  } catch (err) {
+    console.warn(
+      '[ivory] context packet unavailable:',
+      err instanceof Error ? err.message : err,
+    );
+    return null;
+  }
+}
+
+async function traceIvoryContextUse(input: {
+  tmagId: string;
+  taskType: IvoryRuntimeContextTaskType;
+  runtimeSurface: 'ivory-coach' | 'ivory-invitation-draft';
+  packet: McsContextPacketV1 | null;
+  queryHint: string;
+  routeDecision: string;
+  responseType: string;
+  createdAt: string;
+}): Promise<void> {
+  try {
+    await appendRuntimeContextTrace({
+      agentKey: 'ivory',
+      taskType: input.taskType,
+      runtimeSurface: input.runtimeSurface,
+      tmagId: input.tmagId,
+      packet: input.packet,
+      queryHint: input.queryHint,
+      routeDecision: input.routeDecision,
+      responseType: input.responseType,
+      createdAt: input.createdAt,
+    });
+  } catch (err) {
+    console.warn(
+      '[ivory] context trace write failed:',
+      err instanceof Error ? err.message : err,
+    );
+  }
+}
+
+function renderIvoryContextPromptSupplement(
+  packet: McsContextPacketV1 | null | undefined,
+): string {
+  const items = packet?.approvedKnowledge ?? [];
+  const lines = [
+    'APPROVED CONTEXT MANAGER KNOWLEDGE:',
+    'Use only as background guidance. Do not quote source ids. The HARD COMPLIANCE RULES above always win.',
+    `Packet status: ${packet?.packetStatus ?? 'missing'}. Candidate knowledge excluded: yes.`,
+  ];
+  if (items.length === 0) {
+    lines.push('No approved KB item was available for this request; proceed from fixed guardrails only.');
+  } else {
+    lines.push(
+      ...items.slice(0, 6).map((item, index) => {
+        const title = item.title.replace(/\s+/g, ' ').trim();
+        const summary = item.summary.replace(/\s+/g, ' ').trim();
+        const sourceTitle = item.sourceTraceability.title?.replace(/\s+/g, ' ').trim();
+        return `${index + 1}. ${title}: ${summary}${sourceTitle ? ` Source: ${sourceTitle}.` : ''}`;
+      }),
+    );
+  }
+  return lines.join('\n');
 }
 
 export async function mintIvoryInvitation(

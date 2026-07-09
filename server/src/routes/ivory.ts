@@ -319,6 +319,7 @@ ivoryRoutes.post(
 
     try {
       const result = await ivoryCoach({
+        tmagId,
         angle,
         productName: productNameRaw,
         rosterSize,
