@@ -1,18 +1,18 @@
 ## Summary
 
-- Pins shared VM campaign lifecycle contracts for status transitions, metrics, campaign leads, queued imports, and admin live approval.
-- Adds the optional `adminApprovedForLiveDelivery` field to `McsVMCampaignRecord`.
-- Aligns `McsVMDeliveryEventRecord` with the runtime queue writer shape from `vmProviderQueue.ts`.
-- Extends the shared VM lead/provider vocabularies additively so existing legacy paths keep compiling.
+- Replaced the Team VM campaign mock page with live API-driven lead owner, campaign, import, lifecycle, metrics, lead table, and manual export UI.
+- Added the VM dialer entitlement locked state for `VM_DIALER_NOT_ENABLED`.
+- Added Admin VM campaign live-approval controls with confirmation, optimistic update, and rollback on error.
 
 ## Verification
 
 - `pnpm install --frozen-lockfile`
 - `pnpm typecheck`
 - `pnpm build`
+- `pnpm --filter @momentum/team test`
+- `pnpm --filter @momentum/admin test`
 
-## Scope Notes
+## Scope
 
-- Contracts only: `packages/shared/src/types.ts`.
-- Legacy `McsImportBulkLeadsResponse` is untouched.
-- No server routes, domain logic, workers, UI, persistence migration, Holding Tank, placement, or CRM disposition changes.
+- UI only: `apps/team/**` and `apps/admin/**`.
+- No server changes.
