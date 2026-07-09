@@ -1,2078 +1,1868 @@
-# PLATFORM_AUDIT.md
+# Momentum Creation System V2 Platform Audit
 
-# Momentum Creation System V2
+Repository audit generated from the local repository state on 2026-07-09.
 
-## Enterprise Platform Audit
+Source of truth for this audit: the repository implementation and repo-tracked authority files. The requested comparison documents are treated as source inputs, but when documents conflict with implementation or later authority files, the conflict is recorded instead of silently resolved.
 
-**Document Type:** Repository-grade platform audit  
-**Repository Analyzed:** `D:/momentum-creation-system-v2`  
-**Current Branch:** `main`
-**Currentization Basis HEAD:** `8400a5ee993b45b39e71db786bb28c98c29502e6`
-**Constitutional Authority:** `constitution/MOMENTUM_CONSTITUTION.md` with `MOMENTUM_CREATION_SYSTEM_V2_FOUNDATION.md` preserved as the founding charter
-**Comparison Documents:** `constitution/MOMENTUM_CONSTITUTION.md`, `constitution/MOMENTUM_GOVERNANCE.md`, `constitution/MOMENTUM_DECISION_FRAMEWORK.md`, `constitution/MOMENTUM_ACR_SYSTEM.md`, `SCHEMA_GOVERNANCE.md`, `TRAINING_ARCHITECTURE.md`, `MULTI_DB_AGENT_LEARNING_GOVERNANCE.md`, `AGENT_ARCHITECTURE.md`, `AGENT_PROMPT_GOVERNANCE.md`
-**Operational Source of Truth:** Repository implementation as read in the original audit session, currentized by the 2026-06-26 governance and documentation-compiler work
-**Status:** Historical platform audit with currentization addendum
-**Version:** 1.1.0
+Audited HEAD: `b2c5620`
 
----
+Branch: `main`
 
-## 2026-06-26 Currentization Addendum
+Requested comparison files:
 
-This audit was originally written against branch `task-9-qa-compliance` at `763f04cd16bb0299ab4d9a8a912e9a5fb85e7da2`. Subsequent work on `main` changed the governance source-of-truth layer enough that several findings in the original body are now stale if read as current open risks.
+- `MOMENTUM_CREATION_SYSTEM_V2_FOUNDATION.md`
+- `SCHEMA_GOVERNANCE.md`
+- `TRAINING_ARCHITECTURE.md`
+- `MULTI_DB_AGENT_LEARNING_GOVERNANCE.md`
+- `AI_AGENT_PLAYBOOK.md`
 
-Current state as of `8400a5ee993b45b39e71db786bb28c98c29502e6`:
+Important source note: `AI_AGENT_PLAYBOOK.md` was not found in the repository. Closest repo-tracked agent authorities found were `AGENT_ARCHITECTURE.md`, `AGENT_PROMPT_GOVERNANCE.md`, and runtime/engineering agent documents. This is recorded as a governance gap, not inferred away.
 
-1. The old `AI_AGENT_PLAYBOOK.md` P0 is **resolved by replacement**, not by creating that exact file. Agent operating governance now lives in `AGENT_ARCHITECTURE.md`, `AGENT_PROMPT_GOVERNANCE.md`, `constitution/MOMENTUM_CONSTITUTION.md`, and `constitution/MOMENTUM_GOVERNANCE.md`.
-2. `constitution/acr/ACR-001-documentation-compilers.md` is released. The generated handbooks were reclassified as Documentation Compiler outputs, moved out of `constitution/` root, and treated as non-authoritative reference manuals under `docs/reference-manuals/`.
-3. The generated AI organization manuals are reference artifacts, not constitutional authority. Archive copies remain under `constitution/_generated_archive/`; living authority remains in the canonical constitution and governance documents.
-4. Any remaining recommendation in this file to "create `AI_AGENT_PLAYBOOK.md`" should now be read as: keep the current agent governance spine synchronized and do not resurrect a duplicate playbook unless Kevin explicitly approves a new ACR.
-5. Findings about persistence discipline, graph vocabulary drift, GraphRAG runtime readiness, and operational hardening were not re-audited in this currentization pass and remain subject to fresh code review before being closed.
+Verification run:
+
+- `pnpm --config.verify-deps-before-run=false typecheck`: PASS
+- `pnpm --config.verify-deps-before-run=false build`: PASS
+- `pnpm --config.verify-deps-before-run=false --filter @momentum/server test`: FAIL, 9 failing Michael runtime assertions out of 1425 tests
+- Plain `pnpm typecheck`, `pnpm build`, and server test commands were initially blocked before execution by pnpm dependency build-script approval state for `argon2` and `esbuild`
 
 ---
 
-# PAGE 1 - 1.0 EXECUTIVE SUMMARY
+## Page 01 - Executive Summary
 
-## 1.1 Audit Conclusion
+Momentum Creation System V2 is no longer just an architectural idea. The repository contains a substantial working application with three client surfaces, an Express API, direct MongoDB/Neo4j/ChromaDB persistence adapters, real product routes, admin controls, invitation workflows, CRM workflows, orientation and training flows, agent-adjacent surfaces, and a large verification suite. The current system is best understood as a mostly built operating platform with several advanced knowledge and agent governance layers still in staged, dormant, canary, or partially adopted form.
 
-Momentum Creation System V2 is a substantial working monorepo with three client applications, one Express API, shared types and compliance rules, a Universal Gateway persistence layer, prospect-facing PMV, BA-facing onboarding and cockpit surfaces, Kevin-only admin surfaces, Michael scheduling/interview infrastructure, Ivory and ScriptMaker invitation support, CRM, training, orientation, reporting, broadcast, audit, and operational dashboards.
+The repo strongly implements the core product thesis from the foundation document: Brand Ambassadors invite people into a Team Magnificent path through shareable presentation experiences, PMV language, guided orientation, launch support, callback/webinar paths, and BA-facing tools. The `.com`, `.team`, and `admin` separation is real in code. The token lifecycle and prospect dashboard are real. The shared pool mechanic is real. The BA cockpit, CRM, invitation generator, ScriptMaker/Ivory support, Steve success-profile/onboarding work, Fast Start training, 10-step orientation, admin queue/reporting/live ops, and VM/RVM campaign lane all have concrete implementation.
 
-The repository is no longer a concept scaffold.
+The strongest architectural choice is direct app persistence through a dedicated app stack rather than gateway-mediated runtime writes. `server/src/services/persistence` establishes MongoDB, Neo4j, ChromaDB, and embedding health as first-class app dependencies. The newer `tieredWrite.ts` and `projectionOutbox.ts` design is a major improvement over one-shot triple-stack writes because it separates graph-critical writes from operational and knowledge projections. It creates a path toward recoverable, observable, retryable multi-database consistency.
 
-It is an advanced application with meaningful implementation breadth.
+The largest implementation debt is that the stronger tiered writer has not yet replaced the older `tripleStackWrite()` call pattern. There are 56 production/test references to `tripleStackWrite(`, while the exported `writeGraphCritical`, `writeKnowledge`, and `writeOperational` helpers are not used by production callers. The older helper performs Mongo first and then optional Neo4j/Chroma legs. If a downstream leg fails after Mongo succeeds, the current call shape can produce partial persistence. That is the single most important backend architecture gap because the project repeatedly states that multi-store persistence and auditability are non-negotiable.
 
-The primary platform risk is not lack of features.
+The second largest debt is governance/documentation drift. `docs/project-wireframe.md` appears to be the best current implementation map, while `docs/build-registry.md` is materially stale. `TASK.md` in the root points at an old feature branch while the repository is on `main`, so it is stale operational context. The requested `AI_AGENT_PLAYBOOK.md` is absent. Some older documents still describe future, open, or snake_case schema targets that do not match the later constitutional and implementation reality. This does not mean the repo is wrong; it means the authority trail needs an explicit reconciliation pass.
 
-The primary platform risk is that governance documents now describe a more mature AI, GraphRAG, schema, and multi-database architecture than the implementation consistently enforces.
+The third major debt is the knowledge/agent runtime gap. The repository contains thoughtful runtime documents, context manager scaffolding, learning pipeline material, GraphRAG domain code, and active knowledge store code. But the GraphRAG persistence is canary-gated off by default, the domain file itself says it is wired dormant, and Context Manager live flags default to false. The code is in position, but not yet operating as a fully live self-improving agent knowledge layer.
 
-## 1.2 Highest-Priority Findings
+The fourth major issue is verification drift in Michael runtime tests. Typecheck and build pass when pnpm's dependency approval gate is bypassed for command execution, but server tests fail in 4 files with 9 assertions. The failure pattern is consistent: tests expect degraded `safe_fallback` catalog responses, while the implementation now returns `next_training_step`. This is likely a contract/test update issue, but until it is reconciled it is a release risk because it touches agent behavior boundaries.
 
-| Priority | Finding | Evidence | Impact |
-|---|---|---|---|
-| P0 resolved by replacement | `AI_AGENT_PLAYBOOK.md` was referenced by the original audit request but has been superseded by the current governance spine | `constitution/MOMENTUM_CONSTITUTION.md`, `constitution/MOMENTUM_GOVERNANCE.md`, `AGENT_ARCHITECTURE.md`, and `AGENT_PROMPT_GOVERNANCE.md`; ACR-001 release record | Do not create a duplicate playbook unless Kevin approves a new governance change; keep the current spine synchronized |
-| P0 | Persistence architecture is split between older `tripleStackWrite` and newer `tieredWrite`/projection outbox | `server/src/services/tripleStack.ts`, `tieredWrite.ts`, `projectionOutbox.ts` | Some domains still risk partial Mongo/Neo4j/Chroma writes |
-| P0 | Graph vocabulary drift remains in domain code | `:BA` and `:BrandAmbassador` both appear; `SPONSORED_BY`, `UPLINE_IS`, `INVITED`, `IN_HOLDING_TANK` coexist | Agent GraphRAG traversals can fragment or misread lineage |
-| P1 | GraphRAG is architecturally documented but not implemented as a unified runtime retrieval service | Docs contain GraphRAG architecture; code contains graph/vector writes and reads but no central GraphRAG engine | AI agents cannot yet reliably perform source-grounded multi-store reasoning |
-| P1 | Master content administration exists, but consumer rewiring is incomplete by contract | `docs/app-data-model-contract.md`; `server/src/services/masterContent.ts`; references in scriptmaker/Michael | Admin-edited voice/templates may be inert outside rewired consumers |
-| P1 | Community/Event/Resource architectures are document-complete but app runtime support is partial | Architecture docs exist; app has event/orientation/training/resource-adjacent implementations, but no full community/resource center runtime | Long-term governance surfaces outpace implementation |
-| P2 | `graphify-out` report is useful but stale | Graph built from commit `4d8cc7d5`; current HEAD is `763f04cd...` | Repository graph should be regenerated before future dependency analysis |
+The fifth major issue is compliance/governance risk around the VM/RVM campaign lane. The lane is implemented with entitlements, admin approval, provider queue, dry-run/manual controls, tokenized presentation flow, and delivery governance. It is not simply wild automation. Still, the original foundation, locked spec, and compliance rules repeatedly protect the platform from automated prospecting, lead qualification, pressure, and noncompliant claims. The VM/RVM lane changes the acquisition posture enough that it should be tied to an explicit current decision/ACR and compliance review.
 
-## 1.3 Current State Rating
-
-| Dimension | Rating | Notes |
-|---|---|---|
-| Product breadth | Strong | Large implemented surface area across `.com`, `.team`, `/admin`, server, shared package |
-| Governance documentation | Strong | Extensive constitutional, schema, agent, CRM, PMV, training, community, event, resource, recommendation docs |
-| Implementation-governance alignment | Partial | Core app is real; newer AI/GraphRAG governance exceeds runtime implementation |
-| Persistence integrity | Mixed | Tiered writer exists; many domains still use older helper or direct gateway calls |
-| AI readiness | Partial | Anthropic service, ScriptMaker, Ivory, Michael prompt path exist; agent ecosystem is not fully governed at runtime |
-| GraphRAG readiness | Early | Data projections exist; no unified retrieval, evidence, and recommendation orchestration engine |
-| Operational readiness | Moderate | Admin/reporting/live ops are implemented; some env dependencies and worker gaps remain |
-| Scalability readiness | Moderate | Architecture is scalable; in-process SSE/workers and missing indexes/queue drains require hardening |
-
-## 1.4 Executive Decision
-
-The platform should not be treated as "unbuilt."
-
-The platform should be treated as "feature-rich, governance-rich, and in need of a focused integrity convergence pass."
-
-The next platform phase should prioritize:
-
-1. One write discipline.
-2. One graph vocabulary.
-3. One source-backed GraphRAG runtime.
-4. One prompt/agent governance registry.
-5. One operational readiness checklist for app launch.
+Bottom line: this repository is in an advanced build state. It is not a blank slate. It is also not yet a fully governed live knowledge-agent operating system. The immediate path is not to rebuild; it is to consolidate: migrate writes to tiered persistence, reconcile agent/runtime contracts, make authority docs current, harden the knowledge ingestion/retrieval path, and close the last governance gaps around VM/RVM and prompt/agent registries.
 
 ---
 
-# PAGE 2 - 2.0 AUDIT SCOPE AND METHOD
+## Page 02 - Audit Scope And Method
 
-## 2.1 Scope
+This audit examined repository structure, governing documentation, implementation files, route surfaces, persistence adapters, runtime and knowledge systems, test/build outcomes, and current documentation authority. The audit focused on what the code actually contains rather than relying only on planning documents.
 
-This audit evaluates:
+Primary implementation areas reviewed:
 
-1. Architecture.
-2. Agents.
-3. PMV.
-4. CRM.
-5. Training.
-6. Orientation.
-7. Launch Center.
-8. Resource Center.
-9. Event Center.
-10. Knowledge systems.
-11. Mongo usage.
-12. Chroma usage.
-13. Neo4j usage.
-14. GraphRAG usage.
+- `apps/com`
+- `apps/team`
+- `apps/admin`
+- `server/src`
+- `packages/shared`
+- `runtime`
+- `knowledge`
+- `implementation`
+- `constitution`
+- `organization`
+- `engineering`
+- `docs`
 
-## 2.2 Repository Evidence Read
+Repository size signals from the audit scan:
 
-The audit read or inspected:
+- 1037 files in the main audit scope directories
+- 585 TypeScript/JavaScript source files under `apps`, `server`, and `packages`
+- 136 server test files executed by Vitest
+- 1425 server tests observed in the server test run
 
-1. `MOMENTUM_CREATION_SYSTEM_V2_FOUNDATION.md`
-2. `SCHEMA_GOVERNANCE.md`
-3. `TRAINING_ARCHITECTURE.md`
-4. `MULTI_DB_AGENT_LEARNING_GOVERNANCE.md`
-5. `docs/READ-ME-FIRST.md`
-6. `docs/AGENT-BRIEFING.md`
-7. `docs/build-registry.md`
-8. `docs/project-wireframe.md`
-9. `docs/app-data-model-contract.md`
-10. `docs/app-data-model-FINDINGS.md`
-11. `graphify-out/GRAPH_REPORT.md`
-12. `server/src/index.ts`
-13. `server/src/services/gateway.ts`
-14. `server/src/services/tripleStack.ts`
-15. `server/src/services/tieredWrite.ts`
-16. `server/src/services/projectionOutbox.ts`
-17. `server/src/services/chromaCollections.ts`
-18. Route inventory via `server/src/routes`
-19. Domain inventory via `server/src/domain`
-20. Client route mounts in `apps/com`, `apps/team`, and `apps/admin`
-21. Package scripts and workspace configuration
+The audit used the following authority logic:
 
-## 2.3 Source Availability Finding
+1. The repository implementation is the source of truth requested by Kevin.
+2. `docs/project-wireframe.md` appears to be the most current implementation map.
+3. `constitution/MOMENTUM_CONSTITUTION.md` and the related decision framework describe current operating authority more clearly than the older foundation documents.
+4. `docs/locked-spec.md` remains important, but portions of it are older and should be reconciled against the wireframe and code.
+5. `docs/build-registry.md` is useful historical evidence but is stale relative to recent implementation.
+6. Missing requested files are gaps, not opportunities for fabrication.
 
-`AI_AGENT_PLAYBOOK.md` was requested as a comparison document in the original audit request but does not exist in the repository.
-
-Governance interpretation:
-
-1. This was a valid documentation gap in the original evidence session.
-2. The gap is now resolved by replacement: current agent governance is in `constitution/MOMENTUM_CONSTITUTION.md`, `constitution/MOMENTUM_GOVERNANCE.md`, `AGENT_ARCHITECTURE.md`, and `AGENT_PROMPT_GOVERNANCE.md`.
-3. Future audits should reference those documents instead of recreating `AI_AGENT_PLAYBOOK.md` by default.
-
-## 2.4 Method
-
-The audit uses a read-backed assessment model:
-
-```text
-Foundation + Governance Docs
-        |
-        v
-Repository Source Read
-        |
-        v
-Subsystem Assessment
-        |
-        v
-Gap/Risk/Priority Analysis
-        |
-        v
-Optimization Roadmap
-```
-
-## 2.5 Evidence Boundary
-
-This audit evaluates repository files and read-visible architecture.
-
-It does not claim that live databases currently contain production data unless repository evidence or previously written app-data-model documents indicate such state.
+The audit did not assume live database contents beyond what code and configuration prove. It reviewed database usage patterns through repository code, environment defaults, health probes, route/domain behavior, and adapter contracts.
 
 ---
 
-# PAGE 3 - 3.0 REPOSITORY INVENTORY
+## Page 03 - Source Documents Compared
 
-## 3.1 Monorepo Structure
+`MOMENTUM_CREATION_SYSTEM_V2_FOUNDATION.md` defines the original vision: transformation, Team Magnificent community, PMV, invitation-driven growth, a prospect-facing presentation, BA-facing launch and training, AI support bounded by human decision-making, and a multi-database knowledge layer. The implementation broadly follows this product intent, but later repo authority has refined the language and system boundaries.
 
-| Area | Evidence | Assessment |
-|---|---|---|
-| Root package | `package.json`, `pnpm-workspace.yaml` | pnpm workspace with Node >=22 |
-| Server | `server/src` | Express API, domain/services/routes split |
-| Prospect app | `apps/com` | Vite React app for `/p/:token` and prospect reentry |
-| Team app | `apps/team` | Vite React app for BA onboarding, cockpit, training, Ivory, profile |
-| Admin app | `apps/admin` | Vite React app for Kevin-only admin operations |
-| Shared package | `packages/shared` | Types, compliance, brand, rules, reporting |
-| Docs | root and `docs/` | Extensive governance and build-state documentation |
-| Graph output | `graphify-out` | Stale but useful graph map |
+`SCHEMA_GOVERNANCE.md` states a strict one-concept-one-schema discipline, warns against schema drift, and emphasizes canonical schema repositories. The implementation follows the spirit of this document through shared types, direct adapters, audit trails, and route/domain decomposition. However, there is visible drift between older schema-governance language and the current camelCase TypeScript/application model. This needs reconciliation through the current ACR/decision system rather than a casual rewrite.
 
-## 3.2 File Counts Observed
+`TRAINING_ARCHITECTURE.md` describes Resource Center, Orientation, Training Modules, Launch Center, and Daily Success Coach as a connected training ecosystem. The implementation materially covers Orientation, Fast Start, 10-step training, content videos, Steve onboarding/success profile work, Michael runtime support, and BA cockpit guidance. The larger resource/event/training graph vision exists partially, not fully.
 
-| Category | Count |
-|---|---:|
-| Total repository files from `rg --files` excluding generated/dist conventions | 414 |
-| Server source files | 105 |
-| Team source files | 45 |
-| Prospect source files | 33 |
-| Admin source files | 53 |
-| Markdown files | 70 |
+`MULTI_DB_AGENT_LEARNING_GOVERNANCE.md` requires MongoDB as canonical truth, ChromaDB as semantic retrieval, Neo4j as relationship reasoning, and GraphRAG as grounded retrieval/synthesis. The implementation has direct app persistence, health probes, Chroma collection setup, Neo4j adapters, approved knowledge store code, GraphRAG canary code, context scaffolding, and outbox mechanics. But the live knowledge-agent loop is still incomplete because GraphRAG and Context Manager are gated/dormant by default.
 
-## 3.3 Project Wireframe Status
-
-Observed counts from `docs/project-wireframe.md`:
-
-| Status | Count |
-|---|---:|
-| Done `[x]` | 178 |
-| Partial `[~]` | 9 |
-| Pending `[ ]` | 4 |
-
-## 3.4 Graphify Status
-
-`graphify-out/GRAPH_REPORT.md` reports:
-
-1. 2,105 nodes.
-2. 4,128 edges.
-3. 124 communities.
-4. God nodes include `gatewayCall()`, `tripleStackWrite()`, `appendAuditEntry()`, and `findBAByBaId()`.
-5. Graph was built from commit `4d8cc7d5`, which is stale relative to current HEAD `763f04cd...`.
-
-## 3.5 Governance Rule
-
-Future repository architecture work should regenerate graphify output after major code changes or before dependency-sensitive audits.
+`AI_AGENT_PLAYBOOK.md` was requested but not found. The repository contains `AGENT_ARCHITECTURE.md`, `AGENT_PROMPT_GOVERNANCE.md`, `runtime/AGENT_RUNTIME.md`, and engineering agent guides. Those files give enough authority to audit agent behavior, but the missing named playbook is itself a governance and onboarding gap.
 
 ---
 
-# PAGE 4 - 4.0 PLATFORM ARCHITECTURE CURRENT STATE
+## Page 04 - Current State Assessment
 
-## 4.1 Runtime Topology
+The current state is a mature monorepo with a real app architecture:
 
-```text
-apps/com        apps/team        apps/admin
-  :7701           :7702            :7703
-    \               |                /
-     \              |               /
-      +-------------+--------------+
-                    |
-              Express API :7700
-                    |
-          Universal Gateway V2 :2526
-                    |
-        +-----------+-----------+
-        |           |           |
-      Mongo       Neo4j       Chroma
-```
+- Prospect surface: `apps/com`
+- BA/team surface: `apps/team`
+- Kevin/admin surface: `apps/admin`
+- API surface: `server`
+- Shared brand/types/compliance package: `packages/shared`
+- Runtime and governance documents: `runtime`, `constitution`, `organization`, `engineering`, `docs`
 
-## 4.2 Server Mount Architecture
+The system is not merely a prototype. It contains route-level authentication and onboarding gates, token lifecycle handling, invitation creation, PMV presentation flow, prospect dashboard, BA cockpit, CRM, training progress, Steve success interview, Michael runtime, ScriptMaker/Ivory generation support, admin oversight, access code management, reports, live ops, audit controls, content videos, VM/RVM campaign routes, provider queue workers, broadcast workers, and direct persistence.
 
-`server/src/index.ts` demonstrates a mature route mount discipline:
+Verification state:
 
-1. Raw Telnyx webhook route mounts before JSON parsing.
-2. Pre-gate routes mount before Michael completion gate.
-3. Prospect `/api/p` routes remain unauthenticated and token-scoped.
-4. BA-facing routes are mounted in a gated block and apply `requireAuth` plus `requireMichaelComplete` internally.
-5. Admin routes use `requireAdmin`.
-6. Boot-time Chroma collection ensure runs before listen.
-7. Broadcast worker starts after server initialization.
+- TypeScript passes across shared, admin, com, team, and server when pnpm dependency-run verification is bypassed with `--config.verify-deps-before-run=false`.
+- Build passes across shared, admin, com, team, and server under the same pnpm run configuration.
+- Server tests are very strong numerically: 1416 passing tests out of 1425.
+- The 9 failing tests are concentrated around Michael runtime expected catalog behavior.
+- Build warns about team app chunk size and a com dynamic import that cannot split because the module is also statically imported.
 
-## 4.3 Client Topology
-
-| Client | Primary routes | Current state |
-|---|---|---|
-| `.com` | `/p/:token`, `/p/login`, `/p/login/r/:linkToken` | Implemented focused prospect surface |
-| `.team` | register, login, welcome, Michael, cockpit, invitations, video library, Ivory, profile, leadership, training, questionnaire, sponsor workbook, preview | Broad BA operating surface |
-| `/admin` | dashboard, access codes, BAs, prospects, queue, live ops, audit, reports, tenant, orientation, broadcast | Broad Kevin-only operations surface |
-
-## 4.4 Architectural Strengths
-
-1. Clear three-client separation.
-2. Strong route ordering awareness.
-3. Auth boundaries are explicit.
-4. Prospect identity is token/session scoped.
-5. Admin is separately gated.
-6. Shared package centralizes brand, compliance, types, and rules.
-7. Universal Gateway abstraction centralizes external persistence calls.
-
-## 4.5 Architectural Weaknesses
-
-1. Runtime GraphRAG orchestration is not centralized.
-2. Persistence has multiple write disciplines.
-3. Some source documentation still says v1 while repository name and docs say V2.
-4. `graphify-out` is stale.
-5. Some architecture docs are ahead of implementation.
-
-## 4.6 Technical Debt
-
-1. `tripleStackWrite` remains active despite newer `tieredWrite`.
-2. Direct `gatewayCall` write sequences remain in domain code.
-3. Some comments contain mojibake characters, likely from encoding drift.
-4. Generated graph and build registry may lag current implementation.
-
-## 4.7 Missing Components
-
-1. Runtime GraphRAG service.
-2. AI Agent Playbook file.
-3. Central prompt registry.
-4. Unified schema registry implementation.
-5. Complete master-content consumer rewiring.
-
-## 4.8 Scalability Concerns
-
-1. In-process SSE and workers may need external pub/sub for multi-instance deployment.
-2. Gateway latency and retries need operational monitoring.
-3. Projection outbox needs scheduler/monitor guarantees.
-4. Mongo indexes need explicit boot enforcement before production scale.
-
-## 4.9 Governance Concerns
-
-1. Governance documents and runtime code must be reconciled through a tracked implementation queue.
-2. Architecture documents should not imply deployed AI autonomy that does not exist.
-3. All future docs should separate "implemented", "designed", and "future".
+The implementation state is therefore not "broken." It is "mostly buildable with a small but important failing test cluster and a package-manager approval gate that must be resolved for normal commands."
 
 ---
 
-# PAGE 5 - 5.0 SUBSYSTEM AUDIT FORMAT
+## Page 05 - Repository Topology
 
-## 5.1 Standard Evaluation Fields
+The topology is consistent with the intended three-surface product:
 
-Every subsystem is evaluated against:
+- `apps/com` holds prospect-facing routes, presentation sections, dashboard sections, PMV-facing content, magic link redemption, and RVM token route.
+- `apps/team` holds BA login, cockpit, CRM, invitation tools, Ivory surfaces, training, video library, profile, onboarding, Steve/Michael routes, leadership, VM campaigns, and sponsor workbook surfaces.
+- `apps/admin` holds Kevin/admin login, dashboard, access codes, BA/prospect oversight, queue, reports, live ops, broadcast, knowledge, audit, content videos, orientation admin, tenant, agents, and VM admin.
+- `server/src/routes` provides the API shape.
+- `server/src/domain` contains most business logic.
+- `server/src/services` contains persistence, auth/session, delivery, LLM, audit, projection, knowledge, and integration services.
+- `server/src/runtime` contains agent/context/knowledge runtime scaffolding and tests.
+- `packages/shared/src` contains shared types, rules, compliance, brand, runtime contracts, and package exports.
 
-1. Strengths.
-2. Weaknesses.
-3. Technical debt.
-4. Missing components.
-5. Optimization opportunities.
-6. Scalability concerns.
-7. Governance concerns.
+This layout is a strength. It keeps surface-level UI separate from server logic and keeps shared vocabulary/types in a workspace package. It also allows the team to scale implementation across parallel worktrees because domains and routes are fairly well separated.
 
-## 5.2 Severity Model
-
-| Severity | Meaning | Required Response |
-|---|---|---|
-| P0 | Launch integrity blocker | Fix before production trust depends on it |
-| P1 | Major functional or governance gap | Schedule in next convergence phase |
-| P2 | Optimization or hardening item | Add to roadmap |
-| P3 | Documentation or polish | Address opportunistically |
-
-## 5.3 Evidence Rule
-
-Each finding must be tied to repository evidence, a named document, or explicitly marked as an inference.
-
-## 5.4 Audit Boundary
-
-This audit does not replace testing.
-
-It identifies architecture, governance, and implementation alignment risks.
+The main topology weakness is that the server domain layer is now wide. There are many independent domain files, many route modules, and many persistence call sites. That is expected for a fast-moving product, but it raises the cost of consistency work. Any cross-cutting change, especially persistence governance, prompt governance, compliance vocabulary, or agent behavior, now requires repo-wide migration discipline.
 
 ---
 
-# PAGE 6 - 6.0 ARCHITECTURE SUBSYSTEM AUDIT
+## Page 06 - Verification Findings
 
-## 6.1 Strengths
+The audit ran normal verification first:
 
-1. The monorepo is organized into server, three clients, and shared package.
-2. Route mount order reflects operational knowledge.
-3. Client apps are scoped by audience.
-4. Server code separates routes, domain logic, middleware, and services.
-5. Admin, team, and prospect surfaces are independent enough to scale separately.
-6. Gateway access is centralized through `gatewayCall`.
+- `pnpm typecheck`
+- `pnpm --filter @momentum/server test`
+- `pnpm build`
 
-## 6.2 Weaknesses
+All three initially failed before reaching TypeScript, Vitest, or Vite build work because pnpm stopped on ignored dependency build scripts:
 
-1. Persistence helper strategy is not fully converged.
-2. Documentation contains both V1 and V2 naming.
-3. Some architecture docs describe systems not yet implemented as runtime services.
-4. Stale graphify output limits automated architecture confidence.
+- `argon2@0.41.1`
+- `esbuild@0.23.1`
+- `esbuild@0.24.2`
+- `esbuild@0.25.12`
 
-## 6.3 Technical Debt
+The non-invasive command workaround was to run the same gates with `--config.verify-deps-before-run=false`. That does not approve dependency builds; it only avoids the pre-run dependency status check for this command invocation.
 
-1. Older comments in `server/src/index.ts` list pending mounts that are now mounted.
-2. Encoding artifacts appear in comments.
-3. `tripleStackWrite` and `tieredWrite` coexist without a complete migration boundary.
-4. Generated architecture artifacts need freshness policy.
+Results with that flag:
 
-## 6.4 Missing Components
+- Typecheck: PASS
+- Build: PASS
+- Server tests: FAIL
 
-1. `ensureIndexes()` boot process for Mongo indexes.
-2. Deployment topology document for multi-instance scale.
-3. Central runtime health dashboard for gateway, Mongo, Neo4j, Chroma, workers, and outbox.
+Server test failure details:
 
-## 6.5 Optimization Opportunities
+- 4 files failed.
+- 9 tests failed.
+- 132 server test files passed.
+- 1416 tests passed.
+- 1425 tests ran.
 
-1. Convert all writes into tiered write categories.
-2. Add structured route inventory generation.
-3. Add architecture dependency checks to CI.
-4. Regenerate graphify output after major branches.
+Failure pattern:
 
-## 6.6 Scalability Concerns
+- Tests expect `michael_safe_fallback_degraded_en` or `michael_safe_fallback_degraded_es`.
+- Implementation returns `michael_next_training_step_en` or `michael_next_training_step_es`.
+- Tests expect response type `safe_fallback`.
+- Implementation returns response type `next_training_step`.
 
-1. Broadcast worker is in-process.
-2. SSE pub/sub is in-process.
-3. Projection outbox drain schedule must be durable outside one Node process.
-4. Long-running admin reports may need caching or background generation.
+Assessment:
 
-## 6.7 Governance Concerns
-
-1. Architecture governance must classify files as implemented, draft, or future.
-2. Foundational rules should be enforced by tests and runtime checks, not comments only.
+This looks like drift between Michael runtime contract tests and current route behavior, not a broad platform collapse. It still matters because Michael is an agent-facing runtime and contract drift is exactly where governance failures begin. The next action should be to decide whether current behavior is intended. If intended, update the tests and governing runtime docs. If not intended, restore degraded fallback behavior for empty/server-owned turns.
 
 ---
 
-# PAGE 7 - 7.0 AGENTS SUBSYSTEM AUDIT
+## Page 07 - Architecture Assessment
 
-## 7.1 Scope
+Strengths:
 
-Agents include:
+- The three-client architecture matches the product boundaries: prospect, BA/team, admin.
+- The Express API is route modular and domain-heavy rather than putting all logic in route handlers.
+- Raw Telnyx webhook mounting before JSON body parsing is correctly preserved in `server/src/index.ts`.
+- Pre-gate routes and gated BA-facing routes are separated in server boot order.
+- Direct app persistence is clearly separated from external agent memory/tooling.
+- Shared package exports enforce common brand, compliance, rules, and types.
+- Workers are explicitly started and stopped.
 
-1. Michael.
-2. Ivory.
-3. ScriptMaker.
-4. Daily Success Coach concepts.
-5. Future Community, Training, Leadership, Event, Compliance, Customer Success, and Knowledge agents.
+Weaknesses:
 
-## 7.2 Strengths
+- The server domain layer is large and consistency relies heavily on convention.
+- Multiple generations of architecture coexist: older `tripleStackWrite`, newer tiered writer, runtime docs, dormant GraphRAG, and live product routes.
+- Documentation authority is fractured across root docs, constitution docs, runtime docs, engineering docs, `docs/project-wireframe.md`, and stale registry files.
+- Route growth has outpaced a concise endpoint inventory.
 
-1. `server/src/services/anthropic.ts` provides direct Anthropic Messages API support with dormant-safe behavior.
-2. `server/src/domain/scriptmaker.ts` implements compliance-sensitive draft generation with fallback.
-3. `server/src/domain/ivory.ts` implements a real BA-private roster, coach, draft, and mint flow.
-4. `server/src/domain/michael-interview-script.ts` defines Michael prompt content and rubric.
-5. Michael scheduling, interview artifacts, transcript chunks, and cockpit cards exist.
-6. Agent architecture documents define mission, boundaries, permissions, memory, and GraphRAG expectations.
+Technical Debt:
 
-## 7.3 Weaknesses
+- `tripleStackWrite()` remains the dominant multi-store write helper.
+- Tiered persistence exists but is not production-adopted.
+- Some route/domain naming still reflects historical transitions: Michael/Steve role shifts, lead/prospect vocabulary, launch/training/resource terminology.
+- Current build registry is stale relative to implementation.
 
-1. The original `AI_AGENT_PLAYBOOK.md` gap is resolved by replacement; the current agent governance spine must stay synchronized.
-2. No central runtime agent registry was found.
-3. No central prompt registry was found.
-4. Daily Success Coach is implemented as domain logic and UI patterns, not a named autonomous agent runtime.
-5. Future agents are architecture-level, not implementation-level.
+Missing Components:
 
-## 7.4 Technical Debt
+- A current generated API map.
+- A current data schema catalog that binds Mongo collections, Neo4j labels, Chroma collections, shared TypeScript types, and route payloads.
+- A migration status document for `tripleStackWrite` to tiered writes.
+- A single current agent playbook matching the requested `AI_AGENT_PLAYBOOK.md`.
 
-1. Agent behavior is distributed across domain files, prompts, comments, and admin master content.
-2. Master content overrides are not universally wired.
-3. Agent outputs and recommendations are not uniformly stored under a single agent recommendation ledger.
-4. Michael transcript knowledge projection is incomplete relative to governance.
+Optimization Opportunities:
 
-## 7.5 Missing Components
+- Generate route inventory from `server/src/index.ts` and route files.
+- Generate persistence call inventory and make it part of CI.
+- Add architectural lint rules for forbidden route placements and forbidden prospect-facing vocabulary.
+- Turn `docs/project-wireframe.md` into the authoritative human-readable build ledger and automatically mark stale mirrors.
 
-1. Agent registry collection and graph.
-2. Prompt registry collection and graph.
-3. Agent event ledger.
-4. Agent recommendation engine runtime.
-5. Agent learning feedback loop.
-6. Current agent governance spine synchronization across `constitution/`, `AGENT_ARCHITECTURE.md`, and `AGENT_PROMPT_GOVERNANCE.md`.
+Scalability Concerns:
 
-## 7.6 Optimization Opportunities
+- In-process SSE/event emitters and workers are fine for local/single-instance operation but need external coordination before multi-instance deployment.
+- Large team app bundle should be split as modules mature.
+- More domain modules mean more write-path risk unless persistence calls are standardized.
 
-1. Promote ScriptMaker, Ivory, and Michael prompt configurations into governed prompt slots.
-2. Create one `agent_events` collection.
-3. Create one `agent_recommendations` collection with source evidence.
-4. Add regression tests for compliance-sensitive generation.
+Governance Concerns:
 
-## 7.7 Scalability Concerns
-
-1. More agents will multiply prompt drift unless prompt governance becomes runtime-backed.
-2. Agent outputs need retention, privacy, and review policy.
-3. Multi-agent orchestration requires queueing and idempotent handoffs.
-
-## 7.8 Governance Concerns
-
-1. AI cannot replace human sponsor, mentor, or leader.
-2. Ivory and ScriptMaker must remain draft-only and BA-controlled.
-3. Michael must remain BA-facing and mentor-style.
-4. Future agent expansion must use the current governance spine instead of recreating an unapproved duplicate playbook.
+- Missing `AI_AGENT_PLAYBOOK.md`.
+- Stale `TASK.md` can mislead agents on `main`.
+- Stale `docs/build-registry.md` can cause agents to rebuild or misclassify completed work.
+- Architecture changes should be tied to ACR/decision rows, especially VM/RVM and knowledge runtime activation.
 
 ---
 
-# PAGE 8 - 8.0 MICHAEL AUDIT
+## Page 08 - Product Surface Assessment
 
-## 8.1 Strengths
+The product surface is stronger than the older planning documents imply. The `.com` app includes the tokenized presentation and dashboard path. The `.team` app includes login, cockpit, invitation, CRM, training, Steve, Michael, Ivory, profile, preview, leadership, and VM campaign routes. The admin app includes Kevin-level operational controls.
 
-1. Michael schedule domain exists.
-2. Slot generation and booking are implemented.
-3. Telnyx call origination exists.
-4. Telnyx webhook routing exists.
-5. Michael interview UI states exist in `.team`.
-6. Transcript chunk handling exists.
-7. Interview classification and success profile logic exist.
-8. Founder handoff domain exists.
+The `.com` surface aligns with the foundation's core purpose: prospects get a presentation path and next-step options without exposing the internal BA tools. The `.team` surface aligns with the training and launch-center vision: BAs have guided tools to invite, follow up, learn, and work from their cockpit. The admin surface aligns with governance and operations: Kevin can manage access, queue, reporting, content, live ops, and oversight.
 
-## 8.2 Weaknesses
+The largest product-surface gap is not that routes are absent; it is that the feature map is now broader than the old source documents. The VM/RVM lane, knowledge admin, content video management, Michael runtime canaries, and agent overview surfaces need current documented placement in the product architecture.
 
-1. `MICHAEL_WORKER_SECRET` absence is identified in app-data-model findings as blocking worker ingest.
-2. External voice worker itself is not part of the repository implementation.
-3. Full transcript is not projected into Chroma as first-class knowledge according to app-data-model findings.
-4. Neo4j label drift appears in Michael scoring and handoff code.
-
-## 8.3 Technical Debt
-
-1. Michael uses both schedule records and interview artifacts with separate projection paths.
-2. Some Michael graph writes still use `:BA`.
-3. Rescoring and transcript updates may not refresh all knowledge projections.
-
-## 8.4 Missing Components
-
-1. Durable Michael voice worker.
-2. Full transcript chunk embedding and access-gated retrieval.
-3. Unified Michael interview GraphRAG context package.
-4. Prompt-version tracking for Michael system prompt.
-
-## 8.5 Optimization Opportunities
-
-1. Treat Michael interview as Tier 2 knowledge-critical data.
-2. Store transcript chunks with question and speaker metadata.
-3. Add read-side enforcement for sponsor visibility.
-4. Add worker health dashboard.
-
-## 8.6 Scalability Concerns
-
-1. Outbound call throughput will depend on Telnyx rate limits and worker capacity.
-2. Transcript streaming over SSE should be backed by external pub/sub for multi-instance scale.
-3. Founder handoff routing needs idempotent queue guarantees.
-
-## 8.7 Governance Concerns
-
-1. Michael must not become prospect-facing.
-2. Michael must not override sponsor or human leadership.
-3. Interview-derived success profiles require privacy and access governance.
+The current repo should be treated as the working application, not as a wireframe waiting to be built.
 
 ---
 
-# PAGE 9 - 9.0 IVORY AND SCRIPTMAKER AUDIT
+## Page 09 - PMV Assessment
 
-## 9.1 Strengths
+Strengths:
 
-1. Ivory roster exists with BA-private ownership.
-2. Ivory coach exists with Anthropic-backed generation.
-3. Ivory invitation draft and mint flow converge with the invitation spine.
-4. ScriptMaker draft engine exists.
-5. Compliance boundaries are explicitly documented in shared types and domain comments.
-6. Draft-only posture is preserved.
+- PMV is implemented as a vocabulary and compliance frame, not just a slogan.
+- Prospect-facing routes avoid classic income-claim framing.
+- Tokenized presentation and dashboard flows support People, Momentum, Volume, Checks without exposing internal compensation math.
+- The foundation and locked-spec intent of "position in a shared pool is not a binary placement promise" is reflected in the code and comments.
+- BA-facing systems center inviting and follow-up rather than AI lead scoring.
 
-## 9.2 Weaknesses
+Weaknesses:
 
-1. Ivory updates use separate Mongo/Neo4j paths in parts of the domain.
-2. Ivory graph label uses `:BA` in some writes.
-3. Runtime recommendations are not stored in a unified recommendation architecture.
-4. ScriptMaker is a drafting tool, not a complete recommendation engine.
+- PMV documentation remains split across foundation, locked spec, shared rules, compliance constants, presentation content, and admin reporting.
+- Some newer VM/RVM files necessarily use "lead" vocabulary internally; this must remain internal/gated and not bleed into prospect-facing copy.
+- PMV measurement is not yet obviously expressed as a single analytics model across invitation, CRM, training, and events.
 
-## 9.3 Technical Debt
+Technical Debt:
 
-1. Ivory and Generator share `mcs_ivory` Chroma collection.
-2. Chroma collection bootstrapping exists, but the app-data-model contract recommends narrower Chroma scope and cleanup.
-3. Master content read path exists but full consumer rewiring remains incomplete.
+- Need a single PMV contract that maps each PMV concept to allowed UI language, forbidden UI language, database fields, and analytics events.
+- Need automated scanning for forbidden prospect-facing terms in `apps/com`.
+- Need PMV examples in admin reporting to distinguish operational analytics from prospect promises.
 
-## 9.4 Missing Components
+Missing Components:
 
-1. Ivory recommendation ledger.
-2. Draft effectiveness feedback loop.
-3. Compliance scoring/reporting tied to draft outcomes.
-4. Prompt registry entries for ScriptMaker and Ivory.
+- PMV analytics dashboard that traces People -> Momentum -> Volume -> Checks without dollar claims.
+- PMV glossary enforced by lint/tests.
+- PMV event taxonomy shared across invitation, CRM, orientation, launch, and training.
 
-## 9.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Persist draft outcomes: accepted, edited, discarded, minted.
-2. Add generated draft compliance audit metadata.
-3. Add explainable why-this-person/why-this-message support without lead qualification.
+- Connect PMV metrics to cockpit guidance so BAs get simple activity guidance without scoring people.
+- Add PMV compliance snapshots to admin reports.
+- Build PMV content variants for training and resource center without changing the compliance baseline.
 
-## 9.6 Scalability Concerns
+Scalability Concerns:
 
-1. BA roster size may increase semantic retrieval volume.
-2. Anthropic usage must be rate-limited and monitored.
-3. Generator runs need idempotent retry and batch safeguards.
+- As more content is added, PMV language drift becomes likely unless content creation tools validate against shared compliance constants.
+- Internal campaign lanes can accidentally normalize sales terminology if governance is not explicit.
 
-## 9.7 Governance Concerns
+Governance Concerns:
 
-1. Ivory must not become AI prospecting.
-2. ScriptMaker must not send messages.
-3. No income, medical, placement, or pressure claims may be generated.
+- PMV must stay prospect-safe: no income guarantees, no cycle math, no placement promises, no automated qualification.
+- New VM/RVM acquisition flows should be reviewed against PMV vocabulary and THREE compliance rules before live delivery expands.
 
 ---
 
-# PAGE 10 - 10.0 PMV AUDIT
+## Page 10 - CRM Assessment
 
-## 10.1 Strengths
+Strengths:
 
-1. Prospect-facing `/p/:token` route is implemented.
-2. Presentation and dashboard states are route-resolved from token state.
-3. Video milestone tracking exists.
-4. Placement occurs at video completion.
-5. Prospect dashboard sections exist in `.com`.
-6. SSE stream exists for placement updates.
-7. Team stats endpoint exists.
-8. Prospect re-entry login exists.
+- CRM is implemented as a BA-facing tool rather than a cold-sales pipeline.
+- Server domains include `crm.ts`, `crmHub.ts`, `prospectCrm.ts`, callback requests, outcomes, recruiting cycle, invitations, and prospect account logic.
+- Routes are gated behind auth and onboarding where appropriate.
+- Ownership checks are visible in CRM domain code.
+- CRM connects naturally to invitations, prospects, callbacks, and cockpit workflows.
 
-## 10.2 Weaknesses
+Weaknesses:
 
-1. PMV architecture is document-rich, but runtime PMV intelligence is mostly projection logic.
-2. Engagement recommendations are not unified through recommendation engine.
-3. PMV follow-up logic is distributed across cockpit, CRM, callback, invitation activity, and prospect routes.
+- CRM scope has expanded into several files and concepts, which increases the chance of duplicated status language.
+- The older foundation/training docs do not fully describe the now-implemented CRM hub behavior.
+- Relationship between CRM contacts, tokenized prospects, RVM leads, and invitation records needs a current canonical schema map.
 
-## 10.3 Technical Debt
+Technical Debt:
 
-1. Prospect session and token logic are spread across several domain/service files.
-2. Holding tank placement uses direct gateway calls rather than one consistent write discipline.
-3. Graph vocabulary for prospect sponsor/placement edges is not fully unified.
+- Need a single CRM lifecycle state model that maps prospect token states, CRM stages, callback states, webinar states, and VM/RVM import states.
+- Need cross-surface ownership invariants documented and tested as a schema contract.
+- Need a generated collection and graph-label index for CRM-related writes.
 
-## 10.4 Missing Components
+Missing Components:
 
-1. PMV state machine registry.
-2. PMV recommendation engine.
-3. PMV GraphRAG evidence package.
-4. PMV health and follow-up dashboard beyond current cockpit/admin views.
+- End-to-end CRM journey documentation.
+- Admin-level CRM health report showing stuck states, orphaned prospects, and stale follow-ups.
+- Clear human-readable definitions for each CRM state.
 
-## 10.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Centralize PMV state transitions.
-2. Add event-sourced PMV activity ledger.
-3. Add explainable follow-up recommendations.
-4. Add analytics for presentation section completion and return visits.
+- Use CRM events to drive non-AI, rule-based cockpit nudges.
+- Add stale-follow-up reports for BAs and admin without scoring prospects.
+- Add event-sourced history views so Kevin can inspect why a record is in a given state.
 
-## 10.6 Scalability Concerns
+Scalability Concerns:
 
-1. In-process SSE limits multi-server deployment.
-2. High video-event volume requires write batching or event queue.
-3. Team stats should be cached as usage grows.
+- CRM write volume will grow with invites, VM/RVM campaigns, callbacks, and training actions.
+- Without state-machine validation, future branches can introduce incompatible CRM stage names.
 
-## 10.7 Governance Concerns
+Governance Concerns:
 
-1. PMV exists for awareness, not surveillance.
-2. Follow-up must preserve relationship and avoid pressure.
-3. Prospect-facing pages must preserve compliance restrictions.
+- CRM must remain a relationship-support system, not AI lead qualification.
+- Any automated recommendations must be explainable, non-coercive, and BA-facing only.
 
 ---
 
-# PAGE 11 - 11.0 CRM AUDIT
+## Page 11 - Training Assessment
 
-## 11.1 Strengths
+Strengths:
 
-1. BA CRM routes exist.
-2. Cockpit CRM and PMV read-side endpoints exist.
-3. Notes, follow-ups, dispositions, re-invite, print/export, and Today's Actions logic exist.
-4. Ownership checks are present in CRM domain.
-5. Admin prospect oversight includes notes and interventions.
+- Training is meaningfully implemented in `apps/team` and `server/src/domain/training.ts`.
+- Fast Start materials, 10-step training, video library, content videos, and progress routes exist.
+- Training connects to onboarding and BA cockpit.
+- The system includes runtime and knowledge documents that describe learning feedback loops.
+- Steve and Michael roles are increasingly separated: Steve for discovery/success profile, Michael for training support/daily coach.
 
-## 11.2 Weaknesses
+Weaknesses:
 
-1. CRM notes use Chroma through `mcs_invitations`, not a dedicated `mcs_crm_notes` collection as later governance recommends.
-2. Follow-up and disposition graph updates are split from Mongo writes.
-3. CRM recommendations are not centralized through recommendation engine.
+- The training architecture vision is larger than the current live implementation.
+- Resource Center, Launch Center, Training Modules, and Daily Success Coach exist at different maturity levels.
+- Training knowledge ingestion is not fully live through the GraphRAG/Context Manager stack.
+- Michael runtime tests show contract drift around fallback vs next-training-step behavior.
 
-## 11.3 Technical Debt
+Technical Debt:
 
-1. CRM graph code still uses `:BA`.
-2. CRM state lives across prospects, invitation activity, followups, dispositions, callback requests, and cockpit projections.
-3. Some admin interventions create additional graph vocabulary.
+- Need a single training module catalog with module ids, prerequisites, completion criteria, content sources, and routes.
+- Need stronger test coverage around training progress transitions.
+- Need documentation that reflects the current Steve/Michael split and removes older ambiguity.
 
-## 11.4 Missing Components
+Missing Components:
 
-1. Dedicated CRM intelligence layer.
-2. CRM recommendation audit ledger.
-3. CRM note semantic retrieval with privacy filters.
-4. Unified follow-up lifecycle.
+- Full 20-module training ecosystem from `TRAINING_ARCHITECTURE.md`, if still desired.
+- Training effectiveness feedback loop tied to approved knowledge and outcomes.
+- Admin training analytics that avoid ranking/scoring people in ways that conflict with values.
 
-## 11.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Create dedicated `mcs_crm_notes` Chroma collection or revise governance to match implementation.
-2. Migrate CRM writes to tiered write discipline.
-3. Add CRM timeline event consolidation.
-4. Add follow-up aging prioritization.
+- Use training progress to personalize BA cockpit next steps without creating pressure or shame.
+- Use approved knowledge snippets to keep training content fresh through governed ingestion.
+- Add Spanish/English parity checks for training content.
 
-## 11.6 Scalability Concerns
+Scalability Concerns:
 
-1. Per-BA prospect lists will grow.
-2. Notes and activity timelines need pagination and indexes.
-3. Admin prospect oversight may become query-heavy.
+- Content growth will require better module metadata, search, versioning, and publishing workflow.
+- Training state should be resilient to content changes so old completions do not become invalid silently.
 
-## 11.7 Governance Concerns
+Governance Concerns:
 
-1. CRM is relationship-first, not sales-pipeline-first.
-2. BA ownership and privacy must remain enforced.
-3. AI recommendations must not become automated prospecting.
+- Training recommendations must not become qualification scores.
+- Agent-generated training guidance must be grounded in approved knowledge and logged.
 
 ---
 
-# PAGE 12 - 12.0 TRAINING AUDIT
+## Page 12 - Orientation Assessment
 
-## 12.1 Strengths
+Strengths:
 
-1. `TRAINING_ARCHITECTURE.md` defines training as confidence and transformation.
-2. Fast Start routes exist in `.team`.
-3. Fast Start server routes exist.
-4. Training progress domain exists.
-5. Training uses `:BrandAmbassador` correctly in Neo4j according to app-data-model findings.
-6. Training is connected to Daily Success Coach and cockpit launch concepts.
+- Orientation is implemented as a concrete `.team` route family and server domain.
+- The wireframe marks 10-step orientation as largely complete.
+- Orientation connects to onboarding, Steve success profile, cockpit readiness, and launch path.
+- Orientation sessions and admin orientation oversight exist in code.
+- The system respects the idea that a BA should be guided into action rather than dropped into a blank dashboard.
 
-## 12.2 Weaknesses
+Weaknesses:
 
-1. Training Agent is architecture-level, not runtime-level.
-2. Full resource center and adaptive training recommendation engine are not implemented.
-3. Training progress updates skip Chroma after initial add, by design.
+- Orientation is spread across onboarding, questionnaire, Steve interview, training/10-steps, and orientation sessions.
+- Some docs still refer to older or broader onboarding concepts that do not exactly match the code.
+- Orientation's relationship to Launch Center and Resource Center needs clearer current-state documentation.
 
-## 12.3 Technical Debt
+Technical Debt:
 
-1. Some training route access is intentionally pre-Michael while other routes are gated; this must remain documented and tested.
-2. Training module content is coded into components rather than fully resource-governed.
-3. Training architecture is broader than current Fast Start implementation.
+- Need a current orientation state machine.
+- Need a canonical route/data mapping for orientation completion, Steve completion, and cockpit unlock.
+- Need tests proving pre-gate routes stay pre-gate and BA-facing routes stay gated.
 
-## 12.4 Missing Components
+Missing Components:
 
-1. Training Agent runtime.
-2. Training recommendation engine.
-3. Training resource metadata registry.
-4. Learning outcome tracking beyond progress states.
-5. GraphRAG package linking training, transcript, CRM, and outcomes.
+- Orientation analytics that show where BAs stop without pressuring them.
+- Admin diagnostic for orientation records that are stuck, duplicated, or inconsistent.
+- Current orientation content inventory.
 
-## 12.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Add training module metadata store.
-2. Add resource-use events.
-3. Add training confidence feedback.
-4. Add prerequisite and sequence policy.
+- Make orientation completion feed cockpit next steps.
+- Use Steve success profile outputs to tailor orientation sequencing.
+- Add admin content tools for safe orientation updates.
 
-## 12.6 Scalability Concerns
+Scalability Concerns:
 
-1. Training content updates should not require code deploys.
-2. Learning analytics require indexes and aggregation strategy.
-3. Future modules need content governance and versioning.
+- Orientation becomes harder to evolve when multiple domains treat completion as a gate.
+- Future multi-language orientation needs content versioning.
 
-## 12.7 Governance Concerns
+Governance Concerns:
 
-1. Training must not become complexity.
-2. Training should create action, not dependency.
-3. AI training recommendations must remain explainable.
+- Orientation must remain supportive and non-scoring.
+- Any onboarding-gate changes require ACR-level discipline because they affect access and product flow.
 
 ---
 
-# PAGE 13 - 13.0 ORIENTATION AUDIT
+## Page 13 - Launch Center Assessment
 
-## 13.1 Strengths
+Strengths:
 
-1. Orientation architecture document exists.
-2. Group orientation sessions and reservations exist.
-3. Admin orientation management exists.
-4. Team cockpit orientation card exists.
-5. Orientation uses session/roster concepts and capacity control.
+- Launch-like behavior exists through cockpit, Fast Start, invitation generator, ScriptMaker/Ivory, CRM, training, and profile flows.
+- The BA cockpit gives the platform a central operational home.
+- Invitation creation and follow-up tools align with the foundation's launch vision.
+- The system focuses on daily action and relationship support rather than compensation math.
 
-## 13.2 Weaknesses
+Weaknesses:
 
-1. Orientation content experience is not equivalent to the full 10-stage architecture.
-2. Orientation reservation writes use `mcs_orientation`, but boot collection registry does not list that collection.
-3. Neo4j label drift appears in orientation reservation code.
+- "Launch Center" as a named, unified subsystem is less explicit in implementation than "cockpit", "training", "invitations", and "CRM."
+- Launch readiness is inferred from multiple signals rather than modeled as one canonical launch state.
+- Admin visibility into launch completion may be fragmented across reports, BA oversight, and cockpit data.
 
-## 13.3 Technical Debt
+Technical Debt:
 
-1. Orientation collection is lazily bootstrapped separately.
-2. Cancellation graph update is best-effort.
-3. Orientation schedule operations and curriculum operations are separate.
+- Need a launch state projection that composes orientation, training, invitations, CRM setup, profile, and first actions.
+- Need a launch event taxonomy separate from prospect token lifecycle.
+- Need route naming/docs that clarify whether "Launch Center" is a product area or an umbrella concept.
 
-## 13.4 Missing Components
+Missing Components:
 
-1. Full orientation stage engine.
-2. Orientation personalization framework.
-3. Orientation recommendation engine.
-4. Orientation completion scoring and transition into Launch Center.
+- Unified Launch Center dashboard, if the foundation term remains a current product requirement.
+- Launch plan templates tied to Fast Start and PMV.
+- Launch readiness review for Kevin/admin without creating rank/scoring behavior.
 
-## 13.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Merge orientation session and orientation curriculum state.
-2. Add orientation event outcomes.
-3. Add source-backed orientation resources.
-4. Add orientation-to-launch handoff.
+- Make cockpit the de facto Launch Center and document that decision.
+- Add "next best simple action" guidance using deterministic rules, not autonomous qualification.
+- Connect launch milestones to resource and event suggestions.
 
-## 13.6 Scalability Concerns
+Scalability Concerns:
 
-1. Session capacity and roster management must support many sessions.
-2. Admin session creation needs conflict checks at scale.
-3. Notifications require email/SMS readiness.
+- If launch flows remain split, future agents may duplicate "launch state" in multiple collections.
+- Launch guidance can become noisy as training/resources grow.
 
-## 13.7 Governance Concerns
+Governance Concerns:
 
-1. Orientation should welcome and reduce uncertainty.
-2. It should not overload the member.
-3. Michael and Daily Success Coach introductions must preserve AI boundaries.
+- Launch guidance must avoid pressure, income promises, and implied placement guarantees.
+- Any AI involvement must stay BA-facing and explainable.
 
 ---
 
-# PAGE 14 - 14.0 LAUNCH CENTER AUDIT
+## Page 14 - Resource Center Assessment
 
-## 14.1 Strengths
+Strengths:
 
-1. Launch Center architecture document exists.
-2. Team cockpit exposes a launch endpoint and UI component.
-3. Launch integrates Michael status, training, first invitation, and orientation concepts.
-4. Daily action logic supports launch progression.
+- The repository contains a knowledge/admin surface and content video management.
+- Training and video library routes provide resource-like behavior.
+- Runtime docs describe a Knowledge Core and approved knowledge flow.
+- `server/src/services/knowledge/approvedKnowledgeStore.ts` exists and uses triple-stack persistence.
 
-## 14.2 Weaknesses
+Weaknesses:
 
-1. Launch Center is not yet a full Stage 0 through Stage 10 runtime engine.
-2. Launch scoring architecture is document-level.
-3. Launch recommendations are not routed through a central recommendation engine.
+- Resource Center is not yet a fully unified, named implementation area.
+- Resource content, approved knowledge, training videos, and runtime knowledge are adjacent but not fully unified.
+- Search/retrieval behavior is not fully live through Context Manager.
 
-## 14.3 Technical Debt
+Technical Debt:
 
-1. Launch state is derived rather than governed through a dedicated launch collection.
-2. Launch UI and cockpit projection logic are coupled.
-3. Launch milestone completion may be spread across training, Ivory, invitations, Michael, and orientation.
+- Need a resource catalog schema covering videos, docs, training modules, approved knowledge, and event materials.
+- Need content lifecycle states: draft, review, approved, active, archived, superseded.
+- Need Chroma/Neo4j indexing status visible per resource.
 
-## 14.4 Missing Components
+Missing Components:
 
-1. Launch lifecycle collection.
-2. Launch recommendation engine.
-3. Launch scoring records.
-4. Launch completion framework runtime.
-5. Future launch intelligence architecture runtime.
+- Full Resource Center UI with search, filters, categories, and version-safe content.
+- Admin publishing workflow that ensures Chroma/Neo4j readiness before resources become retrievable.
+- Resource-to-training and resource-to-event graph edges.
 
-## 14.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Create launch lifecycle state machine.
-2. Add milestone event ledger.
-3. Add launch stage GraphRAG package.
-4. Add sponsor-visible launch support dashboard.
+- Use approved knowledge metadata to power resource search.
+- Connect Resource Center suggestions to training context and cockpit needs.
+- Add content usage analytics to retire stale resources.
 
-## 14.6 Scalability Concerns
+Scalability Concerns:
 
-1. Derived launch computation may become expensive as BA records grow.
-2. Launch recommendations need caching and evidence storage.
-3. Sponsor dashboards require permission-scoped aggregation.
+- Resource volume will require indexing, pagination, caching, and clear archival rules.
+- Without a canonical resource schema, every new content type can create another mini-system.
 
-## 14.7 Governance Concerns
+Governance Concerns:
 
-1. Launch must build confidence, not pressure.
-2. Launch should connect to community, mentor, and training.
-3. AI should recommend support, not judge performance.
+- Resource content must preserve compliance and source lineage.
+- Agent-ingested resources must remain candidate/review-only until approved.
 
 ---
 
-# PAGE 15 - 15.0 RESOURCE CENTER AUDIT
+## Page 15 - Event Center Assessment
 
-## 15.1 Strengths
+Strengths:
 
-1. Resource Center architecture document exists.
-2. Training and docs include rich institutional knowledge.
-3. Master content system exists for tenant/content templates.
-4. Chroma architecture exists for knowledge retrieval.
+- Webinar reservation and orientation session domains exist.
+- Prospect next-step paths include callback/webinar-style movement.
+- Admin routes include orientation management.
+- Runtime and locked-spec material acknowledge event workflows.
 
-## 15.2 Weaknesses
+Weaknesses:
 
-1. A full Resource Center runtime surface is not evident.
-2. Resource lifecycle and metadata governance are architecture-level.
-3. Resource recommendation engine is not implemented.
-4. Knowledge Agent is architecture-level, not runtime-level.
+- Event Center is less built out as a unified named product area than invitations, CRM, training, or admin.
+- Email delivery is intentionally dormant/degraded when keys are absent, which affects event reminders.
+- Calendar/room/scheduling automation is not a core implemented subsystem.
 
-## 15.3 Technical Debt
+Technical Debt:
 
-1. Training content and resources are partly code-bound.
-2. Master content and Resource Center are related but not unified.
-3. Chroma collections are broader than the app-data-model contract recommends.
+- Need canonical event model: event type, visibility, capacity, registration state, reminders, attendance, follow-up.
+- Need one event center route/domain map.
+- Need integration status for email/SMS reminders.
 
-## 15.4 Missing Components
+Missing Components:
 
-1. Resource catalog collection.
-2. Resource metadata schema.
-3. Resource search UI.
-4. Resource recommendation runtime.
-5. Resource versioning and ownership workflows.
-6. Knowledge Agent runtime.
+- Full Event Center UI for BAs and admin.
+- Event attendance tracking linked to CRM and training.
+- Event resource pack and post-event follow-up workflow.
 
-## 15.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Convert coded training resources into governed resource records.
-2. Add tags, lifecycle stages, objectives, and AI-use metadata.
-3. Implement semantic search with source provenance.
-4. Link resources to training, launch, orientation, and community.
+- Use event participation to trigger non-AI follow-up reminders.
+- Add admin views for upcoming events, reservations, no-shows, and callback requests.
+- Connect events to PMV and training without making attendance a score.
 
-## 15.6 Scalability Concerns
+Scalability Concerns:
 
-1. Resource growth requires taxonomy governance.
-2. Chroma retrieval needs permission and source freshness filters.
-3. Resource version drift can affect AI outputs.
+- Event reminders and live updates need queue-backed delivery before scale.
+- Multi-timezone event handling must be explicit.
 
-## 15.7 Governance Concerns
+Governance Concerns:
 
-1. Resource Center is institutional memory and must not become unsourced content.
-2. AI must retrieve approved resources, not improvise policy.
+- Events cannot become pressure funnels or implied earnings/placement claims.
+- Reminder automation must remain opt-in, compliant, and auditable.
 
 ---
 
-# PAGE 16 - 16.0 EVENT CENTER AUDIT
+## Page 16 - Agents Assessment
 
-## 16.1 Strengths
+Strengths:
 
-1. Event Center architecture document exists.
-2. Webinar event backend exists.
-3. Webinar reservation backend exists.
-4. Orientation event/session backend exists.
-5. Event attendance and reservation concepts are wired into reporting and launch/community concepts.
+- The repository treats agents as support systems, not autonomous authority.
+- Steve, Michael, Ivory, ScriptMaker, admin agent overview, and runtime context scaffolding exist in code.
+- Agent architecture and prompt governance docs emphasize boundaries, auditability, and no scoring.
+- Agent event persistence exists through `/api/agents/events`.
+- Michael runtime has extensive test coverage, even though 9 tests currently fail.
 
-## 16.2 Weaknesses
+Weaknesses:
 
-1. Event Center is not a unified runtime module.
-2. Event recommendation framework is architecture-level.
-3. Event Agent is not implemented.
-4. Event success metrics are not unified.
+- The requested `AI_AGENT_PLAYBOOK.md` is missing.
+- Agent behavior is spread across root docs, runtime docs, server runtime files, domain files, and route tests.
+- Prompt registry/governance is documented more strongly than it is enforced in implementation.
+- Context Manager live activation is off by default.
 
-## 16.3 Technical Debt
+Technical Debt:
 
-1. Webinar events and orientation sessions are separate domains.
-2. Email confirmation remains dormant when email key/domain is not configured.
-3. Event outcomes are not yet standardized across event types.
+- Need a current agent registry file mapping every agent to owner, purpose, allowed inputs, forbidden outputs, prompts, tools, persistence, and tests.
+- Need prompt versioning tied to actual route/runtime behavior.
+- Need a single contract for "agent recommendation" vs "deterministic cockpit recommendation."
 
-## 16.4 Missing Components
+Missing Components:
 
-1. Unified event catalog.
-2. Event attendance collection for all event types.
-3. Event recommendation engine.
-4. Event feedback and outcome records.
-5. Event Agent runtime.
+- `AI_AGENT_PLAYBOOK.md` or a current replacement referenced from repo orientation.
+- Agent permission matrix.
+- Agent memory write/read audit dashboard.
+- Prompt deployment approval workflow.
 
-## 16.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Normalize webinars and orientation sessions under a generalized event model.
-2. Add event type taxonomy.
-3. Add post-event follow-up automation with human boundaries.
-4. Add event outcome GraphRAG package.
+- Promote agent contracts into shared runtime types.
+- Add automated tests for forbidden agent behaviors: scoring, qualification, income claims, pressure, and prospect-facing AI claims.
+- Generate per-agent health cards for admin.
 
-## 16.6 Scalability Concerns
+Scalability Concerns:
 
-1. Event catalogs will need pagination and timezone handling.
-2. Notifications must scale across SMS/email/in-app.
-3. Event attendance analytics can become aggregation-heavy.
+- As more agents are introduced, prompt drift and duplicated context logic can multiply.
+- Live agent memory must not activate without retrieval-ready gates and lineage.
 
-## 16.7 Governance Concerns
+Governance Concerns:
 
-1. Events exist for learning, connection, recognition, collaboration, and culture reinforcement.
-2. Event recommendations must not create attendance pressure.
+- Agents must not qualify prospects.
+- Agents must not override Kevin, sponsor, THREE, or canonical source-of-truth records.
+- Agent output must be traceable to approved knowledge or explicitly marked as degraded/dormant/manual.
 
 ---
 
-# PAGE 17 - 17.0 KNOWLEDGE SYSTEMS AUDIT
+## Page 17 - Steve Assessment
 
-## 17.1 Strengths
+Strengths:
 
-1. The repository contains extensive governance documentation.
-2. App-data-model contract provides a strong integrity blueprint.
-3. GraphRAG schema contract exists under docs.
-4. Chroma collection registry exists.
-5. Master content system exists.
-6. Graphify output provides a repository graph baseline.
+- Steve is implemented as a discovery/success-profile/onboarding support surface.
+- The route/domain files reflect a move away from older Michael interview behavior.
+- Steve-related runtime context foundation exists.
+- Steve completion is used as a gate concept in the app.
 
-## 17.2 Weaknesses
+Weaknesses:
 
-1. Governance docs are richer than runtime knowledge systems.
-2. No centralized GraphRAG service was found.
-3. No central Knowledge Agent implementation was found.
-4. Graphify output is stale.
-5. The former `AI_AGENT_PLAYBOOK.md` gap is resolved by replacement, but governance-to-runtime synchronization remains required.
+- Historical docs and code names can still confuse Steve and Michael responsibilities.
+- The on-disk gate is named `requireSteveComplete`, while historical docs sometimes use older names.
+- Steve context manager live flag defaults to false, so advanced context behavior is not live by default.
 
-## 17.3 Technical Debt
+Technical Debt:
 
-1. Knowledge is distributed across Markdown, docs, code comments, Chroma, and master content.
-2. Some docs are drafts awaiting approval.
-3. Architecture docs created recently are not all mapped to implementation tasks.
+- Need a Steve-specific contract document that matches current implementation.
+- Need route tests around Steve completion gates and pre-gate access.
+- Need current user journey documentation for questionnaire -> Steve -> cockpit/training.
 
-## 17.4 Missing Components
+Missing Components:
 
-1. Knowledge registry.
-2. Knowledge ingestion pipeline.
-3. Source provenance enforcement.
-4. Knowledge conflict resolution workflow.
-5. Runtime GraphRAG context builder.
+- Steve prompt/playbook in a current agent registry.
+- Steve memory/knowledge lineage if Steve outputs become knowledge inputs.
+- Admin diagnostic for Steve completion failures.
 
-## 17.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Promote architecture docs into resource/knowledge records.
-2. Add doc freshness metadata.
-3. Add GraphRAG retrieval tests.
-4. Add governance-document source hierarchy enforcement.
+- Use Steve profile outputs to tailor training and launch guidance deterministically.
+- Add content versioning to Steve interview prompts and profile schemas.
 
-## 17.6 Scalability Concerns
+Scalability Concerns:
 
-1. Documentation volume is growing quickly.
-2. Without metadata and retrieval policy, AI context can drift.
-3. Knowledge updates require lifecycle governance.
+- If Steve profile schema changes without migration, cockpit/training personalization can break.
+- Live context activation should be staged with telemetry.
 
-## 17.7 Governance Concerns
+Governance Concerns:
 
-1. The system must not cite unsourced or stale knowledge as current truth.
-2. Agent behavior still requires runtime registries and prompt governance enforcement so the current governance spine becomes operational, not merely documentary.
+- Steve must discover and support, not judge or rank.
+- Profile data is sensitive and should remain scoped, auditable, and minimally exposed.
 
 ---
 
-# PAGE 18 - 18.0 MONGO USAGE AUDIT
+## Page 18 - Michael Assessment
 
-## 18.1 Strengths
+Strengths:
 
-1. Mongo is consistently used as primary document store.
-2. `gatewayCall('mongodb', ...)` is widely used.
-3. Domain records are typed in TypeScript.
-4. App-data-model contract recognizes Mongo as source of truth.
-5. Projection outbox uses Mongo for durable retry records.
+- Michael is present as BA-facing runtime/training support.
+- Michael runtime has a large test suite.
+- Route body rejection canaries and server-owned turn tests show strong attention to security and behavior contracts.
+- Michael's current role aligns better with training/daily coach than older interview ownership.
 
-## 18.2 Weaknesses
+Weaknesses:
 
-1. Some writes use raw gateway calls directly.
-2. Mongo indexes are not visibly centralized in a boot-time `ensureIndexes()` process.
-3. Some update paths do not update graph/vector projections consistently.
-4. App-data-model contract describes near-empty live app state and intended cleanup, not fully executed cleanup.
+- Server tests currently fail on Michael runtime response expectations.
+- There is current drift between expected degraded fallback behavior and implementation returning next training step.
+- Context Manager live behavior is disabled by default.
 
-## 18.3 Technical Debt
+Technical Debt:
 
-1. Mongo collection names and Chroma names can be confused where `mcs_` prefixes exist.
-2. Append-only vs mutable collection policy is not uniformly enforced by code.
-3. Schema versioning is not consistently visible on records.
+- Need to reconcile Michael runtime tests, route behavior, and docs in one ACR/decision.
+- Need a generated catalog of Michael response keys and their intended degraded/live behavior.
+- Need a single source for supported languages and fallback logic.
 
-## 18.4 Missing Components
+Missing Components:
 
-1. Central Mongo schema registry.
-2. Index creation script.
-3. Collection ownership table enforced in code.
-4. Migration runner.
-5. Read-back verification standard applied to all writes.
+- Current Michael playbook section.
+- Runtime contract that clearly states empty body behavior.
+- Admin-visible Michael health/debug page for catalog and persistence mode.
 
-## 18.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Implement `ensureIndexes()`.
-2. Add repository-level schema definitions.
-3. Add typed collection adapters.
-4. Add write audit wrappers.
+- Turn failing test cluster into a clear intentional contract: either safe fallback or next training step.
+- Add snapshot tests for catalog keys and response types.
+- Use Michael only after training context is known, reducing fallback ambiguity.
 
-## 18.6 Scalability Concerns
+Scalability Concerns:
 
-1. Reporting queries will require indexes.
-2. Activity timelines will grow rapidly.
-3. Projection outbox requires retention and monitoring.
+- If Michael becomes more live without context governance, fallback paths can leak inconsistent guidance.
+- Language expansion multiplies catalog/test complexity.
 
-## 18.7 Governance Concerns
+Governance Concerns:
 
-1. Mongo is source of truth, so record shape drift becomes platform drift.
-2. Schema governance requires one canonical schema per concept.
+- Michael must not be prospect-facing.
+- Michael must not prospect, score, qualify, or imply success guarantees.
+- Runtime changes need prompt and behavior review because they alter agent output.
 
 ---
 
-# PAGE 19 - 19.0 CHROMA USAGE AUDIT
+## Page 19 - Ivory And ScriptMaker Assessment
 
-## 19.1 Strengths
+Strengths:
 
-1. Chroma collection boot guard exists.
-2. Chroma writes exist for invitations, callbacks, pool events, Ivory, audit, Michael, access codes, commitments, questionnaires, workbooks, broadcasts, tenant settings, master content, prospect accounts, magic links, webinar reservations, and training progress.
-3. Chroma failure class is explicitly documented in code comments.
-4. `assertChromaCollectionExists()` prevents one class of Mongo-first orphaning.
+- Ivory and ScriptMaker are implemented as BA-facing composition support.
+- The system degrades when LLM/API keys are absent rather than crashing.
+- Invitation and script generation are tied to user workflows.
+- Compliance boundaries are documented and supported by shared constants/rules.
 
-## 19.2 Weaknesses
+Weaknesses:
 
-1. App-data-model contract recommends only four Chroma collections; code currently registers many.
-2. Some collections may be empty stubs if boot-created but never embedded.
-3. Not all updates refresh Chroma.
-4. Chroma is sometimes treated as broad event log rather than semantic memory.
+- Prompt governance is stronger in docs than in code-enforced registries.
+- Generated copy needs ongoing automated compliance checks as content grows.
+- Ivory, ScriptMaker, and invitation generator responsibilities can blur.
 
-## 19.3 Technical Debt
+Technical Debt:
 
-1. Chroma collection registry and app-data-model contract disagree.
-2. Collection scope needs governance review.
-3. Chroma metadata conventions are not centralized.
-4. Semantic search use cases are not mapped to runtime retrieval.
+- Need prompt registry entries for each generation surface.
+- Need generated-output audit records linked to prompt version, input, user, and compliance check result.
+- Need test fixtures for compliant and noncompliant generation requests.
 
-## 19.4 Missing Components
+Missing Components:
 
-1. Chroma collection ownership matrix.
-2. Metadata schema.
-3. Retrieval policy.
-4. Collection cleanup/migration plan.
-5. Embedding freshness audit.
+- Admin prompt review UI.
+- Prompt version migration plan.
+- Model/provider abstraction governance tied to env and keys.
 
-## 19.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Align Chroma scope with actual semantic search needs.
-2. Add metadata enforcement wrapper.
-3. Add Chroma read/query integration for agents.
-4. Add vector freshness checks.
+- Add deterministic compliance preflight and postflight around every generated copy path.
+- Provide rewrite suggestions that preserve PMV language.
+- Add Spanish variants with compliance parity.
 
-## 19.6 Scalability Concerns
+Scalability Concerns:
 
-1. Over-embedding operational events may create noise.
-2. Many collections increase management cost.
-3. Retrieval without filters can leak or confuse context.
+- More generation surfaces mean higher risk of prompt drift.
+- LLM provider errors need queue/retry/observability if generation becomes central to daily work.
 
-## 19.7 Governance Concerns
+Governance Concerns:
 
-1. Chroma is derived memory, not canonical truth.
-2. Semantic memory must not store unnecessary sensitive data.
+- Generated text must not include income claims, cycle math, placement promises, automated prospecting language, or prospect-facing AI claims.
+- Human BA remains the sender/owner of relationship communication.
 
 ---
 
-# PAGE 20 - 20.0 NEO4J USAGE AUDIT
+## Page 20 - Admin Surface Assessment
 
-## 20.1 Strengths
+Strengths:
 
-1. Neo4j is used across membership, prospect, pool, CRM, training, audit, broadcast, orientation, Michael, and Ivory domains.
-2. Graph relationships are architecturally important and widely recognized.
-3. Newer files use `BrandAmbassador` correctly.
-4. Some files use `MATCH`/`OPTIONAL MATCH` patterns correctly.
+- Admin has broad implemented coverage: dashboard, access codes, BA oversight, prospect oversight, queue, reports, live ops, broadcast, audit, knowledge, content videos, orientation, tenant, agents, and VM.
+- Admin routes are guarded by `requireAdmin`.
+- Audit entries are used across administrative actions.
+- Admin has the operational shape Kevin needs to run and inspect the platform.
 
-## 20.2 Weaknesses
+Weaknesses:
 
-1. `:BA` and `:BrandAmbassador` label drift remains.
-2. `MERGE` can create phantom sponsor/member nodes in several files.
-3. Edge vocabulary is not fully canonicalized.
-4. Graph writes are sometimes best-effort or split from Mongo updates.
+- Admin breadth is now large enough to need a current admin information architecture document.
+- Some admin modules are complete while others are partial or newer lanes.
+- Admin knowledge and VM areas need stronger governance labels because they can affect system behavior.
 
-## 20.3 Technical Debt
+Technical Debt:
 
-1. `SPONSORED_BY`, `UPLINE_IS`, `INVITED`, and `INVITED_BY` overlap conceptually.
-2. `IN_HOLDING_TANK` is implemented while some contract language discusses prior alternatives.
-3. Admin interventions introduce additional graph relationships that need vocabulary governance.
+- Need a generated admin route/module inventory.
+- Need a unified admin audit-event taxonomy.
+- Need admin action tests around destructive or governance-sensitive operations.
 
-## 20.4 Missing Components
+Missing Components:
 
-1. Neo4j constraint/migration script.
-2. Graph vocabulary test suite.
-3. Read-back verification for graph-critical writes.
-4. Graph relationship ownership model.
-5. GraphRAG traversal service.
+- Admin governance dashboard for ACR status, prompt registry status, knowledge indexing status, and persistence projection status.
+- Admin stale-document warnings.
+- Admin cross-store consistency dashboard.
 
-## 20.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Standardize `BrandAmbassador`.
-2. Replace must-exist `MERGE` with `MATCH`.
-3. Add graph projection helpers.
-4. Add graph integrity report.
+- Use admin as the visible control plane for knowledge and agent readiness.
+- Add health summaries for workers, queues, projection outbox, Chroma, Neo4j, Mongo, and embedding service.
 
-## 20.6 Scalability Concerns
+Scalability Concerns:
 
-1. Graph traversal cost will grow with team size.
-2. Relationship duplication will harm query reliability.
-3. Phantom nodes will become difficult to clean after real data lands.
+- Admin views over growing BA/prospect/event/resource volumes need pagination and index awareness.
+- Broadcast/live ops need queue-based backpressure at scale.
 
-## 20.7 Governance Concerns
+Governance Concerns:
 
-1. The graph carries meaning; missing or wrong edges can mislead agents.
-2. AI must not reason from a fragmented graph.
+- Admin override actions must stay audited.
+- Kevin-only controls should remain hard-gated by canonical BA identifiers.
 
 ---
 
-# PAGE 21 - 21.0 GRAPHRAG USAGE AUDIT
+## Page 21 - Knowledge Systems Assessment
 
-## 21.1 Strengths
+Strengths:
 
-1. GraphRAG governance is extensively documented.
-2. App-data-model contract defines GraphRAG-sensitive tiers.
-3. Multiple domain writes create graph and Chroma projections.
-4. Michael, Ivory, and training are explicitly framed as agent-reasoned systems.
+- The repository contains a serious knowledge-system architecture: runtime documents, approved knowledge store, GraphRAG domain, context manager scaffolding, Chroma/Neo4j/Mongo adapters, knowledge admin surface, and learning pipeline docs.
+- Candidate vs approved knowledge separation is described in runtime docs and partly reflected in code.
+- GraphRAG code includes retrieval-ready gating and separates active collections from review-only candidates.
+- Context Manager scaffolding is designed to fail closed.
 
-## 21.2 Weaknesses
+Weaknesses:
 
-1. No centralized GraphRAG runtime service was found.
-2. No standard evidence package format is enforced across agent responses.
-3. No retrieval orchestrator combines Mongo, Neo4j, and Chroma at runtime.
-4. No GraphRAG observability dashboard was found.
+- The live knowledge loop is not fully enabled.
+- `GRAPHRAG_PERSISTENCE_ENABLED` defaults false.
+- `MCS_CONTEXT_MANAGER_LIVE_ENABLED` and `STEVE_CONTEXT_MANAGER_LIVE_ENABLED` default false.
+- `server/src/domain/graphrag.ts` explicitly says it is wired dormant and not route-mounted.
+- Knowledge governance docs are extensive, but implementation activation is cautious and partial.
 
-## 21.3 Technical Debt
+Technical Debt:
 
-1. GraphRAG language appears in comments and docs before runtime support is complete.
-2. Graph and vector projections vary by domain.
-3. Full transcript knowledge needed by GraphRAG is incomplete.
+- Need to connect approved knowledge store, GraphRAG persistence, Context Manager retrieval, and admin review into one live path.
+- Need automated consistency checks for candidate/review-only vs active/retrieval-ready knowledge.
+- Need a visible projection/indexing status per knowledge record.
 
-## 21.4 Missing Components
+Missing Components:
 
-1. `buildGraphRagContext()` service.
-2. Retrieval policy registry.
-3. Evidence bundle schema.
-4. GraphRAG output audit records.
-5. Agent-specific GraphRAG packages.
+- Full admin review workflow from candidate ingestion to active retrieval.
+- Current knowledge schema catalog.
+- Runtime dashboard showing which knowledge domains are live, dormant, or canary.
 
-## 21.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Implement GraphRAG in phases: Michael, Ivory, Training, CRM, Community.
-2. Start with read-only evidence assembly before generated recommendations.
-3. Add confidence and missing-context fields.
-4. Add governance filters before retrieval context reaches agents.
+- Use the projection outbox for knowledge store graph/vector updates.
+- Add source conflict detection and stale knowledge warnings.
+- Build retrieval tests with known approved snippets and expected context packets.
 
-## 21.6 Scalability Concerns
+Scalability Concerns:
 
-1. GraphRAG retrieval can become expensive without caching.
-2. Multi-store queries require timeout and fallback policies.
-3. Retrieval quality depends on clean graph vocabulary and Chroma metadata.
+- Knowledge volume will require chunking, deduplication, re-indexing, versioning, and aging policies.
+- Chroma collections per domain/language can multiply quickly without registry control.
 
-## 21.7 Governance Concerns
+Governance Concerns:
 
-1. GraphRAG may synthesize but must not invent.
-2. GraphRAG evidence must be available for audit.
+- Chroma must not become canonical truth.
+- Candidate knowledge must not be retrieved as active guidance.
+- GraphRAG synthesis must be grounded and auditable.
 
 ---
 
-# PAGE 22 - 22.0 ADMIN SUBSYSTEM AUDIT
+## Page 22 - Mongo Usage Assessment
 
-## 22.1 Strengths
+Strengths:
 
-1. Admin app includes many mounted surfaces.
-2. Admin routes cover dashboard, access codes, BAs, prospects, queue, live ops, audit, reporting, tenant, broadcast, and orientation.
-3. Admin gate exists through `ADMIN_BA_IDS`.
-4. PII redaction support exists.
-5. Audit log domain exists.
-6. Reporting exports exist.
+- MongoDB is treated as canonical operational truth in the implementation.
+- Direct Mongo adapter configuration uses the dedicated MCS stack, not the external agent gateway stack.
+- `PERSISTENCE_DIRECT_ENABLED` defaults true.
+- Many domain writes use Mongo collection names consistently through helper calls.
+- Newer tiered write design correctly treats Mongo commit as the operational success point for non-graph-critical records.
 
-## 22.2 Weaknesses
+Weaknesses:
 
-1. Admin surfaces are broad and may not all be fully end-to-end exercised.
-2. Audit domain still references `mcs_audit_log`, while app-data-model contract recommends canonical `audit_log`.
-3. Tenant master-content edits may not affect all consumers.
+- Many writes still flow through older `tripleStackWrite()`.
+- Mongo collection ownership and schema catalog are not centrally generated.
+- Partial writes can occur if Mongo succeeds and later Neo4j/Chroma legs fail in the old helper path.
 
-## 22.3 Technical Debt
+Technical Debt:
 
-1. Admin queue, prospects, BA oversight, and reporting contain many custom query paths.
-2. Some admin interventions use graph vocabulary that needs canonical review.
-3. Admin comments and docs may lag shipped status.
+- Need collection-by-collection schema registry.
+- Need indexes documented and verified for high-volume paths: prospects, tokens, invitations, CRM, VM queue, audit logs, projection outbox.
+- Need migration from old triple-stack helper to tiered writer.
 
-## 22.4 Missing Components
+Missing Components:
 
-1. Admin operational acceptance test suite.
-2. Admin permission matrix beyond Kevin-only access.
-3. Admin audit severity mapping finalization.
-4. Admin master-content consumer verification.
+- Mongo schema governance dashboard.
+- Collection ownership map.
+- Automated index audit.
 
-## 22.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Add admin E2E smoke tests.
-2. Add central admin route inventory.
-3. Add audit event taxonomy.
-4. Add dashboard data freshness indicators.
+- Use Mongo change/outbox patterns for projections rather than synchronous multi-leg calls on operational writes.
+- Add collection-level validation where appropriate.
+- Add stuck-state queries for admin health.
 
-## 22.6 Scalability Concerns
+Scalability Concerns:
 
-1. Reporting routes may need caching or background export jobs.
-2. Admin live ops SSE should use external pub/sub for multi-instance scale.
-3. Broadcast worker needs queue concurrency policy.
+- Audit, CRM, invitation, token, and VM queue collections can grow quickly.
+- Without indexing discipline, admin reports and dashboards can degrade under load.
 
-## 22.7 Governance Concerns
+Governance Concerns:
 
-1. Admin interventions must be fully audited.
-2. BA-requested sponsor override must remain exceptional and traceable.
-3. Broadcast must never become prospect automation.
+- Mongo remains the source of truth. Chroma and Neo4j should not be allowed to overwrite canonical facts.
+- Agent-memory Mongo and app-runtime Mongo must remain separate in naming, stack, and purpose.
 
 ---
 
-# PAGE 23 - 23.0 PROSPECT-FACING COMPLIANCE AUDIT
+## Page 23 - Chroma Usage Assessment
 
-## 23.1 Strengths
+Strengths:
 
-1. `.com` route scope is narrow and token-based.
-2. Shared compliance constants exist.
-3. Prospect app avoids admin/team functionality.
-4. ScriptMaker compliance guard exists for draft generation.
-5. Foundation and agent docs repeatedly preserve no-pressure principles.
+- ChromaDB is configured as a direct app dependency on `http://localhost:8200`.
+- Startup ensures Chroma collections.
+- Chroma health and embedding service readiness are part of persistence health.
+- GraphRAG active knowledge uses domain/language collection naming.
+- Runtime docs correctly treat Chroma as semantic retrieval, not truth.
 
-## 23.2 Weaknesses
+Weaknesses:
 
-1. Compliance enforcement severity mapping is still listed as an open or unresolved governance point in project status artifacts.
-2. Render-time compliance enforcement should be verified by automated tests.
-3. Master content overrides could introduce compliance risk if consumer rewiring expands without scanner gates.
+- GraphRAG persistence is disabled by default.
+- Many Chroma writes remain tied to old `tripleStackWrite`.
+- Health probe readback has a likely metadata mismatch: write metadata includes `heartbeatId`, but readback filters/checks `healthHeartbeatId`.
+- Chroma collection registry is not fully visible as a single current artifact.
 
-## 23.3 Technical Debt
+Technical Debt:
 
-1. Compliance is partly constants, partly comments, partly domain logic.
-2. Some older design docs contain drift that build-registry flags.
+- Fix the health metadata mismatch.
+- Move Chroma projections to the durable outbox/tiered write path.
+- Add collection schema and metadata contract tests.
 
-## 23.4 Missing Components
+Missing Components:
 
-1. Prospect-facing compliance CI scanner.
-2. Master-content compliance validation at save time and render time.
-3. Audit dashboard for blocked/warn/log severity.
+- Chroma collection catalog by purpose, domain, language, and source.
+- Admin visibility into Chroma projection failures and stale embeddings.
+- Re-index tooling and age-out policy.
 
-## 23.5 Optimization Opportunities
+Optimization Opportunities:
 
-1. Add route-level compliance tests for `.com`.
-2. Add prohibited phrase scanner against generated content.
-3. Add admin compliance metrics.
+- Batch embeddings for large imports.
+- Store compact metadata with canonical Mongo ids for reliable joins.
+- Use retrieval tests to validate tenant/domain/language gates.
 
-## 23.6 Scalability Concerns
+Scalability Concerns:
 
-1. As master content becomes editable, governance risk increases.
-2. More generated invitation copy requires more robust audit.
+- Per-domain/per-language collections can fragment retrieval if not governed.
+- Embedding service availability can block write paths if Chroma is synchronous in old helper calls.
 
-## 23.7 Governance Concerns
+Governance Concerns:
 
-1. No income claims.
-2. No placement promises.
-3. No AI prospecting.
-4. No pressure.
-5. No unsupported product/medical claims.
-
----
-
-# PAGE 24 - 24.0 GAP ANALYSIS
-
-## 24.1 Governance vs Implementation Gap Matrix
-
-| Area | Governance Intent | Implementation State | Gap |
-|---|---|---|---|
-| Schema governance | One canonical schema per concept | Shared types plus domain-local records | Need schema registry and migration policy |
-| Multi-db learning | Mongo + Chroma + Neo4j coordinated memory | Multi-store writes exist but inconsistent | Need tiered write migration and projection discipline |
-| GraphRAG | Grounded multi-store retrieval | Projections exist; runtime engine absent | Build retrieval orchestrator |
-| Agents | Governed ecosystem with memory/recommendations | Michael/Ivory/ScriptMaker partially implemented | Add registry, prompt governance, event ledger |
-| Training | Full learning ecosystem | Fast Start and training progress exist | Add Training Agent/resources/adaptive recommendations |
-| Community | Living community ecosystem | Architecture docs exist; limited runtime | Build community operations runtime |
-| Resource Center | Institutional memory | Docs/master content exist | Add resource catalog/search/runtime |
-| Event Center | Event lifecycle and intelligence | Webinar/orientation events exist | Unified event model needed |
-| Recommendation engine | Explainable recommendations across platform | Local recommendations/actions exist | Central recommendation service absent |
-
-## 24.2 Most Important Gap
-
-The most important gap is not a missing page.
-
-It is the absence of one governed runtime path connecting:
-
-```text
-Observation
-  -> Mongo source record
-  -> Neo4j relationship evidence
-  -> Chroma semantic context
-  -> GraphRAG evidence bundle
-  -> Recommendation
-  -> Human action
-  -> Outcome
-  -> Learning signal
-```
-
-## 24.3 Gap Severity
-
-| Gap | Severity |
-|---|---|
-| Agent governance spine must stay synchronized with runtime registries | P1 |
-| Write discipline migration incomplete | P0 |
-| Graph vocabulary drift | P0 |
-| GraphRAG runtime absent | P1 |
-| Prompt registry absent | P1 |
-| Recommendation engine runtime absent | P1 |
-| Resource Center runtime absent | P2 |
-| Community runtime absent | P2 |
-| Graphify stale | P3 |
+- Chroma results must always resolve back to canonical Mongo records and approved knowledge.
+- No candidate/review-only records should be retrievable by live agents.
 
 ---
 
-# PAGE 25 - 25.0 RISK ANALYSIS
+## Page 24 - Neo4j Usage Assessment
 
-## 25.1 Risk Categories
+Strengths:
 
-1. Data integrity risk.
-2. AI drift risk.
-3. Compliance risk.
-4. Operational scale risk.
-5. Governance-document drift risk.
-6. User trust risk.
-7. Agent recommendation risk.
+- Neo4j is a first-class direct persistence leg.
+- Many domain writes include graph merge queries.
+- The newer `tieredWrite.ts` correctly distinguishes graph-critical writes and supports rollback when Neo4j fails after Mongo.
+- Graph labels such as knowledge and health heartbeat nodes are used to model relationships and operational status.
 
-## 25.2 P0 Risks
+Weaknesses:
 
-| Risk | Cause | Impact | Mitigation |
-|---|---|---|---|
-| Half-written graph-critical records | Mixed write paths | Agents reason from broken graph | Migrate to tiered write |
-| Phantom graph nodes | `MERGE` for must-exist BAs | Genealogy/sponsor graph corruption | Use `MATCH` and verify |
-| Agent governance synchronization | Current authority lives across constitution and agent governance docs | Runtime ambiguity if registries lag documents | Maintain spine, registries, and ACR discipline |
-| Split graph vocabulary | `:BA` and `:BrandAmbassador` | GraphRAG misses relationships | Vocabulary migration |
+- Neo4j schema/constraint registry is not obvious as a single current implementation artifact.
+- Old triple-stack call sites can half-write when Neo4j fails after Mongo.
+- Graph usage appears broad but not yet fully governed by a generated graph model.
 
-## 25.3 P1 Risks
+Technical Debt:
 
-| Risk | Cause | Impact | Mitigation |
-|---|---|---|---|
-| AI prompt drift | No runtime prompt registry | Agent behavior changes invisibly | Implement prompt registry |
-| Recommendations lack evidence | No recommendation engine service | Poor or unreviewable guidance | Implement evidence-backed recommendations |
-| Chroma noise | Too many broad collections | Retrieval confusion | Chroma scope governance |
-| Master content inertness | Consumer rewiring incomplete | Admin edits do not govern behavior | Wire consumers |
+- Need Neo4j label/relationship/constraint catalog.
+- Need migration of graph-critical writes into `writeGraphCritical`.
+- Need graph verification tests for sponsor immutability, pool positioning, CRM ownership, knowledge lineage, and VM ownership.
 
-## 25.4 P2 Risks
+Missing Components:
 
-| Risk | Cause | Impact | Mitigation |
-|---|---|---|---|
-| Event fragmentation | Webinar/orientation separate | Weak event intelligence | Unified event model |
-| Resource sprawl | Docs/code content scattered | Search and AI retrieval drift | Resource catalog |
-| Admin reporting cost | Direct aggregation growth | Slow dashboards | Index/cache/report jobs |
+- Admin graph health report.
+- Constraint creation/migration scripts.
+- GraphRAG relationship readiness dashboard.
 
-## 25.5 Governance Rule
+Optimization Opportunities:
 
-Risks that can mislead Michael, Ivory, or Training Agent must be treated as integrity risks, not cosmetic debt.
+- Use Neo4j for explainable lineage queries and admin diagnostics.
+- Add graph traversals to detect orphaned or inconsistent records.
+- Use graph-critical tiers only where relationships are truly load-bearing.
 
----
+Scalability Concerns:
 
-# PAGE 26 - 26.0 PRIORITY MATRIX
+- Graph write volume can become expensive if every operational event creates dense relationships.
+- Without constraints, duplicate graph nodes become likely as data grows.
 
-## 26.1 Priority Criteria
+Governance Concerns:
 
-Prioritize by:
-
-1. Trust impact.
-2. Data integrity impact.
-3. Agent reasoning impact.
-4. Compliance impact.
-5. Launch readiness impact.
-6. Blast radius.
-7. Implementation dependency.
-
-## 26.2 Matrix
-
-| Priority | Work Item | Reason | Owner |
-|---|---|---|---|
-| P1 | Keep agent governance spine synchronized | Replacement authority exists; runtime registry enforcement still needed | Governance |
-| P0 | Complete tiered write migration | Prevent partial integrity failures | Architecture |
-| P0 | Standardize Neo4j vocabulary | Prevent graph fragmentation | Data/Graph |
-| P0 | Replace phantom `MERGE` with `MATCH` | Prevent fake sponsor/member nodes | Data/Graph |
-| P1 | Implement GraphRAG context builder | Enable grounded agents | AI/Data |
-| P1 | Implement prompt registry | Prevent prompt drift | AI Governance |
-| P1 | Implement recommendation ledger | Make guidance auditable | Product/AI |
-| P1 | Wire master content consumers | Make admin governance real | Product |
-| P2 | Build Resource Center runtime | Operationalize institutional memory | Product |
-| P2 | Build Community operations runtime | Operationalize community architecture | Product |
-| P2 | Unified Event Center model | Standardize event intelligence | Product |
-| P3 | Regenerate graphify | Refresh architecture map | Engineering |
-
-## 26.3 Dependency Order
-
-```text
-P0 write + graph cleanup
-  -> GraphRAG context builder
-  -> Recommendation ledger
-  -> Prompt registry
-  -> Agent runtime governance
-  -> Resource/Event/Community intelligence
-```
+- Neo4j should support relationships and reasoning, not override canonical Mongo facts.
+- Any graph-derived recommendation must be explainable and grounded.
 
 ---
 
-# PAGE 27 - 27.0 OPTIMIZATION ROADMAP
+## Page 25 - GraphRAG Assessment
 
-## 27.1 Phase 1 - Integrity Convergence
+Strengths:
 
-1. Keep the current agent governance spine synchronized and update stale references.
-2. Migrate graph-critical writes to `writeGraphCritical`.
-3. Migrate knowledge-critical writes to `writeKnowledge`.
-4. Migrate operational writes to `writeOperational`.
-5. Standardize `BrandAmbassador`.
-6. Standardize canonical edge vocabulary.
-7. Replace must-exist `MERGE` with `MATCH`.
-8. Add Mongo index bootstrap.
+- GraphRAG is represented in code, not just docs.
+- The domain implementation uses active knowledge collections, retrieval-ready gates, tenant filters, and Neo4j knowledge nodes.
+- It explicitly avoids retrieving candidate/review-only records.
+- The canary-gated default-off posture is appropriate for a sensitive knowledge system.
 
-## 27.2 Phase 2 - Runtime GraphRAG
+Weaknesses:
 
-1. Build GraphRAG context service.
-2. Define evidence bundle schema.
-3. Create agent-specific retrieval policies.
-4. Start with Michael interview, Ivory roster, CRM notes, and training.
-5. Add output audit records.
+- `GRAPHRAG_PERSISTENCE_ENABLED` defaults false.
+- The GraphRAG file says it is wired dormant and no route mounts it.
+- It still uses `tripleStackWrite()` rather than the newer tiered writer/outbox pattern.
+- Live Context Manager retrieval is not fully active.
 
-## 27.3 Phase 3 - Agent Governance
+Technical Debt:
 
-1. Implement prompt registry.
-2. Implement agent registry.
-3. Implement agent event ledger.
-4. Implement recommendation ledger.
-5. Add compliance-sensitive generation tests.
+- Move GraphRAG persistence to `writeKnowledge`.
+- Add GraphRAG route/service activation under an explicit ACR.
+- Add retrieval-readiness tests spanning Mongo, Chroma, Neo4j, and context packet assembly.
 
-## 27.4 Phase 4 - Operational Intelligence
+Missing Components:
 
-1. Resource Center runtime.
-2. Event Center runtime model.
-3. Community operations runtime.
-4. Training recommendation intelligence.
-5. Launch recommendation intelligence.
+- Live GraphRAG admin control and health status.
+- GraphRAG source citation UI.
+- Knowledge conflict resolution workflow.
 
-## 27.5 Phase 5 - Scale and Observability
+Optimization Opportunities:
 
-1. Externalize SSE/pub-sub.
-2. Externalize worker queues.
-3. Add gateway/store health dashboard.
-4. Add projection outbox monitor.
-5. Add GraphRAG quality dashboard.
+- Use GraphRAG first for admin/agent context packets, not user-visible autonomous answers.
+- Start with a narrow domain such as training resources or compliance snippets.
+- Add trace ids from source document to context packet to agent output.
 
----
+Scalability Concerns:
 
-# PAGE 28 - 28.0 CURRENT STATE ASSESSMENT
+- Retrieval latency can increase quickly if graph and vector steps are not cached/batched.
+- Source lineage and supersession edges need strict indexing.
 
-## 28.1 Implemented Capabilities
+Governance Concerns:
 
-1. Three-client monorepo.
-2. Express API.
-3. Authentication and admin gate.
-4. Registration/login.
-5. Prospect token resolution.
-6. Video milestone tracking.
-7. Holding tank placement.
-8. Prospect dashboard.
-9. Prospect reentry login.
-10. Michael scheduling and interview UI surface.
-11. Michael artifact ingest routes.
-12. Ivory roster/coach/draft/mint.
-13. ScriptMaker draft generation.
-14. Invitation spine.
-15. BA cockpit.
-16. CRM notes/followups/dispositions.
-17. Fast Start training.
-18. Orientation sessions.
-19. Webinar events/reservations.
-20. Admin dashboard.
-21. Admin BA/prospect/queue/live ops/reporting/audit/tenant/broadcast/orientation.
-22. Broadcast worker.
-23. Chroma collection boot guard.
-24. Projection outbox.
-25. Direct Anthropic, Telnyx, Resend services.
-
-## 28.2 Partially Implemented Capabilities
-
-1. GraphRAG.
-2. Recommendation engine.
-3. Agent learning.
-4. Prompt governance runtime.
-5. Resource Center runtime.
-6. Community operations runtime.
-7. Full Event Center runtime.
-8. Full Launch Center stage engine.
-9. Full Orientation stage engine.
-10. Full Training Agent.
-
-## 28.3 Documentation-Only Capabilities
-
-1. Future community AI agents.
-2. Future recommendation governance.
-3. Future prompt governance dashboard.
-4. Community operations manual if not committed separately.
-5. Knowledge Agent runtime.
-6. Compliance Agent runtime.
-7. Leadership Agent runtime.
-
-## 28.4 Assessment
-
-The platform is in an advanced pre-production convergence stage.
-
-Feature breadth is strong.
-
-Integrity convergence is the immediate need.
+- GraphRAG must never synthesize unsourced compliance or earnings claims.
+- GraphRAG output should be read as assisted retrieval, not authority.
 
 ---
 
-# PAGE 29 - 29.0 OPERATIONAL PROCEDURES REQUIRED
+## Page 26 - Multi-Database Persistence Assessment
 
-## 29.1 Daily Operations
+Strengths:
 
-1. Check server health.
-2. Check Universal Gateway health.
-3. Check Mongo/Neo4j/Chroma availability.
-4. Check projection outbox backlog.
-5. Check broadcast queue.
-6. Check Telnyx webhook health.
-7. Check failed AI generation fallbacks.
-8. Check admin audit severity events.
+- Direct persistence stack is clear: Mongo 30000, Neo4j 7710, Chroma 8200, embedding service 8300 in repo environment examples.
+- `connectDirectPersistence()` validates all legs.
+- `directPersistenceHealth` is available.
+- `/api/health/persistence` and admin triple-stack health probe exist.
+- New tiered writer and projection outbox are architecturally strong.
 
-## 29.2 Weekly Operations
+Weaknesses:
 
-1. Review graph vocabulary drift.
-2. Review Chroma collection growth.
-3. Review recommendation outcomes.
-4. Review Michael interview completion.
-5. Review Ivory usage.
-6. Review CRM follow-up aging.
-7. Review training progress.
-8. Review prospect funnel conversion.
+- Old and new write strategies coexist.
+- Old write helper allows optional Neo4j/Chroma inputs despite docs saying every persistent app write should hit all three.
+- Projection outbox is not yet the dominant path.
+- Health probe has the Chroma metadata readback bug noted earlier.
 
-## 29.3 Release Operations
+Technical Debt:
 
-1. Run typecheck.
-2. Run build.
-3. Run route smoke tests.
-4. Run compliance scanner.
-5. Run secret scanner.
-6. Run GraphRAG evidence tests when implemented.
-7. Regenerate graphify.
-8. Update project-wireframe and queue mirror.
+- Inventory every `tripleStackWrite` caller and classify as graph-critical, knowledge, or operational.
+- Migrate high-risk writes first: BA identity, sponsorship, token lifecycle, pool placement, CRM ownership, VM ownership, knowledge approvals.
+- Add write-path tests that simulate Neo4j/Chroma failures.
 
-## 29.4 Incident Operations
+Missing Components:
 
-1. Classify incident.
-2. Preserve evidence.
-3. Stop affected automation.
-4. Roll back prompt/write path/content where applicable.
-5. Correct data projections.
-6. Record audit event.
-7. Add regression test.
+- Migration tracker for all 56 call sites.
+- Outbox dead-letter admin UI.
+- Cross-store reconciliation job.
 
----
+Optimization Opportunities:
 
-# PAGE 30 - 30.0 SUCCESS METRICS
+- Treat Mongo commit as primary for operational writes and queue projections.
+- Use graph-critical rollback only for relationship invariants that cannot tolerate eventual graph projection.
+- Add automatic alerts for exhausted projection retries.
 
-## 30.1 Platform Metrics
+Scalability Concerns:
 
-| Metric | Target Meaning |
-|---|---|
-| Write integrity rate | All required store projections landed or queued |
-| Outbox backlog age | Projection retry health |
-| Graph vocabulary conformance | Neo4j schema consistency |
-| Chroma freshness | Semantic memory reliability |
-| Route error rate | API reliability |
-| SSE connection stability | Real-time health |
-| Worker queue success | Operational throughput |
+- Synchronous triple-stack writes increase latency and failure coupling.
+- Multi-store writes need idempotency keys and retries as volume grows.
 
-## 30.2 Product Metrics
+Governance Concerns:
 
-| Metric | Target Meaning |
-|---|---|
-| Prospect video completion | PMV activation |
-| Callback request rate | Hand-raise behavior |
-| Webinar reservation rate | Event engagement |
-| BA welcome completion | Onboarding clarity |
-| Michael completion | Mentor context captured |
-| Training module progress | Confidence development |
-| Ivory roster usage | Invitation support |
-| CRM follow-up completion | Relationship stewardship |
-
-## 30.3 AI Metrics
-
-| Metric | Target Meaning |
-|---|---|
-| Prompt version traceability | Prompt governance |
-| Recommendation evidence completeness | GraphRAG quality |
-| Draft compliance pass rate | Safety |
-| Human approval rate | Trust |
-| Escalation accuracy | Boundary discipline |
-| User usefulness feedback | Support quality |
+- The project says all persistent writes land in all three stores. Current implementation needs a stricter enforcement layer or a formally ratified tiered consistency model.
 
 ---
 
-# PAGE 31 - 31.0 FUTURE RECOMMENDATIONS
+## Page 27 - Context Manager Assessment
 
-## 31.1 Governance Recommendations
+Strengths:
 
-1. Keep the current agent governance spine synchronized and avoid recreating `AI_AGENT_PLAYBOOK.md` without a new approved ACR.
-2. Add implementation status to every architecture document.
-3. Create a single governance dashboard for schema, prompt, agent, and recommendation status.
-4. Require read-backed citations in future audit docs.
+- Context Manager scaffolding is careful and governance-aware.
+- It is fail-closed by default.
+- Runtime context foundation files exist for Michael and Steve.
+- Context packet construction is separated from route/domain code.
+- Tests exist for live flag behavior.
 
-## 31.2 Architecture Recommendations
+Weaknesses:
 
-1. Complete tiered write migration.
-2. Build GraphRAG context service.
-3. Add Mongo index bootstrap.
-4. Add external queue/pub-sub strategy.
-5. Add deployment architecture.
+- Live flags default false.
+- Active retrieval is limited/dormant.
+- Context Manager is not yet the central way agents receive approved knowledge.
+- Documentation is ahead of runtime activation.
 
-## 31.3 Product Recommendations
+Technical Debt:
 
-1. Convert Launch Center into explicit stage engine.
-2. Convert Resource Center into runtime catalog.
-3. Convert Event Center into unified event model.
-4. Add Community operations runtime.
-5. Add recommendation dashboard for human review.
+- Need context packet contract frozen and referenced from agent routes.
+- Need real approved knowledge provider integration behind canaries.
+- Need end-to-end trace from source knowledge -> context packet -> agent response -> audit event.
 
-## 31.4 AI Recommendations
+Missing Components:
 
-1. Prompt registry.
-2. Agent registry.
-3. Agent event ledger.
-4. Recommendation ledger.
-5. GraphRAG evidence packages.
-6. AI audit dashboard.
+- Admin Context Manager health page.
+- Context packet debugger.
+- Retrieval coverage tests across domains and languages.
 
-## 31.5 Data Recommendations
+Optimization Opportunities:
 
-1. Canonical schema registry.
-2. Graph vocabulary migration.
-3. Chroma scope decision.
-4. Projection outbox monitor.
-5. Data retention policy.
+- Activate one narrow context domain first.
+- Use context packets for Michael training guidance before broader live agent features.
+- Add observability around degradation reasons.
 
----
+Scalability Concerns:
 
-# PAGE 32 - 32.0 SUBSYSTEM SUMMARY TABLE
+- Context assembly can become slow without caching and careful retrieval budgets.
+- Multi-agent context duplication can increase token and latency costs.
 
-| Subsystem | Current State | Primary Gap | Priority |
-|---|---|---|---|
-| Architecture | Strong structure | Write/GraphRAG convergence | P0 |
-| Agents | Michael/Ivory/ScriptMaker real | Playbook/registry/recommendation runtime | P0/P1 |
-| PMV | Strong prospect runtime | PMV intelligence/recommendations | P1 |
-| CRM | Broad BA CRM implemented | Dedicated semantic CRM/ledger | P1 |
-| Training | Fast Start implemented | Training Agent/resource model | P2 |
-| Orientation | Sessions implemented | Full stage engine | P2 |
-| Launch Center | Cockpit-derived | Dedicated lifecycle engine | P2 |
-| Resource Center | Architecture/docs | Runtime catalog/search | P2 |
-| Event Center | Webinar/orientation | Unified event model | P2 |
-| Knowledge Systems | Rich docs | Runtime GraphRAG | P1 |
-| Mongo | Primary store | Schema/index governance | P0/P1 |
-| Chroma | Broad registry | Scope/metadata governance | P1 |
-| Neo4j | Widely used | Vocabulary/phantom node cleanup | P0 |
-| GraphRAG | Designed | Runtime missing | P1 |
+Governance Concerns:
+
+- Context Manager must only retrieve approved, active, retrieval-ready knowledge.
+- It must preserve source lineage and never hide degraded mode.
 
 ---
 
-# PAGE 33 - 33.0 IMPLEMENTATION ACCEPTANCE CRITERIA
+## Page 28 - Schema Governance Assessment
 
-## 33.1 Integrity Acceptance
+Strengths:
 
-The platform passes integrity acceptance when:
+- Shared package centralizes many types, compliance constants, rules, and brand tokens.
+- Runtime documents strongly articulate schema discipline.
+- Direct persistence adapters reduce uncontrolled external schema behavior.
+- The ACR system provides a governance mechanism for schema-changing work.
 
-1. Graph-critical writes are atomic or rollback.
-2. Knowledge-critical projections are durable-retry backed.
-3. Operational projections are queued on failure.
-4. Every graph-critical write reads back expected nodes and edges.
-5. No `:BA` writes remain.
-6. Must-exist sponsor/member nodes use `MATCH`.
-7. Chroma writes follow approved scope and metadata.
+Weaknesses:
 
-## 33.2 AI Acceptance
+- `SCHEMA_GOVERNANCE.md` does not fully match the current implementation style and later authority.
+- There is no single generated schema catalog covering Mongo, Neo4j, Chroma, route payloads, and shared types.
+- Domain-specific schemas are spread across TypeScript types, zod validation, Mongoose-ish adapters, and inline objects.
 
-The platform passes AI acceptance when:
+Technical Debt:
 
-1. Every agent has a registry record.
-2. Every prompt has version metadata.
-3. Every recommendation has evidence.
-4. Every generated draft has compliance outcome.
-5. Every GraphRAG answer has source references.
-6. Human approval gates exist where required.
+- Need schema owner map.
+- Need one-concept-one-schema enforcement checks.
+- Need canonical naming decisions for camelCase app model vs older snake_case governance docs.
 
-## 33.3 Product Acceptance
+Missing Components:
 
-The platform passes product acceptance when:
+- Current Schema Registry.
+- Schema drift CI.
+- Collection-to-type-to-route mapping.
 
-1. Critical BA/prospect/admin flows are smoke-tested.
-2. Dormant dependencies degrade safely.
-3. User-visible errors are clear.
-4. Compliance rules are enforced.
-5. Admin audit captures sensitive actions.
+Optimization Opportunities:
 
----
+- Generate documentation from zod/shared types where possible.
+- Add schema change checklist to ACR.
+- Add tests that fail on duplicate incompatible lifecycle enums.
 
-# PAGE 34 - 34.0 TECHNICAL DEBT REGISTER
+Scalability Concerns:
 
-| ID | Debt | Area | Priority |
-|---|---|---|---|
-| TD-001 | Agent governance runtime registry not yet unified with current governance spine | Governance | P1 |
-| TD-002 | `tripleStackWrite` remains in active use | Persistence | P0 |
-| TD-003 | Direct gateway writes in domains | Persistence | P0 |
-| TD-004 | `:BA` label drift | Neo4j | P0 |
-| TD-005 | Phantom node `MERGE` usage | Neo4j | P0 |
-| TD-006 | Chroma collection scope mismatch | Chroma | P1 |
-| TD-007 | GraphRAG runtime absent | AI/Data | P1 |
-| TD-008 | Prompt registry absent | AI Governance | P1 |
-| TD-009 | Recommendation ledger absent | AI/Product | P1 |
-| TD-010 | Master content consumer rewiring incomplete | Content | P1 |
-| TD-011 | Graphify stale | Architecture | P3 |
-| TD-012 | Mixed V1/V2 naming | Documentation | P3 |
+- More surfaces and agents will create more state names unless lifecycle models are centralized.
+- Data migrations become harder as schema drift accumulates.
+
+Governance Concerns:
+
+- Schema drift is one of the highest governance risks because it breaks GraphRAG, reports, agents, and admin oversight at once.
+- Schema changes need explicit decision records.
 
 ---
 
-# PAGE 35 - 35.0 MISSING COMPONENT REGISTER
+## Page 29 - Documentation Authority Assessment
 
-| ID | Missing Component | Required By | Priority |
-|---|---|---|---|
-| MC-001 | AI Agent Playbook | Audit and future agent governance | P0 |
-| MC-002 | GraphRAG context builder | Multi-db learning governance | P1 |
-| MC-003 | Prompt registry | Agent prompt governance | P1 |
-| MC-004 | Agent registry | Agent architecture | P1 |
-| MC-005 | Recommendation ledger | Recommendation engine | P1 |
-| MC-006 | Resource catalog runtime | Resource Center architecture | P2 |
-| MC-007 | Unified event catalog | Event Center architecture | P2 |
-| MC-008 | Community operations runtime | Community architecture | P2 |
-| MC-009 | Launch lifecycle engine | Launch Center architecture | P2 |
-| MC-010 | Orientation stage engine | Orientation architecture | P2 |
-| MC-011 | Mongo index bootstrap | Schema governance | P0/P1 |
-| MC-012 | Neo4j vocabulary migration | Schema/Data governance | P0 |
+Strengths:
 
----
+- The repository has unusually rich documentation.
+- `docs/READ-ME-FIRST.md` correctly points agents to the current operating map.
+- Constitution and decision framework documents explain authority and decision currency.
+- Runtime docs are detailed enough to guide future knowledge and agent work.
 
-# PAGE 36 - 36.0 OPTIMIZATION OPPORTUNITIES REGISTER
+Weaknesses:
 
-| ID | Opportunity | Benefit |
-|---|---|---|
-| OP-001 | Centralize write discipline | Eliminates repeated partial-write fixes |
-| OP-002 | Create route inventory generator | Keeps API docs current |
-| OP-003 | Regenerate graphify on commit or release | Keeps architecture map current |
-| OP-004 | Add GraphRAG evidence bundle | Makes AI outputs auditable |
-| OP-005 | Add semantic metadata enforcement | Improves Chroma retrieval quality |
-| OP-006 | Add admin dashboard freshness indicators | Reduces operational ambiguity |
-| OP-007 | Cache reporting aggregates | Improves admin scale |
-| OP-008 | Externalize SSE/event workers | Enables multi-instance deployment |
-| OP-009 | Build content governance workflow | Makes master content operational |
-| OP-010 | Add compliance CI scanner | Prevents prospect-facing drift |
+- Some docs are stale or historical but not clearly marked in all places.
+- `docs/build-registry.md` is stale relative to recent implementation and wireframe status.
+- Root `TASK.md` is stale on `main`.
+- Missing `AI_AGENT_PLAYBOOK.md` can cause agents to search or infer incorrectly.
+- `graphify-out/GRAPH_REPORT.md` is from an older commit and should not be treated as current truth.
 
----
+Technical Debt:
 
-# PAGE 37 - 37.0 SCALABILITY ASSESSMENT
+- Need doc freshness metadata and stale warnings.
+- Need to archive or clearly mark old generated constitution handbooks.
+- Need automated checks that requested authority files exist.
 
-## 37.1 Current Scalability Strengths
+Missing Components:
 
-1. Monorepo boundaries are clean.
-2. Clients can be deployed separately.
-3. Server domains are modular.
-4. Gateway abstraction isolates data stores.
-5. Admin reporting domains are separated.
+- Current agent playbook.
+- Current build registry regeneration.
+- Current endpoint map and schema map.
 
-## 37.2 Current Scalability Constraints
+Optimization Opportunities:
 
-1. In-process SSE.
-2. In-process broadcast worker.
-3. Projection outbox drain not visibly scheduled from `index.ts`.
-4. Mongo index bootstrap not visible.
-5. GraphRAG runtime absent.
-6. Chroma collection growth policy unresolved.
+- Generate build registry from project wireframe and code scans.
+- Add doc authority banner templates: current, historical, stale, generated archive.
+- Add "last verified against commit" metadata.
 
-## 37.3 Scale Transition Requirements
+Scalability Concerns:
 
-Before multi-instance deployment:
+- A large doc ecosystem can slow agents down if authority order is not machine-checkable.
+- Stale docs can cause duplicate implementation in parallel worktrees.
 
-1. External pub/sub.
-2. External queue or scheduled worker.
-3. Idempotency keys for critical operations.
-4. Health endpoints for workers.
-5. Store-level index verification.
-6. Retry/backoff monitoring.
-7. Alerting for dead-letter outbox rows.
+Governance Concerns:
+
+- Decision ledger and wireframe must remain ahead of mirrors.
+- Agents should not treat old planning docs as permission to rebuild current features.
 
 ---
 
-# PAGE 38 - 38.0 GOVERNANCE ASSESSMENT
+## Page 30 - Compliance Assessment
 
-## 38.1 Governance Strengths
+Strengths:
 
-1. Foundation document is clear.
-2. Schema governance exists.
-3. Training architecture exists.
-4. Multi-db learning governance exists.
-5. Agent architecture exists.
-6. Prompt governance exists.
-7. Recommendation, CRM, PMV, Resource, Event, Community, Launch, and Orientation architectures exist.
+- Compliance is embedded in repo instructions, shared rules, shared compliance constants, surface separation, and route gating.
+- Prospect-facing `.com` is separated from BA-facing `.team`.
+- The codebase includes comments and structures that avoid income, placement, AI prospecting, and THREE branding on `.com`.
+- ScriptMaker/Ivory are designed to degrade safely when API keys are absent.
 
-## 38.2 Governance Weaknesses
+Weaknesses:
 
-1. Missing AI Agent Playbook.
-2. Some governance documents are ahead of code.
-3. Some documents are marked draft.
-4. Implementation status is not consistently embedded in architecture docs.
-5. No central governance dashboard.
+- Compliance scans are not obviously enforced as a full CI gate across all prospect-facing copy.
+- Newer VM/RVM language introduces "lead" vocabulary internally, which is acceptable only if kept gated and non-prospect-facing.
+- Content growth increases copy drift risk.
 
-## 38.3 Governance Technical Debt
+Technical Debt:
 
-1. V1/V2 naming drift.
-2. Build registry can become stale.
-3. Graphify can become stale.
-4. Architecture docs can proliferate faster than implementation tracking.
+- Need CI copy scan for `apps/com`.
+- Need generated compliance report for generated scripts, resources, training, and event content.
+- Need a compliance owner matrix for new lanes.
 
-## 38.4 Governance Recommendation
+Missing Components:
 
-Create a governance index that maps:
+- Automated PMV/prohibited-language scanner.
+- Admin compliance dashboard.
+- VM/RVM compliance ACR linkage.
 
-```text
-Governance Document
-  -> Runtime Component
-  -> Implementation Status
-  -> Owner
-  -> Tests
-  -> Open Gaps
-  -> Last Verified Commit
-```
+Optimization Opportunities:
 
----
+- Build compliance checks into content/video/resource publish workflows.
+- Add test fixtures for noncompliant copy.
+- Use shared rules as both runtime guards and static scan inputs.
 
-# PAGE 39 - 39.0 TESTING AND VERIFICATION GAPS
+Scalability Concerns:
 
-## 39.1 Observed Testing Assets
+- More user-generated/generated content means more moderation and review load.
+- Multi-language content needs equivalent compliance checks.
 
-1. Typecheck scripts exist.
-2. Smoke scripts exist for Michael schedule and holding tank.
-3. Seeding scripts exist.
-4. Manual QA docs exist under `docs/v2-redesign/qa`.
+Governance Concerns:
 
-## 39.2 Missing Automated Coverage
-
-1. No unified test runner is described in root package beyond typecheck/build.
-2. No visible end-to-end test suite.
-3. No GraphRAG tests.
-4. No prompt tests.
-5. No compliance CI scanner.
-6. No projection outbox drain tests.
-7. No graph vocabulary tests.
-
-## 39.3 Required Verification Procedures
-
-1. Typecheck all packages.
-2. Build all packages.
-3. Run route smoke tests.
-4. Run data write smoke tests.
-5. Run Chroma collection verification.
-6. Run Neo4j vocabulary verification.
-7. Run prospect compliance scan.
-8. Run AI generation compliance tests.
-
-## 39.4 Governance Rule
-
-Architecture claims must become tests before production scale.
+- No income claims, no placement promises, no automated prospect qualification, no prospect-facing AI claims, no THREE branding on `.com`.
+- VM/RVM expansion should be reviewed under current policy and product governance.
 
 ---
 
-# PAGE 40 - 40.0 PLATFORM READINESS SCORECARD
+## Page 31 - Security And Access Assessment
 
-| Area | Readiness | Notes |
-|---|---|---|
-| Prospect PMV | High | Core route, presentation, dashboard, SSE, reentry exist |
-| BA onboarding | Moderate-High | Register, welcome, Michael, questionnaire, training exist |
-| Admin operations | Moderate-High | Many surfaces implemented; needs E2E verification |
-| CRM | Moderate | Functional, needs intelligence/persistence convergence |
-| Agents | Moderate | Michael/Ivory/ScriptMaker exist; governance runtime missing |
-| Training | Moderate | Fast Start exists; Training Agent/resource integration missing |
-| Orientation | Moderate | Session scheduling exists; full stage engine missing |
-| Resource Center | Low-Moderate | Architecture/docs exist; runtime catalog missing |
-| Event Center | Moderate | Webinar/orientation exist; unified event center missing |
-| GraphRAG | Low | Designed, not centralized at runtime |
-| Schema Governance | Moderate | Docs exist; registry/migration enforcement missing |
-| Production Scale | Moderate | Strong app structure; worker/pub-sub/index hardening needed |
+Strengths:
 
----
+- Auth middleware, admin middleware, Steve gate, and VM entitlement middleware exist.
+- Admin routes are consistently gated.
+- Prospect token routes are separated from BA/admin routes.
+- VM dialer access requires BA authentication and explicit entitlement.
+- Env validation warns when live VM delivery lacks webhook shared secret.
 
-# PAGE 41 - 41.0 DECISION LOG FOR THIS AUDIT
+Weaknesses:
 
-## 41.1 Decisions Made
+- Access logic is distributed across routes and middleware.
+- Entitlement models need clear schema ownership as new modules are added.
+- Some pre-gate routes are necessarily open and need continued route-placement discipline.
 
-This audit makes no product decisions.
+Technical Debt:
 
-It records findings and recommends priorities.
+- Need route-level access inventory.
+- Need tests proving every admin route uses `requireAdmin`.
+- Need tests proving every gated BA route applies auth and onboarding where intended.
 
-## 41.2 Required Decisions
+Missing Components:
 
-| Decision | Owner | Priority |
-|---|---|---|
-| Maintain current agent governance spine and runtime registry alignment | Governance | P1 |
-| Approve final Chroma collection scope | Data governance | P1 |
-| Approve graph vocabulary migration | Data governance | P0 |
-| Approve tiered write migration plan | Architecture | P0 |
-| Approve GraphRAG runtime implementation sequence | AI/Data | P1 |
-| Approve prompt registry implementation | AI Governance | P1 |
+- Permissions matrix by route.
+- Entitlement admin audit view.
+- Automated route mount lint.
 
-## 41.3 Decision Boundary
+Optimization Opportunities:
 
-This audit should not be used to justify destructive database cleanup without explicit approval.
+- Generate access docs from route mount declarations.
+- Add route smoke tests for 401/403 behavior.
+- Add security headers and cookie setting documentation if not already covered elsewhere.
 
----
+Scalability Concerns:
 
-# PAGE 42 - 42.0 OPERATIONAL ROADMAP BY OWNER
+- As modules grow, manual access review becomes error-prone.
+- Multi-tenant expansion will require more explicit tenant scoping.
 
-## 42.1 Architecture Owner
+Governance Concerns:
 
-1. Migrate write paths.
-2. Add index bootstrap.
-3. Externalize runtime queues.
-4. Maintain graphify freshness.
-
-## 42.2 Data Owner
-
-1. Standardize Mongo schemas.
-2. Standardize Neo4j vocabulary.
-3. Standardize Chroma metadata.
-4. Maintain migration scripts.
-
-## 42.3 AI Systems Owner
-
-1. Add agent registry.
-2. Add prompt registry.
-3. Add GraphRAG context builder.
-4. Add recommendation ledger.
-5. Add AI observability.
-
-## 42.4 Product Owner
-
-1. Prioritize Resource/Event/Community runtime build-out.
-2. Confirm Launch and Orientation scope.
-3. Validate PMV and CRM workflows.
-4. Maintain operational acceptance criteria.
-
-## 42.5 Governance Owner
-
-1. Maintain the current agent governance spine and prevent stale duplicate-playbook references.
-2. Maintain source hierarchy.
-3. Review compliance severity mapping.
-4. Ensure docs map to implementation state.
+- Kevin-only admin controls must remain hard gated.
+- Prospect access must never expose BA/admin internals.
 
 ---
 
-# PAGE 43 - 43.0 FINAL GAP CLOSURE MODEL
+## Page 32 - Observability And Operations Assessment
 
-## 43.1 Closure Model
+Strengths:
 
-```text
-Governance says what must be true.
-Code proves what is currently true.
-Audit identifies the delta.
-Roadmap closes the delta.
-Tests prevent the delta from returning.
-```
+- Health routes exist.
+- Direct persistence health exists.
+- Admin triple-stack health probe exists.
+- Workers have explicit start/stop hooks.
+- Projection outbox has retry and dead-letter semantics.
+- Audit logs exist across admin and domain actions.
 
-## 43.2 Closure Principles
+Weaknesses:
 
-1. Do not build more AI autonomy on unstable graph vocabulary.
-2. Do not build more recommendations without evidence ledger.
-3. Do not expand Chroma without collection scope governance.
-4. Do not allow prompt expansion without prompt registry.
-5. Do not treat docs as implemented features.
-6. Do not treat code comments as operational verification.
+- Health probe Chroma readback likely has a metadata mismatch.
+- Outbox dead-letter handling currently appears more code-level than admin-visible.
+- Observability is not yet centralized into one operational dashboard.
+- Plain pnpm commands are blocked by dependency approval state, which can confuse operators.
 
-## 43.3 Closure Sequence
+Technical Debt:
 
-1. Integrity.
-2. Vocabulary.
-3. Runtime GraphRAG.
-4. Agent governance.
-5. Recommendation engine.
-6. Resource/Event/Community intelligence.
-7. Scale hardening.
+- Fix Chroma heartbeat readback metadata.
+- Add operations runbook for pnpm dependency approvals.
+- Expose projection outbox health in admin.
+- Add worker status reporting.
 
----
+Missing Components:
 
-# PAGE 44 - 44.0 FINAL RECOMMENDATIONS
+- Operations dashboard combining app health, persistence health, worker state, outbox state, delivery state, and test/build status.
+- Alert routing beyond console/log where needed.
+- Stuck queue diagnostics.
 
-## 44.1 Recommendation 1
+Optimization Opportunities:
 
-Complete the P0 data convergence pass before expanding agent autonomy.
+- Add structured logs with correlation ids for token/invitation/CRM/VM flows.
+- Add health probe IDs that can be traced across Mongo, Neo4j, and Chroma.
+- Add build/test status to release checklist.
 
-## 44.2 Recommendation 2
+Scalability Concerns:
 
-Treat `AI_AGENT_PLAYBOOK.md` as formally superseded by the current governance spine; keep `constitution/MOMENTUM_CONSTITUTION.md`, `constitution/MOMENTUM_GOVERNANCE.md`, `AGENT_ARCHITECTURE.md`, and `AGENT_PROMPT_GOVERNANCE.md` synchronized with runtime registries.
+- In-process workers and event buses need coordination before multi-instance deployment.
+- Delivery queues need backpressure and retry controls as volume increases.
 
-## 44.3 Recommendation 3
+Governance Concerns:
 
-Migrate all domain writes into `tieredWrite` categories and add read-back verification.
-
-## 44.4 Recommendation 4
-
-Standardize Neo4j labels and relationships before production data grows.
-
-## 44.5 Recommendation 5
-
-Implement GraphRAG as a runtime service, beginning with Michael transcript, Ivory roster, CRM notes, and training progress.
-
-## 44.6 Recommendation 6
-
-Implement prompt registry and recommendation ledger before launching future agents.
-
-## 44.7 Recommendation 7
-
-Add operational dashboards for projection outbox, gateway health, AI generation fallbacks, and data-store projection health.
-
-## 44.8 Recommendation 8
-
-Regenerate graphify output and add freshness checks to the release procedure.
+- Operational alerts should not leak private data.
+- Health checks should prove all required persistence legs, not merely liveness.
 
 ---
 
-# PAGE 45 - 45.0 CLOSING ASSESSMENT
+## Page 33 - VM And RVM Campaign Lane Assessment
 
-## 45.1 Platform State
+Strengths:
 
-Momentum Creation System V2 has the foundation of a serious platform:
+- VM/RVM is implemented with clear server domains, admin routes, team routes, token route, provider queue, webhook handling, entitlement gate, and live-delivery flags.
+- Live delivery is explicitly guarded by both environment flag and campaign/admin approval concepts.
+- Default env state is safe: live delivery disabled.
+- RVM token route keeps campaign recipients on a controlled presentation path.
 
-1. Clear constitutional authority.
-2. Real product surfaces.
-3. Real server architecture.
-4. Real admin tooling.
-5. Real prospect experience.
-6. Real BA onboarding.
-7. Real invitation support.
-8. Real multi-store persistence.
-9. Real governance documentation.
+Weaknesses:
 
-## 45.2 Platform Constraint
+- This lane is newer than the original foundation model and changes the acquisition posture.
+- It introduces internal lead/campaign language that must stay out of prospect-facing `.com` PMV surfaces.
+- It needs explicit current authority linkage because older rules warn against automated prospecting and AI calling.
 
-The constraint is convergence.
+Technical Debt:
 
-The implementation must converge with the governance architecture before the system relies on AI, GraphRAG, and recommendations as operational intelligence.
+- Need a VM/RVM ACR or current decision record referenced from docs and code comments.
+- Need compliance tests for VM/RVM copy and prospect routing.
+- Need schema catalog entries for VM campaign, lead owner, provider queue, webhook, delivery attempt, and RVM token records.
 
-## 45.3 Final Operating Statement
+Missing Components:
 
-The next phase should not be a broad feature expansion phase.
+- VM/RVM governance summary in current docs.
+- Admin compliance review checklist.
+- Provider failure/stuck-queue dashboard.
 
-It should be an integrity convergence phase.
+Optimization Opportunities:
 
-The platform should become:
+- Keep initial operation in dry-run/manual modes until compliance and delivery evidence is strong.
+- Add throttling, retries, and provider-independent queue abstractions.
+- Add lifecycle reporting for uploaded/imported contacts without scoring people.
 
-1. One schema language.
-2. One graph vocabulary.
-3. One write discipline.
-4. One prompt governance system.
-5. One recommendation ledger.
-6. One GraphRAG runtime.
-7. One operational truth layer.
+Scalability Concerns:
 
-Once those are in place, the already-built product breadth can become a governed, scalable, AI-supported operating system for Team Magnificent.
+- Provider delivery and webhook volume can grow quickly.
+- Queue processing needs rate limits, idempotency, and dead-letter visibility.
+
+Governance Concerns:
+
+- Must not become automated prospecting or automated qualification.
+- Must not imply income, placement, or guaranteed outcomes.
+- Must remain permissioned, auditable, and compliant with THREE rules.
+
+---
+
+## Page 34 - CRM, Events, And Follow-Up Integration
+
+The CRM, Event Center, callback, webinar, orientation, and VM/RVM systems are interconnected in product reality, even if implemented as separate domains. This is normal at the current stage. The integration question is whether a prospect or BA can move through these systems without inconsistent states.
+
+Strengths:
+
+- Token lifecycle states exist.
+- Callback and webinar reservation domains exist.
+- CRM domain connects to invitation and prospect records.
+- VM/RVM tokenization gives imported/campaign contacts a controlled route.
+- Admin oversight surfaces exist.
+
+Weaknesses:
+
+- No single lifecycle diagram currently covers all follow-up paths.
+- Event attendance/follow-up is less mature than invitation and CRM.
+- Callback/webinar/email delivery depends on dormant/degraded external delivery keys.
+
+Technical Debt:
+
+- Need unified lifecycle map across invite token, prospect account, CRM contact, callback, webinar, orientation, VM/RVM delivery, and outcome.
+- Need stuck-state cleanup jobs.
+- Need idempotency keys across external events/webhooks.
+
+Missing Components:
+
+- Event attendance to CRM follow-up loop.
+- Unified follow-up queue.
+- Admin "state integrity" report.
+
+Optimization Opportunities:
+
+- Build deterministic next-step suggestions from lifecycle state.
+- Use admin reports to identify system bottlenecks.
+- Add explicit state transition audit entries.
+
+Scalability Concerns:
+
+- Follow-up workflows can become noisy without prioritization rules.
+- Event and delivery webhooks need idempotent processing.
+
+Governance Concerns:
+
+- Follow-up automation must not cross into AI qualification or pressure.
+- Human relationship owner must remain clear.
+
+---
+
+## Page 35 - Gap Analysis
+
+Critical gaps:
+
+1. `AI_AGENT_PLAYBOOK.md` is absent despite being requested as a comparison authority.
+2. Tiered persistence is not adopted by production call sites.
+3. Michael runtime tests fail due to contract drift.
+4. GraphRAG and Context Manager are not live by default and remain partially dormant.
+5. VM/RVM lane needs explicit current governance linkage.
+6. Build registry and root task file are stale.
+7. Chroma health readback likely has a metadata mismatch.
+
+High gaps:
+
+1. No current schema catalog across Mongo, Neo4j, Chroma, routes, and shared types.
+2. No generated route/access matrix.
+3. No admin-visible projection outbox and cross-store consistency dashboard.
+4. No current full PMV compliance scanner.
+5. No unified training/resource/event/launch catalog.
+
+Medium gaps:
+
+1. Team app bundle size warning.
+2. Com app dynamic import warning.
+3. Documentation freshness metadata is inconsistent.
+4. Graphify output is stale relative to current HEAD.
+5. Resource Center and Event Center are conceptually present but not fully unified.
+
+Low gaps:
+
+1. Some older naming/comment drift.
+2. Some stale historical docs remain in generated archives.
+3. TODO/future language is high in docs because many runtime specs are intentionally forward-looking.
+
+---
+
+## Page 36 - Risk Analysis
+
+Risk 1: Multi-store inconsistency
+
+Severity: Critical
+
+Likelihood: Medium
+
+Reason: Old triple-stack writes still dominate. If Mongo succeeds and Neo4j/Chroma fails, records can become inconsistent unless caller-specific recovery exists.
+
+Mitigation: Migrate to tiered writer and projection outbox, starting with identity, sponsor, token, pool, CRM ownership, VM ownership, and knowledge approval writes.
+
+Risk 2: Agent contract drift
+
+Severity: High
+
+Likelihood: High
+
+Reason: Michael tests already fail on behavior expectations. Missing `AI_AGENT_PLAYBOOK.md` increases drift risk.
+
+Mitigation: Decide current behavior, update tests/docs or route logic, and create current agent playbook.
+
+Risk 3: Governance/doc drift
+
+Severity: High
+
+Likelihood: High
+
+Reason: Build registry, TASK.md, missing playbook, older schema docs, and stale graph reports can mislead future agents.
+
+Mitigation: Reconcile docs, mark stale/historical docs, regenerate registry, and add freshness metadata.
+
+Risk 4: VM/RVM compliance exposure
+
+Severity: High
+
+Likelihood: Medium
+
+Reason: VM/RVM lane is real and powerful. It can be compliant if governed, but it sits near prohibited automation/prospecting territory.
+
+Mitigation: Tie to explicit ACR, compliance checklist, entitlement controls, copy scans, and admin audit.
+
+Risk 5: Knowledge retrieval activation before readiness
+
+Severity: High
+
+Likelihood: Low to Medium
+
+Reason: Flags default off, which lowers immediate likelihood. But runtime docs are extensive and future activation is likely.
+
+Mitigation: Require retrieval-ready gates, source lineage, admin review, context packet traces, and canary activation.
+
+Risk 6: Operational confusion from pnpm approval state
+
+Severity: Medium
+
+Likelihood: High
+
+Reason: Normal commands fail before running unless dependency verification is bypassed or approvals are resolved.
+
+Mitigation: Add operations runbook or resolve approved-builds configuration intentionally.
+
+Risk 7: Scale limits from in-process workers/events
+
+Severity: Medium
+
+Likelihood: Medium
+
+Reason: Fine locally, but multi-instance deployment needs external queues/coordination.
+
+Mitigation: Move high-volume delivery/projection/event paths to durable queue semantics.
+
+---
+
+## Page 37 - Optimization Roadmap
+
+Phase 1: Stabilize release confidence
+
+- Resolve pnpm dependency approval state so normal `pnpm typecheck`, `pnpm build`, and tests execute.
+- Reconcile Michael runtime failing tests.
+- Fix Chroma health readback metadata.
+- Regenerate or clearly mark stale `docs/build-registry.md`.
+- Replace or remove stale root `TASK.md` on `main`.
+
+Phase 2: Consolidate persistence
+
+- Inventory all 56 `tripleStackWrite` call sites.
+- Classify each call as graph-critical, knowledge, or operational.
+- Migrate graph-critical writes first.
+- Migrate knowledge writes to `writeKnowledge`.
+- Migrate operational writes to `writeOperational`.
+- Add failure simulation tests for each tier.
+- Add admin projection outbox dashboard.
+
+Phase 3: Govern agents
+
+- Create `AI_AGENT_PLAYBOOK.md` or formally rename/reference current replacement.
+- Create agent registry: Steve, Michael, Ivory, ScriptMaker, admin recommendations, future agents.
+- Tie prompts to versions, owners, tests, allowed inputs, forbidden outputs, and degradation behavior.
+- Add no-scoring/no-qualification/no-income-claim agent tests.
+
+Phase 4: Activate knowledge safely
+
+- Build knowledge schema catalog.
+- Connect approved knowledge store to GraphRAG through tiered writer/outbox.
+- Add active/retrieval-ready admin UI.
+- Canary one knowledge domain for Context Manager.
+- Add traceable context packet logs.
+
+Phase 5: Product unification
+
+- Decide whether Launch Center, Resource Center, and Event Center are named surfaces or umbrella concepts.
+- If named surfaces, create route/data catalogs and build missing UI.
+- If umbrella concepts, document their composition from cockpit/training/resources/events.
+- Add PMV analytics without earnings or placement claims.
+
+Phase 6: Scale and operations
+
+- Externalize queues/event buses where necessary.
+- Add route/access matrix generation.
+- Add schema drift CI.
+- Add compliance copy scan CI.
+- Add operational dashboard for workers, persistence, projection, delivery, and knowledge.
+
+---
+
+## Page 38 - Priority Matrix
+
+P0 - Immediate:
+
+- Resolve Michael runtime test drift.
+- Fix Chroma health readback metadata.
+- Create or reconcile `AI_AGENT_PLAYBOOK.md`.
+- Decide/record VM/RVM governance authority.
+- Clear pnpm verification blocker or document accepted command pattern.
+
+P1 - High:
+
+- Migrate high-risk `tripleStackWrite` call sites to tiered writes.
+- Create schema catalog.
+- Regenerate build registry.
+- Add route/access inventory.
+- Add PMV/prospect-facing compliance scan.
+- Add projection outbox admin visibility.
+
+P2 - Medium:
+
+- Unify Launch Center/Resource Center/Event Center definitions.
+- Add PMV analytics model.
+- Add training/resource/event content catalog.
+- Add knowledge activation canary.
+- Address team app bundle size.
+
+P3 - Later:
+
+- Expand GraphRAG beyond first canary domain.
+- Add advanced admin knowledge dashboards.
+- Add multi-instance queue infrastructure.
+- Add deeper graph diagnostics and lineage exploration.
+
+Decision matrix:
+
+| Area | Impact | Urgency | Difficulty | Recommended priority |
+| --- | --- | --- | --- | --- |
+| Michael runtime test drift | High | Immediate | Low-Medium | P0 |
+| Tiered write migration | Critical | High | Medium-High | P1, with P0 planning |
+| Missing agent playbook | High | Immediate | Medium | P0 |
+| VM/RVM governance | High | Immediate | Medium | P0 |
+| Chroma health bug | Medium-High | Immediate | Low | P0 |
+| Schema catalog | High | High | Medium | P1 |
+| Build registry freshness | Medium | High | Low | P1 |
+| Context Manager activation | High | Medium | High | P2/P3 |
+| Resource/Event unification | Medium | Medium | Medium | P2 |
+| Team bundle optimization | Medium | Low | Medium | P2 |
+
+---
+
+## Page 39 - Future Recommendations
+
+Recommendation 1: Treat the current repo as a consolidation project, not a rebuild project.
+
+The product is substantially implemented. The best next work is to remove drift, standardize write paths, harden governance, and activate knowledge systems carefully.
+
+Recommendation 2: Make `docs/project-wireframe.md` and generated registries agree.
+
+If the wireframe is the live build map, regenerate stale mirrors or mark them historical. Agents should not need to guess which document is current.
+
+Recommendation 3: Adopt tiered persistence as the mandatory runtime write model.
+
+The old "all three synchronously or bust" model is too brittle for operational scale. The newer tiered writer is the right direction because it distinguishes true graph-critical invariants from eventually consistent projections. The governance docs should be updated to state this explicitly if Kevin approves that model.
+
+Recommendation 4: Create the agent playbook now.
+
+The missing `AI_AGENT_PLAYBOOK.md` is not just a doc hole. It is the natural place to unify Steve, Michael, Ivory, ScriptMaker, prompt registry, context manager, degradation behavior, and no-scoring/no-qualification rules.
+
+Recommendation 5: Keep GraphRAG gated until the active knowledge path is proven.
+
+The current default-off posture is wise. Activate one domain, prove source lineage and retrieval-ready filtering, then expand.
+
+Recommendation 6: Give VM/RVM a governance wrapper.
+
+The lane can be valuable, but it must be surrounded by explicit policy, copy checks, entitlement gates, admin approvals, provider controls, and audit logs.
+
+Recommendation 7: Add generated maps.
+
+The repo has grown past hand-maintained mental maps. Generate:
+
+- route/access map
+- schema catalog
+- persistence write catalog
+- Chroma collection catalog
+- Neo4j label/relationship catalog
+- agent/prompt registry
+- compliance surface inventory
+
+---
+
+## Page 40 - Subsystem Matrix Summary
+
+| Subsystem | Current maturity | Main strength | Main gap | Priority |
+| --- | --- | --- | --- | --- |
+| Architecture | High | Three-surface app and modular server are real | Consistency across generations | P1 |
+| Agents | Medium | Clear support-not-authority posture | Missing playbook and contract drift | P0 |
+| PMV | High | Strong compliance vocabulary and product framing | Need automated scan/analytics model | P1 |
+| CRM | Medium-High | Implemented BA-facing relationship workflows | Unified lifecycle model | P1 |
+| Training | Medium-High | Fast Start, 10-step, video/content paths | Larger training architecture not fully unified | P2 |
+| Orientation | Medium-High | Concrete onboarding/orientation flows | State machine documentation | P1 |
+| Launch Center | Medium | Cockpit/invite/training compose launch | Named surface ambiguity | P2 |
+| Resource Center | Medium | Knowledge/content/video pieces exist | Unified resource catalog | P2 |
+| Event Center | Medium-Low | Webinar/orientation/callback pieces exist | Full event center workflow | P2 |
+| Knowledge Systems | Medium | Strong docs and partial implementation | Live activation incomplete | P2 |
+| Mongo | High | Canonical app truth via direct adapter | Schema/index catalog | P1 |
+| Chroma | Medium | Direct semantic store and collection setup | Dormant GraphRAG, health bug | P0/P2 |
+| Neo4j | Medium-High | Direct graph leg and tiered-write path | Constraint/model catalog | P1 |
+| GraphRAG | Medium-Low | Gated, retrieval-ready design exists | Not live/routed by default | P2/P3 |
+
+---
+
+## Page 41 - Concrete Findings
+
+Finding 1: Production still uses old triple-stack helper.
+
+Evidence: 56 references to `tripleStackWrite(` across `server/src`, `apps`, and `packages`. Only the tiered writer exports reference `writeGraphCritical`, `writeKnowledge`, and `writeOperational`.
+
+Impact: The most important persistence guarantees are not yet enforced by the strongest available implementation.
+
+Finding 2: Tiered writer is architecturally strong but under-adopted.
+
+Evidence: `server/src/services/tieredWrite.ts` defines graph-critical rollback and durable projection behavior, but production callers are not using the exported helpers.
+
+Impact: The repository already has the shape of the solution; the work is migration and verification.
+
+Finding 3: Chroma health readback likely filters on the wrong metadata field.
+
+Evidence: health write metadata spreads `heartbeat` which includes `heartbeatId`; readback uses `where: { healthHeartbeatId: heartbeatId }` and checks `m?.healthHeartbeatId`.
+
+Impact: Chroma health can report failure even when the write landed.
+
+Finding 4: Michael runtime behavior and tests disagree.
+
+Evidence: Server tests expect safe fallback; route returns next training step. 9 tests fail.
+
+Impact: Agent behavior contract is unsettled.
+
+Finding 5: Requested agent playbook is missing.
+
+Evidence: Search found no `AI_AGENT_PLAYBOOK.md` or direct equivalent with that name.
+
+Impact: Agent governance onboarding is incomplete.
+
+Finding 6: GraphRAG is intentionally dormant.
+
+Evidence: `GRAPHRAG_PERSISTENCE_ENABLED` defaults false, and `graphrag.ts` states it is wired dormant.
+
+Impact: Knowledge-system docs are ahead of live runtime.
+
+Finding 7: Normal pnpm commands are blocked by approval state.
+
+Evidence: Initial verification fails on ignored dependency build scripts.
+
+Impact: Operators/agents can think the repo is failing before actual gates run.
+
+Finding 8: VM/RVM lane needs authority linkage.
+
+Evidence: Implementation is real and gated; older docs constrain automated prospecting. This is a governance boundary change.
+
+Impact: Without explicit ACR/decision linkage, future agents may mis-handle compliance.
+
+---
+
+## Page 42 - Current State By Requested Area
+
+Architecture: Strong core architecture, real product surfaces, route/domain separation, direct persistence. Needs consolidation around write tiers and generated maps.
+
+Agents: Implemented support surfaces and runtime scaffolding. Needs current playbook, prompt registry enforcement, and Michael contract reconciliation.
+
+PMV: Strongly represented in product flow and compliance vocabulary. Needs automated scanning and PMV analytics model.
+
+CRM: Implemented and useful. Needs unified lifecycle map across invite/prospect/callback/webinar/VM/outcome.
+
+Training: Substantially implemented. Needs catalog/versioning and stronger integration with knowledge activation.
+
+Orientation: Real implementation. Needs current state machine and admin diagnostics.
+
+Launch Center: Functionally present through cockpit/training/invites/CRM. Needs naming decision and unified projection if product requires a formal surface.
+
+Resource Center: Partially present through video/content/knowledge/training. Needs unified catalog and publishing workflow.
+
+Event Center: Partially present through webinar/callback/orientation sessions. Needs full event workflow and reminder/delivery governance.
+
+Knowledge Systems: Strong design and partial implementation. Needs safe activation path.
+
+Mongo Usage: Strong and canonical. Needs schema/index catalog and tiered write migration.
+
+Chroma Usage: Present and direct. Needs health bug fix, collection catalog, and live retrieval governance.
+
+Neo4j Usage: Present and direct. Needs graph schema/constraint catalog and graph-critical migration.
+
+GraphRAG Usage: Designed and coded in canary/dormant form. Needs activation, route/service integration, source citation, and tiered persistence.
+
+---
+
+## Page 43 - Launch Readiness View
+
+The repository is build-ready under the noverify pnpm command pattern, but not release-clean because server tests fail.
+
+Release blockers:
+
+- Michael runtime test drift.
+- Pnpm dependency approval state for normal commands.
+- Chroma health readback bug if health probe is part of release criteria.
+- VM/RVM governance decision if live delivery is planned.
+
+Release cautions:
+
+- Team bundle size warning.
+- Com dynamic import warning.
+- Tiered persistence migration incomplete.
+- GraphRAG/Context Manager should remain off unless explicitly canaried.
+- Email/LLM live behavior depends on env keys and should be smoke-tested in the intended environment.
+
+Release strengths:
+
+- TypeScript passes.
+- Build passes.
+- Server tests are overwhelmingly passing except one focused Michael cluster.
+- Core product surfaces are implemented.
+- Admin and operational controls are broad.
+- Direct persistence stack is in place.
+
+Launch recommendation:
+
+Do not delay normal product consolidation because of dormant GraphRAG. Keep advanced knowledge systems gated. Fix the P0 items, then treat tiered persistence migration and doc/schema consolidation as the next launch-hardening phase.
+
+---
+
+## Page 44 - Final Assessment
+
+Momentum Creation System V2 is a real working platform with a strong product spine and a serious governance ambition. Its implementation is ahead of several older planning documents. The prospect experience, BA experience, admin controls, PMV framing, invitation system, CRM, training/orientation, and direct persistence stack are all materially present.
+
+The platform's highest-value next work is precision work:
+
+- settle Michael runtime behavior
+- resolve normal verification command blockers
+- fix Chroma health readback
+- create the missing agent playbook
+- wrap VM/RVM in explicit governance
+- migrate persistence to the tiered writer
+- generate current schema/route/persistence maps
+- activate knowledge systems only through governed canaries
+
+The system should not be described as unfinished in a broad sense. It should be described as built, expanding, and in need of governance consolidation before the most advanced agent/knowledge promises are treated as fully live.
+
+This is the right problem to have at this stage. The repository has enough real implementation that the next bottleneck is not imagination; it is disciplined alignment.
