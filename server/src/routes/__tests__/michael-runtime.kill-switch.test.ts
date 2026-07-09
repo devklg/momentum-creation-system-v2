@@ -17,13 +17,24 @@
  */
 
 import type { Request, Response } from 'express';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { handleMichaelRuntimeResolve } from '../michael-runtime.js';
+
+const traceMock = vi.hoisted(() => vi.fn());
+
+vi.mock('../../services/runtimeContextTrace.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../services/runtimeContextTrace.js')>();
+  return {
+    ...actual,
+    appendRuntimeContextTrace: traceMock,
+  };
+});
 
 const ENV_VARS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
   'MICHAEL_RUNTIME_RESPONSE_ENABLED',
   'MICHAEL_RUNTIME_TRACE_ENABLED',
+  'MCS_CONTEXT_MANAGER_LIVE_ENABLED',
 ] as const;
 
 type EnvVarName = (typeof ENV_VARS)[number];
@@ -79,10 +90,13 @@ function asBody(res: MockRes): Record<string, unknown> {
 let snapshot: Record<EnvVarName, string | undefined>;
 
 beforeEach(() => {
+  traceMock.mockReset();
+  traceMock.mockResolvedValue({ traceId: 'ctx_trace_test' });
   snapshot = {
     MICHAEL_RUNTIME_ROUTE_ENABLED: process.env.MICHAEL_RUNTIME_ROUTE_ENABLED,
     MICHAEL_RUNTIME_RESPONSE_ENABLED: process.env.MICHAEL_RUNTIME_RESPONSE_ENABLED,
     MICHAEL_RUNTIME_TRACE_ENABLED: process.env.MICHAEL_RUNTIME_TRACE_ENABLED,
+    MCS_CONTEXT_MANAGER_LIVE_ENABLED: process.env.MCS_CONTEXT_MANAGER_LIVE_ENABLED,
   };
   for (const name of ENV_VARS) {
     delete process.env[name];
@@ -176,6 +190,7 @@ describe('S3.11 Michael runtime route — three-axis kill switch behavior', () =
     expect(body.trace).toBeDefined();
     expect(typeof body.trace).toBe('object');
     expect(body.trace).not.toBeNull();
+    expect(body.contextTraceId).toBe('ctx_trace_test');
   });
 
   it('6. trace flag = "TRUE" (not exact) -> success WITHOUT trace', async () => {

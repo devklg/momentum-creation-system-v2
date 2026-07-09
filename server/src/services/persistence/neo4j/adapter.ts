@@ -12,6 +12,7 @@
 import neo4j from 'neo4j-driver';
 import { getNeo4jDriver } from './connection.js';
 import { PersistenceError } from '../dispatch.js';
+import { env } from '../../../env.js';
 
 /** Normalize Neo4j driver values (Integer, Node/Relationship, arrays, maps) to plain JS. */
 function normalizeValue(value: unknown): unknown {
@@ -51,13 +52,36 @@ export interface Neo4jCypherResult {
   summary: { counters: Record<string, number> };
 }
 
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  timeoutMessage: string,
+): Promise<T> {
+  let timer: NodeJS.Timeout | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 export async function neo4jCypher(input: Neo4jCypherParams): Promise<Neo4jCypherResult> {
   if (!input || typeof input.query !== 'string') {
     throw new PersistenceError('neo4j', 'cypher', 'cypher requires a string `query`');
   }
   const session = getNeo4jDriver().session();
+  const queryTimeoutMs = env.NEO4J_QUERY_TIMEOUT_MS;
   try {
-    const result = await session.run(input.query, input.params ?? {});
+    const result = await withTimeout(
+      session.run(input.query, input.params ?? {}, { timeout: queryTimeoutMs }),
+      queryTimeoutMs,
+      `cypher timed out after ${queryTimeoutMs}ms`,
+    );
     const records = result.records.map(
       (r) => normalizeValue(r.toObject()) as Record<string, unknown>,
     );
@@ -72,7 +96,11 @@ export async function neo4jCypher(input: Neo4jCypherParams): Promise<Neo4jCypher
   } catch (err) {
     throw new PersistenceError('neo4j', 'cypher', err instanceof Error ? err.message : String(err));
   } finally {
-    await session.close();
+    await withTimeout(
+      session.close(),
+      Math.min(1_000, queryTimeoutMs),
+      `session close timed out after ${Math.min(1_000, queryTimeoutMs)}ms`,
+    ).catch(() => undefined);
   }
 }
 

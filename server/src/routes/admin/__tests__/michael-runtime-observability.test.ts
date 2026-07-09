@@ -1,10 +1,10 @@
 /**
- * S3.6 — admin Michael runtime observability endpoint tests (Agent C).
+ * Admin Michael runtime observability endpoint tests.
  *
  * GET /api/admin/michael-runtime/observability is Kevin-only (requireAdmin) and
- * returns the in-memory aggregate snapshot: { ok: true, michaelRuntime: <snapshot> }.
- * It is a PURE read — no persistence, no audit-log, no triple-stack, no PII,
- * tokens, IDs, or raw env strings.
+ * returns aggregate counters plus durable, content-free Context Manager trace
+ * summaries. It does not expose raw packets, prompt text, response text, tokens,
+ * or contact PII.
  *
  * supertest is not installed and index.ts calls app.listen() at import, so the
  * mounted app is never booted. Instead this test (a) introspects the router
@@ -17,13 +17,19 @@
  */
 
 import type { Response } from 'express';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { adminMichaelRuntimeObservabilityRoutes } from '../michael-runtime-observability.js';
 import {
   getMichaelRuntimeObservabilitySnapshot,
   recordMichaelRuntimeSuccess,
   resetMichaelRuntimeObservabilityForTests,
 } from '../../../services/michaelRuntimeObservability.js';
+
+const listTraceMock = vi.hoisted(() => vi.fn());
+
+vi.mock('../../../services/runtimeContextTrace.js', () => ({
+  listRuntimeContextTraces: listTraceMock,
+}));
 
 const ENV_VARS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
@@ -36,6 +42,8 @@ type EnvVarName = (typeof ENV_VARS)[number];
 let envSnapshot: Record<EnvVarName, string | undefined>;
 
 beforeEach(() => {
+  listTraceMock.mockReset();
+  listTraceMock.mockResolvedValue([]);
   envSnapshot = {
     MICHAEL_RUNTIME_ROUTE_ENABLED: process.env.MICHAEL_RUNTIME_ROUTE_ENABLED,
     MICHAEL_RUNTIME_RESPONSE_ENABLED: process.env.MICHAEL_RUNTIME_RESPONSE_ENABLED,
@@ -120,22 +128,23 @@ describe('S3.6 admin Michael runtime observability endpoint', () => {
     expect(route.handles.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('4. terminal handler returns { ok: true, michaelRuntime: <snapshot> }', () => {
+  it('4. terminal handler returns { ok: true, michaelRuntime, contextTraces }', async () => {
     const route = findObservabilityRoute();
     const handler = route.handles[route.handles.length - 1]!.handle;
     const res = mockRes();
-    handler({} as unknown, res as unknown as Response);
+    await handler({} as unknown, res as unknown as Response);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(res.body.michaelRuntime).toBeDefined();
+    expect(res.body.contextTraces).toEqual([]);
   });
 
-  it('5. michaelRuntime payload equals the observability snapshot shape (aggregate only)', () => {
+  it('5. michaelRuntime payload equals the observability snapshot shape', async () => {
     const route = findObservabilityRoute();
     const handler = route.handles[route.handles.length - 1]!.handle;
     const res = mockRes();
-    handler({} as unknown, res as unknown as Response);
+    await handler({} as unknown, res as unknown as Response);
 
     const snap = getMichaelRuntimeObservabilitySnapshot();
     expect(Object.keys(res.body.michaelRuntime).sort()).toEqual(Object.keys(snap).sort());
@@ -144,7 +153,7 @@ describe('S3.6 admin Michael runtime observability endpoint', () => {
     );
   });
 
-  it('6. reflects current aggregate counts and evaluated flags', () => {
+  it('6. reflects current aggregate counts and evaluated flags', async () => {
     process.env.MICHAEL_RUNTIME_ROUTE_ENABLED = 'true';
     recordMichaelRuntimeSuccess();
     recordMichaelRuntimeSuccess();
@@ -152,14 +161,14 @@ describe('S3.6 admin Michael runtime observability endpoint', () => {
     const route = findObservabilityRoute();
     const handler = route.handles[route.handles.length - 1]!.handle;
     const res = mockRes();
-    handler({} as unknown, res as unknown as Response);
+    await handler({} as unknown, res as unknown as Response);
 
     expect(res.body.michaelRuntime.routeEnabled).toBe(true);
     expect(res.body.michaelRuntime.responseEnabled).toBe(false);
     expect(res.body.michaelRuntime.counters.successfulFacadeResolutions).toBe(2);
   });
 
-  it('7. exposes no raw env strings — flags are evaluated booleans', () => {
+  it('7. exposes no raw env strings — flags are evaluated booleans', async () => {
     process.env.MICHAEL_RUNTIME_ROUTE_ENABLED = 'true';
     process.env.MICHAEL_RUNTIME_RESPONSE_ENABLED = 'TRUE';
     process.env.MICHAEL_RUNTIME_TRACE_ENABLED = 'false';
@@ -167,7 +176,7 @@ describe('S3.6 admin Michael runtime observability endpoint', () => {
     const route = findObservabilityRoute();
     const handler = route.handles[route.handles.length - 1]!.handle;
     const res = mockRes();
-    handler({} as unknown, res as unknown as Response);
+    await handler({} as unknown, res as unknown as Response);
 
     const mr = res.body.michaelRuntime;
     expect(typeof mr.routeEnabled).toBe('boolean');
@@ -179,12 +188,41 @@ describe('S3.6 admin Michael runtime observability endpoint', () => {
     expect(serialized).not.toContain('TRUE');
   });
 
-  it('8. exposes no PII / trace / token / ID keys (aggregate-only contract)', () => {
+  it('8. exposes durable context trace summaries without raw packet/prompt/response/contact PII', async () => {
     recordMichaelRuntimeSuccess();
+    listTraceMock.mockResolvedValue([
+      {
+        traceId: 'ctx_trace_1',
+        agentKey: 'michael_magnificent',
+        taskType: 'training_support',
+        runtimeSurface: 'michael-runtime',
+        packetStatus: 'complete',
+        approvedKnowledgeCount: 2,
+        approvedKnowledgeIds: ['knw_1', 'knw_2'],
+        approvedSourceIds: ['knowledge_source_1'],
+        excludedSourceIds: [],
+        candidateKnowledgeExcluded: true,
+        retrievalMethods: ['direct_reference'],
+        routeDecision: 'proceed',
+        catalogKey: 'michael_next_training_step_en',
+        responseType: 'next_training_step',
+        createdAt: '2026-07-08T00:00:00.000Z',
+        tmagId: 'TMAG-HIDDEN',
+        queryHint: 'hidden query text',
+      },
+    ]);
     const route = findObservabilityRoute();
     const handler = route.handles[route.handles.length - 1]!.handle;
     const res = mockRes();
-    handler({} as unknown, res as unknown as Response);
+    await handler({} as unknown, res as unknown as Response);
+
+    expect(res.body.contextTraces).toEqual([
+      expect.objectContaining({
+        traceId: 'ctx_trace_1',
+        approvedKnowledgeIds: ['knw_1', 'knw_2'],
+        approvedKnowledgeCount: 2,
+      }),
+    ]);
 
     const allKeys = new Set<string>();
     const walk = (value: unknown): void => {
@@ -200,7 +238,6 @@ describe('S3.6 admin Michael runtime observability endpoint', () => {
       'trace',
       'packet',
       'contextPacket',
-      'retrieval',
       'token',
       'sessionId',
       'turnId',
@@ -210,31 +247,34 @@ describe('S3.6 admin Michael runtime observability endpoint', () => {
       'phone',
       'prospect',
       'text',
+      'queryHint',
     ];
     for (const forbidden of FORBIDDEN) {
       expect(allKeys.has(forbidden)).toBe(false);
     }
   });
 
-  it('9. terminal handler performs no persistence/audit — it is synchronous and returns no promise', () => {
+  it('9. terminal handler reads durable trace summaries through the trace service', async () => {
     const route = findObservabilityRoute();
     const handler = route.handles[route.handles.length - 1]!.handle;
     const res = mockRes();
-    const returned = handler({} as unknown, res as unknown as Response);
-    // A persisting/audit handler would be async (return a Promise). This is a
-    // pure in-memory read.
-    expect(returned).not.toBeInstanceOf(Promise);
+    await handler({} as unknown, res as unknown as Response);
+
+    expect(listTraceMock).toHaveBeenCalledWith({
+      agentKey: 'michael_magnificent',
+      limit: 10,
+    });
   });
 
-  it('10. repeated reads are non-mutating — counts do not change just by reading', () => {
+  it('10. repeated reads are non-mutating — counts do not change just by reading', async () => {
     recordMichaelRuntimeSuccess();
     const route = findObservabilityRoute();
     const handler = route.handles[route.handles.length - 1]!.handle;
 
     const res1 = mockRes();
-    handler({} as unknown, res1 as unknown as Response);
+    await handler({} as unknown, res1 as unknown as Response);
     const res2 = mockRes();
-    handler({} as unknown, res2 as unknown as Response);
+    await handler({} as unknown, res2 as unknown as Response);
 
     expect(res1.body.michaelRuntime.counters.successfulFacadeResolutions).toBe(1);
     expect(res2.body.michaelRuntime.counters.successfulFacadeResolutions).toBe(1);

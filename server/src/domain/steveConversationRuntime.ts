@@ -37,6 +37,7 @@ import {
   requestSteveRuntimeContextPacket,
   steveContextManagerLiveEnabled,
 } from '../runtime/context/steveRuntimeContextFoundation.js';
+import { appendRuntimeContextTrace } from '../services/runtimeContextTrace.js';
 import {
   STEVE_DISCOVERY_QUESTIONS,
   buildSteveSystemPrompt,
@@ -307,6 +308,23 @@ async function buildSteveContextPromptSupplement(input: {
       createdAt: input.createdAt,
       turnContent: input.turnContent,
     });
+    try {
+      await appendRuntimeContextTrace({
+        agentKey: 'steve_success',
+        taskType: 'success_interview',
+        runtimeSurface: 'steve-discovery',
+        tmagId: input.tmagId as TmagId,
+        packet,
+        queryHint: input.turnContent,
+        routeDecision: packet.packetStatus,
+        createdAt: input.createdAt,
+      });
+    } catch (err) {
+      console.warn(
+        '[steve-runtime] context trace write failed:',
+        err instanceof Error ? err.message : err,
+      );
+    }
     return renderSteveContextPromptSupplement(packet);
   } catch (err) {
     console.warn(

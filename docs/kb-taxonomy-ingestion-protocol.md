@@ -205,6 +205,32 @@ Retrieval smoke test:
 - `Visage skincare serum` should return Visage skincare material.
 - `income claims compliance do and do not` should return governance / policy material.
 
+## Runtime Context Trace Requirement
+
+Agent runtimes that consume approved KB context must write a content-free trace
+through `server/src/services/runtimeContextTrace.ts`.
+
+Trace collection / graph / vector target:
+
+- MongoDB: `momentum.mcs_runtime_context_traces`
+- Neo4j: `(:RuntimeContextTrace)` with `USED_KNOWLEDGE` edges to
+  `(:KnowledgeReference)` and `USED_SOURCE` edges to `(:KnowledgeSource)` when
+  source nodes exist
+- ChromaDB: `mcs_runtime_context_traces`
+
+Current traced runtimes:
+
+- Michael runtime: `server/src/routes/michael-runtime.ts`
+- Steve discovery runtime: `server/src/domain/steveConversationRuntime.ts`
+
+Trace records must not store raw user prompts, generated responses, or full KB
+content. They store packet/source IDs, approved knowledge IDs, source IDs,
+excluded source IDs, packet status, retrieval method names, route/catalog
+decisions, and a short sanitized query hint only.
+
+Runtime trace writes are observability. If a store stalls or fails, the agent
+response must degrade safely instead of hanging the user-facing path.
+
 ## Agent Rule
 
 Agents must use the Context Manager / approved knowledge provider for retrieval.

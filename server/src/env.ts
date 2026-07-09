@@ -235,6 +235,8 @@ const Env = z.object({
   NEO4J_URI: z.string().default('bolt://127.0.0.1:7710'),
   NEO4J_USERNAME: z.string().default('neo4j'),
   NEO4J_PASSWORD: z.string().default(''),
+  NEO4J_CONNECTION_TIMEOUT_MS: z.coerce.number().int().positive().max(30_000).default(5_000),
+  NEO4J_QUERY_TIMEOUT_MS: z.coerce.number().int().positive().max(30_000).default(5_000),
   CHROMA_URL: z.string().url().default('http://localhost:8200'),
   /** Chroma tenant — 'default_tenant' locally; the tenant UUID on Chroma Cloud. */
   CHROMA_TENANT: z.string().default('default_tenant'),
@@ -274,6 +276,7 @@ const Env = z.object({
   // GraphRAG writer + retrieval are no-ops. Only active, retrieval-ready,
   // approved knowledge is ever served; candidates/superseded/archived excluded.
   GRAPHRAG_PERSISTENCE_ENABLED: EnvBoolean.default(false),
+  RUNTIME_CONTEXT_TRACE_WRITE_TIMEOUT_MS: z.coerce.number().int().positive().max(10_000).default(2_500),
 
   /**
    * Context Manager live approved-knowledge retrieval.

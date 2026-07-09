@@ -13,6 +13,11 @@ export function getNeo4jDriver(): Driver {
     driver = neo4j.driver(
       env.NEO4J_URI,
       neo4j.auth.basic(env.NEO4J_USERNAME, env.NEO4J_PASSWORD),
+      {
+        connectionAcquisitionTimeout: env.NEO4J_CONNECTION_TIMEOUT_MS,
+        connectionTimeout: env.NEO4J_CONNECTION_TIMEOUT_MS,
+        maxTransactionRetryTime: env.NEO4J_QUERY_TIMEOUT_MS,
+      },
     );
   }
   return driver;

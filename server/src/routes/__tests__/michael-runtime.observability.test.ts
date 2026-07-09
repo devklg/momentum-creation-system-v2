@@ -23,12 +23,22 @@
  * around every test.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { handleMichaelRuntimeResolve } from '../michael-runtime.js';
 import {
   getMichaelRuntimeObservabilitySnapshot,
   resetMichaelRuntimeObservabilityForTests,
 } from '../../services/michaelRuntimeObservability.js';
+
+const traceMock = vi.hoisted(() => vi.fn());
+
+vi.mock('../../services/runtimeContextTrace.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../services/runtimeContextTrace.js')>();
+  return {
+    ...actual,
+    appendRuntimeContextTrace: traceMock,
+  };
+});
 
 const SESSION_BA_ID = 'TMAG-ABC234';
 
@@ -36,6 +46,7 @@ const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
   'MICHAEL_RUNTIME_RESPONSE_ENABLED',
   'MICHAEL_RUNTIME_TRACE_ENABLED',
+  'MCS_CONTEXT_MANAGER_LIVE_ENABLED',
 ] as const;
 
 type FlagKey = (typeof FLAG_KEYS)[number];
@@ -52,10 +63,13 @@ const COUNTER_KEYS = [
 let envSnapshot: Record<FlagKey, string | undefined>;
 
 beforeEach(() => {
+  traceMock.mockReset();
+  traceMock.mockResolvedValue({ traceId: 'ctx_trace_test' });
   envSnapshot = {
     MICHAEL_RUNTIME_ROUTE_ENABLED: process.env.MICHAEL_RUNTIME_ROUTE_ENABLED,
     MICHAEL_RUNTIME_RESPONSE_ENABLED: process.env.MICHAEL_RUNTIME_RESPONSE_ENABLED,
     MICHAEL_RUNTIME_TRACE_ENABLED: process.env.MICHAEL_RUNTIME_TRACE_ENABLED,
+    MCS_CONTEXT_MANAGER_LIVE_ENABLED: process.env.MCS_CONTEXT_MANAGER_LIVE_ENABLED,
   };
   for (const key of FLAG_KEYS) delete process.env[key];
   resetMichaelRuntimeObservabilityForTests();
@@ -231,6 +245,7 @@ describe('S3.11 Michael runtime route — observability counter wiring', () => {
     await handleMichaelRuntimeResolve(mockReq({}), res);
 
     expect(res.statusCode).toBe(200);
+    expect(res.body.contextTraceId).toBe('ctx_trace_test');
 
     const snap = getMichaelRuntimeObservabilitySnapshot();
     // Top-level keys unchanged; counter key set unchanged (all 6 present,
