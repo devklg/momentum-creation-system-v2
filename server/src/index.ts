@@ -29,15 +29,15 @@ import { adminKnowledgeRoutes } from './routes/admin/knowledge.js';
 import { adminMichaelRuntimeObservabilityRoutes } from './routes/admin/michael-runtime-observability.js';
 import { adminContentVideoRoutes } from './routes/admin/content-videos.js';
 import { adminHealthRoutes } from './routes/admin/health.js';
-import { startBroadcastWorker } from './services/broadcastQueue.js';
-import { startVmDeliveryWorker } from './workers/vmDeliveryWorker.js';
-import { startVmImportWorker } from './workers/vmImportWorker.js';
-import { startVmWebhookWorker } from './workers/vmWebhookWorker.js';
-import { startProjectionOutboxWorker } from './services/projectionOutbox.js';
+import { startBroadcastWorker, stopBroadcastWorker } from './services/broadcastQueue.js';
+import { startVmDeliveryWorker, stopVmDeliveryWorker } from './workers/vmDeliveryWorker.js';
+import { startVmImportWorker, stopVmImportWorker } from './workers/vmImportWorker.js';
+import { startVmWebhookWorker, stopVmWebhookWorker } from './workers/vmWebhookWorker.js';
+import { startProjectionOutboxWorker, stopProjectionOutboxWorker } from './services/projectionOutbox.js';
 import { ensureChromaCollections } from './services/chromaCollections.js';
 import {
   connectDirectPersistence,
-  installDirectPersistenceShutdownHooks,
+  closeDirectPersistence,
 } from './services/persistence/index.js';
 import { telnyxWebhookRoutes } from './routes/telnyx-webhook.js';
 import { vmProviderWebhookRoutes } from './routes/vmProviderWebhooks.js';
@@ -273,10 +273,9 @@ app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 // Awaited before listen so a fresh environment self-heals at startup. Does NOT
 // touch the route mount ORDER above.
 await connectDirectPersistence();
-installDirectPersistenceShutdownHooks();
 await ensureChromaCollections();
 
-app.listen(env.SERVER_PORT, () => {
+const httpServer = app.listen(env.SERVER_PORT, () => {
   // eslint-disable-next-line no-console
   console.log(
     `[momentum-server] listening on :${env.SERVER_PORT} (${env.NODE_ENV}) â€” admin BA IDs configured: ${env.ADMIN_TMAG_IDS.length}`,
@@ -296,3 +295,50 @@ void startVmWebhookWorker();
 // worker replays them until they land or are dead-lettered. Without it the
 // outbox accumulates forever and Neo4j/Chroma silently drift from Mongo.
 startProjectionOutboxWorker();
+
+// Graceful shutdown (fixes SIGKILL-on-restart drift). systemd sends SIGTERM on
+// restart/stop. Order matters: stop the workers FIRST so their next tick can't
+// run a query against a closing Mongo connection (the old hook closed
+// persistence while workers kept ticking -> "Client must be connected" spam ->
+// process never exited cleanly -> systemd SIGKILL after stop-timeout). Sequence:
+// 1) stop worker intervals  2) stop accepting HTTP  3) close persistence  4) exit.
+let shuttingDown = false;
+async function gracefulShutdown(signal: string): Promise<void> {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  // eslint-disable-next-line no-console
+  console.log(`[momentum-server] ${signal} received — graceful shutdown`);
+  // Hard safety net: never hang past 10s (systemd's TimeoutStopSec is the outer bound).
+  const failsafe = setTimeout(() => {
+    // eslint-disable-next-line no-console
+    console.error('[momentum-server] shutdown timed out — forcing exit');
+    process.exit(1);
+  }, 10_000);
+  failsafe.unref();
+  try {
+    // 1) stop workers before anything touches the DB connections
+    stopBroadcastWorker();
+    stopVmImportWorker();
+    stopVmDeliveryWorker();
+    stopVmWebhookWorker();
+    stopProjectionOutboxWorker();
+    // 2) stop accepting new connections
+    await new Promise<void>((resolve) => httpServer.close(() => resolve()));
+    // small drain window so an already-in-flight worker tick can finish its
+    // current DB op before we close the connection underneath it
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // 3) close persistence (Mongo + Neo4j) after workers are quiet
+    await closeDirectPersistence();
+    // eslint-disable-next-line no-console
+    console.log('[momentum-server] graceful shutdown complete');
+    clearTimeout(failsafe);
+    process.exit(0);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[momentum-server] error during shutdown', err);
+    clearTimeout(failsafe);
+    process.exit(1);
+  }
+}
+process.once('SIGTERM', () => void gracefulShutdown('SIGTERM'));
+process.once('SIGINT', () => void gracefulShutdown('SIGINT'));
