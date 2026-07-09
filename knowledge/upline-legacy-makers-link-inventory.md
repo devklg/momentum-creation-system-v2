@@ -56,6 +56,19 @@ Source: rlegacymakers.com (upline onboarding hub). Captured 2026-07-07 for MCS v
 | Start Messaging | https://www.rlegacymakers.com/_files/ugd/760a3a_6d3e64ce477a41fab99ecf1064249ee1.pdf |
 | How to Use GLP-THREE | https://www.rlegacymakers.com/_files/ugd/760a3a_1ca5610dea274680a29f20048bf6a302.pdf |
 
+## Documents — Previously-uncrawled pages (added 2026-07-08)
+
+| Document | Source page | URL |
+| --- | --- | --- |
+| SmartShip Calendar 2023 | smartship-loyalty-rewards | https://www.rlegacymakers.com/_files/ugd/c8cd71_3223c81ec90b4cc8a74605da6331598f.pdf |
+| How to Host Incredible In-Person Events | about-3 (Home & Open House Guide) | https://www.rlegacymakers.com/_files/ugd/760a3a_137b115d746a4f6793369808abd9d0e1.pdf |
+| How to Host an Amazing Open House Wellness Event | about-3 | https://www.rlegacymakers.com/_files/ugd/760a3a_bc380cf9a4d44186ac86af3226cf0a70.pdf |
+| Healthcare Professional Welcome Letter | healthcare-professionals | https://www.rlegacymakers.com/_files/ugd/760a3a_a9c7fc22ee3b4615aea59504187c823e.pdf |
+| Healthcare Professional Program Guide | healthcare-professionals | https://www.rlegacymakers.com/_files/ugd/760a3a_33d4f530fc7a4b5d831b0543275bd28e.pdf |
+| Healthcare Professional Resource | healthcare-professionals | https://www.rlegacymakers.com/_files/ugd/760a3a_ffc2c49f465c4de295cafc791a1ded9a.pdf |
+
+NOTE: set-up-your-iii-wallet and s-projects-basic (Customizable Tools) carry no document downloads — wallet is a video/step page, customizable tools links out to external design apps.
+
 ## Non-document links (context)
 
 - Presentations: youtube.com/live/yVw-w2eP0uk (28-min full presentation), youtube.com/live/R_CXZ8FEpjk (onboarding), youtube.com/live/acyu0fgPiW4 (Roadmap to 3 Star), youtu.be/-ei1CU_ih2c

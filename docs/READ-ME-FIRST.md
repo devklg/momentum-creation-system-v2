@@ -65,6 +65,7 @@ Pull a specific doc only when the work needs it.
 ## Current active briefs
 
 - `docs/agent-briefs/knowledge-base-voicebox-context-brief.md` — current Knowledge Base, Context Manager / Dual RAG, and VoiceBox implementation context. Read before modifying agent runtime, knowledge upload, approved knowledge retrieval, or VoiceBox integration.
+- `docs/kb-taxonomy-ingestion-protocol.md` — active protocol for approved KB ingestion. Read before adding, seeding, backfilling, or repairing Knowledge Base sources/chunks; taxonomy, Chroma flags, Neo4j edges, and the numbered index are mandatory.
 - `docs/agent-briefs/intervector-memory-context-compiler-next-agent-message.md` — July 6 weighted Intervector handoff for the Digital Memory Discovery / Memory Context Compiler. Read when Kevin says "go to intervector agent message."
 - `docs/agent-briefs/steve-context-knowledge-base-next-agent-brief.md` — July 6 Steve/context correction. Read before modifying Steve Success, Steve runtime prompts, Context Packet consumption, or Knowledge Base intake from briefs.
 

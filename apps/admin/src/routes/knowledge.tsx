@@ -24,6 +24,15 @@ interface KnowledgeCreateResponse {
   title?: string;
   domain?: McsKnowledgeDomain;
   language?: McsRuntimeLanguage;
+  taxonomy?: {
+    primaryCategory?: string;
+    categoryTags?: string[];
+    productTags?: string[];
+    topicTags?: string[];
+  };
+  categoryTags?: string[];
+  productTags?: string[];
+  canonicalTopicTags?: string[];
   filename?: string;
   fileKind?: string;
   extractedCharacters?: number;
@@ -76,7 +85,7 @@ export function KnowledgePage() {
         return;
       }
       setStatus(
-        `${body.title ?? 'Source'} saved · ${body.chunkCount ?? 0} chunks · ${body.referenceCount ?? 0} references`,
+        `${body.title ?? 'Source'} saved · ${taxonomySummary(body)} · ${body.chunkCount ?? 0} chunks`,
       );
       setTitle('');
       setContent('');
@@ -125,7 +134,7 @@ export function KnowledgePage() {
         return;
       }
       setStatus(
-        `${body.filename ?? file.name} imported as ${body.fileKind ?? 'source'} · ${body.extractedCharacters ?? 0} chars · ${body.chunkCount ?? 0} chunks`,
+        `${body.filename ?? file.name} imported · ${taxonomySummary(body)} · ${body.chunkCount ?? 0} chunks`,
       );
       setTitle('');
       setContent('');
@@ -324,4 +333,15 @@ async function fileToBase64(file: File): Promise<string> {
     binary += String.fromCharCode(...chunk);
   }
   return btoa(binary);
+}
+
+function taxonomySummary(body: KnowledgeCreateResponse): string {
+  const primary = body.taxonomy?.primaryCategory ?? body.categoryTags?.[0] ?? 'uncategorized';
+  const products = body.productTags ?? body.taxonomy?.productTags ?? [];
+  const topics = body.canonicalTopicTags ?? body.taxonomy?.topicTags ?? [];
+  return [
+    `category ${primary}`,
+    products.length > 0 ? `products ${products.join(', ')}` : '',
+    topics.length > 0 ? `topics ${topics.slice(0, 3).join(', ')}` : '',
+  ].filter(Boolean).join(' · ');
 }

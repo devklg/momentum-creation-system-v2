@@ -26,9 +26,35 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = findRepoRoot(here);
 const envPath = path.join(repoRoot, '.env');
 const result = loadDotenv({ path: envPath });
+
+// ─── Governed persistence vars ALWAYS win over inherited shell env ──────────
+// dotenv does not override variables already present in process.env. When a
+// seed/CLI process is spawned from a shell that inherited LEGACY stack values
+// (e.g. the Universal Gateway's env: MONGODB_URI=…28000, NEO4J_URI=…7687,
+// CHROMADB_PORT=8100), those leak in and silently defeat the repo .env, sending
+// governed writes to the wrong stack. The committed repo .env is the single
+// source of truth for the dedicated governed stack (Mongo 30000 / Neo4j 7710 /
+// Chroma 8200), so for these specific keys the parsed .env value overrides any
+// inherited value. Root fix for the legacy/dedicated split — every seed and the
+// runtime target the dedicated stack automatically, no per-script env scrubbing.
+const GOVERNED_PERSISTENCE_KEYS = [
+  'MONGODB_URI', 'MONGODB_DB',
+  'NEO4J_URI', 'NEO4J_USERNAME', 'NEO4J_PASSWORD',
+  'CHROMA_URL', 'CHROMA_TENANT', 'CHROMA_DATABASE',
+  'GPU_EMBEDDER_URL',
+] as const;
+if (result.parsed) {
+  for (const key of GOVERNED_PERSISTENCE_KEYS) {
+    const fromFile = result.parsed[key];
+    if (fromFile !== undefined && process.env[key] !== fromFile) {
+      process.env[key] = fromFile;
+    }
+  }
+}
+
 if (process.env.DEBUG_ENV) {
   // eslint-disable-next-line no-console
-  console.log('[env] from:', here, '| root:', repoRoot, '| envPath:', envPath, '| parsed keys:', result.parsed ? Object.keys(result.parsed).length : 0, '| error:', result.error?.message);
+  console.log('[env] from:', here, '| root:', repoRoot, '| envPath:', envPath, '| parsed keys:', result.parsed ? Object.keys(result.parsed).length : 0, '| error:', result.error?.message, '| MONGODB_URI:', process.env.MONGODB_URI, '| NEO4J_URI:', process.env.NEO4J_URI, '| CHROMA_URL:', process.env.CHROMA_URL);
 }
 
 const EnvBoolean = z.preprocess((value) => {
