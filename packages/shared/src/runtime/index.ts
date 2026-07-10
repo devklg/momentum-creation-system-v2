@@ -16,3 +16,6 @@ export {
   MCS_MEMORY_CONTEXT_COMPILER_SCHEMA_VERSION,
 } from './memory-context-compiler-schema.js';
 export * from './knowledge-base-schema.js';
+// Knowledge Evolution Runtime (Lane 0 shared foundation) — types + constants only.
+export type * from './knowledge-evolution/types.js';
+export * from './knowledge-evolution/constants.js';
