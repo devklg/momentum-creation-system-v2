@@ -208,7 +208,8 @@ describe('S2.1 orchestration import boundary', () => {
 
   it('confirms /api/runtime remains unmounted in the server entrypoint', () => {
     const serverIndex = readFileSync(resolve(repoRoot, 'server/src/index.ts'), 'utf8');
-    expect(serverIndex).not.toMatch(/\/api\/runtime/);
+    // ACR-0012 / Knowledge Evolution Lane D: the approved /api/runtime/knowledge-evolution mount (spec §25) is permitted; every other /api/runtime family stays forbidden.
+    expect(serverIndex).not.toMatch(/\/api\/runtime(?!\/knowledge-evolution)/);
   });
 
   it('confirms .com has no S2 agent runtime request wiring', () => {

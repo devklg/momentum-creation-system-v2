@@ -130,7 +130,8 @@ describe('S2.15 Michael runtime adapter contract static governance boundary', ()
           text: readFileSync(resolve(repoRoot, 'server/src/index.ts'), 'utf8'),
         },
       ],
-      /(?:app\.use\s*\(\s*['"`]\/api\/runtime\b|app\.(?:get|post|put|patch|delete)\s*\(\s*['"`]\/api\/runtime\b|router\.(?:use|get|post|put|patch|delete)\s*\(\s*['"`]\/api\/runtime\b)/,
+      // ACR-0012 / Knowledge Evolution Lane D: the approved /api/runtime/knowledge-evolution mount (spec §25) is permitted; every other /api/runtime family stays forbidden.
+      /(?:app\.use\s*\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b|app\.(?:get|post|put|patch|delete)\s*\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b|router\.(?:use|get|post|put|patch|delete)\s*\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b)/,
     );
 
     const matches = [...contractMatches, ...serverIndexMatches];

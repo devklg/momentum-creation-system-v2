@@ -61,6 +61,7 @@ import { orientationRoutes } from './routes/orientation.js';
 import { threeWayRoutes } from './routes/three-way.js';
 import { michaelRuntimeRoutes } from './routes/michael-runtime.js';
 import { contentVideoRoutes } from './routes/content-videos.js';
+import { knowledgeEvolutionRoutes } from './runtime/knowledge-evolution/routes.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -145,6 +146,7 @@ app.use('/api/admin/orientation', adminOrientationRoutes);
 app.use('/api/admin/michael-runtime', adminMichaelRuntimeObservabilityRoutes);
 app.use('/api/admin/content/videos', adminContentVideoRoutes);
 app.use('/api/admin/health', adminHealthRoutes);
+app.use('/api/runtime/knowledge-evolution', knowledgeEvolutionRoutes);
 
 // /api/p/* is prospect-facing (apps/com). No auth, no Steve gate. The token
 // itself is the identity surface per COM Design Section E.3.

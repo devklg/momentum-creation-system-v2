@@ -125,7 +125,8 @@ describe('S2.7 runtime turn coordinator static governance boundary', () => {
           text: readFileSync(resolve(repoRoot, 'server/src/index.ts'), 'utf8'),
         },
       ],
-      /(?:app\.use\s*\(\s*['"`]\/api\/runtime\b|['"`]\/api\/runtime\b)/,
+      // ACR-0012 / Knowledge Evolution Lane D: the approved /api/runtime/knowledge-evolution mount (spec §25) is permitted; every other /api/runtime family stays forbidden.
+      /(?:app\.use\s*\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b|['"`]\/api\/runtime(?!\/knowledge-evolution)\b)/,
     );
 
     const matches = [...coordinatorMatches, ...serverIndexMatches];

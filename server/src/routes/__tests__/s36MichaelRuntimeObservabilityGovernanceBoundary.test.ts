@@ -419,7 +419,8 @@ describe('S3.6 server boot static governance boundary', () => {
 
   it('#33 does NOT mount a bare /api/runtime family', () => {
     const index = readSourceFile(indexFilePath).text;
-    expect(/app\.use\(\s*['"`]\/api\/runtime\b/.test(index)).toBe(false);
+    // ACR-0012 / Knowledge Evolution Lane D: the approved /api/runtime/knowledge-evolution mount (spec §25) is permitted; every other /api/runtime family stays forbidden.
+    expect(/app\.use\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b/.test(index)).toBe(false);
   });
 
   it('#34 still mounts /api/michael (pre-gate) and /api/michael-runtime (existing BA route)', () => {

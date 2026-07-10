@@ -421,8 +421,10 @@ describe('S3.13 michael-runtime route UI-leak regression boundary', () => {
     expect(routeMatches, routeMatches.join('\n')).toEqual([]);
     // index.ts: confirm a bare /api/runtime family is NOT mounted.
     const index = readSourceFile(indexFilePath).text;
-    expect(/app\.use\(\s*['"`]\/api\/runtime\b/.test(index), 'no bare /api/runtime mount').toBe(
-      false,
-    );
+    // ACR-0012 / Knowledge Evolution Lane D: the approved /api/runtime/knowledge-evolution mount (spec §25) is permitted; every other /api/runtime family stays forbidden.
+    expect(
+      /app\.use\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b/.test(index),
+      'no bare /api/runtime mount',
+    ).toBe(false);
   });
 });
