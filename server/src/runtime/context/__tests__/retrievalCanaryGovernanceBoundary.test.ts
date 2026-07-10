@@ -112,7 +112,8 @@ describe('P4.11 static retrieval-canary governance boundary', () => {
 
   it('keeps /api/runtime out of the server entrypoint', () => {
     const indexPath = resolve(repoRoot, 'server/src/index.ts');
-    const found = matches([{ relativePath: 'server/src/index.ts', text: readFileSync(indexPath, 'utf8') }], /['"`]\/api\/runtime\b/);
+    // ACR-0012 / Knowledge Evolution Lane D: the approved /api/runtime/knowledge-evolution mount (spec §25) is permitted; every other /api/runtime family stays forbidden.
+    const found = matches([{ relativePath: 'server/src/index.ts', text: readFileSync(indexPath, 'utf8') }], /['"`]\/api\/runtime(?!\/knowledge-evolution)\b/);
     expect(found, found.join('\n')).toEqual([]);
   });
 

@@ -180,7 +180,8 @@ describe('S3.12 michael-runtime forbidden dependency boundary', () => {
 
   it('11. no /api/runtime route family is mounted or added', () => {
     const index = sourceWithoutComments(readSourceFile(indexFilePath).text);
-    expect(/app\.use\(\s*['"`]\/api\/runtime\b/.test(index)).toBe(false);
+    // ACR-0012 / Knowledge Evolution Lane D: the approved /api/runtime/knowledge-evolution mount (spec §25) is permitted; every other /api/runtime family stays forbidden.
+    expect(/app\.use\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b/.test(index)).toBe(false);
 
     const routesDir = resolve(repoRoot, routesDirPath);
     const offenders = readdirSync(routesDir, { recursive: true, withFileTypes: true })

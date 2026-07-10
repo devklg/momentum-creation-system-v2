@@ -138,7 +138,8 @@ describe('S2.13 Michael runtime response fixture integration static governance b
     const forbiddenRoutes =
       /\b(?:Router\s*\(|express\s*\(|fastify\s*\(|app\.(?:use|get|post|put|patch|delete)\s*\(|router\.(?:use|get|post|put|patch|delete)\s*\(|requestHandler|routeHandler|middleware)|\/api\/runtime\b/i;
     const integrationMatches = matchingLines(integrationFiles, forbiddenRoutes);
-    const serverIndexMatches = matchingLines([serverIndex], /\/api\/runtime\b/i);
+    // ACR-0012 / Knowledge Evolution Lane D: the approved /api/runtime/knowledge-evolution mount (spec §25) is permitted; every other /api/runtime family stays forbidden.
+    const serverIndexMatches = matchingLines([serverIndex], /\/api\/runtime(?!\/knowledge-evolution)\b/i);
     const matches = [...integrationMatches, ...serverIndexMatches];
     expect(matches, matches.join('\n')).toEqual([]);
   });

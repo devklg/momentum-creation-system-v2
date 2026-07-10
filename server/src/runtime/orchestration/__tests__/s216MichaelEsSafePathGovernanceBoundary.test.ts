@@ -299,7 +299,8 @@ describe('S2.16 Michael ES safe-path static governance boundary', () => {
     );
     const serverIndexMatches = matchingSourceLines(
       [readSourceFile('server/src/index.ts')],
-      /(?:app\.use\s*\(\s*['"`]\/api\/runtime\b|app\.(?:get|post|put|patch|delete)\s*\(\s*['"`]\/api\/runtime\b|router\.(?:use|get|post|put|patch|delete)\s*\(\s*['"`]\/api\/runtime\b)/,
+      // ACR-0012 / Knowledge Evolution Lane D: the approved /api/runtime/knowledge-evolution mount (spec §25) is permitted; every other /api/runtime family stays forbidden.
+      /(?:app\.use\s*\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b|app\.(?:get|post|put|patch|delete)\s*\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b|router\.(?:use|get|post|put|patch|delete)\s*\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b)/,
     );
     const matches = [...orchestrationMatches, ...serverIndexMatches];
     expect(matches, matches.join('\n')).toEqual([]);

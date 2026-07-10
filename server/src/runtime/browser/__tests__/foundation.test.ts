@@ -332,6 +332,7 @@ describe('S1.6 browser voice/text foundation', () => {
       browserRuntimeFiles,
       /\bfrom\s+['"][^'"]*(?:telnyx|verifyTelnyxWebhook)[^'"]*['"]|\bTELNYX_|\bverifyTelnyxWebhook\b|\b(?:sendSms|makeCall|callControl|CallControl|pstnCall|PstnCall)\b/i,
     );
-    expect(indexText).not.toMatch(/app\.use\(\s*['"`]\/api\/runtime\b/);
+    // ACR-0012 / Knowledge Evolution Lane D: the approved /api/runtime/knowledge-evolution mount (spec §25) is permitted; every other /api/runtime family stays forbidden.
+    expect(indexText).not.toMatch(/app\.use\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b/);
   });
 });

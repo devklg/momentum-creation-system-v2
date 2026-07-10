@@ -315,8 +315,9 @@ describe('S2.19 Michael response selection-request derivation static governance 
   });
 
   it('#16 keeps /api/runtime unmounted in orchestration and the server entrypoint', () => {
+    // ACR-0012 / Knowledge Evolution Lane D: the approved /api/runtime/knowledge-evolution mount (spec §25) is permitted; every other /api/runtime family stays forbidden.
     const routePattern =
-      /(?:app\.use\s*\(\s*['"`]\/api\/runtime\b|app\.(?:get|post|put|patch|delete)\s*\(\s*['"`]\/api\/runtime\b|router\.(?:use|get|post|put|patch|delete)\s*\(\s*['"`]\/api\/runtime\b)/;
+      /(?:app\.use\s*\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b|app\.(?:get|post|put|patch|delete)\s*\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b|router\.(?:use|get|post|put|patch|delete)\s*\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b)/;
     const matches = [
       ...matchingSourceLines(orchestrationProductionFiles(), routePattern),
       ...matchingSourceLines([readSourceFile('server/src/index.ts')], routePattern),

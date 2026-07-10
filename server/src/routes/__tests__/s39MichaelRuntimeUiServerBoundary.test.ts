@@ -284,7 +284,8 @@ describe('S3.9 cockpit placement static governance boundary', () => {
 describe('S3.9 server invariants static regression boundary', () => {
   it('#17 index.ts does NOT mount a bare /api/runtime family', () => {
     const index = readSourceFile(indexFilePath).text;
-    expect(/app\.use\(\s*['"`]\/api\/runtime\b/.test(index)).toBe(false);
+    // ACR-0012 / Knowledge Evolution Lane D: the approved /api/runtime/knowledge-evolution mount (spec §25) is permitted; every other /api/runtime family stays forbidden.
+    expect(/app\.use\(\s*['"`]\/api\/runtime(?!\/knowledge-evolution)\b/.test(index)).toBe(false);
   });
 
   it('#18 index.ts still mounts /api/michael-runtime AND /api/michael', () => {

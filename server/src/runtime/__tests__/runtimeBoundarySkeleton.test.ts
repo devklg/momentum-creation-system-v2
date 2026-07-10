@@ -101,14 +101,23 @@ describe('backend runtime boundary skeleton', () => {
     expect(matches, matches.join('\n')).toEqual([]);
   });
 
-  it('does not mount or import an /api/runtime route family', () => {
+  it('mounts only the approved /api/runtime route family and no bare runtime route module', () => {
     const indexText = readFileSync(resolve(repoRoot, 'server/src/index.ts'), 'utf8');
 
-    expect(indexText).not.toMatch(/app\.use\(\s*['"`]\/api\/runtime\b/);
-    // S3.4: target the forbidden bare `/api/runtime` route family precisely —
-    // an import from a `runtime` route module or a bare `runtimeRoutes` binding.
-    // The approved gated `/api/michael-runtime` route (michaelRuntimeRoutes from
-    // ./routes/michael-runtime.js) is intentionally NOT matched.
+    // ACR-0012 / Knowledge Evolution Lane D: the runtime now legitimately mounts exactly one
+    // approved `/api/runtime/*` route family — `/api/runtime/knowledge-evolution` (spec §25,
+    // internal-only, service-backed). Any OTHER `/api/runtime` mount (especially the bare
+    // `/api/runtime` namespace the skeleton phase forbade) is still a boundary violation. The
+    // five inert runtime skeletons remain fully guarded — they mount nothing.
+    const runtimeMounts = [
+      ...indexText.matchAll(/app\.use\(\s*['"`](\/api\/runtime[^'"`]*)['"`]/g),
+    ].map((match) => match[1]);
+    expect(runtimeMounts).toEqual(['/api/runtime/knowledge-evolution']);
+
+    // S3.4: still forbid a bare `/api/runtime` route MODULE — an import from a `runtime` route
+    // file or a bare `runtimeRoutes` binding. The approved gated `/api/michael-runtime` route
+    // (michaelRuntimeRoutes) and the Lane D `knowledgeEvolutionRoutes` (from
+    // ./runtime/knowledge-evolution/routes.js) are intentionally NOT matched.
     expect(indexText).not.toMatch(/from\s+['"][^'"]*\/runtime\.js['"]|\bruntimeRoutes\b/i);
   });
 });
