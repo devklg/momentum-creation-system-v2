@@ -7,8 +7,26 @@ import { backendRuntimeBoundaries } from '../index.js';
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const runtimeRoot = resolve(repoRoot, 'server/src/runtime');
 
+/**
+ * ACR-0012 / Knowledge Evolution Lane A: the knowledge-evolution runtime's
+ * `persistence/` subtree is the SANCTIONED direct-persistence access point for
+ * that runtime — canonical Mongo models/repositories/indexes via the app's
+ * direct dispatch (spec §27). It is intentionally exempt from the skeleton
+ * "no direct stores" rule below; the five inert runtime skeletons stay fully
+ * guarded. Retrieval activation, route handlers, and live Chroma/Neo4j coupling
+ * remain out of scope for Lane A and are not exempted anywhere.
+ */
+const PERSISTENCE_EXEMPT_DIRS = [
+  'server/src/runtime/knowledge-evolution/persistence',
+];
+
 function normalizePath(path: string): string {
   return path.split(sep).join('/');
+}
+
+function isExempt(absolutePath: string): boolean {
+  const rel = normalizePath(relative(repoRoot, absolutePath));
+  return PERSISTENCE_EXEMPT_DIRS.some((dir) => rel === dir || rel.startsWith(`${dir}/`));
 }
 
 function collectRuntimeFiles(): Array<{ relativePath: string; text: string }> {
@@ -22,6 +40,7 @@ function collectRuntimeFiles(): Array<{ relativePath: string; text: string }> {
       const stats = statSync(absolutePath);
 
       if (stats.isDirectory()) {
+        if (isExempt(absolutePath)) continue;
         walk(absolutePath);
         continue;
       }
