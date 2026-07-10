@@ -15,9 +15,18 @@ const runtimeRoot = resolve(repoRoot, 'server/src/runtime');
  * "no direct stores" rule below; the five inert runtime skeletons stay fully
  * guarded. Retrieval activation, route handlers, and live Chroma/Neo4j coupling
  * remain out of scope for Lane A and are not exempted anywhere.
+ *
+ * ACR-0012 / Knowledge Evolution Lane C: the `indexing/` and `graph/` subtrees
+ * are the SANCTIONED Chroma reindex and Neo4j graph-sync coordination layers
+ * (spec Lane C). They coordinate only through the app's governed direct dispatch
+ * (persistenceCall) — no raw drivers, no route handlers, no GraphRAG activation,
+ * no Context Manager live flags — so they are exempt on the same basis as
+ * `persistence/`. The five inert runtime skeletons stay fully guarded.
  */
 const PERSISTENCE_EXEMPT_DIRS = [
   'server/src/runtime/knowledge-evolution/persistence',
+  'server/src/runtime/knowledge-evolution/indexing',
+  'server/src/runtime/knowledge-evolution/graph',
 ];
 
 function normalizePath(path: string): string {
