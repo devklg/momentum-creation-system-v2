@@ -38,6 +38,15 @@ import {
   deriveKnowledgeId,
   type ChunkOptions,
 } from '../../runtime/knowledge/intake/index.js';
+import {
+  categoryLabel,
+  classifyKnowledgeTaxonomy,
+  inferTaxonomyHints,
+  taxonomyFilterFromHints,
+  taxonomyFlags,
+  type KnowledgeTaxonomy,
+} from './taxonomy.js';
+import { updateKnowledgeDocumentIndex } from './documentIndex.js';
 
 export const KNOWLEDGE_SOURCE_COLLECTION = MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION;
 export const KNOWLEDGE_CHUNK_COLLECTION = MCS_KNOWLEDGE_BASE_CHUNK_COLLECTION;
@@ -121,17 +130,28 @@ export async function createKevinApprovedKnowledgeSource(
     },
   };
   const intake = ingestRawKnowledgeSource(source, chunkOptions);
+  const sourceTaxonomy = classifyKnowledgeTaxonomy({
+    title: source.title,
+    sourceRef: source.sourceRef,
+    domain: source.domain,
+    topicTags: input.topicTags,
+  });
   const references = chunksToKnowledgeReferences(intake.chunks);
   const collection = knowledgeChromaCollection(input.domain, input.language);
-  const sourceRecord: McsKnowledgeBaseSourceRecord = {
+  const sourceRecord = {
     ...source,
+    taxonomy: sourceTaxonomy,
+    categoryTags: sourceTaxonomy.categoryTags,
+    productTags: sourceTaxonomy.productTags,
+    canonicalTopicTags: sourceTaxonomy.topicTags,
+    taxonomyUpdatedAt: createdAt,
     schemaVersion: MCS_KNOWLEDGE_BASE_SCHEMA_VERSION,
     authority: intake.authority.authority,
     authorityDecision: intake.authority.decision,
     ...(input.upload ? { upload: input.upload } : {}),
     chunkCount: intake.chunks.length,
     indexRecordCount: intake.indexRecords.length,
-  };
+  } as McsKnowledgeBaseSourceRecord & Record<string, unknown>;
 
   await tripleStackWrite({
     id: String(source.sourceId),
@@ -152,6 +172,12 @@ export async function createKevinApprovedKnowledgeSource(
           authorityStatus: source.authority?.authorityStatus,
           createdBy: source.createdBy,
           createdAt: source.createdAt,
+          taxonomyVersion: sourceTaxonomy.taxonomyVersion,
+          taxonomyPrimaryCategory: sourceTaxonomy.primaryCategory,
+          categoryTags: sourceTaxonomy.categoryTags,
+          productTags: sourceTaxonomy.productTags,
+          topicTags: sourceTaxonomy.topicTags,
+          taxonomyComplianceSensitivity: sourceTaxonomy.complianceSensitivity,
         },
       },
     },
@@ -164,13 +190,19 @@ export async function createKevinApprovedKnowledgeSource(
         domain: source.domain,
         language: source.language,
         authority: 'kevin',
+        ...taxonomyFlags(sourceTaxonomy),
       },
     },
   });
 
   const chunkRecords: McsKnowledgeBaseChunkRecord[] = intake.chunks.map((chunk) => ({
-    ...chunk,
-    schemaVersion: MCS_KNOWLEDGE_BASE_SCHEMA_VERSION,
+      ...chunk,
+      taxonomy: sourceTaxonomy,
+      categoryTags: sourceTaxonomy.categoryTags,
+      productTags: sourceTaxonomy.productTags,
+      canonicalTopicTags: sourceTaxonomy.topicTags,
+      taxonomyUpdatedAt: createdAt,
+      schemaVersion: MCS_KNOWLEDGE_BASE_SCHEMA_VERSION,
     title: chunk.heading ?? source.title,
     summary: chunk.text,
     knowledgeId: deriveKnowledgeId(chunk.chunkId) as McsKnowledgeId,
@@ -202,6 +234,12 @@ export async function createKevinApprovedKnowledgeSource(
             status: chunkRecord.status,
             retrievalEligible: chunkRecord.retrievalEligible,
             sourceVersion: chunkRecord.sourceVersion,
+            taxonomyVersion: sourceTaxonomy.taxonomyVersion,
+            taxonomyPrimaryCategory: sourceTaxonomy.primaryCategory,
+            categoryTags: sourceTaxonomy.categoryTags,
+            productTags: sourceTaxonomy.productTags,
+            topicTags: sourceTaxonomy.topicTags,
+            taxonomyComplianceSensitivity: sourceTaxonomy.complianceSensitivity,
           },
         },
       },
@@ -225,6 +263,8 @@ export async function createKevinApprovedKnowledgeSource(
           authorityStatus: chunkRecord.authorityStatus,
           sourceTitle: chunkRecord.sourceTitle,
           topicTags: chunkRecord.topicTags.join('|'),
+          categoryTags: (chunkRecord as { categoryTags?: string[] }).categoryTags?.join('|') ?? '',
+          productTags: (chunkRecord as { productTags?: string[] }).productTags?.join('|') ?? '',
           agentScopes: chunkRecord.agentScopes.join('|'),
           surfaceScopes: chunkRecord.surfaceScopes.join('|'),
           'scope.tenantId': chunkRecord.scope.tenantId,
@@ -233,18 +273,100 @@ export async function createKevinApprovedKnowledgeSource(
           'scope.teamName': chunkRecord.scope.teamName,
           startOffset: chunkRecord.sourceOffsets.startOffset,
           endOffset: chunkRecord.sourceOffsets.endOffset,
+          ...taxonomyFlags(sourceTaxonomy),
         },
       },
     });
+    await writeKnowledgeChunkTaxonomyGraph(chunkRecord.chunkId, sourceTaxonomy);
+  }
+  await writeKnowledgeSourceTaxonomyGraph(String(source.sourceId), sourceTaxonomy);
+
+  try {
+    await updateKnowledgeDocumentIndex({ refreshAll: true });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[knowledge] approved-knowledge source stored, but document index refresh failed. ` +
+        `${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 
   return {
-    source: sourceRecord,
+    source: sourceRecord as McsKnowledgeBaseSourceRecord,
     chunks: chunkRecords,
     references,
     chunkCount: intake.chunks.length,
     indexRecordCount: intake.indexRecords.length,
   };
+}
+
+async function writeKnowledgeSourceTaxonomyGraph(sourceId: string, taxonomy: KnowledgeTaxonomy): Promise<void> {
+  await writeTaxonomyGraphEdges({
+    nodeLabel: 'KnowledgeSource',
+    nodeId: sourceId,
+    taxonomy,
+  });
+}
+
+async function writeKnowledgeChunkTaxonomyGraph(chunkId: string, taxonomy: KnowledgeTaxonomy): Promise<void> {
+  await writeTaxonomyGraphEdges({
+    nodeLabel: 'KnowledgeChunk',
+    nodeId: chunkId,
+    taxonomy,
+  });
+}
+
+async function writeTaxonomyGraphEdges(input: {
+  nodeLabel: 'KnowledgeSource' | 'KnowledgeChunk';
+  nodeId: string;
+  taxonomy: KnowledgeTaxonomy;
+}): Promise<void> {
+  const matchLabel = input.nodeLabel;
+  await persistenceCall('neo4j', 'cypher', {
+    query: `
+      MATCH (n:${matchLabel} {id:$nodeId})
+      UNWIND $categories AS category
+      MERGE (c:KnowledgeCategory {id: category.id})
+      SET c.label = category.label,
+          c.taxonomyVersion = $taxonomyVersion
+      MERGE (n)-[:IN_CATEGORY]->(c)
+    `,
+    params: {
+      nodeId: input.nodeId,
+      taxonomyVersion: input.taxonomy.taxonomyVersion,
+      categories: input.taxonomy.categoryTags.map((id) => ({ id, label: categoryLabel(id) })),
+    },
+  });
+  await persistenceCall('neo4j', 'cypher', {
+    query: `
+      MATCH (n:${matchLabel} {id:$nodeId})
+      UNWIND $products AS product
+      MERGE (p:KnowledgeProduct {id: product.id})
+      SET p.label = product.label,
+          p.taxonomyVersion = $taxonomyVersion
+      MERGE (n)-[:ABOUT_PRODUCT]->(p)
+    `,
+    params: {
+      nodeId: input.nodeId,
+      taxonomyVersion: input.taxonomy.taxonomyVersion,
+      products: input.taxonomy.productTags.map((id) => ({ id, label: id })),
+    },
+  });
+  await persistenceCall('neo4j', 'cypher', {
+    query: `
+      MATCH (n:${matchLabel} {id:$nodeId})
+      UNWIND $topics AS topic
+      MERGE (t:KnowledgeTopic {id: topic.id})
+      SET t.label = topic.label,
+          t.taxonomyVersion = $taxonomyVersion
+      MERGE (n)-[:ABOUT_TOPIC]->(t)
+    `,
+    params: {
+      nodeId: input.nodeId,
+      taxonomyVersion: input.taxonomy.taxonomyVersion,
+      topics: input.taxonomy.topicTags.map((id) => ({ id, label: id })),
+    },
+  });
 }
 
 export function createStoredApprovedKnowledgeProvider(): Pick<
@@ -275,15 +397,7 @@ export function createStoredApprovedKnowledgeProvider(): Pick<
       const limit = normalizeSemanticK(k);
       let data: ChromaQueryResult;
       try {
-        data = await persistenceCall<ChromaQueryResult>('chromadb', 'query_with_filter', {
-          collection: KNOWLEDGE_CHUNK_COLLECTION,
-          query: normalizedQuery,
-          n_results: limit,
-          filter: {
-            status: 'active',
-            retrievalEligible: true,
-          },
-        });
+        data = await taxonomyAwareKnowledgeSearch(normalizedQuery, limit);
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(
@@ -294,6 +408,61 @@ export function createStoredApprovedKnowledgeProvider(): Pick<
       }
 
       return hydrateSemanticSearchReferences(data, scope);
+    },
+  };
+}
+
+async function taxonomyAwareKnowledgeSearch(
+  normalizedQuery: string,
+  limit: number,
+): Promise<ChromaQueryResult> {
+  const activeRetrievalClauses = [
+    { status: 'active' },
+    { retrievalEligible: true },
+  ];
+  const taxonomyFilter = taxonomyFilterFromHints(inferTaxonomyHints(normalizedQuery));
+  if (taxonomyFilter) {
+    try {
+      const filtered = await persistenceCall<ChromaQueryResult>('chromadb', 'query_with_filter', {
+        collection: KNOWLEDGE_CHUNK_COLLECTION,
+        query: normalizedQuery,
+        n_results: Math.max(limit, 8),
+        filter: {
+          $and: [
+            ...activeRetrievalClauses,
+            taxonomyFilter,
+          ],
+        },
+      });
+      if ((filtered.results?.ids ?? []).length >= Math.min(2, limit)) return limitChromaResult(filtered, limit);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[knowledge] taxonomy-filtered approved-knowledge search failed; ` +
+          `falling back to active semantic search. ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+
+  return persistenceCall<ChromaQueryResult>('chromadb', 'query_with_filter', {
+    collection: KNOWLEDGE_CHUNK_COLLECTION,
+    query: normalizedQuery,
+    n_results: limit,
+    filter: {
+      $and: activeRetrievalClauses,
+    },
+  });
+}
+
+function limitChromaResult(data: ChromaQueryResult, limit: number): ChromaQueryResult {
+  if (!data.results) return data;
+  return {
+    ...data,
+    results: {
+      ids: data.results.ids?.slice(0, limit),
+      documents: data.results.documents?.slice(0, limit),
+      metadatas: data.results.metadatas?.slice(0, limit),
+      distances: data.results.distances?.slice(0, limit),
     },
   };
 }

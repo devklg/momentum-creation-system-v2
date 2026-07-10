@@ -34,7 +34,7 @@ interface UplineKnowledgeSeedItem {
 // Upline reference corpus — Legacy Makers onboarding hub (rlegacymakers.com),
 // captured 2026-07-07 per DECISION_upline_onboarding_infusion / ACR-0011.
 // Curriculum structure reference only; Team Magnificent authors its own branded versions.
-const UPLINE_ROOT = 'D:/momentum-creation-system-v2/knowledge/upline-legacy-makers';
+const UPLINE_ROOT = 'D:/momentum-creation-system-v2/knowledge/upline-legacy-makers/extracted'; // Docling full-extraction markdown (2026-07-07); originals in parent dir
 const CREATED_BY = 'TMAG-01';
 const AUTHORITY_BY = 'Kevin L. Gardner';
 const INGESTED_AT = new Date().toISOString();
@@ -96,6 +96,19 @@ const ITEMS: UplineKnowledgeSeedItem[] = [
   scriptItem('scripts-for-life.pdf', 'Upline: Scripts for Life', ['scripts']),
   scriptItem('connecting-script.pdf', 'Upline: Connecting Script', ['connecting', 'inviting', 'scripts']),
   scriptItem('in-person-event-invite.pdf', 'Upline: In Person Event Invite', ['events', 'invite', 'scripts']),
+  scriptItem('smartship-calendar-2023.pdf', 'Upline: SmartShip Calendar 2023', ['smartship', 'loyalty', 'product'], M),
+  scriptItem('host-in-person-events.pdf', 'Upline: How to Host Incredible In-Person Events', ['events', 'hosting', 'in-person']),
+  scriptItem('host-open-house-wellness-event.pdf', 'Upline: How to Host an Amazing Open House Wellness Event', ['events', 'open-house', 'wellness', 'hosting']),
+  {
+    path: 'healthcare-welcome-letter.pdf',
+    title: 'Upline: Healthcare Professional Welcome Letter',
+    domain: 'organizational',
+    language: 'en',
+    topicTags: ['upline-reference', '5-point-system', 'healthcare-professional', 'welcome', 'onboarding'],
+    agentScopes: SM,
+  },
+  scriptItem('healthcare-doc-2.pdf', 'Upline: Healthcare Professional Program Guide', ['healthcare-professional', 'program', 'professionals-track']),
+  scriptItem('healthcare-doc-3.pdf', 'Upline: Healthcare Professional Resource', ['healthcare-professional', 'professionals-track']),
   ...(['t1', 't2', 't3', 't4', 't5', 't6', 't8'] as const).map((t) =>
     scriptItem(`tracker-${t}.pdf`, `Upline: Tracker Form ${t.toUpperCase()}`, ['tracker', 'forms'], M),
   ),
@@ -111,7 +124,7 @@ async function main(): Promise<void> {
 
   try {
     for (const item of ITEMS) {
-      const fullPath = path.resolve(UPLINE_ROOT, item.path);
+      const fullPath = path.resolve(UPLINE_ROOT, item.path.replace(/\.(pdf|docx)$/i, '.md'));
       const sourceRef = `file:${fullPath.replace(/\\/g, '/')}`;
       if (await alreadyIngested(sourceRef)) {
         report.skipped += 1;

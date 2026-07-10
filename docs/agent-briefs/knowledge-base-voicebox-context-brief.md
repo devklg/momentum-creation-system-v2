@@ -1,7 +1,7 @@
 # Agent Brief: Knowledge Base, Context Manager, and VoiceBox Work
 
-**Created:** 2026-07-04  
-**Audience:** Codex, Claude, and future MCS v2 implementation agents  
+**Created:** 2026-07-04
+**Audience:** Codex, Claude, and future MCS v2 implementation agents
 **Purpose:** Preserve the current chat context so future agents know what Kevin asked for, what was built, what is still missing, and where to continue.
 
 ## Kevin's Intent
@@ -106,6 +106,23 @@ Authority model:
 Core principle:
 
 Kevin-approved knowledge is the app's authoritative base. Agent/system-captured knowledge is not active guidance by default.
+
+### Active Taxonomy Ingestion Protocol
+
+Protocol file:
+
+- `docs/kb-taxonomy-ingestion-protocol.md`
+- `docs/agent-briefs/memory-gap-solutions-semantic-context.md`
+
+All approved KB ingestion must go through `createKevinApprovedKnowledgeSource()` in
+`server/src/services/knowledge/approvedKnowledgeStore.ts`.
+
+Every source and chunk must receive taxonomy version `kb_taxonomy.v1`, category
+tags, product tags, topic tags, Chroma filter flags, Neo4j taxonomy edges, and a
+chronological row in `knowledge/KB_DOCUMENT_INDEX.md`.
+
+Agents must not create a second ingestion path or raw-write KB records around
+the approved store.
 
 ### Canonical Knowledge Base Schema
 
@@ -319,4 +336,3 @@ Recommended continuation order:
 5. Add readback verification for source/chunk persistence after upload.
 6. Add live retrieval inspection in admin so Kevin can see what Michael would retrieve.
 7. Resolve local Neo4j credential issue so the full dev server can run with triple-stack writes.
-

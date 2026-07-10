@@ -18,6 +18,7 @@ The five `.docx` design files (`Team-Magnificent-ADMIN-Design.docx`, `Team-Magni
 
 Additional reference material in [docs/](docs/) — pull these in when relevant, not by default:
 
+- `kb-taxonomy-ingestion-protocol.md` — active protocol for approved Knowledge Base ingestion. Read before adding, seeding, backfilling, repairing, or changing KB sources/chunks; taxonomy, Chroma filter flags, Neo4j category/product/topic edges, and the chronological numbered index are mandatory.
 - `chat-XX-decisions.md` and `chat84-vs-docs.md`, `chat-94-locked-spec-rewrite.txt` — historical record of decisions from past chat sessions. Useful when "why was this done this way" matters and the answer isn't in `build-registry.md`.
 - `page-inventory.md` — canonical list of routes/pages per surface.
 - `dashboard-prototype.md` — early prototype notes for the prospect dashboard (still a useful intent reference).

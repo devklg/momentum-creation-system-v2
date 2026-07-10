@@ -1,25 +1,46 @@
 /**
- * /api/admin/michael-runtime/observability — admin-only, in-memory aggregate read
- * (Sprint 3 S3.6).
+ * /api/admin/michael-runtime/observability — admin-only runtime observability.
  *
- * Exposes the in-process Michael runtime observability snapshot: evaluated
- * feature-flag booleans plus monotonic process-lifetime counters. This is a
- * PURE in-memory read — it does NOT persist, does NOT audit-log, and does NOT
- * touch the triple-stack. It must never call appendAuditEntry.
+ * Exposes the in-process Michael runtime counters plus the latest durable
+ * Context Manager trace rows. Trace rows are content-free: ids/counts/statuses,
+ * no raw Context Packet body, no prompt text, and no generated response text.
  *
- * The snapshot exposes only evaluated booleans and aggregate counts — no PII,
- * no tokens, no IDs, no raw env strings. Kevin-only via requireAdmin
- * (ADMIN_TMAG_IDS). Not BA-facing, never on `.com`.
+ * Kevin-only via requireAdmin (ADMIN_TMAG_IDS). Not BA-facing, never on `.com`.
  *
- *   GET /observability   { ok: true, michaelRuntime: <snapshot> }
+ *   GET /observability   { ok: true, michaelRuntime: <snapshot>, contextTraces: [...] }
  */
 
 import express, { type Router } from 'express';
 import { requireAdmin } from '../../middleware/requireAuth.js';
 import { getMichaelRuntimeObservabilitySnapshot } from '../../services/michaelRuntimeObservability.js';
+import { listRuntimeContextTraces } from '../../services/runtimeContextTrace.js';
 
 export const adminMichaelRuntimeObservabilityRoutes: Router = express.Router();
 
-adminMichaelRuntimeObservabilityRoutes.get('/observability', requireAdmin, (_req, res) => {
-  res.status(200).json({ ok: true, michaelRuntime: getMichaelRuntimeObservabilitySnapshot() });
+adminMichaelRuntimeObservabilityRoutes.get('/observability', requireAdmin, async (_req, res) => {
+  const contextTraces = await listRuntimeContextTraces({
+    agentKey: 'michael_magnificent',
+    limit: 10,
+  });
+  res.status(200).json({
+    ok: true,
+    michaelRuntime: getMichaelRuntimeObservabilitySnapshot(),
+    contextTraces: contextTraces.map((trace) => ({
+      traceId: trace.traceId,
+      agentKey: trace.agentKey,
+      taskType: trace.taskType,
+      runtimeSurface: trace.runtimeSurface,
+      packetStatus: trace.packetStatus,
+      approvedKnowledgeCount: trace.approvedKnowledgeCount,
+      approvedKnowledgeIds: trace.approvedKnowledgeIds,
+      approvedSourceIds: trace.approvedSourceIds,
+      excludedSourceIds: trace.excludedSourceIds,
+      candidateKnowledgeExcluded: trace.candidateKnowledgeExcluded,
+      retrievalMethods: trace.retrievalMethods,
+      routeDecision: trace.routeDecision,
+      catalogKey: trace.catalogKey,
+      responseType: trace.responseType,
+      createdAt: trace.createdAt,
+    })),
+  });
 });

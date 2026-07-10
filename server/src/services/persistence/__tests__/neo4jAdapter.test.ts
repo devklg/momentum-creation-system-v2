@@ -1,5 +1,5 @@
 import neo4j from 'neo4j-driver';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
   const session = {
@@ -19,6 +19,11 @@ vi.mock('../neo4j/connection.js', () => ({
 describe('Neo4j direct adapter', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useRealTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('normalizes driver records into the PERSISTENCE-compatible cypher shape', async () => {
@@ -48,6 +53,23 @@ describe('Neo4j direct adapter', () => {
       records: [{ answer: 42, node: { id: 'n1', rank: 7 } }],
       summary: { counters: { nodesCreated: 1, propertiesSet: 2 } },
     });
+    expect(mocks.session.close).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects hung cypher calls instead of waiting indefinitely', async () => {
+    vi.useFakeTimers();
+    const { neo4jAdapter } = await import('../neo4j/adapter.js');
+    mocks.session.run.mockReturnValue(new Promise(() => undefined));
+    mocks.session.close.mockResolvedValue(undefined);
+
+    const pending = neo4jAdapter('cypher', {
+      query: 'RETURN 1 AS n',
+      params: {},
+    });
+    const expectation = expect(pending).rejects.toThrow(/cypher timed out after 5000ms/);
+    await vi.advanceTimersByTimeAsync(5_000);
+
+    await expectation;
     expect(mocks.session.close).toHaveBeenCalledTimes(1);
   });
 });

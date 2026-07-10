@@ -1,0 +1,23 @@
+## THREE Talking Points
+
+- Launched May 2023
+- 18 months and $100 Million Accumulated Sales Globally
+- Opened on Day 1 in 15 countries (Australia, Canada, China, Hong Kong, Indonesia, Japan, Macau, Malaysia, New Zealand, Philippines, Singapore, Taiwan, Thailand, United States, Vietnam)
+- We are the fastest growing team in Three and you can Join us.
+- We oer turnkey business systems and trainings
+- Our team website www.rlegacymakers.com oer it all plus special resources for professionals.
+-   Dr . Dan Gubler is our formulator with over 20 years' experience, 17 patents granted and or pending, over 70 formulations developed and he's CalTech trained with a degree in organic chemistry.
+-   Daniel Picou, our THREE founder has had 20 years of business experience, 7 years in the ECommerce space and is well known for being a First-class owner in both Operations and Leadership relations.
+- PPP: Founded on the principles of putting PEOPLE First, A global PURPOSE to unite in better wellness practices and an unparalleled PLATFORM for E-Commerce.
+- Our powerful compensation plan oers upfront cash earnings paid daily, unlimited binary override team commissions and unparalleled 7 level leadership check match on the back end. Plus, additional bonuses, trips and incentives.
+- We have daily and weekly pay
+- No startup fee for customers
+- Share your customer link and earn retail commissions and next day pay
+- Founders are grand fathered into THREE and earn 2% Revenue Share of the entire global sales of the company in a Pool paid weekly
+- -The Founders pack is the BEST pack! It's the most amount of products for the least amount money and you don't have to place another order for 11 months. It's the absolute best system that I highly recommend. 90% of the people I work with get started with this system because they don't want to miss out on the global revenue share.
+- 7 Simple Products used Daily that are scientifically proven to get results
+- Our products are based on key ingredients that we explore; curate and we use 12 dierent cellular absorption technologies for maximum delivery into your cells.
+- You'll look and feel dierent with our 12 Absorption technologies
+- Products are listed in the PDR.net and we have a full scientific advisory board of medical professionals who have put there certifications on the line to promote the power of our products.
+- Awarded from BFH (Business for Home) as a Rising Company that's Triple AAA rated, given to only 7% of companies
+-   We oer a million dollar App with all the quick tools you need at your fingertips to make sharing THREE simple.

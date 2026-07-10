@@ -51,6 +51,7 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_commitments', // domain/commitments.ts
   'mcs_knowledge_sources', // services/knowledge/approvedKnowledgeStore.ts (PR #125, canon-renamed)
   'mcs_knowledge_chunks', // services/knowledge/approvedKnowledgeStore.ts (PR #125, canon-renamed)
+  'mcs_runtime_context_traces', // services/runtimeContextTrace.ts (agent KB/context observability)
   // mcs_questionnaires REMOVED (Ruling 6, 2026-07-02): questionnaire retired into
   // Steve; boot must not resurrect the collection. Historical rows live in Mongo.
   'mcs_workbooks', // domain/workbook.ts

@@ -4,6 +4,8 @@ const mocks = vi.hoisted(() => ({
   persistenceCall: vi.fn(),
   tripleStackWrite: vi.fn(),
   createInvitation: vi.fn(),
+  complete: vi.fn(),
+  appendRuntimeContextTrace: vi.fn(),
 }));
 
 vi.mock('../../services/persistence/dispatch.js', () => ({
@@ -16,6 +18,21 @@ vi.mock('../../services/tripleStack.js', () => ({
 
 vi.mock('../invitations.js', () => ({
   createInvitation: mocks.createInvitation,
+}));
+
+vi.mock('../../services/anthropic.js', () => ({
+  complete: mocks.complete,
+  AnthropicConfigError: class AnthropicConfigError extends Error {},
+  AnthropicError: class AnthropicError extends Error {},
+}));
+
+vi.mock('../../services/masterContent.js', () => ({
+  readMasterContent: vi.fn(async () => 'Use Kevin-approved Team Magnificent tone.'),
+  interpolateMasterContent: vi.fn((template: string) => template),
+}));
+
+vi.mock('../../services/runtimeContextTrace.js', () => ({
+  appendRuntimeContextTrace: mocks.appendRuntimeContextTrace,
 }));
 
 type AnyRec = Record<string, unknown>;
@@ -61,6 +78,10 @@ beforeEach(() => {
   mocks.persistenceCall.mockReset();
   mocks.tripleStackWrite.mockReset();
   mocks.createInvitation.mockReset();
+  mocks.complete.mockReset();
+  mocks.appendRuntimeContextTrace.mockReset();
+  mocks.appendRuntimeContextTrace.mockResolvedValue({ traceId: 'ctx_trace_ivory_test' });
+  vi.unstubAllEnvs();
 });
 
 describe('Ivory persistence fixes', () => {
@@ -223,5 +244,62 @@ describe('Ivory persistence fixes', () => {
       'make_money',
       'unspecified',
     ]);
+  });
+
+  it('Ivory coach requests and traces a Context Manager packet when tmagId is present', async () => {
+    vi.stubEnv('IVORY_CONTEXT_MANAGER_LIVE_ENABLED', 'false');
+    mocks.complete.mockResolvedValue({
+      text: JSON.stringify({
+        coaching: 'Let your memory move through the people you already know.',
+        prompts: [
+          'Who have you not checked in with lately?',
+          'Who has asked what you are working on?',
+          'Who would appreciate a low-pressure share?',
+        ],
+      }),
+    });
+    const ivory = await loadIvory();
+
+    await ivory.ivoryCoach({
+      tmagId: 'TMAG-1',
+      angle: 'do_the_business',
+      rosterSize: 3,
+      ask: 'church friends',
+    });
+
+    expect(mocks.appendRuntimeContextTrace).toHaveBeenCalledWith(expect.objectContaining({
+      agentKey: 'ivory',
+      taskType: 'relationship_coaching',
+      runtimeSurface: 'ivory-coach',
+      tmagId: 'TMAG-1',
+      responseType: 'reflection_prompt',
+    }));
+    expect(String(mocks.complete.mock.calls[0]?.[0]?.system)).toContain(
+      'APPROVED CONTEXT MANAGER KNOWLEDGE',
+    );
+  });
+
+  it('Ivory invitation draft requests and traces a Context Manager packet', async () => {
+    vi.stubEnv('IVORY_CONTEXT_MANAGER_LIVE_ENABLED', 'false');
+    mocks.persistenceCall.mockImplementation(defaultPersistence());
+    mocks.complete.mockResolvedValue({ text: 'Hey Dana, I thought of you when I saw this. Can I send it?' });
+    const ivory = await loadIvory();
+
+    await ivory.draftIvoryInvitation('TMAG-1', {
+      ivoryId: 'ivory_1',
+      relationshipReason: 'old friend from work',
+      productName: 'GLP THREE',
+    } as never);
+
+    expect(mocks.appendRuntimeContextTrace).toHaveBeenCalledWith(expect.objectContaining({
+      agentKey: 'ivory',
+      taskType: 'invitation_drafting',
+      runtimeSurface: 'ivory-invitation-draft',
+      tmagId: 'TMAG-1',
+      responseType: 'editable_invitation_draft',
+    }));
+    expect(String(mocks.complete.mock.calls[0]?.[0]?.system)).toContain(
+      'APPROVED CONTEXT MANAGER KNOWLEDGE',
+    );
   });
 });

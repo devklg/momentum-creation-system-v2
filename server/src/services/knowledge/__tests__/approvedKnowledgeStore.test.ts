@@ -26,7 +26,7 @@ const tripleStackMock = vi.hoisted(() => {
   const writes: Array<{
     mongoCollection: string;
     mongoDoc: Record<string, unknown>;
-    chroma?: { collection: string };
+    chroma?: { collection: string; metadata?: Record<string, unknown> };
   }> = [];
 
   return {
@@ -34,7 +34,7 @@ const tripleStackMock = vi.hoisted(() => {
     write: vi.fn(async (input: {
       mongoCollection: string;
       mongoDoc: Record<string, unknown>;
-      chroma?: { collection: string };
+      chroma?: { collection: string; metadata?: Record<string, unknown> };
     }) => {
       writes.push(input);
     }),
@@ -45,12 +45,25 @@ const persistenceMock = vi.hoisted(() => ({
   call: vi.fn(),
 }));
 
+const documentIndexMock = vi.hoisted(() => ({
+  update: vi.fn(async () => ({
+    path: 'D:/momentum-creation-system-v2/knowledge/KB_DOCUMENT_INDEX.md',
+    mode: 'refreshed',
+    rowCount: 1,
+    totalSources: 1,
+  })),
+}));
+
 vi.mock('../../tripleStack.js', () => ({
   tripleStackWrite: tripleStackMock.write,
 }));
 
 vi.mock('../../persistence/dispatch.js', () => ({
   persistenceCall: persistenceMock.call,
+}));
+
+vi.mock('../documentIndex.js', () => ({
+  updateKnowledgeDocumentIndex: documentIndexMock.update,
 }));
 
 const scope: McsRuntimeRequestScope = {
@@ -81,6 +94,7 @@ describe('approved knowledge store schema projection', () => {
     tripleStackMock.write.mockClear();
     tripleStackMock.writes.length = 0;
     persistenceMock.call.mockReset();
+    documentIndexMock.update.mockClear();
   });
 
   it('creates canonical Knowledge Base source and chunk records for uploaded files', async () => {
@@ -139,6 +153,17 @@ describe('approved knowledge store schema projection', () => {
     expect(sourceWrite?.mongoDoc).toMatchObject({
       schemaVersion: MCS_KNOWLEDGE_BASE_SCHEMA_VERSION,
       format: 'pdf',
+      taxonomy: expect.objectContaining({
+        taxonomyVersion: 'kb_taxonomy.v1',
+        primaryCategory: 'general-training',
+      }),
+      categoryTags: expect.arrayContaining(['general-training']),
+      canonicalTopicTags: expect.arrayContaining(['training']),
+    });
+    expect(sourceWrite?.chroma?.metadata).toMatchObject({
+      taxonomyVersion: 'kb_taxonomy.v1',
+      taxonomyPrimaryCategory: 'general-training',
+      'kb.category.general_training': true,
     });
     expect(
       tripleStackMock.writes
@@ -148,7 +173,24 @@ describe('approved knowledge store schema projection', () => {
     expect(firstChunkWrite?.mongoDoc).toMatchObject({
       schemaVersion: MCS_KNOWLEDGE_BASE_SCHEMA_VERSION,
       sourceTitle: 'PDF Training Source',
+      taxonomy: expect.objectContaining({
+        taxonomyVersion: 'kb_taxonomy.v1',
+        primaryCategory: 'general-training',
+      }),
+      categoryTags: expect.arrayContaining(['general-training']),
     });
+    expect(firstChunkWrite?.chroma?.metadata).toMatchObject({
+      taxonomyVersion: 'kb_taxonomy.v1',
+      taxonomyPrimaryCategory: 'general-training',
+      'kb.category.general_training': true,
+    });
+    expect(persistenceMock.call).toHaveBeenCalledWith('neo4j', 'cypher', expect.objectContaining({
+      query: expect.stringContaining('KnowledgeCategory'),
+    }));
+    expect(persistenceMock.call).toHaveBeenCalledWith('neo4j', 'cypher', expect.objectContaining({
+      query: expect.stringContaining('KnowledgeTopic'),
+    }));
+    expect(documentIndexMock.update).toHaveBeenCalledWith({ refreshAll: true });
   });
 
   it('semantic search maps Chroma top-k hits into approved knowledge references', async () => {
@@ -182,8 +224,10 @@ describe('approved knowledge store schema projection', () => {
       query: 'What should I do today?',
       n_results: 2,
       filter: {
-        status: 'active',
-        retrievalEligible: true,
+        $and: [
+          { status: 'active' },
+          { retrievalEligible: true },
+        ],
       },
     });
     expect(refs).toHaveLength(1);
@@ -238,6 +282,46 @@ describe('approved knowledge store schema projection', () => {
 
     expect(persistenceMock.call.mock.calls[0]?.[2]).toMatchObject({ n_results: 12 });
     expect(refs.map((ref) => ref.sourceId)).toEqual(['source_active']);
+  });
+
+  it('semantic search applies taxonomy hints before broad fallback', async () => {
+    persistenceMock.call.mockResolvedValueOnce({
+      results: {
+        ids: ['glp_chunk'],
+        documents: ['GLP THREE supports healthy metabolism.'],
+        metadatas: [{
+          chunkId: 'glp_chunk',
+          sourceId: 'source_glp',
+          domain: 'training',
+          language: 'en',
+          status: 'active',
+          retrievalEligible: true,
+          authorityStatus: 'active_authority',
+          title: 'GLP THREE',
+        }],
+      },
+    });
+
+    const refs = await createStoredApprovedKnowledgeProvider()
+      .searchApprovedKnowledge(scope, 'GLP THREE metabolic support', 1);
+
+    expect(persistenceMock.call).toHaveBeenCalledTimes(1);
+    expect(persistenceMock.call.mock.calls[0]?.[2]).toMatchObject({
+      n_results: 8,
+      filter: {
+        $and: [
+          { status: 'active' },
+          { retrievalEligible: true },
+          {
+            $or: expect.arrayContaining([
+              { 'kb.product.glp_three': true },
+              { 'kb.category.products': true },
+            ]),
+          },
+        ],
+      },
+    });
+    expect(refs).toHaveLength(1);
   });
 
   it('semantic references pass through P4.7 freshness and P4.6 language selection', async () => {

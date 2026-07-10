@@ -51,6 +51,10 @@ import {
   recordMichaelRuntimeRouteDisabled,
   recordMichaelRuntimeSuccess,
 } from '../services/michaelRuntimeObservability.js';
+import {
+  appendRuntimeContextTrace,
+  packetFromMichaelAdapterInput,
+} from '../services/runtimeContextTrace.js';
 
 export const michaelRuntimeRoutes: Router = Router();
 
@@ -199,6 +203,7 @@ export async function handleMichaelRuntimeResolve(
     catalogKey: string;
     response: unknown;
     supportingContext?: readonly MichaelRuntimeSupportingContextItem[];
+    contextTraceId?: string;
     trace?: unknown;
   } = {
     ok: true,
@@ -216,6 +221,27 @@ export async function handleMichaelRuntimeResolve(
   // explicitly enabled.
   if (michaelRuntimeTraceEnabled()) {
     payload.trace = result.trace;
+    try {
+      const traceRecord = await appendRuntimeContextTrace({
+        agentKey: 'michael_magnificent',
+        taskType: 'training_support',
+        runtimeSurface: 'michael-runtime',
+        tmagId: sessionTmagId,
+        packet: packetFromMichaelAdapterInput(created.input),
+        queryHint: validatedAsk,
+        routeDecision: created.input.runtimeTurn.result.decision,
+        catalogKey: result.catalogKey,
+        responseType: result.response.responseType,
+      });
+      payload.contextTraceId = traceRecord.traceId;
+    } catch (err) {
+      // Context tracing must never leak or break the BA-facing safe response.
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[michael-runtime] context trace write failed:',
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
 
   recordMichaelRuntimeSuccess();
