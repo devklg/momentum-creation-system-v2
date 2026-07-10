@@ -129,3 +129,16 @@ export const knowledgeEvolutionRuntimeBoundary: KnowledgeEvolutionRuntimeBoundar
     'Knowledge Evolution never approves knowledge, mines private journals, uses Telnyx, or lets agents self-modify.',
   ],
 } as const;
+
+// ---------------------------------------------------------------------------
+// Lane A — canonical Mongo persistence (models, repositories, indexes).
+//
+// MongoDB is canonical truth (spec §27). Models validate the domain contract;
+// repositories are the ONLY sanctioned write path (idempotent where needed,
+// audit-preserving). `ensureKnowledgeEvolutionIndexes` applies the index catalog
+// on the dedicated app stack. No route handler, no Universal Gateway, no
+// retrieval activation lives here.
+// ---------------------------------------------------------------------------
+export * from './models/index.js';
+export * from './repositories/index.js';
+export * from './persistence/index.js';
