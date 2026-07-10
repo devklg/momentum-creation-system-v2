@@ -191,6 +191,17 @@ separately. **There are none:** the full server suite is green (1615/1615). No M
 failed, so no "pre-existing failure" caveat is required. No existing governance or boundary test was
 modified or weakened by Lane E.
 
+> **Environment caveat (added post-merge — orchestrator independent verification, 2026-07-10):** the
+> "green (1615/1615)" result holds only in a **credential-absent** environment. CI and the fresh lane
+> worktrees carry no `.env`, so the Michael runtime takes its degraded `safe_fallback` path — exactly
+> what the S3.11/S3.12 tests assert. Run against a working copy that has a live `.env` (LLM/embedding
+> creds present), the Michael runtime returns `next_training_step` instead and **9 tests across 4
+> files fail** (`michael-runtime.test.ts`, `michael-runtime.server-owned-turn.test.ts`,
+> `michael-runtime.turn-source.test.ts`, `s312MichaelRuntimeBodyBaRejectionCanary.test.ts`). Those
+> files are untouched by every Knowledge Evolution lane; the failure is the **pre-existing Michael
+> contract drift recorded in PLATFORM_AUDIT Finding 4 (P0)** — unrelated to this runtime, but not
+> "none" in a live-credential environment.
+
 ### `pnpm` / approved-builds state
 
 Normal `pnpm` was **not** blocked. The worktree began with `node_modules` present but the `vitest`
