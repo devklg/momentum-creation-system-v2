@@ -25,6 +25,11 @@ const FLAG_KEYS = [
   'MICHAEL_RUNTIME_ROUTE_ENABLED',
   'MICHAEL_RUNTIME_RESPONSE_ENABLED',
   'MICHAEL_RUNTIME_TRACE_ENABLED',
+  // Forced OFF each test so the degraded server-owned-turn contract is asserted
+  // deterministically. When MCS_CONTEXT_MANAGER_LIVE_ENABLED=true (e.g. a live
+  // .env) the route resolves next_training_step instead of safe_fallback; these
+  // tests pin the degraded contract, so the flag must not leak in from ambient env.
+  'MCS_CONTEXT_MANAGER_LIVE_ENABLED',
 ] as const;
 
 type FlagKey = (typeof FLAG_KEYS)[number];
@@ -39,6 +44,7 @@ beforeEach(() => {
     MICHAEL_RUNTIME_ROUTE_ENABLED: process.env.MICHAEL_RUNTIME_ROUTE_ENABLED,
     MICHAEL_RUNTIME_RESPONSE_ENABLED: process.env.MICHAEL_RUNTIME_RESPONSE_ENABLED,
     MICHAEL_RUNTIME_TRACE_ENABLED: process.env.MICHAEL_RUNTIME_TRACE_ENABLED,
+    MCS_CONTEXT_MANAGER_LIVE_ENABLED: process.env.MCS_CONTEXT_MANAGER_LIVE_ENABLED,
   };
   for (const key of FLAG_KEYS) delete process.env[key];
 });
