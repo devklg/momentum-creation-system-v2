@@ -28,7 +28,7 @@
  *     prompts are throwaway output, not a persistent record.
  *
  * PERSISTENCE gotchas respected:
- *   - mongodb.insert takes documents:[] (already wrapped by tripleStackWrite).
+ *   - mongodb.insert takes documents:[] (wrapped by the tiered write helper).
  *   - mongodb.query uses filter:, returns {count, documents}.
  *   - mongodb.update does not honor upsert — we branch on existence.
  *   - neo4j.cypher uses {query, params}.
@@ -42,7 +42,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeGraphCritical } from '../services/tieredWrite.js';
 import {
   complete,
   AnthropicConfigError,
@@ -207,64 +207,43 @@ export async function createIvoryName(
     updatedAt: now,
   };
 
-  try {
-    await tripleStackWrite({
-      id: ivoryId,
-      mongoCollection: IVORY_COLLECTION,
-      mongoDoc: { ...record },
-      neo4j: {
-        cypher:
-          'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
-          'MERGE (n:TmagIvoryName {ivoryId: $id}) ' +
-          'SET n.tmagId = $tmagId, ' +
-          '    n.firstName = $firstName, ' +
-          '    n.lastInitial = $lastInitial, ' +
-          '    n.status = $status, ' +
-          '    n.preferredAngle = $preferredAngle, ' +
-          '    n.createdAt = $createdAt ' +
-          'MERGE (b)-[r:KNOWS]->(n) ' +
-          'SET r.since = $createdAt',
-        params: {
-          tmagId,
-          firstName,
-          lastInitial,
-          status: 'new',
-          preferredAngle,
-          createdAt: now,
-        },
+  await writeGraphCritical({
+    id: ivoryId,
+    mongoCollection: IVORY_COLLECTION,
+    mongoDoc: { ...record },
+    neo4j: {
+      cypher:
+        'MATCH (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
+        'CREATE (n:TmagIvoryName {ivoryId: $id, tmagId: $tmagId, firstName: $firstName, ' +
+        '  lastInitial: $lastInitial, status: $status, preferredAngle: $preferredAngle, createdAt: $createdAt}) ' +
+        'CREATE (b)-[:KNOWS {since: $createdAt}]->(n)',
+      params: {
+        tmagId,
+        firstName,
+        lastInitial,
+        status: 'new',
+        preferredAngle,
+        createdAt: now,
       },
-      chroma: {
-        collection: CHROMA_COLLECTION,
-        document: ivoryChromaDoc(record),
-        metadata: {
-          kind: 'ivory_name_created',
-          ivoryId,
-          tmagId,
-          preferredAngle,
-          createdAt: now,
-        },
+      verifyCypher:
+        'MATCH (b:TeamMagnificentMember {tmagId: $tmagId})-[:KNOWS]->' +
+        '(n:TmagIvoryName {ivoryId: $id}) RETURN count(n) AS n',
+      verifyParams: {
+        tmagId,
       },
-    });
-  } catch (err) {
-    // Compensation: tripleStackWrite has no rollback. If the Mongo insert
-    // committed but a later leg (Neo4j/Chroma) threw, best-effort delete the
-    // orphaned row so a client retry (which mints a fresh ivoryId) does not
-    // accumulate half-written duplicates.
-    try {
-      await persistenceCall('mongodb', 'delete', {
-        database: MONGO_DB,
-        collection: IVORY_COLLECTION,
-        filter: { ivoryId },
-      });
-      await persistenceCall('neo4j', 'cypher', {
-        query: 'MATCH (n:TmagIvoryName {ivoryId: $ivoryId}) DETACH DELETE n',
-        params: { ivoryId },
-      });
-    } catch {
-      // Swallow cleanup failure; surface the original write error below.
-    }
-    throw err;
-  }
+    },
+    chroma: {
+      collection: CHROMA_COLLECTION,
+      document: ivoryChromaDoc(record),
+      metadata: {
+        kind: 'ivory_name_created',
+        ivoryId,
+        tmagId,
+        preferredAngle,
+        createdAt: now,
+      },
+    },
+  });
 
   return record;
 }

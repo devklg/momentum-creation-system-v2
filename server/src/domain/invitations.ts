@@ -43,6 +43,7 @@
 import { randomUUID, randomInt } from 'node:crypto';
 import { env } from '../env.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
+import { writeGraphCritical } from '../services/tieredWrite.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { createProspectAccount, normalizePhone } from './prospectAccount.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
@@ -139,14 +140,14 @@ function crmSourceForInvitation(source: McsInvitationSource): McsProspectCrmSour
 }
 
 /**
- * Create an invitation: prospect record + invite-token record, atomically
- * triple-stacked. The prospect starts at state 'minted' with sentAt=null;
+ * Create an invitation: prospect record + invite-token record. The prospect
+ * starts at state 'minted' with sentAt=null;
  * the BA confirms the send separately via markInvitationSent.
  *
  * Sequence (mirrors placeProspect's discipline):
  *   1. Mint a unique token string (collision-retry in tokens.ts).
- *   2. tripleStackWrite the prospect record (Mongo doc + Neo4j INVITED edge +
- *      Chroma searchable "invitation created" event).
+ *   2. writeGraphCritical the prospect record (Mongo doc + verified Neo4j
+ *      INVITED edge + Chroma searchable "invitation created" projection).
  *   3. Insert the token record (Mongo) + MERGE the token node/edge (Neo4j).
  *      The token's Chroma presence is covered by the invitation event in
  *      step 2 — we don't double-log.
@@ -171,7 +172,7 @@ export async function createInvitation(
     country: input.country,
   };
 
-  // ── Step 2: prospect record, triple-stacked. ──────────────────────────
+  // ── Step 2: prospect record, graph-critical. ─────────────────────────
   const prospectRecord: McsProspectRecord = {
     prospectId,
     firstName: input.firstName,
@@ -196,7 +197,7 @@ export async function createInvitation(
   // funnel shape. Persist it on the Mongo doc alongside the record.
   const relationshipReason = input.relationshipReason?.trim() || null;
 
-  await tripleStackWrite({
+  await writeGraphCritical({
     id: prospectId,
     mongoCollection: PROSPECTS_COLLECTION,
     mongoDoc: {
@@ -210,19 +211,11 @@ export async function createInvitation(
     neo4j: {
       // BA INVITED prospect. sponsorTmagId stamped immutably here.
       cypher:
-        'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
-        'MERGE (p:TmagProspect {prospectId: $id}) ' +
-        'SET p.firstName = $firstName, ' +
-        '    p.lastInitial = $lastInitial, ' +
-        '    p.city = $city, ' +
-        '    p.stateOrRegion = $stateOrRegion, ' +
-        '    p.country = $country, ' +
-        '    p.state = $state, ' +
-        '    p.sponsorTmagId = $sponsorTmagId, ' +
-        '    p.relationshipReason = $relationshipReason, ' +
-        '    p.createdAt = $createdAt ' +
-        'MERGE (b)-[r:INVITED]->(p) ' +
-        'SET r.token = $token, r.createdAt = $createdAt',
+        'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
+        'CREATE (p:TmagProspect {prospectId: $id, firstName: $firstName, lastInitial: $lastInitial, ' +
+        '  city: $city, stateOrRegion: $stateOrRegion, country: $country, state: $state, ' +
+        '  sponsorTmagId: $sponsorTmagId, relationshipReason: $relationshipReason, createdAt: $createdAt}) ' +
+        'CREATE (b)-[:INVITED {token: $token, createdAt: $createdAt}]->(p)',
       params: {
         sponsorTmagId: input.sponsorTmagId,
         firstName: input.firstName,
@@ -234,6 +227,13 @@ export async function createInvitation(
         relationshipReason,
         token,
         createdAt,
+      },
+      verifyCypher:
+        'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-' +
+        '[:INVITED {token: $token}]->(p:TmagProspect {prospectId: $id}) RETURN count(p) AS n',
+      verifyParams: {
+        sponsorTmagId: input.sponsorTmagId,
+        token,
       },
     },
     chroma: {

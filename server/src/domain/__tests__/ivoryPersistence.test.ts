@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   persistenceCall: vi.fn(),
   tripleStackWrite: vi.fn(),
+  writeGraphCritical: vi.fn(),
   createInvitation: vi.fn(),
 }));
 
@@ -12,6 +13,10 @@ vi.mock('../../services/persistence/dispatch.js', () => ({
 
 vi.mock('../../services/tripleStack.js', () => ({
   tripleStackWrite: mocks.tripleStackWrite,
+}));
+
+vi.mock('../../services/tieredWrite.js', () => ({
+  writeGraphCritical: mocks.writeGraphCritical,
 }));
 
 vi.mock('../invitations.js', () => ({
@@ -60,6 +65,13 @@ beforeEach(() => {
   vi.resetModules();
   mocks.persistenceCall.mockReset();
   mocks.tripleStackWrite.mockReset();
+  mocks.writeGraphCritical.mockReset();
+  mocks.writeGraphCritical.mockResolvedValue({
+    tier: 'graph_critical',
+    id: 'ivory_test',
+    mongo: { ok: true, verified: true },
+    neo4j: { ok: true, verified: true },
+  });
   mocks.createInvitation.mockReset();
 });
 
@@ -122,27 +134,20 @@ describe('Ivory persistence fixes', () => {
     expect(query.indexOf('SET n.status')).toBeLessThan(query.indexOf('MERGE (p:TmagProspect'));
   });
 
-  it('#5 createIvoryName compensates the orphaned row when the write fails', async () => {
+  it('#5 createIvoryName uses graph-critical rollback/readback semantics', async () => {
     mocks.persistenceCall.mockImplementation(defaultPersistence());
-    mocks.tripleStackWrite.mockRejectedValue(new Error('neo4j leg failed after mongo insert'));
     const ivory = await loadIvory();
 
-    await expect(
-      ivory.createIvoryName('TMAG-1', { firstName: 'Dana', lastName: 'Smith' } as never),
-    ).rejects.toThrow(/neo4j leg failed/);
+    await ivory.createIvoryName('TMAG-1', { firstName: 'Dana', lastName: 'Smith' } as never);
 
-    const del = mocks.persistenceCall.mock.calls.find(
-      ([tool, action]) => tool === 'mongodb' && action === 'delete',
-    );
-    const detach = mocks.persistenceCall.mock.calls.find(
-      ([tool, action, p]) =>
-        tool === 'neo4j' &&
-        action === 'cypher' &&
-        String((p as AnyRec).query).includes('DETACH DELETE'),
-    );
-    expect(del).toBeDefined();
-    expect(del?.[2]).toMatchObject({ collection: 'tmag_ivory_prospect_names' });
-    expect(detach).toBeDefined();
+    const call = mocks.writeGraphCritical.mock.calls[0]?.[0] as AnyRec | undefined;
+    expect(call).toBeDefined();
+    expect(call?.mongoCollection).toBe('tmag_ivory_prospect_names');
+    const neo4j = call?.neo4j as AnyRec | undefined;
+    expect(String(neo4j?.cypher)).toContain('MATCH (b:TeamMagnificentMember {tmagId: $tmagId})');
+    expect(String(neo4j?.cypher)).not.toContain('MERGE (b:TeamMagnificentMember');
+    expect(String(neo4j?.verifyCypher)).toContain('RETURN count(n) AS n');
+    expect(neo4j?.verifyParams).toMatchObject({ tmagId: 'TMAG-1' });
   });
 
   it('#6 updateIvoryName refreshes the Chroma doc with the edited fields', async () => {
