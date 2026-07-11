@@ -6,10 +6,10 @@
 
 ## Summary
 
-- Generated: 2026-07-11T15:25:40.917Z
-- Production `tripleStackWrite` call sites: 41
+- Generated: 2026-07-11T15:30:00.250Z
+- Production `tripleStackWrite` call sites: 39
 - Graph-critical: 4
-- Knowledge: 19
+- Knowledge: 17
 - Operational: 18
 - Excludes tests/spec files. Includes `server/src/**/*.ts` and `server/scripts/**/*.ts`.
 
@@ -62,5 +62,3 @@
 | 37 | knowledge | agent_context | `server/src/domain/training.ts:231` | `markFastStartModuleState` | `PROGRESS_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
 | 38 | operational | delivery_and_reservations | `server/src/domain/vmCampaigns.ts:69` | `createVMCampaign` | `COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
 | 39 | operational | delivery_and_reservations | `server/src/domain/webinarReservation.ts:191` | `createWebinarReservation` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 40 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:136` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_SOURCE_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
-| 41 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:183` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_CHUNK_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |

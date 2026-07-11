@@ -30,7 +30,7 @@ import type {
   McsSourceId,
 } from '@momentum/shared/runtime';
 import { persistenceCall } from '../persistence/dispatch.js';
-import { tripleStackWrite } from '../tripleStack.js';
+import { writeKnowledge } from '../tieredWrite.js';
 import type { KnowledgeCoreBoundaryPort } from '../../runtime/knowledge/knowledgeCore.js';
 import {
   ingestRawKnowledgeSource,
@@ -133,7 +133,7 @@ export async function createKevinApprovedKnowledgeSource(
     indexRecordCount: intake.indexRecords.length,
   };
 
-  await tripleStackWrite({
+  await writeKnowledge({
     id: String(source.sourceId),
     mongoCollection: KNOWLEDGE_SOURCE_COLLECTION,
     mongoDoc: { ...sourceRecord },
@@ -180,7 +180,7 @@ export async function createKevinApprovedKnowledgeSource(
   }));
 
   for (const chunkRecord of chunkRecords) {
-    await tripleStackWrite({
+    await writeKnowledge({
       id: chunkRecord.chunkId,
       mongoCollection: KNOWLEDGE_CHUNK_COLLECTION,
       mongoDoc: { ...chunkRecord },

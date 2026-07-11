@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-vm-ownership-provider-tiered`
+Latest branch: `codex/platform-audit-p1-knowledge-approval-tiered`
 
 Closed in this tranche:
 
@@ -26,6 +26,8 @@ Closed in this tranche:
   `server/src/domain/crmOwnershipPersistence.ts`.
 - P1-28: migrated VM ownership and provider queue writes through
   tiered persistence helpers.
+- P1-29: migrated approved knowledge source and chunk writes to
+  `writeKnowledge`.
 
 Catalog artifacts:
 
@@ -38,9 +40,9 @@ Inventory result:
 | Tier | Count |
 | --- | ---: |
 | `graph_critical` | 4 |
-| `knowledge` | 19 |
+| `knowledge` | 17 |
 | `operational` | 18 |
-| Total production `tripleStackWrite` call sites remaining | 41 |
+| Total production `tripleStackWrite` call sites remaining | 39 |
 
 ## Completed Migration Tranches
 
@@ -177,6 +179,24 @@ Implementation:
 - VM queue tests mock the tiered operational helper for Telnyx call-control and
   delivery-worker flows.
 - Catalog regenerated to 41 remaining production `tripleStackWrite` call sites.
+
+### P1-29: Knowledge Approval
+
+Migrated:
+
+- `server/src/services/knowledge/approvedKnowledgeStore.ts` Kevin/admin
+  approved knowledge source writes.
+- `server/src/services/knowledge/approvedKnowledgeStore.ts` approved knowledge
+  chunk writes.
+
+Implementation:
+
+- Approved source and chunk records now use `writeKnowledge`, keeping Mongo
+  readback as the success boundary while routing Neo4j and Chroma projections
+  through the durable knowledge projection path.
+- `approvedKnowledgeStore` tests mock `writeKnowledge` directly so the approved
+  knowledge intake boundary asserts the tiered writer, not the legacy helper.
+- Catalog regenerated to 39 remaining production `tripleStackWrite` call sites.
 
 ## Lane Map
 

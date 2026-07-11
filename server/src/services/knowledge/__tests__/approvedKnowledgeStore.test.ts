@@ -22,7 +22,7 @@ import {
   createContextManagerRetrievalAdapter,
 } from '../../../runtime/context/index.js';
 
-const tripleStackMock = vi.hoisted(() => {
+const knowledgeWriteMock = vi.hoisted(() => {
   const writes: Array<{
     mongoCollection: string;
     mongoDoc: Record<string, unknown>;
@@ -45,8 +45,8 @@ const persistenceMock = vi.hoisted(() => ({
   call: vi.fn(),
 }));
 
-vi.mock('../../tripleStack.js', () => ({
-  tripleStackWrite: tripleStackMock.write,
+vi.mock('../../tieredWrite.js', () => ({
+  writeKnowledge: knowledgeWriteMock.write,
 }));
 
 vi.mock('../../persistence/dispatch.js', () => ({
@@ -78,8 +78,8 @@ function query(overrides: Partial<McsApprovedKnowledgeQueryRequest> = {}): McsAp
 
 describe('approved knowledge store schema projection', () => {
   beforeEach(() => {
-    tripleStackMock.write.mockClear();
-    tripleStackMock.writes.length = 0;
+    knowledgeWriteMock.write.mockClear();
+    knowledgeWriteMock.writes.length = 0;
     persistenceMock.call.mockReset();
   });
 
@@ -126,8 +126,8 @@ describe('approved knowledge store schema projection', () => {
       retrievalEligible: true,
     });
 
-    const sourceWrite = tripleStackMock.writes[0];
-    const firstChunkWrite = tripleStackMock.writes[1];
+    const sourceWrite = knowledgeWriteMock.writes[0];
+    const firstChunkWrite = knowledgeWriteMock.writes[1];
     expect(sourceWrite).toBeDefined();
     expect(firstChunkWrite).toBeDefined();
     expect(sourceWrite).toMatchObject({
@@ -141,7 +141,7 @@ describe('approved knowledge store schema projection', () => {
       format: 'pdf',
     });
     expect(
-      tripleStackMock.writes
+      knowledgeWriteMock.writes
         .slice(1)
         .every((write) => write.mongoCollection === MCS_KNOWLEDGE_BASE_CHUNK_COLLECTION),
     ).toBe(true);
