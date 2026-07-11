@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-ba-identity-tiered`
+Latest branch: `codex/platform-audit-p1-sponsor-immutability-tiered`
 
 Closed in this tranche:
 
@@ -16,6 +16,8 @@ Closed in this tranche:
   `pnpm catalog:persistence:check` into the CI `gates` job.
 - P1-23: migrated BA identity writes to `writeGraphCritical` through
   `server/src/domain/baIdentityPersistence.ts`.
+- P1-24: migrated sponsor immutability writes to `writeGraphCritical` through
+  `server/src/domain/sponsorImmutabilityPersistence.ts`.
 
 Catalog artifacts:
 
@@ -27,10 +29,10 @@ Inventory result:
 
 | Tier | Count |
 | --- | ---: |
-| `graph_critical` | 8 |
+| `graph_critical` | 5 |
 | `knowledge` | 20 |
 | `operational` | 25 |
-| Total production `tripleStackWrite` call sites remaining | 53 |
+| Total production `tripleStackWrite` call sites remaining | 50 |
 
 ## Completed Migration Tranches
 
@@ -51,8 +53,27 @@ Implementation:
 - Neo4j readback uses `RETURN count(n) AS n` for the BA node plus sponsor edge.
 - Root founder bootstrap remains the explicit no-sponsor exception and verifies
   the root node.
-- Founder access-code seeding intentionally remains on `tripleStackWrite`; it
-  belongs to P1-24 sponsor immutability.
+### P1-24: Sponsor Immutability
+
+Migrated:
+
+- `server/src/domain/codeGen.ts` admin access-code minting.
+- `server/scripts/seed-founders.ts` founder access-code seeding.
+- `server/src/domain/adminBaOversight.ts` sponsor override record and graph
+  relationship write.
+
+Implementation:
+
+- New helper: `server/src/domain/sponsorImmutabilityPersistence.ts`.
+- Uses `writeGraphCritical`.
+- Access-code owner writes use `MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})`
+  instead of `MERGE` so a missing BA owner fails the graph leg and rolls back
+  the Mongo record.
+- Access-code readback verifies the owner-to-code edge with `RETURN count(c) AS n`.
+- Sponsor override graph writes `MATCH` the BA, new sponsor, and existing
+  original sponsor when present, then verifies the current sponsor edge,
+  original sponsor edge, and override node link with `RETURN count(o) AS n`.
+- Catalog regenerated to 50 remaining production `tripleStackWrite` call sites.
 
 ## Lane Map
 

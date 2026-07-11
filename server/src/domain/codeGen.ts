@@ -19,8 +19,8 @@
 
 import { randomInt } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
 import type { AccessCodeRecord } from './access-codes.js';
+import { writeAccessCodeGraphCritical } from './sponsorImmutabilityPersistence.js';
 
 const ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ'; // 31 chars (no 0,1,I,O,L)
 const CODE_LEN = 4;
@@ -109,23 +109,15 @@ export async function mintAccessCode(
     createdAt,
   };
 
-  await tripleStackWrite({
+  await writeAccessCodeGraphCritical({
     id: code,
-    mongoCollection: 'tmag_access_codes',
     mongoDoc: { ...record, note: input.note ?? null, mintedByTmagId: input.mintedByTmagId },
-    neo4j: {
-      // The owning BA may or may not exist yet in our graph (early seeds);
-      // MERGE makes both edge endpoints safe.
-      cypher:
-        'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
-        'MERGE (c:TmagAccessCode {code: $id}) ' +
-        'SET c.active = true, c.createdAt = $createdAt, c.sponsorThreeBaId = $sponsorThreeBaId ' +
-        'MERGE (b)-[:USES]->(c)',
-      params: {
-        sponsorTmagId: input.sponsorTmagId,
-        sponsorThreeBaId: input.sponsorThreeBaId,
-        createdAt,
-      },
+    sponsorTmagId: input.sponsorTmagId,
+    relationship: 'USES',
+    codeProps: {
+      active: true,
+      createdAt,
+      sponsorThreeBaId: input.sponsorThreeBaId,
     },
     chroma: {
       collection: 'mcs_access_codes',

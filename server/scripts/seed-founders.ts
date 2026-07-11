@@ -20,8 +20,8 @@
 
 import { persistenceCall } from '../src/services/persistence/dispatch.js';
 import { connectMongo } from '../src/services/persistence/mongo/connection.js';
-import { tripleStackWrite } from '../src/services/tripleStack.js';
 import { writeBaIdentityGraphCritical } from '../src/domain/baIdentityPersistence.js';
+import { writeAccessCodeGraphCritical } from '../src/domain/sponsorImmutabilityPersistence.js';
 
 interface FounderSeed {
   tmagId: string;          // TM-internal member id (stable, never changes)
@@ -152,9 +152,8 @@ async function seedAccessCode(f: FounderSeed): Promise<void> {
   }
 
   const createdAt = new Date().toISOString();
-  await tripleStackWrite({
+  await writeAccessCodeGraphCritical({
     id: f.code,
-    mongoCollection: 'tmag_access_codes',
     mongoDoc: {
       code: f.code,
       sponsorTmagId: f.tmagId,
@@ -167,20 +166,13 @@ async function seedAccessCode(f: FounderSeed): Promise<void> {
       mintedVia: 'kevin',
       createdAt,
     },
-    neo4j: {
-      cypher:
-        `MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId})
-         MERGE (c:TmagAccessCode {code: $id})
-         SET c.active = true,
-             c.createdAt = $createdAt,
-             c.sponsorThreeBaId = $sponsorThreeBaId,
-             c.founder = true
-         MERGE (b)-[:HOLDS_CODE]->(c)`,
-      params: {
-        sponsorTmagId: f.tmagId,
-        sponsorThreeBaId: f.threeBaId,
-        createdAt,
-      },
+    sponsorTmagId: f.tmagId,
+    relationship: 'HOLDS_CODE',
+    codeProps: {
+      active: true,
+      createdAt,
+      sponsorThreeBaId: f.threeBaId,
+      founder: true,
     },
     chroma: {
       collection: 'mcs_access_codes',

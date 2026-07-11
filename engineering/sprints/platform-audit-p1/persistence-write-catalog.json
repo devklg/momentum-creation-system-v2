@@ -1,28 +1,16 @@
 {
-  "generatedAt": "2026-07-11T14:45:42.278Z",
+  "generatedAt": "2026-07-11T14:57:21.826Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts"
   ],
-  "productionCallSiteCount": 53,
+  "productionCallSiteCount": 50,
   "countsByTier": {
-    "graph_critical": 8,
     "operational": 25,
-    "knowledge": 20
+    "knowledge": 20,
+    "graph_critical": 5
   },
   "callSites": [
-    {
-      "file": "server/scripts/seed-founders.ts",
-      "line": 155,
-      "functionName": "seedAccessCode",
-      "idExpression": "f.code",
-      "mongoCollectionExpression": "'tmag_access_codes'",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "graph_critical",
-      "subsystem": "sponsor_immutability",
-      "rationale": "Access-code and sponsor override writes anchor immutable sponsor relationships."
-    },
     {
       "file": "server/scripts/seed-webinar-events.ts",
       "line": 130,
@@ -34,18 +22,6 @@
       "tier": "operational",
       "subsystem": "delivery_and_reservations",
       "rationale": "Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows."
-    },
-    {
-      "file": "server/src/domain/adminBaOversight.ts",
-      "line": 643,
-      "functionName": "applySponsorOverride",
-      "idExpression": "overrideId",
-      "mongoCollectionExpression": "OVERRIDES_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "graph_critical",
-      "subsystem": "sponsor_immutability",
-      "rationale": "Access-code and sponsor override writes anchor immutable sponsor relationships."
     },
     {
       "file": "server/src/domain/adminProspectOversight.ts",
@@ -178,18 +154,6 @@
       "tier": "operational",
       "subsystem": "delivery_and_reservations",
       "rationale": "Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows."
-    },
-    {
-      "file": "server/src/domain/codeGen.ts",
-      "line": 112,
-      "functionName": "mintAccessCode",
-      "idExpression": "code",
-      "mongoCollectionExpression": "'tmag_access_codes'",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "graph_critical",
-      "subsystem": "sponsor_immutability",
-      "rationale": "Access-code and sponsor override writes anchor immutable sponsor relationships."
     },
     {
       "file": "server/src/domain/commitments.ts",
