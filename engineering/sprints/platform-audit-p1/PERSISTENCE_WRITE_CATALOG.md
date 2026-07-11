@@ -6,7 +6,7 @@
 
 ## Summary
 
-- Generated: 2026-07-11T15:06:38.705Z
+- Generated: 2026-07-11T15:13:51.383Z
 - Production `tripleStackWrite` call sites: 49
 - Graph-critical: 5
 - Knowledge: 20
@@ -24,7 +24,7 @@
 | # | Tier | Subsystem | Location | Function | Mongo collection expression | Neo4j | Chroma | Rationale |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | operational | delivery_and_reservations | `server/scripts/seed-webinar-events.ts:130` | `main` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 2 | operational | governance_records | `server/src/domain/adminProspectOversight.ts:780` | `appendProspectNote` | `COLL_NOTES` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
+| 2 | operational | governance_records | `server/src/domain/adminProspectOversight.ts:781` | `appendProspectNote` | `COLL_NOTES` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
 | 3 | operational | governance_records | `server/src/domain/adminTenantArchitecture.ts:364` | `saveTenantSettings` | `SETTINGS_COLLECTION` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
 | 4 | knowledge | content_governance | `server/src/domain/adminTenantArchitecture.ts:461` | `saveTenantTemplate` | `TEMPLATE_COLLECTION` | yes | yes | Master content, content videos, and tenant templates shape governed retrieval and generated copy. |
 | 5 | knowledge | agent_context | `server/src/domain/agents/orchestrator.ts:299` | `recordAgentEvent` | `agentEventsCollection` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
