@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-cross-store-reconciliation`
+Latest branch: `codex/platform-audit-p1-admin-consistency-report`
 
 Closed in this tranche:
 
@@ -38,6 +38,8 @@ Closed in this tranche:
   surface.
 - P1-35: added a bounded cross-store reconciliation job for Mongo, Neo4j, and
   Chroma.
+- P1-36: added an admin consistency report for half-writes, stale projections,
+  and orphan records.
 
 Catalog artifacts:
 
@@ -346,6 +348,26 @@ Operator command:
 pnpm --filter @momentum/server reconcile:stores -- --limit 25
 pnpm --filter @momentum/server reconcile:stores -- --limit 25 --fail-on-drift
 ```
+
+### P1-36: Admin Consistency Report
+
+Implemented:
+
+- Added `server/src/domain/adminConsistencyReport.ts`.
+- Added `GET /api/admin/consistency/report` under `requireAdmin`.
+- Added `/consistency` to the admin app and sidebar.
+- Added shared response types appended to `packages/shared/src/types.ts`.
+- Added tests for red half-write/orphan/dead-letter classification, yellow
+  stale-pending projection classification, and the admin route shape.
+
+Report coverage:
+
+- Suspected graph-critical half-writes from sampled reconciliation rows whose
+  required Neo4j leg is missing or errored.
+- Stale and failed `tmag_projection_outbox` projections.
+- Bounded graph-orphan scans for prospects, invite tokens, Steve discoveries,
+  and CRM records.
+- Cross-store reconciliation issue samples from P1-35.
 
 ## Lane Map
 
