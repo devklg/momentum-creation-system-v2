@@ -6,11 +6,11 @@
 
 ## Summary
 
-- Generated: 2026-07-11T15:13:51.383Z
-- Production `tripleStackWrite` call sites: 49
+- Generated: 2026-07-11T15:19:28.504Z
+- Production `tripleStackWrite` call sites: 47
 - Graph-critical: 5
-- Knowledge: 20
-- Operational: 24
+- Knowledge: 19
+- Operational: 23
 - Excludes tests/spec files. Includes `server/src/**/*.ts` and `server/scripts/**/*.ts`.
 
 ## Tier Definitions
@@ -51,24 +51,22 @@
 | 26 | operational | delivery_and_reservations | `server/src/domain/orientationSession.ts:448` | `reserveSeat` | `RESERVATIONS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
 | 27 | operational | governance_records | `server/src/domain/outcomes.ts:184` | `appendOutcome` | `COLLECTION` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
 | 28 | operational | prospect_access | `server/src/domain/prospectAccount.ts:238` | `createProspectAccount` | `MONGO_COLLECTION` | yes | yes | Prospect accounts and magic links are credentials/session operations; Mongo commit is the success boundary. |
-| 29 | knowledge | crm_behavioral_trail | `server/src/domain/prospectCrm.ts:220` | `appendProspectTimelineEvent` | `TIMELINE_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
-| 30 | knowledge | crm_behavioral_trail | `server/src/domain/prospectCrm.ts:313` | `createOrUpdateCrmRecordForToken` | `CRM_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
-| 31 | operational | prospect_access | `server/src/domain/prospectMagicLink.ts:168` | `issueLinksForPhone` | `MONGO_COLLECTION` | yes | yes | Prospect accounts and magic links are credentials/session operations; Mongo commit is the success boundary. |
-| 32 | knowledge | agent_context | `server/src/domain/questionnaire.ts:203` | `recordQuestionnaire` | `'tmag_questionnaires'` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
-| 33 | knowledge | agent_context | `server/src/domain/recruitingCycle.ts:305` | `emitMichaelEvent` | `MICHAEL_EVENTS_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
-| 34 | knowledge | agent_context | `server/src/domain/recruitingCycle.ts:407` | `createRecruitingCycle` | `CYCLES_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
-| 35 | knowledge | agent_context | `server/src/domain/steve-success-interview.ts:617` | `ingestDiscoveryArtifact` | `DISCOVERIES_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
-| 36 | operational | delivery_and_reservations | `server/src/domain/threeWayCalls.ts:421` | `setMyThreeWayAvailability` | `AVAILABILITY_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 37 | operational | delivery_and_reservations | `server/src/domain/threeWayCalls.ts:576` | `createThreeWayBooking` | `BOOKINGS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 38 | knowledge | agent_context | `server/src/domain/training.ts:231` | `markFastStartModuleState` | `PROGRESS_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
-| 39 | operational | delivery_and_reservations | `server/src/domain/vmCampaigns.ts:69` | `createVMCampaign` | `COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 40 | graph_critical | vm_ownership | `server/src/domain/vmLeadOwners.ts:55` | `createLeadOwner` | `COLLECTION` | yes | yes | VM lead ownership ties imported recipients to accountable operators. |
-| 41 | operational | audit_controls | `server/src/domain/vmProviderQueue.ts:223` | `vmAudit` | `AUDIT_COLLECTION` | yes | yes | Audit entries must persist, while graph/search projections can lag through the outbox. |
-| 42 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:285` | `enqueueVmJob` | `QUEUE_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 43 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:593` | `upsertImportedLead` | `LEADS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 44 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:743` | `processCrmCreation` | `CRM_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 45 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:837` | `recordDeliveryEvent` | `DELIVERY_EVENTS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 46 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:875` | `recordProviderWebhook` | `WEBHOOK_EVENTS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 47 | operational | delivery_and_reservations | `server/src/domain/webinarReservation.ts:191` | `createWebinarReservation` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 48 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:136` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_SOURCE_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
-| 49 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:183` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_CHUNK_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
+| 29 | knowledge | crm_behavioral_trail | `server/src/domain/prospectCrm.ts:221` | `appendProspectTimelineEvent` | `TIMELINE_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
+| 30 | operational | prospect_access | `server/src/domain/prospectMagicLink.ts:168` | `issueLinksForPhone` | `MONGO_COLLECTION` | yes | yes | Prospect accounts and magic links are credentials/session operations; Mongo commit is the success boundary. |
+| 31 | knowledge | agent_context | `server/src/domain/questionnaire.ts:203` | `recordQuestionnaire` | `'tmag_questionnaires'` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
+| 32 | knowledge | agent_context | `server/src/domain/recruitingCycle.ts:305` | `emitMichaelEvent` | `MICHAEL_EVENTS_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
+| 33 | knowledge | agent_context | `server/src/domain/recruitingCycle.ts:407` | `createRecruitingCycle` | `CYCLES_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
+| 34 | knowledge | agent_context | `server/src/domain/steve-success-interview.ts:617` | `ingestDiscoveryArtifact` | `DISCOVERIES_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
+| 35 | operational | delivery_and_reservations | `server/src/domain/threeWayCalls.ts:421` | `setMyThreeWayAvailability` | `AVAILABILITY_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 36 | operational | delivery_and_reservations | `server/src/domain/threeWayCalls.ts:576` | `createThreeWayBooking` | `BOOKINGS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 37 | knowledge | agent_context | `server/src/domain/training.ts:231` | `markFastStartModuleState` | `PROGRESS_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
+| 38 | operational | delivery_and_reservations | `server/src/domain/vmCampaigns.ts:69` | `createVMCampaign` | `COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 39 | graph_critical | vm_ownership | `server/src/domain/vmLeadOwners.ts:55` | `createLeadOwner` | `COLLECTION` | yes | yes | VM lead ownership ties imported recipients to accountable operators. |
+| 40 | operational | audit_controls | `server/src/domain/vmProviderQueue.ts:223` | `vmAudit` | `AUDIT_COLLECTION` | yes | yes | Audit entries must persist, while graph/search projections can lag through the outbox. |
+| 41 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:285` | `enqueueVmJob` | `QUEUE_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 42 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:593` | `upsertImportedLead` | `LEADS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 43 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:839` | `recordDeliveryEvent` | `DELIVERY_EVENTS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 44 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:877` | `recordProviderWebhook` | `WEBHOOK_EVENTS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 45 | operational | delivery_and_reservations | `server/src/domain/webinarReservation.ts:191` | `createWebinarReservation` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 46 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:136` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_SOURCE_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
+| 47 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:183` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_CHUNK_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
