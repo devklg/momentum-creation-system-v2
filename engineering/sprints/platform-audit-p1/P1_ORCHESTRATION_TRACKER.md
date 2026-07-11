@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-operational-record-sweep`
+Latest branch: `codex/platform-audit-p1-tier-failure-simulations`
 
 Closed in this tranche:
 
@@ -32,6 +32,8 @@ Closed in this tranche:
   with rollback/readback expectations.
 - P1-31: moved all remaining knowledge-tier records to `writeKnowledge`.
 - P1-32: moved all remaining operational records to `writeOperational`.
+- P1-33: added failure simulation tests for graph-critical, knowledge, and
+  operational write tiers.
 
 Catalog artifacts:
 
@@ -283,6 +285,23 @@ Implementation:
 - Updated focused tests to mock/assert the `writeOperational` boundary for
   audit log, runtime audit, and outcomes.
 - Catalog regenerated to 0 remaining production `tripleStackWrite` call sites.
+
+### P1-33: Tier Failure Simulation Tests
+
+Added:
+
+- `server/src/services/__tests__/tieredWrite.test.ts`
+
+Coverage:
+
+- Graph-critical: simulates a Neo4j failure after Mongo insert/readback and
+  asserts Mongo rollback plus `GraphCriticalWriteError`, with no projection
+  queued.
+- Knowledge: simulates a Neo4j projection failure and asserts Mongo success is
+  preserved while a `knowledge` projection is queued.
+- Operational: simulates a Chroma projection failure and asserts Mongo success
+  is preserved while an `operational` projection is queued and no rollback is
+  attempted.
 
 ## Lane Map
 
