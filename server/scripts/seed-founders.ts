@@ -21,6 +21,7 @@
 import { persistenceCall } from '../src/services/persistence/dispatch.js';
 import { connectMongo } from '../src/services/persistence/mongo/connection.js';
 import { tripleStackWrite } from '../src/services/tripleStack.js';
+import { writeBaIdentityGraphCritical } from '../src/domain/baIdentityPersistence.js';
 
 interface FounderSeed {
   tmagId: string;          // TM-internal member id (stable, never changes)
@@ -91,61 +92,41 @@ async function seedBaRecord(f: FounderSeed): Promise<void> {
   }
 
   const createdAt = new Date().toISOString();
-  await tripleStackWrite({
+  const mongoDoc = {
+    tmagId: f.tmagId,
+    threeBaId: f.threeBaId,
+    threeUsername: f.threeUsername,
+    firstName: f.firstName,
+    lastName: f.lastName,
+    email: f.email,
+    phone: f.phone,
+    timezone: f.timezone,
+    role: f.role,
+    sponsorTmagId: f.sponsorTmagId,
+    sponsorThreeBaId: f.sponsorThreeBaId,
+    // Founders have no password hash (they don't sign up via .team /register);
+    // when Kevin/Paul log in, auth will recognize them by THREE BA ID + a
+    // founder-issued credential path. Leave as null for now.
+    passwordHash: null,
+    accessCodeUsed: null,   // founders did not enter through a code
+    accessCodeHeld: f.code,
+    welcomedAt: createdAt,
+    onboardingState: 'completed',
+    createdAt,
+  };
+
+  await writeBaIdentityGraphCritical({
     id: f.tmagId,
-    mongoCollection: 'team_magnificent_members',
-    mongoDoc: {
-      tmagId: f.tmagId,
+    mongoDoc,
+    sponsorTmagId: f.sponsorTmagId,
+    nodeProps: {
       threeBaId: f.threeBaId,
-      threeUsername: f.threeUsername,
+      email: f.email,
       firstName: f.firstName,
       lastName: f.lastName,
-      email: f.email,
-      phone: f.phone,
       timezone: f.timezone,
       role: f.role,
-      sponsorTmagId: f.sponsorTmagId,
-      sponsorThreeBaId: f.sponsorThreeBaId,
-      // Founders have no password hash (they don't sign up via .team /register);
-      // when Kevin/Paul log in, auth will recognize them by THREE BA ID + a
-      // founder-issued credential path. Leave as null for now.
-      passwordHash: null,
-      accessCodeUsed: null,   // founders did not enter through a code
-      accessCodeHeld: f.code,
-      welcomedAt: createdAt,
-      onboardingState: 'completed',
-      createdAt,
-    },
-    neo4j: {
-      // MERGE makes this idempotent. If sponsorTmagId is set, also link upline.
-      cypher: f.sponsorTmagId
-        ? `MERGE (s:TeamMagnificentMember {tmagId: $sponsorTmagId})
-           MERGE (n:TeamMagnificentMember {tmagId: $id})
-           SET n.threeBaId = $threeBaId,
-               n.email = $email,
-               n.firstName = $firstName,
-               n.lastName = $lastName,
-               n.timezone = $timezone,
-               n.role = $role,
-               n.founder = true
-           MERGE (n)-[:SPONSORED_BY]->(s)`
-        : `MERGE (n:TeamMagnificentMember {tmagId: $id})
-           SET n.threeBaId = $threeBaId,
-               n.email = $email,
-               n.firstName = $firstName,
-               n.lastName = $lastName,
-               n.timezone = $timezone,
-               n.role = $role,
-               n.founder = true`,
-      params: {
-        sponsorTmagId: f.sponsorTmagId,
-        threeBaId: f.threeBaId,
-        email: f.email,
-        firstName: f.firstName,
-        lastName: f.lastName,
-        timezone: f.timezone,
-        role: f.role,
-      },
+      founder: true,
     },
     chroma: {
       collection: 'mcs_members',

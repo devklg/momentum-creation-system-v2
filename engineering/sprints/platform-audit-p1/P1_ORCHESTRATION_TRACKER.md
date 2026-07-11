@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Branch: `codex/platform-audit-p1-persistence-catalog`
+Latest branch: `codex/platform-audit-p1-ba-identity-tiered`
 
 Closed in this tranche:
 
@@ -14,6 +14,8 @@ Closed in this tranche:
   `graph_critical`, `knowledge`, or `operational`.
 - P1-69: added a generated persistence write catalog and wired
   `pnpm catalog:persistence:check` into the CI `gates` job.
+- P1-23: migrated BA identity writes to `writeGraphCritical` through
+  `server/src/domain/baIdentityPersistence.ts`.
 
 Catalog artifacts:
 
@@ -25,10 +27,32 @@ Inventory result:
 
 | Tier | Count |
 | --- | ---: |
-| `graph_critical` | 11 |
+| `graph_critical` | 8 |
 | `knowledge` | 20 |
 | `operational` | 25 |
-| Total production call sites | 56 |
+| Total production `tripleStackWrite` call sites remaining | 53 |
+
+## Completed Migration Tranches
+
+### P1-23: BA Identity
+
+Migrated:
+
+- `server/src/domain/ba.ts` registration.
+- `server/src/domain/adminBaCrud.ts` admin manual BA create.
+- `server/scripts/seed-founders.ts` founder BA record seeding.
+
+Implementation:
+
+- New helper: `server/src/domain/baIdentityPersistence.ts`.
+- Uses `writeGraphCritical`.
+- Sponsor-backed writes use `MATCH (s:TeamMagnificentMember {tmagId: $sponsorTmagId})`
+  instead of `MERGE` so a missing graph sponsor fails the graph leg.
+- Neo4j readback uses `RETURN count(n) AS n` for the BA node plus sponsor edge.
+- Root founder bootstrap remains the explicit no-sponsor exception and verifies
+  the root node.
+- Founder access-code seeding intentionally remains on `tripleStackWrite`; it
+  belongs to P1-24 sponsor immutability.
 
 ## Lane Map
 
