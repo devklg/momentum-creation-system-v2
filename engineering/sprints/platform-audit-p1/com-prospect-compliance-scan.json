@@ -1,0 +1,3092 @@
+{
+  "generatedAt": "2026-07-11T23:24:05.129Z",
+  "scope": "apps/com/src visible strings plus shared compliance constants",
+  "summary": {
+    "filesScanned": 34,
+    "visibleStringsScanned": 411,
+    "blockingViolations": 0,
+    "allowedSignals": 68,
+    "status": "pass",
+    "allowedSignalsByRule": {
+      "glp_three_product_context": 13,
+      "public_market_or_cost_context": 7,
+      "team_goal_context": 5,
+      "pmv_language_context": 17,
+      "placement_demo_context": 24,
+      "canonical_disclaimer": 2
+    }
+  },
+  "blockingRules": [
+    {
+      "id": "income_or_compensation_claim",
+      "severity": "blocker",
+      "description": "No income, earnings, compensation, commission, rank, cycle, CV, bonus, or payout claims."
+    },
+    {
+      "id": "placement_or_spillover_promise",
+      "severity": "blocker",
+      "description": "No placement guarantees, spillover promises, binary-leg promises, or downline projections."
+    },
+    {
+      "id": "ai_prospecting_or_qualification",
+      "severity": "blocker",
+      "description": "No AI prospecting, automated calling, AI lead qualification, scoring, or ranking language."
+    },
+    {
+      "id": "current_team_headcount",
+      "severity": "blocker",
+      "description": "No current team head count; the 100,000 goal is allowed."
+    },
+    {
+      "id": "three_company_branding",
+      "severity": "blocker",
+      "description": "No THREE International company branding, logo references, or promoter disclaimers."
+    },
+    {
+      "id": "programmatic_three_handoff",
+      "severity": "blocker",
+      "description": "No programmatic enrollment, registration, or company handoff route language."
+    }
+  ],
+  "allowedSignalRules": [
+    {
+      "id": "glp_three_product_context",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International."
+    },
+    {
+      "id": "public_market_or_cost_context",
+      "description": "Public market figures and product-category cost context are allowed when not tied to earnings."
+    },
+    {
+      "id": "team_goal_context",
+      "description": "The 100,000 team goal is allowed; current team head count is not."
+    },
+    {
+      "id": "pmv_language_context",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks."
+    },
+    {
+      "id": "placement_demo_context",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration."
+    },
+    {
+      "id": "canonical_disclaimer",
+      "description": "The canonical .com disclaimer is allowed only through packages/shared/src/compliance.ts."
+    }
+  ],
+  "violations": [],
+  "allowedSignals": [
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "line": 29,
+      "text": "GLP-THREE is a natural alternative in one of the fastest-expanding wellness categories on the planet. The numbers aren&rsquo;t ours — they&rsquo;re public. We&rsquo;re just standing where they point."
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "line": 32,
+      "text": "GLP-THREE launched January 2026 · trademark and patent pending"
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "line": 423,
+      "text": "Dr. Dan Gubler GLP-THREE product video"
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "line": 431,
+      "text": "Dr. Dan Gubler — GLP-THREE product video"
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "line": 446,
+      "text": "Open Dr. Dan's GLP-THREE video in YouTube, then come back and continue."
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "line": 69,
+      "text": "GLP-THREE was built for the same outcome the category is chasing — through a different door. Same destination. Different mechanism. Different profile. Different cost."
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "line": 93,
+      "text": "GLP-THREE"
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "line": 43,
+      "text": "GLP-THREE is built around MBC-267, a patented peptide complex found naturally in salmon and certain mushrooms."
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "line": 68,
+      "text": "GLP-THREE is taken as a liquid dropper."
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "line": 77,
+      "text": "Is GLP-THREE a drug? No. It is a dietary supplement designed to support your body's own GLP-1 signaling. It is not a prescription drug, not an injection, and not a GLP-1 receptor agonist."
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "line": 79,
+      "text": "Can I take it with other medications? Talk to your physician before combining any supplement with prescribed medication — including GLP-THREE."
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/08-KevinStory.tsx",
+      "line": 42,
+      "text": "Kevin Gardner before and after using GLP-THREE — down 19 lbs, no injections, with measurements"
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "line": 49,
+      "text": "GLP-THREE launched in the third week of January 2026 with trademark and patent pending. The first all-natural GLP-1 replacement on the market. The window is opening, not closing."
+    },
+    {
+      "ruleId": "public_market_or_cost_context",
+      "severity": "allowed",
+      "description": "Public market figures and product-category cost context are allowed when not tied to earnings.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "line": 34,
+      "text": "$6.8T global wellness economy · the category is moving"
+    },
+    {
+      "ruleId": "public_market_or_cost_context",
+      "severity": "allowed",
+      "description": "Public market figures and product-category cost context are allowed when not tied to earnings.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "line": 42,
+      "text": "$6.8T"
+    },
+    {
+      "ruleId": "public_market_or_cost_context",
+      "severity": "allowed",
+      "description": "Public market figures and product-category cost context are allowed when not tied to earnings.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "line": 50,
+      "text": "$200B"
+    },
+    {
+      "ruleId": "public_market_or_cost_context",
+      "severity": "allowed",
+      "description": "Public market figures and product-category cost context are allowed when not tied to earnings.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "line": 100,
+      "text": "A $6.8 Trillion Market."
+    },
+    {
+      "ruleId": "public_market_or_cost_context",
+      "severity": "allowed",
+      "description": "Public market figures and product-category cost context are allowed when not tied to earnings.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "line": 56,
+      "text": "Out-of-pocket cost runs roughly $1,000 to $1,500 per month. Many insurance plans do not cover weight management on these drugs, leaving the cost on the patient."
+    },
+    {
+      "ruleId": "public_market_or_cost_context",
+      "severity": "allowed",
+      "description": "Public market figures and product-category cost context are allowed when not tied to earnings.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "line": 45,
+      "text": "$1,000–$1,500 out of pocket without coverage."
+    },
+    {
+      "ruleId": "public_market_or_cost_context",
+      "severity": "allowed",
+      "description": "Public market figures and product-category cost context are allowed when not tied to earnings.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "line": 53,
+      "text": "Dr. Dan Gubler — Chief Scientific Officer and Chief Formulator — developed the product. His scientific record: Caltech PhD in Organic Chemistry, sixteen patents, more than seventy supplements formulated across his career, a top-50 podcast on supplement science, and a public following of 1.3 million."
+    },
+    {
+      "ruleId": "team_goal_context",
+      "severity": "allowed",
+      "description": "The 100,000 team goal is allowed; current team head count is not.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "line": 84,
+      "text": "100,000"
+    },
+    {
+      "ruleId": "team_goal_context",
+      "severity": "allowed",
+      "description": "The 100,000 team goal is allowed; current team head count is not.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "line": 86,
+      "text": "Qualified Brand Ambassadors. That&rsquo;s the team we&rsquo;re building."
+    },
+    {
+      "ruleId": "team_goal_context",
+      "severity": "allowed",
+      "description": "The 100,000 team goal is allowed; current team head count is not.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "line": 83,
+      "text": "100,000"
+    },
+    {
+      "ruleId": "team_goal_context",
+      "severity": "allowed",
+      "description": "The 100,000 team goal is allowed; current team head count is not.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "line": 85,
+      "text": "Qualified Brand Ambassadors on Team Magnificent"
+    },
+    {
+      "ruleId": "team_goal_context",
+      "severity": "allowed",
+      "description": "The 100,000 team goal is allowed; current team head count is not.",
+      "file": "packages/shared/src/compliance.ts",
+      "line": 15,
+      "text": "A current head count of the team (the 100,000 goal is named, the current count is not)"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/p-login.tsx",
+      "line": 139,
+      "text": "We only text people whose phone was used to invite them and who have asked for their sponsor to reach out. If that's not you, ask whoever invited you for a fresh link."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "line": 51,
+      "text": "Two people. Then they find two."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "line": 96,
+      "text": "Find your first two people in 72 hours. It&rsquo;s not a deadline — it&rsquo;s a rhythm. The team moves at the speed of its leaders."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "line": 121,
+      "text": "invited you, that invitation didn&rsquo;t move alone. It moved alongside every other Brand Ambassador on Team Magnificent — feeding the same dashboard, the same momentum, the same proof you&rsquo;re seeing right now. The team&rsquo;s velocity is the sum of every BA&rsquo;s work, made visible through the same shared OS."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "line": 129,
+      "text": "Every prospect who lands here sees more team than the prospect who landed an hour ago. The momentum compounds. Your placement at #"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "line": 268,
+      "text": "Hosted by Kevin L. Gardner and Paul Barrios. Open conversation, real team, real momentum — see for yourself."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/07-Footer.tsx",
+      "line": 38,
+      "text": "We build people before we build volume."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 257,
+      "text": "Team momentum tape"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "line": 71,
+      "text": "Once the video is complete, this page opens a private team view so you can see the momentum this message is connected to."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "line": 36,
+      "text": "Real people. Real results. No injections, no prescription."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "line": 112,
+      "text": "You are watching a generational shift in how people manage weight. It has already started. It is accelerating."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "line": 40,
+      "text": "Ozempic, Wegovy, Mounjaro and others belong to a class called GLP-1 receptor agonists. They mimic a hormone the body makes naturally and signal the brain that you are full. Appetite quiets. Stomach emptying slows. People lose weight."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/08-KevinStory.tsx",
+      "line": 49,
+      "text": "Real people. Real results."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "line": 85,
+      "text": "Five years from now, everyone will know about this category. The people who moved first will have built something that runs without them. The people who waited will have watched."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "packages/shared/src/compliance.ts",
+      "line": 7,
+      "text": "it shows really how it works, and people are signing up"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "packages/shared/src/compliance.ts",
+      "line": 14,
+      "text": "Compensation cycle math, volume math, or rank math"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "packages/shared/src/compliance.ts",
+      "line": 22,
+      "text": "Queue positions and momentum displays demonstrate team activity in real time and"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx",
+      "line": 46,
+      "text": "Live · holding tank"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "line": 63,
+      "text": "Your position"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "line": 72,
+      "text": "You&rsquo;ve been placed in the Team Magnificent holding tank — the live demonstration of how the team is forming around you, in real time."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "line": 78,
+      "text": "Placement"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "line": 78,
+      "text": "The team is forming beneath you. Right now."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "line": 82,
+      "text": "You&rsquo;re position #"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "line": 99,
+      "text": "Placed beneath you · live"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "line": 103,
+      "text": "Joining the team beneath your position as Team Magnificent grows."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "line": 118,
+      "text": "You&rsquo;re first in line. The next placement will land here."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "line": 129,
+      "text": "Every prospect who lands here sees more team than the prospect who landed an hour ago. The momentum compounds. Your placement at #"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 206,
+      "text": "Live position center"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 217,
+      "text": "Your video is complete, your position is live, and the team is still moving beneath you. The next step is simple: talk with"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 232,
+      "text": "Your position"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 235,
+      "text": "Placed"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 240,
+      "text": "Beneath you · live"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 243,
+      "text": "New placements joining the team after your position as Team Magnificent grows."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 264,
+      "text": "Connecting to the live position stream."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 265,
+      "text": "The next team placement will appear here."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "line": 43,
+      "text": "Here is something you may not have noticed. While you were watching, you were placed into our team's line. Not enrolled, not signed up - placed, so we could show you something real."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "line": 468,
+      "text": "When the video finishes, continue to your live team position."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "packages/shared/src/compliance.ts",
+      "line": 12,
+      "text": "Placement or queue-position-equals-leg-position promises"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "packages/shared/src/compliance.ts",
+      "line": 22,
+      "text": "Queue positions and momentum displays demonstrate team activity in real time and"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "packages/shared/src/compliance.ts",
+      "line": 23,
+      "text": "do not guarantee any final placement, compensation, or earnings outcome."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "packages/shared/src/compliance.ts",
+      "line": 25,
+      "text": "This page contains no income claims, placement promises, or guarantees of any kind."
+    },
+    {
+      "ruleId": "canonical_disclaimer",
+      "severity": "allowed",
+      "description": "The canonical .com disclaimer is allowed only through packages/shared/src/compliance.ts.",
+      "file": "packages/shared/src/compliance.ts",
+      "line": 23,
+      "text": "do not guarantee any final placement, compensation, or earnings outcome."
+    },
+    {
+      "ruleId": "canonical_disclaimer",
+      "severity": "allowed",
+      "description": "The canonical .com disclaimer is allowed only through packages/shared/src/compliance.ts.",
+      "file": "packages/shared/src/compliance.ts",
+      "line": 25,
+      "text": "This page contains no income claims, placement promises, or guarantees of any kind."
+    }
+  ],
+  "scannedStrings": [
+    {
+      "file": "apps/com/src/lib/api.ts",
+      "lineNumber": 130,
+      "kind": "literal:Accept",
+      "text": "application/json"
+    },
+    {
+      "file": "apps/com/src/lib/api.ts",
+      "lineNumber": 193,
+      "kind": "literal:Content-Type",
+      "text": "application/json"
+    },
+    {
+      "file": "apps/com/src/lib/api.ts",
+      "lineNumber": 193,
+      "kind": "literal:Accept",
+      "text": "application/json"
+    },
+    {
+      "file": "apps/com/src/lib/api.ts",
+      "lineNumber": 284,
+      "kind": "literal:Content-Type",
+      "text": "application/json"
+    },
+    {
+      "file": "apps/com/src/lib/api.ts",
+      "lineNumber": 284,
+      "kind": "literal:Accept",
+      "text": "application/json"
+    },
+    {
+      "file": "apps/com/src/lib/api.ts",
+      "lineNumber": 373,
+      "kind": "literal:Content-Type",
+      "text": "application/json"
+    },
+    {
+      "file": "apps/com/src/lib/api.ts",
+      "lineNumber": 373,
+      "kind": "literal:Accept",
+      "text": "application/json"
+    },
+    {
+      "file": "apps/com/src/lib/api.ts",
+      "lineNumber": 459,
+      "kind": "literal:Accept",
+      "text": "application/json"
+    },
+    {
+      "file": "apps/com/src/lib/api.ts",
+      "lineNumber": 528,
+      "kind": "literal:Content-Type",
+      "text": "application/json"
+    },
+    {
+      "file": "apps/com/src/lib/api.ts",
+      "lineNumber": 528,
+      "kind": "literal:Accept",
+      "text": "application/json"
+    },
+    {
+      "file": "apps/com/src/lib/api.ts",
+      "lineNumber": 563,
+      "kind": "literal:Content-Type",
+      "text": "application/json"
+    },
+    {
+      "file": "apps/com/src/lib/api.ts",
+      "lineNumber": 563,
+      "kind": "literal:Accept",
+      "text": "application/json"
+    },
+    {
+      "file": "apps/com/src/main.tsx",
+      "lineNumber": 8,
+      "kind": "literal",
+      "text": "root element missing"
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 92,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 94,
+      "kind": "jsx_text",
+      "text": "Opening your dashboard…"
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 105,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 108,
+      "kind": "jsx_text",
+      "text": "This link has expired or has already been used."
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 111,
+      "kind": "jsx_text",
+      "text": "Request a fresh link below, or ask whoever invited you to send a new one."
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 118,
+      "kind": "jsx_text",
+      "text": "Get a fresh link"
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 131,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 134,
+      "kind": "jsx_text",
+      "text": "Hold on a moment."
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 137,
+      "kind": "jsx_text",
+      "text": "Too many requests from this device. Try again in a few minutes."
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 149,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 152,
+      "kind": "jsx_text",
+      "text": "Something didn't load."
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 155,
+      "kind": "jsx_text",
+      "text": "Check your connection and try again."
+    },
+    {
+      "file": "apps/com/src/routes/p-login-redeem.tsx",
+      "lineNumber": 163,
+      "kind": "jsx_text",
+      "text": "Try again"
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 103,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 106,
+      "kind": "jsx_text",
+      "text": "Get back to your dashboard."
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 109,
+      "kind": "jsx_text",
+      "text": "Enter the mobile number your invitation was sent to. We'll text you a link to walk right back in."
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 115,
+      "kind": "jsx_text",
+      "text": "Mobile number"
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 123,
+      "kind": "jsx_attribute:placeholder",
+      "text": "(555) 123-4567"
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 134,
+      "kind": "literal",
+      "text": "Sending…"
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 134,
+      "kind": "literal",
+      "text": "Text me the link"
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 139,
+      "kind": "jsx_text",
+      "text": "We only text people whose phone was used to invite them and who have asked for their sponsor to reach out. If that's not you, ask whoever invited you for a fresh link."
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 157,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 160,
+      "kind": "jsx_text",
+      "text": "Check your phone."
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 163,
+      "kind": "jsx_text",
+      "text": "If that mobile number is on file, you'll receive a text with your re-entry link shortly. The link works for the next hour."
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 167,
+      "kind": "jsx_text",
+      "text": "Didn't receive it? Ask whoever invited you to send a fresh link."
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 179,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 182,
+      "kind": "jsx_text",
+      "text": "Hold on a moment."
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 185,
+      "kind": "jsx_text",
+      "text": "Too many requests from this device. Try again in a few minutes."
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 192,
+      "kind": "jsx_text",
+      "text": "Back"
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 204,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 207,
+      "kind": "jsx_text",
+      "text": "Something didn't load."
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 210,
+      "kind": "jsx_text",
+      "text": "Check your connection and try again."
+    },
+    {
+      "file": "apps/com/src/routes/p-login.tsx",
+      "lineNumber": 217,
+      "kind": "jsx_text",
+      "text": "Try again"
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 109,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 111,
+      "kind": "jsx_text",
+      "text": "Loading…"
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 143,
+      "kind": "jsx_text",
+      "text": "This link isn’t valid."
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 146,
+      "kind": "jsx_text",
+      "text": "Double-check the link, or ask the person who invited you for a fresh one."
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 182,
+      "kind": "literal",
+      "text": "the person who invited you"
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 186,
+      "kind": "literal",
+      "text": "Hi, the link you sent me expired. Could you send a fresh one?"
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 205,
+      "kind": "jsx_text",
+      "text": "This invitation has expired."
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 208,
+      "kind": "jsx_text",
+      "text": "Ask"
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 208,
+      "kind": "jsx_text",
+      "text": "for a fresh link."
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 217,
+      "kind": "jsx_text",
+      "text": "☎"
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 227,
+      "kind": "literal",
+      "text": "Copied — paste into your SMS app"
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 243,
+      "kind": "literal",
+      "text": "your sponsor"
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 250,
+      "kind": "jsx_text",
+      "text": "Welcome to Team Magnificent."
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 253,
+      "kind": "jsx_text",
+      "text": "will reach out to set up your access code for the team site."
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 253,
+      "kind": "jsx_text",
+      "text": "You’re in. Your sponsor"
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 273,
+      "kind": "jsx_text",
+      "text": "Something didn’t load."
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 276,
+      "kind": "jsx_text",
+      "text": "Check your connection and try again."
+    },
+    {
+      "file": "apps/com/src/routes/p-token.tsx",
+      "lineNumber": 284,
+      "kind": "jsx_text",
+      "text": "Try again"
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 74,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 76,
+      "kind": "jsx_text",
+      "text": "Loading…"
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 101,
+      "kind": "jsx_text",
+      "text": "This link is not valid."
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 104,
+      "kind": "jsx_text",
+      "text": "Check the link, or ask the person who shared it for a fresh one."
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 117,
+      "kind": "literal",
+      "text": "the person who shared it"
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 124,
+      "kind": "jsx_text",
+      "text": "This link has expired."
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 127,
+      "kind": "jsx_text",
+      "text": "Ask"
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 127,
+      "kind": "jsx_text",
+      "text": "for a fresh link."
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 134,
+      "kind": "literal",
+      "text": "your sponsor"
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 141,
+      "kind": "jsx_text",
+      "text": "Welcome to Team Magnificent."
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 144,
+      "kind": "jsx_text",
+      "text": "will reach out to set up your access code for the team site."
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 144,
+      "kind": "jsx_text",
+      "text": "You are in. Your sponsor"
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 158,
+      "kind": "jsx_text",
+      "text": "Something did not load."
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 161,
+      "kind": "jsx_text",
+      "text": "Check your connection and try again."
+    },
+    {
+      "file": "apps/com/src/routes/rvm-token.tsx",
+      "lineNumber": 169,
+      "kind": "jsx_text",
+      "text": "Try again"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx",
+      "lineNumber": 32,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx",
+      "lineNumber": 41,
+      "kind": "jsx_text",
+      "text": "&larr; Back to the video"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx",
+      "lineNumber": 46,
+      "kind": "jsx_text",
+      "text": "Live · holding tank"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "lineNumber": 43,
+      "kind": "jsx_text",
+      "text": "Invited by"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "lineNumber": 47,
+      "kind": "jsx_text",
+      "text": "You saw it."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "lineNumber": 48,
+      "kind": "jsx_text",
+      "text": "in."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "lineNumber": 48,
+      "kind": "jsx_text",
+      "text": "You&rsquo;re"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "lineNumber": 54,
+      "kind": "jsx_text",
+      "text": "The video did its work. You&rsquo;re now part of the team that&rsquo;s building the fastest-moving wellness movement in network marketing. Welcome."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "lineNumber": 63,
+      "kind": "jsx_text",
+      "text": "Your position"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "lineNumber": 65,
+      "kind": "jsx_text",
+      "text": "#"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "lineNumber": 70,
+      "kind": "jsx_text",
+      "text": "Held by"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "lineNumber": 72,
+      "kind": "jsx_text",
+      "text": "You&rsquo;ve been placed in the Team Magnificent holding tank — the live demonstration of how the team is forming around you, in real time."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx",
+      "lineNumber": 78,
+      "kind": "jsx_text",
+      "text": "Placement"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "lineNumber": 24,
+      "kind": "jsx_text",
+      "text": "The market you just stepped into"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "lineNumber": 25,
+      "kind": "jsx_text",
+      "text": "This isn&rsquo;t a small room."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "lineNumber": 29,
+      "kind": "jsx_text",
+      "text": "GLP-THREE is a natural alternative in one of the fastest-expanding wellness categories on the planet. The numbers aren&rsquo;t ours — they&rsquo;re public. We&rsquo;re just standing where they point."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "lineNumber": 37,
+      "kind": "jsx_attribute:label",
+      "text": "Global wellness market"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "lineNumber": 38,
+      "kind": "jsx_attribute:label",
+      "text": "GLP-1 alternatives by 2033"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "lineNumber": 39,
+      "kind": "jsx_attribute:label",
+      "text": "Americans overweight"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "lineNumber": 40,
+      "kind": "jsx_attribute:label",
+      "text": "Cost of synthetic alternatives"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 18,
+      "kind": "literal:label",
+      "text": "1 leader"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 19,
+      "kind": "literal:label",
+      "text": "2 builders"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 20,
+      "kind": "literal:label",
+      "text": "4 builders"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 21,
+      "kind": "literal:label",
+      "text": "8 builders"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 22,
+      "kind": "literal:label",
+      "text": "16 builders"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 23,
+      "kind": "literal:label",
+      "text": "32 builders"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 24,
+      "kind": "literal:label",
+      "text": "64 builders"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 50,
+      "kind": "jsx_text",
+      "text": "How teams build in this market"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 51,
+      "kind": "jsx_text",
+      "text": "Two people. Then they find two."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 55,
+      "kind": "jsx_text",
+      "text": "The math is simple and the rhythm is fast. Each person finds"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 56,
+      "kind": "jsx_text",
+      "text": ". Those two each find two. The team doubles. We move on a"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 56,
+      "kind": "jsx_text",
+      "text": "two"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 57,
+      "kind": "jsx_text",
+      "text": "72-hour"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 57,
+      "kind": "jsx_text",
+      "text": "rhythm — speed is the multiplier, not the exception."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 82,
+      "kind": "jsx_text",
+      "text": "↓"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 83,
+      "kind": "jsx_text",
+      "text": "The math points here"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 84,
+      "kind": "jsx_text",
+      "text": "100,000"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 86,
+      "kind": "jsx_text",
+      "text": "Qualified Brand Ambassadors. That&rsquo;s the team we&rsquo;re building."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 92,
+      "kind": "jsx_text",
+      "text": "The team doubles when each person finds two. One becomes two, two becomes four, four becomes eight — that&rsquo;s how speed compounds."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 96,
+      "kind": "jsx_text",
+      "text": "Find your first two people in 72 hours. It&rsquo;s not a deadline — it&rsquo;s a rhythm. The team moves at the speed of its leaders."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
+      "lineNumber": 100,
+      "kind": "jsx_text",
+      "text": "Big movements get built one daily action at a time. The system handles the scale. You handle the relationships."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 77,
+      "kind": "jsx_text",
+      "text": "Your place in the live team"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 78,
+      "kind": "jsx_text",
+      "text": "The team is forming beneath you. Right now."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 82,
+      "kind": "jsx_text",
+      "text": ". The numbers below update live. Watch what happens when you stay on this page."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 82,
+      "kind": "jsx_text",
+      "text": "You&rsquo;re position #"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 90,
+      "kind": "jsx_text",
+      "text": "#"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 91,
+      "kind": "jsx_text",
+      "text": "You"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 99,
+      "kind": "jsx_text",
+      "text": "Placed beneath you · live"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 103,
+      "kind": "jsx_text",
+      "text": "Joining the team beneath your position as Team Magnificent grows."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 110,
+      "kind": "jsx_text",
+      "text": "Live placements"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 111,
+      "kind": "jsx_text",
+      "text": "↑ growing"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 115,
+      "kind": "jsx_text",
+      "text": "Connecting&hellip;"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 118,
+      "kind": "jsx_text",
+      "text": "You&rsquo;re first in line. The next placement will land here."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx",
+      "lineNumber": 173,
+      "kind": "jsx_text",
+      "text": "#"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 59,
+      "kind": "jsx_text",
+      "text": "Why Team Magnificent moves faster"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 60,
+      "kind": "jsx_text",
+      "text": "We work together. With the same goal."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 64,
+      "kind": "jsx_text",
+      "text": "Most teams in network marketing recruit alone — every Brand Ambassador running their own scattered tools, their own scattered process. Team Magnificent built the technology that changes that."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 73,
+      "kind": "jsx_text",
+      "text": "&ldquo;We&rsquo;ve harnessed the power of our team using"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 74,
+      "kind": "jsx_text",
+      "text": "so we&rsquo;re working together with the"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 74,
+      "kind": "jsx_text",
+      "text": "technology"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 76,
+      "kind": "jsx_text",
+      "text": "— to win.&rdquo;"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 76,
+      "kind": "jsx_text",
+      "text": "same goal"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 78,
+      "kind": "jsx_text",
+      "text": "— Kevin L. Gardner, founding co-leader"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 82,
+      "kind": "jsx_text",
+      "text": "Our commitment · the goal"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 83,
+      "kind": "jsx_text",
+      "text": "100,000"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 85,
+      "kind": "jsx_text",
+      "text": "Qualified Brand Ambassadors on Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 88,
+      "kind": "jsx_text",
+      "text": "Our mission is simple — empower every Brand Ambassador to build their business, and help each one find at minimum two qualified recruits who do the same. Until we reach one hundred thousand, together."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 98,
+      "kind": "jsx_attribute:label",
+      "text": "Brand Ambassadors active in the last 24 hours"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 103,
+      "kind": "jsx_attribute:label",
+      "text": "Invitations sent across the team today"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 108,
+      "kind": "jsx_attribute:label",
+      "text": "New placements added to the team in 24h"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 113,
+      "kind": "jsx_attribute:label",
+      "text": "Recruitment velocity through shared OS (week over week)"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 119,
+      "kind": "jsx_text",
+      "text": "One team. One pool. One system."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 121,
+      "kind": "jsx_text",
+      "text": "invited you, that invitation didn&rsquo;t move alone. It moved alongside every other Brand Ambassador on Team Magnificent — feeding the same dashboard, the same momentum, the same proof you&rsquo;re seeing right now. The team&rsquo;s velocity is the sum of every BA&rsquo;s work, made visible through the same shared OS."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 121,
+      "kind": "jsx_text",
+      "text": "When"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 129,
+      "kind": "jsx_text",
+      "text": "Every prospect who lands here sees more team than the prospect who landed an hour ago. The momentum compounds. Your placement at #"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 131,
+      "kind": "jsx_text",
+      "text": "is the result of every Brand Ambassador who came before you. The team at #500, #1,000, #5,000 will exist because of every Brand Ambassador who joins after."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 137,
+      "kind": "jsx_text",
+      "text": "Built to win. Built to win together."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx",
+      "lineNumber": 141,
+      "kind": "jsx_text",
+      "text": "Operational architecture · numbers of record · no performance promise"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 58,
+      "kind": "jsx_text",
+      "text": "Your next move"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 59,
+      "kind": "jsx_text",
+      "text": "Let&rsquo;s have a real conversation about this unfolding new opportunity."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 63,
+      "kind": "jsx_text",
+      "text": "Two ways to take the next step — a personal call with"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 64,
+      "kind": "jsx_text",
+      "text": ", or the next live team event. Both lead to the same place: two humans, an honest conversation, real context for your decision."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 116,
+      "kind": "literal",
+      "text": "You're already enrolled — your sponsor will be in touch."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 118,
+      "kind": "literal",
+      "text": "This invitation has expired — ask your sponsor for a fresh one."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 120,
+      "kind": "literal",
+      "text": "Something went wrong. Please try again."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 127,
+      "kind": "jsx_text",
+      "text": "You&rsquo;re on the list"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 130,
+      "kind": "jsx_text",
+      "text": "will reach out personally."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 133,
+      "kind": "jsx_text",
+      "text": "got the alert and will be in touch — keep an eye on the number you got the invite from."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 133,
+      "kind": "jsx_text",
+      "text": "Your request landed."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 142,
+      "kind": "jsx_text",
+      "text": "A real conversation with"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 144,
+      "kind": "jsx_text",
+      "text": "I&rsquo;m ready to talk with"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 145,
+      "kind": "jsx_text",
+      "text": "."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 148,
+      "kind": "jsx_text",
+      "text": "This is where it gets human."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 148,
+      "kind": "jsx_text",
+      "text": "will reach out personally to understand where you are and what this opportunity could mean for your future."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 157,
+      "kind": "jsx_attribute:label",
+      "text": "I'm interested — I want to understand more."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 162,
+      "kind": "jsx_attribute:label",
+      "text": "I'm ready to join Team Magnificent."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 167,
+      "kind": "jsx_attribute:label",
+      "text": "I have specific questions to work through."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 178,
+      "kind": "literal",
+      "text": "Sending…"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 178,
+      "kind": "literal",
+      "text": "Yes — let's talk"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 231,
+      "kind": "literal",
+      "text": "That doesn't look like a valid email address."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 233,
+      "kind": "literal",
+      "text": "Please enter your name."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 235,
+      "kind": "literal",
+      "text": "There's no upcoming event scheduled right now. Your sponsor can let you know when the next one is."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 237,
+      "kind": "literal",
+      "text": "This invitation has expired — ask your sponsor for a fresh one."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 239,
+      "kind": "literal",
+      "text": "Something went wrong. Please try again."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 246,
+      "kind": "jsx_text",
+      "text": "Reserved"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 248,
+      "kind": "jsx_text",
+      "text": "You&rsquo;re on the list for the next"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 249,
+      "kind": "jsx_text",
+      "text": "."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 249,
+      "kind": "jsx_text",
+      "text": "live event"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 253,
+      "kind": "jsx_text",
+      "text": "will follow up with the Zoom link before it starts."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 262,
+      "kind": "jsx_text",
+      "text": "Join us live"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 264,
+      "kind": "jsx_text",
+      "text": "."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 264,
+      "kind": "jsx_text",
+      "text": "live"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 264,
+      "kind": "jsx_text",
+      "text": "The next Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 268,
+      "kind": "jsx_text",
+      "text": "Hosted by Kevin L. Gardner and Paul Barrios. Open conversation, real team, real momentum — see for yourself."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 274,
+      "kind": "jsx_text",
+      "text": "Name"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 277,
+      "kind": "jsx_attribute:placeholder",
+      "text": "Your name"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 283,
+      "kind": "jsx_text",
+      "text": "Email"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 286,
+      "kind": "jsx_attribute:placeholder",
+      "text": "Where to send the link"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 300,
+      "kind": "literal",
+      "text": "Reserve my seat"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 300,
+      "kind": "literal",
+      "text": "Reserving…"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 337,
+      "kind": "jsx_text",
+      "text": "The next live event · hosted by Kevin &amp; Paul"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 346,
+      "kind": "jsx_text",
+      "text": "The next live event · hosted by Kevin &amp; Paul"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 362,
+      "kind": "jsx_text",
+      "text": "Happening now"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 369,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Countdown to next live event"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 371,
+      "kind": "jsx_attribute:label",
+      "text": "days"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 372,
+      "kind": "jsx_attribute:label",
+      "text": "hours"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 373,
+      "kind": "jsx_attribute:label",
+      "text": "min"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx",
+      "lineNumber": 374,
+      "kind": "jsx_attribute:label",
+      "text": "sec"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/07-Footer.tsx",
+      "lineNumber": 33,
+      "kind": "jsx_text",
+      "text": "Team"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/07-Footer.tsx",
+      "lineNumber": 34,
+      "kind": "jsx_text",
+      "text": "Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/07-Footer.tsx",
+      "lineNumber": 38,
+      "kind": "jsx_text",
+      "text": "We build people before we build volume."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 203,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 206,
+      "kind": "jsx_text",
+      "text": "Live position center"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 212,
+      "kind": "jsx_text",
+      "text": "Invited by"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 214,
+      "kind": "jsx_text",
+      "text": ", this is where you are."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 217,
+      "kind": "jsx_text",
+      "text": "Your video is complete, your position is live, and the team is still moving beneath you. The next step is simple: talk with"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 219,
+      "kind": "jsx_text",
+      "text": "when you are ready."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 223,
+      "kind": "jsx_text",
+      "text": "Talk with"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 226,
+      "kind": "jsx_text",
+      "text": "Watch live motion"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 232,
+      "kind": "jsx_text",
+      "text": "Your position"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 233,
+      "kind": "jsx_text",
+      "text": "#"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 235,
+      "kind": "jsx_text",
+      "text": "Placed"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 240,
+      "kind": "jsx_text",
+      "text": "Beneath you · live"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 243,
+      "kind": "jsx_text",
+      "text": "New placements joining the team after your position as Team Magnificent grows."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 249,
+      "kind": "jsx_text",
+      "text": "Next live decision point"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 255,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Recent team placements"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 257,
+      "kind": "jsx_text",
+      "text": "Team momentum tape"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 264,
+      "kind": "literal",
+      "text": "Connecting to the live position stream."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 265,
+      "kind": "literal",
+      "text": "The next team placement will appear here."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 270,
+      "kind": "jsx_text",
+      "text": "#"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 272,
+      "kind": "jsx_text",
+      "text": "."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 283,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Compact live team stats"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 284,
+      "kind": "jsx_attribute:label",
+      "text": "BAs active · 24h"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 285,
+      "kind": "jsx_attribute:label",
+      "text": "Invites today"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 286,
+      "kind": "jsx_attribute:label",
+      "text": "Placements · 24h"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 308,
+      "kind": "jsx_text",
+      "text": "Next Team Magnificent live · check back soon"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 317,
+      "kind": "jsx_text",
+      "text": "Next Team Magnificent live · check back soon"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 331,
+      "kind": "jsx_attribute:label",
+      "text": "days"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 332,
+      "kind": "jsx_attribute:label",
+      "text": "hrs"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 333,
+      "kind": "jsx_attribute:label",
+      "text": "min"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 334,
+      "kind": "jsx_attribute:label",
+      "text": "sec"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 361,
+      "kind": "literal",
+      "text": "just now"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 26,
+      "kind": "literal:eyebrow",
+      "text": "A Personal Invitation · Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 27,
+      "kind": "literal:headlineSuffix",
+      "text": "thinks highly of you."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 28,
+      "kind": "literal:subline",
+      "text": "And has information that is timely and powerful to share with you."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 29,
+      "kind": "literal:instruction",
+      "text": "You were not chosen randomly. You were chosen deliberately."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 35,
+      "kind": "literal",
+      "text": "What you are about to see is three things happening at the same time. A category-defining product. A team that is forming in this exact window. A moment in the market that won't come around again."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 36,
+      "kind": "literal",
+      "text": "That is what the invitation is about. Not a sales call - a briefing on all three. Read it the way you would read a memo from a friend who has done the homework."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 41,
+      "kind": "literal:headline",
+      "text": "Now that you've seen the video - what's next?"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 43,
+      "kind": "literal",
+      "text": "Here is something you may not have noticed. While you were watching, you were placed into our team's line. Not enrolled, not signed up - placed, so we could show you something real."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 44,
+      "kind": "literal",
+      "text": "The team you are about to see is being built right now, in real time. This is the mechanism we are so excited about - how our teams are actually built, and why the opportunity in front of you is real. We wanted you to see it for yourself."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 46,
+      "kind": "literal:cta",
+      "text": "See the team forming around you →"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 53,
+      "kind": "literal:eyebrow",
+      "text": "A Team Magnificent Message · Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 54,
+      "kind": "literal:headlineSuffix",
+      "text": "has information for you."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 56,
+      "kind": "literal:subline",
+      "text": "You may have heard a brief message first. This page gives you the fuller context: the product, the timing, and why it was worth sending."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 57,
+      "kind": "literal:instruction",
+      "text": "No pressure, no obligation - just clear information to consider."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 63,
+      "kind": "literal",
+      "text": "A short message can only point to the door. The page in front of you gives the full picture: the product, the timing, and the team activity behind this moment."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 64,
+      "kind": "literal",
+      "text": "Start with the video, then use the rest of the page as a reference. It is information you can consider privately and talk through if it makes sense."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 69,
+      "kind": "literal:headline",
+      "text": "Now that you have seen the video - here is the next view."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 71,
+      "kind": "literal",
+      "text": "Once the video is complete, this page opens a private team view so you can see the momentum this message is connected to."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 72,
+      "kind": "literal",
+      "text": "That next screen shows the team activity, the simple next steps, and how to start a real conversation if what you saw raised questions."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
+      "lineNumber": 74,
+      "kind": "literal:cta",
+      "text": "See your team view →"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "lineNumber": 32,
+      "kind": "literal",
+      "text": "GLP-THREE launched January 2026 · trademark and patent pending"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "lineNumber": 33,
+      "kind": "literal",
+      "text": "The first all-natural GLP-1 replacement"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "lineNumber": 34,
+      "kind": "literal",
+      "text": "$6.8T global wellness economy · the category is moving"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "lineNumber": 35,
+      "kind": "literal",
+      "text": "72% of American adults are overweight · the market is wide open"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "lineNumber": 36,
+      "kind": "literal",
+      "text": "Real people. Real results. No injections, no prescription."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx",
+      "lineNumber": 47,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Team Magnificent activity ticker"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/01-PersonalOpen.tsx",
+      "lineNumber": 102,
+      "kind": "jsx_text",
+      "text": ","
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/01-PersonalOpen.tsx",
+      "lineNumber": 134,
+      "kind": "jsx_text",
+      "text": "“"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/01-PersonalOpen.tsx",
+      "lineNumber": 134,
+      "kind": "jsx_text",
+      "text": "”"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/01-PersonalOpen.tsx",
+      "lineNumber": 159,
+      "kind": "jsx_text",
+      "text": "Take your time with what follows."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/02-Invitation.tsx",
+      "lineNumber": 47,
+      "kind": "jsx_attribute:aria-label",
+      "text": "The Invitation"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 76,
+      "kind": "literal",
+      "text": "youtu.be"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 248,
+      "kind": "literal",
+      "text": "[tm-video] milestone post failed"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 253,
+      "kind": "literal",
+      "text": "[tm-video] milestone post threw"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 268,
+      "kind": "literal",
+      "text": ".tm-drdan-video__yt"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 395,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Dr. Dan's Video"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 397,
+      "kind": "jsx_text",
+      "text": "Part 1 — The Product"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 399,
+      "kind": "jsx_text",
+      "text": "Watch Dr. Dan. Then Everything Makes Sense."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 406,
+      "kind": "jsx_text",
+      "text": "Dr. Dan Gubler · Chief Scientific Officer &amp; Chief Formulator"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 409,
+      "kind": "jsx_text",
+      "text": "Caltech PhD in Organic Chemistry"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 410,
+      "kind": "jsx_text",
+      "text": "16 patents"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 411,
+      "kind": "jsx_text",
+      "text": "70+ supplements formulated"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 412,
+      "kind": "jsx_text",
+      "text": "1.3M followers"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 413,
+      "kind": "jsx_text",
+      "text": "Top-50 podcast"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 423,
+      "kind": "jsx_attribute:title",
+      "text": "Dr. Dan Gubler GLP-THREE product video"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 431,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Dr. Dan Gubler — GLP-THREE product video"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 438,
+      "kind": "literal",
+      "text": "Loading video…"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 438,
+      "kind": "literal",
+      "text": "Press play"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 444,
+      "kind": "jsx_text",
+      "text": "Video did not load."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 446,
+      "kind": "jsx_text",
+      "text": "Open Dr. Dan's GLP-THREE video in YouTube, then come back and continue."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 454,
+      "kind": "jsx_text",
+      "text": "Open video"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 461,
+      "kind": "jsx_text",
+      "text": "I finished the video"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 468,
+      "kind": "jsx_text",
+      "text": "When the video finishes, continue to your live team position."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 474,
+      "kind": "jsx_text",
+      "text": "I finished the video"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
+      "lineNumber": 480,
+      "kind": "jsx_text",
+      "text": "Then scroll. The rest of this page expands on what he just told you."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 42,
+      "kind": "literal:value",
+      "text": "$6.8T"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 46,
+      "kind": "literal:label",
+      "text": "global wellness economy"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 47,
+      "kind": "literal:source",
+      "text": "Global Wellness Institute, 2025"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 50,
+      "kind": "literal:value",
+      "text": "$200B"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 54,
+      "kind": "literal:label",
+      "text": "GLP-1 alternatives market projected by 2033"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 55,
+      "kind": "literal:source",
+      "text": "Grand View Research, 2025"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 61,
+      "kind": "literal:label",
+      "text": "American adults overweight or obese"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 62,
+      "kind": "literal:source",
+      "text": "CDC, 2024"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 68,
+      "kind": "literal:countSuffix",
+      "text": "/mo"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 69,
+      "kind": "literal:label",
+      "text": "average synthetic GLP-1 cost without insurance"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 70,
+      "kind": "literal:source",
+      "text": "J.P. Morgan / WebMD / AMA, 2025–2026"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 97,
+      "kind": "jsx_attribute:aria-label",
+      "text": "The Market"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 100,
+      "kind": "jsx_text",
+      "text": "A $6.8 Trillion Market."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 102,
+      "kind": "jsx_text",
+      "text": "And A Problem Nobody Has Solved."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx",
+      "lineNumber": 112,
+      "kind": "jsx_text",
+      "text": "You are watching a generational shift in how people manage weight. It has already started. It is accelerating."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 24,
+      "kind": "jsx_attribute:aria-label",
+      "text": "The Pharmaceutical Solution"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 26,
+      "kind": "jsx_text",
+      "text": "Part 2 — Context"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 28,
+      "kind": "jsx_text",
+      "text": "What Is Already In The Market."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 31,
+      "kind": "jsx_text",
+      "text": "The injectable GLP-1 category is the reason the world is paying attention. It works. It also has a profile worth understanding."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 37,
+      "kind": "jsx_text",
+      "text": "Mechanism"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 38,
+      "kind": "jsx_text",
+      "text": "GLP-1 receptor agonists"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 40,
+      "kind": "jsx_text",
+      "text": "Ozempic, Wegovy, Mounjaro and others belong to a class called GLP-1 receptor agonists. They mimic a hormone the body makes naturally and signal the brain that you are full. Appetite quiets. Stomach emptying slows. People lose weight."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 46,
+      "kind": "jsx_text",
+      "text": "Delivery is by injection — weekly for the most common dosing. Use is typically continuous; the effect tapers when the injections stop."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 53,
+      "kind": "jsx_text",
+      "text": "Cost &amp; profile"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 54,
+      "kind": "jsx_text",
+      "text": "What it costs to be on it"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 56,
+      "kind": "jsx_text",
+      "text": "Out-of-pocket cost runs roughly $1,000 to $1,500 per month. Many insurance plans do not cover weight management on these drugs, leaving the cost on the patient."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 61,
+      "kind": "jsx_text",
+      "text": "The known side-effect profile includes nausea, slowed gastric emptying (gastroparesis), pancreatitis risk, lean muscle loss, and a recognizable change in facial appearance the press has labeled \"Ozempic face.\""
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 67,
+      "kind": "jsx_text",
+      "text": "Pattern users describe: get on, results come, go off, weight returns."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/05-PharmaceuticalSolution.tsx",
+      "lineNumber": 74,
+      "kind": "jsx_text",
+      "text": "None of this is a knock on the category. It is the starting line everyone is comparing against. What comes next on this page is how that comparison changed."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 35,
+      "kind": "literal:injectable",
+      "text": "Synthetic GLP-1 receptor agonist — pharmaceutical."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 36,
+      "kind": "literal:glpThree",
+      "text": "MBC-267 peptide complex supporting your body's own GLP-1 signaling."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 40,
+      "kind": "literal:injectable",
+      "text": "Weekly injection, prescription required."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 41,
+      "kind": "literal:glpThree",
+      "text": "Liquid dropper. ¾ of a dropper, 30 minutes before a meal."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 44,
+      "kind": "literal:dimension",
+      "text": "Monthly cost"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 45,
+      "kind": "literal:injectable",
+      "text": "$1,000–$1,500 out of pocket without coverage."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 46,
+      "kind": "literal:glpThree",
+      "text": "A fraction of the cost."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 49,
+      "kind": "literal:dimension",
+      "text": "Side-effect profile"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 50,
+      "kind": "literal:injectable",
+      "text": "Nausea, gastric slowing, pancreatitis risk, muscle loss."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 51,
+      "kind": "literal:glpThree",
+      "text": "All-natural ingredients. Trademark and patent pending."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 55,
+      "kind": "literal:injectable",
+      "text": "Effect tapers when injections stop."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 56,
+      "kind": "literal:glpThree",
+      "text": "Designed to be sustainable — built around what the body already does."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 62,
+      "kind": "jsx_attribute:aria-label",
+      "text": "The Natural Path"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 64,
+      "kind": "jsx_text",
+      "text": "Part 3 — The Pivot"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 66,
+      "kind": "jsx_text",
+      "text": "Natural. Patented. No Needle. No Prescription."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 69,
+      "kind": "jsx_text",
+      "text": "GLP-THREE was built for the same outcome the category is chasing — through a different door. Same destination. Different mechanism. Different profile. Different cost."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 76,
+      "kind": "jsx_text",
+      "text": "The ingredient"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 77,
+      "kind": "jsx_text",
+      "text": "MBC-267"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 79,
+      "kind": "jsx_text",
+      "text": "A patented peptide complex found naturally in salmon and mushrooms. It supports your body's own GLP-1 signaling rather than substituting for it. The peptide is delivered orally as a liquid dropper — ¾ of a dropper, thirty minutes before a meal."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 90,
+      "kind": "jsx_text",
+      "text": "Injectable GLP-1"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx",
+      "lineNumber": 93,
+      "kind": "jsx_text",
+      "text": "GLP-THREE"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 41,
+      "kind": "literal:title",
+      "text": "Ingredients & mechanism"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 43,
+      "kind": "literal",
+      "text": "GLP-THREE is built around MBC-267, a patented peptide complex found naturally in salmon and certain mushrooms."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 44,
+      "kind": "literal",
+      "text": "MBC-267 supports the body's own GLP-1 signaling pathway rather than substituting a synthetic agonist. The mechanism is metabolic support, not chemical replacement."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 45,
+      "kind": "literal",
+      "text": "The full ingredient list is on the bottle and in the PDF dossier below."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 50,
+      "kind": "literal:title",
+      "text": "Patent & scientific backing"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 52,
+      "kind": "literal",
+      "text": "Trademark and patent pending. The peptide complex itself is patented; the formulation is proprietary."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 53,
+      "kind": "literal",
+      "text": "Dr. Dan Gubler — Chief Scientific Officer and Chief Formulator — developed the product. His scientific record: Caltech PhD in Organic Chemistry, sixteen patents, more than seventy supplements formulated across his career, a top-50 podcast on supplement science, and a public following of 1.3 million."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 58,
+      "kind": "literal:title",
+      "text": "Manufacturing standards"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 60,
+      "kind": "literal",
+      "text": "Manufactured to current Good Manufacturing Practice (cGMP) standards."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 61,
+      "kind": "literal",
+      "text": "Quality, identity, and potency are verified at multiple stages of production. The dossier below contains the manufacturing summary."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 66,
+      "kind": "literal:title",
+      "text": "Usage protocol"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 68,
+      "kind": "literal",
+      "text": "GLP-THREE is taken as a liquid dropper."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 69,
+      "kind": "literal",
+      "text": "Three-quarters of a dropper, thirty minutes before a meal."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 70,
+      "kind": "literal",
+      "text": "Take consistently. The mechanism is metabolic — results compound with daily use, not from a single dose."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 75,
+      "kind": "literal:title",
+      "text": "Frequently asked questions"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 77,
+      "kind": "literal",
+      "text": "Is GLP-THREE a drug? No. It is a dietary supplement designed to support your body's own GLP-1 signaling. It is not a prescription drug, not an injection, and not a GLP-1 receptor agonist."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 78,
+      "kind": "literal",
+      "text": "Do I need a prescription? No."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 79,
+      "kind": "literal",
+      "text": "Can I take it with other medications? Talk to your physician before combining any supplement with prescribed medication — including GLP-THREE."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 80,
+      "kind": "literal",
+      "text": "How long does a bottle last? Standard daily use is roughly one bottle per month. The dossier below has the exact specifications."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 93,
+      "kind": "jsx_attribute:aria-label",
+      "text": "The Dossier"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 95,
+      "kind": "jsx_text",
+      "text": "Part 4 — The Details"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 96,
+      "kind": "jsx_text",
+      "text": "The Dossier."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 98,
+      "kind": "jsx_text",
+      "text": "Five short briefings for the parts of the page that warranted more than a sentence. Open what you want. Skip what you do not."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 150,
+      "kind": "jsx_text",
+      "text": "↓"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 151,
+      "kind": "jsx_text",
+      "text": "Download the full dossier (PDF)"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 155,
+      "kind": "jsx_text",
+      "text": "↓"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx",
+      "lineNumber": 156,
+      "kind": "jsx_text",
+      "text": "Full dossier PDF coming soon"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/08-KevinStory.tsx",
+      "lineNumber": 31,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Kevin's Story"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/08-KevinStory.tsx",
+      "lineNumber": 33,
+      "kind": "jsx_text",
+      "text": "Part 5 — The Proof"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/08-KevinStory.tsx",
+      "lineNumber": 35,
+      "kind": "jsx_text",
+      "text": "The product works."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/08-KevinStory.tsx",
+      "lineNumber": 42,
+      "kind": "jsx_attribute:alt",
+      "text": "Kevin Gardner before and after using GLP-THREE — down 19 lbs, no injections, with measurements"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/08-KevinStory.tsx",
+      "lineNumber": 47,
+      "kind": "jsx_text",
+      "text": "Kevin Gardner. Down 19 lbs. No injections."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/08-KevinStory.tsx",
+      "lineNumber": 49,
+      "kind": "jsx_text",
+      "text": "Real people. Real results."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "lineNumber": 38,
+      "kind": "literal:title",
+      "text": "The awareness wave"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "lineNumber": 39,
+      "kind": "literal:body",
+      "text": "Two years ago, almost nobody outside the medical world had heard of GLP-1. Today it is on the cover of every magazine and in every other ad break. The category is mainstream. The market is paying attention."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "lineNumber": 43,
+      "kind": "literal:title",
+      "text": "The natural-alternative gap"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "lineNumber": 44,
+      "kind": "literal:body",
+      "text": "Every major movement in wellness eventually produces a natural alternative to the pharmaceutical version. The injectable category created the demand. The shelf for a natural answer has been empty."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "lineNumber": 48,
+      "kind": "literal:title",
+      "text": "The company's moment"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "lineNumber": 49,
+      "kind": "literal:body",
+      "text": "GLP-THREE launched in the third week of January 2026 with trademark and patent pending. The first all-natural GLP-1 replacement on the market. The window is opening, not closing."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "lineNumber": 55,
+      "kind": "jsx_attribute:aria-label",
+      "text": "The Timing"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "lineNumber": 57,
+      "kind": "jsx_text",
+      "text": "Part 6 — The Timing"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "lineNumber": 59,
+      "kind": "jsx_text",
+      "text": "Three things are converging at once."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "lineNumber": 80,
+      "kind": "jsx_text",
+      "text": "The moment all three are true is now."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
+      "lineNumber": 85,
+      "kind": "jsx_text",
+      "text": "Five years from now, everyone will know about this category. The people who moved first will have built something that runs without them. The people who waited will have watched."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/10-WhatsNext.tsx",
+      "lineNumber": 68,
+      "kind": "literal",
+      "text": "the person who invited you"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/10-WhatsNext.tsx",
+      "lineNumber": 72,
+      "kind": "jsx_attribute:aria-label",
+      "text": "What's next"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/10-WhatsNext.tsx",
+      "lineNumber": 74,
+      "kind": "jsx_text",
+      "text": "What&rsquo;s Next"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "lineNumber": 37,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Team Magnificent footer"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "lineNumber": 41,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "lineNumber": 43,
+      "kind": "jsx_text",
+      "text": "teammagnificent.com"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "lineNumber": 49,
+      "kind": "jsx_text",
+      "text": "."
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "lineNumber": 49,
+      "kind": "jsx_text",
+      "text": "Presented to you by"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/12-Leadership.tsx",
+      "lineNumber": 31,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Who leads this"
+    },
+    {
+      "file": "packages/shared/src/compliance.ts",
+      "lineNumber": 7,
+      "kind": "literal",
+      "text": "it shows really how it works, and people are signing up"
+    },
+    {
+      "file": "packages/shared/src/compliance.ts",
+      "lineNumber": 11,
+      "kind": "literal",
+      "text": "Income claims or earnings projections"
+    },
+    {
+      "file": "packages/shared/src/compliance.ts",
+      "lineNumber": 12,
+      "kind": "literal",
+      "text": "Placement or queue-position-equals-leg-position promises"
+    },
+    {
+      "file": "packages/shared/src/compliance.ts",
+      "lineNumber": 13,
+      "kind": "literal",
+      "text": "AI prospecting (Michael is BA-facing only)"
+    },
+    {
+      "file": "packages/shared/src/compliance.ts",
+      "lineNumber": 14,
+      "kind": "literal",
+      "text": "Compensation cycle math, volume math, or rank math"
+    },
+    {
+      "file": "packages/shared/src/compliance.ts",
+      "lineNumber": 15,
+      "kind": "literal",
+      "text": "A current head count of the team (the 100,000 goal is named, the current count is not)"
+    },
+    {
+      "file": "packages/shared/src/compliance.ts",
+      "lineNumber": 16,
+      "kind": "literal",
+      "text": "Direct comparison to other teams or other companies"
+    },
+    {
+      "file": "packages/shared/src/compliance.ts",
+      "lineNumber": 17,
+      "kind": "literal",
+      "text": "Product-company branding (logo, name, eyebrow, or footer disclaimer)"
+    },
+    {
+      "file": "packages/shared/src/compliance.ts",
+      "lineNumber": 22,
+      "kind": "literal",
+      "text": "Queue positions and momentum displays demonstrate team activity in real time and"
+    },
+    {
+      "file": "packages/shared/src/compliance.ts",
+      "lineNumber": 23,
+      "kind": "literal",
+      "text": "do not guarantee any final placement, compensation, or earnings outcome."
+    },
+    {
+      "file": "packages/shared/src/compliance.ts",
+      "lineNumber": 24,
+      "kind": "literal",
+      "text": "Market figures cited from public sources are for context only."
+    },
+    {
+      "file": "packages/shared/src/compliance.ts",
+      "lineNumber": 25,
+      "kind": "literal",
+      "text": "This page contains no income claims, placement promises, or guarantees of any kind."
+    }
+  ]
+}

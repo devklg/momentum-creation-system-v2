@@ -686,6 +686,26 @@ Implemented:
 - Closed a route-placement mismatch by adding missing RVM prospect-token routes
   for `/:token/stream`, `/:token/webinar-reserve`, and `/:token/team-stats`.
 
+### P1-50: COM PMV And Prospect-Facing Compliance Scanner
+
+Implemented:
+
+- Added `server/scripts/generate-com-prospect-compliance-scan.mjs`.
+- Added `pnpm compliance:com` and `pnpm compliance:com:check`; the CI `gates`
+  job now runs the check.
+- Generated `engineering/sprints/platform-audit-p1/COM_PROSPECT_COMPLIANCE_SCAN.md`
+  plus `com-prospect-compliance-scan.json`.
+- Added `server/src/qa/__tests__/comProspectComplianceScan.test.ts`.
+- Scanner uses AST-backed visible strings from `apps/com/src` plus shared
+  compliance constants, rather than raw source grep.
+- Blocks income/compensation/rank/cycle/CV language, placement/spillover or
+  binary-leg promises, AI prospecting/lead qualification/scoring language,
+  current team head count, THREE company branding/promoter disclaimers, and
+  programmatic THREE handoff language.
+- Documents allowed signals for GLP-THREE product context, public market/cost
+  context, the 100,000 goal, PMV language, placement-demo language, and the
+  canonical shared disclaimer.
+
 ## Lane Map
 
 ### Lane P1-A: Persistence Migration
