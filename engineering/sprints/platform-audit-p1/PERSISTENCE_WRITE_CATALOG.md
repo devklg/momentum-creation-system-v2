@@ -6,11 +6,11 @@
 
 ## Summary
 
-- Generated: 2026-07-11T14:57:21.826Z
-- Production `tripleStackWrite` call sites: 50
+- Generated: 2026-07-11T15:06:38.705Z
+- Production `tripleStackWrite` call sites: 49
 - Graph-critical: 5
 - Knowledge: 20
-- Operational: 25
+- Operational: 24
 - Excludes tests/spec files. Includes `server/src/**/*.ts` and `server/scripts/**/*.ts`.
 
 ## Tier Definitions
@@ -33,18 +33,18 @@
 | 8 | operational | delivery_and_reservations | `server/src/domain/broadcast.ts:438` | `enqueueBroadcast` | `COLL_BROADCASTS` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
 | 9 | operational | delivery_and_reservations | `server/src/domain/broadcast.ts:582` | `prepareSendTest` | `COLL_BROADCASTS` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
 | 10 | graph_critical | prospect_sponsorship | `server/src/domain/bulkLeads.ts:115` | `createBulkLeadRecord` | `PROSPECTS_COLLECTION` | yes | yes | Prospect creation and bulk-lead prospect mirrors define sponsor ownership. |
-| 11 | graph_critical | prospect_sponsorship | `server/src/domain/bulkLeads.ts:237` | `createBulkLeadRecord` | `BULK_LEADS_COLLECTION` | yes | yes | Prospect creation and bulk-lead prospect mirrors define sponsor ownership. |
+| 11 | graph_critical | prospect_sponsorship | `server/src/domain/bulkLeads.ts:224` | `createBulkLeadRecord` | `BULK_LEADS_COLLECTION` | yes | yes | Prospect creation and bulk-lead prospect mirrors define sponsor ownership. |
 | 12 | operational | delivery_and_reservations | `server/src/domain/callbackRequest.ts:120` | `createCallbackRequest` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
 | 13 | operational | governance_records | `server/src/domain/commitments.ts:51` | `recordCommitment` | `'tmag_commitments'` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
 | 14 | knowledge | content_governance | `server/src/domain/contentVideos.ts:163` | `createContentVideo` | `COLLECTION` | yes | yes | Master content, content videos, and tenant templates shape governed retrieval and generated copy. |
 | 15 | knowledge | crm_behavioral_trail | `server/src/domain/crm.ts:157` | `addNote` | `NOTES_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
 | 16 | knowledge | crm_behavioral_trail | `server/src/domain/crm.ts:261` | `setFollowUp` | `FOLLOWUPS_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
 | 17 | knowledge | crm_behavioral_trail | `server/src/domain/crm.ts:390` | `setDisposition` | `DISPOSITIONS_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
-| 18 | knowledge | crm_behavioral_trail | `server/src/domain/crm.ts:704` | `appendActivity` | `ACTIVITY_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
+| 18 | knowledge | crm_behavioral_trail | `server/src/domain/crm.ts:687` | `appendActivity` | `ACTIVITY_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
 | 19 | knowledge | crm_behavioral_trail | `server/src/domain/generator.ts:151` | `createGeneratorRun` | `RUNS_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
 | 20 | knowledge | approved_knowledge | `server/src/domain/graphrag.ts:127` | `appendGraphRagRecord` | `MONGO_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
 | 21 | graph_critical | prospect_sponsorship | `server/src/domain/invitations.ts:199` | `createInvitation` | `PROSPECTS_COLLECTION` | yes | yes | Prospect creation and bulk-lead prospect mirrors define sponsor ownership. |
-| 22 | knowledge | crm_behavioral_trail | `server/src/domain/invitations.ts:359` | `appendActivity` | `ACTIVITY_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
+| 22 | knowledge | crm_behavioral_trail | `server/src/domain/invitations.ts:344` | `appendActivity` | `ACTIVITY_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
 | 23 | graph_critical | ivory_roster | `server/src/domain/ivory.ts:211` | `createIvoryName` | `IVORY_COLLECTION` | yes | yes | Ivory roster edges are agent-reasoned BA-private relationship data. |
 | 24 | knowledge | approved_knowledge | `server/src/domain/learningCandidates.ts:158` | `appendLearningCandidate` | `COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
 | 25 | operational | delivery_and_reservations | `server/src/domain/orientationSession.ts:332` | `createOrientationSession` | `SESSIONS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
@@ -66,10 +66,9 @@
 | 41 | operational | audit_controls | `server/src/domain/vmProviderQueue.ts:223` | `vmAudit` | `AUDIT_COLLECTION` | yes | yes | Audit entries must persist, while graph/search projections can lag through the outbox. |
 | 42 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:285` | `enqueueVmJob` | `QUEUE_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
 | 43 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:593` | `upsertImportedLead` | `LEADS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 44 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:681` | `processTokenGeneration` | `TOKENS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 45 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:747` | `processCrmCreation` | `CRM_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 46 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:841` | `recordDeliveryEvent` | `DELIVERY_EVENTS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 47 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:879` | `recordProviderWebhook` | `WEBHOOK_EVENTS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 48 | operational | delivery_and_reservations | `server/src/domain/webinarReservation.ts:191` | `createWebinarReservation` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 49 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:136` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_SOURCE_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
-| 50 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:183` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_CHUNK_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
+| 44 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:743` | `processCrmCreation` | `CRM_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 45 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:837` | `recordDeliveryEvent` | `DELIVERY_EVENTS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 46 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:875` | `recordProviderWebhook` | `WEBHOOK_EVENTS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 47 | operational | delivery_and_reservations | `server/src/domain/webinarReservation.ts:191` | `createWebinarReservation` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 48 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:136` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_SOURCE_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
+| 49 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:183` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_CHUNK_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |

@@ -19,6 +19,7 @@ import {
   appendProspectTimelineEvent,
   createOrUpdateCrmRecordForToken,
 } from './prospectCrm.js';
+import { writeProspectTokenGraphCritical } from './tokenLifecyclePersistence.js';
 import { findVMCampaignForOwner } from './vmCampaigns.js';
 import { markLeadOwnerImported } from './vmLeadOwners.js';
 import type {
@@ -35,7 +36,6 @@ import type {
 const MONGO_DB = 'momentum';
 const BULK_LEADS_COLLECTION = 'tmag_vm_bulk_leads';
 const PROSPECTS_COLLECTION = 'tmag_prospects';
-const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
 const CHROMA_COLLECTION = 'mcs_vm_bulk_leads';
 
 export class BulkLeadError extends Error {
@@ -175,33 +175,20 @@ async function createBulkLeadRecord(input: {
     clickedAt: null,
     expiresAt,
   };
-  await persistenceCall('mongodb', 'insert', {
-    database: MONGO_DB,
-    collection: TOKENS_COLLECTION,
-    documents: [
-      {
-        _id: token,
-        ...tokenRecord,
-        ownerTmagId: input.ownerTmagId,
-        sponsorTmagId: input.sponsorTmagId,
-        source: 'rvm',
-        leadId,
-        leadOwnerId: input.leadOwnerId,
-        vmCampaignId: input.vmCampaignId,
-      },
-    ],
-  });
-  await persistenceCall('neo4j', 'cypher', {
-    query:
-      'MERGE (t:TmagInviteToken {token: $token}) ' +
-      'SET t.prospectId = $prospectId, t.sponsorTmagId = $sponsorTmagId, ' +
-      '    t.ownerTmagId = $ownerTmagId, t.state = $state, t.source = $source, ' +
-      '    t.createdAt = $createdAt, t.expiresAt = $expiresAt ' +
-      'WITH t ' +
-      'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
-      'MERGE (t)-[:FOR_PROSPECT]->(p)',
-    params: {
-      token,
+  await writeProspectTokenGraphCritical({
+    token,
+    prospectId,
+    sponsorTmagId: input.sponsorTmagId,
+    mongoDoc: {
+      ...tokenRecord,
+      ownerTmagId: input.ownerTmagId,
+      sponsorTmagId: input.sponsorTmagId,
+      source: 'rvm',
+      leadId,
+      leadOwnerId: input.leadOwnerId,
+      vmCampaignId: input.vmCampaignId,
+    },
+    tokenProps: {
       prospectId,
       ownerTmagId: input.ownerTmagId,
       sponsorTmagId: input.sponsorTmagId,

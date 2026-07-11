@@ -16,6 +16,7 @@ import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
+import { updateTokenLifecycleOperational } from './tokenLifecyclePersistence.js';
 import type {
   McsAuditActor,
   McsVmLeadLifecycleStatus,
@@ -32,7 +33,6 @@ const MONGO_DB = 'momentum';
 const CRM_COLLECTION = 'tmag_prospect_crm_records';
 const TIMELINE_COLLECTION = 'tmag_prospect_timeline_events';
 const PROSPECTS_COLLECTION = 'tmag_prospects';
-const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
 const BULK_LEADS_COLLECTION = 'tmag_vm_bulk_leads';
 const CRM_CHROMA_COLLECTION = 'mcs_prospect_crm_records';
 const TIMELINE_CHROMA_COLLECTION = 'mcs_prospect_timeline_events';
@@ -466,12 +466,12 @@ export async function closeCrmAsNewBa(input: {
     filter: { prospectId: record.prospectId },
     update: { $set: { state: 'enrolled', updatedAt: closedAt } },
   });
-  await persistenceCall('mongodb', 'update', {
-    database: MONGO_DB,
-    collection: TOKENS_COLLECTION,
-    filter: { token: record.token },
-    update: { $set: { state: 'enrolled', updatedAt: closedAt } },
-  });
+  if (record.token) {
+    await updateTokenLifecycleOperational({
+      token: record.token,
+      patch: { state: 'enrolled', updatedAt: closedAt },
+    });
+  }
   if (record.leadId) {
     await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,

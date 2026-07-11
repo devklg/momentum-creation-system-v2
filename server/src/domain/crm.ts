@@ -38,6 +38,7 @@ import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
+import { writeProspectTokenGraphCritical } from './tokenLifecyclePersistence.js';
 import { findBAByTmagId } from './ba.js';
 import {
   adminCreateProspect,
@@ -61,7 +62,6 @@ import type {
 
 const MONGO_DB = 'momentum';
 const PROSPECTS_COLLECTION = 'tmag_prospects';
-const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
 const ACTIVITY_COLLECTION = 'tmag_prospect_invitation_activity';
 const CALLBACK_COLLECTION = 'tmag_prospect_callback_requests';
 const NOTES_COLLECTION = 'tmag_prospect_crm_notes';
@@ -552,37 +552,20 @@ export async function reinvite(
     expiresAt = newExpiresAt;
 
     // 1. Insert the fresh token record.
-    await persistenceCall('mongodb', 'insert', {
-      database: MONGO_DB,
-      collection: TOKENS_COLLECTION,
-      documents: [
-        {
-          _id: token,
-          token,
-          prospectId,
-          sponsorTmagId,
-          state: 'minted',
-          createdAt: now,
-          clickedAt: null,
-          expiresAt: newExpiresAt,
-        },
-      ],
-    });
-    await persistenceCall('neo4j', 'cypher', {
-      query:
-        'MERGE (t:TmagInviteToken {token: $token}) ' +
-        'SET t.prospectId = $prospectId, ' +
-        '    t.sponsorTmagId = $sponsorTmagId, ' +
-        '    t.state = $state, ' +
-        '    t.createdAt = $createdAt, ' +
-        '    t.expiresAt = $expiresAt ' +
-        'WITH t ' +
-        'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
-        'MERGE (t)-[:FOR_PROSPECT]->(p)',
-      params: {
+    await writeProspectTokenGraphCritical({
+      token,
+      prospectId,
+      sponsorTmagId,
+      mongoDoc: {
         token,
         prospectId,
         sponsorTmagId,
+        state: 'minted',
+        createdAt: now,
+        clickedAt: null,
+        expiresAt: newExpiresAt,
+      },
+      tokenProps: {
         state: 'minted',
         createdAt: now,
         expiresAt: newExpiresAt,
