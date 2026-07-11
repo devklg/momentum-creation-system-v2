@@ -29,7 +29,7 @@
 
 import { persistenceCall } from '../src/services/persistence/dispatch.js';
 import { connectMongo } from '../src/services/persistence/mongo/connection.js';
-import { tripleStackWrite } from '../src/services/tripleStack.js';
+import { writeOperational } from '../src/services/tieredWrite.js';
 import { env } from '../src/env.js';
 import {
   generateUpcomingSlots,
@@ -127,7 +127,7 @@ async function main(): Promise<void> {
       `(Mon/Thu 5pm Pacific, ${WEBINAR_DURATION_MINUTES} min), ` +
       `hosted by ${HOSTS.join(' and ')}.`;
 
-    await tripleStackWrite({
+  await writeOperational({
       id: slot.eventId,
       mongoCollection: MONGO_COLLECTION,
       mongoDoc,

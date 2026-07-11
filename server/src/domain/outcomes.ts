@@ -2,7 +2,7 @@
  * Outcome capture domain (Phase 7 · R1 — P7.4 Outcome Capture Contract).
  *
  * Persists a BA-CONFIRMED, BA-scoped, team-scoped real-world outcome through the
- * single app-direct tripleStackWrite seam into the app's own dedicated stores
+ * app-direct operational tier into the app's own dedicated stores
  * (Mongo `momentum` / Neo4j / Chroma `mcs_outcomes`). NO external MCP tool server, NO
  * `quadstack.write` (ACR-0007). An outcome is memory-class, so it carries the
  * app-memory envelope (McsMemoryEnvelope) and is guarded — when direct mode is
@@ -27,7 +27,7 @@
 import { createHash } from 'node:crypto';
 import { env } from '../env.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeOperational } from '../services/tieredWrite.js';
 import type {
   McsOutcomeInput,
   McsOutcomeKind,
@@ -181,7 +181,7 @@ export async function appendOutcome(
   };
   record.title = outcomeTitle(record);
 
-  await tripleStackWrite({
+  await writeOperational({
     id,
     mongoCollection: COLLECTION,
     mongoDoc: { ...record, _id: undefined } as Record<string, unknown>,

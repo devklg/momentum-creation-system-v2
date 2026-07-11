@@ -4,15 +4,15 @@ import { createPermissiveCollectionSchema } from '../../services/persistence/mon
 
 const mocks = vi.hoisted(() => ({
   persistenceCall: vi.fn(),
-  tripleStackWrite: vi.fn(),
+  writeOperational: vi.fn(),
 }));
 
 vi.mock('../../services/persistence/dispatch.js', () => ({
   persistenceCall: mocks.persistenceCall,
 }));
 
-vi.mock('../../services/tripleStack.js', () => ({
-  tripleStackWrite: mocks.tripleStackWrite,
+vi.mock('../../services/tieredWrite.js', () => ({
+  writeOperational: mocks.writeOperational,
 }));
 
 type AnyRec = Record<string, unknown>;
@@ -23,7 +23,7 @@ const AuditRegressionModel =
 
 beforeEach(() => {
   mocks.persistenceCall.mockReset();
-  mocks.tripleStackWrite.mockReset();
+  mocks.writeOperational.mockReset();
 });
 
 describe('appendAuditEntry Mongo _id regression', () => {
@@ -51,8 +51,8 @@ describe('appendAuditEntry Mongo _id regression', () => {
       },
     });
 
-    expect(mocks.tripleStackWrite).toHaveBeenCalledTimes(1);
-    const call = mocks.tripleStackWrite.mock.calls[0]![0] as AnyRec;
+    expect(mocks.writeOperational).toHaveBeenCalledTimes(1);
+    const call = mocks.writeOperational.mock.calls[0]![0] as AnyRec;
     const mongoDoc = call.mongoDoc as AnyRec;
 
     expect(call.mongoCollection).toBe('mcs_audit_log');

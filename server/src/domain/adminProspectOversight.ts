@@ -36,7 +36,7 @@
  */
 
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeOperational } from '../services/tieredWrite.js';
 import { appendAuditEntry } from './auditLog.js';
 import { listLeaderTmagIds, LEADER_DETECTION_NOTE } from './adminMetrics.js';
 import { findProspectById } from './prospects.js';
@@ -778,7 +778,7 @@ export async function appendProspectNote(input: {
     createdByDisplayName: input.actor.displayName,
   };
 
-  await tripleStackWrite({
+  await writeOperational({
     id: noteId,
     mongoCollection: COLL_NOTES,
     mongoDoc: { ...note },

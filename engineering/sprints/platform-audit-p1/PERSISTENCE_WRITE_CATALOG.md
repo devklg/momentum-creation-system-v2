@@ -6,11 +6,11 @@
 
 ## Summary
 
-- Generated: 2026-07-11T15:40:13.160Z
-- Production `tripleStackWrite` call sites: 18
+- Generated: 2026-07-11T15:46:26.668Z
+- Production `tripleStackWrite` call sites: 0
 - Graph-critical: 0
 - Knowledge: 0
-- Operational: 18
+- Operational: 0
 - Excludes tests/spec files. Includes `server/src/**/*.ts` and `server/scripts/**/*.ts`.
 
 ## Tier Definitions
@@ -23,21 +23,4 @@
 
 | # | Tier | Subsystem | Location | Function | Mongo collection expression | Neo4j | Chroma | Rationale |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | operational | delivery_and_reservations | `server/scripts/seed-webinar-events.ts:130` | `main` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 2 | operational | governance_records | `server/src/domain/adminProspectOversight.ts:781` | `appendProspectNote` | `COLL_NOTES` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
-| 3 | operational | governance_records | `server/src/domain/adminTenantArchitecture.ts:365` | `saveTenantSettings` | `SETTINGS_COLLECTION` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
-| 4 | operational | audit_controls | `server/src/domain/auditLog.ts:143` | `appendAuditEntry` | `COLLECTION` | yes | yes | Audit entries must persist, while graph/search projections can lag through the outbox. |
-| 5 | operational | audit_controls | `server/src/domain/auditLog.ts:399` | `appendRuntimeAuditEntry` | `COLLECTION` | yes | yes | Audit entries must persist, while graph/search projections can lag through the outbox. |
-| 6 | operational | delivery_and_reservations | `server/src/domain/broadcast.ts:438` | `enqueueBroadcast` | `COLL_BROADCASTS` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 7 | operational | delivery_and_reservations | `server/src/domain/broadcast.ts:582` | `prepareSendTest` | `COLL_BROADCASTS` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 8 | operational | delivery_and_reservations | `server/src/domain/callbackRequest.ts:120` | `createCallbackRequest` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 9 | operational | governance_records | `server/src/domain/commitments.ts:51` | `recordCommitment` | `'tmag_commitments'` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
-| 10 | operational | delivery_and_reservations | `server/src/domain/orientationSession.ts:332` | `createOrientationSession` | `SESSIONS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 11 | operational | delivery_and_reservations | `server/src/domain/orientationSession.ts:448` | `reserveSeat` | `RESERVATIONS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 12 | operational | governance_records | `server/src/domain/outcomes.ts:184` | `appendOutcome` | `COLLECTION` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
-| 13 | operational | prospect_access | `server/src/domain/prospectAccount.ts:238` | `createProspectAccount` | `MONGO_COLLECTION` | yes | yes | Prospect accounts and magic links are credentials/session operations; Mongo commit is the success boundary. |
-| 14 | operational | prospect_access | `server/src/domain/prospectMagicLink.ts:168` | `issueLinksForPhone` | `MONGO_COLLECTION` | yes | yes | Prospect accounts and magic links are credentials/session operations; Mongo commit is the success boundary. |
-| 15 | operational | delivery_and_reservations | `server/src/domain/threeWayCalls.ts:421` | `setMyThreeWayAvailability` | `AVAILABILITY_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 16 | operational | delivery_and_reservations | `server/src/domain/threeWayCalls.ts:576` | `createThreeWayBooking` | `BOOKINGS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 17 | operational | delivery_and_reservations | `server/src/domain/vmCampaigns.ts:69` | `createVMCampaign` | `COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 18 | operational | delivery_and_reservations | `server/src/domain/webinarReservation.ts:191` | `createWebinarReservation` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+

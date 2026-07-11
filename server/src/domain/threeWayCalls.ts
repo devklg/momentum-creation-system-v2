@@ -11,7 +11,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeOperational } from '../services/tieredWrite.js';
 import { findBAByTmagId, type BARecord } from './ba.js';
 import type {
   McsThreeWayAvailabilityResponse,
@@ -418,7 +418,7 @@ export async function setMyThreeWayAvailability(
     updatedAt: now,
   };
 
-  await tripleStackWrite({
+  await writeOperational({
     id: availabilityId,
     mongoCollection: AVAILABILITY_COLLECTION,
     mongoDoc: { ...record },
@@ -573,7 +573,7 @@ export async function createThreeWayBooking(input: {
     notificationChannel: 'in_app',
   };
 
-  await tripleStackWrite({
+  await writeOperational({
     id: bookingId,
     mongoCollection: BOOKINGS_COLLECTION,
     mongoDoc: { ...record },

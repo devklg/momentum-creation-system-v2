@@ -10,11 +10,11 @@ import type { McsOutcomeInput } from '@momentum/shared';
 
 const mocks = vi.hoisted(() => ({
   persistenceCall: vi.fn(),
-  tripleStackWrite: vi.fn(),
+  writeOperational: vi.fn(),
 }));
 
 vi.mock('../../services/persistence/dispatch.js', () => ({ persistenceCall: mocks.persistenceCall }));
-vi.mock('../../services/tripleStack.js', () => ({ tripleStackWrite: mocks.tripleStackWrite }));
+vi.mock('../../services/tieredWrite.js', () => ({ writeOperational: mocks.writeOperational }));
 
 type AnyRec = Record<string, unknown>;
 
@@ -48,7 +48,7 @@ function input(overrides: Partial<McsOutcomeInput> = {}): McsOutcomeInput {
 
 beforeEach(() => {
   mocks.persistenceCall.mockReset();
-  mocks.tripleStackWrite.mockReset();
+  mocks.writeOperational.mockReset();
 });
 
 afterEach(() => {
@@ -64,19 +64,19 @@ describe('Phase 7 R1 — outcome capture canary gate', () => {
     const result = await outcomes.appendOutcome(input());
 
     expect(result).toBeNull();
-    expect(mocks.tripleStackWrite).not.toHaveBeenCalled();
+    expect(mocks.writeOperational).not.toHaveBeenCalled();
     expect(mocks.persistenceCall).not.toHaveBeenCalled();
   });
 
-  it('writes through the app-direct triple-stack into mcs_outcomes when ON', async () => {
+  it('writes through the operational tier into mcs_outcomes when ON', async () => {
     mocks.persistenceCall.mockImplementation(defaultPersistence());
     const outcomes = await loadOutcomes(true);
 
     const result = await outcomes.appendOutcome(input());
 
     expect(result).not.toBeNull();
-    expect(mocks.tripleStackWrite).toHaveBeenCalledTimes(1);
-    const call = mocks.tripleStackWrite.mock.calls[0]![0] as AnyRec;
+    expect(mocks.writeOperational).toHaveBeenCalledTimes(1);
+    const call = mocks.writeOperational.mock.calls[0]![0] as AnyRec;
     expect(call.mongoCollection).toBe('mcs_outcomes');
     expect((call.chroma as AnyRec).collection).toBe('mcs_outcomes');
   });
@@ -119,7 +119,7 @@ describe('Phase 7 R1 — app-memory envelope + scope', () => {
     const result = (await outcomes.appendOutcome(input({ note: 'x'.repeat(5000) })))!;
 
     expect(result.note!.length).toBe(2000);
-    const doc = (mocks.tripleStackWrite.mock.calls[0]![0] as AnyRec).mongoDoc as AnyRec;
+    const doc = (mocks.writeOperational.mock.calls[0]![0] as AnyRec).mongoDoc as AnyRec;
     expect(doc).not.toHaveProperty('before');
     expect(doc).not.toHaveProperty('after');
   });
@@ -148,7 +148,7 @@ describe('Phase 7 R1 — deterministic id, idempotency, correction chain', () =>
     const result = (await outcomes.appendOutcome(input()))!;
 
     expect(result.id).toBe('mcsoutcome_existing');
-    expect(mocks.tripleStackWrite).not.toHaveBeenCalled();
+    expect(mocks.writeOperational).not.toHaveBeenCalled();
   });
 
   it('a terminal outcome gets a stable id independent of outcomeAt (once per scope+kind+BA)', async () => {
@@ -186,10 +186,10 @@ describe('Phase 7 R1 — deterministic id, idempotency, correction chain', () =>
     ))!;
 
     // Correction bypasses the dedup short-circuit and writes.
-    expect(mocks.tripleStackWrite).toHaveBeenCalledTimes(1);
+    expect(mocks.writeOperational).toHaveBeenCalledTimes(1);
     expect(result.supersedesOutcomeId).toBe('mcsoutcome_prior');
     const cypher = String(
-      ((mocks.tripleStackWrite.mock.calls[0]![0] as AnyRec).neo4j as AnyRec).cypher,
+      ((mocks.writeOperational.mock.calls[0]![0] as AnyRec).neo4j as AnyRec).cypher,
     );
     expect(cypher).toContain(':SUPERSEDES');
   });

@@ -31,14 +31,14 @@
  *     stamps 'failed', the route still returns opaque success. The
  *     prospect can retry; rate-limit caps the per-phone retry rate
  *     in the route layer.
- *   - tripleStackWrite throws → bubble; the route returns 500. The
+ *   - writeOperational throws -> bubble; the route returns 500. The
  *     prospect sees a soft "try again" message and the original
  *     /p/{token} URL stays as the fallback.
  */
 
 import { randomBytes } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeOperational } from '../services/tieredWrite.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import {
   findAccountsByPhone,
@@ -165,7 +165,7 @@ export async function issueLinksForPhone(
     };
 
     try {
-      await tripleStackWrite({
+      await writeOperational({
         id: linkToken,
         mongoCollection: MONGO_COLLECTION,
         mongoDoc: {
@@ -213,7 +213,7 @@ export async function issueLinksForPhone(
       // not sending. Continue to the next matching account.
       // eslint-disable-next-line no-console
       console.error(
-        `[prospect-magic-link] tripleStackWrite failed for account ${account.accountId}:`,
+        `[prospect-magic-link] writeOperational failed for account ${account.accountId}:`,
         err instanceof Error ? err.message : err,
       );
       continue;
