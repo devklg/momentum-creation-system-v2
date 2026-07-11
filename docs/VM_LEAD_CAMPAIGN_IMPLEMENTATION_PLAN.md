@@ -7,6 +7,8 @@ Depends on: `docs/VM_LEAD_CAMPAIGN_MODULE_ARCHITECTURE.md`
 Repository: `devklg/momentum-creation-system-v2`  
 Primary apps affected: `apps/team`, `apps/com`, `apps/admin`, `server`, `packages/shared`
 
+P0 governance note (2026-07-11): implementation may continue only inside dry-run/manual-safe boundaries until `constitution/acr/ACR-002-vm-rvm-live-delivery-governance.md` is approved. Use `docs/VM_RVM_COMPLIANCE_CHECKLIST.md` before any live provider delivery.
+
 ---
 
 ## 1. Purpose

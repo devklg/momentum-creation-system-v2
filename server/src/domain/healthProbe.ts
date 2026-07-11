@@ -167,11 +167,11 @@ async function readChromaHeartbeat(persistence: Persistence, heartbeatId: string
     collection: HEALTH_CHROMA_COLLECTION,
     query: `health heartbeat ${heartbeatId}`,
     n_results: 1,
-    where: { healthHeartbeatId: heartbeatId },
+    where: { heartbeatId },
   });
   const ids = result.results?.ids ?? [];
   if (ids.includes(heartbeatId)) return true;
-  return (result.results?.metadatas ?? []).some((m) => m?.healthHeartbeatId === heartbeatId);
+  return (result.results?.metadatas ?? []).some((m) => m?.heartbeatId === heartbeatId);
 }
 
 async function pruneMongoHeartbeats(persistence: Persistence, cutoffMs: number): Promise<boolean> {

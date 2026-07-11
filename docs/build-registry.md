@@ -1,5 +1,7 @@
 # Build Registry — Team Magnificent Momentum Creation System v1
 
+> P0 status note (2026-07-11): this registry is retained as a historical artifact index, but it is not the current build-completion authority. Use `momentum.decisions`, `docs/locked-spec.md`, `docs/project-wireframe.md`, `PLATFORM_AUDIT_PRIORITY_TASKLIST.md`, and `engineering/sprints/platform-audit-p0/P0_RELEASE_TRACKER.md` for current platform-audit work. Some rows below still reference older `v1` paths and stale chat-era statuses.
+
 **Purpose.** A single index of every artifact that has been produced for the Momentum Creation System v1 build, where it lives, what state it's in, which chat locked it, and what (if anything) it supersedes. Read this BEFORE asking "is X done?" — the answer is here.
 
 **Source hierarchy** (when this file conflicts with another, the higher source wins):
