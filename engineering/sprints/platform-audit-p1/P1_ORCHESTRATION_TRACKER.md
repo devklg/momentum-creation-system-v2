@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-mongo-ownership-map`
+Latest branch: `codex/platform-audit-p1-mongo-index-audit`
 
 Closed in this tranche:
 
@@ -44,6 +44,7 @@ Closed in this tranche:
   payload surfaces, and shared exports.
 - P1-38: generated a Mongo collection ownership map with zero unclassified
   collections.
+- P1-39: generated a Mongo index audit and high-volume index plan.
 
 Catalog artifacts:
 
@@ -410,6 +411,25 @@ Generated coverage:
 - Owner domain, steward, primary surface, conservative persistence-tier label,
   schema mode, resolved-string status, source count, and source files.
 - 0 unclassified collection rows.
+
+### P1-39: Mongo Index Audit
+
+Implemented:
+
+- Added `server/scripts/generate-mongo-index-audit.mjs`.
+- Added `pnpm catalog:mongo-indexes` and
+  `pnpm catalog:mongo-indexes:check`.
+- Generated:
+  - `engineering/sprints/platform-audit-p1/MONGO_INDEX_AUDIT_PLAN.md`
+  - `engineering/sprints/platform-audit-p1/mongo-index-audit-plan.json`
+
+Generated coverage:
+
+- 46 high-volume/planned Mongo index rows.
+- Current audit state: general `ensureIndexes` is not present; Knowledge
+  Evolution has its own ensure helper; VM indexes are declared in
+  `vmSchemas.ts` but not generally applied.
+- 0 explicit high-volume collections without a plan row.
 
 ## Lane Map
 
