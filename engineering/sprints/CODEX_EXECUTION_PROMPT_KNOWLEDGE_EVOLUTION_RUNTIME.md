@@ -152,6 +152,58 @@ or
 
 Use the matching lane number/letter.
 
+## OpenAI / Codex Model Routing
+
+Model guidance checked against official OpenAI developer documentation on 2026-07-10:
+
+- API model guidance: https://developers.openai.com/api/docs/guides/latest-model
+- API model list: https://developers.openai.com/api/docs/models
+- Codex model guidance: https://developers.openai.com/codex/models
+
+OpenAI's current guidance lists the GPT-5.6 family as the latest model family for API and Codex work:
+
+- `gpt-5.6` alias routes to `gpt-5.6-sol`
+- `gpt-5.6-sol` for frontier capability, complex coding, deep research, and high-value implementation work
+- `gpt-5.6-terra` for everyday implementation work that needs strong reasoning with better cost control
+- `gpt-5.6-luna` for clear, repeatable, high-volume, or tightly scoped support work
+
+Reasoning guidance:
+
+- Default to `medium` for balanced Codex work.
+- Use `high`, `xhigh`, or `max` only when a lane owns shared contracts, persistence invariants, governance policy, or difficult verification.
+- Preserve explicit user-requested model choices.
+
+For this orchestration prompt, prefer GPT-5.6 where the host exposes it. If a local Codex desktop host, CLI build, or subagent runner does not expose GPT-5.6 model IDs yet, use the currently supported fallback IDs:
+
+- `gpt-5.5` - frontier model for complex coding, research, computer use, and long-horizon implementation work.
+- `gpt-5.4` - strong everyday coding model for normal implementation lanes.
+- `gpt-5.4-mini` - small, fast, cost-efficient model for bounded support lanes and simpler checks.
+- `gpt-5.3-codex-spark` - ultra-fast coding model for quick iteration, small fixes, and smoke-review work.
+
+Default lane routing:
+
+| Lane | Recommended model | Reasoning effort | Rationale |
+| --- | --- | --- | --- |
+| Lane 0 - Shared Foundation | `gpt-5.6-sol` | `high`, `xhigh`, or `max` | Owns shared contracts and collision surfaces; mistakes propagate to all lanes. |
+| Lane A - Persistence Models and Repositories | `gpt-5.6-sol` | `high` or `xhigh` | Owns Mongo canonical state, indexes, and persistence invariants. |
+| Lane B - Policies and Core Services | `gpt-5.6-sol` | `high` or `xhigh` | Owns approval, scope, privacy, rollback, bilingual, and retrieval-readiness logic. |
+| Lane C - Chroma Indexing and Neo4j Graph Sync | `gpt-5.6-terra` | `high` | Owns cross-store lineage and retrieval safety after shared contracts exist. |
+| Lane D - Routes, Workers, Events, Metrics | `gpt-5.6-terra` | `medium` or `high` | Mostly integration and route/worker wiring after contracts and services exist. |
+| Lane E - Acceptance Tests, Documentation, Final Verification | `gpt-5.6-terra` | `high` | Heavy verification and documentation, lower schema-invention risk. |
+| Optional sidecar review lanes | `gpt-5.6-luna` | `low` or `medium` | Use only for bounded checks, focused docs review, small smoke fixes, extraction, or targeted test triage. |
+
+Fallback routing if GPT-5.6 is unavailable:
+
+| Preferred model | Fallback model |
+| --- | --- |
+| `gpt-5.6-sol` | `gpt-5.5` |
+| `gpt-5.6-terra` | `gpt-5.4` |
+| `gpt-5.6-luna` | `gpt-5.4-mini` or `gpt-5.3-codex-spark` |
+
+If an orchestrator creates Codex desktop threads, omit the model field unless a lane explicitly needs the override. If a model override is used, use GPT-5.6 IDs only when the host exposes them; otherwise use one of the fallback IDs above.
+
+If an implementation lane uses OpenAI API code directly, use the official latest-model guidance before selecting an API model. Preserve explicit user-requested models, and do not silently retarget API behavior just because a newer model exists.
+
 ## Branch Naming
 
 Use these branches unless the orchestrator has a reason to adjust:
@@ -627,4 +679,3 @@ This implementation is not done until:
 - no prospect-facing `.com` surface has changed
 - no Telnyx/external communication path has been added
 - no ratified document was modified without approved ACR authority
-
