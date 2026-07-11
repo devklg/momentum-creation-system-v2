@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-neo4j-catalog`
+Latest branch: `codex/platform-audit-p1-neo4j-migrations`
 
 Closed in this tranche:
 
@@ -47,6 +47,7 @@ Closed in this tranche:
 - P1-39: generated a Mongo index audit and high-volume index plan.
 - P1-40: generated a Neo4j labels, relationships, constraints, and indexes
   catalog.
+- P1-41: added Neo4j schema migration dry-run, apply, and verify commands.
 
 Catalog artifacts:
 
@@ -56,6 +57,8 @@ Catalog artifacts:
 - `engineering/sprints/platform-audit-p1/NEO4J_CATALOG.md`
 - `engineering/sprints/platform-audit-p1/neo4j-catalog.json`
 - `server/scripts/generate-neo4j-catalog.mjs`
+- `server/src/services/persistence/neo4j/schemaMigration.ts`
+- `server/scripts/apply-neo4j-schema.ts`
 
 Inventory result:
 
@@ -454,6 +457,38 @@ Generated coverage:
   `server/src/services/persistence/neo4j/phase7Constraints.ts`.
 - 53 labels without a cataloged constraint/index, retained as explicit
   follow-up evidence for P1-41 and later graph diagnostics.
+
+### P1-41: Neo4j Schema Migrations
+
+Implemented:
+
+- Added `server/src/services/persistence/neo4j/schemaMigration.ts`.
+- Added `server/scripts/apply-neo4j-schema.ts`.
+- Added root and server package scripts:
+  - `pnpm neo4j:schema:dry-run`
+  - `pnpm neo4j:schema:apply`
+  - `pnpm neo4j:schema:verify`
+- Added `server/src/services/persistence/neo4j/__tests__/schemaMigration.test.ts`.
+
+Migration behavior:
+
+- Uses the P1 Neo4j catalog as the migration authority.
+- Runs through `persistenceCall('neo4j', 'cypher', ...)`, preserving the app's
+  direct-only persistence gate and dedicated MCS stack.
+- Dry-run is the default and does not call Neo4j.
+- Apply executes only single-statement idempotent
+  `CREATE CONSTRAINT/INDEX ... IF NOT EXISTS` Cypher, constraints before
+  indexes.
+- Verify compares expected cataloged names against `SHOW CONSTRAINTS` and
+  `SHOW INDEXES` output instead of count-only checks.
+
+Operator commands:
+
+```powershell
+pnpm neo4j:schema:dry-run
+pnpm neo4j:schema:apply
+pnpm neo4j:schema:verify
+```
 
 ## Lane Map
 
