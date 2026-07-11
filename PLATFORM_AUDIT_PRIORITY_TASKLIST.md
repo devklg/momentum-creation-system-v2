@@ -1,0 +1,231 @@
+# Momentum Creation System V2 - Platform Audit Priority Task List
+
+> Agent orchestration Markdown reformatted from `PLATFORM_AUDIT_PRIORITY_TASKLIST.docx`.
+> This file preserves the global priority numbering. Do not renumber items unless the audit is regenerated.
+
+## Orchestration Notes
+
+- Source document: `PLATFORM_AUDIT_PRIORITY_TASKLIST.docx`
+- Task count: 173
+- Execution order: complete P0 items first, then P1, P2, and P3.
+- Suggested multi-agent lane shape: assign by subsystem label while preserving item dependencies and priority order.
+- Checkbox format: unchecked items use `- [ ]` so agents can update progress in Markdown.
+- Governance rule: do not skip items; if an item is blocked, mark it blocked in notes instead of deleting it.
+
+## Source Metadata
+
+- **Source:** PLATFORM_AUDIT.md
+- **Generated:** July 10, 2026
+- **Task count:** 173 numbered checklist items
+- **Ordering:** P0 immediate blockers first, then P1, P2, and P3 work
+
+## P0 - Immediate / Critical
+
+Release blockers, governance blockers, and correctness issues that should be handled first.
+
+- [ ] 1. **Michael runtime:** Resolve the Michael runtime contract decision: degraded safe_fallback versus next_training_step for server-owned turns.
+- [ ] 2. **Michael runtime:** Update either the Michael implementation or the tests so the contract is explicit and no longer drifted.
+- [ ] 3. **Michael runtime:** Add regression coverage for empty body, explicit English, and explicit Spanish Michael runtime requests.
+- [ ] 4. **Verification:** Rerun the full server Vitest suite until the Michael runtime failure cluster is green.
+- [ ] 5. **Verification:** Resolve pnpm dependency approval state for argon2 and esbuild so normal gates run without bypass flags.
+- [ ] 6. **Operations:** Document the accepted local gate command pattern if pnpm approval state intentionally remains constrained.
+- [ ] 7. **Chroma:** Fix Chroma health heartbeat readback so the metadata field used for write and readback matches.
+- [ ] 8. **Chroma:** Add a regression test for Chroma health readback and metadata filtering.
+- [ ] 9. **Operations:** Validate the admin triple-stack health probe after the Chroma heartbeat fix.
+- [ ] 10. **Agents:** Create AI_AGENT_PLAYBOOK.md or formally reconcile the missing file to a named current replacement.
+- [ ] 11. **Agents:** Link the agent playbook to AGENT_ARCHITECTURE.md, AGENT_PROMPT_GOVERNANCE.md, and runtime agent docs.
+- [ ] 12. **VM/RVM:** Create the explicit VM/RVM governance decision or ACR before expanding live delivery.
+- [ ] 13. **VM/RVM:** Add a VM/RVM compliance checklist covering automation, qualification, PMV, copy, and provider controls.
+- [ ] 14. **VM/RVM:** Confirm VM live delivery remains disabled until the governance and compliance checklist is approved.
+- [ ] 15. **GraphRAG:** Keep GraphRAG and Context Manager live flags off until canary criteria are written and approved.
+- [ ] 16. **Docs:** Regenerate or clearly mark docs/build-registry.md as stale/current so agents do not rely on old status.
+- [ ] 17. **Docs:** Replace, remove, or explicitly mark the stale root TASK.md on main.
+- [ ] 18. **Docs:** Regenerate graphify output or add a visible stale-against-HEAD warning to existing graphify artifacts.
+- [ ] 19. **Release:** Document the current release blockers and cautions in the active project tracking location.
+- [ ] 20. **Verification:** Run typecheck, build, and server tests again after P0 fixes and record the clean gate result.
+
+## P1 - High Priority
+
+Core consolidation work that protects data integrity, governance, compliance, and operator confidence.
+
+- [ ] 21. **Persistence:** Inventory all 56 tripleStackWrite call sites.
+- [ ] 22. **Persistence:** Classify every tripleStackWrite call as graph_critical, knowledge, or operational.
+- [ ] 23. **Persistence:** Migrate BA identity writes to the tiered write model.
+- [ ] 24. **Persistence:** Migrate sponsor immutability writes to the tiered write model.
+- [ ] 25. **Persistence:** Migrate token lifecycle writes to the tiered write model.
+- [ ] 26. **Persistence:** Migrate pool placement writes to the tiered write model.
+- [ ] 27. **Persistence:** Migrate CRM ownership writes to the tiered write model.
+- [ ] 28. **Persistence:** Migrate VM ownership and provider queue writes to the tiered write model.
+- [ ] 29. **Persistence:** Migrate knowledge approval writes to the tiered write model.
+- [ ] 30. **Persistence:** Move graph-critical records to writeGraphCritical with rollback and readback expectations.
+- [ ] 31. **Persistence:** Move knowledge records to writeKnowledge with durable projection through the outbox.
+- [ ] 32. **Persistence:** Move operational records to writeOperational with durable projection through the outbox.
+- [ ] 33. **Persistence:** Add failure simulation tests for graph-critical, knowledge, and operational write tiers.
+- [ ] 34. **Persistence:** Expose projection outbox dead letters in the admin surface.
+- [ ] 35. **Persistence:** Build a cross-store reconciliation job for Mongo, Neo4j, and Chroma.
+- [ ] 36. **Persistence:** Create an admin consistency report for half-writes, stale projections, and orphan records.
+- [ ] 37. **Schema:** Create a schema catalog across Mongo collections, Neo4j labels, Chroma collections, route payloads, and shared types.
+- [ ] 38. **Mongo:** Create a Mongo collection ownership map.
+- [ ] 39. **Mongo:** Run a Mongo index audit and document the index plan for high-volume collections.
+- [ ] 40. **Neo4j:** Create the Neo4j labels, relationships, and constraints catalog.
+- [ ] 41. **Neo4j:** Add Neo4j constraint creation and migration scripts.
+- [ ] 42. **Chroma:** Create the Chroma collection catalog by purpose, domain, language, source, and metadata contract.
+- [ ] 43. **Chroma:** Add Chroma metadata contract tests for canonical ids, tenant, domain, language, readiness, and source.
+- [ ] 44. **API:** Generate a current API route map from server/src/index.ts and route modules.
+- [ ] 45. **Security:** Generate a route access matrix covering auth, admin, Steve completion, and VM entitlement gates.
+- [ ] 46. **Security:** Add tests proving every admin route is protected by requireAdmin.
+- [ ] 47. **Security:** Add tests proving gated BA routes enforce auth and onboarding gates where intended.
+- [ ] 48. **Security:** Add tests proving pre-gate routes stay limited to the approved pre-gate surface.
+- [ ] 49. **Compliance:** Add architectural linting for prospect-facing forbidden terms and route placement mistakes.
+- [ ] 50. **Compliance:** Add a PMV/prospect-facing compliance scanner for apps/com.
+- [ ] 51. **Compliance:** Add compliance checks around ScriptMaker and Ivory generated copy paths.
+- [ ] 52. **PMV:** Create the PMV contract mapping concepts to allowed language, forbidden language, fields, and events.
+- [ ] 53. **PMV:** Create the PMV analytics event taxonomy without earnings, cycle math, or placement claims.
+- [ ] 54. **CRM:** Create the canonical CRM lifecycle state model.
+- [ ] 55. **CRM:** Map invitation token, prospect account, CRM, callback, webinar, VM/RVM delivery, and outcome states.
+- [ ] 56. **CRM:** Add explicit CRM and follow-up state transition audit entries.
+- [ ] 57. **CRM:** Add stuck CRM and follow-up cleanup jobs.
+- [ ] 58. **CRM:** Create an admin state integrity report for stuck, duplicated, orphaned, and inconsistent records.
+- [ ] 59. **Agents:** Create the agent registry for Steve, Michael, Ivory, ScriptMaker, admin recommendations, and future agents.
+- [ ] 60. **Agents:** Tie prompts to versions, owners, tests, allowed inputs, forbidden outputs, and degradation behavior.
+- [ ] 61. **Agents:** Add no-scoring, no-qualification, and no-income-claim tests for agent outputs.
+- [ ] 62. **Michael:** Generate a Michael catalog key and response type registry.
+- [ ] 63. **Prompts:** Create the prompt review, versioning, and deployment approval workflow.
+- [ ] 64. **Admin:** Create admin agent health/debug cards.
+- [ ] 65. **Docs:** Regenerate docs/build-registry.md from the project wireframe and code evidence.
+- [ ] 66. **Docs:** Add freshness metadata to core docs and generated artifacts.
+- [ ] 67. **Docs:** Mark historical and generated docs with explicit authority status.
+- [ ] 68. **Docs:** Add stale-document detection to CI or the agent workflow.
+- [ ] 69. **Persistence:** Generate and maintain a persistence write catalog as part of CI.
+- [ ] 70. **Operations:** Expose outbox worker status and retry metrics.
+- [ ] 71. **Operations:** Create an operational dashboard for workers, persistence, delivery, projections, and knowledge readiness.
+- [ ] 72. **Operations:** Add structured correlation ids for token, invitation, CRM, and VM/RVM flows.
+- [ ] 73. **Security:** Create a permissions matrix by route, role, entitlement, and gate.
+- [ ] 74. **Entitlements:** Create an entitlement admin audit view.
+- [ ] 75. **Audit:** Create a unified admin audit-event taxonomy.
+- [ ] 76. **Admin:** Add tests for destructive or governance-sensitive admin actions.
+- [ ] 77. **VM/RVM:** Document VM/RVM lifecycle schemas for campaigns, recipients, queue, webhooks, attempts, and tokens.
+- [ ] 78. **VM/RVM:** Create a VM/RVM provider queue failure and stuck-state dashboard.
+- [ ] 79. **VM/RVM:** Add VM/RVM copy compliance tests.
+- [ ] 80. **VM/RVM:** Add idempotency keys for VM/RVM provider events and webhooks.
+- [ ] 81. **Delivery:** Add delivery retry, backpressure, and dead-letter controls.
+- [ ] 82. **Resources:** Define resource and content lifecycle states: draft, review, approved, active, archived, superseded.
+- [ ] 83. **Resources:** Build the unified resource catalog schema.
+- [ ] 84. **Resources:** Add a content publishing gate requiring Chroma and Neo4j readiness before retrieval.
+- [ ] 85. **Knowledge:** Map the candidate-to-approved knowledge workflow end to end.
+- [ ] 86. **Knowledge:** Add active and retrieval-ready knowledge status to admin.
+- [ ] 87. **Knowledge:** Connect approved knowledge store to GraphRAG through tiered writes and the projection outbox.
+- [ ] 88. **GraphRAG:** Add GraphRAG retrieval-readiness tests across Mongo, Chroma, Neo4j, and Context Manager packets.
+- [ ] 89. **Context:** Create the Context Manager packet contract and trace schema.
+- [ ] 90. **Context:** Expose Context Manager degraded reasons in admin or runtime diagnostics.
+- [ ] 91. **Knowledge:** Add source lineage and citation storage for knowledge records.
+- [ ] 92. **Schema:** Add schema drift CI checks.
+- [ ] 93. **Docs:** Generate route, access, schema, and persistence maps into the documentation set.
+
+## P2 - Medium Priority
+
+Product unification, workflow completion, content operations, and scale-hardening work.
+
+- [ ] 94. **Launch Center:** Decide whether Launch Center is a named surface or cockpit umbrella concept.
+- [ ] 95. **Launch Center:** If Launch Center is a named surface, create its route and data catalog.
+- [ ] 96. **Launch Center:** If Launch Center is an umbrella concept, document cockpit, training, invitation, and CRM composition.
+- [ ] 97. **Launch Center:** Create a launch state projection combining orientation, training, invitations, profile, and CRM readiness.
+- [ ] 98. **Launch Center:** Add a launch readiness admin view that avoids ranking or scoring people.
+- [ ] 99. **Resource Center:** Define the Resource Center product boundary.
+- [ ] 100. **Resource Center:** Build Resource Center UI with search, filters, categories, and version-safe content.
+- [ ] 101. **Resource Center:** Connect resources to training modules and event materials.
+- [ ] 102. **Resource Center:** Add resource usage analytics and stale-resource warnings.
+- [ ] 103. **Event Center:** Define the Event Center product boundary.
+- [ ] 104. **Event Center:** Build Event Center BA and admin UI.
+- [ ] 105. **Event Center:** Add event model fields for type, visibility, capacity, registration, reminders, attendance, and follow-up.
+- [ ] 106. **Event Center:** Connect event attendance to CRM follow-up.
+- [ ] 107. **Follow-up:** Build a unified follow-up queue.
+- [ ] 108. **Event Center:** Add multi-timezone event handling tests.
+- [ ] 109. **Delivery:** Add email and SMS reminder governance for event workflows.
+- [ ] 110. **Training:** Build the training module catalog with ids, prerequisites, completion criteria, content sources, and routes.
+- [ ] 111. **Training:** Reconcile the full 20-module training target with the current implementation.
+- [ ] 112. **Training:** Add a training effectiveness feedback loop tied to approved knowledge and outcomes.
+- [ ] 113. **Training:** Add admin training analytics that avoid ranking or scoring people.
+- [ ] 114. **Training:** Add Spanish and English parity checks for training content.
+- [ ] 115. **Orientation:** Create the current orientation state machine.
+- [ ] 116. **Orientation:** Add an admin diagnostic for stuck, duplicate, or inconsistent orientation records.
+- [ ] 117. **Orientation:** Create the current orientation content inventory.
+- [ ] 118. **Steve:** Connect Steve profile outputs to tailored training and launch guidance.
+- [ ] 119. **Steve:** Add Steve route, completion, and gate tests.
+- [ ] 120. **Steve:** Add Steve prompt and playbook entries.
+- [ ] 121. **Michael:** Create a Michael runtime health and admin debugger.
+- [ ] 122. **Michael:** Create a single source of truth for Michael language and fallback behavior.
+- [ ] 123. **Ivory:** Register Ivory and ScriptMaker prompts in the prompt registry.
+- [ ] 124. **Ivory:** Add generated-output audit records with prompt version, input, user, and compliance result.
+- [ ] 125. **LLM:** Add LLM provider error observability and retry/degradation reporting.
+- [ ] 126. **PMV:** Build a PMV dashboard without earnings or placement claims.
+- [ ] 127. **Cockpit:** Add deterministic cockpit next-step suggestions from lifecycle state.
+- [ ] 128. **Admin:** Add admin bottleneck reports for invitations, CRM, training, events, and delivery.
+- [ ] 129. **Frontend:** Reduce the team app bundle size through code splitting or manual chunks.
+- [ ] 130. **Frontend:** Resolve the com app dynamic/static import split warning.
+- [ ] 131. **Admin:** Add pagination and index awareness for high-volume admin views.
+- [ ] 132. **Context:** Add caching and batching for Context Manager and GraphRAG retrieval canaries.
+- [ ] 133. **Chroma:** Add Chroma re-index tooling and age-out policy.
+- [ ] 134. **Knowledge:** Add source conflict detection.
+- [ ] 135. **Knowledge:** Add stale knowledge correction and supersession workflow.
+- [ ] 136. **Neo4j:** Add graph traversals for orphan and duplicate detection.
+- [ ] 137. **Neo4j:** Add sponsor immutability graph verification tests.
+- [ ] 138. **Neo4j:** Add pool positioning graph verification tests.
+- [ ] 139. **VM/RVM:** Add a provider-independent queue abstraction.
+- [ ] 140. **VM/RVM:** Add throttling and rate limits for delivery providers.
+- [ ] 141. **Privacy:** Run a privacy and minimal-exposure review for Steve profile data.
+- [ ] 142. **Content:** Add content versioning for training, orientation, resources, and event materials.
+- [ ] 143. **Release:** Add live-environment smoke tests for email and LLM keys.
+
+## P3 - Later / Strategic
+
+Longer-horizon expansion after release blockers, governance layer, and core catalogs are stable.
+
+- [ ] 144. **Knowledge:** Activate one narrow approved-knowledge domain as the first canary.
+- [ ] 145. **Context:** Expand Context Manager use to Michael training only after the first canary passes.
+- [ ] 146. **GraphRAG:** Expand GraphRAG beyond the first canary domain.
+- [ ] 147. **GraphRAG:** Add GraphRAG source citation UI.
+- [ ] 148. **Admin:** Build advanced admin knowledge dashboards.
+- [ ] 149. **Neo4j:** Add a graph lineage explorer.
+- [ ] 150. **Scale:** Externalize the in-process event bus for multi-instance deployment.
+- [ ] 151. **Scale:** Externalize high-volume worker queues.
+- [ ] 152. **Scale:** Add multi-instance coordination for SSE, workers, and delivery jobs.
+- [ ] 153. **Neo4j:** Add deeper graph diagnostics and lineage queries.
+- [ ] 154. **Docs:** Automate route inventory generation from code.
+- [ ] 155. **Docs:** Automate schema documentation from Zod and shared TypeScript types.
+- [ ] 156. **Resources:** Add governed resource suggestions based on approved knowledge and user context.
+- [ ] 157. **PMV:** Add advanced PMV reporting linked to cockpit behavior without income or placement claims.
+- [ ] 158. **Events:** Add attendance, no-show, and post-event trend analytics.
+- [ ] 159. **Knowledge:** Build content deduplication and chunking for large knowledge imports.
+- [ ] 160. **Chroma:** Build batch embedding pipelines for large imports.
+- [ ] 161. **Retrieval:** Add retrieval latency budgets and caching policies.
+- [ ] 162. **Launch Center:** Add launch plan templates tied to Fast Start and PMV.
+- [ ] 163. **Recommendations:** Add resource, event, and training recommendation rules that remain non-scoring.
+- [ ] 164. **Ivory:** Add Spanish variants for generated compliant copy.
+- [ ] 165. **Prompts:** Build a prompt deployment dashboard.
+- [ ] 166. **Agents:** Build an agent memory read/write audit dashboard.
+- [ ] 167. **Operations:** Add worker and queue runbooks for production operations.
+- [ ] 168. **Compliance:** Add multi-language compliance review workflow.
+- [ ] 169. **Docs:** Add a generated endpoint map to every release handoff.
+- [ ] 170. **Schema:** Add migration guides for future schema changes.
+- [ ] 171. **GraphRAG:** Add graph-aware stale knowledge alerts.
+- [ ] 172. **Admin:** Add operational drill-downs for cross-store lineage.
+- [ ] 173. **Governance:** Review this task list after P0/P1 completion and regenerate the priority order from the updated repo state.
+
+## Agent Lane Planning Template
+
+Use this section when assigning work to multiple agents. Keep the original numbered task list above as the source of truth.
+
+| Lane | Agent | Item range or explicit items | Subsystem focus | Branch | Status | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| Lane 0 | Codex/Claude Code | 5, 6, 10, 16, 17, 18, 19 | P0 release-control foundation, stale-doc reconciliation, active blocker tracker | `codex/platform-audit-p0-lane0-foundation` | Prepared | Must run and merge first. Brief: `engineering/sprints/platform-audit-p0/LANE_0_FOUNDATION.md` |
+| Lane 1 | Codex/Claude Code | 1, 2, 3, 4 | Michael runtime contract, EN/ES regressions, server Vitest cluster | `codex/platform-audit-p0-lane1-michael` | Gated | Start after Lane 0 merges. Brief: `engineering/sprints/platform-audit-p0/LANE_1_MICHAEL_RUNTIME.md` |
+| Lane 2 | Codex/Claude Code | 7, 8, 9 | Chroma heartbeat metadata readback, regression test, admin health probe | `codex/platform-audit-p0-lane2-chroma` | Gated | Start after Lane 0 merges. Brief: `engineering/sprints/platform-audit-p0/LANE_2_CHROMA_HEALTH.md` |
+| Lane 3 | Codex/Claude Code | 11, 12, 13, 14, 15 | Agent playbook links, VM/RVM governance, GraphRAG/Context canary guardrails | `codex/platform-audit-p0-lane3-governance` | Gated | Start after Lane 0 merges. Brief: `engineering/sprints/platform-audit-p0/LANE_3_GOVERNANCE.md` |
+| Lane 4 | Codex/Claude Code | 20 plus validation of 4 and 9 | Final gates: typecheck, build, server tests, P0 closeout record | `codex/platform-audit-p0-lane4-final-gates` | Gated | Start after Lanes 1-3 merge. Brief: `engineering/sprints/platform-audit-p0/LANE_4_FINAL_GATES.md` |
+
+## Progress Log
+
+| Date | Item | Agent | Update | Blocker |
+| --- | --- | --- | --- | --- |
+| 2026-07-10 | P0 orchestration | Codex | Created P0 lane map, master prompt, lane briefs, launcher/worktree scripts, Lane 0 worktree, and `momentum.agent_status` rows for lanes 0-4. Lane 0 is prepared first; dependent lanes are gated until Lane 0 merges. | Queue mirror currently returned no `work_queue_leaves` rows from local Mongo `momentum`; P0 tasklist remains the source for this audit orchestration. |
