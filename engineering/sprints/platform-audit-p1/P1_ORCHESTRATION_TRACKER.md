@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-schema-catalog`
+Latest branch: `codex/platform-audit-p1-mongo-ownership-map`
 
 Closed in this tranche:
 
@@ -42,6 +42,8 @@ Closed in this tranche:
   and orphan records.
 - P1-37: generated a schema catalog across Mongo, Neo4j, Chroma, route
   payload surfaces, and shared exports.
+- P1-38: generated a Mongo collection ownership map with zero unclassified
+  collections.
 
 Catalog artifacts:
 
@@ -390,6 +392,24 @@ Generated coverage:
 - Route modules, mounted prefixes, handlers, and shared route/payload type
   imports.
 - Shared package exports across `packages/shared/src`.
+
+### P1-38: Mongo Collection Ownership Map
+
+Implemented:
+
+- Added `server/scripts/generate-mongo-ownership-map.mjs`.
+- Added `pnpm catalog:mongo-ownership` and
+  `pnpm catalog:mongo-ownership:check`.
+- Generated:
+  - `engineering/sprints/platform-audit-p1/MONGO_COLLECTION_OWNERSHIP_MAP.md`
+  - `engineering/sprints/platform-audit-p1/mongo-ownership-map.json`
+
+Generated coverage:
+
+- 65 Mongo collections from the schema catalog.
+- Owner domain, steward, primary surface, conservative persistence-tier label,
+  schema mode, resolved-string status, source count, and source files.
+- 0 unclassified collection rows.
 
 ## Lane Map
 
