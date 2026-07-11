@@ -36,7 +36,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeKnowledge } from '../services/tieredWrite.js';
 import {
   MCS_RECRUITING_STEPS,
   MCS_RECRUITING_STEP_LABELS,
@@ -302,7 +302,7 @@ export async function emitMichaelEvent(input: MichaelEventInput): Promise<string
     createdAt,
     metadata: input.metadata ?? {},
   };
-  await tripleStackWrite({
+  await writeKnowledge({
     id: eventId,
     mongoCollection: MICHAEL_EVENTS_COLLECTION,
     mongoDoc: { ...doc },
@@ -404,7 +404,7 @@ export async function createRecruitingCycle(
     ? `Recruiting cycle for BA ${input.tmagId}. Why: ${cap(why)}`
     : `Recruiting cycle for BA ${input.tmagId}. Why not yet captured.`;
 
-  await tripleStackWrite({
+  await writeKnowledge({
     id,
     mongoCollection: CYCLES_COLLECTION,
     mongoDoc: { ...record },

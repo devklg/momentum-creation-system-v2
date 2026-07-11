@@ -9,11 +9,11 @@ import type { McsLearningCandidateInput } from '@momentum/shared';
 
 const mocks = vi.hoisted(() => ({
   persistenceCall: vi.fn(),
-  tripleStackWrite: vi.fn(),
+  writeKnowledge: vi.fn(),
 }));
 
 vi.mock('../../services/persistence/dispatch.js', () => ({ persistenceCall: mocks.persistenceCall }));
-vi.mock('../../services/tripleStack.js', () => ({ tripleStackWrite: mocks.tripleStackWrite }));
+vi.mock('../../services/tieredWrite.js', () => ({ writeKnowledge: mocks.writeKnowledge }));
 
 type AnyRec = Record<string, unknown>;
 
@@ -48,7 +48,7 @@ function input(overrides: Partial<McsLearningCandidateInput> = {}): McsLearningC
 
 beforeEach(() => {
   mocks.persistenceCall.mockReset();
-  mocks.tripleStackWrite.mockReset();
+  mocks.writeKnowledge.mockReset();
 });
 
 afterEach(() => {
@@ -61,7 +61,7 @@ describe('Phase 7 R2 — canary gate + review-only isolation', () => {
     const m = await load(false);
     expect(m.learningCandidatePersistenceEnabled()).toBe(false);
     expect(await m.appendLearningCandidate(input())).toBeNull();
-    expect(mocks.tripleStackWrite).not.toHaveBeenCalled();
+    expect(mocks.writeKnowledge).not.toHaveBeenCalled();
   });
 
   it('writes to the REVIEW-ONLY chroma collection, never an active-knowledge one', async () => {
@@ -70,7 +70,7 @@ describe('Phase 7 R2 — canary gate + review-only isolation', () => {
 
     await m.appendLearningCandidate(input());
 
-    const call = mocks.tripleStackWrite.mock.calls[0]![0] as AnyRec;
+    const call = mocks.writeKnowledge.mock.calls[0]![0] as AnyRec;
     expect(call.mongoCollection).toBe('mcs_learning_candidates');
     expect((call.chroma as AnyRec).collection).toBe('mcs_learning_candidates_review');
   });

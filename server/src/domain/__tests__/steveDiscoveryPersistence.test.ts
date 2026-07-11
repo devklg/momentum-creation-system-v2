@@ -2,15 +2,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   persistenceCall: vi.fn(),
-  tripleStackWrite: vi.fn(),
+  writeKnowledge: vi.fn(),
 }));
 
 vi.mock('../../services/persistence/dispatch.js', () => ({
   persistenceCall: mocks.persistenceCall,
 }));
 
-vi.mock('../../services/tripleStack.js', () => ({
-  tripleStackWrite: mocks.tripleStackWrite,
+vi.mock('../../services/tieredWrite.js', () => ({
+  writeKnowledge: mocks.writeKnowledge,
 }));
 
 type AnyRec = Record<string, unknown>;
@@ -99,7 +99,14 @@ async function loadSteve() {
 beforeEach(() => {
   vi.resetModules();
   mocks.persistenceCall.mockReset();
-  mocks.tripleStackWrite.mockReset();
+  mocks.writeKnowledge.mockReset();
+  mocks.writeKnowledge.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
+    return {
+      tier: 'knowledge',
+      id: input.id,
+      mongo: { ok: true, verified: true },
+    };
+  });
 });
 
 describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
@@ -140,9 +147,9 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
   it('TOCTOU: a raced duplicate insert falls back to the update path (no throw)', async () => {
     const store: Store = { ba: { ...BA }, discovery: null };
     mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
-    // Simulate a concurrent writer: tripleStackWrite lands the row then the
+    // Simulate a concurrent writer: writeKnowledge lands the row then the
     // insert rejects on the duplicate _id.
-    mocks.tripleStackWrite.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
+    mocks.writeKnowledge.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
       store.discovery = { _id: input.id, ...input.mongoDoc };
       throw new Error('E11000 duplicate key');
     });
@@ -162,7 +169,7 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     mocks.persistenceCall.mockImplementation(
       makePersistenceImpl(store, { listCollectionsFailFirst: 1 }),
     );
-    mocks.tripleStackWrite.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
+    mocks.writeKnowledge.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
       store.discovery = { _id: input.id, ...input.mongoDoc };
       return { mongo: { ok: true }, neo4j: { ok: true }, chroma: { ok: true, verified: true } };
     });

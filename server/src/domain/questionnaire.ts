@@ -18,7 +18,7 @@
  * Per TEAM Design Section C.5 (onboarding spine, locked Chat #22/#25/#103).
  */
 
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeKnowledge } from '../services/tieredWrite.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 
 export const QUESTIONNAIRE_VERSION = 'v1_2026_05_19';
@@ -200,7 +200,7 @@ export async function recordQuestionnaire(
     `Why invest in them: ${input.whyYou}`,
   ].join(' | ');
 
-  await tripleStackWrite({
+  await writeKnowledge({
     id: questionnaireId,
     mongoCollection: 'tmag_questionnaires',
     mongoDoc: record as unknown as Record<string, unknown>,

@@ -14,7 +14,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeKnowledge } from '../services/tieredWrite.js';
 import { appendAuditEntry } from './auditLog.js';
 import { writeCrmOwnershipGraphCritical } from './crmOwnershipPersistence.js';
 import { updateTokenLifecycleOperational } from './tokenLifecyclePersistence.js';
@@ -218,7 +218,7 @@ export async function appendProspectTimelineEvent(
     payload: timelinePayload(input.metadata),
   };
 
-  await tripleStackWrite({
+  await writeKnowledge({
     id: eventId,
     mongoCollection: TIMELINE_COLLECTION,
     mongoDoc: { ...record },

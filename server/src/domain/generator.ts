@@ -36,7 +36,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeKnowledge } from '../services/tieredWrite.js';
 import {
   MCS_PRODUCT_KEYS,
   findProductByKey,
@@ -148,7 +148,7 @@ export async function createGeneratorRun(
     updatedAt: now,
   };
 
-  await tripleStackWrite({
+  await writeKnowledge({
     id: runId,
     mongoCollection: RUNS_COLLECTION,
     mongoDoc: { ...run },

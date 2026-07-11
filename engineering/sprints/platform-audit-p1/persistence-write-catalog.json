@@ -1,13 +1,12 @@
 {
-  "generatedAt": "2026-07-11T15:35:51.891Z",
+  "generatedAt": "2026-07-11T15:40:13.160Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts"
   ],
-  "productionCallSiteCount": 35,
+  "productionCallSiteCount": 18,
   "countsByTier": {
-    "operational": 18,
-    "knowledge": 17
+    "operational": 18
   },
   "callSites": [
     {
@@ -36,7 +35,7 @@
     },
     {
       "file": "server/src/domain/adminTenantArchitecture.ts",
-      "line": 364,
+      "line": 365,
       "functionName": "saveTenantSettings",
       "idExpression": "version.settingsVersionId",
       "mongoCollectionExpression": "SETTINGS_COLLECTION",
@@ -45,30 +44,6 @@
       "tier": "operational",
       "subsystem": "governance_records",
       "rationale": "Commitments, outcomes, tenant settings, and admin notes are operational/governance records."
-    },
-    {
-      "file": "server/src/domain/adminTenantArchitecture.ts",
-      "line": 461,
-      "functionName": "saveTenantTemplate",
-      "idExpression": "after.templateVersionId",
-      "mongoCollectionExpression": "TEMPLATE_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "content_governance",
-      "rationale": "Master content, content videos, and tenant templates shape governed retrieval and generated copy."
-    },
-    {
-      "file": "server/src/domain/agents/orchestrator.ts",
-      "line": 299,
-      "functionName": "recordAgentEvent",
-      "idExpression": "eventId",
-      "mongoCollectionExpression": "agentEventsCollection",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "agent_context",
-      "rationale": "Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context."
     },
     {
       "file": "server/src/domain/auditLog.ts",
@@ -143,114 +118,6 @@
       "rationale": "Commitments, outcomes, tenant settings, and admin notes are operational/governance records."
     },
     {
-      "file": "server/src/domain/contentVideos.ts",
-      "line": 163,
-      "functionName": "createContentVideo",
-      "idExpression": "contentVideoId",
-      "mongoCollectionExpression": "COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "content_governance",
-      "rationale": "Master content, content videos, and tenant templates shape governed retrieval and generated copy."
-    },
-    {
-      "file": "server/src/domain/crm.ts",
-      "line": 157,
-      "functionName": "addNote",
-      "idExpression": "noteId",
-      "mongoCollectionExpression": "NOTES_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "crm_behavioral_trail",
-      "rationale": "CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail."
-    },
-    {
-      "file": "server/src/domain/crm.ts",
-      "line": 261,
-      "functionName": "setFollowUp",
-      "idExpression": "followUpId",
-      "mongoCollectionExpression": "FOLLOWUPS_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "crm_behavioral_trail",
-      "rationale": "CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail."
-    },
-    {
-      "file": "server/src/domain/crm.ts",
-      "line": 390,
-      "functionName": "setDisposition",
-      "idExpression": "dispoId",
-      "mongoCollectionExpression": "DISPOSITIONS_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "crm_behavioral_trail",
-      "rationale": "CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail."
-    },
-    {
-      "file": "server/src/domain/crm.ts",
-      "line": 687,
-      "functionName": "appendActivity",
-      "idExpression": "activityId",
-      "mongoCollectionExpression": "ACTIVITY_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "crm_behavioral_trail",
-      "rationale": "CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail."
-    },
-    {
-      "file": "server/src/domain/generator.ts",
-      "line": 151,
-      "functionName": "createGeneratorRun",
-      "idExpression": "runId",
-      "mongoCollectionExpression": "RUNS_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "crm_behavioral_trail",
-      "rationale": "CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail."
-    },
-    {
-      "file": "server/src/domain/graphrag.ts",
-      "line": 127,
-      "functionName": "appendGraphRagRecord",
-      "idExpression": "",
-      "mongoCollectionExpression": "MONGO_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "approved_knowledge",
-      "rationale": "Approved knowledge and candidate knowledge must project durably to graph/search."
-    },
-    {
-      "file": "server/src/domain/invitations.ts",
-      "line": 344,
-      "functionName": "appendActivity",
-      "idExpression": "activityId",
-      "mongoCollectionExpression": "ACTIVITY_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "crm_behavioral_trail",
-      "rationale": "CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail."
-    },
-    {
-      "file": "server/src/domain/learningCandidates.ts",
-      "line": 158,
-      "functionName": "appendLearningCandidate",
-      "idExpression": "",
-      "mongoCollectionExpression": "COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "approved_knowledge",
-      "rationale": "Approved knowledge and candidate knowledge must project durably to graph/search."
-    },
-    {
       "file": "server/src/domain/orientationSession.ts",
       "line": 332,
       "functionName": "createOrientationSession",
@@ -299,18 +166,6 @@
       "rationale": "Prospect accounts and magic links are credentials/session operations; Mongo commit is the success boundary."
     },
     {
-      "file": "server/src/domain/prospectCrm.ts",
-      "line": 221,
-      "functionName": "appendProspectTimelineEvent",
-      "idExpression": "eventId",
-      "mongoCollectionExpression": "TIMELINE_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "crm_behavioral_trail",
-      "rationale": "CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail."
-    },
-    {
       "file": "server/src/domain/prospectMagicLink.ts",
       "line": 168,
       "functionName": "issueLinksForPhone",
@@ -321,54 +176,6 @@
       "tier": "operational",
       "subsystem": "prospect_access",
       "rationale": "Prospect accounts and magic links are credentials/session operations; Mongo commit is the success boundary."
-    },
-    {
-      "file": "server/src/domain/questionnaire.ts",
-      "line": 203,
-      "functionName": "recordQuestionnaire",
-      "idExpression": "questionnaireId",
-      "mongoCollectionExpression": "'tmag_questionnaires'",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "agent_context",
-      "rationale": "Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context."
-    },
-    {
-      "file": "server/src/domain/recruitingCycle.ts",
-      "line": 305,
-      "functionName": "emitMichaelEvent",
-      "idExpression": "eventId",
-      "mongoCollectionExpression": "MICHAEL_EVENTS_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "agent_context",
-      "rationale": "Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context."
-    },
-    {
-      "file": "server/src/domain/recruitingCycle.ts",
-      "line": 407,
-      "functionName": "createRecruitingCycle",
-      "idExpression": "",
-      "mongoCollectionExpression": "CYCLES_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "agent_context",
-      "rationale": "Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context."
-    },
-    {
-      "file": "server/src/domain/steve-success-interview.ts",
-      "line": 617,
-      "functionName": "ingestDiscoveryArtifact",
-      "idExpression": "",
-      "mongoCollectionExpression": "DISCOVERIES_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "agent_context",
-      "rationale": "Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context."
     },
     {
       "file": "server/src/domain/threeWayCalls.ts",
@@ -393,18 +200,6 @@
       "tier": "operational",
       "subsystem": "delivery_and_reservations",
       "rationale": "Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows."
-    },
-    {
-      "file": "server/src/domain/training.ts",
-      "line": 231,
-      "functionName": "markFastStartModuleState",
-      "idExpression": "_id",
-      "mongoCollectionExpression": "PROGRESS_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "agent_context",
-      "rationale": "Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context."
     },
     {
       "file": "server/src/domain/vmCampaigns.ts",

@@ -13,7 +13,7 @@
  * can target another BA's progress.
  *
  * Triple-stack discipline (CLAUDE.md / locked-spec):
- *   - First write: tripleStackWrite — Mongo insert + Neo4j MERGE + Chroma add.
+ *   - First write: writeKnowledge - Mongo insert + durable Neo4j/Chroma projection.
  *   - Update: mongo.update + neo4j MATCH-SET (no Chroma re-add — the
  *     embedding text doesn't change between in_progress and completed
  *     for the same module).
@@ -30,7 +30,7 @@
  */
 
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeKnowledge } from '../services/tieredWrite.js';
 import type {
   McsFastStartMarkStateResponse,
   McsFastStartModuleId,
@@ -228,7 +228,7 @@ export async function markFastStartModuleState(args: {
 
     const chromaDoc = `BA ${tmagId} ${to} Fast Start module ${moduleId}`;
 
-    await tripleStackWrite({
+    await writeKnowledge({
       id: _id,
       mongoCollection: PROGRESS_COLLECTION,
       mongoDoc: doc as unknown as Record<string, unknown>,

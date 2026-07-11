@@ -1,17 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  tripleStackWrite: vi.fn(),
+  writeKnowledge: vi.fn(),
 }));
 
-vi.mock('../../services/tripleStack.js', () => ({
-  tripleStackWrite: mocks.tripleStackWrite,
+vi.mock('../../services/tieredWrite.js', () => ({
+  writeKnowledge: mocks.writeKnowledge,
 }));
 
 type AnyRec = Record<string, unknown>;
 
 beforeEach(() => {
-  mocks.tripleStackWrite.mockReset();
+  mocks.writeKnowledge.mockReset();
 });
 
 describe('contentVideos domain', () => {
@@ -41,7 +41,7 @@ describe('contentVideos domain', () => {
     if (!result.ok) expect(result.error.kind).toBe('invalid_payload');
   });
 
-  it('creates a content video through the app-direct triple-stack', async () => {
+  it('creates a content video through the knowledge-tier writer', async () => {
     const { createContentVideo } = await import('../contentVideos.js');
 
     const result = await createContentVideo({
@@ -59,8 +59,8 @@ describe('contentVideos domain', () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(mocks.tripleStackWrite).toHaveBeenCalledTimes(1);
-    const call = mocks.tripleStackWrite.mock.calls[0]![0] as AnyRec;
+    expect(mocks.writeKnowledge).toHaveBeenCalledTimes(1);
+    const call = mocks.writeKnowledge.mock.calls[0]![0] as AnyRec;
     expect(call.mongoCollection).toBe('tmag_content_videos');
     expect((call.chroma as AnyRec).collection).toBe('mcs_content_videos');
     expect((call.mongoDoc as AnyRec).section).toBe('Product Knowledge');
