@@ -1,5 +1,7 @@
 # Graph Report — API-Free Structural Build - D:\momentum-creation-system-v2  (2026-06-24)
 
+> P0 freshness warning (2026-07-11): this graph was built from commit `bdc2ec0`. The current P0 audit baseline is `4f1806f`, so these graphify artifacts are stale against HEAD. Use this report only as topology aid until graphify is regenerated.
+
 ## Corpus Check
 - API-free AST/code-only graph. Docs/images were not semantically extracted.
 
