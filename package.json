@@ -33,6 +33,8 @@
     "catalog:mongo-ownership:check": "node server/scripts/generate-mongo-ownership-map.mjs --check",
     "catalog:mongo-indexes": "node server/scripts/generate-mongo-index-audit.mjs",
     "catalog:mongo-indexes:check": "node server/scripts/generate-mongo-index-audit.mjs --check",
+    "catalog:neo4j": "node server/scripts/generate-neo4j-catalog.mjs",
+    "catalog:neo4j:check": "node server/scripts/generate-neo4j-catalog.mjs --check",
     "docs": "node server/scripts/build-checklist.mjs && node server/scripts/sync-queue-from-wireframe.mjs",
     "clean": "pnpm -r exec rm -rf dist node_modules"
   },
