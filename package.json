@@ -35,6 +35,8 @@
     "catalog:mongo-indexes:check": "node server/scripts/generate-mongo-index-audit.mjs --check",
     "catalog:neo4j": "node server/scripts/generate-neo4j-catalog.mjs",
     "catalog:neo4j:check": "node server/scripts/generate-neo4j-catalog.mjs --check",
+    "catalog:chroma": "node server/scripts/generate-chroma-catalog.mjs",
+    "catalog:chroma:check": "node server/scripts/generate-chroma-catalog.mjs --check",
     "neo4j:schema:dry-run": "pnpm --filter @momentum/server neo4j:schema:dry-run",
     "neo4j:schema:apply": "pnpm --filter @momentum/server neo4j:schema:apply",
     "neo4j:schema:verify": "pnpm --filter @momentum/server neo4j:schema:verify",
