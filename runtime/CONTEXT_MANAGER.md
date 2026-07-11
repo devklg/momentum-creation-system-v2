@@ -25,6 +25,8 @@
 **External Runtime Scope:** Ringless Voicemail, SMS, future callback workflows
 **Telnyx Scope:** External runtime only. Telnyx is not part of internal Browser Voice, Steve, Michael, or Ivory runtime.
 
+**Live-Flag Guardrail:** GraphRAG and Context Manager live usage requires an approved canary. See `../docs/GRAPHRAG_CONTEXT_CANARY_CRITERIA.md`. Until then, live flags remain off and agents use approved degraded/fallback behavior.
+
 ---
 
 ## 2. Purpose
