@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-neo4j-migrations`
+Latest branch: `codex/platform-audit-p1-chroma-catalog`
 
 Closed in this tranche:
 
@@ -48,6 +48,8 @@ Closed in this tranche:
 - P1-40: generated a Neo4j labels, relationships, constraints, and indexes
   catalog.
 - P1-41: added Neo4j schema migration dry-run, apply, and verify commands.
+- P1-42: generated a Chroma collection catalog by purpose, domain, language,
+  source, and metadata contract.
 
 Catalog artifacts:
 
@@ -59,6 +61,9 @@ Catalog artifacts:
 - `server/scripts/generate-neo4j-catalog.mjs`
 - `server/src/services/persistence/neo4j/schemaMigration.ts`
 - `server/scripts/apply-neo4j-schema.ts`
+- `engineering/sprints/platform-audit-p1/CHROMA_COLLECTION_CATALOG.md`
+- `engineering/sprints/platform-audit-p1/chroma-collection-catalog.json`
+- `server/scripts/generate-chroma-catalog.mjs`
 
 Inventory result:
 
@@ -490,6 +495,36 @@ pnpm neo4j:schema:apply
 pnpm neo4j:schema:verify
 ```
 
+### P1-42: Chroma Collection Catalog
+
+Implemented:
+
+- Added `server/scripts/generate-chroma-catalog.mjs`.
+- Added `pnpm catalog:chroma` and `pnpm catalog:chroma:check`.
+- Generated:
+  - `engineering/sprints/platform-audit-p1/CHROMA_COLLECTION_CATALOG.md`
+  - `engineering/sprints/platform-audit-p1/chroma-collection-catalog.json`
+
+Generated coverage:
+
+- 50 registered Chroma collections from `server/src/services/chromaCollections.ts`.
+- Rev3 collection metadata from `server/scripts/provisioning/rev3-registry.mjs`
+  including embedding model and dimension.
+- Purpose, domain, language, and source classification for every collection.
+- Observed Chroma write/query actions, metadata keys, and filter keys from
+  source call sites.
+- Inferred required metadata keys for knowledge, active GraphRAG, identity,
+  prospect, CRM, VM/RVM, audit, and operational collections.
+- Observed unregistered/dynamic Chroma targets, including literal drift
+  candidates and generic projection/tiered-write expressions.
+
+Current catalog summary:
+
+- 50 collection contract rows.
+- 30 collections with observed write/query usage.
+- 10 language-scoped active-knowledge collections.
+- 7 observed unregistered/dynamic Chroma targets to drive P1-43 contract tests.
+
 ## Lane Map
 
 ### Lane P1-A: Persistence Migration
@@ -584,6 +619,7 @@ pnpm catalog:schema:check
 pnpm catalog:mongo-ownership:check
 pnpm catalog:mongo-indexes:check
 pnpm catalog:neo4j:check
+pnpm catalog:chroma:check
 pnpm typecheck
 pnpm build
 pnpm --filter @momentum/server test

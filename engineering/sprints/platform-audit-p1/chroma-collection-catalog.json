@@ -1,0 +1,2334 @@
+{
+  "generatedAt": "2026-07-11T22:27:43.631Z",
+  "sources": [
+    "server/src/services/chromaCollections.ts",
+    "server/scripts/provisioning/rev3-registry.mjs",
+    "server/src/**/*.ts chromadb usage",
+    "engineering/sprints/platform-audit-p1/schema-catalog.json"
+  ],
+  "summary": {
+    "collections": 50,
+    "schemaCatalogCollections": 50,
+    "withObservedWrites": 30,
+    "languageScopedCollections": 10,
+    "metadataContractRows": 50,
+    "observedUnregisteredTargets": 7
+  },
+  "byDomain": {
+    "identity_access": 4,
+    "prospect_funnel": 5,
+    "agents": 6,
+    "audit_governance": 1,
+    "broadcast_delivery": 1,
+    "content_resources": 3,
+    "onboarding_training": 2,
+    "operations": 1,
+    "knowledge": 12,
+    "knowledge_review": 1,
+    "outcomes": 1,
+    "crm": 2,
+    "holding_tank": 2,
+    "general": 1,
+    "events": 3,
+    "tenant_admin": 1,
+    "vm_rvm": 4
+  },
+  "collections": [
+    {
+      "collection": "mcs_access_codes",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "identity_access",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_admin_prospect_notes",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "prospect_funnel",
+      "language": "not_language_scoped",
+      "purpose": "Prospect funnel semantic record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeOperational"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/adminProspectOversight.ts",
+          "line": 781,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "createdAt",
+          "createdByTmagId",
+          "kind",
+          "noteId",
+          "prospectId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "createdByTmagId",
+          "noteId",
+          "prospectId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_agent_ivory_events",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "agents",
+      "language": "not_language_scoped",
+      "purpose": "Agent event/template semantic memory.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_agent_michael_events",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "agents",
+      "language": "not_language_scoped",
+      "purpose": "Agent event/template semantic memory.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeKnowledge"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/recruitingCycle.ts",
+          "line": 305,
+          "action": "writeKnowledge"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "agentId",
+          "createdAt",
+          "kind",
+          "tmagId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "agentId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_agent_steve_events",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "agents",
+      "language": "not_language_scoped",
+      "purpose": "Agent event/template semantic memory.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_agent_system_events",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "agents",
+      "language": "not_language_scoped",
+      "purpose": "Agent event/template semantic memory.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_agent_templates",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "agents",
+      "language": "not_language_scoped",
+      "purpose": "Agent event/template semantic memory.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_audit_log",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "audit_governance",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeOperational"
+      ],
+      "sourceCount": 2,
+      "sources": [
+        {
+          "file": "server/src/domain/auditLog.ts",
+          "line": 143,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/auditLog.ts",
+          "line": 399,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "action",
+          "agent",
+          "correlationId",
+          "entityKind",
+          "role",
+          "severity",
+          "tenantId",
+          "timestamp",
+          "tmagId",
+          "turnId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "correlationId",
+          "tenantId",
+          "tmagId",
+          "turnId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_broadcasts",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "broadcast_delivery",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeOperational"
+      ],
+      "sourceCount": 2,
+      "sources": [
+        {
+          "file": "server/src/domain/broadcast.ts",
+          "line": 438,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/broadcast.ts",
+          "line": 582,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "audiencePreset",
+          "broadcastId",
+          "channel",
+          "createdAt",
+          "isTestSend"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "broadcastId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_commitments",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "identity_access",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeOperational"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/commitments.ts",
+          "line": 51,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "acceptedAt",
+          "kind",
+          "threeBaId",
+          "tmagId",
+          "version"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "threeBaId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_content_templates",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "content_resources",
+      "language": "not_language_scoped",
+      "purpose": "Governed content/resource semantic record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeKnowledge"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/adminTenantArchitecture.ts",
+          "line": 461,
+          "action": "writeKnowledge"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "surface",
+          "templateKey",
+          "tenantId",
+          "version"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_content_videos",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "content_resources",
+      "language": "not_language_scoped",
+      "purpose": "Governed content/resource semantic record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "add",
+        "create_collection"
+      ],
+      "sourceCount": 2,
+      "sources": [
+        {
+          "file": "server/scripts/seed-content-videos.ts",
+          "line": 167,
+          "action": "persistenceCall.chromadb.create_collection"
+        },
+        {
+          "file": "server/src/domain/contentVideos.ts",
+          "line": 255,
+          "action": "persistenceCall.chromadb.add"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "project",
+          "purpose"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_fast_start_progress",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "onboarding_training",
+      "language": "not_language_scoped",
+      "purpose": "Onboarding/training semantic record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "create_collection",
+        "writeKnowledge"
+      ],
+      "sourceCount": 2,
+      "sources": [
+        {
+          "file": "server/src/domain/training.ts",
+          "line": 79,
+          "action": "persistenceCall.chromadb.create_collection"
+        },
+        {
+          "file": "server/src/domain/training.ts",
+          "line": 231,
+          "action": "writeKnowledge"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "branch",
+          "moduleId",
+          "purpose",
+          "state",
+          "tmagId",
+          "updatedAt",
+          "wireframe_leaf"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "moduleId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_health_heartbeat",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "operations",
+      "language": "not_language_scoped",
+      "purpose": "Operational health/readback heartbeat record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_ivory_prospect_names",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "agents",
+      "language": "not_language_scoped",
+      "purpose": "Prospect funnel semantic record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "add",
+        "create_collection",
+        "writeGraphCritical",
+        "writeKnowledge"
+      ],
+      "sourceCount": 4,
+      "sources": [
+        {
+          "file": "server/scripts/bootstrap-ivory-collection.ts",
+          "line": 19,
+          "action": "persistenceCall.chromadb.create_collection"
+        },
+        {
+          "file": "server/src/domain/generator.ts",
+          "line": 151,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/ivory.ts",
+          "line": 210,
+          "action": "writeGraphCritical"
+        },
+        {
+          "file": "server/src/domain/ivory.ts",
+          "line": 378,
+          "action": "persistenceCall.chromadb.add"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "angle",
+          "chat_number",
+          "createdAt",
+          "description",
+          "ivoryId",
+          "kind",
+          "preferredAngle",
+          "productKey",
+          "project",
+          "runId",
+          "tmagId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "ivoryId",
+          "runId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_knowledge_chunks",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge",
+      "language": "metadata.language",
+      "purpose": "Approved knowledge chunk retrieval index.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "query_with_filter",
+        "writeKnowledge"
+      ],
+      "sourceCount": 2,
+      "sources": [
+        {
+          "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
+          "line": 183,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
+          "line": 278,
+          "action": "persistenceCall.chromadb.query_with_filter"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "agentScopes",
+          "authority",
+          "authorityStatus",
+          "chunkId",
+          "chunkIndex",
+          "documentId",
+          "domain",
+          "endOffset",
+          "heading",
+          "kind",
+          "language",
+          "retrievalEligible",
+          "scope.teamId",
+          "scope.teamKey",
+          "scope.teamName",
+          "scope.tenantId",
+          "sourceId",
+          "sourceTitle",
+          "sourceVersion",
+          "startOffset",
+          "status",
+          "surfaceScopes",
+          "title",
+          "topicTags"
+        ],
+        "observedFilterKeys": [
+          "retrievalEligible",
+          "status"
+        ],
+        "inferredRequiredKeys": [
+          "chunkId",
+          "documentId",
+          "domain",
+          "language",
+          "retrievalEligible",
+          "scope.teamId",
+          "scope.tenantId",
+          "sourceId",
+          "status"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_knowledge_sources",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge",
+      "language": "not_language_scoped",
+      "purpose": "Approved knowledge source retrieval and source lookup.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "domain",
+          "language"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_learning_candidates_review",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge_review",
+      "language": "metadata.language",
+      "purpose": "Review-only learning candidates; never active retrieval knowledge.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeKnowledge"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/learningCandidates.ts",
+          "line": 158,
+          "action": "writeKnowledge"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "createdAt",
+          "domain",
+          "kind",
+          "language",
+          "status",
+          "tenantId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_members",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "identity_access",
+      "language": "not_language_scoped",
+      "purpose": "Team Magnificent member identity semantic record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "add",
+        "delete",
+        "get"
+      ],
+      "sourceCount": 4,
+      "sources": [
+        {
+          "file": "server/scripts/backfill-founder-timezones.ts",
+          "line": 97,
+          "action": "persistenceCall.chromadb.get"
+        },
+        {
+          "file": "server/scripts/backfill-founder-timezones.ts",
+          "line": 148,
+          "action": "persistenceCall.chromadb.delete"
+        },
+        {
+          "file": "server/scripts/backfill-founder-timezones.ts",
+          "line": 158,
+          "action": "persistenceCall.chromadb.add"
+        },
+        {
+          "file": "server/src/domain/entitlements.ts",
+          "line": 59,
+          "action": "persistenceCall.chromadb.add"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "backfilledAt",
+          "entitlements",
+          "kind",
+          "role",
+          "threeBaId",
+          "timezone",
+          "tmagId",
+          "updatedAt"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "threeBaId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_new_member_orientation_reservations",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "identity_access",
+      "language": "not_language_scoped",
+      "purpose": "Team Magnificent member identity semantic record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "create_collection",
+        "writeOperational"
+      ],
+      "sourceCount": 3,
+      "sources": [
+        {
+          "file": "server/src/domain/orientationSession.ts",
+          "line": 70,
+          "action": "persistenceCall.chromadb.create_collection"
+        },
+        {
+          "file": "server/src/domain/orientationSession.ts",
+          "line": 332,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/orientationSession.ts",
+          "line": 448,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "capacity",
+          "chat_number",
+          "createdAt",
+          "kind",
+          "purpose",
+          "reservationId",
+          "scheduledFor",
+          "sessionId",
+          "status",
+          "tmagId",
+          "wireframe_leaf"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "reservationId",
+          "sessionId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_organizational_knowledge_en",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge",
+      "language": "en",
+      "purpose": "Active approved GraphRAG knowledge for a single domain/language.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "domain",
+          "knowledgeObjectId",
+          "language",
+          "retrievalReady",
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_organizational_knowledge_es",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge",
+      "language": "es",
+      "purpose": "Active approved GraphRAG knowledge for a single domain/language.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "domain",
+          "knowledgeObjectId",
+          "language",
+          "retrievalReady",
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_outcomes",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "outcomes",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeOperational"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/outcomes.ts",
+          "line": 184,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "createdAt",
+          "kind",
+          "outcomeAt",
+          "prospectId",
+          "tenantId",
+          "tmagId",
+          "token",
+          "type"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "prospectId",
+          "tenantId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_performance_knowledge_en",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge",
+      "language": "en",
+      "purpose": "Active approved GraphRAG knowledge for a single domain/language.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "domain",
+          "knowledgeObjectId",
+          "language",
+          "retrievalReady",
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_performance_knowledge_es",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge",
+      "language": "es",
+      "purpose": "Active approved GraphRAG knowledge for a single domain/language.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "domain",
+          "knowledgeObjectId",
+          "language",
+          "retrievalReady",
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_prospect_callback_requests",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "prospect_funnel",
+      "language": "not_language_scoped",
+      "purpose": "Prospect funnel semantic record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeOperational"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/callbackRequest.ts",
+          "line": 120,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "callbackRequestId",
+          "createdAt",
+          "intent",
+          "kind",
+          "prospectId",
+          "sponsorTmagId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "callbackRequestId",
+          "prospectId",
+          "sponsorTmagId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_prospect_crm_records",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "crm",
+      "language": "not_language_scoped",
+      "purpose": "Prospect CRM and lifecycle semantic records.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_prospect_htank_accounts",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "holding_tank",
+      "language": "not_language_scoped",
+      "purpose": "Holding-tank pool event/account semantic records.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeOperational"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/prospectAccount.ts",
+          "line": 238,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "accountId",
+          "createdAt",
+          "expiresAt",
+          "kind",
+          "prospectId",
+          "sponsorTmagId",
+          "tokenId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "accountId",
+          "prospectId",
+          "sponsorTmagId",
+          "tmagId",
+          "tokenId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_prospect_htank_events",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "holding_tank",
+      "language": "not_language_scoped",
+      "purpose": "Holding-tank pool event/account semantic records.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "delete",
+        "query_with_filter"
+      ],
+      "sourceCount": 2,
+      "sources": [
+        {
+          "file": "server/scripts/smoke-holding-tank.ts",
+          "line": 69,
+          "action": "persistenceCall.chromadb.delete"
+        },
+        {
+          "file": "server/scripts/smoke-holding-tank.ts",
+          "line": 122,
+          "action": "persistenceCall.chromadb.query_with_filter"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [
+          "prospectId"
+        ],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_prospect_invitation_activity",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "prospect_funnel",
+      "language": "not_language_scoped",
+      "purpose": "Prospect funnel semantic record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeGraphCritical",
+        "writeKnowledge"
+      ],
+      "sourceCount": 6,
+      "sources": [
+        {
+          "file": "server/src/domain/crm.ts",
+          "line": 157,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/crm.ts",
+          "line": 261,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/crm.ts",
+          "line": 390,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/crm.ts",
+          "line": 687,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/invitations.ts",
+          "line": 199,
+          "action": "writeGraphCritical"
+        },
+        {
+          "file": "server/src/domain/invitations.ts",
+          "line": 343,
+          "action": "writeKnowledge"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "at",
+          "city",
+          "createdAt",
+          "disposition",
+          "dueAt",
+          "kind",
+          "prospectId",
+          "relationshipReason",
+          "source",
+          "sponsorTmagId",
+          "stateOrRegion",
+          "token"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "prospectId",
+          "source",
+          "sponsorTmagId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_prospect_magic_links",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "prospect_funnel",
+      "language": "not_language_scoped",
+      "purpose": "Prospect funnel semantic record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeOperational"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/prospectMagicLink.ts",
+          "line": 168,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "accountId",
+          "expiresAt",
+          "issuedAt",
+          "kind",
+          "linkToken",
+          "phoneHash",
+          "tokenId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "accountId",
+          "tokenId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_prospect_timeline_events",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "crm",
+      "language": "not_language_scoped",
+      "purpose": "Prospect CRM and lifecycle semantic records.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeKnowledge"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/prospectCrm.ts",
+          "line": 221,
+          "action": "writeKnowledge"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "createdAt",
+          "kind",
+          "ownerTmagId",
+          "prospectId",
+          "sponsorTmagId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "ownerTmagId",
+          "prospectId",
+          "sponsorTmagId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_prospect_webinar_reservations",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "prospect_funnel",
+      "language": "not_language_scoped",
+      "purpose": "Prospect funnel semantic record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeOperational"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/webinarReservation.ts",
+          "line": 191,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "createdAt",
+          "eventId",
+          "kind",
+          "prospectId",
+          "reservationId",
+          "scheduledFor",
+          "sponsorTmagId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "eventId",
+          "prospectId",
+          "reservationId",
+          "sponsorTmagId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_recruiting_cycles",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "general",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeKnowledge"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/recruitingCycle.ts",
+          "line": 407,
+          "action": "writeKnowledge"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "cycleId",
+          "enrolledAt",
+          "kind",
+          "tmagId",
+          "whyStatement"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "cycleId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_relationship_knowledge_en",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge",
+      "language": "en",
+      "purpose": "Active approved GraphRAG knowledge for a single domain/language.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "domain",
+          "knowledgeObjectId",
+          "language",
+          "retrievalReady",
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_relationship_knowledge_es",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge",
+      "language": "es",
+      "purpose": "Active approved GraphRAG knowledge for a single domain/language.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "domain",
+          "knowledgeObjectId",
+          "language",
+          "retrievalReady",
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_sponsor_availability",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "events",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeOperational"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/threeWayCalls.ts",
+          "line": 421,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "availabilityId",
+          "kind",
+          "ownerTmagId",
+          "timezone",
+          "updatedAt",
+          "windowCount"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "availabilityId",
+          "ownerTmagId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_steve_success_interview",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "onboarding_training",
+      "language": "not_language_scoped",
+      "purpose": "Onboarding/training semantic record.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "add",
+        "create_collection",
+        "writeKnowledge"
+      ],
+      "sourceCount": 3,
+      "sources": [
+        {
+          "file": "server/src/domain/steve-success-interview.ts",
+          "line": 371,
+          "action": "persistenceCall.chromadb.create_collection"
+        },
+        {
+          "file": "server/src/domain/steve-success-interview.ts",
+          "line": 577,
+          "action": "persistenceCall.chromadb.add"
+        },
+        {
+          "file": "server/src/domain/steve-success-interview.ts",
+          "line": 616,
+          "action": "writeKnowledge"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "agent",
+          "callSid",
+          "completedAt",
+          "discoveryId",
+          "kind",
+          "purpose",
+          "sponsorTmagId",
+          "tmagId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "discoveryId",
+          "sponsorTmagId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_success_knowledge_en",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge",
+      "language": "en",
+      "purpose": "Active approved GraphRAG knowledge for a single domain/language.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "domain",
+          "knowledgeObjectId",
+          "language",
+          "retrievalReady",
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_success_knowledge_es",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge",
+      "language": "es",
+      "purpose": "Active approved GraphRAG knowledge for a single domain/language.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "domain",
+          "knowledgeObjectId",
+          "language",
+          "retrievalReady",
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_tenant_settings",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "tenant_admin",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeOperational"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/adminTenantArchitecture.ts",
+          "line": 364,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "tenantId",
+          "updatedBy",
+          "version"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_three_way_bookings",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "events",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "add",
+        "writeOperational"
+      ],
+      "sourceCount": 2,
+      "sources": [
+        {
+          "file": "server/src/domain/threeWayCalls.ts",
+          "line": 576,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/threeWayCalls.ts",
+          "line": 684,
+          "action": "persistenceCall.chromadb.add"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "bookerTmagId",
+          "bookingId",
+          "cancelledAt",
+          "cancelledByTmagId",
+          "kind",
+          "notificationChannel",
+          "sponsorTmagId",
+          "startAt",
+          "status"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "bookerTmagId",
+          "bookingId",
+          "cancelledByTmagId",
+          "sponsorTmagId",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_training_knowledge_en",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge",
+      "language": "en",
+      "purpose": "Active approved GraphRAG knowledge for a single domain/language.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "domain",
+          "knowledgeObjectId",
+          "language",
+          "retrievalReady",
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_training_knowledge_es",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "knowledge",
+      "language": "es",
+      "purpose": "Active approved GraphRAG knowledge for a single domain/language.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "domain",
+          "knowledgeObjectId",
+          "language",
+          "retrievalReady",
+          "tenantId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_vm_bulk_leads",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "vm_rvm",
+      "language": "not_language_scoped",
+      "purpose": "VM/RVM ownership, campaign, lead, and delivery semantic records.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeGraphCritical"
+      ],
+      "sourceCount": 2,
+      "sources": [
+        {
+          "file": "server/src/domain/bulkLeads.ts",
+          "line": 115,
+          "action": "writeGraphCritical"
+        },
+        {
+          "file": "server/src/domain/bulkLeads.ts",
+          "line": 230,
+          "action": "writeGraphCritical"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "createdAt",
+          "kind",
+          "leadId",
+          "leadOwnerId",
+          "ownerTmagId",
+          "prospectId",
+          "sponsorTmagId",
+          "token",
+          "vmCampaignId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "leadId",
+          "leadOwnerId",
+          "ownerTmagId",
+          "prospectId",
+          "sponsorTmagId",
+          "tmagId",
+          "vmCampaignId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_vm_campaigns",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "vm_rvm",
+      "language": "not_language_scoped",
+      "purpose": "VM/RVM ownership, campaign, lead, and delivery semantic records.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "add",
+        "writeOperational"
+      ],
+      "sourceCount": 7,
+      "sources": [
+        {
+          "file": "server/src/domain/vmCampaigns.ts",
+          "line": 69,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmCampaigns.ts",
+          "line": 180,
+          "action": "persistenceCall.chromadb.add"
+        },
+        {
+          "file": "server/src/domain/vmProviderQueue.ts",
+          "line": 223,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmProviderQueue.ts",
+          "line": 285,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmProviderQueue.ts",
+          "line": 593,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmProviderQueue.ts",
+          "line": 839,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmProviderQueue.ts",
+          "line": 877,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "action",
+          "createdAt",
+          "entityId",
+          "jobKind",
+          "kind",
+          "leadId",
+          "leadOwnerId",
+          "ownerTmagId",
+          "provider",
+          "status",
+          "updatedAt",
+          "vmCampaignId"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "entityId",
+          "leadId",
+          "leadOwnerId",
+          "ownerTmagId",
+          "tmagId",
+          "vmCampaignId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_vm_delivery_events",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "vm_rvm",
+      "language": "not_language_scoped",
+      "purpose": "VM/RVM ownership, campaign, lead, and delivery semantic records.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_vm_lead_owners",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "vm_rvm",
+      "language": "not_language_scoped",
+      "purpose": "VM/RVM ownership, campaign, lead, and delivery semantic records.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeGraphCritical"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/vmLeadOwners.ts",
+          "line": 55,
+          "action": "writeGraphCritical"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "country",
+          "createdAt",
+          "kind",
+          "leadOwnerId",
+          "ownerTmagId",
+          "source"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "leadOwnerId",
+          "ownerTmagId",
+          "source",
+          "tmagId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_webinar_events",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "events",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "create_collection",
+        "writeOperational"
+      ],
+      "sourceCount": 2,
+      "sources": [
+        {
+          "file": "server/scripts/seed-webinar-events.ts",
+          "line": 48,
+          "action": "persistenceCall.chromadb.create_collection"
+        },
+        {
+          "file": "server/scripts/seed-webinar-events.ts",
+          "line": 130,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "chat_number",
+          "description",
+          "eventId",
+          "kind",
+          "project",
+          "scheduledFor",
+          "status"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "eventId"
+        ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_workbooks",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "content_resources",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    }
+  ],
+  "observedUnregisteredTargets": [
+    {
+      "target": "agentEventsCollection",
+      "resolved": false,
+      "actions": [
+        "writeKnowledge"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/agents/orchestrator.ts",
+          "line": 299,
+          "action": "writeKnowledge"
+        }
+      ],
+      "observedMetadataKeys": [
+        "agentId",
+        "createdAt",
+        "kind",
+        "recommendationId",
+        "subjectId",
+        "subjectType",
+        "tmagId"
+      ],
+      "observedFilterKeys": []
+    },
+    {
+      "target": "c.collection",
+      "resolved": false,
+      "actions": [
+        "add"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/services/projectionOutbox.ts",
+          "line": 174,
+          "action": "persistenceCall.chromadb.add"
+        }
+      ],
+      "observedMetadataKeys": [],
+      "observedFilterKeys": []
+    },
+    {
+      "target": "chroma.collection",
+      "resolved": false,
+      "actions": [
+        "add"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/services/tieredWrite.ts",
+          "line": 303,
+          "action": "persistenceCall.chromadb.add"
+        }
+      ],
+      "observedMetadataKeys": [],
+      "observedFilterKeys": []
+    },
+    {
+      "target": "collection",
+      "resolved": false,
+      "actions": [
+        "create_collection"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/runtime/knowledge-evolution/indexing/knowledgeEvolutionReindex.service.ts",
+          "line": 63,
+          "action": "persistenceCall.chromadb.create_collection"
+        }
+      ],
+      "observedMetadataKeys": [
+        "project",
+        "purpose"
+      ],
+      "observedFilterKeys": []
+    },
+    {
+      "target": "input.chroma.collection",
+      "resolved": false,
+      "actions": [
+        "add"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/services/tripleStack.ts",
+          "line": 72,
+          "action": "persistenceCall.chromadb.add"
+        }
+      ],
+      "observedMetadataKeys": [],
+      "observedFilterKeys": []
+    },
+    {
+      "target": "mcs_questionnaires",
+      "resolved": true,
+      "actions": [
+        "writeKnowledge"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/questionnaire.ts",
+          "line": 203,
+          "action": "writeKnowledge"
+        }
+      ],
+      "observedMetadataKeys": [
+        "coachabilityTest",
+        "investmentReady",
+        "kind",
+        "nwmExperience",
+        "productStatus",
+        "questionnaireId",
+        "submittedAt",
+        "threeBaId",
+        "tmagId",
+        "version",
+        "weeklyHours"
+      ],
+      "observedFilterKeys": []
+    },
+    {
+      "target": "tmag_workbooks",
+      "resolved": true,
+      "actions": [
+        "add"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/workbook.ts",
+          "line": 356,
+          "action": "persistenceCall.chromadb.add"
+        }
+      ],
+      "observedMetadataKeys": [
+        "classification",
+        "conductedByTmagId",
+        "finalizedAt",
+        "forThreeBaId",
+        "forTmagId",
+        "kind",
+        "version",
+        "workbookId"
+      ],
+      "observedFilterKeys": []
+    }
+  ]
+}
