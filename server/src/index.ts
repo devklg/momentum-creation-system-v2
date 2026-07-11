@@ -29,6 +29,7 @@ import { adminKnowledgeRoutes } from './routes/admin/knowledge.js';
 import { adminMichaelRuntimeObservabilityRoutes } from './routes/admin/michael-runtime-observability.js';
 import { adminContentVideoRoutes } from './routes/admin/content-videos.js';
 import { adminHealthRoutes } from './routes/admin/health.js';
+import { adminConsistencyRoutes } from './routes/admin/consistency.js';
 import { startBroadcastWorker, stopBroadcastWorker } from './services/broadcastQueue.js';
 import { startVmDeliveryWorker, stopVmDeliveryWorker } from './workers/vmDeliveryWorker.js';
 import { startVmImportWorker, stopVmImportWorker } from './workers/vmImportWorker.js';
@@ -146,6 +147,7 @@ app.use('/api/admin/orientation', adminOrientationRoutes);
 app.use('/api/admin/michael-runtime', adminMichaelRuntimeObservabilityRoutes);
 app.use('/api/admin/content/videos', adminContentVideoRoutes);
 app.use('/api/admin/health', adminHealthRoutes);
+app.use('/api/admin/consistency', adminConsistencyRoutes);
 app.use('/api/runtime/knowledge-evolution', knowledgeEvolutionRoutes);
 
 // /api/p/* is prospect-facing (apps/com). No auth, no Steve gate. The token

@@ -5772,3 +5772,84 @@ export interface McsContentVideoReorderResponse {
   ok: true;
   videos: McsContentVideoRecord[];
 }
+
+export type McsAdminConsistencyOverall = 'green' | 'yellow' | 'red';
+
+export interface McsAdminConsistencyTotals {
+  halfWrites: number;
+  staleProjections: number;
+  failedProjections: number;
+  orphanRecords: number;
+  reconciliationIssues: number;
+  warnings: number;
+}
+
+export interface McsAdminConsistencyHalfWriteRow {
+  specKey: string;
+  id: string;
+  mongoCollection: string;
+  neo4jStatus: 'missing' | 'error';
+  detail: string;
+}
+
+export interface McsAdminConsistencyProjectionRow {
+  outboxId: string;
+  tier: 'knowledge' | 'operational' | string;
+  target: 'neo4j' | 'chroma' | string;
+  status: 'pending' | 'failed' | string;
+  entityId: string;
+  mongoCollection: string;
+  attempts: number;
+  maxAttempts: number;
+  nextAttemptAt: McsIsoTimestamp | null;
+  updatedAt: McsIsoTimestamp | null;
+  ageMinutes: number;
+  stale: boolean;
+  lastError: string | null;
+}
+
+export interface McsAdminConsistencyOrphanRecord {
+  id: string;
+  detail: string;
+}
+
+export interface McsAdminConsistencyOrphanCategory {
+  key: string;
+  label: string;
+  records: McsAdminConsistencyOrphanRecord[];
+  error: string | null;
+}
+
+export interface McsAdminConsistencyReconciliationSpec {
+  key: string;
+  label: string;
+  scanned: number;
+  issueCount: number;
+}
+
+export interface McsAdminConsistencyReconciliationIssue {
+  specKey: string;
+  id: string;
+  mongoCollection: string;
+  issues: string[];
+  neo4jStatus: string;
+  chromaStatus: string;
+  detail: string;
+}
+
+export interface McsAdminConsistencyReportResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  overall: McsAdminConsistencyOverall;
+  totals: McsAdminConsistencyTotals;
+  staleProjectionMinutes: number;
+  reconciliation: {
+    limitPerSpec: number;
+    specs: McsAdminConsistencyReconciliationSpec[];
+    issues: McsAdminConsistencyReconciliationIssue[];
+  };
+  halfWrites: McsAdminConsistencyHalfWriteRow[];
+  staleProjections: McsAdminConsistencyProjectionRow[];
+  orphanCategories: McsAdminConsistencyOrphanCategory[];
+  warnings: string[];
+}

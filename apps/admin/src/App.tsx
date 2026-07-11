@@ -34,6 +34,7 @@ import { VmPage } from '@/routes/vm';
 import { AgentsPage } from '@/routes/agents';
 import { KnowledgePage } from '@/routes/knowledge';
 import { ContentVideosPage } from '@/routes/content-videos';
+import { ConsistencyPage } from '@/routes/consistency';
 
 export function App() {
   return (
@@ -82,6 +83,7 @@ function Inner() {
         <Route path="/agents" element={<AgentsPage />} />
         <Route path="/knowledge" element={<KnowledgePage />} />
         <Route path="/content-videos" element={<ContentVideosPage />} />
+        <Route path="/consistency" element={<ConsistencyPage />} />
         <Route path="/broadcast" element={<BroadcastPage />} />
         <Route
           path="*"
