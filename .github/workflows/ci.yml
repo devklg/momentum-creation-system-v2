@@ -46,6 +46,9 @@ jobs:
       - name: Persistence write catalog check
         run: pnpm catalog:persistence:check
 
+      - name: API route map check
+        run: pnpm catalog:api-routes:check
+
       - name: Typecheck (merge gate)
         run: pnpm typecheck
 

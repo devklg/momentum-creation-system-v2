@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-chroma-contract-tests`
+Latest branch: `codex/platform-audit-p1-api-route-map`
 
 Closed in this tranche:
 
@@ -52,6 +52,8 @@ Closed in this tranche:
   source, and metadata contract.
 - P1-43: added Chroma metadata contract tests and aligned GraphRAG retrieval
   with the direct Chroma adapter's `query_with_filter` action.
+- P1-44: generated a source-backed API route map from `server/src/index.ts`,
+  route modules, and the internal knowledge-evolution runtime router.
 
 Catalog artifacts:
 
@@ -67,6 +69,10 @@ Catalog artifacts:
 - `engineering/sprints/platform-audit-p1/chroma-collection-catalog.json`
 - `server/scripts/generate-chroma-catalog.mjs`
 - `server/src/qa/__tests__/chromaMetadataContract.test.ts`
+- `engineering/sprints/platform-audit-p1/API_ROUTE_MAP.md`
+- `engineering/sprints/platform-audit-p1/api-route-map.json`
+- `server/scripts/generate-api-route-map.mjs`
+- `server/src/qa/__tests__/apiRouteMap.test.ts`
 
 Inventory result:
 
@@ -551,6 +557,31 @@ Coverage:
 - Literal and dynamic unregistered Chroma targets remain visible as follow-up
   evidence.
 
+### P1-44: API Route Map
+
+Implemented:
+
+- Added `server/scripts/generate-api-route-map.mjs`.
+- Added root scripts `pnpm catalog:api-routes` and
+  `pnpm catalog:api-routes:check`.
+- Generated `engineering/sprints/platform-audit-p1/API_ROUTE_MAP.md`.
+- Generated `engineering/sprints/platform-audit-p1/api-route-map.json`.
+- Added `server/src/qa/__tests__/apiRouteMap.test.ts`.
+
+Current route-map summary:
+
+- 46 mounted routers from `server/src/index.ts`.
+- 46 route files, including
+  `server/src/runtime/knowledge-evolution/routes.ts`.
+- 206 static route rows.
+- Mount phases preserved: raw-body before JSON, admin large-body parser,
+  pre-gate routes, and BA-facing gated routes.
+- Access profiles captured for admin, BA auth + Steve, prospect-token,
+  internal runtime, public/pre-gate, and raw-body webhook families.
+- Guard signals captured for `requireAdmin`, `requireAdminOrHealthSecret`,
+  `requireAuth`, `requireSteveComplete`, `requireVmDialerAccess`,
+  `requireRuntimeInternal`, rate-limit middleware, and raw-body parsers.
+
 ## Lane Map
 
 ### Lane P1-A: Persistence Migration
@@ -646,6 +677,7 @@ pnpm catalog:mongo-ownership:check
 pnpm catalog:mongo-indexes:check
 pnpm catalog:neo4j:check
 pnpm catalog:chroma:check
+pnpm catalog:api-routes:check
 pnpm typecheck
 pnpm build
 pnpm --filter @momentum/server test
