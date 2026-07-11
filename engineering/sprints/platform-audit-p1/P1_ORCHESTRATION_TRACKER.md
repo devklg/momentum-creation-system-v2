@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-chroma-catalog`
+Latest branch: `codex/platform-audit-p1-chroma-contract-tests`
 
 Closed in this tranche:
 
@@ -50,6 +50,8 @@ Closed in this tranche:
 - P1-41: added Neo4j schema migration dry-run, apply, and verify commands.
 - P1-42: generated a Chroma collection catalog by purpose, domain, language,
   source, and metadata contract.
+- P1-43: added Chroma metadata contract tests and aligned GraphRAG retrieval
+  with the direct Chroma adapter's `query_with_filter` action.
 
 Catalog artifacts:
 
@@ -64,6 +66,7 @@ Catalog artifacts:
 - `engineering/sprints/platform-audit-p1/CHROMA_COLLECTION_CATALOG.md`
 - `engineering/sprints/platform-audit-p1/chroma-collection-catalog.json`
 - `server/scripts/generate-chroma-catalog.mjs`
+- `server/src/qa/__tests__/chromaMetadataContract.test.ts`
 
 Inventory result:
 
@@ -524,6 +527,29 @@ Current catalog summary:
 - 30 collections with observed write/query usage.
 - 10 language-scoped active-knowledge collections.
 - 7 observed unregistered/dynamic Chroma targets to drive P1-43 contract tests.
+
+### P1-43: Chroma Metadata Contract Tests
+
+Implemented:
+
+- Added `server/src/qa/__tests__/chromaMetadataContract.test.ts`.
+- Updated GraphRAG retrieval in `server/src/domain/graphrag.ts` to use the
+  direct Chroma adapter's supported `query_with_filter` action.
+- Updated `server/src/domain/__tests__/graphrag.test.ts`.
+
+Coverage:
+
+- Every registered Chroma collection has a catalog row with canonical
+  `all-MiniLM-L6-v2` / 384-dim embedding metadata.
+- Approved knowledge chunks require canonical source/id/scope fields:
+  `sourceId`, `chunkId`, `documentId`, domain/language, status,
+  `retrievalEligible`, and tenant/team scope keys.
+- Active GraphRAG collections require `tenantId`, `domain`, `language`,
+  `knowledgeObjectId`, and `retrievalReady`.
+- Review-only learning candidates remain separate from active retrieval
+  readiness.
+- Literal and dynamic unregistered Chroma targets remain visible as follow-up
+  evidence.
 
 ## Lane Map
 

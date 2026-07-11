@@ -107,10 +107,12 @@ describe('Phase 7 R3 — active-collection routing + isolation', () => {
 describe('Phase 7 R3 — retrieval-ready gate', () => {
   it('applies a hard retrievalReady:true + tenant filter on the active collection', async () => {
     mocks.persistenceCall.mockResolvedValue({
-      ids: [['mcsgraph_kobj_1_v3_en']],
-      documents: [['Orientation within 48h correlates with faster launch.']],
-      distances: [[0.12]],
-      metadatas: [[{ knowledgeObjectId: 'kobj_1', version: 3 }]],
+      results: {
+        ids: ['mcsgraph_kobj_1_v3_en'],
+        documents: ['Orientation within 48h correlates with faster launch.'],
+        distances: [0.12],
+        metadatas: [{ knowledgeObjectId: 'kobj_1', version: 3 }],
+      },
     });
     const m = await load(true);
 
@@ -118,9 +120,11 @@ describe('Phase 7 R3 — retrieval-ready gate', () => {
 
     const call = mocks.persistenceCall.mock.calls[0]!;
     expect(call[0]).toBe('chromadb');
-    expect(call[1]).toBe('query');
+    expect(call[1]).toBe('query_with_filter');
     const params = call[2] as AnyRec;
     expect(params.collection).toBe('mcs_performance_knowledge_en');
+    expect(params.query).toBe('how fast do BAs launch after orientation');
+    expect(params.n_results).toBe(5);
     expect(params.where).toEqual({ retrievalReady: true, tenantId: 'team_magnificent' });
 
     expect(hits).toHaveLength(1);
@@ -129,7 +133,7 @@ describe('Phase 7 R3 — retrieval-ready gate', () => {
   });
 
   it('returns [] cleanly when the active collection has no ready matches', async () => {
-    mocks.persistenceCall.mockResolvedValue({ ids: [[]], documents: [[]], distances: [[]], metadatas: [[]] });
+    mocks.persistenceCall.mockResolvedValue({ results: { ids: [], documents: [], distances: [], metadatas: [] } });
     const m = await load(true);
     expect(await m.retrieveGraphRag(retrievalQuery())).toEqual([]);
   });
