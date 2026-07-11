@@ -42,10 +42,10 @@
 
 import { randomBytes } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
 import { findBAByTmagId, type BARecord } from './ba.js';
 import { normalizeEntitlements, setMemberEntitlement, type EntitlementAction } from './entitlements.js';
+import { writeSponsorOverrideGraphCritical } from './sponsorImmutabilityPersistence.js';
 import type {
   McsAdminBaDirectoryRow,
   McsAdminBaNoteEntry,
@@ -640,31 +640,16 @@ export async function applySponsorOverride(args: {
     auditEntryId: audit.entryId,
   };
 
-  await tripleStackWrite({
+  await writeSponsorOverrideGraphCritical({
     id: overrideId,
-    mongoCollection: OVERRIDES_COLLECTION,
     mongoDoc: { ...record },
-    neo4j: {
-      cypher: `
-        MERGE (n:TeamMagnificentMember {tmagId: $tmagId})
-        MERGE (newS:TeamMagnificentMember {tmagId: $newSponsorTmagId})
-        MERGE (prevS:TeamMagnificentMember {tmagId: $previousSponsorTmagId})
-        MERGE (o:TmagSponsorOverride {overrideId: $id})
-        SET o.performedAt = datetime($performedAt),
-            o.reason = $reason,
-            o.auditEntryId = $auditEntryId
-        MERGE (n)-[:SPONSORED_BY {current: true}]->(newS)
-        MERGE (n)-[:HAS_ORIGINAL_SPONSOR]->(prevS)
-        MERGE (n)-[:HAS_OVERRIDE]->(o)
-      `,
-      params: {
-        tmagId: args.tmagId,
-        newSponsorTmagId: args.newSponsorTmagId,
-        previousSponsorTmagId,
-        performedAt,
-        reason: args.reason,
-        auditEntryId: audit.entryId,
-      },
+    tmagId: args.tmagId,
+    previousSponsorTmagId: previousSponsorTmagId || null,
+    newSponsorTmagId: args.newSponsorTmagId,
+    overrideProps: {
+      performedAt,
+      reason: args.reason,
+      auditEntryId: audit.entryId,
     },
     chroma: {
       collection: 'mcs_audit_log',
