@@ -16,6 +16,7 @@ import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
+import { writeCrmOwnershipGraphCritical } from './crmOwnershipPersistence.js';
 import { updateTokenLifecycleOperational } from './tokenLifecyclePersistence.js';
 import type {
   McsAuditActor,
@@ -310,32 +311,19 @@ export async function createOrUpdateCrmRecordForToken(
     updatedAt: now,
   };
 
-  await tripleStackWrite({
+  await writeCrmOwnershipGraphCritical({
     id: record.crmRecordId,
-    mongoCollection: CRM_COLLECTION,
     mongoDoc: { ...record },
-    neo4j: {
-      cypher:
-        'MERGE (b:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
-        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
-        'MERGE (c:TmagProspectCrmRecord {crmRecordId: $id}) ' +
-        'SET c += {' +
-        '  prospectId: $prospectId, token: $token, source: $source, ' +
-        '  status: $status, ownerTmagId: $ownerTmagId, ' +
-        '  sponsorTmagId: $sponsorTmagId, createdAt: $createdAt, updatedAt: $updatedAt' +
-        '} ' +
-        'MERGE (b)-[:OWNS_CRM_RECORD]->(c) ' +
-        'MERGE (c)-[:FOR_PROSPECT]->(p)',
-      params: {
-        prospectId: record.prospectId,
-        token: record.token,
-        source: record.source,
-        status: record.status,
-        ownerTmagId: record.ownerTmagId,
-        sponsorTmagId: record.sponsorTmagId,
-        createdAt: record.createdAt,
-        updatedAt: record.updatedAt,
-      },
+    ownerTmagId: record.ownerTmagId,
+    target: { kind: 'prospect', prospectId: record.prospectId },
+    crmProps: {
+      prospectId: record.prospectId,
+      token: record.token,
+      source: record.source,
+      status: record.status,
+      sponsorTmagId: record.sponsorTmagId,
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
     },
     chroma: {
       collection: CRM_CHROMA_COLLECTION,

@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-07-11T15:13:51.383Z",
+  "generatedAt": "2026-07-11T15:19:28.504Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts"
   ],
-  "productionCallSiteCount": 49,
+  "productionCallSiteCount": 47,
   "countsByTier": {
-    "operational": 24,
-    "knowledge": 20,
+    "operational": 23,
+    "knowledge": 19,
     "graph_critical": 5
   },
   "callSites": [
@@ -349,22 +349,10 @@
     },
     {
       "file": "server/src/domain/prospectCrm.ts",
-      "line": 220,
+      "line": 221,
       "functionName": "appendProspectTimelineEvent",
       "idExpression": "eventId",
       "mongoCollectionExpression": "TIMELINE_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "knowledge",
-      "subsystem": "crm_behavioral_trail",
-      "rationale": "CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail."
-    },
-    {
-      "file": "server/src/domain/prospectCrm.ts",
-      "line": 313,
-      "functionName": "createOrUpdateCrmRecordForToken",
-      "idExpression": "record.crmRecordId",
-      "mongoCollectionExpression": "CRM_COLLECTION",
       "hasNeo4j": true,
       "hasChroma": true,
       "tier": "knowledge",
@@ -529,19 +517,7 @@
     },
     {
       "file": "server/src/domain/vmProviderQueue.ts",
-      "line": 743,
-      "functionName": "processCrmCreation",
-      "idExpression": "crmRecordId",
-      "mongoCollectionExpression": "CRM_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "operational",
-      "subsystem": "delivery_and_reservations",
-      "rationale": "Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows."
-    },
-    {
-      "file": "server/src/domain/vmProviderQueue.ts",
-      "line": 837,
+      "line": 839,
       "functionName": "recordDeliveryEvent",
       "idExpression": "event.eventId",
       "mongoCollectionExpression": "DELIVERY_EVENTS_COLLECTION",
@@ -553,7 +529,7 @@
     },
     {
       "file": "server/src/domain/vmProviderQueue.ts",
-      "line": 875,
+      "line": 877,
       "functionName": "recordProviderWebhook",
       "idExpression": "webhookEventId",
       "mongoCollectionExpression": "WEBHOOK_EVENTS_COLLECTION",

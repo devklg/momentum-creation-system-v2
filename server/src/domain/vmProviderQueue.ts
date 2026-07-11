@@ -24,6 +24,7 @@ import {
   TelnyxError,
 } from '../services/telnyx.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
+import { writeCrmOwnershipGraphCritical } from './crmOwnershipPersistence.js';
 import { writeVmLeadTokenGraphCritical } from './tokenLifecyclePersistence.js';
 
 const MONGO_DB = 'momentum';
@@ -33,7 +34,6 @@ const LEADS_COLLECTION = 'tmag_vm_bulk_leads';
 const QUEUE_COLLECTION = 'tmag_vm_queue_jobs';
 const DELIVERY_EVENTS_COLLECTION = 'tmag_vm_delivery_events';
 const WEBHOOK_EVENTS_COLLECTION = 'tmag_vm_provider_webhook_events';
-const CRM_COLLECTION = 'tmag_prospect_crm_records';
 const AUDIT_COLLECTION = 'tmag_vm_audit_events';
 const SUPPRESSION_COLLECTION = 'tmag_vm_suppression_list';
 
@@ -740,9 +740,8 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
 
   const now = new Date().toISOString();
   const crmRecordId = `crm_${randomUUID()}`;
-  await tripleStackWrite({
+  await writeCrmOwnershipGraphCritical({
     id: crmRecordId,
-    mongoCollection: CRM_COLLECTION,
     mongoDoc: {
       crmRecordId,
       prospectId: null,
@@ -762,16 +761,19 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
       createdAt: now,
       updatedAt: now,
     },
-    neo4j: {
-      cypher:
-        'MERGE (c:TmagProspectCrmRecord {crmRecordId: $id}) ' +
-        'SET c.leadId = $leadId, c.ownerTmagId = $ownerTmagId, c.status = "inactive_pre_engagement", c.createdAt = datetime($createdAt) ' +
-        'WITH c MATCH (l:TmagVmBulkLead {leadId: $leadId}) MERGE (l)-[:HAS_CRM_RECORD]->(c)',
-      params: {
-        leadId: lead.leadId,
-        ownerTmagId: lead.ownerTmagId,
-        createdAt: now,
-      },
+    ownerTmagId: lead.ownerTmagId,
+    target: { kind: 'vm_lead', leadId: lead.leadId },
+    crmProps: {
+      leadId: lead.leadId,
+      sponsorTmagId: lead.sponsorTmagId,
+      source: 'rvm',
+      sourceLabel: lead.sourceLabel,
+      leadOwnerId: lead.leadOwnerId,
+      vmCampaignId: lead.vmCampaignId,
+      token: lead.token,
+      status: 'inactive_pre_engagement',
+      createdAt: now,
+      updatedAt: now,
     },
     chroma: {
       collection: CHROMA_COLLECTION,

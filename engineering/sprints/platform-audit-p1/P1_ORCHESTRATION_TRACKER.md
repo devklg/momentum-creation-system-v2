@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-pool-placement-tiered`
+Latest branch: `codex/platform-audit-p1-crm-ownership-tiered`
 
 Closed in this tranche:
 
@@ -22,6 +22,8 @@ Closed in this tranche:
   `server/src/domain/tokenLifecyclePersistence.ts`.
 - P1-26: migrated pool placement creation and placement patch writes through
   `server/src/domain/poolPlacementPersistence.ts`.
+- P1-27: migrated CRM ownership record creation through
+  `server/src/domain/crmOwnershipPersistence.ts`.
 
 Catalog artifacts:
 
@@ -34,9 +36,9 @@ Inventory result:
 | Tier | Count |
 | --- | ---: |
 | `graph_critical` | 5 |
-| `knowledge` | 20 |
-| `operational` | 24 |
-| Total production `tripleStackWrite` call sites remaining | 49 |
+| `knowledge` | 19 |
+| `operational` | 23 |
+| Total production `tripleStackWrite` call sites remaining | 47 |
 
 ## Completed Migration Tranches
 
@@ -129,6 +131,26 @@ Implementation:
 - Catalog remains at 49 remaining production `tripleStackWrite` call sites
   because P1-26 migrated direct persistence calls rather than cataloged
   `tripleStackWrite` callers.
+
+### P1-27: CRM Ownership
+
+Migrated:
+
+- `server/src/domain/prospectCrm.ts` CRM record creation for prospect tokens.
+- `server/src/domain/vmProviderQueue.ts` CRM record creation for VM leads.
+
+Implementation:
+
+- New helper: `server/src/domain/crmOwnershipPersistence.ts`.
+- Prospect CRM ownership creation uses `writeGraphCritical`, `MATCH`es the
+  owner BA and existing `TmagProspect`, and verifies the
+  `(:TeamMagnificentMember)-[:OWNS_CRM_RECORD]->(:TmagProspectCrmRecord)-[:FOR_PROSPECT]->(:TmagProspect)`
+  graph shape with `RETURN count(c) AS n`.
+- VM CRM ownership creation uses `writeGraphCritical`, `MATCH`es the owner BA
+  and existing `TmagVmBulkLead`, and verifies the
+  `(:TeamMagnificentMember)-[:OWNS_CRM_RECORD]->(:TmagProspectCrmRecord)<-[:HAS_CRM_RECORD]-(:TmagVmBulkLead)`
+  graph shape with `RETURN count(c) AS n`.
+- Catalog regenerated to 47 remaining production `tripleStackWrite` call sites.
 
 ## Lane Map
 
