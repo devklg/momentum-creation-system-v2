@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T23:38:22.801Z",
+  "generatedAt": "2026-07-11T23:45:44.074Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -5454,6 +5454,66 @@
       "file": "packages/shared/src/leaders.ts"
     },
     {
+      "name": "PMV_CONCEPTS",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-contract.ts"
+    },
+    {
+      "name": "PMV_CONTRACT",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-contract.ts"
+    },
+    {
+      "name": "PMV_CONTRACT_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-contract.ts"
+    },
+    {
+      "name": "PMV_EVENT_IDS",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-contract.ts"
+    },
+    {
+      "name": "PMV_FORBIDDEN_LANGUAGE_CATEGORIES",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-contract.ts"
+    },
+    {
+      "name": "PMV_LAST_SIGNAL_KINDS",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-contract.ts"
+    },
+    {
+      "name": "PMV_LIFECYCLE_STAGES",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-contract.ts"
+    },
+    {
+      "name": "PMV_NEXT_ACTION_KINDS",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-contract.ts"
+    },
+    {
+      "name": "PMV_NEXT_ACTION_SCRIPT_KINDS",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-contract.ts"
+    },
+    {
+      "name": "PMV_ROW_FIELDS",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-contract.ts"
+    },
+    {
+      "name": "PmvConceptAudience",
+      "kind": "type",
+      "file": "packages/shared/src/pmv-contract.ts"
+    },
+    {
+      "name": "PmvConceptContract",
+      "kind": "interface",
+      "file": "packages/shared/src/pmv-contract.ts"
+    },
+    {
       "name": "findProductByKey",
       "kind": "function",
       "file": "packages/shared/src/product-catalog.ts"
@@ -9461,6 +9521,6 @@
     "chromaCollections": 50,
     "routeModules": 45,
     "routeHandlers": 236,
-    "sharedExports": 846
+    "sharedExports": 858
   }
 }

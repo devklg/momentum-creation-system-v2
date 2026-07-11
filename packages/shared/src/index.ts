@@ -9,3 +9,4 @@ export * from './broadcast.js';
 export * from './tenant.js';
 export * from './leaders.js';
 export * from './recruiting-cycle.js';
+export * from './pmv-contract.js';
