@@ -749,6 +749,41 @@ Verification:
   `pnpm catalog:route-access:check`,
   `pnpm compliance:com:check`
 
+### P1-52: PMV Contract Mapping
+
+Implemented:
+
+- Added `packages/shared/src/pmv-contract.ts` and exported it from
+  `packages/shared/src/index.ts`.
+- Created `engineering/sprints/platform-audit-p1/PMV_CONTRACT.md` as the
+  human-readable PMV contract artifact.
+- Mapped PMV concepts to allowed language, forbidden language, fields, and
+  events for People, Momentum, Volume, Checks, and Next Action.
+- Captured canonical PMV lifecycle stages, next-action kinds, script kinds,
+  last-signal kinds, PMV row fields, and event ids in the shared contract.
+- Added `server/src/qa/__tests__/pmvContract.test.ts`, which reads
+  `packages/shared/src/types.ts` and proves the contract matches the current
+  PMV unions and `McsProspectMomentumRow` fields.
+
+Verification:
+
+- `pnpm --filter @momentum/server test -- pmvContract`
+- `pnpm --filter @momentum/shared build`
+- `pnpm --filter @momentum/server typecheck`
+- `pnpm typecheck`
+- `pnpm build`
+- `pnpm --filter @momentum/server test`
+- Catalog and `.com` compliance checks:
+  `pnpm catalog:persistence:check`,
+  `pnpm catalog:schema:check`,
+  `pnpm catalog:mongo-ownership:check`,
+  `pnpm catalog:mongo-indexes:check`,
+  `pnpm catalog:neo4j:check`,
+  `pnpm catalog:chroma:check`,
+  `pnpm catalog:api-routes:check`,
+  `pnpm catalog:route-access:check`,
+  `pnpm compliance:com:check`
+
 ## Lane Map
 
 ### Lane P1-A: Persistence Migration

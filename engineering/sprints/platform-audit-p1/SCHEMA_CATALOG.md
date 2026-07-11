@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-11T23:38:22.801Z
+- Generated: 2026-07-11T23:45:44.074Z
 - Mongo collections: 65
 - Neo4j labels: 68
 - Neo4j relationships: 59
 - Chroma collections: 50
 - Route modules: 45
 - Route handlers: 236
-- Shared exports: 846
+- Shared exports: 858
 
 ## Mongo Collections
 
@@ -376,6 +376,18 @@
 | `MCS_LEADER_CREDIBILITY` | const | `packages/shared/src/leaders.ts` |
 | `McsLeaderCredibilityContent` | interface | `packages/shared/src/leaders.ts` |
 | `McsLeaderProfile` | interface | `packages/shared/src/leaders.ts` |
+| `PMV_CONCEPTS` | const | `packages/shared/src/pmv-contract.ts` |
+| `PMV_CONTRACT` | const | `packages/shared/src/pmv-contract.ts` |
+| `PMV_CONTRACT_VERSION` | const | `packages/shared/src/pmv-contract.ts` |
+| `PMV_EVENT_IDS` | const | `packages/shared/src/pmv-contract.ts` |
+| `PMV_FORBIDDEN_LANGUAGE_CATEGORIES` | const | `packages/shared/src/pmv-contract.ts` |
+| `PMV_LAST_SIGNAL_KINDS` | const | `packages/shared/src/pmv-contract.ts` |
+| `PMV_LIFECYCLE_STAGES` | const | `packages/shared/src/pmv-contract.ts` |
+| `PMV_NEXT_ACTION_KINDS` | const | `packages/shared/src/pmv-contract.ts` |
+| `PMV_NEXT_ACTION_SCRIPT_KINDS` | const | `packages/shared/src/pmv-contract.ts` |
+| `PMV_ROW_FIELDS` | const | `packages/shared/src/pmv-contract.ts` |
+| `PmvConceptAudience` | type | `packages/shared/src/pmv-contract.ts` |
+| `PmvConceptContract` | interface | `packages/shared/src/pmv-contract.ts` |
 | `findProductByKey` | function | `packages/shared/src/product-catalog.ts` |
 | `MCS_PRODUCT_CATALOG` | const | `packages/shared/src/product-catalog.ts` |
 | `MCS_PRODUCT_KEYS` | const | `packages/shared/src/product-catalog.ts` |
