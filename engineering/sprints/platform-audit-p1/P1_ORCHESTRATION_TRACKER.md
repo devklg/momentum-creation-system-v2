@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-route-access-matrix`
+Latest branch: `codex/platform-audit-p1-admin-route-protection-tests`
 
 Closed in this tranche:
 
@@ -57,6 +57,8 @@ Closed in this tranche:
 - P1-45: generated a route access matrix covering auth, admin, Steve
   completion, VM entitlement, worker-secret, provider-webhook, and internal
   runtime gate classes.
+- P1-46: added QA tests proving every `/api/admin/*` route is protected by
+  `requireAdmin` or the explicit `requireAdminOrHealthSecret` exception.
 
 Catalog artifacts:
 
@@ -80,6 +82,7 @@ Catalog artifacts:
 - `engineering/sprints/platform-audit-p1/route-access-matrix.json`
 - `server/scripts/generate-route-access-matrix.mjs`
 - `server/src/qa/__tests__/routeAccessMatrix.test.ts`
+- `server/src/qa/__tests__/adminRouteProtection.test.ts`
 
 Inventory result:
 
@@ -615,6 +618,18 @@ Current access-matrix summary:
   prospect-token and prospect re-entry routes, raw-body Telnyx webhooks,
   Steve worker-secret endpoints, VM provider webhooks, and internal runtime
   routes.
+
+### P1-46: Admin Route Protection Tests
+
+Implemented:
+
+- Added `server/src/qa/__tests__/adminRouteProtection.test.ts`.
+- Verifies every current `/api/admin/*` route from
+  `route-access-matrix.json`.
+- Proves ordinary admin routes declare `requireAdmin`, expect an
+  `admin_session`, and carry no generated access findings.
+- Keeps the only admin-secret exception narrow:
+  `GET /api/admin/health/triple-stack` with `requireAdminOrHealthSecret`.
 
 ## Lane Map
 

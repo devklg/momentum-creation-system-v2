@@ -73,7 +73,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 43. **Chroma:** Add Chroma metadata contract tests for canonical ids, tenant, domain, language, readiness, and source.
 - [x] 44. **API:** Generate a current API route map from server/src/index.ts and route modules.
 - [x] 45. **Security:** Generate a route access matrix covering auth, admin, Steve completion, and VM entitlement gates.
-- [ ] 46. **Security:** Add tests proving every admin route is protected by requireAdmin.
+- [x] 46. **Security:** Add tests proving every admin route is protected by requireAdmin.
 - [ ] 47. **Security:** Add tests proving gated BA routes enforce auth and onboarding gates where intended.
 - [ ] 48. **Security:** Add tests proving pre-gate routes stay limited to the approved pre-gate surface.
 - [ ] 49. **Compliance:** Add architectural linting for prospect-facing forbidden terms and route placement mistakes.
@@ -258,3 +258,4 @@ Use this section when assigning work to multiple agents. Keep the original numbe
 | 2026-07-11 | P1 Chroma metadata contract tests | Codex | Closed item 43: added catalog-backed tests for canonical ids, tenant scope, domain, language, readiness, source lineage, review-only separation, and unregistered/dynamic Chroma target visibility. Also moved GraphRAG retrieval from unsupported `chromadb.query` to `query_with_filter`. | P1-44 API route map remains open. |
 | 2026-07-11 | P1 API route map | Codex | Closed item 44: added `server/scripts/generate-api-route-map.mjs`, `pnpm catalog:api-routes`, `pnpm catalog:api-routes:check`, generated `API_ROUTE_MAP.md` plus JSON, and added QA coverage for raw-body, admin, BA-gated, VM-entitlement, prospect-token, and internal-runtime route families. | P1-45 route access matrix remains open. |
 | 2026-07-11 | P1 route access matrix | Codex | Closed item 45: added `server/scripts/generate-route-access-matrix.mjs`, `pnpm catalog:route-access`, `pnpm catalog:route-access:check`, generated `ROUTE_ACCESS_MATRIX.md` plus JSON, and added QA coverage for admin, admin-secret, Steve-gated, Steve-whitelisted, VM entitlement, prospect-token, worker-secret, and provider-webhook route classes. | P1-46 admin route protection tests remain open. |
+| 2026-07-11 | P1 admin route protection tests | Codex | Closed item 46: added `server/src/qa/__tests__/adminRouteProtection.test.ts`, proving every `/api/admin/*` route has `requireAdmin` or the explicit `requireAdminOrHealthSecret` exception, and that ordinary admin routes are admin-session only. | P1-47 gated BA route tests remain open. |
