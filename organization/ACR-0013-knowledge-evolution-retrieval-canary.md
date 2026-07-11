@@ -2,9 +2,9 @@
 
 ## Momentum Creation System V2
 
-Status: Proposed
+Status: Approved
 
-Ratified: — (awaiting Kevin Gardner)
+Ratified: Kevin Gardner, 2026-07-10 — approved. Single-domain canary authorized; flips GRAPHRAG_PERSISTENCE_ENABLED for the canary only; §4 pre-activation checklist must pass before activation; Kevin sole authority to widen scope.
 
 Canonical Authority: runtime/KNOWLEDGE_EVOLUTION_RUNTIME.md (§21 retrieval readiness, §37 Context Manager availability) / ACR-0012
 
@@ -69,7 +69,7 @@ No candidate/review-only knowledge retrievable · no unreviewed machine translat
 
 ## 5. Approval
 
-This ACR is **Proposed**. On approval: register ACR-0013 (Approved, v1.2), run the §4 checklist, then stage-activate §2.3 for the single domain only. Kevin remains sole authority for the activation and for any decision to widen scope.
+Approved by Kevin Gardner on 2026-07-10; registered (Approved, v1.2). The §4 pre-activation checklist must pass before §2.3 flips (GRAPHRAG_PERSISTENCE_ENABLED). Checklist status: (1) live-stack integration — persistence foundation GREEN (health of all four legs + indexes applied + Mongo evolution round-trip verified & cleaned 2026-07-10); Chroma-index + Neo4j-graph write legs pending; (2) indexes applied GREEN; (3) rollback dry run pending; (4) metrics visible pending. Kevin remains sole authority for the activation and for any decision to widen scope.
 
 Register row to add on approval:
 

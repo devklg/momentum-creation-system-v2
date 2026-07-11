@@ -28,6 +28,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0010 | Memory Context Compiler Contract | Context Packet / Knowledge Base runtime contracts | Proposed | v1.2 |
 | ACR-0011 | 5 Point Recruiting Cycle — Launch Center + CRM Integration | LAUNCH_CENTER_ARCHITECTURE.md / CRM_ARCHITECTURE.md | Approved | v1.2 |
 | ACR-0012 | Implement Knowledge Evolution Runtime v1.0 | runtime/KNOWLEDGE_EVOLUTION_RUNTIME.md | Approved | v1.2 |
+| ACR-0013 | Knowledge Evolution Retrieval Canary (single-domain activation) | runtime/KNOWLEDGE_EVOLUTION_RUNTIME.md §21/§37 | Approved | v1.2 |
 
 ---
 
