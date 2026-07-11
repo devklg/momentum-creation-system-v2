@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-admin-route-protection-tests`
+Latest branch: `codex/platform-audit-p1-ba-gate-tests`
 
 Closed in this tranche:
 
@@ -59,6 +59,8 @@ Closed in this tranche:
   runtime gate classes.
 - P1-46: added QA tests proving every `/api/admin/*` route is protected by
   `requireAdmin` or the explicit `requireAdminOrHealthSecret` exception.
+- P1-47: added QA tests proving BA-facing gated routes enforce auth, Steve
+  completion, and VM entitlement gates where intended.
 
 Catalog artifacts:
 
@@ -83,6 +85,7 @@ Catalog artifacts:
 - `server/scripts/generate-route-access-matrix.mjs`
 - `server/src/qa/__tests__/routeAccessMatrix.test.ts`
 - `server/src/qa/__tests__/adminRouteProtection.test.ts`
+- `server/src/qa/__tests__/baRouteGateProtection.test.ts`
 
 Inventory result:
 
@@ -630,6 +633,20 @@ Implemented:
   `admin_session`, and carry no generated access findings.
 - Keeps the only admin-secret exception narrow:
   `GET /api/admin/health/triple-stack` with `requireAdminOrHealthSecret`.
+
+### P1-47: BA Gate Protection Tests
+
+Implemented:
+
+- Added `server/src/qa/__tests__/baRouteGateProtection.test.ts`.
+- Proves all `ba_auth_steve_gated` routes declare `requireAuth` and
+  `requireSteveComplete`.
+- Proves all 12 `ba_auth_steve_vm_entitled` routes declare `requireAuth`,
+  `requireSteveComplete`, and `requireVmDialerAccess`.
+- Proves `ba_auth_pre_steve` routes still require a BA session while recording
+  intentional Steve exceptions.
+- Documents the key exceptions: `/api/cockpit/launch`,
+  `/api/profile/*`, and dynamic Fast Start module state gating.
 
 ## Lane Map
 
