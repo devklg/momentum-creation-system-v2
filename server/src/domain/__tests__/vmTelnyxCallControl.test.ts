@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   persistenceCall: vi.fn(),
   tripleStackWrite: vi.fn(),
+  writeOperational: vi.fn(),
   gatherSingleDigit: vi.fn(),
   hangupCall: vi.fn(),
   playbackStart: vi.fn(),
@@ -15,6 +16,10 @@ vi.mock('../../services/persistence/dispatch.js', () => ({
 
 vi.mock('../../services/tripleStack.js', () => ({
   tripleStackWrite: mocks.tripleStackWrite,
+}));
+
+vi.mock('../../services/tieredWrite.js', () => ({
+  writeOperational: mocks.writeOperational,
 }));
 
 vi.mock('../../services/telnyx.js', () => ({
@@ -104,7 +109,7 @@ function arrange(payload: Record<string, unknown>) {
 }
 
 function deliveryStatuses(): string[] {
-  return mocks.tripleStackWrite.mock.calls
+  return mocks.writeOperational.mock.calls
     .map((call) => call[0]?.mongoDoc?.status)
     .filter((status): status is string => typeof status === 'string');
 }
@@ -112,6 +117,12 @@ function deliveryStatuses(): string[] {
 beforeEach(() => {
   mocks.persistenceCall.mockReset();
   mocks.tripleStackWrite.mockReset();
+  mocks.writeOperational.mockReset();
+  mocks.writeOperational.mockResolvedValue({
+    tier: 'operational',
+    id: 'vm_test',
+    mongo: { ok: true, verified: true },
+  });
   mocks.gatherSingleDigit.mockReset();
   mocks.hangupCall.mockReset();
   mocks.playbackStart.mockReset();

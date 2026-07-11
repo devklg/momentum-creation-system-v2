@@ -13,7 +13,7 @@
 
 import { createHash, randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeOperational } from '../services/tieredWrite.js';
 import { env } from '../env.js';
 import {
   gatherSingleDigit,
@@ -220,7 +220,7 @@ export async function vmAudit(input: {
 }): Promise<void> {
   const at = new Date().toISOString();
   const id = `vmaudit_${randomUUID()}`;
-  await tripleStackWrite({
+  await writeOperational({
     id,
     mongoCollection: AUDIT_COLLECTION,
     mongoDoc: {
@@ -282,7 +282,7 @@ export async function enqueueVmJob<TPayload extends Record<string, unknown>>(
     updatedAt: now,
   };
 
-  await tripleStackWrite({
+  await writeOperational({
     id: job.jobId,
     mongoCollection: QUEUE_COLLECTION,
     mongoDoc: job as unknown as Record<string, unknown>,
@@ -590,7 +590,7 @@ async function upsertImportedLead(
     updatedAt: now,
   };
 
-  await tripleStackWrite({
+  await writeOperational({
     id: leadId,
     mongoCollection: LEADS_COLLECTION,
     mongoDoc: lead as unknown as Record<string, unknown>,
@@ -836,7 +836,7 @@ export async function recordDeliveryEvent(input: Omit<VmDeliveryEventRecord, 'ev
     eventId: `vmdeliv_${randomUUID()}`,
     createdAt,
   };
-  await tripleStackWrite({
+  await writeOperational({
     id: event.eventId,
     mongoCollection: DELIVERY_EVENTS_COLLECTION,
     mongoDoc: event as unknown as Record<string, unknown>,
@@ -874,7 +874,7 @@ export async function recordProviderWebhook(input: {
 }): Promise<{ webhookEventId: string; jobId: string }> {
   const now = new Date().toISOString();
   const webhookEventId = `vmwebhook_${randomUUID()}`;
-  await tripleStackWrite({
+  await writeOperational({
     id: webhookEventId,
     mongoCollection: WEBHOOK_EVENTS_COLLECTION,
     mongoDoc: {

@@ -7,7 +7,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeGraphCritical } from '../services/tieredWrite.js';
 import type { McsLeadOwnerRecord, McsVmLeadOwnerSource, McsVmLeadType } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -52,13 +52,13 @@ export async function createLeadOwner(input: CreateLeadOwnerInput): Promise<McsL
     completedAt: null,
   };
 
-  await tripleStackWrite({
+  await writeGraphCritical({
     id: leadOwner.leadOwnerId,
     mongoCollection: COLLECTION,
     mongoDoc: { ...leadOwner },
     neo4j: {
       cypher:
-        'MERGE (b:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
+        'MATCH (b:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
         'CREATE (lb:TmagVmLeadOwner {leadOwnerId: $id, name: $name, source: $source, ' +
         '  country: $country, leadType: $leadType, ownerTmagId: $ownerTmagId, ' +
         '  sponsorTmagId: $sponsorTmagId, status: $status, createdAt: $createdAt}) ' +
@@ -72,6 +72,12 @@ export async function createLeadOwner(input: CreateLeadOwnerInput): Promise<McsL
         leadType: leadOwner.leadType,
         status: leadOwner.status,
         createdAt: now,
+      },
+      verifyCypher:
+        'MATCH (b:TeamMagnificentMember {tmagId: $ownerTmagId})-[:OWNS_VM_LEAD_OWNER]->' +
+        '(lb:TmagVmLeadOwner {leadOwnerId: $id}) RETURN count(lb) AS n',
+      verifyParams: {
+        ownerTmagId: leadOwner.ownerTmagId,
       },
     },
     chroma: {
