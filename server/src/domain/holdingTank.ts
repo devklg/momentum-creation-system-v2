@@ -33,6 +33,10 @@
 
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { publishPlacement } from '../services/poolEvents.js';
+import {
+  updatePoolPlacementOperational,
+  writePoolPlacementGraphCritical,
+} from './poolPlacementPersistence.js';
 import type {
   McsHoldingTankSnapshot,
   McsPlaceProspectResult,
@@ -201,10 +205,30 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
   };
 
   try {
-    await persistenceCall('mongodb', 'insert', {
-      database: MONGO_DB,
-      collection: PLACEMENTS_COLLECTION,
-      documents: [{ _id: input.prospectId, ...placement }],
+    await writePoolPlacementGraphCritical({
+      placement,
+      poolId: TEAM_POOL_ID,
+      relationshipProps: {
+        position: positionNumber,
+        placedAt,
+        sponsorTmagId: input.sponsorTmagId,
+      },
+      chroma: {
+        collection: CHROMA_COLLECTION,
+        document:
+          `#${positionNumber} ${input.firstName} ${input.lastInitial}. ` +
+          `from ${input.city}, ${input.stateOrRegion} · ` +
+          `invited by ${input.sponsorTmagId} at ${placedAt}`,
+        metadata: {
+          kind: 'placement',
+          prospectId: input.prospectId,
+          sponsorTmagId: input.sponsorTmagId,
+          positionNumber,
+          placedAt,
+          city: input.city,
+          stateOrRegion: input.stateOrRegion,
+        },
+      },
     });
   } catch (err) {
     // Concurrent placement won; return the persisted one. The position we
@@ -221,50 +245,6 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
     }
     throw err;
   }
-
-  // 3. Neo4j: MERGE prospect + pool nodes, MERGE the relationship with
-  //    position. MERGE on the relationship is idempotent in case of retry.
-  await persistenceCall('neo4j', 'cypher', {
-    query:
-      'MERGE (pool:TmagPool {id: $poolId}) ' +
-      'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
-      'MERGE (p)-[r:IN_HOLDING_TANK]->(pool) ' +
-      'SET r.position = $position, ' +
-      '    r.placedAt = $placedAt, ' +
-      '    r.sponsorTmagId = $sponsorTmagId',
-    params: {
-      poolId: TEAM_POOL_ID,
-      prospectId: input.prospectId,
-      position: positionNumber,
-      placedAt,
-      sponsorTmagId: input.sponsorTmagId,
-    },
-  });
-
-  // 4. ChromaDB event log. Document body is the format the ticker will
-  //    eventually render (Chat #108) so semantic search returns recognizable
-  //    text. Collection bootstrapped in Chat #105 (CK-04 protocol).
-  const eventId = `placement_${input.prospectId}_${placedAt}`;
-  const eventDoc =
-    `#${positionNumber} ${input.firstName} ${input.lastInitial}. ` +
-    `from ${input.city}, ${input.stateOrRegion} · ` +
-    `invited by ${input.sponsorTmagId} at ${placedAt}`;
-  await persistenceCall('chromadb', 'add', {
-    collection: CHROMA_COLLECTION,
-    ids: [eventId],
-    documents: [eventDoc],
-    metadatas: [
-      {
-        kind: 'placement',
-        prospectId: input.prospectId,
-        sponsorTmagId: input.sponsorTmagId,
-        positionNumber,
-        placedAt,
-        city: input.city,
-        stateOrRegion: input.stateOrRegion,
-      },
-    ],
-  });
 
   // 5. Mirror position + placedAt + state onto the prospect record so the
   //    next GET /api/p/:token resolve carries the assigned position without
@@ -499,11 +479,10 @@ export async function flushExpiredPlacements(
     const flushedAt = new Date().toISOString();
     try {
       // 1. Placement row — flush stamp. Position untouched.
-      await persistenceCall('mongodb', 'update', {
-        database: MONGO_DB,
-        collection: PLACEMENTS_COLLECTION,
-        filter: { prospectId: c.prospectId, flushedAt: null },
-        update: { $set: { flushedAt, flushReason: 'expired' } },
+      await updatePoolPlacementOperational({
+        prospectId: c.prospectId,
+        patch: { flushedAt, flushReason: 'expired' },
+        relationshipPatch: { flushedAt, flushReason: 'expired' },
       });
 
       // 2. Prospect funnel record — mirror to 'expired'.
@@ -512,19 +491,6 @@ export async function flushExpiredPlacements(
         collection: 'tmag_prospects',
         filter: { prospectId: c.prospectId },
         update: { $set: { state: 'expired', updatedAt: flushedAt } },
-      });
-
-      // 3. Neo4j tank edge — mark flushed, preserve the position. We do NOT
-      //    delete the relationship: graph walks still see the vacated slot.
-      await persistenceCall('neo4j', 'cypher', {
-        query:
-          'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
-          'SET r.flushedAt = $flushedAt, r.flushReason = $flushReason',
-        params: {
-          prospectId: c.prospectId,
-          flushedAt,
-          flushReason: 'expired',
-        },
       });
 
       flushed.push(c);

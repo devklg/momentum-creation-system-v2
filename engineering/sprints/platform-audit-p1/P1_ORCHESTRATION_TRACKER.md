@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-token-lifecycle-tiered`
+Latest branch: `codex/platform-audit-p1-pool-placement-tiered`
 
 Closed in this tranche:
 
@@ -20,6 +20,8 @@ Closed in this tranche:
   `server/src/domain/sponsorImmutabilityPersistence.ts`.
 - P1-25: migrated token lifecycle creation and state-mutation writes through
   `server/src/domain/tokenLifecyclePersistence.ts`.
+- P1-26: migrated pool placement creation and placement patch writes through
+  `server/src/domain/poolPlacementPersistence.ts`.
 
 Catalog artifacts:
 
@@ -103,6 +105,30 @@ Implementation:
   verify the Mongo patch by readback, then project the Neo4j token-state patch
   inline or enqueue it in `tmag_projection_outbox` on graph failure.
 - Catalog regenerated to 49 remaining production `tripleStackWrite` call sites.
+
+### P1-26: Pool Placement
+
+Migrated:
+
+- `server/src/domain/holdingTank.ts` `placeProspect` placement insert, holding
+  tank edge, and Chroma event.
+- `server/src/domain/holdingTank.ts` `flushExpiredPlacements` placement flush
+  stamp and holding-tank edge patch.
+- `server/src/domain/adminProspectOversight.ts` admin move, sponsor reassign,
+  manual flush, and force-enroll placement patches.
+
+Implementation:
+
+- New helper: `server/src/domain/poolPlacementPersistence.ts`.
+- Placement creation uses `writeGraphCritical`, `MATCH`es the existing
+  `TmagProspect`, and verifies the `(:TmagProspect)-[:IN_HOLDING_TANK]->(:TmagPool)`
+  edge with `RETURN count(r) AS n`.
+- Placement patch operations keep Mongo as the operational success boundary,
+  verify the placement row by readback, then project the holding-tank edge
+  patch inline or enqueue it in `tmag_projection_outbox` on graph failure.
+- Catalog remains at 49 remaining production `tripleStackWrite` call sites
+  because P1-26 migrated direct persistence calls rather than cataloged
+  `tripleStackWrite` callers.
 
 ## Lane Map
 

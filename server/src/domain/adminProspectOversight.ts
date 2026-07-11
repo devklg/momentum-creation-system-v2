@@ -42,6 +42,7 @@ import { listLeaderTmagIds, LEADER_DETECTION_NOTE } from './adminMetrics.js';
 import { findProspectById } from './prospects.js';
 import { TOKEN_TTL_MS } from './tokens.js';
 import { findPlacementByProspectId } from './holdingTank.js';
+import { updatePoolPlacementOperational } from './poolPlacementPersistence.js';
 import type {
   McsAdminBaFilterOption,
   McsAdminDashboardFilter,
@@ -966,17 +967,10 @@ export async function executeMoveIntervention(input: {
     },
   });
   if (ctx.placement) {
-    await persistenceCall('mongodb', 'update', {
-      database: MONGO_DB,
-      collection: COLL_PLACEMENTS,
-      filter: { prospectId: input.prospectId },
-      update: { $set: { sponsorTmagId: input.body.toTmagId, updatedAt: now } },
-    });
-    await persistenceCall('neo4j', 'cypher', {
-      query:
-        'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
-        'SET r.sponsorTmagId = $toTmagId',
-      params: { prospectId: input.prospectId, toTmagId: input.body.toTmagId },
+    await updatePoolPlacementOperational({
+      prospectId: input.prospectId,
+      patch: { sponsorTmagId: input.body.toTmagId, updatedAt: now },
+      relationshipPatch: { sponsorTmagId: input.body.toTmagId },
     });
   }
   await persistenceCall('neo4j', 'cypher', {
@@ -1059,20 +1053,10 @@ export async function executeReassignSponsorIntervention(input: {
     },
   });
   if (ctx.placement) {
-    await persistenceCall('mongodb', 'update', {
-      database: MONGO_DB,
-      collection: COLL_PLACEMENTS,
-      filter: { prospectId: input.prospectId },
-      update: { $set: { sponsorTmagId: input.body.newSponsorTmagId, updatedAt: now } },
-    });
-    await persistenceCall('neo4j', 'cypher', {
-      query:
-        'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
-        'SET r.sponsorTmagId = $newSponsorTmagId',
-      params: {
-        prospectId: input.prospectId,
-        newSponsorTmagId: input.body.newSponsorTmagId,
-      },
+    await updatePoolPlacementOperational({
+      prospectId: input.prospectId,
+      patch: { sponsorTmagId: input.body.newSponsorTmagId, updatedAt: now },
+      relationshipPatch: { sponsorTmagId: input.body.newSponsorTmagId },
     });
   }
   await persistenceCall('neo4j', 'cypher', {
@@ -1154,16 +1138,16 @@ export async function executeManualFlushIntervention(input: {
   const before = snapshotProspect(ctx.prospect, ctx.placement);
 
   const now = new Date().toISOString();
-  await persistenceCall('mongodb', 'update', {
-    database: MONGO_DB,
-    collection: COLL_PLACEMENTS,
-    filter: { prospectId: input.prospectId },
-    update: {
-      $set: {
-        flushedAt: now,
-        flushReason: 'archived',
-        updatedAt: now,
-      },
+  await updatePoolPlacementOperational({
+    prospectId: input.prospectId,
+    patch: {
+      flushedAt: now,
+      flushReason: 'archived',
+      updatedAt: now,
+    },
+    relationshipPatch: {
+      flushedAt: now,
+      flushReason: 'archived',
     },
   });
   await persistenceCall('mongodb', 'update', {
@@ -1173,12 +1157,6 @@ export async function executeManualFlushIntervention(input: {
     update: {
       $set: { state: 'expired', updatedAt: now },
     },
-  });
-  await persistenceCall('neo4j', 'cypher', {
-    query:
-      'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
-      'SET r.flushedAt = datetime($now), r.flushReason = "archived"',
-    params: { prospectId: input.prospectId, now },
   });
 
   const afterPlacement: McsPoolPlacement = {
@@ -1252,23 +1230,17 @@ export async function executeForceEnrollIntervention(input: {
   });
 
   if (ctx.placement) {
-    await persistenceCall('mongodb', 'update', {
-      database: MONGO_DB,
-      collection: COLL_PLACEMENTS,
-      filter: { prospectId: input.prospectId },
-      update: {
-        $set: {
-          flushedAt: now,
-          flushReason: 'enrolled',
-          updatedAt: now,
-        },
+    await updatePoolPlacementOperational({
+      prospectId: input.prospectId,
+      patch: {
+        flushedAt: now,
+        flushReason: 'enrolled',
+        updatedAt: now,
       },
-    });
-    await persistenceCall('neo4j', 'cypher', {
-      query:
-        'MATCH (p:TmagProspect {prospectId: $prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
-        'SET r.flushedAt = datetime($now), r.flushReason = "enrolled"',
-      params: { prospectId: input.prospectId, now },
+      relationshipPatch: {
+        flushedAt: now,
+        flushReason: 'enrolled',
+      },
     });
   }
 
