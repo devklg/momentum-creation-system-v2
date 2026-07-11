@@ -5147,6 +5147,19 @@ export interface McsAdminAgentInteractionSummary {
   lastEventAt: McsIsoTimestamp | null;
 }
 
+export interface McsAdminProjectionOutboxDeadLetter {
+  outboxId: string;
+  tier: 'knowledge' | 'operational' | string;
+  target: 'neo4j' | 'chroma' | string;
+  entityId: string;
+  mongoCollection: string;
+  attempts: number;
+  maxAttempts: number;
+  lastError: string | null;
+  nextAttemptAt: McsIsoTimestamp | null;
+  updatedAt: McsIsoTimestamp | null;
+}
+
 export interface McsAdminSuccessProfileMemoryBridgeDraft {
   tmagId: string;
   ready: boolean;
@@ -5173,6 +5186,7 @@ export interface McsAdminAgentOversightResponse {
   successProfiles: McsAdminSuccessProfileSummary[];
   memoryStatus: McsAdminAgentMemoryStatus[];
   interactionSummary: McsAdminAgentInteractionSummary[];
+  projectionOutboxDeadLetters: McsAdminProjectionOutboxDeadLetter[];
   bridgeDrafts: McsAdminSuccessProfileMemoryBridgeDraft[];
   warnings: string[];
 }

@@ -114,6 +114,22 @@ export function AgentsPage() {
               />
             </Panel>
 
+            <Panel title="Projection Dead Letters">
+              <DenseTable
+                headers={['Outbox', 'Tier', 'Target', 'Attempts', 'Last Error']}
+                rows={data.projectionOutboxDeadLetters.map((row) => [
+                  `${row.outboxId} · ${row.mongoCollection}`,
+                  row.tier,
+                  `${row.target} · ${row.entityId}`,
+                  `${row.attempts}/${row.maxAttempts}`,
+                  row.lastError ?? 'not captured',
+                ])}
+                empty="No dead-lettered projections."
+              />
+            </Panel>
+          </section>
+
+          <section className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
             <Panel title="GraphRAG Bridge Drafts">
               <div className="space-y-3 max-h-[520px] overflow-auto pr-1">
                 {data.bridgeDrafts.length === 0 ? (
