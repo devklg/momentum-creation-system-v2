@@ -49,6 +49,9 @@ jobs:
       - name: API route map check
         run: pnpm catalog:api-routes:check
 
+      - name: Route access matrix check
+        run: pnpm catalog:route-access:check
+
       - name: Typecheck (merge gate)
         run: pnpm typecheck
 

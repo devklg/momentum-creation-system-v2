@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-api-route-map`
+Latest branch: `codex/platform-audit-p1-route-access-matrix`
 
 Closed in this tranche:
 
@@ -54,6 +54,9 @@ Closed in this tranche:
   with the direct Chroma adapter's `query_with_filter` action.
 - P1-44: generated a source-backed API route map from `server/src/index.ts`,
   route modules, and the internal knowledge-evolution runtime router.
+- P1-45: generated a route access matrix covering auth, admin, Steve
+  completion, VM entitlement, worker-secret, provider-webhook, and internal
+  runtime gate classes.
 
 Catalog artifacts:
 
@@ -73,6 +76,10 @@ Catalog artifacts:
 - `engineering/sprints/platform-audit-p1/api-route-map.json`
 - `server/scripts/generate-api-route-map.mjs`
 - `server/src/qa/__tests__/apiRouteMap.test.ts`
+- `engineering/sprints/platform-audit-p1/ROUTE_ACCESS_MATRIX.md`
+- `engineering/sprints/platform-audit-p1/route-access-matrix.json`
+- `server/scripts/generate-route-access-matrix.mjs`
+- `server/src/qa/__tests__/routeAccessMatrix.test.ts`
 
 Inventory result:
 
@@ -582,6 +589,33 @@ Current route-map summary:
   `requireAuth`, `requireSteveComplete`, `requireVmDialerAccess`,
   `requireRuntimeInternal`, rate-limit middleware, and raw-body parsers.
 
+### P1-45: Route Access Matrix
+
+Implemented:
+
+- Added `server/scripts/generate-route-access-matrix.mjs`.
+- Added root scripts `pnpm catalog:route-access` and
+  `pnpm catalog:route-access:check`.
+- Added the route-access freshness check to CI `gates`.
+- Generated `engineering/sprints/platform-audit-p1/ROUTE_ACCESS_MATRIX.md`.
+- Generated `engineering/sprints/platform-audit-p1/route-access-matrix.json`.
+- Added `server/src/qa/__tests__/routeAccessMatrix.test.ts`.
+
+Current access-matrix summary:
+
+- 206 routes covered from `api-route-map.json`.
+- 0 generated access findings.
+- 88 `requireAdmin` routes.
+- 1 `requireAdminOrHealthSecret` route.
+- 87 `requireAuth` routes.
+- 72 `requireSteveComplete` routes.
+- 12 `requireVmDialerAccess` routes.
+- Explicit categories for public health, auth bootstrap/session routes,
+  BA pre-Steve routes, BA Steve-gated routes, VM-entitled BA routes,
+  prospect-token and prospect re-entry routes, raw-body Telnyx webhooks,
+  Steve worker-secret endpoints, VM provider webhooks, and internal runtime
+  routes.
+
 ## Lane Map
 
 ### Lane P1-A: Persistence Migration
@@ -678,6 +712,7 @@ pnpm catalog:mongo-indexes:check
 pnpm catalog:neo4j:check
 pnpm catalog:chroma:check
 pnpm catalog:api-routes:check
+pnpm catalog:route-access:check
 pnpm typecheck
 pnpm build
 pnpm --filter @momentum/server test

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T22:40:39.520Z",
+  "generatedAt": "2026-07-11T22:51:15.480Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
