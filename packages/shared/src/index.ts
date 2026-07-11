@@ -10,3 +10,4 @@ export * from './tenant.js';
 export * from './leaders.js';
 export * from './recruiting-cycle.js';
 export * from './pmv-contract.js';
+export * from './pmv-analytics-taxonomy.js';

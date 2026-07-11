@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T23:45:44.074Z",
+  "generatedAt": "2026-07-11T23:51:49.540Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -5454,6 +5454,56 @@
       "file": "packages/shared/src/leaders.ts"
     },
     {
+      "name": "PMV_ANALYTICS_EVENTS",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-analytics-taxonomy.ts"
+    },
+    {
+      "name": "PMV_ANALYTICS_FORBIDDEN_PATTERNS",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-analytics-taxonomy.ts"
+    },
+    {
+      "name": "PMV_ANALYTICS_TAXONOMY",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-analytics-taxonomy.ts"
+    },
+    {
+      "name": "PMV_ANALYTICS_TAXONOMY_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/pmv-analytics-taxonomy.ts"
+    },
+    {
+      "name": "PmvAnalyticsAggregation",
+      "kind": "type",
+      "file": "packages/shared/src/pmv-analytics-taxonomy.ts"
+    },
+    {
+      "name": "PmvAnalyticsAudience",
+      "kind": "type",
+      "file": "packages/shared/src/pmv-analytics-taxonomy.ts"
+    },
+    {
+      "name": "PmvAnalyticsConcept",
+      "kind": "type",
+      "file": "packages/shared/src/pmv-analytics-taxonomy.ts"
+    },
+    {
+      "name": "PmvAnalyticsEventDefinition",
+      "kind": "interface",
+      "file": "packages/shared/src/pmv-analytics-taxonomy.ts"
+    },
+    {
+      "name": "PmvAnalyticsEventId",
+      "kind": "type",
+      "file": "packages/shared/src/pmv-analytics-taxonomy.ts"
+    },
+    {
+      "name": "PmvAnalyticsMetric",
+      "kind": "interface",
+      "file": "packages/shared/src/pmv-analytics-taxonomy.ts"
+    },
+    {
       "name": "PMV_CONCEPTS",
       "kind": "const",
       "file": "packages/shared/src/pmv-contract.ts"
@@ -9521,6 +9571,6 @@
     "chromaCollections": 50,
     "routeModules": 45,
     "routeHandlers": 236,
-    "sharedExports": 858
+    "sharedExports": 868
   }
 }
