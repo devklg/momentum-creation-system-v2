@@ -33,10 +33,10 @@
  */
 
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
 import { appendAuditEntry } from './auditLog.js';
 import { emailExists, type BARecord } from './ba.js';
 import { getTmagProfileBundle } from './adminBaOversight.js';
+import { writeBaIdentityGraphCritical } from './baIdentityPersistence.js';
 import { mintUniqueTmagId } from './tmagIds.js';
 import type {
   McsAdminBaDirectoryRow,
@@ -161,25 +161,17 @@ export async function adminCreateBa(
     ...(payload.marketRegion?.trim() ? { marketRegion: payload.marketRegion.trim() } : {}),
   } as BARecordMaybeDeleted;
 
-  await tripleStackWrite({
+  await writeBaIdentityGraphCritical({
     id: tmagId,
-    mongoCollection: BA_COLLECTION,
     mongoDoc: { ...record },
-    neo4j: {
-      cypher:
-        'MERGE (s:TeamMagnificentMember {tmagId: $sponsorTmagId}) MERGE (n:TeamMagnificentMember {tmagId: $id}) ' +
-        'SET n.threeBaId = $threeBaId, n.email = $email, n.firstName = $firstName, ' +
-        'n.lastName = $lastName, n.timezone = $timezone, n.entitlements = $entitlements ' +
-        'MERGE (n)-[:SPONSORED_BY]->(s)',
-      params: {
-        sponsorTmagId: sponsor.tmagId,
-        threeBaId: payload.threeBaId,
-        email: email,
-        firstName: payload.firstName,
-        lastName: payload.lastName,
-        timezone: payload.timezone?.trim() || null,
-        entitlements: record.entitlements,
-      },
+    sponsorTmagId: sponsor.tmagId,
+    nodeProps: {
+      threeBaId: payload.threeBaId,
+      email: email,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      timezone: payload.timezone?.trim() || null,
+      entitlements: record.entitlements,
     },
   });
 

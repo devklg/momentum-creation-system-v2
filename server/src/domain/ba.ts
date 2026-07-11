@@ -1,13 +1,13 @@
 /**
- * BA registration domain. Triple-stack writes the new BA record.
+ * BA registration domain. Graph-critical tiered write stores the new BA record.
  * Sponsor link in Neo4j is the second source of truth (independent of THREE's genealogy).
  */
 
 import argon2 from 'argon2';
-import { tripleStackWrite } from '../services/tripleStack.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import type { AccessCodeRecord } from './access-codes.js';
 import { mintUniqueTmagId } from './tmagIds.js';
+import { writeBaIdentityGraphCritical } from './baIdentityPersistence.js';
 
 export interface NewBAInput {
   firstName: string;
@@ -201,25 +201,17 @@ export async function registerBA(input: NewBAInput, sponsor: AccessCodeRecord): 
     entitlements: [],
   };
 
-  await tripleStackWrite({
+  await writeBaIdentityGraphCritical({
     id: tmagId,
-    mongoCollection: 'team_magnificent_members',
     mongoDoc: { ...record },
-    neo4j: {
-      cypher:
-        'MERGE (s:TeamMagnificentMember {tmagId: $sponsorTmagId}) MERGE (n:TeamMagnificentMember {tmagId: $id}) ' +
-        'SET n.threeBaId = $threeBaId, n.email = $email, n.firstName = $firstName, ' +
-        'n.lastName = $lastName, n.timezone = $timezone, n.entitlements = $entitlements ' +
-        'MERGE (n)-[:SPONSORED_BY]->(s)',
-      params: {
-        sponsorTmagId: sponsor.sponsorTmagId,
-        threeBaId: input.threeBaId,
-        email: input.email,
-        firstName: input.firstName,
-        lastName: input.lastName,
-        timezone: input.timezone,
-        entitlements: record.entitlements,
-      },
+    sponsorTmagId: sponsor.sponsorTmagId,
+    nodeProps: {
+      threeBaId: input.threeBaId,
+      email: input.email,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      timezone: input.timezone,
+      entitlements: record.entitlements,
     },
   });
 

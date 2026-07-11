@@ -1,31 +1,19 @@
 {
-  "generatedAt": "2026-07-11T14:27:29.389Z",
+  "generatedAt": "2026-07-11T14:45:42.278Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts"
   ],
-  "productionCallSiteCount": 56,
+  "productionCallSiteCount": 53,
   "countsByTier": {
-    "graph_critical": 11,
+    "graph_critical": 8,
     "operational": 25,
     "knowledge": 20
   },
   "callSites": [
     {
       "file": "server/scripts/seed-founders.ts",
-      "line": 94,
-      "functionName": "seedBaRecord",
-      "idExpression": "f.tmagId",
-      "mongoCollectionExpression": "'team_magnificent_members'",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "graph_critical",
-      "subsystem": "ba_identity",
-      "rationale": "BA membership identity and sponsor graph must land atomically."
-    },
-    {
-      "file": "server/scripts/seed-founders.ts",
-      "line": 174,
+      "line": 155,
       "functionName": "seedAccessCode",
       "idExpression": "f.code",
       "mongoCollectionExpression": "'tmag_access_codes'",
@@ -46,18 +34,6 @@
       "tier": "operational",
       "subsystem": "delivery_and_reservations",
       "rationale": "Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows."
-    },
-    {
-      "file": "server/src/domain/adminBaCrud.ts",
-      "line": 164,
-      "functionName": "adminCreateBa",
-      "idExpression": "tmagId",
-      "mongoCollectionExpression": "BA_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": false,
-      "tier": "graph_critical",
-      "subsystem": "ba_identity",
-      "rationale": "BA membership identity and sponsor graph must land atomically."
     },
     {
       "file": "server/src/domain/adminBaOversight.ts",
@@ -142,18 +118,6 @@
       "tier": "operational",
       "subsystem": "audit_controls",
       "rationale": "Audit entries must persist, while graph/search projections can lag through the outbox."
-    },
-    {
-      "file": "server/src/domain/ba.ts",
-      "line": 204,
-      "functionName": "registerBA",
-      "idExpression": "tmagId",
-      "mongoCollectionExpression": "'team_magnificent_members'",
-      "hasNeo4j": true,
-      "hasChroma": false,
-      "tier": "graph_critical",
-      "subsystem": "ba_identity",
-      "rationale": "BA membership identity and sponsor graph must land atomically."
     },
     {
       "file": "server/src/domain/broadcast.ts",
