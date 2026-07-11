@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-tier-failure-simulations`
+Latest branch: `codex/platform-audit-p1-outbox-dead-letters-admin`
 
 Closed in this tranche:
 
@@ -34,6 +34,8 @@ Closed in this tranche:
 - P1-32: moved all remaining operational records to `writeOperational`.
 - P1-33: added failure simulation tests for graph-critical, knowledge, and
   operational write tiers.
+- P1-34: exposed projection outbox dead letters in the admin agent oversight
+  surface.
 
 Catalog artifacts:
 
@@ -302,6 +304,19 @@ Coverage:
 - Operational: simulates a Chroma projection failure and asserts Mongo success
   is preserved while an `operational` projection is queued and no rollback is
   attempted.
+
+### P1-34: Projection Outbox Dead-Letter Admin Exposure
+
+Implemented:
+
+- Extended `McsAdminAgentOversightResponse` with
+  `projectionOutboxDeadLetters`.
+- `buildAdminAgentOversight()` now summarizes `tmag_projection_outbox` rows
+  with `status: "failed"` and reports failed projection count in memory health.
+- `/agents` admin page now renders a Projection Dead Letters table with outbox
+  id, source collection, tier, target, entity, attempts, and last error.
+- Added `adminAgentMemory` regression coverage for failed outbox rows and the
+  memory-health count/note.
 
 ## Lane Map
 

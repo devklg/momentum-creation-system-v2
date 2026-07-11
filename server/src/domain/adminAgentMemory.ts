@@ -13,6 +13,7 @@ import type {
   McsAdminAgentInteractionSummary,
   McsAdminAgentMemoryStatus,
   McsAdminAgentOversightResponse,
+  McsAdminProjectionOutboxDeadLetter,
   McsAdminSuccessProfileMemoryBridgeDraft,
   McsAdminSuccessProfileSummary,
   McsAgentId,
@@ -57,7 +58,16 @@ interface AgentEventDoc {
 
 interface OutboxDoc {
   tier?: string;
+  target?: string;
   status?: string;
+  outboxId?: string;
+  entityId?: string;
+  mongoCollection?: string;
+  attempts?: number;
+  maxAttempts?: number;
+  lastError?: string | null;
+  nextAttemptAt?: string | null;
+  updatedAt?: string | null;
 }
 
 async function safeQuery<T>(
@@ -158,6 +168,7 @@ function memoryStatus(args: {
   const pendingKnowledge = args.outbox.filter(
     (row) => row.tier === 'knowledge' && row.status === 'pending',
   ).length;
+  const failedOutbox = args.outbox.filter((row) => row.status === 'failed').length;
 
   return [
     {
@@ -197,10 +208,29 @@ function memoryStatus(args: {
       collection: COLL_OUTBOX,
       purpose: 'Durable retry queue for knowledge/operational projections.',
       status: 'present',
-      recordCount: pendingKnowledge,
-      note: `${pendingKnowledge} pending knowledge projection(s).`,
+      recordCount: pendingKnowledge + failedOutbox,
+      note: `${pendingKnowledge} pending knowledge projection(s); ${failedOutbox} dead-letter projection(s).`,
     },
   ];
+}
+
+function projectionOutboxDeadLetters(outbox: OutboxDoc[]): McsAdminProjectionOutboxDeadLetter[] {
+  return outbox
+    .filter((row) => row.status === 'failed')
+    .map((row) => ({
+      outboxId: row.outboxId ?? 'unknown',
+      tier: row.tier ?? 'unknown',
+      target: row.target ?? 'unknown',
+      entityId: row.entityId ?? 'unknown',
+      mongoCollection: row.mongoCollection ?? 'unknown',
+      attempts: typeof row.attempts === 'number' ? row.attempts : 0,
+      maxAttempts: typeof row.maxAttempts === 'number' ? row.maxAttempts : 0,
+      lastError: row.lastError ?? null,
+      nextAttemptAt: row.nextAttemptAt ?? null,
+      updatedAt: row.updatedAt ?? null,
+    }))
+    .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
+    .slice(0, 50);
 }
 
 function bridgeDraft(discovery: PersistedSteveDiscovery): McsAdminSuccessProfileMemoryBridgeDraft {
@@ -257,6 +287,7 @@ export async function buildAdminAgentOversight(): Promise<McsAdminAgentOversight
     successProfiles: summarizeSuccessProfiles(discoveries, bas),
     memoryStatus: memoryStatus({ chromaCollections, discoveries, events, outbox }),
     interactionSummary: buildInteractionSummary(events),
+    projectionOutboxDeadLetters: projectionOutboxDeadLetters(outbox),
     bridgeDrafts: discoveries.slice(0, 25).map(bridgeDraft),
     warnings,
   };
