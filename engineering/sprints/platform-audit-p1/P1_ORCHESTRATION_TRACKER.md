@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-knowledge-approval-tiered`
+Latest branch: `codex/platform-audit-p1-graph-critical-sweep`
 
 Closed in this tranche:
 
@@ -28,6 +28,8 @@ Closed in this tranche:
   tiered persistence helpers.
 - P1-29: migrated approved knowledge source and chunk writes to
   `writeKnowledge`.
+- P1-30: moved all remaining graph-critical records to `writeGraphCritical`
+  with rollback/readback expectations.
 
 Catalog artifacts:
 
@@ -39,10 +41,10 @@ Inventory result:
 
 | Tier | Count |
 | --- | ---: |
-| `graph_critical` | 4 |
+| `graph_critical` | 0 |
 | `knowledge` | 17 |
 | `operational` | 18 |
-| Total production `tripleStackWrite` call sites remaining | 39 |
+| Total production `tripleStackWrite` call sites remaining | 35 |
 
 ## Completed Migration Tranches
 
@@ -197,6 +199,27 @@ Implementation:
 - `approvedKnowledgeStore` tests mock `writeKnowledge` directly so the approved
   knowledge intake boundary asserts the tiered writer, not the legacy helper.
 - Catalog regenerated to 39 remaining production `tripleStackWrite` call sites.
+
+### P1-30: Graph-Critical Record Sweep
+
+Migrated:
+
+- `server/src/domain/bulkLeads.ts` legacy RVM prospect creation.
+- `server/src/domain/bulkLeads.ts` legacy RVM bulk-lead graph creation.
+- `server/src/domain/invitations.ts` prospect invitation creation.
+- `server/src/domain/ivory.ts` Ivory roster name creation.
+
+Implementation:
+
+- All remaining graph-critical raw writes now use `writeGraphCritical`.
+- Required graph anchors now use `MATCH` instead of `MERGE` so missing BA,
+  lead-owner, campaign, or prospect anchors fail and trigger the tiered rollback
+  path.
+- Every migrated write has a `RETURN count(...) AS n` readback query covering
+  the required graph edge shape.
+- Ivory persistence tests now assert the tiered graph-critical write contract.
+- Catalog regenerated to 35 remaining production `tripleStackWrite` call sites
+  with zero `graph_critical` raw call sites remaining.
 
 ## Lane Map
 

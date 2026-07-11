@@ -12,7 +12,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeGraphCritical } from '../services/tieredWrite.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 import { lastInitialOf } from './prospects.js';
 import {
@@ -112,7 +112,7 @@ async function createBulkLeadRecord(input: {
     expiresAt,
   };
 
-  await tripleStackWrite({
+  await writeGraphCritical({
     id: prospectId,
     mongoCollection: PROSPECTS_COLLECTION,
     mongoDoc: {
@@ -129,7 +129,7 @@ async function createBulkLeadRecord(input: {
     },
     neo4j: {
       cypher:
-        'MERGE (b:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
+        'MATCH (b:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
         'CREATE (p:TmagProspect {prospectId: $id, firstName: $firstName, lastInitial: $lastInitial, ' +
         '  city: $city, stateOrRegion: $stateOrRegion, country: $country, state: $state, ' +
         '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, source: $source, createdAt: $createdAt}) ' +
@@ -145,6 +145,12 @@ async function createBulkLeadRecord(input: {
         state: 'minted',
         source: 'rvm',
         createdAt: now,
+      },
+      verifyCypher:
+        'MATCH (b:TeamMagnificentMember {tmagId: $ownerTmagId})-[:OWNS_RVM_PROSPECT]->' +
+        '(p:TmagProspect {prospectId: $id}) RETURN count(p) AS n',
+      verifyParams: {
+        ownerTmagId: input.ownerTmagId,
       },
     },
     chroma: {
@@ -221,15 +227,15 @@ async function createBulkLeadRecord(input: {
     updatedAt: now,
   };
 
-  await tripleStackWrite({
+  await writeGraphCritical({
     id: leadId,
     mongoCollection: BULK_LEADS_COLLECTION,
     mongoDoc: { ...bulkLead },
     neo4j: {
       cypher:
-        'MERGE (lb:TmagVmLeadOwner {leadOwnerId: $leadOwnerId}) ' +
-        'MERGE (vm:TmagVmCampaign {vmCampaignId: $vmCampaignId}) ' +
-        'MERGE (p:TmagProspect {prospectId: $prospectId}) ' +
+        'MATCH (lb:TmagVmLeadOwner {leadOwnerId: $leadOwnerId}) ' +
+        'MATCH (vm:TmagVmCampaign {vmCampaignId: $vmCampaignId}) ' +
+        'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
         'CREATE (lead:TmagVmBulkLead {leadId: $id, token: $token, status: $status, ' +
         '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, createdAt: $createdAt}) ' +
         'CREATE (lb)-[:CONTAINS_LEAD]->(lead) ' +
@@ -244,6 +250,16 @@ async function createBulkLeadRecord(input: {
         ownerTmagId: bulkLead.ownerTmagId,
         sponsorTmagId: bulkLead.sponsorTmagId,
         createdAt: now,
+      },
+      verifyCypher:
+        'MATCH (lb:TmagVmLeadOwner {leadOwnerId: $leadOwnerId})-[:CONTAINS_LEAD]->' +
+        '(lead:TmagVmBulkLead {leadId: $id})<-[:TARGETS_LEAD]-(vm:TmagVmCampaign {vmCampaignId: $vmCampaignId}) ' +
+        'MATCH (lead)-[:BECAME_PROSPECT_RECORD]->(p:TmagProspect {prospectId: $prospectId}) ' +
+        'RETURN count(lead) AS n',
+      verifyParams: {
+        leadOwnerId: bulkLead.leadOwnerId,
+        vmCampaignId: bulkLead.vmCampaignId,
+        prospectId: bulkLead.prospectId,
       },
     },
     chroma: {
