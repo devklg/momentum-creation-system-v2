@@ -39,6 +39,7 @@ import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
   createInvitation,
+  InvitationComplianceError,
   logExternalInvite,
   markInvitationSent,
   type CreateInvitationInput,
@@ -177,6 +178,9 @@ invitationRoutes.post('/', requireAuth, requireSteveComplete, async (req, res) =
     };
     return res.status(201).json(response);
   } catch (err) {
+    if (err instanceof InvitationComplianceError) {
+      return res.status(400).json({ ok: false, error: 'message_failed_compliance' });
+    }
     // eslint-disable-next-line no-console
     console.error('[POST /api/invitations] mint failed', err);
     return res.status(500).json({ ok: false, error: 'server_error' });
@@ -258,6 +262,9 @@ invitationRoutes.post('/log', requireAuth, requireSteveComplete, async (req, res
     };
     return res.status(201).json(response);
   } catch (err) {
+    if (err instanceof InvitationComplianceError) {
+      return res.status(400).json({ ok: false, error: 'message_failed_compliance' });
+    }
     // eslint-disable-next-line no-console
     console.error('[POST /api/invitations/log] failed', err);
     return res.status(500).json({ ok: false, error: 'server_error' });

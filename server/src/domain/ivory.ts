@@ -68,8 +68,12 @@ import type {
   McsUpdateIvoryNamePayload,
 } from '@momentum/shared';
 import { createInvitation } from './invitations.js';
-import { ANGLE_LABEL } from './ivoryAngle.js';
+import { GENERATED_COPY_ANGLE_LABEL } from './ivoryAngle.js';
 import { normalizePhone } from './prospectAccount.js';
+import {
+  generatedCopyViolationIds,
+  scanGeneratedCopyCompliance,
+} from './generatedCopyCompliance.js';
 
 const MONGO_DB = 'momentum';
 const IVORY_COLLECTION = 'tmag_ivory_prospect_names';
@@ -588,7 +592,7 @@ const COACH_SYSTEM_PREFIX = [
 
 function buildCoachUserTurn(input: McsIvoryCoachPayload): string {
   const lines = [
-    `BA angle: people who might be interested in ${ANGLE_LABEL[input.angle]}.`,
+    `BA angle: people who might be interested in ${GENERATED_COPY_ANGLE_LABEL[input.angle]}.`,
     `Current roster size: ${input.rosterSize} names.`,
   ];
   if (input.productName) {
@@ -610,7 +614,7 @@ function buildCoachUserTurn(input: McsIvoryCoachPayload): string {
  * WDYK prompts that name no one, score no one, sell nothing.
  */
 function neutralCoach(input: McsIvoryCoachPayload): McsIvoryCoachResponse {
-  const angle = ANGLE_LABEL[input.angle];
+  const angle = GENERATED_COPY_ANGLE_LABEL[input.angle];
   const productLine = input.productName
     ? `When you think about ${input.productName}, `
     : 'When you think about who might be ready for a change, ';
@@ -622,11 +626,11 @@ function neutralCoach(input: McsIvoryCoachPayload): McsIvoryCoachResponse {
       'a few you keep forgetting.',
     prompts: [
       'Who are the two people in your family you haven’t talked to about this yet?',
-      'Who at work has mentioned wanting more — more time, more income, more energy?',
+      'Who at work has mentioned wanting more flexibility, purpose, or energy?',
       'Who do you see at the gym, church, or school that you trust?',
       'Who in your phone contacts have you not texted in a few months?',
       'Who do you know from a past job, a past city, a past chapter?',
-      'Who recently asked you a question about health, money, or what you’re up to?',
+      'Who recently asked you a question about feeling better or what you’re up to?',
       'Who do you owe a follow-up to from a conversation you started months ago?',
     ],
     degraded: true,
@@ -684,7 +688,7 @@ async function buildCoachSystem(input: McsIvoryCoachPayload): Promise<string> {
   const voiceTemplate = await readMasterContent('team.ivory.coach_prompt');
   const voice = interpolateMasterContent(voiceTemplate, {
     productName: input.productName ?? undefined,
-    angle: ANGLE_LABEL[input.angle],
+    angle: GENERATED_COPY_ANGLE_LABEL[input.angle],
     rosterSize: input.rosterSize,
   });
   return [
@@ -712,6 +716,15 @@ export async function ivoryCoach(
       // surface a broken UX. Logs so it's visible if it becomes frequent.
       // eslint-disable-next-line no-console
       console.warn('[ivory.coach] non-JSON response, using neutral fallback');
+      return neutralCoach(input);
+    }
+    const scan = scanGeneratedCopyCompliance([parsed.coaching, ...parsed.prompts]);
+    if (!scan.ok) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[ivory.coach] response failed compliance scan, using neutral fallback:',
+        generatedCopyViolationIds(scan),
+      );
       return neutralCoach(input);
     }
     return {
@@ -846,7 +859,15 @@ export async function draftIvoryInvitation(
       maxTokens: 260,
     });
     const draft = text.trim().replace(/^"|"$/g, '').trim();
-    if (!draft) {
+    const scan = scanGeneratedCopyCompliance(draft);
+    if (!draft || !scan.ok) {
+      if (!scan.ok) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          '[ivory.invitation-agent.draft] draft failed compliance scan, using fallback:',
+          generatedCopyViolationIds(scan),
+        );
+      }
       return {
         ok: true,
         draft: neutralInvitationDraft({
@@ -897,6 +918,10 @@ export async function mintIvoryInvitation(
   if (!message) throw new IvoryValidationError('missing_message');
   if (message.length > INVITATION_MESSAGE_MAX) {
     throw new IvoryValidationError('message_too_long');
+  }
+  const messageScan = scanGeneratedCopyCompliance(message);
+  if (!messageScan.ok) {
+    throw new IvoryValidationError('message_failed_compliance');
   }
   if (!city || city.length > 120) throw new IvoryValidationError('invalid_city');
   if (!stateOrRegion || stateOrRegion.length > 120) {

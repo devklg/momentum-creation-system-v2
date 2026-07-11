@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T23:27:24.784Z",
+  "generatedAt": "2026-07-11T23:38:26.410Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -3985,7 +3985,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/invitations.ts:139",
+      "source": "server/src/routes/invitations.ts:140",
       "routeSource": "server/src/routes/invitations.ts",
       "signals": {
         "requireAuth": true,
@@ -4012,7 +4012,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/invitations.ts:191",
+      "source": "server/src/routes/invitations.ts:195",
       "routeSource": "server/src/routes/invitations.ts",
       "signals": {
         "requireAuth": true,
@@ -4039,7 +4039,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/invitations.ts:237",
+      "source": "server/src/routes/invitations.ts:241",
       "routeSource": "server/src/routes/invitations.ts",
       "signals": {
         "requireAuth": true,

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T23:27:31.939Z",
+  "generatedAt": "2026-07-11T23:38:26.769Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -5793,7 +5793,7 @@
       "id": "POST /api/invitations/",
       "method": "POST",
       "fullPath": "/api/invitations/",
-      "routeSource": "server/src/routes/invitations.ts:139",
+      "routeSource": "server/src/routes/invitations.ts:140",
       "mountPath": "/api/invitations",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -5836,7 +5836,7 @@
       "id": "POST /api/invitations/:prospectId/sent",
       "method": "POST",
       "fullPath": "/api/invitations/:prospectId/sent",
-      "routeSource": "server/src/routes/invitations.ts:191",
+      "routeSource": "server/src/routes/invitations.ts:195",
       "mountPath": "/api/invitations",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -5879,7 +5879,7 @@
       "id": "POST /api/invitations/log",
       "method": "POST",
       "fullPath": "/api/invitations/log",
-      "routeSource": "server/src/routes/invitations.ts:237",
+      "routeSource": "server/src/routes/invitations.ts:241",
       "mountPath": "/api/invitations",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",

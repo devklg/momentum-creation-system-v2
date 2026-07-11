@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T23:27:25.892Z",
+  "generatedAt": "2026-07-11T23:38:25.667Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -585,12 +585,12 @@
         },
         {
           "file": "server/src/domain/ivory.ts",
-          "line": 210,
+          "line": 214,
           "action": "writeGraphCritical"
         },
         {
           "file": "server/src/domain/ivory.ts",
-          "line": 378,
+          "line": 382,
           "action": "persistenceCall.chromadb.add"
         }
       ],
@@ -1272,12 +1272,12 @@
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 199,
+          "line": 217,
           "action": "writeGraphCritical"
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 343,
+          "line": 361,
           "action": "writeKnowledge"
         }
       ],

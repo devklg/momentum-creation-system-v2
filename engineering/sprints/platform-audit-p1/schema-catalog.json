@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T23:27:26.916Z",
+  "generatedAt": "2026-07-11T23:38:22.801Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -921,37 +921,37 @@
       "sources": [
         {
           "file": "server/src/domain/ivory.ts",
-          "line": 210,
+          "line": 214,
           "source": "writeGraphCritical"
         },
         {
           "file": "server/src/domain/ivory.ts",
-          "line": 257,
+          "line": 261,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/ivory.ts",
-          "line": 276,
+          "line": 280,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/ivory.ts",
-          "line": 334,
+          "line": 338,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/ivory.ts",
-          "line": 426,
+          "line": 430,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/ivory.ts",
-          "line": 468,
+          "line": 472,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/ivory.ts",
-          "line": 519,
+          "line": 523,
           "source": "persistenceCall.mongodb.delete"
         },
         {
@@ -1487,7 +1487,7 @@
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 343,
+          "line": 361,
           "source": "writeKnowledge"
         },
         {
@@ -1806,27 +1806,27 @@
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 199,
+          "line": 217,
           "source": "writeGraphCritical"
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 396,
+          "line": 414,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 419,
+          "line": 437,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 451,
+          "line": 469,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/ivory-momentum.ts",
-          "line": 303,
+          "line": 307,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -2354,7 +2354,7 @@
       {
         "label": "INVITED_AS",
         "sources": [
-          "server/src/domain/ivory.ts:494"
+          "server/src/domain/ivory.ts:498"
         ]
       },
       {
@@ -2504,10 +2504,10 @@
           "server/src/domain/crossStoreReconciliation.ts:88",
           "server/src/domain/entitlements.ts:54",
           "server/src/domain/generator.ts:157",
-          "server/src/domain/invitations.ts:213",
           "server/src/domain/invitations.ts:231",
-          "server/src/domain/ivory.ts:216",
-          "server/src/domain/ivory.ts:229",
+          "server/src/domain/invitations.ts:249",
+          "server/src/domain/ivory.ts:220",
+          "server/src/domain/ivory.ts:233",
           "server/src/domain/orientationSession.ts:465",
           "server/src/domain/orientationSession.ts:580",
           "server/src/domain/outcomes.ts:218",
@@ -2646,7 +2646,7 @@
         "label": "TmagInvitationActivity",
         "sources": [
           "server/src/domain/crm.ts:701",
-          "server/src/domain/invitations.ts:357"
+          "server/src/domain/invitations.ts:375"
         ]
       },
       {
@@ -2667,12 +2667,12 @@
       {
         "label": "TmagIvoryName",
         "sources": [
-          "server/src/domain/ivory.ts:217",
-          "server/src/domain/ivory.ts:230",
-          "server/src/domain/ivory.ts:360",
-          "server/src/domain/ivory.ts:440",
-          "server/src/domain/ivory.ts:488",
-          "server/src/domain/ivory.ts:526"
+          "server/src/domain/ivory.ts:221",
+          "server/src/domain/ivory.ts:234",
+          "server/src/domain/ivory.ts:364",
+          "server/src/domain/ivory.ts:444",
+          "server/src/domain/ivory.ts:492",
+          "server/src/domain/ivory.ts:530"
         ]
       },
       {
@@ -2749,10 +2749,10 @@
           "server/src/domain/crossStoreReconciliation.ts:110",
           "server/src/domain/crossStoreReconciliation.ts:165",
           "server/src/domain/crossStoreReconciliation.ts:89",
-          "server/src/domain/invitations.ts:214",
           "server/src/domain/invitations.ts:232",
-          "server/src/domain/invitations.ts:356",
-          "server/src/domain/ivory.ts:493",
+          "server/src/domain/invitations.ts:250",
+          "server/src/domain/invitations.ts:374",
+          "server/src/domain/ivory.ts:497",
           "server/src/domain/outcomes.ts:218",
           "server/src/domain/poolPlacementPersistence.ts:101",
           "server/src/domain/poolPlacementPersistence.ts:107",
@@ -3042,7 +3042,7 @@
         "relationship": "HAS_ACTIVITY",
         "sources": [
           "server/src/domain/crm.ts:704",
-          "server/src/domain/invitations.ts:360"
+          "server/src/domain/invitations.ts:378"
         ]
       },
       {
@@ -3132,8 +3132,8 @@
         "sources": [
           "server/src/domain/adminConsistencyReport.ts:68",
           "server/src/domain/crossStoreReconciliation.ts:89",
-          "server/src/domain/invitations.ts:217",
-          "server/src/domain/invitations.ts:232"
+          "server/src/domain/invitations.ts:235",
+          "server/src/domain/invitations.ts:250"
         ]
       },
       {
@@ -3157,8 +3157,8 @@
       {
         "relationship": "KNOWS",
         "sources": [
-          "server/src/domain/ivory.ts:219",
-          "server/src/domain/ivory.ts:229"
+          "server/src/domain/ivory.ts:223",
+          "server/src/domain/ivory.ts:233"
         ]
       },
       {
@@ -4534,17 +4534,17 @@
         {
           "method": "POST",
           "path": "/",
-          "line": 139
+          "line": 140
         },
         {
           "method": "POST",
           "path": "/:prospectId/sent",
-          "line": 191
+          "line": 195
         },
         {
           "method": "POST",
           "path": "/log",
-          "line": 237
+          "line": 241
         }
       ],
       "sharedTypes": [
