@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Generated: 2026-07-11T23:06:16.529Z
-- Routes: 206
+- Generated: 2026-07-11T23:14:44.512Z
+- Routes: 209
 - Findings: 0
 
 ## Routes By Access Category
@@ -21,7 +21,7 @@
 | ba_auth_steve_vm_entitled | 12 |
 | internal_runtime_admin_or_secret | 5 |
 | prospect_reentry | 4 |
-| prospect_token | 11 |
+| prospect_token | 14 |
 | public_health | 2 |
 | raw_body_webhook | 1 |
 | steve_worker_secret | 2 |
@@ -188,11 +188,14 @@
 | GET | `/api/p/:token/stream` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:689` |
 | POST | `/api/p/:token/webinar-reserve` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:812` |
 | GET | `/api/p/:token/team-stats` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:912` |
-| GET | `/api/rvm/:token` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:90` |
-| POST | `/api/rvm/:token/activate` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:101` |
-| POST | `/api/rvm/:token/video-event` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:112` |
-| POST | `/api/rvm/:token/callback-request` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:130` |
-| POST | `/api/rvm/:token/info-request` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:169` |
+| GET | `/api/rvm/:token` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:117` |
+| POST | `/api/rvm/:token/activate` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:128` |
+| POST | `/api/rvm/:token/video-event` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:139` |
+| POST | `/api/rvm/:token/callback-request` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:157` |
+| GET | `/api/rvm/:token/stream` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:196` |
+| POST | `/api/rvm/:token/webinar-reserve` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:252` |
+| GET | `/api/rvm/:token/team-stats` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:296` |
+| POST | `/api/rvm/:token/info-request` | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:316` |
 | GET | `/api/vm/provider/status` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vmProviderWebhooks.ts:52` |
 | POST | `/api/vm/provider/manual-csv/import` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vmProviderWebhooks.ts:62` |
 | POST | `/api/vm/provider/manual-csv/import.csv` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_text | none | none | `server/src/routes/vmProviderWebhooks.ts:81` |

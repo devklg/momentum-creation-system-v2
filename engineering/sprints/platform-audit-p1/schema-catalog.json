@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T23:06:12.657Z",
+  "generatedAt": "2026-07-11T23:15:33.076Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -4883,36 +4883,55 @@
         {
           "method": "GET",
           "path": "/:token",
-          "line": 90
+          "line": 117
         },
         {
           "method": "POST",
           "path": "/:token/activate",
-          "line": 101
+          "line": 128
         },
         {
           "method": "POST",
           "path": "/:token/video-event",
-          "line": 112
+          "line": 139
         },
         {
           "method": "POST",
           "path": "/:token/callback-request",
-          "line": 130
+          "line": 157
+        },
+        {
+          "method": "GET",
+          "path": "/:token/stream",
+          "line": 196
+        },
+        {
+          "method": "POST",
+          "path": "/:token/webinar-reserve",
+          "line": 252
+        },
+        {
+          "method": "GET",
+          "path": "/:token/team-stats",
+          "line": 296
         },
         {
           "method": "POST",
           "path": "/:token/info-request",
-          "line": 169
+          "line": 316
         }
       ],
       "sharedTypes": [
         "McsCallbackIntent",
         "McsCallbackRequestResponse",
+        "McsHoldingTankSnapshot",
+        "McsPlacementEvent",
         "McsRvmInfoRequestResponse",
         "McsRvmResolvedTokenPayload",
+        "McsTeamStatsResponse",
         "McsVideoEventKind",
-        "McsVideoEventResponse"
+        "McsVideoEventResponse",
+        "McsWebinarReservationResponse"
       ]
     },
     {
@@ -9441,7 +9460,7 @@
     "neo4jRelationships": 59,
     "chromaCollections": 50,
     "routeModules": 45,
-    "routeHandlers": 233,
+    "routeHandlers": 236,
     "sharedExports": 846
   }
 }

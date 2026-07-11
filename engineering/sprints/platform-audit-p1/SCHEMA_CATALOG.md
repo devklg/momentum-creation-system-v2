@@ -5,13 +5,13 @@
 
 ## Summary
 
-- Generated: 2026-07-11T23:06:12.657Z
+- Generated: 2026-07-11T23:15:33.076Z
 - Mongo collections: 65
 - Neo4j labels: 68
 - Neo4j relationships: 59
 - Chroma collections: 50
 - Route modules: 45
-- Route handlers: 233
+- Route handlers: 236
 - Shared exports: 846
 
 ## Mongo Collections
@@ -315,7 +315,7 @@
 | `(unmounted)` | `server/src/routes/preview.ts` | GET / | none |
 | `(unmounted)` | `server/src/routes/profile.ts` | GET /<br>GET /sponsor<br>PATCH /<br>POST /password<br>POST /email/start<br>POST /email/verify<br>POST /phone | `McsProfileGetResponse` |
 | `(unmounted)` | `server/src/routes/questionnaire.ts` | GET /status<br>POST /load<br>POST /submit<br>GET user-agent | none |
-| `(unmounted)` | `server/src/routes/rvm.ts` | GET /:token<br>POST /:token/activate<br>POST /:token/video-event<br>POST /:token/callback-request<br>POST /:token/info-request | `McsCallbackIntent`, `McsCallbackRequestResponse`, `McsRvmInfoRequestResponse`, `McsRvmResolvedTokenPayload`, `McsVideoEventKind`, `McsVideoEventResponse` |
+| `(unmounted)` | `server/src/routes/rvm.ts` | GET /:token<br>POST /:token/activate<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats<br>POST /:token/info-request | `McsCallbackIntent`, `McsCallbackRequestResponse`, `McsHoldingTankSnapshot`, `McsPlacementEvent`, `McsRvmInfoRequestResponse`, `McsRvmResolvedTokenPayload`, `McsTeamStatsResponse`, `McsVideoEventKind`, `McsVideoEventResponse`, `McsWebinarReservationResponse` |
 | `(unmounted)` | `server/src/routes/scriptmaker.ts` | POST /draft | `McsScriptMakerDraftPayload`, `McsScriptMakerDraftResponse`, `McsScriptMakerDraftSelectors`, `McsScriptMakerScriptKind` |
 | `(unmounted)` | `server/src/routes/sponsor-workbook.ts` | GET /:tmagId<br>PUT /:tmagId/draft<br>POST /:tmagId/finalize | none |
 | `(unmounted)` | `server/src/routes/steve.ts` | GET /discovery/state<br>GET /discovery/script<br>GET /discovery/system-prompt<br>POST /discovery/ingest<br>GET /discovery/profile/:downlineTmagId<br>GET /discovery/conversation<br>POST /discovery/converse | none |

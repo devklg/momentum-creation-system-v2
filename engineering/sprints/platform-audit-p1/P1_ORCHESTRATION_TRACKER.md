@@ -668,6 +668,24 @@ Implemented:
   raw webhook, worker secret, provider webhook, admin, or internal runtime
   families.
 
+### P1-49: Prospect-Facing Compliance Architecture Lint
+
+Implemented:
+
+- Added `server/src/qa/__tests__/prospectFacingComplianceArchitecture.test.ts`.
+- Proves `.com` runtime strings stay clear of high-risk forbidden language
+  categories: income/earnings/commission/compensation, cycle/CV/rank math,
+  spillover/binary-leg/placement-guarantee claims, AI prospecting/Michael
+  language, current team head count, and product-company/promoter branding.
+- Proves both `.com` footers render the shared `MCS_COM_DISCLAIMER` instead of
+  hardcoding independent copies.
+- Proves `.com` API literals stay within prospect token/re-entry families:
+  `/api/p` and `/api/rvm`.
+- Proves every `.com` client endpoint has a matching prospect-only route access
+  matrix row with no BA, admin, runtime-internal, Steve, or VM entitlement gate.
+- Closed a route-placement mismatch by adding missing RVM prospect-token routes
+  for `/:token/stream`, `/:token/webinar-reserve`, and `/:token/team-stats`.
+
 ## Lane Map
 
 ### Lane P1-A: Persistence Migration

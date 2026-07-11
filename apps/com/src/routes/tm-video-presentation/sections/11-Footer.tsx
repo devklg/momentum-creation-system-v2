@@ -26,6 +26,8 @@
  * and gives the attribution exact format). Surfaced in the README.
  */
 
+import { MCS_COM_DISCLAIMER } from '@momentum/shared';
+
 export interface FooterProps {
   baFullName: string;
 }
@@ -47,13 +49,7 @@ export function Footer({ baFullName }: FooterProps) {
           Presented to you by {baFullName}.
         </div>
 
-        <p className="tm-footer__disclaimer">
-          Queue positions and momentum displays demonstrate team activity in
-          real time and do not guarantee any final placement, compensation,
-          or earnings outcome. Market figures cited from public sources are
-          for context only. This page contains no income claims, placement
-          promises, or guarantees of any kind.
-        </p>
+        <p className="tm-footer__disclaimer">{MCS_COM_DISCLAIMER}</p>
       </div>
       <style>{styles}</style>
     </footer>

@@ -56,7 +56,7 @@ function route(method: string, fullPath: string): RouteAccessMatrixRow {
 describe('P1 route access matrix', () => {
   it('covers the full API route map with no generated findings', () => {
     const data = matrix();
-    expect(data.summary.routes).toBe(206);
+    expect(data.summary.routes).toBe(209);
     expect(data.routes).toHaveLength(data.summary.routes);
     expect(data.summary.findings).toBe(0);
   });
