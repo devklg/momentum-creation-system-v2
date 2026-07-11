@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-ba-gate-tests`
+Latest branch: `codex/platform-audit-p1-pre-gate-tests`
 
 Closed in this tranche:
 
@@ -61,6 +61,8 @@ Closed in this tranche:
   `requireAdmin` or the explicit `requireAdminOrHealthSecret` exception.
 - P1-47: added QA tests proving BA-facing gated routes enforce auth, Steve
   completion, and VM entitlement gates where intended.
+- P1-48: added QA tests proving pre-gate routes stay limited to approved
+  route families and access classes.
 
 Catalog artifacts:
 
@@ -86,6 +88,7 @@ Catalog artifacts:
 - `server/src/qa/__tests__/routeAccessMatrix.test.ts`
 - `server/src/qa/__tests__/adminRouteProtection.test.ts`
 - `server/src/qa/__tests__/baRouteGateProtection.test.ts`
+- `server/src/qa/__tests__/preGateSurface.test.ts`
 
 Inventory result:
 
@@ -647,6 +650,23 @@ Implemented:
   intentional Steve exceptions.
 - Documents the key exceptions: `/api/cockpit/launch`,
   `/api/profile/*`, and dynamic Fast Start module state gating.
+
+### P1-48: Pre-Gate Surface Tests
+
+Implemented:
+
+- Added `server/src/qa/__tests__/preGateSurface.test.ts`.
+- Proves raw-body, admin large-body, and pre-gate mount phases stay limited
+  to approved access classes.
+- Proves pre-gate rows stay within approved route prefixes.
+- Proves ordinary BA-gated app routes do not land in pre-gate phases except
+  the explicit Michael training-support and Steve sponsor-profile support
+  routes, both of which still declare auth + Steve completion.
+- Proves authenticated pre-Steve rows require a BA session.
+- Proves unauthenticated pre-gate rows are limited to auth bootstrap,
+  auth logout/session exception, public health, prospect token/re-entry,
+  raw webhook, worker secret, provider webhook, admin, or internal runtime
+  families.
 
 ## Lane Map
 

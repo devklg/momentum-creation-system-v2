@@ -75,7 +75,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 45. **Security:** Generate a route access matrix covering auth, admin, Steve completion, and VM entitlement gates.
 - [x] 46. **Security:** Add tests proving every admin route is protected by requireAdmin.
 - [x] 47. **Security:** Add tests proving gated BA routes enforce auth and onboarding gates where intended.
-- [ ] 48. **Security:** Add tests proving pre-gate routes stay limited to the approved pre-gate surface.
+- [x] 48. **Security:** Add tests proving pre-gate routes stay limited to the approved pre-gate surface.
 - [ ] 49. **Compliance:** Add architectural linting for prospect-facing forbidden terms and route placement mistakes.
 - [ ] 50. **Compliance:** Add a PMV/prospect-facing compliance scanner for apps/com.
 - [ ] 51. **Compliance:** Add compliance checks around ScriptMaker and Ivory generated copy paths.
@@ -260,3 +260,4 @@ Use this section when assigning work to multiple agents. Keep the original numbe
 | 2026-07-11 | P1 route access matrix | Codex | Closed item 45: added `server/scripts/generate-route-access-matrix.mjs`, `pnpm catalog:route-access`, `pnpm catalog:route-access:check`, generated `ROUTE_ACCESS_MATRIX.md` plus JSON, and added QA coverage for admin, admin-secret, Steve-gated, Steve-whitelisted, VM entitlement, prospect-token, worker-secret, and provider-webhook route classes. | P1-46 admin route protection tests remain open. |
 | 2026-07-11 | P1 admin route protection tests | Codex | Closed item 46: added `server/src/qa/__tests__/adminRouteProtection.test.ts`, proving every `/api/admin/*` route has `requireAdmin` or the explicit `requireAdminOrHealthSecret` exception, and that ordinary admin routes are admin-session only. | P1-47 gated BA route tests remain open. |
 | 2026-07-11 | P1 BA gate protection tests | Codex | Closed item 47: added `server/src/qa/__tests__/baRouteGateProtection.test.ts`, proving BA-gated routes require auth and Steve completion, VM BA routes require the VM entitlement gate, and pre-Steve BA exceptions remain authenticated and documented. | P1-48 pre-gate route limitation tests remain open. |
+| 2026-07-11 | P1 pre-gate surface tests | Codex | Closed item 48: added `server/src/qa/__tests__/preGateSurface.test.ts`, proving pre-gate/raw-body/admin-large-body routes stay within approved access classes and prefixes, ordinary BA-gated app routes do not slip into pre-gate mounts except explicit Michael/Steve sponsor-support routes, and unauthenticated routes remain token/bootstrap/health/secret/admin/internal only. | P1-49 compliance architectural linting remains open. |
