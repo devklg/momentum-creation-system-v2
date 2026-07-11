@@ -27,21 +27,21 @@ Release blockers, governance blockers, and correctness issues that should be han
 - [ ] 2. **Michael runtime:** Update either the Michael implementation or the tests so the contract is explicit and no longer drifted.
 - [ ] 3. **Michael runtime:** Add regression coverage for empty body, explicit English, and explicit Spanish Michael runtime requests.
 - [ ] 4. **Verification:** Rerun the full server Vitest suite until the Michael runtime failure cluster is green.
-- [ ] 5. **Verification:** Resolve pnpm dependency approval state for argon2 and esbuild so normal gates run without bypass flags.
-- [ ] 6. **Operations:** Document the accepted local gate command pattern if pnpm approval state intentionally remains constrained.
+- [x] 5. **Verification:** Resolve pnpm dependency approval state for argon2 and esbuild so normal gates run without bypass flags.
+- [x] 6. **Operations:** Document the accepted local gate command pattern if pnpm approval state intentionally remains constrained.
 - [ ] 7. **Chroma:** Fix Chroma health heartbeat readback so the metadata field used for write and readback matches.
 - [ ] 8. **Chroma:** Add a regression test for Chroma health readback and metadata filtering.
 - [ ] 9. **Operations:** Validate the admin triple-stack health probe after the Chroma heartbeat fix.
-- [ ] 10. **Agents:** Create AI_AGENT_PLAYBOOK.md or formally reconcile the missing file to a named current replacement.
+- [x] 10. **Agents:** Create AI_AGENT_PLAYBOOK.md or formally reconcile the missing file to a named current replacement.
 - [ ] 11. **Agents:** Link the agent playbook to AGENT_ARCHITECTURE.md, AGENT_PROMPT_GOVERNANCE.md, and runtime agent docs.
 - [ ] 12. **VM/RVM:** Create the explicit VM/RVM governance decision or ACR before expanding live delivery.
 - [ ] 13. **VM/RVM:** Add a VM/RVM compliance checklist covering automation, qualification, PMV, copy, and provider controls.
 - [ ] 14. **VM/RVM:** Confirm VM live delivery remains disabled until the governance and compliance checklist is approved.
 - [ ] 15. **GraphRAG:** Keep GraphRAG and Context Manager live flags off until canary criteria are written and approved.
-- [ ] 16. **Docs:** Regenerate or clearly mark docs/build-registry.md as stale/current so agents do not rely on old status.
-- [ ] 17. **Docs:** Replace, remove, or explicitly mark the stale root TASK.md on main.
-- [ ] 18. **Docs:** Regenerate graphify output or add a visible stale-against-HEAD warning to existing graphify artifacts.
-- [ ] 19. **Release:** Document the current release blockers and cautions in the active project tracking location.
+- [x] 16. **Docs:** Regenerate or clearly mark docs/build-registry.md as stale/current so agents do not rely on old status.
+- [x] 17. **Docs:** Replace, remove, or explicitly mark the stale root TASK.md on main.
+- [x] 18. **Docs:** Regenerate graphify output or add a visible stale-against-HEAD warning to existing graphify artifacts.
+- [x] 19. **Release:** Document the current release blockers and cautions in the active project tracking location.
 - [ ] 20. **Verification:** Run typecheck, build, and server tests again after P0 fixes and record the clean gate result.
 
 ## P1 - High Priority
@@ -229,3 +229,4 @@ Use this section when assigning work to multiple agents. Keep the original numbe
 | Date | Item | Agent | Update | Blocker |
 | --- | --- | --- | --- | --- |
 | 2026-07-10 | P0 orchestration | Codex | Created P0 lane map, master prompt, lane briefs, launcher/worktree scripts, Lane 0 worktree, and `momentum.agent_status` rows for lanes 0-4. Lane 0 is prepared first; dependent lanes are gated until Lane 0 merges. | Queue mirror currently returned no `work_queue_leaves` rows from local Mongo `momentum`; P0 tasklist remains the source for this audit orchestration. |
+| 2026-07-11 | P0 Lane 0 foundation | Codex | Closed items 5, 6, 10, 16, 17, 18, and 19: normal `pnpm install --frozen-lockfile` passed with `argon2`/`esbuild` allowBuilds, active gate commands and blockers are in `engineering/sprints/platform-audit-p0/P0_RELEASE_TRACKER.md`, `AI_AGENT_PLAYBOOK.md` exists, stale build-registry/TASK/graphify warnings are visible. | Items 1-4, 7-9, 11-15, and 20 remain owned by Lanes 1-4. |
