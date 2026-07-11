@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-admin-consistency-report`
+Latest branch: `codex/platform-audit-p1-schema-catalog`
 
 Closed in this tranche:
 
@@ -40,6 +40,8 @@ Closed in this tranche:
   Chroma.
 - P1-36: added an admin consistency report for half-writes, stale projections,
   and orphan records.
+- P1-37: generated a schema catalog across Mongo, Neo4j, Chroma, route
+  payload surfaces, and shared exports.
 
 Catalog artifacts:
 
@@ -368,6 +370,26 @@ Report coverage:
 - Bounded graph-orphan scans for prospects, invite tokens, Steve discoveries,
   and CRM records.
 - Cross-store reconciliation issue samples from P1-35.
+
+### P1-37: Schema Catalog
+
+Implemented:
+
+- Added `server/scripts/generate-schema-catalog.mjs`.
+- Added `pnpm catalog:schema` and `pnpm catalog:schema:check`.
+- Generated:
+  - `engineering/sprints/platform-audit-p1/SCHEMA_CATALOG.md`
+  - `engineering/sprints/platform-audit-p1/schema-catalog.json`
+
+Generated coverage:
+
+- Mongo collections discovered from tiered writes and direct Mongo persistence
+  calls, with explicit/permissive Mongoose schema mode.
+- Neo4j labels and relationships discovered from Cypher strings.
+- Chroma collections discovered from `CHROMA_COLLECTIONS`.
+- Route modules, mounted prefixes, handlers, and shared route/payload type
+  imports.
+- Shared package exports across `packages/shared/src`.
 
 ## Lane Map
 

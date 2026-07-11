@@ -64,7 +64,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 34. **Persistence:** Expose projection outbox dead letters in the admin surface.
 - [x] 35. **Persistence:** Build a cross-store reconciliation job for Mongo, Neo4j, and Chroma.
 - [x] 36. **Persistence:** Create an admin consistency report for half-writes, stale projections, and orphan records.
-- [ ] 37. **Schema:** Create a schema catalog across Mongo collections, Neo4j labels, Chroma collections, route payloads, and shared types.
+- [x] 37. **Schema:** Create a schema catalog across Mongo collections, Neo4j labels, Chroma collections, route payloads, and shared types.
 - [ ] 38. **Mongo:** Create a Mongo collection ownership map.
 - [ ] 39. **Mongo:** Run a Mongo index audit and document the index plan for high-volume collections.
 - [ ] 40. **Neo4j:** Create the Neo4j labels, relationships, and constraints catalog.
@@ -249,3 +249,4 @@ Use this section when assigning work to multiple agents. Keep the original numbe
 | 2026-07-11 | P1 projection outbox dead-letter admin exposure | Codex | Closed item 34: extended the admin agent oversight API and `/agents` admin page with projection outbox dead-letter rows. The response now includes failed outbox records with tier, target, entity, source collection, attempt count, last error, and timestamps; the memory health row counts both pending knowledge projections and dead-letter projections. | P1-35 cross-store reconciliation job remains open. |
 | 2026-07-11 | P1 cross-store reconciliation job | Codex | Closed item 35: added a read-only bounded reconciliation job for Mongo, Neo4j, and Chroma covering member identity, prospect invitations, invite tokens, pool placements, Steve discoveries, and content videos. Run with `pnpm --filter @momentum/server reconcile:stores -- --limit 25`; add `--fail-on-drift` when using it as a gate. | P1-36 admin consistency report remains open. |
 | 2026-07-11 | P1 admin consistency report | Codex | Closed item 36: added `/api/admin/consistency/report` and the `/consistency` admin page. The report summarizes suspected graph-critical half-writes, stale/dead-letter projection outbox rows, bounded graph-orphan scans, and sampled cross-store reconciliation issues. | P1-37 schema catalog remains open. |
+| 2026-07-11 | P1 schema catalog | Codex | Closed item 37: added `server/scripts/generate-schema-catalog.mjs`, `pnpm catalog:schema`, `pnpm catalog:schema:check`, and generated `engineering/sprints/platform-audit-p1/SCHEMA_CATALOG.md` plus JSON. The catalog covers Mongo collections, Neo4j labels/relationships, Chroma collections, route payload surface, and shared exports. | P1-38 Mongo collection ownership map remains open. |

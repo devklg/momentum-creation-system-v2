@@ -27,6 +27,8 @@
     "typecheck": "pnpm -r typecheck",
     "catalog:persistence": "node server/scripts/generate-persistence-write-catalog.mjs",
     "catalog:persistence:check": "node server/scripts/generate-persistence-write-catalog.mjs --check",
+    "catalog:schema": "node server/scripts/generate-schema-catalog.mjs",
+    "catalog:schema:check": "node server/scripts/generate-schema-catalog.mjs --check",
     "docs": "node server/scripts/build-checklist.mjs && node server/scripts/sync-queue-from-wireframe.mjs",
     "clean": "pnpm -r exec rm -rf dist node_modules"
   },
