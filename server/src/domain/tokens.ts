@@ -23,6 +23,7 @@
  */
 
 import { persistenceCall } from '../services/persistence/dispatch.js';
+import { updateTokenLifecycleOperational } from './tokenLifecyclePersistence.js';
 import type { McsInviteTokenRecord, McsTokenState } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -131,11 +132,9 @@ export async function transitionTokenState(
     return { state: record.state, changed: false };
   }
 
-  await persistenceCall('mongodb', 'update', {
-    database: MONGO_DB,
-    collection: TOKENS_COLLECTION,
-    filter: { token },
-    update: { $set: { state: next, updatedAt: new Date().toISOString() } },
+  await updateTokenLifecycleOperational({
+    token,
+    patch: { state: next, updatedAt: new Date().toISOString() },
   });
 
   return { state: next, changed: true };
@@ -169,12 +168,7 @@ export async function markTokenOpened(
   if (shouldStampClick) set.clickedAt = clickedAt;
   if (shouldAdvanceState) set.state = 'clicked';
 
-  await persistenceCall('mongodb', 'update', {
-    database: MONGO_DB,
-    collection: TOKENS_COLLECTION,
-    filter: { token },
-    update: { $set: set },
-  });
+  await updateTokenLifecycleOperational({ token, patch: set });
 
   return {
     state: shouldAdvanceState ? 'clicked' : record.state,

@@ -24,6 +24,7 @@ import {
   TelnyxError,
 } from '../services/telnyx.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
+import { writeVmLeadTokenGraphCritical } from './tokenLifecyclePersistence.js';
 
 const MONGO_DB = 'momentum';
 const CHROMA_COLLECTION = 'mcs_vm_campaigns';
@@ -33,7 +34,6 @@ const QUEUE_COLLECTION = 'tmag_vm_queue_jobs';
 const DELIVERY_EVENTS_COLLECTION = 'tmag_vm_delivery_events';
 const WEBHOOK_EVENTS_COLLECTION = 'tmag_vm_provider_webhook_events';
 const CRM_COLLECTION = 'tmag_prospect_crm_records';
-const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
 const AUDIT_COLLECTION = 'tmag_vm_audit_events';
 const SUPPRESSION_COLLECTION = 'tmag_vm_suppression_list';
 
@@ -678,9 +678,11 @@ export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Prom
   const now = new Date().toISOString();
   const expiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
 
-  await tripleStackWrite({
-    id: token,
-    mongoCollection: TOKENS_COLLECTION,
+  await writeVmLeadTokenGraphCritical({
+    token,
+    leadId: lead.leadId,
+    ownerTmagId: lead.ownerTmagId,
+    sponsorTmagId: lead.sponsorTmagId,
     mongoDoc: {
       token,
       tokenKind: 'rvm',
@@ -695,17 +697,11 @@ export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Prom
       clickedAt: null,
       expiresAt,
     },
-    neo4j: {
-      cypher:
-        'MERGE (t:TmagInviteToken {token: $id}) ' +
-        'SET t.tokenKind = "rvm", t.leadId = $leadId, t.ownerTmagId = $ownerTmagId, t.sponsorTmagId = $sponsorTmagId, t.state = "minted", t.createdAt = datetime($createdAt) ' +
-        'WITH t MATCH (l:TmagVmBulkLead {leadId: $leadId}) MERGE (t)-[:FOR_VM_LEAD]->(l)',
-      params: {
-        leadId: lead.leadId,
-        ownerTmagId: lead.ownerTmagId,
-        sponsorTmagId: lead.sponsorTmagId,
-        createdAt: now,
-      },
+    tokenProps: {
+      tokenKind: 'rvm',
+      state: 'minted',
+      createdAt: now,
+      expiresAt,
     },
     chroma: {
       collection: CHROMA_COLLECTION,

@@ -49,6 +49,7 @@ import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 import { lastInitialOf } from './prospects.js';
 import { createOrUpdateCrmRecordForToken } from './prospectCrm.js';
+import { writeProspectTokenGraphCritical } from './tokenLifecyclePersistence.js';
 import type {
   McsInvitationActivityEntry,
   McsInvitationSource,
@@ -60,7 +61,6 @@ import type {
 
 const MONGO_DB = 'momentum';
 const PROSPECTS_COLLECTION = 'tmag_prospects';
-const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
 const ACTIVITY_COLLECTION = 'tmag_prospect_invitation_activity';
 const CHROMA_COLLECTION = 'mcs_prospect_invitation_activity';
 
@@ -270,27 +270,12 @@ export async function createInvitation(
     expiresAt,
   };
 
-  await persistenceCall('mongodb', 'insert', {
-    database: MONGO_DB,
-    collection: TOKENS_COLLECTION,
-    documents: [{ _id: token, ...tokenRecord }],
-  });
-
-  await persistenceCall('neo4j', 'cypher', {
-    query:
-      'MERGE (t:TmagInviteToken {token: $token}) ' +
-      'SET t.prospectId = $prospectId, ' +
-      '    t.sponsorTmagId = $sponsorTmagId, ' +
-      '    t.state = $state, ' +
-      '    t.createdAt = $createdAt, ' +
-      '    t.expiresAt = $expiresAt ' +
-      'WITH t ' +
-      'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
-      'MERGE (t)-[:FOR_PROSPECT]->(p)',
-    params: {
-      token,
-      prospectId,
-      sponsorTmagId: input.sponsorTmagId,
+  await writeProspectTokenGraphCritical({
+    token,
+    prospectId,
+    sponsorTmagId: input.sponsorTmagId,
+    mongoDoc: { ...tokenRecord },
+    tokenProps: {
       state: 'minted',
       createdAt,
       expiresAt,

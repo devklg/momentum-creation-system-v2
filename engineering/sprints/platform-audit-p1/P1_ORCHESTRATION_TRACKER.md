@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-sponsor-immutability-tiered`
+Latest branch: `codex/platform-audit-p1-token-lifecycle-tiered`
 
 Closed in this tranche:
 
@@ -18,6 +18,8 @@ Closed in this tranche:
   `server/src/domain/baIdentityPersistence.ts`.
 - P1-24: migrated sponsor immutability writes to `writeGraphCritical` through
   `server/src/domain/sponsorImmutabilityPersistence.ts`.
+- P1-25: migrated token lifecycle creation and state-mutation writes through
+  `server/src/domain/tokenLifecyclePersistence.ts`.
 
 Catalog artifacts:
 
@@ -31,8 +33,8 @@ Inventory result:
 | --- | ---: |
 | `graph_critical` | 5 |
 | `knowledge` | 20 |
-| `operational` | 25 |
-| Total production `tripleStackWrite` call sites remaining | 50 |
+| `operational` | 24 |
+| Total production `tripleStackWrite` call sites remaining | 49 |
 
 ## Completed Migration Tranches
 
@@ -74,6 +76,33 @@ Implementation:
   original sponsor when present, then verifies the current sponsor edge,
   original sponsor edge, and override node link with `RETURN count(o) AS n`.
 - Catalog regenerated to 50 remaining production `tripleStackWrite` call sites.
+
+### P1-25: Token Lifecycle
+
+Migrated:
+
+- `server/src/domain/invitations.ts` invite-token creation.
+- `server/src/domain/bulkLeads.ts` legacy bulk-lead token creation.
+- `server/src/domain/crm.ts` re-invite fresh-token creation.
+- `server/src/domain/vmProviderQueue.ts` VM provider token generation.
+- `server/src/domain/tokens.ts` shared forward lifecycle transitions and
+  click-open stamping.
+- `server/src/domain/prospectCrm.ts` token enrollment state update when a CRM
+  record is closed as a new Brand Ambassador.
+
+Implementation:
+
+- New helper: `server/src/domain/tokenLifecyclePersistence.ts`.
+- Prospect token creation uses `writeGraphCritical`, `MATCH`es the existing
+  `TmagProspect`, and verifies the `(:TmagInviteToken)-[:FOR_PROSPECT]->(:TmagProspect)`
+  edge with `RETURN count(t) AS n`.
+- VM lead token creation uses `writeGraphCritical`, `MATCH`es the existing
+  `TmagVmBulkLead`, and verifies the `FOR_VM_LEAD` edge with
+  `RETURN count(t) AS n`.
+- Token lifecycle state updates keep Mongo as the operational success boundary,
+  verify the Mongo patch by readback, then project the Neo4j token-state patch
+  inline or enqueue it in `tmag_projection_outbox` on graph failure.
+- Catalog regenerated to 49 remaining production `tripleStackWrite` call sites.
 
 ## Lane Map
 
