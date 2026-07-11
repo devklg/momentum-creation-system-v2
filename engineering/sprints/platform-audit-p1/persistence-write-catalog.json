@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-07-11T15:19:28.504Z",
+  "generatedAt": "2026-07-11T15:25:40.917Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts"
   ],
-  "productionCallSiteCount": 47,
+  "productionCallSiteCount": 41,
   "countsByTier": {
-    "operational": 23,
+    "operational": 18,
     "knowledge": 19,
-    "graph_critical": 5
+    "graph_critical": 4
   },
   "callSites": [
     {
@@ -461,78 +461,6 @@
       "functionName": "createVMCampaign",
       "idExpression": "campaign.vmCampaignId",
       "mongoCollectionExpression": "COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "operational",
-      "subsystem": "delivery_and_reservations",
-      "rationale": "Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows."
-    },
-    {
-      "file": "server/src/domain/vmLeadOwners.ts",
-      "line": 55,
-      "functionName": "createLeadOwner",
-      "idExpression": "leadOwner.leadOwnerId",
-      "mongoCollectionExpression": "COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "graph_critical",
-      "subsystem": "vm_ownership",
-      "rationale": "VM lead ownership ties imported recipients to accountable operators."
-    },
-    {
-      "file": "server/src/domain/vmProviderQueue.ts",
-      "line": 223,
-      "functionName": "vmAudit",
-      "idExpression": "",
-      "mongoCollectionExpression": "AUDIT_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "operational",
-      "subsystem": "audit_controls",
-      "rationale": "Audit entries must persist, while graph/search projections can lag through the outbox."
-    },
-    {
-      "file": "server/src/domain/vmProviderQueue.ts",
-      "line": 285,
-      "functionName": "enqueueVmJob",
-      "idExpression": "job.jobId",
-      "mongoCollectionExpression": "QUEUE_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "operational",
-      "subsystem": "delivery_and_reservations",
-      "rationale": "Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows."
-    },
-    {
-      "file": "server/src/domain/vmProviderQueue.ts",
-      "line": 593,
-      "functionName": "upsertImportedLead",
-      "idExpression": "leadId",
-      "mongoCollectionExpression": "LEADS_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "operational",
-      "subsystem": "delivery_and_reservations",
-      "rationale": "Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows."
-    },
-    {
-      "file": "server/src/domain/vmProviderQueue.ts",
-      "line": 839,
-      "functionName": "recordDeliveryEvent",
-      "idExpression": "event.eventId",
-      "mongoCollectionExpression": "DELIVERY_EVENTS_COLLECTION",
-      "hasNeo4j": true,
-      "hasChroma": true,
-      "tier": "operational",
-      "subsystem": "delivery_and_reservations",
-      "rationale": "Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows."
-    },
-    {
-      "file": "server/src/domain/vmProviderQueue.ts",
-      "line": 877,
-      "functionName": "recordProviderWebhook",
-      "idExpression": "webhookEventId",
-      "mongoCollectionExpression": "WEBHOOK_EVENTS_COLLECTION",
       "hasNeo4j": true,
       "hasChroma": true,
       "tier": "operational",

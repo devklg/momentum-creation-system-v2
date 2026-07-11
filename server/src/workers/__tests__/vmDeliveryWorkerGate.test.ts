@@ -5,6 +5,7 @@ import type { VmQueueJob } from '../../domain/vmProviderQueue.js';
 const mocks = vi.hoisted(() => ({
   persistenceCall: vi.fn(),
   tripleStackWrite: vi.fn(),
+  writeOperational: vi.fn(),
   sendDrop: vi.fn(),
 }));
 
@@ -14,6 +15,10 @@ vi.mock('../../services/persistence/dispatch.js', () => ({
 
 vi.mock('../../services/tripleStack.js', () => ({
   tripleStackWrite: mocks.tripleStackWrite,
+}));
+
+vi.mock('../../services/tieredWrite.js', () => ({
+  writeOperational: mocks.writeOperational,
 }));
 
 vi.mock('../../services/vmProviders/index.js', () => ({
@@ -113,6 +118,12 @@ beforeEach(() => {
   vi.setSystemTime(new Date('2026-07-09T12:00:00.000Z'));
   mocks.persistenceCall.mockReset();
   mocks.tripleStackWrite.mockReset();
+  mocks.writeOperational.mockReset();
+  mocks.writeOperational.mockResolvedValue({
+    tier: 'operational',
+    id: 'vm_test',
+    mongo: { ok: true, verified: true },
+  });
   mocks.sendDrop.mockReset();
   mocks.sendDrop.mockResolvedValue({
     provider: 'telnyx_call_control',

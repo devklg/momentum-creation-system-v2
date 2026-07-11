@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-crm-ownership-tiered`
+Latest branch: `codex/platform-audit-p1-vm-ownership-provider-tiered`
 
 Closed in this tranche:
 
@@ -24,6 +24,8 @@ Closed in this tranche:
   `server/src/domain/poolPlacementPersistence.ts`.
 - P1-27: migrated CRM ownership record creation through
   `server/src/domain/crmOwnershipPersistence.ts`.
+- P1-28: migrated VM ownership and provider queue writes through
+  tiered persistence helpers.
 
 Catalog artifacts:
 
@@ -35,10 +37,10 @@ Inventory result:
 
 | Tier | Count |
 | --- | ---: |
-| `graph_critical` | 5 |
+| `graph_critical` | 4 |
 | `knowledge` | 19 |
-| `operational` | 23 |
-| Total production `tripleStackWrite` call sites remaining | 47 |
+| `operational` | 18 |
+| Total production `tripleStackWrite` call sites remaining | 41 |
 
 ## Completed Migration Tranches
 
@@ -151,6 +153,30 @@ Implementation:
   `(:TeamMagnificentMember)-[:OWNS_CRM_RECORD]->(:TmagProspectCrmRecord)<-[:HAS_CRM_RECORD]-(:TmagVmBulkLead)`
   graph shape with `RETURN count(c) AS n`.
 - Catalog regenerated to 47 remaining production `tripleStackWrite` call sites.
+
+### P1-28: VM Ownership And Provider Queue
+
+Migrated:
+
+- `server/src/domain/vmLeadOwners.ts` VM lead-owner creation.
+- `server/src/domain/vmProviderQueue.ts` provider audit events.
+- `server/src/domain/vmProviderQueue.ts` VM queue job enqueue.
+- `server/src/domain/vmProviderQueue.ts` imported VM lead upsert.
+- `server/src/domain/vmProviderQueue.ts` provider delivery events.
+- `server/src/domain/vmProviderQueue.ts` provider webhook records.
+
+Implementation:
+
+- VM lead-owner creation now uses `writeGraphCritical`, `MATCH`es the existing
+  owner BA, and verifies the
+  `(:TeamMagnificentMember)-[:OWNS_VM_LEAD_OWNER]->(:TmagVmLeadOwner)` graph
+  shape with `RETURN count(lb) AS n`.
+- Provider queue writes now use `writeOperational`, keeping Mongo readback as
+  the operational success boundary while preserving the existing graph/chroma
+  projection payloads.
+- VM queue tests mock the tiered operational helper for Telnyx call-control and
+  delivery-worker flows.
+- Catalog regenerated to 41 remaining production `tripleStackWrite` call sites.
 
 ## Lane Map
 

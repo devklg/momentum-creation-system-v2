@@ -6,11 +6,11 @@
 
 ## Summary
 
-- Generated: 2026-07-11T15:19:28.504Z
-- Production `tripleStackWrite` call sites: 47
-- Graph-critical: 5
+- Generated: 2026-07-11T15:25:40.917Z
+- Production `tripleStackWrite` call sites: 41
+- Graph-critical: 4
 - Knowledge: 19
-- Operational: 23
+- Operational: 18
 - Excludes tests/spec files. Includes `server/src/**/*.ts` and `server/scripts/**/*.ts`.
 
 ## Tier Definitions
@@ -61,12 +61,6 @@
 | 36 | operational | delivery_and_reservations | `server/src/domain/threeWayCalls.ts:576` | `createThreeWayBooking` | `BOOKINGS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
 | 37 | knowledge | agent_context | `server/src/domain/training.ts:231` | `markFastStartModuleState` | `PROGRESS_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
 | 38 | operational | delivery_and_reservations | `server/src/domain/vmCampaigns.ts:69` | `createVMCampaign` | `COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 39 | graph_critical | vm_ownership | `server/src/domain/vmLeadOwners.ts:55` | `createLeadOwner` | `COLLECTION` | yes | yes | VM lead ownership ties imported recipients to accountable operators. |
-| 40 | operational | audit_controls | `server/src/domain/vmProviderQueue.ts:223` | `vmAudit` | `AUDIT_COLLECTION` | yes | yes | Audit entries must persist, while graph/search projections can lag through the outbox. |
-| 41 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:285` | `enqueueVmJob` | `QUEUE_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 42 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:593` | `upsertImportedLead` | `LEADS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 43 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:839` | `recordDeliveryEvent` | `DELIVERY_EVENTS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 44 | operational | delivery_and_reservations | `server/src/domain/vmProviderQueue.ts:877` | `recordProviderWebhook` | `WEBHOOK_EVENTS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 45 | operational | delivery_and_reservations | `server/src/domain/webinarReservation.ts:191` | `createWebinarReservation` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 46 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:136` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_SOURCE_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
-| 47 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:183` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_CHUNK_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
+| 39 | operational | delivery_and_reservations | `server/src/domain/webinarReservation.ts:191` | `createWebinarReservation` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 40 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:136` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_SOURCE_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
+| 41 | knowledge | approved_knowledge | `server/src/services/knowledge/approvedKnowledgeStore.ts:183` | `createKevinApprovedKnowledgeSource` | `KNOWLEDGE_CHUNK_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
