@@ -168,23 +168,25 @@ export async function retrieveGraphRag(
   const collection = activeKnowledgeCollection(query.domain, query.language);
 
   const result = await persistenceCall<{
-    ids?: string[][];
-    documents?: string[][];
-    distances?: number[][];
-    metadatas?: Array<Array<Record<string, unknown>>>;
-  }>('chromadb', 'query', {
+    results?: {
+      ids?: string[];
+      documents?: string[];
+      distances?: number[];
+      metadatas?: Array<Record<string, unknown> | null>;
+    };
+  }>('chromadb', 'query_with_filter', {
     collection,
-    queryTexts: [query.queryText],
-    nResults: topK,
+    query: query.queryText,
+    n_results: topK,
     // Retrieval-ready gate + tenant scope — the structural exclusion of
     // superseded/archived/review-only knowledge from active retrieval.
     where: { retrievalReady: true, tenantId: query.tenantId },
   });
 
-  const ids = result.ids?.[0] ?? [];
-  const docs = result.documents?.[0] ?? [];
-  const dists = result.distances?.[0] ?? [];
-  const metas = result.metadatas?.[0] ?? [];
+  const ids = result.results?.ids ?? [];
+  const docs = result.results?.documents ?? [];
+  const dists = result.results?.distances ?? [];
+  const metas = result.results?.metadatas ?? [];
 
   return ids.map((id, i) => {
     const meta = metas[i] ?? {};

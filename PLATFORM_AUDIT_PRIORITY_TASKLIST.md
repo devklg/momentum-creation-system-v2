@@ -70,7 +70,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 40. **Neo4j:** Create the Neo4j labels, relationships, and constraints catalog.
 - [x] 41. **Neo4j:** Add Neo4j constraint creation and migration scripts.
 - [x] 42. **Chroma:** Create the Chroma collection catalog by purpose, domain, language, source, and metadata contract.
-- [ ] 43. **Chroma:** Add Chroma metadata contract tests for canonical ids, tenant, domain, language, readiness, and source.
+- [x] 43. **Chroma:** Add Chroma metadata contract tests for canonical ids, tenant, domain, language, readiness, and source.
 - [ ] 44. **API:** Generate a current API route map from server/src/index.ts and route modules.
 - [ ] 45. **Security:** Generate a route access matrix covering auth, admin, Steve completion, and VM entitlement gates.
 - [ ] 46. **Security:** Add tests proving every admin route is protected by requireAdmin.
@@ -255,3 +255,4 @@ Use this section when assigning work to multiple agents. Keep the original numbe
 | 2026-07-11 | P1 Neo4j catalog | Codex | Closed item 40: added `server/scripts/generate-neo4j-catalog.mjs`, `pnpm catalog:neo4j`, `pnpm catalog:neo4j:check`, and generated `NEO4J_CATALOG.md` plus JSON. The catalog covers 68 labels, 59 relationships, 11 planned core constraints, and 7 declared Phase 7 constraints/indexes. | P1-41 Neo4j constraint creation and migration scripts remain open. |
 | 2026-07-11 | P1 Neo4j schema migrations | Codex | Closed item 41: added an app-persistence Neo4j schema migration planner, dry-run/apply/verify CLI commands, and tests proving idempotent planning, dry-run safety, dispatch execution, and name-based verification. | P1-42 Chroma collection catalog remains open. |
 | 2026-07-11 | P1 Chroma collection catalog | Codex | Closed item 42: added `server/scripts/generate-chroma-catalog.mjs`, `pnpm catalog:chroma`, `pnpm catalog:chroma:check`, and generated `CHROMA_COLLECTION_CATALOG.md` plus JSON. The catalog covers 50 registered collections, purpose/domain/language classifications, observed actions, metadata/filter keys, inferred required metadata contracts, and 7 observed unregistered/dynamic targets. | P1-43 Chroma metadata contract tests remain open. |
+| 2026-07-11 | P1 Chroma metadata contract tests | Codex | Closed item 43: added catalog-backed tests for canonical ids, tenant scope, domain, language, readiness, source lineage, review-only separation, and unregistered/dynamic Chroma target visibility. Also moved GraphRAG retrieval from unsupported `chromadb.query` to `query_with_filter`. | P1-44 API route map remains open. |
