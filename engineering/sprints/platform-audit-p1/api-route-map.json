@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T23:06:16.172Z",
+  "generatedAt": "2026-07-11T23:14:39.882Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,11 +8,11 @@
   "summary": {
     "mounts": 46,
     "routeFiles": 46,
-    "routes": 206,
+    "routes": 209,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 2,
-      "pre_gate": 131,
+      "pre_gate": 134,
       "ba_facing_gated": 72
     },
     "byAccessProfile": {
@@ -20,12 +20,12 @@
       "admin": 85,
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
-      "prospect_token": 15,
+      "prospect_token": 18,
       "ba_auth_steve_gated": 72
     },
     "byMethod": {
-      "POST": 85,
-      "GET": 101,
+      "POST": 86,
+      "GET": 103,
       "PUT": 6,
       "PATCH": 8,
       "DELETE": 6
@@ -3661,7 +3661,7 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/rvm.ts:90",
+      "source": "server/src/routes/rvm.ts:117",
       "routeSource": "server/src/routes/rvm.ts",
       "signals": {
         "requireAuth": false,
@@ -3685,7 +3685,7 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/rvm.ts:101",
+      "source": "server/src/routes/rvm.ts:128",
       "routeSource": "server/src/routes/rvm.ts",
       "signals": {
         "requireAuth": false,
@@ -3709,7 +3709,7 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/rvm.ts:112",
+      "source": "server/src/routes/rvm.ts:139",
       "routeSource": "server/src/routes/rvm.ts",
       "signals": {
         "requireAuth": false,
@@ -3733,7 +3733,79 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/rvm.ts:130",
+      "source": "server/src/routes/rvm.ts:157",
+      "routeSource": "server/src/routes/rvm.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/rvm/:token/stream",
+      "mountPath": "/api/rvm",
+      "localPath": "/:token/stream",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/rvm.ts:196",
+      "routeSource": "server/src/routes/rvm.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/rvm/:token/webinar-reserve",
+      "mountPath": "/api/rvm",
+      "localPath": "/:token/webinar-reserve",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/rvm.ts:252",
+      "routeSource": "server/src/routes/rvm.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/rvm/:token/team-stats",
+      "mountPath": "/api/rvm",
+      "localPath": "/:token/team-stats",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/rvm.ts:296",
       "routeSource": "server/src/routes/rvm.ts",
       "signals": {
         "requireAuth": false,
@@ -3757,7 +3829,7 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/rvm.ts:169",
+      "source": "server/src/routes/rvm.ts:316",
       "routeSource": "server/src/routes/rvm.ts",
       "signals": {
         "requireAuth": false,

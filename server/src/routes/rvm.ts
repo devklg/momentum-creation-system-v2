@@ -11,10 +11,14 @@ import { z } from 'zod';
 import type {
   McsCallbackIntent,
   McsCallbackRequestResponse,
+  McsHoldingTankSnapshot,
+  McsPlacementEvent,
   McsRvmInfoRequestResponse,
   McsRvmResolvedTokenPayload,
+  McsTeamStatsResponse,
   McsVideoEventKind,
   McsVideoEventResponse,
+  McsWebinarReservationResponse,
 } from '@momentum/shared';
 import {
   findTokenRecord,
@@ -24,10 +28,15 @@ import {
 import { findProspectById, lastInitialOf } from '../domain/prospects.js';
 import { findBAByTmagId } from '../domain/ba.js';
 import { findBulkLeadByToken } from '../domain/bulkLeads.js';
+import { buildHoldingTankSnapshot } from '../domain/holdingTank.js';
 import { createCallbackRequest } from '../domain/callbackRequest.js';
+import { findNextUpcomingEvent } from '../domain/webinarEvent.js';
+import { createWebinarReservation } from '../domain/webinarReservation.js';
+import { computeTeamStats } from '../domain/teamStats.js';
 import {
   applyCrmLifecycleEvent,
 } from '../domain/prospectCrm.js';
+import { subscribePlacements } from '../services/poolEvents.js';
 import {
   RvmTokenError,
   activateRvmLeadByToken,
@@ -36,6 +45,9 @@ import {
 } from '../domain/rvmTokens.js';
 
 export const rvmRoutes: Router = Router();
+
+const SSE_SNAPSHOT_RECENT_LIMIT = 40;
+const SSE_PING_INTERVAL_MS = 30_000;
 
 const VideoEventSchema = z.object({
   kind: z.enum(['started', 'quarter', 'half', 'three_quarter', 'complete']),
@@ -47,6 +59,11 @@ const CallbackSchema = z.object({
 
 const InfoSchema = z.object({
   note: z.string().max(600).optional(),
+});
+
+const WebinarReservationSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  email: z.string().trim().min(5).max(254).email(),
 });
 
 interface RvmRequestContext {
@@ -66,6 +83,16 @@ function sendRvmError(res: import('express').Response, err: unknown) {
   // eslint-disable-next-line no-console
   console.error('[rvm route] unexpected error', err);
   return res.status(500).json({ error: 'server_error' });
+}
+
+function sseFrame(event: string, data: unknown, id?: string): string {
+  const lines: string[] = [];
+  if (id) lines.push(`id: ${id}`);
+  lines.push(`event: ${event}`);
+  lines.push(`data: ${JSON.stringify(data)}`);
+  lines.push('');
+  lines.push('');
+  return lines.join('\n');
 }
 
 async function resolveRvmRequestContext(token: string): Promise<RvmRequestContext> {
@@ -159,6 +186,126 @@ rvmRoutes.post('/:token/callback-request', async (req, res) => {
       intent: parsed.data.intent as McsCallbackIntent,
       baFirstName: ctx.ba.firstName,
       createdAt: result.createdAt,
+    };
+    return res.status(200).json(body);
+  } catch (err) {
+    return sendRvmError(res, err);
+  }
+});
+
+rvmRoutes.get('/:token/stream', async (req, res) => {
+  const token = req.params.token ?? '';
+  if (token.length < 4) return res.status(404).json({ error: 'invalid_token' });
+
+  try {
+    await resolveRvmRequestContext(token);
+  } catch (err) {
+    return sendRvmError(res, err);
+  }
+
+  res.status(200);
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders?.();
+
+  try {
+    const snapshot: McsHoldingTankSnapshot = await buildHoldingTankSnapshot(
+      SSE_SNAPSHOT_RECENT_LIMIT,
+    );
+    res.write(sseFrame('snapshot', snapshot));
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[GET /api/rvm/:token/stream] snapshot failed', err);
+    res.write(`: snapshot_error ${(err as Error).message}\n\n`);
+    res.end();
+    return;
+  }
+
+  const sub = subscribePlacements((event: McsPlacementEvent) => {
+    try {
+      res.write(sseFrame('placement', event, event.eventId));
+    } catch {
+      // close handlers below clean up the subscription
+    }
+  });
+
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(`: ping ${Date.now()}\n\n`);
+    } catch {
+      // close handlers below clean up the subscription
+    }
+  }, SSE_PING_INTERVAL_MS);
+
+  const teardown = () => {
+    clearInterval(heartbeat);
+    sub.unsubscribe();
+  };
+  req.on('close', teardown);
+  req.on('aborted', teardown);
+  res.on('close', teardown);
+  return;
+});
+
+rvmRoutes.post('/:token/webinar-reserve', async (req, res) => {
+  const token = req.params.token ?? '';
+  if (token.length < 4) return res.status(404).json({ error: 'invalid_token' });
+  const parsed = WebinarReservationSchema.safeParse(req.body);
+  if (!parsed.success) {
+    const invalidEmail = parsed.error.issues.some((issue) => issue.path.join('.') === 'email');
+    return res.status(400).json({ error: invalidEmail ? 'invalid_email' : 'invalid_name' });
+  }
+
+  try {
+    const ctx = await resolveRvmRequestContext(token);
+    const nextEvent = await findNextUpcomingEvent();
+    if (!nextEvent) return res.status(404).json({ error: 'no_upcoming_event' });
+
+    const result = await createWebinarReservation({
+      token: ctx.tokenRecord.token,
+      prospectId: ctx.prospect.prospectId,
+      prospectFirstName: ctx.prospect.firstName,
+      prospectLastInitial: ctx.prospect.lastInitial || lastInitialOf(ctx.prospect.lastName),
+      sponsorTmagId: ctx.tokenRecord.sponsorTmagId,
+      baFirstName: ctx.ba.firstName,
+      baPhone: ctx.ba.phone || null,
+      eventId: nextEvent.eventId,
+      scheduledFor: nextEvent.scheduledFor,
+      zoomUrl: nextEvent.zoomUrl ?? null,
+      name: parsed.data.name,
+      email: parsed.data.email,
+    });
+
+    const body: McsWebinarReservationResponse = {
+      ok: true,
+      reservationId: result.reservationId,
+      eventId: nextEvent.eventId,
+      scheduledFor: nextEvent.scheduledFor,
+      baFirstName: ctx.ba.firstName,
+      emailSent: result.emailDeliveryStatus === 'sent',
+      createdAt: result.createdAt,
+    };
+    return res.status(200).json(body);
+  } catch (err) {
+    return sendRvmError(res, err);
+  }
+});
+
+rvmRoutes.get('/:token/team-stats', async (req, res) => {
+  const token = req.params.token ?? '';
+  if (token.length < 4) return res.status(404).json({ error: 'invalid_token' });
+
+  try {
+    await resolveRvmRequestContext(token);
+    const stats = await computeTeamStats();
+    const body: McsTeamStatsResponse = {
+      basActive24h: stats.basActive24h,
+      invitationsSentToday: stats.invitationsSentToday,
+      newPlacements24h: stats.newPlacements24h,
+      recruitmentVelocityPct: stats.recruitmentVelocityPct,
+      computedAt: stats.computedAt,
     };
     return res.status(200).json(body);
   } catch (err) {

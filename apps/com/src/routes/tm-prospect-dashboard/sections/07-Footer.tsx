@@ -19,6 +19,8 @@
  * (3.8) and the compliance language (3.10) reinforce each other.
  */
 
+import { MCS_COM_DISCLAIMER } from '@momentum/shared';
+
 export function DashboardFooter() {
   return (
     <>
@@ -35,13 +37,7 @@ export function DashboardFooter() {
         <div className="tmpd-footer-tagline">
           We build people before we build volume.
         </div>
-        <div className="tmpd-footer-disclaimer">
-          Queue positions and momentum displays demonstrate team activity in
-          real time and do not guarantee any final placement, compensation, or
-          earnings outcome. Market figures cited from public sources are for
-          context only. This page contains no income claims, placement
-          promises, or guarantees of any kind.
-        </div>
+        <div className="tmpd-footer-disclaimer">{MCS_COM_DISCLAIMER}</div>
       </footer>
       <style>{footerCss}</style>
     </>

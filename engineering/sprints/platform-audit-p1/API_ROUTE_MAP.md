@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-11T23:06:16.172Z
+- Generated: 2026-07-11T23:14:39.882Z
 - Mounted routers: 46
 - Route files: 46
-- Static route rows: 206
+- Static route rows: 209
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
 | ba_facing_gated | 72 |
-| pre_gate | 131 |
+| pre_gate | 134 |
 | pre_json_admin_body_limit | 2 |
 | raw_body_before_json | 1 |
 
@@ -26,7 +26,7 @@
 | ba_auth_steve_gated | 72 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
-| prospect_token | 15 |
+| prospect_token | 18 |
 | raw_body_webhook | 1 |
 
 ## Routes By Method
@@ -34,9 +34,9 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 6 |
-| GET | 101 |
+| GET | 103 |
 | PATCH | 8 |
-| POST | 85 |
+| POST | 86 |
 | PUT | 6 |
 
 ## Mounts
@@ -218,11 +218,14 @@
 | GET | `/api/p/:token/stream` | pre_gate | prospect_token | none | `server/src/routes/p.ts:689` |
 | POST | `/api/p/:token/webinar-reserve` | pre_gate | prospect_token | none | `server/src/routes/p.ts:812` |
 | GET | `/api/p/:token/team-stats` | pre_gate | prospect_token | none | `server/src/routes/p.ts:912` |
-| GET | `/api/rvm/:token` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:90` |
-| POST | `/api/rvm/:token/activate` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:101` |
-| POST | `/api/rvm/:token/video-event` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:112` |
-| POST | `/api/rvm/:token/callback-request` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:130` |
-| POST | `/api/rvm/:token/info-request` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:169` |
+| GET | `/api/rvm/:token` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:117` |
+| POST | `/api/rvm/:token/activate` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:128` |
+| POST | `/api/rvm/:token/video-event` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:139` |
+| POST | `/api/rvm/:token/callback-request` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:157` |
+| GET | `/api/rvm/:token/stream` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:196` |
+| POST | `/api/rvm/:token/webinar-reserve` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:252` |
+| GET | `/api/rvm/:token/team-stats` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:296` |
+| POST | `/api/rvm/:token/info-request` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:316` |
 | GET | `/api/vm/provider/status` | pre_gate | pre_gate_or_public | admin | `server/src/routes/vmProviderWebhooks.ts:52` |
 | POST | `/api/vm/provider/manual-csv/import` | pre_gate | pre_gate_or_public | admin | `server/src/routes/vmProviderWebhooks.ts:62` |
 | POST | `/api/vm/provider/manual-csv/import.csv` | pre_gate | pre_gate_or_public | admin | `server/src/routes/vmProviderWebhooks.ts:81` |
