@@ -1,0 +1,682 @@
+{
+  "generatedAt": "2026-07-11T16:31:31.359Z",
+  "sources": [
+    "docs/app-data-model-contract.md §9",
+    "engineering/sprints/platform-audit-p1/mongo-ownership-map.json",
+    "server/src/domain/vmSchemas.ts",
+    "server/src/runtime/knowledge-evolution/persistence/indexes.ts"
+  ],
+  "currentAudit": {
+    "generalEnsureIndexes": "not_present",
+    "knowledgeEvolutionEnsureIndexes": "present_for_knowledge_evolution_only",
+    "vmIndexDefinitions": "declared_in_schema_registry_not_generally_applied"
+  },
+  "indexCount": 46,
+  "byStatus": {
+    "planned_missing_enforcement": 40,
+    "vm_registry_declared": 6
+  },
+  "highVolumeWithoutPlan": [],
+  "indexes": [
+    {
+      "collection": "team_magnificent_members",
+      "name": "unique_tmagId",
+      "keys": {
+        "tmagId": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "Canonical BA login/member id.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "membership_identity",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "team_magnificent_members",
+      "name": "unique_email",
+      "keys": {
+        "email": 1
+      },
+      "options": {
+        "unique": true,
+        "sparse": true
+      },
+      "rationale": "Admin/member lookup by email.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "membership_identity",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "team_magnificent_members",
+      "name": "unique_threeBaId",
+      "keys": {
+        "threeBaId": 1
+      },
+      "options": {
+        "unique": true,
+        "sparse": true
+      },
+      "rationale": "THREE id mirror should not duplicate.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "membership_identity",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "team_magnificent_members",
+      "name": "sponsor_createdAt",
+      "keys": {
+        "sponsorTmagId": 1,
+        "createdAt": -1
+      },
+      "options": {},
+      "rationale": "Downline listing.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "membership_identity",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "team_magnificent_members",
+      "name": "lastLoginAt",
+      "keys": {
+        "lastLoginAt": -1
+      },
+      "options": {},
+      "rationale": "Admin activity review.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "membership_identity",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_access_codes",
+      "name": "unique_code",
+      "keys": {
+        "code": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "Access codes are one-per-BA reusable keys.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "membership_identity",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_access_codes",
+      "name": "sponsorTmagId",
+      "keys": {
+        "sponsorTmagId": 1
+      },
+      "options": {},
+      "rationale": "Admin code lookup by owner.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "membership_identity",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_prospects",
+      "name": "unique_prospectId",
+      "keys": {
+        "prospectId": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "Prospect canonical id.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospects",
+      "name": "sponsor_state_createdAt",
+      "keys": {
+        "sponsorTmagId": 1,
+        "state": 1,
+        "createdAt": -1
+      },
+      "options": {},
+      "rationale": "BA cockpit prospect list.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospects",
+      "name": "expiresAt",
+      "keys": {
+        "expiresAt": 1
+      },
+      "options": {},
+      "rationale": "Expiry/lazy flush lookups.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospect_invite_tokens",
+      "name": "unique_token",
+      "keys": {
+        "token": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "Token resolver.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospect_invite_tokens",
+      "name": "prospectId",
+      "keys": {
+        "prospectId": 1
+      },
+      "options": {},
+      "rationale": "Token/prospect join.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospect_invite_tokens",
+      "name": "sponsor_state",
+      "keys": {
+        "sponsorTmagId": 1,
+        "state": 1
+      },
+      "options": {},
+      "rationale": "Sponsor token state scans.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospect_invite_tokens",
+      "name": "expiresAt",
+      "keys": {
+        "expiresAt": 1
+      },
+      "options": {},
+      "rationale": "Token expiry checks.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospect_htank_placements",
+      "name": "unique_prospectId",
+      "keys": {
+        "prospectId": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "One placement per prospect.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_htank_placements",
+      "name": "unique_positionNumber",
+      "keys": {
+        "positionNumber": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "Monotonic team pool position.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_htank_placements",
+      "name": "expires_flushed",
+      "keys": {
+        "expiresAt": 1,
+        "flushedAt": 1
+      },
+      "options": {},
+      "rationale": "Flush sweep.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_htank_placements",
+      "name": "sponsor_placedAt",
+      "keys": {
+        "sponsorTmagId": 1,
+        "placedAt": -1
+      },
+      "options": {},
+      "rationale": "Sponsor pool history.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_htank_accounts",
+      "name": "unique_accountId",
+      "keys": {
+        "accountId": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "Prospect account id.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_htank_accounts",
+      "name": "unique_tokenId",
+      "keys": {
+        "tokenId": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "One account per invite token.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_htank_accounts",
+      "name": "phoneHash",
+      "keys": {
+        "phoneHash": 1
+      },
+      "options": {},
+      "rationale": "Prospect re-entry by phone hash.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_magic_links",
+      "name": "unique_linkToken",
+      "keys": {
+        "linkToken": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "Magic-link redemption.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_magic_links",
+      "name": "account_expires",
+      "keys": {
+        "accountId": 1,
+        "expiresAt": 1
+      },
+      "options": {},
+      "rationale": "Account-scoped link validity.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_callback_requests",
+      "name": "prospect_createdAt",
+      "keys": {
+        "prospectId": 1,
+        "createdAt": -1
+      },
+      "options": {},
+      "rationale": "Prospect callback history.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospect_callback_requests",
+      "name": "sponsor_createdAt",
+      "keys": {
+        "sponsorTmagId": 1,
+        "createdAt": -1
+      },
+      "options": {},
+      "rationale": "BA callback queue.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospect_webinar_reservations",
+      "name": "prospect_createdAt",
+      "keys": {
+        "prospectId": 1,
+        "createdAt": -1
+      },
+      "options": {},
+      "rationale": "Prospect webinar history.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_invitation_activity",
+      "name": "prospect_at",
+      "keys": {
+        "prospectId": 1,
+        "at": -1
+      },
+      "options": {},
+      "rationale": "Invitation activity timeline.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospect_crm_records",
+      "name": "unique_crmRecordId",
+      "keys": {
+        "crmRecordId": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "CRM record id.",
+      "status": "vm_registry_declared",
+      "ownerId": "prospect_crm",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_prospect_crm_records",
+      "name": "unique_owner_prospect",
+      "keys": {
+        "ownerTmagId": 1,
+        "prospectId": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "One active owner/prospect CRM row.",
+      "status": "vm_registry_declared",
+      "ownerId": "prospect_crm",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_prospect_crm_records",
+      "name": "owner_status_followup",
+      "keys": {
+        "ownerTmagId": 1,
+        "status": 1,
+        "followUpDueAt": 1
+      },
+      "options": {},
+      "rationale": "BA follow-up queue.",
+      "status": "vm_registry_declared",
+      "ownerId": "prospect_crm",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_prospect_crm_notes",
+      "name": "prospect_createdAt",
+      "keys": {
+        "prospectId": 1,
+        "createdAt": -1
+      },
+      "options": {},
+      "rationale": "CRM notes timeline.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_crm",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_prospect_crm_followups",
+      "name": "dueAt_status",
+      "keys": {
+        "dueAt": 1,
+        "status": 1
+      },
+      "options": {},
+      "rationale": "Due follow-up sweep.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_crm",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_prospect_crm_followups",
+      "name": "prospect_dueAt",
+      "keys": {
+        "prospectId": 1,
+        "dueAt": 1
+      },
+      "options": {},
+      "rationale": "Prospect follow-up history.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "prospect_crm",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "mcs_audit_log",
+      "name": "timestamp",
+      "keys": {
+        "timestamp": -1
+      },
+      "options": {},
+      "rationale": "Admin audit log chronological view.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "operations_governance",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system"
+    },
+    {
+      "collection": "mcs_audit_log",
+      "name": "severity_timestamp",
+      "keys": {
+        "severity": 1,
+        "timestamp": -1
+      },
+      "options": {},
+      "rationale": "Audit severity filtering.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "operations_governance",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system"
+    },
+    {
+      "collection": "mcs_audit_log",
+      "name": "entity",
+      "keys": {
+        "entity.kind": 1,
+        "entity.id": 1,
+        "timestamp": -1
+      },
+      "options": {},
+      "rationale": "Entity audit drill-down.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "operations_governance",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system"
+    },
+    {
+      "collection": "tmag_projection_outbox",
+      "name": "status_nextAttemptAt",
+      "keys": {
+        "status": 1,
+        "nextAttemptAt": 1
+      },
+      "options": {},
+      "rationale": "Projection retry worker due-row scan.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "operations_governance",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system"
+    },
+    {
+      "collection": "tmag_projection_outbox",
+      "name": "entityId",
+      "keys": {
+        "entityId": 1
+      },
+      "options": {},
+      "rationale": "Trace pending projections for a source record.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "operations_governance",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system"
+    },
+    {
+      "collection": "broadcast_recipients",
+      "name": "broadcast_status",
+      "keys": {
+        "broadcastId": 1,
+        "status": 1
+      },
+      "options": {},
+      "rationale": "Broadcast reconciliation.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "broadcast_delivery",
+      "steward": "Broadcast domain",
+      "primarySurface": "admin + workers"
+    },
+    {
+      "collection": "broadcast_recipients",
+      "name": "status_queuedAt",
+      "keys": {
+        "status": 1,
+        "queuedAt": 1
+      },
+      "options": {},
+      "rationale": "Broadcast worker queue.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "broadcast_delivery",
+      "steward": "Broadcast domain",
+      "primarySurface": "admin + workers"
+    },
+    {
+      "collection": "broadcast_optouts",
+      "name": "unique_ba_channel",
+      "keys": {
+        "baId": 1,
+        "channel": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "STOP-list uniqueness.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "broadcast_delivery",
+      "steward": "Broadcast domain",
+      "primarySurface": "admin + workers"
+    },
+    {
+      "collection": "tmag_vm_lead_owners",
+      "name": "unique_leadOwnerId",
+      "keys": {
+        "leadOwnerId": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "VM owner id.",
+      "status": "vm_registry_declared",
+      "ownerId": "vm_rvm",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers"
+    },
+    {
+      "collection": "tmag_vm_bulk_leads",
+      "name": "unique_leadId",
+      "keys": {
+        "leadId": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "VM lead id.",
+      "status": "vm_registry_declared",
+      "ownerId": "vm_rvm",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers"
+    },
+    {
+      "collection": "tmag_vm_campaigns",
+      "name": "unique_vmCampaignId",
+      "keys": {
+        "vmCampaignId": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "VM campaign id.",
+      "status": "vm_registry_declared",
+      "ownerId": "vm_rvm",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers"
+    },
+    {
+      "collection": "tmag_vm_queue_jobs",
+      "name": "status_nextAttemptAt",
+      "keys": {
+        "status": 1,
+        "nextAttemptAt": 1
+      },
+      "options": {},
+      "rationale": "VM provider queue due-row scan.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "vm_rvm",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers"
+    },
+    {
+      "collection": "tmag_vm_provider_webhook_events",
+      "name": "provider_event",
+      "keys": {
+        "provider": 1,
+        "providerEventId": 1
+      },
+      "options": {},
+      "rationale": "Provider webhook idempotency plan.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "vm_rvm",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers"
+    }
+  ]
+}
