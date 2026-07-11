@@ -10,6 +10,7 @@
 import { randomBytes } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeKnowledge } from '../services/tieredWrite.js';
 import type {
   McsAuditActor,
   McsTenantComplianceIssue,
@@ -458,7 +459,7 @@ export async function saveTenantTemplate(input: {
     reason: input.reason,
   };
 
-  await tripleStackWrite({
+  await writeKnowledge({
     id: after.templateVersionId,
     mongoCollection: TEMPLATE_COLLECTION,
     mongoDoc: after as unknown as Record<string, unknown>,

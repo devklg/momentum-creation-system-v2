@@ -26,7 +26,7 @@ import type {
   McsCreateAgentEventPayload,
   McsProspectFocusQueueItem,
 } from '@momentum/shared';
-import { tripleStackWrite } from '../../services/tripleStack.js';
+import { writeKnowledge } from '../../services/tieredWrite.js';
 import {
   getCockpitTodaysActions,
   getProspectMomentumViewer,
@@ -296,7 +296,7 @@ export async function recordAgentEvent(
   };
 
   const agentEventsCollection = `tmag_agent_${event.agentId}_events`;
-  await tripleStackWrite({
+  await writeKnowledge({
     id: eventId,
     mongoCollection: agentEventsCollection,
     mongoDoc: { ...event },

@@ -5,11 +5,11 @@ import type { McsGraphRagInput, McsGraphRagQuery } from '@momentum/shared';
 
 const mocks = vi.hoisted(() => ({
   persistenceCall: vi.fn(),
-  tripleStackWrite: vi.fn(),
+  writeKnowledge: vi.fn(),
 }));
 
 vi.mock('../../services/persistence/dispatch.js', () => ({ persistenceCall: mocks.persistenceCall }));
-vi.mock('../../services/tripleStack.js', () => ({ tripleStackWrite: mocks.tripleStackWrite }));
+vi.mock('../../services/tieredWrite.js', () => ({ writeKnowledge: mocks.writeKnowledge }));
 
 type AnyRec = Record<string, unknown>;
 
@@ -47,7 +47,7 @@ function retrievalQuery(overrides: Partial<McsGraphRagQuery> = {}): McsGraphRagQ
 
 beforeEach(() => {
   mocks.persistenceCall.mockReset();
-  mocks.tripleStackWrite.mockReset();
+  mocks.writeKnowledge.mockReset();
 });
 
 afterEach(() => {
@@ -61,7 +61,7 @@ describe('Phase 7 R3 — canary gate', () => {
     expect(m.graphRagPersistenceEnabled()).toBe(false);
     expect(await m.appendGraphRagRecord(writeInput())).toBeNull();
     expect(await m.retrieveGraphRag(retrievalQuery())).toEqual([]);
-    expect(mocks.tripleStackWrite).not.toHaveBeenCalled();
+    expect(mocks.writeKnowledge).not.toHaveBeenCalled();
     expect(mocks.persistenceCall).not.toHaveBeenCalled();
   });
 });
@@ -80,7 +80,7 @@ describe('Phase 7 R3 — active-collection routing + isolation', () => {
 
     expect(record.model).toBe('all-MiniLM-L6-v2');
     expect(record.modelVersion).toBe('minilm-2026-06');
-    const call = mocks.tripleStackWrite.mock.calls[0]![0] as AnyRec;
+    const call = mocks.writeKnowledge.mock.calls[0]![0] as AnyRec;
     expect(call.mongoCollection).toBe('mcs_graphrag_records');
     expect((call.chroma as AnyRec).collection).toBe('mcs_performance_knowledge_en');
     expect(((call.chroma as AnyRec).metadata as AnyRec).retrievalReady).toBe(true);

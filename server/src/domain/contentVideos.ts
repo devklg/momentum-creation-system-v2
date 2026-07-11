@@ -5,13 +5,13 @@
  * Chroma mirror: mcs_content_videos
  * Neo4j node: TmagContentVideo
  *
- * Create goes through tripleStackWrite. Updates/reorders fan out directly to
- * Mongo + Neo4j + Chroma because tripleStackWrite is insert-only.
+ * Create goes through the knowledge-tier writer. Updates/reorders fan out
+ * directly to Mongo + Neo4j + Chroma because the shared writer is insert-only.
  */
 
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeKnowledge } from '../services/tieredWrite.js';
 import type {
   McsContentVideoAudience,
   McsContentVideoRecord,
@@ -160,7 +160,7 @@ export async function createContentVideo(args: {
     updatedByTmagId: args.actor.tmagId,
   };
 
-  await tripleStackWrite({
+  await writeKnowledge({
     id: contentVideoId,
     mongoCollection: COLLECTION,
     mongoDoc: doc as unknown as Record<string, unknown>,

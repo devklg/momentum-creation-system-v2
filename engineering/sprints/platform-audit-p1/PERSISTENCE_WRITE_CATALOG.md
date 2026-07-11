@@ -6,10 +6,10 @@
 
 ## Summary
 
-- Generated: 2026-07-11T15:35:51.891Z
-- Production `tripleStackWrite` call sites: 35
+- Generated: 2026-07-11T15:40:13.160Z
+- Production `tripleStackWrite` call sites: 18
 - Graph-critical: 0
-- Knowledge: 17
+- Knowledge: 0
 - Operational: 18
 - Excludes tests/spec files. Includes `server/src/**/*.ts` and `server/scripts/**/*.ts`.
 
@@ -25,36 +25,19 @@
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | operational | delivery_and_reservations | `server/scripts/seed-webinar-events.ts:130` | `main` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
 | 2 | operational | governance_records | `server/src/domain/adminProspectOversight.ts:781` | `appendProspectNote` | `COLL_NOTES` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
-| 3 | operational | governance_records | `server/src/domain/adminTenantArchitecture.ts:364` | `saveTenantSettings` | `SETTINGS_COLLECTION` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
-| 4 | knowledge | content_governance | `server/src/domain/adminTenantArchitecture.ts:461` | `saveTenantTemplate` | `TEMPLATE_COLLECTION` | yes | yes | Master content, content videos, and tenant templates shape governed retrieval and generated copy. |
-| 5 | knowledge | agent_context | `server/src/domain/agents/orchestrator.ts:299` | `recordAgentEvent` | `agentEventsCollection` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
-| 6 | operational | audit_controls | `server/src/domain/auditLog.ts:143` | `appendAuditEntry` | `COLLECTION` | yes | yes | Audit entries must persist, while graph/search projections can lag through the outbox. |
-| 7 | operational | audit_controls | `server/src/domain/auditLog.ts:399` | `appendRuntimeAuditEntry` | `COLLECTION` | yes | yes | Audit entries must persist, while graph/search projections can lag through the outbox. |
-| 8 | operational | delivery_and_reservations | `server/src/domain/broadcast.ts:438` | `enqueueBroadcast` | `COLL_BROADCASTS` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 9 | operational | delivery_and_reservations | `server/src/domain/broadcast.ts:582` | `prepareSendTest` | `COLL_BROADCASTS` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 10 | operational | delivery_and_reservations | `server/src/domain/callbackRequest.ts:120` | `createCallbackRequest` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 11 | operational | governance_records | `server/src/domain/commitments.ts:51` | `recordCommitment` | `'tmag_commitments'` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
-| 12 | knowledge | content_governance | `server/src/domain/contentVideos.ts:163` | `createContentVideo` | `COLLECTION` | yes | yes | Master content, content videos, and tenant templates shape governed retrieval and generated copy. |
-| 13 | knowledge | crm_behavioral_trail | `server/src/domain/crm.ts:157` | `addNote` | `NOTES_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
-| 14 | knowledge | crm_behavioral_trail | `server/src/domain/crm.ts:261` | `setFollowUp` | `FOLLOWUPS_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
-| 15 | knowledge | crm_behavioral_trail | `server/src/domain/crm.ts:390` | `setDisposition` | `DISPOSITIONS_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
-| 16 | knowledge | crm_behavioral_trail | `server/src/domain/crm.ts:687` | `appendActivity` | `ACTIVITY_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
-| 17 | knowledge | crm_behavioral_trail | `server/src/domain/generator.ts:151` | `createGeneratorRun` | `RUNS_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
-| 18 | knowledge | approved_knowledge | `server/src/domain/graphrag.ts:127` | `appendGraphRagRecord` | `MONGO_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
-| 19 | knowledge | crm_behavioral_trail | `server/src/domain/invitations.ts:344` | `appendActivity` | `ACTIVITY_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
-| 20 | knowledge | approved_knowledge | `server/src/domain/learningCandidates.ts:158` | `appendLearningCandidate` | `COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
-| 21 | operational | delivery_and_reservations | `server/src/domain/orientationSession.ts:332` | `createOrientationSession` | `SESSIONS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 22 | operational | delivery_and_reservations | `server/src/domain/orientationSession.ts:448` | `reserveSeat` | `RESERVATIONS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 23 | operational | governance_records | `server/src/domain/outcomes.ts:184` | `appendOutcome` | `COLLECTION` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
-| 24 | operational | prospect_access | `server/src/domain/prospectAccount.ts:238` | `createProspectAccount` | `MONGO_COLLECTION` | yes | yes | Prospect accounts and magic links are credentials/session operations; Mongo commit is the success boundary. |
-| 25 | knowledge | crm_behavioral_trail | `server/src/domain/prospectCrm.ts:221` | `appendProspectTimelineEvent` | `TIMELINE_COLLECTION` | yes | yes | CRM notes, follow-ups, dispositions, activities, and prospect CRM records are agent-learning trail. |
-| 26 | operational | prospect_access | `server/src/domain/prospectMagicLink.ts:168` | `issueLinksForPhone` | `MONGO_COLLECTION` | yes | yes | Prospect accounts and magic links are credentials/session operations; Mongo commit is the success boundary. |
-| 27 | knowledge | agent_context | `server/src/domain/questionnaire.ts:203` | `recordQuestionnaire` | `'tmag_questionnaires'` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
-| 28 | knowledge | agent_context | `server/src/domain/recruitingCycle.ts:305` | `emitMichaelEvent` | `MICHAEL_EVENTS_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
-| 29 | knowledge | agent_context | `server/src/domain/recruitingCycle.ts:407` | `createRecruitingCycle` | `CYCLES_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
-| 30 | knowledge | agent_context | `server/src/domain/steve-success-interview.ts:617` | `ingestDiscoveryArtifact` | `DISCOVERIES_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
-| 31 | operational | delivery_and_reservations | `server/src/domain/threeWayCalls.ts:421` | `setMyThreeWayAvailability` | `AVAILABILITY_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 32 | operational | delivery_and_reservations | `server/src/domain/threeWayCalls.ts:576` | `createThreeWayBooking` | `BOOKINGS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 33 | knowledge | agent_context | `server/src/domain/training.ts:231` | `markFastStartModuleState` | `PROGRESS_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
-| 34 | operational | delivery_and_reservations | `server/src/domain/vmCampaigns.ts:69` | `createVMCampaign` | `COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
-| 35 | operational | delivery_and_reservations | `server/src/domain/webinarReservation.ts:191` | `createWebinarReservation` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 3 | operational | governance_records | `server/src/domain/adminTenantArchitecture.ts:365` | `saveTenantSettings` | `SETTINGS_COLLECTION` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
+| 4 | operational | audit_controls | `server/src/domain/auditLog.ts:143` | `appendAuditEntry` | `COLLECTION` | yes | yes | Audit entries must persist, while graph/search projections can lag through the outbox. |
+| 5 | operational | audit_controls | `server/src/domain/auditLog.ts:399` | `appendRuntimeAuditEntry` | `COLLECTION` | yes | yes | Audit entries must persist, while graph/search projections can lag through the outbox. |
+| 6 | operational | delivery_and_reservations | `server/src/domain/broadcast.ts:438` | `enqueueBroadcast` | `COLL_BROADCASTS` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 7 | operational | delivery_and_reservations | `server/src/domain/broadcast.ts:582` | `prepareSendTest` | `COLL_BROADCASTS` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 8 | operational | delivery_and_reservations | `server/src/domain/callbackRequest.ts:120` | `createCallbackRequest` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 9 | operational | governance_records | `server/src/domain/commitments.ts:51` | `recordCommitment` | `'tmag_commitments'` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
+| 10 | operational | delivery_and_reservations | `server/src/domain/orientationSession.ts:332` | `createOrientationSession` | `SESSIONS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 11 | operational | delivery_and_reservations | `server/src/domain/orientationSession.ts:448` | `reserveSeat` | `RESERVATIONS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 12 | operational | governance_records | `server/src/domain/outcomes.ts:184` | `appendOutcome` | `COLLECTION` | yes | yes | Commitments, outcomes, tenant settings, and admin notes are operational/governance records. |
+| 13 | operational | prospect_access | `server/src/domain/prospectAccount.ts:238` | `createProspectAccount` | `MONGO_COLLECTION` | yes | yes | Prospect accounts and magic links are credentials/session operations; Mongo commit is the success boundary. |
+| 14 | operational | prospect_access | `server/src/domain/prospectMagicLink.ts:168` | `issueLinksForPhone` | `MONGO_COLLECTION` | yes | yes | Prospect accounts and magic links are credentials/session operations; Mongo commit is the success boundary. |
+| 15 | operational | delivery_and_reservations | `server/src/domain/threeWayCalls.ts:421` | `setMyThreeWayAvailability` | `AVAILABILITY_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 16 | operational | delivery_and_reservations | `server/src/domain/threeWayCalls.ts:576` | `createThreeWayBooking` | `BOOKINGS_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 17 | operational | delivery_and_reservations | `server/src/domain/vmCampaigns.ts:69` | `createVMCampaign` | `COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |
+| 18 | operational | delivery_and_reservations | `server/src/domain/webinarReservation.ts:191` | `createWebinarReservation` | `MONGO_COLLECTION` | yes | yes | Callbacks, webinars, orientation, broadcasts, VM queue, and delivery events are operational flows. |

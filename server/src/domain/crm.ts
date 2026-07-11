@@ -36,7 +36,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeKnowledge } from '../services/tieredWrite.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 import { writeProspectTokenGraphCritical } from './tokenLifecyclePersistence.js';
 import { findBAByTmagId } from './ba.js';
@@ -154,7 +154,7 @@ export async function addNote(
     createdAt,
   };
 
-  await tripleStackWrite({
+  await writeKnowledge({
     id: noteId,
     mongoCollection: NOTES_COLLECTION,
     mongoDoc: { ...record },
@@ -258,7 +258,7 @@ export async function setFollowUp(
     clearedAt: null,
   };
 
-  await tripleStackWrite({
+  await writeKnowledge({
     id: followUpId,
     mongoCollection: FOLLOWUPS_COLLECTION,
     mongoDoc: { followUpId, ...record },
@@ -387,7 +387,7 @@ export async function setDisposition(
     disposition,
     updatedAt: now,
   };
-  await tripleStackWrite({
+  await writeKnowledge({
     id: dispoId,
     mongoCollection: DISPOSITIONS_COLLECTION,
     mongoDoc: { ...record },
@@ -684,7 +684,7 @@ async function appendActivity(entry: {
   at: string;
 }): Promise<void> {
   const activityId = `invact_${randomUUID()}`;
-  await tripleStackWrite({
+  await writeKnowledge({
     id: activityId,
     mongoCollection: ACTIVITY_COLLECTION,
     mongoDoc: {

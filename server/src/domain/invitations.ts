@@ -43,8 +43,7 @@
 import { randomUUID, randomInt } from 'node:crypto';
 import { env } from '../env.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { writeGraphCritical } from '../services/tieredWrite.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeGraphCritical, writeKnowledge } from '../services/tieredWrite.js';
 import { createProspectAccount, normalizePhone } from './prospectAccount.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
@@ -341,7 +340,7 @@ async function appendActivity(entry: {
   at: string;
 }): Promise<string> {
   const activityId = `invact_${randomUUID()}`;
-  await tripleStackWrite({
+  await writeKnowledge({
     id: activityId,
     mongoCollection: ACTIVITY_COLLECTION,
     mongoDoc: {

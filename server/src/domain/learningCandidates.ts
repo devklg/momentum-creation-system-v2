@@ -25,7 +25,7 @@
 import { createHash } from 'node:crypto';
 import { env } from '../env.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeKnowledge } from '../services/tieredWrite.js';
 import type {
   McsLearningCandidateInput,
   McsLearningCandidateReview,
@@ -155,7 +155,7 @@ export async function appendLearningCandidate(
     supersedesCandidateId: input.supersedesCandidateId ?? null,
   };
 
-  await tripleStackWrite({
+  await writeKnowledge({
     id,
     mongoCollection: COLLECTION,
     mongoDoc: { ...record, _id: undefined } as Record<string, unknown>,

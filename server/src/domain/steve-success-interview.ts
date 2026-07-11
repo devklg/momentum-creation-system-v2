@@ -20,9 +20,8 @@
  * makes earnings claims, commissions projections, cycle math, or placement/
  * queue promises. The BA's own goals may be captured faithfully.
  *
- * Persistence: the existing tripleStackWrite pattern — MongoDB (operational
- * source of truth) + Neo4j (relationships) + ChromaDB (semantic memory) in one
- * logical write, with a Mongo read-back to confirm the row landed.
+ * Persistence: knowledge-tier write - MongoDB source of truth plus durable
+ * Neo4j relationship and Chroma semantic-memory projections.
  */
 
 import type {
@@ -38,7 +37,7 @@ import type {
   McsSteveTranscriptChunk,
 } from '@momentum/shared';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeKnowledge } from '../services/tieredWrite.js';
 
 /** Provenance literal stamped on Steve artifacts. */
 export const STEVE_SIGNED_BY = 'Steve Success · New BA Discovery & Success Interview';
@@ -614,7 +613,7 @@ export async function ingestDiscoveryArtifact(
   } else {
     try {
       await ensureDiscoveriesCollection();
-      await tripleStackWrite({
+      await writeKnowledge({
         id,
         mongoCollection: DISCOVERIES_COLLECTION,
         mongoDoc: { ...artifact },

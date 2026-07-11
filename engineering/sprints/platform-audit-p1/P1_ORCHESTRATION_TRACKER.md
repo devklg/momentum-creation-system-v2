@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-graph-critical-sweep`
+Latest branch: `codex/platform-audit-p1-knowledge-record-sweep`
 
 Closed in this tranche:
 
@@ -30,6 +30,7 @@ Closed in this tranche:
   `writeKnowledge`.
 - P1-30: moved all remaining graph-critical records to `writeGraphCritical`
   with rollback/readback expectations.
+- P1-31: moved all remaining knowledge-tier records to `writeKnowledge`.
 
 Catalog artifacts:
 
@@ -42,9 +43,9 @@ Inventory result:
 | Tier | Count |
 | --- | ---: |
 | `graph_critical` | 0 |
-| `knowledge` | 17 |
+| `knowledge` | 0 |
 | `operational` | 18 |
-| Total production `tripleStackWrite` call sites remaining | 35 |
+| Total production `tripleStackWrite` call sites remaining | 18 |
 
 ## Completed Migration Tranches
 
@@ -220,6 +221,38 @@ Implementation:
 - Ivory persistence tests now assert the tiered graph-critical write contract.
 - Catalog regenerated to 35 remaining production `tripleStackWrite` call sites
   with zero `graph_critical` raw call sites remaining.
+
+### P1-31: Knowledge Record Sweep
+
+Migrated:
+
+- `server/src/domain/adminTenantArchitecture.ts` content-template override
+  writes.
+- `server/src/domain/agents/orchestrator.ts` agent recommendation events.
+- `server/src/domain/contentVideos.ts` content-video creation.
+- `server/src/domain/crm.ts` notes, followups, dispositions, and invitation
+  activity writes.
+- `server/src/domain/generator.ts` generator run creation.
+- `server/src/domain/graphrag.ts` GraphRAG record creation.
+- `server/src/domain/invitations.ts` invitation activity writes.
+- `server/src/domain/learningCandidates.ts` review-only learning candidate
+  writes.
+- `server/src/domain/prospectCrm.ts` prospect timeline event writes.
+- `server/src/domain/questionnaire.ts` questionnaire writes.
+- `server/src/domain/recruitingCycle.ts` Michael event and recruiting-cycle
+  writes.
+- `server/src/domain/steve-success-interview.ts` Steve discovery insert path.
+- `server/src/domain/training.ts` training progress first-write path.
+
+Implementation:
+
+- All remaining knowledge-tier raw writes now use `writeKnowledge`, so Mongo
+  readback remains the success boundary and Neo4j/Chroma projections route
+  through the durable knowledge outbox path on failure.
+- Updated focused tests to mock/assert the `writeKnowledge` boundary for
+  content videos, GraphRAG, learning candidates, and Steve discovery.
+- Catalog regenerated to 18 remaining production `tripleStackWrite` call sites,
+  all `operational`.
 
 ## Lane Map
 
