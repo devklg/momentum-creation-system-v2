@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-mongo-index-audit`
+Latest branch: `codex/platform-audit-p1-neo4j-catalog`
 
 Closed in this tranche:
 
@@ -45,12 +45,17 @@ Closed in this tranche:
 - P1-38: generated a Mongo collection ownership map with zero unclassified
   collections.
 - P1-39: generated a Mongo index audit and high-volume index plan.
+- P1-40: generated a Neo4j labels, relationships, constraints, and indexes
+  catalog.
 
 Catalog artifacts:
 
 - `engineering/sprints/platform-audit-p1/PERSISTENCE_WRITE_CATALOG.md`
 - `engineering/sprints/platform-audit-p1/persistence-write-catalog.json`
 - `server/scripts/generate-persistence-write-catalog.mjs`
+- `engineering/sprints/platform-audit-p1/NEO4J_CATALOG.md`
+- `engineering/sprints/platform-audit-p1/neo4j-catalog.json`
+- `server/scripts/generate-neo4j-catalog.mjs`
 
 Inventory result:
 
@@ -431,6 +436,25 @@ Generated coverage:
   `vmSchemas.ts` but not generally applied.
 - 0 explicit high-volume collections without a plan row.
 
+### P1-40: Neo4j Catalog
+
+Implemented:
+
+- Added `server/scripts/generate-neo4j-catalog.mjs`.
+- Added `pnpm catalog:neo4j` and `pnpm catalog:neo4j:check`.
+- Generated:
+  - `engineering/sprints/platform-audit-p1/NEO4J_CATALOG.md`
+  - `engineering/sprints/platform-audit-p1/neo4j-catalog.json`
+
+Generated coverage:
+
+- 68 Neo4j labels and 59 relationships from the schema catalog.
+- 11 planned core uniqueness constraints for graph-critical app anchors.
+- 7 declared Phase 7 constraints/indexes from
+  `server/src/services/persistence/neo4j/phase7Constraints.ts`.
+- 53 labels without a cataloged constraint/index, retained as explicit
+  follow-up evidence for P1-41 and later graph diagnostics.
+
 ## Lane Map
 
 ### Lane P1-A: Persistence Migration
@@ -521,6 +545,10 @@ Run before merging this tranche:
 
 ```powershell
 pnpm catalog:persistence:check
+pnpm catalog:schema:check
+pnpm catalog:mongo-ownership:check
+pnpm catalog:mongo-indexes:check
+pnpm catalog:neo4j:check
 pnpm typecheck
 pnpm build
 pnpm --filter @momentum/server test

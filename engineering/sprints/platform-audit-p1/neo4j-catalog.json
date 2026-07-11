@@ -1,0 +1,1395 @@
+{
+  "generatedAt": "2026-07-11T16:39:36.729Z",
+  "sources": [
+    "engineering/sprints/platform-audit-p1/schema-catalog.json",
+    "server/src/services/persistence/neo4j/phase7Constraints.ts",
+    "server/src/domain/* Cypher writers"
+  ],
+  "summary": {
+    "labels": 68,
+    "relationships": 59,
+    "constraints": 18,
+    "labelsWithoutConstraint": 53
+  },
+  "byStatus": {
+    "planned_core_not_applied": 11,
+    "declared_phase7_not_applied": 7
+  },
+  "labels": [
+    {
+      "label": "Agent",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:255"
+      ]
+    },
+    {
+      "label": "BrandAmbassador",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:159"
+      ]
+    },
+    {
+      "label": "DISPOSED",
+      "sourceCount": 3,
+      "sources": [
+        "server/src/domain/crm.ts:357",
+        "server/src/domain/crm.ts:376",
+        "server/src/domain/crm.ts:398"
+      ]
+    },
+    {
+      "label": "ENROLLED",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/recruitingCycle.ts:581"
+      ]
+    },
+    {
+      "label": "FOUNDER_PASSWORD",
+      "sourceCount": 1,
+      "sources": [
+        "server/scripts/setup-founder-access.ts:43"
+      ]
+    },
+    {
+      "label": "HAS_FOLLOWUP",
+      "sourceCount": 3,
+      "sources": [
+        "server/src/domain/crm.ts:237",
+        "server/src/domain/crm.ts:269",
+        "server/src/domain/crm.ts:324"
+      ]
+    },
+    {
+      "label": "IN_HOLDING_TANK",
+      "sourceCount": 7,
+      "sources": [
+        "server/scripts/smoke-holding-tank.ts:114",
+        "server/scripts/smoke-holding-tank.ts:66",
+        "server/src/domain/crossStoreReconciliation.ts:165",
+        "server/src/domain/poolPlacementPersistence.ts:101",
+        "server/src/domain/poolPlacementPersistence.ts:107",
+        "server/src/domain/poolPlacementPersistence.ts:38",
+        "server/src/domain/poolPlacementPersistence.ts:41"
+      ]
+    },
+    {
+      "label": "INVITED_AS",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/ivory.ts:494"
+      ]
+    },
+    {
+      "label": "Knowledge",
+      "sourceCount": 10,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:130",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:142",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:173",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:199",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:212",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:228",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:241",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:255",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:96"
+      ]
+    },
+    {
+      "label": "KnowledgeCandidate",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:173"
+      ]
+    },
+    {
+      "label": "KnowledgeChunk",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:189"
+      ]
+    },
+    {
+      "label": "KnowledgeDomain",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:130"
+      ]
+    },
+    {
+      "label": "KnowledgeSource",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:142",
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:192"
+      ]
+    },
+    {
+      "label": "KnowledgeVersion",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186"
+      ]
+    },
+    {
+      "label": "LearningSignal",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:228"
+      ]
+    },
+    {
+      "label": "Outcome",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:241"
+      ]
+    },
+    {
+      "label": "REQUESTED_CALLBACK",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/callbackRequest.ts:132"
+      ]
+    },
+    {
+      "label": "RESERVED_ORIENTATION",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/orientationSession.ts:467",
+        "server/src/domain/orientationSession.ts:580"
+      ]
+    },
+    {
+      "label": "RESERVED_WEBINAR",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/webinarReservation.ts:205"
+      ]
+    },
+    {
+      "label": "S2",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/orchestration/fixtures/runtimeTurnHarness.ts:425"
+      ]
+    },
+    {
+      "label": "SCOPED_TO",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/services/persistence/neo4j/phase7Constraints.ts:61"
+      ]
+    },
+    {
+      "label": "SPONSORED_BY",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/sponsorImmutabilityPersistence.ts:104"
+      ]
+    },
+    {
+      "label": "TeamMagnificent",
+      "sourceCount": 6,
+      "sources": [
+        "server/src/domain/graphrag.ts:214",
+        "server/src/domain/learningCandidates.ts:258",
+        "server/src/domain/outcomes.ts:218",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:142",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:159",
+        "server/src/services/persistence/neo4j/phase7Constraints.ts:59"
+      ]
+    },
+    {
+      "label": "TeamMagnificentMember",
+      "sourceCount": 74,
+      "sources": [
+        "server/scripts/backfill-founder-timezones.ts:138",
+        "server/scripts/backfill-founder-timezones.ts:82",
+        "server/src/domain/adminConsistencyReport.ts:68",
+        "server/src/domain/adminConsistencyReport.ts:87",
+        "server/src/domain/adminConsistencyReport.ts:96",
+        "server/src/domain/adminProspectOversight.ts:1067",
+        "server/src/domain/adminProspectOversight.ts:981",
+        "server/src/domain/agents/orchestrator.ts:305",
+        "server/src/domain/auditLog.ts:182",
+        "server/src/domain/auditLog.ts:452",
+        "server/src/domain/baIdentityPersistence.ts:28",
+        "server/src/domain/baIdentityPersistence.ts:29",
+        "server/src/domain/baIdentityPersistence.ts:33",
+        "server/src/domain/baIdentityPersistence.ts:34",
+        "server/src/domain/baIdentityPersistence.ts:40",
+        "server/src/domain/baIdentityPersistence.ts:43",
+        "server/src/domain/broadcast.ts:448",
+        "server/src/domain/broadcast.ts:592",
+        "server/src/domain/bulkLeads.ts:132",
+        "server/src/domain/bulkLeads.ts:150",
+        "server/src/domain/callbackRequest.ts:131",
+        "server/src/domain/commitments.ts:57",
+        "server/src/domain/crm.ts:164",
+        "server/src/domain/crm.ts:237",
+        "server/src/domain/crm.ts:267",
+        "server/src/domain/crm.ts:324",
+        "server/src/domain/crm.ts:357",
+        "server/src/domain/crm.ts:374",
+        "server/src/domain/crm.ts:396",
+        "server/src/domain/crmOwnershipPersistence.ts:33",
+        "server/src/domain/crmOwnershipPersistence.ts:40",
+        "server/src/domain/crmOwnershipPersistence.ts:48",
+        "server/src/domain/crmOwnershipPersistence.ts:55",
+        "server/src/domain/crossStoreReconciliation.ts:137",
+        "server/src/domain/crossStoreReconciliation.ts:181",
+        "server/src/domain/crossStoreReconciliation.ts:88",
+        "server/src/domain/entitlements.ts:54",
+        "server/src/domain/generator.ts:157",
+        "server/src/domain/invitations.ts:213",
+        "server/src/domain/invitations.ts:231",
+        "server/src/domain/ivory.ts:216",
+        "server/src/domain/ivory.ts:229",
+        "server/src/domain/orientationSession.ts:465",
+        "server/src/domain/orientationSession.ts:580",
+        "server/src/domain/outcomes.ts:218",
+        "server/src/domain/profile.ts:238",
+        "server/src/domain/profile.ts:540",
+        "server/src/domain/prospectAccount.ts:252",
+        "server/src/domain/questionnaire.ts:211",
+        "server/src/domain/recruitingCycle.ts:311",
+        "server/src/domain/recruitingCycle.ts:413",
+        "server/src/domain/recruitingCycle.ts:581",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:101",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:102",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:104",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:114",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:116",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:46",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:51",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:89",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:96",
+        "server/src/domain/steve-success-interview.ts:475",
+        "server/src/domain/steve-success-interview.ts:482",
+        "server/src/domain/threeWayCalls.ts:427",
+        "server/src/domain/threeWayCalls.ts:582",
+        "server/src/domain/threeWayCalls.ts:583",
+        "server/src/domain/training.ts:237",
+        "server/src/domain/vmCampaigns.ts:75",
+        "server/src/domain/vmLeadOwners.ts:61",
+        "server/src/domain/vmLeadOwners.ts:77",
+        "server/src/domain/vmProviderQueue.ts:240",
+        "server/src/domain/vmProviderQueue.ts:602",
+        "server/src/domain/workbook.ts:307",
+        "server/src/domain/workbook.ts:308"
+      ]
+    },
+    {
+      "label": "Tenant",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/adminTenantArchitecture.ts:369",
+        "server/src/domain/adminTenantArchitecture.ts:466"
+      ]
+    },
+    {
+      "label": "TenantSettingsVersion",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/adminTenantArchitecture.ts:369"
+      ]
+    },
+    {
+      "label": "TmagAccessCode",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/sponsorImmutabilityPersistence.ts:47",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:52"
+      ]
+    },
+    {
+      "label": "TmagAdminProspectNote",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/adminProspectOversight.ts:788"
+      ]
+    },
+    {
+      "label": "TmagAgentEvent",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/agents/orchestrator.ts:306"
+      ]
+    },
+    {
+      "label": "TmagAgentMichaelEvent",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/recruitingCycle.ts:312"
+      ]
+    },
+    {
+      "label": "TmagAuditEntry",
+      "sourceCount": 3,
+      "sources": [
+        "server/src/domain/auditLog.ts:182",
+        "server/src/domain/auditLog.ts:197",
+        "server/src/domain/auditLog.ts:452"
+      ]
+    },
+    {
+      "label": "TmagBroadcast",
+      "sourceCount": 3,
+      "sources": [
+        "server/src/domain/broadcast.ts:444",
+        "server/src/domain/broadcast.ts:588",
+        "server/src/domain/healthProbe.ts:369"
+      ]
+    },
+    {
+      "label": "TmagCommitment",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/commitments.ts:58"
+      ]
+    },
+    {
+      "label": "TmagContentTemplate",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/adminTenantArchitecture.ts:466"
+      ]
+    },
+    {
+      "label": "TmagContentVideo",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/contentVideos.ts:264",
+        "server/src/domain/crossStoreReconciliation.ts:195"
+      ]
+    },
+    {
+      "label": "TmagCrmNote",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/crm.ts:166"
+      ]
+    },
+    {
+      "label": "TmagFastStartProgress",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/training.ts:238",
+        "server/src/domain/training.ts:305"
+      ]
+    },
+    {
+      "label": "TmagGeneratorRun",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/generator.ts:158"
+      ]
+    },
+    {
+      "label": "TmagHealthHeartbeat",
+      "sourceCount": 3,
+      "sources": [
+        "server/src/domain/healthProbe.ts:157",
+        "server/src/domain/healthProbe.ts:189",
+        "server/src/domain/healthProbe.ts:85"
+      ]
+    },
+    {
+      "label": "TmagInvitationActivity",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/crm.ts:701",
+        "server/src/domain/invitations.ts:357"
+      ]
+    },
+    {
+      "label": "TmagInviteToken",
+      "sourceCount": 10,
+      "sources": [
+        "server/src/domain/adminConsistencyReport.ts:76",
+        "server/src/domain/crossStoreReconciliation.ts:101",
+        "server/src/domain/crossStoreReconciliation.ts:109",
+        "server/src/domain/prospectAccount.ts:250",
+        "server/src/domain/tokenLifecyclePersistence.ts:152",
+        "server/src/domain/tokenLifecyclePersistence.ts:158",
+        "server/src/domain/tokenLifecyclePersistence.ts:47",
+        "server/src/domain/tokenLifecyclePersistence.ts:51",
+        "server/src/domain/tokenLifecyclePersistence.ts:63",
+        "server/src/domain/tokenLifecyclePersistence.ts:67"
+      ]
+    },
+    {
+      "label": "TmagIvoryName",
+      "sourceCount": 6,
+      "sources": [
+        "server/src/domain/ivory.ts:217",
+        "server/src/domain/ivory.ts:230",
+        "server/src/domain/ivory.ts:360",
+        "server/src/domain/ivory.ts:440",
+        "server/src/domain/ivory.ts:488",
+        "server/src/domain/ivory.ts:526"
+      ]
+    },
+    {
+      "label": "TmagKnowledge",
+      "sourceCount": 3,
+      "sources": [
+        "server/src/domain/graphrag.ts:214",
+        "server/src/services/persistence/neo4j/phase7Constraints.ts:51",
+        "server/src/services/persistence/neo4j/phase7Constraints.ts:86"
+      ]
+    },
+    {
+      "label": "TmagLearningCandidate",
+      "sourceCount": 4,
+      "sources": [
+        "server/src/domain/learningCandidates.ts:232",
+        "server/src/domain/learningCandidates.ts:258",
+        "server/src/services/persistence/neo4j/phase7Constraints.ts:43",
+        "server/src/services/persistence/neo4j/phase7Constraints.ts:78"
+      ]
+    },
+    {
+      "label": "TmagOrientationSession",
+      "sourceCount": 3,
+      "sources": [
+        "server/src/domain/orientationSession.ts:338",
+        "server/src/domain/orientationSession.ts:466",
+        "server/src/domain/orientationSession.ts:580"
+      ]
+    },
+    {
+      "label": "TmagOutcome",
+      "sourceCount": 4,
+      "sources": [
+        "server/src/domain/learningCandidates.ts:258",
+        "server/src/domain/outcomes.ts:218",
+        "server/src/services/persistence/neo4j/phase7Constraints.ts:35",
+        "server/src/services/persistence/neo4j/phase7Constraints.ts:70"
+      ]
+    },
+    {
+      "label": "TmagPool",
+      "sourceCount": 6,
+      "sources": [
+        "server/scripts/smoke-holding-tank.ts:114",
+        "server/src/domain/crossStoreReconciliation.ts:165",
+        "server/src/domain/poolPlacementPersistence.ts:101",
+        "server/src/domain/poolPlacementPersistence.ts:107",
+        "server/src/domain/poolPlacementPersistence.ts:36",
+        "server/src/domain/poolPlacementPersistence.ts:42"
+      ]
+    },
+    {
+      "label": "TmagProspect",
+      "sourceCount": 40,
+      "sources": [
+        "server/scripts/smoke-holding-tank.ts:114",
+        "server/scripts/smoke-holding-tank.ts:66",
+        "server/src/domain/adminConsistencyReport.ts:67",
+        "server/src/domain/adminConsistencyReport.ts:77",
+        "server/src/domain/adminProspectOversight.ts:1064",
+        "server/src/domain/adminProspectOversight.ts:787",
+        "server/src/domain/adminProspectOversight.ts:978",
+        "server/src/domain/bulkLeads.ts:133",
+        "server/src/domain/bulkLeads.ts:151",
+        "server/src/domain/bulkLeads.ts:238",
+        "server/src/domain/bulkLeads.ts:257",
+        "server/src/domain/callbackRequest.ts:130",
+        "server/src/domain/crm.ts:165",
+        "server/src/domain/crm.ts:237",
+        "server/src/domain/crm.ts:268",
+        "server/src/domain/crm.ts:324",
+        "server/src/domain/crm.ts:357",
+        "server/src/domain/crm.ts:375",
+        "server/src/domain/crm.ts:397",
+        "server/src/domain/crm.ts:592",
+        "server/src/domain/crm.ts:700",
+        "server/src/domain/crmOwnershipPersistence.ts:49",
+        "server/src/domain/crmOwnershipPersistence.ts:57",
+        "server/src/domain/crossStoreReconciliation.ts:110",
+        "server/src/domain/crossStoreReconciliation.ts:165",
+        "server/src/domain/crossStoreReconciliation.ts:89",
+        "server/src/domain/invitations.ts:214",
+        "server/src/domain/invitations.ts:232",
+        "server/src/domain/invitations.ts:356",
+        "server/src/domain/ivory.ts:493",
+        "server/src/domain/outcomes.ts:218",
+        "server/src/domain/poolPlacementPersistence.ts:101",
+        "server/src/domain/poolPlacementPersistence.ts:107",
+        "server/src/domain/poolPlacementPersistence.ts:37",
+        "server/src/domain/poolPlacementPersistence.ts:41",
+        "server/src/domain/prospectCrm.ts:227",
+        "server/src/domain/prospectCrm.ts:477",
+        "server/src/domain/tokenLifecyclePersistence.ts:46",
+        "server/src/domain/tokenLifecyclePersistence.ts:52",
+        "server/src/domain/webinarReservation.ts:203"
+      ]
+    },
+    {
+      "label": "TmagProspectAccount",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/prospectAccount.ts:244",
+        "server/src/domain/prospectMagicLink.ts:184"
+      ]
+    },
+    {
+      "label": "TmagProspectCrmRecord",
+      "sourceCount": 8,
+      "sources": [
+        "server/src/domain/adminConsistencyReport.ts:95",
+        "server/src/domain/crmOwnershipPersistence.ts:35",
+        "server/src/domain/crmOwnershipPersistence.ts:41",
+        "server/src/domain/crmOwnershipPersistence.ts:50",
+        "server/src/domain/crmOwnershipPersistence.ts:56",
+        "server/src/domain/prospectCrm.ts:283",
+        "server/src/domain/prospectCrm.ts:382",
+        "server/src/domain/prospectCrm.ts:473"
+      ]
+    },
+    {
+      "label": "TmagProspectMagicLink",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/prospectMagicLink.ts:178"
+      ]
+    },
+    {
+      "label": "TmagProspectTimelineEvent",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/prospectCrm.ts:228"
+      ]
+    },
+    {
+      "label": "TmagQuestionnaire",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/questionnaire.ts:212"
+      ]
+    },
+    {
+      "label": "TmagRecruitingCycle",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/recruitingCycle.ts:414",
+        "server/src/domain/recruitingCycle.ts:489"
+      ]
+    },
+    {
+      "label": "TmagSponsorAvailability",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/threeWayCalls.ts:428"
+      ]
+    },
+    {
+      "label": "TmagSponsorOverride",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/sponsorImmutabilityPersistence.ts:108",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:118"
+      ]
+    },
+    {
+      "label": "TmagSteveDiscovery",
+      "sourceCount": 3,
+      "sources": [
+        "server/src/domain/adminConsistencyReport.ts:86",
+        "server/src/domain/crossStoreReconciliation.ts:182",
+        "server/src/domain/steve-success-interview.ts:476"
+      ]
+    },
+    {
+      "label": "TmagThreeWayBooking",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/threeWayCalls.ts:584",
+        "server/src/domain/threeWayCalls.ts:678"
+      ]
+    },
+    {
+      "label": "TmagVmAuditEvent",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/vmProviderQueue.ts:237"
+      ]
+    },
+    {
+      "label": "TmagVmBulkLead",
+      "sourceCount": 10,
+      "sources": [
+        "server/src/domain/adminConsistencyReport.ts:78",
+        "server/src/domain/bulkLeads.ts:239",
+        "server/src/domain/bulkLeads.ts:256",
+        "server/src/domain/crmOwnershipPersistence.ts:34",
+        "server/src/domain/crmOwnershipPersistence.ts:42",
+        "server/src/domain/crossStoreReconciliation.ts:102",
+        "server/src/domain/tokenLifecyclePersistence.ts:62",
+        "server/src/domain/tokenLifecyclePersistence.ts:68",
+        "server/src/domain/vmProviderQueue.ts:599",
+        "server/src/domain/vmProviderQueue.ts:847"
+      ]
+    },
+    {
+      "label": "TmagVmCampaign",
+      "sourceCount": 4,
+      "sources": [
+        "server/src/domain/bulkLeads.ts:237",
+        "server/src/domain/bulkLeads.ts:256",
+        "server/src/domain/vmCampaigns.ts:171",
+        "server/src/domain/vmCampaigns.ts:77"
+      ]
+    },
+    {
+      "label": "TmagVmDeliveryEvent",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/vmProviderQueue.ts:845"
+      ]
+    },
+    {
+      "label": "TmagVmLeadOwner",
+      "sourceCount": 6,
+      "sources": [
+        "server/src/domain/bulkLeads.ts:236",
+        "server/src/domain/bulkLeads.ts:255",
+        "server/src/domain/vmCampaigns.ts:76",
+        "server/src/domain/vmLeadOwners.ts:151",
+        "server/src/domain/vmLeadOwners.ts:62",
+        "server/src/domain/vmLeadOwners.ts:78"
+      ]
+    },
+    {
+      "label": "TmagVmProviderWebhook",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/vmProviderQueue.ts:891"
+      ]
+    },
+    {
+      "label": "TmagVmQueueJob",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/vmProviderQueue.ts:291"
+      ]
+    },
+    {
+      "label": "TmagWebinarEvent",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/webinarReservation.ts:204"
+      ]
+    },
+    {
+      "label": "TmagWorkbook",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/workbook.ts:309"
+      ]
+    },
+    {
+      "label": "WebinarEvent",
+      "sourceCount": 1,
+      "sources": [
+        "server/scripts/seed-webinar-events.ts:136"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "relationship": "ABOUT",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/crm.ts:168"
+      ]
+    },
+    {
+      "relationship": "ABOUT_PROSPECT",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/outcomes.ts:218"
+      ]
+    },
+    {
+      "relationship": "ACCEPTED",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/commitments.ts:60"
+      ]
+    },
+    {
+      "relationship": "ACTED_BY",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/auditLog.ts:182"
+      ]
+    },
+    {
+      "relationship": "ACTED_FOR",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/auditLog.ts:452"
+      ]
+    },
+    {
+      "relationship": "APPROVED_AS",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:173"
+      ]
+    },
+    {
+      "relationship": "AVAILABLE_TO",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:255"
+      ]
+    },
+    {
+      "relationship": "BECAME_PROSPECT_RECORD",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/bulkLeads.ts:243",
+        "server/src/domain/bulkLeads.ts:257"
+      ]
+    },
+    {
+      "relationship": "BELONGS_TO_DOMAIN",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:130"
+      ]
+    },
+    {
+      "relationship": "BOOKED_THREE_WAY_CALL",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/threeWayCalls.ts:587"
+      ]
+    },
+    {
+      "relationship": "CONDUCTED",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/workbook.ts:312"
+      ]
+    },
+    {
+      "relationship": "CONFIRMED_BY",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/outcomes.ts:218"
+      ]
+    },
+    {
+      "relationship": "CONTAINS_LEAD",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/bulkLeads.ts:241",
+        "server/src/domain/bulkLeads.ts:255"
+      ]
+    },
+    {
+      "relationship": "DERIVED_FROM",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/learningCandidates.ts:258",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:228"
+      ]
+    },
+    {
+      "relationship": "FOR",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/workbook.ts:313"
+      ]
+    },
+    {
+      "relationship": "FOR_PROSPECT",
+      "sourceCount": 6,
+      "sources": [
+        "server/src/domain/adminConsistencyReport.ts:77",
+        "server/src/domain/crmOwnershipPersistence.ts:53",
+        "server/src/domain/crmOwnershipPersistence.ts:56",
+        "server/src/domain/crossStoreReconciliation.ts:109",
+        "server/src/domain/tokenLifecyclePersistence.ts:49",
+        "server/src/domain/tokenLifecyclePersistence.ts:51"
+      ]
+    },
+    {
+      "relationship": "FOR_VM_LEAD",
+      "sourceCount": 4,
+      "sources": [
+        "server/src/domain/adminConsistencyReport.ts:78",
+        "server/src/domain/crossStoreReconciliation.ts:101",
+        "server/src/domain/tokenLifecyclePersistence.ts:65",
+        "server/src/domain/tokenLifecyclePersistence.ts:67"
+      ]
+    },
+    {
+      "relationship": "HAD_STEVE_DISCOVERY",
+      "sourceCount": 3,
+      "sources": [
+        "server/src/domain/adminConsistencyReport.ts:87",
+        "server/src/domain/crossStoreReconciliation.ts:181",
+        "server/src/domain/steve-success-interview.ts:479"
+      ]
+    },
+    {
+      "relationship": "HAS_ACTIVITY",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/crm.ts:704",
+        "server/src/domain/invitations.ts:360"
+      ]
+    },
+    {
+      "relationship": "HAS_CHUNK",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:193"
+      ]
+    },
+    {
+      "relationship": "HAS_CRM_RECORD",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/crmOwnershipPersistence.ts:38",
+        "server/src/domain/crmOwnershipPersistence.ts:41"
+      ]
+    },
+    {
+      "relationship": "HAS_LANGUAGE_VARIANT",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:212"
+      ]
+    },
+    {
+      "relationship": "HAS_ORIGINAL_SPONSOR",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/sponsorImmutabilityPersistence.ts:92",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:95"
+      ]
+    },
+    {
+      "relationship": "HAS_OVERRIDE",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/sponsorImmutabilityPersistence.ts:112",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:118"
+      ]
+    },
+    {
+      "relationship": "HAS_PROGRESS",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/training.ts:242"
+      ]
+    },
+    {
+      "relationship": "HAS_RECRUITING_CYCLE",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/recruitingCycle.ts:418"
+      ]
+    },
+    {
+      "relationship": "HAS_SETTINGS_VERSION",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/adminTenantArchitecture.ts:369"
+      ]
+    },
+    {
+      "relationship": "HAS_THREE_WAY_AVAILABILITY",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/threeWayCalls.ts:431"
+      ]
+    },
+    {
+      "relationship": "HAS_TIMELINE_EVENT",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/prospectCrm.ts:232"
+      ]
+    },
+    {
+      "relationship": "HAS_VERSION",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/adminTenantArchitecture.ts:466",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186"
+      ]
+    },
+    {
+      "relationship": "HAS_VM_AUDIT",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/vmProviderQueue.ts:241"
+      ]
+    },
+    {
+      "relationship": "HAS_VM_DELIVERY_EVENT",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/vmProviderQueue.ts:847"
+      ]
+    },
+    {
+      "relationship": "INVITED",
+      "sourceCount": 4,
+      "sources": [
+        "server/src/domain/adminConsistencyReport.ts:68",
+        "server/src/domain/crossStoreReconciliation.ts:89",
+        "server/src/domain/invitations.ts:217",
+        "server/src/domain/invitations.ts:232"
+      ]
+    },
+    {
+      "relationship": "INVITED_BY",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/adminProspectOversight.ts:982"
+      ]
+    },
+    {
+      "relationship": "ISSUED_FOR",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/prospectMagicLink.ts:185"
+      ]
+    },
+    {
+      "relationship": "KEYS",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/prospectAccount.ts:251"
+      ]
+    },
+    {
+      "relationship": "KNOWS",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/ivory.ts:219",
+        "server/src/domain/ivory.ts:229"
+      ]
+    },
+    {
+      "relationship": "MEMBER_OF",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:159"
+      ]
+    },
+    {
+      "relationship": "NOTE_ON",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/adminProspectOversight.ts:791"
+      ]
+    },
+    {
+      "relationship": "OWNS_CRM_RECORD",
+      "sourceCount": 5,
+      "sources": [
+        "server/src/domain/adminConsistencyReport.ts:96",
+        "server/src/domain/crmOwnershipPersistence.ts:37",
+        "server/src/domain/crmOwnershipPersistence.ts:40",
+        "server/src/domain/crmOwnershipPersistence.ts:52",
+        "server/src/domain/crmOwnershipPersistence.ts:55"
+      ]
+    },
+    {
+      "relationship": "OWNS_MASTER_CONTENT",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/adminTenantArchitecture.ts:466"
+      ]
+    },
+    {
+      "relationship": "OWNS_RVM_PROSPECT",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/bulkLeads.ts:136",
+        "server/src/domain/bulkLeads.ts:150"
+      ]
+    },
+    {
+      "relationship": "OWNS_VM_CAMPAIGN",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/vmCampaigns.ts:80"
+      ]
+    },
+    {
+      "relationship": "OWNS_VM_LEAD",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/vmProviderQueue.ts:603"
+      ]
+    },
+    {
+      "relationship": "OWNS_VM_LEAD_OWNER",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/vmLeadOwners.ts:65",
+        "server/src/domain/vmLeadOwners.ts:77"
+      ]
+    },
+    {
+      "relationship": "RAN_GENERATOR",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/generator.ts:161"
+      ]
+    },
+    {
+      "relationship": "RECEIVED_MICHAEL_EVENT",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/recruitingCycle.ts:314"
+      ]
+    },
+    {
+      "relationship": "RECORDED_AGENT_EVENT",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/agents/orchestrator.ts:314"
+      ]
+    },
+    {
+      "relationship": "SCOPED_TO",
+      "sourceCount": 4,
+      "sources": [
+        "server/src/domain/graphrag.ts:214",
+        "server/src/domain/learningCandidates.ts:258",
+        "server/src/domain/outcomes.ts:218",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:142"
+      ]
+    },
+    {
+      "relationship": "SENT_BY",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/broadcast.ts:449",
+        "server/src/domain/broadcast.ts:593"
+      ]
+    },
+    {
+      "relationship": "SPONSORED_BY",
+      "sourceCount": 6,
+      "sources": [
+        "server/src/domain/adminProspectOversight.ts:1068",
+        "server/src/domain/baIdentityPersistence.ts:31",
+        "server/src/domain/baIdentityPersistence.ts:33",
+        "server/src/domain/prospectAccount.ts:253",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:110",
+        "server/src/domain/sponsorImmutabilityPersistence.ts:115"
+      ]
+    },
+    {
+      "relationship": "SUBMITTED",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/questionnaire.ts:216"
+      ]
+    },
+    {
+      "relationship": "SUPERSEDES",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/outcomes.ts:218",
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:199"
+      ]
+    },
+    {
+      "relationship": "SUPPORTED_BY",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:241"
+      ]
+    },
+    {
+      "relationship": "TARGETS_LEAD",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/bulkLeads.ts:242",
+        "server/src/domain/bulkLeads.ts:256"
+      ]
+    },
+    {
+      "relationship": "USES_VM_LEAD_OWNER",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/vmCampaigns.ts:81"
+      ]
+    },
+    {
+      "relationship": "VISIBLE_TO_SPONSOR",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/steve-success-interview.ts:483"
+      ]
+    },
+    {
+      "relationship": "WITH_UPLINE",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/threeWayCalls.ts:588"
+      ]
+    },
+    {
+      "relationship": "WROTE_NOTE",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/crm.ts:167"
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "name": "access_code_code",
+      "label": "TmagAccessCode",
+      "property": "code",
+      "kind": "unique_constraint",
+      "status": "planned_core_not_applied",
+      "cypher": "CREATE CONSTRAINT access_code_code IF NOT EXISTS FOR (n:TmagAccessCode) REQUIRE n.code IS UNIQUE",
+      "drop": "DROP CONSTRAINT access_code_code IF EXISTS",
+      "purpose": "Access-code ownership graph anchor."
+    },
+    {
+      "name": "candidate_status",
+      "label": "TmagLearningCandidate",
+      "property": "status",
+      "kind": "index",
+      "status": "declared_phase7_not_applied",
+      "cypher": "CREATE INDEX candidate_status IF NOT EXISTS FOR (c:TmagLearningCandidate) ON (c.status)",
+      "drop": "DROP INDEX candidate_status IF EXISTS",
+      "purpose": "Review-queue lookups by candidate status."
+    },
+    {
+      "name": "content_video_id",
+      "label": "TmagContentVideo",
+      "property": "contentVideoId",
+      "kind": "unique_constraint",
+      "status": "planned_core_not_applied",
+      "cypher": "CREATE CONSTRAINT content_video_id IF NOT EXISTS FOR (n:TmagContentVideo) REQUIRE n.contentVideoId IS UNIQUE",
+      "drop": "DROP CONSTRAINT content_video_id IF EXISTS",
+      "purpose": "Admin content video artifact."
+    },
+    {
+      "name": "crm_record_id",
+      "label": "TmagProspectCrmRecord",
+      "property": "crmRecordId",
+      "kind": "unique_constraint",
+      "status": "planned_core_not_applied",
+      "cypher": "CREATE CONSTRAINT crm_record_id IF NOT EXISTS FOR (n:TmagProspectCrmRecord) REQUIRE n.crmRecordId IS UNIQUE",
+      "drop": "DROP CONSTRAINT crm_record_id IF EXISTS",
+      "purpose": "CRM record ownership graph anchor."
+    },
+    {
+      "name": "invite_token_token",
+      "label": "TmagInviteToken",
+      "property": "token",
+      "kind": "unique_constraint",
+      "status": "planned_core_not_applied",
+      "cypher": "CREATE CONSTRAINT invite_token_token IF NOT EXISTS FOR (n:TmagInviteToken) REQUIRE n.token IS UNIQUE",
+      "drop": "DROP CONSTRAINT invite_token_token IF EXISTS",
+      "purpose": "Token lifecycle graph anchor."
+    },
+    {
+      "name": "knowledge_id",
+      "label": "TmagKnowledge",
+      "property": "id",
+      "kind": "unique_constraint",
+      "status": "declared_phase7_not_applied",
+      "cypher": "CREATE CONSTRAINT knowledge_id IF NOT EXISTS FOR (k:TmagKnowledge) REQUIRE k.id IS UNIQUE",
+      "drop": "DROP CONSTRAINT knowledge_id IF EXISTS",
+      "purpose": "R3 GraphRAG active-knowledge nodes keyed on the shared id."
+    },
+    {
+      "name": "knowledge_ready",
+      "label": "TmagKnowledge",
+      "property": "retrievalReady",
+      "kind": "index",
+      "status": "declared_phase7_not_applied",
+      "cypher": "CREATE INDEX knowledge_ready IF NOT EXISTS FOR (k:TmagKnowledge) ON (k.retrievalReady)",
+      "drop": "DROP INDEX knowledge_ready IF EXISTS",
+      "purpose": "Retrieval-ready gate filtering."
+    },
+    {
+      "name": "learning_candidate_id",
+      "label": "TmagLearningCandidate",
+      "property": "id",
+      "kind": "unique_constraint",
+      "status": "declared_phase7_not_applied",
+      "cypher": "CREATE CONSTRAINT learning_candidate_id IF NOT EXISTS FOR (c:TmagLearningCandidate) REQUIRE c.id IS UNIQUE",
+      "drop": "DROP CONSTRAINT learning_candidate_id IF EXISTS",
+      "purpose": "R2 review-only learning candidates keyed on the shared id."
+    },
+    {
+      "name": "outcome_ba",
+      "label": "TmagOutcome",
+      "property": "tmagId",
+      "kind": "index",
+      "status": "declared_phase7_not_applied",
+      "cypher": "CREATE INDEX outcome_ba IF NOT EXISTS FOR (o:TmagOutcome) ON (o.tmagId)",
+      "drop": "DROP INDEX outcome_ba IF EXISTS",
+      "purpose": "BA-scoped outcome lookups."
+    },
+    {
+      "name": "outcome_id",
+      "label": "TmagOutcome",
+      "property": "id",
+      "kind": "unique_constraint",
+      "status": "declared_phase7_not_applied",
+      "cypher": "CREATE CONSTRAINT outcome_id IF NOT EXISTS FOR (o:TmagOutcome) REQUIRE o.id IS UNIQUE",
+      "drop": "DROP CONSTRAINT outcome_id IF EXISTS",
+      "purpose": "R1 outcome nodes keyed on the shared app-memory id (Mongo _id == Chroma id)."
+    },
+    {
+      "name": "pool_id",
+      "label": "TmagPool",
+      "property": "id",
+      "kind": "unique_constraint",
+      "status": "planned_core_not_applied",
+      "cypher": "CREATE CONSTRAINT pool_id IF NOT EXISTS FOR (n:TmagPool) REQUIRE n.id IS UNIQUE",
+      "drop": "DROP CONSTRAINT pool_id IF EXISTS",
+      "purpose": "Shared holding-tank pool node."
+    },
+    {
+      "name": "prospect_prospectId",
+      "label": "TmagProspect",
+      "property": "prospectId",
+      "kind": "unique_constraint",
+      "status": "planned_core_not_applied",
+      "cypher": "CREATE CONSTRAINT prospect_prospectId IF NOT EXISTS FOR (n:TmagProspect) REQUIRE n.prospectId IS UNIQUE",
+      "drop": "DROP CONSTRAINT prospect_prospectId IF EXISTS",
+      "purpose": "Prospect invitation and holding-tank anchor."
+    },
+    {
+      "name": "steve_discovery_id",
+      "label": "TmagSteveDiscovery",
+      "property": "discoveryId",
+      "kind": "unique_constraint",
+      "status": "planned_core_not_applied",
+      "cypher": "CREATE CONSTRAINT steve_discovery_id IF NOT EXISTS FOR (n:TmagSteveDiscovery) REQUIRE n.discoveryId IS UNIQUE",
+      "drop": "DROP CONSTRAINT steve_discovery_id IF EXISTS",
+      "purpose": "Steve Success Profile artifact."
+    },
+    {
+      "name": "team_magnificent_key",
+      "label": "TeamMagnificent",
+      "property": "teamKey",
+      "kind": "unique_constraint",
+      "status": "declared_phase7_not_applied",
+      "cypher": "CREATE CONSTRAINT team_magnificent_key IF NOT EXISTS FOR (t:TeamMagnificent) REQUIRE t.teamKey IS UNIQUE",
+      "drop": "DROP CONSTRAINT team_magnificent_key IF EXISTS",
+      "purpose": "Single Team Magnificent scope node (:SCOPED_TO target for R2/R3)."
+    },
+    {
+      "name": "team_member_tmagId",
+      "label": "TeamMagnificentMember",
+      "property": "tmagId",
+      "kind": "unique_constraint",
+      "status": "planned_core_not_applied",
+      "cypher": "CREATE CONSTRAINT team_member_tmagId IF NOT EXISTS FOR (n:TeamMagnificentMember) REQUIRE n.tmagId IS UNIQUE",
+      "drop": "DROP CONSTRAINT team_member_tmagId IF EXISTS",
+      "purpose": "Member identity and sponsor graph anchor."
+    },
+    {
+      "name": "vm_bulk_lead_id",
+      "label": "TmagVmBulkLead",
+      "property": "leadId",
+      "kind": "unique_constraint",
+      "status": "planned_core_not_applied",
+      "cypher": "CREATE CONSTRAINT vm_bulk_lead_id IF NOT EXISTS FOR (n:TmagVmBulkLead) REQUIRE n.leadId IS UNIQUE",
+      "drop": "DROP CONSTRAINT vm_bulk_lead_id IF EXISTS",
+      "purpose": "VM imported lead graph anchor."
+    },
+    {
+      "name": "vm_campaign_id",
+      "label": "TmagVmCampaign",
+      "property": "vmCampaignId",
+      "kind": "unique_constraint",
+      "status": "planned_core_not_applied",
+      "cypher": "CREATE CONSTRAINT vm_campaign_id IF NOT EXISTS FOR (n:TmagVmCampaign) REQUIRE n.vmCampaignId IS UNIQUE",
+      "drop": "DROP CONSTRAINT vm_campaign_id IF EXISTS",
+      "purpose": "VM campaign graph anchor."
+    },
+    {
+      "name": "vm_lead_owner_id",
+      "label": "TmagVmLeadOwner",
+      "property": "leadOwnerId",
+      "kind": "unique_constraint",
+      "status": "planned_core_not_applied",
+      "cypher": "CREATE CONSTRAINT vm_lead_owner_id IF NOT EXISTS FOR (n:TmagVmLeadOwner) REQUIRE n.leadOwnerId IS UNIQUE",
+      "drop": "DROP CONSTRAINT vm_lead_owner_id IF EXISTS",
+      "purpose": "VM lead-owner graph anchor."
+    }
+  ],
+  "labelsWithoutConstraint": [
+    "Agent",
+    "BrandAmbassador",
+    "DISPOSED",
+    "ENROLLED",
+    "FOUNDER_PASSWORD",
+    "HAS_FOLLOWUP",
+    "INVITED_AS",
+    "IN_HOLDING_TANK",
+    "Knowledge",
+    "KnowledgeCandidate",
+    "KnowledgeChunk",
+    "KnowledgeDomain",
+    "KnowledgeSource",
+    "KnowledgeVersion",
+    "LearningSignal",
+    "Outcome",
+    "REQUESTED_CALLBACK",
+    "RESERVED_ORIENTATION",
+    "RESERVED_WEBINAR",
+    "S2",
+    "SCOPED_TO",
+    "SPONSORED_BY",
+    "Tenant",
+    "TenantSettingsVersion",
+    "TmagAdminProspectNote",
+    "TmagAgentEvent",
+    "TmagAgentMichaelEvent",
+    "TmagAuditEntry",
+    "TmagBroadcast",
+    "TmagCommitment",
+    "TmagContentTemplate",
+    "TmagCrmNote",
+    "TmagFastStartProgress",
+    "TmagGeneratorRun",
+    "TmagHealthHeartbeat",
+    "TmagInvitationActivity",
+    "TmagIvoryName",
+    "TmagOrientationSession",
+    "TmagProspectAccount",
+    "TmagProspectMagicLink",
+    "TmagProspectTimelineEvent",
+    "TmagQuestionnaire",
+    "TmagRecruitingCycle",
+    "TmagSponsorAvailability",
+    "TmagSponsorOverride",
+    "TmagThreeWayBooking",
+    "TmagVmAuditEvent",
+    "TmagVmDeliveryEvent",
+    "TmagVmProviderWebhook",
+    "TmagVmQueueJob",
+    "TmagWebinarEvent",
+    "TmagWorkbook",
+    "WebinarEvent"
+  ]
+}
