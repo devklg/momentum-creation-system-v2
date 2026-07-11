@@ -706,6 +706,49 @@ Implemented:
   context, the 100,000 goal, PMV language, placement-demo language, and the
   canonical shared disclaimer.
 
+### P1-51: ScriptMaker And Ivory Generated-Copy Compliance
+
+Implemented:
+
+- Added `server/src/domain/generatedCopyCompliance.ts` as the shared
+  deterministic post-generation guard for ScriptMaker and Ivory copy.
+- Replaced ScriptMaker's private scanner with the shared generated-copy
+  scanner while preserving degraded fallback behavior.
+- Added generated-output scans around Ivory coach JSON, Ivory invitation-agent
+  drafts, and Ivory Momentum follow-up suggestions; noncompliant model output
+  drops to deterministic safe fallback copy.
+- Added a generated-source persistence boundary in the invitation spine:
+  `source: 'ivory' | 'scriptmaker'` messages that trip the scanner fail before
+  token minting or prospect persistence. This covers ScriptMaker-seeded
+  invitations, Ivory direct mint, and Generator mint paths.
+- Kept the BA-side canonical `make_money` angle label intact, but added
+  compliance-safe angle labels for LLM prompts and generated fallbacks so Ivory
+  generated copy never echoes the risky phrase.
+- Added focused Vitest coverage:
+  `generatedCopyCompliance.test.ts`,
+  `scriptmakerGeneratedCopyCompliance.test.ts`,
+  `ivoryGeneratedCopyCompliance.test.ts`,
+  `ivoryMomentumGeneratedCopyCompliance.test.ts`, and
+  `invitationGeneratedMessageCompliance.test.ts`.
+
+Verification:
+
+- `pnpm --filter @momentum/server test -- generatedCopyCompliance scriptmakerGeneratedCopyCompliance ivoryGeneratedCopyCompliance ivoryMomentumGeneratedCopyCompliance invitationGeneratedMessageCompliance`
+- `pnpm --filter @momentum/server typecheck`
+- `pnpm typecheck`
+- `pnpm build`
+- `pnpm --filter @momentum/server test`
+- Catalog and `.com` compliance checks:
+  `pnpm catalog:persistence:check`,
+  `pnpm catalog:schema:check`,
+  `pnpm catalog:mongo-ownership:check`,
+  `pnpm catalog:mongo-indexes:check`,
+  `pnpm catalog:neo4j:check`,
+  `pnpm catalog:chroma:check`,
+  `pnpm catalog:api-routes:check`,
+  `pnpm catalog:route-access:check`,
+  `pnpm compliance:com:check`
+
 ## Lane Map
 
 ### Lane P1-A: Persistence Migration

@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-11T23:27:31.939Z
+- Generated: 2026-07-11T23:38:26.769Z
 - Routes: 209
 - Findings: 0
 
@@ -201,9 +201,9 @@
 | POST | `/api/vm/provider/manual-csv/import.csv` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_text | none | none | `server/src/routes/vmProviderWebhooks.ts:81` |
 | GET | `/api/vm/provider/manual-csv/export/:campaignId` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vmProviderWebhooks.ts:106` |
 | POST | `/api/vm/provider/:provider/webhook` | vm_provider_webhook | none | none | not_applicable | none | none | none | x-vm-provider-secret_when_configured | no | no | global_256kb_json | VM provider webhook secret is conditional; when VM_WEBHOOK_SHARED_SECRET is unset this route accepts provider payloads without auth | none | `server/src/routes/vmProviderWebhooks.ts:124` |
-| POST | `/api/invitations/` | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/invitations.ts:139` |
-| POST | `/api/invitations/:prospectId/sent` | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/invitations.ts:191` |
-| POST | `/api/invitations/log` | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/invitations.ts:237` |
+| POST | `/api/invitations/` | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/invitations.ts:140` |
+| POST | `/api/invitations/:prospectId/sent` | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/invitations.ts:195` |
+| POST | `/api/invitations/log` | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/invitations.ts:241` |
 | GET | `/api/cockpit/launch` | ba_auth_pre_steve | ba_session | none | whitelisted | static_whitelist | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:43` |
 | GET | `/api/cockpit/invites` | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:61` |
 | GET | `/api/cockpit/summary` | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:78` |

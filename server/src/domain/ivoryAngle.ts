@@ -13,3 +13,15 @@ export const ANGLE_LABEL: Record<McsIvoryAngle, string> = {
   lose_fat: 'losing fat or feeling better',
   unspecified: 'what might fit them',
 };
+
+/**
+ * Compliance-safe label for LLM prompts and generated fallback copy. The
+ * canonical UI/domain label above can say "make money" because it is a BA-side
+ * selector; generated copy must not echo that phrase.
+ */
+export const GENERATED_COPY_ANGLE_LABEL: Record<McsIvoryAngle, string> = {
+  do_the_business: 'building the business side thoughtfully',
+  make_money: 'building something of their own',
+  lose_fat: 'feeling better or taking a fresh look',
+  unspecified: 'what might fit them',
+};

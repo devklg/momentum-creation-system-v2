@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T23:27:24.240Z",
+  "generatedAt": "2026-07-11T23:38:23.887Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -79,7 +79,7 @@
       "label": "INVITED_AS",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/ivory.ts:494"
+        "server/src/domain/ivory.ts:498"
       ]
     },
     {
@@ -245,10 +245,10 @@
         "server/src/domain/crossStoreReconciliation.ts:88",
         "server/src/domain/entitlements.ts:54",
         "server/src/domain/generator.ts:157",
-        "server/src/domain/invitations.ts:213",
         "server/src/domain/invitations.ts:231",
-        "server/src/domain/ivory.ts:216",
-        "server/src/domain/ivory.ts:229",
+        "server/src/domain/invitations.ts:249",
+        "server/src/domain/ivory.ts:220",
+        "server/src/domain/ivory.ts:233",
         "server/src/domain/orientationSession.ts:465",
         "server/src/domain/orientationSession.ts:580",
         "server/src/domain/outcomes.ts:218",
@@ -403,7 +403,7 @@
       "sourceCount": 2,
       "sources": [
         "server/src/domain/crm.ts:701",
-        "server/src/domain/invitations.ts:357"
+        "server/src/domain/invitations.ts:375"
       ]
     },
     {
@@ -426,12 +426,12 @@
       "label": "TmagIvoryName",
       "sourceCount": 6,
       "sources": [
-        "server/src/domain/ivory.ts:217",
-        "server/src/domain/ivory.ts:230",
-        "server/src/domain/ivory.ts:360",
-        "server/src/domain/ivory.ts:440",
-        "server/src/domain/ivory.ts:488",
-        "server/src/domain/ivory.ts:526"
+        "server/src/domain/ivory.ts:221",
+        "server/src/domain/ivory.ts:234",
+        "server/src/domain/ivory.ts:364",
+        "server/src/domain/ivory.ts:444",
+        "server/src/domain/ivory.ts:492",
+        "server/src/domain/ivory.ts:530"
       ]
     },
     {
@@ -514,10 +514,10 @@
         "server/src/domain/crossStoreReconciliation.ts:110",
         "server/src/domain/crossStoreReconciliation.ts:165",
         "server/src/domain/crossStoreReconciliation.ts:89",
-        "server/src/domain/invitations.ts:214",
         "server/src/domain/invitations.ts:232",
-        "server/src/domain/invitations.ts:356",
-        "server/src/domain/ivory.ts:493",
+        "server/src/domain/invitations.ts:250",
+        "server/src/domain/invitations.ts:374",
+        "server/src/domain/ivory.ts:497",
         "server/src/domain/outcomes.ts:218",
         "server/src/domain/poolPlacementPersistence.ts:101",
         "server/src/domain/poolPlacementPersistence.ts:107",
@@ -846,7 +846,7 @@
       "sourceCount": 2,
       "sources": [
         "server/src/domain/crm.ts:704",
-        "server/src/domain/invitations.ts:360"
+        "server/src/domain/invitations.ts:378"
       ]
     },
     {
@@ -950,8 +950,8 @@
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:68",
         "server/src/domain/crossStoreReconciliation.ts:89",
-        "server/src/domain/invitations.ts:217",
-        "server/src/domain/invitations.ts:232"
+        "server/src/domain/invitations.ts:235",
+        "server/src/domain/invitations.ts:250"
       ]
     },
     {
@@ -979,8 +979,8 @@
       "relationship": "KNOWS",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/ivory.ts:219",
-        "server/src/domain/ivory.ts:229"
+        "server/src/domain/ivory.ts:223",
+        "server/src/domain/ivory.ts:233"
       ]
     },
     {

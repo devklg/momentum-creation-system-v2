@@ -50,6 +50,10 @@ import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 import { lastInitialOf } from './prospects.js';
 import { createOrUpdateCrmRecordForToken } from './prospectCrm.js';
 import { writeProspectTokenGraphCritical } from './tokenLifecyclePersistence.js';
+import {
+  generatedCopyViolationIds,
+  scanGeneratedCopyCompliance,
+} from './generatedCopyCompliance.js';
 import type {
   McsInvitationActivityEntry,
   McsInvitationSource,
@@ -120,6 +124,13 @@ export interface CreateInvitationResult {
   relationshipReason: string | null;
 }
 
+export class InvitationComplianceError extends Error {
+  constructor(public readonly violations: string) {
+    super(`invitation_message_failed_compliance: ${violations}`);
+    this.name = 'InvitationComplianceError';
+  }
+}
+
 /**
  * Base URL the /p/{token} link is built on. Env-driven (#145): prod sets
  * PROSPECT_BASE_URL=https://teammagnificent.com; dev defaults to
@@ -158,6 +169,13 @@ function crmSourceForInvitation(source: McsInvitationSource): McsProspectCrmSour
 export async function createInvitation(
   input: CreateInvitationInput,
 ): Promise<CreateInvitationResult> {
+  if (input.message && (input.source === 'ivory' || input.source === 'scriptmaker')) {
+    const scan = scanGeneratedCopyCompliance(input.message);
+    if (!scan.ok) {
+      throw new InvitationComplianceError(generatedCopyViolationIds(scan));
+    }
+  }
+
   const prospectId = `prospect_${randomUUID()}`;
   const token = await mintUniqueToken();
   const reentryCode = genReentryCode();

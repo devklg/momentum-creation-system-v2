@@ -39,6 +39,10 @@ import {
   readMasterContent,
   interpolateMasterContent,
 } from '../services/masterContent.js';
+import {
+  generatedCopyViolationIds,
+  scanGeneratedCopyCompliance,
+} from './generatedCopyCompliance.js';
 import type {
   McsScriptMakerScriptKind,
   McsTenantTemplateKey,
@@ -144,43 +148,6 @@ const SYSTEM_PREFIX = [
  * "GLP-THREE"), so the .com chrome rule would false-positive on the product
  * name. Naming the product is allowed; income/placement/comp claims are not.
  */
-const COMPLIANCE_PATTERNS: ReadonlyArray<{ id: string; pattern: RegExp }> = [
-  {
-    id: 'income',
-    pattern:
-      /\b(income|earnings?|profit|paychecks?|salary|six[-\s]?figure|seven[-\s]?figure|make money|making money|make \$|\$\s?\d|\d+\s?(?:dollars|usd))\b/i,
-  },
-  {
-    id: 'comp_plan',
-    pattern:
-      /\b(compensation plan|comp[-\s]?plan|commissions?|cycles?|commissionable volume|cv|binary|ranks?|bonus(?:es)?|downline|residual income)\b/i,
-  },
-  {
-    id: 'placement',
-    pattern:
-      /\b(placement|spillover|queue position|leg position|guaranteed (?:spot|position|placement)|locked[-\s]?spot)\b/i,
-  },
-  {
-    id: 'medical',
-    pattern:
-      /\b(cure[sd]?|guaranteed? to (?:lose|cure|heal)|you will lose|lose \d+\s?(?:lbs?|pounds))\b/i,
-  },
-  {
-    id: 'pressure',
-    pattern:
-      /\b(act now|limited time|hurry|last chance|don'?t miss out|only \d+ (?:spots?|seats?) left)\b/i,
-  },
-];
-
-/** True when `text` trips none of the ScriptMaker NEVER rules. */
-function scanDraftCompliance(text: string): { ok: boolean; violations: string[] } {
-  const violations: string[] = [];
-  for (const { id, pattern } of COMPLIANCE_PATTERNS) {
-    if (pattern.test(text)) violations.push(id);
-  }
-  return { ok: violations.length === 0, violations };
-}
-
 /**
  * The token set ScriptMaker injects server-side — the SAME values it has
  * always personalized with, plus the event_invite scheduling tokens. Unknown
@@ -211,7 +178,7 @@ async function resolveSeed(
   const key = SCRIPT_KIND_KEYS[input.scriptKind ?? 'product_anchored'];
   const raw = await readMasterContent(key); // never throws — code-default fallback
   const content = interpolateMasterContent(raw, buildTokenValues(input)).trim();
-  const scan = scanDraftCompliance(content);
+  const scan = scanGeneratedCopyCompliance(content);
   return { content, compliant: scan.ok && content.length > 0 };
 }
 
@@ -293,12 +260,12 @@ export async function draftInvitation(
       maxTokens: 512,
     });
     const draft = text.trim();
-    const scan = scanDraftCompliance(draft);
+    const scan = scanGeneratedCopyCompliance(draft);
     if (!scan.ok || !draft) {
       // eslint-disable-next-line no-console
       console.warn(
         '[scriptmaker] LLM draft failed compliance scan, using seed fallback:',
-        scan.violations.join(', ') || 'empty_draft',
+        generatedCopyViolationIds(scan) || 'empty_draft',
       );
       return { draft: fallbackText, degraded: true };
     }

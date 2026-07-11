@@ -33,12 +33,16 @@
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { getProspectMomentumViewer } from './cockpit.js';
 import { listIvoryNamesForBA } from './ivory.js';
-import { ANGLE_LABEL } from './ivoryAngle.js';
+import { GENERATED_COPY_ANGLE_LABEL } from './ivoryAngle.js';
 import {
   complete,
   AnthropicConfigError,
   AnthropicError,
 } from '../services/anthropic.js';
+import {
+  generatedCopyViolationIds,
+  scanGeneratedCopyCompliance,
+} from './generatedCopyCompliance.js';
 import type {
   McsIvoryMomentumCohortCounts,
   McsIvoryMomentumContext,
@@ -385,7 +389,11 @@ function buildSuggestUserTurn(input: {
     `Last signal: ${prospect.lastSignal.label} (${prospect.lastSignal.at})`,
   ];
   if (context.preferredAngle) {
-    lines.push(`BA's chosen angle for this person: ${ANGLE_LABEL[context.preferredAngle]}.`);
+    lines.push(
+      `BA's chosen angle for this person: ${
+        GENERATED_COPY_ANGLE_LABEL[context.preferredAngle]
+      }.`,
+    );
   }
   if (context.categories.length > 0) {
     lines.push(`Relationship categories: ${context.categories.join(', ')}.`);
@@ -564,6 +572,15 @@ export async function suggestIvoryMomentumFollowUp(
     if (!parsed) {
       // eslint-disable-next-line no-console
       console.warn('[ivory.momentum.suggest] non-JSON response, using fallback');
+      return neutralSuggestion(row);
+    }
+    const scan = scanGeneratedCopyCompliance([parsed.coaching, parsed.suggestion]);
+    if (!scan.ok) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[ivory.momentum.suggest] response failed compliance scan, using fallback:',
+        generatedCopyViolationIds(scan),
+      );
       return neutralSuggestion(row);
     }
     return {

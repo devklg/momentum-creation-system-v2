@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-11T23:27:24.784Z
+- Generated: 2026-07-11T23:38:26.410Z
 - Mounted routers: 46
 - Route files: 46
 - Static route rows: 209
@@ -231,9 +231,9 @@
 | POST | `/api/vm/provider/manual-csv/import.csv` | pre_gate | pre_gate_or_public | admin | `server/src/routes/vmProviderWebhooks.ts:81` |
 | GET | `/api/vm/provider/manual-csv/export/:campaignId` | pre_gate | pre_gate_or_public | admin | `server/src/routes/vmProviderWebhooks.ts:106` |
 | POST | `/api/vm/provider/:provider/webhook` | pre_gate | pre_gate_or_public | none | `server/src/routes/vmProviderWebhooks.ts:124` |
-| POST | `/api/invitations/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/invitations.ts:139` |
-| POST | `/api/invitations/:prospectId/sent` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/invitations.ts:191` |
-| POST | `/api/invitations/log` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/invitations.ts:237` |
+| POST | `/api/invitations/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/invitations.ts:140` |
+| POST | `/api/invitations/:prospectId/sent` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/invitations.ts:195` |
+| POST | `/api/invitations/log` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/invitations.ts:241` |
 | GET | `/api/cockpit/launch` | ba_facing_gated | ba_auth_steve_gated | auth | `server/src/routes/cockpit.ts:43` |
 | GET | `/api/cockpit/invites` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:61` |
 | GET | `/api/cockpit/summary` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:78` |
