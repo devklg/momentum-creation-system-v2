@@ -24,7 +24,7 @@ const RED_STATUS: HealthStatusFile = {
   ],
 };
 
-function persistenceWithChroma(chromaOk = true) {
+function persistenceWithChroma(chromaOk = true, options: { metadataOnly?: boolean } = {}) {
   return vi.fn(async (tool: string, action: string, params: AnyRec) => {
     if (tool === 'mongodb' && action === 'query') return { count: 1, documents: [{ _id: 'health_fixed' }] };
     if (tool === 'mongodb' && action === 'delete') return { deletedCount: 0 };
@@ -34,10 +34,11 @@ function persistenceWithChroma(chromaOk = true) {
       return { records: [], summary: { counters: {} } };
     }
     if (tool === 'chromadb' && action === 'query_with_filter') {
+      const canonicalFilter = (params.where as AnyRec | undefined)?.heartbeatId === 'health_fixed';
       return {
         results: {
-          ids: chromaOk ? ['health_fixed'] : [],
-          metadatas: chromaOk ? [{ healthHeartbeatId: 'health_fixed' }] : [],
+          ids: chromaOk && canonicalFilter && !options.metadataOnly ? ['health_fixed'] : [],
+          metadatas: chromaOk && canonicalFilter ? [{ heartbeatId: 'health_fixed' }] : [],
         },
       };
     }
@@ -72,6 +73,16 @@ describe('production health triple-stack probe', () => {
     const call = write.mock.calls[0]![0] as unknown as AnyRec;
     expect(call.mongoCollection).toBe('tmag_health_heartbeat');
     expect((call.chroma as AnyRec).collection).toBe('mcs_health_heartbeat');
+    expect(((call.chroma as AnyRec).metadata as AnyRec).heartbeatId).toBe('health_fixed');
+    expect(((call.chroma as AnyRec).metadata as AnyRec).healthHeartbeatId).toBeUndefined();
+    expect(persistence).toHaveBeenCalledWith(
+      'chromadb',
+      'query_with_filter',
+      expect.objectContaining({
+        collection: 'mcs_health_heartbeat',
+        where: { heartbeatId: 'health_fixed' },
+      }),
+    );
     expect(persistence).toHaveBeenCalledWith(
       'chromadb',
       'delete',
@@ -89,6 +100,17 @@ describe('production health triple-stack probe', () => {
     expect(result.ok).toBe(false);
     expect(result.legs).toEqual({ mongo: true, neo4j: true, chroma: false });
     expect(result.legDetails.chroma).toBe('readback_missing');
+  });
+
+  it('accepts Chroma readback by canonical heartbeat metadata even when ids are absent', async () => {
+    const result = await runTripleStackHealthProbe({
+      id: () => 'health_fixed',
+      write: vi.fn(async (_input: unknown) => okTripleStackResult()),
+      persistence: persistenceWithChroma(true, { metadataOnly: true }) as never,
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.legs.chroma).toBe(true);
   });
 
   it('classifies write failures by the persistence leg named in the error', async () => {

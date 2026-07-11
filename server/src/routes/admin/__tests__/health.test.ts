@@ -81,3 +81,56 @@ describe('admin health status route', () => {
     });
   });
 });
+
+describe('admin triple-stack health route', () => {
+  it('returns 200 with heartbeat details when the probe is green', async () => {
+    const route = findRoute('/triple-stack');
+    expect(route.map((h) => h.name)).toContain('requireAdminOrHealthSecret');
+
+    vi.spyOn(healthProbe, 'runTripleStackHealthProbe').mockResolvedValueOnce({
+      ok: true,
+      checkedAt: '2026-07-05T00:00:00.000Z',
+      heartbeatId: 'health_fixed',
+      legs: { mongo: true, neo4j: true, chroma: true },
+      legDetails: { mongo: 'readback_ok', neo4j: 'readback_ok', chroma: 'readback_ok' },
+    });
+
+    const handler = route[route.length - 1]!.handle;
+    const res = mockRes();
+    await handler({} as unknown, res as unknown as Response);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      ok: true,
+      checkedAt: '2026-07-05T00:00:00.000Z',
+      heartbeatId: 'health_fixed',
+      legs: { mongo: true, neo4j: true, chroma: true },
+      legDetails: { mongo: 'readback_ok', neo4j: 'readback_ok', chroma: 'readback_ok' },
+    });
+  });
+
+  it('returns 503 with heartbeat details when any probe leg is red', async () => {
+    const route = findRoute('/triple-stack');
+
+    vi.spyOn(healthProbe, 'runTripleStackHealthProbe').mockResolvedValueOnce({
+      ok: false,
+      checkedAt: '2026-07-05T00:00:00.000Z',
+      heartbeatId: 'health_fixed',
+      legs: { mongo: true, neo4j: true, chroma: false },
+      legDetails: { mongo: 'readback_ok', neo4j: 'readback_ok', chroma: 'readback_missing' },
+    });
+
+    const handler = route[route.length - 1]!.handle;
+    const res = mockRes();
+    await handler({} as unknown, res as unknown as Response);
+
+    expect(res.statusCode).toBe(503);
+    expect(res.body).toEqual({
+      ok: false,
+      checkedAt: '2026-07-05T00:00:00.000Z',
+      heartbeatId: 'health_fixed',
+      legs: { mongo: true, neo4j: true, chroma: false },
+      legDetails: { mongo: 'readback_ok', neo4j: 'readback_ok', chroma: 'readback_missing' },
+    });
+  });
+});
