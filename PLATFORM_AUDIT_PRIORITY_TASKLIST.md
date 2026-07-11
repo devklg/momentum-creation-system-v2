@@ -33,11 +33,11 @@ Release blockers, governance blockers, and correctness issues that should be han
 - [ ] 8. **Chroma:** Add a regression test for Chroma health readback and metadata filtering.
 - [ ] 9. **Operations:** Validate the admin triple-stack health probe after the Chroma heartbeat fix.
 - [ ] 10. **Agents:** Create AI_AGENT_PLAYBOOK.md or formally reconcile the missing file to a named current replacement.
-- [ ] 11. **Agents:** Link the agent playbook to AGENT_ARCHITECTURE.md, AGENT_PROMPT_GOVERNANCE.md, and runtime agent docs.
-- [ ] 12. **VM/RVM:** Create the explicit VM/RVM governance decision or ACR before expanding live delivery.
-- [ ] 13. **VM/RVM:** Add a VM/RVM compliance checklist covering automation, qualification, PMV, copy, and provider controls.
-- [ ] 14. **VM/RVM:** Confirm VM live delivery remains disabled until the governance and compliance checklist is approved.
-- [ ] 15. **GraphRAG:** Keep GraphRAG and Context Manager live flags off until canary criteria are written and approved.
+- [x] 11. **Agents:** Link the agent playbook to AGENT_ARCHITECTURE.md, AGENT_PROMPT_GOVERNANCE.md, and runtime agent docs.
+- [x] 12. **VM/RVM:** Create the explicit VM/RVM governance decision or ACR before expanding live delivery.
+- [x] 13. **VM/RVM:** Add a VM/RVM compliance checklist covering automation, qualification, PMV, copy, and provider controls.
+- [x] 14. **VM/RVM:** Confirm VM live delivery remains disabled until the governance and compliance checklist is approved.
+- [x] 15. **GraphRAG:** Keep GraphRAG and Context Manager live flags off until canary criteria are written and approved.
 - [ ] 16. **Docs:** Regenerate or clearly mark docs/build-registry.md as stale/current so agents do not rely on old status.
 - [ ] 17. **Docs:** Replace, remove, or explicitly mark the stale root TASK.md on main.
 - [ ] 18. **Docs:** Regenerate graphify output or add a visible stale-against-HEAD warning to existing graphify artifacts.
@@ -229,3 +229,4 @@ Use this section when assigning work to multiple agents. Keep the original numbe
 | Date | Item | Agent | Update | Blocker |
 | --- | --- | --- | --- | --- |
 | 2026-07-10 | P0 orchestration | Codex | Created P0 lane map, master prompt, lane briefs, launcher/worktree scripts, Lane 0 worktree, and `momentum.agent_status` rows for lanes 0-4. Lane 0 is prepared first; dependent lanes are gated until Lane 0 merges. | Queue mirror currently returned no `work_queue_leaves` rows from local Mongo `momentum`; P0 tasklist remains the source for this audit orchestration. |
+| 2026-07-11 | P0 Lane 3 governance | Codex | Closed items 11-15: linked the agent playbook from agent/prompt/runtime docs, proposed ACR-002 for VM/RVM live-delivery governance, added VM/RVM compliance checklist, documented live delivery disabled until approval, and added GraphRAG/Context canary criteria with live flags off by default. | ACR-002 remains Proposed and requires Kevin approval before live delivery expansion. |

@@ -18,6 +18,7 @@ same opportunity, tools, training, and support for every BA.
 Companion Governance:
 SCHEMA_GOVERNANCE.md
 MULTI_DB_AGENT_LEARNING_GOVERNANCE.md
+AI_AGENT_PLAYBOOK.md
 
 ---
 

@@ -6,6 +6,8 @@ Status: Proposed implementation architecture
 Scope: `.team` BA Cockpit, `.com` RVM prospect page, Admin oversight, Prospect CRM, VM campaign engine  
 Primary boundary: Momentum manages prospects before enrollment. Three International manages active business records after enrollment.
 
+P0 governance note (2026-07-11): live VM/RVM delivery is not approved by this architecture document. Expansion beyond dry-run/manual operation requires `constitution/acr/ACR-002-vm-rvm-live-delivery-governance.md` approval and the checklist in `docs/VM_RVM_COMPLIANCE_CHECKLIST.md`.
+
 ---
 
 ## 1. Purpose

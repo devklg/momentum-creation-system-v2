@@ -169,6 +169,8 @@ The `/runtime` folder contains the canonical Runtime Layer documents.
 /runtime/LEARNING_PIPELINE.md
 ```
 
+Current operational routing for agents is summarized in `../AI_AGENT_PLAYBOOK.md`. That playbook is subordinate to the ratified runtime specifications and points agents to the correct source before implementation.
+
 Implementation documents live outside `/runtime`.
 
 If present, implementation specifications belong under `/implementation`.
@@ -528,6 +530,8 @@ Chroma is the semantic memory.
 GraphRAG is the retrieval orchestration strategy.
 
 Agents do not access these stores directly.
+
+P0 live-flag guardrail (2026-07-11): GraphRAG and Context Manager remain governed design targets, not broad live-enabled defaults. See `../docs/GRAPHRAG_CONTEXT_CANARY_CRITERIA.md` before enabling live flags.
 
 ---
 

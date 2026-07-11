@@ -19,6 +19,7 @@ Companion architecture references:
 * `LAUNCH_CENTER_ARCHITECTURE.md`
 * `ORIENTATION_ARCHITECTURE.md`
 * `PMV_ARCHITECTURE.md`
+* `AI_AGENT_PLAYBOOK.md`
 
 This governance document exists to prevent prompt drift across the full Momentum Creation System V2 ecosystem.
 

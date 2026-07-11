@@ -25,6 +25,8 @@
 **External Runtime Scope:** Ringless Voicemail, SMS, future callback workflows
 **Telnyx Scope:** External runtime only. Telnyx is not part of internal Browser Voice, Steve, Michael, or Ivory runtime.
 
+**Operational Playbook:** `../AI_AGENT_PLAYBOOK.md` routes implementation work to this runtime spec and the prompt/agent governance documents. The playbook is subordinate to this ratified runtime source.
+
 ---
 
 ## 2. Purpose
