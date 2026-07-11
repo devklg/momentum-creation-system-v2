@@ -29,7 +29,7 @@
 import { randomBytes } from 'node:crypto';
 import { env } from '../env.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeOperational } from '../services/tieredWrite.js';
 import type {
   McsAppendAuditEntryInput,
   McsRuntimeAuditInput,
@@ -140,7 +140,7 @@ export async function appendAuditEntry(input: McsAppendAuditEntryInput): Promise
   // the entry stands alone (still traversable by action / timestamp).
   const cypher = buildCypher(entry);
 
-  await tripleStackWrite({
+  await writeOperational({
     id: entryId,
     mongoCollection: COLLECTION,
     mongoDoc: { ...entry, _id: entryId } as Record<string, unknown>,
@@ -293,8 +293,8 @@ export async function findAuditEntry(entryId: string): Promise<McsAuditLogEntry 
 //
 // A thin extension of the substrate above for the AGENT-RUNTIME turn lifecycle
 // (Michael/Steve/Ivory turns, gate decisions, draft-emission markers). Same
-// canonical `mcs_audit_log` triple-stack, same append-only invariant, same
-// app-direct tripleStackWrite seam (NO external MCP tool server; ACR-0007). Differences
+// canonical `mcs_audit_log` operational-tier write, same append-only invariant,
+// same app-direct persistence seam (NO external MCP tool server; ACR-0007). Differences
 // from the admin substrate:
 //   - metadata only: no before/after body EVER (lifecycle markers, not mutations);
 //   - carries a dedicated `runtime` scope block (ids only — no content, no PII);
@@ -348,7 +348,7 @@ export async function findRuntimeAuditEntry(
  * dedup hit, or `null` when the canary is disabled (no write attempted).
  *
  * Invariants (P7.2 §6): append-only, metadata-only (no before/after), all-three
- * -or-fail via tripleStackWrite, deterministic dedup on (turnId, action), tenant
+ * -or-fail via writeOperational, deterministic dedup on (turnId, action), tenant
  * + BA + agent scope on every row, no agent-authored writes.
  */
 export async function appendRuntimeAuditEntry(
@@ -396,7 +396,7 @@ export async function appendRuntimeAuditEntry(
 
   const cypher = buildRuntimeCypher(entry);
 
-  await tripleStackWrite({
+  await writeOperational({
     id: entryId,
     mongoCollection: COLLECTION,
     mongoDoc: { ...entry, _id: entryId } as Record<string, unknown>,

@@ -40,7 +40,7 @@
 
 import { createHash, randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeOperational } from '../services/tieredWrite.js';
 import type {
   McsIsoTimestamp,
   McsProspectAccountRecord,
@@ -235,7 +235,7 @@ export async function createProspectAccount(
   };
 
   try {
-    await tripleStackWrite({
+    await writeOperational({
       id: accountId,
       mongoCollection: MONGO_COLLECTION,
       mongoDoc: { ...record },

@@ -12,9 +12,9 @@
  *   • Interpolation is server-side. Rendered content is stored per
  *     recipient row so a later audit reads exactly what was sent.
  *
- * Triple-stack rule (locked-spec 3.14): broadcast records and recipient
- * rows write through `tripleStackWrite`. ChromaDB indexes the SMS / email
- * body so a future audit search ("what did Kevin send about X?") works.
+ * Operational-tier rule (locked-spec 3.14): broadcast records and recipient
+ * rows write through `writeOperational`. ChromaDB indexes the SMS / email body
+ * so a future audit search ("what did Kevin send about X?") works.
  *
  * Mongo PERSISTENCE gotchas baked in below (see services/tripleStack.ts):
  *   - `mongodb.insert`  needs `documents:` (plural array)
@@ -24,7 +24,7 @@
 
 import { randomBytes } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeOperational } from '../services/tieredWrite.js';
 import { findBAByTmagId, listAllBAsForAdmin, type BAListItem } from './ba.js';
 import { listLeaderTmagIds } from './adminMetrics.js';
 import { appendAuditEntry } from './auditLog.js';
@@ -435,7 +435,7 @@ export async function enqueueBroadcast(
     completedAt: null,
   };
 
-  await tripleStackWrite({
+  await writeOperational({
     id: broadcastId,
     mongoCollection: COLL_BROADCASTS,
     mongoDoc: { ...broadcast },
@@ -579,7 +579,7 @@ export async function prepareSendTest(
     completedAt: null,
   };
 
-  await tripleStackWrite({
+  await writeOperational({
     id: broadcastId,
     mongoCollection: COLL_BROADCASTS,
     mongoDoc: { ...broadcast },

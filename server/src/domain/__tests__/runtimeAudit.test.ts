@@ -11,15 +11,15 @@ import type { McsRuntimeAuditInput, McsRuntimeAuditContext } from '@momentum/sha
 
 const mocks = vi.hoisted(() => ({
   persistenceCall: vi.fn(),
-  tripleStackWrite: vi.fn(),
+  writeOperational: vi.fn(),
 }));
 
 vi.mock('../../services/persistence/dispatch.js', () => ({
   persistenceCall: mocks.persistenceCall,
 }));
 
-vi.mock('../../services/tripleStack.js', () => ({
-  tripleStackWrite: mocks.tripleStackWrite,
+vi.mock('../../services/tieredWrite.js', () => ({
+  writeOperational: mocks.writeOperational,
 }));
 
 type AnyRec = Record<string, unknown>;
@@ -54,7 +54,7 @@ async function loadAudit(enabled: boolean) {
 
 beforeEach(() => {
   mocks.persistenceCall.mockReset();
-  mocks.tripleStackWrite.mockReset();
+  mocks.writeOperational.mockReset();
 });
 
 afterEach(() => {
@@ -74,11 +74,11 @@ describe('Phase 7 R0 — appendRuntimeAuditEntry canary gate', () => {
     const result = await audit.appendRuntimeAuditEntry(input());
 
     expect(result).toBeNull();
-    expect(mocks.tripleStackWrite).not.toHaveBeenCalled();
+    expect(mocks.writeOperational).not.toHaveBeenCalled();
     expect(mocks.persistenceCall).not.toHaveBeenCalled();
   });
 
-  it('writes through the triple-stack when the flag is ON', async () => {
+  it('writes through the operational tier when the flag is ON', async () => {
     mocks.persistenceCall.mockImplementation(defaultPersistence());
     const audit = await loadAudit(true);
     expect(audit.runtimeAuditPersistenceEnabled()).toBe(true);
@@ -86,8 +86,8 @@ describe('Phase 7 R0 — appendRuntimeAuditEntry canary gate', () => {
     const result = await audit.appendRuntimeAuditEntry(input());
 
     expect(result).not.toBeNull();
-    expect(mocks.tripleStackWrite).toHaveBeenCalledTimes(1);
-    const call = mocks.tripleStackWrite.mock.calls[0]![0] as AnyRec;
+    expect(mocks.writeOperational).toHaveBeenCalledTimes(1);
+    const call = mocks.writeOperational.mock.calls[0]![0] as AnyRec;
     expect(call.mongoCollection).toBe('mcs_audit_log');
     expect((call.chroma as AnyRec).collection).toBe('mcs_audit_log');
     expect(result!.runtime).toEqual(RUNTIME);
@@ -103,7 +103,7 @@ describe('Phase 7 R0 — metadata-only + scope invariants', () => {
 
     expect(result!.before).toBeNull();
     expect(result!.after).toBeNull();
-    const doc = (mocks.tripleStackWrite.mock.calls[0]![0] as AnyRec).mongoDoc as AnyRec;
+    const doc = (mocks.writeOperational.mock.calls[0]![0] as AnyRec).mongoDoc as AnyRec;
     expect(doc.before).toBeNull();
     expect(doc.after).toBeNull();
   });
@@ -118,7 +118,7 @@ describe('Phase 7 R0 — metadata-only + scope invariants', () => {
     expect(result!.role).toBe('system');
     expect(result!.runtime.tenantId).toBe('team_magnificent');
     expect(result!.runtime.tmagId).toBe('TMAG-1');
-    const meta = (mocks.tripleStackWrite.mock.calls[0]![0] as AnyRec).chroma as AnyRec;
+    const meta = (mocks.writeOperational.mock.calls[0]![0] as AnyRec).chroma as AnyRec;
     expect((meta.metadata as AnyRec).tenantId).toBe('team_magnificent');
     expect((meta.metadata as AnyRec).agent).toBe('michael');
   });
@@ -164,7 +164,7 @@ describe('Phase 7 R0 — idempotency on (turnId, action)', () => {
     const result = await audit.appendRuntimeAuditEntry(input());
 
     expect(result!.entryId).toBe('audit_existing');
-    expect(mocks.tripleStackWrite).not.toHaveBeenCalled();
+    expect(mocks.writeOperational).not.toHaveBeenCalled();
   });
 
   it('queries the dedup key by action + runtime.turnId', async () => {

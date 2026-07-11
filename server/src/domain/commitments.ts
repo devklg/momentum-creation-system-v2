@@ -6,7 +6,7 @@
  * Per TEAM Design Section C.4 (Locked Chat #82/#84).
  */
 
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeOperational } from '../services/tieredWrite.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 
 export const COMMITMENT_VERSION = 'v1_2026_05_18';
@@ -48,7 +48,7 @@ export async function recordCommitment(
     userAgent: input.userAgent,
   };
 
-  await tripleStackWrite({
+  await writeOperational({
     id: commitmentId,
     mongoCollection: 'tmag_commitments',
     mongoDoc: record as unknown as Record<string, unknown>,

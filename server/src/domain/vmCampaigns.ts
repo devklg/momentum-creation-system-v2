@@ -7,7 +7,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeOperational } from '../services/tieredWrite.js';
 import { findLeadOwnerForOwner } from './vmLeadOwners.js';
 import type {
   McsAdminVmLiveApprovalResponse,
@@ -66,7 +66,7 @@ export async function createVMCampaign(
     updatedAt: now,
   };
 
-  await tripleStackWrite({
+  await writeOperational({
     id: campaign.vmCampaignId,
     mongoCollection: COLLECTION,
     mongoDoc: { ...campaign },

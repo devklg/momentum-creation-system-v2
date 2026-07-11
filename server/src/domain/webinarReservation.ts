@@ -22,7 +22,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
-import { tripleStackWrite } from '../services/tripleStack.js';
+import { writeOperational } from '../services/tieredWrite.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import { sendEmail, ResendConfigError, ResendError } from '../services/resend.js';
 import type {
@@ -188,7 +188,7 @@ export async function createWebinarReservation(
     createdAt,
   };
 
-  await tripleStackWrite({
+  await writeOperational({
     id: reservationId,
     mongoCollection: MONGO_COLLECTION,
     mongoDoc: {

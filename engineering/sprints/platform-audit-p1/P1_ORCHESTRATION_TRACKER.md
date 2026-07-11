@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-knowledge-record-sweep`
+Latest branch: `codex/platform-audit-p1-operational-record-sweep`
 
 Closed in this tranche:
 
@@ -31,6 +31,7 @@ Closed in this tranche:
 - P1-30: moved all remaining graph-critical records to `writeGraphCritical`
   with rollback/readback expectations.
 - P1-31: moved all remaining knowledge-tier records to `writeKnowledge`.
+- P1-32: moved all remaining operational records to `writeOperational`.
 
 Catalog artifacts:
 
@@ -44,8 +45,8 @@ Inventory result:
 | --- | ---: |
 | `graph_critical` | 0 |
 | `knowledge` | 0 |
-| `operational` | 18 |
-| Total production `tripleStackWrite` call sites remaining | 18 |
+| `operational` | 0 |
+| Total production `tripleStackWrite` call sites remaining | 0 |
 
 ## Completed Migration Tranches
 
@@ -253,6 +254,35 @@ Implementation:
   content videos, GraphRAG, learning candidates, and Steve discovery.
 - Catalog regenerated to 18 remaining production `tripleStackWrite` call sites,
   all `operational`.
+
+### P1-32: Operational Record Sweep
+
+Migrated:
+
+- `server/scripts/seed-webinar-events.ts` webinar event seeding.
+- `server/src/domain/adminProspectOversight.ts` admin prospect action audit.
+- `server/src/domain/adminTenantArchitecture.ts` tenant settings versions.
+- `server/src/domain/auditLog.ts` admin audit and runtime audit entries.
+- `server/src/domain/broadcast.ts` broadcast records and recipient rows.
+- `server/src/domain/callbackRequest.ts` callback requests.
+- `server/src/domain/commitments.ts` welcome commitment records.
+- `server/src/domain/orientationSession.ts` orientation session records and
+  events.
+- `server/src/domain/outcomes.ts` outcome records.
+- `server/src/domain/prospectAccount.ts` prospect account creation.
+- `server/src/domain/prospectMagicLink.ts` prospect magic-link rows.
+- `server/src/domain/threeWayCalls.ts` three-way call records and call events.
+- `server/src/domain/vmCampaigns.ts` VM campaign records.
+- `server/src/domain/webinarReservation.ts` webinar reservations.
+
+Implementation:
+
+- All remaining operational raw writes now use `writeOperational`, so Mongo
+  readback remains the success boundary and Neo4j/Chroma projections route
+  through the durable operational outbox path on failure.
+- Updated focused tests to mock/assert the `writeOperational` boundary for
+  audit log, runtime audit, and outcomes.
+- Catalog regenerated to 0 remaining production `tripleStackWrite` call sites.
 
 ## Lane Map
 
