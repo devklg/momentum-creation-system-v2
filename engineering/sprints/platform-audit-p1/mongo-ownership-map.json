@@ -1,0 +1,1022 @@
+{
+  "generatedAt": "2026-07-11T16:26:05.339Z",
+  "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
+  "collectionCount": 65,
+  "unclassifiedCount": 0,
+  "byOwner": {
+    "dynamic_helper": 4,
+    "broadcast_delivery": 3,
+    "operations_governance": 6,
+    "knowledge_content": 5,
+    "agents_training_success": 11,
+    "events_orientation_and_calls": 6,
+    "membership_identity": 6,
+    "prospect_invitation_flow": 5,
+    "prospect_crm": 5,
+    "holding_tank_and_reentry": 6,
+    "vm_rvm": 8
+  },
+  "collections": [
+    {
+      "collection": "agentEventsCollection",
+      "ownerId": "dynamic_helper",
+      "owner": "Dynamic helper expression",
+      "steward": "Owning caller resolves at runtime",
+      "primarySurface": "system",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": false,
+      "sourceCount": 1,
+      "sourceFiles": [
+        "server/src/domain/agents/orchestrator.ts"
+      ]
+    },
+    {
+      "collection": "broadcast_optouts",
+      "ownerId": "broadcast_delivery",
+      "owner": "Broadcast delivery and opt-out state",
+      "steward": "Broadcast domain",
+      "primarySurface": "admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/domain/broadcast.ts"
+      ]
+    },
+    {
+      "collection": "broadcast_recipients",
+      "ownerId": "broadcast_delivery",
+      "owner": "Broadcast delivery and opt-out state",
+      "steward": "Broadcast domain",
+      "primarySurface": "admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 8,
+      "sourceFiles": [
+        "server/src/domain/broadcast.ts"
+      ]
+    },
+    {
+      "collection": "broadcasts",
+      "ownerId": "broadcast_delivery",
+      "owner": "Broadcast delivery and opt-out state",
+      "steward": "Broadcast domain",
+      "primarySurface": "admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 5,
+      "sourceFiles": [
+        "server/src/domain/broadcast.ts"
+      ]
+    },
+    {
+      "collection": "input.mongoCollection",
+      "ownerId": "dynamic_helper",
+      "owner": "Dynamic helper expression",
+      "steward": "Owning caller resolves at runtime",
+      "primarySurface": "system",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": false,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/services/tieredWrite.ts",
+        "server/src/services/tripleStack.ts"
+      ]
+    },
+    {
+      "collection": "KNOWLEDGE_CHUNK_COLLECTION",
+      "ownerId": "dynamic_helper",
+      "owner": "Dynamic helper expression",
+      "steward": "Owning caller resolves at runtime",
+      "primarySurface": "system",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": false,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/services/knowledge/approvedKnowledgeStore.ts"
+      ]
+    },
+    {
+      "collection": "KNOWLEDGE_SOURCE_COLLECTION",
+      "ownerId": "dynamic_helper",
+      "owner": "Dynamic helper expression",
+      "steward": "Owning caller resolves at runtime",
+      "primarySurface": "system",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": false,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/scripts/seed-three-knowledge-base.ts",
+        "server/scripts/seed-upline-knowledge-base.ts",
+        "server/src/services/knowledge/approvedKnowledgeStore.ts"
+      ]
+    },
+    {
+      "collection": "mcs_audit_log",
+      "ownerId": "operations_governance",
+      "owner": "Operations, audit, tenant, settings, and projection health",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 5,
+      "sourceFiles": [
+        "server/src/domain/auditLog.ts"
+      ]
+    },
+    {
+      "collection": "mcs_graphrag_records",
+      "ownerId": "knowledge_content",
+      "owner": "Knowledge, content, and retrieval governance",
+      "steward": "Knowledge / content domain",
+      "primarySurface": "admin + runtime",
+      "persistenceTier": "knowledge",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 1,
+      "sourceFiles": [
+        "server/src/domain/graphrag.ts"
+      ]
+    },
+    {
+      "collection": "mcs_learning_candidates",
+      "ownerId": "knowledge_content",
+      "owner": "Knowledge, content, and retrieval governance",
+      "steward": "Knowledge / content domain",
+      "primarySurface": "admin + runtime",
+      "persistenceTier": "knowledge",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/domain/learningCandidates.ts"
+      ]
+    },
+    {
+      "collection": "mcs_outcomes",
+      "ownerId": "operations_governance",
+      "owner": "Operations, audit, tenant, settings, and projection health",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/domain/outcomes.ts"
+      ]
+    },
+    {
+      "collection": "mcs_questionnaires",
+      "ownerId": "agents_training_success",
+      "owner": "BA agents, training, success profile, and commitments",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 1,
+      "sourceFiles": [
+        "server/src/domain/questionnaire.ts"
+      ]
+    },
+    {
+      "collection": "mcs_workbooks",
+      "ownerId": "agents_training_success",
+      "owner": "BA agents, training, success profile, and commitments",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/domain/workbook.ts"
+      ]
+    },
+    {
+      "collection": "orientation_sessions",
+      "ownerId": "events_orientation_and_calls",
+      "owner": "Events, orientation, webinars, and three-way calls",
+      "steward": "Events / orientation domain",
+      "primarySurface": "team + admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 1,
+      "sourceFiles": [
+        "server/scripts/seed-orientation-sessions.ts"
+      ]
+    },
+    {
+      "collection": "team_magnificent_members",
+      "ownerId": "membership_identity",
+      "owner": "Membership identity and sponsor governance",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "explicit_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 57,
+      "sourceFiles": [
+        "server/scripts/backfill-founder-timezones.ts",
+        "server/scripts/setup-founder-access.ts",
+        "server/src/domain/adminBaCrud.ts",
+        "server/src/domain/adminBaOversight.ts",
+        "server/src/domain/adminMetrics.ts",
+        "server/src/domain/adminProspectOversight.ts",
+        "server/src/domain/ba.ts",
+        "server/src/domain/baIdentityPersistence.ts",
+        "server/src/domain/broadcast.ts",
+        "server/src/domain/cockpit.ts",
+        "server/src/domain/commitments.ts",
+        "server/src/domain/entitlements.ts",
+        "server/src/domain/michael-training-support.ts",
+        "server/src/domain/profile.ts",
+        "server/src/domain/questionnaire.ts",
+        "server/src/domain/recruitingCycle.ts",
+        "server/src/domain/reports/baActivation.ts",
+        "server/src/domain/reports/enrollmentCompletion.ts",
+        "server/src/domain/reports/inviteFunnel.ts",
+        "server/src/domain/reports/leaderScorecards.ts",
+        "server/src/domain/reports/trainingCompletion.ts",
+        "server/src/domain/steve-success-interview.ts",
+        "server/src/domain/steveConversationRuntime.ts",
+        "server/src/domain/tmagIds.ts",
+        "server/src/domain/workbook.ts",
+        "server/src/routes/steve.ts"
+      ]
+    },
+    {
+      "collection": "tenant_settings_versions",
+      "ownerId": "operations_governance",
+      "owner": "Operations, audit, tenant, settings, and projection health",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/domain/adminTenantArchitecture.ts"
+      ]
+    },
+    {
+      "collection": "tmag_access_codes",
+      "ownerId": "membership_identity",
+      "owner": "Membership identity and sponsor governance",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 8,
+      "sourceFiles": [
+        "server/scripts/seed-access-codes.ts",
+        "server/src/domain/access-codes.ts",
+        "server/src/domain/codeGen.ts",
+        "server/src/domain/profile.ts",
+        "server/src/domain/sponsorImmutabilityPersistence.ts"
+      ]
+    },
+    {
+      "collection": "tmag_admin_curated_leader_tags",
+      "ownerId": "membership_identity",
+      "owner": "Membership identity and sponsor governance",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/domain/adminBaOversight.ts"
+      ]
+    },
+    {
+      "collection": "tmag_admin_member_notes",
+      "ownerId": "membership_identity",
+      "owner": "Membership identity and sponsor governance",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/domain/adminBaOversight.ts"
+      ]
+    },
+    {
+      "collection": "tmag_admin_prospect_notes",
+      "ownerId": "operations_governance",
+      "owner": "Operations, audit, tenant, settings, and projection health",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 1,
+      "sourceFiles": [
+        "server/src/domain/adminProspectOversight.ts"
+      ]
+    },
+    {
+      "collection": "tmag_admin_settings",
+      "ownerId": "operations_governance",
+      "owner": "Operations, audit, tenant, settings, and projection health",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/domain/adminQueueOversight.ts"
+      ]
+    },
+    {
+      "collection": "tmag_admin_sponsor_overrides",
+      "ownerId": "membership_identity",
+      "owner": "Membership identity and sponsor governance",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/domain/adminBaOversight.ts",
+        "server/src/domain/sponsorImmutabilityPersistence.ts"
+      ]
+    },
+    {
+      "collection": "tmag_agent_michael_events",
+      "ownerId": "agents_training_success",
+      "owner": "BA agents, training, success profile, and commitments",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 1,
+      "sourceFiles": [
+        "server/src/domain/recruitingCycle.ts"
+      ]
+    },
+    {
+      "collection": "tmag_agent_steve_events",
+      "ownerId": "agents_training_success",
+      "owner": "BA agents, training, success profile, and commitments",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/domain/steveConversationRuntime.ts"
+      ]
+    },
+    {
+      "collection": "tmag_commitments",
+      "ownerId": "agents_training_success",
+      "owner": "BA agents, training, success profile, and commitments",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/domain/cockpit.ts",
+        "server/src/domain/commitments.ts"
+      ]
+    },
+    {
+      "collection": "tmag_content_templates",
+      "ownerId": "knowledge_content",
+      "owner": "Knowledge, content, and retrieval governance",
+      "steward": "Knowledge / content domain",
+      "primarySurface": "admin + runtime",
+      "persistenceTier": "knowledge",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/domain/adminTenantArchitecture.ts"
+      ]
+    },
+    {
+      "collection": "tmag_content_videos",
+      "ownerId": "knowledge_content",
+      "owner": "Knowledge, content, and retrieval governance",
+      "steward": "Knowledge / content domain",
+      "primarySurface": "admin + runtime",
+      "persistenceTier": "knowledge",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 5,
+      "sourceFiles": [
+        "server/scripts/seed-content-videos.ts",
+        "server/src/domain/contentVideos.ts"
+      ]
+    },
+    {
+      "collection": "tmag_fast_start_progress",
+      "ownerId": "agents_training_success",
+      "owner": "BA agents, training, success profile, and commitments",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 7,
+      "sourceFiles": [
+        "server/src/domain/adminMetrics.ts",
+        "server/src/domain/reports/trainingCompletion.ts",
+        "server/src/domain/training.ts"
+      ]
+    },
+    {
+      "collection": "tmag_invitation_generator_runs",
+      "ownerId": "knowledge_content",
+      "owner": "Knowledge, content, and retrieval governance",
+      "steward": "Knowledge / content domain",
+      "primarySurface": "admin + runtime",
+      "persistenceTier": "knowledge",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/domain/generator.ts"
+      ]
+    },
+    {
+      "collection": "tmag_ivory_prospect_names",
+      "ownerId": "agents_training_success",
+      "owner": "BA agents, training, success profile, and commitments",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 8,
+      "sourceFiles": [
+        "server/src/domain/ivory.ts",
+        "server/src/domain/recruitingCycle.ts"
+      ]
+    },
+    {
+      "collection": "tmag_new_member_orientation_reservations",
+      "ownerId": "events_orientation_and_calls",
+      "owner": "Events, orientation, webinars, and three-way calls",
+      "steward": "Events / orientation domain",
+      "primarySurface": "team + admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 5,
+      "sourceFiles": [
+        "server/src/domain/orientationSession.ts"
+      ]
+    },
+    {
+      "collection": "tmag_new_member_orientation_sessions",
+      "ownerId": "events_orientation_and_calls",
+      "owner": "Events, orientation, webinars, and three-way calls",
+      "steward": "Events / orientation domain",
+      "primarySurface": "team + admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 4,
+      "sourceFiles": [
+        "server/src/domain/orientationSession.ts"
+      ]
+    },
+    {
+      "collection": "tmag_profile_change_challenges",
+      "ownerId": "membership_identity",
+      "owner": "Membership identity and sponsor governance",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/domain/profile.ts"
+      ]
+    },
+    {
+      "collection": "tmag_projection_outbox",
+      "ownerId": "operations_governance",
+      "owner": "Operations, audit, tenant, settings, and projection health",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 4,
+      "sourceFiles": [
+        "server/src/services/projectionOutbox.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_callback_requests",
+      "ownerId": "prospect_invitation_flow",
+      "owner": "Prospect invitation and PMV flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 6,
+      "sourceFiles": [
+        "server/src/domain/callbackRequest.ts",
+        "server/src/domain/cockpit.ts",
+        "server/src/domain/crm.ts",
+        "server/src/domain/todaysActions.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_crm_dispositions",
+      "ownerId": "prospect_crm",
+      "owner": "Prospect CRM and follow-up trail",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 6,
+      "sourceFiles": [
+        "server/src/domain/cockpit.ts",
+        "server/src/domain/crm.ts",
+        "server/src/domain/reports/followUpAging.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_crm_followups",
+      "ownerId": "prospect_crm",
+      "owner": "Prospect CRM and follow-up trail",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 8,
+      "sourceFiles": [
+        "server/src/domain/cockpit.ts",
+        "server/src/domain/crm.ts",
+        "server/src/domain/recruitingCycle.ts",
+        "server/src/domain/todaysActions.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_crm_notes",
+      "ownerId": "prospect_crm",
+      "owner": "Prospect CRM and follow-up trail",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/domain/cockpit.ts",
+        "server/src/domain/crm.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_crm_records",
+      "ownerId": "prospect_crm",
+      "owner": "Prospect CRM and follow-up trail",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 7,
+      "sourceFiles": [
+        "server/src/domain/crmOwnershipPersistence.ts",
+        "server/src/domain/prospectCrm.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_htank_accounts",
+      "ownerId": "holding_tank_and_reentry",
+      "owner": "Holding tank, prospect account, and re-entry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 8,
+      "sourceFiles": [
+        "server/src/domain/prospectAccount.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_htank_counters",
+      "ownerId": "holding_tank_and_reentry",
+      "owner": "Holding tank, prospect account, and re-entry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 8,
+      "sourceFiles": [
+        "server/src/domain/adminQueueOversight.ts",
+        "server/src/domain/holdingTank.ts",
+        "server/src/domain/previewToken.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_htank_placements",
+      "ownerId": "holding_tank_and_reentry",
+      "owner": "Holding tank, prospect account, and re-entry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 22,
+      "sourceFiles": [
+        "server/scripts/smoke-holding-tank.ts",
+        "server/src/domain/adminMetrics.ts",
+        "server/src/domain/adminQueueOversight.ts",
+        "server/src/domain/holdingTank.ts",
+        "server/src/domain/poolPlacementPersistence.ts",
+        "server/src/domain/reports/baActivation.ts",
+        "server/src/domain/reports/enrollmentCompletion.ts",
+        "server/src/domain/reports/leaderScorecards.ts",
+        "server/src/domain/reports/queueVelocity.ts",
+        "server/src/routes/admin/queue.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_invitation_activity",
+      "ownerId": "prospect_invitation_flow",
+      "owner": "Prospect invitation and PMV flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 7,
+      "sourceFiles": [
+        "server/src/domain/cockpit.ts",
+        "server/src/domain/crm.ts",
+        "server/src/domain/invitations.ts",
+        "server/src/domain/reports/baActivation.ts",
+        "server/src/domain/reports/inviteFunnel.ts",
+        "server/src/domain/reports/leaderScorecards.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_invite_tokens",
+      "ownerId": "prospect_invitation_flow",
+      "owner": "Prospect invitation and PMV flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 8,
+      "sourceFiles": [
+        "server/src/domain/cockpit.ts",
+        "server/src/domain/reports/inviteFunnel.ts",
+        "server/src/domain/tokenLifecyclePersistence.ts",
+        "server/src/domain/tokens.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_magic_links",
+      "ownerId": "holding_tank_and_reentry",
+      "owner": "Holding tank, prospect account, and re-entry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 5,
+      "sourceFiles": [
+        "server/src/domain/prospectMagicLink.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_sessions",
+      "ownerId": "prospect_invitation_flow",
+      "owner": "Prospect invitation and PMV flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/services/prospectSession.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_timeline_events",
+      "ownerId": "prospect_crm",
+      "owner": "Prospect CRM and follow-up trail",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/domain/prospectCrm.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_webinar_events",
+      "ownerId": "holding_tank_and_reentry",
+      "owner": "Holding tank, prospect account, and re-entry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 4,
+      "sourceFiles": [
+        "server/src/domain/adminProspectOversight.ts",
+        "server/src/domain/webinarEvent.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospect_webinar_reservations",
+      "ownerId": "holding_tank_and_reentry",
+      "owner": "Holding tank, prospect account, and re-entry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/domain/webinarReservation.ts"
+      ]
+    },
+    {
+      "collection": "tmag_prospects",
+      "ownerId": "prospect_invitation_flow",
+      "owner": "Prospect invitation and PMV flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 36,
+      "sourceFiles": [
+        "server/scripts/smoke-holding-tank.ts",
+        "server/src/domain/adminMetrics.ts",
+        "server/src/domain/adminProspectCrud.ts",
+        "server/src/domain/adminProspectOversight.ts",
+        "server/src/domain/adminQueueOversight.ts",
+        "server/src/domain/bulkLeads.ts",
+        "server/src/domain/cockpit.ts",
+        "server/src/domain/crm.ts",
+        "server/src/domain/holdingTank.ts",
+        "server/src/domain/invitations.ts",
+        "server/src/domain/ivory-momentum.ts",
+        "server/src/domain/prospectCrm.ts",
+        "server/src/domain/prospects.ts",
+        "server/src/domain/recruitingCycle.ts",
+        "server/src/domain/todaysActions.ts",
+        "server/src/domain/training.ts"
+      ]
+    },
+    {
+      "collection": "tmag_questionnaires",
+      "ownerId": "agents_training_success",
+      "owner": "BA agents, training, success profile, and commitments",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/domain/questionnaire.ts"
+      ]
+    },
+    {
+      "collection": "tmag_recruiting_cycles",
+      "ownerId": "agents_training_success",
+      "owner": "BA agents, training, success profile, and commitments",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/domain/recruitingCycle.ts"
+      ]
+    },
+    {
+      "collection": "tmag_sponsor_availability",
+      "ownerId": "events_orientation_and_calls",
+      "owner": "Events, orientation, webinars, and three-way calls",
+      "steward": "Events / orientation domain",
+      "primarySurface": "team + admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 5,
+      "sourceFiles": [
+        "server/src/domain/threeWayCalls.ts"
+      ]
+    },
+    {
+      "collection": "tmag_steve_success_interview",
+      "ownerId": "agents_training_success",
+      "owner": "BA agents, training, success profile, and commitments",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 7,
+      "sourceFiles": [
+        "server/src/domain/michael-training-support.ts",
+        "server/src/domain/recruitingCycle.ts",
+        "server/src/domain/reports/baActivation.ts",
+        "server/src/domain/steve-success-interview.ts"
+      ]
+    },
+    {
+      "collection": "tmag_three_way_bookings",
+      "ownerId": "events_orientation_and_calls",
+      "owner": "Events, orientation, webinars, and three-way calls",
+      "steward": "Events / orientation domain",
+      "primarySurface": "team + admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 5,
+      "sourceFiles": [
+        "server/src/domain/threeWayCalls.ts"
+      ]
+    },
+    {
+      "collection": "tmag_vm_audit_events",
+      "ownerId": "vm_rvm",
+      "owner": "VM/RVM import, ownership, queue, and provider events",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 1,
+      "sourceFiles": [
+        "server/src/domain/vmProviderQueue.ts"
+      ]
+    },
+    {
+      "collection": "tmag_vm_bulk_leads",
+      "ownerId": "vm_rvm",
+      "owner": "VM/RVM import, ownership, queue, and provider events",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 14,
+      "sourceFiles": [
+        "server/src/domain/bulkLeads.ts",
+        "server/src/domain/prospectCrm.ts",
+        "server/src/domain/vmProviderQueue.ts",
+        "server/src/routes/vm.ts"
+      ]
+    },
+    {
+      "collection": "tmag_vm_campaigns",
+      "ownerId": "vm_rvm",
+      "owner": "VM/RVM import, ownership, queue, and provider events",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 6,
+      "sourceFiles": [
+        "server/src/domain/vmCampaigns.ts",
+        "server/src/workers/vmDeliveryWorker.ts"
+      ]
+    },
+    {
+      "collection": "tmag_vm_delivery_events",
+      "ownerId": "vm_rvm",
+      "owner": "VM/RVM import, ownership, queue, and provider events",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 1,
+      "sourceFiles": [
+        "server/src/domain/vmProviderQueue.ts"
+      ]
+    },
+    {
+      "collection": "tmag_vm_lead_owners",
+      "ownerId": "vm_rvm",
+      "owner": "VM/RVM import, ownership, queue, and provider events",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 4,
+      "sourceFiles": [
+        "server/src/domain/vmLeadOwners.ts"
+      ]
+    },
+    {
+      "collection": "tmag_vm_provider_webhook_events",
+      "ownerId": "vm_rvm",
+      "owner": "VM/RVM import, ownership, queue, and provider events",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 4,
+      "sourceFiles": [
+        "server/src/domain/vmProviderQueue.ts"
+      ]
+    },
+    {
+      "collection": "tmag_vm_queue_jobs",
+      "ownerId": "vm_rvm",
+      "owner": "VM/RVM import, ownership, queue, and provider events",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 8,
+      "sourceFiles": [
+        "server/src/domain/vmCampaigns.ts",
+        "server/src/domain/vmProviderQueue.ts"
+      ]
+    },
+    {
+      "collection": "tmag_vm_suppression_list",
+      "ownerId": "vm_rvm",
+      "owner": "VM/RVM import, ownership, queue, and provider events",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 1,
+      "sourceFiles": [
+        "server/src/domain/vmProviderQueue.ts"
+      ]
+    },
+    {
+      "collection": "tmag_workbooks",
+      "ownerId": "agents_training_success",
+      "owner": "BA agents, training, success profile, and commitments",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 4,
+      "sourceFiles": [
+        "server/src/domain/workbook.ts"
+      ]
+    },
+    {
+      "collection": "webinar_events",
+      "ownerId": "events_orientation_and_calls",
+      "owner": "Events, orientation, webinars, and three-way calls",
+      "steward": "Events / orientation domain",
+      "primarySurface": "team + admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/scripts/seed-webinar-events.ts"
+      ]
+    }
+  ]
+}
