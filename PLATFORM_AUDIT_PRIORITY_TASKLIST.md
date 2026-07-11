@@ -23,10 +23,10 @@
 
 Release blockers, governance blockers, and correctness issues that should be handled first.
 
-- [ ] 1. **Michael runtime:** Resolve the Michael runtime contract decision: degraded safe_fallback versus next_training_step for server-owned turns.
-- [ ] 2. **Michael runtime:** Update either the Michael implementation or the tests so the contract is explicit and no longer drifted.
-- [ ] 3. **Michael runtime:** Add regression coverage for empty body, explicit English, and explicit Spanish Michael runtime requests.
-- [ ] 4. **Verification:** Rerun the full server Vitest suite until the Michael runtime failure cluster is green.
+- [x] 1. **Michael runtime:** Resolve the Michael runtime contract decision: degraded safe_fallback versus next_training_step for server-owned turns.
+- [x] 2. **Michael runtime:** Update either the Michael implementation or the tests so the contract is explicit and no longer drifted.
+- [x] 3. **Michael runtime:** Add regression coverage for empty body, explicit English, and explicit Spanish Michael runtime requests.
+- [x] 4. **Verification:** Rerun the full server Vitest suite until the Michael runtime failure cluster is green.
 - [x] 5. **Verification:** Resolve pnpm dependency approval state for argon2 and esbuild so normal gates run without bypass flags.
 - [x] 6. **Operations:** Document the accepted local gate command pattern if pnpm approval state intentionally remains constrained.
 - [ ] 7. **Chroma:** Fix Chroma health heartbeat readback so the metadata field used for write and readback matches.
@@ -230,3 +230,4 @@ Use this section when assigning work to multiple agents. Keep the original numbe
 | --- | --- | --- | --- | --- |
 | 2026-07-10 | P0 orchestration | Codex | Created P0 lane map, master prompt, lane briefs, launcher/worktree scripts, Lane 0 worktree, and `momentum.agent_status` rows for lanes 0-4. Lane 0 is prepared first; dependent lanes are gated until Lane 0 merges. | Queue mirror currently returned no `work_queue_leaves` rows from local Mongo `momentum`; P0 tasklist remains the source for this audit orchestration. |
 | 2026-07-11 | P0 Lane 0 foundation | Codex | Closed items 5, 6, 10, 16, 17, 18, and 19: normal `pnpm install --frozen-lockfile` passed with `argon2`/`esbuild` allowBuilds, active gate commands and blockers are in `engineering/sprints/platform-audit-p0/P0_RELEASE_TRACKER.md`, `AI_AGENT_PLAYBOOK.md` exists, stale build-registry/TASK/graphify warnings are visible. | Items 1-4, 7-9, 11-15, and 20 remain owned by Lanes 1-4. |
+| 2026-07-11 | P0 Lane 1 Michael runtime | Codex | Closed items 1-4 as evidence-only: current baseline already enforces degraded `safe_fallback` for server-owned turns while Context Manager live retrieval is off, with regression coverage for empty body, explicit English, explicit Spanish, forbidden body fields, malformed language, fail-closed flags, trace off by default, and disabled persistence. Verification passed: `pnpm --filter @momentum/server test -- michael-runtime` (7 files / 104 tests) and full server Vitest (150 files / 1615 tests). | No implementation edit was needed. A future `next_training_step` contract requires approved live Context Manager retrieval, not this P0 lane. |
