@@ -21,6 +21,7 @@
     "seed:orientation-sessions": "tsx scripts/seed-orientation-sessions.ts",
     "seed:three-knowledge": "tsx scripts/seed-three-knowledge-base.ts",
     "seed:upline-knowledge": "tsx scripts/seed-upline-knowledge-base.ts",
+    "reconcile:stores": "tsx scripts/run-cross-store-reconciliation.ts",
     "smoke:steve-context": "tsx scripts/smoke-steve-context-comparison.ts",
     "worker:vm-import": "tsx src/workers/vmImportWorker.ts",
     "worker:vm-delivery": "tsx src/workers/vmDeliveryWorker.ts",
