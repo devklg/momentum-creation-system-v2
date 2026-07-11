@@ -735,7 +735,7 @@ read-back (Rule 1.2.3). Schedules/owners marked `[SET BY KEVIN]` are pending.
 | # | Procedure | Pass criterion |
 | --- | --- | --- |
 | M1 | Index audit: all day-one unique indexes present (contract Section 9); no missing/duplicate. | Complete. |
-| M2 | Cross-store reconciliation: sample N membership records; confirm Mongo ↔ Neo4j ↔ Chroma agreement. | Within tolerance `[SET BY KEYIN]`. |
+| M2 | Cross-store reconciliation: run `pnpm --filter @momentum/server reconcile:stores -- --limit 25`; add `--fail-on-drift` for gate mode. | No missing/error legs, or drift logged for repair. |
 | M3 | Master-content propagation audit: every override reflected by downstream consumers. | No inert overrides. |
 | M4 | Capacity review: store sizes, embedding volume, growth trend. | Within plan. |
 | M5 | Access review (interim, until RBAC): list of admins and standing access. | Confirmed by owner. |

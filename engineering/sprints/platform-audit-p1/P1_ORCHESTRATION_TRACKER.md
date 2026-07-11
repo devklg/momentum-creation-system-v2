@@ -5,7 +5,7 @@
 
 ## Current Tranche
 
-Latest branch: `codex/platform-audit-p1-outbox-dead-letters-admin`
+Latest branch: `codex/platform-audit-p1-cross-store-reconciliation`
 
 Closed in this tranche:
 
@@ -36,6 +36,8 @@ Closed in this tranche:
   operational write tiers.
 - P1-34: exposed projection outbox dead letters in the admin agent oversight
   surface.
+- P1-35: added a bounded cross-store reconciliation job for Mongo, Neo4j, and
+  Chroma.
 
 Catalog artifacts:
 
@@ -317,6 +319,33 @@ Implemented:
   id, source collection, tier, target, entity, attempts, and last error.
 - Added `adminAgentMemory` regression coverage for failed outbox rows and the
   memory-health count/note.
+
+### P1-35: Cross-Store Reconciliation Job
+
+Implemented:
+
+- Added `server/src/domain/crossStoreReconciliation.ts`.
+- Added CLI script `server/scripts/run-cross-store-reconciliation.ts`.
+- Added `pnpm --filter @momentum/server reconcile:stores`.
+- Added regression coverage for clean readbacks, missing Neo4j/Chroma
+  projections, and store exceptions that remain report rows instead of crashing
+  the whole job.
+
+Current reconciliation specs:
+
+- Team Magnificent member identity.
+- Prospect invitation ownership.
+- Invite token graph links.
+- Holding-tank placement edges.
+- Steve discovery knowledge artifacts.
+- Admin content video knowledge.
+
+Operator command:
+
+```powershell
+pnpm --filter @momentum/server reconcile:stores -- --limit 25
+pnpm --filter @momentum/server reconcile:stores -- --limit 25 --fail-on-drift
+```
 
 ## Lane Map
 
