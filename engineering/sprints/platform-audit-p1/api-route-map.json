@@ -1,0 +1,5858 @@
+{
+  "generatedAt": "2026-07-11T22:40:39.520Z",
+  "sources": [
+    "server/src/index.ts",
+    "server/src/routes/**/*.ts",
+    "server/src/runtime/knowledge-evolution/routes.ts"
+  ],
+  "summary": {
+    "mounts": 46,
+    "routeFiles": 46,
+    "routes": 206,
+    "byPhase": {
+      "raw_body_before_json": 1,
+      "pre_json_admin_body_limit": 2,
+      "pre_gate": 131,
+      "ba_facing_gated": 72
+    },
+    "byAccessProfile": {
+      "raw_body_webhook": 1,
+      "admin": 85,
+      "pre_gate_or_public": 28,
+      "internal_runtime": 5,
+      "prospect_token": 15,
+      "ba_auth_steve_gated": 72
+    },
+    "byMethod": {
+      "POST": 85,
+      "GET": 101,
+      "PUT": 6,
+      "PATCH": 8,
+      "DELETE": 6
+    }
+  },
+  "mounts": [
+    {
+      "mountPath": "/api/telnyx",
+      "routerIdentifier": "telnyxWebhookRoutes",
+      "routeFile": "server/src/routes/telnyx-webhook.ts",
+      "line": 86,
+      "phase": "raw_body_before_json",
+      "accessProfile": "raw_body_webhook",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/knowledge",
+      "routerIdentifier": "adminKnowledgeRoutes",
+      "routeFile": "server/src/routes/admin/knowledge.ts",
+      "line": 102,
+      "phase": "pre_json_admin_body_limit",
+      "accessProfile": "admin",
+      "mountMiddleware": [
+        "express.json(...)"
+      ]
+    },
+    {
+      "mountPath": "/api/health",
+      "routerIdentifier": "healthRoutes",
+      "routeFile": "server/src/routes/health.ts",
+      "line": 113,
+      "phase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/auth",
+      "routerIdentifier": "authRoutes",
+      "routeFile": "server/src/routes/auth.ts",
+      "line": 114,
+      "phase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/welcome",
+      "routerIdentifier": "welcomeRoutes",
+      "routeFile": "server/src/routes/welcome.ts",
+      "line": 115,
+      "phase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/onboarding/questionnaire",
+      "routerIdentifier": "questionnaireRoutes",
+      "routeFile": "server/src/routes/questionnaire.ts",
+      "line": 116,
+      "phase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/sponsor/workbook",
+      "routerIdentifier": "sponsorWorkbookRoutes",
+      "routeFile": "server/src/routes/sponsor-workbook.ts",
+      "line": 117,
+      "phase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/michael",
+      "routerIdentifier": "michaelRoutes",
+      "routeFile": "server/src/routes/michael.ts",
+      "line": 118,
+      "phase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/steve",
+      "routerIdentifier": "steveRoutes",
+      "routeFile": "server/src/routes/steve.ts",
+      "line": 125,
+      "phase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/access-codes",
+      "routerIdentifier": "adminAccessCodesRoutes",
+      "routeFile": "server/src/routes/admin/access-codes.ts",
+      "line": 126,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/bas",
+      "routerIdentifier": "adminBasRoutes",
+      "routeFile": "server/src/routes/admin/bas.ts",
+      "line": 127,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/prospects",
+      "routerIdentifier": "adminProspectsRoutes",
+      "routeFile": "server/src/routes/admin/prospects.ts",
+      "line": 128,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/queue",
+      "routerIdentifier": "adminQueueRoutes",
+      "routeFile": "server/src/routes/admin/queue.ts",
+      "line": 129,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/audit",
+      "routerIdentifier": "adminAuditRoutes",
+      "routeFile": "server/src/routes/admin/audit.ts",
+      "line": 130,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/dashboard",
+      "routerIdentifier": "adminDashboardRoutes",
+      "routeFile": "server/src/routes/admin/dashboard.ts",
+      "line": 131,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/reporting",
+      "routerIdentifier": "adminReportingRoutes",
+      "routeFile": "server/src/routes/admin/reporting.ts",
+      "line": 132,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/live-ops",
+      "routerIdentifier": "adminLiveOpsRoutes",
+      "routeFile": "server/src/routes/admin/liveOps.ts",
+      "line": 133,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/tenant",
+      "routerIdentifier": "adminTenantRoutes",
+      "routeFile": "server/src/routes/admin/tenant.ts",
+      "line": 134,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/vm",
+      "routerIdentifier": "adminVmRoutes",
+      "routeFile": "server/src/routes/admin/vm.ts",
+      "line": 135,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/agents",
+      "routerIdentifier": "adminAgentsRoutes",
+      "routeFile": "server/src/routes/admin/agents.ts",
+      "line": 136,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/broadcast",
+      "routerIdentifier": "adminBroadcastRoutes",
+      "routeFile": "server/src/routes/admin/broadcast.ts",
+      "line": 140,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/orientation",
+      "routerIdentifier": "adminOrientationRoutes",
+      "routeFile": "server/src/routes/admin/orientation.ts",
+      "line": 144,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/michael-runtime",
+      "routerIdentifier": "adminMichaelRuntimeObservabilityRoutes",
+      "routeFile": "server/src/routes/admin/michael-runtime-observability.ts",
+      "line": 147,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/content/videos",
+      "routerIdentifier": "adminContentVideoRoutes",
+      "routeFile": "server/src/routes/admin/content-videos.ts",
+      "line": 148,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/health",
+      "routerIdentifier": "adminHealthRoutes",
+      "routeFile": "server/src/routes/admin/health.ts",
+      "line": 149,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/admin/consistency",
+      "routerIdentifier": "adminConsistencyRoutes",
+      "routeFile": "server/src/routes/admin/consistency.ts",
+      "line": 150,
+      "phase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/runtime/knowledge-evolution",
+      "routerIdentifier": "knowledgeEvolutionRoutes",
+      "routeFile": "server/src/runtime/knowledge-evolution/routes.ts",
+      "line": 151,
+      "phase": "pre_gate",
+      "accessProfile": "internal_runtime",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/p/login",
+      "routerIdentifier": "prospectLoginRoutes",
+      "routeFile": "server/src/routes/p-login.ts",
+      "line": 166,
+      "phase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/p",
+      "routerIdentifier": "prospectTokenRoutes",
+      "routeFile": "server/src/routes/p.ts",
+      "line": 167,
+      "phase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/rvm",
+      "routerIdentifier": "rvmRoutes",
+      "routeFile": "server/src/routes/rvm.ts",
+      "line": 168,
+      "phase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/vm/provider",
+      "routerIdentifier": "vmProviderWebhookRoutes",
+      "routeFile": "server/src/routes/vmProviderWebhooks.ts",
+      "line": 172,
+      "phase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/invitations",
+      "routerIdentifier": "invitationRoutes",
+      "routeFile": "server/src/routes/invitations.ts",
+      "line": 197,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/cockpit",
+      "routerIdentifier": "cockpitRoutes",
+      "routeFile": "server/src/routes/cockpit.ts",
+      "line": 201,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/crm",
+      "routerIdentifier": "crmRoutes",
+      "routeFile": "server/src/routes/crm.ts",
+      "line": 209,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/crm-hub",
+      "routerIdentifier": "crmHubRoutes",
+      "routeFile": "server/src/routes/crmHub.ts",
+      "line": 210,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/scriptmaker",
+      "routerIdentifier": "scriptmakerRoutes",
+      "routeFile": "server/src/routes/scriptmaker.ts",
+      "line": 218,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/ivory",
+      "routerIdentifier": "ivoryRoutes",
+      "routeFile": "server/src/routes/ivory.ts",
+      "line": 224,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/agents",
+      "routerIdentifier": "agentRoutes",
+      "routeFile": "server/src/routes/agents.ts",
+      "line": 228,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/vm",
+      "routerIdentifier": "vmRoutes",
+      "routeFile": "server/src/routes/vm.ts",
+      "line": 229,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/training",
+      "routerIdentifier": "trainingRoutes",
+      "routeFile": "server/src/routes/training.ts",
+      "line": 234,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/profile",
+      "routerIdentifier": "profileRoutes",
+      "routeFile": "server/src/routes/profile.ts",
+      "line": 240,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/preview",
+      "routerIdentifier": "previewRoutes",
+      "routeFile": "server/src/routes/preview.ts",
+      "line": 247,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/orientation",
+      "routerIdentifier": "orientationRoutes",
+      "routeFile": "server/src/routes/orientation.ts",
+      "line": 254,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/three-way",
+      "routerIdentifier": "threeWayRoutes",
+      "routeFile": "server/src/routes/three-way.ts",
+      "line": 258,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/michael-runtime",
+      "routerIdentifier": "michaelRuntimeRoutes",
+      "routeFile": "server/src/routes/michael-runtime.ts",
+      "line": 266,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/content",
+      "routerIdentifier": "contentVideoRoutes",
+      "routeFile": "server/src/routes/content-videos.ts",
+      "line": 267,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    }
+  ],
+  "routes": [
+    {
+      "method": "POST",
+      "fullPath": "/api/telnyx/webhook",
+      "mountPath": "/api/telnyx",
+      "localPath": "/webhook",
+      "mountPhase": "raw_body_before_json",
+      "accessProfile": "raw_body_webhook",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "express.raw(...)",
+        "verifyTelnyxWebhook"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/telnyx-webhook.ts:14",
+      "routeSource": "server/src/routes/telnyx-webhook.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": true
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/knowledge/sources",
+      "mountPath": "/api/admin/knowledge",
+      "localPath": "/sources",
+      "mountPhase": "pre_json_admin_body_limit",
+      "accessProfile": "admin",
+      "mountMiddleware": [
+        "express.json(...)"
+      ],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/knowledge.ts:40",
+      "routeSource": "server/src/routes/admin/knowledge.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/knowledge/sources/upload",
+      "mountPath": "/api/admin/knowledge",
+      "localPath": "/sources/upload",
+      "mountPhase": "pre_json_admin_body_limit",
+      "accessProfile": "admin",
+      "mountMiddleware": [
+        "express.json(...)"
+      ],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/knowledge.ts:102",
+      "routeSource": "server/src/routes/admin/knowledge.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/health/",
+      "mountPath": "/api/health",
+      "localPath": "/",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/health.ts:7",
+      "routeSource": "server/src/routes/health.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/health/persistence",
+      "mountPath": "/api/health",
+      "localPath": "/persistence",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/health.ts:15",
+      "routeSource": "server/src/routes/health.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/auth/verify-code",
+      "mountPath": "/api/auth",
+      "localPath": "/verify-code",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "ipRateLimit(...)"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/auth.ts:23",
+      "routeSource": "server/src/routes/auth.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": true,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/auth/register",
+      "mountPath": "/api/auth",
+      "localPath": "/register",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "ipRateLimit(...)"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/auth.ts:68",
+      "routeSource": "server/src/routes/auth.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": true,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/auth/login",
+      "mountPath": "/api/auth",
+      "localPath": "/login",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "ipRateLimit(...)"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/auth.ts:136",
+      "routeSource": "server/src/routes/auth.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": true,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/auth/logout",
+      "mountPath": "/api/auth",
+      "localPath": "/logout",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/auth.ts:183",
+      "routeSource": "server/src/routes/auth.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/auth/me",
+      "mountPath": "/api/auth",
+      "localPath": "/me",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/auth.ts:200",
+      "routeSource": "server/src/routes/auth.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/welcome/load",
+      "mountPath": "/api/welcome",
+      "localPath": "/load",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/welcome.ts:32",
+      "routeSource": "server/src/routes/welcome.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/welcome/accept",
+      "mountPath": "/api/welcome",
+      "localPath": "/accept",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/welcome.ts:60",
+      "routeSource": "server/src/routes/welcome.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/onboarding/questionnaire/status",
+      "mountPath": "/api/onboarding/questionnaire",
+      "localPath": "/status",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/questionnaire.ts:41",
+      "routeSource": "server/src/routes/questionnaire.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/onboarding/questionnaire/load",
+      "mountPath": "/api/onboarding/questionnaire",
+      "localPath": "/load",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/questionnaire.ts:70",
+      "routeSource": "server/src/routes/questionnaire.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/onboarding/questionnaire/submit",
+      "mountPath": "/api/onboarding/questionnaire",
+      "localPath": "/submit",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/questionnaire.ts:199",
+      "routeSource": "server/src/routes/questionnaire.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/sponsor/workbook/:tmagId",
+      "mountPath": "/api/sponsor/workbook",
+      "localPath": "/:tmagId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/sponsor-workbook.ts:75",
+      "routeSource": "server/src/routes/sponsor-workbook.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PUT",
+      "fullPath": "/api/sponsor/workbook/:tmagId/draft",
+      "mountPath": "/api/sponsor/workbook",
+      "localPath": "/:tmagId/draft",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/sponsor-workbook.ts:171",
+      "routeSource": "server/src/routes/sponsor-workbook.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/sponsor/workbook/:tmagId/finalize",
+      "mountPath": "/api/sponsor/workbook",
+      "localPath": "/:tmagId/finalize",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/sponsor-workbook.ts:241",
+      "routeSource": "server/src/routes/sponsor-workbook.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/michael/training-support/:downlineTmagId",
+      "mountPath": "/api/michael",
+      "localPath": "/training-support/:downlineTmagId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/michael.ts:23",
+      "routeSource": "server/src/routes/michael.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/steve/discovery/state",
+      "mountPath": "/api/steve",
+      "localPath": "/discovery/state",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/steve.ts:65",
+      "routeSource": "server/src/routes/steve.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/steve/discovery/script",
+      "mountPath": "/api/steve",
+      "localPath": "/discovery/script",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/steve.ts:81",
+      "routeSource": "server/src/routes/steve.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/steve/discovery/system-prompt",
+      "mountPath": "/api/steve",
+      "localPath": "/discovery/system-prompt",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/steve.ts:93",
+      "routeSource": "server/src/routes/steve.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/steve/discovery/ingest",
+      "mountPath": "/api/steve",
+      "localPath": "/discovery/ingest",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/steve.ts:193",
+      "routeSource": "server/src/routes/steve.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/steve/discovery/profile/:downlineTmagId",
+      "mountPath": "/api/steve",
+      "localPath": "/discovery/profile/:downlineTmagId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/steve.ts:247",
+      "routeSource": "server/src/routes/steve.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/steve/discovery/conversation",
+      "mountPath": "/api/steve",
+      "localPath": "/discovery/conversation",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/steve.ts:278",
+      "routeSource": "server/src/routes/steve.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/steve/discovery/converse",
+      "mountPath": "/api/steve",
+      "localPath": "/discovery/converse",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/steve.ts:294",
+      "routeSource": "server/src/routes/steve.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/access-codes/",
+      "mountPath": "/api/admin/access-codes",
+      "localPath": "/",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/access-codes.ts:30",
+      "routeSource": "server/src/routes/admin/access-codes.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/access-codes/",
+      "mountPath": "/api/admin/access-codes",
+      "localPath": "/",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/access-codes.ts:65",
+      "routeSource": "server/src/routes/admin/access-codes.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/bas/",
+      "mountPath": "/api/admin/bas",
+      "localPath": "/",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/bas.ts:51",
+      "routeSource": "server/src/routes/admin/bas.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/bas/:tmagId",
+      "mountPath": "/api/admin/bas",
+      "localPath": "/:tmagId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/bas.ts:80",
+      "routeSource": "server/src/routes/admin/bas.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/bas/:tmagId/sponsor-override",
+      "mountPath": "/api/admin/bas",
+      "localPath": "/:tmagId/sponsor-override",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/bas.ts:106",
+      "routeSource": "server/src/routes/admin/bas.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/bas/:tmagId/entitlements",
+      "mountPath": "/api/admin/bas",
+      "localPath": "/:tmagId/entitlements",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/bas.ts:171",
+      "routeSource": "server/src/routes/admin/bas.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/bas/:tmagId/leader-tag",
+      "mountPath": "/api/admin/bas",
+      "localPath": "/:tmagId/leader-tag",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/bas.ts:212",
+      "routeSource": "server/src/routes/admin/bas.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/bas/:tmagId/notes",
+      "mountPath": "/api/admin/bas",
+      "localPath": "/:tmagId/notes",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/bas.ts:252",
+      "routeSource": "server/src/routes/admin/bas.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/bas/",
+      "mountPath": "/api/admin/bas",
+      "localPath": "/",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/bas.ts:362",
+      "routeSource": "server/src/routes/admin/bas.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PATCH",
+      "fullPath": "/api/admin/bas/:tmagId",
+      "mountPath": "/api/admin/bas",
+      "localPath": "/:tmagId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/bas.ts:397",
+      "routeSource": "server/src/routes/admin/bas.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "DELETE",
+      "fullPath": "/api/admin/bas/:tmagId",
+      "mountPath": "/api/admin/bas",
+      "localPath": "/:tmagId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/bas.ts:423",
+      "routeSource": "server/src/routes/admin/bas.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/bas/:tmagId/restore",
+      "mountPath": "/api/admin/bas",
+      "localPath": "/:tmagId/restore",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/bas.ts:449",
+      "routeSource": "server/src/routes/admin/bas.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/prospects/",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:114",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/prospects/filters",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/filters",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:156",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/prospects/:prospectId",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/:prospectId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:180",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/prospects/:prospectId/sandbox-preview",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/:prospectId/sandbox-preview",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:249",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/prospects/:prospectId/notes",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/:prospectId/notes",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:297",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/prospects/:prospectId/move",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/:prospectId/move",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:334",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/prospects/:prospectId/reassign-sponsor",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/:prospectId/reassign-sponsor",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:355",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/prospects/:prospectId/manual-flush",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/:prospectId/manual-flush",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:387",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/prospects/:prospectId/force-enroll",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/:prospectId/force-enroll",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:416",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/prospects/",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:573",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PATCH",
+      "fullPath": "/api/admin/prospects/:prospectId",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/:prospectId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:621",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "DELETE",
+      "fullPath": "/api/admin/prospects/:prospectId",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/:prospectId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:663",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/prospects/:prospectId/restore",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/:prospectId/restore",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:692",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/prospects/flush-expired",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/flush-expired",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:731",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/prospects/alerts/aged",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/alerts/aged",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:767",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/queue/summary",
+      "mountPath": "/api/admin/queue",
+      "localPath": "/summary",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/queue.ts:77",
+      "routeSource": "server/src/routes/admin/queue.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/queue/lookup",
+      "mountPath": "/api/admin/queue",
+      "localPath": "/lookup",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/queue.ts:105",
+      "routeSource": "server/src/routes/admin/queue.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/queue/visible-window",
+      "mountPath": "/api/admin/queue",
+      "localPath": "/visible-window",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/queue.ts:146",
+      "routeSource": "server/src/routes/admin/queue.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PUT",
+      "fullPath": "/api/admin/queue/visible-window",
+      "mountPath": "/api/admin/queue",
+      "localPath": "/visible-window",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/queue.ts:185",
+      "routeSource": "server/src/routes/admin/queue.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/queue/ticker",
+      "mountPath": "/api/admin/queue",
+      "localPath": "/ticker",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/queue.ts:246",
+      "routeSource": "server/src/routes/admin/queue.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/queue/ticker/stream",
+      "mountPath": "/api/admin/queue",
+      "localPath": "/ticker/stream",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/queue.ts:312",
+      "routeSource": "server/src/routes/admin/queue.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/queue/rules",
+      "mountPath": "/api/admin/queue",
+      "localPath": "/rules",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/queue.ts:408",
+      "routeSource": "server/src/routes/admin/queue.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PUT",
+      "fullPath": "/api/admin/queue/rules/:key",
+      "mountPath": "/api/admin/queue",
+      "localPath": "/rules/:key",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/queue.ts:441",
+      "routeSource": "server/src/routes/admin/queue.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/audit/",
+      "mountPath": "/api/admin/audit",
+      "localPath": "/",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/audit.ts:80",
+      "routeSource": "server/src/routes/admin/audit.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/audit/:entryId",
+      "mountPath": "/api/admin/audit",
+      "localPath": "/:entryId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/audit.ts:107",
+      "routeSource": "server/src/routes/admin/audit.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/dashboard/metrics",
+      "mountPath": "/api/admin/dashboard",
+      "localPath": "/metrics",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/dashboard.ts:81",
+      "routeSource": "server/src/routes/admin/dashboard.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/dashboard/filters",
+      "mountPath": "/api/admin/dashboard",
+      "localPath": "/filters",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/dashboard.ts:127",
+      "routeSource": "server/src/routes/admin/dashboard.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/dashboard/drilldown",
+      "mountPath": "/api/admin/dashboard",
+      "localPath": "/drilldown",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/dashboard.ts:173",
+      "routeSource": "server/src/routes/admin/dashboard.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/dashboard/stream",
+      "mountPath": "/api/admin/dashboard",
+      "localPath": "/stream",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/dashboard.ts:288",
+      "routeSource": "server/src/routes/admin/dashboard.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/master-report.pdf",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/master-report.pdf",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:88",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/activation",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/activation",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:135",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/training",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/training",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:185",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/invite-funnel",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/invite-funnel",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:236",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/queue-velocity",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/queue-velocity",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:291",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/enrollment-completion",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/enrollment-completion",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:321",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/follow-up-aging",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/follow-up-aging",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:351",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/leader-scorecards",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/leader-scorecards",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:381",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/activation/export",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/activation/export",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:471",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/training/export",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/training/export",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:498",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/invite-funnel/export",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/invite-funnel/export",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:525",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/queue-velocity/export",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/queue-velocity/export",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:555",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/enrollment-completion/export",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/enrollment-completion/export",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:582",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/follow-up-aging/export",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/follow-up-aging/export",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:609",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/leader-scorecards/export",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/leader-scorecards/export",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:636",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/live-ops/growth",
+      "mountPath": "/api/admin/live-ops",
+      "localPath": "/growth",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/liveOps.ts:82",
+      "routeSource": "server/src/routes/admin/liveOps.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/live-ops/grid",
+      "mountPath": "/api/admin/live-ops",
+      "localPath": "/grid",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/liveOps.ts:123",
+      "routeSource": "server/src/routes/admin/liveOps.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/live-ops/funnel",
+      "mountPath": "/api/admin/live-ops",
+      "localPath": "/funnel",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/liveOps.ts:164",
+      "routeSource": "server/src/routes/admin/liveOps.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/live-ops/usage/stream",
+      "mountPath": "/api/admin/live-ops",
+      "localPath": "/usage/stream",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/liveOps.ts:241",
+      "routeSource": "server/src/routes/admin/liveOps.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/tenant/overview",
+      "mountPath": "/api/admin/tenant",
+      "localPath": "/overview",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/tenant.ts:77",
+      "routeSource": "server/src/routes/admin/tenant.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PATCH",
+      "fullPath": "/api/admin/tenant/settings",
+      "mountPath": "/api/admin/tenant",
+      "localPath": "/settings",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/tenant.ts:102",
+      "routeSource": "server/src/routes/admin/tenant.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/tenant/templates/validate",
+      "mountPath": "/api/admin/tenant",
+      "localPath": "/templates/validate",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/tenant.ts:145",
+      "routeSource": "server/src/routes/admin/tenant.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PUT",
+      "fullPath": "/api/admin/tenant/templates/:templateKey",
+      "mountPath": "/api/admin/tenant",
+      "localPath": "/templates/:templateKey",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/tenant.ts:164",
+      "routeSource": "server/src/routes/admin/tenant.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/vm/overview",
+      "mountPath": "/api/admin/vm",
+      "localPath": "/overview",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/vm.ts:32",
+      "routeSource": "server/src/routes/admin/vm.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/vm/campaigns/:vmCampaignId/live-approval",
+      "mountPath": "/api/admin/vm",
+      "localPath": "/campaigns/:vmCampaignId/live-approval",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/vm.ts:87",
+      "routeSource": "server/src/routes/admin/vm.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/vm/ownership-correction",
+      "mountPath": "/api/admin/vm",
+      "localPath": "/ownership-correction",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/vm.ts:145",
+      "routeSource": "server/src/routes/admin/vm.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/agents/overview",
+      "mountPath": "/api/admin/agents",
+      "localPath": "/overview",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/agents.ts:25",
+      "routeSource": "server/src/routes/admin/agents.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/broadcast/audience",
+      "mountPath": "/api/admin/broadcast",
+      "localPath": "/audience",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/broadcast.ts:92",
+      "routeSource": "server/src/routes/admin/broadcast.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/broadcast/list",
+      "mountPath": "/api/admin/broadcast",
+      "localPath": "/list",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/broadcast.ts:128",
+      "routeSource": "server/src/routes/admin/broadcast.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/broadcast/:broadcastId",
+      "mountPath": "/api/admin/broadcast",
+      "localPath": "/:broadcastId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/broadcast.ts:142",
+      "routeSource": "server/src/routes/admin/broadcast.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/broadcast/test",
+      "mountPath": "/api/admin/broadcast",
+      "localPath": "/test",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/broadcast.ts:173",
+      "routeSource": "server/src/routes/admin/broadcast.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/broadcast/",
+      "mountPath": "/api/admin/broadcast",
+      "localPath": "/",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/broadcast.ts:206",
+      "routeSource": "server/src/routes/admin/broadcast.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/orientation/sessions",
+      "mountPath": "/api/admin/orientation",
+      "localPath": "/sessions",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/orientation.ts:53",
+      "routeSource": "server/src/routes/admin/orientation.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/orientation/sessions",
+      "mountPath": "/api/admin/orientation",
+      "localPath": "/sessions",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/orientation.ts:85",
+      "routeSource": "server/src/routes/admin/orientation.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/michael-runtime/observability",
+      "mountPath": "/api/admin/michael-runtime",
+      "localPath": "/observability",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/michael-runtime-observability.ts:23",
+      "routeSource": "server/src/routes/admin/michael-runtime-observability.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/content/videos/",
+      "mountPath": "/api/admin/content/videos",
+      "localPath": "/",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/content-videos.ts:72",
+      "routeSource": "server/src/routes/admin/content-videos.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/content/videos/",
+      "mountPath": "/api/admin/content/videos",
+      "localPath": "/",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/content-videos.ts:84",
+      "routeSource": "server/src/routes/admin/content-videos.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PATCH",
+      "fullPath": "/api/admin/content/videos/:contentVideoId",
+      "mountPath": "/api/admin/content/videos",
+      "localPath": "/:contentVideoId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/content-videos.ts:125",
+      "routeSource": "server/src/routes/admin/content-videos.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/content/videos/reorder",
+      "mountPath": "/api/admin/content/videos",
+      "localPath": "/reorder",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/content-videos.ts:179",
+      "routeSource": "server/src/routes/admin/content-videos.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/health/triple-stack",
+      "mountPath": "/api/admin/health",
+      "localPath": "/triple-stack",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdminOrHealthSecret"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/health.ts:29",
+      "routeSource": "server/src/routes/admin/health.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/health/status",
+      "mountPath": "/api/admin/health",
+      "localPath": "/status",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/health.ts:48",
+      "routeSource": "server/src/routes/admin/health.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/consistency/report",
+      "mountPath": "/api/admin/consistency",
+      "localPath": "/report",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/consistency.ts:26",
+      "routeSource": "server/src/routes/admin/consistency.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/runtime/knowledge-evolution/metrics",
+      "mountPath": "/api/runtime/knowledge-evolution",
+      "localPath": "/metrics",
+      "mountPhase": "pre_gate",
+      "accessProfile": "internal_runtime",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireRuntimeInternal"
+      ],
+      "handler": "handler",
+      "source": "server/src/runtime/knowledge-evolution/routes.ts:236",
+      "routeSource": "server/src/runtime/knowledge-evolution/routes.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": true,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/runtime/knowledge-evolution/",
+      "mountPath": "/api/runtime/knowledge-evolution",
+      "localPath": "/",
+      "mountPhase": "pre_gate",
+      "accessProfile": "internal_runtime",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireRuntimeInternal"
+      ],
+      "handler": "handler",
+      "source": "server/src/runtime/knowledge-evolution/routes.ts:239",
+      "routeSource": "server/src/runtime/knowledge-evolution/routes.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": true,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/runtime/knowledge-evolution/:evolutionId",
+      "mountPath": "/api/runtime/knowledge-evolution",
+      "localPath": "/:evolutionId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "internal_runtime",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireRuntimeInternal"
+      ],
+      "handler": "handler",
+      "source": "server/src/runtime/knowledge-evolution/routes.ts:242",
+      "routeSource": "server/src/runtime/knowledge-evolution/routes.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": true,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/runtime/knowledge-evolution/:evolutionId/retrieval-ready",
+      "mountPath": "/api/runtime/knowledge-evolution",
+      "localPath": "/:evolutionId/retrieval-ready",
+      "mountPhase": "pre_gate",
+      "accessProfile": "internal_runtime",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireRuntimeInternal"
+      ],
+      "handler": "handler",
+      "source": "server/src/runtime/knowledge-evolution/routes.ts:245",
+      "routeSource": "server/src/runtime/knowledge-evolution/routes.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": true,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/runtime/knowledge-evolution/:evolutionId/rollback",
+      "mountPath": "/api/runtime/knowledge-evolution",
+      "localPath": "/:evolutionId/rollback",
+      "mountPhase": "pre_gate",
+      "accessProfile": "internal_runtime",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireRuntimeInternal"
+      ],
+      "handler": "handler",
+      "source": "server/src/runtime/knowledge-evolution/routes.ts:248",
+      "routeSource": "server/src/runtime/knowledge-evolution/routes.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": true,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/p/login/start",
+      "mountPath": "/api/p/login",
+      "localPath": "/start",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/p-login.ts:133",
+      "routeSource": "server/src/routes/p-login.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/p/login/redeem",
+      "mountPath": "/api/p/login",
+      "localPath": "/redeem",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/p-login.ts:202",
+      "routeSource": "server/src/routes/p-login.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/p/login/code",
+      "mountPath": "/api/p/login",
+      "localPath": "/code",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/p-login.ts:264",
+      "routeSource": "server/src/routes/p-login.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/p/login/logout",
+      "mountPath": "/api/p/login",
+      "localPath": "/logout",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/p-login.ts:312",
+      "routeSource": "server/src/routes/p-login.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/p/:token",
+      "mountPath": "/api/p",
+      "localPath": "/:token",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/p.ts:225",
+      "routeSource": "server/src/routes/p.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/p/:token/video-event",
+      "mountPath": "/api/p",
+      "localPath": "/:token/video-event",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/p.ts:384",
+      "routeSource": "server/src/routes/p.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/p/:token/callback-request",
+      "mountPath": "/api/p",
+      "localPath": "/:token/callback-request",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/p.ts:556",
+      "routeSource": "server/src/routes/p.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/p/:token/stream",
+      "mountPath": "/api/p",
+      "localPath": "/:token/stream",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/p.ts:689",
+      "routeSource": "server/src/routes/p.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/p/:token/webinar-reserve",
+      "mountPath": "/api/p",
+      "localPath": "/:token/webinar-reserve",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/p.ts:812",
+      "routeSource": "server/src/routes/p.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/p/:token/team-stats",
+      "mountPath": "/api/p",
+      "localPath": "/:token/team-stats",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/p.ts:912",
+      "routeSource": "server/src/routes/p.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/rvm/:token",
+      "mountPath": "/api/rvm",
+      "localPath": "/:token",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/rvm.ts:90",
+      "routeSource": "server/src/routes/rvm.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/rvm/:token/activate",
+      "mountPath": "/api/rvm",
+      "localPath": "/:token/activate",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/rvm.ts:101",
+      "routeSource": "server/src/routes/rvm.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/rvm/:token/video-event",
+      "mountPath": "/api/rvm",
+      "localPath": "/:token/video-event",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/rvm.ts:112",
+      "routeSource": "server/src/routes/rvm.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/rvm/:token/callback-request",
+      "mountPath": "/api/rvm",
+      "localPath": "/:token/callback-request",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/rvm.ts:130",
+      "routeSource": "server/src/routes/rvm.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/rvm/:token/info-request",
+      "mountPath": "/api/rvm",
+      "localPath": "/:token/info-request",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/rvm.ts:169",
+      "routeSource": "server/src/routes/rvm.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/provider/status",
+      "mountPath": "/api/vm/provider",
+      "localPath": "/status",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vmProviderWebhooks.ts:52",
+      "routeSource": "server/src/routes/vmProviderWebhooks.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/vm/provider/manual-csv/import",
+      "mountPath": "/api/vm/provider",
+      "localPath": "/manual-csv/import",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vmProviderWebhooks.ts:62",
+      "routeSource": "server/src/routes/vmProviderWebhooks.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/vm/provider/manual-csv/import.csv",
+      "mountPath": "/api/vm/provider",
+      "localPath": "/manual-csv/import.csv",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin",
+        "express.text(...)"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vmProviderWebhooks.ts:81",
+      "routeSource": "server/src/routes/vmProviderWebhooks.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/provider/manual-csv/export/:campaignId",
+      "mountPath": "/api/vm/provider",
+      "localPath": "/manual-csv/export/:campaignId",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vmProviderWebhooks.ts:106",
+      "routeSource": "server/src/routes/vmProviderWebhooks.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/vm/provider/:provider/webhook",
+      "mountPath": "/api/vm/provider",
+      "localPath": "/:provider/webhook",
+      "mountPhase": "pre_gate",
+      "accessProfile": "pre_gate_or_public",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/vmProviderWebhooks.ts:124",
+      "routeSource": "server/src/routes/vmProviderWebhooks.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/invitations/",
+      "mountPath": "/api/invitations",
+      "localPath": "/",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/invitations.ts:139",
+      "routeSource": "server/src/routes/invitations.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/invitations/:prospectId/sent",
+      "mountPath": "/api/invitations",
+      "localPath": "/:prospectId/sent",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/invitations.ts:191",
+      "routeSource": "server/src/routes/invitations.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/invitations/log",
+      "mountPath": "/api/invitations",
+      "localPath": "/log",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/invitations.ts:237",
+      "routeSource": "server/src/routes/invitations.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/cockpit/launch",
+      "mountPath": "/api/cockpit",
+      "localPath": "/launch",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/cockpit.ts:43",
+      "routeSource": "server/src/routes/cockpit.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/cockpit/invites",
+      "mountPath": "/api/cockpit",
+      "localPath": "/invites",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/cockpit.ts:61",
+      "routeSource": "server/src/routes/cockpit.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/cockpit/summary",
+      "mountPath": "/api/cockpit",
+      "localPath": "/summary",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/cockpit.ts:78",
+      "routeSource": "server/src/routes/cockpit.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/cockpit/pmv",
+      "mountPath": "/api/cockpit",
+      "localPath": "/pmv",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/cockpit.ts:98",
+      "routeSource": "server/src/routes/cockpit.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/cockpit/todays-actions",
+      "mountPath": "/api/cockpit",
+      "localPath": "/todays-actions",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/cockpit.ts:117",
+      "routeSource": "server/src/routes/cockpit.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/cockpit/team-calendar",
+      "mountPath": "/api/cockpit",
+      "localPath": "/team-calendar",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/cockpit.ts:141",
+      "routeSource": "server/src/routes/cockpit.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/cockpit/invites/print.pdf",
+      "mountPath": "/api/cockpit",
+      "localPath": "/invites/print.pdf",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/cockpit.ts:167",
+      "routeSource": "server/src/routes/cockpit.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/crm/today",
+      "mountPath": "/api/crm",
+      "localPath": "/today",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crm.ts:92",
+      "routeSource": "server/src/routes/crm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/crm/:prospectId",
+      "mountPath": "/api/crm",
+      "localPath": "/:prospectId",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crm.ts:107",
+      "routeSource": "server/src/routes/crm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/crm/:prospectId/notes",
+      "mountPath": "/api/crm",
+      "localPath": "/:prospectId/notes",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crm.ts:125",
+      "routeSource": "server/src/routes/crm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/crm/:prospectId/followup",
+      "mountPath": "/api/crm",
+      "localPath": "/:prospectId/followup",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crm.ts:151",
+      "routeSource": "server/src/routes/crm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "DELETE",
+      "fullPath": "/api/crm/:prospectId/followup",
+      "mountPath": "/api/crm",
+      "localPath": "/:prospectId/followup",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crm.ts:178",
+      "routeSource": "server/src/routes/crm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/crm/:prospectId/disposition",
+      "mountPath": "/api/crm",
+      "localPath": "/:prospectId/disposition",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crm.ts:201",
+      "routeSource": "server/src/routes/crm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/crm/:prospectId/reinvite",
+      "mountPath": "/api/crm",
+      "localPath": "/:prospectId/reinvite",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crm.ts:232",
+      "routeSource": "server/src/routes/crm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/crm/:prospectId/reinvite-script",
+      "mountPath": "/api/crm",
+      "localPath": "/:prospectId/reinvite-script",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crm.ts:267",
+      "routeSource": "server/src/routes/crm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/crm/",
+      "mountPath": "/api/crm",
+      "localPath": "/",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crm.ts:318",
+      "routeSource": "server/src/routes/crm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PUT",
+      "fullPath": "/api/crm/:prospectId",
+      "mountPath": "/api/crm",
+      "localPath": "/:prospectId",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crm.ts:364",
+      "routeSource": "server/src/routes/crm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "DELETE",
+      "fullPath": "/api/crm/:prospectId",
+      "mountPath": "/api/crm",
+      "localPath": "/:prospectId",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crm.ts:396",
+      "routeSource": "server/src/routes/crm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/crm-hub/prospects",
+      "mountPath": "/api/crm-hub",
+      "localPath": "/prospects",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crmHub.ts:60",
+      "routeSource": "server/src/routes/crmHub.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/crm-hub/prospects/:prospectId",
+      "mountPath": "/api/crm-hub",
+      "localPath": "/prospects/:prospectId",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crmHub.ts:72",
+      "routeSource": "server/src/routes/crmHub.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/crm-hub/prospects/:prospectId/close-as-ba",
+      "mountPath": "/api/crm-hub",
+      "localPath": "/prospects/:prospectId/close-as-ba",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crmHub.ts:86",
+      "routeSource": "server/src/routes/crmHub.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/scriptmaker/draft",
+      "mountPath": "/api/scriptmaker",
+      "localPath": "/draft",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/scriptmaker.ts:79",
+      "routeSource": "server/src/routes/scriptmaker.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/ivory/",
+      "mountPath": "/api/ivory",
+      "localPath": "/",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:113",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/ivory/",
+      "mountPath": "/api/ivory",
+      "localPath": "/",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:132",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PATCH",
+      "fullPath": "/api/ivory/:ivoryId",
+      "mountPath": "/api/ivory",
+      "localPath": "/:ivoryId",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:178",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PATCH",
+      "fullPath": "/api/ivory/:ivoryId/status",
+      "mountPath": "/api/ivory",
+      "localPath": "/:ivoryId/status",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:227",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "DELETE",
+      "fullPath": "/api/ivory/:ivoryId",
+      "mountPath": "/api/ivory",
+      "localPath": "/:ivoryId",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:265",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/ivory/coach",
+      "mountPath": "/api/ivory",
+      "localPath": "/coach",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:297",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/ivory/invitation-agent/draft",
+      "mountPath": "/api/ivory",
+      "localPath": "/invitation-agent/draft",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:341",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/ivory/invitation-agent/mint",
+      "mountPath": "/api/ivory",
+      "localPath": "/invitation-agent/mint",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:389",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/ivory/generator/run",
+      "mountPath": "/api/ivory",
+      "localPath": "/generator/run",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:458",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/ivory/generator/run/:runId",
+      "mountPath": "/api/ivory",
+      "localPath": "/generator/run/:runId",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:495",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/ivory/generator/run/:runId/invite",
+      "mountPath": "/api/ivory",
+      "localPath": "/generator/run/:runId/invite",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:524",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/ivory/momentum",
+      "mountPath": "/api/ivory",
+      "localPath": "/momentum",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:605",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/ivory/momentum/:prospectId/suggest",
+      "mountPath": "/api/ivory",
+      "localPath": "/momentum/:prospectId/suggest",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/ivory.ts:624",
+      "routeSource": "server/src/routes/ivory.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/agents/recommendations",
+      "mountPath": "/api/agents",
+      "localPath": "/recommendations",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/agents.ts:25",
+      "routeSource": "server/src/routes/agents.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/agents/events",
+      "mountPath": "/api/agents",
+      "localPath": "/events",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/agents.ts:45",
+      "routeSource": "server/src/routes/agents.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/lead-owners",
+      "mountPath": "/api/vm",
+      "localPath": "/lead-owners",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "listLeadOwnersHandler",
+      "source": "server/src/routes/vm.ts:158",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/vm/lead-owners",
+      "mountPath": "/api/vm",
+      "localPath": "/lead-owners",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "createLeadOwnerHandler",
+      "source": "server/src/routes/vm.ts:180",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/lead-owners/:leadOwnerId",
+      "mountPath": "/api/vm",
+      "localPath": "/lead-owners/:leadOwnerId",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "getLeadOwnerHandler",
+      "source": "server/src/routes/vm.ts:194",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/campaigns",
+      "mountPath": "/api/vm",
+      "localPath": "/campaigns",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:196",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/vm/campaigns",
+      "mountPath": "/api/vm",
+      "localPath": "/campaigns",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:208",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/campaigns/:campaignId",
+      "mountPath": "/api/vm",
+      "localPath": "/campaigns/:campaignId",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:245",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PATCH",
+      "fullPath": "/api/vm/campaigns/:campaignId/status",
+      "mountPath": "/api/vm",
+      "localPath": "/campaigns/:campaignId/status",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:257",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/campaigns/:campaignId/metrics",
+      "mountPath": "/api/vm",
+      "localPath": "/campaigns/:campaignId/metrics",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:307",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/campaigns/:campaignId/leads",
+      "mountPath": "/api/vm",
+      "localPath": "/campaigns/:campaignId/leads",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:321",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/campaigns/:campaignId/manual-export",
+      "mountPath": "/api/vm",
+      "localPath": "/campaigns/:campaignId/manual-export",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:383",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/vm/lead-owners/:leadOwnerId/import",
+      "mountPath": "/api/vm",
+      "localPath": "/lead-owners/:leadOwnerId/import",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "importLeadOwnerLeadsHandler",
+      "source": "server/src/routes/vm.ts:435",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/imports/:importJobId",
+      "mountPath": "/api/vm",
+      "localPath": "/imports/:importJobId",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:437",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/training/fast-start/progress",
+      "mountPath": "/api/training",
+      "localPath": "/fast-start/progress",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/training.ts:49",
+      "routeSource": "server/src/routes/training.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/training/fast-start/modules/:id/state",
+      "mountPath": "/api/training",
+      "localPath": "/fast-start/modules/:id/state",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/training.ts:79",
+      "routeSource": "server/src/routes/training.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/profile/",
+      "mountPath": "/api/profile",
+      "localPath": "/",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/profile.ts:86",
+      "routeSource": "server/src/routes/profile.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/profile/sponsor",
+      "mountPath": "/api/profile",
+      "localPath": "/sponsor",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/profile.ts:102",
+      "routeSource": "server/src/routes/profile.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PATCH",
+      "fullPath": "/api/profile/",
+      "mountPath": "/api/profile",
+      "localPath": "/",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/profile.ts:116",
+      "routeSource": "server/src/routes/profile.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/profile/password",
+      "mountPath": "/api/profile",
+      "localPath": "/password",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/profile.ts:136",
+      "routeSource": "server/src/routes/profile.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/profile/email/start",
+      "mountPath": "/api/profile",
+      "localPath": "/email/start",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/profile.ts:162",
+      "routeSource": "server/src/routes/profile.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/profile/email/verify",
+      "mountPath": "/api/profile",
+      "localPath": "/email/verify",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/profile.ts:181",
+      "routeSource": "server/src/routes/profile.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/profile/phone",
+      "mountPath": "/api/profile",
+      "localPath": "/phone",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/profile.ts:206",
+      "routeSource": "server/src/routes/profile.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/preview/",
+      "mountPath": "/api/preview",
+      "localPath": "/",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/preview.ts:32",
+      "routeSource": "server/src/routes/preview.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/orientation/sessions",
+      "mountPath": "/api/orientation",
+      "localPath": "/sessions",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/orientation.ts:39",
+      "routeSource": "server/src/routes/orientation.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/orientation/sessions/:sessionId/reserve",
+      "mountPath": "/api/orientation",
+      "localPath": "/sessions/:sessionId/reserve",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/orientation.ts:64",
+      "routeSource": "server/src/routes/orientation.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "DELETE",
+      "fullPath": "/api/orientation/sessions/:sessionId/reserve",
+      "mountPath": "/api/orientation",
+      "localPath": "/sessions/:sessionId/reserve",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/orientation.ts:116",
+      "routeSource": "server/src/routes/orientation.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/three-way/availability",
+      "mountPath": "/api/three-way",
+      "localPath": "/availability",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/three-way.ts:29",
+      "routeSource": "server/src/routes/three-way.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PUT",
+      "fullPath": "/api/three-way/availability",
+      "mountPath": "/api/three-way",
+      "localPath": "/availability",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/three-way.ts:42",
+      "routeSource": "server/src/routes/three-way.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/three-way/bookings",
+      "mountPath": "/api/three-way",
+      "localPath": "/bookings",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/three-way.ts:63",
+      "routeSource": "server/src/routes/three-way.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/three-way/bookings",
+      "mountPath": "/api/three-way",
+      "localPath": "/bookings",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/three-way.ts:76",
+      "routeSource": "server/src/routes/three-way.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/three-way/bookings/:id/cancel",
+      "mountPath": "/api/three-way",
+      "localPath": "/bookings/:id/cancel",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/three-way.ts:110",
+      "routeSource": "server/src/routes/three-way.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/michael-runtime/resolve",
+      "mountPath": "/api/michael-runtime",
+      "localPath": "/resolve",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/michael-runtime.ts:245",
+      "routeSource": "server/src/routes/michael-runtime.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/content/videos",
+      "mountPath": "/api/content",
+      "localPath": "/videos",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/content-videos.ts:16",
+      "routeSource": "server/src/routes/content-videos.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    }
+  ]
+}

@@ -71,7 +71,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 41. **Neo4j:** Add Neo4j constraint creation and migration scripts.
 - [x] 42. **Chroma:** Create the Chroma collection catalog by purpose, domain, language, source, and metadata contract.
 - [x] 43. **Chroma:** Add Chroma metadata contract tests for canonical ids, tenant, domain, language, readiness, and source.
-- [ ] 44. **API:** Generate a current API route map from server/src/index.ts and route modules.
+- [x] 44. **API:** Generate a current API route map from server/src/index.ts and route modules.
 - [ ] 45. **Security:** Generate a route access matrix covering auth, admin, Steve completion, and VM entitlement gates.
 - [ ] 46. **Security:** Add tests proving every admin route is protected by requireAdmin.
 - [ ] 47. **Security:** Add tests proving gated BA routes enforce auth and onboarding gates where intended.
@@ -256,3 +256,4 @@ Use this section when assigning work to multiple agents. Keep the original numbe
 | 2026-07-11 | P1 Neo4j schema migrations | Codex | Closed item 41: added an app-persistence Neo4j schema migration planner, dry-run/apply/verify CLI commands, and tests proving idempotent planning, dry-run safety, dispatch execution, and name-based verification. | P1-42 Chroma collection catalog remains open. |
 | 2026-07-11 | P1 Chroma collection catalog | Codex | Closed item 42: added `server/scripts/generate-chroma-catalog.mjs`, `pnpm catalog:chroma`, `pnpm catalog:chroma:check`, and generated `CHROMA_COLLECTION_CATALOG.md` plus JSON. The catalog covers 50 registered collections, purpose/domain/language classifications, observed actions, metadata/filter keys, inferred required metadata contracts, and 7 observed unregistered/dynamic targets. | P1-43 Chroma metadata contract tests remain open. |
 | 2026-07-11 | P1 Chroma metadata contract tests | Codex | Closed item 43: added catalog-backed tests for canonical ids, tenant scope, domain, language, readiness, source lineage, review-only separation, and unregistered/dynamic Chroma target visibility. Also moved GraphRAG retrieval from unsupported `chromadb.query` to `query_with_filter`. | P1-44 API route map remains open. |
+| 2026-07-11 | P1 API route map | Codex | Closed item 44: added `server/scripts/generate-api-route-map.mjs`, `pnpm catalog:api-routes`, `pnpm catalog:api-routes:check`, generated `API_ROUTE_MAP.md` plus JSON, and added QA coverage for raw-body, admin, BA-gated, VM-entitlement, prospect-token, and internal-runtime route families. | P1-45 route access matrix remains open. |
