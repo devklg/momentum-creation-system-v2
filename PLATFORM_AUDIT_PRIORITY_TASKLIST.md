@@ -48,8 +48,8 @@ Release blockers, governance blockers, and correctness issues that should be han
 
 Core consolidation work that protects data integrity, governance, compliance, and operator confidence.
 
-- [ ] 21. **Persistence:** Inventory all 56 tripleStackWrite call sites.
-- [ ] 22. **Persistence:** Classify every tripleStackWrite call as graph_critical, knowledge, or operational.
+- [x] 21. **Persistence:** Inventory all 56 tripleStackWrite call sites.
+- [x] 22. **Persistence:** Classify every tripleStackWrite call as graph_critical, knowledge, or operational.
 - [ ] 23. **Persistence:** Migrate BA identity writes to the tiered write model.
 - [ ] 24. **Persistence:** Migrate sponsor immutability writes to the tiered write model.
 - [ ] 25. **Persistence:** Migrate token lifecycle writes to the tiered write model.
@@ -96,7 +96,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [ ] 66. **Docs:** Add freshness metadata to core docs and generated artifacts.
 - [ ] 67. **Docs:** Mark historical and generated docs with explicit authority status.
 - [ ] 68. **Docs:** Add stale-document detection to CI or the agent workflow.
-- [ ] 69. **Persistence:** Generate and maintain a persistence write catalog as part of CI.
+- [x] 69. **Persistence:** Generate and maintain a persistence write catalog as part of CI.
 - [ ] 70. **Operations:** Expose outbox worker status and retry metrics.
 - [ ] 71. **Operations:** Create an operational dashboard for workers, persistence, delivery, projections, and knowledge readiness.
 - [ ] 72. **Operations:** Add structured correlation ids for token, invitation, CRM, and VM/RVM flows.
@@ -234,3 +234,4 @@ Use this section when assigning work to multiple agents. Keep the original numbe
 | 2026-07-11 | P0 Lane 2 Chroma health | Codex | Closed items 7, 8, and 9: Chroma heartbeat readback now filters and checks metadata by canonical `heartbeatId`; regression tests assert writer/readback key parity, metadata-only readback, and admin `/triple-stack` 200/503 route shapes. Verification passed: targeted health tests 9/9, full server Vitest 150 files / 1618 tests, `@momentum/shared` build, server typecheck. | Live admin health probe was not called because this lane used isolated tests; live validation should use MCS stack Mongo 30000 / Neo4j 7710 / Chroma 8200 with inherited DB env stripped. |
 | 2026-07-11 | P0 Lane 3 governance | Codex | Closed items 11-15: linked the agent playbook from agent/prompt/runtime docs, proposed ACR-002 for VM/RVM live-delivery governance, added VM/RVM compliance checklist, documented live delivery disabled until approval, and added GraphRAG/Context canary criteria with live flags off by default. | ACR-002 remains Proposed and requires Kevin approval before live delivery expansion. |
 | 2026-07-11 | P0 Lane 4 final gates | Codex | Closed item 20 after integrating Lanes 0-3 locally. Final gates passed: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm build`, and `pnpm --filter @momentum/server test` (150 files / 1618 tests). | Build warnings remain as existing P2/P3 cautions: `.com` dynamic/static import split and `.team` chunk size over 500 kB. |
+| 2026-07-11 | P1 persistence catalog | Codex | Closed items 21, 22, and 69: generated `engineering/sprints/platform-audit-p1/PERSISTENCE_WRITE_CATALOG.md` plus JSON from AST discovery; catalog covers 56 production `tripleStackWrite` call sites and classifies them as 11 graph-critical, 20 knowledge, and 25 operational. Added `pnpm catalog:persistence:check` to the CI `gates` job so new/unclassified call sites fail the merge gate. | Migration items 23-33 remain open; the catalog is the dependency map for moving callers onto `writeGraphCritical`, `writeKnowledge`, and `writeOperational`. |
