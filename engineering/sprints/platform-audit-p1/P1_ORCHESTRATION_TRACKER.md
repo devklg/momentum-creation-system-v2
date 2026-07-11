@@ -784,6 +784,36 @@ Verification:
   `pnpm catalog:route-access:check`,
   `pnpm compliance:com:check`
 
+### P1-53: PMV Analytics Event Taxonomy
+
+Implemented:
+
+- Added `packages/shared/src/pmv-analytics-taxonomy.ts` and exported it from
+  `packages/shared/src/index.ts`.
+- Created
+  `engineering/sprints/platform-audit-p1/PMV_ANALYTICS_EVENT_TAXONOMY.md` as
+  the human-readable PMV analytics taxonomy artifact.
+- Defined analytics events for every PMV contract event id, including
+  invitation creation/send, link open, video milestones, callback request,
+  webinar reservation, follow-up due, CRM note/disposition, customer/enrollment
+  outcomes, expiry, and archive.
+- Defined allowed metric ids, labels, descriptions, aggregations, source
+  collections, source fields, triggers, and forbidden metric families.
+- Added `server/src/qa/__tests__/pmvAnalyticsTaxonomy.test.ts`, proving the
+  taxonomy covers every PMV contract event exactly once and public metric text
+  avoids earnings, cycle math, and placement/spillover claim language.
+
+Verification:
+
+- `pnpm --filter @momentum/server test -- pmvAnalyticsTaxonomy`
+- `pnpm --filter @momentum/shared build`
+- `pnpm --filter @momentum/server typecheck`
+- `pnpm typecheck`
+- `pnpm build`
+- `pnpm --filter @momentum/server test`
+- `pnpm catalog:persistence && pnpm catalog:schema && pnpm catalog:mongo-ownership && pnpm catalog:mongo-indexes && pnpm catalog:neo4j && pnpm catalog:chroma && pnpm catalog:api-routes && pnpm catalog:route-access && pnpm compliance:com`
+- `pnpm catalog:persistence:check && pnpm catalog:schema:check && pnpm catalog:mongo-ownership:check && pnpm catalog:mongo-indexes:check && pnpm catalog:neo4j:check && pnpm catalog:chroma:check && pnpm catalog:api-routes:check && pnpm catalog:route-access:check && pnpm compliance:com:check`
+
 ## Lane Map
 
 ### Lane P1-A: Persistence Migration

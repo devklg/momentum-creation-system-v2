@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-11T23:45:44.074Z
+- Generated: 2026-07-11T23:51:49.540Z
 - Mongo collections: 65
 - Neo4j labels: 68
 - Neo4j relationships: 59
 - Chroma collections: 50
 - Route modules: 45
 - Route handlers: 236
-- Shared exports: 858
+- Shared exports: 868
 
 ## Mongo Collections
 
@@ -376,6 +376,16 @@
 | `MCS_LEADER_CREDIBILITY` | const | `packages/shared/src/leaders.ts` |
 | `McsLeaderCredibilityContent` | interface | `packages/shared/src/leaders.ts` |
 | `McsLeaderProfile` | interface | `packages/shared/src/leaders.ts` |
+| `PMV_ANALYTICS_EVENTS` | const | `packages/shared/src/pmv-analytics-taxonomy.ts` |
+| `PMV_ANALYTICS_FORBIDDEN_PATTERNS` | const | `packages/shared/src/pmv-analytics-taxonomy.ts` |
+| `PMV_ANALYTICS_TAXONOMY` | const | `packages/shared/src/pmv-analytics-taxonomy.ts` |
+| `PMV_ANALYTICS_TAXONOMY_VERSION` | const | `packages/shared/src/pmv-analytics-taxonomy.ts` |
+| `PmvAnalyticsAggregation` | type | `packages/shared/src/pmv-analytics-taxonomy.ts` |
+| `PmvAnalyticsAudience` | type | `packages/shared/src/pmv-analytics-taxonomy.ts` |
+| `PmvAnalyticsConcept` | type | `packages/shared/src/pmv-analytics-taxonomy.ts` |
+| `PmvAnalyticsEventDefinition` | interface | `packages/shared/src/pmv-analytics-taxonomy.ts` |
+| `PmvAnalyticsEventId` | type | `packages/shared/src/pmv-analytics-taxonomy.ts` |
+| `PmvAnalyticsMetric` | interface | `packages/shared/src/pmv-analytics-taxonomy.ts` |
 | `PMV_CONCEPTS` | const | `packages/shared/src/pmv-contract.ts` |
 | `PMV_CONTRACT` | const | `packages/shared/src/pmv-contract.ts` |
 | `PMV_CONTRACT_VERSION` | const | `packages/shared/src/pmv-contract.ts` |
