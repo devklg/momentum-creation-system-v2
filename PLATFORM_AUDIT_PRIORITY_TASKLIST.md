@@ -109,7 +109,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 79. **VM/RVM:** Add VM/RVM copy compliance tests.
 - [x] 80. **VM/RVM:** Add idempotency keys for VM/RVM provider events and webhooks.
 - [x] 81. **Delivery:** Add delivery retry, backpressure, and dead-letter controls.
-- [ ] 82. **Resources:** Define resource and content lifecycle states: draft, review, approved, active, archived, superseded.
+- [x] 82. **Resources:** Define resource and content lifecycle states: draft, review, approved, active, archived, superseded.
 - [ ] 83. **Resources:** Build the unified resource catalog schema.
 - [ ] 84. **Resources:** Add a content publishing gate requiring Chroma and Neo4j readiness before retrieval.
 - [ ] 85. **Knowledge:** Map the candidate-to-approved knowledge workflow end to end.

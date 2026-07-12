@@ -16,3 +16,4 @@ export * from './agent-registry.js';
 export * from './agent-skills.js';
 export * from './prompt-governance.js';
 export * from './admin-sensitive-actions.js';
+export * from './resource-lifecycle.js';
