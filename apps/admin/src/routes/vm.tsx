@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type {
   McsAdminVmLiveApprovalPayload,
   McsAdminVmLiveApprovalResponse,
-  McsAdminVmOverviewResponse,
+  McsAdminVmQueueHealthOverviewResponse,
   McsAdminVmOwnershipCorrectionResponse,
 } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,7 @@ const EMPTY_CORRECTION: CorrectionForm = {
 };
 
 export function VmPage() {
-  const [data, setData] = useState<McsAdminVmOverviewResponse | null>(null);
+  const [data, setData] = useState<McsAdminVmQueueHealthOverviewResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [correction, setCorrection] = useState<CorrectionForm>(EMPTY_CORRECTION);
@@ -51,7 +51,7 @@ export function VmPage() {
       setErr(null);
       try {
         const res = await fetch('/api/admin/vm/overview', { credentials: 'include' });
-        const body = (await res.json()) as McsAdminVmOverviewResponse & { error?: string };
+        const body = (await res.json()) as McsAdminVmQueueHealthOverviewResponse & { error?: string };
         if (!body.ok) {
           setErr(body.error ?? 'Could not load VM overview.');
           return;
@@ -111,7 +111,7 @@ export function VmPage() {
     if (!data) return;
 
     const previous = data;
-    const optimistic: McsAdminVmOverviewResponse = {
+    const optimistic: McsAdminVmQueueHealthOverviewResponse = {
       ...data,
       campaigns: data.campaigns.map((row) =>
         row.vmCampaignId === vmCampaignId
@@ -347,6 +347,49 @@ export function VmPage() {
             />
           </section>
 
+          <section className="mb-8">
+            <SectionHeading title="Provider Queue Failures & Stuck States" />
+            <p className="mb-3 text-xs text-cream-mute">
+              Read-only operational findings. Elapsed time flags a processing lock for investigation; it never completes, retries, or closes a record.
+            </p>
+            <div className="grid grid-cols-6 gap-3 mb-4">
+              <QueueStat label="Queued" value={data.queueHealth.counts.queued} />
+              <QueueStat label="Processing" value={data.queueHealth.counts.processing} />
+              <QueueStat label="Retry due" value={data.queueHealth.counts.retryDue} tone="watch" />
+              <QueueStat label="Stuck locks" value={data.queueHealth.counts.stuckProcessing} tone="watch" />
+              <QueueStat label="Failed" value={data.queueHealth.counts.failed} tone="risk" />
+              <QueueStat label="Dead letters" value={data.queueHealth.counts.deadLettered} tone="risk" />
+            </div>
+            <div className="border border-line rounded-md overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-cream/[0.04] text-cream-faint font-mono text-[10px] uppercase tracking-label">
+                  <tr>
+                    <th className="text-left px-3 py-2">Condition</th>
+                    <th className="text-left px-3 py-2">Job</th>
+                    <th className="text-left px-3 py-2">Campaign / lead</th>
+                    <th className="text-right px-3 py-2">Attempts</th>
+                    <th className="text-right px-3 py-2">Age</th>
+                    <th className="text-left px-3 py-2">Failure</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.queueHealth.findings.length === 0 ? (
+                    <tr><td className="px-3 py-5 text-cream-mute" colSpan={6}>No failed, dead-lettered, due-retry, or stale-processing queue findings.</td></tr>
+                  ) : data.queueHealth.findings.map((row) => (
+                    <tr key={row.jobId} className="border-t border-line/50">
+                      <td className="px-3 py-2 font-mono text-[11px] text-gold">{row.condition.replaceAll('_', ' ')}</td>
+                      <td className="px-3 py-2"><p className="text-cream">{row.kind}</p><p className="font-mono text-[10px] text-cream-faint">{row.jobId}</p></td>
+                      <td className="px-3 py-2 font-mono text-[10px] text-cream-mute">{row.vmCampaignId ?? '—'}<br />{row.leadId ?? '—'}</td>
+                      <td className="px-3 py-2 text-right">{row.attempts}/{row.maxAttempts}</td>
+                      <td className="px-3 py-2 text-right">{formatAge(row.ageMs)}</td>
+                      <td className="px-3 py-2 text-xs text-cream-mute max-w-[280px] truncate" title={row.failureReason ?? ''}>{row.failureReason ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
           <section className="grid grid-cols-3 gap-6 mb-8">
             <HookList
               title="Provider Health"
@@ -429,11 +472,24 @@ function Stat({ label, value }: { label: string; value: number | string }) {
   );
 }
 
-function isLiveApproved(row: McsAdminVmOverviewResponse['campaigns'][number]): boolean {
+function isLiveApproved(row: McsAdminVmQueueHealthOverviewResponse['campaigns'][number]): boolean {
   return (
     'adminApprovedForLiveDelivery' in row &&
     row.adminApprovedForLiveDelivery === true
   );
+}
+
+function QueueStat({ label, value, tone = 'neutral' }: { label: string; value: number; tone?: 'neutral' | 'watch' | 'risk' }) {
+  const color = tone === 'risk' ? 'text-red-300' : tone === 'watch' ? 'text-gold' : 'text-cream';
+  return <div className="border border-line rounded-md bg-ink-2 p-3"><p className="font-mono text-[9px] tracking-label text-cream-faint uppercase">{label}</p><p className={`font-display text-[26px] mt-1 ${color}`}>{value}</p></div>;
+}
+
+function formatAge(ageMs: number | null): string {
+  if (ageMs === null) return '—';
+  const minutes = Math.floor(ageMs / 60_000);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  return hours < 48 ? `${hours}h` : `${Math.floor(hours / 24)}d`;
 }
 
 function LiveApprovalControl({

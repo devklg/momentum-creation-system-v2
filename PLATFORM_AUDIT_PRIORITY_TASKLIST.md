@@ -105,7 +105,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 75. **Audit:** Create a unified admin audit-event taxonomy.
 - [x] 76. **Admin:** Add tests for destructive or governance-sensitive admin actions.
 - [x] 77. **VM/RVM:** Document VM/RVM lifecycle schemas for campaigns, recipients, queue, webhooks, attempts, and tokens.
-- [ ] 78. **VM/RVM:** Create a VM/RVM provider queue failure and stuck-state dashboard.
+- [x] 78. **VM/RVM:** Create a VM/RVM provider queue failure and stuck-state dashboard.
 - [ ] 79. **VM/RVM:** Add VM/RVM copy compliance tests.
 - [ ] 80. **VM/RVM:** Add idempotency keys for VM/RVM provider events and webhooks.
 - [ ] 81. **Delivery:** Add delivery retry, backpressure, and dead-letter controls.

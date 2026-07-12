@@ -5992,3 +5992,42 @@ export interface McsAuditEventTaxonomy {
 export interface McsTaxonomizedAuditLogEntry extends McsAuditLogEntry {
   taxonomy: McsAuditEventTaxonomy;
 }
+
+export interface McsAdminVmQueueHealthRow {
+  jobId: string;
+  kind: string;
+  status: string;
+  condition: 'stuck_processing' | 'dead_lettered' | 'failed' | 'retry_due';
+  attempts: number;
+  maxAttempts: number;
+  availableAt: McsIsoTimestamp | null;
+  lockedAt: McsIsoTimestamp | null;
+  failedAt: McsIsoTimestamp | null;
+  failureReason: string | null;
+  vmCampaignId: string | null;
+  leadId: string | null;
+  ageMs: number | null;
+}
+
+export interface McsAdminVmQueueHealth {
+  policy: 'report_only';
+  stuckAfterMs: number;
+  counts: {
+    total: number;
+    queued: number;
+    processing: number;
+    complete: number;
+    skipped: number;
+    failed: number;
+    deadLettered: number;
+    retryDue: number;
+    stuckProcessing: number;
+  };
+  oldestQueuedAt: McsIsoTimestamp | null;
+  oldestLockedAt: McsIsoTimestamp | null;
+  findings: McsAdminVmQueueHealthRow[];
+}
+
+export interface McsAdminVmQueueHealthOverviewResponse extends McsAdminVmOverviewResponse {
+  queueHealth: McsAdminVmQueueHealth;
+}
