@@ -32,6 +32,10 @@ let timer: NodeJS.Timeout | null = null;
 let tickInFlight = false;
 let lastDispatchAt = 0;
 
+export function getVmDeliveryWorkerStatus() {
+  return { started: workerStarted, inFlight: tickInFlight, tickMs: TICK_MS, batchSize: BATCH, lastDispatchAt: lastDispatchAt > 0 ? new Date(lastDispatchAt).toISOString() : null };
+}
+
 interface DeliveryPayload extends Record<string, unknown> {
   leadId: string;
   provider?: VmProviderKey;

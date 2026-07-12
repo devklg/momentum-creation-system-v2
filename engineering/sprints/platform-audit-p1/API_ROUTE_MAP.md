@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-12T10:06:09.635Z
+- Generated: 2026-07-12T10:11:36.236Z
 - Mounted routers: 46
 - Route files: 46
-- Static route rows: 212
+- Static route rows: 213
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
 | ba_facing_gated | 72 |
-| pre_gate | 137 |
+| pre_gate | 138 |
 | pre_json_admin_body_limit | 2 |
 | raw_body_before_json | 1 |
 
@@ -22,7 +22,7 @@
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 88 |
+| admin | 89 |
 | ba_auth_steve_gated | 72 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 6 |
-| GET | 106 |
+| GET | 107 |
 | PATCH | 8 |
 | POST | 86 |
 | PUT | 6 |
@@ -176,10 +176,11 @@
 | GET | `/api/admin/reporting/enrollment-completion/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:582` |
 | GET | `/api/admin/reporting/follow-up-aging/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:609` |
 | GET | `/api/admin/reporting/leader-scorecards/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:636` |
-| GET | `/api/admin/live-ops/growth` | pre_gate | admin | admin | `server/src/routes/admin/liveOps.ts:82` |
-| GET | `/api/admin/live-ops/grid` | pre_gate | admin | admin | `server/src/routes/admin/liveOps.ts:123` |
-| GET | `/api/admin/live-ops/funnel` | pre_gate | admin | admin | `server/src/routes/admin/liveOps.ts:164` |
-| GET | `/api/admin/live-ops/usage/stream` | pre_gate | admin | admin | `server/src/routes/admin/liveOps.ts:241` |
+| GET | `/api/admin/live-ops/operations` | pre_gate | admin | admin | `server/src/routes/admin/liveOps.ts:51` |
+| GET | `/api/admin/live-ops/growth` | pre_gate | admin | admin | `server/src/routes/admin/liveOps.ts:91` |
+| GET | `/api/admin/live-ops/grid` | pre_gate | admin | admin | `server/src/routes/admin/liveOps.ts:132` |
+| GET | `/api/admin/live-ops/funnel` | pre_gate | admin | admin | `server/src/routes/admin/liveOps.ts:173` |
+| GET | `/api/admin/live-ops/usage/stream` | pre_gate | admin | admin | `server/src/routes/admin/liveOps.ts:250` |
 | GET | `/api/admin/tenant/overview` | pre_gate | admin | admin | `server/src/routes/admin/tenant.ts:77` |
 | PATCH | `/api/admin/tenant/settings` | pre_gate | admin | admin | `server/src/routes/admin/tenant.ts:102` |
 | POST | `/api/admin/tenant/templates/validate` | pre_gate | admin | admin | `server/src/routes/admin/tenant.ts:145` |

@@ -159,4 +159,16 @@ export const MCS_ADMIN_LIVE_OPS_PATHS = {
   liveGrid: '/api/admin/live-ops/grid',
   /** GET — H.4 funnel (query param `kind=prospect|ba_activation`) */
   funnel: '/api/admin/live-ops/funnel',
+  operations: '/api/admin/live-ops/operations',
 } as const;
+
+export interface McsAdminOperationsDashboardResponse {
+  ok: true;
+  generatedAt: string;
+  workers: Array<{ key: string; label: string; status: 'running' | 'busy' | 'stopped'; detail: string }>;
+  persistence: { status: 'healthy' | 'degraded' | 'unknown'; checkedAt: string | null; detail: string };
+  delivery: { status: 'healthy' | 'warning' | 'not_configured'; delivered24h: number; failed24h: number; providers: number };
+  projections: { pending: number; due: number; scheduled: number; deadLettered: number; attempts: number; oldestPendingAt: string | null };
+  knowledge: { status: 'ready' | 'empty' | 'degraded'; sources: number; chunks: number; pendingProjections: number; detail: string };
+  warnings: string[];
+}

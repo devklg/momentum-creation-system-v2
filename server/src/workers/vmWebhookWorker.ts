@@ -12,6 +12,10 @@ const BATCH = 20;
 
 let workerStarted = false;
 let timer: NodeJS.Timeout | null = null;
+
+export function getVmWebhookWorkerStatus() {
+  return { started: workerStarted };
+}
 let tickInFlight = false;
 
 export async function startVmWebhookWorker(): Promise<void> {

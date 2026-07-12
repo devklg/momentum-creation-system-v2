@@ -14,6 +14,10 @@ const BATCH = 10;
 
 let workerStarted = false;
 let timer: NodeJS.Timeout | null = null;
+
+export function getVmImportWorkerStatus() {
+  return { started: workerStarted };
+}
 let tickInFlight = false;
 
 export async function startVmImportWorker(): Promise<void> {

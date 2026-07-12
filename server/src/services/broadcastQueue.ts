@@ -52,6 +52,10 @@ const BATCH = 10;
 const MAX_ATTEMPTS = 3;
 
 let workerStarted = false;
+
+export function getBroadcastWorkerStatus() {
+  return { started: workerStarted };
+}
 let timer: NodeJS.Timeout | null = null;
 let tickInFlight = false;
 

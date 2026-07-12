@@ -33,6 +33,7 @@ import {
   getLiveGrid,
   getUsageSample,
 } from '../../domain/liveOps.js';
+import { buildAdminOperationsDashboard } from '../../domain/adminOperationsDashboard.js';
 import {
   decrementAdminSessions,
   incrementAdminSessions,
@@ -46,6 +47,14 @@ import type {
 } from '@momentum/shared';
 
 export const adminLiveOpsRoutes: Router = express.Router();
+
+adminLiveOpsRoutes.get('/operations', requireAdmin, async (_req, res) => {
+  try {
+    res.status(200).json(await buildAdminOperationsDashboard());
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err instanceof Error ? err.message : String(err) });
+  }
+});
 
 const FilterSchema = z.object({
   tmagId: z.string().min(2).max(80).optional(),
