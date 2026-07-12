@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T01:27:29.292Z",
+  "generatedAt": "2026-07-12T02:12:16.976Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -34,9 +34,9 @@
       "label": "DISPOSED",
       "sourceCount": 3,
       "sources": [
-        "server/src/domain/crm.ts:357",
-        "server/src/domain/crm.ts:376",
-        "server/src/domain/crm.ts:398"
+        "server/src/domain/crm.ts:409",
+        "server/src/domain/crm.ts:436",
+        "server/src/domain/crm.ts:466"
       ]
     },
     {
@@ -57,9 +57,9 @@
       "label": "HAS_FOLLOWUP",
       "sourceCount": 3,
       "sources": [
-        "server/src/domain/crm.ts:237",
-        "server/src/domain/crm.ts:269",
-        "server/src/domain/crm.ts:324"
+        "server/src/domain/crm.ts:262",
+        "server/src/domain/crm.ts:302",
+        "server/src/domain/crm.ts:366"
       ]
     },
     {
@@ -229,13 +229,13 @@
         "server/src/domain/bulkLeads.ts:150",
         "server/src/domain/callbackRequest.ts:131",
         "server/src/domain/commitments.ts:57",
-        "server/src/domain/crm.ts:164",
-        "server/src/domain/crm.ts:237",
-        "server/src/domain/crm.ts:267",
-        "server/src/domain/crm.ts:324",
-        "server/src/domain/crm.ts:357",
-        "server/src/domain/crm.ts:374",
-        "server/src/domain/crm.ts:396",
+        "server/src/domain/crm.ts:180",
+        "server/src/domain/crm.ts:262",
+        "server/src/domain/crm.ts:300",
+        "server/src/domain/crm.ts:366",
+        "server/src/domain/crm.ts:409",
+        "server/src/domain/crm.ts:434",
+        "server/src/domain/crm.ts:464",
         "server/src/domain/crmOwnershipPersistence.ts:33",
         "server/src/domain/crmOwnershipPersistence.ts:40",
         "server/src/domain/crmOwnershipPersistence.ts:48",
@@ -371,7 +371,7 @@
       "label": "TmagCrmNote",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/crm.ts:166"
+        "server/src/domain/crm.ts:182"
       ]
     },
     {
@@ -402,7 +402,7 @@
       "label": "TmagInvitationActivity",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/crm.ts:701",
+        "server/src/domain/crm.ts:777",
         "server/src/domain/invitations.ts:375"
       ]
     },
@@ -500,15 +500,15 @@
         "server/src/domain/bulkLeads.ts:238",
         "server/src/domain/bulkLeads.ts:257",
         "server/src/domain/callbackRequest.ts:130",
-        "server/src/domain/crm.ts:165",
-        "server/src/domain/crm.ts:237",
-        "server/src/domain/crm.ts:268",
-        "server/src/domain/crm.ts:324",
-        "server/src/domain/crm.ts:357",
-        "server/src/domain/crm.ts:375",
-        "server/src/domain/crm.ts:397",
-        "server/src/domain/crm.ts:592",
-        "server/src/domain/crm.ts:700",
+        "server/src/domain/crm.ts:181",
+        "server/src/domain/crm.ts:262",
+        "server/src/domain/crm.ts:301",
+        "server/src/domain/crm.ts:366",
+        "server/src/domain/crm.ts:409",
+        "server/src/domain/crm.ts:435",
+        "server/src/domain/crm.ts:465",
+        "server/src/domain/crm.ts:668",
+        "server/src/domain/crm.ts:776",
         "server/src/domain/crmOwnershipPersistence.ts:49",
         "server/src/domain/crmOwnershipPersistence.ts:57",
         "server/src/domain/crossStoreReconciliation.ts:110",
@@ -524,7 +524,7 @@
         "server/src/domain/poolPlacementPersistence.ts:37",
         "server/src/domain/poolPlacementPersistence.ts:41",
         "server/src/domain/prospectCrm.ts:227",
-        "server/src/domain/prospectCrm.ts:477",
+        "server/src/domain/prospectCrm.ts:498",
         "server/src/domain/tokenLifecyclePersistence.ts:46",
         "server/src/domain/tokenLifecyclePersistence.ts:52",
         "server/src/domain/webinarReservation.ts:203"
@@ -549,7 +549,7 @@
         "server/src/domain/crmOwnershipPersistence.ts:56",
         "server/src/domain/prospectCrm.ts:283",
         "server/src/domain/prospectCrm.ts:382",
-        "server/src/domain/prospectCrm.ts:473"
+        "server/src/domain/prospectCrm.ts:494"
       ]
     },
     {
@@ -706,7 +706,7 @@
       "relationship": "ABOUT",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/crm.ts:168"
+        "server/src/domain/crm.ts:184"
       ]
     },
     {
@@ -845,7 +845,7 @@
       "relationship": "HAS_ACTIVITY",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/crm.ts:704",
+        "server/src/domain/crm.ts:780",
         "server/src/domain/invitations.ts:378"
       ]
     },
@@ -1151,7 +1151,7 @@
       "relationship": "WROTE_NOTE",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/crm.ts:167"
+        "server/src/domain/crm.ts:183"
       ]
     }
   ],

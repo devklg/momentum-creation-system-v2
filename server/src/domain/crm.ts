@@ -37,6 +37,7 @@
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeKnowledge } from '../services/tieredWrite.js';
+import { appendAuditEntry } from './auditLog.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 import { writeProspectTokenGraphCritical } from './tokenLifecyclePersistence.js';
 import { findBAByTmagId } from './ba.js';
@@ -131,6 +132,21 @@ async function assertOwnership(
   return doc;
 }
 
+function prospectAuditEntity(prospect: ProspectGuardDoc) {
+  const displayLabel = [prospect.firstName, prospect.lastInitial]
+    .filter((part): part is string => Boolean(part))
+    .join(' ');
+  return {
+    kind: 'prospect' as const,
+    id: prospect.prospectId,
+    displayLabel: displayLabel || prospect.prospectId,
+  };
+}
+
+function followUpState(dueAt: string): 'scheduled' | 'due' {
+  return new Date(dueAt).getTime() <= Date.now() ? 'due' : 'scheduled';
+}
+
 // ── Notes ─────────────────────────────────────────────────────────────────
 
 export async function addNote(
@@ -218,13 +234,22 @@ export async function setFollowUp(
   if (Number.isNaN(dueMs)) throw new CrmError('invalid_due_at');
   if (dueMs <= Date.now()) throw new CrmError('due_at_in_past');
 
-  await assertOwnership(prospectId, sponsorTmagId);
+  const prospect = await assertOwnership(prospectId, sponsorTmagId);
 
   const existing = await getActiveFollowUp(prospectId, sponsorTmagId);
   const dueAtIso = new Date(dueMs).toISOString();
   const now = new Date().toISOString();
 
   if (existing) {
+    if (existing.dueAt === dueAtIso) {
+      return {
+        prospectId,
+        sponsorTmagId,
+        dueAt: dueAtIso,
+        createdAt: existing.createdAt,
+        clearedAt: null,
+      };
+    }
     // Replace in place — keep createdAt as the original ask.
     await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
@@ -237,6 +262,14 @@ export async function setFollowUp(
         'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-[r:HAS_FOLLOWUP]->(p:TmagProspect {prospectId: $prospectId}) ' +
         'SET r.dueAt = $dueAt, r.updatedAt = $now',
       params: { sponsorTmagId, prospectId, dueAt: dueAtIso, now },
+    });
+    await appendAuditEntry({
+      actor: await baActor(sponsorTmagId),
+      action: 'ba.crm.follow_up.rescheduled',
+      entity: prospectAuditEntity(prospect),
+      severity: 'info',
+      before: { state: followUpState(existing.dueAt), dueAt: existing.dueAt },
+      after: { state: 'scheduled', dueAt: dueAtIso },
     });
     return {
       prospectId,
@@ -283,6 +316,15 @@ export async function setFollowUp(
     },
   });
 
+  await appendAuditEntry({
+    actor: await baActor(sponsorTmagId),
+    action: 'ba.crm.follow_up.scheduled',
+    entity: prospectAuditEntity(prospect),
+    severity: 'info',
+    before: { state: 'none', dueAt: null },
+    after: { state: 'scheduled', dueAt: dueAtIso },
+  });
+
   return record;
 }
 
@@ -307,7 +349,7 @@ export async function clearFollowUp(
   prospectId: string,
   sponsorTmagId: string,
 ): Promise<void> {
-  await assertOwnership(prospectId, sponsorTmagId);
+  const prospect = await assertOwnership(prospectId, sponsorTmagId);
 
   const existing = await getActiveFollowUp(prospectId, sponsorTmagId);
   if (!existing) return; // idempotent
@@ -325,6 +367,14 @@ export async function clearFollowUp(
       'DELETE r',
     params: { sponsorTmagId, prospectId },
   });
+  await appendAuditEntry({
+    actor: await baActor(sponsorTmagId),
+    action: 'ba.crm.follow_up.cleared',
+    entity: prospectAuditEntity(prospect),
+    severity: 'info',
+    before: { state: followUpState(existing.dueAt), dueAt: existing.dueAt },
+    after: { state: 'cleared', dueAt: null, clearedAt },
+  });
 }
 
 // ── Dispositions ──────────────────────────────────────────────────────────
@@ -338,10 +388,12 @@ export async function setDisposition(
     throw new CrmError('invalid_disposition');
   }
 
-  await assertOwnership(prospectId, sponsorTmagId);
+  const prospect = await assertOwnership(prospectId, sponsorTmagId);
 
   const existing = await getDisposition(prospectId, sponsorTmagId);
   const now = new Date().toISOString();
+
+  if (existing === disposition) return disposition;
 
   // Clear path
   if (disposition === null) {
@@ -357,6 +409,14 @@ export async function setDisposition(
         'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-[r:DISPOSED]->(p:TmagProspect {prospectId: $prospectId}) ' +
         'DELETE r',
       params: { sponsorTmagId, prospectId },
+    });
+    await appendAuditEntry({
+      actor: await baActor(sponsorTmagId),
+      action: 'ba.crm.disposition.cleared',
+      entity: prospectAuditEntity(prospect),
+      severity: 'info',
+      before: { disposition: existing },
+      after: { disposition: null },
     });
     return null;
   }
@@ -376,6 +436,14 @@ export async function setDisposition(
         'MERGE (b)-[r:DISPOSED]->(p) ' +
         'SET r.disposition = $disposition, r.updatedAt = $now',
       params: { sponsorTmagId, prospectId, disposition, now },
+    });
+    await appendAuditEntry({
+      actor: await baActor(sponsorTmagId),
+      action: 'ba.crm.disposition.changed',
+      entity: prospectAuditEntity(prospect),
+      severity: 'info',
+      before: { disposition: existing },
+      after: { disposition },
     });
     return disposition;
   }
@@ -410,6 +478,14 @@ export async function setDisposition(
         at: now,
       },
     },
+  });
+  await appendAuditEntry({
+    actor: await baActor(sponsorTmagId),
+    action: 'ba.crm.disposition.set',
+    entity: prospectAuditEntity(prospect),
+    severity: 'info',
+    before: { disposition: null },
+    after: { disposition },
   });
   return disposition;
 }

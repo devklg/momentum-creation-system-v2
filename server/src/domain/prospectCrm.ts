@@ -411,6 +411,27 @@ export async function applyCrmLifecycleEvent(
     createdAt: now,
   });
 
+  if (nextStatus && nextStatus !== record.status) {
+    await appendAuditEntry({
+      actor: { kind: 'system', label: 'crm_lifecycle' },
+      action: 'system.crm.status_changed',
+      entity: {
+        kind: 'prospect',
+        id: record.prospectId,
+        displayLabel: record.prospectId,
+      },
+      severity: 'info',
+      before: { status: record.status },
+      after: {
+        status: nextStatus,
+        timelineEventKind: kind,
+        crmRecordId: record.crmRecordId,
+        token: record.token,
+        leadId: record.leadId,
+      },
+    });
+  }
+
   return { ...record, ...patch };
 }
 
