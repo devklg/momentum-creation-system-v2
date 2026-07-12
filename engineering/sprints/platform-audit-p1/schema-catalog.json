@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T02:45:26.070Z",
+  "generatedAt": "2026-07-12T09:26:37.966Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -1103,6 +1103,16 @@
           "file": "server/src/domain/todaysActions.ts",
           "line": 94,
           "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 190,
+          "source": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 243,
+          "source": "persistenceCall.mongodb.query"
         }
       ]
     },
@@ -1251,6 +1261,16 @@
           "file": "server/src/domain/prospectCrm.ts",
           "line": 466,
           "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 320,
+          "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 334,
+          "source": "persistenceCall.mongodb.query"
         }
       ]
     },
@@ -1621,6 +1641,11 @@
         {
           "file": "server/src/domain/prospectCrm.ts",
           "line": 221,
+          "source": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 263,
           "source": "writeKnowledge"
         }
       ]
@@ -2008,7 +2033,7 @@
       "sources": [
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 223,
+          "line": 257,
           "source": "writeOperational"
         }
       ]
@@ -2039,53 +2064,63 @@
           "source": "persistenceCall.mongodb.update"
         },
         {
-          "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 543,
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 107,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 449,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 593,
+          "line": 577,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmProviderQueue.ts",
+          "line": 629,
           "source": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 719,
+          "line": 755,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 791,
+          "line": 827,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 802,
+          "line": 852,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 817,
+          "line": 867,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1132,
+          "line": 1193,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/routes/vm.ts",
-          "line": 289,
+          "line": 294,
           "source": "persistenceCall.mongodb.aggregate"
         },
         {
           "file": "server/src/routes/vm.ts",
-          "line": 335,
+          "line": 340,
           "source": "persistenceCall.mongodb.aggregate"
         },
         {
           "file": "server/src/routes/vm.ts",
-          "line": 364,
+          "line": 369,
           "source": "persistenceCall.mongodb.aggregate"
         }
       ]
@@ -2122,7 +2157,7 @@
         },
         {
           "file": "server/src/workers/vmDeliveryWorker.ts",
-          "line": 220,
+          "line": 250,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -2133,8 +2168,30 @@
       "schemaMode": "permissive_mongoose_schema",
       "sources": [
         {
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 119,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 839,
+          "line": 889,
+          "source": "writeOperational"
+        }
+      ]
+    },
+    {
+      "collection": "tmag_vm_inbound_calls",
+      "resolved": true,
+      "schemaMode": "permissive_mongoose_schema",
+      "sources": [
+        {
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 90,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 142,
           "source": "writeOperational"
         }
       ]
@@ -2173,22 +2230,22 @@
       "sources": [
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 877,
+          "line": 927,
           "source": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 910,
+          "line": 960,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 926,
+          "line": 976,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 957,
+          "line": 1007,
           "source": "persistenceCall.mongodb.update"
         }
       ]
@@ -2205,37 +2262,37 @@
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 285,
+          "line": 319,
           "source": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 319,
+          "line": 353,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 330,
+          "line": 364,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 362,
+          "line": 396,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 386,
+          "line": 420,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 414,
+          "line": 448,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 445,
+          "line": 479,
           "source": "persistenceCall.mongodb.update"
         }
       ]
@@ -2247,7 +2304,7 @@
       "sources": [
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 656,
+          "line": 692,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -2411,6 +2468,21 @@
         ]
       },
       {
+        "label": "MemoryIndexEntry",
+        "sources": [
+          "server/scripts/write-edges-2026-07-11.ts:169",
+          "server/scripts/write-edges-2026-07-11.ts:179",
+          "server/scripts/write-edges-2026-07-11.ts:180",
+          "server/scripts/write-edges-2026-07-11.ts:205"
+        ]
+      },
+      {
+        "label": "MemorySourceRecord",
+        "sources": [
+          "server/src/lib/memoryContextIndex.ts:275"
+        ]
+      },
+      {
         "label": "Outcome",
         "sources": [
           "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:241"
@@ -2419,7 +2491,8 @@
       {
         "label": "REQUESTED_CALLBACK",
         "sources": [
-          "server/src/domain/callbackRequest.ts:132"
+          "server/src/domain/callbackRequest.ts:132",
+          "server/src/domain/vmInboundCallback.ts:214"
         ]
       },
       {
@@ -2536,10 +2609,11 @@
           "server/src/domain/threeWayCalls.ts:583",
           "server/src/domain/training.ts:237",
           "server/src/domain/vmCampaigns.ts:75",
+          "server/src/domain/vmInboundCallback.ts:213",
           "server/src/domain/vmLeadOwners.ts:61",
           "server/src/domain/vmLeadOwners.ts:77",
-          "server/src/domain/vmProviderQueue.ts:240",
-          "server/src/domain/vmProviderQueue.ts:602",
+          "server/src/domain/vmProviderQueue.ts:274",
+          "server/src/domain/vmProviderQueue.ts:638",
           "server/src/domain/workbook.ts:307",
           "server/src/domain/workbook.ts:308"
         ]
@@ -2785,7 +2859,8 @@
           "server/src/domain/crmOwnershipPersistence.ts:56",
           "server/src/domain/prospectCrm.ts:283",
           "server/src/domain/prospectCrm.ts:382",
-          "server/src/domain/prospectCrm.ts:494"
+          "server/src/domain/prospectCrm.ts:494",
+          "server/src/domain/vmInboundCallback.ts:328"
         ]
       },
       {
@@ -2797,7 +2872,8 @@
       {
         "label": "TmagProspectTimelineEvent",
         "sources": [
-          "server/src/domain/prospectCrm.ts:228"
+          "server/src/domain/prospectCrm.ts:228",
+          "server/src/domain/vmInboundCallback.ts:287"
         ]
       },
       {
@@ -2844,7 +2920,7 @@
       {
         "label": "TmagVmAuditEvent",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:237"
+          "server/src/domain/vmProviderQueue.ts:271"
         ]
       },
       {
@@ -2858,8 +2934,11 @@
           "server/src/domain/crossStoreReconciliation.ts:102",
           "server/src/domain/tokenLifecyclePersistence.ts:62",
           "server/src/domain/tokenLifecyclePersistence.ts:68",
-          "server/src/domain/vmProviderQueue.ts:599",
-          "server/src/domain/vmProviderQueue.ts:847"
+          "server/src/domain/vmInboundCallback.ts:152",
+          "server/src/domain/vmInboundCallback.ts:212",
+          "server/src/domain/vmInboundCallback.ts:286",
+          "server/src/domain/vmProviderQueue.ts:635",
+          "server/src/domain/vmProviderQueue.ts:897"
         ]
       },
       {
@@ -2874,7 +2953,13 @@
       {
         "label": "TmagVmDeliveryEvent",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:845"
+          "server/src/domain/vmProviderQueue.ts:895"
+        ]
+      },
+      {
+        "label": "TmagVmInboundCall",
+        "sources": [
+          "server/src/domain/vmInboundCallback.ts:148"
         ]
       },
       {
@@ -2891,13 +2976,13 @@
       {
         "label": "TmagVmProviderWebhook",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:891"
+          "server/src/domain/vmProviderQueue.ts:941"
         ]
       },
       {
         "label": "TmagVmQueueJob",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:291"
+          "server/src/domain/vmProviderQueue.ts:325"
         ]
       },
       {
@@ -3062,6 +3147,12 @@
         ]
       },
       {
+        "relationship": "HAS_INBOUND_CALL",
+        "sources": [
+          "server/src/domain/vmInboundCallback.ts:153"
+        ]
+      },
+      {
         "relationship": "HAS_LANGUAGE_VARIANT",
         "sources": [
           "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:212"
@@ -3108,7 +3199,8 @@
       {
         "relationship": "HAS_TIMELINE_EVENT",
         "sources": [
-          "server/src/domain/prospectCrm.ts:232"
+          "server/src/domain/prospectCrm.ts:232",
+          "server/src/domain/vmInboundCallback.ts:291"
         ]
       },
       {
@@ -3121,13 +3213,13 @@
       {
         "relationship": "HAS_VM_AUDIT",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:241"
+          "server/src/domain/vmProviderQueue.ts:275"
         ]
       },
       {
         "relationship": "HAS_VM_DELIVERY_EVENT",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:847"
+          "server/src/domain/vmProviderQueue.ts:897"
         ]
       },
       {
@@ -3208,7 +3300,7 @@
       {
         "relationship": "OWNS_VM_LEAD",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:603"
+          "server/src/domain/vmProviderQueue.ts:639"
         ]
       },
       {
@@ -3542,12 +3634,17 @@
         {
           "method": "GET",
           "path": "/overview",
-          "line": 25
+          "line": 26
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 43
+          "line": 44
+        },
+        {
+          "method": "GET",
+          "path": "/health",
+          "line": 58
         }
       ],
       "sharedTypes": [
@@ -3687,12 +3784,22 @@
         {
           "method": "GET",
           "path": "/report",
-          "line": 26
+          "line": 27
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 46
+          "line": 47
+        },
+        {
+          "method": "GET",
+          "path": "/crm-integrity",
+          "line": 61
+        },
+        {
+          "method": "GET",
+          "path": "user-agent",
+          "line": 74
         }
       ],
       "sharedTypes": [
@@ -5095,62 +5202,62 @@
         {
           "method": "GET",
           "path": "/lead-owners",
-          "line": 158
+          "line": 163
         },
         {
           "method": "POST",
           "path": "/lead-owners",
-          "line": 180
+          "line": 185
         },
         {
           "method": "GET",
           "path": "/lead-owners/:leadOwnerId",
-          "line": 194
+          "line": 199
         },
         {
           "method": "GET",
           "path": "/campaigns",
-          "line": 196
+          "line": 201
         },
         {
           "method": "POST",
           "path": "/campaigns",
-          "line": 208
+          "line": 213
         },
         {
           "method": "GET",
           "path": "/campaigns/:campaignId",
-          "line": 245
+          "line": 250
         },
         {
           "method": "PATCH",
           "path": "/campaigns/:campaignId/status",
-          "line": 257
+          "line": 262
         },
         {
           "method": "GET",
           "path": "/campaigns/:campaignId/metrics",
-          "line": 307
+          "line": 312
         },
         {
           "method": "GET",
           "path": "/campaigns/:campaignId/leads",
-          "line": 321
+          "line": 326
         },
         {
           "method": "GET",
           "path": "/campaigns/:campaignId/manual-export",
-          "line": 383
+          "line": 388
         },
         {
           "method": "POST",
           "path": "/lead-owners/:leadOwnerId/import",
-          "line": 435
+          "line": 440
         },
         {
           "method": "GET",
           "path": "/imports/:importJobId",
-          "line": 437
+          "line": 442
         }
       ],
       "sharedTypes": [
@@ -5275,6 +5382,106 @@
       "name": "McsAdminLiveUsageStreamEvent",
       "kind": "type",
       "file": "packages/shared/src/admin-live-ops.ts"
+    },
+    {
+      "name": "getMcsPlatformAgent",
+      "kind": "function",
+      "file": "packages/shared/src/agent-registry.ts"
+    },
+    {
+      "name": "isMcsPlatformAgentKey",
+      "kind": "function",
+      "file": "packages/shared/src/agent-registry.ts"
+    },
+    {
+      "name": "MCS_PLATFORM_AGENT_KEYS",
+      "kind": "const",
+      "file": "packages/shared/src/agent-registry.ts"
+    },
+    {
+      "name": "MCS_PLATFORM_AGENT_REGISTRY",
+      "kind": "const",
+      "file": "packages/shared/src/agent-registry.ts"
+    },
+    {
+      "name": "MCS_PLATFORM_CAPABILITY_REGISTRY",
+      "kind": "const",
+      "file": "packages/shared/src/agent-registry.ts"
+    },
+    {
+      "name": "McsFutureAgentRegistration",
+      "kind": "interface",
+      "file": "packages/shared/src/agent-registry.ts"
+    },
+    {
+      "name": "McsPlatformAgentDescriptor",
+      "kind": "interface",
+      "file": "packages/shared/src/agent-registry.ts"
+    },
+    {
+      "name": "McsPlatformAgentKey",
+      "kind": "type",
+      "file": "packages/shared/src/agent-registry.ts"
+    },
+    {
+      "name": "McsPlatformAgentKind",
+      "kind": "type",
+      "file": "packages/shared/src/agent-registry.ts"
+    },
+    {
+      "name": "McsPlatformAgentSurface",
+      "kind": "type",
+      "file": "packages/shared/src/agent-registry.ts"
+    },
+    {
+      "name": "McsPlatformCapabilityDescriptor",
+      "kind": "interface",
+      "file": "packages/shared/src/agent-registry.ts"
+    },
+    {
+      "name": "validateFutureAgentRegistration",
+      "kind": "function",
+      "file": "packages/shared/src/agent-registry.ts"
+    },
+    {
+      "name": "MCS_AGENT_SKILL_REGISTRY",
+      "kind": "const",
+      "file": "packages/shared/src/agent-skills.ts"
+    },
+    {
+      "name": "MCS_AGENT_TEMPLATE_REGISTRY",
+      "kind": "const",
+      "file": "packages/shared/src/agent-skills.ts"
+    },
+    {
+      "name": "McsAgentDegradationMode",
+      "kind": "type",
+      "file": "packages/shared/src/agent-skills.ts"
+    },
+    {
+      "name": "McsAgentSkillDescriptor",
+      "kind": "interface",
+      "file": "packages/shared/src/agent-skills.ts"
+    },
+    {
+      "name": "McsAgentSkillStatus",
+      "kind": "type",
+      "file": "packages/shared/src/agent-skills.ts"
+    },
+    {
+      "name": "McsAgentTemplateDescriptor",
+      "kind": "interface",
+      "file": "packages/shared/src/agent-skills.ts"
+    },
+    {
+      "name": "McsAgentTemplateStatus",
+      "kind": "type",
+      "file": "packages/shared/src/agent-skills.ts"
+    },
+    {
+      "name": "validateAgentSkillTemplateRegistries",
+      "kind": "function",
+      "file": "packages/shared/src/agent-skills.ts"
     },
     {
       "name": "McsBrandPrimitive",
@@ -5745,6 +5952,56 @@
       "name": "McsProductVideoKind",
       "kind": "type",
       "file": "packages/shared/src/product-catalog.ts"
+    },
+    {
+      "name": "McsPromptGovernanceAction",
+      "kind": "type",
+      "file": "packages/shared/src/prompt-governance.ts"
+    },
+    {
+      "name": "McsPromptGovernanceActor",
+      "kind": "interface",
+      "file": "packages/shared/src/prompt-governance.ts"
+    },
+    {
+      "name": "McsPromptGovernanceEvent",
+      "kind": "interface",
+      "file": "packages/shared/src/prompt-governance.ts"
+    },
+    {
+      "name": "McsPromptGovernanceRole",
+      "kind": "type",
+      "file": "packages/shared/src/prompt-governance.ts"
+    },
+    {
+      "name": "McsPromptTransitionContext",
+      "kind": "interface",
+      "file": "packages/shared/src/prompt-governance.ts"
+    },
+    {
+      "name": "McsPromptTransitionResult",
+      "kind": "type",
+      "file": "packages/shared/src/prompt-governance.ts"
+    },
+    {
+      "name": "McsPromptVersionRecord",
+      "kind": "interface",
+      "file": "packages/shared/src/prompt-governance.ts"
+    },
+    {
+      "name": "McsPromptVersionStatus",
+      "kind": "type",
+      "file": "packages/shared/src/prompt-governance.ts"
+    },
+    {
+      "name": "transitionPromptVersion",
+      "kind": "function",
+      "file": "packages/shared/src/prompt-governance.ts"
+    },
+    {
+      "name": "validatePromptVersionRecord",
+      "kind": "function",
+      "file": "packages/shared/src/prompt-governance.ts"
     },
     {
       "name": "MCS_RECRUITING_ATTESTATION_LEGS",
@@ -7197,6 +7454,41 @@
       "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
     },
     {
+      "name": "McsContextGuardHit",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsContextGuardReport",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsContextPacket",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsContextPacketBrief",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsLearningCandidate",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsLearningCandidateKind",
+      "kind": "type",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsMemoryAudience",
+      "kind": "type",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
       "name": "McsMemoryContextComparisonMethod",
       "kind": "type",
       "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
@@ -7303,6 +7595,41 @@
     },
     {
       "name": "McsMemoryContextSubject",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsMemoryProvenance",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsMemoryStackName",
+      "kind": "type",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsMemoryStatedBy",
+      "kind": "type",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsMemoryStoreKey",
+      "kind": "type",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsRetrievalLadderRung",
+      "kind": "type",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsVerbCoverageEntry",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
+    },
+    {
+      "name": "McsVerbCoverageReport",
       "kind": "interface",
       "file": "packages/shared/src/runtime/memory-context-compiler-schema.ts"
     },
@@ -7517,6 +7844,21 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsAdminAgentHealthCard",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminAgentHealthResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminAgentHealthStatus",
+      "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsAdminAgentInteractionSummary",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -7663,6 +8005,21 @@
     },
     {
       "name": "McsAdminCreateProspectResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminCrmIntegrityCategory",
+      "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminCrmIntegrityFinding",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminCrmIntegrityReportResponse",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
     },
@@ -9718,12 +10075,12 @@
     }
   ],
   "summary": {
-    "mongoCollections": 65,
-    "neo4jLabels": 68,
-    "neo4jRelationships": 59,
+    "mongoCollections": 66,
+    "neo4jLabels": 71,
+    "neo4jRelationships": 60,
     "chromaCollections": 50,
     "routeModules": 45,
-    "routeHandlers": 236,
-    "sharedExports": 898
+    "routeHandlers": 239,
+    "sharedExports": 948
   }
 }

@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-12T09:59:13.246Z
+- Generated: 2026-07-12T10:06:09.635Z
 - Mounted routers: 46
 - Route files: 46
 - Static route rows: 212
@@ -274,18 +274,18 @@
 | POST | `/api/ivory/momentum/:prospectId/suggest` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:624` |
 | GET | `/api/agents/recommendations` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/agents.ts:25` |
 | POST | `/api/agents/events` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/agents.ts:45` |
-| GET | `/api/vm/lead-owners` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:158` |
-| POST | `/api/vm/lead-owners` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:180` |
-| GET | `/api/vm/lead-owners/:leadOwnerId` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:194` |
-| GET | `/api/vm/campaigns` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:196` |
-| POST | `/api/vm/campaigns` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:208` |
-| GET | `/api/vm/campaigns/:campaignId` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:245` |
-| PATCH | `/api/vm/campaigns/:campaignId/status` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:257` |
-| GET | `/api/vm/campaigns/:campaignId/metrics` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:307` |
-| GET | `/api/vm/campaigns/:campaignId/leads` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:321` |
-| GET | `/api/vm/campaigns/:campaignId/manual-export` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:383` |
-| POST | `/api/vm/lead-owners/:leadOwnerId/import` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:435` |
-| GET | `/api/vm/imports/:importJobId` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:437` |
+| GET | `/api/vm/lead-owners` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:163` |
+| POST | `/api/vm/lead-owners` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:185` |
+| GET | `/api/vm/lead-owners/:leadOwnerId` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:199` |
+| GET | `/api/vm/campaigns` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:201` |
+| POST | `/api/vm/campaigns` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:213` |
+| GET | `/api/vm/campaigns/:campaignId` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:250` |
+| PATCH | `/api/vm/campaigns/:campaignId/status` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:262` |
+| GET | `/api/vm/campaigns/:campaignId/metrics` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:312` |
+| GET | `/api/vm/campaigns/:campaignId/leads` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:326` |
+| GET | `/api/vm/campaigns/:campaignId/manual-export` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:388` |
+| POST | `/api/vm/lead-owners/:leadOwnerId/import` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:440` |
+| GET | `/api/vm/imports/:importJobId` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:442` |
 | GET | `/api/training/fast-start/progress` | ba_facing_gated | ba_auth_steve_gated | auth | `server/src/routes/training.ts:49` |
 | POST | `/api/training/fast-start/modules/:id/state` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/training.ts:79` |
 | GET | `/api/profile/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/profile.ts:86` |

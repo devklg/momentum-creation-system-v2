@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-12T09:59:13.603Z
+- Generated: 2026-07-12T10:06:09.978Z
 - Routes: 212
 - Findings: 0
 
@@ -244,18 +244,18 @@
 | POST | `/api/ivory/momentum/:prospectId/suggest` | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:624` |
 | GET | `/api/agents/recommendations` | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/agents.ts:25` |
 | POST | `/api/agents/events` | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/agents.ts:45` |
-| GET | `/api/vm/lead-owners` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:158` |
-| POST | `/api/vm/lead-owners` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:180` |
-| GET | `/api/vm/lead-owners/:leadOwnerId` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:194` |
-| GET | `/api/vm/campaigns` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:196` |
-| POST | `/api/vm/campaigns` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:208` |
-| GET | `/api/vm/campaigns/:campaignId` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:245` |
-| PATCH | `/api/vm/campaigns/:campaignId/status` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:257` |
-| GET | `/api/vm/campaigns/:campaignId/metrics` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:307` |
-| GET | `/api/vm/campaigns/:campaignId/leads` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:321` |
-| GET | `/api/vm/campaigns/:campaignId/manual-export` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:383` |
-| POST | `/api/vm/lead-owners/:leadOwnerId/import` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:435` |
-| GET | `/api/vm/imports/:importJobId` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:437` |
+| GET | `/api/vm/lead-owners` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:163` |
+| POST | `/api/vm/lead-owners` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:185` |
+| GET | `/api/vm/lead-owners/:leadOwnerId` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:199` |
+| GET | `/api/vm/campaigns` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:201` |
+| POST | `/api/vm/campaigns` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:213` |
+| GET | `/api/vm/campaigns/:campaignId` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:250` |
+| PATCH | `/api/vm/campaigns/:campaignId/status` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:262` |
+| GET | `/api/vm/campaigns/:campaignId/metrics` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:312` |
+| GET | `/api/vm/campaigns/:campaignId/leads` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:326` |
+| GET | `/api/vm/campaigns/:campaignId/manual-export` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:388` |
+| POST | `/api/vm/lead-owners/:leadOwnerId/import` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:440` |
+| GET | `/api/vm/imports/:importJobId` | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:442` |
 | GET | `/api/training/fast-start/progress` | ba_auth_pre_steve | ba_session | none | whitelisted | static_whitelist | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/training.ts:49` |
 | POST | `/api/training/fast-start/modules/:id/state` | ba_auth_steve_gated | ba_session | none | dynamic_by_module_id | module_1_dynamic_whitelist_only | none | none | none | no | no | global_256kb_json | Static route path is dynamic: module 1 is Steve-whitelisted at runtime; modules 2-5 require Steve completion | none | `server/src/routes/training.ts:79` |
 | GET | `/api/profile/` | ba_auth_pre_steve | ba_session | none | whitelisted | profile_prefix_whitelist | none | none | none | no | no | global_256kb_json | Steve whitelist is prefix-based, so all profile settings routes bypass the Steve completion check effectively | none | `server/src/routes/profile.ts:86` |

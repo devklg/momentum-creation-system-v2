@@ -19,6 +19,7 @@ vi.mock('../../services/tripleStack.js', () => ({
 
 vi.mock('../../services/tieredWrite.js', () => ({
   writeOperational: mocks.writeOperational,
+  writeKnowledge: vi.fn(),
 }));
 
 vi.mock('../../services/vmProviders/index.js', () => ({

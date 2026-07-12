@@ -279,6 +279,80 @@ const Env = z.object({
 export const env = Env.parse(process.env);
 export type Env = z.infer<typeof Env>;
 
+// ─── VM live-delivery configuration validation ─────────────────────────────
+// Two known landmines turn a live campaign into a silent 100% failure:
+//   1. TELNYX_CONNECTION_ID pointing at the WRONG Call Control app (Michael's
+//      app instead of the VM dialer app `mcs-vm-v2` = 2995619818075325536,
+//      which owns +13236931362 and webhooks to /api/telnyx/webhook).
+//   2. PROSPECT_BASE_URL left at the localhost dev default — every prospect
+//      link sent to a real phone would point at localhost:7701.
+// This turns a silent live-send failure into a loud boot failure.
+
+export function vmLiveDeliveryConfigProblems(e: {
+  VM_LIVE_DELIVERY_ENABLED: boolean;
+  VM_PROVIDER_MODE: string;
+  TELNYX_CONNECTION_ID: string;
+  TELNYX_DIAL_FROM_NUMBER: string;
+  VM_WEBHOOK_SHARED_SECRET: string;
+  PROSPECT_BASE_URL: string;
+}): string[] {
+  if (!e.VM_LIVE_DELIVERY_ENABLED || e.VM_PROVIDER_MODE !== 'telnyx_call_control') {
+    return [];
+  }
+  const problems: string[] = [];
+  if (!e.TELNYX_CONNECTION_ID.trim()) {
+    problems.push(
+      'TELNYX_CONNECTION_ID is missing — set it to the mcs-vm-v2 Call Control ' +
+        "application id (2995619818075325536). Michael's call-control app id " +
+        'will NOT work for VM dialer traffic.',
+    );
+  }
+  if (!e.TELNYX_DIAL_FROM_NUMBER.trim()) {
+    problems.push(
+      'TELNYX_DIAL_FROM_NUMBER is missing — the VM dialer caller ID ' +
+        '(+13236931362, owned by the mcs-vm-v2 app).',
+    );
+  }
+  if (!e.VM_WEBHOOK_SHARED_SECRET.trim()) {
+    problems.push(
+      'VM_WEBHOOK_SHARED_SECRET is missing — inbound VM provider webhooks ' +
+        'would be unauthenticated in live delivery.',
+    );
+  }
+  let prospectHost = '';
+  try {
+    prospectHost = new URL(e.PROSPECT_BASE_URL).hostname.toLowerCase();
+  } catch {
+    prospectHost = '';
+  }
+  if (
+    !prospectHost ||
+    prospectHost === 'localhost' ||
+    prospectHost === '127.0.0.1' ||
+    prospectHost === '::1' ||
+    prospectHost === '[::1]' ||
+    prospectHost.endsWith('.localhost')
+  ) {
+    problems.push(
+      `PROSPECT_BASE_URL (${e.PROSPECT_BASE_URL}) points at localhost — every ` +
+        'prospect link would be unreachable from a real phone. Set it to ' +
+        'https://teammagnificent.com.',
+    );
+  }
+  return problems;
+}
+
+{
+  const vmProblems = vmLiveDeliveryConfigProblems(env);
+  if (vmProblems.length > 0) {
+    throw new Error(
+      '[env] VM live delivery is enabled (VM_LIVE_DELIVERY_ENABLED=true, ' +
+        'provider telnyx_call_control) but the configuration is unusable:\n' +
+        vmProblems.map((p) => `  - ${p}`).join('\n'),
+    );
+  }
+}
+
 // ─── P10 H3/H4 — production configuration hardening ───────────────────────
 // Fail fast at boot rather than silently running an insecure production config.
 if (env.NODE_ENV === 'production') {

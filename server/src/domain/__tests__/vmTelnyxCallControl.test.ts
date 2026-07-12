@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   persistenceCall: vi.fn(),
   tripleStackWrite: vi.fn(),
   writeOperational: vi.fn(),
+  writeKnowledge: vi.fn(),
   gatherSingleDigit: vi.fn(),
   hangupCall: vi.fn(),
   playbackStart: vi.fn(),
@@ -20,6 +21,7 @@ vi.mock('../../services/tripleStack.js', () => ({
 
 vi.mock('../../services/tieredWrite.js', () => ({
   writeOperational: mocks.writeOperational,
+  writeKnowledge: mocks.writeKnowledge,
 }));
 
 vi.mock('../../services/telnyx.js', () => ({
