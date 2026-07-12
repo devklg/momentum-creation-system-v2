@@ -1,37 +1,44 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "freshnessBasis": "content_sha256_and_declared_review_date",
-  "instructions": "Regenerate an artifact when any declared source hash changes. reviewedAt is freshness metadata, not proof that content is authoritative.",
+  "authorityRule": "decision ledger > locked spec > design docs > generated mirrors > git log > agent registry > handoffs",
+  "instructions": "Regenerate an artifact when any declared source hash changes. reviewedAt is freshness metadata. authorityStatus states how a document may be used.",
   "coreDocs": [
     {
       "file": "docs/READ-ME-FIRST.md",
+      "authorityStatus": "current_navigation",
       "contentSha256": "d9ea1c08da9b8cdfd35ab3358a680ac39830fe7f004b0630fbb7aa4088975f81",
       "reviewedAt": "2026-07-12"
     },
     {
       "file": "docs/AGENT-BRIEFING.md",
+      "authorityStatus": "current_orientation",
       "contentSha256": "a3a464386a8236f39d4435a88c46c4e29b7819e5bba1f1203a97648934556dd7",
       "reviewedAt": "2026-07-12"
     },
     {
       "file": "docs/locked-spec.md",
+      "authorityStatus": "authoritative_state",
       "contentSha256": "e2afa8b263e48cf6bc2ac4c8e8daad929cb6745545685ec1504c9b345820fe9d",
       "reviewedAt": "2026-07-12"
     },
     {
       "file": "docs/project-wireframe.md",
+      "authorityStatus": "current_build_decomposition",
       "contentSha256": "9150c159dfef48afa6fd2a28141ce2186b48d31441de0023162ee14c6e4cb2a7",
       "reviewedAt": "2026-07-12"
     },
     {
       "file": "PLATFORM_AUDIT_PRIORITY_TASKLIST.md",
-      "contentSha256": "979bf9014b7cc0e769ce22693d5a94694b89f0aaeae7467abd268af69b3afe51",
+      "authorityStatus": "current_execution_queue",
+      "contentSha256": "3f5d24f541cdbcaec358b51c4dcf06fd0e6954589931b845f14c9021a792935a",
       "reviewedAt": "2026-07-12"
     }
   ],
   "generatedArtifacts": [
     {
       "file": "docs/build-registry.md",
+      "authorityStatus": "generated_mirror",
       "generator": "server/scripts/generate-build-registry.mjs",
       "sources": [
         {
@@ -45,6 +52,7 @@
     },
     {
       "file": "docs/build-checklist.html",
+      "authorityStatus": "generated_mirror",
       "generator": "server/scripts/build-checklist.mjs",
       "sources": [
         {
@@ -58,6 +66,7 @@
     },
     {
       "file": "engineering/sprints/platform-audit-p1/api-route-map.json",
+      "authorityStatus": "generated_mirror",
       "generator": "server/scripts/generate-api-route-map.mjs",
       "sources": [
         {
@@ -71,6 +80,7 @@
     },
     {
       "file": "engineering/sprints/platform-audit-p1/route-access-matrix.json",
+      "authorityStatus": "generated_mirror",
       "generator": "server/scripts/generate-route-access-matrix.mjs",
       "sources": [
         {
@@ -84,6 +94,7 @@
     },
     {
       "file": "engineering/sprints/platform-audit-p1/persistence-write-catalog.json",
+      "authorityStatus": "generated_mirror",
       "generator": "server/scripts/generate-persistence-write-catalog.mjs",
       "sources": [
         {
@@ -97,6 +108,7 @@
     },
     {
       "file": "engineering/sprints/platform-audit-p1/schema-catalog.json",
+      "authorityStatus": "generated_mirror",
       "generator": "server/scripts/generate-schema-catalog.mjs",
       "sources": [
         {
@@ -114,6 +126,7 @@
     },
     {
       "file": "engineering/sprints/platform-audit-p1/mongo-ownership-map.json",
+      "authorityStatus": "generated_mirror",
       "generator": "server/scripts/generate-mongo-ownership-map.mjs",
       "sources": [
         {
@@ -127,6 +140,7 @@
     },
     {
       "file": "engineering/sprints/platform-audit-p1/mongo-index-audit-plan.json",
+      "authorityStatus": "generated_mirror",
       "generator": "server/scripts/generate-mongo-index-audit.mjs",
       "sources": [
         {
@@ -140,6 +154,7 @@
     },
     {
       "file": "engineering/sprints/platform-audit-p1/neo4j-catalog.json",
+      "authorityStatus": "generated_mirror",
       "generator": "server/scripts/generate-neo4j-catalog.mjs",
       "sources": [
         {
@@ -153,6 +168,7 @@
     },
     {
       "file": "engineering/sprints/platform-audit-p1/chroma-collection-catalog.json",
+      "authorityStatus": "generated_mirror",
       "generator": "server/scripts/generate-chroma-catalog.mjs",
       "sources": [
         {
@@ -166,6 +182,7 @@
     },
     {
       "file": "engineering/sprints/platform-audit-p1/com-prospect-compliance-scan.json",
+      "authorityStatus": "generated_mirror",
       "generator": "server/scripts/generate-com-prospect-compliance-scan.mjs",
       "sources": [
         {
@@ -180,6 +197,58 @@
       "contentSha256": "2c12964ed6740490696dc897310108450f2d296751638bd7b963f3f3afbb3e94",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T00:02:22.810Z"
+    }
+  ],
+  "historicalDocs": [
+    {
+      "file": "docs/APP_COMPLETION_AUDIT_2026-06-24.md",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "2a744f5d57589b510d8c2c094bea63d5edc1386ae36cf6241e3d3d672c373584",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    },
+    {
+      "file": "docs/APP_STATE_AUDIT_PRINT_CHECKLIST_2026-06-23.md",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "6d5faa6ad316cf552788b98d3cbdb52b20d67085b56bb0cd1e85a3692c6b2b1d",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    },
+    {
+      "file": "docs/IMPLEMENTATION_PLAN_COMPLETE_APP_2026-06-23.md",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "90378fbd51c1ade4884f0f9375fbbdb7a2eceb537323960ee6decf1df25fa951",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    },
+    {
+      "file": "docs/chat-105-decisions.md",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "e4f7f7d4dbbba220f7d3cf4ccef5baf6b49c99f398aca31d804dddbd5faaab63",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    },
+    {
+      "file": "docs/chat-109-decisions.md",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "6a113bf3322951183e79b3c41b57f4b046850927b5b85e89f0164c8a0d905a07",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    },
+    {
+      "file": "docs/chat-85-decisions.md",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "d1acf36cacc509a29e44f6bf1152551298a06c2be6b36cd7c37db4e733447b8d",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    },
+    {
+      "file": "docs/chat-94-locked-spec-rewrite.txt",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "15d48ac249d55bea01109725e401e3c0e15442c974db5319ac39de89434a2428",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    }
+  ],
+  "designReferences": [
+    {
+      "file": "docs/dashboard-prototype.md",
+      "authorityStatus": "design_reference",
+      "contentSha256": "c08b5ac76c2bd9beb19a00f66fe97f5f24e50915baf9ebc176f5920abcddbb38",
+      "useConstraint": "Design authority within its named dashboard scope, subordinate to the decision ledger and locked spec."
     }
   ]
 }
