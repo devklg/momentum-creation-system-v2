@@ -5965,3 +5965,15 @@ export interface McsFlowCorrelation {
   vmCampaignId: string | null;
   leadId: string | null;
 }
+
+export interface McsAdminEntitlementAuditResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  policy: 'read_only_audit';
+  definitions: Array<{ entitlement: string; storage: string; gate: string; protectedRoutes: number; grantedPrincipals: number | null }>;
+  adminAllowlist: string[];
+  memberGrants: Array<{ tmagId: string; threeBaId: string | null; fullName: string; entitlement: string; recognized: boolean; source: 'member_record' }>;
+  unknownGrants: Array<{ tmagId: string; threeBaId: string | null; fullName: string; entitlement: string; recognized: boolean; source: 'member_record' }>;
+  totals: { membersScanned: number; memberGrants: number; unknownGrants: number; routesClassified: number };
+  warnings: string[];
+}
