@@ -100,7 +100,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 70. **Operations:** Expose outbox worker status and retry metrics.
 - [x] 71. **Operations:** Create an operational dashboard for workers, persistence, delivery, projections, and knowledge readiness.
 - [x] 72. **Operations:** Add structured correlation ids for token, invitation, CRM, and VM/RVM flows.
-- [ ] 73. **Security:** Create a permissions matrix by route, role, entitlement, and gate.
+- [x] 73. **Security:** Create a permissions matrix by route, role, entitlement, and gate.
 - [ ] 74. **Entitlements:** Create an entitlement admin audit view.
 - [ ] 75. **Audit:** Create a unified admin audit-event taxonomy.
 - [ ] 76. **Admin:** Add tests for destructive or governance-sensitive admin actions.

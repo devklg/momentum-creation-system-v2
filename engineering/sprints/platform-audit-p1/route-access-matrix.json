@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T10:11:36.562Z",
+  "generatedAt": "2026-07-12T11:03:47.973Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -38,6 +38,22 @@
       "vm_provider_webhook": 1,
       "ba_auth_steve_vm_entitled": 12
     },
+    "byRole": {
+      "provider": 2,
+      "founder_admin": 98,
+      "anonymous": 5,
+      "system": 10,
+      "brand_ambassador": 88,
+      "prospect": 18
+    },
+    "byEntitlement": {
+      "machine_credential": 12,
+      "admin_allowlist": 98,
+      "none": 5,
+      "registered_ba": 88,
+      "valid_prospect_identity": 18,
+      "vm_dialer": 12
+    },
     "guardCoverage": {
       "requireAuth": 87,
       "requireAdmin": 92,
@@ -63,6 +79,17 @@
       "routeAccessProfile": "raw_body_webhook",
       "accessClass": "raw_body_webhook",
       "accessCategory": "raw_body_webhook",
+      "permissions": {
+        "roles": [
+          "provider"
+        ],
+        "entitlements": [
+          "machine_credential"
+        ],
+        "gates": [
+          "telnyx_signature"
+        ]
+      },
       "expected": {
         "authGate": "none",
         "adminGate": "none",
@@ -108,6 +135,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -151,6 +190,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -194,6 +245,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "public_health",
       "accessCategory": "public_health",
+      "permissions": {
+        "roles": [
+          "anonymous",
+          "system"
+        ],
+        "entitlements": [
+          "machine_credential",
+          "none"
+        ],
+        "gates": []
+      },
       "expected": {
         "authGate": "none",
         "adminGate": "none",
@@ -234,6 +296,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "public_health",
       "accessCategory": "public_health",
+      "permissions": {
+        "roles": [
+          "anonymous",
+          "system"
+        ],
+        "entitlements": [
+          "machine_credential",
+          "none"
+        ],
+        "gates": []
+      },
       "expected": {
         "authGate": "none",
         "adminGate": "none",
@@ -276,6 +349,15 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "auth_bootstrap",
       "accessCategory": "auth_bootstrap",
+      "permissions": {
+        "roles": [
+          "anonymous"
+        ],
+        "entitlements": [
+          "none"
+        ],
+        "gates": []
+      },
       "expected": {
         "authGate": "none",
         "adminGate": "none",
@@ -318,6 +400,15 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "auth_bootstrap",
       "accessCategory": "auth_bootstrap",
+      "permissions": {
+        "roles": [
+          "anonymous"
+        ],
+        "entitlements": [
+          "none"
+        ],
+        "gates": []
+      },
       "expected": {
         "authGate": "none",
         "adminGate": "none",
@@ -360,6 +451,15 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "auth_bootstrap",
       "accessCategory": "auth_bootstrap",
+      "permissions": {
+        "roles": [
+          "anonymous"
+        ],
+        "entitlements": [
+          "none"
+        ],
+        "gates": []
+      },
       "expected": {
         "authGate": "none",
         "adminGate": "none",
@@ -402,6 +502,15 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "auth_session",
       "accessCategory": "auth_session",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": []
+      },
       "expected": {
         "authGate": "none",
         "adminGate": "none",
@@ -442,6 +551,18 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "auth_session",
       "accessCategory": "auth_session",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "whitelisted"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -484,6 +605,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -526,6 +658,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -568,6 +711,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -610,6 +764,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -652,6 +817,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -694,6 +870,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -736,6 +923,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -778,6 +976,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -820,6 +1029,18 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -863,6 +1084,18 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "whitelisted"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -905,6 +1138,18 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "whitelisted"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -947,6 +1192,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "steve_worker_secret",
       "accessCategory": "steve_worker_secret",
+      "permissions": {
+        "roles": [
+          "system"
+        ],
+        "entitlements": [
+          "machine_credential"
+        ],
+        "gates": [
+          "x-steve-worker-secret"
+        ]
+      },
       "expected": {
         "authGate": "none",
         "adminGate": "none",
@@ -989,6 +1245,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "steve_worker_secret",
       "accessCategory": "steve_worker_secret",
+      "permissions": {
+        "roles": [
+          "system"
+        ],
+        "entitlements": [
+          "machine_credential"
+        ],
+        "gates": [
+          "x-steve-worker-secret"
+        ]
+      },
       "expected": {
         "authGate": "none",
         "adminGate": "none",
@@ -1031,6 +1298,18 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -1074,6 +1353,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -1116,6 +1406,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -1158,6 +1459,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1200,6 +1513,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1242,6 +1567,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1284,6 +1621,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1326,6 +1675,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1368,6 +1729,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1410,6 +1783,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1452,6 +1837,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1494,6 +1891,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1536,6 +1945,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1578,6 +1999,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1620,6 +2053,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1662,6 +2107,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1704,6 +2161,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1746,6 +2215,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1788,6 +2269,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1830,6 +2323,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1872,6 +2377,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1914,6 +2431,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1956,6 +2485,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -1998,6 +2539,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2040,6 +2593,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2082,6 +2647,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2124,6 +2701,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2166,6 +2755,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2208,6 +2809,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2250,6 +2863,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2292,6 +2917,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2334,6 +2971,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2376,6 +3025,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2418,6 +3079,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2460,6 +3133,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2502,6 +3187,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2544,6 +3241,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2586,6 +3295,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2628,6 +3349,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2670,6 +3403,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2712,6 +3457,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2754,6 +3511,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2796,6 +3565,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2838,6 +3619,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2880,6 +3673,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2922,6 +3727,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -2964,6 +3781,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3006,6 +3835,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3048,6 +3889,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3090,6 +3943,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3132,6 +3997,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3174,6 +4051,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3216,6 +4105,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3258,6 +4159,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3300,6 +4213,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3342,6 +4267,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3384,6 +4321,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3426,6 +4375,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3468,6 +4429,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3510,6 +4483,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3552,6 +4537,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3594,6 +4591,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3636,6 +4645,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3678,6 +4699,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3720,6 +4753,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3762,6 +4807,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3804,6 +4861,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3846,6 +4915,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3888,6 +4969,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3930,6 +5023,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -3972,6 +5077,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4014,6 +5131,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4056,6 +5185,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4098,6 +5239,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4140,6 +5293,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4182,6 +5347,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4224,6 +5401,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4266,6 +5455,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4308,6 +5509,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4350,6 +5563,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4392,6 +5617,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4434,6 +5671,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4476,6 +5725,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4518,6 +5779,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4560,6 +5833,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4602,6 +5887,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4644,6 +5941,21 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin_or_health_secret",
       "accessCategory": "admin_or_health_secret",
+      "permissions": {
+        "roles": [
+          "founder_admin",
+          "system"
+        ],
+        "entitlements": [
+          "admin_allowlist",
+          "machine_credential"
+        ],
+        "gates": [
+          "admin_session_or_shared_secret",
+          "requireAdminOrHealthSecret",
+          "health_secret_optional"
+        ]
+      },
       "expected": {
         "authGate": "admin_session_or_shared_secret",
         "adminGate": "requireAdminOrHealthSecret",
@@ -4688,6 +6000,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4730,6 +6054,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4772,6 +6108,18 @@
       "routeAccessProfile": "admin",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -4814,6 +6162,21 @@
       "routeAccessProfile": "internal_runtime",
       "accessClass": "internal_runtime_admin_or_secret",
       "accessCategory": "internal_runtime_admin_or_secret",
+      "permissions": {
+        "roles": [
+          "founder_admin",
+          "system"
+        ],
+        "entitlements": [
+          "admin_allowlist",
+          "machine_credential"
+        ],
+        "gates": [
+          "runtime_secret_or_admin_session",
+          "admin_fallback",
+          "x-mcs-runtime-secret_when_configured"
+        ]
+      },
       "expected": {
         "authGate": "runtime_secret_or_admin_session",
         "adminGate": "admin_fallback",
@@ -4858,6 +6221,21 @@
       "routeAccessProfile": "internal_runtime",
       "accessClass": "internal_runtime_admin_or_secret",
       "accessCategory": "internal_runtime_admin_or_secret",
+      "permissions": {
+        "roles": [
+          "founder_admin",
+          "system"
+        ],
+        "entitlements": [
+          "admin_allowlist",
+          "machine_credential"
+        ],
+        "gates": [
+          "runtime_secret_or_admin_session",
+          "admin_fallback",
+          "x-mcs-runtime-secret_when_configured"
+        ]
+      },
       "expected": {
         "authGate": "runtime_secret_or_admin_session",
         "adminGate": "admin_fallback",
@@ -4902,6 +6280,21 @@
       "routeAccessProfile": "internal_runtime",
       "accessClass": "internal_runtime_admin_or_secret",
       "accessCategory": "internal_runtime_admin_or_secret",
+      "permissions": {
+        "roles": [
+          "founder_admin",
+          "system"
+        ],
+        "entitlements": [
+          "admin_allowlist",
+          "machine_credential"
+        ],
+        "gates": [
+          "runtime_secret_or_admin_session",
+          "admin_fallback",
+          "x-mcs-runtime-secret_when_configured"
+        ]
+      },
       "expected": {
         "authGate": "runtime_secret_or_admin_session",
         "adminGate": "admin_fallback",
@@ -4946,6 +6339,21 @@
       "routeAccessProfile": "internal_runtime",
       "accessClass": "internal_runtime_admin_or_secret",
       "accessCategory": "internal_runtime_admin_or_secret",
+      "permissions": {
+        "roles": [
+          "founder_admin",
+          "system"
+        ],
+        "entitlements": [
+          "admin_allowlist",
+          "machine_credential"
+        ],
+        "gates": [
+          "runtime_secret_or_admin_session",
+          "admin_fallback",
+          "x-mcs-runtime-secret_when_configured"
+        ]
+      },
       "expected": {
         "authGate": "runtime_secret_or_admin_session",
         "adminGate": "admin_fallback",
@@ -4990,6 +6398,21 @@
       "routeAccessProfile": "internal_runtime",
       "accessClass": "internal_runtime_admin_or_secret",
       "accessCategory": "internal_runtime_admin_or_secret",
+      "permissions": {
+        "roles": [
+          "founder_admin",
+          "system"
+        ],
+        "entitlements": [
+          "admin_allowlist",
+          "machine_credential"
+        ],
+        "gates": [
+          "runtime_secret_or_admin_session",
+          "admin_fallback",
+          "x-mcs-runtime-secret_when_configured"
+        ]
+      },
       "expected": {
         "authGate": "runtime_secret_or_admin_session",
         "adminGate": "admin_fallback",
@@ -5034,6 +6457,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_reentry",
       "accessCategory": "prospect_reentry",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "magic_link_or_reentry_cookie"
+        ]
+      },
       "expected": {
         "authGate": "magic_link_or_reentry_cookie",
         "adminGate": "none",
@@ -5074,6 +6508,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_reentry",
       "accessCategory": "prospect_reentry",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "magic_link_or_reentry_cookie"
+        ]
+      },
       "expected": {
         "authGate": "magic_link_or_reentry_cookie",
         "adminGate": "none",
@@ -5114,6 +6559,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_reentry",
       "accessCategory": "prospect_reentry",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "magic_link_or_reentry_cookie"
+        ]
+      },
       "expected": {
         "authGate": "magic_link_or_reentry_cookie",
         "adminGate": "none",
@@ -5154,6 +6610,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_reentry",
       "accessCategory": "prospect_reentry",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "magic_link_or_reentry_cookie"
+        ]
+      },
       "expected": {
         "authGate": "magic_link_or_reentry_cookie",
         "adminGate": "none",
@@ -5194,6 +6661,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5234,6 +6712,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5274,6 +6763,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5314,6 +6814,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5354,6 +6865,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5394,6 +6916,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5434,6 +6967,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5474,6 +7018,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5514,6 +7069,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5554,6 +7120,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5594,6 +7171,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5634,6 +7222,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5674,6 +7273,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5714,6 +7324,17 @@
       "routeAccessProfile": "prospect_token",
       "accessClass": "prospect_token",
       "accessCategory": "prospect_token",
+      "permissions": {
+        "roles": [
+          "prospect"
+        ],
+        "entitlements": [
+          "valid_prospect_identity"
+        ],
+        "gates": [
+          "token_in_path_or_magic_link"
+        ]
+      },
       "expected": {
         "authGate": "token_in_path_or_magic_link",
         "adminGate": "none",
@@ -5754,6 +7375,18 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -5796,6 +7429,18 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -5838,6 +7483,18 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -5881,6 +7538,18 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "admin",
       "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
       "expected": {
         "authGate": "admin_session",
         "adminGate": "requireAdmin",
@@ -5923,6 +7592,17 @@
       "routeAccessProfile": "pre_gate_or_public",
       "accessClass": "vm_provider_webhook",
       "accessCategory": "vm_provider_webhook",
+      "permissions": {
+        "roles": [
+          "provider"
+        ],
+        "entitlements": [
+          "machine_credential"
+        ],
+        "gates": [
+          "x-vm-provider-secret_when_configured"
+        ]
+      },
       "expected": {
         "authGate": "none",
         "adminGate": "none",
@@ -5967,6 +7647,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6010,6 +7702,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6053,6 +7757,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6096,6 +7812,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "whitelisted"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6138,6 +7866,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6181,6 +7921,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6224,6 +7976,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6267,6 +8031,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6310,6 +8086,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6353,6 +8141,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6396,6 +8196,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6439,6 +8251,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6482,6 +8306,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6525,6 +8361,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6568,6 +8416,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6611,6 +8471,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6654,6 +8526,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6697,6 +8581,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6740,6 +8636,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6783,6 +8691,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6826,6 +8746,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6869,6 +8801,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6912,6 +8856,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6955,6 +8911,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -6998,6 +8966,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7041,6 +9021,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7084,6 +9076,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7127,6 +9131,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7170,6 +9186,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7213,6 +9241,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7256,6 +9296,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7299,6 +9351,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7342,6 +9406,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7385,6 +9461,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7428,6 +9516,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7471,6 +9571,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7514,6 +9626,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7557,6 +9681,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7600,6 +9736,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7643,6 +9791,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7686,6 +9846,20 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_vm_entitled",
       "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7730,6 +9904,20 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_vm_entitled",
       "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7774,6 +9962,20 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_vm_entitled",
       "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7818,6 +10020,20 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_vm_entitled",
       "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7862,6 +10078,20 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_vm_entitled",
       "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7906,6 +10136,20 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_vm_entitled",
       "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7950,6 +10194,20 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_vm_entitled",
       "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -7994,6 +10252,20 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_vm_entitled",
       "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8038,6 +10310,20 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_vm_entitled",
       "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8082,6 +10368,20 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_vm_entitled",
       "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8126,6 +10426,20 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_vm_entitled",
       "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8170,6 +10484,20 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_vm_entitled",
       "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8214,6 +10542,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "whitelisted"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8256,6 +10596,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "dynamic_by_module_id"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8301,6 +10653,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "whitelisted"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8346,6 +10710,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "whitelisted"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8391,6 +10767,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "whitelisted"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8436,6 +10824,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "whitelisted"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8481,6 +10881,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "whitelisted"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8526,6 +10938,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "whitelisted"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8571,6 +10995,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_pre_steve",
       "accessCategory": "ba_auth_pre_steve",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "whitelisted"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8616,6 +11052,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8659,6 +11107,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8702,6 +11162,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8745,6 +11217,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8788,6 +11272,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8831,6 +11327,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8874,6 +11382,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8917,6 +11437,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -8960,6 +11492,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -9003,6 +11547,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
@@ -9046,6 +11602,18 @@
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",
       "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
       "expected": {
         "authGate": "ba_session",
         "adminGate": "none",
