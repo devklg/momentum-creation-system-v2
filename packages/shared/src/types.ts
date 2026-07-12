@@ -5953,3 +5953,15 @@ export interface McsAdminOutboxHealthResponse {
   };
   truncated: boolean;
 }
+
+export interface McsFlowCorrelation {
+  correlationId: string;
+  rootKind: 'invitation' | 'vm_rvm';
+  rootId: string;
+  tokenId: string | null;
+  invitationId: string | null;
+  prospectId: string | null;
+  crmRecordId: string | null;
+  vmCampaignId: string | null;
+  leadId: string | null;
+}

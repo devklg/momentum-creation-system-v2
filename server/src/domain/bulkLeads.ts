@@ -22,6 +22,7 @@ import {
 import { writeProspectTokenGraphCritical } from './tokenLifecyclePersistence.js';
 import { findVMCampaignForOwner } from './vmCampaigns.js';
 import { markLeadOwnerImported } from './vmLeadOwners.js';
+import { createFlowCorrelation, withCrmCorrelation } from './flowCorrelation.js';
 import type {
   McsBulkLeadRecord,
   McsImportBulkLeadPayload,
@@ -89,6 +90,7 @@ async function createBulkLeadRecord(input: {
   const leadId = `lead_${randomUUID()}`;
   const prospectId = `prospect_${randomUUID()}`;
   const token = await mintUniqueToken();
+  const correlation = createFlowCorrelation({ rootKind: 'vm_rvm', rootId: leadId, leadId, vmCampaignId: input.vmCampaignId, prospectId, tokenId: token });
   const location: McsProspectLocation = { city, stateOrRegion, country };
   const lastInitial = lastInitialOf(lastName);
 
@@ -126,13 +128,14 @@ async function createBulkLeadRecord(input: {
       vmCampaignId: input.vmCampaignId,
       sentAt: null,
       message: null,
+      correlation,
     },
     neo4j: {
       cypher:
         'MATCH (b:TeamMagnificentMember {tmagId: $ownerTmagId}) ' +
         'CREATE (p:TmagProspect {prospectId: $id, firstName: $firstName, lastInitial: $lastInitial, ' +
         '  city: $city, stateOrRegion: $stateOrRegion, country: $country, state: $state, ' +
-        '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, source: $source, createdAt: $createdAt}) ' +
+        '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, source: $source, correlationId: $correlationId, createdAt: $createdAt}) ' +
         'CREATE (b)-[:OWNS_RVM_PROSPECT]->(p)',
       params: {
         ownerTmagId: input.ownerTmagId,
@@ -145,6 +148,7 @@ async function createBulkLeadRecord(input: {
         state: 'minted',
         source: 'rvm',
         createdAt: now,
+        correlationId: correlation.correlationId,
       },
       verifyCypher:
         'MATCH (b:TeamMagnificentMember {tmagId: $ownerTmagId})-[:OWNS_RVM_PROSPECT]->' +
@@ -168,6 +172,7 @@ async function createBulkLeadRecord(input: {
         leadOwnerId: input.leadOwnerId,
         vmCampaignId: input.vmCampaignId,
         createdAt: now,
+        correlationId: correlation.correlationId,
       },
     },
   });
@@ -193,6 +198,7 @@ async function createBulkLeadRecord(input: {
       leadId,
       leadOwnerId: input.leadOwnerId,
       vmCampaignId: input.vmCampaignId,
+      correlation,
     },
     tokenProps: {
       prospectId,
@@ -202,6 +208,7 @@ async function createBulkLeadRecord(input: {
       source: 'rvm',
       createdAt: now,
       expiresAt,
+      correlationId: correlation.correlationId,
     },
   });
 
@@ -230,14 +237,14 @@ async function createBulkLeadRecord(input: {
   await writeGraphCritical({
     id: leadId,
     mongoCollection: BULK_LEADS_COLLECTION,
-    mongoDoc: { ...bulkLead },
+    mongoDoc: { ...bulkLead, correlation },
     neo4j: {
       cypher:
         'MATCH (lb:TmagVmLeadOwner {leadOwnerId: $leadOwnerId}) ' +
         'MATCH (vm:TmagVmCampaign {vmCampaignId: $vmCampaignId}) ' +
         'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
         'CREATE (lead:TmagVmBulkLead {leadId: $id, token: $token, status: $status, ' +
-        '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, createdAt: $createdAt}) ' +
+        '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, correlationId: $correlationId, createdAt: $createdAt}) ' +
         'CREATE (lb)-[:CONTAINS_LEAD]->(lead) ' +
         'CREATE (vm)-[:TARGETS_LEAD]->(lead) ' +
         'CREATE (lead)-[:BECAME_PROSPECT_RECORD]->(p)',
@@ -250,6 +257,7 @@ async function createBulkLeadRecord(input: {
         ownerTmagId: bulkLead.ownerTmagId,
         sponsorTmagId: bulkLead.sponsorTmagId,
         createdAt: now,
+        correlationId: correlation.correlationId,
       },
       verifyCypher:
         'MATCH (lb:TmagVmLeadOwner {leadOwnerId: $leadOwnerId})-[:CONTAINS_LEAD]->' +
@@ -276,6 +284,7 @@ async function createBulkLeadRecord(input: {
         leadOwnerId: input.leadOwnerId,
         vmCampaignId: input.vmCampaignId,
         createdAt: now,
+        correlationId: correlation.correlationId,
       },
     },
   });
@@ -290,6 +299,7 @@ async function createBulkLeadRecord(input: {
     leadOwnerId: input.leadOwnerId,
     vmCampaignId: input.vmCampaignId,
     createdAt: now,
+    correlation: withCrmCorrelation(correlation, `crm_${prospectId}`),
   });
 
   await appendProspectTimelineEvent({
@@ -299,7 +309,7 @@ async function createBulkLeadRecord(input: {
     sponsorTmagId: input.sponsorTmagId,
     kind: 'token_created',
     note: 'RVM lead imported as an inactive acquisition record.',
-    metadata: { leadId, leadOwnerId: input.leadOwnerId, vmCampaignId: input.vmCampaignId },
+    metadata: { leadId, leadOwnerId: input.leadOwnerId, vmCampaignId: input.vmCampaignId, correlationId: correlation.correlationId },
     createdAt: now,
   });
   await appendProspectTimelineEvent({
@@ -309,7 +319,7 @@ async function createBulkLeadRecord(input: {
     sponsorTmagId: input.sponsorTmagId,
     kind: 'token_created',
     note: 'RVM token created. CRM-visible; not placed in the holding tank.',
-    metadata: { leadId, token },
+    metadata: { leadId, token, correlationId: correlation.correlationId },
     createdAt: now,
   });
 
