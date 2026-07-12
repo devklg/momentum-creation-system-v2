@@ -3,21 +3,26 @@
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
-import type { McsAdminConsistencyReportResponse } from '@momentum/shared';
+import type {
+  McsAdminConsistencyReportResponse,
+  McsAdminCrmIntegrityReportResponse,
+} from '@momentum/shared';
 
 export function ConsistencyPage() {
   const [data, setData] = useState<McsAdminConsistencyReportResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [crmIntegrity, setCrmIntegrity] = useState<McsAdminCrmIntegrityReportResponse | null>(null);
 
   useEffect(() => {
     void (async () => {
       setLoading(true);
       setErr(null);
       try {
-        const res = await fetch('/api/admin/consistency/report', {
-          credentials: 'include',
-        });
+        const [res, crmRes] = await Promise.all([
+          fetch('/api/admin/consistency/report', { credentials: 'include' }),
+          fetch('/api/admin/consistency/crm-integrity', { credentials: 'include' }),
+        ]);
         const body = (await res.json()) as McsAdminConsistencyReportResponse & {
           error?: string;
         };
@@ -26,6 +31,12 @@ export function ConsistencyPage() {
           return;
         }
         setData(body);
+        const crmBody = (await crmRes.json()) as McsAdminCrmIntegrityReportResponse & { error?: string };
+        if (!crmRes.ok || !crmBody.ok) {
+          setErr(crmBody.error ?? 'Could not load CRM integrity report.');
+          return;
+        }
+        setCrmIntegrity(crmBody);
       } catch (e) {
         setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
       } finally {
@@ -157,6 +168,35 @@ export function ConsistencyPage() {
               />
             </Panel>
           </section>
+
+          {crmIntegrity && (
+            <section className="mb-8">
+              <Panel title="CRM State Integrity · Report Only">
+                <p className="text-sm text-cream-mute mb-4">
+                  Missing, duplicate, orphaned, ambiguous, and age-based findings are never repaired here.
+                  Elapsed time never closes a CRM record or clears a follow-up.
+                </p>
+                <div className="grid grid-cols-2 xl:grid-cols-6 gap-3 mb-5">
+                  <Metric label="Stuck" value={String(crmIntegrity.totals.stuck)} tone={crmIntegrity.totals.stuck ? 'yellow' : 'green'} />
+                  <Metric label="Duplicates" value={String(crmIntegrity.totals.duplicate)} tone={crmIntegrity.totals.duplicate ? 'red' : 'green'} />
+                  <Metric label="Orphans" value={String(crmIntegrity.totals.orphan)} tone={crmIntegrity.totals.orphan ? 'red' : 'green'} />
+                  <Metric label="Inconsistent" value={String(crmIntegrity.totals.inconsistent)} tone={crmIntegrity.totals.inconsistent ? 'red' : 'green'} />
+                  <Metric label="Ambiguous" value={String(crmIntegrity.totals.ambiguous)} tone={crmIntegrity.totals.ambiguous ? 'yellow' : 'green'} />
+                  <Metric label="Cleanup Preview" value={String(crmIntegrity.totals.cleanupCandidates)} tone={crmIntegrity.totals.cleanupCandidates ? 'yellow' : 'green'} />
+                </div>
+                <DenseTable
+                  headers={['Category', 'Code', 'Record', 'Detail']}
+                  rows={crmIntegrity.findings.map((row) => [
+                    row.category,
+                    row.code,
+                    row.crmRecordId ?? row.prospectId ?? 'identity missing',
+                    row.detail,
+                  ])}
+                  empty="No CRM state integrity findings in the bounded scan."
+                />
+              </Panel>
+            </section>
+          )}
         </>
       )}
     </div>
