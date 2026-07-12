@@ -145,7 +145,18 @@ function arrange(payload: Record<string, unknown>, options: ArrangeOptions = {})
           };
         }
         if (params.collection === 'tmag_vm_delivery_events') {
-          return { documents: options.deliveryEvents ?? [], count: options.deliveryEvents?.length ?? 0 };
+          const seeded = options.deliveryEvents ?? [];
+          const filter = params.filter as Record<string, unknown> | undefined;
+          // P1-80 idempotency looks records up by _id (digest key); the seeded
+          // fixtures are prior events, never the record being written — honor
+          // the _id lookup so writes are not skipped as duplicates.
+          if (filter && typeof filter._id === 'string') {
+            const matches = seeded.filter(
+              (doc) => doc._id === filter._id || doc.eventId === filter._id,
+            );
+            return { documents: matches, count: matches.length };
+          }
+          return { documents: seeded, count: seeded.length };
         }
       }
       return { documents: [], count: 0 };
