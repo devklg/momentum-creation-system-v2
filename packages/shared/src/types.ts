@@ -5853,3 +5853,41 @@ export interface McsAdminConsistencyReportResponse {
   orphanCategories: McsAdminConsistencyOrphanCategory[];
   warnings: string[];
 }
+
+/** P1-58 read-only admin CRM integrity report. */
+export type McsAdminCrmIntegrityCategory =
+  | 'stuck'
+  | 'duplicate'
+  | 'orphan'
+  | 'inconsistent'
+  | 'ambiguous';
+
+export interface McsAdminCrmIntegrityFinding {
+  category: McsAdminCrmIntegrityCategory;
+  code: string;
+  crmRecordId: string | null;
+  prospectId: string | null;
+  sponsorTmagId: string | null;
+  detail: string;
+  evidence: Record<string, unknown>;
+  repairPolicy: 'report_only';
+}
+
+export interface McsAdminCrmIntegrityReportResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  policy: 'report_only';
+  stuckDays: number;
+  scanned: { crmRecords: number; followUps: number; prospects: number };
+  totals: Record<McsAdminCrmIntegrityCategory, number> & {
+    findings: number;
+    cleanupCandidates: number;
+  };
+  cleanupPreview: {
+    dryRun: true;
+    planned: number;
+    actions: Array<{ kind: string; prospectId: string; sponsorTmagId: string; reason: string }>;
+    errors: Array<{ prospectId: string; kind: string; message: string }>;
+  };
+  findings: McsAdminCrmIntegrityFinding[];
+}

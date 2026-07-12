@@ -6,6 +6,7 @@ import express, { type Request, type Router } from 'express';
 import { requireAdmin } from '../../middleware/requireAuth.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
 import { buildAdminConsistencyReport } from '../../domain/adminConsistencyReport.js';
+import { buildCrmIntegrityReport } from '../../domain/crmIntegrityReport.js';
 import type { McsAuditActor } from '@momentum/shared';
 
 export const adminConsistencyRoutes: Router = express.Router();
@@ -54,5 +55,28 @@ adminConsistencyRoutes.get('/report', requireAdmin, async (req, res) => {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Consistency report failed: ${msg}` });
+  }
+});
+
+adminConsistencyRoutes.get('/crm-integrity', requireAdmin, async (req, res) => {
+  try {
+    const payload = await buildCrmIntegrityReport({
+      limit: positiveNumber(req.query.limit, 500),
+      stuckDays: positiveNumber(req.query.stuckDays, 30),
+    });
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.consistency.crm_integrity.viewed',
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
+      severity: payload.totals.findings > 0 ? 'warn' : 'info',
+      after: { generatedAt: payload.generatedAt, totals: payload.totals, policy: payload.policy },
+      reason: null,
+      context: { ip: req.ip ?? null, userAgent: req.get('user-agent') ?? null,
+        route: '/api/admin/consistency/crm-integrity', method: 'GET', requestId: null },
+    });
+    res.status(200).json(payload);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `CRM integrity report failed: ${msg}` });
   }
 });
