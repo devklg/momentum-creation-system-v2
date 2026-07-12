@@ -211,6 +211,33 @@ export async function hangupCall(callControlId: string): Promise<void> {
   );
 }
 
+/**
+ * Transfer an in-progress call to a new destination (the live-transfer
+ * bridge). Telnyx dials the new leg; its webhooks arrive with the
+ * client_state provided here, which is how the webhook processor tells the
+ * transfer leg apart from the original AMD leg.
+ */
+export async function transferCall(input: {
+  callControlId: string;
+  to: string;
+  from?: string;
+  clientState?: string;
+  timeoutSecs?: number;
+}): Promise<void> {
+  assertVoiceConfig();
+  const body: Record<string, unknown> = {
+    to: input.to,
+    from: input.from ?? env.TELNYX_DIAL_FROM_NUMBER,
+    timeout_secs: input.timeoutSecs ?? 20,
+  };
+  if (input.clientState) body.client_state = input.clientState;
+  await telnyxJson(
+    `${TELNYX_CALLS_URL}/${encodeURIComponent(input.callControlId)}/actions/transfer`,
+    body,
+    'transfer',
+  );
+}
+
 export async function gatherSingleDigit(input: {
   callControlId: string;
   audioUrl: string;

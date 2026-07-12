@@ -4,11 +4,11 @@
 
 ## Summary
 
-- Generated: 2026-07-12T09:26:40.296Z
-- Labels: 71
-- Relationships: 60
+- Generated: 2026-07-12T11:29:30.692Z
+- Labels: 73
+- Relationships: 61
 - Constraints/indexes cataloged: 18
-- Labels without a cataloged constraint/index: 56
+- Labels without a cataloged constraint/index: 58
 
 ## Constraints By Status
 
@@ -23,10 +23,10 @@
 | --- | ---: |
 | `Agent` | 1 |
 | `BrandAmbassador` | 1 |
-| `DISPOSED` | 3 |
+| `DISPOSED` | 5 |
 | `ENROLLED` | 1 |
 | `FOUNDER_PASSWORD` | 1 |
-| `HAS_FOLLOWUP` | 4 |
+| `HAS_FOLLOWUP` | 5 |
 | `IN_HOLDING_TANK` | 7 |
 | `INVITED_AS` | 1 |
 | `Knowledge` | 10 |
@@ -46,7 +46,7 @@
 | `SCOPED_TO` | 1 |
 | `SPONSORED_BY` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 76 |
+| `TeamMagnificentMember` | 80 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 2 |
@@ -58,7 +58,7 @@
 | `TmagCommitment` | 1 |
 | `TmagContentTemplate` | 1 |
 | `TmagContentVideo` | 2 |
-| `TmagCrmNote` | 1 |
+| `TmagCrmNote` | 2 |
 | `TmagFastStartProgress` | 2 |
 | `TmagGeneratorRun` | 1 |
 | `TmagHealthHeartbeat` | 3 |
@@ -74,7 +74,7 @@
 | `TmagProspectAccount` | 2 |
 | `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |
-| `TmagProspectTimelineEvent` | 2 |
+| `TmagProspectTimelineEvent` | 3 |
 | `TmagQuestionnaire` | 1 |
 | `TmagRecruitingCycle` | 2 |
 | `TmagSponsorAvailability` | 1 |
@@ -82,13 +82,15 @@
 | `TmagSteveDiscovery` | 3 |
 | `TmagThreeWayBooking` | 2 |
 | `TmagVmAuditEvent` | 1 |
-| `TmagVmBulkLead` | 13 |
+| `TmagVmBulkLead` | 19 |
 | `TmagVmCampaign` | 4 |
 | `TmagVmDeliveryEvent` | 1 |
 | `TmagVmInboundCall` | 1 |
 | `TmagVmLeadOwner` | 6 |
 | `TmagVmProviderWebhook` | 1 |
 | `TmagVmQueueJob` | 1 |
+| `TmagVmSuppression` | 1 |
+| `TmagVmTransferAvailability` | 2 |
 | `TmagWebinarEvent` | 1 |
 | `TmagWorkbook` | 1 |
 | `WebinarEvent` | 1 |
@@ -97,7 +99,7 @@
 
 | Relationship | Source count |
 | --- | ---: |
-| `ABOUT` | 1 |
+| `ABOUT` | 2 |
 | `ABOUT_PROSPECT` | 1 |
 | `ACCEPTED` | 1 |
 | `ACTED_BY` | 1 |
@@ -126,7 +128,7 @@
 | `HAS_RECRUITING_CYCLE` | 1 |
 | `HAS_SETTINGS_VERSION` | 1 |
 | `HAS_THREE_WAY_AVAILABILITY` | 1 |
-| `HAS_TIMELINE_EVENT` | 2 |
+| `HAS_TIMELINE_EVENT` | 3 |
 | `HAS_VERSION` | 2 |
 | `HAS_VM_AUDIT` | 1 |
 | `HAS_VM_DELIVERY_EVENT` | 1 |
@@ -152,11 +154,12 @@
 | `SUBMITTED` | 1 |
 | `SUPERSEDES` | 2 |
 | `SUPPORTED_BY` | 1 |
+| `SUPPRESSED_BY` | 1 |
 | `TARGETS_LEAD` | 2 |
 | `USES_VM_LEAD_OWNER` | 1 |
 | `VISIBLE_TO_SPONSOR` | 1 |
 | `WITH_UPLINE` | 1 |
-| `WROTE_NOTE` | 1 |
+| `WROTE_NOTE` | 2 |
 
 ## Constraints And Indexes
 
@@ -236,6 +239,8 @@
 - `TmagVmInboundCall`
 - `TmagVmProviderWebhook`
 - `TmagVmQueueJob`
+- `TmagVmSuppression`
+- `TmagVmTransferAvailability`
 - `TmagWebinarEvent`
 - `TmagWorkbook`
 - `WebinarEvent`

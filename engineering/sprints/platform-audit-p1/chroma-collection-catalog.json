@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T09:26:42.580Z",
+  "generatedAt": "2026-07-12T11:29:33.268Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -1257,7 +1257,7 @@
         "writeGraphCritical",
         "writeKnowledge"
       ],
-      "sourceCount": 6,
+      "sourceCount": 9,
       "sources": [
         {
           "file": "server/src/domain/crm.ts",
@@ -1281,12 +1281,27 @@
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 217,
+          "line": 220,
           "action": "writeGraphCritical"
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 361,
+          "line": 370,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 183,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 282,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 382,
           "action": "writeKnowledge"
         }
       ],
@@ -1301,10 +1316,13 @@
         "observedMetadataKeys": [
           "at",
           "city",
+          "correlationId",
           "createdAt",
           "disposition",
           "dueAt",
           "kind",
+          "leadId",
+          "ownerTmagId",
           "prospectId",
           "relationshipReason",
           "source",
@@ -1314,6 +1332,9 @@
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
+          "correlationId",
+          "leadId",
+          "ownerTmagId",
           "prospectId",
           "source",
           "sponsorTmagId",
@@ -1379,16 +1400,21 @@
       "actions": [
         "writeKnowledge"
       ],
-      "sourceCount": 2,
+      "sourceCount": 3,
       "sources": [
         {
           "file": "server/src/domain/prospectCrm.ts",
-          "line": 221,
+          "line": 223,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/domain/vmInboundCallback.ts",
           "line": 263,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 82,
           "action": "writeKnowledge"
         }
       ],
@@ -1918,12 +1944,12 @@
       "sources": [
         {
           "file": "server/src/domain/bulkLeads.ts",
-          "line": 115,
+          "line": 117,
           "action": "writeGraphCritical"
         },
         {
           "file": "server/src/domain/bulkLeads.ts",
-          "line": 230,
+          "line": 237,
           "action": "writeGraphCritical"
         }
       ],
@@ -1936,6 +1962,7 @@
           "purpose": "rev3 canonical registry"
         },
         "observedMetadataKeys": [
+          "correlationId",
           "createdAt",
           "kind",
           "leadId",
@@ -1948,6 +1975,7 @@
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
+          "correlationId",
           "leadId",
           "leadOwnerId",
           "ownerTmagId",
@@ -1972,16 +2000,16 @@
         "add",
         "writeOperational"
       ],
-      "sourceCount": 8,
+      "sourceCount": 10,
       "sources": [
         {
           "file": "server/src/domain/vmCampaigns.ts",
-          "line": 69,
+          "line": 74,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmCampaigns.ts",
-          "line": 180,
+          "line": 185,
           "action": "persistenceCall.chromadb.add"
         },
         {
@@ -1990,28 +2018,38 @@
           "action": "writeOperational"
         },
         {
-          "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 257,
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 512,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmLiveTransfer.ts",
+          "line": 133,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 319,
+          "line": 258,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 629,
+          "line": 320,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 889,
+          "line": 630,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 927,
+          "line": 890,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmProviderQueue.ts",
+          "line": 928,
           "action": "writeOperational"
         }
       ],
@@ -2025,6 +2063,7 @@
         },
         "observedMetadataKeys": [
           "action",
+          "available",
           "createdAt",
           "entityId",
           "inboundCallId",
@@ -2036,6 +2075,7 @@
           "ownerTmagId",
           "provider",
           "status",
+          "suppressionId",
           "updatedAt",
           "vmCampaignId"
         ],
@@ -2046,6 +2086,7 @@
           "leadId",
           "leadOwnerId",
           "ownerTmagId",
+          "suppressionId",
           "tmagId",
           "vmCampaignId"
         ],

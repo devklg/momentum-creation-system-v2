@@ -6031,3 +6031,179 @@ export interface McsAdminVmQueueHealth {
 export interface McsAdminVmQueueHealthOverviewResponse extends McsAdminVmOverviewResponse {
   queueHealth: McsAdminVmQueueHealth;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VM live transfer (dialMode) + pilot cockpit — appended block
+// (lane feat/vm-live-transfer-cockpit; append-only per worktree rules)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * How a Telnyx Call Control campaign treats AMD results:
+ *  - vm_only:       machine → play audio; human → existing press-1 gather
+ *                   (never bridged). Default.
+ *  - live_transfer: human → bridge to the owner's phone; machine → hang up
+ *                   with no message.
+ *  - both:          human → bridge; machine → leave the voicemail.
+ */
+export type McsVmDialMode = 'vm_only' | 'live_transfer' | 'both';
+
+export const MCS_VM_DIAL_MODES: readonly McsVmDialMode[] = [
+  'vm_only',
+  'live_transfer',
+  'both',
+] as const;
+
+/** Optional dial-mode fields carried on a VM campaign document. */
+export interface McsVmCampaignDialFields {
+  /** Absent on legacy campaigns — treat as 'vm_only'. */
+  dialMode?: McsVmDialMode;
+}
+
+export interface McsVmDialModePatchPayload {
+  dialMode: McsVmDialMode;
+}
+
+/**
+ * Owner live-transfer availability — VM-local, fail closed. No record or
+ * available=false means live transfers are never attempted for this owner.
+ */
+export interface McsVmTransferAvailabilityRecord {
+  ownerTmagId: TmagId;
+  available: boolean;
+  /** E.164 number bridged calls are transferred to. */
+  transferToNumber: string | null;
+  updatedAt: McsIsoTimestamp;
+}
+
+export interface McsVmTransferAvailabilityResponse {
+  ok: true;
+  availability: McsVmTransferAvailabilityRecord;
+}
+
+/** A matched raised hand: an inbound callback joined to lead + campaign. */
+export interface McsVmRaisedHandRow {
+  callbackRequestId: string;
+  leadId: string;
+  vmCampaignId: string;
+  campaignName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  city: string | null;
+  stateOrRegion: string | null;
+  /** When the prospect called back. */
+  calledBackAt: McsIsoTimestamp;
+  /** When the lead entered the system (interview-age proxy). */
+  leadCreatedAt: McsIsoTimestamp | null;
+  leadStatus: string | null;
+  disposition: McsCrmDisposition | null;
+}
+
+/** An inbound call we could not match to a lead — still a raised hand. */
+export interface McsVmUnattributedInboundRow {
+  inboundCallId: string;
+  fromNumber: string | null;
+  normalizedFromNumber: string | null;
+  toNumber: string | null;
+  calledAt: McsIsoTimestamp;
+}
+
+export interface McsVmRaisedHandsResponse {
+  ok: true;
+  raisedHands: McsVmRaisedHandRow[];
+  unattributed: McsVmUnattributedInboundRow[];
+}
+
+export interface McsVmLeadNoteRecord {
+  noteId: string;
+  leadId: string;
+  ownerTmagId: TmagId;
+  text: string;
+  createdAt: McsIsoTimestamp;
+}
+
+export interface McsVmLeadFollowUpRecord {
+  followUpId: string;
+  leadId: string;
+  ownerTmagId: TmagId;
+  dueAt: McsIsoTimestamp;
+  createdAt: McsIsoTimestamp;
+  clearedAt: McsIsoTimestamp | null;
+}
+
+export interface McsVmLeadWorkLead {
+  leadId: string;
+  vmCampaignId: string;
+  firstName: string | null;
+  lastName: string | null;
+  city: string | null;
+  stateOrRegion: string | null;
+  country: string;
+  normalizedPhone: string | null;
+  normalizedEmail: string | null;
+  /** Full VM lead lifecycle status (wider than the metric-status subset). */
+  status: McsVmLeadLifecycleStatus | string;
+  token: string | null;
+  crmRecordId: string | null;
+  validationIssues: string[];
+  doNotDrop: boolean;
+  createdAt: McsIsoTimestamp;
+  updatedAt: McsIsoTimestamp;
+}
+
+/** Detail bundle for working one VM lead from the cockpit. */
+export interface McsVmLeadWorkDetailResponse {
+  ok: true;
+  lead: McsVmLeadWorkLead;
+  disposition: McsCrmDisposition | null;
+  notes: McsVmLeadNoteRecord[];
+  followUp: McsVmLeadFollowUpRecord | null;
+  /** Prospect-facing invite URL for the lead's rvm token (null if no token). */
+  inviteUrl: string | null;
+}
+
+export interface McsVmLeadDispositionPayload {
+  disposition: McsCrmDisposition;
+}
+
+export interface McsVmLeadNotePayload {
+  text: string;
+}
+
+export interface McsVmLeadFollowUpPayload {
+  dueAt: McsIsoTimestamp;
+}
+
+export interface McsVmLeadInvitePayload {
+  /** True once Kevin has actually sent the link himself (human-send only). */
+  markSent?: boolean;
+}
+
+export interface McsVmLeadInviteResponse {
+  ok: true;
+  leadId: string;
+  inviteUrl: string;
+  markedSent: boolean;
+}
+
+/** Per-campaign pilot readout — the experiment's entire output. */
+export interface McsVmPilotReadoutRow {
+  vmCampaignId: string;
+  campaignName: string;
+  /** Dials placed (delivery attempts that left the queue). */
+  dropped: number;
+  /** Voicemails actually left (machine drops + human-fallback voicemails). */
+  voicemailsLeft: number;
+  liveTransfers: number;
+  callbacks: number;
+  /** callbacks ÷ voicemailsLeft; null when voicemailsLeft is 0. */
+  callbackRate: number | null;
+  /** Median ms between a delivered drop and the callback; null if unknown. */
+  medianTimeToCallbackMs: number | null;
+}
+
+export interface McsVmPilotReadoutResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  rows: McsVmPilotReadoutRow[];
+}

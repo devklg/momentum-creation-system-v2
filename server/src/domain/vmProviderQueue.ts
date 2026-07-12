@@ -20,6 +20,7 @@ import {
   hangupCall,
   playbackStart,
   sendSms,
+  transferCall,
   TelnyxConfigError,
   TelnyxError,
 } from '../services/telnyx.js';
@@ -1107,6 +1108,10 @@ export async function processWebhookEvent(job: VmQueueJob<{ webhookEventId: stri
   await completeVmJob(job.jobId, `Webhook ${job.payload.webhookEventId} processed.`);
 }
 
+export function encodeTelnyxClientState(payload: Record<string, unknown>): string {
+  return Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
+}
+
 export function decodeTelnyxClientState(value: unknown): Record<string, unknown> {
   if (typeof value !== 'string' || !value.trim()) return {};
   try {
@@ -1186,7 +1191,66 @@ async function processTelnyxCallControlWebhook(payload: Record<string, unknown>,
     });
   }
 
+  const dialContext = await resolveVmDialContext(lead.vmCampaignId);
+  const dialMode = dialContext.dialMode;
+
+  // ── Live-transfer leg (the bridged call to the OWNER's phone) ────────────
+  // The transfer command tags its leg with transferLeg=true client_state so
+  // its webhooks never re-enter the AMD state machine.
+  if (clientState.transferLeg === true) {
+    if (eventType === 'call.answered') {
+      await record('live_transfer_connected', { transferLeg: true });
+      return;
+    }
+    if (eventType === 'call.hangup') {
+      const originalCallControlId = asString(clientState.originalCallControlId);
+      const cause = asString(payload.hangup_cause)?.toLowerCase() ?? null;
+      const connected = await hasDeliveryEvent(leadId, 'live_transfer_connected', callControlId);
+      if (connected) {
+        await record('live_transfer_completed', { transferLeg: true, hangupCause: cause });
+        return;
+      }
+      // Transfer failed / not answered within the timeout — record it and
+      // fall back to the voicemail in 'both' mode. Never dead air.
+      await record('live_transfer_failed', {
+        transferLeg: true,
+        hangupCause: cause,
+        stage: 'transfer_leg',
+      });
+      if (dialMode === 'both' && originalCallControlId && audioUrl) {
+        try {
+          await playbackStart(originalCallControlId, audioUrl);
+          await record('voicemail_fallback_started', {
+            reason: 'transfer_failed',
+            playbackCallControlId: originalCallControlId,
+          });
+        } catch (err) {
+          await record('failed', {
+            reason: 'voicemail_fallback_failed',
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
+      } else if (originalCallControlId) {
+        try {
+          await hangupCall(originalCallControlId);
+        } catch {
+          // Original leg may already be gone — nothing further to do.
+        }
+      }
+      return;
+    }
+    // Other transfer-leg events (initiated, bridged …) are already persisted
+    // in the raw webhook store; no state change needed.
+    return;
+  }
+
   if (eventType === 'call.machine.premium.greeting.ended') {
+    if (dialMode === 'live_transfer') {
+      // live_transfer: machine → hang up, no message.
+      if (callControlId) await hangupCall(callControlId);
+      await record('machine_no_message', { dialMode });
+      return;
+    }
     if (callControlId && audioUrl) await playbackStart(callControlId, audioUrl);
     await record('machine_beep_playback_started');
     return;
@@ -1195,7 +1259,16 @@ async function processTelnyxCallControlWebhook(payload: Record<string, unknown>,
   if (eventType === 'call.playback.ended') {
     if (callControlId) await hangupCall(callControlId);
     await updateLeadStatus(leadId, 'voicemail_drop_delivered', { ownerTmagId: lead.ownerTmagId });
-    await record('voicemail_drop_delivered');
+    // A fallback playback (human answered but the bridge was unavailable or
+    // failed) counts as `voicemail_left`; a machine drop stays
+    // `voicemail_drop_delivered`. The readout counts both as voicemails left.
+    const wasFallback = await hasDeliveryEvent(
+      leadId,
+      'voicemail_fallback_started',
+      null,
+      callControlId,
+    );
+    await record(wasFallback ? 'voicemail_left' : 'voicemail_drop_delivered');
     return;
   }
 
@@ -1231,11 +1304,32 @@ async function processTelnyxCallControlWebhook(payload: Record<string, unknown>,
   const result = amdResult(payload);
   if (eventType === 'call.machine.premium.detection.ended' || result) {
     if (['human', 'human_residence', 'human_business', 'live'].includes(result)) {
+      if (dialMode === 'live_transfer' || dialMode === 'both') {
+        await attemptLiveTransferBridge({
+          lead: leadRecord,
+          dialMode,
+          liveGateOpen: dialContext.liveGateOpen,
+          callControlId,
+          audioUrl,
+          amdResult: result,
+          record,
+        });
+        return;
+      }
+      // vm_only: keep the existing press-1 gather; the human answer is still
+      // countable as "human, no transfer attempted".
       if (callControlId && audioUrl) await gatherSingleDigit({ callControlId, audioUrl, timeoutMs: 8000 });
       await record('human_answered_gather_started', { amdResult: result });
+      await record('human_no_transfer', { amdResult: result, reason: 'dial_mode_vm_only', dialMode });
       return;
     }
     if (['machine', 'machine_start', 'machine_end_beep', 'voicemail', 'answering_machine'].includes(result)) {
+      if (dialMode === 'live_transfer') {
+        // live_transfer: machine → hang up, no message.
+        if (callControlId) await hangupCall(callControlId);
+        await record('machine_no_message', { amdResult: result, dialMode });
+        return;
+      }
       if (result === 'machine_end_beep' && callControlId && audioUrl) {
         await playbackStart(callControlId, audioUrl);
         await record('machine_beep_playback_started', { amdResult: result });
@@ -1248,11 +1342,13 @@ async function processTelnyxCallControlWebhook(payload: Record<string, unknown>,
       if (callControlId) await hangupCall(callControlId);
       await updateLeadStatus(leadId, 'voicemail_drop_failed', { ownerTmagId: lead.ownerTmagId, reason: result });
       await record('undeliverable', { amdResult: result });
+      await record('failed', { amdResult: result, reason: 'undeliverable' });
       return;
     }
     if (['no_answer', 'busy'].includes(result)) {
       await updateLeadStatus(leadId, 'queued', { ownerTmagId: lead.ownerTmagId, retryReason: result });
       await enqueueVmJob('delivery', { leadId, provider: 'telnyx_call_control' }, { availableAt: new Date(Date.now() + 5 * 60 * 1000).toISOString() });
+      await record('no_answer', { amdResult: result });
       await record('provider_retry_scheduled', { amdResult: result });
       return;
     }
@@ -1263,12 +1359,166 @@ async function processTelnyxCallControlWebhook(payload: Record<string, unknown>,
     if (cause.includes('busy') || cause.includes('no_answer')) {
       await updateLeadStatus(leadId, 'queued', { ownerTmagId: lead.ownerTmagId, retryReason: cause });
       await enqueueVmJob('delivery', { leadId, provider: 'telnyx_call_control' }, { availableAt: new Date(Date.now() + 5 * 60 * 1000).toISOString() });
+      await record('no_answer', { hangupCause: cause });
       await record('provider_retry_scheduled', { hangupCause: cause });
       return;
     }
   }
 
   await record('provider_webhook');
+}
+
+// ── Live-transfer support (dialMode 'live_transfer' / 'both') ──────────────
+
+type VmDialMode = 'vm_only' | 'live_transfer' | 'both';
+
+interface VmDialContext {
+  dialMode: VmDialMode;
+  /** True only when live delivery is enabled AND the campaign is admin-approved. */
+  liveGateOpen: boolean;
+}
+
+async function resolveVmDialContext(vmCampaignId: string): Promise<VmDialContext> {
+  const result = await persistenceCall<{
+    documents: Array<{ dialMode?: string; adminApprovedForLiveDelivery?: boolean }>;
+  }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: 'tmag_vm_campaigns',
+    filter: { vmCampaignId },
+    limit: 1,
+  });
+  const doc = result.documents?.[0];
+  const dialMode: VmDialMode =
+    doc?.dialMode === 'live_transfer' || doc?.dialMode === 'both' ? doc.dialMode : 'vm_only';
+  return {
+    dialMode,
+    liveGateOpen: env.VM_LIVE_DELIVERY_ENABLED && doc?.adminApprovedForLiveDelivery === true,
+  };
+}
+
+async function hasDeliveryEvent(
+  leadId: string,
+  status: string,
+  providerMessageId: string | null,
+  playbackCallControlId?: string | null,
+): Promise<boolean> {
+  const filter: Record<string, unknown> = { leadId, status };
+  if (providerMessageId) filter.providerMessageId = providerMessageId;
+  if (playbackCallControlId) filter['details.playbackCallControlId'] = playbackCallControlId;
+  const result = await persistenceCall<{ count?: number; documents?: unknown[] }>(
+    'mongodb',
+    'query',
+    {
+      database: MONGO_DB,
+      collection: DELIVERY_EVENTS_COLLECTION,
+      filter,
+      limit: 1,
+    },
+  );
+  return (result.count ?? result.documents?.length ?? 0) > 0;
+}
+
+/**
+ * A human answered on a live-transfer-capable campaign. Fail-closed chain:
+ *
+ *   1. live gate  — a dry-run / unapproved campaign NEVER bridges (defense in
+ *      depth; a dry-run campaign should never reach Telnyx at all).
+ *   2. availability — the owner must be explicitly available with a
+ *      transfer-to number. Unavailable: both → leave the voicemail;
+ *      live_transfer → polite hangup. Never dead air.
+ *   3. transfer — command failure falls back exactly like unavailability.
+ */
+async function attemptLiveTransferBridge(input: {
+  lead: VmBulkLeadRecord;
+  dialMode: VmDialMode;
+  liveGateOpen: boolean;
+  callControlId: string | null;
+  audioUrl: string | null;
+  amdResult: string;
+  record: (status: string, details?: Record<string, unknown>) => Promise<void>;
+}): Promise<void> {
+  const { lead, dialMode, callControlId, audioUrl, record } = input;
+
+  if (!input.liveGateOpen) {
+    if (callControlId) await hangupCall(callControlId);
+    await record('live_transfer_refused_not_live', {
+      amdResult: input.amdResult,
+      dialMode,
+      reason: 'live_gate_closed',
+    });
+    return;
+  }
+
+  if (!callControlId) {
+    await record('human_no_transfer', { amdResult: input.amdResult, dialMode, reason: 'missing_call_control_id' });
+    return;
+  }
+
+  const fallbackToVoicemail = async (reason: string): Promise<void> => {
+    if (dialMode === 'both' && audioUrl) {
+      try {
+        await playbackStart(callControlId, audioUrl);
+        await record('voicemail_fallback_started', {
+          reason,
+          playbackCallControlId: callControlId,
+        });
+        return;
+      } catch (err) {
+        await record('failed', {
+          reason: 'voicemail_fallback_failed',
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+    try {
+      await hangupCall(callControlId);
+    } catch {
+      // Leg already gone.
+    }
+  };
+
+  // getTransferAvailability is fail closed: no record → unavailable.
+  const { getTransferAvailability } = await import('./vmLiveTransfer.js');
+  const availability = await getTransferAvailability(lead.ownerTmagId);
+  if (!availability.available || !availability.transferToNumber) {
+    await record('human_no_transfer', {
+      amdResult: input.amdResult,
+      dialMode,
+      reason: 'owner_unavailable',
+    });
+    await fallbackToVoicemail('owner_unavailable');
+    return;
+  }
+
+  try {
+    await transferCall({
+      callControlId,
+      to: availability.transferToNumber,
+      timeoutSecs: 20,
+      clientState: encodeTelnyxClientState({
+        source: 'mcs_vm_dialer_v1',
+        transferLeg: true,
+        leadId: lead.leadId,
+        vmCampaignId: lead.vmCampaignId,
+        ownerTmagId: lead.ownerTmagId,
+        dialMode,
+        audioUrl,
+        originalCallControlId: callControlId,
+      }),
+    });
+    await record('live_transfer_initiated', {
+      amdResult: input.amdResult,
+      dialMode,
+      transferToNumber: availability.transferToNumber,
+    });
+  } catch (err) {
+    await record('live_transfer_failed', {
+      stage: 'transfer_command',
+      dialMode,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    await fallbackToVoicemail('transfer_command_failed');
+  }
 }
 
 export async function listDeliveryRowsForManualExport(
