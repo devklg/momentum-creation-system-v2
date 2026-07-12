@@ -14,3 +14,4 @@ export * from './pmv-analytics-taxonomy.js';
 export * from './crm-lifecycle.js';
 export * from './agent-registry.js';
 export * from './agent-skills.js';
+export * from './prompt-governance.js';
