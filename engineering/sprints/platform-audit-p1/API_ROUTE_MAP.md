@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-12T02:45:29.446Z
+- Generated: 2026-07-12T07:21:31.736Z
 - Mounted routers: 46
 - Route files: 46
-- Static route rows: 209
+- Static route rows: 210
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
 | ba_facing_gated | 72 |
-| pre_gate | 134 |
+| pre_gate | 135 |
 | pre_json_admin_body_limit | 2 |
 | raw_body_before_json | 1 |
 
@@ -22,7 +22,7 @@
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 85 |
+| admin | 86 |
 | ba_auth_steve_gated | 72 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 6 |
-| GET | 103 |
+| GET | 104 |
 | PATCH | 8 |
 | POST | 86 |
 | PUT | 6 |
@@ -202,7 +202,8 @@
 | POST | `/api/admin/content/videos/reorder` | pre_gate | admin | admin | `server/src/routes/admin/content-videos.ts:179` |
 | GET | `/api/admin/health/triple-stack` | pre_gate | admin | admin-or-secret | `server/src/routes/admin/health.ts:29` |
 | GET | `/api/admin/health/status` | pre_gate | admin | admin | `server/src/routes/admin/health.ts:48` |
-| GET | `/api/admin/consistency/report` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:26` |
+| GET | `/api/admin/consistency/report` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:27` |
+| GET | `/api/admin/consistency/crm-integrity` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:61` |
 | GET | `/api/runtime/knowledge-evolution/metrics` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:236` |
 | POST | `/api/runtime/knowledge-evolution/` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:239` |
 | GET | `/api/runtime/knowledge-evolution/:evolutionId` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:242` |

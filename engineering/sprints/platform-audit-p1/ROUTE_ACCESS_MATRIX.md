@@ -4,15 +4,15 @@
 
 ## Summary
 
-- Generated: 2026-07-12T02:45:29.760Z
-- Routes: 209
+- Generated: 2026-07-12T07:22:23.594Z
+- Routes: 210
 - Findings: 0
 
 ## Routes By Access Category
 
 | Access category | Routes |
 | --- | ---: |
-| admin | 88 |
+| admin | 89 |
 | admin_or_health_secret | 1 |
 | auth_bootstrap | 3 |
 | auth_session | 2 |
@@ -34,7 +34,7 @@
 | customSecretGuard | 10 |
 | rateLimited | 3 |
 | rawBodyParser | 1 |
-| requireAdmin | 88 |
+| requireAdmin | 89 |
 | requireAdminOrHealthSecret | 1 |
 | requireAuth | 87 |
 | requireRuntimeInternal | 5 |
@@ -172,7 +172,8 @@
 | POST | `/api/admin/content/videos/reorder` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/content-videos.ts:179` |
 | GET | `/api/admin/health/triple-stack` | admin_or_health_secret | admin_session_or_shared_secret | requireAdminOrHealthSecret | not_applicable | none | none | none | health_secret_optional | no | no | global_256kb_json | none | none | `server/src/routes/admin/health.ts:29` |
 | GET | `/api/admin/health/status` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/health.ts:48` |
-| GET | `/api/admin/consistency/report` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/consistency.ts:26` |
+| GET | `/api/admin/consistency/report` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/consistency.ts:27` |
+| GET | `/api/admin/consistency/crm-integrity` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/consistency.ts:61` |
 | GET | `/api/runtime/knowledge-evolution/metrics` | internal_runtime_admin_or_secret | runtime_secret_or_admin_session | admin_fallback | not_applicable | none | none | none | x-mcs-runtime-secret_when_configured | no | no | global_256kb_json | none | none | `server/src/runtime/knowledge-evolution/routes.ts:236` |
 | POST | `/api/runtime/knowledge-evolution/` | internal_runtime_admin_or_secret | runtime_secret_or_admin_session | admin_fallback | not_applicable | none | none | none | x-mcs-runtime-secret_when_configured | no | no | global_256kb_json | none | none | `server/src/runtime/knowledge-evolution/routes.ts:239` |
 | GET | `/api/runtime/knowledge-evolution/:evolutionId` | internal_runtime_admin_or_secret | runtime_secret_or_admin_session | admin_fallback | not_applicable | none | none | none | x-mcs-runtime-secret_when_configured | no | no | global_256kb_json | none | none | `server/src/runtime/knowledge-evolution/routes.ts:242` |

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T02:45:29.446Z",
+  "generatedAt": "2026-07-12T07:21:31.736Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,16 +8,16 @@
   "summary": {
     "mounts": 46,
     "routeFiles": 46,
-    "routes": 209,
+    "routes": 210,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 2,
-      "pre_gate": 134,
+      "pre_gate": 135,
       "ba_facing_gated": 72
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
-      "admin": 85,
+      "admin": 86,
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
       "prospect_token": 18,
@@ -25,7 +25,7 @@
     },
     "byMethod": {
       "POST": 86,
-      "GET": 103,
+      "GET": 104,
       "PUT": 6,
       "PATCH": 8,
       "DELETE": 6
@@ -3267,7 +3267,33 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/consistency.ts:26",
+      "source": "server/src/routes/admin/consistency.ts:27",
+      "routeSource": "server/src/routes/admin/consistency.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/consistency/crm-integrity",
+      "mountPath": "/api/admin/consistency",
+      "localPath": "/crm-integrity",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/consistency.ts:61",
       "routeSource": "server/src/routes/admin/consistency.ts",
       "signals": {
         "requireAuth": false,
