@@ -88,7 +88,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 58. **CRM:** Create an admin state integrity report for stuck, duplicated, orphaned, and inconsistent records.
 - [x] 59. **Agents:** Create the agent registry for Steve, Michael, Ivory, ScriptMaker, admin recommendations, and future agents.
 - [x] 60. **Agents:** Tie prompts to versions, owners, tests, allowed inputs, forbidden outputs, and degradation behavior.
-- [ ] 61. **Agents:** Add no-scoring, no-qualification, and no-income-claim tests for agent outputs.
+- [x] 61. **Agents:** Add no-scoring, no-qualification, and no-income-claim tests for agent outputs.
 - [ ] 62. **Michael:** Generate a Michael catalog key and response type registry.
 - [ ] 63. **Prompts:** Create the prompt review, versioning, and deployment approval workflow.
 - [ ] 64. **Admin:** Create admin agent health/debug cards.
