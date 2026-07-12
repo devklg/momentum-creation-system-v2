@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T00:02:15.975Z",
+  "generatedAt": "2026-07-12T01:27:24.283Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts"

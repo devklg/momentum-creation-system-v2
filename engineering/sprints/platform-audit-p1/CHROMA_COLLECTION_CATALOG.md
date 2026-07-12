@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-12T00:02:21.242Z
+- Generated: 2026-07-12T01:27:31.365Z
 - Registered collections: 50
 - Schema-catalog collections: 50
 - Collections with observed write/query usage: 30
