@@ -69,7 +69,7 @@ describe('P1 BA route gate protection', () => {
 
   it('requires auth, Steve completion, and VM entitlement on VM BA routes', () => {
     const vmRoutes = routesByClass('ba_auth_steve_vm_entitled');
-    expect(vmRoutes).toHaveLength(12);
+    expect(vmRoutes).toHaveLength(25);
     for (const vmRoute of vmRoutes) {
       expect(vmRoute.fullPath.startsWith('/api/vm/')).toBe(true);
       expect(vmRoute.declared.requireAuth, vmRoute.fullPath).toBe(true);

@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-12T11:29:28.283Z
+- Generated: 2026-07-12T18:03:45.940Z
 - Mongo collections: 67
 - Neo4j labels: 73
 - Neo4j relationships: 61
 - Chroma collections: 50
 - Route modules: 45
-- Route handlers: 254
-- Shared exports: 972
+- Route handlers: 255
+- Shared exports: 977
 
 ## Mongo Collections
 
@@ -32,7 +32,7 @@
 | `mcs_questionnaires` | permissive_mongoose_schema | yes | 1 |
 | `mcs_workbooks` | permissive_mongoose_schema | yes | 2 |
 | `orientation_sessions` | permissive_mongoose_schema | yes | 1 |
-| `team_magnificent_members` | explicit_mongoose_schema | yes | 57 |
+| `team_magnificent_members` | explicit_mongoose_schema | yes | 58 |
 | `tenant_settings_versions` | permissive_mongoose_schema | yes | 3 |
 | `tmag_access_codes` | permissive_mongoose_schema | yes | 8 |
 | `tmag_admin_curated_leader_tags` | permissive_mongoose_schema | yes | 3 |
@@ -292,7 +292,7 @@
 | `(unmounted)` | `server/src/routes/admin/access-codes.ts` | POST /<br>GET / | none |
 | `(unmounted)` | `server/src/routes/admin/agents.ts` | GET /overview<br>GET user-agent<br>GET /health<br>GET /outbox-health | `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/audit.ts` | GET /<br>GET /:entryId | `McsAuditActorRole`, `McsAuditEntityKind`, `McsAuditEntryResponse`, `McsAuditListResponse`, `McsAuditQueryFilters`, `McsAuditSeverity` |
-| `(unmounted)` | `server/src/routes/admin/bas.ts` | GET /<br>GET /:tmagId<br>POST /:tmagId/sponsor-override<br>POST /:tmagId/entitlements<br>POST /:tmagId/leader-tag<br>POST /:tmagId/notes<br>POST /<br>PATCH /:tmagId<br>DELETE /:tmagId<br>POST /:tmagId/restore | `McsAdminBaDirectoryResponse`, `McsAdminBaEntitlementsResponse`, `McsAdminBaNoteResponse`, `McsAdminBaProfileResponse`, `McsAdminLeaderTagResponse`, `McsAdminSponsorOverrideResponse` |
+| `(unmounted)` | `server/src/routes/admin/bas.ts` | GET /entitlements/audit<br>GET /<br>GET /:tmagId<br>POST /:tmagId/sponsor-override<br>POST /:tmagId/entitlements<br>POST /:tmagId/leader-tag<br>POST /:tmagId/notes<br>POST /<br>PATCH /:tmagId<br>DELETE /:tmagId<br>POST /:tmagId/restore | `McsAdminBaDirectoryResponse`, `McsAdminBaEntitlementsResponse`, `McsAdminBaNoteResponse`, `McsAdminBaProfileResponse`, `McsAdminLeaderTagResponse`, `McsAdminSponsorOverrideResponse` |
 | `(unmounted)` | `server/src/routes/admin/broadcast.ts` | GET /audience<br>GET /list<br>GET /:broadcastId<br>POST /test<br>POST / | `McsAuditActor`, `McsBroadcastAudiencePreviewResponse`, `McsBroadcastEnqueueResponse`, `McsBroadcastSendTestResponse`, `McsBroadcastStatusResponse` |
 | `(unmounted)` | `server/src/routes/admin/consistency.ts` | GET /report<br>GET user-agent<br>GET /crm-integrity<br>GET user-agent | `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/content-videos.ts` | GET user-agent<br>GET /<br>POST /<br>PATCH /:contentVideoId<br>POST /reorder | `McsAuditActor`, `McsContentVideoAudience`, `McsContentVideoMutationResponse`, `McsContentVideoReorderResponse`, `McsContentVideosAdminListResponse` |
@@ -350,6 +350,8 @@
 | `McsAdminLiveUsageSample` | interface | `packages/shared/src/admin-live-ops.ts` |
 | `McsAdminLiveUsageStreamEvent` | type | `packages/shared/src/admin-live-ops.ts` |
 | `McsAdminOperationsDashboardResponse` | interface | `packages/shared/src/admin-live-ops.ts` |
+| `MCS_ADMIN_SENSITIVE_ACTIONS` | const | `packages/shared/src/admin-sensitive-actions.ts` |
+| `McsAdminSensitiveActionControl` | interface | `packages/shared/src/admin-sensitive-actions.ts` |
 | `getMcsPlatformAgent` | function | `packages/shared/src/agent-registry.ts` |
 | `isMcsPlatformAgentKey` | function | `packages/shared/src/agent-registry.ts` |
 | `MCS_PLATFORM_AGENT_KEYS` | const | `packages/shared/src/agent-registry.ts` |
@@ -891,6 +893,7 @@
 | `McsAdminEditProspectPayload` | interface | `packages/shared/src/types.ts` |
 | `McsAdminEditProspectResponse` | interface | `packages/shared/src/types.ts` |
 | `McsAdminEnrollmentRow` | interface | `packages/shared/src/types.ts` |
+| `McsAdminEntitlementAuditResponse` | interface | `packages/shared/src/types.ts` |
 | `McsAdminLeaderGroupOption` | interface | `packages/shared/src/types.ts` |
 | `McsAdminLeaderTagPayload` | interface | `packages/shared/src/types.ts` |
 | `McsAdminLeaderTagResponse` | interface | `packages/shared/src/types.ts` |
@@ -969,6 +972,7 @@
 | `McsAuditEntity` | interface | `packages/shared/src/types.ts` |
 | `McsAuditEntityKind` | type | `packages/shared/src/types.ts` |
 | `McsAuditEntryResponse` | interface | `packages/shared/src/types.ts` |
+| `McsAuditEventTaxonomy` | interface | `packages/shared/src/types.ts` |
 | `McsAuditListResponse` | interface | `packages/shared/src/types.ts` |
 | `McsAuditLogEntry` | interface | `packages/shared/src/types.ts` |
 | `McsAuditQueryFilters` | interface | `packages/shared/src/types.ts` |
@@ -1235,6 +1239,7 @@
 | `McsSuccessProfileAgentContext` | interface | `packages/shared/src/types.ts` |
 | `McsSupportAgentInteractionKind` | type | `packages/shared/src/types.ts` |
 | `McsSupportAgentKind` | type | `packages/shared/src/types.ts` |
+| `McsTaxonomizedAuditLogEntry` | interface | `packages/shared/src/types.ts` |
 | `McsTeamLaunchCenterResponse` | interface | `packages/shared/src/types.ts` |
 | `McsTeamStatsResponse` | interface | `packages/shared/src/types.ts` |
 | `McsThreeWayAvailabilityResponse` | interface | `packages/shared/src/types.ts` |

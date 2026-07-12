@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T11:27:29.962Z",
+  "generatedAt": "2026-07-12T18:03:42.223Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -21,7 +21,7 @@
     "/api/training/fast-start/modules/1"
   ],
   "summary": {
-    "routes": 214,
+    "routes": 227,
     "byAccessClass": {
       "raw_body_webhook": 1,
       "admin": 93,
@@ -36,31 +36,31 @@
       "prospect_reentry": 4,
       "prospect_token": 14,
       "vm_provider_webhook": 1,
-      "ba_auth_steve_vm_entitled": 12
+      "ba_auth_steve_vm_entitled": 25
     },
     "byRole": {
       "provider": 2,
       "founder_admin": 99,
       "anonymous": 5,
       "system": 10,
-      "brand_ambassador": 88,
+      "brand_ambassador": 101,
       "prospect": 18
     },
     "byEntitlement": {
       "machine_credential": 12,
       "admin_allowlist": 99,
       "none": 5,
-      "registered_ba": 88,
+      "registered_ba": 101,
       "valid_prospect_identity": 18,
-      "vm_dialer": 12
+      "vm_dialer": 25
     },
     "guardCoverage": {
-      "requireAuth": 87,
+      "requireAuth": 100,
       "requireAdmin": 93,
       "requireAdminOrHealthSecret": 1,
       "requireRuntimeInternal": 5,
-      "requireSteveComplete": 72,
-      "requireVmDialerAccess": 12,
+      "requireSteveComplete": 85,
+      "requireVmDialerAccess": 25,
       "rateLimited": 3,
       "rawBodyParser": 1,
       "customSecretGuard": 10
@@ -9894,7 +9894,7 @@
       "id": "GET /api/vm/lead-owners",
       "method": "GET",
       "fullPath": "/api/vm/lead-owners",
-      "routeSource": "server/src/routes/vm.ts:163",
+      "routeSource": "server/src/routes/vm.ts:237",
       "mountPath": "/api/vm",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -9952,7 +9952,7 @@
       "id": "POST /api/vm/lead-owners",
       "method": "POST",
       "fullPath": "/api/vm/lead-owners",
-      "routeSource": "server/src/routes/vm.ts:185",
+      "routeSource": "server/src/routes/vm.ts:259",
       "mountPath": "/api/vm",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -10010,7 +10010,7 @@
       "id": "GET /api/vm/lead-owners/:leadOwnerId",
       "method": "GET",
       "fullPath": "/api/vm/lead-owners/:leadOwnerId",
-      "routeSource": "server/src/routes/vm.ts:199",
+      "routeSource": "server/src/routes/vm.ts:273",
       "mountPath": "/api/vm",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -10068,7 +10068,7 @@
       "id": "GET /api/vm/campaigns",
       "method": "GET",
       "fullPath": "/api/vm/campaigns",
-      "routeSource": "server/src/routes/vm.ts:201",
+      "routeSource": "server/src/routes/vm.ts:275",
       "mountPath": "/api/vm",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -10126,7 +10126,7 @@
       "id": "POST /api/vm/campaigns",
       "method": "POST",
       "fullPath": "/api/vm/campaigns",
-      "routeSource": "server/src/routes/vm.ts:213",
+      "routeSource": "server/src/routes/vm.ts:287",
       "mountPath": "/api/vm",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -10184,7 +10184,7 @@
       "id": "GET /api/vm/campaigns/:campaignId",
       "method": "GET",
       "fullPath": "/api/vm/campaigns/:campaignId",
-      "routeSource": "server/src/routes/vm.ts:250",
+      "routeSource": "server/src/routes/vm.ts:326",
       "mountPath": "/api/vm",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -10242,7 +10242,7 @@
       "id": "PATCH /api/vm/campaigns/:campaignId/status",
       "method": "PATCH",
       "fullPath": "/api/vm/campaigns/:campaignId/status",
-      "routeSource": "server/src/routes/vm.ts:262",
+      "routeSource": "server/src/routes/vm.ts:338",
       "mountPath": "/api/vm",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -10300,7 +10300,7 @@
       "id": "GET /api/vm/campaigns/:campaignId/metrics",
       "method": "GET",
       "fullPath": "/api/vm/campaigns/:campaignId/metrics",
-      "routeSource": "server/src/routes/vm.ts:312",
+      "routeSource": "server/src/routes/vm.ts:388",
       "mountPath": "/api/vm",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -10358,7 +10358,7 @@
       "id": "GET /api/vm/campaigns/:campaignId/leads",
       "method": "GET",
       "fullPath": "/api/vm/campaigns/:campaignId/leads",
-      "routeSource": "server/src/routes/vm.ts:326",
+      "routeSource": "server/src/routes/vm.ts:402",
       "mountPath": "/api/vm",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -10416,7 +10416,7 @@
       "id": "GET /api/vm/campaigns/:campaignId/manual-export",
       "method": "GET",
       "fullPath": "/api/vm/campaigns/:campaignId/manual-export",
-      "routeSource": "server/src/routes/vm.ts:388",
+      "routeSource": "server/src/routes/vm.ts:464",
       "mountPath": "/api/vm",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -10474,7 +10474,7 @@
       "id": "POST /api/vm/lead-owners/:leadOwnerId/import",
       "method": "POST",
       "fullPath": "/api/vm/lead-owners/:leadOwnerId/import",
-      "routeSource": "server/src/routes/vm.ts:440",
+      "routeSource": "server/src/routes/vm.ts:516",
       "mountPath": "/api/vm",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -10532,7 +10532,761 @@
       "id": "GET /api/vm/imports/:importJobId",
       "method": "GET",
       "fullPath": "/api/vm/imports/:importJobId",
-      "routeSource": "server/src/routes/vm.ts:442",
+      "routeSource": "server/src/routes/vm.ts:518",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "PATCH /api/vm/campaigns/:campaignId/dial-mode",
+      "method": "PATCH",
+      "fullPath": "/api/vm/campaigns/:campaignId/dial-mode",
+      "routeSource": "server/src/routes/vm.ts:535",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/vm/transfer-availability",
+      "method": "GET",
+      "fullPath": "/api/vm/transfer-availability",
+      "routeSource": "server/src/routes/vm.ts:555",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "PUT /api/vm/transfer-availability",
+      "method": "PUT",
+      "fullPath": "/api/vm/transfer-availability",
+      "routeSource": "server/src/routes/vm.ts:567",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/vm/raised-hands",
+      "method": "GET",
+      "fullPath": "/api/vm/raised-hands",
+      "routeSource": "server/src/routes/vm.ts:587",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/vm/inbound-calls/:inboundCallId/dismiss",
+      "method": "POST",
+      "fullPath": "/api/vm/inbound-calls/:inboundCallId/dismiss",
+      "routeSource": "server/src/routes/vm.ts:599",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/vm/pilot-readout",
+      "method": "GET",
+      "fullPath": "/api/vm/pilot-readout",
+      "routeSource": "server/src/routes/vm.ts:610",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/vm/leads/:leadId",
+      "method": "GET",
+      "fullPath": "/api/vm/leads/:leadId",
+      "routeSource": "server/src/routes/vm.ts:626",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/vm/leads/:leadId/disposition",
+      "method": "POST",
+      "fullPath": "/api/vm/leads/:leadId/disposition",
+      "routeSource": "server/src/routes/vm.ts:668",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/vm/leads/:leadId/notes",
+      "method": "POST",
+      "fullPath": "/api/vm/leads/:leadId/notes",
+      "routeSource": "server/src/routes/vm.ts:687",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/vm/leads/:leadId/follow-up",
+      "method": "POST",
+      "fullPath": "/api/vm/leads/:leadId/follow-up",
+      "routeSource": "server/src/routes/vm.ts:706",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "DELETE /api/vm/leads/:leadId/follow-up",
+      "method": "DELETE",
+      "fullPath": "/api/vm/leads/:leadId/follow-up",
+      "routeSource": "server/src/routes/vm.ts:725",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/vm/leads/:leadId/invite",
+      "method": "POST",
+      "fullPath": "/api/vm/leads/:leadId/invite",
+      "routeSource": "server/src/routes/vm.ts:736",
+      "mountPath": "/api/vm",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_vm_entitled",
+      "accessCategory": "ba_auth_steve_vm_entitled",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba",
+          "vm_dialer"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "requireVmDialerAccess",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete",
+          "requireVmDialerAccess"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/vm/leads/:leadId/do-not-call",
+      "method": "POST",
+      "fullPath": "/api/vm/leads/:leadId/do-not-call",
+      "routeSource": "server/src/routes/vm.ts:762",
       "mountPath": "/api/vm",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",

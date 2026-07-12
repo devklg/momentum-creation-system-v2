@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-12T11:29:29.114Z
+- Generated: 2026-07-12T18:03:50.189Z
 - Collections: 67
 - Unclassified: 0
 
@@ -43,7 +43,7 @@
 | `mcs_questionnaires` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 1 |
 | `mcs_workbooks` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
 | `orientation_sessions` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 1 |
-| `team_magnificent_members` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | explicit_mongoose_schema | yes | 57 |
+| `team_magnificent_members` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | explicit_mongoose_schema | yes | 58 |
 | `tenant_settings_versions` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 3 |
 | `tmag_access_codes` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 8 |
 | `tmag_admin_curated_leader_tags` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 3 |

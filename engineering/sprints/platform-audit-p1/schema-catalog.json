@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T11:29:28.283Z",
+  "generatedAt": "2026-07-12T18:03:45.940Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -182,27 +182,27 @@
       "sources": [
         {
           "file": "server/src/domain/auditLog.ts",
-          "line": 143,
+          "line": 147,
           "source": "writeOperational"
         },
         {
           "file": "server/src/domain/auditLog.ts",
-          "line": 261,
+          "line": 271,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/auditLog.ts",
-          "line": 282,
+          "line": 293,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/auditLog.ts",
-          "line": 337,
+          "line": 349,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/auditLog.ts",
-          "line": 399,
+          "line": 413,
           "source": "writeOperational"
         }
       ]
@@ -358,6 +358,11 @@
           "file": "server/src/domain/adminBaOversight.ts",
           "line": 580,
           "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/adminEntitlementAudit.ts",
+          "line": 48,
+          "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/adminMetrics.ts",
@@ -2748,8 +2753,8 @@
           "server/src/domain/adminProspectOversight.ts:1067",
           "server/src/domain/adminProspectOversight.ts:981",
           "server/src/domain/agents/orchestrator.ts:305",
-          "server/src/domain/auditLog.ts:182",
-          "server/src/domain/auditLog.ts:452",
+          "server/src/domain/auditLog.ts:192",
+          "server/src/domain/auditLog.ts:469",
           "server/src/domain/baIdentityPersistence.ts:28",
           "server/src/domain/baIdentityPersistence.ts:29",
           "server/src/domain/baIdentityPersistence.ts:33",
@@ -2863,9 +2868,9 @@
       {
         "label": "TmagAuditEntry",
         "sources": [
-          "server/src/domain/auditLog.ts:182",
-          "server/src/domain/auditLog.ts:197",
-          "server/src/domain/auditLog.ts:452"
+          "server/src/domain/auditLog.ts:192",
+          "server/src/domain/auditLog.ts:207",
+          "server/src/domain/auditLog.ts:469"
         ]
       },
       {
@@ -3252,13 +3257,13 @@
       {
         "relationship": "ACTED_BY",
         "sources": [
-          "server/src/domain/auditLog.ts:182"
+          "server/src/domain/auditLog.ts:192"
         ]
       },
       {
         "relationship": "ACTED_FOR",
         "sources": [
-          "server/src/domain/auditLog.ts:452"
+          "server/src/domain/auditLog.ts:469"
         ]
       },
       {
@@ -3920,53 +3925,58 @@
       "routes": [
         {
           "method": "GET",
+          "path": "/entitlements/audit",
+          "line": 52
+        },
+        {
+          "method": "GET",
           "path": "/",
-          "line": 51
+          "line": 57
         },
         {
           "method": "GET",
           "path": "/:tmagId",
-          "line": 80
+          "line": 86
         },
         {
           "method": "POST",
           "path": "/:tmagId/sponsor-override",
-          "line": 106
+          "line": 112
         },
         {
           "method": "POST",
           "path": "/:tmagId/entitlements",
-          "line": 171
+          "line": 177
         },
         {
           "method": "POST",
           "path": "/:tmagId/leader-tag",
-          "line": 212
+          "line": 218
         },
         {
           "method": "POST",
           "path": "/:tmagId/notes",
-          "line": 252
+          "line": 258
         },
         {
           "method": "POST",
           "path": "/",
-          "line": 362
+          "line": 368
         },
         {
           "method": "PATCH",
           "path": "/:tmagId",
-          "line": 397
+          "line": 403
         },
         {
           "method": "DELETE",
           "path": "/:tmagId",
-          "line": 423
+          "line": 429
         },
         {
           "method": "POST",
           "path": "/:tmagId/restore",
-          "line": 449
+          "line": 455
         }
       ],
       "sharedTypes": [
@@ -5704,6 +5714,16 @@
       "name": "McsAdminOperationsDashboardResponse",
       "kind": "interface",
       "file": "packages/shared/src/admin-live-ops.ts"
+    },
+    {
+      "name": "MCS_ADMIN_SENSITIVE_ACTIONS",
+      "kind": "const",
+      "file": "packages/shared/src/admin-sensitive-actions.ts"
+    },
+    {
+      "name": "McsAdminSensitiveActionControl",
+      "kind": "interface",
+      "file": "packages/shared/src/admin-sensitive-actions.ts"
     },
     {
       "name": "getMcsPlatformAgent",
@@ -8411,6 +8431,11 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsAdminEntitlementAuditResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsAdminLeaderGroupOption",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -8797,6 +8822,11 @@
     },
     {
       "name": "McsAuditEntryResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAuditEventTaxonomy",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
     },
@@ -10131,6 +10161,11 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsTaxonomizedAuditLogEntry",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsTeamLaunchCenterResponse",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -10517,7 +10552,7 @@
     "neo4jRelationships": 61,
     "chromaCollections": 50,
     "routeModules": 45,
-    "routeHandlers": 254,
-    "sharedExports": 972
+    "routeHandlers": 255,
+    "sharedExports": 977
   }
 }

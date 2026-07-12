@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T11:29:29.114Z",
+  "generatedAt": "2026-07-12T18:03:50.189Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 67,
   "unclassifiedCount": 0,
@@ -225,12 +225,13 @@
       "persistenceTier": "mixed",
       "schemaMode": "explicit_mongoose_schema",
       "resolved": true,
-      "sourceCount": 57,
+      "sourceCount": 58,
       "sourceFiles": [
         "server/scripts/backfill-founder-timezones.ts",
         "server/scripts/setup-founder-access.ts",
         "server/src/domain/adminBaCrud.ts",
         "server/src/domain/adminBaOversight.ts",
+        "server/src/domain/adminEntitlementAudit.ts",
         "server/src/domain/adminMetrics.ts",
         "server/src/domain/adminProspectOversight.ts",
         "server/src/domain/ba.ts",

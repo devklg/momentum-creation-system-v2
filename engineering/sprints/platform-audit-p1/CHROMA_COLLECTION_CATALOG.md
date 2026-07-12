@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-12T11:29:33.268Z
+- Generated: 2026-07-12T18:03:48.678Z
 - Registered collections: 50
 - Schema-catalog collections: 50
 - Collections with observed write/query usage: 30
@@ -48,7 +48,7 @@
 | `mcs_agent_steve_events` | agents | not_language_scoped | Agent event/template semantic memory. | not observed | none observed | none observed | none inferred |
 | `mcs_agent_system_events` | agents | not_language_scoped | Agent event/template semantic memory. | not observed | none observed | none observed | none inferred |
 | `mcs_agent_templates` | agents | not_language_scoped | Agent event/template semantic memory. | not observed | none observed | none observed | none inferred |
-| `mcs_audit_log` | audit_governance | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `action`, `agent`, `correlationId`, `entityKind`, `role`, `severity`, `tenantId`, `timestamp`, `tmagId`, `turnId` | none observed | `correlationId`, `tenantId`, `tmagId`, `turnId` |
+| `mcs_audit_log` | audit_governance | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `action`, `agent`, `correlationId`, `entityKind`, `role`, `severity`, `taxonomyCategory`, `taxonomyImpact`, `taxonomyOutcome`, `tenantId`, `timestamp`, `tmagId`, `turnId` | none observed | `correlationId`, `tenantId`, `tmagId`, `turnId` |
 | `mcs_broadcasts` | broadcast_delivery | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `audiencePreset`, `broadcastId`, `channel`, `createdAt`, `isTestSend` | none observed | `broadcastId` |
 | `mcs_commitments` | identity_access | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `acceptedAt`, `kind`, `threeBaId`, `tmagId`, `version` | none observed | `threeBaId`, `tmagId` |
 | `mcs_content_templates` | content_resources | not_language_scoped | Governed content/resource semantic record. | `writeKnowledge` | `surface`, `templateKey`, `tenantId`, `version` | none observed | `tenantId` |

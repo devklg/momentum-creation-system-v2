@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T11:29:33.268Z",
+  "generatedAt": "2026-07-12T18:03:48.678Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -266,12 +266,12 @@
       "sources": [
         {
           "file": "server/src/domain/auditLog.ts",
-          "line": 143,
+          "line": 147,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/auditLog.ts",
-          "line": 399,
+          "line": 413,
           "action": "writeOperational"
         }
       ],
@@ -290,6 +290,9 @@
           "entityKind",
           "role",
           "severity",
+          "taxonomyCategory",
+          "taxonomyImpact",
+          "taxonomyOutcome",
           "tenantId",
           "timestamp",
           "tmagId",
