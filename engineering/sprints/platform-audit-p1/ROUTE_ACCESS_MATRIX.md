@@ -4,15 +4,15 @@
 
 ## Summary
 
-- Generated: 2026-07-12T09:08:17.973Z
-- Routes: 211
+- Generated: 2026-07-12T09:59:13.603Z
+- Routes: 212
 - Findings: 0
 
 ## Routes By Access Category
 
 | Access category | Routes |
 | --- | ---: |
-| admin | 90 |
+| admin | 91 |
 | admin_or_health_secret | 1 |
 | auth_bootstrap | 3 |
 | auth_session | 2 |
@@ -34,7 +34,7 @@
 | customSecretGuard | 10 |
 | rateLimited | 3 |
 | rawBodyParser | 1 |
-| requireAdmin | 90 |
+| requireAdmin | 91 |
 | requireAdminOrHealthSecret | 1 |
 | requireAuth | 87 |
 | requireRuntimeInternal | 5 |
@@ -157,8 +157,9 @@
 | GET | `/api/admin/vm/overview` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/vm.ts:32` |
 | POST | `/api/admin/vm/campaigns/:vmCampaignId/live-approval` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/vm.ts:87` |
 | POST | `/api/admin/vm/ownership-correction` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/vm.ts:145` |
-| GET | `/api/admin/agents/overview` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/agents.ts:26` |
-| GET | `/api/admin/agents/health` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/agents.ts:58` |
+| GET | `/api/admin/agents/overview` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/agents.ts:27` |
+| GET | `/api/admin/agents/health` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/agents.ts:59` |
+| GET | `/api/admin/agents/outbox-health` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/agents.ts:68` |
 | GET | `/api/admin/broadcast/audience` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/broadcast.ts:92` |
 | GET | `/api/admin/broadcast/list` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/broadcast.ts:128` |
 | GET | `/api/admin/broadcast/:broadcastId` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/broadcast.ts:142` |

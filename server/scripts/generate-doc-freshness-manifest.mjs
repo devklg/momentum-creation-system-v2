@@ -8,6 +8,13 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const output = path.join(root, 'docs/freshness-manifest.json');
 const check = process.argv.includes('--check');
+const trackedFiles = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' }).split(/\r?\n/).filter(Boolean);
+const trackedObjectIds = execFileSync('git', ['hash-object', '--stdin-paths'], {
+  cwd: root,
+  encoding: 'utf8',
+  input: `${trackedFiles.join('\n')}\n`,
+}).split(/\r?\n/).filter(Boolean);
+const objectIdByFile = new Map(trackedFiles.map((file, index) => [file, trackedObjectIds[index]]));
 
 const coreDocs = [
   ['docs/READ-ME-FIRST.md', 'current_navigation'],
@@ -40,22 +47,27 @@ function sha256(relative) {
   const absolute = path.join(root, relative);
   if (!existsSync(absolute)) return null;
   const hash = createHash('sha256');
-  const addFile = (file) => {
-    const bytes = readFileSync(file);
-    const textLike = /\.(?:md|json|mjs|js|ts|tsx|html|css|yml|yaml|txt)$/i.test(file);
-    hash.update(textLike ? bytes.toString('utf8').replace(/\r\n/g, '\n') : bytes);
+  const addFile = (file, repoRelative) => {
+    const objectId = objectIdByFile.get(repoRelative);
+    if (objectId) {
+      hash.update(objectId);
+    } else {
+      const bytes = readFileSync(file);
+      const textLike = /\.(?:md|json|mjs|js|ts|tsx|html|css|yml|yaml|txt)$/i.test(file);
+      hash.update(textLike ? bytes.toString('utf8').replace(/\r\n/g, '\n') : bytes);
+    }
   };
   if (statSync(absolute).isFile()) {
-    addFile(absolute);
+    addFile(absolute, relative.replaceAll('\\', '/'));
     return hash.digest('hex');
   }
-  const files = execFileSync('git', ['ls-files', `${relative.replaceAll('\\', '/')}/*`], { cwd: root, encoding: 'utf8' })
-    .split(/\r?\n/)
-    .filter(Boolean)
+  const prefix = `${relative.replaceAll('\\', '/').replace(/\/$/, '')}/`;
+  const files = trackedFiles
+    .filter((file) => file.startsWith(prefix))
     .sort();
   for (const file of files) {
     hash.update(file).update('\0');
-    addFile(path.join(root, file));
+    addFile(path.join(root, file), file);
     hash.update('\0');
   }
   return hash.digest('hex');

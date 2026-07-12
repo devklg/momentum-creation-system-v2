@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T09:08:17.652Z",
+  "generatedAt": "2026-07-12T09:59:13.246Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,16 +8,16 @@
   "summary": {
     "mounts": 46,
     "routeFiles": 46,
-    "routes": 211,
+    "routes": 212,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 2,
-      "pre_gate": 136,
+      "pre_gate": 137,
       "ba_facing_gated": 72
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
-      "admin": 87,
+      "admin": 88,
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
       "prospect_token": 18,
@@ -25,7 +25,7 @@
     },
     "byMethod": {
       "POST": 86,
-      "GET": 105,
+      "GET": 106,
       "PUT": 6,
       "PATCH": 8,
       "DELETE": 6
@@ -2877,7 +2877,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/agents.ts:26",
+      "source": "server/src/routes/admin/agents.ts:27",
       "routeSource": "server/src/routes/admin/agents.ts",
       "signals": {
         "requireAuth": false,
@@ -2903,7 +2903,33 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/agents.ts:58",
+      "source": "server/src/routes/admin/agents.ts:59",
+      "routeSource": "server/src/routes/admin/agents.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/agents/outbox-health",
+      "mountPath": "/api/admin/agents",
+      "localPath": "/outbox-health",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/agents.ts:68",
       "routeSource": "server/src/routes/admin/agents.ts",
       "signals": {
         "requireAuth": false,

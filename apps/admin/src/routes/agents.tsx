@@ -3,22 +3,24 @@
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
-import type { McsAdminAgentHealthResponse, McsAdminAgentOversightResponse } from '@momentum/shared';
+import type { McsAdminAgentHealthResponse, McsAdminAgentOversightResponse, McsAdminOutboxHealthResponse } from '@momentum/shared';
 
 export function AgentsPage() {
   const [data, setData] = useState<McsAdminAgentOversightResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [health, setHealth] = useState<McsAdminAgentHealthResponse | null>(null);
+  const [outbox, setOutbox] = useState<McsAdminOutboxHealthResponse | null>(null);
 
   useEffect(() => {
     void (async () => {
       setLoading(true);
       setErr(null);
       try {
-        const [res, healthRes] = await Promise.all([
+        const [res, healthRes, outboxRes] = await Promise.all([
           fetch('/api/admin/agents/overview', { credentials: 'include' }),
           fetch('/api/admin/agents/health', { credentials: 'include' }),
+          fetch('/api/admin/agents/outbox-health', { credentials: 'include' }),
         ]);
         const body = (await res.json()) as McsAdminAgentOversightResponse & {
           error?: string;
@@ -29,6 +31,7 @@ export function AgentsPage() {
         }
         setData(body);
         if (healthRes.ok) setHealth((await healthRes.json()) as McsAdminAgentHealthResponse);
+        if (outboxRes.ok) setOutbox((await outboxRes.json()) as McsAdminOutboxHealthResponse);
       } catch (e) {
         setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
       } finally {
@@ -83,6 +86,34 @@ export function AgentsPage() {
                   <li key={warning}>{warning}</li>
                 ))}
               </ul>
+            </section>
+          )}
+
+          {outbox && (
+            <section className="border border-line bg-cream/[0.025] p-5 mb-8">
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <h2 className="font-mono text-[11px] tracking-label uppercase text-gold">Projection Outbox Worker</h2>
+                <span className="font-mono text-[10px] uppercase text-cream-mute">
+                  {outbox.worker.started ? (outbox.worker.inFlight ? 'draining' : 'running') : 'stopped'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
+                {[
+                  ['Pending', outbox.queue.pending], ['Due', outbox.queue.due],
+                  ['Scheduled', outbox.queue.scheduled], ['Dead letters', outbox.queue.deadLettered],
+                  ['Attempts', outbox.queue.attempts], ['Landed', outbox.worker.totals.landed],
+                  ['Re-enqueued', outbox.worker.totals.reEnqueued], ['Scanned', outbox.worker.totals.scanned],
+                ].map(([label, value]) => (
+                  <div key={label} className="border border-line p-3">
+                    <p className="font-display text-[26px] text-cream">{value}</p>
+                    <p className="font-mono text-[9px] uppercase text-cream-faint">{label}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-cream-mute mt-4">
+                Last successful tick: {formatDateTime(outbox.worker.lastSuccessAt)} · Oldest pending: {formatDateTime(outbox.queue.oldestPendingAt)} · interval {outbox.worker.intervalMs / 1000}s
+              </p>
+              {outbox.worker.lastError && <p className="text-xs text-red-300 mt-2">Last worker error: {outbox.worker.lastError}</p>}
             </section>
           )}
 
@@ -240,4 +271,9 @@ function DenseTable({
 function formatDate(value: string | null): string {
   if (!value) return 'never';
   return new Date(value).toLocaleDateString();
+}
+
+function formatDateTime(value: string | null): string {
+  if (!value) return 'never';
+  return new Date(value).toLocaleString();
 }

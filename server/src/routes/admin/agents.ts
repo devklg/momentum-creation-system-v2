@@ -12,6 +12,7 @@ import { requireAdmin } from '../../middleware/requireAuth.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
 import { buildAdminAgentOversight } from '../../domain/adminAgentMemory.js';
 import { buildAdminAgentHealth } from '../../domain/adminAgentHealth.js';
+import { buildAdminOutboxHealth } from '../../domain/adminOutboxHealth.js';
 import type { McsAuditActor } from '@momentum/shared';
 
 export const adminAgentsRoutes: Router = express.Router();
@@ -61,5 +62,14 @@ adminAgentsRoutes.get('/health', requireAdmin, async (_req, res) => {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Agent health failed: ${msg}` });
+  }
+});
+
+adminAgentsRoutes.get('/outbox-health', requireAdmin, async (_req, res) => {
+  try {
+    res.status(200).json(await buildAdminOutboxHealth());
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Outbox health failed: ${msg}` });
   }
 });
