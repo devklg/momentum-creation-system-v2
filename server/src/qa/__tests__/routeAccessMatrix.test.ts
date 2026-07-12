@@ -6,6 +6,7 @@ interface RouteAccessMatrixRow {
   method: string;
   fullPath: string;
   accessClass: string;
+  permissions: { roles: string[]; entitlements: string[]; gates: string[] };
   expected: {
     authGate: string;
     adminGate: string;
@@ -36,6 +37,8 @@ interface RouteAccessMatrix {
     findings: number;
     byAccessClass: Record<string, number>;
     guardCoverage: Record<string, number>;
+    byRole: Record<string, number>;
+    byEntitlement: Record<string, number>;
   };
   routes: RouteAccessMatrixRow[];
 }
@@ -122,5 +125,17 @@ describe('P1 route access matrix', () => {
     expect(coverage.requireSteveComplete).toBeGreaterThan(70);
     expect(coverage.requireVmDialerAccess).toBe(12);
     expect(coverage.customSecretGuard).toBeGreaterThanOrEqual(4);
+  });
+
+  it('assigns every route an explicit role, entitlement, and effective gate model', () => {
+    const data = matrix();
+    expect(data.routes.every((row) => row.permissions.roles.length > 0)).toBe(true);
+    expect(data.routes.every((row) => row.permissions.entitlements.length > 0)).toBe(true);
+    expect(data.summary.byRole.founder_admin).toBeGreaterThan(90);
+    expect(data.summary.byRole.brand_ambassador).toBe(88);
+    expect(data.summary.byEntitlement.vm_dialer).toBe(12);
+    expect(route('GET', '/api/admin/agents/outbox-health').permissions).toMatchObject({ roles: ['founder_admin'], entitlements: ['admin_allowlist'] });
+    expect(route('GET', '/api/vm/lead-owners').permissions.gates).toContain('requireVmDialerAccess');
+    expect(route('GET', '/api/p/:token').permissions).toMatchObject({ roles: ['prospect'], entitlements: ['valid_prospect_identity'] });
   });
 });

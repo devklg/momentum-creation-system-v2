@@ -93,6 +93,29 @@ function tokenIdentity(row) {
   return 'none';
 }
 
+function permissionsFor(accessClass, expected) {
+  const rolesByClass = {
+    admin: ['founder_admin'], admin_or_health_secret: ['founder_admin', 'system'],
+    internal_runtime_admin_or_secret: ['founder_admin', 'system'],
+    ba_auth_steve_vm_entitled: ['brand_ambassador'], ba_auth_steve_gated: ['brand_ambassador'],
+    ba_auth_pre_steve: ['brand_ambassador'], auth_session: ['brand_ambassador'],
+    prospect_reentry: ['prospect'], prospect_token: ['prospect'],
+    raw_body_webhook: ['provider'], steve_worker_secret: ['system'], vm_provider_webhook: ['provider'],
+    auth_bootstrap: ['anonymous'], public_health: ['anonymous', 'system'], public_or_pregate: ['anonymous'],
+  };
+  const roles = rolesByClass[accessClass] ?? ['system'];
+  const entitlements = [];
+  if (roles.includes('founder_admin')) entitlements.push('admin_allowlist');
+  if (roles.includes('brand_ambassador')) entitlements.push('registered_ba');
+  if (expected.vmEntitlementGate !== 'none') entitlements.push('vm_dialer');
+  if (roles.includes('prospect')) entitlements.push('valid_prospect_identity');
+  if (roles.includes('provider') || roles.includes('system')) entitlements.push('machine_credential');
+  if (roles.includes('anonymous')) entitlements.push('none');
+  const gates = [expected.authGate, expected.adminGate, expected.steveGate, expected.vmEntitlementGate, expected.secretGate]
+    .filter((value) => !['none', 'not_applicable', 'not_applied'].includes(value));
+  return { roles, entitlements: [...new Set(entitlements)], gates: [...new Set(gates)] };
+}
+
 function classify(row) {
   const signals = row.signals;
   const allMiddleware = [...row.mountMiddleware, ...row.localMiddleware];
@@ -209,6 +232,7 @@ function classify(row) {
     findings.push('vm_provider_admin_utility_without_admin_gate');
   }
 
+  const permissions = permissionsFor(accessClass, expected);
   return {
     id: `${row.method} ${row.fullPath}`,
     method: row.method,
@@ -219,6 +243,7 @@ function classify(row) {
     routeAccessProfile: row.accessProfile,
     accessClass,
     accessCategory: accessClass,
+    permissions,
     expected,
     declared: {
       middleware: allMiddleware,
@@ -258,6 +283,12 @@ function buildMatrix(generatedAtOverride = null) {
     acc[finding] = (acc[finding] ?? 0) + 1;
     return acc;
   }, {});
+  const byRole = routes.flatMap((row) => row.permissions.roles).reduce((acc, role) => {
+    acc[role] = (acc[role] ?? 0) + 1; return acc;
+  }, {});
+  const byEntitlement = routes.flatMap((row) => row.permissions.entitlements).reduce((acc, entitlement) => {
+    acc[entitlement] = (acc[entitlement] ?? 0) + 1; return acc;
+  }, {});
   const guardCoverage = {
     requireAuth: routes.filter((row) => row.declared.requireAuth).length,
     requireAdmin: routes.filter((row) => row.declared.requireAdmin).length,
@@ -284,6 +315,8 @@ function buildMatrix(generatedAtOverride = null) {
     summary: {
       routes: routes.length,
       byAccessClass,
+      byRole,
+      byEntitlement,
       guardCoverage,
       findings: Object.values(byFinding).reduce((sum, count) => sum + count, 0),
       byFinding,
@@ -309,10 +342,12 @@ function renderMarkdown(matrix) {
       : Object.entries(matrix.summary.byFinding)
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([finding, count]) => `| ${finding} | ${count} |`);
+  const roleRows = Object.entries(matrix.summary.byRole).sort(([a], [b]) => a.localeCompare(b)).map(([role, count]) => `| ${role} | ${count} |`);
+  const entitlementRows = Object.entries(matrix.summary.byEntitlement).sort(([a], [b]) => a.localeCompare(b)).map(([entitlement, count]) => `| ${entitlement} | ${count} |`);
   const routeRows = matrix.routes.map((row) => {
     const findings = row.findings.join(', ') || 'none';
     const notes = row.notes.join('; ') || 'none';
-    return `| ${row.method} | \`${row.fullPath}\` | ${row.accessCategory} | ${row.expected.authGate} | ${row.expected.adminGate} | ${row.expected.steveGate} | ${row.effectiveSteveException} | ${row.expected.vmEntitlementGate} | ${row.tokenIdentity} | ${row.machineSecret} | ${row.rawBody ? 'yes' : 'no'} | ${row.rateLimit ? 'yes' : 'no'} | ${row.bodyLimit} | ${notes} | ${findings} | \`${row.routeSource}\` |`;
+    return `| ${row.method} | \`${row.fullPath}\` | ${row.permissions.roles.join(', ')} | ${row.permissions.entitlements.join(', ')} | ${row.permissions.gates.join(', ') || 'none'} | ${row.accessCategory} | ${row.expected.authGate} | ${row.expected.adminGate} | ${row.expected.steveGate} | ${row.effectiveSteveException} | ${row.expected.vmEntitlementGate} | ${row.tokenIdentity} | ${row.machineSecret} | ${row.rawBody ? 'yes' : 'no'} | ${row.rateLimit ? 'yes' : 'no'} | ${row.bodyLimit} | ${notes} | ${findings} | \`${row.routeSource}\` |`;
   });
 
   return `# Route Access Matrix
@@ -337,6 +372,18 @@ ${mdTable(accessRows)}
 | --- | ---: |
 ${mdTable(guardRows)}
 
+## Role Coverage
+
+| Role | Routes |
+| --- | ---: |
+${mdTable(roleRows)}
+
+## Entitlement Coverage
+
+| Entitlement | Routes |
+| --- | ---: |
+${mdTable(entitlementRows)}
+
 ## Findings
 
 | Finding | Count |
@@ -349,8 +396,8 @@ ${matrix.steveWhitelist.map((entry) => `- \`${entry}\``).join('\n')}
 
 ## Matrix
 
-| Method | Path | Access category | Auth gate | Admin gate | Steve gate | Steve exception | VM entitlement | Token identity | Machine secret | Raw body | Rate limit | Body limit | Notes | Findings | Source |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Method | Path | Roles | Entitlements | Effective gates | Access category | Auth gate | Admin gate | Steve gate | Steve exception | VM entitlement | Token identity | Machine secret | Raw body | Rate limit | Body limit | Notes | Findings | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${mdTable(routeRows)}
 `;
 }
