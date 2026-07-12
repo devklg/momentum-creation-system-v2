@@ -40,6 +40,13 @@ Live delivery remains disabled until Kevin approves the ACR, this checklist, pro
 - Ambiguous content escalates instead of sending.
 - Copy must remain relational, consent-aware, and educational.
 
+### Automated copy coverage (P1-79)
+
+- The deterministic generated-copy scanner rejects income, compensation-plan, placement, AI-qualification, programmatic THREE handoff, medical, pressure, and automated-prospecting claims in prospect-bound text.
+- The provider delivery payload accepts a token URL and an audio URL; it does not accept arbitrary message, copy, script, transcript, subject, or body fields.
+- Manual CSV export contains identity/contact/routing fields only and cannot silently add an unreviewed message or script column.
+- Audio content is opaque to the current runtime. An `audioUrl` must not be represented as compliance-scanned unless an approved transcript or content record is introduced through a governed change. Live delivery therefore remains dependent on the existing global lock, campaign-level admin approval, and the checklist's human review requirement.
+
 ## Runtime And Knowledge Controls
 
 - Agents receive Context Packets only; they do not query MongoDB, Neo4j, Chroma, or GraphRAG directly.
