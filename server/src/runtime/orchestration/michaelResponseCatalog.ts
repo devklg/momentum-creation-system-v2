@@ -108,6 +108,44 @@ export const MICHAEL_RESPONSE_CATALOG: readonly MichaelResponseCatalogEntry[] = 
   ),
 ] as const;
 
+/** P1-62 generated response-type registry over the controlled catalog. */
+export const MICHAEL_RESPONSE_TYPE_REGISTRY = {
+  next_training_step: { substantive: true, allowedScenarioFamilies: ['complete'] },
+  clarification_question: { substantive: true, allowedScenarioFamilies: ['complete'] },
+  safe_fallback: { substantive: false, allowedScenarioFamilies: ['degraded', 'missing'] },
+  safe_close: { substantive: false, allowedScenarioFamilies: ['failed', 'rejected'] },
+} as const satisfies Readonly<Record<MichaelResponseType, {
+  substantive: boolean;
+  allowedScenarioFamilies: readonly MichaelResponseScenarioFamily[];
+}>>;
+
+/** P1-62 catalog-key registry generated from the actual controlled entries. */
+export const MICHAEL_CATALOG_KEY_REGISTRY: Readonly<Record<string, {
+  responseType: MichaelResponseType;
+  scenarioFamily: MichaelResponseScenarioFamily;
+  contextPacketStatus: MichaelResponseContextPacketStatus;
+  language: 'en' | 'es';
+  substantive: boolean;
+  safePath: boolean;
+}>> = Object.freeze(Object.fromEntries(MICHAEL_RESPONSE_CATALOG.map((catalogEntry) => [
+  catalogEntry.catalogKey,
+  Object.freeze({
+    responseType: catalogEntry.responseType,
+    scenarioFamily: catalogEntry.scenarioFamily,
+    contextPacketStatus: catalogEntry.contextPacketStatus,
+    language: catalogEntry.language,
+    substantive: catalogEntry.isSubstantive,
+    safePath: catalogEntry.isSafePath,
+  }),
+]))) as Readonly<Record<string, {
+  responseType: MichaelResponseType;
+  scenarioFamily: MichaelResponseScenarioFamily;
+  contextPacketStatus: MichaelResponseContextPacketStatus;
+  language: 'en' | 'es';
+  substantive: boolean;
+  safePath: boolean;
+}>>;
+
 const CATALOG_BY_KEY: ReadonlyMap<string, MichaelResponseCatalogEntry> = new Map(
   MICHAEL_RESPONSE_CATALOG.map((catalogEntry) => [catalogEntry.catalogKey, catalogEntry]),
 );
