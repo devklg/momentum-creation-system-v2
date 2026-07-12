@@ -50,6 +50,7 @@ import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
 import { lastInitialOf } from './prospects.js';
 import { createOrUpdateCrmRecordForToken } from './prospectCrm.js';
 import { writeProspectTokenGraphCritical } from './tokenLifecyclePersistence.js';
+import { createFlowCorrelation, withCrmCorrelation } from './flowCorrelation.js';
 import {
   generatedCopyViolationIds,
   scanGeneratedCopyCompliance,
@@ -182,6 +183,8 @@ export async function createInvitation(
   const createdAt = new Date().toISOString();
   const expiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
   const lastInitial = lastInitialOf(input.lastName);
+  const invitationId = `inv_${prospectId}`;
+  const correlation = createFlowCorrelation({ rootKind: 'invitation', rootId: invitationId, invitationId, prospectId, tokenId: token });
 
   const location: McsProspectLocation = {
     city: input.city,
@@ -224,6 +227,7 @@ export async function createInvitation(
       message: input.message,
       source: input.source,
       relationshipReason,
+      correlation,
     },
     neo4j: {
       // BA INVITED prospect. sponsorTmagId stamped immutably here.
@@ -231,7 +235,7 @@ export async function createInvitation(
         'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
         'CREATE (p:TmagProspect {prospectId: $id, firstName: $firstName, lastInitial: $lastInitial, ' +
         '  city: $city, stateOrRegion: $stateOrRegion, country: $country, state: $state, ' +
-        '  sponsorTmagId: $sponsorTmagId, relationshipReason: $relationshipReason, createdAt: $createdAt}) ' +
+        '  sponsorTmagId: $sponsorTmagId, relationshipReason: $relationshipReason, correlationId: $correlationId, createdAt: $createdAt}) ' +
         'CREATE (b)-[:INVITED {token: $token, createdAt: $createdAt}]->(p)',
       params: {
         sponsorTmagId: input.sponsorTmagId,
@@ -244,6 +248,7 @@ export async function createInvitation(
         relationshipReason,
         token,
         createdAt,
+        correlationId: correlation.correlationId,
       },
       verifyCypher:
         'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-' +
@@ -270,6 +275,7 @@ export async function createInvitation(
         source: input.source,
         relationshipReason,
         createdAt,
+        correlationId: correlation.correlationId,
       },
     },
   });
@@ -291,11 +297,12 @@ export async function createInvitation(
     token,
     prospectId,
     sponsorTmagId: input.sponsorTmagId,
-    mongoDoc: { ...tokenRecord },
+    mongoDoc: { ...tokenRecord, correlation },
     tokenProps: {
       state: 'minted',
       createdAt,
       expiresAt,
+      correlationId: correlation.correlationId,
     },
   });
 
@@ -303,6 +310,7 @@ export async function createInvitation(
   // or updates a BA-scoped CRM record. Existing cockpit reads still work
   // from the prospect row; this dedicated record powers the CRM hub and VM
   // module without changing the /p/:token PMV spine.
+  const crmRecordId = `crm_${prospectId}`;
   await createOrUpdateCrmRecordForToken({
     prospectId,
     token,
@@ -313,6 +321,7 @@ export async function createInvitation(
     leadOwnerId: null,
     vmCampaignId: null,
     createdAt,
+    correlation: withCrmCorrelation(correlation, crmRecordId),
   });
 
   // Step 4 (#148): create the prospect-account at MINT with the BA-supplied

@@ -26,9 +26,10 @@ import type {
   McsProspectCrmStatus,
   McsProspectTimelineEventRecord,
   McsProspectTimelineEventKind,
+  McsFlowCorrelation,
 } from '@momentum/shared';
 
-type ProspectCRMDocument = McsProspectCRMRecord & { token: string | null };
+type ProspectCRMDocument = McsProspectCRMRecord & { token: string | null; correlation?: McsFlowCorrelation };
 
 const MONGO_DB = 'momentum';
 const CRM_COLLECTION = 'tmag_prospect_crm_records';
@@ -55,6 +56,7 @@ interface CreateOrUpdateCrmInput {
   leadOwnerId?: string | null;
   vmCampaignId?: string | null;
   createdAt?: string;
+  correlation?: McsFlowCorrelation;
 }
 
 interface TimelineInput {
@@ -271,6 +273,7 @@ export async function createOrUpdateCrmRecordForToken(
       vmCampaignId: input.vmCampaignId ?? existing.vmCampaignId,
       source: input.source,
       updatedAt: now,
+      ...(input.correlation ? { correlation: input.correlation } : {}),
     };
     await persistenceCall('mongodb', 'update', {
       database: MONGO_DB,
@@ -281,12 +284,13 @@ export async function createOrUpdateCrmRecordForToken(
     await persistenceCall('neo4j', 'cypher', {
       query:
         'MATCH (c:TmagProspectCrmRecord {crmRecordId: $crmRecordId}) ' +
-        'SET c.token = $token, c.source = $source, c.updatedAt = $updatedAt',
+        'SET c.token = $token, c.source = $source, c.updatedAt = $updatedAt, c.correlationId = $correlationId',
       params: {
         crmRecordId: existing.crmRecordId,
         token: input.token,
         source: input.source,
         updatedAt: now,
+        correlationId: input.correlation?.correlationId ?? existing.correlation?.correlationId ?? null,
       },
     });
     return { ...existing, ...patch };
@@ -309,6 +313,7 @@ export async function createOrUpdateCrmRecordForToken(
     closedReason: null,
     createdAt: now,
     updatedAt: now,
+    ...(input.correlation ? { correlation: input.correlation } : {}),
   };
 
   await writeCrmOwnershipGraphCritical({
@@ -324,6 +329,7 @@ export async function createOrUpdateCrmRecordForToken(
       sponsorTmagId: record.sponsorTmagId,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
+      correlationId: input.correlation?.correlationId ?? null,
     },
     chroma: {
       collection: CRM_CHROMA_COLLECTION,
@@ -338,6 +344,7 @@ export async function createOrUpdateCrmRecordForToken(
         sponsorTmagId: record.sponsorTmagId,
         source: record.source,
         createdAt: now,
+        correlationId: input.correlation?.correlationId ?? null,
       },
     },
   });
@@ -349,7 +356,7 @@ export async function createOrUpdateCrmRecordForToken(
     sponsorTmagId: record.sponsorTmagId,
     kind: 'crm_created',
     note: `CRM record created from ${record.source} token creation.`,
-    metadata: { token: record.token, source: record.source },
+    metadata: { token: record.token, source: record.source, correlationId: input.correlation?.correlationId ?? null },
     createdAt: now,
   });
 
