@@ -361,7 +361,7 @@ export async function claimVmJobs(
   const claimed: VmQueueJob[] = [];
   for (const job of result.documents ?? []) {
     const lockedAt = new Date().toISOString();
-    await persistenceCall('mongodb', 'update', {
+    const claim = await persistenceCall<{ matchedCount?: number; modifiedCount?: number }>('mongodb', 'update', {
       database: MONGO_DB,
       collection: QUEUE_COLLECTION,
       filter: { jobId: job.jobId, status: 'queued' },
@@ -374,6 +374,7 @@ export async function claimVmJobs(
         },
       },
     });
+    if ((claim.modifiedCount ?? claim.matchedCount ?? 0) !== 1) continue;
     await vmAudit({
       action: 'vm.queue.claimed',
       entityId: job.jobId,
@@ -396,7 +397,7 @@ export async function completeVmJob(jobId: string, note: string): Promise<void> 
   await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: QUEUE_COLLECTION,
-    filter: { jobId },
+    filter: { jobId, status: 'processing' },
     update: {
       $set: {
         status: 'complete',
@@ -420,7 +421,7 @@ export async function skipVmJob(jobId: string, note: string): Promise<void> {
   await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: QUEUE_COLLECTION,
-    filter: { jobId },
+    filter: { jobId, status: 'processing' },
     update: {
       $set: {
         status: 'skipped',
@@ -448,7 +449,7 @@ export async function requeueVmJobWithoutBurningAttempt(
   await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: QUEUE_COLLECTION,
-    filter: { jobId: job.jobId },
+    filter: { jobId: job.jobId, status: 'processing', lockedAt: job.lockedAt },
     update: {
       $set: {
         status: 'queued',
@@ -479,7 +480,7 @@ export async function failVmJob(job: VmQueueJob, reason: string): Promise<void> 
   await persistenceCall('mongodb', 'update', {
     database: MONGO_DB,
     collection: QUEUE_COLLECTION,
-    filter: { jobId: job.jobId },
+    filter: { jobId: job.jobId, status: 'processing', lockedAt: job.lockedAt },
     update: {
       $set: {
         status,
