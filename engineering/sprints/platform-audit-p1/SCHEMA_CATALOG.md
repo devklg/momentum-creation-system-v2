@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-11T23:51:49.540Z
+- Generated: 2026-07-12T00:02:18.537Z
 - Mongo collections: 65
 - Neo4j labels: 68
 - Neo4j relationships: 59
 - Chroma collections: 50
 - Route modules: 45
 - Route handlers: 236
-- Shared exports: 868
+- Shared exports: 883
 
 ## Mongo Collections
 
@@ -373,6 +373,21 @@
 | `MCS_COM_DISCLAIMER` | const | `packages/shared/src/compliance.ts` |
 | `MCS_COMPLIANCE_FRAME` | const | `packages/shared/src/compliance.ts` |
 | `MCS_NEVER_ON_COM` | const | `packages/shared/src/compliance.ts` |
+| `CRM_CANONICAL_LIFECYCLE_STATES` | const | `packages/shared/src/crm-lifecycle.ts` |
+| `CRM_CLOSED_REASONS` | const | `packages/shared/src/crm-lifecycle.ts` |
+| `CRM_DISPOSITIONS` | const | `packages/shared/src/crm-lifecycle.ts` |
+| `CRM_FOLLOW_UP_STATES` | const | `packages/shared/src/crm-lifecycle.ts` |
+| `CRM_LIFECYCLE_MODEL` | const | `packages/shared/src/crm-lifecycle.ts` |
+| `CRM_LIFECYCLE_MODEL_VERSION` | const | `packages/shared/src/crm-lifecycle.ts` |
+| `CRM_PROSPECT_LIFECYCLE_STAGES` | const | `packages/shared/src/crm-lifecycle.ts` |
+| `CRM_RECORD_STATUSES` | const | `packages/shared/src/crm-lifecycle.ts` |
+| `CRM_TIMELINE_EVENT_KINDS` | const | `packages/shared/src/crm-lifecycle.ts` |
+| `CRM_TOKEN_STATES` | const | `packages/shared/src/crm-lifecycle.ts` |
+| `CRM_VM_LEAD_STATUSES` | const | `packages/shared/src/crm-lifecycle.ts` |
+| `CrmCanonicalLifecyclePhase` | type | `packages/shared/src/crm-lifecycle.ts` |
+| `CrmCanonicalLifecycleState` | interface | `packages/shared/src/crm-lifecycle.ts` |
+| `CrmCanonicalLifecycleStateId` | type | `packages/shared/src/crm-lifecycle.ts` |
+| `CrmFollowUpState` | type | `packages/shared/src/crm-lifecycle.ts` |
 | `MCS_LEADER_CREDIBILITY` | const | `packages/shared/src/leaders.ts` |
 | `McsLeaderCredibilityContent` | interface | `packages/shared/src/leaders.ts` |
 | `McsLeaderProfile` | interface | `packages/shared/src/leaders.ts` |

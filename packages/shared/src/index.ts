@@ -11,3 +11,4 @@ export * from './leaders.js';
 export * from './recruiting-cycle.js';
 export * from './pmv-contract.js';
 export * from './pmv-analytics-taxonomy.js';
+export * from './crm-lifecycle.js';

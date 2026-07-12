@@ -814,6 +814,35 @@ Verification:
 - `pnpm catalog:persistence && pnpm catalog:schema && pnpm catalog:mongo-ownership && pnpm catalog:mongo-indexes && pnpm catalog:neo4j && pnpm catalog:chroma && pnpm catalog:api-routes && pnpm catalog:route-access && pnpm compliance:com`
 - `pnpm catalog:persistence:check && pnpm catalog:schema:check && pnpm catalog:mongo-ownership:check && pnpm catalog:mongo-indexes:check && pnpm catalog:neo4j:check && pnpm catalog:chroma:check && pnpm catalog:api-routes:check && pnpm catalog:route-access:check && pnpm compliance:com:check`
 
+### P1-54: CRM Lifecycle State Model
+
+Implemented:
+
+- Added `packages/shared/src/crm-lifecycle.ts` and exported it from
+  `packages/shared/src/index.ts`.
+- Created
+  `engineering/sprints/platform-audit-p1/CRM_LIFECYCLE_STATE_MODEL.md` as the
+  human-readable CRM lifecycle state model artifact.
+- Defined the canonical CRM lifecycle model across token states, PMV lifecycle
+  stages, CRM record statuses, CRM dispositions, closed reasons, timeline event
+  kinds, VM/RVM lead lifecycle statuses, and manual follow-up states.
+- Kept callback requests, webinar reservations, and follow-up reminders as
+  signal rails rather than token lifecycle states.
+- Added `server/src/qa/__tests__/crmLifecycleStateModel.test.ts`, proving the
+  shared model stays aligned to existing shared type unions and documents every
+  canonical state in the audit artifact.
+
+Verification:
+
+- `pnpm --filter @momentum/server test -- crmLifecycleStateModel`
+- `pnpm --filter @momentum/shared build`
+- `pnpm --filter @momentum/server typecheck`
+- `pnpm typecheck`
+- `pnpm build`
+- `pnpm --filter @momentum/server test`
+- `pnpm catalog:persistence; pnpm catalog:schema; pnpm catalog:mongo-ownership; pnpm catalog:mongo-indexes; pnpm catalog:neo4j; pnpm catalog:chroma; pnpm catalog:api-routes; pnpm catalog:route-access; pnpm compliance:com`
+- `pnpm catalog:persistence:check; pnpm catalog:schema:check; pnpm catalog:mongo-ownership:check; pnpm catalog:mongo-indexes:check; pnpm catalog:neo4j:check; pnpm catalog:chroma:check; pnpm catalog:api-routes:check; pnpm catalog:route-access:check; pnpm compliance:com:check`
+
 ## Lane Map
 
 ### Lane P1-A: Persistence Migration
