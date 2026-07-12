@@ -9,12 +9,16 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const output = path.join(root, 'docs/freshness-manifest.json');
 const check = process.argv.includes('--check');
 const trackedFiles = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' }).split(/\r?\n/).filter(Boolean);
-const trackedObjectIds = execFileSync('git', ['hash-object', '--stdin-paths'], {
-  cwd: root,
-  encoding: 'utf8',
-  input: `${trackedFiles.join('\n')}\n`,
-}).split(/\r?\n/).filter(Boolean);
-const objectIdByFile = new Map(trackedFiles.map((file, index) => [file, trackedObjectIds[index]]));
+const objectIdByFile = new Map(
+  execFileSync('git', ['ls-files', '-s'], { cwd: root, encoding: 'utf8' })
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((line) => {
+      const match = line.match(/^\d+\s+([0-9a-f]+)\s+\d+\t(.+)$/);
+      return match ? [match[2], match[1]] : ['', ''];
+    })
+    .filter(([file]) => Boolean(file)),
+);
 
 const coreDocs = [
   ['docs/READ-ME-FIRST.md', 'current_navigation'],
@@ -85,7 +89,7 @@ function embeddedGeneratedAt(relative) {
 
 const manifest = {
   schemaVersion: 2,
-  freshnessBasis: 'content_sha256_and_declared_review_date',
+  freshnessBasis: 'git_blob_envelope_sha256_and_declared_review_date',
   authorityRule: 'decision ledger > locked spec > design docs > generated mirrors > git log > agent registry > handoffs',
   instructions: 'Regenerate an artifact when any declared source hash changes. reviewedAt is freshness metadata. authorityStatus states how a document may be used.',
   coreDocs: coreDocs.map(([file, authorityStatus]) => ({ file, authorityStatus, contentSha256: sha256(file), reviewedAt })),

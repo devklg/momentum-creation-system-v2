@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T10:06:09.635Z",
+  "generatedAt": "2026-07-12T10:11:36.236Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,16 +8,16 @@
   "summary": {
     "mounts": 46,
     "routeFiles": 46,
-    "routes": 212,
+    "routes": 213,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 2,
-      "pre_gate": 137,
+      "pre_gate": 138,
       "ba_facing_gated": 72
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
-      "admin": 88,
+      "admin": 89,
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
       "prospect_token": 18,
@@ -25,7 +25,7 @@
     },
     "byMethod": {
       "POST": 86,
-      "GET": 106,
+      "GET": 107,
       "PUT": 6,
       "PATCH": 8,
       "DELETE": 6
@@ -2581,6 +2581,32 @@
     },
     {
       "method": "GET",
+      "fullPath": "/api/admin/live-ops/operations",
+      "mountPath": "/api/admin/live-ops",
+      "localPath": "/operations",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/liveOps.ts:51",
+      "routeSource": "server/src/routes/admin/liveOps.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
       "fullPath": "/api/admin/live-ops/growth",
       "mountPath": "/api/admin/live-ops",
       "localPath": "/growth",
@@ -2591,7 +2617,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/liveOps.ts:82",
+      "source": "server/src/routes/admin/liveOps.ts:91",
       "routeSource": "server/src/routes/admin/liveOps.ts",
       "signals": {
         "requireAuth": false,
@@ -2617,7 +2643,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/liveOps.ts:123",
+      "source": "server/src/routes/admin/liveOps.ts:132",
       "routeSource": "server/src/routes/admin/liveOps.ts",
       "signals": {
         "requireAuth": false,
@@ -2643,7 +2669,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/liveOps.ts:164",
+      "source": "server/src/routes/admin/liveOps.ts:173",
       "routeSource": "server/src/routes/admin/liveOps.ts",
       "signals": {
         "requireAuth": false,
@@ -2669,7 +2695,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/liveOps.ts:241",
+      "source": "server/src/routes/admin/liveOps.ts:250",
       "routeSource": "server/src/routes/admin/liveOps.ts",
       "signals": {
         "requireAuth": false,

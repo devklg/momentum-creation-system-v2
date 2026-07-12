@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "freshnessBasis": "content_sha256_and_declared_review_date",
+  "freshnessBasis": "git_blob_envelope_sha256_and_declared_review_date",
   "authorityRule": "decision ledger > locked spec > design docs > generated mirrors > git log > agent registry > handoffs",
   "instructions": "Regenerate an artifact when any declared source hash changes. reviewedAt is freshness metadata. authorityStatus states how a document may be used.",
   "coreDocs": [
@@ -31,7 +31,7 @@
     {
       "file": "PLATFORM_AUDIT_PRIORITY_TASKLIST.md",
       "authorityStatus": "current_execution_queue",
-      "contentSha256": "af7a563f69cdd60e333f4cca5a695f7aa6a9557b0ea437ff29499a1699fdebc9",
+      "contentSha256": "1836116946a6e03c16db61a500de43def2a6e7fe45d3181222f456a14a2d9706",
       "reviewedAt": "2026-07-12"
     }
   ],
@@ -74,9 +74,9 @@
           "contentSha256": "3b6a3e873643ca862ab09de16d8b0db562741f27eb099a8edbf7e0c5e4d93cad"
         }
       ],
-      "contentSha256": "8e5e98ae2a3e7b38b8f79cd42f7ad44928e91ef40aa03051ad1ecc72639e66b1",
+      "contentSha256": "6323446a190b649b90c1ee18d4e28bf84f32488e9d78d33700f52b8d9527e638",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-12T10:06:09.635Z"
+      "generatedAt": "2026-07-12T10:11:36.236Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/route-access-matrix.json",
@@ -85,12 +85,12 @@
       "sources": [
         {
           "path": "engineering/sprints/platform-audit-p1/api-route-map.json",
-          "contentSha256": "8e5e98ae2a3e7b38b8f79cd42f7ad44928e91ef40aa03051ad1ecc72639e66b1"
+          "contentSha256": "6323446a190b649b90c1ee18d4e28bf84f32488e9d78d33700f52b8d9527e638"
         }
       ],
-      "contentSha256": "3f8f8d7829bb24b85b0204b2df458ccfcf2b5d5d447736f35fecc9bfb16c92af",
+      "contentSha256": "ea3034a4a6129aaea5567bdf9b0d55e20f79e411bffbbd211284e8ad850ce714",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-12T10:06:09.978Z"
+      "generatedAt": "2026-07-12T10:11:36.562Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/persistence-write-catalog.json",
@@ -99,7 +99,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "92f92ccc73c0847015234d47df4f28341e9616e6cec5811da246609f193d68bf"
+          "contentSha256": "b4ab7c681eaba7024b6cae359f3579c4e66a1a111c479c5735c7a274465b10d7"
         }
       ],
       "contentSha256": "989906a1996568122435d947148abe8bbdeea8756900195814cecfc8090d3c2a",
@@ -113,11 +113,11 @@
       "sources": [
         {
           "path": "packages/shared/src",
-          "contentSha256": "26b9bf8bb3a53fa4adb51c87ec2b8c7a399e77de7192bce34fd16a10b3836908"
+          "contentSha256": "3bfb6936f4def7fdf604a114cb8a83ce2b5d4f81462b5f16a80499696ec20f1a"
         },
         {
           "path": "server/src",
-          "contentSha256": "92f92ccc73c0847015234d47df4f28341e9616e6cec5811da246609f193d68bf"
+          "contentSha256": "b4ab7c681eaba7024b6cae359f3579c4e66a1a111c479c5735c7a274465b10d7"
         }
       ],
       "contentSha256": "222a34f2c8424e175696d13a9b850367af494da6b38e26ce513c3461741110f5",
@@ -131,7 +131,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "92f92ccc73c0847015234d47df4f28341e9616e6cec5811da246609f193d68bf"
+          "contentSha256": "b4ab7c681eaba7024b6cae359f3579c4e66a1a111c479c5735c7a274465b10d7"
         }
       ],
       "contentSha256": "1ad9c82de28cd601d4779a985ed16805757ebfe20fdcd7c5c75dc619ad3e1c5a",
@@ -145,7 +145,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "92f92ccc73c0847015234d47df4f28341e9616e6cec5811da246609f193d68bf"
+          "contentSha256": "b4ab7c681eaba7024b6cae359f3579c4e66a1a111c479c5735c7a274465b10d7"
         }
       ],
       "contentSha256": "a436fc90dc485770d421b66eb248d313f9dc939a9ce3bb9c98b0e5f9a71b9418",
@@ -159,7 +159,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "92f92ccc73c0847015234d47df4f28341e9616e6cec5811da246609f193d68bf"
+          "contentSha256": "b4ab7c681eaba7024b6cae359f3579c4e66a1a111c479c5735c7a274465b10d7"
         }
       ],
       "contentSha256": "395657fad532a136e4c701e26f4332989aaf1028a060bedf67af7490e06bf8e8",
@@ -173,7 +173,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "92f92ccc73c0847015234d47df4f28341e9616e6cec5811da246609f193d68bf"
+          "contentSha256": "b4ab7c681eaba7024b6cae359f3579c4e66a1a111c479c5735c7a274465b10d7"
         }
       ],
       "contentSha256": "e4fb6a9c1135faf791efe799a6f6b2eecf75c5c295ec33d3a1d2e9e78f544ce2",

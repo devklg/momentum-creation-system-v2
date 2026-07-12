@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T10:06:09.978Z",
+  "generatedAt": "2026-07-12T10:11:36.562Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -21,10 +21,10 @@
     "/api/training/fast-start/modules/1"
   ],
   "summary": {
-    "routes": 212,
+    "routes": 213,
     "byAccessClass": {
       "raw_body_webhook": 1,
-      "admin": 91,
+      "admin": 92,
       "public_health": 2,
       "auth_bootstrap": 3,
       "auth_session": 2,
@@ -40,7 +40,7 @@
     },
     "guardCoverage": {
       "requireAuth": 87,
-      "requireAdmin": 91,
+      "requireAdmin": 92,
       "requireAdminOrHealthSecret": 1,
       "requireRuntimeInternal": 5,
       "requireSteveComplete": 72,
@@ -3501,10 +3501,52 @@
       "findings": []
     },
     {
+      "id": "GET /api/admin/live-ops/operations",
+      "method": "GET",
+      "fullPath": "/api/admin/live-ops/operations",
+      "routeSource": "server/src/routes/admin/liveOps.ts:51",
+      "mountPath": "/api/admin/live-ops",
+      "mountPhase": "pre_gate",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
       "id": "GET /api/admin/live-ops/growth",
       "method": "GET",
       "fullPath": "/api/admin/live-ops/growth",
-      "routeSource": "server/src/routes/admin/liveOps.ts:82",
+      "routeSource": "server/src/routes/admin/liveOps.ts:91",
       "mountPath": "/api/admin/live-ops",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -3546,7 +3588,7 @@
       "id": "GET /api/admin/live-ops/grid",
       "method": "GET",
       "fullPath": "/api/admin/live-ops/grid",
-      "routeSource": "server/src/routes/admin/liveOps.ts:123",
+      "routeSource": "server/src/routes/admin/liveOps.ts:132",
       "mountPath": "/api/admin/live-ops",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -3588,7 +3630,7 @@
       "id": "GET /api/admin/live-ops/funnel",
       "method": "GET",
       "fullPath": "/api/admin/live-ops/funnel",
-      "routeSource": "server/src/routes/admin/liveOps.ts:164",
+      "routeSource": "server/src/routes/admin/liveOps.ts:173",
       "mountPath": "/api/admin/live-ops",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -3630,7 +3672,7 @@
       "id": "GET /api/admin/live-ops/usage/stream",
       "method": "GET",
       "fullPath": "/api/admin/live-ops/usage/stream",
-      "routeSource": "server/src/routes/admin/liveOps.ts:241",
+      "routeSource": "server/src/routes/admin/liveOps.ts:250",
       "mountPath": "/api/admin/live-ops",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",

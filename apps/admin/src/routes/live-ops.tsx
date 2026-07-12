@@ -13,9 +13,8 @@
  * H.2 / H.3 / H.4; H.1 is operationally team-wide (cannot be sliced by BA
  * — it's machine telemetry, not business state).
  *
- * Mock mode: while H-server has not landed, `USE_MOCKS = true` short-circuits
- * the SSE hook and feeds each panel from the mocks module. Flip the constant
- * to false when the H-server endpoints are live; no other line changes.
+ * The H-server endpoints are live. Mocks remain importable for isolated visual
+ * development, but production reads the real admin APIs.
  */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -26,6 +25,7 @@ import type {
   McsAdminFunnelResponse,
   McsAdminGrowthCardsResponse,
   McsAdminLiveGridResponse,
+  McsAdminOperationsDashboardResponse,
 } from '@momentum/shared';
 import { MCS_ADMIN_LIVE_OPS_PATHS } from '@momentum/shared';
 import { FilterBar } from '@/components/dashboard/FilterBar';
@@ -42,11 +42,9 @@ import {
 } from '@/components/admin/live-ops/mocks';
 
 /**
- * Swap to false when H-server (brief brief-h-server.md) ships. Nothing
- * else needs to change — every panel reads from the same @momentum/shared
- * contract types in both modes.
+ * Keep false in production. The mock path is retained only for isolated UI work.
  */
-const USE_MOCKS = true;
+const USE_MOCKS = false;
 
 const POLL_INTERVAL_MS = 30_000;
 const DEFAULT_FILTER: McsAdminDashboardFilter = { tmagId: null, leaderGroup: 'all' };
@@ -63,8 +61,22 @@ export function LiveOpsPage() {
   const [funnelKind, setFunnelKind] = useState<McsAdminFunnelKind>('prospect');
   const [funnel, setFunnel] = useState<McsAdminFunnelResponse | null>(null);
   const [funnelLoading, setFunnelLoading] = useState<boolean>(false);
+  const [operations, setOperations] = useState<McsAdminOperationsDashboardResponse | null>(null);
 
   const stream = useUsageStream({ enabled: !USE_MOCKS });
+
+  const loadOperations = useCallback(async () => {
+    try {
+      const res = await fetch(MCS_ADMIN_LIVE_OPS_PATHS.operations, { credentials: 'include' });
+      const data = (await res.json()) as McsAdminOperationsDashboardResponse & { error?: string };
+      if (!res.ok || !data.ok) { setErr(data.error ?? 'Operations health unavailable.'); return; }
+      setOperations(data);
+    } catch (e) {
+      setErr(e instanceof Error ? `Operations fetch failed: ${e.message}` : 'Operations fetch failed.');
+    }
+  }, []);
+
+  useEffect(() => { void loadOperations(); }, [loadOperations]);
 
   // Filter dropdown options — load once. Same endpoint as /dashboard.
   useEffect(() => {
@@ -194,9 +206,10 @@ export function LiveOpsPage() {
       void loadGrowth(filter);
       void loadGrid(filter);
       void loadFunnel(funnelKind, filter);
+      void loadOperations();
     }, POLL_INTERVAL_MS);
     return () => clearInterval(t);
-  }, [filter, funnelKind, loadGrowth, loadGrid, loadFunnel]);
+  }, [filter, funnelKind, loadGrowth, loadGrid, loadFunnel, loadOperations]);
 
   const sampleForStrip = stream.sample ?? (USE_MOCKS ? mockUsageSample() : null);
 
@@ -228,6 +241,8 @@ export function LiveOpsPage() {
         lastHeartbeatAt={stream.lastHeartbeatAt}
       />
 
+      {operations && <OperationsHealth data={operations} />}
+
       <FilterBar filter={filter} options={options} onChange={setFilter} />
 
       <GrowthCards data={growth} loading={growthLoading} />
@@ -241,6 +256,36 @@ export function LiveOpsPage() {
         loading={funnelLoading}
       />
     </div>
+  );
+}
+
+function OperationsHealth({ data }: { data: McsAdminOperationsDashboardResponse }) {
+  const cards = [
+    ['Persistence', data.persistence.status, data.persistence.detail],
+    ['Delivery', data.delivery.status, `${data.delivery.delivered24h} delivered · ${data.delivery.failed24h} failed / 24h`],
+    ['Projections', data.projections.deadLettered > 0 ? 'warning' : 'healthy', `${data.projections.pending} pending · ${data.projections.due} due · ${data.projections.deadLettered} dead`],
+    ['Knowledge', data.knowledge.status, `${data.knowledge.sources} sources · ${data.knowledge.chunks} chunks · ${data.knowledge.pendingProjections} projections`],
+  ];
+  return (
+    <section className="border border-line bg-cream/[0.025] p-5 mb-6">
+      <h2 className="font-mono text-[11px] tracking-label uppercase text-gold mb-4">Operational Readiness</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
+        {cards.map(([label, status, detail]) => (
+          <div key={label} className="border border-line p-3">
+            <div className="flex justify-between gap-2"><p className="font-display text-[22px]">{label}</p><span className="font-mono text-[9px] uppercase text-gold">{status}</span></div>
+            <p className="text-xs text-cream-mute mt-2">{detail}</p>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+        {data.workers.map((row) => (
+          <div key={row.key} className="border border-line/70 px-3 py-2">
+            <p className="text-xs text-cream">{row.label}</p><p className="font-mono text-[9px] uppercase text-cream-faint">{row.status}</p>
+          </div>
+        ))}
+      </div>
+      {data.warnings.length > 0 && <p className="text-xs text-red-300 mt-3">{data.warnings.join(' · ')}</p>}
+    </section>
   );
 }
 

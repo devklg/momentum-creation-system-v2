@@ -4,15 +4,15 @@
 
 ## Summary
 
-- Generated: 2026-07-12T10:06:09.978Z
-- Routes: 212
+- Generated: 2026-07-12T10:11:36.562Z
+- Routes: 213
 - Findings: 0
 
 ## Routes By Access Category
 
 | Access category | Routes |
 | --- | ---: |
-| admin | 91 |
+| admin | 92 |
 | admin_or_health_secret | 1 |
 | auth_bootstrap | 3 |
 | auth_session | 2 |
@@ -34,7 +34,7 @@
 | customSecretGuard | 10 |
 | rateLimited | 3 |
 | rawBodyParser | 1 |
-| requireAdmin | 91 |
+| requireAdmin | 92 |
 | requireAdminOrHealthSecret | 1 |
 | requireAuth | 87 |
 | requireRuntimeInternal | 5 |
@@ -146,10 +146,11 @@
 | GET | `/api/admin/reporting/enrollment-completion/export` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/reporting.ts:582` |
 | GET | `/api/admin/reporting/follow-up-aging/export` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/reporting.ts:609` |
 | GET | `/api/admin/reporting/leader-scorecards/export` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/reporting.ts:636` |
-| GET | `/api/admin/live-ops/growth` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/liveOps.ts:82` |
-| GET | `/api/admin/live-ops/grid` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/liveOps.ts:123` |
-| GET | `/api/admin/live-ops/funnel` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/liveOps.ts:164` |
-| GET | `/api/admin/live-ops/usage/stream` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/liveOps.ts:241` |
+| GET | `/api/admin/live-ops/operations` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/liveOps.ts:51` |
+| GET | `/api/admin/live-ops/growth` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/liveOps.ts:91` |
+| GET | `/api/admin/live-ops/grid` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/liveOps.ts:132` |
+| GET | `/api/admin/live-ops/funnel` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/liveOps.ts:173` |
+| GET | `/api/admin/live-ops/usage/stream` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/liveOps.ts:250` |
 | GET | `/api/admin/tenant/overview` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/tenant.ts:77` |
 | PATCH | `/api/admin/tenant/settings` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/tenant.ts:102` |
 | POST | `/api/admin/tenant/templates/validate` | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/tenant.ts:145` |

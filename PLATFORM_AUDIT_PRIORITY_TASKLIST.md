@@ -98,7 +98,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 68. **Docs:** Add stale-document detection to CI or the agent workflow.
 - [x] 69. **Persistence:** Generate and maintain a persistence write catalog as part of CI.
 - [x] 70. **Operations:** Expose outbox worker status and retry metrics.
-- [ ] 71. **Operations:** Create an operational dashboard for workers, persistence, delivery, projections, and knowledge readiness.
+- [x] 71. **Operations:** Create an operational dashboard for workers, persistence, delivery, projections, and knowledge readiness.
 - [ ] 72. **Operations:** Add structured correlation ids for token, invitation, CRM, and VM/RVM flows.
 - [ ] 73. **Security:** Create a permissions matrix by route, role, entitlement, and gate.
 - [ ] 74. **Entitlements:** Create an entitlement admin audit view.
