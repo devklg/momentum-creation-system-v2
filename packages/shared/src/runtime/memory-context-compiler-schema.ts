@@ -212,3 +212,132 @@ export interface McsMemoryContextComparisonReport {
   recommendedContextQuery: string;
   warnings: readonly string[];
 }
+
+// ---------------------------------------------------------------------------
+// ACR-0013 appendix — context retrieval standard (guard + ladder).
+// APPEND-ONLY EXTENSION of memory_context_compiler.schema.v1 (CDX-001).
+// Nothing above this line may be edited; these types finish the schema, they
+// do not replace it (ACR-0013 header). Graph questions, graph verbs, and
+// store functions defined above remain the vocabulary for expansion.
+// ---------------------------------------------------------------------------
+
+/** Who originally stated a remembered claim. An agent's prior suggestion is
+ * NOT Kevin's decision, even if he reacted well to it (ACR-0013 §4.4). */
+export type McsMemoryStatedBy = 'kevin' | 'agent' | 'unknown';
+
+/** Which physical stack a store lives on. Both host a `momentum` database;
+ * naming the stack is mandatory before any verifying operation (ACR-0012 §2.2). */
+export type McsMemoryStackName = 'memory' | 'app';
+
+/** The stores an index must cover — an index of one is a fragment (ACR-0013 §3). */
+export type McsMemoryStoreKey =
+  | 'memory_index'
+  | 'memory_decisions'
+  | 'kevin_milestone_chats'
+  | 'session_handoffs'
+  | 'chat_registry'
+  | 'governance_decisions'
+  | 'claude_learning_notes'
+  | 'kevin_library'
+  | 'mcs_memory_context_index';
+
+/** Provenance carried on every retrieval claim (ACR-0013 §4.4). */
+export interface McsMemoryProvenance {
+  stack: McsMemoryStackName;
+  storeKey: McsMemoryStoreKey;
+  /** e.g. `universal_gateway.memory_index` */
+  storePath: string;
+  recordId: string;
+  date: string | null;
+  statedBy: McsMemoryStatedBy;
+}
+
+/** A single guard/retrieval hit, with the instructions that travel with it. */
+export interface McsContextGuardHit {
+  provenance: McsMemoryProvenance;
+  title: string;
+  summary: string;
+  /** 0–10 human-assigned meaning gradient, when the record carries one. */
+  weight?: number;
+  /** Chroma distance when the hit came from semantic search. */
+  distance?: number;
+  matchKind: 'exact_handle' | 'exact_alias' | 'use_when' | 'lexical' | 'semantic';
+  useWhen?: string;
+  nextAgentInstruction?: string;
+  superseded: boolean;
+  supersededBy?: string;
+}
+
+/** checkExisting() output — retrieval before invention (ACR-0014 §3.1). */
+export interface McsContextGuardReport {
+  schemaVersion: McsMemoryContextCompilerSchemaVersion;
+  topic: string;
+  checkedAt: string;
+  /** Every store searched, whether or not it hit. Absence discipline: "I don't
+   * have that" is sayable only when this covers all stores (ACR-0013 §4.6). */
+  storesSearched: readonly string[];
+  storesUnreachable: readonly string[];
+  hits: readonly McsContextGuardHit[];
+  /** true only when every store was reachable AND no hit was found. */
+  verifiedAbsent: boolean;
+}
+
+/** The rung of the retrieval ladder that produced a packet (ACR-0013 §4). */
+export type McsRetrievalLadderRung = 'invocation' | 'compiled' | 'semantic_fallback';
+
+/** An implementation brief pointer, in the stated order (never re-ranked). */
+export interface McsContextPacketBrief {
+  key: string;
+  path: string;
+  role: string;
+  action: string;
+}
+
+/** compileContextPacket() output. Server compiles; runtime agents never query
+ * stores directly (ACR-0013 §6). Token-budgeted and ranked internally. */
+export interface McsContextPacket {
+  schemaVersion: McsMemoryContextCompilerSchemaVersion;
+  query: string;
+  ladderRung: McsRetrievalLadderRung;
+  compiledAt: string;
+  /** The deterministic handle match, when rung = invocation. */
+  invokedHandle?: {
+    recordId: string;
+    humanHandle: string;
+    matchedPhrase: string;
+    weight?: number;
+  };
+  canonicalRecord?: McsContextGuardHit;
+  /** Neo4j expansion along requires_context/grounds/supports/hands_off_to/supersedes. */
+  graphExpansion: readonly McsMemoryContextGraphEdge[];
+  /** Capped semantic neighbours. */
+  semanticNeighbours: readonly McsContextGuardHit[];
+  implementationBriefs: readonly McsContextPacketBrief[];
+  /** Superseded records surfaced AS superseded, never silently (ACR-0013 §4.5). */
+  supersededRecords: readonly McsContextGuardHit[];
+  tokenBudget: { maxChars: number; usedChars: number; truncated: boolean };
+  warnings: readonly string[];
+}
+
+/** Context-agent candidate kinds (ACR-0014 §3.2). */
+export type McsLearningCandidateKind =
+  | 'decision'
+  | 'correction'
+  | 'reversal'
+  | 'open_question'
+  | 'front_of_line';
+
+/** A parsed candidate. Evidence or it didn't happen: Kevin's actual words. */
+export interface McsLearningCandidate {
+  candidateId: string;
+  kind: McsLearningCandidateKind;
+  proposedSummary: string;
+  /** Kevin's exact words, verbatim. */
+  evidenceQuote: string;
+  /** Turn reference within the session transcript. */
+  evidenceTurn: number;
+  statedBy: McsMemoryStatedBy;
+  sessionRef: string;
+  /** Always `proposed` at parse time — the agent never self-confirms. */
+  status: 'proposed';
+}

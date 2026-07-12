@@ -152,7 +152,17 @@ Do not load these in full unless you're auditing a decision from that chat. For 
 - **Four severities, lowercase, exactly:** `critical` (breaks production / corrupts data / loses money — target <10% of corpus), `high` (costs real rework or repeats a paid-for mistake), `medium` (useful, saves time), `low` (incidental). Severity grades the consequence of being wrong, not enthusiasm at the time of writing.
 - **Anchors: only Kevin names them.** Agents never self-declare `anchor_phrase`/`priority_anchor`. When Kevin names one, the phrase opens the Chroma document and the write must retrieval-test it (top hit, visible distance separation).
 - **Write protocol:** Mongo → Chroma → Neo4j, then **read back all three** — never report a write landed without reading it back. Chroma `add()` does NOT overwrite an existing id; updates are delete-then-add. Use the helper — `writeAgentNote()` / `writeAnchor()` in `server/src/lib/agentMemory.ts` enforce all of this; do not hand-roll memory writes.
-- **The index is regenerable:** `pnpm memory:index` rebuilds `docs/agent-memory-index.html` (the library of context) and `docs/agent-memory-drift-report.md`, read-only. The 606 legacy notes stay untouched until a separately ratified migration (§4).
+- **The index is regenerable:** `pnpm memory:index` rebuilds `docs/memory-index.html` (the library of context — ALL memory stores, Kevin's handles first) and `docs/memory-drift-report.md`, read-only. The 606 legacy notes stay untouched until a separately ratified migration (§4).
+
+**Context retrieval — ACR-0013 (RATIFIED 2026-07-11).** Full spec: `docs/governance/ACR-0013-context-retrieval-standard.md`. The short version:
+
+- **The guard fires before invention.** Before proposing new work on a topic, run `pnpm memory:guard "<topic>"` (`checkExisting()` in `server/src/lib/contextGuard.ts`). It searches EVERY store in ACR-0013 §3 — handles/aliases, context index, milestones, session handoffs, decisions, learning notes, kevin_library — and returns hits with provenance: store, record id, date, and **who stated it (Kevin or an agent)**, plus any `useWhen`/`nextAgentInstruction`. This is the function that would have prevented 2026-07-11's anchor rediscovery.
+- **The ladder, in order:** (1) exact `call_phrase`/alias invocation — deterministic, no semantic guessing; (2) compile the packet — canonical Mongo record + Neo4j expansion (`requires_context`, `grounds`, `supports`, `hands_off_to`, `supersedes`) + capped Chroma neighbours + `implementationBriefs` in stated order (`pnpm memory:packet "<phrase>"`); (3) semantic fallback — union across ALL stores ranked weight × recency × distance, never one collection.
+- **Absence discipline:** "I don't have that" is sayable only after all stores were searched AND reachable. A miss in one store — or on the wrong stack — is not evidence of absence.
+- **Supersession:** prefer current records; surface superseded ones AS superseded, never silently.
+- **A handle that does not retrieve is a broken handle.** Every `call_phrase`/alias in `server/src/lib/handleManifest.ts` is retrieval-tested (top hit + visible distance separation) by the vitest regression suite and `pnpm memory:verify`. A failing handle fails the build.
+
+**The Context Agent — ACR-0014 (RATIFIED 2026-07-11).** Full spec: `docs/governance/ACR-0014-context-agent.md`. Guard → parse → propose → confirm → close, in `server/src/lib/contextAgent.ts`. The agent PROPOSES to `momentum.mcs_learning_candidates` (app stack) with Kevin's exact words as evidence; **Kevin confirms, weights (0–10), and names handles** — only then does anything go through the ACR-0012 envelope (`writeAgentNote()` for corrections, `writeHandle()` for Kevin-named handles). Close writes the handoff per `docs/handoff-contract.md` with agreeing `_id`/`chat_number`/`chat_registry_id` and a `front_of_line`. Silence is a valid output.
 
 **Critical gotchas (learned the hard way):**
 - `mongodb.insert` wants `documents:` (plural array), not `document:`
@@ -176,4 +186,4 @@ Do not load these in full unless you're auditing a decision from that chat. For 
 
 ---
 
-*Last updated: 2026-07-11 (ACR-0012 agent-memory section; previously 2026-05-21, Chat #112). Update this file when a Layer 1 rule changes, a Layer 2 architectural fact shifts, or a Layer 3 pointer becomes stale. Do not let this file grow past ~500 lines. If it does, the discipline has failed.*
+*Last updated: 2026-07-11 (ACR-0012/0013/0014 agent-memory, retrieval, and context-agent sections; previously 2026-05-21, Chat #112). Update this file when a Layer 1 rule changes, a Layer 2 architectural fact shifts, or a Layer 3 pointer becomes stale. Do not let this file grow past ~500 lines. If it does, the discipline has failed.*
