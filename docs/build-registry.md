@@ -1,280 +1,194 @@
-# Build Registry — Team Magnificent Momentum Creation System v1
+# Build Registry — Team Magnificent Momentum Creation System v2
 
-> P0 status note (2026-07-11): this registry is retained as a historical artifact index, but it is not the current build-completion authority. Use `momentum.decisions`, `docs/locked-spec.md`, `docs/project-wireframe.md`, `PLATFORM_AUDIT_PRIORITY_TASKLIST.md`, and `engineering/sprints/platform-audit-p0/P0_RELEASE_TRACKER.md` for current platform-audit work. Some rows below still reference older `v1` paths and stale chat-era statuses.
+> GENERATED FILE. Source state comes from `docs/project-wireframe.md`; repository paths in wireframe leaves are checked against the working tree. Run `pnpm registry:build` after changing the wireframe and `pnpm registry:build:check` to detect drift.
 
-**Purpose.** A single index of every artifact that has been produced for the Momentum Creation System v1 build, where it lives, what state it's in, which chat locked it, and what (if anything) it supersedes. Read this BEFORE asking "is X done?" — the answer is here.
+## Authority and interpretation
 
-**Source hierarchy** (when this file conflicts with another, the higher source wins):
-1. `docs/locked-spec.md` — authoritative spec
-2. `momentum.decisions` decision ledger in MongoDB (replaces KEVIN-CONTEXT.md as of #129)
-3. `docs/project-wireframe.md` — build decomposition + per-leaf status (#129)
-4. This file (`docs/build-registry.md`) — artifact index
-5. Git log on `github.com/devklg/momentum-creation-system-v1`
-6. Agent chat registry (artifact lookup, not app identity authority)
-7. Handoffs (artifact lookup, not app identity authority)
+Decision ledger (currency) > `docs/locked-spec.md` (state) > design docs > this generated registry > git log > agent chat registry > handoffs. A `done` status is inherited from the wireframe. “Path verified” means at least one repository path named by that leaf exists; it does not independently prove runtime behavior.
 
-**How to read the status column:**
-- `drafted` — exists as a prototype or working copy, not yet reviewed by Kevin
-- `reviewed` — Kevin has seen it, may have markup pending
-- `approved` — Kevin has signed off on the content; safe to wire into production
-- `wired` — code in the v1 repo references or implements it
-- `live` — pushed to GitHub on `main`, present in the working app
-- `superseded` — replaced by a later artifact (named in the Supersedes column)
-- `pending` — known to be needed, not yet started
+## Current summary
 
-**How to update this file.** When an artifact is produced, ships, or supersedes another, add or update its row. Keep one row per artifact, not per chat. The Chat Locked column points to the chat that finalized its current state.
+- Total build leaves: 154
+- Done: 152
+- Partial: 1
+- Pending: 1
+- Leaves with explicit verified repository-path evidence: 30
+- Stale explicit repository references: 2
 
----
+| Surface | Done | Partial | Pending | Total |
+|---|---:|---:|---:|---:|
+| foundation | 8 | 0 | 0 | 8 |
+| auth | 3 | 0 | 0 | 3 |
+| com | 23 | 1 | 0 | 24 |
+| team | 111 | 0 | 1 | 112 |
+| hygiene | 7 | 0 | 0 | 7 |
 
-## 1. Design documents (the four-doc design set + spec)
+## Leaf registry
 
-| Artifact | Where it lives | Status | Chat Locked | Supersedes | Notes |
-|---|---|---|---|---|---|
-| `locked-spec.md` (v2, 463 lines, six-part structure) | `D:/momentum-creation-system-v1/docs/locked-spec.md` | live | #94 | locked-spec.md v1 (157 lines) | Operating frame as Part 1. Authoritative source-of-truth. Read first, every session. |
-| `Team-Magnificent-App-Description.docx` | `D:/momentum-creation-system-v1/docs/` | reviewed | #85 | — | Readback of the app in Kevin's words. Contains drift item: Section 3 names Dr. Dan as "THREE International's Chief Scientific Officer" — violates locked-spec 3.8 brand isolation, correct on port. |
-| `Team-Magnificent-Signup-Architecture.docx` | `D:/momentum-creation-system-v1/docs/` | approved | #94 (E.1 closed) | — | 10-step server sequence on `/register`. Access code format closed in #94 (TM-XXXX 4-char, 31-char alphabet). 5 open questions remaining in Section E. |
-| `Team-Magnificent-COM-Design.docx` | `D:/momentum-creation-system-v1/docs/` | approved | #88 (H.1 closed) | — | Prospect-facing surface. Brand isolation 3.8 locked. 9 open questions; H.1 resolved 2026-05-17 (page is never anonymous). |
-| `Team-Magnificent-TEAM-Design.docx` | `D:/momentum-creation-system-v1/docs/` | approved | #86 (J.3 closed in #94) | — | BA-facing surface. Welcome click-acknowledge locked in #94. 12 open questions, J.3 resolved. |
-| `Team-Magnificent-ADMIN-Design.docx` | `D:/momentum-creation-system-v1/docs/` (Kevin downloaded from chat UI) | approved | #89 | — | Kevin-only surface. 9 sections. Compliance review removed; enforcement lives at script-time + render-time. 10 open questions in J.5. |
-| `Team-Magnificent-App-Style-Guide.html` | `D:/momentum-creation-system-v1/docs/` | approved | #82 token block | — | Canonical brand tokens, fonts, atmospheric treatment. Reused verbatim across all prototypes. |
+| # | Surface | Section | Status | Build leaf | Code evidence |
+|---:|---|---|---|---|---|
+| 1 | foundation | 0 Â· FOUNDATION (infra + shared) | done | Monorepo scaffold â€” apps/com, apps/team, apps/admin, server, packages/shared (#92) | wireframe status; no explicit path |
+| 2 | foundation | 0 Â· FOUNDATION (infra + shared) | done | Triple-stack persistence: MongoDB + Neo4j + ChromaDB — services/tripleStack.ts, persistence/dispatch.ts (#93). NOTE (2026-07-02): runtime persistence is direct store access per locked-spec §3.14; the old HTTP persistence path is retired. | `server/src/services/tripleStack.ts`, `server/src/services/persistence/dispatch.ts` |
+| 3 | foundation | 0 Â· FOUNDATION (infra + shared) | done | Shared package â€” brand.ts, compliance.ts, rules.ts, types.ts (#92,#110) | `packages/shared/src/brand.ts`, `packages/shared/src/compliance.ts`, `packages/shared/src/rules.ts`, `packages/shared/src/runtime/knowledge-evolution/types.ts` |
+| 4 | foundation | 0 Â· FOUNDATION (infra + shared) | done | Decision ledger + master work queue + this wireframe (#129) | wireframe status; no explicit path |
+| 5 | foundation | 0 Â· FOUNDATION (infra + shared) | done | LLM layer (direct Anthropic Messages API, NOT through external tooling, #118) â€” services/anthropic.ts; ScriptMaker + Ivory consume it. VERIFIED LIVE #145: ANTHROPIC_API_KEY landed in root .env, server restarted, Ivory Coach returned input-specific questions (typed "i went to oru" produced 7 ORU-specific prompts, impossible from the evergreen fallback). Key live, complete() reaching the API end to end. | `server/src/services/anthropic.ts` |
+| 6 | foundation | 0 Â· FOUNDATION (infra + shared) | done | ↳ anthropic.ts transport + dormant-aware fallback (default claude-haiku-4-5-20251001; prompt-caching on stable prefix) | `server/src/services/anthropic.ts` |
+| 7 | foundation | 0 Â· FOUNDATION (infra + shared) | done | ↳ Ivory coaching consumer (#131/#132 â€” coach surfaces WDYK prompts; evergreen fallback when key unset; VERIFIED firing real LLM #145) | wireframe status; no explicit path |
+| 8 | foundation | 0 Â· FOUNDATION (infra + shared) | done | ↳ Michael Training Agent + Daily Success Coach artifact consumer (#134/#147 reconciled 2026-06-24 — server/src/domain/michaelScoring.ts, triple-stacked, sponsor-stamped, no classification) | wireframe status; no explicit path |
+| 9 | auth | 1 Â· AUTH / SIGNUP (all built) | done | Access codes TM-XXXX â€” gen + validate, sponsor-immutable, admin-issued (#94) | wireframe status; no explicit path |
+| 10 | auth | 1 Â· AUTH / SIGNUP (all built) | done | BA registration â€” 10-step sequence, argon2, JWT, timezone, Michael gate (#92,#98) | wireframe status; no explicit path |
+| 11 | auth | 1 Â· AUTH / SIGNUP (all built) | done | BA login (.team) + admin login (e1a2d7f) | wireframe status; no explicit path |
+| 12 | com | 2.1 Token resolver + lifecycle  `[x]` (#104,#110,#111) | done | Mint + GET /api/p/:token | wireframe status; no explicit path |
+| 13 | com | 2.1 Token resolver + lifecycle  `[x]` (#104,#110,#111) | done | 200 presentation/dashboard by state; 404 invalid; 409 enrolled; 410 expired (lazy-flush); 500 soft-degrade | wireframe status; no explicit path |
+| 14 | com | 2.1 Token resolver + lifecycle  `[x]` (#104,#110,#111) | done | Sponsor immutability enforced at route layer every branch | wireframe status; no explicit path |
+| 15 | com | 2.2 tm-video-presentation â€” 11 sections  `[x]` (#107,#108,#109,#117) | done | 00 TickerStrip Â· 01 PersonalOpen Â· 02 Invitation (copy approved #117) | wireframe status; no explicit path |
+| 16 | com | 2.2 tm-video-presentation â€” 11 sections  `[x]` (#107,#108,#109,#117) | done | 03 DrDanVideo (YT IFrame state machine, fires video-event milestones) | wireframe status; no explicit path |
+| 17 | com | 2.2 tm-video-presentation â€” 11 sections  `[x]` (#107,#108,#109,#117) | done | 04 Market Â· 05 PharmaceuticalSolution Â· 06 NaturalPath Â· 07 Dossier | wireframe status; no explicit path |
+| 18 | com | 2.2 tm-video-presentation â€” 11 sections  `[x]` (#107,#108,#109,#117) | done | 08 KevinStory (luxury-favorite.jpeg full-bleed) Â· 09 Timing Â· 10 WhatsNext (presentationâ†’dashboard bridge closer, #126 â€” REPLACED QuietDoor callback section; callback now lives on dashboard Â§6) Â· 11 Footer | wireframe status; no explicit path |
+| 19 | com | 2.2 tm-video-presentation â€” 11 sections  `[x]` (#107,#108,#109,#117) | done | OG-injection middleware (token-resolved card) | wireframe status; no explicit path |
+| 20 | com | 2.2 tm-video-presentation â€” 11 sections  `[x]` (#107,#108,#109,#117) | done | CONTENT: drop dossier PDF -> flip DOSSIER_AVAILABLE flag in 07-Dossier.tsx (done #115; PDF at `apps/com/public/assets/glp-three-dossier.pdf`) | stale ref: `apps/com/public/assets/glp-three-dossier.pdf` |
+| 21 | com | 2.2 tm-video-presentation â€” 11 sections  `[x]` (#107,#108,#109,#117) | done | HYGIENE #147: removed orphaned `10-QuietDoor.tsx` (replaced by 10-WhatsNext #126, never imported by the composer; em-dash content fix is moot with the file gone) | wireframe status; no explicit path |
+| 22 | com | 2.3 Holding-tank placement  `[x]` (#105) | done | Silent placement at video_complete, monotonic position, triple-stack write | wireframe status; no explicit path |
+| 23 | com | 2.3 Holding-tank placement  `[x]` (#105) | done | 8-week expiry flush — holdingTank.ts flushExpiredPlacements() manual sweep + listProspectsAgedBeyond(8) alert (#140; clock anchored to placedAt, NOT mint expiresAt; flushes past-window placements to flushReason:'expired', vacates slot WITHOUT reshuffle). VERIFIED LIVE #142: seeded a 9-week-aged placement across Mongo+Neo4j, ran the real fn, read back all legs — flushedAt+reason stamped, position preserved, counter never decremented, idempotent on re-run. No scheduler — Kevin-run. | `server/src/domain/holdingTank.ts` |
+| 24 | com | 2.4 tm-prospect-dashboard â€” 6 sections  `[x]` (#113,#114) | done | Ribbon Â· 01 Arrival Â· 02 Opportunity Â· 03 Mechanic | wireframe status; no explicit path |
+| 25 | com | 2.4 tm-prospect-dashboard â€” 6 sections  `[x]` (#113,#114) | done | 04 LivePlace (behind-you SSE counter + vertical ticker; #84 behind-only correction) | wireframe status; no explicit path |
+| 26 | com | 2.4 tm-prospect-dashboard â€” 6 sections  `[x]` (#113,#114) | done | 05 TmAdvantage Â· 06 YourNextMove Â· 07 Footer (TM-only, 3.10 disclaimer) | wireframe status; no explicit path |
+| 27 | com | 2.4 tm-prospect-dashboard â€” 6 sections  `[x]` (#113,#114) | done | SSE: poolEvents.ts EventEmitter + usePlacementStream hook (snapshot+placement+30s heartbeat) | `server/src/services/poolEvents.ts` |
+| 28 | com | 2.4 tm-prospect-dashboard â€” 6 sections  `[x]` (#113,#114) | done | CONTENT: remove stray 'leg' wording on position card (01-Arrival.tsx h3 + comment: "Held in {ba}'s leg" â†’ "Held by {ba}", content/hygiene pass) | wireframe status; no explicit path |
+| 29 | com | 2.5 Callback request  `[x]` (#109,#117) | done | Two-radio + reach-out button + confirmation; Telnyx BA SMS alert | wireframe status; no explicit path |
+| 30 | com | 2.6 Webinar  `[~]` (#116) | done | Event entity + cadence generator (Mon/Thu 5pm PT, DST-correct) + reservation + seeded 16 events | wireframe status; no explicit path |
+| 31 | com | 2.6 Webinar  `[~]` (#116) | done | BA SMS notification on reserve (live fallback) | wireframe status; no explicit path |
+| 32 | com | 2.6 Webinar  `[~]` (#116) | partial | Prospect confirmation EMAIL â€” wired via Resend, DORMANT pending teammagnificent.com domain verification | wireframe status; no explicit path |
+| 33 | com | 2.7 Prospect re-entry  `[x]` (#126, #131) | done | Layer 1: completion-interrupt fix + presentation<->dashboard nav (#126) | wireframe status; no explicit path |
+| 34 | com | 2.7 Prospect re-entry  `[x]` (#126, #131) | done | Layer 2: temporary prospect account (auto-create at video_complete, expire at 8wk flush) (#131) | wireframe status; no explicit path |
+| 35 | com | 2.7 Prospect re-entry  `[x]` (#126, #131) | done | Layer 3: prospect login surface on .com â€” /p/login phone-entry + /p/login/r/:linkToken redeem (#131) | wireframe status; no explicit path |
+| 36 | team | 3.1 Welcome  `[x]` (#94, #147) | done | Click-acknowledge commitment, triple-stack write, routes to Michael | wireframe status; no explicit path |
+| 37 | team | 3.1 Welcome  `[x]` (#94, #147) | done | Audit current welcome.tsx against locked-spec v2; merge welcome-prototype-v2 letter-voice + 7-day-arc strip (#147 wf_0037) | `server/src/routes/welcome.ts` |
+| 38 | team | 3.2 Steve discovery + Michael training and daily success coach  `[~]` (#102, #134, #147; reconciled 2026-06-24) | done | Scheduler + Telnyx call origination + webhook + STT wiring | wireframe status; no explicit path |
+| 39 | team | 3.2 Steve discovery + Michael training and daily success coach  `[~]` (#102, #134, #147; reconciled 2026-06-24) | done | State 1 â€” Awaiting call (gold pill, pulsing dot, wrong-number link) (#134 wf_0038) | wireframe status; no explicit path |
+| 40 | team | 3.2 Steve discovery + Michael training and daily success coach  `[~]` (#102, #134, #147; reconciled 2026-06-24) | done | State 2 â€” Call in progress (teal pill, near-real-time transcript via SSE, speaker labels, no buttons) (#134 wf_0039) | wireframe status; no explicit path |
+| 41 | team | 3.2 Steve discovery + Michael training and daily success coach  `[~]` (#102, #134, #147; reconciled 2026-06-24) | done | State 3 â€” Complete (gold check, answer readback, signed-by, CTA to Fast Start) (#134 wf_0040) | wireframe status; no explicit path |
+| 42 | team | 3.2 Steve discovery + Michael training and daily success coach  `[~]` (#102, #134, #147; reconciled 2026-06-24) | done | Fallbacks (no-answer + reschedule, invalid-number banner, page-close resume via /state refetch, STT-fail audio) (#134 wf_0041) | wireframe status; no explicit path |
+| 43 | team | 3.2 Steve discovery + Michael training and daily success coach  `[~]` (#102, #134, #147; reconciled 2026-06-24) | done | Upline cockpit event card (answers + audio link + support tags, SPONSOR-ONLY server-enforced, no classification) (#134 wf_0042) | wireframe status; no explicit path |
+| 44 | team | 3.2 Steve discovery + Michael training and daily success coach  `[~]` (#102, #134, #147; reconciled 2026-06-24) | done | RECONCILED 2026-06-24: old Michael scoring/classification is retired. No Builder / Emerging Leader / Part-Time Producer / Casual Participant labels. Steve conducts New BA Discovery + Success Interview and creates the Success Profile without scoring, ranking, or predicting. Michael receives that context and acts as the Training Agent and Daily Success Coach: clarify, support, answer questions, build confidence, prepare for action, and route the BA into orientation + Launch Center. Everyone receives the same opportunity, tools, training, and support; actions and outcomes determine results. | wireframe status; no explicit path |
+| 45 | team | 3.3 BA Cockpit  `[~]` (#121, #132) | done | My Sponsor card (name+phone+SMS button; founder override for Kevin/Paul) | wireframe status; no explicit path |
+| 46 | team | 3.3 BA Cockpit  `[~]` (#121, #132) | done | My Invites pipeline (read side: status badges, expandable rows, 'I sent this') | wireframe status; no explicit path |
+| 47 | team | 3.3 BA Cockpit  `[~]` (#121, #132) | done | Welcome banner / left-rail surfaces nav | wireframe status; no explicit path |
+| 48 | team | 3.3 BA Cockpit  `[~]` (#121, #132) | done | Today's actions card (callbacks + due follow-ups + expiring windows, bias-prompt empty state, jump-to-row) (#132/#134 wf_0046) | wireframe status; no explicit path |
+| 49 | team | 3.3 BA Cockpit  `[~]` (#121, #132) | done | CRM per invite â€” notes (append-only), follow-up reminders (one active, replace-or-clear), 5-tag dispositions (new-ba/new-customer/interested/later/not-interested), re-invite (7-day cooldown, mints fresh if expired) (#132) | wireframe status; no explicit path |
+| 50 | team | 3.3 BA Cockpit  `[~]` (#121, #132) | done | EDGE (#147, dec_cockpit_sponsor_and_reinvite seq 23): REMOVE the 7-day re-invite cooldown gate â€” BA decides timing; add a re-invite SCRIPT BUTTON (surfaces/generates a re-invite script; does not gate) | wireframe status; no explicit path |
+| 51 | team | 3.3 BA Cockpit  `[~]` (#121, #132) | done | EDGE (#147, seq 23): My Sponsor card â€” if the (immutable) sponsor is INACTIVE, point the BA to founders Kevin+Paul as support/contact fallback (placement + immutable relationship unchanged) | wireframe status; no explicit path |
+| 52 | team | 3.4 Invitation engine | done | **Spine** â€” plain-form front door + mint (phone-required #125) + cockpit read-side (#119,#120,#121). VERIFIED LIVE #145: Generator minted /p/{token}, prospect page rendered against local Mongo (position #3, held by Kevin, live placement strip). NOTE the link rendered only after swapping the prod domain for localhost â€” see PROSPECT_BASE_URL bug in Section 5. | wireframe status; no explicit path |
+| 53 | team | 3.4 Invitation engine | done | **ScriptMaker** â€” per-product video library, one-name compliance-clean draft -> /invitations seam (#122,#123) | wireframe status; no explicit path |
+| 54 | team | 3.4 Invitation engine | done | **GENERATOR** (#131) â€” gallery-driven, per-product, MULTI-ANGLE WDYK: | wireframe status; no explicit path |
+| 55 | team | 3.4 Invitation engine | done | ↳ BA picks product from gallery (shared `packages/shared/src/product-catalog.ts`) | `packages/shared/src/product-catalog.ts` |
+| 56 | team | 3.4 Invitation engine | done | ↳ Per-product multi-angle WDYK prompts (do-the-business / make-money / lose-fat) | wireframe status; no explicit path |
+| 57 | team | 3.4 Invitation engine | done | ↳ Every name converges on ONE action: send that product's /p/{token} via spine + source='ivory' | wireframe status; no explicit path |
+| 58 | team | 3.4 Invitation engine | done | ↳ Roster persists triple-stacked, tagged by product + angle (Generator runs in `generator_runs`) | wireframe status; no explicit path |
+| 59 | team | 3.4 Invitation engine | done | **IVORY** (#131) â€” standalone /ivory + feeder into generator: | wireframe status; no explicit path |
+| 60 | team | 3.4 Invitation engine | done | ↳ Persistent warm-market roster, category tags (`ivory_names`, BA-private) | wireframe status; no explicit path |
+| 61 | team | 3.4 Invitation engine | done | ↳ Mark invited / customer / BA / not-interested / follow-up (`updateIvoryStatus`) | wireframe status; no explicit path |
+| 62 | team | 3.4 Invitation engine | done | ↳ LLM coaching layer (Anthropic transport, evergreen fallback when key unset) â€” VERIFIED LIVE #145: Coach returned ORU-specific questions from a 13-char ask; Generator ran "THE THREE PRODUCT LINE / make-money" and queued a name for mint; ADD A NAME triple-stacked clean after the mcs_ivory Chroma bootstrap was run (#145 â€” collection was missing, every prior add 500'd silently while Mongo committed; see Section 5) | wireframe status; no explicit path |
+| 63 | team | 3.4 Invitation engine | done | ↳ Does NOT call/text/score (compliance â€” coach surfaces WDYK prompts, never names) | wireframe status; no explicit path |
+| 64 | team | 3.5 Fast Start Guide â€” 5 modules  `[x]` (#95, feat/fast-start-training) | done | Module 1 â€” The Product (GLP-THREE fact-sheet + MBC-267 + six-pillar product CV table) | wireframe status; no explicit path |
+| 65 | team | 3.5 Fast Start Guide â€” 5 modules  `[x]` (#95, feat/fast-start-training) | done | Module 2 â€” Comp Plan Layer 1 (6 ways, cycle 300+600=900=$35, Active+Qualified, PIBs, 2-by-2) | wireframe status; no explicit path |
+| 66 | team | 3.5 Fast Start Guide â€” 5 modules  `[x]` (#95, feat/fast-start-training) | done | Module 3 â€” The Binary as Two Legs (Power/Pay legs, no breakage, first-mover, 14-level dup chart) | wireframe status; no explicit path |
+| 67 | team | 3.5 Fast Start Guide â€” 5 modules  `[x]` (#95, feat/fast-start-training) | done | Module 4 â€” Build Your Prospect List (names list, mindset, first-touch script, LINK to /ivory) | wireframe status; no explicit path |
+| 68 | team | 3.5 Fast Start Guide â€” 5 modules  `[x]` (#95, feat/fast-start-training) | done | Module 5 â€” Build Your Team (22-in-2-weeks model, far-left/far-right, mark candidates in CRM) | wireframe status; no explicit path |
+| 69 | team | 3.5 Fast Start Guide â€” 5 modules  `[x]` (#95, feat/fast-start-training) | done | Completion logic: 5 modules complete AND >=1 invitation sent (cross-checked from spine) | wireframe status; no explicit path |
+| 70 | team | 3.5 Fast Start Guide â€” 5 modules  `[x]` (#95, feat/fast-start-training) | done | Triple-stack progress entity (mongo + neo4j + chroma `mcs_training_progress`, lazy bootstrap) | wireframe status; no explicit path |
+| 71 | team | 3.5 Fast Start Guide â€” 5 modules  `[x]` (#95, feat/fast-start-training) | done | Welcome '/welcome' "Day 1 unlocks" step card now links to /training/fast-start | wireframe status; no explicit path |
+| 72 | team | 3.6 10-step orientation  `[x]` (#100, #147) | done | Curriculum page ported to /training/10-steps | wireframe status; no explicit path |
+| 73 | team | 3.6 10-step orientation  `[x]` (#100, #147) | done | Cockpit scheduling card + slot mechanism (#147, dec_orientation_scheduling seq 21): in-app GROUP orientation sessions, cap 10 BAs/session, hosts Kevin+Paul (host field assignable, leader-extensible later), REUSE webinar Event/reservation pattern (2.6) â€” NOT new infra; Michael-handoff -> cockpit card shows available sessions -> BA reserves seat -> founders see per-session roster; founders add sessions as growth demands; Google Calendar sync DEFERRED. SHIPPED: domain/orientationSession.ts (entity+reservation+roster, triple-stack, mcs_orientation Chroma), routes/orientation.ts (BA list/reserve/cancel, gated), routes/admin/orientation.ts (founder roster+create, audited), apps/team OrientationCard in cockpit, apps/admin /orientation roster page, seed:orientation-sessions; live round-trip verified (create->reserve->roster->cancel) | `server/src/domain/orientationSession.ts`, `server/src/routes/orientation.ts`, `server/src/routes/admin/orientation.ts` |
+| 74 | team | 3.7 Replicated .com preview  `[x]` (#134) | done | /preview route in-app (standalone preview.html exists, not in-app) | wireframe status; no explicit path |
+| 75 | team | 3.7 Replicated .com preview  `[x]` (#134) | done | Sandboxed token (no holding-tank write, no placement, no alerts, no counter) | wireframe status; no explicit path |
+| 76 | team | 3.7 Replicated .com preview  `[x]` (#134) | done | PREVIEW MODE ribbon | wireframe status; no explicit path |
+| 77 | team | 3.8 Profile / settings  `[x]` (#134) | done | Editable: first/last (audit), email (re-verify), phone (update), password, photo, timezone, notif prefs | wireframe status; no explicit path |
+| 78 | team | 3.8 Profile / settings  `[x]` (#134) | done | Read-only: sponsor, THREE BA ID, TM BA ID, access code held | wireframe status; no explicit path |
+| 79 | team | 3.8 Profile / settings  `[x]` (#134) | done | J.8 phone-change verification (#147, dec_profile_verification_and_notifications seq 22): NO SMS code â€” confirmation MODAL restating the new number + why it matters (Telnyx alerts, Michael calls, prospect-login), explicit confirm before save (confirm-your-input, not an OTP) | wireframe status; no explicit path |
+| 80 | team | 3.8 Profile / settings  `[x]` (#134) | done | J.12 notification defaults (#147, seq 22): operational signals ON by default (callback alerts, video-complete, follow-up-due); promotional/digest OFF until opt-in; all tunable in settings | wireframe status; no explicit path |
+| 81 | team | 3.9 Onboarding carry-forward  `[x]` (3418d61) | done | Questionnaire + sponsor interview workbook | wireframe status; no explicit path |
+| 82 | team | 3.11 Leadership credibility + BA track-record  `[ ]` (#147, dec_leadership_credibility_and_track_record seq 25) | done | #1 LEADER CREDIBILITY (Paul+Kevin) — founder credibility component (who leads, Kevin+Paul track records, why trust the path); STATIC content, NOT master-content-driven; renders on BOTH .com presentation (prospect trust) AND .team (new-BA confidence); .com side compliance-clean (no income/comp/THREE branding) (#147 — packages/shared/src/leaders.ts LEADER_CREDIBILITY; .com Section 12-Leadership.tsx; .team /leadership route + cockpit link; income line stripped for .com) | `packages/shared/src/leaders.ts` |
+| 83 | team | 3.11 Leadership credibility + BA track-record  `[ ]` (#147, dec_leadership_credibility_and_track_record seq 25) | done | #2 BA INVITATION TRACK-RECORD — .team-ONLY display of the BA's own activity (invitations generated + who they invite) as the success indicator; DISPLAY layer over existing data (spine mint log + admin per-BA invite funnel); activity metric NOT income; never shown raw on .com (protects new BAs) (#147 — cockpit TrackRecordCard over already-loaded GET /api/cockpit/invites) | wireframe status; no explicit path |
+| 84 | team | 4.A Gate  `[x]` (#102) | done | ADMIN_BA_IDS env gate, hard 403, audit-logged attempt, server-side every route | wireframe status; no explicit path |
+| 85 | team | 4.A Gate  `[x]` (#102) | done | Admin shell + scaffold (port 7703) | wireframe status; no explicit path |
+| 86 | team | 4.A.4.1 Access-code generator UI  `[x]` | done | routes/access-codes.tsx + server route | wireframe status; no explicit path |
+| 87 | team | 4.B Core Dashboard  `[x]` (Section B â€” build 3rd, #134) | done | Master metrics row: active BAs, prospects in flow, queue movement 24h, enrollments 24h, training % | wireframe status; no explicit path |
+| 88 | team | 4.B Core Dashboard  `[x]` (Section B â€” build 3rd, #134) | done | Each tile clickable -> drilldown panel | wireframe status; no explicit path |
+| 89 | team | 4.B Core Dashboard  `[x]` (Section B â€” build 3rd, #134) | done | Filter bar: by BA, by leader group (system-detected + Kevin-curated) | wireframe status; no explicit path |
+| 90 | team | 4.B Core Dashboard  `[x]` (Section B â€” build 3rd, #134) | done | Live event stream | wireframe status; no explicit path |
+| 91 | team | 4.C BA Oversight  `[x]` (Section C â€” build 4th; UI shipped #141, VERIFIED #143) | done | BA directory (routes/bas.tsx mounts DirectoryTable + filter + create; GET /api/admin/bas with leaderDetectionNote) | wireframe status; no explicit path |
+| 92 | team | 4.C BA Oversight  `[x]` (Section C â€” build 4th; UI shipped #141, VERIFIED #143) | done | BA profile detail (ProfileDrawer, GET /api/admin/bas/:baId profile bundle) | wireframe status; no explicit path |
+| 93 | team | 4.C BA Oversight  `[x]` (Section C â€” build 4th; UI shipped #141, VERIFIED #143) | done | BA-requested sponsor override (audited, before/after, requesting-BA, reason) â€” sponsor-override-flow.tsx via drawer, POST /:baId/sponsor-override | wireframe status; no explicit path |
+| 94 | team | 4.C BA Oversight  `[x]` (Section C â€” build 4th; UI shipped #141, VERIFIED #143) | done | Leader tag toggle + at-risk tag (Kevin-curated, no algorithmic flagging) â€” POST /:baId/leader-tag, system-detected dormant per leaderDetectionNote | wireframe status; no explicit path |
+| 95 | team | 4.C.CRUD Manual BA lifecycle  `[x]` (Section C CRUD — domain+routes #140, UI #141) | done | domain/adminBaCrud.ts — create / edit / softDelete / restore (#140, round-tripped live Mongo) | `server/src/domain/adminBaCrud.ts` |
+| 96 | team | 4.C.CRUD Manual BA lifecycle  `[x]` (Section C CRUD — domain+routes #140, UI #141) | done | CREATE: sponsorBaId required + stamped original/immutable-from-birth, no password (mirror entry), unique-email enforced | wireframe status; no explicit path |
+| 97 | team | 4.C.CRUD Manual BA lifecycle  `[x]` (Section C CRUD — domain+routes #140, UI #141) | done | EDIT: ordinary fields + reason→info audit; sponsor change delegates to C.5 applySponsorOverride (one mutation path) | wireframe status; no explicit path |
+| 98 | team | 4.C.CRUD Manual BA lifecycle  `[x]` (Section C CRUD — domain+routes #140, UI #141) | done | SOFT DELETE: distinct `deleted` state, reason required, reversible; severity info (#140); EDIT rejects a deleted BA (restore first) | wireframe status; no explicit path |
+| 99 | team | 4.C.CRUD Manual BA lifecycle  `[x]` (Section C CRUD — domain+routes #140, UI #141) | done | RESTORE: clears deleted, stamps restoredAt, keeps delete history | wireframe status; no explicit path |
+| 100 | team | 4.C.CRUD Manual BA lifecycle  `[x]` (Section C CRUD — domain+routes #140, UI #141) | done | routes/admin/bas.ts — POST / · PATCH /:baId · DELETE /:baId · POST /:baId/restore (typecheck clean, round-tripped) | `server/src/routes/admin/bas.ts` |
+| 101 | team | 4.C.CRUD Manual BA lifecycle  `[x]` (Section C CRUD — domain+routes #140, UI #141) | done | Admin UI: bas.tsx create/edit/delete/restore forms + friction-heavy confirm (before/after on sponsor) (#141, typecheck clean) | `server/src/routes/admin/bas.ts` |
+| 102 | team | 4.D Prospect Oversight  `[x]` (Section D â€” build 4th; UI shipped #141, VERIFIED #143) | done | Cross-team prospect view (routes/prospects.tsx: FilterBar + DirectoryTable, GET /api/admin/prospects) | wireframe status; no explicit path |
+| 103 | team | 4.D Prospect Oversight  `[x]` (Section D â€” build 4th; UI shipped #141, VERIFIED #143) | done | Sponsor-routed URL inspection (resolved-BA-at-mint vs now, discrepancy surfacing) â€” DetailPanel drift detector (sponsorBaIdAtMint !== sponsorBaIdNow, warn banner) + Token+sponsor-routed-URL section w/ sandbox preview | wireframe status; no explicit path |
+| 104 | team | 4.D Prospect Oversight  `[x]` (Section D â€” build 4th; UI shipped #141, VERIFIED #143) | done | Prospect detail panel (token, callback, webinar, enrollment, Kevin's private notes) â€” DetailPanel, ?prospectId= deep-link contract w/ Agent E | wireframe status; no explicit path |
+| 105 | team | 4.D Prospect Oversight  `[x]` (Section D â€” build 4th; UI shipped #141, VERIFIED #143) | done | BA-requested holding-tank intervention: move / reassign sponsor / manual flush / force-enroll (monotonic preserved, audited) â€” InterventionModal + prospects.ts intervention routes | `server/src/domain/prospects.ts`, `server/src/routes/admin/prospects.ts` |
+| 106 | team | 4.D.CRUD Manual prospect lifecycle  `[x]` (Section D CRUD — domain+routes #140, UI #141) | done | domain/adminProspectCrud.ts — create / edit / softDelete / restore (#140, round-tripped live Mongo) | `server/src/domain/adminProspectCrud.ts` |
+| 107 | team | 4.D.CRUD Manual prospect lifecycle  `[x]` (Section D CRUD — domain+routes #140, UI #141) | done | CREATE: MINT-ONLY via createInvitation — #140 SUPERSEDES #138 "place at create"; placement+SMS+video tracking happen later through the normal /api/p/:token/video-event path (position earned at video_complete, not create) | wireframe status; no explicit path |
+| 108 | team | 4.D.CRUD Manual prospect lifecycle  `[x]` (Section D CRUD — domain+routes #140, UI #141) | done | EDIT: ordinary fields + reason; sponsor stays D.4 reassign-only; EDIT rejects a deleted prospect | wireframe status; no explicit path |
+| 109 | team | 4.D.CRUD Manual prospect lifecycle  `[x]` (Section D CRUD — domain+routes #140, UI #141) | done | SOFT DELETE: record-only `deleted` flip + audit; HOLDING TANK LEFT ENTIRELY UNTOUCHED (slot/position/ticker persist until the manual 8-week flush); severity info | wireframe status; no explicit path |
+| 110 | team | 4.D.CRUD Manual prospect lifecycle  `[x]` (Section D CRUD — domain+routes #140, UI #141) | done | RESTORE: clears deleted, keeps delete history | wireframe status; no explicit path |
+| 111 | team | 4.D.CRUD Manual prospect lifecycle  `[x]` (Section D CRUD — domain+routes #140, UI #141) | done | routes/admin/prospects.ts — POST / · PATCH /:prospectId · DELETE /:prospectId · POST /:prospectId/restore · POST /flush-expired · GET /alerts/aged (typecheck clean, round-tripped) | `server/src/routes/admin/prospects.ts` |
+| 112 | team | 4.D.CRUD Manual prospect lifecycle  `[x]` (Section D CRUD — domain+routes #140, UI #141) | done | Cockpit BA-scoped prospect edit/delete (sponsor-guarded to own prospects) — routes + UI (#141; restore is admin-only by decision, no cockpit restore; soft-deleted excluded from invites + today's actions) | wireframe status; no explicit path |
+| 113 | team | 4.D.CRUD Manual prospect lifecycle  `[x]` (Section D CRUD — domain+routes #140, UI #141) | done | Admin UI: prospects.tsx create/edit/delete/restore forms (#141, typecheck clean) | `server/src/domain/prospects.ts`, `server/src/routes/admin/prospects.ts` |
+| 114 | team | 4.E Queue / Recruitment Leg Oversight  `[x]` (Section E â€” build 5th; UI shipped #141, VERIFIED #143) | done | Queue depth + movement (placements/flushes/enrollments, net) â€” QueueDepthPanel (E.1), GET /api/admin/queue/summary | wireframe status; no explicit path |
+| 115 | team | 4.E Queue / Recruitment Leg Oversight  `[x]` (Section E â€” build 5th; UI shipped #141, VERIFIED #143) | done | Fixed assigned queue numbers (monotonic, highest today / ever, vacant slots) â€” QueueNumbersPanel (E.2), GET /queue/lookup | wireframe status; no explicit path |
+| 116 | team | 4.E Queue / Recruitment Leg Oversight  `[x]` (Section E â€” build 5th; UI shipped #141, VERIFIED #143) | done | Ticker config (E.3 â€” position-stack visible window) â€” VisibleWindowPanel, GET/PUT /queue/visible-window + GrowthSparkline (E.4) + AdminTickerPanel (E.5, SSE /queue/ticker/stream) | wireframe status; no explicit path |
+| 117 | team | 4.E Queue / Recruitment Leg Oversight  `[x]` (Section E â€” build 5th; UI shipped #141, VERIFIED #143) | done | Queue rule management (E.6) â€” QueueRulesPanel, GET /queue/rules + PUT /queue/rules/:key (audited) | wireframe status; no explicit path |
+| 118 | team | 4.H Live Operations  `[x]` (Section H — build 6th; shipped Chat #144 fan-out) | done | Real-time usage strip (active dashboard viewers, events/min, persistence p50/p95, active admin sessions) via SSE — UsageStrip.tsx + useUsageStream.ts hook (H.1, snapshot+heartbeat at 30s); server services/persistenceLatency.ts + services/poolEvents.ts extended additively (eventsInLastMinute / activeAdminSessions counters added; original public API unchanged); GET /api/admin/live-ops/usage/stream | `apps/admin/src/components/admin/live-ops/useUsageStream.ts`, `server/src/services/persistenceLatency.ts`, `server/src/services/poolEvents.ts` |
+| 119 | team | 4.H Live Operations  `[x]` (Section H — build 6th; shipped Chat #144 fan-out) | done | Growth stat cards 24h / 7d / 30d with previous-window deltas (BAs added, prospects placed, enrollments) — GrowthCards.tsx; GET /api/admin/live-ops/growth | wireframe status; no explicit path |
+| 120 | team | 4.H Live Operations  `[x]` (Section H — build 6th; shipped Chat #144 fan-out) | done | Holding-tank live grid (color by age bucket fresh/warming/aging/stale, hover detail, click → /admin/prospects?prospectId={id} deep-link) — HoldingTankGrid.tsx; GET /api/admin/live-ops/grid | wireframe status; no explicit path |
+| 121 | team | 4.H Live Operations  `[x]` (Section H — build 6th; shipped Chat #144 fan-out) | done | Toggleable conversion funnels (prospect funnel: mint→click→video_started→video_complete→enrolled; BA activation funnel: signed_up→welcomed→michael_done→first_invite→first_video_complete→first_enrollment) — ConversionFunnel.tsx; GET /api/admin/live-ops/funnel?kind=prospect\|ba_activation | wireframe status; no explicit path |
+| 122 | team | 4.H Live Operations  `[x]` (Section H — build 6th; shipped Chat #144 fan-out) | done | Contract pinned in packages/shared/src/admin-live-ops.ts (AdminLiveUsageSample, AdminLiveUsageStreamEvent, AdminGrowthCard*, AdminLiveGridSlot, AdminFunnel*, ADMIN_LIVE_OPS_PATHS); H-server and H-UI both import from @momentum/shared, neither defines locally | `packages/shared/src/admin-live-ops.ts` |
+| 123 | team | 4.I Reporting / Analytics  `[x]` (Section I — build 7th; I.1 library shipped #143, I.4/I.5 export shipped #144) | done | I.1 standard-report library (Chat #143) â€” BA activation, training completion, invite-to-presentation movement (incl. per-BA breakdown w/ ?sort=completes\|mints\|completion_pct, Chat #143), queue velocity, enrollment completion (renamed from spec's "Registration handoff completion" per locked-spec 3.6), follow-up aging, leader scorecards. Each report = a JSON domain fn under server/src/domain/reports/* consumed by GET /api/admin/reporting/<name> AND a PDF section in I.3. Time range supports preset (lifetime\|last_30d\|last_90d\|by_month) AND explicit from/to per Kevin decision A. Reports 7 (compliance count) + 8 (exception dashboard) intentionally NOT built (decision dec_reporting_i1_scope). FUTURE: video playback telemetry deferred to dec_video_playback_telemetry_deferred. Round-tripped live; full 5-workspace typecheck green. | wireframe status; no explicit path |
+| 124 | team | 4.I Reporting / Analytics  `[x]` (Section I — build 7th; I.1 library shipped #143, I.4/I.5 export shipped #144) | done | I.3 Print Master Report â€” routes/admin/reporting.ts GET /master-report.pdf + domain/adminMasterReport.ts (#142, completed #143). Brand-locked PDF, verifiability footer (timestamp + SHA-256 source hash), audited on generate. Composites Section B dashboard metrics AND the full I.1 library (Reports 1–6 + 9) as of Chat #143 â€” provenance note now records that scope rather than pending state. Round-tripped live (valid %PDF, deterministic hash). | `server/src/routes/admin/reporting.ts`, `server/src/domain/adminMasterReport.ts` |
+| 125 | team | 4.I Reporting / Analytics  `[x]` (Section I — build 7th; I.1 library shipped #143, I.4/I.5 export shipped #144) | done | Cockpit BA prospect-list print â€” cockpit GET /invites/print.pdf + domain/cockpitPrint.ts (#142). Sponsor-scoped via listInvitesForBA; brand-locked PDF, same pdfReport.ts foundation. Round-tripped live (3 prospects, valid %PDF). | `server/src/domain/cockpitPrint.ts`, `server/src/services/pdfReport.ts` |
+| 126 | team | 4.I Reporting / Analytics  `[x]` (Section I — build 7th; I.1 library shipped #143, I.4/I.5 export shipped #144) | done | services/pdfReport.ts â€” shared pdfkit foundation (brand header + verifiability footer + table/section helpers); pdfkit + @types/pdfkit added to server (#142) | `server/src/services/pdfReport.ts` |
+| 127 | team | 4.I Reporting / Analytics  `[x]` (Section I — build 7th; I.1 library shipped #143, I.4/I.5 export shipped #144) | done | Export with PII redaction — modal every export, Kevin picks redact/raw each time (locked Chat #144; never persisted as a preference). Redacted fields: prospectFirstName, prospectLastName, phone, email. Kept verbatim: city, prospectId, tokenId, sponsorBaId, sponsorFullName. Pure functions in server/src/services/piiRedact.ts; CSV serializer in server/src/domain/reports/export.ts. 7 append-only routes on routes/admin/reporting.ts (one per I.1 report) returning text/csv with attachment disposition. Every export (raw OR redacted) appends one audit entry with redaction choice recorded (info severity). Admin UI: ExportPanel.tsx + RedactionModal.tsx mounted on /reports route. | `server/src/services/piiRedact.ts`, `server/src/domain/reports/export.ts`, `server/src/routes/admin/reporting.ts` |
+| 128 | team | 4.F Tenant Architecture  `[~]` (Section F — build 8th; editor surface shipped via Codex PR #4 / bb03711 merged Chat #144, wireframe reconciled Chat #146) | done | F.1 master settings — tenant name + .com/.team/admin domains + compliance posture (hard-locked `fail_closed`, read-only display per spec) — GET /api/admin/tenant/overview + PATCH /api/admin/tenant/settings; triple-stacked to `tenant_settings_versions` / `:TenantSettingsVersion` / `mcs_tenant_settings`; every PATCH audit warn | wireframe status; no explicit path |
+| 129 | team | 4.F Tenant Architecture  `[~]` (Section F — build 8th; editor surface shipped via Codex PR #4 / bb03711 merged Chat #144, wireframe reconciled Chat #146) | done | F.4 role permission matrix — 5 roles (founder_admin / leader / brand_ambassador / prospect / system) × 10 permissions, read-only display. NOTE: goes beyond locked-spec F.4 which calls for two roles (BA, Admin) — extra granularity is informational only; role assignment still env-var-only per Section A.2, no UI flow | wireframe status; no explicit path |
+| 130 | team | 4.F Tenant Architecture  `[~]` (Section F — build 8th; editor surface shipped via Codex PR #4 / bb03711 merged Chat #144, wireframe reconciled Chat #146) | done | master-content EDITOR surface — sandboxed preview + POST /api/admin/tenant/templates/validate + PUT /api/admin/tenant/templates/:templateKey; .com violations block save with 422 + structured `TenantComplianceValidation`; saves triple-stacked to `master_content_versions` / `:MasterContentVersion` / `mcs_master_content`; audit critical on save AND on block. Resolves the #144 deferral concern (the editor surface did not exist when F was deferred) | wireframe status; no explicit path |
+| 131 | team | 4.F Tenant Architecture  `[~]` (Section F — build 8th; editor surface shipped via Codex PR #4 / bb03711 merged Chat #144, wireframe reconciled Chat #146) | done | F.2 / F.5 master-content INHERITANCE — COMPLETE (Chat #147). Editor exists; 17 templates defined (keystone). readMasterContent() read-path resolves override-else-code-default with infra-failure fallback. All four BA-facing consumers re-wired to read from `master_content_versions` (Wave-2 inherit-* lanes): .com renderers (6 dashboard sections + presentation hero via server route p.ts), ScriptMaker (4 team.invitation.* seeds + render-time compliance scan), Ivory (team.ivory.coach_prompt voice layer; compliance/JSON guardrails stay code-owned), Michael (team.michael.interview_prompts served to the external voice worker; 29-Q backbone untouched). Live override-test verified per consumer (default → override → revert, no residue). A saved master override is now FUNCTIONAL, not inert. | `server/src/routes/p.ts` |
+| 132 | team | 4.F Tenant Architecture  `[~]` (Section F — build 8th; editor surface shipped via Codex PR #4 / bb03711 merged Chat #144, wireframe reconciled Chat #146) | done | F.2 add `{{baVoiceCopy}}` token to `com.presentation.hero` (Chat #147 keystone) — token declared on the hero template definition; apps/com PersonalOpen renders an optional inviting-BA voice line when supplied | wireframe status; no explicit path |
+| 133 | team | 4.F Tenant Architecture  `[~]` (Section F — build 8th; editor surface shipped via Codex PR #4 / bb03711 merged Chat #144, wireframe reconciled Chat #146) | done | F.5 add remaining master-content categories per spec F.5 (Chat #147 keystone) — 12 template keys added (.com dashboard sections, ScriptMaker seed library, training, michael.interview_prompts scaffold, ivory.coach_prompt); .com defaults pass validateMasterContent; all surface in the registry-driven editor | wireframe status; no explicit path |
+| 134 | team | 4.F Tenant Architecture  `[~]` (Section F — build 8th; editor surface shipped via Codex PR #4 / bb03711 merged Chat #144, wireframe reconciled Chat #146) | done | F.5 wire BA-facing consumers (.com renderers, ScriptMaker, Ivory, Michael) to read from `master_content_versions` — the leg that makes inheritance actually inherit. READ-PATH NOW EXISTS (Chat #147 keystone): `server/src/services/masterContent.ts` readMasterContent(key) resolves override-else-code-default with infra-failure fallback + interpolateMasterContent(). Wave-2 inherit-* lanes swap call sites to this helper. | `server/src/services/masterContent.ts` |
+| 135 | team | 4.F Tenant Architecture  `[~]` (Section F — build 8th; editor surface shipped via Codex PR #4 / bb03711 merged Chat #144, wireframe reconciled Chat #146) | pending | F.3 explicit URL-structure read-only panel — locked-spec F.3 lists token pattern, mint endpoint, resolution rules as a read-only display. Currently absorbed into F.1 domain fields. Low priority — spec itself flags this surface as read-only-display, "URL structure changes require a deploy." | wireframe status; no explicit path |
+| 136 | team | 4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export) | done | Composer with per-recipient {{firstName}} interpolation + preview — Composer.tsx; server-side interpolation only (client never sees rendered text for a third-party recipient) | wireframe status; no explicit path |
+| 137 | team | 4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export) | done | Audience selector (all / first-72h / leaders / at-risk / custom, live count) — AudienceSelector.tsx; STOP-exclusion-list members filtered server-side at audience resolution, not client-side | wireframe status; no explicit path |
+| 138 | team | 4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export) | done | Channel selector (email / text / both) — ChannelSelector.tsx; email DORMANT pending teammagnificent.com domain verification in Resend (transport stamps emailDeliveryStatus='skipped' until both EMAIL_API_KEY and verified domain land); SMS via Telnyx LIVE | wireframe status; no explicit path |
+| 139 | team | 4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export) | done | Send-test-to-Kevin — SendTestButton.tsx; sends ONE message to Kevin's own BA contact identical to what the audience will receive (full interpolation); audit severity info | wireframe status; no explicit path |
+| 140 | team | 4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export) | done | Queue master broadcast — server/src/domain/broadcast.ts (audience resolution, interpolation, enqueue, status reporting) + server/src/services/broadcastQueue.ts (in-memory worker w/ retry+backoff, startBroadcastWorker() void-called after listen); broadcast record + per-recipient rows triple-stacked; states queued → sending → sent \| failed; BroadcastStatus.tsx renders live counts; audit severity critical for full sends | `server/src/domain/broadcast.ts`, `server/src/services/broadcastQueue.ts` |
+| 141 | team | 4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export) | done | Audit/consent guardrail — STOP keyword permanent exclusion enforced server-side at audience resolution; opt-out global across Team Magnificent; every broadcast send audited with audience preset + recipient count + channel | wireframe status; no explicit path |
+| 142 | team | 4.G Kevin-Only Broadcast  `[x]` (Section G — shipped Chat #144 fan-out; was scheduled LAST per ADMIN J.6, landed in the same tranche as H + I export) | done | Contract pinned in packages/shared/src/broadcast.ts (exported via index.ts barrel); routes/admin/broadcast.ts mounted at /api/admin/broadcast | `packages/shared/src/broadcast.ts`, `packages/shared/src/index.ts`, `packages/shared/src/runtime/index.ts`, `packages/shared/src/runtime/knowledge-evolution/index.ts` |
+| 143 | team | 4.J Audit / Controls  `[~]` (Section J.1-J.3 â€” build 2nd, SUBSTRATE) | done | Append-only audit log (every triple-stack write, every /admin request, every mutation) | wireframe status; no explicit path |
+| 144 | team | 4.J Audit / Controls  `[~]` (Section J.1-J.3 â€” build 2nd, SUBSTRATE) | done | Views: by actor / role / action / entity / timestamp | wireframe status; no explicit path |
+| 145 | team | 4.J Audit / Controls  `[~]` (Section J.1-J.3 â€” build 2nd, SUBSTRATE) | done | Before/after state on overrides, queue rule changes, compliance changes, master content saves | wireframe status; no explicit path |
+| 146 | team | 4.J Audit / Controls  `[~]` (Section J.1-J.3 â€” build 2nd, SUBSTRATE) | done | Michael transcripts linked from audit entries (no separate tab, #89) | wireframe status; no explicit path |
+| 147 | team | 4.J Audit / Controls  `[~]` (Section J.1-J.3 â€” build 2nd, SUBSTRATE) | done | FIX #140: appendAuditEntry chroma leg targeted a nonexistent collection (500'd, left half-written records). Renamed bare `audit_log` → `mcs_audit_log` (Mongo + Chroma) to match mcs_ convention; created the collection; migrated 3 real pre-existing entries; dropped the old Mongo collection. Audit triple-stack now lands clean across all four CRUD actions. | wireframe status; no explicit path |
+| 148 | hygiene | 5 Â· DRIFT / HYGIENE (non-blocking) | done | Relocate WELCOME LETTER pdf out of apps/com/public/assets (verified absent at content/hygiene pass â€” already not in tree) | wireframe status; no explicit path |
+| 149 | hygiene | 5 Â· DRIFT / HYGIENE (non-blocking) | done | Delete docs/_team-design-extract.txt scratch file (verified absent; also deleted `docs/_leaves.json` at content/hygiene pass) | stale ref: `docs/_leaves.json` |
+| 150 | hygiene | 5 Â· DRIFT / HYGIENE (non-blocking) | done | Update build-registry.md to cover #122-#131; KEVIN-CONTEXT removed from source hierarchy in favor of momentum.decisions ledger (content/hygiene pass) | `docs/build-registry.md` |
+| 151 | hygiene | 5 Â· DRIFT / HYGIENE (non-blocking) | done | FIX (#148, wf_0151): Dr. Dan "THREE CSO" brand-isolation drift in App-Description.docx Section 3 - source build-app-description.cjs corrected to brand-isolation lock (G.5, 2026-05-17): Part 1 lead + product-detail card now name him "Chief Scientific Officer and Chief Formulator", employer not named. Regenerated docx VERIFIED #148 (read-back of word/document.xml): old "THREE International's Chief Scientific Officer" string absent, new title present 2x. Sibling Section-3 brand-isolation drifts (hero eyebrow + footer "Independent Promoter Tool") corrected separately in wf_0152. | wireframe status; no explicit path |
+| 152 | hygiene | 5 Â· DRIFT / HYGIENE (non-blocking) | done | FIX (#148, wf_0152): remaining Section-3 brand-isolation drift in App-Description.docx - hero eyebrow corrected to "Team Magnificent" alone (was "Team Magnificent / THREE International"); footer corrected to Team Magnificent only (removed "THREE International Independent Promoter Tool"), per brand-isolation lock G.5 (2026-05-17). Source build-app-description.cjs edited + docx regenerated, VERIFIED #148 via word/document.xml read-back. Also closed a stale Section-7 compliance open-question that quoted the now-banned promoter-tool footer language (resolved per the same lock). | wireframe status; no explicit path |
+| 153 | hygiene | 5 Â· DRIFT / HYGIENE (non-blocking) | done | FIX (#145â†’#147, wf_0147): PROSPECT_BASE_URL is env-driven. env.ts carries `PROSPECT_BASE_URL` (default `http://localhost:7701`); invitations.ts reads `env.PROSPECT_BASE_URL`; .env.example documents the prod value (`https://teammagnificent.com`). VERIFIED #147: dev default resolves to `http://localhost:7701/p/{token}`. Old minted tokens keep the pre-fix inviteUrl â€” accepted for stale test invites (re-mint to refresh). | `server/src/env.ts`, `server/src/domain/invitations.ts`, `server/src/routes/invitations.ts` |
+| 154 | hygiene | 5 Â· DRIFT / HYGIENE (non-blocking) | done | HARDEN (#145â†’#147, wf_0148): triple-stack Chroma collection guard, two layers in services/chromaCollections.ts. (1) BOOT: ensureChromaCollections() idempotently creates every registered collection that's missing + logs loud (wired before app.listen in index.ts). (2) WRITE: assertChromaCollectionExists() runs in tripleStackWrite BEFORE the Mongo insert, throwing ChromaCollectionMissingError so a missing collection fails loud on the Chroma leg instead of orphaning a Mongo row. VERIFIED LIVE #147: boot ensure created the 8 missing collections (mcs_broadcasts, mcs_tenant_settings, mcs_master_content, mcs_prospect_accounts, mcs_prospect_magic_links, mcs_webinar_reservations, mcs_training_progress, admin_prospect_notes); a bogus collection throws loud at the write guard. Same failure class as the #140 audit_log fix. | `server/src/services/chromaCollections.ts`, `packages/shared/src/index.ts`, `packages/shared/src/runtime/index.ts`, `packages/shared/src/runtime/knowledge-evolution/index.ts` |
 
----
+## Stale explicit references
 
-## 2. Prototype artifacts (HTML, pre-React)
+These paths are named by the wireframe but were not present when this registry was generated. They are surfaced for reconciliation; the generator never changes leaf status automatically.
 
-| Artifact | Where it lives | Status | Chat Locked | Supersedes | Notes |
-|---|---|---|---|---|---|
-| `dashboard-prototype.html` (1,437 lines, six locked sections) | `D:/momentum-creation-system-v1/docs/` + project knowledge | approved | #82 | — | The locked dashboard design. Footer drift item: "operational team inside THREE International" violates 3.8; correct on port to `apps/com`. |
-| `tm-prospect-glp3-v3-UPDATED.html` (presentation page reference) | `D:/momentum-creation-system-v1/docs/` (reference only) | superseded | #99 | — | Working sketch. Superseded by the React tm-video-presentation in `apps/com`. |
-| `preview.html` (standalone 11-section tm-video-presentation preview) | `D:/momentum-creation-system-v1/docs/` + Kevin's downloads | approved | #107 | — | Standalone single-file preview with live name-swap controls. Mirrors the React composer. Section 8 renders luxury-favorite.jpeg as-is. |
-| `welcome-prototype-v2.html` (the /welcome screen prototype) | `/mnt/user-data/outputs/` (Chat #95 session) | drafted | #95 | welcome-prototype-v1 | Letter's voice, shorter format, click-acknowledge routes to /michael/schedule. **Markup pending.** |
-| `welcome-letter-v2.html` (long-form welcome email) | Local disk + `github.com/devklg/team-magnificent-training` | approved | #95 | welcome-letter v1 | Full 7-day arc (Days 1–4 learn, Days 5–7 2-in-72). User confirmed done 2026-05-21. |
-| `day1-prototype.html` (Fast Start Day 1) | `/mnt/user-data/outputs/` (Chat #95 session) | drafted | #95 | — | Three GLP-THREE packs side-by-side (Essential/Advantage/Complete), Essential visually emphasized, receiving-end framing, PDR foundation. **Markup pending.** |
-
----
-
-## 3. Reference assets
-
-| Artifact | Where it lives | Status | Chat Locked | Supersedes | Notes |
-|---|---|---|---|---|---|
-| `luxuryfavorite.jpeg` (Kevin's before/after marketing image) | `D:/TEAM-MAG/before-after/luxury-favorite.jpeg` (source) + `apps/com/public/assets/luxury-favorite.jpeg` (recompressed 216KB) | live | #95 (canonized) | — | Section 8 hero asset. Drift item: copy in `apps/com` is 216KB vs 254KB source — verify intentional. |
-| `assets/logos/logo_dark_hero.png` | `D:/momentum-creation-system-v1/assets/logos/` | live | #92 (wired) | — | Team Magnificent wordmark for `apps/team` register page. Served by Vite via `publicDir` config. |
-| THREE product fact sheets (15 PDFs: GLP-THREE + Simple Six + Visage + Kynetik + price sheet) | Project knowledge (Chat #95 upload) | reference | #95 | — | Source material for product claims. Day 2 Fast Start centerpiece. Cellular absorption + Dr. Dan + PDR + Collagène 60-day focus study (73% absorption, 99% recommend). |
-| THREE Financial Rewards Plan v12.1 NAM-ENG (2026) | Project knowledge | reference | #95 | — | Authoritative source for every comp-plan dollar figure. PIB tiers: 25% (20–199 CV) / 28% (200–299) / 33% (300+). Cycles $35 on 300/600 CV. |
-| Dr. Dan Gubler GLP-THREE video (YouTube `1IZiV7RXdCY`, 17 min) | YouTube | live | #39 | — | The product video. Foundation of the presentation page. |
-
----
-
-## 4. Server (apps/server/)
-
-| Artifact | Where it lives | Status | Chat Locked | Supersedes | Notes |
-|---|---|---|---|---|---|
-| Express boot + env loader + persistence dispatch client + triple-stack helper | `server/src/` | live | #92 | — | Foundation. `findRepoRoot` walks up to `pnpm-workspace.yaml` marker. |
-| `POST /api/auth/verify-code` | `server/src/routes/auth.ts` | live | #92 | — | Live access-code validation, debounced from client. |
-| `POST /api/auth/register` | `server/src/routes/auth.ts` | live | #92 | — | 10-step sequence per Signup Architecture A.4. Argon2 password hash, TMBA-YYYYMMDD-XXXXXX BA ID, sponsor immutability at step 2, JWT cookie scoped to `.teammagnificent.team`. |
-| `server/src/domain/access-codes.ts` | `server/src/domain/` | live | #92 | — | `findAccessCode`. |
-| `server/src/domain/ba.ts` | `server/src/domain/` | live | #92 | — | `registerBA` with argon2, `emailExists`, `threeBaIdExists`. |
-| `server/src/domain/codeGen.ts` (TM-XXXX generator) | `server/src/domain/` | live | #94 | — | 4-char codes, 31-char alphabet excluding 0/O/1/I/L (~924k codes). |
-| `server/src/domain/commitments.ts` (welcome commitment triple-stack) | `server/src/domain/` | live | #94 | — | Triple-stack write on "I accept" click. |
-| `server/src/middleware/requireAuth.ts` (+ `requireAdmin` hard 403) | `server/src/middleware/` | live | #94 | — | `ADMIN_BA_IDS` env-var gate per ADMIN A.2. |
-| `POST /api/welcome/load` + `/accept` | `server/src/routes/welcome.ts` | live | #94 | — | Welcome page server endpoints. |
-| `POST /api/admin/access-codes` + `GET /api/admin/access-codes` | `server/src/routes/admin/access-codes.ts` | live | #94 | — | Admin code generator + list. |
-| Founder seeding (TM-01 Kevin + TM-02 Paul) | MongoDB `momentum.brand_ambassadors` | live | #97 | placeholder TMBA-ROOT-KEVIN | Real founders seeded via mintAccessCode flow. |
-| Timezone field on registration + Michael call-gating | `server/` | live | #98 | — | Per locked-spec Part 5 J.4 partial close. |
-| Auth routes + Telnyx webhook + call origination + Admin scaffold + tsconfig fix | `server/src/` + `apps/admin/` | live | #102 | — | Telnyx integration foundation for Michael outbound voice. |
-| `apps/com` scaffold + prospect/token domain + `GET /api/p/:token` | `apps/com/` + `server/src/domain/prospect.ts` | live | #104 | — | Phase 1 prospect flow at `/p/{token}` per locked-spec Part 4. |
-| Holding-tank domain + `POST /api/p/:token/video-event` | `server/src/domain/holding-tank.ts` + `server/src/routes/p.ts` | live | #105 | — | Video milestone events fire monotonic position assignment at `video_complete`. Triple-stack write. |
-| `/p/:token` token-lifecycle edge cases (409 enrolled + 410 expired) + EnrolledResponse/ExpiredResponse types | `server/src/routes/p.ts` + `packages/shared/types.ts` | live | #110, #111 | — | Lazy-flush at read time. F.1/F.2/E.2/F.4–F.6 error views in client. Commit `8216311`. |
-| Invitation spine — write side of `/p` (mint + `invitation_links` domain) | `server/src/domain/invitations.ts` + `server/src/routes/invitations.ts` | live | #119 | — | The plain-form front door's server half. Token mint, sponsor-immutable at mint, triple-stack write. Commit `f3041e1`. |
-| ScriptMaker server (per-product video library + compliance-clean draft pipeline) | `server/src/domain/scriptMaker.ts` + `server/src/routes/scripts.ts` + `services/anthropic.ts` | live | #122 | — | One-name draft → `/invitations` seam. Anthropic transport dormant-aware (key empty → manual-compose fallback). Commit `ef8b433`. |
-| Phone-required invitation mints (server validation) | `server/src/routes/invitations.ts` | live | e1a2d7f (Chat #124/#125) | — | Phone is required at mint so re-entry can resolve to a prospect account later. Part of `fix(com,team)` commit `e1a2d7f`. |
-| Prospect re-entry Layer 1 — completion-interrupt fix + presentation↔dashboard nav | `server/src/routes/p.ts` + `apps/com/` (cross-cut) | live | #126 | — | Fixes the case where a prospect's video session is interrupted before `video_complete`; the token state survives reload and the page resumes correctly. Commit `5c7105f`. |
-| Prospect re-entry Layers 2+3 — temporary prospect account + `/p/login` magic link | `server/src/domain/prospectAccounts.ts` + `server/src/routes/prospectAuth.ts` | live | #130/#131 | — | Auto-create temporary account at `video_complete`; phone-only SMS magic link; 60-min single-use click window; opaque-by-design `/p/login`; expires at 8-week flush. Spec amendment locked in Part 3.17 (#131). Commits `6564e19`, `58d1f8f`. |
-
----
-
-## 5. Client — apps/team (BA-facing)
-
-| Artifact | Where it lives | Status | Chat Locked | Supersedes | Notes |
-|---|---|---|---|---|---|
-| Vite + Tailwind + shadcn scaffold | `apps/team/` | live | #92 | — | Brand tokens in `tailwind.config.ts`. Compass-rose logo header. |
-| `/register` page (10 fields, sponsor confirmation card, password strength, debounced code validation) | `apps/team/src/routes/register.tsx` | live | #92 | — | Working end-to-end test: Sally Sue registered TMBA-20260518-8KVZ2Q via TM-TEST. |
-| `/welcome` page (click-acknowledge per TEAM C.4) | `apps/team/src/routes/welcome.tsx` (209 lines) | wired | #94 | hero "You just hit the lottery" v1 | Voice + atmosphere match welcome-letter-v2.html. Routes to /michael/schedule on accept. **Needs audit against locked-spec v2 per Chat #95 carry-forward.** |
-| `/cockpit` page (real shell: My Invites working, My Sponsor working, CRM stubbed) | `apps/team/src/routes/cockpit.tsx` (670 lines) | live | #121 | `/cockpit` stub (27 lines) | Replaces the stub. My Invites = the read side of the invitation module (status badges, expandable rows with link/saved message/source/activity timeline, 'I sent this' for drafts). My Sponsor card (founder treatment when no upline). CRM stubbed for a later session. Reads GET /api/cockpit/invites + /summary. Local wire types per .team TS6059 convention. |
-| Questionnaire + sponsor workbook routes + onboarding/sponsor surfaces | `apps/team/src/routes/` | live | (carry-forward `3418d61`) | — | Pushed alongside Chat #104. |
-| Welcome-prototype-v2 reconciliation into `/welcome` | `apps/team/src/routes/welcome.tsx` | pending | #95 (drafted) | welcome.tsx (current) | Needs to merge the v2 prototype's letter-voice + 7-day-arc strip into the live route. |
-| `/invitations` plain-form front door (write-side seam into invitation spine) | `apps/team/src/routes/invitations.tsx` | live | #120 | — | The minimum-viable invite form: name + phone, posts to invitation spine, returns token, copy-to-share. Commit `6561abc`. |
-| ScriptMaker UI — video-library front door | `apps/team/src/routes/scripts.tsx` + components | live | #123 | — | Per-product video library; one-name compliance-clean draft → routes into `/invitations`. Hands a clean draft + selected video to the spine. Commit `df02b17`. |
-| `/login` BA login page (.team) | `apps/team/src/routes/login.tsx` | live | e1a2d7f (Chat #124/#125) | — | Replaces `/register` as the daily front door; preserves register on a deep link for first-time use. Part of commit `e1a2d7f`. |
-
----
-
-## 6. Client — apps/com (prospect-facing)
-
-| Artifact | Where it lives | Status | Chat Locked | Supersedes | Notes |
-|---|---|---|---|---|---|
-| Vite scaffold | `apps/com/` | live | #104 | — | Brand tokens, Tailwind, port 7701. |
-| `/p/:token` route (token resolve, presentation page or dashboard based on state) | `apps/com/src/routes/p-token.tsx` | live | #104, extended #110/#111 | — | F.1/F.2/E.2/F.4–F.6 error views verbatim per locked-spec Part 4.9. |
-| `tm-video-presentation` composer (11 sections + ticker strip) | `apps/com/src/routes/tm-video-presentation/tm-video-presentation.tsx` | live | #108, #109 | Chat #106 composer | Section 01–11 + ticker. Reconciliation note: B's 11-section structure + A's verbatim copy where B is silent. |
-| Section 00 — TickerStrip | `sections/00-TickerStrip.tsx` | live | #107 | — | Fixed top bar (A1 copy). |
-| Section 01 — PersonalOpen | `sections/01-PersonalOpen.tsx` | live | #106 | — | Hero stagger reveal. Locked Chat #39 schematic. |
-| Section 02 — Invitation | `sections/02-Invitation.tsx` | approved | #117 | placeholder | Copy APPROVED by Kevin Chat #117 (Version 2 — the Chat #108 three-factor framing; the earlier preview.html "thirty years to assemble" wording was rejected as a fabricated track record). WORKING-COPY flag cleared. |
-| Section 03 — DrDanVideo | `sections/03-DrDanVideo.tsx` | live | #107 | — | YouTube IFrame state machine. fires milestone events to `/api/p/:token/video-event`. Section 3 seekTo verification for mid-stream return-visits pending. |
-| Section 04 — Market | `sections/04-Market.tsx` | live | #107 | — | IntersectionObserver count-up. |
-| Section 05 — PharmaceuticalSolution | `sections/05-PharmaceuticalSolution.tsx` | live | #107 | — | — |
-| Section 06 — NaturalPath | `sections/06-NaturalPath.tsx` | live | #107 | — | MBC-267 + comparison table. |
-| Section 07 — Dossier | `sections/07-Dossier.tsx` | live | #107 (flag flip #115) | — | Accordion + gated PDF. `DOSSIER_AVAILABLE = true` since #115; PDF at `apps/com/public/assets/glp-three-dossier.pdf` (canonical path; the older `public/dossier/` plan was abandoned). |
-| Section 08 — KevinStory | `sections/08-KevinStory.tsx` | live | #107 | — | luxury-favorite.jpeg as-is, full-bleed, no rebuilt card. Locked-spec 4.7. |
-| Section 09 — Timing | `sections/09-Timing.tsx` | live | #107 | — | Three-factor convergence + locked Bebas closing. |
-| Section 10 — QuietDoor (callback-request form) | `sections/10-QuietDoor.tsx` | approved | #117 | placeholder card | Two soft-CTA radios (interested / have questions) + "Have [BA] reach out" button + confirmation state. Copy APPROVED by Kevin Chat #117. **Both "Take your time / no clock on this page" footnotes REMOVED Chat #117** — inconsistent with the forthcoming 72-hour dashboard clock. (Note: the historical "three intent radios + phone + best time" description was superseded by the Chat #109 two-radio no-phone design.) |
-| Section 11 — Footer | `sections/11-Footer.tsx` | live | #107 | — | BA attribution + G.5 disclaimer. |
-| `og-injection.ts` middleware | `apps/server/src/middleware/og-injection.ts` | live | #107 | — | Token-resolved OG metadata. Requires marker pair in `apps/com/index.html`. |
-| Dashboard six locked sections (Arrival → Opportunity → Mechanic → Live → Advantage → Next Move) | `apps/com/src/routes/tm-prospect-dashboard/` (composer + 7 section files) | wired | #114 | placeholder | Ported from `dashboard-prototype.html` Chat #114. **Chat #84 correction applied to Section 4**: behind-only counter, vertical layout, no left/right columns, no ahead-of-you tile. **Chat #112 drift correction applied to Footer**: Team Magnificent branding only, no THREE reference, locked-spec 3.10 compliance disclaimer verbatim. Rendered from `tm-video-presentation.tsx:169` when placement resolves. Typecheck GREEN. |
-| Ticker fixes + return-visit video overlay | `apps/com/src/routes/tm-video-presentation/sections/` (00 TickerStrip, 03 DrDanVideo) | live | e1a2d7f (Chat #124/#125) | — | Ticker rendering refinements + overlay for prospects returning mid-video. Part of commit `e1a2d7f`. |
-| Prospect re-entry Layer 1 — completion-interrupt fix + presentation↔dashboard navigation (client) | `apps/com/src/routes/p-token.tsx` + composer | live | #126 | — | Client half of re-entry Layer 1. Commit `5c7105f`. |
-| `/p/login` prospect login surface (phone-entry + `/p/login/r/:linkToken` redeem) | `apps/com/src/routes/p-login.tsx` + `p-login-redeem.tsx` | live | #130/#131 | — | Phone-only, opaque-by-design; consumes server magic-link endpoints. Re-entry resolves to ORIGINAL token + ORIGINAL inviting BA via sponsorBaId stamped on `prospect_accounts` at video_complete. Commits `6564e19`, `58d1f8f`. |
-
----
-
-## 7. Client — apps/admin (Kevin-only)
-
-| Artifact | Where it lives | Status | Chat Locked | Supersedes | Notes |
-|---|---|---|---|---|---|
-| Vite scaffold + ADMIN_BA_IDS gate middleware | `apps/admin/` | live | #102 | — | Hard 403 for non-allowed BAs. Port 7703. |
-| Access code generator UI | `apps/admin/src/routes/` | pending | — | — | Calls existing `POST /api/admin/access-codes`. ADMIN-Design Section A.4.1 surface. |
-| 9 admin surfaces (B–J per ADMIN-Design) | `apps/admin/src/routes/` | pending | #89 (design locked) | — | Build sequence in ADMIN J.6: gate → audit log → Core Dashboard → BA/Prospect Oversight → Queue → Live Ops → Reporting → Tenant → Broadcast. |
-
----
-
-## 8. Shared package
-
-| Artifact | Where it lives | Status | Chat Locked | Supersedes | Notes |
-|---|---|---|---|---|---|
-| Brand TS constants + CSS variables | `packages/shared/src/brand.ts` + `brand.css` | live | #92 | — | `--ink #0A0A0A`, `--gold #C9A84C`, `--gold-bright #F5C030`, `--teal #2DD4BF`, `--cream #F5EFE6`. |
-| Compliance constants (`COMPLIANCE_FRAME`, `NEVER_ON_COM`, `COM_DISCLAIMER`) | `packages/shared/src/compliance.ts` | live | #92 | — | Reads at script-time (ScriptMaker) and render-time (platform). |
-| Standing rules (4 const exports) | `packages/shared/src/rules.ts` | live | #92 | — | THREE-final-authority, sponsor immutability, monotonic queue, 8-week flush, brand isolation. |
-| Shared types: `TokenState`, `CallbackIntent`, `TripleStackWriteResult` | `packages/shared/src/types.ts` | live | #92 | — | — |
-| `EnrolledResponse` + `ExpiredResponse` types (token-lifecycle 409/410) | `packages/shared/src/types.ts` | live | #110 | — | Added in Chat #110 step B, used by p-token.tsx F.1/F.2 views. |
-
----
-
-## 9. Infrastructure & seeded data
-
-| Artifact | Where it lives | Status | Chat Locked | Supersedes | Notes |
-|---|---|---|---|---|---|
-| Port allocation 7700–7799 reserved for MCS | `external port registry` (changelog 2026-05-18) | live | #92 | — | 7700 server / 7701 com / 7702 team / 7703 admin. |
-| GitHub repo `devklg/momentum-creation-system-v1` (private, main) | https://github.com/devklg/momentum-creation-system-v1 | live | #92 | `devklg/momentum-creation-system` (abandoned) | 11 commits as of Chat #111, latest `8216311`. |
-| MongoDB `momentum.access_codes` (TM-01 + TM-02 + TM-TEST seeded) | MongoDB `momentum` | live | #97 | #92 placeholder | TM-01 Kevin, TM-02 Paul, TM-TEST for end-to-end testing. |
-| Neo4j BA graph (founders + test BA, SPONSORED_BY edges, 5 camelCase constraints) | Neo4j dedicated app stack | live | #97 | Onboarding OS residue (cleaned #94) | Constraints: `ba_baId_unique`, `ba_threeBaId_unique`, `ba_email_unique`, `accesscode_code_unique`, `commitment_id_unique`. |
-| ChromaDB MCS collections (`mcs_commitments`, `mcs_access_codes`) | ChromaDB localhost:8100 | live | #94 | — | Bootstrapped during welcome flow build. |
-| Maxwell GPU embedding service autostart (Windows Task Scheduler) | `D:/agents/doc-parser/gpu-embeddings-service/` | live | #92 | — | Triggers on user logon. Required for ChromaDB writes through external tooling. |
-| `.gitignore` includes `.handoff/` | `D:/momentum-creation-system-v1/.gitignore` | live | #111 | — | Per-session Perry write/verify files stay local. |
-
----
-
-## 10. Pending — design-locked, not yet built
-
-| Artifact | Spec Source | Chat Locked | Notes |
-|---|---|---|---|
-| Dashboard six locked sections (React port from `dashboard-prototype.html`) | COM Design Section C | #114 SHIPPED | Ported Chat #114 to `apps/com/src/routes/tm-prospect-dashboard/`. Footer drift correction applied (Team Magnificent only, no THREE). Chat #84 Section-4 correction applied (behind-only). Typecheck GREEN. |
-| Real `/cockpit` (My Sponsor card + My Invites + CRM per invite) | TEAM Design Section H | #121 My Invites + My Sponsor SHIPPED | Cockpit shell live Chat #121 with My Invites (read side of the invitation module) + My Sponsor working; CRM still stubbed (its own later session). Reads GET /api/cockpit/invites + /summary (server/src/domain/cockpit.ts + routes/cockpit.ts). |
-| Michael interview surface (3 states: Awaiting / In Progress / Complete) | TEAM Design Section D | #86 | Telnyx + STT wired #102. UI pending. |
-| Fast Start Guide 5 modules | TEAM Design Section E | #86 + #95 7-day arc | Day 1 prototype drafted. Days 2–7 pending. |
-| 10-step orientation surface | TEAM Design Section F + locked-spec | #100 curriculum ported | Currently scheduling-only; live hosted by Kevin/Paul. |
-| Invitation generator (Ivory + ScriptMaker + token mint) | TEAM Design Section G | #86 | Verbatim agent roles transcribed. Build pending. |
-| Replicated .com preview at `/preview` (sandboxed token) | TEAM Design Section I.1 | #86 | Standalone preview.html exists; in-app version pending. |
-| 9 admin surfaces (B through J per ADMIN-Design) | ADMIN-Design | #89 | Scaffold gated #102. Surfaces pending. |
-| Real-time SSE for behind-you counter + position stack | `server/src/services/poolEvents.ts` + `GET /api/p/:token/stream` + `apps/com/src/lib/usePlacementStream.ts` | #114 SHIPPED | **AUDIT CORRECTION**: previously listed here as "open question H.6 (SSE vs short-poll)." That was wrong — SSE was LOCKED in locked-spec 4.4 AND in Kevin's Phase 3 specification in project knowledge. Shipped Chat #114: in-process EventEmitter pub/sub, snapshot+placement+30s heartbeat. |
-| Webinar event entity + reservation backend | `server/src/domain/webinarEvent.ts` + `server/src/domain/webinarReservation.ts` + `POST /api/p/:token/webinar-reserve` | #116 SHIPPED | Event entity + reservation triple-stack write + Telnyx BA SMS LIVE. Prospect-facing email-with-Zoom-link WIRED Chat #116 via Resend (see rows below) — DORMANT pending domain verification. Cadence RESOLVED Chat #116 (Mon/Thu 5pm Pacific) and SEEDED — `webinar_events` now populated. |
-| Webinar cadence generator | `server/src/domain/webinarCadence.ts` | #116 SHIPPED | Pure DST-correct generator for Mon/Thu 5pm Pacific slots over an N-week horizon. Per-date America/Los_Angeles offset resolution (no hardcoded offset) so re-seeds across the Nov DST flip stay correct. Typecheck GREEN. |
-| Webinar event seeder | `server/scripts/seed-webinar-events.ts` (`pnpm seed:webinar-events`) | #116 SHIPPED | Idempotent rolling-8-week triple-stack seeder (Mongo `webinar_events` + Neo4j `:WebinarEvent` + Chroma `mcs_webinar_events`). Ran Chat #116: 16 events created (May 26–Jul 17), all three stores verified. ChromaDB collection `mcs_webinar_events` created Chat #116 (CK-04). findNextUpcomingEvent() now returns the live next slot — dashboard countdown ticks, reserve endpoint no longer 404s. Auto-replenish cron deferred. |
-| Resend email transport | `server/src/services/resend.ts` | #116 WIRED — DORMANT | Thin transport mirroring telnyx.ts. ResendConfigError (missing key) / ResendError (non-2xx), best-effort. **Untested against a live domain** — teammagnificent.com not yet verified in Resend (Namecheap DNS deferred by Kevin until app complete). Empty EMAIL_API_KEY → ResendConfigError → emailDeliveryStatus='skipped', BA-SMS fallback stays live. Sends begin with no code change once key + verified domain land. env vars EMAIL_PROVIDER/EMAIL_API_KEY/EMAIL_FROM/EMAIL_REPLY_TO added to env.ts + .env + .env.example. Typecheck GREEN, env boot verified. |
-| Webinar Zoom link config | `WEBINAR_REGISTER_URL` env → `webinar_events.zoomUrl` | #116 SHIPPED | One persistent recurring Zoom registration link for all sessions, threaded into the reservation domain + confirmation email. Future Zoom S2S OAuth per-occurrence-link sync agent deferred (Kevin's paid plan supports it); `zoomUrl` already nullable per-event to accept it without migration. |
+- Leaf 20: `apps/com/public/assets/glp-three-dossier.pdf`
+- Leaf 149: `docs/_leaves.json`
 
 ---
 
-## 11. Open spec questions blocking future builds
-
-From `locked-spec.md` Part 5, ordered roughly by what blocks earliest builds:
-
-1. ~~**Email provider**~~ — *RESOLVED Chat #116: Resend, wired dormant pending teammagnificent.com domain verification.*
-2. ~~**Webinar cadence (H.3)**~~ — *RESOLVED Chat #116: Mon/Thu 5pm Pacific, seeded 8-week rolling.*
-3. **Michael's 5 interview prompts** — blocks: Michael interview surface. Placeholder list in TEAM D.4.
-3. **10-step orientation curriculum titles + order** — partially closed in #100 port; Kevin's verbatim curriculum still pending.
-4. **8-week flush adaptive vs fixed** — blocks: queue rule management in ADMIN E.6. Architecture doc says adaptive; design assumes fixed.
-5. ~~**Behind-you counter update interval** — SSE vs short-poll. Engineering choice affects Live Ops live tiles.~~ **RESOLVED #114**: SSE. Was never actually open — locked in locked-spec 4.4 + Phase 3 spec; Chat #112 audit misclassified. Shipped Chat #114.
-6. **Position stack visible window** — 5 / 10 / 20 cards. Sets in ADMIN E.3.
-7. **Sponsor-leaves behavior** — auto-roll-up vs locked-with-escalation-contact (TEAM J.7).
-8. **Phone change verification** — SMS code vs immediate effect (TEAM J.8).
-9. **Fast Start gating** — sequential-but-not-gated current default; should some modules gate access (TEAM J.9)?
-10. **Orientation scheduling mechanism** — Calendly embed / custom picker / manual sponsor outreach (TEAM J.10).
-11. **Re-invite cooldown** — per-N-days or max-M-total (TEAM J.11).
-12. **Notification preference defaults** — which alerts SMS/email/in-app by default (TEAM J.12).
-13. **Market/geographic tracking** — collect region as a dimension (ADMIN J.5.4)?
-14. **Compliance enforcement severity mapping** — block/warn/log per rule (ADMIN J.5.9).
-15. **Export PII redaction default** — per-export confirmation vs persistent preference (ADMIN J.5.10).
-16. **Webinar cadence** — every 72h or weekly Tuesday (COM H.3).
-17. **Leadership track records placement inside .team** — added in #94 from leadership-as-structural-advantage clarification.
-
----
-
-## 12. Known drift items
-
-Tracked because they need fixing during a port or audit, not because they block anything today.
-
-| Drift | Where | Notes |
-|---|---|---|
-| `luxury-favorite.jpeg` size mismatch | `apps/com/public/assets/luxury-favorite.jpeg` 216KB vs `D:/TEAM-MAG/before-after/luxury-favorite.jpeg` 254KB source | Confirm intentional recompression or overwrite. |
-| Dr. Dan named as "THREE International's Chief Scientific Officer" | `Team-Magnificent-App-Description.docx` Section 3 | Violates locked-spec 3.8 brand isolation. Correct on next docx edit. |
-| ~~Footer "operational team inside THREE International"~~ **RESOLVED #114** | `dashboard-prototype.html` (original prototype unchanged) | Drift CORRECTED at port time in `apps/com/src/routes/tm-prospect-dashboard/sections/07-Footer.tsx`. Footer carries Team Magnificent branding only + locked-spec 3.10 disclaimer verbatim. |
-| Welcome route on disk pre-dates locked-spec v2 audit | `apps/team/src/routes/welcome.tsx` | Chat #94 flagged: needs audit against locked-spec v2 operating frame. |
-| Chat #84 transcript only in system prompt summary | (not in project knowledge as a transcript) | Kevin planned to transcribe and save as text file. Captured as `chat-84-architecture-revelation.txt` in project knowledge in Chat #94+. **VERIFIED PRESENT.** |
-
----
-
-## 13. Build sequence so far (chat-by-chat, condensed)
-
-For narrative context. Authoritative detail lives in `D:/claude-learning/KEVIN-CONTEXT.md`.
-
-- **Chat #82** (2026-05-14) — Dashboard revelation. Six locked sections + Section 6 headline locked. Power-of-2 cascade + 100,000 destination + financial-freedom-in-conversation-only.
-- **Chat #84** (2026-05-14) — Architecture revelation. Pool mechanic, two-stage placement, replicated site vs dashboard, no-programmatic-handoff, no save-spot, 8-week adaptive flush, Telnyx, Michael as outbound voice agent. 46-page inventory + Open Design wireframe prompt produced.
-- **Chat #85** (2026-05-17) — Cockpit scope locked to 3 elements (My Sponsor / My Invites / CRM). Founder sponsor-card override pattern.
-- **Chat #86** (2026-05-17) — TEAM Design docx delivered (9 sections, 12 open questions).
-- **Chat #88** — COM Design H.1 resolved (page never anonymous).
-- **Chat #89** (2026-05-18) — ADMIN Design docx delivered. BA-requested-emergency override framing locked. Compliance Review surface removed in favor of script-time + render-time enforcement. No algorithmic BA scoring.
-- **Chat #90** (2026-05-18) — v1 directory cleanup. Standing rule: reading the design docs is not authorization to scaffold from them.
-- **Chat #92** (2026-05-18) — Phase 0 scaffold + Registration end-to-end. Sally Sue test BA registered. Three-client architecture (apps/com + apps/team + apps/admin). Ports 7700–7799 reserved. pnpm 9. Vite 6 + React 19 + TS 5.5.
-- **Chat #93** — Triple-stack persistence fully restored (ChromaDB GPU patch).
-- **Chat #94** (2026-05-18/19) — Locked-spec v2 rewrite (157 → 463 lines, six-part structure, operating frame as Part 1). 12 layered clarifications. Access code TM-XXXX 4-char locked. Welcome click-acknowledge locked. /welcome + /cockpit stub shipped.
-- **Chat #95** (2026-05-18) — Welcome v2 prototype + welcome-letter v2 + Day 1 Fast Start prototype. 7-day arc locked. Essential Pack default + no-front-loading principle. 70% statistic sourced (MLM.com/InfoTrax). 15 THREE product docs uploaded.
-- **Chat #97** (2026-05-18) — Founders seeded (TM-01 Kevin + TM-02 Paul). Michael call-scheduling.
-- **Chat #98** (2026-05-19) — Timezone on registration + Michael gate + founder backfill.
-- **Chat #99** (2026-05-19) — tm-video-presentation + tm-prospect-dashboard naming, ticker design, 10-step curriculum, OpenGraph card, visual-lead principle (Section 8 jpeg as-is), locked assets.
-- **Chat #100** (2026-05-19) — Spec gap closure + 10-step orientation port.
-- **Chat #102** (2026-05-19) — Admin scaffold, tsconfig fix, auth routes, Telnyx webhook + call origination.
-- **Chat #104** (2026-05-19) — apps/com scaffold + prospect/token domain + `GET /api/p/:token`.
-- **Chat #105** (2026-05-19) — holding-tank domain + `POST /api/p/:token/video-event` (video milestones → monotonic position).
-- **Chat #106** — Section 01 + composer + p-token route (superseded by #107).
-- **Chat #107** — 11-section bundle (Sections 00, 02–11 + og-injection middleware).
-- **Chat #108–#109** (2026-05-20) — tm-video-presentation 11 sections + Section 10 callback-request form.
-- **Chat #110** — Token-lifecycle 409/410 spec + shared types (EnrolledResponse/ExpiredResponse).
-- **Chat #111** (2026-05-21) — Token-lifecycle wiring: server routes/p.ts 409+410 enrichment with lazy-flush, apps/com api.ts payload parsing + p-token.tsx F.1/F.2/E.2/F.4–F.6 verbatim views. Commit `8216311`. preview.html broken image fix.
-- **Chat #112** (2026-05-21, this chat) — Project knowledge readback + build registry file created.
-- **Chat #113** (2026-05-21) — Dashboard wiring scaffolded: composer import added in `tm-video-presentation.tsx:51` and render branch wired at `:169` with full prop contract. (Build went RED — actual six-section files weren't yet on disk; corrected in #114.)
-- **Chat #114** (2026-05-21) — **Dashboard six-section port complete.** Shared types extended (PlacementTickerEntry, HoldingTankSnapshot, PlacementEvent, WebinarEvent, WebinarReservation*). Server: `services/poolEvents.ts` (in-process EventEmitter), `domain/holdingTank.ts` modified (publish after step 5 + snapshot builder), `domain/webinarEvent.ts` + `domain/webinarReservation.ts` new, `routes/p.ts` extended with `GET /:token/stream` SSE + `POST /:token/webinar-reserve`. Client: `lib/usePlacementStream.ts` React hook around EventSource + `lib/api.ts` postWebinarReservation, `routes/tm-prospect-dashboard/` composer + 7 section files (Ribbon, Arrival, Opportunity, Mechanic, LivePlace, TmAdvantage, YourNextMove, Footer). Chat #84 correction to Section 4 (behind-only, vertical). Chat #112 drift correction to Footer (TM only). Third callback intent `ready_to_join` wired in UI (server already supported). Typecheck GREEN: shared, server, apps/com, apps/team, apps/admin. Two locked-spec amendments queued (Part 3.4, Part 4.4). SSE was-locked-not-open audit correction recorded.
-- **Chat #115** — DOSSIER_AVAILABLE flipped to `true`; PDF dropped at `apps/com/public/assets/glp-three-dossier.pdf` (canonical path replaces earlier `public/dossier/` plan).
-- **Chat #116** (2026-05-22) — Webinar cadence locked (Mon/Thu 5pm Pacific) + DST-correct generator + idempotent 8-week seeder (16 events) + Resend transport wired-dormant pending teammagnificent.com domain verification. Commit `2e28a53`.
-- **Chat #117** (2026-05-22) — Section 02 + Section 10 copy signoff; both "Take your time / no clock" footnotes REMOVED. Commit `8c00d8d`.
-- **Chat #119** (2026-05-22) — **Invitation spine.** Write-side of `/p` — `invitation_links` domain + routes + sponsor-immutable mint + triple-stack write. Commit `f3041e1`.
-- **Chat #120** (2026-05-22) — `.team /invitations` plain-form front door. Posts to spine, returns token, copy-to-share. Commit `6561abc`.
-- **Chat #121** (2026-05-22) — Real `/cockpit` shell: My Invites (read side of invitation module, status badges, expandable rows, 'I sent this' for drafts) + My Sponsor card (founder treatment) + Welcome banner + nav. CRM stubbed for later. Commits `82f867b`, `7e02a17`.
-- **Chat #122** (2026-05-22) — Invitation module env plumbing + ScriptMaker server side. Commit `ef8b433`.
-- **Chat #123** (2026-05-22) — ScriptMaker UI: per-product video library + one-name compliance-clean draft → `/invitations` seam. Commit `df02b17`.
-- **Chat #124/#125** (commit `e1a2d7f`) — BA `/login` page on `.team`, phone-required invitation mints, ticker fixes, return-visit video overlay on `apps/com`.
-- **Chat #126** (2026-05-23) — **Prospect re-entry Layer 1.** Completion-interrupt fix + presentation↔dashboard navigation (server + client). Commit `5c7105f`.
-- **Chat #129** (2026-05-23) — `docs/project-wireframe.md` written — full structural tree with per-leaf status verified against disk. Decision ledger formalized in `momentum.decisions`, replacing `KEVIN-CONTEXT.md` in the source hierarchy.
-- **Chat #130/#131** (2026-05-24) — **Prospect re-entry Layers 2 + 3.** Temporary `prospect_accounts` auto-created at `video_complete` (expire at 8-week flush) + `/p/login` magic-link surface on `.com` (phone-entry + `/p/login/r/:linkToken` redeem). Phone-only SMS magic link, 60-min single-use click window, opaque-by-design `/p/login`, callback-intent-only consent signal. Spec amendment locked in Part 3.17. Re-entry resolves to ORIGINAL token + ORIGINAL inviting BA via sponsorBaId stamped on prospect_accounts at video_complete. Commits `6564e19`, `58d1f8f`. (Chat #130 was retroactively renamed to #131 in commit `58d1f8f`.)
-
----
-
-*Last updated: 2026-05-24 (Chat #131 + content/hygiene pass). Update this file at the end of every chat that ships an artifact, supersedes one, or closes an open spec question.*
+Generated deterministically from `docs/project-wireframe.md` plus filesystem path evidence. Do not hand-edit this file.

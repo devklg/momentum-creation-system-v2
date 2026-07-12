@@ -52,6 +52,12 @@ jobs:
       - name: Route access matrix check
         run: pnpm catalog:route-access:check
 
+      - name: Build registry check
+        run: pnpm registry:build:check
+
+      - name: Documentation freshness check
+        run: pnpm docs:freshness:check
+
       - name: COM prospect compliance scan check
         run: pnpm compliance:com:check
 

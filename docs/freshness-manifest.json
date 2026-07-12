@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 2,
+  "freshnessBasis": "content_sha256_and_declared_review_date",
+  "authorityRule": "decision ledger > locked spec > design docs > generated mirrors > git log > agent registry > handoffs",
+  "instructions": "Regenerate an artifact when any declared source hash changes. reviewedAt is freshness metadata. authorityStatus states how a document may be used.",
+  "coreDocs": [
+    {
+      "file": "docs/READ-ME-FIRST.md",
+      "authorityStatus": "current_navigation",
+      "contentSha256": "103ff4c4ff395e55c6881013c9c1b5429db50424844c3bd91107d63edcb24e15",
+      "reviewedAt": "2026-07-12"
+    },
+    {
+      "file": "docs/AGENT-BRIEFING.md",
+      "authorityStatus": "current_orientation",
+      "contentSha256": "8f3cbdbd3dd2a1833f5b117b8c11bd6497f423ad8b7d22488e367c62ae5e0baa",
+      "reviewedAt": "2026-07-12"
+    },
+    {
+      "file": "docs/locked-spec.md",
+      "authorityStatus": "authoritative_state",
+      "contentSha256": "a3c2ccccda036a5f61f889b517b969582bd67195df1ac1cc25bf7af7aa673596",
+      "reviewedAt": "2026-07-12"
+    },
+    {
+      "file": "docs/project-wireframe.md",
+      "authorityStatus": "current_build_decomposition",
+      "contentSha256": "722864096103fa57d7937d77cfa52f3f9f54f6de488ff4184d98096b2cd373e0",
+      "reviewedAt": "2026-07-12"
+    },
+    {
+      "file": "PLATFORM_AUDIT_PRIORITY_TASKLIST.md",
+      "authorityStatus": "current_execution_queue",
+      "contentSha256": "0ee825493929495c4aef47a7b172257e9da055e21a4ec72bb4b82674fe6971cc",
+      "reviewedAt": "2026-07-12"
+    }
+  ],
+  "generatedArtifacts": [
+    {
+      "file": "docs/build-registry.md",
+      "authorityStatus": "generated_mirror",
+      "generator": "server/scripts/generate-build-registry.mjs",
+      "sources": [
+        {
+          "path": "docs/project-wireframe.md",
+          "contentSha256": "722864096103fa57d7937d77cfa52f3f9f54f6de488ff4184d98096b2cd373e0"
+        }
+      ],
+      "contentSha256": "b4cf54eb3d2a91a6285ad4fb65dbba373eae87472461482b3c63d109f36e669f",
+      "lastVerifiedAt": "2026-07-12",
+      "generatedAt": null
+    },
+    {
+      "file": "docs/build-checklist.html",
+      "authorityStatus": "generated_mirror",
+      "generator": "server/scripts/build-checklist.mjs",
+      "sources": [
+        {
+          "path": "docs/project-wireframe.md",
+          "contentSha256": "722864096103fa57d7937d77cfa52f3f9f54f6de488ff4184d98096b2cd373e0"
+        }
+      ],
+      "contentSha256": "e6b8498158641b5907fbbe2d1200ef1eb1632c170fd15a6cb5934a36d9f8db6e",
+      "lastVerifiedAt": "2026-07-12",
+      "generatedAt": null
+    },
+    {
+      "file": "engineering/sprints/platform-audit-p1/api-route-map.json",
+      "authorityStatus": "generated_mirror",
+      "generator": "server/scripts/generate-api-route-map.mjs",
+      "sources": [
+        {
+          "path": "server/src/index.ts",
+          "contentSha256": "17770ee763ae6f133959f2a66eb12b81ba6057311e25a54bcc411d7c3c997d18"
+        }
+      ],
+      "contentSha256": "aed1e38dd9ac063ed52739c523e0487e41848c122c92824be65f6c326ae642ac",
+      "lastVerifiedAt": "2026-07-12",
+      "generatedAt": "2026-07-12T09:08:17.652Z"
+    },
+    {
+      "file": "engineering/sprints/platform-audit-p1/route-access-matrix.json",
+      "authorityStatus": "generated_mirror",
+      "generator": "server/scripts/generate-route-access-matrix.mjs",
+      "sources": [
+        {
+          "path": "engineering/sprints/platform-audit-p1/api-route-map.json",
+          "contentSha256": "aed1e38dd9ac063ed52739c523e0487e41848c122c92824be65f6c326ae642ac"
+        }
+      ],
+      "contentSha256": "009c65c756b644909ca84a450e20b2fb83e37254026bd2f81ce71c4ce13e21c9",
+      "lastVerifiedAt": "2026-07-12",
+      "generatedAt": "2026-07-12T09:08:17.973Z"
+    },
+    {
+      "file": "engineering/sprints/platform-audit-p1/persistence-write-catalog.json",
+      "authorityStatus": "generated_mirror",
+      "generator": "server/scripts/generate-persistence-write-catalog.mjs",
+      "sources": [
+        {
+          "path": "server/src",
+          "contentSha256": "35e0e70e40e6f778f0a87d4ca0f011faf9064545bef91ecf0257ca1ef411b402"
+        }
+      ],
+      "contentSha256": "0a540b1f879ac7a02057b52fadc22eda501330f5bfb8eb185a1a18727111baad",
+      "lastVerifiedAt": "2026-07-12",
+      "generatedAt": "2026-07-12T02:45:23.601Z"
+    },
+    {
+      "file": "engineering/sprints/platform-audit-p1/schema-catalog.json",
+      "authorityStatus": "generated_mirror",
+      "generator": "server/scripts/generate-schema-catalog.mjs",
+      "sources": [
+        {
+          "path": "packages/shared/src",
+          "contentSha256": "80050583362581b73d0af1af945832690293efe8aaa6d0d43b5480c0166f6d77"
+        },
+        {
+          "path": "server/src",
+          "contentSha256": "35e0e70e40e6f778f0a87d4ca0f011faf9064545bef91ecf0257ca1ef411b402"
+        }
+      ],
+      "contentSha256": "d3dd4d91d7a84cc4c8227f63fec968fbb3ae3c88c4578dda1eff8ccd01970f85",
+      "lastVerifiedAt": "2026-07-12",
+      "generatedAt": "2026-07-12T02:45:26.070Z"
+    },
+    {
+      "file": "engineering/sprints/platform-audit-p1/mongo-ownership-map.json",
+      "authorityStatus": "generated_mirror",
+      "generator": "server/scripts/generate-mongo-ownership-map.mjs",
+      "sources": [
+        {
+          "path": "server/src",
+          "contentSha256": "35e0e70e40e6f778f0a87d4ca0f011faf9064545bef91ecf0257ca1ef411b402"
+        }
+      ],
+      "contentSha256": "2ae1d47e0748c1b54e696252cef2d4fe158c1eefd22e5b2521f524cc98b8d91c",
+      "lastVerifiedAt": "2026-07-12",
+      "generatedAt": "2026-07-12T02:45:26.414Z"
+    },
+    {
+      "file": "engineering/sprints/platform-audit-p1/mongo-index-audit-plan.json",
+      "authorityStatus": "generated_mirror",
+      "generator": "server/scripts/generate-mongo-index-audit.mjs",
+      "sources": [
+        {
+          "path": "server/src",
+          "contentSha256": "35e0e70e40e6f778f0a87d4ca0f011faf9064545bef91ecf0257ca1ef411b402"
+        }
+      ],
+      "contentSha256": "0e048e724731e325a3d804efac473aa9be5efbe4c7e4dd549984de8eea786a49",
+      "lastVerifiedAt": "2026-07-12",
+      "generatedAt": "2026-07-12T02:45:26.724Z"
+    },
+    {
+      "file": "engineering/sprints/platform-audit-p1/neo4j-catalog.json",
+      "authorityStatus": "generated_mirror",
+      "generator": "server/scripts/generate-neo4j-catalog.mjs",
+      "sources": [
+        {
+          "path": "server/src",
+          "contentSha256": "35e0e70e40e6f778f0a87d4ca0f011faf9064545bef91ecf0257ca1ef411b402"
+        }
+      ],
+      "contentSha256": "875be0ac286da8407032808fdf7e10994193d55f0538fddf64559caa46ef6bf4",
+      "lastVerifiedAt": "2026-07-12",
+      "generatedAt": "2026-07-12T02:45:27.057Z"
+    },
+    {
+      "file": "engineering/sprints/platform-audit-p1/chroma-collection-catalog.json",
+      "authorityStatus": "generated_mirror",
+      "generator": "server/scripts/generate-chroma-catalog.mjs",
+      "sources": [
+        {
+          "path": "server/src",
+          "contentSha256": "35e0e70e40e6f778f0a87d4ca0f011faf9064545bef91ecf0257ca1ef411b402"
+        }
+      ],
+      "contentSha256": "6edca057cb69514040dfb1c9506e1a3e2d5e7946f983fd9fd1748ecddd84f44b",
+      "lastVerifiedAt": "2026-07-12",
+      "generatedAt": "2026-07-12T02:45:28.723Z"
+    },
+    {
+      "file": "engineering/sprints/platform-audit-p1/com-prospect-compliance-scan.json",
+      "authorityStatus": "generated_mirror",
+      "generator": "server/scripts/generate-com-prospect-compliance-scan.mjs",
+      "sources": [
+        {
+          "path": "apps/com/src",
+          "contentSha256": "428627d7e81ce4f2197b235079825c101e7f34461bb9401a3fe9b5957e8e54f6"
+        },
+        {
+          "path": "packages/shared/src/compliance.ts",
+          "contentSha256": "b41ffe2a0acbfa13d245fd6080be4041d2741b98ab37fdecb6fbfefdb8b10f35"
+        }
+      ],
+      "contentSha256": "56951931d69965e6c4221b7f0da801bed00e7ce2339dd0aa0d66d774a7e09b76",
+      "lastVerifiedAt": "2026-07-12",
+      "generatedAt": "2026-07-12T00:02:22.810Z"
+    }
+  ],
+  "historicalDocs": [
+    {
+      "file": "docs/APP_COMPLETION_AUDIT_2026-06-24.md",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "68c71b72a418e000e84337785cd1b7fcaa571cb91209a794dedd980ff5f42145",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    },
+    {
+      "file": "docs/APP_STATE_AUDIT_PRINT_CHECKLIST_2026-06-23.md",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "005ea8510f172f97095835e9d99a24fbae3eb33077efdab97ee1fc4a2dc9d03e",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    },
+    {
+      "file": "docs/IMPLEMENTATION_PLAN_COMPLETE_APP_2026-06-23.md",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "8aa0fd015aec74f36a80885949e1d56f546cdfb948a14543ec8ecbd1e3641196",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    },
+    {
+      "file": "docs/chat-105-decisions.md",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "a8693baba25c025c986408f779c9b9b07996497b000ea76bfd95c955c9b2fe03",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    },
+    {
+      "file": "docs/chat-109-decisions.md",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "a39708bad6c2c1d0b15197a3b9af1c349fc1166ab936498a8bb1f823b7994836",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    },
+    {
+      "file": "docs/chat-85-decisions.md",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "016670d8f52703155b953a231b6b376ad09fbf6d014d7d012a95e8326f7f8bd0",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    },
+    {
+      "file": "docs/chat-94-locked-spec-rewrite.txt",
+      "authorityStatus": "historical_reference_only",
+      "contentSha256": "332c3ce5790d042299d7b4dd84ac8f6010e023a47ca478e49afeb487ca0b9d41",
+      "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
+    }
+  ],
+  "designReferences": [
+    {
+      "file": "docs/dashboard-prototype.md",
+      "authorityStatus": "design_reference",
+      "contentSha256": "b51f246b0ee4183b042b37da2744d2acc22d91f99dda11a295431253dadd27d8",
+      "useConstraint": "Design authority within its named dashboard scope, subordinate to the decision ledger and locked spec."
+    }
+  ]
+}
