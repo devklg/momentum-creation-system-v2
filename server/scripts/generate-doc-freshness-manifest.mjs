@@ -40,12 +40,24 @@ function sha256(relative) {
   const absolute = path.join(root, relative);
   if (!existsSync(absolute)) return null;
   const hash = createHash('sha256');
-  if (statSync(absolute).isFile()) return hash.update(readFileSync(absolute)).digest('hex');
+  const addFile = (file) => {
+    const bytes = readFileSync(file);
+    const textLike = /\.(?:md|json|mjs|js|ts|tsx|html|css|yml|yaml|txt)$/i.test(file);
+    hash.update(textLike ? bytes.toString('utf8').replace(/\r\n/g, '\n') : bytes);
+  };
+  if (statSync(absolute).isFile()) {
+    addFile(absolute);
+    return hash.digest('hex');
+  }
   const files = execFileSync('git', ['ls-files', `${relative.replaceAll('\\', '/')}/*`], { cwd: root, encoding: 'utf8' })
     .split(/\r?\n/)
     .filter(Boolean)
     .sort();
-  for (const file of files) hash.update(file).update('\0').update(readFileSync(path.join(root, file))).update('\0');
+  for (const file of files) {
+    hash.update(file).update('\0');
+    addFile(path.join(root, file));
+    hash.update('\0');
+  }
   return hash.digest('hex');
 }
 

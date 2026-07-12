@@ -7,31 +7,31 @@
     {
       "file": "docs/READ-ME-FIRST.md",
       "authorityStatus": "current_navigation",
-      "contentSha256": "d9ea1c08da9b8cdfd35ab3358a680ac39830fe7f004b0630fbb7aa4088975f81",
+      "contentSha256": "103ff4c4ff395e55c6881013c9c1b5429db50424844c3bd91107d63edcb24e15",
       "reviewedAt": "2026-07-12"
     },
     {
       "file": "docs/AGENT-BRIEFING.md",
       "authorityStatus": "current_orientation",
-      "contentSha256": "a3a464386a8236f39d4435a88c46c4e29b7819e5bba1f1203a97648934556dd7",
+      "contentSha256": "8f3cbdbd3dd2a1833f5b117b8c11bd6497f423ad8b7d22488e367c62ae5e0baa",
       "reviewedAt": "2026-07-12"
     },
     {
       "file": "docs/locked-spec.md",
       "authorityStatus": "authoritative_state",
-      "contentSha256": "e2afa8b263e48cf6bc2ac4c8e8daad929cb6745545685ec1504c9b345820fe9d",
+      "contentSha256": "a3c2ccccda036a5f61f889b517b969582bd67195df1ac1cc25bf7af7aa673596",
       "reviewedAt": "2026-07-12"
     },
     {
       "file": "docs/project-wireframe.md",
       "authorityStatus": "current_build_decomposition",
-      "contentSha256": "9150c159dfef48afa6fd2a28141ce2186b48d31441de0023162ee14c6e4cb2a7",
+      "contentSha256": "722864096103fa57d7937d77cfa52f3f9f54f6de488ff4184d98096b2cd373e0",
       "reviewedAt": "2026-07-12"
     },
     {
       "file": "PLATFORM_AUDIT_PRIORITY_TASKLIST.md",
       "authorityStatus": "current_execution_queue",
-      "contentSha256": "3f5d24f541cdbcaec358b51c4dcf06fd0e6954589931b845f14c9021a792935a",
+      "contentSha256": "0ee825493929495c4aef47a7b172257e9da055e21a4ec72bb4b82674fe6971cc",
       "reviewedAt": "2026-07-12"
     }
   ],
@@ -43,7 +43,7 @@
       "sources": [
         {
           "path": "docs/project-wireframe.md",
-          "contentSha256": "9150c159dfef48afa6fd2a28141ce2186b48d31441de0023162ee14c6e4cb2a7"
+          "contentSha256": "722864096103fa57d7937d77cfa52f3f9f54f6de488ff4184d98096b2cd373e0"
         }
       ],
       "contentSha256": "b4cf54eb3d2a91a6285ad4fb65dbba373eae87472461482b3c63d109f36e669f",
@@ -57,10 +57,10 @@
       "sources": [
         {
           "path": "docs/project-wireframe.md",
-          "contentSha256": "9150c159dfef48afa6fd2a28141ce2186b48d31441de0023162ee14c6e4cb2a7"
+          "contentSha256": "722864096103fa57d7937d77cfa52f3f9f54f6de488ff4184d98096b2cd373e0"
         }
       ],
-      "contentSha256": "bbe33fdec00a1af383afd249683f462e9ce0b702097a2a75bf3d044528ef9dbe",
+      "contentSha256": "e6b8498158641b5907fbbe2d1200ef1eb1632c170fd15a6cb5934a36d9f8db6e",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": null
     },
@@ -71,7 +71,7 @@
       "sources": [
         {
           "path": "server/src/index.ts",
-          "contentSha256": "5fce52083f7ccfaf1c914cdd55673d2ae7602d8992d8e60620f0e7d099c70e29"
+          "contentSha256": "17770ee763ae6f133959f2a66eb12b81ba6057311e25a54bcc411d7c3c997d18"
         }
       ],
       "contentSha256": "aed1e38dd9ac063ed52739c523e0487e41848c122c92824be65f6c326ae642ac",
@@ -99,10 +99,10 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "e0077c0c91e9519cd7a57c2fcc4a2590f8142d0b9b668f32f171c006c43c37b2"
+          "contentSha256": "35e0e70e40e6f778f0a87d4ca0f011faf9064545bef91ecf0257ca1ef411b402"
         }
       ],
-      "contentSha256": "2f49a6e28a8573c98a5a2b1c10cbbdea7afbf1d2d54935d4d9ab71568bae421c",
+      "contentSha256": "0a540b1f879ac7a02057b52fadc22eda501330f5bfb8eb185a1a18727111baad",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T02:45:23.601Z"
     },
@@ -113,14 +113,14 @@
       "sources": [
         {
           "path": "packages/shared/src",
-          "contentSha256": "1cb5778e23176ec7d695caf0b3ce8f5bc58629aa6d709dbcf2d749c216c13d79"
+          "contentSha256": "80050583362581b73d0af1af945832690293efe8aaa6d0d43b5480c0166f6d77"
         },
         {
           "path": "server/src",
-          "contentSha256": "e0077c0c91e9519cd7a57c2fcc4a2590f8142d0b9b668f32f171c006c43c37b2"
+          "contentSha256": "35e0e70e40e6f778f0a87d4ca0f011faf9064545bef91ecf0257ca1ef411b402"
         }
       ],
-      "contentSha256": "aa30e68eef14897fa00f7038500e6ccb87ffc861608edfb5563c03cc0416652c",
+      "contentSha256": "d3dd4d91d7a84cc4c8227f63fec968fbb3ae3c88c4578dda1eff8ccd01970f85",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T02:45:26.070Z"
     },
@@ -131,10 +131,10 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "e0077c0c91e9519cd7a57c2fcc4a2590f8142d0b9b668f32f171c006c43c37b2"
+          "contentSha256": "35e0e70e40e6f778f0a87d4ca0f011faf9064545bef91ecf0257ca1ef411b402"
         }
       ],
-      "contentSha256": "8031f3c48491424819a81b43005a67cb031bcd56d81e6f7615ec3bb738460f44",
+      "contentSha256": "2ae1d47e0748c1b54e696252cef2d4fe158c1eefd22e5b2521f524cc98b8d91c",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T02:45:26.414Z"
     },
@@ -145,10 +145,10 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "e0077c0c91e9519cd7a57c2fcc4a2590f8142d0b9b668f32f171c006c43c37b2"
+          "contentSha256": "35e0e70e40e6f778f0a87d4ca0f011faf9064545bef91ecf0257ca1ef411b402"
         }
       ],
-      "contentSha256": "0cab475d2fc981fa55cfe73963feba7983c1f523ddd2451e757616b15a876e73",
+      "contentSha256": "0e048e724731e325a3d804efac473aa9be5efbe4c7e4dd549984de8eea786a49",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T02:45:26.724Z"
     },
@@ -159,10 +159,10 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "e0077c0c91e9519cd7a57c2fcc4a2590f8142d0b9b668f32f171c006c43c37b2"
+          "contentSha256": "35e0e70e40e6f778f0a87d4ca0f011faf9064545bef91ecf0257ca1ef411b402"
         }
       ],
-      "contentSha256": "5d97c0c8d52a8cea25d419fb656146d09f89b6e75c2ca1fd19ae871414ef132e",
+      "contentSha256": "875be0ac286da8407032808fdf7e10994193d55f0538fddf64559caa46ef6bf4",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T02:45:27.057Z"
     },
@@ -173,10 +173,10 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "e0077c0c91e9519cd7a57c2fcc4a2590f8142d0b9b668f32f171c006c43c37b2"
+          "contentSha256": "35e0e70e40e6f778f0a87d4ca0f011faf9064545bef91ecf0257ca1ef411b402"
         }
       ],
-      "contentSha256": "25f237ca81e75a14ec630c11eee44a1f11a8c90b3b9caa32679dcce7846e7202",
+      "contentSha256": "6edca057cb69514040dfb1c9506e1a3e2d5e7946f983fd9fd1748ecddd84f44b",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T02:45:28.723Z"
     },
@@ -187,14 +187,14 @@
       "sources": [
         {
           "path": "apps/com/src",
-          "contentSha256": "71c8f07df08a437d22c68b01c50cce6ba97a89f1277dac7bea9f23dc2ba40632"
+          "contentSha256": "428627d7e81ce4f2197b235079825c101e7f34461bb9401a3fe9b5957e8e54f6"
         },
         {
           "path": "packages/shared/src/compliance.ts",
-          "contentSha256": "55a454779b2c29327c48e6b9a8c77f5fd449e4a1067e733b7b19a6b008af33d1"
+          "contentSha256": "b41ffe2a0acbfa13d245fd6080be4041d2741b98ab37fdecb6fbfefdb8b10f35"
         }
       ],
-      "contentSha256": "2c12964ed6740490696dc897310108450f2d296751638bd7b963f3f3afbb3e94",
+      "contentSha256": "56951931d69965e6c4221b7f0da801bed00e7ce2339dd0aa0d66d774a7e09b76",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T00:02:22.810Z"
     }
@@ -203,43 +203,43 @@
     {
       "file": "docs/APP_COMPLETION_AUDIT_2026-06-24.md",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "2a744f5d57589b510d8c2c094bea63d5edc1386ae36cf6241e3d3d672c373584",
+      "contentSha256": "68c71b72a418e000e84337785cd1b7fcaa571cb91209a794dedd980ff5f42145",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     },
     {
       "file": "docs/APP_STATE_AUDIT_PRINT_CHECKLIST_2026-06-23.md",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "6d5faa6ad316cf552788b98d3cbdb52b20d67085b56bb0cd1e85a3692c6b2b1d",
+      "contentSha256": "005ea8510f172f97095835e9d99a24fbae3eb33077efdab97ee1fc4a2dc9d03e",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     },
     {
       "file": "docs/IMPLEMENTATION_PLAN_COMPLETE_APP_2026-06-23.md",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "90378fbd51c1ade4884f0f9375fbbdb7a2eceb537323960ee6decf1df25fa951",
+      "contentSha256": "8aa0fd015aec74f36a80885949e1d56f546cdfb948a14543ec8ecbd1e3641196",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     },
     {
       "file": "docs/chat-105-decisions.md",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "e4f7f7d4dbbba220f7d3cf4ccef5baf6b49c99f398aca31d804dddbd5faaab63",
+      "contentSha256": "a8693baba25c025c986408f779c9b9b07996497b000ea76bfd95c955c9b2fe03",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     },
     {
       "file": "docs/chat-109-decisions.md",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "6a113bf3322951183e79b3c41b57f4b046850927b5b85e89f0164c8a0d905a07",
+      "contentSha256": "a39708bad6c2c1d0b15197a3b9af1c349fc1166ab936498a8bb1f823b7994836",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     },
     {
       "file": "docs/chat-85-decisions.md",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "d1acf36cacc509a29e44f6bf1152551298a06c2be6b36cd7c37db4e733447b8d",
+      "contentSha256": "016670d8f52703155b953a231b6b376ad09fbf6d014d7d012a95e8326f7f8bd0",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     },
     {
       "file": "docs/chat-94-locked-spec-rewrite.txt",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "15d48ac249d55bea01109725e401e3c0e15442c974db5319ac39de89434a2428",
+      "contentSha256": "332c3ce5790d042299d7b4dd84ac8f6010e023a47ca478e49afeb487ca0b9d41",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     }
   ],
@@ -247,7 +247,7 @@
     {
       "file": "docs/dashboard-prototype.md",
       "authorityStatus": "design_reference",
-      "contentSha256": "c08b5ac76c2bd9beb19a00f66fe97f5f24e50915baf9ebc176f5920abcddbb38",
+      "contentSha256": "b51f246b0ee4183b042b37da2744d2acc22d91f99dda11a295431253dadd27d8",
       "useConstraint": "Design authority within its named dashboard scope, subordinate to the decision ledger and locked spec."
     }
   ]
