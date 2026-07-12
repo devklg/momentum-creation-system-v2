@@ -50,7 +50,9 @@ Extraction is cheap; **confirmation is the scarce signal.** An agent that grades
 
 ### 3.5 WRITE & VERIFY
 
-Confirmed items go through the ACR-0012 envelope — Mongo → Chroma (delete-then-add on update) → Neo4j → **read back**. Any new handle is **retrieval-tested** (ACR-0013 §5) before it counts.
+Confirmed items go through the ACR-0012 envelope — Mongo → Chroma (delete-then-add on update) → Neo4j → **read back**. Any new handle is **retrieval-tested** (ACR-0013 §5) before it counts — live on the machine that owns the library (`pnpm memory:verify`); the deterministic manifest gate covers CI, where the library is unreachable by design.
+
+Writes carry `audience` (ACR-0012 §3.2b; absent fails closed to `dev_agents`) and graph edges are written as **typed relationships with provenance** (`asserted_by` / `asserted_at` / `source_chat`), from stated assertions only — the agent never invents edges (ACR-0013 §4.3).
 
 ### 3.6 CLOSE
 

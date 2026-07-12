@@ -62,4 +62,11 @@ jobs:
         run: pnpm build
 
       - name: Server tests
+        # The deterministic handle-manifest gate (handleManifest.test.ts) always
+        # runs here. The LIVE retrieval regression is local-only BY DESIGN —
+        # Kevin's library must never be reachable from GitHub runners. It runs
+        # only with RETRIEVAL_REGRESSION=live (`pnpm memory:verify` locally);
+        # unset here, so it skips loudly and visibly.
         run: pnpm --filter @momentum/server test
+        env:
+          RETRIEVAL_REGRESSION: skip

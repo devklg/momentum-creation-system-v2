@@ -1,6 +1,6 @@
 # Memory Drift Report — all stores
 
-> Generated 2026-07-12T03:46:02.149Z by `node server/scripts/generate-memory-index.mjs` (`pnpm memory:index`).
+> Generated 2026-07-12T08:10:42.231Z by `node server/scripts/generate-memory-index.mjs` (`pnpm memory:index`).
 >
 > **READ-ONLY.** This report *describes* non-conformance against ACR-0012 /
 > ACR-0013. Under ACR-0012 §4, mutating existing records — backfill,
@@ -17,9 +17,9 @@
 | `universal_gateway.session_handoffs` | memory | 167 |
 | `universal_gateway.chat_registry` | memory | 40 |
 | `momentum.decisions (governance ledger)` | memory | 42 |
-| `universal_gateway.claude_learning_notes` | memory | 606 |
+| `universal_gateway.claude_learning_notes` | memory | 607 |
 | `universal_gateway.kevin_library` | memory | 19 |
-| `momentum.mcs_memory_context_index` | app | 4 |
+| `momentum.mcs_memory_context_index` | app | 5 |
 
 ## Cross-store discrepancies observed (described, not fixed)
 
@@ -27,20 +27,22 @@
 - 53 session_handoffs row(s) carry a non-integer chat_number (slugs/dates) — violates the registry numbering rule; left as-is.
 - 1 chat_registry row(s) carry a suspicious chat_number (non-integer or date-as-number, e.g. 20260610); left as-is.
 - cdx-001 (`momentum.mcs_memory_context_index`, app stack) claims aliases `digital-memory-discovery` and `dmd-mem`; the Digital Memory Discovery handle entry deliberately claims no aliases to avoid ambiguity. Kevin may reassign; agents must not mutate cdx-001.
+- 4/13 operators are DEAD on the memory stack (zero edges): expresses, supports, guides, retrieves. A hollow operator compiles an empty packet that looks like an answer — edges must be written, not backfilled mechanically.
+- 12/13 operators are DEAD on the app stack (zero edges): captures, expresses, supports, requires_context, guides, grounds, protects, excludes, hands_off_to, relates_to, supersedes, contradicts. A hollow operator compiles an empty packet that looks like an answer — edges must be written, not backfilled mechanically.
 
 ## Learning-notes corpus snapshot (`universal_gateway.claude_learning_notes`)
 
 | Metric | Value |
 |---|---:|
-| Total notes | 606 |
+| Total notes | 607 |
 | Ungraded (no `severity`) | 170 |
 | Unassigned project (missing or `unassigned`) | 573 |
-| Named anchors | 1 |
+| Named anchors | 2 |
 | Graded `critical` | 195 |
-| Graded `high` | 194 |
+| Graded `high` | 195 |
 | Graded `medium` | 44 |
 | Graded `low` | 2 |
-| Critical-or-high share | 64.2% (target: critical <10%) |
+| Critical-or-high share | 64.3% (target: critical <10%) |
 | Severity casing drift (e.g. `HIGH`) | 3 |
 | Non-standard severity values | 1 (downgraded_to_partial_truth) |
 | No usable date at all | 208 |

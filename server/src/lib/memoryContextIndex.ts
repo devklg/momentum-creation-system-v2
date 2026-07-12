@@ -19,9 +19,10 @@
  * does not retrieve as the top hit is a failure, not a warning.
  */
 
+import type { McsMemoryAudience } from '@momentum/shared/runtime';
 import { MCS_MEMORY_CONTEXT_COMPILER_SCHEMA_VERSION } from '@momentum/shared/runtime';
 import { callGateway, DEFAULT_GATEWAY_URL } from './gatewayClient.js';
-import { AgentMemoryValidationError, AgentMemoryWriteError } from './agentMemory.js';
+import { AgentMemoryValidationError, AgentMemoryWriteError, MEMORY_AUDIENCES } from './agentMemory.js';
 
 /** App-stack connectors and containers for the context index. */
 export const CONTEXT_INDEX_STACK = {
@@ -93,6 +94,9 @@ export interface MemoryHandleInput {
   useWhen: string;
   nextAgentInstruction?: string;
   created_at?: string;
+  /** Who this handle is for (compile-time boundary). Absent = `dev_agents`
+   * (fail closed). Only `app_agents`/`both` when III-Intl-scoped. */
+  audience?: McsMemoryAudience;
 }
 
 export interface HandleReceipt {
@@ -124,6 +128,9 @@ export function validateHandle(input: MemoryHandleInput): string[] {
   }
   if (!Array.isArray(input.aliases) || input.aliases.some((a) => typeof a !== 'string' || a.trim() === '')) {
     problems.push('aliases must be an array of non-empty strings (may be empty)');
+  }
+  if (input.audience !== undefined && !MEMORY_AUDIENCES.includes(input.audience)) {
+    problems.push(`audience must be one of ${MEMORY_AUDIENCES.join('|')} when present (absent fails closed to dev_agents)`);
   }
   return problems;
 }
@@ -160,6 +167,8 @@ function buildEntryDocument(input: MemoryHandleInput, created_at: string): Recor
     weightScale: '0-10',
     named_by: input.named_by,
     status: 'active',
+    // Fail closed: an unmarked handle is a dev handle. Never app_agents.
+    audience: input.audience ?? 'dev_agents',
     category: input.category,
     tags: input.tags,
     memory_id: input.memory_id,
@@ -249,6 +258,7 @@ export async function writeHandle(input: MemoryHandleInput, options: WriteHandle
           aliases: input.aliases.join(','),
           weight: input.weight,
           named_by: input.named_by,
+          audience: input.audience ?? 'dev_agents',
           memory_id: input.memory_id,
           source: input.source_store,
           created_at,
@@ -278,6 +288,7 @@ export async function writeHandle(input: MemoryHandleInput, options: WriteHandle
           aliases: input.aliases,
           weight: input.weight,
           named_by: input.named_by,
+          audience: input.audience ?? 'dev_agents',
           created_at,
         },
       },

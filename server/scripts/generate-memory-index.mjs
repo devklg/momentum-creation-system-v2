@@ -59,6 +59,58 @@ const SEVERITY_MEANINGS = {
   low: 'incidental',
 };
 
+// The 13 graph verbs — Kevin's OPERATORS at speak-time, not schema
+// decoration. Coverage is a first-class metric: a verb with zero edges is a
+// hollow operator and must be reported as dead, never as an empty answer.
+const GRAPH_VERBS = [
+  'captures',
+  'expresses',
+  'supports',
+  'requires_context',
+  'guides',
+  'retrieves',
+  'grounds',
+  'protects',
+  'excludes',
+  'hands_off_to',
+  'relates_to',
+  'supersedes',
+  'contradicts',
+];
+const GATEWAY_URL = process.env.AGENT_MEMORY_GATEWAY_URL || 'http://localhost:2526';
+
+/** Count edges per operator on one stack's graph (read-only, via gateway).
+ * Edge types on disk are UPPERCASE on the memory stack, lowercase on the
+ * app stack — counted case-insensitively, reported lowercase. */
+async function measureVerbCoverage(connector, stack) {
+  const res = await fetch(`${GATEWAY_URL}/api/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      tool: connector,
+      action: 'cypher',
+      params: {
+        query:
+          'MATCH ()-[r]->() WITH type(r) AS t, count(r) AS c ' +
+          'WHERE toLower(t) IN $verbs RETURN toLower(t) AS verb, sum(c) AS edges',
+        params: { verbs: GRAPH_VERBS },
+      },
+    }),
+  });
+  const body = await res.json();
+  if (!res.ok || body.success === false) throw new Error(body.error || `HTTP ${res.status}`);
+  const counts = new Map();
+  for (const row of body.data?.records ?? []) {
+    counts.set(String(row.verb), (counts.get(String(row.verb)) ?? 0) + Number(row.edges ?? 0));
+  }
+  return {
+    stack,
+    connector,
+    verbs: GRAPH_VERBS.map((verb) => ({ verb, edgeCount: counts.get(verb) ?? 0 })),
+    hollowVerbs: GRAPH_VERBS.filter((verb) => (counts.get(verb) ?? 0) === 0),
+  };
+}
+
 // ---------- normalization on read (never mutates the source) ----------
 
 function firstString(...values) {
@@ -238,6 +290,39 @@ ${entryRows}
 ${aliasRows || '      <tr><td colspan="3">none</td></tr>'}
       </tbody>
     </table>
+  </section>`;
+}
+
+function renderVerbCoverage(coverages) {
+  const blocks = coverages
+    .map((cov) => {
+      if (cov.error) {
+        return `    <p class="section-note defect">Verb coverage for the ${esc(cov.stack)} stack (${esc(cov.connector)}) is UNAVAILABLE: ${esc(cov.error)}. An unmeasured operator is not a working operator.</p>`;
+      }
+      const rows = cov.verbs
+        .map(
+          (v) =>
+            `      <tr><td class="mono">${esc(v.verb)}</td><td class="num">${v.edgeCount}</td><td>${
+              v.edgeCount === 0 ? '<span class="defect">DEAD — compiles an empty packet that looks like an answer</span>' : 'populated'
+            }</td></tr>`,
+        )
+        .join('\n');
+      return `    <h3>${esc(cov.stack)} stack <span class="mono">(${esc(cov.connector)})</span> <span class="count">${
+        cov.verbs.length - cov.hollowVerbs.length
+      }/${cov.verbs.length} operators populated</span></h3>
+    <table>
+      <thead><tr><th>Operator</th><th class="num">Edges</th><th>Status</th></tr></thead>
+      <tbody>
+${rows}
+      </tbody>
+    </table>`;
+    })
+    .join('\n');
+
+  return `  <section class="verbs">
+    <h2>1b · Verb Coverage — The Operators</h2>
+    <p class="section-note">The 13 graph verbs are Kevin's operators at speak-time: handle (noun) + verb (operator) = a packet compiled for that moment. Edges are relationships, not properties — typed, directional, traversable, carrying their own provenance. A verb with zero edges is a HOLLOW OPERATOR: it compiles an empty packet that looks like an answer. This table is the first-class metric that keeps that visible.</p>
+${blocks}
   </section>`;
 }
 
@@ -644,6 +729,20 @@ async function main() {
     const integrity = buildIntegrity(notes);
     const generatedAt = new Date().toISOString();
 
+    // Verb coverage — first-class metric; degrade loudly, never silently.
+    const verbCoverages = await Promise.all(
+      [
+        ['neo4j', 'memory'],
+        ['neo4j2', 'app'],
+      ].map(async ([connector, stack]) => {
+        try {
+          return await measureVerbCoverage(connector, stack);
+        } catch (error) {
+          return { stack, connector, verbs: [], hollowVerbs: [], error: error instanceof Error ? error.message : String(error) };
+        }
+      }),
+    );
+
     const storeCounts = [
       { path: 'universal_gateway.memory_index', stack: 'memory', count: memoryIndexDocs.length },
       { path: 'universal_gateway.memory_decisions', stack: 'memory', count: kevinDecisions.length },
@@ -667,6 +766,7 @@ async function main() {
 
     const sections = [
       renderHandles(memoryIndexDocs, contextIndexDocs),
+      renderVerbCoverage(verbCoverages),
       renderMilestones(milestones),
       renderDecisions(governance, kevinDecisions),
       renderChronicle(handoffs),
@@ -674,6 +774,17 @@ async function main() {
     ].join('\n\n');
 
     const counts = storeCounts.map((r) => `${r.path.split('.').pop()} ${r.count}`).join(' · ');
+
+    for (const cov of verbCoverages) {
+      if (cov.error) {
+        discrepancies.push(`Verb coverage for the ${cov.stack} stack (${cov.connector}) could not be measured: ${cov.error}.`);
+      } else if (cov.hollowVerbs.length > 0) {
+        discrepancies.push(
+          `${cov.hollowVerbs.length}/13 operators are DEAD on the ${cov.stack} stack (zero edges): ${cov.hollowVerbs.join(', ')}. ` +
+            'A hollow operator compiles an empty packet that looks like an answer — edges must be written, not backfilled mechanically.',
+        );
+      }
+    }
 
     writeFileSync(htmlPath, renderHtml(sections, counts, generatedAt));
     writeFileSync(driftPath, renderDriftReport(integrity, storeCounts, discrepancies, generatedAt));
@@ -684,6 +795,14 @@ async function main() {
       `Integrity: ${integrity.ungraded} ungraded · ${integrity.unassignedProject} unassigned project · ` +
         `${integrity.anchors} named anchor(s) · ${integrity.criticalOrHighPct}% critical-or-high.`,
     );
+    for (const cov of verbCoverages) {
+      if (cov.error) console.log(`Verb coverage (${cov.stack}): UNAVAILABLE — ${cov.error}`);
+      else
+        console.log(
+          `Verb coverage (${cov.stack}): ${cov.verbs.length - cov.hollowVerbs.length}/13 populated` +
+            (cov.hollowVerbs.length > 0 ? ` · DEAD: ${cov.hollowVerbs.join(', ')}` : ''),
+        );
+    }
     console.log(`Wrote ${path.relative(repoRoot, htmlPath)} and ${path.relative(repoRoot, driftPath)}.`);
   } finally {
     await memory.close();

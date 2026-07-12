@@ -61,11 +61,25 @@ Only Kevin names a handle. Agents never self-declare one. When he names somethin
 - **Retrieval-test it.** Search the call phrase; it must return top with visible separation. A handle that does not retrieve is not a handle.
 
 ### 3.2 Canonical learning-note schema (agent corrections only)
-`note_id` · `subject` · `note` · `trigger` · `severity` (`critical`|`high`|`medium`|`low`, lowercase) · `tags[]` · `project` · `chat_number` · `created_at` · `canonical_collection`.
+`note_id` · `subject` · `note` · `trigger` · `severity` (`critical`|`high`|`medium`|`low`, lowercase) · `tags[]` · `project` · `chat_number` · `audience` · `created_at` · `canonical_collection`.
 Severity grades **consequence of being wrong**, not enthusiasm. `critical` = breaks production, corrupts data, or loses money. Target <10%.
+
+### 3.2b `audience` — who a memory record is FOR (added 2026-07-11, Kevin's correction)
+One shared library serves two audiences; **the boundary is at compile time, not at rest** (ACR-0013 §4.7). Every memory record — handle, note, anchor — carries `audience`:
+
+| Value | Who | Scope |
+|---|---|---|
+| `dev_agents` | Kevin / Claude / Codex | the whole library |
+| `app_agents` | Steve / Michael / Ivory | **III-Intl-scoped knowledge only** |
+| `both` | either | safe for both |
+
+**Fail closed:** an absent or unknown `audience` is treated as `dev_agents` — never `app_agents`. Existing records are NOT backfilled (§4); they simply never reach an app agent until explicitly marked. Projections of memory-stack records into the app stack (e.g. cdx-001, which self-declares `sourceStack: universal_gateway`, `appStack: mcs_v2`) are **by design and correct** — the compiler is one shared layer; `audience` is what says who each record is for.
 
 ### 3.3 Write protocol
 Mongo (canonical) → Chroma (semantic; **`add()` does not overwrite — update = delete then add**; `verified: true` is not proof) → Neo4j. **Read back and confirm.** Never report a write or delete complete without re-querying.
+
+### 3.3b Graph edges are relationships, not properties (2026-07-11)
+The Neo4j leg is not a mirror of the Mongo document. The 13 graph verbs are **typed, directional, first-class, traversable relationships** between nodes, and each edge carries its own provenance: `asserted_by`, `asserted_at`, `source`/`source_chat`. A verb stored as a property list on a node is decoration; an edge is an operator an agent can traverse (ACR-0013 §4.3). Edges are written only from stated assertions (normally Kevin's, confirmed in conversation) — never invented, never mechanically backfilled.
 
 ### 3.4 The Memory Index is a library of context
 One regenerable, printable index **across all stores in §2.1**. It MUST lead with:

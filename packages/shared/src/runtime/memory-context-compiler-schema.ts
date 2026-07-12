@@ -266,6 +266,8 @@ export interface McsContextGuardHit {
   nextAgentInstruction?: string;
   superseded: boolean;
   supersededBy?: string;
+  /** Who this record is for. Absent = unmarked = dev_agents (fail closed). */
+  audience?: McsMemoryAudience;
 }
 
 /** checkExisting() output — retrieval before invention (ACR-0014 §3.1). */
@@ -317,6 +319,43 @@ export interface McsContextPacket {
   supersededRecords: readonly McsContextGuardHit[];
   tokenBudget: { maxChars: number; usedChars: number; truncated: boolean };
   warnings: readonly string[];
+  /** The audience this packet was compiled FOR (compile-time boundary). */
+  audience?: McsMemoryAudience;
+  /** The verb-operator the packet was compiled WITH, when Kevin gave one. */
+  verb?: McsMemoryContextGraphVerb;
+  /** Which operators are populated vs. dead — a hollow verb must never look
+   * like an empty answer. */
+  verbCoverage?: McsVerbCoverageReport;
+}
+
+/**
+ * Who a memory record is FOR. The boundary is at COMPILE time, not at rest:
+ * one shared library, two audiences. `dev_agents` = Kevin / Claude / Codex
+ * (the whole library). `app_agents` = Steve / Michael / Ivory (III-Intl-scoped
+ * knowledge only). `both` = safe for either. FAIL CLOSED: an absent or
+ * unknown audience is treated as `dev_agents` — never `app_agents`.
+ */
+export type McsMemoryAudience = 'dev_agents' | 'app_agents' | 'both';
+
+/** Per-verb edge population on a stack. A verb with zero edges is a HOLLOW
+ * OPERATOR — it must be reported explicitly, never masquerade as an empty
+ * answer. */
+export interface McsVerbCoverageEntry {
+  verb: McsMemoryContextGraphVerb;
+  /** Total edges of this type on the stack. */
+  edgeCount: number;
+  /** Edges of this type reachable from the compiled handle (when compiling). */
+  handleEdgeCount?: number;
+}
+
+/** Verb coverage report — which of the 13 operators are populated and which
+ * are dead. First-class metric of the index and of every compiled packet. */
+export interface McsVerbCoverageReport {
+  stack: McsMemoryStackName;
+  measuredAt: string;
+  verbs: readonly McsVerbCoverageEntry[];
+  /** Verbs with zero edges anywhere on the stack. */
+  hollowVerbs: readonly McsMemoryContextGraphVerb[];
 }
 
 /** Context-agent candidate kinds (ACR-0014 §3.2). */

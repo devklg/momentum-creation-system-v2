@@ -20,7 +20,7 @@
  * surface the discrepancy in the drift report — we do not move data.
  */
 
-import type { McsMemoryStackName, McsMemoryStoreKey } from '@momentum/shared/runtime';
+import type { McsMemoryAudience, McsMemoryStackName, McsMemoryStoreKey } from '@momentum/shared/runtime';
 
 export interface MemoryStoreDef {
   key: McsMemoryStoreKey;
@@ -167,6 +167,28 @@ export function recordTitle(doc: Record<string, unknown>): string {
     if (typeof value === 'string' && value.trim() !== '') return value;
   }
   return String(doc._id ?? doc.id ?? '(untitled)');
+}
+
+/**
+ * Who a record is FOR — the compile-time audience boundary. FAIL CLOSED:
+ * absent or unknown audience is `dev_agents`, never `app_agents`. No memory
+ * record reaches an app agent (Steve/Michael/Ivory) unless it explicitly
+ * says so.
+ */
+export function audienceOf(doc: Record<string, unknown>): McsMemoryAudience {
+  const value = typeof doc.audience === 'string' ? doc.audience.trim().toLowerCase() : '';
+  if (value === 'app_agents' || value === 'both') return value;
+  return 'dev_agents';
+}
+
+/**
+ * May a record with `recordAudience` appear in a packet compiled for
+ * `requester`? Dev agents (Kevin/Claude/Codex) see everything; app agents
+ * see ONLY records explicitly marked `app_agents` or `both`.
+ */
+export function isVisibleToAudience(recordAudience: McsMemoryAudience, requester: McsMemoryAudience): boolean {
+  if (requester === 'app_agents') return recordAudience === 'app_agents' || recordAudience === 'both';
+  return true;
 }
 
 export function recordSummary(doc: Record<string, unknown>, maxChars = 480): string {

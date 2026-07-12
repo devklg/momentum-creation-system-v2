@@ -49,6 +49,11 @@ export const APP_STACK_CONNECTORS = ['mongodb2', 'chromadb2', 'neo4j2'] as const
 export const AGENT_NOTE_SEVERITIES = ['critical', 'high', 'medium', 'low'] as const;
 export type AgentNoteSeverity = (typeof AGENT_NOTE_SEVERITIES)[number];
 
+/** Who a record is FOR (compile-time boundary). Absent/unknown FAILS CLOSED
+ * to `dev_agents` at read time — never `app_agents`. */
+export const MEMORY_AUDIENCES = ['dev_agents', 'app_agents', 'both'] as const;
+export type MemoryAudience = (typeof MEMORY_AUDIENCES)[number];
+
 /** Every agent writes this shape. No dialects. */
 export interface AgentNote {
   /** slug-case, stable, unique. NOT `noteId`. */
@@ -71,6 +76,9 @@ export interface AgentNote {
   project: string;
   /** integer-only when known (registry numbering rule). */
   chat_number?: number;
+  /** Who this note is for. Absent = `dev_agents` (fail closed). Only mark
+   * `app_agents`/`both` when the content is III-Intl-scoped. */
+  audience?: MemoryAudience;
   /** ISO 8601. NOT `createdAt`. */
   created_at: string;
   canonical_collection: typeof AGENT_MEMORY_STACK.canonicalCollection;
@@ -134,6 +142,9 @@ export function validateAgentNote(input: AgentNoteInput): AgentNote {
   }
   if (input.chat_number !== undefined && !Number.isInteger(input.chat_number)) {
     problems.push('chat_number is integer-only when present');
+  }
+  if (input.audience !== undefined && !MEMORY_AUDIENCES.includes(input.audience)) {
+    problems.push(`audience must be one of ${MEMORY_AUDIENCES.join('|')} when present (absent fails closed to dev_agents)`);
   }
   if (Number.isNaN(new Date(created_at).getTime())) {
     problems.push(`created_at must be ISO 8601 (got ${JSON.stringify(created_at)})`);
@@ -210,6 +221,7 @@ function chromaMetadata(note: AgentNote): Record<string, string | number | boole
     canonical_collection: note.canonical_collection,
   };
   if (note.chat_number !== undefined) metadata.chat_number = note.chat_number;
+  if (note.audience !== undefined) metadata.audience = note.audience;
   if (note.priority_anchor === true) metadata.priority_anchor = true;
   if (note.anchor_phrase) metadata.anchor_phrase = note.anchor_phrase;
   return metadata;
@@ -296,6 +308,7 @@ export async function writeAgentNote(input: AgentNoteInput): Promise<AgentNoteRe
           created_at: note.created_at,
           canonical_collection: note.canonical_collection,
           ...(note.chat_number !== undefined ? { chat_number: note.chat_number } : {}),
+          ...(note.audience !== undefined ? { audience: note.audience } : {}),
           ...(note.priority_anchor === true ? { priority_anchor: true, anchor_phrase: note.anchor_phrase } : {}),
         },
       },

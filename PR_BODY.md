@@ -2,6 +2,71 @@
 
 Implements the three RATIFIED governance specs committed in this PR — `docs/governance/ACR-0012-agent-memory-schema.md` (write envelope + canonical stores), `ACR-0013-context-retrieval-standard.md` (the retrieval ladder), and `ACR-0014-context-agent.md` (guard → parse → propose → confirm → close). Extends `memory_context_compiler.schema.v1` (CDX-001) append-only; the concept was **not** rediscovered.
 
+---
+
+# Round 2 (2026-07-12) — CI unred + Kevin's three corrections
+
+## FIX 1 — CI was red: the live/deterministic split
+
+CI failed with `ECONNREFUSED 127.0.0.1:2526` — the retrieval regression reached for the Universal Gateway from a GitHub runner. **Kevin's ruling: the main library is LOCAL BY DESIGN; runners must never reach it.** Split:
+
+- **CI gate (deterministic, no network, always runs):** `server/src/lib/handleManifest.ts` now carries the committed **handle manifest fixture** (handle, call_phrase, aliases, expected memory_id, audience) and `server/src/lib/__tests__/handleManifest.test.ts` asserts every handle and alias resolves through **rung-1 invocation** via the REAL matching rule (`matchHandleDoc`, now exported pure) — unambiguously, exactly. Fails if a handle is renamed, duplicated, or dropped. Plus the audience-boundary assertions (below). 36 deterministic tests.
+- **Local-only (live):** `retrievalRegression.test.ts` runs only with `RETRIEVAL_REGRESSION=live`; otherwise it is **skipped with a loud console banner** (never a silent pass, never a false failure). `pnpm memory:verify` is the standalone live runner. `ci.yml` sets `RETRIEVAL_REGRESSION: skip` explicitly with a comment explaining why.
+- Live suite re-run on Kevin's machine after tonight's writes: **19/19 pass** (`pnpm memory:verify`: all handles retrieve).
+
+Also fixed while in there: `findExactHandle` was first-doc-wins, so one record's `useWhen` substring could shadow another record's exact call_phrase (cdx-001's useWhen contains "digital memory discovery"). Now rank-based within each store: exact handle > exact alias > useWhen. And `expandGraph` keyed graph lookups off Mongo `_id` — for learning-note anchors that's an ObjectId, not the slug; it now uses the same id rule as provenance (`note_id`/`noteId` first), which is what made anchor-rooted graph expansion work at all.
+
+## FIX 2 — `audience`: the compile-time boundary
+
+- `audience: 'dev_agents' | 'app_agents' | 'both'` added to the memory envelope: `AgentNote` (agentMemory.ts), `MemoryHandleInput`/`buildEntryDocument` (memoryContextIndex.ts), Chroma metadata, Neo4j props, and the shared schema (`McsMemoryAudience`, appended).
+- **Fail closed:** `audienceOf()` in memoryStores.ts — absent/unknown → `dev_agents`, never `app_agents`.
+- `compileContextPacket()` filters every hit list (canonical, neighbours, fallback, graph-edge endpoints) by audience; app-agent packets contain ONLY `app_agents`/`both`. Exclusion counts are reported in `warnings` without leaking content.
+- **Deterministic CI test** (no database): no dev handle survives the app-agent filter; an unmarked record never reaches an app packet.
+- **cdx-001 and the app-stack `claude_learning_notes` copy: untouched**, exactly as ruled — projections are by design; audience is what says who each record is for.
+
+## FIX 3 — the verbs are the operators
+
+- `compileContextPacket(handleOrPhrase, verb?, options)` — the verb selects the Neo4j traversal (**multi-hop**, up to 3 hops, matching UPPERCASE memory-stack and lowercase app-stack edge types); no verb → the full 13-verb chain (was 5). CLI: `pnpm memory:packet "<phrase>" --verb excludes [--audience …]`.
+- **Edges are relationships, not properties:** typed, directional, traversable; edge provenance (`asserted_by`/`asserted_at`/`source`) travels into the packet as `evidence`.
+- **Verb coverage is a first-class metric:** `measureVerbCoverage()` + `verbCoverage` on every compiled packet + a new "Verb Coverage — The Operators" section in `docs/memory-index.html` and dead-operator lines in the drift report. A **hollow operator** produces an explicit warning — e.g. compiling `--verb protects` on a handle with no PROTECTS edges says *"empty because the edges were never written, NOT because the answer is empty."*
+
+## FIX 4 — tonight's edges (Kevin is the asserter), written and read back
+
+`server/scripts/write-edges-2026-07-11.ts` (idempotent, MERGE, ON CREATE only — no existing record mutated). Memory stack, all edges `asserted_by: kevin · asserted_at: 2026-07-11 · source: chat`:
+
+- **`voice mailer reality`** — 18 edges: REQUIRES_CONTEXT×5 (apache leads callback model, lead qualification pipeline, US-only phone normalization, quiet hours/region windows, Telnyx connection wiring), GROUNDS×2, HANDS_OFF_TO×2 (PMV, Holding Tank), PROTECTS×4, EXCLUDES×3, SUPERSEDES×1 (press-1 → auto-SMS-link design), CONTRADICTS×1 ("Telnyx is ringless").
+- **`member sms channel`** — new Kevin-named handle (weight 8, audience `dev_agents`): anchor written via `writeAnchor` on the memory stack (retrieves at distance **0.290**, separation 0.856) + context-index projection via `writeHandle` (distance **0.484**, separation 0.927) + 13 edges: REQUIRES_CONTEXT×5 (consent capture NOT BUILT, backfill, STOP/HELP handler NOT BUILT, G.6 exclusion list, 10DLC brand BFPJ85Q), PROTECTS×4 (incl. membership NEVER contingent on staying subscribed), EXCLUDES×3, RELATES_TO×1 → voice mailer reality (shared Telnyx account only).
+- **All 31 edges read back and printed** with provenance; the script fails if any edge or the `kevin` assertion is missing.
+
+**Verb coverage, memory stack — before → after:**
+
+| Verb | Before | After |
+|---|---:|---:|
+| supersedes | 16 | 17 |
+| relates_to | 14 | 15 |
+| hands_off_to | 4 | 6 |
+| captures | 2 | 2 |
+| requires_context | **0** | **10** |
+| protects | **0** | **8** |
+| excludes | **0** | **6** |
+| grounds | **0** | **2** |
+| contradicts | **0** | **1** |
+| expresses / supports / guides / retrieves | 0 | 0 (still dead — Kevin asserted no such edges; none invented) |
+
+**4/13 → 9/13 operators populated.** The four still-dead verbs are named in the index and in every packet — hollow, not empty.
+
+## Round-2 governance updates
+
+ACR-0012 gains §3.2b (`audience`, fail closed) and §3.3b (edges are relationships with provenance); ACR-0013 gains §4.3 (verbs as operators), §4.7 (compile-time audience boundary), and a rewritten §5 (local-library / CI split); ACR-0014 §3.5 updated to match.
+
+## Round 2 — could not do as specified
+
+- The brief's positional signature `compileContextPacket(handleOrPhrase, verb?, audience)` is implemented as `(handleOrPhrase, verb?, options)` with `options.audience` — audience rides with `gatewayUrl`/`maxChars` rather than as a bare third positional; same operators, same semantics.
+- App-stack verb coverage remains 1/13 (only `retrieves` from handle→source edges) — tonight's edges were memory-stack assertions by ruling; nothing was mirrored to the app stack.
+- `expresses`, `supports`, `guides`, `retrieves` remain dead on the memory stack — the brief said "do not invent additional edges," so they stay dead and visibly reported.
+
+---
+
 ## Retrieval distances per handle (live, `pnpm memory:verify`, 2026-07-11)
 
 Semantic leg — top hit + visible separation (`chromadb2/mcs_memory_context_index` unless noted):

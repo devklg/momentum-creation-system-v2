@@ -3,11 +3,25 @@
  *
  *   1. INVOCATION (exact). Kevin says a call_phrase or alias → deterministic
  *      lookup against handles / aliases / useWhen. No semantic guessing.
- *   2. COMPILE. Canonical Mongo record + Neo4j graph expansion (follow
- *      requires_context, grounds, supports, hands_off_to, supersedes) +
- *      capped Chroma neighbours + implementationBriefs in their STATED order.
+ *   2. COMPILE. Canonical Mongo record + Neo4j graph expansion + capped
+ *      Chroma neighbours + implementationBriefs in their STATED order.
  *   3. SEMANTIC FALLBACK. No handle match → union search across ALL stores
  *      (never a single collection), ranked weight × recency × distance.
+ *
+ * THE VERBS ARE THE OPERATORS (ACR-0013 §4.3). The 13 graph verbs are not
+ * schema decoration — they are Kevin's operators at speak-time. Handle (noun)
+ * + verb (operator) = a packet compiled for that moment. A verb selects the
+ * Neo4j traversal (multi-hop — follow the chain); no verb → the full chain.
+ * Edges are RELATIONSHIPS, not properties: typed, directional, first-class,
+ * traversable, carrying their own provenance (asserted_by / asserted_at /
+ * source_chat). Verb coverage is a first-class metric: a hollow operator
+ * (zero edges) is reported explicitly — it must never masquerade as an
+ * empty answer.
+ *
+ * THE AUDIENCE BOUNDARY IS AT COMPILE TIME (ACR-0013 §4.7). One shared
+ * library, two audiences. Packets compiled for app agents (Steve / Michael /
+ * Ivory) include ONLY records marked `app_agents` / `both`; absent or unknown
+ * audience FAILS CLOSED to `dev_agents`. Dev agents get everything.
  *
  * Provenance on every claim; superseded records surfaced AS superseded;
  * token-budgeted and ranked internally. The server compiles — runtime agents
@@ -20,27 +34,54 @@ import type {
   McsContextGuardHit,
   McsContextPacket,
   McsContextPacketBrief,
+  McsMemoryAudience,
   McsMemoryContextGraphEdge,
+  McsMemoryContextGraphQuestionKey,
   McsMemoryContextGraphVerb,
+  McsVerbCoverageEntry,
+  McsVerbCoverageReport,
 } from '@momentum/shared/runtime';
 import { MCS_MEMORY_CONTEXT_COMPILER_SCHEMA_VERSION } from '@momentum/shared/runtime';
 import { callGateway, DEFAULT_GATEWAY_URL } from './gatewayClient.js';
 import { checkExisting } from './contextGuard.js';
-import { CONTEXT_INDEX_STACK } from './memoryContextIndex.js';
-import { MEMORY_STORES, recordDate, recordSummary, recordTitle, statedBy, storePath, type MemoryStoreDef } from './memoryStores.js';
+import { CONTEXT_INDEX_GRAPH_VERBS, CONTEXT_INDEX_STACK } from './memoryContextIndex.js';
+import {
+  MEMORY_STORES,
+  audienceOf,
+  isVisibleToAudience,
+  recordDate,
+  recordSummary,
+  recordTitle,
+  statedBy,
+  storePath,
+  type MemoryStoreDef,
+} from './memoryStores.js';
 
-/** Graph verbs the compile rung follows outward from the canonical record. */
-export const EXPANSION_VERBS: readonly McsMemoryContextGraphVerb[] = [
-  'requires_context',
-  'grounds',
-  'supports',
-  'hands_off_to',
-  'supersedes',
-];
+/** All 13 operators. No verb given → the FULL chain is followed. */
+export const EXPANSION_VERBS: readonly McsMemoryContextGraphVerb[] = CONTEXT_INDEX_GRAPH_VERBS;
+
+/** Which graph question each operator answers. */
+export const VERB_QUESTION_KEYS: Record<McsMemoryContextGraphVerb, McsMemoryContextGraphQuestionKey> = {
+  captures: 'what_created_this_memory',
+  expresses: 'what_does_this_memory_mean',
+  grounds: 'what_does_this_memory_mean',
+  supports: 'what_does_this_memory_support',
+  relates_to: 'what_does_this_memory_support',
+  requires_context: 'what_context_does_this_memory_require',
+  guides: 'what_agent_action_does_this_memory_guide',
+  retrieves: 'what_should_this_memory_retrieve',
+  protects: 'what_does_this_memory_protect_or_exclude',
+  excludes: 'what_does_this_memory_protect_or_exclude',
+  hands_off_to: 'what_does_this_memory_handoff_to',
+  supersedes: 'what_does_this_memory_mean',
+  contradicts: 'what_does_this_memory_mean',
+};
 
 const MAX_PACKET_CHARS = 24_000;
 const MAX_SEMANTIC_NEIGHBOURS = 5;
 const MAX_FALLBACK_HITS = 12;
+const MAX_GRAPH_HOPS = 3;
+const MAX_GRAPH_EDGES = 50;
 
 interface MongoQueryResult {
   documents?: Array<Record<string, unknown>>;
@@ -49,10 +90,23 @@ interface MongoQueryResult {
 export interface CompilePacketOptions {
   gatewayUrl?: string;
   maxChars?: number;
+  /** Who the packet is FOR. Fail closed: default `dev_agents`. */
+  audience?: McsMemoryAudience;
 }
 
 function normalize(text: string): string {
   return text.trim().toLowerCase();
+}
+
+/** Edge types on disk: memory-stack edges are UPPERCASE, app-stack lowercase.
+ * Traversal matches both; the packet reports the canonical lowercase verb. */
+function verbTypeUnion(verbs: readonly McsMemoryContextGraphVerb[]): string {
+  return verbs.flatMap((v) => [v, v.toUpperCase()]).join('|');
+}
+
+function toCanonicalVerb(edgeType: string): McsMemoryContextGraphVerb | null {
+  const lower = edgeType.toLowerCase() as McsMemoryContextGraphVerb;
+  return (EXPANSION_VERBS as readonly string[]).includes(lower) ? lower : null;
 }
 
 function toGuardHit(store: MemoryStoreDef, doc: Record<string, unknown>, matchKind: McsContextGuardHit['matchKind']): McsContextGuardHit {
@@ -72,6 +126,7 @@ function toGuardHit(store: MemoryStoreDef, doc: Record<string, unknown>, matchKi
     summary: recordSummary(doc, 1200),
     matchKind,
     superseded: status === 'superseded' || supersededBy != null,
+    audience: audienceOf(doc),
   };
   if (typeof doc.weight === 'number') hit.weight = doc.weight;
   if (typeof doc.useWhen === 'string') hit.useWhen = doc.useWhen;
@@ -80,17 +135,36 @@ function toGuardHit(store: MemoryStoreDef, doc: Record<string, unknown>, matchKi
   return hit;
 }
 
-interface HandleMatch {
+export interface HandleMatch {
   store: MemoryStoreDef;
   doc: Record<string, unknown>;
   matchedPhrase: string;
   matchKind: 'exact_handle' | 'exact_alias' | 'use_when';
 }
 
-/** Rung 1 — deterministic invocation lookup. No semantic guessing. */
-async function findExactHandle(query: string, gatewayUrl: string): Promise<HandleMatch | null> {
+/**
+ * The PURE rung-1 matching rule, shared by the live path and the
+ * deterministic CI manifest test: exact call_phrase / human_handle /
+ * anchor_phrase / title match, then exact alias, then useWhen substring.
+ * No network, no semantic guessing.
+ */
+export function matchHandleDoc(
+  doc: Record<string, unknown>,
+  query: string,
+): 'exact_handle' | 'exact_alias' | 'use_when' | null {
   const needle = normalize(query);
   if (needle === '') return null;
+  const eq = (v: unknown) => typeof v === 'string' && normalize(v) === needle;
+  const inList = (v: unknown) => Array.isArray(v) && v.some((x) => typeof x === 'string' && normalize(x) === needle);
+  if (eq(doc.call_phrase) || eq(doc.human_handle) || eq(doc.anchor_phrase) || eq(doc.title)) return 'exact_handle';
+  if (eq(doc.alias) || inList(doc.aliases) || inList(doc.alias_candidates)) return 'exact_alias';
+  if (typeof doc.useWhen === 'string' && normalize(doc.useWhen).includes(needle)) return 'use_when';
+  return null;
+}
+
+/** Rung 1 — deterministic invocation lookup. No semantic guessing. */
+async function findExactHandle(query: string, gatewayUrl: string): Promise<HandleMatch | null> {
+  if (normalize(query) === '') return null;
 
   const handleStores = MEMORY_STORES.filter((s) => s.key === 'mcs_memory_context_index' || s.key === 'memory_index' || s.key === 'claude_learning_notes');
 
@@ -111,19 +185,17 @@ async function findExactHandle(query: string, gatewayUrl: string): Promise<Handl
       continue; // an unreachable store cannot veto invocation on the others
     }
 
+    // Rank within the store: an exact handle beats an exact alias beats a
+    // useWhen substring, regardless of document order on disk.
+    const rank = { exact_handle: 0, exact_alias: 1, use_when: 2 } as const;
+    let best: HandleMatch | null = null;
     for (const doc of docs) {
-      const eq = (v: unknown) => typeof v === 'string' && normalize(v) === needle;
-      const inList = (v: unknown) => Array.isArray(v) && v.some((x) => typeof x === 'string' && normalize(x) === needle);
-      if (eq(doc.call_phrase) || eq(doc.human_handle) || eq(doc.anchor_phrase) || eq(doc.title)) {
-        return { store, doc, matchedPhrase: query, matchKind: 'exact_handle' };
-      }
-      if (eq(doc.alias) || inList(doc.aliases) || inList(doc.alias_candidates)) {
-        return { store, doc, matchedPhrase: query, matchKind: 'exact_alias' };
-      }
-      if (typeof doc.useWhen === 'string' && normalize(doc.useWhen).includes(needle)) {
-        return { store, doc, matchedPhrase: query, matchKind: 'use_when' };
+      const matchKind = matchHandleDoc(doc, query);
+      if (matchKind && (!best || rank[matchKind] < rank[best.matchKind])) {
+        best = { store, doc, matchedPhrase: query, matchKind };
       }
     }
+    if (best) return best;
   }
   return null;
 }
@@ -154,36 +226,114 @@ async function resolveAliasTarget(match: HandleMatch, gatewayUrl: string): Promi
   return match;
 }
 
-/** Rung 2 — Neo4j expansion on the stack the handle lives on. */
-async function expandGraph(match: HandleMatch, gatewayUrl: string, warnings: string[]): Promise<McsMemoryContextGraphEdge[]> {
+interface GraphExpansionResult {
+  edges: McsMemoryContextGraphEdge[];
+  /** Edge count per canonical verb reachable from this handle. */
+  handleVerbCounts: Partial<Record<McsMemoryContextGraphVerb, number>>;
+}
+
+/**
+ * Rung 2 — Neo4j expansion on the stack the handle lives on. The verb is the
+ * operator: it selects the traversal. Multi-hop (follow the chain, up to
+ * MAX_GRAPH_HOPS); no verb → all 13. Edge provenance (asserted_by /
+ * asserted_at / source_chat) travels on the edge as evidence.
+ */
+async function expandGraph(
+  match: HandleMatch,
+  verbs: readonly McsMemoryContextGraphVerb[],
+  audience: McsMemoryAudience,
+  gatewayUrl: string,
+  warnings: string[],
+): Promise<GraphExpansionResult> {
   const connector = match.store.stack === 'app' ? CONTEXT_INDEX_STACK.neo4jConnector : 'neo4j';
-  const id = String(match.doc._id ?? match.doc.id ?? '');
-  const verbList = EXPANSION_VERBS.map((v) => `'${v}'`).join(', ');
+  // Same id rule as provenance.recordId: slug ids (note_id/noteId) beat Mongo
+  // ObjectIds — graph nodes are keyed by the slug, not the ObjectId.
+  const id = String(match.doc.note_id ?? match.doc.noteId ?? match.doc._id ?? match.doc.id ?? '');
+  const handleVerbCounts: Partial<Record<McsMemoryContextGraphVerb, number>> = {};
   try {
     const result = await callGateway<{ records?: Array<Record<string, unknown>> }>(gatewayUrl, connector, 'cypher', {
       query:
         `MATCH (n) WHERE n.memoryContextId = $id OR n.id = $id OR n.note_id = $id ` +
-        `MATCH (n)-[r]-(m) WHERE type(r) IN [${verbList}] ` +
-        `RETURN type(r) AS verb, startNode(r) = n AS outgoing, ` +
-        `coalesce(m.memoryContextId, m.id, m.note_id, m.sourceId) AS otherId, ` +
-        `coalesce(m.title, m.human_handle, m.subject, '') AS otherTitle LIMIT 25`,
+        `MATCH p = (n)-[:${verbTypeUnion(verbs)}*1..${MAX_GRAPH_HOPS}]-(m) ` +
+        `UNWIND relationships(p) AS r ` +
+        `WITH DISTINCT r, startNode(r) AS a, endNode(r) AS b ` +
+        `RETURN type(r) AS verb, ` +
+        `coalesce(a.memoryContextId, a.id, a.note_id, a.sourceId) AS fromId, ` +
+        `coalesce(b.memoryContextId, b.id, b.note_id, b.sourceId) AS toId, ` +
+        `coalesce(a.title, a.human_handle, a.subject, '') AS fromTitle, ` +
+        `coalesce(b.title, b.human_handle, b.subject, '') AS toTitle, ` +
+        `coalesce(b.audience, 'dev_agents') AS toAudience, ` +
+        `coalesce(a.audience, 'dev_agents') AS fromAudience, ` +
+        `r.asserted_by AS assertedBy, r.asserted_at AS assertedAt, ` +
+        `coalesce(r.source_chat, r.source) AS sourceChat, r.note AS note ` +
+        `LIMIT ${MAX_GRAPH_EDGES}`,
       params: { id },
     });
     const rows = result.records ?? [];
-    return rows.map((row, i) => ({
-      edgeId: `${id}-edge-${i}`,
-      questionKey: 'what_context_does_this_memory_require' as const,
-      fromIngredientId: id,
-      verb: row.verb as McsMemoryContextGraphVerb,
-      toIngredientId: row.otherId == null ? undefined : String(row.otherId),
-      summary: `${row.outgoing ? id : String(row.otherId ?? '?')} ${String(row.verb)} ${row.outgoing ? String(row.otherId ?? '?') : id}${
-        row.otherTitle ? ` — ${String(row.otherTitle)}` : ''
-      }`,
-    }));
+    const edges: McsMemoryContextGraphEdge[] = [];
+    for (const [i, row] of rows.entries()) {
+      const verb = toCanonicalVerb(String(row.verb ?? ''));
+      if (!verb) continue;
+      const fromAudience = (String(row.fromAudience) as McsMemoryAudience) || 'dev_agents';
+      const toAudience = (String(row.toAudience) as McsMemoryAudience) || 'dev_agents';
+      if (!isVisibleToAudience(fromAudience, audience) || !isVisibleToAudience(toAudience, audience)) continue;
+      handleVerbCounts[verb] = (handleVerbCounts[verb] ?? 0) + 1;
+      const evidence: string[] = [];
+      if (row.assertedBy != null) evidence.push(`asserted_by: ${String(row.assertedBy)}`);
+      if (row.assertedAt != null) evidence.push(`asserted_at: ${String(row.assertedAt)}`);
+      if (row.sourceChat != null) evidence.push(`source: ${String(row.sourceChat)}`);
+      if (row.note != null) evidence.push(String(row.note));
+      edges.push({
+        edgeId: `${id}-edge-${i}`,
+        questionKey: VERB_QUESTION_KEYS[verb],
+        fromIngredientId: String(row.fromId ?? id),
+        verb,
+        toIngredientId: row.toId == null ? undefined : String(row.toId),
+        summary:
+          `${String(row.fromId ?? '?')} ${verb} ${String(row.toId ?? '?')}` +
+          (row.toTitle ? ` — ${String(row.toTitle)}` : ''),
+        ...(evidence.length > 0 ? { evidence } : {}),
+      });
+    }
+    return { edges, handleVerbCounts };
   } catch (error) {
     warnings.push(`graph expansion degraded (${connector}): ${error instanceof Error ? error.message : String(error)}`);
-    return [];
+    return { edges: [], handleVerbCounts };
   }
+}
+
+/**
+ * Verb coverage — a FIRST-CLASS metric. Counts edges per operator on the
+ * given stack so a dead verb is visible as dead, never as an empty answer.
+ */
+export async function measureVerbCoverage(
+  stack: 'memory' | 'app',
+  gatewayUrl: string = DEFAULT_GATEWAY_URL,
+  handleVerbCounts?: Partial<Record<McsMemoryContextGraphVerb, number>>,
+): Promise<McsVerbCoverageReport> {
+  const connector = stack === 'app' ? CONTEXT_INDEX_STACK.neo4jConnector : 'neo4j';
+  const counts = new Map<McsMemoryContextGraphVerb, number>();
+  const result = await callGateway<{ records?: Array<Record<string, unknown>> }>(gatewayUrl, connector, 'cypher', {
+    query:
+      `MATCH ()-[r]->() WITH type(r) AS t, count(r) AS c ` +
+      `WHERE toLower(t) IN $verbs RETURN toLower(t) AS verb, sum(c) AS edges`,
+    params: { verbs: [...EXPANSION_VERBS] },
+  });
+  for (const row of result.records ?? []) {
+    const verb = toCanonicalVerb(String(row.verb ?? ''));
+    if (verb) counts.set(verb, (counts.get(verb) ?? 0) + Number(row.edges ?? 0));
+  }
+  const verbs: McsVerbCoverageEntry[] = EXPANSION_VERBS.map((verb) => ({
+    verb,
+    edgeCount: counts.get(verb) ?? 0,
+    ...(handleVerbCounts ? { handleEdgeCount: handleVerbCounts[verb] ?? 0 } : {}),
+  }));
+  return {
+    stack,
+    measuredAt: new Date().toISOString(),
+    verbs,
+    hollowVerbs: verbs.filter((v) => v.edgeCount === 0).map((v) => v.verb),
+  };
 }
 
 /** Rung 2 — capped Chroma neighbours from the handle's own collection. */
@@ -200,14 +350,17 @@ async function semanticNeighbours(match: HandleMatch, query: string, gatewayUrl:
     });
     const rawIds = search.results?.ids ?? [];
     const rawDistances = search.results?.distances ?? [];
+    const rawMetadatas = search.results?.metadatas ?? [];
     const ids = Array.isArray(rawIds[0]) ? (rawIds as string[][])[0] ?? [] : (rawIds as string[]);
     const distances = Array.isArray(rawDistances[0]) ? (rawDistances as number[][])[0] ?? [] : (rawDistances as number[]);
+    const metadatas = Array.isArray(rawMetadatas[0]) ? (rawMetadatas as unknown[][])[0] ?? [] : rawMetadatas;
     const selfId = String(match.doc._id ?? match.doc.id ?? '');
     const hits: McsContextGuardHit[] = [];
     for (let i = 0; i < ids.length && hits.length < MAX_SEMANTIC_NEIGHBOURS; i += 1) {
       const idValue = ids[i];
       if (idValue === undefined || idValue === selfId) continue;
-      hits.push({ ...toGuardHit(match.store, { _id: idValue }, 'semantic'), distance: distances[i] });
+      const meta = (metadatas[i] ?? {}) as Record<string, unknown>;
+      hits.push({ ...toGuardHit(match.store, { _id: idValue, ...meta }, 'semantic'), distance: distances[i] });
     }
     return hits;
   } catch (error) {
@@ -245,28 +398,75 @@ function packetChars(packet: McsContextPacket): number {
   return JSON.stringify(packet).length;
 }
 
+/** Apply the compile-time audience boundary to a hit list. Fail closed. */
+function filterByAudience(hits: readonly McsContextGuardHit[], audience: McsMemoryAudience, excludedCounter: { count: number }): McsContextGuardHit[] {
+  const visible: McsContextGuardHit[] = [];
+  for (const hit of hits) {
+    if (isVisibleToAudience(hit.audience ?? 'dev_agents', audience)) visible.push(hit);
+    else excludedCounter.count += 1;
+  }
+  return visible;
+}
+
 /**
- * Compile a Context Packet for a call phrase or free query, per the ladder.
+ * Compile a Context Packet: handle (noun) + optional verb (operator) +
+ * audience, per the ladder. The verb selects the graph traversal; no verb →
+ * the full 13-verb chain. Packets for `app_agents` contain ONLY records
+ * explicitly marked `app_agents`/`both` — unmarked records fail closed to
+ * `dev_agents` and never reach an app agent.
  */
 export async function compileContextPacket(
   callPhraseOrQuery: string,
+  verb?: McsMemoryContextGraphVerb | null,
   options: CompilePacketOptions = {},
 ): Promise<McsContextPacket> {
   const gatewayUrl = options.gatewayUrl ?? DEFAULT_GATEWAY_URL;
   const maxChars = options.maxChars ?? MAX_PACKET_CHARS;
+  const audience = options.audience ?? 'dev_agents';
   const warnings: string[] = [];
   const compiledAt = new Date().toISOString();
+  const excluded = { count: 0 };
+  const verbs: readonly McsMemoryContextGraphVerb[] = verb ? [verb] : EXPANSION_VERBS;
 
   // Rung 1: invocation.
   let match = await findExactHandle(callPhraseOrQuery, gatewayUrl);
+  if (match && !isVisibleToAudience(audienceOf(match.doc), audience)) {
+    // The handle exists but is not for this audience — the boundary is at
+    // compile time. Fall through to (audience-filtered) semantic fallback.
+    excluded.count += 1;
+    match = null;
+  }
   if (match) {
     match = await resolveAliasTarget(match, gatewayUrl);
     const canonical = toGuardHit(match.store, match.doc, match.matchKind);
-    const [graphExpansion, neighbours] = await Promise.all([
-      expandGraph(match, gatewayUrl, warnings),
+    const [expansion, neighboursRaw] = await Promise.all([
+      expandGraph(match, verbs, audience, gatewayUrl, warnings),
       semanticNeighbours(match, callPhraseOrQuery, gatewayUrl, warnings),
     ]);
+    const neighbours = filterByAudience(neighboursRaw, audience, excluded);
     const superseded = [canonical, ...neighbours].filter((h) => h.superseded);
+
+    // Verb coverage — never let a hollow operator masquerade as an answer.
+    let verbCoverage: McsVerbCoverageReport | undefined;
+    try {
+      verbCoverage = await measureVerbCoverage(match.store.stack, gatewayUrl, expansion.handleVerbCounts);
+    } catch (error) {
+      warnings.push(`verb coverage unavailable: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    if (verb) {
+      const handleEdges = expansion.handleVerbCounts[verb] ?? 0;
+      if (handleEdges === 0) {
+        const stackEdges = verbCoverage?.verbs.find((v) => v.verb === verb)?.edgeCount ?? 0;
+        warnings.push(
+          `HOLLOW OPERATOR: verb '${verb}' has ${handleEdges} edges from '${canonical.provenance.recordId}'` +
+            (verbCoverage ? ` and ${stackEdges} edges on the ${verbCoverage.stack} stack overall` : '') +
+            `. This packet is empty because the edges were never written, NOT because the answer is empty.`,
+        );
+      }
+    }
+    if (excluded.count > 0) {
+      warnings.push(`${excluded.count} record(s) excluded by the ${audience} audience boundary (compile-time, fail closed).`);
+    }
 
     const packet: McsContextPacket = {
       schemaVersion: MCS_MEMORY_CONTEXT_COMPILER_SCHEMA_VERSION,
@@ -280,12 +480,15 @@ export async function compileContextPacket(
         ...(typeof match.doc.weight === 'number' ? { weight: match.doc.weight } : {}),
       },
       canonicalRecord: canonical,
-      graphExpansion,
+      graphExpansion: expansion.edges,
       semanticNeighbours: neighbours.filter((h) => !h.superseded),
       implementationBriefs: extractBriefs(match.doc),
       supersededRecords: superseded,
       tokenBudget: { maxChars, usedChars: 0, truncated: false },
       warnings,
+      audience,
+      ...(verb ? { verb } : {}),
+      ...(verbCoverage ? { verbCoverage } : {}),
     };
     return applyBudget(packet, maxChars);
   }
@@ -294,9 +497,13 @@ export async function compileContextPacket(
   const guard = await checkExisting(callPhraseOrQuery, { gatewayUrl });
   warnings.push(...guard.storesUnreachable.map((s) => `store unreachable during fallback: ${s}`));
   const now = Date.now();
-  const ranked = [...guard.hits].sort((a, b) => fallbackScore(b, now) - fallbackScore(a, now));
+  const visible = filterByAudience(guard.hits, audience, excluded);
+  const ranked = [...visible].sort((a, b) => fallbackScore(b, now) - fallbackScore(a, now));
   const current = ranked.filter((h) => !h.superseded).slice(0, MAX_FALLBACK_HITS);
   const superseded = ranked.filter((h) => h.superseded).slice(0, MAX_FALLBACK_HITS);
+  if (excluded.count > 0) {
+    warnings.push(`${excluded.count} record(s) excluded by the ${audience} audience boundary (compile-time, fail closed).`);
+  }
 
   const packet: McsContextPacket = {
     schemaVersion: MCS_MEMORY_CONTEXT_COMPILER_SCHEMA_VERSION,
@@ -309,6 +516,8 @@ export async function compileContextPacket(
     supersededRecords: superseded,
     tokenBudget: { maxChars, usedChars: 0, truncated: false },
     warnings,
+    audience,
+    ...(verb ? { verb } : {}),
   };
   return applyBudget(packet, maxChars);
 }
