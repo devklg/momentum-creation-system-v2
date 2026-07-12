@@ -41,6 +41,8 @@
     "catalog:api-routes:check": "node server/scripts/generate-api-route-map.mjs --check",
     "catalog:route-access": "node server/scripts/generate-route-access-matrix.mjs",
     "catalog:route-access:check": "node server/scripts/generate-route-access-matrix.mjs --check",
+    "registry:build": "node server/scripts/generate-build-registry.mjs",
+    "registry:build:check": "node server/scripts/generate-build-registry.mjs --check",
     "memory:index": "node server/scripts/generate-memory-index.mjs",
     "memory:guard": "pnpm --filter @momentum/server exec tsx scripts/context-guard.ts",
     "memory:packet": "pnpm --filter @momentum/server exec tsx scripts/compile-context-packet.ts",
