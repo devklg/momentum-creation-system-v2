@@ -139,6 +139,21 @@ Do not load these in full unless you're auditing a decision from that chat. For 
 - GraphRAG schema protocol (Chat #135+): every new external MCP tooling memory/lineage write — GraphRAG records, handoffs, decisions, learning notes, transcripts, imports, and derived memory — must call schema-enforced `quadstack.write` with `options.require: ['mongo','neo4j','chroma']` and `options.enforce_schema: true`. Include the canonical `base` envelope from `docs/graphrag-schema-contract.md`: `id`, `type`, `schema_version`, `namespace`, `source`, `created_at`, `title`, `origin_kind`, plus the correct origin field (`chat_number`, `job_id`/`service_name`, or `import_batch_id`). Do not add new `date`, `timestamp`, `chat`, `synced_chat`, or `start_time` aliases on memory records.
 - Registry numbering rule: `chat_number` is integer-only. Task slugs, dates, and provider titles belong in `task_id`, `session_label`, or provider metadata, never in `chat_number`. Unproven Claude/Codex records get `chat_number: null` and `registration_status: 'needs_reconciliation'`.
 
+**Agent memory — ACR-0012 (RATIFIED 2026-07-11).** Full spec: `docs/governance/ACR-0012-agent-memory-schema.md`. The short version every agent must know:
+
+- **Two stacks, same database name.** Agent memory (learning notes, anchors, decisions ABOUT the work) lives on the **memory stack**; app data lives on the **app stack**. Both host a database named `momentum` — a write to the wrong one succeeds silently.
+
+  | | Connectors | Instances | What goes there |
+  |---|---|---|---|
+  | Memory stack | `mongodb` / `chromadb` / `neo4j` | Mongo 28000 · Chroma 8100 · Neo4j 7687 | agent memory — canonical home `universal_gateway.claude_learning_notes` |
+  | App stack | `mongodb2` / `chromadb2` / `neo4j2` | Mongo 30000 · Chroma 8200 · Neo4j 7710 | MCS-v2 application data only — NEVER agent memory |
+
+- **One schema, no dialects** (ACR-0012 §3.2): `note_id` (not `noteId`), `subject` (not `topic`/`category`), `note` (not `learned`/`content`), `trigger`, `severity`, `tags` (may be empty, never absent), `project` (`unassigned` is a defect), `created_at` ISO 8601 (not `createdAt`), `canonical_collection`, optional integer `chat_number`.
+- **Four severities, lowercase, exactly:** `critical` (breaks production / corrupts data / loses money — target <10% of corpus), `high` (costs real rework or repeats a paid-for mistake), `medium` (useful, saves time), `low` (incidental). Severity grades the consequence of being wrong, not enthusiasm at the time of writing.
+- **Anchors: only Kevin names them.** Agents never self-declare `anchor_phrase`/`priority_anchor`. When Kevin names one, the phrase opens the Chroma document and the write must retrieval-test it (top hit, visible distance separation).
+- **Write protocol:** Mongo → Chroma → Neo4j, then **read back all three** — never report a write landed without reading it back. Chroma `add()` does NOT overwrite an existing id; updates are delete-then-add. Use the helper — `writeAgentNote()` / `writeAnchor()` in `server/src/lib/agentMemory.ts` enforce all of this; do not hand-roll memory writes.
+- **The index is regenerable:** `pnpm memory:index` rebuilds `docs/agent-memory-index.html` (the library of context) and `docs/agent-memory-drift-report.md`, read-only. The 606 legacy notes stay untouched until a separately ratified migration (§4).
+
 **Critical gotchas (learned the hard way):**
 - `mongodb.insert` wants `documents:` (plural array), not `document:`
 - `mongodb.query` uses `filter:` (not `query:`), returns `{count, documents}` not the array directly
@@ -161,4 +176,4 @@ Do not load these in full unless you're auditing a decision from that chat. For 
 
 ---
 
-*Last updated: 2026-05-21 (Chat #112). Update this file when a Layer 1 rule changes, a Layer 2 architectural fact shifts, or a Layer 3 pointer becomes stale. Do not let this file grow past ~500 lines. If it does, the discipline has failed.*
+*Last updated: 2026-07-11 (ACR-0012 agent-memory section; previously 2026-05-21, Chat #112). Update this file when a Layer 1 rule changes, a Layer 2 architectural fact shifts, or a Layer 3 pointer becomes stale. Do not let this file grow past ~500 lines. If it does, the discipline has failed.*

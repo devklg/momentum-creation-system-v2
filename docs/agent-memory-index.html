@@ -1,0 +1,4454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Memory Index — The Library of Context</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0A0A0A;
+    --ink-2: #0F0F0F;
+    --gold: #C9A84C;
+    --gold-bright: #F5C030;
+    --teal: #2DD4BF;
+    --cream: #F5EFE6;
+    --cream-mute: rgba(245, 239, 230, 0.72);
+    --cream-faint: rgba(245, 239, 230, 0.48);
+    --line: rgba(245, 239, 230, 0.12);
+    --display: 'Bebas Neue', sans-serif;
+    --body: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: var(--body);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  main { max-width: 1080px; margin: 0 auto; padding: 48px 32px 96px; }
+  header.masthead { border-bottom: 1px solid var(--gold); padding-bottom: 24px; margin-bottom: 40px; }
+  .eyebrow { color: var(--teal); font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 8px; }
+  h1 { font-family: var(--display); font-size: 56px; font-weight: 400; letter-spacing: 0.02em; color: var(--gold); margin: 0; line-height: 1; }
+  .subtitle { color: var(--cream-mute); margin: 10px 0 0; max-width: 64ch; }
+  .provenance { font-family: var(--mono); font-size: 12px; color: var(--cream-faint); margin-top: 14px; }
+  h2 { font-family: var(--display); font-size: 30px; font-weight: 400; letter-spacing: 0.03em; color: var(--gold); margin: 0 0 16px; }
+  h2 .count { color: var(--cream-faint); font-size: 22px; margin-left: 8px; }
+  h2 .meaning { display: block; font-family: var(--body); font-size: 13px; color: var(--cream-faint); letter-spacing: 0; text-transform: none; margin-top: 2px; }
+  section { margin-bottom: 48px; }
+
+  /* Corpus integrity — governance first */
+  .integrity { border: 1px solid var(--gold); background: var(--ink-2); padding: 24px; }
+  .integrity h2 { color: var(--gold-bright); }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat { border: 1px solid var(--line); padding: 14px 16px; }
+  .stat .value { font-family: var(--display); font-size: 40px; line-height: 1; color: var(--cream); }
+  .stat .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cream-faint); margin-top: 6px; }
+  .stat--defect .value { color: var(--gold-bright); }
+  .stat--anchor .value { color: var(--teal); }
+  .integrity-note { color: var(--cream-mute); font-size: 13px; max-width: 78ch; }
+  .defect { color: var(--gold-bright); font-family: var(--mono); font-size: 12px; }
+
+  /* Anchors — Kevin's handles */
+  .anchors h2 { color: var(--teal); }
+  .anchor-card { border: 1px solid var(--gold); border-left: 6px solid var(--gold-bright); background: var(--ink-2); padding: 20px 24px; margin-bottom: 16px; }
+  .anchor-phrase { font-family: var(--display); font-size: 34px; letter-spacing: 0.04em; color: var(--gold-bright); margin: 0; line-height: 1.05; }
+  .anchor-subject { color: var(--cream); font-weight: 500; margin: 8px 0 0; }
+  .anchor-meta { font-family: var(--mono); font-size: 12px; color: var(--cream-faint); margin: 6px 0 0; }
+  .anchor-body { color: var(--cream-mute); margin: 12px 0 0; font-size: 13px; }
+  .anchor-rule { color: var(--cream-faint); font-size: 13px; margin-top: 4px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--gold); }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.subject { color: var(--cream); }
+  td.date, th.date { white-space: nowrap; width: 96px; }
+  .num { text-align: right; width: 56px; font-family: var(--mono); }
+  .mono { font-family: var(--mono); font-size: 12px; color: var(--cream-mute); }
+  .anchor-mark { color: var(--teal); font-family: var(--mono); font-size: 11px; }
+  .sev { text-transform: uppercase; }
+  .sev--critical { color: var(--gold-bright); }
+  .sev--high { color: var(--gold); }
+  .sev--medium, .sev--low { color: var(--cream); }
+  .sev--nonstandard, .sev--ungraded { color: var(--cream-mute); }
+
+  /* Print — Letter, light theme (brand print variant), repeating thead, no row splits */
+  @media print {
+    @page { size: Letter; margin: 0.6in; }
+    body { background: #FFFFFF; color: var(--ink); font-size: 11px; }
+    main { max-width: none; padding: 0; }
+    h1 { color: var(--ink); }
+    .eyebrow, .anchor-mark { color: #0E8074; }
+    h2, th { color: var(--ink); border-color: var(--ink); }
+    .subtitle, .integrity-note, .anchor-body, .meaning, td.subject, td, .mono, .anchor-rule { color: var(--ink); }
+    .provenance, .stat .label, .anchor-meta, h2 .count { color: rgba(10, 10, 10, 0.6); }
+    .integrity, .anchor-card, .stat { background: #FFFFFF; border-color: var(--gold); }
+    .stat .value, .anchor-phrase { color: var(--ink); }
+    .stat--defect .value, .defect, .sev--critical { color: #8A6D1F; }
+    td { border-bottom-color: rgba(10, 10, 10, 0.15); }
+    thead { display: table-header-group; }
+    tr, .stat, .anchor-card { break-inside: avoid; page-break-inside: avoid; }
+    .severity-section, .anchors { break-before: auto; }
+    h2 { break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="masthead">
+    <p class="eyebrow">Team Magnificent · Agent Memory · ACR-0012</p>
+    <h1>The Library of Context</h1>
+    <p class="subtitle">Every durable lesson, decision, and correction in <span class="mono">universal_gateway.claude_learning_notes</span>. Memory is not an archive — it is a vocabulary. Regenerate with <span class="mono">pnpm memory:index</span>.</p>
+    <p class="provenance">Generated 2026-07-12T01:11:22.911Z · memory stack (read-only) · 606 notes</p>
+  </header>
+
+  <section class="integrity">
+    <h2>Corpus Integrity</h2>
+    <div class="stat-grid">
+      <div class="stat"><div class="value">606</div><div class="label">Total notes</div></div>
+      <div class="stat stat--defect"><div class="value">170</div><div class="label">Ungraded (no severity)</div></div>
+      <div class="stat stat--defect"><div class="value">573</div><div class="label">Unassigned project</div></div>
+      <div class="stat stat--anchor"><div class="value">1</div><div class="label">Named anchors</div></div>
+      <div class="stat stat--defect"><div class="value">64.2%</div><div class="label">Critical or high</div></div>
+      <div class="stat stat--defect"><div class="value">4</div><div class="label">Severity drift</div></div>
+      <div class="stat stat--defect"><div class="value">208</div><div class="label">No usable date</div></div>
+    </div>
+    <table>
+      <thead><tr><th>Legacy field dialect</th><th class="num">Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">noteId</td><td class="num">2</td></tr>
+        <tr><td class="mono">topic</td><td class="num">8</td></tr>
+        <tr><td class="mono">category</td><td class="num">543</td></tr>
+        <tr><td class="mono">learned</td><td class="num">2</td></tr>
+        <tr><td class="mono">lesson</td><td class="num">20</td></tr>
+        <tr><td class="mono">content</td><td class="num">545</td></tr>
+        <tr><td class="mono">createdAt</td><td class="num">2</td></tr>
+        <tr><td class="mono">timestamp</td><td class="num">3</td></tr>
+        <tr><td class="mono">date</td><td class="num">4</td></tr>
+        <tr><td class="mono">chat</td><td class="num">152</td></tr>
+      </tbody>
+    </table>
+    <p class="integrity-note">Severity grades the consequence of being wrong, not enthusiasm at the time of writing. 64.2% of the corpus is graded critical-or-high against a &lt;10% critical target — severity does not currently discriminate. 3 note(s) drift only in casing (e.g. HIGH); 1 carry a value outside the canonical four (downgraded_to_partial_truth). Nothing here has been mutated: this index normalizes on read only (ACR-0012 §4).</p>
+  </section>
+
+  <section class="anchors">
+    <h2>Named Anchors — Kevin's Handles</h2>
+    <p class="anchor-rule">An anchor is minted only when Kevin names something. Saying the phrase pulls the whole reasoning chain back into context (ACR-0012 §3.4).</p>
+    <article class="anchor-card">
+      <p class="anchor-phrase">VOICE MAILER REALITY</p>
+      <p class="anchor-subject">VOICE MAILER REALITY — MCS v2 VM dialer: audit, E2E verification, Telnyx/10DLC truth, callback pivot, AU coverage</p>
+      <p class="anchor-meta">2026-07-11 · unassigned · <span class="mono">voicemail-dialer-reality-2026-07-11</span></p>
+      <p class="anchor-body">SHIPPED: PR#150 shared VM contracts; PR#151 Team app off mock onto real API + admin live-approval toggle; PR#153 server (import unified on queue pipeline, retired divergent bulkLeads writer, campaign lifecycle table, delivery-worker gating, live-approval endpoint+audit, BA metrics/leads/export); PR#154 docs; PR#187 carried vm_e2e_verify.ts. Branches/worktrees cleaned. Harness flaws: unscoped queue drain + cleanup misses CRM records and invite tokens. | E2E VERIFIED on live tr…</p>
+    </article>
+  </section>
+
+  <section class="severity-section">
+    <h2><span class="sev sev--critical">critical</span> <span class="count">195</span> <span class="meaning">violating this breaks production, corrupts data, or loses money</span></h2>
+    <table>
+      <thead>
+        <tr><th class="date">Date</th><th class="subject">Subject</th><th>Project</th><th class="num">Chat</th><th>note_id</th></tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="date">2026-07-08</td>
+        <td class="subject">gateway_process_topology</td>
+        <td>universal-gateway-v2</td>
+        <td class="num">—</td>
+        <td class="mono">lesson_gateway_api_vs_mcp_bridge_restart_codex_20260708</td>
+      </tr>
+      <tr>
+        <td class="date">2026-07-08</td>
+        <td class="subject">database_stack_separation</td>
+        <td>momentum-creation-system-v2</td>
+        <td class="num">—</td>
+        <td class="mono">lesson_two_db_stacks_gateway_vs_mcs_codex_20260708</td>
+      </tr>
+      <tr>
+        <td class="date">2026-07-06</td>
+        <td class="subject">intervector_workflow_authority</td>
+        <td>momentum-creation-system-v2</td>
+        <td class="num">—</td>
+        <td class="mono">lesson_cdx001_not_leaf_workflow_codex_20260706</td>
+      </tr>
+      <tr>
+        <td class="date">2026-07-02</td>
+        <td class="subject">gateway_v2_ports</td>
+        <td>universal-gateway-v2</td>
+        <td class="num">—</td>
+        <td class="mono">lesson_gateway_v2_dashboard_port_3102_codex_20260702</td>
+      </tr>
+      <tr>
+        <td class="date">2026-06-30</td>
+        <td class="subject">persistence_vocabulary</td>
+        <td>universal-gateway-v2</td>
+        <td class="num">—</td>
+        <td class="mono">lesson_quadstack_means_surreal_addition_codex_20260629</td>
+      </tr>
+      <tr>
+        <td class="date">2026-06-30</td>
+        <td class="subject">mcs_v2_infrastructure</td>
+        <td>momentum-creation-system-v2</td>
+        <td class="num">—</td>
+        <td class="mono">lesson_mcs_v2_neo4j_app_instance_port_7710_codex_20260629</td>
+      </tr>
+      <tr>
+        <td class="date">2026-06-30</td>
+        <td class="subject">gateway_v2_startup</td>
+        <td>universal-gateway-v2</td>
+        <td class="num">—</td>
+        <td class="mono">lesson_gateway_v2_fastapi_startup_no_precore_gateway_wait_codex_20260629</td>
+      </tr>
+      <tr>
+        <td class="date">2026-06-26</td>
+        <td class="subject">mcs_v2_agent_roles</td>
+        <td>momentum-creation-system-v2</td>
+        <td class="num">—</td>
+        <td class="mono">lesson_michael_no_schedule_or_interview_codex_2026_06_26</td>
+      </tr>
+      <tr>
+        <td class="date">2026-06-26</td>
+        <td class="subject">mcs_v2_project_boundary</td>
+        <td>momentum-creation-system-v2</td>
+        <td class="num">—</td>
+        <td class="mono">lesson_mcs_v2_perry_removed_not_app_layer_codex_2026_06_26</td>
+      </tr>
+      <tr>
+        <td class="date">2026-06-26</td>
+        <td class="subject">agent_infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_perry_discontinued_not_working_agent_codex_20260626</td>
+      </tr>
+      <tr>
+        <td class="date">2026-06-16</td>
+        <td class="subject">perry_handoff_boundary</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_no_perry_handoff_without_explicit_save_20260616</td>
+      </tr>
+      <tr>
+        <td class="date">2026-06-16</td>
+        <td class="subject">architecture_research_discipline</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_architecture_research_before_claiming_confidence_20260616</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-24</td>
+        <td class="subject">posture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">127</td>
+        <td class="mono">lesson_attempt_before_i_cant_chat127</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-24</td>
+        <td class="subject">posture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">127</td>
+        <td class="mono">lesson_verify_before_done_chat127</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-24</td>
+        <td class="subject">persistence</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">127</td>
+        <td class="mono">lesson_write_all_live_legs_with_edges_chat127</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-24</td>
+        <td class="subject">foundation</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">127</td>
+        <td class="mono">lesson_kevin_is_not_the_integrity_check_chat127</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">strategic_posture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_strategic_posture_anticipating_growth_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">operating_principle</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_leadership_track_record_is_structural_advantage_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">operating_principle</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_elegance_share_respect_move_on_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">purpose</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_demonstrates_team_sharing_visibility_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">purpose</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_market_timing_belief_foundation_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">operating_principle</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_sharing_not_selling_belief_natural_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">purpose</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_is_word_of_mouth_advertising_at_team_scale_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">operating_principle</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_share_the_video_is_the_primary_action_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">purpose</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_purpose_is_team_building_velocity_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">scope</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_customer_conversion_tag_not_customer_program_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">scope</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_tracks_prospects_and_bas_only_not_customers_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">standing_rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_team_magnificent_scope_is_kevin_downline_only_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">standing_rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_three_mirror_authority_full_scope_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">100</td>
+        <td class="mono">lesson_mcs_locked_spec_md_is_source_of_truth_chat100</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">standing_rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_three_international_authority_scope_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">project_scope</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_v1_architectural_docs_are_foundation_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">consultation_discipline</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">90</td>
+        <td class="mono">unauthorized_scaffolding_pattern_chat90</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">93</td>
+        <td class="mono">lesson_chromadb_gpu_endpoint_v110_chat93</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_fixed_assigned_queue_number_growth_beneath_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_research_sections_useful_visual_not_fluff_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_leader_master_dashboard_god_control_required_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">port_registry</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">81</td>
+        <td class="mono">lesson_tm_onboarding_os_check_port_registry_first_codex_chat81_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">field_experience_claims</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">lesson_no_invented_field_experience_claims_chat78</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-10</td>
+        <td class="subject">dbs_screen18_design</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_screen18_simple_prospect_experience_one_video_one_line_codex_2026_05_10</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">session_protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">72</td>
+        <td class="mono">lesson_query_agent_board_at_session_start_chat72</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">design_recovery_process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">75</td>
+        <td class="mono">lesson_do_not_reconstruct_distilled_design_from_memory_codex_chat75</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_candidate_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">decision_invite_team_tank_video_view_team_leg_demo_codex_chat70_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_candidate_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">decision_countdown_dashboard_generic_compliance_safe_prospect_info_codex_chat70_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_prospect_72hr_clock_starts_after_leg_placement_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_prospect_72hr_choice_window_powerline_lineage_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_prospect_demo_eliminates_weaker_leg_concept_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_prospect_demo_dynamic_holding_tank_binary_representation_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_prospect_flow_two_piece_holding_tank_video_trigger_leg_placement_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_prospect_two_phase_demo_fomo_excitement_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_prospect_demo_dynamic_rolling_queue_counts_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_wireframe_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_screen05_binary_team_rolling_queue_holding_tank_trigger_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_replicated_inviter_dashboard_animated_growth_binary_explanation_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_replicated_dashboard_minimal_iii_reference_binary_mechanics_only_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_replicated_dashboard_exponential_growth_two_getting_two_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_replicated_dashboard_social_proof_300000_binary_history_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_team_confidence_repeat_binary_scale_with_dbs_system_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_300000_binary_history_without_dbs_tech_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_replicated_dashboard_interest_alert_and_90_second_video_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_dbs_unique_team_magnificent_high_tech_high_touch_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_design_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_screen18_is_dbs_lynchkey_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_design_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_screen18_countdown_2_in_72_cycle_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_design_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_screen18_ticker_tape_data_model_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_design_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_screen18_holding_tank_until_presentation_video_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_design_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_holding_tank_scope_tm_ba_prospects_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_design_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_72_hour_clock_triggers_after_drdan_video_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_onboarding_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_dbs_ba_3_day_training_certification_10_prospects_gate_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_design_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_dbs_scope_two_roles_tm_bas_and_their_prospects_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_design_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_screen18_animated_guided_tour_ba_host_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_design_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_dbs_goal_show_100_people_as_fast_as_possible_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_positioning</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_dbs_positioning_systemized_team_marketing_strategy_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_design_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_screen18_models_real_life_tm_placement_method_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_design_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_screen18_dynamic_building_simulator_experience_over_explanation_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_positioning</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_dbs_origin_story_tech_network_word_of_mouth_ninjas_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_screen18_design</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_screen18_prospect_first_structure_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-07</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">66</td>
+        <td class="mono">lesson_no_self_timelines_for_agent_work_chat66</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">59</td>
+        <td class="mono">lesson_mongo_objectid_string_in_match_chat59</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">58</td>
+        <td class="mono">lesson_gpu_endpoint_mismatch_chat58</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">58</td>
+        <td class="mono">lesson_savechat_must_use_quadstack_chat58</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">58</td>
+        <td class="mono">lesson_use_gpu_always_chat58</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">59</td>
+        <td class="mono">lesson_chromadb_gpu_endpoint_patched_chat59</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">60</td>
+        <td class="mono">lesson_surrealdb_jwt_ttl_root_cause_chat60</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">62</td>
+        <td class="mono">lesson_tm_assets_phantom_id_dupes_chat62</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">52</td>
+        <td class="mono">lesson_count_endpoint_stale_after_batch_writes_chat52</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">52</td>
+        <td class="mono">lesson_dbs_is_multi_tenant_chat52</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">52</td>
+        <td class="mono">lesson_no_unilateral_timelines_chat52</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_validation_stack_must_be_built</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_alert_dont_silence_errors</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_schema_first_writes</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_handoff_match_schema_before_writing</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_handoff_verify_at_handoff_time</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_docker_can_shadow_bind_native_ports</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-23</td>
+        <td class="subject">comp-plan-knowledge</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">44</td>
+        <td class="mono">chat44_seven_percent_override_fabrication_in_dr_roni_doc</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">triple-a-correction</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">correction_chat41_whitney_56k_community_active_not_idle</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">triple-a-structure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">decision_chat41_triple_a_partnership_structure_locked</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">comp-plan-knowledge</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">correction_chat41_comp_plan_facts_from_training_deck</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">triple-a-structure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">decision_chat41_whitney_placement_locked</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">triple-a-structure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_team_size_30_players_all_builders</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">triple-a-activation</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_whitney_first_conversation_happened_today</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">critical-rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">lesson_chat41_dont_interrogate_kevins_timelines_or_mechanisms</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">triple-a-activation</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_the_refrigerator_opened_metaphor_dr_roni_scope_discovery</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">triple-a-activation</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_whitney_full_profile_and_keys_to_kingdom</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">triple-a-activation</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_dr_roni_corroborated_marketing_dissatisfaction</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_kevin_agent_working_contract</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">triple-a-activation</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_whitney_vulnerability_and_dr_roni_corroboration</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">triple-a-structure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_whitney_placement_ceo_of_the_leg_apex_position</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">critical-rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_lesson_four_uploads_not_read_properly</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">session_log</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">43</td>
+        <td class="mono">chat43_session_save</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">handoff</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">43</td>
+        <td class="mono">chat43_handoff_close</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-17</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">36</td>
+        <td class="mono">lesson_chat36_claude_code_wsl2_phantom_dbs</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-17</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">36</td>
+        <td class="mono">lesson_chat36_claude_code_mcp_config_wsl2</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-17</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">38</td>
+        <td class="mono">lesson_chat38_full_protocol_every_session_no_exceptions</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-17</td>
+        <td class="subject">prospect-page</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">39</td>
+        <td class="mono">lesson_chat39_no_time_estimates_no_rushing_prospects</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-17</td>
+        <td class="subject">critical-rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">39</td>
+        <td class="mono">lesson_chat39_never_invent_timelines_consult_kevin_first</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-16</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">69e1cf9968746ad43719df1b</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-06</td>
+        <td class="subject">trust</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69d4ac13af38eba27087d85b</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-06</td>
+        <td class="subject">trust</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69d4ac13af38eba27087d85c</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-06</td>
+        <td class="subject">vocabulary</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69d4ac13af38eba27087d85d</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-06</td>
+        <td class="subject">workflow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69d4ac13af38eba27087d85e</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-01</td>
+        <td class="subject">architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">14</td>
+        <td class="mono">69ccc614bf7ca84001aeec69</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-01</td>
+        <td class="subject">protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">14</td>
+        <td class="mono">69ccca17bf7ca84001aeef9d</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-01</td>
+        <td class="subject">protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">14</td>
+        <td class="mono">69ccccf0bf7ca84001aef2c3</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-01</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">14</td>
+        <td class="mono">69ccd2a2bf7ca84001aef759</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69cbe04db42536c38436f08b</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">infrastructure-gap</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69cbf33c7b863cd28d77f38b</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">file-naming</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69cc2bf77b863cd28d77fee7</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">session-management</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69cc2e507b863cd28d780171</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">powerline-three-spec</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">10</td>
+        <td class="mono">69cc32a67b863cd28d78041a</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">enrollment-flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">10</td>
+        <td class="mono">69cc36747b863cd28d7804aa</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">live-binary-fomo</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">10</td>
+        <td class="mono">69cc39bc7b863cd28d7805b8</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">brand-positioning</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">10</td>
+        <td class="mono">69cc3af37b863cd28d7805f7</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">brand-positioning</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">10</td>
+        <td class="mono">69cc3b5a7b863cd28d780608</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">prospect-page</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">10</td>
+        <td class="mono">69cc44d27b863cd28d7807e3</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">deliverable-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_043</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">session-management</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69ccac0fbf7ca84001aed241</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">session-management</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69ccac0fbf7ca84001aed242</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">13</td>
+        <td class="mono">learn_ck00_context_read</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">core_philosophy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">13</td>
+        <td class="mono">learn_powerline_essence</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">core_philosophy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">13</td>
+        <td class="mono">learn_tech_empowers_by_doing</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">market_intelligence</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">13</td>
+        <td class="mono">learn_nwm_industry_stats</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">core_philosophy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">13</td>
+        <td class="mono">learn_human_development_primary</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">core_philosophy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">13</td>
+        <td class="mono">learn_team_building_tool_attribution</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">13</td>
+        <td class="mono">learn_kevin_name_protocol</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">13</td>
+        <td class="mono">learn_never_name_kevins_tools</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">13</td>
+        <td class="mono">learn_genspark_attribution</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">13</td>
+        <td class="mono">learn_genspark_chats_gold</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">brand_voice</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">13</td>
+        <td class="mono">learn_alacrity_definition</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">session-management-and-infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_050_055_batch</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">agent-routing</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">2</td>
+        <td class="mono">learn_042</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">session-gate</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1110</td>
+        <td class="mono">learn_040</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">session-gate</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1110</td>
+        <td class="mono">learn_040</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1110</td>
+        <td class="mono">learn_039</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1110</td>
+        <td class="mono">learn_039</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1110</td>
+        <td class="mono">learn_038</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1110</td>
+        <td class="mono">learn_038</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">skill-usage</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1110</td>
+        <td class="mono">learn_037</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">skill-usage</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1110</td>
+        <td class="mono">learn_037</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">archie-sync</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1109</td>
+        <td class="mono">learn_036</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">memory-system</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1108</td>
+        <td class="mono">learn_034</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1108</td>
+        <td class="mono">learn_034</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1108</td>
+        <td class="mono">learn_035</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">script-writing</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1108</td>
+        <td class="mono">learn_033</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1099</td>
+        <td class="mono">learn_032</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">spec-following</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1099</td>
+        <td class="mono">learn_031</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">agent-routing</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1097</td>
+        <td class="mono">learn_030</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1097</td>
+        <td class="mono">learn_028</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-26</td>
+        <td class="subject">yaml-ops</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1080</td>
+        <td class="mono">learn_026</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-25</td>
+        <td class="subject">If the conversation tells or infers an action, DO IT — don't ask permission</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1076</td>
+        <td class="mono">learn_023</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">Synthesized documents must contain ZERO unverified claims</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1073</td>
+        <td class="mono">learn_021</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">Stop rushing and skimming — do the actual work</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1073</td>
+        <td class="mono">learn_020</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">Do ONLY what Kevin asks — nothing more, nothing less</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1073</td>
+        <td class="mono">learn_019</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">Still asking permission after plan was established — AGAIN</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1072</td>
+        <td class="mono">learn_018</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">Read everything first, then execute without hand-holding</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1071</td>
+        <td class="mono">learn_015</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">Triple-stack means EVERY write hits all 3 in the SAME batch</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1071</td>
+        <td class="mono">learn_014</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">I AM Claude — I don't need the Anthropic API to analyze things</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1071</td>
+        <td class="mono">learn_012</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-23</td>
+        <td class="subject">Actually add tools to tools_library.yaml, not just claim it</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1070</td>
+        <td class="mono">learn_007</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-23</td>
+        <td class="subject">Previous session claimed tools were added but they weren't</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1070</td>
+        <td class="mono">learn_004</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_docker_shadow_native_ports</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">Actually add tools to tools_library.yaml, not just claim it</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_007</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent-routing</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1097</td>
+        <td class="mono">learn_030</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">correction</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_004</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">correction</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">correction_port_3100_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">critical</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1073</td>
+        <td class="mono">learn_019</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">critical</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1073</td>
+        <td class="mono">learn_020</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">critical</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1073</td>
+        <td class="mono">learn_021</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">critical</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1076</td>
+        <td class="mono">learn_023</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">engineering_discipline</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69cd1877e59e7f8927133508</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">I AM Claude — I don't need the Anthropic API to analyze things</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_012</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69cd1877e59e7f8927133509</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">maxwell_gpu</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69cc960ebf7ca84001aeba15</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">operating_philosophy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69cd1877e59e7f892713350b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">Read everything first, then execute without hand-holding</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_015</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1097</td>
+        <td class="mono">learn_028</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">Still asking permission after plan was established — AGAIN</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_018</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">Triple-stack means EVERY write hits all 3 in the SAME batch</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_014</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="severity-section">
+    <h2><span class="sev sev--high">high</span> <span class="count">194</span> <span class="meaning">costs real rework, or repeats a mistake already paid for</span></h2>
+    <table>
+      <thead>
+        <tr><th class="date">Date</th><th class="subject">Subject</th><th>Project</th><th class="num">Chat</th><th>note_id</th></tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="date">2026-07-11</td>
+        <td class="subject">VOICE MAILER REALITY — MCS v2 VM dialer: audit, E2E verification, Telnyx/10DLC truth, callback pivot, AU coverage <span class="anchor-mark">⚓ anchor</span></td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">voicemail-dialer-reality-2026-07-11</td>
+      </tr>
+      <tr>
+        <td class="date">2026-07-06</td>
+        <td class="subject">gateway_tooling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_gateway_v2_suffixed_stack_tools_20260706</td>
+      </tr>
+      <tr>
+        <td class="date">2026-07-06</td>
+        <td class="subject">memory_protocol_lineage</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_mcs_v2_as_muse_not_source_river_20260706</td>
+      </tr>
+      <tr>
+        <td class="date">2026-07-06</td>
+        <td class="subject">memory_protocol_vocabulary</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_memory_index_use_kevin_words_not_call_index_20260706</td>
+      </tr>
+      <tr>
+        <td class="date">2026-06-27</td>
+        <td class="subject">Chroma add() does NOT overwrite an existing id — updates need delete+add</td>
+        <td>momentum-creation-system-v2</td>
+        <td class="num">0</td>
+        <td class="mono">note_chromadb_add_no_overwrite</td>
+      </tr>
+      <tr>
+        <td class="date">2026-06-20</td>
+        <td class="subject">codex_gateway_v2_scope</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_do_not_pull_perry_into_gateway_v2_conversation_20260620</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-24</td>
+        <td class="subject">retrieval</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">127</td>
+        <td class="mono">lesson_search_library_before_claiming_absence_chat127</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-24</td>
+        <td class="subject">scope</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">127</td>
+        <td class="mono">lesson_reconciled_scope_doc_over_stale_fragments_chat127</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-23</td>
+        <td class="subject">tooling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_windows_connector_cannot_see_repo_git_chat124</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-23</td>
+        <td class="subject">tooling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_github_mcp_connector_is_api_not_local_push_chat124</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-23</td>
+        <td class="subject">tooling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_start_process_wait_passthru_for_exit_codes_chat123</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-23</td>
+        <td class="subject">tooling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">126</td>
+        <td class="mono">lesson_native_file_tools_hit_container_reconfirmed_chat126</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-23</td>
+        <td class="subject">architecture_pointer</td>
+        <td>momentum-creation-system-v1</td>
+        <td class="num">127</td>
+        <td class="mono">pointer_chat84_prospect_architecture_live_in_apps_com_chat127</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-22</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">118</td>
+        <td class="mono">lesson_search_before_declaring_tool_absent_chat118</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-22</td>
+        <td class="subject">team_magnificent_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">118</td>
+        <td class="mono">lesson_scriptmaker_role_corrected_chat118</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-22</td>
+        <td class="subject">tooling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_create_file_writes_container_not_d_drive_chat119</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-21</td>
+        <td class="subject">perry_handoff_param_shapes</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">115</td>
+        <td class="mono">lesson_perry_handoff_mcp_path_when_http_2525_unreachable_chat115</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">handoff_quality</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">102</td>
+        <td class="mono">lesson_chat100_handoff_description_inaccurate_chat102</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">express_middleware</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">102</td>
+        <td class="mono">lesson_signed_webhook_raw_body_mount_order_chat102</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_chromadb_add_no_upsert_on_existing_id_chat98</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">locked_decision</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">100</td>
+        <td class="mono">lesson_mcs_holding_tank_flush_fixed_8_weeks_chat100</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">locked_decision</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">100</td>
+        <td class="mono">lesson_mcs_leader_detection_thresholds_chat100</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">infrastructure</td>
+        <td>infrastructure</td>
+        <td class="num">—</td>
+        <td class="mono">ck_chat92_restart_claude_desktop_after_gateway</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">gateway_action_signatures</td>
+        <td>momentum-creation-system-v1</td>
+        <td class="num">—</td>
+        <td class="mono">ck_chat92_gateway_action_signatures</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">admin_design_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">89</td>
+        <td class="mono">lesson_override_as_ba_requested_emergency_chat89</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">compliance_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">89</td>
+        <td class="mono">lesson_compliance_enforcement_not_admin_queue_chat89</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">admin_design_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">89</td>
+        <td class="mono">lesson_no_algorithmic_ba_scoring_chat89</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">codex_install_paths</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_graphify_agents_home_d_agents_2026_05_18</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">process_discipline</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">90</td>
+        <td class="mono">chat_number_cross_check_at_session_start_chat90</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">surrealdb_diagnosis</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">93</td>
+        <td class="mono">lesson_surrealdb_check_process_before_dispatch_chat93</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-14</td>
+        <td class="subject">intervector_interpretation</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">84</td>
+        <td class="mono">lesson_do_not_overattribute_claude_dashboard_intent_codex_chat84</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_brand_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_magnificent_momentum_growth_result_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_brand_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_magnificent_concept_required_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_brand_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_manifesto_created_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_brand_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_exclusive_branding_required_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_ba_first_login_welcome_required_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_platform_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_tenant_architecture_replicated_sites_required_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_welcome_letter_and_flow_required_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_kevin_only_rep_broadcast_not_ba_feature_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_ai_advantage_nwm_positioning_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_ai_crm_report_absorbed_into_operating_system_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_ba_profile_edit_prospect_dashboard_sponsor_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_tm_ba_action_rate_internal_success_objective_codex_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_compliance_copy_boundary</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_tm_nwm_research_framing_internal_only_codex_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_requirements_source</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">lesson_tm_chat78_local_session_is_source_of_truth_codex_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_blueprint_checklist</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">lesson_tm_blueprint_checklist_must_include_planning_scope_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_prospect_queue_ratio_holding_tank_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_prospect_dashboard_25_to_100_beneath_reference_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_team_structure_benefit_language_prospect_safe_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_dashboard_duplicates_market_product_research_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_compliance_research</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_prospect_numbers_need_visible_citations_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_prospect_dashboard_72_hour_2in72_countdown_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_signup_registration_video_library_flow_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_prospect_explainer_must_be_rich_not_skeletal_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_clock_visual_registration_module_ba_option_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_ba_prospect_crud_required_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_ba_reports_required_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_product_strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_ai_centric_crm_positioning_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_source_assets</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_source_docs_mapped_product_presentation_welcome_letter_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_source_assets</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_dbs_design_reference_assets_added_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_source_assets</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_github_training_repo_source_content_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_source_assets</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_confirmed_dr_dan_video_url_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_open_design</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_open_design_brief_created_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_open_design_review</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_open_design_first_output_review_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">workspace_location</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">81</td>
+        <td class="mono">lesson_codex_use_d_drive_for_tm_onboarding_repo_chat81_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">stack_decision</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">81</td>
+        <td class="mono">lesson_tm_onboarding_os_mern_not_next_codex_chat81_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_artifact</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_onboarding_feature_checklist_pdf_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-12</td>
+        <td class="subject">printing_artifacts</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_hp_officejet_print_images_mspaint_pt_2026_05_12</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-12</td>
+        <td class="subject">context_engineering</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_prompt_stub_pattern_for_token_savings_chat77</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-12</td>
+        <td class="subject">open_design_prototype_workflow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_team_magnificent_rebase_original_complete_prototype_codex_2026_05_12</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">team_magnificent_assets</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_tm_master_asset_index_chat74_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">architecture_lineage</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">72</td>
+        <td class="mono">lesson_intervector_is_origin_lineage_chat72</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">72</td>
+        <td class="mono">lesson_read_sdk_source_first_chat72</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_architecture_continuity</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_dbs_two_repo_model_foundational_workflow_doc_chat74_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">session_continuity</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_claude_code_chat73_intervector_opendesign_michael_ivory_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">port_registry</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_check_gateway_port_registry_before_localhost_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">runtime_tooling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_use_node22_pnpm_kevin_stack_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">runtime_tooling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_use_node22_pnpm_kevin_stack_2026_05_08_v2</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">open_design_codex_integration</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">68</td>
+        <td class="mono">lesson_codex_open_design_detection_vs_route_404_chat68_codex5_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">open_design_codex_integration</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">68</td>
+        <td class="mono">lesson_codex_open_design_detection_vs_route_404_chat68_codex5_2026_05_08_v2</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">codex_persistence_framework_references</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_framework_references_must_hit_documentation_library_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_ivory_placement_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">decision_candidate_view_activates_leg_mechanism_codex_chat70_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_ivory_placement_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">decision_candidate_view_activates_leg_mechanism_codex_chat70_2026_05_08_v2</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_ivory_placement_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">decision_holding_tank_not_admin_placement_codex_chat70_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_ivory_placement_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">decision_video_presentation_completion_triggers_leg_alert_codex_chat70_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_candidate_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">decision_prospect_process_notice_after_completion_codex_chat70_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_candidate_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">decision_candidate_growth_snapshot_holding_tank_actual_leg_codex_chat70_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_ivory_invitation_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">71</td>
+        <td class="mono">decision_ivory_invitation_activation_flow_codex_chat71_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_ivory_invitation_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">71</td>
+        <td class="mono">decision_ivory_invitation_activation_flow_codex_chat71_2026_05_08_v2</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">71</td>
+        <td class="mono">decision_prospect_flow_distinct_group_and_ba_level_codex_chat71_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_power_of_two_html_reference_analysis_for_replicated_dashboard_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_dbs_launch_seed_30_bas_400_500_prospects_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_prospect_flow_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_dbs_launch_baseline_37_team_plus_paul_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_wireframe_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_open_design_place_replicated_dashboard_screen18_after_video_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">prospect_page_compliance</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">75</td>
+        <td class="mono">lesson_market_intel_stats_allowed_when_sourced_codex_chat75</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">dbs_design_flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">74</td>
+        <td class="mono">lesson_screen18_prospect_dashboard_page_intent_codex_2026_05_08</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-07</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">66</td>
+        <td class="mono">lesson_disclose_rendering_engine_chat66</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-07</td>
+        <td class="subject">tooling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">66</td>
+        <td class="mono">lesson_libreoffice_vs_word_pdf_drift_chat66</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-07</td>
+        <td class="subject">codex_persistence_command</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_savecodex_means_quadstack_save_codex_2026_05_07</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-07</td>
+        <td class="subject">codex_session_identity</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_subset_chat_numbering_chat68_codex5_2026_05_07</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-07</td>
+        <td class="subject">infrastructure_continuity</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_remember_quadstack_surrealdb_testing_chat_1b_v3</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-07</td>
+        <td class="subject">infrastructure_continuity</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_remember_quadstack_surrealdb_testing_chat_1b_v2</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-07</td>
+        <td class="subject">infrastructure_continuity</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_remember_quadstack_surrealdb_testing_chat_1b</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-05</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">64</td>
+        <td class="mono">lesson_surreal_authrenewal_settimeout_overflow_chat64</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-05</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">62</td>
+        <td class="mono">lesson_quadstack_no_params_skips_silently_chat62</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-05</td>
+        <td class="subject">process_enforcement</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">62</td>
+        <td class="mono">lesson_savechat_skill_created_chat62</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-05</td>
+        <td class="subject">process_enforcement</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">62</td>
+        <td class="mono">lesson_check_existing_skills_before_creating_chat62</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">data_quality</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">59</td>
+        <td class="mono">lesson_cln_heterogeneous_schema_three_eras_chat59</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">59</td>
+        <td class="mono">lesson_id_list_cache_drift_chat59</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">58</td>
+        <td class="mono">lesson_surrealdb_session_expires_after_idle_chat58</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_surrealdb_test_path_forward_slash_fragile_chat57b</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">data_quality</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">61</td>
+        <td class="mono">lesson_archie_conversations_contamination_chat61</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">61</td>
+        <td class="mono">lesson_step6_chatgpt_messages_complete_chat61</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">60</td>
+        <td class="mono">lesson_chat60_step4_tm_assets_complete</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">62</td>
+        <td class="mono">lesson_phantom_dupes_isolated_to_tm_assets_chat62</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">62</td>
+        <td class="mono">lesson_step9_mongo_chroma_alignment_chat62</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">62</td>
+        <td class="mono">lesson_archie_documents_reingest_complete_chat62</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">62</td>
+        <td class="mono">lesson_tm_assets_phantom_dupes_resolved_chat62</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">54</td>
+        <td class="mono">lesson_chromadb_path_env_is_dead_config_chat54</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">52</td>
+        <td class="mono">lesson_chromadb_connector_gpu_path_chat52</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_atomic_handoff_snapshot</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_handoff_no_stale_fields</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_handoff_filter_pitfalls</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_handoff_schema_publish_required</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_gpu_embedding_service_setup_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_chroma_embedding_default_function</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_chromadb_path_from_working_dir</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_conversation_memory_mcp_disabled_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-24</td>
+        <td class="subject">docx-discipline</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">45</td>
+        <td class="mono">chat45_docxjs_pbdr_element_order_schema_fix</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-24</td>
+        <td class="subject">docx-discipline</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">45</td>
+        <td class="mono">chat45_bw_print_conversion_checklist</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-23</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">chat43_faster_whisper_gpu_transcription_pipeline_works</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-23</td>
+        <td class="subject">triple-stack-pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">chat43_triple_stack_ingest_pattern_locked</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-23</td>
+        <td class="subject">library-architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">chat43_chromadb_retrieval_needs_source_filter_for_library_segmentation</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-23</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">44</td>
+        <td class="mono">chat44_archie_cookie_stale_handoff_workaround</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">library-architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">40</td>
+        <td class="mono">69e89cab7d3b5938fd532b94</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">reportlab-discipline</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">40</td>
+        <td class="mono">69e89a447d3b5938fd532730</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">audit-discipline</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">40</td>
+        <td class="mono">69e890d57d3b5938fd5326a3</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">project-priority</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">40</td>
+        <td class="mono">69e88dda7d3b5938fd532590</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">40</td>
+        <td class="mono">69e8866fd90780dfdc71b768</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">triple-a-structure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_triple_a_player_count_update_and_tracking_agent_need</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">infrastructure-need</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_todo_free_stt_dictation_tool_for_kevin</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-17</td>
+        <td class="subject">prospect-page</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">39</td>
+        <td class="mono">decision_chat39_testimonial_block_evolution_path</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-06</td>
+        <td class="subject">technical</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69d4ac13af38eba27087d85f</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-06</td>
+        <td class="subject">technical</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69d4ac13af38eba27087d860</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-06</td>
+        <td class="subject">technical</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69d4ac13af38eba27087d861</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">team-structure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69cbe7ce7b863cd28d77ee0e</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">product-warm-market-flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69cbf2b97b863cd28d77f342</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">product-warm-market-flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69cbf2ca7b863cd28d77f353</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">invitation-flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69cbf30d7b863cd28d77f36f</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">file-naming</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69cc2b8b7b863cd28d77fddb</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">session-management</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69ccac0fbf7ca84001aed243</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69ccac0fbf7ca84001aed244</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69ccac0fbf7ca84001aed245</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1097</td>
+        <td class="mono">learn_029</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-26</td>
+        <td class="subject">gateway-ops</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1080</td>
+        <td class="mono">learn_027</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-26</td>
+        <td class="subject">gateway-ops</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1080</td>
+        <td class="mono">learn_025</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-25</td>
+        <td class="subject">inference</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1077</td>
+        <td class="mono">learn_024</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-25</td>
+        <td class="subject">Auto-declare chat number at every session start</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1076</td>
+        <td class="mono">learn_022</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">Check gateway tools before saying you can't do something</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1071</td>
+        <td class="mono">learn_016</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">If the plan was already established, execute it — don't re-ask</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1071</td>
+        <td class="mono">learn_013</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">Same data gets same treatment — don't ask, just do it</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1071</td>
+        <td class="mono">learn_011</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">ChromaDB uses localhost not 127.0.0.1 — and know the API version</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1071</td>
+        <td class="mono">learn_010</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">Always include all three databases — never make any DB optional</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1071</td>
+        <td class="mono">learn_009</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-23</td>
+        <td class="subject">Kevin decides timelines, not Claude</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1070</td>
+        <td class="mono">learn_001</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-23</td>
+        <td class="subject">If Kevin mentions it, it matters</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1070</td>
+        <td class="mono">learn_002</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-23</td>
+        <td class="subject">Kevin wants tools that work, not placeholders</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1070</td>
+        <td class="mono">learn_005</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_chromadb_working_dir_path</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_conversation_memory_disabled</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_gpu_embedding_service_8300</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_embedding_paths_chat48</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">52</td>
+        <td class="mono">chat52_single_doc_test_claude_learning_notes_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">Always include all three databases — never make any DB optional</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_009</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1097</td>
+        <td class="mono">learn_029</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">Check gateway tools before saying you can't do something</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_016</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">ChromaDB uses localhost not 127.0.0.1 — and know the API version</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_010</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">chromadb_collection_bootstrap</td>
+        <td>team-magnificent-onboarding-os</td>
+        <td class="num">0</td>
+        <td class="mono">6a0593ba6f2d16c557c134f7</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">correction</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">correction_generic_people_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">correction</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">correction_sponsor_detail_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">If the plan was already established, execute it — don't re-ask</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_013</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">inference</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1077</td>
+        <td class="mono">learn_024</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69cd1877e59e7f892713350a</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">56</td>
+        <td class="mono">lesson_surreal_create_use_raw_query</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">56</td>
+        <td class="mono">lesson_chroma_count_does_not_refresh_on_restart_chat56</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">56</td>
+        <td class="mono">lesson_mongo_query_action_ignores_filters_chat56</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">56</td>
+        <td class="mono">lesson_gateway_restart_layers_chat56</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">invitation-flow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_046_corrected</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">preference</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_001</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">preference</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_002</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">preference</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_005</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">56</td>
+        <td class="mono">lesson_verify_ground_truth_before_consolidation_chat56</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">protocol-gap</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1076</td>
+        <td class="mono">learn_022</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">Same data gets same treatment — don't ask, just do it</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_011</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">surrealdb_auth</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">65</td>
+        <td class="mono">lesson_surrealdb_auth_recurrence_chat65</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">tool_reliability</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">96</td>
+        <td class="mono">lesson_perry_create_handoff_silent_failure_chat96</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="severity-section">
+    <h2><span class="sev sev--medium">medium</span> <span class="count">44</span> <span class="meaning">useful; saves time</span></h2>
+    <table>
+      <thead>
+        <tr><th class="date">Date</th><th class="subject">Subject</th><th>Project</th><th class="num">Chat</th><th>note_id</th></tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="date">2026-05-23</td>
+        <td class="subject">build</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_founder_login_two_gates_chat124</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-23</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_verify_git_state_not_handoff_push_claim_chat123</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-23</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">126</td>
+        <td class="mono">lesson_layered_build_for_spec_reversing_feature_chat126</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-23</td>
+        <td class="subject">tooling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">126</td>
+        <td class="mono">lesson_tsc_listfilesonly_defeats_stale_green_chat126</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-22</td>
+        <td class="subject">tooling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_git_commit_msg_via_file_not_inline_chat119</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-22</td>
+        <td class="subject">build_tooling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">120</td>
+        <td class="mono">lesson_team_app_cannot_import_shared_types_ts6059_chat120</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-22</td>
+        <td class="subject">team_magnificent_architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_cockpit_read_side_pattern_chat121</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-22</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_magic_question_needs_relational_edges_chat121</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-21</td>
+        <td class="subject">perry_connector_neo4j_leg_failure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">6a0f45af6c6c5e930cd39530</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">webhook_design</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">102</td>
+        <td class="mono">lesson_webhook_binding_client_state_with_callsid_fallback_chat102</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">build_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">102</td>
+        <td class="mono">lesson_typescript_project_references_pattern_chat102</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">build_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_typescript_project_refs_require_emit_before_downstream_noemit_chat104</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-19</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">101</td>
+        <td class="mono">lesson_the_key_md_count_fields_drift_unless_refreshed_at_savechat_chat101</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">infrastructure</td>
+        <td>infrastructure</td>
+        <td class="num">—</td>
+        <td class="mono">ck_chat92_gpu_service_autostart_pattern</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-18</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">89</td>
+        <td class="mono">lesson_chunked_b64_transfer_to_windows_failed_chat89</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">tooling_pdf_generation</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">79</td>
+        <td class="mono">lesson_pdf_generation_check_gateway_before_local_runtime_codex_chat79_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_keymd_via_userpreferences_universal_gateway_chat80</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-13</td>
+        <td class="subject">team_magnificent_ux</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">78</td>
+        <td class="mono">tm_tickers_use_date_time_not_relative_minutes_codex_chat78_2026_05_13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-07</td>
+        <td class="subject">codex_session_identity</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">68</td>
+        <td class="mono">lesson_codex_chat68_session_identity_2026_05_07</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-07</td>
+        <td class="subject">codex_session_identity</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">68</td>
+        <td class="mono">lesson_codex_chat68_session_identity_2026_05_07_v2</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-07</td>
+        <td class="subject">codex_output_handling</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_codex_create_doc_when_user_asks_doc_chat68_codex5</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-05</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">64</td>
+        <td class="mono">lesson_gmail_oauth_settimeout_overflow_chat64</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-05</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">64</td>
+        <td class="mono">lesson_project_logs_belong_with_project_chat64</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-05</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">62</td>
+        <td class="mono">lesson_savechat_self_audit_chat62</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_dashboard_can_lie_about_connector_status_chat57b</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-27</td>
+        <td class="subject">audit</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_audit_chroma_via_sqlite3_direct</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">library-architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">40</td>
+        <td class="mono">69e89c757d3b5938fd532b83</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-22</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">40</td>
+        <td class="mono">69e890d57d3b5938fd5326a4</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-06</td>
+        <td class="subject">technical</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69d4ac13af38eba27087d862</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">system-design</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">8</td>
+        <td class="mono">69ccac0fbf7ca84001aed246</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-24</td>
+        <td class="subject">Use the skill-creator skill to create and package skills</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1071</td>
+        <td class="mono">learn_017</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-23</td>
+        <td class="subject">Search past chats when Kevin references prior discussions</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1070</td>
+        <td class="mono">learn_008</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-23</td>
+        <td class="subject">Kevin is a builder who moves fast</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1070</td>
+        <td class="mono">learn_003</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-23</td>
+        <td class="subject">Don't put things in separate locations — consolidate</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">1070</td>
+        <td class="mono">learn_006</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">48</td>
+        <td class="mono">lesson_audit_chroma_via_sqlite</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_sandbox_scope</td>
+        <td>team-magnificent-onboarding-os</td>
+        <td class="num">0</td>
+        <td class="mono">6a0593ba6f2d16c557c134f8</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">build-discipline</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">40</td>
+        <td class="mono">69e88dda7d3b5938fd532591</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">build-discipline</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">40</td>
+        <td class="mono">69e89a447d3b5938fd532731</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">codex_integration</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">65</td>
+        <td class="mono">lesson_codex_cli_gateway_onboarding_chat65</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">data_quality</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">rule19_extraction_tm_session_2026_04_27_chat61</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_003</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">preference</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_006</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">Search past chats when Kevin references prior discussions</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_008</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">Use the skill-creator skill to create and package skills</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">learn_017</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="severity-section">
+    <h2><span class="sev sev--low">low</span> <span class="count">2</span> <span class="meaning">incidental</span></h2>
+    <table>
+      <thead>
+        <tr><th class="date">Date</th><th class="subject">Subject</th><th>Project</th><th class="num">Chat</th><th>note_id</th></tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="date">2026-05-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_surreal_root_user_persists_in_rocksdb_chat57b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">perry_handoff_param_shapes</td>
+        <td>team-magnificent-onboarding-os</td>
+        <td class="num">81</td>
+        <td class="mono">6a05d9096f2d16c557c32b4c</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="severity-section">
+    <h2><span class="sev sev--nonstandard">non-standard</span> <span class="count">1</span> <span class="meaning">severity value outside the canonical four — counted, never silently coerced</span></h2>
+    <table>
+      <thead>
+        <tr><th class="date">Date</th><th class="subject">Subject</th><th>Project</th><th class="num">Chat</th><th>note_id</th></tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="date">2026-05-08</td>
+        <td class="subject">surrealdb_auth</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">72</td>
+        <td class="mono">lesson_invalidateonexpiry_aborts_auth_chat72</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="severity-section">
+    <h2><span class="sev sev--ungraded">ungraded</span> <span class="count">170</span> <span class="meaning">no severity at all — invisible to triage until graded</span></h2>
+    <table>
+      <thead>
+        <tr><th class="date">Date</th><th class="subject">Subject</th><th>Project</th><th class="num">Chat</th><th>note_id</th></tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="date">2026-07-09</td>
+        <td class="subject">codex exec launch mechanics (orchestration skill addendum)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">codex-exec-stdin-2026-07-09</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-31</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">147</td>
+        <td class="mono">6a1d1cf52b17accca0439579</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-31</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">147</td>
+        <td class="mono">6a1d1cf52b17accca043957a</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-31</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">147</td>
+        <td class="mono">6a1d1cf52b17accca043957b</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-31</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">147</td>
+        <td class="mono">6a1d1cf52b17accca043957c</td>
+      </tr>
+      <tr>
+        <td class="date">2026-05-31</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">147</td>
+        <td class="mono">6a1d1cf52b17accca043957d</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-05</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">69d255509663d7c6684fde95</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-04</td>
+        <td class="subject">tech-stack</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">28</td>
+        <td class="mono">note_28_003</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-04</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">28</td>
+        <td class="mono">note_28_001</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-04</td>
+        <td class="subject">design</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">28</td>
+        <td class="mono">note_28_002</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-03</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_binary_two_lines_not_tree</td>
+      </tr>
+      <tr>
+        <td class="date">2026-04-01</td>
+        <td class="subject">file-verification</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">12</td>
+        <td class="mono">69cc824d7b863cd28d7821a3</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-31</td>
+        <td class="subject">file-delivery</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">11</td>
+        <td class="mono">69cc78617b863cd28d781615</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">6</td>
+        <td class="mono">69c6e58d39f2165f7898bbdf</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">team-magnificent-vision</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">6</td>
+        <td class="mono">69c7045239f2165f7898ca02</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">team-magnificent-strategy</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">6</td>
+        <td class="mono">69c7045239f2165f7898ca13</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">session-continuity</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">6</td>
+        <td class="mono">69c7045239f2165f7898ca24</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">three-compliance</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">6</td>
+        <td class="mono">69c7045239f2165f7898ca35</td>
+      </tr>
+      <tr>
+        <td class="date">2026-03-27</td>
+        <td class="subject">vision</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">6</td>
+        <td class="mono">learn_chat6_vision</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_ticker_format</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_no_three_branding</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_ticker_format</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_no_three_branding</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_ba_training_frame</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">decision_chat24_dynamic_building_system</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">decision_chat24_prospect_page_presenting_tool</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">decision_chat24_script_maker_agent</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">decision_chat24_ivory_agent</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_umbrella_naming</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_two_paths_one_pipeline</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_mentor_vs_automation</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_visualizer_for_wireframes</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_antipattern_tree_diagram</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_cta_always_alerts_ba</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_handoff_before_context_exhaustion</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_persist_then_confirm</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_agent_naming_personality</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_product_context_tracking</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_binary_two_lines_not_tree</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_ticker_format</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_no_three_branding</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_ba_training_frame</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">decision_chat24_dynamic_building_system</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">decision_chat24_prospect_page_presenting_tool</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">decision_chat24_script_maker_agent</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">decision_chat24_ivory_agent</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_umbrella_naming</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_two_paths_one_pipeline</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_mentor_vs_automation</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_visualizer_for_wireframes</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_antipattern_tree_diagram</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_cta_always_alerts_ba</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_handoff_before_context_exhaustion</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_persist_then_confirm</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_agent_naming_personality</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">24</td>
+        <td class="mono">lesson_chat24_product_context_tracking</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td>DynamicBuildingSystem</td>
+        <td class="num">30</td>
+        <td class="mono">component_admin_dashboard_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">brand_colors_team_magnificent_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">session_summary_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td>dynamic-building-system</td>
+        <td class="num">—</td>
+        <td class="mono">dbs_placement_schema_reference_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td>dynamic-building-system</td>
+        <td class="num">—</td>
+        <td class="mono">tm_ref_backoffice_001_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td>dynamic-building-system</td>
+        <td class="num">—</td>
+        <td class="mono">tm_ref_powerleg_001_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">57</td>
+        <td class="mono">quadstack_smoke_chat57_chroma</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">57</td>
+        <td class="mono">quadstack_4way_chat57_chroma</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">(no subject)</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">handoff_chat_57b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_architecture</td>
+        <td>malinke_app</td>
+        <td class="num">35</td>
+        <td class="mono">malinke_sissoko_created</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_041</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_042</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_043</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_044</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_045</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_046</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_047</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_041_let_kevin_tell_story</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_042_emotional_truth</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_043_paul_character</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_044_kevin_unique_value</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_045_timing_everything</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_046_reversal_redemption</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">agent_lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_047_core_message</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">archie_scope_clarification</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">correction_archie_covers_both_clients_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">archie_sync_backlog</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">todo_archie_backlog_27_days_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">architecture</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">decision_single_line_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">business_logic</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">learn_recruited_count_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">business_logic</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">decision_recruited_count_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">conversation_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_048</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">conversation_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_049</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">conversation_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_050</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">conversation_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_048_pattern_correction</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">conversation_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_049_pattern_story_sharing</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">conversation_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">25</td>
+        <td class="mono">learn_050_pattern_this_is_why</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">critical-rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_trust_threshold_kevin_considering_going_old_school</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">critical-rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_pmv_is_kevins_binary_definition_agent_was_doing_math_instead</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">critical-rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_lesson_kevin_uses_exponents_to_teach_structure_not_arithmetic</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">critical-rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_FINAL_kevin_was_telling_me_gratitude_cascade_not_marketing</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">critical-rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_FINAL_LESSON_miracle_worker_not_influencer_not_list</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">critical-rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_why_celebrities_endorse_witness_vs_endorsement</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">critical-rule</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_lesson_start_with_ba_count_times_200cv_not_sales_dollars</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">data_format</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">learn_tm_id_format_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">decisions</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">chat7-graph-decisions</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">deliverable_added</td>
+        <td>malinke_app</td>
+        <td class="num">35</td>
+        <td class="mono">malinke_handwriting_workbook_added</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">design</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">28</td>
+        <td class="mono">note_28_002_chroma</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">design_system</td>
+        <td>malinke_app</td>
+        <td class="num">35</td>
+        <td class="mono">malinke_design_system_locked</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">design_system_correction</td>
+        <td>malinke_app</td>
+        <td class="num">35</td>
+        <td class="mono">malinke_design_system_v2_blackwhite</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">development_workflow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">learn_html_mock_first_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">explainer_guide</td>
+        <td>dynamic-building-system</td>
+        <td class="num">—</td>
+        <td class="mono">tm_guide_backoffice_explainer_001_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">failures</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">chat7-graph-failures</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">feature_design</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">learn_sponsor_report_structure_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">framework_adoption</td>
+        <td>malinke_app</td>
+        <td class="num">35</td>
+        <td class="mono">bmad_v6_adoption_chat35</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">graph_design</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">35</td>
+        <td class="mono">future_agent_graph_edges_chat35</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">graphrag_cache_purpose</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">graphrag_cache_purpose_token_savings_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">57</td>
+        <td class="mono">lesson_quadstack_built_chat57</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">57</td>
+        <td class="mono">lesson_chat52_heal_chatgpt_messages_largely_failed_chat57</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">57</td>
+        <td class="mono">lesson_cannot_restart_gateway_from_inside_gateway_chat57</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">28</td>
+        <td class="mono">note_28_001_chroma</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_claude_gateway_reads_are_sandbox_redirected_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_surreal_was_never_installed_phantom_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_surreal_is_cli_command_not_exe_path_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_mongoose_tool_registry_lives_in_mcp_universal_gateway_db_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_connector_enabled_flag_db_is_source_of_truth_not_yaml_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_neon_postgres_coldstart_timeout_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_gmail_connector_two_bugs_env_and_registry_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_connector_status_and_lasterror_fields_unreliable_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_github_pat_401_and_gmail_invalid_grant_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_github_copilot_endpoint_needs_subscription_db_is_truth_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_gmail_db_doc_still_smtp_shape_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_github_official_remote_WORKS_resolution_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure_decision</td>
+        <td>malinke_app</td>
+        <td class="num">35</td>
+        <td class="mono">intervector_adaptation_chat35</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure_test</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">surrealdb_30day_test_started_2026_04_30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure_wiring</td>
+        <td>malinke_app</td>
+        <td class="num">35</td>
+        <td class="mono">universal_gateway_mcp_chat35</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">infrastructure_wiring</td>
+        <td>malinke_app</td>
+        <td class="num">35</td>
+        <td class="mono">wsl_claude_code_gateway_chat35</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_archive_discovery_2026_04_05</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_compaction_handling_2026_04_05</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_archie_date_limit_2026_04_05</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_code_in_markdown_2026_04_05</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_powerline_dbs_lineage_2026_04_05</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_doc_analysis_pattern_2026_04_05</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">lesson</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_behavioral_source_2026_04_05</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">lessons</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">chat7-graph-lessons</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">market-context</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_12_percent_glp1_prevalence_verified_kevin_not_guessing</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">milestone_chat</td>
+        <td>malinke_app</td>
+        <td class="num">35</td>
+        <td class="mono">milestone_chat_35_malinke_genesis</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">neon_graphrag_cache_backfill</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">neon_graphrag_backfill_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">neon_graphrag_complete_backfill</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">neon_graphrag_full_backfill_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">operating_reality</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">94</td>
+        <td class="mono">lesson_mcs_actual_team_state_41_bas_2_active_sharers_chat94</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">operational_runbook</td>
+        <td>dynamic-building-system</td>
+        <td class="num">—</td>
+        <td class="mono">tm_runbook_backoffice_kevin_001_2026_04_27</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">pattern_filesystem_archives_2026_04_05</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">personal_profile</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">35</td>
+        <td class="mono">kevin_languages_chat35</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">57</td>
+        <td class="mono">lesson_userpreferences_session_gate_underspec_chat57</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">process</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">lesson_savechat_must_create_neo4j_lesson_edges_not_just_notes_chat125b</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">project_genesis</td>
+        <td>malinke_app</td>
+        <td class="num">35</td>
+        <td class="mono">malinke_app_genesis</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">prospect-page</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">69cc1e527b863cd28d77f4fa</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">requirements</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">learn_ba_tracking_priority_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">requirements</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">decision_ba_not_people_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">session-protocol</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_failure_critical_context_not_persisted_at_session_start</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">standing_rules</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">35</td>
+        <td class="mono">kevin_standing_rules_chat35</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">strategic_brief</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">brief_powerline_to_three_001</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">triple-a-activation</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_56k_cultivated_not_tended_slippage_expected</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">triple-a-activation</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_560_customers_floor_locked_distinct_from_mixed_estimate</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">triple-a-activation</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_30k_under_whitney_infrastructure_is_the_constraint</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">triple-a-structure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_whitney_builds_two_legs_from_apex_position</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">triple-a-structure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_kevin_personal_people_state_8_and_100_plus_90_days</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">triple-a-structure</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">41</td>
+        <td class="mono">chat41_dr_roni_ask_is_2_bas_10_customers_not_56k_activation</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">ui_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">learn_status_badges_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">ui_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">pattern_dark_dashboard_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">ui_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">pattern_stats_row_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">ui_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">pattern_data_table_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">ui_pattern</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">pattern_modal_crud_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">video_assets</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">—</td>
+        <td class="mono">asset_video_list_comp_plan</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">workflow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">learn_holding_tank_pattern_chat30</td>
+      </tr>
+      <tr>
+        <td class="date">—</td>
+        <td class="subject">workflow</td>
+        <td><span class="defect">unassigned</span></td>
+        <td class="num">30</td>
+        <td class="mono">learn_claude_code_handoff_chat30</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>
