@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T09:26:43.320Z",
+  "generatedAt": "2026-07-12T10:06:09.978Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -21,10 +21,10 @@
     "/api/training/fast-start/modules/1"
   ],
   "summary": {
-    "routes": 211,
+    "routes": 212,
     "byAccessClass": {
       "raw_body_webhook": 1,
-      "admin": 90,
+      "admin": 91,
       "public_health": 2,
       "auth_bootstrap": 3,
       "auth_session": 2,
@@ -40,7 +40,7 @@
     },
     "guardCoverage": {
       "requireAuth": 87,
-      "requireAdmin": 90,
+      "requireAdmin": 91,
       "requireAdminOrHealthSecret": 1,
       "requireRuntimeInternal": 5,
       "requireSteveComplete": 72,
@@ -3966,7 +3966,7 @@
       "id": "GET /api/admin/agents/overview",
       "method": "GET",
       "fullPath": "/api/admin/agents/overview",
-      "routeSource": "server/src/routes/admin/agents.ts:26",
+      "routeSource": "server/src/routes/admin/agents.ts:27",
       "mountPath": "/api/admin/agents",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -4008,7 +4008,49 @@
       "id": "GET /api/admin/agents/health",
       "method": "GET",
       "fullPath": "/api/admin/agents/health",
-      "routeSource": "server/src/routes/admin/agents.ts:58",
+      "routeSource": "server/src/routes/admin/agents.ts:59",
+      "mountPath": "/api/admin/agents",
+      "mountPhase": "pre_gate",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/admin/agents/outbox-health",
+      "method": "GET",
+      "fullPath": "/api/admin/agents/outbox-health",
+      "routeSource": "server/src/routes/admin/agents.ts:68",
       "mountPath": "/api/admin/agents",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",

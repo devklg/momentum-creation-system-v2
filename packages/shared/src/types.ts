@@ -5193,6 +5193,7 @@ export interface McsAdminAgentOversightResponse {
 
 export type McsSupportAgentKind = 'ivory' | 'michael' | 'steve_success';
 
+
 export type McsSupportAgentInteractionKind =
   | 'invitation_draft'
   | 'followup_draft'
@@ -5914,4 +5915,41 @@ export interface McsAdminCrmIntegrityReportResponse {
     errors: Array<{ prospectId: string; kind: string; message: string }>;
   };
   findings: McsAdminCrmIntegrityFinding[];
+}
+
+export interface McsAdminOutboxDrainSummary {
+  scanned: number;
+  landed: number;
+  reEnqueued: number;
+  deadLettered: number;
+}
+
+export interface McsAdminOutboxHealthResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  worker: {
+    started: boolean;
+    inFlight: boolean;
+    startedAt: McsIsoTimestamp | null;
+    lastTickAt: McsIsoTimestamp | null;
+    lastSuccessAt: McsIsoTimestamp | null;
+    lastErrorAt: McsIsoTimestamp | null;
+    lastError: string | null;
+    intervalMs: number;
+    drainLimit: number;
+    lastSummary: McsAdminOutboxDrainSummary | null;
+    totals: McsAdminOutboxDrainSummary;
+  };
+  queue: {
+    total: number;
+    pending: number;
+    due: number;
+    scheduled: number;
+    deadLettered: number;
+    attempts: number;
+    oldestPendingAt: McsIsoTimestamp | null;
+    byTier: { knowledge: number; operational: number };
+    byTarget: { neo4j: number; chroma: number };
+  };
+  truncated: boolean;
 }

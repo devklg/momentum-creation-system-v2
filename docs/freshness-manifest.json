@@ -7,31 +7,31 @@
     {
       "file": "docs/READ-ME-FIRST.md",
       "authorityStatus": "current_navigation",
-      "contentSha256": "103ff4c4ff395e55c6881013c9c1b5429db50424844c3bd91107d63edcb24e15",
+      "contentSha256": "c223df054f16a2232dbfe0e5f7f2e3cb5530b75579399f388d49fd6ff5fb58c3",
       "reviewedAt": "2026-07-12"
     },
     {
       "file": "docs/AGENT-BRIEFING.md",
       "authorityStatus": "current_orientation",
-      "contentSha256": "8f3cbdbd3dd2a1833f5b117b8c11bd6497f423ad8b7d22488e367c62ae5e0baa",
+      "contentSha256": "80bd28d6f70ae649e7b63ca71519fa0e5b829037dcf0dc9cc38277c64837fa85",
       "reviewedAt": "2026-07-12"
     },
     {
       "file": "docs/locked-spec.md",
       "authorityStatus": "authoritative_state",
-      "contentSha256": "a3c2ccccda036a5f61f889b517b969582bd67195df1ac1cc25bf7af7aa673596",
+      "contentSha256": "c1c410d2b9d8890a82a8af1657883bb6ec780f4e36136c3c442fb0b07d54c44b",
       "reviewedAt": "2026-07-12"
     },
     {
       "file": "docs/project-wireframe.md",
       "authorityStatus": "current_build_decomposition",
-      "contentSha256": "722864096103fa57d7937d77cfa52f3f9f54f6de488ff4184d98096b2cd373e0",
+      "contentSha256": "e700362e0a45da85d92697f5d1ddc1ae1f1b4747da266d865819137e60fe2eb3",
       "reviewedAt": "2026-07-12"
     },
     {
       "file": "PLATFORM_AUDIT_PRIORITY_TASKLIST.md",
       "authorityStatus": "current_execution_queue",
-      "contentSha256": "0ee825493929495c4aef47a7b172257e9da055e21a4ec72bb4b82674fe6971cc",
+      "contentSha256": "af7a563f69cdd60e333f4cca5a695f7aa6a9557b0ea437ff29499a1699fdebc9",
       "reviewedAt": "2026-07-12"
     }
   ],
@@ -43,10 +43,10 @@
       "sources": [
         {
           "path": "docs/project-wireframe.md",
-          "contentSha256": "722864096103fa57d7937d77cfa52f3f9f54f6de488ff4184d98096b2cd373e0"
+          "contentSha256": "e700362e0a45da85d92697f5d1ddc1ae1f1b4747da266d865819137e60fe2eb3"
         }
       ],
-      "contentSha256": "b4cf54eb3d2a91a6285ad4fb65dbba373eae87472461482b3c63d109f36e669f",
+      "contentSha256": "1d163e596edbb535e3fcbbbf20d7434cf04fdcfea6f3126374095f788b218c7e",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": null
     },
@@ -57,10 +57,10 @@
       "sources": [
         {
           "path": "docs/project-wireframe.md",
-          "contentSha256": "722864096103fa57d7937d77cfa52f3f9f54f6de488ff4184d98096b2cd373e0"
+          "contentSha256": "e700362e0a45da85d92697f5d1ddc1ae1f1b4747da266d865819137e60fe2eb3"
         }
       ],
-      "contentSha256": "e6b8498158641b5907fbbe2d1200ef1eb1632c170fd15a6cb5934a36d9f8db6e",
+      "contentSha256": "804b9de7cbc40e43ace24ebbfd47637d71a0433f914d03c89326eb226f99988a",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": null
     },
@@ -71,12 +71,12 @@
       "sources": [
         {
           "path": "server/src/index.ts",
-          "contentSha256": "17770ee763ae6f133959f2a66eb12b81ba6057311e25a54bcc411d7c3c997d18"
+          "contentSha256": "3b6a3e873643ca862ab09de16d8b0db562741f27eb099a8edbf7e0c5e4d93cad"
         }
       ],
-      "contentSha256": "b9b2c7dbbf194d8a25206b387873ad74c0af7b80d3bbab2dddbca13d1ac75614",
+      "contentSha256": "8e5e98ae2a3e7b38b8f79cd42f7ad44928e91ef40aa03051ad1ecc72639e66b1",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-12T09:26:24.460Z"
+      "generatedAt": "2026-07-12T10:06:09.635Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/route-access-matrix.json",
@@ -85,12 +85,12 @@
       "sources": [
         {
           "path": "engineering/sprints/platform-audit-p1/api-route-map.json",
-          "contentSha256": "b9b2c7dbbf194d8a25206b387873ad74c0af7b80d3bbab2dddbca13d1ac75614"
+          "contentSha256": "8e5e98ae2a3e7b38b8f79cd42f7ad44928e91ef40aa03051ad1ecc72639e66b1"
         }
       ],
-      "contentSha256": "8e2594b2233167f8f873c3975b8a2e49f1880e281928b415c9a73f52bbbdd5b1",
+      "contentSha256": "3f8f8d7829bb24b85b0204b2df458ccfcf2b5d5d447736f35fecc9bfb16c92af",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-12T09:26:43.320Z"
+      "generatedAt": "2026-07-12T10:06:09.978Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/persistence-write-catalog.json",
@@ -99,10 +99,10 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "f3314459b4e6b0f47912d8e716b44dbd6090c725c0c9eabb97074c55520802e1"
+          "contentSha256": "92f92ccc73c0847015234d47df4f28341e9616e6cec5811da246609f193d68bf"
         }
       ],
-      "contentSha256": "a643dfcecf8b58f89dcdd83e220092e30c4334ee9e02137d4d2b24c63f4fef41",
+      "contentSha256": "989906a1996568122435d947148abe8bbdeea8756900195814cecfc8090d3c2a",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T09:26:34.684Z"
     },
@@ -113,14 +113,14 @@
       "sources": [
         {
           "path": "packages/shared/src",
-          "contentSha256": "80050583362581b73d0af1af945832690293efe8aaa6d0d43b5480c0166f6d77"
+          "contentSha256": "26b9bf8bb3a53fa4adb51c87ec2b8c7a399e77de7192bce34fd16a10b3836908"
         },
         {
           "path": "server/src",
-          "contentSha256": "f3314459b4e6b0f47912d8e716b44dbd6090c725c0c9eabb97074c55520802e1"
+          "contentSha256": "92f92ccc73c0847015234d47df4f28341e9616e6cec5811da246609f193d68bf"
         }
       ],
-      "contentSha256": "9a5652ab62b22319345a6909d84f66791643841dc602a53fd74b8f1118e48ae9",
+      "contentSha256": "222a34f2c8424e175696d13a9b850367af494da6b38e26ce513c3461741110f5",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T09:26:37.966Z"
     },
@@ -131,10 +131,10 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "f3314459b4e6b0f47912d8e716b44dbd6090c725c0c9eabb97074c55520802e1"
+          "contentSha256": "92f92ccc73c0847015234d47df4f28341e9616e6cec5811da246609f193d68bf"
         }
       ],
-      "contentSha256": "d862e1477039a3c350cda7eb1011f9f2eafcd2c3c80c83df92fe00ee8e59bc79",
+      "contentSha256": "1ad9c82de28cd601d4779a985ed16805757ebfe20fdcd7c5c75dc619ad3e1c5a",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T09:26:38.728Z"
     },
@@ -145,10 +145,10 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "f3314459b4e6b0f47912d8e716b44dbd6090c725c0c9eabb97074c55520802e1"
+          "contentSha256": "92f92ccc73c0847015234d47df4f28341e9616e6cec5811da246609f193d68bf"
         }
       ],
-      "contentSha256": "82508cbeaa05e2b32ddb970dc478cc8e973b4a361c6c2ee887668f1241e72a02",
+      "contentSha256": "a436fc90dc485770d421b66eb248d313f9dc939a9ce3bb9c98b0e5f9a71b9418",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T09:26:39.531Z"
     },
@@ -159,10 +159,10 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "f3314459b4e6b0f47912d8e716b44dbd6090c725c0c9eabb97074c55520802e1"
+          "contentSha256": "92f92ccc73c0847015234d47df4f28341e9616e6cec5811da246609f193d68bf"
         }
       ],
-      "contentSha256": "3e9a28a8a30979e8e002e9b91cb460c41e284399a27dcf176a3c30c0819ad5ec",
+      "contentSha256": "395657fad532a136e4c701e26f4332989aaf1028a060bedf67af7490e06bf8e8",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T09:26:40.296Z"
     },
@@ -173,10 +173,10 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "f3314459b4e6b0f47912d8e716b44dbd6090c725c0c9eabb97074c55520802e1"
+          "contentSha256": "92f92ccc73c0847015234d47df4f28341e9616e6cec5811da246609f193d68bf"
         }
       ],
-      "contentSha256": "29c770e3b6f9b4f09acbafd10288abab87df70d7062458d1de2e2bc26f427af0",
+      "contentSha256": "e4fb6a9c1135faf791efe799a6f6b2eecf75c5c295ec33d3a1d2e9e78f544ce2",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T09:26:42.580Z"
     },
@@ -187,14 +187,14 @@
       "sources": [
         {
           "path": "apps/com/src",
-          "contentSha256": "428627d7e81ce4f2197b235079825c101e7f34461bb9401a3fe9b5957e8e54f6"
+          "contentSha256": "6e3e9bb1a8b87298225f8b4f16d3f99a0bf4ef567d7cbf1c882b7015e6db9640"
         },
         {
           "path": "packages/shared/src/compliance.ts",
-          "contentSha256": "b41ffe2a0acbfa13d245fd6080be4041d2741b98ab37fdecb6fbfefdb8b10f35"
+          "contentSha256": "bc2dbf222cb4aa6e4920fb9e7d85e16a76aa1550a1e76282b7d366dafd1c333e"
         }
       ],
-      "contentSha256": "c41aa5855d52dd877205e2a47dede4ffbbeb0f5293728757754452967abfd77e",
+      "contentSha256": "644803326ff0be493dbc0f3b8d864a9aecb7bdbe1f092f97998fd279f74bd7fd",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-12T09:26:43.635Z"
     }
@@ -203,43 +203,43 @@
     {
       "file": "docs/APP_COMPLETION_AUDIT_2026-06-24.md",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "68c71b72a418e000e84337785cd1b7fcaa571cb91209a794dedd980ff5f42145",
+      "contentSha256": "2e9cf4137db920cc37cd43bf74fcfef68309d1764ed268828a3e026189b64f11",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     },
     {
       "file": "docs/APP_STATE_AUDIT_PRINT_CHECKLIST_2026-06-23.md",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "005ea8510f172f97095835e9d99a24fbae3eb33077efdab97ee1fc4a2dc9d03e",
+      "contentSha256": "ebd0c7bc99ec522285d831292f05e6e22190cfa346351f1c58e13eb66f65463f",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     },
     {
       "file": "docs/IMPLEMENTATION_PLAN_COMPLETE_APP_2026-06-23.md",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "8aa0fd015aec74f36a80885949e1d56f546cdfb948a14543ec8ecbd1e3641196",
+      "contentSha256": "4c7cfb1a7f08be2baa4cbccadfda532dde342e99ebaa42dabf91f76b53b1c524",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     },
     {
       "file": "docs/chat-105-decisions.md",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "a8693baba25c025c986408f779c9b9b07996497b000ea76bfd95c955c9b2fe03",
+      "contentSha256": "f64c1080e0e17ed8bcc1645c1a06f7fa35998e6b08f01903a9daeae54266ae28",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     },
     {
       "file": "docs/chat-109-decisions.md",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "a39708bad6c2c1d0b15197a3b9af1c349fc1166ab936498a8bb1f823b7994836",
+      "contentSha256": "5cfd17e548b0a6ad4445563f012a37934a675c1033ad1626f2a1fdbd47e29fce",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     },
     {
       "file": "docs/chat-85-decisions.md",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "016670d8f52703155b953a231b6b376ad09fbf6d014d7d012a95e8326f7f8bd0",
+      "contentSha256": "e95fce97be18f3f6dd8124f545c960ae14a18641716fbbadf9034228d67ab25d",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     },
     {
       "file": "docs/chat-94-locked-spec-rewrite.txt",
       "authorityStatus": "historical_reference_only",
-      "contentSha256": "332c3ce5790d042299d7b4dd84ac8f6010e023a47ca478e49afeb487ca0b9d41",
+      "contentSha256": "f17ff88048633d6011c0d736a91dd2ac5460f8a4b2b78bcce8a99442e6c67a6a",
       "useConstraint": "May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition."
     }
   ],
@@ -247,7 +247,7 @@
     {
       "file": "docs/dashboard-prototype.md",
       "authorityStatus": "design_reference",
-      "contentSha256": "b51f246b0ee4183b042b37da2744d2acc22d91f99dda11a295431253dadd27d8",
+      "contentSha256": "4fd3fc6b9654c1e000d92225af479ee907f8e36c6af446c7fff260d8915d88e3",
       "useConstraint": "Design authority within its named dashboard scope, subordinate to the decision ledger and locked spec."
     }
   ]

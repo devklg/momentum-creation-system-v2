@@ -292,6 +292,45 @@ const DRAIN_LIMIT = 50;
 let outboxWorkerStarted = false;
 let outboxTimer: NodeJS.Timeout | null = null;
 let outboxTickInFlight = false;
+let workerStartedAt: string | null = null;
+let workerLastTickAt: string | null = null;
+let workerLastSuccessAt: string | null = null;
+let workerLastErrorAt: string | null = null;
+let workerLastError: string | null = null;
+let workerIntervalMs = DRAIN_INTERVAL_MS;
+let workerDrainLimit = DRAIN_LIMIT;
+let workerLastSummary: DrainSummary | null = null;
+let workerTotals: DrainSummary = { scanned: 0, landed: 0, reEnqueued: 0, deadLettered: 0 };
+
+export interface ProjectionOutboxWorkerStatus {
+  started: boolean;
+  inFlight: boolean;
+  startedAt: string | null;
+  lastTickAt: string | null;
+  lastSuccessAt: string | null;
+  lastErrorAt: string | null;
+  lastError: string | null;
+  intervalMs: number;
+  drainLimit: number;
+  lastSummary: DrainSummary | null;
+  totals: DrainSummary;
+}
+
+export function getProjectionOutboxWorkerStatus(): ProjectionOutboxWorkerStatus {
+  return {
+    started: outboxWorkerStarted,
+    inFlight: outboxTickInFlight,
+    startedAt: workerStartedAt,
+    lastTickAt: workerLastTickAt,
+    lastSuccessAt: workerLastSuccessAt,
+    lastErrorAt: workerLastErrorAt,
+    lastError: workerLastError,
+    intervalMs: workerIntervalMs,
+    drainLimit: workerDrainLimit,
+    lastSummary: workerLastSummary ? { ...workerLastSummary } : null,
+    totals: { ...workerTotals },
+  };
+}
 
 export interface ProjectionOutboxWorkerOptions {
   intervalMs?: number;
@@ -309,13 +348,26 @@ export function startProjectionOutboxWorker(opts?: ProjectionOutboxWorkerOptions
 
   const intervalMs = opts?.intervalMs ?? DRAIN_INTERVAL_MS;
   const limit = opts?.drainLimit ?? DRAIN_LIMIT;
+  workerStartedAt = nowIso();
+  workerIntervalMs = intervalMs;
+  workerDrainLimit = limit;
   const drain = opts?.drain ?? drainProjectionOutbox;
 
   const runTick = async (): Promise<void> => {
     if (outboxTickInFlight) return;
     outboxTickInFlight = true;
+    workerLastTickAt = nowIso();
     try {
       const summary = await drain({ limit });
+      workerLastSummary = { ...summary };
+      workerLastSuccessAt = nowIso();
+      workerLastError = null;
+      workerTotals = {
+        scanned: workerTotals.scanned + summary.scanned,
+        landed: workerTotals.landed + summary.landed,
+        reEnqueued: workerTotals.reEnqueued + summary.reEnqueued,
+        deadLettered: workerTotals.deadLettered + summary.deadLettered,
+      };
       if (summary.landed > 0 || summary.deadLettered > 0) {
         // eslint-disable-next-line no-console
         console.log(
@@ -324,6 +376,8 @@ export function startProjectionOutboxWorker(opts?: ProjectionOutboxWorkerOptions
         );
       }
     } catch (err) {
+      workerLastErrorAt = nowIso();
+      workerLastError = err instanceof Error ? err.message : String(err);
       // eslint-disable-next-line no-console
       console.error('[projection-outbox] drain tick failed (continuing)', err);
     } finally {

@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-12T09:26:24.460Z
+- Generated: 2026-07-12T10:06:09.635Z
 - Mounted routers: 46
 - Route files: 46
-- Static route rows: 211
+- Static route rows: 212
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
 | ba_facing_gated | 72 |
-| pre_gate | 136 |
+| pre_gate | 137 |
 | pre_json_admin_body_limit | 2 |
 | raw_body_before_json | 1 |
 
@@ -22,7 +22,7 @@
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 87 |
+| admin | 88 |
 | ba_auth_steve_gated | 72 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 6 |
-| GET | 105 |
+| GET | 106 |
 | PATCH | 8 |
 | POST | 86 |
 | PUT | 6 |
@@ -187,8 +187,9 @@
 | GET | `/api/admin/vm/overview` | pre_gate | admin | admin | `server/src/routes/admin/vm.ts:32` |
 | POST | `/api/admin/vm/campaigns/:vmCampaignId/live-approval` | pre_gate | admin | admin | `server/src/routes/admin/vm.ts:87` |
 | POST | `/api/admin/vm/ownership-correction` | pre_gate | admin | admin | `server/src/routes/admin/vm.ts:145` |
-| GET | `/api/admin/agents/overview` | pre_gate | admin | admin | `server/src/routes/admin/agents.ts:26` |
-| GET | `/api/admin/agents/health` | pre_gate | admin | admin | `server/src/routes/admin/agents.ts:58` |
+| GET | `/api/admin/agents/overview` | pre_gate | admin | admin | `server/src/routes/admin/agents.ts:27` |
+| GET | `/api/admin/agents/health` | pre_gate | admin | admin | `server/src/routes/admin/agents.ts:59` |
+| GET | `/api/admin/agents/outbox-health` | pre_gate | admin | admin | `server/src/routes/admin/agents.ts:68` |
 | GET | `/api/admin/broadcast/audience` | pre_gate | admin | admin | `server/src/routes/admin/broadcast.ts:92` |
 | GET | `/api/admin/broadcast/list` | pre_gate | admin | admin | `server/src/routes/admin/broadcast.ts:128` |
 | GET | `/api/admin/broadcast/:broadcastId` | pre_gate | admin | admin | `server/src/routes/admin/broadcast.ts:142` |
