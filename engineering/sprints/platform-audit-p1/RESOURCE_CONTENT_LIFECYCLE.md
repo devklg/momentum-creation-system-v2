@@ -39,3 +39,7 @@ P1-82 defines the contract only. It does not mutate existing records or silently
 ## Unified catalog schema (P1-83)
 
 `packages/shared/src/resource-catalog.ts` defines one immutable catalog row per resource version. Lifecycle, authority, language, audience, retrieval readiness, lineage, content location, digest, and migration ambiguity are separate fields. The declarative persistence contract uses Mongo `tmag_resource_catalog`, Neo4j `TmagResource`/`TmagResourceVersion`, and Chroma `mcs_resource_catalog`. Existing source collections remain authoritative; the catalog is a projection and does not silently migrate them.
+
+## Publishing and retrieval gate (P1-84)
+
+`server/src/domain/resourcePublishingGate.ts` fails closed unless canonical Mongo and exact Neo4j plus Chroma readbacks agree on tenant, team, logical resource, immutable version, content digest, lifecycle, and projection freshness. Chroma uses an exact-ID readback, never semantic similarity. Queued projections and write acknowledgements are not readiness evidence. The gate is non-mutating; blocked checks never activate, archive, supersede, or otherwise rewrite a resource.
