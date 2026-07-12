@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T23:51:49.540Z",
+  "generatedAt": "2026-07-12T00:02:18.537Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -5439,6 +5439,81 @@
       "file": "packages/shared/src/compliance.ts"
     },
     {
+      "name": "CRM_CANONICAL_LIFECYCLE_STATES",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_CLOSED_REASONS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_DISPOSITIONS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_FOLLOW_UP_STATES",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_LIFECYCLE_MODEL",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_LIFECYCLE_MODEL_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_PROSPECT_LIFECYCLE_STAGES",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_RECORD_STATUSES",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_TIMELINE_EVENT_KINDS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_TOKEN_STATES",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_VM_LEAD_STATUSES",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CrmCanonicalLifecyclePhase",
+      "kind": "type",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CrmCanonicalLifecycleState",
+      "kind": "interface",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CrmCanonicalLifecycleStateId",
+      "kind": "type",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CrmFollowUpState",
+      "kind": "type",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "MCS_LEADER_CREDIBILITY",
       "kind": "const",
       "file": "packages/shared/src/leaders.ts"
@@ -9571,6 +9646,6 @@
     "chromaCollections": 50,
     "routeModules": 45,
     "routeHandlers": 236,
-    "sharedExports": 868
+    "sharedExports": 883
   }
 }
