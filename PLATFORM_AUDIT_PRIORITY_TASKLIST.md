@@ -107,7 +107,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 77. **VM/RVM:** Document VM/RVM lifecycle schemas for campaigns, recipients, queue, webhooks, attempts, and tokens.
 - [x] 78. **VM/RVM:** Create a VM/RVM provider queue failure and stuck-state dashboard.
 - [x] 79. **VM/RVM:** Add VM/RVM copy compliance tests.
-- [ ] 80. **VM/RVM:** Add idempotency keys for VM/RVM provider events and webhooks.
+- [x] 80. **VM/RVM:** Add idempotency keys for VM/RVM provider events and webhooks.
 - [ ] 81. **Delivery:** Add delivery retry, backpressure, and dead-letter controls.
 - [ ] 82. **Resources:** Define resource and content lifecycle states: draft, review, approved, active, archived, superseded.
 - [ ] 83. **Resources:** Build the unified resource catalog schema.

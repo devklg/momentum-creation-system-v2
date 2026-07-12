@@ -297,11 +297,11 @@ export async function vmAudit(input: {
 export async function enqueueVmJob<TPayload extends Record<string, unknown>>(
   kind: VmQueueJobKind,
   payload: TPayload,
-  options?: { maxAttempts?: number; availableAt?: string },
+  options?: { maxAttempts?: number; availableAt?: string; jobId?: string },
 ): Promise<VmQueueJob<TPayload>> {
   const now = new Date().toISOString();
   const job: VmQueueJob<TPayload> = {
-    jobId: `vmjob_${randomUUID()}`,
+    jobId: options?.jobId ?? `vmjob_${randomUUID()}`,
     kind,
     status: 'queued',
     attempts: 0,
@@ -879,14 +879,87 @@ export async function updateLeadStatus(
   });
 }
 
+function stableValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stableValue);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b)).map(([key, item]) => [key, stableValue(item)]));
+  }
+  return value;
+}
+
+function digestKey(...parts: unknown[]): string {
+  return createHash('sha256').update(JSON.stringify(stableValue(parts))).digest('hex');
+}
+
+function stringAt(value: unknown, path: string[]): string | null {
+  let current = value;
+  for (const key of path) {
+    if (!current || typeof current !== 'object' || Array.isArray(current)) return null;
+    current = (current as Record<string, unknown>)[key];
+  }
+  return typeof current === 'string' && current.trim() ? current.trim() : null;
+}
+
+export function deriveVmWebhookIdempotencyKey(input: {
+  provider: VmProviderKey;
+  payload: Record<string, unknown>;
+  headers: Record<string, string | string[] | undefined>;
+}): string {
+  const headerValue = (name: string): string | null => {
+    const value = input.headers[name] ?? input.headers[name.toLowerCase()];
+    return Array.isArray(value) ? value[0] ?? null : typeof value === 'string' && value.trim() ? value.trim() : null;
+  };
+  const externalId =
+    headerValue('x-idempotency-key') ??
+    headerValue('x-event-id') ??
+    stringAt(input.payload, ['data', 'event', 'id']) ??
+    stringAt(input.payload, ['data', 'id']) ??
+    stringAt(input.payload, ['event_id']) ??
+    stringAt(input.payload, ['eventId']) ??
+    stringAt(input.payload, ['id']);
+  return `vmhook_${digestKey(input.provider, externalId ? ['external', externalId] : ['payload', input.payload])}`;
+}
+
+async function findById<T>(collection: string, id: string): Promise<T | null> {
+  const result = await persistenceCall<{ documents?: T[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection,
+    filter: { _id: id },
+    limit: 1,
+  });
+  return result.documents?.[0] ?? null;
+}
+
+function duplicateKeyError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /duplicate key|e11000/i.test(message);
+}
+
+async function ensureWebhookJob(webhookEventId: string, provider: VmProviderKey, jobId: string): Promise<void> {
+  if (await findById<VmQueueJob>(QUEUE_COLLECTION, jobId)) return;
+  try {
+    await enqueueVmJob('webhook_event', { webhookEventId, provider }, { jobId });
+  } catch (error) {
+    if (!duplicateKeyError(error)) throw error;
+  }
+}
+
 export async function recordDeliveryEvent(input: Omit<VmDeliveryEventRecord, 'eventId' | 'createdAt'>): Promise<VmDeliveryEventRecord> {
   const createdAt = new Date().toISOString();
+  const idempotencyKey = input.providerMessageId
+    ? `vmdeliv_${digestKey(input.provider, input.providerMessageId, input.providerStatus, input.status, input.leadId)}`
+    : null;
+  if (idempotencyKey) {
+    const existing = await findById<VmDeliveryEventRecord>(DELIVERY_EVENTS_COLLECTION, idempotencyKey);
+    if (existing) return existing;
+  }
   const event: VmDeliveryEventRecord = {
     ...input,
-    eventId: `vmdeliv_${randomUUID()}`,
+    eventId: idempotencyKey ?? `vmdeliv_${randomUUID()}`,
     createdAt,
   };
-  await writeOperational({
+  try {
+    await writeOperational({
     id: event.eventId,
     mongoCollection: DELIVERY_EVENTS_COLLECTION,
     mongoDoc: event as unknown as Record<string, unknown>,
@@ -913,7 +986,13 @@ export async function recordDeliveryEvent(input: Omit<VmDeliveryEventRecord, 'ev
         createdAt,
       },
     },
-  });
+    });
+  } catch (error) {
+    if (!idempotencyKey || !duplicateKeyError(error)) throw error;
+    const existing = await findById<VmDeliveryEventRecord>(DELIVERY_EVENTS_COLLECTION, idempotencyKey);
+    if (existing) return existing;
+    throw error;
+  }
   return event;
 }
 
@@ -921,10 +1000,17 @@ export async function recordProviderWebhook(input: {
   provider: VmProviderKey;
   payload: Record<string, unknown>;
   headers: Record<string, string | string[] | undefined>;
-}): Promise<{ webhookEventId: string; jobId: string }> {
+}): Promise<{ webhookEventId: string; jobId: string; duplicate: boolean }> {
   const now = new Date().toISOString();
-  const webhookEventId = `vmwebhook_${randomUUID()}`;
-  await writeOperational({
+  const webhookEventId = deriveVmWebhookIdempotencyKey(input);
+  const jobId = `vmjob_${digestKey('webhook_event', webhookEventId)}`;
+  const existing = await findById<{ webhookEventId: string; jobId?: string }>(WEBHOOK_EVENTS_COLLECTION, webhookEventId);
+  if (existing) {
+    await ensureWebhookJob(webhookEventId, input.provider, existing.jobId ?? jobId);
+    return { webhookEventId, jobId: existing.jobId ?? jobId, duplicate: true };
+  }
+  try {
+    await writeOperational({
     id: webhookEventId,
     mongoCollection: WEBHOOK_EVENTS_COLLECTION,
     mongoDoc: {
@@ -933,6 +1019,8 @@ export async function recordProviderWebhook(input: {
       payload: input.payload,
       headers: input.headers,
       status: 'received',
+      idempotencyKey: webhookEventId,
+      jobId,
       createdAt: now,
       processedAt: null,
     },
@@ -951,9 +1039,14 @@ export async function recordProviderWebhook(input: {
         createdAt: now,
       },
     },
-  });
-  const job = await enqueueVmJob('webhook_event', { webhookEventId, provider: input.provider });
-  return { webhookEventId, jobId: job.jobId };
+    });
+  } catch (error) {
+    if (!duplicateKeyError(error)) throw error;
+    await ensureWebhookJob(webhookEventId, input.provider, jobId);
+    return { webhookEventId, jobId, duplicate: true };
+  }
+  await ensureWebhookJob(webhookEventId, input.provider, jobId);
+  return { webhookEventId, jobId, duplicate: false };
 }
 
 export async function processWebhookEvent(job: VmQueueJob<{ webhookEventId: string; provider: VmProviderKey }>): Promise<void> {
