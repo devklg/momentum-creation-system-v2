@@ -11,6 +11,7 @@ import express, { type Request, type Router } from 'express';
 import { requireAdmin } from '../../middleware/requireAuth.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
 import { buildAdminAgentOversight } from '../../domain/adminAgentMemory.js';
+import { buildAdminAgentHealth } from '../../domain/adminAgentHealth.js';
 import type { McsAuditActor } from '@momentum/shared';
 
 export const adminAgentsRoutes: Router = express.Router();
@@ -51,5 +52,14 @@ adminAgentsRoutes.get('/overview', requireAdmin, async (req, res) => {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Agent oversight failed: ${msg}` });
+  }
+});
+
+adminAgentsRoutes.get('/health', requireAdmin, async (_req, res) => {
+  try {
+    res.status(200).json(await buildAdminAgentHealth());
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Agent health failed: ${msg}` });
   }
 });

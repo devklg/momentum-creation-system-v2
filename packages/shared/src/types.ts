@@ -5854,6 +5854,30 @@ export interface McsAdminConsistencyReportResponse {
   warnings: string[];
 }
 
+export type McsAdminAgentHealthStatus = 'healthy' | 'degraded' | 'planned' | 'error';
+export interface McsAdminAgentHealthCard {
+  agentKey: import('./agent-registry.js').McsPlatformAgentKey;
+  displayName: string;
+  kind: import('./agent-registry.js').McsPlatformAgentKind;
+  status: McsAdminAgentHealthStatus;
+  activeSkills: number;
+  plannedSkills: number;
+  activeTemplates: number;
+  plannedTemplates: number;
+  events7d: number;
+  lastEventAt: McsIsoTimestamp | null;
+  behaviorSource: string;
+  issues: string[];
+  debug: { humanActionOwner: string; surfaces: readonly string[]; owns: readonly string[]; doesNotOwn: readonly string[] };
+}
+export interface McsAdminAgentHealthResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  cards: McsAdminAgentHealthCard[];
+  summary: Record<McsAdminAgentHealthStatus, number>;
+  warnings: string[];
+}
+
 /** P1-58 read-only admin CRM integrity report. */
 export type McsAdminCrmIntegrityCategory =
   | 'stuck'
