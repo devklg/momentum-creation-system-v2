@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T18:17:52.338Z",
+  "generatedAt": "2026-07-12T18:24:20.659Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -2042,17 +2042,17 @@
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 630,
+          "line": 631,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 963,
+          "line": 964,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1014,
+          "line": 1015,
           "action": "writeOperational"
         }
       ],
