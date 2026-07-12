@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T00:02:18.537Z",
+  "generatedAt": "2026-07-12T01:27:27.341Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -5439,6 +5439,16 @@
       "file": "packages/shared/src/compliance.ts"
     },
     {
+      "name": "CRM_CALLBACK_INTENTS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_CALLBACK_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "CRM_CANONICAL_LIFECYCLE_STATES",
       "kind": "const",
       "file": "packages/shared/src/crm-lifecycle.ts"
@@ -5449,7 +5459,17 @@
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
     {
+      "name": "CRM_CROSS_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "CRM_DISPOSITIONS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_FOLLOW_UP_STATE_MAPPINGS",
       "kind": "const",
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
@@ -5469,7 +5489,22 @@
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
     {
+      "name": "CRM_OUTCOME_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_PROSPECT_ACCOUNT_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "CRM_PROSPECT_LIFECYCLE_STAGES",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_RECORD_STATUS_MAPPINGS",
       "kind": "const",
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
@@ -5484,12 +5519,42 @@
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
     {
+      "name": "CRM_TIMELINE_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_TOKEN_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "CRM_TOKEN_STATES",
       "kind": "const",
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
     {
+      "name": "CRM_VM_DELIVERY_STATUSES",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "CRM_VM_LEAD_STATUSES",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_VM_RVM_DELIVERY_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_VM_RVM_LEAD_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_WEBINAR_STATE_MAPPINGS",
       "kind": "const",
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
@@ -5509,7 +5574,17 @@
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
     {
+      "name": "CrmCrossStateMapping",
+      "kind": "interface",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "CrmFollowUpState",
+      "kind": "type",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CrmStateMapRail",
       "kind": "type",
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
@@ -9646,6 +9721,6 @@
     "chromaCollections": 50,
     "routeModules": 45,
     "routeHandlers": 236,
-    "sharedExports": 883
+    "sharedExports": 898
   }
 }
