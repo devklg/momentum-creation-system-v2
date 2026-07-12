@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T18:03:45.940Z",
+  "generatedAt": "2026-07-12T18:14:18.341Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -8731,6 +8731,21 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsAdminVmQueueHealth",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminVmQueueHealthOverviewResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminVmQueueHealthRow",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsAdminVmTeamNewsHook",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -10553,6 +10568,6 @@
     "chromaCollections": 50,
     "routeModules": 45,
     "routeHandlers": 255,
-    "sharedExports": 977
+    "sharedExports": 980
   }
 }

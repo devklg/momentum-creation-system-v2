@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-12T18:03:45.940Z
+- Generated: 2026-07-12T18:14:18.341Z
 - Mongo collections: 67
 - Neo4j labels: 73
 - Neo4j relationships: 61
 - Chroma collections: 50
 - Route modules: 45
 - Route handlers: 255
-- Shared exports: 977
+- Shared exports: 980
 
 ## Mongo Collections
 
@@ -953,6 +953,9 @@
 | `McsAdminVmOwnershipCorrectionPayload` | interface | `packages/shared/src/types.ts` |
 | `McsAdminVmOwnershipCorrectionResponse` | interface | `packages/shared/src/types.ts` |
 | `McsAdminVmProviderHealth` | interface | `packages/shared/src/types.ts` |
+| `McsAdminVmQueueHealth` | interface | `packages/shared/src/types.ts` |
+| `McsAdminVmQueueHealthOverviewResponse` | interface | `packages/shared/src/types.ts` |
+| `McsAdminVmQueueHealthRow` | interface | `packages/shared/src/types.ts` |
 | `McsAdminVmTeamNewsHook` | interface | `packages/shared/src/types.ts` |
 | `McsAgentEvent` | interface | `packages/shared/src/types.ts` |
 | `McsAgentEventKind` | type | `packages/shared/src/types.ts` |
