@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-12T02:45:26.070Z
-- Mongo collections: 65
-- Neo4j labels: 68
-- Neo4j relationships: 59
+- Generated: 2026-07-12T09:26:37.966Z
+- Mongo collections: 66
+- Neo4j labels: 71
+- Neo4j relationships: 60
 - Chroma collections: 50
 - Route modules: 45
-- Route handlers: 236
-- Shared exports: 898
+- Route handlers: 239
+- Shared exports: 948
 
 ## Mongo Collections
 
@@ -52,11 +52,11 @@
 | `tmag_new_member_orientation_sessions` | permissive_mongoose_schema | yes | 4 |
 | `tmag_profile_change_challenges` | permissive_mongoose_schema | yes | 3 |
 | `tmag_projection_outbox` | permissive_mongoose_schema | yes | 4 |
-| `tmag_prospect_callback_requests` | permissive_mongoose_schema | yes | 6 |
+| `tmag_prospect_callback_requests` | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_crm_dispositions` | permissive_mongoose_schema | yes | 6 |
 | `tmag_prospect_crm_followups` | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_crm_notes` | permissive_mongoose_schema | yes | 3 |
-| `tmag_prospect_crm_records` | permissive_mongoose_schema | yes | 7 |
+| `tmag_prospect_crm_records` | permissive_mongoose_schema | yes | 9 |
 | `tmag_prospect_htank_accounts` | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_htank_counters` | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_htank_placements` | permissive_mongoose_schema | yes | 22 |
@@ -64,7 +64,7 @@
 | `tmag_prospect_invite_tokens` | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_magic_links` | permissive_mongoose_schema | yes | 5 |
 | `tmag_prospect_sessions` | permissive_mongoose_schema | yes | 3 |
-| `tmag_prospect_timeline_events` | permissive_mongoose_schema | yes | 2 |
+| `tmag_prospect_timeline_events` | permissive_mongoose_schema | yes | 3 |
 | `tmag_prospect_webinar_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_reservations` | permissive_mongoose_schema | yes | 2 |
 | `tmag_prospects` | permissive_mongoose_schema | yes | 36 |
@@ -74,9 +74,10 @@
 | `tmag_steve_success_interview` | permissive_mongoose_schema | yes | 7 |
 | `tmag_three_way_bookings` | permissive_mongoose_schema | yes | 5 |
 | `tmag_vm_audit_events` | permissive_mongoose_schema | yes | 1 |
-| `tmag_vm_bulk_leads` | permissive_mongoose_schema | yes | 14 |
+| `tmag_vm_bulk_leads` | permissive_mongoose_schema | yes | 16 |
 | `tmag_vm_campaigns` | permissive_mongoose_schema | yes | 6 |
-| `tmag_vm_delivery_events` | permissive_mongoose_schema | yes | 1 |
+| `tmag_vm_delivery_events` | permissive_mongoose_schema | yes | 2 |
+| `tmag_vm_inbound_calls` | permissive_mongoose_schema | yes | 2 |
 | `tmag_vm_lead_owners` | permissive_mongoose_schema | yes | 4 |
 | `tmag_vm_provider_webhook_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_vm_queue_jobs` | permissive_mongoose_schema | yes | 8 |
@@ -103,15 +104,17 @@
 | `KnowledgeSource` | 2 |
 | `KnowledgeVersion` | 1 |
 | `LearningSignal` | 1 |
+| `MemoryIndexEntry` | 4 |
+| `MemorySourceRecord` | 1 |
 | `Outcome` | 1 |
-| `REQUESTED_CALLBACK` | 1 |
+| `REQUESTED_CALLBACK` | 2 |
 | `RESERVED_ORIENTATION` | 2 |
 | `RESERVED_WEBINAR` | 1 |
 | `S2` | 1 |
 | `SCOPED_TO` | 1 |
 | `SPONSORED_BY` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 75 |
+| `TeamMagnificentMember` | 76 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 2 |
@@ -137,9 +140,9 @@
 | `TmagPool` | 6 |
 | `TmagProspect` | 41 |
 | `TmagProspectAccount` | 2 |
-| `TmagProspectCrmRecord` | 8 |
+| `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |
-| `TmagProspectTimelineEvent` | 1 |
+| `TmagProspectTimelineEvent` | 2 |
 | `TmagQuestionnaire` | 1 |
 | `TmagRecruitingCycle` | 2 |
 | `TmagSponsorAvailability` | 1 |
@@ -147,9 +150,10 @@
 | `TmagSteveDiscovery` | 3 |
 | `TmagThreeWayBooking` | 2 |
 | `TmagVmAuditEvent` | 1 |
-| `TmagVmBulkLead` | 10 |
+| `TmagVmBulkLead` | 13 |
 | `TmagVmCampaign` | 4 |
 | `TmagVmDeliveryEvent` | 1 |
+| `TmagVmInboundCall` | 1 |
 | `TmagVmLeadOwner` | 6 |
 | `TmagVmProviderWebhook` | 1 |
 | `TmagVmQueueJob` | 1 |
@@ -182,6 +186,7 @@
 | `HAS_ACTIVITY` | 2 |
 | `HAS_CHUNK` | 1 |
 | `HAS_CRM_RECORD` | 2 |
+| `HAS_INBOUND_CALL` | 1 |
 | `HAS_LANGUAGE_VARIANT` | 1 |
 | `HAS_ORIGINAL_SPONSOR` | 2 |
 | `HAS_OVERRIDE` | 2 |
@@ -189,7 +194,7 @@
 | `HAS_RECRUITING_CYCLE` | 1 |
 | `HAS_SETTINGS_VERSION` | 1 |
 | `HAS_THREE_WAY_AVAILABILITY` | 1 |
-| `HAS_TIMELINE_EVENT` | 1 |
+| `HAS_TIMELINE_EVENT` | 2 |
 | `HAS_VERSION` | 2 |
 | `HAS_VM_AUDIT` | 1 |
 | `HAS_VM_DELIVERY_EVENT` | 1 |
@@ -281,11 +286,11 @@
 | Mount | Route file | Handlers | Shared route/payload types imported |
 | --- | --- | --- | --- |
 | `(unmounted)` | `server/src/routes/admin/access-codes.ts` | POST /<br>GET / | none |
-| `(unmounted)` | `server/src/routes/admin/agents.ts` | GET /overview<br>GET user-agent | `McsAuditActor` |
+| `(unmounted)` | `server/src/routes/admin/agents.ts` | GET /overview<br>GET user-agent<br>GET /health | `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/audit.ts` | GET /<br>GET /:entryId | `McsAuditActorRole`, `McsAuditEntityKind`, `McsAuditEntryResponse`, `McsAuditListResponse`, `McsAuditQueryFilters`, `McsAuditSeverity` |
 | `(unmounted)` | `server/src/routes/admin/bas.ts` | GET /<br>GET /:tmagId<br>POST /:tmagId/sponsor-override<br>POST /:tmagId/entitlements<br>POST /:tmagId/leader-tag<br>POST /:tmagId/notes<br>POST /<br>PATCH /:tmagId<br>DELETE /:tmagId<br>POST /:tmagId/restore | `McsAdminBaDirectoryResponse`, `McsAdminBaEntitlementsResponse`, `McsAdminBaNoteResponse`, `McsAdminBaProfileResponse`, `McsAdminLeaderTagResponse`, `McsAdminSponsorOverrideResponse` |
 | `(unmounted)` | `server/src/routes/admin/broadcast.ts` | GET /audience<br>GET /list<br>GET /:broadcastId<br>POST /test<br>POST / | `McsAuditActor`, `McsBroadcastAudiencePreviewResponse`, `McsBroadcastEnqueueResponse`, `McsBroadcastSendTestResponse`, `McsBroadcastStatusResponse` |
-| `(unmounted)` | `server/src/routes/admin/consistency.ts` | GET /report<br>GET user-agent | `McsAuditActor` |
+| `(unmounted)` | `server/src/routes/admin/consistency.ts` | GET /report<br>GET user-agent<br>GET /crm-integrity<br>GET user-agent | `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/content-videos.ts` | GET user-agent<br>GET /<br>POST /<br>PATCH /:contentVideoId<br>POST /reorder | `McsAuditActor`, `McsContentVideoAudience`, `McsContentVideoMutationResponse`, `McsContentVideoReorderResponse`, `McsContentVideosAdminListResponse` |
 | `(unmounted)` | `server/src/routes/admin/dashboard.ts` | GET /metrics<br>GET user-agent<br>GET /filters<br>GET user-agent<br>GET /drilldown<br>GET user-agent<br>GET /stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminDashboardFiltersResponse`, `McsAdminDashboardMetricsResponse`, `McsAdminDrilldownResponse`, `McsAdminLiveAuditEvent`, `McsAdminLiveEvent`, `McsAdminLivePlacementEvent`, `McsAdminLiveSnapshot`, `McsAuditActor`, `McsAuditLogEntry`, `McsPlacementEvent` |
 | `(unmounted)` | `server/src/routes/admin/health.ts` | GET x-mcs-health-secret<br>GET /triple-stack<br>GET /status | none |
@@ -340,6 +345,26 @@
 | `McsAdminLiveGridSlot` | interface | `packages/shared/src/admin-live-ops.ts` |
 | `McsAdminLiveUsageSample` | interface | `packages/shared/src/admin-live-ops.ts` |
 | `McsAdminLiveUsageStreamEvent` | type | `packages/shared/src/admin-live-ops.ts` |
+| `getMcsPlatformAgent` | function | `packages/shared/src/agent-registry.ts` |
+| `isMcsPlatformAgentKey` | function | `packages/shared/src/agent-registry.ts` |
+| `MCS_PLATFORM_AGENT_KEYS` | const | `packages/shared/src/agent-registry.ts` |
+| `MCS_PLATFORM_AGENT_REGISTRY` | const | `packages/shared/src/agent-registry.ts` |
+| `MCS_PLATFORM_CAPABILITY_REGISTRY` | const | `packages/shared/src/agent-registry.ts` |
+| `McsFutureAgentRegistration` | interface | `packages/shared/src/agent-registry.ts` |
+| `McsPlatformAgentDescriptor` | interface | `packages/shared/src/agent-registry.ts` |
+| `McsPlatformAgentKey` | type | `packages/shared/src/agent-registry.ts` |
+| `McsPlatformAgentKind` | type | `packages/shared/src/agent-registry.ts` |
+| `McsPlatformAgentSurface` | type | `packages/shared/src/agent-registry.ts` |
+| `McsPlatformCapabilityDescriptor` | interface | `packages/shared/src/agent-registry.ts` |
+| `validateFutureAgentRegistration` | function | `packages/shared/src/agent-registry.ts` |
+| `MCS_AGENT_SKILL_REGISTRY` | const | `packages/shared/src/agent-skills.ts` |
+| `MCS_AGENT_TEMPLATE_REGISTRY` | const | `packages/shared/src/agent-skills.ts` |
+| `McsAgentDegradationMode` | type | `packages/shared/src/agent-skills.ts` |
+| `McsAgentSkillDescriptor` | interface | `packages/shared/src/agent-skills.ts` |
+| `McsAgentSkillStatus` | type | `packages/shared/src/agent-skills.ts` |
+| `McsAgentTemplateDescriptor` | interface | `packages/shared/src/agent-skills.ts` |
+| `McsAgentTemplateStatus` | type | `packages/shared/src/agent-skills.ts` |
+| `validateAgentSkillTemplateRegistries` | function | `packages/shared/src/agent-skills.ts` |
 | `McsBrandPrimitive` | type | `packages/shared/src/brand.ts` |
 | `mcsBrandPrimitiveClasses` | const | `packages/shared/src/brand.ts` |
 | `McsBrandRole` | type | `packages/shared/src/brand.ts` |
@@ -434,6 +459,16 @@
 | `McsCatalogProduct` | interface | `packages/shared/src/product-catalog.ts` |
 | `McsProductVideo` | interface | `packages/shared/src/product-catalog.ts` |
 | `McsProductVideoKind` | type | `packages/shared/src/product-catalog.ts` |
+| `McsPromptGovernanceAction` | type | `packages/shared/src/prompt-governance.ts` |
+| `McsPromptGovernanceActor` | interface | `packages/shared/src/prompt-governance.ts` |
+| `McsPromptGovernanceEvent` | interface | `packages/shared/src/prompt-governance.ts` |
+| `McsPromptGovernanceRole` | type | `packages/shared/src/prompt-governance.ts` |
+| `McsPromptTransitionContext` | interface | `packages/shared/src/prompt-governance.ts` |
+| `McsPromptTransitionResult` | type | `packages/shared/src/prompt-governance.ts` |
+| `McsPromptVersionRecord` | interface | `packages/shared/src/prompt-governance.ts` |
+| `McsPromptVersionStatus` | type | `packages/shared/src/prompt-governance.ts` |
+| `transitionPromptVersion` | function | `packages/shared/src/prompt-governance.ts` |
+| `validatePromptVersionRecord` | function | `packages/shared/src/prompt-governance.ts` |
 | `MCS_RECRUITING_ATTESTATION_LEGS` | const | `packages/shared/src/recruiting-cycle.ts` |
 | `MCS_RECRUITING_CYCLE_STATUSES` | const | `packages/shared/src/recruiting-cycle.ts` |
 | `MCS_RECRUITING_STEP_LABELS` | const | `packages/shared/src/recruiting-cycle.ts` |
@@ -724,6 +759,13 @@
 | `McsRuntimeTranslationStatus` | type | `packages/shared/src/runtime/language.ts` |
 | `MCS_MEMORY_CONTEXT_COMPILER_SCHEMA_VERSION` | const | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
 | `McsCompiledMemoryContextShape` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsContextGuardHit` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsContextGuardReport` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsContextPacket` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsContextPacketBrief` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsLearningCandidate` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsLearningCandidateKind` | type | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsMemoryAudience` | type | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
 | `McsMemoryContextComparisonMethod` | type | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
 | `McsMemoryContextComparisonReport` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
 | `McsMemoryContextComparisonSummary` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
@@ -746,6 +788,13 @@
 | `McsMemoryContextStoreContribution` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
 | `McsMemoryContextStoreFunction` | type | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
 | `McsMemoryContextSubject` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsMemoryProvenance` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsMemoryStackName` | type | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsMemoryStatedBy` | type | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsMemoryStoreKey` | type | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsRetrievalLadderRung` | type | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsVerbCoverageEntry` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
+| `McsVerbCoverageReport` | interface | `packages/shared/src/runtime/memory-context-compiler-schema.ts` |
 | `McsLearningSignalReference` | interface | `packages/shared/src/runtime/outcomes.ts` |
 | `McsLearningSignalStrength` | type | `packages/shared/src/runtime/outcomes.ts` |
 | `McsRuntimeOutcomeReference` | interface | `packages/shared/src/runtime/outcomes.ts` |
@@ -788,6 +837,9 @@
 | `MCS_ORIENTATION_SESSION_CAPACITY` | const | `packages/shared/src/types.ts` |
 | `MCS_VM_LEAD_LIFECYCLE_STATUSES` | const | `packages/shared/src/types.ts` |
 | `McsAdminActiveBaRow` | interface | `packages/shared/src/types.ts` |
+| `McsAdminAgentHealthCard` | interface | `packages/shared/src/types.ts` |
+| `McsAdminAgentHealthResponse` | interface | `packages/shared/src/types.ts` |
+| `McsAdminAgentHealthStatus` | type | `packages/shared/src/types.ts` |
 | `McsAdminAgentInteractionSummary` | interface | `packages/shared/src/types.ts` |
 | `McsAdminAgentMemoryStatus` | interface | `packages/shared/src/types.ts` |
 | `McsAdminAgentOversightResponse` | interface | `packages/shared/src/types.ts` |
@@ -818,6 +870,9 @@
 | `McsAdminCreateOrientationSessionResponse` | interface | `packages/shared/src/types.ts` |
 | `McsAdminCreateProspectPayload` | interface | `packages/shared/src/types.ts` |
 | `McsAdminCreateProspectResponse` | interface | `packages/shared/src/types.ts` |
+| `McsAdminCrmIntegrityCategory` | type | `packages/shared/src/types.ts` |
+| `McsAdminCrmIntegrityFinding` | interface | `packages/shared/src/types.ts` |
+| `McsAdminCrmIntegrityReportResponse` | interface | `packages/shared/src/types.ts` |
 | `McsAdminDashboardFilter` | interface | `packages/shared/src/types.ts` |
 | `McsAdminDashboardFiltersResponse` | interface | `packages/shared/src/types.ts` |
 | `McsAdminDashboardMetrics` | interface | `packages/shared/src/types.ts` |

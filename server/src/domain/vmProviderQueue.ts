@@ -24,6 +24,10 @@ import {
   TelnyxError,
 } from '../services/telnyx.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
+import {
+  isInboundTelnyxCallPayload,
+  processInboundTelnyxCall,
+} from './vmInboundCallback.js';
 import { writeCrmOwnershipGraphCritical } from './crmOwnershipPersistence.js';
 import { writeVmLeadTokenGraphCritical } from './tokenLifecyclePersistence.js';
 
@@ -72,7 +76,10 @@ export type VmLeadStatus =
   | 'voicemail_drop_queued'
   | 'voicemail_drop_delivered'
   | 'voicemail_drop_failed'
-  | 'opted_out';
+  | 'opted_out'
+  // Canonical raised-hand status (CRM_VM_LEAD_STATUSES / McsVmLeadLifecycleStatus)
+  // — set when an inbound callback is matched to this lead.
+  | 'callback_requested';
 
 export interface VmImportLeadRow {
   firstName?: string | null;
@@ -84,6 +91,18 @@ export interface VmImportLeadRow {
   country?: string | null;
   sourceLeadId?: string | null;
   consentStatus?: 'unknown' | 'provided' | 'not_provided' | 'do_not_contact';
+  /**
+   * Lead classification. `interviewed` = a human already spoke with this
+   * person; a robotic voicemail would regress the relationship, so it
+   * implies doNotDrop.
+   */
+  leadType?: string | null;
+  /**
+   * Hard delivery block: a doNotDrop lead can NEVER receive a VM delivery
+   * job, regardless of campaign. Enforced fail-closed in the delivery
+   * worker gate.
+   */
+  doNotDrop?: boolean | null;
   raw?: Record<string, unknown>;
 }
 
@@ -122,6 +141,10 @@ export interface VmBulkLeadRecord {
   stateOrRegion: string | null;
   country: string;
   consentStatus: 'unknown' | 'provided' | 'not_provided' | 'do_not_contact';
+  /** See VmImportLeadRow.leadType. Optional — legacy docs predate the field. */
+  leadType?: string | null;
+  /** See VmImportLeadRow.doNotDrop. Optional — legacy docs predate the field. */
+  doNotDrop?: boolean | null;
   dedupeKey: string;
   status: VmLeadStatus;
   token: string | null;
@@ -189,6 +212,17 @@ export function normalizeVmEmail(input: string | null | undefined): string | nul
   const value = input?.trim().toLowerCase();
   if (!value) return null;
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? value : null;
+}
+
+/**
+ * Fail-closed do-not-drop check: an explicit doNotDrop flag OR the
+ * `interviewed` lead type (a human already spoke to them) blocks VM
+ * delivery entirely.
+ */
+export function isDoNotDropLead(
+  lead: Pick<VmBulkLeadRecord, 'doNotDrop' | 'leadType'>,
+): boolean {
+  return lead.doNotDrop === true || lead.leadType === 'interviewed';
 }
 
 function hashDedupe(parts: string[]): string {
@@ -580,6 +614,8 @@ async function upsertImportedLead(
     stateOrRegion: row.stateOrRegion?.trim() || null,
     country: row.country?.trim() || 'US',
     consentStatus: row.consentStatus ?? 'unknown',
+    leadType: row.leadType?.trim() || null,
+    doNotDrop: row.doNotDrop === true || row.leadType?.trim() === 'interviewed',
     dedupeKey,
     status,
     token: null,
@@ -794,6 +830,20 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
     filter: { leadId: lead.leadId },
     update: { $set: { crmRecordId, status: 'crm_created', updatedAt: now } },
   });
+  if (isDoNotDropLead(lead)) {
+    await vmAudit({
+      action: 'vm.lead.do_not_drop_delivery_blocked',
+      entityId: lead.leadId,
+      ownerTmagId: lead.ownerTmagId,
+      summary: `VM lead ${lead.leadId} is doNotDrop; no delivery job enqueued.`,
+      payload: { leadType: lead.leadType ?? null, doNotDrop: lead.doNotDrop === true },
+    });
+    await completeVmJob(
+      job.jobId,
+      `CRM record created for VM lead ${lead.leadId}; delivery blocked (doNotDrop).`,
+    );
+    return;
+  }
   await enqueueVmJob<LeadPayload>('delivery', { leadId: lead.leadId, vmCampaignId: lead.vmCampaignId });
   await completeVmJob(job.jobId, `CRM record created for VM lead ${lead.leadId}.`);
 }
@@ -1003,6 +1053,14 @@ function digitFromPayload(payload: Record<string, unknown>): string | null {
 }
 
 async function processTelnyxCallControlWebhook(payload: Record<string, unknown>, attempt: number): Promise<void> {
+  // Inbound calls (the prospect calling BACK after a voicemail drop) carry no
+  // client_state — we did not originate them. They MUST be handled before the
+  // leadId early-return below or every callback is silently dropped.
+  if (isInboundTelnyxCallPayload(payload)) {
+    await processInboundTelnyxCall(payload, attempt);
+    return;
+  }
+
   const clientState = decodeTelnyxClientState(payload.client_state);
   const leadId = asString(payload.leadId) ?? asString(clientState.leadId);
   if (!leadId) return;
@@ -1127,6 +1185,9 @@ export async function listDeliveryRowsForManualExport(
     vmCampaignId: campaignId,
     status: { $in: ['crm_created', 'queued', 'manual_exported', 'delivery_dry_run'] },
     normalizedPhone: { $ne: null },
+    // Manual export is a delivery path too — doNotDrop leads never appear.
+    doNotDrop: { $ne: true },
+    leadType: { $ne: 'interviewed' },
   };
   if (ownerTmagId) filter.ownerTmagId = ownerTmagId;
   const result = await persistenceCall<{ documents: VmBulkLeadRecord[] }>('mongodb', 'query', {

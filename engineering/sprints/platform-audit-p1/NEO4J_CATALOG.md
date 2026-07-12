@@ -4,11 +4,11 @@
 
 ## Summary
 
-- Generated: 2026-07-12T02:45:27.057Z
-- Labels: 68
-- Relationships: 59
+- Generated: 2026-07-12T09:26:40.296Z
+- Labels: 71
+- Relationships: 60
 - Constraints/indexes cataloged: 18
-- Labels without a cataloged constraint/index: 53
+- Labels without a cataloged constraint/index: 56
 
 ## Constraints By Status
 
@@ -36,15 +36,17 @@
 | `KnowledgeSource` | 2 |
 | `KnowledgeVersion` | 1 |
 | `LearningSignal` | 1 |
+| `MemoryIndexEntry` | 4 |
+| `MemorySourceRecord` | 1 |
 | `Outcome` | 1 |
-| `REQUESTED_CALLBACK` | 1 |
+| `REQUESTED_CALLBACK` | 2 |
 | `RESERVED_ORIENTATION` | 2 |
 | `RESERVED_WEBINAR` | 1 |
 | `S2` | 1 |
 | `SCOPED_TO` | 1 |
 | `SPONSORED_BY` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 75 |
+| `TeamMagnificentMember` | 76 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 2 |
@@ -70,9 +72,9 @@
 | `TmagPool` | 6 |
 | `TmagProspect` | 41 |
 | `TmagProspectAccount` | 2 |
-| `TmagProspectCrmRecord` | 8 |
+| `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |
-| `TmagProspectTimelineEvent` | 1 |
+| `TmagProspectTimelineEvent` | 2 |
 | `TmagQuestionnaire` | 1 |
 | `TmagRecruitingCycle` | 2 |
 | `TmagSponsorAvailability` | 1 |
@@ -80,9 +82,10 @@
 | `TmagSteveDiscovery` | 3 |
 | `TmagThreeWayBooking` | 2 |
 | `TmagVmAuditEvent` | 1 |
-| `TmagVmBulkLead` | 10 |
+| `TmagVmBulkLead` | 13 |
 | `TmagVmCampaign` | 4 |
 | `TmagVmDeliveryEvent` | 1 |
+| `TmagVmInboundCall` | 1 |
 | `TmagVmLeadOwner` | 6 |
 | `TmagVmProviderWebhook` | 1 |
 | `TmagVmQueueJob` | 1 |
@@ -115,6 +118,7 @@
 | `HAS_ACTIVITY` | 2 |
 | `HAS_CHUNK` | 1 |
 | `HAS_CRM_RECORD` | 2 |
+| `HAS_INBOUND_CALL` | 1 |
 | `HAS_LANGUAGE_VARIANT` | 1 |
 | `HAS_ORIGINAL_SPONSOR` | 2 |
 | `HAS_OVERRIDE` | 2 |
@@ -122,7 +126,7 @@
 | `HAS_RECRUITING_CYCLE` | 1 |
 | `HAS_SETTINGS_VERSION` | 1 |
 | `HAS_THREE_WAY_AVAILABILITY` | 1 |
-| `HAS_TIMELINE_EVENT` | 1 |
+| `HAS_TIMELINE_EVENT` | 2 |
 | `HAS_VERSION` | 2 |
 | `HAS_VM_AUDIT` | 1 |
 | `HAS_VM_DELIVERY_EVENT` | 1 |
@@ -194,6 +198,8 @@
 - `KnowledgeSource`
 - `KnowledgeVersion`
 - `LearningSignal`
+- `MemoryIndexEntry`
+- `MemorySourceRecord`
 - `Outcome`
 - `REQUESTED_CALLBACK`
 - `RESERVED_ORIENTATION`
@@ -227,6 +233,7 @@
 - `TmagThreeWayBooking`
 - `TmagVmAuditEvent`
 - `TmagVmDeliveryEvent`
+- `TmagVmInboundCall`
 - `TmagVmProviderWebhook`
 - `TmagVmQueueJob`
 - `TmagWebinarEvent`

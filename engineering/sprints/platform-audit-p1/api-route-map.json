@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T09:08:17.652Z",
+  "generatedAt": "2026-07-12T09:26:24.460Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -5117,7 +5117,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "listLeadOwnersHandler",
-      "source": "server/src/routes/vm.ts:158",
+      "source": "server/src/routes/vm.ts:163",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5145,7 +5145,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "createLeadOwnerHandler",
-      "source": "server/src/routes/vm.ts:180",
+      "source": "server/src/routes/vm.ts:185",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5173,7 +5173,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "getLeadOwnerHandler",
-      "source": "server/src/routes/vm.ts:194",
+      "source": "server/src/routes/vm.ts:199",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5201,7 +5201,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:196",
+      "source": "server/src/routes/vm.ts:201",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5229,7 +5229,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:208",
+      "source": "server/src/routes/vm.ts:213",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5257,7 +5257,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:245",
+      "source": "server/src/routes/vm.ts:250",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5285,7 +5285,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:257",
+      "source": "server/src/routes/vm.ts:262",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5313,7 +5313,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:307",
+      "source": "server/src/routes/vm.ts:312",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5341,7 +5341,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:321",
+      "source": "server/src/routes/vm.ts:326",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5369,7 +5369,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:383",
+      "source": "server/src/routes/vm.ts:388",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5397,7 +5397,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "importLeadOwnerLeadsHandler",
-      "source": "server/src/routes/vm.ts:435",
+      "source": "server/src/routes/vm.ts:440",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5425,7 +5425,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:437",
+      "source": "server/src/routes/vm.ts:442",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
