@@ -92,7 +92,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 62. **Michael:** Generate a Michael catalog key and response type registry.
 - [x] 63. **Prompts:** Create the prompt review, versioning, and deployment approval workflow.
 - [x] 64. **Admin:** Create admin agent health/debug cards.
-- [ ] 65. **Docs:** Regenerate docs/build-registry.md from the project wireframe and code evidence.
+- [x] 65. **Docs:** Regenerate docs/build-registry.md from the project wireframe and code evidence.
 - [ ] 66. **Docs:** Add freshness metadata to core docs and generated artifacts.
 - [ ] 67. **Docs:** Mark historical and generated docs with explicit authority status.
 - [ ] 68. **Docs:** Add stale-document detection to CI or the agent workflow.
