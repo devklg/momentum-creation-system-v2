@@ -83,6 +83,11 @@ const ImportLeadSchema = z.object({
   city: z.string().min(1).max(120),
   stateOrRegion: z.string().min(1).max(120),
   country: z.string().min(2).max(2).optional(),
+  // Lead classification; 'interviewed' implies doNotDrop (a human already
+  // spoke to this person — never voicemail them).
+  leadType: z.string().min(1).max(80).nullable().optional(),
+  // Hard VM-delivery block, enforced fail-closed in the delivery worker.
+  doNotDrop: z.boolean().optional(),
 });
 
 const ImportLeadsSchema = z.object({

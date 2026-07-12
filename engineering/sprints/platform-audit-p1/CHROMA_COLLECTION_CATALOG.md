@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-12T02:45:28.723Z
+- Generated: 2026-07-12T09:26:42.580Z
 - Registered collections: 50
 - Schema-catalog collections: 50
 - Collections with observed write/query usage: 30
@@ -66,13 +66,13 @@
 | `mcs_outcomes` | outcomes | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `createdAt`, `kind`, `outcomeAt`, `prospectId`, `tenantId`, `tmagId`, `token`, `type` | none observed | `prospectId`, `tenantId`, `tmagId` |
 | `mcs_performance_knowledge_en` | knowledge | en | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_performance_knowledge_es` | knowledge | es | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
-| `mcs_prospect_callback_requests` | prospect_funnel | not_language_scoped | Prospect funnel semantic record. | `writeOperational` | `callbackRequestId`, `createdAt`, `intent`, `kind`, `prospectId`, `sponsorTmagId` | none observed | `callbackRequestId`, `prospectId`, `sponsorTmagId`, `tmagId` |
+| `mcs_prospect_callback_requests` | prospect_funnel | not_language_scoped | Prospect funnel semantic record. | `writeOperational` | `callbackRequestId`, `createdAt`, `intent`, `kind`, `leadId`, `prospectId`, `source`, `sponsorTmagId` | none observed | `callbackRequestId`, `leadId`, `prospectId`, `source`, `sponsorTmagId`, `tmagId` |
 | `mcs_prospect_crm_records` | crm | not_language_scoped | Prospect CRM and lifecycle semantic records. | not observed | none observed | none observed | none inferred |
 | `mcs_prospect_htank_accounts` | holding_tank | not_language_scoped | Holding-tank pool event/account semantic records. | `writeOperational` | `accountId`, `createdAt`, `expiresAt`, `kind`, `prospectId`, `sponsorTmagId`, `tokenId` | none observed | `accountId`, `prospectId`, `sponsorTmagId`, `tmagId`, `tokenId` |
 | `mcs_prospect_htank_events` | holding_tank | not_language_scoped | Holding-tank pool event/account semantic records. | `delete`<br>`query_with_filter` | none observed | `prospectId` | none inferred |
 | `mcs_prospect_invitation_activity` | prospect_funnel | not_language_scoped | Prospect funnel semantic record. | `writeGraphCritical`<br>`writeKnowledge` | `at`, `city`, `createdAt`, `disposition`, `dueAt`, `kind`, `prospectId`, `relationshipReason`, `source`, `sponsorTmagId`, `stateOrRegion`, `token` | none observed | `prospectId`, `source`, `sponsorTmagId`, `tmagId` |
 | `mcs_prospect_magic_links` | prospect_funnel | not_language_scoped | Prospect funnel semantic record. | `writeOperational` | `accountId`, `expiresAt`, `issuedAt`, `kind`, `linkToken`, `phoneHash`, `tokenId` | none observed | `accountId`, `tokenId` |
-| `mcs_prospect_timeline_events` | crm | not_language_scoped | Prospect CRM and lifecycle semantic records. | `writeKnowledge` | `createdAt`, `kind`, `ownerTmagId`, `prospectId`, `sponsorTmagId` | none observed | `ownerTmagId`, `prospectId`, `sponsorTmagId`, `tmagId` |
+| `mcs_prospect_timeline_events` | crm | not_language_scoped | Prospect CRM and lifecycle semantic records. | `writeKnowledge` | `createdAt`, `kind`, `leadId`, `ownerTmagId`, `prospectId`, `sponsorTmagId` | none observed | `leadId`, `ownerTmagId`, `prospectId`, `sponsorTmagId`, `tmagId` |
 | `mcs_prospect_webinar_reservations` | prospect_funnel | not_language_scoped | Prospect funnel semantic record. | `writeOperational` | `createdAt`, `eventId`, `kind`, `prospectId`, `reservationId`, `scheduledFor`, `sponsorTmagId` | none observed | `eventId`, `prospectId`, `reservationId`, `sponsorTmagId`, `tmagId` |
 | `mcs_recruiting_cycles` | general | not_language_scoped | Registered app Chroma collection. | `writeKnowledge` | `cycleId`, `enrolledAt`, `kind`, `tmagId`, `whyStatement` | none observed | `cycleId`, `tmagId` |
 | `mcs_relationship_knowledge_en` | knowledge | en | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
@@ -86,7 +86,7 @@
 | `mcs_training_knowledge_en` | knowledge | en | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_training_knowledge_es` | knowledge | es | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_vm_bulk_leads` | vm_rvm | not_language_scoped | VM/RVM ownership, campaign, lead, and delivery semantic records. | `writeGraphCritical` | `createdAt`, `kind`, `leadId`, `leadOwnerId`, `ownerTmagId`, `prospectId`, `sponsorTmagId`, `token`, `vmCampaignId` | none observed | `leadId`, `leadOwnerId`, `ownerTmagId`, `prospectId`, `sponsorTmagId`, `tmagId`, `vmCampaignId` |
-| `mcs_vm_campaigns` | vm_rvm | not_language_scoped | VM/RVM ownership, campaign, lead, and delivery semantic records. | `add`<br>`writeOperational` | `action`, `createdAt`, `entityId`, `jobKind`, `kind`, `leadId`, `leadOwnerId`, `ownerTmagId`, `provider`, `status`, `updatedAt`, `vmCampaignId` | none observed | `entityId`, `leadId`, `leadOwnerId`, `ownerTmagId`, `tmagId`, `vmCampaignId` |
+| `mcs_vm_campaigns` | vm_rvm | not_language_scoped | VM/RVM ownership, campaign, lead, and delivery semantic records. | `add`<br>`writeOperational` | `action`, `createdAt`, `entityId`, `inboundCallId`, `jobKind`, `kind`, `leadId`, `leadOwnerId`, `matched`, `ownerTmagId`, `provider`, `status`, `updatedAt`, `vmCampaignId` | none observed | `entityId`, `inboundCallId`, `leadId`, `leadOwnerId`, `ownerTmagId`, `tmagId`, `vmCampaignId` |
 | `mcs_vm_delivery_events` | vm_rvm | not_language_scoped | VM/RVM ownership, campaign, lead, and delivery semantic records. | not observed | none observed | none observed | none inferred |
 | `mcs_vm_lead_owners` | vm_rvm | not_language_scoped | VM/RVM ownership, campaign, lead, and delivery semantic records. | `writeGraphCritical` | `country`, `createdAt`, `kind`, `leadOwnerId`, `ownerTmagId`, `source` | none observed | `leadOwnerId`, `ownerTmagId`, `source`, `tmagId` |
 | `mcs_webinar_events` | events | not_language_scoped | Registered app Chroma collection. | `create_collection`<br>`writeOperational` | `chat_number`, `description`, `eventId`, `kind`, `project`, `scheduledFor`, `status` | none observed | `eventId` |

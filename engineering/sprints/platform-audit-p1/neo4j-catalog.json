@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-12T02:45:27.057Z",
+  "generatedAt": "2026-07-12T09:26:40.296Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
     "server/src/domain/* Cypher writers"
   ],
   "summary": {
-    "labels": 68,
-    "relationships": 59,
+    "labels": 71,
+    "relationships": 60,
     "constraints": 18,
-    "labelsWithoutConstraint": 53
+    "labelsWithoutConstraint": 56
   },
   "byStatus": {
     "planned_core_not_applied": 11,
@@ -143,6 +143,23 @@
       ]
     },
     {
+      "label": "MemoryIndexEntry",
+      "sourceCount": 4,
+      "sources": [
+        "server/scripts/write-edges-2026-07-11.ts:169",
+        "server/scripts/write-edges-2026-07-11.ts:179",
+        "server/scripts/write-edges-2026-07-11.ts:180",
+        "server/scripts/write-edges-2026-07-11.ts:205"
+      ]
+    },
+    {
+      "label": "MemorySourceRecord",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/lib/memoryContextIndex.ts:275"
+      ]
+    },
+    {
       "label": "Outcome",
       "sourceCount": 1,
       "sources": [
@@ -151,9 +168,10 @@
     },
     {
       "label": "REQUESTED_CALLBACK",
-      "sourceCount": 1,
+      "sourceCount": 2,
       "sources": [
-        "server/src/domain/callbackRequest.ts:132"
+        "server/src/domain/callbackRequest.ts:132",
+        "server/src/domain/vmInboundCallback.ts:214"
       ]
     },
     {
@@ -206,7 +224,7 @@
     },
     {
       "label": "TeamMagnificentMember",
-      "sourceCount": 75,
+      "sourceCount": 76,
       "sources": [
         "server/scripts/backfill-founder-timezones.ts:138",
         "server/scripts/backfill-founder-timezones.ts:82",
@@ -277,10 +295,11 @@
         "server/src/domain/threeWayCalls.ts:583",
         "server/src/domain/training.ts:237",
         "server/src/domain/vmCampaigns.ts:75",
+        "server/src/domain/vmInboundCallback.ts:213",
         "server/src/domain/vmLeadOwners.ts:61",
         "server/src/domain/vmLeadOwners.ts:77",
-        "server/src/domain/vmProviderQueue.ts:240",
-        "server/src/domain/vmProviderQueue.ts:602",
+        "server/src/domain/vmProviderQueue.ts:274",
+        "server/src/domain/vmProviderQueue.ts:638",
         "server/src/domain/workbook.ts:307",
         "server/src/domain/workbook.ts:308"
       ]
@@ -543,7 +562,7 @@
     },
     {
       "label": "TmagProspectCrmRecord",
-      "sourceCount": 8,
+      "sourceCount": 9,
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:95",
         "server/src/domain/crmOwnershipPersistence.ts:35",
@@ -552,7 +571,8 @@
         "server/src/domain/crmOwnershipPersistence.ts:56",
         "server/src/domain/prospectCrm.ts:283",
         "server/src/domain/prospectCrm.ts:382",
-        "server/src/domain/prospectCrm.ts:494"
+        "server/src/domain/prospectCrm.ts:494",
+        "server/src/domain/vmInboundCallback.ts:328"
       ]
     },
     {
@@ -564,9 +584,10 @@
     },
     {
       "label": "TmagProspectTimelineEvent",
-      "sourceCount": 1,
+      "sourceCount": 2,
       "sources": [
-        "server/src/domain/prospectCrm.ts:228"
+        "server/src/domain/prospectCrm.ts:228",
+        "server/src/domain/vmInboundCallback.ts:287"
       ]
     },
     {
@@ -620,12 +641,12 @@
       "label": "TmagVmAuditEvent",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:237"
+        "server/src/domain/vmProviderQueue.ts:271"
       ]
     },
     {
       "label": "TmagVmBulkLead",
-      "sourceCount": 10,
+      "sourceCount": 13,
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:78",
         "server/src/domain/bulkLeads.ts:239",
@@ -635,8 +656,11 @@
         "server/src/domain/crossStoreReconciliation.ts:102",
         "server/src/domain/tokenLifecyclePersistence.ts:62",
         "server/src/domain/tokenLifecyclePersistence.ts:68",
-        "server/src/domain/vmProviderQueue.ts:599",
-        "server/src/domain/vmProviderQueue.ts:847"
+        "server/src/domain/vmInboundCallback.ts:152",
+        "server/src/domain/vmInboundCallback.ts:212",
+        "server/src/domain/vmInboundCallback.ts:286",
+        "server/src/domain/vmProviderQueue.ts:635",
+        "server/src/domain/vmProviderQueue.ts:897"
       ]
     },
     {
@@ -653,7 +677,14 @@
       "label": "TmagVmDeliveryEvent",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:845"
+        "server/src/domain/vmProviderQueue.ts:895"
+      ]
+    },
+    {
+      "label": "TmagVmInboundCall",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/vmInboundCallback.ts:148"
       ]
     },
     {
@@ -672,14 +703,14 @@
       "label": "TmagVmProviderWebhook",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:891"
+        "server/src/domain/vmProviderQueue.ts:941"
       ]
     },
     {
       "label": "TmagVmQueueJob",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:291"
+        "server/src/domain/vmProviderQueue.ts:325"
       ]
     },
     {
@@ -868,6 +899,13 @@
       ]
     },
     {
+      "relationship": "HAS_INBOUND_CALL",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/vmInboundCallback.ts:153"
+      ]
+    },
+    {
       "relationship": "HAS_LANGUAGE_VARIANT",
       "sourceCount": 1,
       "sources": [
@@ -920,9 +958,10 @@
     },
     {
       "relationship": "HAS_TIMELINE_EVENT",
-      "sourceCount": 1,
+      "sourceCount": 2,
       "sources": [
-        "server/src/domain/prospectCrm.ts:232"
+        "server/src/domain/prospectCrm.ts:232",
+        "server/src/domain/vmInboundCallback.ts:291"
       ]
     },
     {
@@ -937,14 +976,14 @@
       "relationship": "HAS_VM_AUDIT",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:241"
+        "server/src/domain/vmProviderQueue.ts:275"
       ]
     },
     {
       "relationship": "HAS_VM_DELIVERY_EVENT",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:847"
+        "server/src/domain/vmProviderQueue.ts:897"
       ]
     },
     {
@@ -1037,7 +1076,7 @@
       "relationship": "OWNS_VM_LEAD",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:603"
+        "server/src/domain/vmProviderQueue.ts:639"
       ]
     },
     {
@@ -1356,6 +1395,8 @@
     "KnowledgeSource",
     "KnowledgeVersion",
     "LearningSignal",
+    "MemoryIndexEntry",
+    "MemorySourceRecord",
     "Outcome",
     "REQUESTED_CALLBACK",
     "RESERVED_ORIENTATION",
@@ -1389,6 +1430,7 @@
     "TmagThreeWayBooking",
     "TmagVmAuditEvent",
     "TmagVmDeliveryEvent",
+    "TmagVmInboundCall",
     "TmagVmProviderWebhook",
     "TmagVmQueueJob",
     "TmagWebinarEvent",

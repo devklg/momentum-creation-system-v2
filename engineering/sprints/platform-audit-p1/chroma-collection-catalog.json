@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T02:45:28.723Z",
+  "generatedAt": "2026-07-12T09:26:42.580Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -1085,11 +1085,16 @@
       "actions": [
         "writeOperational"
       ],
-      "sourceCount": 1,
+      "sourceCount": 2,
       "sources": [
         {
           "file": "server/src/domain/callbackRequest.ts",
           "line": 120,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 190,
           "action": "writeOperational"
         }
       ],
@@ -1106,13 +1111,17 @@
           "createdAt",
           "intent",
           "kind",
+          "leadId",
           "prospectId",
+          "source",
           "sponsorTmagId"
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
           "callbackRequestId",
+          "leadId",
           "prospectId",
+          "source",
           "sponsorTmagId",
           "tmagId"
         ],
@@ -1370,11 +1379,16 @@
       "actions": [
         "writeKnowledge"
       ],
-      "sourceCount": 1,
+      "sourceCount": 2,
       "sources": [
         {
           "file": "server/src/domain/prospectCrm.ts",
           "line": 221,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 263,
           "action": "writeKnowledge"
         }
       ],
@@ -1389,12 +1403,14 @@
         "observedMetadataKeys": [
           "createdAt",
           "kind",
+          "leadId",
           "ownerTmagId",
           "prospectId",
           "sponsorTmagId"
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
+          "leadId",
           "ownerTmagId",
           "prospectId",
           "sponsorTmagId",
@@ -1956,7 +1972,7 @@
         "add",
         "writeOperational"
       ],
-      "sourceCount": 7,
+      "sourceCount": 8,
       "sources": [
         {
           "file": "server/src/domain/vmCampaigns.ts",
@@ -1969,28 +1985,33 @@
           "action": "persistenceCall.chromadb.add"
         },
         {
-          "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 223,
+          "file": "server/src/domain/vmInboundCallback.ts",
+          "line": 142,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 285,
+          "line": 257,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 593,
+          "line": 319,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 839,
+          "line": 629,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 877,
+          "line": 889,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmProviderQueue.ts",
+          "line": 927,
           "action": "writeOperational"
         }
       ],
@@ -2006,10 +2027,12 @@
           "action",
           "createdAt",
           "entityId",
+          "inboundCallId",
           "jobKind",
           "kind",
           "leadId",
           "leadOwnerId",
+          "matched",
           "ownerTmagId",
           "provider",
           "status",
@@ -2019,6 +2042,7 @@
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
           "entityId",
+          "inboundCallId",
           "leadId",
           "leadOwnerId",
           "ownerTmagId",
