@@ -5977,3 +5977,18 @@ export interface McsAdminEntitlementAuditResponse {
   totals: { membersScanned: number; memberGrants: number; unknownGrants: number; routesClassified: number };
   warnings: string[];
 }
+
+export interface McsAuditEventTaxonomy {
+  version: 1;
+  namespace: string;
+  category: 'read' | 'create' | 'update' | 'delete' | 'lifecycle' | 'security' | 'delivery' | 'governance' | 'reporting' | 'runtime' | 'unknown';
+  operation: string;
+  impact: 'observation' | 'mutation' | 'destructive' | 'control';
+  outcome: 'succeeded' | 'blocked' | 'failed' | 'queued' | 'unknown';
+  sensitivity: 'routine' | 'sensitive' | 'governance_critical';
+  reasonRequired: boolean;
+}
+
+export interface McsTaxonomizedAuditLogEntry extends McsAuditLogEntry {
+  taxonomy: McsAuditEventTaxonomy;
+}
