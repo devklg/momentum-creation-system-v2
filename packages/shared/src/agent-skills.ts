@@ -19,6 +19,7 @@ export interface McsAgentSkillDescriptor {
   handoffTarget: string | null;
   eventsEmitted: readonly string[];
   degradation: { mode: McsAgentDegradationMode; behavior: string };
+  implementationPrompts?: readonly string[];
 }
 
 export interface McsAgentTemplateDescriptor {
@@ -69,7 +70,12 @@ export const MCS_AGENT_SKILL_REGISTRY: readonly McsAgentSkillDescriptor[] = [
     allowedOutputs: ['teachable_moments', 'practice_suggestion'], forbiddenOutputs: ['trainee_score', 'live_interruption', 'automatic_outreach'],
     behaviorSource: 'planned:sponsor-assisted-coaching', templateIds: ['michael_sponsor_debrief'], testIds: ['planned:p160-sponsor-debrief'],
     handoffTarget: 'sponsor_or_upline', eventsEmitted: ['coaching.debrief.prepared'],
-    degradation: { mode: 'block_substantive', behavior: 'Without consent or session evidence, defer to the human sponsor.' } }),
+    degradation: { mode: 'block_substantive', behavior: 'Without consent or session evidence, defer to the human sponsor.' },
+    implementationPrompts: [
+      'engineering/sprints/agent-capabilities/03_SPONSOR_ASSISTED_COACHING.md',
+      'engineering/sprints/agent-capabilities/04_TRAINING_RECORDINGS.md',
+      'engineering/sprints/agent-capabilities/05_MICHAEL_DEBRIEF.md',
+    ] }),
   skill({ skillKey: 'ivory.manage_personal_prospect_roster', ownerAgentKey: 'ivory', version: '1.0.0', status: 'implemented',
     purpose: 'Maintain the BA-authored warm relationship roster.', requiredInputs: ['authenticated_ba', 'ba_authored_relationship_context'],
     allowedOutputs: ['roster_entry', 'relationship_context'], forbiddenOutputs: ['scraped_contact', 'prospect_score', 'qualification'],
@@ -95,7 +101,11 @@ export const MCS_AGENT_SKILL_REGISTRY: readonly McsAgentSkillDescriptor[] = [
     forbiddenOutputs: ['scraped_contact', 'qualification', 'automatic_send', 'income_projection'],
     behaviorSource: 'planned:scriptmaker-wdyk-token-flow', templateIds: ['scriptmaker_wdyk_product', 'scriptmaker_wdyk_opportunity'],
     testIds: ['planned:p160-scriptmaker-wdyk'], handoffTarget: 'brand_ambassador_then_ivory', eventsEmitted: ['ivory.invitation.created'],
-    degradation: { mode: 'block_substantive', behavior: 'Do not mint until the BA identifies the person and approves the draft.' } }),
+    degradation: { mode: 'block_substantive', behavior: 'Do not mint until the BA identifies the person and approves the draft.' },
+    implementationPrompts: [
+      'engineering/sprints/agent-capabilities/01_SCRIPTMAKER_WDYK_PERSONAL_PROSPECT_LIST.md',
+      'engineering/sprints/agent-capabilities/02_SCRIPTMAKER_INVITATION_TOKEN.md',
+    ] }),
   skill({ skillKey: 'admin.inspect_agent_memory', ownerAgentKey: 'admin_recommendations', version: '1.0.0', status: 'implemented',
     purpose: 'Explain agent-memory health and report review-only findings.', requiredInputs: ['admin_session', 'agent_memory_projections'],
     allowedOutputs: ['overview', 'warning', 'bridge_draft'], forbiddenOutputs: ['automatic_mutation', 'ba_score', 'leadership_decision'],
@@ -129,6 +139,7 @@ export function validateAgentSkillTemplateRegistries(): string[] {
     skillKeys.add(item.skillKey);
     if (!/^\d+\.\d+\.\d+$/.test(item.version)) errors.push(`invalid_skill_version:${item.skillKey}`);
     if (!item.requiredInputs.length || !item.allowedOutputs.length || !item.forbiddenOutputs.length || !item.testIds.length) errors.push(`incomplete_skill:${item.skillKey}`);
+    if (item.status === 'planned' && !item.implementationPrompts?.length) errors.push(`planned_without_prompt:${item.skillKey}`);
   }
   for (const item of MCS_AGENT_TEMPLATE_REGISTRY) {
     const identity = `${item.templateId}@${item.version}`;

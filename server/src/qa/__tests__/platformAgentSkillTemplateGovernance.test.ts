@@ -23,6 +23,12 @@ describe('P1-60 agent skill and template governance', () => {
     expect(MCS_AGENT_SKILL_REGISTRY.find((skill) => skill.skillKey === 'michael.sponsor_assisted_debrief')?.status).toBe('planned');
   });
 
+  it('gives every planned skill an implementation-ready prompt', () => {
+    const planned = MCS_AGENT_SKILL_REGISTRY.filter((skill) => skill.status === 'planned');
+    expect(planned).not.toHaveLength(0);
+    expect(planned.every((skill) => (skill.implementationPrompts?.length ?? 0) > 0)).toBe(true);
+  });
+
   it('requires declared degradation behavior without broadening output authority', () => {
     for (const skill of MCS_AGENT_SKILL_REGISTRY) {
       expect(skill.degradation.behavior.length).toBeGreaterThan(0);
