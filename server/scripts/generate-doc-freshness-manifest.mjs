@@ -10,11 +10,11 @@ const output = path.join(root, 'docs/freshness-manifest.json');
 const check = process.argv.includes('--check');
 
 const coreDocs = [
-  'docs/READ-ME-FIRST.md',
-  'docs/AGENT-BRIEFING.md',
-  'docs/locked-spec.md',
-  'docs/project-wireframe.md',
-  'PLATFORM_AUDIT_PRIORITY_TASKLIST.md',
+  ['docs/READ-ME-FIRST.md', 'current_navigation'],
+  ['docs/AGENT-BRIEFING.md', 'current_orientation'],
+  ['docs/locked-spec.md', 'authoritative_state'],
+  ['docs/project-wireframe.md', 'current_build_decomposition'],
+  ['PLATFORM_AUDIT_PRIORITY_TASKLIST.md', 'current_execution_queue'],
 ];
 const reviewedAt = '2026-07-12';
 
@@ -31,6 +31,10 @@ const generatedArtifacts = [
   ['engineering/sprints/platform-audit-p1/chroma-collection-catalog.json', 'server/scripts/generate-chroma-catalog.mjs', ['server/src']],
   ['engineering/sprints/platform-audit-p1/com-prospect-compliance-scan.json', 'server/scripts/generate-com-prospect-compliance-scan.mjs', ['apps/com/src', 'packages/shared/src/compliance.ts']],
 ];
+const historicalDocs = execFileSync('git', ['ls-files', 'docs'], { cwd: root, encoding: 'utf8' })
+  .split(/\r?\n/)
+  .filter((file) => /(?:^docs\/chat-\d+-|AUDIT_|IMPLEMENTATION_PLAN_|APP_STATE_AUDIT)/i.test(file))
+  .sort();
 
 function sha256(relative) {
   const absolute = path.join(root, relative);
@@ -56,18 +60,32 @@ function embeddedGeneratedAt(relative) {
 }
 
 const manifest = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   freshnessBasis: 'content_sha256_and_declared_review_date',
-  instructions: 'Regenerate an artifact when any declared source hash changes. reviewedAt is freshness metadata, not proof that content is authoritative.',
-  coreDocs: coreDocs.map((file) => ({ file, contentSha256: sha256(file), reviewedAt })),
+  authorityRule: 'decision ledger > locked spec > design docs > generated mirrors > git log > agent registry > handoffs',
+  instructions: 'Regenerate an artifact when any declared source hash changes. reviewedAt is freshness metadata. authorityStatus states how a document may be used.',
+  coreDocs: coreDocs.map(([file, authorityStatus]) => ({ file, authorityStatus, contentSha256: sha256(file), reviewedAt })),
   generatedArtifacts: generatedArtifacts.map(([file, generator, sources]) => ({
     file,
+    authorityStatus: 'generated_mirror',
     generator,
     sources: sources.map((source) => ({ path: source, contentSha256: sha256(source) })),
     contentSha256: sha256(file),
     lastVerifiedAt: reviewedAt,
     generatedAt: embeddedGeneratedAt(file),
   })),
+  historicalDocs: historicalDocs.map((file) => ({
+    file,
+    authorityStatus: 'historical_reference_only',
+    contentSha256: sha256(file),
+    useConstraint: 'May explain prior decisions or implementation history; cannot override the decision ledger, locked spec, or current build decomposition.',
+  })),
+  designReferences: [{
+    file: 'docs/dashboard-prototype.md',
+    authorityStatus: 'design_reference',
+    contentSha256: sha256('docs/dashboard-prototype.md'),
+    useConstraint: 'Design authority within its named dashboard scope, subordinate to the decision ledger and locked spec.',
+  }],
 };
 
 const rendered = `${JSON.stringify(manifest, null, 2)}\n`;
