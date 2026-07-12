@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-12T02:12:15.981Z
+- Generated: 2026-07-12T02:45:26.070Z
 - Mongo collections: 65
 - Neo4j labels: 68
 - Neo4j relationships: 59
@@ -93,7 +93,7 @@
 | `DISPOSED` | 3 |
 | `ENROLLED` | 1 |
 | `FOUNDER_PASSWORD` | 1 |
-| `HAS_FOLLOWUP` | 3 |
+| `HAS_FOLLOWUP` | 4 |
 | `IN_HOLDING_TANK` | 7 |
 | `INVITED_AS` | 1 |
 | `Knowledge` | 10 |
@@ -111,7 +111,7 @@
 | `SCOPED_TO` | 1 |
 | `SPONSORED_BY` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 74 |
+| `TeamMagnificentMember` | 75 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 2 |
@@ -135,7 +135,7 @@
 | `TmagOrientationSession` | 3 |
 | `TmagOutcome` | 4 |
 | `TmagPool` | 6 |
-| `TmagProspect` | 40 |
+| `TmagProspect` | 41 |
 | `TmagProspectAccount` | 2 |
 | `TmagProspectCrmRecord` | 8 |
 | `TmagProspectMagicLink` | 1 |

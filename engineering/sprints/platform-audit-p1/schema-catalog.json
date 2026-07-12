@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T02:12:15.981Z",
+  "generatedAt": "2026-07-12T02:45:26.070Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -2336,7 +2336,8 @@
         "sources": [
           "server/src/domain/crm.ts:262",
           "server/src/domain/crm.ts:302",
-          "server/src/domain/crm.ts:366"
+          "server/src/domain/crm.ts:366",
+          "server/src/domain/crmCleanup.ts:234"
         ]
       },
       {
@@ -2495,6 +2496,7 @@
           "server/src/domain/crm.ts:409",
           "server/src/domain/crm.ts:434",
           "server/src/domain/crm.ts:464",
+          "server/src/domain/crmCleanup.ts:234",
           "server/src/domain/crmOwnershipPersistence.ts:33",
           "server/src/domain/crmOwnershipPersistence.ts:40",
           "server/src/domain/crmOwnershipPersistence.ts:48",
@@ -2744,6 +2746,7 @@
           "server/src/domain/crm.ts:465",
           "server/src/domain/crm.ts:668",
           "server/src/domain/crm.ts:776",
+          "server/src/domain/crmCleanup.ts:235",
           "server/src/domain/crmOwnershipPersistence.ts:49",
           "server/src/domain/crmOwnershipPersistence.ts:57",
           "server/src/domain/crossStoreReconciliation.ts:110",

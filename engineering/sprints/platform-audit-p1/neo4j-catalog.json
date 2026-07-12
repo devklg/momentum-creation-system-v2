@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T02:12:16.976Z",
+  "generatedAt": "2026-07-12T02:45:27.057Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -55,11 +55,12 @@
     },
     {
       "label": "HAS_FOLLOWUP",
-      "sourceCount": 3,
+      "sourceCount": 4,
       "sources": [
         "server/src/domain/crm.ts:262",
         "server/src/domain/crm.ts:302",
-        "server/src/domain/crm.ts:366"
+        "server/src/domain/crm.ts:366",
+        "server/src/domain/crmCleanup.ts:234"
       ]
     },
     {
@@ -205,7 +206,7 @@
     },
     {
       "label": "TeamMagnificentMember",
-      "sourceCount": 74,
+      "sourceCount": 75,
       "sources": [
         "server/scripts/backfill-founder-timezones.ts:138",
         "server/scripts/backfill-founder-timezones.ts:82",
@@ -236,6 +237,7 @@
         "server/src/domain/crm.ts:409",
         "server/src/domain/crm.ts:434",
         "server/src/domain/crm.ts:464",
+        "server/src/domain/crmCleanup.ts:234",
         "server/src/domain/crmOwnershipPersistence.ts:33",
         "server/src/domain/crmOwnershipPersistence.ts:40",
         "server/src/domain/crmOwnershipPersistence.ts:48",
@@ -486,7 +488,7 @@
     },
     {
       "label": "TmagProspect",
-      "sourceCount": 40,
+      "sourceCount": 41,
       "sources": [
         "server/scripts/smoke-holding-tank.ts:114",
         "server/scripts/smoke-holding-tank.ts:66",
@@ -509,6 +511,7 @@
         "server/src/domain/crm.ts:465",
         "server/src/domain/crm.ts:668",
         "server/src/domain/crm.ts:776",
+        "server/src/domain/crmCleanup.ts:235",
         "server/src/domain/crmOwnershipPersistence.ts:49",
         "server/src/domain/crmOwnershipPersistence.ts:57",
         "server/src/domain/crossStoreReconciliation.ts:110",
