@@ -3,21 +3,23 @@
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
-import type { McsAdminAgentOversightResponse } from '@momentum/shared';
+import type { McsAdminAgentHealthResponse, McsAdminAgentOversightResponse } from '@momentum/shared';
 
 export function AgentsPage() {
   const [data, setData] = useState<McsAdminAgentOversightResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [health, setHealth] = useState<McsAdminAgentHealthResponse | null>(null);
 
   useEffect(() => {
     void (async () => {
       setLoading(true);
       setErr(null);
       try {
-        const res = await fetch('/api/admin/agents/overview', {
-          credentials: 'include',
-        });
+        const [res, healthRes] = await Promise.all([
+          fetch('/api/admin/agents/overview', { credentials: 'include' }),
+          fetch('/api/admin/agents/health', { credentials: 'include' }),
+        ]);
         const body = (await res.json()) as McsAdminAgentOversightResponse & {
           error?: string;
         };
@@ -26,6 +28,7 @@ export function AgentsPage() {
           return;
         }
         setData(body);
+        if (healthRes.ok) setHealth((await healthRes.json()) as McsAdminAgentHealthResponse);
       } catch (e) {
         setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
       } finally {
@@ -53,6 +56,23 @@ export function AgentsPage() {
 
       {data && (
         <>
+          {health && (
+            <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-8">
+              {health.cards.map((card) => (
+                <div key={card.agentKey} className="border border-line bg-cream/[0.025] p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-display text-[22px] text-cream">{card.displayName}</p>
+                    <span className="font-mono text-[10px] tracking-label uppercase text-gold">{card.status}</span>
+                  </div>
+                  <p className="text-xs text-cream-mute mt-2">{card.kind} · {card.events7d} events / 7d</p>
+                  <p className="text-xs text-cream-mute mt-1">Skills {card.activeSkills} active / {card.plannedSkills} planned</p>
+                  <p className="text-xs text-cream-mute">Templates {card.activeTemplates} active / {card.plannedTemplates} planned</p>
+                  <p className="font-mono text-[10px] text-cream-faint mt-3 break-all">{card.behaviorSource}</p>
+                  {card.issues.length > 0 && <p className="text-xs text-red-300 mt-2">{card.issues.join(', ')}</p>}
+                </div>
+              ))}
+            </section>
+          )}
           {data.warnings.length > 0 && (
             <section className="border border-gold/40 bg-gold/[0.06] p-4 mb-6">
               <p className="font-mono text-[10px] tracking-label uppercase text-gold mb-2">

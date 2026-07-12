@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T07:21:31.736Z",
+  "generatedAt": "2026-07-12T09:08:17.652Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,16 +8,16 @@
   "summary": {
     "mounts": 46,
     "routeFiles": 46,
-    "routes": 210,
+    "routes": 211,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 2,
-      "pre_gate": 135,
+      "pre_gate": 136,
       "ba_facing_gated": 72
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
-      "admin": 86,
+      "admin": 87,
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
       "prospect_token": 18,
@@ -25,7 +25,7 @@
     },
     "byMethod": {
       "POST": 86,
-      "GET": 104,
+      "GET": 105,
       "PUT": 6,
       "PATCH": 8,
       "DELETE": 6
@@ -2877,7 +2877,33 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/agents.ts:25",
+      "source": "server/src/routes/admin/agents.ts:26",
+      "routeSource": "server/src/routes/admin/agents.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/agents/health",
+      "mountPath": "/api/admin/agents",
+      "localPath": "/health",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/agents.ts:58",
       "routeSource": "server/src/routes/admin/agents.ts",
       "signals": {
         "requireAuth": false,
