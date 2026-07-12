@@ -138,6 +138,8 @@ export { runMichaelRuntimeAdapterContract } from './michaelRuntimeAdapterContrac
 
 export {
   MICHAEL_RESPONSE_CATALOG,
+  MICHAEL_CATALOG_KEY_REGISTRY,
+  MICHAEL_RESPONSE_TYPE_REGISTRY,
   getMichaelResponseCatalogEntry,
   hasMichaelResponseCatalogEntry,
   listMichaelResponseCatalogEntries,
