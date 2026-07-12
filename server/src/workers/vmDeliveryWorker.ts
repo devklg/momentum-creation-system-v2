@@ -74,7 +74,10 @@ async function tick(): Promise<void> {
   if (tickInFlight) return;
   tickInFlight = true;
   try {
-    const jobs = await claimVmJobs(['delivery'], BATCH);
+    const jobs = await claimVmJobs(
+      ['delivery'],
+      vmDeliveryClaimBatchSize(env.VM_DELIVERY_RATE_PER_MINUTE, TICK_MS, BATCH),
+    );
     for (const job of jobs) {
       await throttle();
       await dispatch(job as VmQueueJob<DeliveryPayload>);
@@ -98,6 +101,11 @@ async function throttle(): Promise<void> {
 
 export function vmDeliveryMinGapMs(ratePerMinute: number): number {
   return Math.ceil(60_000 / ratePerMinute);
+}
+
+export function vmDeliveryClaimBatchSize(ratePerMinute: number, tickMs: number, maxBatch: number): number {
+  const dispatchCapacity = Math.ceil((ratePerMinute * tickMs) / 60_000);
+  return Math.max(1, Math.min(maxBatch, dispatchCapacity));
 }
 
 export async function dispatchVmDeliveryJobForTest(job: VmQueueJob<DeliveryPayload>): Promise<void> {
