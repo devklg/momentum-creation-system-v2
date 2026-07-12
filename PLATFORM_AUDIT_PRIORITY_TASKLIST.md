@@ -102,7 +102,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 72. **Operations:** Add structured correlation ids for token, invitation, CRM, and VM/RVM flows.
 - [x] 73. **Security:** Create a permissions matrix by route, role, entitlement, and gate.
 - [x] 74. **Entitlements:** Create an entitlement admin audit view.
-- [ ] 75. **Audit:** Create a unified admin audit-event taxonomy.
+- [x] 75. **Audit:** Create a unified admin audit-event taxonomy.
 - [ ] 76. **Admin:** Add tests for destructive or governance-sensitive admin actions.
 - [ ] 77. **VM/RVM:** Document VM/RVM lifecycle schemas for campaigns, recipients, queue, webhooks, attempts, and tokens.
 - [ ] 78. **VM/RVM:** Create a VM/RVM provider queue failure and stuck-state dashboard.

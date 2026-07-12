@@ -41,7 +41,9 @@ import type {
   McsAuditSeverity,
   McsRuntimeAuditAction,
   McsRuntimeAuditLogEntry,
+  McsTaxonomizedAuditLogEntry,
 } from '@momentum/shared';
+import { classifyAuditAction } from './auditTaxonomy.js';
 
 const MONGO_DB = 'momentum';
 const COLLECTION = 'mcs_audit_log';
@@ -112,12 +114,13 @@ function semanticDocument(entry: McsAuditLogEntry): string {
  * Triple-stacked append. The ONLY writer. Returns the persisted
  * entry so callers can echo entryId in their own response if useful.
  */
-export async function appendAuditEntry(input: McsAppendAuditEntryInput): Promise<McsAuditLogEntry> {
+export async function appendAuditEntry(input: McsAppendAuditEntryInput): Promise<McsTaxonomizedAuditLogEntry> {
   const now = new Date().toISOString();
   const timestamp = input.timestamp ?? now;
   const entryId = mintEntryId(timestamp);
 
-  const entry: McsAuditLogEntry = {
+  const severity = input.severity ?? 'info';
+  const entry: McsTaxonomizedAuditLogEntry = {
     entryId,
     timestamp,
     createdAt: now,
@@ -125,7 +128,8 @@ export async function appendAuditEntry(input: McsAppendAuditEntryInput): Promise
     actor: input.actor,
     action: input.action,
     entity: input.entity,
-    severity: input.severity ?? 'info',
+    severity,
+    taxonomy: classifyAuditAction(input.action, severity),
     before: clampSnapshot(input.before),
     after: clampSnapshot(input.after),
     reason: input.reason ?? null,
@@ -154,6 +158,9 @@ export async function appendAuditEntry(input: McsAppendAuditEntryInput): Promise
         entityKind: entry.entity.kind,
         severity: entry.severity,
         timestamp: entry.timestamp,
+        taxonomyCategory: entry.taxonomy.category,
+        taxonomyImpact: entry.taxonomy.impact,
+        taxonomyOutcome: entry.taxonomy.outcome,
       },
     },
   });
@@ -162,10 +169,10 @@ export async function appendAuditEntry(input: McsAppendAuditEntryInput): Promise
 }
 
 function buildCypher(
-  entry: McsAuditLogEntry,
+  entry: McsTaxonomizedAuditLogEntry,
 ): { cypher: string; params?: Record<string, unknown> } {
   const baseProps =
-    'entryId: $entryId, timestamp: datetime($timestamp), action: $action, role: $role, severity: $severity, entityKind: $entityKind, entityId: $entityId';
+    'entryId: $entryId, timestamp: datetime($timestamp), action: $action, role: $role, severity: $severity, entityKind: $entityKind, entityId: $entityId, taxonomyCategory: $taxonomyCategory, taxonomyImpact: $taxonomyImpact, taxonomyOutcome: $taxonomyOutcome';
   const params: Record<string, unknown> = {
     entryId: entry.entryId,
     timestamp: entry.timestamp,
@@ -174,6 +181,9 @@ function buildCypher(
     severity: entry.severity,
     entityKind: entry.entity.kind,
     entityId: entry.entity.id,
+    taxonomyCategory: entry.taxonomy.category,
+    taxonomyImpact: entry.taxonomy.impact,
+    taxonomyOutcome: entry.taxonomy.outcome,
   };
 
   if (entry.actor.kind === 'admin' || entry.actor.kind === 'ba') {
@@ -243,7 +253,7 @@ function buildMongoFilter(filters: McsAuditQueryFilters): Record<string, unknown
  */
 export async function queryAuditEntries(
   filters: McsAuditQueryFilters,
-): Promise<{ entries: McsAuditLogEntry[]; nextCursor: string | null }> {
+): Promise<{ entries: McsTaxonomizedAuditLogEntry[]; nextCursor: string | null }> {
   const limit = Math.max(1, Math.min(filters.limit ?? DEFAULT_LIMIT, MAX_LIMIT));
   const filter = buildMongoFilter(filters);
 
@@ -272,20 +282,22 @@ export async function queryAuditEntries(
 
   const docs = result.documents ?? [];
   const hasMore = docs.length > limit;
-  const entries = hasMore ? docs.slice(0, limit) : docs;
+  const selected = hasMore ? docs.slice(0, limit) : docs;
+  const entries = selected.map((entry) => ({ ...entry, taxonomy: (entry as McsTaxonomizedAuditLogEntry).taxonomy ?? classifyAuditAction(entry.action, entry.severity) }));
   const nextCursor = hasMore ? entries[entries.length - 1]?.entryId ?? null : null;
 
   return { entries, nextCursor };
 }
 
-export async function findAuditEntry(entryId: string): Promise<McsAuditLogEntry | null> {
+export async function findAuditEntry(entryId: string): Promise<McsTaxonomizedAuditLogEntry | null> {
   const result = await persistenceCall<{ documents: McsAuditLogEntry[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLLECTION,
     filter: { entryId },
     limit: 1,
   });
-  return result.documents?.[0] ?? null;
+  const entry = result.documents?.[0];
+  return entry ? { ...entry, taxonomy: (entry as McsTaxonomizedAuditLogEntry).taxonomy ?? classifyAuditAction(entry.action, entry.severity) } as McsTaxonomizedAuditLogEntry : null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -377,7 +389,8 @@ export async function appendRuntimeAuditEntry(
     displayLabel: `${runtime.agent} turn`,
   };
 
-  const entry: McsRuntimeAuditLogEntry = {
+  const taxonomy = classifyAuditAction(action, input.severity ?? runtimeSeverityFor(action));
+  const entry: McsRuntimeAuditLogEntry & { taxonomy: ReturnType<typeof classifyAuditAction> } = {
     entryId,
     timestamp,
     createdAt: now,
@@ -392,6 +405,7 @@ export async function appendRuntimeAuditEntry(
     context: null,
     linkedTranscriptId: null,
     runtime,
+    taxonomy,
   };
 
   const cypher = buildRuntimeCypher(entry);
@@ -415,6 +429,9 @@ export async function appendRuntimeAuditEntry(
         agent: runtime.agent,
         tenantId: runtime.tenantId,
         tmagId: runtime.tmagId,
+        taxonomyCategory: taxonomy.category,
+        taxonomyImpact: taxonomy.impact,
+        taxonomyOutcome: taxonomy.outcome,
       },
     },
   });
@@ -445,7 +462,7 @@ function runtimeSemanticDocument(entry: McsRuntimeAuditLogEntry): string {
  * {entryId}; specific verb only (:ACTED_FOR). No generic relationships.
  */
 function buildRuntimeCypher(
-  entry: McsRuntimeAuditLogEntry,
+  entry: McsRuntimeAuditLogEntry & { taxonomy: ReturnType<typeof classifyAuditAction> },
 ): { cypher: string; params?: Record<string, unknown> } {
   const { runtime } = entry;
   return {
@@ -454,7 +471,9 @@ function buildRuntimeCypher(
       SET a += {
         entryId: $entryId, timestamp: datetime($timestamp), action: $action,
         role: $role, severity: $severity, agent: $agent, turnId: $turnId,
-        correlationId: $correlationId, tenantId: $tenantId, gate: $gate
+        correlationId: $correlationId, tenantId: $tenantId, gate: $gate,
+        taxonomyCategory: $taxonomyCategory, taxonomyImpact: $taxonomyImpact,
+        taxonomyOutcome: $taxonomyOutcome
       }
       WITH a
       OPTIONAL MATCH (ba:TeamMagnificentMember {tmagId: $tmagId})
@@ -475,6 +494,9 @@ function buildRuntimeCypher(
       tenantId: runtime.tenantId,
       gate: runtime.gate,
       tmagId: runtime.tmagId,
+      taxonomyCategory: entry.taxonomy.category,
+      taxonomyImpact: entry.taxonomy.impact,
+      taxonomyOutcome: entry.taxonomy.outcome,
     },
   };
 }
