@@ -37,6 +37,7 @@ import {
   type AdminBaCrudError,
   type AdminActor,
 } from '../../domain/adminBaCrud.js';
+import { buildAdminEntitlementAudit } from '../../domain/adminEntitlementAudit.js';
 import type {
   McsAdminBaDirectoryResponse,
   McsAdminBaEntitlementsResponse,
@@ -47,6 +48,11 @@ import type {
 } from '@momentum/shared';
 
 export const adminBasRoutes: Router = express.Router();
+
+adminBasRoutes.get('/entitlements/audit', requireAdmin, async (_req, res) => {
+  try { res.status(200).json(await buildAdminEntitlementAudit()); }
+  catch (err) { res.status(500).json({ ok: false, error: err instanceof Error ? err.message : String(err) }); }
+});
 
 adminBasRoutes.get('/', requireAdmin, async (req: Request, res: Response) => {
   const limitRaw = Number.parseInt(String(req.query.limit ?? '500'), 10);

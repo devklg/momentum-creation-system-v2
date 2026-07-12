@@ -31,7 +31,7 @@
     {
       "file": "PLATFORM_AUDIT_PRIORITY_TASKLIST.md",
       "authorityStatus": "current_execution_queue",
-      "contentSha256": "52e162cdf3bed3dcbdce89f6d6a49aedc259a953dc1b87c99282b6f42635df36",
+      "contentSha256": "391384d2ffcf5a08eff382111c646de8a634d0a80d06f88d784bb3d0752c59af",
       "reviewedAt": "2026-07-12"
     }
   ],
@@ -74,9 +74,9 @@
           "contentSha256": "3b6a3e873643ca862ab09de16d8b0db562741f27eb099a8edbf7e0c5e4d93cad"
         }
       ],
-      "contentSha256": "6323446a190b649b90c1ee18d4e28bf84f32488e9d78d33700f52b8d9527e638",
+      "contentSha256": "bef4fbfd4716f7e5852ba3c573aa967ca978c9893941c989039432c69a44fda4",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-12T10:11:36.236Z"
+      "generatedAt": "2026-07-12T11:27:29.596Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/route-access-matrix.json",
@@ -85,12 +85,12 @@
       "sources": [
         {
           "path": "engineering/sprints/platform-audit-p1/api-route-map.json",
-          "contentSha256": "6323446a190b649b90c1ee18d4e28bf84f32488e9d78d33700f52b8d9527e638"
+          "contentSha256": "bef4fbfd4716f7e5852ba3c573aa967ca978c9893941c989039432c69a44fda4"
         }
       ],
-      "contentSha256": "a4919d3190c061b78c305162c0084e62753853e32a5a14f128ccfbf9f04134d4",
+      "contentSha256": "5b81b00bdd9c13d6477292d91eaa8d3ad4713a8aba2223cd73777ba2d85be814",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-12T11:03:47.973Z"
+      "generatedAt": "2026-07-12T11:27:29.962Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/persistence-write-catalog.json",
@@ -99,7 +99,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "6ec8ba5a0aa5c6ff22b4a5d34bfae7b0fcff712ab6ccaab92e5bb89407e5d029"
+          "contentSha256": "a0c05a1ce7b1f90273450e4ca06cfb85aa30d6bf2021d7861c750b4da28b9544"
         }
       ],
       "contentSha256": "989906a1996568122435d947148abe8bbdeea8756900195814cecfc8090d3c2a",
@@ -113,11 +113,11 @@
       "sources": [
         {
           "path": "packages/shared/src",
-          "contentSha256": "a21d683802111fb66922bde4f28460141ef47362a43101fbc50eb85be16be30f"
+          "contentSha256": "393c428669f89d178c47cc8e650569f5b63aad63cafd0385791ba8aa67b055f4"
         },
         {
           "path": "server/src",
-          "contentSha256": "6ec8ba5a0aa5c6ff22b4a5d34bfae7b0fcff712ab6ccaab92e5bb89407e5d029"
+          "contentSha256": "a0c05a1ce7b1f90273450e4ca06cfb85aa30d6bf2021d7861c750b4da28b9544"
         }
       ],
       "contentSha256": "222a34f2c8424e175696d13a9b850367af494da6b38e26ce513c3461741110f5",
@@ -131,7 +131,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "6ec8ba5a0aa5c6ff22b4a5d34bfae7b0fcff712ab6ccaab92e5bb89407e5d029"
+          "contentSha256": "a0c05a1ce7b1f90273450e4ca06cfb85aa30d6bf2021d7861c750b4da28b9544"
         }
       ],
       "contentSha256": "1ad9c82de28cd601d4779a985ed16805757ebfe20fdcd7c5c75dc619ad3e1c5a",
@@ -145,7 +145,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "6ec8ba5a0aa5c6ff22b4a5d34bfae7b0fcff712ab6ccaab92e5bb89407e5d029"
+          "contentSha256": "a0c05a1ce7b1f90273450e4ca06cfb85aa30d6bf2021d7861c750b4da28b9544"
         }
       ],
       "contentSha256": "a436fc90dc485770d421b66eb248d313f9dc939a9ce3bb9c98b0e5f9a71b9418",
@@ -159,7 +159,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "6ec8ba5a0aa5c6ff22b4a5d34bfae7b0fcff712ab6ccaab92e5bb89407e5d029"
+          "contentSha256": "a0c05a1ce7b1f90273450e4ca06cfb85aa30d6bf2021d7861c750b4da28b9544"
         }
       ],
       "contentSha256": "395657fad532a136e4c701e26f4332989aaf1028a060bedf67af7490e06bf8e8",
@@ -173,7 +173,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "6ec8ba5a0aa5c6ff22b4a5d34bfae7b0fcff712ab6ccaab92e5bb89407e5d029"
+          "contentSha256": "a0c05a1ce7b1f90273450e4ca06cfb85aa30d6bf2021d7861c750b4da28b9544"
         }
       ],
       "contentSha256": "e4fb6a9c1135faf791efe799a6f6b2eecf75c5c295ec33d3a1d2e9e78f544ce2",
