@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-12T00:02:19.561Z
+- Generated: 2026-07-12T02:45:27.057Z
 - Labels: 68
 - Relationships: 59
 - Constraints/indexes cataloged: 18
@@ -26,7 +26,7 @@
 | `DISPOSED` | 3 |
 | `ENROLLED` | 1 |
 | `FOUNDER_PASSWORD` | 1 |
-| `HAS_FOLLOWUP` | 3 |
+| `HAS_FOLLOWUP` | 4 |
 | `IN_HOLDING_TANK` | 7 |
 | `INVITED_AS` | 1 |
 | `Knowledge` | 10 |
@@ -44,7 +44,7 @@
 | `SCOPED_TO` | 1 |
 | `SPONSORED_BY` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 74 |
+| `TeamMagnificentMember` | 75 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 2 |
@@ -68,7 +68,7 @@
 | `TmagOrientationSession` | 3 |
 | `TmagOutcome` | 4 |
 | `TmagPool` | 6 |
-| `TmagProspect` | 40 |
+| `TmagProspect` | 41 |
 | `TmagProspectAccount` | 2 |
 | `TmagProspectCrmRecord` | 8 |
 | `TmagProspectMagicLink` | 1 |

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T00:02:18.537Z",
+  "generatedAt": "2026-07-12T02:45:26.070Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -1096,7 +1096,7 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 753,
+          "line": 829,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1118,22 +1118,22 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 349,
+          "line": 401,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 366,
+          "line": 426,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 390,
+          "line": 458,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 421,
+          "line": 497,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1155,27 +1155,27 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 229,
+          "line": 254,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 261,
+          "line": 294,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 293,
+          "line": 335,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 316,
+          "line": 358,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 766,
+          "line": 842,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1202,12 +1202,12 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 157,
+          "line": 173,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 190,
+          "line": 206,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -1249,7 +1249,7 @@
         },
         {
           "file": "server/src/domain/prospectCrm.ts",
-          "line": 445,
+          "line": 466,
           "source": "persistenceCall.mongodb.update"
         }
       ]
@@ -1482,7 +1482,7 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 687,
+          "line": 763,
           "source": "writeKnowledge"
         },
         {
@@ -1766,27 +1766,27 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 105,
+          "line": 106,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 491,
+          "line": 567,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 576,
+          "line": 652,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 598,
+          "line": 674,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 773,
+          "line": 849,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1831,7 +1831,7 @@
         },
         {
           "file": "server/src/domain/prospectCrm.ts",
-          "line": 451,
+          "line": 472,
           "source": "persistenceCall.mongodb.update"
         },
         {
@@ -2035,7 +2035,7 @@
         },
         {
           "file": "server/src/domain/prospectCrm.ts",
-          "line": 464,
+          "line": 485,
           "source": "persistenceCall.mongodb.update"
         },
         {
@@ -2314,9 +2314,9 @@
       {
         "label": "DISPOSED",
         "sources": [
-          "server/src/domain/crm.ts:357",
-          "server/src/domain/crm.ts:376",
-          "server/src/domain/crm.ts:398"
+          "server/src/domain/crm.ts:409",
+          "server/src/domain/crm.ts:436",
+          "server/src/domain/crm.ts:466"
         ]
       },
       {
@@ -2334,9 +2334,10 @@
       {
         "label": "HAS_FOLLOWUP",
         "sources": [
-          "server/src/domain/crm.ts:237",
-          "server/src/domain/crm.ts:269",
-          "server/src/domain/crm.ts:324"
+          "server/src/domain/crm.ts:262",
+          "server/src/domain/crm.ts:302",
+          "server/src/domain/crm.ts:366",
+          "server/src/domain/crmCleanup.ts:234"
         ]
       },
       {
@@ -2488,13 +2489,14 @@
           "server/src/domain/bulkLeads.ts:150",
           "server/src/domain/callbackRequest.ts:131",
           "server/src/domain/commitments.ts:57",
-          "server/src/domain/crm.ts:164",
-          "server/src/domain/crm.ts:237",
-          "server/src/domain/crm.ts:267",
-          "server/src/domain/crm.ts:324",
-          "server/src/domain/crm.ts:357",
-          "server/src/domain/crm.ts:374",
-          "server/src/domain/crm.ts:396",
+          "server/src/domain/crm.ts:180",
+          "server/src/domain/crm.ts:262",
+          "server/src/domain/crm.ts:300",
+          "server/src/domain/crm.ts:366",
+          "server/src/domain/crm.ts:409",
+          "server/src/domain/crm.ts:434",
+          "server/src/domain/crm.ts:464",
+          "server/src/domain/crmCleanup.ts:234",
           "server/src/domain/crmOwnershipPersistence.ts:33",
           "server/src/domain/crmOwnershipPersistence.ts:40",
           "server/src/domain/crmOwnershipPersistence.ts:48",
@@ -2618,7 +2620,7 @@
       {
         "label": "TmagCrmNote",
         "sources": [
-          "server/src/domain/crm.ts:166"
+          "server/src/domain/crm.ts:182"
         ]
       },
       {
@@ -2645,7 +2647,7 @@
       {
         "label": "TmagInvitationActivity",
         "sources": [
-          "server/src/domain/crm.ts:701",
+          "server/src/domain/crm.ts:777",
           "server/src/domain/invitations.ts:375"
         ]
       },
@@ -2735,15 +2737,16 @@
           "server/src/domain/bulkLeads.ts:238",
           "server/src/domain/bulkLeads.ts:257",
           "server/src/domain/callbackRequest.ts:130",
-          "server/src/domain/crm.ts:165",
-          "server/src/domain/crm.ts:237",
-          "server/src/domain/crm.ts:268",
-          "server/src/domain/crm.ts:324",
-          "server/src/domain/crm.ts:357",
-          "server/src/domain/crm.ts:375",
-          "server/src/domain/crm.ts:397",
-          "server/src/domain/crm.ts:592",
-          "server/src/domain/crm.ts:700",
+          "server/src/domain/crm.ts:181",
+          "server/src/domain/crm.ts:262",
+          "server/src/domain/crm.ts:301",
+          "server/src/domain/crm.ts:366",
+          "server/src/domain/crm.ts:409",
+          "server/src/domain/crm.ts:435",
+          "server/src/domain/crm.ts:465",
+          "server/src/domain/crm.ts:668",
+          "server/src/domain/crm.ts:776",
+          "server/src/domain/crmCleanup.ts:235",
           "server/src/domain/crmOwnershipPersistence.ts:49",
           "server/src/domain/crmOwnershipPersistence.ts:57",
           "server/src/domain/crossStoreReconciliation.ts:110",
@@ -2759,7 +2762,7 @@
           "server/src/domain/poolPlacementPersistence.ts:37",
           "server/src/domain/poolPlacementPersistence.ts:41",
           "server/src/domain/prospectCrm.ts:227",
-          "server/src/domain/prospectCrm.ts:477",
+          "server/src/domain/prospectCrm.ts:498",
           "server/src/domain/tokenLifecyclePersistence.ts:46",
           "server/src/domain/tokenLifecyclePersistence.ts:52",
           "server/src/domain/webinarReservation.ts:203"
@@ -2782,7 +2785,7 @@
           "server/src/domain/crmOwnershipPersistence.ts:56",
           "server/src/domain/prospectCrm.ts:283",
           "server/src/domain/prospectCrm.ts:382",
-          "server/src/domain/prospectCrm.ts:473"
+          "server/src/domain/prospectCrm.ts:494"
         ]
       },
       {
@@ -2920,7 +2923,7 @@
       {
         "relationship": "ABOUT",
         "sources": [
-          "server/src/domain/crm.ts:168"
+          "server/src/domain/crm.ts:184"
         ]
       },
       {
@@ -3041,7 +3044,7 @@
       {
         "relationship": "HAS_ACTIVITY",
         "sources": [
-          "server/src/domain/crm.ts:704",
+          "server/src/domain/crm.ts:780",
           "server/src/domain/invitations.ts:378"
         ]
       },
@@ -3307,7 +3310,7 @@
       {
         "relationship": "WROTE_NOTE",
         "sources": [
-          "server/src/domain/crm.ts:167"
+          "server/src/domain/crm.ts:183"
         ]
       }
     ]
@@ -5439,6 +5442,16 @@
       "file": "packages/shared/src/compliance.ts"
     },
     {
+      "name": "CRM_CALLBACK_INTENTS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_CALLBACK_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "CRM_CANONICAL_LIFECYCLE_STATES",
       "kind": "const",
       "file": "packages/shared/src/crm-lifecycle.ts"
@@ -5449,7 +5462,17 @@
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
     {
+      "name": "CRM_CROSS_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "CRM_DISPOSITIONS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_FOLLOW_UP_STATE_MAPPINGS",
       "kind": "const",
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
@@ -5469,7 +5492,22 @@
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
     {
+      "name": "CRM_OUTCOME_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_PROSPECT_ACCOUNT_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "CRM_PROSPECT_LIFECYCLE_STAGES",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_RECORD_STATUS_MAPPINGS",
       "kind": "const",
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
@@ -5484,12 +5522,42 @@
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
     {
+      "name": "CRM_TIMELINE_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_TOKEN_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "CRM_TOKEN_STATES",
       "kind": "const",
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
     {
+      "name": "CRM_VM_DELIVERY_STATUSES",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "CRM_VM_LEAD_STATUSES",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_VM_RVM_DELIVERY_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_VM_RVM_LEAD_STATE_MAPPINGS",
+      "kind": "const",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CRM_WEBINAR_STATE_MAPPINGS",
       "kind": "const",
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
@@ -5509,7 +5577,17 @@
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
     {
+      "name": "CrmCrossStateMapping",
+      "kind": "interface",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
       "name": "CrmFollowUpState",
+      "kind": "type",
+      "file": "packages/shared/src/crm-lifecycle.ts"
+    },
+    {
+      "name": "CrmStateMapRail",
       "kind": "type",
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
@@ -9646,6 +9724,6 @@
     "chromaCollections": 50,
     "routeModules": 45,
     "routeHandlers": 236,
-    "sharedExports": 883
+    "sharedExports": 898
   }
 }

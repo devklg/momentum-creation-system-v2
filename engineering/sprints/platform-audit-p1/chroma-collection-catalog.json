@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T00:02:21.242Z",
+  "generatedAt": "2026-07-12T02:45:28.723Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -1252,22 +1252,22 @@
       "sources": [
         {
           "file": "server/src/domain/crm.ts",
-          "line": 157,
+          "line": 173,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 261,
+          "line": 294,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 390,
+          "line": 458,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 687,
+          "line": 763,
           "action": "writeKnowledge"
         },
         {
