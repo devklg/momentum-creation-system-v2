@@ -35,3 +35,7 @@ Approval requires a human actor, approval evidence, and separation between autho
 - Resource Center historical vocabulary maps `drafted -> draft`, `reviewed -> review`, `published -> active`, `deprecated/replaced -> archived/superseded`.
 
 P1-82 defines the contract only. It does not mutate existing records or silently reinterpret ambiguous inactive content.
+
+## Unified catalog schema (P1-83)
+
+`packages/shared/src/resource-catalog.ts` defines one immutable catalog row per resource version. Lifecycle, authority, language, audience, retrieval readiness, lineage, content location, digest, and migration ambiguity are separate fields. The declarative persistence contract uses Mongo `tmag_resource_catalog`, Neo4j `TmagResource`/`TmagResourceVersion`, and Chroma `mcs_resource_catalog`. Existing source collections remain authoritative; the catalog is a projection and does not silently migrate them.
