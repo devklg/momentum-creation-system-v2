@@ -18,8 +18,9 @@ import type {
   McsAdminVmCampaignRow,
   McsAdminVmComplianceSummary,
   McsAdminVmMetricCard,
-  McsAdminVmOverviewResponse,
   McsAdminVmProviderHealth,
+  McsAdminVmQueueHealth,
+  McsAdminVmQueueHealthOverviewResponse,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -30,10 +31,12 @@ const COLL_CAMPAIGNS = 'tmag_vm_campaigns';
 const COLL_DELIVERY = 'tmag_vm_delivery_events';
 const COLL_CRM = 'tmag_prospect_crm_records';
 const COLL_SUPPRESSIONS = 'tmag_vm_suppression_list';
+const COLL_QUEUE = 'tmag_vm_queue_jobs';
 
 const QUERY_LIMIT = 200_000;
 const RECENT_LIMIT = 500;
 const MS_24H = 24 * 60 * 60 * 1000;
+export const VM_QUEUE_STUCK_AFTER_MS = 15 * 60 * 1000;
 
 interface BaDoc {
   tmagId: string;
@@ -102,6 +105,22 @@ interface SuppressionDoc {
   status?: string;
 }
 
+interface VmQueueJobDoc {
+  jobId?: string;
+  kind?: string;
+  status?: string;
+  attempts?: number;
+  maxAttempts?: number;
+  availableAt?: string;
+  lockedAt?: string | null;
+  completedAt?: string | null;
+  failedAt?: string | null;
+  failureReason?: string | null;
+  payload?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 interface AdminVmSources {
   warnings: string[];
   bas: BaDoc[];
@@ -111,6 +130,7 @@ interface AdminVmSources {
   delivery: DeliveryEventDoc[];
   crm: CrmRecordDoc[];
   suppressions: SuppressionDoc[];
+  queueJobs: VmQueueJobDoc[];
 }
 
 function fullName(ba: BaDoc | undefined, fallback: string): string {
@@ -186,7 +206,7 @@ function countByStatus<T extends { status?: string }>(
 
 async function loadSources(): Promise<AdminVmSources> {
   const warnings: string[] = [];
-  const [bas, leadOwners, leads, campaigns, delivery, crm, suppressions] =
+  const [bas, leadOwners, leads, campaigns, delivery, crm, suppressions, queueJobs] =
     await Promise.all([
       safeQuery<BaDoc>(COLL_BAS, warnings, {}, 50_000),
       safeQuery<LeadOwnerDoc>(COLL_LEAD_OWNERS, warnings, {}, QUERY_LIMIT, { createdAt: -1 }),
@@ -195,9 +215,10 @@ async function loadSources(): Promise<AdminVmSources> {
       safeQuery<DeliveryEventDoc>(COLL_DELIVERY, warnings, {}, QUERY_LIMIT),
       safeQuery<CrmRecordDoc>(COLL_CRM, warnings, { source: { $in: ['rvm', 'vm'] } }, QUERY_LIMIT),
       safeQuery<SuppressionDoc>(COLL_SUPPRESSIONS, warnings, {}, QUERY_LIMIT),
+      safeQuery<VmQueueJobDoc>(COLL_QUEUE, warnings, {}, QUERY_LIMIT, { updatedAt: -1 }),
     ]);
 
-  return { warnings, bas, leadOwners, leads, campaigns, delivery, crm, suppressions };
+  return { warnings, bas, leadOwners, leads, campaigns, delivery, crm, suppressions, queueJobs };
 }
 
 function buildCards(args: {
@@ -462,7 +483,93 @@ function buildProviderHealth(sources: AdminVmSources): McsAdminVmProviderHealth[
   });
 }
 
-export async function buildAdminVmOverview(): Promise<McsAdminVmOverviewResponse> {
+function validIso(value: string | null | undefined): string | null {
+  if (!value || Number.isNaN(Date.parse(value))) return null;
+  return value;
+}
+
+function payloadId(payload: Record<string, unknown> | undefined, key: string): string | null {
+  const value = payload?.[key];
+  return typeof value === 'string' && value ? value : null;
+}
+
+export function buildVmQueueHealth(
+  jobs: VmQueueJobDoc[],
+  now = new Date(),
+): McsAdminVmQueueHealth {
+  const nowMs = now.getTime();
+  const cutoffMs = nowMs - VM_QUEUE_STUCK_AFTER_MS;
+  const findings: McsAdminVmQueueHealth['findings'] = [];
+  const count = (status: string) => jobs.filter((job) => job.status === status).length;
+
+  for (const job of jobs) {
+    const lockedAt = validIso(job.lockedAt);
+    const availableAt = validIso(job.availableAt);
+    const failedAt = validIso(job.failedAt);
+    let condition: McsAdminVmQueueHealth['findings'][number]['condition'] | null = null;
+    let anchor: string | null = null;
+    if (job.status === 'dead_lettered') {
+      condition = 'dead_lettered';
+      anchor = failedAt ?? validIso(job.updatedAt);
+    } else if (job.status === 'failed') {
+      condition = 'failed';
+      anchor = failedAt ?? validIso(job.updatedAt);
+    } else if (job.status === 'processing' && lockedAt && Date.parse(lockedAt) <= cutoffMs) {
+      condition = 'stuck_processing';
+      anchor = lockedAt;
+    } else if (
+      job.status === 'queued' &&
+      failedAt &&
+      availableAt &&
+      Date.parse(availableAt) <= nowMs
+    ) {
+      condition = 'retry_due';
+      anchor = availableAt;
+    }
+    if (!condition) continue;
+    findings.push({
+      jobId: job.jobId ?? 'unknown',
+      kind: job.kind ?? 'unknown',
+      status: job.status ?? 'unknown',
+      condition,
+      attempts: job.attempts ?? 0,
+      maxAttempts: job.maxAttempts ?? 0,
+      availableAt,
+      lockedAt,
+      failedAt,
+      failureReason: job.failureReason ?? null,
+      vmCampaignId: payloadId(job.payload, 'vmCampaignId'),
+      leadId: payloadId(job.payload, 'leadId'),
+      ageMs: anchor ? Math.max(0, nowMs - Date.parse(anchor)) : null,
+    });
+  }
+
+  const oldest = (values: Array<string | null>): string | null =>
+    values.filter((value): value is string => value !== null).sort()[0] ?? null;
+  const priority = { dead_lettered: 0, failed: 1, stuck_processing: 2, retry_due: 3 } as const;
+  findings.sort((a, b) => priority[a.condition] - priority[b.condition] || (b.ageMs ?? -1) - (a.ageMs ?? -1));
+
+  return {
+    policy: 'report_only',
+    stuckAfterMs: VM_QUEUE_STUCK_AFTER_MS,
+    counts: {
+      total: jobs.length,
+      queued: count('queued'),
+      processing: count('processing'),
+      complete: count('complete'),
+      skipped: count('skipped'),
+      failed: count('failed'),
+      deadLettered: count('dead_lettered'),
+      retryDue: findings.filter((row) => row.condition === 'retry_due').length,
+      stuckProcessing: findings.filter((row) => row.condition === 'stuck_processing').length,
+    },
+    oldestQueuedAt: oldest(jobs.filter((job) => job.status === 'queued').map((job) => validIso(job.createdAt))),
+    oldestLockedAt: oldest(jobs.filter((job) => job.status === 'processing').map((job) => validIso(job.lockedAt))),
+    findings: findings.slice(0, 100),
+  };
+}
+
+export async function buildAdminVmOverview(): Promise<McsAdminVmQueueHealthOverviewResponse> {
   const sources = await loadSources();
   return {
     ok: true,
@@ -473,6 +580,7 @@ export async function buildAdminVmOverview(): Promise<McsAdminVmOverviewResponse
     campaigns: buildCampaignRows(sources),
     compliance: buildComplianceSummary(sources),
     providerHealth: buildProviderHealth(sources),
+    queueHealth: buildVmQueueHealth(sources.queueJobs),
     notificationHooks: listVmNotificationHooks(),
     teamNewsHooks: listVmTeamNewsHooks(),
     warnings: sources.warnings,
