@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T18:14:18.341Z",
+  "generatedAt": "2026-07-12T18:17:49.502Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -2220,7 +2220,7 @@
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1443,
+          "line": 1536,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -2282,7 +2282,7 @@
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1288,
+          "line": 1381,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -2309,12 +2309,12 @@
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 890,
+          "line": 963,
           "source": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1314,
+          "line": 1407,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -2390,22 +2390,22 @@
       "sources": [
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 928,
+          "line": 1014,
           "source": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 961,
+          "line": 1054,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 977,
+          "line": 1070,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1008,
+          "line": 1101,
           "source": "persistenceCall.mongodb.update"
         }
       ]
@@ -3155,7 +3155,7 @@
           "server/src/domain/vmLeadWork.ts:389",
           "server/src/domain/vmLeadWork.ts:531",
           "server/src/domain/vmProviderQueue.ts:636",
-          "server/src/domain/vmProviderQueue.ts:898"
+          "server/src/domain/vmProviderQueue.ts:971"
         ]
       },
       {
@@ -3170,7 +3170,7 @@
       {
         "label": "TmagVmDeliveryEvent",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:896"
+          "server/src/domain/vmProviderQueue.ts:969"
         ]
       },
       {
@@ -3193,7 +3193,7 @@
       {
         "label": "TmagVmProviderWebhook",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:942"
+          "server/src/domain/vmProviderQueue.ts:1030"
         ]
       },
       {
@@ -3451,7 +3451,7 @@
       {
         "relationship": "HAS_VM_DELIVERY_EVENT",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:898"
+          "server/src/domain/vmProviderQueue.ts:971"
         ]
       },
       {

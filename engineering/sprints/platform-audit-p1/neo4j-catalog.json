@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T18:14:23.409Z",
+  "generatedAt": "2026-07-12T18:17:54.754Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -675,7 +675,7 @@
         "server/src/domain/vmLeadWork.ts:389",
         "server/src/domain/vmLeadWork.ts:531",
         "server/src/domain/vmProviderQueue.ts:636",
-        "server/src/domain/vmProviderQueue.ts:898"
+        "server/src/domain/vmProviderQueue.ts:971"
       ]
     },
     {
@@ -692,7 +692,7 @@
       "label": "TmagVmDeliveryEvent",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:896"
+        "server/src/domain/vmProviderQueue.ts:969"
       ]
     },
     {
@@ -718,7 +718,7 @@
       "label": "TmagVmProviderWebhook",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:942"
+        "server/src/domain/vmProviderQueue.ts:1030"
       ]
     },
     {
@@ -1015,7 +1015,7 @@
       "relationship": "HAS_VM_DELIVERY_EVENT",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:898"
+        "server/src/domain/vmProviderQueue.ts:971"
       ]
     },
     {
