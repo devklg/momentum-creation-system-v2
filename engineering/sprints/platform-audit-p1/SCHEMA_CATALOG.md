@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T16:35:36.861Z
+- Generated: 2026-07-13T16:54:25.531Z
 - Mongo collections: 69
-- Neo4j labels: 77
-- Neo4j relationships: 65
-- Chroma collections: 51
-- Route modules: 46
-- Route handlers: 259
-- Shared exports: 1019
+- Neo4j labels: 78
+- Neo4j relationships: 67
+- Chroma collections: 52
+- Route modules: 47
+- Route handlers: 262
+- Shared exports: 1024
 
 ## Mongo Collections
 
@@ -117,7 +117,7 @@
 | `SCOPED_TO` | 1 |
 | `SPONSORED_BY` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 82 |
+| `TeamMagnificentMember` | 83 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 2 |
@@ -150,7 +150,8 @@
 | `TmagQuestionnaire` | 1 |
 | `TmagRecruitingCycle` | 2 |
 | `TmagResource` | 2 |
-| `TmagResourceVersion` | 4 |
+| `TmagResourceUsageEvent` | 1 |
+| `TmagResourceVersion` | 5 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 2 |
 | `TmagSteveDiscovery` | 3 |
@@ -215,6 +216,8 @@
 | `KNOWS` | 2 |
 | `MEMBER_OF` | 1 |
 | `NOTE_ON` | 1 |
+| `OPENED_RESOURCE` | 1 |
+| `OPENED_VERSION` | 1 |
 | `OWNS_CRM_RECORD` | 5 |
 | `OWNS_MASTER_CONTENT` | 1 |
 | `OWNS_RVM_PROSPECT` | 2 |
@@ -281,6 +284,7 @@
 | `mcs_relationship_knowledge_en` | `server/src/services/chromaCollections.ts` |
 | `mcs_relationship_knowledge_es` | `server/src/services/chromaCollections.ts` |
 | `mcs_resource_catalog` | `server/src/services/chromaCollections.ts` |
+| `mcs_resource_usage_events` | `server/src/services/chromaCollections.ts` |
 | `mcs_sponsor_availability` | `server/src/services/chromaCollections.ts` |
 | `mcs_steve_success_interview` | `server/src/services/chromaCollections.ts` |
 | `mcs_success_knowledge_en` | `server/src/services/chromaCollections.ts` |
@@ -316,6 +320,7 @@
 | `(unmounted)` | `server/src/routes/admin/prospects.ts` | GET user-agent<br>GET /<br>GET /filters<br>GET /:prospectId<br>GET /:prospectId/sandbox-preview<br>POST /:prospectId/notes<br>POST /:prospectId/move<br>POST /:prospectId/reassign-sponsor<br>POST /:prospectId/manual-flush<br>POST /:prospectId/force-enroll<br>POST /<br>PATCH /:prospectId<br>DELETE /:prospectId<br>POST /:prospectId/restore<br>POST /flush-expired<br>GET /alerts/aged | `McsAdminDashboardFilter`, `McsAdminProspectActivityEvent`, `McsAdminProspectActivityEventKind`, `McsAdminProspectAddNoteResponse`, `McsAdminProspectDetailResponse`, `McsAdminProspectDirectoryResponse`, `McsAuditActor`, `McsAuditContext`, `McsAuditLogEntry` |
 | `(unmounted)` | `server/src/routes/admin/queue.ts` | GET user-agent<br>GET /summary<br>GET /lookup<br>GET /visible-window<br>PUT /visible-window<br>GET /ticker<br>GET /ticker/stream<br>GET /rules<br>PUT /rules/:key | `McsAdminQueueTickerSnapshot`, `McsAdminQueueTickerSseEvent`, `McsAdminTickerEntry`, `McsAuditActor`, `McsPlacementEvent`, `McsQueueAdminTickerResponse`, `McsQueueLookupResponse`, `McsQueueOversightSummaryResponse`, `McsQueueRulesResponse`, `McsQueueVisibleWindow`, `McsQueueVisibleWindowResponse` |
 | `(unmounted)` | `server/src/routes/admin/reporting.ts` | GET /master-report.pdf<br>GET user-agent<br>GET /activation<br>GET user-agent<br>GET /training<br>GET user-agent<br>GET /invite-funnel<br>GET user-agent<br>GET /queue-velocity<br>GET user-agent<br>GET /enrollment-completion<br>GET user-agent<br>GET /follow-up-aging<br>GET user-agent<br>GET /leader-scorecards<br>GET user-agent<br>GET user-agent<br>GET /activation/export<br>GET /training/export<br>GET /invite-funnel/export<br>GET /queue-velocity/export<br>GET /enrollment-completion/export<br>GET /follow-up-aging/export<br>GET /leader-scorecards/export | `McsAdminDashboardFilter`, `McsAdminReportTimeRange`, `McsAuditActor` |
+| `(unmounted)` | `server/src/routes/admin/resourceCenter.ts` | GET /analytics<br>GET user-agent | none |
 | `(unmounted)` | `server/src/routes/admin/tenant.ts` | GET user-agent<br>GET /overview<br>PATCH /settings<br>POST /templates/validate<br>PUT /templates/:templateKey | `McsAuditActor`, `McsSaveTenantTemplateResponse`, `McsTenantOverviewResponse`, `McsTenantSurface`, `McsTenantTemplateKey`, `McsUpdateTenantSettingsResponse`, `McsValidateTenantTemplateResponse` |
 | `(unmounted)` | `server/src/routes/admin/vm.ts` | GET /overview<br>GET user-agent<br>POST /campaigns/:vmCampaignId/live-approval<br>GET user-agent<br>POST /ownership-correction<br>GET user-agent | `McsAdminVmLiveApprovalPayload`, `McsAdminVmLiveApprovalResponse`, `McsAdminVmOwnershipCorrectionPayload`, `McsAdminVmOwnershipCorrectionResponse`, `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/agents.ts` | GET /recommendations<br>POST /events | `McsAgentEventResponse`, `McsAgentRecommendationsResponse`, `McsCreateAgentEventPayload` |
@@ -335,7 +340,7 @@
 | `(unmounted)` | `server/src/routes/preview.ts` | GET / | none |
 | `(unmounted)` | `server/src/routes/profile.ts` | GET /<br>GET /sponsor<br>PATCH /<br>POST /password<br>POST /email/start<br>POST /email/verify<br>POST /phone | `McsProfileGetResponse` |
 | `(unmounted)` | `server/src/routes/questionnaire.ts` | GET /status<br>POST /load<br>POST /submit<br>GET user-agent | none |
-| `(unmounted)` | `server/src/routes/resources.ts` | GET /<br>GET /:resourceVersionId | `McsResourceCenterResponse` |
+| `(unmounted)` | `server/src/routes/resources.ts` | GET /<br>POST /:resourceVersionId/usage<br>GET /:resourceVersionId | `McsResourceCenterResponse` |
 | `(unmounted)` | `server/src/routes/rvm.ts` | GET /:token<br>POST /:token/activate<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats<br>POST /:token/info-request | `McsCallbackIntent`, `McsCallbackRequestResponse`, `McsHoldingTankSnapshot`, `McsPlacementEvent`, `McsRvmInfoRequestResponse`, `McsRvmResolvedTokenPayload`, `McsTeamStatsResponse`, `McsVideoEventKind`, `McsVideoEventResponse`, `McsWebinarReservationResponse` |
 | `(unmounted)` | `server/src/routes/scriptmaker.ts` | POST /draft | `McsScriptMakerDraftPayload`, `McsScriptMakerDraftResponse`, `McsScriptMakerDraftSelectors`, `McsScriptMakerScriptKind` |
 | `(unmounted)` | `server/src/routes/sponsor-workbook.ts` | GET /:tmagId<br>PUT /:tmagId/draft<br>POST /:tmagId/finalize | none |
@@ -553,9 +558,14 @@
 | `validateResourceCatalogEntry` | function | `packages/shared/src/resource-catalog.ts` |
 | `MCS_RESOURCE_CENTER_CATALOG` | const | `packages/shared/src/resource-center-catalog.ts` |
 | `MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION` | const | `packages/shared/src/resource-center.ts` |
+| `MCS_RESOURCE_STALE_REVIEW_DAYS` | const | `packages/shared/src/resource-center.ts` |
+| `MCS_RESOURCE_USAGE_SCHEMA_VERSION` | const | `packages/shared/src/resource-center.ts` |
 | `McsResourceCenterDetailResponse` | interface | `packages/shared/src/resource-center.ts` |
 | `McsResourceCenterItem` | interface | `packages/shared/src/resource-center.ts` |
 | `McsResourceCenterResponse` | interface | `packages/shared/src/resource-center.ts` |
+| `McsResourceUsageEvent` | interface | `packages/shared/src/resource-center.ts` |
+| `McsResourceUsageRow` | interface | `packages/shared/src/resource-center.ts` |
+| `McsResourceUsageSummaryResponse` | interface | `packages/shared/src/resource-center.ts` |
 | `evaluateResourceLifecycleTransition` | function | `packages/shared/src/resource-lifecycle.ts` |
 | `legacyActiveBooleanLifecycle` | function | `packages/shared/src/resource-lifecycle.ts` |
 | `MCS_RESOURCE_LIFECYCLE_STATES` | const | `packages/shared/src/resource-lifecycle.ts` |

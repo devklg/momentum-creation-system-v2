@@ -4,11 +4,11 @@
 
 ## Summary
 
-- Generated: 2026-07-13T16:35:23.650Z
-- Labels: 77
-- Relationships: 65
+- Generated: 2026-07-13T16:54:11.767Z
+- Labels: 78
+- Relationships: 67
 - Constraints/indexes cataloged: 18
-- Labels without a cataloged constraint/index: 62
+- Labels without a cataloged constraint/index: 63
 
 ## Constraints By Status
 
@@ -46,7 +46,7 @@
 | `SCOPED_TO` | 1 |
 | `SPONSORED_BY` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 82 |
+| `TeamMagnificentMember` | 83 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 2 |
@@ -79,7 +79,8 @@
 | `TmagQuestionnaire` | 1 |
 | `TmagRecruitingCycle` | 2 |
 | `TmagResource` | 2 |
-| `TmagResourceVersion` | 4 |
+| `TmagResourceUsageEvent` | 1 |
+| `TmagResourceVersion` | 5 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 2 |
 | `TmagSteveDiscovery` | 3 |
@@ -144,6 +145,8 @@
 | `KNOWS` | 2 |
 | `MEMBER_OF` | 1 |
 | `NOTE_ON` | 1 |
+| `OPENED_RESOURCE` | 1 |
+| `OPENED_VERSION` | 1 |
 | `OWNS_CRM_RECORD` | 5 |
 | `OWNS_MASTER_CONTENT` | 1 |
 | `OWNS_RVM_PROSPECT` | 2 |
@@ -241,6 +244,7 @@
 - `TmagQuestionnaire`
 - `TmagRecruitingCycle`
 - `TmagResource`
+- `TmagResourceUsageEvent`
 - `TmagResourceVersion`
 - `TmagSponsorAvailability`
 - `TmagSponsorOverride`

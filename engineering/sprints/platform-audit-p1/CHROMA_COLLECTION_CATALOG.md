@@ -5,12 +5,12 @@
 
 ## Summary
 
-- Generated: 2026-07-13T16:35:26.842Z
-- Registered collections: 51
-- Schema-catalog collections: 51
+- Generated: 2026-07-13T16:54:15.271Z
+- Registered collections: 52
+- Schema-catalog collections: 52
 - Collections with observed write/query usage: 31
 - Language-scoped collections: 10
-- Metadata contract rows: 51
+- Metadata contract rows: 52
 - Observed unregistered/dynamic targets: 8
 - Embedding model: all-MiniLM-L6-v2
 - Embedding dimension: 384
@@ -25,7 +25,7 @@
 | content_resources | 3 |
 | crm | 2 |
 | events | 3 |
-| general | 2 |
+| general | 3 |
 | holding_tank | 2 |
 | identity_access | 4 |
 | knowledge | 12 |
@@ -78,6 +78,7 @@
 | `mcs_relationship_knowledge_en` | knowledge | en | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_relationship_knowledge_es` | knowledge | es | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_resource_catalog` | general | not_language_scoped | Registered app Chroma collection. | `create_collection` | `project`, `purpose` | none observed | none inferred |
+| `mcs_resource_usage_events` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
 | `mcs_sponsor_availability` | events | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `availabilityId`, `kind`, `ownerTmagId`, `timezone`, `updatedAt`, `windowCount` | none observed | `availabilityId`, `ownerTmagId`, `tmagId` |
 | `mcs_steve_success_interview` | onboarding_training | not_language_scoped | Onboarding/training semantic record. | `add`<br>`create_collection`<br>`writeKnowledge` | `agent`, `callSid`, `completedAt`, `discoveryId`, `kind`, `purpose`, `sponsorTmagId`, `tmagId` | none observed | `discoveryId`, `sponsorTmagId`, `tmagId` |
 | `mcs_success_knowledge_en` | knowledge | en | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
