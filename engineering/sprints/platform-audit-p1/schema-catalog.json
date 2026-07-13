@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T17:04:24.417Z",
+  "generatedAt": "2026-07-13T17:21:28.731Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -1811,6 +1811,11 @@
       "resolved": true,
       "schemaMode": "permissive_mongoose_schema",
       "sources": [
+        {
+          "file": "server/src/domain/eventCenter.ts",
+          "line": 33,
+          "source": "persistenceCall.mongodb.query"
+        },
         {
           "file": "server/src/domain/webinarReservation.ts",
           "line": 191,
@@ -4280,6 +4285,18 @@
       ]
     },
     {
+      "file": "server/src/routes/admin/events.ts",
+      "mount": null,
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/",
+          "line": 7
+        }
+      ],
+      "sharedTypes": []
+    },
+    {
       "file": "server/src/routes/admin/health.ts",
       "mount": null,
       "routes": [
@@ -5022,6 +5039,18 @@
         "McsProspectCrmListResponse",
         "McsProspectCrmRecordResponse"
       ]
+    },
+    {
+      "file": "server/src/routes/events.ts",
+      "mount": null,
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/",
+          "line": 8
+        }
+      ],
+      "sharedTypes": []
     },
     {
       "file": "server/src/routes/health.ts",
@@ -6327,6 +6356,41 @@
       "name": "MCS_EVENT_CENTER_CATALOG",
       "kind": "const",
       "file": "packages/shared/src/event-center-catalog.ts"
+    },
+    {
+      "name": "MCS_EVENT_CENTER_SCHEMA_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsAdminEventCenterResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsAdminEventCenterWebinarEvent",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventCenterResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventCenterSourceHealth",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventCenterSourceStatus",
+      "kind": "type",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventCenterWebinarEvent",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
     },
     {
       "name": "knowledgeWorkflowOpenGaps",
@@ -10964,8 +11028,8 @@
     "neo4jLabels": 78,
     "neo4jRelationships": 67,
     "chromaCollections": 52,
-    "routeModules": 47,
-    "routeHandlers": 262,
-    "sharedExports": 1025
+    "routeModules": 49,
+    "routeHandlers": 264,
+    "sharedExports": 1032
   }
 }

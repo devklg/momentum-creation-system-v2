@@ -4,20 +4,20 @@
 
 ## Summary
 
-- Generated: 2026-07-13T17:04:19.931Z
-- Routes: 233
+- Generated: 2026-07-13T17:21:24.176Z
+- Routes: 235
 - Findings: 0
 
 ## Routes By Access Category
 
 | Access category | Routes |
 | --- | ---: |
-| admin | 96 |
+| admin | 97 |
 | admin_or_health_secret | 1 |
 | auth_bootstrap | 3 |
 | auth_session | 2 |
 | ba_auth_pre_steve | 21 |
-| ba_auth_steve_gated | 56 |
+| ba_auth_steve_gated | 57 |
 | ba_auth_steve_vm_entitled | 25 |
 | internal_runtime_admin_or_secret | 5 |
 | prospect_reentry | 4 |
@@ -34,11 +34,11 @@
 | customSecretGuard | 10 |
 | rateLimited | 3 |
 | rawBodyParser | 1 |
-| requireAdmin | 96 |
+| requireAdmin | 97 |
 | requireAdminOrHealthSecret | 1 |
-| requireAuth | 103 |
+| requireAuth | 104 |
 | requireRuntimeInternal | 5 |
-| requireSteveComplete | 88 |
+| requireSteveComplete | 89 |
 | requireVmDialerAccess | 25 |
 
 ## Role Coverage
@@ -46,8 +46,8 @@
 | Role | Routes |
 | --- | ---: |
 | anonymous | 5 |
-| brand_ambassador | 104 |
-| founder_admin | 102 |
+| brand_ambassador | 105 |
+| founder_admin | 103 |
 | prospect | 18 |
 | provider | 2 |
 | system | 10 |
@@ -56,10 +56,10 @@
 
 | Entitlement | Routes |
 | --- | ---: |
-| admin_allowlist | 102 |
+| admin_allowlist | 103 |
 | machine_credential | 12 |
 | none | 5 |
-| registered_ba | 104 |
+| registered_ba | 105 |
 | valid_prospect_identity | 18 |
 | vm_dialer | 25 |
 
@@ -203,6 +203,7 @@
 | GET | `/api/admin/consistency/report` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/consistency.ts:27` |
 | GET | `/api/admin/consistency/crm-integrity` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/consistency.ts:61` |
 | GET | `/api/admin/resource-center/analytics` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/resourceCenter.ts:8` |
+| GET | `/api/admin/events/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/events.ts:7` |
 | GET | `/api/runtime/knowledge-evolution/metrics` | founder_admin, system | admin_allowlist, machine_credential | runtime_secret_or_admin_session, admin_fallback, x-mcs-runtime-secret_when_configured | internal_runtime_admin_or_secret | runtime_secret_or_admin_session | admin_fallback | not_applicable | none | none | none | x-mcs-runtime-secret_when_configured | no | no | global_256kb_json | none | none | `server/src/runtime/knowledge-evolution/routes.ts:236` |
 | POST | `/api/runtime/knowledge-evolution/` | founder_admin, system | admin_allowlist, machine_credential | runtime_secret_or_admin_session, admin_fallback, x-mcs-runtime-secret_when_configured | internal_runtime_admin_or_secret | runtime_secret_or_admin_session | admin_fallback | not_applicable | none | none | none | x-mcs-runtime-secret_when_configured | no | no | global_256kb_json | none | none | `server/src/runtime/knowledge-evolution/routes.ts:239` |
 | GET | `/api/runtime/knowledge-evolution/:evolutionId` | founder_admin, system | admin_allowlist, machine_credential | runtime_secret_or_admin_session, admin_fallback, x-mcs-runtime-secret_when_configured | internal_runtime_admin_or_secret | runtime_secret_or_admin_session | admin_fallback | not_applicable | none | none | none | x-mcs-runtime-secret_when_configured | no | no | global_256kb_json | none | none | `server/src/runtime/knowledge-evolution/routes.ts:242` |
@@ -319,3 +320,4 @@
 | GET | `/api/resources/` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/resources.ts:11` |
 | POST | `/api/resources/:resourceVersionId/usage` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/resources.ts:22` |
 | GET | `/api/resources/:resourceVersionId` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/resources.ts:38` |
+| GET | `/api/events/` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/events.ts:8` |

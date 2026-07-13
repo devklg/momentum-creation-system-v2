@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T17:04:09.879Z",
+  "generatedAt": "2026-07-13T17:21:14.310Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 69,
   "unclassifiedCount": 0,
@@ -808,8 +808,9 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 2,
+      "sourceCount": 3,
       "sourceFiles": [
+        "server/src/domain/eventCenter.ts",
         "server/src/domain/webinarReservation.ts"
       ]
     },

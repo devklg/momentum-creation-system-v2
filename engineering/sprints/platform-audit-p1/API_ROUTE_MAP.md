@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-13T17:04:19.874Z
-- Mounted routers: 48
-- Route files: 48
-- Static route rows: 233
+- Generated: 2026-07-13T17:21:24.124Z
+- Mounted routers: 50
+- Route files: 50
+- Static route rows: 235
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
-| ba_facing_gated | 88 |
-| pre_gate | 141 |
+| ba_facing_gated | 89 |
+| pre_gate | 142 |
 | pre_json_admin_body_limit | 3 |
 | raw_body_before_json | 1 |
 
@@ -22,8 +22,8 @@
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 93 |
-| ba_auth_steve_gated | 88 |
+| admin | 94 |
+| ba_auth_steve_gated | 89 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
 | prospect_token | 18 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 7 |
-| GET | 117 |
+| GET | 119 |
 | PATCH | 9 |
 | POST | 93 |
 | PUT | 7 |
@@ -43,54 +43,56 @@
 
 | Mount path | Router | Phase | Access profile | Source |
 | --- | --- | --- | --- | --- |
-| `/api/telnyx` | `telnyxWebhookRoutes` | raw_body_before_json | raw_body_webhook | `server/src/index.ts:88` |
-| `/api/admin/knowledge` | `adminKnowledgeRoutes` | pre_json_admin_body_limit | admin | `server/src/index.ts:104` |
-| `/api/health` | `healthRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:115` |
-| `/api/auth` | `authRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:116` |
-| `/api/welcome` | `welcomeRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:117` |
-| `/api/onboarding/questionnaire` | `questionnaireRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:118` |
-| `/api/sponsor/workbook` | `sponsorWorkbookRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:119` |
-| `/api/michael` | `michaelRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:120` |
-| `/api/steve` | `steveRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:127` |
-| `/api/admin/access-codes` | `adminAccessCodesRoutes` | pre_gate | admin | `server/src/index.ts:128` |
-| `/api/admin/bas` | `adminBasRoutes` | pre_gate | admin | `server/src/index.ts:129` |
-| `/api/admin/prospects` | `adminProspectsRoutes` | pre_gate | admin | `server/src/index.ts:130` |
-| `/api/admin/queue` | `adminQueueRoutes` | pre_gate | admin | `server/src/index.ts:131` |
-| `/api/admin/audit` | `adminAuditRoutes` | pre_gate | admin | `server/src/index.ts:132` |
-| `/api/admin/dashboard` | `adminDashboardRoutes` | pre_gate | admin | `server/src/index.ts:133` |
-| `/api/admin/reporting` | `adminReportingRoutes` | pre_gate | admin | `server/src/index.ts:134` |
-| `/api/admin/live-ops` | `adminLiveOpsRoutes` | pre_gate | admin | `server/src/index.ts:135` |
-| `/api/admin/tenant` | `adminTenantRoutes` | pre_gate | admin | `server/src/index.ts:136` |
-| `/api/admin/vm` | `adminVmRoutes` | pre_gate | admin | `server/src/index.ts:137` |
-| `/api/admin/agents` | `adminAgentsRoutes` | pre_gate | admin | `server/src/index.ts:138` |
-| `/api/admin/broadcast` | `adminBroadcastRoutes` | pre_gate | admin | `server/src/index.ts:142` |
-| `/api/admin/orientation` | `adminOrientationRoutes` | pre_gate | admin | `server/src/index.ts:146` |
-| `/api/admin/michael-runtime` | `adminMichaelRuntimeObservabilityRoutes` | pre_gate | admin | `server/src/index.ts:149` |
-| `/api/admin/content/videos` | `adminContentVideoRoutes` | pre_gate | admin | `server/src/index.ts:150` |
-| `/api/admin/health` | `adminHealthRoutes` | pre_gate | admin | `server/src/index.ts:151` |
-| `/api/admin/consistency` | `adminConsistencyRoutes` | pre_gate | admin | `server/src/index.ts:152` |
-| `/api/admin/resource-center` | `adminResourceCenterRoutes` | pre_gate | admin | `server/src/index.ts:153` |
-| `/api/runtime/knowledge-evolution` | `knowledgeEvolutionRoutes` | pre_gate | internal_runtime | `server/src/index.ts:154` |
-| `/api/p/login` | `prospectLoginRoutes` | pre_gate | prospect_token | `server/src/index.ts:169` |
-| `/api/p` | `prospectTokenRoutes` | pre_gate | prospect_token | `server/src/index.ts:170` |
-| `/api/rvm` | `rvmRoutes` | pre_gate | prospect_token | `server/src/index.ts:171` |
-| `/api/vm/provider` | `vmProviderWebhookRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:175` |
-| `/api/invitations` | `invitationRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:200` |
-| `/api/cockpit` | `cockpitRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:204` |
-| `/api/crm` | `crmRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:212` |
-| `/api/crm-hub` | `crmHubRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:213` |
-| `/api/scriptmaker` | `scriptmakerRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:221` |
-| `/api/ivory` | `ivoryRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:227` |
-| `/api/agents` | `agentRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:231` |
-| `/api/vm` | `vmRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:232` |
-| `/api/training` | `trainingRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:237` |
-| `/api/profile` | `profileRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:243` |
-| `/api/preview` | `previewRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:250` |
-| `/api/orientation` | `orientationRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:257` |
-| `/api/three-way` | `threeWayRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:261` |
-| `/api/michael-runtime` | `michaelRuntimeRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:269` |
-| `/api/content` | `contentVideoRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:270` |
-| `/api/resources` | `resourceRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:271` |
+| `/api/telnyx` | `telnyxWebhookRoutes` | raw_body_before_json | raw_body_webhook | `server/src/index.ts:90` |
+| `/api/admin/knowledge` | `adminKnowledgeRoutes` | pre_json_admin_body_limit | admin | `server/src/index.ts:106` |
+| `/api/health` | `healthRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:117` |
+| `/api/auth` | `authRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:118` |
+| `/api/welcome` | `welcomeRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:119` |
+| `/api/onboarding/questionnaire` | `questionnaireRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:120` |
+| `/api/sponsor/workbook` | `sponsorWorkbookRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:121` |
+| `/api/michael` | `michaelRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:122` |
+| `/api/steve` | `steveRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:129` |
+| `/api/admin/access-codes` | `adminAccessCodesRoutes` | pre_gate | admin | `server/src/index.ts:130` |
+| `/api/admin/bas` | `adminBasRoutes` | pre_gate | admin | `server/src/index.ts:131` |
+| `/api/admin/prospects` | `adminProspectsRoutes` | pre_gate | admin | `server/src/index.ts:132` |
+| `/api/admin/queue` | `adminQueueRoutes` | pre_gate | admin | `server/src/index.ts:133` |
+| `/api/admin/audit` | `adminAuditRoutes` | pre_gate | admin | `server/src/index.ts:134` |
+| `/api/admin/dashboard` | `adminDashboardRoutes` | pre_gate | admin | `server/src/index.ts:135` |
+| `/api/admin/reporting` | `adminReportingRoutes` | pre_gate | admin | `server/src/index.ts:136` |
+| `/api/admin/live-ops` | `adminLiveOpsRoutes` | pre_gate | admin | `server/src/index.ts:137` |
+| `/api/admin/tenant` | `adminTenantRoutes` | pre_gate | admin | `server/src/index.ts:138` |
+| `/api/admin/vm` | `adminVmRoutes` | pre_gate | admin | `server/src/index.ts:139` |
+| `/api/admin/agents` | `adminAgentsRoutes` | pre_gate | admin | `server/src/index.ts:140` |
+| `/api/admin/broadcast` | `adminBroadcastRoutes` | pre_gate | admin | `server/src/index.ts:144` |
+| `/api/admin/orientation` | `adminOrientationRoutes` | pre_gate | admin | `server/src/index.ts:148` |
+| `/api/admin/michael-runtime` | `adminMichaelRuntimeObservabilityRoutes` | pre_gate | admin | `server/src/index.ts:151` |
+| `/api/admin/content/videos` | `adminContentVideoRoutes` | pre_gate | admin | `server/src/index.ts:152` |
+| `/api/admin/health` | `adminHealthRoutes` | pre_gate | admin | `server/src/index.ts:153` |
+| `/api/admin/consistency` | `adminConsistencyRoutes` | pre_gate | admin | `server/src/index.ts:154` |
+| `/api/admin/resource-center` | `adminResourceCenterRoutes` | pre_gate | admin | `server/src/index.ts:155` |
+| `/api/admin/events` | `adminEventRoutes` | pre_gate | admin | `server/src/index.ts:156` |
+| `/api/runtime/knowledge-evolution` | `knowledgeEvolutionRoutes` | pre_gate | internal_runtime | `server/src/index.ts:157` |
+| `/api/p/login` | `prospectLoginRoutes` | pre_gate | prospect_token | `server/src/index.ts:172` |
+| `/api/p` | `prospectTokenRoutes` | pre_gate | prospect_token | `server/src/index.ts:173` |
+| `/api/rvm` | `rvmRoutes` | pre_gate | prospect_token | `server/src/index.ts:174` |
+| `/api/vm/provider` | `vmProviderWebhookRoutes` | pre_gate | pre_gate_or_public | `server/src/index.ts:178` |
+| `/api/invitations` | `invitationRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:203` |
+| `/api/cockpit` | `cockpitRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:207` |
+| `/api/crm` | `crmRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:215` |
+| `/api/crm-hub` | `crmHubRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:216` |
+| `/api/scriptmaker` | `scriptmakerRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:224` |
+| `/api/ivory` | `ivoryRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:230` |
+| `/api/agents` | `agentRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:234` |
+| `/api/vm` | `vmRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:235` |
+| `/api/training` | `trainingRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:240` |
+| `/api/profile` | `profileRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:246` |
+| `/api/preview` | `previewRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:253` |
+| `/api/orientation` | `orientationRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:260` |
+| `/api/three-way` | `threeWayRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:264` |
+| `/api/michael-runtime` | `michaelRuntimeRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:272` |
+| `/api/content` | `contentVideoRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:273` |
+| `/api/resources` | `resourceRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:274` |
+| `/api/events` | `eventRoutes` | ba_facing_gated | ba_auth_steve_gated | `server/src/index.ts:275` |
 
 ## Routes
 
@@ -213,6 +215,7 @@
 | GET | `/api/admin/consistency/report` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:27` |
 | GET | `/api/admin/consistency/crm-integrity` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:61` |
 | GET | `/api/admin/resource-center/analytics` | pre_gate | admin | admin | `server/src/routes/admin/resourceCenter.ts:8` |
+| GET | `/api/admin/events/` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:7` |
 | GET | `/api/runtime/knowledge-evolution/metrics` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:236` |
 | POST | `/api/runtime/knowledge-evolution/` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:239` |
 | GET | `/api/runtime/knowledge-evolution/:evolutionId` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:242` |
@@ -329,3 +332,4 @@
 | GET | `/api/resources/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:11` |
 | POST | `/api/resources/:resourceVersionId/usage` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:22` |
 | GET | `/api/resources/:resourceVersionId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:38` |
+| GET | `/api/events/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/events.ts:8` |
