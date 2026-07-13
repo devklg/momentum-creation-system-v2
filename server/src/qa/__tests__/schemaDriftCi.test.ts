@@ -33,8 +33,10 @@ describe('P1-92 schema drift CI gate', () => {
     expect(workflow).toContain('needs: gates');
     expect(workflow).toContain('git add -u');
     expect(workflow).toContain('pull-requests: write');
+    expect(workflow).toContain('actions: write');
     expect(workflow).toContain('gh pr create');
     expect(workflow).toContain('gh pr merge "$pr_url" --auto --merge --delete-branch');
+    expect(workflow).toContain('gh workflow run ci.yml --ref "$refresh_branch"');
     expect(workflow).not.toContain('git push origin HEAD:main');
     expect(workflow).not.toContain('run: pnpm catalog:schema-drift:check');
   });
