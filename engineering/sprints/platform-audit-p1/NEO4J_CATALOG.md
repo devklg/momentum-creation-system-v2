@@ -4,11 +4,11 @@
 
 ## Summary
 
-- Generated: 2026-07-13T12:23:40.217Z
-- Labels: 75
-- Relationships: 63
+- Generated: 2026-07-13T16:35:23.650Z
+- Labels: 77
+- Relationships: 65
 - Constraints/indexes cataloged: 18
-- Labels without a cataloged constraint/index: 60
+- Labels without a cataloged constraint/index: 62
 
 ## Constraints By Status
 
@@ -59,6 +59,7 @@
 | `TmagContentTemplate` | 1 |
 | `TmagContentVideo` | 2 |
 | `TmagCrmNote` | 2 |
+| `TmagEventMaterialContext` | 1 |
 | `TmagFastStartProgress` | 2 |
 | `TmagGeneratorRun` | 1 |
 | `TmagHealthHeartbeat` | 3 |
@@ -78,11 +79,12 @@
 | `TmagQuestionnaire` | 1 |
 | `TmagRecruitingCycle` | 2 |
 | `TmagResource` | 2 |
-| `TmagResourceVersion` | 2 |
+| `TmagResourceVersion` | 4 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 2 |
 | `TmagSteveDiscovery` | 3 |
 | `TmagThreeWayBooking` | 2 |
+| `TmagTrainingModule` | 1 |
 | `TmagVmAuditEvent` | 1 |
 | `TmagVmBulkLead` | 19 |
 | `TmagVmCampaign` | 4 |
@@ -158,6 +160,8 @@
 | `SUBMITTED` | 1 |
 | `SUPERSEDES` | 2 |
 | `SUPPORTED_BY` | 1 |
+| `SUPPORTS_EVENT_MATERIAL` | 1 |
+| `SUPPORTS_TRAINING_MODULE` | 1 |
 | `SUPPRESSED_BY` | 1 |
 | `TARGETS_LEAD` | 2 |
 | `USES_VM_LEAD_OWNER` | 1 |
@@ -224,6 +228,7 @@
 - `TmagCommitment`
 - `TmagContentTemplate`
 - `TmagCrmNote`
+- `TmagEventMaterialContext`
 - `TmagFastStartProgress`
 - `TmagGeneratorRun`
 - `TmagHealthHeartbeat`
@@ -240,6 +245,7 @@
 - `TmagSponsorAvailability`
 - `TmagSponsorOverride`
 - `TmagThreeWayBooking`
+- `TmagTrainingModule`
 - `TmagVmAuditEvent`
 - `TmagVmDeliveryEvent`
 - `TmagVmInboundCall`

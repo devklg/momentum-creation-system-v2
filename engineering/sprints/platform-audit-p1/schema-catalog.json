@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T12:23:52.526Z",
+  "generatedAt": "2026-07-13T16:35:36.861Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -2692,7 +2692,7 @@
         "sources": [
           "server/src/services/knowledge/approvedKnowledgeStore.ts:153",
           "server/src/services/knowledge/approvedKnowledgeStore.ts:213",
-          "server/src/services/knowledge/knowledgeResourceProjection.ts:263"
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:264"
         ]
       },
       {
@@ -2861,7 +2861,7 @@
           "server/src/domain/vmProviderQueue.ts:640",
           "server/src/domain/workbook.ts:307",
           "server/src/domain/workbook.ts:308",
-          "server/src/services/knowledge/knowledgeResourceProjection.ts:259"
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:260"
         ]
       },
       {
@@ -2942,6 +2942,12 @@
         "sources": [
           "server/src/domain/crm.ts:182",
           "server/src/domain/vmLeadWork.ts:290"
+        ]
+      },
+      {
+        "label": "TmagEventMaterialContext",
+        "sources": [
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:304"
         ]
       },
       {
@@ -3143,14 +3149,16 @@
         "label": "TmagResource",
         "sources": [
           "server/src/domain/resourcePublishingGate.ts:72",
-          "server/src/services/knowledge/knowledgeResourceProjection.ts:253"
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:254"
         ]
       },
       {
         "label": "TmagResourceVersion",
         "sources": [
           "server/src/domain/resourcePublishingGate.ts:72",
-          "server/src/services/knowledge/knowledgeResourceProjection.ts:255"
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:256",
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:288",
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:303"
         ]
       },
       {
@@ -3179,6 +3187,12 @@
         "sources": [
           "server/src/domain/threeWayCalls.ts:584",
           "server/src/domain/threeWayCalls.ts:678"
+        ]
+      },
+      {
+        "label": "TmagTrainingModule",
+        "sources": [
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:289"
         ]
       },
       {
@@ -3329,7 +3343,7 @@
         "relationship": "APPROVED_BY",
         "sources": [
           "server/src/domain/resourcePublishingGate.ts:72",
-          "server/src/services/knowledge/knowledgeResourceProjection.ts:261"
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:262"
         ]
       },
       {
@@ -3501,7 +3515,7 @@
           "server/src/domain/adminTenantArchitecture.ts:466",
           "server/src/domain/resourcePublishingGate.ts:72",
           "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186",
-          "server/src/services/knowledge/knowledgeResourceProjection.ts:258"
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:259"
         ]
       },
       {
@@ -3607,7 +3621,7 @@
       {
         "relationship": "PROJECTS_KNOWLEDGE_SOURCE",
         "sources": [
-          "server/src/services/knowledge/knowledgeResourceProjection.ts:264"
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:265"
         ]
       },
       {
@@ -3672,6 +3686,18 @@
         "relationship": "SUPPORTED_BY",
         "sources": [
           "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:241"
+        ]
+      },
+      {
+        "relationship": "SUPPORTS_EVENT_MATERIAL",
+        "sources": [
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:306"
+        ]
+      },
+      {
+        "relationship": "SUPPORTS_TRAINING_MODULE",
+        "sources": [
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:291"
         ]
       },
       {
@@ -10859,8 +10885,8 @@
   ],
   "summary": {
     "mongoCollections": 69,
-    "neo4jLabels": 75,
-    "neo4jRelationships": 63,
+    "neo4jLabels": 77,
+    "neo4jRelationships": 65,
     "chromaCollections": 51,
     "routeModules": 46,
     "routeHandlers": 259,
