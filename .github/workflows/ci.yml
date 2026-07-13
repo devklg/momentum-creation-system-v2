@@ -79,6 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Checkout merged main
         uses: actions/checkout@v4
@@ -106,15 +107,25 @@ jobs:
       - name: Regenerate catalogs from merged source
         run: pnpm catalog:generate:all
 
-      - name: Commit refreshed tracked artifacts when changed
+      - name: Open protected catalog refresh pull request when changed
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           if git diff --quiet; then
             echo "Generated catalogs are already current."
             exit 0
           fi
+          refresh_branch="automation/catalog-refresh-${GITHUB_SHA::12}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$refresh_branch"
           git add -u
           git commit -m "chore: refresh generated catalogs after merge"
-          git push origin HEAD:main
+          git push origin "$refresh_branch"
+          pr_url=$(gh pr create \
+            --base main \
+            --head "$refresh_branch" \
+            --title "chore: refresh generated catalogs after merge" \
+            --body "Automated catalog refresh generated from merged source at ${GITHUB_SHA}. This PR contains tracked derived artifacts only.")
+          gh pr merge "$pr_url" --auto --merge --delete-branch
