@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T20:00:45.260Z",
+  "generatedAt": "2026-07-13T20:21:16.936Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -1166,6 +1166,11 @@
           "source": "persistenceCall.mongodb.query"
         },
         {
+          "file": "server/src/domain/followUpQueue.ts",
+          "line": 80,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
           "file": "server/src/domain/todaysActions.ts",
           "line": 94,
           "source": "persistenceCall.mongodb.query"
@@ -1287,6 +1292,11 @@
         {
           "file": "server/src/domain/eventCenter.ts",
           "line": 223,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/followUpQueue.ts",
+          "line": 90,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1981,6 +1991,11 @@
           "source": "persistenceCall.mongodb.query"
         },
         {
+          "file": "server/src/domain/followUpQueue.ts",
+          "line": 100,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
           "file": "server/src/domain/holdingTank.ts",
           "line": 252,
           "source": "persistenceCall.mongodb.update"
@@ -2217,6 +2232,11 @@
         {
           "file": "server/src/domain/bulkLeads.ts",
           "line": 362,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/followUpQueue.ts",
+          "line": 107,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -4953,37 +4973,42 @@
         {
           "method": "GET",
           "path": "/launch",
-          "line": 43
+          "line": 44
         },
         {
           "method": "GET",
           "path": "/invites",
-          "line": 61
+          "line": 62
         },
         {
           "method": "GET",
           "path": "/summary",
-          "line": 78
+          "line": 79
         },
         {
           "method": "GET",
           "path": "/pmv",
-          "line": 98
+          "line": 99
         },
         {
           "method": "GET",
           "path": "/todays-actions",
-          "line": 117
+          "line": 118
+        },
+        {
+          "method": "GET",
+          "path": "/follow-up-queue",
+          "line": 142
         },
         {
           "method": "GET",
           "path": "/team-calendar",
-          "line": 141
+          "line": 165
         },
         {
           "method": "GET",
           "path": "/invites/print.pdf",
-          "line": 167
+          "line": 191
         }
       ],
       "sharedTypes": []
@@ -10882,6 +10907,36 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsUnifiedFollowUpEntityKind",
+      "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsUnifiedFollowUpItem",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsUnifiedFollowUpQueueResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsUnifiedFollowUpReason",
+      "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsUnifiedFollowUpSource",
+      "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsUnifiedFollowUpStatus",
+      "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsUpdateIvoryNamePayload",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -11158,7 +11213,7 @@
     "neo4jRelationships": 69,
     "chromaCollections": 53,
     "routeModules": 49,
-    "routeHandlers": 265,
-    "sharedExports": 1045
+    "routeHandlers": 266,
+    "sharedExports": 1051
   }
 }
