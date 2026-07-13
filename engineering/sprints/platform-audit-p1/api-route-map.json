@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T11:27:29.596Z",
+  "generatedAt": "2026-07-13T01:34:02.869Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,16 +8,16 @@
   "summary": {
     "mounts": 46,
     "routeFiles": 46,
-    "routes": 214,
+    "routes": 215,
     "byPhase": {
       "raw_body_before_json": 1,
-      "pre_json_admin_body_limit": 2,
+      "pre_json_admin_body_limit": 3,
       "pre_gate": 139,
       "ba_facing_gated": 72
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
-      "admin": 90,
+      "admin": 91,
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
       "prospect_token": 18,
@@ -25,7 +25,7 @@
     },
     "byMethod": {
       "POST": 86,
-      "GET": 108,
+      "GET": 109,
       "PUT": 6,
       "PATCH": 8,
       "DELETE": 6
@@ -478,6 +478,34 @@
       "staticAnalysisStatus": "ok"
     },
     {
+      "method": "GET",
+      "fullPath": "/api/admin/knowledge/status",
+      "mountPath": "/api/admin/knowledge",
+      "localPath": "/status",
+      "mountPhase": "pre_json_admin_body_limit",
+      "accessProfile": "admin",
+      "mountMiddleware": [
+        "express.json(...)"
+      ],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/knowledge.ts:41",
+      "routeSource": "server/src/routes/admin/knowledge.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
       "method": "POST",
       "fullPath": "/api/admin/knowledge/sources",
       "mountPath": "/api/admin/knowledge",
@@ -491,7 +519,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:40",
+      "source": "server/src/routes/admin/knowledge.ts:50",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -519,7 +547,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:102",
+      "source": "server/src/routes/admin/knowledge.ts:112",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,

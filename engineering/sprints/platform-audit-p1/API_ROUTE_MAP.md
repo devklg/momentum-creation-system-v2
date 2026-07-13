@@ -4,10 +4,10 @@
 
 ## Summary
 
-- Generated: 2026-07-12T11:27:29.596Z
+- Generated: 2026-07-13T01:34:02.869Z
 - Mounted routers: 46
 - Route files: 46
-- Static route rows: 214
+- Static route rows: 215
 
 ## Routes By Phase
 
@@ -15,14 +15,14 @@
 | --- | ---: |
 | ba_facing_gated | 72 |
 | pre_gate | 139 |
-| pre_json_admin_body_limit | 2 |
+| pre_json_admin_body_limit | 3 |
 | raw_body_before_json | 1 |
 
 ## Routes By Access Profile
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 90 |
+| admin | 91 |
 | ba_auth_steve_gated | 72 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 6 |
-| GET | 108 |
+| GET | 109 |
 | PATCH | 8 |
 | POST | 86 |
 | PUT | 6 |
@@ -95,8 +95,9 @@
 | Method | Full path | Phase | Access profile | Guard signals | Source |
 | --- | --- | --- | --- | --- | --- |
 | POST | `/api/telnyx/webhook` | raw_body_before_json | raw_body_webhook | raw-body | `server/src/routes/telnyx-webhook.ts:14` |
-| POST | `/api/admin/knowledge/sources` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:40` |
-| POST | `/api/admin/knowledge/sources/upload` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:102` |
+| GET | `/api/admin/knowledge/status` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:41` |
+| POST | `/api/admin/knowledge/sources` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:50` |
+| POST | `/api/admin/knowledge/sources/upload` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:112` |
 | GET | `/api/health/` | pre_gate | pre_gate_or_public | none | `server/src/routes/health.ts:7` |
 | GET | `/api/health/persistence` | pre_gate | pre_gate_or_public | none | `server/src/routes/health.ts:15` |
 | POST | `/api/auth/verify-code` | pre_gate | pre_gate_or_public | rate-limit | `server/src/routes/auth.ts:23` |
