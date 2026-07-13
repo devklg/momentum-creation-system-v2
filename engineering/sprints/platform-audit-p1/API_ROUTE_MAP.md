@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-13T12:11:40.062Z
+- Generated: 2026-07-13T12:23:48.381Z
 - Mounted routers: 47
 - Route files: 47
 - Static route rows: 231
