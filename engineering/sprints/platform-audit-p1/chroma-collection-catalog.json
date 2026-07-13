@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T18:17:36.793Z",
+  "generatedAt": "2026-07-13T19:20:46.762Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -7,11 +7,11 @@
     "engineering/sprints/platform-audit-p1/schema-catalog.json"
   ],
   "summary": {
-    "collections": 52,
-    "schemaCatalogCollections": 52,
-    "withObservedWrites": 31,
+    "collections": 53,
+    "schemaCatalogCollections": 53,
+    "withObservedWrites": 32,
     "languageScopedCollections": 10,
-    "metadataContractRows": 52,
+    "metadataContractRows": 53,
     "observedUnregisteredTargets": 8
   },
   "byDomain": {
@@ -21,6 +21,7 @@
     "audit_governance": 1,
     "broadcast_delivery": 1,
     "content_resources": 3,
+    "events": 4,
     "onboarding_training": 2,
     "operations": 1,
     "knowledge": 12,
@@ -29,7 +30,6 @@
     "crm": 2,
     "holding_tank": 2,
     "general": 3,
-    "events": 3,
     "tenant_admin": 1,
     "vm_rvm": 4
   },
@@ -479,6 +479,56 @@
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_event_attendance",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "events",
+      "language": "not_language_scoped",
+      "purpose": "Explicit event attendance evidence linked to human CRM follow-up.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [
+        "writeOperational"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/eventAttendance.ts",
+          "line": 87,
+          "action": "writeOperational"
+        }
+      ],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [
+          "crmFollowUpDueAt",
+          "eventId",
+          "eventType",
+          "kind",
+          "prospectId",
+          "recordedAt",
+          "reservationId",
+          "sponsorTmagId",
+          "state"
+        ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [
+          "eventId",
+          "prospectId",
+          "reservationId",
+          "sponsorTmagId",
+          "tmagId"
+        ],
         "embeddingDimension": 384,
         "embeddingModel": "all-MiniLM-L6-v2"
       }
@@ -1266,22 +1316,22 @@
       "sources": [
         {
           "file": "server/src/domain/crm.ts",
-          "line": 173,
+          "line": 174,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 294,
+          "line": 300,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 458,
+          "line": 464,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 763,
+          "line": 769,
           "action": "writeKnowledge"
         },
         {

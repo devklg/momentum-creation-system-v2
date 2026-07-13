@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T18:17:42.136Z",
+  "generatedAt": "2026-07-13T19:20:51.352Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -21,10 +21,10 @@
     "/api/training/fast-start/modules/1"
   ],
   "summary": {
-    "routes": 235,
+    "routes": 236,
     "byAccessClass": {
       "raw_body_webhook": 1,
-      "admin": 97,
+      "admin": 98,
       "public_health": 2,
       "auth_bootstrap": 3,
       "auth_session": 2,
@@ -40,7 +40,7 @@
     },
     "byRole": {
       "provider": 2,
-      "founder_admin": 103,
+      "founder_admin": 104,
       "anonymous": 5,
       "system": 10,
       "brand_ambassador": 105,
@@ -48,7 +48,7 @@
     },
     "byEntitlement": {
       "machine_credential": 12,
-      "admin_allowlist": 103,
+      "admin_allowlist": 104,
       "none": 5,
       "registered_ba": 105,
       "valid_prospect_identity": 18,
@@ -56,7 +56,7 @@
     },
     "guardCoverage": {
       "requireAuth": 104,
-      "requireAdmin": 97,
+      "requireAdmin": 98,
       "requireAdminOrHealthSecret": 1,
       "requireRuntimeInternal": 5,
       "requireSteveComplete": 89,
@@ -6373,7 +6373,61 @@
       "id": "GET /api/admin/events/",
       "method": "GET",
       "fullPath": "/api/admin/events/",
-      "routeSource": "server/src/routes/admin/events.ts:7",
+      "routeSource": "server/src/routes/admin/events.ts:22",
+      "mountPath": "/api/admin/events",
+      "mountPhase": "pre_gate",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/admin/events/webinars/:eventId/reservations/:reservationId/attendance",
+      "method": "POST",
+      "fullPath": "/api/admin/events/webinars/:eventId/reservations/:reservationId/attendance",
+      "routeSource": "server/src/routes/admin/events.ts:35",
       "mountPath": "/api/admin/events",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",

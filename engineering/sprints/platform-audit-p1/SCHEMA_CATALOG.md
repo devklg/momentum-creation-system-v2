@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T18:17:46.886Z
-- Mongo collections: 69
-- Neo4j labels: 78
-- Neo4j relationships: 67
-- Chroma collections: 52
+- Generated: 2026-07-13T19:20:54.883Z
+- Mongo collections: 70
+- Neo4j labels: 79
+- Neo4j relationships: 69
+- Chroma collections: 53
 - Route modules: 49
-- Route handlers: 264
-- Shared exports: 1040
+- Route handlers: 265
+- Shared exports: 1045
 
 ## Mongo Collections
 
@@ -47,6 +47,7 @@
 | `tmag_commitments` | permissive_mongoose_schema | yes | 3 |
 | `tmag_content_templates` | permissive_mongoose_schema | yes | 2 |
 | `tmag_content_videos` | permissive_mongoose_schema | yes | 5 |
+| `tmag_event_attendance` | permissive_mongoose_schema | yes | 3 |
 | `tmag_fast_start_progress` | permissive_mongoose_schema | yes | 7 |
 | `tmag_invitation_generator_runs` | permissive_mongoose_schema | yes | 3 |
 | `tmag_ivory_prospect_names` | permissive_mongoose_schema | yes | 8 |
@@ -56,7 +57,7 @@
 | `tmag_projection_outbox` | permissive_mongoose_schema | yes | 6 |
 | `tmag_prospect_callback_requests` | permissive_mongoose_schema | yes | 9 |
 | `tmag_prospect_crm_dispositions` | permissive_mongoose_schema | yes | 11 |
-| `tmag_prospect_crm_followups` | permissive_mongoose_schema | yes | 12 |
+| `tmag_prospect_crm_followups` | permissive_mongoose_schema | yes | 13 |
 | `tmag_prospect_crm_notes` | permissive_mongoose_schema | yes | 6 |
 | `tmag_prospect_crm_records` | permissive_mongoose_schema | yes | 12 |
 | `tmag_prospect_htank_accounts` | permissive_mongoose_schema | yes | 8 |
@@ -68,7 +69,7 @@
 | `tmag_prospect_sessions` | permissive_mongoose_schema | yes | 3 |
 | `tmag_prospect_timeline_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_events` | permissive_mongoose_schema | yes | 4 |
-| `tmag_prospect_webinar_reservations` | permissive_mongoose_schema | yes | 3 |
+| `tmag_prospect_webinar_reservations` | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospects` | permissive_mongoose_schema | yes | 36 |
 | `tmag_questionnaires` | permissive_mongoose_schema | yes | 2 |
 | `tmag_recruiting_cycles` | permissive_mongoose_schema | yes | 3 |
@@ -130,6 +131,7 @@
 | `TmagContentTemplate` | 1 |
 | `TmagContentVideo` | 2 |
 | `TmagCrmNote` | 2 |
+| `TmagEventAttendance` | 1 |
 | `TmagEventMaterialContext` | 1 |
 | `TmagFastStartProgress` | 2 |
 | `TmagGeneratorRun` | 1 |
@@ -142,7 +144,7 @@
 | `TmagOrientationSession` | 3 |
 | `TmagOutcome` | 4 |
 | `TmagPool` | 6 |
-| `TmagProspect` | 41 |
+| `TmagProspect` | 42 |
 | `TmagProspectAccount` | 2 |
 | `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |
@@ -167,7 +169,7 @@
 | `TmagVmQueueJob` | 1 |
 | `TmagVmSuppression` | 1 |
 | `TmagVmTransferAvailability` | 2 |
-| `TmagWebinarEvent` | 1 |
+| `TmagWebinarEvent` | 2 |
 | `TmagWorkbook` | 1 |
 | `WebinarEvent` | 1 |
 
@@ -191,12 +193,14 @@
 | `CONTAINS_LEAD` | 2 |
 | `DERIVED_FROM` | 2 |
 | `FOR` | 1 |
+| `FOR_EVENT` | 1 |
 | `FOR_PROSPECT` | 6 |
 | `FOR_VM_LEAD` | 4 |
 | `HAD_STEVE_DISCOVERY` | 3 |
 | `HAS_ACTIVITY` | 2 |
 | `HAS_CHUNK` | 1 |
 | `HAS_CRM_RECORD` | 2 |
+| `HAS_EVENT_ATTENDANCE` | 1 |
 | `HAS_INBOUND_CALL` | 1 |
 | `HAS_LANGUAGE_VARIANT` | 1 |
 | `HAS_ORIGINAL_SPONSOR` | 2 |
@@ -259,6 +263,7 @@
 | `mcs_commitments` | `server/src/services/chromaCollections.ts` |
 | `mcs_content_templates` | `server/src/services/chromaCollections.ts` |
 | `mcs_content_videos` | `server/src/services/chromaCollections.ts` |
+| `mcs_event_attendance` | `server/src/services/chromaCollections.ts` |
 | `mcs_fast_start_progress` | `server/src/services/chromaCollections.ts` |
 | `mcs_health_heartbeat` | `server/src/services/chromaCollections.ts` |
 | `mcs_ivory_prospect_names` | `server/src/services/chromaCollections.ts` |
@@ -312,7 +317,7 @@
 | `(unmounted)` | `server/src/routes/admin/consistency.ts` | GET /report<br>GET user-agent<br>GET /crm-integrity<br>GET user-agent | `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/content-videos.ts` | GET user-agent<br>GET /<br>POST /<br>PATCH /:contentVideoId<br>POST /reorder | `McsAuditActor`, `McsContentVideoAudience`, `McsContentVideoMutationResponse`, `McsContentVideoReorderResponse`, `McsContentVideosAdminListResponse` |
 | `(unmounted)` | `server/src/routes/admin/dashboard.ts` | GET /metrics<br>GET user-agent<br>GET /filters<br>GET user-agent<br>GET /drilldown<br>GET user-agent<br>GET /stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminDashboardFiltersResponse`, `McsAdminDashboardMetricsResponse`, `McsAdminDrilldownResponse`, `McsAdminLiveAuditEvent`, `McsAdminLiveEvent`, `McsAdminLivePlacementEvent`, `McsAdminLiveSnapshot`, `McsAuditActor`, `McsAuditLogEntry`, `McsPlacementEvent` |
-| `(unmounted)` | `server/src/routes/admin/events.ts` | GET / | none |
+| `(unmounted)` | `server/src/routes/admin/events.ts` | GET /<br>POST /webinars/:eventId/reservations/:reservationId/attendance | `McsAuditActor`, `McsRecordEventAttendanceResponse` |
 | `(unmounted)` | `server/src/routes/admin/health.ts` | GET x-mcs-health-secret<br>GET /triple-stack<br>GET /status | none |
 | `(unmounted)` | `server/src/routes/admin/knowledge.ts` | GET /status<br>POST /sources<br>POST /sources/upload | none |
 | `(unmounted)` | `server/src/routes/admin/liveOps.ts` | GET /operations<br>GET /growth<br>GET user-agent<br>GET /grid<br>GET user-agent<br>GET /funnel<br>GET user-agent<br>GET /usage/stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminFunnelKind`, `McsAdminLiveUsageSample`, `McsAdminLiveUsageStreamEvent`, `McsAuditActor` |
@@ -460,6 +465,9 @@
 | `MCS_EVENT_CENTER_SCHEMA_VERSION` | const | `packages/shared/src/event-center.ts` |
 | `McsAdminEventCenterResponse` | interface | `packages/shared/src/event-center.ts` |
 | `McsAdminEventCenterWebinarEvent` | interface | `packages/shared/src/event-center.ts` |
+| `McsAdminEventCenterWebinarReservation` | interface | `packages/shared/src/event-center.ts` |
+| `McsEventAttendanceRecord` | interface | `packages/shared/src/event-center.ts` |
+| `McsEventAttendanceState` | type | `packages/shared/src/event-center.ts` |
 | `McsEventCenterAttendance` | interface | `packages/shared/src/event-center.ts` |
 | `McsEventCenterCapacity` | interface | `packages/shared/src/event-center.ts` |
 | `McsEventCenterEvent` | interface | `packages/shared/src/event-center.ts` |
@@ -472,6 +480,8 @@
 | `McsEventCenterSourceStatus` | type | `packages/shared/src/event-center.ts` |
 | `McsEventCenterVisibility` | interface | `packages/shared/src/event-center.ts` |
 | `McsEventCenterWebinarEvent` | interface | `packages/shared/src/event-center.ts` |
+| `McsRecordEventAttendancePayload` | interface | `packages/shared/src/event-center.ts` |
+| `McsRecordEventAttendanceResponse` | interface | `packages/shared/src/event-center.ts` |
 | `knowledgeWorkflowOpenGaps` | function | `packages/shared/src/knowledge-workflow-map.ts` |
 | `MCS_KNOWLEDGE_WORKFLOW_EDGES` | const | `packages/shared/src/knowledge-workflow-map.ts` |
 | `MCS_KNOWLEDGE_WORKFLOW_STAGES` | const | `packages/shared/src/knowledge-workflow-map.ts` |

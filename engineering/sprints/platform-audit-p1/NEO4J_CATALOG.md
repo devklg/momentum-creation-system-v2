@@ -4,11 +4,11 @@
 
 ## Summary
 
-- Generated: 2026-07-13T18:17:33.706Z
-- Labels: 78
-- Relationships: 67
+- Generated: 2026-07-13T19:20:44.151Z
+- Labels: 79
+- Relationships: 69
 - Constraints/indexes cataloged: 18
-- Labels without a cataloged constraint/index: 63
+- Labels without a cataloged constraint/index: 64
 
 ## Constraints By Status
 
@@ -59,6 +59,7 @@
 | `TmagContentTemplate` | 1 |
 | `TmagContentVideo` | 2 |
 | `TmagCrmNote` | 2 |
+| `TmagEventAttendance` | 1 |
 | `TmagEventMaterialContext` | 1 |
 | `TmagFastStartProgress` | 2 |
 | `TmagGeneratorRun` | 1 |
@@ -71,7 +72,7 @@
 | `TmagOrientationSession` | 3 |
 | `TmagOutcome` | 4 |
 | `TmagPool` | 6 |
-| `TmagProspect` | 41 |
+| `TmagProspect` | 42 |
 | `TmagProspectAccount` | 2 |
 | `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |
@@ -96,7 +97,7 @@
 | `TmagVmQueueJob` | 1 |
 | `TmagVmSuppression` | 1 |
 | `TmagVmTransferAvailability` | 2 |
-| `TmagWebinarEvent` | 1 |
+| `TmagWebinarEvent` | 2 |
 | `TmagWorkbook` | 1 |
 | `WebinarEvent` | 1 |
 
@@ -120,12 +121,14 @@
 | `CONTAINS_LEAD` | 2 |
 | `DERIVED_FROM` | 2 |
 | `FOR` | 1 |
+| `FOR_EVENT` | 1 |
 | `FOR_PROSPECT` | 6 |
 | `FOR_VM_LEAD` | 4 |
 | `HAD_STEVE_DISCOVERY` | 3 |
 | `HAS_ACTIVITY` | 2 |
 | `HAS_CHUNK` | 1 |
 | `HAS_CRM_RECORD` | 2 |
+| `HAS_EVENT_ATTENDANCE` | 1 |
 | `HAS_INBOUND_CALL` | 1 |
 | `HAS_LANGUAGE_VARIANT` | 1 |
 | `HAS_ORIGINAL_SPONSOR` | 2 |
@@ -231,6 +234,7 @@
 - `TmagCommitment`
 - `TmagContentTemplate`
 - `TmagCrmNote`
+- `TmagEventAttendance`
 - `TmagEventMaterialContext`
 - `TmagFastStartProgress`
 - `TmagGeneratorRun`

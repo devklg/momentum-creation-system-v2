@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Generated: 2026-07-13T18:17:33.289Z
-- Planned/audited indexes: 46
+- Generated: 2026-07-13T19:20:43.805Z
+- Planned/audited indexes: 48
 - General ensureIndexes runner: not_present
 - Knowledge Evolution ensureIndexes: present_for_knowledge_evolution_only
 - VM index definitions: declared_in_schema_registry_not_generally_applied
@@ -14,7 +14,7 @@
 
 | Status | Count |
 | --- | ---: |
-| planned_missing_enforcement | 40 |
+| planned_missing_enforcement | 42 |
 | vm_registry_declared | 6 |
 
 ## High-Volume Collections Without A Specific Plan Row
@@ -51,6 +51,8 @@
 | `tmag_prospect_callback_requests` | `prospect_createdAt` | `prospectId:1, createdAt:-1` | no | planned_missing_enforcement | Prospect / invitation domain | Prospect callback history. |
 | `tmag_prospect_callback_requests` | `sponsor_createdAt` | `sponsorTmagId:1, createdAt:-1` | no | planned_missing_enforcement | Prospect / invitation domain | BA callback queue. |
 | `tmag_prospect_webinar_reservations` | `prospect_createdAt` | `prospectId:1, createdAt:-1` | no | planned_missing_enforcement | Prospect access / pool placement | Prospect webinar history. |
+| `tmag_event_attendance` | `event_recordedAt` | `eventId:1, recordedAt:-1` | no | planned_missing_enforcement | Events / orientation domain | Event attendance aggregation by event. |
+| `tmag_event_attendance` | `reservation_recordedAt` | `reservationId:1, recordedAt:-1` | no | planned_missing_enforcement | Events / orientation domain | Latest explicit attendance state per reservation. |
 | `tmag_prospect_invitation_activity` | `prospect_at` | `prospectId:1, at:-1` | no | planned_missing_enforcement | Prospect / invitation domain | Invitation activity timeline. |
 | `tmag_prospect_crm_records` | `unique_crmRecordId` | `crmRecordId:1` | yes | vm_registry_declared | CRM domain | CRM record id. |
 | `tmag_prospect_crm_records` | `unique_owner_prospect` | `ownerTmagId:1, prospectId:1` | yes | vm_registry_declared | CRM domain | One active owner/prospect CRM row. |

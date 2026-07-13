@@ -4,15 +4,15 @@
 
 ## Summary
 
-- Generated: 2026-07-13T18:17:42.136Z
-- Routes: 235
+- Generated: 2026-07-13T19:20:51.352Z
+- Routes: 236
 - Findings: 0
 
 ## Routes By Access Category
 
 | Access category | Routes |
 | --- | ---: |
-| admin | 97 |
+| admin | 98 |
 | admin_or_health_secret | 1 |
 | auth_bootstrap | 3 |
 | auth_session | 2 |
@@ -34,7 +34,7 @@
 | customSecretGuard | 10 |
 | rateLimited | 3 |
 | rawBodyParser | 1 |
-| requireAdmin | 97 |
+| requireAdmin | 98 |
 | requireAdminOrHealthSecret | 1 |
 | requireAuth | 104 |
 | requireRuntimeInternal | 5 |
@@ -47,7 +47,7 @@
 | --- | ---: |
 | anonymous | 5 |
 | brand_ambassador | 105 |
-| founder_admin | 103 |
+| founder_admin | 104 |
 | prospect | 18 |
 | provider | 2 |
 | system | 10 |
@@ -56,7 +56,7 @@
 
 | Entitlement | Routes |
 | --- | ---: |
-| admin_allowlist | 103 |
+| admin_allowlist | 104 |
 | machine_credential | 12 |
 | none | 5 |
 | registered_ba | 105 |
@@ -203,7 +203,8 @@
 | GET | `/api/admin/consistency/report` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/consistency.ts:27` |
 | GET | `/api/admin/consistency/crm-integrity` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/consistency.ts:61` |
 | GET | `/api/admin/resource-center/analytics` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/resourceCenter.ts:8` |
-| GET | `/api/admin/events/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/events.ts:7` |
+| GET | `/api/admin/events/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/events.ts:22` |
+| POST | `/api/admin/events/webinars/:eventId/reservations/:reservationId/attendance` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/events.ts:35` |
 | GET | `/api/runtime/knowledge-evolution/metrics` | founder_admin, system | admin_allowlist, machine_credential | runtime_secret_or_admin_session, admin_fallback, x-mcs-runtime-secret_when_configured | internal_runtime_admin_or_secret | runtime_secret_or_admin_session | admin_fallback | not_applicable | none | none | none | x-mcs-runtime-secret_when_configured | no | no | global_256kb_json | none | none | `server/src/runtime/knowledge-evolution/routes.ts:236` |
 | POST | `/api/runtime/knowledge-evolution/` | founder_admin, system | admin_allowlist, machine_credential | runtime_secret_or_admin_session, admin_fallback, x-mcs-runtime-secret_when_configured | internal_runtime_admin_or_secret | runtime_secret_or_admin_session | admin_fallback | not_applicable | none | none | none | x-mcs-runtime-secret_when_configured | no | no | global_256kb_json | none | none | `server/src/runtime/knowledge-evolution/routes.ts:239` |
 | GET | `/api/runtime/knowledge-evolution/:evolutionId` | founder_admin, system | admin_allowlist, machine_credential | runtime_secret_or_admin_session, admin_fallback, x-mcs-runtime-secret_when_configured | internal_runtime_admin_or_secret | runtime_secret_or_admin_session | admin_fallback | not_applicable | none | none | none | x-mcs-runtime-secret_when_configured | no | no | global_256kb_json | none | none | `server/src/runtime/knowledge-evolution/routes.ts:242` |

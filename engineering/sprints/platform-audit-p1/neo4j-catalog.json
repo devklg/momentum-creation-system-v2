@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-13T18:17:33.706Z",
+  "generatedAt": "2026-07-13T19:20:44.151Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
     "server/src/domain/* Cypher writers"
   ],
   "summary": {
-    "labels": 78,
-    "relationships": 67,
+    "labels": 79,
+    "relationships": 69,
     "constraints": 18,
-    "labelsWithoutConstraint": 63
+    "labelsWithoutConstraint": 64
   },
   "byStatus": {
     "planned_core_not_applied": 11,
@@ -34,9 +34,9 @@
       "label": "DISPOSED",
       "sourceCount": 5,
       "sources": [
-        "server/src/domain/crm.ts:409",
-        "server/src/domain/crm.ts:436",
-        "server/src/domain/crm.ts:466",
+        "server/src/domain/crm.ts:415",
+        "server/src/domain/crm.ts:442",
+        "server/src/domain/crm.ts:472",
         "server/src/domain/vmLeadWork.ts:173",
         "server/src/domain/vmLeadWork.ts:198"
       ]
@@ -59,9 +59,9 @@
       "label": "HAS_FOLLOWUP",
       "sourceCount": 5,
       "sources": [
-        "server/src/domain/crm.ts:262",
-        "server/src/domain/crm.ts:302",
-        "server/src/domain/crm.ts:366",
+        "server/src/domain/crm.ts:268",
+        "server/src/domain/crm.ts:308",
+        "server/src/domain/crm.ts:372",
         "server/src/domain/crmCleanup.ts:234",
         "server/src/domain/vmLeadWork.ts:390"
       ]
@@ -252,13 +252,13 @@
         "server/src/domain/bulkLeads.ts:154",
         "server/src/domain/callbackRequest.ts:131",
         "server/src/domain/commitments.ts:57",
-        "server/src/domain/crm.ts:180",
-        "server/src/domain/crm.ts:262",
-        "server/src/domain/crm.ts:300",
-        "server/src/domain/crm.ts:366",
-        "server/src/domain/crm.ts:409",
-        "server/src/domain/crm.ts:434",
-        "server/src/domain/crm.ts:464",
+        "server/src/domain/crm.ts:181",
+        "server/src/domain/crm.ts:268",
+        "server/src/domain/crm.ts:306",
+        "server/src/domain/crm.ts:372",
+        "server/src/domain/crm.ts:415",
+        "server/src/domain/crm.ts:440",
+        "server/src/domain/crm.ts:470",
         "server/src/domain/crmCleanup.ts:234",
         "server/src/domain/crmOwnershipPersistence.ts:33",
         "server/src/domain/crmOwnershipPersistence.ts:40",
@@ -403,8 +403,15 @@
       "label": "TmagCrmNote",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/crm.ts:182",
+        "server/src/domain/crm.ts:183",
         "server/src/domain/vmLeadWork.ts:290"
+      ]
+    },
+    {
+      "label": "TmagEventAttendance",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/eventAttendance.ts:95"
       ]
     },
     {
@@ -442,7 +449,7 @@
       "label": "TmagInvitationActivity",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/crm.ts:777",
+        "server/src/domain/crm.ts:783",
         "server/src/domain/invitations.ts:384"
       ]
     },
@@ -528,7 +535,7 @@
     },
     {
       "label": "TmagProspect",
-      "sourceCount": 41,
+      "sourceCount": 42,
       "sources": [
         "server/scripts/smoke-holding-tank.ts:114",
         "server/scripts/smoke-holding-tank.ts:66",
@@ -542,21 +549,22 @@
         "server/src/domain/bulkLeads.ts:245",
         "server/src/domain/bulkLeads.ts:265",
         "server/src/domain/callbackRequest.ts:130",
-        "server/src/domain/crm.ts:181",
-        "server/src/domain/crm.ts:262",
-        "server/src/domain/crm.ts:301",
-        "server/src/domain/crm.ts:366",
-        "server/src/domain/crm.ts:409",
-        "server/src/domain/crm.ts:435",
-        "server/src/domain/crm.ts:465",
-        "server/src/domain/crm.ts:668",
-        "server/src/domain/crm.ts:776",
+        "server/src/domain/crm.ts:182",
+        "server/src/domain/crm.ts:268",
+        "server/src/domain/crm.ts:307",
+        "server/src/domain/crm.ts:372",
+        "server/src/domain/crm.ts:415",
+        "server/src/domain/crm.ts:441",
+        "server/src/domain/crm.ts:471",
+        "server/src/domain/crm.ts:674",
+        "server/src/domain/crm.ts:782",
         "server/src/domain/crmCleanup.ts:235",
         "server/src/domain/crmOwnershipPersistence.ts:49",
         "server/src/domain/crmOwnershipPersistence.ts:57",
         "server/src/domain/crossStoreReconciliation.ts:110",
         "server/src/domain/crossStoreReconciliation.ts:165",
         "server/src/domain/crossStoreReconciliation.ts:89",
+        "server/src/domain/eventAttendance.ts:93",
         "server/src/domain/invitations.ts:236",
         "server/src/domain/invitations.ts:255",
         "server/src/domain/invitations.ts:383",
@@ -791,8 +799,9 @@
     },
     {
       "label": "TmagWebinarEvent",
-      "sourceCount": 1,
+      "sourceCount": 2,
       "sources": [
+        "server/src/domain/eventAttendance.ts:94",
         "server/src/domain/webinarReservation.ts:204"
       ]
     },
@@ -816,7 +825,7 @@
       "relationship": "ABOUT",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/crm.ts:184",
+        "server/src/domain/crm.ts:185",
         "server/src/domain/vmLeadWork.ts:292"
       ]
     },
@@ -930,6 +939,13 @@
       ]
     },
     {
+      "relationship": "FOR_EVENT",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/eventAttendance.ts:96"
+      ]
+    },
+    {
       "relationship": "FOR_PROSPECT",
       "sourceCount": 6,
       "sources": [
@@ -964,7 +980,7 @@
       "relationship": "HAS_ACTIVITY",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/crm.ts:780",
+        "server/src/domain/crm.ts:786",
         "server/src/domain/invitations.ts:387"
       ]
     },
@@ -981,6 +997,13 @@
       "sources": [
         "server/src/domain/crmOwnershipPersistence.ts:38",
         "server/src/domain/crmOwnershipPersistence.ts:41"
+      ]
+    },
+    {
+      "relationship": "HAS_EVENT_ATTENDANCE",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/eventAttendance.ts:96"
       ]
     },
     {
@@ -1323,7 +1346,7 @@
       "relationship": "WROTE_NOTE",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/crm.ts:183",
+        "server/src/domain/crm.ts:184",
         "server/src/domain/vmLeadWork.ts:291"
       ]
     }
@@ -1545,6 +1568,7 @@
     "TmagCommitment",
     "TmagContentTemplate",
     "TmagCrmNote",
+    "TmagEventAttendance",
     "TmagEventMaterialContext",
     "TmagFastStartProgress",
     "TmagGeneratorRun",

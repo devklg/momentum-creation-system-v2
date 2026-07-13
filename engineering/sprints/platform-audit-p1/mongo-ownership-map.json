@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-13T18:17:32.875Z",
+  "generatedAt": "2026-07-13T19:20:43.468Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
-  "collectionCount": 69,
+  "collectionCount": 70,
   "unclassifiedCount": 0,
   "byOwner": {
     "dynamic_helper": 4,
@@ -9,7 +9,7 @@
     "operations_governance": 6,
     "knowledge_content": 7,
     "agents_training_success": 11,
-    "events_orientation_and_calls": 6,
+    "events_orientation_and_calls": 7,
     "membership_identity": 6,
     "prospect_invitation_flow": 5,
     "prospect_crm": 5,
@@ -461,6 +461,20 @@
       ]
     },
     {
+      "collection": "tmag_event_attendance",
+      "ownerId": "events_orientation_and_calls",
+      "owner": "Events, orientation, webinars, and three-way calls",
+      "steward": "Events / orientation domain",
+      "primarySurface": "team + admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/domain/eventAttendance.ts"
+      ]
+    },
+    {
       "collection": "tmag_fast_start_progress",
       "ownerId": "agents_training_success",
       "owner": "BA agents, training, success profile, and commitments",
@@ -609,10 +623,11 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 12,
+      "sourceCount": 13,
       "sourceFiles": [
         "server/src/domain/cockpit.ts",
         "server/src/domain/crm.ts",
+        "server/src/domain/eventCenter.ts",
         "server/src/domain/recruitingCycle.ts",
         "server/src/domain/todaysActions.ts",
         "server/src/domain/vmLeadWork.ts"
@@ -808,8 +823,9 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 3,
+      "sourceCount": 4,
       "sourceFiles": [
+        "server/src/domain/eventAttendance.ts",
         "server/src/domain/eventCenter.ts",
         "server/src/domain/webinarReservation.ts"
       ]
