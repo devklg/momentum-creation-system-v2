@@ -1,5 +1,6 @@
 import type {
   McsResourceCatalogEntry,
+  McsResourceCenterDetailResponse,
   McsResourceCenterItem,
   McsResourceCenterResponse,
 } from '@momentum/shared';
@@ -7,6 +8,8 @@ import { MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION } from '@momentum/shared';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { RESOURCE_CATALOG_MONGO_COLLECTION } from './resourceCatalogSchema.js';
 import { verifyResourcePublishingGate } from './resourcePublishingGate.js';
+import { knowledgeSourceContentDigest } from '../services/knowledge/knowledgeResourceProjection.js';
+import type { McsKnowledgeBaseSourceRecord } from '@momentum/shared/runtime';
 
 type Persistence = typeof persistenceCall;
 type VerifyGate = typeof verifyResourcePublishingGate;
@@ -18,7 +21,9 @@ function teamAudience(entry: McsResourceCatalogEntry): boolean {
 
 function safeOpenTarget(entry: McsResourceCatalogEntry): string | null {
   const locator = entry.contentLocator.locator.trim();
-  const isTeamResourceRoute = locator === '/video-library' || locator.startsWith('/training/');
+  const isTeamResourceRoute = locator === '/video-library' ||
+    locator.startsWith('/training/') ||
+    locator.startsWith('/resources/');
   if (entry.contentLocator.type === 'route' && isTeamResourceRoute) {
     return locator;
   }
@@ -27,6 +32,47 @@ function safeOpenTarget(entry: McsResourceCatalogEntry): string | null {
   }
   if (entry.kind === 'content_video') return '/video-library';
   return null;
+}
+
+export async function getResourceCenterResourceDetail(
+  resourceVersionId: string,
+  persistence: Persistence = persistenceCall,
+  verifyGate: VerifyGate = verifyResourcePublishingGate,
+): Promise<McsResourceCenterDetailResponse | null> {
+  const mongo = await persistence<{ documents?: McsResourceCatalogEntry[] }>('mongodb', 'query', {
+    database: 'momentum',
+    collection: RESOURCE_CATALOG_MONGO_COLLECTION,
+    filter: { resourceVersionId, lifecycle: 'active' },
+    limit: 1,
+  });
+  const entry = mongo.documents?.[0];
+  if (!entry || !teamAudience(entry) || entry.kind !== 'knowledge_source') return null;
+  if (!(await verifyGate(resourceVersionId, 'retrieve', persistence)).allowed) return null;
+  if (
+    entry.lineage.sourceCollection !== 'mcs_knowledge_sources' ||
+    !entry.lineage.sourceRecordId
+  ) return null;
+  const sourceResult = await persistence<{ documents?: McsKnowledgeBaseSourceRecord[] }>('mongodb', 'query', {
+    database: 'momentum',
+    collection: entry.lineage.sourceCollection,
+    filter: {
+      sourceId: entry.lineage.sourceRecordId,
+      version: entry.version,
+      status: 'active',
+      authorityDecision: 'active_authority',
+      'authority.authorityStatus': 'active_authority',
+      'authority.authorityKind': { $in: ['kevin_authored', 'kevin_approved'] },
+    },
+    limit: 1,
+  });
+  const source = sourceResult.documents?.[0];
+  if (!source || knowledgeSourceContentDigest(source) !== entry.contentDigestSha256) return null;
+  return {
+    ok: true,
+    schemaVersion: MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION,
+    item: toItem(entry),
+    content: source.originalContent,
+  };
 }
 
 function toItem(entry: McsResourceCatalogEntry): McsResourceCenterItem {

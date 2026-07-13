@@ -13,6 +13,7 @@
     "seed:codes": "tsx scripts/seed-access-codes.ts",
     "seed:founders": "tsx scripts/seed-founders.ts",
     "backfill:founder-timezones": "tsx scripts/backfill-founder-timezones.ts",
+    "backfill:knowledge-resources": "tsx scripts/backfill-knowledge-resource-catalog.ts --apply",
     "seed:webinar-events": "tsx scripts/seed-webinar-events.ts",
     "seed:content-videos": "tsx scripts/seed-content-videos.ts",
     "setup:founder-access": "tsx scripts/setup-founder-access.ts",

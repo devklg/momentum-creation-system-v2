@@ -24,3 +24,10 @@ export interface McsResourceCenterResponse {
   categories: string[];
   kinds: McsResourceKind[];
 }
+
+export interface McsResourceCenterDetailResponse {
+  ok: true;
+  schemaVersion: typeof MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION;
+  item: McsResourceCenterItem;
+  content: string;
+}

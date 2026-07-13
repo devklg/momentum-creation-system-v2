@@ -38,6 +38,7 @@
     "catalog:neo4j:check": "node server/scripts/generate-neo4j-catalog.mjs --check",
     "catalog:chroma": "node server/scripts/generate-chroma-catalog.mjs",
     "catalog:chroma:check": "node server/scripts/generate-chroma-catalog.mjs --check",
+    "catalog:generate:all": "pnpm catalog:schema && pnpm catalog:mongo-ownership && pnpm catalog:mongo-indexes && pnpm catalog:neo4j && pnpm catalog:chroma && pnpm catalog:persistence && pnpm catalog:api-routes && pnpm catalog:route-access && pnpm registry:build && pnpm docs:maps && pnpm compliance:com && pnpm docs:freshness",
     "catalog:api-routes": "node server/scripts/generate-api-route-map.mjs",
     "catalog:api-routes:check": "node server/scripts/generate-api-route-map.mjs --check",
     "catalog:route-access": "node server/scripts/generate-route-access-matrix.mjs",
