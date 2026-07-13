@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T08:50:59.258Z",
+  "generatedAt": "2026-07-13T09:34:25.906Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -21,7 +21,7 @@
     "/api/training/fast-start/modules/1"
   ],
   "summary": {
-    "routes": 216,
+    "routes": 217,
     "byAccessClass": {
       "raw_body_webhook": 1,
       "admin": 95,
@@ -29,7 +29,7 @@
       "auth_bootstrap": 3,
       "auth_session": 2,
       "ba_auth_pre_steve": 21,
-      "ba_auth_steve_gated": 53,
+      "ba_auth_steve_gated": 54,
       "steve_worker_secret": 2,
       "admin_or_health_secret": 1,
       "internal_runtime_admin_or_secret": 5,
@@ -43,23 +43,23 @@
       "founder_admin": 101,
       "anonymous": 5,
       "system": 10,
-      "brand_ambassador": 88,
+      "brand_ambassador": 89,
       "prospect": 18
     },
     "byEntitlement": {
       "machine_credential": 12,
       "admin_allowlist": 101,
       "none": 5,
-      "registered_ba": 88,
+      "registered_ba": 89,
       "valid_prospect_identity": 18,
       "vm_dialer": 12
     },
     "guardCoverage": {
-      "requireAuth": 87,
+      "requireAuth": 88,
       "requireAdmin": 95,
       "requireAdminOrHealthSecret": 1,
       "requireRuntimeInternal": 5,
-      "requireSteveComplete": 72,
+      "requireSteveComplete": 73,
       "requireVmDialerAccess": 12,
       "rateLimited": 3,
       "rawBodyParser": 1,
@@ -11761,6 +11761,61 @@
       "fullPath": "/api/content/videos",
       "routeSource": "server/src/routes/content-videos.ts:16",
       "mountPath": "/api/content",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_gated",
+      "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/resources/",
+      "method": "GET",
+      "fullPath": "/api/resources/",
+      "routeSource": "server/src/routes/resources.ts:9",
+      "mountPath": "/api/resources",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
       "accessClass": "ba_auth_steve_gated",

@@ -1,0 +1,87 @@
+import type {
+  McsResourceCatalogEntry,
+  McsResourceCenterItem,
+  McsResourceCenterResponse,
+} from '@momentum/shared';
+import { MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION } from '@momentum/shared';
+import { persistenceCall } from '../services/persistence/dispatch.js';
+import { RESOURCE_CATALOG_MONGO_COLLECTION } from './resourceCatalogSchema.js';
+import { verifyResourcePublishingGate } from './resourcePublishingGate.js';
+
+type Persistence = typeof persistenceCall;
+type VerifyGate = typeof verifyResourcePublishingGate;
+
+function teamAudience(entry: McsResourceCatalogEntry): boolean {
+  return entry.audience.surfaces.includes('team') &&
+    entry.audience.roles.some((role) => role === 'brand_ambassador' || role === 'leader');
+}
+
+function safeOpenTarget(entry: McsResourceCatalogEntry): string | null {
+  const locator = entry.contentLocator.locator.trim();
+  const isTeamResourceRoute = locator === '/video-library' || locator.startsWith('/training/');
+  if (entry.contentLocator.type === 'route' && isTeamResourceRoute) {
+    return locator;
+  }
+  if (entry.contentLocator.type === 'external_url' && /^https:\/\//i.test(locator)) {
+    return locator;
+  }
+  if (entry.kind === 'content_video') return '/video-library';
+  return null;
+}
+
+function toItem(entry: McsResourceCatalogEntry): McsResourceCenterItem {
+  return {
+    resourceId: entry.resourceId,
+    resourceVersionId: entry.resourceVersionId,
+    title: entry.title,
+    summary: entry.summary,
+    kind: entry.kind,
+    categories: [...new Set(entry.categories)].sort(),
+    tags: [...new Set(entry.tags)].sort(),
+    languageCode: entry.language.code,
+    version: entry.version,
+    sourceSystem: entry.lineage.sourceSystem,
+    openTarget: safeOpenTarget(entry),
+    updatedAt: entry.updatedAt,
+  };
+}
+
+export async function listResourceCenterResources(
+  persistence: Persistence = persistenceCall,
+  verifyGate: VerifyGate = verifyResourcePublishingGate,
+): Promise<McsResourceCenterResponse> {
+  const mongo = await persistence<{ documents?: McsResourceCatalogEntry[] }>('mongodb', 'query', {
+    database: 'momentum',
+    collection: RESOURCE_CATALOG_MONGO_COLLECTION,
+    filter: { lifecycle: 'active' },
+    sort: { title: 1, version: -1 },
+    limit: 500,
+  });
+  const audienceCandidates = (mongo.documents ?? []).filter(teamAudience);
+  const activeVersionsByResource = audienceCandidates.reduce<Map<string, number>>((counts, entry) => {
+    counts.set(entry.resourceId, (counts.get(entry.resourceId) ?? 0) + 1);
+    return counts;
+  }, new Map());
+  const candidates = audienceCandidates.filter(
+    (entry) => activeVersionsByResource.get(entry.resourceId) === 1,
+  );
+  const decisions: Awaited<ReturnType<VerifyGate>>[] = [];
+  for (let start = 0; start < candidates.length; start += 8) {
+    decisions.push(...await Promise.all(
+      candidates.slice(start, start + 8)
+        .map((entry) => verifyGate(entry.resourceVersionId, 'retrieve', persistence)),
+    ));
+  }
+  const items = candidates
+    .filter((_entry, index) => decisions[index]?.allowed === true)
+    .map(toItem)
+    .sort((left, right) => left.title.localeCompare(right.title));
+
+  return {
+    ok: true,
+    schemaVersion: MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION,
+    items,
+    categories: [...new Set(items.flatMap((item) => item.categories))].sort(),
+    kinds: [...new Set(items.map((item) => item.kind))].sort(),
+  };
+}

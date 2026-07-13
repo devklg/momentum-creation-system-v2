@@ -6,10 +6,10 @@ import { MCS_RESOURCE_CENTER_CATALOG as catalog } from '@momentum/shared';
 const root = path.resolve(process.cwd(), '..');
 
 describe('P2-99 Resource Center product boundary', () => {
-  it('defines one named BA library without prematurely building P2-100 UI', () => {
+  it('defines one named BA library with the P2-100 UI live', () => {
     expect(catalog).toMatchObject({
       productBoundary: 'named_ba_library_over_source_owned_resources',
-      currentState: 'boundary_defined_ui_pending',
+      currentState: 'named_ui_live_version_safe_projection',
       teamRoute: '/resources',
       access: 'ba_authenticated',
     });
@@ -17,11 +17,11 @@ describe('P2-99 Resource Center product boundary', () => {
     const teamApp = readFileSync(path.join(root, 'apps/team/src/App.tsx'), 'utf8');
     const boundary = readFileSync(path.join(root, 'docs/resource-center-product-boundary.md'), 'utf8');
     const tasklist = readFileSync(path.join(root, 'PLATFORM_AUDIT_PRIORITY_TASKLIST.md'), 'utf8');
-    expect(teamApp).not.toContain('path="/resources"');
+    expect(teamApp).toContain('path="/resources"');
     expect(boundary).toContain('governed discovery layer over source-owned resources');
-    expect(boundary).toContain('P2-100 owns `/resources` UI');
+    expect(boundary).toContain('P2-100 added the `/resources` UI');
     expect(tasklist).toMatch(/\[x\] 99\. \*\*Resource Center:\*\*/);
-    expect(catalog.deferred.p2_100).toEqual(expect.arrayContaining(['team_ui', 'search', 'filters']));
+    expect(catalog.deferred).not.toHaveProperty('p2_100');
   });
 
   it('keeps resource sources authoritative and avoids double-counting the Product Gallery', () => {

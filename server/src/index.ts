@@ -63,6 +63,7 @@ import { threeWayRoutes } from './routes/three-way.js';
 import { michaelRuntimeRoutes } from './routes/michael-runtime.js';
 import { contentVideoRoutes } from './routes/content-videos.js';
 import { knowledgeEvolutionRoutes } from './runtime/knowledge-evolution/routes.js';
+import { resourceRoutes } from './routes/resources.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -265,6 +266,7 @@ app.use('/api/three-way', threeWayRoutes);
 // unmounted.
 app.use('/api/michael-runtime', michaelRuntimeRoutes);
 app.use('/api/content', contentVideoRoutes);
+app.use('/api/resources', resourceRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 

@@ -1,7 +1,7 @@
 export const MCS_RESOURCE_CENTER_CATALOG = {
   surface: 'resource_center',
   productBoundary: 'named_ba_library_over_source_owned_resources',
-  currentState: 'boundary_defined_ui_pending',
+  currentState: 'named_ui_live_version_safe_projection',
   teamRoute: '/resources',
   access: 'ba_authenticated',
   primaryAudience: ['brand_ambassador', 'leader'] as const,
@@ -71,7 +71,6 @@ export const MCS_RESOURCE_CENTER_CATALOG = {
     'duplicate_content_authority',
   ],
   deferred: {
-    p2_100: ['team_ui', 'search', 'filters', 'categories', 'version_safe_results'],
     p2_101: ['training_module_links', 'event_material_links'],
     p2_102: ['usage_analytics', 'stale_resource_warnings'],
   },
