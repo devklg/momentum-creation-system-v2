@@ -6,10 +6,12 @@ const orientation = vi.hoisted(() => ({
 }));
 const webinar = vi.hoisted(() => ({ listUpcomingWebinarEvents: vi.fn() }));
 const persistence = vi.hoisted(() => ({ persistenceCall: vi.fn() }));
+const attendance = vi.hoisted(() => ({ listLatestWebinarAttendance: vi.fn() }));
 
 vi.mock('../orientationSession.js', () => orientation);
 vi.mock('../webinarEvent.js', () => webinar);
 vi.mock('../../services/persistence/dispatch.js', () => persistence);
+vi.mock('../eventAttendance.js', () => attendance);
 
 import { getEventCenterForAdmin, getEventCenterForBA } from '../eventCenter.js';
 
@@ -19,7 +21,10 @@ const webinarEvent = {
   createdAt: '2026-07-01T00:00:00.000Z',
 };
 
-beforeEach(() => vi.resetAllMocks());
+beforeEach(() => {
+  vi.resetAllMocks();
+  attendance.listLatestWebinarAttendance.mockResolvedValue(new Map());
+});
 
 describe('Event Center read projection', () => {
   it('composes BA orientation and webinar truth without changing ownership', async () => {
@@ -36,8 +41,8 @@ describe('Event Center read projection', () => {
         capacity: expect.objectContaining({ mode: 'limited' }),
         registration: expect.objectContaining({ owner: 'orientation', state: 'available' }),
         reminders: { owner: 'source_domain', status: 'not_configured', channels: [] },
-        attendance: { state: 'not_recorded', recordedAt: null, inferred: false },
-        followUp: { owner: 'human_crm', connection: 'not_connected', automated: false },
+        attendance: { state: 'not_recorded', recordedAt: null, inferred: false, counts: { recorded: 0, attended: 0, missed: 0, rescheduled: 0 } },
+        followUp: { owner: 'human_crm', connection: 'not_connected', automated: false, connectedCount: 0 },
       }),
       expect.objectContaining({
         eventType: 'prospect_webinar',
@@ -60,14 +65,43 @@ describe('Event Center read projection', () => {
   it('counts webinar reservations for admin without treating them as attendance', async () => {
     orientation.listSessionsWithRosters.mockResolvedValue([]);
     webinar.listUpcomingWebinarEvents.mockResolvedValue([webinarEvent]);
-    persistence.persistenceCall.mockResolvedValue({ documents: [{ eventId: 'web_1' }, { eventId: 'web_1' }] });
+    persistence.persistenceCall
+      .mockResolvedValueOnce({ documents: [
+        { reservationId: 'r1', eventId: 'web_1', prospectId: 'p1', sponsorTmagId: 'TM-01', name: 'A', createdAt: '2026-07-01T00:00:00.000Z' },
+        { reservationId: 'r2', eventId: 'web_1', prospectId: 'p2', sponsorTmagId: 'TM-01', name: 'B', createdAt: '2026-07-01T00:00:00.000Z' },
+      ] })
+      .mockResolvedValueOnce({ documents: [] });
     const result = await getEventCenterForAdmin();
     expect(result.webinarEvents[0]).toMatchObject({ eventId: 'web_1', reservationCount: 2 });
     expect(result.webinarEvents[0]).not.toHaveProperty('attendanceCount');
     expect(result.events.find((event) => event.eventType === 'prospect_webinar')).toMatchObject({
       capacity: { mode: 'unlimited', limit: null, reserved: 2, remaining: null },
-      attendance: { state: 'not_recorded', recordedAt: null, inferred: false },
-      followUp: { owner: 'human_crm', connection: 'not_connected', automated: false },
+      attendance: { state: 'not_recorded', recordedAt: null, inferred: false, counts: { recorded: 0, attended: 0, missed: 0, rescheduled: 0 } },
+      followUp: { owner: 'human_crm', connection: 'not_connected', automated: false, connectedCount: 0 },
     });
+    expect(result.webinarReservations).toHaveLength(2);
+  });
+
+  it('projects explicit attendance and an available human CRM connection', async () => {
+    orientation.listSessionsWithRosters.mockResolvedValue([]);
+    webinar.listUpcomingWebinarEvents.mockResolvedValue([webinarEvent]);
+    persistence.persistenceCall
+      .mockResolvedValueOnce({ documents: [
+        { reservationId: 'r1', eventId: 'web_1', prospectId: 'p1', sponsorTmagId: 'TM-01', name: 'A', createdAt: '2026-07-01T00:00:00.000Z' },
+      ] })
+      .mockResolvedValueOnce({ documents: [
+        { prospectId: 'p1', sponsorTmagId: 'TM-01', dueAt: '2026-08-02T00:00:00.000Z', createdAt: '2026-08-01T00:00:00.000Z', clearedAt: null },
+      ] });
+    attendance.listLatestWebinarAttendance.mockResolvedValue(new Map([['r1', {
+      attendanceId: 'a1', eventId: 'web_1', reservationId: 'r1', eventType: 'prospect_webinar',
+      prospectId: 'p1', sponsorTmagId: 'TM-01', state: 'attended',
+      recordedAt: '2026-08-01T01:00:00.000Z', recordedByTmagId: 'TM-01', crmFollowUpDueAt: '2026-08-02T00:00:00.000Z',
+    }]]));
+    const result = await getEventCenterForAdmin();
+    expect(result.events[0]).toMatchObject({
+      attendance: { state: 'recorded', inferred: false, counts: { recorded: 1, attended: 1, missed: 0, rescheduled: 0 } },
+      followUp: { owner: 'human_crm', connection: 'available', automated: false, connectedCount: 1 },
+    });
+    expect(result.webinarReservations[0]).toMatchObject({ attendance: 'attended', crmFollowUpDueAt: '2026-08-02T00:00:00.000Z' });
   });
 });

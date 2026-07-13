@@ -4,7 +4,7 @@ import type {
   McsWebinarEvent,
 } from './types.js';
 
-export const MCS_EVENT_CENTER_SCHEMA_VERSION = 'event_center.v1.1' as const;
+export const MCS_EVENT_CENTER_SCHEMA_VERSION = 'event_center.v1.2' as const;
 
 export type McsEventCenterSourceStatus = 'available' | 'unavailable';
 
@@ -50,15 +50,64 @@ export interface McsEventCenterReminders {
 }
 
 export interface McsEventCenterAttendance {
-  state: 'not_recorded' | 'attended' | 'missed' | 'rescheduled';
+  state: 'not_recorded' | 'recorded' | 'unavailable';
   recordedAt: string | null;
   inferred: false;
+  counts: {
+    recorded: number;
+    attended: number;
+    missed: number;
+    rescheduled: number;
+  };
 }
 
 export interface McsEventCenterFollowUp {
   owner: 'human_crm';
-  connection: 'not_connected' | 'available';
+  connection: 'not_connected' | 'available' | 'unavailable';
   automated: false;
+  connectedCount: number;
+}
+
+export type McsEventAttendanceState = 'attended' | 'missed' | 'rescheduled';
+
+export interface McsEventAttendanceRecord {
+  attendanceId: string;
+  eventId: string;
+  reservationId: string;
+  eventType: 'prospect_webinar';
+  prospectId: string;
+  sponsorTmagId: string;
+  state: McsEventAttendanceState;
+  recordedAt: string;
+  recordedByTmagId: string;
+  crmFollowUpDueAt: string;
+}
+
+export interface McsAdminEventCenterWebinarReservation {
+  reservationId: string;
+  eventId: string;
+  prospectId: string;
+  sponsorTmagId: string;
+  name: string;
+  createdAt: string;
+  attendance: McsEventAttendanceState | null;
+  attendanceRecordedAt: string | null;
+  crmFollowUpDueAt: string | null;
+}
+
+export interface McsRecordEventAttendancePayload {
+  state: McsEventAttendanceState;
+}
+
+export interface McsRecordEventAttendanceResponse {
+  ok: true;
+  attendance: McsEventAttendanceRecord;
+  followUp: {
+    connection: 'available';
+    dueAt: string;
+    created: boolean;
+    automatedContact: false;
+  };
 }
 
 export interface McsEventCenterEvent {
@@ -93,7 +142,12 @@ export interface McsAdminEventCenterResponse {
   schemaVersion: typeof MCS_EVENT_CENTER_SCHEMA_VERSION;
   generatedAt: string;
   sources: McsEventCenterSourceHealth;
+  dependencies: {
+    attendance: McsEventCenterSourceStatus;
+    crm: McsEventCenterSourceStatus;
+  };
   events: McsEventCenterEvent[];
   orientationSessions: McsOrientationSessionWithRoster[];
   webinarEvents: McsAdminEventCenterWebinarEvent[];
+  webinarReservations: McsAdminEventCenterWebinarReservation[];
 }

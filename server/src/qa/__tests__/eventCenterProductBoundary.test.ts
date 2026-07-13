@@ -5,11 +5,11 @@ import { MCS_EVENT_CENTER_CATALOG as catalog } from '@momentum/shared';
 
 const root = path.resolve(process.cwd(), '..');
 
-describe('P2-105 Event Center model', () => {
+describe('P2-106 Event Center attendance and CRM connection', () => {
   it('builds one named surface over the unified read API', () => {
     expect(catalog).toMatchObject({
       productBoundary: 'named_event_discovery_and_coordination_surface_over_source_owned_events',
-      currentState: 'normalized_event_model_v1_1_live',
+      currentState: 'attendance_to_human_crm_live',
       teamRoute: '/events',
       adminRoute: '/events',
     });
@@ -34,6 +34,9 @@ describe('P2-105 Event Center model', () => {
       elapsedTimeDoesNotProveAttendance: true,
       sponsorIdentityRemainsTokenDerived: true,
       crmFollowUpRemainsHumanOwned: true,
+      attendanceRequiresExplicitAdminAction: true,
+      attendanceCreatesNoAutomatedContact: true,
+      existingCrmReminderIsPreserved: true,
     });
     expect(catalog.exclusions).toEqual(expect.arrayContaining([
       'automatic_attendance_inference', 'automatic_prospect_follow_up',
@@ -41,19 +44,20 @@ describe('P2-105 Event Center model', () => {
     ]));
   });
 
-  it('defines the additive P2-105 model without activating future behavior', () => {
+  it('defines the additive P2-106 model with explicit attendance only', () => {
     expect(catalog).toMatchObject({
-      currentState: 'normalized_event_model_v1_1_live',
+      currentState: 'attendance_to_human_crm_live',
       normalizedModel: {
-        schemaVersion: 'event_center.v1.1',
-        persistence: 'read_projection_only',
-        acr: 'ACR-0015',
+        schemaVersion: 'event_center.v1.2',
+        persistence: 'source_owned_attendance_plus_read_projection',
+        acr: 'ACR-0016',
       },
     });
     expect(catalog.normalizedModel.fields).toEqual(expect.arrayContaining([
       'eventType', 'visibility', 'capacity', 'registration', 'reminders', 'attendance', 'followUp',
     ]));
     expect(catalog.deferred).not.toHaveProperty('p2_105');
+    expect(catalog.deferred).not.toHaveProperty('p2_106');
   });
 
   it('records the audit as the implementation authority', () => {
@@ -62,6 +66,7 @@ describe('P2-105 Event Center model', () => {
     expect(tasklist).toMatch(/\[x\] 103\. \*\*Event Center:\*\*/);
     expect(tasklist).toMatch(/\[x\] 104\. \*\*Event Center:\*\*/);
     expect(tasklist).toMatch(/\[x\] 105\. \*\*Event Center:\*\*/);
+    expect(tasklist).toMatch(/\[x\] 106\. \*\*Event Center:\*\*/);
     expect(boundary).toContain('A reservation proves only that a seat was reserved.');
   });
 });

@@ -27,7 +27,7 @@ interface WebinarEvent {
 
 interface EventCenterResponse {
   ok: true;
-  schemaVersion: 'event_center.v1.1';
+  schemaVersion: 'event_center.v1.2';
   sources: { orientation: SourceStatus; webinar: SourceStatus };
   events: NormalizedEvent[];
   orientationSessions: OrientationEvent[];
@@ -41,8 +41,12 @@ interface NormalizedEvent {
   visibility: { prospect: 'none' | 'invitation_token_only' };
   registration: { state: 'available' | 'full' | 'reserved_by_me' | 'invitation_required' };
   reminders: { status: 'not_configured' | 'configured' };
-  attendance: { state: 'not_recorded' | 'attended' | 'missed' | 'rescheduled'; inferred: false };
-  followUp: { owner: 'human_crm'; connection: 'not_connected' | 'available'; automated: false };
+  attendance: {
+    state: 'not_recorded' | 'recorded' | 'unavailable';
+    inferred: false;
+    counts: { recorded: number; attended: number; missed: number; rescheduled: number };
+  };
+  followUp: { owner: 'human_crm'; connection: 'not_connected' | 'available' | 'unavailable'; automated: false; connectedCount: number };
 }
 
 function formatDate(iso: string): { day: string; time: string } {
@@ -183,7 +187,11 @@ export function EventsPage() {
 
 function EventTruthLine({ event }: { event: NormalizedEvent }) {
   const reminder = event.reminders.status === 'configured' ? 'Reminder configured' : 'No reminder scheduled';
-  const attendance = event.attendance.state === 'not_recorded' ? 'Attendance not recorded' : event.attendance.state;
+  const attendance = event.attendance.state === 'unavailable'
+    ? 'Attendance source unavailable'
+    : event.attendance.state === 'not_recorded'
+    ? 'Attendance not recorded'
+    : `${event.attendance.counts.recorded} attendance records`;
   return <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.1em] text-cream-faint">{reminder} · {attendance} · Follow-up stays human-owned</p>;
 }
 

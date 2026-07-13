@@ -1,7 +1,7 @@
 export const MCS_EVENT_CENTER_CATALOG = {
   surface: 'event_center',
   productBoundary: 'named_event_discovery_and_coordination_surface_over_source_owned_events',
-  currentState: 'normalized_event_model_v1_1_live',
+  currentState: 'attendance_to_human_crm_live',
   teamRoute: '/events',
   adminRoute: '/events',
   access: {
@@ -16,7 +16,7 @@ export const MCS_EVENT_CENTER_CATALOG = {
       audience: ['brand_ambassador', 'founder_admin'],
       sourceCollections: ['tmag_new_member_orientation_sessions', 'tmag_new_member_orientation_reservations'],
       currentApiRoutes: ['/api/orientation/sessions', '/api/admin/orientation/sessions'],
-      eventCenterApiRoutes: ['/api/events', '/api/admin/events'],
+      eventCenterApiRoutes: ['/api/events', '/api/admin/events', '/api/admin/events/webinars/:eventId/reservations/:reservationId/attendance'],
       currentAdminRoute: '/orientation',
     },
     {
@@ -38,7 +38,7 @@ export const MCS_EVENT_CENTER_CATALOG = {
     },
   ],
   ownership: {
-    eventCenter: ['discovery', 'calendar_composition', 'event_type_filtering', 'source_owner_deep_link'],
+    eventCenter: ['discovery', 'calendar_composition', 'event_type_filtering', 'source_owner_deep_link', 'explicit_webinar_attendance_capture'],
     sourceDomains: ['event_authority', 'scheduling', 'capacity', 'reservation', 'attendance', 'materials', 'follow_up'],
     admin: ['event_operations', 'visibility', 'host_assignment', 'rosters'],
   },
@@ -48,12 +48,15 @@ export const MCS_EVENT_CENTER_CATALOG = {
     eventCenterDoesNotChangeTokenLifecycle: true,
     sponsorIdentityRemainsTokenDerived: true,
     crmFollowUpRemainsHumanOwned: true,
+    attendanceRequiresExplicitAdminAction: true,
+    attendanceCreatesNoAutomatedContact: true,
+    existingCrmReminderIsPreserved: true,
   },
   normalizedModel: {
-    schemaVersion: 'event_center.v1.1',
+    schemaVersion: 'event_center.v1.2',
     fields: ['eventType', 'visibility', 'capacity', 'registration', 'reminders', 'attendance', 'followUp'],
-    persistence: 'read_projection_only',
-    acr: 'ACR-0015',
+    persistence: 'source_owned_attendance_plus_read_projection',
+    acr: 'ACR-0016',
   },
   exclusions: [
     'new_event_authority',
@@ -66,7 +69,5 @@ export const MCS_EVENT_CENTER_CATALOG = {
     'broadcast_composer',
     'duplicate_orientation_or_webinar_records',
   ],
-  deferred: {
-    p2_106: ['attendance_to_crm_follow_up'],
-  },
+  deferred: {},
 } as const;

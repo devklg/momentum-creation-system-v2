@@ -107,6 +107,7 @@ const OWNER_RULES = [
     tier: 'operational',
     match: (c) =>
       c === 'webinar_events' ||
+      c.includes('event_attendance') ||
       c.includes('orientation') ||
       c.includes('three_way') ||
       c === 'tmag_sponsor_availability',
