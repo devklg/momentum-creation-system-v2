@@ -5,11 +5,11 @@ import { MCS_EVENT_CENTER_CATALOG as catalog } from '@momentum/shared';
 
 const root = path.resolve(process.cwd(), '..');
 
-describe('P2-104 Event Center implementation', () => {
+describe('P2-105 Event Center model', () => {
   it('builds one named surface over the unified read API', () => {
     expect(catalog).toMatchObject({
       productBoundary: 'named_event_discovery_and_coordination_surface_over_source_owned_events',
-      currentState: 'ba_and_admin_ui_live_over_unified_read_api',
+      currentState: 'normalized_event_model_v1_1_live',
       teamRoute: '/events',
       adminRoute: '/events',
     });
@@ -41,11 +41,27 @@ describe('P2-104 Event Center implementation', () => {
     ]));
   });
 
+  it('defines the additive P2-105 model without activating future behavior', () => {
+    expect(catalog).toMatchObject({
+      currentState: 'normalized_event_model_v1_1_live',
+      normalizedModel: {
+        schemaVersion: 'event_center.v1.1',
+        persistence: 'read_projection_only',
+        acr: 'ACR-0015',
+      },
+    });
+    expect(catalog.normalizedModel.fields).toEqual(expect.arrayContaining([
+      'eventType', 'visibility', 'capacity', 'registration', 'reminders', 'attendance', 'followUp',
+    ]));
+    expect(catalog.deferred).not.toHaveProperty('p2_105');
+  });
+
   it('records the audit as the implementation authority', () => {
     const tasklist = readFileSync(path.join(root, 'PLATFORM_AUDIT_PRIORITY_TASKLIST.md'), 'utf8');
     const boundary = readFileSync(path.join(root, 'docs/event-center-product-boundary.md'), 'utf8');
     expect(tasklist).toMatch(/\[x\] 103\. \*\*Event Center:\*\*/);
     expect(tasklist).toMatch(/\[x\] 104\. \*\*Event Center:\*\*/);
+    expect(tasklist).toMatch(/\[x\] 105\. \*\*Event Center:\*\*/);
     expect(boundary).toContain('A reservation proves only that a seat was reserved.');
   });
 });

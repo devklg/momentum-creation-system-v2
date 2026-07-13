@@ -4,6 +4,8 @@ Decision: **Event Center is a named, authenticated event discovery and coordinat
 
 The executable boundary is `packages/shared/src/event-center-catalog.ts`.
 
+The additive normalized response contract is `event_center.v1.1`, governed by `organization/ACR-0015-event-center-model-fields.md`. Its `events` projection carries explicit event type, visibility, capacity, registration, reminder, attendance, and follow-up fields while retaining the source-specific orientation and webinar arrays for compatibility.
+
 ## Audience and routes
 
 - Brand Ambassadors and leaders use the live `.team` route `/events`.
@@ -20,6 +22,8 @@ Event Center owns discovery, calendar composition, filtering by event type, and 
 ## Factual lifecycle rules
 
 A reservation proves only that a seat was reserved. It does not prove attendance, completion, engagement quality, or readiness. Elapsed time never converts a reservation into attendance. Event Center does not change prospect token lifecycle, sponsor identity, or CRM disposition. Sponsor identity remains token-derived and immutable.
+
+Until their separately governed implementation items land, reminder status is `not_configured`, attendance is `not_recorded` with `inferred:false`, and follow-up is `not_connected` with `automated:false`. These values describe missing behavior honestly; they do not simulate it.
 
 ## Exclusions
 

@@ -27,11 +27,22 @@ interface WebinarEvent {
 
 interface EventCenterResponse {
   ok: true;
-  schemaVersion: 'event_center.v1';
+  schemaVersion: 'event_center.v1.1';
   sources: { orientation: SourceStatus; webinar: SourceStatus };
+  events: NormalizedEvent[];
   orientationSessions: OrientationEvent[];
   myOrientationReservationSessionId: string | null;
   webinarEvents: WebinarEvent[];
+}
+
+interface NormalizedEvent {
+  sourceId: string;
+  eventType: 'new_member_orientation' | 'prospect_webinar';
+  visibility: { prospect: 'none' | 'invitation_token_only' };
+  registration: { state: 'available' | 'full' | 'reserved_by_me' | 'invitation_required' };
+  reminders: { status: 'not_configured' | 'configured' };
+  attendance: { state: 'not_recorded' | 'attended' | 'missed' | 'rescheduled'; inferred: false };
+  followUp: { owner: 'human_crm'; connection: 'not_connected' | 'available'; automated: false };
 }
 
 function formatDate(iso: string): { day: string; time: string } {
@@ -121,12 +132,14 @@ export function EventsPage() {
             <div className="grid gap-4 md:grid-cols-2">
               {data.orientationSessions.map((event) => {
                 const when = formatDate(event.scheduledFor);
+                const model = data.events.find((item) => item.sourceId === event.sessionId);
                 const heldElsewhere = data.myOrientationReservationSessionId !== null && !event.reservedByMe;
                 return (
                   <article key={event.sessionId} className={`rounded-md border p-5 ${event.reservedByMe ? 'border-teal/45 bg-teal/[0.05]' : 'border-line bg-ink-2'}`}>
                     <p className="font-display text-2xl tracking-wide">{when.day}</p>
                     <p className="mt-1 font-mono text-xs text-gold">{when.time}</p>
                     <p className="mt-4 text-sm text-cream-mute">Hosted by {event.hosts.join(' & ')} · {event.durationMinutes} minutes</p>
+                    {model && <EventTruthLine event={model} />}
                     <div className="mt-5 flex items-end justify-between gap-4">
                       <p className="font-mono text-[10px] uppercase tracking-label text-cream-faint">{event.seatsRemaining} of {event.capacity} seats open</p>
                       <Button disabled={busyId === event.sessionId || event.seatsRemaining === 0 || heldElsewhere} onClick={() => void actOnSeat(event.sessionId, event.reservedByMe ? 'DELETE' : 'POST')} className={event.reservedByMe ? 'border border-line bg-transparent text-cream' : 'bg-gold text-ink'}>
@@ -148,12 +161,14 @@ export function EventsPage() {
             <div className="grid gap-4 md:grid-cols-2">
               {data.webinarEvents.map((event) => {
                 const when = formatDate(event.scheduledFor);
+                const model = data.events.find((item) => item.sourceId === event.eventId);
                 return (
                   <article key={event.eventId} className="rounded-md border border-line bg-ink-2 p-5">
                     <div className="flex items-start justify-between gap-4"><CalendarDays className="h-6 w-6 text-teal" /><span className="font-mono text-[9px] uppercase tracking-label text-cream-faint">Invitation link only</span></div>
                     <p className="mt-7 font-display text-2xl tracking-wide">{when.day}</p>
                     <p className="mt-1 font-mono text-xs text-gold">{when.time}</p>
                     <p className="mt-4 text-sm text-cream-mute">Hosted by {event.hosts.join(' & ')} · {event.durationMinutes} minutes</p>
+                    {model && <EventTruthLine event={model} />}
                   </article>
                 );
               })}
@@ -164,6 +179,12 @@ export function EventsPage() {
       </div>
     </main>
   );
+}
+
+function EventTruthLine({ event }: { event: NormalizedEvent }) {
+  const reminder = event.reminders.status === 'configured' ? 'Reminder configured' : 'No reminder scheduled';
+  const attendance = event.attendance.state === 'not_recorded' ? 'Attendance not recorded' : event.attendance.state;
+  return <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.1em] text-cream-faint">{reminder} · {attendance} · Follow-up stays human-owned</p>;
 }
 
 function EventSection({ title, detail, children }: { title: string; detail: string; children: React.ReactNode }) {
