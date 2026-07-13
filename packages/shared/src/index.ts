@@ -24,3 +24,4 @@ export * from './launch-center-catalog.js';
 export * from './resource-center-catalog.js';
 export * from './resource-center.js';
 export * from './event-center-catalog.js';
+export * from './event-center.js';

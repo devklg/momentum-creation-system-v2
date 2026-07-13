@@ -1,7 +1,7 @@
 export const MCS_EVENT_CENTER_CATALOG = {
   surface: 'event_center',
   productBoundary: 'named_event_discovery_and_coordination_surface_over_source_owned_events',
-  currentState: 'boundary_defined_ui_deferred_to_p2_104',
+  currentState: 'ba_and_admin_ui_live_over_unified_read_api',
   teamRoute: '/events',
   adminRoute: '/events',
   access: {
@@ -16,6 +16,7 @@ export const MCS_EVENT_CENTER_CATALOG = {
       audience: ['brand_ambassador', 'founder_admin'],
       sourceCollections: ['tmag_new_member_orientation_sessions', 'tmag_new_member_orientation_reservations'],
       currentApiRoutes: ['/api/orientation/sessions', '/api/admin/orientation/sessions'],
+      eventCenterApiRoutes: ['/api/events', '/api/admin/events'],
       currentAdminRoute: '/orientation',
     },
     {
@@ -24,6 +25,7 @@ export const MCS_EVENT_CENTER_CATALOG = {
       audience: ['prospect', 'brand_ambassador', 'founder_admin'],
       sourceCollections: ['tmag_prospect_webinar_events', 'tmag_prospect_webinar_reservations'],
       currentApiRoutes: ['/api/p/:token/webinar-reserve'],
+      eventCenterApiRoutes: ['/api/events', '/api/admin/events'],
       prospectAccess: 'valid_invitation_token_only',
     },
     {
@@ -59,7 +61,6 @@ export const MCS_EVENT_CENTER_CATALOG = {
     'duplicate_orientation_or_webinar_records',
   ],
   deferred: {
-    p2_104: ['team_ui', 'admin_ui', 'unified_event_api'],
     p2_105: ['unified_event_model_fields'],
     p2_106: ['attendance_to_crm_follow_up'],
   },

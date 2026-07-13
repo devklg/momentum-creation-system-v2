@@ -30,6 +30,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/training/fast-start', label: 'Training' },
   { to: '/video-library', label: 'Videos' },
   { to: '/resources', label: 'Resources' },
+  { to: '/events', label: 'Events' },
   { to: '/leadership', label: 'Leadership' },
   { to: '/profile', label: 'Profile' },
 ];

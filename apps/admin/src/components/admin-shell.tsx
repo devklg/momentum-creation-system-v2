@@ -26,6 +26,7 @@ const NAV: NavItem[] = [
   { to: '/agents', label: 'Agent Oversight' },
   { to: '/knowledge', label: 'Knowledge Base' },
   { to: '/resource-center', label: 'Resource Center' },
+  { to: '/events', label: 'Event Center' },
   { to: '/content-videos', label: 'Product Gallery' },
   { to: '/consistency', label: 'Consistency' },
   { to: '/entitlements', label: 'Entitlements' },
