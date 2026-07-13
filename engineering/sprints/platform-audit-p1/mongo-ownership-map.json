@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-07-13T09:44:17.679Z",
+  "generatedAt": "2026-07-13T12:11:29.734Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
-  "collectionCount": 67,
+  "collectionCount": 69,
   "unclassifiedCount": 0,
   "byOwner": {
     "dynamic_helper": 4,
     "broadcast_delivery": 3,
     "operations_governance": 6,
-    "knowledge_content": 5,
+    "knowledge_content": 7,
     "agents_training_success": 11,
     "events_orientation_and_calls": 6,
     "membership_identity": 6,
@@ -145,6 +145,34 @@
       "sourceFiles": [
         "server/src/domain/graphrag.ts",
         "server/src/domain/graphragReadiness.ts"
+      ]
+    },
+    {
+      "collection": "mcs_knowledge_chunks",
+      "ownerId": "knowledge_content",
+      "owner": "Knowledge, content, and retrieval governance",
+      "steward": "Knowledge / content domain",
+      "primarySurface": "admin + runtime",
+      "persistenceTier": "knowledge",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 1,
+      "sourceFiles": [
+        "server/scripts/backfill-knowledge-resource-catalog.ts"
+      ]
+    },
+    {
+      "collection": "mcs_knowledge_sources",
+      "ownerId": "knowledge_content",
+      "owner": "Knowledge, content, and retrieval governance",
+      "steward": "Knowledge / content domain",
+      "primarySurface": "admin + runtime",
+      "persistenceTier": "knowledge",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 1,
+      "sourceFiles": [
+        "server/scripts/backfill-knowledge-resource-catalog.ts"
       ]
     },
     {

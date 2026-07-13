@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T09:44:20.295Z",
+  "generatedAt": "2026-07-13T12:11:40.062Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,12 +8,12 @@
   "summary": {
     "mounts": 47,
     "routeFiles": 47,
-    "routes": 230,
+    "routes": 231,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 3,
       "pre_gate": 140,
-      "ba_facing_gated": 86
+      "ba_facing_gated": 87
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
@@ -21,11 +21,11 @@
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
       "prospect_token": 18,
-      "ba_auth_steve_gated": 86
+      "ba_auth_steve_gated": 87
     },
     "byMethod": {
       "POST": 92,
-      "GET": 115,
+      "GET": 116,
       "PUT": 7,
       "PATCH": 9,
       "DELETE": 7
@@ -556,7 +556,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:114",
+      "source": "server/src/routes/admin/knowledge.ts:115",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -6496,7 +6496,34 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/resources.ts:9",
+      "source": "server/src/routes/resources.ts:10",
+      "routeSource": "server/src/routes/resources.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/resources/:resourceVersionId",
+      "mountPath": "/api/resources",
+      "localPath": "/:resourceVersionId",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/resources.ts:21",
       "routeSource": "server/src/routes/resources.ts",
       "signals": {
         "requireAuth": true,

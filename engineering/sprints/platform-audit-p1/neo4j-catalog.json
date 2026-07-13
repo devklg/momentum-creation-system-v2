@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T09:44:17.815Z",
+  "generatedAt": "2026-07-13T12:11:30.636Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -7,7 +7,7 @@
   ],
   "summary": {
     "labels": 75,
-    "relationships": 62,
+    "relationships": 63,
     "constraints": 18,
     "labelsWithoutConstraint": 60
   },
@@ -113,7 +113,7 @@
       "label": "KnowledgeChunk",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:205"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:210"
       ]
     },
     {
@@ -125,10 +125,11 @@
     },
     {
       "label": "KnowledgeSource",
-      "sourceCount": 2,
+      "sourceCount": 3,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:148",
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:208"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:153",
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:213",
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:263"
       ]
     },
     {
@@ -227,7 +228,7 @@
     },
     {
       "label": "TeamMagnificentMember",
-      "sourceCount": 81,
+      "sourceCount": 82,
       "sources": [
         "server/scripts/backfill-founder-timezones.ts:138",
         "server/scripts/backfill-founder-timezones.ts:82",
@@ -309,7 +310,8 @@
         "server/src/domain/vmProviderQueue.ts:275",
         "server/src/domain/vmProviderQueue.ts:640",
         "server/src/domain/workbook.ts:307",
-        "server/src/domain/workbook.ts:308"
+        "server/src/domain/workbook.ts:308",
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:259"
       ]
     },
     {
@@ -619,16 +621,18 @@
     },
     {
       "label": "TmagResource",
-      "sourceCount": 1,
+      "sourceCount": 2,
       "sources": [
-        "server/src/domain/resourcePublishingGate.ts:72"
+        "server/src/domain/resourcePublishingGate.ts:72",
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:253"
       ]
     },
     {
       "label": "TmagResourceVersion",
-      "sourceCount": 1,
+      "sourceCount": 2,
       "sources": [
-        "server/src/domain/resourcePublishingGate.ts:72"
+        "server/src/domain/resourcePublishingGate.ts:72",
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:255"
       ]
     },
     {
@@ -828,9 +832,10 @@
     },
     {
       "relationship": "APPROVED_BY",
-      "sourceCount": 1,
+      "sourceCount": 2,
       "sources": [
-        "server/src/domain/resourcePublishingGate.ts:72"
+        "server/src/domain/resourcePublishingGate.ts:72",
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:261"
       ]
     },
     {
@@ -942,7 +947,7 @@
       "relationship": "HAS_CHUNK",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:209"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:214"
       ]
     },
     {
@@ -1022,11 +1027,12 @@
     },
     {
       "relationship": "HAS_VERSION",
-      "sourceCount": 3,
+      "sourceCount": 4,
       "sources": [
         "server/src/domain/adminTenantArchitecture.ts:466",
         "server/src/domain/resourcePublishingGate.ts:72",
-        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186"
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186",
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:258"
       ]
     },
     {
@@ -1142,6 +1148,13 @@
       "sources": [
         "server/src/domain/vmLeadOwners.ts:65",
         "server/src/domain/vmLeadOwners.ts:77"
+      ]
+    },
+    {
+      "relationship": "PROJECTS_KNOWLEDGE_SOURCE",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:264"
       ]
     },
     {

@@ -4,16 +4,16 @@
 
 ## Summary
 
-- Generated: 2026-07-13T09:44:20.295Z
+- Generated: 2026-07-13T12:11:40.062Z
 - Mounted routers: 47
 - Route files: 47
-- Static route rows: 230
+- Static route rows: 231
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
-| ba_facing_gated | 86 |
+| ba_facing_gated | 87 |
 | pre_gate | 140 |
 | pre_json_admin_body_limit | 3 |
 | raw_body_before_json | 1 |
@@ -23,7 +23,7 @@
 | Access profile | Routes |
 | --- | ---: |
 | admin | 92 |
-| ba_auth_steve_gated | 86 |
+| ba_auth_steve_gated | 87 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
 | prospect_token | 18 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 7 |
-| GET | 115 |
+| GET | 116 |
 | PATCH | 9 |
 | POST | 92 |
 | PUT | 7 |
@@ -98,7 +98,7 @@
 | POST | `/api/telnyx/webhook` | raw_body_before_json | raw_body_webhook | raw-body | `server/src/routes/telnyx-webhook.ts:14` |
 | GET | `/api/admin/knowledge/status` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:41` |
 | POST | `/api/admin/knowledge/sources` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:50` |
-| POST | `/api/admin/knowledge/sources/upload` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:114` |
+| POST | `/api/admin/knowledge/sources/upload` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:115` |
 | GET | `/api/health/` | pre_gate | pre_gate_or_public | none | `server/src/routes/health.ts:7` |
 | GET | `/api/health/persistence` | pre_gate | pre_gate_or_public | none | `server/src/routes/health.ts:15` |
 | POST | `/api/auth/verify-code` | pre_gate | pre_gate_or_public | rate-limit | `server/src/routes/auth.ts:23` |
@@ -324,4 +324,5 @@
 | POST | `/api/three-way/bookings/:id/cancel` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/three-way.ts:110` |
 | POST | `/api/michael-runtime/resolve` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/michael-runtime.ts:245` |
 | GET | `/api/content/videos` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/content-videos.ts:16` |
-| GET | `/api/resources/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:9` |
+| GET | `/api/resources/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:10` |
+| GET | `/api/resources/:resourceVersionId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:21` |

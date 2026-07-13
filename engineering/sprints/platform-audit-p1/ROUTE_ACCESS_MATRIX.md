@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Generated: 2026-07-13T09:44:20.356Z
-- Routes: 230
+- Generated: 2026-07-13T12:11:40.114Z
+- Routes: 231
 - Findings: 0
 
 ## Routes By Access Category
@@ -17,7 +17,7 @@
 | auth_bootstrap | 3 |
 | auth_session | 2 |
 | ba_auth_pre_steve | 21 |
-| ba_auth_steve_gated | 54 |
+| ba_auth_steve_gated | 55 |
 | ba_auth_steve_vm_entitled | 25 |
 | internal_runtime_admin_or_secret | 5 |
 | prospect_reentry | 4 |
@@ -36,9 +36,9 @@
 | rawBodyParser | 1 |
 | requireAdmin | 95 |
 | requireAdminOrHealthSecret | 1 |
-| requireAuth | 101 |
+| requireAuth | 102 |
 | requireRuntimeInternal | 5 |
-| requireSteveComplete | 86 |
+| requireSteveComplete | 87 |
 | requireVmDialerAccess | 25 |
 
 ## Role Coverage
@@ -46,7 +46,7 @@
 | Role | Routes |
 | --- | ---: |
 | anonymous | 5 |
-| brand_ambassador | 102 |
+| brand_ambassador | 103 |
 | founder_admin | 101 |
 | prospect | 18 |
 | provider | 2 |
@@ -59,7 +59,7 @@
 | admin_allowlist | 101 |
 | machine_credential | 12 |
 | none | 5 |
-| registered_ba | 102 |
+| registered_ba | 103 |
 | valid_prospect_identity | 18 |
 | vm_dialer | 25 |
 
@@ -89,7 +89,7 @@
 | POST | `/api/telnyx/webhook` | provider | machine_credential | telnyx_signature | raw_body_webhook | none | none | not_applicable | none | none | none | telnyx_signature | yes | no | global_256kb_json | none | none | `server/src/routes/telnyx-webhook.ts:14` |
 | GET | `/api/admin/knowledge/status` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:41` |
 | POST | `/api/admin/knowledge/sources` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:50` |
-| POST | `/api/admin/knowledge/sources/upload` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:114` |
+| POST | `/api/admin/knowledge/sources/upload` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:115` |
 | GET | `/api/health/` | anonymous, system | machine_credential, none | none | public_health | none | none | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/health.ts:7` |
 | GET | `/api/health/persistence` | anonymous, system | machine_credential, none | none | public_health | none | none | not_applicable | none | none | none | none | no | no | global_256kb_json | public persistence diagnostic; review before production exposure if ops-only detail is considered sensitive | none | `server/src/routes/health.ts:15` |
 | POST | `/api/auth/verify-code` | anonymous | none | none | auth_bootstrap | none | none | not_applicable | none | none | none | none | no | yes | global_256kb_json | none | none | `server/src/routes/auth.ts:23` |
@@ -315,4 +315,5 @@
 | POST | `/api/three-way/bookings/:id/cancel` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/three-way.ts:110` |
 | POST | `/api/michael-runtime/resolve` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/michael-runtime.ts:245` |
 | GET | `/api/content/videos` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/content-videos.ts:16` |
-| GET | `/api/resources/` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/resources.ts:9` |
+| GET | `/api/resources/` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/resources.ts:10` |
+| GET | `/api/resources/:resourceVersionId` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/resources.ts:21` |
