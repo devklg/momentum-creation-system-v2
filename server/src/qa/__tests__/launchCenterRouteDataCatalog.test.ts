@@ -11,3 +11,12 @@ describe('P2-95 Launch Center route/data catalog',()=>{
   expect(catalog.prohibited).toEqual(expect.arrayContaining(['person_score','person_rank','outcome_prediction']));
  });
 });
+describe('P2-96 conditional boundary',()=>{
+ it('keeps the umbrella branch explicitly not applicable',()=>{
+  const boundary=readFileSync(path.join(root,'docs/launch-center-product-boundary.md'),'utf8');
+  const tasks=readFileSync(path.join(root,'PLATFORM_AUDIT_PRIORITY_TASKLIST.md'),'utf8');
+  expect(catalog.productBoundary).toBe('named_first_run_surface_within_cockpit');
+  expect(boundary).toContain('not renamed or subsumed');
+  expect(tasks).toMatch(/\[x\] 96[\s\S]*Not applicable/);
+ });
+});
