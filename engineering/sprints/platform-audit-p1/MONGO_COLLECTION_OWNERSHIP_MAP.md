@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-13T17:04:09.879Z
+- Generated: 2026-07-13T17:21:14.310Z
 - Collections: 69
 - Unclassified: 0
 
@@ -79,7 +79,7 @@
 | `tmag_prospect_sessions` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 3 |
 | `tmag_prospect_timeline_events` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_events` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 4 |
-| `tmag_prospect_webinar_reservations` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 2 |
+| `tmag_prospect_webinar_reservations` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 3 |
 | `tmag_prospects` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 36 |
 | `tmag_questionnaires` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
 | `tmag_recruiting_cycles` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 3 |

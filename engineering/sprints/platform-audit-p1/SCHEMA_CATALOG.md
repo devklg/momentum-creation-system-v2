@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T17:04:24.417Z
+- Generated: 2026-07-13T17:21:28.731Z
 - Mongo collections: 69
 - Neo4j labels: 78
 - Neo4j relationships: 67
 - Chroma collections: 52
-- Route modules: 47
-- Route handlers: 262
-- Shared exports: 1025
+- Route modules: 49
+- Route handlers: 264
+- Shared exports: 1032
 
 ## Mongo Collections
 
@@ -68,7 +68,7 @@
 | `tmag_prospect_sessions` | permissive_mongoose_schema | yes | 3 |
 | `tmag_prospect_timeline_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_events` | permissive_mongoose_schema | yes | 4 |
-| `tmag_prospect_webinar_reservations` | permissive_mongoose_schema | yes | 2 |
+| `tmag_prospect_webinar_reservations` | permissive_mongoose_schema | yes | 3 |
 | `tmag_prospects` | permissive_mongoose_schema | yes | 36 |
 | `tmag_questionnaires` | permissive_mongoose_schema | yes | 2 |
 | `tmag_recruiting_cycles` | permissive_mongoose_schema | yes | 3 |
@@ -312,6 +312,7 @@
 | `(unmounted)` | `server/src/routes/admin/consistency.ts` | GET /report<br>GET user-agent<br>GET /crm-integrity<br>GET user-agent | `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/content-videos.ts` | GET user-agent<br>GET /<br>POST /<br>PATCH /:contentVideoId<br>POST /reorder | `McsAuditActor`, `McsContentVideoAudience`, `McsContentVideoMutationResponse`, `McsContentVideoReorderResponse`, `McsContentVideosAdminListResponse` |
 | `(unmounted)` | `server/src/routes/admin/dashboard.ts` | GET /metrics<br>GET user-agent<br>GET /filters<br>GET user-agent<br>GET /drilldown<br>GET user-agent<br>GET /stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminDashboardFiltersResponse`, `McsAdminDashboardMetricsResponse`, `McsAdminDrilldownResponse`, `McsAdminLiveAuditEvent`, `McsAdminLiveEvent`, `McsAdminLivePlacementEvent`, `McsAdminLiveSnapshot`, `McsAuditActor`, `McsAuditLogEntry`, `McsPlacementEvent` |
+| `(unmounted)` | `server/src/routes/admin/events.ts` | GET / | none |
 | `(unmounted)` | `server/src/routes/admin/health.ts` | GET x-mcs-health-secret<br>GET /triple-stack<br>GET /status | none |
 | `(unmounted)` | `server/src/routes/admin/knowledge.ts` | GET /status<br>POST /sources<br>POST /sources/upload | none |
 | `(unmounted)` | `server/src/routes/admin/liveOps.ts` | GET /operations<br>GET /growth<br>GET user-agent<br>GET /grid<br>GET user-agent<br>GET /funnel<br>GET user-agent<br>GET /usage/stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminFunnelKind`, `McsAdminLiveUsageSample`, `McsAdminLiveUsageStreamEvent`, `McsAuditActor` |
@@ -329,6 +330,7 @@
 | `(unmounted)` | `server/src/routes/content-videos.ts` | GET /videos | `McsContentVideosResponse` |
 | `(unmounted)` | `server/src/routes/crm.ts` | GET /today<br>GET /:prospectId<br>POST /:prospectId/notes<br>POST /:prospectId/followup<br>DELETE /:prospectId/followup<br>POST /:prospectId/disposition<br>POST /:prospectId/reinvite<br>POST /:prospectId/reinvite-script<br>POST /<br>PUT /:prospectId<br>DELETE /:prospectId | `McsClearFollowUpResponse`, `McsCreateNotePayload`, `McsCreateNoteResponse`, `McsCrmBundleResponse`, `McsReinviteResponse`, `McsReinviteScriptResponse`, `McsReinviteTerminalError`, `McsReinviteUnsentError`, `McsSetDispositionPayload`, `McsSetDispositionResponse`, `McsSetFollowUpPayload`, `McsSetFollowUpResponse`, `McsTodaysActionsResponse` |
 | `(unmounted)` | `server/src/routes/crmHub.ts` | GET /prospects<br>GET /prospects/:prospectId<br>POST /prospects/:prospectId/close-as-ba | `McsCloseAsNewBaResponse`, `McsProspectCrmListResponse`, `McsProspectCrmRecordResponse` |
+| `(unmounted)` | `server/src/routes/events.ts` | GET / | none |
 | `(unmounted)` | `server/src/routes/health.ts` | GET /<br>GET /persistence | none |
 | `(unmounted)` | `server/src/routes/invitations.ts` | POST /<br>POST /:prospectId/sent<br>POST /log | `McsCreateInvitationPayload`, `McsCreateInvitationResponse`, `McsInvitationSource`, `McsMarkInvitationSentResponse` |
 | `(unmounted)` | `server/src/routes/ivory.ts` | GET /<br>POST /<br>PATCH /:ivoryId<br>PATCH /:ivoryId/status<br>DELETE /:ivoryId<br>POST /coach<br>POST /invitation-agent/draft<br>POST /invitation-agent/mint<br>POST /generator/run<br>GET /generator/run/:runId<br>POST /generator/run/:runId/invite<br>GET /momentum<br>POST /momentum/:prospectId/suggest | `McsCreateGeneratorRunPayload`, `McsCreateGeneratorRunResponse`, `McsCreateIvoryNamePayload`, `McsGeneratorInvitePayload`, `McsGeneratorInviteResponse`, `McsGeneratorRunResponse`, `McsIvoryCategory`, `McsIvoryCoachPayload`, `McsIvoryCoachResponse`, `McsIvoryInvitationDraftPayload`, `McsIvoryInvitationDraftResponse`, `McsIvoryInvitationMintPayload`, `McsIvoryInvitationMintResponse`, `McsIvoryMomentumSuggestionPayload`, `McsIvoryMomentumSuggestionResponse`, `McsIvoryMomentumViewResponse`, `McsIvoryNameResponse`, `McsIvoryStatus`, `McsListIvoryNamesResponse`, `McsUpdateIvoryNamePayload`, `McsUpdateIvoryStatusPayload` |
@@ -455,6 +457,13 @@
 | `CrmFollowUpState` | type | `packages/shared/src/crm-lifecycle.ts` |
 | `CrmStateMapRail` | type | `packages/shared/src/crm-lifecycle.ts` |
 | `MCS_EVENT_CENTER_CATALOG` | const | `packages/shared/src/event-center-catalog.ts` |
+| `MCS_EVENT_CENTER_SCHEMA_VERSION` | const | `packages/shared/src/event-center.ts` |
+| `McsAdminEventCenterResponse` | interface | `packages/shared/src/event-center.ts` |
+| `McsAdminEventCenterWebinarEvent` | interface | `packages/shared/src/event-center.ts` |
+| `McsEventCenterResponse` | interface | `packages/shared/src/event-center.ts` |
+| `McsEventCenterSourceHealth` | interface | `packages/shared/src/event-center.ts` |
+| `McsEventCenterSourceStatus` | type | `packages/shared/src/event-center.ts` |
+| `McsEventCenterWebinarEvent` | interface | `packages/shared/src/event-center.ts` |
 | `knowledgeWorkflowOpenGaps` | function | `packages/shared/src/knowledge-workflow-map.ts` |
 | `MCS_KNOWLEDGE_WORKFLOW_EDGES` | const | `packages/shared/src/knowledge-workflow-map.ts` |
 | `MCS_KNOWLEDGE_WORKFLOW_STAGES` | const | `packages/shared/src/knowledge-workflow-map.ts` |
