@@ -46,6 +46,8 @@
     "registry:build:check": "node server/scripts/generate-build-registry.mjs --check",
     "docs:freshness": "node server/scripts/generate-doc-freshness-manifest.mjs",
     "docs:freshness:check": "node server/scripts/generate-doc-freshness-manifest.mjs --check",
+    "docs:maps": "node server/scripts/generate-documentation-maps.mjs",
+    "docs:maps:check": "node server/scripts/generate-documentation-maps.mjs --check",
     "memory:index": "node server/scripts/generate-memory-index.mjs",
     "memory:guard": "pnpm --filter @momentum/server exec tsx scripts/context-guard.ts",
     "memory:packet": "pnpm --filter @momentum/server exec tsx scripts/compile-context-packet.ts",
