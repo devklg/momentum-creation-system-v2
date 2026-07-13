@@ -42,6 +42,10 @@ import {
   appendGraphRagRecord,
   GRAPHRAG_EMBEDDING_MODEL_VERSION,
 } from '../../domain/graphrag.js';
+import {
+  projectKevinApprovedKnowledgeSourceToCatalog,
+  type KnowledgeResourceProjectionResult,
+} from './knowledgeResourceProjection.js';
 
 export const KNOWLEDGE_SOURCE_COLLECTION = MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION;
 export const KNOWLEDGE_CHUNK_COLLECTION = MCS_KNOWLEDGE_BASE_CHUNK_COLLECTION;
@@ -72,6 +76,7 @@ export interface CreateKevinApprovedKnowledgeSourceResult {
   indexRecordCount: number;
   graphRagRecordCount: number;
   graphRagFailureCount: number;
+  resourceCatalogProjection: KnowledgeResourceProjectionResult;
 }
 
 interface MongoQueryResult {
@@ -272,6 +277,25 @@ export async function createKevinApprovedKnowledgeSource(
     }
   }
 
+  let resourceCatalogProjection: KnowledgeResourceProjectionResult;
+  try {
+    resourceCatalogProjection = await projectKevinApprovedKnowledgeSourceToCatalog(
+      sourceRecord,
+      chunkRecords,
+    );
+  } catch (error) {
+    resourceCatalogProjection = {
+      resourceId: `knowledge:${sourceRecord.sourceId}`,
+      resourceVersionId: `knowledge:${sourceRecord.sourceId}:v${sourceRecord.version}`,
+      active: false,
+      reasons: [error instanceof Error ? error.message : String(error)],
+      entry: null,
+    };
+    console.error(
+      `[knowledge][resource-catalog] projection failed for ${sourceRecord.sourceId}: ${resourceCatalogProjection.reasons.join(', ')}`,
+    );
+  }
+
   return {
     source: sourceRecord,
     chunks: chunkRecords,
@@ -280,6 +304,7 @@ export async function createKevinApprovedKnowledgeSource(
     indexRecordCount: intake.indexRecords.length,
     graphRagRecordCount,
     graphRagFailureCount,
+    resourceCatalogProjection,
   };
 }
 

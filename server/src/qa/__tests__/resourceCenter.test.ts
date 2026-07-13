@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import type { McsResourceCatalogEntry } from '@momentum/shared';
-import { listResourceCenterResources } from '../../domain/resourceCenter.js';
+import { getResourceCenterResourceDetail, listResourceCenterResources } from '../../domain/resourceCenter.js';
 
 const NOW = '2026-07-13T09:30:00.000Z';
 
@@ -92,5 +92,29 @@ describe('P2-100 Resource Center verified projection', () => {
     expect(page).toContain('Search resources');
     expect(page).toContain('All categories');
     expect(page).toContain('All types');
+  });
+
+  it('returns knowledge content only when catalog, authority, source version, and digest agree', async () => {
+    const { createHash } = await import('node:crypto');
+    const content = 'Kevin-approved training content.';
+    const approved = entry({
+      resourceId: 'knowledge:source_1',
+      resourceVersionId: 'knowledge:source_1:v1',
+      kind: 'knowledge_source',
+      lineage: { originKind: 'admin_upload', sourceSystem: 'knowledge_core', sourceCollection: 'mcs_knowledge_sources', sourceRecordId: 'source_1', parentResourceVersionId: null, supersedesResourceVersionId: null, replacementResourceVersionId: null },
+      contentLocator: { type: 'route', locator: '/resources/knowledge%3Asource_1%3Av1', field: null },
+      contentDigestSha256: createHash('sha256').update(content).digest('hex'),
+    });
+    const persistence = vi.fn(async (_tool: string, _action: string, params: { collection?: string }) => {
+      if (params.collection === 'tmag_resource_catalog') return { documents: [approved] };
+      if (params.collection === 'mcs_knowledge_sources') return { documents: [{
+        sourceId: 'source_1', version: 1, status: 'active', authorityDecision: 'active_authority',
+        authority: { authorityKind: 'kevin_approved', authorityStatus: 'active_authority' }, originalContent: content,
+      }] };
+      throw new Error('unexpected');
+    });
+    const verify = vi.fn(async () => ({ allowed: true }));
+    const response = await getResourceCenterResourceDetail(approved.resourceVersionId, persistence as never, verify as never);
+    expect(response).toMatchObject({ ok: true, item: { resourceVersionId: approved.resourceVersionId }, content });
   });
 });
