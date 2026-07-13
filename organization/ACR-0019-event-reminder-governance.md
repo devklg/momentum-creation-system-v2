@@ -1,12 +1,13 @@
 # ACR-0019 — Event Email and SMS Reminder Governance
 
-**Status:** PROPOSED — awaiting Kevin L. Gardner; not approved
-**Authorship:** Agent-authored proposal; this document is not Kevin-approved knowledge
+**Status:** APPROVED — Kevin L. Gardner, 2026-07-13
+**Approval record:** Kevin approved this fail-closed boundary in the Codex task with the exact instruction, "show me i approve."
+**Authorship:** Agent-authored proposal approved by Kevin; undefined implementation details remain reserved to Kevin
 **Risk:** High — external communications, consent, opt-out, and compliance boundaries
 **Change type:** Integration / compliance boundary / surface contract
 **Audit authority:** `PLATFORM_AUDIT_PRIORITY_TASKLIST.md` P2-109
 **Affected boundary:** Event Center, New Member Orientation, Prospect Webinar, CRM follow-up
-**Target version:** Unscheduled until approval
+**Target version:** v1.2
 
 ## Why an ACR is required
 
@@ -17,12 +18,13 @@ email. Those choices affect people and external communications. Under the
 Constitution, Decision Framework, and ACR System, an agent may propose them but
 Kevin must decide them.
 
-This proposal therefore creates no implementation authority. The audit task,
-its ACR, and this branch cannot be treated as approval.
+Kevin approved the fail-closed boundary below on 2026-07-13. That approval
+authorizes the governance boundary; it does not invent or authorize live
+delivery details that Kevin has not supplied.
 
-## Proposed channel rules
+## Approved fail-closed channel rules
 
-The following rules are proposed exactly as a fail-closed boundary:
+The following rules are approved exactly as a fail-closed boundary:
 
 1. **SMS is members-only.** Prospect webinar SMS reminders are always
    prohibited.
@@ -45,27 +47,27 @@ The following rules are proposed exactly as a fail-closed boundary:
    `not_configured` and `channels` stays `[]` until Kevin approves this boundary
    and every required prerequisite exists and is verified.
 
-These proposed rules do not define consent wording, backfill wording, cadence,
+These approved rules do not define consent wording, backfill wording, cadence,
 message count, send times, reminder copy, or opt-out copy. Those are reserved
 for Kevin's decision. Resend is already the locked email provider; its live
 path remains dormant until the required configuration and sending-domain
 verification are complete.
 
-## Existing behavior held outside this proposal slice
+## Existing behavior held outside this approval slice
 
 The repository already attempts a best-effort orientation confirmation SMS to
 the reserving member and a webinar-reservation alert SMS to the sponsoring BA.
-Those paths predate this proposal and do not apply the complete proposed
+Those paths predate this approval and do not apply the complete approved
 consent/preference/STOP/10DLC gate. They are recorded as existing drift for
-Kevin's ruling; this proposal branch does not alter, endorse, or expand them.
+Kevin's ruling; this approval branch does not alter, endorse, or expand them.
 
 The existing webinar reservation confirmation email is also left unchanged.
-This proposal concerns subsequent event reminders and does not silently
+This approval concerns subsequent event reminders and does not silently
 reclassify existing confirmation behavior.
 
 ## Approval and implementation gates
 
-If Kevin approves or amends the channel rules, implementation still must:
+Implementation still must:
 
 - remain fail-closed when any required evidence is absent or unavailable;
 - preserve prospect SMS prohibition and STOP precedence as approved;
@@ -77,9 +79,9 @@ If Kevin approves or amends the channel rules, implementation still must:
 - receive separate authority before any live send, scheduler activation,
   provider call, production mutation, or release.
 
-Approval of this ACR would not itself approve live communications.
+Approval of this ACR does not itself approve live communications.
 
-## This proposal slice expressly excludes
+## This approval slice expressly excludes
 
 - email or SMS sends;
 - provider imports or provider calls;
@@ -91,11 +93,10 @@ Approval of this ACR would not itself approve live communications.
 
 ## Compatibility and rollback
 
-This proposal changes documentation only and has no runtime, schema,
-persistence, provider, or production effect. Before approval, rollback is simply
-removing the proposed record and register row. After a future approved
-implementation, rollback requirements must be defined by that implementation
-slice before it begins.
+This approval changes documentation only and has no runtime, schema,
+persistence, provider, or production effect. A future implementation must
+define its rollback requirements before it begins; this approval record remains
+in history even if an implementation is later rolled back.
 
 ## Evidence
 
@@ -113,14 +114,13 @@ slice before it begins.
   `server/src/domain/webinarReservation.ts` contain the existing BA SMS paths
   described above.
 
-## Single Kevin decision request
+## Approval record and remaining implementation authority
 
-**Kevin: approve or amend these channel rules and specify (1) reminder
-cadence/count, (2) approved copy/opt-out wording, (3) whether webinar
-reservation email authorizes reminder email, (4) member SMS consent/backfill
-wording, and (5) whether current ungated BA SMS confirmations fail closed
-immediately.**
+Kevin approved the fail-closed channel boundary on 2026-07-13. The approval did
+not provide reminder cadence/count, approved copy/opt-out wording, a webinar
+email reminder-consent rule, member SMS consent/backfill wording, or a ruling on
+the current ungated BA confirmation paths. Agents must not invent those values.
 
-Until Kevin answers, ACR-0019 remains Proposed, P2-109 remains unchecked, Event
-Center remains `not_configured` with `channels:[]`, and no implementation is
-authorized.
+Until Kevin supplies those implementation details, P2-109 remains unchecked,
+Event Center remains `not_configured` with `channels:[]`, and no live email or
+SMS reminder implementation is authorized.

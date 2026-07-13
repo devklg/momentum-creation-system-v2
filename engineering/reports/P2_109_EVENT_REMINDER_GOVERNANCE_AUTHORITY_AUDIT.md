@@ -1,7 +1,7 @@
 # P2-109 Event Reminder Governance Authority Audit
 
-**Status:** Non-canonical evidence report; awaiting Kevin L. Gardner
-**Conclusion:** BLOCKED at the High-risk approval gate
+**Status:** Non-canonical evidence report; Kevin approval recorded 2026-07-13
+**Conclusion:** Fail-closed boundary approved; live implementation remains blocked
 **Implementation performed:** None
 **Production or communication effect:** None
 
@@ -97,7 +97,9 @@ High-risk Proposed ACR. It proposes:
 - human-only, in-app CRM attendance follow-up; and
 - continued Event Center `not_configured` / `channels:[]` truth.
 
-The proposal is not an approval record and does not authorize implementation.
+Kevin approved the fail-closed boundary on 2026-07-13. The approval does not
+authorize live delivery or fill the implementation details that remain
+undefined.
 
 ## Work deliberately not performed
 
@@ -109,12 +111,13 @@ The proposal is not an approval record and does not authorize implementation.
 - No generated catalog updates.
 - P2-109 remains unchecked.
 
-## Single Kevin decision request
+## Approval and remaining implementation gate
 
-**Kevin: approve or amend these channel rules and specify (1) reminder
-cadence/count, (2) approved copy/opt-out wording, (3) whether webinar
-reservation email authorizes reminder email, (4) member SMS consent/backfill
-wording, and (5) whether current ungated BA SMS confirmations fail closed
-immediately.**
+Kevin approved the proposed fail-closed boundary in the Codex task on
+2026-07-13 with the exact instruction, "show me i approve." This clears the ACR
+approval gate for the boundary only.
 
-Until that decision is recorded, P2-109 is blocked at the approval gate.
+P2-109 implementation remains blocked until Kevin supplies the exact reminder
+cadence/count, approved copy/opt-out wording, webinar-email reminder consent
+rule, member SMS consent/backfill wording, and disposition of the current
+ungated BA confirmation paths. No live communication is authorized meanwhile.
