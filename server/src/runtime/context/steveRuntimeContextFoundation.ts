@@ -161,6 +161,7 @@ async function requestLiveContextPacket(input: {
   const approvedKnowledgeStoreModule = await import('../../services/knowledge/approvedKnowledgeStore.js');
   const storedProvider = approvedKnowledgeStoreModule.createStoredApprovedKnowledgeProvider();
   const query = deriveSteveApprovedKnowledgeQuery(input.request, input.turnContent);
+  const diagnosticsModule = await import('../../services/contextManagerDiagnostics.js');
 
   const result = await contextManagerModule.createContextManagerService(
     {
@@ -177,6 +178,7 @@ async function requestLiveContextPacket(input: {
         journalEnabled: false,
         languagePreference: input.request.language,
       },
+      retrieval: { onRetrievalObservability: diagnosticsModule.recordContextManagerDiagnostic },
     },
   ).buildContext({ scope: input.scope, request: input.request });
   return result.packet;

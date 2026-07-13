@@ -192,6 +192,26 @@ export function KnowledgePage() {
               {knowledgeStatus.pendingChromaProjections} Chroma pending · {knowledgeStatus.failedChromaProjections} Chroma failed · {knowledgeStatus.pendingNeo4jProjections} graph pending · {knowledgeStatus.failedNeo4jProjections} graph failed
             </p>
             {knowledgeStatus.warnings.map((warning) => <p key={warning} className="text-xs text-amber-300 mt-2">{warning}</p>)}
+            <div className="border-t border-line mt-5 pt-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="font-mono text-[10px] uppercase tracking-label text-gold">Context Manager Degraded Reasons</h3>
+                <p className="font-mono text-[9px] uppercase tracking-label text-cream-mute">
+                  Michael {knowledgeStatus.contextManager.liveSurfaces.michael ? 'live' : 'off'} · Steve {knowledgeStatus.contextManager.liveSurfaces.steve ? 'live' : 'off'}
+                </p>
+              </div>
+              <p className="text-xs text-cream-mute mt-2">
+                {knowledgeStatus.contextManager.total} observed · {knowledgeStatus.contextManager.degraded} degraded · counters reset when the server restarts.
+              </p>
+              {knowledgeStatus.contextManager.degradedReasons.length > 0 ? (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {knowledgeStatus.contextManager.degradedReasons.map((entry) => (
+                    <span key={entry.reason} className="border border-line px-2 py-1 font-mono text-[10px] text-amber-300">
+                      {entry.reason.replaceAll('_', ' ')} · {entry.count}
+                    </span>
+                  ))}
+                </div>
+              ) : <p className="text-xs text-cream-mute mt-3">No degraded retrieval reason has been observed since restart.</p>}
+            </div>
           </>
         ) : <p className="text-sm text-cream-mute">{statusError ?? 'Loading knowledge status…'}</p>}
       </section>

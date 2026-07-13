@@ -4,6 +4,9 @@ import {
   MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION,
 } from '@momentum/shared/runtime';
 import { persistenceCall } from '../services/persistence/dispatch.js';
+import { getContextManagerDiagnosticsSnapshot } from '../services/contextManagerDiagnostics.js';
+import { env } from '../env.js';
+import { steveContextManagerLiveEnabled } from '../runtime/context/steveRuntimeContextFoundation.js';
 
 const OUTBOX_COLLECTION = 'tmag_projection_outbox';
 const TEAM_SCOPE = {
@@ -59,11 +62,19 @@ export async function buildAdminKnowledgeStatus(): Promise<McsAdminKnowledgeStat
     : activeSources === 0 || activeChunks === 0 || retrievalEligibleChunks === 0 ? 'empty'
       : retrievalReadyChunks === retrievalEligibleChunks ? 'ready' : 'partial';
 
+  const contextManager = getContextManagerDiagnosticsSnapshot();
   return {
     ok: true, generatedAt: new Date().toISOString(), status,
     statusBasis: 'mongo_provider_eligibility_plus_projection_queue',
     activeSources, activeChunks, retrievalReadyChunks,
     pendingChromaProjections, failedChromaProjections,
     pendingNeo4jProjections, failedNeo4jProjections, warnings,
+    contextManager: {
+      ...contextManager,
+      liveSurfaces: {
+        michael: env.MCS_CONTEXT_MANAGER_LIVE_ENABLED,
+        steve: steveContextManagerLiveEnabled(),
+      },
+    },
   };
 }
