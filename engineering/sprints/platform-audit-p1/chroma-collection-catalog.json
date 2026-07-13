@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T09:26:42.580Z",
+  "generatedAt": "2026-07-13T03:10:26.971Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -7,12 +7,12 @@
     "engineering/sprints/platform-audit-p1/schema-catalog.json"
   ],
   "summary": {
-    "collections": 50,
-    "schemaCatalogCollections": 50,
+    "collections": 51,
+    "schemaCatalogCollections": 51,
     "withObservedWrites": 30,
     "languageScopedCollections": 10,
-    "metadataContractRows": 50,
-    "observedUnregisteredTargets": 7
+    "metadataContractRows": 51,
+    "observedUnregisteredTargets": 8
   },
   "byDomain": {
     "identity_access": 4,
@@ -28,7 +28,7 @@
     "outcomes": 1,
     "crm": 2,
     "holding_tank": 2,
-    "general": 1,
+    "general": 2,
     "events": 3,
     "tenant_admin": 1,
     "vm_rvm": 4
@@ -266,12 +266,12 @@
       "sources": [
         {
           "file": "server/src/domain/auditLog.ts",
-          "line": 143,
+          "line": 147,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/auditLog.ts",
-          "line": 399,
+          "line": 413,
           "action": "writeOperational"
         }
       ],
@@ -290,6 +290,9 @@
           "entityKind",
           "role",
           "severity",
+          "taxonomyCategory",
+          "taxonomyImpact",
+          "taxonomyOutcome",
           "tenantId",
           "timestamp",
           "tmagId",
@@ -641,12 +644,12 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 183,
+          "line": 199,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 278,
+          "line": 337,
           "action": "persistenceCall.chromadb.query_with_filter"
         }
       ],
@@ -664,6 +667,8 @@
           "authorityStatus",
           "chunkId",
           "chunkIndex",
+          "citationLabel",
+          "citationSourceRef",
           "documentId",
           "domain",
           "endOffset",
@@ -1281,12 +1286,12 @@
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 217,
+          "line": 220,
           "action": "writeGraphCritical"
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 361,
+          "line": 370,
           "action": "writeKnowledge"
         }
       ],
@@ -1301,6 +1306,7 @@
         "observedMetadataKeys": [
           "at",
           "city",
+          "correlationId",
           "createdAt",
           "disposition",
           "dueAt",
@@ -1314,6 +1320,7 @@
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
+          "correlationId",
           "prospectId",
           "source",
           "sponsorTmagId",
@@ -1383,7 +1390,7 @@
       "sources": [
         {
           "file": "server/src/domain/prospectCrm.ts",
-          "line": 221,
+          "line": 223,
           "action": "writeKnowledge"
         },
         {
@@ -1571,6 +1578,32 @@
           "retrievalReady",
           "tenantId"
         ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_resource_catalog",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "general",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
         "embeddingDimension": 384,
         "embeddingModel": "all-MiniLM-L6-v2"
       }
@@ -1918,12 +1951,12 @@
       "sources": [
         {
           "file": "server/src/domain/bulkLeads.ts",
-          "line": 115,
+          "line": 117,
           "action": "writeGraphCritical"
         },
         {
           "file": "server/src/domain/bulkLeads.ts",
-          "line": 230,
+          "line": 237,
           "action": "writeGraphCritical"
         }
       ],
@@ -1936,6 +1969,7 @@
           "purpose": "rev3 canonical registry"
         },
         "observedMetadataKeys": [
+          "correlationId",
           "createdAt",
           "kind",
           "leadId",
@@ -1948,6 +1982,7 @@
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
+          "correlationId",
           "leadId",
           "leadOwnerId",
           "ownerTmagId",
@@ -2001,17 +2036,17 @@
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 629,
+          "line": 630,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 889,
+          "line": 963,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 927,
+          "line": 1014,
           "action": "writeOperational"
         }
       ],
@@ -2203,6 +2238,23 @@
     }
   ],
   "observedUnregisteredTargets": [
+    {
+      "target": "activeKnowledgeCollection(record.domain, record.language)",
+      "resolved": false,
+      "actions": [
+        "get"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/graphragReadiness.ts",
+          "line": 45,
+          "action": "persistenceCall.chromadb.get"
+        }
+      ],
+      "observedMetadataKeys": [],
+      "observedFilterKeys": []
+    },
     {
       "target": "agentEventsCollection",
       "resolved": false,

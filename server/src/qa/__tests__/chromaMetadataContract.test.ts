@@ -54,7 +54,7 @@ function expectRequiredKeys(collection: string, keys: string[]): void {
 describe('P1 Chroma metadata contracts', () => {
   it('covers every registered collection with the canonical embedding contract', () => {
     const data = catalog();
-    expect(data.summary.collections).toBe(50);
+    expect(data.summary.collections).toBe(51);
     expect(data.summary.metadataContractRows).toBe(data.summary.collections);
 
     for (const collection of data.collections) {

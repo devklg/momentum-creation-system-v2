@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T09:26:38.728Z",
+  "generatedAt": "2026-07-13T03:10:24.190Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 66,
   "unclassifiedCount": 0,
@@ -141,9 +141,10 @@
       "persistenceTier": "knowledge",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 1,
+      "sourceCount": 2,
       "sourceFiles": [
-        "server/src/domain/graphrag.ts"
+        "server/src/domain/graphrag.ts",
+        "server/src/domain/graphragReadiness.ts"
       ]
     },
     {
@@ -225,12 +226,13 @@
       "persistenceTier": "mixed",
       "schemaMode": "explicit_mongoose_schema",
       "resolved": true,
-      "sourceCount": 57,
+      "sourceCount": 58,
       "sourceFiles": [
         "server/scripts/backfill-founder-timezones.ts",
         "server/scripts/setup-founder-access.ts",
         "server/src/domain/adminBaCrud.ts",
         "server/src/domain/adminBaOversight.ts",
+        "server/src/domain/adminEntitlementAudit.ts",
         "server/src/domain/adminMetrics.ts",
         "server/src/domain/adminProspectOversight.ts",
         "server/src/domain/ba.ts",
@@ -526,8 +528,10 @@
       "persistenceTier": "operational",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 4,
+      "sourceCount": 6,
       "sourceFiles": [
+        "server/src/domain/adminOutboxHealth.ts",
+        "server/src/domain/graphragReadiness.ts",
         "server/src/services/projectionOutbox.ts"
       ]
     },

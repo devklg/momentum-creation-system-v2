@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-12T09:26:40.296Z",
+  "generatedAt": "2026-07-13T03:10:24.888Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
     "server/src/domain/* Cypher writers"
   ],
   "summary": {
-    "labels": 71,
-    "relationships": 60,
+    "labels": 73,
+    "relationships": 61,
     "constraints": 18,
-    "labelsWithoutConstraint": 56
+    "labelsWithoutConstraint": 58
   },
   "byStatus": {
     "planned_core_not_applied": 11,
@@ -110,7 +110,7 @@
       "label": "KnowledgeChunk",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:189"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:205"
       ]
     },
     {
@@ -124,8 +124,8 @@
       "label": "KnowledgeSource",
       "sourceCount": 2,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:142",
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:192"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:148",
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:208"
       ]
     },
     {
@@ -214,7 +214,7 @@
       "label": "TeamMagnificent",
       "sourceCount": 6,
       "sources": [
-        "server/src/domain/graphrag.ts:216",
+        "server/src/domain/graphrag.ts:217",
         "server/src/domain/learningCandidates.ts:258",
         "server/src/domain/outcomes.ts:218",
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:142",
@@ -224,7 +224,7 @@
     },
     {
       "label": "TeamMagnificentMember",
-      "sourceCount": 76,
+      "sourceCount": 77,
       "sources": [
         "server/scripts/backfill-founder-timezones.ts:138",
         "server/scripts/backfill-founder-timezones.ts:82",
@@ -234,8 +234,8 @@
         "server/src/domain/adminProspectOversight.ts:1067",
         "server/src/domain/adminProspectOversight.ts:981",
         "server/src/domain/agents/orchestrator.ts:305",
-        "server/src/domain/auditLog.ts:182",
-        "server/src/domain/auditLog.ts:452",
+        "server/src/domain/auditLog.ts:192",
+        "server/src/domain/auditLog.ts:469",
         "server/src/domain/baIdentityPersistence.ts:28",
         "server/src/domain/baIdentityPersistence.ts:29",
         "server/src/domain/baIdentityPersistence.ts:33",
@@ -244,8 +244,8 @@
         "server/src/domain/baIdentityPersistence.ts:43",
         "server/src/domain/broadcast.ts:448",
         "server/src/domain/broadcast.ts:592",
-        "server/src/domain/bulkLeads.ts:132",
-        "server/src/domain/bulkLeads.ts:150",
+        "server/src/domain/bulkLeads.ts:135",
+        "server/src/domain/bulkLeads.ts:154",
         "server/src/domain/callbackRequest.ts:131",
         "server/src/domain/commitments.ts:57",
         "server/src/domain/crm.ts:180",
@@ -265,8 +265,8 @@
         "server/src/domain/crossStoreReconciliation.ts:88",
         "server/src/domain/entitlements.ts:54",
         "server/src/domain/generator.ts:157",
-        "server/src/domain/invitations.ts:231",
-        "server/src/domain/invitations.ts:249",
+        "server/src/domain/invitations.ts:235",
+        "server/src/domain/invitations.ts:254",
         "server/src/domain/ivory.ts:220",
         "server/src/domain/ivory.ts:233",
         "server/src/domain/orientationSession.ts:465",
@@ -279,6 +279,7 @@
         "server/src/domain/recruitingCycle.ts:311",
         "server/src/domain/recruitingCycle.ts:413",
         "server/src/domain/recruitingCycle.ts:581",
+        "server/src/domain/resourcePublishingGate.ts:72",
         "server/src/domain/sponsorImmutabilityPersistence.ts:101",
         "server/src/domain/sponsorImmutabilityPersistence.ts:102",
         "server/src/domain/sponsorImmutabilityPersistence.ts:104",
@@ -299,7 +300,7 @@
         "server/src/domain/vmLeadOwners.ts:61",
         "server/src/domain/vmLeadOwners.ts:77",
         "server/src/domain/vmProviderQueue.ts:274",
-        "server/src/domain/vmProviderQueue.ts:638",
+        "server/src/domain/vmProviderQueue.ts:639",
         "server/src/domain/workbook.ts:307",
         "server/src/domain/workbook.ts:308"
       ]
@@ -352,9 +353,9 @@
       "label": "TmagAuditEntry",
       "sourceCount": 3,
       "sources": [
-        "server/src/domain/auditLog.ts:182",
-        "server/src/domain/auditLog.ts:197",
-        "server/src/domain/auditLog.ts:452"
+        "server/src/domain/auditLog.ts:192",
+        "server/src/domain/auditLog.ts:207",
+        "server/src/domain/auditLog.ts:469"
       ]
     },
     {
@@ -424,7 +425,7 @@
       "sourceCount": 2,
       "sources": [
         "server/src/domain/crm.ts:777",
-        "server/src/domain/invitations.ts:375"
+        "server/src/domain/invitations.ts:384"
       ]
     },
     {
@@ -457,9 +458,11 @@
     },
     {
       "label": "TmagKnowledge",
-      "sourceCount": 3,
+      "sourceCount": 5,
       "sources": [
-        "server/src/domain/graphrag.ts:216",
+        "server/src/domain/graphrag.ts:217",
+        "server/src/domain/graphrag.ts:238",
+        "server/src/domain/graphragReadiness.ts:42",
         "server/src/services/persistence/neo4j/phase7Constraints.ts:51",
         "server/src/services/persistence/neo4j/phase7Constraints.ts:86"
       ]
@@ -516,10 +519,10 @@
         "server/src/domain/adminProspectOversight.ts:1064",
         "server/src/domain/adminProspectOversight.ts:787",
         "server/src/domain/adminProspectOversight.ts:978",
-        "server/src/domain/bulkLeads.ts:133",
-        "server/src/domain/bulkLeads.ts:151",
-        "server/src/domain/bulkLeads.ts:238",
-        "server/src/domain/bulkLeads.ts:257",
+        "server/src/domain/bulkLeads.ts:136",
+        "server/src/domain/bulkLeads.ts:155",
+        "server/src/domain/bulkLeads.ts:245",
+        "server/src/domain/bulkLeads.ts:265",
         "server/src/domain/callbackRequest.ts:130",
         "server/src/domain/crm.ts:181",
         "server/src/domain/crm.ts:262",
@@ -536,17 +539,17 @@
         "server/src/domain/crossStoreReconciliation.ts:110",
         "server/src/domain/crossStoreReconciliation.ts:165",
         "server/src/domain/crossStoreReconciliation.ts:89",
-        "server/src/domain/invitations.ts:232",
-        "server/src/domain/invitations.ts:250",
-        "server/src/domain/invitations.ts:374",
+        "server/src/domain/invitations.ts:236",
+        "server/src/domain/invitations.ts:255",
+        "server/src/domain/invitations.ts:383",
         "server/src/domain/ivory.ts:497",
         "server/src/domain/outcomes.ts:218",
         "server/src/domain/poolPlacementPersistence.ts:101",
         "server/src/domain/poolPlacementPersistence.ts:107",
         "server/src/domain/poolPlacementPersistence.ts:37",
         "server/src/domain/poolPlacementPersistence.ts:41",
-        "server/src/domain/prospectCrm.ts:227",
-        "server/src/domain/prospectCrm.ts:498",
+        "server/src/domain/prospectCrm.ts:229",
+        "server/src/domain/prospectCrm.ts:505",
         "server/src/domain/tokenLifecyclePersistence.ts:46",
         "server/src/domain/tokenLifecyclePersistence.ts:52",
         "server/src/domain/webinarReservation.ts:203"
@@ -569,9 +572,9 @@
         "server/src/domain/crmOwnershipPersistence.ts:41",
         "server/src/domain/crmOwnershipPersistence.ts:50",
         "server/src/domain/crmOwnershipPersistence.ts:56",
-        "server/src/domain/prospectCrm.ts:283",
-        "server/src/domain/prospectCrm.ts:382",
-        "server/src/domain/prospectCrm.ts:494",
+        "server/src/domain/prospectCrm.ts:286",
+        "server/src/domain/prospectCrm.ts:389",
+        "server/src/domain/prospectCrm.ts:501",
         "server/src/domain/vmInboundCallback.ts:328"
       ]
     },
@@ -586,7 +589,7 @@
       "label": "TmagProspectTimelineEvent",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/prospectCrm.ts:228",
+        "server/src/domain/prospectCrm.ts:230",
         "server/src/domain/vmInboundCallback.ts:287"
       ]
     },
@@ -603,6 +606,20 @@
       "sources": [
         "server/src/domain/recruitingCycle.ts:414",
         "server/src/domain/recruitingCycle.ts:489"
+      ]
+    },
+    {
+      "label": "TmagResource",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/resourcePublishingGate.ts:72"
+      ]
+    },
+    {
+      "label": "TmagResourceVersion",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/resourcePublishingGate.ts:72"
       ]
     },
     {
@@ -649,8 +666,8 @@
       "sourceCount": 13,
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:78",
-        "server/src/domain/bulkLeads.ts:239",
-        "server/src/domain/bulkLeads.ts:256",
+        "server/src/domain/bulkLeads.ts:246",
+        "server/src/domain/bulkLeads.ts:264",
         "server/src/domain/crmOwnershipPersistence.ts:34",
         "server/src/domain/crmOwnershipPersistence.ts:42",
         "server/src/domain/crossStoreReconciliation.ts:102",
@@ -659,16 +676,16 @@
         "server/src/domain/vmInboundCallback.ts:152",
         "server/src/domain/vmInboundCallback.ts:212",
         "server/src/domain/vmInboundCallback.ts:286",
-        "server/src/domain/vmProviderQueue.ts:635",
-        "server/src/domain/vmProviderQueue.ts:897"
+        "server/src/domain/vmProviderQueue.ts:636",
+        "server/src/domain/vmProviderQueue.ts:971"
       ]
     },
     {
       "label": "TmagVmCampaign",
       "sourceCount": 4,
       "sources": [
-        "server/src/domain/bulkLeads.ts:237",
-        "server/src/domain/bulkLeads.ts:256",
+        "server/src/domain/bulkLeads.ts:244",
+        "server/src/domain/bulkLeads.ts:264",
         "server/src/domain/vmCampaigns.ts:171",
         "server/src/domain/vmCampaigns.ts:77"
       ]
@@ -677,7 +694,7 @@
       "label": "TmagVmDeliveryEvent",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:895"
+        "server/src/domain/vmProviderQueue.ts:969"
       ]
     },
     {
@@ -691,8 +708,8 @@
       "label": "TmagVmLeadOwner",
       "sourceCount": 6,
       "sources": [
-        "server/src/domain/bulkLeads.ts:236",
-        "server/src/domain/bulkLeads.ts:255",
+        "server/src/domain/bulkLeads.ts:243",
+        "server/src/domain/bulkLeads.ts:263",
         "server/src/domain/vmCampaigns.ts:76",
         "server/src/domain/vmLeadOwners.ts:151",
         "server/src/domain/vmLeadOwners.ts:62",
@@ -703,7 +720,7 @@
       "label": "TmagVmProviderWebhook",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:941"
+        "server/src/domain/vmProviderQueue.ts:1030"
       ]
     },
     {
@@ -761,14 +778,14 @@
       "relationship": "ACTED_BY",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/auditLog.ts:182"
+        "server/src/domain/auditLog.ts:192"
       ]
     },
     {
       "relationship": "ACTED_FOR",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/auditLog.ts:452"
+        "server/src/domain/auditLog.ts:469"
       ]
     },
     {
@@ -776,6 +793,13 @@
       "sourceCount": 1,
       "sources": [
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:173"
+      ]
+    },
+    {
+      "relationship": "APPROVED_BY",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/resourcePublishingGate.ts:72"
       ]
     },
     {
@@ -789,8 +813,8 @@
       "relationship": "BECAME_PROSPECT_RECORD",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/bulkLeads.ts:243",
-        "server/src/domain/bulkLeads.ts:257"
+        "server/src/domain/bulkLeads.ts:250",
+        "server/src/domain/bulkLeads.ts:265"
       ]
     },
     {
@@ -825,8 +849,8 @@
       "relationship": "CONTAINS_LEAD",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/bulkLeads.ts:241",
-        "server/src/domain/bulkLeads.ts:255"
+        "server/src/domain/bulkLeads.ts:248",
+        "server/src/domain/bulkLeads.ts:263"
       ]
     },
     {
@@ -880,14 +904,14 @@
       "sourceCount": 2,
       "sources": [
         "server/src/domain/crm.ts:780",
-        "server/src/domain/invitations.ts:378"
+        "server/src/domain/invitations.ts:387"
       ]
     },
     {
       "relationship": "HAS_CHUNK",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:193"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:209"
       ]
     },
     {
@@ -960,15 +984,16 @@
       "relationship": "HAS_TIMELINE_EVENT",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/prospectCrm.ts:232",
+        "server/src/domain/prospectCrm.ts:234",
         "server/src/domain/vmInboundCallback.ts:291"
       ]
     },
     {
       "relationship": "HAS_VERSION",
-      "sourceCount": 2,
+      "sourceCount": 3,
       "sources": [
         "server/src/domain/adminTenantArchitecture.ts:466",
+        "server/src/domain/resourcePublishingGate.ts:72",
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186"
       ]
     },
@@ -983,7 +1008,7 @@
       "relationship": "HAS_VM_DELIVERY_EVENT",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:897"
+        "server/src/domain/vmProviderQueue.ts:971"
       ]
     },
     {
@@ -992,8 +1017,8 @@
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:68",
         "server/src/domain/crossStoreReconciliation.ts:89",
-        "server/src/domain/invitations.ts:235",
-        "server/src/domain/invitations.ts:250"
+        "server/src/domain/invitations.ts:239",
+        "server/src/domain/invitations.ts:255"
       ]
     },
     {
@@ -1061,8 +1086,8 @@
       "relationship": "OWNS_RVM_PROSPECT",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/bulkLeads.ts:136",
-        "server/src/domain/bulkLeads.ts:150"
+        "server/src/domain/bulkLeads.ts:139",
+        "server/src/domain/bulkLeads.ts:154"
       ]
     },
     {
@@ -1076,7 +1101,7 @@
       "relationship": "OWNS_VM_LEAD",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/vmProviderQueue.ts:639"
+        "server/src/domain/vmProviderQueue.ts:640"
       ]
     },
     {
@@ -1112,7 +1137,7 @@
       "relationship": "SCOPED_TO",
       "sourceCount": 4,
       "sources": [
-        "server/src/domain/graphrag.ts:216",
+        "server/src/domain/graphrag.ts:217",
         "server/src/domain/learningCandidates.ts:258",
         "server/src/domain/outcomes.ts:218",
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:142"
@@ -1164,8 +1189,8 @@
       "relationship": "TARGETS_LEAD",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/bulkLeads.ts:242",
-        "server/src/domain/bulkLeads.ts:256"
+        "server/src/domain/bulkLeads.ts:249",
+        "server/src/domain/bulkLeads.ts:264"
       ]
     },
     {
@@ -1425,6 +1450,8 @@
     "TmagProspectTimelineEvent",
     "TmagQuestionnaire",
     "TmagRecruitingCycle",
+    "TmagResource",
+    "TmagResourceVersion",
     "TmagSponsorAvailability",
     "TmagSponsorOverride",
     "TmagThreeWayBooking",
