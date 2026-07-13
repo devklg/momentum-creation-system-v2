@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T16:35:26.842Z",
+  "generatedAt": "2026-07-13T16:54:15.271Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -7,11 +7,11 @@
     "engineering/sprints/platform-audit-p1/schema-catalog.json"
   ],
   "summary": {
-    "collections": 51,
-    "schemaCatalogCollections": 51,
+    "collections": 52,
+    "schemaCatalogCollections": 52,
     "withObservedWrites": 31,
     "languageScopedCollections": 10,
-    "metadataContractRows": 51,
+    "metadataContractRows": 52,
     "observedUnregisteredTargets": 8
   },
   "byDomain": {
@@ -28,7 +28,7 @@
     "outcomes": 1,
     "crm": 2,
     "holding_tank": 2,
-    "general": 2,
+    "general": 3,
     "events": 3,
     "tenant_admin": 1,
     "vm_rvm": 4
@@ -1637,6 +1637,32 @@
           "project",
           "purpose"
         ],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_resource_usage_events",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "general",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [],
         "embeddingDimension": 384,

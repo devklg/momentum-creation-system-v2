@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T16:35:36.861Z",
+  "generatedAt": "2026-07-13T16:54:25.531Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -2834,6 +2834,7 @@
           "server/src/domain/recruitingCycle.ts:413",
           "server/src/domain/recruitingCycle.ts:581",
           "server/src/domain/resourcePublishingGate.ts:72",
+          "server/src/domain/resourceUsage.ts:78",
           "server/src/domain/sponsorImmutabilityPersistence.ts:101",
           "server/src/domain/sponsorImmutabilityPersistence.ts:102",
           "server/src/domain/sponsorImmutabilityPersistence.ts:104",
@@ -3153,9 +3154,16 @@
         ]
       },
       {
+        "label": "TmagResourceUsageEvent",
+        "sources": [
+          "server/src/domain/resourceUsage.ts:76"
+        ]
+      },
+      {
         "label": "TmagResourceVersion",
         "sources": [
           "server/src/domain/resourcePublishingGate.ts:72",
+          "server/src/domain/resourceUsage.ts:79",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:256",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:288",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:303"
@@ -3577,6 +3585,18 @@
         ]
       },
       {
+        "relationship": "OPENED_RESOURCE",
+        "sources": [
+          "server/src/domain/resourceUsage.ts:80"
+        ]
+      },
+      {
+        "relationship": "OPENED_VERSION",
+        "sources": [
+          "server/src/domain/resourceUsage.ts:81"
+        ]
+      },
+      {
         "relationship": "OWNS_CRM_RECORD",
         "sources": [
           "server/src/domain/adminConsistencyReport.ts:96",
@@ -3887,6 +3907,10 @@
     },
     {
       "collection": "mcs_resource_catalog",
+      "source": "server/src/services/chromaCollections.ts"
+    },
+    {
+      "collection": "mcs_resource_usage_events",
       "source": "server/src/services/chromaCollections.ts"
     },
     {
@@ -4689,6 +4713,23 @@
       ]
     },
     {
+      "file": "server/src/routes/admin/resourceCenter.ts",
+      "mount": null,
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/analytics",
+          "line": 8
+        },
+        {
+          "method": "GET",
+          "path": "user-agent",
+          "line": 19
+        }
+      ],
+      "sharedTypes": []
+    },
+    {
       "file": "server/src/routes/admin/tenant.ts",
       "mount": null,
       "routes": [
@@ -5355,12 +5396,17 @@
         {
           "method": "GET",
           "path": "/",
-          "line": 10
+          "line": 11
+        },
+        {
+          "method": "POST",
+          "path": "/:resourceVersionId/usage",
+          "line": 22
         },
         {
           "method": "GET",
           "path": "/:resourceVersionId",
-          "line": 21
+          "line": 38
         }
       ],
       "sharedTypes": [
@@ -6798,6 +6844,16 @@
       "file": "packages/shared/src/resource-center.ts"
     },
     {
+      "name": "MCS_RESOURCE_STALE_REVIEW_DAYS",
+      "kind": "const",
+      "file": "packages/shared/src/resource-center.ts"
+    },
+    {
+      "name": "MCS_RESOURCE_USAGE_SCHEMA_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/resource-center.ts"
+    },
+    {
       "name": "McsResourceCenterDetailResponse",
       "kind": "interface",
       "file": "packages/shared/src/resource-center.ts"
@@ -6809,6 +6865,21 @@
     },
     {
       "name": "McsResourceCenterResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/resource-center.ts"
+    },
+    {
+      "name": "McsResourceUsageEvent",
+      "kind": "interface",
+      "file": "packages/shared/src/resource-center.ts"
+    },
+    {
+      "name": "McsResourceUsageRow",
+      "kind": "interface",
+      "file": "packages/shared/src/resource-center.ts"
+    },
+    {
+      "name": "McsResourceUsageSummaryResponse",
       "kind": "interface",
       "file": "packages/shared/src/resource-center.ts"
     },
@@ -10885,11 +10956,11 @@
   ],
   "summary": {
     "mongoCollections": 69,
-    "neo4jLabels": 77,
-    "neo4jRelationships": 65,
-    "chromaCollections": 51,
-    "routeModules": 46,
-    "routeHandlers": 259,
-    "sharedExports": 1019
+    "neo4jLabels": 78,
+    "neo4jRelationships": 67,
+    "chromaCollections": 52,
+    "routeModules": 47,
+    "routeHandlers": 262,
+    "sharedExports": 1024
   }
 }

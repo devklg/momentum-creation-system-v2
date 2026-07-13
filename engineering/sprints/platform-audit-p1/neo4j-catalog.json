@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-13T16:35:23.650Z",
+  "generatedAt": "2026-07-13T16:54:11.767Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
     "server/src/domain/* Cypher writers"
   ],
   "summary": {
-    "labels": 77,
-    "relationships": 65,
+    "labels": 78,
+    "relationships": 67,
     "constraints": 18,
-    "labelsWithoutConstraint": 62
+    "labelsWithoutConstraint": 63
   },
   "byStatus": {
     "planned_core_not_applied": 11,
@@ -228,7 +228,7 @@
     },
     {
       "label": "TeamMagnificentMember",
-      "sourceCount": 82,
+      "sourceCount": 83,
       "sources": [
         "server/scripts/backfill-founder-timezones.ts:138",
         "server/scripts/backfill-founder-timezones.ts:82",
@@ -284,6 +284,7 @@
         "server/src/domain/recruitingCycle.ts:413",
         "server/src/domain/recruitingCycle.ts:581",
         "server/src/domain/resourcePublishingGate.ts:72",
+        "server/src/domain/resourceUsage.ts:78",
         "server/src/domain/sponsorImmutabilityPersistence.ts:101",
         "server/src/domain/sponsorImmutabilityPersistence.ts:102",
         "server/src/domain/sponsorImmutabilityPersistence.ts:104",
@@ -635,10 +636,18 @@
       ]
     },
     {
+      "label": "TmagResourceUsageEvent",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/resourceUsage.ts:76"
+      ]
+    },
+    {
       "label": "TmagResourceVersion",
-      "sourceCount": 4,
+      "sourceCount": 5,
       "sources": [
         "server/src/domain/resourcePublishingGate.ts:72",
+        "server/src/domain/resourceUsage.ts:79",
         "server/src/services/knowledge/knowledgeResourceProjection.ts:256",
         "server/src/services/knowledge/knowledgeResourceProjection.ts:288",
         "server/src/services/knowledge/knowledgeResourceProjection.ts:303"
@@ -1119,6 +1128,20 @@
       ]
     },
     {
+      "relationship": "OPENED_RESOURCE",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/resourceUsage.ts:80"
+      ]
+    },
+    {
+      "relationship": "OPENED_VERSION",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/resourceUsage.ts:81"
+      ]
+    },
+    {
       "relationship": "OWNS_CRM_RECORD",
       "sourceCount": 5,
       "sources": [
@@ -1535,6 +1558,7 @@
     "TmagQuestionnaire",
     "TmagRecruitingCycle",
     "TmagResource",
+    "TmagResourceUsageEvent",
     "TmagResourceVersion",
     "TmagSponsorAvailability",
     "TmagSponsorOverride",

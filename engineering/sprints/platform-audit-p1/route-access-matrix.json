@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T16:35:32.444Z",
+  "generatedAt": "2026-07-13T16:54:20.993Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -21,15 +21,15 @@
     "/api/training/fast-start/modules/1"
   ],
   "summary": {
-    "routes": 231,
+    "routes": 233,
     "byAccessClass": {
       "raw_body_webhook": 1,
-      "admin": 95,
+      "admin": 96,
       "public_health": 2,
       "auth_bootstrap": 3,
       "auth_session": 2,
       "ba_auth_pre_steve": 21,
-      "ba_auth_steve_gated": 55,
+      "ba_auth_steve_gated": 56,
       "steve_worker_secret": 2,
       "admin_or_health_secret": 1,
       "internal_runtime_admin_or_secret": 5,
@@ -40,26 +40,26 @@
     },
     "byRole": {
       "provider": 2,
-      "founder_admin": 101,
+      "founder_admin": 102,
       "anonymous": 5,
       "system": 10,
-      "brand_ambassador": 103,
+      "brand_ambassador": 104,
       "prospect": 18
     },
     "byEntitlement": {
       "machine_credential": 12,
-      "admin_allowlist": 101,
+      "admin_allowlist": 102,
       "none": 5,
-      "registered_ba": 103,
+      "registered_ba": 104,
       "valid_prospect_identity": 18,
       "vm_dialer": 25
     },
     "guardCoverage": {
-      "requireAuth": 102,
-      "requireAdmin": 95,
+      "requireAuth": 103,
+      "requireAdmin": 96,
       "requireAdminOrHealthSecret": 1,
       "requireRuntimeInternal": 5,
-      "requireSteveComplete": 87,
+      "requireSteveComplete": 88,
       "requireVmDialerAccess": 25,
       "rateLimited": 3,
       "rawBodyParser": 1,
@@ -6267,6 +6267,60 @@
       "fullPath": "/api/admin/consistency/crm-integrity",
       "routeSource": "server/src/routes/admin/consistency.ts:61",
       "mountPath": "/api/admin/consistency",
+      "mountPhase": "pre_gate",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/admin/resource-center/analytics",
+      "method": "GET",
+      "fullPath": "/api/admin/resource-center/analytics",
+      "routeSource": "server/src/routes/admin/resourceCenter.ts:8",
+      "mountPath": "/api/admin/resource-center",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
       "accessClass": "admin",
@@ -12568,7 +12622,62 @@
       "id": "GET /api/resources/",
       "method": "GET",
       "fullPath": "/api/resources/",
-      "routeSource": "server/src/routes/resources.ts:10",
+      "routeSource": "server/src/routes/resources.ts:11",
+      "mountPath": "/api/resources",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_gated",
+      "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/resources/:resourceVersionId/usage",
+      "method": "POST",
+      "fullPath": "/api/resources/:resourceVersionId/usage",
+      "routeSource": "server/src/routes/resources.ts:22",
       "mountPath": "/api/resources",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -12623,7 +12732,7 @@
       "id": "GET /api/resources/:resourceVersionId",
       "method": "GET",
       "fullPath": "/api/resources/:resourceVersionId",
-      "routeSource": "server/src/routes/resources.ts:21",
+      "routeSource": "server/src/routes/resources.ts:38",
       "mountPath": "/api/resources",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
