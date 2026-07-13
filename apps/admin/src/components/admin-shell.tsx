@@ -25,6 +25,7 @@ const NAV: NavItem[] = [
   { to: '/vm', label: 'VM Campaigns' },
   { to: '/agents', label: 'Agent Oversight' },
   { to: '/knowledge', label: 'Knowledge Base' },
+  { to: '/resource-center', label: 'Resource Center' },
   { to: '/content-videos', label: 'Product Gallery' },
   { to: '/consistency', label: 'Consistency' },
   { to: '/entitlements', label: 'Entitlements' },

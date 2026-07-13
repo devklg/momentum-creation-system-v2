@@ -1,7 +1,7 @@
 export const MCS_RESOURCE_CENTER_CATALOG = {
   surface: 'resource_center',
   productBoundary: 'named_ba_library_over_source_owned_resources',
-  currentState: 'named_ui_live_version_safe_projection',
+  currentState: 'named_ui_live_version_safe_projection_with_usage_and_review_warnings',
   teamRoute: '/resources',
   access: 'ba_authenticated',
   primaryAudience: ['brand_ambassador', 'leader'] as const,
@@ -69,6 +69,15 @@ export const MCS_RESOURCE_CENTER_CATALOG = {
     graphRelationships: ['SUPPORTS_TRAINING_MODULE', 'SUPPORTS_EVENT_MATERIAL'],
     consumers: ['fast_start_modules', 'ten_step_orientation', 'orientation_event_card'],
   },
+  usageAnalytics: {
+    eventSchema: 'resource_usage.v1',
+    eventType: 'opened',
+    persistence: ['mongo', 'neo4j', 'chroma'],
+    staleReviewDays: 90,
+    staleSignal: 'warning_only',
+    publishingEffect: 'none',
+    authorityEffect: 'none',
+  },
   exclusions: [
     'prospect_public_surface',
     'training_sequence_or_progress',
@@ -79,7 +88,5 @@ export const MCS_RESOURCE_CENTER_CATALOG = {
     'semantic_similarity_as_truth',
     'duplicate_content_authority',
   ],
-  deferred: {
-    p2_102: ['usage_analytics', 'stale_resource_warnings'],
-  },
+  deferred: {},
 } as const;
