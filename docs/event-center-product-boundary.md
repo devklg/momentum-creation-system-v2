@@ -6,16 +6,16 @@ The executable boundary is `packages/shared/src/event-center-catalog.ts`.
 
 ## Audience and routes
 
-- Brand Ambassadors and leaders use the future `.team` route `/events`.
-- Kevin uses the future `/admin/events` route, represented as `/events` inside the admin application.
+- Brand Ambassadors and leaders use the live `.team` route `/events`.
+- Kevin uses the live `/admin/events` route, represented as `/events` inside the admin application.
 - Prospects never receive a public Event Center. They may reserve a specific webinar only through the existing valid `/p/:token` flow.
-- P2-104 owns the team/admin UI and unified read API. P2-103 does not scaffold those surfaces.
+- P2-104 delivered the team/admin UI and the unified read APIs at `/api/events` and `/api/admin/events`. A source-health field keeps a temporary source failure distinct from an honestly empty schedule.
 
 ## Source ownership
 
 New Member Orientation owns orientation sessions, capacity, hosts, BA reservations, and rosters. Prospect Webinar owns prospect event occurrences and token-derived reservations. Resource Center exposes only verified Kevin-approved materials carrying an explicit `context:event:*` tag; semantic inference cannot attach materials to an event. CRM owns follow-up work.
 
-Event Center owns discovery, calendar composition, filtering by event type, and deep links to those source owners. It cannot authoritatively rewrite their records.
+Event Center owns discovery, calendar composition, filtering by event type, and deep links to those source owners. The BA page delegates orientation seat changes to the existing orientation reservation API. The admin page links to the existing Group Orientation operation surface. Event Center cannot authoritatively rewrite source records.
 
 ## Factual lifecycle rules
 

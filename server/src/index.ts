@@ -65,6 +65,8 @@ import { contentVideoRoutes } from './routes/content-videos.js';
 import { knowledgeEvolutionRoutes } from './runtime/knowledge-evolution/routes.js';
 import { resourceRoutes } from './routes/resources.js';
 import { adminResourceCenterRoutes } from './routes/admin/resourceCenter.js';
+import { adminEventRoutes } from './routes/admin/events.js';
+import { eventRoutes } from './routes/events.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -151,6 +153,7 @@ app.use('/api/admin/content/videos', adminContentVideoRoutes);
 app.use('/api/admin/health', adminHealthRoutes);
 app.use('/api/admin/consistency', adminConsistencyRoutes);
 app.use('/api/admin/resource-center', adminResourceCenterRoutes);
+app.use('/api/admin/events', adminEventRoutes);
 app.use('/api/runtime/knowledge-evolution', knowledgeEvolutionRoutes);
 
 // /api/p/* is prospect-facing (apps/com). No auth, no Steve gate. The token
@@ -269,6 +272,7 @@ app.use('/api/three-way', threeWayRoutes);
 app.use('/api/michael-runtime', michaelRuntimeRoutes);
 app.use('/api/content', contentVideoRoutes);
 app.use('/api/resources', resourceRoutes);
+app.use('/api/events', eventRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 

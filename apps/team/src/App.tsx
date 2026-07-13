@@ -26,6 +26,7 @@ import { LeadershipPage } from './routes/leadership';
 import { PreviewPage } from './routes/preview';
 import { ResourcesPage } from './routes/resources';
 import { ResourceDetailPage } from './routes/resource-detail';
+import { EventsPage } from './routes/events';
 
 export function App() {
   return (
@@ -42,6 +43,7 @@ export function App() {
         <Route path="/video-library" element={<VideoLibraryPage />} />
         <Route path="/resources" element={<ResourcesPage />} />
         <Route path="/resources/:resourceVersionId" element={<ResourceDetailPage />} />
+        <Route path="/events" element={<EventsPage />} />
         <Route path="/ivory" element={<IvoryPage />} />
         <Route path="/ivory/momentum" element={<IvoryMomentumPage />} />
         <Route path="/crm" element={<CrmPage />} />
