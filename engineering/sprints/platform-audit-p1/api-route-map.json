@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-07-13T08:50:59.171Z",
+  "generatedAt": "2026-07-13T09:34:25.842Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
     "server/src/runtime/knowledge-evolution/routes.ts"
   ],
   "summary": {
-    "mounts": 46,
-    "routeFiles": 46,
-    "routes": 216,
+    "mounts": 47,
+    "routeFiles": 47,
+    "routes": 217,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 3,
       "pre_gate": 140,
-      "ba_facing_gated": 72
+      "ba_facing_gated": 73
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
@@ -21,11 +21,11 @@
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
       "prospect_token": 18,
-      "ba_auth_steve_gated": 72
+      "ba_auth_steve_gated": 73
     },
     "byMethod": {
       "POST": 86,
-      "GET": 110,
+      "GET": 111,
       "PUT": 6,
       "PATCH": 8,
       "DELETE": 6
@@ -36,7 +36,7 @@
       "mountPath": "/api/telnyx",
       "routerIdentifier": "telnyxWebhookRoutes",
       "routeFile": "server/src/routes/telnyx-webhook.ts",
-      "line": 86,
+      "line": 87,
       "phase": "raw_body_before_json",
       "accessProfile": "raw_body_webhook",
       "mountMiddleware": []
@@ -45,7 +45,7 @@
       "mountPath": "/api/admin/knowledge",
       "routerIdentifier": "adminKnowledgeRoutes",
       "routeFile": "server/src/routes/admin/knowledge.ts",
-      "line": 102,
+      "line": 103,
       "phase": "pre_json_admin_body_limit",
       "accessProfile": "admin",
       "mountMiddleware": [
@@ -56,7 +56,7 @@
       "mountPath": "/api/health",
       "routerIdentifier": "healthRoutes",
       "routeFile": "server/src/routes/health.ts",
-      "line": 113,
+      "line": 114,
       "phase": "pre_gate",
       "accessProfile": "pre_gate_or_public",
       "mountMiddleware": []
@@ -65,7 +65,7 @@
       "mountPath": "/api/auth",
       "routerIdentifier": "authRoutes",
       "routeFile": "server/src/routes/auth.ts",
-      "line": 114,
+      "line": 115,
       "phase": "pre_gate",
       "accessProfile": "pre_gate_or_public",
       "mountMiddleware": []
@@ -74,7 +74,7 @@
       "mountPath": "/api/welcome",
       "routerIdentifier": "welcomeRoutes",
       "routeFile": "server/src/routes/welcome.ts",
-      "line": 115,
+      "line": 116,
       "phase": "pre_gate",
       "accessProfile": "pre_gate_or_public",
       "mountMiddleware": []
@@ -83,7 +83,7 @@
       "mountPath": "/api/onboarding/questionnaire",
       "routerIdentifier": "questionnaireRoutes",
       "routeFile": "server/src/routes/questionnaire.ts",
-      "line": 116,
+      "line": 117,
       "phase": "pre_gate",
       "accessProfile": "pre_gate_or_public",
       "mountMiddleware": []
@@ -92,7 +92,7 @@
       "mountPath": "/api/sponsor/workbook",
       "routerIdentifier": "sponsorWorkbookRoutes",
       "routeFile": "server/src/routes/sponsor-workbook.ts",
-      "line": 117,
+      "line": 118,
       "phase": "pre_gate",
       "accessProfile": "pre_gate_or_public",
       "mountMiddleware": []
@@ -101,7 +101,7 @@
       "mountPath": "/api/michael",
       "routerIdentifier": "michaelRoutes",
       "routeFile": "server/src/routes/michael.ts",
-      "line": 118,
+      "line": 119,
       "phase": "pre_gate",
       "accessProfile": "pre_gate_or_public",
       "mountMiddleware": []
@@ -110,7 +110,7 @@
       "mountPath": "/api/steve",
       "routerIdentifier": "steveRoutes",
       "routeFile": "server/src/routes/steve.ts",
-      "line": 125,
+      "line": 126,
       "phase": "pre_gate",
       "accessProfile": "pre_gate_or_public",
       "mountMiddleware": []
@@ -119,7 +119,7 @@
       "mountPath": "/api/admin/access-codes",
       "routerIdentifier": "adminAccessCodesRoutes",
       "routeFile": "server/src/routes/admin/access-codes.ts",
-      "line": 126,
+      "line": 127,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -128,7 +128,7 @@
       "mountPath": "/api/admin/bas",
       "routerIdentifier": "adminBasRoutes",
       "routeFile": "server/src/routes/admin/bas.ts",
-      "line": 127,
+      "line": 128,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -137,7 +137,7 @@
       "mountPath": "/api/admin/prospects",
       "routerIdentifier": "adminProspectsRoutes",
       "routeFile": "server/src/routes/admin/prospects.ts",
-      "line": 128,
+      "line": 129,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -146,7 +146,7 @@
       "mountPath": "/api/admin/queue",
       "routerIdentifier": "adminQueueRoutes",
       "routeFile": "server/src/routes/admin/queue.ts",
-      "line": 129,
+      "line": 130,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -155,7 +155,7 @@
       "mountPath": "/api/admin/audit",
       "routerIdentifier": "adminAuditRoutes",
       "routeFile": "server/src/routes/admin/audit.ts",
-      "line": 130,
+      "line": 131,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -164,7 +164,7 @@
       "mountPath": "/api/admin/dashboard",
       "routerIdentifier": "adminDashboardRoutes",
       "routeFile": "server/src/routes/admin/dashboard.ts",
-      "line": 131,
+      "line": 132,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -173,7 +173,7 @@
       "mountPath": "/api/admin/reporting",
       "routerIdentifier": "adminReportingRoutes",
       "routeFile": "server/src/routes/admin/reporting.ts",
-      "line": 132,
+      "line": 133,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -182,7 +182,7 @@
       "mountPath": "/api/admin/live-ops",
       "routerIdentifier": "adminLiveOpsRoutes",
       "routeFile": "server/src/routes/admin/liveOps.ts",
-      "line": 133,
+      "line": 134,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -191,7 +191,7 @@
       "mountPath": "/api/admin/tenant",
       "routerIdentifier": "adminTenantRoutes",
       "routeFile": "server/src/routes/admin/tenant.ts",
-      "line": 134,
+      "line": 135,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -200,7 +200,7 @@
       "mountPath": "/api/admin/vm",
       "routerIdentifier": "adminVmRoutes",
       "routeFile": "server/src/routes/admin/vm.ts",
-      "line": 135,
+      "line": 136,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -209,7 +209,7 @@
       "mountPath": "/api/admin/agents",
       "routerIdentifier": "adminAgentsRoutes",
       "routeFile": "server/src/routes/admin/agents.ts",
-      "line": 136,
+      "line": 137,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -218,7 +218,7 @@
       "mountPath": "/api/admin/broadcast",
       "routerIdentifier": "adminBroadcastRoutes",
       "routeFile": "server/src/routes/admin/broadcast.ts",
-      "line": 140,
+      "line": 141,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -227,7 +227,7 @@
       "mountPath": "/api/admin/orientation",
       "routerIdentifier": "adminOrientationRoutes",
       "routeFile": "server/src/routes/admin/orientation.ts",
-      "line": 144,
+      "line": 145,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -236,7 +236,7 @@
       "mountPath": "/api/admin/michael-runtime",
       "routerIdentifier": "adminMichaelRuntimeObservabilityRoutes",
       "routeFile": "server/src/routes/admin/michael-runtime-observability.ts",
-      "line": 147,
+      "line": 148,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -245,7 +245,7 @@
       "mountPath": "/api/admin/content/videos",
       "routerIdentifier": "adminContentVideoRoutes",
       "routeFile": "server/src/routes/admin/content-videos.ts",
-      "line": 148,
+      "line": 149,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -254,7 +254,7 @@
       "mountPath": "/api/admin/health",
       "routerIdentifier": "adminHealthRoutes",
       "routeFile": "server/src/routes/admin/health.ts",
-      "line": 149,
+      "line": 150,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -263,7 +263,7 @@
       "mountPath": "/api/admin/consistency",
       "routerIdentifier": "adminConsistencyRoutes",
       "routeFile": "server/src/routes/admin/consistency.ts",
-      "line": 150,
+      "line": 151,
       "phase": "pre_gate",
       "accessProfile": "admin",
       "mountMiddleware": []
@@ -272,7 +272,7 @@
       "mountPath": "/api/runtime/knowledge-evolution",
       "routerIdentifier": "knowledgeEvolutionRoutes",
       "routeFile": "server/src/runtime/knowledge-evolution/routes.ts",
-      "line": 151,
+      "line": 152,
       "phase": "pre_gate",
       "accessProfile": "internal_runtime",
       "mountMiddleware": []
@@ -281,7 +281,7 @@
       "mountPath": "/api/p/login",
       "routerIdentifier": "prospectLoginRoutes",
       "routeFile": "server/src/routes/p-login.ts",
-      "line": 166,
+      "line": 167,
       "phase": "pre_gate",
       "accessProfile": "prospect_token",
       "mountMiddleware": []
@@ -290,7 +290,7 @@
       "mountPath": "/api/p",
       "routerIdentifier": "prospectTokenRoutes",
       "routeFile": "server/src/routes/p.ts",
-      "line": 167,
+      "line": 168,
       "phase": "pre_gate",
       "accessProfile": "prospect_token",
       "mountMiddleware": []
@@ -299,7 +299,7 @@
       "mountPath": "/api/rvm",
       "routerIdentifier": "rvmRoutes",
       "routeFile": "server/src/routes/rvm.ts",
-      "line": 168,
+      "line": 169,
       "phase": "pre_gate",
       "accessProfile": "prospect_token",
       "mountMiddleware": []
@@ -308,7 +308,7 @@
       "mountPath": "/api/vm/provider",
       "routerIdentifier": "vmProviderWebhookRoutes",
       "routeFile": "server/src/routes/vmProviderWebhooks.ts",
-      "line": 172,
+      "line": 173,
       "phase": "pre_gate",
       "accessProfile": "pre_gate_or_public",
       "mountMiddleware": []
@@ -317,7 +317,7 @@
       "mountPath": "/api/invitations",
       "routerIdentifier": "invitationRoutes",
       "routeFile": "server/src/routes/invitations.ts",
-      "line": 197,
+      "line": 198,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -326,7 +326,7 @@
       "mountPath": "/api/cockpit",
       "routerIdentifier": "cockpitRoutes",
       "routeFile": "server/src/routes/cockpit.ts",
-      "line": 201,
+      "line": 202,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -335,7 +335,7 @@
       "mountPath": "/api/crm",
       "routerIdentifier": "crmRoutes",
       "routeFile": "server/src/routes/crm.ts",
-      "line": 209,
+      "line": 210,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -344,7 +344,7 @@
       "mountPath": "/api/crm-hub",
       "routerIdentifier": "crmHubRoutes",
       "routeFile": "server/src/routes/crmHub.ts",
-      "line": 210,
+      "line": 211,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -353,7 +353,7 @@
       "mountPath": "/api/scriptmaker",
       "routerIdentifier": "scriptmakerRoutes",
       "routeFile": "server/src/routes/scriptmaker.ts",
-      "line": 218,
+      "line": 219,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -362,7 +362,7 @@
       "mountPath": "/api/ivory",
       "routerIdentifier": "ivoryRoutes",
       "routeFile": "server/src/routes/ivory.ts",
-      "line": 224,
+      "line": 225,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -371,7 +371,7 @@
       "mountPath": "/api/agents",
       "routerIdentifier": "agentRoutes",
       "routeFile": "server/src/routes/agents.ts",
-      "line": 228,
+      "line": 229,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -380,7 +380,7 @@
       "mountPath": "/api/vm",
       "routerIdentifier": "vmRoutes",
       "routeFile": "server/src/routes/vm.ts",
-      "line": 229,
+      "line": 230,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -389,7 +389,7 @@
       "mountPath": "/api/training",
       "routerIdentifier": "trainingRoutes",
       "routeFile": "server/src/routes/training.ts",
-      "line": 234,
+      "line": 235,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -398,7 +398,7 @@
       "mountPath": "/api/profile",
       "routerIdentifier": "profileRoutes",
       "routeFile": "server/src/routes/profile.ts",
-      "line": 240,
+      "line": 241,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -407,7 +407,7 @@
       "mountPath": "/api/preview",
       "routerIdentifier": "previewRoutes",
       "routeFile": "server/src/routes/preview.ts",
-      "line": 247,
+      "line": 248,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -416,7 +416,7 @@
       "mountPath": "/api/orientation",
       "routerIdentifier": "orientationRoutes",
       "routeFile": "server/src/routes/orientation.ts",
-      "line": 254,
+      "line": 255,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -425,7 +425,7 @@
       "mountPath": "/api/three-way",
       "routerIdentifier": "threeWayRoutes",
       "routeFile": "server/src/routes/three-way.ts",
-      "line": 258,
+      "line": 259,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -434,7 +434,7 @@
       "mountPath": "/api/michael-runtime",
       "routerIdentifier": "michaelRuntimeRoutes",
       "routeFile": "server/src/routes/michael-runtime.ts",
-      "line": 266,
+      "line": 267,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -443,7 +443,16 @@
       "mountPath": "/api/content",
       "routerIdentifier": "contentVideoRoutes",
       "routeFile": "server/src/routes/content-videos.ts",
-      "line": 267,
+      "line": 268,
+      "phase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": []
+    },
+    {
+      "mountPath": "/api/resources",
+      "routerIdentifier": "resourceRoutes",
+      "routeFile": "server/src/routes/resources.ts",
+      "line": 269,
       "phase": "ba_facing_gated",
       "accessProfile": "ba_auth_steve_gated",
       "mountMiddleware": []
@@ -6098,6 +6107,33 @@
       "handler": "handler",
       "source": "server/src/routes/content-videos.ts:16",
       "routeSource": "server/src/routes/content-videos.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/resources/",
+      "mountPath": "/api/resources",
+      "localPath": "/",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/resources.ts:9",
+      "routeSource": "server/src/routes/resources.ts",
       "signals": {
         "requireAuth": true,
         "requireAdmin": false,

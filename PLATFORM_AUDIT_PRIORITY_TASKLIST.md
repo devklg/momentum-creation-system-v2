@@ -132,7 +132,7 @@ Product unification, workflow completion, content operations, and scale-hardenin
 - [x] 97. **Launch Center:** Create a launch state projection combining orientation, training, invitations, profile, and CRM readiness.
 - [x] 98. **Launch Center:** Add a launch readiness admin view that avoids ranking or scoring people.
 - [x] 99. **Resource Center:** Define the Resource Center product boundary.
-- [ ] 100. **Resource Center:** Build Resource Center UI with search, filters, categories, and version-safe content.
+- [x] 100. **Resource Center:** Build Resource Center UI with search, filters, categories, and version-safe content.
 - [ ] 101. **Resource Center:** Connect resources to training modules and event materials.
 - [ ] 102. **Resource Center:** Add resource usage analytics and stale-resource warnings.
 - [ ] 103. **Event Center:** Define the Event Center product boundary.

@@ -12,7 +12,7 @@ The executable boundary catalog is `packages/shared/src/resource-center-catalog.
 - Owner plane: Kevin-only administration through the existing `/knowledge` and `/content-videos` surfaces; catalog lifecycle/readiness controls remain to be surfaced by later Resource Center work.
 - Existing deep links remain valid: `/video-library`, `/training/fast-start`, and `/training/10-steps`.
 - No public or prospect-facing Resource Center route is authorized by this decision.
-- P2-100 owns `/resources` UI, search, filters, categories, and result rendering. P2-99 does not add that route or UI.
+- P2-100 added the `/resources` UI, search, filters, categories, and fail-closed result rendering. The source-owner shortcuts remain available even when no catalog versions have completed verification.
 
 ## Ownership
 
@@ -23,6 +23,8 @@ The video library and Product Gallery are one current product surface, not two i
 ## Version safety
 
 Every Resource Center result must resolve to `resource_catalog.v1`. Only an `active`, audience-eligible version with active human authority may be shown. Retrieval fails closed unless Mongo `tmag_resource_catalog`, Neo4j `TmagResource`/`TmagResourceVersion`, and Chroma `mcs_resource_catalog` agree on exact identity, immutable version, SHA-256 digest, and projection freshness.
+
+The BA read endpoint is `GET /api/resources`. It rechecks every candidate through the publishing gate at read time; cached readiness flags alone cannot authorize display. Search and filters operate only over the verified response. As of P2-100 implementation, the live catalog has no active versions, so `/resources` truthfully renders an empty verified-results state alongside deep links to the existing source-owned libraries.
 
 Legacy `active` booleans, inline training content, repository files, and semantic similarity are not publication evidence. Existing sources require catalog projection with owner, audience, lifecycle, version, digest, locator, lineage, and readiness. The catalog is a projection; the source domain remains authoritative.
 

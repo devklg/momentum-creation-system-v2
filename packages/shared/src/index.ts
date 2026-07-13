@@ -22,3 +22,4 @@ export * from './knowledge-workflow-map.js';
 export * from './admin-knowledge-status.js';
 export * from './launch-center-catalog.js';
 export * from './resource-center-catalog.js';
+export * from './resource-center.js';

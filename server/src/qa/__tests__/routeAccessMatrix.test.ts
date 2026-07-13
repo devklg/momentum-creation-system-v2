@@ -59,7 +59,7 @@ function route(method: string, fullPath: string): RouteAccessMatrixRow {
 describe('P1 route access matrix', () => {
   it('covers the full API route map with no generated findings', () => {
     const data = matrix();
-    expect(data.summary.routes).toBe(216);
+    expect(data.summary.routes).toBe(217);
     expect(data.routes).toHaveLength(data.summary.routes);
     expect(data.summary.findings).toBe(0);
   });
@@ -94,6 +94,10 @@ describe('P1 route access matrix', () => {
     expect(profile.accessClass).toBe('ba_auth_pre_steve');
     expect(profile.effectiveSteveException).toBe('profile_prefix_whitelist');
 
+    const resources = route('GET', '/api/resources/');
+    expect(resources.accessClass).toBe('ba_auth_steve_gated');
+    expect(resources.expected.steveGate).toBe('requireSteveComplete');
+
     const vm = route('GET', '/api/vm/lead-owners');
     expect(vm.accessClass).toBe('ba_auth_steve_vm_entitled');
     expect(vm.expected.vmEntitlementGate).toBe('requireVmDialerAccess');
@@ -121,7 +125,7 @@ describe('P1 route access matrix', () => {
   it('tracks required guard coverage for the P1 security follow-up tasks', () => {
     const coverage = matrix().summary.guardCoverage;
     expect(coverage.requireAdmin).toBeGreaterThan(70);
-    expect(coverage.requireAuth).toBe(87);
+    expect(coverage.requireAuth).toBe(88);
     expect(coverage.requireSteveComplete).toBeGreaterThan(70);
     expect(coverage.requireVmDialerAccess).toBe(12);
     expect(coverage.customSecretGuard).toBeGreaterThanOrEqual(4);
@@ -132,7 +136,7 @@ describe('P1 route access matrix', () => {
     expect(data.routes.every((row) => row.permissions.roles.length > 0)).toBe(true);
     expect(data.routes.every((row) => row.permissions.entitlements.length > 0)).toBe(true);
     expect(data.summary.byRole.founder_admin).toBeGreaterThan(90);
-    expect(data.summary.byRole.brand_ambassador).toBe(88);
+    expect(data.summary.byRole.brand_ambassador).toBe(89);
     expect(data.summary.byEntitlement.vm_dialer).toBe(12);
     expect(route('GET', '/api/admin/agents/outbox-health').permissions).toMatchObject({ roles: ['founder_admin'], entitlements: ['admin_allowlist'] });
     expect(route('GET', '/api/vm/lead-owners').permissions.gates).toContain('requireVmDialerAccess');
