@@ -81,6 +81,7 @@ jobs:
       actions: write
       contents: write
       pull-requests: write
+      statuses: write
     steps:
       - name: Checkout merged main
         uses: actions/checkout@v4
@@ -123,6 +124,7 @@ jobs:
           git switch -c "$refresh_branch"
           git add -u
           git commit -m "chore: refresh generated catalogs after merge"
+          refresh_sha=$(git rev-parse HEAD)
           git push origin "$refresh_branch"
           pr_url=$(gh pr create \
             --base main \
@@ -131,3 +133,27 @@ jobs:
             --body "Automated catalog refresh generated from merged source at ${GITHUB_SHA}. This PR contains tracked derived artifacts only.")
           gh pr merge "$pr_url" --auto --merge --delete-branch
           gh workflow run ci.yml --ref "$refresh_branch"
+          run_id=""
+          for _ in {1..30}; do
+            run_id=$(gh run list \
+              --workflow ci.yml \
+              --branch "$refresh_branch" \
+              --event workflow_dispatch \
+              --limit 5 \
+              --json databaseId,headSha \
+              --jq ".[] | select(.headSha == \"${refresh_sha}\") | .databaseId" | head -n 1)
+            if [ -n "$run_id" ]; then break; fi
+            sleep 2
+          done
+          if [ -z "$run_id" ]; then
+            echo "Dispatched catalog gate run was not found."
+            exit 1
+          fi
+          gh run watch "$run_id" --exit-status
+          gh api \
+            --method POST \
+            "repos/${GITHUB_REPOSITORY}/statuses/${refresh_sha}" \
+            -f state=success \
+            -f context=gates \
+            -f description="CI Merge Gates passed via workflow_dispatch" \
+            -f target_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${run_id}"
