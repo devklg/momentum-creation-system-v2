@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T09:44:17.591Z
-- Mongo collections: 67
+- Generated: 2026-07-13T12:11:44.706Z
+- Mongo collections: 69
 - Neo4j labels: 75
-- Neo4j relationships: 62
+- Neo4j relationships: 63
 - Chroma collections: 51
 - Route modules: 46
-- Route handlers: 258
-- Shared exports: 1018
+- Route handlers: 259
+- Shared exports: 1019
 
 ## Mongo Collections
 
@@ -27,6 +27,8 @@
 | `KNOWLEDGE_SOURCE_COLLECTION` | permissive_mongoose_schema | expression | 3 |
 | `mcs_audit_log` | permissive_mongoose_schema | yes | 5 |
 | `mcs_graphrag_records` | permissive_mongoose_schema | yes | 2 |
+| `mcs_knowledge_chunks` | permissive_mongoose_schema | yes | 1 |
+| `mcs_knowledge_sources` | permissive_mongoose_schema | yes | 1 |
 | `mcs_learning_candidates` | permissive_mongoose_schema | yes | 3 |
 | `mcs_outcomes` | permissive_mongoose_schema | yes | 2 |
 | `mcs_questionnaires` | permissive_mongoose_schema | yes | 1 |
@@ -102,7 +104,7 @@
 | `KnowledgeCandidate` | 1 |
 | `KnowledgeChunk` | 1 |
 | `KnowledgeDomain` | 1 |
-| `KnowledgeSource` | 2 |
+| `KnowledgeSource` | 3 |
 | `KnowledgeVersion` | 1 |
 | `LearningSignal` | 1 |
 | `MemoryIndexEntry` | 4 |
@@ -115,7 +117,7 @@
 | `SCOPED_TO` | 1 |
 | `SPONSORED_BY` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 81 |
+| `TeamMagnificentMember` | 82 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 2 |
@@ -146,8 +148,8 @@
 | `TmagProspectTimelineEvent` | 3 |
 | `TmagQuestionnaire` | 1 |
 | `TmagRecruitingCycle` | 2 |
-| `TmagResource` | 1 |
-| `TmagResourceVersion` | 1 |
+| `TmagResource` | 2 |
+| `TmagResourceVersion` | 2 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 2 |
 | `TmagSteveDiscovery` | 3 |
@@ -176,7 +178,7 @@
 | `ACTED_BY` | 1 |
 | `ACTED_FOR` | 1 |
 | `APPROVED_AS` | 1 |
-| `APPROVED_BY` | 1 |
+| `APPROVED_BY` | 2 |
 | `AVAILABLE_TO` | 1 |
 | `BECAME_PROSPECT_RECORD` | 2 |
 | `BELONGS_TO_DOMAIN` | 1 |
@@ -201,7 +203,7 @@
 | `HAS_SETTINGS_VERSION` | 1 |
 | `HAS_THREE_WAY_AVAILABILITY` | 1 |
 | `HAS_TIMELINE_EVENT` | 3 |
-| `HAS_VERSION` | 3 |
+| `HAS_VERSION` | 4 |
 | `HAS_VM_AUDIT` | 1 |
 | `HAS_VM_DELIVERY_EVENT` | 1 |
 | `INVITED` | 4 |
@@ -217,6 +219,7 @@
 | `OWNS_VM_CAMPAIGN` | 1 |
 | `OWNS_VM_LEAD` | 1 |
 | `OWNS_VM_LEAD_OWNER` | 2 |
+| `PROJECTS_KNOWLEDGE_SOURCE` | 1 |
 | `RAN_GENERATOR` | 1 |
 | `RECEIVED_MICHAEL_EVENT` | 1 |
 | `RECORDED_AGENT_EVENT` | 1 |
@@ -328,7 +331,7 @@
 | `(unmounted)` | `server/src/routes/preview.ts` | GET / | none |
 | `(unmounted)` | `server/src/routes/profile.ts` | GET /<br>GET /sponsor<br>PATCH /<br>POST /password<br>POST /email/start<br>POST /email/verify<br>POST /phone | `McsProfileGetResponse` |
 | `(unmounted)` | `server/src/routes/questionnaire.ts` | GET /status<br>POST /load<br>POST /submit<br>GET user-agent | none |
-| `(unmounted)` | `server/src/routes/resources.ts` | GET / | `McsResourceCenterResponse` |
+| `(unmounted)` | `server/src/routes/resources.ts` | GET /<br>GET /:resourceVersionId | `McsResourceCenterResponse` |
 | `(unmounted)` | `server/src/routes/rvm.ts` | GET /:token<br>POST /:token/activate<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats<br>POST /:token/info-request | `McsCallbackIntent`, `McsCallbackRequestResponse`, `McsHoldingTankSnapshot`, `McsPlacementEvent`, `McsRvmInfoRequestResponse`, `McsRvmResolvedTokenPayload`, `McsTeamStatsResponse`, `McsVideoEventKind`, `McsVideoEventResponse`, `McsWebinarReservationResponse` |
 | `(unmounted)` | `server/src/routes/scriptmaker.ts` | POST /draft | `McsScriptMakerDraftPayload`, `McsScriptMakerDraftResponse`, `McsScriptMakerDraftSelectors`, `McsScriptMakerScriptKind` |
 | `(unmounted)` | `server/src/routes/sponsor-workbook.ts` | GET /:tmagId<br>PUT /:tmagId/draft<br>POST /:tmagId/finalize | none |
@@ -546,6 +549,7 @@
 | `validateResourceCatalogEntry` | function | `packages/shared/src/resource-catalog.ts` |
 | `MCS_RESOURCE_CENTER_CATALOG` | const | `packages/shared/src/resource-center-catalog.ts` |
 | `MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION` | const | `packages/shared/src/resource-center.ts` |
+| `McsResourceCenterDetailResponse` | interface | `packages/shared/src/resource-center.ts` |
 | `McsResourceCenterItem` | interface | `packages/shared/src/resource-center.ts` |
 | `McsResourceCenterResponse` | interface | `packages/shared/src/resource-center.ts` |
 | `evaluateResourceLifecycleTransition` | function | `packages/shared/src/resource-lifecycle.ts` |
