@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T18:17:33.289Z",
+  "generatedAt": "2026-07-13T19:20:43.805Z",
   "sources": [
     "docs/app-data-model-contract.md §9",
     "engineering/sprints/platform-audit-p1/mongo-ownership-map.json",
@@ -11,9 +11,9 @@
     "knowledgeEvolutionEnsureIndexes": "present_for_knowledge_evolution_only",
     "vmIndexDefinitions": "declared_in_schema_registry_not_generally_applied"
   },
-  "indexCount": 46,
+  "indexCount": 48,
   "byStatus": {
-    "planned_missing_enforcement": 40,
+    "planned_missing_enforcement": 42,
     "vm_registry_declared": 6
   },
   "highVolumeWithoutPlan": [],
@@ -389,6 +389,34 @@
       "ownerId": "holding_tank_and_reentry",
       "steward": "Prospect access / pool placement",
       "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_event_attendance",
+      "name": "event_recordedAt",
+      "keys": {
+        "eventId": 1,
+        "recordedAt": -1
+      },
+      "options": {},
+      "rationale": "Event attendance aggregation by event.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "events_orientation_and_calls",
+      "steward": "Events / orientation domain",
+      "primarySurface": "team + admin + workers"
+    },
+    {
+      "collection": "tmag_event_attendance",
+      "name": "reservation_recordedAt",
+      "keys": {
+        "reservationId": 1,
+        "recordedAt": -1
+      },
+      "options": {},
+      "rationale": "Latest explicit attendance state per reservation.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "events_orientation_and_calls",
+      "steward": "Events / orientation domain",
+      "primarySurface": "team + admin + workers"
     },
     {
       "collection": "tmag_prospect_invitation_activity",

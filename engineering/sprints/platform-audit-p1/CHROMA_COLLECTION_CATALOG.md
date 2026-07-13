@@ -5,12 +5,12 @@
 
 ## Summary
 
-- Generated: 2026-07-13T18:17:36.793Z
-- Registered collections: 52
-- Schema-catalog collections: 52
-- Collections with observed write/query usage: 31
+- Generated: 2026-07-13T19:20:46.762Z
+- Registered collections: 53
+- Schema-catalog collections: 53
+- Collections with observed write/query usage: 32
 - Language-scoped collections: 10
-- Metadata contract rows: 52
+- Metadata contract rows: 53
 - Observed unregistered/dynamic targets: 8
 - Embedding model: all-MiniLM-L6-v2
 - Embedding dimension: 384
@@ -24,7 +24,7 @@
 | broadcast_delivery | 1 |
 | content_resources | 3 |
 | crm | 2 |
-| events | 3 |
+| events | 4 |
 | general | 3 |
 | holding_tank | 2 |
 | identity_access | 4 |
@@ -53,6 +53,7 @@
 | `mcs_commitments` | identity_access | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `acceptedAt`, `kind`, `threeBaId`, `tmagId`, `version` | none observed | `threeBaId`, `tmagId` |
 | `mcs_content_templates` | content_resources | not_language_scoped | Governed content/resource semantic record. | `writeKnowledge` | `surface`, `templateKey`, `tenantId`, `version` | none observed | `tenantId` |
 | `mcs_content_videos` | content_resources | not_language_scoped | Governed content/resource semantic record. | `add`<br>`create_collection` | `project`, `purpose` | none observed | none inferred |
+| `mcs_event_attendance` | events | not_language_scoped | Explicit event attendance evidence linked to human CRM follow-up. | `writeOperational` | `crmFollowUpDueAt`, `eventId`, `eventType`, `kind`, `prospectId`, `recordedAt`, `reservationId`, `sponsorTmagId`, `state` | none observed | `eventId`, `prospectId`, `reservationId`, `sponsorTmagId`, `tmagId` |
 | `mcs_fast_start_progress` | onboarding_training | not_language_scoped | Onboarding/training semantic record. | `create_collection`<br>`writeKnowledge` | `branch`, `moduleId`, `purpose`, `state`, `tmagId`, `updatedAt`, `wireframe_leaf` | none observed | `moduleId`, `tmagId` |
 | `mcs_health_heartbeat` | operations | not_language_scoped | Operational health/readback heartbeat record. | not observed | none observed | none observed | none inferred |
 | `mcs_ivory_prospect_names` | agents | not_language_scoped | Prospect funnel semantic record. | `add`<br>`create_collection`<br>`writeGraphCritical`<br>`writeKnowledge` | `angle`, `chat_number`, `createdAt`, `description`, `ivoryId`, `kind`, `preferredAngle`, `productKey`, `project`, `runId`, `tmagId` | none observed | `ivoryId`, `runId`, `tmagId` |

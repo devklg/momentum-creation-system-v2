@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-13T18:17:42.093Z
+- Generated: 2026-07-13T19:20:51.307Z
 - Mounted routers: 50
 - Route files: 50
-- Static route rows: 235
+- Static route rows: 236
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
 | ba_facing_gated | 89 |
-| pre_gate | 142 |
+| pre_gate | 143 |
 | pre_json_admin_body_limit | 3 |
 | raw_body_before_json | 1 |
 
@@ -22,7 +22,7 @@
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 94 |
+| admin | 95 |
 | ba_auth_steve_gated | 89 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
@@ -36,7 +36,7 @@
 | DELETE | 7 |
 | GET | 119 |
 | PATCH | 9 |
-| POST | 93 |
+| POST | 94 |
 | PUT | 7 |
 
 ## Mounts
@@ -215,7 +215,8 @@
 | GET | `/api/admin/consistency/report` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:27` |
 | GET | `/api/admin/consistency/crm-integrity` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:61` |
 | GET | `/api/admin/resource-center/analytics` | pre_gate | admin | admin | `server/src/routes/admin/resourceCenter.ts:8` |
-| GET | `/api/admin/events/` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:7` |
+| GET | `/api/admin/events/` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:22` |
+| POST | `/api/admin/events/webinars/:eventId/reservations/:reservationId/attendance` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:35` |
 | GET | `/api/runtime/knowledge-evolution/metrics` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:236` |
 | POST | `/api/runtime/knowledge-evolution/` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:239` |
 | GET | `/api/runtime/knowledge-evolution/:evolutionId` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:242` |

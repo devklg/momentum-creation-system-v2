@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T18:17:46.886Z",
+  "generatedAt": "2026-07-13T19:20:54.883Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -885,6 +885,28 @@
       ]
     },
     {
+      "collection": "tmag_event_attendance",
+      "resolved": true,
+      "schemaMode": "permissive_mongoose_schema",
+      "sources": [
+        {
+          "file": "server/src/domain/eventAttendance.ts",
+          "line": 52,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/eventAttendance.ts",
+          "line": 87,
+          "source": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/eventAttendance.ts",
+          "line": 209,
+          "source": "persistenceCall.mongodb.query"
+        }
+      ]
+    },
+    {
       "collection": "tmag_fast_start_progress",
       "resolved": true,
       "schemaMode": "permissive_mongoose_schema",
@@ -1140,7 +1162,7 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 829,
+          "line": 835,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1177,22 +1199,22 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 401,
+          "line": 407,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 426,
+          "line": 432,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 458,
+          "line": 464,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 497,
+          "line": 503,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1239,27 +1261,32 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 254,
+          "line": 260,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 294,
+          "line": 300,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 335,
+          "line": 341,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 358,
+          "line": 364,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 842,
+          "line": 848,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/eventCenter.ts",
+          "line": 223,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1306,12 +1333,12 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 173,
+          "line": 174,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 206,
+          "line": 207,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1626,7 +1653,7 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 763,
+          "line": 769,
           "source": "writeKnowledge"
         },
         {
@@ -1812,8 +1839,13 @@
       "schemaMode": "permissive_mongoose_schema",
       "sources": [
         {
+          "file": "server/src/domain/eventAttendance.ts",
+          "line": 35,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
           "file": "server/src/domain/eventCenter.ts",
-          "line": 122,
+          "line": 199,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1925,27 +1957,27 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 106,
+          "line": 107,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 567,
+          "line": 573,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 652,
+          "line": 658,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 674,
+          "line": 680,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 849,
+          "line": 855,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -2612,9 +2644,9 @@
       {
         "label": "DISPOSED",
         "sources": [
-          "server/src/domain/crm.ts:409",
-          "server/src/domain/crm.ts:436",
-          "server/src/domain/crm.ts:466",
+          "server/src/domain/crm.ts:415",
+          "server/src/domain/crm.ts:442",
+          "server/src/domain/crm.ts:472",
           "server/src/domain/vmLeadWork.ts:173",
           "server/src/domain/vmLeadWork.ts:198"
         ]
@@ -2634,9 +2666,9 @@
       {
         "label": "HAS_FOLLOWUP",
         "sources": [
-          "server/src/domain/crm.ts:262",
-          "server/src/domain/crm.ts:302",
-          "server/src/domain/crm.ts:366",
+          "server/src/domain/crm.ts:268",
+          "server/src/domain/crm.ts:308",
+          "server/src/domain/crm.ts:372",
           "server/src/domain/crmCleanup.ts:234",
           "server/src/domain/vmLeadWork.ts:390"
         ]
@@ -2807,13 +2839,13 @@
           "server/src/domain/bulkLeads.ts:154",
           "server/src/domain/callbackRequest.ts:131",
           "server/src/domain/commitments.ts:57",
-          "server/src/domain/crm.ts:180",
-          "server/src/domain/crm.ts:262",
-          "server/src/domain/crm.ts:300",
-          "server/src/domain/crm.ts:366",
-          "server/src/domain/crm.ts:409",
-          "server/src/domain/crm.ts:434",
-          "server/src/domain/crm.ts:464",
+          "server/src/domain/crm.ts:181",
+          "server/src/domain/crm.ts:268",
+          "server/src/domain/crm.ts:306",
+          "server/src/domain/crm.ts:372",
+          "server/src/domain/crm.ts:415",
+          "server/src/domain/crm.ts:440",
+          "server/src/domain/crm.ts:470",
           "server/src/domain/crmCleanup.ts:234",
           "server/src/domain/crmOwnershipPersistence.ts:33",
           "server/src/domain/crmOwnershipPersistence.ts:40",
@@ -2946,8 +2978,14 @@
       {
         "label": "TmagCrmNote",
         "sources": [
-          "server/src/domain/crm.ts:182",
+          "server/src/domain/crm.ts:183",
           "server/src/domain/vmLeadWork.ts:290"
+        ]
+      },
+      {
+        "label": "TmagEventAttendance",
+        "sources": [
+          "server/src/domain/eventAttendance.ts:95"
         ]
       },
       {
@@ -2980,7 +3018,7 @@
       {
         "label": "TmagInvitationActivity",
         "sources": [
-          "server/src/domain/crm.ts:777",
+          "server/src/domain/crm.ts:783",
           "server/src/domain/invitations.ts:384"
         ]
       },
@@ -3072,21 +3110,22 @@
           "server/src/domain/bulkLeads.ts:245",
           "server/src/domain/bulkLeads.ts:265",
           "server/src/domain/callbackRequest.ts:130",
-          "server/src/domain/crm.ts:181",
-          "server/src/domain/crm.ts:262",
-          "server/src/domain/crm.ts:301",
-          "server/src/domain/crm.ts:366",
-          "server/src/domain/crm.ts:409",
-          "server/src/domain/crm.ts:435",
-          "server/src/domain/crm.ts:465",
-          "server/src/domain/crm.ts:668",
-          "server/src/domain/crm.ts:776",
+          "server/src/domain/crm.ts:182",
+          "server/src/domain/crm.ts:268",
+          "server/src/domain/crm.ts:307",
+          "server/src/domain/crm.ts:372",
+          "server/src/domain/crm.ts:415",
+          "server/src/domain/crm.ts:441",
+          "server/src/domain/crm.ts:471",
+          "server/src/domain/crm.ts:674",
+          "server/src/domain/crm.ts:782",
           "server/src/domain/crmCleanup.ts:235",
           "server/src/domain/crmOwnershipPersistence.ts:49",
           "server/src/domain/crmOwnershipPersistence.ts:57",
           "server/src/domain/crossStoreReconciliation.ts:110",
           "server/src/domain/crossStoreReconciliation.ts:165",
           "server/src/domain/crossStoreReconciliation.ts:89",
+          "server/src/domain/eventAttendance.ts:93",
           "server/src/domain/invitations.ts:236",
           "server/src/domain/invitations.ts:255",
           "server/src/domain/invitations.ts:383",
@@ -3298,6 +3337,7 @@
       {
         "label": "TmagWebinarEvent",
         "sources": [
+          "server/src/domain/eventAttendance.ts:94",
           "server/src/domain/webinarReservation.ts:204"
         ]
       },
@@ -3318,7 +3358,7 @@
       {
         "relationship": "ABOUT",
         "sources": [
-          "server/src/domain/crm.ts:184",
+          "server/src/domain/crm.ts:185",
           "server/src/domain/vmLeadWork.ts:292"
         ]
       },
@@ -3417,6 +3457,12 @@
         ]
       },
       {
+        "relationship": "FOR_EVENT",
+        "sources": [
+          "server/src/domain/eventAttendance.ts:96"
+        ]
+      },
+      {
         "relationship": "FOR_PROSPECT",
         "sources": [
           "server/src/domain/adminConsistencyReport.ts:77",
@@ -3447,7 +3493,7 @@
       {
         "relationship": "HAS_ACTIVITY",
         "sources": [
-          "server/src/domain/crm.ts:780",
+          "server/src/domain/crm.ts:786",
           "server/src/domain/invitations.ts:387"
         ]
       },
@@ -3462,6 +3508,12 @@
         "sources": [
           "server/src/domain/crmOwnershipPersistence.ts:38",
           "server/src/domain/crmOwnershipPersistence.ts:41"
+        ]
+      },
+      {
+        "relationship": "HAS_EVENT_ATTENDANCE",
+        "sources": [
+          "server/src/domain/eventAttendance.ts:96"
         ]
       },
       {
@@ -3759,7 +3811,7 @@
       {
         "relationship": "WROTE_NOTE",
         "sources": [
-          "server/src/domain/crm.ts:183",
+          "server/src/domain/crm.ts:184",
           "server/src/domain/vmLeadWork.ts:291"
         ]
       }
@@ -3812,6 +3864,10 @@
     },
     {
       "collection": "mcs_content_videos",
+      "source": "server/src/services/chromaCollections.ts"
+    },
+    {
+      "collection": "mcs_event_attendance",
       "source": "server/src/services/chromaCollections.ts"
     },
     {
@@ -4291,10 +4347,18 @@
         {
           "method": "GET",
           "path": "/",
-          "line": 7
+          "line": 22
+        },
+        {
+          "method": "POST",
+          "path": "/webinars/:eventId/reservations/:reservationId/attendance",
+          "line": 35
         }
       ],
-      "sharedTypes": []
+      "sharedTypes": [
+        "McsAuditActor",
+        "McsRecordEventAttendanceResponse"
+      ]
     },
     {
       "file": "server/src/routes/admin/health.ts",
@@ -6373,6 +6437,21 @@
       "file": "packages/shared/src/event-center.ts"
     },
     {
+      "name": "McsAdminEventCenterWebinarReservation",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventAttendanceRecord",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventAttendanceState",
+      "kind": "type",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
       "name": "McsEventCenterAttendance",
       "kind": "interface",
       "file": "packages/shared/src/event-center.ts"
@@ -6429,6 +6508,16 @@
     },
     {
       "name": "McsEventCenterWebinarEvent",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsRecordEventAttendancePayload",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsRecordEventAttendanceResponse",
       "kind": "interface",
       "file": "packages/shared/src/event-center.ts"
     },
@@ -11064,12 +11153,12 @@
     }
   ],
   "summary": {
-    "mongoCollections": 69,
-    "neo4jLabels": 78,
-    "neo4jRelationships": 67,
-    "chromaCollections": 52,
+    "mongoCollections": 70,
+    "neo4jLabels": 79,
+    "neo4jRelationships": 69,
+    "chromaCollections": 53,
     "routeModules": 49,
-    "routeHandlers": 264,
-    "sharedExports": 1040
+    "routeHandlers": 265,
+    "sharedExports": 1045
   }
 }
