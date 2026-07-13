@@ -6207,3 +6207,60 @@ export interface McsVmPilotReadoutResponse {
   generatedAt: McsIsoTimestamp;
   rows: McsVmPilotReadoutRow[];
 }
+
+/* P2-97 — additive, read-only Launch Center state projection. */
+export type McsLaunchReadinessDomain =
+  | 'orientation'
+  | 'training'
+  | 'invitations'
+  | 'success_profile'
+  | 'crm';
+
+export type McsLaunchReadinessStatus =
+  | 'not_started'
+  | 'scheduled'
+  | 'in_progress'
+  | 'ready'
+  | 'complete'
+  | 'needs_attention'
+  | 'source_unavailable';
+
+export interface McsLaunchReadinessItem {
+  domain: McsLaunchReadinessDomain;
+  status: McsLaunchReadinessStatus;
+  source: string;
+  evidenceCount: number;
+  href: string;
+  detail: string;
+}
+
+export interface McsLaunchReadinessProjection {
+  /** Domain evidence only. This is never a person score, rank, or prediction. */
+  items: McsLaunchReadinessItem[];
+  attentionDomains: McsLaunchReadinessDomain[];
+}
+
+/** Declaration merge keeps the shared response contract append-only. */
+export interface McsTeamLaunchCenterResponse {
+  readiness: McsLaunchReadinessProjection;
+}
+
+/* P2-98 — Kevin-only, read-only roster view of factual launch evidence. */
+export interface McsAdminLaunchReadinessRow {
+  tmagId: string;
+  fullName: string;
+  sponsorTmagId: string | null;
+  readiness: McsLaunchReadinessProjection;
+}
+
+export interface McsAdminLaunchReadinessResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  policy: 'read_only_report_only';
+  rows: McsAdminLaunchReadinessRow[];
+  summary: {
+    members: number;
+    membersWithAttention: number;
+  };
+  warnings: string[];
+}

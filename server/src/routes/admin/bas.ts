@@ -38,6 +38,7 @@ import {
   type AdminActor,
 } from '../../domain/adminBaCrud.js';
 import { buildAdminEntitlementAudit } from '../../domain/adminEntitlementAudit.js';
+import { buildAdminLaunchReadiness } from '../../domain/adminLaunchReadiness.js';
 import type {
   McsAdminBaDirectoryResponse,
   McsAdminBaEntitlementsResponse,
@@ -52,6 +53,16 @@ export const adminBasRoutes: Router = express.Router();
 adminBasRoutes.get('/entitlements/audit', requireAdmin, async (_req, res) => {
   try { res.status(200).json(await buildAdminEntitlementAudit()); }
   catch (err) { res.status(500).json({ ok: false, error: err instanceof Error ? err.message : String(err) }); }
+});
+
+adminBasRoutes.get('/launch-readiness', requireAdmin, async (req, res) => {
+  const requested = Number.parseInt(String(req.query.limit ?? '10000'), 10);
+  const limit = Number.isFinite(requested) ? Math.max(1, Math.min(50_000, requested)) : 10_000;
+  try {
+    res.status(200).json(await buildAdminLaunchReadiness({ limit }));
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err instanceof Error ? err.message : String(err) });
+  }
 });
 
 adminBasRoutes.get('/', requireAdmin, async (req: Request, res: Response) => {

@@ -20,3 +20,4 @@ export * from './resource-lifecycle.js';
 export * from './resource-catalog.js';
 export * from './knowledge-workflow-map.js';
 export * from './admin-knowledge-status.js';
+export * from './launch-center-catalog.js';
