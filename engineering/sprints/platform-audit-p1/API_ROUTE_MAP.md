@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-13T03:52:25.202Z
+- Generated: 2026-07-13T08:50:59.171Z
 - Mounted routers: 46
 - Route files: 46
-- Static route rows: 215
+- Static route rows: 216
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
 | ba_facing_gated | 72 |
-| pre_gate | 139 |
+| pre_gate | 140 |
 | pre_json_admin_body_limit | 3 |
 | raw_body_before_json | 1 |
 
@@ -22,7 +22,7 @@
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 91 |
+| admin | 92 |
 | ba_auth_steve_gated | 72 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 6 |
-| GET | 109 |
+| GET | 110 |
 | PATCH | 8 |
 | POST | 86 |
 | PUT | 6 |
@@ -123,17 +123,18 @@
 | POST | `/api/steve/discovery/converse` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:294` |
 | POST | `/api/admin/access-codes/` | pre_gate | admin | admin | `server/src/routes/admin/access-codes.ts:30` |
 | GET | `/api/admin/access-codes/` | pre_gate | admin | admin | `server/src/routes/admin/access-codes.ts:65` |
-| GET | `/api/admin/bas/entitlements/audit` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:52` |
-| GET | `/api/admin/bas/` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:57` |
-| GET | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:86` |
-| POST | `/api/admin/bas/:tmagId/sponsor-override` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:112` |
-| POST | `/api/admin/bas/:tmagId/entitlements` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:177` |
-| POST | `/api/admin/bas/:tmagId/leader-tag` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:218` |
-| POST | `/api/admin/bas/:tmagId/notes` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:258` |
-| POST | `/api/admin/bas/` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:368` |
-| PATCH | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:403` |
-| DELETE | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:429` |
-| POST | `/api/admin/bas/:tmagId/restore` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:455` |
+| GET | `/api/admin/bas/entitlements/audit` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:53` |
+| GET | `/api/admin/bas/launch-readiness` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:58` |
+| GET | `/api/admin/bas/` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:68` |
+| GET | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:97` |
+| POST | `/api/admin/bas/:tmagId/sponsor-override` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:123` |
+| POST | `/api/admin/bas/:tmagId/entitlements` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:188` |
+| POST | `/api/admin/bas/:tmagId/leader-tag` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:229` |
+| POST | `/api/admin/bas/:tmagId/notes` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:269` |
+| POST | `/api/admin/bas/` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:379` |
+| PATCH | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:414` |
+| DELETE | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:440` |
+| POST | `/api/admin/bas/:tmagId/restore` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:466` |
 | GET | `/api/admin/prospects/` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:114` |
 | GET | `/api/admin/prospects/filters` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:156` |
 | GET | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:180` |

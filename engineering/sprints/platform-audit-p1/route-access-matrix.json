@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T03:52:25.262Z",
+  "generatedAt": "2026-07-13T08:50:59.258Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -21,10 +21,10 @@
     "/api/training/fast-start/modules/1"
   ],
   "summary": {
-    "routes": 215,
+    "routes": 216,
     "byAccessClass": {
       "raw_body_webhook": 1,
-      "admin": 94,
+      "admin": 95,
       "public_health": 2,
       "auth_bootstrap": 3,
       "auth_session": 2,
@@ -40,7 +40,7 @@
     },
     "byRole": {
       "provider": 2,
-      "founder_admin": 100,
+      "founder_admin": 101,
       "anonymous": 5,
       "system": 10,
       "brand_ambassador": 88,
@@ -48,7 +48,7 @@
     },
     "byEntitlement": {
       "machine_credential": 12,
-      "admin_allowlist": 100,
+      "admin_allowlist": 101,
       "none": 5,
       "registered_ba": 88,
       "valid_prospect_identity": 18,
@@ -56,7 +56,7 @@
     },
     "guardCoverage": {
       "requireAuth": 87,
-      "requireAdmin": 94,
+      "requireAdmin": 95,
       "requireAdminOrHealthSecret": 1,
       "requireRuntimeInternal": 5,
       "requireSteveComplete": 72,
@@ -1616,7 +1616,61 @@
       "id": "GET /api/admin/bas/entitlements/audit",
       "method": "GET",
       "fullPath": "/api/admin/bas/entitlements/audit",
-      "routeSource": "server/src/routes/admin/bas.ts:52",
+      "routeSource": "server/src/routes/admin/bas.ts:53",
+      "mountPath": "/api/admin/bas",
+      "mountPhase": "pre_gate",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/admin/bas/launch-readiness",
+      "method": "GET",
+      "fullPath": "/api/admin/bas/launch-readiness",
+      "routeSource": "server/src/routes/admin/bas.ts:58",
       "mountPath": "/api/admin/bas",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -1670,7 +1724,7 @@
       "id": "GET /api/admin/bas/",
       "method": "GET",
       "fullPath": "/api/admin/bas/",
-      "routeSource": "server/src/routes/admin/bas.ts:57",
+      "routeSource": "server/src/routes/admin/bas.ts:68",
       "mountPath": "/api/admin/bas",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -1724,7 +1778,7 @@
       "id": "GET /api/admin/bas/:tmagId",
       "method": "GET",
       "fullPath": "/api/admin/bas/:tmagId",
-      "routeSource": "server/src/routes/admin/bas.ts:86",
+      "routeSource": "server/src/routes/admin/bas.ts:97",
       "mountPath": "/api/admin/bas",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -1778,7 +1832,7 @@
       "id": "POST /api/admin/bas/:tmagId/sponsor-override",
       "method": "POST",
       "fullPath": "/api/admin/bas/:tmagId/sponsor-override",
-      "routeSource": "server/src/routes/admin/bas.ts:112",
+      "routeSource": "server/src/routes/admin/bas.ts:123",
       "mountPath": "/api/admin/bas",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -1832,7 +1886,7 @@
       "id": "POST /api/admin/bas/:tmagId/entitlements",
       "method": "POST",
       "fullPath": "/api/admin/bas/:tmagId/entitlements",
-      "routeSource": "server/src/routes/admin/bas.ts:177",
+      "routeSource": "server/src/routes/admin/bas.ts:188",
       "mountPath": "/api/admin/bas",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -1886,7 +1940,7 @@
       "id": "POST /api/admin/bas/:tmagId/leader-tag",
       "method": "POST",
       "fullPath": "/api/admin/bas/:tmagId/leader-tag",
-      "routeSource": "server/src/routes/admin/bas.ts:218",
+      "routeSource": "server/src/routes/admin/bas.ts:229",
       "mountPath": "/api/admin/bas",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -1940,7 +1994,7 @@
       "id": "POST /api/admin/bas/:tmagId/notes",
       "method": "POST",
       "fullPath": "/api/admin/bas/:tmagId/notes",
-      "routeSource": "server/src/routes/admin/bas.ts:258",
+      "routeSource": "server/src/routes/admin/bas.ts:269",
       "mountPath": "/api/admin/bas",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -1994,7 +2048,7 @@
       "id": "POST /api/admin/bas/",
       "method": "POST",
       "fullPath": "/api/admin/bas/",
-      "routeSource": "server/src/routes/admin/bas.ts:368",
+      "routeSource": "server/src/routes/admin/bas.ts:379",
       "mountPath": "/api/admin/bas",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -2048,7 +2102,7 @@
       "id": "PATCH /api/admin/bas/:tmagId",
       "method": "PATCH",
       "fullPath": "/api/admin/bas/:tmagId",
-      "routeSource": "server/src/routes/admin/bas.ts:403",
+      "routeSource": "server/src/routes/admin/bas.ts:414",
       "mountPath": "/api/admin/bas",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -2102,7 +2156,7 @@
       "id": "DELETE /api/admin/bas/:tmagId",
       "method": "DELETE",
       "fullPath": "/api/admin/bas/:tmagId",
-      "routeSource": "server/src/routes/admin/bas.ts:429",
+      "routeSource": "server/src/routes/admin/bas.ts:440",
       "mountPath": "/api/admin/bas",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -2156,7 +2210,7 @@
       "id": "POST /api/admin/bas/:tmagId/restore",
       "method": "POST",
       "fullPath": "/api/admin/bas/:tmagId/restore",
-      "routeSource": "server/src/routes/admin/bas.ts:455",
+      "routeSource": "server/src/routes/admin/bas.ts:466",
       "mountPath": "/api/admin/bas",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",

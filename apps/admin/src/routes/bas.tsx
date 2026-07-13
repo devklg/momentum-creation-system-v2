@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { DirectoryTable } from '@/components/ba-oversight/directory-table';
 import { ProfileDrawer } from '@/components/ba-oversight/profile-drawer';
 import { BaCrudModal, type BaCrudResponse } from '@/components/ba-oversight/ba-crud-modal';
+import { LaunchReadinessPanel } from '@/components/ba-oversight/launch-readiness-panel';
 import type {
   McsAdminBaDirectoryResponse,
   McsAdminBaDirectoryRow,
@@ -125,6 +126,8 @@ export function BAsPage() {
       {err && (
         <p className="text-[13px] font-mono tracking-[0.04em] text-red-400 mb-4">{err}</p>
       )}
+
+      <LaunchReadinessPanel />
 
       <div className="mb-4 max-w-md">
         <Input
