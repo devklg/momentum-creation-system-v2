@@ -4,15 +4,15 @@
 
 ## Summary
 
-- Generated: 2026-07-12T11:27:29.962Z
-- Routes: 214
+- Generated: 2026-07-13T01:34:02.945Z
+- Routes: 215
 - Findings: 0
 
 ## Routes By Access Category
 
 | Access category | Routes |
 | --- | ---: |
-| admin | 93 |
+| admin | 94 |
 | admin_or_health_secret | 1 |
 | auth_bootstrap | 3 |
 | auth_session | 2 |
@@ -34,7 +34,7 @@
 | customSecretGuard | 10 |
 | rateLimited | 3 |
 | rawBodyParser | 1 |
-| requireAdmin | 93 |
+| requireAdmin | 94 |
 | requireAdminOrHealthSecret | 1 |
 | requireAuth | 87 |
 | requireRuntimeInternal | 5 |
@@ -47,7 +47,7 @@
 | --- | ---: |
 | anonymous | 5 |
 | brand_ambassador | 88 |
-| founder_admin | 99 |
+| founder_admin | 100 |
 | prospect | 18 |
 | provider | 2 |
 | system | 10 |
@@ -56,7 +56,7 @@
 
 | Entitlement | Routes |
 | --- | ---: |
-| admin_allowlist | 99 |
+| admin_allowlist | 100 |
 | machine_credential | 12 |
 | none | 5 |
 | registered_ba | 88 |
@@ -87,8 +87,9 @@
 | Method | Path | Roles | Entitlements | Effective gates | Access category | Auth gate | Admin gate | Steve gate | Steve exception | VM entitlement | Token identity | Machine secret | Raw body | Rate limit | Body limit | Notes | Findings | Source |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | POST | `/api/telnyx/webhook` | provider | machine_credential | telnyx_signature | raw_body_webhook | none | none | not_applicable | none | none | none | telnyx_signature | yes | no | global_256kb_json | none | none | `server/src/routes/telnyx-webhook.ts:14` |
-| POST | `/api/admin/knowledge/sources` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:40` |
-| POST | `/api/admin/knowledge/sources/upload` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:102` |
+| GET | `/api/admin/knowledge/status` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:41` |
+| POST | `/api/admin/knowledge/sources` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:50` |
+| POST | `/api/admin/knowledge/sources/upload` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:112` |
 | GET | `/api/health/` | anonymous, system | machine_credential, none | none | public_health | none | none | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/health.ts:7` |
 | GET | `/api/health/persistence` | anonymous, system | machine_credential, none | none | public_health | none | none | not_applicable | none | none | none | none | no | no | global_256kb_json | public persistence diagnostic; review before production exposure if ops-only detail is considered sensitive | none | `server/src/routes/health.ts:15` |
 | POST | `/api/auth/verify-code` | anonymous | none | none | auth_bootstrap | none | none | not_applicable | none | none | none | none | no | yes | global_256kb_json | none | none | `server/src/routes/auth.ts:23` |
