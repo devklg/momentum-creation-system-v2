@@ -111,6 +111,7 @@ export interface McsSourceTraceability {
   title?: string;
   capturedAt?: string;
   reviewedAt?: string;
+  citation?: import('./knowledge.js').McsKnowledgeCitation;
 }
 
 export type McsRetrievalMethod =

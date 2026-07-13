@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T02:54:49.687Z
+- Generated: 2026-07-13T03:05:51.106Z
 - Mongo collections: 66
 - Neo4j labels: 73
 - Neo4j relationships: 61
 - Chroma collections: 51
 - Route modules: 45
 - Route handlers: 243
-- Shared exports: 985
+- Shared exports: 986
 
 ## Mongo Collections
 
@@ -780,6 +780,7 @@
 | `McsApprovedKnowledgeQueryResultMetadata` | interface | `packages/shared/src/runtime/knowledge-query.ts` |
 | `McsApprovedKnowledgeQuerySchemaVersion` | type | `packages/shared/src/runtime/knowledge-query.ts` |
 | `McsKnowledgeCandidateReference` | interface | `packages/shared/src/runtime/knowledge.ts` |
+| `McsKnowledgeCitation` | interface | `packages/shared/src/runtime/knowledge.ts` |
 | `McsKnowledgeDomain` | type | `packages/shared/src/runtime/knowledge.ts` |
 | `McsKnowledgeLifecycleStatus` | type | `packages/shared/src/runtime/knowledge.ts` |
 | `McsKnowledgeReference` | interface | `packages/shared/src/runtime/knowledge.ts` |

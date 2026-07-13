@@ -113,6 +113,7 @@ export interface McsKnowledgeBaseChunkRecord extends McsKnowledgeChunk {
   authorityKind?: McsKnowledgeAuthorityKind;
   authorityStatus?: McsKnowledgeAuthorityStatus;
   sourceTitle: string;
+  citation: import('./knowledge.js').McsKnowledgeCitation;
 }
 
 export interface McsKnowledgeBaseIndexProjection extends McsKnowledgeIndexRecord {
