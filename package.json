@@ -29,6 +29,7 @@
     "catalog:persistence:check": "node server/scripts/generate-persistence-write-catalog.mjs --check",
     "catalog:schema": "node server/scripts/generate-schema-catalog.mjs",
     "catalog:schema:check": "node server/scripts/generate-schema-catalog.mjs --check",
+    "catalog:schema-drift:check": "pnpm catalog:schema:check && pnpm catalog:mongo-ownership:check && pnpm catalog:mongo-indexes:check && pnpm catalog:neo4j:check && pnpm catalog:chroma:check",
     "catalog:mongo-ownership": "node server/scripts/generate-mongo-ownership-map.mjs",
     "catalog:mongo-ownership:check": "node server/scripts/generate-mongo-ownership-map.mjs --check",
     "catalog:mongo-indexes": "node server/scripts/generate-mongo-index-audit.mjs",
