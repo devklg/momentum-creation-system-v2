@@ -18,3 +18,7 @@ Consequences:
 - “Launch Center” remains visible user-facing language during launch.
 - Cockpit owns routing and lifecycle transition; training, invitations, profile, orientation, and CRM remain their own authoritative domains.
 - Launch readiness describes completed actions and available next steps. It must not score, rank, classify, or predict a person.
+
+## P2-96 conditional disposition
+
+The “umbrella concept” branch is not applicable because P2-94 selected the named-surface branch. Cockpit, training, invitations, and CRM remain independent authoritative product domains; they are not renamed or subsumed under a Launch Center umbrella. The current read-only projection composes onboarding, training, and invitation evidence. Profile and CRM readiness join that projection in P2-97.
