@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T01:34:02.869Z",
+  "generatedAt": "2026-07-13T01:49:41.678Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -547,7 +547,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:112",
+      "source": "server/src/routes/admin/knowledge.ts:114",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,

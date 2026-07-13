@@ -37,6 +37,7 @@ const SERVICE_NAME = 'mcs_graphrag';
 const TENANT_NAMESPACE = 'momentum';
 const SCHEMA_VERSION = 1;
 const EMBEDDING_MODEL: McsEmbeddingModel = 'all-MiniLM-L6-v2';
+export const GRAPHRAG_EMBEDDING_MODEL_VERSION = 'all-MiniLM-L6-v2';
 const EMBEDDING_DIM = 384;
 const DEFAULT_TOP_K = 5;
 const MAX_TOP_K = 25;
@@ -211,7 +212,7 @@ export function graphRagEmbeddingDim(): number {
  */
 function buildGraphRagCypher(
   record: McsGraphRagRecord,
-): { cypher: string; params?: Record<string, unknown> } {
+): { cypher: string; params?: Record<string, unknown>; verifyCypher?: string } {
   return {
     cypher: `
       MERGE (k:TmagKnowledge {id: $id})
@@ -234,5 +235,6 @@ function buildGraphRagCypher(
       retrievalReady: record.retrievalReady,
       createdAt: record.createdAt,
     },
+    verifyCypher: 'MATCH (k:TmagKnowledge {id:$id}) RETURN count(k) AS n',
   };
 }

@@ -31,7 +31,7 @@
     {
       "file": "PLATFORM_AUDIT_PRIORITY_TASKLIST.md",
       "authorityStatus": "current_execution_queue",
-      "contentSha256": "23d1011169c94d4c9b0aea484d9738afdbb7d8c215dbd9c8df7a32fea00ae82b",
+      "contentSha256": "5f08e2f00a8f9a960461494c8a061d6cc9fbfc1f0cf0e5e6bbbcfde14d65fddb",
       "reviewedAt": "2026-07-12"
     }
   ],
@@ -74,9 +74,9 @@
           "contentSha256": "3b6a3e873643ca862ab09de16d8b0db562741f27eb099a8edbf7e0c5e4d93cad"
         }
       ],
-      "contentSha256": "d73603553a2ee6a429cbda9e0f5c2b53f49ecef23e7edb055d8c15b23fcd7c49",
+      "contentSha256": "774621ed20c991aca6f62f7c8918c0128bd12709416abb21ab420476a93840ab",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-13T01:34:02.869Z"
+      "generatedAt": "2026-07-13T01:49:41.678Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/route-access-matrix.json",
@@ -85,12 +85,12 @@
       "sources": [
         {
           "path": "engineering/sprints/platform-audit-p1/api-route-map.json",
-          "contentSha256": "d73603553a2ee6a429cbda9e0f5c2b53f49ecef23e7edb055d8c15b23fcd7c49"
+          "contentSha256": "774621ed20c991aca6f62f7c8918c0128bd12709416abb21ab420476a93840ab"
         }
       ],
-      "contentSha256": "8bf9e4aa76e5422089470d1dbb9e986a3b208204fa3b0ec5b022cba2787cd153",
+      "contentSha256": "a729197a019cfcedb1d3baceebc8bed32e5e8878bff10fa337dc5e41fc1a1a5f",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-13T01:34:02.945Z"
+      "generatedAt": "2026-07-13T01:49:41.736Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/persistence-write-catalog.json",
@@ -99,7 +99,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "ce3d5c30bd08f0831f471f1a5668ce2a1f0079db02efd7b7db138aad7f071c57"
+          "contentSha256": "dbd957747fdec3e1435e4613cc016f65d27d0f5044f0396a4012e8af8a5f29d2"
         }
       ],
       "contentSha256": "989906a1996568122435d947148abe8bbdeea8756900195814cecfc8090d3c2a",
@@ -117,7 +117,7 @@
         },
         {
           "path": "server/src",
-          "contentSha256": "ce3d5c30bd08f0831f471f1a5668ce2a1f0079db02efd7b7db138aad7f071c57"
+          "contentSha256": "dbd957747fdec3e1435e4613cc016f65d27d0f5044f0396a4012e8af8a5f29d2"
         }
       ],
       "contentSha256": "222a34f2c8424e175696d13a9b850367af494da6b38e26ce513c3461741110f5",
@@ -131,7 +131,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "ce3d5c30bd08f0831f471f1a5668ce2a1f0079db02efd7b7db138aad7f071c57"
+          "contentSha256": "dbd957747fdec3e1435e4613cc016f65d27d0f5044f0396a4012e8af8a5f29d2"
         }
       ],
       "contentSha256": "1ad9c82de28cd601d4779a985ed16805757ebfe20fdcd7c5c75dc619ad3e1c5a",
@@ -145,7 +145,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "ce3d5c30bd08f0831f471f1a5668ce2a1f0079db02efd7b7db138aad7f071c57"
+          "contentSha256": "dbd957747fdec3e1435e4613cc016f65d27d0f5044f0396a4012e8af8a5f29d2"
         }
       ],
       "contentSha256": "a436fc90dc485770d421b66eb248d313f9dc939a9ce3bb9c98b0e5f9a71b9418",
@@ -159,7 +159,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "ce3d5c30bd08f0831f471f1a5668ce2a1f0079db02efd7b7db138aad7f071c57"
+          "contentSha256": "dbd957747fdec3e1435e4613cc016f65d27d0f5044f0396a4012e8af8a5f29d2"
         }
       ],
       "contentSha256": "395657fad532a136e4c701e26f4332989aaf1028a060bedf67af7490e06bf8e8",
@@ -173,7 +173,7 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "ce3d5c30bd08f0831f471f1a5668ce2a1f0079db02efd7b7db138aad7f071c57"
+          "contentSha256": "dbd957747fdec3e1435e4613cc016f65d27d0f5044f0396a4012e8af8a5f29d2"
         }
       ],
       "contentSha256": "e4fb6a9c1135faf791efe799a6f6b2eecf75c5c295ec33d3a1d2e9e78f544ce2",

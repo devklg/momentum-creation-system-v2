@@ -38,6 +38,10 @@ import {
   deriveKnowledgeId,
   type ChunkOptions,
 } from '../../runtime/knowledge/intake/index.js';
+import {
+  appendGraphRagRecord,
+  GRAPHRAG_EMBEDDING_MODEL_VERSION,
+} from '../../domain/graphrag.js';
 
 export const KNOWLEDGE_SOURCE_COLLECTION = MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION;
 export const KNOWLEDGE_CHUNK_COLLECTION = MCS_KNOWLEDGE_BASE_CHUNK_COLLECTION;
@@ -66,6 +70,8 @@ export interface CreateKevinApprovedKnowledgeSourceResult {
   references: McsKnowledgeReference[];
   chunkCount: number;
   indexRecordCount: number;
+  graphRagRecordCount: number;
+  graphRagFailureCount: number;
 }
 
 interface MongoQueryResult {
@@ -238,13 +244,54 @@ export async function createKevinApprovedKnowledgeSource(
     });
   }
 
+  let graphRagRecordCount = 0;
+  let graphRagFailureCount = 0;
+  for (const chunkRecord of chunkRecords) {
+    try {
+      const projected = await projectApprovedChunkToGraphRag(chunkRecord);
+      if (projected) graphRagRecordCount += 1;
+    } catch (error) {
+      graphRagFailureCount += 1;
+      // Approved knowledge remains authoritative. A derived-memory failure must
+      // be visible, but must never roll back or ambiguously mutate that approval.
+      console.error(
+        `[knowledge][graphrag] projection failed for ${chunkRecord.chunkId}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
   return {
     source: sourceRecord,
     chunks: chunkRecords,
     references,
     chunkCount: intake.chunks.length,
     indexRecordCount: intake.indexRecords.length,
+    graphRagRecordCount,
+    graphRagFailureCount,
   };
+}
+
+export async function projectApprovedChunkToGraphRag(
+  chunk: McsKnowledgeBaseChunkRecord,
+) {
+  if (chunk.status !== 'active' || !chunk.retrievalEligible) return null;
+  if (chunk.authorityStatus !== 'active_authority') return null;
+  const domain = chunk.domain === 'system' || chunk.domain === 'governance'
+    ? 'organizational'
+    : chunk.domain;
+  return appendGraphRagRecord({
+    knowledgeObjectId: String(chunk.knowledgeId),
+    version: chunk.sourceVersion,
+    tenantId: chunk.scope.tenantId,
+    domain,
+    language: chunk.language,
+    summary: chunk.summary || chunk.text,
+    modelVersion: GRAPHRAG_EMBEDDING_MODEL_VERSION,
+    title: chunk.title,
+    type: 'graphrag_chunk',
+    retrievalReady: false,
+    derivedFrom: [String(chunk.sourceId), chunk.chunkId],
+  });
 }
 
 export function createStoredApprovedKnowledgeProvider(): Pick<

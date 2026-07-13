@@ -101,6 +101,8 @@ adminKnowledgeRoutes.post('/sources', requireAdmin, async (req, res) => {
       language: result.source.language,
       chunkCount: result.chunkCount,
       referenceCount: result.references.length,
+      graphRagRecordCount: result.graphRagRecordCount,
+      graphRagFailureCount: result.graphRagFailureCount,
     });
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -193,6 +195,8 @@ adminKnowledgeRoutes.post('/sources/upload', requireAdmin, async (req, res) => {
       extractedCharacters: extracted.content.length,
       chunkCount: result.chunkCount,
       referenceCount: result.references.length,
+      graphRagRecordCount: result.graphRagRecordCount,
+      graphRagFailureCount: result.graphRagFailureCount,
     });
   } catch (err) {
     if (err instanceof KnowledgeFileExtractionError) {

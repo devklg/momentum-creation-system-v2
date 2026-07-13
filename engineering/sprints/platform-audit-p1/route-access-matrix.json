@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T01:34:02.945Z",
+  "generatedAt": "2026-07-13T01:49:41.736Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -239,7 +239,7 @@
       "id": "POST /api/admin/knowledge/sources/upload",
       "method": "POST",
       "fullPath": "/api/admin/knowledge/sources/upload",
-      "routeSource": "server/src/routes/admin/knowledge.ts:112",
+      "routeSource": "server/src/routes/admin/knowledge.ts:114",
       "mountPath": "/api/admin/knowledge",
       "mountPhase": "pre_json_admin_body_limit",
       "routeAccessProfile": "admin",
