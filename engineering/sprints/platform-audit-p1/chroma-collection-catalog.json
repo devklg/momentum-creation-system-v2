@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T19:20:46.762Z",
+  "generatedAt": "2026-07-13T19:31:24.967Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
