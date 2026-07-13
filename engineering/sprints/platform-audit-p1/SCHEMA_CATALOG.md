@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T21:30:03.110Z
+- Generated: 2026-07-13T22:39:30.888Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
 - Route handlers: 266
-- Shared exports: 1051
+- Shared exports: 1057
 
 ## Mongo Collections
 
@@ -918,6 +918,12 @@
 | `McsUpdateTenantSettingsResponse` | interface | `packages/shared/src/tenant.ts` |
 | `McsValidateTenantTemplatePayload` | interface | `packages/shared/src/tenant.ts` |
 | `McsValidateTenantTemplateResponse` | interface | `packages/shared/src/tenant.ts` |
+| `MCS_TRAINING_CATALOG` | const | `packages/shared/src/training-catalog.ts` |
+| `MCS_TRAINING_CATALOG_SCHEMA_VERSION` | const | `packages/shared/src/training-catalog.ts` |
+| `MCS_TRAINING_MODULE_CATALOG` | const | `packages/shared/src/training-catalog.ts` |
+| `McsTrainingAccessPrerequisite` | type | `packages/shared/src/training-catalog.ts` |
+| `McsTrainingCatalogModuleId` | type | `packages/shared/src/training-catalog.ts` |
+| `McsTrainingModuleCatalogEntry` | interface | `packages/shared/src/training-catalog.ts` |
 | `MCS_BA_NOTIF_DEFAULTS` | const | `packages/shared/src/types.ts` |
 | `MCS_CRM_DISPOSITIONS` | const | `packages/shared/src/types.ts` |
 | `MCS_FAST_START_MODULES` | const | `packages/shared/src/types.ts` |

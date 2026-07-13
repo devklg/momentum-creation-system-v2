@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T21:30:03.110Z",
+  "generatedAt": "2026-07-13T22:39:30.888Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -8727,6 +8727,36 @@
       "file": "packages/shared/src/tenant.ts"
     },
     {
+      "name": "MCS_TRAINING_CATALOG",
+      "kind": "const",
+      "file": "packages/shared/src/training-catalog.ts"
+    },
+    {
+      "name": "MCS_TRAINING_CATALOG_SCHEMA_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/training-catalog.ts"
+    },
+    {
+      "name": "MCS_TRAINING_MODULE_CATALOG",
+      "kind": "const",
+      "file": "packages/shared/src/training-catalog.ts"
+    },
+    {
+      "name": "McsTrainingAccessPrerequisite",
+      "kind": "type",
+      "file": "packages/shared/src/training-catalog.ts"
+    },
+    {
+      "name": "McsTrainingCatalogModuleId",
+      "kind": "type",
+      "file": "packages/shared/src/training-catalog.ts"
+    },
+    {
+      "name": "McsTrainingModuleCatalogEntry",
+      "kind": "interface",
+      "file": "packages/shared/src/training-catalog.ts"
+    },
+    {
       "name": "MCS_BA_NOTIF_DEFAULTS",
       "kind": "const",
       "file": "packages/shared/src/types.ts"
@@ -11214,6 +11244,6 @@
     "chromaCollections": 53,
     "routeModules": 49,
     "routeHandlers": 266,
-    "sharedExports": 1051
+    "sharedExports": 1057
   }
 }
