@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T08:51:07.205Z",
+  "generatedAt": "2026-07-13T09:14:06.522Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -6405,6 +6405,11 @@
       "file": "packages/shared/src/resource-catalog.ts"
     },
     {
+      "name": "MCS_RESOURCE_CENTER_CATALOG",
+      "kind": "const",
+      "file": "packages/shared/src/resource-center-catalog.ts"
+    },
+    {
       "name": "evaluateResourceLifecycleTransition",
       "kind": "function",
       "file": "packages/shared/src/resource-lifecycle.ts"
@@ -10382,6 +10387,6 @@
     "chromaCollections": 51,
     "routeModules": 45,
     "routeHandlers": 244,
-    "sharedExports": 994
+    "sharedExports": 995
   }
 }

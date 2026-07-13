@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T08:51:07.205Z
+- Generated: 2026-07-13T09:14:06.522Z
 - Mongo collections: 66
 - Neo4j labels: 73
 - Neo4j relationships: 61
 - Chroma collections: 51
 - Route modules: 45
 - Route handlers: 244
-- Shared exports: 994
+- Shared exports: 995
 
 ## Mongo Collections
 
@@ -539,6 +539,7 @@
 | `McsResourceReadinessCheck` | type | `packages/shared/src/resource-catalog.ts` |
 | `resourceCatalogRetrievalEligible` | function | `packages/shared/src/resource-catalog.ts` |
 | `validateResourceCatalogEntry` | function | `packages/shared/src/resource-catalog.ts` |
+| `MCS_RESOURCE_CENTER_CATALOG` | const | `packages/shared/src/resource-center-catalog.ts` |
 | `evaluateResourceLifecycleTransition` | function | `packages/shared/src/resource-lifecycle.ts` |
 | `legacyActiveBooleanLifecycle` | function | `packages/shared/src/resource-lifecycle.ts` |
 | `MCS_RESOURCE_LIFECYCLE_STATES` | const | `packages/shared/src/resource-lifecycle.ts` |
