@@ -13,4 +13,13 @@ export interface McsAdminKnowledgeStatusResponse {
   pendingNeo4jProjections: number;
   failedNeo4jProjections: number;
   warnings: string[];
+  contextManager: {
+    retention: 'in_process_since_restart';
+    liveSurfaces: { michael: boolean; steve: boolean };
+    total: number;
+    successful: number;
+    degraded: number;
+    lastObservedAt: string | null;
+    degradedReasons: Array<{ reason: string; count: number }>;
+  };
 }
