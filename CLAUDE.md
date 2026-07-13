@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Automatic context lifecycle
+
+ACR-0017 project hooks in `.claude/settings.json` inject the living continuation
+foundation at session and subagent start, then run the ACR-0014 memory guard on
+the first user prompt. If the injected context says the inbox or guard is
+unavailable, do not treat that as absence; run the documented session-start
+query and `pnpm memory:guard "<topic>"` manually before substantive work.
+
 ## Repo orientation — read these first
 
 Before writing code in this repo, read in this order:

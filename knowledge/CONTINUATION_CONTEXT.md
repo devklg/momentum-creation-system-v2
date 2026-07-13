@@ -14,9 +14,10 @@ You are continuing implementation of Team Magnificent Momentum Creation System
 V2 in `D:/momentum-creation-system-v2`. Do not begin from general assumptions
 and do not redesign the platform.
 
-First, read and obey the repository `AGENTS.md`. Process the Intervector inbox
-before substantive work, including unread high-priority messages in
-`universal_gateway.agent_message_board`. Then run:
+First, read and obey the repository `AGENTS.md`. ACR-0017 project hooks should
+already have injected this foundation, the unread Intervector summary, and a
+topic-specific memory guard before substantive work. If any automatic leg
+reports unavailable, run the fallback commands explicitly:
 
 ```powershell
 git status --short --branch

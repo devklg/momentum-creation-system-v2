@@ -27,7 +27,11 @@ Before substantive work on any thread, the agent queries the index across **all*
 
 This is the single highest-value function. Had it existed today it would have stopped the word "anchor" cold.
 
-Cheap. Lazy. No session-start ritual — it fires on the work, not on the greeting.
+Cheap and lazy: the topic-specific guard fires on the work, not on the greeting.
+ACR-0017 adds lifecycle enforcement around this principle: `SessionStart`
+injects the durable continuation foundation, and the first real
+`UserPromptSubmit` runs this guard against the user's topic. A trivial first
+prompt such as `continue` resolves to the handoff's `front_of_line`.
 
 ### 3.2 PARSE
 
@@ -63,5 +67,7 @@ Write the handoff per `docs/handoff-contract.md`: `_id = handoff_chat_{N}`, agre
 - The agent **proposes**; Kevin **disposes**. It never self-confirms, never self-weights, never mints a handle.
 - Evidence or it didn't happen: every candidate cites Kevin's actual words.
 - Never flatten lineage: Kevin authors the meaning; Claude is the conversational partner; Codex operationalizes (per the 2026-07-06 lineage decision).
-- No ritual. The guard fires on work, not on "hello."
+- Automatic lifecycle delivery is governed by ACR-0017. Static foundation
+  arrives at session/subagent start; topic retrieval fires on the first work
+  prompt, not on the greeting itself.
 - Silence is a valid output. A chat with no durable learning produces no candidates.
