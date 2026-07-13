@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-13T01:34:02.945Z
+- Generated: 2026-07-13T01:49:41.736Z
 - Routes: 215
 - Findings: 0
 
@@ -89,7 +89,7 @@
 | POST | `/api/telnyx/webhook` | provider | machine_credential | telnyx_signature | raw_body_webhook | none | none | not_applicable | none | none | none | telnyx_signature | yes | no | global_256kb_json | none | none | `server/src/routes/telnyx-webhook.ts:14` |
 | GET | `/api/admin/knowledge/status` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:41` |
 | POST | `/api/admin/knowledge/sources` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:50` |
-| POST | `/api/admin/knowledge/sources/upload` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:112` |
+| POST | `/api/admin/knowledge/sources/upload` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:114` |
 | GET | `/api/health/` | anonymous, system | machine_credential, none | none | public_health | none | none | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/health.ts:7` |
 | GET | `/api/health/persistence` | anonymous, system | machine_credential, none | none | public_health | none | none | not_applicable | none | none | none | none | no | no | global_256kb_json | public persistence diagnostic; review before production exposure if ops-only detail is considered sensitive | none | `server/src/routes/health.ts:15` |
 | POST | `/api/auth/verify-code` | anonymous | none | none | auth_bootstrap | none | none | not_applicable | none | none | none | none | no | yes | global_256kb_json | none | none | `server/src/routes/auth.ts:23` |

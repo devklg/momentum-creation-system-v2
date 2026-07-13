@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-13T01:34:02.869Z
+- Generated: 2026-07-13T01:49:41.678Z
 - Mounted routers: 46
 - Route files: 46
 - Static route rows: 215
@@ -97,7 +97,7 @@
 | POST | `/api/telnyx/webhook` | raw_body_before_json | raw_body_webhook | raw-body | `server/src/routes/telnyx-webhook.ts:14` |
 | GET | `/api/admin/knowledge/status` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:41` |
 | POST | `/api/admin/knowledge/sources` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:50` |
-| POST | `/api/admin/knowledge/sources/upload` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:112` |
+| POST | `/api/admin/knowledge/sources/upload` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:114` |
 | GET | `/api/health/` | pre_gate | pre_gate_or_public | none | `server/src/routes/health.ts:7` |
 | GET | `/api/health/persistence` | pre_gate | pre_gate_or_public | none | `server/src/routes/health.ts:15` |
 | POST | `/api/auth/verify-code` | pre_gate | pre_gate_or_public | rate-limit | `server/src/routes/auth.ts:23` |
