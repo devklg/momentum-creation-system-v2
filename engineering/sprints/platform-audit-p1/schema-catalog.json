@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T17:21:28.731Z",
+  "generatedAt": "2026-07-13T18:06:09.476Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -1813,7 +1813,7 @@
       "sources": [
         {
           "file": "server/src/domain/eventCenter.ts",
-          "line": 33,
+          "line": 122,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -6373,6 +6373,41 @@
       "file": "packages/shared/src/event-center.ts"
     },
     {
+      "name": "McsEventCenterAttendance",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventCenterCapacity",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventCenterEvent",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventCenterEventType",
+      "kind": "type",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventCenterFollowUp",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventCenterRegistration",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventCenterReminders",
+      "kind": "interface",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
       "name": "McsEventCenterResponse",
       "kind": "interface",
       "file": "packages/shared/src/event-center.ts"
@@ -6385,6 +6420,11 @@
     {
       "name": "McsEventCenterSourceStatus",
       "kind": "type",
+      "file": "packages/shared/src/event-center.ts"
+    },
+    {
+      "name": "McsEventCenterVisibility",
+      "kind": "interface",
       "file": "packages/shared/src/event-center.ts"
     },
     {
@@ -11030,6 +11070,6 @@
     "chromaCollections": 52,
     "routeModules": 49,
     "routeHandlers": 264,
-    "sharedExports": 1032
+    "sharedExports": 1040
   }
 }
