@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T03:16:43.188Z
+- Generated: 2026-07-13T03:29:30.074Z
 - Mongo collections: 66
 - Neo4j labels: 73
 - Neo4j relationships: 61
 - Chroma collections: 51
 - Route modules: 45
 - Route handlers: 243
-- Shared exports: 986
+- Shared exports: 987
 
 ## Mongo Collections
 
@@ -443,6 +443,7 @@
 | `McsKnowledgeWorkflowEdge` | interface | `packages/shared/src/knowledge-workflow-map.ts` |
 | `McsKnowledgeWorkflowEdgeStatus` | type | `packages/shared/src/knowledge-workflow-map.ts` |
 | `McsKnowledgeWorkflowStage` | interface | `packages/shared/src/knowledge-workflow-map.ts` |
+| `MCS_LAUNCH_CENTER_CATALOG` | const | `packages/shared/src/launch-center-catalog.ts` |
 | `MCS_LEADER_CREDIBILITY` | const | `packages/shared/src/leaders.ts` |
 | `McsLeaderCredibilityContent` | interface | `packages/shared/src/leaders.ts` |
 | `McsLeaderProfile` | interface | `packages/shared/src/leaders.ts` |

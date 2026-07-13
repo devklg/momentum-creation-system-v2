@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T03:16:43.188Z",
+  "generatedAt": "2026-07-13T03:29:30.074Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -5920,6 +5920,11 @@
       "file": "packages/shared/src/knowledge-workflow-map.ts"
     },
     {
+      "name": "MCS_LAUNCH_CENTER_CATALOG",
+      "kind": "const",
+      "file": "packages/shared/src/launch-center-catalog.ts"
+    },
+    {
       "name": "MCS_LEADER_CREDIBILITY",
       "kind": "const",
       "file": "packages/shared/src/leaders.ts"
@@ -10337,6 +10342,6 @@
     "chromaCollections": 51,
     "routeModules": 45,
     "routeHandlers": 243,
-    "sharedExports": 986
+    "sharedExports": 987
   }
 }
