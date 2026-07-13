@@ -112,6 +112,12 @@ export {
   createContextManagerServiceFromRetrieval,
   planContextRequest,
 } from './contextManagerService.js';
+export {
+  ContextManagerTraceValidationError,
+  assertValidContextManagerExecutionTraceV1,
+  validateContextManagerExecutionTraceV1,
+} from './contextManagerTraceContract.js';
+export type { ContextManagerTraceValidationIssue } from './contextManagerTraceContract.js';
 export type {
   ContextManagerExecutionTrace,
   ContextManagerPlan,

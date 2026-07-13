@@ -304,3 +304,32 @@ export interface McsContextPacketRequest {
   language: McsRuntimeLanguage;
   taskType: McsRuntimeTaskType;
 }
+
+export type McsContextManagerTraceSchemaVersion = 'context_manager_trace.v1';
+
+/** Content-free Planner / Executor / Tracer evidence paired to one Context Packet. */
+export interface McsContextManagerExecutionTraceV1 {
+  schemaVersion: McsContextManagerTraceSchemaVersion;
+  requestId: McsContextRequestId;
+  packetId: McsContextPacketId;
+  agentKey: McsAgentKey;
+  taskType: McsRuntimeTaskType;
+  planner: {
+    domains: readonly string[];
+    language: McsRuntimeLanguage;
+    allowLanguageFallback: boolean;
+    maxResults?: number;
+  };
+  executor: {
+    retrievalStatus: 'ok' | 'degraded';
+    approvedCount: number;
+    candidateExcludedCount: number;
+    degradeReasons: readonly string[];
+  };
+  tracer: {
+    packetStatus: McsContextPacketStatus;
+    includedKnowledgeIds: readonly string[];
+    excludedSourceIds: readonly string[];
+    notes: readonly string[];
+  };
+}
