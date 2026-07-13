@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Generated: 2026-07-13T09:10:32.592Z
-- Routes: 229
+- Generated: 2026-07-13T09:44:20.356Z
+- Routes: 230
 - Findings: 0
 
 ## Routes By Access Category
@@ -17,7 +17,7 @@
 | auth_bootstrap | 3 |
 | auth_session | 2 |
 | ba_auth_pre_steve | 21 |
-| ba_auth_steve_gated | 53 |
+| ba_auth_steve_gated | 54 |
 | ba_auth_steve_vm_entitled | 25 |
 | internal_runtime_admin_or_secret | 5 |
 | prospect_reentry | 4 |
@@ -36,9 +36,9 @@
 | rawBodyParser | 1 |
 | requireAdmin | 95 |
 | requireAdminOrHealthSecret | 1 |
-| requireAuth | 100 |
+| requireAuth | 101 |
 | requireRuntimeInternal | 5 |
-| requireSteveComplete | 85 |
+| requireSteveComplete | 86 |
 | requireVmDialerAccess | 25 |
 
 ## Role Coverage
@@ -46,7 +46,7 @@
 | Role | Routes |
 | --- | ---: |
 | anonymous | 5 |
-| brand_ambassador | 101 |
+| brand_ambassador | 102 |
 | founder_admin | 101 |
 | prospect | 18 |
 | provider | 2 |
@@ -59,7 +59,7 @@
 | admin_allowlist | 101 |
 | machine_credential | 12 |
 | none | 5 |
-| registered_ba | 101 |
+| registered_ba | 102 |
 | valid_prospect_identity | 18 |
 | vm_dialer | 25 |
 
@@ -315,3 +315,4 @@
 | POST | `/api/three-way/bookings/:id/cancel` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/three-way.ts:110` |
 | POST | `/api/michael-runtime/resolve` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/michael-runtime.ts:245` |
 | GET | `/api/content/videos` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/content-videos.ts:16` |
+| GET | `/api/resources/` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/resources.ts:9` |

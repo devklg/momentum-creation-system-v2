@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T09:10:24.490Z
+- Generated: 2026-07-13T09:44:17.591Z
 - Mongo collections: 67
 - Neo4j labels: 75
 - Neo4j relationships: 62
 - Chroma collections: 51
-- Route modules: 45
-- Route handlers: 257
-- Shared exports: 1014
+- Route modules: 46
+- Route handlers: 258
+- Shared exports: 1018
 
 ## Mongo Collections
 
@@ -328,6 +328,7 @@
 | `(unmounted)` | `server/src/routes/preview.ts` | GET / | none |
 | `(unmounted)` | `server/src/routes/profile.ts` | GET /<br>GET /sponsor<br>PATCH /<br>POST /password<br>POST /email/start<br>POST /email/verify<br>POST /phone | `McsProfileGetResponse` |
 | `(unmounted)` | `server/src/routes/questionnaire.ts` | GET /status<br>POST /load<br>POST /submit<br>GET user-agent | none |
+| `(unmounted)` | `server/src/routes/resources.ts` | GET / | `McsResourceCenterResponse` |
 | `(unmounted)` | `server/src/routes/rvm.ts` | GET /:token<br>POST /:token/activate<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats<br>POST /:token/info-request | `McsCallbackIntent`, `McsCallbackRequestResponse`, `McsHoldingTankSnapshot`, `McsPlacementEvent`, `McsRvmInfoRequestResponse`, `McsRvmResolvedTokenPayload`, `McsTeamStatsResponse`, `McsVideoEventKind`, `McsVideoEventResponse`, `McsWebinarReservationResponse` |
 | `(unmounted)` | `server/src/routes/scriptmaker.ts` | POST /draft | `McsScriptMakerDraftPayload`, `McsScriptMakerDraftResponse`, `McsScriptMakerDraftSelectors`, `McsScriptMakerScriptKind` |
 | `(unmounted)` | `server/src/routes/sponsor-workbook.ts` | GET /:tmagId<br>PUT /:tmagId/draft<br>POST /:tmagId/finalize | none |
@@ -543,6 +544,10 @@
 | `McsResourceReadinessCheck` | type | `packages/shared/src/resource-catalog.ts` |
 | `resourceCatalogRetrievalEligible` | function | `packages/shared/src/resource-catalog.ts` |
 | `validateResourceCatalogEntry` | function | `packages/shared/src/resource-catalog.ts` |
+| `MCS_RESOURCE_CENTER_CATALOG` | const | `packages/shared/src/resource-center-catalog.ts` |
+| `MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION` | const | `packages/shared/src/resource-center.ts` |
+| `McsResourceCenterItem` | interface | `packages/shared/src/resource-center.ts` |
+| `McsResourceCenterResponse` | interface | `packages/shared/src/resource-center.ts` |
 | `evaluateResourceLifecycleTransition` | function | `packages/shared/src/resource-lifecycle.ts` |
 | `legacyActiveBooleanLifecycle` | function | `packages/shared/src/resource-lifecycle.ts` |
 | `MCS_RESOURCE_LIFECYCLE_STATES` | const | `packages/shared/src/resource-lifecycle.ts` |

@@ -24,6 +24,7 @@ import { VmCampaignsPage } from './routes/vm-campaigns';
 import { ProfilePage } from './routes/profile';
 import { LeadershipPage } from './routes/leadership';
 import { PreviewPage } from './routes/preview';
+import { ResourcesPage } from './routes/resources';
 
 export function App() {
   return (
@@ -38,6 +39,7 @@ export function App() {
         <Route path="/launch" element={<RecruitingCycleDashboardPage />} />
         <Route path="/invitations" element={<InvitationsPage />} />
         <Route path="/video-library" element={<VideoLibraryPage />} />
+        <Route path="/resources" element={<ResourcesPage />} />
         <Route path="/ivory" element={<IvoryPage />} />
         <Route path="/ivory/momentum" element={<IvoryMomentumPage />} />
         <Route path="/crm" element={<CrmPage />} />

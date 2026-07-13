@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T09:10:24.490Z",
+  "generatedAt": "2026-07-13T09:44:17.591Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -5287,6 +5287,20 @@
       "sharedTypes": []
     },
     {
+      "file": "server/src/routes/resources.ts",
+      "mount": null,
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/",
+          "line": 9
+        }
+      ],
+      "sharedTypes": [
+        "McsResourceCenterResponse"
+      ]
+    },
+    {
       "file": "server/src/routes/rvm.ts",
       "mount": null,
       "routes": [
@@ -6705,6 +6719,26 @@
       "name": "validateResourceCatalogEntry",
       "kind": "function",
       "file": "packages/shared/src/resource-catalog.ts"
+    },
+    {
+      "name": "MCS_RESOURCE_CENTER_CATALOG",
+      "kind": "const",
+      "file": "packages/shared/src/resource-center-catalog.ts"
+    },
+    {
+      "name": "MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/resource-center.ts"
+    },
+    {
+      "name": "McsResourceCenterItem",
+      "kind": "interface",
+      "file": "packages/shared/src/resource-center.ts"
+    },
+    {
+      "name": "McsResourceCenterResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/resource-center.ts"
     },
     {
       "name": "evaluateResourceLifecycleTransition",
@@ -10782,8 +10816,8 @@
     "neo4jLabels": 75,
     "neo4jRelationships": 62,
     "chromaCollections": 51,
-    "routeModules": 45,
-    "routeHandlers": 257,
-    "sharedExports": 1014
+    "routeModules": 46,
+    "routeHandlers": 258,
+    "sharedExports": 1018
   }
 }

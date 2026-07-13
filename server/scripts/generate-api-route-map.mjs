@@ -76,11 +76,26 @@ function resolveImportFile(importSpecifier) {
   return path.normalize(path.join(path.dirname(indexPath), withoutExt)).replaceAll('\\', '/');
 }
 
-function mountPhase(line) {
-  if (line <= 86) return 'raw_body_before_json';
-  if (line <= 102) return 'pre_json_admin_body_limit';
-  if (line <= 172) return 'pre_gate';
-  if (line >= 197 && line <= 267) return 'ba_facing_gated';
+function sourceLine(sourceFile, needle) {
+  const index = sourceFile.getFullText().indexOf(needle);
+  if (index < 0) throw new Error(`Route-map phase anchor missing from ${indexPath}: ${needle}`);
+  return sourceFile.getLineAndColumnAtPos(index).line;
+}
+
+function phaseBoundaries(indexFile) {
+  return {
+    cookieParser: sourceLine(indexFile, 'app.use(cookieParser())'),
+    globalJson: sourceLine(indexFile, "app.use(express.json({ limit: '256kb' }))"),
+    baFacing: sourceLine(indexFile, "app.use('/api/invitations', invitationRoutes)"),
+    fallback: sourceLine(indexFile, 'app.use((_req, res) => res.status(404)'),
+  };
+}
+
+function mountPhase(line, boundaries) {
+  if (line < boundaries.cookieParser) return 'raw_body_before_json';
+  if (line < boundaries.globalJson) return 'pre_json_admin_body_limit';
+  if (line < boundaries.baFacing) return 'pre_gate';
+  if (line < boundaries.fallback) return 'ba_facing_gated';
   return 'server_middleware_or_fallback';
 }
 
@@ -95,6 +110,7 @@ function mountAccessProfile(mountPath, phase) {
 
 function discoverMounts(indexFile) {
   const imports = importMap(indexFile);
+  const boundaries = phaseBoundaries(indexFile);
   const mounts = [];
   indexFile.forEachDescendant((node) => {
     if (!Node.isCallExpression(node)) return;
@@ -117,7 +133,7 @@ function discoverMounts(indexFile) {
       .map((arg) => expressionName(arg))
       .filter(Boolean);
     const line = node.getStartLineNumber();
-    const phase = mountPhase(line);
+    const phase = mountPhase(line, boundaries);
     mounts.push({
       mountPath,
       routerIdentifier,
