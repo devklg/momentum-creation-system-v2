@@ -17,17 +17,17 @@ Complete this block for every audit run.
 
 | Field | Record |
 |---|---|
-| Date and time (Pacific) | |
-| Tester | |
-| Production release / Git SHA | |
-| `.com` deployment version | |
-| `.team` deployment version | |
-| Admin deployment version | |
-| Browser and version | |
-| Operating system | |
-| Test identities used | |
-| Screenshot/evidence folder | |
-| Overall result | `PASS / PASS WITH DEFECTS / FAIL / BLOCKED` |
+| Date and time (Pacific) | 2026-07-13 14:22 PDT |
+| Tester | Codex — P2-107 scoped reconciliation lane |
+| Production release / Git SHA | SHA not exposed by production health/HTML; current local `main` at audit start: `9ab8695d8c03f6cae3394f835d18f5c7b6557e57` |
+| `.com` deployment version | Not tested — outside P2-107 scoped run |
+| `.team` deployment version | Asset `index-DVxQlJCw.js`; release SHA unavailable; asset does not contain the P2-107 title or manual-contact copy |
+| Admin deployment version | Not tested — outside P2-107 scoped run |
+| Browser and version | In-app browser unavailable (untrusted bridge); fallback Playwright Chromium, version not exposed |
+| Operating system | Windows |
+| Test identities used | None. No authorized authenticated production test identity was available; local fixtures used synthetic names only. |
+| Screenshot/evidence folder | `engineering/audits/p2-107-visual-qa/` |
+| Overall result | `BLOCKED` — scoped local P2-107 component visuals pass; production P2-107 is not deployed/identifiable and authenticated production states were not exercised |
 
 For each defect record: surface, route, role, viewport, data state, exact steps, expected result, actual result, screenshot/video ID, console error, failed request, severity, and retest result.
 
