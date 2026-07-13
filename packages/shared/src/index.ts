@@ -16,3 +16,7 @@ export * from './agent-registry.js';
 export * from './agent-skills.js';
 export * from './prompt-governance.js';
 export * from './admin-sensitive-actions.js';
+export * from './resource-lifecycle.js';
+export * from './resource-catalog.js';
+export * from './knowledge-workflow-map.js';
+export * from './admin-knowledge-status.js';

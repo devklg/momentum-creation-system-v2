@@ -5,13 +5,13 @@
 
 ## Summary
 
-- Generated: 2026-07-12T18:24:20.659Z
-- Registered collections: 50
-- Schema-catalog collections: 50
+- Generated: 2026-07-13T03:11:56.843Z
+- Registered collections: 51
+- Schema-catalog collections: 51
 - Collections with observed write/query usage: 30
 - Language-scoped collections: 10
-- Metadata contract rows: 50
-- Observed unregistered/dynamic targets: 7
+- Metadata contract rows: 51
+- Observed unregistered/dynamic targets: 8
 - Embedding model: all-MiniLM-L6-v2
 - Embedding dimension: 384
 
@@ -25,7 +25,7 @@
 | content_resources | 3 |
 | crm | 2 |
 | events | 3 |
-| general | 1 |
+| general | 2 |
 | holding_tank | 2 |
 | identity_access | 4 |
 | knowledge | 12 |
@@ -56,7 +56,7 @@
 | `mcs_fast_start_progress` | onboarding_training | not_language_scoped | Onboarding/training semantic record. | `create_collection`<br>`writeKnowledge` | `branch`, `moduleId`, `purpose`, `state`, `tmagId`, `updatedAt`, `wireframe_leaf` | none observed | `moduleId`, `tmagId` |
 | `mcs_health_heartbeat` | operations | not_language_scoped | Operational health/readback heartbeat record. | not observed | none observed | none observed | none inferred |
 | `mcs_ivory_prospect_names` | agents | not_language_scoped | Prospect funnel semantic record. | `add`<br>`create_collection`<br>`writeGraphCritical`<br>`writeKnowledge` | `angle`, `chat_number`, `createdAt`, `description`, `ivoryId`, `kind`, `preferredAngle`, `productKey`, `project`, `runId`, `tmagId` | none observed | `ivoryId`, `runId`, `tmagId` |
-| `mcs_knowledge_chunks` | knowledge | metadata.language | Approved knowledge chunk retrieval index. | `query_with_filter`<br>`writeKnowledge` | `agentScopes`, `authority`, `authorityStatus`, `chunkId`, `chunkIndex`, `documentId`, `domain`, `endOffset`, `heading`, `kind`, `language`, `retrievalEligible`, `scope.teamId`, `scope.teamKey`, `scope.teamName`, `scope.tenantId`, `sourceId`, `sourceTitle`, `sourceVersion`, `startOffset`, `status`, `surfaceScopes`, `title`, `topicTags` | `retrievalEligible`, `status` | `chunkId`, `documentId`, `domain`, `language`, `retrievalEligible`, `scope.teamId`, `scope.tenantId`, `sourceId`, `status` |
+| `mcs_knowledge_chunks` | knowledge | metadata.language | Approved knowledge chunk retrieval index. | `query_with_filter`<br>`writeKnowledge` | `agentScopes`, `authority`, `authorityStatus`, `chunkId`, `chunkIndex`, `citationLabel`, `citationSourceRef`, `documentId`, `domain`, `endOffset`, `heading`, `kind`, `language`, `retrievalEligible`, `scope.teamId`, `scope.teamKey`, `scope.teamName`, `scope.tenantId`, `sourceId`, `sourceTitle`, `sourceVersion`, `startOffset`, `status`, `surfaceScopes`, `title`, `topicTags` | `retrievalEligible`, `status` | `chunkId`, `documentId`, `domain`, `language`, `retrievalEligible`, `scope.teamId`, `scope.tenantId`, `sourceId`, `status` |
 | `mcs_knowledge_sources` | knowledge | not_language_scoped | Approved knowledge source retrieval and source lookup. | not observed | none observed | none observed | `domain`, `language` |
 | `mcs_learning_candidates_review` | knowledge_review | metadata.language | Review-only learning candidates; never active retrieval knowledge. | `writeKnowledge` | `createdAt`, `domain`, `kind`, `language`, `status`, `tenantId` | none observed | `tenantId` |
 | `mcs_members` | identity_access | not_language_scoped | Team Magnificent member identity semantic record. | `add`<br>`delete`<br>`get` | `backfilledAt`, `entitlements`, `kind`, `role`, `threeBaId`, `timezone`, `tmagId`, `updatedAt` | none observed | `threeBaId`, `tmagId` |
@@ -77,6 +77,7 @@
 | `mcs_recruiting_cycles` | general | not_language_scoped | Registered app Chroma collection. | `writeKnowledge` | `cycleId`, `enrolledAt`, `kind`, `tmagId`, `whyStatement` | none observed | `cycleId`, `tmagId` |
 | `mcs_relationship_knowledge_en` | knowledge | en | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_relationship_knowledge_es` | knowledge | es | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
+| `mcs_resource_catalog` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
 | `mcs_sponsor_availability` | events | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `availabilityId`, `kind`, `ownerTmagId`, `timezone`, `updatedAt`, `windowCount` | none observed | `availabilityId`, `ownerTmagId`, `tmagId` |
 | `mcs_steve_success_interview` | onboarding_training | not_language_scoped | Onboarding/training semantic record. | `add`<br>`create_collection`<br>`writeKnowledge` | `agent`, `callSid`, `completedAt`, `discoveryId`, `kind`, `purpose`, `sponsorTmagId`, `tmagId` | none observed | `discoveryId`, `sponsorTmagId`, `tmagId` |
 | `mcs_success_knowledge_en` | knowledge | en | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
@@ -100,6 +101,7 @@ entries need explicit contract handling in P1-43.
 
 | Target | Resolution | Actions | Source count | Sources |
 | --- | --- | --- | ---: | --- |
+| `activeKnowledgeCollection(record.domain, record.language)` | expression | `get` | 1 | `server/src/domain/graphragReadiness.ts:45` |
 | `agentEventsCollection` | expression | `writeKnowledge` | 1 | `server/src/domain/agents/orchestrator.ts:299` |
 | `c.collection` | expression | `add` | 1 | `server/src/services/projectionOutbox.ts:174` |
 | `chroma.collection` | expression | `add` | 1 | `server/src/services/tieredWrite.ts:303` |

@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-12T18:24:23.014Z",
+  "generatedAt": "2026-07-13T03:11:54.016Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
     "server/src/domain/* Cypher writers"
   ],
   "summary": {
-    "labels": 73,
-    "relationships": 61,
+    "labels": 75,
+    "relationships": 62,
     "constraints": 18,
-    "labelsWithoutConstraint": 58
+    "labelsWithoutConstraint": 60
   },
   "byStatus": {
     "planned_core_not_applied": 11,
@@ -113,7 +113,7 @@
       "label": "KnowledgeChunk",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:189"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:205"
       ]
     },
     {
@@ -127,8 +127,8 @@
       "label": "KnowledgeSource",
       "sourceCount": 2,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:142",
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:192"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:148",
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:208"
       ]
     },
     {
@@ -217,7 +217,7 @@
       "label": "TeamMagnificent",
       "sourceCount": 6,
       "sources": [
-        "server/src/domain/graphrag.ts:216",
+        "server/src/domain/graphrag.ts:217",
         "server/src/domain/learningCandidates.ts:258",
         "server/src/domain/outcomes.ts:218",
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:142",
@@ -227,7 +227,7 @@
     },
     {
       "label": "TeamMagnificentMember",
-      "sourceCount": 80,
+      "sourceCount": 81,
       "sources": [
         "server/scripts/backfill-founder-timezones.ts:138",
         "server/scripts/backfill-founder-timezones.ts:82",
@@ -282,6 +282,7 @@
         "server/src/domain/recruitingCycle.ts:311",
         "server/src/domain/recruitingCycle.ts:413",
         "server/src/domain/recruitingCycle.ts:581",
+        "server/src/domain/resourcePublishingGate.ts:72",
         "server/src/domain/sponsorImmutabilityPersistence.ts:101",
         "server/src/domain/sponsorImmutabilityPersistence.ts:102",
         "server/src/domain/sponsorImmutabilityPersistence.ts:104",
@@ -465,9 +466,11 @@
     },
     {
       "label": "TmagKnowledge",
-      "sourceCount": 3,
+      "sourceCount": 5,
       "sources": [
-        "server/src/domain/graphrag.ts:216",
+        "server/src/domain/graphrag.ts:217",
+        "server/src/domain/graphrag.ts:238",
+        "server/src/domain/graphragReadiness.ts:42",
         "server/src/services/persistence/neo4j/phase7Constraints.ts:51",
         "server/src/services/persistence/neo4j/phase7Constraints.ts:86"
       ]
@@ -612,6 +615,20 @@
       "sources": [
         "server/src/domain/recruitingCycle.ts:414",
         "server/src/domain/recruitingCycle.ts:489"
+      ]
+    },
+    {
+      "label": "TmagResource",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/resourcePublishingGate.ts:72"
+      ]
+    },
+    {
+      "label": "TmagResourceVersion",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/resourcePublishingGate.ts:72"
       ]
     },
     {
@@ -810,6 +827,13 @@
       ]
     },
     {
+      "relationship": "APPROVED_BY",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/resourcePublishingGate.ts:72"
+      ]
+    },
+    {
       "relationship": "AVAILABLE_TO",
       "sourceCount": 1,
       "sources": [
@@ -918,7 +942,7 @@
       "relationship": "HAS_CHUNK",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:193"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:209"
       ]
     },
     {
@@ -998,9 +1022,10 @@
     },
     {
       "relationship": "HAS_VERSION",
-      "sourceCount": 2,
+      "sourceCount": 3,
       "sources": [
         "server/src/domain/adminTenantArchitecture.ts:466",
+        "server/src/domain/resourcePublishingGate.ts:72",
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186"
       ]
     },
@@ -1144,7 +1169,7 @@
       "relationship": "SCOPED_TO",
       "sourceCount": 4,
       "sources": [
-        "server/src/domain/graphrag.ts:216",
+        "server/src/domain/graphrag.ts:217",
         "server/src/domain/learningCandidates.ts:258",
         "server/src/domain/outcomes.ts:218",
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:142"
@@ -1465,6 +1490,8 @@
     "TmagProspectTimelineEvent",
     "TmagQuestionnaire",
     "TmagRecruitingCycle",
+    "TmagResource",
+    "TmagResourceVersion",
     "TmagSponsorAvailability",
     "TmagSponsorOverride",
     "TmagThreeWayBooking",

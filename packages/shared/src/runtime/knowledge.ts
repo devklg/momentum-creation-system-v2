@@ -29,9 +29,21 @@ export interface McsKnowledgeReference {
   language: McsRuntimeLanguage;
   translationStatus: McsRuntimeTranslationStatus;
   sourceId: McsSourceId;
+  citation?: McsKnowledgeCitation;
   // P4.7 — optional freshness/deprecation descriptor. Absent ⇒ treated as current (a reference
   // without this field behaves exactly as pre-P4.7).
   freshness?: McsKnowledgeFreshness;
+}
+
+export interface McsKnowledgeCitation {
+  label: string;
+  sourceRef: string | null;
+  documentId: string;
+  chunkId: string;
+  sourceVersion: number;
+  chunkIndex: number;
+  startOffset: number;
+  endOffset: number;
 }
 
 export interface McsKnowledgeCandidateReference {

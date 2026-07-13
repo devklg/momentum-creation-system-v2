@@ -2,7 +2,8 @@
  * /knowledge — Kevin-authored Knowledge Base intake.
  */
 
-import { FormEvent, useState, type ReactNode } from 'react';
+import { FormEvent, useCallback, useEffect, useState, type ReactNode } from 'react';
+import type { McsAdminKnowledgeStatusResponse } from '@momentum/shared';
 import type { McsKnowledgeDomain, McsRuntimeLanguage } from '@momentum/shared/runtime';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,6 +46,23 @@ export function KnowledgePage() {
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [knowledgeStatus, setKnowledgeStatus] = useState<McsAdminKnowledgeStatusResponse | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
+
+  const loadKnowledgeStatus = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/knowledge/status', { credentials: 'include' });
+      const body = (await res.json()) as McsAdminKnowledgeStatusResponse & { error?: string };
+      if (!res.ok || !body.ok) throw new Error(body.error ?? 'Knowledge status unavailable.');
+      setKnowledgeStatus(body);
+      setStatusError(null);
+    } catch (error) {
+      setKnowledgeStatus(null);
+      setStatusError(error instanceof Error ? error.message : 'Knowledge status unavailable.');
+    }
+  }, []);
+
+  useEffect(() => { void loadKnowledgeStatus(); }, [loadKnowledgeStatus]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -82,6 +100,7 @@ export function KnowledgePage() {
       setContent('');
       setTopicTags('');
       setSourceRef('');
+      await loadKnowledgeStatus();
     } catch (e) {
       setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
     } finally {
@@ -132,6 +151,7 @@ export function KnowledgePage() {
       setTopicTags('');
       setSourceRef('');
       setFile(null);
+      await loadKnowledgeStatus();
     } catch (e) {
       setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
     } finally {
@@ -148,6 +168,53 @@ export function KnowledgePage() {
       <p className="text-cream-mute text-sm mb-8 max-w-3xl">
         Kevin-approved source material for Michael, Steve, and Ivory.
       </p>
+
+      <section className="border border-line bg-cream/[0.025] p-5 mb-6" aria-label="Knowledge readiness">
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+          <div>
+            <h2 className="font-mono text-[11px] tracking-label uppercase text-gold">Knowledge Status</h2>
+            <p className="text-xs text-cream-mute mt-2">
+              Retrieval-ready means an active eligible chunk has no unresolved Chroma projection.
+            </p>
+          </div>
+          <button type="button" onClick={() => void loadKnowledgeStatus()} className="font-mono text-[10px] uppercase tracking-label text-gold hover:text-gold-bright">
+            Refresh
+          </button>
+        </div>
+        {knowledgeStatus ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <StatusMetric label="Active Sources" value={knowledgeStatus.activeSources} />
+              <StatusMetric label="Active Chunks" value={knowledgeStatus.activeChunks} />
+              <StatusMetric label="Retrieval Ready" value={knowledgeStatus.retrievalReadyChunks} state={knowledgeStatus.status} />
+            </div>
+            <p className="font-mono text-[10px] text-cream-mute mt-4 uppercase tracking-label">
+              {knowledgeStatus.pendingChromaProjections} Chroma pending · {knowledgeStatus.failedChromaProjections} Chroma failed · {knowledgeStatus.pendingNeo4jProjections} graph pending · {knowledgeStatus.failedNeo4jProjections} graph failed
+            </p>
+            {knowledgeStatus.warnings.map((warning) => <p key={warning} className="text-xs text-amber-300 mt-2">{warning}</p>)}
+            <div className="border-t border-line mt-5 pt-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="font-mono text-[10px] uppercase tracking-label text-gold">Context Manager Degraded Reasons</h3>
+                <p className="font-mono text-[9px] uppercase tracking-label text-cream-mute">
+                  Michael {knowledgeStatus.contextManager.liveSurfaces.michael ? 'live' : 'off'} · Steve {knowledgeStatus.contextManager.liveSurfaces.steve ? 'live' : 'off'}
+                </p>
+              </div>
+              <p className="text-xs text-cream-mute mt-2">
+                {knowledgeStatus.contextManager.total} observed · {knowledgeStatus.contextManager.degraded} degraded · counters reset when the server restarts.
+              </p>
+              {knowledgeStatus.contextManager.degradedReasons.length > 0 ? (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {knowledgeStatus.contextManager.degradedReasons.map((entry) => (
+                    <span key={entry.reason} className="border border-line px-2 py-1 font-mono text-[10px] text-amber-300">
+                      {entry.reason.replaceAll('_', ' ')} · {entry.count}
+                    </span>
+                  ))}
+                </div>
+              ) : <p className="text-xs text-cream-mute mt-3">No degraded retrieval reason has been observed since restart.</p>}
+            </div>
+          </>
+        ) : <p className="text-sm text-cream-mute">{statusError ?? 'Loading knowledge status…'}</p>}
+      </section>
 
       <section className="border border-line bg-cream/[0.025] p-5 mb-6">
         <h2 className="font-mono text-[11px] tracking-label uppercase text-gold mb-5">
@@ -301,6 +368,17 @@ export function KnowledgePage() {
           </div>
         </form>
       </section>
+    </div>
+  );
+}
+
+function StatusMetric({ label, value, state }: { label: string; value: number; state?: McsAdminKnowledgeStatusResponse['status'] }) {
+  const color = state === 'ready' ? 'text-teal' : state === 'degraded' ? 'text-red-400' : state === 'partial' ? 'text-amber-300' : 'text-cream';
+  return (
+    <div className="border border-line bg-ink-2 p-4">
+      <p className="font-mono text-[10px] uppercase tracking-label text-cream-mute">{label}</p>
+      <p className={`font-display text-[32px] leading-none mt-2 ${color}`}>{value}</p>
+      {state && <p className={`font-mono text-[10px] uppercase tracking-label mt-2 ${color}`}>{state}</p>}
     </div>
   );
 }

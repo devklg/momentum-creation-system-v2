@@ -38,6 +38,10 @@ import {
   deriveKnowledgeId,
   type ChunkOptions,
 } from '../../runtime/knowledge/intake/index.js';
+import {
+  appendGraphRagRecord,
+  GRAPHRAG_EMBEDDING_MODEL_VERSION,
+} from '../../domain/graphrag.js';
 
 export const KNOWLEDGE_SOURCE_COLLECTION = MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION;
 export const KNOWLEDGE_CHUNK_COLLECTION = MCS_KNOWLEDGE_BASE_CHUNK_COLLECTION;
@@ -66,6 +70,8 @@ export interface CreateKevinApprovedKnowledgeSourceResult {
   references: McsKnowledgeReference[];
   chunkCount: number;
   indexRecordCount: number;
+  graphRagRecordCount: number;
+  graphRagFailureCount: number;
 }
 
 interface MongoQueryResult {
@@ -177,6 +183,16 @@ export async function createKevinApprovedKnowledgeSource(
     authorityKind: source.authority?.authorityKind,
     authorityStatus: source.authority?.authorityStatus,
     sourceTitle: source.title,
+    citation: {
+      label: source.title,
+      sourceRef: source.sourceRef ?? null,
+      documentId: chunk.documentId,
+      chunkId: chunk.chunkId,
+      sourceVersion: chunk.sourceVersion,
+      chunkIndex: chunk.chunkIndex,
+      startOffset: chunk.sourceOffsets.startOffset,
+      endOffset: chunk.sourceOffsets.endOffset,
+    },
   }));
 
   for (const chunkRecord of chunkRecords) {
@@ -224,6 +240,8 @@ export async function createKevinApprovedKnowledgeSource(
           authority: chunkRecord.authorityKind ?? 'kevin',
           authorityStatus: chunkRecord.authorityStatus,
           sourceTitle: chunkRecord.sourceTitle,
+          citationLabel: chunkRecord.citation.label,
+          citationSourceRef: chunkRecord.citation.sourceRef ?? undefined,
           topicTags: chunkRecord.topicTags.join('|'),
           agentScopes: chunkRecord.agentScopes.join('|'),
           surfaceScopes: chunkRecord.surfaceScopes.join('|'),
@@ -238,13 +256,54 @@ export async function createKevinApprovedKnowledgeSource(
     });
   }
 
+  let graphRagRecordCount = 0;
+  let graphRagFailureCount = 0;
+  for (const chunkRecord of chunkRecords) {
+    try {
+      const projected = await projectApprovedChunkToGraphRag(chunkRecord);
+      if (projected) graphRagRecordCount += 1;
+    } catch (error) {
+      graphRagFailureCount += 1;
+      // Approved knowledge remains authoritative. A derived-memory failure must
+      // be visible, but must never roll back or ambiguously mutate that approval.
+      console.error(
+        `[knowledge][graphrag] projection failed for ${chunkRecord.chunkId}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
   return {
     source: sourceRecord,
     chunks: chunkRecords,
     references,
     chunkCount: intake.chunks.length,
     indexRecordCount: intake.indexRecords.length,
+    graphRagRecordCount,
+    graphRagFailureCount,
   };
+}
+
+export async function projectApprovedChunkToGraphRag(
+  chunk: McsKnowledgeBaseChunkRecord,
+) {
+  if (chunk.status !== 'active' || !chunk.retrievalEligible) return null;
+  if (chunk.authorityStatus !== 'active_authority') return null;
+  const domain = chunk.domain === 'system' || chunk.domain === 'governance'
+    ? 'organizational'
+    : chunk.domain;
+  return appendGraphRagRecord({
+    knowledgeObjectId: String(chunk.knowledgeId),
+    version: chunk.sourceVersion,
+    tenantId: chunk.scope.tenantId,
+    domain,
+    language: chunk.language,
+    summary: chunk.summary || chunk.text,
+    modelVersion: GRAPHRAG_EMBEDDING_MODEL_VERSION,
+    title: chunk.title,
+    type: 'graphrag_chunk',
+    retrievalReady: false,
+    derivedFrom: [String(chunk.sourceId), chunk.chunkId],
+  });
 }
 
 export function createStoredApprovedKnowledgeProvider(): Pick<
@@ -341,6 +400,7 @@ function documentToKnowledgeReference(doc: Record<string, unknown>): McsKnowledg
     language,
     translationStatus,
     sourceId: sourceId as McsKnowledgeReference['sourceId'],
+    ...(citationFromRecord(doc) ? { citation: citationFromRecord(doc)! } : {}),
     ...(freshness ? { freshness } : {}),
   }];
 }
@@ -378,10 +438,23 @@ function hydrateSemanticSearchReferences(
         ? metadata.translationStatus
         : reference.translationStatus,
       ...(extractFreshness(metadata) ? { freshness: extractFreshness(metadata) } : {}),
+      ...(citationFromRecord(metadata) ? { citation: citationFromRecord(metadata)! } : {}),
     });
   }
 
   return references;
+}
+
+function citationFromRecord(record: Record<string, unknown>) {
+  const documentId = stringValue(record.documentId);
+  const chunkId = stringValue(record.chunkId);
+  const sourceVersion = numberValue(record.sourceVersion);
+  const chunkIndex = numberValue(record.chunkIndex);
+  const startOffset = numberValue(record.startOffset) ?? (isRecord(record.sourceOffsets) ? numberValue(record.sourceOffsets.startOffset) : undefined);
+  const endOffset = numberValue(record.endOffset) ?? (isRecord(record.sourceOffsets) ? numberValue(record.sourceOffsets.endOffset) : undefined);
+  const label = stringValue(record.citationLabel) ?? stringValue(record.sourceTitle);
+  if (!documentId || !chunkId || !label || sourceVersion === undefined || chunkIndex === undefined || startOffset === undefined || endOffset === undefined || sourceVersion < 1 || chunkIndex < 0 || startOffset < 0 || endOffset < startOffset) return null;
+  return { label, sourceRef: stringValue(record.citationSourceRef) ?? stringValue(record.sourceRef) ?? null, documentId, chunkId, sourceVersion, chunkIndex, startOffset, endOffset };
 }
 
 function metadataToKnowledgeChunk(input: {

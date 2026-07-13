@@ -45,12 +45,19 @@ const persistenceMock = vi.hoisted(() => ({
   call: vi.fn(),
 }));
 
+const graphRagMock = vi.hoisted(() => ({ append: vi.fn() }));
+
 vi.mock('../../tieredWrite.js', () => ({
   writeKnowledge: knowledgeWriteMock.write,
 }));
 
 vi.mock('../../persistence/dispatch.js', () => ({
   persistenceCall: persistenceMock.call,
+}));
+
+vi.mock('../../../domain/graphrag.js', () => ({
+  appendGraphRagRecord: graphRagMock.append,
+  GRAPHRAG_EMBEDDING_MODEL_VERSION: 'all-MiniLM-L6-v2',
 }));
 
 const scope: McsRuntimeRequestScope = {
@@ -81,6 +88,7 @@ describe('approved knowledge store schema projection', () => {
     knowledgeWriteMock.write.mockClear();
     knowledgeWriteMock.writes.length = 0;
     persistenceMock.call.mockReset();
+    graphRagMock.append.mockReset().mockResolvedValue(null);
   });
 
   it('creates canonical Knowledge Base source and chunk records for uploaded files', async () => {
@@ -149,6 +157,42 @@ describe('approved knowledge store schema projection', () => {
       schemaVersion: MCS_KNOWLEDGE_BASE_SCHEMA_VERSION,
       sourceTitle: 'PDF Training Source',
     });
+    expect(graphRagMock.append).toHaveBeenCalledTimes(result.chunks.length);
+    expect(graphRagMock.append).toHaveBeenCalledWith(expect.objectContaining({
+      knowledgeObjectId: result.chunks[0]?.knowledgeId,
+      domain: 'training',
+      language: 'en',
+      retrievalReady: false,
+      derivedFrom: [result.source.sourceId, result.chunks[0]?.chunkId],
+    }));
+  });
+
+  it('normalizes governance knowledge and never projects ineligible chunks as GraphRAG', async () => {
+    const result = await createKevinApprovedKnowledgeSource({
+      title: 'Governance Source', content: 'Approved governance guidance for the team.',
+      createdBy: 'TMAG-01', domain: 'governance', language: 'en',
+    });
+    expect(graphRagMock.append).toHaveBeenCalledWith(expect.objectContaining({
+      domain: 'organizational', retrievalReady: false,
+    }));
+    const { projectApprovedChunkToGraphRag } = await import('../approvedKnowledgeStore.js');
+    graphRagMock.append.mockClear();
+    await expect(projectApprovedChunkToGraphRag({ ...result.chunks[0]!, retrievalEligible: false })).resolves.toBeNull();
+    expect(graphRagMock.append).not.toHaveBeenCalled();
+  });
+
+  it('preserves approved knowledge when a derived GraphRAG record cannot be created', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    graphRagMock.append.mockRejectedValue(new Error('derived store unavailable'));
+    const result = await createKevinApprovedKnowledgeSource({
+      title: 'Approved Source', content: 'Approved training guidance remains authoritative.',
+      createdBy: 'TMAG-01', domain: 'training', language: 'en',
+    });
+    expect(result.source.status).toBe('active');
+    expect(result.graphRagRecordCount).toBe(0);
+    expect(result.graphRagFailureCount).toBe(result.chunks.length);
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('derived store unavailable'));
+    errorSpy.mockRestore();
   });
 
   it('semantic search maps Chroma top-k hits into approved knowledge references', async () => {

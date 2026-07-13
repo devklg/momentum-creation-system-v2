@@ -4,11 +4,11 @@
 
 ## Summary
 
-- Generated: 2026-07-12T18:24:23.014Z
-- Labels: 73
-- Relationships: 61
+- Generated: 2026-07-13T03:11:54.016Z
+- Labels: 75
+- Relationships: 62
 - Constraints/indexes cataloged: 18
-- Labels without a cataloged constraint/index: 58
+- Labels without a cataloged constraint/index: 60
 
 ## Constraints By Status
 
@@ -46,7 +46,7 @@
 | `SCOPED_TO` | 1 |
 | `SPONSORED_BY` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 80 |
+| `TeamMagnificentMember` | 81 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 2 |
@@ -65,7 +65,7 @@
 | `TmagInvitationActivity` | 2 |
 | `TmagInviteToken` | 10 |
 | `TmagIvoryName` | 6 |
-| `TmagKnowledge` | 3 |
+| `TmagKnowledge` | 5 |
 | `TmagLearningCandidate` | 4 |
 | `TmagOrientationSession` | 3 |
 | `TmagOutcome` | 4 |
@@ -77,6 +77,8 @@
 | `TmagProspectTimelineEvent` | 3 |
 | `TmagQuestionnaire` | 1 |
 | `TmagRecruitingCycle` | 2 |
+| `TmagResource` | 1 |
+| `TmagResourceVersion` | 1 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 2 |
 | `TmagSteveDiscovery` | 3 |
@@ -105,6 +107,7 @@
 | `ACTED_BY` | 1 |
 | `ACTED_FOR` | 1 |
 | `APPROVED_AS` | 1 |
+| `APPROVED_BY` | 1 |
 | `AVAILABLE_TO` | 1 |
 | `BECAME_PROSPECT_RECORD` | 2 |
 | `BELONGS_TO_DOMAIN` | 1 |
@@ -129,7 +132,7 @@
 | `HAS_SETTINGS_VERSION` | 1 |
 | `HAS_THREE_WAY_AVAILABILITY` | 1 |
 | `HAS_TIMELINE_EVENT` | 3 |
-| `HAS_VERSION` | 2 |
+| `HAS_VERSION` | 3 |
 | `HAS_VM_AUDIT` | 1 |
 | `HAS_VM_DELIVERY_EVENT` | 1 |
 | `INVITED` | 4 |
@@ -231,6 +234,8 @@
 - `TmagProspectTimelineEvent`
 - `TmagQuestionnaire`
 - `TmagRecruitingCycle`
+- `TmagResource`
+- `TmagResourceVersion`
 - `TmagSponsorAvailability`
 - `TmagSponsorOverride`
 - `TmagThreeWayBooking`

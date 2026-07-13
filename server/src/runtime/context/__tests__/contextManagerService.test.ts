@@ -13,6 +13,8 @@ import type {
   TmagId,
 } from '@momentum/shared/runtime';
 import {
+  ContextManagerTraceValidationError,
+  assertValidContextManagerExecutionTraceV1,
   ContextManagerServiceError,
   createContextManagerService,
   planContextRequest,
@@ -115,6 +117,29 @@ describe('Context Manager service', () => {
       candidateExcludedCount: 0,
       degradeReasons: ['knowledge_unavailable'],
     });
+  });
+
+  it('keeps candidate exclusions identical across retrieval, packet audit, and trace', async () => {
+    const candidate = { ...approvedReference, knowledgeId: 'candidate_1', sourceId: 'source_candidate_1', status: 'candidate' } as unknown as McsKnowledgeReference;
+    const result = await createContextManagerService({
+      async listApprovedKnowledge() { return [approvedReference, candidate]; },
+    }, { createdAt: '2026-07-04T00:00:00.000Z' }).buildContext({ scope, request });
+    expect(result.packet.approvedKnowledge.map((item) => item.knowledgeId)).toEqual(['knowledge_training_1']);
+    expect(result.retrieval.metadata.candidateExcludedCount).toBe(1);
+    expect(result.packet.retrievalAudit.excludedSourceIds).toEqual(['source_candidate_1']);
+    expect(result.trace.executor.candidateExcludedCount).toBe(1);
+    expect(result.trace.tracer.excludedSourceIds).toEqual(['source_candidate_1']);
+  });
+
+  it('rejects a trace whose identity or counts diverge from its packet and retrieval evidence', async () => {
+    const result = await createContextManagerService({ async listApprovedKnowledge() { return [approvedReference]; } }, {
+      createdAt: '2026-07-04T00:00:00.000Z',
+    }).buildContext({ scope, request });
+    expect(() => assertValidContextManagerExecutionTraceV1({
+      ...result.trace,
+      packetId: 'ctx_packet_wrong',
+      executor: { ...result.trace.executor, approvedCount: 99 },
+    }, { packet: result.packet, retrieval: result.retrieval })).toThrow(ContextManagerTraceValidationError);
   });
 
   it('provides an orchestration-compatible request port without exposing trace to agents', async () => {

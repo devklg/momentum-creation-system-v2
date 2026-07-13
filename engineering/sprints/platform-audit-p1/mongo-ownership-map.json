@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T18:24:22.224Z",
+  "generatedAt": "2026-07-13T03:11:52.337Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 67,
   "unclassifiedCount": 0,
@@ -141,9 +141,10 @@
       "persistenceTier": "knowledge",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 1,
+      "sourceCount": 2,
       "sourceFiles": [
-        "server/src/domain/graphrag.ts"
+        "server/src/domain/graphrag.ts",
+        "server/src/domain/graphragReadiness.ts"
       ]
     },
     {
@@ -527,9 +528,10 @@
       "persistenceTier": "operational",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 5,
+      "sourceCount": 6,
       "sourceFiles": [
         "server/src/domain/adminOutboxHealth.ts",
+        "server/src/domain/graphragReadiness.ts",
         "server/src/services/projectionOutbox.ts"
       ]
     },

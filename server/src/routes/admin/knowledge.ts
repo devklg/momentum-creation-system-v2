@@ -19,6 +19,7 @@ import {
   extractKnowledgeFile,
   KnowledgeFileExtractionError,
 } from '../../runtime/knowledge/knowledgeFileExtraction.js';
+import { buildAdminKnowledgeStatus } from '../../domain/adminKnowledgeStatus.js';
 
 export const adminKnowledgeRoutes: Router = Router();
 
@@ -36,6 +37,15 @@ const DOMAINS = new Set([
 ]);
 const LANGUAGES = new Set(['en', 'es']);
 const AGENTS = new Set(['steve_success', 'michael_magnificent', 'ivory']);
+
+adminKnowledgeRoutes.get('/status', requireAdmin, async (_req, res) => {
+  try {
+    return res.json(await buildAdminKnowledgeStatus());
+  } catch (err) {
+    console.error('[GET /api/admin/knowledge/status] failed', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
 
 adminKnowledgeRoutes.post('/sources', requireAdmin, async (req, res) => {
   const body = req.body as Record<string, unknown>;
@@ -91,6 +101,8 @@ adminKnowledgeRoutes.post('/sources', requireAdmin, async (req, res) => {
       language: result.source.language,
       chunkCount: result.chunkCount,
       referenceCount: result.references.length,
+      graphRagRecordCount: result.graphRagRecordCount,
+      graphRagFailureCount: result.graphRagFailureCount,
     });
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -183,6 +195,8 @@ adminKnowledgeRoutes.post('/sources/upload', requireAdmin, async (req, res) => {
       extractedCharacters: extracted.content.length,
       chunkCount: result.chunkCount,
       referenceCount: result.references.length,
+      graphRagRecordCount: result.graphRagRecordCount,
+      graphRagFailureCount: result.graphRagFailureCount,
     });
   } catch (err) {
     if (err instanceof KnowledgeFileExtractionError) {

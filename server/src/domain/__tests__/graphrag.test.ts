@@ -84,6 +84,7 @@ describe('Phase 7 R3 — active-collection routing + isolation', () => {
     expect(call.mongoCollection).toBe('mcs_graphrag_records');
     expect((call.chroma as AnyRec).collection).toBe('mcs_performance_knowledge_en');
     expect(((call.chroma as AnyRec).metadata as AnyRec).retrievalReady).toBe(true);
+    expect((call.neo4j as AnyRec).verifyCypher).toContain('RETURN count(k) AS n');
   });
 
   it('stamps the app-memory envelope with no PERSISTENCE-only fields', async () => {

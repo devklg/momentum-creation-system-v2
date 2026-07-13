@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T18:24:20.659Z",
+  "generatedAt": "2026-07-13T03:11:56.843Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -7,12 +7,12 @@
     "engineering/sprints/platform-audit-p1/schema-catalog.json"
   ],
   "summary": {
-    "collections": 50,
-    "schemaCatalogCollections": 50,
+    "collections": 51,
+    "schemaCatalogCollections": 51,
     "withObservedWrites": 30,
     "languageScopedCollections": 10,
-    "metadataContractRows": 50,
-    "observedUnregisteredTargets": 7
+    "metadataContractRows": 51,
+    "observedUnregisteredTargets": 8
   },
   "byDomain": {
     "identity_access": 4,
@@ -28,7 +28,7 @@
     "outcomes": 1,
     "crm": 2,
     "holding_tank": 2,
-    "general": 1,
+    "general": 2,
     "events": 3,
     "tenant_admin": 1,
     "vm_rvm": 4
@@ -644,12 +644,12 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 183,
+          "line": 199,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 278,
+          "line": 337,
           "action": "persistenceCall.chromadb.query_with_filter"
         }
       ],
@@ -667,6 +667,8 @@
           "authorityStatus",
           "chunkId",
           "chunkIndex",
+          "citationLabel",
+          "citationSourceRef",
           "documentId",
           "domain",
           "endOffset",
@@ -1605,6 +1607,32 @@
       }
     },
     {
+      "collection": "mcs_resource_catalog",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "general",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
       "collection": "mcs_sponsor_availability",
       "registered": true,
       "inSchemaCatalog": true,
@@ -2247,6 +2275,23 @@
     }
   ],
   "observedUnregisteredTargets": [
+    {
+      "target": "activeKnowledgeCollection(record.domain, record.language)",
+      "resolved": false,
+      "actions": [
+        "get"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/domain/graphragReadiness.ts",
+          "line": 45,
+          "action": "persistenceCall.chromadb.get"
+        }
+      ],
+      "observedMetadataKeys": [],
+      "observedFilterKeys": []
+    },
     {
       "target": "agentEventsCollection",
       "resolved": false,

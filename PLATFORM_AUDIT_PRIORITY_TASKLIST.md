@@ -109,16 +109,16 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 79. **VM/RVM:** Add VM/RVM copy compliance tests.
 - [x] 80. **VM/RVM:** Add idempotency keys for VM/RVM provider events and webhooks.
 - [x] 81. **Delivery:** Add delivery retry, backpressure, and dead-letter controls.
-- [ ] 82. **Resources:** Define resource and content lifecycle states: draft, review, approved, active, archived, superseded.
-- [ ] 83. **Resources:** Build the unified resource catalog schema.
-- [ ] 84. **Resources:** Add a content publishing gate requiring Chroma and Neo4j readiness before retrieval.
-- [ ] 85. **Knowledge:** Map the candidate-to-approved knowledge workflow end to end.
-- [ ] 86. **Knowledge:** Add active and retrieval-ready knowledge status to admin.
-- [ ] 87. **Knowledge:** Connect approved knowledge store to GraphRAG through tiered writes and the projection outbox.
-- [ ] 88. **GraphRAG:** Add GraphRAG retrieval-readiness tests across Mongo, Chroma, Neo4j, and Context Manager packets.
-- [ ] 89. **Context:** Create the Context Manager packet contract and trace schema.
-- [ ] 90. **Context:** Expose Context Manager degraded reasons in admin or runtime diagnostics.
-- [ ] 91. **Knowledge:** Add source lineage and citation storage for knowledge records.
+- [x] 82. **Resources:** Define resource and content lifecycle states: draft, review, approved, active, archived, superseded.
+- [x] 83. **Resources:** Build the unified resource catalog schema.
+- [x] 84. **Resources:** Add a content publishing gate requiring Chroma and Neo4j readiness before retrieval.
+- [x] 85. **Knowledge:** Map the candidate-to-approved knowledge workflow end to end.
+- [x] 86. **Knowledge:** Add active and retrieval-ready knowledge status to admin.
+- [x] 87. **Knowledge:** Connect approved knowledge store to GraphRAG through tiered writes and the projection outbox.
+- [x] 88. **GraphRAG:** Add GraphRAG retrieval-readiness tests across Mongo, Chroma, Neo4j, and Context Manager packets.
+- [x] 89. **Context:** Create the Context Manager packet contract and trace schema.
+- [x] 90. **Context:** Expose Context Manager degraded reasons in admin or runtime diagnostics.
+- [x] 91. **Knowledge:** Add source lineage and citation storage for knowledge records.
 - [ ] 92. **Schema:** Add schema drift CI checks.
 - [ ] 93. **Docs:** Generate route, access, schema, and persistence maps into the documentation set.
 

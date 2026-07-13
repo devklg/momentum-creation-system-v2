@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T18:24:17.917Z",
+  "generatedAt": "2026-07-13T03:11:42.513Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -143,12 +143,12 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 183,
+          "line": 199,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 256,
+          "line": 315,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -170,7 +170,7 @@
         },
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 136,
+          "line": 142,
           "source": "writeKnowledge"
         }
       ]
@@ -214,8 +214,13 @@
       "sources": [
         {
           "file": "server/src/domain/graphrag.ts",
-          "line": 127,
+          "line": 128,
           "source": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/graphragReadiness.ts",
+          "line": 24,
+          "source": "persistenceCall.mongodb.query"
         }
       ]
     },
@@ -1055,6 +1060,11 @@
         {
           "file": "server/src/domain/adminOutboxHealth.ts",
           "line": 32,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/graphragReadiness.ts",
+          "line": 37,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -2644,7 +2654,7 @@
       {
         "label": "KnowledgeChunk",
         "sources": [
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:189"
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:205"
         ]
       },
       {
@@ -2656,8 +2666,8 @@
       {
         "label": "KnowledgeSource",
         "sources": [
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:142",
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:192"
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:148",
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:208"
         ]
       },
       {
@@ -2734,7 +2744,7 @@
       {
         "label": "TeamMagnificent",
         "sources": [
-          "server/src/domain/graphrag.ts:216",
+          "server/src/domain/graphrag.ts:217",
           "server/src/domain/learningCandidates.ts:258",
           "server/src/domain/outcomes.ts:218",
           "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:142",
@@ -2798,6 +2808,7 @@
           "server/src/domain/recruitingCycle.ts:311",
           "server/src/domain/recruitingCycle.ts:413",
           "server/src/domain/recruitingCycle.ts:581",
+          "server/src/domain/resourcePublishingGate.ts:72",
           "server/src/domain/sponsorImmutabilityPersistence.ts:101",
           "server/src/domain/sponsorImmutabilityPersistence.ts:102",
           "server/src/domain/sponsorImmutabilityPersistence.ts:104",
@@ -2964,7 +2975,9 @@
       {
         "label": "TmagKnowledge",
         "sources": [
-          "server/src/domain/graphrag.ts:216",
+          "server/src/domain/graphrag.ts:217",
+          "server/src/domain/graphrag.ts:238",
+          "server/src/domain/graphragReadiness.ts:42",
           "server/src/services/persistence/neo4j/phase7Constraints.ts:51",
           "server/src/services/persistence/neo4j/phase7Constraints.ts:86"
         ]
@@ -3098,6 +3111,18 @@
         "sources": [
           "server/src/domain/recruitingCycle.ts:414",
           "server/src/domain/recruitingCycle.ts:489"
+        ]
+      },
+      {
+        "label": "TmagResource",
+        "sources": [
+          "server/src/domain/resourcePublishingGate.ts:72"
+        ]
+      },
+      {
+        "label": "TmagResourceVersion",
+        "sources": [
+          "server/src/domain/resourcePublishingGate.ts:72"
         ]
       },
       {
@@ -3273,6 +3298,12 @@
         ]
       },
       {
+        "relationship": "APPROVED_BY",
+        "sources": [
+          "server/src/domain/resourcePublishingGate.ts:72"
+        ]
+      },
+      {
         "relationship": "AVAILABLE_TO",
         "sources": [
           "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:255"
@@ -3367,7 +3398,7 @@
       {
         "relationship": "HAS_CHUNK",
         "sources": [
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:193"
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:209"
         ]
       },
       {
@@ -3439,6 +3470,7 @@
         "relationship": "HAS_VERSION",
         "sources": [
           "server/src/domain/adminTenantArchitecture.ts:466",
+          "server/src/domain/resourcePublishingGate.ts:72",
           "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186"
         ]
       },
@@ -3563,7 +3595,7 @@
       {
         "relationship": "SCOPED_TO",
         "sources": [
-          "server/src/domain/graphrag.ts:216",
+          "server/src/domain/graphrag.ts:217",
           "server/src/domain/learningCandidates.ts:258",
           "server/src/domain/outcomes.ts:218",
           "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:142"
@@ -3789,6 +3821,10 @@
     },
     {
       "collection": "mcs_relationship_knowledge_es",
+      "source": "server/src/services/chromaCollections.ts"
+    },
+    {
+      "collection": "mcs_resource_catalog",
       "source": "server/src/services/chromaCollections.ts"
     },
     {
@@ -4179,14 +4215,19 @@
       "mount": null,
       "routes": [
         {
+          "method": "GET",
+          "path": "/status",
+          "line": 41
+        },
+        {
           "method": "POST",
           "path": "/sources",
-          "line": 40
+          "line": 50
         },
         {
           "method": "POST",
           "path": "/sources/upload",
-          "line": 102
+          "line": 114
         }
       ],
       "sharedTypes": []
@@ -5661,6 +5702,16 @@
   ],
   "sharedExports": [
     {
+      "name": "McsAdminKnowledgeReadiness",
+      "kind": "type",
+      "file": "packages/shared/src/admin-knowledge-status.ts"
+    },
+    {
+      "name": "McsAdminKnowledgeStatusResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/admin-knowledge-status.ts"
+    },
+    {
       "name": "MCS_ADMIN_LIVE_OPS_PATHS",
       "kind": "const",
       "file": "packages/shared/src/admin-live-ops.ts"
@@ -6141,6 +6192,36 @@
       "file": "packages/shared/src/crm-lifecycle.ts"
     },
     {
+      "name": "knowledgeWorkflowOpenGaps",
+      "kind": "function",
+      "file": "packages/shared/src/knowledge-workflow-map.ts"
+    },
+    {
+      "name": "MCS_KNOWLEDGE_WORKFLOW_EDGES",
+      "kind": "const",
+      "file": "packages/shared/src/knowledge-workflow-map.ts"
+    },
+    {
+      "name": "MCS_KNOWLEDGE_WORKFLOW_STAGES",
+      "kind": "const",
+      "file": "packages/shared/src/knowledge-workflow-map.ts"
+    },
+    {
+      "name": "McsKnowledgeWorkflowEdge",
+      "kind": "interface",
+      "file": "packages/shared/src/knowledge-workflow-map.ts"
+    },
+    {
+      "name": "McsKnowledgeWorkflowEdgeStatus",
+      "kind": "type",
+      "file": "packages/shared/src/knowledge-workflow-map.ts"
+    },
+    {
+      "name": "McsKnowledgeWorkflowStage",
+      "kind": "interface",
+      "file": "packages/shared/src/knowledge-workflow-map.ts"
+    },
+    {
       "name": "MCS_LEADER_CREDIBILITY",
       "kind": "const",
       "file": "packages/shared/src/leaders.ts"
@@ -6586,6 +6667,81 @@
       "file": "packages/shared/src/reporting.ts"
     },
     {
+      "name": "MCS_RESOURCE_CATALOG_SCHEMA_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/resource-catalog.ts"
+    },
+    {
+      "name": "McsResourceCatalogEntry",
+      "kind": "interface",
+      "file": "packages/shared/src/resource-catalog.ts"
+    },
+    {
+      "name": "McsResourceKind",
+      "kind": "type",
+      "file": "packages/shared/src/resource-catalog.ts"
+    },
+    {
+      "name": "McsResourceReadinessCheck",
+      "kind": "type",
+      "file": "packages/shared/src/resource-catalog.ts"
+    },
+    {
+      "name": "resourceCatalogRetrievalEligible",
+      "kind": "function",
+      "file": "packages/shared/src/resource-catalog.ts"
+    },
+    {
+      "name": "validateResourceCatalogEntry",
+      "kind": "function",
+      "file": "packages/shared/src/resource-catalog.ts"
+    },
+    {
+      "name": "evaluateResourceLifecycleTransition",
+      "kind": "function",
+      "file": "packages/shared/src/resource-lifecycle.ts"
+    },
+    {
+      "name": "legacyActiveBooleanLifecycle",
+      "kind": "function",
+      "file": "packages/shared/src/resource-lifecycle.ts"
+    },
+    {
+      "name": "MCS_RESOURCE_LIFECYCLE_STATES",
+      "kind": "const",
+      "file": "packages/shared/src/resource-lifecycle.ts"
+    },
+    {
+      "name": "MCS_RESOURCE_LIFECYCLE_TRANSITIONS",
+      "kind": "const",
+      "file": "packages/shared/src/resource-lifecycle.ts"
+    },
+    {
+      "name": "MCS_RESOURCE_RETRIEVAL_ELIGIBLE_STATES",
+      "kind": "const",
+      "file": "packages/shared/src/resource-lifecycle.ts"
+    },
+    {
+      "name": "McsResourceLifecycleAction",
+      "kind": "type",
+      "file": "packages/shared/src/resource-lifecycle.ts"
+    },
+    {
+      "name": "McsResourceLifecycleDecision",
+      "kind": "interface",
+      "file": "packages/shared/src/resource-lifecycle.ts"
+    },
+    {
+      "name": "McsResourceLifecycleState",
+      "kind": "type",
+      "file": "packages/shared/src/resource-lifecycle.ts"
+    },
+    {
+      "name": "McsResourceLifecycleTransitionContext",
+      "kind": "interface",
+      "file": "packages/shared/src/resource-lifecycle.ts"
+    },
+    {
       "name": "MCS_STANDING_RULE_FLUSH_WINDOW_DAYS",
       "kind": "const",
       "file": "packages/shared/src/rules.ts"
@@ -6732,6 +6888,16 @@
     },
     {
       "name": "McsContextExclusionReason",
+      "kind": "type",
+      "file": "packages/shared/src/runtime/context-packets.ts"
+    },
+    {
+      "name": "McsContextManagerExecutionTraceV1",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/context-packets.ts"
+    },
+    {
+      "name": "McsContextManagerTraceSchemaVersion",
       "kind": "type",
       "file": "packages/shared/src/runtime/context-packets.ts"
     },
@@ -7737,6 +7903,11 @@
     },
     {
       "name": "McsKnowledgeCandidateReference",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/knowledge.ts"
+    },
+    {
+      "name": "McsKnowledgeCitation",
       "kind": "interface",
       "file": "packages/shared/src/runtime/knowledge.ts"
     },
@@ -10563,11 +10734,11 @@
   ],
   "summary": {
     "mongoCollections": 67,
-    "neo4jLabels": 73,
-    "neo4jRelationships": 61,
-    "chromaCollections": 50,
+    "neo4jLabels": 75,
+    "neo4jRelationships": 62,
+    "chromaCollections": 51,
     "routeModules": 45,
-    "routeHandlers": 255,
-    "sharedExports": 980
+    "routeHandlers": 256,
+    "sharedExports": 1006
   }
 }
