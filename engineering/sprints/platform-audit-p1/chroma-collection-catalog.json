@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T20:21:06.615Z",
+  "generatedAt": "2026-07-13T20:31:07.138Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -914,12 +914,12 @@
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 332,
+          "line": 335,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 448,
+          "line": 451,
           "action": "writeOperational"
         }
       ],

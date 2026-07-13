@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T20:21:03.304Z",
+  "generatedAt": "2026-07-13T20:31:03.703Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -182,8 +182,8 @@
       "label": "RESERVED_ORIENTATION",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/orientationSession.ts:467",
-        "server/src/domain/orientationSession.ts:580"
+        "server/src/domain/orientationSession.ts:470",
+        "server/src/domain/orientationSession.ts:583"
       ]
     },
     {
@@ -273,8 +273,8 @@
         "server/src/domain/invitations.ts:254",
         "server/src/domain/ivory.ts:220",
         "server/src/domain/ivory.ts:233",
-        "server/src/domain/orientationSession.ts:465",
-        "server/src/domain/orientationSession.ts:580",
+        "server/src/domain/orientationSession.ts:468",
+        "server/src/domain/orientationSession.ts:583",
         "server/src/domain/outcomes.ts:218",
         "server/src/domain/profile.ts:238",
         "server/src/domain/profile.ts:540",
@@ -506,9 +506,9 @@
       "label": "TmagOrientationSession",
       "sourceCount": 3,
       "sources": [
-        "server/src/domain/orientationSession.ts:338",
-        "server/src/domain/orientationSession.ts:466",
-        "server/src/domain/orientationSession.ts:580"
+        "server/src/domain/orientationSession.ts:341",
+        "server/src/domain/orientationSession.ts:469",
+        "server/src/domain/orientationSession.ts:583"
       ]
     },
     {
