@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T09:44:17.591Z",
+  "generatedAt": "2026-07-13T12:11:44.706Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -143,12 +143,12 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 199,
+          "line": 204,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 315,
+          "line": 340,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -170,7 +170,7 @@
         },
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 142,
+          "line": 147,
           "source": "writeKnowledge"
         }
       ]
@@ -220,6 +220,30 @@
         {
           "file": "server/src/domain/graphragReadiness.ts",
           "line": 24,
+          "source": "persistenceCall.mongodb.query"
+        }
+      ]
+    },
+    {
+      "collection": "mcs_knowledge_chunks",
+      "resolved": true,
+      "schemaMode": "permissive_mongoose_schema",
+      "sources": [
+        {
+          "file": "server/scripts/backfill-knowledge-resource-catalog.ts",
+          "line": 34,
+          "source": "persistenceCall.mongodb.query"
+        }
+      ]
+    },
+    {
+      "collection": "mcs_knowledge_sources",
+      "resolved": true,
+      "schemaMode": "permissive_mongoose_schema",
+      "sources": [
+        {
+          "file": "server/scripts/backfill-knowledge-resource-catalog.ts",
+          "line": 22,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -2654,7 +2678,7 @@
       {
         "label": "KnowledgeChunk",
         "sources": [
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:205"
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:210"
         ]
       },
       {
@@ -2666,8 +2690,9 @@
       {
         "label": "KnowledgeSource",
         "sources": [
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:148",
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:208"
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:153",
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:213",
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:263"
         ]
       },
       {
@@ -2835,7 +2860,8 @@
           "server/src/domain/vmProviderQueue.ts:275",
           "server/src/domain/vmProviderQueue.ts:640",
           "server/src/domain/workbook.ts:307",
-          "server/src/domain/workbook.ts:308"
+          "server/src/domain/workbook.ts:308",
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:259"
         ]
       },
       {
@@ -3116,13 +3142,15 @@
       {
         "label": "TmagResource",
         "sources": [
-          "server/src/domain/resourcePublishingGate.ts:72"
+          "server/src/domain/resourcePublishingGate.ts:72",
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:253"
         ]
       },
       {
         "label": "TmagResourceVersion",
         "sources": [
-          "server/src/domain/resourcePublishingGate.ts:72"
+          "server/src/domain/resourcePublishingGate.ts:72",
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:255"
         ]
       },
       {
@@ -3300,7 +3328,8 @@
       {
         "relationship": "APPROVED_BY",
         "sources": [
-          "server/src/domain/resourcePublishingGate.ts:72"
+          "server/src/domain/resourcePublishingGate.ts:72",
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:261"
         ]
       },
       {
@@ -3398,7 +3427,7 @@
       {
         "relationship": "HAS_CHUNK",
         "sources": [
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:209"
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:214"
         ]
       },
       {
@@ -3471,7 +3500,8 @@
         "sources": [
           "server/src/domain/adminTenantArchitecture.ts:466",
           "server/src/domain/resourcePublishingGate.ts:72",
-          "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186"
+          "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186",
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:258"
         ]
       },
       {
@@ -3572,6 +3602,12 @@
         "sources": [
           "server/src/domain/vmLeadOwners.ts:65",
           "server/src/domain/vmLeadOwners.ts:77"
+        ]
+      },
+      {
+        "relationship": "PROJECTS_KNOWLEDGE_SOURCE",
+        "sources": [
+          "server/src/services/knowledge/knowledgeResourceProjection.ts:264"
         ]
       },
       {
@@ -4232,7 +4268,7 @@
         {
           "method": "POST",
           "path": "/sources/upload",
-          "line": 114
+          "line": 115
         }
       ],
       "sharedTypes": []
@@ -5293,7 +5329,12 @@
         {
           "method": "GET",
           "path": "/",
-          "line": 9
+          "line": 10
+        },
+        {
+          "method": "GET",
+          "path": "/:resourceVersionId",
+          "line": 21
         }
       ],
       "sharedTypes": [
@@ -6728,6 +6769,11 @@
     {
       "name": "MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION",
       "kind": "const",
+      "file": "packages/shared/src/resource-center.ts"
+    },
+    {
+      "name": "McsResourceCenterDetailResponse",
+      "kind": "interface",
       "file": "packages/shared/src/resource-center.ts"
     },
     {
@@ -10812,12 +10858,12 @@
     }
   ],
   "summary": {
-    "mongoCollections": 67,
+    "mongoCollections": 69,
     "neo4jLabels": 75,
-    "neo4jRelationships": 62,
+    "neo4jRelationships": 63,
     "chromaCollections": 51,
     "routeModules": 46,
-    "routeHandlers": 258,
-    "sharedExports": 1018
+    "routeHandlers": 259,
+    "sharedExports": 1019
   }
 }

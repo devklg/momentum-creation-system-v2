@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T09:44:19.772Z",
+  "generatedAt": "2026-07-13T12:11:33.955Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -9,7 +9,7 @@
   "summary": {
     "collections": 51,
     "schemaCatalogCollections": 51,
-    "withObservedWrites": 30,
+    "withObservedWrites": 31,
     "languageScopedCollections": 10,
     "metadataContractRows": 51,
     "observedUnregisteredTargets": 8
@@ -644,12 +644,12 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 199,
+          "line": 204,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 337,
+          "line": 362,
           "action": "persistenceCall.chromadb.query_with_filter"
         }
       ],
@@ -1614,9 +1614,17 @@
       "language": "not_language_scoped",
       "purpose": "Registered app Chroma collection.",
       "source": "server/src/services/chromaCollections.ts",
-      "actions": [],
-      "sourceCount": 0,
-      "sources": [],
+      "actions": [
+        "create_collection"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/scripts/backfill-knowledge-resource-catalog.ts",
+          "line": 79,
+          "action": "persistenceCall.chromadb.create_collection"
+        }
+      ],
       "metadataContract": {
         "collectionMetadata": {
           "project": "momentum_creation_system_v2",
@@ -1625,7 +1633,10 @@
           "embedding_model": "all-MiniLM-L6-v2",
           "purpose": "rev3 canonical registry"
         },
-        "observedMetadataKeys": [],
+        "observedMetadataKeys": [
+          "project",
+          "purpose"
+        ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [],
         "embeddingDimension": 384,
