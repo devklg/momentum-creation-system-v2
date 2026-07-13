@@ -61,6 +61,9 @@ jobs:
       - name: Documentation freshness check
         run: pnpm docs:freshness:check
 
+      - name: Generated platform maps check
+        run: pnpm docs:maps:check
+
       - name: COM prospect compliance scan check
         run: pnpm compliance:com:check
 
