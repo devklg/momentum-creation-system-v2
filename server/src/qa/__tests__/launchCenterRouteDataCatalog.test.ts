@@ -40,3 +40,16 @@ describe('P2-97 launch state projection',()=>{
   expect(domain).not.toContain("persistenceCall('mongodb', 'update'");
  });
 });
+describe('P2-98 admin factual readiness',()=>{
+ it('keeps the admin view read-only and free of person evaluation',()=>{
+  const route=readFileSync(path.join(root,'server/src/routes/admin/bas.ts'),'utf8');
+  const domain=readFileSync(path.join(root,'server/src/domain/adminLaunchReadiness.ts'),'utf8');
+  const ui=readFileSync(path.join(root,'apps/admin/src/components/ba-oversight/launch-readiness-panel.tsx'),'utf8');
+  expect(route).toContain("get('/launch-readiness', requireAdmin");
+  expect(route.indexOf("get('/launch-readiness'")).toBeLessThan(route.indexOf("get('/:tmagId'"));
+  expect(domain).toContain("policy: 'read_only_report_only'");
+  expect(domain).not.toMatch(/persistence[^\n]+(?:insert|update|delete)/i);
+  expect(ui).toContain('No score, rank, or prediction.');
+  expect(`${domain}\n${ui}`).not.toMatch(/leaderboard|percentile|best readiness|worst readiness/i);
+ });
+});

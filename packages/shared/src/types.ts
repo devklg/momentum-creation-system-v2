@@ -6068,3 +6068,23 @@ export interface McsLaunchReadinessProjection {
 export interface McsTeamLaunchCenterResponse {
   readiness: McsLaunchReadinessProjection;
 }
+
+/* P2-98 — Kevin-only, read-only roster view of factual launch evidence. */
+export interface McsAdminLaunchReadinessRow {
+  tmagId: string;
+  fullName: string;
+  sponsorTmagId: string | null;
+  readiness: McsLaunchReadinessProjection;
+}
+
+export interface McsAdminLaunchReadinessResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  policy: 'read_only_report_only';
+  rows: McsAdminLaunchReadinessRow[];
+  summary: {
+    members: number;
+    membersWithAttention: number;
+  };
+  warnings: string[];
+}

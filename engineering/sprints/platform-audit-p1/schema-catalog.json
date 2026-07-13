@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T03:52:27.940Z",
+  "generatedAt": "2026-07-13T08:51:07.205Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -3733,57 +3733,62 @@
         {
           "method": "GET",
           "path": "/entitlements/audit",
-          "line": 52
+          "line": 53
+        },
+        {
+          "method": "GET",
+          "path": "/launch-readiness",
+          "line": 58
         },
         {
           "method": "GET",
           "path": "/",
-          "line": 57
+          "line": 68
         },
         {
           "method": "GET",
           "path": "/:tmagId",
-          "line": 86
+          "line": 97
         },
         {
           "method": "POST",
           "path": "/:tmagId/sponsor-override",
-          "line": 112
+          "line": 123
         },
         {
           "method": "POST",
           "path": "/:tmagId/entitlements",
-          "line": 177
+          "line": 188
         },
         {
           "method": "POST",
           "path": "/:tmagId/leader-tag",
-          "line": 218
+          "line": 229
         },
         {
           "method": "POST",
           "path": "/:tmagId/notes",
-          "line": 258
+          "line": 269
         },
         {
           "method": "POST",
           "path": "/",
-          "line": 368
+          "line": 379
         },
         {
           "method": "PATCH",
           "path": "/:tmagId",
-          "line": 403
+          "line": 414
         },
         {
           "method": "DELETE",
           "path": "/:tmagId",
-          "line": 429
+          "line": 440
         },
         {
           "method": "POST",
           "path": "/:tmagId/restore",
-          "line": 455
+          "line": 466
         }
       ],
       "sharedTypes": [
@@ -8305,6 +8310,16 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsAdminLaunchReadinessResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminLaunchReadinessRow",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsAdminLeaderGroupOption",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -10366,7 +10381,7 @@
     "neo4jRelationships": 61,
     "chromaCollections": 51,
     "routeModules": 45,
-    "routeHandlers": 243,
-    "sharedExports": 992
+    "routeHandlers": 244,
+    "sharedExports": 994
   }
 }
