@@ -23,3 +23,4 @@ export * from './admin-knowledge-status.js';
 export * from './launch-center-catalog.js';
 export * from './resource-center-catalog.js';
 export * from './resource-center.js';
+export * from './event-center-catalog.js';
