@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T20:00:45.260Z
+- Generated: 2026-07-13T20:21:16.936Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
-- Route handlers: 265
-- Shared exports: 1045
+- Route handlers: 266
+- Shared exports: 1051
 
 ## Mongo Collections
 
@@ -55,9 +55,9 @@
 | `tmag_new_member_orientation_sessions` | permissive_mongoose_schema | yes | 4 |
 | `tmag_profile_change_challenges` | permissive_mongoose_schema | yes | 3 |
 | `tmag_projection_outbox` | permissive_mongoose_schema | yes | 6 |
-| `tmag_prospect_callback_requests` | permissive_mongoose_schema | yes | 9 |
+| `tmag_prospect_callback_requests` | permissive_mongoose_schema | yes | 10 |
 | `tmag_prospect_crm_dispositions` | permissive_mongoose_schema | yes | 11 |
-| `tmag_prospect_crm_followups` | permissive_mongoose_schema | yes | 13 |
+| `tmag_prospect_crm_followups` | permissive_mongoose_schema | yes | 14 |
 | `tmag_prospect_crm_notes` | permissive_mongoose_schema | yes | 6 |
 | `tmag_prospect_crm_records` | permissive_mongoose_schema | yes | 12 |
 | `tmag_prospect_htank_accounts` | permissive_mongoose_schema | yes | 8 |
@@ -70,14 +70,14 @@
 | `tmag_prospect_timeline_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_reservations` | permissive_mongoose_schema | yes | 4 |
-| `tmag_prospects` | permissive_mongoose_schema | yes | 36 |
+| `tmag_prospects` | permissive_mongoose_schema | yes | 37 |
 | `tmag_questionnaires` | permissive_mongoose_schema | yes | 2 |
 | `tmag_recruiting_cycles` | permissive_mongoose_schema | yes | 3 |
 | `tmag_sponsor_availability` | permissive_mongoose_schema | yes | 5 |
 | `tmag_steve_success_interview` | permissive_mongoose_schema | yes | 7 |
 | `tmag_three_way_bookings` | permissive_mongoose_schema | yes | 5 |
 | `tmag_vm_audit_events` | permissive_mongoose_schema | yes | 1 |
-| `tmag_vm_bulk_leads` | permissive_mongoose_schema | yes | 20 |
+| `tmag_vm_bulk_leads` | permissive_mongoose_schema | yes | 21 |
 | `tmag_vm_campaigns` | permissive_mongoose_schema | yes | 9 |
 | `tmag_vm_delivery_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_vm_inbound_calls` | permissive_mongoose_schema | yes | 6 |
@@ -331,7 +331,7 @@
 | `(unmounted)` | `server/src/routes/admin/vm.ts` | GET /overview<br>GET user-agent<br>POST /campaigns/:vmCampaignId/live-approval<br>GET user-agent<br>POST /ownership-correction<br>GET user-agent | `McsAdminVmLiveApprovalPayload`, `McsAdminVmLiveApprovalResponse`, `McsAdminVmOwnershipCorrectionPayload`, `McsAdminVmOwnershipCorrectionResponse`, `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/agents.ts` | GET /recommendations<br>POST /events | `McsAgentEventResponse`, `McsAgentRecommendationsResponse`, `McsCreateAgentEventPayload` |
 | `(unmounted)` | `server/src/routes/auth.ts` | POST /verify-code<br>POST /register<br>POST /login<br>POST /logout<br>GET /me | none |
-| `(unmounted)` | `server/src/routes/cockpit.ts` | GET /launch<br>GET /invites<br>GET /summary<br>GET /pmv<br>GET /todays-actions<br>GET /team-calendar<br>GET /invites/print.pdf | none |
+| `(unmounted)` | `server/src/routes/cockpit.ts` | GET /launch<br>GET /invites<br>GET /summary<br>GET /pmv<br>GET /todays-actions<br>GET /follow-up-queue<br>GET /team-calendar<br>GET /invites/print.pdf | none |
 | `(unmounted)` | `server/src/routes/content-videos.ts` | GET /videos | `McsContentVideosResponse` |
 | `(unmounted)` | `server/src/routes/crm.ts` | GET /today<br>GET /:prospectId<br>POST /:prospectId/notes<br>POST /:prospectId/followup<br>DELETE /:prospectId/followup<br>POST /:prospectId/disposition<br>POST /:prospectId/reinvite<br>POST /:prospectId/reinvite-script<br>POST /<br>PUT /:prospectId<br>DELETE /:prospectId | `McsClearFollowUpResponse`, `McsCreateNotePayload`, `McsCreateNoteResponse`, `McsCrmBundleResponse`, `McsReinviteResponse`, `McsReinviteScriptResponse`, `McsReinviteTerminalError`, `McsReinviteUnsentError`, `McsSetDispositionPayload`, `McsSetDispositionResponse`, `McsSetFollowUpPayload`, `McsSetFollowUpResponse`, `McsTodaysActionsResponse` |
 | `(unmounted)` | `server/src/routes/crmHub.ts` | GET /prospects<br>GET /prospects/:prospectId<br>POST /prospects/:prospectId/close-as-ba | `McsCloseAsNewBaResponse`, `McsProspectCrmListResponse`, `McsProspectCrmRecordResponse` |
@@ -1354,6 +1354,12 @@
 | `McsTodaysActionsResponse` | interface | `packages/shared/src/types.ts` |
 | `McsTokenState` | type | `packages/shared/src/types.ts` |
 | `McsTripleStackWriteResult` | interface | `packages/shared/src/types.ts` |
+| `McsUnifiedFollowUpEntityKind` | type | `packages/shared/src/types.ts` |
+| `McsUnifiedFollowUpItem` | interface | `packages/shared/src/types.ts` |
+| `McsUnifiedFollowUpQueueResponse` | interface | `packages/shared/src/types.ts` |
+| `McsUnifiedFollowUpReason` | type | `packages/shared/src/types.ts` |
+| `McsUnifiedFollowUpSource` | type | `packages/shared/src/types.ts` |
+| `McsUnifiedFollowUpStatus` | type | `packages/shared/src/types.ts` |
 | `McsUpdateIvoryNamePayload` | interface | `packages/shared/src/types.ts` |
 | `McsUpdateIvoryStatusPayload` | interface | `packages/shared/src/types.ts` |
 | `McsVideoEventKind` | type | `packages/shared/src/types.ts` |

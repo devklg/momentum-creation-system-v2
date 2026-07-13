@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T20:00:30.736Z",
+  "generatedAt": "2026-07-13T20:21:02.406Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 70,
   "unclassifiedCount": 0,
@@ -586,11 +586,12 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 9,
+      "sourceCount": 10,
       "sourceFiles": [
         "server/src/domain/callbackRequest.ts",
         "server/src/domain/cockpit.ts",
         "server/src/domain/crm.ts",
+        "server/src/domain/followUpQueue.ts",
         "server/src/domain/todaysActions.ts",
         "server/src/domain/vmInboundCallback.ts",
         "server/src/domain/vmPilotCockpit.ts"
@@ -623,11 +624,12 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 13,
+      "sourceCount": 14,
       "sourceFiles": [
         "server/src/domain/cockpit.ts",
         "server/src/domain/crm.ts",
         "server/src/domain/eventCenter.ts",
+        "server/src/domain/followUpQueue.ts",
         "server/src/domain/recruitingCycle.ts",
         "server/src/domain/todaysActions.ts",
         "server/src/domain/vmLeadWork.ts"
@@ -839,7 +841,7 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 36,
+      "sourceCount": 37,
       "sourceFiles": [
         "server/scripts/smoke-holding-tank.ts",
         "server/src/domain/adminMetrics.ts",
@@ -849,6 +851,7 @@
         "server/src/domain/bulkLeads.ts",
         "server/src/domain/cockpit.ts",
         "server/src/domain/crm.ts",
+        "server/src/domain/followUpQueue.ts",
         "server/src/domain/holdingTank.ts",
         "server/src/domain/invitations.ts",
         "server/src/domain/ivory-momentum.ts",
@@ -955,9 +958,10 @@
       "persistenceTier": "operational",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 20,
+      "sourceCount": 21,
       "sourceFiles": [
         "server/src/domain/bulkLeads.ts",
+        "server/src/domain/followUpQueue.ts",
         "server/src/domain/prospectCrm.ts",
         "server/src/domain/vmInboundCallback.ts",
         "server/src/domain/vmLeadWork.ts",

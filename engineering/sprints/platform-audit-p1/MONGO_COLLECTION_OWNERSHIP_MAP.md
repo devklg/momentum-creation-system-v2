@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-13T20:00:30.736Z
+- Generated: 2026-07-13T20:21:02.406Z
 - Collections: 70
 - Unclassified: 0
 
@@ -66,9 +66,9 @@
 | `tmag_new_member_orientation_sessions` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 4 |
 | `tmag_profile_change_challenges` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 3 |
 | `tmag_projection_outbox` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 6 |
-| `tmag_prospect_callback_requests` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 9 |
+| `tmag_prospect_callback_requests` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 10 |
 | `tmag_prospect_crm_dispositions` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 11 |
-| `tmag_prospect_crm_followups` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 13 |
+| `tmag_prospect_crm_followups` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 14 |
 | `tmag_prospect_crm_notes` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 6 |
 | `tmag_prospect_crm_records` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 12 |
 | `tmag_prospect_htank_accounts` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 8 |
@@ -81,14 +81,14 @@
 | `tmag_prospect_timeline_events` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_events` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_reservations` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 4 |
-| `tmag_prospects` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 36 |
+| `tmag_prospects` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 37 |
 | `tmag_questionnaires` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
 | `tmag_recruiting_cycles` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 3 |
 | `tmag_sponsor_availability` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 5 |
 | `tmag_steve_success_interview` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 7 |
 | `tmag_three_way_bookings` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 5 |
 | `tmag_vm_audit_events` | VM/RVM import, ownership, queue, and provider events | VM/RVM domain | admin + workers | operational | permissive_mongoose_schema | yes | 1 |
-| `tmag_vm_bulk_leads` | VM/RVM import, ownership, queue, and provider events | VM/RVM domain | admin + workers | operational | permissive_mongoose_schema | yes | 20 |
+| `tmag_vm_bulk_leads` | VM/RVM import, ownership, queue, and provider events | VM/RVM domain | admin + workers | operational | permissive_mongoose_schema | yes | 21 |
 | `tmag_vm_campaigns` | VM/RVM import, ownership, queue, and provider events | VM/RVM domain | admin + workers | operational | permissive_mongoose_schema | yes | 9 |
 | `tmag_vm_delivery_events` | VM/RVM import, ownership, queue, and provider events | VM/RVM domain | admin + workers | operational | permissive_mongoose_schema | yes | 4 |
 | `tmag_vm_inbound_calls` | VM/RVM import, ownership, queue, and provider events | VM/RVM domain | admin + workers | operational | permissive_mongoose_schema | yes | 6 |

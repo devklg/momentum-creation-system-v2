@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T20:00:40.746Z",
+  "generatedAt": "2026-07-13T20:21:12.370Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,12 +8,12 @@
   "summary": {
     "mounts": 50,
     "routeFiles": 50,
-    "routes": 236,
+    "routes": 237,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 3,
       "pre_gate": 143,
-      "ba_facing_gated": 89
+      "ba_facing_gated": 90
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
@@ -21,11 +21,11 @@
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
       "prospect_token": 18,
-      "ba_auth_steve_gated": 89
+      "ba_auth_steve_gated": 90
     },
     "byMethod": {
       "POST": 94,
-      "GET": 119,
+      "GET": 120,
       "PUT": 7,
       "PATCH": 9,
       "DELETE": 7
@@ -4363,7 +4363,7 @@
         "requireAuth"
       ],
       "handler": "handler",
-      "source": "server/src/routes/cockpit.ts:43",
+      "source": "server/src/routes/cockpit.ts:44",
       "routeSource": "server/src/routes/cockpit.ts",
       "signals": {
         "requireAuth": true,
@@ -4390,7 +4390,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/cockpit.ts:61",
+      "source": "server/src/routes/cockpit.ts:62",
       "routeSource": "server/src/routes/cockpit.ts",
       "signals": {
         "requireAuth": true,
@@ -4417,7 +4417,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/cockpit.ts:78",
+      "source": "server/src/routes/cockpit.ts:79",
       "routeSource": "server/src/routes/cockpit.ts",
       "signals": {
         "requireAuth": true,
@@ -4444,7 +4444,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/cockpit.ts:98",
+      "source": "server/src/routes/cockpit.ts:99",
       "routeSource": "server/src/routes/cockpit.ts",
       "signals": {
         "requireAuth": true,
@@ -4471,7 +4471,34 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/cockpit.ts:117",
+      "source": "server/src/routes/cockpit.ts:118",
+      "routeSource": "server/src/routes/cockpit.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/cockpit/follow-up-queue",
+      "mountPath": "/api/cockpit",
+      "localPath": "/follow-up-queue",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/cockpit.ts:142",
       "routeSource": "server/src/routes/cockpit.ts",
       "signals": {
         "requireAuth": true,
@@ -4498,7 +4525,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/cockpit.ts:141",
+      "source": "server/src/routes/cockpit.ts:165",
       "routeSource": "server/src/routes/cockpit.ts",
       "signals": {
         "requireAuth": true,
@@ -4525,7 +4552,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/cockpit.ts:167",
+      "source": "server/src/routes/cockpit.ts:191",
       "routeSource": "server/src/routes/cockpit.ts",
       "signals": {
         "requireAuth": true,
