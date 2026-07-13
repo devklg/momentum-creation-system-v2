@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TrackRecordCard } from '@/components/cockpit/TrackRecordCard';
+import { FollowUpQueue } from '@/components/cockpit/FollowUpQueue';
 import { OrientationCard } from '@/components/cockpit/OrientationCard';
 import { MichaelRuntimeSupportCard } from '@/components/cockpit/MichaelRuntimeSupportCard';
 import { ThreeWayCallWorkspace } from '@/components/cockpit/ThreeWayCallWorkspace';
@@ -752,6 +753,11 @@ export function CockpitPage() {
       {showPmvIntro && <PmvIntroPanel onDismiss={dismissPmvIntro} />}
 
       <CountsStrip counts={summary.counts} />
+
+      <FollowUpQueue
+        onProspect={handlePmvJump}
+        onVmLead={() => navigate('/vm-campaigns')}
+      />
 
       <div className="mt-8 grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-6 items-start">
         <FocusQueue

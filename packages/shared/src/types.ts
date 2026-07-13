@@ -6264,3 +6264,40 @@ export interface McsAdminLaunchReadinessResponse {
   };
   warnings: string[];
 }
+
+/* ─── P2-107 Unified follow-up queue ───────────────────────────────────────
+ * Read-only BA queue over prospect + VM/RVM callback and reminder records.
+ * The queue creates no outreach and keeps each action owned by the human BA.
+ */
+export type McsUnifiedFollowUpEntityKind = 'prospect' | 'vm_lead';
+export type McsUnifiedFollowUpReason = 'callback_request' | 'crm_reminder';
+export type McsUnifiedFollowUpStatus = 'raised_hand' | 'overdue' | 'upcoming';
+export type McsUnifiedFollowUpSource = 'prospect_crm' | 'vm_rvm';
+
+export interface McsUnifiedFollowUpItem {
+  id: string;
+  entityKind: McsUnifiedFollowUpEntityKind;
+  entityId: string;
+  firstName: string;
+  lastInitial: string;
+  reason: McsUnifiedFollowUpReason;
+  status: McsUnifiedFollowUpStatus;
+  source: McsUnifiedFollowUpSource;
+  intent: McsCallbackIntent | null;
+  signaledAt: McsIsoTimestamp | null;
+  dueAt: McsIsoTimestamp | null;
+  href: string;
+}
+
+export interface McsUnifiedFollowUpQueueResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  manualOnly: true;
+  counts: {
+    total: number;
+    raisedHands: number;
+    overdue: number;
+    upcoming: number;
+  };
+  items: McsUnifiedFollowUpItem[];
+}
