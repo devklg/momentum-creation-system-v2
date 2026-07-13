@@ -259,7 +259,7 @@ export async function getEventCenterForBA(
     events: [
       ...projectOrientationEvents(orientationSessions),
       ...projectWebinarEvents(webinarEvents),
-    ].sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor)),
+    ].sort((a, b) => new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime()),
     orientationSessions,
     myOrientationReservationSessionId:
       orientation.status === 'fulfilled'

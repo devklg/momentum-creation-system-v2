@@ -27,6 +27,24 @@ beforeEach(() => {
 });
 
 describe('Event Center read projection', () => {
+  it('orders mixed-offset event timestamps by their actual instant', async () => {
+    orientation.getSessionAvailabilityForBA.mockResolvedValue({
+      sessions: [{
+        sessionId: 'ori_later', scheduledFor: '2026-11-01T01:30:00-08:00', hosts: ['Kevin'],
+        durationMinutes: 60, capacity: 10, seatsTaken: 0, seatsRemaining: 10, reservedByMe: false,
+      }],
+      myReservationSessionId: null,
+    });
+    webinar.listUpcomingWebinarEvents.mockResolvedValue([{
+      ...webinarEvent,
+      eventId: 'web_earlier',
+      scheduledFor: '2026-11-01T08:45:00.000Z',
+    }]);
+
+    const result = await getEventCenterForBA('TM-01');
+    expect(result.events.map((event) => event.sourceId)).toEqual(['web_earlier', 'ori_later']);
+  });
+
   it('composes BA orientation and webinar truth without changing ownership', async () => {
     orientation.getSessionAvailabilityForBA.mockResolvedValue({ sessions: [{ sessionId: 'ori_1' }], myReservationSessionId: 'ori_1' });
     webinar.listUpcomingWebinarEvents.mockResolvedValue([webinarEvent]);
