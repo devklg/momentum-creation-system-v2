@@ -115,7 +115,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 85. **Knowledge:** Map the candidate-to-approved knowledge workflow end to end.
 - [x] 86. **Knowledge:** Add active and retrieval-ready knowledge status to admin.
 - [x] 87. **Knowledge:** Connect approved knowledge store to GraphRAG through tiered writes and the projection outbox.
-- [ ] 88. **GraphRAG:** Add GraphRAG retrieval-readiness tests across Mongo, Chroma, Neo4j, and Context Manager packets.
+- [x] 88. **GraphRAG:** Add GraphRAG retrieval-readiness tests across Mongo, Chroma, Neo4j, and Context Manager packets.
 - [ ] 89. **Context:** Create the Context Manager packet contract and trace schema.
 - [ ] 90. **Context:** Expose Context Manager degraded reasons in admin or runtime diagnostics.
 - [ ] 91. **Knowledge:** Add source lineage and citation storage for knowledge records.
