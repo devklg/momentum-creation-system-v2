@@ -317,10 +317,13 @@ export async function createOrientationSession(
   const capacity = input.capacity ?? MCS_ORIENTATION_SESSION_CAPACITY;
   const durationMinutes = input.durationMinutes ?? ORIENTATION_DURATION_MINUTES;
   const joinUrl = input.joinUrl ?? null;
+  // Admin accepts any ISO-8601 offset. Persist one canonical UTC instant so
+  // Mongo range queries and cross-source Event Center ordering stay correct.
+  const scheduledFor = new Date(input.scheduledFor).toISOString();
 
   const session: McsOrientationSession = {
     sessionId,
-    scheduledFor: input.scheduledFor,
+    scheduledFor,
     hosts,
     capacity,
     durationMinutes,

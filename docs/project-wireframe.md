@@ -112,6 +112,7 @@ One route /p/{token}, two faces by token state.
 - [x] Welcome banner / left-rail surfaces nav
 - [x] Today's actions card (callbacks + due follow-ups + expiring windows, bias-prompt empty state, jump-to-row) (#132/#134 wf_0046)
 - [x] P2-107 unified human follow-up queue (prospect + VM/RVM callbacks and reminders; raised hand > overdue > upcoming; no automated contact) (ACR-0018)
+- [x] P2-108 Event Center multi-timezone hardening (UTC canonical storage, epoch ordering, BA-local display, Pacific DST tests)
 - [x] CRM per invite â€” notes (append-only), follow-up reminders (one active, replace-or-clear), 5-tag dispositions (new-ba/new-customer/interested/later/not-interested), re-invite (7-day cooldown, mints fresh if expired) (#132)
 - [x] EDGE (#147, dec_cockpit_sponsor_and_reinvite seq 23): REMOVE the 7-day re-invite cooldown gate â€” BA decides timing; add a re-invite SCRIPT BUTTON (surfaces/generates a re-invite script; does not gate)
 - [x] EDGE (#147, seq 23): My Sponsor card â€” if the (immutable) sponsor is INACTIVE, point the BA to founders Kevin+Paul as support/contact fallback (placement + immutable relationship unchanged)

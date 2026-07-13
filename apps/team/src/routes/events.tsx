@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CalendarDays, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ContextResources } from '@/components/resources/ContextResources';
+import { formatEventDate } from '@/lib/eventTime';
 
 type SourceStatus = 'available' | 'unavailable';
 type EventFilter = 'all' | 'orientation' | 'webinar';
@@ -47,14 +48,6 @@ interface NormalizedEvent {
     counts: { recorded: number; attended: number; missed: number; rescheduled: number };
   };
   followUp: { owner: 'human_crm'; connection: 'not_connected' | 'available' | 'unavailable'; automated: false; connectedCount: number };
-}
-
-function formatDate(iso: string): { day: string; time: string } {
-  const date = new Date(iso);
-  return {
-    day: date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }),
-    time: date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }),
-  };
 }
 
 export function EventsPage() {
@@ -135,7 +128,7 @@ export function EventsPage() {
             {data.sources.orientation === 'available' && data.orientationSessions.length === 0 && <StatusPanel>No upcoming orientation sessions are scheduled.</StatusPanel>}
             <div className="grid gap-4 md:grid-cols-2">
               {data.orientationSessions.map((event) => {
-                const when = formatDate(event.scheduledFor);
+                const when = formatEventDate(event.scheduledFor);
                 const model = data.events.find((item) => item.sourceId === event.sessionId);
                 const heldElsewhere = data.myOrientationReservationSessionId !== null && !event.reservedByMe;
                 return (
@@ -164,7 +157,7 @@ export function EventsPage() {
             {data.sources.webinar === 'available' && data.webinarEvents.length === 0 && <StatusPanel>No upcoming prospect webinars are scheduled.</StatusPanel>}
             <div className="grid gap-4 md:grid-cols-2">
               {data.webinarEvents.map((event) => {
-                const when = formatDate(event.scheduledFor);
+                const when = formatEventDate(event.scheduledFor);
                 const model = data.events.find((item) => item.sourceId === event.eventId);
                 return (
                   <article key={event.eventId} className="rounded-md border border-line bg-ink-2 p-5">
