@@ -25,6 +25,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ContextResources } from '@/components/resources/ContextResources';
 // Local wire shapes — .team TS6059 convention (see _wire.ts header).
 import {
   FAST_START_MODULES,
@@ -205,7 +206,10 @@ export function ModuleScaffold({ moduleId, nextSlug, children }: ModuleScaffoldP
       </section>
 
       <main className="relative z-10 px-6 py-12">
-        <div className="max-w-[860px] mx-auto">{children}</div>
+        <div className="max-w-[860px] mx-auto">
+          {children}
+          <ContextResources contextTag={`context:training:fast-start:${moduleId}`} />
+        </div>
       </main>
 
       {/* MARK COMPLETE + NEXT */}

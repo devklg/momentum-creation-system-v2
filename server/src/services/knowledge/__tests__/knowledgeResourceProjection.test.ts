@@ -33,7 +33,7 @@ function source(patch: Partial<McsKnowledgeBaseSourceRecord> = {}): McsKnowledge
   };
 }
 
-function chunk(): McsKnowledgeBaseChunkRecord {
+function chunk(topicTags: string[] = ['training']): McsKnowledgeBaseChunkRecord {
   return {
     schemaVersion: 'knowledge_base.schema.v1',
     chunkId: 'chunk_1',
@@ -46,7 +46,7 @@ function chunk(): McsKnowledgeBaseChunkRecord {
     language: 'en',
     domain: 'training',
     scope: source().scope,
-    topicTags: ['training'],
+    topicTags,
     agentScopes: ['michael_magnificent'],
     surfaceScopes: ['team'],
     sourceOffsets: { startOffset: 0, endOffset: 32 },
@@ -100,6 +100,37 @@ describe('Kevin-approved knowledge Resource Catalog projection', () => {
     expect(verify).toHaveBeenNthCalledWith(2, 'knowledge:knowledge_source_1:v1', 'retrieve', persistence);
     expect(writes.filter((write) => write.tool === 'neo4j')).toHaveLength(2);
     expect(writes.filter((write) => write.tool === 'chromadb')).toHaveLength(2);
+  });
+
+  it('projects only explicit training and event context tags into graph edges', async () => {
+    let exists = false;
+    const writes: Array<{ tool: string; action: string; params: Record<string, unknown> }> = [];
+    const persistence = vi.fn(async (tool: string, action: string, params: Record<string, unknown>) => {
+      writes.push({ tool, action, params });
+      if (tool === 'mongodb' && action === 'query') return { documents: exists ? [{}] : [] };
+      if (tool === 'mongodb' && action === 'insert') { exists = true; return { insertedCount: 1 }; }
+      return {};
+    });
+    const verify = vi.fn(async (_id: string, mode: string) => ({
+      allowed: true,
+      reasons: [],
+      evidence: { evidenceId: mode === 'publish' ? 'ready_1' : 'ready_2' },
+    }));
+
+    await projectKevinApprovedKnowledgeSourceToCatalog(
+      source(),
+      [chunk(['context:training:fast-start:1', 'context:event:orientation', 'product-education'])],
+      persistence as never,
+      verify as never,
+      () => new Date(NOW),
+    );
+
+    const neoQueries = writes
+      .filter((write) => write.tool === 'neo4j')
+      .map((write) => String(write.params.query));
+    expect(neoQueries.filter((query) => query.includes('SUPPORTS_TRAINING_MODULE'))).toHaveLength(2);
+    expect(neoQueries.filter((query) => query.includes('SUPPORTS_EVENT_MATERIAL'))).toHaveLength(2);
+    expect(neoQueries.some((query) => query.includes('product-education'))).toBe(false);
   });
 
   it('fails closed when Kevin authority is absent', async () => {

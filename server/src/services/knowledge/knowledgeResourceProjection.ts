@@ -5,6 +5,7 @@ import type {
   McsKnowledgeBaseSourceRecord,
 } from '@momentum/shared/runtime';
 import { verifyResourcePublishingGate } from '../../domain/resourcePublishingGate.js';
+import { resourceContextLinksFromTags } from '../../domain/resourceContextLinks.js';
 import {
   RESOURCE_CATALOG_CHROMA_COLLECTION,
   RESOURCE_CATALOG_MONGO_COLLECTION,
@@ -279,6 +280,39 @@ async function writeCatalogProjection(entry: McsResourceCatalogEntry, persistenc
       sourceId: entry.lineage.sourceRecordId,
     },
   });
+
+  for (const link of resourceContextLinksFromTags(entry.tags)) {
+    if (link.kind === 'training_module') {
+      await persistence('neo4j', 'cypher', {
+        query: [
+          'MATCH (v:TmagResourceVersion {resourceVersionId:$resourceVersionId})',
+          'MERGE (m:TmagTrainingModule {moduleId:$targetId})',
+          'SET m.label=$label, m.route=$route',
+          'MERGE (v)-[:SUPPORTS_TRAINING_MODULE]->(m)',
+        ].join(' '),
+        params: {
+          resourceVersionId: entry.resourceVersionId,
+          targetId: link.targetId,
+          label: link.label,
+          route: link.route,
+        },
+      });
+    } else {
+      await persistence('neo4j', 'cypher', {
+        query: [
+          'MATCH (v:TmagResourceVersion {resourceVersionId:$resourceVersionId})',
+          'MERGE (e:TmagEventMaterialContext {eventContextId:$targetId})',
+          'SET e.label=$label',
+          'MERGE (v)-[:SUPPORTS_EVENT_MATERIAL]->(e)',
+        ].join(' '),
+        params: {
+          resourceVersionId: entry.resourceVersionId,
+          targetId: link.targetId,
+          label: link.label,
+        },
+      });
+    }
+  }
 
   await persistence('chromadb', 'add', {
     collection: RESOURCE_CATALOG_CHROMA_COLLECTION,
