@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T17:21:28.731Z
+- Generated: 2026-07-13T18:06:09.476Z
 - Mongo collections: 69
 - Neo4j labels: 78
 - Neo4j relationships: 67
 - Chroma collections: 52
 - Route modules: 49
 - Route handlers: 264
-- Shared exports: 1032
+- Shared exports: 1040
 
 ## Mongo Collections
 
@@ -460,9 +460,17 @@
 | `MCS_EVENT_CENTER_SCHEMA_VERSION` | const | `packages/shared/src/event-center.ts` |
 | `McsAdminEventCenterResponse` | interface | `packages/shared/src/event-center.ts` |
 | `McsAdminEventCenterWebinarEvent` | interface | `packages/shared/src/event-center.ts` |
+| `McsEventCenterAttendance` | interface | `packages/shared/src/event-center.ts` |
+| `McsEventCenterCapacity` | interface | `packages/shared/src/event-center.ts` |
+| `McsEventCenterEvent` | interface | `packages/shared/src/event-center.ts` |
+| `McsEventCenterEventType` | type | `packages/shared/src/event-center.ts` |
+| `McsEventCenterFollowUp` | interface | `packages/shared/src/event-center.ts` |
+| `McsEventCenterRegistration` | interface | `packages/shared/src/event-center.ts` |
+| `McsEventCenterReminders` | interface | `packages/shared/src/event-center.ts` |
 | `McsEventCenterResponse` | interface | `packages/shared/src/event-center.ts` |
 | `McsEventCenterSourceHealth` | interface | `packages/shared/src/event-center.ts` |
 | `McsEventCenterSourceStatus` | type | `packages/shared/src/event-center.ts` |
+| `McsEventCenterVisibility` | interface | `packages/shared/src/event-center.ts` |
 | `McsEventCenterWebinarEvent` | interface | `packages/shared/src/event-center.ts` |
 | `knowledgeWorkflowOpenGaps` | function | `packages/shared/src/knowledge-workflow-map.ts` |
 | `MCS_KNOWLEDGE_WORKFLOW_EDGES` | const | `packages/shared/src/knowledge-workflow-map.ts` |
