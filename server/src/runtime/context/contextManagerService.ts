@@ -20,6 +20,7 @@ import type {
   McsContextPacketId,
   McsContextPacketRequest,
   McsContextPacketV1,
+  McsContextManagerExecutionTraceV1,
   McsContextRequestId,
   McsKnowledgeDomain,
   McsRuntimeLanguage,
@@ -48,6 +49,7 @@ import type {
   ContextManagerRetrievalAdapterOptions,
 } from './contextManagerRetrievalAdapter.js';
 import { safeFallbackFromResult } from './safeFallback.js';
+import { assertValidContextManagerExecutionTraceV1 } from './contextManagerTraceContract.js';
 
 const APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION = 'approved_knowledge_query.v1' as const;
 const CONTEXT_MANAGER_COMPONENT_VERSION = 's1.5' as const;
@@ -100,31 +102,7 @@ export interface ContextManagerPlan {
   approvedKnowledgeQuery: McsApprovedKnowledgeQueryRequest;
 }
 
-export interface ContextManagerExecutionTrace {
-  schemaVersion: 'context_manager_trace.v1';
-  requestId: McsContextRequestId;
-  packetId: McsContextPacketId;
-  agentKey: McsAgentKey;
-  taskType: McsRuntimeTaskType;
-  planner: {
-    domains: readonly McsKnowledgeDomain[];
-    language: McsRuntimeLanguage;
-    allowLanguageFallback: boolean;
-    maxResults?: number;
-  };
-  executor: {
-    retrievalStatus: McsApprovedKnowledgeQueryResult['status'];
-    approvedCount: number;
-    candidateExcludedCount: number;
-    degradeReasons: readonly string[];
-  };
-  tracer: {
-    packetStatus: McsContextPacketV1['packetStatus'];
-    includedKnowledgeIds: readonly string[];
-    excludedSourceIds: readonly string[];
-    notes: readonly string[];
-  };
-}
+export type ContextManagerExecutionTrace = McsContextManagerExecutionTraceV1;
 
 export interface ContextManagerServiceResult {
   packet: McsContextPacketV1;
@@ -263,6 +241,10 @@ async function buildContextWithRetrieval(
         : {}),
     },
     knowledgeReferences,
+    excludedKnowledge: retrieval.excluded.map((item) => ({
+      sourceId: item.sourceId,
+      reason: item.reason === 'queued_for_review' ? 'not_review_workflow' : item.reason,
+    })),
     provenance: {
       assembledBy: 'context_manager',
       requestId: input.request.requestId,
@@ -290,6 +272,7 @@ async function buildContextWithRetrieval(
   };
 
   const trace = buildTrace({ packet, plan, retrieval });
+  assertValidContextManagerExecutionTraceV1(trace, { packet, retrieval });
   return { packet, plan, retrieval, trace };
 }
 
