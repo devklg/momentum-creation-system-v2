@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T03:29:30.074Z
+- Generated: 2026-07-13T03:52:27.940Z
 - Mongo collections: 66
 - Neo4j labels: 73
 - Neo4j relationships: 61
 - Chroma collections: 51
 - Route modules: 45
 - Route handlers: 243
-- Shared exports: 987
+- Shared exports: 992
 
 ## Mongo Collections
 
@@ -1101,6 +1101,10 @@
 | `McsLaunchFirstInvitationState` | interface | `packages/shared/src/types.ts` |
 | `McsLaunchMichaelState` | interface | `packages/shared/src/types.ts` |
 | `McsLaunchNextAction` | interface | `packages/shared/src/types.ts` |
+| `McsLaunchReadinessDomain` | type | `packages/shared/src/types.ts` |
+| `McsLaunchReadinessItem` | interface | `packages/shared/src/types.ts` |
+| `McsLaunchReadinessProjection` | interface | `packages/shared/src/types.ts` |
+| `McsLaunchReadinessStatus` | type | `packages/shared/src/types.ts` |
 | `McsLaunchStep` | interface | `packages/shared/src/types.ts` |
 | `McsLaunchStepId` | type | `packages/shared/src/types.ts` |
 | `McsLaunchStepState` | type | `packages/shared/src/types.ts` |
@@ -1269,6 +1273,7 @@
 | `McsSupportAgentInteractionKind` | type | `packages/shared/src/types.ts` |
 | `McsSupportAgentKind` | type | `packages/shared/src/types.ts` |
 | `McsTaxonomizedAuditLogEntry` | interface | `packages/shared/src/types.ts` |
+| `McsTeamLaunchCenterResponse` | interface | `packages/shared/src/types.ts` |
 | `McsTeamLaunchCenterResponse` | interface | `packages/shared/src/types.ts` |
 | `McsTeamStatsResponse` | interface | `packages/shared/src/types.ts` |
 | `McsThreeWayAvailabilityResponse` | interface | `packages/shared/src/types.ts` |

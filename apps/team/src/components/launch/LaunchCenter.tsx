@@ -75,7 +75,7 @@ export interface TeamLaunchCenter {
   };
   steps: LaunchStep[];
   steve: {
-    phase: 'awaiting_call' | 'in_progress' | 'complete';
+    phase: 'awaiting_call' | 'call_in_progress' | 'complete' | 'no_answer' | 'invalid_number' | 'stt_failed';
     completedAt: string | null;
   };
   michael: {
@@ -94,6 +94,17 @@ export interface TeamLaunchCenter {
     day1StartedAt: string | null;
     day1CompletedAt: string | null;
     complete: boolean;
+  };
+  readiness: {
+    items: Array<{
+      domain: 'orientation' | 'training' | 'invitations' | 'success_profile' | 'crm';
+      status: 'not_started' | 'scheduled' | 'in_progress' | 'ready' | 'complete' | 'needs_attention' | 'source_unavailable';
+      source: string;
+      evidenceCount: number;
+      href: string;
+      detail: string;
+    }>;
+    attentionDomains: Array<'orientation' | 'training' | 'invitations' | 'success_profile' | 'crm'>;
   };
   launchComplete: boolean;
 }
@@ -176,7 +187,8 @@ export function LaunchCenter({ launch, onNavigate, defaultExpanded = false }: La
       </div>
 
       {expanded && (
-        <ul className="border-t border-cream/10 px-4 py-3 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1.5">
+        <div className="border-t border-cream/10 px-4 py-3">
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1.5">
           {launch.steps.map((step) => (
             <li key={step.id}>
               <button
@@ -213,6 +225,33 @@ export function LaunchCenter({ launch, onNavigate, defaultExpanded = false }: La
             </li>
           ))}
         </ul>
+        <div className="mt-3 pt-3 border-t border-cream/10">
+          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-cream-faint mb-2">
+            Launch state · factual activity evidence
+          </p>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+            {launch.readiness.items.map((item) => (
+              <li key={item.domain}>
+                <button
+                  type="button"
+                  onClick={() => onNavigate(item.href)}
+                  title={item.detail}
+                  className="w-full text-left rounded border border-cream/10 px-2.5 py-2 hover:border-gold/30"
+                >
+                  <span className="block text-[11px] text-cream capitalize">
+                    {item.domain.replace('_', ' ')}
+                  </span>
+                  <span className={item.status === 'needs_attention'
+                    ? 'block font-mono text-[9px] uppercase tracking-wide text-gold'
+                    : 'block font-mono text-[9px] uppercase tracking-wide text-cream-faint'}>
+                    {item.status.replace('_', ' ')}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+        </div>
       )}
     </section>
   );

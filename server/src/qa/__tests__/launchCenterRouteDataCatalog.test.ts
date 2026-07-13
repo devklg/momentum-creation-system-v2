@@ -20,3 +20,23 @@ describe('P2-96 conditional boundary',()=>{
   expect(tasks).toMatch(/\[x\] 96[\s\S]*Not applicable/);
  });
 });
+describe('P2-97 launch state projection',()=>{
+ it('composes five factual domains without adding person evaluation',()=>{
+  expect(catalog.dataDomains).toEqual(expect.arrayContaining([
+   'orientation_reservations','training_progress','invitations','success_profile','crm_readiness',
+  ]));
+  expect(catalog.sourceCollections).toEqual(expect.arrayContaining([
+   'tmag_new_member_orientation_reservations','tmag_fast_start_progress',
+   'tmag_steve_success_interview','tmag_prospects','tmag_prospect_crm_records',
+  ]));
+  const domain=readFileSync(path.join(root,'server/src/domain/cockpit.ts'),'utf8');
+  const projection=domain.slice(domain.indexOf('const readinessItems'),domain.indexOf('const steps:'));
+  for(const factualDomain of ["domain: 'orientation'","domain: 'training'","domain: 'invitations'","domain: 'success_profile'","domain: 'crm'"]){
+   expect(projection).toContain(factualDomain);
+  }
+  expect(projection).toContain('attendance completion is not inferred from time');
+  expect(projection).toContain('findings are report-only');
+  expect(projection).not.toMatch(/leaderboard|percentile|outcome prediction/i);
+  expect(domain).not.toContain("persistenceCall('mongodb', 'update'");
+ });
+});

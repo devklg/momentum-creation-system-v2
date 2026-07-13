@@ -129,7 +129,7 @@ Product unification, workflow completion, content operations, and scale-hardenin
 - [x] 94. **Launch Center:** Decide whether Launch Center is a named surface or cockpit umbrella concept.
 - [x] 95. **Launch Center:** If Launch Center is a named surface, create its route and data catalog.
 - [x] 96. **Launch Center:** If Launch Center is an umbrella concept, document cockpit, training, invitation, and CRM composition. *(Not applicable: P2-94 selected the named `/cockpit` surface.)*
-- [ ] 97. **Launch Center:** Create a launch state projection combining orientation, training, invitations, profile, and CRM readiness.
+- [x] 97. **Launch Center:** Create a launch state projection combining orientation, training, invitations, profile, and CRM readiness.
 - [ ] 98. **Launch Center:** Add a launch readiness admin view that avoids ranking or scoring people.
 - [ ] 99. **Resource Center:** Define the Resource Center product boundary.
 - [ ] 100. **Resource Center:** Build Resource Center UI with search, filters, categories, and version-safe content.

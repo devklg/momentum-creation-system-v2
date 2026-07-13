@@ -48,6 +48,7 @@ import type {
   McsLaunchNextAction,
   McsLaunchStep,
   McsLaunchStepId,
+  McsLaunchReadinessItem,
   McsTeamLaunchCenterResponse,
   McsTokenState,
 } from '@momentum/shared';
@@ -63,6 +64,9 @@ const DISPOSITIONS_COLLECTION = 'tmag_prospect_crm_dispositions';
 const NOTES_COLLECTION = 'tmag_prospect_crm_notes';
 const COMMITMENTS_COLLECTION = 'tmag_commitments';
 const IVORY_COLLECTION = 'tmag_ivory_prospect_names';
+const ORIENTATION_RESERVATIONS_COLLECTION = 'tmag_new_member_orientation_reservations';
+const CRM_RECORDS_COLLECTION = 'tmag_prospect_crm_records';
+const STEVE_COLLECTION = 'tmag_steve_success_interview';
 /**
  * Michael's interview records (locked spec: TEAM design D.2/D.3 — Michael
  * calls every new BA; the cockpit carries the step until the interview is
@@ -949,6 +953,19 @@ async function countCollection(collection: string, filter: Record<string, unknow
   return result.documents?.length ?? 0;
 }
 
+async function queryLaunchRows(
+  collection: string,
+  filter: Record<string, unknown>,
+  limit = 500,
+): Promise<Array<Record<string, unknown>>> {
+  const result = await persistenceCall<{ documents?: Array<Record<string, unknown>> }>(
+    'mongodb',
+    'query',
+    { database: MONGO_DB, collection, filter, limit },
+  );
+  return result.documents ?? [];
+}
+
 function buildLaunchStep(args: {
   id: McsLaunchStepId;
   label: string;
@@ -1014,7 +1031,8 @@ function nextActionFromSteps(steps: McsLaunchStep[], launchComplete: boolean): M
  * instead of writing a parallel launch-state record.
  */
 export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunchCenterResponse> {
-  const [ba, commitmentAcceptedAt, steve, fastStart, michaelInterviewCount, ivoryNames] =
+  const [ba, commitmentAcceptedAt, steve, fastStart, michaelInterviewCount, ivoryNames,
+    orientationReservations, profileRows] =
     await Promise.all([
       findBAByTmagId(tmagId),
       getLatestCommitmentAcceptedAt(tmagId),
@@ -1022,6 +1040,8 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
       getFastStartProgress(tmagId),
       countCollection(MICHAEL_INTERVIEWS_COLLECTION, { tmagId }),
       countCollection(IVORY_COLLECTION, { tmagId }),
+      queryLaunchRows(ORIENTATION_RESERVATIONS_COLLECTION, { tmagId, status: 'reserved' }, 2),
+      queryLaunchRows(STEVE_COLLECTION, { tmagId }, 2),
     ]);
 
   const { invites } = await listInvitesForBA(tmagId);
@@ -1044,6 +1064,84 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
   const firstInviteDrafted = mintedCount > 0;
   const firstInviteSent = sentCount > 0;
   const ivoryStarted = ivoryNames > 0;
+
+  const crmRows = await queryLaunchRows(CRM_RECORDS_COLLECTION, { sponsorTmagId: tmagId });
+  const inviteIds = new Set(invites.map((invite) => invite.prospectId));
+  const crmByProspect = new Map<string, Array<Record<string, unknown>>>();
+  let crmAmbiguous = false;
+  for (const row of crmRows) {
+    const prospectId = typeof row.prospectId === 'string' ? row.prospectId : null;
+    const owner = typeof row.ownerTmagId === 'string' ? row.ownerTmagId : null;
+    const sponsor = typeof row.sponsorTmagId === 'string' ? row.sponsorTmagId : null;
+    if (!prospectId || owner !== tmagId || sponsor !== tmagId || !inviteIds.has(prospectId)) {
+      crmAmbiguous = true;
+      continue;
+    }
+    const rows = crmByProspect.get(prospectId) ?? [];
+    rows.push(row);
+    crmByProspect.set(prospectId, rows);
+  }
+  if ([...crmByProspect.values()].some((rows) => rows.length !== 1)) crmAmbiguous = true;
+  const crmMissing = invites.some((invite) => (crmByProspect.get(invite.prospectId)?.length ?? 0) !== 1);
+  const crmReadyCount = [...crmByProspect.values()].filter((rows) => rows.length === 1).length;
+
+  const rawProfile = profileRows[0];
+  const rawSuccessProfile = rawProfile?.successProfile as Record<string, unknown> | undefined;
+  const profileIdentityMatches = rawSuccessProfile?.tmagId === tmagId;
+  const profileAmbiguous = profileRows.length > 1 || (steveComplete && !profileIdentityMatches);
+
+  const readinessItems: McsLaunchReadinessItem[] = [
+    {
+      domain: 'orientation',
+      status: orientationReservations.length > 0 ? 'scheduled' : 'source_unavailable',
+      source: 'tmag_new_member_orientation_reservations status=reserved; attendance is not tracked',
+      evidenceCount: orientationReservations.length,
+      href: '/orientation',
+      detail: orientationReservations.length > 0
+        ? 'A live orientation seat is reserved; attendance completion is not inferred from time.'
+        : 'No reservation is active, and orientation attendance completion has no durable source yet.',
+    },
+    {
+      domain: 'training',
+      status: fastStart.complete ? 'complete' : day1Started ? 'in_progress' : 'not_started',
+      source: 'tmag_fast_start_progress',
+      evidenceCount: fastStart.modules.filter((module) => module.state === 'completed').length,
+      href: '/training/fast-start/product',
+      detail: fastStart.complete ? 'Fast Start training is complete.'
+        : day1Started ? 'Fast Start training is underway.' : 'Begin Day 1 Fast Start training.',
+    },
+    {
+      domain: 'invitations',
+      status: firstInviteSent ? 'complete' : firstInviteDrafted ? 'in_progress' : 'not_started',
+      source: 'tmag_prospects invitation spine',
+      evidenceCount: firstInviteSent ? sentCount : mintedCount,
+      href: '/ivory',
+      detail: firstInviteSent ? 'At least one personal invitation is confirmed sent.'
+        : firstInviteDrafted ? 'An invitation exists and still needs manual sending.' : 'Prepare the first personal invitation.',
+    },
+    {
+      domain: 'success_profile',
+      status: profileAmbiguous ? 'needs_attention' : steveComplete && profileIdentityMatches ? 'complete'
+        : steve.phase === 'call_in_progress' ? 'in_progress' : 'not_started',
+      source: 'tmag_steve_success_interview persisted artifact',
+      evidenceCount: profileRows.length,
+      href: '/steve/discovery',
+      detail: profileAmbiguous ? 'Success Profile evidence is duplicated or identity-inconsistent; review only.'
+        : steveComplete && profileIdentityMatches ? 'Steve saved the non-scored Success Profile.'
+          : 'Complete Steve discovery so the Success Profile can be saved.',
+    },
+    {
+      domain: 'crm',
+      status: crmAmbiguous || crmMissing ? 'needs_attention' : crmReadyCount > 0 ? 'ready' : 'not_started',
+      source: 'tmag_prospect_crm_records matched to owned invitation prospects',
+      evidenceCount: crmReadyCount,
+      href: '/cockpit#pmv',
+      detail: crmAmbiguous || crmMissing
+        ? 'CRM evidence is missing, duplicated, orphaned, or identity-inconsistent; findings are report-only.'
+        : crmReadyCount > 0 ? 'CRM records are ready for relationship notes and human follow-up.'
+          : 'CRM becomes actionable after the first invitation exists.',
+    },
+  ];
 
   const steps: McsLaunchStep[] = [
     buildLaunchStep({
@@ -1210,6 +1308,12 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
       day1StartedAt: day1?.startedAt ?? null,
       day1CompletedAt: day1?.completedAt ?? null,
       complete: fastStart.complete,
+    },
+    readiness: {
+      items: readinessItems,
+      attentionDomains: readinessItems
+        .filter((item) => item.status === 'needs_attention')
+        .map((item) => item.domain),
     },
     launchComplete,
   };
