@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-12T09:26:38.728Z
+- Generated: 2026-07-13T03:10:24.190Z
 - Collections: 66
 - Unclassified: 0
 
@@ -37,13 +37,13 @@
 | `KNOWLEDGE_CHUNK_COLLECTION` | Dynamic helper expression | Owning caller resolves at runtime | system | mixed | permissive_mongoose_schema | expression | 2 |
 | `KNOWLEDGE_SOURCE_COLLECTION` | Dynamic helper expression | Owning caller resolves at runtime | system | mixed | permissive_mongoose_schema | expression | 3 |
 | `mcs_audit_log` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 5 |
-| `mcs_graphrag_records` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 1 |
+| `mcs_graphrag_records` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 2 |
 | `mcs_learning_candidates` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 3 |
 | `mcs_outcomes` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 2 |
 | `mcs_questionnaires` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 1 |
 | `mcs_workbooks` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
 | `orientation_sessions` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 1 |
-| `team_magnificent_members` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | explicit_mongoose_schema | yes | 57 |
+| `team_magnificent_members` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | explicit_mongoose_schema | yes | 58 |
 | `tenant_settings_versions` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 3 |
 | `tmag_access_codes` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 8 |
 | `tmag_admin_curated_leader_tags` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 3 |
@@ -62,7 +62,7 @@
 | `tmag_new_member_orientation_reservations` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 5 |
 | `tmag_new_member_orientation_sessions` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 4 |
 | `tmag_profile_change_challenges` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 3 |
-| `tmag_projection_outbox` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 4 |
+| `tmag_projection_outbox` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 6 |
 | `tmag_prospect_callback_requests` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_crm_dispositions` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 6 |
 | `tmag_prospect_crm_followups` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 8 |

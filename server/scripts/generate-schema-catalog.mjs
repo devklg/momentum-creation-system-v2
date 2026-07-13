@@ -67,7 +67,7 @@ function addMapSet(map, key, value) {
 
 function projectSources() {
   const project = new Project({ skipAddingFilesFromTsConfig: true });
-  project.addSourceFilesAtPaths(SOURCE_GLOBS);
+  project.addSourceFilesAtPaths(SOURCE_GLOBS.map((glob) => path.join(repoRoot, glob).replaceAll('\\', '/')));
   return project.getSourceFiles().filter((sf) => !shouldSkip(normalizePath(sf.getFilePath())));
 }
 

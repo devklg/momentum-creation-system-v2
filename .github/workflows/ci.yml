@@ -43,6 +43,9 @@ jobs:
       - name: Build shared package for downstream typecheck
         run: pnpm build:shared
 
+      - name: Schema drift check
+        run: pnpm catalog:schema-drift:check
+
       - name: Persistence write catalog check
         run: pnpm catalog:persistence:check
 

@@ -119,7 +119,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 89. **Context:** Create the Context Manager packet contract and trace schema.
 - [x] 90. **Context:** Expose Context Manager degraded reasons in admin or runtime diagnostics.
 - [x] 91. **Knowledge:** Add source lineage and citation storage for knowledge records.
-- [ ] 92. **Schema:** Add schema drift CI checks.
+- [x] 92. **Schema:** Add schema drift CI checks.
 - [ ] 93. **Docs:** Generate route, access, schema, and persistence maps into the documentation set.
 
 ## P2 - Medium Priority
