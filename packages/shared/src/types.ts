@@ -6031,3 +6031,40 @@ export interface McsAdminVmQueueHealth {
 export interface McsAdminVmQueueHealthOverviewResponse extends McsAdminVmOverviewResponse {
   queueHealth: McsAdminVmQueueHealth;
 }
+
+/* P2-97 — additive, read-only Launch Center state projection. */
+export type McsLaunchReadinessDomain =
+  | 'orientation'
+  | 'training'
+  | 'invitations'
+  | 'success_profile'
+  | 'crm';
+
+export type McsLaunchReadinessStatus =
+  | 'not_started'
+  | 'scheduled'
+  | 'in_progress'
+  | 'ready'
+  | 'complete'
+  | 'needs_attention'
+  | 'source_unavailable';
+
+export interface McsLaunchReadinessItem {
+  domain: McsLaunchReadinessDomain;
+  status: McsLaunchReadinessStatus;
+  source: string;
+  evidenceCount: number;
+  href: string;
+  detail: string;
+}
+
+export interface McsLaunchReadinessProjection {
+  /** Domain evidence only. This is never a person score, rank, or prediction. */
+  items: McsLaunchReadinessItem[];
+  attentionDomains: McsLaunchReadinessDomain[];
+}
+
+/** Declaration merge keeps the shared response contract append-only. */
+export interface McsTeamLaunchCenterResponse {
+  readiness: McsLaunchReadinessProjection;
+}

@@ -9,18 +9,21 @@ export const MCS_LAUNCH_CENTER_CATALOG = {
   lifecycle: 'first_run_then_operational_pmv',
   dataDomains: [
     'welcome_commitment', 'steve_success_interview', 'michael_status',
-    'training_progress', 'ivory_names', 'invitations', 'sponsor_identity',
+    'orientation_reservations', 'training_progress', 'ivory_names', 'invitations',
+    'success_profile', 'crm_readiness', 'sponsor_identity',
   ],
   sourceCollections: [
     'team_magnificent_members', 'tmag_commitments', 'tmag_steve_success_interview',
     'tmag_fast_start_progress', 'michael_interviews', 'tmag_ivory_prospect_names',
     'tmag_prospects', 'tmag_prospect_invite_tokens',
+    'tmag_new_member_orientation_reservations', 'tmag_prospect_crm_records',
   ],
   knownCaveats: [
     'drafted_and_minted_counts_share_current_invitation_evidence',
     'michael_completion_timestamp_not_available',
     'sponsor_confirmation_not_separately_tracked',
-    'profile_and_crm_readiness_deferred_to_p2_97',
+    'orientation_has_reservation_evidence_but_no_attendance_completion_source',
+    'crm_missing_duplicate_or_identity_inconsistent_evidence_is_report_only',
   ],
   prohibited: ['separate_launch_center_route', 'person_score', 'person_rank', 'person_classification', 'outcome_prediction'],
 } as const;
