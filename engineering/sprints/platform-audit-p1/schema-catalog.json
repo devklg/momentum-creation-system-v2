@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T02:54:49.687Z",
+  "generatedAt": "2026-07-13T03:05:51.106Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -143,12 +143,12 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 189,
+          "line": 199,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 303,
+          "line": 315,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -2459,7 +2459,7 @@
       {
         "label": "KnowledgeChunk",
         "sources": [
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:195"
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:205"
         ]
       },
       {
@@ -2472,7 +2472,7 @@
         "label": "KnowledgeSource",
         "sources": [
           "server/src/services/knowledge/approvedKnowledgeStore.ts:148",
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:198"
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:208"
         ]
       },
       {
@@ -3177,7 +3177,7 @@
       {
         "relationship": "HAS_CHUNK",
         "sources": [
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:199"
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:209"
         ]
       },
       {
@@ -7605,6 +7605,11 @@
       "file": "packages/shared/src/runtime/knowledge.ts"
     },
     {
+      "name": "McsKnowledgeCitation",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/knowledge.ts"
+    },
+    {
       "name": "McsKnowledgeDomain",
       "kind": "type",
       "file": "packages/shared/src/runtime/knowledge.ts"
@@ -10332,6 +10337,6 @@
     "chromaCollections": 51,
     "routeModules": 45,
     "routeHandlers": 243,
-    "sharedExports": 985
+    "sharedExports": 986
   }
 }

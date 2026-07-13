@@ -118,7 +118,7 @@ Core consolidation work that protects data integrity, governance, compliance, an
 - [x] 88. **GraphRAG:** Add GraphRAG retrieval-readiness tests across Mongo, Chroma, Neo4j, and Context Manager packets.
 - [x] 89. **Context:** Create the Context Manager packet contract and trace schema.
 - [x] 90. **Context:** Expose Context Manager degraded reasons in admin or runtime diagnostics.
-- [ ] 91. **Knowledge:** Add source lineage and citation storage for knowledge records.
+- [x] 91. **Knowledge:** Add source lineage and citation storage for knowledge records.
 - [ ] 92. **Schema:** Add schema drift CI checks.
 - [ ] 93. **Docs:** Generate route, access, schema, and persistence maps into the documentation set.
 

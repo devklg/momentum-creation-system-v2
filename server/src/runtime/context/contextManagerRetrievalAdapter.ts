@@ -255,6 +255,7 @@ export function toContextReferences(result: McsApprovedKnowledgeQueryResult): Co
     summary: reference.summary ?? structuralSummary(reference.domain, reference.knowledgeId),
     language: reference.language,
     translationStatus: reference.translationStatus,
+    ...(reference.citation ? { citation: reference.citation } : {}),
   }));
 }
 

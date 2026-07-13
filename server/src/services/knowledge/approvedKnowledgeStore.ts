@@ -183,6 +183,16 @@ export async function createKevinApprovedKnowledgeSource(
     authorityKind: source.authority?.authorityKind,
     authorityStatus: source.authority?.authorityStatus,
     sourceTitle: source.title,
+    citation: {
+      label: source.title,
+      sourceRef: source.sourceRef ?? null,
+      documentId: chunk.documentId,
+      chunkId: chunk.chunkId,
+      sourceVersion: chunk.sourceVersion,
+      chunkIndex: chunk.chunkIndex,
+      startOffset: chunk.sourceOffsets.startOffset,
+      endOffset: chunk.sourceOffsets.endOffset,
+    },
   }));
 
   for (const chunkRecord of chunkRecords) {
@@ -230,6 +240,8 @@ export async function createKevinApprovedKnowledgeSource(
           authority: chunkRecord.authorityKind ?? 'kevin',
           authorityStatus: chunkRecord.authorityStatus,
           sourceTitle: chunkRecord.sourceTitle,
+          citationLabel: chunkRecord.citation.label,
+          citationSourceRef: chunkRecord.citation.sourceRef ?? undefined,
           topicTags: chunkRecord.topicTags.join('|'),
           agentScopes: chunkRecord.agentScopes.join('|'),
           surfaceScopes: chunkRecord.surfaceScopes.join('|'),
@@ -388,6 +400,7 @@ function documentToKnowledgeReference(doc: Record<string, unknown>): McsKnowledg
     language,
     translationStatus,
     sourceId: sourceId as McsKnowledgeReference['sourceId'],
+    ...(citationFromRecord(doc) ? { citation: citationFromRecord(doc)! } : {}),
     ...(freshness ? { freshness } : {}),
   }];
 }
@@ -425,10 +438,23 @@ function hydrateSemanticSearchReferences(
         ? metadata.translationStatus
         : reference.translationStatus,
       ...(extractFreshness(metadata) ? { freshness: extractFreshness(metadata) } : {}),
+      ...(citationFromRecord(metadata) ? { citation: citationFromRecord(metadata)! } : {}),
     });
   }
 
   return references;
+}
+
+function citationFromRecord(record: Record<string, unknown>) {
+  const documentId = stringValue(record.documentId);
+  const chunkId = stringValue(record.chunkId);
+  const sourceVersion = numberValue(record.sourceVersion);
+  const chunkIndex = numberValue(record.chunkIndex);
+  const startOffset = numberValue(record.startOffset) ?? (isRecord(record.sourceOffsets) ? numberValue(record.sourceOffsets.startOffset) : undefined);
+  const endOffset = numberValue(record.endOffset) ?? (isRecord(record.sourceOffsets) ? numberValue(record.sourceOffsets.endOffset) : undefined);
+  const label = stringValue(record.citationLabel) ?? stringValue(record.sourceTitle);
+  if (!documentId || !chunkId || !label || sourceVersion === undefined || chunkIndex === undefined || startOffset === undefined || endOffset === undefined || sourceVersion < 1 || chunkIndex < 0 || startOffset < 0 || endOffset < startOffset) return null;
+  return { label, sourceRef: stringValue(record.citationSourceRef) ?? stringValue(record.sourceRef) ?? null, documentId, chunkId, sourceVersion, chunkIndex, startOffset, endOffset };
 }
 
 function metadataToKnowledgeChunk(input: {

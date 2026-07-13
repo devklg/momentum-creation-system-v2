@@ -78,6 +78,7 @@ export interface ContextReference {
   // backward-compatible: absent ⇒ defaults to en/same_language (pre-P4.6 behavior).
   language?: McsRuntimeLanguage;
   translationStatus?: McsRuntimeTranslationStatus;
+  citation?: import('@momentum/shared/runtime').McsKnowledgeCitation;
 }
 
 export interface ContextConstraint {
@@ -449,6 +450,7 @@ function approvedKnowledgeFromReferences(references: ContextReference[]): McsApp
         sourceId: reference.sourceId as McsSourceId,
         sourceType: 'approved_knowledge',
         title: reference.title,
+        ...(reference.citation ? { citation: reference.citation } : {}),
       },
       retrieval: {
         retrievalMethod: 'direct_reference',
