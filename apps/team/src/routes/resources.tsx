@@ -180,8 +180,15 @@ function ResourceCard({ item }: { item: ResourceItem }) {
     </article>
   );
   if (!item.openTarget) return content;
-  if (external) return <a href={item.openTarget} target="_blank" rel="noreferrer" aria-label={`Open ${item.title}`}>{content}</a>;
-  return <Link to={item.openTarget} aria-label={`Open ${item.title}`}>{content}</Link>;
+  if (external) return <a href={item.openTarget} target="_blank" rel="noreferrer" aria-label={`Open ${item.title}`} onClick={() => recordResourceOpen(item.resourceVersionId)}>{content}</a>;
+  const detailTracksOnLoad = item.openTarget.startsWith('/resources/');
+  return <Link to={item.openTarget} aria-label={`Open ${item.title}`} onClick={detailTracksOnLoad ? undefined : () => recordResourceOpen(item.resourceVersionId)}>{content}</Link>;
+}
+
+function recordResourceOpen(resourceVersionId: string): void {
+  void fetch(`/api/resources/${encodeURIComponent(resourceVersionId)}/usage`, {
+    method: 'POST', credentials: 'include', keepalive: true,
+  });
 }
 
 function StatePanel({ message, tone = 'neutral' }: { message: string; tone?: 'neutral' | 'error' }) {

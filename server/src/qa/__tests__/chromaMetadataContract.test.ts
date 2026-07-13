@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { CHROMA_COLLECTIONS } from '../../services/chromaCollections.js';
 
 interface ChromaCatalogRow {
   collection: string;
@@ -54,7 +55,7 @@ function expectRequiredKeys(collection: string, keys: string[]): void {
 describe('P1 Chroma metadata contracts', () => {
   it('covers every registered collection with the canonical embedding contract', () => {
     const data = catalog();
-    expect(data.summary.collections).toBe(51);
+    expect(data.summary.collections).toBe(CHROMA_COLLECTIONS.length);
     expect(data.summary.metadataContractRows).toBe(data.summary.collections);
 
     for (const collection of data.collections) {

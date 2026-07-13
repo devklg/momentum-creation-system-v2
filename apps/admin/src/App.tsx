@@ -36,6 +36,7 @@ import { KnowledgePage } from '@/routes/knowledge';
 import { ContentVideosPage } from '@/routes/content-videos';
 import { ConsistencyPage } from '@/routes/consistency';
 import { EntitlementsPage } from '@/routes/entitlements';
+import { ResourceCenterAdminPage } from '@/routes/resource-center';
 
 export function App() {
   return (
@@ -86,6 +87,7 @@ function Inner() {
         <Route path="/content-videos" element={<ContentVideosPage />} />
         <Route path="/consistency" element={<ConsistencyPage />} />
         <Route path="/entitlements" element={<EntitlementsPage />} />
+        <Route path="/resource-center" element={<ResourceCenterAdminPage />} />
         <Route path="/broadcast" element={<BroadcastPage />} />
         <Route
           path="*"

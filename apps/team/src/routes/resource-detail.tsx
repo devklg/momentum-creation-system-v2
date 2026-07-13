@@ -34,6 +34,9 @@ export function ResourceDetailPage() {
         if (cancelled) return;
         setDetail(data);
         setState('ready');
+        void fetch(`/api/resources/${encodeURIComponent(data.item.resourceVersionId)}/usage`, {
+          method: 'POST', credentials: 'include', keepalive: true,
+        });
       })
       .catch(() => {
         if (!cancelled) setState('missing');

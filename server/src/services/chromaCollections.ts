@@ -61,6 +61,7 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_content_templates', // domain/adminTenantArchitecture.ts (templates)
   'mcs_content_videos', // domain/contentVideos.ts (Product Gallery)
   'mcs_resource_catalog', // domain/resourcePublishingGate.ts (P1-84 exact publishing/readback evidence)
+  'mcs_resource_usage_events', // domain/resourceUsage.ts (P2-102 verified resource opens)
   'mcs_prospect_htank_accounts', // domain/prospectAccount.ts
   'mcs_prospect_magic_links', // domain/prospectMagicLink.ts
   'mcs_prospect_webinar_reservations', // domain/webinarReservation.ts

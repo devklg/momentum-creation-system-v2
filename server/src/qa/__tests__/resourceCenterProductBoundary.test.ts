@@ -9,7 +9,7 @@ describe('P2-99 Resource Center product boundary', () => {
   it('defines one named BA library with the P2-100 UI live', () => {
     expect(catalog).toMatchObject({
       productBoundary: 'named_ba_library_over_source_owned_resources',
-      currentState: 'named_ui_live_version_safe_projection',
+      currentState: 'named_ui_live_version_safe_projection_with_usage_and_review_warnings',
       teamRoute: '/resources',
       access: 'ba_authenticated',
     });
@@ -52,6 +52,19 @@ describe('P2-99 Resource Center product boundary', () => {
       graphRelationships: ['SUPPORTS_TRAINING_MODULE', 'SUPPORTS_EVENT_MATERIAL'],
     });
     expect(catalog.deferred).not.toHaveProperty('p2_101');
+  });
+
+  it('keeps P2-102 usage and staleness advisory-only', () => {
+    expect(catalog.usageAnalytics).toEqual({
+      eventSchema: 'resource_usage.v1',
+      eventType: 'opened',
+      persistence: ['mongo', 'neo4j', 'chroma'],
+      staleReviewDays: 90,
+      staleSignal: 'warning_only',
+      publishingEffect: 'none',
+      authorityEffect: 'none',
+    });
+    expect(catalog.deferred).not.toHaveProperty('p2_102');
   });
 
   it('pins fail-closed version safety and explicit exclusions', () => {

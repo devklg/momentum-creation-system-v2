@@ -64,6 +64,7 @@ import { michaelRuntimeRoutes } from './routes/michael-runtime.js';
 import { contentVideoRoutes } from './routes/content-videos.js';
 import { knowledgeEvolutionRoutes } from './runtime/knowledge-evolution/routes.js';
 import { resourceRoutes } from './routes/resources.js';
+import { adminResourceCenterRoutes } from './routes/admin/resourceCenter.js';
 // Imported so the module is part of the build graph and verified by tsc even
 // before any route uses it. Future BA-facing routes (cockpit, fast-start,
 // training/day-2+, invitations) import this directly. See the
@@ -149,6 +150,7 @@ app.use('/api/admin/michael-runtime', adminMichaelRuntimeObservabilityRoutes);
 app.use('/api/admin/content/videos', adminContentVideoRoutes);
 app.use('/api/admin/health', adminHealthRoutes);
 app.use('/api/admin/consistency', adminConsistencyRoutes);
+app.use('/api/admin/resource-center', adminResourceCenterRoutes);
 app.use('/api/runtime/knowledge-evolution', knowledgeEvolutionRoutes);
 
 // /api/p/* is prospect-facing (apps/com). No auth, no Steve gate. The token
