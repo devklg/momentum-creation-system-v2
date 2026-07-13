@@ -14,7 +14,9 @@ import type {
   McsVmCampaignStatusAction,
   McsVMCampaignProviderMode,
   McsVMCampaignRecord,
+  McsVmDialMode,
 } from '@momentum/shared';
+import { MCS_VM_DIAL_MODES } from '@momentum/shared';
 import { vmAudit } from './vmProviderQueue.js';
 
 const MONGO_DB = 'momentum';
@@ -39,6 +41,8 @@ export interface CreateVMCampaignInput {
   smsTemplateId: string | null;
   emailTemplateId: string | null;
   scheduledAt: string | null;
+  /** Default 'vm_only' — live transfer is opt-in per campaign. */
+  dialMode?: McsVmDialMode;
 }
 
 export async function createVMCampaign(
@@ -47,8 +51,9 @@ export async function createVMCampaign(
   await findLeadOwnerForOwner(input.leadOwnerId, input.ownerTmagId);
 
   const now = new Date().toISOString();
-  const campaign: McsVMCampaignRecord = {
+  const campaign: McsVMCampaignRecord & { dialMode: McsVmDialMode } = {
     vmCampaignId: `vm_${randomUUID()}`,
+    dialMode: input.dialMode ?? 'vm_only',
     ownerTmagId: input.ownerTmagId,
     sponsorTmagId: input.sponsorTmagId,
     leadOwnerId: input.leadOwnerId,
@@ -310,6 +315,36 @@ export async function completeRunningCampaignIfIdle(vmCampaignId: string): Promi
     summary: `VM campaign ${campaign.vmCampaignId} completed after all delivery jobs finished.`,
     payload: { beforeStatus: campaign.status, afterStatus: updated.status, completedAt },
   });
+}
+
+/**
+ * Owner-scoped dialMode patch — lets Kevin flip an EXISTING campaign (the
+ * four imported LeadPower cohorts) between vm_only / live_transfer / both
+ * without recreating it. Audited.
+ */
+export async function setVMCampaignDialModeForOwner(input: {
+  vmCampaignId: string;
+  ownerTmagId: string;
+  dialMode: McsVmDialMode;
+}): Promise<McsVMCampaignRecord> {
+  if (!MCS_VM_DIAL_MODES.includes(input.dialMode)) {
+    throw new VMCampaignError('invalid_dial_mode');
+  }
+  const current = await findVMCampaignForOwner(input.vmCampaignId, input.ownerTmagId);
+  const before = (current as { dialMode?: McsVmDialMode }).dialMode ?? 'vm_only';
+  const updated = await persistCampaignPatch(
+    current,
+    { dialMode: input.dialMode },
+    `dial_mode:${input.dialMode}`,
+  );
+  await vmAudit({
+    action: 'vm.campaign.dial_mode_changed',
+    entityId: current.vmCampaignId,
+    ownerTmagId: current.ownerTmagId,
+    summary: `VM campaign ${current.vmCampaignId} dialMode changed from ${before} to ${input.dialMode}.`,
+    payload: { beforeDialMode: before, afterDialMode: input.dialMode },
+  });
+  return updated;
 }
 
 export async function setVMCampaignLiveApproval(input: {

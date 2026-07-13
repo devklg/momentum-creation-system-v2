@@ -59,9 +59,16 @@ import type {
   McsVmLeadOwnerSource,
   McsVmLeadType,
 } from '@momentum/shared';
+import type { McsVmCampaignDialFields, McsVmDialMode } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  LeadWorkPanel,
+  PilotReadoutCard,
+  RaisedHandsCard,
+  TransferAvailabilityCard,
+} from '@/components/vm/PilotCockpit';
 
 type ApiErrorBody = { ok?: false; error?: string };
 type LoadState = 'loading' | 'ready' | 'locked' | 'error';
@@ -313,6 +320,7 @@ export function VmCampaignsPage() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [leadsLoading, setLeadsLoading] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState('');
+  const [workLeadId, setWorkLeadId] = useState<string | null>(null);
 
   const selected = campaigns.find((campaign) => campaign.vmCampaignId === selectedId) ?? null;
   const selectedLeadOwner =
@@ -513,6 +521,24 @@ export function VmCampaignsPage() {
     setToast(`Campaign is now ${STATUS_LABEL[body.campaign.status]}.`);
   }
 
+  async function patchDialMode(dialMode: McsVmDialMode) {
+    if (!selected) return;
+    setToast(null);
+    const res = await fetch(`/api/vm/campaigns/${encodeURIComponent(selected.vmCampaignId)}/dial-mode`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dialMode }),
+    });
+    const body = await readJson<McsVMCampaignResponse>(res);
+    if (!res.ok || !('ok' in body) || body.ok !== true) {
+      setToast((body as ApiErrorBody).error ?? 'Could not update dial mode.');
+      return;
+    }
+    setCampaigns((prev) => prev.map((c) => (c.vmCampaignId === selected.vmCampaignId ? body.campaign : c)));
+    setToast(`Dial mode is now ${dialMode.replace(/_/g, ' ')}.`);
+  }
+
   async function importLeadBatch(rows: McsImportBulkLeadPayload[]) {
     if (!selected) throw new Error('Select a campaign first.');
     const payload: McsImportBulkLeadsPayload = {
@@ -630,6 +656,19 @@ export function VmCampaignsPage() {
 
         {loadState === 'ready' && (
           <>
+            {/* Pilot cockpit — the raised-hand list ALWAYS comes first. */}
+            <div className="mb-6 space-y-6">
+              <RaisedHandsCard onWorkLead={(leadId) => setWorkLeadId(leadId)} />
+              {workLeadId && (
+                <LeadWorkPanel
+                  leadId={workLeadId}
+                  onClose={() => setWorkLeadId(null)}
+                  onChanged={refreshSelectedCampaignData}
+                />
+              )}
+              <PilotReadoutCard />
+            </div>
+
             <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
               <Metric label="Campaigns" value={totals.campaigns} />
               <Metric label="Lead owners" value={totals.leadOwners} />
@@ -639,6 +678,7 @@ export function VmCampaignsPage() {
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
               <aside className="space-y-4">
+                <TransferAvailabilityCard />
                 <CampaignCreateCard leadOwners={leadOwners} onCreate={(payload) => createCampaign(payload)} />
                 <LeadOwnerCreateCard onCreate={(payload) => createLeadOwner(payload)} />
                 <CampaignList
@@ -662,6 +702,7 @@ export function VmCampaignsPage() {
                       onScheduleValue={setSelectedSchedule}
                       onPatchStatus={(action, scheduledAt) => void patchStatus(action, scheduledAt)}
                       onManualExport={() => void downloadManualExport()}
+                      onDialMode={(dialMode) => void patchDialMode(dialMode)}
                     />
                     <LeadImportCard
                       campaign={selected}
@@ -682,6 +723,7 @@ export function VmCampaignsPage() {
                         setLeadPage(1);
                       }}
                       onPage={setLeadPage}
+                      onWorkLead={(leadId) => setWorkLeadId(leadId)}
                     />
                   </>
                 ) : (
@@ -1002,6 +1044,12 @@ function CampaignCreateCard({
   );
 }
 
+const DIAL_MODE_OPTIONS: Array<{ value: McsVmDialMode; label: string; help: string }> = [
+  { value: 'vm_only', label: 'VM only', help: 'Machine → voicemail. Human → press-1 gather.' },
+  { value: 'live_transfer', label: 'Live transfer', help: 'Human → bridge to you. Machine → hang up, no message.' },
+  { value: 'both', label: 'Both', help: 'Human → bridge to you. Machine → voicemail. Every dial produces something.' },
+];
+
 function CampaignDetail({
   campaign,
   leadOwner,
@@ -1010,6 +1058,7 @@ function CampaignDetail({
   onScheduleValue,
   onPatchStatus,
   onManualExport,
+  onDialMode,
 }: {
   campaign: McsVMCampaignRecord;
   leadOwner: McsLeadOwnerRecord | null;
@@ -1018,8 +1067,10 @@ function CampaignDetail({
   onScheduleValue: (value: string) => void;
   onPatchStatus: (action: McsVmCampaignStatusAction, scheduledAt?: string | null) => void;
   onManualExport: () => void;
+  onDialMode: (dialMode: McsVmDialMode) => void;
 }) {
   const scheduledIso = toIsoFromLocal(scheduleValue);
+  const dialMode = (campaign as McsVMCampaignRecord & McsVmCampaignDialFields).dialMode ?? 'vm_only';
 
   return (
     <section className="rounded-md border border-cream/10 bg-cream/[0.02] p-5 md:p-6">
@@ -1057,6 +1108,37 @@ function CampaignDetail({
         <ReadOnlyBox label="SMS template" icon={<ListChecks />} value={campaign.smsTemplateId ?? 'Not set'} />
         <ReadOnlyBox label="Email template" icon={<CalendarClock />} value={campaign.emailTemplateId ?? 'Not set'} />
       </div>
+
+      {campaign.provider === 'telnyx_call_control' && (
+        <div className="mt-5 rounded-md border border-teal/20 bg-teal/[0.02] p-4">
+          <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.12em] text-cream-mute">
+            Dial mode — what happens when a human answers
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {DIAL_MODE_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                title={option.help}
+                onClick={() => onDialMode(option.value)}
+                className={
+                  'rounded border px-3 py-2 text-left transition-colors ' +
+                  (dialMode === option.value
+                    ? 'border-teal/60 bg-teal/[0.08]'
+                    : 'border-cream/10 bg-cream/[0.02] hover:border-cream/25')
+                }
+              >
+                <span className={'block font-mono text-[11px] uppercase tracking-[0.06em] ' + (dialMode === option.value ? 'text-teal' : 'text-cream')}>
+                  {option.label}
+                </span>
+                <span className="mt-1 block max-w-[280px] text-[11px] leading-[1.5] text-cream-faint">
+                  {option.help}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 rounded-md border border-cream/10 bg-cream/[0.02] p-4">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-[260px_minmax(0,1fr)]">
@@ -1352,6 +1434,7 @@ function CampaignAnalytics({
   loading,
   onFilter,
   onPage,
+  onWorkLead,
 }: {
   metrics: McsVmCampaignMetrics;
   leads: McsVmCampaignLeadRow[];
@@ -1362,6 +1445,7 @@ function CampaignAnalytics({
   loading: boolean;
   onFilter: (status: LeadStatusFilter) => void;
   onPage: (page: number) => void;
+  onWorkLead: (leadId: string) => void;
 }) {
   const maxPage = Math.max(1, Math.ceil(leadsTotal / pageSize));
 
@@ -1413,12 +1497,13 @@ function CampaignAnalytics({
                 <th className="px-3 py-2 text-left">Token</th>
                 <th className="px-3 py-2 text-left">Issues</th>
                 <th className="px-3 py-2 text-left">Updated</th>
+                <th className="px-3 py-2 text-left" />
               </tr>
             </thead>
             <tbody>
               {leads.length === 0 ? (
                 <tr>
-                  <td className="px-3 py-5 text-cream-mute" colSpan={7}>
+                  <td className="px-3 py-5 text-cream-mute" colSpan={8}>
                     No leads match this view.
                   </td>
                 </tr>
@@ -1446,6 +1531,15 @@ function CampaignAnalytics({
                       {lead.validationIssues.length === 0 ? 'None' : lead.validationIssues.join(', ')}
                     </td>
                     <td className="px-3 py-2 text-cream-faint">{formatDate(lead.updatedAt)}</td>
+                    <td className="px-3 py-2">
+                      <button
+                        type="button"
+                        onClick={() => onWorkLead(lead.leadId)}
+                        className="rounded border border-gold/40 bg-gold/[0.06] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.05em] text-gold hover:border-gold/70"
+                      >
+                        Work
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}

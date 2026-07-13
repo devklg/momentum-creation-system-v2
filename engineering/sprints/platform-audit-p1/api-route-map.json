@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T09:34:25.842Z",
+  "generatedAt": "2026-07-13T09:44:20.295Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,12 +8,12 @@
   "summary": {
     "mounts": 47,
     "routeFiles": 47,
-    "routes": 217,
+    "routes": 230,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 3,
       "pre_gate": 140,
-      "ba_facing_gated": 73
+      "ba_facing_gated": 86
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
@@ -21,14 +21,14 @@
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
       "prospect_token": 18,
-      "ba_auth_steve_gated": 73
+      "ba_auth_steve_gated": 86
     },
     "byMethod": {
-      "POST": 86,
-      "GET": 111,
-      "PUT": 6,
-      "PATCH": 8,
-      "DELETE": 6
+      "POST": 92,
+      "GET": 115,
+      "PUT": 7,
+      "PATCH": 9,
+      "DELETE": 7
     }
   },
   "mounts": [
@@ -5258,7 +5258,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "listLeadOwnersHandler",
-      "source": "server/src/routes/vm.ts:163",
+      "source": "server/src/routes/vm.ts:237",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5286,7 +5286,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "createLeadOwnerHandler",
-      "source": "server/src/routes/vm.ts:185",
+      "source": "server/src/routes/vm.ts:259",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5314,7 +5314,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "getLeadOwnerHandler",
-      "source": "server/src/routes/vm.ts:199",
+      "source": "server/src/routes/vm.ts:273",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5342,7 +5342,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:201",
+      "source": "server/src/routes/vm.ts:275",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5370,7 +5370,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:213",
+      "source": "server/src/routes/vm.ts:287",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5398,7 +5398,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:250",
+      "source": "server/src/routes/vm.ts:326",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5426,7 +5426,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:262",
+      "source": "server/src/routes/vm.ts:338",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5454,7 +5454,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:312",
+      "source": "server/src/routes/vm.ts:388",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5482,7 +5482,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:326",
+      "source": "server/src/routes/vm.ts:402",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5510,7 +5510,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:388",
+      "source": "server/src/routes/vm.ts:464",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5538,7 +5538,7 @@
         "requireVmDialerAccess"
       ],
       "handler": "importLeadOwnerLeadsHandler",
-      "source": "server/src/routes/vm.ts:440",
+      "source": "server/src/routes/vm.ts:516",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,
@@ -5566,7 +5566,371 @@
         "requireVmDialerAccess"
       ],
       "handler": "handler",
-      "source": "server/src/routes/vm.ts:442",
+      "source": "server/src/routes/vm.ts:518",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PATCH",
+      "fullPath": "/api/vm/campaigns/:campaignId/dial-mode",
+      "mountPath": "/api/vm",
+      "localPath": "/campaigns/:campaignId/dial-mode",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:535",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/transfer-availability",
+      "mountPath": "/api/vm",
+      "localPath": "/transfer-availability",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:555",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "PUT",
+      "fullPath": "/api/vm/transfer-availability",
+      "mountPath": "/api/vm",
+      "localPath": "/transfer-availability",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:567",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/raised-hands",
+      "mountPath": "/api/vm",
+      "localPath": "/raised-hands",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:587",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/vm/inbound-calls/:inboundCallId/dismiss",
+      "mountPath": "/api/vm",
+      "localPath": "/inbound-calls/:inboundCallId/dismiss",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:599",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/pilot-readout",
+      "mountPath": "/api/vm",
+      "localPath": "/pilot-readout",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:610",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/vm/leads/:leadId",
+      "mountPath": "/api/vm",
+      "localPath": "/leads/:leadId",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:626",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/vm/leads/:leadId/disposition",
+      "mountPath": "/api/vm",
+      "localPath": "/leads/:leadId/disposition",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:668",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/vm/leads/:leadId/notes",
+      "mountPath": "/api/vm",
+      "localPath": "/leads/:leadId/notes",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:687",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/vm/leads/:leadId/follow-up",
+      "mountPath": "/api/vm",
+      "localPath": "/leads/:leadId/follow-up",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:706",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "DELETE",
+      "fullPath": "/api/vm/leads/:leadId/follow-up",
+      "mountPath": "/api/vm",
+      "localPath": "/leads/:leadId/follow-up",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:725",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/vm/leads/:leadId/invite",
+      "mountPath": "/api/vm",
+      "localPath": "/leads/:leadId/invite",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:736",
+      "routeSource": "server/src/routes/vm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": true,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/vm/leads/:leadId/do-not-call",
+      "mountPath": "/api/vm",
+      "localPath": "/leads/:leadId/do-not-call",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete",
+        "requireVmDialerAccess"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/vm.ts:762",
       "routeSource": "server/src/routes/vm.ts",
       "signals": {
         "requireAuth": true,

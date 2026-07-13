@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T09:34:28.872Z
-- Mongo collections: 66
-- Neo4j labels: 73
-- Neo4j relationships: 61
+- Generated: 2026-07-13T09:44:17.591Z
+- Mongo collections: 67
+- Neo4j labels: 75
+- Neo4j relationships: 62
 - Chroma collections: 51
 - Route modules: 46
-- Route handlers: 245
-- Shared exports: 998
+- Route handlers: 258
+- Shared exports: 1018
 
 ## Mongo Collections
 
@@ -52,11 +52,11 @@
 | `tmag_new_member_orientation_sessions` | permissive_mongoose_schema | yes | 4 |
 | `tmag_profile_change_challenges` | permissive_mongoose_schema | yes | 3 |
 | `tmag_projection_outbox` | permissive_mongoose_schema | yes | 6 |
-| `tmag_prospect_callback_requests` | permissive_mongoose_schema | yes | 8 |
-| `tmag_prospect_crm_dispositions` | permissive_mongoose_schema | yes | 6 |
-| `tmag_prospect_crm_followups` | permissive_mongoose_schema | yes | 8 |
-| `tmag_prospect_crm_notes` | permissive_mongoose_schema | yes | 3 |
-| `tmag_prospect_crm_records` | permissive_mongoose_schema | yes | 9 |
+| `tmag_prospect_callback_requests` | permissive_mongoose_schema | yes | 9 |
+| `tmag_prospect_crm_dispositions` | permissive_mongoose_schema | yes | 11 |
+| `tmag_prospect_crm_followups` | permissive_mongoose_schema | yes | 12 |
+| `tmag_prospect_crm_notes` | permissive_mongoose_schema | yes | 6 |
+| `tmag_prospect_crm_records` | permissive_mongoose_schema | yes | 12 |
 | `tmag_prospect_htank_accounts` | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_htank_counters` | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_htank_placements` | permissive_mongoose_schema | yes | 22 |
@@ -64,7 +64,7 @@
 | `tmag_prospect_invite_tokens` | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_magic_links` | permissive_mongoose_schema | yes | 5 |
 | `tmag_prospect_sessions` | permissive_mongoose_schema | yes | 3 |
-| `tmag_prospect_timeline_events` | permissive_mongoose_schema | yes | 3 |
+| `tmag_prospect_timeline_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_reservations` | permissive_mongoose_schema | yes | 2 |
 | `tmag_prospects` | permissive_mongoose_schema | yes | 36 |
@@ -74,14 +74,15 @@
 | `tmag_steve_success_interview` | permissive_mongoose_schema | yes | 7 |
 | `tmag_three_way_bookings` | permissive_mongoose_schema | yes | 5 |
 | `tmag_vm_audit_events` | permissive_mongoose_schema | yes | 1 |
-| `tmag_vm_bulk_leads` | permissive_mongoose_schema | yes | 16 |
-| `tmag_vm_campaigns` | permissive_mongoose_schema | yes | 6 |
-| `tmag_vm_delivery_events` | permissive_mongoose_schema | yes | 2 |
-| `tmag_vm_inbound_calls` | permissive_mongoose_schema | yes | 2 |
+| `tmag_vm_bulk_leads` | permissive_mongoose_schema | yes | 20 |
+| `tmag_vm_campaigns` | permissive_mongoose_schema | yes | 9 |
+| `tmag_vm_delivery_events` | permissive_mongoose_schema | yes | 4 |
+| `tmag_vm_inbound_calls` | permissive_mongoose_schema | yes | 6 |
 | `tmag_vm_lead_owners` | permissive_mongoose_schema | yes | 4 |
 | `tmag_vm_provider_webhook_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_vm_queue_jobs` | permissive_mongoose_schema | yes | 8 |
-| `tmag_vm_suppression_list` | permissive_mongoose_schema | yes | 1 |
+| `tmag_vm_suppression_list` | permissive_mongoose_schema | yes | 3 |
+| `tmag_vm_transfer_availability` | permissive_mongoose_schema | yes | 5 |
 | `tmag_workbooks` | permissive_mongoose_schema | yes | 4 |
 | `webinar_events` | permissive_mongoose_schema | yes | 2 |
 
@@ -91,10 +92,10 @@
 | --- | ---: |
 | `Agent` | 1 |
 | `BrandAmbassador` | 1 |
-| `DISPOSED` | 3 |
+| `DISPOSED` | 5 |
 | `ENROLLED` | 1 |
 | `FOUNDER_PASSWORD` | 1 |
-| `HAS_FOLLOWUP` | 4 |
+| `HAS_FOLLOWUP` | 5 |
 | `IN_HOLDING_TANK` | 7 |
 | `INVITED_AS` | 1 |
 | `Knowledge` | 10 |
@@ -114,7 +115,7 @@
 | `SCOPED_TO` | 1 |
 | `SPONSORED_BY` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 77 |
+| `TeamMagnificentMember` | 81 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 2 |
@@ -126,7 +127,7 @@
 | `TmagCommitment` | 1 |
 | `TmagContentTemplate` | 1 |
 | `TmagContentVideo` | 2 |
-| `TmagCrmNote` | 1 |
+| `TmagCrmNote` | 2 |
 | `TmagFastStartProgress` | 2 |
 | `TmagGeneratorRun` | 1 |
 | `TmagHealthHeartbeat` | 3 |
@@ -142,7 +143,7 @@
 | `TmagProspectAccount` | 2 |
 | `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |
-| `TmagProspectTimelineEvent` | 2 |
+| `TmagProspectTimelineEvent` | 3 |
 | `TmagQuestionnaire` | 1 |
 | `TmagRecruitingCycle` | 2 |
 | `TmagResource` | 1 |
@@ -152,13 +153,15 @@
 | `TmagSteveDiscovery` | 3 |
 | `TmagThreeWayBooking` | 2 |
 | `TmagVmAuditEvent` | 1 |
-| `TmagVmBulkLead` | 13 |
+| `TmagVmBulkLead` | 19 |
 | `TmagVmCampaign` | 4 |
 | `TmagVmDeliveryEvent` | 1 |
 | `TmagVmInboundCall` | 1 |
 | `TmagVmLeadOwner` | 6 |
 | `TmagVmProviderWebhook` | 1 |
 | `TmagVmQueueJob` | 1 |
+| `TmagVmSuppression` | 1 |
+| `TmagVmTransferAvailability` | 2 |
 | `TmagWebinarEvent` | 1 |
 | `TmagWorkbook` | 1 |
 | `WebinarEvent` | 1 |
@@ -167,7 +170,7 @@
 
 | Relationship | Source count |
 | --- | ---: |
-| `ABOUT` | 1 |
+| `ABOUT` | 2 |
 | `ABOUT_PROSPECT` | 1 |
 | `ACCEPTED` | 1 |
 | `ACTED_BY` | 1 |
@@ -197,7 +200,7 @@
 | `HAS_RECRUITING_CYCLE` | 1 |
 | `HAS_SETTINGS_VERSION` | 1 |
 | `HAS_THREE_WAY_AVAILABILITY` | 1 |
-| `HAS_TIMELINE_EVENT` | 2 |
+| `HAS_TIMELINE_EVENT` | 3 |
 | `HAS_VERSION` | 3 |
 | `HAS_VM_AUDIT` | 1 |
 | `HAS_VM_DELIVERY_EVENT` | 1 |
@@ -223,11 +226,12 @@
 | `SUBMITTED` | 1 |
 | `SUPERSEDES` | 2 |
 | `SUPPORTED_BY` | 1 |
+| `SUPPRESSED_BY` | 1 |
 | `TARGETS_LEAD` | 2 |
 | `USES_VM_LEAD_OWNER` | 1 |
 | `VISIBLE_TO_SPONSOR` | 1 |
 | `WITH_UPLINE` | 1 |
-| `WROTE_NOTE` | 1 |
+| `WROTE_NOTE` | 2 |
 
 ## Chroma Collections
 
@@ -332,7 +336,7 @@
 | `(unmounted)` | `server/src/routes/telnyx-webhook.ts` | POST /webhook | none |
 | `(unmounted)` | `server/src/routes/three-way.ts` | GET /availability<br>PUT /availability<br>GET /bookings<br>POST /bookings<br>POST /bookings/:id/cancel | `McsThreeWayBookPayload`, `McsThreeWayBookResponse`, `McsThreeWayCancelResponse`, `McsThreeWaySetAvailabilityPayload`, `McsThreeWaySetAvailabilityResponse` |
 | `(unmounted)` | `server/src/routes/training.ts` | GET /fast-start/progress<br>POST /fast-start/modules/:id/state | `McsFastStartMarkStatePayload`, `McsFastStartModuleId` |
-| `(unmounted)` | `server/src/routes/vm.ts` | GET /lead-owners<br>POST /lead-owners<br>GET /lead-owners/:leadOwnerId<br>GET /campaigns<br>POST /campaigns<br>GET /campaigns/:campaignId<br>PATCH /campaigns/:campaignId/status<br>GET /campaigns/:campaignId/metrics<br>GET /campaigns/:campaignId/leads<br>GET /campaigns/:campaignId/manual-export<br>POST /lead-owners/:leadOwnerId/import<br>GET /imports/:importJobId | `McsLeadOwnerListResponse`, `McsLeadOwnerResponse`, `McsVMCampaignListResponse`, `McsVMCampaignProviderMode`, `McsVMCampaignResponse`, `McsVmCampaignLeadRow`, `McsVmCampaignLeadsResponse`, `McsVmCampaignMetricStatus`, `McsVmCampaignMetrics`, `McsVmCampaignMetricsResponse`, `McsVmCampaignStatusPatchPayload`, `McsVmCampaignStatusPatchResponse`, `McsVmImportJobStatusResponse`, `McsVmImportQueuedResponse` |
+| `(unmounted)` | `server/src/routes/vm.ts` | GET /lead-owners<br>POST /lead-owners<br>GET /lead-owners/:leadOwnerId<br>GET /campaigns<br>POST /campaigns<br>GET /campaigns/:campaignId<br>PATCH /campaigns/:campaignId/status<br>GET /campaigns/:campaignId/metrics<br>GET /campaigns/:campaignId/leads<br>GET /campaigns/:campaignId/manual-export<br>POST /lead-owners/:leadOwnerId/import<br>GET /imports/:importJobId<br>PATCH /campaigns/:campaignId/dial-mode<br>GET /transfer-availability<br>PUT /transfer-availability<br>GET /raised-hands<br>POST /inbound-calls/:inboundCallId/dismiss<br>GET /pilot-readout<br>GET /leads/:leadId<br>POST /leads/:leadId/disposition<br>POST /leads/:leadId/notes<br>POST /leads/:leadId/follow-up<br>DELETE /leads/:leadId/follow-up<br>POST /leads/:leadId/invite<br>POST /leads/:leadId/do-not-call | `CRM_DISPOSITIONS`, `McsCrmDisposition`, `McsLeadOwnerListResponse`, `McsLeadOwnerResponse`, `McsVMCampaignListResponse`, `McsVMCampaignProviderMode`, `McsVMCampaignResponse`, `McsVmCampaignLeadRow`, `McsVmCampaignLeadsResponse`, `McsVmCampaignMetricStatus`, `McsVmCampaignMetrics`, `McsVmCampaignMetricsResponse`, `McsVmCampaignStatusPatchPayload`, `McsVmCampaignStatusPatchResponse`, `McsVmDialMode`, `McsVmImportJobStatusResponse`, `McsVmImportQueuedResponse`, `McsVmLeadInviteResponse`, `McsVmLeadWorkDetailResponse`, `McsVmPilotReadoutResponse`, `McsVmRaisedHandsResponse`, `McsVmTransferAvailabilityResponse` |
 | `(unmounted)` | `server/src/routes/vmProviderWebhooks.ts` | GET /status<br>POST /manual-csv/import<br>POST /manual-csv/import.csv<br>GET /manual-csv/export/:campaignId<br>POST /:provider/webhook | none |
 | `(unmounted)` | `server/src/routes/welcome.ts` | POST /load<br>POST /accept<br>GET user-agent | none |
 
@@ -874,6 +878,7 @@
 | `MCS_MICHAEL_CLASSIFICATION_BANDS` | const | `packages/shared/src/types.ts` |
 | `MCS_MICHAEL_RUBRIC_MAX` | const | `packages/shared/src/types.ts` |
 | `MCS_ORIENTATION_SESSION_CAPACITY` | const | `packages/shared/src/types.ts` |
+| `MCS_VM_DIAL_MODES` | const | `packages/shared/src/types.ts` |
 | `MCS_VM_LEAD_LIFECYCLE_STATUSES` | const | `packages/shared/src/types.ts` |
 | `McsAdminActiveBaRow` | interface | `packages/shared/src/types.ts` |
 | `McsAdminAgentHealthCard` | interface | `packages/shared/src/types.ts` |
@@ -1308,6 +1313,7 @@
 | `McsVideoEventKind` | type | `packages/shared/src/types.ts` |
 | `McsVideoEventPayload` | interface | `packages/shared/src/types.ts` |
 | `McsVideoEventResponse` | interface | `packages/shared/src/types.ts` |
+| `McsVmCampaignDialFields` | interface | `packages/shared/src/types.ts` |
 | `McsVmCampaignLeadRow` | interface | `packages/shared/src/types.ts` |
 | `McsVmCampaignLeadsResponse` | interface | `packages/shared/src/types.ts` |
 | `McsVMCampaignListResponse` | interface | `packages/shared/src/types.ts` |
@@ -1325,12 +1331,30 @@
 | `McsVmDeliveryChannel` | type | `packages/shared/src/types.ts` |
 | `McsVMDeliveryEventRecord` | interface | `packages/shared/src/types.ts` |
 | `McsVmDeliveryStatus` | type | `packages/shared/src/types.ts` |
+| `McsVmDialMode` | type | `packages/shared/src/types.ts` |
+| `McsVmDialModePatchPayload` | interface | `packages/shared/src/types.ts` |
 | `McsVmImportJobStatusResponse` | interface | `packages/shared/src/types.ts` |
 | `McsVmImportQueuedResponse` | interface | `packages/shared/src/types.ts` |
+| `McsVmLeadDispositionPayload` | interface | `packages/shared/src/types.ts` |
+| `McsVmLeadFollowUpPayload` | interface | `packages/shared/src/types.ts` |
+| `McsVmLeadFollowUpRecord` | interface | `packages/shared/src/types.ts` |
 | `McsVmLeadIdentity` | interface | `packages/shared/src/types.ts` |
+| `McsVmLeadInvitePayload` | interface | `packages/shared/src/types.ts` |
+| `McsVmLeadInviteResponse` | interface | `packages/shared/src/types.ts` |
 | `McsVmLeadLifecycleStatus` | type | `packages/shared/src/types.ts` |
+| `McsVmLeadNotePayload` | interface | `packages/shared/src/types.ts` |
+| `McsVmLeadNoteRecord` | interface | `packages/shared/src/types.ts` |
 | `McsVmLeadOwnerSource` | type | `packages/shared/src/types.ts` |
 | `McsVmLeadType` | type | `packages/shared/src/types.ts` |
+| `McsVmLeadWorkDetailResponse` | interface | `packages/shared/src/types.ts` |
+| `McsVmLeadWorkLead` | interface | `packages/shared/src/types.ts` |
+| `McsVmPilotReadoutResponse` | interface | `packages/shared/src/types.ts` |
+| `McsVmPilotReadoutRow` | interface | `packages/shared/src/types.ts` |
+| `McsVmRaisedHandRow` | interface | `packages/shared/src/types.ts` |
+| `McsVmRaisedHandsResponse` | interface | `packages/shared/src/types.ts` |
+| `McsVmTransferAvailabilityRecord` | interface | `packages/shared/src/types.ts` |
+| `McsVmTransferAvailabilityResponse` | interface | `packages/shared/src/types.ts` |
+| `McsVmUnattributedInboundRow` | interface | `packages/shared/src/types.ts` |
 | `McsWebinarEvent` | interface | `packages/shared/src/types.ts` |
 | `McsWebinarReservationPayload` | interface | `packages/shared/src/types.ts` |
 | `McsWebinarReservationRecord` | interface | `packages/shared/src/types.ts` |

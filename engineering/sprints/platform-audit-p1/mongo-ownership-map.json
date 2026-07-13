@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-13T09:34:30.519Z",
+  "generatedAt": "2026-07-13T09:44:17.679Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
-  "collectionCount": 66,
+  "collectionCount": 67,
   "unclassifiedCount": 0,
   "byOwner": {
     "dynamic_helper": 4,
@@ -14,7 +14,7 @@
     "prospect_invitation_flow": 5,
     "prospect_crm": 5,
     "holding_tank_and_reentry": 6,
-    "vm_rvm": 9
+    "vm_rvm": 10
   },
   "collections": [
     {
@@ -544,13 +544,14 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 8,
+      "sourceCount": 9,
       "sourceFiles": [
         "server/src/domain/callbackRequest.ts",
         "server/src/domain/cockpit.ts",
         "server/src/domain/crm.ts",
         "server/src/domain/todaysActions.ts",
-        "server/src/domain/vmInboundCallback.ts"
+        "server/src/domain/vmInboundCallback.ts",
+        "server/src/domain/vmPilotCockpit.ts"
       ]
     },
     {
@@ -562,11 +563,13 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 6,
+      "sourceCount": 11,
       "sourceFiles": [
         "server/src/domain/cockpit.ts",
         "server/src/domain/crm.ts",
-        "server/src/domain/reports/followUpAging.ts"
+        "server/src/domain/reports/followUpAging.ts",
+        "server/src/domain/vmLeadWork.ts",
+        "server/src/domain/vmPilotCockpit.ts"
       ]
     },
     {
@@ -578,12 +581,13 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 8,
+      "sourceCount": 12,
       "sourceFiles": [
         "server/src/domain/cockpit.ts",
         "server/src/domain/crm.ts",
         "server/src/domain/recruitingCycle.ts",
-        "server/src/domain/todaysActions.ts"
+        "server/src/domain/todaysActions.ts",
+        "server/src/domain/vmLeadWork.ts"
       ]
     },
     {
@@ -595,10 +599,11 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 3,
+      "sourceCount": 6,
       "sourceFiles": [
         "server/src/domain/cockpit.ts",
-        "server/src/domain/crm.ts"
+        "server/src/domain/crm.ts",
+        "server/src/domain/vmLeadWork.ts"
       ]
     },
     {
@@ -610,11 +615,12 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 9,
+      "sourceCount": 12,
       "sourceFiles": [
         "server/src/domain/crmOwnershipPersistence.ts",
         "server/src/domain/prospectCrm.ts",
-        "server/src/domain/vmInboundCallback.ts"
+        "server/src/domain/vmInboundCallback.ts",
+        "server/src/domain/vmLeadWork.ts"
       ]
     },
     {
@@ -743,10 +749,11 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 3,
+      "sourceCount": 4,
       "sourceFiles": [
         "server/src/domain/prospectCrm.ts",
-        "server/src/domain/vmInboundCallback.ts"
+        "server/src/domain/vmInboundCallback.ts",
+        "server/src/domain/vmLeadWork.ts"
       ]
     },
     {
@@ -903,11 +910,13 @@
       "persistenceTier": "operational",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 16,
+      "sourceCount": 20,
       "sourceFiles": [
         "server/src/domain/bulkLeads.ts",
         "server/src/domain/prospectCrm.ts",
         "server/src/domain/vmInboundCallback.ts",
+        "server/src/domain/vmLeadWork.ts",
+        "server/src/domain/vmPilotCockpit.ts",
         "server/src/domain/vmProviderQueue.ts",
         "server/src/routes/vm.ts"
       ]
@@ -921,9 +930,11 @@
       "persistenceTier": "operational",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 6,
+      "sourceCount": 9,
       "sourceFiles": [
         "server/src/domain/vmCampaigns.ts",
+        "server/src/domain/vmPilotCockpit.ts",
+        "server/src/domain/vmProviderQueue.ts",
         "server/src/workers/vmDeliveryWorker.ts"
       ]
     },
@@ -936,9 +947,10 @@
       "persistenceTier": "operational",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 2,
+      "sourceCount": 4,
       "sourceFiles": [
         "server/src/domain/vmInboundCallback.ts",
+        "server/src/domain/vmPilotCockpit.ts",
         "server/src/domain/vmProviderQueue.ts"
       ]
     },
@@ -951,9 +963,10 @@
       "persistenceTier": "operational",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 2,
+      "sourceCount": 6,
       "sourceFiles": [
-        "server/src/domain/vmInboundCallback.ts"
+        "server/src/domain/vmInboundCallback.ts",
+        "server/src/domain/vmPilotCockpit.ts"
       ]
     },
     {
@@ -1008,9 +1021,24 @@
       "persistenceTier": "operational",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 1,
+      "sourceCount": 3,
       "sourceFiles": [
+        "server/src/domain/vmLeadWork.ts",
         "server/src/domain/vmProviderQueue.ts"
+      ]
+    },
+    {
+      "collection": "tmag_vm_transfer_availability",
+      "ownerId": "vm_rvm",
+      "owner": "VM/RVM import, ownership, queue, and provider events",
+      "steward": "VM/RVM domain",
+      "primarySurface": "admin + workers",
+      "persistenceTier": "operational",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 5,
+      "sourceFiles": [
+        "server/src/domain/vmLiveTransfer.ts"
       ]
     },
     {

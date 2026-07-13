@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T09:34:28.872Z",
+  "generatedAt": "2026-07-13T09:44:17.591Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -1133,6 +1133,11 @@
           "file": "server/src/domain/vmInboundCallback.ts",
           "line": 243,
           "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmPilotCockpit.ts",
+          "line": 65,
+          "source": "persistenceCall.mongodb.query"
         }
       ]
     },
@@ -1164,6 +1169,31 @@
         {
           "file": "server/src/domain/crm.ts",
           "line": 497,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 136,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 163,
+          "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 183,
+          "source": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 251,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmPilotCockpit.ts",
+          "line": 91,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1217,6 +1247,26 @@
           "file": "server/src/domain/todaysActions.ts",
           "line": 101,
           "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 340,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 365,
+          "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 382,
+          "source": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 441,
+          "source": "persistenceCall.mongodb.update"
         }
       ]
     },
@@ -1238,6 +1288,21 @@
         {
           "file": "server/src/domain/crm.ts",
           "line": 206,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 282,
+          "source": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 310,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 324,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -1291,6 +1356,21 @@
           "file": "server/src/domain/vmInboundCallback.ts",
           "line": 334,
           "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 223,
+          "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 410,
+          "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 448,
+          "source": "persistenceCall.mongodb.update"
         }
       ]
     },
@@ -1666,6 +1746,11 @@
         {
           "file": "server/src/domain/vmInboundCallback.ts",
           "line": 263,
+          "source": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 82,
           "source": "writeKnowledge"
         }
       ]
@@ -2053,7 +2138,7 @@
       "sources": [
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 257,
+          "line": 258,
           "source": "writeOperational"
         }
       ]
@@ -2094,53 +2179,73 @@
           "source": "persistenceCall.mongodb.query"
         },
         {
-          "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 578,
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 58,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 555,
+          "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 597,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmPilotCockpit.ts",
+          "line": 83,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 630,
+          "line": 579,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmProviderQueue.ts",
+          "line": 631,
           "source": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 756,
+          "line": 757,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 828,
+          "line": 829,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 853,
+          "line": 854,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 868,
+          "line": 869,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1287,
+          "line": 1537,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/routes/vm.ts",
-          "line": 294,
+          "line": 370,
           "source": "persistenceCall.mongodb.aggregate"
         },
         {
           "file": "server/src/routes/vm.ts",
-          "line": 340,
+          "line": 416,
           "source": "persistenceCall.mongodb.aggregate"
         },
         {
           "file": "server/src/routes/vm.ts",
-          "line": 369,
+          "line": 445,
           "source": "persistenceCall.mongodb.aggregate"
         }
       ]
@@ -2152,32 +2257,47 @@
       "sources": [
         {
           "file": "server/src/domain/vmCampaigns.ts",
-          "line": 69,
+          "line": 74,
           "source": "writeOperational"
         },
         {
           "file": "server/src/domain/vmCampaigns.ts",
+          "line": 121,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmCampaigns.ts",
+          "line": 133,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmCampaigns.ts",
+          "line": 147,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmCampaigns.ts",
+          "line": 167,
+          "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/vmPilotCockpit.ts",
           "line": 116,
           "source": "persistenceCall.mongodb.query"
         },
         {
-          "file": "server/src/domain/vmCampaigns.ts",
-          "line": 128,
+          "file": "server/src/domain/vmPilotCockpit.ts",
+          "line": 320,
           "source": "persistenceCall.mongodb.query"
         },
         {
-          "file": "server/src/domain/vmCampaigns.ts",
-          "line": 142,
+          "file": "server/src/domain/vmProviderQueue.ts",
+          "line": 1382,
           "source": "persistenceCall.mongodb.query"
-        },
-        {
-          "file": "server/src/domain/vmCampaigns.ts",
-          "line": 162,
-          "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/workers/vmDeliveryWorker.ts",
-          "line": 262,
+          "line": 302,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -2193,9 +2313,19 @@
           "source": "persistenceCall.mongodb.query"
         },
         {
+          "file": "server/src/domain/vmPilotCockpit.ts",
+          "line": 333,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 963,
+          "line": 964,
           "source": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmProviderQueue.ts",
+          "line": 1408,
+          "source": "persistenceCall.mongodb.query"
         }
       ]
     },
@@ -2213,6 +2343,26 @@
           "file": "server/src/domain/vmInboundCallback.ts",
           "line": 142,
           "source": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmPilotCockpit.ts",
+          "line": 158,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmPilotCockpit.ts",
+          "line": 198,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmPilotCockpit.ts",
+          "line": 207,
+          "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/vmPilotCockpit.ts",
+          "line": 214,
+          "source": "persistenceCall.mongodb.query"
         }
       ]
     },
@@ -2250,22 +2400,22 @@
       "sources": [
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1014,
+          "line": 1015,
           "source": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1054,
+          "line": 1055,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1070,
+          "line": 1071,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1101,
+          "line": 1102,
           "source": "persistenceCall.mongodb.update"
         }
       ]
@@ -2277,42 +2427,42 @@
       "sources": [
         {
           "file": "server/src/domain/vmCampaigns.ts",
-          "line": 284,
+          "line": 289,
           "source": "persistenceCall.mongodb.aggregate"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 319,
+          "line": 320,
           "source": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 353,
+          "line": 354,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 364,
+          "line": 365,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 397,
+          "line": 398,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 421,
+          "line": 422,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 449,
+          "line": 450,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 480,
+          "line": 481,
           "source": "persistenceCall.mongodb.update"
         }
       ]
@@ -2323,8 +2473,50 @@
       "schemaMode": "permissive_mongoose_schema",
       "sources": [
         {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 512,
+          "source": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 586,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 693,
+          "line": 694,
+          "source": "persistenceCall.mongodb.query"
+        }
+      ]
+    },
+    {
+      "collection": "tmag_vm_transfer_availability",
+      "resolved": true,
+      "schemaMode": "permissive_mongoose_schema",
+      "sources": [
+        {
+          "file": "server/src/domain/vmLiveTransfer.ts",
+          "line": 44,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmLiveTransfer.ts",
+          "line": 96,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/vmLiveTransfer.ts",
+          "line": 109,
+          "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/vmLiveTransfer.ts",
+          "line": 133,
+          "source": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmLiveTransfer.ts",
+          "line": 164,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -2393,7 +2585,9 @@
         "sources": [
           "server/src/domain/crm.ts:409",
           "server/src/domain/crm.ts:436",
-          "server/src/domain/crm.ts:466"
+          "server/src/domain/crm.ts:466",
+          "server/src/domain/vmLeadWork.ts:173",
+          "server/src/domain/vmLeadWork.ts:198"
         ]
       },
       {
@@ -2414,7 +2608,8 @@
           "server/src/domain/crm.ts:262",
           "server/src/domain/crm.ts:302",
           "server/src/domain/crm.ts:366",
-          "server/src/domain/crmCleanup.ts:234"
+          "server/src/domain/crmCleanup.ts:234",
+          "server/src/domain/vmLeadWork.ts:390"
         ]
       },
       {
@@ -2629,12 +2824,16 @@
           "server/src/domain/threeWayCalls.ts:582",
           "server/src/domain/threeWayCalls.ts:583",
           "server/src/domain/training.ts:237",
-          "server/src/domain/vmCampaigns.ts:75",
+          "server/src/domain/vmCampaigns.ts:80",
           "server/src/domain/vmInboundCallback.ts:213",
           "server/src/domain/vmLeadOwners.ts:61",
           "server/src/domain/vmLeadOwners.ts:77",
-          "server/src/domain/vmProviderQueue.ts:274",
-          "server/src/domain/vmProviderQueue.ts:639",
+          "server/src/domain/vmLeadWork.ts:171",
+          "server/src/domain/vmLeadWork.ts:196",
+          "server/src/domain/vmLeadWork.ts:288",
+          "server/src/domain/vmLeadWork.ts:388",
+          "server/src/domain/vmProviderQueue.ts:275",
+          "server/src/domain/vmProviderQueue.ts:640",
           "server/src/domain/workbook.ts:307",
           "server/src/domain/workbook.ts:308"
         ]
@@ -2715,7 +2914,8 @@
       {
         "label": "TmagCrmNote",
         "sources": [
-          "server/src/domain/crm.ts:182"
+          "server/src/domain/crm.ts:182",
+          "server/src/domain/vmLeadWork.ts:290"
         ]
       },
       {
@@ -2896,7 +3096,8 @@
         "label": "TmagProspectTimelineEvent",
         "sources": [
           "server/src/domain/prospectCrm.ts:230",
-          "server/src/domain/vmInboundCallback.ts:287"
+          "server/src/domain/vmInboundCallback.ts:287",
+          "server/src/domain/vmLeadWork.ts:102"
         ]
       },
       {
@@ -2955,7 +3156,7 @@
       {
         "label": "TmagVmAuditEvent",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:271"
+          "server/src/domain/vmProviderQueue.ts:272"
         ]
       },
       {
@@ -2972,8 +3173,14 @@
           "server/src/domain/vmInboundCallback.ts:152",
           "server/src/domain/vmInboundCallback.ts:212",
           "server/src/domain/vmInboundCallback.ts:286",
-          "server/src/domain/vmProviderQueue.ts:636",
-          "server/src/domain/vmProviderQueue.ts:971"
+          "server/src/domain/vmLeadWork.ts:101",
+          "server/src/domain/vmLeadWork.ts:172",
+          "server/src/domain/vmLeadWork.ts:197",
+          "server/src/domain/vmLeadWork.ts:289",
+          "server/src/domain/vmLeadWork.ts:389",
+          "server/src/domain/vmLeadWork.ts:531",
+          "server/src/domain/vmProviderQueue.ts:637",
+          "server/src/domain/vmProviderQueue.ts:972"
         ]
       },
       {
@@ -2981,14 +3188,14 @@
         "sources": [
           "server/src/domain/bulkLeads.ts:244",
           "server/src/domain/bulkLeads.ts:264",
-          "server/src/domain/vmCampaigns.ts:171",
-          "server/src/domain/vmCampaigns.ts:77"
+          "server/src/domain/vmCampaigns.ts:176",
+          "server/src/domain/vmCampaigns.ts:82"
         ]
       },
       {
         "label": "TmagVmDeliveryEvent",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:969"
+          "server/src/domain/vmProviderQueue.ts:970"
         ]
       },
       {
@@ -3002,7 +3209,7 @@
         "sources": [
           "server/src/domain/bulkLeads.ts:243",
           "server/src/domain/bulkLeads.ts:263",
-          "server/src/domain/vmCampaigns.ts:76",
+          "server/src/domain/vmCampaigns.ts:81",
           "server/src/domain/vmLeadOwners.ts:151",
           "server/src/domain/vmLeadOwners.ts:62",
           "server/src/domain/vmLeadOwners.ts:78"
@@ -3011,13 +3218,26 @@
       {
         "label": "TmagVmProviderWebhook",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:1030"
+          "server/src/domain/vmProviderQueue.ts:1031"
         ]
       },
       {
         "label": "TmagVmQueueJob",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:325"
+          "server/src/domain/vmProviderQueue.ts:326"
+        ]
+      },
+      {
+        "label": "TmagVmSuppression",
+        "sources": [
+          "server/src/domain/vmLeadWork.ts:527"
+        ]
+      },
+      {
+        "label": "TmagVmTransferAvailability",
+        "sources": [
+          "server/src/domain/vmLiveTransfer.ts:123",
+          "server/src/domain/vmLiveTransfer.ts:139"
         ]
       },
       {
@@ -3043,7 +3263,8 @@
       {
         "relationship": "ABOUT",
         "sources": [
-          "server/src/domain/crm.ts:184"
+          "server/src/domain/crm.ts:184",
+          "server/src/domain/vmLeadWork.ts:292"
         ]
       },
       {
@@ -3241,7 +3462,8 @@
         "relationship": "HAS_TIMELINE_EVENT",
         "sources": [
           "server/src/domain/prospectCrm.ts:234",
-          "server/src/domain/vmInboundCallback.ts:291"
+          "server/src/domain/vmInboundCallback.ts:291",
+          "server/src/domain/vmLeadWork.ts:106"
         ]
       },
       {
@@ -3255,13 +3477,13 @@
       {
         "relationship": "HAS_VM_AUDIT",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:275"
+          "server/src/domain/vmProviderQueue.ts:276"
         ]
       },
       {
         "relationship": "HAS_VM_DELIVERY_EVENT",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:971"
+          "server/src/domain/vmProviderQueue.ts:972"
         ]
       },
       {
@@ -3336,13 +3558,13 @@
       {
         "relationship": "OWNS_VM_CAMPAIGN",
         "sources": [
-          "server/src/domain/vmCampaigns.ts:80"
+          "server/src/domain/vmCampaigns.ts:85"
         ]
       },
       {
         "relationship": "OWNS_VM_LEAD",
         "sources": [
-          "server/src/domain/vmProviderQueue.ts:640"
+          "server/src/domain/vmProviderQueue.ts:641"
         ]
       },
       {
@@ -3417,6 +3639,12 @@
         ]
       },
       {
+        "relationship": "SUPPRESSED_BY",
+        "sources": [
+          "server/src/domain/vmLeadWork.ts:532"
+        ]
+      },
+      {
         "relationship": "TARGETS_LEAD",
         "sources": [
           "server/src/domain/bulkLeads.ts:249",
@@ -3426,7 +3654,7 @@
       {
         "relationship": "USES_VM_LEAD_OWNER",
         "sources": [
-          "server/src/domain/vmCampaigns.ts:81"
+          "server/src/domain/vmCampaigns.ts:86"
         ]
       },
       {
@@ -3444,7 +3672,8 @@
       {
         "relationship": "WROTE_NOTE",
         "sources": [
-          "server/src/domain/crm.ts:183"
+          "server/src/domain/crm.ts:183",
+          "server/src/domain/vmLeadWork.ts:291"
         ]
       }
     ]
@@ -5287,65 +5516,132 @@
         {
           "method": "GET",
           "path": "/lead-owners",
-          "line": 163
+          "line": 237
         },
         {
           "method": "POST",
           "path": "/lead-owners",
-          "line": 185
+          "line": 259
         },
         {
           "method": "GET",
           "path": "/lead-owners/:leadOwnerId",
-          "line": 199
+          "line": 273
         },
         {
           "method": "GET",
           "path": "/campaigns",
-          "line": 201
+          "line": 275
         },
         {
           "method": "POST",
           "path": "/campaigns",
-          "line": 213
+          "line": 287
         },
         {
           "method": "GET",
           "path": "/campaigns/:campaignId",
-          "line": 250
+          "line": 326
         },
         {
           "method": "PATCH",
           "path": "/campaigns/:campaignId/status",
-          "line": 262
+          "line": 338
         },
         {
           "method": "GET",
           "path": "/campaigns/:campaignId/metrics",
-          "line": 312
+          "line": 388
         },
         {
           "method": "GET",
           "path": "/campaigns/:campaignId/leads",
-          "line": 326
+          "line": 402
         },
         {
           "method": "GET",
           "path": "/campaigns/:campaignId/manual-export",
-          "line": 388
+          "line": 464
         },
         {
           "method": "POST",
           "path": "/lead-owners/:leadOwnerId/import",
-          "line": 440
+          "line": 516
         },
         {
           "method": "GET",
           "path": "/imports/:importJobId",
-          "line": 442
+          "line": 518
+        },
+        {
+          "method": "PATCH",
+          "path": "/campaigns/:campaignId/dial-mode",
+          "line": 535
+        },
+        {
+          "method": "GET",
+          "path": "/transfer-availability",
+          "line": 555
+        },
+        {
+          "method": "PUT",
+          "path": "/transfer-availability",
+          "line": 567
+        },
+        {
+          "method": "GET",
+          "path": "/raised-hands",
+          "line": 587
+        },
+        {
+          "method": "POST",
+          "path": "/inbound-calls/:inboundCallId/dismiss",
+          "line": 599
+        },
+        {
+          "method": "GET",
+          "path": "/pilot-readout",
+          "line": 610
+        },
+        {
+          "method": "GET",
+          "path": "/leads/:leadId",
+          "line": 626
+        },
+        {
+          "method": "POST",
+          "path": "/leads/:leadId/disposition",
+          "line": 668
+        },
+        {
+          "method": "POST",
+          "path": "/leads/:leadId/notes",
+          "line": 687
+        },
+        {
+          "method": "POST",
+          "path": "/leads/:leadId/follow-up",
+          "line": 706
+        },
+        {
+          "method": "DELETE",
+          "path": "/leads/:leadId/follow-up",
+          "line": 725
+        },
+        {
+          "method": "POST",
+          "path": "/leads/:leadId/invite",
+          "line": 736
+        },
+        {
+          "method": "POST",
+          "path": "/leads/:leadId/do-not-call",
+          "line": 762
         }
       ],
       "sharedTypes": [
+        "CRM_DISPOSITIONS",
+        "McsCrmDisposition",
         "McsLeadOwnerListResponse",
         "McsLeadOwnerResponse",
         "McsVMCampaignListResponse",
@@ -5358,8 +5654,14 @@
         "McsVmCampaignMetricsResponse",
         "McsVmCampaignStatusPatchPayload",
         "McsVmCampaignStatusPatchResponse",
+        "McsVmDialMode",
         "McsVmImportJobStatusResponse",
-        "McsVmImportQueuedResponse"
+        "McsVmImportQueuedResponse",
+        "McsVmLeadInviteResponse",
+        "McsVmLeadWorkDetailResponse",
+        "McsVmPilotReadoutResponse",
+        "McsVmRaisedHandsResponse",
+        "McsVmTransferAvailabilityResponse"
       ]
     },
     {
@@ -8089,6 +8391,11 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "MCS_VM_DIAL_MODES",
+      "kind": "const",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "MCS_VM_LEAD_LIFECYCLE_STATUSES",
       "kind": "const",
       "file": "packages/shared/src/types.ts"
@@ -10259,6 +10566,11 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsVmCampaignDialFields",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsVmCampaignLeadRow",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -10344,6 +10656,16 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsVmDialMode",
+      "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmDialModePatchPayload",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsVmImportJobStatusResponse",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -10354,13 +10676,48 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsVmLeadDispositionPayload",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmLeadFollowUpPayload",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmLeadFollowUpRecord",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsVmLeadIdentity",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmLeadInvitePayload",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmLeadInviteResponse",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
     },
     {
       "name": "McsVmLeadLifecycleStatus",
       "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmLeadNotePayload",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmLeadNoteRecord",
+      "kind": "interface",
       "file": "packages/shared/src/types.ts"
     },
     {
@@ -10371,6 +10728,51 @@
     {
       "name": "McsVmLeadType",
       "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmLeadWorkDetailResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmLeadWorkLead",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmPilotReadoutResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmPilotReadoutRow",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmRaisedHandRow",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmRaisedHandsResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmTransferAvailabilityRecord",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmTransferAvailabilityResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmUnattributedInboundRow",
+      "kind": "interface",
       "file": "packages/shared/src/types.ts"
     },
     {
@@ -10410,12 +10812,12 @@
     }
   ],
   "summary": {
-    "mongoCollections": 66,
-    "neo4jLabels": 73,
-    "neo4jRelationships": 61,
+    "mongoCollections": 67,
+    "neo4jLabels": 75,
+    "neo4jRelationships": 62,
     "chromaCollections": 51,
     "routeModules": 46,
-    "routeHandlers": 245,
-    "sharedExports": 998
+    "routeHandlers": 258,
+    "sharedExports": 1018
   }
 }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T09:34:33.412Z",
+  "generatedAt": "2026-07-13T09:44:19.772Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -1262,7 +1262,7 @@
         "writeGraphCritical",
         "writeKnowledge"
       ],
-      "sourceCount": 6,
+      "sourceCount": 9,
       "sources": [
         {
           "file": "server/src/domain/crm.ts",
@@ -1293,6 +1293,21 @@
           "file": "server/src/domain/invitations.ts",
           "line": 370,
           "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 183,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 282,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 382,
+          "action": "writeKnowledge"
         }
       ],
       "metadataContract": {
@@ -1311,6 +1326,8 @@
           "disposition",
           "dueAt",
           "kind",
+          "leadId",
+          "ownerTmagId",
           "prospectId",
           "relationshipReason",
           "source",
@@ -1321,6 +1338,8 @@
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
           "correlationId",
+          "leadId",
+          "ownerTmagId",
           "prospectId",
           "source",
           "sponsorTmagId",
@@ -1386,7 +1405,7 @@
       "actions": [
         "writeKnowledge"
       ],
-      "sourceCount": 2,
+      "sourceCount": 3,
       "sources": [
         {
           "file": "server/src/domain/prospectCrm.ts",
@@ -1396,6 +1415,11 @@
         {
           "file": "server/src/domain/vmInboundCallback.ts",
           "line": 263,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 82,
           "action": "writeKnowledge"
         }
       ],
@@ -2007,16 +2031,16 @@
         "add",
         "writeOperational"
       ],
-      "sourceCount": 8,
+      "sourceCount": 10,
       "sources": [
         {
           "file": "server/src/domain/vmCampaigns.ts",
-          "line": 69,
+          "line": 74,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmCampaigns.ts",
-          "line": 180,
+          "line": 185,
           "action": "persistenceCall.chromadb.add"
         },
         {
@@ -2025,28 +2049,38 @@
           "action": "writeOperational"
         },
         {
-          "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 257,
+          "file": "server/src/domain/vmLeadWork.ts",
+          "line": 512,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmLiveTransfer.ts",
+          "line": 133,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 319,
+          "line": 258,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 630,
+          "line": 320,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 963,
+          "line": 631,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1014,
+          "line": 964,
+          "action": "writeOperational"
+        },
+        {
+          "file": "server/src/domain/vmProviderQueue.ts",
+          "line": 1015,
           "action": "writeOperational"
         }
       ],
@@ -2060,6 +2094,7 @@
         },
         "observedMetadataKeys": [
           "action",
+          "available",
           "createdAt",
           "entityId",
           "inboundCallId",
@@ -2071,6 +2106,7 @@
           "ownerTmagId",
           "provider",
           "status",
+          "suppressionId",
           "updatedAt",
           "vmCampaignId"
         ],
@@ -2081,6 +2117,7 @@
           "leadId",
           "leadOwnerId",
           "ownerTmagId",
+          "suppressionId",
           "tmagId",
           "vmCampaignId"
         ],

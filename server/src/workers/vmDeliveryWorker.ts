@@ -20,6 +20,7 @@ import {
   completeRunningCampaignIfIdle,
   startScheduledCampaignForWorker,
 } from '../domain/vmCampaigns.js';
+import { getTransferAvailability } from '../domain/vmLiveTransfer.js';
 import type { McsVMCampaignRecord } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -50,6 +51,8 @@ interface VmCampaignDoc {
   scheduledAt?: string | null;
   startedAt?: string | null;
   completedAt?: string | null;
+  /** 'vm_only' (default) | 'live_transfer' | 'both' — see McsVmDialMode. */
+  dialMode?: string;
 }
 
 export async function startVmDeliveryWorker(): Promise<void> {
@@ -149,6 +152,43 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
 
     const gate = await gateCampaignForDelivery(job, campaign);
     if (!gate.proceed) return;
+
+    // Live-transfer availability gate — FAIL CLOSED. In 'live_transfer' mode
+    // a human answer has nowhere to go when the owner is unavailable, so we
+    // do not dial at all (abandoned calls get numbers flagged). The job is
+    // requeued without burning an attempt; dials resume when the owner flips
+    // available. 'both' mode proceeds — the voicemail branch still works and
+    // the webhook side falls back to voicemail on a human answer.
+    if (campaign.dialMode === 'live_transfer') {
+      const availability = await getTransferAvailability(lead.ownerTmagId);
+      if (!availability.available || !availability.transferToNumber) {
+        await recordDeliveryEvent({
+          provider: (job.payload.provider ?? campaign.provider ?? env.VM_PROVIDER_MODE) as VmProviderKey,
+          leadId: lead.leadId,
+          vmCampaignId: lead.vmCampaignId,
+          ownerTmagId: lead.ownerTmagId,
+          status: 'skipped',
+          providerMessageId: null,
+          providerStatus: 'owner_unavailable_live_transfer',
+          dryRun: true,
+          attempt: job.attempts,
+          details: { reason: 'owner_unavailable', dialMode: 'live_transfer' },
+        });
+        await vmAudit({
+          action: 'vm.delivery.live_transfer_owner_unavailable',
+          entityId: lead.leadId,
+          ownerTmagId: lead.ownerTmagId,
+          summary: `Live-transfer dial refused for lead ${lead.leadId}: owner unavailable (fail closed).`,
+          payload: { jobId: job.jobId, vmCampaignId: lead.vmCampaignId },
+        });
+        await requeueVmJobWithoutBurningAttempt(
+          job,
+          new Date(Date.now() + 5 * 60_000).toISOString(),
+          `Owner ${lead.ownerTmagId} unavailable for live transfer; dial refused and requeued.`,
+        );
+        return;
+      }
+    }
 
     if (!lead.token) {
       await completeVmJob(job.jobId, `Lead ${lead.leadId} has no token; delivery skipped.`);
