@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-13T16:54:25.531Z
+- Generated: 2026-07-13T17:04:24.417Z
 - Mongo collections: 69
 - Neo4j labels: 78
 - Neo4j relationships: 67
 - Chroma collections: 52
 - Route modules: 47
 - Route handlers: 262
-- Shared exports: 1024
+- Shared exports: 1025
 
 ## Mongo Collections
 
@@ -454,6 +454,7 @@
 | `CrmCrossStateMapping` | interface | `packages/shared/src/crm-lifecycle.ts` |
 | `CrmFollowUpState` | type | `packages/shared/src/crm-lifecycle.ts` |
 | `CrmStateMapRail` | type | `packages/shared/src/crm-lifecycle.ts` |
+| `MCS_EVENT_CENTER_CATALOG` | const | `packages/shared/src/event-center-catalog.ts` |
 | `knowledgeWorkflowOpenGaps` | function | `packages/shared/src/knowledge-workflow-map.ts` |
 | `MCS_KNOWLEDGE_WORKFLOW_EDGES` | const | `packages/shared/src/knowledge-workflow-map.ts` |
 | `MCS_KNOWLEDGE_WORKFLOW_STAGES` | const | `packages/shared/src/knowledge-workflow-map.ts` |
