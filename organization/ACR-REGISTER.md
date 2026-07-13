@@ -29,6 +29,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0011 | 5 Point Recruiting Cycle — Launch Center + CRM Integration | LAUNCH_CENTER_ARCHITECTURE.md / CRM_ARCHITECTURE.md | Approved | v1.2 |
 | ACR-0012 | Implement Knowledge Evolution Runtime v1.0 | runtime/KNOWLEDGE_EVOLUTION_RUNTIME.md | Approved | v1.2 |
 | ACR-0013 | Knowledge Evolution Retrieval Canary (single-domain activation) | runtime/KNOWLEDGE_EVOLUTION_RUNTIME.md §21/§37 | Approved | v1.2 |
+| ACR-0015 | Event Center Normalized Model Fields | packages/shared/src/event-center.ts / Event Center boundary | Approved | v1.2 |
 
 ---
 

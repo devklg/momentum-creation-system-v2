@@ -1,7 +1,7 @@
 export const MCS_EVENT_CENTER_CATALOG = {
   surface: 'event_center',
   productBoundary: 'named_event_discovery_and_coordination_surface_over_source_owned_events',
-  currentState: 'ba_and_admin_ui_live_over_unified_read_api',
+  currentState: 'normalized_event_model_v1_1_live',
   teamRoute: '/events',
   adminRoute: '/events',
   access: {
@@ -49,6 +49,12 @@ export const MCS_EVENT_CENTER_CATALOG = {
     sponsorIdentityRemainsTokenDerived: true,
     crmFollowUpRemainsHumanOwned: true,
   },
+  normalizedModel: {
+    schemaVersion: 'event_center.v1.1',
+    fields: ['eventType', 'visibility', 'capacity', 'registration', 'reminders', 'attendance', 'followUp'],
+    persistence: 'read_projection_only',
+    acr: 'ACR-0015',
+  },
   exclusions: [
     'new_event_authority',
     'automatic_attendance_inference',
@@ -61,7 +67,6 @@ export const MCS_EVENT_CENTER_CATALOG = {
     'duplicate_orientation_or_webinar_records',
   ],
   deferred: {
-    p2_105: ['unified_event_model_fields'],
     p2_106: ['attendance_to_crm_follow_up'],
   },
 } as const;
