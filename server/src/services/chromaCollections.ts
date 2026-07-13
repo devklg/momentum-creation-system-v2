@@ -65,6 +65,7 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_prospect_htank_accounts', // domain/prospectAccount.ts
   'mcs_prospect_magic_links', // domain/prospectMagicLink.ts
   'mcs_prospect_webinar_reservations', // domain/webinarReservation.ts
+  'mcs_event_attendance', // domain/eventAttendance.ts (P2-106)
   'mcs_new_member_orientation_reservations', // domain/orientationSession.ts
   'mcs_sponsor_availability', // domain/threeWayCalls.ts
   'mcs_three_way_bookings', // domain/threeWayCalls.ts

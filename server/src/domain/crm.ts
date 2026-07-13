@@ -50,6 +50,7 @@ import {
 } from './adminProspectCrud.js';
 import type {
   McsAdminProspectDirectoryRow,
+  McsAuditActor,
   McsCallbackIntent,
   McsCrmDisposition,
   McsCrmDispositionRecord,
@@ -228,6 +229,11 @@ export async function setFollowUp(
   prospectId: string,
   sponsorTmagId: string,
   dueAt: string,
+  audit?: {
+    actor: McsAuditActor;
+    scheduledAction: string;
+    rescheduledAction: string;
+  },
 ): Promise<McsCrmFollowUpRecord> {
   // Validate: ISO timestamp, in the future.
   const dueMs = new Date(dueAt).getTime();
@@ -264,8 +270,8 @@ export async function setFollowUp(
       params: { sponsorTmagId, prospectId, dueAt: dueAtIso, now },
     });
     await appendAuditEntry({
-      actor: await baActor(sponsorTmagId),
-      action: 'ba.crm.follow_up.rescheduled',
+      actor: audit?.actor ?? await baActor(sponsorTmagId),
+      action: audit?.rescheduledAction ?? 'ba.crm.follow_up.rescheduled',
       entity: prospectAuditEntity(prospect),
       severity: 'info',
       before: { state: followUpState(existing.dueAt), dueAt: existing.dueAt },
@@ -317,8 +323,8 @@ export async function setFollowUp(
   });
 
   await appendAuditEntry({
-    actor: await baActor(sponsorTmagId),
-    action: 'ba.crm.follow_up.scheduled',
+    actor: audit?.actor ?? await baActor(sponsorTmagId),
+    action: audit?.scheduledAction ?? 'ba.crm.follow_up.scheduled',
     entity: prospectAuditEntity(prospect),
     severity: 'info',
     before: { state: 'none', dueAt: null },

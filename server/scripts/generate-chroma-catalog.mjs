@@ -241,7 +241,7 @@ function inferDomain(collection) {
   if (collection.includes('prospect_')) return 'prospect_funnel';
   if (collection.includes('member') || collection.includes('access_code') || collection.includes('commitment')) return 'identity_access';
   if (collection.includes('orientation') || collection.includes('fast_start') || collection.includes('steve_success')) return 'onboarding_training';
-  if (collection.includes('webinar') || collection.includes('three_way') || collection.includes('sponsor_availability')) return 'events';
+  if (collection.includes('webinar') || collection.includes('event_attendance') || collection.includes('three_way') || collection.includes('sponsor_availability')) return 'events';
   if (collection.includes('content') || collection.includes('workbook')) return 'content_resources';
   if (collection.includes('broadcast')) return 'broadcast_delivery';
   if (collection.includes('audit')) return 'audit_governance';
@@ -265,6 +265,7 @@ function inferPurpose(collection) {
   if (collection.includes('prospect_')) return 'Prospect funnel semantic record.';
   if (collection.includes('member')) return 'Team Magnificent member identity semantic record.';
   if (collection.includes('steve') || collection.includes('fast_start')) return 'Onboarding/training semantic record.';
+  if (collection.includes('event_attendance')) return 'Explicit event attendance evidence linked to human CRM follow-up.';
   if (collection.includes('content')) return 'Governed content/resource semantic record.';
   if (collection.includes('health')) return 'Operational health/readback heartbeat record.';
   return 'Registered app Chroma collection.';

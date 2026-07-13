@@ -138,7 +138,7 @@ Product unification, workflow completion, content operations, and scale-hardenin
 - [x] 103. **Event Center:** Define the Event Center product boundary.
 - [x] 104. **Event Center:** Build Event Center BA and admin UI.
 - [x] 105. **Event Center:** Add event model fields for type, visibility, capacity, registration, reminders, attendance, and follow-up.
-- [ ] 106. **Event Center:** Connect event attendance to CRM follow-up.
+- [x] 106. **Event Center:** Connect event attendance to CRM follow-up.
 - [ ] 107. **Follow-up:** Build a unified follow-up queue.
 - [ ] 108. **Event Center:** Add multi-timezone event handling tests.
 - [ ] 109. **Delivery:** Add email and SMS reminder governance for event workflows.
