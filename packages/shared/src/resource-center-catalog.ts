@@ -28,6 +28,7 @@ export const MCS_RESOURCE_CENTER_CATALOG = {
       ],
       inclusion: 'catalog_projection_required',
       versionSafety: 'code_owned_content_requires_version_and_digest_projection',
+      resourceConnection: 'explicit_context_tag_only',
     },
     {
       domain: 'approved_knowledge',
@@ -41,8 +42,8 @@ export const MCS_RESOURCE_CENTER_CATALOG = {
     {
       domain: 'event_materials',
       owner: 'event_center',
-      currentState: 'no_material_model_or_source',
-      inclusion: 'deferred_to_p2_101',
+      currentState: 'approved_resources_linkable_to_orientation_and_webinar_contexts',
+      inclusion: 'explicit_context_tag_only',
       versionSafety: 'event_schedules_and_reservations_are_not_resources',
     },
   ],
@@ -60,6 +61,14 @@ export const MCS_RESOURCE_CENTER_CATALOG = {
     sourceDomains: ['authoring', 'content_accuracy', 'workflow_state', 'source_records'],
     admin: ['approval', 'audience', 'lifecycle', 'readiness', 'retirement'],
   },
+  connections: {
+    authority: 'kevin_selected_during_knowledge_approval',
+    inference: 'forbidden',
+    trainingTagPrefix: 'context:training:',
+    eventTagPrefix: 'context:event:',
+    graphRelationships: ['SUPPORTS_TRAINING_MODULE', 'SUPPORTS_EVENT_MATERIAL'],
+    consumers: ['fast_start_modules', 'ten_step_orientation', 'orientation_event_card'],
+  },
   exclusions: [
     'prospect_public_surface',
     'training_sequence_or_progress',
@@ -71,7 +80,6 @@ export const MCS_RESOURCE_CENTER_CATALOG = {
     'duplicate_content_authority',
   ],
   deferred: {
-    p2_101: ['training_module_links', 'event_material_links'],
     p2_102: ['usage_analytics', 'stale_resource_warnings'],
   },
 } as const;

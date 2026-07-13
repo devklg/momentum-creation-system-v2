@@ -19,6 +19,17 @@ const DOMAINS: ReadonlyArray<{ value: McsKnowledgeDomain; label: string }> = [
   { value: 'system', label: 'System' },
 ];
 
+const RESOURCE_CONTEXT_OPTIONS = [
+  { tag: 'context:training:fast-start:1', label: 'Fast Start · The Product' },
+  { tag: 'context:training:fast-start:2', label: 'Fast Start · Comp Plan, Layer 1' },
+  { tag: 'context:training:fast-start:3', label: 'Fast Start · The Binary as Two Legs' },
+  { tag: 'context:training:fast-start:4', label: 'Fast Start · Build Your Prospect List' },
+  { tag: 'context:training:fast-start:5', label: 'Fast Start · Build Your Team' },
+  { tag: 'context:training:10-steps', label: '10-Step Orientation' },
+  { tag: 'context:event:orientation', label: 'New-member orientation materials' },
+  { tag: 'context:event:webinar', label: 'Team webinar materials' },
+] as const;
+
 interface KnowledgeCreateResponse {
   ok: boolean;
   sourceId?: string;
@@ -41,6 +52,7 @@ export function KnowledgePage() {
   const [content, setContent] = useState('');
   const [topicTags, setTopicTags] = useState('');
   const [sourceRef, setSourceRef] = useState('');
+  const [resourceContexts, setResourceContexts] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -71,10 +83,10 @@ export function KnowledgePage() {
     setErr(null);
 
     try {
-      const tags = topicTags
+      const tags = [...new Set([...resourceContexts, ...topicTags
         .split(',')
         .map((tag) => tag.trim())
-        .filter(Boolean);
+        .filter(Boolean)])];
       const res = await fetch('/api/admin/knowledge/sources', {
         method: 'POST',
         credentials: 'include',
@@ -100,6 +112,7 @@ export function KnowledgePage() {
       setContent('');
       setTopicTags('');
       setSourceRef('');
+      setResourceContexts([]);
       await loadKnowledgeStatus();
     } catch (e) {
       setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
@@ -120,10 +133,10 @@ export function KnowledgePage() {
     setErr(null);
 
     try {
-      const tags = topicTags
+      const tags = [...new Set([...resourceContexts, ...topicTags
         .split(',')
         .map((tag) => tag.trim())
-        .filter(Boolean);
+        .filter(Boolean)])];
       const res = await fetch('/api/admin/knowledge/sources/upload', {
         method: 'POST',
         credentials: 'include',
@@ -150,6 +163,7 @@ export function KnowledgePage() {
       setContent('');
       setTopicTags('');
       setSourceRef('');
+      setResourceContexts([]);
       setFile(null);
       await loadKnowledgeStatus();
     } catch (e) {
@@ -275,6 +289,8 @@ export function KnowledgePage() {
             </Field>
           </div>
 
+          <ResourceContextPicker values={resourceContexts} onChange={setResourceContexts} />
+
           <div className="flex items-center gap-4">
             <Button type="submit" disabled={uploading || !file}>
               {uploading ? 'Uploading' : 'Upload Source'}
@@ -359,6 +375,8 @@ export function KnowledgePage() {
             </Field>
           </div>
 
+          <ResourceContextPicker values={resourceContexts} onChange={setResourceContexts} />
+
           <div className="flex items-center gap-4">
             <Button type="submit" disabled={submitting}>
               {submitting ? 'Saving' : 'Save Source'}
@@ -389,6 +407,42 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
       <Label>{label}</Label>
       {children}
     </label>
+  );
+}
+
+function ResourceContextPicker({
+  values,
+  onChange,
+}: {
+  values: string[];
+  onChange: (values: string[]) => void;
+}) {
+  return (
+    <fieldset className="border border-line bg-ink-2 p-4">
+      <legend className="px-2 font-mono text-[10px] uppercase tracking-label text-gold">
+        Resource connections
+      </legend>
+      <p className="mb-3 text-xs text-cream-mute">
+        Optional. Kevin-selected links only—nothing is inferred from the document.
+      </p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {RESOURCE_CONTEXT_OPTIONS.map((option) => (
+          <label key={option.tag} className="flex items-start gap-2 text-xs text-cream-mute">
+            <input
+              type="checkbox"
+              checked={values.includes(option.tag)}
+              onChange={(event) => onChange(
+                event.target.checked
+                  ? [...values, option.tag]
+                  : values.filter((value) => value !== option.tag),
+              )}
+              className="mt-0.5 accent-gold"
+            />
+            <span>{option.label}</span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
   );
 }
 

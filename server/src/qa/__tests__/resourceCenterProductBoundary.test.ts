@@ -43,9 +43,15 @@ describe('P2-99 Resource Center product boundary', () => {
     });
     expect(events).toMatchObject({
       owner: 'event_center',
-      currentState: 'no_material_model_or_source',
-      inclusion: 'deferred_to_p2_101',
+      currentState: 'approved_resources_linkable_to_orientation_and_webinar_contexts',
+      inclusion: 'explicit_context_tag_only',
     });
+    expect(catalog.connections).toMatchObject({
+      authority: 'kevin_selected_during_knowledge_approval',
+      inference: 'forbidden',
+      graphRelationships: ['SUPPORTS_TRAINING_MODULE', 'SUPPORTS_EVENT_MATERIAL'],
+    });
+    expect(catalog.deferred).not.toHaveProperty('p2_101');
   });
 
   it('pins fail-closed version safety and explicit exclusions', () => {

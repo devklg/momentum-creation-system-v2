@@ -20,6 +20,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { ContextResources } from '@/components/resources/ContextResources';
 
 // ── Local wire shapes (mirror packages/shared/src/types.ts) ──────────────
 
@@ -262,6 +263,10 @@ export function OrientationCard() {
           </>
         )}
       </div>
+      <ContextResources
+        contextTag="context:event:orientation"
+        title="Approved orientation materials"
+      />
     </div>
   );
 }

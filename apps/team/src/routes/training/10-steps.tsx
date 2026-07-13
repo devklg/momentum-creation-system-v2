@@ -23,6 +23,7 @@
  */
 
 import { useState } from 'react';
+import { ContextResources } from '@/components/resources/ContextResources';
 
 interface Step {
   n: string;
@@ -200,6 +201,7 @@ export function TenStepsPage() {
               );
             })}
           </div>
+          <ContextResources contextTag="context:training:10-steps" />
         </div>
       </section>
 
