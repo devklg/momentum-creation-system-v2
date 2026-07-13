@@ -5,10 +5,10 @@
 
 ## Summary
 
-- Generated: 2026-07-13T12:23:52.526Z
+- Generated: 2026-07-13T16:35:36.861Z
 - Mongo collections: 69
-- Neo4j labels: 75
-- Neo4j relationships: 63
+- Neo4j labels: 77
+- Neo4j relationships: 65
 - Chroma collections: 51
 - Route modules: 46
 - Route handlers: 259
@@ -130,6 +130,7 @@
 | `TmagContentTemplate` | 1 |
 | `TmagContentVideo` | 2 |
 | `TmagCrmNote` | 2 |
+| `TmagEventMaterialContext` | 1 |
 | `TmagFastStartProgress` | 2 |
 | `TmagGeneratorRun` | 1 |
 | `TmagHealthHeartbeat` | 3 |
@@ -149,11 +150,12 @@
 | `TmagQuestionnaire` | 1 |
 | `TmagRecruitingCycle` | 2 |
 | `TmagResource` | 2 |
-| `TmagResourceVersion` | 2 |
+| `TmagResourceVersion` | 4 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 2 |
 | `TmagSteveDiscovery` | 3 |
 | `TmagThreeWayBooking` | 2 |
+| `TmagTrainingModule` | 1 |
 | `TmagVmAuditEvent` | 1 |
 | `TmagVmBulkLead` | 19 |
 | `TmagVmCampaign` | 4 |
@@ -229,6 +231,8 @@
 | `SUBMITTED` | 1 |
 | `SUPERSEDES` | 2 |
 | `SUPPORTED_BY` | 1 |
+| `SUPPORTS_EVENT_MATERIAL` | 1 |
+| `SUPPORTS_TRAINING_MODULE` | 1 |
 | `SUPPRESSED_BY` | 1 |
 | `TARGETS_LEAD` | 2 |
 | `USES_VM_LEAD_OWNER` | 1 |
