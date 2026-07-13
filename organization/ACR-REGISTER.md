@@ -32,6 +32,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0015 | Event Center Normalized Model Fields | packages/shared/src/event-center.ts / Event Center boundary | Approved | v1.2 |
 | ACR-0016 | Explicit Webinar Attendance to Human CRM Follow-up | packages/shared/src/event-center.ts / CRM follow-up | Approved | v1.2 |
 | ACR-0017 | Automatic Context Agent Lifecycle Hooks | ACR-0014 / Codex + Claude Code session hooks | Verified | v1.2 |
+| ACR-0018 | Unified Human Follow-up Queue | P2-107 / Prospect CRM + VM/RVM | Verified | v1.2 |
 
 ---
 

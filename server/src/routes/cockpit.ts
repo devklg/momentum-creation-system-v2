@@ -33,6 +33,7 @@ import {
   getTeamLaunchCenter,
 } from '../domain/cockpit.js';
 import { buildCockpitProspectListPdf } from '../domain/cockpitPrint.js';
+import { getUnifiedFollowUpQueue } from '../domain/followUpQueue.js';
 
 export const cockpitRoutes: Router = Router();
 
@@ -128,6 +129,29 @@ cockpitRoutes.get(
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('[GET /api/cockpit/todays-actions] failed', err);
+      return res.status(500).json({ ok: false, error: 'server_error' });
+    }
+  },
+);
+
+/**
+ * GET /api/cockpit/follow-up-queue — P2-107 cross-source human action queue.
+ * Includes prospect + VM/RVM callbacks and active CRM reminders. Read-only;
+ * owner identity comes exclusively from the authenticated session.
+ */
+cockpitRoutes.get(
+  '/follow-up-queue',
+  requireAuth,
+  requireSteveComplete,
+  async (req, res) => {
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+    try {
+      return res.status(200).json(await getUnifiedFollowUpQueue(tmagId));
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[GET /api/cockpit/follow-up-queue] failed', err);
       return res.status(500).json({ ok: false, error: 'server_error' });
     }
   },
