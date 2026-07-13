@@ -1,0 +1,44 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/server/scripts/agent-context-hook.mjs\"",
+            "commandWindows": "powershell -NoProfile -Command \"$root = git rev-parse --show-toplevel; node (Join-Path $root 'server/scripts/agent-context-hook.mjs')\"",
+            "timeout": 40,
+            "statusMessage": "Loading Momentum context"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/server/scripts/agent-context-hook.mjs\"",
+            "commandWindows": "powershell -NoProfile -Command \"$root = git rev-parse --show-toplevel; node (Join-Path $root 'server/scripts/agent-context-hook.mjs')\"",
+            "timeout": 40,
+            "statusMessage": "Checking prior context"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/server/scripts/agent-context-hook.mjs\"",
+            "commandWindows": "powershell -NoProfile -Command \"$root = git rev-parse --show-toplevel; node (Join-Path $root 'server/scripts/agent-context-hook.mjs')\"",
+            "timeout": 15,
+            "statusMessage": "Loading subagent context"
+          }
+        ]
+      }
+    ]
+  }
+}

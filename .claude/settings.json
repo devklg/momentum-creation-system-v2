@@ -1,0 +1,50 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/server/scripts/agent-context-hook.mjs"
+            ],
+            "timeout": 40,
+            "statusMessage": "Loading Momentum context"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/server/scripts/agent-context-hook.mjs"
+            ],
+            "timeout": 40,
+            "statusMessage": "Checking prior context"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/server/scripts/agent-context-hook.mjs"
+            ],
+            "timeout": 15,
+            "statusMessage": "Loading subagent context"
+          }
+        ]
+      }
+    ]
+  }
+}
