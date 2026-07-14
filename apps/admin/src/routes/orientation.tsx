@@ -12,6 +12,7 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import type {
+  McsAdminOrientationDiagnosticResponse,
   McsAdminOrientationSessionsResponse,
   McsAdminCreateOrientationSessionResponse,
   McsOrientationSessionWithRoster,
@@ -37,6 +38,8 @@ function fmt(iso: string): string {
 export function OrientationPage() {
   const [sessions, setSessions] = useState<McsOrientationSessionWithRoster[] | null>(null);
   const [loadErr, setLoadErr] = useState<string | null>(null);
+  const [diagnostic, setDiagnostic] = useState<McsAdminOrientationDiagnosticResponse | null>(null);
+  const [diagnosticErr, setDiagnosticErr] = useState<string | null>(null);
 
   // Create-form state
   const [scheduledFor, setScheduledFor] = useState('');
@@ -48,18 +51,27 @@ export function OrientationPage() {
 
   const load = useCallback(async () => {
     setLoadErr(null);
+    setDiagnosticErr(null);
     try {
-      const res = await fetch('/api/admin/orientation/sessions', {
-        credentials: 'include',
-      });
+      const [res, diagnosticRes] = await Promise.all([
+        fetch('/api/admin/orientation/sessions', { credentials: 'include' }),
+        fetch('/api/admin/orientation/diagnostic', { credentials: 'include' }),
+      ]);
       if (!res.ok) {
         setLoadErr('Could not load orientation sessions.');
-        return;
+      } else {
+        const data = (await res.json()) as McsAdminOrientationSessionsResponse;
+        setSessions(data.sessions);
       }
-      const data = (await res.json()) as McsAdminOrientationSessionsResponse;
-      setSessions(data.sessions);
+      if (!diagnosticRes.ok) {
+        setDiagnosticErr('Could not load the orientation diagnostic.');
+      } else {
+        const data = (await diagnosticRes.json()) as McsAdminOrientationDiagnosticResponse;
+        setDiagnostic(data);
+      }
     } catch {
       setLoadErr('Network error loading sessions.');
+      setDiagnosticErr('Network error loading the orientation diagnostic.');
     }
   }, []);
 
@@ -125,7 +137,7 @@ export function OrientationPage() {
   );
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-4xl min-w-0 overflow-x-hidden">
       <header className="mb-6">
         <p className="font-mono tracking-label text-[10px] text-gold uppercase mb-1">
           Wireframe §3.6
@@ -137,6 +149,100 @@ export function OrientationPage() {
           their names appear on the roster below. Add sessions as the team grows.
         </p>
       </header>
+
+      {/* Read-only integrity diagnostic */}
+      <section
+        aria-labelledby="orientation-diagnostic-heading"
+        className="w-full min-w-0 overflow-hidden border border-line rounded-md p-5 mb-8 bg-cream/[0.02]"
+      >
+        <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
+          <div className="min-w-0">
+            <p className="font-mono tracking-label text-[10px] text-gold uppercase mb-1">
+              Kevin-only · report only
+            </p>
+            <h2 id="orientation-diagnostic-heading" className="font-display text-xl text-cream">
+              Orientation Record Diagnostic
+            </h2>
+            <p className="text-cream-mute text-sm mt-2 max-w-2xl">
+              Surfaces stuck, duplicate, and inconsistent scheduler evidence for human review.
+              This report never repairs records or infers attendance or completion.
+            </p>
+          </div>
+          {diagnostic && (
+            <span className="font-mono text-[10px] tracking-label text-cream-faint">
+              {diagnostic.schemaVersion}
+            </span>
+          )}
+        </div>
+
+        {diagnosticErr && (
+          <p className="text-red-400 font-mono text-[11px] tracking-label">{diagnosticErr}</p>
+        )}
+        {!diagnostic && !diagnosticErr && (
+          <p className="text-cream-faint font-mono text-[11px] tracking-label">
+            Loading diagnostic…
+          </p>
+        )}
+        {diagnostic && (
+          <>
+            <dl className="min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+              {([
+                ['Stuck', diagnostic.totals.stuck],
+                ['Duplicate', diagnostic.totals.duplicate],
+                ['Inconsistent', diagnostic.totals.inconsistent],
+                ['Total findings', diagnostic.totals.findings],
+              ] as const).map(([label, value]) => (
+                <div key={label} className="min-w-0 rounded border border-cream/10 px-3 py-3">
+                  <dt className="font-mono text-[9px] uppercase tracking-label text-cream-faint">
+                    {label}
+                  </dt>
+                  <dd className="font-display text-2xl text-cream mt-1">{value}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="font-mono text-[10px] tracking-label text-cream-faint mb-4">
+              Scanned {diagnostic.scanned.sessions} sessions and {diagnostic.scanned.reservations}{' '}
+              reservations. Attendance authority: none. Completion authority: none.
+            </p>
+            {diagnostic.scanLimitReached.sessions || diagnostic.scanLimitReached.reservations ? (
+              <p className="text-gold text-[12px] mb-4">
+                The bounded scan reached its {diagnostic.scanLimit}-record limit; totals may be incomplete.
+              </p>
+            ) : null}
+            {diagnostic.findings.length === 0 ? (
+              <p className="text-cream-mute text-sm">
+                No orientation record findings in the bounded scan.
+              </p>
+            ) : (
+              <ul className="space-y-2" aria-label="Orientation diagnostic findings">
+                {diagnostic.findings.map((finding, index) => (
+                  <li
+                    key={`${finding.code}-${finding.reservationId ?? finding.sessionId ?? index}`}
+                    className="min-w-0 rounded border border-cream/10 px-3 py-3"
+                  >
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="font-mono text-[9px] uppercase tracking-label text-gold">
+                        {finding.category}
+                      </span>
+                      <span className="font-mono text-[10px] tracking-label text-cream-faint">
+                        {finding.code.replaceAll('_', ' ')}
+                      </span>
+                    </div>
+                    <p className="text-cream-mute text-[13px]">{finding.detail}</p>
+                    {(finding.tmagId || finding.sessionId || finding.reservationId) && (
+                      <p className="font-mono text-[9px] tracking-label text-cream-faint mt-2 break-all">
+                        {[finding.tmagId, finding.sessionId, finding.reservationId]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
+        )}
+      </section>
 
       {/* Create a session */}
       <form
