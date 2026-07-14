@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T05:04:05.316Z",
+  "generatedAt": "2026-07-14T05:12:37.385Z",
   "scope": "apps/com/src visible strings plus shared compliance constants",
   "summary": {
     "filesScanned": 34,
@@ -97,7 +97,7 @@
       "severity": "allowed",
       "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "line": 423,
+      "line": 421,
       "text": "Dr. Dan Gubler GLP-THREE product video"
     },
     {
@@ -105,7 +105,7 @@
       "severity": "allowed",
       "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "line": 431,
+      "line": 429,
       "text": "Dr. Dan Gubler — GLP-THREE product video"
     },
     {
@@ -113,7 +113,7 @@
       "severity": "allowed",
       "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "line": 446,
+      "line": 444,
       "text": "Open Dr. Dan's GLP-THREE video in YouTube, then come back and continue."
     },
     {
@@ -569,7 +569,7 @@
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "line": 468,
+      "line": 466,
       "text": "When the video finishes, continue to your live team position."
     },
     {
@@ -2256,145 +2256,145 @@
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 76,
+      "lineNumber": 77,
       "kind": "literal",
       "text": "youtu.be"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 248,
+      "lineNumber": 246,
       "kind": "literal",
       "text": "[tm-video] milestone post failed"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 253,
+      "lineNumber": 251,
       "kind": "literal",
       "text": "[tm-video] milestone post threw"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 268,
+      "lineNumber": 266,
       "kind": "literal",
       "text": ".tm-drdan-video__yt"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 395,
+      "lineNumber": 393,
       "kind": "jsx_attribute:aria-label",
       "text": "Dr. Dan's Video"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 397,
+      "lineNumber": 395,
       "kind": "jsx_text",
       "text": "Part 1 — The Product"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 399,
+      "lineNumber": 397,
       "kind": "jsx_text",
       "text": "Watch Dr. Dan. Then Everything Makes Sense."
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 406,
+      "lineNumber": 404,
       "kind": "jsx_text",
       "text": "Dr. Dan Gubler · Chief Scientific Officer &amp; Chief Formulator"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 409,
+      "lineNumber": 407,
       "kind": "jsx_text",
       "text": "Caltech PhD in Organic Chemistry"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 410,
+      "lineNumber": 408,
       "kind": "jsx_text",
       "text": "16 patents"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 411,
+      "lineNumber": 409,
       "kind": "jsx_text",
       "text": "70+ supplements formulated"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 412,
+      "lineNumber": 410,
       "kind": "jsx_text",
       "text": "1.3M followers"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 413,
+      "lineNumber": 411,
       "kind": "jsx_text",
       "text": "Top-50 podcast"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 423,
+      "lineNumber": 421,
       "kind": "jsx_attribute:title",
       "text": "Dr. Dan Gubler GLP-THREE product video"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 431,
+      "lineNumber": 429,
       "kind": "jsx_attribute:aria-label",
       "text": "Dr. Dan Gubler — GLP-THREE product video"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 438,
+      "lineNumber": 436,
       "kind": "literal",
       "text": "Loading video…"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 438,
+      "lineNumber": 436,
       "kind": "literal",
       "text": "Press play"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 444,
+      "lineNumber": 442,
       "kind": "jsx_text",
       "text": "Video did not load."
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 446,
+      "lineNumber": 444,
       "kind": "jsx_text",
       "text": "Open Dr. Dan's GLP-THREE video in YouTube, then come back and continue."
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 454,
+      "lineNumber": 452,
       "kind": "jsx_text",
       "text": "Open video"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 461,
+      "lineNumber": 459,
       "kind": "jsx_text",
       "text": "I finished the video"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 468,
+      "lineNumber": 466,
       "kind": "jsx_text",
       "text": "When the video finishes, continue to your live team position."
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 474,
+      "lineNumber": 472,
       "kind": "jsx_text",
       "text": "I finished the video"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx",
-      "lineNumber": 480,
+      "lineNumber": 478,
       "kind": "jsx_text",
       "text": "Then scroll. The rest of this page expands on what he just told you."
     },

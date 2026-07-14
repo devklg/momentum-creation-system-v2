@@ -1,6 +1,6 @@
 # COM Prospect Compliance Scan
 
-Generated: 2026-07-14T05:04:05.316Z
+Generated: 2026-07-14T05:12:37.385Z
 
 ## Summary
 
@@ -43,9 +43,9 @@ None.
 | --- | --- | --- |
 | `glp_three_product_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx:29` | GLP-THREE is a natural alternative in one of the fastest-expanding wellness categories on the planet. The numbers aren&rsquo;t ours — they&rsquo;re public. We&rsquo;re just standing where they point. |
 | `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx:32` | GLP-THREE launched January 2026 · trademark and patent pending |
-| `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:423` | Dr. Dan Gubler GLP-THREE product video |
-| `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:431` | Dr. Dan Gubler — GLP-THREE product video |
-| `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:446` | Open Dr. Dan's GLP-THREE video in YouTube, then come back and continue. |
+| `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:421` | Dr. Dan Gubler GLP-THREE product video |
+| `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:429` | Dr. Dan Gubler — GLP-THREE product video |
+| `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:444` | Open Dr. Dan's GLP-THREE video in YouTube, then come back and continue. |
 | `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx:69` | GLP-THREE was built for the same outcome the category is chasing — through a different door. Same destination. Different mechanism. Different profile. Different cost. |
 | `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/06-NaturalPath.tsx:93` | GLP-THREE |
 | `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/07-Dossier.tsx:43` | GLP-THREE is built around MBC-267, a patented peptide complex found naturally in salmon and certain mushrooms. |
@@ -102,7 +102,7 @@ None.
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:264` | Connecting to the live position stream. |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:265` | The next team placement will appear here. |
 | `placement_demo_context` | `apps/com/src/routes/tm-video-presentation/presentationCopy.ts:43` | Here is something you may not have noticed. While you were watching, you were placed into our team's line. Not enrolled, not signed up - placed, so we could show you something real. |
-| `placement_demo_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:468` | When the video finishes, continue to your live team position. |
+| `placement_demo_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:466` | When the video finishes, continue to your live team position. |
 | `placement_demo_context` | `packages/shared/src/compliance.ts:12` | Placement or queue-position-equals-leg-position promises |
 | `placement_demo_context` | `packages/shared/src/compliance.ts:22` | Queue positions and momentum displays demonstrate team activity in real time and |
 | `placement_demo_context` | `packages/shared/src/compliance.ts:23` | do not guarantee any final placement, compensation, or earnings outcome. |
