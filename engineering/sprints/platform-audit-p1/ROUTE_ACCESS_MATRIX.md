@@ -4,15 +4,15 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:00:06.816Z
-- Routes: 237
+- Generated: 2026-07-14T01:11:23.063Z
+- Routes: 238
 - Findings: 0
 
 ## Routes By Access Category
 
 | Access category | Routes |
 | --- | ---: |
-| admin | 98 |
+| admin | 99 |
 | admin_or_health_secret | 1 |
 | auth_bootstrap | 3 |
 | auth_session | 2 |
@@ -34,7 +34,7 @@
 | customSecretGuard | 10 |
 | rateLimited | 3 |
 | rawBodyParser | 1 |
-| requireAdmin | 98 |
+| requireAdmin | 99 |
 | requireAdminOrHealthSecret | 1 |
 | requireAuth | 105 |
 | requireRuntimeInternal | 5 |
@@ -47,7 +47,7 @@
 | --- | ---: |
 | anonymous | 5 |
 | brand_ambassador | 106 |
-| founder_admin | 104 |
+| founder_admin | 105 |
 | prospect | 18 |
 | provider | 2 |
 | system | 10 |
@@ -56,7 +56,7 @@
 
 | Entitlement | Routes |
 | --- | ---: |
-| admin_allowlist | 104 |
+| admin_allowlist | 105 |
 | machine_credential | 12 |
 | none | 5 |
 | registered_ba | 106 |
@@ -152,10 +152,11 @@
 | PUT | `/api/admin/queue/rules/:key` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/queue.ts:441` |
 | GET | `/api/admin/audit/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/audit.ts:80` |
 | GET | `/api/admin/audit/:entryId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/audit.ts:107` |
-| GET | `/api/admin/dashboard/metrics` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/dashboard.ts:81` |
-| GET | `/api/admin/dashboard/filters` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/dashboard.ts:127` |
-| GET | `/api/admin/dashboard/drilldown` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/dashboard.ts:173` |
-| GET | `/api/admin/dashboard/stream` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/dashboard.ts:288` |
+| GET | `/api/admin/dashboard/metrics` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/dashboard.ts:84` |
+| GET | `/api/admin/dashboard/filters` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/dashboard.ts:130` |
+| GET | `/api/admin/dashboard/drilldown` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/dashboard.ts:176` |
+| GET | `/api/admin/dashboard/training-analytics` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/dashboard.ts:223` |
+| GET | `/api/admin/dashboard/stream` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/dashboard.ts:337` |
 | GET | `/api/admin/reporting/master-report.pdf` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/reporting.ts:88` |
 | GET | `/api/admin/reporting/activation` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/reporting.ts:135` |
 | GET | `/api/admin/reporting/training` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/reporting.ts:185` |

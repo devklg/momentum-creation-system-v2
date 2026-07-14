@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:00:06.764Z
+- Generated: 2026-07-14T01:11:23.018Z
 - Mounted routers: 50
 - Route files: 50
-- Static route rows: 237
+- Static route rows: 238
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
 | ba_facing_gated | 90 |
-| pre_gate | 143 |
+| pre_gate | 144 |
 | pre_json_admin_body_limit | 3 |
 | raw_body_before_json | 1 |
 
@@ -22,7 +22,7 @@
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 95 |
+| admin | 96 |
 | ba_auth_steve_gated | 90 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 7 |
-| GET | 120 |
+| GET | 121 |
 | PATCH | 9 |
 | POST | 94 |
 | PUT | 7 |
@@ -164,10 +164,11 @@
 | PUT | `/api/admin/queue/rules/:key` | pre_gate | admin | admin | `server/src/routes/admin/queue.ts:441` |
 | GET | `/api/admin/audit/` | pre_gate | admin | admin | `server/src/routes/admin/audit.ts:80` |
 | GET | `/api/admin/audit/:entryId` | pre_gate | admin | admin | `server/src/routes/admin/audit.ts:107` |
-| GET | `/api/admin/dashboard/metrics` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:81` |
-| GET | `/api/admin/dashboard/filters` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:127` |
-| GET | `/api/admin/dashboard/drilldown` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:173` |
-| GET | `/api/admin/dashboard/stream` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:288` |
+| GET | `/api/admin/dashboard/metrics` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:84` |
+| GET | `/api/admin/dashboard/filters` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:130` |
+| GET | `/api/admin/dashboard/drilldown` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:176` |
+| GET | `/api/admin/dashboard/training-analytics` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:223` |
+| GET | `/api/admin/dashboard/stream` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:337` |
 | GET | `/api/admin/reporting/master-report.pdf` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:88` |
 | GET | `/api/admin/reporting/activation` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:135` |
 | GET | `/api/admin/reporting/training` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:185` |
