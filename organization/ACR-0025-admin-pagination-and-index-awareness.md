@@ -1,12 +1,13 @@
 # ACR-0025 — Admin Pagination and Index Awareness
 
-**Status:** PROPOSED — Kevin approval is required before implementation
-**Authorship:** Agent-authored architecture proposal; not Kevin-approved policy
+**Status:** APPROVED — Kevin L. Gardner, 2026-07-13
+**Authorship:** Agent-authored proposal approved by Kevin as the recommended P2-131 bundle
 **Risk:** Medium — additive admin API/surface contracts and read-query/index behavior
 **Change type:** Contract / surface / persistence-read pattern
 **Audit authority:** `PLATFORM_AUDIT_PRIORITY_TASKLIST.md` P2-131 and `PLATFORM_AUDIT.md:798,875`
 **Affected boundary:** Kevin-only admin BA, prospect, event, resource, and audit-log high-volume row sets
 **Target version:** v1.2
+**Decision ledger:** `dec_acr_0025_admin_pagination_approval_2026_07_13`
 
 ## Purpose
 
@@ -17,8 +18,8 @@ mutation or make the generated index catalog proof that an index is installed.
 
 ## Constitutional check
 
-**Future-Development Test:** Pass, subject to Kevin's reserved decisions. The
-proposal increases clarity and sustainability, simplifies high-volume admin
+**Future-Development Test:** Pass. The approved change increases clarity and
+sustainability, simplifies high-volume admin
 operation, and preserves human authority, privacy, equal treatment, and the
 existing compliance boundaries. Reviewed boundaries: no-scoring, sponsor
 immutability, THREE upstream authority, privacy-minimal audit records, Kevin-only
@@ -46,9 +47,9 @@ No constitutional boundary is expanded.
   reports 42 `planned_missing_enforcement` rows and six registry-declared VM
   rows; freshness does not prove that production indexes exist.
 
-## Proposed invariant contract
+## Approved invariant contract
 
-If approved, every in-scope high-volume row set will use these invariants:
+Every in-scope high-volume row set will use these invariants:
 
 1. Pagination is keyset/cursor based, never deep `skip`/offset paging.
 2. The cursor is opaque to clients, contains stable sort keys only, and is
@@ -81,17 +82,17 @@ If approved, every in-scope high-volume row set will use these invariants:
     keyset or bounded aggregate reads before P2-131 can complete. The existing
     helper is not a valid pagination primitive.
 
-## Proposed surface scope and index identities
+## Approved surface scope and index identities
 
-| Row set | Proposed stable order | Proposed named non-unique indexes |
+| Row set | Approved stable order | Required named non-unique indexes |
 | --- | --- | --- |
 | BA directory | `createdAt DESC, tmagId DESC` | `admin_createdAt_tmagId` on `{ createdAt: -1, tmagId: -1 }` |
 | Prospect directory | `createdAt DESC, prospectId DESC` | `admin_createdAt_prospectId` on `{ createdAt: -1, prospectId: -1 }`; `admin_sponsor_createdAt_prospectId` on `{ sponsorTmagId: 1, createdAt: -1, prospectId: -1 }` |
 | Webinar reservation rows | `createdAt DESC, reservationId DESC` within the selected event set | `admin_event_createdAt_reservationId` on `{ eventId: 1, createdAt: -1, reservationId: -1 }`; retain prospect-specific indexes for detail joins |
-| Resource usage rows | Kevin decision required: preserve derived `openCount DESC, title ASC`, or adopt catalog `updatedAt DESC, resourceVersionId DESC` for page-first reads | Active sources are `tmag_resource_catalog` and `tmag_resource_usage_events`. A page-first catalog option requires a matching active-audience/catalog cursor index plus usage-event indexes beginning with `resourceVersionId` and covering `eventType`/`occurredAt`; preserving derived global usage order requires a separately governed indexed read model rather than whole-event aggregation. No new collection is authorized by this ACR. |
+| Resource usage rows | catalog `updatedAt DESC, resourceVersionId DESC` for page-first reads; complete source-owned usage aggregates remain separate | Active sources are `tmag_resource_catalog` and `tmag_resource_usage_events`. The page-first catalog requires a matching active-audience/catalog cursor index plus usage-event indexes beginning with `resourceVersionId` and covering `eventType`/`occurredAt`. No new collection or indexed summary model is authorized by this ACR. |
 | Audit log index/cursor validation | existing `timestamp DESC, entryId DESC` | add/verify `admin_timestamp_entryId` on `{ timestamp: -1, entryId: -1 }` and matching severity/entity variants where those filters are supported; malformed or unknown cursors must fail 400 |
 
-These are query-shape proposals, not approval to create indexes. Exact existing
+These are approved query shapes, not approval to create indexes. Exact existing
 field/collection names must be confirmed before implementation, and the ACR
 must be revised rather than inventing aliases where a source lacks a stable
 timestamp or identifier.
@@ -113,7 +114,7 @@ must distinguish `required`, `observed`, `missing`, and `definition_mismatch`.
 It must never label a planned catalog row as installed.
 
 No `createIndex`, migration, production write, or automatic application of the
-P1 48-index plan is authorized by this proposal. A complete named index
+P1 48-index plan is authorized by this approval. A complete named index
 manifest must be produced from the approved query shapes and reviewed through
 an amended ACR-0025 (or successor ACR) before any creation is considered. Any
 later approved index creation must run idempotently in a safe non-production
@@ -121,34 +122,25 @@ environment first, produce a read-back evidence package, and receive Kevin's
 separate explicit production authority before production mutation.
 Unique-index creation is excluded.
 
-## Kevin-reserved decisions
+## Kevin-approved decisions
 
-Kevin's approval must answer all six questions; silence is not approval:
+Kevin approved the recommended P2-131 bundle on 2026-07-13:
 
-1. Approve the proposed default order and tie-breaker for each in-scope row set,
-   or provide changes.
-2. Approve additive pagination on the existing endpoints, or require separate
-   paged endpoints for event/resource aggregates.
-3. Choose the compatibility rule for legacy full-array fields (especially
-   `/api/admin/bas` `bas`): retain for one documented transition release, retain
-   indefinitely on the first page, or remove in a separately versioned change.
-4. Choose the global search/sort contract: move currently supported directory
-   search and sortable columns server-side with matching cursor/index behavior;
-   intentionally narrow the supported keys and label that change; or visibly
-   make search/sort page-local. No implementation may silently convert today's
-   whole-result behavior into current-page-only behavior.
-5. Confirm that optional directory matched totals are omitted in favor of
-   honest `hasMore`, or authorize a specifically labeled matched-count strategy.
-   Existing source-owned Event and Resource aggregate summary metrics remain
-   complete and separate; approval must not turn them into page-only totals.
-6. Choose Resource usage ordering: preserve the existing global
-   `openCount DESC, title ASC` contract through a separately governed indexed
-   summary/read model, or adopt page-first catalog ordering and keep complete
-   source-owned aggregate metrics separate from paged rows.
+1. Use the stable orders and unique tie-breakers named in this ACR.
+2. Add pagination to the existing endpoints; do not create parallel paged
+   endpoint families.
+3. Retain the legacy `/api/admin/bas` `bas` full-array field for one documented
+   transition release, then remove it only through a separately versioned change.
+4. Move the currently supported directory search and sortable columns
+   server-side with matching cursor/index behavior. Any unsupported key must be
+   visibly narrowed and documented; current-page-only search/sort is prohibited.
+5. Omit matched totals in favor of honest `hasMore`. Existing source-owned Event
+   and Resource aggregate summaries remain complete and separate from page rows.
+6. Use page-first Resource catalog ordering `updatedAt DESC,
+   resourceVersionId DESC`; keep complete source-owned usage aggregates separate.
 
-Index authority under this proposal is verify/report-only. Approval of this ACR
-does not authorize index creation; a complete manifest and later explicit
-approval are mandatory.
+Index authority is verify/report-only. This approval does not authorize index
+creation; a complete manifest and later explicit approval are mandatory.
 
 ## Explicit exclusions
 
@@ -189,6 +181,8 @@ read-back-evidenced operation.
 
 ## Approval record
 
-No approval has been recorded. Until Kevin approves this ACR and its six
-reserved decisions, P2-131 remains unchecked and no pagination contract,
-surface behavior, or index installation is authorized.
+Kevin approved the recommended P2-131 bundle in the active Codex task on
+2026-07-13. The approval was read back from MongoDB, Neo4j, and ChromaDB under
+`dec_acr_0025_admin_pagination_approval_2026_07_13`. Implementation is authorized
+on `codex/p2-131-admin-pagination` under the six decisions above. Index creation,
+automatic index application, and production mutation remain unauthorized.
