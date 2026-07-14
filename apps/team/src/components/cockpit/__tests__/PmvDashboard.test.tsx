@@ -12,11 +12,12 @@ import {
 function row(overrides: Partial<PmvDashboardRow> = {}): PmvDashboardRow {
   return {
     lifecycle: 'draft',
+    tokenState: 'minted',
     sentAt: null,
     clickedAt: null,
+    placedAt: null,
     latestCallbackIntent: null,
     crm: { followUpIsDue: false },
-    nextAction: { priority: 0 },
     ...overrides,
   };
 }
@@ -27,22 +28,24 @@ describe('PmvDashboard', () => {
       row({ lifecycle: 'draft' }),
       row({
         lifecycle: 'clicked',
+        tokenState: 'clicked',
         sentAt: '2026-07-13T17:00:00.000Z',
         clickedAt: '2026-07-13T18:00:00.000Z',
-        nextAction: { priority: 2 },
       }),
       row({
         lifecycle: 'watched',
+        tokenState: 'video_complete',
         sentAt: '2026-07-13T17:00:00.000Z',
         clickedAt: '2026-07-13T18:00:00.000Z',
+        placedAt: '2026-07-13T19:00:00.000Z',
         crm: { followUpIsDue: true },
-        nextAction: { priority: 4 },
       }),
       row({
         lifecycle: 'callback_requested',
+        tokenState: 'video_complete',
         sentAt: '2026-07-13T17:00:00.000Z',
+        placedAt: '2026-07-13T19:00:00.000Z',
         latestCallbackIntent: 'have_questions',
-        nextAction: { priority: 5 },
       }),
     ]);
 
@@ -54,10 +57,42 @@ describe('PmvDashboard', () => {
       presentationsCompleted: 2,
       callbackRequests: 1,
       followUpsDue: 1,
-      activeNextSteps: 3,
       createdToOpenRate: 75,
       openToCompleteRate: 67,
       completeToCallbackRate: 50,
+    });
+  });
+
+  it('does not infer presentation activity from customer or enrollment outcomes', () => {
+    const snapshot = buildPmvDashboardSnapshot([
+      row({ lifecycle: 'customer' }),
+      row({ lifecycle: 'enrolled', tokenState: 'enrolled' }),
+    ]);
+
+    expect(snapshot).toMatchObject({
+      peopleInvited: 2,
+      linkOpens: 0,
+      videoStarts: 0,
+      presentationsCompleted: 0,
+      createdToOpenRate: 0,
+      openToCompleteRate: null,
+    });
+  });
+
+  it('preserves completion evidence after a token advances to enrolled', () => {
+    const snapshot = buildPmvDashboardSnapshot([
+      row({
+        lifecycle: 'enrolled',
+        tokenState: 'enrolled',
+        clickedAt: '2026-07-13T18:00:00.000Z',
+        placedAt: '2026-07-13T19:00:00.000Z',
+      }),
+    ]);
+
+    expect(snapshot).toMatchObject({
+      linkOpens: 1,
+      videoStarts: 1,
+      presentationsCompleted: 1,
     });
   });
 

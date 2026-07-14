@@ -23,14 +23,22 @@ export type PmvDashboardLifecycle =
 
 export interface PmvDashboardRow {
   lifecycle: PmvDashboardLifecycle;
+  tokenState:
+    | 'minted'
+    | 'clicked'
+    | 'video_started'
+    | 'video_quarter'
+    | 'video_half'
+    | 'video_three_quarter'
+    | 'video_complete'
+    | 'enrolled'
+    | 'expired';
   sentAt: string | null;
   clickedAt: string | null;
+  placedAt: string | null;
   latestCallbackIntent: string | null;
   crm: {
     followUpIsDue: boolean;
-  };
-  nextAction: {
-    priority: number;
   };
 }
 
@@ -42,40 +50,26 @@ export interface PmvDashboardSnapshot {
   presentationsCompleted: number;
   callbackRequests: number;
   followUpsDue: number;
-  activeNextSteps: number;
   createdToOpenRate: number | null;
   openToCompleteRate: number | null;
   completeToCallbackRate: number | null;
 }
 
-const OPENED_LIFECYCLES = new Set<PmvDashboardLifecycle>([
+const OPENED_TOKEN_STATES = new Set<PmvDashboardRow['tokenState']>([
   'clicked',
   'video_started',
-  'video_25',
-  'video_50',
-  'video_75',
-  'watched',
-  'callback_requested',
-  'customer',
-  'enrolled',
+  'video_quarter',
+  'video_half',
+  'video_three_quarter',
+  'video_complete',
 ]);
 
-const VIDEO_STARTED_LIFECYCLES = new Set<PmvDashboardLifecycle>([
+const VIDEO_STARTED_TOKEN_STATES = new Set<PmvDashboardRow['tokenState']>([
   'video_started',
-  'video_25',
-  'video_50',
-  'video_75',
-  'watched',
-  'callback_requested',
-  'customer',
-  'enrolled',
-]);
-
-const COMPLETED_LIFECYCLES = new Set<PmvDashboardLifecycle>([
-  'watched',
-  'callback_requested',
-  'customer',
-  'enrolled',
+  'video_quarter',
+  'video_half',
+  'video_three_quarter',
+  'video_complete',
 ]);
 
 function rate(numerator: number, denominator: number): number | null {
@@ -88,20 +82,22 @@ export function buildPmvDashboardSnapshot(
   const peopleInvited = rows.length;
   const manualSends = rows.filter((row) => row.sentAt !== null).length;
   const linkOpens = rows.filter(
-    (row) => row.clickedAt !== null || OPENED_LIFECYCLES.has(row.lifecycle),
+    (row) =>
+      row.clickedAt !== null ||
+      row.placedAt !== null ||
+      OPENED_TOKEN_STATES.has(row.tokenState),
   ).length;
-  const videoStarts = rows.filter((row) =>
-    VIDEO_STARTED_LIFECYCLES.has(row.lifecycle),
+  const videoStarts = rows.filter(
+    (row) => row.placedAt !== null || VIDEO_STARTED_TOKEN_STATES.has(row.tokenState),
   ).length;
-  const presentationsCompleted = rows.filter((row) =>
-    COMPLETED_LIFECYCLES.has(row.lifecycle),
+  const presentationsCompleted = rows.filter(
+    (row) => row.placedAt !== null || row.tokenState === 'video_complete',
   ).length;
   const callbackRequests = rows.filter(
     (row) =>
       row.latestCallbackIntent !== null || row.lifecycle === 'callback_requested',
   ).length;
   const followUpsDue = rows.filter((row) => row.crm.followUpIsDue).length;
-  const activeNextSteps = rows.filter((row) => row.nextAction.priority > 0).length;
 
   return {
     peopleInvited,
@@ -111,7 +107,6 @@ export function buildPmvDashboardSnapshot(
     presentationsCompleted,
     callbackRequests,
     followUpsDue,
-    activeNextSteps,
     createdToOpenRate: rate(linkOpens, peopleInvited),
     openToCompleteRate: rate(presentationsCompleted, linkOpens),
     completeToCallbackRate: rate(callbackRequests, presentationsCompleted),
@@ -154,13 +149,13 @@ export function PmvDashboard({ rows }: { rows: readonly PmvDashboardRow[] }) {
       description: 'Relationships you invited',
       metrics: [
         { label: 'People invited', value: snapshot.peopleInvited },
-        { label: 'Manual sends', value: snapshot.manualSends },
       ],
     },
     {
       eyebrow: 'Momentum',
       description: 'Presentation activity',
       metrics: [
+        { label: 'Manual sends', value: snapshot.manualSends },
         { label: 'Link opens', value: snapshot.linkOpens },
         { label: 'Video starts', value: snapshot.videoStarts },
       ],
@@ -170,15 +165,14 @@ export function PmvDashboard({ rows }: { rows: readonly PmvDashboardRow[] }) {
       description: 'Completed presentations and replies',
       metrics: [
         { label: 'Presentations completed', value: snapshot.presentationsCompleted },
-        { label: 'Callback requests', value: snapshot.callbackRequests },
       ],
     },
     {
       eyebrow: 'Next steps',
       description: 'Your manual follow-up work',
       metrics: [
+        { label: 'Callback requests', value: snapshot.callbackRequests },
         { label: 'Follow-ups due', value: snapshot.followUpsDue },
-        { label: 'Active next steps', value: snapshot.activeNextSteps },
       ],
     },
   ] as const;
