@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T01:19:40.290Z",
+  "generatedAt": "2026-07-14T01:27:11.653Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 70,
   "unclassifiedCount": 0,
@@ -530,7 +530,7 @@
       "persistenceTier": "operational",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 5,
+      "sourceCount": 6,
       "sourceFiles": [
         "server/src/domain/orientationSession.ts"
       ]

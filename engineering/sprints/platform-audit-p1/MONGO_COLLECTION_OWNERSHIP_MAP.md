@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:19:40.290Z
+- Generated: 2026-07-14T01:27:11.653Z
 - Collections: 70
 - Unclassified: 0
 
@@ -62,7 +62,7 @@
 | `tmag_fast_start_progress` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 8 |
 | `tmag_invitation_generator_runs` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 3 |
 | `tmag_ivory_prospect_names` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 8 |
-| `tmag_new_member_orientation_reservations` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 5 |
+| `tmag_new_member_orientation_reservations` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 6 |
 | `tmag_new_member_orientation_sessions` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 4 |
 | `tmag_profile_change_challenges` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 3 |
 | `tmag_projection_outbox` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 6 |

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T01:19:50.473Z",
+  "generatedAt": "2026-07-14T01:27:18.962Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,12 +8,12 @@
   "summary": {
     "mounts": 50,
     "routeFiles": 50,
-    "routes": 238,
+    "routes": 239,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 3,
       "pre_gate": 144,
-      "ba_facing_gated": 90
+      "ba_facing_gated": 91
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
@@ -21,11 +21,11 @@
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
       "prospect_token": 18,
-      "ba_auth_steve_gated": 90
+      "ba_auth_steve_gated": 91
     },
     "byMethod": {
       "POST": 94,
-      "GET": 121,
+      "GET": 122,
       "PUT": 7,
       "PATCH": 9,
       "DELETE": 7
@@ -6373,6 +6373,33 @@
     },
     {
       "method": "GET",
+      "fullPath": "/api/orientation/state",
+      "mountPath": "/api/orientation",
+      "localPath": "/state",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/orientation.ts:42",
+      "routeSource": "server/src/routes/orientation.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
       "fullPath": "/api/orientation/sessions",
       "mountPath": "/api/orientation",
       "localPath": "/sessions",
@@ -6384,7 +6411,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/orientation.ts:39",
+      "source": "server/src/routes/orientation.ts:65",
       "routeSource": "server/src/routes/orientation.ts",
       "signals": {
         "requireAuth": true,
@@ -6411,7 +6438,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/orientation.ts:64",
+      "source": "server/src/routes/orientation.ts:90",
       "routeSource": "server/src/routes/orientation.ts",
       "signals": {
         "requireAuth": true,
@@ -6438,7 +6465,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/orientation.ts:116",
+      "source": "server/src/routes/orientation.ts:142",
       "routeSource": "server/src/routes/orientation.ts",
       "signals": {
         "requireAuth": true,

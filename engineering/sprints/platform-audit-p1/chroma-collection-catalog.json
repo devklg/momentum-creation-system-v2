@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T01:19:44.664Z",
+  "generatedAt": "2026-07-14T01:27:14.810Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -909,17 +909,17 @@
       "sources": [
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 70,
+          "line": 72,
           "action": "persistenceCall.chromadb.create_collection"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 335,
+          "line": 366,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 451,
+          "line": 482,
           "action": "writeOperational"
         }
       ],

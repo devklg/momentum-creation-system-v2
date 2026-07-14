@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:19:55.058Z
+- Generated: 2026-07-14T01:27:22.342Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
-- Route handlers: 268
-- Shared exports: 1074
+- Route handlers: 269
+- Shared exports: 1082
 
 ## Mongo Collections
 
@@ -51,7 +51,7 @@
 | `tmag_fast_start_progress` | permissive_mongoose_schema | yes | 8 |
 | `tmag_invitation_generator_runs` | permissive_mongoose_schema | yes | 3 |
 | `tmag_ivory_prospect_names` | permissive_mongoose_schema | yes | 8 |
-| `tmag_new_member_orientation_reservations` | permissive_mongoose_schema | yes | 5 |
+| `tmag_new_member_orientation_reservations` | permissive_mongoose_schema | yes | 6 |
 | `tmag_new_member_orientation_sessions` | permissive_mongoose_schema | yes | 4 |
 | `tmag_profile_change_challenges` | permissive_mongoose_schema | yes | 3 |
 | `tmag_projection_outbox` | permissive_mongoose_schema | yes | 6 |
@@ -341,7 +341,7 @@
 | `(unmounted)` | `server/src/routes/ivory.ts` | GET /<br>POST /<br>PATCH /:ivoryId<br>PATCH /:ivoryId/status<br>DELETE /:ivoryId<br>POST /coach<br>POST /invitation-agent/draft<br>POST /invitation-agent/mint<br>POST /generator/run<br>GET /generator/run/:runId<br>POST /generator/run/:runId/invite<br>GET /momentum<br>POST /momentum/:prospectId/suggest | `McsCreateGeneratorRunPayload`, `McsCreateGeneratorRunResponse`, `McsCreateIvoryNamePayload`, `McsGeneratorInvitePayload`, `McsGeneratorInviteResponse`, `McsGeneratorRunResponse`, `McsIvoryCategory`, `McsIvoryCoachPayload`, `McsIvoryCoachResponse`, `McsIvoryInvitationDraftPayload`, `McsIvoryInvitationDraftResponse`, `McsIvoryInvitationMintPayload`, `McsIvoryInvitationMintResponse`, `McsIvoryMomentumSuggestionPayload`, `McsIvoryMomentumSuggestionResponse`, `McsIvoryMomentumViewResponse`, `McsIvoryNameResponse`, `McsIvoryStatus`, `McsListIvoryNamesResponse`, `McsUpdateIvoryNamePayload`, `McsUpdateIvoryStatusPayload` |
 | `(unmounted)` | `server/src/routes/michael-runtime.ts` | POST /resolve | none |
 | `(unmounted)` | `server/src/routes/michael.ts` | GET /training-support/:downlineTmagId | none |
-| `(unmounted)` | `server/src/routes/orientation.ts` | GET /sessions<br>POST /sessions/:sessionId/reserve<br>DELETE /sessions/:sessionId/reserve | `McsOrientationCancelResponse`, `McsOrientationReserveResponse`, `McsOrientationSessionsResponse` |
+| `(unmounted)` | `server/src/routes/orientation.ts` | GET /state<br>GET /sessions<br>POST /sessions/:sessionId/reserve<br>DELETE /sessions/:sessionId/reserve | `McsOrientationCancelResponse`, `McsOrientationReserveResponse`, `McsOrientationSessionsResponse`, `McsOrientationStateResponse` |
 | `(unmounted)` | `server/src/routes/p-login.ts` | GET x-forwarded-for<br>GET origin<br>POST /start<br>POST /redeem<br>POST /code<br>POST /logout | `McsProspectLoginRedeemError`, `McsProspectLoginRedeemResponse`, `McsProspectLoginStartResponse` |
 | `(unmounted)` | `server/src/routes/p.ts` | GET /:token<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats | `McsCallbackIntent`, `McsCallbackRequestPayload`, `McsCallbackRequestResponse`, `McsComProspectCopy`, `McsEnrolledResponse`, `McsExpiredResponse`, `McsHoldingTankSnapshot`, `McsPlacementEvent`, `McsResolvedTokenPayload`, `McsTeamStatsResponse`, `McsTokenState`, `McsVideoEventKind`, `McsVideoEventPayload`, `McsVideoEventResponse`, `McsWebinarReservationPayload`, `McsWebinarReservationResponse` |
 | `(unmounted)` | `server/src/routes/preview.ts` | GET / | none |
@@ -492,6 +492,14 @@
 | `MCS_LEADER_CREDIBILITY` | const | `packages/shared/src/leaders.ts` |
 | `McsLeaderCredibilityContent` | interface | `packages/shared/src/leaders.ts` |
 | `McsLeaderProfile` | interface | `packages/shared/src/leaders.ts` |
+| `MCS_CURRENT_ORIENTATION_STATE_MACHINE` | const | `packages/shared/src/orientation-state-machine.ts` |
+| `MCS_ORIENTATION_STATE_MACHINE_VERSION` | const | `packages/shared/src/orientation-state-machine.ts` |
+| `McsCurrentOrientationEvent` | type | `packages/shared/src/orientation-state-machine.ts` |
+| `McsCurrentOrientationState` | type | `packages/shared/src/orientation-state-machine.ts` |
+| `McsCurrentOrientationStateProjection` | interface | `packages/shared/src/orientation-state-machine.ts` |
+| `McsOrientationStateReservationEvidence` | interface | `packages/shared/src/orientation-state-machine.ts` |
+| `McsOrientationStateResponse` | interface | `packages/shared/src/orientation-state-machine.ts` |
+| `projectCurrentOrientationState` | function | `packages/shared/src/orientation-state-machine.ts` |
 | `PMV_ANALYTICS_EVENTS` | const | `packages/shared/src/pmv-analytics-taxonomy.ts` |
 | `PMV_ANALYTICS_FORBIDDEN_PATTERNS` | const | `packages/shared/src/pmv-analytics-taxonomy.ts` |
 | `PMV_ANALYTICS_TAXONOMY` | const | `packages/shared/src/pmv-analytics-taxonomy.ts` |

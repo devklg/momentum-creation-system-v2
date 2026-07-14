@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:19:50.526Z
-- Routes: 238
+- Generated: 2026-07-14T01:27:18.999Z
+- Routes: 239
 - Findings: 0
 
 ## Routes By Access Category
@@ -17,7 +17,7 @@
 | auth_bootstrap | 3 |
 | auth_session | 2 |
 | ba_auth_pre_steve | 21 |
-| ba_auth_steve_gated | 58 |
+| ba_auth_steve_gated | 59 |
 | ba_auth_steve_vm_entitled | 25 |
 | internal_runtime_admin_or_secret | 5 |
 | prospect_reentry | 4 |
@@ -36,9 +36,9 @@
 | rawBodyParser | 1 |
 | requireAdmin | 99 |
 | requireAdminOrHealthSecret | 1 |
-| requireAuth | 105 |
+| requireAuth | 106 |
 | requireRuntimeInternal | 5 |
-| requireSteveComplete | 90 |
+| requireSteveComplete | 91 |
 | requireVmDialerAccess | 25 |
 
 ## Role Coverage
@@ -46,7 +46,7 @@
 | Role | Routes |
 | --- | ---: |
 | anonymous | 5 |
-| brand_ambassador | 106 |
+| brand_ambassador | 107 |
 | founder_admin | 105 |
 | prospect | 18 |
 | provider | 2 |
@@ -59,7 +59,7 @@
 | admin_allowlist | 105 |
 | machine_credential | 12 |
 | none | 5 |
-| registered_ba | 106 |
+| registered_ba | 107 |
 | valid_prospect_identity | 18 |
 | vm_dialer | 25 |
 
@@ -310,9 +310,10 @@
 | POST | `/api/profile/email/verify` | brand_ambassador | registered_ba | ba_session, whitelisted | ba_auth_pre_steve | ba_session | none | whitelisted | profile_prefix_whitelist | none | none | none | no | no | global_256kb_json | Steve whitelist is prefix-based, so all profile settings routes bypass the Steve completion check effectively | none | `server/src/routes/profile.ts:181` |
 | POST | `/api/profile/phone` | brand_ambassador | registered_ba | ba_session, whitelisted | ba_auth_pre_steve | ba_session | none | whitelisted | profile_prefix_whitelist | none | none | none | no | no | global_256kb_json | Steve whitelist is prefix-based, so all profile settings routes bypass the Steve completion check effectively | none | `server/src/routes/profile.ts:206` |
 | GET | `/api/preview/` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/preview.ts:32` |
-| GET | `/api/orientation/sessions` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/orientation.ts:39` |
-| POST | `/api/orientation/sessions/:sessionId/reserve` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/orientation.ts:64` |
-| DELETE | `/api/orientation/sessions/:sessionId/reserve` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/orientation.ts:116` |
+| GET | `/api/orientation/state` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/orientation.ts:42` |
+| GET | `/api/orientation/sessions` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/orientation.ts:65` |
+| POST | `/api/orientation/sessions/:sessionId/reserve` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/orientation.ts:90` |
+| DELETE | `/api/orientation/sessions/:sessionId/reserve` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/orientation.ts:142` |
 | GET | `/api/three-way/availability` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/three-way.ts:29` |
 | PUT | `/api/three-way/availability` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/three-way.ts:42` |
 | GET | `/api/three-way/bookings` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/three-way.ts:63` |

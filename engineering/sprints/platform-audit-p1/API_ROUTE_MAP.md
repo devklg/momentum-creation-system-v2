@@ -4,16 +4,16 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:19:50.473Z
+- Generated: 2026-07-14T01:27:18.962Z
 - Mounted routers: 50
 - Route files: 50
-- Static route rows: 238
+- Static route rows: 239
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
-| ba_facing_gated | 90 |
+| ba_facing_gated | 91 |
 | pre_gate | 144 |
 | pre_json_admin_body_limit | 3 |
 | raw_body_before_json | 1 |
@@ -23,7 +23,7 @@
 | Access profile | Routes |
 | --- | ---: |
 | admin | 96 |
-| ba_auth_steve_gated | 90 |
+| ba_auth_steve_gated | 91 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
 | prospect_token | 18 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 7 |
-| GET | 121 |
+| GET | 122 |
 | PATCH | 9 |
 | POST | 94 |
 | PUT | 7 |
@@ -322,9 +322,10 @@
 | POST | `/api/profile/email/verify` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/profile.ts:181` |
 | POST | `/api/profile/phone` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/profile.ts:206` |
 | GET | `/api/preview/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/preview.ts:32` |
-| GET | `/api/orientation/sessions` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/orientation.ts:39` |
-| POST | `/api/orientation/sessions/:sessionId/reserve` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/orientation.ts:64` |
-| DELETE | `/api/orientation/sessions/:sessionId/reserve` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/orientation.ts:116` |
+| GET | `/api/orientation/state` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/orientation.ts:42` |
+| GET | `/api/orientation/sessions` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/orientation.ts:65` |
+| POST | `/api/orientation/sessions/:sessionId/reserve` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/orientation.ts:90` |
+| DELETE | `/api/orientation/sessions/:sessionId/reserve` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/orientation.ts:142` |
 | GET | `/api/three-way/availability` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/three-way.ts:29` |
 | PUT | `/api/three-way/availability` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/three-way.ts:42` |
 | GET | `/api/three-way/bookings` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/three-way.ts:63` |
