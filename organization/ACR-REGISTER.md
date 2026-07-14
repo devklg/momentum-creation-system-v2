@@ -42,6 +42,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0027 | Chroma Re-index and Age-out Governance | P2-133 / Chroma operator maintenance | Verified | v1.2 |
 | ACR-0028 | Knowledge Source Conflict Detection | P2-134 / Knowledge integrity observation | Verified | v1.2 |
 | ACR-0029 | Governed Knowledge Correction and Supersession | P2-135 / Knowledge lifecycle correction | Approved | v1.2 |
+| ACR-0030 | Neo4j Orphan and Duplicate Traversals | P2-136 / Neo4j topology integrity | Proposed | v1.2 |
 
 ---
 

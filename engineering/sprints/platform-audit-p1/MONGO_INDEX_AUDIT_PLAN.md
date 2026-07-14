@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-14T20:47:39.386Z
+- Generated: 2026-07-14T20:59:09.247Z
 - Planned/audited indexes: 74
 - General ensureIndexes runner: not_present
 - Knowledge Evolution ensureIndexes: present_for_knowledge_evolution_only
