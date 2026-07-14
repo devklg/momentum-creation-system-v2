@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T03:52:32.988Z",
+  "generatedAt": "2026-07-14T04:03:25.716Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -4413,17 +4413,22 @@
         {
           "method": "GET",
           "path": "x-mcs-health-secret",
-          "line": 21
+          "line": 22
         },
         {
           "method": "GET",
           "path": "/triple-stack",
-          "line": 29
+          "line": 30
         },
         {
           "method": "GET",
           "path": "/status",
-          "line": 48
+          "line": 49
+        },
+        {
+          "method": "GET",
+          "path": "/llm-provider",
+          "line": 79
         }
       ],
       "sharedTypes": []
@@ -5224,82 +5229,82 @@
         {
           "method": "GET",
           "path": "/",
-          "line": 114
+          "line": 115
         },
         {
           "method": "POST",
           "path": "/",
-          "line": 133
+          "line": 134
         },
         {
           "method": "PATCH",
           "path": "/:ivoryId",
-          "line": 179
+          "line": 180
         },
         {
           "method": "PATCH",
           "path": "/:ivoryId/status",
-          "line": 228
+          "line": 229
         },
         {
           "method": "DELETE",
           "path": "/:ivoryId",
-          "line": 266
+          "line": 267
         },
         {
           "method": "POST",
           "path": "/coach",
-          "line": 298
+          "line": 299
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 343
+          "line": 345
         },
         {
           "method": "POST",
           "path": "/invitation-agent/draft",
-          "line": 363
+          "line": 365
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 406
+          "line": 409
         },
         {
           "method": "POST",
           "path": "/invitation-agent/mint",
-          "line": 431
+          "line": 434
         },
         {
           "method": "POST",
           "path": "/generator/run",
-          "line": 500
+          "line": 503
         },
         {
           "method": "GET",
           "path": "/generator/run/:runId",
-          "line": 537
+          "line": 540
         },
         {
           "method": "POST",
           "path": "/generator/run/:runId/invite",
-          "line": 566
+          "line": 569
         },
         {
           "method": "GET",
           "path": "/momentum",
-          "line": 647
+          "line": 650
         },
         {
           "method": "POST",
           "path": "/momentum/:prospectId/suggest",
-          "line": 666
+          "line": 669
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 700
+          "line": 704
         }
       ],
       "sharedTypes": [
@@ -5649,12 +5654,12 @@
         {
           "method": "POST",
           "path": "/draft",
-          "line": 80
+          "line": 81
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 144
+          "line": 146
         }
       ],
       "sharedTypes": [
@@ -11496,7 +11501,7 @@
     "neo4jRelationships": 69,
     "chromaCollections": 53,
     "routeModules": 49,
-    "routeHandlers": 274,
+    "routeHandlers": 275,
     "sharedExports": 1096
   }
 }
