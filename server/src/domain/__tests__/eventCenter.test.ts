@@ -6,12 +6,10 @@ const orientation = vi.hoisted(() => ({
 }));
 const webinar = vi.hoisted(() => ({ listUpcomingWebinarEvents: vi.fn() }));
 const persistence = vi.hoisted(() => ({ persistenceCall: vi.fn() }));
-const attendance = vi.hoisted(() => ({ listLatestWebinarAttendance: vi.fn() }));
 
 vi.mock('../orientationSession.js', () => orientation);
 vi.mock('../webinarEvent.js', () => webinar);
 vi.mock('../../services/persistence/dispatch.js', () => persistence);
-vi.mock('../eventAttendance.js', () => attendance);
 
 import { getEventCenterForAdmin, getEventCenterForBA } from '../eventCenter.js';
 
@@ -23,7 +21,6 @@ const webinarEvent = {
 
 beforeEach(() => {
   vi.resetAllMocks();
-  attendance.listLatestWebinarAttendance.mockResolvedValue(new Map());
 });
 
 describe('Event Center read projection', () => {
@@ -83,13 +80,15 @@ describe('Event Center read projection', () => {
   it('counts webinar reservations for admin without treating them as attendance', async () => {
     orientation.listSessionsWithRosters.mockResolvedValue([]);
     webinar.listUpcomingWebinarEvents.mockResolvedValue([webinarEvent]);
-    persistence.persistenceCall
-      .mockResolvedValueOnce({ documents: [
-        { reservationId: 'r1', eventId: 'web_1', prospectId: 'p1', sponsorTmagId: 'TM-01', name: 'A', createdAt: '2026-07-01T00:00:00.000Z' },
-        { reservationId: 'r2', eventId: 'web_1', prospectId: 'p2', sponsorTmagId: 'TM-01', name: 'B', createdAt: '2026-07-01T00:00:00.000Z' },
-      ] })
-      .mockResolvedValueOnce({ results: [{ _id: 'web_1', count: 2 }] })
-      .mockResolvedValueOnce({ documents: [] });
+    const reservations = [
+      { reservationId: 'r1', eventId: 'web_1', prospectId: 'p1', sponsorTmagId: 'TM-01', name: 'A', createdAt: '2026-07-01T00:00:00.000Z' },
+      { reservationId: 'r2', eventId: 'web_1', prospectId: 'p2', sponsorTmagId: 'TM-01', name: 'B', createdAt: '2026-07-01T00:00:00.000Z' },
+    ];
+    persistence.persistenceCall.mockImplementation(async (_tool: string, action: string, params: { collection: string; pipeline?: unknown[] }) => {
+      if (params.collection === 'tmag_prospect_webinar_reservations' && action === 'query') return { documents: reservations };
+      if (params.collection === 'tmag_prospect_webinar_reservations') return { results: [{ _id: 'web_1', count: 2 }] };
+      return { results: [] };
+    });
     const result = await getEventCenterForAdmin();
     expect(result.webinarEvents[0]).toMatchObject({ eventId: 'web_1', reservationCount: 2 });
     expect(result.webinarEvents[0]).not.toHaveProperty('attendanceCount');
@@ -105,24 +104,55 @@ describe('Event Center read projection', () => {
   it('projects explicit attendance and an available human CRM connection', async () => {
     orientation.listSessionsWithRosters.mockResolvedValue([]);
     webinar.listUpcomingWebinarEvents.mockResolvedValue([webinarEvent]);
-    persistence.persistenceCall
-      .mockResolvedValueOnce({ documents: [
-        { reservationId: 'r1', eventId: 'web_1', prospectId: 'p1', sponsorTmagId: 'TM-01', name: 'A', createdAt: '2026-07-01T00:00:00.000Z' },
-      ] })
-      .mockResolvedValueOnce({ results: [{ _id: 'web_1', count: 1 }] })
-      .mockResolvedValueOnce({ documents: [
-        { prospectId: 'p1', sponsorTmagId: 'TM-01', dueAt: '2026-08-02T00:00:00.000Z', createdAt: '2026-08-01T00:00:00.000Z', clearedAt: null },
-      ] });
-    attendance.listLatestWebinarAttendance.mockResolvedValue(new Map([['r1', {
+    const reservation = { reservationId: 'r1', eventId: 'web_1', prospectId: 'p1', sponsorTmagId: 'TM-01', name: 'A', createdAt: '2026-07-01T00:00:00.000Z' };
+    const attendanceRow = {
       attendanceId: 'a1', eventId: 'web_1', reservationId: 'r1', eventType: 'prospect_webinar',
       prospectId: 'p1', sponsorTmagId: 'TM-01', state: 'attended',
       recordedAt: '2026-08-01T01:00:00.000Z', recordedByTmagId: 'TM-01', crmFollowUpDueAt: '2026-08-02T00:00:00.000Z',
-    }]]));
+    };
+    persistence.persistenceCall.mockImplementation(async (_tool: string, action: string, params: { collection: string; pipeline?: unknown[] }) => {
+      const pipeline = JSON.stringify(params.pipeline ?? []);
+      if (params.collection === 'tmag_prospect_webinar_reservations' && action === 'query') return { documents: [reservation] };
+      if (params.collection === 'tmag_prospect_webinar_reservations') return { results: [{ _id: 'web_1', count: 1 }] };
+      if (params.collection === 'tmag_event_attendance' && pipeline.includes('$lookup')) return { results: [{ _id: 'web_1', count: 1 }] };
+      if (params.collection === 'tmag_event_attendance' && pipeline.includes('"recorded"')) return { results: [{ _id: 'web_1', recorded: 1, attended: 1, missed: 0, rescheduled: 0, recordedAt: attendanceRow.recordedAt }] };
+      if (params.collection === 'tmag_event_attendance') return { results: [{ _id: 'r1', row: attendanceRow }] };
+      if (params.collection === 'tmag_prospect_crm_followups') return { results: [{ _id: { prospectId: 'p1', sponsorTmagId: 'TM-01' }, row: { prospectId: 'p1', sponsorTmagId: 'TM-01', dueAt: '2026-08-02T00:00:00.000Z', createdAt: '2026-08-01T00:00:00.000Z', clearedAt: null } }] };
+      return { results: [] };
+    });
     const result = await getEventCenterForAdmin();
     expect(result.events[0]).toMatchObject({
       attendance: { state: 'recorded', inferred: false, counts: { recorded: 1, attended: 1, missed: 0, rescheduled: 0 } },
       followUp: { owner: 'human_crm', connection: 'available', automated: false, connectedCount: 1 },
     });
     expect(result.webinarReservations[0]).toMatchObject({ attendance: 'attended', crmFollowUpDueAt: '2026-08-02T00:00:00.000Z' });
+  });
+
+  it('keeps complete Event summaries independent from the bounded reservation page', async () => {
+    orientation.listSessionsWithRosters.mockResolvedValue([]);
+    webinar.listUpcomingWebinarEvents.mockResolvedValue([webinarEvent]);
+    const pageRows = [
+      { reservationId: 'r2', eventId: 'web_1', prospectId: 'p2', sponsorTmagId: 'TM-01', name: 'Second', createdAt: '2026-07-02T00:00:00.000Z' },
+      { reservationId: 'r1', eventId: 'web_1', prospectId: 'p1', sponsorTmagId: 'TM-01', name: 'First', createdAt: '2026-07-01T00:00:00.000Z' },
+    ];
+    persistence.persistenceCall.mockImplementation(async (_tool: string, action: string, params: { collection: string; pipeline?: unknown[] }) => {
+      const pipeline = JSON.stringify(params.pipeline ?? []);
+      if (params.collection === 'tmag_prospect_webinar_reservations' && action === 'query') return { documents: pageRows };
+      if (params.collection === 'tmag_prospect_webinar_reservations') return { results: [{ _id: 'web_1', count: 5001 }] };
+      if (params.collection === 'tmag_event_attendance' && pipeline.includes('$lookup')) return { results: [{ _id: 'web_1', count: 3000 }] };
+      if (params.collection === 'tmag_event_attendance' && pipeline.includes('"recorded"')) return { results: [{ _id: 'web_1', recorded: 4000, attended: 2500, missed: 1000, rescheduled: 500, recordedAt: '2026-08-01T01:00:00.000Z' }] };
+      if (params.collection === 'tmag_event_attendance') return { results: [] };
+      if (params.collection === 'tmag_prospect_crm_followups') return { results: [] };
+      return { results: [] };
+    });
+    const result = await getEventCenterForAdmin({ pageSize: 1 });
+    expect(result.webinarReservations).toHaveLength(1);
+    expect(result.pageInfo).toMatchObject({ pageSize: 1, hasMore: true });
+    expect(result.webinarEvents[0]?.reservationCount).toBe(5001);
+    expect(result.events[0]).toMatchObject({
+      capacity: { reserved: 5001 },
+      attendance: { counts: { recorded: 4000, attended: 2500, missed: 1000, rescheduled: 500 } },
+      followUp: { connectedCount: 3000 },
+    });
   });
 });

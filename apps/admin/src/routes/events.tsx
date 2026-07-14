@@ -52,7 +52,7 @@ interface AdminEventCenterResponse {
     reservationCount: number;
   }>;
   webinarReservations: WebinarReservation[];
-  pageInfo?: { pageSize: number; hasMore: boolean; nextCursor: string | null };
+  pageInfo: { pageSize: number; hasMore: boolean; nextCursor: string | null };
 }
 
 export function EventsAdminPage() {
@@ -106,16 +106,29 @@ export function EventsAdminPage() {
       );
       const payload = (await response.json()) as {
         ok?: boolean;
+        attendance?: { state: AttendanceState; recordedAt: string };
         followUp?: { dueAt: string; created: boolean; automatedContact: false };
         error?: string;
       };
-      if (!response.ok || !payload.ok || !payload.followUp) {
+      if (!response.ok || !payload.ok || !payload.followUp || !payload.attendance) {
         throw new Error(payload.error ?? 'attendance_not_saved');
       }
       setNotice(
         `${row.name}: ${label(state)} recorded. Human CRM follow-up ${payload.followUp.created ? 'created' : 'preserved'}; no contact was sent.`,
       );
-      await load();
+      setData((current) => current ? {
+        ...current,
+        webinarReservations: current.webinarReservations.map((candidate) => (
+          candidate.reservationId === row.reservationId
+            ? {
+                ...candidate,
+                attendance: payload.attendance!.state,
+                attendanceRecordedAt: payload.attendance!.recordedAt,
+                crmFollowUpDueAt: payload.followUp!.dueAt,
+              }
+            : candidate
+        )),
+      } : current);
     } catch (reason) {
       setNotice(reason instanceof Error ? `Could not record attendance: ${reason.message}` : 'Could not record attendance.');
     } finally {
@@ -210,11 +223,11 @@ export function EventsAdminPage() {
             <div className="mt-3 flex items-center gap-3">
               <button
                 type="button"
-                disabled={loadingPage || !data.pageInfo?.hasMore || !data.pageInfo.nextCursor}
-                onClick={() => data.pageInfo?.nextCursor && void load('append', data.pageInfo.nextCursor)}
+                disabled={loadingPage || !data.pageInfo.hasMore || !data.pageInfo.nextCursor}
+                onClick={() => data.pageInfo.nextCursor && void load('append', data.pageInfo.nextCursor)}
                 className="rounded border border-gold/45 px-4 py-2 font-mono text-[10px] uppercase tracking-label text-gold disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {loadingPage ? 'Loading…' : data.pageInfo?.hasMore ? 'Load more reservations' : 'All reservations loaded'}
+                {loadingPage ? 'Loading…' : data.pageInfo.hasMore ? 'Load more reservations' : 'All reservations loaded'}
               </button>
               <span className="font-mono text-[10px] uppercase tracking-label text-cream-faint">
                 Newest reservations first · {data.webinarReservations.length} loaded

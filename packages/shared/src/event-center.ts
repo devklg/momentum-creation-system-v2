@@ -3,6 +3,7 @@ import type {
   McsOrientationSessionWithRoster,
   McsWebinarEvent,
 } from './types.js';
+import type { McsAdminPageInfo, McsAdminStableSort } from './admin-pagination.js';
 
 export const MCS_EVENT_CENTER_SCHEMA_VERSION = 'event_center.v1.2' as const;
 
@@ -150,4 +151,10 @@ export interface McsAdminEventCenterResponse {
   orientationSessions: McsOrientationSessionWithRoster[];
   webinarEvents: McsAdminEventCenterWebinarEvent[];
   webinarReservations: McsAdminEventCenterWebinarReservation[];
+  pageInfo: McsAdminPageInfo;
+  appliedFilters: {
+    eventId: string | null;
+  };
+  appliedSort: Extract<McsAdminStableSort, 'createdAt_desc_reservationId_desc'>;
+  computedAt: string;
 }

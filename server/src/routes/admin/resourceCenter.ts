@@ -46,20 +46,17 @@ adminResourceCenterRoutes.get('/analytics', requireAdmin, async (_req, res) => {
       entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: report.totals.staleReviewWarnings > 0 ? 'warn' : 'info',
       after: {
-        sort: 'updatedAt_desc_resourceVersionId_desc',
+        filters: report.appliedFilters,
+        sort: report.appliedSort,
         pageSize: report.pageInfo.pageSize,
         returnedCount: report.resources.length,
         hasMore: report.pageInfo.hasMore,
         cursorSupplied: !!parsed.data.cursor,
       },
       reason: null,
-      context: { ip: req.ip ?? null, userAgent: req.get('user-agent') ?? null, route: '/api/admin/resource-center/analytics', method: 'GET', requestId: null },
+      context: { ip: null, userAgent: null, route: '/api/admin/resource-center/analytics', method: 'GET', requestId: null },
     });
-    res.status(200).json({
-      ...report,
-      appliedSort: 'updatedAt_desc_resourceVersionId_desc',
-      computedAt: report.generatedAt,
-    });
+    res.status(200).json(report);
   } catch (error) {
     if (error instanceof AdminCursorError) {
       res.status(400).json({ ok: false, error: error.code });

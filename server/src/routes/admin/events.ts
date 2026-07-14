@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { McsAuditActor, McsRecordEventAttendanceResponse } from '@momentum/shared';
 import { getEventCenterForAdmin } from '../../domain/eventCenter.js';
 import { AdminCursorError } from '../../domain/adminPagination.js';
+import { appendAuditEntry } from '../../domain/auditLog.js';
 import {
   EventAttendanceError,
   recordWebinarAttendance,
@@ -30,11 +31,29 @@ adminEventRoutes.get('/', requireAdmin, async (req, res) => {
   }
   try {
     const report = await getEventCenterForAdmin(parsed.data);
-    return res.status(200).json({
-      ...report,
-      appliedSort: 'createdAt_desc_reservationId_desc',
-      computedAt: report.generatedAt,
+    await appendAuditEntry({
+      actor: adminActor(req),
+      action: 'admin.events.reservations.viewed',
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
+      severity: 'info',
+      after: {
+        filters: report.appliedFilters,
+        sort: report.appliedSort,
+        pageSize: report.pageInfo.pageSize,
+        returnedCount: report.webinarReservations.length,
+        hasMore: report.pageInfo.hasMore,
+        cursorSupplied: Boolean(parsed.data.cursor),
+      },
+      reason: null,
+      context: {
+        ip: null,
+        userAgent: null,
+        route: '/api/admin/events',
+        method: 'GET',
+        requestId: null,
+      },
     });
+    return res.status(200).json(report);
   } catch (error) {
     if (error instanceof AdminCursorError) {
       return res.status(400).json({ ok: false, error: error.code });

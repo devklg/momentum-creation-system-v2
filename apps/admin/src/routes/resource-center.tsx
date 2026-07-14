@@ -18,7 +18,7 @@ type Summary = {
   policy: { staleReviewDays: number; warningOnly: true; changesPublishingState: false };
   totals: { activeResources: number; totalOpens: number; opensLast30Days: number; neverOpened: number; staleReviewWarnings: number };
   resources: ResourceRow[];
-  pageInfo?: { pageSize: number; hasMore: boolean; nextCursor: string | null };
+  pageInfo: { pageSize: number; hasMore: boolean; nextCursor: string | null };
 };
 
 export function ResourceCenterAdminPage() {
@@ -100,11 +100,11 @@ export function ResourceCenterAdminPage() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              disabled={loading || !data.pageInfo?.hasMore || !data.pageInfo.nextCursor}
-              onClick={() => data.pageInfo?.nextCursor && void load('append', data.pageInfo.nextCursor)}
+              disabled={loading || !data.pageInfo.hasMore || !data.pageInfo.nextCursor}
+              onClick={() => data.pageInfo.nextCursor && void load('append', data.pageInfo.nextCursor)}
               className="rounded border border-gold/45 px-4 py-2 font-mono text-[10px] uppercase tracking-label text-gold disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {loading ? 'Loading…' : data.pageInfo?.hasMore ? 'Load more resources' : 'All resources loaded'}
+              {loading ? 'Loading…' : data.pageInfo.hasMore ? 'Load more resources' : 'All resources loaded'}
             </button>
             <span className="font-mono text-[10px] uppercase tracking-label text-cream-faint">
               Catalog updated order · {data.resources.length} loaded · totals remain complete

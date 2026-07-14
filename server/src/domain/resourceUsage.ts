@@ -19,7 +19,6 @@ import {
   decodeAdminCursor,
   descendingKeysetFilter,
   encodeAdminCursor,
-  type AdminPageInfo,
 } from './adminPagination.js';
 
 export const RESOURCE_USAGE_MONGO_COLLECTION = 'tmag_resource_usage_events';
@@ -29,19 +28,11 @@ type Persistence = typeof persistenceCall;
 type VerifyGate = typeof verifyResourcePublishingGate;
 type TripleWrite = typeof tripleStackWrite;
 
-interface UsageAggregate {
+interface PageUsageAggregate {
   _id: string;
   openCount: number;
   memberIds?: string[];
   lastOpenedAt: string | null;
-}
-
-interface RecentAggregate {
-  _id: string;
-  opensLast30Days: number;
-}
-
-interface PageUsageAggregate extends UsageAggregate {
   opensLast30Days: number;
 }
 
@@ -119,67 +110,7 @@ function staleAgeDays(updatedAt: string, now: Date): number | null {
 export async function buildResourceUsageSummary(
   options: { persistence?: Persistence; now?: Date } = {},
 ): Promise<McsResourceUsageSummaryResponse> {
-  const persistence = options.persistence ?? persistenceCall;
-  const now = options.now ?? new Date();
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 86_400_000).toISOString();
-  const [catalog, allTime, recent] = await Promise.all([
-    persistence<{ documents?: McsResourceCatalogEntry[] }>('mongodb', 'query', {
-      database: 'momentum', collection: RESOURCE_CATALOG_MONGO_COLLECTION,
-      filter: { lifecycle: 'active', 'audience.surfaces': 'team' }, sort: { title: 1 }, limit: 500,
-    }),
-    persistence<{ results?: UsageAggregate[] }>('mongodb', 'aggregate', {
-      database: 'momentum', collection: RESOURCE_USAGE_MONGO_COLLECTION,
-      pipeline: [
-        { $match: { eventType: 'opened' } },
-        { $group: { _id: '$resourceVersionId', openCount: { $sum: 1 }, memberIds: { $addToSet: '$actorTmagId' }, lastOpenedAt: { $max: '$occurredAt' } } },
-      ],
-    }),
-    persistence<{ results?: RecentAggregate[] }>('mongodb', 'aggregate', {
-      database: 'momentum', collection: RESOURCE_USAGE_MONGO_COLLECTION,
-      pipeline: [
-        { $match: { eventType: 'opened', occurredAt: { $gte: thirtyDaysAgo } } },
-        { $group: { _id: '$resourceVersionId', opensLast30Days: { $sum: 1 } } },
-      ],
-    }),
-  ]);
-  const allTimeByVersion = new Map((allTime.results ?? []).map((row) => [row._id, row]));
-  const recentByVersion = new Map((recent.results ?? []).map((row) => [row._id, row.opensLast30Days]));
-  const resources: McsResourceUsageRow[] = (catalog.documents ?? [])
-    .filter(teamAudience)
-    .map((entry) => {
-      const usage = allTimeByVersion.get(entry.resourceVersionId);
-      const ageDays = staleAgeDays(entry.updatedAt, now);
-      return {
-        resourceId: entry.resourceId,
-        resourceVersionId: entry.resourceVersionId,
-        title: entry.title,
-        kind: entry.kind,
-        version: entry.version,
-        updatedAt: entry.updatedAt,
-        openCount: usage?.openCount ?? 0,
-        uniqueMemberCount: usage?.memberIds?.length ?? 0,
-        opensLast30Days: recentByVersion.get(entry.resourceVersionId) ?? 0,
-        lastOpenedAt: usage?.lastOpenedAt ?? null,
-        staleReviewWarning: ageDays === null || ageDays >= MCS_RESOURCE_STALE_REVIEW_DAYS,
-        staleReviewAgeDays: ageDays,
-      };
-    })
-    .sort((left, right) => right.openCount - left.openCount || left.title.localeCompare(right.title));
-
-  return {
-    ok: true,
-    schemaVersion: MCS_RESOURCE_USAGE_SCHEMA_VERSION,
-    generatedAt: now.toISOString(),
-    policy: { staleReviewDays: MCS_RESOURCE_STALE_REVIEW_DAYS, warningOnly: true, changesPublishingState: false },
-    totals: {
-      activeResources: resources.length,
-      totalOpens: resources.reduce((sum, row) => sum + row.openCount, 0),
-      opensLast30Days: resources.reduce((sum, row) => sum + row.opensLast30Days, 0),
-      neverOpened: resources.filter((row) => row.openCount === 0).length,
-      staleReviewWarnings: resources.filter((row) => row.staleReviewWarning).length,
-    },
-    resources,
-  };
+  return buildResourceUsageSummaryPage({ ...options, pageSize: 100 });
 }
 
 const RESOURCE_ANALYTICS_SCOPE = 'admin_resource_analytics.v1';
@@ -191,12 +122,12 @@ export async function buildResourceUsageSummaryPage(
     pageSize?: number;
     cursor?: string;
   } = {},
-): Promise<McsResourceUsageSummaryResponse & { pageInfo: AdminPageInfo }> {
+): Promise<McsResourceUsageSummaryResponse> {
   const persistence = options.persistence ?? persistenceCall;
   const now = options.now ?? new Date();
   const pageSize = Math.max(1, Math.min(100, options.pageSize ?? 50));
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 86_400_000).toISOString();
-  const staleCutoff = new Date(now.getTime() - MCS_RESOURCE_STALE_REVIEW_DAYS * 86_400_000).toISOString();
+  const staleCutoff = new Date(now.getTime() - MCS_RESOURCE_STALE_REVIEW_DAYS * 86_400_000);
   const baseFilter: Record<string, unknown> = {
     lifecycle: 'active',
     'audience.surfaces': 'team',
@@ -267,13 +198,17 @@ export async function buildResourceUsageSummaryPage(
           },
         },
         { $set: { usage: { $first: '$usage' } } },
+        { $set: { updatedInstant: { $convert: { input: '$updatedAt', to: 'date', onError: null, onNull: null } } } },
         { $group: {
           _id: null,
           activeResources: { $sum: 1 },
           totalOpens: { $sum: { $ifNull: ['$usage.openCount', 0] } },
           opensLast30Days: { $sum: { $ifNull: ['$usage.recentCount', 0] } },
           neverOpened: { $sum: { $cond: [{ $gt: [{ $ifNull: ['$usage.openCount', 0] }, 0] }, 0, 1] } },
-          staleReviewWarnings: { $sum: { $cond: [{ $lt: ['$updatedAt', staleCutoff] }, 1, 0] } },
+          staleReviewWarnings: { $sum: { $cond: [{ $or: [
+            { $eq: ['$updatedInstant', null] },
+            { $lt: ['$updatedInstant', staleCutoff] },
+          ] }, 1, 0] } },
         } },
       ],
     }),
@@ -348,5 +283,12 @@ export async function buildResourceUsageSummaryPage(
           })
         : null,
     },
+    appliedFilters: {
+      lifecycle: 'active',
+      surface: 'team',
+      roles: ['brand_ambassador', 'leader'],
+    },
+    appliedSort: 'updatedAt_desc_resourceVersionId_desc',
+    computedAt: now.toISOString(),
   };
 }

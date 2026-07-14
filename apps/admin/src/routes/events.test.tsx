@@ -14,6 +14,7 @@ describe('Admin Event Center', () => {
       orientationSessions: [{ sessionId: 'ori_1', scheduledFor: '2026-08-01T17:00:00.000Z', hosts: ['Kevin'], status: 'upcoming', capacity: 10, seatsTaken: 3, seatsRemaining: 7 }],
       webinarEvents: [{ eventId: 'web_1', scheduledFor: '2026-08-02T17:00:00.000Z', hosts: ['Paul'], status: 'upcoming', reservationCount: 4 }],
       webinarReservations: [],
+      pageInfo: { pageSize: 50, hasMore: false, nextCursor: null },
     }) })));
     render(<MemoryRouter><EventsAdminPage /></MemoryRouter>);
     expect(await screen.findByText('Event operations')).toBeInTheDocument();
@@ -30,16 +31,35 @@ describe('Admin Event Center', () => {
       ok: true, schemaVersion: 'event_center.v1.2', sources: { orientation: 'available', webinar: 'available' }, events: [], orientationSessions: [],
       webinarEvents: [{ eventId: 'web_1', scheduledFor: '2026-08-02T17:00:00.000Z', hosts: ['Paul'], status: 'upcoming', reservationCount: 1 }],
       webinarReservations: [{ reservationId: 'r1', eventId: 'web_1', prospectId: 'p1', sponsorTmagId: 'TM-02', name: 'Pat Prospect', createdAt: '2026-07-01T00:00:00.000Z', attendance: null, attendanceRecordedAt: null, crmFollowUpDueAt: null }],
+      pageInfo: { pageSize: 50, hasMore: false, nextCursor: null },
     };
     const fetchMock = vi.fn()
       .mockResolvedValueOnce({ ok: true, json: async () => getPayload })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ ok: true, followUp: { dueAt: '2026-08-03T17:00:00.000Z', created: true, automatedContact: false } }) })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...getPayload, webinarReservations: [{ ...getPayload.webinarReservations[0], attendance: 'attended', attendanceRecordedAt: '2026-08-02T18:00:00.000Z', crmFollowUpDueAt: '2026-08-03T17:00:00.000Z' }] }) });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ok: true, attendance: { state: 'attended', recordedAt: '2026-08-02T18:00:00.000Z' }, followUp: { dueAt: '2026-08-03T17:00:00.000Z', created: true, automatedContact: false } }) });
     vi.stubGlobal('fetch', fetchMock);
     render(<MemoryRouter><EventsAdminPage /></MemoryRouter>);
     const buttons = await screen.findAllByRole('button', { name: 'attended' });
     fireEvent.click(buttons[0]!);
     expect(await screen.findByText(/Human CRM follow-up created; no contact was sent/)).toBeInTheDocument();
     expect(fetchMock).toHaveBeenNthCalledWith(2, '/api/admin/events/webinars/web_1/reservations/r1/attendance', expect.objectContaining({ method: 'POST' }));
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('appends, deduplicates, and exposes an honest terminal state', async () => {
+    const base = {
+      ok: true, schemaVersion: 'event_center.v1.2', sources: { orientation: 'available', webinar: 'available' },
+      dependencies: { attendance: 'available', crm: 'available' }, events: [], orientationSessions: [], webinarEvents: [],
+    };
+    const row = (reservationId: string, name: string) => ({ reservationId, eventId: 'web_1', prospectId: reservationId, sponsorTmagId: 'TM-02', name, createdAt: '2026-07-01T00:00:00.000Z', attendance: null, attendanceRecordedAt: null, crmFollowUpDueAt: null });
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...base, webinarReservations: [row('r1', 'First')], pageInfo: { pageSize: 1, hasMore: true, nextCursor: 'cursor-token-that-is-long-enough' } }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...base, webinarReservations: [row('r1', 'First updated'), row('r2', 'Second')], pageInfo: { pageSize: 1, hasMore: false, nextCursor: null } }) });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<MemoryRouter><EventsAdminPage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole('button', { name: 'Load more reservations' }));
+    expect(await screen.findByText('Second')).toBeInTheDocument();
+    expect(screen.getByText('First updated')).toBeInTheDocument();
+    expect(screen.queryByText('First')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'All reservations loaded' })).toBeDisabled();
   });
 });
