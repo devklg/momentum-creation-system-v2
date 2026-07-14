@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T05:12:34.510Z",
+  "generatedAt": "2026-07-14T05:47:26.984Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -1708,6 +1708,11 @@
       "resolved": true,
       "schemaMode": "permissive_mongoose_schema",
       "sources": [
+        {
+          "file": "server/src/domain/adminBottlenecks.ts",
+          "line": 217,
+          "source": "persistenceCall.mongodb.query"
+        },
         {
           "file": "server/src/domain/cockpit.ts",
           "line": 625,
@@ -4725,123 +4730,133 @@
       "routes": [
         {
           "method": "GET",
-          "path": "/master-report.pdf",
-          "line": 88
+          "path": "/bottlenecks",
+          "line": 89
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 114
+          "line": 110
+        },
+        {
+          "method": "GET",
+          "path": "/master-report.pdf",
+          "line": 125
+        },
+        {
+          "method": "GET",
+          "path": "user-agent",
+          "line": 151
         },
         {
           "method": "GET",
           "path": "/activation",
-          "line": 135
+          "line": 172
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 165
+          "line": 202
         },
         {
           "method": "GET",
           "path": "/training",
-          "line": 185
+          "line": 222
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 216
+          "line": 253
         },
         {
           "method": "GET",
           "path": "/invite-funnel",
-          "line": 236
+          "line": 273
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 271
+          "line": 308
         },
         {
           "method": "GET",
           "path": "/queue-velocity",
-          "line": 291
+          "line": 328
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 310
+          "line": 347
         },
         {
           "method": "GET",
           "path": "/enrollment-completion",
-          "line": 321
+          "line": 358
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 340
+          "line": 377
         },
         {
           "method": "GET",
           "path": "/follow-up-aging",
-          "line": 351
+          "line": 388
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 370
+          "line": 407
         },
         {
           "method": "GET",
           "path": "/leader-scorecards",
-          "line": 381
+          "line": 418
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 400
+          "line": 437
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 463
+          "line": 500
         },
         {
           "method": "GET",
           "path": "/activation/export",
-          "line": 471
+          "line": 508
         },
         {
           "method": "GET",
           "path": "/training/export",
-          "line": 498
+          "line": 535
         },
         {
           "method": "GET",
           "path": "/invite-funnel/export",
-          "line": 525
+          "line": 562
         },
         {
           "method": "GET",
           "path": "/queue-velocity/export",
-          "line": 555
+          "line": 592
         },
         {
           "method": "GET",
           "path": "/enrollment-completion/export",
-          "line": 582
+          "line": 619
         },
         {
           "method": "GET",
           "path": "/follow-up-aging/export",
-          "line": 609
+          "line": 646
         },
         {
           "method": "GET",
           "path": "/leader-scorecards/export",
-          "line": 636
+          "line": 673
         }
       ],
       "sharedTypes": [
@@ -6014,6 +6029,66 @@
     }
   ],
   "sharedExports": [
+    {
+      "name": "MCS_ADMIN_BOTTLENECKS_SCHEMA_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/admin-bottlenecks.ts"
+    },
+    {
+      "name": "McsAdminBottleneckCoverage",
+      "kind": "interface",
+      "file": "packages/shared/src/admin-bottlenecks.ts"
+    },
+    {
+      "name": "McsAdminBottleneckReportResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/admin-bottlenecks.ts"
+    },
+    {
+      "name": "McsAdminBottleneckSectionBase",
+      "kind": "interface",
+      "file": "packages/shared/src/admin-bottlenecks.ts"
+    },
+    {
+      "name": "McsAdminBottleneckSectionKey",
+      "kind": "type",
+      "file": "packages/shared/src/admin-bottlenecks.ts"
+    },
+    {
+      "name": "McsAdminBottleneckSourceStatus",
+      "kind": "type",
+      "file": "packages/shared/src/admin-bottlenecks.ts"
+    },
+    {
+      "name": "McsAdminBottleneckStatus",
+      "kind": "type",
+      "file": "packages/shared/src/admin-bottlenecks.ts"
+    },
+    {
+      "name": "McsAdminCrmBottleneckSection",
+      "kind": "interface",
+      "file": "packages/shared/src/admin-bottlenecks.ts"
+    },
+    {
+      "name": "McsAdminDeliveryBottleneckSection",
+      "kind": "interface",
+      "file": "packages/shared/src/admin-bottlenecks.ts"
+    },
+    {
+      "name": "McsAdminEventBottleneckSection",
+      "kind": "interface",
+      "file": "packages/shared/src/admin-bottlenecks.ts"
+    },
+    {
+      "name": "McsAdminInvitationBottleneckSection",
+      "kind": "interface",
+      "file": "packages/shared/src/admin-bottlenecks.ts"
+    },
+    {
+      "name": "McsAdminTrainingBottleneckSection",
+      "kind": "interface",
+      "file": "packages/shared/src/admin-bottlenecks.ts"
+    },
     {
       "name": "McsAdminKnowledgeReadiness",
       "kind": "type",
@@ -11501,7 +11576,7 @@
     "neo4jRelationships": 69,
     "chromaCollections": 53,
     "routeModules": 49,
-    "routeHandlers": 275,
-    "sharedExports": 1096
+    "routeHandlers": 277,
+    "sharedExports": 1108
   }
 }

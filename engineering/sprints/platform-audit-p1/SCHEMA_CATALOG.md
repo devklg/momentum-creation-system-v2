@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T05:12:34.510Z
+- Generated: 2026-07-14T05:47:26.984Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
-- Route handlers: 275
-- Shared exports: 1096
+- Route handlers: 277
+- Shared exports: 1108
 
 ## Mongo Collections
 
@@ -64,7 +64,7 @@
 | `tmag_prospect_htank_counters` | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_htank_placements` | permissive_mongoose_schema | yes | 22 |
 | `tmag_prospect_invitation_activity` | permissive_mongoose_schema | yes | 7 |
-| `tmag_prospect_invite_tokens` | permissive_mongoose_schema | yes | 8 |
+| `tmag_prospect_invite_tokens` | permissive_mongoose_schema | yes | 9 |
 | `tmag_prospect_magic_links` | permissive_mongoose_schema | yes | 5 |
 | `tmag_prospect_sessions` | permissive_mongoose_schema | yes | 3 |
 | `tmag_prospect_timeline_events` | permissive_mongoose_schema | yes | 4 |
@@ -325,7 +325,7 @@
 | `(unmounted)` | `server/src/routes/admin/orientation.ts` | GET user-agent<br>GET /sessions<br>GET /diagnostic<br>POST /sessions | `McsAdminCreateOrientationSessionResponse`, `McsAdminOrientationDiagnosticResponse`, `McsAdminOrientationSessionsResponse`, `McsAuditActor`, `McsAuditContext` |
 | `(unmounted)` | `server/src/routes/admin/prospects.ts` | GET user-agent<br>GET /<br>GET /filters<br>GET /:prospectId<br>GET /:prospectId/sandbox-preview<br>POST /:prospectId/notes<br>POST /:prospectId/move<br>POST /:prospectId/reassign-sponsor<br>POST /:prospectId/manual-flush<br>POST /:prospectId/force-enroll<br>POST /<br>PATCH /:prospectId<br>DELETE /:prospectId<br>POST /:prospectId/restore<br>POST /flush-expired<br>GET /alerts/aged | `McsAdminDashboardFilter`, `McsAdminProspectActivityEvent`, `McsAdminProspectActivityEventKind`, `McsAdminProspectAddNoteResponse`, `McsAdminProspectDetailResponse`, `McsAdminProspectDirectoryResponse`, `McsAuditActor`, `McsAuditContext`, `McsAuditLogEntry` |
 | `(unmounted)` | `server/src/routes/admin/queue.ts` | GET user-agent<br>GET /summary<br>GET /lookup<br>GET /visible-window<br>PUT /visible-window<br>GET /ticker<br>GET /ticker/stream<br>GET /rules<br>PUT /rules/:key | `McsAdminQueueTickerSnapshot`, `McsAdminQueueTickerSseEvent`, `McsAdminTickerEntry`, `McsAuditActor`, `McsPlacementEvent`, `McsQueueAdminTickerResponse`, `McsQueueLookupResponse`, `McsQueueOversightSummaryResponse`, `McsQueueRulesResponse`, `McsQueueVisibleWindow`, `McsQueueVisibleWindowResponse` |
-| `(unmounted)` | `server/src/routes/admin/reporting.ts` | GET /master-report.pdf<br>GET user-agent<br>GET /activation<br>GET user-agent<br>GET /training<br>GET user-agent<br>GET /invite-funnel<br>GET user-agent<br>GET /queue-velocity<br>GET user-agent<br>GET /enrollment-completion<br>GET user-agent<br>GET /follow-up-aging<br>GET user-agent<br>GET /leader-scorecards<br>GET user-agent<br>GET user-agent<br>GET /activation/export<br>GET /training/export<br>GET /invite-funnel/export<br>GET /queue-velocity/export<br>GET /enrollment-completion/export<br>GET /follow-up-aging/export<br>GET /leader-scorecards/export | `McsAdminDashboardFilter`, `McsAdminReportTimeRange`, `McsAuditActor` |
+| `(unmounted)` | `server/src/routes/admin/reporting.ts` | GET /bottlenecks<br>GET user-agent<br>GET /master-report.pdf<br>GET user-agent<br>GET /activation<br>GET user-agent<br>GET /training<br>GET user-agent<br>GET /invite-funnel<br>GET user-agent<br>GET /queue-velocity<br>GET user-agent<br>GET /enrollment-completion<br>GET user-agent<br>GET /follow-up-aging<br>GET user-agent<br>GET /leader-scorecards<br>GET user-agent<br>GET user-agent<br>GET /activation/export<br>GET /training/export<br>GET /invite-funnel/export<br>GET /queue-velocity/export<br>GET /enrollment-completion/export<br>GET /follow-up-aging/export<br>GET /leader-scorecards/export | `McsAdminDashboardFilter`, `McsAdminReportTimeRange`, `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/resourceCenter.ts` | GET /analytics<br>GET user-agent | none |
 | `(unmounted)` | `server/src/routes/admin/tenant.ts` | GET user-agent<br>GET /overview<br>PATCH /settings<br>POST /templates/validate<br>PUT /templates/:templateKey | `McsAuditActor`, `McsSaveTenantTemplateResponse`, `McsTenantOverviewResponse`, `McsTenantSurface`, `McsTenantTemplateKey`, `McsUpdateTenantSettingsResponse`, `McsValidateTenantTemplateResponse` |
 | `(unmounted)` | `server/src/routes/admin/vm.ts` | GET /overview<br>GET user-agent<br>POST /campaigns/:vmCampaignId/live-approval<br>GET user-agent<br>POST /ownership-correction<br>GET user-agent | `McsAdminVmLiveApprovalPayload`, `McsAdminVmLiveApprovalResponse`, `McsAdminVmOwnershipCorrectionPayload`, `McsAdminVmOwnershipCorrectionResponse`, `McsAuditActor` |
@@ -363,6 +363,18 @@
 
 | Export | Kind | File |
 | --- | --- | --- |
+| `MCS_ADMIN_BOTTLENECKS_SCHEMA_VERSION` | const | `packages/shared/src/admin-bottlenecks.ts` |
+| `McsAdminBottleneckCoverage` | interface | `packages/shared/src/admin-bottlenecks.ts` |
+| `McsAdminBottleneckReportResponse` | interface | `packages/shared/src/admin-bottlenecks.ts` |
+| `McsAdminBottleneckSectionBase` | interface | `packages/shared/src/admin-bottlenecks.ts` |
+| `McsAdminBottleneckSectionKey` | type | `packages/shared/src/admin-bottlenecks.ts` |
+| `McsAdminBottleneckSourceStatus` | type | `packages/shared/src/admin-bottlenecks.ts` |
+| `McsAdminBottleneckStatus` | type | `packages/shared/src/admin-bottlenecks.ts` |
+| `McsAdminCrmBottleneckSection` | interface | `packages/shared/src/admin-bottlenecks.ts` |
+| `McsAdminDeliveryBottleneckSection` | interface | `packages/shared/src/admin-bottlenecks.ts` |
+| `McsAdminEventBottleneckSection` | interface | `packages/shared/src/admin-bottlenecks.ts` |
+| `McsAdminInvitationBottleneckSection` | interface | `packages/shared/src/admin-bottlenecks.ts` |
+| `McsAdminTrainingBottleneckSection` | interface | `packages/shared/src/admin-bottlenecks.ts` |
 | `McsAdminKnowledgeReadiness` | type | `packages/shared/src/admin-knowledge-status.ts` |
 | `McsAdminKnowledgeStatusResponse` | interface | `packages/shared/src/admin-knowledge-status.ts` |
 | `MCS_ADMIN_LIVE_OPS_PATHS` | const | `packages/shared/src/admin-live-ops.ts` |
