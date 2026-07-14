@@ -21,12 +21,13 @@
  *   - "Follow-up needed" is surfaced as a date, never a system flag.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
   McsAdminDashboardFilter,
   McsAdminDashboardFiltersResponse,
   McsAdminProspectDirectoryResponse,
   McsAdminProspectDirectoryRow,
+  McsAdminPaginationContract,
 } from '@momentum/shared';
 import { FilterBar } from '@/components/dashboard/FilterBar';
 import { DirectoryTable } from '@/components/prospect-oversight/DirectoryTable';
@@ -65,6 +66,8 @@ export function ProspectsPage() {
     readProspectIdParam(),
   );
   const [createOpen, setCreateOpen] = useState(false);
+  const [pageInfo, setPageInfo] = useState<McsAdminPaginationContract['pageInfo'] | null>(null);
+  const requestSequence = useRef(0);
 
   // Filter options — load once.
   useEffect(() => {
@@ -87,28 +90,42 @@ export function ProspectsPage() {
     })();
   }, []);
 
-  const loadRows = useCallback(async (f: McsAdminDashboardFilter) => {
+  const loadRows = useCallback(async (
+    f: McsAdminDashboardFilter,
+    mode: 'replace' | 'append' = 'replace',
+    cursor?: string,
+  ) => {
+    const sequence = ++requestSequence.current;
     setLoading(true);
     setErr(null);
     try {
       const params = new URLSearchParams();
       if (f.tmagId) params.set('tmagId', f.tmagId);
       if (f.leaderGroup) params.set('leaderGroup', f.leaderGroup);
+      params.set('pageSize', '50');
+      if (cursor) params.set('cursor', cursor);
       const res = await fetch(`/api/admin/prospects?${params.toString()}`, {
         credentials: 'include',
       });
-      const data = (await res.json()) as McsAdminProspectDirectoryResponse & {
+      const data = (await res.json()) as McsAdminProspectDirectoryResponse & McsAdminPaginationContract & {
         error?: string;
       };
+      if (sequence !== requestSequence.current) return;
       if (!data.ok) {
         setErr(data.error ?? 'Could not load prospects.');
         return;
       }
-      setRows(data.rows);
+      setRows((previous) => {
+        if (mode === 'replace' || !previous) return data.rows;
+        const byId = new Map(previous.map((row) => [row.prospectId, row]));
+        for (const row of data.rows) byId.set(row.prospectId, row);
+        return [...byId.values()];
+      });
+      setPageInfo(data.pageInfo);
     } catch (e) {
       setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
     } finally {
-      setLoading(false);
+      if (sequence === requestSequence.current) setLoading(false);
     }
   }, []);
 
@@ -173,6 +190,22 @@ export function ProspectsPage() {
         loading={loading}
         onSelectProspect={handleSelectProspect}
       />
+
+      {rows && (
+        <div className="mt-4 flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || !pageInfo?.hasMore || !pageInfo.nextCursor}
+            onClick={() => pageInfo?.nextCursor && void loadRows(filter, 'append', pageInfo.nextCursor)}
+          >
+            {loading ? 'Loading…' : pageInfo?.hasMore ? 'Load more' : 'All matching prospects loaded'}
+          </Button>
+          <span className="font-mono text-[10px] uppercase tracking-label text-cream-faint">
+            Server ordered · newest first contact first · {rows.length} loaded
+          </span>
+        </div>
+      )}
 
       {selectedProspectId && (
         <DetailPanel

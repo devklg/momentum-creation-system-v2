@@ -13,7 +13,6 @@
  *     mirrored yet), curated is Kevin-toggled from the row.
  */
 
-import { useMemo, useState } from 'react';
 import type { McsAdminBaDirectoryRow } from '@momentum/shared';
 
 type SortKey =
@@ -48,46 +47,13 @@ interface Props {
 
 export function DirectoryTable({
   rows,
-  filterText,
   onOpenProfile,
   onToggleCurated,
   togglePendingTmagId,
 }: Props) {
-  const [sort, setSort] = useState<SortState>({ key: 'joinedAt', dir: 'desc' });
-
-  const filtered = useMemo(() => {
-    const needle = filterText.trim().toLowerCase();
-    if (!needle) return rows;
-    return rows.filter((r) => {
-      const haystack = [
-        r.fullName,
-        r.tmagId,
-        r.threeBaId,
-        r.email ?? '',
-        r.sponsorName ?? '',
-        r.sponsorTmagId ?? '',
-        r.accessCodeOwned ?? '',
-      ]
-        .join(' ')
-        .toLowerCase();
-      return haystack.includes(needle);
-    });
-  }, [rows, filterText]);
-
-  const sorted = useMemo(() => {
-    const copy = [...filtered];
-    copy.sort((a, b) => compareRows(a, b, sort.key));
-    if (sort.dir === 'desc') copy.reverse();
-    return copy;
-  }, [filtered, sort]);
-
-  function onHeaderClick(key: SortKey) {
-    setSort((prev) =>
-      prev.key === key
-        ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
-        : { key, dir: 'asc' },
-    );
-  }
+  const sort: SortState = { key: 'joinedAt', dir: 'desc' };
+  const sorted = rows;
+  const onHeaderClick = () => undefined;
 
   if (rows.length === 0) {
     return (
@@ -355,27 +321,10 @@ export function DirectoryTable({
   );
 }
 
-function compareRows(
-  a: McsAdminBaDirectoryRow,
-  b: McsAdminBaDirectoryRow,
-  key: SortKey,
-): number {
-  const av = a[key];
-  const bv = b[key];
-  if (av === null || av === undefined) return bv === null || bv === undefined ? 0 : 1;
-  if (bv === null || bv === undefined) return -1;
-  if (typeof av === 'number' && typeof bv === 'number') return av - bv;
-  if (typeof av === 'boolean' && typeof bv === 'boolean') {
-    return av === bv ? 0 : av ? -1 : 1;
-  }
-  return String(av).localeCompare(String(bv));
-}
-
 function SortHeader({
   label,
   col,
   sort,
-  onClick,
 }: {
   label: string;
   col: SortKey;
@@ -385,17 +334,15 @@ function SortHeader({
   const active = sort.key === col;
   return (
     <th className="px-3 py-2.5 text-[10px] font-mono tracking-label uppercase text-cream-faint text-left whitespace-nowrap">
-      <button
-        type="button"
-        onClick={() => onClick(col)}
+      <span
         className={[
-          'inline-flex items-center gap-1 transition-colors',
-          active ? 'text-gold' : 'hover:text-cream',
+          'inline-flex items-center gap-1',
+          active ? 'text-gold' : 'text-cream-faint',
         ].join(' ')}
       >
         {label}
         {active && <span>{sort.dir === 'asc' ? '↑' : '↓'}</span>}
-      </button>
+      </span>
     </th>
   );
 }

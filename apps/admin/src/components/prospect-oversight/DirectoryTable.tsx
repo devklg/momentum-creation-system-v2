@@ -12,7 +12,6 @@
  * never a system flag — Kevin reads it.
  */
 
-import { useMemo, useState } from 'react';
 import type {
   McsAdminProspectDirectoryRow,
   McsAdminProspectPresentationStatus,
@@ -36,7 +35,6 @@ interface SortState {
   column: SortColumn;
   dir: SortDir;
 }
-
 const DEFAULT_SORT: SortState = { column: 'firstContact', dir: 'desc' };
 
 interface Props {
@@ -46,22 +44,9 @@ interface Props {
 }
 
 export function DirectoryTable({ rows, loading, onSelectProspect }: Props) {
-  const [sort, setSort] = useState<SortState>(DEFAULT_SORT);
-
-  const sortedRows = useMemo(() => {
-    if (!rows) return null;
-    const copy = [...rows];
-    copy.sort((a, b) => compareRows(a, b, sort));
-    return copy;
-  }, [rows, sort]);
-
-  function handleSort(col: SortColumn) {
-    setSort((prev) =>
-      prev.column === col
-        ? { column: col, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
-        : { column: col, dir: 'asc' },
-    );
-  }
+  const sort = DEFAULT_SORT;
+  const sortedRows = rows;
+  const handleSort = () => undefined;
 
   if (loading && !sortedRows) {
     return (
@@ -229,7 +214,7 @@ function SortableTh({
   col,
   label,
   sort,
-  onSort,
+  onSort: _onSort,
   align = 'left',
 }: {
   col: SortColumn;
@@ -242,11 +227,10 @@ function SortableTh({
   const arrow = active ? (sort.dir === 'asc' ? '↑' : '↓') : '';
   return (
     <th
-      onClick={() => onSort(col)}
       className={[
-        'px-3 py-2.5 text-[10px] font-mono tracking-label uppercase whitespace-nowrap cursor-pointer select-none',
+        'px-3 py-2.5 text-[10px] font-mono tracking-label uppercase whitespace-nowrap',
         align === 'right' ? 'text-right' : 'text-left',
-        active ? 'text-gold' : 'text-cream-faint hover:text-cream',
+        active ? 'text-gold' : 'text-cream-faint',
       ].join(' ')}
     >
       {label} <span className="ml-1">{arrow}</span>
@@ -352,50 +336,3 @@ function formatDate(iso: string): string {
   }
 }
 
-function compareRows(
-  a: McsAdminProspectDirectoryRow,
-  b: McsAdminProspectDirectoryRow,
-  sort: SortState,
-): number {
-  const flip = sort.dir === 'asc' ? 1 : -1;
-  switch (sort.column) {
-    case 'name':
-      return flip * `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`);
-    case 'sponsor':
-      return flip * a.sponsorName.localeCompare(b.sponsorName);
-    case 'status':
-      return flip * a.presentationStatus.localeCompare(b.presentationStatus);
-    case 'position':
-      return flip * compareNullableNumber(a.positionNumber, b.positionNumber);
-    case 'url':
-      return flip * a.prospectUrl.localeCompare(b.prospectUrl);
-    case 'firstContact':
-      return flip * compareIso(a.firstContactAt, b.firstContactAt);
-    case 'recent':
-      return flip * compareIso(a.mostRecentActivity.at, b.mostRecentActivity.at);
-    case 'days':
-      return flip * compareNullableNumber(a.daysInHoldingTank, b.daysInHoldingTank);
-    case 'followUp':
-      return flip * compareNullableIso(a.followUpNeededBy, b.followUpNeededBy);
-    case 'handoff':
-      return flip * a.prospectStatus.localeCompare(b.prospectStatus);
-  }
-}
-
-function compareIso(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
-}
-
-function compareNullableIso(a: string | null, b: string | null): number {
-  if (a === null && b === null) return 0;
-  if (a === null) return 1;
-  if (b === null) return -1;
-  return compareIso(a, b);
-}
-
-function compareNullableNumber(a: number | null, b: number | null): number {
-  if (a === null && b === null) return 0;
-  if (a === null) return 1;
-  if (b === null) return -1;
-  return a - b;
-}

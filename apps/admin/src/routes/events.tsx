@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 type AttendanceState = 'attended' | 'missed' | 'rescheduled';
@@ -52,6 +52,7 @@ interface AdminEventCenterResponse {
     reservationCount: number;
   }>;
   webinarReservations: WebinarReservation[];
+  pageInfo?: { pageSize: number; hasMore: boolean; nextCursor: string | null };
 }
 
 export function EventsAdminPage() {
@@ -59,16 +60,31 @@ export function EventsAdminPage() {
   const [error, setError] = useState(false);
   const [working, setWorking] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [loadingPage, setLoadingPage] = useState(false);
+  const requestSequence = useRef(0);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (mode: 'replace' | 'append' = 'replace', cursor?: string) => {
+    const sequence = ++requestSequence.current;
+    setLoadingPage(true);
     try {
-      const response = await fetch('/api/admin/events', { credentials: 'include' });
+      const params = new URLSearchParams({ pageSize: '50' });
+      if (cursor) params.set('cursor', cursor);
+      const response = await fetch(`/api/admin/events?${params.toString()}`, { credentials: 'include' });
       const payload = (await response.json()) as AdminEventCenterResponse | { ok: false };
       if (!response.ok || !payload.ok) throw new Error('unavailable');
-      setData(payload as AdminEventCenterResponse);
+      if (sequence !== requestSequence.current) return;
+      const next = payload as AdminEventCenterResponse;
+      setData((previous) => {
+        if (mode === 'replace' || !previous) return next;
+        const reservations = new Map(previous.webinarReservations.map((row) => [row.reservationId, row]));
+        for (const row of next.webinarReservations) reservations.set(row.reservationId, row);
+        return { ...next, webinarReservations: [...reservations.values()] };
+      });
       setError(false);
     } catch {
-      setError(true);
+      if (sequence === requestSequence.current) setError(true);
+    } finally {
+      if (sequence === requestSequence.current) setLoadingPage(false);
     }
   }, []);
 
@@ -190,6 +206,19 @@ export function EventsAdminPage() {
                   {data.webinarReservations.length === 0 && <tr><td colSpan={5} className="px-4 py-7 text-center text-cream-mute">No webinar reservations are available for attendance recording.</td></tr>}
                 </tbody>
               </table>
+            </div>
+            <div className="mt-3 flex items-center gap-3">
+              <button
+                type="button"
+                disabled={loadingPage || !data.pageInfo?.hasMore || !data.pageInfo.nextCursor}
+                onClick={() => data.pageInfo?.nextCursor && void load('append', data.pageInfo.nextCursor)}
+                className="rounded border border-gold/45 px-4 py-2 font-mono text-[10px] uppercase tracking-label text-gold disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {loadingPage ? 'Loading…' : data.pageInfo?.hasMore ? 'Load more reservations' : 'All reservations loaded'}
+              </button>
+              <span className="font-mono text-[10px] uppercase tracking-label text-cream-faint">
+                Newest reservations first · {data.webinarReservations.length} loaded
+              </span>
             </div>
           </section>
 
