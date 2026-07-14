@@ -26,6 +26,7 @@ import { buildQueueVelocityReport } from '../../domain/reports/queueVelocity.js'
 import { buildEnrollmentReport } from '../../domain/reports/enrollmentCompletion.js';
 import { buildFollowUpReport } from '../../domain/reports/followUpAging.js';
 import { buildLeaderScorecardReport } from '../../domain/reports/leaderScorecards.js';
+import { buildAdminBottleneckReport } from '../../domain/adminBottlenecks.js';
 import { resolveTimeRange } from '../../domain/reports/timeRange.js';
 import {
   exportBaActivation,
@@ -82,6 +83,42 @@ function adminActorFromRequest(req: Request): McsAuditActor & { kind: 'admin' } 
     (session as unknown as { fullName?: string }).fullName ?? session.tmagId;
   return { kind: 'admin', tmagId: session.tmagId, displayName };
 }
+
+/* ─── GET /bottlenecks — P2-128 aggregate operational composition ── */
+
+adminReportingRoutes.get('/bottlenecks', requireAdmin, async (req, res) => {
+  try {
+    const report = await buildAdminBottleneckReport();
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.reporting.bottlenecks.generated',
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
+      severity: report.unavailableSources.length > 0 ? 'warn' : 'info',
+      after: {
+        schemaVersion: report.schemaVersion,
+        generatedAt: report.generatedAt,
+        scope: report.scope,
+        sectionStatus: Object.fromEntries(
+          Object.entries(report.sections).map(([key, section]) => [key, section.status]),
+        ),
+        partialSources: report.partialSources,
+        unavailableSources: report.unavailableSources,
+      },
+      reason: null,
+      context: {
+        ip: req.ip ?? null,
+        userAgent: req.get('user-agent') ?? null,
+        route: '/api/admin/reporting/bottlenecks',
+        method: 'GET',
+        requestId: null,
+      },
+    });
+    res.status(200).json(report);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Bottleneck report failed: ${msg}` });
+  }
+});
 
 /* ─── GET /master-report.pdf — I.3 ───────────────────────── */
 

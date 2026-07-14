@@ -8,10 +8,11 @@
  */
 
 import { ExportPanel } from '@/components/admin/reports/ExportPanel';
+import { BottleneckReport } from '@/components/admin/reports/BottleneckReport';
 
 export function ReportsPage() {
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-6xl">
       <p className="font-mono tracking-eyebrow text-[10px] text-gold uppercase mb-2">
         Admin · Section I · Reporting
       </p>
@@ -22,6 +23,7 @@ export function ReportsPage() {
         into the I.3 Master Report PDF separately.
       </p>
 
+      <BottleneckReport />
       <ExportPanel />
     </div>
   );
