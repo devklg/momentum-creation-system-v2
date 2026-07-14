@@ -1,6 +1,9 @@
 # P2-128 Admin Bottleneck Report
 
-Status: implementation and automated verification complete; trusted visual QA blocked.
+Status: approved and complete. Automated verification passed, and Kevin approved
+the contained desktop/mobile component previews on 2026-07-13. The trusted
+in-app route browser remained unavailable and is not represented as having
+passed.
 
 ## Scope and authority
 
@@ -49,15 +52,15 @@ P2-128 does not imply that the P2-109 email/SMS decisions have been approved.
 - Full admin suite passed: 35 tests.
 - Repo typecheck and production build passed.
 
-## Visual gate
+## Visual approval
 
-Trusted visual QA is blocked. The required in-app browser refused the session
-because its automation client is not trusted. The safety boundary was not
-bypassed, no fallback browser was used, and no screenshot or visual pass is
-claimed.
+The required in-app browser refused the session because its automation client
+was not trusted, so no trusted live-route pass is claimed. A contained component
+preview was instead rendered at desktop and mobile widths and shown to Kevin.
+Kevin explicitly approved P2-128 on 2026-07-13, accepting that bounded evidence
+as the release gate for this task.
 
-After the browser client is trusted, verify the actual `/reports` component at
-1440×1000, 768×1024, 390×844, 360×800, and 200% zoom. Cover populated, partial,
-unavailable, loading, and error states; confirm card wrapping, disclosure text,
-status pills, keyboard-visible coverage details, and absence of horizontal
-overflow.
+The unperformed live-route matrix remains useful follow-up evidence after the
+browser client is trusted: 1440×1000, 768×1024, 390×844, 360×800, and 200% zoom,
+covering populated, partial, unavailable, loading, and error states. It is not a
+condition of the recorded P2-128 approval.
