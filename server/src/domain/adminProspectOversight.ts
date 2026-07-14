@@ -38,6 +38,14 @@
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeOperational } from '../services/tieredWrite.js';
 import { appendAuditEntry } from './auditLog.js';
+import {
+  AdminCursorError,
+  combineMongoFilters,
+  decodeAdminCursor,
+  descendingKeysetFilter,
+  encodeAdminCursor,
+  type AdminPageInfo,
+} from './adminPagination.js';
 import { listLeaderTmagIds, LEADER_DETECTION_NOTE } from './adminMetrics.js';
 import { findProspectById } from './prospects.js';
 import { TOKEN_TTL_MS } from './tokens.js';
@@ -300,6 +308,7 @@ function truncatedToken(token: string): string {
 export async function listDirectoryRows(
   filter: McsAdminDashboardFilter,
   nowMs: number = Date.now(),
+  selectedProspects?: ProspectDoc[],
 ): Promise<McsAdminProspectDirectoryRow[]> {
   const scopedTmagIds = await resolveScopedTmagIds(filter);
   const baNames = await loadBaNameMap();
@@ -309,17 +318,15 @@ export async function listDirectoryRows(
     if (scopedTmagIds.length === 0) return [];
     prospectFilter.sponsorTmagId = { $in: scopedTmagIds };
   }
-  const prospectsResult = await persistenceCall<{ documents: ProspectDoc[] }>(
-    'mongodb',
-    'query',
-    {
-      database: MONGO_DB,
-      collection: COLL_PROSPECTS,
-      filter: prospectFilter,
-      sort: { createdAt: -1 },
-      limit: 50_000,
-    },
-  );
+  const prospectsResult = selectedProspects
+    ? { documents: selectedProspects }
+    : await persistenceCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
+        database: MONGO_DB,
+        collection: COLL_PROSPECTS,
+        filter: prospectFilter,
+        sort: { createdAt: -1, prospectId: -1 },
+        limit: 50_000,
+      });
   const prospects = prospectsResult.documents ?? [];
   if (prospects.length === 0) return [];
 
@@ -372,6 +379,82 @@ export async function listDirectoryRows(
       deleted: p.deleted === true,
     };
   });
+}
+
+const PROSPECT_DIRECTORY_SCOPE = 'admin_prospect_directory.v1';
+
+export async function listProspectDirectoryPage(input: {
+  filter: McsAdminDashboardFilter;
+  pageSize: number;
+  cursor?: string;
+  nowMs?: number;
+}): Promise<{ rows: McsAdminProspectDirectoryRow[]; pageInfo: AdminPageInfo }> {
+  const pageSize = Math.max(1, Math.min(100, input.pageSize));
+  const scopedTmagIds = await resolveScopedTmagIds(input.filter);
+  const baseFilter: Record<string, unknown> = {};
+  if (scopedTmagIds) {
+    if (scopedTmagIds.length === 0) {
+      return { rows: [], pageInfo: { pageSize, hasMore: false, nextCursor: null } };
+    }
+    baseFilter.sponsorTmagId = { $in: scopedTmagIds };
+  }
+  const contract = {
+    filter: input.filter,
+    sort: 'createdAt_desc_prospectId_desc',
+  };
+  let keyset: Record<string, unknown> = {};
+  if (input.cursor) {
+    const keys = decodeAdminCursor({
+      token: input.cursor,
+      scope: PROSPECT_DIRECTORY_SCOPE,
+      contract,
+      requiredKeys: ['createdAt', 'prospectId'],
+    });
+    const cursorMatch = await persistenceCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
+      database: MONGO_DB,
+      collection: COLL_PROSPECTS,
+      filter: combineMongoFilters(baseFilter, {
+        createdAt: keys.createdAt,
+        prospectId: keys.prospectId,
+      }),
+      limit: 1,
+    });
+    if (!cursorMatch.documents?.[0]) throw new AdminCursorError();
+    keyset = descendingKeysetFilter(
+      'createdAt',
+      'prospectId',
+      keys.createdAt!,
+      keys.prospectId!,
+    );
+  }
+
+  const result = await persistenceCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: COLL_PROSPECTS,
+    filter: combineMongoFilters(baseFilter, keyset),
+    sort: { createdAt: -1, prospectId: -1 },
+    limit: pageSize + 1,
+  });
+  const docs = result.documents ?? [];
+  const hasMore = docs.length > pageSize;
+  const selected = hasMore ? docs.slice(0, pageSize) : docs;
+  const rows = await listDirectoryRows(input.filter, input.nowMs ?? Date.now(), selected);
+  const last = selected[selected.length - 1];
+  return {
+    rows,
+    pageInfo: {
+      pageSize,
+      hasMore,
+      nextCursor:
+        hasMore && last
+          ? encodeAdminCursor({
+              scope: PROSPECT_DIRECTORY_SCOPE,
+              contract,
+              keys: { createdAt: last.createdAt, prospectId: last.prospectId },
+            })
+          : null,
+    },
+  };
 }
 
 /**

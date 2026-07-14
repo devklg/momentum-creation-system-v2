@@ -26,9 +26,11 @@ import {
   applySponsorOverride,
   getTmagProfileBundle,
   listBADirectory,
+  listBADirectoryPage,
   setBaEntitlement,
   setCuratedLeaderTag,
 } from '../../domain/adminBaOversight.js';
+import { AdminCursorError } from '../../domain/adminPagination.js';
 import {
   adminCreateBa,
   adminEditBa,
@@ -44,6 +46,7 @@ import type {
   McsAdminBaEntitlementsResponse,
   McsAdminBaNoteResponse,
   McsAdminBaProfileResponse,
+  McsAdminPaginationContract,
   McsAdminLeaderTagResponse,
   McsAdminSponsorOverrideResponse,
 } from '@momentum/shared';
@@ -66,25 +69,45 @@ adminBasRoutes.get('/launch-readiness', requireAdmin, async (req, res) => {
 });
 
 adminBasRoutes.get('/', requireAdmin, async (req: Request, res: Response) => {
-  const limitRaw = Number.parseInt(String(req.query.limit ?? '500'), 10);
-  const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(2000, limitRaw)) : 500;
+  const parsed = z.object({
+    pageSize: z.coerce.number().int().min(1).max(100).default(50),
+    cursor: z.string().min(20).max(2000).optional(),
+    search: z.string().trim().max(120).optional(),
+  }).safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ ok: false, error: 'Invalid pagination parameters.', issues: parsed.error.issues });
+    return;
+  }
 
   try {
-    const [{ rows, leaderDetectionNote }, legacy] = await Promise.all([
-      listBADirectory(limit),
+    const [page, legacy] = await Promise.all([
+      listBADirectoryPage(parsed.data),
       // Preserve the pre-#135 shape so any caller still keying off `bas:`
-      // keeps working. The new client reads `rows:`.
-      listAllBAsForAdmin(limit),
+      // keeps working for this documented transition release. It remains a
+      // bounded compatibility field and is not pagination authority.
+      listAllBAsForAdmin(500),
     ]);
-    const body: McsAdminBaDirectoryResponse & { bas: typeof legacy; count: number } = {
+    const body: McsAdminBaDirectoryResponse & McsAdminPaginationContract & {
+      bas: typeof legacy;
+      count: number;
+      appliedSearch: string;
+    } = {
       ok: true,
-      count: rows.length,
-      rows,
-      leaderDetectionNote,
+      count: page.rows.length,
+      rows: page.rows,
+      leaderDetectionNote: page.leaderDetectionNote,
       bas: legacy,
+      pageInfo: page.pageInfo,
+      appliedSearch: page.appliedSearch,
+      appliedSort: 'createdAt_desc_tmagId_desc',
+      computedAt: new Date().toISOString(),
     };
     res.json(body);
   } catch (err) {
+    if (err instanceof AdminCursorError) {
+      res.status(400).json({ ok: false, error: err.code });
+      return;
+    }
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Directory failed: ${msg}` });
   }

@@ -43,6 +43,14 @@
 import { randomBytes } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { appendAuditEntry } from './auditLog.js';
+import {
+  AdminCursorError,
+  combineMongoFilters,
+  decodeAdminCursor,
+  descendingKeysetFilter,
+  encodeAdminCursor,
+  type AdminPageInfo,
+} from './adminPagination.js';
 import { findBAByTmagId, type BARecord } from './ba.js';
 import { normalizeEntitlements, setMemberEntitlement, type EntitlementAction } from './entitlements.js';
 import { writeSponsorOverrideGraphCritical } from './sponsorImmutabilityPersistence.js';
@@ -194,38 +202,20 @@ function maxIso(...values: Array<string | null | undefined>): McsIsoTimestamp | 
   return best;
 }
 
-async function fetchAllPaged<T>(
+async function fetchJoinRows<T>(
   database: string,
   collection: string,
   filter: Record<string, unknown>,
-  pageSize = 1000,
 ): Promise<T[]> {
-  // The PERSISTENCE has no cursor; we page by ascending _id. For now `filter`
-  // is the same across pages; the BA roster is small enough that a single
-  // bounded query (limit 2000) is fine, but the paged primitive is here so
-  // the join collections can grow without changing the call sites.
-  const all: T[] = [];
-  let offset = 0;
-  let lastBatchSize = pageSize;
-  while (lastBatchSize === pageSize && offset < 50_000) {
-    const res = await persistenceCall<{ documents: T[]; count?: number }>(
-      'mongodb',
-      'query',
-      {
-        database,
-        collection,
-        filter,
-        sort: { _id: 1 },
-        limit: pageSize,
-        skip: offset,
-      },
-    );
-    const docs = res.documents ?? [];
-    all.push(...docs);
-    lastBatchSize = docs.length;
-    offset += docs.length;
-  }
-  return all;
+  // Page-scoped aggregate reads replace the former `skip` loop. The direct
+  // adapter intentionally has no skip support, so that loop repeated page one
+  // at exact batch boundaries and inflated derived counts.
+  const result = await persistenceCall<{ results: T[] }>('mongodb', 'aggregate', {
+    database,
+    collection,
+    pipeline: [{ $match: filter }],
+  });
+  return result.results ?? [];
 }
 
 /**
@@ -236,19 +226,18 @@ async function fetchAllPaged<T>(
  */
 export async function listBADirectory(
   limit = 500,
+  selectedBas?: BARecordWithExtras[],
 ): Promise<{ rows: McsAdminBaDirectoryRow[]; leaderDetectionNote: string }> {
   // 1. Pull the BA roster (newest first, capped).
-  const baRaw = await persistenceCall<{ documents: BARecordWithExtras[] }>(
-    'mongodb',
-    'query',
-    {
-      database: MONGO_DB,
-      collection: BA_COLLECTION,
-      filter: {},
-      sort: { createdAt: -1 },
-      limit,
-    },
-  );
+  const baRaw = selectedBas
+    ? { documents: selectedBas }
+    : await persistenceCall<{ documents: BARecordWithExtras[] }>('mongodb', 'query', {
+        database: MONGO_DB,
+        collection: BA_COLLECTION,
+        filter: {},
+        sort: { createdAt: -1, tmagId: -1 },
+        limit,
+      });
   const bas = baRaw.documents ?? [];
   if (bas.length === 0) {
     return { rows: [], leaderDetectionNote: LEADER_DETECTION_NOTE };
@@ -284,7 +273,7 @@ export async function listBADirectory(
   }
 
   // 3. Owned access codes (one per BA — sponsorTmagId is the owner).
-  const codes = await fetchAllPaged<AccessCodeLite>(
+  const codes = await fetchJoinRows<AccessCodeLite>(
     MONGO_DB,
     ACCESS_CODES_COLLECTION,
     { sponsorTmagId: { $in: baIds }, active: true },
@@ -295,7 +284,7 @@ export async function listBADirectory(
   }
 
   // 4. Welcome commitments — most recent acceptedAt per BA.
-  const commitments = await fetchAllPaged<CommitmentLite>(
+  const commitments = await fetchJoinRows<CommitmentLite>(
     MONGO_DB,
     COMMITMENTS_COLLECTION,
     { tmagId: { $in: baIds } },
@@ -310,7 +299,7 @@ export async function listBADirectory(
   // + 2-in-72 client-side. (BA count × tokens-per-BA is small at v1 scale;
   // when it isn't, the PERSISTENCE grows aggregation and this becomes a $match
   // + $group.)
-  const tokens = await fetchAllPaged<TokenLite>(
+  const tokens = await fetchJoinRows<TokenLite>(
     MONGO_DB,
     TOKENS_COLLECTION,
     { sponsorTmagId: { $in: baIds } },
@@ -326,7 +315,7 @@ export async function listBADirectory(
   }
 
   // 6. CRM follow-ups — oldest open dueAt per BA.
-  const followups = await fetchAllPaged<FollowUpLite>(
+  const followups = await fetchJoinRows<FollowUpLite>(
     MONGO_DB,
     FOLLOWUPS_COLLECTION,
     { sponsorTmagId: { $in: baIds }, clearedAt: null },
@@ -338,7 +327,7 @@ export async function listBADirectory(
   }
 
   // 7. Fast Start — count modules in `completed` per BA.
-  const fastStart = await fetchAllPaged<FastStartLite>(
+  const fastStart = await fetchJoinRows<FastStartLite>(
     MONGO_DB,
     FAST_START_COLLECTION,
     { tmagId: { $in: baIds } },
@@ -351,7 +340,7 @@ export async function listBADirectory(
   }
 
   // 8. Curated leader tags.
-  const tags = await fetchAllPaged<CuratedLeaderTagRecord>(
+  const tags = await fetchJoinRows<CuratedLeaderTagRecord>(
     MONGO_DB,
     CURATED_LEADER_TAGS_COLLECTION,
     { tmagId: { $in: baIds } },
@@ -401,6 +390,100 @@ export async function listBADirectory(
   });
 
   return { rows, leaderDetectionNote: LEADER_DETECTION_NOTE };
+}
+
+const BA_DIRECTORY_SCOPE = 'admin_ba_directory.v1';
+
+function escapedPrefix(value: string): string {
+  return `^${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`;
+}
+
+function baSearchFilter(search: string): Record<string, unknown> {
+  if (!search) return {};
+  const prefix = { $regex: escapedPrefix(search), $options: 'i' };
+  return {
+    $or: [
+      { tmagId: prefix },
+      { threeBaId: prefix },
+      { firstName: prefix },
+      { lastName: prefix },
+      { email: prefix },
+    ],
+  };
+}
+
+export async function listBADirectoryPage(input: {
+  pageSize: number;
+  cursor?: string;
+  search?: string;
+}): Promise<{
+  rows: McsAdminBaDirectoryRow[];
+  leaderDetectionNote: string;
+  pageInfo: AdminPageInfo;
+  appliedSearch: string;
+}> {
+  const pageSize = Math.max(1, Math.min(100, input.pageSize));
+  const search = input.search?.trim().slice(0, 120) ?? '';
+  const contract = { search, sort: 'createdAt_desc_tmagId_desc' };
+  const baseFilter = baSearchFilter(search);
+  let keyset: Record<string, unknown> = {};
+
+  if (input.cursor) {
+    const keys = decodeAdminCursor({
+      token: input.cursor,
+      scope: BA_DIRECTORY_SCOPE,
+      contract,
+      requiredKeys: ['createdAt', 'tmagId'],
+    });
+    const cursorMatch = await persistenceCall<{ documents: BARecordWithExtras[] }>(
+      'mongodb',
+      'query',
+      {
+        database: MONGO_DB,
+        collection: BA_COLLECTION,
+        filter: combineMongoFilters(baseFilter, {
+          createdAt: keys.createdAt,
+          tmagId: keys.tmagId,
+        }),
+        limit: 1,
+      },
+    );
+    if (!cursorMatch.documents?.[0]) throw new AdminCursorError();
+    keyset = descendingKeysetFilter('createdAt', 'tmagId', keys.createdAt!, keys.tmagId!);
+  }
+
+  const result = await persistenceCall<{ documents: BARecordWithExtras[] }>(
+    'mongodb',
+    'query',
+    {
+      database: MONGO_DB,
+      collection: BA_COLLECTION,
+      filter: combineMongoFilters(baseFilter, keyset),
+      sort: { createdAt: -1, tmagId: -1 },
+      limit: pageSize + 1,
+    },
+  );
+  const docs = result.documents ?? [];
+  const hasMore = docs.length > pageSize;
+  const selected = hasMore ? docs.slice(0, pageSize) : docs;
+  const projected = await listBADirectory(pageSize, selected);
+  const last = selected[selected.length - 1];
+  return {
+    ...projected,
+    appliedSearch: search,
+    pageInfo: {
+      pageSize,
+      hasMore,
+      nextCursor:
+        hasMore && last
+          ? encodeAdminCursor({
+              scope: BA_DIRECTORY_SCOPE,
+              contract,
+              keys: { createdAt: last.createdAt, tmagId: last.tmagId },
+            })
+          : null,
+    },
+  };
 }
 
 /** Build the C.4 profile bundle for one BA. */

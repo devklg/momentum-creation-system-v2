@@ -17,6 +17,14 @@ import {
 } from './orientationSession.js';
 import { listUpcomingWebinarEvents } from './webinarEvent.js';
 import { listLatestWebinarAttendance } from './eventAttendance.js';
+import {
+  AdminCursorError,
+  combineMongoFilters,
+  decodeAdminCursor,
+  descendingKeysetFilter,
+  encodeAdminCursor,
+  type AdminPageInfo,
+} from './adminPagination.js';
 
 const MONGO_DB = 'momentum';
 const WEBINAR_RESERVATIONS_COLLECTION = 'tmag_prospect_webinar_reservations';
@@ -192,31 +200,101 @@ function projectWebinarEvents(
   }));
 }
 
-async function webinarReservations(
-  eventIds: string[],
-): Promise<McsWebinarReservationRecord[]> {
-  if (eventIds.length === 0) return [];
+async function reservationCounts(eventIds: string[]): Promise<Map<string, number>> {
+  if (eventIds.length === 0) return new Map();
+  const result = await persistenceCall<{ results: Array<{ _id: string; count: number }> }>(
+    'mongodb',
+    'aggregate',
+    {
+      database: MONGO_DB,
+      collection: WEBINAR_RESERVATIONS_COLLECTION,
+      pipeline: [
+        { $match: { eventId: { $in: eventIds } } },
+        { $group: { _id: '$eventId', count: { $sum: 1 } } },
+      ],
+    },
+  );
+  return new Map((result.results ?? []).map((row) => [row._id, row.count]));
+}
+
+const EVENT_RESERVATION_SCOPE = 'admin_event_reservations.v1';
+
+async function webinarReservationPage(input: {
+  eventIds: string[];
+  pageSize: number;
+  cursor?: string;
+}): Promise<{ rows: McsWebinarReservationRecord[]; pageInfo: AdminPageInfo }> {
+  const pageSize = Math.max(1, Math.min(100, input.pageSize));
+  if (input.eventIds.length === 0) {
+    return { rows: [], pageInfo: { pageSize, hasMore: false, nextCursor: null } };
+  }
+  const baseFilter = { eventId: { $in: input.eventIds } };
+  const contract = {
+    eventIds: [...input.eventIds].sort(),
+    sort: 'createdAt_desc_reservationId_desc',
+  };
+  let keyset: Record<string, unknown> = {};
+  if (input.cursor) {
+    const keys = decodeAdminCursor({
+      token: input.cursor,
+      scope: EVENT_RESERVATION_SCOPE,
+      contract,
+      requiredKeys: ['createdAt', 'reservationId'],
+    });
+    const cursorMatch = await persistenceCall<{ documents: McsWebinarReservationRecord[] }>(
+      'mongodb',
+      'query',
+      {
+        database: MONGO_DB,
+        collection: WEBINAR_RESERVATIONS_COLLECTION,
+        filter: combineMongoFilters(baseFilter, {
+          createdAt: keys.createdAt,
+          reservationId: keys.reservationId,
+        }),
+        limit: 1,
+      },
+    );
+    if (!cursorMatch.documents?.[0]) throw new AdminCursorError();
+    keyset = descendingKeysetFilter(
+      'createdAt',
+      'reservationId',
+      keys.createdAt!,
+      keys.reservationId!,
+    );
+  }
   const result = await persistenceCall<{ documents: McsWebinarReservationRecord[] }>(
     'mongodb',
     'query',
     {
       database: MONGO_DB,
       collection: WEBINAR_RESERVATIONS_COLLECTION,
-      filter: { eventId: { $in: eventIds } },
-      limit: 5000,
+      filter: combineMongoFilters(baseFilter, keyset),
+      sort: { createdAt: -1, reservationId: -1 },
+      limit: pageSize + 1,
     },
   );
-  return result.documents ?? [];
-}
-
-function reservationCounts(rows: McsWebinarReservationRecord[]): Map<string, number> {
-  const counts = new Map<string, number>();
-  for (const row of rows) counts.set(row.eventId, (counts.get(row.eventId) ?? 0) + 1);
-  return counts;
+  const docs = result.documents ?? [];
+  const hasMore = docs.length > pageSize;
+  const rows = hasMore ? docs.slice(0, pageSize) : docs;
+  const last = rows[rows.length - 1];
+  return {
+    rows,
+    pageInfo: {
+      pageSize,
+      hasMore,
+      nextCursor: hasMore && last
+        ? encodeAdminCursor({
+            scope: EVENT_RESERVATION_SCOPE,
+            contract,
+            keys: { createdAt: last.createdAt, reservationId: last.reservationId },
+          })
+        : null,
+    },
+  };
 }
 
 async function activeFollowUps(
-  rows: McsWebinarReservationRecord[],
+  rows: Array<Pick<McsWebinarReservationRecord, 'prospectId' | 'sponsorTmagId'>>,
 ): Promise<Map<string, McsCrmFollowUpRecord>> {
   const prospectIds = [...new Set(rows.map((row) => row.prospectId))];
   if (prospectIds.length === 0) return new Map();
@@ -269,7 +347,10 @@ export async function getEventCenterForBA(
   };
 }
 
-export async function getEventCenterForAdmin(): Promise<McsAdminEventCenterResponse> {
+export async function getEventCenterForAdmin(input: {
+  pageSize?: number;
+  cursor?: string;
+} = {}): Promise<McsAdminEventCenterResponse & { pageInfo: AdminPageInfo }> {
   const [orientation, webinar] = await Promise.allSettled([
     listSessionsWithRosters(),
     (async (): Promise<{
@@ -281,32 +362,39 @@ export async function getEventCenterForAdmin(): Promise<McsAdminEventCenterRespo
       connectedCounts: Map<string, number>;
       attendanceAvailable: boolean;
       crmAvailable: boolean;
+      pageInfo: AdminPageInfo;
     }> => {
       const events = await listUpcomingWebinarEvents({ horizonDays: 30, limit: 100 });
-      const sourceReservations = await webinarReservations(events.map((event) => event.eventId));
-      const counts = reservationCounts(sourceReservations);
-      const [attendanceResult, followUpResult] = await Promise.allSettled([
-        listLatestWebinarAttendance(events.map((event) => event.eventId)),
-        activeFollowUps(sourceReservations),
+      const eventIds = events.map((event) => event.eventId);
+      const [reservationPage, counts] = await Promise.all([
+        webinarReservationPage({ eventIds, pageSize: input.pageSize ?? 50, cursor: input.cursor }),
+        reservationCounts(eventIds),
       ]);
+      const sourceReservations = reservationPage.rows;
+      const attendanceResult = await Promise.allSettled([
+        listLatestWebinarAttendance(eventIds),
+      ]).then(([result]) => result!);
       const latestAttendance = attendanceResult.status === 'fulfilled' ? attendanceResult.value : new Map();
+      const followUpResult = await Promise.allSettled([
+        activeFollowUps([...latestAttendance.values()]),
+      ]).then(([result]) => result!);
       const followUps = followUpResult.status === 'fulfilled' ? followUpResult.value : new Map();
       const attendanceByEvent = new Map<string, McsEventAttendanceRecord[]>();
       const connectedCounts = new Map<string, number>();
+      for (const attendance of latestAttendance.values()) {
+        const rows = attendanceByEvent.get(attendance.eventId) ?? [];
+        rows.push(attendance);
+        attendanceByEvent.set(attendance.eventId, rows);
+        if (followUps.has(`${attendance.prospectId}\u0000${attendance.sponsorTmagId}`)) {
+          connectedCounts.set(
+            attendance.eventId,
+            (connectedCounts.get(attendance.eventId) ?? 0) + 1,
+          );
+        }
+      }
       const reservations = sourceReservations.map((reservation) => {
         const attendance = latestAttendance.get(reservation.reservationId) ?? null;
         const followUp = followUps.get(`${reservation.prospectId}\u0000${reservation.sponsorTmagId}`) ?? null;
-        if (attendance) {
-          const rows = attendanceByEvent.get(reservation.eventId) ?? [];
-          rows.push(attendance);
-          attendanceByEvent.set(reservation.eventId, rows);
-          if (followUp) {
-            connectedCounts.set(
-              reservation.eventId,
-              (connectedCounts.get(reservation.eventId) ?? 0) + 1,
-            );
-          }
-        }
         return {
           reservationId: reservation.reservationId,
           eventId: reservation.eventId,
@@ -327,6 +415,7 @@ export async function getEventCenterForAdmin(): Promise<McsAdminEventCenterRespo
         connectedCounts,
         attendanceAvailable: attendanceResult.status === 'fulfilled',
         crmAvailable: followUpResult.status === 'fulfilled',
+        pageInfo: reservationPage.pageInfo,
         projected: projectWebinars(events).map((event) => ({
           ...event,
           reservationCount: counts.get(event.eventId) ?? 0,
@@ -367,5 +456,8 @@ export async function getEventCenterForAdmin(): Promise<McsAdminEventCenterRespo
     orientationSessions,
     webinarEvents: webinar.status === 'fulfilled' ? webinar.value.projected : [],
     webinarReservations: webinar.status === 'fulfilled' ? webinar.value.reservations : [],
+    pageInfo: webinar.status === 'fulfilled'
+      ? webinar.value.pageInfo
+      : { pageSize: input.pageSize ?? 50, hasMore: false, nextCursor: null },
   };
 }

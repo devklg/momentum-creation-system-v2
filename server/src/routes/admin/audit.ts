@@ -25,6 +25,7 @@ import {
   findAuditEntry,
   queryAuditEntries,
 } from '../../domain/auditLog.js';
+import { AdminCursorError } from '../../domain/adminPagination.js';
 import type {
   McsAuditListResponse,
   McsAuditEntryResponse,
@@ -95,6 +96,10 @@ adminAuditRoutes.get('/', requireAdmin, async (req: Request, res: Response) => {
     };
     res.json(body);
   } catch (err) {
+    if (err instanceof AdminCursorError) {
+      res.status(400).json({ ok: false, error: err.code });
+      return;
+    }
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Audit list failed: ${msg}` });
   }
