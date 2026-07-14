@@ -19,9 +19,12 @@ const SAMPLE_LIMIT = 20;
 const TEAM_SCOPE = {
   'scope.tenantId': 'tenant_team_magnificent',
   'scope.teamId': 'team_magnificent',
-  'scope.teamKey': 'team_magnificent',
-  'scope.teamName': 'Team Magnificent',
 } as const;
+const KNOWLEDGE_DOMAINS = new Set([
+  'success', 'training', 'relationship', 'performance', 'organizational', 'system', 'governance',
+]);
+const KNOWLEDGE_LANGUAGES = new Set(['en', 'es']);
+const KNOWLEDGE_STATUSES = new Set(['active', 'deprecated', 'archived', 'rejected']);
 
 const CONFLICT_CLASSES: readonly McsKnowledgeSourceConflictClass[] = [
   'active_source_ref_divergence',
@@ -57,6 +60,7 @@ interface SourceDocument extends Record<string, unknown> {
   status?: unknown;
   authorityDecision?: unknown;
   authority?: unknown;
+  scope?: unknown;
 }
 
 interface ResourceDocument extends Record<string, unknown> {
@@ -64,6 +68,7 @@ interface ResourceDocument extends Record<string, unknown> {
   resourceVersionId?: unknown;
   contentDigestSha256?: unknown;
   lineage?: unknown;
+  version?: unknown;
 }
 
 interface ValidSource {
@@ -80,6 +85,8 @@ interface ValidSource {
 interface ValidResource {
   resourceVersionId: string;
   digest: string;
+  sourceRecordId: string;
+  version: number;
 }
 
 interface ScanResult<T> {
@@ -169,11 +176,27 @@ export function detectKnowledgeSourceConflicts(
   }
 
   const resourcesByVersion = groupBy(resources, (resource) => resource.resourceVersionId);
-  for (const source of activeSources.filter((candidate) => candidate.approved)) {
+  const approvedActiveSources = activeSources.filter((candidate) => candidate.approved);
+  const approvedSourcesById = groupBy(approvedActiveSources, (source) => source.sourceId);
+  for (const source of approvedActiveSources) {
     const resourceVersionId = `knowledge:${source.sourceId}:v${source.version}`;
     const matches = resourcesByVersion.get(resourceVersionId) ?? [];
+    if (matches.length === 0) degradedReasons.push('missing_resource_projection');
+    if (matches.length > 1) degradedReasons.push('ambiguous_resource_projection');
+    if (matches.some((resource) =>
+      resource.sourceRecordId !== source.sourceId || resource.version !== source.version)) {
+      degradedReasons.push('resource_lineage_mismatch');
+    }
     if (matches.some((resource) => resource.digest !== source.digest)) {
       addConflict('resource_projection_digest_mismatch', resourceVersionId);
+    }
+  }
+  for (const resource of resources) {
+    const expectedSources = approvedSourcesById.get(resource.sourceRecordId) ?? [];
+    if (expectedSources.length !== 1 ||
+      expectedSources[0]?.version !== resource.version ||
+      `knowledge:${expectedSources[0]?.sourceId}:v${expectedSources[0]?.version}` !== resource.resourceVersionId) {
+      degradedReasons.push('orphan_resource_projection');
     }
   }
 
@@ -229,6 +252,7 @@ export async function observeKnowledgeSourceConflicts(
   persistence: Persistence = persistenceCall,
   now: () => Date = () => new Date(),
 ): Promise<McsAdminKnowledgeIntegrityStatus> {
+  const collectionReasons = await verifyCollections(persistence);
   const [sourceScan, resourceScan] = await Promise.all([
     scanCollection<SourceDocument>(persistence, {
       collection: MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION,
@@ -236,6 +260,7 @@ export async function observeKnowledgeSourceConflicts(
       projection: {
         _id: 1, sourceId: 1, version: 1, originalContent: 1, sourceRef: 1,
         domain: 1, language: 1, status: 1, authorityDecision: 1, authority: 1,
+        scope: 1,
       },
       maxRows: MAX_SOURCE_ROWS,
       failureReason: 'source_scan_unavailable',
@@ -261,9 +286,26 @@ export async function observeKnowledgeSourceConflicts(
     resources: resourceScan.documents,
     sourceTruncated: sourceScan.truncated,
     resourceTruncated: resourceScan.truncated,
-    degradedReasons: [...sourceScan.degradedReasons, ...resourceScan.degradedReasons],
+    degradedReasons: [...collectionReasons, ...sourceScan.degradedReasons, ...resourceScan.degradedReasons],
     computedAt: now().toISOString(),
   });
+}
+
+async function verifyCollections(persistence: Persistence): Promise<string[]> {
+  try {
+    const result = await persistence<{ collections?: Array<{ name?: unknown }> }>(
+      'mongodb', 'list_collections', { database: DATABASE },
+    );
+    const names = new Set((result.collections ?? []).map((entry) => entry.name).filter(
+      (name): name is string => typeof name === 'string',
+    ));
+    const reasons: string[] = [];
+    if (!names.has(MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION)) reasons.push('source_collection_missing');
+    if (!names.has(RESOURCE_CATALOG_MONGO_COLLECTION)) reasons.push('resource_collection_missing');
+    return reasons;
+  } catch {
+    return ['collection_inventory_unavailable'];
+  }
 }
 
 async function scanCollection<T extends Record<string, unknown>>(
@@ -333,18 +375,27 @@ async function scanCollection<T extends Record<string, unknown>>(
 }
 
 function parseSource(document: SourceDocument): ValidSource | null {
+  const rowId = stringValue(document._id);
   const sourceId = stringValue(document.sourceId);
   const version = positiveInteger(document.version);
   const originalContent = typeof document.originalContent === 'string' ? document.originalContent : null;
   const domain = stringValue(document.domain);
   const language = stringValue(document.language);
   const status = stringValue(document.status);
-  if (!sourceId || version === null || originalContent === null || !domain || !language || !status) return null;
+  const scope = isRecord(document.scope) ? document.scope : {};
+  if (!rowId || !sourceId || version === null || !originalContent ||
+    !domain || !KNOWLEDGE_DOMAINS.has(domain) ||
+    !language || !KNOWLEDGE_LANGUAGES.has(language) ||
+    !status || !KNOWLEDGE_STATUSES.has(status) ||
+    scope.tenantId !== 'tenant_team_magnificent' ||
+    scope.teamId !== 'team_magnificent' ||
+    scope.teamKey !== 'team_magnificent' || scope.teamName !== 'Team Magnificent') return null;
 
   const authority = isRecord(document.authority) ? document.authority : {};
   const approved = document.authorityDecision === 'active_authority' &&
     authority.authorityStatus === 'active_authority' &&
-    (authority.authorityKind === 'kevin_authored' || authority.authorityKind === 'kevin_approved');
+    (authority.authorityKind === 'kevin_authored' || authority.authorityKind === 'kevin_approved') &&
+    stringValue(authority.authorityBy) !== null && validIsoTimestamp(authority.authorityAt);
   const sourceRef = typeof document.sourceRef === 'string' && document.sourceRef.trim()
     ? normalizeSourceRef(document.sourceRef)
     : null;
@@ -364,8 +415,12 @@ function parseSource(document: SourceDocument): ValidSource | null {
 function parseResource(document: ResourceDocument): ValidResource | null {
   const resourceVersionId = stringValue(document.resourceVersionId);
   const digestValue = stringValue(document.contentDigestSha256)?.toLowerCase() ?? null;
-  if (!resourceVersionId || !digestValue || !/^[a-f0-9]{64}$/.test(digestValue)) return null;
-  return { resourceVersionId, digest: digestValue };
+  const lineage = isRecord(document.lineage) ? document.lineage : {};
+  const sourceRecordId = stringValue(lineage.sourceRecordId);
+  const version = positiveInteger(document.version);
+  if (!resourceVersionId || !digestValue || !/^[a-f0-9]{64}$/.test(digestValue) ||
+    !sourceRecordId || version === null) return null;
+  return { resourceVersionId, digest: digestValue, sourceRecordId, version };
 }
 
 export function normalizeKnowledgeSourceRef(value: string): string {
@@ -416,4 +471,9 @@ function positiveInteger(value: unknown): number | null {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function validIsoTimestamp(value: unknown): boolean {
+  return typeof value === 'string' && value.trim().length > 0 &&
+    Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value;
 }

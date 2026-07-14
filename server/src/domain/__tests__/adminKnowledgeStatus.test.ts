@@ -13,9 +13,9 @@ function countFor(params: { collection: string; filter: Record<string, unknown> 
 
 describe('buildAdminKnowledgeStatus', () => {
   beforeEach(() => {
-    persistence.mockReset().mockImplementation(async (_tool, _action, params) => params.sort
-      ? { count: 0, documents: [] }
-      : { count: countFor(params) });
+    persistence.mockReset().mockImplementation(async (_tool, action, params) => action === 'list_collections'
+      ? { collections: [{ name: 'mcs_knowledge_sources' }, { name: 'tmag_resource_catalog' }], count: 2 }
+      : params.sort ? { count: 0, documents: [] } : { count: countFor(params) });
   });
 
   it('separates active records from retrieval readiness and projection consistency', async () => {
@@ -41,7 +41,10 @@ describe('buildAdminKnowledgeStatus', () => {
   });
 
   it('reports ready only when eligible chunks have no unresolved Chroma projection', async () => {
-    persistence.mockImplementation(async (_tool, _action, params) => {
+    persistence.mockImplementation(async (_tool, action, params) => {
+      if (action === 'list_collections') return {
+        collections: [{ name: 'mcs_knowledge_sources' }, { name: 'tmag_resource_catalog' }], count: 2,
+      };
       if (params.sort) return { count: 0, documents: [] };
       const count = params.collection === 'mcs_knowledge_sources' ? 2
         : params.collection === 'mcs_knowledge_chunks' ? 7 : 0;
@@ -52,7 +55,10 @@ describe('buildAdminKnowledgeStatus', () => {
   });
 
   it('fails closed to degraded when any status read is unavailable', async () => {
-    persistence.mockImplementation(async (_tool, _action, params) => {
+    persistence.mockImplementation(async (_tool, action, params) => {
+      if (action === 'list_collections') return {
+        collections: [{ name: 'mcs_knowledge_sources' }, { name: 'tmag_resource_catalog' }], count: 2,
+      };
       if (params.sort) return { count: 0, documents: [] };
       if (params.collection === 'mcs_knowledge_chunks' && params.filter.retrievalEligible) throw new Error('mongo offline');
       return { count: 0 };

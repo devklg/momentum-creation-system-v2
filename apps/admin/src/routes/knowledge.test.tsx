@@ -50,6 +50,26 @@ describe('Knowledge retrieval diagnostics', () => {
     expect(screen.getByText(/hash abcdef123456/)).toBeInTheDocument();
     expect(screen.queryByText(/7890abcdef1234567890/)).not.toBeInTheDocument();
   });
+
+  it.each(['degraded', 'truncated'])('renders the %s fail-closed integrity state', async (state) => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: true,
+      json: async () => statusResponse({
+        status: state,
+        scan: {
+          sourceLimit: 1000, resourceLimit: 1000,
+          sourcesObserved: 2, resourcesObserved: 1, complete: false,
+        },
+        degradedReasons: [{ reason: 'missing_resource_projection', count: 1 }],
+      }),
+    })));
+
+    render(<KnowledgePage />);
+
+    expect(await screen.findByText(new RegExp(`canonical scan was ${state}`, 'i'))).toBeInTheDocument();
+    expect(screen.getByText(/missing resource projection · 1/i)).toBeInTheDocument();
+    expect(screen.queryByText(/found no deterministic source conflicts/i)).not.toBeInTheDocument();
+  });
 });
 
 function statusResponse(integrityOverrides: Record<string, unknown> = {}) {

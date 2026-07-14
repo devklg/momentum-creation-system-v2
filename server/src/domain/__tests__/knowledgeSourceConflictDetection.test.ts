@@ -29,6 +29,10 @@ function source(
     status: 'active',
     authorityDecision: 'active_authority',
     authority: approvedAuthority,
+    scope: {
+      tenantId: 'tenant_team_magnificent', teamId: 'team_magnificent',
+      teamKey: 'team_magnificent', teamName: 'Team Magnificent',
+    },
     ...overrides,
   };
 }
@@ -38,6 +42,8 @@ function resource(id: string, content: string): Record<string, unknown> {
     _id: `knowledge:${id}:v1`,
     resourceVersionId: `knowledge:${id}:v1`,
     contentDigestSha256: sha(content),
+    version: 1,
+    lineage: { sourceRecordId: id },
   };
 }
 
@@ -74,7 +80,7 @@ describe('knowledge source conflict detection', () => {
       resources: [],
     });
 
-    expect(result.status).toBe('conflicts');
+    expect(result.status).toBe('degraded');
     expect(result.highestSeverity).toBe('critical');
     expect(result.counts.active_source_identity_divergence).toBe(1);
     expect(result.samples[0]).toMatchObject({
@@ -141,6 +147,48 @@ describe('knowledge source conflict detection', () => {
     expect(truncated.scan.complete).toBe(false);
   });
 
+  it('degrades for incomplete source-to-resource reconciliation', () => {
+    const missing = detectKnowledgeSourceConflicts({ sources: [source('source-a', 'a')], resources: [] });
+    expect(missing.degradedReasons).toContainEqual({ reason: 'missing_resource_projection', count: 1 });
+
+    const orphan = detectKnowledgeSourceConflicts({
+      sources: [], resources: [resource('source-a', 'a')],
+    });
+    expect(orphan.degradedReasons).toContainEqual({ reason: 'orphan_resource_projection', count: 1 });
+
+    const wrongLineage = detectKnowledgeSourceConflicts({
+      sources: [source('source-a', 'a')],
+      resources: [{ ...resource('source-a', 'a'), lineage: { sourceRecordId: 'source-b' } }],
+    });
+    expect(wrongLineage.degradedReasons).toContainEqual({ reason: 'resource_lineage_mismatch', count: 1 });
+  });
+
+  it('degrades invalid authority envelopes, enums, scope, and empty content', () => {
+    const documents = [
+      source('bad-authority', 'a', { authority: { ...approvedAuthority, authorityAt: 'not-a-date' } }),
+      source('bad-status', 'b', { status: 'activ' }),
+      source('bad-domain', 'c', { domain: 'sales' }),
+      source('bad-language', 'd', { language: 'fr' }),
+      source('bad-scope', 'e', { scope: { tenantId: 'tenant_team_magnificent', teamId: 'team_magnificent' } }),
+      source('empty-content', ''),
+    ];
+    const result = detectKnowledgeSourceConflicts({ sources: documents, resources: [] });
+    expect(result.status).toBe('degraded');
+    expect(result.degradedReasons).toContainEqual({ reason: 'malformed_source_record', count: 5 });
+    expect(result.counts.active_authority_state_mismatch).toBe(1);
+  });
+
+  it('is deterministic when observation order is reversed', () => {
+    const sources = [source('source-a', 'a'), source('source-b', 'b')];
+    const resources = [resource('source-a', 'a'), resource('source-b', 'b')];
+    const left = detectKnowledgeSourceConflicts({ sources, resources, computedAt: '2026-07-14T00:00:00.000Z' });
+    const right = detectKnowledgeSourceConflicts({
+      sources: [...sources].reverse(), resources: [...resources].reverse(),
+      computedAt: '2026-07-14T00:00:00.000Z',
+    });
+    expect(right).toEqual(left);
+  });
+
   it('normalizes only surrounding whitespace plus URL scheme and host case', () => {
     expect(normalizeKnowledgeSourceRef(' HTTPS://User@EXAMPLE.COM/Policy/RevA?Key=Value '))
       .toBe('https://User@example.com/Policy/RevA?Key=Value');
@@ -153,6 +201,9 @@ describe('knowledge source conflict detection', () => {
       return source(id, `content-${index}`);
     });
     const persistence = vi.fn(async (_tool: string, _action: string, params: Record<string, unknown>) => {
+      if (_action === 'list_collections') return { collections: [
+        { name: 'mcs_knowledge_sources' }, { name: 'tmag_resource_catalog' },
+      ], count: 2 };
       if (params.collection === 'tmag_resource_catalog') return { documents: [], count: 0 };
       const filter = params.filter as { _id?: { $gt?: string } };
       const after = filter._id?.$gt;
@@ -179,6 +230,9 @@ describe('knowledge source conflict detection', () => {
 
   it('degrades without throwing when a canonical scan is unavailable', async () => {
     const persistence = vi.fn(async (_tool: string, _action: string, params: Record<string, unknown>) => {
+      if (_action === 'list_collections') return { collections: [
+        { name: 'mcs_knowledge_sources' }, { name: 'tmag_resource_catalog' },
+      ], count: 2 };
       if (params.collection === 'mcs_knowledge_sources') throw new Error('offline');
       return { documents: [], count: 0 };
     });
@@ -186,5 +240,54 @@ describe('knowledge source conflict detection', () => {
     expect(result.status).toBe('degraded');
     expect(result.degradedReasons).toContainEqual({ reason: 'source_scan_unavailable', count: 1 });
     expect(result.mutationAuthorized).toBe(false);
+  });
+
+  it('degrades when canonical collections are missing and performs read-only calls only', async () => {
+    const persistence = vi.fn(async (_tool: string, action: string) => action === 'list_collections'
+      ? { collections: [{ name: 'mcs_knowledge_sources' }], count: 1 }
+      : { documents: [], count: 0 });
+    const first = await observeKnowledgeSourceConflicts(persistence as never);
+    const second = await observeKnowledgeSourceConflicts(persistence as never);
+    expect(first.degradedReasons).toContainEqual({ reason: 'resource_collection_missing', count: 1 });
+    expect(second.status).toBe('degraded');
+    expect(new Set(persistence.mock.calls.map((call) => call[1]))).toEqual(new Set(['list_collections', 'query']));
+    expect(persistence.mock.calls.every((call) => call[0] === 'mongodb')).toBe(true);
+  });
+
+  it.each([
+    ['invalid cursor', { documents: [{ _id: null }], count: 1 }, 'invalid_scan_cursor'],
+    ['incomplete page', { documents: [], count: 1 }, 'incomplete_scan_page'],
+  ])('degrades a resource scan with an %s', async (_label, resourceResult, reason) => {
+    const persistence = vi.fn(async (_tool: string, action: string, params: Record<string, unknown>) => {
+      if (action === 'list_collections') return { collections: [
+        { name: 'mcs_knowledge_sources' }, { name: 'tmag_resource_catalog' },
+      ], count: 2 };
+      return params.collection === 'tmag_resource_catalog'
+        ? resourceResult
+        : { documents: [], count: 0 };
+    });
+    const result = await observeKnowledgeSourceConflicts(persistence as never);
+    expect(result.status).toBe('degraded');
+    expect(result.degradedReasons).toContainEqual({ reason, count: 1 });
+  });
+
+  it('truncates a resource scan above the approved bound', async () => {
+    const resources = Array.from({ length: 1_001 }, (_, index) => ({
+      ...resource(`source-${String(index).padStart(4, '0')}`, `content-${index}`),
+      _id: `resource-${String(index).padStart(4, '0')}`,
+    }));
+    const persistence = vi.fn(async (_tool: string, action: string, params: Record<string, unknown>) => {
+      if (action === 'list_collections') return { collections: [
+        { name: 'mcs_knowledge_sources' }, { name: 'tmag_resource_catalog' },
+      ], count: 2 };
+      if (params.collection === 'mcs_knowledge_sources') return { documents: [], count: 0 };
+      const filter = params.filter as { _id?: { $gt?: string } };
+      const after = filter._id?.$gt;
+      const remaining = resources.filter((entry) => !after || String(entry._id) > after);
+      return { documents: remaining.slice(0, Number(params.limit)), count: remaining.length };
+    });
+    const result = await observeKnowledgeSourceConflicts(persistence as never);
+    expect(result.status).toBe('truncated');
+    expect(result.scan).toMatchObject({ resourcesObserved: 1_000, complete: false });
   });
 });
