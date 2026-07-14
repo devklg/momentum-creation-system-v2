@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T01:11:27.369Z",
+  "generatedAt": "2026-07-14T01:19:55.058Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -8778,6 +8778,46 @@
       "file": "packages/shared/src/training-catalog.ts"
     },
     {
+      "name": "buildTrainingLanguageParityReport",
+      "kind": "function",
+      "file": "packages/shared/src/training-language-parity.ts"
+    },
+    {
+      "name": "MCS_TRAINING_LANGUAGE_PARITY_REPORT",
+      "kind": "const",
+      "file": "packages/shared/src/training-language-parity.ts"
+    },
+    {
+      "name": "MCS_TRAINING_LANGUAGE_PARITY_SURFACES",
+      "kind": "const",
+      "file": "packages/shared/src/training-language-parity.ts"
+    },
+    {
+      "name": "McsTrainingContentAvailability",
+      "kind": "type",
+      "file": "packages/shared/src/training-language-parity.ts"
+    },
+    {
+      "name": "McsTrainingContentLocale",
+      "kind": "type",
+      "file": "packages/shared/src/training-language-parity.ts"
+    },
+    {
+      "name": "McsTrainingLanguageParityFinding",
+      "kind": "interface",
+      "file": "packages/shared/src/training-language-parity.ts"
+    },
+    {
+      "name": "McsTrainingLanguageParitySurface",
+      "kind": "interface",
+      "file": "packages/shared/src/training-language-parity.ts"
+    },
+    {
+      "name": "McsTrainingLanguageVariant",
+      "kind": "interface",
+      "file": "packages/shared/src/training-language-parity.ts"
+    },
+    {
       "name": "MCS_TRAINING_TARGET_RECONCILIATION",
       "kind": "const",
       "file": "packages/shared/src/training-target-reconciliation.ts"
@@ -11310,6 +11350,6 @@
     "chromaCollections": 53,
     "routeModules": 49,
     "routeHandlers": 268,
-    "sharedExports": 1066
+    "sharedExports": 1074
   }
 }
