@@ -8,6 +8,7 @@ describe('unified audit event taxonomy', () => {
     ['admin.tenant.master_content.blocked', 'security', 'control', 'blocked'],
     ['vm.queue.retry_scheduled', 'delivery', 'mutation', 'queued'],
     ['runtime.gate.denied', 'runtime', 'control', 'blocked'],
+    ['prompt.output.generated', 'runtime', 'mutation', 'succeeded'],
     ['system.crm.status_changed', 'update', 'mutation', 'succeeded'],
   ])('%s has stable category, impact, and outcome', (action, category, impact, outcome) => {
     expect(classifyAuditAction(action, 'info')).toMatchObject({ version: 1, category, impact, outcome });
