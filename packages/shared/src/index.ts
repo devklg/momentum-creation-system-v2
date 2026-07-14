@@ -27,3 +27,4 @@ export * from './event-center-catalog.js';
 export * from './event-center.js';
 export * from './training-catalog.js';
 export * from './training-target-reconciliation.js';
+export * from './training-language-parity.js';
