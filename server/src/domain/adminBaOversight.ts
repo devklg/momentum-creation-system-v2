@@ -394,20 +394,13 @@ export async function listBADirectory(
 
 const BA_DIRECTORY_SCOPE = 'admin_ba_directory.v1';
 
-function escapedPrefix(value: string): string {
-  return `^${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`;
-}
-
 function baSearchFilter(search: string): Record<string, unknown> {
   if (!search) return {};
-  const prefix = { $regex: escapedPrefix(search), $options: 'i' };
   return {
     $or: [
-      { tmagId: prefix },
-      { threeBaId: prefix },
-      { firstName: prefix },
-      { lastName: prefix },
-      { email: prefix },
+      { tmagId: search },
+      { threeBaId: search },
+      { email: search.toLowerCase() },
     ],
   };
 }

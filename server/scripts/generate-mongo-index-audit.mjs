@@ -10,6 +10,8 @@ const ownershipPath = path.join(outDir, 'mongo-ownership-map.json');
 const jsonPath = path.join(outDir, 'mongo-index-audit-plan.json');
 const mdPath = path.join(outDir, 'MONGO_INDEX_AUDIT_PLAN.md');
 const check = process.argv.includes('--check');
+const adminPaginationManifestPath = path.join(repoRoot, 'organization/p2-131-admin-index-manifest.json');
+const adminPaginationManifest = JSON.parse(readFileSync(adminPaginationManifestPath, 'utf8'));
 
 const INDEX_PLAN = [
   idx('team_magnificent_members', 'unique_tmagId', { tmagId: 1 }, { unique: true }, 'Canonical BA login/member id.'),
@@ -60,6 +62,14 @@ const INDEX_PLAN = [
   idx('tmag_vm_campaigns', 'unique_vmCampaignId', { vmCampaignId: 1 }, { unique: true }, 'VM campaign id.', 'vm_registry_declared'),
   idx('tmag_vm_queue_jobs', 'status_nextAttemptAt', { status: 1, nextAttemptAt: 1 }, {}, 'VM provider queue due-row scan.'),
   idx('tmag_vm_provider_webhook_events', 'provider_event', { provider: 1, providerEventId: 1 }, {}, 'Provider webhook idempotency plan.'),
+  ...adminPaginationManifest.indexes.map((row) => idx(
+    row.collection,
+    row.name,
+    row.keys,
+    { unique: false },
+    row.rationale,
+    'required_not_verified',
+  )),
 ];
 
 const HIGH_VOLUME_COLLECTIONS = new Set([
@@ -138,6 +148,7 @@ function buildAudit(generatedAtOverride = null) {
       'engineering/sprints/platform-audit-p1/mongo-ownership-map.json',
       'server/src/domain/vmSchemas.ts',
       'server/src/runtime/knowledge-evolution/persistence/indexes.ts',
+      'organization/p2-131-admin-index-manifest.json',
     ],
     currentAudit: {
       generalEnsureIndexes: 'not_present',

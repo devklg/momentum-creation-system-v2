@@ -1,20 +1,22 @@
 {
-  "generatedAt": "2026-07-14T05:54:00.528Z",
+  "generatedAt": "2026-07-14T06:20:56.453Z",
   "sources": [
     "docs/app-data-model-contract.md §9",
     "engineering/sprints/platform-audit-p1/mongo-ownership-map.json",
     "server/src/domain/vmSchemas.ts",
-    "server/src/runtime/knowledge-evolution/persistence/indexes.ts"
+    "server/src/runtime/knowledge-evolution/persistence/indexes.ts",
+    "organization/p2-131-admin-index-manifest.json"
   ],
   "currentAudit": {
     "generalEnsureIndexes": "not_present",
     "knowledgeEvolutionEnsureIndexes": "present_for_knowledge_evolution_only",
     "vmIndexDefinitions": "declared_in_schema_registry_not_generally_applied"
   },
-  "indexCount": 48,
+  "indexCount": 67,
   "byStatus": {
     "planned_missing_enforcement": 42,
-    "vm_registry_declared": 6
+    "vm_registry_declared": 6,
+    "required_not_verified": 19
   },
   "highVolumeWithoutPlan": [],
   "indexes": [
@@ -705,6 +707,317 @@
       "ownerId": "vm_rvm",
       "steward": "VM/RVM domain",
       "primarySurface": "admin + workers"
+    },
+    {
+      "collection": "team_magnificent_members",
+      "name": "admin_createdAt_tmagId",
+      "keys": {
+        "createdAt": -1,
+        "tmagId": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Stable BA keyset page.",
+      "status": "required_not_verified",
+      "ownerId": "membership_identity",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_access_codes",
+      "name": "admin_owner_active",
+      "keys": {
+        "sponsorTmagId": 1,
+        "active": 1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Page-scoped owned access-code join.",
+      "status": "required_not_verified",
+      "ownerId": "membership_identity",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_commitments",
+      "name": "admin_tmagId_acceptedAt",
+      "keys": {
+        "tmagId": 1,
+        "acceptedAt": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Latest commitment per page BA.",
+      "status": "required_not_verified",
+      "ownerId": "agents_training_success",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_prospect_invite_tokens",
+      "name": "admin_sponsor_createdAt",
+      "keys": {
+        "sponsorTmagId": 1,
+        "createdAt": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Page-scoped invitation counts and 72-hour window.",
+      "status": "required_not_verified",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospect_crm_followups",
+      "name": "admin_sponsor_open_dueAt",
+      "keys": {
+        "sponsorTmagId": 1,
+        "clearedAt": 1,
+        "dueAt": 1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Oldest open follow-up per page BA.",
+      "status": "required_not_verified",
+      "ownerId": "prospect_crm",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_fast_start_progress",
+      "name": "admin_tmagId_state",
+      "keys": {
+        "tmagId": 1,
+        "state": 1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Completed training module count per page BA.",
+      "status": "required_not_verified",
+      "ownerId": "agents_training_success",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_admin_curated_leader_tags",
+      "name": "admin_tmagId",
+      "keys": {
+        "tmagId": 1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Kevin-curated display tag join.",
+      "status": "required_not_verified",
+      "ownerId": "membership_identity",
+      "steward": "Admin / BA identity",
+      "primarySurface": "team + admin"
+    },
+    {
+      "collection": "tmag_prospects",
+      "name": "admin_createdAt_prospectId",
+      "keys": {
+        "createdAt": -1,
+        "prospectId": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Stable unscoped prospect keyset page.",
+      "status": "required_not_verified",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospects",
+      "name": "admin_sponsor_createdAt_prospectId",
+      "keys": {
+        "sponsorTmagId": 1,
+        "createdAt": -1,
+        "prospectId": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Stable sponsor-scoped prospect keyset page.",
+      "status": "required_not_verified",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospect_htank_placements",
+      "name": "admin_prospectId",
+      "keys": {
+        "prospectId": 1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Placement join by page prospect.",
+      "status": "required_not_verified",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_invite_tokens",
+      "name": "admin_prospect_createdAt",
+      "keys": {
+        "prospectId": 1,
+        "createdAt": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Latest invite token join by page prospect.",
+      "status": "required_not_verified",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospect_callback_requests",
+      "name": "admin_prospect_createdAt",
+      "keys": {
+        "prospectId": 1,
+        "createdAt": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Latest callback join by page prospect.",
+      "status": "required_not_verified",
+      "ownerId": "prospect_invitation_flow",
+      "steward": "Prospect / invitation domain",
+      "primarySurface": "com + team + admin"
+    },
+    {
+      "collection": "tmag_prospect_webinar_reservations",
+      "name": "admin_prospect_createdAt",
+      "keys": {
+        "prospectId": 1,
+        "createdAt": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Latest webinar join by page prospect.",
+      "status": "required_not_verified",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_webinar_reservations",
+      "name": "admin_event_createdAt_reservationId",
+      "keys": {
+        "eventId": 1,
+        "createdAt": -1,
+        "reservationId": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Stable reservation page within selected events.",
+      "status": "required_not_verified",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_resource_catalog",
+      "name": "admin_active_team_updatedAt_resourceVersionId",
+      "keys": {
+        "lifecycle": 1,
+        "audience.surfaces": 1,
+        "updatedAt": -1,
+        "resourceVersionId": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Page-first active Team catalog ordering.",
+      "status": "required_not_verified",
+      "ownerId": "unknown",
+      "steward": "unknown",
+      "primarySurface": "unknown"
+    },
+    {
+      "collection": "tmag_resource_usage_events",
+      "name": "admin_version_event_occurredAt",
+      "keys": {
+        "resourceVersionId": 1,
+        "eventType": 1,
+        "occurredAt": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Page-scoped all-time and recent usage aggregates.",
+      "status": "required_not_verified",
+      "ownerId": "unknown",
+      "steward": "unknown",
+      "primarySurface": "unknown"
+    },
+    {
+      "collection": "mcs_audit_log",
+      "name": "admin_timestamp_entryId",
+      "keys": {
+        "timestamp": -1,
+        "entryId": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Stable audit traversal tie-breaker.",
+      "status": "required_not_verified",
+      "ownerId": "operations_governance",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system"
+    },
+    {
+      "collection": "mcs_audit_log",
+      "name": "admin_severity_timestamp_entryId",
+      "keys": {
+        "severity": 1,
+        "timestamp": -1,
+        "entryId": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Severity-filtered stable audit traversal.",
+      "status": "required_not_verified",
+      "ownerId": "operations_governance",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system"
+    },
+    {
+      "collection": "mcs_audit_log",
+      "name": "admin_entity_timestamp_entryId",
+      "keys": {
+        "entity.kind": 1,
+        "entity.id": 1,
+        "timestamp": -1,
+        "entryId": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Entity-filtered stable audit traversal.",
+      "status": "required_not_verified",
+      "ownerId": "operations_governance",
+      "steward": "Operations / governance",
+      "primarySurface": "admin + system"
     }
   ]
 }

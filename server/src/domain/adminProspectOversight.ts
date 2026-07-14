@@ -168,12 +168,13 @@ async function resolveScopedTmagIds(
 
 /* ─── BA name resolver ──────────────────────────────────────────── */
 
-async function loadBaNameMap(): Promise<Map<string, string>> {
+async function loadBaNameMap(tmagIds: string[]): Promise<Map<string, string>> {
+  if (tmagIds.length === 0) return new Map();
   const result = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
-    filter: {},
-    limit: 50_000,
+    filter: { tmagId: { $in: [...new Set(tmagIds)] } },
+    limit: new Set(tmagIds).size,
   });
   const map = new Map<string, string>();
   for (const doc of result.documents ?? []) {
@@ -311,7 +312,6 @@ export async function listDirectoryRows(
   selectedProspects?: ProspectDoc[],
 ): Promise<McsAdminProspectDirectoryRow[]> {
   const scopedTmagIds = await resolveScopedTmagIds(filter);
-  const baNames = await loadBaNameMap();
 
   const prospectFilter: Record<string, unknown> = {};
   if (scopedTmagIds) {
@@ -331,6 +331,7 @@ export async function listDirectoryRows(
   if (prospects.length === 0) return [];
 
   const prospectIds = prospects.map((p) => p.prospectId);
+  const baNames = await loadBaNameMap(prospects.map((p) => p.sponsorTmagId));
 
   const [placements, tokens, callbacks, webinars] = await Promise.all([
     queryByProspectIds<McsPoolPlacement>(COLL_PLACEMENTS, prospectIds),
@@ -513,7 +514,7 @@ export async function buildDetailPayload(
     listByProspectId<McsCallbackRequestRecord>(COLL_CALLBACKS, prospectId),
     listByProspectId<McsWebinarReservationRecord>(COLL_WEBINARS, prospectId),
     listByProspectId<McsInviteTokenRecord>(COLL_TOKENS, prospectId),
-    loadBaNameMap(),
+    loadBaNameMap([prospect.sponsorTmagId, prospect.sponsorTmagIdAtMint ?? prospect.sponsorTmagId]),
     listByProspectId<NoteDoc>(COLL_NOTES, prospectId, { createdAt: 1 }),
   ]);
 
@@ -967,7 +968,6 @@ export class InterventionError extends Error {
  * projection — reuses the directory derivation helpers.
  */
 export async function refreshRowFor(prospectId: string): Promise<McsAdminProspectDirectoryRow> {
-  const baNames = await loadBaNameMap();
   const [prospect, placement, tokens, callbacks, webinars] = await Promise.all([
     findProspectById(prospectId),
     findPlacementByProspectId(prospectId),
@@ -979,6 +979,10 @@ export async function refreshRowFor(prospectId: string): Promise<McsAdminProspec
     throw new InterventionError('prospect_not_found_after_write', 500);
   }
   const token = pickLatest(tokens, (t) => t.createdAt);
+  const baNames = await loadBaNameMap([
+    prospect.sponsorTmagId,
+    token?.sponsorTmagId ?? prospect.sponsorTmagId,
+  ]);
   const callback = pickLatest(callbacks, (c) => c.createdAt);
   const webinar = pickLatest(webinars, (w) => w.createdAt);
   const nowMs = Date.now();

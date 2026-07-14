@@ -154,7 +154,7 @@ export function BAsPage() {
         <Input
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
-          placeholder="Search BA ID, THREE ID, name, or email…"
+          placeholder="Exact BA ID, THREE ID, or email…"
         />
       </div>
 

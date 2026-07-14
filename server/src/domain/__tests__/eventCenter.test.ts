@@ -88,6 +88,7 @@ describe('Event Center read projection', () => {
         { reservationId: 'r1', eventId: 'web_1', prospectId: 'p1', sponsorTmagId: 'TM-01', name: 'A', createdAt: '2026-07-01T00:00:00.000Z' },
         { reservationId: 'r2', eventId: 'web_1', prospectId: 'p2', sponsorTmagId: 'TM-01', name: 'B', createdAt: '2026-07-01T00:00:00.000Z' },
       ] })
+      .mockResolvedValueOnce({ results: [{ _id: 'web_1', count: 2 }] })
       .mockResolvedValueOnce({ documents: [] });
     const result = await getEventCenterForAdmin();
     expect(result.webinarEvents[0]).toMatchObject({ eventId: 'web_1', reservationCount: 2 });
@@ -98,6 +99,7 @@ describe('Event Center read projection', () => {
       followUp: { owner: 'human_crm', connection: 'not_connected', automated: false, connectedCount: 0 },
     });
     expect(result.webinarReservations).toHaveLength(2);
+    expect(result.pageInfo).toEqual({ pageSize: 50, hasMore: false, nextCursor: null });
   });
 
   it('projects explicit attendance and an available human CRM connection', async () => {
@@ -107,6 +109,7 @@ describe('Event Center read projection', () => {
       .mockResolvedValueOnce({ documents: [
         { reservationId: 'r1', eventId: 'web_1', prospectId: 'p1', sponsorTmagId: 'TM-01', name: 'A', createdAt: '2026-07-01T00:00:00.000Z' },
       ] })
+      .mockResolvedValueOnce({ results: [{ _id: 'web_1', count: 1 }] })
       .mockResolvedValueOnce({ documents: [
         { prospectId: 'p1', sponsorTmagId: 'TM-01', dueAt: '2026-08-02T00:00:00.000Z', createdAt: '2026-08-01T00:00:00.000Z', clearedAt: null },
       ] });

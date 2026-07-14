@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => {
     find: vi.fn(),
     insertMany: vi.fn(),
     updateMany: vi.fn(),
+    collection: { indexes: vi.fn() },
   };
   return {
     fakeModel,
@@ -91,5 +92,24 @@ describe('Mongo direct adapter', () => {
         pipeline: [{ $match: { active: true } }],
       }),
     ).resolves.toEqual({ results: [{ ok: true }], count: 1 });
+  });
+
+  it('lists index metadata while leaving mutation unsupported', async () => {
+    const { mongoAdapter } = await import('../mongo/adapter.js');
+    mocks.fakeModel.collection.indexes.mockResolvedValue([
+      { name: '_id_', key: { _id: 1 }, unique: true },
+      { name: 'admin_createdAt_tmagId', key: { createdAt: -1, tmagId: -1 } },
+    ]);
+
+    await expect(mongoAdapter('list_indexes', { collection: 'members' })).resolves.toEqual({
+      collectionExists: true,
+      indexes: [
+        { name: '_id_', keys: { _id: 1 }, unique: true },
+        { name: 'admin_createdAt_tmagId', keys: { createdAt: -1, tmagId: -1 }, unique: false },
+      ],
+    });
+    await expect(mongoAdapter('create_index', { collection: 'members' })).rejects.toThrow(
+      'unsupported mongodb action',
+    );
   });
 }, 15000);

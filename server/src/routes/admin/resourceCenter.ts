@@ -4,8 +4,29 @@ import { requireAdmin } from '../../middleware/requireAuth.js';
 import { buildResourceUsageSummaryPage } from '../../domain/resourceUsage.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
 import { AdminCursorError } from '../../domain/adminPagination.js';
+import { buildAdminIndexAwareness } from '../../domain/adminIndexAwareness.js';
 
 export const adminResourceCenterRoutes: Router = Router();
+
+adminResourceCenterRoutes.get('/index-awareness', requireAdmin, async (_req, res) => {
+  try {
+    const report = await buildAdminIndexAwareness();
+    const req = _req as Request;
+    await appendAuditEntry({
+      actor: { kind: 'admin', tmagId: req.session!.tmagId, displayName: req.session!.tmagId },
+      action: 'admin.index_awareness.viewed',
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
+      severity: report.summary.missing > 0 || report.summary.definitionMismatch > 0 ? 'warn' : 'info',
+      after: { observedAt: report.observedAt, summary: report.summary, mutationAuthorized: false },
+      reason: null,
+      context: { ip: req.ip ?? null, userAgent: req.get('user-agent') ?? null, route: '/api/admin/resource-center/index-awareness', method: 'GET', requestId: null },
+    });
+    res.status(200).json(report);
+  } catch (error) {
+    console.error('[GET /api/admin/resource-center/index-awareness] failed', error);
+    res.status(503).json({ ok: false, error: 'index_awareness_unavailable' });
+  }
+});
 
 adminResourceCenterRoutes.get('/analytics', requireAdmin, async (_req, res) => {
   const parsed = z.object({
