@@ -25,6 +25,7 @@ import { buildDiscoveryView } from './steve-success-interview.js';
 import { projectSteveTailoredGuidance } from './steve-tailored-guidance.js';
 import { getFastStartProgress } from './training.js';
 import { listUpcomingWebinarEvents } from './webinarEvent.js';
+import { projectCockpitNextAction } from './cockpit-next-action.js';
 import type {
   McsCallbackIntent,
   McsCockpitSponsorFallback,
@@ -44,7 +45,6 @@ import type {
   McsProspectMomentumCrmSummary,
   McsProspectMomentumRow,
   McsProspectMomentumViewerResponse,
-  McsProspectNextAction,
   McsSponsorFallbackFounder,
   McsLaunchNextAction,
   McsLaunchStep,
@@ -273,7 +273,6 @@ const LAST_SIGNAL_LABEL: Record<McsProspectLastSignal['kind'], string> = {
   archived: 'Archived',
 };
 
-const TWO_DAY_MS = 2 * 24 * 60 * 60 * 1000;
 const EXPIRING_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 const CALLBACK_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
 const BIAS_PROMPT = 'Who are you sharing with today?';
@@ -463,147 +462,10 @@ function buildLastSignal(input: {
   ]);
 }
 
-function addMs(iso: string | null | undefined, ms: number): string | null {
-  if (!iso) return null;
-  const base = new Date(iso).getTime();
-  if (!Number.isFinite(base)) return null;
-  return new Date(base + ms).toISOString();
-}
-
 function isDue(iso: string | null | undefined, nowMs: number): boolean {
   if (!iso) return false;
   const dueMs = new Date(iso).getTime();
   return Number.isFinite(dueMs) && dueMs <= nowMs;
-}
-
-function nextActionFor(input: {
-  lifecycle: McsProspectLifecycleStage;
-  prospect: ProspectDoc;
-  crm: McsProspectMomentumCrmSummary;
-  lastSignal: McsProspectLastSignal;
-  nowMs: number;
-}): McsProspectNextAction {
-  const { lifecycle, prospect, crm, lastSignal, nowMs } = input;
-  const name = prospect.firstName;
-
-  if (lifecycle === 'archived' || lifecycle === 'enrolled' || lifecycle === 'customer') {
-    return {
-      kind: 'none',
-      label: 'No PMV action',
-      reason: `${name} is in a terminal or archived state.`,
-      priority: 0,
-      dueAt: null,
-      scriptKind: null,
-    };
-  }
-
-  if (lifecycle === 'callback_requested') {
-    return {
-      kind: 'reply_to_callback',
-      label: 'Reply to callback',
-      reason: `${name} raised a hand and asked for follow-up.`,
-      priority: 5,
-      dueAt: lastSignal.at,
-      scriptKind: 'callback_reply',
-    };
-  }
-
-  if (crm.followUpIsDue && crm.followUpDueAt) {
-    return {
-      kind: 'follow_up_due',
-      label: 'Follow-up due',
-      reason: `A BA-set reminder for ${name} is due.`,
-      priority: 4,
-      dueAt: crm.followUpDueAt,
-      scriptKind: 'later_reconnect',
-    };
-  }
-
-  if (lifecycle === 'watched') {
-    return {
-      kind: 'call_now',
-      label: 'Call now',
-      reason: `${name} watched the video and has not raised a callback request yet.`,
-      priority: 4,
-      dueAt: lastSignal.at,
-      scriptKind: 'watched_no_callback',
-    };
-  }
-
-  if (lifecycle === 'draft') {
-    return {
-      kind: 'send_invite',
-      label: 'Manually send invite',
-      reason: `${name}'s invitation is minted but not marked sent.`,
-      priority: 3,
-      dueAt: null,
-      scriptKind: 'initial_send',
-    };
-  }
-
-  if (lifecycle === 'expired') {
-    return {
-      kind: 'reinvite',
-      label: 'Consider re-invite',
-      reason: `${name}'s consideration window has expired.`,
-      priority: 2,
-      dueAt: prospect.expiresAt,
-      scriptKind: 'reinvite',
-    };
-  }
-
-  if (lifecycle === 'clicked') {
-    return {
-      kind: 'ask_if_video_played',
-      label: 'Ask if video played',
-      reason: `${name} opened the link but has not started the video.`,
-      priority: 2,
-      dueAt: lastSignal.at,
-      scriptKind: 'clicked_no_watch',
-    };
-  }
-
-  if (lifecycle === 'video_started' || lifecycle === 'video_25' || lifecycle === 'video_50' || lifecycle === 'video_75') {
-    return {
-      kind: 'send_soft_nudge',
-      label: 'Send soft nudge',
-      reason: `${name} started the video and has not completed it yet.`,
-      priority: 2,
-      dueAt: lastSignal.at,
-      scriptKind: 'partial_watch',
-    };
-  }
-
-  if (lifecycle === 'sent_unopened') {
-    const nudgeDueAt = addMs(prospect.sentAt, TWO_DAY_MS);
-    if (isDue(nudgeDueAt, nowMs)) {
-      return {
-        kind: 'send_soft_nudge',
-        label: 'Send soft nudge',
-        reason: `${name}'s invitation was sent but has not been opened.`,
-        priority: 2,
-        dueAt: nudgeDueAt,
-        scriptKind: 'later_reconnect',
-      };
-    }
-    return {
-      kind: 'wait',
-      label: 'Wait',
-      reason: `${name}'s invitation was sent recently.`,
-      priority: 0,
-      dueAt: nudgeDueAt,
-      scriptKind: null,
-    };
-  }
-
-  return {
-    kind: 'none',
-    label: 'No PMV action',
-    reason: `${name} has no current PMV action.`,
-    priority: 0,
-    dueAt: null,
-    scriptKind: null,
-  };
 }
 
 function focusQueueFromRows(rows: McsProspectMomentumRow[]): McsProspectFocusQueueItem[] {
@@ -879,11 +741,14 @@ export async function getProspectMomentumViewer(
       latestActivity: latestActivityByProspect.get(p.prospectId) ?? null,
       lifecycle,
     });
-    const nextAction = nextActionFor({
+    const nextAction = projectCockpitNextAction({
       lifecycle,
-      prospect: p,
-      crm,
-      lastSignal,
+      firstName: p.firstName,
+      sentAt: p.sentAt ?? null,
+      expiresAt: p.expiresAt,
+      followUpDueAt: crm.followUpDueAt,
+      followUpIsDue: crm.followUpIsDue,
+      lastSignalAt: lastSignal.at,
       nowMs,
     });
 

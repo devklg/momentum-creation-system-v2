@@ -1121,7 +1121,7 @@ function FocusQueue({
         <div>
           <SectionLabel>Focus Queue</SectionLabel>
           <p className="text-cream-faint text-[13px] leading-[1.5]">
-            Highest-priority manual actions from the PMV projection.
+            Manual next steps based on lifecycle activity and your reminders.
           </p>
         </div>
         <span className="font-display text-[34px] leading-none text-gold">
@@ -1163,6 +1163,9 @@ function FocusQueue({
                     </p>
                     <p className="text-cream-faint text-[12px] leading-[1.4] mt-1">
                       {item.nextAction.label}
+                    </p>
+                    <p className="text-cream-mute text-[11px] leading-[1.45] mt-1 line-clamp-2">
+                      {item.nextAction.reason}
                     </p>
                   </div>
                   <span className="font-mono text-[10px] tracking-[0.08em] text-gold shrink-0">
