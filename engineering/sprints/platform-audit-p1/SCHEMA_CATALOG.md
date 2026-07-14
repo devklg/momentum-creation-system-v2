@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-14T18:46:28.336Z
+- Generated: 2026-07-14T18:56:00.145Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
