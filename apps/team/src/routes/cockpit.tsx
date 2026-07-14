@@ -44,6 +44,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { TrackRecordCard } from '@/components/cockpit/TrackRecordCard';
 import { FollowUpQueue } from '@/components/cockpit/FollowUpQueue';
+import { PmvDashboard } from '@/components/cockpit/PmvDashboard';
 import { OrientationCard } from '@/components/cockpit/OrientationCard';
 import { MichaelRuntimeSupportCard } from '@/components/cockpit/MichaelRuntimeSupportCard';
 import { ThreeWayCallWorkspace } from '@/components/cockpit/ThreeWayCallWorkspace';
@@ -752,7 +753,7 @@ export function CockpitPage() {
 
       {showPmvIntro && <PmvIntroPanel onDismiss={dismissPmvIntro} />}
 
-      <CountsStrip counts={summary.counts} />
+      <PmvDashboard rows={pmv.rows} />
 
       <FollowUpQueue
         onProspect={handlePmvJump}
@@ -1055,42 +1056,6 @@ function AgentSupportPanel({
           ))}
         </ul>
       </div>
-    </div>
-  );
-}
-
-function CountsStrip({
-  counts,
-}: {
-  counts: CockpitSummaryResponse['counts'];
-}) {
-  const items: Array<{ label: string; value: number; accent?: boolean }> = [
-    { label: 'Invited', value: counts.total },
-    { label: 'Sent', value: counts.sent },
-    { label: 'Watched', value: counts.watched },
-    { label: 'Callbacks', value: counts.callbacks, accent: true },
-    { label: 'Enrolled', value: counts.enrolled },
-  ];
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-      {items.map((it) => (
-        <div
-          key={it.label}
-          className="bg-cream/[0.02] border border-cream/10 rounded-md py-4 px-4"
-        >
-          <p
-            className={
-              'font-display text-[34px] leading-none ' +
-              (it.accent ? 'text-gold' : 'text-cream')
-            }
-          >
-            {it.value}
-          </p>
-          <p className="font-mono tracking-[0.1em] text-[10px] text-cream-faint uppercase mt-2">
-            {it.label}
-          </p>
-        </div>
-      ))}
     </div>
   );
 }
