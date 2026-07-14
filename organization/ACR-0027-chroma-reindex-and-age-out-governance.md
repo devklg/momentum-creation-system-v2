@@ -2,7 +2,7 @@
 
 ## Momentum Creation System V2
 
-Status: Proposed
+Status: Verified
 
 Priority: P2-133 — Chroma re-index tooling and age-out policy
 
@@ -10,7 +10,7 @@ Type: Operator tooling + derived-projection lifecycle policy
 
 Risk: High
 
-Approval: Pending Kevin L. Gardner
+Approval: Kevin L. Gardner — 2026-07-14
 
 Target Version: v1.2
 
@@ -135,6 +135,46 @@ The Administrator Guide currently leaves owner-approved retention duration as
   adapter, metadata-contract, full server, typecheck, build, and generated
   catalog gates pass.
 
+## Verified implementation
+
+Commit `b1b3ddb9` implements the approved operator boundary without adding a
+route, UI control, schedule, boot hook, or live mutation. The code-owned
+manifest covers every registered app collection plus all fourteen ratified
+Knowledge Evolution active collections. Only those active collections have a
+canonical projector and mutation capabilities; all other registered entries
+are audit-only, and the seven unowned live collections remain excluded.
+
+The CLI defaults to dry-run and accepts only exact manifest collection names,
+bounded batches, and collection-specific resume cursors. Apply additionally
+requires all of the following:
+
+- exact `--confirm P2-133`;
+- a dedicated `dec_p2_133_chroma_live_apply_*` decision id;
+- the SHA-256 of the reviewed dry-run report;
+- canonical Mongo readback proving Kevin, ACR-0027, mode, exact collections,
+  evidence digest, active status, and `live_chroma_apply` scope all match;
+- complete live and canonical scans with no blocked or duplicate canonical
+  projection identity;
+- exact post-upsert or post-removal readback.
+
+The approved implementation decision is intentionally rejected as a live-apply
+decision. No live apply was attempted or authorized during verification.
+
+Read-only dedicated-stack verification on 2026-07-14 produced content-free
+audit and reindex dry-run reports under `.logs/chroma-maintenance/`. Both
+observed 60 live collections, reported the same seven unowned exclusions,
+found zero live and zero canonical rows in the bounded
+`mcs_success_knowledge_en` sample, and applied zero upserts/removals. Evidence:
+
+- audit SHA-256: `6f4fd36f4164a67cbf0b6e79e64a0caeef0fad15115dc7edee70db42546c5516`
+- reindex SHA-256: `c6824852e6ee3a896602d875d0cdc8e13ad093cccb5d3c8e3e8057213c1e5225`
+
+Automated verification passed 20 focused maintenance/adapter safety tests,
+repository-wide typecheck, the production build, generated catalog execution,
+`git diff --check`, and the full server suite with 2,169 passing and 19 skipped
+tests. This operator-only change has no visual surface, so no visual gate
+applies.
+
 ## Rollback
 
 Disable/remove the maintenance CLI and manifest. Any projection removed during
@@ -148,7 +188,7 @@ records are never deleted or rewritten by this tool.
 {
   "acr_id": "ACR-0027",
   "title": "Chroma Re-index and Age-out Governance",
-  "status": "proposed",
+  "status": "verified",
   "risk_level": "high",
   "change_type": "runtime_operator_tooling_and_policy",
   "proposed_by": "Codex",
@@ -182,32 +222,67 @@ records are never deleted or rewritten by this tool.
       "Kevin L. Gardner",
       "Persistence/QA"
     ],
-    "decision": "pending",
+    "decision": "approved",
     "conditions": [
       "Implementation approval does not authorize a live apply run.",
       "Calendar-based deletion remains disabled pending a separate duration decision."
-    ]
+    ],
+    "approved_by": "Kevin L. Gardner",
+    "approved_at": "2026-07-14"
   },
   "implementation": {
     "branch": "codex/p2-133-chroma-lifecycle",
-    "commits": [],
-    "append_only_respected": null
+    "commits": [
+      "b1b3ddb9"
+    ],
+    "append_only_respected": true
   },
   "verification": {
     "baseline_focused_tests": 42,
-    "typecheck": null,
-    "flows": [],
-    "persistence_readback": null
+    "implementation_focused_tests": 20,
+    "full_server_tests": {
+      "passed": 2169,
+      "skipped": 19
+    },
+    "typecheck": "pass",
+    "build": "pass",
+    "catalog_generation": "pass",
+    "flows": [
+      "unknown and unowned collection rejection",
+      "dry-run zero-mutation enforcement",
+      "bounded batch and resume cursor",
+      "canonical approval, retrieval-ready, archive, and supersession classification",
+      "dedicated live-apply decision and dry-run digest enforcement",
+      "exact upsert and removal readback",
+      "content-free report contract"
+    ],
+    "persistence_readback": {
+      "mode": "read_only_dry_run",
+      "live_collection_count": 60,
+      "unowned_excluded_count": 7,
+      "sample_collection": "mcs_success_knowledge_en",
+      "sample_live_records": 0,
+      "sample_canonical_records": 0,
+      "applied_upserts": 0,
+      "applied_removals": 0,
+      "audit_report_sha256": "6f4fd36f4164a67cbf0b6e79e64a0caeef0fad15115dc7edee70db42546c5516",
+      "reindex_report_sha256": "c6824852e6ee3a896602d875d0cdc8e13ad093cccb5d3c8e3e8057213c1e5225"
+    }
   },
   "release": {
-    "gates_passed": [],
-    "gates_pending": [
-      "kevin_architecture_approval",
+    "gates_passed": [
       "implementation",
-      "automated_verification",
-      "dry_run_evidence_review"
+      "focused_automated_verification",
+      "repository_typecheck",
+      "production_build",
+      "full_server_tests",
+      "catalog_generation",
+      "content_free_live_dry_runs"
     ],
-    "released_at": null
+    "gates_pending": [
+      "kevin_live_apply_authorization"
+    ],
+    "released_at": "2026-07-14"
   },
   "version": {
     "from": "single-object reindex coordination without operator rebuild policy",
@@ -215,14 +290,19 @@ records are never deleted or rewritten by this tool.
     "supersedes": null,
     "rollback_to": "single-object reindex coordination"
   },
-  "decision_ledger_ref": null,
+  "decision_ledger_ref": "dec_acr_0027_chroma_reindex_age_out_approval_2026_07_14",
   "created_at": "2026-07-14",
   "updated_at": "2026-07-14"
 }
 ```
 
-## Approval gate
+## Approval record
 
-Implementation remains blocked until Kevin approves the recommended ACR-0027
-bundle. Even after approval and implementation, live apply remains separately
-blocked until Kevin reviews dry-run evidence and authorizes exact collections.
+Kevin L. Gardner approved the recommended ACR-0027 bundle on 2026-07-14 with
+the exact statement `YES approve acr-0027`. The durable decision ledger record
+is `dec_acr_0027_chroma_reindex_age_out_approval_2026_07_14`.
+
+This approval authorizes implementation and local/disposable verification only.
+Live Chroma re-index or age-out mutation remains separately blocked until Kevin
+reviews an exact dry-run evidence digest and authorizes the exact mode and
+collections in a dedicated live-apply decision.
