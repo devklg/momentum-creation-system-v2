@@ -88,4 +88,20 @@ describe('P1-60 agent skill and template governance', () => {
       expect.arrayContaining(['score', 'rank', 'qualification', 'prediction']),
     );
   });
+
+  it('registers every current Ivory and ScriptMaker generation surface', () => {
+    const identities = MCS_AGENT_TEMPLATE_REGISTRY
+      .filter((item) => item.ownerAgentKey === 'ivory' || item.ownerAgentKey === 'scriptmaker')
+      .map((item) => `${item.templateId}@${item.version}`)
+      .sort();
+
+    expect(identities).toEqual([
+      'ivory_momentum_followup@1.0.0',
+      'ivory_personal_invitation@1.0.0',
+      'ivory_wdyk_coach@1.0.0',
+      'scriptmaker_product_invitation@1.0.0',
+      'scriptmaker_wdyk_opportunity@0.1.0',
+      'scriptmaker_wdyk_product@0.1.0',
+    ]);
+  });
 });
