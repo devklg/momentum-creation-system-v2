@@ -28,7 +28,7 @@ export function IndexAwarenessPanel() {
           credentials: 'include',
         });
         const payload = await response.json() as IndexAwarenessResponse;
-        if (!response.ok || !payload.ok) throw new Error('unavailable');
+        if (!response.ok || !payload.ok || !Array.isArray(payload.indexes)) throw new Error('unavailable');
         if (!cancelled) setReport(payload);
       } catch {
         if (!cancelled) setUnavailable(true);

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T06:20:56.453Z",
+  "generatedAt": "2026-07-14T06:34:48.060Z",
   "sources": [
     "docs/app-data-model-contract.md §9",
     "engineering/sprints/platform-audit-p1/mongo-ownership-map.json",
@@ -12,11 +12,11 @@
     "knowledgeEvolutionEnsureIndexes": "present_for_knowledge_evolution_only",
     "vmIndexDefinitions": "declared_in_schema_registry_not_generally_applied"
   },
-  "indexCount": 67,
+  "indexCount": 70,
   "byStatus": {
     "planned_missing_enforcement": 42,
     "vm_registry_declared": 6,
-    "required_not_verified": 19
+    "required_not_verified": 22
   },
   "highVolumeWithoutPlan": [],
   "indexes": [
@@ -932,6 +932,59 @@
       "ownerId": "holding_tank_and_reentry",
       "steward": "Prospect access / pool placement",
       "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_event_attendance",
+      "name": "admin_event_type_reservation_recordedAt",
+      "keys": {
+        "eventId": 1,
+        "eventType": 1,
+        "reservationId": 1,
+        "recordedAt": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Complete latest explicit attendance summaries for selected events.",
+      "status": "required_not_verified",
+      "ownerId": "events_orientation_and_calls",
+      "steward": "Events / orientation domain",
+      "primarySurface": "team + admin + workers"
+    },
+    {
+      "collection": "tmag_event_attendance",
+      "name": "admin_reservation_type_recordedAt",
+      "keys": {
+        "reservationId": 1,
+        "eventType": 1,
+        "recordedAt": -1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Latest explicit attendance record for page-scoped reservations.",
+      "status": "required_not_verified",
+      "ownerId": "events_orientation_and_calls",
+      "steward": "Events / orientation domain",
+      "primarySurface": "team + admin + workers"
+    },
+    {
+      "collection": "tmag_prospect_crm_followups",
+      "name": "admin_prospect_sponsor_cleared_dueAt",
+      "keys": {
+        "prospectId": 1,
+        "sponsorTmagId": 1,
+        "clearedAt": 1,
+        "dueAt": 1
+      },
+      "options": {
+        "unique": false
+      },
+      "rationale": "Open human CRM follow-up lookup for page and aggregate event projections.",
+      "status": "required_not_verified",
+      "ownerId": "prospect_crm",
+      "steward": "CRM domain",
+      "primarySurface": "team + admin"
     },
     {
       "collection": "tmag_resource_catalog",

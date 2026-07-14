@@ -24,7 +24,6 @@ import {
   appendBaNote,
   applySponsorOverride,
   getTmagProfileBundle,
-  listBADirectory,
   listBADirectoryPage,
   setBaEntitlement,
   setCuratedLeaderTag,
@@ -218,12 +217,14 @@ adminBasRoutes.post(
       }
       // Refresh the row so the table can update in place.
       const bundle = await getTmagProfileBundle(params.data.tmagId);
+      if (!bundle) {
+        res.status(500).json({ ok: false, error: 'Updated BA could not be reloaded.' });
+        return;
+      }
       const responseBody: McsAdminSponsorOverrideResponse = {
         ok: true,
         override: result.entry,
-        row:
-          bundle?.row ??
-          (await listBADirectory(2000)).rows.find((r) => r.tmagId === params.data.tmagId)!,
+        row: bundle.row,
       };
       res.json(responseBody);
     } catch (err) {

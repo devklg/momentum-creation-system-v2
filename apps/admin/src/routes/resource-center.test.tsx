@@ -21,9 +21,16 @@ describe('Resource Center admin analytics', () => {
   it('appends catalog pages, deduplicates versions, and keeps complete totals', async () => {
     const row = (resourceVersionId: string, title: string) => ({ resourceVersionId, title, kind: 'static_resource', version: 1, openCount: 1, uniqueMemberCount: 1, opensLast30Days: 1, lastOpenedAt: null, staleReviewWarning: false, staleReviewAgeDays: 1 });
     const base = { ok: true, policy: { staleReviewDays: 90, warningOnly: true, changesPublishingState: false }, totals: { activeResources: 20, totalOpens: 99, opensLast30Days: 12, neverOpened: 3, staleReviewWarnings: 2 } };
-    const fetchMock = vi.fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...base, resources: [row('r1', 'First')], pageInfo: { pageSize: 1, hasMore: true, nextCursor: 'cursor-token-that-is-long-enough' } }) })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...base, resources: [row('r1', 'First updated'), row('r2', 'Second')], pageInfo: { pageSize: 1, hasMore: false, nextCursor: null } }) });
+    let analyticsPage = 0;
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url.includes('index-awareness')) {
+        return { ok: false, json: async () => ({ ok: false }) };
+      }
+      analyticsPage += 1;
+      return analyticsPage === 1
+        ? { ok: true, json: async () => ({ ...base, resources: [row('r1', 'First')], pageInfo: { pageSize: 1, hasMore: true, nextCursor: 'cursor-token-that-is-long-enough' } }) }
+        : { ok: true, json: async () => ({ ...base, resources: [row('r1', 'First updated'), row('r2', 'Second')], pageInfo: { pageSize: 1, hasMore: false, nextCursor: null } }) };
+    });
     vi.stubGlobal('fetch', fetchMock);
     render(<ResourceCenterAdminPage />);
     fireEvent.click(await screen.findByRole('button', { name: 'Load more resources' }));

@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Generated: 2026-07-14T06:20:56.453Z
-- Planned/audited indexes: 67
+- Generated: 2026-07-14T06:34:48.060Z
+- Planned/audited indexes: 70
 - General ensureIndexes runner: not_present
 - Knowledge Evolution ensureIndexes: present_for_knowledge_evolution_only
 - VM index definitions: declared_in_schema_registry_not_generally_applied
@@ -15,7 +15,7 @@
 | Status | Count |
 | --- | ---: |
 | planned_missing_enforcement | 42 |
-| required_not_verified | 19 |
+| required_not_verified | 22 |
 | vm_registry_declared | 6 |
 
 ## High-Volume Collections Without A Specific Plan Row
@@ -88,6 +88,9 @@
 | `tmag_prospect_callback_requests` | `admin_prospect_createdAt` | `prospectId:1, createdAt:-1` | no | required_not_verified | Prospect / invitation domain | Latest callback join by page prospect. |
 | `tmag_prospect_webinar_reservations` | `admin_prospect_createdAt` | `prospectId:1, createdAt:-1` | no | required_not_verified | Prospect access / pool placement | Latest webinar join by page prospect. |
 | `tmag_prospect_webinar_reservations` | `admin_event_createdAt_reservationId` | `eventId:1, createdAt:-1, reservationId:-1` | no | required_not_verified | Prospect access / pool placement | Stable reservation page within selected events. |
+| `tmag_event_attendance` | `admin_event_type_reservation_recordedAt` | `eventId:1, eventType:1, reservationId:1, recordedAt:-1` | no | required_not_verified | Events / orientation domain | Complete latest explicit attendance summaries for selected events. |
+| `tmag_event_attendance` | `admin_reservation_type_recordedAt` | `reservationId:1, eventType:1, recordedAt:-1` | no | required_not_verified | Events / orientation domain | Latest explicit attendance record for page-scoped reservations. |
+| `tmag_prospect_crm_followups` | `admin_prospect_sponsor_cleared_dueAt` | `prospectId:1, sponsorTmagId:1, clearedAt:1, dueAt:1` | no | required_not_verified | CRM domain | Open human CRM follow-up lookup for page and aggregate event projections. |
 | `tmag_resource_catalog` | `admin_active_team_updatedAt_resourceVersionId` | `lifecycle:1, audience.surfaces:1, updatedAt:-1, resourceVersionId:-1` | no | required_not_verified | unknown | Page-first active Team catalog ordering. |
 | `tmag_resource_usage_events` | `admin_version_event_occurredAt` | `resourceVersionId:1, eventType:1, occurredAt:-1` | no | required_not_verified | unknown | Page-scoped all-time and recent usage aggregates. |
 | `mcs_audit_log` | `admin_timestamp_entryId` | `timestamp:-1, entryId:-1` | no | required_not_verified | Operations / governance | Stable audit traversal tie-breaker. |

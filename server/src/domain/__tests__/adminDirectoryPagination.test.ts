@@ -107,8 +107,14 @@ describe('admin directory keyset traversal', () => {
     const joinFilters: string[][] = [];
     persistence.persistenceCall.mockImplementation(
       async (_tool: string, action: string, params: Record<string, unknown>) => {
-        expect(action).toBe('query');
         const collection = String(params.collection);
+        if (action === 'aggregate') {
+          const match = (params.pipeline as Array<{ $match?: Record<string, unknown> }>)[0]?.$match;
+          const ids = ((match?.prospectId as { $in?: string[] } | undefined)?.$in ?? []);
+          joinFilters.push(ids);
+          return { results: [] };
+        }
+        expect(action).toBe('query');
         const filter = params.filter as Record<string, unknown>;
         if (collection === 'tmag_prospects') {
           if (typeof filter.prospectId === 'string') {

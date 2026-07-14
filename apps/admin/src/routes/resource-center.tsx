@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { IndexAwarenessPanel } from '@/components/resource-center/IndexAwarenessPanel';
 
 type ResourceRow = {
   resourceVersionId: string;
@@ -63,6 +64,7 @@ export function ResourceCenterAdminPage() {
           Verified resource opens and advisory review warnings. Warnings never publish, retire, or change the authority of a resource.
         </p>
       </header>
+      <IndexAwarenessPanel />
       {error && <Panel>The resource usage report is unavailable right now.</Panel>}
       {!error && !data && <Panel>Loading verified resource usage…</Panel>}
       {data && (
