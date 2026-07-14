@@ -1,6 +1,6 @@
 # ACR-0021 — Steve Success Profile Guidance Projection
 
-**Status:** PROPOSED — implementation prepared for Kevin review; no approval is inferred
+**Status:** APPROVED — Kevin authorized CLI gates, merge, cleanup, and continuation in the active Codex task on 2026-07-13
 **Authorship:** Agent-authored reconciliation proposal
 **Risk:** Medium — additive recommendation/API/surface projection
 **Change type:** Shared contract / read-only application projection
@@ -63,5 +63,9 @@ behavior remain unchanged.
 
 ## Approval record
 
-No approval has been recorded. Kevin remains the sole approval and merge
-authority.
+Kevin L. Gardner approved this governed implementation and explicitly
+authorized Codex to run the CLI gates, merge, clean up, and continue the
+Priority Task List Audit in the active Codex task on 2026-07-13. This approval
+is scoped to the read-only `steve_guidance.v1` projection and the boundaries
+recorded above; it does not authorize future Michael runtime consumption or a
+broader Steve-profile privacy contract.
