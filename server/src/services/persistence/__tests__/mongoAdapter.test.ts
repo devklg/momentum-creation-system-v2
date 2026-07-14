@@ -52,10 +52,12 @@ describe('Mongo direct adapter', () => {
     const queryChain = {
       exec: vi.fn().mockResolvedValue([{ _id: 'one' }]),
       limit: vi.fn(),
+      select: vi.fn(),
       sort: vi.fn(),
     };
     queryChain.sort.mockReturnValue(queryChain);
     queryChain.limit.mockReturnValue(queryChain);
+    queryChain.select.mockReturnValue(queryChain);
     mocks.fakeModel.find.mockReturnValue({ lean: () => queryChain });
     mocks.fakeModel.countDocuments.mockReturnValue({ exec: vi.fn().mockResolvedValue(1) });
     mocks.fakeModel.updateMany.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 });
@@ -66,10 +68,12 @@ describe('Mongo direct adapter', () => {
       mongoAdapter('query', {
         collection: 'adapter_contracts',
         filter: { active: true },
+        projection: { _id: 1, active: 1 },
         sort: { createdAt: -1 },
         limit: 1,
       }),
     ).resolves.toEqual({ documents: [{ _id: 'one' }], count: 1 });
+    expect(queryChain.select).toHaveBeenCalledWith({ _id: 1, active: 1 });
 
     await expect(
       mongoAdapter('update', {

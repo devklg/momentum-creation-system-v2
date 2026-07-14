@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T17:55:31.208Z",
+  "generatedAt": "2026-07-14T18:26:52.241Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -6147,6 +6147,16 @@
       "file": "packages/shared/src/admin-bottlenecks.ts"
     },
     {
+      "name": "McsAdminKnowledgeIntegrityState",
+      "kind": "type",
+      "file": "packages/shared/src/admin-knowledge-status.ts"
+    },
+    {
+      "name": "McsAdminKnowledgeIntegrityStatus",
+      "kind": "interface",
+      "file": "packages/shared/src/admin-knowledge-status.ts"
+    },
+    {
       "name": "McsAdminKnowledgeReadiness",
       "kind": "type",
       "file": "packages/shared/src/admin-knowledge-status.ts"
@@ -6154,6 +6164,21 @@
     {
       "name": "McsAdminKnowledgeStatusResponse",
       "kind": "interface",
+      "file": "packages/shared/src/admin-knowledge-status.ts"
+    },
+    {
+      "name": "McsKnowledgeSourceConflictClass",
+      "kind": "type",
+      "file": "packages/shared/src/admin-knowledge-status.ts"
+    },
+    {
+      "name": "McsKnowledgeSourceConflictFingerprint",
+      "kind": "interface",
+      "file": "packages/shared/src/admin-knowledge-status.ts"
+    },
+    {
+      "name": "McsKnowledgeSourceConflictSeverity",
+      "kind": "type",
       "file": "packages/shared/src/admin-knowledge-status.ts"
     },
     {
@@ -11649,6 +11674,6 @@
     "chromaCollections": 53,
     "routeModules": 49,
     "routeHandlers": 279,
-    "sharedExports": 1111
+    "sharedExports": 1116
   }
 }

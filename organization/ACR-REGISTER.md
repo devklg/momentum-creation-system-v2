@@ -40,6 +40,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0025 | Admin Pagination and Index Awareness | P2-131 / admin high-volume read contracts | Approved | v1.2 |
 | ACR-0026 | Context Retrieval Cache and Readiness Batching | P2-132 / Context Manager + GraphRAG retrieval | Verified | v1.2 |
 | ACR-0027 | Chroma Re-index and Age-out Governance | P2-133 / Chroma operator maintenance | Verified | v1.2 |
+| ACR-0028 | Knowledge Source Conflict Detection | P2-134 / Knowledge integrity observation | Verified | v1.2 |
 
 ---
 

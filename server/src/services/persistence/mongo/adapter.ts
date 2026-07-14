@@ -13,6 +13,7 @@ interface MongoParams {
   update?: Record<string, unknown>;
   pipeline?: PipelineStage[];
   sort?: Record<string, 1 | -1>;
+  projection?: Record<string, 0 | 1>;
   limit?: number;
 }
 
@@ -61,6 +62,7 @@ export async function mongoQuery(params: MongoParams): Promise<{
   const filter = params.filter ?? params.query ?? {};
   const model = getMongoModel(database(params), collection(params, 'query'));
   let query = model.find(filter).lean<MongoDocument[]>();
+  if (params.projection) query = query.select(params.projection);
   if (params.sort) query = query.sort(params.sort);
   if (typeof params.limit === 'number') query = query.limit(params.limit);
   const [documents, count] = await Promise.all([query.exec(), model.countDocuments(filter).exec()]);
