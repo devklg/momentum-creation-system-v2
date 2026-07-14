@@ -20,15 +20,16 @@
 import express, { type Request, type Response, type Router } from 'express';
 import { z } from 'zod';
 import { requireAdmin } from '../../middleware/requireAuth.js';
-import { listAllBAsForAdmin } from '../../domain/ba.js';
 import {
   appendBaNote,
   applySponsorOverride,
   getTmagProfileBundle,
-  listBADirectory,
+  listBADirectoryPage,
   setBaEntitlement,
   setCuratedLeaderTag,
 } from '../../domain/adminBaOversight.js';
+import { AdminCursorError } from '../../domain/adminPagination.js';
+import { appendAuditEntry } from '../../domain/auditLog.js';
 import {
   adminCreateBa,
   adminEditBa,
@@ -44,6 +45,7 @@ import type {
   McsAdminBaEntitlementsResponse,
   McsAdminBaNoteResponse,
   McsAdminBaProfileResponse,
+  McsAdminPaginationContract,
   McsAdminLeaderTagResponse,
   McsAdminSponsorOverrideResponse,
 } from '@momentum/shared';
@@ -66,29 +68,84 @@ adminBasRoutes.get('/launch-readiness', requireAdmin, async (req, res) => {
 });
 
 adminBasRoutes.get('/', requireAdmin, async (req: Request, res: Response) => {
-  const limitRaw = Number.parseInt(String(req.query.limit ?? '500'), 10);
-  const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(2000, limitRaw)) : 500;
+  const parsed = BaDirectoryQuery.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ ok: false, error: 'Invalid pagination parameters.', issues: parsed.error.issues });
+    return;
+  }
 
   try {
-    const [{ rows, leaderDetectionNote }, legacy] = await Promise.all([
-      listBADirectory(limit),
-      // Preserve the pre-#135 shape so any caller still keying off `bas:`
-      // keeps working. The new client reads `rows:`.
-      listAllBAsForAdmin(limit),
-    ]);
-    const body: McsAdminBaDirectoryResponse & { bas: typeof legacy; count: number } = {
+    const page = await listBADirectoryPage(parsed.data);
+    await appendAuditEntry({
+      actor: {
+        kind: 'admin',
+        tmagId: req.session!.tmagId,
+        displayName: req.session!.email ?? req.session!.tmagId,
+      },
+      action: 'admin.ba.directory_page.viewed',
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
+      severity: 'info',
+      after: paginationAuditMetadata({
+        pageSize: parsed.data.pageSize,
+        cursorProvided: Boolean(parsed.data.cursor),
+        searchApplied: Boolean(parsed.data.search),
+        returnedCount: page.rows.length,
+        hasMore: page.pageInfo.hasMore,
+      }),
+      reason: null,
+      context: {
+        ip: req.ip ?? null,
+        userAgent: req.get('user-agent') ?? null,
+        route: '/api/admin/bas',
+        method: 'GET',
+        requestId: null,
+      },
+    });
+    const body: McsAdminBaDirectoryResponse & McsAdminPaginationContract & {
+      bas: typeof page.legacyBas;
+      count: number;
+      appliedSearch: string;
+    } = {
       ok: true,
-      count: rows.length,
-      rows,
-      leaderDetectionNote,
-      bas: legacy,
+      count: page.rows.length,
+      rows: page.rows,
+      leaderDetectionNote: page.leaderDetectionNote,
+      bas: page.legacyBas,
+      pageInfo: page.pageInfo,
+      appliedSearch: page.appliedSearch,
+      appliedSort: 'createdAt_desc_tmagId_desc',
+      computedAt: new Date().toISOString(),
     };
     res.json(body);
   } catch (err) {
+    if (err instanceof AdminCursorError) {
+      res.status(400).json({ ok: false, error: err.code });
+      return;
+    }
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Directory failed: ${msg}` });
   }
 });
+
+const BaDirectoryQuery = z.object({
+  pageSize: z.coerce.number().int().min(1).max(100).default(50),
+  cursor: z.string().min(20).max(2000).optional(),
+  search: z.string().trim().max(120).optional(),
+}).strict();
+
+export function parseBaDirectoryQuery(query: unknown) {
+  return BaDirectoryQuery.safeParse(query);
+}
+
+export function paginationAuditMetadata(input: {
+  pageSize: number;
+  cursorProvided: boolean;
+  searchApplied: boolean;
+  returnedCount: number;
+  hasMore: boolean;
+}) {
+  return { ...input, sort: 'createdAt_desc_tmagId_desc' as const };
+}
 
 const TmagIdParams = z.object({
   tmagId: z.string().min(2).max(80),
@@ -160,12 +217,14 @@ adminBasRoutes.post(
       }
       // Refresh the row so the table can update in place.
       const bundle = await getTmagProfileBundle(params.data.tmagId);
+      if (!bundle) {
+        res.status(500).json({ ok: false, error: 'Updated BA could not be reloaded.' });
+        return;
+      }
       const responseBody: McsAdminSponsorOverrideResponse = {
         ok: true,
         override: result.entry,
-        row:
-          bundle?.row ??
-          (await listBADirectory(2000)).rows.find((r) => r.tmagId === params.data.tmagId)!,
+        row: bundle.row,
       };
       res.json(responseBody);
     } catch (err) {

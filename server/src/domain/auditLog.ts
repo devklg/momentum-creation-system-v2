@@ -29,6 +29,13 @@
 import { randomBytes } from 'node:crypto';
 import { env } from '../env.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
+import {
+  AdminCursorError,
+  combineMongoFilters,
+  decodeAdminCursor,
+  descendingKeysetFilter,
+  encodeAdminCursor,
+} from './adminPagination.js';
 import { writeOperational } from '../services/tieredWrite.js';
 import type {
   McsAppendAuditEntryInput,
@@ -255,17 +262,32 @@ export async function queryAuditEntries(
   filters: McsAuditQueryFilters,
 ): Promise<{ entries: McsTaxonomizedAuditLogEntry[]; nextCursor: string | null }> {
   const limit = Math.max(1, Math.min(filters.limit ?? DEFAULT_LIMIT, MAX_LIMIT));
-  const filter = buildMongoFilter(filters);
+  const baseFilter = buildMongoFilter(filters);
+  let filter = baseFilter;
+  const { before: _before, ...filterContract } = filters;
+  const contract = { filters: filterContract, limit, sort: 'timestamp_desc_entryId_desc' };
 
   if (filters.before) {
-    const cursorEntry = await findAuditEntry(filters.before);
-    if (cursorEntry) {
-      // Strictly older than the cursor's (timestamp, entryId) pair.
-      filter.$or = [
-        { timestamp: { $lt: cursorEntry.timestamp } },
-        { timestamp: cursorEntry.timestamp, entryId: { $lt: cursorEntry.entryId } },
-      ];
-    }
+    const keys = decodeAdminCursor({
+      token: filters.before,
+      scope: 'admin_audit.v1',
+      contract,
+      requiredKeys: ['timestamp', 'entryId'],
+    });
+    const cursorMatch = await persistenceCall<{ documents: McsAuditLogEntry[] }>('mongodb', 'query', {
+      database: MONGO_DB,
+      collection: COLLECTION,
+      filter: combineMongoFilters(baseFilter, {
+        timestamp: keys.timestamp,
+        entryId: keys.entryId,
+      }),
+      limit: 1,
+    });
+    if (!cursorMatch.documents?.[0]) throw new AdminCursorError();
+    filter = combineMongoFilters(
+      baseFilter,
+      descendingKeysetFilter('timestamp', 'entryId', keys.timestamp!, keys.entryId!),
+    );
   }
 
   const result = await persistenceCall<{ documents: McsAuditLogEntry[]; count: number }>(
@@ -284,7 +306,14 @@ export async function queryAuditEntries(
   const hasMore = docs.length > limit;
   const selected = hasMore ? docs.slice(0, limit) : docs;
   const entries = selected.map((entry) => ({ ...entry, taxonomy: (entry as McsTaxonomizedAuditLogEntry).taxonomy ?? classifyAuditAction(entry.action, entry.severity) }));
-  const nextCursor = hasMore ? entries[entries.length - 1]?.entryId ?? null : null;
+  const last = entries[entries.length - 1];
+  const nextCursor = hasMore && last
+    ? encodeAdminCursor({
+        scope: 'admin_audit.v1',
+        contract,
+        keys: { timestamp: last.timestamp, entryId: last.entryId },
+      })
+    : null;
 
   return { entries, nextCursor };
 }

@@ -8,7 +8,7 @@
  * via linkedTranscriptId (Chat #89 - no separate tab).
  */
 
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import type {
   McsAuditActor,
   McsAuditActorRole,
@@ -58,6 +58,7 @@ export function AuditPage() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [openEntryId, setOpenEntryId] = useState<string | null>(null);
+  const requestSequence = useRef(0);
 
   const queryString = useMemo(() => buildQueryString(applied, null), [applied]);
 
@@ -66,22 +67,35 @@ export function AuditPage() {
   }, [queryString]);
 
   async function load(qs: string, append: boolean): Promise<void> {
+    const sequence = ++requestSequence.current;
     setLoading(true);
     setErr(null);
+    if (!append) {
+      setEntries(null);
+      setNextCursor(null);
+    }
     try {
       const res = await fetch(`/api/admin/audit${qs}`, { credentials: 'include' });
       const data = (await res.json()) as ListResponse;
+      if (sequence !== requestSequence.current) return;
       if (!data.ok) {
         setErr(data.error ?? 'Could not load audit log.');
         return;
       }
       const fresh = data.entries ?? [];
-      setEntries((prev) => (append && prev ? [...prev, ...fresh] : fresh));
+      setEntries((prev) => {
+        if (!append || !prev) return fresh;
+        const byId = new Map(prev.map((entry) => [entry.entryId, entry]));
+        for (const entry of fresh) byId.set(entry.entryId, entry);
+        return [...byId.values()];
+      });
       setNextCursor(data.nextCursor ?? null);
     } catch (e) {
-      setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+      if (sequence === requestSequence.current) {
+        setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+      }
     } finally {
-      setLoading(false);
+      if (sequence === requestSequence.current) setLoading(false);
     }
   }
 
@@ -235,6 +249,11 @@ export function AuditPage() {
             {loading ? 'Loading…' : 'Load more'}
           </Button>
         </div>
+      )}
+      {entries && (
+        <p className="mt-3 font-mono text-[10px] uppercase tracking-label text-cream-faint">
+          Bounded reverse-chronological pages · {entries.length} loaded · matched total omitted
+        </p>
       )}
     </div>
   );

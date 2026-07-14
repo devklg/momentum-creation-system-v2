@@ -109,6 +109,30 @@ export async function mongoListCollections(params: MongoParams): Promise<{
   return { collections, count: collections.length };
 }
 
+export async function mongoListIndexes(params: MongoParams): Promise<{
+  collectionExists: boolean;
+  indexes: Array<{ name: string; keys: Record<string, 1 | -1>; unique: boolean }>;
+}> {
+  const model = getMongoModel(database(params), collection(params, 'list_indexes'));
+  try {
+    const indexes = await model.collection.indexes();
+    return {
+      collectionExists: true,
+      indexes: indexes.map((index) => ({
+        name: index.name ?? '',
+        keys: index.key as Record<string, 1 | -1>,
+        unique: index.unique === true,
+      })),
+    };
+  } catch (err) {
+    const mongoError = err as { code?: number; codeName?: string };
+    if (mongoError.code === 26 || mongoError.codeName === 'NamespaceNotFound') {
+      return { collectionExists: false, indexes: [] };
+    }
+    throw err;
+  }
+}
+
 export async function mongoPing(params: MongoParams): Promise<{ ok: true }> {
   await connectMongo();
   const db = getMongoConnection(database(params)).db;
@@ -136,6 +160,8 @@ export async function mongoAdapter(
         return await mongoAggregate(p);
       case 'list_collections':
         return await mongoListCollections(p);
+      case 'list_indexes':
+        return await mongoListIndexes(p);
       case 'ping':
         return await mongoPing(p);
       default:

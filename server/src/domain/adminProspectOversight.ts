@@ -38,6 +38,14 @@
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeOperational } from '../services/tieredWrite.js';
 import { appendAuditEntry } from './auditLog.js';
+import {
+  AdminCursorError,
+  combineMongoFilters,
+  decodeAdminCursor,
+  descendingKeysetFilter,
+  encodeAdminCursor,
+  type AdminPageInfo,
+} from './adminPagination.js';
 import { listLeaderTmagIds, LEADER_DETECTION_NOTE } from './adminMetrics.js';
 import { findProspectById } from './prospects.js';
 import { TOKEN_TTL_MS } from './tokens.js';
@@ -160,12 +168,14 @@ async function resolveScopedTmagIds(
 
 /* ─── BA name resolver ──────────────────────────────────────────── */
 
-async function loadBaNameMap(): Promise<Map<string, string>> {
+async function loadBaNameMapFor(tmagIds: string[]): Promise<Map<string, string>> {
+  const uniqueIds = [...new Set(tmagIds)];
+  if (uniqueIds.length === 0) return new Map();
   const result = await persistenceCall<{ documents: BaDoc[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: COLL_BAS,
-    filter: {},
-    limit: 50_000,
+    filter: { tmagId: { $in: uniqueIds } },
+    limit: uniqueIds.length,
   });
   const map = new Map<string, string>();
   for (const doc of result.documents ?? []) {
@@ -294,48 +304,36 @@ function truncatedToken(token: string): string {
  * Build the D.1 directory rows. Pure-read; the route handler appends an
  * `admin.prospects.directory.viewed` info-severity audit entry.
  *
- * Sorting: not applied here. The client sorts in-memory on column click
- * (Kevin-scale; rows are dozens to low thousands at v1).
+ * The caller has already selected the stable server-ordered page. This helper
+ * only performs page-scoped joins and projection; it never reorders rows.
  */
-export async function listDirectoryRows(
-  filter: McsAdminDashboardFilter,
-  nowMs: number = Date.now(),
+async function buildDirectoryRows(
+  prospects: ProspectDoc[],
+  nowMs: number,
 ): Promise<McsAdminProspectDirectoryRow[]> {
-  const scopedTmagIds = await resolveScopedTmagIds(filter);
-  const baNames = await loadBaNameMap();
-
-  const prospectFilter: Record<string, unknown> = {};
-  if (scopedTmagIds) {
-    if (scopedTmagIds.length === 0) return [];
-    prospectFilter.sponsorTmagId = { $in: scopedTmagIds };
-  }
-  const prospectsResult = await persistenceCall<{ documents: ProspectDoc[] }>(
-    'mongodb',
-    'query',
-    {
-      database: MONGO_DB,
-      collection: COLL_PROSPECTS,
-      filter: prospectFilter,
-      sort: { createdAt: -1 },
-      limit: 50_000,
-    },
-  );
-  const prospects = prospectsResult.documents ?? [];
   if (prospects.length === 0) return [];
 
   const prospectIds = prospects.map((p) => p.prospectId);
+  const sponsorTmagIds = prospects.map((p) => p.sponsorTmagId);
 
-  const [placements, tokens, callbacks, webinars] = await Promise.all([
-    queryByProspectIds<McsPoolPlacement>(COLL_PLACEMENTS, prospectIds),
-    queryByProspectIds<McsInviteTokenRecord>(COLL_TOKENS, prospectIds),
-    queryByProspectIds<McsCallbackRequestRecord>(COLL_CALLBACKS, prospectIds),
-    queryByProspectIds<McsWebinarReservationRecord>(COLL_WEBINARS, prospectIds),
-  ]);
+  const [baNames, placements, tokenByProspect, callbackByProspect, webinarByProspect] =
+    await Promise.all([
+      loadBaNameMapFor(sponsorTmagIds),
+      queryByProspectIds<McsPoolPlacement>(COLL_PLACEMENTS, prospectIds),
+      queryLatestByProspect<McsInviteTokenRecord>(COLL_TOKENS, prospectIds, 'token'),
+      queryLatestByProspect<McsCallbackRequestRecord>(
+        COLL_CALLBACKS,
+        prospectIds,
+        'callbackRequestId',
+      ),
+      queryLatestByProspect<McsWebinarReservationRecord>(
+        COLL_WEBINARS,
+        prospectIds,
+        'reservationId',
+      ),
+    ]);
 
   const placementByProspect = indexBy(placements, (p) => p.prospectId);
-  const tokenByProspect = latestByProspect(tokens, (t) => t.createdAt);
-  const callbackByProspect = latestByProspect(callbacks, (c) => c.createdAt);
-  const webinarByProspect = latestByProspect(webinars, (w) => w.createdAt);
 
   return prospects.map<McsAdminProspectDirectoryRow>((p) => {
     const placement = placementByProspect.get(p.prospectId) ?? null;
@@ -372,6 +370,82 @@ export async function listDirectoryRows(
       deleted: p.deleted === true,
     };
   });
+}
+
+const PROSPECT_DIRECTORY_SCOPE = 'admin_prospect_directory.v1';
+
+export async function listProspectDirectoryPage(input: {
+  filter: McsAdminDashboardFilter;
+  pageSize: number;
+  cursor?: string;
+  nowMs?: number;
+}): Promise<{ rows: McsAdminProspectDirectoryRow[]; pageInfo: AdminPageInfo }> {
+  const pageSize = Math.max(1, Math.min(100, input.pageSize));
+  const scopedTmagIds = await resolveScopedTmagIds(input.filter);
+  const baseFilter: Record<string, unknown> = {};
+  if (scopedTmagIds) {
+    if (scopedTmagIds.length === 0) {
+      return { rows: [], pageInfo: { pageSize, hasMore: false, nextCursor: null } };
+    }
+    baseFilter.sponsorTmagId = { $in: scopedTmagIds };
+  }
+  const contract = {
+    filter: input.filter,
+    sort: 'createdAt_desc_prospectId_desc',
+  };
+  let keyset: Record<string, unknown> = {};
+  if (input.cursor) {
+    const keys = decodeAdminCursor({
+      token: input.cursor,
+      scope: PROSPECT_DIRECTORY_SCOPE,
+      contract,
+      requiredKeys: ['createdAt', 'prospectId'],
+    });
+    const cursorMatch = await persistenceCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
+      database: MONGO_DB,
+      collection: COLL_PROSPECTS,
+      filter: combineMongoFilters(baseFilter, {
+        createdAt: keys.createdAt,
+        prospectId: keys.prospectId,
+      }),
+      limit: 1,
+    });
+    if (!cursorMatch.documents?.[0]) throw new AdminCursorError();
+    keyset = descendingKeysetFilter(
+      'createdAt',
+      'prospectId',
+      keys.createdAt!,
+      keys.prospectId!,
+    );
+  }
+
+  const result = await persistenceCall<{ documents: ProspectDoc[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: COLL_PROSPECTS,
+    filter: combineMongoFilters(baseFilter, keyset),
+    sort: { createdAt: -1, prospectId: -1 },
+    limit: pageSize + 1,
+  });
+  const docs = result.documents ?? [];
+  const hasMore = docs.length > pageSize;
+  const selected = hasMore ? docs.slice(0, pageSize) : docs;
+  const rows = await buildDirectoryRows(selected, input.nowMs ?? Date.now());
+  const last = selected[selected.length - 1];
+  return {
+    rows,
+    pageInfo: {
+      pageSize,
+      hasMore,
+      nextCursor:
+        hasMore && last
+          ? encodeAdminCursor({
+              scope: PROSPECT_DIRECTORY_SCOPE,
+              contract,
+              keys: { createdAt: last.createdAt, prospectId: last.prospectId },
+            })
+          : null,
+    },
+  };
 }
 
 /**
@@ -430,7 +504,7 @@ export async function buildDetailPayload(
     listByProspectId<McsCallbackRequestRecord>(COLL_CALLBACKS, prospectId),
     listByProspectId<McsWebinarReservationRecord>(COLL_WEBINARS, prospectId),
     listByProspectId<McsInviteTokenRecord>(COLL_TOKENS, prospectId),
-    loadBaNameMap(),
+    loadBaNameMapFor([prospect.sponsorTmagId, prospect.sponsorTmagIdAtMint ?? prospect.sponsorTmagId]),
     listByProspectId<NoteDoc>(COLL_NOTES, prospectId, { createdAt: 1 }),
   ]);
 
@@ -884,7 +958,6 @@ export class InterventionError extends Error {
  * projection — reuses the directory derivation helpers.
  */
 export async function refreshRowFor(prospectId: string): Promise<McsAdminProspectDirectoryRow> {
-  const baNames = await loadBaNameMap();
   const [prospect, placement, tokens, callbacks, webinars] = await Promise.all([
     findProspectById(prospectId),
     findPlacementByProspectId(prospectId),
@@ -896,6 +969,10 @@ export async function refreshRowFor(prospectId: string): Promise<McsAdminProspec
     throw new InterventionError('prospect_not_found_after_write', 500);
   }
   const token = pickLatest(tokens, (t) => t.createdAt);
+  const baNames = await loadBaNameMapFor([
+    prospect.sponsorTmagId,
+    token?.sponsorTmagId ?? prospect.sponsorTmagId,
+  ]);
   const callback = pickLatest(callbacks, (c) => c.createdAt);
   const webinar = pickLatest(webinars, (w) => w.createdAt);
   const nowMs = Date.now();
@@ -1328,6 +1405,25 @@ async function queryByProspectIds<T>(
   return result.documents ?? [];
 }
 
+async function queryLatestByProspect<T extends { prospectId: string }>(
+  collection: string,
+  prospectIds: string[],
+  stableIdField: string,
+): Promise<Map<string, T>> {
+  if (prospectIds.length === 0) return new Map();
+  const result = await persistenceCall<{ results: T[] }>('mongodb', 'aggregate', {
+    database: MONGO_DB,
+    collection,
+    pipeline: [
+      { $match: { prospectId: { $in: prospectIds } } },
+      { $sort: { prospectId: 1, createdAt: -1, [stableIdField]: -1 } },
+      { $group: { _id: '$prospectId', record: { $first: '$$ROOT' } } },
+      { $replaceRoot: { newRoot: '$record' } },
+    ],
+  });
+  return indexBy(result.results ?? [], (record) => record.prospectId);
+}
+
 async function listByProspectId<T>(
   collection: string,
   prospectId: string,
@@ -1346,18 +1442,6 @@ async function listByProspectId<T>(
 function indexBy<T>(rows: T[], keyOf: (row: T) => string): Map<string, T> {
   const map = new Map<string, T>();
   for (const r of rows) map.set(keyOf(r), r);
-  return map;
-}
-
-function latestByProspect<T extends { prospectId: string }>(
-  rows: T[],
-  whenOf: (row: T) => string,
-): Map<string, T> {
-  const map = new Map<string, T>();
-  for (const r of rows) {
-    const cur = map.get(r.prospectId);
-    if (!cur || whenOf(r) > whenOf(cur)) map.set(r.prospectId, r);
-  }
   return map;
 }
 

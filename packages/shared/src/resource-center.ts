@@ -1,4 +1,5 @@
 import type { McsResourceKind } from './resource-catalog.js';
+import type { McsAdminPageInfo, McsAdminStableSort } from './admin-pagination.js';
 
 export const MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION = 'resource_center.v1' as const;
 
@@ -77,4 +78,12 @@ export interface McsResourceUsageSummaryResponse {
     staleReviewWarnings: number;
   };
   resources: McsResourceUsageRow[];
+  pageInfo: McsAdminPageInfo;
+  appliedFilters: {
+    lifecycle: 'active';
+    surface: 'team';
+    roles: Array<'brand_ambassador' | 'leader'>;
+  };
+  appliedSort: Extract<McsAdminStableSort, 'updatedAt_desc_resourceVersionId_desc'>;
+  computedAt: string;
 }

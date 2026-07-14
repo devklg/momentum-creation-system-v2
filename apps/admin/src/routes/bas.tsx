@@ -20,7 +20,7 @@
  *     yet, see `leaderDetectionNote`), curated is Kevin-toggled.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { DirectoryTable } from '@/components/ba-oversight/directory-table';
@@ -31,6 +31,7 @@ import type {
   McsAdminBaDirectoryResponse,
   McsAdminBaDirectoryRow,
   McsAdminLeaderTagResponse,
+  McsAdminPaginationContract,
 } from '@momentum/shared';
 
 export function BAsPage() {
@@ -41,25 +42,52 @@ export function BAsPage() {
   const [openTmagId, setOpenTmagId] = useState<string | null>(null);
   const [togglePendingTmagId, setTogglePendingTmagId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [pageInfo, setPageInfo] = useState<McsAdminPaginationContract['pageInfo'] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const requestSequence = useRef(0);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (mode: 'replace' | 'append', cursor?: string) => {
+    const sequence = ++requestSequence.current;
+    setLoading(true);
     setErr(null);
     try {
-      const res = await fetch('/api/admin/bas', { credentials: 'include' });
-      const data = (await res.json()) as McsAdminBaDirectoryResponse & { error?: string };
+      const params = new URLSearchParams({ pageSize: '50' });
+      const search = filterText.trim();
+      if (search) params.set('search', search);
+      if (cursor) params.set('cursor', cursor);
+      const res = await fetch(`/api/admin/bas?${params.toString()}`, { credentials: 'include' });
+      const data = (await res.json()) as McsAdminBaDirectoryResponse &
+        McsAdminPaginationContract & { error?: string };
+      if (sequence !== requestSequence.current) return;
       if (!data.ok) {
         setErr(data.error ?? 'Could not load directory.');
         return;
       }
-      setRows(data.rows);
+      setRows((previous) => {
+        if (mode === 'replace' || !previous) return data.rows;
+        const byId = new Map(previous.map((row) => [row.tmagId, row]));
+        for (const row of data.rows) byId.set(row.tmagId, row);
+        return [...byId.values()];
+      });
+      setPageInfo(data.pageInfo);
       setLeaderNote(data.leaderDetectionNote);
     } catch (e) {
-      setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+      if (sequence === requestSequence.current) {
+        setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+      }
+    } finally {
+      if (sequence === requestSequence.current) setLoading(false);
     }
-  }, []);
+  }, [filterText]);
 
   useEffect(() => {
-    void load();
+    // Invalidate any in-flight page immediately when the filter contract
+    // changes, and disable the old page's Load More control during debounce.
+    requestSequence.current += 1;
+    setPageInfo(null);
+    setLoading(true);
+    const timer = window.setTimeout(() => void load('replace'), 250);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   function onRowChanged(next: McsAdminBaDirectoryRow) {
@@ -70,7 +98,7 @@ export function BAsPage() {
 
   function onCreateDone(_resp: BaCrudResponse) {
     setCreateOpen(false);
-    void load();
+    void load('replace');
   }
 
   async function onToggleCurated(tmagId: string, next: boolean) {
@@ -133,8 +161,12 @@ export function BAsPage() {
         <Input
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
-          placeholder="Filter by name, BA ID, sponsor, code, email…"
+          placeholder="Exact TM ID, THREE BA ID, or email…"
         />
+        <p className="mt-2 font-mono text-[10px] leading-relaxed text-cream-faint">
+          Exact index-compatible lookup only; installed index state is reported separately. Name,
+          sponsor, access-code, and derived-column filters are not supported in this paged release.
+        </p>
       </div>
 
       <div className="mb-4">
@@ -150,11 +182,26 @@ export function BAsPage() {
       ) : (
         <DirectoryTable
           rows={rows}
-          filterText={filterText}
           onOpenProfile={setOpenTmagId}
           onToggleCurated={(id, next) => void onToggleCurated(id, next)}
           togglePendingTmagId={togglePendingTmagId}
         />
+      )}
+
+      {rows && (
+        <div className="mt-4 flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || !pageInfo?.hasMore || !pageInfo.nextCursor}
+            onClick={() => pageInfo?.nextCursor && void load('append', pageInfo.nextCursor)}
+          >
+            {loading ? 'Loading…' : pageInfo?.hasMore ? 'Load more' : 'All matching BAs loaded'}
+          </Button>
+          <span className="font-mono text-[10px] uppercase tracking-label text-cream-faint">
+            Server ordered · newest signup first · {rows.length} loaded
+          </span>
+        </div>
       )}
 
       {openTmagId && (

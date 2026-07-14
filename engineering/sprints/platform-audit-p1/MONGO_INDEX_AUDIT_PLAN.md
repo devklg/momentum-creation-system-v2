@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Generated: 2026-07-14T05:54:00.528Z
-- Planned/audited indexes: 48
+- Generated: 2026-07-14T06:37:09.509Z
+- Planned/audited indexes: 70
 - General ensureIndexes runner: not_present
 - Knowledge Evolution ensureIndexes: present_for_knowledge_evolution_only
 - VM index definitions: declared_in_schema_registry_not_generally_applied
@@ -15,6 +15,7 @@
 | Status | Count |
 | --- | ---: |
 | planned_missing_enforcement | 42 |
+| required_not_verified | 22 |
 | vm_registry_declared | 6 |
 
 ## High-Volume Collections Without A Specific Plan Row
@@ -73,3 +74,25 @@
 | `tmag_vm_campaigns` | `unique_vmCampaignId` | `vmCampaignId:1` | yes | vm_registry_declared | VM/RVM domain | VM campaign id. |
 | `tmag_vm_queue_jobs` | `status_nextAttemptAt` | `status:1, nextAttemptAt:1` | no | planned_missing_enforcement | VM/RVM domain | VM provider queue due-row scan. |
 | `tmag_vm_provider_webhook_events` | `provider_event` | `provider:1, providerEventId:1` | no | planned_missing_enforcement | VM/RVM domain | Provider webhook idempotency plan. |
+| `team_magnificent_members` | `admin_createdAt_tmagId` | `createdAt:-1, tmagId:-1` | no | required_not_verified | Admin / BA identity | Stable BA keyset page. |
+| `tmag_access_codes` | `admin_owner_active` | `sponsorTmagId:1, active:1` | no | required_not_verified | Admin / BA identity | Page-scoped owned access-code join. |
+| `tmag_commitments` | `admin_tmagId_acceptedAt` | `tmagId:1, acceptedAt:-1` | no | required_not_verified | Agent / training domain | Latest commitment per page BA. |
+| `tmag_prospect_invite_tokens` | `admin_sponsor_createdAt` | `sponsorTmagId:1, createdAt:-1` | no | required_not_verified | Prospect / invitation domain | Page-scoped invitation counts and 72-hour window. |
+| `tmag_prospect_crm_followups` | `admin_sponsor_open_dueAt` | `sponsorTmagId:1, clearedAt:1, dueAt:1` | no | required_not_verified | CRM domain | Oldest open follow-up per page BA. |
+| `tmag_fast_start_progress` | `admin_tmagId_state` | `tmagId:1, state:1` | no | required_not_verified | Agent / training domain | Completed training module count per page BA. |
+| `tmag_admin_curated_leader_tags` | `admin_tmagId` | `tmagId:1` | no | required_not_verified | Admin / BA identity | Kevin-curated display tag join. |
+| `tmag_prospects` | `admin_createdAt_prospectId` | `createdAt:-1, prospectId:-1` | no | required_not_verified | Prospect / invitation domain | Stable unscoped prospect keyset page. |
+| `tmag_prospects` | `admin_sponsor_createdAt_prospectId` | `sponsorTmagId:1, createdAt:-1, prospectId:-1` | no | required_not_verified | Prospect / invitation domain | Stable sponsor-scoped prospect keyset page. |
+| `tmag_prospect_htank_placements` | `admin_prospectId` | `prospectId:1` | no | required_not_verified | Prospect access / pool placement | Placement join by page prospect. |
+| `tmag_prospect_invite_tokens` | `admin_prospect_createdAt` | `prospectId:1, createdAt:-1` | no | required_not_verified | Prospect / invitation domain | Latest invite token join by page prospect. |
+| `tmag_prospect_callback_requests` | `admin_prospect_createdAt` | `prospectId:1, createdAt:-1` | no | required_not_verified | Prospect / invitation domain | Latest callback join by page prospect. |
+| `tmag_prospect_webinar_reservations` | `admin_prospect_createdAt` | `prospectId:1, createdAt:-1` | no | required_not_verified | Prospect access / pool placement | Latest webinar join by page prospect. |
+| `tmag_prospect_webinar_reservations` | `admin_event_createdAt_reservationId` | `eventId:1, createdAt:-1, reservationId:-1` | no | required_not_verified | Prospect access / pool placement | Stable reservation page within selected events. |
+| `tmag_event_attendance` | `admin_event_type_reservation_recordedAt` | `eventId:1, eventType:1, reservationId:1, recordedAt:-1` | no | required_not_verified | Events / orientation domain | Complete latest explicit attendance summaries for selected events. |
+| `tmag_event_attendance` | `admin_reservation_type_recordedAt` | `reservationId:1, eventType:1, recordedAt:-1` | no | required_not_verified | Events / orientation domain | Latest explicit attendance record for page-scoped reservations. |
+| `tmag_prospect_crm_followups` | `admin_prospect_sponsor_cleared_dueAt` | `prospectId:1, sponsorTmagId:1, clearedAt:1, dueAt:1` | no | required_not_verified | CRM domain | Open human CRM follow-up lookup for page and aggregate event projections. |
+| `tmag_resource_catalog` | `admin_active_team_updatedAt_resourceVersionId` | `lifecycle:1, audience.surfaces:1, updatedAt:-1, resourceVersionId:-1` | no | required_not_verified | unknown | Page-first active Team catalog ordering. |
+| `tmag_resource_usage_events` | `admin_version_event_occurredAt` | `resourceVersionId:1, eventType:1, occurredAt:-1` | no | required_not_verified | unknown | Page-scoped all-time and recent usage aggregates. |
+| `mcs_audit_log` | `admin_timestamp_entryId` | `timestamp:-1, entryId:-1` | no | required_not_verified | Operations / governance | Stable audit traversal tie-breaker. |
+| `mcs_audit_log` | `admin_severity_timestamp_entryId` | `severity:1, timestamp:-1, entryId:-1` | no | required_not_verified | Operations / governance | Severity-filtered stable audit traversal. |
+| `mcs_audit_log` | `admin_entity_timestamp_entryId` | `entity.kind:1, entity.id:1, timestamp:-1, entryId:-1` | no | required_not_verified | Operations / governance | Entity-filtered stable audit traversal. |

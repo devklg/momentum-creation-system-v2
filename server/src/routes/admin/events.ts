@@ -2,6 +2,8 @@ import { Router, type Request } from 'express';
 import { z } from 'zod';
 import type { McsAuditActor, McsRecordEventAttendanceResponse } from '@momentum/shared';
 import { getEventCenterForAdmin } from '../../domain/eventCenter.js';
+import { AdminCursorError } from '../../domain/adminPagination.js';
+import { appendAuditEntry } from '../../domain/auditLog.js';
 import {
   EventAttendanceError,
   recordWebinarAttendance,
@@ -19,10 +21,43 @@ function adminActor(req: Request): McsAuditActor & { kind: 'admin' } {
   };
 }
 
-adminEventRoutes.get('/', requireAdmin, async (_req, res) => {
+adminEventRoutes.get('/', requireAdmin, async (req, res) => {
+  const parsed = z.object({
+    pageSize: z.coerce.number().int().min(1).max(100).default(50),
+    cursor: z.string().min(20).max(2000).optional(),
+  }).safeParse(req.query);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: 'invalid_pagination', issues: parsed.error.issues });
+  }
   try {
-    return res.status(200).json(await getEventCenterForAdmin());
+    const report = await getEventCenterForAdmin(parsed.data);
+    await appendAuditEntry({
+      actor: adminActor(req),
+      action: 'admin.events.reservations.viewed',
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
+      severity: 'info',
+      after: {
+        filters: report.appliedFilters,
+        sort: report.appliedSort,
+        pageSize: report.pageInfo.pageSize,
+        returnedCount: report.webinarReservations.length,
+        hasMore: report.pageInfo.hasMore,
+        cursorSupplied: Boolean(parsed.data.cursor),
+      },
+      reason: null,
+      context: {
+        ip: null,
+        userAgent: null,
+        route: '/api/admin/events',
+        method: 'GET',
+        requestId: null,
+      },
+    });
+    return res.status(200).json(report);
   } catch (error) {
+    if (error instanceof AdminCursorError) {
+      return res.status(400).json({ ok: false, error: error.code });
+    }
     console.error('[GET /api/admin/events] failed', error);
     return res.status(500).json({ ok: false, error: 'server_error' });
   }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T05:54:00.992Z",
+  "generatedAt": "2026-07-14T06:37:09.881Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -235,11 +235,11 @@
         "server/src/domain/adminConsistencyReport.ts:68",
         "server/src/domain/adminConsistencyReport.ts:87",
         "server/src/domain/adminConsistencyReport.ts:96",
-        "server/src/domain/adminProspectOversight.ts:1067",
-        "server/src/domain/adminProspectOversight.ts:981",
+        "server/src/domain/adminProspectOversight.ts:1058",
+        "server/src/domain/adminProspectOversight.ts:1144",
         "server/src/domain/agents/orchestrator.ts:305",
-        "server/src/domain/auditLog.ts:192",
-        "server/src/domain/auditLog.ts:469",
+        "server/src/domain/auditLog.ts:199",
+        "server/src/domain/auditLog.ts:498",
         "server/src/domain/baIdentityPersistence.ts:28",
         "server/src/domain/baIdentityPersistence.ts:29",
         "server/src/domain/baIdentityPersistence.ts:33",
@@ -284,7 +284,7 @@
         "server/src/domain/recruitingCycle.ts:413",
         "server/src/domain/recruitingCycle.ts:581",
         "server/src/domain/resourcePublishingGate.ts:72",
-        "server/src/domain/resourceUsage.ts:78",
+        "server/src/domain/resourceUsage.ts:81",
         "server/src/domain/sponsorImmutabilityPersistence.ts:101",
         "server/src/domain/sponsorImmutabilityPersistence.ts:102",
         "server/src/domain/sponsorImmutabilityPersistence.ts:104",
@@ -342,7 +342,7 @@
       "label": "TmagAdminProspectNote",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/adminProspectOversight.ts:788"
+        "server/src/domain/adminProspectOversight.ts:862"
       ]
     },
     {
@@ -363,9 +363,9 @@
       "label": "TmagAuditEntry",
       "sourceCount": 3,
       "sources": [
-        "server/src/domain/auditLog.ts:192",
-        "server/src/domain/auditLog.ts:207",
-        "server/src/domain/auditLog.ts:469"
+        "server/src/domain/auditLog.ts:199",
+        "server/src/domain/auditLog.ts:214",
+        "server/src/domain/auditLog.ts:498"
       ]
     },
     {
@@ -541,9 +541,9 @@
         "server/scripts/smoke-holding-tank.ts:66",
         "server/src/domain/adminConsistencyReport.ts:67",
         "server/src/domain/adminConsistencyReport.ts:77",
-        "server/src/domain/adminProspectOversight.ts:1064",
-        "server/src/domain/adminProspectOversight.ts:787",
-        "server/src/domain/adminProspectOversight.ts:978",
+        "server/src/domain/adminProspectOversight.ts:1055",
+        "server/src/domain/adminProspectOversight.ts:1141",
+        "server/src/domain/adminProspectOversight.ts:861",
         "server/src/domain/bulkLeads.ts:136",
         "server/src/domain/bulkLeads.ts:155",
         "server/src/domain/bulkLeads.ts:245",
@@ -647,7 +647,7 @@
       "label": "TmagResourceUsageEvent",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/resourceUsage.ts:76"
+        "server/src/domain/resourceUsage.ts:79"
       ]
     },
     {
@@ -655,7 +655,7 @@
       "sourceCount": 5,
       "sources": [
         "server/src/domain/resourcePublishingGate.ts:72",
-        "server/src/domain/resourceUsage.ts:79",
+        "server/src/domain/resourceUsage.ts:82",
         "server/src/services/knowledge/knowledgeResourceProjection.ts:256",
         "server/src/services/knowledge/knowledgeResourceProjection.ts:288",
         "server/src/services/knowledge/knowledgeResourceProjection.ts:303"
@@ -847,14 +847,14 @@
       "relationship": "ACTED_BY",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/auditLog.ts:192"
+        "server/src/domain/auditLog.ts:199"
       ]
     },
     {
       "relationship": "ACTED_FOR",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/auditLog.ts:469"
+        "server/src/domain/auditLog.ts:498"
       ]
     },
     {
@@ -1111,7 +1111,7 @@
       "relationship": "INVITED_BY",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/adminProspectOversight.ts:982"
+        "server/src/domain/adminProspectOversight.ts:1059"
       ]
     },
     {
@@ -1147,21 +1147,21 @@
       "relationship": "NOTE_ON",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/adminProspectOversight.ts:791"
+        "server/src/domain/adminProspectOversight.ts:865"
       ]
     },
     {
       "relationship": "OPENED_RESOURCE",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/resourceUsage.ts:80"
+        "server/src/domain/resourceUsage.ts:83"
       ]
     },
     {
       "relationship": "OPENED_VERSION",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/resourceUsage.ts:81"
+        "server/src/domain/resourceUsage.ts:84"
       ]
     },
     {
@@ -1262,7 +1262,7 @@
       "relationship": "SPONSORED_BY",
       "sourceCount": 6,
       "sources": [
-        "server/src/domain/adminProspectOversight.ts:1068",
+        "server/src/domain/adminProspectOversight.ts:1145",
         "server/src/domain/baIdentityPersistence.ts:31",
         "server/src/domain/baIdentityPersistence.ts:33",
         "server/src/domain/prospectAccount.ts:253",

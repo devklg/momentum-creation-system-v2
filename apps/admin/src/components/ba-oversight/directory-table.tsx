@@ -1,9 +1,9 @@
 /**
  * C.1 — Brand Ambassador directory table.
  *
- * 15 columns, every one sortable. Click a column header to sort asc;
- * click again to flip desc. Filter input is a free-text "contains" over
- * BA name + BA IDs + email + sponsor name + access code.
+ * 15 static columns in the server-owned P2-131 order:
+ * createdAt DESC, tmagId DESC. Derived column sorting is intentionally
+ * unavailable because it cannot preserve indexed keyset traversal.
  *
  * Compliance discipline (Chat #89):
  *   - No "at-risk" badges, no score columns. Every metric is the raw
@@ -13,34 +13,10 @@
  *     mirrored yet), curated is Kevin-toggled from the row.
  */
 
-import { useMemo, useState } from 'react';
 import type { McsAdminBaDirectoryRow } from '@momentum/shared';
-
-type SortKey =
-  | 'fullName'
-  | 'threeBaId'
-  | 'accessCodeOwned'
-  | 'sponsorName'
-  | 'joinedAt'
-  | 'welcomeAcceptedAt'
-  | 'lastLoginAt'
-  | 'twoInSeventyTwoCount'
-  | 'profileCompletenessPct'
-  | 'personalInvitesCount'
-  | 'oldestOpenFollowUpDueAt'
-  | 'trainingModulesCompleted'
-  | 'status'
-  | 'lastActivityAt'
-  | 'curatedLeader';
-
-interface SortState {
-  key: SortKey;
-  dir: 'asc' | 'desc';
-}
 
 interface Props {
   rows: McsAdminBaDirectoryRow[];
-  filterText: string;
   onOpenProfile: (tmagId: string) => void;
   onToggleCurated: (tmagId: string, next: boolean) => void;
   togglePendingTmagId: string | null;
@@ -48,47 +24,10 @@ interface Props {
 
 export function DirectoryTable({
   rows,
-  filterText,
   onOpenProfile,
   onToggleCurated,
   togglePendingTmagId,
 }: Props) {
-  const [sort, setSort] = useState<SortState>({ key: 'joinedAt', dir: 'desc' });
-
-  const filtered = useMemo(() => {
-    const needle = filterText.trim().toLowerCase();
-    if (!needle) return rows;
-    return rows.filter((r) => {
-      const haystack = [
-        r.fullName,
-        r.tmagId,
-        r.threeBaId,
-        r.email ?? '',
-        r.sponsorName ?? '',
-        r.sponsorTmagId ?? '',
-        r.accessCodeOwned ?? '',
-      ]
-        .join(' ')
-        .toLowerCase();
-      return haystack.includes(needle);
-    });
-  }, [rows, filterText]);
-
-  const sorted = useMemo(() => {
-    const copy = [...filtered];
-    copy.sort((a, b) => compareRows(a, b, sort.key));
-    if (sort.dir === 'desc') copy.reverse();
-    return copy;
-  }, [filtered, sort]);
-
-  function onHeaderClick(key: SortKey) {
-    setSort((prev) =>
-      prev.key === key
-        ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
-        : { key, dir: 'asc' },
-    );
-  }
-
   if (rows.length === 0) {
     return (
       <p className="text-[12px] font-mono tracking-label text-cream-faint uppercase">
@@ -102,100 +41,25 @@ export function DirectoryTable({
       <table className="w-full text-sm">
         <thead className="bg-cream/[0.025]">
           <tr className="text-left">
-            <SortHeader
-              label="Name"
-              col="fullName"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="THREE BA ID"
-              col="threeBaId"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Code"
-              col="accessCodeOwned"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Sponsor"
-              col="sponsorName"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Signed up"
-              col="joinedAt"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Welcome"
-              col="welcomeAcceptedAt"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="First login"
-              col="lastLoginAt"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="2-in-72"
-              col="twoInSeventyTwoCount"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Profile %"
-              col="profileCompletenessPct"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Invites"
-              col="personalInvitesCount"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Follow-up aging"
-              col="oldestOpenFollowUpDueAt"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Training"
-              col="trainingModulesCompleted"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Status"
-              col="status"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Last activity"
-              col="lastActivityAt"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Leader"
-              col="curatedLeader"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
+            <StaticHeader label="Name" />
+            <StaticHeader label="THREE BA ID" />
+            <StaticHeader label="Code" />
+            <StaticHeader label="Sponsor" />
+            <StaticHeader label="Signed up" ordered />
+            <StaticHeader label="Welcome" />
+            <StaticHeader label="First login" />
+            <StaticHeader label="2-in-72" />
+            <StaticHeader label="Profile %" />
+            <StaticHeader label="Invites" />
+            <StaticHeader label="Follow-up aging" />
+            <StaticHeader label="Training" />
+            <StaticHeader label="Status" />
+            <StaticHeader label="Last activity" />
+            <StaticHeader label="Leader" />
           </tr>
         </thead>
         <tbody>
-          {sorted.map((r) => (
+          {rows.map((r) => (
             <tr key={r.tmagId} className="border-t border-line hover:bg-cream/[0.015]">
               <Td>
                 <button
@@ -355,47 +219,24 @@ export function DirectoryTable({
   );
 }
 
-function compareRows(
-  a: McsAdminBaDirectoryRow,
-  b: McsAdminBaDirectoryRow,
-  key: SortKey,
-): number {
-  const av = a[key];
-  const bv = b[key];
-  if (av === null || av === undefined) return bv === null || bv === undefined ? 0 : 1;
-  if (bv === null || bv === undefined) return -1;
-  if (typeof av === 'number' && typeof bv === 'number') return av - bv;
-  if (typeof av === 'boolean' && typeof bv === 'boolean') {
-    return av === bv ? 0 : av ? -1 : 1;
-  }
-  return String(av).localeCompare(String(bv));
-}
-
-function SortHeader({
+function StaticHeader({
   label,
-  col,
-  sort,
-  onClick,
+  ordered = false,
 }: {
   label: string;
-  col: SortKey;
-  sort: SortState;
-  onClick: (key: SortKey) => void;
+  ordered?: boolean;
 }) {
-  const active = sort.key === col;
   return (
     <th className="px-3 py-2.5 text-[10px] font-mono tracking-label uppercase text-cream-faint text-left whitespace-nowrap">
-      <button
-        type="button"
-        onClick={() => onClick(col)}
+      <span
         className={[
-          'inline-flex items-center gap-1 transition-colors',
-          active ? 'text-gold' : 'hover:text-cream',
+          'inline-flex items-center gap-1',
+          ordered ? 'text-gold' : 'text-cream-faint',
         ].join(' ')}
       >
         {label}
-        {active && <span>{sort.dir === 'asc' ? '↑' : '↓'}</span>}
-      </button>
+        {ordered && <span aria-label="newest signup first">↓</span>}
+      </span>
     </th>
   );
 }

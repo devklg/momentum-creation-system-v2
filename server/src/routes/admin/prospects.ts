@@ -41,9 +41,10 @@ import {
   getDirectoryFilterOptions,
   InterventionError,
   LEADER_DETECTION_NOTE,
-  listDirectoryRows,
+  listProspectDirectoryPage,
   synthesizeAdminSandboxPreview,
 } from '../../domain/adminProspectOversight.js';
+import { AdminCursorError } from '../../domain/adminPagination.js';
 import {
   adminCreateProspect,
   adminEditProspect,
@@ -64,6 +65,7 @@ import type {
   McsAdminProspectAddNoteResponse,
   McsAdminProspectDetailResponse,
   McsAdminProspectDirectoryResponse,
+  McsAdminPaginationContract,
   McsAuditActor,
   McsAuditContext,
   McsAuditLogEntry,
@@ -113,6 +115,14 @@ function contextFromRequest(req: Request, route: string, method: string): McsAud
 
 adminProspectsRoutes.get('/', requireAdmin, async (req, res) => {
   let filter: McsAdminDashboardFilter;
+  const pagination = z.object({
+    pageSize: z.coerce.number().int().min(1).max(100).default(50),
+    cursor: z.string().min(20).max(2000).optional(),
+  }).safeParse({ pageSize: req.query.pageSize, cursor: req.query.cursor });
+  if (!pagination.success) {
+    res.status(400).json({ ok: false, error: 'Invalid pagination parameters.', issues: pagination.error.issues });
+    return;
+  }
   try {
     filter = parseFilter(req);
   } catch (err) {
@@ -125,27 +135,39 @@ adminProspectsRoutes.get('/', requireAdmin, async (req, res) => {
   }
 
   try {
-    const rows = await listDirectoryRows(filter);
+    const page = await listProspectDirectoryPage({ filter, ...pagination.data });
 
     await appendAuditEntry({
       actor: adminActorFromRequest(req),
       action: 'admin.prospects.directory.viewed',
       entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
       severity: 'info',
-      after: { filter, rowCount: rows.length },
+      after: {
+        filter,
+        pageSize: page.pageInfo.pageSize,
+        returnedCount: page.rows.length,
+        hasMore: page.pageInfo.hasMore,
+        cursorSupplied: !!pagination.data.cursor,
+      },
       reason: null,
       context: contextFromRequest(req, '/api/admin/prospects', 'GET'),
     });
 
-    const body: McsAdminProspectDirectoryResponse = {
+    const body: McsAdminProspectDirectoryResponse & McsAdminPaginationContract = {
       ok: true,
-      rows,
+      rows: page.rows,
       appliedFilter: filter,
       computedAt: new Date().toISOString(),
       leaderDetectionNote: LEADER_DETECTION_NOTE,
+      pageInfo: page.pageInfo,
+      appliedSort: 'createdAt_desc_prospectId_desc',
     };
     res.json(body);
   } catch (err) {
+    if (err instanceof AdminCursorError) {
+      res.status(400).json({ ok: false, error: err.code });
+      return;
+    }
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Directory failed: ${msg}` });
   }

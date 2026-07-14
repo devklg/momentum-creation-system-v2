@@ -33,11 +33,17 @@ describe('P2-102 resource usage analytics', () => {
   it('reports opens and review warnings without changing publishing state', async () => {
     const persistence = vi.fn()
       .mockResolvedValueOnce({ documents: [ENTRY] })
-      .mockResolvedValueOnce({ results: [{ _id: 'resource-1:v1', openCount: 4, memberIds: ['A', 'B'], lastOpenedAt: '2026-07-12T00:00:00.000Z' }] })
-      .mockResolvedValueOnce({ results: [{ _id: 'resource-1:v1', opensLast30Days: 3 }] });
+      .mockResolvedValueOnce({ results: [{ activeResources: 12, totalOpens: 40, opensLast30Days: 30, neverOpened: 2, staleReviewWarnings: 5 }] })
+      .mockResolvedValueOnce({ results: [{ _id: 'resource-1:v1', openCount: 4, memberIds: ['A', 'B'], lastOpenedAt: '2026-07-12T00:00:00.000Z', opensLast30Days: 3 }] });
     const report = await buildResourceUsageSummary({ persistence: persistence as unknown as typeof persistenceCall, now: new Date('2026-07-13T12:00:00.000Z') });
     expect(report.policy).toEqual({ staleReviewDays: 90, warningOnly: true, changesPublishingState: false });
-    expect(report.totals).toEqual({ activeResources: 1, totalOpens: 4, opensLast30Days: 3, neverOpened: 0, staleReviewWarnings: 1 });
+    expect(report.totals).toEqual({ activeResources: 12, totalOpens: 40, opensLast30Days: 30, neverOpened: 2, staleReviewWarnings: 5 });
     expect(report.resources[0]).toMatchObject({ openCount: 4, uniqueMemberCount: 2, staleReviewWarning: true });
+    expect(report.pageInfo).toEqual({ pageSize: 100, hasMore: false, nextCursor: null });
+    expect(report.appliedSort).toBe('updatedAt_desc_resourceVersionId_desc');
+    expect(persistence.mock.calls[0]?.[2]).toMatchObject({
+      sort: { updatedAt: -1, resourceVersionId: -1 },
+      limit: 101,
+    });
   });
 });

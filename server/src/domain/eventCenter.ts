@@ -16,11 +16,19 @@ import {
   listSessionsWithRosters,
 } from './orientationSession.js';
 import { listUpcomingWebinarEvents } from './webinarEvent.js';
-import { listLatestWebinarAttendance } from './eventAttendance.js';
+import {
+  AdminCursorError,
+  combineMongoFilters,
+  decodeAdminCursor,
+  descendingKeysetFilter,
+  encodeAdminCursor,
+  type AdminPageInfo,
+} from './adminPagination.js';
 
 const MONGO_DB = 'momentum';
 const WEBINAR_RESERVATIONS_COLLECTION = 'tmag_prospect_webinar_reservations';
 const CRM_FOLLOWUPS_COLLECTION = 'tmag_prospect_crm_followups';
+const ATTENDANCE_COLLECTION = 'tmag_event_attendance';
 
 const EMPTY_ATTENDANCE_COUNTS = {
   recorded: 0,
@@ -60,8 +68,16 @@ function currentLifecycleFields(): Pick<
   };
 }
 
+interface AttendanceSummary {
+  recorded: number;
+  attended: number;
+  missed: number;
+  rescheduled: number;
+  recordedAt: string;
+}
+
 function attendanceLifecycle(
-  rows: McsEventAttendanceRecord[],
+  summary: AttendanceSummary | undefined,
   connectedCount: number,
   availability: { attendance: boolean; crm: boolean } = { attendance: true, crm: true },
 ): Pick<McsEventCenterEvent, 'attendance' | 'followUp'> {
@@ -77,23 +93,20 @@ function attendanceLifecycle(
       },
     };
   }
-  if (rows.length === 0) {
+  if (!summary || summary.recorded === 0) {
     const current = currentLifecycleFields();
     return { attendance: current.attendance, followUp: current.followUp };
   }
   return {
     attendance: {
       state: 'recorded',
-      recordedAt: rows.reduce(
-        (latest, row) => row.recordedAt > latest ? row.recordedAt : latest,
-        rows[0]!.recordedAt,
-      ),
+      recordedAt: summary.recordedAt,
       inferred: false,
       counts: {
-        recorded: rows.length,
-        attended: rows.filter((row) => row.state === 'attended').length,
-        missed: rows.filter((row) => row.state === 'missed').length,
-        rescheduled: rows.filter((row) => row.state === 'rescheduled').length,
+        recorded: summary.recorded,
+        attended: summary.attended,
+        missed: summary.missed,
+        rescheduled: summary.rescheduled,
       },
     },
     followUp: {
@@ -155,7 +168,7 @@ function projectOrientationEvents(
 function projectWebinarEvents(
   events: Awaited<ReturnType<typeof listUpcomingWebinarEvents>>,
   counts?: Map<string, number>,
-  attendance?: Map<string, McsEventAttendanceRecord[]>,
+  attendance?: Map<string, AttendanceSummary>,
   connectedCounts?: Map<string, number>,
   availability?: { attendance: boolean; crm: boolean },
 ): McsEventCenterEvent[] {
@@ -185,54 +198,203 @@ function projectWebinarEvents(
     },
     reminders: currentLifecycleFields().reminders,
     ...attendanceLifecycle(
-      attendance?.get(event.eventId) ?? [],
+      attendance?.get(event.eventId),
       connectedCounts?.get(event.eventId) ?? 0,
       availability,
     ),
   }));
 }
 
-async function webinarReservations(
-  eventIds: string[],
-): Promise<McsWebinarReservationRecord[]> {
-  if (eventIds.length === 0) return [];
+async function reservationCounts(eventIds: string[]): Promise<Map<string, number>> {
+  if (eventIds.length === 0) return new Map();
+  const result = await persistenceCall<{ results: Array<{ _id: string; count: number }> }>(
+    'mongodb',
+    'aggregate',
+    {
+      database: MONGO_DB,
+      collection: WEBINAR_RESERVATIONS_COLLECTION,
+      pipeline: [
+        { $match: { eventId: { $in: eventIds } } },
+        { $group: { _id: '$eventId', count: { $sum: 1 } } },
+      ],
+    },
+  );
+  return new Map((result.results ?? []).map((row) => [row._id, row.count]));
+}
+
+const EVENT_RESERVATION_SCOPE = 'admin_event_reservations.v1';
+
+async function webinarReservationPage(input: {
+  eventIds: string[];
+  pageSize: number;
+  cursor?: string;
+}): Promise<{ rows: McsWebinarReservationRecord[]; pageInfo: AdminPageInfo }> {
+  const pageSize = Math.max(1, Math.min(100, input.pageSize));
+  if (input.eventIds.length === 0) {
+    return { rows: [], pageInfo: { pageSize, hasMore: false, nextCursor: null } };
+  }
+  const baseFilter = { eventId: { $in: input.eventIds } };
+  const contract = {
+    eventIds: [...input.eventIds].sort(),
+    sort: 'createdAt_desc_reservationId_desc',
+  };
+  let keyset: Record<string, unknown> = {};
+  if (input.cursor) {
+    const keys = decodeAdminCursor({
+      token: input.cursor,
+      scope: EVENT_RESERVATION_SCOPE,
+      contract,
+      requiredKeys: ['createdAt', 'reservationId'],
+    });
+    const cursorMatch = await persistenceCall<{ documents: McsWebinarReservationRecord[] }>(
+      'mongodb',
+      'query',
+      {
+        database: MONGO_DB,
+        collection: WEBINAR_RESERVATIONS_COLLECTION,
+        filter: combineMongoFilters(baseFilter, {
+          createdAt: keys.createdAt,
+          reservationId: keys.reservationId,
+        }),
+        limit: 1,
+      },
+    );
+    if (!cursorMatch.documents?.[0]) throw new AdminCursorError();
+    keyset = descendingKeysetFilter(
+      'createdAt',
+      'reservationId',
+      keys.createdAt!,
+      keys.reservationId!,
+    );
+  }
   const result = await persistenceCall<{ documents: McsWebinarReservationRecord[] }>(
     'mongodb',
     'query',
     {
       database: MONGO_DB,
       collection: WEBINAR_RESERVATIONS_COLLECTION,
-      filter: { eventId: { $in: eventIds } },
-      limit: 5000,
+      filter: combineMongoFilters(baseFilter, keyset),
+      sort: { createdAt: -1, reservationId: -1 },
+      limit: pageSize + 1,
     },
   );
-  return result.documents ?? [];
+  const docs = result.documents ?? [];
+  const hasMore = docs.length > pageSize;
+  const rows = hasMore ? docs.slice(0, pageSize) : docs;
+  const last = rows[rows.length - 1];
+  return {
+    rows,
+    pageInfo: {
+      pageSize,
+      hasMore,
+      nextCursor: hasMore && last
+        ? encodeAdminCursor({
+            scope: EVENT_RESERVATION_SCOPE,
+            contract,
+            keys: { createdAt: last.createdAt, reservationId: last.reservationId },
+          })
+        : null,
+    },
+  };
 }
 
-function reservationCounts(rows: McsWebinarReservationRecord[]): Map<string, number> {
-  const counts = new Map<string, number>();
-  for (const row of rows) counts.set(row.eventId, (counts.get(row.eventId) ?? 0) + 1);
-  return counts;
+async function completeAttendanceSummaries(
+  eventIds: string[],
+): Promise<Map<string, AttendanceSummary>> {
+  if (eventIds.length === 0) return new Map();
+  const result = await persistenceCall<{ results?: Array<AttendanceSummary & { _id: string }> }>(
+    'mongodb', 'aggregate', {
+      database: MONGO_DB,
+      collection: ATTENDANCE_COLLECTION,
+      pipeline: [
+        { $match: { eventId: { $in: eventIds }, eventType: 'prospect_webinar' } },
+        { $sort: { recordedAt: -1 } },
+        { $group: { _id: '$reservationId', row: { $first: '$$ROOT' } } },
+        { $group: {
+          _id: '$row.eventId',
+          recorded: { $sum: 1 },
+          attended: { $sum: { $cond: [{ $eq: ['$row.state', 'attended'] }, 1, 0] } },
+          missed: { $sum: { $cond: [{ $eq: ['$row.state', 'missed'] }, 1, 0] } },
+          rescheduled: { $sum: { $cond: [{ $eq: ['$row.state', 'rescheduled'] }, 1, 0] } },
+          recordedAt: { $max: '$row.recordedAt' },
+        } },
+      ],
+    },
+  );
+  return new Map((result.results ?? []).map((row) => [row._id, row]));
+}
+
+async function completeConnectedCounts(eventIds: string[]): Promise<Map<string, number>> {
+  if (eventIds.length === 0) return new Map();
+  const result = await persistenceCall<{ results?: Array<{ _id: string; count: number }> }>(
+    'mongodb', 'aggregate', {
+      database: MONGO_DB,
+      collection: ATTENDANCE_COLLECTION,
+      pipeline: [
+        { $match: { eventId: { $in: eventIds }, eventType: 'prospect_webinar' } },
+        { $sort: { recordedAt: -1 } },
+        { $group: { _id: '$reservationId', row: { $first: '$$ROOT' } } },
+        { $lookup: {
+          from: CRM_FOLLOWUPS_COLLECTION,
+          let: { prospectId: '$row.prospectId', sponsorTmagId: '$row.sponsorTmagId' },
+          pipeline: [
+            { $match: { $expr: { $and: [
+              { $eq: ['$prospectId', '$$prospectId'] },
+              { $eq: ['$sponsorTmagId', '$$sponsorTmagId'] },
+              { $eq: ['$clearedAt', null] },
+            ] } } },
+            { $limit: 1 },
+          ],
+          as: 'followUp',
+        } },
+        { $match: { 'followUp.0': { $exists: true } } },
+        { $group: { _id: '$row.eventId', count: { $sum: 1 } } },
+      ],
+    },
+  );
+  return new Map((result.results ?? []).map((row) => [row._id, row.count]));
+}
+
+async function latestAttendanceForReservations(
+  reservationIds: string[],
+): Promise<Map<string, McsEventAttendanceRecord>> {
+  if (reservationIds.length === 0) return new Map();
+  const result = await persistenceCall<{
+    results?: Array<{ _id: string; row: McsEventAttendanceRecord }>;
+  }>('mongodb', 'aggregate', {
+    database: MONGO_DB,
+    collection: ATTENDANCE_COLLECTION,
+    pipeline: [
+      { $match: { reservationId: { $in: reservationIds }, eventType: 'prospect_webinar' } },
+      { $sort: { recordedAt: -1 } },
+      { $group: { _id: '$reservationId', row: { $first: '$$ROOT' } } },
+    ],
+  });
+  return new Map((result.results ?? []).map((item) => [item._id, item.row]));
 }
 
 async function activeFollowUps(
-  rows: McsWebinarReservationRecord[],
+  rows: Array<Pick<McsWebinarReservationRecord, 'prospectId' | 'sponsorTmagId'>>,
 ): Promise<Map<string, McsCrmFollowUpRecord>> {
   const prospectIds = [...new Set(rows.map((row) => row.prospectId))];
   if (prospectIds.length === 0) return new Map();
-  const result = await persistenceCall<{ documents: McsCrmFollowUpRecord[] }>(
-    'mongodb',
-    'query',
-    {
+  const result = await persistenceCall<{
+    results?: Array<{ _id: { prospectId: string; sponsorTmagId: string }; row: McsCrmFollowUpRecord }>;
+  }>('mongodb', 'aggregate', {
       database: MONGO_DB,
       collection: CRM_FOLLOWUPS_COLLECTION,
-      filter: { prospectId: { $in: prospectIds }, clearedAt: null },
-      limit: 10000,
-    },
-  );
-  return new Map((result.documents ?? []).map((row) => [
-    `${row.prospectId}\u0000${row.sponsorTmagId}`,
-    row,
+      pipeline: [
+        { $match: { prospectId: { $in: prospectIds }, clearedAt: null } },
+        { $sort: { dueAt: 1 } },
+        { $group: {
+          _id: { prospectId: '$prospectId', sponsorTmagId: '$sponsorTmagId' },
+          row: { $first: '$$ROOT' },
+        } },
+      ],
+    });
+  return new Map((result.results ?? []).map((item) => [
+    `${item._id.prospectId}\u0000${item._id.sponsorTmagId}`,
+    item.row,
   ]));
 }
 
@@ -269,7 +431,10 @@ export async function getEventCenterForBA(
   };
 }
 
-export async function getEventCenterForAdmin(): Promise<McsAdminEventCenterResponse> {
+export async function getEventCenterForAdmin(input: {
+  pageSize?: number;
+  cursor?: string;
+} = {}): Promise<McsAdminEventCenterResponse> {
   const [orientation, webinar] = await Promise.allSettled([
     listSessionsWithRosters(),
     (async (): Promise<{
@@ -277,36 +442,35 @@ export async function getEventCenterForAdmin(): Promise<McsAdminEventCenterRespo
       projected: McsAdminEventCenterWebinarEvent[];
       counts: Map<string, number>;
       reservations: McsAdminEventCenterWebinarReservation[];
-      attendanceByEvent: Map<string, McsEventAttendanceRecord[]>;
+      attendanceByEvent: Map<string, AttendanceSummary>;
       connectedCounts: Map<string, number>;
       attendanceAvailable: boolean;
       crmAvailable: boolean;
+      pageInfo: AdminPageInfo;
     }> => {
       const events = await listUpcomingWebinarEvents({ horizonDays: 30, limit: 100 });
-      const sourceReservations = await webinarReservations(events.map((event) => event.eventId));
-      const counts = reservationCounts(sourceReservations);
-      const [attendanceResult, followUpResult] = await Promise.allSettled([
-        listLatestWebinarAttendance(events.map((event) => event.eventId)),
-        activeFollowUps(sourceReservations),
+      const eventIds = events.map((event) => event.eventId);
+      const [reservationPage, counts] = await Promise.all([
+        webinarReservationPage({ eventIds, pageSize: input.pageSize ?? 50, cursor: input.cursor }),
+        reservationCounts(eventIds),
       ]);
-      const latestAttendance = attendanceResult.status === 'fulfilled' ? attendanceResult.value : new Map();
+      const sourceReservations = reservationPage.rows;
+      const [attendanceResult, connectedResult, pageAttendanceResult] = await Promise.allSettled([
+        completeAttendanceSummaries(eventIds),
+        completeConnectedCounts(eventIds),
+        latestAttendanceForReservations(sourceReservations.map((row) => row.reservationId)),
+      ]);
+      const attendanceByEvent = attendanceResult.status === 'fulfilled'
+        ? attendanceResult.value : new Map<string, AttendanceSummary>();
+      const connectedCounts = connectedResult.status === 'fulfilled'
+        ? connectedResult.value : new Map<string, number>();
+      const latestAttendance = pageAttendanceResult.status === 'fulfilled'
+        ? pageAttendanceResult.value : new Map<string, McsEventAttendanceRecord>();
+      const followUpResult = await Promise.allSettled([activeFollowUps(sourceReservations)]).then(([result]) => result!);
       const followUps = followUpResult.status === 'fulfilled' ? followUpResult.value : new Map();
-      const attendanceByEvent = new Map<string, McsEventAttendanceRecord[]>();
-      const connectedCounts = new Map<string, number>();
       const reservations = sourceReservations.map((reservation) => {
         const attendance = latestAttendance.get(reservation.reservationId) ?? null;
         const followUp = followUps.get(`${reservation.prospectId}\u0000${reservation.sponsorTmagId}`) ?? null;
-        if (attendance) {
-          const rows = attendanceByEvent.get(reservation.eventId) ?? [];
-          rows.push(attendance);
-          attendanceByEvent.set(reservation.eventId, rows);
-          if (followUp) {
-            connectedCounts.set(
-              reservation.eventId,
-              (connectedCounts.get(reservation.eventId) ?? 0) + 1,
-            );
-          }
-        }
         return {
           reservationId: reservation.reservationId,
           eventId: reservation.eventId,
@@ -326,7 +490,8 @@ export async function getEventCenterForAdmin(): Promise<McsAdminEventCenterRespo
         attendanceByEvent,
         connectedCounts,
         attendanceAvailable: attendanceResult.status === 'fulfilled',
-        crmAvailable: followUpResult.status === 'fulfilled',
+        crmAvailable: connectedResult.status === 'fulfilled' && followUpResult.status === 'fulfilled',
+        pageInfo: reservationPage.pageInfo,
         projected: projectWebinars(events).map((event) => ({
           ...event,
           reservationCount: counts.get(event.eventId) ?? 0,
@@ -336,11 +501,12 @@ export async function getEventCenterForAdmin(): Promise<McsAdminEventCenterRespo
   ]);
 
   const orientationSessions = orientation.status === 'fulfilled' ? orientation.value : [];
+  const computedAt = new Date().toISOString();
 
   return {
     ok: true,
     schemaVersion: MCS_EVENT_CENTER_SCHEMA_VERSION,
-    generatedAt: new Date().toISOString(),
+    generatedAt: computedAt,
     sources: {
       orientation: orientation.status === 'fulfilled' ? 'available' : 'unavailable',
       webinar: webinar.status === 'fulfilled' ? 'available' : 'unavailable',
@@ -367,5 +533,11 @@ export async function getEventCenterForAdmin(): Promise<McsAdminEventCenterRespo
     orientationSessions,
     webinarEvents: webinar.status === 'fulfilled' ? webinar.value.projected : [],
     webinarReservations: webinar.status === 'fulfilled' ? webinar.value.reservations : [],
+    pageInfo: webinar.status === 'fulfilled'
+      ? webinar.value.pageInfo
+      : { pageSize: input.pageSize ?? 50, hasMore: false, nextCursor: null },
+    appliedFilters: { eventId: null },
+    appliedSort: 'createdAt_desc_reservationId_desc',
+    computedAt,
   };
 }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T05:54:00.063Z",
+  "generatedAt": "2026-07-14T06:37:09.154Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 70,
   "unclassifiedCount": 0,
@@ -127,7 +127,7 @@
       "persistenceTier": "operational",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 5,
+      "sourceCount": 6,
       "sourceFiles": [
         "server/src/domain/auditLog.ts"
       ]
@@ -254,7 +254,7 @@
       "persistenceTier": "mixed",
       "schemaMode": "explicit_mongoose_schema",
       "resolved": true,
-      "sourceCount": 59,
+      "sourceCount": 61,
       "sourceFiles": [
         "server/scripts/backfill-founder-timezones.ts",
         "server/scripts/setup-founder-access.ts",
@@ -470,9 +470,10 @@
       "persistenceTier": "operational",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 3,
+      "sourceCount": 6,
       "sourceFiles": [
-        "server/src/domain/eventAttendance.ts"
+        "server/src/domain/eventAttendance.ts",
+        "server/src/domain/eventCenter.ts"
       ]
     },
     {
@@ -828,7 +829,7 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 4,
+      "sourceCount": 6,
       "sourceFiles": [
         "server/src/domain/eventAttendance.ts",
         "server/src/domain/eventCenter.ts",
@@ -844,7 +845,7 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 37,
+      "sourceCount": 38,
       "sourceFiles": [
         "server/scripts/smoke-holding-tank.ts",
         "server/src/domain/adminMetrics.ts",

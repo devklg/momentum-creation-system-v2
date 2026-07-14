@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T05:54:10.044Z",
+  "generatedAt": "2026-07-14T06:37:16.249Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,16 +8,16 @@
   "summary": {
     "mounts": 50,
     "routeFiles": 50,
-    "routes": 242,
+    "routes": 243,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 3,
-      "pre_gate": 147,
+      "pre_gate": 148,
       "ba_facing_gated": 91
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
-      "admin": 99,
+      "admin": 100,
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
       "prospect_token": 18,
@@ -25,7 +25,7 @@
     },
     "byMethod": {
       "POST": 94,
-      "GET": 125,
+      "GET": 126,
       "PUT": 7,
       "PATCH": 9,
       "DELETE": 7
@@ -1251,7 +1251,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/bas.ts:53",
+      "source": "server/src/routes/admin/bas.ts:55",
       "routeSource": "server/src/routes/admin/bas.ts",
       "signals": {
         "requireAuth": false,
@@ -1277,7 +1277,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/bas.ts:58",
+      "source": "server/src/routes/admin/bas.ts:60",
       "routeSource": "server/src/routes/admin/bas.ts",
       "signals": {
         "requireAuth": false,
@@ -1303,7 +1303,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/bas.ts:68",
+      "source": "server/src/routes/admin/bas.ts:70",
       "routeSource": "server/src/routes/admin/bas.ts",
       "signals": {
         "requireAuth": false,
@@ -1329,7 +1329,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/bas.ts:97",
+      "source": "server/src/routes/admin/bas.ts:154",
       "routeSource": "server/src/routes/admin/bas.ts",
       "signals": {
         "requireAuth": false,
@@ -1355,7 +1355,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/bas.ts:123",
+      "source": "server/src/routes/admin/bas.ts:180",
       "routeSource": "server/src/routes/admin/bas.ts",
       "signals": {
         "requireAuth": false,
@@ -1381,7 +1381,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/bas.ts:188",
+      "source": "server/src/routes/admin/bas.ts:247",
       "routeSource": "server/src/routes/admin/bas.ts",
       "signals": {
         "requireAuth": false,
@@ -1407,7 +1407,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/bas.ts:229",
+      "source": "server/src/routes/admin/bas.ts:288",
       "routeSource": "server/src/routes/admin/bas.ts",
       "signals": {
         "requireAuth": false,
@@ -1433,7 +1433,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/bas.ts:269",
+      "source": "server/src/routes/admin/bas.ts:328",
       "routeSource": "server/src/routes/admin/bas.ts",
       "signals": {
         "requireAuth": false,
@@ -1459,7 +1459,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/bas.ts:379",
+      "source": "server/src/routes/admin/bas.ts:438",
       "routeSource": "server/src/routes/admin/bas.ts",
       "signals": {
         "requireAuth": false,
@@ -1485,7 +1485,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/bas.ts:414",
+      "source": "server/src/routes/admin/bas.ts:473",
       "routeSource": "server/src/routes/admin/bas.ts",
       "signals": {
         "requireAuth": false,
@@ -1511,7 +1511,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/bas.ts:440",
+      "source": "server/src/routes/admin/bas.ts:499",
       "routeSource": "server/src/routes/admin/bas.ts",
       "signals": {
         "requireAuth": false,
@@ -1537,7 +1537,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/bas.ts:466",
+      "source": "server/src/routes/admin/bas.ts:525",
       "routeSource": "server/src/routes/admin/bas.ts",
       "signals": {
         "requireAuth": false,
@@ -1563,7 +1563,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:114",
+      "source": "server/src/routes/admin/prospects.ts:116",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1589,7 +1589,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:156",
+      "source": "server/src/routes/admin/prospects.ts:178",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1615,7 +1615,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:180",
+      "source": "server/src/routes/admin/prospects.ts:202",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1641,7 +1641,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:249",
+      "source": "server/src/routes/admin/prospects.ts:271",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1667,7 +1667,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:297",
+      "source": "server/src/routes/admin/prospects.ts:319",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1693,7 +1693,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:334",
+      "source": "server/src/routes/admin/prospects.ts:356",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1719,7 +1719,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:355",
+      "source": "server/src/routes/admin/prospects.ts:377",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1745,7 +1745,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:387",
+      "source": "server/src/routes/admin/prospects.ts:409",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1771,7 +1771,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:416",
+      "source": "server/src/routes/admin/prospects.ts:438",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1797,7 +1797,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:573",
+      "source": "server/src/routes/admin/prospects.ts:595",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1823,7 +1823,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:621",
+      "source": "server/src/routes/admin/prospects.ts:643",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1849,7 +1849,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:663",
+      "source": "server/src/routes/admin/prospects.ts:685",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1875,7 +1875,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:692",
+      "source": "server/src/routes/admin/prospects.ts:714",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1901,7 +1901,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:731",
+      "source": "server/src/routes/admin/prospects.ts:753",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1927,7 +1927,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:767",
+      "source": "server/src/routes/admin/prospects.ts:789",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2161,7 +2161,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/audit.ts:80",
+      "source": "server/src/routes/admin/audit.ts:81",
       "routeSource": "server/src/routes/admin/audit.ts",
       "signals": {
         "requireAuth": false,
@@ -2187,7 +2187,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/audit.ts:107",
+      "source": "server/src/routes/admin/audit.ts:112",
       "routeSource": "server/src/routes/admin/audit.ts",
       "signals": {
         "requireAuth": false,
@@ -3607,6 +3607,32 @@
     },
     {
       "method": "GET",
+      "fullPath": "/api/admin/resource-center/index-awareness",
+      "mountPath": "/api/admin/resource-center",
+      "localPath": "/index-awareness",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/resourceCenter.ts:11",
+      "routeSource": "server/src/routes/admin/resourceCenter.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
       "fullPath": "/api/admin/resource-center/analytics",
       "mountPath": "/api/admin/resource-center",
       "localPath": "/analytics",
@@ -3617,7 +3643,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/resourceCenter.ts:8",
+      "source": "server/src/routes/admin/resourceCenter.ts:31",
       "routeSource": "server/src/routes/admin/resourceCenter.ts",
       "signals": {
         "requireAuth": false,
@@ -3643,7 +3669,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/events.ts:22",
+      "source": "server/src/routes/admin/events.ts:24",
       "routeSource": "server/src/routes/admin/events.ts",
       "signals": {
         "requireAuth": false,
@@ -3669,7 +3695,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/events.ts:35",
+      "source": "server/src/routes/admin/events.ts:70",
       "routeSource": "server/src/routes/admin/events.ts",
       "signals": {
         "requireAuth": false,

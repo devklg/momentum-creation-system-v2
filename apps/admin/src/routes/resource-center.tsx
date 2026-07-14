@@ -1,4 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { IndexAwarenessPanel } from '@/components/resource-center/IndexAwarenessPanel';
 
 type ResourceRow = {
   resourceVersionId: string;
@@ -18,23 +19,41 @@ type Summary = {
   policy: { staleReviewDays: number; warningOnly: true; changesPublishingState: false };
   totals: { activeResources: number; totalOpens: number; opensLast30Days: number; neverOpened: number; staleReviewWarnings: number };
   resources: ResourceRow[];
+  pageInfo: { pageSize: number; hasMore: boolean; nextCursor: string | null };
 };
 
 export function ResourceCenterAdminPage() {
   const [data, setData] = useState<Summary | null>(null);
   const [error, setError] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    void fetch('/api/admin/resource-center/analytics', { credentials: 'include' })
-      .then(async (response) => {
-        const payload = await response.json() as Summary | { ok: false };
-        if (!response.ok || !payload.ok) throw new Error('unavailable');
-        return payload;
-      })
-      .then((payload) => { if (!cancelled) setData(payload); })
-      .catch(() => { if (!cancelled) setError(true); });
-    return () => { cancelled = true; };
+  const [loading, setLoading] = useState(false);
+  const requestSequence = useRef(0);
+  const load = useCallback(async (mode: 'replace' | 'append' = 'replace', cursor?: string) => {
+    const sequence = ++requestSequence.current;
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ pageSize: '50' });
+      if (cursor) params.set('cursor', cursor);
+      const response = await fetch(`/api/admin/resource-center/analytics?${params.toString()}`, { credentials: 'include' });
+      const payload = await response.json() as Summary | { ok: false };
+      if (!response.ok || !payload.ok) throw new Error('unavailable');
+      if (sequence !== requestSequence.current) return;
+      const next = payload as Summary;
+      setData((previous) => {
+        if (mode === 'replace' || !previous) return next;
+        const resources = new Map(previous.resources.map((row) => [row.resourceVersionId, row]));
+        for (const row of next.resources) resources.set(row.resourceVersionId, row);
+        return { ...next, resources: [...resources.values()] };
+      });
+      setError(false);
+    } catch {
+      if (sequence === requestSequence.current) setError(true);
+    } finally {
+      if (sequence === requestSequence.current) setLoading(false);
+    }
   }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   return (
     <div className="space-y-7">
@@ -45,6 +64,7 @@ export function ResourceCenterAdminPage() {
           Verified resource opens and advisory review warnings. Warnings never publish, retire, or change the authority of a resource.
         </p>
       </header>
+      <IndexAwarenessPanel />
       {error && <Panel>The resource usage report is unavailable right now.</Panel>}
       {!error && !data && <Panel>Loading verified resource usage…</Panel>}
       {data && (
@@ -79,6 +99,19 @@ export function ResourceCenterAdminPage() {
               </tbody>
             </table>
           </section>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              disabled={loading || !data.pageInfo.hasMore || !data.pageInfo.nextCursor}
+              onClick={() => data.pageInfo.nextCursor && void load('append', data.pageInfo.nextCursor)}
+              className="rounded border border-gold/45 px-4 py-2 font-mono text-[10px] uppercase tracking-label text-gold disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {loading ? 'Loading…' : data.pageInfo.hasMore ? 'Load more resources' : 'All resources loaded'}
+            </button>
+            <span className="font-mono text-[10px] uppercase tracking-label text-cream-faint">
+              Catalog updated order · {data.resources.length} loaded · totals remain complete
+            </span>
+          </div>
         </>
       )}
     </div>
