@@ -6,7 +6,7 @@
 
 ## Summary
 
-- Generated: 2026-07-14T06:52:22.524Z
+- Generated: 2026-07-14T13:40:05.435Z
 - Production `tripleStackWrite` call sites: 0
 - Graph-critical: 0
 - Knowledge: 0
@@ -23,4 +23,3 @@
 
 | # | Tier | Subsystem | Location | Function | Mongo collection expression | Neo4j | Chroma | Rationale |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-

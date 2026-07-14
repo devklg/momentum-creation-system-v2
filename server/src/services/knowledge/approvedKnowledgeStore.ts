@@ -95,6 +95,26 @@ interface ChromaQueryResult {
 
 const DEFAULT_SEMANTIC_K = 6;
 const MAX_SEMANTIC_K = 12;
+export const APPROVED_RETRIEVAL_CACHE_TTL_MS = 5_000;
+export const APPROVED_RETRIEVAL_CACHE_MAX_ENTRIES = 128;
+
+interface ApprovedRetrievalCacheEntry {
+  expiresAt: number;
+  references: McsKnowledgeReference[];
+}
+
+const approvedRetrievalCache = new Map<string, ApprovedRetrievalCacheEntry>();
+const approvedRetrievalInFlight = new Map<
+  string,
+  { generation: number; promise: Promise<McsKnowledgeReference[]> }
+>();
+let approvedRetrievalCacheGeneration = 0;
+let cacheHits = 0;
+let cacheMisses = 0;
+let cacheCoalesced = 0;
+let cacheEvictions = 0;
+let cacheInvalidations = 0;
+let cacheInFlightCount = 0;
 
 export async function createKevinApprovedKnowledgeSource(
   input: CreateKevinApprovedKnowledgeSourceInput,
@@ -178,6 +198,7 @@ export async function createKevinApprovedKnowledgeSource(
       },
     },
   });
+  invalidateApprovedKnowledgeRetrievalCache();
 
   const chunkRecords: McsKnowledgeBaseChunkRecord[] = intake.chunks.map((chunk) => ({
     ...chunk,
@@ -259,6 +280,7 @@ export async function createKevinApprovedKnowledgeSource(
         },
       },
     });
+    invalidateApprovedKnowledgeRetrievalCache();
   }
 
   let graphRagRecordCount = 0;
@@ -352,34 +374,146 @@ export function createStoredApprovedKnowledgeProvider(): Pick<
 
       return (data.documents ?? []).flatMap(documentToKnowledgeReference);
     },
-    async searchApprovedKnowledge(scope, query, k) {
+    async searchApprovedKnowledge(scope, query, k, language) {
       const normalizedQuery = normalizeSearchQuery(query);
       if (!normalizedQuery) return [];
 
       const limit = normalizeSemanticK(k);
-      let data: ChromaQueryResult;
-      try {
-        data = await persistenceCall<ChromaQueryResult>('chromadb', 'query_with_filter', {
-          collection: KNOWLEDGE_CHUNK_COLLECTION,
-          query: normalizedQuery,
-          n_results: limit,
-          filter: {
-            status: 'active',
-            retrievalEligible: true,
-          },
-        });
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `[knowledge] semantic approved-knowledge search failed through embedder/Chroma; ` +
-            `returning empty references. ${err instanceof Error ? err.message : String(err)}`,
-        );
-        return [];
+      const key = approvedRetrievalCacheKey(scope, normalizedQuery, limit, language);
+      const now = Date.now();
+      const cached = approvedRetrievalCache.get(key);
+      if (cached && cached.expiresAt > now) {
+        cacheHits += 1;
+        approvedRetrievalCache.delete(key);
+        approvedRetrievalCache.set(key, cached);
+        return copyKnowledgeReferences(cached.references);
+      }
+      if (cached) approvedRetrievalCache.delete(key);
+
+      const existing = approvedRetrievalInFlight.get(key);
+      if (existing?.generation === approvedRetrievalCacheGeneration) {
+        cacheCoalesced += 1;
+        return copyKnowledgeReferences(await existing.promise);
       }
 
-      return hydrateSemanticSearchReferences(data, scope);
+      cacheMisses += 1;
+      const generation = approvedRetrievalCacheGeneration;
+      cacheInFlightCount += 1;
+      const search = searchApprovedKnowledgeStore(scope, normalizedQuery, limit)
+        .then((references) => {
+          if (references.length > 0 && generation === approvedRetrievalCacheGeneration) {
+            setApprovedRetrievalCacheEntry(key, references);
+          }
+          return references;
+        })
+        .finally(() => {
+          cacheInFlightCount = Math.max(0, cacheInFlightCount - 1);
+          if (approvedRetrievalInFlight.get(key)?.promise === search) {
+            approvedRetrievalInFlight.delete(key);
+          }
+        });
+      approvedRetrievalInFlight.set(key, { generation, promise: search });
+
+      return copyKnowledgeReferences(await search);
     },
   };
+}
+
+export function getApprovedKnowledgeRetrievalCacheDiagnostics() {
+  return {
+    retention: 'in_process_since_restart' as const,
+    ttlMs: APPROVED_RETRIEVAL_CACHE_TTL_MS,
+    maxEntries: APPROVED_RETRIEVAL_CACHE_MAX_ENTRIES,
+    hits: cacheHits,
+    misses: cacheMisses,
+    coalesced: cacheCoalesced,
+    evictions: cacheEvictions,
+    size: approvedRetrievalCache.size,
+    inFlight: cacheInFlightCount,
+    invalidations: cacheInvalidations,
+    generation: approvedRetrievalCacheGeneration,
+  };
+}
+
+export function invalidateApprovedKnowledgeRetrievalCache(): void {
+  approvedRetrievalCache.clear();
+  approvedRetrievalCacheGeneration += 1;
+  cacheInvalidations += 1;
+}
+
+export function resetApprovedKnowledgeRetrievalCacheForTests(): void {
+  approvedRetrievalCache.clear();
+  approvedRetrievalInFlight.clear();
+  approvedRetrievalCacheGeneration = 0;
+  cacheHits = 0;
+  cacheMisses = 0;
+  cacheCoalesced = 0;
+  cacheEvictions = 0;
+  cacheInvalidations = 0;
+  cacheInFlightCount = 0;
+}
+
+async function searchApprovedKnowledgeStore(
+  scope: McsRuntimeRequestScope,
+  normalizedQuery: string,
+  limit: number,
+): Promise<McsKnowledgeReference[]> {
+  let data: ChromaQueryResult;
+  try {
+    data = await persistenceCall<ChromaQueryResult>('chromadb', 'query_with_filter', {
+      collection: KNOWLEDGE_CHUNK_COLLECTION,
+      query: normalizedQuery,
+      n_results: limit,
+      filter: {
+        status: 'active',
+        retrievalEligible: true,
+      },
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `[knowledge] semantic approved-knowledge search failed through embedder/Chroma; ` +
+        `returning empty references. ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return [];
+  }
+  return hydrateSemanticSearchReferences(data, scope);
+}
+
+function approvedRetrievalCacheKey(
+  scope: McsRuntimeRequestScope,
+  normalizedQuery: string,
+  limit: number,
+  language: McsRuntimeLanguage | undefined,
+): string {
+  return JSON.stringify([
+    normalizedQuery.toLocaleLowerCase('en-US'),
+    limit,
+    language ?? null,
+    scope.tenantId,
+    scope.teamId ?? null,
+    scope.teamKey ?? null,
+    scope.teamName ?? null,
+    scope.tmagId ?? null,
+  ]);
+}
+
+function setApprovedRetrievalCacheEntry(key: string, references: readonly McsKnowledgeReference[]): void {
+  if (approvedRetrievalCache.has(key)) approvedRetrievalCache.delete(key);
+  while (approvedRetrievalCache.size >= APPROVED_RETRIEVAL_CACHE_MAX_ENTRIES) {
+    const oldest = approvedRetrievalCache.keys().next().value as string | undefined;
+    if (oldest === undefined) break;
+    approvedRetrievalCache.delete(oldest);
+    cacheEvictions += 1;
+  }
+  approvedRetrievalCache.set(key, {
+    expiresAt: Date.now() + APPROVED_RETRIEVAL_CACHE_TTL_MS,
+    references: copyKnowledgeReferences(references),
+  });
+}
+
+function copyKnowledgeReferences(references: readonly McsKnowledgeReference[]): McsKnowledgeReference[] {
+  return structuredClone(references) as McsKnowledgeReference[];
 }
 
 export function knowledgeChromaCollection(

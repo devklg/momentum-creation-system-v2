@@ -38,6 +38,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0021 | Steve Success Profile Guidance Projection | P2-118 / Steve + Launch Center read projection | Approved | v1.2 |
 | ACR-0022 | Steve Success Profile Extraction Prompt Registration | P2-120 / prompt governance registry | Proposed | v1.2 |
 | ACR-0025 | Admin Pagination and Index Awareness | P2-131 / admin high-volume read contracts | Approved | v1.2 |
+| ACR-0026 | Context Retrieval Cache and Readiness Batching | P2-132 / Context Manager + GraphRAG retrieval | Verified | v1.2 |
 
 ---
 

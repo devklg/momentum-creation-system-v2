@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T06:52:05.480Z",
+  "generatedAt": "2026-07-14T13:39:55.365Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -113,7 +113,7 @@
       "label": "KnowledgeChunk",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:210"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:231"
       ]
     },
     {
@@ -127,8 +127,8 @@
       "label": "KnowledgeSource",
       "sourceCount": 3,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:153",
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:213",
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:173",
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:234",
         "server/src/services/knowledge/knowledgeResourceProjection.ts:264"
       ]
     },
@@ -487,7 +487,7 @@
       "sources": [
         "server/src/domain/graphrag.ts:217",
         "server/src/domain/graphrag.ts:238",
-        "server/src/domain/graphragReadiness.ts:42",
+        "server/src/domain/graphragReadiness.ts:139",
         "server/src/services/persistence/neo4j/phase7Constraints.ts:51",
         "server/src/services/persistence/neo4j/phase7Constraints.ts:86"
       ]
@@ -988,7 +988,7 @@
       "relationship": "HAS_CHUNK",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:214"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:235"
       ]
     },
     {

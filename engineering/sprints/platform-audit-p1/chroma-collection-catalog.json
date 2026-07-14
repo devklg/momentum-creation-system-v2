@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T06:52:08.821Z",
+  "generatedAt": "2026-07-14T13:39:57.507Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -694,12 +694,12 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 204,
+          "line": 225,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 362,
+          "line": 463,
           "action": "persistenceCall.chromadb.query_with_filter"
         }
       ],
@@ -2363,7 +2363,7 @@
   ],
   "observedUnregisteredTargets": [
     {
-      "target": "activeKnowledgeCollection(record.domain, record.language)",
+      "target": "activeKnowledgeCollection(group[0]!.domain, group[0]!.language)",
       "resolved": false,
       "actions": [
         "get"
@@ -2372,7 +2372,7 @@
       "sources": [
         {
           "file": "server/src/domain/graphragReadiness.ts",
-          "line": 45,
+          "line": 145,
           "action": "persistenceCall.chromadb.get"
         }
       ],

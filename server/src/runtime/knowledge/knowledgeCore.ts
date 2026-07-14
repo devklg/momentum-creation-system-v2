@@ -1,6 +1,7 @@
 import type {
   McsKnowledgeCandidateReference,
   McsKnowledgeReference,
+  McsRuntimeLanguage,
   McsRuntimeRequestScope,
 } from '@momentum/shared/runtime';
 import { defineRuntimeBoundary } from '../common.js';
@@ -12,6 +13,7 @@ export interface KnowledgeCoreBoundaryPort {
     scope: McsRuntimeRequestScope,
     query: string,
     k?: number,
+    language?: McsRuntimeLanguage,
   ): Promise<readonly McsKnowledgeReference[]>;
   listCandidateKnowledgeForReview(
     scope: McsRuntimeRequestScope,

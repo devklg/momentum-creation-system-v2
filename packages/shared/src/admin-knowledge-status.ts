@@ -22,4 +22,30 @@ export interface McsAdminKnowledgeStatusResponse {
     lastObservedAt: string | null;
     degradedReasons: Array<{ reason: string; count: number }>;
   };
+  retrievalPerformance: {
+    retention: 'in_process_since_restart';
+    approvedReferenceCache: {
+      ttlMs: number;
+      maxEntries: number;
+      hits: number;
+      misses: number;
+      coalesced: number;
+      evictions: number;
+      size: number;
+      inFlight: number;
+      invalidations: number;
+      generation: number;
+    };
+    graphRagReadiness: {
+      maxUniqueIds: number;
+      batches: number;
+      requestedIds: number;
+      storeCalls: {
+        mongoCanonical: number;
+        mongoOutbox: number;
+        neo4j: number;
+        chroma: number;
+      };
+    };
+  };
 }
