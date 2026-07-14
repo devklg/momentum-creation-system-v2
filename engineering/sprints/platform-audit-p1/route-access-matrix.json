@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T04:32:05.364Z",
+  "generatedAt": "2026-07-14T05:03:57.558Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
