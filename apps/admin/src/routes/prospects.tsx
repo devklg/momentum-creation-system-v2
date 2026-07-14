@@ -98,6 +98,10 @@ export function ProspectsPage() {
     const sequence = ++requestSequence.current;
     setLoading(true);
     setErr(null);
+    if (mode === 'replace') {
+      setRows(null);
+      setPageInfo(null);
+    }
     try {
       const params = new URLSearchParams();
       if (f.tmagId) params.set('tmagId', f.tmagId);
@@ -123,7 +127,9 @@ export function ProspectsPage() {
       });
       setPageInfo(data.pageInfo);
     } catch (e) {
-      setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+      if (sequence === requestSequence.current) {
+        setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+      }
     } finally {
       if (sequence === requestSequence.current) setLoading(false);
     }
@@ -202,7 +208,7 @@ export function ProspectsPage() {
             {loading ? 'Loading…' : pageInfo?.hasMore ? 'Load more' : 'All matching prospects loaded'}
           </Button>
           <span className="font-mono text-[10px] uppercase tracking-label text-cream-faint">
-            Server ordered · newest first contact first · {rows.length} loaded
+            Bounded server pages · newest created first · {rows.length} loaded · matched total omitted
           </span>
         </div>
       )}

@@ -1,9 +1,9 @@
 /**
  * D.1 — the prospect directory table.
  *
- * Ten columns, sortable on every one. Sort is in-memory (Kevin-scale —
- * dozens to low thousands of rows at v1). Row click selects the prospect
- * for the detail panel; the prospect-URL "preview" link opens the
+ * Ten columns in the server's approved stable order. Headers are deliberately
+ * static: sorting a loaded page would misrepresent the full directory. Row
+ * click selects the prospect for the detail panel; the prospect-URL "preview" link opens the
  * sandbox preview inside the detail panel rather than navigating, so
  * no real /p/{token} click event ever fires.
  *
@@ -18,25 +18,6 @@ import type {
   McsProspectStatus,
 } from '@momentum/shared';
 
-type SortDir = 'asc' | 'desc';
-type SortColumn =
-  | 'name'
-  | 'sponsor'
-  | 'status'
-  | 'position'
-  | 'url'
-  | 'firstContact'
-  | 'recent'
-  | 'days'
-  | 'followUp'
-  | 'handoff';
-
-interface SortState {
-  column: SortColumn;
-  dir: SortDir;
-}
-const DEFAULT_SORT: SortState = { column: 'firstContact', dir: 'desc' };
-
 interface Props {
   rows: McsAdminProspectDirectoryRow[] | null;
   loading: boolean;
@@ -44,11 +25,7 @@ interface Props {
 }
 
 export function DirectoryTable({ rows, loading, onSelectProspect }: Props) {
-  const sort = DEFAULT_SORT;
-  const sortedRows = rows;
-  const handleSort = () => undefined;
-
-  if (loading && !sortedRows) {
+  if (loading && !rows) {
     return (
       <p className="text-[12px] font-mono tracking-label text-cream-faint uppercase mt-6">
         Loading…
@@ -56,7 +33,7 @@ export function DirectoryTable({ rows, loading, onSelectProspect }: Props) {
     );
   }
 
-  if (sortedRows && sortedRows.length === 0) {
+  if (rows && rows.length === 0) {
     return (
       <p className="text-[12px] font-mono tracking-label text-cream-faint uppercase mt-6">
         No prospects match this filter.
@@ -69,67 +46,20 @@ export function DirectoryTable({ rows, loading, onSelectProspect }: Props) {
       <table className="w-full text-sm">
         <thead className="bg-cream/[0.025]">
           <tr className="text-left">
-            <SortableTh
-              col="name"
-              label="Prospect"
-              sort={sort}
-              onSort={handleSort}
-            />
-            <SortableTh
-              col="sponsor"
-              label="Inviting BA"
-              sort={sort}
-              onSort={handleSort}
-            />
-            <SortableTh col="status" label="Status" sort={sort} onSort={handleSort} />
-            <SortableTh
-              col="position"
-              label="Position"
-              sort={sort}
-              onSort={handleSort}
-              align="right"
-            />
-            <SortableTh
-              col="url"
-              label="Prospect URL"
-              sort={sort}
-              onSort={handleSort}
-            />
-            <SortableTh
-              col="firstContact"
-              label="First Contact"
-              sort={sort}
-              onSort={handleSort}
-            />
-            <SortableTh
-              col="recent"
-              label="Most Recent"
-              sort={sort}
-              onSort={handleSort}
-            />
-            <SortableTh
-              col="days"
-              label="Days in Tank"
-              sort={sort}
-              onSort={handleSort}
-              align="right"
-            />
-            <SortableTh
-              col="followUp"
-              label="Follow-up By"
-              sort={sort}
-              onSort={handleSort}
-            />
-            <SortableTh
-              col="handoff"
-              label="Handoff State"
-              sort={sort}
-              onSort={handleSort}
-            />
+            <Th>Prospect</Th>
+            <Th>Inviting BA</Th>
+            <Th>Status</Th>
+            <Th align="right">Position</Th>
+            <Th>Prospect URL</Th>
+            <Th>First Contact</Th>
+            <Th>Most Recent</Th>
+            <Th align="right">Days in Tank</Th>
+            <Th>Follow-up By</Th>
+            <Th>Handoff State</Th>
           </tr>
         </thead>
         <tbody>
-          {sortedRows?.map((row) => (
+          {rows?.map((row) => (
             <tr
               key={row.prospectId}
               className="border-t border-line hover:bg-cream/[0.02] cursor-pointer"
@@ -210,30 +140,22 @@ export function DirectoryTable({ rows, loading, onSelectProspect }: Props) {
 
 /* ─── helpers ───────────────────────────────────────────────────── */
 
-function SortableTh({
-  col,
-  label,
-  sort,
-  onSort: _onSort,
+function Th({
+  children,
   align = 'left',
 }: {
-  col: SortColumn;
-  label: string;
-  sort: SortState;
-  onSort: (col: SortColumn) => void;
+  children: React.ReactNode;
   align?: 'left' | 'right';
 }) {
-  const active = sort.column === col;
-  const arrow = active ? (sort.dir === 'asc' ? '↑' : '↓') : '';
   return (
     <th
       className={[
         'px-3 py-2.5 text-[10px] font-mono tracking-label uppercase whitespace-nowrap',
         align === 'right' ? 'text-right' : 'text-left',
-        active ? 'text-gold' : 'text-cream-faint',
+        'text-cream-faint',
       ].join(' ')}
     >
-      {label} <span className="ml-1">{arrow}</span>
+      {children}
     </th>
   );
 }
