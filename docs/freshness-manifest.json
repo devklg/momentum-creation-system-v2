@@ -31,7 +31,7 @@
     {
       "file": "PLATFORM_AUDIT_PRIORITY_TASKLIST.md",
       "authorityStatus": "current_execution_queue",
-      "contentSha256": "9db42d1247088ef15857bd9f898eb4214eebfeed0ab067a9d1f9d8bd3ab7d0e9",
+      "contentSha256": "4b34aeeb728e012900269ffba42d772248a403a1691b8509d058b2954ee214cb",
       "reviewedAt": "2026-07-12"
     }
   ],
@@ -74,9 +74,9 @@
           "contentSha256": "85e443f3b6e0e93e9c41a6fe9b3480d5c32cbe7c468858ea51aca2033277783c"
         }
       ],
-      "contentSha256": "c8bf39a9ff1a1c2faca70285a53e93e3af077dc4bed595f6178b0a8831b63240",
+      "contentSha256": "5ebb28b2a0d84c29fe6a4fb7cbaa521e3576411333ced66df0b7fec1422b44df",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-14T00:40:38.158Z"
+      "generatedAt": "2026-07-14T00:47:22.769Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/route-access-matrix.json",
@@ -85,12 +85,12 @@
       "sources": [
         {
           "path": "engineering/sprints/platform-audit-p1/api-route-map.json",
-          "contentSha256": "c8bf39a9ff1a1c2faca70285a53e93e3af077dc4bed595f6178b0a8831b63240"
+          "contentSha256": "5ebb28b2a0d84c29fe6a4fb7cbaa521e3576411333ced66df0b7fec1422b44df"
         }
       ],
-      "contentSha256": "9b814dba67eb2ce4982fa0659c3252a676a025a407e143a72b090cd4a7c8dc18",
+      "contentSha256": "83fec3f58faa9fc1e931b21f3f8d38cc79234df5eeea4167496d49ba8ff35336",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-14T00:40:38.215Z"
+      "generatedAt": "2026-07-14T00:47:22.826Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/persistence-write-catalog.json",
@@ -99,12 +99,12 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "8deba9be1f7dcd2dc8e47dd9d42f263781016dc22c57f3f11e9169724a04f19e"
+          "contentSha256": "cd75196c42e5fbdb6e20ac28357502a91e5b0e7150b0c5a4002412afd342a403"
         }
       ],
-      "contentSha256": "8c6ff34631f50ac5706ca8d07655910a36a9d9969ab81cc567b28ccedb9f4142",
+      "contentSha256": "84ebb7c1ed2e2e522f994a807b6451993c0d84cca94e75991a1cc579dba329db",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-14T00:40:45.299Z"
+      "generatedAt": "2026-07-14T00:47:26.640Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/schema-catalog.json",
@@ -113,16 +113,16 @@
       "sources": [
         {
           "path": "packages/shared/src",
-          "contentSha256": "124c4a5e795ea2130dab000682a86144c00d106f6612174234f132a81b1b81ff"
+          "contentSha256": "aafa22500ad98c586cb8e0729ab0760b7af8709f1afa1ef7b6171d674f2dda77"
         },
         {
           "path": "server/src",
-          "contentSha256": "8deba9be1f7dcd2dc8e47dd9d42f263781016dc22c57f3f11e9169724a04f19e"
+          "contentSha256": "cd75196c42e5fbdb6e20ac28357502a91e5b0e7150b0c5a4002412afd342a403"
         }
       ],
-      "contentSha256": "a16223323839f7845a1db3f59fa3da833e0ca168cee8a248f5376409ebe47378",
+      "contentSha256": "5aa5f9a85fcdf944c5af641e98e9e9be629018298e32d42e3669385cdcb6e622",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-14T00:40:43.219Z"
+      "generatedAt": "2026-07-14T00:47:25.439Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/mongo-ownership-map.json",
@@ -131,12 +131,12 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "8deba9be1f7dcd2dc8e47dd9d42f263781016dc22c57f3f11e9169724a04f19e"
+          "contentSha256": "cd75196c42e5fbdb6e20ac28357502a91e5b0e7150b0c5a4002412afd342a403"
         }
       ],
-      "contentSha256": "d6bb76c04687fccb27f711e296807b7a525b001bcfd5a71f39b82c2f0a811fa2",
+      "contentSha256": "66f008a353e41a71e2f89c4cd1ad09d365a0275465970eeac9460ea3666e2ed2",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-14T00:40:27.997Z"
+      "generatedAt": "2026-07-14T00:47:16.382Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/mongo-index-audit-plan.json",
@@ -145,12 +145,12 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "8deba9be1f7dcd2dc8e47dd9d42f263781016dc22c57f3f11e9169724a04f19e"
+          "contentSha256": "cd75196c42e5fbdb6e20ac28357502a91e5b0e7150b0c5a4002412afd342a403"
         }
       ],
-      "contentSha256": "6c96f0693115548bba2522234d592303be9f75b28758f79d86f611d38d481f62",
+      "contentSha256": "419a100d966eacf78f29d7d0c6b56db42dcfaa93af86f0f12668f207f44276fb",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-14T00:40:28.444Z"
+      "generatedAt": "2026-07-14T00:47:16.735Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/neo4j-catalog.json",
@@ -159,12 +159,12 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "8deba9be1f7dcd2dc8e47dd9d42f263781016dc22c57f3f11e9169724a04f19e"
+          "contentSha256": "cd75196c42e5fbdb6e20ac28357502a91e5b0e7150b0c5a4002412afd342a403"
         }
       ],
-      "contentSha256": "d88530f1edd062edf1e4d6f66164796f12d6565b7d5788dc2a692f0895c87aaf",
+      "contentSha256": "9845a013a24c6435c7536a47874b36a3f0aba2245df33f60d46a213bd5d2f5fa",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-14T00:40:28.896Z"
+      "generatedAt": "2026-07-14T00:47:17.084Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/chroma-collection-catalog.json",
@@ -173,12 +173,12 @@
       "sources": [
         {
           "path": "server/src",
-          "contentSha256": "8deba9be1f7dcd2dc8e47dd9d42f263781016dc22c57f3f11e9169724a04f19e"
+          "contentSha256": "cd75196c42e5fbdb6e20ac28357502a91e5b0e7150b0c5a4002412afd342a403"
         }
       ],
-      "contentSha256": "a0692d9cc9e18c5adbd3e62a10922cc4fab502a5feba68e05487743ec715f96b",
+      "contentSha256": "35d19e0212aa87f44e3977cdbe57142b0feeef1587eaf6f3da319c861f1b8b32",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-14T00:40:32.272Z"
+      "generatedAt": "2026-07-14T00:47:18.997Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/com-prospect-compliance-scan.json",
@@ -194,9 +194,9 @@
           "contentSha256": "bc2dbf222cb4aa6e4920fb9e7d85e16a76aa1550a1e76282b7d366dafd1c333e"
         }
       ],
-      "contentSha256": "b70e68b8e08aaa5479cb5a18ce8f4e05216ffd170bbf5e05db1c7ffa3e59ae26",
+      "contentSha256": "53ea187752568ca65f80d96280fcd3c3e5c761b62117cd3e8eab1b39e7a7b8a0",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-14T00:40:46.065Z"
+      "generatedAt": "2026-07-14T00:47:27.183Z"
     }
   ],
   "historicalDocs": [

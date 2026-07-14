@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T00:40:43.219Z
+- Generated: 2026-07-14T00:47:25.439Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
 - Route handlers: 266
-- Shared exports: 1057
+- Shared exports: 1063
 
 ## Mongo Collections
 
@@ -924,6 +924,12 @@
 | `McsTrainingAccessPrerequisite` | type | `packages/shared/src/training-catalog.ts` |
 | `McsTrainingCatalogModuleId` | type | `packages/shared/src/training-catalog.ts` |
 | `McsTrainingModuleCatalogEntry` | interface | `packages/shared/src/training-catalog.ts` |
+| `MCS_TRAINING_TARGET_RECONCILIATION` | const | `packages/shared/src/training-target-reconciliation.ts` |
+| `MCS_TRAINING_TARGET_RECONCILIATION_ENTRIES` | const | `packages/shared/src/training-target-reconciliation.ts` |
+| `MCS_TRAINING_TARGET_RECONCILIATION_SCHEMA_VERSION` | const | `packages/shared/src/training-target-reconciliation.ts` |
+| `McsTrainingArchitectureModuleNumber` | type | `packages/shared/src/training-target-reconciliation.ts` |
+| `McsTrainingTargetImplementationState` | type | `packages/shared/src/training-target-reconciliation.ts` |
+| `McsTrainingTargetReconciliationEntry` | interface | `packages/shared/src/training-target-reconciliation.ts` |
 | `MCS_BA_NOTIF_DEFAULTS` | const | `packages/shared/src/types.ts` |
 | `MCS_CRM_DISPOSITIONS` | const | `packages/shared/src/types.ts` |
 | `MCS_FAST_START_MODULES` | const | `packages/shared/src/types.ts` |

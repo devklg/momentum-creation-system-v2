@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T00:40:43.219Z",
+  "generatedAt": "2026-07-14T00:47:25.439Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -8757,6 +8757,36 @@
       "file": "packages/shared/src/training-catalog.ts"
     },
     {
+      "name": "MCS_TRAINING_TARGET_RECONCILIATION",
+      "kind": "const",
+      "file": "packages/shared/src/training-target-reconciliation.ts"
+    },
+    {
+      "name": "MCS_TRAINING_TARGET_RECONCILIATION_ENTRIES",
+      "kind": "const",
+      "file": "packages/shared/src/training-target-reconciliation.ts"
+    },
+    {
+      "name": "MCS_TRAINING_TARGET_RECONCILIATION_SCHEMA_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/training-target-reconciliation.ts"
+    },
+    {
+      "name": "McsTrainingArchitectureModuleNumber",
+      "kind": "type",
+      "file": "packages/shared/src/training-target-reconciliation.ts"
+    },
+    {
+      "name": "McsTrainingTargetImplementationState",
+      "kind": "type",
+      "file": "packages/shared/src/training-target-reconciliation.ts"
+    },
+    {
+      "name": "McsTrainingTargetReconciliationEntry",
+      "kind": "interface",
+      "file": "packages/shared/src/training-target-reconciliation.ts"
+    },
+    {
       "name": "MCS_BA_NOTIF_DEFAULTS",
       "kind": "const",
       "file": "packages/shared/src/types.ts"
@@ -11244,6 +11274,6 @@
     "chromaCollections": 53,
     "routeModules": 49,
     "routeHandlers": 266,
-    "sharedExports": 1057
+    "sharedExports": 1063
   }
 }
