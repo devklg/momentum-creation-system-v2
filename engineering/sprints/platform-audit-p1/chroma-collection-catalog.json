@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T05:54:04.327Z",
+  "generatedAt": "2026-07-14T06:37:12.053Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -75,7 +75,7 @@
       "sources": [
         {
           "file": "server/src/domain/adminProspectOversight.ts",
-          "line": 781,
+          "line": 855,
           "action": "writeOperational"
         }
       ],
@@ -266,12 +266,12 @@
       "sources": [
         {
           "file": "server/src/domain/auditLog.ts",
-          "line": 147,
+          "line": 154,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/auditLog.ts",
-          "line": 413,
+          "line": 442,
           "action": "writeOperational"
         }
       ],

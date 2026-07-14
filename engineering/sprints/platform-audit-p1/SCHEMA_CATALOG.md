@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T05:54:14.797Z
+- Generated: 2026-07-14T06:37:19.221Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
-- Route handlers: 277
-- Shared exports: 1108
+- Route handlers: 279
+- Shared exports: 1111
 
 ## Mongo Collections
 
@@ -25,7 +25,7 @@
 | `input.mongoCollection` | permissive_mongoose_schema | expression | 2 |
 | `KNOWLEDGE_CHUNK_COLLECTION` | permissive_mongoose_schema | expression | 2 |
 | `KNOWLEDGE_SOURCE_COLLECTION` | permissive_mongoose_schema | expression | 3 |
-| `mcs_audit_log` | permissive_mongoose_schema | yes | 5 |
+| `mcs_audit_log` | permissive_mongoose_schema | yes | 6 |
 | `mcs_graphrag_records` | permissive_mongoose_schema | yes | 2 |
 | `mcs_knowledge_chunks` | permissive_mongoose_schema | yes | 1 |
 | `mcs_knowledge_sources` | permissive_mongoose_schema | yes | 1 |
@@ -34,7 +34,7 @@
 | `mcs_questionnaires` | permissive_mongoose_schema | yes | 1 |
 | `mcs_workbooks` | permissive_mongoose_schema | yes | 2 |
 | `orientation_sessions` | permissive_mongoose_schema | yes | 1 |
-| `team_magnificent_members` | explicit_mongoose_schema | yes | 59 |
+| `team_magnificent_members` | explicit_mongoose_schema | yes | 61 |
 | `tenant_settings_versions` | permissive_mongoose_schema | yes | 3 |
 | `tmag_access_codes` | permissive_mongoose_schema | yes | 8 |
 | `tmag_admin_curated_leader_tags` | permissive_mongoose_schema | yes | 3 |
@@ -47,7 +47,7 @@
 | `tmag_commitments` | permissive_mongoose_schema | yes | 3 |
 | `tmag_content_templates` | permissive_mongoose_schema | yes | 2 |
 | `tmag_content_videos` | permissive_mongoose_schema | yes | 5 |
-| `tmag_event_attendance` | permissive_mongoose_schema | yes | 3 |
+| `tmag_event_attendance` | permissive_mongoose_schema | yes | 6 |
 | `tmag_fast_start_progress` | permissive_mongoose_schema | yes | 8 |
 | `tmag_invitation_generator_runs` | permissive_mongoose_schema | yes | 3 |
 | `tmag_ivory_prospect_names` | permissive_mongoose_schema | yes | 8 |
@@ -69,8 +69,8 @@
 | `tmag_prospect_sessions` | permissive_mongoose_schema | yes | 3 |
 | `tmag_prospect_timeline_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_events` | permissive_mongoose_schema | yes | 4 |
-| `tmag_prospect_webinar_reservations` | permissive_mongoose_schema | yes | 4 |
-| `tmag_prospects` | permissive_mongoose_schema | yes | 37 |
+| `tmag_prospect_webinar_reservations` | permissive_mongoose_schema | yes | 6 |
+| `tmag_prospects` | permissive_mongoose_schema | yes | 38 |
 | `tmag_questionnaires` | permissive_mongoose_schema | yes | 2 |
 | `tmag_recruiting_cycles` | permissive_mongoose_schema | yes | 3 |
 | `tmag_sponsor_availability` | permissive_mongoose_schema | yes | 5 |
@@ -312,7 +312,7 @@
 | `(unmounted)` | `server/src/routes/admin/access-codes.ts` | POST /<br>GET / | none |
 | `(unmounted)` | `server/src/routes/admin/agents.ts` | GET /overview<br>GET user-agent<br>GET /health<br>GET /outbox-health | `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/audit.ts` | GET /<br>GET /:entryId | `McsAuditActorRole`, `McsAuditEntityKind`, `McsAuditEntryResponse`, `McsAuditListResponse`, `McsAuditQueryFilters`, `McsAuditSeverity` |
-| `(unmounted)` | `server/src/routes/admin/bas.ts` | GET /entitlements/audit<br>GET /launch-readiness<br>GET /<br>GET /:tmagId<br>POST /:tmagId/sponsor-override<br>POST /:tmagId/entitlements<br>POST /:tmagId/leader-tag<br>POST /:tmagId/notes<br>POST /<br>PATCH /:tmagId<br>DELETE /:tmagId<br>POST /:tmagId/restore | `McsAdminBaDirectoryResponse`, `McsAdminBaEntitlementsResponse`, `McsAdminBaNoteResponse`, `McsAdminBaProfileResponse`, `McsAdminLeaderTagResponse`, `McsAdminSponsorOverrideResponse` |
+| `(unmounted)` | `server/src/routes/admin/bas.ts` | GET /entitlements/audit<br>GET /launch-readiness<br>GET /<br>GET user-agent<br>GET /:tmagId<br>POST /:tmagId/sponsor-override<br>POST /:tmagId/entitlements<br>POST /:tmagId/leader-tag<br>POST /:tmagId/notes<br>POST /<br>PATCH /:tmagId<br>DELETE /:tmagId<br>POST /:tmagId/restore | `McsAdminBaDirectoryResponse`, `McsAdminBaEntitlementsResponse`, `McsAdminBaNoteResponse`, `McsAdminBaProfileResponse`, `McsAdminLeaderTagResponse`, `McsAdminPaginationContract`, `McsAdminSponsorOverrideResponse` |
 | `(unmounted)` | `server/src/routes/admin/broadcast.ts` | GET /audience<br>GET /list<br>GET /:broadcastId<br>POST /test<br>POST / | `McsAuditActor`, `McsBroadcastAudiencePreviewResponse`, `McsBroadcastEnqueueResponse`, `McsBroadcastSendTestResponse`, `McsBroadcastStatusResponse` |
 | `(unmounted)` | `server/src/routes/admin/consistency.ts` | GET /report<br>GET user-agent<br>GET /crm-integrity<br>GET user-agent | `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/content-videos.ts` | GET user-agent<br>GET /<br>POST /<br>PATCH /:contentVideoId<br>POST /reorder | `McsAuditActor`, `McsContentVideoAudience`, `McsContentVideoMutationResponse`, `McsContentVideoReorderResponse`, `McsContentVideosAdminListResponse` |
@@ -323,10 +323,10 @@
 | `(unmounted)` | `server/src/routes/admin/liveOps.ts` | GET /operations<br>GET /growth<br>GET user-agent<br>GET /grid<br>GET user-agent<br>GET /funnel<br>GET user-agent<br>GET /usage/stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminFunnelKind`, `McsAdminLiveUsageSample`, `McsAdminLiveUsageStreamEvent`, `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/michael-runtime-observability.ts` | GET /observability | none |
 | `(unmounted)` | `server/src/routes/admin/orientation.ts` | GET user-agent<br>GET /sessions<br>GET /diagnostic<br>POST /sessions | `McsAdminCreateOrientationSessionResponse`, `McsAdminOrientationDiagnosticResponse`, `McsAdminOrientationSessionsResponse`, `McsAuditActor`, `McsAuditContext` |
-| `(unmounted)` | `server/src/routes/admin/prospects.ts` | GET user-agent<br>GET /<br>GET /filters<br>GET /:prospectId<br>GET /:prospectId/sandbox-preview<br>POST /:prospectId/notes<br>POST /:prospectId/move<br>POST /:prospectId/reassign-sponsor<br>POST /:prospectId/manual-flush<br>POST /:prospectId/force-enroll<br>POST /<br>PATCH /:prospectId<br>DELETE /:prospectId<br>POST /:prospectId/restore<br>POST /flush-expired<br>GET /alerts/aged | `McsAdminDashboardFilter`, `McsAdminProspectActivityEvent`, `McsAdminProspectActivityEventKind`, `McsAdminProspectAddNoteResponse`, `McsAdminProspectDetailResponse`, `McsAdminProspectDirectoryResponse`, `McsAuditActor`, `McsAuditContext`, `McsAuditLogEntry` |
+| `(unmounted)` | `server/src/routes/admin/prospects.ts` | GET user-agent<br>GET /<br>GET /filters<br>GET /:prospectId<br>GET /:prospectId/sandbox-preview<br>POST /:prospectId/notes<br>POST /:prospectId/move<br>POST /:prospectId/reassign-sponsor<br>POST /:prospectId/manual-flush<br>POST /:prospectId/force-enroll<br>POST /<br>PATCH /:prospectId<br>DELETE /:prospectId<br>POST /:prospectId/restore<br>POST /flush-expired<br>GET /alerts/aged | `McsAdminDashboardFilter`, `McsAdminPaginationContract`, `McsAdminProspectActivityEvent`, `McsAdminProspectActivityEventKind`, `McsAdminProspectAddNoteResponse`, `McsAdminProspectDetailResponse`, `McsAdminProspectDirectoryResponse`, `McsAuditActor`, `McsAuditContext`, `McsAuditLogEntry` |
 | `(unmounted)` | `server/src/routes/admin/queue.ts` | GET user-agent<br>GET /summary<br>GET /lookup<br>GET /visible-window<br>PUT /visible-window<br>GET /ticker<br>GET /ticker/stream<br>GET /rules<br>PUT /rules/:key | `McsAdminQueueTickerSnapshot`, `McsAdminQueueTickerSseEvent`, `McsAdminTickerEntry`, `McsAuditActor`, `McsPlacementEvent`, `McsQueueAdminTickerResponse`, `McsQueueLookupResponse`, `McsQueueOversightSummaryResponse`, `McsQueueRulesResponse`, `McsQueueVisibleWindow`, `McsQueueVisibleWindowResponse` |
 | `(unmounted)` | `server/src/routes/admin/reporting.ts` | GET /bottlenecks<br>GET user-agent<br>GET /master-report.pdf<br>GET user-agent<br>GET /activation<br>GET user-agent<br>GET /training<br>GET user-agent<br>GET /invite-funnel<br>GET user-agent<br>GET /queue-velocity<br>GET user-agent<br>GET /enrollment-completion<br>GET user-agent<br>GET /follow-up-aging<br>GET user-agent<br>GET /leader-scorecards<br>GET user-agent<br>GET user-agent<br>GET /activation/export<br>GET /training/export<br>GET /invite-funnel/export<br>GET /queue-velocity/export<br>GET /enrollment-completion/export<br>GET /follow-up-aging/export<br>GET /leader-scorecards/export | `McsAdminDashboardFilter`, `McsAdminReportTimeRange`, `McsAuditActor` |
-| `(unmounted)` | `server/src/routes/admin/resourceCenter.ts` | GET /analytics<br>GET user-agent | none |
+| `(unmounted)` | `server/src/routes/admin/resourceCenter.ts` | GET /index-awareness<br>GET user-agent<br>GET /analytics | none |
 | `(unmounted)` | `server/src/routes/admin/tenant.ts` | GET user-agent<br>GET /overview<br>PATCH /settings<br>POST /templates/validate<br>PUT /templates/:templateKey | `McsAuditActor`, `McsSaveTenantTemplateResponse`, `McsTenantOverviewResponse`, `McsTenantSurface`, `McsTenantTemplateKey`, `McsUpdateTenantSettingsResponse`, `McsValidateTenantTemplateResponse` |
 | `(unmounted)` | `server/src/routes/admin/vm.ts` | GET /overview<br>GET user-agent<br>POST /campaigns/:vmCampaignId/live-approval<br>GET user-agent<br>POST /ownership-correction<br>GET user-agent | `McsAdminVmLiveApprovalPayload`, `McsAdminVmLiveApprovalResponse`, `McsAdminVmOwnershipCorrectionPayload`, `McsAdminVmOwnershipCorrectionResponse`, `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/agents.ts` | GET /recommendations<br>POST /events | `McsAgentEventResponse`, `McsAgentRecommendationsResponse`, `McsCreateAgentEventPayload` |
@@ -388,6 +388,9 @@
 | `McsAdminLiveUsageSample` | interface | `packages/shared/src/admin-live-ops.ts` |
 | `McsAdminLiveUsageStreamEvent` | type | `packages/shared/src/admin-live-ops.ts` |
 | `McsAdminOperationsDashboardResponse` | interface | `packages/shared/src/admin-live-ops.ts` |
+| `McsAdminPageInfo` | interface | `packages/shared/src/admin-pagination.ts` |
+| `McsAdminPaginationContract` | interface | `packages/shared/src/admin-pagination.ts` |
+| `McsAdminStableSort` | type | `packages/shared/src/admin-pagination.ts` |
 | `MCS_ADMIN_SENSITIVE_ACTIONS` | const | `packages/shared/src/admin-sensitive-actions.ts` |
 | `McsAdminSensitiveActionControl` | interface | `packages/shared/src/admin-sensitive-actions.ts` |
 | `getMcsPlatformAgent` | function | `packages/shared/src/agent-registry.ts` |

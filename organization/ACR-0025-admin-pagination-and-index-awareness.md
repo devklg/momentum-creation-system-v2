@@ -186,3 +186,37 @@ Kevin approved the recommended P2-131 bundle in the active Codex task on
 `dec_acr_0025_admin_pagination_approval_2026_07_13`. Implementation is authorized
 on `codex/p2-131-admin-pagination` under the six decisions above. Index creation,
 automatic index application, and production mutation remain unauthorized.
+
+## Implementation evidence — 2026-07-13
+
+Implementation is present on `codex/p2-131-admin-pagination` in the P2-131
+commit series beginning at `f165be25`. The existing BA, prospect, Event,
+Resource, and audit endpoints now use authenticated filter-bound keyset
+cursors, `pageSize + 1`, stable source-owned compound ordering, page-scoped
+joins, honest `hasMore`, and additive page metadata. The one-release BA
+compatibility field remains bounded and documented. Unsupported derived sorts
+and the former broad BA contains-search are visibly narrowed; exact TM ID,
+THREE BA ID, and email lookup remains server-side.
+
+The Event and Resource source summaries are computed independently from their
+bounded row pages. The generated required-index manifest and the admin
+index-awareness surface are read-only and explicitly report observed,
+missing, or definition-mismatch state with `mutationAuthorized:false`.
+
+Verification evidence:
+
+- Repo typecheck: green across shared, server, com, team, and admin.
+- Server test suite: 2,141 passed, 19 skipped.
+- Admin test suite: 44 passed.
+- Production build: green across all workspaces.
+- Route-access catalog: 243 routes, zero findings.
+- Mongo index catalog check: current, 70 plan rows.
+- Dedicated local MCS Mongo read-back via `$indexStats`: every present
+  in-scope collection currently exposes only `_id_`; the usage-event
+  collection was absent or had no index metadata. This is recorded as missing,
+  not installed. No index was created or applied.
+
+Trusted browser visual QA remains pending because the in-app browser bridge
+rejected this task as untrusted. Component/UI tests cover initial load,
+load-more append/dedupe, filter reset, stale-response isolation, disabled and
+terminal controls, but those tests are not represented as a visual sign-off.

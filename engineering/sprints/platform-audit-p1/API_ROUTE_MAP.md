@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-14T05:54:10.044Z
+- Generated: 2026-07-14T06:37:16.249Z
 - Mounted routers: 50
 - Route files: 50
-- Static route rows: 242
+- Static route rows: 243
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
 | ba_facing_gated | 91 |
-| pre_gate | 147 |
+| pre_gate | 148 |
 | pre_json_admin_body_limit | 3 |
 | raw_body_before_json | 1 |
 
@@ -22,7 +22,7 @@
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 99 |
+| admin | 100 |
 | ba_auth_steve_gated | 91 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 7 |
-| GET | 125 |
+| GET | 126 |
 | PATCH | 9 |
 | POST | 94 |
 | PUT | 7 |
@@ -127,33 +127,33 @@
 | POST | `/api/steve/discovery/converse` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:294` |
 | POST | `/api/admin/access-codes/` | pre_gate | admin | admin | `server/src/routes/admin/access-codes.ts:30` |
 | GET | `/api/admin/access-codes/` | pre_gate | admin | admin | `server/src/routes/admin/access-codes.ts:65` |
-| GET | `/api/admin/bas/entitlements/audit` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:53` |
-| GET | `/api/admin/bas/launch-readiness` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:58` |
-| GET | `/api/admin/bas/` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:68` |
-| GET | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:97` |
-| POST | `/api/admin/bas/:tmagId/sponsor-override` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:123` |
-| POST | `/api/admin/bas/:tmagId/entitlements` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:188` |
-| POST | `/api/admin/bas/:tmagId/leader-tag` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:229` |
-| POST | `/api/admin/bas/:tmagId/notes` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:269` |
-| POST | `/api/admin/bas/` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:379` |
-| PATCH | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:414` |
-| DELETE | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:440` |
-| POST | `/api/admin/bas/:tmagId/restore` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:466` |
-| GET | `/api/admin/prospects/` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:114` |
-| GET | `/api/admin/prospects/filters` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:156` |
-| GET | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:180` |
-| GET | `/api/admin/prospects/:prospectId/sandbox-preview` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:249` |
-| POST | `/api/admin/prospects/:prospectId/notes` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:297` |
-| POST | `/api/admin/prospects/:prospectId/move` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:334` |
-| POST | `/api/admin/prospects/:prospectId/reassign-sponsor` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:355` |
-| POST | `/api/admin/prospects/:prospectId/manual-flush` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:387` |
-| POST | `/api/admin/prospects/:prospectId/force-enroll` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:416` |
-| POST | `/api/admin/prospects/` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:573` |
-| PATCH | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:621` |
-| DELETE | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:663` |
-| POST | `/api/admin/prospects/:prospectId/restore` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:692` |
-| POST | `/api/admin/prospects/flush-expired` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:731` |
-| GET | `/api/admin/prospects/alerts/aged` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:767` |
+| GET | `/api/admin/bas/entitlements/audit` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:55` |
+| GET | `/api/admin/bas/launch-readiness` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:60` |
+| GET | `/api/admin/bas/` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:70` |
+| GET | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:154` |
+| POST | `/api/admin/bas/:tmagId/sponsor-override` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:180` |
+| POST | `/api/admin/bas/:tmagId/entitlements` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:247` |
+| POST | `/api/admin/bas/:tmagId/leader-tag` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:288` |
+| POST | `/api/admin/bas/:tmagId/notes` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:328` |
+| POST | `/api/admin/bas/` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:438` |
+| PATCH | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:473` |
+| DELETE | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:499` |
+| POST | `/api/admin/bas/:tmagId/restore` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:525` |
+| GET | `/api/admin/prospects/` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:116` |
+| GET | `/api/admin/prospects/filters` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:178` |
+| GET | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:202` |
+| GET | `/api/admin/prospects/:prospectId/sandbox-preview` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:271` |
+| POST | `/api/admin/prospects/:prospectId/notes` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:319` |
+| POST | `/api/admin/prospects/:prospectId/move` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:356` |
+| POST | `/api/admin/prospects/:prospectId/reassign-sponsor` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:377` |
+| POST | `/api/admin/prospects/:prospectId/manual-flush` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:409` |
+| POST | `/api/admin/prospects/:prospectId/force-enroll` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:438` |
+| POST | `/api/admin/prospects/` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:595` |
+| PATCH | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:643` |
+| DELETE | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:685` |
+| POST | `/api/admin/prospects/:prospectId/restore` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:714` |
+| POST | `/api/admin/prospects/flush-expired` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:753` |
+| GET | `/api/admin/prospects/alerts/aged` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:789` |
 | GET | `/api/admin/queue/summary` | pre_gate | admin | admin | `server/src/routes/admin/queue.ts:77` |
 | GET | `/api/admin/queue/lookup` | pre_gate | admin | admin | `server/src/routes/admin/queue.ts:105` |
 | GET | `/api/admin/queue/visible-window` | pre_gate | admin | admin | `server/src/routes/admin/queue.ts:146` |
@@ -162,8 +162,8 @@
 | GET | `/api/admin/queue/ticker/stream` | pre_gate | admin | admin | `server/src/routes/admin/queue.ts:312` |
 | GET | `/api/admin/queue/rules` | pre_gate | admin | admin | `server/src/routes/admin/queue.ts:408` |
 | PUT | `/api/admin/queue/rules/:key` | pre_gate | admin | admin | `server/src/routes/admin/queue.ts:441` |
-| GET | `/api/admin/audit/` | pre_gate | admin | admin | `server/src/routes/admin/audit.ts:80` |
-| GET | `/api/admin/audit/:entryId` | pre_gate | admin | admin | `server/src/routes/admin/audit.ts:107` |
+| GET | `/api/admin/audit/` | pre_gate | admin | admin | `server/src/routes/admin/audit.ts:81` |
+| GET | `/api/admin/audit/:entryId` | pre_gate | admin | admin | `server/src/routes/admin/audit.ts:112` |
 | GET | `/api/admin/dashboard/metrics` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:84` |
 | GET | `/api/admin/dashboard/filters` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:130` |
 | GET | `/api/admin/dashboard/drilldown` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:176` |
@@ -218,9 +218,10 @@
 | GET | `/api/admin/health/llm-provider` | pre_gate | admin | admin | `server/src/routes/admin/health.ts:79` |
 | GET | `/api/admin/consistency/report` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:27` |
 | GET | `/api/admin/consistency/crm-integrity` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:61` |
-| GET | `/api/admin/resource-center/analytics` | pre_gate | admin | admin | `server/src/routes/admin/resourceCenter.ts:8` |
-| GET | `/api/admin/events/` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:22` |
-| POST | `/api/admin/events/webinars/:eventId/reservations/:reservationId/attendance` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:35` |
+| GET | `/api/admin/resource-center/index-awareness` | pre_gate | admin | admin | `server/src/routes/admin/resourceCenter.ts:11` |
+| GET | `/api/admin/resource-center/analytics` | pre_gate | admin | admin | `server/src/routes/admin/resourceCenter.ts:31` |
+| GET | `/api/admin/events/` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:24` |
+| POST | `/api/admin/events/webinars/:eventId/reservations/:reservationId/attendance` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:70` |
 | GET | `/api/runtime/knowledge-evolution/metrics` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:236` |
 | POST | `/api/runtime/knowledge-evolution/` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:239` |
 | GET | `/api/runtime/knowledge-evolution/:evolutionId` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:242` |

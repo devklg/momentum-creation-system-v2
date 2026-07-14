@@ -4,15 +4,15 @@
 
 ## Summary
 
-- Generated: 2026-07-14T06:34:48.421Z
-- Routes: 242
+- Generated: 2026-07-14T06:37:16.315Z
+- Routes: 243
 - Findings: 0
 
 ## Routes By Access Category
 
 | Access category | Routes |
 | --- | ---: |
-| admin | 102 |
+| admin | 103 |
 | admin_or_health_secret | 1 |
 | auth_bootstrap | 3 |
 | auth_session | 2 |
@@ -34,7 +34,7 @@
 | customSecretGuard | 10 |
 | rateLimited | 3 |
 | rawBodyParser | 1 |
-| requireAdmin | 102 |
+| requireAdmin | 103 |
 | requireAdminOrHealthSecret | 1 |
 | requireAuth | 106 |
 | requireRuntimeInternal | 5 |
@@ -47,7 +47,7 @@
 | --- | ---: |
 | anonymous | 5 |
 | brand_ambassador | 107 |
-| founder_admin | 108 |
+| founder_admin | 109 |
 | prospect | 18 |
 | provider | 2 |
 | system | 10 |
@@ -56,7 +56,7 @@
 
 | Entitlement | Routes |
 | --- | ---: |
-| admin_allowlist | 108 |
+| admin_allowlist | 109 |
 | machine_credential | 12 |
 | none | 5 |
 | registered_ba | 107 |
@@ -115,33 +115,33 @@
 | POST | `/api/steve/discovery/converse` | brand_ambassador | registered_ba | ba_session | ba_auth_pre_steve | ba_session | none | not_applied | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/steve.ts:294` |
 | POST | `/api/admin/access-codes/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/access-codes.ts:30` |
 | GET | `/api/admin/access-codes/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/access-codes.ts:65` |
-| GET | `/api/admin/bas/entitlements/audit` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:53` |
-| GET | `/api/admin/bas/launch-readiness` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:58` |
-| GET | `/api/admin/bas/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:68` |
-| GET | `/api/admin/bas/:tmagId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:97` |
-| POST | `/api/admin/bas/:tmagId/sponsor-override` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:123` |
-| POST | `/api/admin/bas/:tmagId/entitlements` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:188` |
-| POST | `/api/admin/bas/:tmagId/leader-tag` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:229` |
-| POST | `/api/admin/bas/:tmagId/notes` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:269` |
-| POST | `/api/admin/bas/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:379` |
-| PATCH | `/api/admin/bas/:tmagId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:414` |
-| DELETE | `/api/admin/bas/:tmagId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:440` |
-| POST | `/api/admin/bas/:tmagId/restore` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:466` |
-| GET | `/api/admin/prospects/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:114` |
-| GET | `/api/admin/prospects/filters` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:156` |
-| GET | `/api/admin/prospects/:prospectId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:180` |
-| GET | `/api/admin/prospects/:prospectId/sandbox-preview` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:249` |
-| POST | `/api/admin/prospects/:prospectId/notes` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:297` |
-| POST | `/api/admin/prospects/:prospectId/move` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:334` |
-| POST | `/api/admin/prospects/:prospectId/reassign-sponsor` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:355` |
-| POST | `/api/admin/prospects/:prospectId/manual-flush` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:387` |
-| POST | `/api/admin/prospects/:prospectId/force-enroll` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:416` |
-| POST | `/api/admin/prospects/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:573` |
-| PATCH | `/api/admin/prospects/:prospectId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:621` |
-| DELETE | `/api/admin/prospects/:prospectId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:663` |
-| POST | `/api/admin/prospects/:prospectId/restore` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:692` |
-| POST | `/api/admin/prospects/flush-expired` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:731` |
-| GET | `/api/admin/prospects/alerts/aged` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:767` |
+| GET | `/api/admin/bas/entitlements/audit` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:55` |
+| GET | `/api/admin/bas/launch-readiness` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:60` |
+| GET | `/api/admin/bas/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:70` |
+| GET | `/api/admin/bas/:tmagId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:154` |
+| POST | `/api/admin/bas/:tmagId/sponsor-override` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:180` |
+| POST | `/api/admin/bas/:tmagId/entitlements` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:247` |
+| POST | `/api/admin/bas/:tmagId/leader-tag` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:288` |
+| POST | `/api/admin/bas/:tmagId/notes` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:328` |
+| POST | `/api/admin/bas/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:438` |
+| PATCH | `/api/admin/bas/:tmagId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:473` |
+| DELETE | `/api/admin/bas/:tmagId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:499` |
+| POST | `/api/admin/bas/:tmagId/restore` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:525` |
+| GET | `/api/admin/prospects/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:116` |
+| GET | `/api/admin/prospects/filters` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:178` |
+| GET | `/api/admin/prospects/:prospectId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:202` |
+| GET | `/api/admin/prospects/:prospectId/sandbox-preview` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:271` |
+| POST | `/api/admin/prospects/:prospectId/notes` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:319` |
+| POST | `/api/admin/prospects/:prospectId/move` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:356` |
+| POST | `/api/admin/prospects/:prospectId/reassign-sponsor` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:377` |
+| POST | `/api/admin/prospects/:prospectId/manual-flush` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:409` |
+| POST | `/api/admin/prospects/:prospectId/force-enroll` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:438` |
+| POST | `/api/admin/prospects/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:595` |
+| PATCH | `/api/admin/prospects/:prospectId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:643` |
+| DELETE | `/api/admin/prospects/:prospectId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:685` |
+| POST | `/api/admin/prospects/:prospectId/restore` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:714` |
+| POST | `/api/admin/prospects/flush-expired` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:753` |
+| GET | `/api/admin/prospects/alerts/aged` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/prospects.ts:789` |
 | GET | `/api/admin/queue/summary` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/queue.ts:77` |
 | GET | `/api/admin/queue/lookup` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/queue.ts:105` |
 | GET | `/api/admin/queue/visible-window` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/queue.ts:146` |
@@ -150,8 +150,8 @@
 | GET | `/api/admin/queue/ticker/stream` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/queue.ts:312` |
 | GET | `/api/admin/queue/rules` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/queue.ts:408` |
 | PUT | `/api/admin/queue/rules/:key` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/queue.ts:441` |
-| GET | `/api/admin/audit/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/audit.ts:80` |
-| GET | `/api/admin/audit/:entryId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/audit.ts:107` |
+| GET | `/api/admin/audit/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/audit.ts:81` |
+| GET | `/api/admin/audit/:entryId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/audit.ts:112` |
 | GET | `/api/admin/dashboard/metrics` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/dashboard.ts:84` |
 | GET | `/api/admin/dashboard/filters` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/dashboard.ts:130` |
 | GET | `/api/admin/dashboard/drilldown` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/dashboard.ts:176` |
@@ -206,9 +206,10 @@
 | GET | `/api/admin/health/llm-provider` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/health.ts:79` |
 | GET | `/api/admin/consistency/report` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/consistency.ts:27` |
 | GET | `/api/admin/consistency/crm-integrity` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/consistency.ts:61` |
-| GET | `/api/admin/resource-center/analytics` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/resourceCenter.ts:8` |
-| GET | `/api/admin/events/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/events.ts:22` |
-| POST | `/api/admin/events/webinars/:eventId/reservations/:reservationId/attendance` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/events.ts:35` |
+| GET | `/api/admin/resource-center/index-awareness` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/resourceCenter.ts:11` |
+| GET | `/api/admin/resource-center/analytics` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/resourceCenter.ts:31` |
+| GET | `/api/admin/events/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/events.ts:24` |
+| POST | `/api/admin/events/webinars/:eventId/reservations/:reservationId/attendance` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/events.ts:70` |
 | GET | `/api/runtime/knowledge-evolution/metrics` | founder_admin, system | admin_allowlist, machine_credential | runtime_secret_or_admin_session, admin_fallback, x-mcs-runtime-secret_when_configured | internal_runtime_admin_or_secret | runtime_secret_or_admin_session | admin_fallback | not_applicable | none | none | none | x-mcs-runtime-secret_when_configured | no | no | global_256kb_json | none | none | `server/src/runtime/knowledge-evolution/routes.ts:236` |
 | POST | `/api/runtime/knowledge-evolution/` | founder_admin, system | admin_allowlist, machine_credential | runtime_secret_or_admin_session, admin_fallback, x-mcs-runtime-secret_when_configured | internal_runtime_admin_or_secret | runtime_secret_or_admin_session | admin_fallback | not_applicable | none | none | none | x-mcs-runtime-secret_when_configured | no | no | global_256kb_json | none | none | `server/src/runtime/knowledge-evolution/routes.ts:239` |
 | GET | `/api/runtime/knowledge-evolution/:evolutionId` | founder_admin, system | admin_allowlist, machine_credential | runtime_secret_or_admin_session, admin_fallback, x-mcs-runtime-secret_when_configured | internal_runtime_admin_or_secret | runtime_secret_or_admin_session | admin_fallback | not_applicable | none | none | none | x-mcs-runtime-secret_when_configured | no | no | global_256kb_json | none | none | `server/src/runtime/knowledge-evolution/routes.ts:242` |
