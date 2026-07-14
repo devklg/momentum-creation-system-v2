@@ -48,6 +48,7 @@ import type {
   McsUpdateIvoryStatusPayload,
 } from '@momentum/shared';
 import { appendGeneratedOutputAudit } from '../domain/generatedOutputAudit.js';
+import { recordLlmProviderDegradation } from '../services/llmProviderObservability.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
@@ -325,6 +326,7 @@ ivoryRoutes.post(
         rosterSize,
         ask,
       });
+      if (result.degraded) recordLlmProviderDegradation('ivory_wdyk_coach');
       await appendGeneratedOutputAudit({
         templateId: 'ivory_wdyk_coach',
         tmagId,
@@ -389,6 +391,7 @@ ivoryRoutes.post(
         relationshipReason,
         productName,
       });
+      if (result.degraded) recordLlmProviderDegradation('ivory_personal_invitation');
       await appendGeneratedOutputAudit({
         templateId: 'ivory_personal_invitation',
         tmagId,
@@ -684,6 +687,7 @@ ivoryRoutes.post(
 
     try {
       const result = await suggestIvoryMomentumFollowUp(tmagId, prospectId, { ask });
+      if (result.degraded) recordLlmProviderDegradation('ivory_momentum_followup');
       await appendGeneratedOutputAudit({
         templateId: 'ivory_momentum_followup',
         tmagId,

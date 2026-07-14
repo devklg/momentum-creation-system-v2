@@ -157,7 +157,7 @@ Product unification, workflow completion, content operations, and scale-hardenin
 - [ ] 122. **Michael:** Create a single source of truth for Michael language and fallback behavior.
 - [x] 123. **Ivory:** Register Ivory and ScriptMaker prompts in the prompt registry. *(All four live provider-backed generation surfaces are registered with behavior/fallback sources and regression coverage; the two approved planned ScriptMaker WDYK contracts remain explicitly planned.)*
 - [x] 124. **Ivory:** Add generated-output audit records with prompt version, input, user, and compliance result. *(All four live Ivory/ScriptMaker generation routes append privacy-minimal records to the existing audit substrate, derive prompt identity/version from the registry, independently rescan delivered copy, and fail closed on rejection.)*
-- [ ] 125. **LLM:** Add LLM provider error observability and retry/degradation reporting.
+- [x] 125. **LLM:** Add LLM provider error observability and retry/degradation reporting. *(The shared Anthropic adapter now performs one bounded transient retry, reports safe aggregate outcomes and fallback degradations, and exposes an admin-only provider-health snapshot without prompt, output, identity, credential, or upstream-body content.)*
 - [ ] 126. **PMV:** Build a PMV dashboard without earnings or placement claims.
 - [ ] 127. **Cockpit:** Add deterministic cockpit next-step suggestions from lifecycle state.
 - [ ] 128. **Admin:** Add admin bottleneck reports for invitations, CRM, training, events, and delivery.

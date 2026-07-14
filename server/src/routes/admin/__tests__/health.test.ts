@@ -2,6 +2,7 @@ import type { Response } from 'express';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { adminHealthRoutes } from '../health.js';
 import * as healthProbe from '../../../domain/healthProbe.js';
+import * as llmObservability from '../../../services/llmProviderObservability.js';
 
 type RouteLayerHandle = {
   name?: string;
@@ -131,6 +132,33 @@ describe('admin triple-stack health route', () => {
       heartbeatId: 'health_fixed',
       legs: { mongo: true, neo4j: true, chroma: false },
       legDetails: { mongo: 'readback_ok', neo4j: 'readback_ok', chroma: 'readback_missing' },
+    });
+  });
+});
+
+describe('admin LLM provider observability route', () => {
+  it('is admin-only and returns the aggregate privacy-safe snapshot', async () => {
+    const route = findRoute('/llm-provider');
+    expect(route.map((h) => h.name)).toContain('requireAdmin');
+    vi.spyOn(llmObservability, 'getLlmProviderObservabilitySnapshot').mockReturnValueOnce({
+      provider: 'anthropic',
+      configured: true,
+      state: 'healthy',
+      counters: { requests: 2, attempts: 3, successes: 2, failures: 0, retries: 1, degradations: 0 },
+      failuresByKind: { config: 0, transport: 0, rate_limit: 0, upstream_4xx: 0, upstream_5xx: 0, malformed_response: 0, empty_response: 0 },
+      lastFailure: null,
+      lastDegradation: null,
+      lastSuccessAt: '2026-07-14T00:00:00.000Z',
+      privacy: { aggregateOnly: true, promptContentStored: false, outputContentStored: false, credentialsStored: false, upstreamBodyStored: false },
+    });
+
+    const handler = route[route.length - 1]!.handle;
+    const res = mockRes();
+    await handler({} as unknown, res as unknown as Response);
+
+    expect(res.body).toMatchObject({
+      ok: true,
+      observability: { provider: 'anthropic', state: 'healthy', counters: { retries: 1 } },
     });
   });
 });

@@ -142,6 +142,21 @@ Generated-output audit contract:
   critical `prompt.output.rejected` row and then fails closed without returning
   that copy to the BA.
 
+LLM provider reliability and observability:
+
+- The shared Anthropic adapter retries at most once, after a bounded delay, and
+  only for transient transport, HTTP 408, HTTP 429, and HTTP 5xx failures.
+  Permanent 4xx, malformed JSON, and empty-output responses are not retried.
+- Ivory and ScriptMaker preserve their registered deterministic fallbacks after
+  the bounded retry is exhausted. Steve remains fail-closed and does not invent
+  a conversation or extraction result.
+- The admin-only `/api/admin/health/llm-provider` endpoint reports aggregate
+  requests, attempts, successes, failures, retries, degradation count, safe
+  failure classifications, and the last affected template id.
+- Provider observability is process-local and resets on restart. It never stores
+  API keys, prompts, user turns, generated output, upstream response bodies, BA
+  identity, prospect identity, or relationship context.
+
 - Degraded agent behavior must be explicit in API responses, logs, or admin diagnostics where user-facing behavior depends on it.
 - A fallback must stay inside the same compliance boundary as the full agent response.
 - A fallback must not pretend to have used unavailable context, GraphRAG, Context Manager, or provider output.

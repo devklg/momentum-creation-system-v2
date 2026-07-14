@@ -3,8 +3,8 @@
  *
  * Single responsibility: send one Messages request and return the assistant's
  * text. Mirrors the shape of services/resend.ts and services/telnyx.ts — a
- * thin transport with two error types (Config + transport) and no retry/queue
- * logic. Callers treat a throw as a soft failure on the LLM-optional surfaces
+ * thin transport with two error types (Config + transport) and one bounded
+ * transient retry. Callers treat a final throw as a soft failure on the LLM-optional surfaces
  * (ScriptMaker / Ivory): if the draft can't be generated, the BA still has
  * the manual compose form.
  *
@@ -30,12 +30,22 @@
 
 import { fetch } from 'undici';
 import { env } from '../env.js';
+import {
+  recordLlmProviderAttempt,
+  recordLlmProviderFailure,
+  recordLlmProviderRequest,
+  recordLlmProviderRetry,
+  recordLlmProviderSuccess,
+  type LlmProviderErrorKind,
+} from './llmProviderObservability.js';
 
 export class AnthropicError extends Error {
   constructor(
     public readonly status: number,
     public readonly upstreamBody: string,
     message: string,
+    public readonly kind: LlmProviderErrorKind = classifyErrorKind(status),
+    public readonly retryable: boolean = retryableStatus(status),
   ) {
     super(`[anthropic] ${message}`);
     this.name = 'AnthropicError';
@@ -91,6 +101,8 @@ export interface CompleteResult {
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
+const MAX_ATTEMPTS = 2;
+const RETRY_DELAY_MS = 250;
 
 interface AnthropicApiResponse {
   content?: Array<{ type: string; text?: string }>;
@@ -99,23 +111,25 @@ interface AnthropicApiResponse {
   error?: { type?: string; message?: string };
 }
 
-/**
- * Send one Messages request and return the assistant's text.
- *
- * Throws AnthropicConfigError if the key is unset (dormant state today).
- * Throws AnthropicError on a non-2xx response or a malformed body. Callers
- * MUST wrap in try/catch and degrade to the manual path on any throw — never
- * fail the BA's flow because a draft couldn't be generated.
- */
-export async function complete(input: CompleteInput): Promise<CompleteResult> {
-  assertAnthropicConfig();
+function retryableStatus(status: number): boolean {
+  return status === 0 || status === 408 || status === 429 || status >= 500;
+}
 
-  const model = input.model ?? env.ANTHROPIC_MODEL;
+function classifyErrorKind(status: number): LlmProviderErrorKind {
+  if (status === 0) return 'transport';
+  if (status === 429) return 'rate_limit';
+  if (status >= 500) return 'upstream_5xx';
+  return 'upstream_4xx';
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function requestOnce(input: CompleteInput, model: string): Promise<CompleteResult> {
   const body = {
     model,
     max_tokens: input.maxTokens ?? 1024,
-    // System as an array of blocks so we can attach cache_control to the
-    // stable prefix (Chat #118 prompt-caching cost lock).
     system: [
       {
         type: 'text',
@@ -126,17 +140,21 @@ export async function complete(input: CompleteInput): Promise<CompleteResult> {
     messages: input.messages.map((m) => ({ role: m.role, content: m.content })),
   };
 
-  const res = await fetch(ANTHROPIC_URL, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': env.ANTHROPIC_API_KEY,
-      'anthropic-version': ANTHROPIC_VERSION,
-      // Opt into prompt caching for the system block.
-      'anthropic-beta': 'prompt-caching-2024-07-31',
-    },
-    body: JSON.stringify(body),
-  });
+  let res: Awaited<ReturnType<typeof fetch>>;
+  try {
+    res = await fetch(ANTHROPIC_URL, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': env.ANTHROPIC_API_KEY,
+        'anthropic-version': ANTHROPIC_VERSION,
+        'anthropic-beta': 'prompt-caching-2024-07-31',
+      },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new AnthropicError(0, '', 'transport request failed', 'transport', true);
+  }
 
   const raw = await res.text();
   if (!res.ok) {
@@ -151,7 +169,7 @@ export async function complete(input: CompleteInput): Promise<CompleteResult> {
   try {
     parsed = JSON.parse(raw) as AnthropicApiResponse;
   } catch {
-    throw new AnthropicError(res.status, raw, 'response was not JSON');
+    throw new AnthropicError(res.status, raw, 'response was not JSON', 'malformed_response', false);
   }
 
   if (parsed.error) {
@@ -169,7 +187,7 @@ export async function complete(input: CompleteInput): Promise<CompleteResult> {
     .trim();
 
   if (!text) {
-    throw new AnthropicError(res.status, raw, 'response contained no text');
+    throw new AnthropicError(res.status, raw, 'response contained no text', 'empty_response', false);
   }
 
   return {
@@ -180,4 +198,57 @@ export async function complete(input: CompleteInput): Promise<CompleteResult> {
       outputTokens: parsed.usage?.output_tokens ?? 0,
     },
   };
+}
+
+/**
+ * Send one Messages request and return the assistant's text.
+ *
+ * Throws AnthropicConfigError if the key is unset (dormant state today).
+ * Throws AnthropicError on a non-2xx response or a malformed body. Callers
+ * MUST wrap in try/catch and degrade to the manual path on any throw — never
+ * fail the BA's flow because a draft couldn't be generated.
+ */
+export async function complete(input: CompleteInput): Promise<CompleteResult> {
+  const model = input.model ?? env.ANTHROPIC_MODEL;
+  recordLlmProviderRequest();
+  try {
+    assertAnthropicConfig();
+  } catch (err) {
+    recordLlmProviderFailure({
+      kind: 'config',
+      status: null,
+      model,
+      attempts: 0,
+      retryable: false,
+    });
+    throw err;
+  }
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    recordLlmProviderAttempt();
+    try {
+      const result = await requestOnce(input, model);
+      recordLlmProviderSuccess();
+      return result;
+    } catch (err) {
+      const providerError = err instanceof AnthropicError
+        ? err
+        : new AnthropicError(0, '', 'transport request failed', 'transport', true);
+      if (providerError.retryable && attempt < MAX_ATTEMPTS) {
+        recordLlmProviderRetry();
+        await wait(RETRY_DELAY_MS);
+        continue;
+      }
+      recordLlmProviderFailure({
+        kind: providerError.kind,
+        status: providerError.status || null,
+        model,
+        attempts: attempt,
+        retryable: providerError.retryable,
+      });
+      throw providerError;
+    }
+  }
+
+  throw new Error('Anthropic retry loop exhausted unexpectedly');
 }
