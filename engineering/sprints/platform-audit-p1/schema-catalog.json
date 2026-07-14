@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T01:51:12.817Z",
+  "generatedAt": "2026-07-14T02:04:24.402Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -6635,6 +6635,26 @@
       "file": "packages/shared/src/leaders.ts"
     },
     {
+      "name": "MCS_CURRENT_ORIENTATION_CONTENT_INVENTORY",
+      "kind": "const",
+      "file": "packages/shared/src/orientation-content-inventory.ts"
+    },
+    {
+      "name": "MCS_CURRENT_ORIENTATION_CURRICULUM_STEPS",
+      "kind": "const",
+      "file": "packages/shared/src/orientation-content-inventory.ts"
+    },
+    {
+      "name": "MCS_ORIENTATION_CONTENT_INVENTORY_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/orientation-content-inventory.ts"
+    },
+    {
+      "name": "McsCurrentOrientationCurriculumStep",
+      "kind": "interface",
+      "file": "packages/shared/src/orientation-content-inventory.ts"
+    },
+    {
       "name": "MCS_ORIENTATION_DIAGNOSTIC_VERSION",
       "kind": "const",
       "file": "packages/shared/src/orientation-diagnostic.ts"
@@ -11437,6 +11457,6 @@
     "chromaCollections": 53,
     "routeModules": 49,
     "routeHandlers": 270,
-    "sharedExports": 1088
+    "sharedExports": 1092
   }
 }

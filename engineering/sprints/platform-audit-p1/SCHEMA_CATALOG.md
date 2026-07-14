@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:51:12.817Z
+- Generated: 2026-07-14T02:04:24.402Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
 - Route handlers: 270
-- Shared exports: 1088
+- Shared exports: 1092
 
 ## Mongo Collections
 
@@ -492,6 +492,10 @@
 | `MCS_LEADER_CREDIBILITY` | const | `packages/shared/src/leaders.ts` |
 | `McsLeaderCredibilityContent` | interface | `packages/shared/src/leaders.ts` |
 | `McsLeaderProfile` | interface | `packages/shared/src/leaders.ts` |
+| `MCS_CURRENT_ORIENTATION_CONTENT_INVENTORY` | const | `packages/shared/src/orientation-content-inventory.ts` |
+| `MCS_CURRENT_ORIENTATION_CURRICULUM_STEPS` | const | `packages/shared/src/orientation-content-inventory.ts` |
+| `MCS_ORIENTATION_CONTENT_INVENTORY_VERSION` | const | `packages/shared/src/orientation-content-inventory.ts` |
+| `McsCurrentOrientationCurriculumStep` | interface | `packages/shared/src/orientation-content-inventory.ts` |
 | `MCS_ORIENTATION_DIAGNOSTIC_VERSION` | const | `packages/shared/src/orientation-diagnostic.ts` |
 | `McsAdminOrientationDiagnosticResponse` | interface | `packages/shared/src/orientation-diagnostic.ts` |
 | `McsOrientationDiagnosticCategory` | type | `packages/shared/src/orientation-diagnostic.ts` |
