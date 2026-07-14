@@ -216,7 +216,8 @@ source repair, projection rebuild, or lifecycle reversal.
   "implementation": {
     "branch": "codex/p2-134-source-conflict-detection",
     "commits": [
-      "510346ae"
+      "510346ae",
+      "afe4d0e9"
     ],
     "append_only_respected": true
   },
@@ -239,13 +240,13 @@ source repair, projection rebuild, or lifecycle reversal.
       "repository typecheck and build",
       "read-only dedicated-stack observation"
     ],
-    "focused_tests": 16,
+    "focused_tests": 25,
     "full_server_tests": {
-      "passed": 2177,
+      "passed": 2184,
       "skipped": 19
     },
     "full_admin_tests": {
-      "passed": 46
+      "passed": 48
     },
     "typecheck": "pass",
     "build": "pass",
@@ -301,13 +302,14 @@ archive, supersession, semantic LLM judgment, or external communication.
 
 ## Implementation evidence — 2026-07-14
 
-Commit `510346ae` implements the approved read-only boundary. A pure detector
+Commits `510346ae` and `afe4d0e9` implement and harden the approved read-only boundary. A pure detector
 classifies the five approved conflict classes from canonical metadata and
 SHA-256 digests, emits only hashed fingerprints, and cannot write. The admin
 observer scans source and matching knowledge-resource rows in deterministic
 250-row keyset pages, caps each collection at 1,000 rows, probes for
-truncation, and fails closed for unavailable, malformed, incomplete, or
-non-monotonic evidence.
+truncation, verifies both canonical collections, reconciles resource lineage,
+and fails closed for unavailable, missing, malformed, orphaned, ambiguous,
+incomplete, or non-monotonic evidence.
 
 The existing Kevin-only Knowledge Status response now carries a separate
 integrity block. Retrieval readiness is unchanged. The admin page shows clear,
@@ -316,8 +318,8 @@ content-free fingerprints, and the explicit statement that no mutation is
 authorized. The Mongo direct adapter now honors caller projections so the
 observer does not retrieve unrelated source/resource fields.
 
-Verification passed 16 focused server/admin assertions, the full server suite
-with 2,177 passing and 19 skipped tests, all 46 admin tests, admin test
+Verification passed 25 focused server/admin assertions, the full server suite
+with 2,184 passing and 19 skipped tests, all 48 admin tests, admin test
 typecheck, repository-wide typecheck, the production build, generated schema
 and persistence catalogs, documentation freshness, and the 243-route access
 catalog with zero findings. A live read-only dedicated-stack observation found
