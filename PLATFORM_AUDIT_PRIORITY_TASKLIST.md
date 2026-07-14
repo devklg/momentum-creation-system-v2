@@ -152,7 +152,7 @@ Product unification, workflow completion, content operations, and scale-hardenin
 - [x] 117. **Orientation:** Create the current orientation content inventory.
 - [x] 118. **Steve:** Connect Steve profile outputs to tailored training and launch guidance.
 - [x] 119. **Steve:** Add Steve route, completion, and gate tests.
-- [ ] 120. **Steve:** Add Steve prompt and playbook entries.
+- [x] 120. **Steve:** Add Steve prompt and playbook entries. *(Reconciled: the two governed Steve prompt templates already existed in `MCS_AGENT_TEMPLATE_REGISTRY`; the current runtime/playbook mapping and targeted registry regression coverage were added.)*
 - [ ] 121. **Michael:** Create a Michael runtime health and admin debugger.
 - [ ] 122. **Michael:** Create a single source of truth for Michael language and fallback behavior.
 - [ ] 123. **Ivory:** Register Ivory and ScriptMaker prompts in the prompt registry.
