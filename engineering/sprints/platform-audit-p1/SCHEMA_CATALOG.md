@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T03:17:46.704Z
+- Generated: 2026-07-14T03:26:40.936Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
 - Route handlers: 270
-- Shared exports: 1096
+- Shared exports: 1105
 
 ## Mongo Collections
 
@@ -339,7 +339,7 @@
 | `(unmounted)` | `server/src/routes/health.ts` | GET /<br>GET /persistence | none |
 | `(unmounted)` | `server/src/routes/invitations.ts` | POST /<br>POST /:prospectId/sent<br>POST /log | `McsCreateInvitationPayload`, `McsCreateInvitationResponse`, `McsInvitationSource`, `McsMarkInvitationSentResponse` |
 | `(unmounted)` | `server/src/routes/ivory.ts` | GET /<br>POST /<br>PATCH /:ivoryId<br>PATCH /:ivoryId/status<br>DELETE /:ivoryId<br>POST /coach<br>POST /invitation-agent/draft<br>POST /invitation-agent/mint<br>POST /generator/run<br>GET /generator/run/:runId<br>POST /generator/run/:runId/invite<br>GET /momentum<br>POST /momentum/:prospectId/suggest | `McsCreateGeneratorRunPayload`, `McsCreateGeneratorRunResponse`, `McsCreateIvoryNamePayload`, `McsGeneratorInvitePayload`, `McsGeneratorInviteResponse`, `McsGeneratorRunResponse`, `McsIvoryCategory`, `McsIvoryCoachPayload`, `McsIvoryCoachResponse`, `McsIvoryInvitationDraftPayload`, `McsIvoryInvitationDraftResponse`, `McsIvoryInvitationMintPayload`, `McsIvoryInvitationMintResponse`, `McsIvoryMomentumSuggestionPayload`, `McsIvoryMomentumSuggestionResponse`, `McsIvoryMomentumViewResponse`, `McsIvoryNameResponse`, `McsIvoryStatus`, `McsListIvoryNamesResponse`, `McsUpdateIvoryNamePayload`, `McsUpdateIvoryStatusPayload` |
-| `(unmounted)` | `server/src/routes/michael-runtime.ts` | POST /resolve | none |
+| `(unmounted)` | `server/src/routes/michael-runtime.ts` | POST /resolve | `MICHAEL_RUNTIME_SUPPORTED_LANGUAGES`, `MichaelRuntimeLanguage` |
 | `(unmounted)` | `server/src/routes/michael.ts` | GET /training-support/:downlineTmagId | none |
 | `(unmounted)` | `server/src/routes/orientation.ts` | GET /state<br>GET /sessions<br>POST /sessions/:sessionId/reserve<br>DELETE /sessions/:sessionId/reserve | `McsOrientationCancelResponse`, `McsOrientationReserveResponse`, `McsOrientationSessionsResponse`, `McsOrientationStateResponse` |
 | `(unmounted)` | `server/src/routes/p-login.ts` | GET x-forwarded-for<br>GET origin<br>POST /start<br>POST /redeem<br>POST /code<br>POST /logout | `McsProspectLoginRedeemError`, `McsProspectLoginRedeemResponse`, `McsProspectLoginStartResponse` |
@@ -492,6 +492,15 @@
 | `MCS_LEADER_CREDIBILITY` | const | `packages/shared/src/leaders.ts` |
 | `McsLeaderCredibilityContent` | interface | `packages/shared/src/leaders.ts` |
 | `McsLeaderProfile` | interface | `packages/shared/src/leaders.ts` |
+| `MICHAEL_RUNTIME_FALLBACK_POLICY` | const | `packages/shared/src/michael-language.ts` |
+| `MICHAEL_RUNTIME_FALLBACK_SCENARIOS` | const | `packages/shared/src/michael-language.ts` |
+| `MICHAEL_RUNTIME_LANGUAGE_AUTHORITY_VERSION` | const | `packages/shared/src/michael-language.ts` |
+| `MICHAEL_RUNTIME_RESPONSE_COPY` | const | `packages/shared/src/michael-language.ts` |
+| `MICHAEL_RUNTIME_SUPPORTED_LANGUAGES` | const | `packages/shared/src/michael-language.ts` |
+| `MICHAEL_RUNTIME_UI_COPY` | const | `packages/shared/src/michael-language.ts` |
+| `MichaelRuntimeFallbackResponseType` | type | `packages/shared/src/michael-language.ts` |
+| `MichaelRuntimeFallbackScenario` | type | `packages/shared/src/michael-language.ts` |
+| `MichaelRuntimeLanguage` | type | `packages/shared/src/michael-language.ts` |
 | `MCS_CURRENT_ORIENTATION_CONTENT_INVENTORY` | const | `packages/shared/src/orientation-content-inventory.ts` |
 | `MCS_CURRENT_ORIENTATION_CURRICULUM_STEPS` | const | `packages/shared/src/orientation-content-inventory.ts` |
 | `MCS_ORIENTATION_CONTENT_INVENTORY_VERSION` | const | `packages/shared/src/orientation-content-inventory.ts` |

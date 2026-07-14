@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T03:17:46.704Z",
+  "generatedAt": "2026-07-14T03:26:40.936Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -5318,10 +5318,13 @@
         {
           "method": "POST",
           "path": "/resolve",
-          "line": 245
+          "line": 249
         }
       ],
-      "sharedTypes": []
+      "sharedTypes": [
+        "MICHAEL_RUNTIME_SUPPORTED_LANGUAGES",
+        "MichaelRuntimeLanguage"
+      ]
     },
     {
       "file": "server/src/routes/michael.ts",
@@ -6633,6 +6636,51 @@
       "name": "McsLeaderProfile",
       "kind": "interface",
       "file": "packages/shared/src/leaders.ts"
+    },
+    {
+      "name": "MICHAEL_RUNTIME_FALLBACK_POLICY",
+      "kind": "const",
+      "file": "packages/shared/src/michael-language.ts"
+    },
+    {
+      "name": "MICHAEL_RUNTIME_FALLBACK_SCENARIOS",
+      "kind": "const",
+      "file": "packages/shared/src/michael-language.ts"
+    },
+    {
+      "name": "MICHAEL_RUNTIME_LANGUAGE_AUTHORITY_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/michael-language.ts"
+    },
+    {
+      "name": "MICHAEL_RUNTIME_RESPONSE_COPY",
+      "kind": "const",
+      "file": "packages/shared/src/michael-language.ts"
+    },
+    {
+      "name": "MICHAEL_RUNTIME_SUPPORTED_LANGUAGES",
+      "kind": "const",
+      "file": "packages/shared/src/michael-language.ts"
+    },
+    {
+      "name": "MICHAEL_RUNTIME_UI_COPY",
+      "kind": "const",
+      "file": "packages/shared/src/michael-language.ts"
+    },
+    {
+      "name": "MichaelRuntimeFallbackResponseType",
+      "kind": "type",
+      "file": "packages/shared/src/michael-language.ts"
+    },
+    {
+      "name": "MichaelRuntimeFallbackScenario",
+      "kind": "type",
+      "file": "packages/shared/src/michael-language.ts"
+    },
+    {
+      "name": "MichaelRuntimeLanguage",
+      "kind": "type",
+      "file": "packages/shared/src/michael-language.ts"
     },
     {
       "name": "MCS_CURRENT_ORIENTATION_CONTENT_INVENTORY",
@@ -11477,6 +11525,6 @@
     "chromaCollections": 53,
     "routeModules": 49,
     "routeHandlers": 270,
-    "sharedExports": 1096
+    "sharedExports": 1105
   }
 }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T03:17:41.953Z",
+  "generatedAt": "2026-07-14T03:26:38.190Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -12838,7 +12838,7 @@
       "id": "POST /api/michael-runtime/resolve",
       "method": "POST",
       "fullPath": "/api/michael-runtime/resolve",
-      "routeSource": "server/src/routes/michael-runtime.ts:245",
+      "routeSource": "server/src/routes/michael-runtime.ts:249",
       "mountPath": "/api/michael-runtime",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
