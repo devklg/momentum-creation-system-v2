@@ -926,14 +926,22 @@ async function reprojectStagedSource(source: SourceDocument) {
   const graph = stagedSourceNeo4j(source);
   await persistenceCall('neo4j', 'cypher', { query: graph.cypher, params: { id: storageId(source), ...graph.params } });
   await upsertSourceChroma(source, false, 'approved');
-  return { mongo: { ok: true, verified: true }, neo4j: { ok: true }, chroma: { ok: true } };
+  return {
+    mongo: { ok: true, verified: true },
+    neo4j: { ok: true, queued: false },
+    chroma: { ok: true, queued: false },
+  };
 }
 
 async function reprojectStagedChunk(chunk: ChunkDocument, sourceVersionId: string) {
   const graph = stagedChunkNeo4j(chunk, sourceVersionId);
   await persistenceCall('neo4j', 'cypher', { query: graph.cypher, params: { id: chunk.chunkId, ...graph.params } });
   await upsertChunkChroma(chunk, false);
-  return { mongo: { ok: true, verified: true }, neo4j: { ok: true }, chroma: { ok: true } };
+  return {
+    mongo: { ok: true, verified: true },
+    neo4j: { ok: true, queued: false },
+    chroma: { ok: true, queued: false },
+  };
 }
 
 async function verifyGraphRagBatches(ids: readonly string[]) {
