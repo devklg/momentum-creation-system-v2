@@ -2,7 +2,7 @@
 
 ## Momentum Creation System V2
 
-Status: Implemented
+Status: Verified
 
 Priority: P2-134 — Knowledge source conflict detection
 
@@ -171,7 +171,7 @@ source repair, projection rebuild, or lifecycle reversal.
 {
   "acr_id": "ACR-0028",
   "title": "Knowledge Source Conflict Detection",
-  "status": "approved",
+  "status": "verified",
   "risk_level": "medium",
   "change_type": "read_only_knowledge_integrity_projection",
   "proposed_by": "Codex",
@@ -235,7 +235,7 @@ source repair, projection rebuild, or lifecycle reversal.
     "gates": [
       "focused deterministic detector tests",
       "knowledge-status route and privacy tests",
-      "admin UI tests and trusted visual QA",
+      "admin UI tests with audited unavailable-browser override",
       "route-access catalog",
       "repository typecheck and build",
       "read-only dedicated-stack observation"
@@ -265,9 +265,12 @@ source repair, projection rebuild, or lifecycle reversal.
       "persistent_mutations": 0
     },
     "visual_qa": {
-      "status": "unavailable",
+      "status": "accepted_automated_evidence_override",
       "reason": "trusted in-app browser rejected the isolated local preview as untrusted",
-      "represented_as_passed": false
+      "represented_as_passed": false,
+      "override_decision_ref": "dec_p2_134_visual_gate_override_2026_07_14",
+      "accepted_by": "Kevin L. Gardner",
+      "accepted_at": "2026-07-14"
     }
   },
   "version": {
@@ -277,6 +280,7 @@ source repair, projection rebuild, or lifecycle reversal.
     "rollback_to": "ingestion-time single-resource conflict rejection"
   },
   "decision_ledger_ref": "dec_acr_0028_knowledge_source_conflict_detection_approval_2026_07_14",
+  "verification_override_ref": "dec_p2_134_visual_gate_override_2026_07_14",
   "created_at": "2026-07-14",
   "updated_at": "2026-07-14"
 }
@@ -328,6 +332,14 @@ conflicts, zero degraded reasons, and zero mutations.
 
 Trusted visual QA was attempted against an isolated worktree preview, but the
 in-app browser rejected the preview as untrusted. That visual gate is not
-represented as passed. The implementation remains unmerged and P2-134 remains
-unchecked until Kevin explicitly accepts the automated UI evidence as the
-override for this unavailable browser gate.
+represented as passed. Kevin explicitly accepted the complete automated UI
+evidence as the substitute for the unavailable trusted-browser gate on
+2026-07-14 with the exact statement `Accept the automated UI evidence and
+override the unavailable trusted-browser visual gate for P2-134 / PR #339.`
+The audited override was written and read back from the dedicated MCS MongoDB,
+Neo4j, and ChromaDB stores under
+`dec_p2_134_visual_gate_override_2026_07_14`. It authorizes verification
+closeout, PR #339 merge after green CI, and branch/worktree cleanup without
+claiming that visual inspection passed. It does not authorize source
+correction, semantic LLM judgment, lifecycle change, activation, archive,
+knowledge-record merge, or supersession; P2-135 retains that separate boundary.
