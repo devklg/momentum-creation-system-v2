@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T03:37:36.929Z",
+  "generatedAt": "2026-07-14T03:52:32.988Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -5224,67 +5224,82 @@
         {
           "method": "GET",
           "path": "/",
-          "line": 113
+          "line": 114
         },
         {
           "method": "POST",
           "path": "/",
-          "line": 132
+          "line": 133
         },
         {
           "method": "PATCH",
           "path": "/:ivoryId",
-          "line": 178
+          "line": 179
         },
         {
           "method": "PATCH",
           "path": "/:ivoryId/status",
-          "line": 227
+          "line": 228
         },
         {
           "method": "DELETE",
           "path": "/:ivoryId",
-          "line": 265
+          "line": 266
         },
         {
           "method": "POST",
           "path": "/coach",
-          "line": 297
+          "line": 298
+        },
+        {
+          "method": "GET",
+          "path": "user-agent",
+          "line": 343
         },
         {
           "method": "POST",
           "path": "/invitation-agent/draft",
-          "line": 341
+          "line": 363
+        },
+        {
+          "method": "GET",
+          "path": "user-agent",
+          "line": 406
         },
         {
           "method": "POST",
           "path": "/invitation-agent/mint",
-          "line": 389
+          "line": 431
         },
         {
           "method": "POST",
           "path": "/generator/run",
-          "line": 458
+          "line": 500
         },
         {
           "method": "GET",
           "path": "/generator/run/:runId",
-          "line": 495
+          "line": 537
         },
         {
           "method": "POST",
           "path": "/generator/run/:runId/invite",
-          "line": 524
+          "line": 566
         },
         {
           "method": "GET",
           "path": "/momentum",
-          "line": 605
+          "line": 647
         },
         {
           "method": "POST",
           "path": "/momentum/:prospectId/suggest",
-          "line": 624
+          "line": 666
+        },
+        {
+          "method": "GET",
+          "path": "user-agent",
+          "line": 700
         }
       ],
       "sharedTypes": [
@@ -5634,7 +5649,12 @@
         {
           "method": "POST",
           "path": "/draft",
-          "line": 79
+          "line": 80
+        },
+        {
+          "method": "GET",
+          "path": "user-agent",
+          "line": 144
         }
       ],
       "sharedTypes": [
@@ -11476,7 +11496,7 @@
     "neo4jRelationships": 69,
     "chromaCollections": 53,
     "routeModules": 49,
-    "routeHandlers": 270,
+    "routeHandlers": 274,
     "sharedExports": 1096
   }
 }
