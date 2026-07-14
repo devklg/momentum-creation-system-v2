@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T03:17:41.895Z",
+  "generatedAt": "2026-07-14T03:26:38.132Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -6653,7 +6653,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/michael-runtime.ts:245",
+      "source": "server/src/routes/michael-runtime.ts:249",
       "routeSource": "server/src/routes/michael-runtime.ts",
       "signals": {
         "requireAuth": true,

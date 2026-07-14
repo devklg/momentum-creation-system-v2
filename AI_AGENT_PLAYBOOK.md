@@ -99,6 +99,40 @@ Operational rules:
 - GraphRAG and Context Manager live flags stay off until canary criteria are written and approved.
 - VM/RVM live delivery stays disabled until a governance decision or ACR and compliance checklist are approved.
 
+## Michael Language And Fallback Authority
+
+P2-122 proposes one implementation source for Michael's runtime words and
+safe-path decisions: `packages/shared/src/michael-language.ts`, version `1.0.0`.
+Adoption is blocked behind proposed ACR-0023. The implementation branch routes
+server fixtures, catalog selection, and the `.team` runtime card through that
+source so parity can be verified without declaring it canonical early.
+
+The delivery chain is:
+
+`michael-language.ts` → controlled response fixtures → response catalog and
+selector → runtime facade/route → `.team` card.
+
+| Context Packet state | Required behavior | Response type |
+| --- | --- | --- |
+| `degraded` | Return the controlled limited-context copy. | `safe_fallback` |
+| `missing` | Return the controlled missing-context copy. | `safe_fallback` |
+| `failed` | Close the turn without saving or sending. | `safe_close` |
+| `rejected` | Reject candidate/review-only context and close safely. | `safe_close` |
+
+Operational rules:
+
+- The authority contains the already-controlled EN/ES response bodies and the
+  current English-only `.team` card chrome. Consolidation does not approve new
+  wording or an unapproved UI-language selector.
+- Runtime consumers select and return controlled copy; they do not generate,
+  rewrite, translate, or persist Michael language.
+- Empty-response, kill-switch, and network-error states use the shared UI copy.
+  They remain honest about unavailable context and never pretend an agent or
+  provider completed work.
+- Any wording, supported-language, mission, safety, or fallback-policy change
+  must version and review the authority under prompt/agent governance. Do not
+  edit a consumer to bypass that review.
+
 ## Implementation Checklist
 
 Before changing an agent surface:

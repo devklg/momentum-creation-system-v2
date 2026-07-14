@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-14T03:17:41.895Z
+- Generated: 2026-07-14T03:26:38.132Z
 - Mounted routers: 50
 - Route files: 50
 - Static route rows: 240
@@ -332,7 +332,7 @@
 | GET | `/api/three-way/bookings` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/three-way.ts:63` |
 | POST | `/api/three-way/bookings` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/three-way.ts:76` |
 | POST | `/api/three-way/bookings/:id/cancel` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/three-way.ts:110` |
-| POST | `/api/michael-runtime/resolve` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/michael-runtime.ts:245` |
+| POST | `/api/michael-runtime/resolve` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/michael-runtime.ts:249` |
 | GET | `/api/content/videos` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/content-videos.ts:16` |
 | GET | `/api/resources/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:11` |
 | POST | `/api/resources/:resourceVersionId/usage` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:22` |

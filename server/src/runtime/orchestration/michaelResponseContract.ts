@@ -1,3 +1,7 @@
+import {
+  MICHAEL_RUNTIME_FALLBACK_SCENARIOS,
+  MICHAEL_RUNTIME_SUPPORTED_LANGUAGES,
+} from '@momentum/shared';
 import type {
   MichaelResponseContractV1,
   MichaelResponseContractValidationIssue,
@@ -19,7 +23,7 @@ const SAFETY_STATUSES = [
   'degraded',
 ] as const satisfies readonly MichaelResponseSafetyValidationStatus[];
 
-const CONTEXT_PACKET_STATUSES = ['complete', 'degraded', 'failed', 'missing', 'rejected'] as const;
+const CONTEXT_PACKET_STATUSES = ['complete', ...MICHAEL_RUNTIME_FALLBACK_SCENARIOS] as const;
 
 export const MICHAEL_RESPONSE_CONTRACT_SCHEMA_VERSION =
   'michael_response_contract.v1' as const;
@@ -224,7 +228,7 @@ export function validateMichaelResponseContractV1(
   expectString(candidate, 'turnId', issues);
   expectString(candidate, 'correlationId', issues);
   expectEnum(candidate, 'contextPacketStatus', CONTEXT_PACKET_STATUSES, issues);
-  expectEnum(candidate, 'language', ['en', 'es'] as const, issues);
+  expectEnum(candidate, 'language', MICHAEL_RUNTIME_SUPPORTED_LANGUAGES, issues);
   expectString(candidate, 'text', issues);
   expectLiteral(candidate, 'persistence', 'disabled', issues);
   expectTimestamp(candidate, 'generatedAt', issues);

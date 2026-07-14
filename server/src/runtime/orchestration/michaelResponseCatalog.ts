@@ -1,3 +1,7 @@
+import {
+  MICHAEL_RUNTIME_FALLBACK_POLICY,
+  MICHAEL_RUNTIME_FALLBACK_SCENARIOS,
+} from '@momentum/shared';
 import { validateMichaelResponseContract } from './michaelResponseContract.js';
 import type {
   MichaelResponseCatalogEntry,
@@ -112,8 +116,18 @@ export const MICHAEL_RESPONSE_CATALOG: readonly MichaelResponseCatalogEntry[] = 
 export const MICHAEL_RESPONSE_TYPE_REGISTRY = {
   next_training_step: { substantive: true, allowedScenarioFamilies: ['complete'] },
   clarification_question: { substantive: true, allowedScenarioFamilies: ['complete'] },
-  safe_fallback: { substantive: false, allowedScenarioFamilies: ['degraded', 'missing'] },
-  safe_close: { substantive: false, allowedScenarioFamilies: ['failed', 'rejected'] },
+  safe_fallback: {
+    substantive: false,
+    allowedScenarioFamilies: MICHAEL_RUNTIME_FALLBACK_SCENARIOS.filter(
+      (scenario) => MICHAEL_RUNTIME_FALLBACK_POLICY[scenario].responseType === 'safe_fallback',
+    ),
+  },
+  safe_close: {
+    substantive: false,
+    allowedScenarioFamilies: MICHAEL_RUNTIME_FALLBACK_SCENARIOS.filter(
+      (scenario) => MICHAEL_RUNTIME_FALLBACK_POLICY[scenario].responseType === 'safe_close',
+    ),
+  },
 } as const satisfies Readonly<Record<MichaelResponseType, {
   substantive: boolean;
   allowedScenarioFamilies: readonly MichaelResponseScenarioFamily[];

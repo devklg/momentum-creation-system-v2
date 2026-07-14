@@ -1,3 +1,9 @@
+import {
+  MICHAEL_RUNTIME_FALLBACK_POLICY,
+  MICHAEL_RUNTIME_SUPPORTED_LANGUAGES,
+  type MichaelRuntimeFallbackScenario,
+  type MichaelRuntimeLanguage,
+} from '@momentum/shared';
 import { validateMichaelResponseContract } from './michaelResponseContract.js';
 import type {
   ContextPacketConsumptionResult,
@@ -28,9 +34,7 @@ import {
 
 const MICHAEL_AGENT_KEY = 'michael_magnificent' as const;
 const MICHAEL_TASK_TYPE = 'training_support' as const;
-const SUPPORTED_LANGUAGES = ['en', 'es'] as const;
-
-type SupportedMichaelLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+type SupportedMichaelLanguage = MichaelRuntimeLanguage;
 type ValidatedMichaelResponse = Extract<
   MichaelResponseContractValidationResult,
   { ok: true }
@@ -68,67 +72,66 @@ export function runMichaelRuntimeAdapterContract(
   const safeLanguage: SupportedMichaelLanguage = language ?? 'en';
 
   if (identity.agentKey !== MICHAEL_AGENT_KEY) {
-    return selectResponse(input, 'wrong_agent', 'safe_close', 'rejected', safeLanguage);
+    return selectFallbackResponse(input, 'wrong_agent', 'rejected', safeLanguage);
   }
 
   if (input.taskType !== MICHAEL_TASK_TYPE) {
-    return selectResponse(input, 'wrong_task', 'safe_close', 'rejected', safeLanguage);
+    return selectFallbackResponse(input, 'wrong_task', 'rejected', safeLanguage);
   }
 
   if (!language) {
-    return selectResponse(input, 'unsupported_language', 'safe_close', 'rejected', safeLanguage);
+    return selectFallbackResponse(input, 'unsupported_language', 'rejected', safeLanguage);
   }
 
   const inertIssue = findInertRuntimeIssue(runtimeTurn, input);
   if (inertIssue) {
-    return selectResponse(input, inertIssue, 'safe_close', 'rejected', safeLanguage);
+    return selectFallbackResponse(input, inertIssue, 'rejected', safeLanguage);
   }
 
   const issueReason = reasonFromIssueCodes(collectIssueCodes(runtimeTurn));
   if (issueReason) {
-    const responseKind = issueReason === 'missing_context' ? 'safe_fallback' : 'safe_close';
     const contextKind = issueReason === 'missing_context' ? 'missing' : 'rejected';
-    return selectResponse(input, issueReason, responseKind, contextKind, safeLanguage);
+    return selectFallbackResponse(input, issueReason, contextKind, safeLanguage);
   }
 
   const consumption = runtimeTurn.consumption;
   if (!consumption) {
-    return selectResponse(input, 'invalid_runtime_turn', 'safe_close', 'rejected', safeLanguage);
+    return selectFallbackResponse(input, 'invalid_runtime_turn', 'rejected', safeLanguage);
   }
 
   if (consumption.packetAgentKey && consumption.packetAgentKey !== MICHAEL_AGENT_KEY) {
-    return selectResponse(input, 'wrong_agent', 'safe_close', 'rejected', safeLanguage);
+    return selectFallbackResponse(input, 'wrong_agent', 'rejected', safeLanguage);
   }
 
   if (consumption.taskType && consumption.taskType !== MICHAEL_TASK_TYPE) {
-    return selectResponse(input, 'wrong_task', 'safe_close', 'rejected', safeLanguage);
+    return selectFallbackResponse(input, 'wrong_task', 'rejected', safeLanguage);
   }
 
   if (
     (consumption.decision === 'proceed' || consumption.decision === 'degraded') &&
     !hasContextManagerAssemblyMarker(consumption)
   ) {
-    return selectResponse(input, 'non_context_manager', 'safe_close', 'rejected', safeLanguage);
+    return selectFallbackResponse(input, 'non_context_manager', 'rejected', safeLanguage);
   }
 
   if (hasCandidateReviewOnlyContext(consumption)) {
-    return selectResponse(input, 'candidate_review_only', 'safe_close', 'rejected', safeLanguage);
+    return selectFallbackResponse(input, 'candidate_review_only', 'rejected', safeLanguage);
   }
 
   if (consumption.decision === 'degraded' || consumption.packetStatus === 'degraded') {
-    return selectResponse(input, 'degraded_context', 'safe_fallback', 'degraded', safeLanguage);
+    return selectFallbackResponse(input, 'degraded_context', 'degraded', safeLanguage);
   }
 
   if (consumption.decision === 'block_substantive' || consumption.packetStatus === 'failed') {
-    return selectResponse(input, 'failed_context', 'safe_close', 'failed', safeLanguage);
+    return selectFallbackResponse(input, 'failed_context', 'failed', safeLanguage);
   }
 
   if (consumption.decision === 'reject') {
-    return selectResponse(input, 'rejected_context', 'safe_close', 'rejected', safeLanguage);
+    return selectFallbackResponse(input, 'rejected_context', 'rejected', safeLanguage);
   }
 
   if (consumption.packetStatus !== 'complete') {
-    return selectResponse(input, 'invalid_runtime_turn', 'safe_close', 'rejected', safeLanguage);
+    return selectFallbackResponse(input, 'invalid_runtime_turn', 'rejected', safeLanguage);
   }
 
   if (
@@ -157,7 +160,7 @@ function resolveLanguage(
   input: MichaelRuntimeAdapterContractInput,
 ): SupportedMichaelLanguage | undefined {
   const candidate = input.language ?? input.identity.language;
-  return SUPPORTED_LANGUAGES.includes(candidate as SupportedMichaelLanguage)
+  return MICHAEL_RUNTIME_SUPPORTED_LANGUAGES.includes(candidate as SupportedMichaelLanguage)
     ? (candidate as SupportedMichaelLanguage)
     : undefined;
 }
@@ -325,6 +328,21 @@ function selectResponse(
     behavior: 'not_implemented',
     agentResponseGenerated: false,
   };
+}
+
+function selectFallbackResponse(
+  input: MichaelRuntimeAdapterContractInput,
+  selectionReason: SelectionReason,
+  scenario: MichaelRuntimeFallbackScenario,
+  language: SupportedMichaelLanguage,
+): MichaelRuntimeAdapterContractResult {
+  return selectResponse(
+    input,
+    selectionReason,
+    MICHAEL_RUNTIME_FALLBACK_POLICY[scenario].responseType,
+    scenario,
+    language,
+  );
 }
 
 function issuesFor(selectionReason: SelectionReason): MichaelRuntimeAdapterContractIssue[] {

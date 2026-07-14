@@ -1,3 +1,4 @@
+import { MICHAEL_RUNTIME_SUPPORTED_LANGUAGES } from '@momentum/shared';
 import type { McsAgentKey, McsRuntimeTaskType } from '@momentum/shared/runtime';
 import type { AgentOrchestrationDescriptor } from './types.js';
 
@@ -79,7 +80,7 @@ const MICHAEL_MAGNIFICENT: AgentOrchestrationDescriptor = {
     'guided_action_review',
   ],
   supportedModes: ['browser_text', 'browser_voice', 'mixed'],
-  supportedLanguages: ['en', 'es'],
+  supportedLanguages: MICHAEL_RUNTIME_SUPPORTED_LANGUAGES,
   guardrailSet: [
     'no_prospect_facing_language',
     'no_income_or_placement_claims',

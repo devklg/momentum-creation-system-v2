@@ -47,6 +47,12 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Bot, Send } from 'lucide-react';
+import {
+  MICHAEL_RUNTIME_UI_COPY,
+  type MichaelRuntimeLanguage,
+} from '@momentum/shared';
+
+const UI_COPY = MICHAEL_RUNTIME_UI_COPY.en;
 
 // ── Safe render subset ───────────────────────────────────────────────────────
 // Only the fields a BA is allowed to see. The server response carries far more
@@ -111,7 +117,7 @@ export type MichaelRuntimeResult =
  * IndexedDB, and emits no analytics.
  */
 export async function resolveMichaelRuntimeTrainingStep(opts?: {
-  language?: 'en' | 'es';
+  language?: MichaelRuntimeLanguage;
   ask?: string;
 }): Promise<MichaelRuntimeResult> {
   const ask = opts?.ask?.replace(/\s+/g, ' ').trim();
@@ -289,7 +295,7 @@ export function MichaelRuntimeSupportCard() {
 
   return (
     <section
-      aria-label="Michael runtime training support"
+      aria-label={UI_COPY.regionLabel}
       className="bg-cream/[0.02] border border-gold/25 rounded-md p-5"
     >
       <div className="flex items-center gap-3 mb-3">
@@ -300,7 +306,7 @@ export function MichaelRuntimeSupportCard() {
           <Bot className="h-4 w-4" />
         </span>
         <h3 className="font-mono tracking-[0.18em] text-[11px] text-cream-mute uppercase">
-          Michael · Training Support
+          {UI_COPY.heading}
         </h3>
       </div>
       {renderRuntimeResult(result)}
@@ -308,14 +314,14 @@ export function MichaelRuntimeSupportCard() {
         <input
           value={ask}
           onChange={(event) => setAsk(event.target.value.slice(0, 500))}
-          aria-label="Ask Michael about training"
-          placeholder="Ask about training..."
+          aria-label={UI_COPY.askLabel}
+          placeholder={UI_COPY.askPlaceholder}
           className="min-w-0 flex-1 rounded border border-gold/20 bg-ink/40 px-3 py-2 text-[13px] text-cream placeholder:text-cream-faint focus:border-gold/50 focus:outline-none"
         />
         <button
           type="submit"
           disabled={!ask.trim() || result.kind === 'loading'}
-          aria-label="Send training question"
+          aria-label={UI_COPY.sendLabel}
           className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded border border-gold/30 bg-gold/[0.08] text-gold transition hover:bg-gold/[0.14] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Send className="h-4 w-4" aria-hidden="true" />
@@ -327,7 +333,7 @@ export function MichaelRuntimeSupportCard() {
           onClick={() => setAttempt((n) => n + 1)}
           className="mt-3 font-mono tracking-[0.12em] text-[10px] text-gold uppercase underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none"
         >
-          Try again
+          {UI_COPY.tryAgain}
         </button>
       )}
     </section>
@@ -341,7 +347,7 @@ function renderRuntimeResult(result: MichaelRuntimeResult) {
     case 'loading':
       return (
         <p className="text-cream-mute text-[13px] leading-[1.5]">
-          Bringing up your next training step…
+          {UI_COPY.loading}
         </p>
       );
 
@@ -351,12 +357,10 @@ function renderRuntimeResult(result: MichaelRuntimeResult) {
       return (
         <div className="space-y-2">
           <p className="text-cream-mute text-[13px] leading-[1.5]">
-            Michael is your training guide. When it&rsquo;s switched on, this is
-            where your next suggested training step shows up — a calm pointer to
-            what to learn or practice next.
+            {UI_COPY.disabledBody}
           </p>
           <p className="font-mono tracking-[0.12em] text-[10px] text-cream-faint uppercase">
-            Not available yet
+            {UI_COPY.disabledStatus}
           </p>
         </div>
       );
@@ -364,24 +368,21 @@ function renderRuntimeResult(result: MichaelRuntimeResult) {
     case 'response_disabled':
       return (
         <p className="text-cream-mute text-[13px] leading-[1.5]">
-          Michael is on, but training guidance is paused right now. Check back a
-          little later for your next suggested step.
+          {UI_COPY.responseDisabled}
         </p>
       );
 
     case 'safe_fallback':
       return (
         <p className="text-cream-mute text-[13px] leading-[1.5]">
-          {result.text ||
-            'No specific step to suggest right now — keep working your usual training rhythm.'}
+          {result.text || UI_COPY.emptySafeFallback}
         </p>
       );
 
     case 'safe_close':
       return (
         <p className="text-cream-mute text-[13px] leading-[1.5]">
-          {result.text ||
-            'Nothing more to add for now. You&rsquo;re good to keep going.'}
+          {result.text || UI_COPY.emptySafeClose}
         </p>
       );
 
@@ -395,7 +396,7 @@ function renderRuntimeResult(result: MichaelRuntimeResult) {
           {nextStep && (nextStep.title || nextStep.instruction) && (
             <div className="border-l border-gold/30 pl-4">
               <p className="font-mono tracking-[0.12em] text-[10px] text-gold uppercase mb-1">
-                Your next step
+                {UI_COPY.nextStepLabel}
               </p>
               {nextStep.title && (
                 <p className="font-display text-[16px] text-cream leading-tight">
@@ -415,7 +416,7 @@ function renderRuntimeResult(result: MichaelRuntimeResult) {
             </div>
           )}
           <p className="font-mono tracking-[0.12em] text-[10px] text-cream-faint uppercase">
-            Guidance · {language}
+            {UI_COPY.guidanceLabel} · {language}
           </p>
           {supportingContext && supportingContext.length > 0 && (
             <div className="space-y-2 border-t border-gold/15 pt-3">
@@ -438,8 +439,7 @@ function renderRuntimeResult(result: MichaelRuntimeResult) {
     case 'error':
       return (
         <p className="text-cream-mute text-[13px] leading-[1.5]">
-          Couldn&rsquo;t load a training step just now. Nothing&rsquo;s wrong on
-          your end — try again a little later.
+          {UI_COPY.genericError}
         </p>
       );
 

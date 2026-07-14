@@ -22,6 +22,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MichaelRuntimeSupportCard } from '../MichaelRuntimeSupportCard';
+import { MICHAEL_RUNTIME_UI_COPY } from '@momentum/shared';
 
 const fetchMock = vi.fn();
 
@@ -95,7 +96,7 @@ describe('MichaelRuntimeSupportCard — fallback/close defaults', () => {
     render(<MichaelRuntimeSupportCard />);
 
     expect(
-      await screen.findByText(/no specific step to suggest right now/i),
+      await screen.findByText(MICHAEL_RUNTIME_UI_COPY.en.emptySafeFallback),
     ).toBeInTheDocument();
   });
 
@@ -109,7 +110,9 @@ describe('MichaelRuntimeSupportCard — fallback/close defaults', () => {
 
     render(<MichaelRuntimeSupportCard />);
 
-    expect(await screen.findByText(/nothing more to add for now/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(MICHAEL_RUNTIME_UI_COPY.en.emptySafeClose),
+    ).toBeInTheDocument();
   });
 
   it('prefers the server-provided safe_close text over the default', async () => {
