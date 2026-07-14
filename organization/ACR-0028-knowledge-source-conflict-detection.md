@@ -2,7 +2,7 @@
 
 ## Momentum Creation System V2
 
-Status: Approved
+Status: Implemented
 
 Priority: P2-134 — Knowledge source conflict detection
 
@@ -215,7 +215,9 @@ source repair, projection rebuild, or lifecycle reversal.
   },
   "implementation": {
     "branch": "codex/p2-134-source-conflict-detection",
-    "commits": [],
+    "commits": [
+      "510346ae"
+    ],
     "append_only_respected": true
   },
   "verification": {
@@ -236,7 +238,36 @@ source repair, projection rebuild, or lifecycle reversal.
       "route-access catalog",
       "repository typecheck and build",
       "read-only dedicated-stack observation"
-    ]
+    ],
+    "focused_tests": 16,
+    "full_server_tests": {
+      "passed": 2177,
+      "skipped": 19
+    },
+    "full_admin_tests": {
+      "passed": 46
+    },
+    "typecheck": "pass",
+    "build": "pass",
+    "catalogs": "pass",
+    "route_access": {
+      "routes": 243,
+      "findings": 0
+    },
+    "live_read_only_observation": {
+      "status": "clear",
+      "sources_observed": 209,
+      "resources_observed": 209,
+      "conflicts": 0,
+      "degraded_reasons": 0,
+      "scan_complete": true,
+      "persistent_mutations": 0
+    },
+    "visual_qa": {
+      "status": "unavailable",
+      "reason": "trusted in-app browser rejected the isolated local preview as untrusted",
+      "represented_as_passed": false
+    }
   },
   "version": {
     "from": "ingestion-time single-resource conflict rejection",
@@ -267,3 +298,34 @@ stores under
 This approval authorizes implementation and read-only verification only. It
 does not authorize source correction, merge, lifecycle mutation, activation,
 archive, supersession, semantic LLM judgment, or external communication.
+
+## Implementation evidence — 2026-07-14
+
+Commit `510346ae` implements the approved read-only boundary. A pure detector
+classifies the five approved conflict classes from canonical metadata and
+SHA-256 digests, emits only hashed fingerprints, and cannot write. The admin
+observer scans source and matching knowledge-resource rows in deterministic
+250-row keyset pages, caps each collection at 1,000 rows, probes for
+truncation, and fails closed for unavailable, malformed, incomplete, or
+non-monotonic evidence.
+
+The existing Kevin-only Knowledge Status response now carries a separate
+integrity block. Retrieval readiness is unchanged. The admin page shows clear,
+conflicts, degraded, and truncated states, bounded class counts, shortened
+content-free fingerprints, and the explicit statement that no mutation is
+authorized. The Mongo direct adapter now honors caller projections so the
+observer does not retrieve unrelated source/resource fields.
+
+Verification passed 16 focused server/admin assertions, the full server suite
+with 2,177 passing and 19 skipped tests, all 46 admin tests, admin test
+typecheck, repository-wide typecheck, the production build, generated schema
+and persistence catalogs, documentation freshness, and the 243-route access
+catalog with zero findings. A live read-only dedicated-stack observation found
+209 sources, 209 resource projections, a complete scan, zero deterministic
+conflicts, zero degraded reasons, and zero mutations.
+
+Trusted visual QA was attempted against an isolated worktree preview, but the
+in-app browser rejected the preview as untrusted. That visual gate is not
+represented as passed. The implementation remains unmerged and P2-134 remains
+unchecked until Kevin explicitly accepts the automated UI evidence as the
+override for this unavailable browser gate.
