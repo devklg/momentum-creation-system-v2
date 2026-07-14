@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-14T05:12:19.438Z
+- Generated: 2026-07-14T05:47:11.616Z
 - Collections: 70
 - Unclassified: 0
 
@@ -75,7 +75,7 @@
 | `tmag_prospect_htank_counters` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_htank_placements` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 22 |
 | `tmag_prospect_invitation_activity` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 7 |
-| `tmag_prospect_invite_tokens` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 8 |
+| `tmag_prospect_invite_tokens` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 9 |
 | `tmag_prospect_magic_links` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 5 |
 | `tmag_prospect_sessions` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 3 |
 | `tmag_prospect_timeline_events` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 4 |
