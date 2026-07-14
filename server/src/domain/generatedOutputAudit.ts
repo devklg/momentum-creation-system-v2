@@ -129,6 +129,11 @@ function activeTemplate(templateId: McsGeneratedOutputTemplateId) {
 export async function appendGeneratedOutputAudit(
   input: McsAppendGeneratedOutputAuditInput,
 ): Promise<McsTaxonomizedAuditLogEntry> {
+  if (input.templateId !== input.input.classification) {
+    throw new Error(
+      `Generated output audit template/input mismatch: ${input.templateId} != ${input.input.classification}`,
+    );
+  }
   const template = activeTemplate(input.templateId);
   const segments = (Array.isArray(input.output) ? input.output : [input.output]) as readonly string[];
   const characterCount = segments.reduce((total, value) => total + value.length, 0);

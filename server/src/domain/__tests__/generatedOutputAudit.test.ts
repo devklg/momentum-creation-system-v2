@@ -101,6 +101,27 @@ describe('P2-124 generated-output audit records', () => {
     );
   });
 
+  it('fails closed before persistence when template identity and input classification disagree', async () => {
+    const { appendGeneratedOutputAudit } = await import('../generatedOutputAudit.js');
+
+    await expect(
+      appendGeneratedOutputAudit({
+        templateId: 'ivory_wdyk_coach',
+        tmagId: 'TMAG-2',
+        input: {
+          classification: 'ivory_momentum_followup',
+          ownedProspectProvided: true,
+          askProvided: false,
+          askLength: 0,
+        },
+        output: 'Who from a past chapter comes to mind?',
+        degraded: false,
+      }),
+    ).rejects.toThrow('Generated output audit template/input mismatch');
+
+    expect(mocks.appendAuditEntry).not.toHaveBeenCalled();
+  });
+
   it('persists a critical rejection and fails closed when delivered output is noncompliant', async () => {
     const { appendGeneratedOutputAudit, GeneratedOutputComplianceAuditError } =
       await import('../generatedOutputAudit.js');
