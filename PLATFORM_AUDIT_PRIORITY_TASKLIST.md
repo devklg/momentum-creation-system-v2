@@ -162,7 +162,7 @@ Product unification, workflow completion, content operations, and scale-hardenin
 - [x] 127. **Cockpit:** Add deterministic cockpit next-step suggestions from lifecycle state. *(The existing PMV projection now delegates to a versioned, ordered, pure next-action policy covering every lifecycle, BA-reminder precedence, and the exact 48-hour unopened boundary. The Focus Queue displays each behavioral reason; all contact remains manual and non-scoring.)*
 - [ ] 128. **Admin:** Add admin bottleneck reports for invitations, CRM, training, events, and delivery.
 - [x] 129. **Frontend:** Reduce the team app bundle size through code splitting or manual chunks. *(All public and authenticated team pages now load at route boundaries with shell-preserving suspense states. The initial minified JS entry fell from 681.19 kB to 232.23 kB (65.9%), gzip fell from 185.44 kB to 74.95 kB, and Vite's oversized-JS warning is resolved.)*
-- [ ] 130. **Frontend:** Resolve the com app dynamic/static import split warning.
+- [x] 130. **Frontend:** Resolve the com app dynamic/static import split warning. *(Dr. Dan video milestone posting now uses the same static `lib/api` authority as the other com surfaces. The contradictory no-op dynamic boundary is gone, the Rollup warning is absent, and the production JavaScript decreased from 393.48 kB to 392.04 kB.)*
 - [ ] 131. **Admin:** Add pagination and index awareness for high-volume admin views.
 - [ ] 132. **Context:** Add caching and batching for Context Manager and GraphRAG retrieval canaries.
 - [ ] 133. **Chroma:** Add Chroma re-index tooling and age-out policy.
