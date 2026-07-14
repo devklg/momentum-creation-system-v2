@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T02:04:24.402Z",
+  "generatedAt": "2026-07-14T02:38:23.863Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -505,7 +505,7 @@
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 146,
+          "line": 147,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -530,7 +530,7 @@
         },
         {
           "file": "server/src/domain/michael-training-support.ts",
-          "line": 117,
+          "line": 83,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -825,7 +825,7 @@
       "sources": [
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 935,
+          "line": 936,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1167,12 +1167,12 @@
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 668,
+          "line": 669,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 769,
+          "line": 770,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1214,7 +1214,7 @@
       "sources": [
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 790,
+          "line": 791,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1276,7 +1276,7 @@
       "sources": [
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 783,
+          "line": 784,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1353,7 +1353,7 @@
       "sources": [
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 797,
+          "line": 798,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1668,12 +1668,12 @@
       "sources": [
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 688,
+          "line": 689,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 776,
+          "line": 777,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1710,7 +1710,7 @@
       "sources": [
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 762,
+          "line": 763,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1972,12 +1972,12 @@
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 652,
+          "line": 653,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 755,
+          "line": 756,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -2155,7 +2155,7 @@
       "sources": [
         {
           "file": "server/src/domain/michael-training-support.ts",
-          "line": 129,
+          "line": 95,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -10970,6 +10970,11 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsSteveGuidanceRecommendation",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsSteveLearningModality",
       "kind": "type",
       "file": "packages/shared/src/types.ts"
@@ -11010,6 +11015,16 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsSteveTailoredGuidance",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsSteveTailoredGuidanceStatus",
+      "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsSteveTranscriptChunk",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -11031,6 +11046,11 @@
     },
     {
       "name": "McsTaxonomizedAuditLogEntry",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsTeamLaunchCenterResponse",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
     },
@@ -11457,6 +11477,6 @@
     "chromaCollections": 53,
     "routeModules": 49,
     "routeHandlers": 270,
-    "sharedExports": 1092
+    "sharedExports": 1096
   }
 }
