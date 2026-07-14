@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T01:33:17.627Z",
+  "generatedAt": "2026-07-14T01:51:12.817Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -4527,21 +4527,27 @@
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 44
+          "line": 46
         },
         {
           "method": "GET",
           "path": "/sessions",
-          "line": 53
+          "line": 55
+        },
+        {
+          "method": "GET",
+          "path": "/diagnostic",
+          "line": 79
         },
         {
           "method": "POST",
           "path": "/sessions",
-          "line": 85
+          "line": 120
         }
       ],
       "sharedTypes": [
         "McsAdminCreateOrientationSessionResponse",
+        "McsAdminOrientationDiagnosticResponse",
         "McsAdminOrientationSessionsResponse",
         "McsAuditActor",
         "McsAuditContext"
@@ -6627,6 +6633,31 @@
       "name": "McsLeaderProfile",
       "kind": "interface",
       "file": "packages/shared/src/leaders.ts"
+    },
+    {
+      "name": "MCS_ORIENTATION_DIAGNOSTIC_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/orientation-diagnostic.ts"
+    },
+    {
+      "name": "McsAdminOrientationDiagnosticResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/orientation-diagnostic.ts"
+    },
+    {
+      "name": "McsOrientationDiagnosticCategory",
+      "kind": "type",
+      "file": "packages/shared/src/orientation-diagnostic.ts"
+    },
+    {
+      "name": "McsOrientationDiagnosticCode",
+      "kind": "type",
+      "file": "packages/shared/src/orientation-diagnostic.ts"
+    },
+    {
+      "name": "McsOrientationDiagnosticFinding",
+      "kind": "interface",
+      "file": "packages/shared/src/orientation-diagnostic.ts"
     },
     {
       "name": "MCS_CURRENT_ORIENTATION_STATE_MACHINE",
@@ -11405,7 +11436,7 @@
     "neo4jRelationships": 69,
     "chromaCollections": 53,
     "routeModules": 49,
-    "routeHandlers": 269,
-    "sharedExports": 1083
+    "routeHandlers": 270,
+    "sharedExports": 1088
   }
 }

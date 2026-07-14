@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:33:12.680Z
+- Generated: 2026-07-14T01:51:08.280Z
 - Mounted routers: 50
 - Route files: 50
-- Static route rows: 239
+- Static route rows: 240
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
 | ba_facing_gated | 91 |
-| pre_gate | 144 |
+| pre_gate | 145 |
 | pre_json_admin_body_limit | 3 |
 | raw_body_before_json | 1 |
 
@@ -22,7 +22,7 @@
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 96 |
+| admin | 97 |
 | ba_auth_steve_gated | 91 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 7 |
-| GET | 122 |
+| GET | 123 |
 | PATCH | 9 |
 | POST | 94 |
 | PUT | 7 |
@@ -204,8 +204,9 @@
 | GET | `/api/admin/broadcast/:broadcastId` | pre_gate | admin | admin | `server/src/routes/admin/broadcast.ts:142` |
 | POST | `/api/admin/broadcast/test` | pre_gate | admin | admin | `server/src/routes/admin/broadcast.ts:173` |
 | POST | `/api/admin/broadcast/` | pre_gate | admin | admin | `server/src/routes/admin/broadcast.ts:206` |
-| GET | `/api/admin/orientation/sessions` | pre_gate | admin | admin | `server/src/routes/admin/orientation.ts:53` |
-| POST | `/api/admin/orientation/sessions` | pre_gate | admin | admin | `server/src/routes/admin/orientation.ts:85` |
+| GET | `/api/admin/orientation/sessions` | pre_gate | admin | admin | `server/src/routes/admin/orientation.ts:55` |
+| GET | `/api/admin/orientation/diagnostic` | pre_gate | admin | admin | `server/src/routes/admin/orientation.ts:79` |
+| POST | `/api/admin/orientation/sessions` | pre_gate | admin | admin | `server/src/routes/admin/orientation.ts:120` |
 | GET | `/api/admin/michael-runtime/observability` | pre_gate | admin | admin | `server/src/routes/admin/michael-runtime-observability.ts:23` |
 | GET | `/api/admin/content/videos/` | pre_gate | admin | admin | `server/src/routes/admin/content-videos.ts:72` |
 | POST | `/api/admin/content/videos/` | pre_gate | admin | admin | `server/src/routes/admin/content-videos.ts:84` |

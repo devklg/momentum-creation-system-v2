@@ -4,15 +4,15 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:33:12.731Z
-- Routes: 239
+- Generated: 2026-07-14T01:51:08.343Z
+- Routes: 240
 - Findings: 0
 
 ## Routes By Access Category
 
 | Access category | Routes |
 | --- | ---: |
-| admin | 99 |
+| admin | 100 |
 | admin_or_health_secret | 1 |
 | auth_bootstrap | 3 |
 | auth_session | 2 |
@@ -34,7 +34,7 @@
 | customSecretGuard | 10 |
 | rateLimited | 3 |
 | rawBodyParser | 1 |
-| requireAdmin | 99 |
+| requireAdmin | 100 |
 | requireAdminOrHealthSecret | 1 |
 | requireAuth | 106 |
 | requireRuntimeInternal | 5 |
@@ -47,7 +47,7 @@
 | --- | ---: |
 | anonymous | 5 |
 | brand_ambassador | 107 |
-| founder_admin | 105 |
+| founder_admin | 106 |
 | prospect | 18 |
 | provider | 2 |
 | system | 10 |
@@ -56,7 +56,7 @@
 
 | Entitlement | Routes |
 | --- | ---: |
-| admin_allowlist | 105 |
+| admin_allowlist | 106 |
 | machine_credential | 12 |
 | none | 5 |
 | registered_ba | 107 |
@@ -192,8 +192,9 @@
 | GET | `/api/admin/broadcast/:broadcastId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/broadcast.ts:142` |
 | POST | `/api/admin/broadcast/test` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/broadcast.ts:173` |
 | POST | `/api/admin/broadcast/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/broadcast.ts:206` |
-| GET | `/api/admin/orientation/sessions` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/orientation.ts:53` |
-| POST | `/api/admin/orientation/sessions` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/orientation.ts:85` |
+| GET | `/api/admin/orientation/sessions` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/orientation.ts:55` |
+| GET | `/api/admin/orientation/diagnostic` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/orientation.ts:79` |
+| POST | `/api/admin/orientation/sessions` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/orientation.ts:120` |
 | GET | `/api/admin/michael-runtime/observability` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/michael-runtime-observability.ts:23` |
 | GET | `/api/admin/content/videos/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/content-videos.ts:72` |
 | POST | `/api/admin/content/videos/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/content-videos.ts:84` |
