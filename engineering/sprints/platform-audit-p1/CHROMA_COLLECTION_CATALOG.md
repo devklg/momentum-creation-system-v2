@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-14T19:46:18.438Z
+- Generated: 2026-07-14T20:47:42.125Z
 - Registered collections: 53
 - Schema-catalog collections: 53
 - Collections with observed write/query usage: 33
@@ -110,6 +110,6 @@ entries need explicit contract handling in P1-43.
 | `collection` | expression | `create_collection` | 1 | `server/src/runtime/knowledge-evolution/indexing/knowledgeEvolutionReindex.service.ts:63` |
 | `input.chroma.collection` | expression | `add` | 1 | `server/src/services/tripleStack.ts:72` |
 | `knowledgeChromaCollection(current.domain, current.language)` | expression | `writeKnowledge` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:382` |
-| `knowledgeChromaCollection(source.domain, source.language)` | expression | `add` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:1056` |
+| `knowledgeChromaCollection(source.domain, source.language)` | expression | `add` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:1103` |
 | `mcs_questionnaires` | literal/constant | `writeKnowledge` | 1 | `server/src/domain/questionnaire.ts:203` |
 | `tmag_workbooks` | literal/constant | `add` | 1 | `server/src/domain/workbook.ts:356` |

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T19:46:18.438Z",
+  "generatedAt": "2026-07-14T20:47:42.125Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -221,7 +221,7 @@
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 978,
+          "line": 1025,
           "action": "persistenceCall.chromadb.add"
         },
         {
@@ -743,12 +743,12 @@
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 436,
+          "line": 429,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 1065,
+          "line": 1112,
           "action": "persistenceCall.chromadb.add"
         }
       ],
@@ -2551,7 +2551,7 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 1056,
+          "line": 1103,
           "action": "persistenceCall.chromadb.add"
         }
       ],
