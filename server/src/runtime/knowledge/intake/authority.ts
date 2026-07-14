@@ -8,14 +8,12 @@
  */
 
 import type {
+  McsKnowledgeBaseAuthorityDecision,
   McsKnowledgeAuthorityEnvelope,
   McsRawKnowledgeSource,
 } from '@momentum/shared/runtime';
 
-export type KnowledgeAuthorityDecision =
-  | 'active_authority'
-  | 'candidate_only'
-  | 'not_authorized';
+export type KnowledgeAuthorityDecision = McsKnowledgeBaseAuthorityDecision;
 
 export interface KnowledgeAuthorityResolution {
   decision: KnowledgeAuthorityDecision;
@@ -41,6 +39,15 @@ const LEGACY_KEVIN_CREATED_BY = new Set([
 ]);
 
 export function resolveKnowledgeAuthority(source: McsRawKnowledgeSource): KnowledgeAuthorityResolution {
+  if (source.status === 'superseded') {
+    const authority = source.authority ?? fallbackAuthority(source, 'system_captured', 'superseded');
+    return resolution(
+      source,
+      'superseded_authority',
+      { ...authority, authorityStatus: 'superseded' },
+      'authority_rejected_or_superseded',
+    );
+  }
   if (source.status !== 'active') {
     return resolution(source, 'not_authorized', fallbackAuthority(source, 'system_captured', 'rejected'), 'source_not_active');
   }

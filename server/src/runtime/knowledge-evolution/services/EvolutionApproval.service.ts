@@ -28,9 +28,21 @@ export interface EvolutionApprovalService {
   validate(input: EvolutionApprovalInput): PolicyResult;
   /** Throws `KnowledgeEvolutionRuntimeError` when approval is missing/invalid. */
   assertApproved(input: EvolutionApprovalInput): void;
+  /** Proves the caller-supplied reference exists in the configured canonical authority store. */
+  verifyCanonical(input: EvolutionApprovalInput): Promise<PolicyResult>;
 }
 
-export function createEvolutionApprovalService(): EvolutionApprovalService {
+export interface EvolutionApprovalAuthorityPort {
+  verify(reference: KnowledgeApprovalReference): Promise<boolean>;
+}
+
+const shapeVerifiedAuthority: EvolutionApprovalAuthorityPort = {
+  async verify() { return true; },
+};
+
+export function createEvolutionApprovalService(
+  authority: EvolutionApprovalAuthorityPort = shapeVerifiedAuthority,
+): EvolutionApprovalService {
   const toPolicyInput = (input: EvolutionApprovalInput): ApprovalPolicyInput => ({
     approvalReference: input.approvalReference,
     inputType: input.inputType,
@@ -43,6 +55,18 @@ export function createEvolutionApprovalService(): EvolutionApprovalService {
     },
     assertApproved(input) {
       assertPolicy(evaluateApproval(toPolicyInput(input)));
+    },
+    async verifyCanonical(input) {
+      const shape = evaluateApproval(toPolicyInput(input));
+      if (!shape.ok) return shape;
+      const reference = input.approvalReference!;
+      if (await authority.verify(reference)) return shape;
+      return {
+        ok: false,
+        errorType: 'approval_missing',
+        reason: `Approval ${reference.approvalId} was not read back from canonical authority.`,
+        safeMessage: 'Knowledge evolution rejected: canonical approval evidence is missing.',
+      };
     },
   };
 }

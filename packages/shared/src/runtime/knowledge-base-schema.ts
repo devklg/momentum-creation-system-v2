@@ -46,7 +46,8 @@ export type McsKnowledgeBaseRelationship =
 export type McsKnowledgeBaseAuthorityDecision =
   | 'active_authority'
   | 'candidate_only'
-  | 'not_authorized';
+  | 'not_authorized'
+  | 'superseded_authority';
 
 export interface McsKnowledgeBaseAuthorityResolution {
   decision: McsKnowledgeBaseAuthorityDecision;
@@ -103,6 +104,15 @@ export interface McsKnowledgeBaseSourceRecord extends McsRawKnowledgeSource {
   upload?: McsKnowledgeBaseUploadMetadata;
   chunkCount: number;
   indexRecordCount: number;
+  /** Stable immutable identity for this logical-source version. Legacy v1 rows may omit it. */
+  sourceVersionId?: string;
+  supersedesSourceVersionId?: string | null;
+  replacementSourceVersionId?: string | null;
+  correctionDecisionId?: string | null;
+  contentDigestSha256?: string;
+  supersededAt?: string | null;
+  supersededBy?: string | null;
+  supersessionReason?: string | null;
 }
 
 export interface McsKnowledgeBaseChunkRecord extends McsKnowledgeChunk {
@@ -114,6 +124,30 @@ export interface McsKnowledgeBaseChunkRecord extends McsKnowledgeChunk {
   authorityStatus?: McsKnowledgeAuthorityStatus;
   sourceTitle: string;
   citation: import('./knowledge.js').McsKnowledgeCitation;
+  sourceVersionId?: string;
+  correctionDecisionId?: string | null;
+  contentDigestSha256?: string;
+}
+
+/** P2-135 corrected/staged versions require evidence that legacy v1 rows may omit. */
+export interface McsCorrectedKnowledgeBaseSourceRecord
+  extends McsKnowledgeBaseSourceRecord {
+  sourceVersionId: string;
+  correctionDecisionId: string;
+  contentDigestSha256: string;
+  supersedesSourceVersionId: string;
+  replacementSourceVersionId: string | null;
+  supersededAt: string | null;
+  supersededBy: string | null;
+  supersessionReason: string | null;
+}
+
+export interface McsCorrectedKnowledgeBaseChunkRecord
+  extends McsKnowledgeBaseChunkRecord {
+  sourceVersionId: string;
+  correctionDecisionId: string;
+  contentDigestSha256: string;
+  retrievalEligible: boolean;
 }
 
 export interface McsKnowledgeBaseIndexProjection extends McsKnowledgeIndexRecord {

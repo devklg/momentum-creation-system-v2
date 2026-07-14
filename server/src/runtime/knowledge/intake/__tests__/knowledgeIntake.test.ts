@@ -247,6 +247,31 @@ describe('P4.5A knowledge intake — Kevin authority foundation', () => {
     });
     expect(chunksToKnowledgeReferences(result.chunks).length).toBeGreaterThan(0);
   });
+
+  it('preserves previously approved superseded sources as non-retrievable historical authority', () => {
+    const raw = source({
+      status: 'superseded',
+      authority: {
+        authorityKind: 'kevin_approved',
+        authorityStatus: 'superseded',
+        authorityBy: 'TMAG-01',
+        authorityAt: '2026-07-14T19:00:00.000Z',
+        authorityRef: 'dec_correction_1',
+      },
+    });
+
+    const resolution = resolveKnowledgeAuthority(raw);
+    const result = ingestRawKnowledgeSource(raw);
+
+    expect(resolution).toMatchObject({
+      decision: 'superseded_authority',
+      canBecomeActiveGuidance: false,
+      candidateOnly: false,
+      reason: 'authority_rejected_or_superseded',
+    });
+    expect(result.chunks.every((chunk) => chunk.retrievalEligible === false)).toBe(true);
+    expect(chunksToKnowledgeReferences(result.chunks)).toEqual([]);
+  });
 });
 
 describe('P4.5A knowledge intake — chunker & traceability', () => {

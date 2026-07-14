@@ -4,9 +4,17 @@
 
 import { FormEvent, useCallback, useEffect, useState, type ReactNode } from 'react';
 import type {
+  McsAdminKnowledgeCorrectionPreview,
+  McsAdminKnowledgeCorrectionRecord,
   McsAdminKnowledgeIntegrityStatus,
+  McsAdminKnowledgeSourceVersionDetail,
+  McsAdminKnowledgeSourceVersionSummary,
   McsAdminKnowledgeStatusResponse,
   McsKnowledgeSourceConflictClass,
+} from '@momentum/shared';
+import {
+  MCS_KNOWLEDGE_CORRECTION_CONFIRMATION,
+  MCS_KNOWLEDGE_ROLLBACK_CONFIRMATION,
 } from '@momentum/shared';
 import type { McsKnowledgeDomain, McsRuntimeLanguage } from '@momentum/shared/runtime';
 import { Button } from '@/components/ui/button';
@@ -247,6 +255,8 @@ export function KnowledgePage() {
         ) : <p className="text-sm text-cream-mute">{statusError ?? 'Loading knowledge status…'}</p>}
       </section>
 
+      <KnowledgeCorrectionPanel />
+
       <section className="border border-line bg-cream/[0.025] p-5 mb-6">
         <h2 className="font-mono text-[11px] tracking-label uppercase text-gold mb-5">
           Upload File
@@ -404,6 +414,211 @@ export function KnowledgePage() {
         </form>
       </section>
     </div>
+  );
+}
+
+function KnowledgeCorrectionPanel() {
+  const [versions, setVersions] = useState<McsAdminKnowledgeSourceVersionSummary[]>([]);
+  const [lifecycleFilter, setLifecycleFilter] = useState<'active' | 'approved' | 'superseded'>('active');
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [selected, setSelected] = useState<McsAdminKnowledgeSourceVersionDetail | null>(null);
+  const [replacementContent, setReplacementContent] = useState('');
+  const [reason, setReason] = useState('');
+  const [preview, setPreview] = useState<McsAdminKnowledgeCorrectionPreview | null>(null);
+  const [correction, setCorrection] = useState<McsAdminKnowledgeCorrectionRecord | null>(null);
+  const [confirmation, setConfirmation] = useState('');
+  const [rollbackReason, setRollbackReason] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const loadVersions = useCallback(async (cursor?: string) => {
+    const query = new URLSearchParams({ limit: '25', status: lifecycleFilter });
+    if (cursor) query.set('cursor', cursor);
+    const res = await fetch(`/api/admin/knowledge/source-versions?${query}`, { credentials: 'include' });
+    const body = await res.json() as { ok?: boolean; items?: McsAdminKnowledgeSourceVersionSummary[]; nextCursor?: string | null; error?: string };
+    if (!res.ok || !body.ok) throw new Error(body.error ?? 'Source versions unavailable.');
+    setVersions((current) => cursor ? [...current, ...(body.items ?? [])] : (body.items ?? []));
+    setNextCursor(body.nextCursor ?? null);
+  }, [lifecycleFilter]);
+
+  useEffect(() => { void loadVersions().catch((error) => setMessage(error instanceof Error ? error.message : 'Source versions unavailable.')); }, [loadVersions]);
+
+  async function selectVersion(version: McsAdminKnowledgeSourceVersionSummary) {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/admin/knowledge/source-versions/${encodeURIComponent(version.sourceVersionId)}`, { credentials: 'include' });
+      const body = await res.json() as { ok?: boolean; source?: McsAdminKnowledgeSourceVersionDetail; error?: string };
+      if (!res.ok || !body.ok || !body.source) throw new Error(body.error ?? 'Source version unavailable.');
+      setSelected(body.source);
+      setReplacementContent(body.source.originalContent);
+      setReason('');
+      setPreview(null);
+      setCorrection(null);
+      setConfirmation('');
+      setRollbackReason('');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Source version unavailable.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function createPreview() {
+    if (!selected) return;
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/admin/knowledge/source-versions/${encodeURIComponent(selected.sourceVersionId)}/corrections/preview`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ replacementContent, reason }),
+      });
+      const body = await res.json() as { ok?: boolean; preview?: McsAdminKnowledgeCorrectionPreview; error?: string; message?: string };
+      if (!res.ok || !body.ok || !body.preview) throw new Error(body.message ?? body.error ?? 'Preview unavailable.');
+      setPreview(body.preview);
+      setConfirmation('');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Preview unavailable.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function applyCorrection() {
+    if (!selected || !preview) return;
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/admin/knowledge/source-versions/${encodeURIComponent(selected.sourceVersionId)}/corrections`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          replacementContent, reason,
+          previewId: preview.previewId,
+          previewCreatedAt: preview.createdAt,
+          previewExpiresAt: preview.expiresAt,
+          previewDigestSha256: preview.previewDigestSha256,
+          idempotencyKey: `admin-${preview.previewId}`,
+          confirmation,
+        }),
+      });
+      const body = await res.json() as { ok?: boolean; correction?: McsAdminKnowledgeCorrectionRecord; error?: string; message?: string };
+      if (!res.ok || !body.ok || !body.correction) throw new Error(body.message ?? body.error ?? 'Correction did not start.');
+      setCorrection(body.correction);
+      setMessage(body.correction.state === 'verified' ? 'Correction verified across the governed cutover.' : `Correction state: ${body.correction.state}`);
+      await loadVersions();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Correction did not start.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function retryCorrection() {
+    if (!correction) return;
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/admin/knowledge/corrections/${encodeURIComponent(correction.correctionId)}/retry`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          expectedRecordRevision: correction.recordRevision,
+          idempotencyKey: correction.idempotencyKey,
+          approvalDecisionId: correction.approvalDecisionId,
+          confirmation: MCS_KNOWLEDGE_CORRECTION_CONFIRMATION,
+        }),
+      });
+      const body = await res.json() as { ok?: boolean; correction?: McsAdminKnowledgeCorrectionRecord; error?: string };
+      if (!res.ok || !body.correction) throw new Error(body.error ?? 'Retry failed.');
+      setCorrection(body.correction);
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'Retry failed.'); }
+    finally { setBusy(false); }
+  }
+
+  async function rollbackCorrection() {
+    if (!correction) return;
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/admin/knowledge/corrections/${encodeURIComponent(correction.correctionId)}/rollback`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reason: rollbackReason,
+          idempotencyKey: `rollback-${correction.correctionId}`,
+          expectedState: correction.state,
+          expectedRecordRevision: correction.recordRevision,
+          rollbackTargetSourceVersionId: correction.rollbackTargetSourceVersionId,
+          rollbackTargetDigestSha256: correction.currentDigestSha256,
+          approvalDecisionId: correction.approvalDecisionId,
+          confirmation,
+        }),
+      });
+      const body = await res.json() as { ok?: boolean; correction?: McsAdminKnowledgeCorrectionRecord; error?: string; message?: string };
+      if (!res.ok || !body.correction) throw new Error(body.message ?? body.error ?? 'Rollback failed.');
+      setCorrection(body.correction);
+      setMessage('Rollback appended and verified a new immutable version.');
+      await loadVersions();
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'Rollback failed.'); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <section className="border border-line bg-cream/[0.025] p-5 mb-6" aria-label="Governed knowledge corrections">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+        <div>
+          <h2 className="font-mono text-[11px] tracking-label uppercase text-gold">Governed Corrections</h2>
+          <p className="text-sm text-cream-mute mt-2">Kevin-only · immutable versions · exact preview evidence · safe-gap cutover</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {(['active', 'approved', 'superseded'] as const).map((value) => (
+            <button key={value} type="button" onClick={() => setLifecycleFilter(value)} className={`border px-3 py-2 font-mono text-[10px] uppercase tracking-label ${lifecycleFilter === value ? 'border-gold text-gold' : 'border-line text-cream-mute'}`}>{value}</button>
+          ))}
+          <Button type="button" variant="outline" onClick={() => void loadVersions()} disabled={busy}>Refresh</Button>
+        </div>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
+        <div className="border border-line bg-ink-2 max-h-[420px] overflow-y-auto">
+          {versions.map((version) => (
+            <button key={version.sourceVersionId} type="button" onClick={() => void selectVersion(version)} className="block w-full border-b border-line p-3 text-left hover:bg-cream/5">
+              <span className="block text-sm text-cream">{version.title}</span>
+              <span className="block font-mono text-[9px] uppercase tracking-label text-cream-mute mt-1">v{version.version} · {version.status} · {version.domain}/{version.language}</span>
+              <span className="block font-mono text-[9px] text-cream-mute mt-1">{version.contentDigestSha256.slice(0, 12)}</span>
+            </button>
+          ))}
+          {versions.length === 0 && <p className="p-3 text-xs text-cream-mute">No source versions returned.</p>}
+          {nextCursor && <Button type="button" variant="outline" className="m-3" onClick={() => void loadVersions(nextCursor)} disabled={busy}>Load more</Button>}
+        </div>
+        <div>
+          {selected ? <>
+            <p className="font-mono text-[10px] uppercase tracking-label text-gold">{selected.sourceVersionId}</p>
+            <p className="text-xs text-cream-mute mt-1">{selected.authorityStatus} · {selected.chunkCount} chunks · digest {selected.contentDigestSha256.slice(0, 16)}</p>
+            <textarea value={replacementContent} onChange={(event) => { setReplacementContent(event.target.value); setPreview(null); }} rows={10} className="mt-3 w-full bg-ink-2 border border-line text-cream rounded-md px-3.5 py-3 text-sm leading-6" aria-label="Replacement content" />
+            <Input value={reason} onChange={(event) => { setReason(event.target.value); setPreview(null); }} className="mt-3" placeholder="Correction reason (required)" aria-label="Correction reason" />
+            <div className="flex flex-wrap gap-2 mt-3">
+              <Button type="button" onClick={() => void createPreview()} disabled={busy || selected.status !== 'active'}>Create read-only preview</Button>
+            </div>
+            {preview && <div className="border border-gold/40 bg-ink-2 p-3 mt-4">
+              <p className="font-mono text-[10px] text-gold uppercase tracking-label">Preview · no live mutation yet</p>
+              <p className="text-xs text-cream-mute mt-2">{preview.currentSourceVersionId} → {preview.replacementSourceVersionId}</p>
+              <p className="font-mono text-[9px] text-cream-mute mt-1">old {preview.currentDigestSha256.slice(0, 12)} · new {preview.replacementDigestSha256.slice(0, 12)} · preview {preview.previewDigestSha256.slice(0, 12)}</p>
+              <p className="text-xs text-cream-mute mt-1">Mongo · Neo4j · Chroma · Resource Catalog · GraphRAG · rollback target {preview.rollbackTargetSourceVersionId}</p>
+              <Input value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className="mt-3" placeholder={MCS_KNOWLEDGE_CORRECTION_CONFIRMATION} aria-label="Exact correction confirmation" />
+              <Button type="button" className="mt-3" onClick={() => void applyCorrection()} disabled={busy || confirmation !== MCS_KNOWLEDGE_CORRECTION_CONFIRMATION}>Apply governed correction</Button>
+            </div>}
+            {correction && <div className="border border-line p-3 mt-4">
+              <p className="font-mono text-[10px] uppercase tracking-label text-gold">Correction {correction.state}</p>
+              <p className="text-xs text-cream-mute mt-2">Phase {correction.cutoverPhase.replaceAll('_', ' ')} · attempt {correction.attemptCount} · revision {correction.recordRevision}</p>
+              {correction.failureCode && <p className="text-xs text-red-400 mt-2">{correction.failureStage}: {correction.failureCode}</p>}
+              {correction.state === 'failed' && <Button type="button" className="mt-3" onClick={() => void retryCorrection()} disabled={busy}>Retry exact approved correction</Button>}
+              {correction.state === 'verified' && <>
+                <Input value={rollbackReason} onChange={(event) => setRollbackReason(event.target.value)} className="mt-3" placeholder="Rollback reason (required)" aria-label="Rollback reason" />
+                <Input value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className="mt-3" placeholder={MCS_KNOWLEDGE_ROLLBACK_CONFIRMATION} aria-label="Exact rollback confirmation" />
+                <Button type="button" variant="outline" className="mt-3" onClick={() => void rollbackCorrection()} disabled={busy || rollbackReason.trim().length < 8 || confirmation !== MCS_KNOWLEDGE_ROLLBACK_CONFIRMATION}>Append rollback version</Button>
+              </>}
+            </div>}
+          </> : <p className="text-sm text-cream-mute">Select a source version to inspect its canonical content. List rows expose metadata only.</p>}
+          {message && <p className="font-mono text-[10px] text-amber-300 mt-3">{message}</p>}
+        </div>
+      </div>
+      <p className="font-mono text-[9px] uppercase tracking-label text-cream-mute mt-4">No automatic stale classification · no semantic truth decision · no external communication</p>
+    </section>
   );
 }
 

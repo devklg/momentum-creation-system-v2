@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T18:46:17.767Z",
+  "generatedAt": "2026-07-14T19:46:18.438Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -9,10 +9,10 @@
   "summary": {
     "collections": 53,
     "schemaCatalogCollections": 53,
-    "withObservedWrites": 32,
+    "withObservedWrites": 33,
     "languageScopedCollections": 10,
     "metadataContractRows": 53,
-    "observedUnregisteredTargets": 8
+    "observedUnregisteredTargets": 10
   },
   "byDomain": {
     "identity_access": 4,
@@ -207,9 +207,29 @@
       "language": "not_language_scoped",
       "purpose": "Agent event/template semantic memory.",
       "source": "server/src/services/chromaCollections.ts",
-      "actions": [],
-      "sourceCount": 0,
-      "sources": [],
+      "actions": [
+        "add",
+        "get",
+        "tripleStackWrite"
+      ],
+      "sourceCount": 3,
+      "sources": [
+        {
+          "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
+          "line": 254,
+          "action": "tripleStackWrite"
+        },
+        {
+          "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
+          "line": 978,
+          "action": "persistenceCall.chromadb.add"
+        },
+        {
+          "file": "server/src/runtime/knowledge-evolution/persistence/canonicalApprovalAuthority.ts",
+          "line": 21,
+          "action": "persistenceCall.chromadb.get"
+        }
+      ],
       "metadataContract": {
         "collectionMetadata": {
           "project": "momentum_creation_system_v2",
@@ -218,7 +238,25 @@
           "embedding_model": "all-MiniLM-L6-v2",
           "purpose": "rev3 canonical registry"
         },
-        "observedMetadataKeys": [],
+        "observedMetadataKeys": [
+          "actor_tmag_id",
+          "correction_id",
+          "current_digest_sha256",
+          "current_source_version_id",
+          "decided_by",
+          "decision_id",
+          "expected_lifecycle",
+          "expected_replacement_source_version_id",
+          "expected_version",
+          "idempotency_key",
+          "preview_digest_sha256",
+          "reason_digest_sha256",
+          "replacement_digest_sha256",
+          "replacement_source_version_id",
+          "source_id",
+          "status",
+          "type"
+        ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [],
         "embeddingDimension": 384,
@@ -687,20 +725,31 @@
       "purpose": "Approved knowledge chunk retrieval index.",
       "source": "server/src/services/chromaCollections.ts",
       "actions": [
+        "add",
         "query_with_filter",
         "writeKnowledge"
       ],
-      "sourceCount": 2,
+      "sourceCount": 4,
       "sources": [
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 225,
+          "line": 226,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 463,
+          "line": 467,
           "action": "persistenceCall.chromadb.query_with_filter"
+        },
+        {
+          "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
+          "line": 436,
+          "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
+          "line": 1065,
+          "action": "persistenceCall.chromadb.add"
         }
       ],
       "metadataContract": {
@@ -2473,6 +2522,42 @@
         }
       ],
       "observedMetadataKeys": [],
+      "observedFilterKeys": []
+    },
+    {
+      "target": "knowledgeChromaCollection(current.domain, current.language)",
+      "resolved": false,
+      "actions": [
+        "writeKnowledge"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
+          "line": 382,
+          "action": "writeKnowledge"
+        }
+      ],
+      "observedMetadataKeys": [],
+      "observedFilterKeys": []
+    },
+    {
+      "target": "knowledgeChromaCollection(source.domain, source.language)",
+      "resolved": false,
+      "actions": [
+        "add"
+      ],
+      "sourceCount": 1,
+      "sources": [
+        {
+          "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
+          "line": 1056,
+          "action": "persistenceCall.chromadb.add"
+        }
+      ],
+      "observedMetadataKeys": [
+        "status"
+      ],
       "observedFilterKeys": []
     },
     {

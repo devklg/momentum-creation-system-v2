@@ -117,4 +117,23 @@ describe('P2-100 Resource Center verified projection', () => {
     const response = await getResourceCenterResourceDetail(approved.resourceVersionId, persistence as never, verify as never);
     expect(response).toMatchObject({ ok: true, item: { resourceVersionId: approved.resourceVersionId }, content });
   });
+
+  it('does not list an active knowledge catalog projection before its canonical source is active', async () => {
+    const knowledge = entry({
+      resourceId: 'knowledge:source_1',
+      resourceVersionId: 'knowledge:source_1:v2',
+      kind: 'knowledge_source',
+      version: 2,
+      lineage: { originKind: 'admin_upload', sourceSystem: 'knowledge_core', sourceCollection: 'mcs_knowledge_sources', sourceRecordId: 'source_1', parentResourceVersionId: null, supersedesResourceVersionId: 'knowledge:source_1:v1', replacementResourceVersionId: null },
+    });
+    const persistence = vi.fn(async (_tool: string, _action: string, params: { collection?: string }) => {
+      if (params.collection === 'tmag_resource_catalog') return { documents: [knowledge] };
+      if (params.collection === 'mcs_knowledge_sources') return { documents: [] };
+      throw new Error('unexpected');
+    });
+    const verify = vi.fn(async () => ({ allowed: true }));
+
+    expect((await listResourceCenterResources(persistence as never, verify as never)).items).toEqual([]);
+    expect(verify).not.toHaveBeenCalled();
+  });
 });

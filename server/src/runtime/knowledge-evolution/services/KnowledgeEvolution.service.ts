@@ -236,6 +236,15 @@ export function createKnowledgeEvolutionService(
       await persistViolation(validation, request);
       throw new KnowledgeEvolutionRuntimeError(validation);
     }
+    const canonicalApproval = await deps.approvalService.verifyCanonical({
+      approvalReference: request.approvalReference,
+      inputType: request.inputType,
+      sourceCandidateIds: request.sourceCandidateIds ?? [],
+    });
+    if (!canonicalApproval.ok) {
+      await persistViolation(canonicalApproval, request);
+      throw new KnowledgeEvolutionRuntimeError(canonicalApproval);
+    }
 
     const record = await deps.recordRepository.insert(buildRecord(request));
 
@@ -428,6 +437,15 @@ export function createKnowledgeEvolutionService(
       if (!validation.ok) {
         await persistViolation(validation, request);
         throw new KnowledgeEvolutionRuntimeError(validation);
+      }
+      const canonicalApproval = await deps.approvalService.verifyCanonical({
+        approvalReference: request.approvalReference,
+        inputType: request.inputType,
+        sourceCandidateIds: request.sourceCandidateIds ?? [],
+      });
+      if (!canonicalApproval.ok) {
+        await persistViolation(canonicalApproval, request);
+        throw new KnowledgeEvolutionRuntimeError(canonicalApproval);
       }
       return deps.planService.createPlan({
         evolutionId: runtime.ids.newId('kev'),

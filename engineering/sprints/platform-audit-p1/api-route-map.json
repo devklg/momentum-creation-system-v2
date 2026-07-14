@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T18:55:57.102Z",
+  "generatedAt": "2026-07-14T19:46:23.421Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,24 +8,24 @@
   "summary": {
     "mounts": 50,
     "routeFiles": 50,
-    "routes": 243,
+    "routes": 250,
     "byPhase": {
       "raw_body_before_json": 1,
-      "pre_json_admin_body_limit": 3,
+      "pre_json_admin_body_limit": 10,
       "pre_gate": 148,
       "ba_facing_gated": 91
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
-      "admin": 100,
+      "admin": 107,
       "pre_gate_or_public": 28,
       "internal_runtime": 5,
       "prospect_token": 18,
       "ba_auth_steve_gated": 91
     },
     "byMethod": {
-      "POST": 94,
-      "GET": 126,
+      "POST": 98,
+      "GET": 129,
       "PUT": 7,
       "PATCH": 9,
       "DELETE": 7
@@ -527,7 +527,203 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:41",
+      "source": "server/src/routes/admin/knowledge.ts:55",
+      "routeSource": "server/src/routes/admin/knowledge.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/knowledge/source-versions",
+      "mountPath": "/api/admin/knowledge",
+      "localPath": "/source-versions",
+      "mountPhase": "pre_json_admin_body_limit",
+      "accessProfile": "admin",
+      "mountMiddleware": [
+        "express.json(...)"
+      ],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/knowledge.ts:64",
+      "routeSource": "server/src/routes/admin/knowledge.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/knowledge/source-versions/:sourceVersionId",
+      "mountPath": "/api/admin/knowledge",
+      "localPath": "/source-versions/:sourceVersionId",
+      "mountPhase": "pre_json_admin_body_limit",
+      "accessProfile": "admin",
+      "mountMiddleware": [
+        "express.json(...)"
+      ],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/knowledge.ts:80",
+      "routeSource": "server/src/routes/admin/knowledge.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/knowledge/source-versions/:sourceVersionId/corrections/preview",
+      "mountPath": "/api/admin/knowledge",
+      "localPath": "/source-versions/:sourceVersionId/corrections/preview",
+      "mountPhase": "pre_json_admin_body_limit",
+      "accessProfile": "admin",
+      "mountMiddleware": [
+        "express.json(...)"
+      ],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/knowledge.ts:88",
+      "routeSource": "server/src/routes/admin/knowledge.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/knowledge/source-versions/:sourceVersionId/corrections",
+      "mountPath": "/api/admin/knowledge",
+      "localPath": "/source-versions/:sourceVersionId/corrections",
+      "mountPhase": "pre_json_admin_body_limit",
+      "accessProfile": "admin",
+      "mountMiddleware": [
+        "express.json(...)"
+      ],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/knowledge.ts:101",
+      "routeSource": "server/src/routes/admin/knowledge.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/knowledge/corrections/:correctionId",
+      "mountPath": "/api/admin/knowledge",
+      "localPath": "/corrections/:correctionId",
+      "mountPhase": "pre_json_admin_body_limit",
+      "accessProfile": "admin",
+      "mountMiddleware": [
+        "express.json(...)"
+      ],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/knowledge.ts:125",
+      "routeSource": "server/src/routes/admin/knowledge.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/knowledge/corrections/:correctionId/retry",
+      "mountPath": "/api/admin/knowledge",
+      "localPath": "/corrections/:correctionId/retry",
+      "mountPhase": "pre_json_admin_body_limit",
+      "accessProfile": "admin",
+      "mountMiddleware": [
+        "express.json(...)"
+      ],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/knowledge.ts:133",
+      "routeSource": "server/src/routes/admin/knowledge.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/knowledge/corrections/:correctionId/rollback",
+      "mountPath": "/api/admin/knowledge",
+      "localPath": "/corrections/:correctionId/rollback",
+      "mountPhase": "pre_json_admin_body_limit",
+      "accessProfile": "admin",
+      "mountMiddleware": [
+        "express.json(...)"
+      ],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/knowledge.ts:151",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -555,7 +751,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:50",
+      "source": "server/src/routes/admin/knowledge.ts:177",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -583,7 +779,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:115",
+      "source": "server/src/routes/admin/knowledge.ts:242",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,

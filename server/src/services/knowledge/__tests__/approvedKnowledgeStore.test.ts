@@ -206,6 +206,7 @@ describe('approved knowledge store schema projection', () => {
 
   it('semantic search maps Chroma top-k hits into approved knowledge references', async () => {
     persistenceMock.call.mockResolvedValue({
+      documents: [{ chunkId: 'chunk_1' }],
       results: {
         ids: ['chunk_1'],
         documents: ['Two legs and daily sharing create the training rhythm.'],
@@ -253,9 +254,10 @@ describe('approved knowledge store schema projection', () => {
 
   it('semantic search excludes non-approved and retrieval-ineligible hits defensively', async () => {
     persistenceMock.call.mockResolvedValue({
+      documents: [{ chunkId: 'active_chunk' }],
       results: {
-        ids: ['candidate_chunk', 'disabled_chunk', 'active_chunk'],
-        documents: ['candidate', 'disabled', 'active'],
+        ids: ['candidate_chunk', 'disabled_chunk', 'staged_chunk', 'implicit_chunk', 'superseded_chunk', 'active_chunk'],
+        documents: ['candidate', 'disabled', 'staged', 'implicit', 'superseded', 'active'],
         metadatas: [
           {
             chunkId: 'candidate_chunk',
@@ -272,6 +274,29 @@ describe('approved knowledge store schema projection', () => {
             language: 'en',
             status: 'active',
             retrievalEligible: false,
+          },
+          {
+            chunkId: 'staged_chunk',
+            sourceId: 'source_staged',
+            domain: 'training',
+            language: 'en',
+            status: 'approved',
+            retrievalEligible: true,
+          },
+          {
+            chunkId: 'implicit_chunk',
+            sourceId: 'source_implicit',
+            domain: 'training',
+            language: 'en',
+            status: 'active',
+          },
+          {
+            chunkId: 'superseded_chunk',
+            sourceId: 'source_superseded',
+            domain: 'training',
+            language: 'en',
+            status: 'superseded',
+            retrievalEligible: true,
           },
           {
             chunkId: 'active_chunk',
@@ -295,6 +320,7 @@ describe('approved knowledge store schema projection', () => {
 
   it('semantic references pass through P4.7 freshness and P4.6 language selection', async () => {
     persistenceMock.call.mockResolvedValue({
+      documents: [{ chunkId: 'expired_en' }, { chunkId: 'fresh_es' }],
       results: {
         ids: ['expired_en', 'fresh_es'],
         documents: ['expired english', 'orientacion en espanol'],
@@ -357,7 +383,9 @@ describe('approved knowledge store schema projection', () => {
 
   it('single-flights identical concurrent searches and returns isolated copies', async () => {
     let release!: (value: unknown) => void;
-    persistenceMock.call.mockImplementation(() => new Promise((resolve) => { release = resolve; }));
+    persistenceMock.call.mockImplementation((tool: string) => tool === 'mongodb'
+      ? Promise.resolve({ documents: [{ chunkId: 'chunk_single_flight' }] })
+      : new Promise((resolve) => { release = resolve; }));
     const providerA = createStoredApprovedKnowledgeProvider();
     const providerB = createStoredApprovedKnowledgeProvider();
 
@@ -390,6 +418,7 @@ describe('approved knowledge store schema projection', () => {
 
   it('keeps query limit language and tenant/team/BA scope isolated', async () => {
     persistenceMock.call.mockResolvedValue({
+      documents: [{ chunkId: 'chunk_scope' }],
       results: {
         ids: ['chunk_scope'], documents: ['Approved scoped guidance.'],
         metadatas: [{
@@ -405,7 +434,7 @@ describe('approved knowledge store schema projection', () => {
     await provider.searchApprovedKnowledge({ ...scope, tmagId: 'TMAG-002' as TmagId }, 'scope', 4, 'en');
     const anotherTeamScope = { ...scope, teamKey: 'another_team' } as unknown as McsRuntimeRequestScope;
     await provider.searchApprovedKnowledge(anotherTeamScope, 'scope', 4, 'en');
-    expect(persistenceMock.call).toHaveBeenCalledTimes(5);
+    expect(persistenceMock.call.mock.calls.filter(([tool]) => tool === 'chromadb')).toHaveLength(5);
     expect(getApprovedKnowledgeRetrievalCacheDiagnostics()).toMatchObject({ misses: 5, hits: 0, size: 5 });
   });
 
@@ -417,6 +446,7 @@ describe('approved knowledge store schema projection', () => {
       .mockResolvedValueOnce({ results: { ids: [], documents: [], metadatas: [] } })
       .mockRejectedValueOnce(new Error('store unavailable'))
       .mockResolvedValue({
+        documents: [{ chunkId: 'chunk_ttl' }],
         results: {
           ids: ['chunk_ttl'], documents: ['Approved TTL guidance.'],
           metadatas: [{
@@ -431,17 +461,19 @@ describe('approved knowledge store schema projection', () => {
     await expect(provider.searchApprovedKnowledge(scope, 'ttl', 2, 'en')).resolves.toEqual([]);
     await expect(provider.searchApprovedKnowledge(scope, 'ttl', 2, 'en')).resolves.toHaveLength(1);
     await expect(provider.searchApprovedKnowledge(scope, 'ttl', 2, 'en')).resolves.toHaveLength(1);
-    expect(persistenceMock.call).toHaveBeenCalledTimes(3);
+    expect(persistenceMock.call.mock.calls.filter(([tool]) => tool === 'chromadb')).toHaveLength(3);
 
     vi.advanceTimersByTime(5_001);
     await expect(provider.searchApprovedKnowledge(scope, 'ttl', 2, 'en')).resolves.toHaveLength(1);
-    expect(persistenceMock.call).toHaveBeenCalledTimes(4);
+    expect(persistenceMock.call.mock.calls.filter(([tool]) => tool === 'chromadb')).toHaveLength(4);
     errorSpy.mockRestore();
   });
 
   it('does not populate an invalidated in-flight generation', async () => {
     let release!: (value: unknown) => void;
-    persistenceMock.call.mockImplementation(() => new Promise((resolve) => { release = resolve; }));
+    persistenceMock.call.mockImplementation((tool: string) => tool === 'mongodb'
+      ? Promise.resolve({ documents: [{ chunkId: 'chunk_generation' }] })
+      : new Promise((resolve) => { release = resolve; }));
     const provider = createStoredApprovedKnowledgeProvider();
     const first = provider.searchApprovedKnowledge(scope, 'generation', 2, 'en');
     invalidateApprovedKnowledgeRetrievalCache();
@@ -460,7 +492,13 @@ describe('approved knowledge store schema projection', () => {
 
   it('does not coalesce a post-invalidation request onto the older generation', async () => {
     const releases: Array<(value: unknown) => void> = [];
-    persistenceMock.call.mockImplementation(() => new Promise((resolve) => { releases.push(resolve); }));
+    persistenceMock.call.mockImplementation((tool: string, _action: string, params: Record<string, unknown>) => {
+      if (tool === 'mongodb') {
+        const ids = ((params.filter as { chunkId?: { $in?: string[] } })?.chunkId?.$in ?? []);
+        return Promise.resolve({ documents: ids.map((chunkId) => ({ chunkId })) });
+      }
+      return new Promise((resolve) => { releases.push(resolve); });
+    });
     const provider = createStoredApprovedKnowledgeProvider();
     const beforeWrite = provider.searchApprovedKnowledge(scope, 'generation boundary', 2, 'en');
     invalidateApprovedKnowledgeRetrievalCache();
@@ -499,11 +537,13 @@ describe('approved knowledge store schema projection', () => {
   });
 
   it('evicts the least-recently-used entry at the deterministic 128-entry bound', async () => {
-    persistenceMock.call.mockImplementation(async (_tool, _action, params: { query: string }) => ({
+    persistenceMock.call.mockImplementation(async (tool: string, _action: string, params: { query?: string; filter?: { chunkId?: { $in?: string[] } } }) => tool === 'mongodb'
+      ? { documents: (params.filter?.chunkId?.$in ?? []).map((chunkId) => ({ chunkId })) }
+      : ({
       results: {
-        ids: [`chunk_${params.query}`], documents: [`Approved ${params.query}.`],
+        ids: [`chunk_${params.query ?? ''}`], documents: [`Approved ${params.query ?? ''}.`],
         metadatas: [{
-          chunkId: `chunk_${params.query}`, sourceId: `source_${params.query}`,
+          chunkId: `chunk_${params.query ?? ''}`, sourceId: `source_${params.query ?? ''}`,
           domain: 'training', language: 'en', status: 'active', retrievalEligible: true,
         }],
       },
@@ -515,12 +555,13 @@ describe('approved knowledge store schema projection', () => {
     expect(getApprovedKnowledgeRetrievalCacheDiagnostics()).toMatchObject({ size: 128, evictions: 1 });
 
     await provider.searchApprovedKnowledge(scope, 'bounded-0', 2, 'en');
-    expect(persistenceMock.call).toHaveBeenCalledTimes(130);
+    expect(persistenceMock.call.mock.calls.filter(([tool]) => tool === 'chromadb')).toHaveLength(130);
     expect(getApprovedKnowledgeRetrievalCacheDiagnostics()).toMatchObject({ size: 128, evictions: 2 });
   });
 
   it('keeps performance diagnostics free of query, BA, packet, and knowledge content', async () => {
     persistenceMock.call.mockResolvedValue({
+      documents: [{ chunkId: 'DO_NOT_EXPOSE' }],
       results: {
         ids: ['DO_NOT_EXPOSE'], documents: ['DO_NOT_EXPOSE'],
         metadatas: [{

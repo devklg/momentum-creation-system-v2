@@ -4,10 +4,10 @@
 
 ## Summary
 
-- Generated: 2026-07-14T18:55:57.102Z
+- Generated: 2026-07-14T19:46:23.421Z
 - Mounted routers: 50
 - Route files: 50
-- Static route rows: 243
+- Static route rows: 250
 
 ## Routes By Phase
 
@@ -15,14 +15,14 @@
 | --- | ---: |
 | ba_facing_gated | 91 |
 | pre_gate | 148 |
-| pre_json_admin_body_limit | 3 |
+| pre_json_admin_body_limit | 10 |
 | raw_body_before_json | 1 |
 
 ## Routes By Access Profile
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 100 |
+| admin | 107 |
 | ba_auth_steve_gated | 91 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
@@ -34,9 +34,9 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 7 |
-| GET | 126 |
+| GET | 129 |
 | PATCH | 9 |
-| POST | 94 |
+| POST | 98 |
 | PUT | 7 |
 
 ## Mounts
@@ -99,9 +99,16 @@
 | Method | Full path | Phase | Access profile | Guard signals | Source |
 | --- | --- | --- | --- | --- | --- |
 | POST | `/api/telnyx/webhook` | raw_body_before_json | raw_body_webhook | raw-body | `server/src/routes/telnyx-webhook.ts:14` |
-| GET | `/api/admin/knowledge/status` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:41` |
-| POST | `/api/admin/knowledge/sources` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:50` |
-| POST | `/api/admin/knowledge/sources/upload` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:115` |
+| GET | `/api/admin/knowledge/status` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:55` |
+| GET | `/api/admin/knowledge/source-versions` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:64` |
+| GET | `/api/admin/knowledge/source-versions/:sourceVersionId` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:80` |
+| POST | `/api/admin/knowledge/source-versions/:sourceVersionId/corrections/preview` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:88` |
+| POST | `/api/admin/knowledge/source-versions/:sourceVersionId/corrections` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:101` |
+| GET | `/api/admin/knowledge/corrections/:correctionId` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:125` |
+| POST | `/api/admin/knowledge/corrections/:correctionId/retry` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:133` |
+| POST | `/api/admin/knowledge/corrections/:correctionId/rollback` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:151` |
+| POST | `/api/admin/knowledge/sources` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:177` |
+| POST | `/api/admin/knowledge/sources/upload` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:242` |
 | GET | `/api/health/` | pre_gate | pre_gate_or_public | none | `server/src/routes/health.ts:7` |
 | GET | `/api/health/persistence` | pre_gate | pre_gate_or_public | none | `server/src/routes/health.ts:15` |
 | POST | `/api/auth/verify-code` | pre_gate | pre_gate_or_public | rate-limit | `server/src/routes/auth.ts:23` |

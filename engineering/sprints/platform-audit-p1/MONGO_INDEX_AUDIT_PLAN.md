@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Generated: 2026-07-14T18:46:13.892Z
-- Planned/audited indexes: 70
+- Generated: 2026-07-14T19:46:16.036Z
+- Planned/audited indexes: 74
 - General ensureIndexes runner: not_present
 - Knowledge Evolution ensureIndexes: present_for_knowledge_evolution_only
 - VM index definitions: declared_in_schema_registry_not_generally_applied
@@ -15,7 +15,7 @@
 | Status | Count |
 | --- | ---: |
 | planned_missing_enforcement | 42 |
-| required_not_verified | 22 |
+| required_not_verified | 26 |
 | vm_registry_declared | 6 |
 
 ## High-Volume Collections Without A Specific Plan Row
@@ -66,6 +66,10 @@
 | `mcs_audit_log` | `entity` | `entity.kind:1, entity.id:1, timestamp:-1` | no | planned_missing_enforcement | Operations / governance | Entity audit drill-down. |
 | `tmag_projection_outbox` | `status_nextAttemptAt` | `status:1, nextAttemptAt:1` | no | planned_missing_enforcement | Operations / governance | Projection retry worker due-row scan. |
 | `tmag_projection_outbox` | `entityId` | `entityId:1` | no | planned_missing_enforcement | Operations / governance | Trace pending projections for a source record. |
+| `mcs_knowledge_corrections` | `unique_knowledge_correction_idempotency` | `idempotencyKey:1` | yes | required_not_verified | unknown | Bind one correction workflow to one immutable apply key. |
+| `mcs_knowledge_corrections` | `knowledge_correction_state_updated` | `state:1, updatedAt:1` | no | required_not_verified | unknown | Bound retry and operations status scans. |
+| `mcs_knowledge_sources` | `knowledge_source_version_list` | `status:1, createdAt:-1, _id:-1` | no | required_not_verified | Knowledge / content domain | Kevin-only keyset source-version list. |
+| `mcs_knowledge_chunks` | `knowledge_chunk_source_version_lifecycle` | `sourceId:1, sourceVersion:1, status:1` | no | required_not_verified | Knowledge / content domain | Exclusive old/new chunk lifecycle readback. |
 | `broadcast_recipients` | `broadcast_status` | `broadcastId:1, status:1` | no | planned_missing_enforcement | Broadcast domain | Broadcast reconciliation. |
 | `broadcast_recipients` | `status_queuedAt` | `status:1, queuedAt:1` | no | planned_missing_enforcement | Broadcast domain | Broadcast worker queue. |
 | `broadcast_optouts` | `unique_ba_channel` | `baId:1, channel:1` | yes | planned_missing_enforcement | Broadcast domain | STOP-list uniqueness. |

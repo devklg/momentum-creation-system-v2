@@ -95,6 +95,7 @@ const OWNER_RULES = [
       c.includes('knowledge') ||
       c.includes('graphrag') ||
       c.includes('learning_candidate') ||
+      c === 'decisions' ||
       c === 'tmag_content_templates' ||
       c === 'tmag_content_videos' ||
       c === 'tmag_invitation_generator_runs',

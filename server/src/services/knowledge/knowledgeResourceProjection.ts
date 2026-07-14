@@ -45,12 +45,13 @@ export function knowledgeSourceContentDigest(source: Pick<McsKnowledgeBaseSource
 export function buildKnowledgeResourceCatalogEntry(input: {
   source: McsKnowledgeBaseSourceRecord;
   chunks: readonly McsKnowledgeBaseChunkRecord[];
-  lifecycle: 'approved' | 'active';
+  lifecycle: 'approved' | 'active' | 'superseded';
   updatedAt: string;
   readinessEvidenceId?: string;
+  replacementResourceVersionId?: string;
 }): McsResourceCatalogEntry {
   const { source, chunks } = input;
-  assertKevinApproved(source);
+  assertKevinApproved(source, input.lifecycle === 'approved');
   const taxonomized = source as TaxonomizedSource;
   const resourceId = `knowledge:${source.sourceId}`;
   const resourceVersionId = `${resourceId}:v${source.version}`;
@@ -68,6 +69,7 @@ export function buildKnowledgeResourceCatalogEntry(input: {
   ]);
   const agentScopes = unique(chunks.flatMap((chunk) => chunk.agentScopes));
   const active = input.lifecycle === 'active';
+  const superseded = input.lifecycle === 'superseded';
   const evidenceIds = input.readinessEvidenceId ? [input.readinessEvidenceId] : [];
 
   return {
@@ -94,25 +96,25 @@ export function buildKnowledgeResourceCatalogEntry(input: {
     },
     authority: {
       kind: source.authority.authorityKind,
-      status: 'active_authority',
+      status: superseded ? 'superseded' : 'active_authority',
       decidedByTmagId: approvalTmagId(source),
       decidedAt: source.authority.authorityAt,
       evidenceId: source.authority.authorityRef ?? String(source.sourceId),
     },
     readiness: {
       retrievalMode: 'required',
-      state: active ? 'ready' : 'pending',
+      state: active ? 'ready' : superseded ? 'blocked' : 'pending',
       checks: {
         content: 'passed',
         compliance: 'passed',
-        authority: 'passed',
+        authority: superseded ? 'failed' : 'passed',
         translation: 'passed',
         mongo: 'passed',
         neo4j: active ? 'passed' : 'pending',
         chroma: active ? 'passed' : 'pending',
       },
       evidenceIds,
-      blockedReasons: [],
+      blockedReasons: superseded ? ['superseded_by_approved_replacement'] : [],
       evaluatedAt: active ? input.updatedAt : null,
       evaluatedByTmagId: active ? approvalTmagId(source) : null,
     },
@@ -123,7 +125,7 @@ export function buildKnowledgeResourceCatalogEntry(input: {
       sourceRecordId: String(source.sourceId),
       parentResourceVersionId: null,
       supersedesResourceVersionId: source.version > 1 ? `${resourceId}:v${source.version - 1}` : null,
-      replacementResourceVersionId: null,
+      replacementResourceVersionId: input.replacementResourceVersionId ?? null,
     },
     contentLocator: {
       type: 'route',
@@ -203,7 +205,7 @@ export async function projectKevinApprovedKnowledgeSourceToCatalog(
     lifecycle: 'approved',
     updatedAt: now().toISOString(),
   });
-  await writeCatalogProjection(approved, persistence);
+  await writeKnowledgeResourceCatalogProjection(approved, persistence);
   const publish = await verifyGate(approved.resourceVersionId, 'publish', persistence);
   if (!publish.allowed || !publish.evidence) {
     return { resourceId: approved.resourceId, resourceVersionId: approved.resourceVersionId, active: false, reasons: publish.reasons, entry: approved };
@@ -216,7 +218,7 @@ export async function projectKevinApprovedKnowledgeSourceToCatalog(
     updatedAt: now().toISOString(),
     readinessEvidenceId: publish.evidence.evidenceId,
   });
-  await writeCatalogProjection(active, persistence);
+  await writeKnowledgeResourceCatalogProjection(active, persistence);
   const retrieve = await verifyGate(active.resourceVersionId, 'retrieve', persistence);
   return {
     resourceId: active.resourceId,
@@ -227,7 +229,7 @@ export async function projectKevinApprovedKnowledgeSourceToCatalog(
   };
 }
 
-async function writeCatalogProjection(entry: McsResourceCatalogEntry, persistence: Persistence): Promise<void> {
+export async function writeKnowledgeResourceCatalogProjection(entry: McsResourceCatalogEntry, persistence: Persistence = persistenceCall): Promise<void> {
   const existing = await persistence<{ documents?: unknown[] }>('mongodb', 'query', {
     database: MONGO_DATABASE,
     collection: RESOURCE_CATALOG_MONGO_COLLECTION,
@@ -333,8 +335,8 @@ async function writeCatalogProjection(entry: McsResourceCatalogEntry, persistenc
   });
 }
 
-function assertKevinApproved(source: McsKnowledgeBaseSourceRecord): void {
-  if (source.status !== 'active' || source.authorityDecision !== 'active_authority') {
+function assertKevinApproved(source: McsKnowledgeBaseSourceRecord, allowStaged = false): void {
+  if ((source.status !== 'active' && !(allowStaged && source.status === 'approved')) || source.authorityDecision !== 'active_authority') {
     throw new Error('active_knowledge_source_required');
   }
   if (source.authority.authorityStatus !== 'active_authority') {

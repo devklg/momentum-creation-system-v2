@@ -60,6 +60,7 @@ import {
   recordEvolutionError,
   recordMetricsSnapshot,
 } from './repositories/index.js';
+import { canonicalApprovalAuthority } from './persistence/index.js';
 import {
   assertNoProtectedFields,
   KNOWLEDGE_RETRIEVAL_ROLLOUT_COLLECTION,
@@ -278,7 +279,11 @@ export function buildKnowledgeEvolutionRuntime(
   const runtimeDeps = options.runtimeDeps ?? defaultEvolutionRuntimeDeps();
   const repositories = options.repositories ?? buildDefaultRepositories();
   const bus = options.bus ?? createKnowledgeEvolutionEventBus();
-  const services = composeKnowledgeEvolutionServices(repositories, runtimeDeps);
+  const services = composeKnowledgeEvolutionServices(
+    repositories,
+    runtimeDeps,
+    options.repositories ? undefined : canonicalApprovalAuthority,
+  );
 
   const reindex =
     options.reindex ??
