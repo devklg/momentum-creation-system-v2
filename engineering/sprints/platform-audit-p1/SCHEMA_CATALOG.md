@@ -5,13 +5,13 @@
 
 ## Summary
 
-- Generated: 2026-07-14T03:37:36.929Z
+- Generated: 2026-07-14T03:52:32.988Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
-- Route handlers: 270
+- Route handlers: 274
 - Shared exports: 1096
 
 ## Mongo Collections
@@ -338,7 +338,7 @@
 | `(unmounted)` | `server/src/routes/events.ts` | GET / | none |
 | `(unmounted)` | `server/src/routes/health.ts` | GET /<br>GET /persistence | none |
 | `(unmounted)` | `server/src/routes/invitations.ts` | POST /<br>POST /:prospectId/sent<br>POST /log | `McsCreateInvitationPayload`, `McsCreateInvitationResponse`, `McsInvitationSource`, `McsMarkInvitationSentResponse` |
-| `(unmounted)` | `server/src/routes/ivory.ts` | GET /<br>POST /<br>PATCH /:ivoryId<br>PATCH /:ivoryId/status<br>DELETE /:ivoryId<br>POST /coach<br>POST /invitation-agent/draft<br>POST /invitation-agent/mint<br>POST /generator/run<br>GET /generator/run/:runId<br>POST /generator/run/:runId/invite<br>GET /momentum<br>POST /momentum/:prospectId/suggest | `McsCreateGeneratorRunPayload`, `McsCreateGeneratorRunResponse`, `McsCreateIvoryNamePayload`, `McsGeneratorInvitePayload`, `McsGeneratorInviteResponse`, `McsGeneratorRunResponse`, `McsIvoryCategory`, `McsIvoryCoachPayload`, `McsIvoryCoachResponse`, `McsIvoryInvitationDraftPayload`, `McsIvoryInvitationDraftResponse`, `McsIvoryInvitationMintPayload`, `McsIvoryInvitationMintResponse`, `McsIvoryMomentumSuggestionPayload`, `McsIvoryMomentumSuggestionResponse`, `McsIvoryMomentumViewResponse`, `McsIvoryNameResponse`, `McsIvoryStatus`, `McsListIvoryNamesResponse`, `McsUpdateIvoryNamePayload`, `McsUpdateIvoryStatusPayload` |
+| `(unmounted)` | `server/src/routes/ivory.ts` | GET /<br>POST /<br>PATCH /:ivoryId<br>PATCH /:ivoryId/status<br>DELETE /:ivoryId<br>POST /coach<br>GET user-agent<br>POST /invitation-agent/draft<br>GET user-agent<br>POST /invitation-agent/mint<br>POST /generator/run<br>GET /generator/run/:runId<br>POST /generator/run/:runId/invite<br>GET /momentum<br>POST /momentum/:prospectId/suggest<br>GET user-agent | `McsCreateGeneratorRunPayload`, `McsCreateGeneratorRunResponse`, `McsCreateIvoryNamePayload`, `McsGeneratorInvitePayload`, `McsGeneratorInviteResponse`, `McsGeneratorRunResponse`, `McsIvoryCategory`, `McsIvoryCoachPayload`, `McsIvoryCoachResponse`, `McsIvoryInvitationDraftPayload`, `McsIvoryInvitationDraftResponse`, `McsIvoryInvitationMintPayload`, `McsIvoryInvitationMintResponse`, `McsIvoryMomentumSuggestionPayload`, `McsIvoryMomentumSuggestionResponse`, `McsIvoryMomentumViewResponse`, `McsIvoryNameResponse`, `McsIvoryStatus`, `McsListIvoryNamesResponse`, `McsUpdateIvoryNamePayload`, `McsUpdateIvoryStatusPayload` |
 | `(unmounted)` | `server/src/routes/michael-runtime.ts` | POST /resolve | none |
 | `(unmounted)` | `server/src/routes/michael.ts` | GET /training-support/:downlineTmagId | none |
 | `(unmounted)` | `server/src/routes/orientation.ts` | GET /state<br>GET /sessions<br>POST /sessions/:sessionId/reserve<br>DELETE /sessions/:sessionId/reserve | `McsOrientationCancelResponse`, `McsOrientationReserveResponse`, `McsOrientationSessionsResponse`, `McsOrientationStateResponse` |
@@ -349,7 +349,7 @@
 | `(unmounted)` | `server/src/routes/questionnaire.ts` | GET /status<br>POST /load<br>POST /submit<br>GET user-agent | none |
 | `(unmounted)` | `server/src/routes/resources.ts` | GET /<br>POST /:resourceVersionId/usage<br>GET /:resourceVersionId | `McsResourceCenterResponse` |
 | `(unmounted)` | `server/src/routes/rvm.ts` | GET /:token<br>POST /:token/activate<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats<br>POST /:token/info-request | `McsCallbackIntent`, `McsCallbackRequestResponse`, `McsHoldingTankSnapshot`, `McsPlacementEvent`, `McsRvmInfoRequestResponse`, `McsRvmResolvedTokenPayload`, `McsTeamStatsResponse`, `McsVideoEventKind`, `McsVideoEventResponse`, `McsWebinarReservationResponse` |
-| `(unmounted)` | `server/src/routes/scriptmaker.ts` | POST /draft | `McsScriptMakerDraftPayload`, `McsScriptMakerDraftResponse`, `McsScriptMakerDraftSelectors`, `McsScriptMakerScriptKind` |
+| `(unmounted)` | `server/src/routes/scriptmaker.ts` | POST /draft<br>GET user-agent | `McsScriptMakerDraftPayload`, `McsScriptMakerDraftResponse`, `McsScriptMakerDraftSelectors`, `McsScriptMakerScriptKind` |
 | `(unmounted)` | `server/src/routes/sponsor-workbook.ts` | GET /:tmagId<br>PUT /:tmagId/draft<br>POST /:tmagId/finalize | none |
 | `(unmounted)` | `server/src/routes/steve.ts` | GET /discovery/state<br>GET /discovery/script<br>GET /discovery/system-prompt<br>POST /discovery/ingest<br>GET /discovery/profile/:downlineTmagId<br>GET /discovery/conversation<br>POST /discovery/converse | none |
 | `(unmounted)` | `server/src/routes/telnyx-webhook.ts` | POST /webhook | none |

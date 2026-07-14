@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-14T03:37:33.252Z
+- Generated: 2026-07-14T03:52:28.097Z
 - Mounted routers: 50
 - Route files: 50
 - Static route rows: 240
@@ -272,20 +272,20 @@
 | GET | `/api/crm-hub/prospects` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crmHub.ts:60` |
 | GET | `/api/crm-hub/prospects/:prospectId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crmHub.ts:72` |
 | POST | `/api/crm-hub/prospects/:prospectId/close-as-ba` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crmHub.ts:86` |
-| POST | `/api/scriptmaker/draft` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/scriptmaker.ts:79` |
-| GET | `/api/ivory/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:113` |
-| POST | `/api/ivory/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:132` |
-| PATCH | `/api/ivory/:ivoryId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:178` |
-| PATCH | `/api/ivory/:ivoryId/status` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:227` |
-| DELETE | `/api/ivory/:ivoryId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:265` |
-| POST | `/api/ivory/coach` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:297` |
-| POST | `/api/ivory/invitation-agent/draft` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:341` |
-| POST | `/api/ivory/invitation-agent/mint` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:389` |
-| POST | `/api/ivory/generator/run` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:458` |
-| GET | `/api/ivory/generator/run/:runId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:495` |
-| POST | `/api/ivory/generator/run/:runId/invite` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:524` |
-| GET | `/api/ivory/momentum` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:605` |
-| POST | `/api/ivory/momentum/:prospectId/suggest` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:624` |
+| POST | `/api/scriptmaker/draft` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/scriptmaker.ts:80` |
+| GET | `/api/ivory/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:114` |
+| POST | `/api/ivory/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:133` |
+| PATCH | `/api/ivory/:ivoryId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:179` |
+| PATCH | `/api/ivory/:ivoryId/status` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:228` |
+| DELETE | `/api/ivory/:ivoryId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:266` |
+| POST | `/api/ivory/coach` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:298` |
+| POST | `/api/ivory/invitation-agent/draft` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:363` |
+| POST | `/api/ivory/invitation-agent/mint` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:431` |
+| POST | `/api/ivory/generator/run` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:500` |
+| GET | `/api/ivory/generator/run/:runId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:537` |
+| POST | `/api/ivory/generator/run/:runId/invite` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:566` |
+| GET | `/api/ivory/momentum` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:647` |
+| POST | `/api/ivory/momentum/:prospectId/suggest` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:666` |
 | GET | `/api/agents/recommendations` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/agents.ts:25` |
 | POST | `/api/agents/events` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/agents.ts:45` |
 | GET | `/api/vm/lead-owners` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:237` |
