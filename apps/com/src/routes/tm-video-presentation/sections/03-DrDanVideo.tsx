@@ -36,6 +36,7 @@ import type {
   VideoEventKind,
   VideoCompletePlacement,
 } from "../tm-video-presentation";
+import { postRvmVideoEvent, postVideoEvent } from "../../../lib/api";
 
 // react-youtube types — minimal local shape so this file is self-contained.
 // Use `import YouTube, { YouTubeEvent, YouTubePlayer } from "react-youtube"`
@@ -216,13 +217,10 @@ export function DrDanVideo({
       firedRef.current.add(kind);
 
       try {
-        // Lazy import keeps the section file decoupled from lib/api
-        // shape changes and matches the page composer's import style.
-        const api = await import("../../../lib/api");
         const result =
           entryKind === "rvm"
-            ? await api.postRvmVideoEvent(token, kind)
-            : await api.postVideoEvent(token, kind);
+            ? await postRvmVideoEvent(token, kind)
+            : await postVideoEvent(token, kind);
         if (result.ok) {
           if (kind === "complete") {
             const d = result.data;
