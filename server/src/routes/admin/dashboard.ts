@@ -9,6 +9,7 @@
  *   GET  /metrics      master metrics row (wf_0077)
  *   GET  /filters      filter-bar options: BAs + leader groups (wf_0079)
  *   GET  /drilldown    per-tile detail rows (wf_0078)
+ *   GET  /training-analytics aggregate curriculum state (P2-113)
  *   GET  /stream       SSE live event stream (wf_0080)
  *
  * Filter contract — server-enforced, narrowing only. The client passes
@@ -30,6 +31,7 @@ import {
   computeAdminDashboardMetrics,
   getFilterOptions,
 } from '../../domain/adminMetrics.js';
+import { buildAdminTrainingAnalytics } from '../../domain/adminTrainingAnalytics.js';
 import { appendAuditEntry, queryAuditEntries } from '../../domain/auditLog.js';
 import {
   subscribePlacements,
@@ -43,6 +45,7 @@ import type {
   McsAdminLiveEvent,
   McsAdminLivePlacementEvent,
   McsAdminLiveSnapshot,
+  McsAdminTrainingAnalyticsResponse,
   McsAuditActor,
   McsAuditLogEntry,
   McsPlacementEvent,
@@ -212,6 +215,52 @@ adminDashboardRoutes.get('/drilldown', requireAdmin, async (req, res) => {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Drilldown failed: ${msg}` });
+  }
+});
+
+/* ─── GET /training-analytics — aggregate curriculum health (P2-113) ── */
+
+adminDashboardRoutes.get('/training-analytics', requireAdmin, async (req, res) => {
+  let filter: McsAdminDashboardFilter;
+  try {
+    filter = parseFilter(req);
+  } catch (err) {
+    res.status(400).json({ ok: false, error: 'Invalid filter.', issues: (err as z.ZodError).issues });
+    return;
+  }
+
+  try {
+    const analytics = await buildAdminTrainingAnalytics(filter);
+
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.dashboard.training_analytics.viewed',
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
+      severity: 'info',
+      after: {
+        filter,
+        scopeBaCount: analytics.scopeBaCount,
+        computedAt: analytics.computedAt,
+      },
+      reason: null,
+      context: {
+        ip: req.ip ?? null,
+        userAgent: req.get('user-agent') ?? null,
+        route: '/api/admin/dashboard/training-analytics',
+        method: 'GET',
+        requestId: null,
+      },
+    });
+
+    const body: McsAdminTrainingAnalyticsResponse = {
+      ok: true,
+      appliedFilter: filter,
+      analytics,
+    };
+    res.json(body);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Training analytics failed: ${msg}` });
   }
 });
 
