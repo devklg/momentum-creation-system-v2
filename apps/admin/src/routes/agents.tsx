@@ -4,6 +4,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import type { McsAdminAgentHealthResponse, McsAdminAgentOversightResponse, McsAdminOutboxHealthResponse } from '@momentum/shared';
+import { MichaelRuntimeObservabilityPanel } from '@/components/admin/MichaelRuntimeObservabilityPanel';
 
 export function AgentsPage() {
   const [data, setData] = useState<McsAdminAgentOversightResponse | null>(null);
@@ -53,6 +54,10 @@ export function AgentsPage() {
         and GraphRAG bridge drafts. Success Profile data stays out of the BA
         editable profile.
       </p>
+
+      <div className="mb-8">
+        <MichaelRuntimeObservabilityPanel />
+      </div>
 
       {err && <p className="text-[13px] font-mono text-red-400 mb-4">{err}</p>}
       {loading && <p className="font-mono text-xs text-cream-mute">Loading agent oversight...</p>}

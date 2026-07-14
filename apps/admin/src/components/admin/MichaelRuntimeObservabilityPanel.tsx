@@ -1,5 +1,5 @@
 /**
- * Michael Runtime Observability panel (Phase 3 / P3.16) — admin-only, read-only.
+ * Michael Runtime Health & Debugger panel — admin-only, read-only.
  *
  * Surfaces the in-process Michael runtime observability snapshot from
  * `GET /api/admin/michael-runtime/observability` (S3.6): the three evaluated
@@ -11,10 +11,6 @@
  * schedules, scores, or ranks anything. The snapshot carries no PII, tokens,
  * IDs, request/response bodies, traces, or Context Packets — only booleans and
  * integer counts — so nothing sensitive can reach the DOM.
- *
- * NOTE (P3.16 scope): this slice intentionally does NOT wire the panel into the
- * admin router or navigation. It is a self-contained, separately-importable
- * component; wiring is left to a follow-up.
  *
  * Wire types are declared locally rather than imported from @momentum/shared,
  * matching the apps convention for cross-workspace type isolation.
@@ -39,6 +35,12 @@ interface MichaelRuntimeObservabilitySnapshot {
   responseEnabled: boolean;
   traceEnabled: boolean;
   counters: MichaelRuntimeCounters;
+}
+
+export interface MichaelRuntimeHealth {
+  state: 'available' | 'dormant' | 'attention';
+  label: string;
+  detail: string;
 }
 
 /** Discriminated fetch result. The error / unauthorized paths leak no server
@@ -69,6 +71,43 @@ const COUNTER_LABELS: Record<keyof MichaelRuntimeCounters, string> = {
 
 function asCount(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+/**
+ * Interpret the two delivery kill switches without guessing from lifetime
+ * counters. Matching switches are an intentional state; a mismatch is the only
+ * configuration condition that needs admin attention.
+ */
+export function deriveMichaelRuntimeHealth(
+  snapshot: Pick<MichaelRuntimeObservabilitySnapshot, 'routeEnabled' | 'responseEnabled'>,
+): MichaelRuntimeHealth {
+  if (snapshot.routeEnabled && snapshot.responseEnabled) {
+    return {
+      state: 'available',
+      label: 'Available',
+      detail: 'The route and generated responses are enabled.',
+    };
+  }
+
+  if (!snapshot.routeEnabled && !snapshot.responseEnabled) {
+    return {
+      state: 'dormant',
+      label: 'Dormant by configuration',
+      detail: 'The route and generated responses are both disabled.',
+    };
+  }
+
+  return snapshot.routeEnabled
+    ? {
+        state: 'attention',
+        label: 'Configuration mismatch',
+        detail: 'The route is enabled while generated responses are disabled.',
+      }
+    : {
+        state: 'attention',
+        label: 'Configuration mismatch',
+        detail: 'Generated responses are enabled while the route is disabled.',
+      };
 }
 
 // ── Client helper ─────────────────────────────────────────────────────────────
@@ -172,7 +211,7 @@ function CounterCell({ label, value }: { label: string; value: number }) {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 /**
- * Read-only observability panel. Fetches the snapshot on mount and on manual
+ * Read-only health and debugger panel. Fetches the snapshot on mount and on manual
  * Refresh. Every state (loading / ok / unauthorized / error) renders leak-free.
  */
 export function MichaelRuntimeObservabilityPanel() {
@@ -193,7 +232,7 @@ export function MichaelRuntimeObservabilityPanel() {
 
   return (
     <section
-      aria-label="Michael runtime observability"
+      aria-label="Michael runtime health and debugger"
       className="bg-ink/40 border border-line rounded-md p-5"
     >
       <div className="flex items-center justify-between mb-4">
@@ -205,7 +244,7 @@ export function MichaelRuntimeObservabilityPanel() {
             <Activity className="h-4 w-4" />
           </span>
           <h3 className="font-mono tracking-[0.18em] text-[11px] text-cream-mute uppercase">
-            Michael · Runtime Observability
+            Michael · Runtime Health &amp; Debugger
           </h3>
         </div>
         <button
@@ -220,7 +259,7 @@ export function MichaelRuntimeObservabilityPanel() {
       {renderObservability(result)}
 
       <p className="text-cream-faint text-[11px] mt-4">
-        In-memory aggregates · counts reset on server restart · no PII or IDs.
+        In-memory diagnostics · counts reset on server restart · no PII or IDs.
       </p>
     </section>
   );
@@ -243,8 +282,30 @@ function renderObservability(result: MichaelRuntimeObservabilityResult) {
 
     case 'ok': {
       const { routeEnabled, responseEnabled, traceEnabled, counters } = result.snapshot;
+      const health = deriveMichaelRuntimeHealth(result.snapshot);
+      const healthTone =
+        health.state === 'available'
+          ? 'border-teal/40 bg-teal/[0.04] text-teal'
+          : health.state === 'attention'
+            ? 'border-red-400/40 bg-red-400/[0.04] text-red-300'
+            : 'border-line bg-cream/[0.025] text-cream-mute';
       return (
         <div className="space-y-4">
+          <div
+            role="status"
+            aria-label={`Michael runtime health: ${health.label}`}
+            className={`border rounded px-4 py-3 ${healthTone}`}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em]">
+                Runtime health · {health.label}
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em]">
+                Trace diagnostics {traceEnabled ? 'enabled' : 'disabled'}
+              </p>
+            </div>
+            <p className="mt-2 text-xs text-cream-mute">{health.detail}</p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <FlagChip label="Route" on={routeEnabled} />
             <FlagChip label="Response" on={responseEnabled} />

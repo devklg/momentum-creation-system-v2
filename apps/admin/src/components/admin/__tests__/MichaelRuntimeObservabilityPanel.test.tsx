@@ -1,5 +1,5 @@
 /**
- * Behavioral tests for the Michael Runtime Observability panel (P3.16).
+ * Behavioral tests for the Michael Runtime Health & Debugger panel.
  *
  * First apps/admin behavioral test. Exercises both surfaces:
  *   1. fetchMichaelRuntimeObservability() — the read-only client helper that
@@ -14,6 +14,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import {
   fetchMichaelRuntimeObservability,
+  deriveMichaelRuntimeHealth,
   MichaelRuntimeObservabilityPanel,
 } from '../MichaelRuntimeObservabilityPanel';
 
@@ -22,6 +23,23 @@ const fetchMock = vi.fn();
 beforeEach(() => {
   vi.stubGlobal('fetch', fetchMock);
   fetchMock.mockReset();
+});
+
+describe('deriveMichaelRuntimeHealth — kill-switch interpretation', () => {
+  it.each([
+    [true, true, 'available', 'Available'],
+    [false, false, 'dormant', 'Dormant by configuration'],
+    [true, false, 'attention', 'Configuration mismatch'],
+    [false, true, 'attention', 'Configuration mismatch'],
+  ] as const)(
+    'maps route=%s response=%s to %s',
+    (routeEnabled, responseEnabled, state, label) => {
+      expect(deriveMichaelRuntimeHealth({ routeEnabled, responseEnabled })).toMatchObject({
+        state,
+        label,
+      });
+    },
+  );
 });
 
 afterEach(() => {
@@ -183,11 +201,28 @@ describe('MichaelRuntimeObservabilityPanel — render behavior', () => {
 
     expect(screen.getByText(/loading runtime observability/i)).toBeInTheDocument();
     expect(
-      screen.getByRole('region', { name: /michael runtime observability/i }),
+      screen.getByRole('region', { name: /michael runtime health and debugger/i }),
     ).toBeInTheDocument();
     expect(
-      await screen.findByRole('heading', { name: /michael · runtime observability/i }),
+      await screen.findByRole('heading', { name: /michael · runtime health & debugger/i }),
     ).toBeInTheDocument();
+  });
+
+  it('renders the interpreted runtime health and trace diagnostic state', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse(
+        200,
+        snapshotBody({ routeEnabled: true, responseEnabled: false, traceEnabled: true }),
+      ),
+    );
+
+    render(<MichaelRuntimeObservabilityPanel />);
+
+    expect(
+      await screen.findByRole('status', { name: /michael runtime health: configuration mismatch/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/route is enabled while generated responses are disabled/i)).toBeInTheDocument();
+    expect(screen.getByText(/trace diagnostics enabled/i)).toBeInTheDocument();
   });
 
   it('renders flag states and counter values from the snapshot', async () => {
@@ -259,7 +294,7 @@ describe('MichaelRuntimeObservabilityPanel — governance', () => {
     fetchMock.mockResolvedValue(jsonResponse(200, snapshotBody()));
 
     render(<MichaelRuntimeObservabilityPanel />);
-    await screen.findByRole('heading', { name: /runtime observability/i });
+    await screen.findByRole('heading', { name: /runtime health & debugger/i });
 
     fireEvent.click(screen.getByRole('button', { name: /refresh/i }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
