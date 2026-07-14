@@ -51,13 +51,14 @@ describe('P1-60 agent skill and template governance', () => {
       .every((item) => item.approval.state === 'approved' && item.approval.activatedAt !== null)).toBe(true);
   });
 
-  it('registers both current Steve prompt contracts without a duplicate registry', () => {
+  it('registers current Steve templates and keeps extraction pending approval', () => {
     const templates = MCS_AGENT_TEMPLATE_REGISTRY.filter(
       (item) => item.ownerAgentKey === 'steve_success',
     );
     expect(templates.map((item) => `${item.templateId}@${item.version}`).sort()).toEqual([
       'steve_success_discovery@1.0.0',
       'steve_success_profile@1.0.0',
+      'steve_success_profile_extraction@1.0.0',
     ]);
 
     expect(templates.find((item) => item.templateId === 'steve_success_discovery')).toMatchObject({
@@ -73,6 +74,13 @@ describe('P1-60 agent skill and template governance', () => {
       testIds: ['steveDiscoveryPersistence.test.ts'],
       degradation: { mode: 'block_substantive', fallbackSource: 'incomplete_profile_block' },
       approval: { state: 'approved', authority: 'locked-spec-3.12' },
+    });
+    expect(templates.find((item) => item.templateId === 'steve_success_profile_extraction')).toMatchObject({
+      status: 'planned',
+      behaviorSource: 'server/src/domain/steveConversationRuntime.ts#extractionSystem',
+      testIds: ['steveConversationRuntime.test.ts', 'stevePromptPlaybook.test.ts'],
+      degradation: { mode: 'block_substantive', fallbackSource: 'steve_extraction_retry_then_pending' },
+      approval: { state: 'planned', authority: 'ACR-0022-pending', activatedAt: null },
     });
 
     const forbidden = templates.flatMap((item) => item.forbiddenOutputs);

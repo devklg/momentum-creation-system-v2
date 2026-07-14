@@ -47,16 +47,23 @@ For current implementation state:
 
 ## Steve Prompt And Runtime Playbook
 
-Steve's current prompt inventory lives in the existing
+Steve's current governed template inventory lives in the existing
 `MCS_AGENT_TEMPLATE_REGISTRY` in `packages/shared/src/agent-skills.ts`. Do not
 create a second Steve prompt registry. The stable template id and semantic
 version identify the governed prompt contract; the behavior source identifies
-the code that supplies the active instructions.
+the code that supplies the implementation. P2-120 does not re-approve the two
+existing active records.
 
-| Governed template | Purpose | Behavior source | Degradation | Primary tests |
-| --- | --- | --- | --- | --- |
-| `steve_success_discovery@1.0.0` | Conduct the authenticated BA's browser-based, non-scored Success Discovery conversation. | `server/src/domain/steve-success-interview.ts#buildSteveSystemPrompt`, orchestrated by `server/src/domain/steveConversationRuntime.ts`. | Preserve prior turns and block substantive invention; request a retry. | `steveConversationRuntime.test.ts`, `steve.test.ts` |
-| `steve_success_profile@1.0.0` | Assemble the completed BA-authored answers into the descriptive Success Profile and Michael handoff summary. | `server/src/domain/steve-success-interview.ts#assembleSuccessProfile`. | Do not create a profile from incomplete authoritative answers. | `steveDiscoveryPersistence.test.ts`, `steve.test.ts` |
+| Governed template | Status | Purpose | Behavior source | Degradation | Primary tests |
+| --- | --- | --- | --- | --- | --- |
+| `steve_success_discovery@1.0.0` | Existing active record | Conduct the authenticated BA's non-scored Success Discovery conversation. | `server/src/domain/steve-success-interview.ts#buildSteveSystemPrompt`, composed by `server/src/domain/steveConversationRuntime.ts`. | Preserve prior turns and block substantive invention; request a retry. | `steveConversationRuntime.test.ts`, `steve.test.ts` |
+| `steve_success_profile@1.0.0` | Existing active deterministic record | Structurally assemble completed BA-authored answers into the descriptive Success Profile and Michael handoff summary. This is not an LLM prompt. | `server/src/domain/steve-success-interview.ts#assembleSuccessProfile`. | Do not create a profile from incomplete authoritative answers. | `steveDiscoveryPersistence.test.ts`, `steve.test.ts` |
+| `steve_success_profile_extraction@1.0.0` | Planned; ACR-0022 approval required | Extract structured BA-authored answers and Success Profile inputs from the completed transcript without judging the BA. | `server/src/domain/steveConversationRuntime.ts#extractionSystem`. | Retry once, then leave extraction pending; never fabricate a profile. | `steveConversationRuntime.test.ts`, `stevePromptPlaybook.test.ts` |
+
+The extraction system is already invoked by the current runtime, but it was
+not independently represented in the template registry. The planned entry
+documents that governance gap without claiming approval. It must not become
+active until Kevin approves ACR-0022 and the approval record is updated.
 
 Operational rules:
 
@@ -64,7 +71,7 @@ Operational rules:
 - The interaction is BA-facing inside the authenticated `.team` browser
   runtime. Steve never appears on `.com` and Telnyx carries no Steve runtime
   conversation.
-- `buildSteveSystemPrompt` is the base prompt authority. Optional approved
+- `buildSteveSystemPrompt` is the registered base prompt implementation. Optional approved
   Context Packet material may supplement it only through the server-owned,
   flag-gated context path; unavailable context never broadens behavior.
 - `[[DISCOVERY_COMPLETE]]` is an internal completion marker. The server removes
@@ -74,6 +81,11 @@ Operational rules:
   classify, qualify, predict, compare, pressure, or infer human potential.
 - The Success Profile is private support context, not the BA's public/editable
   profile and not Kevin-approved Knowledge Base content.
+- Current drift remains visible rather than silently changing behavior here:
+  the locked spec describes a 36-question / 11-section browser interaction,
+  while the current base source contains 17 questions / 7 sections and a
+  stale phone-call literal. P2-120 registers and documents prompt truth; it
+  does not amend the runtime prompt or onboarding contract.
 - Prompt or extraction changes must update the registered version and tests.
   Mission, safety, retrieval, or completion-contract changes require the
   applicable prompt-governance and ACR approval; never edit an approved active
