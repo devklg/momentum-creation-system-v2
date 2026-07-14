@@ -65,7 +65,7 @@ export function MetricsRow({ metrics, loading, activeTile, onSelectTile }: Props
         tile="training"
         eyebrow="Training %"
         value={metrics ? formatPct(metrics.trainingCompletionPct) : '—'}
-        sub={metrics ? 'Fast Start complete' : 'loading…'}
+        sub={metrics ? 'all 5 modules complete' : 'loading…'}
         loading={loading}
         active={activeTile === 'training'}
         onClick={() => onSelectTile('training')}

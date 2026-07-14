@@ -6301,3 +6301,46 @@ export interface McsUnifiedFollowUpQueueResponse {
   };
   items: McsUnifiedFollowUpItem[];
 }
+
+/* ─── P2-113 Aggregate admin training analytics ───────────────────────────
+ * Curriculum-health counts only. No BA identity, row ordering, score, rank,
+ * prediction, effectiveness claim, or outcome attribution crosses this API.
+ */
+export interface McsAdminTrainingModuleAnalytics {
+  moduleId: McsFastStartModuleId;
+  title: string;
+  stateCounts: {
+    notStarted: number;
+    inProgress: number;
+    completed: number;
+  };
+  completionPct: number | null;
+}
+
+export interface McsAdminTrainingAnalytics {
+  computedAt: McsIsoTimestamp;
+  sourceAuthority: 'tmag_fast_start_progress';
+  policy: {
+    people: 'aggregate_only_no_ranking_or_scoring';
+    effectiveness: 'not_measured';
+  };
+  scopeBaCount: number;
+  programStateCounts: {
+    notStarted: number;
+    underway: number;
+    allModulesComplete: number;
+  };
+  /** All five module states are completed; this does not assert the invitation requirement. */
+  allModulesCompletionPct: number | null;
+  modules: McsAdminTrainingModuleAnalytics[];
+  dataQuality: {
+    duplicateProgressRecordCount: number;
+    invalidProgressRecordCount: number;
+  };
+}
+
+export interface McsAdminTrainingAnalyticsResponse {
+  ok: true;
+  appliedFilter: McsAdminDashboardFilter;
+  analytics: McsAdminTrainingAnalytics;
+}

@@ -5,7 +5,8 @@
  *   • FilterBar      (wf_0079) — BA + leader-group filter
  *   • MetricsRow     (wf_0077) — five tiles (active BAs, prospects in flow,
  *                                queue Δ24h, enrollments 24h, training %)
- *   • DrilldownPanel (wf_0078) — per-tile detail rows, opens on tile click
+ *   • DrilldownPanel (wf_0078) — operational detail rows, opens on tile click
+ *   • TrainingAnalyticsPanel   — aggregate curriculum state, no person rows
  *   • LiveEventStream(wf_0080) — SSE: placements + audit-log tail
  *
  * Filter changes re-fetch metrics + drilldown together (the panel keys on
@@ -27,6 +28,7 @@ import { MetricsRow } from '@/components/dashboard/MetricsRow';
 import { DrilldownPanel } from '@/components/dashboard/DrilldownPanel';
 import { LiveEventStream } from '@/components/dashboard/LiveEventStream';
 import { HealthStatusWidget } from '@/components/dashboard/HealthStatusWidget';
+import { TrainingAnalyticsPanel } from '@/components/dashboard/TrainingAnalyticsPanel';
 
 const DEFAULT_FILTER: McsAdminDashboardFilter = { tmagId: null, leaderGroup: 'all' };
 
@@ -94,9 +96,10 @@ export function DashboardPage() {
       </p>
       <h1 className="font-display text-[36px] leading-none mb-2">Core Dashboard</h1>
       <p className="text-cream-mute text-sm mb-8 max-w-2xl">
-        Operational metrics for Team Magnificent. Click any tile for the
-        per-row drilldown. Live event stream tails placements and the audit
-        log in real time.
+        Operational metrics for Team Magnificent. Click a tile for its
+        supporting detail; training opens aggregate curriculum state without
+        person ranking or scoring. Live event stream tails placements and the
+        audit log in real time.
       </p>
 
       {err && (
@@ -114,7 +117,14 @@ export function DashboardPage() {
         onSelectTile={onSelectTile}
       />
 
-      {activeTile && (
+      {activeTile === 'training' && (
+        <TrainingAnalyticsPanel
+          filter={filter}
+          onClose={() => setActiveTile(null)}
+        />
+      )}
+
+      {activeTile && activeTile !== 'training' && (
         <DrilldownPanel
           tile={activeTile}
           filter={filter}
