@@ -220,3 +220,16 @@ Trusted browser visual QA remains pending because the in-app browser bridge
 rejected this task as untrusted. Component/UI tests cover initial load,
 load-more append/dedupe, filter reset, stale-response isolation, disabled and
 terminal controls, but those tests are not represented as a visual sign-off.
+
+## Verification-gate override — 2026-07-13
+
+Kevin explicitly approved and authorized proceeding after being told that
+trusted narrow/wide browser visual QA was the sole unverified gate. The audited
+override was written and read back from MongoDB, Neo4j, and ChromaDB under
+`dec_acr_0025_visual_gate_override_2026_07_13` and authorizes PR #332 to merge
+using the completed automated, component/UI, typecheck, build, catalog, and CI
+evidence.
+
+This is an explicit gate override, not a claim that trusted browser visual QA
+passed. It does not authorize index creation, automatic index application, or
+production mutation.
