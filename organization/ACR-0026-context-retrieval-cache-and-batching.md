@@ -152,16 +152,40 @@ rollback requires no data migration or cleanup.
   },
   "implementation": {
     "branch": "codex/p2-132-context-caching",
-    "commits": [],
+    "commits": [
+      "c67d8cc7",
+      "c396a85b"
+    ],
     "append_only_respected": true
   },
   "verification": {
-    "typecheck": false,
-    "flows": [],
-    "persistence_readback": false
+    "typecheck": true,
+    "flows": [
+      "approved-reference cache hit, expiry, LRU, copy, scope, language, and limit isolation",
+      "identical-request single-flight and governed-write generation invalidation",
+      "ordered GraphRAG batch reads, grouped Chroma reads, and per-id fail-closed results",
+      "content-free admin retrieval diagnostics",
+      "admin suite: 45 passed",
+      "full server suite: 2152 passed, 19 skipped"
+    ],
+    "persistence_readback": true
   },
   "release": {
-    "gates_passed": [],
+    "gates_passed": [
+      "focused_vitest",
+      "server_full_vitest",
+      "repo_typecheck",
+      "repo_build",
+      "schema_drift_catalogs",
+      "api_route_map",
+      "route_access_matrix",
+      "documentation_maps",
+      "com_prospect_compliance",
+      "documentation_freshness"
+    ],
+    "gates_pending": [
+      "trusted_visual_qa"
+    ],
     "released_at": null
   },
   "version": {
@@ -182,3 +206,13 @@ Kevin L. Gardner approved the recommended ACR-0026 bundle on 2026-07-14.
 The durable decision record is
 `dec_acr_0026_context_retrieval_cache_batching_approval_2026_07_14`, verified
 in the dedicated MCS MongoDB, Neo4j, and ChromaDB stores before implementation.
+
+## Implementation record
+
+The approved bundle is implemented on `codex/p2-132-context-caching` in
+`c67d8cc7` and `c396a85b`. The runtime caches only copied, successful, non-empty approved
+references for five seconds; exact normalized query, limit, language, and
+tenant/team/BA scope determine identity. Governed knowledge writes advance the
+cache generation. GraphRAG readiness now supports stable, set-oriented batches
+of at most 50 unique ids, isolates collection failures, and fails closed when a
+bounded outbox result is incomplete. Admin diagnostics contain counters only.
