@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T00:59:56.240Z",
+  "generatedAt": "2026-07-14T01:11:13.752Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 70,
   "unclassifiedCount": 0,
@@ -254,7 +254,7 @@
       "persistenceTier": "mixed",
       "schemaMode": "explicit_mongoose_schema",
       "resolved": true,
-      "sourceCount": 58,
+      "sourceCount": 59,
       "sourceFiles": [
         "server/scripts/backfill-founder-timezones.ts",
         "server/scripts/setup-founder-access.ts",
@@ -263,6 +263,7 @@
         "server/src/domain/adminEntitlementAudit.ts",
         "server/src/domain/adminMetrics.ts",
         "server/src/domain/adminProspectOversight.ts",
+        "server/src/domain/adminTrainingAnalytics.ts",
         "server/src/domain/ba.ts",
         "server/src/domain/baIdentityPersistence.ts",
         "server/src/domain/broadcast.ts",
@@ -483,9 +484,10 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 7,
+      "sourceCount": 8,
       "sourceFiles": [
         "server/src/domain/adminMetrics.ts",
+        "server/src/domain/adminTrainingAnalytics.ts",
         "server/src/domain/reports/trainingCompletion.ts",
         "server/src/domain/training.ts"
       ]

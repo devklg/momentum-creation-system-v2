@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T01:00:06.816Z",
+  "generatedAt": "2026-07-14T01:11:23.063Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -21,10 +21,10 @@
     "/api/training/fast-start/modules/1"
   ],
   "summary": {
-    "routes": 237,
+    "routes": 238,
     "byAccessClass": {
       "raw_body_webhook": 1,
-      "admin": 98,
+      "admin": 99,
       "public_health": 2,
       "auth_bootstrap": 3,
       "auth_session": 2,
@@ -40,7 +40,7 @@
     },
     "byRole": {
       "provider": 2,
-      "founder_admin": 104,
+      "founder_admin": 105,
       "anonymous": 5,
       "system": 10,
       "brand_ambassador": 106,
@@ -48,7 +48,7 @@
     },
     "byEntitlement": {
       "machine_credential": 12,
-      "admin_allowlist": 104,
+      "admin_allowlist": 105,
       "none": 5,
       "registered_ba": 106,
       "valid_prospect_identity": 18,
@@ -56,7 +56,7 @@
     },
     "guardCoverage": {
       "requireAuth": 105,
-      "requireAdmin": 98,
+      "requireAdmin": 99,
       "requireAdminOrHealthSecret": 1,
       "requireRuntimeInternal": 5,
       "requireSteveComplete": 90,
@@ -3614,7 +3614,7 @@
       "id": "GET /api/admin/dashboard/metrics",
       "method": "GET",
       "fullPath": "/api/admin/dashboard/metrics",
-      "routeSource": "server/src/routes/admin/dashboard.ts:81",
+      "routeSource": "server/src/routes/admin/dashboard.ts:84",
       "mountPath": "/api/admin/dashboard",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -3668,7 +3668,7 @@
       "id": "GET /api/admin/dashboard/filters",
       "method": "GET",
       "fullPath": "/api/admin/dashboard/filters",
-      "routeSource": "server/src/routes/admin/dashboard.ts:127",
+      "routeSource": "server/src/routes/admin/dashboard.ts:130",
       "mountPath": "/api/admin/dashboard",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -3722,7 +3722,61 @@
       "id": "GET /api/admin/dashboard/drilldown",
       "method": "GET",
       "fullPath": "/api/admin/dashboard/drilldown",
-      "routeSource": "server/src/routes/admin/dashboard.ts:173",
+      "routeSource": "server/src/routes/admin/dashboard.ts:176",
+      "mountPath": "/api/admin/dashboard",
+      "mountPhase": "pre_gate",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/admin/dashboard/training-analytics",
+      "method": "GET",
+      "fullPath": "/api/admin/dashboard/training-analytics",
+      "routeSource": "server/src/routes/admin/dashboard.ts:223",
       "mountPath": "/api/admin/dashboard",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",
@@ -3776,7 +3830,7 @@
       "id": "GET /api/admin/dashboard/stream",
       "method": "GET",
       "fullPath": "/api/admin/dashboard/stream",
-      "routeSource": "server/src/routes/admin/dashboard.ts:288",
+      "routeSource": "server/src/routes/admin/dashboard.ts:337",
       "mountPath": "/api/admin/dashboard",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",

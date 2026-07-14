@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:00:11.600Z
+- Generated: 2026-07-14T01:11:27.369Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
-- Route handlers: 266
-- Shared exports: 1063
+- Route handlers: 268
+- Shared exports: 1066
 
 ## Mongo Collections
 
@@ -34,7 +34,7 @@
 | `mcs_questionnaires` | permissive_mongoose_schema | yes | 1 |
 | `mcs_workbooks` | permissive_mongoose_schema | yes | 2 |
 | `orientation_sessions` | permissive_mongoose_schema | yes | 1 |
-| `team_magnificent_members` | explicit_mongoose_schema | yes | 58 |
+| `team_magnificent_members` | explicit_mongoose_schema | yes | 59 |
 | `tenant_settings_versions` | permissive_mongoose_schema | yes | 3 |
 | `tmag_access_codes` | permissive_mongoose_schema | yes | 8 |
 | `tmag_admin_curated_leader_tags` | permissive_mongoose_schema | yes | 3 |
@@ -48,7 +48,7 @@
 | `tmag_content_templates` | permissive_mongoose_schema | yes | 2 |
 | `tmag_content_videos` | permissive_mongoose_schema | yes | 5 |
 | `tmag_event_attendance` | permissive_mongoose_schema | yes | 3 |
-| `tmag_fast_start_progress` | permissive_mongoose_schema | yes | 7 |
+| `tmag_fast_start_progress` | permissive_mongoose_schema | yes | 8 |
 | `tmag_invitation_generator_runs` | permissive_mongoose_schema | yes | 3 |
 | `tmag_ivory_prospect_names` | permissive_mongoose_schema | yes | 8 |
 | `tmag_new_member_orientation_reservations` | permissive_mongoose_schema | yes | 5 |
@@ -316,7 +316,7 @@
 | `(unmounted)` | `server/src/routes/admin/broadcast.ts` | GET /audience<br>GET /list<br>GET /:broadcastId<br>POST /test<br>POST / | `McsAuditActor`, `McsBroadcastAudiencePreviewResponse`, `McsBroadcastEnqueueResponse`, `McsBroadcastSendTestResponse`, `McsBroadcastStatusResponse` |
 | `(unmounted)` | `server/src/routes/admin/consistency.ts` | GET /report<br>GET user-agent<br>GET /crm-integrity<br>GET user-agent | `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/content-videos.ts` | GET user-agent<br>GET /<br>POST /<br>PATCH /:contentVideoId<br>POST /reorder | `McsAuditActor`, `McsContentVideoAudience`, `McsContentVideoMutationResponse`, `McsContentVideoReorderResponse`, `McsContentVideosAdminListResponse` |
-| `(unmounted)` | `server/src/routes/admin/dashboard.ts` | GET /metrics<br>GET user-agent<br>GET /filters<br>GET user-agent<br>GET /drilldown<br>GET user-agent<br>GET /stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminDashboardFiltersResponse`, `McsAdminDashboardMetricsResponse`, `McsAdminDrilldownResponse`, `McsAdminLiveAuditEvent`, `McsAdminLiveEvent`, `McsAdminLivePlacementEvent`, `McsAdminLiveSnapshot`, `McsAuditActor`, `McsAuditLogEntry`, `McsPlacementEvent` |
+| `(unmounted)` | `server/src/routes/admin/dashboard.ts` | GET /metrics<br>GET user-agent<br>GET /filters<br>GET user-agent<br>GET /drilldown<br>GET user-agent<br>GET /training-analytics<br>GET user-agent<br>GET /stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminDashboardFiltersResponse`, `McsAdminDashboardMetricsResponse`, `McsAdminDrilldownResponse`, `McsAdminLiveAuditEvent`, `McsAdminLiveEvent`, `McsAdminLivePlacementEvent`, `McsAdminLiveSnapshot`, `McsAdminTrainingAnalyticsResponse`, `McsAuditActor`, `McsAuditLogEntry`, `McsPlacementEvent` |
 | `(unmounted)` | `server/src/routes/admin/events.ts` | GET /<br>POST /webinars/:eventId/reservations/:reservationId/attendance | `McsAuditActor`, `McsRecordEventAttendanceResponse` |
 | `(unmounted)` | `server/src/routes/admin/health.ts` | GET x-mcs-health-secret<br>GET /triple-stack<br>GET /status | none |
 | `(unmounted)` | `server/src/routes/admin/knowledge.ts` | GET /status<br>POST /sources<br>POST /sources/upload | none |
@@ -1034,6 +1034,9 @@
 | `McsAdminSuccessProfileMemoryBridgeDraft` | interface | `packages/shared/src/types.ts` |
 | `McsAdminSuccessProfileSummary` | interface | `packages/shared/src/types.ts` |
 | `McsAdminTickerEntry` | interface | `packages/shared/src/types.ts` |
+| `McsAdminTrainingAnalytics` | interface | `packages/shared/src/types.ts` |
+| `McsAdminTrainingAnalyticsResponse` | interface | `packages/shared/src/types.ts` |
+| `McsAdminTrainingModuleAnalytics` | interface | `packages/shared/src/types.ts` |
 | `McsAdminTrainingRow` | interface | `packages/shared/src/types.ts` |
 | `McsAdminVmBaPerformanceRow` | interface | `packages/shared/src/types.ts` |
 | `McsAdminVmCampaignRow` | interface | `packages/shared/src/types.ts` |

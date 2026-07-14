@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T01:00:11.600Z",
+  "generatedAt": "2026-07-14T01:11:27.369Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -456,6 +456,11 @@
         {
           "file": "server/src/domain/adminProspectOversight.ts",
           "line": 862,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/adminTrainingAnalytics.ts",
+          "line": 150,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -919,6 +924,11 @@
         {
           "file": "server/src/domain/adminMetrics.ts",
           "line": 584,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/adminTrainingAnalytics.ts",
+          "line": 160,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -4308,42 +4318,52 @@
         {
           "method": "GET",
           "path": "/metrics",
-          "line": 81
+          "line": 84
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 105
+          "line": 108
         },
         {
           "method": "GET",
           "path": "/filters",
-          "line": 127
+          "line": 130
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 139
+          "line": 142
         },
         {
           "method": "GET",
           "path": "/drilldown",
-          "line": 173
+          "line": 176
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 198
+          "line": 201
+        },
+        {
+          "method": "GET",
+          "path": "/training-analytics",
+          "line": 223
+        },
+        {
+          "method": "GET",
+          "path": "user-agent",
+          "line": 248
         },
         {
           "method": "GET",
           "path": "/stream",
-          "line": 288
+          "line": 337
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 298
+          "line": 347
         }
       ],
       "sharedTypes": [
@@ -4355,6 +4375,7 @@
         "McsAdminLiveEvent",
         "McsAdminLivePlacementEvent",
         "McsAdminLiveSnapshot",
+        "McsAdminTrainingAnalyticsResponse",
         "McsAuditActor",
         "McsAuditLogEntry",
         "McsPlacementEvent"
@@ -9307,6 +9328,21 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsAdminTrainingAnalytics",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminTrainingAnalyticsResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminTrainingModuleAnalytics",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsAdminTrainingRow",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -11273,7 +11309,7 @@
     "neo4jRelationships": 69,
     "chromaCollections": 53,
     "routeModules": 49,
-    "routeHandlers": 266,
-    "sharedExports": 1063
+    "routeHandlers": 268,
+    "sharedExports": 1066
   }
 }
