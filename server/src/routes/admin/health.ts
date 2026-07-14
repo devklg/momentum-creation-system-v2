@@ -14,6 +14,7 @@ import {
   readHealthStatusFile,
   runTripleStackHealthProbe,
 } from '../../domain/healthProbe.js';
+import { getLlmProviderObservabilitySnapshot } from '../../services/llmProviderObservability.js';
 
 export const adminHealthRoutes: Router = express.Router();
 
@@ -73,4 +74,8 @@ adminHealthRoutes.get('/status', requireAdmin, async (_req, res) => {
     status: file.status,
     alert: transition,
   });
+});
+
+adminHealthRoutes.get('/llm-provider', requireAdmin, (_req, res) => {
+  res.json({ ok: true, observability: getLlmProviderObservabilitySnapshot() });
 });

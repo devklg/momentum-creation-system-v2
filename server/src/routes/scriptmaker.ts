@@ -38,6 +38,7 @@ import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import { draftInvitation } from '../domain/scriptmaker.js';
 import { appendGeneratedOutputAudit } from '../domain/generatedOutputAudit.js';
+import { recordLlmProviderDegradation } from '../services/llmProviderObservability.js';
 
 const SCRIPT_KINDS: ReadonlySet<McsScriptMakerScriptKind> = new Set([
   'default_script',
@@ -123,6 +124,7 @@ scriptmakerRoutes.post(
         eventDay,
         eventTime,
       });
+      if (result.degraded) recordLlmProviderDegradation('scriptmaker_product_invitation');
       await appendGeneratedOutputAudit({
         templateId: 'scriptmaker_product_invitation',
         tmagId,
