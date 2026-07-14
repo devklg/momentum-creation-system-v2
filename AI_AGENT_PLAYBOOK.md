@@ -93,6 +93,39 @@ Operational rules:
 
 ## Degradation And Fallbacks
 
+## Ivory And ScriptMaker Prompt Playbook
+
+Ivory and ScriptMaker use the existing `MCS_AGENT_TEMPLATE_REGISTRY` in
+`packages/shared/src/agent-skills.ts`; there is no parallel prompt registry.
+This inventory records every current provider-backed generation surface plus
+the two approved-but-unimplemented ScriptMaker WDYK contracts. It registers
+existing behavior and does not change prompt text or activate planned work.
+
+| Governed template | Status | Purpose | Behavior source | Degradation |
+| --- | --- | --- | --- | --- |
+| `ivory_wdyk_coach@1.0.0` | Active existing runtime | Ask reflective WDYK questions without choosing, scoring, or qualifying anyone. | `server/src/domain/ivory.ts#COACH_SYSTEM_PREFIX` | `ivoryCoachFallback` supplies safe deterministic memory prompts. |
+| `ivory_personal_invitation@1.0.0` | Active existing runtime | Draft one editable invitation after the BA identifies the person and supplies relationship context. | `server/src/domain/ivory.ts#INVITATION_DRAFT_SYSTEM` | `neutralInvitationDraft` produces a safe deterministic fallback without echoing private relationship notes. |
+| `ivory_momentum_followup@1.0.0` | Active existing runtime | Suggest one editable, lifecycle-aware follow-up for an owned prospect. | `server/src/domain/ivory-momentum.ts#SUGGEST_SYSTEM_PREFIX` | `neutralSuggestion` produces a safe deterministic fallback. |
+| `scriptmaker_product_invitation@1.0.0` | Active existing runtime | Draft compliant product/video invitation copy for review. | `server/src/domain/scriptmaker.ts#SYSTEM_PREFIX` | `neutralFallback`, or an approved compliant master-content seed, supplies the deterministic fallback. |
+| `scriptmaker_wdyk_product@0.1.0` | Planned | Preserve the approved product WDYK contract for future implementation. | `planned:scriptmaker-wdyk-product` | Block substantive generation and return to approved product training. |
+| `scriptmaker_wdyk_opportunity@0.1.0` | Planned | Preserve the approved opportunity WDYK contract for future implementation. | `planned:scriptmaker-wdyk-opportunity` | Block substantive generation and return to leadership-approved training. |
+
+Operational boundaries:
+
+- The BA remains the sender. No prompt may send, call, follow up, or select a
+  person on the BA's behalf.
+- Relationship context is private drafting context. Ivory may use it to choose
+  tone but may not quote or expose private relationship notes to the prospect.
+- Provider failure, missing configuration, malformed output, or failed copy
+  compliance returns the registered deterministic fallback; it never broadens
+  the prompt's authority.
+- Generated output is scanned before it reaches the BA. The prompts and the
+  runtime scan both forbid qualification, pressure, income/placement promises,
+  and medical claims.
+- Any new provider-backed Ivory or ScriptMaker generation call must receive a
+  versioned registry entry, behavior source, fallback source, and tests in the
+  same change. Existing active prompt text is never edited in place.
+
 - Degraded agent behavior must be explicit in API responses, logs, or admin diagnostics where user-facing behavior depends on it.
 - A fallback must stay inside the same compliance boundary as the full agent response.
 - A fallback must not pretend to have used unavailable context, GraphRAG, Context Manager, or provider output.
