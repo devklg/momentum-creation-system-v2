@@ -6,6 +6,7 @@ import {
   MCS_TRAINING_LANGUAGE_PARITY_SURFACES,
   MCS_TRAINING_MODULE_CATALOG,
   buildTrainingLanguageParityReport,
+  findMissingTrainingSourceAnchors,
 } from '@momentum/shared';
 
 const root = path.resolve(process.cwd(), '..');
@@ -44,13 +45,14 @@ describe('P2-114 training language parity', () => {
     }
   });
 
-  it('requires complete structural blocks for every declared available variant', () => {
+  it('requires every declared block anchor to exist in the actual locale source', () => {
     for (const surface of MCS_TRAINING_LANGUAGE_PARITY_SURFACES) {
       for (const locale of ['en', 'es'] as const) {
         const variant = surface.variants[locale];
         if (variant.status !== 'available') continue;
-        expect(new Set(variant.implementedBlockKeys)).toEqual(new Set(surface.requiredBlockKeys));
-        expect(variant.implementedBlockKeys).toHaveLength(surface.requiredBlockKeys.length);
+        const sourceText = fs.readFileSync(path.join(root, variant.sourcePath!), 'utf8');
+        expect(Object.keys(variant.sourceAnchors).sort()).toEqual([...surface.requiredBlockKeys].sort());
+        expect(findMissingTrainingSourceAnchors(surface, locale, sourceText)).toEqual([]);
       }
     }
   });
@@ -79,7 +81,7 @@ describe('P2-114 training language parity', () => {
           locale: 'es',
           status: 'available',
           sourcePath: 'apps/team/src/routes/training/fast-start/index.es.tsx',
-          implementedBlockKeys: surface.requiredBlockKeys.slice(1),
+          sourceAnchors: Object.fromEntries(surface.requiredBlockKeys.slice(1).map((key) => [key, key])),
         },
       },
     }]);
