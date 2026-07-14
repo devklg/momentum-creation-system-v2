@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-14T03:52:28.097Z
+- Generated: 2026-07-14T04:03:22.700Z
 - Mounted routers: 50
 - Route files: 50
-- Static route rows: 240
+- Static route rows: 241
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
 | ba_facing_gated | 91 |
-| pre_gate | 145 |
+| pre_gate | 146 |
 | pre_json_admin_body_limit | 3 |
 | raw_body_before_json | 1 |
 
@@ -22,7 +22,7 @@
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 97 |
+| admin | 98 |
 | ba_auth_steve_gated | 91 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 28 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 7 |
-| GET | 123 |
+| GET | 124 |
 | PATCH | 9 |
 | POST | 94 |
 | PUT | 7 |
@@ -212,8 +212,9 @@
 | POST | `/api/admin/content/videos/` | pre_gate | admin | admin | `server/src/routes/admin/content-videos.ts:84` |
 | PATCH | `/api/admin/content/videos/:contentVideoId` | pre_gate | admin | admin | `server/src/routes/admin/content-videos.ts:125` |
 | POST | `/api/admin/content/videos/reorder` | pre_gate | admin | admin | `server/src/routes/admin/content-videos.ts:179` |
-| GET | `/api/admin/health/triple-stack` | pre_gate | admin | admin-or-secret | `server/src/routes/admin/health.ts:29` |
-| GET | `/api/admin/health/status` | pre_gate | admin | admin | `server/src/routes/admin/health.ts:48` |
+| GET | `/api/admin/health/triple-stack` | pre_gate | admin | admin-or-secret | `server/src/routes/admin/health.ts:30` |
+| GET | `/api/admin/health/status` | pre_gate | admin | admin | `server/src/routes/admin/health.ts:49` |
+| GET | `/api/admin/health/llm-provider` | pre_gate | admin | admin | `server/src/routes/admin/health.ts:79` |
 | GET | `/api/admin/consistency/report` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:27` |
 | GET | `/api/admin/consistency/crm-integrity` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:61` |
 | GET | `/api/admin/resource-center/analytics` | pre_gate | admin | admin | `server/src/routes/admin/resourceCenter.ts:8` |
@@ -272,20 +273,20 @@
 | GET | `/api/crm-hub/prospects` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crmHub.ts:60` |
 | GET | `/api/crm-hub/prospects/:prospectId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crmHub.ts:72` |
 | POST | `/api/crm-hub/prospects/:prospectId/close-as-ba` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crmHub.ts:86` |
-| POST | `/api/scriptmaker/draft` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/scriptmaker.ts:80` |
-| GET | `/api/ivory/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:114` |
-| POST | `/api/ivory/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:133` |
-| PATCH | `/api/ivory/:ivoryId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:179` |
-| PATCH | `/api/ivory/:ivoryId/status` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:228` |
-| DELETE | `/api/ivory/:ivoryId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:266` |
-| POST | `/api/ivory/coach` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:298` |
-| POST | `/api/ivory/invitation-agent/draft` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:363` |
-| POST | `/api/ivory/invitation-agent/mint` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:431` |
-| POST | `/api/ivory/generator/run` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:500` |
-| GET | `/api/ivory/generator/run/:runId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:537` |
-| POST | `/api/ivory/generator/run/:runId/invite` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:566` |
-| GET | `/api/ivory/momentum` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:647` |
-| POST | `/api/ivory/momentum/:prospectId/suggest` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:666` |
+| POST | `/api/scriptmaker/draft` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/scriptmaker.ts:81` |
+| GET | `/api/ivory/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:115` |
+| POST | `/api/ivory/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:134` |
+| PATCH | `/api/ivory/:ivoryId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:180` |
+| PATCH | `/api/ivory/:ivoryId/status` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:229` |
+| DELETE | `/api/ivory/:ivoryId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:267` |
+| POST | `/api/ivory/coach` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:299` |
+| POST | `/api/ivory/invitation-agent/draft` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:365` |
+| POST | `/api/ivory/invitation-agent/mint` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:434` |
+| POST | `/api/ivory/generator/run` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:503` |
+| GET | `/api/ivory/generator/run/:runId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:540` |
+| POST | `/api/ivory/generator/run/:runId/invite` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:569` |
+| GET | `/api/ivory/momentum` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:650` |
+| POST | `/api/ivory/momentum/:prospectId/suggest` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/ivory.ts:669` |
 | GET | `/api/agents/recommendations` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/agents.ts:25` |
 | POST | `/api/agents/events` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/agents.ts:45` |
 | GET | `/api/vm/lead-owners` | ba_facing_gated | ba_auth_steve_gated | auth, steve, vm-entitlement | `server/src/routes/vm.ts:237` |

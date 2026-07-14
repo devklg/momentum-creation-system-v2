@@ -4,15 +4,15 @@
 
 ## Summary
 
-- Generated: 2026-07-14T03:52:28.149Z
-- Routes: 240
+- Generated: 2026-07-14T04:03:22.734Z
+- Routes: 241
 - Findings: 0
 
 ## Routes By Access Category
 
 | Access category | Routes |
 | --- | ---: |
-| admin | 100 |
+| admin | 101 |
 | admin_or_health_secret | 1 |
 | auth_bootstrap | 3 |
 | auth_session | 2 |
@@ -34,7 +34,7 @@
 | customSecretGuard | 10 |
 | rateLimited | 3 |
 | rawBodyParser | 1 |
-| requireAdmin | 100 |
+| requireAdmin | 101 |
 | requireAdminOrHealthSecret | 1 |
 | requireAuth | 106 |
 | requireRuntimeInternal | 5 |
@@ -47,7 +47,7 @@
 | --- | ---: |
 | anonymous | 5 |
 | brand_ambassador | 107 |
-| founder_admin | 106 |
+| founder_admin | 107 |
 | prospect | 18 |
 | provider | 2 |
 | system | 10 |
@@ -56,7 +56,7 @@
 
 | Entitlement | Routes |
 | --- | ---: |
-| admin_allowlist | 106 |
+| admin_allowlist | 107 |
 | machine_credential | 12 |
 | none | 5 |
 | registered_ba | 107 |
@@ -200,8 +200,9 @@
 | POST | `/api/admin/content/videos/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/content-videos.ts:84` |
 | PATCH | `/api/admin/content/videos/:contentVideoId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/content-videos.ts:125` |
 | POST | `/api/admin/content/videos/reorder` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/content-videos.ts:179` |
-| GET | `/api/admin/health/triple-stack` | founder_admin, system | admin_allowlist, machine_credential | admin_session_or_shared_secret, requireAdminOrHealthSecret, health_secret_optional | admin_or_health_secret | admin_session_or_shared_secret | requireAdminOrHealthSecret | not_applicable | none | none | none | health_secret_optional | no | no | global_256kb_json | none | none | `server/src/routes/admin/health.ts:29` |
-| GET | `/api/admin/health/status` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/health.ts:48` |
+| GET | `/api/admin/health/triple-stack` | founder_admin, system | admin_allowlist, machine_credential | admin_session_or_shared_secret, requireAdminOrHealthSecret, health_secret_optional | admin_or_health_secret | admin_session_or_shared_secret | requireAdminOrHealthSecret | not_applicable | none | none | none | health_secret_optional | no | no | global_256kb_json | none | none | `server/src/routes/admin/health.ts:30` |
+| GET | `/api/admin/health/status` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/health.ts:49` |
+| GET | `/api/admin/health/llm-provider` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/health.ts:79` |
 | GET | `/api/admin/consistency/report` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/consistency.ts:27` |
 | GET | `/api/admin/consistency/crm-integrity` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/consistency.ts:61` |
 | GET | `/api/admin/resource-center/analytics` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/resourceCenter.ts:8` |
@@ -260,20 +261,20 @@
 | GET | `/api/crm-hub/prospects` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/crmHub.ts:60` |
 | GET | `/api/crm-hub/prospects/:prospectId` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/crmHub.ts:72` |
 | POST | `/api/crm-hub/prospects/:prospectId/close-as-ba` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/crmHub.ts:86` |
-| POST | `/api/scriptmaker/draft` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/scriptmaker.ts:80` |
-| GET | `/api/ivory/` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:114` |
-| POST | `/api/ivory/` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:133` |
-| PATCH | `/api/ivory/:ivoryId` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:179` |
-| PATCH | `/api/ivory/:ivoryId/status` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:228` |
-| DELETE | `/api/ivory/:ivoryId` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:266` |
-| POST | `/api/ivory/coach` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:298` |
-| POST | `/api/ivory/invitation-agent/draft` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:363` |
-| POST | `/api/ivory/invitation-agent/mint` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:431` |
-| POST | `/api/ivory/generator/run` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:500` |
-| GET | `/api/ivory/generator/run/:runId` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:537` |
-| POST | `/api/ivory/generator/run/:runId/invite` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:566` |
-| GET | `/api/ivory/momentum` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:647` |
-| POST | `/api/ivory/momentum/:prospectId/suggest` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:666` |
+| POST | `/api/scriptmaker/draft` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/scriptmaker.ts:81` |
+| GET | `/api/ivory/` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:115` |
+| POST | `/api/ivory/` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:134` |
+| PATCH | `/api/ivory/:ivoryId` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:180` |
+| PATCH | `/api/ivory/:ivoryId/status` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:229` |
+| DELETE | `/api/ivory/:ivoryId` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:267` |
+| POST | `/api/ivory/coach` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:299` |
+| POST | `/api/ivory/invitation-agent/draft` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:365` |
+| POST | `/api/ivory/invitation-agent/mint` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:434` |
+| POST | `/api/ivory/generator/run` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:503` |
+| GET | `/api/ivory/generator/run/:runId` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:540` |
+| POST | `/api/ivory/generator/run/:runId/invite` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:569` |
+| GET | `/api/ivory/momentum` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:650` |
+| POST | `/api/ivory/momentum/:prospectId/suggest` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/ivory.ts:669` |
 | GET | `/api/agents/recommendations` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/agents.ts:25` |
 | POST | `/api/agents/events` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/agents.ts:45` |
 | GET | `/api/vm/lead-owners` | brand_ambassador | registered_ba, vm_dialer | ba_session, requireSteveComplete, requireVmDialerAccess | ba_auth_steve_vm_entitled | ba_session | none | requireSteveComplete | none | requireVmDialerAccess | none | none | no | no | global_256kb_json | none | none | `server/src/routes/vm.ts:237` |

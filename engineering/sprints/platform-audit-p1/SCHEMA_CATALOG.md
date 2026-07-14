@@ -5,13 +5,13 @@
 
 ## Summary
 
-- Generated: 2026-07-14T03:52:32.988Z
+- Generated: 2026-07-14T04:03:25.716Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
-- Route handlers: 274
+- Route handlers: 275
 - Shared exports: 1096
 
 ## Mongo Collections
@@ -318,7 +318,7 @@
 | `(unmounted)` | `server/src/routes/admin/content-videos.ts` | GET user-agent<br>GET /<br>POST /<br>PATCH /:contentVideoId<br>POST /reorder | `McsAuditActor`, `McsContentVideoAudience`, `McsContentVideoMutationResponse`, `McsContentVideoReorderResponse`, `McsContentVideosAdminListResponse` |
 | `(unmounted)` | `server/src/routes/admin/dashboard.ts` | GET /metrics<br>GET user-agent<br>GET /filters<br>GET user-agent<br>GET /drilldown<br>GET user-agent<br>GET /training-analytics<br>GET user-agent<br>GET /stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminDashboardFiltersResponse`, `McsAdminDashboardMetricsResponse`, `McsAdminDrilldownResponse`, `McsAdminLiveAuditEvent`, `McsAdminLiveEvent`, `McsAdminLivePlacementEvent`, `McsAdminLiveSnapshot`, `McsAdminTrainingAnalyticsResponse`, `McsAuditActor`, `McsAuditLogEntry`, `McsPlacementEvent` |
 | `(unmounted)` | `server/src/routes/admin/events.ts` | GET /<br>POST /webinars/:eventId/reservations/:reservationId/attendance | `McsAuditActor`, `McsRecordEventAttendanceResponse` |
-| `(unmounted)` | `server/src/routes/admin/health.ts` | GET x-mcs-health-secret<br>GET /triple-stack<br>GET /status | none |
+| `(unmounted)` | `server/src/routes/admin/health.ts` | GET x-mcs-health-secret<br>GET /triple-stack<br>GET /status<br>GET /llm-provider | none |
 | `(unmounted)` | `server/src/routes/admin/knowledge.ts` | GET /status<br>POST /sources<br>POST /sources/upload | none |
 | `(unmounted)` | `server/src/routes/admin/liveOps.ts` | GET /operations<br>GET /growth<br>GET user-agent<br>GET /grid<br>GET user-agent<br>GET /funnel<br>GET user-agent<br>GET /usage/stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminFunnelKind`, `McsAdminLiveUsageSample`, `McsAdminLiveUsageStreamEvent`, `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/michael-runtime-observability.ts` | GET /observability | none |
