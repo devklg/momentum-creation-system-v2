@@ -51,7 +51,7 @@ import {
   encodeAdminCursor,
   type AdminPageInfo,
 } from './adminPagination.js';
-import { findBAByTmagId, type BARecord } from './ba.js';
+import { findBAByTmagId, type BAListItem, type BARecord } from './ba.js';
 import { normalizeEntitlements, setMemberEntitlement, type EntitlementAction } from './entitlements.js';
 import { writeSponsorOverrideGraphCritical } from './sponsorImmutabilityPersistence.js';
 import type {
@@ -396,10 +396,15 @@ const BA_DIRECTORY_SCOPE = 'admin_ba_directory.v1';
 
 function baSearchFilter(search: string): Record<string, unknown> {
   if (!search) return {};
+  // P2-131 deliberately narrows the former client-side "contains" search.
+  // These three exact source-owned fields have named required index definitions;
+  // names, sponsor names, and access codes are joined/derived and therefore
+  // cannot honestly be advertised as indexed directory filters.
+  const id = search.toUpperCase();
   return {
     $or: [
-      { tmagId: search },
-      { threeBaId: search },
+      { tmagId: id },
+      { threeBaId: id },
       { email: search.toLowerCase() },
     ],
   };
@@ -414,6 +419,7 @@ export async function listBADirectoryPage(input: {
   leaderDetectionNote: string;
   pageInfo: AdminPageInfo;
   appliedSearch: string;
+  legacyBas: BAListItem[];
 }> {
   const pageSize = Math.max(1, Math.min(100, input.pageSize));
   const search = input.search?.trim().slice(0, 120) ?? '';
@@ -460,10 +466,27 @@ export async function listBADirectoryPage(input: {
   const hasMore = docs.length > pageSize;
   const selected = hasMore ? docs.slice(0, pageSize) : docs;
   const projected = await listBADirectory(pageSize, selected);
+  const rowByTmagId = new Map(projected.rows.map((row) => [row.tmagId, row]));
   const last = selected[selected.length - 1];
   return {
     ...projected,
     appliedSearch: search,
+    // ACR-0025 transition compatibility: preserve the legacy field shape,
+    // but derive it from this exact page. Never perform a second roster read.
+    legacyBas: selected.map((ba) => {
+      const row = rowByTmagId.get(ba.tmagId)!;
+      return {
+        tmagId: ba.tmagId,
+        threeBaId: ba.threeBaId,
+        fullName: row.fullName,
+        email: ba.email ?? null,
+        phone: ba.phone ?? null,
+        timezone: ba.timezone ?? null,
+        sponsorTmagId: ba.sponsorTmagId ?? null,
+        sponsorName: row.sponsorName,
+        joinedAt: ba.createdAt,
+      };
+    }),
     pageInfo: {
       pageSize,
       hasMore,
@@ -483,53 +506,11 @@ export async function listBADirectoryPage(input: {
 export async function getTmagProfileBundle(
   tmagId: string,
 ): Promise<McsAdminBaProfileBundle | null> {
-  // Reuse listBADirectory's projection so the table row + drawer row are
-  // identical (the directory limit is enough for typical use; if the
-  // target BA is outside the window, fall through to a focused build).
-  const { rows } = await listBADirectory(2000);
-  let row = rows.find((r) => r.tmagId === tmagId) ?? null;
-  if (!row) {
-    // Focused build — the requested BA wasn't in the recent batch.
-    const single = await listBADirectory(1).then((r) =>
-      r.rows.find((x) => x.tmagId === tmagId) ?? null,
-    );
-    if (single) row = single;
-    else {
-      const ba = await findBAByTmagId(tmagId);
-      if (!ba) return null;
-      // Final fallback — synthesize a sparse row so the drawer renders SOMETHING.
-      row = {
-        tmagId: ba.tmagId,
-        threeBaId: ba.threeBaId,
-        fullName: `${ba.firstName} ${ba.lastName}`.trim(),
-        email: ba.email ?? null,
-        phone: ba.phone ?? null,
-        accessCodeOwned: null,
-        sponsorTmagId: ba.sponsorTmagId ?? null,
-        sponsorName: null,
-        originalSponsorTmagId: null,
-        originalSponsorName: null,
-        joinedAt: ba.createdAt,
-        welcomeAcceptedAt: null,
-        lastLoginAt: ba.lastLoginAt ?? null,
-        twoInSeventyTwoCount: 0,
-        twoInSeventyTwoWindowStart: new Date(
-          Date.now() - TWO_IN_SEVENTY_TWO_WINDOW_MS,
-        ).toISOString(),
-        profileCompletenessPct: 0,
-        personalInvitesCount: 0,
-        oldestOpenFollowUpDueAt: null,
-        trainingModulesCompleted: 0,
-        trainingComplete: false,
-        status: 'inactive',
-        lastActivityAt: ba.lastLoginAt ?? null,
-        systemDetectedLeader: false,
-        curatedLeader: false,
-        entitlements: normalizeEntitlements((ba as unknown as { entitlements?: unknown }).entitlements),
-        deleted: (ba as unknown as Record<string, unknown>).deleted === true,
-      };
-    }
-  }
+  const ba = await findBAByTmagId(tmagId);
+  if (!ba) return null;
+  const { rows } = await listBADirectory(1, [ba as BARecordWithExtras]);
+  const row = rows[0];
+  if (!row) return null;
 
   const [history, notes] = await Promise.all([
     fetchOverrideHistory(tmagId),

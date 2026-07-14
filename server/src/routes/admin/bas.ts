@@ -20,7 +20,6 @@
 import express, { type Request, type Response, type Router } from 'express';
 import { z } from 'zod';
 import { requireAdmin } from '../../middleware/requireAuth.js';
-import { listAllBAsForAdmin } from '../../domain/ba.js';
 import {
   appendBaNote,
   applySponsorOverride,
@@ -31,6 +30,7 @@ import {
   setCuratedLeaderTag,
 } from '../../domain/adminBaOversight.js';
 import { AdminCursorError } from '../../domain/adminPagination.js';
+import { appendAuditEntry } from '../../domain/auditLog.js';
 import {
   adminCreateBa,
   adminEditBa,
@@ -69,26 +69,41 @@ adminBasRoutes.get('/launch-readiness', requireAdmin, async (req, res) => {
 });
 
 adminBasRoutes.get('/', requireAdmin, async (req: Request, res: Response) => {
-  const parsed = z.object({
-    pageSize: z.coerce.number().int().min(1).max(100).default(50),
-    cursor: z.string().min(20).max(2000).optional(),
-    search: z.string().trim().max(120).optional(),
-  }).safeParse(req.query);
+  const parsed = BaDirectoryQuery.safeParse(req.query);
   if (!parsed.success) {
     res.status(400).json({ ok: false, error: 'Invalid pagination parameters.', issues: parsed.error.issues });
     return;
   }
 
   try {
-    const [page, legacy] = await Promise.all([
-      listBADirectoryPage(parsed.data),
-      // Preserve the pre-#135 shape so any caller still keying off `bas:`
-      // keeps working for this documented transition release. It remains a
-      // bounded compatibility field and is not pagination authority.
-      listAllBAsForAdmin(500),
-    ]);
+    const page = await listBADirectoryPage(parsed.data);
+    await appendAuditEntry({
+      actor: {
+        kind: 'admin',
+        tmagId: req.session!.tmagId,
+        displayName: req.session!.email ?? req.session!.tmagId,
+      },
+      action: 'admin.ba.directory_page.viewed',
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
+      severity: 'info',
+      after: paginationAuditMetadata({
+        pageSize: parsed.data.pageSize,
+        cursorProvided: Boolean(parsed.data.cursor),
+        searchApplied: Boolean(parsed.data.search),
+        returnedCount: page.rows.length,
+        hasMore: page.pageInfo.hasMore,
+      }),
+      reason: null,
+      context: {
+        ip: req.ip ?? null,
+        userAgent: req.get('user-agent') ?? null,
+        route: '/api/admin/bas',
+        method: 'GET',
+        requestId: null,
+      },
+    });
     const body: McsAdminBaDirectoryResponse & McsAdminPaginationContract & {
-      bas: typeof legacy;
+      bas: typeof page.legacyBas;
       count: number;
       appliedSearch: string;
     } = {
@@ -96,7 +111,7 @@ adminBasRoutes.get('/', requireAdmin, async (req: Request, res: Response) => {
       count: page.rows.length,
       rows: page.rows,
       leaderDetectionNote: page.leaderDetectionNote,
-      bas: legacy,
+      bas: page.legacyBas,
       pageInfo: page.pageInfo,
       appliedSearch: page.appliedSearch,
       appliedSort: 'createdAt_desc_tmagId_desc',
@@ -112,6 +127,26 @@ adminBasRoutes.get('/', requireAdmin, async (req: Request, res: Response) => {
     res.status(500).json({ ok: false, error: `Directory failed: ${msg}` });
   }
 });
+
+const BaDirectoryQuery = z.object({
+  pageSize: z.coerce.number().int().min(1).max(100).default(50),
+  cursor: z.string().min(20).max(2000).optional(),
+  search: z.string().trim().max(120).optional(),
+}).strict();
+
+export function parseBaDirectoryQuery(query: unknown) {
+  return BaDirectoryQuery.safeParse(query);
+}
+
+export function paginationAuditMetadata(input: {
+  pageSize: number;
+  cursorProvided: boolean;
+  searchApplied: boolean;
+  returnedCount: number;
+  hasMore: boolean;
+}) {
+  return { ...input, sort: 'createdAt_desc_tmagId_desc' as const };
+}
 
 const TmagIdParams = z.object({
   tmagId: z.string().min(2).max(80),

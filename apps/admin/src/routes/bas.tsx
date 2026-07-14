@@ -72,13 +72,20 @@ export function BAsPage() {
       setPageInfo(data.pageInfo);
       setLeaderNote(data.leaderDetectionNote);
     } catch (e) {
-      setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+      if (sequence === requestSequence.current) {
+        setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+      }
     } finally {
       if (sequence === requestSequence.current) setLoading(false);
     }
   }, [filterText]);
 
   useEffect(() => {
+    // Invalidate any in-flight page immediately when the filter contract
+    // changes, and disable the old page's Load More control during debounce.
+    requestSequence.current += 1;
+    setPageInfo(null);
+    setLoading(true);
     const timer = window.setTimeout(() => void load('replace'), 250);
     return () => window.clearTimeout(timer);
   }, [load]);
@@ -154,8 +161,12 @@ export function BAsPage() {
         <Input
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
-          placeholder="Exact BA ID, THREE ID, or email…"
+          placeholder="Exact TM ID, THREE BA ID, or email…"
         />
+        <p className="mt-2 font-mono text-[10px] leading-relaxed text-cream-faint">
+          Exact index-compatible lookup only; installed index state is reported separately. Name,
+          sponsor, access-code, and derived-column filters are not supported in this paged release.
+        </p>
       </div>
 
       <div className="mb-4">
@@ -171,7 +182,6 @@ export function BAsPage() {
       ) : (
         <DirectoryTable
           rows={rows}
-          filterText={filterText}
           onOpenProfile={setOpenTmagId}
           onToggleCurated={(id, next) => void onToggleCurated(id, next)}
           togglePendingTmagId={togglePendingTmagId}

@@ -1,9 +1,9 @@
 /**
  * C.1 — Brand Ambassador directory table.
  *
- * 15 columns, every one sortable. Click a column header to sort asc;
- * click again to flip desc. Filter input is a free-text "contains" over
- * BA name + BA IDs + email + sponsor name + access code.
+ * 15 static columns in the server-owned P2-131 order:
+ * createdAt DESC, tmagId DESC. Derived column sorting is intentionally
+ * unavailable because it cannot preserve indexed keyset traversal.
  *
  * Compliance discipline (Chat #89):
  *   - No "at-risk" badges, no score columns. Every metric is the raw
@@ -15,31 +15,8 @@
 
 import type { McsAdminBaDirectoryRow } from '@momentum/shared';
 
-type SortKey =
-  | 'fullName'
-  | 'threeBaId'
-  | 'accessCodeOwned'
-  | 'sponsorName'
-  | 'joinedAt'
-  | 'welcomeAcceptedAt'
-  | 'lastLoginAt'
-  | 'twoInSeventyTwoCount'
-  | 'profileCompletenessPct'
-  | 'personalInvitesCount'
-  | 'oldestOpenFollowUpDueAt'
-  | 'trainingModulesCompleted'
-  | 'status'
-  | 'lastActivityAt'
-  | 'curatedLeader';
-
-interface SortState {
-  key: SortKey;
-  dir: 'asc' | 'desc';
-}
-
 interface Props {
   rows: McsAdminBaDirectoryRow[];
-  filterText: string;
   onOpenProfile: (tmagId: string) => void;
   onToggleCurated: (tmagId: string, next: boolean) => void;
   togglePendingTmagId: string | null;
@@ -51,10 +28,6 @@ export function DirectoryTable({
   onToggleCurated,
   togglePendingTmagId,
 }: Props) {
-  const sort: SortState = { key: 'joinedAt', dir: 'desc' };
-  const sorted = rows;
-  const onHeaderClick = () => undefined;
-
   if (rows.length === 0) {
     return (
       <p className="text-[12px] font-mono tracking-label text-cream-faint uppercase">
@@ -68,100 +41,25 @@ export function DirectoryTable({
       <table className="w-full text-sm">
         <thead className="bg-cream/[0.025]">
           <tr className="text-left">
-            <SortHeader
-              label="Name"
-              col="fullName"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="THREE BA ID"
-              col="threeBaId"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Code"
-              col="accessCodeOwned"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Sponsor"
-              col="sponsorName"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Signed up"
-              col="joinedAt"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Welcome"
-              col="welcomeAcceptedAt"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="First login"
-              col="lastLoginAt"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="2-in-72"
-              col="twoInSeventyTwoCount"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Profile %"
-              col="profileCompletenessPct"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Invites"
-              col="personalInvitesCount"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Follow-up aging"
-              col="oldestOpenFollowUpDueAt"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Training"
-              col="trainingModulesCompleted"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Status"
-              col="status"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Last activity"
-              col="lastActivityAt"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
-            <SortHeader
-              label="Leader"
-              col="curatedLeader"
-              sort={sort}
-              onClick={onHeaderClick}
-            />
+            <StaticHeader label="Name" />
+            <StaticHeader label="THREE BA ID" />
+            <StaticHeader label="Code" />
+            <StaticHeader label="Sponsor" />
+            <StaticHeader label="Signed up" ordered />
+            <StaticHeader label="Welcome" />
+            <StaticHeader label="First login" />
+            <StaticHeader label="2-in-72" />
+            <StaticHeader label="Profile %" />
+            <StaticHeader label="Invites" />
+            <StaticHeader label="Follow-up aging" />
+            <StaticHeader label="Training" />
+            <StaticHeader label="Status" />
+            <StaticHeader label="Last activity" />
+            <StaticHeader label="Leader" />
           </tr>
         </thead>
         <tbody>
-          {sorted.map((r) => (
+          {rows.map((r) => (
             <tr key={r.tmagId} className="border-t border-line hover:bg-cream/[0.015]">
               <Td>
                 <button
@@ -321,27 +219,23 @@ export function DirectoryTable({
   );
 }
 
-function SortHeader({
+function StaticHeader({
   label,
-  col,
-  sort,
+  ordered = false,
 }: {
   label: string;
-  col: SortKey;
-  sort: SortState;
-  onClick: (key: SortKey) => void;
+  ordered?: boolean;
 }) {
-  const active = sort.key === col;
   return (
     <th className="px-3 py-2.5 text-[10px] font-mono tracking-label uppercase text-cream-faint text-left whitespace-nowrap">
       <span
         className={[
           'inline-flex items-center gap-1',
-          active ? 'text-gold' : 'text-cream-faint',
+          ordered ? 'text-gold' : 'text-cream-faint',
         ].join(' ')}
       >
         {label}
-        {active && <span>{sort.dir === 'asc' ? '↑' : '↓'}</span>}
+        {ordered && <span aria-label="newest signup first">↓</span>}
       </span>
     </th>
   );
