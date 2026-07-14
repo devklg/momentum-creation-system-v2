@@ -143,6 +143,9 @@ describe('P2-132 GraphRAG readiness batching', () => {
       retention: 'in_process_since_restart', maxUniqueIds: 50, batches: 1, requestedIds: 4,
       storeCalls: { mongoCanonical: 1, mongoOutbox: 1, neo4j: 1, chroma: 2 },
     });
+    expect(result[0]?.record).not.toBe(result[2]?.record);
+    if (result[0]?.record) result[0].record.summary = 'caller mutation';
+    expect(result[2]?.record?.summary).toBe(second.summary);
   });
 
   it('rejects more than 50 unique ids before any store read', async () => {
@@ -176,6 +179,39 @@ describe('P2-132 GraphRAG readiness batching', () => {
     expect(result[1]).toMatchObject({
       id: spanish.id, status: 'degraded', reasons: ['chroma_error:spanish collection offline'],
     });
+  });
+
+  it('fails closed for every eligible id when the bounded outbox result is truncated', async () => {
+    const second = {
+      ...mongoRecord,
+      _id: 'mcsgraph_knowledge_2_v1_en', id: 'mcsgraph_knowledge_2_v1_en',
+      knowledgeObjectId: 'knowledge_2', derivedFrom: ['source_2', 'chunk_2'],
+    };
+    const records = [mongoRecord, second];
+    persistence.mockImplementation(async (tool: string, action: string, params: Record<string, unknown>) => {
+      if (tool === 'mongodb' && params.collection === 'mcs_graphrag_records') return { documents: records };
+      if (tool === 'mongodb' && params.collection === 'tmag_projection_outbox') {
+        return { documents: [{ entityId: id, status: 'pending' }], count: 5 };
+      }
+      if (tool === 'neo4j') return {
+        records: records.map(({ id: rowId, knowledgeObjectId, version, domain, language, tenantId, retrievalReady }) =>
+          ({ id: rowId, knowledgeObjectId, version, domain, language, tenantId, retrievalReady })),
+      };
+      if (tool === 'chromadb' && action === 'get') return {
+        ids: records.map((record) => record.id),
+        metadatas: records.map(({ id: rowId, knowledgeObjectId, version, domain, language, tenantId, retrievalReady }) =>
+          ({ id: rowId, knowledgeObjectId, version, domain, language, tenantId, retrievalReady })),
+      };
+      throw new Error(`unexpected ${tool}.${action}`);
+    });
+
+    const m = await import('../../domain/graphragReadiness.js');
+    const result = await m.verifyGraphRagRetrievalReadinessBatch([id, second.id]);
+
+    expect(result).toEqual([
+      expect.objectContaining({ id, status: 'degraded', reasons: ['outbox_result_truncated'] }),
+      expect.objectContaining({ id: second.id, status: 'degraded', reasons: ['outbox_result_truncated'] }),
+    ]);
   });
 });
 

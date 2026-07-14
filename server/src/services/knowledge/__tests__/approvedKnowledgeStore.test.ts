@@ -458,6 +458,46 @@ describe('approved knowledge store schema projection', () => {
     expect(getApprovedKnowledgeRetrievalCacheDiagnostics()).toMatchObject({ size: 0, invalidations: 1 });
   });
 
+  it('does not coalesce a post-invalidation request onto the older generation', async () => {
+    const releases: Array<(value: unknown) => void> = [];
+    persistenceMock.call.mockImplementation(() => new Promise((resolve) => { releases.push(resolve); }));
+    const provider = createStoredApprovedKnowledgeProvider();
+    const beforeWrite = provider.searchApprovedKnowledge(scope, 'generation boundary', 2, 'en');
+    invalidateApprovedKnowledgeRetrievalCache();
+    const afterWrite = provider.searchApprovedKnowledge(scope, 'generation boundary', 2, 'en');
+
+    expect(persistenceMock.call).toHaveBeenCalledTimes(2);
+    expect(getApprovedKnowledgeRetrievalCacheDiagnostics().inFlight).toBe(2);
+    releases[0]?.({
+      results: {
+        ids: ['chunk_before'], documents: ['Before write.'],
+        metadatas: [{
+          chunkId: 'chunk_before', sourceId: 'source_before', domain: 'training',
+          language: 'en', status: 'active', retrievalEligible: true,
+        }],
+      },
+    });
+    releases[1]?.({
+      results: {
+        ids: ['chunk_after'], documents: ['After write.'],
+        metadatas: [{
+          chunkId: 'chunk_after', sourceId: 'source_after', domain: 'training',
+          language: 'en', status: 'active', retrievalEligible: true,
+        }],
+      },
+    });
+
+    await expect(beforeWrite).resolves.toEqual([
+      expect.objectContaining({ sourceId: 'source_before' }),
+    ]);
+    await expect(afterWrite).resolves.toEqual([
+      expect.objectContaining({ sourceId: 'source_after' }),
+    ]);
+    expect(getApprovedKnowledgeRetrievalCacheDiagnostics()).toMatchObject({
+      misses: 2, coalesced: 0, size: 1, inFlight: 0, invalidations: 1,
+    });
+  });
+
   it('evicts the least-recently-used entry at the deterministic 128-entry bound', async () => {
     persistenceMock.call.mockImplementation(async (_tool, _action, params: { query: string }) => ({
       results: {

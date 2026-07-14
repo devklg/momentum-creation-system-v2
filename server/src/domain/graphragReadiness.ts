@@ -143,7 +143,7 @@ async function verifyEligibleProjections(
   const chromaPromises = [...chromaGroups.entries()].map(async ([collection, group]) => {
     readinessChromaCalls += 1;
     const value = await persistenceCall<ChromaGetResult>('chromadb', 'get', {
-      collection,
+      collection: activeKnowledgeCollection(group[0]!.domain, group[0]!.language),
       ids: group.map((record) => record.id),
     });
     return { collection, value };
@@ -172,6 +172,9 @@ async function verifyEligibleProjections(
     if (outboxSettled.status === 'rejected') {
       degradedResult = true;
       reasons.push(`outbox_error:${message(outboxSettled.reason)}`);
+    } else if (outboxResultTruncated(outboxSettled.value)) {
+      degradedResult = true;
+      reasons.push('outbox_result_truncated');
     } else if (hasUnresolvedProjection(outboxSettled.value, record.id)) {
       reasons.push('projection_unresolved');
     }
@@ -223,6 +226,10 @@ function hasUnresolvedProjection(result: MongoResult, id: string): boolean {
   return documents.some((document) => document.entityId === undefined || document.entityId === id);
 }
 
+function outboxResultTruncated(result: MongoResult): boolean {
+  return typeof result.count === 'number' && result.count > (result.documents?.length ?? 0);
+}
+
 function asRecord(doc: Record<string, unknown>, id: string): McsGraphRagRecord | null {
   if (doc.id !== id || typeof doc.knowledgeObjectId !== 'string' || typeof doc.version !== 'number' ||
       !['success', 'training', 'relationship', 'performance', 'organizational'].includes(String(doc.domain)) ||
@@ -251,7 +258,11 @@ function equalProjection(value: Record<string, unknown>, record: McsGraphRagReco
 }
 
 function copyReadinessResult(result: GraphRagReadinessResult): GraphRagReadinessResult {
-  return { ...result, reasons: [...result.reasons] };
+  return {
+    ...result,
+    reasons: [...result.reasons],
+    record: result.record ? structuredClone(result.record) : null,
+  };
 }
 
 function blocked(id: string, reason: string): GraphRagReadinessResult { return { id, status: 'blocked', reasons: [reason], record: null }; }

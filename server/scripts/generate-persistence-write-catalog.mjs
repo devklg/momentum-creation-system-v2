@@ -280,8 +280,7 @@ function renderMarkdown(catalog) {
 ## Call Sites
 
 | # | Tier | Subsystem | Location | Function | Mongo collection expression | Neo4j | Chroma | Rationale |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-${rows}
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |${rows ? `\n${rows}` : ''}
 `;
 }
 

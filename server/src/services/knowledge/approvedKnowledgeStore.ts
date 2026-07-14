@@ -104,13 +104,17 @@ interface ApprovedRetrievalCacheEntry {
 }
 
 const approvedRetrievalCache = new Map<string, ApprovedRetrievalCacheEntry>();
-const approvedRetrievalInFlight = new Map<string, Promise<McsKnowledgeReference[]>>();
+const approvedRetrievalInFlight = new Map<
+  string,
+  { generation: number; promise: Promise<McsKnowledgeReference[]> }
+>();
 let approvedRetrievalCacheGeneration = 0;
 let cacheHits = 0;
 let cacheMisses = 0;
 let cacheCoalesced = 0;
 let cacheEvictions = 0;
 let cacheInvalidations = 0;
+let cacheInFlightCount = 0;
 
 export async function createKevinApprovedKnowledgeSource(
   input: CreateKevinApprovedKnowledgeSourceInput,
@@ -387,13 +391,14 @@ export function createStoredApprovedKnowledgeProvider(): Pick<
       if (cached) approvedRetrievalCache.delete(key);
 
       const existing = approvedRetrievalInFlight.get(key);
-      if (existing) {
+      if (existing?.generation === approvedRetrievalCacheGeneration) {
         cacheCoalesced += 1;
-        return copyKnowledgeReferences(await existing);
+        return copyKnowledgeReferences(await existing.promise);
       }
 
       cacheMisses += 1;
       const generation = approvedRetrievalCacheGeneration;
+      cacheInFlightCount += 1;
       const search = searchApprovedKnowledgeStore(scope, normalizedQuery, limit)
         .then((references) => {
           if (references.length > 0 && generation === approvedRetrievalCacheGeneration) {
@@ -402,9 +407,12 @@ export function createStoredApprovedKnowledgeProvider(): Pick<
           return references;
         })
         .finally(() => {
-          approvedRetrievalInFlight.delete(key);
+          cacheInFlightCount = Math.max(0, cacheInFlightCount - 1);
+          if (approvedRetrievalInFlight.get(key)?.promise === search) {
+            approvedRetrievalInFlight.delete(key);
+          }
         });
-      approvedRetrievalInFlight.set(key, search);
+      approvedRetrievalInFlight.set(key, { generation, promise: search });
 
       return copyKnowledgeReferences(await search);
     },
@@ -421,7 +429,7 @@ export function getApprovedKnowledgeRetrievalCacheDiagnostics() {
     coalesced: cacheCoalesced,
     evictions: cacheEvictions,
     size: approvedRetrievalCache.size,
-    inFlight: approvedRetrievalInFlight.size,
+    inFlight: cacheInFlightCount,
     invalidations: cacheInvalidations,
     generation: approvedRetrievalCacheGeneration,
   };
@@ -442,6 +450,7 @@ export function resetApprovedKnowledgeRetrievalCacheForTests(): void {
   cacheCoalesced = 0;
   cacheEvictions = 0;
   cacheInvalidations = 0;
+  cacheInFlightCount = 0;
 }
 
 async function searchApprovedKnowledgeStore(
