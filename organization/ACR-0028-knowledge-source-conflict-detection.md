@@ -2,13 +2,15 @@
 
 ## Momentum Creation System V2
 
-Status: Proposed
+Status: Approved
 
 Priority: P2-134 — Knowledge source conflict detection
 
 Type: Read-only integrity projection + Kevin-only admin warning
 
 Risk: Medium
+
+Approval: Kevin L. Gardner — 2026-07-14
 
 Target Version: v1.2
 
@@ -169,7 +171,7 @@ source repair, projection rebuild, or lifecycle reversal.
 {
   "acr_id": "ACR-0028",
   "title": "Knowledge Source Conflict Detection",
-  "status": "proposed",
+  "status": "approved",
   "risk_level": "medium",
   "change_type": "read_only_knowledge_integrity_projection",
   "proposed_by": "Codex",
@@ -202,12 +204,14 @@ source repair, projection rebuild, or lifecycle reversal.
       "Kevin L. Gardner",
       "Knowledge/Persistence/QA"
     ],
-    "decision": "pending",
+    "decision": "approved",
     "conditions": [
       "Approval authorizes detection and admin warnings only.",
       "Source correction, lifecycle mutation, and supersession remain unauthorized.",
       "Semantic contradiction judgments remain human-governed."
-    ]
+    ],
+    "approved_by": "Kevin L. Gardner",
+    "approved_at": "2026-07-14"
   },
   "implementation": {
     "branch": "codex/p2-134-source-conflict-detection",
@@ -240,15 +244,26 @@ source repair, projection rebuild, or lifecycle reversal.
     "supersedes": null,
     "rollback_to": "ingestion-time single-resource conflict rejection"
   },
-  "decision_ledger_ref": null,
+  "decision_ledger_ref": "dec_acr_0028_knowledge_source_conflict_detection_approval_2026_07_14",
   "created_at": "2026-07-14",
   "updated_at": "2026-07-14"
 }
 ```
 
-## Approval gate
+## Approved implementation boundary
 
-Approve the recommended ACR-0028 bundle to authorize implementation and
-local/read-only verification on `codex/p2-134-source-conflict-detection`.
-Approval does not authorize source correction, lifecycle changes,
+The approved bundle authorizes implementation and local/read-only verification
+on `codex/p2-134-source-conflict-detection`. Approval does not authorize source correction, lifecycle changes,
 supersession, live content mutation, or external communication.
+
+## Approval record
+
+Kevin L. Gardner approved the recommended ACR-0028 bundle on 2026-07-14 with
+the exact statement `Approve recommended ACR-0028 bundle.` The decision was
+written and read back from the dedicated MCS MongoDB, Neo4j, and ChromaDB
+stores under
+`dec_acr_0028_knowledge_source_conflict_detection_approval_2026_07_14`.
+
+This approval authorizes implementation and read-only verification only. It
+does not authorize source correction, merge, lifecycle mutation, activation,
+archive, supersession, semantic LLM judgment, or external communication.

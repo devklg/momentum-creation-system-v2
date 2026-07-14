@@ -13,7 +13,9 @@ function countFor(params: { collection: string; filter: Record<string, unknown> 
 
 describe('buildAdminKnowledgeStatus', () => {
   beforeEach(() => {
-    persistence.mockReset().mockImplementation(async (_tool, _action, params) => ({ count: countFor(params) }));
+    persistence.mockReset().mockImplementation(async (_tool, _action, params) => params.sort
+      ? { count: 0, documents: [] }
+      : { count: countFor(params) });
   });
 
   it('separates active records from retrieval readiness and projection consistency', async () => {
@@ -28,6 +30,7 @@ describe('buildAdminKnowledgeStatus', () => {
         approvedReferenceCache: { ttlMs: 5000, maxEntries: 128 },
         graphRagReadiness: { maxUniqueIds: 50 },
       },
+      integrity: { status: 'clear', conflictCount: 0, mutationAuthorized: false },
     });
     expect(result.warnings).toHaveLength(2);
     expect(persistence).toHaveBeenCalledWith('mongodb', 'query', expect.objectContaining({
@@ -39,6 +42,7 @@ describe('buildAdminKnowledgeStatus', () => {
 
   it('reports ready only when eligible chunks have no unresolved Chroma projection', async () => {
     persistence.mockImplementation(async (_tool, _action, params) => {
+      if (params.sort) return { count: 0, documents: [] };
       const count = params.collection === 'mcs_knowledge_sources' ? 2
         : params.collection === 'mcs_knowledge_chunks' ? 7 : 0;
       return { count };
@@ -49,6 +53,7 @@ describe('buildAdminKnowledgeStatus', () => {
 
   it('fails closed to degraded when any status read is unavailable', async () => {
     persistence.mockImplementation(async (_tool, _action, params) => {
+      if (params.sort) return { count: 0, documents: [] };
       if (params.collection === 'mcs_knowledge_chunks' && params.filter.retrievalEligible) throw new Error('mongo offline');
       return { count: 0 };
     });

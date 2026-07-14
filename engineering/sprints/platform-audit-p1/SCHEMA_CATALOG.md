@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T17:55:31.208Z
+- Generated: 2026-07-14T18:26:52.241Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
 - Route handlers: 279
-- Shared exports: 1111
+- Shared exports: 1116
 
 ## Mongo Collections
 
@@ -375,8 +375,13 @@
 | `McsAdminEventBottleneckSection` | interface | `packages/shared/src/admin-bottlenecks.ts` |
 | `McsAdminInvitationBottleneckSection` | interface | `packages/shared/src/admin-bottlenecks.ts` |
 | `McsAdminTrainingBottleneckSection` | interface | `packages/shared/src/admin-bottlenecks.ts` |
+| `McsAdminKnowledgeIntegrityState` | type | `packages/shared/src/admin-knowledge-status.ts` |
+| `McsAdminKnowledgeIntegrityStatus` | interface | `packages/shared/src/admin-knowledge-status.ts` |
 | `McsAdminKnowledgeReadiness` | type | `packages/shared/src/admin-knowledge-status.ts` |
 | `McsAdminKnowledgeStatusResponse` | interface | `packages/shared/src/admin-knowledge-status.ts` |
+| `McsKnowledgeSourceConflictClass` | type | `packages/shared/src/admin-knowledge-status.ts` |
+| `McsKnowledgeSourceConflictFingerprint` | interface | `packages/shared/src/admin-knowledge-status.ts` |
+| `McsKnowledgeSourceConflictSeverity` | type | `packages/shared/src/admin-knowledge-status.ts` |
 | `MCS_ADMIN_LIVE_OPS_PATHS` | const | `packages/shared/src/admin-live-ops.ts` |
 | `McsAdminFunnelKind` | type | `packages/shared/src/admin-live-ops.ts` |
 | `McsAdminFunnelResponse` | interface | `packages/shared/src/admin-live-ops.ts` |

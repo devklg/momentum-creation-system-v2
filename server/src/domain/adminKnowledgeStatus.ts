@@ -9,6 +9,7 @@ import { getApprovedKnowledgeRetrievalCacheDiagnostics } from '../services/knowl
 import { env } from '../env.js';
 import { steveContextManagerLiveEnabled } from '../runtime/context/steveRuntimeContextFoundation.js';
 import { getGraphRagReadinessDiagnostics } from './graphragReadiness.js';
+import { observeKnowledgeSourceConflicts } from './knowledgeSourceConflictDetection.js';
 
 const OUTBOX_COLLECTION = 'tmag_projection_outbox';
 const TEAM_SCOPE = {
@@ -45,7 +46,7 @@ export async function buildAdminKnowledgeStatus(): Promise<McsAdminKnowledgeStat
   const outboxBase = { tier: 'knowledge', mongoCollection: MCS_KNOWLEDGE_BASE_CHUNK_COLLECTION };
 
   const [activeSources, activeChunks, retrievalEligibleChunks, pendingChromaProjections,
-    failedChromaProjections, pendingNeo4jProjections, failedNeo4jProjections] = await Promise.all([
+    failedChromaProjections, pendingNeo4jProjections, failedNeo4jProjections, integrity] = await Promise.all([
     safeCount('Active knowledge sources', MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION, activeSourceFilter),
     safeCount('Active knowledge chunks', MCS_KNOWLEDGE_BASE_CHUNK_COLLECTION, activeChunkFilter),
     safeCount('Retrieval-eligible knowledge chunks', MCS_KNOWLEDGE_BASE_CHUNK_COLLECTION, retrievalReadyFilter),
@@ -53,6 +54,7 @@ export async function buildAdminKnowledgeStatus(): Promise<McsAdminKnowledgeStat
     safeCount('Failed Chroma projections', OUTBOX_COLLECTION, { ...outboxBase, target: 'chroma', status: 'failed' }),
     safeCount('Pending Neo4j projections', OUTBOX_COLLECTION, { ...outboxBase, target: 'neo4j', status: 'pending' }),
     safeCount('Failed Neo4j projections', OUTBOX_COLLECTION, { ...outboxBase, target: 'neo4j', status: 'failed' }),
+    observeKnowledgeSourceConflicts(),
   ]);
 
   const unresolvedChroma = pendingChromaProjections + failedChromaProjections;
@@ -72,7 +74,7 @@ export async function buildAdminKnowledgeStatus(): Promise<McsAdminKnowledgeStat
     statusBasis: 'mongo_provider_eligibility_plus_projection_queue',
     activeSources, activeChunks, retrievalReadyChunks,
     pendingChromaProjections, failedChromaProjections,
-    pendingNeo4jProjections, failedNeo4jProjections, warnings,
+    pendingNeo4jProjections, failedNeo4jProjections, warnings, integrity,
     contextManager: {
       ...contextManager,
       liveSurfaces: {

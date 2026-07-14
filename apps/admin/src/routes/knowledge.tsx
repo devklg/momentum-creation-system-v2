@@ -3,7 +3,11 @@
  */
 
 import { FormEvent, useCallback, useEffect, useState, type ReactNode } from 'react';
-import type { McsAdminKnowledgeStatusResponse } from '@momentum/shared';
+import type {
+  McsAdminKnowledgeIntegrityStatus,
+  McsAdminKnowledgeStatusResponse,
+  McsKnowledgeSourceConflictClass,
+} from '@momentum/shared';
 import type { McsKnowledgeDomain, McsRuntimeLanguage } from '@momentum/shared/runtime';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -206,6 +210,7 @@ export function KnowledgePage() {
               {knowledgeStatus.pendingChromaProjections} Chroma pending · {knowledgeStatus.failedChromaProjections} Chroma failed · {knowledgeStatus.pendingNeo4jProjections} graph pending · {knowledgeStatus.failedNeo4jProjections} graph failed
             </p>
             {knowledgeStatus.warnings.map((warning) => <p key={warning} className="text-xs text-amber-300 mt-2">{warning}</p>)}
+            <KnowledgeIntegrityPanel integrity={knowledgeStatus.integrity} />
             <div className="border-t border-line mt-5 pt-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="font-mono text-[10px] uppercase tracking-label text-gold">Context Manager Degraded Reasons</h3>
@@ -398,6 +403,73 @@ export function KnowledgePage() {
           </div>
         </form>
       </section>
+    </div>
+  );
+}
+
+const CONFLICT_LABELS: Record<McsKnowledgeSourceConflictClass, string> = {
+  active_source_ref_divergence: 'Source reference divergence',
+  active_source_identity_divergence: 'Source identity divergence',
+  resource_projection_digest_mismatch: 'Resource digest mismatch',
+  active_authority_state_mismatch: 'Authority state mismatch',
+  active_exact_duplicate: 'Exact active duplicate',
+};
+
+function KnowledgeIntegrityPanel({ integrity }: { integrity: McsAdminKnowledgeIntegrityStatus }) {
+  const stateColor = integrity.status === 'clear'
+    ? 'text-teal border-teal/40'
+    : integrity.status === 'conflicts'
+      ? 'text-amber-300 border-amber-300/40'
+      : 'text-red-400 border-red-400/40';
+  const populatedCounts = (Object.entries(integrity.counts) as Array<[McsKnowledgeSourceConflictClass, number]>)
+    .filter(([, count]) => count > 0);
+
+  return (
+    <div className="border-t border-line mt-5 pt-4" aria-label="Knowledge source integrity">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-mono text-[10px] uppercase tracking-label text-gold">Source Integrity</h3>
+        <span className={`border px-2 py-1 font-mono text-[9px] uppercase tracking-label ${stateColor}`}>
+          {integrity.status}
+        </span>
+      </div>
+      <p className="text-xs text-cream-mute mt-2">
+        {integrity.scan.sourcesObserved} sources · {integrity.scan.resourcesObserved} resources · {integrity.conflictCount} conflicts
+        {integrity.highestSeverity ? ` · highest severity ${integrity.highestSeverity}` : ''}
+      </p>
+      {integrity.status === 'clear' && (
+        <p className="text-xs text-teal mt-2">The bounded canonical scan found no deterministic source conflicts.</p>
+      )}
+      {(integrity.status === 'degraded' || integrity.status === 'truncated') && (
+        <p className="text-xs text-red-400 mt-2">
+          Integrity is not clear because the canonical scan was {integrity.status}. Refresh after the store or scan boundary is resolved.
+        </p>
+      )}
+      {populatedCounts.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-3">
+          {populatedCounts.map(([conflictClass, count]) => (
+            <span key={conflictClass} className="border border-line px-2 py-1 font-mono text-[10px] text-amber-300">
+              {CONFLICT_LABELS[conflictClass]} · {count}
+            </span>
+          ))}
+        </div>
+      )}
+      {integrity.degradedReasons.length > 0 && (
+        <p className="font-mono text-[9px] uppercase tracking-label text-red-400 mt-3">
+          {integrity.degradedReasons.map((entry) => `${entry.reason.replaceAll('_', ' ')} · ${entry.count}`).join(' · ')}
+        </p>
+      )}
+      {integrity.samples.length > 0 && (
+        <ul className="grid gap-1 mt-3" aria-label="Conflict fingerprints">
+          {integrity.samples.map((sample) => (
+            <li key={`${sample.conflictClass}:${sample.fingerprint}`} className="font-mono text-[9px] text-cream-mute">
+              {CONFLICT_LABELS[sample.conflictClass]} · {sample.severity} · hash {sample.fingerprint.slice(0, 12)}
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="font-mono text-[9px] uppercase tracking-label text-cream-mute mt-3">
+        Read-only observation · content-free fingerprints · no mutation authorized
+      </p>
     </div>
   );
 }
