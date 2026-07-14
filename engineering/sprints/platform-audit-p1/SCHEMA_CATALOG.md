@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:11:27.369Z
+- Generated: 2026-07-14T01:19:55.058Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
 - Route handlers: 268
-- Shared exports: 1066
+- Shared exports: 1074
 
 ## Mongo Collections
 
@@ -924,6 +924,14 @@
 | `McsTrainingAccessPrerequisite` | type | `packages/shared/src/training-catalog.ts` |
 | `McsTrainingCatalogModuleId` | type | `packages/shared/src/training-catalog.ts` |
 | `McsTrainingModuleCatalogEntry` | interface | `packages/shared/src/training-catalog.ts` |
+| `buildTrainingLanguageParityReport` | function | `packages/shared/src/training-language-parity.ts` |
+| `MCS_TRAINING_LANGUAGE_PARITY_REPORT` | const | `packages/shared/src/training-language-parity.ts` |
+| `MCS_TRAINING_LANGUAGE_PARITY_SURFACES` | const | `packages/shared/src/training-language-parity.ts` |
+| `McsTrainingContentAvailability` | type | `packages/shared/src/training-language-parity.ts` |
+| `McsTrainingContentLocale` | type | `packages/shared/src/training-language-parity.ts` |
+| `McsTrainingLanguageParityFinding` | interface | `packages/shared/src/training-language-parity.ts` |
+| `McsTrainingLanguageParitySurface` | interface | `packages/shared/src/training-language-parity.ts` |
+| `McsTrainingLanguageVariant` | interface | `packages/shared/src/training-language-parity.ts` |
 | `MCS_TRAINING_TARGET_RECONCILIATION` | const | `packages/shared/src/training-target-reconciliation.ts` |
 | `MCS_TRAINING_TARGET_RECONCILIATION_ENTRIES` | const | `packages/shared/src/training-target-reconciliation.ts` |
 | `MCS_TRAINING_TARGET_RECONCILIATION_SCHEMA_VERSION` | const | `packages/shared/src/training-target-reconciliation.ts` |
