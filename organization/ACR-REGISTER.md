@@ -37,6 +37,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0020 | Training Effectiveness Feedback Governance | P2-112 / Training + approved knowledge + outcomes | Proposed | v1.2 |
 | ACR-0021 | Steve Success Profile Guidance Projection | P2-118 / Steve + Launch Center read projection | Approved | v1.2 |
 | ACR-0022 | Steve Success Profile Extraction Prompt Registration | P2-120 / prompt governance registry | Proposed | v1.2 |
+| ACR-0025 | Admin Pagination and Index Awareness | P2-131 / admin high-volume read contracts | Proposed | v1.2 |
 
 ---
 
