@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T03:37:33.252Z",
+  "generatedAt": "2026-07-14T03:52:28.097Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -5009,7 +5009,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/scriptmaker.ts:79",
+      "source": "server/src/routes/scriptmaker.ts:80",
       "routeSource": "server/src/routes/scriptmaker.ts",
       "signals": {
         "requireAuth": true,
@@ -5036,7 +5036,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:113",
+      "source": "server/src/routes/ivory.ts:114",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
@@ -5063,7 +5063,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:132",
+      "source": "server/src/routes/ivory.ts:133",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
@@ -5090,7 +5090,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:178",
+      "source": "server/src/routes/ivory.ts:179",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
@@ -5117,7 +5117,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:227",
+      "source": "server/src/routes/ivory.ts:228",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
@@ -5144,7 +5144,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:265",
+      "source": "server/src/routes/ivory.ts:266",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
@@ -5171,7 +5171,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:297",
+      "source": "server/src/routes/ivory.ts:298",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
@@ -5198,7 +5198,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:341",
+      "source": "server/src/routes/ivory.ts:363",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
@@ -5225,7 +5225,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:389",
+      "source": "server/src/routes/ivory.ts:431",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
@@ -5252,7 +5252,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:458",
+      "source": "server/src/routes/ivory.ts:500",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
@@ -5279,7 +5279,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:495",
+      "source": "server/src/routes/ivory.ts:537",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
@@ -5306,7 +5306,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:524",
+      "source": "server/src/routes/ivory.ts:566",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
@@ -5333,7 +5333,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:605",
+      "source": "server/src/routes/ivory.ts:647",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
@@ -5360,7 +5360,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/ivory.ts:624",
+      "source": "server/src/routes/ivory.ts:666",
       "routeSource": "server/src/routes/ivory.ts",
       "signals": {
         "requireAuth": true,
