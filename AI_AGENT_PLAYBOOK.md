@@ -45,6 +45,40 @@ For current implementation state:
 | ScriptMaker | Draft compliant product/video invitation copy for human review and sending. | Auto-send, promise outcomes, use `.com`-forbidden claims, or bypass compliance scans. | `AGENT_PROMPT_GOVERNANCE.md`, ScriptMaker domain code. |
 | Governance/operations agents | Coordinate, verify, warn, document, and surface risk. | Decide for Kevin, self-approve expansion, or silently change source-of-truth order. | Constitution and governance docs. |
 
+## Steve Prompt And Runtime Playbook
+
+Steve's current prompt inventory lives in the existing
+`MCS_AGENT_TEMPLATE_REGISTRY` in `packages/shared/src/agent-skills.ts`. Do not
+create a second Steve prompt registry. The stable template id and semantic
+version identify the governed prompt contract; the behavior source identifies
+the code that supplies the active instructions.
+
+| Governed template | Purpose | Behavior source | Degradation | Primary tests |
+| --- | --- | --- | --- | --- |
+| `steve_success_discovery@1.0.0` | Conduct the authenticated BA's browser-based, non-scored Success Discovery conversation. | `server/src/domain/steve-success-interview.ts#buildSteveSystemPrompt`, orchestrated by `server/src/domain/steveConversationRuntime.ts`. | Preserve prior turns and block substantive invention; request a retry. | `steveConversationRuntime.test.ts`, `steve.test.ts` |
+| `steve_success_profile@1.0.0` | Assemble the completed BA-authored answers into the descriptive Success Profile and Michael handoff summary. | `server/src/domain/steve-success-interview.ts#assembleSuccessProfile`. | Do not create a profile from incomplete authoritative answers. | `steveDiscoveryPersistence.test.ts`, `steve.test.ts` |
+
+Operational rules:
+
+- Steve is the sole New BA Discovery interviewer. Michael does not interview.
+- The interaction is BA-facing inside the authenticated `.team` browser
+  runtime. Steve never appears on `.com` and Telnyx carries no Steve runtime
+  conversation.
+- `buildSteveSystemPrompt` is the base prompt authority. Optional approved
+  Context Packet material may supplement it only through the server-owned,
+  flag-gated context path; unavailable context never broadens behavior.
+- `[[DISCOVERY_COMPLETE]]` is an internal completion marker. The server removes
+  it from BA-facing text, extracts the completed profile, persists the
+  authoritative artifact, and only then opens Steve-completion-gated routes.
+- Steve may reflect the BA's own goals and words. Steve may not score, rank,
+  classify, qualify, predict, compare, pressure, or infer human potential.
+- The Success Profile is private support context, not the BA's public/editable
+  profile and not Kevin-approved Knowledge Base content.
+- Prompt or extraction changes must update the registered version and tests.
+  Mission, safety, retrieval, or completion-contract changes require the
+  applicable prompt-governance and ACR approval; never edit an approved active
+  version in place.
+
 ## Degradation And Fallbacks
 
 - Degraded agent behavior must be explicit in API responses, logs, or admin diagnostics where user-facing behavior depends on it.
