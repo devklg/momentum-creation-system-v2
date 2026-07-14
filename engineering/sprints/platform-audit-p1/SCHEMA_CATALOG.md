@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:33:17.627Z
+- Generated: 2026-07-14T01:51:12.817Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
-- Route handlers: 269
-- Shared exports: 1083
+- Route handlers: 270
+- Shared exports: 1088
 
 ## Mongo Collections
 
@@ -322,7 +322,7 @@
 | `(unmounted)` | `server/src/routes/admin/knowledge.ts` | GET /status<br>POST /sources<br>POST /sources/upload | none |
 | `(unmounted)` | `server/src/routes/admin/liveOps.ts` | GET /operations<br>GET /growth<br>GET user-agent<br>GET /grid<br>GET user-agent<br>GET /funnel<br>GET user-agent<br>GET /usage/stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminFunnelKind`, `McsAdminLiveUsageSample`, `McsAdminLiveUsageStreamEvent`, `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/michael-runtime-observability.ts` | GET /observability | none |
-| `(unmounted)` | `server/src/routes/admin/orientation.ts` | GET user-agent<br>GET /sessions<br>POST /sessions | `McsAdminCreateOrientationSessionResponse`, `McsAdminOrientationSessionsResponse`, `McsAuditActor`, `McsAuditContext` |
+| `(unmounted)` | `server/src/routes/admin/orientation.ts` | GET user-agent<br>GET /sessions<br>GET /diagnostic<br>POST /sessions | `McsAdminCreateOrientationSessionResponse`, `McsAdminOrientationDiagnosticResponse`, `McsAdminOrientationSessionsResponse`, `McsAuditActor`, `McsAuditContext` |
 | `(unmounted)` | `server/src/routes/admin/prospects.ts` | GET user-agent<br>GET /<br>GET /filters<br>GET /:prospectId<br>GET /:prospectId/sandbox-preview<br>POST /:prospectId/notes<br>POST /:prospectId/move<br>POST /:prospectId/reassign-sponsor<br>POST /:prospectId/manual-flush<br>POST /:prospectId/force-enroll<br>POST /<br>PATCH /:prospectId<br>DELETE /:prospectId<br>POST /:prospectId/restore<br>POST /flush-expired<br>GET /alerts/aged | `McsAdminDashboardFilter`, `McsAdminProspectActivityEvent`, `McsAdminProspectActivityEventKind`, `McsAdminProspectAddNoteResponse`, `McsAdminProspectDetailResponse`, `McsAdminProspectDirectoryResponse`, `McsAuditActor`, `McsAuditContext`, `McsAuditLogEntry` |
 | `(unmounted)` | `server/src/routes/admin/queue.ts` | GET user-agent<br>GET /summary<br>GET /lookup<br>GET /visible-window<br>PUT /visible-window<br>GET /ticker<br>GET /ticker/stream<br>GET /rules<br>PUT /rules/:key | `McsAdminQueueTickerSnapshot`, `McsAdminQueueTickerSseEvent`, `McsAdminTickerEntry`, `McsAuditActor`, `McsPlacementEvent`, `McsQueueAdminTickerResponse`, `McsQueueLookupResponse`, `McsQueueOversightSummaryResponse`, `McsQueueRulesResponse`, `McsQueueVisibleWindow`, `McsQueueVisibleWindowResponse` |
 | `(unmounted)` | `server/src/routes/admin/reporting.ts` | GET /master-report.pdf<br>GET user-agent<br>GET /activation<br>GET user-agent<br>GET /training<br>GET user-agent<br>GET /invite-funnel<br>GET user-agent<br>GET /queue-velocity<br>GET user-agent<br>GET /enrollment-completion<br>GET user-agent<br>GET /follow-up-aging<br>GET user-agent<br>GET /leader-scorecards<br>GET user-agent<br>GET user-agent<br>GET /activation/export<br>GET /training/export<br>GET /invite-funnel/export<br>GET /queue-velocity/export<br>GET /enrollment-completion/export<br>GET /follow-up-aging/export<br>GET /leader-scorecards/export | `McsAdminDashboardFilter`, `McsAdminReportTimeRange`, `McsAuditActor` |
@@ -492,6 +492,11 @@
 | `MCS_LEADER_CREDIBILITY` | const | `packages/shared/src/leaders.ts` |
 | `McsLeaderCredibilityContent` | interface | `packages/shared/src/leaders.ts` |
 | `McsLeaderProfile` | interface | `packages/shared/src/leaders.ts` |
+| `MCS_ORIENTATION_DIAGNOSTIC_VERSION` | const | `packages/shared/src/orientation-diagnostic.ts` |
+| `McsAdminOrientationDiagnosticResponse` | interface | `packages/shared/src/orientation-diagnostic.ts` |
+| `McsOrientationDiagnosticCategory` | type | `packages/shared/src/orientation-diagnostic.ts` |
+| `McsOrientationDiagnosticCode` | type | `packages/shared/src/orientation-diagnostic.ts` |
+| `McsOrientationDiagnosticFinding` | interface | `packages/shared/src/orientation-diagnostic.ts` |
 | `MCS_CURRENT_ORIENTATION_STATE_MACHINE` | const | `packages/shared/src/orientation-state-machine.ts` |
 | `MCS_ORIENTATION_STATE_MACHINE_VERSION` | const | `packages/shared/src/orientation-state-machine.ts` |
 | `McsCurrentOrientationEvent` | type | `packages/shared/src/orientation-state-machine.ts` |
