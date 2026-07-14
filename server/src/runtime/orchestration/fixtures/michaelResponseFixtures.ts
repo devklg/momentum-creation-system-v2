@@ -3,6 +3,7 @@ import type {
   McsRuntimeTurnId,
   McsSessionId,
 } from '@momentum/shared/runtime';
+import { MICHAEL_RUNTIME_RESPONSE_COPY } from '@momentum/shared';
 import type { MichaelResponseContractV1 } from '../types.js';
 
 const SESSION_ID = 'session_s2_12_michael_response_fixture' as McsSessionId;
@@ -66,12 +67,11 @@ export const michaelResponseFixtureNextTrainingStepEn = baseFixture({
   contextPacketStatus: 'complete',
   contextPacketId: COMPLETE_CONTEXT_PACKET_ID,
   language: 'en',
-  text: 'Review the next training step, then write down one question you want your sponsor to help you practice.',
+  text: MICHAEL_RUNTIME_RESPONSE_COPY.nextTrainingStep.en.text,
   safety: validSafety,
   nextStep: {
-    title: 'Review the next training step',
-    instruction:
-      'Open the next training step and make one private note about what you want to practice.',
+    title: MICHAEL_RUNTIME_RESPONSE_COPY.nextTrainingStep.en.nextStep.title,
+    instruction: MICHAEL_RUNTIME_RESPONSE_COPY.nextTrainingStep.en.nextStep.instruction,
     baOwned: true,
     automaticSending: false,
     automaticCalling: false,
@@ -84,12 +84,11 @@ export const michaelResponseFixtureNextTrainingStepEs = baseFixture({
   contextPacketStatus: 'complete',
   contextPacketId: COMPLETE_CONTEXT_PACKET_ID,
   language: 'es',
-  text: 'Repasa el siguiente paso de entrenamiento y anota una pregunta para practicarla con tu patrocinador.',
+  text: MICHAEL_RUNTIME_RESPONSE_COPY.nextTrainingStep.es.text,
   safety: validSafety,
   nextStep: {
-    title: 'Repasa el siguiente paso',
-    instruction:
-      'Abre el siguiente paso de entrenamiento y escribe una nota privada sobre lo que quieres practicar.',
+    title: MICHAEL_RUNTIME_RESPONSE_COPY.nextTrainingStep.es.nextStep.title,
+    instruction: MICHAEL_RUNTIME_RESPONSE_COPY.nextTrainingStep.es.nextStep.instruction,
     baOwned: true,
     automaticSending: false,
     automaticCalling: false,
@@ -102,7 +101,7 @@ export const michaelResponseFixtureClarificationQuestionEn = baseFixture({
   contextPacketStatus: 'complete',
   contextPacketId: COMPLETE_CONTEXT_PACKET_ID,
   language: 'en',
-  text: 'Which part would help most right now: understanding the two-leg structure, practicing your words, or choosing the next training page?',
+  text: MICHAEL_RUNTIME_RESPONSE_COPY.clarificationQuestion.en.text,
   safety: validSafety,
 });
 
@@ -111,7 +110,7 @@ export const michaelResponseFixtureClarificationQuestionEs = baseFixture({
   contextPacketStatus: 'complete',
   contextPacketId: COMPLETE_CONTEXT_PACKET_ID,
   language: 'es',
-  text: '¿Qué te ayudaría más ahora: entender la estructura de dos piernas, practicar tus palabras o elegir la próxima página de entrenamiento?',
+  text: MICHAEL_RUNTIME_RESPONSE_COPY.clarificationQuestion.es.text,
   safety: validSafety,
 });
 
@@ -120,7 +119,7 @@ export const michaelResponseFixtureSafeFallbackDegradedContextPacket = baseFixtu
   contextPacketStatus: 'degraded',
   contextPacketId: DEGRADED_CONTEXT_PACKET_ID,
   language: 'en',
-  text: 'I have limited context right now, so keep this simple: continue with the next training step and ask your sponsor before making any outside commitment.',
+  text: MICHAEL_RUNTIME_RESPONSE_COPY.safeFallback.degraded.en.text,
   safety: safeFallbackSafety,
 });
 
@@ -128,7 +127,7 @@ export const michaelResponseFixtureSafeFallbackMissingContextPacket = baseFixtur
   responseType: 'safe_fallback',
   contextPacketStatus: 'missing',
   language: 'en',
-  text: 'I do not have the training context I need. Please return to the training page or ask your sponsor for the next step.',
+  text: MICHAEL_RUNTIME_RESPONSE_COPY.safeFallback.missing.en.text,
   safety: safeFallbackSafety,
 });
 
@@ -136,7 +135,7 @@ export const michaelResponseFixtureSafeCloseFailedContextPacket = baseFixture({
   responseType: 'safe_close',
   contextPacketStatus: 'failed',
   language: 'en',
-  text: 'I cannot continue this training turn without a valid Context Packet. Nothing was saved or sent.',
+  text: MICHAEL_RUNTIME_RESPONSE_COPY.safeClose.failed.en.text,
   safety: blockedSafety,
 });
 
@@ -144,7 +143,7 @@ export const michaelResponseFixtureSafeCloseCandidateReviewOnlyRejection = baseF
   responseType: 'safe_close',
   contextPacketStatus: 'rejected',
   language: 'en',
-  text: 'I cannot use candidate or review-only context for this turn. Please continue from approved training context only.',
+  text: MICHAEL_RUNTIME_RESPONSE_COPY.safeClose.rejected.en.text,
   safety: {
     ...blockedSafety,
     blockedReasonCodes: ['candidate_review_only_context_rejected'],
@@ -161,7 +160,7 @@ export const michaelResponseFixtureSafeFallbackDegradedContextPacketEs = baseFix
   contextPacketStatus: 'degraded',
   contextPacketId: DEGRADED_CONTEXT_PACKET_ID,
   language: 'es',
-  text: 'Ahora tengo contexto limitado, así que mantengámoslo sencillo: sigue con tu entrenamiento y consulta a tu patrocinador antes de cualquier compromiso externo.',
+  text: MICHAEL_RUNTIME_RESPONSE_COPY.safeFallback.degraded.es.text,
   safety: safeFallbackSafety,
 });
 
@@ -169,7 +168,7 @@ export const michaelResponseFixtureSafeFallbackMissingContextPacketEs = baseFixt
   responseType: 'safe_fallback',
   contextPacketStatus: 'missing',
   language: 'es',
-  text: 'No tengo el contexto de entrenamiento que necesito. Por favor regresa a la página de entrenamiento o pide a tu patrocinador el siguiente paso.',
+  text: MICHAEL_RUNTIME_RESPONSE_COPY.safeFallback.missing.es.text,
   safety: safeFallbackSafety,
 });
 
@@ -177,7 +176,7 @@ export const michaelResponseFixtureSafeCloseFailedContextPacketEs = baseFixture(
   responseType: 'safe_close',
   contextPacketStatus: 'failed',
   language: 'es',
-  text: 'No puedo continuar este turno de entrenamiento sin un Context Packet válido. No se guardó ni se envió nada.',
+  text: MICHAEL_RUNTIME_RESPONSE_COPY.safeClose.failed.es.text,
   safety: blockedSafety,
 });
 
@@ -185,7 +184,7 @@ export const michaelResponseFixtureSafeCloseCandidateReviewOnlyRejectionEs = bas
   responseType: 'safe_close',
   contextPacketStatus: 'rejected',
   language: 'es',
-  text: 'No puedo usar contexto candidato o de solo revisión en este turno. Por favor continúa solo desde contexto de entrenamiento aprobado.',
+  text: MICHAEL_RUNTIME_RESPONSE_COPY.safeClose.rejected.es.text,
   safety: {
     ...blockedSafety,
     blockedReasonCodes: ['candidate_review_only_context_rejected'],

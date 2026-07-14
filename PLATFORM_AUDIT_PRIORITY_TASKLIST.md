@@ -154,7 +154,7 @@ Product unification, workflow completion, content operations, and scale-hardenin
 - [x] 119. **Steve:** Add Steve route, completion, and gate tests.
 - [ ] 120. **Steve:** Add Steve prompt and playbook entries. *(PR #305 documented two existing records, but the active `extractionSystem()` LLM prompt was not registered. A planned extraction entry and ACR-0022 now preserve the unresolved approval gate.)*
 - [x] 121. **Michael:** Create a Michael runtime health and admin debugger.
-- [ ] 122. **Michael:** Create a single source of truth for Michael language and fallback behavior.
+- [ ] 122. **Michael:** Create a single source of truth for Michael language and fallback behavior. *(Implementation and automated verification prepared; ACR-0023 is Proposed and Kevin approval is required before adoption or merge.)*
 - [ ] 123. **Ivory:** Register Ivory and ScriptMaker prompts in the prompt registry.
 - [ ] 124. **Ivory:** Add generated-output audit records with prompt version, input, user, and compliance result.
 - [ ] 125. **LLM:** Add LLM provider error observability and retry/degradation reporting.

@@ -32,6 +32,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { MICHAEL_RUNTIME_SUPPORTED_LANGUAGES } from '@momentum/shared';
 import type {
   TmagId,
   McsCorrelationId,
@@ -66,7 +67,8 @@ const MICHAEL_TASK_TYPE = 'training_support' as const;
 const TENANT_ID = 'tenant_team_magnificent' as McsTenantId;
 const TEAM_ID = 'team_magnificent' as McsTeamId;
 
-const SUPPORTED_LANGUAGES: readonly McsRuntimeLanguage[] = ['en', 'es'];
+const SUPPORTED_LANGUAGES: readonly McsRuntimeLanguage[] =
+  MICHAEL_RUNTIME_SUPPORTED_LANGUAGES;
 const SUPPORTED_MODES: readonly McsRuntimeMode[] = ['browser_text', 'browser_voice', 'mixed'];
 const DEFAULT_LANGUAGE: McsRuntimeLanguage = 'en';
 const DEFAULT_MODE: McsRuntimeMode = 'browser_text';

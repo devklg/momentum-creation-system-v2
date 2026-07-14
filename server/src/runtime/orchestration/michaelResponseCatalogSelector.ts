@@ -1,4 +1,9 @@
 import {
+  MICHAEL_RUNTIME_FALLBACK_POLICY,
+  MICHAEL_RUNTIME_FALLBACK_SCENARIOS,
+  MICHAEL_RUNTIME_SUPPORTED_LANGUAGES,
+} from '@momentum/shared';
+import {
   getMichaelResponseCatalogEntry,
   MICHAEL_RESPONSE_CATALOG,
 } from './michaelResponseCatalog.js';
@@ -12,20 +17,13 @@ import type {
 
 const MICHAEL_AGENT_KEY = 'michael_magnificent' as const;
 const MICHAEL_TASK_TYPE = 'training_support' as const;
-const SUPPORTED_LANGUAGES = ['en', 'es'] as const;
 const KNOWN_RESPONSE_TYPES = [
   'next_training_step',
   'clarification_question',
   'safe_fallback',
   'safe_close',
 ] as const;
-const KNOWN_SCENARIO_FAMILIES = [
-  'complete',
-  'degraded',
-  'missing',
-  'failed',
-  'rejected',
-] as const;
+const KNOWN_SCENARIO_FAMILIES = ['complete', ...MICHAEL_RUNTIME_FALLBACK_SCENARIOS] as const;
 
 /**
  * Valid (scenarioFamily, responseType) → catalog-key-base mapping. Language is
@@ -35,10 +33,12 @@ const KNOWN_SCENARIO_FAMILIES = [
 const CATALOG_KEY_BASE_BY_COMBINATION: ReadonlyMap<string, string> = new Map([
   ['complete|next_training_step', 'michael_next_training_step'],
   ['complete|clarification_question', 'michael_clarification_question'],
-  ['degraded|safe_fallback', 'michael_safe_fallback_degraded'],
-  ['missing|safe_fallback', 'michael_safe_fallback_missing'],
-  ['failed|safe_close', 'michael_safe_close_failed'],
-  ['rejected|safe_close', 'michael_safe_close_rejected'],
+  ...Object.entries(MICHAEL_RUNTIME_FALLBACK_POLICY).map(
+    ([scenarioFamily, policy]) => [
+      `${scenarioFamily}|${policy.responseType}`,
+      `michael_${policy.responseType}_${scenarioFamily}`,
+    ] as const,
+  ),
 ]);
 
 /** Intent that must accompany each complete-family response type, when given. */
@@ -72,7 +72,7 @@ export function selectMichaelResponseCatalogEntry(
     issues.push(issue('wrong_task', 'Selector accepts only training_support.'));
   }
 
-  if (!(SUPPORTED_LANGUAGES as readonly string[]).includes(request.language)) {
+  if (!(MICHAEL_RUNTIME_SUPPORTED_LANGUAGES as readonly string[]).includes(request.language)) {
     issues.push(issue('unsupported_language', 'Selector accepts only en or es.'));
   }
 

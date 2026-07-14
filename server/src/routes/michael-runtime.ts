@@ -32,6 +32,10 @@
 
 import { Router } from 'express';
 import type { Request, Response } from 'express';
+import {
+  MICHAEL_RUNTIME_SUPPORTED_LANGUAGES,
+  type MichaelRuntimeLanguage,
+} from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
@@ -59,7 +63,7 @@ export const michaelRuntimeRoutes: Router = Router();
 // authority, identifiers, tokens, etc.) is rejected. `ask` is content only: it
 // is sanitized, length-limited, and used only as a Context Manager search cue.
 const ALLOWED_BODY_FIELDS = new Set(['language', 'ask']);
-const SUPPORTED_BODY_LANGUAGES = new Set(['en', 'es']);
+const SUPPORTED_BODY_LANGUAGES = new Set<string>(MICHAEL_RUNTIME_SUPPORTED_LANGUAGES);
 const MAX_ASK_LENGTH = 500;
 
 interface MichaelRuntimeSupportingContextItem {
@@ -102,7 +106,7 @@ export async function handleMichaelRuntimeResolve(
   // targetTmagId (and turn/contextPacket/token/sessionId/etc.) now all yield
   // CLIENT_RUNTIME_INPUT_NOT_ALLOWED.
   const body = (req.body ?? {}) as Record<string, unknown>;
-  let validatedLanguage: 'en' | 'es' | undefined;
+  let validatedLanguage: MichaelRuntimeLanguage | undefined;
   let validatedAsk: string | undefined;
   for (const key of Object.keys(body)) {
     if (!ALLOWED_BODY_FIELDS.has(key)) {
@@ -123,7 +127,7 @@ export async function handleMichaelRuntimeResolve(
         code: 'CLIENT_RUNTIME_INPUT_NOT_ALLOWED',
       });
     }
-    validatedLanguage = body.language as 'en' | 'es';
+    validatedLanguage = body.language as MichaelRuntimeLanguage;
   }
   if (body.ask !== undefined) {
     if (typeof body.ask !== 'string') {
