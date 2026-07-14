@@ -26,3 +26,4 @@ export * from './resource-center.js';
 export * from './event-center-catalog.js';
 export * from './event-center.js';
 export * from './training-catalog.js';
+export * from './training-target-reconciliation.js';

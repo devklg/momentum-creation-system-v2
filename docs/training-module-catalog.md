@@ -31,10 +31,11 @@ Start module. It has no durable completion source today and the catalog does
 not infer one. Resource Center materials support training but do not own module
 sequence or progress.
 
-## Boundary with P2-111
+## Target reconciliation
 
 `TRAINING_ARCHITECTURE.md` describes a larger target curriculum. P2-110 does
 not claim that target is implemented and does not silently map current Fast
-Start modules onto it. P2-111 owns the explicit target-versus-current
-reconciliation. This separation keeps the catalog factual while giving that
-reconciliation one stable current-state input.
+Start modules onto it. P2-111 records the explicit target-versus-current
+reconciliation in `docs/training-target-reconciliation.md` and
+`packages/shared/src/training-target-reconciliation.ts`. This separation keeps
+the current catalog factual while making every target gap explicit.
