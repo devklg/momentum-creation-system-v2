@@ -2,7 +2,7 @@
 
 ## Momentum Creation System V2
 
-Status: Proposed
+Status: Approved
 
 Priority: P2-135 — Stale knowledge correction and supersession workflow
 
@@ -10,7 +10,7 @@ Type: Kevin-only append-only knowledge lifecycle workflow
 
 Risk: High
 
-Approval: Required — Kevin L. Gardner
+Approval: Kevin L. Gardner — 2026-07-14
 
 Target Version: v1.2
 
@@ -284,7 +284,7 @@ Approval does not authorize applying a correction to existing live knowledge.
 {
   "acr_id": "ACR-0029",
   "title": "Governed Knowledge Correction and Supersession",
-  "status": "proposed",
+  "status": "approved",
   "risk_level": "high",
   "change_type": "kevin_only_append_only_knowledge_lifecycle_workflow",
   "proposed_by": "Codex",
@@ -322,7 +322,9 @@ Approval does not authorize applying a correction to existing live knowledge.
       "Kevin L. Gardner",
       "Knowledge/Persistence/QA"
     ],
-    "decision": "pending",
+    "decision": "approved",
+    "approved_by": "Kevin L. Gardner",
+    "approved_at": "2026-07-14",
     "conditions": [
       "ACR approval authorizes implementation and read-only verification only.",
       "Every live correction requires a separate Kevin decision bound to exact preview evidence.",
@@ -340,7 +342,30 @@ Approval does not authorize applying a correction to existing live knowledge.
     "supersedes": null,
     "rollback_to": "read-only conflict observation and source creation only"
   },
+  "decision_ledger_ref": "dec_acr_0029_governed_knowledge_correction_approval_2026_07_14",
   "created_at": "2026-07-14",
   "updated_at": "2026-07-14"
 }
 ```
+
+## Approved implementation boundary
+
+The approved bundle authorizes implementation and local/read-only verification
+on `codex/p2-135-stale-knowledge-supersession`. It does not authorize changing
+any existing live knowledge source, creating a live index, widening a canary,
+or sending an external communication.
+
+Every live source correction remains separately gated by an immutable Kevin
+decision bound to the exact source version, old and replacement digests,
+preview digest, reason, actor, and apply idempotency key.
+
+## Approval record
+
+Kevin L. Gardner approved the recommended ACR-0029 bundle on 2026-07-14 with
+the exact statement `Approve recommended ACR-0029 bundle.` The decision was
+written and read back from the dedicated MCS MongoDB, Neo4j, and ChromaDB
+stores under
+`dec_acr_0029_governed_knowledge_correction_approval_2026_07_14`.
+
+This approval authorizes implementation and read-only verification only.
+`live_mutation_authorized` remains false.
