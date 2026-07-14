@@ -30,7 +30,8 @@
     "worker:vm-webhook": "tsx src/workers/vmWebhookWorker.ts",
     "neo4j:schema:dry-run": "tsx scripts/apply-neo4j-schema.ts",
     "neo4j:schema:apply": "tsx scripts/apply-neo4j-schema.ts --apply --fail-on-error",
-    "neo4j:schema:verify": "tsx scripts/apply-neo4j-schema.ts --verify"
+    "neo4j:schema:verify": "tsx scripts/apply-neo4j-schema.ts --verify",
+    "chroma:maintain": "tsx scripts/chroma-maintenance.ts"
   },
   "dependencies": {
     "@momentum/shared": "workspace:*",

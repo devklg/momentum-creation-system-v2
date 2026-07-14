@@ -19,6 +19,9 @@ interface ChromaParams {
   query?: string;
   query_texts?: string[];
   n_results?: number;
+  limit?: number;
+  offset?: number;
+  include_documents?: boolean;
   filter?: Record<string, unknown>;
   where?: Record<string, unknown>;
 }
@@ -178,8 +181,48 @@ export async function getRecords(params: ChromaParams): Promise<unknown> {
   return request(collectionEndpoint(collection, 'get'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ids: params.ids, include: ['documents', 'metadatas'] }),
+    body: JSON.stringify({
+      ids: params.ids,
+      include: params.include_documents === false ? ['metadatas'] : ['documents', 'metadatas'],
+    }),
   });
+}
+
+export async function listRecords(params: ChromaParams): Promise<{
+  ids: string[];
+  metadatas: Array<Record<string, unknown> | null>;
+  count: number;
+  limit: number;
+  offset: number;
+}> {
+  if (!params.collection) {
+    throw new PersistenceError('chromadb', 'list_records', 'collection required');
+  }
+  const limit = Math.min(100, Math.max(1, params.limit ?? 100));
+  const offset = Math.max(0, params.offset ?? 0);
+  const collection = await getCollection(params.collection);
+  const where = normalizeWhere(params.where ?? params.filter);
+  const body = await request(collectionEndpoint(collection, 'get'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      limit,
+      offset,
+      include: ['metadatas'],
+      ...(where ? { where } : {}),
+    }),
+  }) as {
+    ids?: string[];
+    metadatas?: Array<Record<string, unknown> | null>;
+  };
+  const ids = body.ids ?? [];
+  return {
+    ids,
+    metadatas: body.metadatas ?? [],
+    count: ids.length,
+    limit,
+    offset,
+  };
 }
 
 export async function query(params: ChromaParams): Promise<unknown> {
@@ -257,6 +300,8 @@ export async function chromaAdapter(
         return await deleteRecords(p);
       case 'get':
         return await getRecords(p);
+      case 'list_records':
+        return await listRecords(p);
       case 'search':
         return await queryPERSISTENCEShape(p, { includeQuery: true });
       case 'query_with_filter':
