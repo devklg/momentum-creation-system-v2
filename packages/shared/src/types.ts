@@ -6344,3 +6344,54 @@ export interface McsAdminTrainingAnalyticsResponse {
   appliedFilter: McsAdminDashboardFilter;
   analytics: McsAdminTrainingAnalytics;
 }
+
+/* ─── P2-118 Steve Success Profile guidance projection ────────────────────
+ * Read-only, self-facing pass-through of already-persisted Steve guidance.
+ * It never changes access, sequence, completion, or Launch Center state.
+ */
+export type McsSteveTailoredGuidanceStatus =
+  | 'available'
+  | 'unavailable'
+  | 'needs_attention';
+
+export interface McsSteveGuidanceRecommendation {
+  text: string;
+  href: string | null;
+}
+
+export interface McsSteveTailoredGuidance {
+  schemaVersion: 'steve_guidance.v1';
+  status: McsSteveTailoredGuidanceStatus;
+  reason:
+    | 'profile_available'
+    | 'profile_not_complete'
+    | 'profile_missing'
+    | 'profile_duplicate_or_identity_inconsistent';
+  source: 'steve_success_profile';
+  provenance: {
+    generatedAt: McsIsoTimestamp | null;
+    signedBy: string | null;
+  };
+  training: McsSteveGuidanceRecommendation[];
+  launch: McsSteveGuidanceRecommendation[];
+  policy: {
+    guidanceNotRequirement: true;
+    equalAccess: true;
+    changesAccess: false;
+    changesCurriculumOrder: false;
+    changesCompletion: false;
+    changesLaunchNextAction: false;
+    approvedKnowledge: false;
+    scoring: false;
+    ranking: false;
+    classification: false;
+    qualification: false;
+    prediction: false;
+    comparison: false;
+  };
+}
+
+/** Declaration merge preserves the append-only shared-file rule. */
+export interface McsTeamLaunchCenterResponse {
+  guidance: McsSteveTailoredGuidance;
+}

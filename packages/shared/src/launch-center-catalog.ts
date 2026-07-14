@@ -25,5 +25,13 @@ export const MCS_LAUNCH_CENTER_CATALOG = {
     'orientation_has_reservation_evidence_but_no_attendance_completion_source',
     'crm_missing_duplicate_or_identity_inconsistent_evidence_is_report_only',
   ],
+  steveGuidance: {
+    schemaVersion: 'steve_guidance.v1',
+    source: 'exactly_one_identity_matching_completed_steve_success_profile',
+    projection: 'read_only_existing_recommendations',
+    changesAccessOrCompletion: false,
+    changesLaunchNextAction: false,
+    approvedKnowledge: false,
+  },
   prohibited: ['separate_launch_center_route', 'person_score', 'person_rank', 'person_classification', 'outcome_prediction'],
 } as const;

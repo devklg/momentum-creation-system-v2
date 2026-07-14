@@ -35,6 +35,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0018 | Unified Human Follow-up Queue | P2-107 / Prospect CRM + VM/RVM | Verified | v1.2 |
 | ACR-0019 | Event Email and SMS Reminder Governance | P2-109 / Event Center communication boundary | Approved | v1.2 |
 | ACR-0020 | Training Effectiveness Feedback Governance | P2-112 / Training + approved knowledge + outcomes | Proposed | v1.2 |
+| ACR-0021 | Steve Success Profile Guidance Projection | P2-118 / Steve + Launch Center read projection | Proposed | v1.2 |
 
 ---
 

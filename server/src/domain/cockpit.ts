@@ -22,6 +22,7 @@ import { persistenceCall } from '../services/persistence/dispatch.js';
 import { findBAByTmagId, type BARecord } from './ba.js';
 import { lastInitialOf } from './prospects.js';
 import { buildDiscoveryView } from './steve-success-interview.js';
+import { projectSteveTailoredGuidance } from './steve-tailored-guidance.js';
 import { getFastStartProgress } from './training.js';
 import { listUpcomingWebinarEvents } from './webinarEvent.js';
 import type {
@@ -1089,6 +1090,12 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
   const rawSuccessProfile = rawProfile?.successProfile as Record<string, unknown> | undefined;
   const profileIdentityMatches = rawSuccessProfile?.tmagId === tmagId;
   const profileAmbiguous = profileRows.length > 1 || (steveComplete && !profileIdentityMatches);
+  const guidance = projectSteveTailoredGuidance({
+    expectedTmagId: tmagId,
+    steveComplete,
+    profileRecordCount: profileRows.length,
+    successProfile: rawSuccessProfile,
+  });
 
   const readinessItems: McsLaunchReadinessItem[] = [
     {
@@ -1315,6 +1322,7 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
         .filter((item) => item.status === 'needs_attention')
         .map((item) => item.domain),
     },
+    guidance,
     launchComplete,
   };
 }

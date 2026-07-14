@@ -18,13 +18,15 @@
  * header note). Source of truth: packages/shared/src/types.ts.
  */
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   ArrowRight,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
   Circle,
+  Compass,
+  GraduationCap,
   Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -106,6 +108,30 @@ export interface TeamLaunchCenter {
     }>;
     attentionDomains: Array<'orientation' | 'training' | 'invitations' | 'success_profile' | 'crm'>;
   };
+  guidance: {
+    schemaVersion: 'steve_guidance.v1';
+    status: 'available' | 'unavailable' | 'needs_attention';
+    reason: string;
+    source: 'steve_success_profile';
+    provenance: { generatedAt: string | null; signedBy: string | null };
+    training: Array<{ text: string; href: string | null }>;
+    launch: Array<{ text: string; href: string | null }>;
+    policy: {
+      guidanceNotRequirement: true;
+      equalAccess: true;
+      changesAccess: false;
+      changesCurriculumOrder: false;
+      changesCompletion: false;
+      changesLaunchNextAction: false;
+      approvedKnowledge: false;
+      scoring: false;
+      ranking: false;
+      classification: false;
+      qualification: false;
+      prediction: false;
+      comparison: false;
+    };
+  };
   launchComplete: boolean;
 }
 
@@ -124,6 +150,45 @@ function stepIcon(state: LaunchStepState) {
   if (state === 'current')
     return <Circle className="h-4 w-4 text-gold shrink-0" aria-hidden="true" />;
   return <Circle className="h-4 w-4 text-cream-faint shrink-0" aria-hidden="true" />;
+}
+
+function GuidanceList({
+  title,
+  items,
+  icon,
+  onNavigate,
+}: {
+  title: string;
+  items: Array<{ text: string; href: string | null }>;
+  icon: ReactNode;
+  onNavigate: (href: string) => void;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <div className="min-w-0">
+      <h3 className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-teal">
+        {icon}
+        {title}
+      </h3>
+      <ul className="space-y-2">
+        {items.map((item, index) => (
+          <li key={`${title}-${index}`} className="flex min-w-0 items-start gap-2 text-[13px] leading-relaxed text-cream-mute">
+            <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold" aria-hidden="true" />
+            <span className="min-w-0 flex-1 break-words">{item.text}</span>
+            {item.href && (
+              <button
+                type="button"
+                onClick={() => onNavigate(item.href!)}
+                className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-gold hover:text-gold-bright"
+              >
+                Open
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 export function LaunchCenter({ launch, onNavigate, defaultExpanded = false }: LaunchCenterProps) {
@@ -185,6 +250,39 @@ export function LaunchCenter({ launch, onNavigate, defaultExpanded = false }: La
           </button>
         </div>
       </div>
+
+      {launch.guidance.status === 'available' &&
+        (launch.guidance.training.length > 0 || launch.guidance.launch.length > 0) && (
+          <div className="border-t border-cream/10 px-4 py-4" data-testid="steve-tailored-guidance">
+            <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+              <div>
+                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-gold">
+                  From your Steve Success Profile
+                </p>
+                <h2 className="font-display text-[20px] tracking-[0.04em] text-cream">
+                  Guidance shaped around what you shared
+                </h2>
+              </div>
+              <p className="max-w-md text-[11px] leading-relaxed text-cream-faint sm:text-right">
+                Suggestions, not requirements. Your full training and tools stay available.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">
+              <GuidanceList
+                title="Training suggestions"
+                items={launch.guidance.training}
+                icon={<GraduationCap className="h-3.5 w-3.5" aria-hidden="true" />}
+                onNavigate={onNavigate}
+              />
+              <GuidanceList
+                title="Launch suggestions"
+                items={launch.guidance.launch}
+                icon={<Compass className="h-3.5 w-3.5" aria-hidden="true" />}
+                onNavigate={onNavigate}
+              />
+            </div>
+          </div>
+        )}
 
       {expanded && (
         <div className="border-t border-cream/10 px-4 py-3">
