@@ -101,6 +101,8 @@ describe('Steve runtime Context Manager foundation live retrieval flag', () => {
     expect(storeMock.searchApprovedKnowledge).toHaveBeenCalledWith(
       expect.objectContaining({ tmagId: 'TMAG-001' }),
       'I prefer weekly text check-ins from my sponsor.',
+      undefined,
+      'en',
     );
     expect(packet.packetStatus).toBe('complete');
     expect(packet.approvedKnowledge.map((item) => item.knowledgeId)).toEqual([

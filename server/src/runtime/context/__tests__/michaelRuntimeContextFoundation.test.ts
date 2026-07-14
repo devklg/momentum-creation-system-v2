@@ -101,6 +101,8 @@ describe('Michael runtime Context Manager foundation live retrieval flag', () =>
     expect(storeMock.searchApprovedKnowledge).toHaveBeenCalledWith(
       expect.objectContaining({ tmagId: 'TMAG-001' }),
       'What should I practice today?',
+      undefined,
+      'en',
     );
     expect(packet.packetStatus).toBe('complete');
     expect(packet.approvedKnowledge.map((item) => item.knowledgeId)).toEqual([

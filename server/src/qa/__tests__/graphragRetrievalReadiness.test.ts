@@ -97,6 +97,88 @@ describe('P1-88 GraphRAG cross-store retrieval readiness', () => {
   });
 });
 
+describe('P2-132 GraphRAG readiness batching', () => {
+  beforeEach(() => { persistence.mockReset(); });
+
+  it('uses set-oriented reads, groups Chroma by collection, and preserves caller order', async () => {
+    const second = {
+      ...mongoRecord,
+      _id: 'mcsgraph_knowledge_2_v1_es', id: 'mcsgraph_knowledge_2_v1_es',
+      knowledgeObjectId: 'knowledge_2', language: 'es', derivedFrom: ['source_2', 'chunk_2'],
+    };
+    const third = {
+      ...mongoRecord,
+      _id: 'mcsgraph_knowledge_3_v1_en', id: 'mcsgraph_knowledge_3_v1_en',
+      knowledgeObjectId: 'knowledge_3', derivedFrom: ['source_3', 'chunk_3'],
+    };
+    const records = [mongoRecord, second, third];
+    persistence.mockImplementation(async (tool: string, action: string, params: Record<string, unknown>) => {
+      if (tool === 'mongodb' && params.collection === 'mcs_graphrag_records') return { documents: records };
+      if (tool === 'mongodb' && params.collection === 'tmag_projection_outbox') {
+        return { documents: [{ entityId: second.id, status: 'pending' }], count: 1 };
+      }
+      if (tool === 'neo4j') return { records: records.map(({ id: rowId, knowledgeObjectId, version, domain, language, tenantId, retrievalReady }) => ({ id: rowId, knowledgeObjectId, version, domain, language, tenantId, retrievalReady })) };
+      if (tool === 'chromadb' && action === 'get') {
+        const requested = params.ids as string[];
+        const selected = records.filter((record) => requested.includes(record.id));
+        return {
+          ids: selected.map((record) => record.id),
+          metadatas: selected.map(({ id: rowId, knowledgeObjectId, version, domain, language, tenantId, retrievalReady }) => ({ id: rowId, knowledgeObjectId, version, domain, language, tenantId, retrievalReady })),
+        };
+      }
+      throw new Error(`unexpected ${tool}.${action}`);
+    });
+    const m = await import('../../domain/graphragReadiness.js');
+    m.resetGraphRagReadinessDiagnosticsForTests();
+    const result = await m.verifyGraphRagRetrievalReadinessBatch([second.id, id, second.id, third.id]);
+
+    expect(result.map((entry) => [entry.id, entry.status])).toEqual([
+      [second.id, 'blocked'], [id, 'ready'], [second.id, 'blocked'], [third.id, 'ready'],
+    ]);
+    expect(result[0]?.reasons).toEqual(['projection_unresolved']);
+    expect(persistence.mock.calls.filter((call) => call[0] === 'mongodb')).toHaveLength(2);
+    expect(persistence.mock.calls.filter((call) => call[0] === 'neo4j')).toHaveLength(1);
+    expect(persistence.mock.calls.filter((call) => call[0] === 'chromadb')).toHaveLength(2);
+    expect(m.getGraphRagReadinessDiagnostics()).toEqual({
+      retention: 'in_process_since_restart', maxUniqueIds: 50, batches: 1, requestedIds: 4,
+      storeCalls: { mongoCanonical: 1, mongoOutbox: 1, neo4j: 1, chroma: 2 },
+    });
+  });
+
+  it('rejects more than 50 unique ids before any store read', async () => {
+    const m = await import('../../domain/graphragReadiness.js');
+    await expect(m.verifyGraphRagRetrievalReadinessBatch(
+      Array.from({ length: 51 }, (_, index) => `graph_${index}`),
+    )).rejects.toThrow('at most 50 unique ids');
+    expect(persistence).not.toHaveBeenCalled();
+  });
+
+  it('isolates a failed Chroma collection without degrading healthy groups', async () => {
+    const spanish = {
+      ...mongoRecord,
+      _id: 'mcsgraph_knowledge_2_v1_es', id: 'mcsgraph_knowledge_2_v1_es',
+      knowledgeObjectId: 'knowledge_2', language: 'es', derivedFrom: ['source_2', 'chunk_2'],
+    };
+    const records = [mongoRecord, spanish];
+    persistence.mockImplementation(async (tool: string, action: string, params: Record<string, unknown>) => {
+      if (tool === 'mongodb' && params.collection === 'mcs_graphrag_records') return { documents: records };
+      if (tool === 'mongodb') return { documents: [], count: 0 };
+      if (tool === 'neo4j') return { records: records.map(({ id: rowId, knowledgeObjectId, version, domain, language, tenantId, retrievalReady }) => ({ id: rowId, knowledgeObjectId, version, domain, language, tenantId, retrievalReady })) };
+      if (tool === 'chromadb' && action === 'get') {
+        if (params.collection === 'mcs_training_knowledge_es') throw new Error('spanish collection offline');
+        return { ids: [id], metadatas: [projection] };
+      }
+      throw new Error(`unexpected ${tool}.${action}`);
+    });
+    const m = await import('../../domain/graphragReadiness.js');
+    const result = await m.verifyGraphRagRetrievalReadinessBatch([id, spanish.id]);
+    expect(result[0]).toMatchObject({ id, status: 'ready', reasons: [] });
+    expect(result[1]).toMatchObject({
+      id: spanish.id, status: 'degraded', reasons: ['chroma_error:spanish collection offline'],
+    });
+  });
+});
+
 const scope = {
   tenantId: 'tenant_team_magnificent', teamId: 'team_magnificent', teamKey: 'team_magnificent', teamName: 'Team Magnificent',
   tmagId: 'TMAG-001', requestId: 'ctx_req_p188', sessionId: 'session_p188',

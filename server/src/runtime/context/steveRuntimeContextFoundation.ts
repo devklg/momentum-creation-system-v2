@@ -166,7 +166,7 @@ async function requestLiveContextPacket(input: {
   const result = await contextManagerModule.createContextManagerService(
     {
       async listApprovedKnowledge(scope) {
-        return storedProvider.searchApprovedKnowledge(scope, query);
+        return storedProvider.searchApprovedKnowledge(scope, query, undefined, input.request.language);
       },
     },
     {

@@ -226,6 +226,18 @@ export function KnowledgePage() {
                 </div>
               ) : <p className="text-xs text-cream-mute mt-3">No degraded retrieval reason has been observed since restart.</p>}
             </div>
+            <div className="border-t border-line mt-5 pt-4" aria-label="Retrieval performance diagnostics">
+              <h3 className="font-mono text-[10px] uppercase tracking-label text-gold">Retrieval Performance</h3>
+              <p className="text-xs text-cream-mute mt-2">
+                Cache {knowledgeStatus.retrievalPerformance.approvedReferenceCache.hits} hits · {knowledgeStatus.retrievalPerformance.approvedReferenceCache.misses} misses · {knowledgeStatus.retrievalPerformance.approvedReferenceCache.coalesced} coalesced · {knowledgeStatus.retrievalPerformance.approvedReferenceCache.evictions} evictions · {knowledgeStatus.retrievalPerformance.approvedReferenceCache.size}/{knowledgeStatus.retrievalPerformance.approvedReferenceCache.maxEntries} entries
+              </p>
+              <p className="text-xs text-cream-mute mt-1">
+                GraphRAG {knowledgeStatus.retrievalPerformance.graphRagReadiness.batches} batches · {knowledgeStatus.retrievalPerformance.graphRagReadiness.requestedIds} ids · {knowledgeStatus.retrievalPerformance.graphRagReadiness.storeCalls.mongoCanonical + knowledgeStatus.retrievalPerformance.graphRagReadiness.storeCalls.mongoOutbox} Mongo calls · {knowledgeStatus.retrievalPerformance.graphRagReadiness.storeCalls.neo4j} Neo4j calls · {knowledgeStatus.retrievalPerformance.graphRagReadiness.storeCalls.chroma} Chroma calls
+              </p>
+              <p className="font-mono text-[9px] uppercase tracking-label text-cream-mute mt-2">
+                Content-free in-process counters · reset on server restart
+              </p>
+            </div>
           </>
         ) : <p className="text-sm text-cream-mute">{statusError ?? 'Loading knowledge status…'}</p>}
       </section>

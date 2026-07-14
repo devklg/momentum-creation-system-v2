@@ -5,8 +5,10 @@ import {
 } from '@momentum/shared/runtime';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { getContextManagerDiagnosticsSnapshot } from '../services/contextManagerDiagnostics.js';
+import { getApprovedKnowledgeRetrievalCacheDiagnostics } from '../services/knowledge/approvedKnowledgeStore.js';
 import { env } from '../env.js';
 import { steveContextManagerLiveEnabled } from '../runtime/context/steveRuntimeContextFoundation.js';
+import { getGraphRagReadinessDiagnostics } from './graphragReadiness.js';
 
 const OUTBOX_COLLECTION = 'tmag_projection_outbox';
 const TEAM_SCOPE = {
@@ -63,6 +65,8 @@ export async function buildAdminKnowledgeStatus(): Promise<McsAdminKnowledgeStat
       : retrievalReadyChunks === retrievalEligibleChunks ? 'ready' : 'partial';
 
   const contextManager = getContextManagerDiagnosticsSnapshot();
+  const approvedReferenceCache = getApprovedKnowledgeRetrievalCacheDiagnostics();
+  const graphRagReadiness = getGraphRagReadinessDiagnostics();
   return {
     ok: true, generatedAt: new Date().toISOString(), status,
     statusBasis: 'mongo_provider_eligibility_plus_projection_queue',
@@ -74,6 +78,27 @@ export async function buildAdminKnowledgeStatus(): Promise<McsAdminKnowledgeStat
       liveSurfaces: {
         michael: env.MCS_CONTEXT_MANAGER_LIVE_ENABLED,
         steve: steveContextManagerLiveEnabled(),
+      },
+    },
+    retrievalPerformance: {
+      retention: 'in_process_since_restart',
+      approvedReferenceCache: {
+        ttlMs: approvedReferenceCache.ttlMs,
+        maxEntries: approvedReferenceCache.maxEntries,
+        hits: approvedReferenceCache.hits,
+        misses: approvedReferenceCache.misses,
+        coalesced: approvedReferenceCache.coalesced,
+        evictions: approvedReferenceCache.evictions,
+        size: approvedReferenceCache.size,
+        inFlight: approvedReferenceCache.inFlight,
+        invalidations: approvedReferenceCache.invalidations,
+        generation: approvedReferenceCache.generation,
+      },
+      graphRagReadiness: {
+        maxUniqueIds: graphRagReadiness.maxUniqueIds,
+        batches: graphRagReadiness.batches,
+        requestedIds: graphRagReadiness.requestedIds,
+        storeCalls: graphRagReadiness.storeCalls,
       },
     },
   };

@@ -23,12 +23,18 @@ describe('buildAdminKnowledgeStatus', () => {
       status: 'partial', activeSources: 3, activeChunks: 10, retrievalReadyChunks: 6,
       pendingChromaProjections: 2, failedChromaProjections: 0,
       pendingNeo4jProjections: 0, failedNeo4jProjections: 1,
+      retrievalPerformance: {
+        retention: 'in_process_since_restart',
+        approvedReferenceCache: { ttlMs: 5000, maxEntries: 128 },
+        graphRagReadiness: { maxUniqueIds: 50 },
+      },
     });
     expect(result.warnings).toHaveLength(2);
     expect(persistence).toHaveBeenCalledWith('mongodb', 'query', expect.objectContaining({
       collection: 'mcs_knowledge_chunks',
       filter: expect.objectContaining({ status: 'active', retrievalEligible: true, 'scope.teamKey': 'team_magnificent' }),
     }));
+    expect(JSON.stringify(result.retrievalPerformance)).not.toMatch(/query|tmagId|sessionId|packet|knowledgeId|summary|content/i);
   });
 
   it('reports ready only when eligible chunks have no unresolved Chroma projection', async () => {

@@ -16,6 +16,9 @@ import type {
 import {
   createKevinApprovedKnowledgeSource,
   createStoredApprovedKnowledgeProvider,
+  getApprovedKnowledgeRetrievalCacheDiagnostics,
+  invalidateApprovedKnowledgeRetrievalCache,
+  resetApprovedKnowledgeRetrievalCacheForTests,
 } from '../approvedKnowledgeStore.js';
 import {
   APPROVED_KNOWLEDGE_QUERY_SCHEMA_VERSION,
@@ -89,6 +92,8 @@ describe('approved knowledge store schema projection', () => {
     knowledgeWriteMock.writes.length = 0;
     persistenceMock.call.mockReset();
     graphRagMock.append.mockReset().mockResolvedValue(null);
+    resetApprovedKnowledgeRetrievalCacheForTests();
+    vi.useRealTimers();
   });
 
   it('creates canonical Knowledge Base source and chunk records for uploaded files', async () => {
@@ -165,6 +170,10 @@ describe('approved knowledge store schema projection', () => {
       retrievalReady: false,
       derivedFrom: [result.source.sourceId, result.chunks[0]?.chunkId],
     }));
+    expect(getApprovedKnowledgeRetrievalCacheDiagnostics()).toMatchObject({
+      size: 0,
+      invalidations: 1 + result.chunks.length,
+    });
   });
 
   it('normalizes governance knowledge and never projects ineligible chunks as GraphRAG', async () => {
@@ -344,5 +353,146 @@ describe('approved knowledge store schema projection', () => {
     expect(refs).toEqual([]);
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('embedder/Chroma'));
     errorSpy.mockRestore();
+  });
+
+  it('single-flights identical concurrent searches and returns isolated copies', async () => {
+    let release!: (value: unknown) => void;
+    persistenceMock.call.mockImplementation(() => new Promise((resolve) => { release = resolve; }));
+    const providerA = createStoredApprovedKnowledgeProvider();
+    const providerB = createStoredApprovedKnowledgeProvider();
+
+    const first = providerA.searchApprovedKnowledge(scope, '  Daily   Rhythm ', 4, 'en');
+    const second = providerB.searchApprovedKnowledge(scope, 'Daily Rhythm', 4, 'en');
+    expect(persistenceMock.call).toHaveBeenCalledTimes(1);
+    release({
+      results: {
+        ids: ['chunk_single_flight'],
+        documents: ['Approved daily rhythm.'],
+        metadatas: [{
+          chunkId: 'chunk_single_flight', sourceId: 'source_single_flight',
+          domain: 'training', language: 'en', status: 'active', retrievalEligible: true,
+        }],
+      },
+    });
+
+    const [left, right] = await Promise.all([first, second]);
+    expect(left).toEqual(right);
+    expect(left).not.toBe(right);
+    expect(getApprovedKnowledgeRetrievalCacheDiagnostics()).toMatchObject({
+      misses: 1, coalesced: 1, size: 1, inFlight: 0,
+    });
+
+    (left[0] as { summary?: string }).summary = 'caller mutation';
+    const cached = await providerA.searchApprovedKnowledge(scope, 'daily rhythm', 4, 'en');
+    expect(cached[0]?.summary).toBe('Approved daily rhythm.');
+    expect(getApprovedKnowledgeRetrievalCacheDiagnostics().hits).toBe(1);
+  });
+
+  it('keeps query limit language and tenant/team/BA scope isolated', async () => {
+    persistenceMock.call.mockResolvedValue({
+      results: {
+        ids: ['chunk_scope'], documents: ['Approved scoped guidance.'],
+        metadatas: [{
+          chunkId: 'chunk_scope', sourceId: 'source_scope', domain: 'training',
+          language: 'en', status: 'active', retrievalEligible: true,
+        }],
+      },
+    });
+    const provider = createStoredApprovedKnowledgeProvider();
+    await provider.searchApprovedKnowledge(scope, 'scope', 4, 'en');
+    await provider.searchApprovedKnowledge(scope, 'scope', 5, 'en');
+    await provider.searchApprovedKnowledge(scope, 'scope', 4, 'es');
+    await provider.searchApprovedKnowledge({ ...scope, tmagId: 'TMAG-002' as TmagId }, 'scope', 4, 'en');
+    const anotherTeamScope = { ...scope, teamKey: 'another_team' } as unknown as McsRuntimeRequestScope;
+    await provider.searchApprovedKnowledge(anotherTeamScope, 'scope', 4, 'en');
+    expect(persistenceMock.call).toHaveBeenCalledTimes(5);
+    expect(getApprovedKnowledgeRetrievalCacheDiagnostics()).toMatchObject({ misses: 5, hits: 0, size: 5 });
+  });
+
+  it('expires successful entries after five seconds and never caches empty or failed results', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-14T00:00:00.000Z'));
+    const provider = createStoredApprovedKnowledgeProvider();
+    persistenceMock.call
+      .mockResolvedValueOnce({ results: { ids: [], documents: [], metadatas: [] } })
+      .mockRejectedValueOnce(new Error('store unavailable'))
+      .mockResolvedValue({
+        results: {
+          ids: ['chunk_ttl'], documents: ['Approved TTL guidance.'],
+          metadatas: [{
+            chunkId: 'chunk_ttl', sourceId: 'source_ttl', domain: 'training',
+            language: 'en', status: 'active', retrievalEligible: true,
+          }],
+        },
+      });
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await expect(provider.searchApprovedKnowledge(scope, 'ttl', 2, 'en')).resolves.toEqual([]);
+    await expect(provider.searchApprovedKnowledge(scope, 'ttl', 2, 'en')).resolves.toEqual([]);
+    await expect(provider.searchApprovedKnowledge(scope, 'ttl', 2, 'en')).resolves.toHaveLength(1);
+    await expect(provider.searchApprovedKnowledge(scope, 'ttl', 2, 'en')).resolves.toHaveLength(1);
+    expect(persistenceMock.call).toHaveBeenCalledTimes(3);
+
+    vi.advanceTimersByTime(5_001);
+    await expect(provider.searchApprovedKnowledge(scope, 'ttl', 2, 'en')).resolves.toHaveLength(1);
+    expect(persistenceMock.call).toHaveBeenCalledTimes(4);
+    errorSpy.mockRestore();
+  });
+
+  it('does not populate an invalidated in-flight generation', async () => {
+    let release!: (value: unknown) => void;
+    persistenceMock.call.mockImplementation(() => new Promise((resolve) => { release = resolve; }));
+    const provider = createStoredApprovedKnowledgeProvider();
+    const first = provider.searchApprovedKnowledge(scope, 'generation', 2, 'en');
+    invalidateApprovedKnowledgeRetrievalCache();
+    release({
+      results: {
+        ids: ['chunk_generation'], documents: ['Approved generation guidance.'],
+        metadatas: [{
+          chunkId: 'chunk_generation', sourceId: 'source_generation', domain: 'training',
+          language: 'en', status: 'active', retrievalEligible: true,
+        }],
+      },
+    });
+    await expect(first).resolves.toHaveLength(1);
+    expect(getApprovedKnowledgeRetrievalCacheDiagnostics()).toMatchObject({ size: 0, invalidations: 1 });
+  });
+
+  it('evicts the least-recently-used entry at the deterministic 128-entry bound', async () => {
+    persistenceMock.call.mockImplementation(async (_tool, _action, params: { query: string }) => ({
+      results: {
+        ids: [`chunk_${params.query}`], documents: [`Approved ${params.query}.`],
+        metadatas: [{
+          chunkId: `chunk_${params.query}`, sourceId: `source_${params.query}`,
+          domain: 'training', language: 'en', status: 'active', retrievalEligible: true,
+        }],
+      },
+    }));
+    const provider = createStoredApprovedKnowledgeProvider();
+    for (let index = 0; index < 129; index += 1) {
+      await provider.searchApprovedKnowledge(scope, `bounded-${index}`, 2, 'en');
+    }
+    expect(getApprovedKnowledgeRetrievalCacheDiagnostics()).toMatchObject({ size: 128, evictions: 1 });
+
+    await provider.searchApprovedKnowledge(scope, 'bounded-0', 2, 'en');
+    expect(persistenceMock.call).toHaveBeenCalledTimes(130);
+    expect(getApprovedKnowledgeRetrievalCacheDiagnostics()).toMatchObject({ size: 128, evictions: 2 });
+  });
+
+  it('keeps performance diagnostics free of query, BA, packet, and knowledge content', async () => {
+    persistenceMock.call.mockResolvedValue({
+      results: {
+        ids: ['DO_NOT_EXPOSE'], documents: ['DO_NOT_EXPOSE'],
+        metadatas: [{
+          chunkId: 'DO_NOT_EXPOSE', sourceId: 'DO_NOT_EXPOSE', domain: 'training',
+          language: 'en', status: 'active', retrievalEligible: true,
+        }],
+      },
+    });
+    await createStoredApprovedKnowledgeProvider()
+      .searchApprovedKnowledge(scope, 'DO_NOT_EXPOSE', 2, 'en');
+    const json = JSON.stringify(getApprovedKnowledgeRetrievalCacheDiagnostics());
+    expect(json).not.toContain('DO_NOT_EXPOSE');
+    expect(json).not.toMatch(/query|tmagId|sessionId|packet|knowledgeId|summary|content/i);
   });
 });
