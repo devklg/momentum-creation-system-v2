@@ -24,7 +24,7 @@ export function classifyAuditAction(action: string, severity: McsAuditSeverity):
   else if (normalized.includes('status') || normalized.includes('completed') || normalized.includes('closed')) category = 'lifecycle';
   else if (namespace === 'admin' || namespace === 'system') category = 'governance';
 
-  const outcome: McsAuditEventTaxonomy['outcome'] = normalized.includes('blocked') || normalized.includes('denied') || normalized.includes('refused')
+  const outcome: McsAuditEventTaxonomy['outcome'] = normalized.includes('blocked') || normalized.includes('denied') || normalized.includes('refused') || normalized.includes('rejected')
     ? 'blocked' : normalized.includes('failed') || normalized.includes('dead_lettered') ? 'failed'
       : normalized.includes('queued') || normalized.includes('retry_scheduled') ? 'queued' : 'succeeded';
   const impact: McsAuditEventTaxonomy['impact'] = destructive ? 'destructive' : security || category === 'governance' ? 'control' : category === 'read' || category === 'reporting' ? 'observation' : 'mutation';
