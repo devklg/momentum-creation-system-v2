@@ -98,15 +98,15 @@ Operational rules:
 Ivory and ScriptMaker use the existing `MCS_AGENT_TEMPLATE_REGISTRY` in
 `packages/shared/src/agent-skills.ts`; there is no parallel prompt registry.
 This inventory records every current provider-backed generation surface plus
-the two approved-but-unimplemented ScriptMaker WDYK contracts. It registers
+the two planned ScriptMaker WDYK contracts. It registers
 existing behavior and does not change prompt text or activate planned work.
 
 | Governed template | Status | Purpose | Behavior source | Degradation |
 | --- | --- | --- | --- | --- |
-| `ivory_wdyk_coach@1.0.0` | Active existing runtime | Ask reflective WDYK questions without choosing, scoring, or qualifying anyone. | `server/src/domain/ivory.ts#COACH_SYSTEM_PREFIX` | `ivoryCoachFallback` supplies safe deterministic memory prompts. |
-| `ivory_personal_invitation@1.0.0` | Active existing runtime | Draft one editable invitation after the BA identifies the person and supplies relationship context. | `server/src/domain/ivory.ts#INVITATION_DRAFT_SYSTEM` | `neutralInvitationDraft` produces a safe deterministic fallback without echoing private relationship notes. |
-| `ivory_momentum_followup@1.0.0` | Active existing runtime | Suggest one editable, lifecycle-aware follow-up for an owned prospect. | `server/src/domain/ivory-momentum.ts#SUGGEST_SYSTEM_PREFIX` | `neutralSuggestion` produces a safe deterministic fallback. |
-| `scriptmaker_product_invitation@1.0.0` | Active existing runtime | Draft compliant product/video invitation copy for review. | `server/src/domain/scriptmaker.ts#SYSTEM_PREFIX` | `neutralFallback`, or an approved compliant master-content seed, supplies the deterministic fallback. |
+| `ivory_wdyk_coach@1.0.0` | Active existing runtime | Ask reflective WDYK questions without choosing, scoring, or qualifying anyone. | `server/src/domain/ivory.ts#buildCoachSystem+buildCoachUserTurn` (fixed guardrails plus admin master-content voice) | `neutralCoach` supplies safe deterministic memory prompts. |
+| `ivory_personal_invitation@1.0.0` | Active existing runtime | Draft one editable invitation after the BA identifies the person and supplies private relationship context. | `server/src/domain/ivory.ts#INVITATION_DRAFT_SYSTEM+buildInvitationDraftUserTurn` | `neutralInvitationDraft` produces a safe deterministic fallback without echoing private relationship notes. |
+| `ivory_momentum_followup@1.0.0` | Active existing runtime | Suggest one editable, lifecycle-aware follow-up for an owned prospect. | `server/src/domain/ivory-momentum.ts#SUGGEST_SYSTEM_PREFIX+buildSuggestUserTurn` | `neutralSuggestion` produces a safe deterministic fallback. |
+| `scriptmaker_product_invitation@1.0.0` | Active existing runtime | Draft compliant product/video invitation copy for review. | `server/src/domain/scriptmaker.ts#SYSTEM_PREFIX+resolveSeed+buildUserTurn` (fixed guardrails plus resolved master-content seed) | A compliant resolved seed, or `neutralFallback`, supplies the deterministic fallback. |
 | `scriptmaker_wdyk_product@0.1.0` | Planned | Preserve the approved product WDYK contract for future implementation. | `planned:scriptmaker-wdyk-product` | Block substantive generation and return to approved product training. |
 | `scriptmaker_wdyk_opportunity@0.1.0` | Planned | Preserve the approved opportunity WDYK contract for future implementation. | `planned:scriptmaker-wdyk-opportunity` | Block substantive generation and return to leadership-approved training. |
 
