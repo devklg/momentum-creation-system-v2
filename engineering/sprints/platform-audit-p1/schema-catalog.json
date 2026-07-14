@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T06:37:19.221Z",
+  "generatedAt": "2026-07-14T07:27:41.177Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -143,12 +143,12 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 204,
+          "line": 225,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 340,
+          "line": 362,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -170,7 +170,7 @@
         },
         {
           "file": "server/src/services/knowledge/approvedKnowledgeStore.ts",
-          "line": 147,
+          "line": 167,
           "source": "writeKnowledge"
         }
       ]
@@ -224,7 +224,7 @@
         },
         {
           "file": "server/src/domain/graphragReadiness.ts",
-          "line": 24,
+          "line": 51,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -1155,7 +1155,7 @@
         },
         {
           "file": "server/src/domain/graphragReadiness.ts",
-          "line": 37,
+          "line": 127,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -2800,7 +2800,7 @@
       {
         "label": "KnowledgeChunk",
         "sources": [
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:210"
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:231"
         ]
       },
       {
@@ -2812,8 +2812,8 @@
       {
         "label": "KnowledgeSource",
         "sources": [
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:153",
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:213",
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:173",
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:234",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:264"
         ]
       },
@@ -3138,7 +3138,7 @@
         "sources": [
           "server/src/domain/graphrag.ts:217",
           "server/src/domain/graphrag.ts:238",
-          "server/src/domain/graphragReadiness.ts:42",
+          "server/src/domain/graphragReadiness.ts:139",
           "server/src/services/persistence/neo4j/phase7Constraints.ts:51",
           "server/src/services/persistence/neo4j/phase7Constraints.ts:86"
         ]
@@ -3585,7 +3585,7 @@
       {
         "relationship": "HAS_CHUNK",
         "sources": [
-          "server/src/services/knowledge/approvedKnowledgeStore.ts:214"
+          "server/src/services/knowledge/approvedKnowledgeStore.ts:235"
         ]
       },
       {

@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-14T06:37:12.053Z
+- Generated: 2026-07-14T07:27:45.490Z
 - Registered collections: 53
 - Schema-catalog collections: 53
 - Collections with observed write/query usage: 32
@@ -103,7 +103,7 @@ entries need explicit contract handling in P1-43.
 
 | Target | Resolution | Actions | Source count | Sources |
 | --- | --- | --- | ---: | --- |
-| `activeKnowledgeCollection(record.domain, record.language)` | expression | `get` | 1 | `server/src/domain/graphragReadiness.ts:45` |
+| `activeKnowledgeCollection(group[0]!.domain, group[0]!.language)` | expression | `get` | 1 | `server/src/domain/graphragReadiness.ts:145` |
 | `agentEventsCollection` | expression | `writeKnowledge` | 1 | `server/src/domain/agents/orchestrator.ts:299` |
 | `c.collection` | expression | `add` | 1 | `server/src/services/projectionOutbox.ts:174` |
 | `chroma.collection` | expression | `add` | 1 | `server/src/services/tieredWrite.ts:303` |
