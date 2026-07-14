@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T01:27:22.342Z",
+  "generatedAt": "2026-07-14T01:33:17.627Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -8834,6 +8834,11 @@
       "file": "packages/shared/src/training-language-parity.ts"
     },
     {
+      "name": "findMissingTrainingSourceAnchors",
+      "kind": "function",
+      "file": "packages/shared/src/training-language-parity.ts"
+    },
+    {
       "name": "MCS_TRAINING_LANGUAGE_PARITY_REPORT",
       "kind": "const",
       "file": "packages/shared/src/training-language-parity.ts"
@@ -11401,6 +11406,6 @@
     "chromaCollections": 53,
     "routeModules": 49,
     "routeHandlers": 269,
-    "sharedExports": 1082
+    "sharedExports": 1083
   }
 }

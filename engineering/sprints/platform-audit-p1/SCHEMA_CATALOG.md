@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T01:27:22.342Z
+- Generated: 2026-07-14T01:33:17.627Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
 - Route handlers: 269
-- Shared exports: 1082
+- Shared exports: 1083
 
 ## Mongo Collections
 
@@ -933,6 +933,7 @@
 | `McsTrainingCatalogModuleId` | type | `packages/shared/src/training-catalog.ts` |
 | `McsTrainingModuleCatalogEntry` | interface | `packages/shared/src/training-catalog.ts` |
 | `buildTrainingLanguageParityReport` | function | `packages/shared/src/training-language-parity.ts` |
+| `findMissingTrainingSourceAnchors` | function | `packages/shared/src/training-language-parity.ts` |
 | `MCS_TRAINING_LANGUAGE_PARITY_REPORT` | const | `packages/shared/src/training-language-parity.ts` |
 | `MCS_TRAINING_LANGUAGE_PARITY_SURFACES` | const | `packages/shared/src/training-language-parity.ts` |
 | `McsTrainingContentAvailability` | type | `packages/shared/src/training-language-parity.ts` |
