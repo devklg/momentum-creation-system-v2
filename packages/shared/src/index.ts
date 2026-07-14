@@ -29,3 +29,4 @@ export * from './training-catalog.js';
 export * from './training-target-reconciliation.js';
 export * from './training-language-parity.js';
 export * from './orientation-state-machine.js';
+export * from './orientation-diagnostic.js';

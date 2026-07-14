@@ -22,8 +22,10 @@ import {
   listSessionsWithRosters,
 } from '../../domain/orientationSession.js';
 import { appendAuditEntry } from '../../domain/auditLog.js';
+import { buildAdminOrientationDiagnostic } from '../../domain/orientationDiagnostic.js';
 import type {
   McsAdminCreateOrientationSessionResponse,
+  McsAdminOrientationDiagnosticResponse,
   McsAdminOrientationSessionsResponse,
   McsAuditActor,
   McsAuditContext,
@@ -69,6 +71,39 @@ adminOrientationRoutes.get('/sessions', requireAdmin, async (req, res) => {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Roster failed: ${msg}` });
+  }
+});
+
+/* ─── GET /diagnostic  (read-only record integrity) ─────────────── */
+
+adminOrientationRoutes.get('/diagnostic', requireAdmin, async (req, res) => {
+  try {
+    const requestedLimit = Number(req.query.limit);
+    const payload: McsAdminOrientationDiagnosticResponse = await buildAdminOrientationDiagnostic({
+      limit: Number.isFinite(requestedLimit) && requestedLimit > 0
+        ? Math.floor(requestedLimit)
+        : undefined,
+    });
+
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.orientation.diagnostic.viewed',
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
+      severity: payload.totals.findings > 0 ? 'warn' : 'info',
+      after: {
+        generatedAt: payload.generatedAt,
+        policy: payload.policy,
+        scanned: payload.scanned,
+        totals: payload.totals,
+      },
+      reason: null,
+      context: contextFromRequest(req, '/api/admin/orientation/diagnostic', 'GET'),
+    });
+
+    res.json(payload);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown';
+    res.status(500).json({ ok: false, error: `Orientation diagnostic failed: ${msg}` });
   }
 });
 
