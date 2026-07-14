@@ -28,8 +28,13 @@
  * — only the direct sponsor (downline.sponsorTmagId === requestingTmagId) can read.
  */
 
-import type { McsMichaelTrainingSupportCard, McsMichaelTrainingSupportGuidanceSection } from '@momentum/shared';
+import type {
+  McsMichaelTrainingSupportCard,
+  McsMichaelTrainingSupportGuidanceSection,
+  McsSteveSuccessProfile,
+} from '@momentum/shared';
 import { persistenceCall } from '../services/persistence/dispatch.js';
+import { isSafeSteveGuidanceText } from './steve-tailored-guidance.js';
 
 /** Provenance literal stamped on the derived training-support card. */
 export const MICHAEL_TRAINING_SUPPORT_SIGNED_BY =
@@ -44,51 +49,12 @@ const STEVE_DISCOVERIES_COLLECTION = 'tmag_steve_success_interview';
 // friction once Steve merges.
 // ─────────────────────────────────────────────────────────────────────────
 
-interface SuccessProfilePrimaryWhy {
-  statement?: string | null;
-}
-
-interface SuccessProfileSuccessVision {
-  statement?: string | null;
-}
-
-interface SuccessProfileLearningStyle {
-  modalities?: string[] | null;
-  feedbackPreference?: string | null;
-  pacePreference?: string | null;
-}
-
-interface SuccessProfileCommunicationPreferences {
-  preferredChannels?: string[] | null;
-  cadence?: string | null;
-  bestTimes?: string | null;
-}
-
-interface SuccessProfileSupportNeeds {
-  areas?: string[] | null;
-  pastObstacles?: string | null;
-  helpStyle?: string | null;
-}
-
-interface SuccessProfile {
-  tmagId: string;
-  primaryWhy: SuccessProfilePrimaryWhy;
-  successVision: SuccessProfileSuccessVision;
-  learningStyle: SuccessProfileLearningStyle;
-  communicationPreferences: SuccessProfileCommunicationPreferences;
-  supportNeeds: SuccessProfileSupportNeeds;
-  trainingRecommendations?: string[] | null;
-  michaelHandoffSummary?: string | null;
-  generatedAt: string;
-  signedBy: string;
-}
-
 interface PersistedSteveDiscovery {
   _id: string;
   tmagId: string;
   sponsorTmagId: string | null;
   completedAt?: string | null;
-  successProfile: SuccessProfile;
+  successProfile: McsSteveSuccessProfile;
 }
 
 interface TeamMagnificentMemberLookup {
@@ -160,19 +126,17 @@ function joinNatural(items: string[]): string {
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
 }
 
-function deriveLearningStyle(ls: SuccessProfileLearningStyle): McsMichaelTrainingSupportGuidanceSection {
+function deriveLearningStyle(ls: McsSteveSuccessProfile['learningStyle']): McsMichaelTrainingSupportGuidanceSection {
   const modalities = cleanList(ls.modalities);
   const feedback = trimToNonEmpty(ls.feedbackPreference);
-  const pace = trimToNonEmpty(ls.pacePreference);
   const bullets: string[] = [];
   if (modalities.length > 0) bullets.push(`Learns best by: ${joinNatural(modalities)}.`);
   if (feedback) bullets.push(`Wants feedback: ${feedback}.`);
-  if (pace) bullets.push(`Pace: ${pace}.`);
   return { label: 'How they learn', bullets };
 }
 
 function deriveCommunication(
-  cp: SuccessProfileCommunicationPreferences,
+  cp: McsSteveSuccessProfile['communicationPreferences'],
 ): McsMichaelTrainingSupportGuidanceSection {
   const channels = cleanList(cp.preferredChannels);
   const cadence = trimToNonEmpty(cp.cadence);
@@ -184,13 +148,13 @@ function deriveCommunication(
   return { label: 'How to stay in touch', bullets };
 }
 
-function deriveSupportFocus(sn: SuccessProfileSupportNeeds): McsMichaelTrainingSupportGuidanceSection {
+function deriveSupportFocus(sn: McsSteveSuccessProfile['supportNeeds']): McsMichaelTrainingSupportGuidanceSection {
   const areas = cleanList(sn.areas);
-  const obstacles = trimToNonEmpty(sn.pastObstacles);
+  const obstacles = cleanList(sn.potentialObstacles);
   const helpStyle = trimToNonEmpty(sn.helpStyle);
   const bullets: string[] = [];
   if (areas.length > 0) bullets.push(`Where they want support early: ${joinNatural(areas)}.`);
-  if (obstacles) bullets.push(`Has been derailed before by: ${obstacles}.`);
+  if (obstacles.length > 0) bullets.push(`They named: ${joinNatural(obstacles)}.`);
   if (helpStyle) bullets.push(`When stuck: ${helpStyle}.`);
   return { label: 'Where to focus your support', bullets };
 }
@@ -203,7 +167,7 @@ function deriveSupportFocus(sn: SuccessProfileSupportNeeds): McsMichaelTrainingS
 export function projectSuccessProfileToCard(args: {
   downlineTmagId: string;
   downlineFirstName: string;
-  profile: SuccessProfile;
+  profile: McsSteveSuccessProfile;
 }): McsMichaelTrainingSupportCard {
   const p = args.profile;
   return {
@@ -212,10 +176,14 @@ export function projectSuccessProfileToCard(args: {
     derivedFromSteveAt: p.generatedAt,
     primaryWhy: trimToNonEmpty(p.primaryWhy?.statement),
     successVision: trimToNonEmpty(p.successVision?.statement),
-    learningStyle: deriveLearningStyle(p.learningStyle ?? {}),
-    communication: deriveCommunication(p.communicationPreferences ?? {}),
-    supportFocus: deriveSupportFocus(p.supportNeeds ?? {}),
-    trainingRecommendations: cleanList(p.trainingRecommendations),
+    learningStyle: deriveLearningStyle(p.learningStyle),
+    communication: deriveCommunication(p.communicationPreferences),
+    supportFocus: deriveSupportFocus(p.supportNeeds),
+    trainingRecommendations: cleanList(
+      p.trainingRecommendations
+        .map((recommendation) => recommendation.text)
+        .filter(isSafeSteveGuidanceText),
+    ),
     michaelHandoffSummary: trimToNonEmpty(p.michaelHandoffSummary),
     signedBy: MICHAEL_TRAINING_SUPPORT_SIGNED_BY,
   };
