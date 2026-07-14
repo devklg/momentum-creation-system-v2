@@ -2,7 +2,7 @@
 
 ## Momentum Creation System V2
 
-Status: Proposed
+Status: Approved
 
 Priority: P2-132 — Context Manager / GraphRAG scale hardening
 
@@ -10,7 +10,7 @@ Type: Runtime retrieval policy + additive diagnostics contract
 
 Risk: Medium
 
-Approval: Pending Kevin review
+Approval: Kevin L. Gardner — 2026-07-14
 
 Target Version: v1.2
 
@@ -105,7 +105,7 @@ rollback requires no data migration or cleanup.
 {
   "acr_id": "ACR-0026",
   "title": "Context Retrieval Cache and Readiness Batching",
-  "status": "proposed",
+  "status": "approved",
   "risk_level": "medium",
   "change_type": "contract",
   "proposed_by": "Codex",
@@ -143,12 +143,12 @@ rollback requires no data migration or cleanup.
       "Kevin L. Gardner",
       "Runtime/QA"
     ],
-    "decision": "",
+    "decision": "approved",
     "conditions": []
   },
   "approval": {
-    "approved_by": "",
-    "approved_at": null
+    "approved_by": "Kevin L. Gardner",
+    "approved_at": "2026-07-14"
   },
   "implementation": {
     "branch": "codex/p2-132-context-caching",
@@ -170,8 +170,15 @@ rollback requires no data migration or cleanup.
     "supersedes": null,
     "rollback_to": "direct per-request retrieval"
   },
-  "decision_ledger_ref": "",
+  "decision_ledger_ref": "dec_acr_0026_context_retrieval_cache_batching_approval_2026_07_14",
   "created_at": "2026-07-13",
-  "updated_at": "2026-07-13"
+  "updated_at": "2026-07-14"
 }
 ```
+
+## Approval record
+
+Kevin L. Gardner approved the recommended ACR-0026 bundle on 2026-07-14.
+The durable decision record is
+`dec_acr_0026_context_retrieval_cache_batching_approval_2026_07_14`, verified
+in the dedicated MCS MongoDB, Neo4j, and ChromaDB stores before implementation.
