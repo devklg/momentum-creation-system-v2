@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T02:04:24.402Z
+- Generated: 2026-07-14T02:38:23.863Z
 - Mongo collections: 70
 - Neo4j labels: 79
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
 - Route handlers: 270
-- Shared exports: 1092
+- Shared exports: 1096
 
 ## Mongo Collections
 
@@ -1359,6 +1359,7 @@
 | `McsSteveDiscoveryScriptResponse` | interface | `packages/shared/src/types.ts` |
 | `McsSteveDiscoveryScriptSection` | interface | `packages/shared/src/types.ts` |
 | `McsSteveDiscoveryView` | interface | `packages/shared/src/types.ts` |
+| `McsSteveGuidanceRecommendation` | interface | `packages/shared/src/types.ts` |
 | `McsSteveLearningModality` | type | `packages/shared/src/types.ts` |
 | `McsSteveLearningStyle` | interface | `packages/shared/src/types.ts` |
 | `McsStevePrimaryWhy` | interface | `packages/shared/src/types.ts` |
@@ -1367,11 +1368,14 @@
 | `McsSteveSuccessProfile` | interface | `packages/shared/src/types.ts` |
 | `McsSteveSuccessVision` | interface | `packages/shared/src/types.ts` |
 | `McsSteveSupportNeeds` | interface | `packages/shared/src/types.ts` |
+| `McsSteveTailoredGuidance` | interface | `packages/shared/src/types.ts` |
+| `McsSteveTailoredGuidanceStatus` | type | `packages/shared/src/types.ts` |
 | `McsSteveTranscriptChunk` | interface | `packages/shared/src/types.ts` |
 | `McsSuccessProfileAgentContext` | interface | `packages/shared/src/types.ts` |
 | `McsSupportAgentInteractionKind` | type | `packages/shared/src/types.ts` |
 | `McsSupportAgentKind` | type | `packages/shared/src/types.ts` |
 | `McsTaxonomizedAuditLogEntry` | interface | `packages/shared/src/types.ts` |
+| `McsTeamLaunchCenterResponse` | interface | `packages/shared/src/types.ts` |
 | `McsTeamLaunchCenterResponse` | interface | `packages/shared/src/types.ts` |
 | `McsTeamLaunchCenterResponse` | interface | `packages/shared/src/types.ts` |
 | `McsTeamStatsResponse` | interface | `packages/shared/src/types.ts` |
