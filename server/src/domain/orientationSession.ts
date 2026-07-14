@@ -31,6 +31,8 @@ import { writeOperational } from '../services/tieredWrite.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import {
   MCS_ORIENTATION_SESSION_CAPACITY,
+  projectCurrentOrientationState,
+  type McsCurrentOrientationStateProjection,
   type McsOrientationReservationRecord,
   type McsOrientationSession,
   type McsOrientationSessionAvailability,
@@ -171,6 +173,35 @@ async function myReservedReservations(
     },
   );
   return result.documents ?? [];
+}
+
+/** All reservation history for one BA, newest first, for the state projection. */
+async function orientationReservationsForBA(
+  tmagId: string,
+): Promise<McsOrientationReservationRecord[]> {
+  const result = await persistenceCall<{ documents: McsOrientationReservationRecord[] }>(
+    'mongodb',
+    'query',
+    {
+      database: MONGO_DB,
+      collection: RESERVATIONS_COLLECTION,
+      filter: { tmagId },
+      sort: { createdAt: -1 },
+      limit: 500,
+    },
+  );
+  return result.documents ?? [];
+}
+
+/** P2-115 read-only projection over the current reservation scheduler. */
+export async function getCurrentOrientationState(
+  tmagId: string,
+): Promise<McsCurrentOrientationStateProjection> {
+  const reservations = await orientationReservationsForBA(tmagId);
+  return projectCurrentOrientationState({
+    reservations,
+    projectedAt: new Date().toISOString(),
+  });
 }
 
 /**

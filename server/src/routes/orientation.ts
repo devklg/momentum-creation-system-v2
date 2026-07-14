@@ -8,6 +8,7 @@
  * (routes/admin/orientation.ts).
  *
  *   GET    /sessions                      available sessions + my reservation
+ *   GET    /state                         current reservation-backed state
  *   POST   /sessions/:sessionId/reserve   book a seat (cap 10)
  *   DELETE /sessions/:sessionId/reserve   cancel my seat
  *
@@ -24,6 +25,7 @@ import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import { findBAByTmagId } from '../domain/ba.js';
 import {
   cancelSeat,
+  getCurrentOrientationState,
   getSessionAvailabilityForBA,
   reserveSeat,
 } from '../domain/orientationSession.js';
@@ -31,9 +33,33 @@ import type {
   McsOrientationCancelResponse,
   McsOrientationReserveResponse,
   McsOrientationSessionsResponse,
+  McsOrientationStateResponse,
 } from '@momentum/shared';
 
 export const orientationRoutes: Router = Router();
+
+/** GET /state — current, read-only participant state (P2-115). */
+orientationRoutes.get(
+  '/state',
+  requireAuth,
+  requireSteveComplete,
+  async (req, res) => {
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+    try {
+      const body: McsOrientationStateResponse = {
+        ok: true,
+        orientation: await getCurrentOrientationState(tmagId),
+      };
+      return res.status(200).json(body);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[GET /api/orientation/state] failed', err);
+      return res.status(500).json({ ok: false, error: 'server_error' });
+    }
+  },
+);
 
 /** GET /sessions — the cockpit scheduling-card payload for this BA. */
 orientationRoutes.get(
