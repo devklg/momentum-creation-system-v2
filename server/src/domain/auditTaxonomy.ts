@@ -13,7 +13,7 @@ export function classifyAuditAction(action: string, severity: McsAuditSeverity):
   const destructive = DESTRUCTIVE_WORDS.test(normalized);
   const security = SECURITY_WORDS.test(normalized);
   let category: McsAuditEventTaxonomy['category'] = 'unknown';
-  if (normalized.startsWith('runtime.')) category = 'runtime';
+  if (normalized.startsWith('runtime.') || normalized.startsWith('prompt.')) category = 'runtime';
   else if (security) category = 'security';
   else if (READ_WORDS.test(normalized)) category = 'read';
   else if (normalized.includes('report') || normalized.includes('export') || normalized.includes('metrics')) category = 'reporting';

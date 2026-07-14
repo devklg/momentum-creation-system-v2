@@ -126,6 +126,22 @@ Operational boundaries:
   versioned registry entry, behavior source, fallback source, and tests in the
   same change. Existing active prompt text is never edited in place.
 
+Generated-output audit contract:
+
+- Every BA-visible Ivory and ScriptMaker generation route appends a
+  `prompt.output.generated` record to the existing `mcs_audit_log` before the
+  response is returned.
+- The record resolves template id and version from `MCS_AGENT_TEMPLATE_REGISTRY`,
+  identifies the authenticated BA, classifies the input, distinguishes provider
+  output from deterministic fallback, and records an independently recomputed
+  generated-copy compliance result.
+- Audit input is privacy-minimal metadata: field presence, enum selections, and
+  character counts. Raw prompts, names, relationship reasons, prospect context,
+  and generated copy are not stored in the audit row or Chroma document.
+- If delivered output fails the independent scan, the system first appends a
+  critical `prompt.output.rejected` row and then fails closed without returning
+  that copy to the BA.
+
 - Degraded agent behavior must be explicit in API responses, logs, or admin diagnostics where user-facing behavior depends on it.
 - A fallback must stay inside the same compliance boundary as the full agent response.
 - A fallback must not pretend to have used unavailable context, GraphRAG, Context Manager, or provider output.

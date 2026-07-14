@@ -37,6 +37,7 @@ import type {
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import { draftInvitation } from '../domain/scriptmaker.js';
+import { appendGeneratedOutputAudit } from '../domain/generatedOutputAudit.js';
 
 const SCRIPT_KINDS: ReadonlySet<McsScriptMakerScriptKind> = new Set([
   'default_script',
@@ -121,6 +122,30 @@ scriptmakerRoutes.post(
         scriptKind,
         eventDay,
         eventTime,
+      });
+      await appendGeneratedOutputAudit({
+        templateId: 'scriptmaker_product_invitation',
+        tmagId,
+        input: {
+          classification: 'scriptmaker_product_invitation',
+          scriptKind,
+          productNameLength: productName.length,
+          videoTitleLength: videoTitle.length,
+          prospectFirstNameLength: prospectFirstName.length,
+          prospectContextProvided: prospectContext !== null,
+          prospectContextLength: prospectContext?.length ?? 0,
+          eventDayProvided: eventDay !== null,
+          eventTimeProvided: eventTime !== null,
+        },
+        output: result.draft,
+        degraded: result.degraded,
+        context: {
+          ip: req.ip ?? null,
+          userAgent: req.get('user-agent') ?? null,
+          route: '/api/scriptmaker/draft',
+          method: 'POST',
+          requestId: null,
+        },
       });
       const response: McsScriptMakerDraftResponse = {
         ok: true,

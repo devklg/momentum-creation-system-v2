@@ -47,6 +47,7 @@ import type {
   McsUpdateIvoryNamePayload,
   McsUpdateIvoryStatusPayload,
 } from '@momentum/shared';
+import { appendGeneratedOutputAudit } from '../domain/generatedOutputAudit.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
@@ -324,6 +325,27 @@ ivoryRoutes.post(
         rosterSize,
         ask,
       });
+      await appendGeneratedOutputAudit({
+        templateId: 'ivory_wdyk_coach',
+        tmagId,
+        input: {
+          classification: 'ivory_wdyk_coach',
+          angle,
+          rosterSize,
+          productNameProvided: productNameRaw !== null,
+          askProvided: ask.trim().length > 0,
+          askLength: ask.length,
+        },
+        output: [result.coaching, ...result.prompts],
+        degraded: result.degraded,
+        context: {
+          ip: req.ip ?? null,
+          userAgent: req.get('user-agent') ?? null,
+          route: '/api/ivory/coach',
+          method: 'POST',
+          requestId: null,
+        },
+      });
       const out: McsIvoryCoachResponse = result;
       return res.status(200).json(out);
     } catch (err) {
@@ -366,6 +388,26 @@ ivoryRoutes.post(
         ivoryId,
         relationshipReason,
         productName,
+      });
+      await appendGeneratedOutputAudit({
+        templateId: 'ivory_personal_invitation',
+        tmagId,
+        input: {
+          classification: 'ivory_personal_invitation',
+          ivoryRecordProvided: true,
+          relationshipReasonProvided: true,
+          relationshipReasonLength: relationshipReason.length,
+          productNameProvided: productName !== null,
+        },
+        output: result.draft,
+        degraded: result.degraded,
+        context: {
+          ip: req.ip ?? null,
+          userAgent: req.get('user-agent') ?? null,
+          route: '/api/ivory/invitation-agent/draft',
+          method: 'POST',
+          requestId: null,
+        },
       });
       const out: McsIvoryInvitationDraftResponse = result;
       return res.status(200).json(out);
@@ -642,6 +684,25 @@ ivoryRoutes.post(
 
     try {
       const result = await suggestIvoryMomentumFollowUp(tmagId, prospectId, { ask });
+      await appendGeneratedOutputAudit({
+        templateId: 'ivory_momentum_followup',
+        tmagId,
+        input: {
+          classification: 'ivory_momentum_followup',
+          ownedProspectProvided: true,
+          askProvided: ask.trim().length > 0,
+          askLength: ask.length,
+        },
+        output: [result.coaching, result.suggestion],
+        degraded: result.degraded,
+        context: {
+          ip: req.ip ?? null,
+          userAgent: req.get('user-agent') ?? null,
+          route: '/api/ivory/momentum/:prospectId/suggest',
+          method: 'POST',
+          requestId: null,
+        },
+      });
       const out: McsIvoryMomentumSuggestionResponse = result;
       return res.status(200).json(out);
     } catch (err) {
