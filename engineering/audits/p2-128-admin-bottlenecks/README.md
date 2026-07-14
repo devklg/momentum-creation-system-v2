@@ -41,9 +41,13 @@ P2-128 does not imply that the P2-109 email/SMS decisions have been approved.
 - Route coverage confirms `requireAdmin` and aggregate-only audit payloads.
 - Component coverage confirms all five sections, governance notes, partial-source
   rendering, loading, and contained failure behavior.
-- Focused verification passed: seven server tests and three admin component
+- Focused verification passed: eight server tests and three admin component
   tests.
-- Shared, server, and admin typechecks are green.
+- Full server suite passed serially: 2,110 passed, 19 skipped. An initial
+  parallel run completed all assertions but lost one worker and exited nonzero;
+  it was not accepted as a gate.
+- Full admin suite passed: 35 tests.
+- Repo typecheck and production build passed.
 
 ## Visual gate
 

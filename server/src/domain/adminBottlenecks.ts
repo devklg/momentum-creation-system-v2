@@ -185,7 +185,7 @@ function deliverySection(source: AdminBottleneckProjectionSources['delivery']) {
   const value = source.value;
   const deliveryWorkerKeys = new Set(['projection', 'vm_delivery', 'vm_webhook', 'broadcast']);
   const stoppedWorkers = value.workers.filter((worker) => deliveryWorkerKeys.has(worker.key) && worker.status === 'stopped').map((worker) => worker.label);
-  const deliveryWarnings = value.warnings.filter((warning) => /delivery|provider|projection|outbox|webhook|broadcast/i.test(warning));
+  const deliveryWarnings = value.warnings.filter((warning) => /tmag_vm_|delivery|provider|projection|outbox|webhook|broadcast/i.test(warning));
   const attention = value.delivery.failed24h > 0 || value.delivery.status === 'warning' || value.projections.due > 0 || value.projections.deadLettered > 0 || stoppedWorkers.length > 0 || deliveryWarnings.length > 0;
   return {
     status: attention ? 'attention' as const : value.delivery.status === 'not_configured' ? 'observed' as const : 'clear' as const,

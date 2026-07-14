@@ -114,4 +114,14 @@ describe('P2-128 admin bottleneck projection', () => {
     expect(report.sections.delivery.summary).toContain('not configured');
     expect(report.sections.delivery.projections.pending).toBe(2);
   });
+
+  it('surfaces VM source warnings and stopped delivery workers as attention', () => {
+    const input = sources();
+    input.delivery.value.warnings = ['tmag_vm_campaigns unavailable; analytics using empty set.'];
+    input.delivery.value.workers = [{ key: 'vm_delivery', label: 'VM delivery', status: 'stopped', detail: 'never' }];
+    const report = projectAdminBottleneckReport(input);
+    expect(report.sections.delivery.status).toBe('attention');
+    expect(report.sections.delivery.warningCount).toBe(1);
+    expect(report.sections.delivery.stoppedWorkers).toEqual(['VM delivery']);
+  });
 });
