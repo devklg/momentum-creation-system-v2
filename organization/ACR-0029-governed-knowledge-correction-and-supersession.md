@@ -87,7 +87,10 @@ and new versions are never both eligible for normal retrieval.
 
 At cutover:
 
-- the old source authority becomes `superseded`;
+- the old source authority status becomes `superseded` and its additive
+  `authorityDecision` becomes `superseded_authority`; `not_authorized` remains
+  reserved for material that Kevin never authorized, so history is not
+  falsified;
 - the old source and chunks become `superseded` and non-retrieval-eligible;
 - the replacement source and chunks become active and retrieval-eligible only
   after required Mongo, Neo4j, Chroma, resource-catalog, and GraphRAG checks;
@@ -98,6 +101,20 @@ At cutover:
 `approved` and `superseded` are additive lifecycle values for source/chunk
 contracts. Existing active, deprecated, archived, rejected, and parse-failed
 behavior remains unchanged.
+
+The replacement may carry active Kevin authority while its lifecycle is
+`approved` and `retrievalEligible=false`; authority approval alone never makes
+the staged version retrievable. `superseded_authority` is additive to the
+source authority-decision contract and is never retrieval-eligible.
+
+Because the stores cannot share one transaction, cutover uses an explicit
+safe-gap order rather than claiming cross-store atomicity: stage the replacement
+everywhere as ineligible; disable the old canonical source/chunks; prove the old
+version is excluded from every active derived projection; make the replacement
+derived projections ready while canonical eligibility remains false; then make
+the replacement canonical version active as the final visibility step. Any
+failed readback stops at a safe gap and records the resumable stage. It may
+never continue into a two-eligible-version state.
 
 ### 4. Canonical per-correction decision
 
@@ -145,10 +162,13 @@ Partial projection failure must remain visible and retryable. It must never be
 reported as a successful correction. During an incomplete cutover, retrieval
 must prefer a safe gap over serving both versions.
 
-Rollback appends a rollback record, restores the last verified active version,
-reconciles Mongo/Neo4j/Chroma/resource/GraphRAG projections, and preserves the
-failed replacement and correction evidence. No rollback erases a decision,
-version, or failure.
+Rollback appends a rollback record and creates the next monotonic immutable
+version (`N+1`) from the last verified content/digest; it never reactivates or
+rewrites a historical superseded row. The restored copy receives its own
+source-version identity, approval evidence, projections, and exclusive
+safe-gap cutover. Mongo/Neo4j/Chroma/resource/GraphRAG are reconciled while the
+failed replacement and all correction evidence remain preserved. No rollback
+erases a decision, version, or failure.
 
 ### 7. Kevin-only admin workflow
 
@@ -187,6 +207,9 @@ single Kevin-selected version inside the correction form.
 - Correction record: identity, expected/current digests, replacement digest,
   preview digest, idempotency key, state, stage evidence, approval reference,
   rollback target, failures, and timestamps.
+- Authority decision value: additive `superseded_authority` for previously
+  authorized historical versions; `not_authorized` is not used as a
+  supersession alias.
 - Admin request/response contracts for source-version list, single-version
   detail, correction preview, apply/status, retry, and rollback.
 
@@ -216,6 +239,10 @@ decision and idempotency evidence.
 7. Run dry-run/read-only verification against the dedicated stack. Do not apply
    a live correction without its separate per-correction Kevin decision.
 
+Any new source-version list index is definition/local-verification only under
+this ACR. Creating an index on the live stack requires separate explicit Kevin
+apply authority after a read-only query-plan and index proposal review.
+
 ## Acceptance criteria
 
 - A correction cannot start without a canonical Kevin decision readback.
@@ -229,7 +256,8 @@ decision and idempotency evidence.
 - Neo4j records version and `SUPERSEDES` lineage.
 - Retries are idempotent and resume rather than duplicate.
 - Failure is visible, fail-closed, and rollbackable.
-- Rollback restores a prior verified active version without erasing history.
+- Rollback appends a new monotonic version from prior verified content without
+  reactivating or rewriting a historical row or erasing history.
 - No agent approval, semantic truth judgment, automatic staleness decision,
   external communication, or prospect/BA surface is added.
 - Focused/full tests, typecheck, build, generated catalogs, route access, and a
