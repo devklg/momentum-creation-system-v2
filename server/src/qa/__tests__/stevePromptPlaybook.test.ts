@@ -1,20 +1,28 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { MCS_AGENT_TEMPLATE_REGISTRY } from '@momentum/shared';
 
 const repoRoot = path.resolve(process.cwd(), '..');
 const playbook = readFileSync(path.join(repoRoot, 'AI_AGENT_PLAYBOOK.md'), 'utf8');
 
 describe('P2-120 Steve prompt playbook', () => {
-  it('maps both governed Steve templates to their current behavior sources', () => {
+  it('uses the existing registry and maps every Steve behavior source', () => {
+    expect(playbook).toContain('`MCS_AGENT_TEMPLATE_REGISTRY`');
     expect(playbook).toContain('`steve_success_discovery@1.0.0`');
     expect(playbook).toContain('`steve_success_profile@1.0.0`');
+    expect(playbook).toContain('`steve_success_profile_extraction@1.0.0`');
     expect(playbook).toContain(
       '`server/src/domain/steve-success-interview.ts#buildSteveSystemPrompt`',
     );
     expect(playbook).toContain(
       '`server/src/domain/steve-success-interview.ts#assembleSuccessProfile`',
     );
+    expect(playbook).toContain(
+      '`server/src/domain/steveConversationRuntime.ts#extractionSystem`',
+    );
+    expect(MCS_AGENT_TEMPLATE_REGISTRY.filter((item) => item.ownerAgentKey === 'steve_success'))
+      .toHaveLength(3);
   });
 
   it('records the completion, degradation, and human-dignity boundaries', () => {
@@ -25,5 +33,7 @@ describe('P2-120 Steve prompt playbook', () => {
       /may not score, rank,\s+classify, qualify, predict, compare, pressure, or infer human potential/,
     );
     expect(playbook).toContain('never edit an approved active');
+    expect(playbook).toContain('not Kevin-approved Knowledge Base content');
+    expect(playbook).toContain('ACR-0022 approval required');
   });
 });
