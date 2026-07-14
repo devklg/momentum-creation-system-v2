@@ -127,4 +127,48 @@ describe('Chroma direct adapter', () => {
       where: { runId: 'phase3' },
     });
   });
+
+  it('lists bounded metadata-only records without requesting documents or embeddings', async () => {
+    const { chromaAdapter } = await import('../chroma/adapter.js');
+    mocks.fetch
+      .mockResolvedValueOnce(jsonResponse({ collections: [{ id: 'col-1', name: 'mcs_test' }] }))
+      .mockResolvedValueOnce(jsonResponse({ ids: ['id-1'], metadatas: [{ indexedAt: '2026-07-14' }] }));
+
+    await expect(chromaAdapter('list_records', {
+      collection: 'mcs_test',
+      limit: 25,
+      offset: 50,
+      where: { domain: 'success', language: 'en' },
+    })).resolves.toEqual({
+      ids: ['id-1'],
+      metadatas: [{ indexedAt: '2026-07-14' }],
+      count: 1,
+      limit: 25,
+      offset: 50,
+    });
+    expect(mocks.embed).not.toHaveBeenCalled();
+    expect(JSON.parse(String(mocks.fetch.mock.calls[1]?.[1]?.body))).toEqual({
+      limit: 25,
+      offset: 50,
+      include: ['metadatas'],
+      where: { $and: [{ domain: 'success' }, { language: 'en' }] },
+    });
+  });
+
+  it('supports metadata-only exact-id readback for maintenance verification', async () => {
+    const { chromaAdapter } = await import('../chroma/adapter.js');
+    mocks.fetch
+      .mockResolvedValueOnce(jsonResponse({ collections: [{ id: 'col-1', name: 'mcs_test' }] }))
+      .mockResolvedValueOnce(jsonResponse({ ids: ['id-1'], metadatas: [{ version: 1 }] }));
+
+    await chromaAdapter('get', {
+      collection: 'mcs_test',
+      ids: ['id-1'],
+      include_documents: false,
+    });
+    expect(JSON.parse(String(mocks.fetch.mock.calls[1]?.[1]?.body))).toEqual({
+      ids: ['id-1'],
+      include: ['metadatas'],
+    });
+  });
 });
