@@ -2,7 +2,7 @@
 
 ## Momentum Creation System V2
 
-Status: Approved
+Status: Verified
 
 Priority: P2-132 — Context Manager / GraphRAG scale hardening
 
@@ -105,7 +105,7 @@ rollback requires no data migration or cleanup.
 {
   "acr_id": "ACR-0026",
   "title": "Context Retrieval Cache and Readiness Batching",
-  "status": "approved",
+  "status": "verified",
   "risk_level": "medium",
   "change_type": "contract",
   "proposed_by": "Codex",
@@ -183,10 +183,15 @@ rollback requires no data migration or cleanup.
       "com_prospect_compliance",
       "documentation_freshness"
     ],
-    "gates_pending": [
-      "trusted_visual_qa"
+    "gates_overridden": [
+      {
+        "gate": "trusted_visual_qa",
+        "decision_ledger_ref": "dec_acr_0026_visual_gate_override_2026_07_14",
+        "note": "Kevin accepted the unavailable trusted browser gate; it is not represented as passed."
+      }
     ],
-    "released_at": null
+    "gates_pending": [],
+    "released_at": "2026-07-14"
   },
   "version": {
     "from": "direct per-request retrieval",
@@ -216,3 +221,13 @@ tenant/team/BA scope determine identity. Governed knowledge writes advance the
 cache generation. GraphRAG readiness now supports stable, set-oriented batches
 of at most 50 unique ids, isolates collection failures, and fails closed when a
 bounded outbox result is incomplete. Admin diagnostics contain counters only.
+
+## Verification-gate override
+
+The trusted in-app browser bridge was unavailable, so trusted visual QA was not
+performed and is not represented as passed. Kevin L. Gardner explicitly
+accepted that unavailable gate and authorized PR #334 to merge on 2026-07-14.
+The audited override is
+`dec_acr_0026_visual_gate_override_2026_07_14`, verified in the dedicated MCS
+MongoDB, Neo4j, and ChromaDB stores. Automated admin component rendering and all
+repository and GitHub CI gates passed.
