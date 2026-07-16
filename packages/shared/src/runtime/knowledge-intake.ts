@@ -71,7 +71,13 @@ export interface McsKnowledgeAuthorityEnvelope {
 }
 
 /** Lifecycle of a raw source. Only `active` sources yield retrieval-eligible chunks. */
-export type McsRawKnowledgeStatus = 'active' | 'deprecated' | 'archived' | 'rejected';
+export type McsRawKnowledgeStatus =
+  | 'approved'
+  | 'active'
+  | 'superseded'
+  | 'deprecated'
+  | 'archived'
+  | 'rejected';
 
 /**
  * The original knowledge exactly as Kevin added it — the single point of authority and
@@ -147,7 +153,9 @@ export type McsKnowledgeSurfaceScope = 'team' | 'admin';
 
 /** Lifecycle of a derived chunk. Only `active` chunks are retrieval-eligible. */
 export type McsKnowledgeChunkStatus =
+  | 'approved'
   | 'active'
+  | 'superseded'
   | 'deprecated'
   | 'archived'
   | 'rejected'

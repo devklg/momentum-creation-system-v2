@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T18:46:28.336Z
-- Mongo collections: 70
-- Neo4j labels: 79
+- Generated: 2026-07-14T20:47:50.583Z
+- Mongo collections: 74
+- Neo4j labels: 83
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
-- Route handlers: 279
-- Shared exports: 1116
+- Route handlers: 286
+- Shared exports: 1141
 
 ## Mongo Collections
 
@@ -22,9 +22,12 @@
 | `broadcast_optouts` | permissive_mongoose_schema | yes | 3 |
 | `broadcast_recipients` | permissive_mongoose_schema | yes | 8 |
 | `broadcasts` | permissive_mongoose_schema | yes | 5 |
+| `CORRECTION_COLLECTION` | permissive_mongoose_schema | expression | 4 |
+| `decisions` | permissive_mongoose_schema | yes | 3 |
 | `input.mongoCollection` | permissive_mongoose_schema | expression | 2 |
-| `KNOWLEDGE_CHUNK_COLLECTION` | permissive_mongoose_schema | expression | 2 |
-| `KNOWLEDGE_SOURCE_COLLECTION` | permissive_mongoose_schema | expression | 3 |
+| `KNOWLEDGE_CHUNK_COLLECTION` | permissive_mongoose_schema | expression | 7 |
+| `KNOWLEDGE_SOURCE_COLLECTION` | permissive_mongoose_schema | expression | 9 |
+| `knowledge_supersession_records` | permissive_mongoose_schema | yes | 1 |
 | `mcs_audit_log` | permissive_mongoose_schema | yes | 6 |
 | `mcs_graphrag_records` | permissive_mongoose_schema | yes | 2 |
 | `mcs_knowledge_chunks` | permissive_mongoose_schema | yes | 1 |
@@ -34,6 +37,7 @@
 | `mcs_questionnaires` | permissive_mongoose_schema | yes | 1 |
 | `mcs_workbooks` | permissive_mongoose_schema | yes | 2 |
 | `orientation_sessions` | permissive_mongoose_schema | yes | 1 |
+| `RESOURCE_CATALOG_MONGO_COLLECTION` | permissive_mongoose_schema | expression | 2 |
 | `team_magnificent_members` | explicit_mongoose_schema | yes | 61 |
 | `tenant_settings_versions` | permissive_mongoose_schema | yes | 3 |
 | `tmag_access_codes` | permissive_mongoose_schema | yes | 8 |
@@ -54,7 +58,7 @@
 | `tmag_new_member_orientation_reservations` | permissive_mongoose_schema | yes | 6 |
 | `tmag_new_member_orientation_sessions` | permissive_mongoose_schema | yes | 4 |
 | `tmag_profile_change_challenges` | permissive_mongoose_schema | yes | 3 |
-| `tmag_projection_outbox` | permissive_mongoose_schema | yes | 6 |
+| `tmag_projection_outbox` | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_callback_requests` | permissive_mongoose_schema | yes | 10 |
 | `tmag_prospect_crm_dispositions` | permissive_mongoose_schema | yes | 11 |
 | `tmag_prospect_crm_followups` | permissive_mongoose_schema | yes | 14 |
@@ -95,6 +99,7 @@
 | --- | ---: |
 | `Agent` | 1 |
 | `BrandAmbassador` | 1 |
+| `Decision` | 3 |
 | `DISPOSED` | 5 |
 | `ENROLLED` | 1 |
 | `FOUNDER_PASSWORD` | 1 |
@@ -103,9 +108,11 @@
 | `INVITED_AS` | 1 |
 | `Knowledge` | 10 |
 | `KnowledgeCandidate` | 1 |
-| `KnowledgeChunk` | 1 |
+| `KnowledgeChunk` | 6 |
+| `KnowledgeCorrection` | 3 |
 | `KnowledgeDomain` | 1 |
-| `KnowledgeSource` | 3 |
+| `KnowledgeSource` | 5 |
+| `KnowledgeSourceVersion` | 7 |
 | `KnowledgeVersion` | 1 |
 | `LearningSignal` | 1 |
 | `MemoryIndexEntry` | 4 |
@@ -117,6 +124,7 @@
 | `S2` | 1 |
 | `SCOPED_TO` | 1 |
 | `SPONSORED_BY` | 1 |
+| `SUPERSEDES` | 1 |
 | `TeamMagnificent` | 6 |
 | `TeamMagnificentMember` | 83 |
 | `Tenant` | 2 |
@@ -198,7 +206,7 @@
 | `FOR_VM_LEAD` | 4 |
 | `HAD_STEVE_DISCOVERY` | 3 |
 | `HAS_ACTIVITY` | 2 |
-| `HAS_CHUNK` | 1 |
+| `HAS_CHUNK` | 6 |
 | `HAS_CRM_RECORD` | 2 |
 | `HAS_EVENT_ATTENDANCE` | 1 |
 | `HAS_INBOUND_CALL` | 1 |
@@ -210,7 +218,7 @@
 | `HAS_SETTINGS_VERSION` | 1 |
 | `HAS_THREE_WAY_AVAILABILITY` | 1 |
 | `HAS_TIMELINE_EVENT` | 3 |
-| `HAS_VERSION` | 4 |
+| `HAS_VERSION` | 6 |
 | `HAS_VM_AUDIT` | 1 |
 | `HAS_VM_DELIVERY_EVENT` | 1 |
 | `INVITED` | 4 |
@@ -236,7 +244,7 @@
 | `SENT_BY` | 2 |
 | `SPONSORED_BY` | 6 |
 | `SUBMITTED` | 1 |
-| `SUPERSEDES` | 2 |
+| `SUPERSEDES` | 3 |
 | `SUPPORTED_BY` | 1 |
 | `SUPPORTS_EVENT_MATERIAL` | 1 |
 | `SUPPORTS_TRAINING_MODULE` | 1 |
@@ -319,7 +327,7 @@
 | `(unmounted)` | `server/src/routes/admin/dashboard.ts` | GET /metrics<br>GET user-agent<br>GET /filters<br>GET user-agent<br>GET /drilldown<br>GET user-agent<br>GET /training-analytics<br>GET user-agent<br>GET /stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminDashboardFiltersResponse`, `McsAdminDashboardMetricsResponse`, `McsAdminDrilldownResponse`, `McsAdminLiveAuditEvent`, `McsAdminLiveEvent`, `McsAdminLivePlacementEvent`, `McsAdminLiveSnapshot`, `McsAdminTrainingAnalyticsResponse`, `McsAuditActor`, `McsAuditLogEntry`, `McsPlacementEvent` |
 | `(unmounted)` | `server/src/routes/admin/events.ts` | GET /<br>POST /webinars/:eventId/reservations/:reservationId/attendance | `McsAuditActor`, `McsRecordEventAttendanceResponse` |
 | `(unmounted)` | `server/src/routes/admin/health.ts` | GET x-mcs-health-secret<br>GET /triple-stack<br>GET /status<br>GET /llm-provider | none |
-| `(unmounted)` | `server/src/routes/admin/knowledge.ts` | GET /status<br>POST /sources<br>POST /sources/upload | none |
+| `(unmounted)` | `server/src/routes/admin/knowledge.ts` | GET /status<br>GET /source-versions<br>GET /source-versions/:sourceVersionId<br>POST /source-versions/:sourceVersionId/corrections/preview<br>POST /source-versions/:sourceVersionId/corrections<br>GET /corrections/:correctionId<br>POST /corrections/:correctionId/retry<br>POST /corrections/:correctionId/rollback<br>POST /sources<br>POST /sources/upload | `MCS_KNOWLEDGE_CORRECTION_CONFIRMATION`, `MCS_KNOWLEDGE_ROLLBACK_CONFIRMATION`, `McsAdminKnowledgeCorrectionApplyRequest`, `McsAdminKnowledgeCorrectionRetryRequest`, `McsAdminKnowledgeCorrectionRollbackRequest` |
 | `(unmounted)` | `server/src/routes/admin/liveOps.ts` | GET /operations<br>GET /growth<br>GET user-agent<br>GET /grid<br>GET user-agent<br>GET /funnel<br>GET user-agent<br>GET /usage/stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminFunnelKind`, `McsAdminLiveUsageSample`, `McsAdminLiveUsageStreamEvent`, `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/michael-runtime-observability.ts` | GET /observability | none |
 | `(unmounted)` | `server/src/routes/admin/orientation.ts` | GET user-agent<br>GET /sessions<br>GET /diagnostic<br>POST /sessions | `McsAdminCreateOrientationSessionResponse`, `McsAdminOrientationDiagnosticResponse`, `McsAdminOrientationSessionsResponse`, `McsAuditActor`, `McsAuditContext` |
@@ -375,6 +383,29 @@
 | `McsAdminEventBottleneckSection` | interface | `packages/shared/src/admin-bottlenecks.ts` |
 | `McsAdminInvitationBottleneckSection` | interface | `packages/shared/src/admin-bottlenecks.ts` |
 | `McsAdminTrainingBottleneckSection` | interface | `packages/shared/src/admin-bottlenecks.ts` |
+| `MCS_KNOWLEDGE_CORRECTION_CONFIRMATION` | const | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `MCS_KNOWLEDGE_CORRECTION_SCHEMA_VERSION` | const | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `MCS_KNOWLEDGE_ROLLBACK_CONFIRMATION` | const | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsAdminKnowledgeCorrectionApplyRequest` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsAdminKnowledgeCorrectionPreview` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsAdminKnowledgeCorrectionPreviewRequest` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsAdminKnowledgeCorrectionRecord` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsAdminKnowledgeCorrectionResponse` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsAdminKnowledgeCorrectionRetryRequest` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsAdminKnowledgeCorrectionRollbackRequest` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsAdminKnowledgeSourceVersionDetail` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsAdminKnowledgeSourceVersionListRequest` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsAdminKnowledgeSourceVersionListResponse` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsAdminKnowledgeSourceVersionSummary` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsKnowledgeCorrectionCheck` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsKnowledgeCorrectionCheckKey` | type | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsKnowledgeCorrectionCutoverPhase` | type | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsKnowledgeCorrectionDecisionBinding` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsKnowledgeCorrectionExecutableStage` | type | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsKnowledgeCorrectionFailureCode` | type | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsKnowledgeCorrectionStageEvidence` | interface | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsKnowledgeCorrectionState` | type | `packages/shared/src/admin-knowledge-corrections.ts` |
+| `McsKnowledgeSourceVersionLifecycle` | type | `packages/shared/src/admin-knowledge-corrections.ts` |
 | `McsAdminKnowledgeIntegrityState` | type | `packages/shared/src/admin-knowledge-status.ts` |
 | `McsAdminKnowledgeIntegrityStatus` | interface | `packages/shared/src/admin-knowledge-status.ts` |
 | `McsAdminKnowledgeReadiness` | type | `packages/shared/src/admin-knowledge-status.ts` |
@@ -762,6 +793,8 @@
 | `MCS_KNOWLEDGE_BASE_SOURCE_CHUNK_RELATIONSHIP` | const | `packages/shared/src/runtime/knowledge-base-schema.ts` |
 | `MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION` | const | `packages/shared/src/runtime/knowledge-base-schema.ts` |
 | `MCS_KNOWLEDGE_BASE_SOURCE_NODE_LABEL` | const | `packages/shared/src/runtime/knowledge-base-schema.ts` |
+| `McsCorrectedKnowledgeBaseChunkRecord` | interface | `packages/shared/src/runtime/knowledge-base-schema.ts` |
+| `McsCorrectedKnowledgeBaseSourceRecord` | interface | `packages/shared/src/runtime/knowledge-base-schema.ts` |
 | `McsKnowledgeBaseAuthorityDecision` | type | `packages/shared/src/runtime/knowledge-base-schema.ts` |
 | `McsKnowledgeBaseAuthorityResolution` | interface | `packages/shared/src/runtime/knowledge-base-schema.ts` |
 | `McsKnowledgeBaseChunkRecord` | interface | `packages/shared/src/runtime/knowledge-base-schema.ts` |

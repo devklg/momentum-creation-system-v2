@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T18:46:23.694Z",
+  "generatedAt": "2026-07-14T20:47:47.583Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -21,10 +21,10 @@
     "/api/training/fast-start/modules/1"
   ],
   "summary": {
-    "routes": 243,
+    "routes": 250,
     "byAccessClass": {
       "raw_body_webhook": 1,
-      "admin": 103,
+      "admin": 110,
       "public_health": 2,
       "auth_bootstrap": 3,
       "auth_session": 2,
@@ -40,7 +40,7 @@
     },
     "byRole": {
       "provider": 2,
-      "founder_admin": 109,
+      "founder_admin": 116,
       "anonymous": 5,
       "system": 10,
       "brand_ambassador": 107,
@@ -48,7 +48,7 @@
     },
     "byEntitlement": {
       "machine_credential": 12,
-      "admin_allowlist": 109,
+      "admin_allowlist": 116,
       "none": 5,
       "registered_ba": 107,
       "valid_prospect_identity": 18,
@@ -56,7 +56,7 @@
     },
     "guardCoverage": {
       "requireAuth": 106,
-      "requireAdmin": 103,
+      "requireAdmin": 110,
       "requireAdminOrHealthSecret": 1,
       "requireRuntimeInternal": 5,
       "requireSteveComplete": 91,
@@ -129,7 +129,392 @@
       "id": "GET /api/admin/knowledge/status",
       "method": "GET",
       "fullPath": "/api/admin/knowledge/status",
-      "routeSource": "server/src/routes/admin/knowledge.ts:41",
+      "routeSource": "server/src/routes/admin/knowledge.ts:55",
+      "mountPath": "/api/admin/knowledge",
+      "mountPhase": "pre_json_admin_body_limit",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "express.json(...)",
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "25mb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/admin/knowledge/source-versions",
+      "method": "GET",
+      "fullPath": "/api/admin/knowledge/source-versions",
+      "routeSource": "server/src/routes/admin/knowledge.ts:64",
+      "mountPath": "/api/admin/knowledge",
+      "mountPhase": "pre_json_admin_body_limit",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "express.json(...)",
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "25mb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/admin/knowledge/source-versions/:sourceVersionId",
+      "method": "GET",
+      "fullPath": "/api/admin/knowledge/source-versions/:sourceVersionId",
+      "routeSource": "server/src/routes/admin/knowledge.ts:80",
+      "mountPath": "/api/admin/knowledge",
+      "mountPhase": "pre_json_admin_body_limit",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "express.json(...)",
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "25mb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/admin/knowledge/source-versions/:sourceVersionId/corrections/preview",
+      "method": "POST",
+      "fullPath": "/api/admin/knowledge/source-versions/:sourceVersionId/corrections/preview",
+      "routeSource": "server/src/routes/admin/knowledge.ts:88",
+      "mountPath": "/api/admin/knowledge",
+      "mountPhase": "pre_json_admin_body_limit",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "express.json(...)",
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "25mb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/admin/knowledge/source-versions/:sourceVersionId/corrections",
+      "method": "POST",
+      "fullPath": "/api/admin/knowledge/source-versions/:sourceVersionId/corrections",
+      "routeSource": "server/src/routes/admin/knowledge.ts:101",
+      "mountPath": "/api/admin/knowledge",
+      "mountPhase": "pre_json_admin_body_limit",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "express.json(...)",
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "25mb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/admin/knowledge/corrections/:correctionId",
+      "method": "GET",
+      "fullPath": "/api/admin/knowledge/corrections/:correctionId",
+      "routeSource": "server/src/routes/admin/knowledge.ts:125",
+      "mountPath": "/api/admin/knowledge",
+      "mountPhase": "pre_json_admin_body_limit",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "express.json(...)",
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "25mb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/admin/knowledge/corrections/:correctionId/retry",
+      "method": "POST",
+      "fullPath": "/api/admin/knowledge/corrections/:correctionId/retry",
+      "routeSource": "server/src/routes/admin/knowledge.ts:133",
+      "mountPath": "/api/admin/knowledge",
+      "mountPhase": "pre_json_admin_body_limit",
+      "routeAccessProfile": "admin",
+      "accessClass": "admin",
+      "accessCategory": "admin",
+      "permissions": {
+        "roles": [
+          "founder_admin"
+        ],
+        "entitlements": [
+          "admin_allowlist"
+        ],
+        "gates": [
+          "admin_session",
+          "requireAdmin"
+        ]
+      },
+      "expected": {
+        "authGate": "admin_session",
+        "adminGate": "requireAdmin",
+        "steveGate": "not_applicable",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "express.json(...)",
+          "requireAdmin"
+        ],
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "25mb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/admin/knowledge/corrections/:correctionId/rollback",
+      "method": "POST",
+      "fullPath": "/api/admin/knowledge/corrections/:correctionId/rollback",
+      "routeSource": "server/src/routes/admin/knowledge.ts:151",
       "mountPath": "/api/admin/knowledge",
       "mountPhase": "pre_json_admin_body_limit",
       "routeAccessProfile": "admin",
@@ -184,7 +569,7 @@
       "id": "POST /api/admin/knowledge/sources",
       "method": "POST",
       "fullPath": "/api/admin/knowledge/sources",
-      "routeSource": "server/src/routes/admin/knowledge.ts:50",
+      "routeSource": "server/src/routes/admin/knowledge.ts:177",
       "mountPath": "/api/admin/knowledge",
       "mountPhase": "pre_json_admin_body_limit",
       "routeAccessProfile": "admin",
@@ -239,7 +624,7 @@
       "id": "POST /api/admin/knowledge/sources/upload",
       "method": "POST",
       "fullPath": "/api/admin/knowledge/sources/upload",
-      "routeSource": "server/src/routes/admin/knowledge.ts:115",
+      "routeSource": "server/src/routes/admin/knowledge.ts:242",
       "mountPath": "/api/admin/knowledge",
       "mountPhase": "pre_json_admin_body_limit",
       "routeAccessProfile": "admin",

@@ -6,10 +6,10 @@
 
 ## Summary
 
-- Generated: 2026-07-14T18:46:30.508Z
-- Production `tripleStackWrite` call sites: 0
+- Generated: 2026-07-14T20:47:53.384Z
+- Production `tripleStackWrite` call sites: 2
 - Graph-critical: 0
-- Knowledge: 0
+- Knowledge: 2
 - Operational: 0
 - Excludes tests/spec files. Includes `server/src/**/*.ts` and `server/scripts/**/*.ts`.
 
@@ -23,3 +23,5 @@
 
 | # | Tier | Subsystem | Location | Function | Mongo collection expression | Neo4j | Chroma | Rationale |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | knowledge | approved_knowledge | `server/src/services/knowledge/knowledgeCorrectionStore.ts:131` | `insertCorrection` | `CORRECTION_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
+| 2 | knowledge | approved_knowledge | `server/src/services/knowledge/knowledgeCorrectionStore.ts:254` | `createAndVerifyApprovalDecision` | `DECISION_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |

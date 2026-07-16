@@ -33,3 +33,4 @@ export * from './orientation-diagnostic.js';
 export * from './orientation-content-inventory.js';
 export * from './admin-bottlenecks.js';
 export * from './admin-pagination.js';
+export * from './admin-knowledge-corrections.js';

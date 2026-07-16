@@ -1,10 +1,37 @@
 {
-  "generatedAt": "2026-07-14T18:46:30.508Z",
+  "generatedAt": "2026-07-14T20:47:53.384Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts"
   ],
-  "productionCallSiteCount": 0,
-  "countsByTier": {},
-  "callSites": []
+  "productionCallSiteCount": 2,
+  "countsByTier": {
+    "knowledge": 2
+  },
+  "callSites": [
+    {
+      "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
+      "line": 131,
+      "functionName": "insertCorrection",
+      "idExpression": "record.correctionId",
+      "mongoCollectionExpression": "CORRECTION_COLLECTION",
+      "hasNeo4j": true,
+      "hasChroma": true,
+      "tier": "knowledge",
+      "subsystem": "approved_knowledge",
+      "rationale": "Approved knowledge and candidate knowledge must project durably to graph/search."
+    },
+    {
+      "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
+      "line": 254,
+      "functionName": "createAndVerifyApprovalDecision",
+      "idExpression": "input.approvalDecisionId",
+      "mongoCollectionExpression": "DECISION_COLLECTION",
+      "hasNeo4j": true,
+      "hasChroma": true,
+      "tier": "knowledge",
+      "subsystem": "approved_knowledge",
+      "rationale": "Approved knowledge and candidate knowledge must project durably to graph/search."
+    }
+  ]
 }

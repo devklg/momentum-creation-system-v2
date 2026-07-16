@@ -8,3 +8,4 @@
 
 export * from './mongoRepository.js';
 export * from './indexes.js';
+export * from './canonicalApprovalAuthority.js';

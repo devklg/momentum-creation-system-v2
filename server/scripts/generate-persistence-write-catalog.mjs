@@ -67,6 +67,7 @@ const CLASSIFICATION_RULES = [
     rationale: 'Approved knowledge and candidate knowledge must project durably to graph/search.',
     match: ({ file }) =>
       file.endsWith('/approvedKnowledgeStore.ts') ||
+      file.endsWith('/knowledgeCorrectionStore.ts') ||
       file.endsWith('/learningCandidates.ts') ||
       file.endsWith('/graphrag.ts'),
   },

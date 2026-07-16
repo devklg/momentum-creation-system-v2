@@ -46,6 +46,7 @@ import {
   projectKevinApprovedKnowledgeSourceToCatalog,
   type KnowledgeResourceProjectionResult,
 } from './knowledgeResourceProjection.js';
+import { filterCanonicalActiveKnowledgeChunkIds } from './knowledgeCanonicalRetrievalGate.js';
 
 export const KNOWLEDGE_SOURCE_COLLECTION = MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION;
 export const KNOWLEDGE_CHUNK_COLLECTION = MCS_KNOWLEDGE_BASE_CHUNK_COLLECTION;
@@ -332,8 +333,11 @@ export async function createKevinApprovedKnowledgeSource(
 
 export async function projectApprovedChunkToGraphRag(
   chunk: McsKnowledgeBaseChunkRecord,
+  options: { allowStaged?: boolean } = {},
 ) {
-  if (chunk.status !== 'active' || !chunk.retrievalEligible) return null;
+  const active = chunk.status === 'active' && chunk.retrievalEligible;
+  const staged = options.allowStaged === true && chunk.status === 'approved' && !chunk.retrievalEligible;
+  if (!active && !staged) return null;
   if (chunk.authorityStatus !== 'active_authority') return null;
   const domain = chunk.domain === 'system' || chunk.domain === 'governance'
     ? 'organizational'
@@ -477,7 +481,18 @@ async function searchApprovedKnowledgeStore(
     );
     return [];
   }
-  return hydrateSemanticSearchReferences(data, scope);
+  const candidateIds = data.results?.ids ?? [];
+  if (candidateIds.length === 0) return [];
+  const canonicalIds = await filterCanonicalActiveKnowledgeChunkIds(candidateIds, scope);
+  const indexes = candidateIds.flatMap((id, index) => canonicalIds.has(id) ? [index] : []);
+  return hydrateSemanticSearchReferences({
+    results: {
+      ids: indexes.map((index) => data.results?.ids?.[index] ?? ''),
+      documents: indexes.map((index) => data.results?.documents?.[index] ?? ''),
+      metadatas: indexes.map((index) => data.results?.metadatas?.[index] ?? null),
+      distances: indexes.map((index) => data.results?.distances?.[index] ?? 0),
+    },
+  }, scope);
 }
 
 function approvedRetrievalCacheKey(
@@ -538,7 +553,7 @@ function documentToKnowledgeReference(doc: Record<string, unknown>): McsKnowledg
     !isDomain(domain) ||
     (language !== 'en' && language !== 'es') ||
     status !== 'active' ||
-    retrievalEligible === false
+    retrievalEligible !== true
   ) {
     return [];
   }
@@ -656,7 +671,7 @@ function metadataToKnowledgeChunk(input: {
       endOffset: numberValue(input.metadata.endOffset) ?? text.length,
     },
     status: 'active',
-    retrievalEligible: input.metadata.retrievalEligible !== false,
+    retrievalEligible: input.metadata.retrievalEligible === true,
   };
 }
 
@@ -665,8 +680,8 @@ function isApprovedSearchHit(
   scope: McsRuntimeRequestScope,
 ): boolean {
   const status = metadata.status;
-  if (status !== 'active' && status !== 'approved') return false;
-  if (metadata.retrievalEligible === false) return false;
+  if (status !== 'active') return false;
+  if (metadata.retrievalEligible !== true) return false;
   if (!metadataScopeMatches(metadata, scope)) return false;
 
   const authorityStatus = metadata.authorityStatus ?? metadata.authorityDecision;

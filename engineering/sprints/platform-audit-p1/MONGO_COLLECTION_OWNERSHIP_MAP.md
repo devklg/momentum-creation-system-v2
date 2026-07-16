@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Generated: 2026-07-14T18:46:13.442Z
-- Collections: 70
+- Generated: 2026-07-14T20:47:39.010Z
+- Collections: 74
 - Unclassified: 0
 
 ## Collections By Owner
@@ -15,10 +15,10 @@
 | --- | ---: |
 | agents_training_success | 11 |
 | broadcast_delivery | 3 |
-| dynamic_helper | 4 |
+| dynamic_helper | 6 |
 | events_orientation_and_calls | 7 |
 | holding_tank_and_reentry | 6 |
-| knowledge_content | 7 |
+| knowledge_content | 9 |
 | membership_identity | 6 |
 | operations_governance | 6 |
 | prospect_crm | 5 |
@@ -33,9 +33,12 @@
 | `broadcast_optouts` | Broadcast delivery and opt-out state | Broadcast domain | admin + workers | operational | permissive_mongoose_schema | yes | 3 |
 | `broadcast_recipients` | Broadcast delivery and opt-out state | Broadcast domain | admin + workers | operational | permissive_mongoose_schema | yes | 8 |
 | `broadcasts` | Broadcast delivery and opt-out state | Broadcast domain | admin + workers | operational | permissive_mongoose_schema | yes | 5 |
+| `CORRECTION_COLLECTION` | Dynamic helper expression | Owning caller resolves at runtime | system | mixed | permissive_mongoose_schema | expression | 4 |
+| `decisions` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 3 |
 | `input.mongoCollection` | Dynamic helper expression | Owning caller resolves at runtime | system | mixed | permissive_mongoose_schema | expression | 2 |
-| `KNOWLEDGE_CHUNK_COLLECTION` | Dynamic helper expression | Owning caller resolves at runtime | system | mixed | permissive_mongoose_schema | expression | 2 |
-| `KNOWLEDGE_SOURCE_COLLECTION` | Dynamic helper expression | Owning caller resolves at runtime | system | mixed | permissive_mongoose_schema | expression | 3 |
+| `KNOWLEDGE_CHUNK_COLLECTION` | Dynamic helper expression | Owning caller resolves at runtime | system | mixed | permissive_mongoose_schema | expression | 7 |
+| `KNOWLEDGE_SOURCE_COLLECTION` | Dynamic helper expression | Owning caller resolves at runtime | system | mixed | permissive_mongoose_schema | expression | 9 |
+| `knowledge_supersession_records` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 1 |
 | `mcs_audit_log` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 6 |
 | `mcs_graphrag_records` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 2 |
 | `mcs_knowledge_chunks` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 1 |
@@ -45,6 +48,7 @@
 | `mcs_questionnaires` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 1 |
 | `mcs_workbooks` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
 | `orientation_sessions` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 1 |
+| `RESOURCE_CATALOG_MONGO_COLLECTION` | Dynamic helper expression | Owning caller resolves at runtime | system | mixed | permissive_mongoose_schema | expression | 2 |
 | `team_magnificent_members` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | explicit_mongoose_schema | yes | 61 |
 | `tenant_settings_versions` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 3 |
 | `tmag_access_codes` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 8 |
@@ -65,7 +69,7 @@
 | `tmag_new_member_orientation_reservations` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 6 |
 | `tmag_new_member_orientation_sessions` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 4 |
 | `tmag_profile_change_challenges` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 3 |
-| `tmag_projection_outbox` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 6 |
+| `tmag_projection_outbox` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_callback_requests` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 10 |
 | `tmag_prospect_crm_dispositions` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 11 |
 | `tmag_prospect_crm_followups` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 14 |

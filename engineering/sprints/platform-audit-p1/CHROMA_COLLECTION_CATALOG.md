@@ -5,13 +5,13 @@
 
 ## Summary
 
-- Generated: 2026-07-14T18:46:17.767Z
+- Generated: 2026-07-14T20:47:42.125Z
 - Registered collections: 53
 - Schema-catalog collections: 53
-- Collections with observed write/query usage: 32
+- Collections with observed write/query usage: 33
 - Language-scoped collections: 10
 - Metadata contract rows: 53
-- Observed unregistered/dynamic targets: 8
+- Observed unregistered/dynamic targets: 10
 - Embedding model: all-MiniLM-L6-v2
 - Embedding dimension: 384
 
@@ -46,7 +46,7 @@
 | `mcs_agent_ivory_events` | agents | not_language_scoped | Agent event/template semantic memory. | not observed | none observed | none observed | none inferred |
 | `mcs_agent_michael_events` | agents | not_language_scoped | Agent event/template semantic memory. | `writeKnowledge` | `agentId`, `createdAt`, `kind`, `tmagId` | none observed | `agentId`, `tmagId` |
 | `mcs_agent_steve_events` | agents | not_language_scoped | Agent event/template semantic memory. | not observed | none observed | none observed | none inferred |
-| `mcs_agent_system_events` | agents | not_language_scoped | Agent event/template semantic memory. | not observed | none observed | none observed | none inferred |
+| `mcs_agent_system_events` | agents | not_language_scoped | Agent event/template semantic memory. | `add`<br>`get`<br>`tripleStackWrite` | `actor_tmag_id`, `correction_id`, `current_digest_sha256`, `current_source_version_id`, `decided_by`, `decision_id`, `expected_lifecycle`, `expected_replacement_source_version_id`, `expected_version`, `idempotency_key`, `preview_digest_sha256`, `reason_digest_sha256`, `replacement_digest_sha256`, `replacement_source_version_id`, `source_id`, `status`, `type` | none observed | none inferred |
 | `mcs_agent_templates` | agents | not_language_scoped | Agent event/template semantic memory. | not observed | none observed | none observed | none inferred |
 | `mcs_audit_log` | audit_governance | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `action`, `agent`, `correlationId`, `entityKind`, `role`, `severity`, `taxonomyCategory`, `taxonomyImpact`, `taxonomyOutcome`, `tenantId`, `timestamp`, `tmagId`, `turnId` | none observed | `correlationId`, `tenantId`, `tmagId`, `turnId` |
 | `mcs_broadcasts` | broadcast_delivery | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `audiencePreset`, `broadcastId`, `channel`, `createdAt`, `isTestSend` | none observed | `broadcastId` |
@@ -57,7 +57,7 @@
 | `mcs_fast_start_progress` | onboarding_training | not_language_scoped | Onboarding/training semantic record. | `create_collection`<br>`writeKnowledge` | `branch`, `moduleId`, `purpose`, `state`, `tmagId`, `updatedAt`, `wireframe_leaf` | none observed | `moduleId`, `tmagId` |
 | `mcs_health_heartbeat` | operations | not_language_scoped | Operational health/readback heartbeat record. | not observed | none observed | none observed | none inferred |
 | `mcs_ivory_prospect_names` | agents | not_language_scoped | Prospect funnel semantic record. | `add`<br>`create_collection`<br>`writeGraphCritical`<br>`writeKnowledge` | `angle`, `chat_number`, `createdAt`, `description`, `ivoryId`, `kind`, `preferredAngle`, `productKey`, `project`, `runId`, `tmagId` | none observed | `ivoryId`, `runId`, `tmagId` |
-| `mcs_knowledge_chunks` | knowledge | metadata.language | Approved knowledge chunk retrieval index. | `query_with_filter`<br>`writeKnowledge` | `agentScopes`, `authority`, `authorityStatus`, `chunkId`, `chunkIndex`, `citationLabel`, `citationSourceRef`, `documentId`, `domain`, `endOffset`, `heading`, `kind`, `language`, `retrievalEligible`, `scope.teamId`, `scope.teamKey`, `scope.teamName`, `scope.tenantId`, `sourceId`, `sourceTitle`, `sourceVersion`, `startOffset`, `status`, `surfaceScopes`, `title`, `topicTags` | `retrievalEligible`, `status` | `chunkId`, `documentId`, `domain`, `language`, `retrievalEligible`, `scope.teamId`, `scope.tenantId`, `sourceId`, `status` |
+| `mcs_knowledge_chunks` | knowledge | metadata.language | Approved knowledge chunk retrieval index. | `add`<br>`query_with_filter`<br>`writeKnowledge` | `agentScopes`, `authority`, `authorityStatus`, `chunkId`, `chunkIndex`, `citationLabel`, `citationSourceRef`, `documentId`, `domain`, `endOffset`, `heading`, `kind`, `language`, `retrievalEligible`, `scope.teamId`, `scope.teamKey`, `scope.teamName`, `scope.tenantId`, `sourceId`, `sourceTitle`, `sourceVersion`, `startOffset`, `status`, `surfaceScopes`, `title`, `topicTags` | `retrievalEligible`, `status` | `chunkId`, `documentId`, `domain`, `language`, `retrievalEligible`, `scope.teamId`, `scope.tenantId`, `sourceId`, `status` |
 | `mcs_knowledge_sources` | knowledge | not_language_scoped | Approved knowledge source retrieval and source lookup. | not observed | none observed | none observed | `domain`, `language` |
 | `mcs_learning_candidates_review` | knowledge_review | metadata.language | Review-only learning candidates; never active retrieval knowledge. | `writeKnowledge` | `createdAt`, `domain`, `kind`, `language`, `status`, `tenantId` | none observed | `tenantId` |
 | `mcs_members` | identity_access | not_language_scoped | Team Magnificent member identity semantic record. | `add`<br>`delete`<br>`get` | `backfilledAt`, `entitlements`, `kind`, `role`, `threeBaId`, `timezone`, `tmagId`, `updatedAt` | none observed | `threeBaId`, `tmagId` |
@@ -109,5 +109,7 @@ entries need explicit contract handling in P1-43.
 | `chroma.collection` | expression | `add` | 1 | `server/src/services/tieredWrite.ts:303` |
 | `collection` | expression | `create_collection` | 1 | `server/src/runtime/knowledge-evolution/indexing/knowledgeEvolutionReindex.service.ts:63` |
 | `input.chroma.collection` | expression | `add` | 1 | `server/src/services/tripleStack.ts:72` |
+| `knowledgeChromaCollection(current.domain, current.language)` | expression | `writeKnowledge` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:382` |
+| `knowledgeChromaCollection(source.domain, source.language)` | expression | `add` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:1103` |
 | `mcs_questionnaires` | literal/constant | `writeKnowledge` | 1 | `server/src/domain/questionnaire.ts:203` |
 | `tmag_workbooks` | literal/constant | `add` | 1 | `server/src/domain/workbook.ts:356` |

@@ -4,15 +4,15 @@
 
 ## Summary
 
-- Generated: 2026-07-14T18:46:23.694Z
-- Routes: 243
+- Generated: 2026-07-14T20:47:47.583Z
+- Routes: 250
 - Findings: 0
 
 ## Routes By Access Category
 
 | Access category | Routes |
 | --- | ---: |
-| admin | 103 |
+| admin | 110 |
 | admin_or_health_secret | 1 |
 | auth_bootstrap | 3 |
 | auth_session | 2 |
@@ -34,7 +34,7 @@
 | customSecretGuard | 10 |
 | rateLimited | 3 |
 | rawBodyParser | 1 |
-| requireAdmin | 103 |
+| requireAdmin | 110 |
 | requireAdminOrHealthSecret | 1 |
 | requireAuth | 106 |
 | requireRuntimeInternal | 5 |
@@ -47,7 +47,7 @@
 | --- | ---: |
 | anonymous | 5 |
 | brand_ambassador | 107 |
-| founder_admin | 109 |
+| founder_admin | 116 |
 | prospect | 18 |
 | provider | 2 |
 | system | 10 |
@@ -56,7 +56,7 @@
 
 | Entitlement | Routes |
 | --- | ---: |
-| admin_allowlist | 109 |
+| admin_allowlist | 116 |
 | machine_credential | 12 |
 | none | 5 |
 | registered_ba | 107 |
@@ -87,9 +87,16 @@
 | Method | Path | Roles | Entitlements | Effective gates | Access category | Auth gate | Admin gate | Steve gate | Steve exception | VM entitlement | Token identity | Machine secret | Raw body | Rate limit | Body limit | Notes | Findings | Source |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | POST | `/api/telnyx/webhook` | provider | machine_credential | telnyx_signature | raw_body_webhook | none | none | not_applicable | none | none | none | telnyx_signature | yes | no | global_256kb_json | none | none | `server/src/routes/telnyx-webhook.ts:14` |
-| GET | `/api/admin/knowledge/status` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:41` |
-| POST | `/api/admin/knowledge/sources` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:50` |
-| POST | `/api/admin/knowledge/sources/upload` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:115` |
+| GET | `/api/admin/knowledge/status` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:55` |
+| GET | `/api/admin/knowledge/source-versions` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:64` |
+| GET | `/api/admin/knowledge/source-versions/:sourceVersionId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:80` |
+| POST | `/api/admin/knowledge/source-versions/:sourceVersionId/corrections/preview` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:88` |
+| POST | `/api/admin/knowledge/source-versions/:sourceVersionId/corrections` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:101` |
+| GET | `/api/admin/knowledge/corrections/:correctionId` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:125` |
+| POST | `/api/admin/knowledge/corrections/:correctionId/retry` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:133` |
+| POST | `/api/admin/knowledge/corrections/:correctionId/rollback` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:151` |
+| POST | `/api/admin/knowledge/sources` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:177` |
+| POST | `/api/admin/knowledge/sources/upload` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | 25mb_json | none | none | `server/src/routes/admin/knowledge.ts:242` |
 | GET | `/api/health/` | anonymous, system | machine_credential, none | none | public_health | none | none | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/health.ts:7` |
 | GET | `/api/health/persistence` | anonymous, system | machine_credential, none | none | public_health | none | none | not_applicable | none | none | none | none | no | no | global_256kb_json | public persistence diagnostic; review before production exposure if ops-only detail is considered sensitive | none | `server/src/routes/health.ts:15` |
 | POST | `/api/auth/verify-code` | anonymous | none | none | auth_bootstrap | none | none | not_applicable | none | none | none | none | no | yes | global_256kb_json | none | none | `server/src/routes/auth.ts:23` |

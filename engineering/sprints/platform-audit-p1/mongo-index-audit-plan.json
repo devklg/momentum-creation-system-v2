@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T18:46:13.892Z",
+  "generatedAt": "2026-07-14T20:47:39.386Z",
   "sources": [
     "docs/app-data-model-contract.md §9",
     "engineering/sprints/platform-audit-p1/mongo-ownership-map.json",
@@ -12,11 +12,11 @@
     "knowledgeEvolutionEnsureIndexes": "present_for_knowledge_evolution_only",
     "vmIndexDefinitions": "declared_in_schema_registry_not_generally_applied"
   },
-  "indexCount": 70,
+  "indexCount": 74,
   "byStatus": {
     "planned_missing_enforcement": 42,
     "vm_registry_declared": 6,
-    "required_not_verified": 22
+    "required_not_verified": 26
   },
   "highVolumeWithoutPlan": [],
   "indexes": [
@@ -590,6 +590,65 @@
       "ownerId": "operations_governance",
       "steward": "Operations / governance",
       "primarySurface": "admin + system"
+    },
+    {
+      "collection": "mcs_knowledge_corrections",
+      "name": "unique_knowledge_correction_idempotency",
+      "keys": {
+        "idempotencyKey": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "Bind one correction workflow to one immutable apply key.",
+      "status": "required_not_verified",
+      "ownerId": "unknown",
+      "steward": "unknown",
+      "primarySurface": "unknown"
+    },
+    {
+      "collection": "mcs_knowledge_corrections",
+      "name": "knowledge_correction_state_updated",
+      "keys": {
+        "state": 1,
+        "updatedAt": 1
+      },
+      "options": {},
+      "rationale": "Bound retry and operations status scans.",
+      "status": "required_not_verified",
+      "ownerId": "unknown",
+      "steward": "unknown",
+      "primarySurface": "unknown"
+    },
+    {
+      "collection": "mcs_knowledge_sources",
+      "name": "knowledge_source_version_list",
+      "keys": {
+        "status": 1,
+        "createdAt": -1,
+        "_id": -1
+      },
+      "options": {},
+      "rationale": "Kevin-only keyset source-version list.",
+      "status": "required_not_verified",
+      "ownerId": "knowledge_content",
+      "steward": "Knowledge / content domain",
+      "primarySurface": "admin + runtime"
+    },
+    {
+      "collection": "mcs_knowledge_chunks",
+      "name": "knowledge_chunk_source_version_lifecycle",
+      "keys": {
+        "sourceId": 1,
+        "sourceVersion": 1,
+        "status": 1
+      },
+      "options": {},
+      "rationale": "Exclusive old/new chunk lifecycle readback.",
+      "status": "required_not_verified",
+      "ownerId": "knowledge_content",
+      "steward": "Knowledge / content domain",
+      "primarySurface": "admin + runtime"
     },
     {
       "collection": "broadcast_recipients",

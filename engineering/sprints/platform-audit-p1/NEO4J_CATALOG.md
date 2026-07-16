@@ -4,11 +4,11 @@
 
 ## Summary
 
-- Generated: 2026-07-14T18:46:14.356Z
-- Labels: 79
+- Generated: 2026-07-14T20:47:39.783Z
+- Labels: 83
 - Relationships: 69
 - Constraints/indexes cataloged: 18
-- Labels without a cataloged constraint/index: 64
+- Labels without a cataloged constraint/index: 68
 
 ## Constraints By Status
 
@@ -23,6 +23,7 @@
 | --- | ---: |
 | `Agent` | 1 |
 | `BrandAmbassador` | 1 |
+| `Decision` | 3 |
 | `DISPOSED` | 5 |
 | `ENROLLED` | 1 |
 | `FOUNDER_PASSWORD` | 1 |
@@ -31,9 +32,11 @@
 | `INVITED_AS` | 1 |
 | `Knowledge` | 10 |
 | `KnowledgeCandidate` | 1 |
-| `KnowledgeChunk` | 1 |
+| `KnowledgeChunk` | 6 |
+| `KnowledgeCorrection` | 3 |
 | `KnowledgeDomain` | 1 |
-| `KnowledgeSource` | 3 |
+| `KnowledgeSource` | 5 |
+| `KnowledgeSourceVersion` | 7 |
 | `KnowledgeVersion` | 1 |
 | `LearningSignal` | 1 |
 | `MemoryIndexEntry` | 4 |
@@ -45,6 +48,7 @@
 | `S2` | 1 |
 | `SCOPED_TO` | 1 |
 | `SPONSORED_BY` | 1 |
+| `SUPERSEDES` | 1 |
 | `TeamMagnificent` | 6 |
 | `TeamMagnificentMember` | 83 |
 | `Tenant` | 2 |
@@ -126,7 +130,7 @@
 | `FOR_VM_LEAD` | 4 |
 | `HAD_STEVE_DISCOVERY` | 3 |
 | `HAS_ACTIVITY` | 2 |
-| `HAS_CHUNK` | 1 |
+| `HAS_CHUNK` | 6 |
 | `HAS_CRM_RECORD` | 2 |
 | `HAS_EVENT_ATTENDANCE` | 1 |
 | `HAS_INBOUND_CALL` | 1 |
@@ -138,7 +142,7 @@
 | `HAS_SETTINGS_VERSION` | 1 |
 | `HAS_THREE_WAY_AVAILABILITY` | 1 |
 | `HAS_TIMELINE_EVENT` | 3 |
-| `HAS_VERSION` | 4 |
+| `HAS_VERSION` | 6 |
 | `HAS_VM_AUDIT` | 1 |
 | `HAS_VM_DELIVERY_EVENT` | 1 |
 | `INVITED` | 4 |
@@ -164,7 +168,7 @@
 | `SENT_BY` | 2 |
 | `SPONSORED_BY` | 6 |
 | `SUBMITTED` | 1 |
-| `SUPERSEDES` | 2 |
+| `SUPERSEDES` | 3 |
 | `SUPPORTED_BY` | 1 |
 | `SUPPORTS_EVENT_MATERIAL` | 1 |
 | `SUPPORTS_TRAINING_MODULE` | 1 |
@@ -203,6 +207,7 @@
 - `Agent`
 - `BrandAmbassador`
 - `DISPOSED`
+- `Decision`
 - `ENROLLED`
 - `FOUNDER_PASSWORD`
 - `HAS_FOLLOWUP`
@@ -211,8 +216,10 @@
 - `Knowledge`
 - `KnowledgeCandidate`
 - `KnowledgeChunk`
+- `KnowledgeCorrection`
 - `KnowledgeDomain`
 - `KnowledgeSource`
+- `KnowledgeSourceVersion`
 - `KnowledgeVersion`
 - `LearningSignal`
 - `MemoryIndexEntry`
@@ -224,6 +231,7 @@
 - `S2`
 - `SCOPED_TO`
 - `SPONSORED_BY`
+- `SUPERSEDES`
 - `Tenant`
 - `TenantSettingsVersion`
 - `TmagAdminProspectNote`

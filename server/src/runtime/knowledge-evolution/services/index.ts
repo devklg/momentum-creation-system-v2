@@ -7,7 +7,7 @@
  */
 
 import { defaultEvolutionRuntimeDeps, type EvolutionRuntimeDeps } from '../deps.js';
-import { createEvolutionApprovalService } from './EvolutionApproval.service.js';
+import { createEvolutionApprovalService, type EvolutionApprovalAuthorityPort } from './EvolutionApproval.service.js';
 import { createEvolutionPlanService } from './EvolutionPlan.service.js';
 import { createEvolutionVersionService } from './EvolutionVersion.service.js';
 import { createSupersessionService } from './Supersession.service.js';
@@ -57,8 +57,9 @@ export interface KnowledgeEvolutionRepositories {
 export function composeKnowledgeEvolutionServices(
   repositories: KnowledgeEvolutionRepositories,
   runtime: EvolutionRuntimeDeps = defaultEvolutionRuntimeDeps(),
+  approvalAuthority?: EvolutionApprovalAuthorityPort,
 ) {
-  const approvalService = createEvolutionApprovalService();
+  const approvalService = createEvolutionApprovalService(approvalAuthority);
   const planService = createEvolutionPlanService(repositories.planRepository, runtime);
   const versionService = createEvolutionVersionService(
     repositories.versionRepository,

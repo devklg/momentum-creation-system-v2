@@ -103,7 +103,10 @@ export async function listResourceCenterResources(
     sort: { title: 1, version: -1 },
     limit: 500,
   });
-  const audienceCandidates = (mongo.documents ?? []).filter(teamAudience);
+  const audienceCandidates = await filterCanonicalKnowledgeEntries(
+    (mongo.documents ?? []).filter(teamAudience),
+    persistence,
+  );
   const activeVersionsByResource = audienceCandidates.reduce<Map<string, number>>((counts, entry) => {
     counts.set(entry.resourceId, (counts.get(entry.resourceId) ?? 0) + 1);
     return counts;
@@ -130,4 +133,39 @@ export async function listResourceCenterResources(
     categories: [...new Set(items.flatMap((item) => item.categories))].sort(),
     kinds: [...new Set(items.map((item) => item.kind))].sort(),
   };
+}
+
+async function filterCanonicalKnowledgeEntries(
+  entries: readonly McsResourceCatalogEntry[],
+  persistence: Persistence,
+): Promise<McsResourceCatalogEntry[]> {
+  const knowledgeEntries = entries.filter((entry) => entry.kind === 'knowledge_source');
+  if (knowledgeEntries.length === 0) return [...entries];
+  const identities = knowledgeEntries.flatMap((entry) => {
+    const sourceId = entry.lineage.sourceRecordId;
+    return entry.lineage.sourceCollection === 'mcs_knowledge_sources' && sourceId
+      ? [{ sourceId, version: entry.version }]
+      : [];
+  });
+  if (identities.length === 0) return entries.filter((entry) => entry.kind !== 'knowledge_source');
+  const result = await persistence<{ documents?: McsKnowledgeBaseSourceRecord[] }>('mongodb', 'query', {
+    database: 'momentum',
+    collection: 'mcs_knowledge_sources',
+    filter: {
+      $or: identities,
+      status: 'active',
+      authorityDecision: 'active_authority',
+      'authority.authorityStatus': 'active_authority',
+      'authority.authorityKind': { $in: ['kevin_authored', 'kevin_approved'] },
+    },
+    limit: Math.min(500, identities.length),
+  });
+  const canonical = new Map(
+    (result.documents ?? []).map((source) => [`${String(source.sourceId)}:${source.version}`, knowledgeSourceContentDigest(source)]),
+  );
+  return entries.filter((entry) => {
+    if (entry.kind !== 'knowledge_source') return true;
+    const sourceId = entry.lineage.sourceRecordId;
+    return !!sourceId && canonical.get(`${sourceId}:${entry.version}`) === entry.contentDigestSha256;
+  });
 }

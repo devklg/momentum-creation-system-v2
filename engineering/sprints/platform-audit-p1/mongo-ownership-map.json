@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-07-14T18:46:13.442Z",
+  "generatedAt": "2026-07-14T20:47:39.010Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
-  "collectionCount": 70,
+  "collectionCount": 74,
   "unclassifiedCount": 0,
   "byOwner": {
-    "dynamic_helper": 4,
+    "dynamic_helper": 6,
     "broadcast_delivery": 3,
+    "knowledge_content": 9,
     "operations_governance": 6,
-    "knowledge_content": 7,
     "agents_training_success": 11,
     "events_orientation_and_calls": 7,
     "membership_identity": 6,
@@ -74,6 +74,35 @@
       ]
     },
     {
+      "collection": "CORRECTION_COLLECTION",
+      "ownerId": "dynamic_helper",
+      "owner": "Dynamic helper expression",
+      "steward": "Owning caller resolves at runtime",
+      "primarySurface": "system",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": false,
+      "sourceCount": 4,
+      "sourceFiles": [
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts"
+      ]
+    },
+    {
+      "collection": "decisions",
+      "ownerId": "knowledge_content",
+      "owner": "Knowledge, content, and retrieval governance",
+      "steward": "Knowledge / content domain",
+      "primarySurface": "admin + runtime",
+      "persistenceTier": "knowledge",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/runtime/knowledge-evolution/persistence/canonicalApprovalAuthority.ts",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts"
+      ]
+    },
+    {
       "collection": "input.mongoCollection",
       "ownerId": "dynamic_helper",
       "owner": "Dynamic helper expression",
@@ -97,9 +126,10 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": false,
-      "sourceCount": 2,
+      "sourceCount": 7,
       "sourceFiles": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts"
       ]
     },
     {
@@ -111,11 +141,26 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": false,
-      "sourceCount": 3,
+      "sourceCount": 9,
       "sourceFiles": [
         "server/scripts/seed-three-knowledge-base.ts",
         "server/scripts/seed-upline-knowledge-base.ts",
-        "server/src/services/knowledge/approvedKnowledgeStore.ts"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts"
+      ]
+    },
+    {
+      "collection": "knowledge_supersession_records",
+      "ownerId": "knowledge_content",
+      "owner": "Knowledge, content, and retrieval governance",
+      "steward": "Knowledge / content domain",
+      "primarySurface": "admin + runtime",
+      "persistenceTier": "knowledge",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 1,
+      "sourceFiles": [
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts"
       ]
     },
     {
@@ -243,6 +288,20 @@
       "sourceCount": 1,
       "sourceFiles": [
         "server/scripts/seed-orientation-sessions.ts"
+      ]
+    },
+    {
+      "collection": "RESOURCE_CATALOG_MONGO_COLLECTION",
+      "ownerId": "dynamic_helper",
+      "owner": "Dynamic helper expression",
+      "steward": "Owning caller resolves at runtime",
+      "primarySurface": "system",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": false,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts"
       ]
     },
     {
@@ -573,10 +632,11 @@
       "persistenceTier": "operational",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 6,
+      "sourceCount": 8,
       "sourceFiles": [
         "server/src/domain/adminOutboxHealth.ts",
         "server/src/domain/graphragReadiness.ts",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts",
         "server/src/services/projectionOutbox.ts"
       ]
     },

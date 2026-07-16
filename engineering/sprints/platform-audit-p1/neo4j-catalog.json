@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-14T18:46:14.356Z",
+  "generatedAt": "2026-07-14T20:47:39.783Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
     "server/src/domain/* Cypher writers"
   ],
   "summary": {
-    "labels": 79,
+    "labels": 83,
     "relationships": 69,
     "constraints": 18,
-    "labelsWithoutConstraint": 64
+    "labelsWithoutConstraint": 68
   },
   "byStatus": {
     "planned_core_not_applied": 11,
@@ -28,6 +28,15 @@
       "sourceCount": 1,
       "sources": [
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:159"
+      ]
+    },
+    {
+      "label": "Decision",
+      "sourceCount": 3,
+      "sources": [
+        "server/src/runtime/knowledge-evolution/persistence/canonicalApprovalAuthority.ts:18",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:260",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:809"
       ]
     },
     {
@@ -111,9 +120,23 @@
     },
     {
       "label": "KnowledgeChunk",
-      "sourceCount": 1,
+      "sourceCount": 6,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:231"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:232",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:488",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:582",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:589",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:632",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:910"
+      ]
+    },
+    {
+      "label": "KnowledgeCorrection",
+      "sourceCount": 3,
+      "sources": [
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:1037",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:137",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:166"
       ]
     },
     {
@@ -125,11 +148,26 @@
     },
     {
       "label": "KnowledgeSource",
-      "sourceCount": 3,
+      "sourceCount": 5,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:173",
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:234",
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:264"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:174",
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:235",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:577",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:889",
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:266"
+      ]
+    },
+    {
+      "label": "KnowledgeSourceVersion",
+      "sourceCount": 7,
+      "sources": [
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:487",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:578",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:586",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:630",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:723",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:890",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:909"
       ]
     },
     {
@@ -212,6 +250,13 @@
       "sourceCount": 1,
       "sources": [
         "server/src/domain/sponsorImmutabilityPersistence.ts:104"
+      ]
+    },
+    {
+      "label": "SUPERSEDES",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:723"
       ]
     },
     {
@@ -312,7 +357,7 @@
         "server/src/domain/vmProviderQueue.ts:640",
         "server/src/domain/workbook.ts:307",
         "server/src/domain/workbook.ts:308",
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:260"
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:262"
       ]
     },
     {
@@ -418,7 +463,7 @@
       "label": "TmagEventMaterialContext",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:304"
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:306"
       ]
     },
     {
@@ -640,7 +685,7 @@
       "sourceCount": 2,
       "sources": [
         "server/src/domain/resourcePublishingGate.ts:72",
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:254"
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:256"
       ]
     },
     {
@@ -656,9 +701,9 @@
       "sources": [
         "server/src/domain/resourcePublishingGate.ts:72",
         "server/src/domain/resourceUsage.ts:82",
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:256",
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:288",
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:303"
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:258",
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:290",
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:305"
       ]
     },
     {
@@ -697,7 +742,7 @@
       "label": "TmagTrainingModule",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:289"
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:291"
       ]
     },
     {
@@ -869,7 +914,7 @@
       "sourceCount": 2,
       "sources": [
         "server/src/domain/resourcePublishingGate.ts:72",
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:262"
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:264"
       ]
     },
     {
@@ -986,9 +1031,14 @@
     },
     {
       "relationship": "HAS_CHUNK",
-      "sourceCount": 1,
+      "sourceCount": 6,
       "sources": [
-        "server/src/services/knowledge/approvedKnowledgeStore.ts:235"
+        "server/src/services/knowledge/approvedKnowledgeStore.ts:236",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:488",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:584",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:589",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:632",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:914"
       ]
     },
     {
@@ -1075,12 +1125,14 @@
     },
     {
       "relationship": "HAS_VERSION",
-      "sourceCount": 4,
+      "sourceCount": 6,
       "sources": [
         "server/src/domain/adminTenantArchitecture.ts:466",
         "server/src/domain/resourcePublishingGate.ts:72",
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186",
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:259"
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:580",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:894",
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:261"
       ]
     },
     {
@@ -1216,7 +1268,7 @@
       "relationship": "PROJECTS_KNOWLEDGE_SOURCE",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:265"
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:267"
       ]
     },
     {
@@ -1279,10 +1331,11 @@
     },
     {
       "relationship": "SUPERSEDES",
-      "sourceCount": 2,
+      "sourceCount": 3,
       "sources": [
         "server/src/domain/outcomes.ts:218",
-        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:199"
+        "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:199",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:587"
       ]
     },
     {
@@ -1296,14 +1349,14 @@
       "relationship": "SUPPORTS_EVENT_MATERIAL",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:306"
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:308"
       ]
     },
     {
       "relationship": "SUPPORTS_TRAINING_MODULE",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/knowledgeResourceProjection.ts:291"
+        "server/src/services/knowledge/knowledgeResourceProjection.ts:293"
       ]
     },
     {
@@ -1537,6 +1590,7 @@
     "Agent",
     "BrandAmbassador",
     "DISPOSED",
+    "Decision",
     "ENROLLED",
     "FOUNDER_PASSWORD",
     "HAS_FOLLOWUP",
@@ -1545,8 +1599,10 @@
     "Knowledge",
     "KnowledgeCandidate",
     "KnowledgeChunk",
+    "KnowledgeCorrection",
     "KnowledgeDomain",
     "KnowledgeSource",
+    "KnowledgeSourceVersion",
     "KnowledgeVersion",
     "LearningSignal",
     "MemoryIndexEntry",
@@ -1558,6 +1614,7 @@
     "S2",
     "SCOPED_TO",
     "SPONSORED_BY",
+    "SUPERSEDES",
     "Tenant",
     "TenantSettingsVersion",
     "TmagAdminProspectNote",
