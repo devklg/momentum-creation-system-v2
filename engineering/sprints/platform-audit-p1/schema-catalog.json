@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T14:44:18.137Z",
+  "generatedAt": "2026-07-16T15:02:17.958Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -3063,7 +3063,9 @@
       {
         "label": "SPONSORED_BY",
         "sources": [
-          "server/src/domain/sponsorImmutabilityPersistence.ts:104"
+          "server/src/domain/sponsorImmutabilityPersistence.ts:104",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:56",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:76"
         ]
       },
       {
@@ -3168,6 +3170,17 @@
           "server/src/domain/vmProviderQueue.ts:640",
           "server/src/domain/workbook.ts:307",
           "server/src/domain/workbook.ts:308",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:110",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:124",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:126",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:147",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:56",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:67",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:75",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:76",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:87",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:88",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:97",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:262"
         ]
       },
@@ -3188,7 +3201,8 @@
         "label": "TmagAccessCode",
         "sources": [
           "server/src/domain/sponsorImmutabilityPersistence.ts:47",
-          "server/src/domain/sponsorImmutabilityPersistence.ts:52"
+          "server/src/domain/sponsorImmutabilityPersistence.ts:52",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:146"
         ]
       },
       {
@@ -3303,7 +3317,9 @@
           "server/src/domain/tokenLifecyclePersistence.ts:47",
           "server/src/domain/tokenLifecyclePersistence.ts:51",
           "server/src/domain/tokenLifecyclePersistence.ts:63",
-          "server/src/domain/tokenLifecyclePersistence.ts:67"
+          "server/src/domain/tokenLifecyclePersistence.ts:67",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:109",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:123"
         ]
       },
       {
@@ -3408,14 +3424,18 @@
           "server/src/domain/prospectCrm.ts:505",
           "server/src/domain/tokenLifecyclePersistence.ts:46",
           "server/src/domain/tokenLifecyclePersistence.ts:52",
-          "server/src/domain/webinarReservation.ts:203"
+          "server/src/domain/webinarReservation.ts:203",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:109",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:125",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:96"
         ]
       },
       {
         "label": "TmagProspectAccount",
         "sources": [
           "server/src/domain/prospectAccount.ts:244",
-          "server/src/domain/prospectMagicLink.ts:184"
+          "server/src/domain/prospectMagicLink.ts:184",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:123"
         ]
       },
       {
@@ -3492,7 +3512,9 @@
         "label": "TmagSponsorOverride",
         "sources": [
           "server/src/domain/sponsorImmutabilityPersistence.ts:108",
-          "server/src/domain/sponsorImmutabilityPersistence.ts:118"
+          "server/src/domain/sponsorImmutabilityPersistence.ts:118",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:75",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:87"
         ]
       },
       {
@@ -3739,7 +3761,9 @@
           "server/src/domain/crmOwnershipPersistence.ts:56",
           "server/src/domain/crossStoreReconciliation.ts:109",
           "server/src/domain/tokenLifecyclePersistence.ts:49",
-          "server/src/domain/tokenLifecyclePersistence.ts:51"
+          "server/src/domain/tokenLifecyclePersistence.ts:51",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:109",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:125"
         ]
       },
       {
@@ -3806,14 +3830,17 @@
         "relationship": "HAS_ORIGINAL_SPONSOR",
         "sources": [
           "server/src/domain/sponsorImmutabilityPersistence.ts:92",
-          "server/src/domain/sponsorImmutabilityPersistence.ts:95"
+          "server/src/domain/sponsorImmutabilityPersistence.ts:95",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:88"
         ]
       },
       {
         "relationship": "HAS_OVERRIDE",
         "sources": [
           "server/src/domain/sponsorImmutabilityPersistence.ts:112",
-          "server/src/domain/sponsorImmutabilityPersistence.ts:118"
+          "server/src/domain/sponsorImmutabilityPersistence.ts:118",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:75",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:87"
         ]
       },
       {
@@ -3877,7 +3904,10 @@
           "server/src/domain/adminConsistencyReport.ts:70",
           "server/src/domain/crossStoreReconciliation.ts:89",
           "server/src/domain/invitations.ts:239",
-          "server/src/domain/invitations.ts:255"
+          "server/src/domain/invitations.ts:255",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:110",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:126",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:97"
         ]
       },
       {
@@ -3895,7 +3925,8 @@
       {
         "relationship": "KEYS",
         "sources": [
-          "server/src/domain/prospectAccount.ts:251"
+          "server/src/domain/prospectAccount.ts:251",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:123"
         ]
       },
       {
@@ -4019,7 +4050,9 @@
           "server/src/domain/baIdentityPersistence.ts:33",
           "server/src/domain/prospectAccount.ts:253",
           "server/src/domain/sponsorImmutabilityPersistence.ts:110",
-          "server/src/domain/sponsorImmutabilityPersistence.ts:115"
+          "server/src/domain/sponsorImmutabilityPersistence.ts:115",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:124",
+          "server/src/qa/sponsorImmutabilityGraphVerification.ts:67"
         ]
       },
       {

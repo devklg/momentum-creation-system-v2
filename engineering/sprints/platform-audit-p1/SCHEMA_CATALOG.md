@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T14:44:18.137Z
+- Generated: 2026-07-16T15:02:17.958Z
 - Mongo collections: 74
 - Neo4j labels: 83
 - Neo4j relationships: 69
@@ -123,13 +123,13 @@
 | `RESERVED_WEBINAR` | 1 |
 | `S2` | 1 |
 | `SCOPED_TO` | 1 |
-| `SPONSORED_BY` | 1 |
+| `SPONSORED_BY` | 3 |
 | `SUPERSEDES` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 83 |
+| `TeamMagnificentMember` | 94 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
-| `TmagAccessCode` | 2 |
+| `TmagAccessCode` | 3 |
 | `TmagAdminProspectNote` | 1 |
 | `TmagAgentEvent` | 1 |
 | `TmagAgentMichaelEvent` | 1 |
@@ -145,15 +145,15 @@
 | `TmagGeneratorRun` | 1 |
 | `TmagHealthHeartbeat` | 3 |
 | `TmagInvitationActivity` | 2 |
-| `TmagInviteToken` | 10 |
+| `TmagInviteToken` | 12 |
 | `TmagIvoryName` | 6 |
 | `TmagKnowledge` | 5 |
 | `TmagLearningCandidate` | 4 |
 | `TmagOrientationSession` | 3 |
 | `TmagOutcome` | 4 |
 | `TmagPool` | 6 |
-| `TmagProspect` | 42 |
-| `TmagProspectAccount` | 2 |
+| `TmagProspect` | 45 |
+| `TmagProspectAccount` | 3 |
 | `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |
 | `TmagProspectTimelineEvent` | 3 |
@@ -163,7 +163,7 @@
 | `TmagResourceUsageEvent` | 1 |
 | `TmagResourceVersion` | 5 |
 | `TmagSponsorAvailability` | 1 |
-| `TmagSponsorOverride` | 2 |
+| `TmagSponsorOverride` | 4 |
 | `TmagSteveDiscovery` | 3 |
 | `TmagThreeWayBooking` | 2 |
 | `TmagTrainingModule` | 1 |
@@ -202,7 +202,7 @@
 | `DERIVED_FROM` | 2 |
 | `FOR` | 1 |
 | `FOR_EVENT` | 1 |
-| `FOR_PROSPECT` | 6 |
+| `FOR_PROSPECT` | 8 |
 | `FOR_VM_LEAD` | 4 |
 | `HAD_STEVE_DISCOVERY` | 3 |
 | `HAS_ACTIVITY` | 2 |
@@ -211,8 +211,8 @@
 | `HAS_EVENT_ATTENDANCE` | 1 |
 | `HAS_INBOUND_CALL` | 1 |
 | `HAS_LANGUAGE_VARIANT` | 1 |
-| `HAS_ORIGINAL_SPONSOR` | 2 |
-| `HAS_OVERRIDE` | 2 |
+| `HAS_ORIGINAL_SPONSOR` | 3 |
+| `HAS_OVERRIDE` | 4 |
 | `HAS_PROGRESS` | 1 |
 | `HAS_RECRUITING_CYCLE` | 1 |
 | `HAS_SETTINGS_VERSION` | 1 |
@@ -221,10 +221,10 @@
 | `HAS_VERSION` | 6 |
 | `HAS_VM_AUDIT` | 1 |
 | `HAS_VM_DELIVERY_EVENT` | 1 |
-| `INVITED` | 4 |
+| `INVITED` | 7 |
 | `INVITED_BY` | 1 |
 | `ISSUED_FOR` | 1 |
-| `KEYS` | 1 |
+| `KEYS` | 2 |
 | `KNOWS` | 2 |
 | `MEMBER_OF` | 1 |
 | `NOTE_ON` | 1 |
@@ -242,7 +242,7 @@
 | `RECORDED_AGENT_EVENT` | 1 |
 | `SCOPED_TO` | 4 |
 | `SENT_BY` | 2 |
-| `SPONSORED_BY` | 6 |
+| `SPONSORED_BY` | 8 |
 | `SUBMITTED` | 1 |
 | `SUPERSEDES` | 3 |
 | `SUPPORTED_BY` | 1 |
