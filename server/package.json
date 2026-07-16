@@ -31,6 +31,7 @@
     "neo4j:schema:dry-run": "tsx scripts/apply-neo4j-schema.ts",
     "neo4j:schema:apply": "tsx scripts/apply-neo4j-schema.ts --apply --fail-on-error",
     "neo4j:schema:verify": "tsx scripts/apply-neo4j-schema.ts --verify",
+    "neo4j:sponsor-immutability:verify": "tsx scripts/verify-sponsor-immutability-graph.ts",
     "chroma:maintain": "tsx scripts/chroma-maintenance.ts"
   },
   "dependencies": {
