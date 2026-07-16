@@ -139,6 +139,25 @@ describe('buildAdminAgentOversight projection outbox visibility', () => {
     expect(discoveryRead?.[2]).not.toHaveProperty(
       'projection.successProfile.successVision',
     );
+    const agentEventReads = mocks.persistenceCall.mock.calls.filter(
+      ([tool, action, params]) =>
+        tool === 'mongodb' &&
+        action === 'query' &&
+        /^tmag_agent_(ivory|michael|steve|system)_events$/.test(
+          String((params as AnyRec).collection),
+        ),
+    );
+    expect(agentEventReads).toHaveLength(4);
+    for (const [, , params] of agentEventReads) {
+      expect(params).toMatchObject({
+        projection: {
+          agentId: 1,
+          createdAt: 1,
+        },
+      });
+      expect(params).not.toHaveProperty('projection.payload');
+      expect(params).not.toHaveProperty('projection.tmagId');
+    }
     expect(result.bridgeDrafts[0]).toMatchObject({
       ready: false,
       semanticDocument:

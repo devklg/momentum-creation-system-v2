@@ -19,9 +19,9 @@ No external communication or provider call occurred.
 | Consumer/store | Required data | Current authorized visibility | P2-141 hardening |
 | --- | --- | --- | --- |
 | BA self | Own completed answers and Success Profile | Authenticated self | Private/no-store response; content-free errors |
-| Direct sponsor | Raw answers/profile/audio per existing wireframe | Authenticated direct sponsor only | Authorization preserved; private/no-store response |
-| Michael sponsor support | Derived training-support card | Authenticated direct sponsor only | Minimal Mongo projection; private/no-store response |
-| Kevin admin | Oversight summary | Kevin-only | Minimal Mongo projection; bridge cannot be materialized |
+| Direct sponsor | Raw answers/profile/audio per existing wireframe | Authenticated direct sponsor only | Authorization preserved; private/no-store response; unrelated/not-found states are opaque |
+| Michael sponsor support | Derived training-support card | Authenticated direct sponsor only | Minimal Mongo projection; private/no-store response; unrelated/not-found states are opaque |
+| Kevin admin | Oversight summary | Kevin-only | Minimal Mongo projections, including content-free agent-event reads; bridge cannot be materialized |
 | Steve worker | Completion acknowledgement | Worker secret | Minimal receipt; no artifact echo; bounded arrays |
 | Context Manager | Governed interview-support knowledge query | Internal Steve runtime | Fixed governed query; no BA turn text |
 | Retrieval cache | Query identity | Process-local | SHA-256 query digest instead of plaintext |
@@ -34,6 +34,8 @@ No external communication or provider call occurred.
 
 - Sponsor identity remains server-derived and immutable.
 - The BA self-read and direct-sponsor read remain authenticated.
+- Sponsor-only routes do not disclose BA existence or profile-completion state
+  to unrelated authenticated BAs.
 - No scoring, ranking, prediction, classification, or qualification is added.
 - ACR-0011 recruiting-cycle why replay is not changed.
 - Existing production records are not scrubbed by this implementation.

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T16:53:33.105Z",
+  "generatedAt": "2026-07-16T17:48:14.747Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -6058,22 +6058,22 @@
         {
           "method": "POST",
           "path": "/discovery/ingest",
-          "line": 199
+          "line": 200
         },
         {
           "method": "GET",
           "path": "/discovery/profile/:downlineTmagId",
-          "line": 264
+          "line": 265
         },
         {
           "method": "GET",
           "path": "/discovery/conversation",
-          "line": 295
+          "line": 299
         },
         {
           "method": "POST",
           "path": "/discovery/converse",
-          "line": 311
+          "line": 315
         }
       ],
       "sharedTypes": []

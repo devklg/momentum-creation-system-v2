@@ -41,8 +41,11 @@ michaelRoutes.get(
       res.json({ ok: true, card });
     } catch (err) {
       if (err instanceof TrainingSupportAccessError) {
-        const status = err.code === 'NOT_SPONSOR' ? 403 : 404;
-        res.status(status).json({ ok: false, error: err.message, code: err.code });
+        res.status(404).json({
+          ok: false,
+          error: 'Training-support card unavailable.',
+          code: 'TRAINING_SUPPORT_UNAVAILABLE',
+        });
         return;
       }
       res.status(500).json({ ok: false, error: 'Training-support read failed.' });

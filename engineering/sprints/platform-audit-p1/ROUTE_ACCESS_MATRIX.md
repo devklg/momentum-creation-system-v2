@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T16:53:30.658Z
+- Generated: 2026-07-16T17:48:12.278Z
 - Routes: 250
 - Findings: 0
 
@@ -116,10 +116,10 @@
 | GET | `/api/steve/discovery/state` | brand_ambassador | registered_ba | ba_session, whitelisted | ba_auth_pre_steve | ba_session | none | whitelisted | static_whitelist | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/steve.ts:70` |
 | GET | `/api/steve/discovery/script` | brand_ambassador | registered_ba | ba_session, whitelisted | ba_auth_pre_steve | ba_session | none | whitelisted | static_whitelist | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/steve.ts:86` |
 | GET | `/api/steve/discovery/system-prompt` | system | machine_credential | x-steve-worker-secret | steve_worker_secret | none | none | not_applicable | none | none | none | x-steve-worker-secret | no | no | global_256kb_json | none | none | `server/src/routes/steve.ts:98` |
-| POST | `/api/steve/discovery/ingest` | system | machine_credential | x-steve-worker-secret | steve_worker_secret | none | none | not_applicable | none | none | none | x-steve-worker-secret | no | no | global_256kb_json | none | none | `server/src/routes/steve.ts:199` |
-| GET | `/api/steve/discovery/profile/:downlineTmagId` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/steve.ts:264` |
-| GET | `/api/steve/discovery/conversation` | brand_ambassador | registered_ba | ba_session | ba_auth_pre_steve | ba_session | none | not_applied | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/steve.ts:295` |
-| POST | `/api/steve/discovery/converse` | brand_ambassador | registered_ba | ba_session | ba_auth_pre_steve | ba_session | none | not_applied | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/steve.ts:311` |
+| POST | `/api/steve/discovery/ingest` | system | machine_credential | x-steve-worker-secret | steve_worker_secret | none | none | not_applicable | none | none | none | x-steve-worker-secret | no | no | global_256kb_json | none | none | `server/src/routes/steve.ts:200` |
+| GET | `/api/steve/discovery/profile/:downlineTmagId` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/steve.ts:265` |
+| GET | `/api/steve/discovery/conversation` | brand_ambassador | registered_ba | ba_session | ba_auth_pre_steve | ba_session | none | not_applied | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/steve.ts:299` |
+| POST | `/api/steve/discovery/converse` | brand_ambassador | registered_ba | ba_session | ba_auth_pre_steve | ba_session | none | not_applied | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/steve.ts:315` |
 | POST | `/api/admin/access-codes/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/access-codes.ts:30` |
 | GET | `/api/admin/access-codes/` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/access-codes.ts:65` |
 | GET | `/api/admin/bas/entitlements/audit` | founder_admin | admin_allowlist | admin_session, requireAdmin | admin | admin_session | requireAdmin | not_applicable | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/admin/bas.ts:55` |

@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T16:53:30.605Z
+- Generated: 2026-07-16T17:48:12.227Z
 - Mounted routers: 50
 - Route files: 50
 - Static route rows: 250
@@ -128,10 +128,10 @@
 | GET | `/api/steve/discovery/state` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:70` |
 | GET | `/api/steve/discovery/script` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:86` |
 | GET | `/api/steve/discovery/system-prompt` | pre_gate | pre_gate_or_public | none | `server/src/routes/steve.ts:98` |
-| POST | `/api/steve/discovery/ingest` | pre_gate | pre_gate_or_public | none | `server/src/routes/steve.ts:199` |
-| GET | `/api/steve/discovery/profile/:downlineTmagId` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/steve.ts:264` |
-| GET | `/api/steve/discovery/conversation` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:295` |
-| POST | `/api/steve/discovery/converse` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:311` |
+| POST | `/api/steve/discovery/ingest` | pre_gate | pre_gate_or_public | none | `server/src/routes/steve.ts:200` |
+| GET | `/api/steve/discovery/profile/:downlineTmagId` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/steve.ts:265` |
+| GET | `/api/steve/discovery/conversation` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:299` |
+| POST | `/api/steve/discovery/converse` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:315` |
 | POST | `/api/admin/access-codes/` | pre_gate | admin | admin | `server/src/routes/admin/access-codes.ts:30` |
 | GET | `/api/admin/access-codes/` | pre_gate | admin | admin | `server/src/routes/admin/access-codes.ts:65` |
 | GET | `/api/admin/bas/entitlements/audit` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:55` |

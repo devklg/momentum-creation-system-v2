@@ -283,7 +283,12 @@ export async function buildAdminAgentOversight(): Promise<McsAdminAgentOversight
       sponsorTmagId: 1,
     }),
     Promise.all(
-      AGENT_EVENT_COLLECTIONS.map((c) => safeQuery<AgentEventDoc>(c, warnings)),
+      AGENT_EVENT_COLLECTIONS.map((c) =>
+        safeQuery<AgentEventDoc>(c, warnings, {}, 50_000, {
+          agentId: 1,
+          createdAt: 1,
+        }),
+      ),
     ).then((r) => r.flat()),
     safeQuery<OutboxDoc>(COLL_OUTBOX, warnings),
     listChromaCollections(warnings),

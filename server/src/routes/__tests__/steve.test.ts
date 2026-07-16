@@ -247,4 +247,31 @@ describe('Steve route behavior', () => {
     expect(JSON.stringify(response.body)).not.toContain('CA-private');
     expect(response.set).toHaveBeenCalledWith('Cache-Control', 'private, no-store');
   });
+
+  it.each(['NO_DOWNLINE', 'NOT_SPONSOR', 'NO_ARTIFACT', 'NO_COMPLETED_AT'])(
+    'returns one opaque sponsor-profile response for %s',
+    async (code) => {
+      vi.spyOn(steveDomain, 'getProfileCardForSponsor').mockRejectedValueOnce(
+        new steveDomain.SponsorAccessError(code, `private ${code} detail`),
+      );
+      const response = mockResponse();
+
+      await finalHandler('get', '/discovery/profile/:downlineTmagId')(
+        {
+          session: { tmagId: 'TMAG-SPONSOR' },
+          params: { downlineTmagId: 'TMAG-TARGET' },
+        } as unknown as Request,
+        response,
+      );
+
+      expect(response.statusCode).toBe(404);
+      expect(response.body).toEqual({
+        ok: false,
+        error: 'Profile unavailable.',
+        code: 'PROFILE_UNAVAILABLE',
+      });
+      expect(JSON.stringify(response.body)).not.toContain(code);
+      expect(JSON.stringify(response.body)).not.toContain('private');
+    },
+  );
 });

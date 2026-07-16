@@ -23,6 +23,10 @@ describe('P2-141 Steve Success Profile privacy boundary', () => {
     expect(steve).not.toContain('Profile read failed: ${msg}');
     expect(steve).not.toContain('Conversation read failed: ${msg}');
     expect(steve).not.toContain('Steve conversation failed: ${msg}');
+    expect(steve).toContain("code: 'PROFILE_UNAVAILABLE'");
+    expect(michael).toContain("code: 'TRAINING_SUPPORT_UNAVAILABLE'");
+    expect(steve).not.toContain('error: err.message, code: err.code');
+    expect(michael).not.toContain('error: err.message, code: err.code');
   });
 
   it('never uses raw BA turn text as an approved-knowledge query or plaintext cache key', () => {

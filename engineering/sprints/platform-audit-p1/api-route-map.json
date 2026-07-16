@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T16:53:30.605Z",
+  "generatedAt": "2026-07-16T17:48:12.227Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -1290,7 +1290,7 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/steve.ts:199",
+      "source": "server/src/routes/steve.ts:200",
       "routeSource": "server/src/routes/steve.ts",
       "signals": {
         "requireAuth": false,
@@ -1317,7 +1317,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/steve.ts:264",
+      "source": "server/src/routes/steve.ts:265",
       "routeSource": "server/src/routes/steve.ts",
       "signals": {
         "requireAuth": true,
@@ -1343,7 +1343,7 @@
         "requireAuth"
       ],
       "handler": "handler",
-      "source": "server/src/routes/steve.ts:295",
+      "source": "server/src/routes/steve.ts:299",
       "routeSource": "server/src/routes/steve.ts",
       "signals": {
         "requireAuth": true,
@@ -1369,7 +1369,7 @@
         "requireAuth"
       ],
       "handler": "handler",
-      "source": "server/src/routes/steve.ts:311",
+      "source": "server/src/routes/steve.ts:315",
       "routeSource": "server/src/routes/steve.ts",
       "signals": {
         "requireAuth": true,

@@ -118,6 +118,7 @@ steveRoutes.get(
           database: 'momentum',
           collection: 'team_magnificent_members',
           filter: { tmagId },
+          projection: { firstName: 1 },
           limit: 1,
         },
       );
@@ -281,8 +282,11 @@ steveRoutes.get(
       res.json({ ok: true, card });
     } catch (err) {
       if (err instanceof SponsorAccessError) {
-        const status = err.code === 'NOT_SPONSOR' ? 403 : 404;
-        res.status(status).json({ ok: false, error: err.message, code: err.code });
+        res.status(404).json({
+          ok: false,
+          error: 'Profile unavailable.',
+          code: 'PROFILE_UNAVAILABLE',
+        });
         return;
       }
       res.status(500).json({ ok: false, error: 'Profile read failed.' });
