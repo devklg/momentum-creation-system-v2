@@ -9,8 +9,8 @@ MongoDB, Neo4j, and ChromaDB.
 Kevin approved ACR-0031 and separately authorized PR #353, which merged on
 2026-07-16. That baseline hardened the private read and storage boundaries.
 
-The current follow-on branch implements the approved current-record controls
-that do not require historical mutation:
+Draft PR #355 implements the approved current-record controls that do not
+require historical mutation:
 
 - authenticated BA self-export of the current transcript, answers, Success
   Profile, and privacy state;
