@@ -369,3 +369,15 @@ stores under
 
 This approval authorizes implementation and read-only verification only.
 `live_mutation_authorized` remains false.
+
+## Fallback visual acceptance and merge authority
+
+On 2026-07-16 Kevin L. Gardner explicitly accepted the P2-135 fallback visual
+evidence in `engineering/audits/p2-135-visual-qa/` and authorized PR #341 to
+merge. The fallback evidence covers desktop, tablet, mobile, small-mobile, and
+200% reflow with the Apply control disabled and zero browser console errors.
+
+The trusted in-app route browser remained unavailable, so trusted route visual
+QA is not represented as passed. This acceptance closes the P2-135 visual merge
+gate only. It does not authorize a live knowledge correction, live index apply,
+canary widening, production mutation, or external communication.
