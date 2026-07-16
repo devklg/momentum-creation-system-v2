@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T13:52:13.949Z
+- Generated: 2026-07-16T14:38:43.744Z
 - Mounted routers: 50
 - Route files: 50
 - Static route rows: 250
@@ -224,7 +224,7 @@
 | GET | `/api/admin/health/status` | pre_gate | admin | admin | `server/src/routes/admin/health.ts:49` |
 | GET | `/api/admin/health/llm-provider` | pre_gate | admin | admin | `server/src/routes/admin/health.ts:79` |
 | GET | `/api/admin/consistency/report` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:27` |
-| GET | `/api/admin/consistency/crm-integrity` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:61` |
+| GET | `/api/admin/consistency/crm-integrity` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:69` |
 | GET | `/api/admin/resource-center/index-awareness` | pre_gate | admin | admin | `server/src/routes/admin/resourceCenter.ts:11` |
 | GET | `/api/admin/resource-center/analytics` | pre_gate | admin | admin | `server/src/routes/admin/resourceCenter.ts:31` |
 | GET | `/api/admin/events/` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:24` |

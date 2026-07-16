@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T13:52:18.165Z",
+  "generatedAt": "2026-07-16T14:38:46.165Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -3088,9 +3088,9 @@
         "sources": [
           "server/scripts/backfill-founder-timezones.ts:138",
           "server/scripts/backfill-founder-timezones.ts:82",
-          "server/src/domain/adminConsistencyReport.ts:68",
-          "server/src/domain/adminConsistencyReport.ts:87",
-          "server/src/domain/adminConsistencyReport.ts:96",
+          "server/src/domain/adminConsistencyReport.ts:70",
+          "server/src/domain/adminConsistencyReport.ts:89",
+          "server/src/domain/adminConsistencyReport.ts:98",
           "server/src/domain/adminProspectOversight.ts:1058",
           "server/src/domain/adminProspectOversight.ts:1144",
           "server/src/domain/agents/orchestrator.ts:305",
@@ -3294,7 +3294,7 @@
       {
         "label": "TmagInviteToken",
         "sources": [
-          "server/src/domain/adminConsistencyReport.ts:76",
+          "server/src/domain/adminConsistencyReport.ts:78",
           "server/src/domain/crossStoreReconciliation.ts:101",
           "server/src/domain/crossStoreReconciliation.ts:109",
           "server/src/domain/prospectAccount.ts:250",
@@ -3369,8 +3369,8 @@
         "sources": [
           "server/scripts/smoke-holding-tank.ts:114",
           "server/scripts/smoke-holding-tank.ts:66",
-          "server/src/domain/adminConsistencyReport.ts:67",
-          "server/src/domain/adminConsistencyReport.ts:77",
+          "server/src/domain/adminConsistencyReport.ts:69",
+          "server/src/domain/adminConsistencyReport.ts:79",
           "server/src/domain/adminProspectOversight.ts:1055",
           "server/src/domain/adminProspectOversight.ts:1141",
           "server/src/domain/adminProspectOversight.ts:861",
@@ -3421,7 +3421,7 @@
       {
         "label": "TmagProspectCrmRecord",
         "sources": [
-          "server/src/domain/adminConsistencyReport.ts:95",
+          "server/src/domain/adminConsistencyReport.ts:97",
           "server/src/domain/crmOwnershipPersistence.ts:35",
           "server/src/domain/crmOwnershipPersistence.ts:41",
           "server/src/domain/crmOwnershipPersistence.ts:50",
@@ -3498,7 +3498,7 @@
       {
         "label": "TmagSteveDiscovery",
         "sources": [
-          "server/src/domain/adminConsistencyReport.ts:86",
+          "server/src/domain/adminConsistencyReport.ts:88",
           "server/src/domain/crossStoreReconciliation.ts:182",
           "server/src/domain/steve-success-interview.ts:476"
         ]
@@ -3525,7 +3525,7 @@
       {
         "label": "TmagVmBulkLead",
         "sources": [
-          "server/src/domain/adminConsistencyReport.ts:78",
+          "server/src/domain/adminConsistencyReport.ts:80",
           "server/src/domain/bulkLeads.ts:246",
           "server/src/domain/bulkLeads.ts:264",
           "server/src/domain/crmOwnershipPersistence.ts:34",
@@ -3734,7 +3734,7 @@
       {
         "relationship": "FOR_PROSPECT",
         "sources": [
-          "server/src/domain/adminConsistencyReport.ts:77",
+          "server/src/domain/adminConsistencyReport.ts:79",
           "server/src/domain/crmOwnershipPersistence.ts:53",
           "server/src/domain/crmOwnershipPersistence.ts:56",
           "server/src/domain/crossStoreReconciliation.ts:109",
@@ -3745,7 +3745,7 @@
       {
         "relationship": "FOR_VM_LEAD",
         "sources": [
-          "server/src/domain/adminConsistencyReport.ts:78",
+          "server/src/domain/adminConsistencyReport.ts:80",
           "server/src/domain/crossStoreReconciliation.ts:101",
           "server/src/domain/tokenLifecyclePersistence.ts:65",
           "server/src/domain/tokenLifecyclePersistence.ts:67"
@@ -3754,7 +3754,7 @@
       {
         "relationship": "HAD_STEVE_DISCOVERY",
         "sources": [
-          "server/src/domain/adminConsistencyReport.ts:87",
+          "server/src/domain/adminConsistencyReport.ts:89",
           "server/src/domain/crossStoreReconciliation.ts:181",
           "server/src/domain/steve-success-interview.ts:479"
         ]
@@ -3874,7 +3874,7 @@
       {
         "relationship": "INVITED",
         "sources": [
-          "server/src/domain/adminConsistencyReport.ts:68",
+          "server/src/domain/adminConsistencyReport.ts:70",
           "server/src/domain/crossStoreReconciliation.ts:89",
           "server/src/domain/invitations.ts:239",
           "server/src/domain/invitations.ts:255"
@@ -3932,7 +3932,7 @@
       {
         "relationship": "OWNS_CRM_RECORD",
         "sources": [
-          "server/src/domain/adminConsistencyReport.ts:96",
+          "server/src/domain/adminConsistencyReport.ts:98",
           "server/src/domain/crmOwnershipPersistence.ts:37",
           "server/src/domain/crmOwnershipPersistence.ts:40",
           "server/src/domain/crmOwnershipPersistence.ts:52",
@@ -4509,17 +4509,17 @@
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 47
+          "line": 55
         },
         {
           "method": "GET",
           "path": "/crm-integrity",
-          "line": 61
+          "line": 69
         },
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 74
+          "line": 82
         }
       ],
       "sharedTypes": [
@@ -9685,6 +9685,11 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsAdminConsistencyReportV2",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsAdminConsistencyTotals",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -9796,6 +9801,26 @@
     },
     {
       "name": "McsAdminEntitlementAuditResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminGraphIntegrityFindingClass",
+      "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminGraphIntegrityReport",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminGraphIntegrityStatus",
+      "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsAdminGraphIntegrityTraversal",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
     },
@@ -12032,6 +12057,6 @@
     "chromaCollections": 53,
     "routeModules": 49,
     "routeHandlers": 286,
-    "sharedExports": 1141
+    "sharedExports": 1146
   }
 }

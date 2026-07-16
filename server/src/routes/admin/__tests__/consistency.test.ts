@@ -78,6 +78,24 @@ describe('admin consistency report route', () => {
       staleProjections: [],
       orphanCategories: [],
       warnings: [],
+      graphIntegrity: {
+        generatedAt: '2026-07-11T00:00:00.000Z',
+        status: 'clear',
+        repairPolicy: 'report_only',
+        sampleLimit: 25,
+        topology: { nodes: 10, relationships: 20 },
+        coverage: { expected: 41, completed: 41, degraded: 0 },
+        totals: {
+          findings: 0,
+          missingIdentity: 0,
+          duplicateIdentity: 0,
+          missingRequiredAnchor: 0,
+          ambiguousRequiredAnchor: 0,
+          duplicateParallelEdge: 0,
+        },
+        traversals: [],
+        degradedReasons: [],
+      },
     });
 
     const handler = route[route.length - 1]!.handle;
@@ -85,7 +103,7 @@ describe('admin consistency report route', () => {
     await handler(
       {
         session: { tmagId: 'TMAG-01', fullName: 'Kevin Gardner' },
-        query: { limitPerSpec: '7', orphanLimit: '8' },
+        query: { limitPerSpec: '7', orphanLimit: '8', graphSampleLimit: '9' },
         ip: '127.0.0.1',
         get: () => 'vitest',
       } as unknown,
@@ -95,6 +113,7 @@ describe('admin consistency report route', () => {
     expect(consistency.buildAdminConsistencyReport).toHaveBeenCalledWith({
       limitPerSpec: 7,
       orphanLimit: 8,
+      graphSampleLimit: 9,
     });
     expect(auditLog.appendAuditEntry).toHaveBeenCalledWith(
       expect.objectContaining({

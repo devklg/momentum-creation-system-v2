@@ -45,6 +45,12 @@ describe('admin consistency report', () => {
       }
       if (tool === 'neo4j' && action === 'cypher') {
         const query = String(params.query ?? '');
+        if (query.includes('RETURN nodes, count(r) AS relationships')) {
+          return { records: [{ nodes: 10, relationships: 20 }] };
+        }
+        if (query.includes('RETURN size(findings) AS total')) {
+          return { records: [{ total: 0, samples: [] }] };
+        }
         if (query.includes('RETURN count')) return { records: [{ n: 0 }] };
         if (query.includes('MATCH (p:TmagProspect)')) return { records: [{ id: 'orphan_prospect' }] };
         return { records: [] };
@@ -103,7 +109,16 @@ describe('admin consistency report', () => {
         }
         return { documents: [], count: 0 };
       }
-      if (tool === 'neo4j' && action === 'cypher') return { records: [] };
+      if (tool === 'neo4j' && action === 'cypher') {
+        const query = String(params.query ?? '');
+        if (query.includes('RETURN nodes, count(r) AS relationships')) {
+          return { records: [{ nodes: 0, relationships: 0 }] };
+        }
+        if (query.includes('RETURN size(findings) AS total')) {
+          return { records: [{ total: 0, samples: [] }] };
+        }
+        return { records: [] };
+      }
       if (tool === 'chromadb' && action === 'query_with_filter') {
         return { results: { ids: [], metadatas: [] } };
       }
@@ -123,5 +138,6 @@ describe('admin consistency report', () => {
       orphanRecords: 0,
     });
     expect(report.staleProjections[0]?.ageMinutes).toBe(20);
+    expect(report.graphIntegrity.status).toBe('clear');
   });
 });
