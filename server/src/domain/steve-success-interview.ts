@@ -408,6 +408,8 @@ interface PersistedDiscovery extends McsSteveDiscoveryArtifact {
   _id: string;
   privacy: McsStevePrivacyState;
   eventBodyCompaction?: SteveEventBodyCompactionEligibility;
+  correctionRevision?: number;
+  lastCorrectedAt?: string | null;
 }
 
 async function getBaSponsor(tmagId: string): Promise<{
@@ -451,6 +453,8 @@ function stripPersisted(doc: PersistedDiscovery): McsSteveDiscoveryArtifact {
     answers: doc.answers,
     successProfile: doc.successProfile,
     audioUrl: null,
+    correctionRevision: doc.correctionRevision ?? 0,
+    lastCorrectedAt: doc.lastCorrectedAt ?? null,
   };
 }
 

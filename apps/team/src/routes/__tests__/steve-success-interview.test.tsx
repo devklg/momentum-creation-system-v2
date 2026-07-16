@@ -10,6 +10,13 @@ const fields = [
   'michael_handoff_summary',
 ] as const;
 
+const CONSENT_LABELS_FOR_TEST: Record<(typeof fields)[number], string> = {
+  why_statement: 'Primary why',
+  success_vision: 'Success vision',
+  support_obstacles: 'Potential obstacles',
+  michael_handoff_summary: 'Michael handoff summary',
+};
+
 function privacy(grantedField?: (typeof fields)[number], status = 'active') {
   return {
     policyVersion: 'acr-0031.v1',
@@ -36,8 +43,18 @@ const artifact = {
   callSid: null,
   startedAt: '2026-07-16T00:00:00.000Z',
   completedAt: '2026-07-16T00:10:00.000Z',
+  transcript: [
+    {
+      sequence: 1,
+      speaker: 'ba',
+      text: 'Family',
+      occurredAt: '2026-07-16T00:01:00.000Z',
+    },
+  ],
   answers: [],
   audioUrl: null,
+  correctionRevision: 0,
+  lastCorrectedAt: null,
   successProfile: {
     tmagId: 'TMAG-BA',
     generatedAt: '2026-07-16T00:10:00.000Z',
@@ -122,11 +139,19 @@ describe('Steve Success Profile privacy controls', () => {
     );
 
     expect(await screen.findByText('Your Privacy Controls')).toBeInTheDocument();
-    const checkboxes = await screen.findAllByRole('checkbox');
-    expect(checkboxes).toHaveLength(4);
-    expect(checkboxes.every((checkbox) => !(checkbox as HTMLInputElement).checked)).toBe(
-      true,
+    await waitFor(() => {
+      expect(screen.getAllByRole('checkbox')).toHaveLength(5);
+    });
+    const privacyCheckboxes = fields.map((field) =>
+      screen.getByRole('checkbox', {
+        name: new RegExp(`^${CONSENT_LABELS_FOR_TEST[field]}`),
+      }),
     );
+    expect(
+      privacyCheckboxes.every(
+        (checkbox) => !(checkbox as HTMLInputElement).checked,
+      ),
+    ).toBe(true);
     expect(screen.getAllByText(grantCopy)).toHaveLength(4);
 
     fireEvent.click(screen.getByRole('checkbox', { name: /Primary why/ }));
@@ -179,7 +204,112 @@ describe('Steve Success Profile privacy controls', () => {
     ).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Turn off personalization' })).not.toBeInTheDocument();
     expect(
-      screen.getAllByRole('checkbox').every((checkbox) => checkbox.hasAttribute('disabled')),
+      fields
+        .map((field) =>
+          screen.getByRole('checkbox', {
+            name: new RegExp(`^${CONSENT_LABELS_FOR_TEST[field]}`),
+          }),
+        )
+        .every((checkbox) => checkbox.hasAttribute('disabled')),
     ).toBe(true);
+  });
+
+  it('submits one confirmed exact correction and reloads the current artifact', async () => {
+    let currentArtifact = structuredClone(artifact);
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith('/api/steve/discovery/state')) {
+        return json({
+          ok: true,
+          view: {
+            tmagId: 'TMAG-BA',
+            phase: 'complete',
+            transcript: currentArtifact.transcript,
+            artifact: currentArtifact,
+          },
+        });
+      }
+      if (url.endsWith('/api/steve/discovery/privacy') && !init?.method) {
+        return json({
+          ok: true,
+          privacy: privacy(),
+          currentSponsorTmagId: 'TMAG-SPONSOR',
+          grantCopy,
+          revocationCopy,
+        });
+      }
+      if (
+        url.endsWith('/api/steve/discovery/correction') &&
+        init?.method === 'PUT'
+      ) {
+        const body = JSON.parse(String(init.body)) as {
+          target: unknown;
+          replacement: string;
+          expectedRevision: number;
+          confirmation: string;
+        };
+        expect(body).toMatchObject({
+          target: { kind: 'profile_text', path: 'primaryWhy.statement' },
+          replacement: 'Family and freedom',
+          expectedRevision: 0,
+          confirmation: 'I CONFIRM THIS STEVE CORRECTION',
+        });
+        currentArtifact = {
+          ...currentArtifact,
+          correctionRevision: 1,
+          lastCorrectedAt: '2026-07-16T02:00:00.000Z',
+          successProfile: {
+            ...currentArtifact.successProfile,
+            primaryWhy: {
+              ...currentArtifact.successProfile.primaryWhy,
+              statement: 'Family and freedom',
+            },
+          },
+        };
+        return json({
+          ok: true,
+          artifact: currentArtifact,
+          correctionRevision: 1,
+          correctedAt: '2026-07-16T02:00:00.000Z',
+          changedFieldPaths: ['successProfile.primaryWhy.statement'],
+          auditEntryId: 'audit-correction',
+        });
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(
+      <MemoryRouter>
+        <SteveSuccessInterviewPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('Correct Your Private Record')).toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('steve-correction-target'), {
+      target: { value: 'primary-why' },
+    });
+    fireEvent.change(screen.getByTestId('steve-correction-replacement'), {
+      target: { value: 'Family and freedom' },
+    });
+    fireEvent.click(
+      screen.getByRole('checkbox', {
+        name: /I confirm this replacement is the current private value/,
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Save confirmed correction' }),
+    );
+
+    expect(
+      await screen.findByText(
+        'Your correction is saved. The previous private value was not retained.',
+      ),
+    ).toBeInTheDocument();
+    expect((await screen.findAllByText('Family and freedom')).length).toBeGreaterThan(0);
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/steve/discovery/correction',
+      expect.objectContaining({ method: 'PUT' }),
+    );
   });
 });

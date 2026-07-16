@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T20:21:25.308Z
+- Generated: 2026-07-16T20:40:09.715Z
 - Labels: 83
 - Relationships: 68
 - Constraints/indexes cataloged: 18
@@ -88,7 +88,7 @@
 | `TmagResourceVersion` | 5 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 4 |
-| `TmagSteveDiscovery` | 4 |
+| `TmagSteveDiscovery` | 6 |
 | `TmagThreeWayBooking` | 2 |
 | `TmagTrainingModule` | 1 |
 | `TmagVmAuditEvent` | 1 |

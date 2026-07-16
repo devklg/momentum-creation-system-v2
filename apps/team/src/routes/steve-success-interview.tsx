@@ -35,6 +35,13 @@ interface SteveDiscoveryAnswer {
   answerText: string;
 }
 
+interface SteveTranscriptChunk {
+  sequence: number;
+  speaker: 'steve' | 'ba';
+  text: string;
+  occurredAt: string;
+}
+
 interface StevePrimaryWhy {
   statement: string;
   who: string;
@@ -91,14 +98,18 @@ interface SteveDiscoveryArtifact {
   callSid: string | null;
   startedAt: string | null;
   completedAt: string | null;
+  transcript: SteveTranscriptChunk[];
   answers: SteveDiscoveryAnswer[];
   successProfile: SteveSuccessProfile;
   audioUrl: string | null;
+  correctionRevision?: number;
+  lastCorrectedAt?: string | null;
 }
 
 interface SteveDiscoveryView {
   tmagId: string;
   phase: SteveDiscoveryPhase;
+  transcript: SteveTranscriptChunk[];
   artifact: SteveDiscoveryArtifact | null;
 }
 
@@ -129,6 +140,50 @@ interface StevePrivacyResponse {
   currentSponsorTmagId?: string | null;
   grantCopy?: string;
   revocationCopy?: string;
+  error?: string;
+}
+
+type SteveCorrectionTarget =
+  | { kind: 'transcript_text'; sequence: number }
+  | { kind: 'answer_text'; questionId: string }
+  | {
+      kind: 'profile_text';
+      path:
+        | 'primaryWhy.statement'
+        | 'primaryWhy.who'
+        | 'primaryWhy.whyNow'
+        | 'successVision.statement'
+        | 'successVision.oneBigChange'
+        | 'learningStyle.feedbackPreference'
+        | 'learningStyle.notes'
+        | 'communicationPreferences.cadence'
+        | 'communicationPreferences.bestTimes'
+        | 'communicationPreferences.notes'
+        | 'supportNeeds.helpStyle'
+        | 'supportNeeds.notes'
+        | 'michaelHandoffSummary';
+    }
+  | {
+      kind: 'profile_list';
+      path:
+        | 'learningStyle.modalities'
+        | 'communicationPreferences.preferredChannels'
+        | 'supportNeeds.areas'
+        | 'supportNeeds.potentialObstacles';
+    }
+  | {
+      kind: 'recommendation_text';
+      list: 'launch' | 'training';
+      index: number;
+    };
+
+interface SteveCorrectionResponse {
+  ok: boolean;
+  artifact?: SteveDiscoveryArtifact;
+  correctionRevision?: number;
+  correctedAt?: string;
+  changedFieldPaths?: string[];
+  auditEntryId?: string;
   error?: string;
 }
 
@@ -177,7 +232,7 @@ export function SteveSuccessInterviewPage() {
     return <DiscoveryChat onComplete={load} />;
   }
 
-  return <ProfileView artifact={view.artifact} />;
+  return <ProfileView artifact={view.artifact} onReload={load} />;
 }
 
 /* ─── In-flight state — the live discovery conversation with Steve ─── */
@@ -691,7 +746,13 @@ function IntroPanel({
 
 /* ─── Complete state — the Success Profile ─── */
 
-function ProfileView({ artifact }: { artifact: SteveDiscoveryArtifact }) {
+function ProfileView({
+  artifact,
+  onReload,
+}: {
+  artifact: SteveDiscoveryArtifact;
+  onReload: () => Promise<void>;
+}) {
   const p = artifact.successProfile;
   return (
     <div className="min-h-screen bg-ink text-cream">
@@ -781,6 +842,27 @@ function ProfileView({ artifact }: { artifact: SteveDiscoveryArtifact }) {
           </Section>
         ) : null}
 
+        {artifact.transcript.length ? (
+          <Section title="Your Transcript">
+            <ol className="space-y-3">
+              {artifact.transcript.map((turn) => (
+                <li
+                  key={`${turn.sequence}-${turn.speaker}`}
+                  className="rounded-lg border border-cream/10 bg-black/20 p-3"
+                >
+                  <p className="text-[11px] font-mono uppercase tracking-[0.12em] text-cream-mute">
+                    {turn.speaker === 'ba' ? 'You' : 'Steve'} · turn {turn.sequence}
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-cream">
+                    {turn.text}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </Section>
+        ) : null}
+
+        <SteveCorrectionControls artifact={artifact} onReload={onReload} />
         <StevePrivacyControls tmagId={artifact.tmagId} />
 
         <p className="mt-10 text-[11px] font-mono uppercase tracking-[0.18em] text-cream-mute">
@@ -788,6 +870,378 @@ function ProfileView({ artifact }: { artifact: SteveDiscoveryArtifact }) {
         </p>
       </div>
     </div>
+  );
+}
+
+interface SteveCorrectionChoice {
+  id: string;
+  label: string;
+  currentValue: string;
+  kind: 'text' | 'list';
+  target: SteveCorrectionTarget;
+}
+
+const CORRECTION_CONFIRMATION = 'I CONFIRM THIS STEVE CORRECTION';
+
+function correctionChoices(
+  artifact: SteveDiscoveryArtifact,
+): SteveCorrectionChoice[] {
+  const profile = artifact.successProfile;
+  const choices: SteveCorrectionChoice[] = [];
+  const addText = (
+    id: string,
+    label: string,
+    currentValue: string,
+    target: SteveCorrectionTarget,
+  ) => {
+    choices.push({ id, label, currentValue, kind: 'text', target });
+  };
+  const addList = (
+    id: string,
+    label: string,
+    currentValue: string[],
+    target: SteveCorrectionTarget,
+  ) => {
+    choices.push({
+      id,
+      label,
+      currentValue: currentValue.join(', '),
+      kind: 'list',
+      target,
+    });
+  };
+
+  for (const turn of artifact.transcript) {
+    addText(
+      `transcript-${turn.sequence}`,
+      `Transcript · ${turn.speaker === 'ba' ? 'You' : 'Steve'} · turn ${turn.sequence}`,
+      turn.text,
+      { kind: 'transcript_text', sequence: turn.sequence },
+    );
+  }
+  for (const answer of artifact.answers) {
+    addText(
+      `answer-${answer.questionId}`,
+      `Answer · ${answer.prompt}`,
+      answer.answerText,
+      { kind: 'answer_text', questionId: answer.questionId },
+    );
+  }
+
+  const profileText: Array<{
+    id: string;
+    label: string;
+    value: string;
+    path: Extract<SteveCorrectionTarget, { kind: 'profile_text' }>['path'];
+  }> = [
+    {
+      id: 'primary-why',
+      label: 'Success Profile · Primary why',
+      value: profile.primaryWhy.statement,
+      path: 'primaryWhy.statement',
+    },
+    {
+      id: 'primary-who',
+      label: "Success Profile · Who it's for",
+      value: profile.primaryWhy.who,
+      path: 'primaryWhy.who',
+    },
+    {
+      id: 'primary-why-now',
+      label: 'Success Profile · Why now',
+      value: profile.primaryWhy.whyNow,
+      path: 'primaryWhy.whyNow',
+    },
+    {
+      id: 'success-vision',
+      label: 'Success Profile · Success vision',
+      value: profile.successVision.statement,
+      path: 'successVision.statement',
+    },
+    {
+      id: 'success-change',
+      label: 'Success Profile · One big change',
+      value: profile.successVision.oneBigChange,
+      path: 'successVision.oneBigChange',
+    },
+    {
+      id: 'learning-feedback',
+      label: 'Success Profile · Feedback preference',
+      value: profile.learningStyle.feedbackPreference,
+      path: 'learningStyle.feedbackPreference',
+    },
+    {
+      id: 'learning-notes',
+      label: 'Success Profile · Learning notes',
+      value: profile.learningStyle.notes,
+      path: 'learningStyle.notes',
+    },
+    {
+      id: 'communication-cadence',
+      label: 'Success Profile · Contact cadence',
+      value: profile.communicationPreferences.cadence ?? '',
+      path: 'communicationPreferences.cadence',
+    },
+    {
+      id: 'communication-best-times',
+      label: 'Success Profile · Best contact times',
+      value: profile.communicationPreferences.bestTimes,
+      path: 'communicationPreferences.bestTimes',
+    },
+    {
+      id: 'communication-notes',
+      label: 'Success Profile · Communication notes',
+      value: profile.communicationPreferences.notes,
+      path: 'communicationPreferences.notes',
+    },
+    {
+      id: 'support-help-style',
+      label: 'Success Profile · Help style',
+      value: profile.supportNeeds.helpStyle,
+      path: 'supportNeeds.helpStyle',
+    },
+    {
+      id: 'support-notes',
+      label: 'Success Profile · Support notes',
+      value: profile.supportNeeds.notes,
+      path: 'supportNeeds.notes',
+    },
+    {
+      id: 'michael-handoff',
+      label: 'Success Profile · Michael handoff summary',
+      value: profile.michaelHandoffSummary,
+      path: 'michaelHandoffSummary',
+    },
+  ];
+  for (const field of profileText) {
+    addText(field.id, field.label, field.value, {
+      kind: 'profile_text',
+      path: field.path,
+    });
+  }
+
+  addList(
+    'learning-modalities',
+    'Success Profile · Learning modalities',
+    profile.learningStyle.modalities,
+    { kind: 'profile_list', path: 'learningStyle.modalities' },
+  );
+  addList(
+    'communication-channels',
+    'Success Profile · Preferred contact channels',
+    profile.communicationPreferences.preferredChannels,
+    {
+      kind: 'profile_list',
+      path: 'communicationPreferences.preferredChannels',
+    },
+  );
+  addList(
+    'support-areas',
+    'Success Profile · Support areas',
+    profile.supportNeeds.areas,
+    { kind: 'profile_list', path: 'supportNeeds.areas' },
+  );
+  addList(
+    'support-obstacles',
+    'Success Profile · Potential obstacles',
+    profile.supportNeeds.potentialObstacles,
+    { kind: 'profile_list', path: 'supportNeeds.potentialObstacles' },
+  );
+
+  profile.launchRecommendations.forEach((recommendation, index) => {
+    addText(
+      `launch-${index}`,
+      `Success Profile · Launch recommendation ${index + 1}`,
+      recommendation.text,
+      { kind: 'recommendation_text', list: 'launch', index },
+    );
+  });
+  profile.trainingRecommendations.forEach((recommendation, index) => {
+    addText(
+      `training-${index}`,
+      `Success Profile · Training recommendation ${index + 1}`,
+      recommendation.text,
+      { kind: 'recommendation_text', list: 'training', index },
+    );
+  });
+
+  return choices;
+}
+
+function SteveCorrectionControls({
+  artifact,
+  onReload,
+}: {
+  artifact: SteveDiscoveryArtifact;
+  onReload: () => Promise<void>;
+}) {
+  const choices = correctionChoices(artifact);
+  const [selectedId, setSelectedId] = useState(choices[0]?.id ?? '');
+  const selected =
+    choices.find((choice) => choice.id === selectedId) ?? choices[0] ?? null;
+  const [replacement, setReplacement] = useState(
+    selected?.currentValue ?? '',
+  );
+  const [confirmed, setConfirmed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!selected) return;
+    setReplacement(selected.currentValue);
+  }, [selected?.id, selected?.currentValue]);
+
+  const submitCorrection = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!selected || !confirmed) return;
+
+    const normalizedReplacement =
+      selected.kind === 'list'
+        ? replacement
+            .split(/[,\n]/)
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : replacement;
+    if (
+      selected.kind === 'text' &&
+      normalizedReplacement === selected.currentValue
+    ) {
+      setError('Enter a replacement that differs from the current value.');
+      return;
+    }
+    if (
+      selected.kind === 'list' &&
+      JSON.stringify(normalizedReplacement) ===
+        JSON.stringify(
+          selected.currentValue
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean),
+        )
+    ) {
+      setError('Enter a replacement that differs from the current list.');
+      return;
+    }
+
+    setBusy(true);
+    setMessage('');
+    setError('');
+    try {
+      const res = await fetch('/api/steve/discovery/correction', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          target: selected.target,
+          replacement: normalizedReplacement,
+          expectedRevision: artifact.correctionRevision ?? 0,
+          confirmation: CORRECTION_CONFIRMATION,
+        }),
+      });
+      const data = (await res.json()) as SteveCorrectionResponse;
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error ?? 'Could not correct your private record.');
+      }
+      setConfirmed(false);
+      setMessage('Your correction is saved. The previous private value was not retained.');
+      await onReload();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Could not correct your private record.',
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!selected) return null;
+
+  return (
+    <Section title="Correct Your Private Record">
+      <p className="text-sm leading-relaxed text-cream-mute">
+        Choose one current value and replace it after confirmation. The audit
+        records only the field path and revision — never the old or new private
+        text. Identity, timestamps, Steve&apos;s signature, provider details,
+        and internal resource links cannot be edited here.
+      </p>
+
+      <form onSubmit={submitCorrection} className="space-y-4">
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-cream">
+            Value to correct
+          </span>
+          <select
+            data-testid="steve-correction-target"
+            value={selected.id}
+            disabled={busy}
+            onChange={(event) => {
+              const next = choices.find(
+                (choice) => choice.id === event.currentTarget.value,
+              );
+              setSelectedId(event.currentTarget.value);
+              setReplacement(next?.currentValue ?? '');
+              setConfirmed(false);
+              setMessage('');
+              setError('');
+            }}
+            className="w-full rounded-lg border border-cream/20 bg-ink px-3 py-2 text-sm text-cream focus:border-gold focus:outline-none"
+          >
+            {choices.map((choice) => (
+              <option key={choice.id} value={choice.id}>
+                {choice.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-cream">
+            Replacement
+          </span>
+          <textarea
+            data-testid="steve-correction-replacement"
+            rows={selected.kind === 'list' ? 3 : 5}
+            value={replacement}
+            disabled={busy}
+            onChange={(event) => setReplacement(event.currentTarget.value)}
+            className="w-full rounded-lg border border-cream/20 bg-black/30 px-3 py-2 text-sm leading-relaxed text-cream focus:border-gold focus:outline-none"
+          />
+          {selected.kind === 'list' ? (
+            <span className="mt-1 block text-xs text-cream-mute">
+              Separate list items with commas or new lines.
+            </span>
+          ) : null}
+        </label>
+
+        <label className="flex items-start gap-3 rounded-lg border border-gold/20 bg-gold/5 p-3">
+          <input
+            type="checkbox"
+            checked={confirmed}
+            disabled={busy}
+            onChange={(event) => setConfirmed(event.currentTarget.checked)}
+            className="mt-1 h-4 w-4 accent-[#C9A84C]"
+          />
+          <span className="text-xs leading-relaxed text-cream-mute">
+            I confirm this replacement is the current private value I want
+            saved. I understand the prior private value will not be retained.
+          </span>
+        </label>
+
+        <button
+          type="submit"
+          disabled={busy || !confirmed}
+          className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-2 text-sm text-gold hover:bg-gold/15 disabled:opacity-50"
+        >
+          {busy ? 'Saving correction…' : 'Save confirmed correction'}
+        </button>
+      </form>
+
+      {message ? <p className="text-sm text-teal">{message}</p> : null}
+      {error ? <p className="text-sm text-red-400">{error}</p> : null}
+    </Section>
   );
 }
 

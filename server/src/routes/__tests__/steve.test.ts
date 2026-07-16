@@ -1,11 +1,13 @@
 import type { Request, Response } from 'express';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  MCS_STEVE_CORRECTION_CONFIRMATION,
   MCS_STEVE_SPONSOR_CONSENT_GRANT_COPY,
   MCS_STEVE_SPONSOR_CONSENT_REVOCATION_COPY,
   MCS_STEVE_WITHDRAW_CONFIRMATION,
 } from '@momentum/shared';
 import * as steveDomain from '../../domain/steve-success-interview.js';
+import * as steveCorrection from '../../domain/steveCorrection.js';
 import * as steveRuntime from '../../domain/steveConversationRuntime.js';
 import * as stevePrivacy from '../../domain/stevePrivacy.js';
 import { steveRoutes } from '../steve.js';
@@ -86,6 +88,7 @@ describe('Steve route gate contract', () => {
   it.each([
     ['get', '/discovery/privacy'],
     ['get', '/discovery/export'],
+    ['put', '/discovery/correction'],
     ['put', '/discovery/privacy/consent'],
     ['post', '/discovery/privacy/withdraw'],
   ] as const)('requires a completed authenticated BA profile for %s %s', (method, path) => {
@@ -460,6 +463,132 @@ describe('Steve route behavior', () => {
       auditEntryId: 'audit-withdraw',
       privacy: { status: 'withdrawn' },
     });
+  });
+
+  it('requires exact correction confirmation and returns only the current BA artifact', async () => {
+    const invalid = mockResponse();
+    await finalHandler('put', '/discovery/correction')(
+      {
+        session: { tmagId: 'TMAG-001' },
+        body: {
+          target: { kind: 'profile_text', path: 'primaryWhy.statement' },
+          replacement: 'Corrected why',
+          expectedRevision: 0,
+          confirmation: 'yes',
+        },
+      } as unknown as Request,
+      invalid,
+    );
+    expect(invalid.statusCode).toBe(400);
+
+    vi.spyOn(steveCorrection, 'correctStevePrivateRecord').mockResolvedValueOnce({
+      artifact: {
+        tmagId: 'TMAG-001',
+        sponsorTmagId: 'TMAG-SPONSOR',
+        callSid: null,
+        startedAt: '2026-07-16T00:00:00.000Z',
+        completedAt: '2026-07-16T00:10:00.000Z',
+        transcript: [],
+        answers: [],
+        successProfile: {
+          tmagId: 'TMAG-001',
+          generatedAt: '2026-07-16T00:10:00.000Z',
+          primaryWhy: { statement: 'Corrected why', who: '', whyNow: '' },
+          successVision: { statement: '', oneBigChange: '' },
+          learningStyle: {
+            modalities: [],
+            feedbackPreference: '',
+            notes: '',
+          },
+          communicationPreferences: {
+            preferredChannels: [],
+            cadence: null,
+            bestTimes: '',
+            notes: '',
+          },
+          supportNeeds: {
+            areas: [],
+            potentialObstacles: [],
+            helpStyle: '',
+            notes: '',
+          },
+          launchRecommendations: [],
+          trainingRecommendations: [],
+          michaelHandoffSummary: '',
+          signedBy: 'Steve · Success Profile',
+        },
+        audioUrl: null,
+        correctionRevision: 1,
+        lastCorrectedAt: '2026-07-16T02:00:00.000Z',
+      },
+      correctionRevision: 1,
+      correctedAt: '2026-07-16T02:00:00.000Z',
+      changedFieldPaths: ['successProfile.primaryWhy.statement'],
+      auditEntryId: 'audit-correction',
+    });
+    const response = mockResponse();
+    await finalHandler('put', '/discovery/correction')(
+      {
+        session: { tmagId: 'TMAG-001' },
+        body: {
+          target: { kind: 'profile_text', path: 'primaryWhy.statement' },
+          replacement: 'Corrected why',
+          expectedRevision: 0,
+          confirmation: MCS_STEVE_CORRECTION_CONFIRMATION,
+        },
+      } as unknown as Request,
+      response,
+    );
+
+    expect(steveCorrection.correctStevePrivateRecord).toHaveBeenCalledWith({
+      tmagId: 'TMAG-001',
+      payload: expect.objectContaining({
+        expectedRevision: 0,
+        replacement: 'Corrected why',
+      }),
+    });
+    expect(response.body).toMatchObject({
+      ok: true,
+      correctionRevision: 1,
+      changedFieldPaths: ['successProfile.primaryWhy.statement'],
+      artifact: {
+        tmagId: 'TMAG-001',
+        callSid: null,
+        audioUrl: null,
+      },
+    });
+    expect(response.set).toHaveBeenCalledWith('Cache-Control', 'private, no-store');
+  });
+
+  it('maps stale correction detail to an opaque content-free 409', async () => {
+    vi.spyOn(steveCorrection, 'correctStevePrivateRecord').mockRejectedValueOnce(
+      new steveCorrection.SteveCorrectionError(
+        'STALE_REVISION',
+        'private stale detail',
+      ),
+    );
+    const response = mockResponse();
+
+    await finalHandler('put', '/discovery/correction')(
+      {
+        session: { tmagId: 'TMAG-001' },
+        body: {
+          target: { kind: 'answer_text', questionId: 'q_why' },
+          replacement: 'Corrected answer',
+          expectedRevision: 0,
+          confirmation: MCS_STEVE_CORRECTION_CONFIRMATION,
+        },
+      } as unknown as Request,
+      response,
+    );
+
+    expect(response.statusCode).toBe(409);
+    expect(response.body).toEqual({
+      ok: false,
+      error: 'Your Steve profile changed. Reload before correcting it.',
+      code: 'STALE_STEVE_CORRECTION',
+    });
+    expect(JSON.stringify(response.body)).not.toContain('private stale detail');
   });
 
   it('sets an attachment filename and does not add provider internals to export responses', async () => {

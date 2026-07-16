@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T20:21:24.623Z
+- Generated: 2026-07-16T20:40:09.079Z
 - Collections: 74
 - Unclassified: 0
 
@@ -87,9 +87,9 @@
 | `tmag_prospect_webinar_reservations` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 6 |
 | `tmag_prospects` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 38 |
 | `tmag_questionnaires` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
-| `tmag_recruiting_cycles` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 3 |
+| `tmag_recruiting_cycles` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 4 |
 | `tmag_sponsor_availability` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 5 |
-| `tmag_steve_success_interview` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 12 |
+| `tmag_steve_success_interview` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 15 |
 | `tmag_three_way_bookings` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 5 |
 | `tmag_vm_audit_events` | VM/RVM import, ownership, queue, and provider events | VM/RVM domain | admin + workers | operational | permissive_mongoose_schema | yes | 1 |
 | `tmag_vm_bulk_leads` | VM/RVM import, ownership, queue, and provider events | VM/RVM domain | admin + workers | operational | permissive_mongoose_schema | yes | 21 |

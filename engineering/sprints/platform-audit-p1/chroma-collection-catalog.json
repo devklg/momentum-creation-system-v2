@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T20:21:27.346Z",
+  "generatedAt": "2026-07-16T20:40:11.723Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -1607,14 +1607,26 @@
       "purpose": "Registered app Chroma collection.",
       "source": "server/src/services/chromaCollections.ts",
       "actions": [
+        "add",
+        "get",
         "writeKnowledge"
       ],
-      "sourceCount": 1,
+      "sourceCount": 3,
       "sources": [
         {
           "file": "server/src/domain/recruitingCycle.ts",
           "line": 419,
           "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/steveCorrection.ts",
+          "line": 469,
+          "action": "persistenceCall.chromadb.add"
+        },
+        {
+          "file": "server/src/domain/steveCorrection.ts",
+          "line": 486,
+          "action": "persistenceCall.chromadb.get"
         }
       ],
       "metadataContract": {
@@ -1626,9 +1638,12 @@
           "purpose": "rev3 canonical registry"
         },
         "observedMetadataKeys": [
+          "correctedAt",
           "cycleId",
           "enrolledAt",
           "kind",
+          "privacyStatus",
+          "retrievalEligible",
           "tmagId",
           "whyStatement"
         ],
@@ -1824,9 +1839,10 @@
       "actions": [
         "add",
         "create_collection",
+        "get",
         "writeKnowledge"
       ],
-      "sourceCount": 3,
+      "sourceCount": 5,
       "sources": [
         {
           "file": "server/src/domain/steve-success-interview.ts",
@@ -1835,8 +1851,18 @@
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 737,
+          "line": 741,
           "action": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/steveCorrection.ts",
+          "line": 383,
+          "action": "persistenceCall.chromadb.add"
+        },
+        {
+          "file": "server/src/domain/steveCorrection.ts",
+          "line": 422,
+          "action": "persistenceCall.chromadb.get"
         },
         {
           "file": "server/src/domain/stevePrivacy.ts",
@@ -1856,10 +1882,12 @@
           "agent",
           "completedAt",
           "consentedFieldCount",
+          "correctionRevision",
           "discoveryId",
           "eventBodiesCompactionEligible",
           "eventBodyCompactionPolicyVersion",
           "kind",
+          "lastCorrectedAt",
           "ownerTmagId",
           "privacyPolicyVersion",
           "privacyStatus",

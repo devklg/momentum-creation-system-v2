@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T20:21:27.346Z
+- Generated: 2026-07-16T20:40:11.723Z
 - Registered collections: 53
 - Schema-catalog collections: 53
 - Collections with observed write/query usage: 33
@@ -75,13 +75,13 @@
 | `mcs_prospect_magic_links` | prospect_funnel | not_language_scoped | Prospect funnel semantic record. | `writeOperational` | `accountId`, `expiresAt`, `issuedAt`, `kind`, `linkToken`, `phoneHash`, `tokenId` | none observed | `accountId`, `tokenId` |
 | `mcs_prospect_timeline_events` | crm | not_language_scoped | Prospect CRM and lifecycle semantic records. | `writeKnowledge` | `createdAt`, `kind`, `leadId`, `ownerTmagId`, `prospectId`, `sponsorTmagId` | none observed | `leadId`, `ownerTmagId`, `prospectId`, `sponsorTmagId`, `tmagId` |
 | `mcs_prospect_webinar_reservations` | prospect_funnel | not_language_scoped | Prospect funnel semantic record. | `writeOperational` | `createdAt`, `eventId`, `kind`, `prospectId`, `reservationId`, `scheduledFor`, `sponsorTmagId` | none observed | `eventId`, `prospectId`, `reservationId`, `sponsorTmagId`, `tmagId` |
-| `mcs_recruiting_cycles` | general | not_language_scoped | Registered app Chroma collection. | `writeKnowledge` | `cycleId`, `enrolledAt`, `kind`, `tmagId`, `whyStatement` | none observed | `cycleId`, `tmagId` |
+| `mcs_recruiting_cycles` | general | not_language_scoped | Registered app Chroma collection. | `add`<br>`get`<br>`writeKnowledge` | `correctedAt`, `cycleId`, `enrolledAt`, `kind`, `privacyStatus`, `retrievalEligible`, `tmagId`, `whyStatement` | none observed | `cycleId`, `tmagId` |
 | `mcs_relationship_knowledge_en` | knowledge | en | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_relationship_knowledge_es` | knowledge | es | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_resource_catalog` | general | not_language_scoped | Registered app Chroma collection. | `create_collection` | `project`, `purpose` | none observed | none inferred |
 | `mcs_resource_usage_events` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
 | `mcs_sponsor_availability` | events | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `availabilityId`, `kind`, `ownerTmagId`, `timezone`, `updatedAt`, `windowCount` | none observed | `availabilityId`, `ownerTmagId`, `tmagId` |
-| `mcs_steve_success_interview` | onboarding_training | not_language_scoped | Onboarding/training semantic record. | `add`<br>`create_collection`<br>`writeKnowledge` | `agent`, `completedAt`, `consentedFieldCount`, `discoveryId`, `eventBodiesCompactionEligible`, `eventBodyCompactionPolicyVersion`, `kind`, `ownerTmagId`, `privacyPolicyVersion`, `privacyStatus`, `purpose`, `retrievalEligible` | none observed | `discoveryId`, `ownerTmagId`, `tmagId` |
+| `mcs_steve_success_interview` | onboarding_training | not_language_scoped | Onboarding/training semantic record. | `add`<br>`create_collection`<br>`get`<br>`writeKnowledge` | `agent`, `completedAt`, `consentedFieldCount`, `correctionRevision`, `discoveryId`, `eventBodiesCompactionEligible`, `eventBodyCompactionPolicyVersion`, `kind`, `lastCorrectedAt`, `ownerTmagId`, `privacyPolicyVersion`, `privacyStatus`, `purpose`, `retrievalEligible` | none observed | `discoveryId`, `ownerTmagId`, `tmagId` |
 | `mcs_success_knowledge_en` | knowledge | en | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_success_knowledge_es` | knowledge | es | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_tenant_settings` | tenant_admin | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `tenantId`, `updatedBy`, `version` | none observed | `tenantId` |

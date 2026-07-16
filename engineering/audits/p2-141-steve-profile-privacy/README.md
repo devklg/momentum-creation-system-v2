@@ -23,15 +23,17 @@ require historical mutation:
 - content-free consent, withdrawal, and export audit facts;
 - rollback when a privacy projection or its required audit append fails; and
 - create-only ordinary ingest so a repeated worker completion cannot replace
-  private content without a future BA-confirmed correction flow;
+  private content;
 - post-completion compaction of new-record in-flight Steve event bodies only
   after the canonical Success Profile writes and reads back, preserving
-  content-free event facts and an idempotent retry path.
+  content-free event facts and an idempotent retry path; and
+- BA-confirmed correction of one exact current transcript, answer, profile, or
+  recommendation value with optimistic revision control, content-free audit
+  evidence, projection read-back, and rollback on failure.
 
-The item remains partial. BA-confirmed correction, BA-requested private-content
-deletion, the deletion/onboarding-gate and tombstone behavior, provider
-inventory/terms review, and historical reconciliation remain separate visible
-work.
+The item remains partial. BA-requested private-content deletion, the
+deletion/onboarding-gate and tombstone behavior, provider inventory/terms
+review, and historical reconciliation remain separate visible work.
 
 No production record was read, changed, deleted, re-indexed, or backfilled.
 No external communication or provider call occurred.
@@ -61,7 +63,9 @@ No external communication or provider call occurred.
 - Sponsor-only routes do not disclose BA existence or profile-completion state
   to unrelated authenticated BAs.
 - No scoring, ranking, prediction, classification, or qualification is added.
-- ACR-0011 recruiting-cycle why replay is not changed.
+- ACR-0011 recruiting-cycle why replay scope is not expanded. A BA-confirmed
+  correction to the primary why replaces that already-authorized active
+  projection and reads it back.
 - Existing production records are not scrubbed by this implementation.
 
 ## ACR-0031 implementation boundary
@@ -70,8 +74,11 @@ No external communication or provider call occurred.
   `organization/ACR-0031-steve-profile-retention-and-visibility.md`.
 - Self-export, one-way withdrawal, and field-specific sponsor consent are
   implemented for current records.
-- BA-confirmed correction remains open. Ordinary re-ingest is create-only and
-  returns a conflict rather than silently replacing private content.
+- BA-confirmed correction is implemented for current records. One exact value
+  is replaced only after explicit confirmation and a current revision match;
+  identity, timestamps, signatures, provider fields, and internal resource
+  links remain immutable. Ordinary re-ingest remains create-only and returns a
+  conflict rather than silently replacing private content.
 - Private-content deletion remains open because the approved ACR does not yet
   resolve whether deletion preserves onboarding completion or reopens the Steve
   gate; the minimal tombstone/read-back flow must be designed with that answer.
@@ -89,11 +96,14 @@ No external communication or provider call occurred.
 The focused suite additionally covers legacy consent defaults, sponsor-change
 invalidation, exact consented-field projection, content-free audit payloads,
 withdrawal, export minimization, projection/audit rollback, create-only ingest,
-route opacity, and the four `.team` privacy controls.
+route opacity, exact confirmed correction, stale-revision rejection, private
+audit minimization, correction rollback, and the `.team` privacy controls.
 
-Current verification: 2,277 server tests passed / 19 skipped; 71 team tests
-passed; repo typecheck passed; production build passed; 254 routes produced
+Current verification: 2,284 server tests passed / 19 skipped; 72 team tests
+passed; repo typecheck passed; production build passed; 255 routes produced
 zero access findings; the `.com` scan covered 34 files with zero violations;
-generated catalogs and freshness are current. The trusted in-app browser
-runtime was unavailable, so visual QA is not represented as passed. The ACR
-decision and PR #353 merge state were verified.
+generated catalogs and freshness are current. Responsive fallback component
+visual QA passed at desktop, tablet, 390px, 360px, and 200% reflow with zero
+horizontal overflow and zero browser exceptions. The trusted in-app browser
+runtime was unavailable, so trusted-route QA is not represented as passed. The
+ACR decision and PR #353 merge state were verified.

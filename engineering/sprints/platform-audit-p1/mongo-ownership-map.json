@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T20:21:24.623Z",
+  "generatedAt": "2026-07-16T20:40:09.079Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 74,
   "unclassifiedCount": 0,
@@ -951,9 +951,10 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 3,
+      "sourceCount": 4,
       "sourceFiles": [
-        "server/src/domain/recruitingCycle.ts"
+        "server/src/domain/recruitingCycle.ts",
+        "server/src/domain/steveCorrection.ts"
       ]
     },
     {
@@ -979,12 +980,13 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 12,
+      "sourceCount": 15,
       "sourceFiles": [
         "server/src/domain/michael-training-support.ts",
         "server/src/domain/recruitingCycle.ts",
         "server/src/domain/reports/baActivation.ts",
         "server/src/domain/steve-success-interview.ts",
+        "server/src/domain/steveCorrection.ts",
         "server/src/domain/stevePrivacy.ts"
       ]
     },

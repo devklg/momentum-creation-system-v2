@@ -110,6 +110,14 @@ sharing choices. A correction replaces the active private value after explicit
 confirmation. The audit fact records artifact id, changed field paths, actor,
 policy version, and time, but not the former or replacement private text.
 
+Draft PR #355 implements the current-record private-value portion of this
+right. It replaces one exact transcript, answer, profile, or recommendation
+value after the approved confirmation and a current revision match. Identity,
+timestamps, signatures, provider fields, and internal resource links remain
+immutable. A primary-why correction replaces and reads back the existing
+ACR-0011 projection without expanding its retrieval principals. Projection,
+audit, or read-back failure restores the prior canonical current record.
+
 ### 4.4 Withdrawal
 
 The BA may withdraw the Steve record from further personalization and sponsor
@@ -302,10 +310,10 @@ ACR-0031 approval alone is not apply authority for historical data.
   },
   "verification": {
     "typecheck": true,
-    "server_tests": "2277 passed / 19 skipped",
-    "team_tests": "71 passed",
+    "server_tests": "2284 passed / 19 skipped",
+    "team_tests": "72 passed",
     "production_build": true,
-    "route_access": "254 routes / 0 findings",
+    "route_access": "255 routes / 0 findings",
     "com_compliance": "34 files / 0 violations",
     "catalogs_current": true,
     "flows": [
@@ -318,6 +326,10 @@ ACR-0031 approval alone is not apply authority for historical data.
       "BA self-export and one-way withdrawal",
       "withdrawal blocks tailored Launch guidance and why replay",
       "create-only ordinary ingest",
+      "BA-confirmed one-value correction with optimistic revision control",
+      "correction audit excludes prior and replacement private text",
+      "correction projection read-back and rollback",
+      "primary why correction replaces the existing ACR-0011 projection",
       "new-record event bodies compact only after canonical read-back",
       "event compaction retains content-free facts and excludes historical rows",
       "new records store null provider/audio fields",
