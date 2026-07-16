@@ -313,7 +313,8 @@ ACR-0031 approval alone is not apply authority for historical data.
       "a251fbfc",
       "25254777",
       "7638c3df",
-      "62cfb268"
+      "62cfb268",
+      "1e276fc8"
     ],
     "append_only_respected": true,
     "live_mutation_authorized": false,
