@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-16T15:45:18.190Z
+- Generated: 2026-07-16T16:12:55.325Z
 - Mongo collections: 74
 - Neo4j labels: 83
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
 - Route handlers: 286
-- Shared exports: 1146
+- Shared exports: 1153
 
 ## Mongo Collections
 
@@ -1517,3 +1517,10 @@
 | `TmagId` | type | `packages/shared/src/types.ts` |
 | `TmagProfile` | interface | `packages/shared/src/types.ts` |
 | `TmagProfilePatch` | interface | `packages/shared/src/types.ts` |
+| `McsVmProviderAvailability` | type | `packages/shared/src/vm-provider-catalog.ts` |
+| `McsVmProviderCatalogEntry` | interface | `packages/shared/src/vm-provider-catalog.ts` |
+| `VM_CAMPAIGN_SELECTABLE_PROVIDER_KEYS` | const | `packages/shared/src/vm-provider-catalog.ts` |
+| `VM_CAMPAIGN_SELECTABLE_PROVIDER_OPTIONS` | const | `packages/shared/src/vm-provider-catalog.ts` |
+| `VM_PROVIDER_CATALOG` | const | `packages/shared/src/vm-provider-catalog.ts` |
+| `VM_PROVIDER_LABELS` | const | `packages/shared/src/vm-provider-catalog.ts` |
+| `VM_REGISTERED_PROVIDER_KEYS` | const | `packages/shared/src/vm-provider-catalog.ts` |
