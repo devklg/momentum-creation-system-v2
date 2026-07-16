@@ -8,6 +8,7 @@ export class TelnyxError extends Error {
     public readonly status: number,
     public readonly upstreamBody: string,
     message: string,
+    public readonly retryAfter: string | null = null,
   ) {
     super(`[telnyx] ${message}`);
     this.name = 'TelnyxError';
@@ -163,7 +164,12 @@ async function telnyxJson<T>(url: string, body: Record<string, unknown>, label: 
 
   const text = await res.text();
   if (!res.ok) {
-    throw new TelnyxError(res.status, text, `${label} failed: HTTP ${res.status} ${res.statusText}`);
+    throw new TelnyxError(
+      res.status,
+      text,
+      `${label} failed: HTTP ${res.status} ${res.statusText}`,
+      res.headers.get('retry-after'),
+    );
   }
   try {
     return JSON.parse(text) as T;

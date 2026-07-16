@@ -13,6 +13,10 @@ import type {
   RinglessVoicemailProvider,
   VoicemailDropPayload,
 } from './types.js';
+import {
+  parseVmProviderRetryAfterMs,
+  VmProviderRateLimitError,
+} from './types.js';
 
 export const acquisitionProvider: RinglessVoicemailProvider = {
   key: 'acquisition_provider_placeholder',
@@ -63,9 +67,15 @@ export const acquisitionProvider: RinglessVoicemailProvider = {
       }),
     });
 
+    if (res.status === 429) {
+      throw new VmProviderRateLimitError(
+        'acquisition_provider_placeholder',
+        parseVmProviderRetryAfterMs(res.headers.get('retry-after')),
+      );
+    }
     const text = await res.text();
     if (!res.ok) {
-      throw new Error(`vm_provider_http_${res.status}:${text.slice(0, 200)}`);
+      throw new Error(`vm_provider_http_${res.status}`);
     }
 
     let parsed: Record<string, unknown> = {};
