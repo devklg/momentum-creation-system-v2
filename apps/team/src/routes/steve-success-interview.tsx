@@ -244,10 +244,10 @@ interface ChatTurn {
   at: string;
 }
 
-/* ─── Browser voice (S1.6 completion) — Web Speech STT/TTS, browser-only,
-       no Telnyx/PSTN per the amended locked spec. The voice layer is purely
-       client-side: speech → text → the SAME /converse endpoint → text →
-       speech. The event-sourced transcript is identical either way. ─── */
+/* ─── Browser voice (S1.6 completion) — local-device Web Speech only,
+       no Telnyx/PSTN and no user-agent-selected remote speech provider.
+       Speech recognition must expose processLocally and TTS must expose a
+       localService voice. Otherwise the surface remains typed text only. ─── */
 
 interface SpeechAlt {
   transcript: string;
@@ -264,6 +264,7 @@ interface SpeechRec {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
+  processLocally: boolean;
   onresult: ((e: SpeechEventLike) => void) | null;
   onend: (() => void) | null;
   onerror: ((e: { error?: string }) => void) | null;
@@ -281,6 +282,17 @@ function speechRecognitionCtor(): (new () => SpeechRec) | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
+function localSpeechRecognitionCtor(): (new () => SpeechRec) | null {
+  const Ctor = speechRecognitionCtor();
+  if (!Ctor) return null;
+  try {
+    const probe = new Ctor();
+    return 'processLocally' in probe ? Ctor : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Strip emoji + markdown emphasis so TTS reads clean sentences. */
 function speakableText(text: string): string {
   return text
@@ -290,8 +302,11 @@ function speakableText(text: string): string {
 }
 
 function choosePreferredVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
-  const enUsVoices = voices.filter((voice) => /^en[-_]US/i.test(voice.lang));
-  const candidates = enUsVoices.length ? enUsVoices : voices.filter((voice) => /^en/i.test(voice.lang));
+  const localVoices = voices.filter((voice) => voice.localService);
+  const enUsVoices = localVoices.filter((voice) => /^en[-_]US/i.test(voice.lang));
+  const candidates = enUsVoices.length
+    ? enUsVoices
+    : localVoices.filter((voice) => /^en/i.test(voice.lang));
 
   const scored = candidates
     .map((voice) => {
@@ -299,9 +314,6 @@ function choosePreferredVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVo
       let score = 0;
       if (voice.lang.toLowerCase() === 'en-us') score += 8;
       if (name.includes('natural')) score += 12;
-      if (name.includes('google')) score += 10;
-      if (name.includes('microsoft')) score += 9;
-      if (name.includes('online')) score += 4;
       if (name.includes('neural')) score += 4;
       if (name.includes('default')) score -= 3;
       return { voice, score };
@@ -358,7 +370,7 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
   const pendingFinalRef = useRef('');
   const lastSpeechAtRef = useRef(0);
   const ignoreNextEndRef = useRef(false);
-  const voiceSupported = speechRecognitionCtor() !== null;
+  const voiceSupported = localSpeechRecognitionCtor() !== null && preferredVoice !== null;
 
   const send = useCallback(
     async (message: string) => {
@@ -426,8 +438,14 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
   }, []);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [turns, busy]);
+    if (
+      turns.length > 0 &&
+      !introOpen &&
+      typeof endRef.current?.scrollIntoView === 'function'
+    ) {
+      endRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [turns, busy, introOpen]);
 
   useEffect(() => {
     if (typeof speechSynthesis === 'undefined') return undefined;
@@ -480,11 +498,14 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
   /* ── voice controls ── */
 
   function speak(text: string) {
-    if (typeof speechSynthesis === 'undefined') return;
+    if (typeof speechSynthesis === 'undefined' || !preferredVoice?.localService) {
+      stopVoice();
+      return;
+    }
     speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(speakableText(text));
     utter.lang = 'en-US';
-    if (preferredVoice) utter.voice = preferredVoice;
+    utter.voice = preferredVoice;
     utter.rate = 1.0;
     utter.pitch = 0.92;
     utter.onend = () => {
@@ -496,11 +517,16 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
   function startListening() {
     if (!voiceOnRef.current || doneRef.current) return;
     if (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking) return;
-    const Ctor = speechRecognitionCtor();
-    if (!Ctor) return;
+    const Ctor = localSpeechRecognitionCtor();
+    if (!Ctor) {
+      setError('Private on-device voice is unavailable in this browser. Type your answer instead.');
+      stopVoice();
+      return;
+    }
     try { recRef.current?.abort(); } catch { /* noop */ }
     const rec = new Ctor();
     recRef.current = rec;
+    rec.processLocally = true;
     rec.lang = 'en-US';
     rec.continuous = true;
     rec.interimResults = true;
@@ -535,7 +561,11 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
         startListening();
       }
     };
-    rec.onerror = () => setListening(false);
+    rec.onerror = () => {
+      recRef.current = null;
+      setError('Private on-device voice could not start. Type your answer instead.');
+      stopVoice();
+    };
     setListening(true);
     rec.start();
   }
@@ -633,7 +663,7 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
 
         {error ? <p className="mt-2 text-sm text-red-400">{error}</p> : null}
 
-        <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
+        <form onSubmit={handleSubmit} className="mt-4 flex flex-wrap gap-2">
           {voiceSupported ? (
             <button
               type="button"
@@ -660,7 +690,7 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
                   : 'Type your answer…'
             }
             disabled={busy || !started}
-            className="flex-1 rounded-lg border border-cream/20 bg-black/30 px-4 py-3 text-sm text-cream placeholder:text-cream-mute focus:border-gold focus:outline-none"
+            className="min-w-0 basis-32 flex-1 rounded-lg border border-cream/20 bg-black/30 px-4 py-3 text-sm text-cream placeholder:text-cream-mute focus:border-gold focus:outline-none"
           />
           <button
             type="submit"
@@ -679,6 +709,11 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
             </button>
           ) : null}
         </form>
+        <p className="mt-2 text-xs leading-relaxed text-cream-mute">
+          Type is always available. Voice appears only when this browser reports both
+          on-device speech recognition and a local playback voice. Team Magnificent
+          receives the resulting text, not microphone audio.
+        </p>
       </div>
     </div>
   );
@@ -718,7 +753,11 @@ function IntroPanel({
         <p>
           What happens with your answers: they become your Success Profile… You already belong.
         </p>
-        <p>Takes about ten minutes. Talk or type. Your conversation saves as you go.</p>
+        <p>
+          Takes about ten minutes. Type your answers, or use voice when your browser
+          can keep speech recognition and playback on this device. Your conversation
+          saves as you go.
+        </p>
       </div>
       <div className="mt-5 flex flex-wrap gap-3">
         {!started ? (

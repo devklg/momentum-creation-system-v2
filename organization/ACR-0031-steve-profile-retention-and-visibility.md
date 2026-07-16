@@ -179,10 +179,11 @@ The source-backed inventory is recorded at
 `engineering/audits/p2-141-steve-provider-inventory/README.md`. The review
 identifies Anthropic, the browser/user-agent speech services, InterServer,
 MongoDB Atlas Flex, Neo4j Aura Free, and Chroma Cloud. The inventory itself is
-complete, but the activation gate is not passed: browser recognition is not
-local-only, browser TTS can select a remote online voice, Anthropic
-organization-level ZDR is unverified, and account-specific backup/retention
-evidence remains outstanding.
+complete. Draft PR #355 now fails browser voice closed to
+`processLocally=true` recognition and `localService===true` playback, with
+typing preserved and an explicit privacy notice. The overall activation gate
+is not passed because Anthropic organization-level ZDR is unverified and
+account-specific backup/retention evidence remains outstanding.
 
 ## 7. Semantic-memory boundary
 
@@ -323,8 +324,8 @@ ACR-0031 approval alone is not apply authority for historical data.
   },
   "verification": {
     "typecheck": true,
-    "server_tests": "2284 passed / 19 skipped",
-    "team_tests": "72 passed",
+    "server_tests": "2285 passed / 19 skipped",
+    "team_tests": "73 passed",
     "production_build": true,
     "route_access": "255 routes / 0 findings",
     "com_compliance": "34 files / 0 violations",
@@ -348,6 +349,9 @@ ACR-0031 approval alone is not apply authority for historical data.
       "new records store null provider/audio fields",
       "named source-backed provider inventory and official-terms review",
       "provider activation blockers remain explicit and fail closed",
+      "browser recognition requires processLocally and fails back to typing",
+      "browser playback requires a localService voice",
+      "browser voice privacy notice is visible",
       "content-free Neo4j and Chroma projections",
       "blocked admin bridge materialization",
       "no Steve content on .com"
@@ -359,11 +363,12 @@ ACR-0031 approval alone is not apply authority for historical data.
       "review",
       "approval",
       "baseline_merge",
-      "provider_inventory"
+      "provider_inventory",
+      "browser_speech_local_only",
+      "browser_tts_local_only",
+      "browser_voice_privacy_notice"
     ],
     "gates_blocked": [
-      "browser_speech_local_only_or_named_remote_provider",
-      "browser_tts_local_only_or_named_remote_provider",
       "anthropic_zdr_or_explicit_standard_retention_approval",
       "account_specific_backup_and_log_retention_evidence"
     ],

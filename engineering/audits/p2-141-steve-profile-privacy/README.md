@@ -89,10 +89,11 @@ No external communication or provider call occurred.
 - The source-backed provider inventory and current official-terms review is
   complete in
   `engineering/audits/p2-141-steve-provider-inventory/README.md`. It found that
-  the ACR-0031 provider gate is not satisfied: browser speech recognition is
-  not local-only, TTS can prefer a remote online voice, Anthropic
-  organization-level ZDR is unverified, and managed-store/VPS backup settings
-  still need account evidence.
+  the ACR-0031 provider gate is not satisfied. Draft PR #355 now fails browser
+  voice closed to on-device recognition and local playback with a typed
+  fallback and privacy notice. Anthropic organization-level ZDR remains
+  unverified, and managed-store/VPS backup settings still need account
+  evidence.
 - Any historical cleanup still requires report-only preview plus separate
   Kevin apply authority.
 
@@ -104,7 +105,7 @@ withdrawal, export minimization, projection/audit rollback, create-only ingest,
 route opacity, exact confirmed correction, stale-revision rejection, private
 audit minimization, correction rollback, and the `.team` privacy controls.
 
-Current verification: 2,284 server tests passed / 19 skipped; 72 team tests
+Current verification: 2,285 server tests passed / 19 skipped; 73 team tests
 passed; repo typecheck passed; production build passed; 255 routes produced
 zero access findings; the `.com` scan covered 34 files with zero violations;
 generated catalogs and freshness are current. Responsive fallback component
@@ -114,3 +115,8 @@ runtime was unavailable, so trusted-route QA is not represented as passed. The
 ACR decision and PR #353 merge state were verified. The provider inventory and
 official-terms review was source-only and made no live provider or production
 call.
+
+Additional fallback actual-component voice-privacy QA passed at desktop,
+tablet, 390px, 360px, and 200% reflow with the typed fallback and privacy notice
+visible, zero horizontal overflow, and zero browser exceptions. It did not
+request microphone permission or invoke speech.

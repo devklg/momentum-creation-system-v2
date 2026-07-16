@@ -97,6 +97,46 @@ afterEach(() => {
 });
 
 describe('Steve Success Profile privacy controls', () => {
+  it('keeps typed conversation available when local-device voice is unavailable', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.endsWith('/api/steve/discovery/state')) {
+          return json({
+            ok: true,
+            view: {
+              tmagId: 'TMAG-BA',
+              phase: 'awaiting_call',
+              transcript: [],
+              artifact: null,
+            },
+          });
+        }
+        if (url.endsWith('/api/steve/discovery/conversation')) {
+          return json({ ok: true, turns: [] });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <SteveSuccessInterviewPage />
+      </MemoryRouter>,
+    );
+
+    expect(
+      await screen.findByText(
+        /Type is always available. Voice appears only when this browser reports both/,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Voice' })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: "I'm ready — start my conversation" }),
+    ).toBeInTheDocument();
+  });
+
   it('renders four independent off-by-default controls and sends one exact field grant', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);

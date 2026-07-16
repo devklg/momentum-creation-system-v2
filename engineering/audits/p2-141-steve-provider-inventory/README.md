@@ -8,27 +8,31 @@ capabilities. This is an engineering privacy review, not legal advice.
 
 ## Result
 
-The named inventory is complete, but the ACR-0031 provider activation gate is
-not satisfied.
+The named inventory is complete. Draft PR #355 now fails the browser voice
+boundary closed to local-device recognition and playback, but the overall
+ACR-0031 provider activation gate is not satisfied.
 
-Three private-content boundaries remain fail-closed release blockers:
+The browser remediation:
 
-1. The browser speech-recognition path does not request local-only processing,
-   so raw microphone audio may leave the BA's device through a user-agent
-   selected service.
-2. The browser speech-synthesis path does not require a local voice and
-   positively scores names containing `google`, `microsoft`, and `online`, so
-   Steve response text may be sent to a remote voice service.
-3. The source proves use of the Anthropic Messages API but cannot prove that
+- requires `SpeechRecognition.processLocally`;
+- filters TTS voices to `SpeechSynthesisVoice.localService===true`;
+- hides voice and preserves typed input when either local capability is
+  unavailable or fails; and
+- tells the BA that Team Magnificent receives recognized text, not microphone
+  audio.
+
+Two provider-evidence blockers remain:
+
+1. The source proves use of the Anthropic Messages API but cannot prove that
    the production Anthropic organization has Zero Data Retention enabled.
    Without account-level proof, the standard commercial API retention terms
    apply and a BA deletion cannot promise immediate deletion of Anthropic's
    retained request/response copy.
-
-The managed storage providers publish processor terms and deletion controls,
-but account-specific backup configuration and contractual acceptance are not
-provable from this repository. Those confirmations must be captured before the
-platform represents provider-side deletion as complete.
+2. The managed storage providers publish processor terms and deletion
+   controls, but account-specific backup configuration and contractual
+   acceptance are not provable from this repository. Those confirmations must
+   be captured before the platform represents provider-side deletion as
+   complete.
 
 No production environment, provider console, BA record, provider API, or live
 browser speech service was contacted during this review.
@@ -37,8 +41,8 @@ browser speech service was contacted during this review.
 
 | Boundary | Current code path | Data that crosses the boundary | Current disposition |
 | --- | --- | --- | --- |
-| BA browser microphone | `SpeechRecognition` / `webkitSpeechRecognition` in `apps/team/src/routes/steve-success-interview.tsx` | Raw microphone audio reaches the browser's speech implementation; recognized text returns to the page | **Blocked for a device-only claim.** The code does not set `processLocally`; the user agent may process locally or remotely. |
-| BA browser TTS | `speechSynthesis` in `apps/team/src/routes/steve-success-interview.tsx` | Steve reply text is supplied to the selected speech voice | **Blocked for a device-only claim.** Voice selection ignores `localService` and can prefer an online/vendor voice. |
+| BA browser microphone | `SpeechRecognition` / `webkitSpeechRecognition` in `apps/team/src/routes/steve-success-interview.tsx` | Raw microphone audio reaches the browser's local speech implementation; recognized text returns to the page and then the app | **Fail closed to local.** Voice appears only when `processLocally` exists; every recognition instance sets it to `true`, and an unavailable/error path returns to typing. |
+| BA browser TTS | `speechSynthesis` in `apps/team/src/routes/steve-success-interview.tsx` | Steve reply text is supplied only to a voice reporting `localService===true` | **Fail closed to local.** No local voice means no speech playback and typed/visible text remains available. |
 | MCS Express API | `POST /api/steve/discovery/converse` | Recognized or typed BA text, session identity, and returned Steve text | Private/no-store response. No general request-body logger was found. Application/system log retention remains an operations policy to document. |
 | InterServer VPS | Production Express process and Nginx reverse proxy | Request bodies are processed in memory; source does not intentionally persist Steve bodies on the VPS filesystem | InterServer is the infrastructure processor. Whether VPS snapshots or remote backups are enabled is not proved by the repo or runbook. |
 | Anthropic Messages API | `server/src/services/anthropic.ts` and `server/src/domain/steveConversationRuntime.ts` | BA first name in the system prompt; full conversation history on each turn; Steve outputs; full assembled transcript again for extraction, with one validation retry possible | Commercial API content is not used for training unless explicitly opted in, but standard retention is up to 30 days unless a ZDR arrangement applies. Organization-level ZDR is unverified. |
@@ -178,42 +182,34 @@ and journald/Nginx retention before the host boundary is called complete.
 
 ## Required activation evidence
 
-The following evidence is required before ACR-0031's provider gate can be
-marked passed:
+The following evidence is still required before ACR-0031's provider gate can
+be marked passed:
 
 1. Anthropic organization/workspace evidence showing commercial terms, DPA
    coverage, ZDR status, and eligibility of the exact production model and
    Messages/prompt-cache features. If ZDR is not enabled, Kevin must explicitly
    approve the documented standard retention and provider-deletion lag.
-2. A speech-recognition contract that either:
-   - requires `processLocally=true` and fails closed to typed input when local
-     recognition is unavailable; or
-   - names each permitted remote browser/provider path, its terms, notice,
-     retention, and deletion behavior.
-3. A speech-synthesis contract that requires `voice.localService===true` and
-   falls back to visible text, or explicitly approves a named remote TTS
-   provider and its terms.
-4. A user-facing privacy notice at the microphone control that accurately says
-   whether audio can leave the device and identifies any approved remote
-   processor.
-5. Console/configuration evidence for Atlas Flex backup retention, Aura
+2. Console/configuration evidence for Atlas Flex backup retention, Aura
    on-demand/exported snapshots, Chroma backup deletion behavior, InterServer
    snapshots/remote backups, and Nginx/journald retention.
-6. A deletion runbook that distinguishes immediate active-record deletion from
+3. A deletion runbook that distinguishes immediate active-record deletion from
    provider retention windows, legal/abuse exceptions, and backup expiry.
+4. Before voice is represented as supported in a production browser, a trusted
+   route smoke should confirm that local recognition starts successfully and a
+   local playback voice is selected. Failure remains privacy-safe because the
+   code hides/stops voice and leaves typing available.
 
-## Safe next implementation
+## Browser remediation verification
 
-The narrow code-safe next slice is to make voice fail closed:
+Focused component and static privacy tests cover the typed fallback,
+`processLocally=true`, local-service-only voice selection, removal of
+online/vendor voice preference, and the user-facing notice. Responsive fallback
+actual-component evidence is in
+`engineering/audits/p2-141-voice-privacy-visual-qa/`: desktop, tablet, 390px,
+360px, and 200% reflow all report zero horizontal overflow and zero browser
+exceptions.
 
-- typed conversation remains the universal default;
-- speech recognition requests local-only processing and becomes unavailable
-  when the browser cannot guarantee it;
-- TTS selects only `localService===true` voices and otherwise leaves Steve's
-  reply as visible text; and
-- the microphone control carries the approved privacy notice.
-
-That slice would avoid choosing a remote browser speech provider without
-separate provider approval. It would not change the Anthropic boundary,
-production data, historical records, or the unresolved private-content
+This remediation avoids selecting a remote browser speech provider without
+separate approval. It does not change the Anthropic boundary, production data,
+historical records, or the unresolved private-content
 deletion/onboarding-gate decision.

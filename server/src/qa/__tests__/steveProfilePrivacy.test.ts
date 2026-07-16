@@ -148,6 +148,23 @@ describe('P2-141 Steve Success Profile privacy boundary', () => {
     }
   });
 
+  it('fails browser voice closed to local recognition and local playback', () => {
+    const page = source('apps/team/src/routes/steve-success-interview.tsx');
+
+    expect(page).toContain("'processLocally' in probe");
+    expect(page).toContain('rec.processLocally = true');
+    expect(page).toContain('voice.localService');
+    expect(page).toContain('!preferredVoice?.localService');
+    expect(page).not.toContain("name.includes('online')");
+    expect(page).not.toContain("name.includes('google')");
+    expect(page).not.toContain("name.includes('microsoft')");
+    expect(page).toContain(
+      'Voice appears only when this browser reports both',
+    );
+    expect(page).toContain('Team Magnificent');
+    expect(page).toContain('not microphone audio.');
+  });
+
   it('keeps Steve private data out of the prospect-facing application', () => {
     const comFiles = [
       source('apps/com/src/App.tsx'),
