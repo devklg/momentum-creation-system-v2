@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T15:18:34.449Z
+- Generated: 2026-07-16T15:32:39.335Z
 - Mongo collections: 74
 - Neo4j labels: 83
 - Neo4j relationships: 69
@@ -104,7 +104,7 @@
 | `ENROLLED` | 1 |
 | `FOUNDER_PASSWORD` | 1 |
 | `HAS_FOLLOWUP` | 5 |
-| `IN_HOLDING_TANK` | 7 |
+| `IN_HOLDING_TANK` | 8 |
 | `INVITED_AS` | 1 |
 | `Knowledge` | 10 |
 | `KnowledgeCandidate` | 1 |
@@ -151,8 +151,8 @@
 | `TmagLearningCandidate` | 4 |
 | `TmagOrientationSession` | 3 |
 | `TmagOutcome` | 4 |
-| `TmagPool` | 6 |
-| `TmagProspect` | 45 |
+| `TmagPool` | 8 |
+| `TmagProspect` | 46 |
 | `TmagProspectAccount` | 3 |
 | `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |

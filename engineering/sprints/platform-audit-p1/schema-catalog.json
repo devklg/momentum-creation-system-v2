@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T15:18:34.449Z",
+  "generatedAt": "2026-07-16T15:32:39.335Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -2918,7 +2918,8 @@
           "server/src/domain/poolPlacementPersistence.ts:101",
           "server/src/domain/poolPlacementPersistence.ts:107",
           "server/src/domain/poolPlacementPersistence.ts:38",
-          "server/src/domain/poolPlacementPersistence.ts:41"
+          "server/src/domain/poolPlacementPersistence.ts:41",
+          "server/src/qa/poolPositioningGraphVerification.ts:119"
         ]
       },
       {
@@ -3377,7 +3378,9 @@
           "server/src/domain/poolPlacementPersistence.ts:101",
           "server/src/domain/poolPlacementPersistence.ts:107",
           "server/src/domain/poolPlacementPersistence.ts:36",
-          "server/src/domain/poolPlacementPersistence.ts:42"
+          "server/src/domain/poolPlacementPersistence.ts:42",
+          "server/src/qa/poolPositioningGraphVerification.ts:119",
+          "server/src/qa/poolPositioningGraphVerification.ts:134"
         ]
       },
       {
@@ -3425,6 +3428,7 @@
           "server/src/domain/tokenLifecyclePersistence.ts:46",
           "server/src/domain/tokenLifecyclePersistence.ts:52",
           "server/src/domain/webinarReservation.ts:203",
+          "server/src/qa/poolPositioningGraphVerification.ts:119",
           "server/src/qa/sponsorImmutabilityGraphVerification.ts:109",
           "server/src/qa/sponsorImmutabilityGraphVerification.ts:125",
           "server/src/qa/sponsorImmutabilityGraphVerification.ts:96"

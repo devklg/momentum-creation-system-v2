@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T15:18:21.864Z",
+  "generatedAt": "2026-07-16T15:32:30.268Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -77,7 +77,7 @@
     },
     {
       "label": "IN_HOLDING_TANK",
-      "sourceCount": 7,
+      "sourceCount": 8,
       "sources": [
         "server/scripts/smoke-holding-tank.ts:114",
         "server/scripts/smoke-holding-tank.ts:66",
@@ -85,7 +85,8 @@
         "server/src/domain/poolPlacementPersistence.ts:101",
         "server/src/domain/poolPlacementPersistence.ts:107",
         "server/src/domain/poolPlacementPersistence.ts:38",
-        "server/src/domain/poolPlacementPersistence.ts:41"
+        "server/src/domain/poolPlacementPersistence.ts:41",
+        "server/src/qa/poolPositioningGraphVerification.ts:119"
       ]
     },
     {
@@ -584,19 +585,21 @@
     },
     {
       "label": "TmagPool",
-      "sourceCount": 6,
+      "sourceCount": 8,
       "sources": [
         "server/scripts/smoke-holding-tank.ts:114",
         "server/src/domain/crossStoreReconciliation.ts:165",
         "server/src/domain/poolPlacementPersistence.ts:101",
         "server/src/domain/poolPlacementPersistence.ts:107",
         "server/src/domain/poolPlacementPersistence.ts:36",
-        "server/src/domain/poolPlacementPersistence.ts:42"
+        "server/src/domain/poolPlacementPersistence.ts:42",
+        "server/src/qa/poolPositioningGraphVerification.ts:119",
+        "server/src/qa/poolPositioningGraphVerification.ts:134"
       ]
     },
     {
       "label": "TmagProspect",
-      "sourceCount": 45,
+      "sourceCount": 46,
       "sources": [
         "server/scripts/smoke-holding-tank.ts:114",
         "server/scripts/smoke-holding-tank.ts:66",
@@ -640,6 +643,7 @@
         "server/src/domain/tokenLifecyclePersistence.ts:46",
         "server/src/domain/tokenLifecyclePersistence.ts:52",
         "server/src/domain/webinarReservation.ts:203",
+        "server/src/qa/poolPositioningGraphVerification.ts:119",
         "server/src/qa/sponsorImmutabilityGraphVerification.ts:109",
         "server/src/qa/sponsorImmutabilityGraphVerification.ts:125",
         "server/src/qa/sponsorImmutabilityGraphVerification.ts:96"
