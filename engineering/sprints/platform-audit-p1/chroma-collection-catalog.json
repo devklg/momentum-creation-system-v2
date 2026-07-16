@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T16:37:38.139Z",
+  "generatedAt": "2026-07-16T16:53:26.210Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -1835,12 +1835,12 @@
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 577,
+          "line": 574,
           "action": "persistenceCall.chromadb.add"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 616,
+          "line": 612,
           "action": "writeKnowledge"
         }
       ],
@@ -1854,18 +1854,17 @@
         },
         "observedMetadataKeys": [
           "agent",
-          "callSid",
           "completedAt",
           "discoveryId",
           "kind",
+          "ownerTmagId",
           "purpose",
-          "sponsorTmagId",
-          "tmagId"
+          "retrievalEligible"
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
           "discoveryId",
-          "sponsorTmagId",
+          "ownerTmagId",
           "tmagId"
         ],
         "embeddingDimension": 384,

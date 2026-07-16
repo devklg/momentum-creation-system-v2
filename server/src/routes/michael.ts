@@ -26,6 +26,8 @@ michaelRoutes.get(
   requireSteveComplete,
   async (req: Request, res: Response) => {
     const session = req.session!;
+    res.set('Cache-Control', 'private, no-store');
+    res.set('Pragma', 'no-cache');
     const downlineTmagId = String(req.params.downlineTmagId ?? '');
     if (!downlineTmagId) {
       res.status(400).json({ ok: false, error: 'Missing downlineTmagId.' });
@@ -43,8 +45,7 @@ michaelRoutes.get(
         res.status(status).json({ ok: false, error: err.message, code: err.code });
         return;
       }
-      const msg = err instanceof Error ? err.message : 'unknown';
-      res.status(500).json({ ok: false, error: `Training-support read failed: ${msg}` });
+      res.status(500).json({ ok: false, error: 'Training-support read failed.' });
     }
   },
 );

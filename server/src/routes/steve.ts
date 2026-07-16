@@ -41,6 +41,11 @@ import { persistenceCall } from '../services/persistence/dispatch.js';
 
 export const steveRoutes: Router = express.Router();
 
+function markPrivate(res: Response): void {
+  res.set('Cache-Control', 'private, no-store');
+  res.set('Pragma', 'no-cache');
+}
+
 /** Worker-only secret guard for ingest/system-prompt endpoints. Safe-by-default:
  *  if STEVE_WORKER_SECRET is unset (dev), the route returns 503 rather than
  *  letting anyone write artifacts — same posture as requireMichaelWorker. */
@@ -67,12 +72,12 @@ steveRoutes.get(
   requireAuth,
   async (req: Request, res: Response) => {
     const session = req.session!;
+    markPrivate(res);
     try {
       const view = await buildDiscoveryView(session.tmagId);
       res.json({ ok: true, view });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'unknown';
-      res.status(500).json({ ok: false, error: `Could not load discovery state: ${msg}` });
+      res.status(500).json({ ok: false, error: 'Could not load discovery state.' });
     }
   },
 );
@@ -94,6 +99,7 @@ steveRoutes.get(
   '/discovery/system-prompt',
   async (req: Request, res: Response) => {
     if (!requireSteveWorker(req, res)) return;
+    markPrivate(res);
 
     const tmagId = typeof req.query.tmagId === 'string' ? req.query.tmagId.trim() : '';
     if (!tmagId) {
@@ -144,14 +150,14 @@ const IngestBody = z.object({
       text: z.string(),
       occurredAt: z.string(),
     }),
-  ),
+  ).max(250),
   answers: z.array(
     z.object({
       questionId: z.string(),
       prompt: z.string(),
       answerText: z.string(),
     }),
-  ),
+  ).max(100),
   audioUrl: z.string().nullable(),
   profile: z.object({
     primaryWhy: z.object({
@@ -166,26 +172,26 @@ const IngestBody = z.object({
     learningStyle: z.object({
       modalities: z.array(
         z.enum(['watching', 'doing', 'step_by_step', 'reading', 'discussing', 'mixed']),
-      ),
+      ).max(6),
       feedbackPreference: z.string(),
       notes: z.string(),
     }),
     communicationPreferences: z.object({
       preferredChannels: z.array(
         z.enum(['text', 'call', 'email', 'in_app', 'video', 'in_person']),
-      ),
+      ).max(6),
       cadence: z.enum(['daily', 'few_times_week', 'weekly', 'as_needed']).nullable(),
       bestTimes: z.string(),
       notes: z.string(),
     }),
     supportNeeds: z.object({
-      areas: z.array(z.string()),
-      potentialObstacles: z.array(z.string()),
+      areas: z.array(z.string()).max(50),
+      potentialObstacles: z.array(z.string()).max(50),
       helpStyle: z.string(),
       notes: z.string(),
     }),
-    launchRecommendations: z.array(Recommendation),
-    trainingRecommendations: z.array(Recommendation),
+    launchRecommendations: z.array(Recommendation).max(50),
+    trainingRecommendations: z.array(Recommendation).max(50),
     michaelHandoffSummary: z.string(),
   }),
 });
@@ -194,6 +200,7 @@ steveRoutes.post(
   '/discovery/ingest',
   async (req: Request, res: Response) => {
     if (!requireSteveWorker(req, res)) return;
+    markPrivate(res);
     const parsed = IngestBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({
@@ -224,19 +231,29 @@ steveRoutes.post(
       });
       // eslint-disable-next-line no-console
       console.log(
-        `[audit] steve_discovery_ingested tmagId=${artifact.tmagId} sponsor=${
-          artifact.sponsorTmagId ?? 'none'
-        } answers=${artifact.answers.length}`,
+        `[audit] steve_discovery_ingested discoveryId=SD-${artifact.tmagId} ` +
+          `answers=${artifact.answers.length}`,
       );
-      res.json({ ok: true, artifact });
+      res.json({
+        ok: true,
+        receipt: {
+          discoveryId: `SD-${artifact.tmagId}`,
+          tmagId: artifact.tmagId,
+          completedAt: artifact.completedAt,
+          signedBy: artifact.successProfile.signedBy,
+        },
+      });
     } catch (err) {
       if (err instanceof DiscoveryIngestError) {
         const status = err.code === 'NO_BA' ? 400 : 500;
-        res.status(status).json({ ok: false, error: err.message, code: err.code });
+        res.status(status).json({
+          ok: false,
+          error: status === 400 ? 'No matching BA record.' : 'Discovery ingest failed.',
+          code: err.code,
+        });
         return;
       }
-      const msg = err instanceof Error ? err.message : 'unknown';
-      res.status(500).json({ ok: false, error: `Discovery ingest failed: ${msg}` });
+      res.status(500).json({ ok: false, error: 'Discovery ingest failed.' });
     }
   },
 );
@@ -250,6 +267,7 @@ steveRoutes.get(
   requireSteveComplete,
   async (req: Request, res: Response) => {
     const session = req.session!;
+    markPrivate(res);
     const downlineTmagId = String(req.params.downlineTmagId ?? '');
     if (!downlineTmagId) {
       res.status(400).json({ ok: false, error: 'Missing downlineTmagId.' });
@@ -267,8 +285,7 @@ steveRoutes.get(
         res.status(status).json({ ok: false, error: err.message, code: err.code });
         return;
       }
-      const msg = err instanceof Error ? err.message : 'unknown';
-      res.status(500).json({ ok: false, error: `Profile read failed: ${msg}` });
+      res.status(500).json({ ok: false, error: 'Profile read failed.' });
     }
   },
 );
@@ -276,12 +293,12 @@ steveRoutes.get(
 /** GET /api/steve/discovery/conversation — the BA's own LIVE chat transcript
  *  (in-flight interview state; the completed artifact lives in /state). */
 steveRoutes.get('/discovery/conversation', requireAuth, async (req: Request, res: Response) => {
+  markPrivate(res);
   try {
     const turns = await loadConversation(req.session!.tmagId);
     res.json({ ok: true, turns });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'unknown';
-    res.status(500).json({ ok: false, error: `Conversation read failed: ${msg}` });
+    res.status(500).json({ ok: false, error: 'Conversation read failed.' });
   }
 });
 
@@ -292,6 +309,7 @@ const ConverseBody = z.object({ message: z.string().max(4000).optional().default
  *  conversations). Empty message = open/greet. done=true once the artifact
  *  has been ingested (gate opens). */
 steveRoutes.post('/discovery/converse', requireAuth, async (req: Request, res: Response) => {
+  markPrivate(res);
   const parsed = ConverseBody.safeParse(req.body ?? {});
   if (!parsed.success) {
     res.status(400).json({ ok: false, error: 'Invalid body.' });
@@ -309,7 +327,6 @@ steveRoutes.post('/discovery/converse', requireAuth, async (req: Request, res: R
       res.status(503).json({ ok: false, error: 'Steve is not configured on this environment yet.', code: 'LLM_DORMANT' });
       return;
     }
-    const msg = err instanceof Error ? err.message : 'unknown';
-    res.status(500).json({ ok: false, error: `Steve conversation failed: ${msg}` });
+    res.status(500).json({ ok: false, error: 'Steve conversation failed.' });
   }
 });

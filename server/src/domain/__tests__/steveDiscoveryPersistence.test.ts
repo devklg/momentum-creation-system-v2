@@ -127,7 +127,30 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     expect(chromaAdd?.[2]).toMatchObject({
       collection: 'mcs_steve_success_interview',
       ids: ['SD-TMAG-1'],
+      metadatas: [
+        {
+          discoveryId: 'SD-TMAG-1',
+          ownerTmagId: 'TMAG-1',
+          kind: 'steve_discovery',
+          retrievalEligible: false,
+        },
+      ],
     });
+    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('callSid');
+    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('sponsorTmagId');
+    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Primary why');
+    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Success vision');
+    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Learns by');
+    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Support areas');
+    expect(JSON.stringify(chromaAdd?.[2])).toContain(
+      'Profile content is canonical in MongoDB.',
+    );
+
+    const graphWrite = mocks.persistenceCall.mock.calls.find(
+      ([tool, action]) => tool === 'neo4j' && action === 'cypher',
+    );
+    expect(JSON.stringify(graphWrite?.[2])).not.toContain('callSid');
+    expect(JSON.stringify(graphWrite?.[2])).not.toContain('audioUrl');
   });
 
   it('read-back throws READBACK_FAILED when the update did not apply content', async () => {

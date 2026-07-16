@@ -75,12 +75,14 @@ async function safeQuery<T>(
   warnings: string[],
   filter: Record<string, unknown> = {},
   limit = 50_000,
+  projection?: Record<string, 0 | 1>,
 ): Promise<T[]> {
   try {
     const result = await persistenceCall<{ documents?: T[] }>('mongodb', 'query', {
       database: MONGO_DB,
       collection,
       filter,
+      ...(projection ? { projection } : {}),
       limit,
     });
     return result.documents ?? [];
@@ -236,14 +238,10 @@ function projectionOutboxDeadLetters(outbox: OutboxDoc[]): McsAdminProjectionOut
 function bridgeDraft(discovery: PersistedSteveDiscovery): McsAdminSuccessProfileMemoryBridgeDraft {
   const now = new Date().toISOString();
   const id = `graphrag_success_profile_${discovery.tmagId}`;
-  const profile = discovery.successProfile;
-  const learning = profile.learningStyle.modalities.join(', ') || 'not captured';
-  const support = profile.supportNeeds.areas.join(', ') || 'not captured';
-  const primaryWhy = profile.primaryWhy.statement || 'not captured';
 
   return {
     tmagId: discovery.tmagId,
-    ready: true,
+    ready: false,
     base: {
       id,
       type: 'document',
@@ -255,25 +253,35 @@ function bridgeDraft(discovery: PersistedSteveDiscovery): McsAdminSuccessProfile
       origin_kind: 'system',
       service_name: 'admin_agent_memory_bridge',
     },
-    semanticDocument: [
-      `Success Profile for BA ${discovery.tmagId}.`,
-      `Primary why: ${primaryWhy}.`,
-      `Learning style: ${learning}.`,
-      `Support areas: ${support}.`,
-      `Signed by: ${profile.signedBy}.`,
-    ].join(' '),
+    semanticDocument:
+      'Private Success Profile content omitted pending approved retention and retrieval-scope policy.',
     requiredWritePath: 'quadstack.write',
     options: { require: ['mongo', 'neo4j', 'chroma'], enforce_schema: true },
     note:
-      'Draft only. Persist with external MCP tool server quadstack.write and enforce_schema=true; do not use repo-local tripleStackWrite for new GraphRAG lineage records.',
+      'Not materializable. ACR-0031 must approve retention and retrieval scope before any external GraphRAG write.',
   };
 }
 
 export async function buildAdminAgentOversight(): Promise<McsAdminAgentOversightResponse> {
   const warnings: string[] = [];
   const [discoveries, bas, events, outbox, chromaCollections] = await Promise.all([
-    safeQuery<PersistedSteveDiscovery>(COLL_STEVE, warnings),
-    safeQuery<BaDoc>(COLL_BAS, warnings),
+    safeQuery<PersistedSteveDiscovery>(COLL_STEVE, warnings, {}, 50_000, {
+      _id: 1,
+      tmagId: 1,
+      sponsorTmagId: 1,
+      completedAt: 1,
+      'successProfile.generatedAt': 1,
+      'successProfile.primaryWhy.statement': 1,
+      'successProfile.learningStyle.modalities': 1,
+      'successProfile.supportNeeds.areas': 1,
+      'successProfile.signedBy': 1,
+    }),
+    safeQuery<BaDoc>(COLL_BAS, warnings, {}, 50_000, {
+      tmagId: 1,
+      firstName: 1,
+      lastName: 1,
+      sponsorTmagId: 1,
+    }),
     Promise.all(
       AGENT_EVENT_COLLECTIONS.map((c) => safeQuery<AgentEventDoc>(c, warnings)),
     ).then((r) => r.flat()),

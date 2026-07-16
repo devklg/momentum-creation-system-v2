@@ -74,7 +74,7 @@ describe('Steve runtime Context Manager foundation live retrieval flag', () => {
     expect(storeMock.searchApprovedKnowledge).not.toHaveBeenCalled();
   });
 
-  it('flag on derives the semantic query from turn content and includes Steve relationship context', async () => {
+  it('flag on uses a governed query without copying private turn content', async () => {
     vi.stubEnv('STEVE_CONTEXT_MANAGER_LIVE_ENABLED', 'true');
     storeMock.searchApprovedKnowledge.mockResolvedValue([
       {
@@ -100,9 +100,12 @@ describe('Steve runtime Context Manager foundation live retrieval flag', () => {
 
     expect(storeMock.searchApprovedKnowledge).toHaveBeenCalledWith(
       expect.objectContaining({ tmagId: 'TMAG-001' }),
-      'I prefer weekly text check-ins from my sponsor.',
+      'steve_success success_interview en Team Magnificent Steve Success discovery interview support learning style communication preferences',
       undefined,
       'en',
+    );
+    expect(JSON.stringify(storeMock.searchApprovedKnowledge.mock.calls)).not.toContain(
+      'I prefer weekly text check-ins from my sponsor.',
     );
     expect(packet.packetStatus).toBe('complete');
     expect(packet.approvedKnowledge.map((item) => item.knowledgeId)).toEqual([

@@ -405,6 +405,7 @@ async function getBaSponsor(tmagId: string): Promise<{
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: { tmagId },
+    projection: { tmagId: 1, sponsorTmagId: 1, firstName: 1 },
     limit: 1,
   });
   const doc = result.documents[0];
@@ -452,8 +453,18 @@ export async function buildDiscoveryView(tmagId: string): Promise<McsSteveDiscov
 }
 
 export async function isSteveDiscoveryComplete(tmagId: string): Promise<boolean> {
-  const artifact = await getDiscoveryByTmagId(tmagId);
-  return derivePhase(artifact) === 'complete';
+  const result = await persistenceCall<{ documents: Array<{ _id: string }> }>(
+    'mongodb',
+    'query',
+    {
+      database: 'momentum',
+      collection: DISCOVERIES_COLLECTION,
+      filter: { tmagId },
+      projection: { _id: 1 },
+      limit: 1,
+    },
+  );
+  return result.documents.length > 0;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -474,8 +485,7 @@ function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Recor
     cypher:
       'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
       'MERGE (d:TmagSteveDiscovery {discoveryId: $id}) ' +
-      'SET d.completedAt = $completedAt, d.callSid = $callSid, d.audioUrl = $audioUrl, ' +
-      '    d.signedBy = $signedBy ' +
+      'SET d.completedAt = $completedAt, d.signedBy = $signedBy ' +
       'MERGE (b)-[:HAD_STEVE_DISCOVERY]->(d) ' +
       'WITH d, $sponsorTmagId AS sponsorId ' +
       'WHERE sponsorId IS NOT NULL ' +
@@ -486,26 +496,13 @@ function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Recor
       tmagId: a.tmagId,
       sponsorTmagId: a.sponsorTmagId,
       completedAt: a.completedAt,
-      callSid: a.callSid,
-      audioUrl: a.audioUrl,
       signedBy: a.successProfile.signedBy,
     },
   };
 }
 
-function chromaDocForDiscovery(a: PersistedDiscovery): string {
-  const sp = a.successProfile;
-  const learn = sp.learningStyle.modalities.join(', ');
-  const channels = sp.communicationPreferences.preferredChannels.join(', ');
-  return [
-    `Steve discovery completed for BA ${a.tmagId}.`,
-    `Primary why: ${sp.primaryWhy.statement}.`,
-    `Success vision: ${sp.successVision.statement}.`,
-    `Learns by: ${learn}. Prefers contact via: ${channels}.`,
-    `Support areas: ${sp.supportNeeds.areas.join(', ')}.`,
-  ]
-    .join(' ')
-    .slice(0, 500);
+function chromaDocForDiscovery(_a: PersistedDiscovery): string {
+  return 'Private Steve discovery completion marker. Profile content is canonical in MongoDB.';
 }
 
 function artifactToUpdate(a: PersistedDiscovery): Partial<PersistedDiscovery> {
@@ -581,11 +578,10 @@ export async function ingestDiscoveryArtifact(
       metadatas: [
         {
           discoveryId: id,
-          tmagId: artifact.tmagId,
-          sponsorTmagId: artifact.sponsorTmagId ?? '',
-          callSid: artifact.callSid ?? '',
+          ownerTmagId: artifact.tmagId,
           completedAt: artifact.completedAt ?? '',
           kind: 'steve_discovery',
+          retrievalEligible: false,
         },
       ],
     });
@@ -623,11 +619,10 @@ export async function ingestDiscoveryArtifact(
           document: chromaDocForDiscovery(artifact),
           metadata: {
             discoveryId: id,
-            tmagId: artifact.tmagId,
-            sponsorTmagId: artifact.sponsorTmagId ?? '',
-            callSid: artifact.callSid ?? '',
+            ownerTmagId: artifact.tmagId,
             completedAt: artifact.completedAt ?? '',
             kind: 'steve_discovery',
+            retrievalEligible: false,
           },
         },
       });

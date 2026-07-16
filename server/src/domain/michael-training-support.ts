@@ -84,6 +84,7 @@ async function getTeamMagnificentMember(tmagId: string): Promise<TeamMagnificent
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: { tmagId },
+    projection: { tmagId: 1, sponsorTmagId: 1, firstName: 1 },
     limit: 1,
   });
   return result.documents[0] ?? null;
@@ -99,6 +100,25 @@ async function getSteveDiscoveryByTmagId(
       database: 'momentum',
       collection: STEVE_DISCOVERIES_COLLECTION,
       filter: { tmagId },
+      projection: {
+        _id: 1,
+        tmagId: 1,
+        sponsorTmagId: 1,
+        completedAt: 1,
+        'successProfile.generatedAt': 1,
+        'successProfile.primaryWhy.statement': 1,
+        'successProfile.successVision.statement': 1,
+        'successProfile.learningStyle.modalities': 1,
+        'successProfile.learningStyle.feedbackPreference': 1,
+        'successProfile.communicationPreferences.preferredChannels': 1,
+        'successProfile.communicationPreferences.cadence': 1,
+        'successProfile.communicationPreferences.bestTimes': 1,
+        'successProfile.supportNeeds.areas': 1,
+        'successProfile.supportNeeds.potentialObstacles': 1,
+        'successProfile.supportNeeds.helpStyle': 1,
+        'successProfile.trainingRecommendations.text': 1,
+        'successProfile.michaelHandoffSummary': 1,
+      },
       limit: 1,
     },
   );

@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T16:37:45.847Z
+- Generated: 2026-07-16T16:53:30.605Z
 - Mounted routers: 50
 - Route files: 50
 - Static route rows: 250
@@ -125,13 +125,13 @@
 | PUT | `/api/sponsor/workbook/:tmagId/draft` | pre_gate | pre_gate_or_public | auth | `server/src/routes/sponsor-workbook.ts:171` |
 | POST | `/api/sponsor/workbook/:tmagId/finalize` | pre_gate | pre_gate_or_public | auth | `server/src/routes/sponsor-workbook.ts:241` |
 | GET | `/api/michael/training-support/:downlineTmagId` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/michael.ts:23` |
-| GET | `/api/steve/discovery/state` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:65` |
-| GET | `/api/steve/discovery/script` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:81` |
-| GET | `/api/steve/discovery/system-prompt` | pre_gate | pre_gate_or_public | none | `server/src/routes/steve.ts:93` |
-| POST | `/api/steve/discovery/ingest` | pre_gate | pre_gate_or_public | none | `server/src/routes/steve.ts:193` |
-| GET | `/api/steve/discovery/profile/:downlineTmagId` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/steve.ts:247` |
-| GET | `/api/steve/discovery/conversation` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:278` |
-| POST | `/api/steve/discovery/converse` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:294` |
+| GET | `/api/steve/discovery/state` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:70` |
+| GET | `/api/steve/discovery/script` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:86` |
+| GET | `/api/steve/discovery/system-prompt` | pre_gate | pre_gate_or_public | none | `server/src/routes/steve.ts:98` |
+| POST | `/api/steve/discovery/ingest` | pre_gate | pre_gate_or_public | none | `server/src/routes/steve.ts:199` |
+| GET | `/api/steve/discovery/profile/:downlineTmagId` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/steve.ts:264` |
+| GET | `/api/steve/discovery/conversation` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:295` |
+| POST | `/api/steve/discovery/converse` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:311` |
 | POST | `/api/admin/access-codes/` | pre_gate | admin | admin | `server/src/routes/admin/access-codes.ts:30` |
 | GET | `/api/admin/access-codes/` | pre_gate | admin | admin | `server/src/routes/admin/access-codes.ts:65` |
 | GET | `/api/admin/bas/entitlements/audit` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:55` |
@@ -205,8 +205,8 @@
 | POST | `/api/admin/vm/campaigns/:vmCampaignId/live-approval` | pre_gate | admin | admin | `server/src/routes/admin/vm.ts:87` |
 | POST | `/api/admin/vm/ownership-correction` | pre_gate | admin | admin | `server/src/routes/admin/vm.ts:145` |
 | GET | `/api/admin/agents/overview` | pre_gate | admin | admin | `server/src/routes/admin/agents.ts:27` |
-| GET | `/api/admin/agents/health` | pre_gate | admin | admin | `server/src/routes/admin/agents.ts:59` |
-| GET | `/api/admin/agents/outbox-health` | pre_gate | admin | admin | `server/src/routes/admin/agents.ts:68` |
+| GET | `/api/admin/agents/health` | pre_gate | admin | admin | `server/src/routes/admin/agents.ts:60` |
+| GET | `/api/admin/agents/outbox-health` | pre_gate | admin | admin | `server/src/routes/admin/agents.ts:69` |
 | GET | `/api/admin/broadcast/audience` | pre_gate | admin | admin | `server/src/routes/admin/broadcast.ts:92` |
 | GET | `/api/admin/broadcast/list` | pre_gate | admin | admin | `server/src/routes/admin/broadcast.ts:128` |
 | GET | `/api/admin/broadcast/:broadcastId` | pre_gate | admin | admin | `server/src/routes/admin/broadcast.ts:142` |

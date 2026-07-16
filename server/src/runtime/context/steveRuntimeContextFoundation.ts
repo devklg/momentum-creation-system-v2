@@ -40,7 +40,8 @@ export interface SteveRuntimeContextFoundationInput {
   readonly mode: McsRuntimeMode;
   /** ISO timestamp anchoring the assembled session context. */
   readonly createdAt: string;
-  /** Optional turn text used only to derive the approved-knowledge search query. */
+  /** Optional turn text is accepted for API compatibility but never sent to
+   * approved-knowledge retrieval. */
   readonly turnContent?: string;
 }
 
@@ -186,10 +187,8 @@ async function requestLiveContextPacket(input: {
 
 function deriveSteveApprovedKnowledgeQuery(
   request: McsContextPacketRequest,
-  turnContent: string | undefined,
+  _turnContent: string | undefined,
 ): string {
-  const normalizedTurn = turnContent?.replace(/\s+/g, ' ').trim();
-  if (normalizedTurn) return normalizedTurn;
   return [
     request.agentKey,
     request.taskType,
