@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T22:34:09.325Z",
+  "generatedAt": "2026-07-16T21:50:54.275Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -1620,12 +1620,12 @@
         },
         {
           "file": "server/src/domain/steveCorrection.ts",
-          "line": 488,
+          "line": 469,
           "action": "persistenceCall.chromadb.add"
         },
         {
           "file": "server/src/domain/steveCorrection.ts",
-          "line": 505,
+          "line": 486,
           "action": "persistenceCall.chromadb.get"
         }
       ],
@@ -1842,57 +1842,32 @@
         "get",
         "writeKnowledge"
       ],
-      "sourceCount": 10,
+      "sourceCount": 5,
       "sources": [
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 397,
+          "line": 384,
           "action": "persistenceCall.chromadb.create_collection"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 725,
-          "action": "persistenceCall.chromadb.add"
-        },
-        {
-          "file": "server/src/domain/steve-success-interview.ts",
-          "line": 761,
-          "action": "persistenceCall.chromadb.get"
-        },
-        {
-          "file": "server/src/domain/steve-success-interview.ts",
-          "line": 1024,
+          "line": 741,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/domain/steveCorrection.ts",
-          "line": 397,
+          "line": 383,
           "action": "persistenceCall.chromadb.add"
         },
         {
           "file": "server/src/domain/steveCorrection.ts",
-          "line": 439,
+          "line": 422,
           "action": "persistenceCall.chromadb.get"
         },
         {
           "file": "server/src/domain/stevePrivacy.ts",
           "line": 197,
           "action": "persistenceCall.chromadb.add"
-        },
-        {
-          "file": "server/src/domain/steveVersioning.ts",
-          "line": 135,
-          "action": "persistenceCall.chromadb.get"
-        },
-        {
-          "file": "server/src/domain/steveVersioning.ts",
-          "line": 316,
-          "action": "persistenceCall.chromadb.add"
-        },
-        {
-          "file": "server/src/domain/steveVersioning.ts",
-          "line": 354,
-          "action": "persistenceCall.chromadb.get"
         }
       ],
       "metadataContract": {
@@ -1916,19 +1891,13 @@
           "ownerTmagId",
           "privacyPolicyVersion",
           "privacyStatus",
-          "profileVersion",
           "purpose",
-          "retakeSessionId",
-          "retakeStartedAt",
-          "retakeStatus",
-          "retrievalEligible",
-          "versioningPolicyVersion"
+          "retrievalEligible"
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
           "discoveryId",
           "ownerTmagId",
-          "retakeSessionId",
           "tmagId"
         ],
         "embeddingDimension": 384,
@@ -2539,13 +2508,8 @@
       "actions": [
         "add"
       ],
-      "sourceCount": 2,
+      "sourceCount": 1,
       "sources": [
-        {
-          "file": "server/src/domain/steveVersioning.ts",
-          "line": 266,
-          "action": "persistenceCall.chromadb.add"
-        },
         {
           "file": "server/src/services/tieredWrite.ts",
           "line": 303,

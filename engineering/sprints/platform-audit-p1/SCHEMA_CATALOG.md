@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-16T22:34:16.513Z
-- Mongo collections: 75
-- Neo4j labels: 84
+- Generated: 2026-07-16T21:51:06.872Z
+- Mongo collections: 74
+- Neo4j labels: 83
 - Neo4j relationships: 68
 - Chroma collections: 53
 - Route modules: 49
-- Route handlers: 292
-- Shared exports: 1182
+- Route handlers: 291
+- Shared exports: 1178
 
 ## Mongo Collections
 
@@ -78,8 +78,7 @@
 | `tmag_questionnaires` | permissive_mongoose_schema | yes | 2 |
 | `tmag_recruiting_cycles` | permissive_mongoose_schema | yes | 4 |
 | `tmag_sponsor_availability` | permissive_mongoose_schema | yes | 5 |
-| `tmag_steve_success_interview` | permissive_mongoose_schema | yes | 20 |
-| `tmag_steve_success_interview_versions` | permissive_mongoose_schema | yes | 3 |
+| `tmag_steve_success_interview` | permissive_mongoose_schema | yes | 15 |
 | `tmag_three_way_bookings` | permissive_mongoose_schema | yes | 5 |
 | `tmag_vm_audit_events` | permissive_mongoose_schema | yes | 1 |
 | `tmag_vm_bulk_leads` | permissive_mongoose_schema | yes | 21 |
@@ -165,8 +164,7 @@
 | `TmagResourceVersion` | 5 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 4 |
-| `TmagSteveDiscovery` | 10 |
-| `TmagSteveDiscoveryVersion` | 2 |
+| `TmagSteveDiscovery` | 6 |
 | `TmagThreeWayBooking` | 2 |
 | `TmagTrainingModule` | 1 |
 | `TmagVmAuditEvent` | 1 |
@@ -220,7 +218,7 @@
 | `HAS_SETTINGS_VERSION` | 1 |
 | `HAS_THREE_WAY_AVAILABILITY` | 1 |
 | `HAS_TIMELINE_EVENT` | 3 |
-| `HAS_VERSION` | 7 |
+| `HAS_VERSION` | 6 |
 | `HAS_VM_AUDIT` | 1 |
 | `HAS_VM_DELIVERY_EVENT` | 1 |
 | `INVITED` | 7 |
@@ -360,7 +358,7 @@
 | `(unmounted)` | `server/src/routes/rvm.ts` | GET /:token<br>POST /:token/activate<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats<br>POST /:token/info-request | `McsCallbackIntent`, `McsCallbackRequestResponse`, `McsHoldingTankSnapshot`, `McsPlacementEvent`, `McsRvmInfoRequestResponse`, `McsRvmResolvedTokenPayload`, `McsTeamStatsResponse`, `McsVideoEventKind`, `McsVideoEventResponse`, `McsWebinarReservationResponse` |
 | `(unmounted)` | `server/src/routes/scriptmaker.ts` | POST /draft<br>GET user-agent | `McsScriptMakerDraftPayload`, `McsScriptMakerDraftResponse`, `McsScriptMakerDraftSelectors`, `McsScriptMakerScriptKind` |
 | `(unmounted)` | `server/src/routes/sponsor-workbook.ts` | GET /:tmagId<br>PUT /:tmagId/draft<br>POST /:tmagId/finalize | none |
-| `(unmounted)` | `server/src/routes/steve.ts` | GET /discovery/state<br>GET /discovery/script<br>GET /discovery/privacy<br>GET /discovery/export<br>PUT /discovery/privacy/consent<br>PUT /discovery/correction<br>POST /discovery/retake<br>POST /discovery/privacy/withdraw<br>GET /discovery/system-prompt<br>POST /discovery/ingest<br>GET /discovery/profile/:downlineTmagId<br>GET /discovery/conversation<br>POST /discovery/converse | `MCS_STEVE_CORRECTABLE_PROFILE_LIST_FIELDS`, `MCS_STEVE_CORRECTABLE_PROFILE_TEXT_FIELDS`, `MCS_STEVE_CORRECTION_CONFIRMATION`, `MCS_STEVE_RETAKE_CONFIRMATION`, `MCS_STEVE_SPONSOR_CONSENT_FIELDS`, `MCS_STEVE_SPONSOR_CONSENT_GRANT_COPY`, `MCS_STEVE_SPONSOR_CONSENT_REVOCATION_COPY`, `MCS_STEVE_WITHDRAW_CONFIRMATION` |
+| `(unmounted)` | `server/src/routes/steve.ts` | GET /discovery/state<br>GET /discovery/script<br>GET /discovery/privacy<br>GET /discovery/export<br>PUT /discovery/privacy/consent<br>PUT /discovery/correction<br>POST /discovery/privacy/withdraw<br>GET /discovery/system-prompt<br>POST /discovery/ingest<br>GET /discovery/profile/:downlineTmagId<br>GET /discovery/conversation<br>POST /discovery/converse | `MCS_STEVE_CORRECTABLE_PROFILE_LIST_FIELDS`, `MCS_STEVE_CORRECTABLE_PROFILE_TEXT_FIELDS`, `MCS_STEVE_CORRECTION_CONFIRMATION`, `MCS_STEVE_SPONSOR_CONSENT_FIELDS`, `MCS_STEVE_SPONSOR_CONSENT_GRANT_COPY`, `MCS_STEVE_SPONSOR_CONSENT_REVOCATION_COPY`, `MCS_STEVE_WITHDRAW_CONFIRMATION` |
 | `(unmounted)` | `server/src/routes/telnyx-webhook.ts` | POST /webhook | none |
 | `(unmounted)` | `server/src/routes/three-way.ts` | GET /availability<br>PUT /availability<br>GET /bookings<br>POST /bookings<br>POST /bookings/:id/cancel | `McsThreeWayBookPayload`, `McsThreeWayBookResponse`, `McsThreeWayCancelResponse`, `McsThreeWaySetAvailabilityPayload`, `McsThreeWaySetAvailabilityResponse` |
 | `(unmounted)` | `server/src/routes/training.ts` | GET /fast-start/progress<br>POST /fast-start/modules/:id/state | `McsFastStartMarkStatePayload`, `McsFastStartModuleId` |
@@ -970,7 +968,6 @@
 | `MCS_STEVE_CORRECTABLE_PROFILE_TEXT_FIELDS` | const | `packages/shared/src/steve-privacy.ts` |
 | `MCS_STEVE_CORRECTION_CONFIRMATION` | const | `packages/shared/src/steve-privacy.ts` |
 | `MCS_STEVE_PRIVACY_POLICY_VERSION` | const | `packages/shared/src/steve-privacy.ts` |
-| `MCS_STEVE_RETAKE_CONFIRMATION` | const | `packages/shared/src/steve-privacy.ts` |
 | `MCS_STEVE_SPONSOR_CONSENT_FIELDS` | const | `packages/shared/src/steve-privacy.ts` |
 | `MCS_STEVE_SPONSOR_CONSENT_GRANT_COPY` | const | `packages/shared/src/steve-privacy.ts` |
 | `MCS_STEVE_SPONSOR_CONSENT_REVOCATION_COPY` | const | `packages/shared/src/steve-privacy.ts` |
@@ -985,8 +982,6 @@
 | `McsStevePrivacyStatus` | type | `packages/shared/src/steve-privacy.ts` |
 | `McsStevePrivateExport` | interface | `packages/shared/src/steve-privacy.ts` |
 | `McsStevePrivateExportResponse` | interface | `packages/shared/src/steve-privacy.ts` |
-| `McsSteveRetakePayload` | interface | `packages/shared/src/steve-privacy.ts` |
-| `McsSteveRetakeResponse` | interface | `packages/shared/src/steve-privacy.ts` |
 | `McsSteveSponsorConsentField` | type | `packages/shared/src/steve-privacy.ts` |
 | `McsSteveSponsorConsentGrant` | interface | `packages/shared/src/steve-privacy.ts` |
 | `McsSteveSponsorConsentPayload` | interface | `packages/shared/src/steve-privacy.ts` |
@@ -1445,7 +1440,6 @@
 | `McsSteveDiscoveryScriptQuestion` | interface | `packages/shared/src/types.ts` |
 | `McsSteveDiscoveryScriptResponse` | interface | `packages/shared/src/types.ts` |
 | `McsSteveDiscoveryScriptSection` | interface | `packages/shared/src/types.ts` |
-| `McsSteveDiscoveryView` | interface | `packages/shared/src/types.ts` |
 | `McsSteveDiscoveryView` | interface | `packages/shared/src/types.ts` |
 | `McsSteveGuidanceRecommendation` | interface | `packages/shared/src/types.ts` |
 | `McsSteveLearningModality` | type | `packages/shared/src/types.ts` |

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T22:34:16.513Z",
+  "generatedAt": "2026-07-16T21:51:06.872Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -723,12 +723,12 @@
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 434,
+          "line": 419,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steveConversationRuntime.ts",
-          "line": 155,
+          "line": 132,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -753,7 +753,7 @@
         },
         {
           "file": "server/src/routes/steve.ts",
-          "line": 417,
+          "line": 360,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -961,22 +961,22 @@
       "sources": [
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 561,
+          "line": 535,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 627,
+          "line": 584,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steveConversationRuntime.ts",
-          "line": 104,
+          "line": 82,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steveConversationRuntime.ts",
-          "line": 136,
+          "line": 113,
           "source": "persistenceCall.mongodb.insert"
         }
       ]
@@ -2324,7 +2324,7 @@
         },
         {
           "file": "server/src/domain/steveCorrection.ts",
-          "line": 471,
+          "line": 452,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -2388,42 +2388,32 @@
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 449,
+          "line": 434,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 498,
+          "line": 477,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 826,
-          "source": "persistenceCall.mongodb.update"
-        },
-        {
-          "file": "server/src/domain/steve-success-interview.ts",
-          "line": 920,
-          "source": "persistenceCall.mongodb.update"
-        },
-        {
-          "file": "server/src/domain/steve-success-interview.ts",
-          "line": 1024,
+          "line": 741,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/domain/steveCorrection.ts",
-          "line": 114,
+          "line": 103,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steveCorrection.ts",
-          "line": 526,
+          "line": 507,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/steveCorrection.ts",
-          "line": 643,
+          "line": 603,
           "source": "persistenceCall.mongodb.update"
         },
         {
@@ -2447,46 +2437,9 @@
           "source": "persistenceCall.mongodb.query"
         },
         {
-          "file": "server/src/domain/steveVersioning.ts",
-          "line": 97,
-          "source": "persistenceCall.mongodb.query"
-        },
-        {
-          "file": "server/src/domain/steveVersioning.ts",
-          "line": 404,
-          "source": "persistenceCall.mongodb.update"
-        },
-        {
-          "file": "server/src/domain/steveVersioning.ts",
-          "line": 453,
-          "source": "persistenceCall.mongodb.update"
-        },
-        {
           "file": "server/src/domain/reports/baActivation.ts",
           "line": 133,
           "source": "persistenceCall.mongodb.query"
-        }
-      ]
-    },
-    {
-      "collection": "tmag_steve_success_interview_versions",
-      "resolved": true,
-      "schemaMode": "permissive_mongoose_schema",
-      "sources": [
-        {
-          "file": "server/src/domain/steveVersioning.ts",
-          "line": 121,
-          "source": "persistenceCall.mongodb.query"
-        },
-        {
-          "file": "server/src/domain/steveVersioning.ts",
-          "line": 179,
-          "source": "persistenceCall.mongodb.query"
-        },
-        {
-          "file": "server/src/domain/steveVersioning.ts",
-          "line": 251,
-          "source": "tripleStackWrite"
         }
       ]
     },
@@ -3260,7 +3213,7 @@
           "server/src/domain/sponsorImmutabilityPersistence.ts:51",
           "server/src/domain/sponsorImmutabilityPersistence.ts:89",
           "server/src/domain/sponsorImmutabilityPersistence.ts:96",
-          "server/src/domain/steve-success-interview.ts:678",
+          "server/src/domain/steve-success-interview.ts:637",
           "server/src/domain/threeWayCalls.ts:427",
           "server/src/domain/threeWayCalls.ts:582",
           "server/src/domain/threeWayCalls.ts:583",
@@ -3630,21 +3583,10 @@
         "sources": [
           "server/src/domain/adminConsistencyReport.ts:88",
           "server/src/domain/crossStoreReconciliation.ts:182",
-          "server/src/domain/steve-success-interview.ts:679",
-          "server/src/domain/steve-success-interview.ts:756",
-          "server/src/domain/steveCorrection.ts:380",
-          "server/src/domain/steveCorrection.ts:432",
-          "server/src/domain/stevePrivacy.ts:186",
-          "server/src/domain/steveVersioning.ts:211",
-          "server/src/domain/steveVersioning.ts:298",
-          "server/src/domain/steveVersioning.ts:349"
-        ]
-      },
-      {
-        "label": "TmagSteveDiscoveryVersion",
-        "sources": [
-          "server/src/domain/steveVersioning.ts:130",
-          "server/src/domain/steveVersioning.ts:212"
+          "server/src/domain/steve-success-interview.ts:638",
+          "server/src/domain/steveCorrection.ts:368",
+          "server/src/domain/steveCorrection.ts:416",
+          "server/src/domain/stevePrivacy.ts:186"
         ]
       },
       {
@@ -3902,7 +3844,7 @@
         "sources": [
           "server/src/domain/adminConsistencyReport.ts:89",
           "server/src/domain/crossStoreReconciliation.ts:181",
-          "server/src/domain/steve-success-interview.ts:686"
+          "server/src/domain/steve-success-interview.ts:643"
         ]
       },
       {
@@ -4002,7 +3944,6 @@
         "sources": [
           "server/src/domain/adminTenantArchitecture.ts:466",
           "server/src/domain/resourcePublishingGate.ts:72",
-          "server/src/domain/steveVersioning.ts:217",
           "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186",
           "server/src/services/knowledge/knowledgeCorrectionStore.ts:580",
           "server/src/services/knowledge/knowledgeCorrectionStore.ts:894",
@@ -6153,74 +6094,68 @@
         {
           "method": "GET",
           "path": "/discovery/state",
-          "line": 172
+          "line": 152
         },
         {
           "method": "GET",
           "path": "/discovery/script",
-          "line": 188
+          "line": 168
         },
         {
           "method": "GET",
           "path": "/discovery/privacy",
-          "line": 197
+          "line": 177
         },
         {
           "method": "GET",
           "path": "/discovery/export",
-          "line": 214
+          "line": 194
         },
         {
           "method": "PUT",
           "path": "/discovery/privacy/consent",
-          "line": 241
+          "line": 221
         },
         {
           "method": "PUT",
           "path": "/discovery/correction",
-          "line": 308
-        },
-        {
-          "method": "POST",
-          "path": "/discovery/retake",
-          "line": 342
+          "line": 288
         },
         {
           "method": "POST",
           "path": "/discovery/privacy/withdraw",
-          "line": 373
+          "line": 316
         },
         {
           "method": "GET",
           "path": "/discovery/system-prompt",
-          "line": 401
+          "line": 344
         },
         {
           "method": "POST",
           "path": "/discovery/ingest",
-          "line": 503
+          "line": 446
         },
         {
           "method": "GET",
           "path": "/discovery/profile/:downlineTmagId",
-          "line": 574
+          "line": 517
         },
         {
           "method": "GET",
           "path": "/discovery/conversation",
-          "line": 608
+          "line": 551
         },
         {
           "method": "POST",
           "path": "/discovery/converse",
-          "line": 624
+          "line": 567
         }
       ],
       "sharedTypes": [
         "MCS_STEVE_CORRECTABLE_PROFILE_LIST_FIELDS",
         "MCS_STEVE_CORRECTABLE_PROFILE_TEXT_FIELDS",
         "MCS_STEVE_CORRECTION_CONFIRMATION",
-        "MCS_STEVE_RETAKE_CONFIRMATION",
         "MCS_STEVE_SPONSOR_CONSENT_FIELDS",
         "MCS_STEVE_SPONSOR_CONSENT_GRANT_COPY",
         "MCS_STEVE_SPONSOR_CONSENT_REVOCATION_COPY",
@@ -9499,11 +9434,6 @@
       "file": "packages/shared/src/steve-privacy.ts"
     },
     {
-      "name": "MCS_STEVE_RETAKE_CONFIRMATION",
-      "kind": "const",
-      "file": "packages/shared/src/steve-privacy.ts"
-    },
-    {
       "name": "MCS_STEVE_SPONSOR_CONSENT_FIELDS",
       "kind": "const",
       "file": "packages/shared/src/steve-privacy.ts"
@@ -9570,16 +9500,6 @@
     },
     {
       "name": "McsStevePrivateExportResponse",
-      "kind": "interface",
-      "file": "packages/shared/src/steve-privacy.ts"
-    },
-    {
-      "name": "McsSteveRetakePayload",
-      "kind": "interface",
-      "file": "packages/shared/src/steve-privacy.ts"
-    },
-    {
-      "name": "McsSteveRetakeResponse",
       "kind": "interface",
       "file": "packages/shared/src/steve-privacy.ts"
     },
@@ -11879,11 +11799,6 @@
       "file": "packages/shared/src/types.ts"
     },
     {
-      "name": "McsSteveDiscoveryView",
-      "kind": "interface",
-      "file": "packages/shared/src/types.ts"
-    },
-    {
       "name": "McsSteveGuidanceRecommendation",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -12420,12 +12335,12 @@
     }
   ],
   "summary": {
-    "mongoCollections": 75,
-    "neo4jLabels": 84,
+    "mongoCollections": 74,
+    "neo4jLabels": 83,
     "neo4jRelationships": 68,
     "chromaCollections": 53,
     "routeModules": 49,
-    "routeHandlers": 292,
-    "sharedExports": 1182
+    "routeHandlers": 291,
+    "sharedExports": 1178
   }
 }

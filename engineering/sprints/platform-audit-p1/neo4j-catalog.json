@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-16T22:34:07.388Z",
+  "generatedAt": "2026-07-16T21:50:50.765Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
     "server/src/domain/* Cypher writers"
   ],
   "summary": {
-    "labels": 84,
+    "labels": 83,
     "relationships": 68,
     "constraints": 18,
-    "labelsWithoutConstraint": 69
+    "labelsWithoutConstraint": 68
   },
   "byStatus": {
     "planned_core_not_applied": 11,
@@ -342,7 +342,7 @@
         "server/src/domain/sponsorImmutabilityPersistence.ts:51",
         "server/src/domain/sponsorImmutabilityPersistence.ts:89",
         "server/src/domain/sponsorImmutabilityPersistence.ts:96",
-        "server/src/domain/steve-success-interview.ts:678",
+        "server/src/domain/steve-success-interview.ts:637",
         "server/src/domain/threeWayCalls.ts:427",
         "server/src/domain/threeWayCalls.ts:582",
         "server/src/domain/threeWayCalls.ts:583",
@@ -746,26 +746,14 @@
     },
     {
       "label": "TmagSteveDiscovery",
-      "sourceCount": 10,
+      "sourceCount": 6,
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:88",
         "server/src/domain/crossStoreReconciliation.ts:182",
-        "server/src/domain/steve-success-interview.ts:679",
-        "server/src/domain/steve-success-interview.ts:756",
-        "server/src/domain/steveCorrection.ts:380",
-        "server/src/domain/steveCorrection.ts:432",
-        "server/src/domain/stevePrivacy.ts:186",
-        "server/src/domain/steveVersioning.ts:211",
-        "server/src/domain/steveVersioning.ts:298",
-        "server/src/domain/steveVersioning.ts:349"
-      ]
-    },
-    {
-      "label": "TmagSteveDiscoveryVersion",
-      "sourceCount": 2,
-      "sources": [
-        "server/src/domain/steveVersioning.ts:130",
-        "server/src/domain/steveVersioning.ts:212"
+        "server/src/domain/steve-success-interview.ts:638",
+        "server/src/domain/steveCorrection.ts:368",
+        "server/src/domain/steveCorrection.ts:416",
+        "server/src/domain/stevePrivacy.ts:186"
       ]
     },
     {
@@ -1058,7 +1046,7 @@
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:89",
         "server/src/domain/crossStoreReconciliation.ts:181",
-        "server/src/domain/steve-success-interview.ts:686"
+        "server/src/domain/steve-success-interview.ts:643"
       ]
     },
     {
@@ -1168,11 +1156,10 @@
     },
     {
       "relationship": "HAS_VERSION",
-      "sourceCount": 7,
+      "sourceCount": 6,
       "sources": [
         "server/src/domain/adminTenantArchitecture.ts:466",
         "server/src/domain/resourcePublishingGate.ts:72",
-        "server/src/domain/steveVersioning.ts:217",
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186",
         "server/src/services/knowledge/knowledgeCorrectionStore.ts:580",
         "server/src/services/knowledge/knowledgeCorrectionStore.ts:894",
@@ -1686,7 +1673,6 @@
     "TmagResourceVersion",
     "TmagSponsorAvailability",
     "TmagSponsorOverride",
-    "TmagSteveDiscoveryVersion",
     "TmagThreeWayBooking",
     "TmagTrainingModule",
     "TmagVmAuditEvent",
