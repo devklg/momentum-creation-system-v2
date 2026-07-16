@@ -25,6 +25,8 @@ interface PlacementSnapshot {
 interface GraphPlacementSnapshot {
   prospectId: string;
   poolId: string;
+  sourceLabels: string[];
+  poolLabels: string[];
   sponsorTmagId: string;
   positionNumber: number;
   placedAt: string;
@@ -56,7 +58,7 @@ export interface PoolPositioningVerificationReport {
     completed: number;
     degraded: number;
   };
-  exactFindings: number;
+  exactFindings: number | null;
   observations: {
     mongoPlacements: number | null;
     neo4jPlacements: number | null;
@@ -116,8 +118,9 @@ export const POOL_POSITIONING_QUERY_CATALOG: readonly PoolPositioningQuerySpec[]
     action: 'cypher',
     params: {
       query:
-        'MATCH (prospect:TmagProspect)-[edge:IN_HOLDING_TANK]->(pool:TmagPool) ' +
-        'RETURN prospect.prospectId AS prospectId, pool.id AS poolId, ' +
+        'MATCH (prospect)-[edge:IN_HOLDING_TANK]->(pool) ' +
+        'RETURN prospect.prospectId AS prospectId, labels(prospect) AS sourceLabels, ' +
+        'pool.id AS poolId, labels(pool) AS poolLabels, ' +
         'edge.sponsorTmagId AS sponsorTmagId, edge.position AS positionNumber, ' +
         'edge.placedAt AS placedAt, edge.flushedAt AS flushedAt, ' +
         'edge.flushReason AS flushReason ' +
@@ -132,8 +135,9 @@ export const POOL_POSITIONING_QUERY_CATALOG: readonly PoolPositioningQuerySpec[]
     params: {
       query:
         'MATCH (pool:TmagPool) ' +
-        'WITH collect(toString(pool.id)) AS poolIds ' +
-        'RETURN size(poolIds) AS total, poolIds[..$sampleLimit] AS samples',
+        "WITH count(pool) AS total, collect(coalesce(toString(pool.id), '__MISSING__')) AS poolIds, " +
+        'sum(CASE WHEN pool.id IS NULL OR trim(toString(pool.id)) = "" THEN 1 ELSE 0 END) AS malformedIds ' +
+        'RETURN total, malformedIds, poolIds[..$sampleLimit] AS samples',
       params: { sampleLimit: '$sampleLimit' },
     },
   },
@@ -237,26 +241,51 @@ function degradedResults(reason: string): PoolPositioningVerificationResult[] {
 function parseMongoPlacement(row: Record<string, unknown>): PlacementSnapshot | null {
   const positionNumber = numberValue(row.positionNumber);
   const placedAt = isoValue(row.placedAt);
+  const flushedAt =
+    row.flushedAt === null || row.flushedAt === undefined
+      ? null
+      : isoValue(row.flushedAt);
+  const flushReason =
+    row.flushReason === null || row.flushReason === undefined
+      ? null
+      : nullableString(row.flushReason);
   if (
     typeof row.prospectId !== 'string' ||
+    !row.prospectId.trim() ||
     typeof row.sponsorTmagId !== 'string' ||
+    !row.sponsorTmagId.trim() ||
     positionNumber === null ||
-    placedAt === null
+    placedAt === null ||
+    (row.flushedAt !== null && row.flushedAt !== undefined && flushedAt === null) ||
+    (row.flushReason !== null && row.flushReason !== undefined && flushReason === null)
   ) return null;
   return {
     prospectId: row.prospectId,
     sponsorTmagId: row.sponsorTmagId,
     positionNumber,
     placedAt,
-    flushedAt: nullableString(row.flushedAt),
-    flushReason: nullableString(row.flushReason),
+    flushedAt,
+    flushReason,
   };
 }
 
 function parseGraphPlacement(row: Record<string, unknown>): GraphPlacementSnapshot | null {
   const placement = parseMongoPlacement(row);
-  if (!placement || typeof row.poolId !== 'string') return null;
-  return { ...placement, poolId: row.poolId };
+  if (
+    !placement ||
+    typeof row.poolId !== 'string' ||
+    !row.poolId.trim() ||
+    !Array.isArray(row.sourceLabels) ||
+    !row.sourceLabels.every((label) => typeof label === 'string') ||
+    !Array.isArray(row.poolLabels) ||
+    !row.poolLabels.every((label) => typeof label === 'string')
+  ) return null;
+  return {
+    ...placement,
+    poolId: row.poolId,
+    sourceLabels: row.sourceLabels,
+    poolLabels: row.poolLabels,
+  };
 }
 
 function parityKey(row: PlacementSnapshot): string {
@@ -288,7 +317,7 @@ export async function verifyPoolPositioningGraph(
       status: 'degraded',
       policy: 'read_only_test',
       coverage: { expected: INVARIANTS.length, completed: 0, degraded: INVARIANTS.length },
-      exactFindings: 0,
+      exactFindings: null,
       observations: emptyObservations,
       results: degradedResults(validationErrors.join(',')),
     };
@@ -353,7 +382,7 @@ export async function verifyPoolPositioningGraph(
         status: 'truncated',
         policy: 'read_only_test',
         coverage: { expected: INVARIANTS.length, completed: 0, degraded: 0 },
-        exactFindings: 0,
+        exactFindings: null,
         observations: {
           mongoPlacements: rawMongo.length,
           neo4jPlacements: rawGraph.length,
@@ -375,14 +404,29 @@ export async function verifyPoolPositioningGraph(
     if (counterDocument && parsedCounter === null) throw new Error('malformed_pool_counter');
     const counter = parsedCounter ?? 0;
     const poolTotal = numberValue(rawPoolRecord.total);
+    const malformedPoolIds = numberValue(rawPoolRecord.malformedIds);
     const poolSamples = Array.isArray(rawPoolRecord.samples)
       ? rawPoolRecord.samples.filter((value): value is string => typeof value === 'string')
       : null;
-    if (poolTotal === null || poolSamples === null) throw new Error('malformed_pool_count');
+    if (poolTotal === null || malformedPoolIds === null || poolSamples === null) {
+      throw new Error('malformed_pool_count');
+    }
 
     const poolFindings = [
-      ...(poolTotal === 0 && mongo.length === 0 ? [] : poolTotal === 1 && poolSamples[0] === TEAM_POOL_ID ? [] : [`pools:${poolTotal}:${poolSamples.join(',')}`]),
-      ...graph.filter((row) => row.poolId !== TEAM_POOL_ID).map((row) => `edge:${row.prospectId}:${row.poolId}`),
+      ...(poolTotal === 0 && mongo.length === 0
+        ? []
+        : poolTotal === 1 && malformedPoolIds === 0 && poolSamples[0] === TEAM_POOL_ID
+          ? []
+          : [`pools:${poolTotal}:malformed:${malformedPoolIds}:${poolSamples.join(',')}`]),
+      ...rawGraph.flatMap((row, index) => {
+        const sourceLabels = Array.isArray(row.sourceLabels) ? row.sourceLabels : [];
+        const poolLabels = Array.isArray(row.poolLabels) ? row.poolLabels : [];
+        return sourceLabels.includes('TmagProspect') &&
+          poolLabels.includes('TmagPool') &&
+          row.poolId === TEAM_POOL_ID
+          ? []
+          : [`edge:${index}:labels:${sourceLabels.join(',')}->${poolLabels.join(',')}:pool:${String(row.poolId)}`];
+      }),
     ];
 
     const prospectCounts = new Map<string, number>();
@@ -390,7 +434,8 @@ export async function verifyPoolPositioningGraph(
     for (const row of graph) prospectCounts.set(`g:${row.prospectId}`, (prospectCounts.get(`g:${row.prospectId}`) ?? 0) + 1);
     const cardinalityFindings = [...prospectCounts.entries()]
       .filter(([, count]) => count !== 1)
-      .map(([key, count]) => `${key}:${count}`);
+      .map(([key, count]) => `${key}:${count}`)
+      .concat(malformedMongo, malformedGraph);
 
     const positionOwners = new Map<string, string[]>();
     for (const [prefix, rows] of [['m', mongo] as const, ['g', graph] as const]) {
@@ -425,11 +470,11 @@ export async function verifyPoolPositioningGraph(
     }
 
     const validReasons = new Set(['enrolled', 'expired', 'archived']);
-    const flushFindings = [...mongo, ...graph].filter((row) => {
+    const flushFindings = [...malformedMongo, ...malformedGraph, ...[...mongo, ...graph].filter((row) => {
       const hasAt = row.flushedAt !== null;
       const hasReason = row.flushReason !== null;
       return hasAt !== hasReason || (hasReason && !validReasons.has(row.flushReason!));
-    }).map((row) => `${row.prospectId}:${row.flushedAt ?? ''}:${row.flushReason ?? ''}`);
+    }).map((row) => `${row.prospectId}:${row.flushedAt ?? ''}:${row.flushReason ?? ''}`)];
 
     const mongoByProspect = new Map(mongo.map((row) => [row.prospectId, row]));
     const graphByProspect = new Map(graph.map((row) => [row.prospectId, row]));
@@ -475,7 +520,7 @@ export async function verifyPoolPositioningGraph(
       status: 'degraded',
       policy: 'read_only_test',
       coverage: { expected: INVARIANTS.length, completed: 0, degraded: INVARIANTS.length },
-      exactFindings: 0,
+      exactFindings: null,
       observations: emptyObservations,
       results: degradedResults(reason),
     };

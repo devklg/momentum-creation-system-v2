@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T15:32:39.335Z
+- Generated: 2026-07-16T15:39:14.988Z
 - Mongo collections: 74
 - Neo4j labels: 83
 - Neo4j relationships: 69
@@ -151,8 +151,8 @@
 | `TmagLearningCandidate` | 4 |
 | `TmagOrientationSession` | 3 |
 | `TmagOutcome` | 4 |
-| `TmagPool` | 8 |
-| `TmagProspect` | 46 |
+| `TmagPool` | 7 |
+| `TmagProspect` | 45 |
 | `TmagProspectAccount` | 3 |
 | `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |

@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T15:32:30.268Z
+- Generated: 2026-07-16T15:39:06.282Z
 - Labels: 83
 - Relationships: 69
 - Constraints/indexes cataloged: 18
@@ -75,8 +75,8 @@
 | `TmagLearningCandidate` | 4 |
 | `TmagOrientationSession` | 3 |
 | `TmagOutcome` | 4 |
-| `TmagPool` | 8 |
-| `TmagProspect` | 46 |
+| `TmagPool` | 7 |
+| `TmagProspect` | 45 |
 | `TmagProspectAccount` | 3 |
 | `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |

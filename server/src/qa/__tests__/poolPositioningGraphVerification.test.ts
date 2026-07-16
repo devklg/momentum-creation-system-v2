@@ -31,7 +31,13 @@ function persistenceFor(args: {
     const query = String(params.query);
     if (query.includes('MATCH (pool:TmagPool)')) {
       const pools = args.pools ?? [];
-      return { records: [{ total: pools.length, samples: pools }] };
+      return {
+        records: [{
+          total: pools.length,
+          malformedIds: pools.filter((pool) => pool === '__MISSING__').length,
+          samples: pools,
+        }],
+      };
     }
     return { records: args.graph ?? [] };
   });
@@ -71,7 +77,12 @@ describe('pool positioning query catalog', () => {
 
 describe('pool positioning verification runner', () => {
   it('reports a clear canonical Mongo-to-Neo4j snapshot and preserves valid gaps', async () => {
-    const graph = { ...placement, poolId: 'tm_team_pool' };
+    const graph = {
+      ...placement,
+      poolId: 'tm_team_pool',
+      sourceLabels: ['TmagProspect'],
+      poolLabels: ['TmagPool'],
+    };
     const persistence = persistenceFor({
       mongo: [placement],
       graph: [graph],
@@ -101,7 +112,12 @@ describe('pool positioning verification runner', () => {
     const report = await verifyPoolPositioningGraph({
       persistence: persistenceFor({
         mongo: [placement, second],
-        graph: [{ ...placement, poolId: 'alternate_pool' }],
+        graph: [{
+          ...placement,
+          poolId: 'alternate_pool',
+          sourceLabels: ['TmagProspect'],
+          poolLabels: ['TmagPool'],
+        }],
         counter: 3,
         pools: ['tm_team_pool', 'alternate_pool'],
       }) as never,
@@ -155,6 +171,32 @@ describe('pool positioning verification runner', () => {
       specs: [],
     });
     expect(invalid.status).toBe('degraded');
+    expect(invalid.exactFindings).toBeNull();
     expect(persistence).not.toHaveBeenCalled();
+  });
+
+  it('fails closed on wrong endpoint labels, missing pool ids, and malformed identity or flush fields', async () => {
+    const wrongEndpoint = {
+      ...placement,
+      poolId: 'tm_team_pool',
+      sourceLabels: ['WrongProspect'],
+      poolLabels: ['WrongPool'],
+    };
+    const report = await verifyPoolPositioningGraph({
+      persistence: persistenceFor({
+        mongo: [{
+          ...placement,
+          prospectId: '',
+          flushedAt: 'not-an-iso-date',
+          flushReason: 7,
+        }],
+        graph: [wrongEndpoint],
+        pools: ['__MISSING__'],
+      }) as never,
+    });
+    expect(report.status).toBe('findings');
+    expect(report.results.find((row) => row.key === 'single_team_pool')?.exactCount).toBeGreaterThan(0);
+    expect(report.results.find((row) => row.key === 'one_placement_per_prospect')?.exactCount).toBeGreaterThan(0);
+    expect(report.results.find((row) => row.key === 'flush_metadata_pair')?.exactCount).toBeGreaterThan(0);
   });
 });

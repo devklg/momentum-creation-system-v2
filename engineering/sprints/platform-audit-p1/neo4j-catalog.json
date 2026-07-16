@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T15:32:30.268Z",
+  "generatedAt": "2026-07-16T15:39:06.282Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -86,7 +86,7 @@
         "server/src/domain/poolPlacementPersistence.ts:107",
         "server/src/domain/poolPlacementPersistence.ts:38",
         "server/src/domain/poolPlacementPersistence.ts:41",
-        "server/src/qa/poolPositioningGraphVerification.ts:119"
+        "server/src/qa/poolPositioningGraphVerification.ts:121"
       ]
     },
     {
@@ -585,7 +585,7 @@
     },
     {
       "label": "TmagPool",
-      "sourceCount": 8,
+      "sourceCount": 7,
       "sources": [
         "server/scripts/smoke-holding-tank.ts:114",
         "server/src/domain/crossStoreReconciliation.ts:165",
@@ -593,13 +593,12 @@
         "server/src/domain/poolPlacementPersistence.ts:107",
         "server/src/domain/poolPlacementPersistence.ts:36",
         "server/src/domain/poolPlacementPersistence.ts:42",
-        "server/src/qa/poolPositioningGraphVerification.ts:119",
-        "server/src/qa/poolPositioningGraphVerification.ts:134"
+        "server/src/qa/poolPositioningGraphVerification.ts:137"
       ]
     },
     {
       "label": "TmagProspect",
-      "sourceCount": 46,
+      "sourceCount": 45,
       "sources": [
         "server/scripts/smoke-holding-tank.ts:114",
         "server/scripts/smoke-holding-tank.ts:66",
@@ -643,7 +642,6 @@
         "server/src/domain/tokenLifecyclePersistence.ts:46",
         "server/src/domain/tokenLifecyclePersistence.ts:52",
         "server/src/domain/webinarReservation.ts:203",
-        "server/src/qa/poolPositioningGraphVerification.ts:119",
         "server/src/qa/sponsorImmutabilityGraphVerification.ts:109",
         "server/src/qa/sponsorImmutabilityGraphVerification.ts:125",
         "server/src/qa/sponsorImmutabilityGraphVerification.ts:96"

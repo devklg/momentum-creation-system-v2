@@ -21,9 +21,9 @@ The seven checks cover:
 
 ## Verification
 
-- Focused tests: 10 passed across the new verifier and the existing
+- Focused tests: 11 passed across the new verifier and the existing
   pool-placement persistence contract.
-- Full server suite: 2,215 passed and 19 skipped. The live Context Manager
+- Full server suite: 2,216 passed and 19 skipped. The live Context Manager
   feature flag was explicitly disabled for the inert runtime-route test
   contract; with the developer `.env` live flag inherited, those unrelated
   tests time out while attempting live retrieval.
