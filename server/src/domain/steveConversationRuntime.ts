@@ -136,6 +136,8 @@ async function getFirstName(tmagId: string): Promise<string> {
       database: MONGO_DB,
       collection: 'team_magnificent_members',
       filter: { tmagId },
+      projection: { firstName: 1 },
+      limit: 1,
     },
   );
   return res.documents?.[0]?.firstName ?? 'there';

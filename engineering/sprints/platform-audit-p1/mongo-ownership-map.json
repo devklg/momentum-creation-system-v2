@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T16:37:33.845Z",
+  "generatedAt": "2026-07-16T18:25:57.810Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 74,
   "unclassifiedCount": 0,
@@ -977,7 +977,7 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 7,
+      "sourceCount": 8,
       "sourceFiles": [
         "server/src/domain/michael-training-support.ts",
         "server/src/domain/recruitingCycle.ts",

@@ -37,6 +37,7 @@ function mockResponse() {
       response.statusCode = statusCode;
       return response;
     }),
+    set: vi.fn(() => response),
     json: vi.fn((body: unknown) => {
       response.body = body;
       return response;
@@ -108,6 +109,7 @@ describe('Steve route behavior', () => {
         ok: true,
         view: { tmagId: 'TMAG-001', phase, transcript: [], artifact: null },
       });
+      expect(response.set).toHaveBeenCalledWith('Cache-Control', 'private, no-store');
     },
   );
 
@@ -178,4 +180,98 @@ describe('Steve route behavior', () => {
     expect(response.statusCode).toBe(400);
     expect(response.body).toEqual({ ok: false, error: 'Provide tmagId.' });
   });
+
+  it('returns a minimal private receipt instead of echoing the full artifact', async () => {
+    process.env.STEVE_WORKER_SECRET = 'expected-secret';
+    vi.spyOn(steveDomain, 'ingestDiscoveryArtifact').mockResolvedValueOnce({
+      tmagId: 'TMAG-001',
+      sponsorTmagId: 'TMAG-SPONSOR',
+      callSid: 'CA-private',
+      startedAt: '2026-07-16T00:00:00.000Z',
+      completedAt: '2026-07-16T00:10:00.000Z',
+      transcript: [{ sequence: 1, speaker: 'ba', text: 'private', occurredAt: '2026-07-16T00:00:01.000Z' }],
+      answers: [{ questionId: 'q_welcome_intro', prompt: 'prompt', answerText: 'private answer' }],
+      successProfile: {
+        tmagId: 'TMAG-001',
+        generatedAt: '2026-07-16T00:10:00.000Z',
+        primaryWhy: { statement: 'private why', who: '', whyNow: '' },
+        successVision: { statement: '', oneBigChange: '' },
+        learningStyle: { modalities: [], feedbackPreference: '', notes: '' },
+        communicationPreferences: { preferredChannels: [], cadence: null, bestTimes: '', notes: '' },
+        supportNeeds: { areas: [], potentialObstacles: [], helpStyle: '', notes: '' },
+        launchRecommendations: [],
+        trainingRecommendations: [],
+        michaelHandoffSummary: '',
+        signedBy: 'Steve · Success Profile',
+      },
+      audioUrl: 'https://private.example/audio',
+    });
+    const response = mockResponse();
+
+    await finalHandler('post', '/discovery/ingest')(
+      {
+        header: () => 'expected-secret',
+        body: {
+          tmagId: 'TMAG-001',
+          callSid: null,
+          startedAt: '2026-07-16T00:00:00.000Z',
+          completedAt: '2026-07-16T00:10:00.000Z',
+          transcript: [],
+          answers: [],
+          audioUrl: null,
+          profile: {
+            primaryWhy: { statement: '', who: '', whyNow: '' },
+            successVision: { statement: '', oneBigChange: '' },
+            learningStyle: { modalities: [], feedbackPreference: '', notes: '' },
+            communicationPreferences: { preferredChannels: [], cadence: null, bestTimes: '', notes: '' },
+            supportNeeds: { areas: [], potentialObstacles: [], helpStyle: '', notes: '' },
+            launchRecommendations: [],
+            trainingRecommendations: [],
+            michaelHandoffSummary: '',
+          },
+        },
+      } as unknown as Request,
+      response,
+    );
+
+    expect(response.body).toEqual({
+      ok: true,
+      receipt: {
+        discoveryId: 'SD-TMAG-001',
+        tmagId: 'TMAG-001',
+        completedAt: '2026-07-16T00:10:00.000Z',
+        signedBy: 'Steve · Success Profile',
+      },
+    });
+    expect(JSON.stringify(response.body)).not.toContain('private why');
+    expect(JSON.stringify(response.body)).not.toContain('CA-private');
+    expect(response.set).toHaveBeenCalledWith('Cache-Control', 'private, no-store');
+  });
+
+  it.each(['NO_DOWNLINE', 'NOT_SPONSOR', 'NO_ARTIFACT', 'NO_COMPLETED_AT', 'CONSENT_REQUIRED'])(
+    'returns one opaque sponsor-profile response for %s',
+    async (code) => {
+      vi.spyOn(steveDomain, 'getProfileCardForSponsor').mockRejectedValueOnce(
+        new steveDomain.SponsorAccessError(code, `private ${code} detail`),
+      );
+      const response = mockResponse();
+
+      await finalHandler('get', '/discovery/profile/:downlineTmagId')(
+        {
+          session: { tmagId: 'TMAG-SPONSOR' },
+          params: { downlineTmagId: 'TMAG-TARGET' },
+        } as unknown as Request,
+        response,
+      );
+
+      expect(response.statusCode).toBe(404);
+      expect(response.body).toEqual({
+        ok: false,
+        error: 'Profile unavailable.',
+        code: 'PROFILE_UNAVAILABLE',
+      });
+      expect(JSON.stringify(response.body)).not.toContain(code);
+      expect(JSON.stringify(response.body)).not.toContain('private');
+    },
+  );
 });

@@ -7,7 +7,7 @@
  * the Context Manager can use in real time.
  */
 
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   MCS_KNOWLEDGE_BASE_CHUNK_COLLECTION,
   MCS_KNOWLEDGE_BASE_SCHEMA_VERSION,
@@ -501,7 +501,7 @@ function approvedRetrievalCacheKey(
   limit: number,
   language: McsRuntimeLanguage | undefined,
 ): string {
-  return JSON.stringify([
+  return createHash('sha256').update(JSON.stringify([
     normalizedQuery.toLocaleLowerCase('en-US'),
     limit,
     language ?? null,
@@ -510,7 +510,7 @@ function approvedRetrievalCacheKey(
     scope.teamKey ?? null,
     scope.teamName ?? null,
     scope.tmagId ?? null,
-  ]);
+  ])).digest('hex');
 }
 
 function setApprovedRetrievalCacheEntry(key: string, references: readonly McsKnowledgeReference[]): void {

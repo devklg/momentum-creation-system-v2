@@ -25,6 +25,8 @@ function adminActorFromRequest(req: Request): McsAuditActor & { kind: 'admin' } 
 }
 
 adminAgentsRoutes.get('/overview', requireAdmin, async (req, res) => {
+  res.set('Cache-Control', 'private, no-store');
+  res.set('Pragma', 'no-cache');
   try {
     const payload = await buildAdminAgentOversight();
 
@@ -51,8 +53,7 @@ adminAgentsRoutes.get('/overview', requireAdmin, async (req, res) => {
 
     res.status(200).json(payload);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'unknown';
-    res.status(500).json({ ok: false, error: `Agent oversight failed: ${msg}` });
+    res.status(500).json({ ok: false, error: 'Agent oversight failed.' });
   }
 });
 

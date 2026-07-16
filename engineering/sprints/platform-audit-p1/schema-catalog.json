@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T16:37:50.659Z",
+  "generatedAt": "2026-07-16T18:26:10.262Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -678,7 +678,7 @@
         },
         {
           "file": "server/src/domain/michael-training-support.ts",
-          "line": 83,
+          "line": 85,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -748,7 +748,7 @@
         },
         {
           "file": "server/src/routes/steve.ts",
-          "line": 108,
+          "line": 116,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -2348,7 +2348,7 @@
       "sources": [
         {
           "file": "server/src/domain/michael-training-support.ts",
-          "line": 95,
+          "line": 98,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -2363,17 +2363,22 @@
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 416,
+          "line": 417,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 598,
+          "line": 458,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/steve-success-interview.ts",
+          "line": 596,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 616,
+          "line": 614,
           "source": "writeKnowledge"
         },
         {
@@ -3153,8 +3158,8 @@
           "server/src/domain/sponsorImmutabilityPersistence.ts:51",
           "server/src/domain/sponsorImmutabilityPersistence.ts:89",
           "server/src/domain/sponsorImmutabilityPersistence.ts:96",
-          "server/src/domain/steve-success-interview.ts:475",
-          "server/src/domain/steve-success-interview.ts:482",
+          "server/src/domain/steve-success-interview.ts:488",
+          "server/src/domain/steve-success-interview.ts:494",
           "server/src/domain/threeWayCalls.ts:427",
           "server/src/domain/threeWayCalls.ts:582",
           "server/src/domain/threeWayCalls.ts:583",
@@ -3524,7 +3529,7 @@
         "sources": [
           "server/src/domain/adminConsistencyReport.ts:88",
           "server/src/domain/crossStoreReconciliation.ts:182",
-          "server/src/domain/steve-success-interview.ts:476"
+          "server/src/domain/steve-success-interview.ts:489"
         ]
       },
       {
@@ -3782,7 +3787,7 @@
         "sources": [
           "server/src/domain/adminConsistencyReport.ts:89",
           "server/src/domain/crossStoreReconciliation.ts:181",
-          "server/src/domain/steve-success-interview.ts:479"
+          "server/src/domain/steve-success-interview.ts:491"
         ]
       },
       {
@@ -4111,7 +4116,7 @@
       {
         "relationship": "VISIBLE_TO_SPONSOR",
         "sources": [
-          "server/src/domain/steve-success-interview.ts:483"
+          "server/src/domain/steve-success-interview.ts:495"
         ]
       },
       {
@@ -4373,17 +4378,17 @@
         {
           "method": "GET",
           "path": "user-agent",
-          "line": 45
+          "line": 47
         },
         {
           "method": "GET",
           "path": "/health",
-          "line": 59
+          "line": 60
         },
         {
           "method": "GET",
           "path": "/outbox-health",
-          "line": 68
+          "line": 69
         }
       ],
       "sharedTypes": [
@@ -6038,37 +6043,37 @@
         {
           "method": "GET",
           "path": "/discovery/state",
-          "line": 65
+          "line": 72
         },
         {
           "method": "GET",
           "path": "/discovery/script",
-          "line": 81
+          "line": 88
         },
         {
           "method": "GET",
           "path": "/discovery/system-prompt",
-          "line": 93
+          "line": 100
         },
         {
           "method": "POST",
           "path": "/discovery/ingest",
-          "line": 193
+          "line": 202
         },
         {
           "method": "GET",
           "path": "/discovery/profile/:downlineTmagId",
-          "line": 247
+          "line": 267
         },
         {
           "method": "GET",
           "path": "/discovery/conversation",
-          "line": 278
+          "line": 301
         },
         {
           "method": "POST",
           "path": "/discovery/converse",
-          "line": 294
+          "line": 317
         }
       ],
       "sharedTypes": []

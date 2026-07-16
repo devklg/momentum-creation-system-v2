@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T16:37:50.659Z
+- Generated: 2026-07-16T18:26:10.262Z
 - Mongo collections: 74
 - Neo4j labels: 83
 - Neo4j relationships: 69
@@ -78,7 +78,7 @@
 | `tmag_questionnaires` | permissive_mongoose_schema | yes | 2 |
 | `tmag_recruiting_cycles` | permissive_mongoose_schema | yes | 3 |
 | `tmag_sponsor_availability` | permissive_mongoose_schema | yes | 5 |
-| `tmag_steve_success_interview` | permissive_mongoose_schema | yes | 7 |
+| `tmag_steve_success_interview` | permissive_mongoose_schema | yes | 8 |
 | `tmag_three_way_bookings` | permissive_mongoose_schema | yes | 5 |
 | `tmag_vm_audit_events` | permissive_mongoose_schema | yes | 1 |
 | `tmag_vm_bulk_leads` | permissive_mongoose_schema | yes | 21 |

@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T16:37:33.845Z
+- Generated: 2026-07-16T18:25:57.810Z
 - Collections: 74
 - Unclassified: 0
 
@@ -89,7 +89,7 @@
 | `tmag_questionnaires` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
 | `tmag_recruiting_cycles` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 3 |
 | `tmag_sponsor_availability` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 5 |
-| `tmag_steve_success_interview` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 7 |
+| `tmag_steve_success_interview` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 8 |
 | `tmag_three_way_bookings` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 5 |
 | `tmag_vm_audit_events` | VM/RVM import, ownership, queue, and provider events | VM/RVM domain | admin + workers | operational | permissive_mongoose_schema | yes | 1 |
 | `tmag_vm_bulk_leads` | VM/RVM import, ownership, queue, and provider events | VM/RVM domain | admin + workers | operational | permissive_mongoose_schema | yes | 21 |

@@ -405,6 +405,7 @@ async function getBaSponsor(tmagId: string): Promise<{
     database: 'momentum',
     collection: 'team_magnificent_members',
     filter: { tmagId },
+    projection: { tmagId: 1, sponsorTmagId: 1, firstName: 1 },
     limit: 1,
   });
   const doc = result.documents[0];
@@ -426,13 +427,15 @@ function stripPersisted(doc: PersistedDiscovery): McsSteveDiscoveryArtifact {
   return {
     tmagId: doc.tmagId,
     sponsorTmagId: doc.sponsorTmagId,
-    callSid: doc.callSid,
+    // ACR-0031: provider internals and audio pointers are not user-facing,
+    // including on legacy records that may still contain those fields.
+    callSid: null,
     startedAt: doc.startedAt,
     completedAt: doc.completedAt,
     transcript: doc.transcript,
     answers: doc.answers,
     successProfile: doc.successProfile,
-    audioUrl: doc.audioUrl,
+    audioUrl: null,
   };
 }
 
@@ -452,8 +455,18 @@ export async function buildDiscoveryView(tmagId: string): Promise<McsSteveDiscov
 }
 
 export async function isSteveDiscoveryComplete(tmagId: string): Promise<boolean> {
-  const artifact = await getDiscoveryByTmagId(tmagId);
-  return derivePhase(artifact) === 'complete';
+  const result = await persistenceCall<{ documents: Array<{ _id: string }> }>(
+    'mongodb',
+    'query',
+    {
+      database: 'momentum',
+      collection: DISCOVERIES_COLLECTION,
+      filter: { tmagId },
+      projection: { _id: 1 },
+      limit: 1,
+    },
+  );
+  return result.documents.length > 0;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -474,8 +487,7 @@ function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Recor
     cypher:
       'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
       'MERGE (d:TmagSteveDiscovery {discoveryId: $id}) ' +
-      'SET d.completedAt = $completedAt, d.callSid = $callSid, d.audioUrl = $audioUrl, ' +
-      '    d.signedBy = $signedBy ' +
+      'SET d.completedAt = $completedAt, d.signedBy = $signedBy ' +
       'MERGE (b)-[:HAD_STEVE_DISCOVERY]->(d) ' +
       'WITH d, $sponsorTmagId AS sponsorId ' +
       'WHERE sponsorId IS NOT NULL ' +
@@ -486,38 +498,23 @@ function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Recor
       tmagId: a.tmagId,
       sponsorTmagId: a.sponsorTmagId,
       completedAt: a.completedAt,
-      callSid: a.callSid,
-      audioUrl: a.audioUrl,
       signedBy: a.successProfile.signedBy,
     },
   };
 }
 
-function chromaDocForDiscovery(a: PersistedDiscovery): string {
-  const sp = a.successProfile;
-  const learn = sp.learningStyle.modalities.join(', ');
-  const channels = sp.communicationPreferences.preferredChannels.join(', ');
-  return [
-    `Steve discovery completed for BA ${a.tmagId}.`,
-    `Primary why: ${sp.primaryWhy.statement}.`,
-    `Success vision: ${sp.successVision.statement}.`,
-    `Learns by: ${learn}. Prefers contact via: ${channels}.`,
-    `Support areas: ${sp.supportNeeds.areas.join(', ')}.`,
-  ]
-    .join(' ')
-    .slice(0, 500);
+function chromaDocForDiscovery(_a: PersistedDiscovery): string {
+  return 'Private Steve discovery completion marker. Profile content is canonical in MongoDB.';
 }
 
 function artifactToUpdate(a: PersistedDiscovery): Partial<PersistedDiscovery> {
   return {
     sponsorTmagId: a.sponsorTmagId,
-    callSid: a.callSid,
     startedAt: a.startedAt,
     completedAt: a.completedAt,
     transcript: a.transcript,
     answers: a.answers,
     successProfile: a.successProfile,
-    audioUrl: a.audioUrl,
   };
 }
 
@@ -556,7 +553,9 @@ export async function ingestDiscoveryArtifact(
     _id: id,
     tmagId: payload.tmagId,
     sponsorTmagId: baInfo.sponsorTmagId, // server-stamped (3.5)
-    callSid: payload.callSid,
+    // Internal Steve uses browser voice/text. ACR-0031 stores transcripts,
+    // not provider call identifiers or raw-audio pointers.
+    callSid: null,
     startedAt: payload.startedAt,
     completedAt: payload.completedAt,
     transcript,
@@ -565,7 +564,7 @@ export async function ingestDiscoveryArtifact(
       answerText: ans.answerText.slice(0, 5000),
     })),
     successProfile,
-    audioUrl: payload.audioUrl,
+    audioUrl: null,
   };
 
   const cy = discoveryCypher(artifact);
@@ -581,11 +580,10 @@ export async function ingestDiscoveryArtifact(
       metadatas: [
         {
           discoveryId: id,
-          tmagId: artifact.tmagId,
-          sponsorTmagId: artifact.sponsorTmagId ?? '',
-          callSid: artifact.callSid ?? '',
+          ownerTmagId: artifact.tmagId,
           completedAt: artifact.completedAt ?? '',
           kind: 'steve_discovery',
+          retrievalEligible: false,
         },
       ],
     });
@@ -623,11 +621,10 @@ export async function ingestDiscoveryArtifact(
           document: chromaDocForDiscovery(artifact),
           metadata: {
             discoveryId: id,
-            tmagId: artifact.tmagId,
-            sponsorTmagId: artifact.sponsorTmagId ?? '',
-            callSid: artifact.callSid ?? '',
+            ownerTmagId: artifact.tmagId,
             completedAt: artifact.completedAt ?? '',
             kind: 'steve_discovery',
+            retrievalEligible: false,
           },
         },
       });
@@ -668,8 +665,12 @@ export class SponsorAccessError extends Error {
   }
 }
 
-/** Sponsor-only fetch of a downline's Steve profile card. Authoritative check
- *  is server-side: requestingTmagId must equal the downline's sponsorTmagId. */
+/** Legacy raw sponsor-card boundary.
+ *
+ * ACR-0031 removed raw answers/full-profile/audio from the sponsor default.
+ * The direct sponsor must use Michael's bounded training-support projection.
+ * This route fails closed until a field-specific BA consent contract exists.
+ */
 export async function getProfileCardForSponsor(args: {
   requestingTmagId: string;
   downlineTmagId: string;
@@ -682,21 +683,8 @@ export async function getProfileCardForSponsor(args: {
     throw new SponsorAccessError('NOT_SPONSOR', 'Only the direct sponsor can read this profile.');
   }
 
-  const artifact = await getDiscoveryByTmagId(args.downlineTmagId);
-  if (!artifact) {
-    throw new SponsorAccessError('NO_ARTIFACT', 'Discovery is not complete yet for this BA.');
-  }
-  if (!artifact.completedAt) {
-    throw new SponsorAccessError('NO_COMPLETED_AT', 'Discovery artifact has no completedAt timestamp.');
-  }
-
-  return {
-    downlineTmagId: args.downlineTmagId,
-    downlineFirstName: downlineInfo.firstName,
-    completedAt: artifact.completedAt,
-    answers: artifact.answers,
-    successProfile: artifact.successProfile,
-    audioUrl: artifact.audioUrl,
-    signedBy: artifact.successProfile.signedBy,
-  };
+  throw new SponsorAccessError(
+    'CONSENT_REQUIRED',
+    'Raw Steve profile access is unavailable without field-specific BA consent.',
+  );
 }

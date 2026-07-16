@@ -18,14 +18,16 @@ export const michaelRoutes: Router = express.Router();
 
 /** GET /api/michael/training-support/:downlineTmagId — sponsor-only.
  *  Sponsor reads derived training-support suggestions for a downline BA.
- *  Authoritative access check is server-side; 403 if not the direct sponsor,
- *  404 if no downline or no Steve discovery yet. */
+ *  Authoritative access check is server-side; all access/not-found failures
+ *  return one opaque 404. */
 michaelRoutes.get(
   '/training-support/:downlineTmagId',
   requireAuth,
   requireSteveComplete,
   async (req: Request, res: Response) => {
     const session = req.session!;
+    res.set('Cache-Control', 'private, no-store');
+    res.set('Pragma', 'no-cache');
     const downlineTmagId = String(req.params.downlineTmagId ?? '');
     if (!downlineTmagId) {
       res.status(400).json({ ok: false, error: 'Missing downlineTmagId.' });
@@ -39,12 +41,14 @@ michaelRoutes.get(
       res.json({ ok: true, card });
     } catch (err) {
       if (err instanceof TrainingSupportAccessError) {
-        const status = err.code === 'NOT_SPONSOR' ? 403 : 404;
-        res.status(status).json({ ok: false, error: err.message, code: err.code });
+        res.status(404).json({
+          ok: false,
+          error: 'Training-support card unavailable.',
+          code: 'TRAINING_SUPPORT_UNAVAILABLE',
+        });
         return;
       }
-      const msg = err instanceof Error ? err.message : 'unknown';
-      res.status(500).json({ ok: false, error: `Training-support read failed: ${msg}` });
+      res.status(500).json({ ok: false, error: 'Training-support read failed.' });
     }
   },
 );

@@ -127,7 +127,55 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     expect(chromaAdd?.[2]).toMatchObject({
       collection: 'mcs_steve_success_interview',
       ids: ['SD-TMAG-1'],
+      metadatas: [
+        {
+          discoveryId: 'SD-TMAG-1',
+          ownerTmagId: 'TMAG-1',
+          kind: 'steve_discovery',
+          retrievalEligible: false,
+        },
+      ],
     });
+    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('callSid');
+    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('sponsorTmagId');
+    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Primary why');
+    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Success vision');
+    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Learns by');
+    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Support areas');
+    expect(JSON.stringify(chromaAdd?.[2])).toContain(
+      'Profile content is canonical in MongoDB.',
+    );
+
+    const graphWrite = mocks.persistenceCall.mock.calls.find(
+      ([tool, action]) => tool === 'neo4j' && action === 'cypher',
+    );
+    expect(JSON.stringify(graphWrite?.[2])).not.toContain('callSid');
+    expect(JSON.stringify(graphWrite?.[2])).not.toContain('audioUrl');
+
+    const mongoUpdate = mocks.persistenceCall.mock.calls.find(
+      ([tool, action]) => tool === 'mongodb' && action === 'update',
+    );
+    expect(JSON.stringify(mongoUpdate?.[2])).not.toContain('callSid');
+    expect(JSON.stringify(mongoUpdate?.[2])).not.toContain('audioUrl');
+  });
+
+  it('stores no provider call identifier or audio URL on a new internal Steve record', async () => {
+    const store: Store = { ba: { ...BA }, discovery: null };
+    mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
+    mocks.writeKnowledge.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
+      store.discovery = { _id: input.id, ...input.mongoDoc };
+      return { mongo: { ok: true }, neo4j: { ok: true }, chroma: { ok: true, verified: true } };
+    });
+    const steve = await loadSteve();
+
+    const artifact = await steve.ingestDiscoveryArtifact(
+      makePayload({ callSid: 'CA-private', audioUrl: 'https://private.example/audio' }),
+    );
+
+    const write = mocks.writeKnowledge.mock.calls[0]?.[0] as { mongoDoc?: AnyRec } | undefined;
+    expect(write?.mongoDoc).toMatchObject({ callSid: null, audioUrl: null });
+    expect(artifact.callSid).toBeNull();
+    expect(artifact.audioUrl).toBeNull();
   });
 
   it('read-back throws READBACK_FAILED when the update did not apply content', async () => {
