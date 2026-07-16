@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T15:45:18.190Z",
+  "generatedAt": "2026-07-16T16:12:55.325Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -2524,17 +2524,17 @@
         },
         {
           "file": "server/src/routes/vm.ts",
-          "line": 370,
+          "line": 372,
           "source": "persistenceCall.mongodb.aggregate"
         },
         {
           "file": "server/src/routes/vm.ts",
-          "line": 416,
+          "line": 418,
           "source": "persistenceCall.mongodb.aggregate"
         },
         {
           "file": "server/src/routes/vm.ts",
-          "line": 445,
+          "line": 447,
           "source": "persistenceCall.mongodb.aggregate"
         }
       ]
@@ -2586,7 +2586,7 @@
         },
         {
           "file": "server/src/workers/vmDeliveryWorker.ts",
-          "line": 302,
+          "line": 307,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -6150,127 +6150,127 @@
         {
           "method": "GET",
           "path": "/lead-owners",
-          "line": 237
+          "line": 232
         },
         {
           "method": "POST",
           "path": "/lead-owners",
-          "line": 259
+          "line": 254
         },
         {
           "method": "GET",
           "path": "/lead-owners/:leadOwnerId",
-          "line": 273
+          "line": 268
         },
         {
           "method": "GET",
           "path": "/campaigns",
-          "line": 275
+          "line": 270
         },
         {
           "method": "POST",
           "path": "/campaigns",
-          "line": 287
+          "line": 282
         },
         {
           "method": "GET",
           "path": "/campaigns/:campaignId",
-          "line": 326
+          "line": 328
         },
         {
           "method": "PATCH",
           "path": "/campaigns/:campaignId/status",
-          "line": 338
+          "line": 340
         },
         {
           "method": "GET",
           "path": "/campaigns/:campaignId/metrics",
-          "line": 388
+          "line": 390
         },
         {
           "method": "GET",
           "path": "/campaigns/:campaignId/leads",
-          "line": 402
+          "line": 404
         },
         {
           "method": "GET",
           "path": "/campaigns/:campaignId/manual-export",
-          "line": 464
+          "line": 466
         },
         {
           "method": "POST",
           "path": "/lead-owners/:leadOwnerId/import",
-          "line": 516
+          "line": 518
         },
         {
           "method": "GET",
           "path": "/imports/:importJobId",
-          "line": 518
+          "line": 520
         },
         {
           "method": "PATCH",
           "path": "/campaigns/:campaignId/dial-mode",
-          "line": 535
+          "line": 537
         },
         {
           "method": "GET",
           "path": "/transfer-availability",
-          "line": 555
+          "line": 557
         },
         {
           "method": "PUT",
           "path": "/transfer-availability",
-          "line": 567
+          "line": 569
         },
         {
           "method": "GET",
           "path": "/raised-hands",
-          "line": 587
+          "line": 589
         },
         {
           "method": "POST",
           "path": "/inbound-calls/:inboundCallId/dismiss",
-          "line": 599
+          "line": 601
         },
         {
           "method": "GET",
           "path": "/pilot-readout",
-          "line": 610
+          "line": 612
         },
         {
           "method": "GET",
           "path": "/leads/:leadId",
-          "line": 626
+          "line": 628
         },
         {
           "method": "POST",
           "path": "/leads/:leadId/disposition",
-          "line": 668
+          "line": 670
         },
         {
           "method": "POST",
           "path": "/leads/:leadId/notes",
-          "line": 687
+          "line": 689
         },
         {
           "method": "POST",
           "path": "/leads/:leadId/follow-up",
-          "line": 706
+          "line": 708
         },
         {
           "method": "DELETE",
           "path": "/leads/:leadId/follow-up",
-          "line": 725
+          "line": 727
         },
         {
           "method": "POST",
           "path": "/leads/:leadId/invite",
-          "line": 736
+          "line": 738
         },
         {
           "method": "POST",
           "path": "/leads/:leadId/do-not-call",
-          "line": 762
+          "line": 764
         }
       ],
       "sharedTypes": [
@@ -12083,6 +12083,41 @@
       "name": "TmagProfilePatch",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsVmProviderAvailability",
+      "kind": "type",
+      "file": "packages/shared/src/vm-provider-catalog.ts"
+    },
+    {
+      "name": "McsVmProviderCatalogEntry",
+      "kind": "interface",
+      "file": "packages/shared/src/vm-provider-catalog.ts"
+    },
+    {
+      "name": "VM_CAMPAIGN_SELECTABLE_PROVIDER_KEYS",
+      "kind": "const",
+      "file": "packages/shared/src/vm-provider-catalog.ts"
+    },
+    {
+      "name": "VM_CAMPAIGN_SELECTABLE_PROVIDER_OPTIONS",
+      "kind": "const",
+      "file": "packages/shared/src/vm-provider-catalog.ts"
+    },
+    {
+      "name": "VM_PROVIDER_CATALOG",
+      "kind": "const",
+      "file": "packages/shared/src/vm-provider-catalog.ts"
+    },
+    {
+      "name": "VM_PROVIDER_LABELS",
+      "kind": "const",
+      "file": "packages/shared/src/vm-provider-catalog.ts"
+    },
+    {
+      "name": "VM_REGISTERED_PROVIDER_KEYS",
+      "kind": "const",
+      "file": "packages/shared/src/vm-provider-catalog.ts"
     }
   ],
   "summary": {
@@ -12092,6 +12127,6 @@
     "chromaCollections": 53,
     "routeModules": 49,
     "routeHandlers": 286,
-    "sharedExports": 1146
+    "sharedExports": 1153
   }
 }

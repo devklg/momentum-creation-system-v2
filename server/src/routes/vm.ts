@@ -42,6 +42,9 @@ import {
   setVMCampaignDialModeForOwner,
 } from '../domain/vmCampaigns.js';
 import { createManualImportJobs } from '../domain/vmProviderQueue.js';
+import {
+  VM_CAMPAIGN_SELECTABLE_PROVIDER_KEYS,
+} from '../services/vmProviders/index.js';
 import { buildManualExportCsv } from '../domain/vmManualExport.js';
 import {
   VmLiveTransferError,
@@ -84,14 +87,6 @@ export const vmRoutes: Router = Router();
 const MONGO_DB = 'momentum';
 const LEADS_COLLECTION = 'tmag_vm_bulk_leads';
 
-const PROVIDERS: readonly McsVMCampaignProviderMode[] = [
-  'manual_csv',
-  'telnyx_call_control',
-  'leadsrain_style_adapter',
-  'slybroadcast_style_adapter',
-  'future_telecom_adapter',
-];
-
 const CreateLeadOwnerSchema = z.object({
   name: z.string().min(1).max(160),
   source: z.string().min(1).max(120),
@@ -103,7 +98,7 @@ const CreateLeadOwnerSchema = z.object({
 const CreateCampaignSchema = z.object({
   leadOwnerId: z.string().min(4).max(120),
   name: z.string().min(1).max(160),
-  provider: z.enum(PROVIDERS as [McsVMCampaignProviderMode, ...McsVMCampaignProviderMode[]]).default('manual_csv'),
+  provider: z.enum(VM_CAMPAIGN_SELECTABLE_PROVIDER_KEYS).default('manual_csv'),
   voicemailAudioId: z.string().min(1).max(120).nullable().optional(),
   audioUrl: z.string().url().nullable().optional(),
   smsTemplateId: z.string().min(1).max(120).nullable().optional(),
@@ -287,6 +282,13 @@ vmRoutes.get('/campaigns', requireAuth, requireSteveComplete, requireVmDialerAcc
 vmRoutes.post('/campaigns', requireAuth, requireSteveComplete, requireVmDialerAccess, async (req, res) => {
   const tmagId = sessionTmagId(req);
   if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  const requestedProvider = req.body?.provider as unknown;
+  if (
+    requestedProvider !== undefined &&
+    !VM_CAMPAIGN_SELECTABLE_PROVIDER_KEYS.some((key) => key === requestedProvider)
+  ) {
+    return res.status(400).json({ ok: false, error: 'unsupported_provider' });
+  }
   const parsed = CreateCampaignSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ ok: false, error: 'invalid_payload', issues: parsed.error.issues });

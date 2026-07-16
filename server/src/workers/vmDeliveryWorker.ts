@@ -13,7 +13,6 @@ import {
   skipVmJob,
   updateLeadStatus,
   vmAudit,
-  type VmProviderKey,
   type VmQueueJob,
 } from '../domain/vmProviderQueue.js';
 import {
@@ -39,12 +38,12 @@ export function getVmDeliveryWorkerStatus() {
 
 interface DeliveryPayload extends Record<string, unknown> {
   leadId: string;
-  provider?: VmProviderKey;
+  provider?: unknown;
 }
 
 interface VmCampaignDoc {
   vmCampaignId: string;
-  provider?: VmProviderKey;
+  provider?: unknown;
   adminApprovedForLiveDelivery?: boolean;
   audioUrl?: string | null;
   status: McsVMCampaignRecord['status'];
@@ -119,13 +118,14 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
   try {
     const lead = await findLead(job.payload.leadId);
     if (!lead) throw new Error('lead_not_found');
+    const jobProvider = getVmProvider(job.payload.provider ?? env.VM_PROVIDER_MODE);
 
     // do_not_drop gate — FAIL CLOSED, before any campaign gate. A flagged
     // lead (explicit doNotDrop or leadType 'interviewed') can never receive
     // a delivery dispatch, regardless of campaign state or approval.
     if (isDoNotDropLead(lead)) {
       await recordDeliveryEvent({
-        provider: (job.payload.provider ?? env.VM_PROVIDER_MODE) as VmProviderKey,
+        provider: jobProvider.key,
         leadId: lead.leadId,
         vmCampaignId: lead.vmCampaignId,
         ownerTmagId: lead.ownerTmagId,
@@ -149,6 +149,13 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
 
     const campaign = await findCampaign(lead.vmCampaignId);
     if (!campaign) throw new Error('vm_campaign_not_found');
+    const campaignProvider =
+      campaign.provider === undefined || campaign.provider === null
+        ? null
+        : getVmProvider(campaign.provider);
+    const provider = getVmProvider(
+      job.payload.provider ?? campaignProvider?.key ?? env.VM_PROVIDER_MODE,
+    );
 
     const gate = await gateCampaignForDelivery(job, campaign);
     if (!gate.proceed) return;
@@ -163,7 +170,7 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
       const availability = await getTransferAvailability(lead.ownerTmagId);
       if (!availability.available || !availability.transferToNumber) {
         await recordDeliveryEvent({
-          provider: (job.payload.provider ?? campaign.provider ?? env.VM_PROVIDER_MODE) as VmProviderKey,
+          provider: provider.key,
           leadId: lead.leadId,
           vmCampaignId: lead.vmCampaignId,
           ownerTmagId: lead.ownerTmagId,
@@ -202,8 +209,6 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
       return;
     }
 
-    const providerKey = job.payload.provider ?? campaign?.provider ?? env.VM_PROVIDER_MODE;
-    const provider = getVmProvider(providerKey);
     const tokenUrl = `${env.PROSPECT_BASE_URL.replace(/\/$/, '')}/rvm/${lead.token}`;
     const adminApprovedForLiveDelivery = campaign?.adminApprovedForLiveDelivery === true;
     const dryRun = !env.VM_LIVE_DELIVERY_ENABLED || !adminApprovedForLiveDelivery || provider.key === 'manual_csv';

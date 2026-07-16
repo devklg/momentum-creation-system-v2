@@ -59,6 +59,10 @@ import type {
   McsVmLeadOwnerSource,
   McsVmLeadType,
 } from '@momentum/shared';
+import {
+  VM_CAMPAIGN_SELECTABLE_PROVIDER_OPTIONS,
+  VM_PROVIDER_LABELS,
+} from '@momentum/shared';
 import type { McsVmCampaignDialFields, McsVmDialMode } from '@momentum/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,24 +85,6 @@ interface ImportJobView {
   counts: McsVmCampaignMetrics | null;
   error: string | null;
 }
-
-const PROVIDER_OPTIONS: Array<{ value: McsVmCampaignProvider; label: string; help: string }> = [
-  { value: 'manual_csv', label: 'Manual CSV', help: 'Owner export, no live dialer.' },
-  { value: 'acquisition_provider_placeholder', label: 'Provider placeholder', help: 'Dry-run acquisition adapter.' },
-  { value: 'telnyx_call_control', label: 'Telnyx Call Control', help: 'Live-capable only after admin approval.' },
-  { value: 'leadsrain_style_adapter', label: 'LeadsRain-style adapter', help: 'Provider-mode integration.' },
-  { value: 'slybroadcast_style_adapter', label: 'Slybroadcast-style adapter', help: 'Provider-mode integration.' },
-];
-
-const PROVIDER_LABEL: Record<McsVmCampaignProvider, string> = {
-  manual_csv: 'Manual CSV',
-  acquisition_provider_placeholder: 'Provider placeholder',
-  telnyx_call_control: 'Telnyx Call Control',
-  leadsrain_style_adapter: 'LeadsRain-style adapter',
-  slybroadcast_style_adapter: 'Slybroadcast-style adapter',
-  future_telecom_adapter: 'Future telecom adapter',
-  none: 'None',
-};
 
 const STATUS_LABEL: Record<McsVmCampaignStatus, string> = {
   draft: 'Draft',
@@ -831,7 +817,7 @@ function CampaignList({
                   <div className="min-w-0">
                     <p className="truncate text-[15px] leading-[1.25] text-cream">{campaign.name}</p>
                     <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-cream-faint">
-                      {STATUS_LABEL[campaign.status]} / {PROVIDER_LABEL[campaign.provider]}
+                      {STATUS_LABEL[campaign.status]} / {VM_PROVIDER_LABELS[campaign.provider]}
                     </p>
                   </div>
                   <LiveBadge campaign={campaign} compact />
@@ -1005,7 +991,10 @@ function CampaignCreateCard({
           label="Provider"
           value={provider}
           onChange={(value) => setProvider(value as McsVmCampaignProvider)}
-          options={PROVIDER_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+          options={VM_CAMPAIGN_SELECTABLE_PROVIDER_OPTIONS.map((option) => ({
+            value: option.key,
+            label: option.label,
+          }))}
         />
         <div>
           <Label htmlFor="campaignAudio">Audio URL</Label>
@@ -1083,7 +1072,7 @@ function CampaignDetail({
             {campaign.name}
           </h2>
           <p className="mt-2 text-[14px] leading-[1.55] text-cream-mute">
-            {leadOwner?.name ?? campaign.leadOwnerId} / {PROVIDER_LABEL[campaign.provider]}
+            {leadOwner?.name ?? campaign.leadOwnerId} / {VM_PROVIDER_LABELS[campaign.provider]}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

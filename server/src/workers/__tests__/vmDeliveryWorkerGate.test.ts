@@ -23,10 +23,13 @@ vi.mock('../../services/tieredWrite.js', () => ({
 }));
 
 vi.mock('../../services/vmProviders/index.js', () => ({
-  getVmProvider: () => ({
-    key: 'telnyx_call_control',
-    sendDrop: mocks.sendDrop,
-  }),
+  getVmProvider: (key: unknown) => {
+    if (key === 'invalid_provider') throw new Error('unsupported_vm_provider');
+    return {
+      key: 'telnyx_call_control',
+      sendDrop: mocks.sendDrop,
+    };
+  },
 }));
 
 const lead = {
@@ -58,14 +61,18 @@ const lead = {
   updatedAt: '2026-07-09T00:00:00.000Z',
 };
 
-function campaign(status: McsVMCampaignRecord['status'], scheduledAt: string | null = null) {
+function campaign(
+  status: McsVMCampaignRecord['status'],
+  scheduledAt: string | null = null,
+  provider: string = 'telnyx_call_control',
+) {
   return {
     vmCampaignId: 'vm_1',
     ownerTmagId: 'TMBA-1',
     sponsorTmagId: 'TMBA-1',
     leadOwnerId: 'lo_1',
     name: 'VM Test',
-    provider: 'telnyx_call_control',
+    provider,
     status,
     voicemailAudioId: null,
     audioUrl: 'https://example.com/audio.mp3',
@@ -79,7 +86,9 @@ function campaign(status: McsVMCampaignRecord['status'], scheduledAt: string | n
   };
 }
 
-function job(): VmQueueJob<{ leadId: string; vmCampaignId: string }> {
+function job(
+  provider?: string,
+): VmQueueJob<{ leadId: string; vmCampaignId: string; provider?: string }> {
   return {
     jobId: 'job_1',
     kind: 'delivery',
@@ -91,7 +100,11 @@ function job(): VmQueueJob<{ leadId: string; vmCampaignId: string }> {
     completedAt: null,
     failedAt: null,
     failureReason: null,
-    payload: { leadId: 'lead_1', vmCampaignId: 'vm_1' },
+    payload: {
+      leadId: 'lead_1',
+      vmCampaignId: 'vm_1',
+      ...(provider ? { provider } : {}),
+    },
     createdAt: '2026-07-09T00:00:00.000Z',
     updatedAt: '2026-07-09T00:00:00.000Z',
   };
@@ -223,5 +236,61 @@ describe('VM delivery worker campaign gate', () => {
         }),
       }),
     ]);
+  });
+
+  it('fails closed on a malformed durable provider before a campaign requeue branch', async () => {
+    arrange(campaign('draft', null, 'invalid_provider'));
+    const { dispatchVmDeliveryJobForTest } = await import('../vmDeliveryWorker.js');
+
+    await dispatchVmDeliveryJobForTest(job());
+
+    expect(mocks.sendDrop).not.toHaveBeenCalled();
+    expect(mongoUpdates()).toContainEqual([
+      'mongodb',
+      'update',
+      expect.objectContaining({
+        collection: 'tmag_vm_queue_jobs',
+        update: expect.objectContaining({
+          $set: expect.objectContaining({
+            status: 'queued',
+            failureReason: 'unsupported_vm_provider',
+          }),
+        }),
+      }),
+    ]);
+    const deliveryEventWrites = mocks.writeOperational.mock.calls.filter(
+      ([input]) =>
+        (input as { mongoCollection?: string }).mongoCollection ===
+        'tmag_vm_delivery_events',
+    );
+    expect(deliveryEventWrites).toHaveLength(0);
+  });
+
+  it('does not let a valid job provider mask a malformed durable campaign provider', async () => {
+    arrange(campaign('draft', null, 'invalid_provider'));
+    const { dispatchVmDeliveryJobForTest } = await import('../vmDeliveryWorker.js');
+
+    await dispatchVmDeliveryJobForTest(job('telnyx_call_control'));
+
+    expect(mocks.sendDrop).not.toHaveBeenCalled();
+    expect(mongoUpdates()).toContainEqual([
+      'mongodb',
+      'update',
+      expect.objectContaining({
+        collection: 'tmag_vm_queue_jobs',
+        update: expect.objectContaining({
+          $set: expect.objectContaining({
+            status: 'queued',
+            failureReason: 'unsupported_vm_provider',
+          }),
+        }),
+      }),
+    ]);
+    const deliveryEventWrites = mocks.writeOperational.mock.calls.filter(
+      ([input]) =>
+        (input as { mongoCollection?: string }).mongoCollection ===
+        'tmag_vm_delivery_events',
+    );
+    expect(deliveryEventWrites).toHaveLength(0);
   });
 });
