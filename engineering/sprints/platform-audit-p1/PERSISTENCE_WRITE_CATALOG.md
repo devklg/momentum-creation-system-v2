@@ -6,7 +6,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T13:56:27.473Z
+- Generated: 2026-07-16T14:06:05.076Z
 - Production `tripleStackWrite` call sites: 2
 - Graph-critical: 0
 - Knowledge: 2

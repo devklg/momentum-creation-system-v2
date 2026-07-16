@@ -1,0 +1,12 @@
+{
+  "controls": {
+    "repairButtons": 0,
+    "headingFound": true,
+    "reportOnlyFound": true,
+    "coverageFound": true,
+    "nodesFound": true,
+    "relationshipsFound": true,
+    "horizontalOverflow": false
+  },
+  "consoleErrors": []
+}

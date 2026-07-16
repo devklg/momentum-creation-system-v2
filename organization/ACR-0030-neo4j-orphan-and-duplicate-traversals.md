@@ -170,6 +170,21 @@ authorizing implementation and local/read-only verification on
 Approval does not authorize a live graph mutation, constraint/index apply,
 automatic repair, sponsor/pool semantic expansion, or external communication.
 
+## Fallback visual verification
+
+On 2026-07-16 the production `ConsistencyPage` component passed fallback visual
+QA at desktop, tablet, mobile, small-mobile, and 200% reflow using deterministic,
+read-only API fixtures matching the dedicated-stack observation. The report-only
+policy, 2,527-node and 18,057-relationship topology counts, 41/41 coverage, zero
+findings, zero degraded traversals, absence of repair/apply/delete/merge controls,
+and zero browser console errors were verified. Evidence is stored in
+`engineering/audits/p2-136-visual-qa/`.
+
+The trusted in-app route browser remained unavailable, so trusted route QA is not
+represented as passed. This fallback evidence does not itself authorize merge,
+graph mutation, repair, constraint/index apply, or any expansion of approved
+scope.
+
 ## Structured record
 
 ```json
