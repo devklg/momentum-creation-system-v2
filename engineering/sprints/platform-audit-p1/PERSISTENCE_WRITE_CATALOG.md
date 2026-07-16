@@ -6,10 +6,10 @@
 
 ## Summary
 
-- Generated: 2026-07-16T21:51:11.044Z
-- Production `tripleStackWrite` call sites: 2
+- Generated: 2026-07-16T23:54:36.391Z
+- Production `tripleStackWrite` call sites: 3
 - Graph-critical: 0
-- Knowledge: 2
+- Knowledge: 3
 - Operational: 0
 - Excludes tests/spec files. Includes `server/src/**/*.ts` and `server/scripts/**/*.ts`.
 
@@ -23,5 +23,6 @@
 
 | # | Tier | Subsystem | Location | Function | Mongo collection expression | Neo4j | Chroma | Rationale |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | knowledge | approved_knowledge | `server/src/services/knowledge/knowledgeCorrectionStore.ts:131` | `insertCorrection` | `CORRECTION_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
-| 2 | knowledge | approved_knowledge | `server/src/services/knowledge/knowledgeCorrectionStore.ts:254` | `createAndVerifyApprovalDecision` | `DECISION_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
+| 1 | knowledge | agent_context | `server/src/domain/steveVersioning.ts:251` | `archiveSteveDiscoveryVersion` | `VERSIONS_COLLECTION` | yes | yes | Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context. |
+| 2 | knowledge | approved_knowledge | `server/src/services/knowledge/knowledgeCorrectionStore.ts:131` | `insertCorrection` | `CORRECTION_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
+| 3 | knowledge | approved_knowledge | `server/src/services/knowledge/knowledgeCorrectionStore.ts:254` | `createAndVerifyApprovalDecision` | `DECISION_COLLECTION` | yes | yes | Approved knowledge and candidate knowledge must project durably to graph/search. |
