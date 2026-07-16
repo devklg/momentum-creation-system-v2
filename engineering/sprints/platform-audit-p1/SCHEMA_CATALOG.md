@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-14T20:59:19.971Z
+- Generated: 2026-07-16T13:32:16.349Z
 - Mongo collections: 74
 - Neo4j labels: 83
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
 - Route handlers: 286
-- Shared exports: 1141
+- Shared exports: 1146
 
 ## Mongo Collections
 
@@ -1044,6 +1044,7 @@
 | `McsAdminConsistencyReconciliationIssue` | interface | `packages/shared/src/types.ts` |
 | `McsAdminConsistencyReconciliationSpec` | interface | `packages/shared/src/types.ts` |
 | `McsAdminConsistencyReportResponse` | interface | `packages/shared/src/types.ts` |
+| `McsAdminConsistencyReportV2` | interface | `packages/shared/src/types.ts` |
 | `McsAdminConsistencyTotals` | interface | `packages/shared/src/types.ts` |
 | `McsAdminCreateBaPayload` | interface | `packages/shared/src/types.ts` |
 | `McsAdminCreateBaResponse` | interface | `packages/shared/src/types.ts` |
@@ -1067,6 +1068,10 @@
 | `McsAdminEditProspectResponse` | interface | `packages/shared/src/types.ts` |
 | `McsAdminEnrollmentRow` | interface | `packages/shared/src/types.ts` |
 | `McsAdminEntitlementAuditResponse` | interface | `packages/shared/src/types.ts` |
+| `McsAdminGraphIntegrityFindingClass` | type | `packages/shared/src/types.ts` |
+| `McsAdminGraphIntegrityReport` | interface | `packages/shared/src/types.ts` |
+| `McsAdminGraphIntegrityStatus` | type | `packages/shared/src/types.ts` |
+| `McsAdminGraphIntegrityTraversal` | interface | `packages/shared/src/types.ts` |
 | `McsAdminLaunchReadinessResponse` | interface | `packages/shared/src/types.ts` |
 | `McsAdminLaunchReadinessRow` | interface | `packages/shared/src/types.ts` |
 | `McsAdminLeaderGroupOption` | interface | `packages/shared/src/types.ts` |

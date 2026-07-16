@@ -4,12 +4,12 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import type {
-  McsAdminConsistencyReportResponse,
+  McsAdminConsistencyReportV2,
   McsAdminCrmIntegrityReportResponse,
 } from '@momentum/shared';
 
 export function ConsistencyPage() {
-  const [data, setData] = useState<McsAdminConsistencyReportResponse | null>(null);
+  const [data, setData] = useState<McsAdminConsistencyReportV2 | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [crmIntegrity, setCrmIntegrity] = useState<McsAdminCrmIntegrityReportResponse | null>(null);
@@ -23,7 +23,7 @@ export function ConsistencyPage() {
           fetch('/api/admin/consistency/report', { credentials: 'include' }),
           fetch('/api/admin/consistency/crm-integrity', { credentials: 'include' }),
         ]);
-        const body = (await res.json()) as McsAdminConsistencyReportResponse & {
+        const body = (await res.json()) as McsAdminConsistencyReportV2 & {
           error?: string;
         };
         if (!res.ok || !body.ok) {
@@ -109,6 +109,64 @@ export function ConsistencyPage() {
                   row.lastError ?? 'not captured',
                 ])}
                 empty="No stale or failed projections."
+              />
+            </Panel>
+          </section>
+
+          <section className="mb-8">
+            <Panel title="Neo4j Topology Integrity · Report Only">
+              <div className="flex flex-col gap-2 mb-5 text-sm text-cream-mute">
+                <p>
+                  Static, bounded traversals inspect projection topology without repair, constraint
+                  application, or business-truth inference. Samples are SHA-256 identity fingerprints only.
+                </p>
+                <p className="font-mono text-[10px] tracking-label uppercase text-cream-faint">
+                  Policy: {data.graphIntegrity.repairPolicy.replace('_', ' ')}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 xl:grid-cols-6 gap-3 mb-5">
+                <Metric
+                  label="Graph Status"
+                  value={data.graphIntegrity.status.toUpperCase()}
+                  tone={graphTone(data.graphIntegrity.status)}
+                />
+                <Metric
+                  label="Nodes"
+                  value={displayCount(data.graphIntegrity.topology.nodes)}
+                  tone={data.graphIntegrity.topology.nodes === null ? 'yellow' : 'green'}
+                />
+                <Metric
+                  label="Relationships"
+                  value={displayCount(data.graphIntegrity.topology.relationships)}
+                  tone={data.graphIntegrity.topology.relationships === null ? 'yellow' : 'green'}
+                />
+                <Metric
+                  label="Findings"
+                  value={String(data.graphIntegrity.totals.findings)}
+                  tone={data.graphIntegrity.totals.findings > 0 ? 'red' : 'green'}
+                />
+                <Metric
+                  label="Coverage"
+                  value={`${data.graphIntegrity.coverage.completed}/${data.graphIntegrity.coverage.expected}`}
+                  tone={data.graphIntegrity.coverage.degraded > 0 ? 'yellow' : 'green'}
+                />
+                <Metric
+                  label="Degraded"
+                  value={String(data.graphIntegrity.coverage.degraded)}
+                  tone={data.graphIntegrity.coverage.degraded > 0 ? 'yellow' : 'green'}
+                />
+              </div>
+              <DenseTable
+                headers={['Traversal', 'Class', 'Severity', 'Status', 'Count', 'Fingerprints']}
+                rows={data.graphIntegrity.traversals.map((row) => [
+                  row.label,
+                  row.findingClass,
+                  row.severity,
+                  row.status,
+                  String(row.exactCount),
+                  row.error ?? (row.sampleFingerprints.join(', ') || 'none'),
+                ])}
+                empty="No graph-integrity traversal evidence was returned."
               />
             </Panel>
           </section>
@@ -201,6 +259,18 @@ export function ConsistencyPage() {
       )}
     </div>
   );
+}
+
+function displayCount(value: number | null): string {
+  return value === null ? 'N/A' : value.toLocaleString();
+}
+
+function graphTone(
+  status: McsAdminConsistencyReportV2['graphIntegrity']['status'],
+): 'green' | 'yellow' | 'red' {
+  if (status === 'clear') return 'green';
+  if (status === 'degraded' || status === 'truncated') return 'yellow';
+  return 'red';
 }
 
 function Metric({

@@ -2,7 +2,7 @@
 
 ## Momentum Creation System V2
 
-Status: Proposed
+Status: Approved
 
 Priority: P2-136 — Neo4j graph traversals for orphan and duplicate detection
 
@@ -10,7 +10,7 @@ Type: Read-only graph integrity observation + Kevin-only consistency evidence
 
 Risk: Medium
 
-Approval: Required — Kevin L. Gardner
+Approval: Approved by Kevin L. Gardner on 2026-07-16
 
 Target Version: v1.2
 
@@ -163,8 +163,8 @@ repair, migration, constraint removal, or projection rebuild.
 
 ## Approval requested
 
-Approve the recommended ACR-0030 bundle to authorize implementation and
-local/read-only verification on
+Kevin L. Gardner approved the recommended ACR-0030 bundle on 2026-07-16,
+authorizing implementation and local/read-only verification on
 `codex/p2-136-neo4j-orphan-duplicate`.
 
 Approval does not authorize a live graph mutation, constraint/index apply,
@@ -176,7 +176,7 @@ automatic repair, sponsor/pool semantic expansion, or external communication.
 {
   "acr_id": "ACR-0030",
   "title": "Neo4j Orphan and Duplicate Traversals",
-  "status": "proposed",
+  "status": "approved",
   "risk_level": "medium",
   "change_type": "read_only_graph_integrity_observer",
   "proposed_by": "Codex",
@@ -210,7 +210,7 @@ automatic repair, sponsor/pool semantic expansion, or external communication.
       "Kevin L. Gardner",
       "Persistence/Graph/QA"
     ],
-    "decision": "pending"
+    "decision": "approved_by_kevin_2026_07_16"
   },
   "implementation": {
     "branch": "codex/p2-136-neo4j-orphan-duplicate",
@@ -234,6 +234,6 @@ automatic repair, sponsor/pool semantic expansion, or external communication.
   },
   "decision_ledger_ref": null,
   "created_at": "2026-07-14",
-  "updated_at": "2026-07-14"
+  "updated_at": "2026-07-16"
 }
 ```

@@ -6395,3 +6395,59 @@ export interface McsSteveTailoredGuidance {
 export interface McsTeamLaunchCenterResponse {
   guidance: McsSteveTailoredGuidance;
 }
+
+/* ─── P2-136 read-only Neo4j graph-integrity observation ───────────────── */
+export type McsAdminGraphIntegrityStatus =
+  | 'clear'
+  | 'findings'
+  | 'degraded'
+  | 'truncated';
+
+export type McsAdminGraphIntegrityFindingClass =
+  | 'missing_identity'
+  | 'duplicate_identity'
+  | 'missing_required_anchor'
+  | 'ambiguous_required_anchor'
+  | 'duplicate_parallel_edge';
+
+export interface McsAdminGraphIntegrityTraversal {
+  key: string;
+  label: string;
+  findingClass: McsAdminGraphIntegrityFindingClass;
+  severity: 'warning' | 'critical';
+  status: McsAdminGraphIntegrityStatus;
+  exactCount: number;
+  sampleLimit: number;
+  sampleFingerprints: string[];
+  error: string | null;
+}
+
+export interface McsAdminGraphIntegrityReport {
+  generatedAt: McsIsoTimestamp;
+  status: McsAdminGraphIntegrityStatus;
+  repairPolicy: 'report_only';
+  sampleLimit: number;
+  topology: {
+    nodes: number | null;
+    relationships: number | null;
+  };
+  coverage: {
+    expected: number;
+    completed: number;
+    degraded: number;
+  };
+  totals: {
+    findings: number;
+    missingIdentity: number;
+    duplicateIdentity: number;
+    missingRequiredAnchor: number;
+    ambiguousRequiredAnchor: number;
+    duplicateParallelEdge: number;
+  };
+  traversals: McsAdminGraphIntegrityTraversal[];
+  degradedReasons: string[];
+}
+
+export interface McsAdminConsistencyReportV2 extends McsAdminConsistencyReportResponse {
+  graphIntegrity: McsAdminGraphIntegrityReport;
+}

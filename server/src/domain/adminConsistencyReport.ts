@@ -5,7 +5,7 @@ import type {
   McsAdminConsistencyOverall,
   McsAdminConsistencyProjectionRow,
   McsAdminConsistencyReconciliationIssue,
-  McsAdminConsistencyReportResponse,
+  McsAdminConsistencyReportV2,
 } from '@momentum/shared';
 import {
   runCrossStoreReconciliation,
@@ -13,6 +13,7 @@ import {
   type ReconciliationRowResult,
 } from './crossStoreReconciliation.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
+import { observeNeo4jGraphIntegrity } from './neo4jGraphIntegrity.js';
 
 const MONGO_DB = 'momentum';
 const OUTBOX_COLLECTION = 'tmag_projection_outbox';
@@ -55,6 +56,7 @@ export interface AdminConsistencyReportOptions {
   limitPerSpec?: number;
   orphanLimit?: number;
   staleProjectionMinutes?: number;
+  graphSampleLimit?: number;
   now?: () => Date;
   persistence?: Persistence;
 }
@@ -235,7 +237,7 @@ function overall(args: {
 
 export async function buildAdminConsistencyReport(
   options: AdminConsistencyReportOptions = {},
-): Promise<McsAdminConsistencyReportResponse> {
+): Promise<McsAdminConsistencyReportV2> {
   const now = options.now?.() ?? new Date();
   const persistence = options.persistence ?? persistenceCall;
   const limitPerSpec = Math.max(1, Math.floor(options.limitPerSpec ?? DEFAULT_LIMIT_PER_SPEC));
@@ -246,7 +248,7 @@ export async function buildAdminConsistencyReport(
   );
 
   const warnings: string[] = [];
-  const [reconciliation, outboxResult, orphanCategories] = await Promise.all([
+  const [reconciliation, outboxResult, orphanCategories, graphIntegrity] = await Promise.all([
     runCrossStoreReconciliation({
       limitPerSpec,
       persistence,
@@ -259,12 +261,18 @@ export async function buildAdminConsistencyReport(
       return [] as OutboxDoc[];
     }),
     Promise.all(ORPHAN_SPECS.map((spec) => orphanCategory(spec, orphanLimit, persistence))),
+    observeNeo4jGraphIntegrity({
+      persistence,
+      sampleLimit: options.graphSampleLimit,
+      now: () => now,
+    }),
   ]);
 
   for (const spec of reconciliation.specs) warnings.push(...spec.warnings);
   for (const category of orphanCategories) {
     if (category.error) warnings.push(`${category.label}: ${category.error}`);
   }
+  warnings.push(...graphIntegrity.degradedReasons.map((reason) => `Graph integrity: ${reason}`));
 
   const halfWrites = halfWriteRows(reconciliation);
   const staleProjections = projectionRows(outboxResult, now, staleProjectionMinutes);
@@ -307,5 +315,6 @@ export async function buildAdminConsistencyReport(
     staleProjections,
     orphanCategories,
     warnings,
+    graphIntegrity,
   };
 }

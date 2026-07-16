@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T20:59:17.095Z",
+  "generatedAt": "2026-07-16T13:32:13.821Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -6866,7 +6866,7 @@
       "id": "GET /api/admin/consistency/crm-integrity",
       "method": "GET",
       "fullPath": "/api/admin/consistency/crm-integrity",
-      "routeSource": "server/src/routes/admin/consistency.ts:61",
+      "routeSource": "server/src/routes/admin/consistency.ts:69",
       "mountPath": "/api/admin/consistency",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "admin",

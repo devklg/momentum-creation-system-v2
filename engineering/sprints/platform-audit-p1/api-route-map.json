@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T20:59:17.025Z",
+  "generatedAt": "2026-07-16T13:32:13.761Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -3787,7 +3787,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/consistency.ts:61",
+      "source": "server/src/routes/admin/consistency.ts:69",
       "routeSource": "server/src/routes/admin/consistency.ts",
       "signals": {
         "requireAuth": false,

@@ -29,6 +29,7 @@ adminConsistencyRoutes.get('/report', requireAdmin, async (req, res) => {
     const payload = await buildAdminConsistencyReport({
       limitPerSpec: positiveNumber(req.query.limitPerSpec, 25),
       orphanLimit: positiveNumber(req.query.orphanLimit, 25),
+      graphSampleLimit: positiveNumber(req.query.graphSampleLimit, 25),
     });
 
     await appendAuditEntry({
@@ -40,6 +41,13 @@ adminConsistencyRoutes.get('/report', requireAdmin, async (req, res) => {
         generatedAt: payload.generatedAt,
         overall: payload.overall,
         totals: payload.totals,
+        graphIntegrity: {
+          status: payload.graphIntegrity.status,
+          topology: payload.graphIntegrity.topology,
+          coverage: payload.graphIntegrity.coverage,
+          totals: payload.graphIntegrity.totals,
+          repairPolicy: payload.graphIntegrity.repairPolicy,
+        },
       },
       reason: null,
       context: {
