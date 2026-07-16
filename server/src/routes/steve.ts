@@ -29,6 +29,7 @@ import {
   MCS_STEVE_CORRECTABLE_PROFILE_LIST_FIELDS,
   MCS_STEVE_CORRECTABLE_PROFILE_TEXT_FIELDS,
   MCS_STEVE_CORRECTION_CONFIRMATION,
+  MCS_STEVE_RETAKE_CONFIRMATION,
   MCS_STEVE_WITHDRAW_CONFIRMATION,
 } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
@@ -60,6 +61,10 @@ import {
   correctStevePrivateRecord,
   SteveCorrectionError,
 } from '../domain/steveCorrection.js';
+import {
+  startSteveRetake,
+  SteveVersioningError,
+} from '../domain/steveVersioning.js';
 
 export const steveRoutes: Router = express.Router();
 
@@ -99,7 +104,7 @@ function handleStevePrivacyError(err: unknown, res: Response): boolean {
 function handleSteveCorrectionError(err: unknown, res: Response): boolean {
   if (!(err instanceof SteveCorrectionError)) return false;
   const status =
-    err.code === 'STALE_REVISION'
+    err.code === 'STALE_REVISION' || err.code === 'RETAKE_IN_PROGRESS'
       ? 409
       : err.code === 'INVALID_TARGET' || err.code === 'INVALID_REPLACEMENT'
         ? 400
@@ -124,6 +129,21 @@ function handleSteveCorrectionError(err: unknown, res: Response): boolean {
           : status === 404
             ? 'STEVE_CORRECTION_UNAVAILABLE'
             : 'STEVE_CORRECTION_FAILED',
+  });
+  return true;
+}
+
+function handleSteveVersioningError(err: unknown, res: Response): boolean {
+  if (!(err instanceof SteveVersioningError)) return false;
+  const status = err.code === 'NO_PROFILE' ? 404 : 500;
+  res.status(status).json({
+    ok: false,
+    error:
+      status === 404
+        ? 'A completed Steve profile is required before a retake.'
+        : 'Steve retake could not start.',
+    code:
+      status === 404 ? 'STEVE_PROFILE_REQUIRED' : 'STEVE_RETAKE_FAILED',
   });
   return true;
 }
@@ -308,6 +328,43 @@ steveRoutes.put(
     } catch (err) {
       if (handleSteveCorrectionError(err, res)) return;
       res.status(500).json({ ok: false, error: 'Steve correction failed.' });
+    }
+  },
+);
+
+const RetakeBody = z.object({
+  confirmation: z.literal(MCS_STEVE_RETAKE_CONFIRMATION),
+});
+
+/** POST /api/steve/discovery/retake — begin a versioned BA-owned retake.
+ *  The current completed profile remains active until the replacement is
+ *  complete; no ordinary deletion endpoint exists. */
+steveRoutes.post(
+  '/discovery/retake',
+  requireAuth,
+  requireSteveComplete,
+  async (req: Request, res: Response) => {
+    markPrivate(res);
+    const parsed = RetakeBody.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      res.status(400).json({
+        ok: false,
+        error: 'Retake confirmation is required.',
+      });
+      return;
+    }
+    try {
+      const result = await startSteveRetake(req.session!.tmagId);
+      res.json({
+        ok: true,
+        retakeSessionId: result.retakeSession.sessionId,
+        profileVersion: result.profileVersion,
+        startedAt: result.retakeSession.startedAt,
+        auditEntryId: result.auditEntryId,
+      });
+    } catch (err) {
+      if (handleSteveVersioningError(err, res)) return;
+      res.status(500).json({ ok: false, error: 'Steve retake could not start.' });
     }
   },
 );

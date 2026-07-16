@@ -79,6 +79,7 @@ const CLASSIFICATION_RULES = [
       file.endsWith('/agents/orchestrator.ts') ||
       file.endsWith('/recruitingCycle.ts') ||
       file.endsWith('/steve-success-interview.ts') ||
+      file.endsWith('/steveVersioning.ts') ||
       file.endsWith('/questionnaire.ts') ||
       file.endsWith('/training.ts'),
   },

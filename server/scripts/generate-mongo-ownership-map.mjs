@@ -77,6 +77,7 @@ const OWNER_RULES = [
       c.startsWith('tmag_agent_') ||
       c === 'tmag_ivory_prospect_names' ||
       c === 'tmag_steve_success_interview' ||
+      c === 'tmag_steve_success_interview_versions' ||
       c === 'tmag_recruiting_cycles' ||
       c === 'tmag_fast_start_progress' ||
       c === 'tmag_commitments' ||

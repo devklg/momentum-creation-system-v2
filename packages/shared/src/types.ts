@@ -6460,4 +6460,13 @@ export interface McsAdminConsistencyReportV2 extends McsAdminConsistencyReportRe
 export interface McsSteveDiscoveryArtifact {
   correctionRevision?: number;
   lastCorrectedAt?: McsIsoTimestamp | null;
+  /** Major interview version. Edits increment correctionRevision; a completed
+   * retake increments profileVersion and becomes the active action plan. */
+  profileVersion?: number;
+}
+
+/** Additive P2-141 retake state. The current completed artifact remains the
+ * active action plan until the in-progress retake completes successfully. */
+export interface McsSteveDiscoveryView {
+  retakeInProgress?: boolean;
 }

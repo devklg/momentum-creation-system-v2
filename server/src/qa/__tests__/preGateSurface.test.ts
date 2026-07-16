@@ -85,6 +85,7 @@ const ALLOWED_STEVE_GATED_PRE_GATE_PATHS = new Set([
   '/api/steve/discovery/privacy/consent',
   '/api/steve/discovery/privacy/withdraw',
   '/api/steve/discovery/profile/:downlineTmagId',
+  '/api/steve/discovery/retake',
 ]);
 
 function routeMap(): ApiRouteMap {

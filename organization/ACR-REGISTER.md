@@ -44,6 +44,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0029 | Governed Knowledge Correction and Supersession | P2-135 / Knowledge lifecycle correction | Approved | v1.2 |
 | ACR-0030 | Neo4j Orphan and Duplicate Traversals | P2-136 / Neo4j topology integrity | Approved | v1.2 |
 | ACR-0031 | Steve Profile Retention and Visibility | P2-141 / Steve private-data lifecycle | Approved | v1.2 |
+| ACR-0032 | Steve Interview Versioning and Durable Retention | P2-141 / Steve plan-of-action continuity | Approved | v1.3 |
 
 ---
 

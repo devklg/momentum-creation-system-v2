@@ -103,6 +103,7 @@ One route /p/{token}, two faces by token state.
 - [x] State 3 â€” Complete (gold check, answer readback, signed-by, CTA to Fast Start) (#134 wf_0040)
 - [x] Fallbacks (no-answer + reschedule, invalid-number banner, page-close resume via /state refetch, STT-fail audio) (#134 wf_0041)
 - [x] Upline cockpit event card (answers + audio link + support tags, SPONSOR-ONLY server-enforced, no classification) (#134 wf_0042)
+- [x] ACR-0032 durable interview versioning: BA-confirmed edits and retakes preserve prior versions; the current plan remains active until replacement completion; no ordinary delete path (P2-141)
 - [x] RECONCILED 2026-06-24: old Michael scoring/classification is retired. No Builder / Emerging Leader / Part-Time Producer / Casual Participant labels. Steve conducts New BA Discovery + Success Interview and creates the Success Profile without scoring, ranking, or predicting. Michael receives that context and acts as the Training Agent and Daily Success Coach: clarify, support, answer questions, build confidence, prepare for action, and route the BA into orientation + Launch Center. Everyone receives the same opportunity, tools, training, and support; actions and outcomes determine results.
 - DEP RESOLVED (#147): Michael's interview content = full 29-Q script (was "5 prompts open"); call-timing immediate-vs-delay (Kevin chose scheduler)
 

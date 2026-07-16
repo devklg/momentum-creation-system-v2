@@ -9,7 +9,7 @@ MongoDB, Neo4j, and ChromaDB.
 Kevin approved ACR-0031 and separately authorized PR #353, which merged on
 2026-07-16. That baseline hardened the private read and storage boundaries.
 
-Draft PR #355 implements the approved current-record controls that do not
+PR #355 merged the approved current-record controls that do not
 require historical mutation:
 
 - authenticated BA self-export of the current transcript, answers, Success
@@ -31,9 +31,12 @@ require historical mutation:
   recommendation value with optimistic revision control, content-free audit
   evidence, projection read-back, and rollback on failure.
 
-The item remains partial. BA-requested private-content deletion, the
-deletion/onboarding-gate and tombstone behavior, provider activation evidence,
-and historical reconciliation remain separate visible work.
+ACR-0032 supersedes the deletion and destructive-correction portion of
+ACR-0031. The interview is durable plan-of-action input: ordinary deletion is
+not exposed, corrections preserve the prior confirmed revision, retakes are
+versioned, and the previous completed profile remains active until replacement
+completion. Provider activation evidence and historical reconciliation remain
+separate visible work.
 
 No production record was read, changed, deleted, re-indexed, or backfilled.
 No external communication or provider call occurred.
@@ -49,9 +52,9 @@ No external communication or provider call occurred.
 | Steve worker | Completion acknowledgement | Worker secret | Minimal receipt; no artifact echo; bounded arrays |
 | Context Manager | Governed interview-support knowledge query | Internal Steve runtime | Fixed governed query; no BA turn text |
 | Retrieval cache | Query identity | Process-local | SHA-256 query digest instead of plaintext |
-| MongoDB | Canonical artifact and embedded privacy state | Server persistence | BA-owned canonical record; create-only ordinary ingest; new records store null provider/audio fields; historical values are not exposed or silently purged |
-| Neo4j | Discovery relationship/lineage and content-free privacy state | Internal relationship projection | New writes omit call identifier, audio URL, and unconditional sponsor-visibility edges |
-| ChromaDB | Triple-stack completion marker and content-free privacy state | No active content consumer found | Documents remain content-free and retrieval-ineligible; privacy projection preserves completion metadata |
+| MongoDB | Canonical artifact, embedded privacy state, and prior confirmed revisions | Server persistence | Stable current record plus full BA-private immutable version snapshots; new records store null provider/audio fields |
+| Neo4j | Discovery relationship, version lineage, and content-free privacy state | Internal relationship projection | Version/status metadata only; no transcript, answers, or profile text |
+| ChromaDB | Triple-stack completion/version markers and content-free privacy state | No unrestricted private-content consumer | Documents remain content-free and retrieval-ineligible; only separately approved support projections may carry content |
 | `.com` | None | Prohibited | Static boundary remains: no Steve profile route or content |
 
 ## Preserved boundaries
@@ -79,9 +82,9 @@ No external communication or provider call occurred.
   identity, timestamps, signatures, provider fields, and internal resource
   links remain immutable. Ordinary re-ingest remains create-only and returns a
   conflict rather than silently replacing private content.
-- Private-content deletion remains open because the approved ACR does not yet
-  resolve whether deletion preserves onboarding completion or reopens the Steve
-  gate; the minimal tombstone/read-back flow must be designed with that answer.
+- ACR-0032 removes ordinary private-content deletion from the product. The BA
+  may edit or retake; prior confirmed revisions are preserved, and the current
+  completed profile remains active until a replacement retake completes.
 - New-record post-completion event-body compaction is implemented. It removes
   the entire private payload from only that BA's Steve conversation events
   after canonical artifact read-back, retains content-free compaction facts,
@@ -105,7 +108,7 @@ withdrawal, export minimization, projection/audit rollback, create-only ingest,
 route opacity, exact confirmed correction, stale-revision rejection, private
 audit minimization, correction rollback, and the `.team` privacy controls.
 
-Current verification: 2,285 server tests passed / 19 skipped; 73 team tests
+Current verification: 2,291 server tests passed / 19 skipped; 74 team tests
 passed; repo typecheck passed; production build passed; 255 routes produced
 zero access findings; the `.com` scan covered 34 files with zero violations;
 generated catalogs and freshness are current. Responsive fallback component
@@ -120,3 +123,11 @@ Additional fallback actual-component voice-privacy QA passed at desktop,
 tablet, 390px, 360px, and 200% reflow with the typed fallback and privacy notice
 visible, zero horizontal overflow, and zero browser exceptions. It did not
 request microphone permission or invoke speech.
+
+ACR-0032 fallback actual-component QA is recorded at
+`engineering/audits/p2-141-retake-visual-qa/`. The production Success Profile
+passed at 1440 × 900 and 390 × 844 with the active version, continuity copy,
+retake confirmation, preserved-version correction copy, and no delete control
+visible; both captures had zero horizontal overflow and zero runtime errors.
+The in-app browser setup failed, so this is not represented as trusted-route
+QA.

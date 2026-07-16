@@ -1,0 +1,32 @@
+{
+  "reviewedAt": "2026-07-16",
+  "surface": "SteveSuccessInterviewPage",
+  "fixture": "synthetic_read_only_completed_profile",
+  "trustedRoute": false,
+  "captures": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "horizontalOverflow": false,
+      "retakeControlVisible": true,
+      "activeVersionVisible": true,
+      "currentPlanContinuityCopyVisible": true,
+      "deleteControlVisible": false
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false,
+      "retakeControlVisible": true,
+      "activeVersionVisible": true,
+      "currentPlanContinuityCopyVisible": true,
+      "deleteControlVisible": false
+    }
+  ],
+  "consoleErrors": 0,
+  "writesPerformed": false,
+  "providerCallsPerformed": false
+}
+

@@ -107,7 +107,9 @@ function discovery() {
 
 interface Store {
   discovery: AnyRec;
+  versions: Map<string, AnyRec>;
   graph: AnyRec;
+  graphVersions: Map<string, AnyRec>;
   chroma: Map<string, { document: string; metadata: AnyRec }>;
 }
 
@@ -116,6 +118,11 @@ function makePersistence(store: Store) {
     if (tool === 'mongodb' && action === 'query') {
       if (params.collection === 'tmag_steve_success_interview') {
         return { documents: [structuredClone(store.discovery)], count: 1 };
+      }
+      if (params.collection === 'tmag_steve_success_interview_versions') {
+        const id = ((params.filter ?? {}) as AnyRec)._id as string;
+        const row = store.versions.get(id);
+        return { documents: row ? [structuredClone(row)] : [], count: row ? 1 : 0 };
       }
       if (params.collection === 'tmag_recruiting_cycles') {
         return {
@@ -128,6 +135,15 @@ function makePersistence(store: Store) {
           count: 1,
         };
       }
+    }
+    if (
+      tool === 'mongodb' &&
+      action === 'insert' &&
+      params.collection === 'tmag_steve_success_interview_versions'
+    ) {
+      const rows = params.documents as AnyRec[];
+      rows.forEach((row) => store.versions.set(String(row._id), structuredClone(row)));
+      return { insertedCount: rows.length };
     }
     if (
       tool === 'mongodb' &&
@@ -156,10 +172,23 @@ function makePersistence(store: Store) {
     if (tool === 'neo4j' && action === 'cypher') {
       const query = params.query as string;
       const queryParams = (params.params ?? {}) as AnyRec;
+      if (query.includes('TmagSteveDiscoveryVersion') && query.includes('MERGE')) {
+        store.graphVersions.set(String(queryParams.versionId), {
+          ownerTmagId: queryParams.ownerTmagId,
+          profileVersion: queryParams.profileVersion,
+          correctionRevision: queryParams.correctionRevision,
+        });
+        return { records: [] };
+      }
+      if (query.includes('TmagSteveDiscoveryVersion') && query.includes('RETURN')) {
+        const row = store.graphVersions.get(String(queryParams.versionId));
+        return { records: row ? [structuredClone(row)] : [] };
+      }
       if (query.includes('SET d.correctionRevision')) {
         store.graph = {
           correctionRevision: queryParams.correctionRevision,
           lastCorrectedAt: queryParams.lastCorrectedAt,
+          profileVersion: queryParams.profileVersion,
         };
         return { records: [] };
       }
@@ -167,6 +196,9 @@ function makePersistence(store: Store) {
         return { records: [structuredClone(store.graph)] };
       }
       return { records: [] };
+    }
+    if (tool === 'chromadb' && action === 'list_collections') {
+      return { collections: [{ name: 'mcs_steve_success_interview' }] };
     }
     if (tool === 'chromadb' && action === 'add') {
       const ids = params.ids as string[];
@@ -207,11 +239,13 @@ beforeEach(() => {
   mocks.appendAuditEntry.mockResolvedValue({ entryId: 'audit-correction' });
 });
 
-describe('ACR-0031 Steve BA-confirmed correction', () => {
+describe('ACR-0032 Steve versioned BA-confirmed correction', () => {
   it('replaces one private value, updates the why projection, and audits only field paths', async () => {
     const store: Store = {
       discovery: discovery(),
+      versions: new Map(),
       graph: {},
+      graphVersions: new Map(),
       chroma: new Map(),
     };
     store.chroma.set('rc_TMAG-BA', {
@@ -235,6 +269,11 @@ describe('ACR-0031 Steve BA-confirmed correction', () => {
       (store.discovery.successProfile as AnyRec).primaryWhy,
     ).toMatchObject({ statement: NEW_PRIVATE });
     expect(store.discovery.correctionRevision).toBe(1);
+    const archived = store.versions.get('SD-TMAG-BA-v1-r0');
+    expect(archived?.successProfile).toMatchObject({
+      primaryWhy: { statement: OLD_PRIVATE },
+    });
+    expect(store.chroma.get('SD-TMAG-BA-v1-r0')?.document).not.toContain(OLD_PRIVATE);
     expect(result.changedFieldPaths).toEqual([
       'successProfile.primaryWhy.statement',
     ]);
@@ -261,7 +300,9 @@ describe('ACR-0031 Steve BA-confirmed correction', () => {
   it('rejects a stale revision before any persistent write', async () => {
     const store: Store = {
       discovery: { ...discovery(), correctionRevision: 2 },
+      versions: new Map(),
       graph: {},
+      graphVersions: new Map(),
       chroma: new Map(),
     };
     mocks.persistenceCall.mockImplementation(makePersistence(store));
@@ -290,7 +331,9 @@ describe('ACR-0031 Steve BA-confirmed correction', () => {
   it('rolls the canonical value and why projection back when the audit append fails', async () => {
     const store: Store = {
       discovery: discovery(),
+      versions: new Map(),
       graph: {},
+      graphVersions: new Map(),
       chroma: new Map(),
     };
     store.chroma.set('rc_TMAG-BA', {
@@ -324,7 +367,9 @@ describe('ACR-0031 Steve BA-confirmed correction', () => {
   it('rejects a target that no longer exists without changing the record', async () => {
     const store: Store = {
       discovery: discovery(),
+      versions: new Map(),
       graph: {},
+      graphVersions: new Map(),
       chroma: new Map(),
     };
     mocks.persistenceCall.mockImplementation(makePersistence(store));

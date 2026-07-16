@@ -37,10 +37,22 @@ import type {
   McsSteveSuccessProfile,
   McsSteveTranscriptChunk,
 } from '@momentum/shared';
-import { MCS_STEVE_PRIVACY_POLICY_VERSION } from '@momentum/shared';
+import {
+  MCS_STEVE_PRIVACY_POLICY_VERSION,
+  MCS_STEVE_SPONSOR_CONSENT_FIELDS,
+} from '@momentum/shared';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeKnowledge } from '../services/tieredWrite.js';
 import { defaultStevePrivacyState } from './stevePrivacy.js';
+import { appendAuditEntry } from './auditLog.js';
+import {
+  activeRetakeSession,
+  archiveSteveDiscoveryVersion,
+  correctionRevisionOf,
+  profileVersionOf,
+  STEVE_VERSIONING_POLICY_VERSION,
+  type SteveRetakeSession,
+} from './steveVersioning.js';
 
 /** Provenance literal stamped on Steve artifacts. */
 export const STEVE_SIGNED_BY = 'Steve Success · New BA Discovery & Success Interview';
@@ -55,7 +67,8 @@ interface SteveEventBodyCompactionEligibility {
   policyVersion: typeof MCS_STEVE_PRIVACY_POLICY_VERSION;
   eventKind: typeof STEVE_DISCOVERY_CHAT_KIND;
   boundaryCompletedAt: string;
-  scope: 'new_record_only';
+  scope: 'new_record_only' | 'active_session';
+  sessionId?: string | null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -410,6 +423,8 @@ interface PersistedDiscovery extends McsSteveDiscoveryArtifact {
   eventBodyCompaction?: SteveEventBodyCompactionEligibility;
   correctionRevision?: number;
   lastCorrectedAt?: string | null;
+  profileVersion?: number;
+  retakeSession?: SteveRetakeSession | null;
 }
 
 async function getBaSponsor(tmagId: string): Promise<{
@@ -455,11 +470,16 @@ function stripPersisted(doc: PersistedDiscovery): McsSteveDiscoveryArtifact {
     audioUrl: null,
     correctionRevision: doc.correctionRevision ?? 0,
     lastCorrectedAt: doc.lastCorrectedAt ?? null,
+    profileVersion: profileVersionOf(doc),
   };
 }
 
 function derivePhase(artifact: PersistedDiscovery | null): McsSteveDiscoveryPhase {
-  return artifact ? 'complete' : 'awaiting_call';
+  return artifact
+    ? activeRetakeSession(artifact)
+      ? 'call_in_progress'
+      : 'complete'
+    : 'awaiting_call';
 }
 
 /** Build the BA's own discovery view (self-read). */
@@ -470,6 +490,7 @@ export async function buildDiscoveryView(tmagId: string): Promise<McsSteveDiscov
     phase: derivePhase(artifact),
     transcript: artifact ? artifact.transcript : [],
     artifact: artifact ? stripPersisted(artifact) : null,
+    retakeInProgress: activeRetakeSession(artifact) !== null,
   };
 }
 
@@ -499,7 +520,7 @@ export class DiscoveryIngestError extends Error {
   }
 }
 
-function isNewRecordEventCompactionEligible(
+function isEventCompactionEligible(
   discovery: PersistedDiscovery,
 ): discovery is PersistedDiscovery & {
   eventBodyCompaction: SteveEventBodyCompactionEligibility;
@@ -509,7 +530,8 @@ function isNewRecordEventCompactionEligible(
     eligibility?.eligible === true &&
     eligibility.policyVersion === MCS_STEVE_PRIVACY_POLICY_VERSION &&
     eligibility.eventKind === STEVE_DISCOVERY_CHAT_KIND &&
-    eligibility.scope === 'new_record_only' &&
+    (eligibility.scope === 'new_record_only' ||
+      (eligibility.scope === 'active_session' && Boolean(eligibility.sessionId))) &&
     eligibility.boundaryCompletedAt === discovery.completedAt
   );
 }
@@ -527,9 +549,13 @@ export async function compactSteveConversationEventBodies(args: {
   tmagId: string;
   discoveryId: string;
   boundaryCompletedAt: string;
+  sessionId?: string | null;
 }): Promise<{ matchedCount: number; modifiedCount: number; compactedAt: string }> {
   const compactedAt = new Date().toISOString();
   let update: { matchedCount?: number; modifiedCount?: number };
+  const sessionFilter = args.sessionId
+    ? { 'payload.sessionId': args.sessionId }
+    : {};
 
   try {
     update = await persistenceCall<{ matchedCount?: number; modifiedCount?: number }>(
@@ -542,6 +568,7 @@ export async function compactSteveConversationEventBodies(args: {
           tmagId: args.tmagId,
           agentId: 'steve',
           kind: STEVE_DISCOVERY_CHAT_KIND,
+          ...sessionFilter,
           $or: [
             { payload: { $exists: true } },
             { 'contentCompaction.state': { $ne: 'compacted' } },
@@ -566,6 +593,7 @@ export async function compactSteveConversationEventBodies(args: {
               policyVersion: MCS_STEVE_PRIVACY_POLICY_VERSION,
               discoveryId: args.discoveryId,
               boundaryCompletedAt: args.boundaryCompletedAt,
+              sessionId: args.sessionId ?? null,
               compactedAt,
             },
           },
@@ -581,6 +609,21 @@ export async function compactSteveConversationEventBodies(args: {
 
   let residual: { count?: number };
   try {
+    const residualConditions = [
+      { payload: { $exists: true } },
+      { 'contentCompaction.state': { $ne: 'compacted' } },
+      {
+        'contentCompaction.policyVersion': {
+          $ne: MCS_STEVE_PRIVACY_POLICY_VERSION,
+        },
+      },
+      { 'contentCompaction.discoveryId': { $ne: args.discoveryId } },
+      {
+        'contentCompaction.boundaryCompletedAt': {
+          $ne: args.boundaryCompletedAt,
+        },
+      },
+    ];
     residual = await persistenceCall<{ count?: number }>('mongodb', 'query', {
       database: 'momentum',
       collection: STEVE_EVENTS_COLLECTION,
@@ -588,21 +631,19 @@ export async function compactSteveConversationEventBodies(args: {
         tmagId: args.tmagId,
         agentId: 'steve',
         kind: STEVE_DISCOVERY_CHAT_KIND,
-        $or: [
-          { payload: { $exists: true } },
-          { 'contentCompaction.state': { $ne: 'compacted' } },
-          {
-            'contentCompaction.policyVersion': {
-              $ne: MCS_STEVE_PRIVACY_POLICY_VERSION,
-            },
-          },
-          { 'contentCompaction.discoveryId': { $ne: args.discoveryId } },
-          {
-            'contentCompaction.boundaryCompletedAt': {
-              $ne: args.boundaryCompletedAt,
-            },
-          },
-        ],
+        ...(args.sessionId
+          ? {
+              $and: [
+                {
+                  $or: [
+                    { 'payload.sessionId': args.sessionId },
+                    { 'contentCompaction.sessionId': args.sessionId },
+                  ],
+                },
+                { $or: residualConditions },
+              ],
+            }
+          : { $or: residualConditions }),
       },
       projection: { _id: 1 },
       limit: 1,
@@ -638,6 +679,8 @@ function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Recor
       'MERGE (d:TmagSteveDiscovery {discoveryId: $id}) ' +
       'SET d.completedAt = $completedAt, d.signedBy = $signedBy, ' +
       'd.privacyStatus = $privacyStatus, d.privacyPolicyVersion = $privacyPolicyVersion, ' +
+      'd.profileVersion = $profileVersion, d.correctionRevision = $correctionRevision, ' +
+      'd.retakeStatus = $retakeStatus, d.retakeSessionId = $retakeSessionId, ' +
       'd.eventBodiesCompactionEligible = $eventBodiesCompactionEligible, ' +
       'd.eventBodyCompactionPolicyVersion = $eventBodyCompactionPolicyVersion ' +
       'MERGE (b)-[:HAD_STEVE_DISCOVERY]->(d)',
@@ -648,6 +691,10 @@ function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Recor
       signedBy: a.successProfile.signedBy,
       privacyStatus: a.privacy?.status ?? 'active',
       privacyPolicyVersion: a.privacy?.policyVersion ?? 'acr-0031.v1',
+      profileVersion: profileVersionOf(a),
+      correctionRevision: correctionRevisionOf(a),
+      retakeStatus: activeRetakeSession(a)?.status ?? 'not_in_progress',
+      retakeSessionId: activeRetakeSession(a)?.sessionId ?? null,
       eventBodiesCompactionEligible: a.eventBodyCompaction?.eligible === true,
       eventBodyCompactionPolicyVersion:
         a.eventBodyCompaction?.policyVersion ?? MCS_STEVE_PRIVACY_POLICY_VERSION,
@@ -657,6 +704,229 @@ function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Recor
 
 function chromaDocForDiscovery(_a: PersistedDiscovery): string {
   return 'Private Steve discovery completion marker. Profile content is canonical in MongoDB.';
+}
+
+interface DiscoveryChromaGetResult {
+  ids?: string[];
+  metadatas?: Array<Record<string, unknown>>;
+}
+
+async function writeCurrentDiscoveryProjection(artifact: PersistedDiscovery): Promise<void> {
+  const cy = discoveryCypher(artifact);
+  const retake = activeRetakeSession(artifact);
+  const consentedFieldCount = MCS_STEVE_SPONSOR_CONSENT_FIELDS.filter(
+    (field) => artifact.privacy.sponsorConsent[field].granted,
+  ).length;
+  await ensureDiscoveriesCollection();
+  await persistenceCall('neo4j', 'cypher', {
+    query: cy.cypher,
+    params: cy.params,
+  });
+  await persistenceCall('chromadb', 'add', {
+    collection: CHROMA_DISCOVERIES,
+    ids: [artifact._id],
+    documents: [chromaDocForDiscovery(artifact)],
+    metadatas: [
+      {
+        discoveryId: artifact._id,
+        ownerTmagId: artifact.tmagId,
+        completedAt: artifact.completedAt ?? '',
+        kind: 'steve_discovery',
+        retrievalEligible: false,
+        privacyStatus: artifact.privacy.status,
+        privacyPolicyVersion: artifact.privacy.policyVersion,
+        consentedFieldCount,
+        profileVersion: profileVersionOf(artifact),
+        correctionRevision: correctionRevisionOf(artifact),
+        retakeStatus: retake?.status ?? 'not_in_progress',
+        retakeSessionId: retake?.sessionId ?? '',
+        versioningPolicyVersion: STEVE_VERSIONING_POLICY_VERSION,
+        eventBodiesCompactionEligible:
+          artifact.eventBodyCompaction?.eligible === true,
+        eventBodyCompactionPolicyVersion:
+          artifact.eventBodyCompaction?.policyVersion ??
+          MCS_STEVE_PRIVACY_POLICY_VERSION,
+      },
+    ],
+  });
+
+  const [graph, chroma] = await Promise.all([
+    persistenceCall<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
+      query:
+        'MATCH (d:TmagSteveDiscovery {discoveryId: $discoveryId}) ' +
+        'RETURN d.profileVersion AS profileVersion, ' +
+        'd.correctionRevision AS correctionRevision, d.retakeStatus AS retakeStatus',
+      params: { discoveryId: artifact._id },
+    }),
+    persistenceCall<DiscoveryChromaGetResult>('chromadb', 'get', {
+      collection: CHROMA_DISCOVERIES,
+      ids: [artifact._id],
+      include_documents: false,
+    }),
+  ]);
+  const graphRow = graph.records?.[0];
+  const chromaIndex = chroma.ids?.indexOf(artifact._id) ?? -1;
+  const chromaRow = chromaIndex >= 0 ? chroma.metadatas?.[chromaIndex] : undefined;
+  const expectedRetakeStatus = retake?.status ?? 'not_in_progress';
+  if (
+    Number(graphRow?.profileVersion) !== profileVersionOf(artifact) ||
+    Number(graphRow?.correctionRevision) !== correctionRevisionOf(artifact) ||
+    graphRow?.retakeStatus !== expectedRetakeStatus ||
+    Number(chromaRow?.profileVersion) !== profileVersionOf(artifact) ||
+    Number(chromaRow?.correctionRevision) !== correctionRevisionOf(artifact) ||
+    chromaRow?.retakeStatus !== expectedRetakeStatus
+  ) {
+    throw new DiscoveryIngestError(
+      'READBACK_FAILED',
+      'Steve current profile projection did not read back.',
+    );
+  }
+}
+
+async function replaceDiscoveryFromRetake(args: {
+  existing: PersistedDiscovery;
+  replacement: PersistedDiscovery;
+  retakeSessionId: string;
+}): Promise<McsSteveDiscoveryArtifact> {
+  const retake = activeRetakeSession(args.existing);
+  if (!retake || retake.sessionId !== args.retakeSessionId) {
+    throw new DiscoveryIngestError(
+      'RETAKE_NOT_ACTIVE',
+      'A matching Steve retake is not active.',
+    );
+  }
+  const profileVersion = profileVersionOf(args.existing) + 1;
+  const completedAt = args.replacement.completedAt ?? new Date().toISOString();
+  const next: PersistedDiscovery = {
+    ...args.replacement,
+    _id: args.existing._id,
+    sponsorTmagId: args.existing.sponsorTmagId,
+    privacy: args.existing.privacy,
+    profileVersion,
+    correctionRevision: 0,
+    lastCorrectedAt: null,
+    completedAt,
+    retakeSession: null,
+    eventBodyCompaction: {
+      eligible: true,
+      policyVersion: MCS_STEVE_PRIVACY_POLICY_VERSION,
+      eventKind: STEVE_DISCOVERY_CHAT_KIND,
+      boundaryCompletedAt: completedAt,
+      scope: 'active_session',
+      sessionId: args.retakeSessionId,
+    },
+  };
+
+  await archiveSteveDiscoveryVersion({
+    discovery: args.existing,
+    reason: 'retake',
+    supersededAt: completedAt,
+  });
+
+  const update = await persistenceCall<{ matchedCount?: number }>('mongodb', 'update', {
+    database: 'momentum',
+    collection: DISCOVERIES_COLLECTION,
+    filter: {
+      _id: args.existing._id,
+      tmagId: args.existing.tmagId,
+      'retakeSession.sessionId': args.retakeSessionId,
+    },
+    update: {
+      $set: {
+        sponsorTmagId: next.sponsorTmagId,
+        callSid: null,
+        startedAt: next.startedAt,
+        completedAt: next.completedAt,
+        transcript: next.transcript,
+        answers: next.answers,
+        successProfile: next.successProfile,
+        audioUrl: null,
+        privacy: next.privacy,
+        profileVersion,
+        correctionRevision: 0,
+        lastCorrectedAt: null,
+        retakeSession: null,
+        eventBodyCompaction: next.eventBodyCompaction,
+      },
+    },
+  });
+  if (update.matchedCount !== 1) {
+    throw new DiscoveryIngestError('RETAKE_STALE', 'The Steve retake state changed.');
+  }
+
+  let canonicalPromoted = false;
+  let completionAudited = false;
+  try {
+    await writeCurrentDiscoveryProjection(next);
+    const readback = await getDiscoveryByTmagId(next.tmagId);
+    if (
+      !readback ||
+      profileVersionOf(readback) !== profileVersion ||
+      correctionRevisionOf(readback) !== 0 ||
+      readback.completedAt !== next.completedAt ||
+      activeRetakeSession(readback) !== null
+    ) {
+      throw new DiscoveryIngestError(
+        'READBACK_FAILED',
+        'The completed Steve retake did not read back.',
+      );
+    }
+    canonicalPromoted = true;
+    await appendAuditEntry({
+      actor: {
+        kind: 'ba',
+        tmagId: next.tmagId,
+        displayName: next.tmagId,
+      },
+      action: 'ba.steve_profile.retake_completed',
+      entity: {
+        kind: 'brand_ambassador',
+        id: next.tmagId,
+        displayLabel: 'Steve Success Profile',
+      },
+      severity: 'info',
+      before: {
+        profileVersion: profileVersionOf(args.existing),
+        correctionRevision: correctionRevisionOf(args.existing),
+      },
+      after: {
+        profileVersion,
+        correctionRevision: 0,
+        versioningPolicyVersion: STEVE_VERSIONING_POLICY_VERSION,
+      },
+    });
+    completionAudited = true;
+    await compactSteveConversationEventBodies({
+      tmagId: next.tmagId,
+      discoveryId: next._id,
+      boundaryCompletedAt: completedAt,
+      sessionId: args.retakeSessionId,
+    });
+    return stripPersisted(readback);
+  } catch (error) {
+    // Once the canonical replacement and its audit fact are durable, a
+    // compaction failure must not resurrect the prior plan or discard the
+    // completed retake. The explicit eligibility marker allows a safe retry.
+    if (
+      canonicalPromoted &&
+      completionAudited &&
+      error instanceof DiscoveryIngestError &&
+      error.code === 'EVENT_COMPACTION_FAILED'
+    ) {
+      throw error;
+    }
+    const restoreFields: Record<string, unknown> = { ...args.existing };
+    delete restoreFields._id;
+    await persistenceCall('mongodb', 'update', {
+      database: 'momentum',
+      collection: DISCOVERIES_COLLECTION,
+      filter: { _id: next._id, tmagId: next.tmagId, profileVersion },
+      update: { $set: restoreFields },
+    });
+    await writeCurrentDiscoveryProjection(args.existing);
+    if (error instanceof DiscoveryIngestError) throw error;
+    throw new DiscoveryIngestError('RETAKE_FAILED', 'Steve retake did not complete.');
+  }
 }
 
 /**
@@ -669,6 +939,7 @@ function chromaDocForDiscovery(_a: PersistedDiscovery): string {
  */
 export async function ingestDiscoveryArtifact(
   payload: McsSteveDiscoveryIngestPayload,
+  options: { retakeSessionId?: string | null } = {},
 ): Promise<McsSteveDiscoveryArtifact> {
   const baInfo = await getBaSponsor(payload.tmagId);
   if (!baInfo) {
@@ -708,6 +979,10 @@ export async function ingestDiscoveryArtifact(
     successProfile,
     audioUrl: null,
     privacy: defaultStevePrivacyState(),
+    profileVersion: 1,
+    correctionRevision: 0,
+    lastCorrectedAt: null,
+    retakeSession: null,
     eventBodyCompaction: {
       eligible: true,
       policyVersion: MCS_STEVE_PRIVACY_POLICY_VERSION,
@@ -720,11 +995,19 @@ export async function ingestDiscoveryArtifact(
   const cy = discoveryCypher(artifact);
   const existing = await getDiscoveryByTmagId(payload.tmagId);
   if (existing) {
-    if (isNewRecordEventCompactionEligible(existing)) {
+    if (options.retakeSessionId) {
+      return replaceDiscoveryFromRetake({
+        existing,
+        replacement: artifact,
+        retakeSessionId: options.retakeSessionId,
+      });
+    }
+    if (isEventCompactionEligible(existing)) {
       await compactSteveConversationEventBodies({
         tmagId: existing.tmagId,
         discoveryId: existing._id,
         boundaryCompletedAt: existing.eventBodyCompaction.boundaryCompletedAt,
+        sessionId: existing.eventBodyCompaction.sessionId ?? null,
       });
       if (existing.completedAt === payload.completedAt) {
         return stripPersisted(existing);
@@ -755,6 +1038,11 @@ export async function ingestDiscoveryArtifact(
           privacyStatus: artifact.privacy.status,
           privacyPolicyVersion: artifact.privacy.policyVersion,
           consentedFieldCount: 0,
+          profileVersion: 1,
+          correctionRevision: 0,
+          retakeStatus: 'not_in_progress',
+          retakeSessionId: '',
+          versioningPolicyVersion: STEVE_VERSIONING_POLICY_VERSION,
           eventBodiesCompactionEligible: true,
           eventBodyCompactionPolicyVersion: MCS_STEVE_PRIVACY_POLICY_VERSION,
         },
@@ -766,11 +1054,12 @@ export async function ingestDiscoveryArtifact(
     // authorize content-free event-body compaction for the winning artifact.
     const raced = await getDiscoveryByTmagId(payload.tmagId);
     if (raced) {
-      if (isNewRecordEventCompactionEligible(raced)) {
+      if (isEventCompactionEligible(raced)) {
         await compactSteveConversationEventBodies({
           tmagId: raced.tmagId,
           discoveryId: raced._id,
           boundaryCompletedAt: raced.eventBodyCompaction.boundaryCompletedAt,
+          sessionId: raced.eventBodyCompaction.sessionId ?? null,
         });
         if (raced.completedAt === payload.completedAt) {
           return stripPersisted(raced);
@@ -793,7 +1082,7 @@ export async function ingestDiscoveryArtifact(
     !readback ||
     readback._id !== id ||
     readback.completedAt !== artifact.completedAt ||
-    !isNewRecordEventCompactionEligible(readback)
+    !isEventCompactionEligible(readback)
   ) {
     throw new DiscoveryIngestError(
       'READBACK_FAILED',

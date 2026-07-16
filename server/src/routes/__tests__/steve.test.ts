@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   MCS_STEVE_CORRECTION_CONFIRMATION,
+  MCS_STEVE_RETAKE_CONFIRMATION,
   MCS_STEVE_SPONSOR_CONSENT_GRANT_COPY,
   MCS_STEVE_SPONSOR_CONSENT_REVOCATION_COPY,
   MCS_STEVE_WITHDRAW_CONFIRMATION,
@@ -10,6 +11,7 @@ import * as steveDomain from '../../domain/steve-success-interview.js';
 import * as steveCorrection from '../../domain/steveCorrection.js';
 import * as steveRuntime from '../../domain/steveConversationRuntime.js';
 import * as stevePrivacy from '../../domain/stevePrivacy.js';
+import * as steveVersioning from '../../domain/steveVersioning.js';
 import { steveRoutes } from '../steve.js';
 
 type HttpMethod = 'get' | 'post' | 'put';
@@ -66,6 +68,11 @@ afterEach(() => {
 });
 
 describe('Steve route gate contract', () => {
+  it('exposes no ordinary Steve interview deletion route', () => {
+    expect(() => findRoute('post', '/discovery/delete')).toThrow();
+    expect(() => findRoute('post', '/discovery/privacy/delete')).toThrow();
+  });
+
   it.each([
     ['get', '/discovery/state'],
     ['get', '/discovery/script'],
@@ -89,6 +96,7 @@ describe('Steve route gate contract', () => {
     ['get', '/discovery/privacy'],
     ['get', '/discovery/export'],
     ['put', '/discovery/correction'],
+    ['post', '/discovery/retake'],
     ['put', '/discovery/privacy/consent'],
     ['post', '/discovery/privacy/withdraw'],
   ] as const)('requires a completed authenticated BA profile for %s %s', (method, path) => {
@@ -143,6 +151,48 @@ describe('Steve route behavior', () => {
       },
     },
   };
+
+  it('requires exact confirmation and starts a versioned retake for the current BA', async () => {
+    const invalid = mockResponse();
+    await finalHandler('post', '/discovery/retake')(
+      {
+        session: { tmagId: 'TMAG-001' },
+        body: { confirmation: 'delete and start over' },
+      } as unknown as Request,
+      invalid,
+    );
+    expect(invalid.statusCode).toBe(400);
+
+    vi.spyOn(steveVersioning, 'startSteveRetake').mockResolvedValueOnce({
+      retakeSession: {
+        sessionId: 'steve_retake_123',
+        status: 'in_progress',
+        startedAt: '2026-07-16T03:00:00.000Z',
+        baseProfileVersion: 2,
+        policyVersion: 'acr-0032.v1',
+      },
+      profileVersion: 2,
+      auditEntryId: 'audit-retake',
+    });
+    const response = mockResponse();
+    await finalHandler('post', '/discovery/retake')(
+      {
+        session: { tmagId: 'TMAG-001' },
+        body: { confirmation: MCS_STEVE_RETAKE_CONFIRMATION },
+      } as unknown as Request,
+      response,
+    );
+
+    expect(steveVersioning.startSteveRetake).toHaveBeenCalledWith('TMAG-001');
+    expect(response.body).toEqual({
+      ok: true,
+      retakeSessionId: 'steve_retake_123',
+      profileVersion: 2,
+      startedAt: '2026-07-16T03:00:00.000Z',
+      auditEntryId: 'audit-retake',
+    });
+    expect(response.set).toHaveBeenCalledWith('Cache-Control', 'private, no-store');
+  });
 
   it.each(['awaiting_call', 'complete'] as const)(
     'returns the authenticated BA discovery state for phase %s',
