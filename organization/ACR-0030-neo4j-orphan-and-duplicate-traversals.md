@@ -185,6 +185,16 @@ represented as passed. This fallback evidence does not itself authorize merge,
 graph mutation, repair, constraint/index apply, or any expansion of approved
 scope.
 
+## Fallback visual acceptance and merge authority
+
+On 2026-07-16 Kevin L. Gardner explicitly accepted the P2-136 fallback visual
+evidence and authorized PR #342 to merge.
+
+This acceptance resolves only the unavailable trusted-route visual gate and the
+merge gate for the reviewed implementation. It does not authorize graph
+mutation, repair, constraint/index apply, sponsor/pool semantic expansion, or
+external communication.
+
 ## Structured record
 
 ```json

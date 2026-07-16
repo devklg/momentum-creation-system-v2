@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T14:06:00.488Z
+- Generated: 2026-07-16T14:38:43.794Z
 - Routes: 250
 - Findings: 0
 
