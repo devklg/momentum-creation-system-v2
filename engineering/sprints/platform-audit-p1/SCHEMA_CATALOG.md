@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T19:56:27.878Z
+- Generated: 2026-07-16T20:21:34.824Z
 - Mongo collections: 74
 - Neo4j labels: 83
 - Neo4j relationships: 68
@@ -47,7 +47,7 @@
 | `tmag_admin_settings` | permissive_mongoose_schema | yes | 3 |
 | `tmag_admin_sponsor_overrides` | permissive_mongoose_schema | yes | 2 |
 | `tmag_agent_michael_events` | permissive_mongoose_schema | yes | 1 |
-| `tmag_agent_steve_events` | permissive_mongoose_schema | yes | 2 |
+| `tmag_agent_steve_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_commitments` | permissive_mongoose_schema | yes | 3 |
 | `tmag_content_templates` | permissive_mongoose_schema | yes | 2 |
 | `tmag_content_videos` | permissive_mongoose_schema | yes | 5 |

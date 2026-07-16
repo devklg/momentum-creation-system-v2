@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T19:56:18.782Z",
+  "generatedAt": "2026-07-16T20:21:25.308Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -342,7 +342,7 @@
         "server/src/domain/sponsorImmutabilityPersistence.ts:51",
         "server/src/domain/sponsorImmutabilityPersistence.ts:89",
         "server/src/domain/sponsorImmutabilityPersistence.ts:96",
-        "server/src/domain/steve-success-interview.ts:492",
+        "server/src/domain/steve-success-interview.ts:633",
         "server/src/domain/threeWayCalls.ts:427",
         "server/src/domain/threeWayCalls.ts:582",
         "server/src/domain/threeWayCalls.ts:583",
@@ -750,7 +750,7 @@
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:88",
         "server/src/domain/crossStoreReconciliation.ts:182",
-        "server/src/domain/steve-success-interview.ts:493",
+        "server/src/domain/steve-success-interview.ts:634",
         "server/src/domain/stevePrivacy.ts:186"
       ]
     },
@@ -1044,7 +1044,7 @@
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:89",
         "server/src/domain/crossStoreReconciliation.ts:181",
-        "server/src/domain/steve-success-interview.ts:496"
+        "server/src/domain/steve-success-interview.ts:639"
       ]
     },
     {

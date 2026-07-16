@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T19:56:18.146Z
+- Generated: 2026-07-16T20:21:24.623Z
 - Collections: 74
 - Unclassified: 0
 
@@ -58,7 +58,7 @@
 | `tmag_admin_settings` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 3 |
 | `tmag_admin_sponsor_overrides` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
 | `tmag_agent_michael_events` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 1 |
-| `tmag_agent_steve_events` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
+| `tmag_agent_steve_events` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 4 |
 | `tmag_commitments` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 3 |
 | `tmag_content_templates` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 2 |
 | `tmag_content_videos` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 5 |

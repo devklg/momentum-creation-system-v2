@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T19:56:20.803Z",
+  "generatedAt": "2026-07-16T20:21:27.346Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -1830,12 +1830,12 @@
       "sources": [
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 373,
+          "line": 384,
           "action": "persistenceCall.chromadb.create_collection"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 574,
+          "line": 737,
           "action": "writeKnowledge"
         },
         {
@@ -1857,6 +1857,8 @@
           "completedAt",
           "consentedFieldCount",
           "discoveryId",
+          "eventBodiesCompactionEligible",
+          "eventBodyCompactionPolicyVersion",
           "kind",
           "ownerTmagId",
           "privacyPolicyVersion",

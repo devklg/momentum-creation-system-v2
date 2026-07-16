@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T19:56:27.878Z",
+  "generatedAt": "2026-07-16T20:21:34.824Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -723,7 +723,7 @@
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 405,
+          "line": 417,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -959,6 +959,16 @@
       "resolved": true,
       "schemaMode": "permissive_mongoose_schema",
       "sources": [
+        {
+          "file": "server/src/domain/steve-success-interview.ts",
+          "line": 531,
+          "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/steve-success-interview.ts",
+          "line": 580,
+          "source": "persistenceCall.mongodb.query"
+        },
         {
           "file": "server/src/domain/steveConversationRuntime.ts",
           "line": 82,
@@ -2373,17 +2383,17 @@
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 420,
+          "line": 432,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 461,
+          "line": 473,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 574,
+          "line": 737,
           "source": "writeKnowledge"
         },
         {
@@ -3183,7 +3193,7 @@
           "server/src/domain/sponsorImmutabilityPersistence.ts:51",
           "server/src/domain/sponsorImmutabilityPersistence.ts:89",
           "server/src/domain/sponsorImmutabilityPersistence.ts:96",
-          "server/src/domain/steve-success-interview.ts:492",
+          "server/src/domain/steve-success-interview.ts:633",
           "server/src/domain/threeWayCalls.ts:427",
           "server/src/domain/threeWayCalls.ts:582",
           "server/src/domain/threeWayCalls.ts:583",
@@ -3553,7 +3563,7 @@
         "sources": [
           "server/src/domain/adminConsistencyReport.ts:88",
           "server/src/domain/crossStoreReconciliation.ts:182",
-          "server/src/domain/steve-success-interview.ts:493",
+          "server/src/domain/steve-success-interview.ts:634",
           "server/src/domain/stevePrivacy.ts:186"
         ]
       },
@@ -3812,7 +3822,7 @@
         "sources": [
           "server/src/domain/adminConsistencyReport.ts:89",
           "server/src/domain/crossStoreReconciliation.ts:181",
-          "server/src/domain/steve-success-interview.ts:496"
+          "server/src/domain/steve-success-interview.ts:639"
         ]
       },
       {

@@ -23,12 +23,15 @@ require historical mutation:
 - content-free consent, withdrawal, and export audit facts;
 - rollback when a privacy projection or its required audit append fails; and
 - create-only ordinary ingest so a repeated worker completion cannot replace
-  private content without a future BA-confirmed correction flow.
+  private content without a future BA-confirmed correction flow;
+- post-completion compaction of new-record in-flight Steve event bodies only
+  after the canonical Success Profile writes and reads back, preserving
+  content-free event facts and an idempotent retry path.
 
 The item remains partial. BA-confirmed correction, BA-requested private-content
-deletion, the deletion/onboarding-gate and tombstone behavior, post-completion
-event-body compaction, provider inventory/terms review, and historical
-reconciliation remain separate visible work.
+deletion, the deletion/onboarding-gate and tombstone behavior, provider
+inventory/terms review, and historical reconciliation remain separate visible
+work.
 
 No production record was read, changed, deleted, re-indexed, or backfilled.
 No external communication or provider call occurred.
@@ -72,8 +75,10 @@ No external communication or provider call occurred.
 - Private-content deletion remains open because the approved ACR does not yet
   resolve whether deletion preserves onboarding completion or reopens the Steve
   gate; the minimal tombstone/read-back flow must be designed with that answer.
-- Post-completion in-flight event-body compaction must be implemented for new
-  records before it can be represented as runtime-complete.
+- New-record post-completion event-body compaction is implemented. It removes
+  the entire private payload from only that BA's Steve conversation events
+  after canonical artifact read-back, retains content-free compaction facts,
+  fails closed on residual payloads, and does not sweep historical rows.
 - Provider inventory/terms review remains required before production
   activation.
 - Any historical cleanup still requires report-only preview plus separate
@@ -86,7 +91,7 @@ invalidation, exact consented-field projection, content-free audit payloads,
 withdrawal, export minimization, projection/audit rollback, create-only ingest,
 route opacity, and the four `.team` privacy controls.
 
-Current verification: 2,274 server tests passed / 19 skipped; 71 team tests
+Current verification: 2,277 server tests passed / 19 skipped; 71 team tests
 passed; repo typecheck passed; production build passed; 254 routes produced
 zero access findings; the `.com` scan covered 34 files with zero violations;
 generated catalogs and freshness are current. The trusted in-app browser

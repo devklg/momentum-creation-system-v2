@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T19:56:18.146Z",
+  "generatedAt": "2026-07-16T20:21:24.623Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 74,
   "unclassifiedCount": 0,
@@ -472,8 +472,9 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 2,
+      "sourceCount": 4,
       "sourceFiles": [
+        "server/src/domain/steve-success-interview.ts",
         "server/src/domain/steveConversationRuntime.ts"
       ]
     },

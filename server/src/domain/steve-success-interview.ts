@@ -37,6 +37,7 @@ import type {
   McsSteveSuccessProfile,
   McsSteveTranscriptChunk,
 } from '@momentum/shared';
+import { MCS_STEVE_PRIVACY_POLICY_VERSION } from '@momentum/shared';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeKnowledge } from '../services/tieredWrite.js';
 import { defaultStevePrivacyState } from './stevePrivacy.js';
@@ -46,6 +47,16 @@ export const STEVE_SIGNED_BY = 'Steve Success · New BA Discovery & Success Inte
 
 const DISCOVERIES_COLLECTION = 'tmag_steve_success_interview';
 const CHROMA_DISCOVERIES = 'mcs_steve_success_interview';
+const STEVE_EVENTS_COLLECTION = 'tmag_agent_steve_events';
+const STEVE_DISCOVERY_CHAT_KIND = 'discovery_chat_message';
+
+interface SteveEventBodyCompactionEligibility {
+  eligible: true;
+  policyVersion: typeof MCS_STEVE_PRIVACY_POLICY_VERSION;
+  eventKind: typeof STEVE_DISCOVERY_CHAT_KIND;
+  boundaryCompletedAt: string;
+  scope: 'new_record_only';
+}
 
 // ─────────────────────────────────────────────────────────────────────────
 // Discovery script (the backbone Steve leads with)
@@ -396,6 +407,7 @@ async function ensureDiscoveriesCollection(): Promise<void> {
 interface PersistedDiscovery extends McsSteveDiscoveryArtifact {
   _id: string;
   privacy: McsStevePrivacyState;
+  eventBodyCompaction?: SteveEventBodyCompactionEligibility;
 }
 
 async function getBaSponsor(tmagId: string): Promise<{
@@ -483,6 +495,135 @@ export class DiscoveryIngestError extends Error {
   }
 }
 
+function isNewRecordEventCompactionEligible(
+  discovery: PersistedDiscovery,
+): discovery is PersistedDiscovery & {
+  eventBodyCompaction: SteveEventBodyCompactionEligibility;
+} {
+  const eligibility = discovery.eventBodyCompaction;
+  return (
+    eligibility?.eligible === true &&
+    eligibility.policyVersion === MCS_STEVE_PRIVACY_POLICY_VERSION &&
+    eligibility.eventKind === STEVE_DISCOVERY_CHAT_KIND &&
+    eligibility.scope === 'new_record_only' &&
+    eligibility.boundaryCompletedAt === discovery.completedAt
+  );
+}
+
+/**
+ * ACR-0031 post-completion compaction for new records only.
+ *
+ * The canonical discovery must already exist and read back before this runs.
+ * Event rows remain as content-free operational facts while their private
+ * payload bodies are removed. Historical rows are excluded unless their
+ * canonical discovery carries the explicit eligibility marker written by this
+ * implementation.
+ */
+export async function compactSteveConversationEventBodies(args: {
+  tmagId: string;
+  discoveryId: string;
+  boundaryCompletedAt: string;
+}): Promise<{ matchedCount: number; modifiedCount: number; compactedAt: string }> {
+  const compactedAt = new Date().toISOString();
+  let update: { matchedCount?: number; modifiedCount?: number };
+
+  try {
+    update = await persistenceCall<{ matchedCount?: number; modifiedCount?: number }>(
+      'mongodb',
+      'update',
+      {
+        database: 'momentum',
+        collection: STEVE_EVENTS_COLLECTION,
+        filter: {
+          tmagId: args.tmagId,
+          agentId: 'steve',
+          kind: STEVE_DISCOVERY_CHAT_KIND,
+          $or: [
+            { payload: { $exists: true } },
+            { 'contentCompaction.state': { $ne: 'compacted' } },
+            {
+              'contentCompaction.policyVersion': {
+                $ne: MCS_STEVE_PRIVACY_POLICY_VERSION,
+              },
+            },
+            { 'contentCompaction.discoveryId': { $ne: args.discoveryId } },
+            {
+              'contentCompaction.boundaryCompletedAt': {
+                $ne: args.boundaryCompletedAt,
+              },
+            },
+          ],
+        },
+        update: {
+          $unset: { payload: '' },
+          $set: {
+            contentCompaction: {
+              state: 'compacted',
+              policyVersion: MCS_STEVE_PRIVACY_POLICY_VERSION,
+              discoveryId: args.discoveryId,
+              boundaryCompletedAt: args.boundaryCompletedAt,
+              compactedAt,
+            },
+          },
+        },
+      },
+    );
+  } catch {
+    throw new DiscoveryIngestError(
+      'EVENT_COMPACTION_FAILED',
+      'Steve event body compaction did not complete.',
+    );
+  }
+
+  let residual: { count?: number };
+  try {
+    residual = await persistenceCall<{ count?: number }>('mongodb', 'query', {
+      database: 'momentum',
+      collection: STEVE_EVENTS_COLLECTION,
+      filter: {
+        tmagId: args.tmagId,
+        agentId: 'steve',
+        kind: STEVE_DISCOVERY_CHAT_KIND,
+        $or: [
+          { payload: { $exists: true } },
+          { 'contentCompaction.state': { $ne: 'compacted' } },
+          {
+            'contentCompaction.policyVersion': {
+              $ne: MCS_STEVE_PRIVACY_POLICY_VERSION,
+            },
+          },
+          { 'contentCompaction.discoveryId': { $ne: args.discoveryId } },
+          {
+            'contentCompaction.boundaryCompletedAt': {
+              $ne: args.boundaryCompletedAt,
+            },
+          },
+        ],
+      },
+      projection: { _id: 1 },
+      limit: 1,
+    });
+  } catch {
+    throw new DiscoveryIngestError(
+      'EVENT_COMPACTION_FAILED',
+      'Steve event body compaction read-back did not complete.',
+    );
+  }
+
+  if ((residual.count ?? 0) > 0) {
+    throw new DiscoveryIngestError(
+      'EVENT_COMPACTION_FAILED',
+      'Steve event body compaction did not read back.',
+    );
+  }
+
+  return {
+    matchedCount: update.matchedCount ?? 0,
+    modifiedCount: update.modifiedCount ?? 0,
+    compactedAt,
+  };
+}
+
 function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Record<string, unknown> } {
   // ACR-0031 keeps the graph relationship-only. Sponsor consent is enforced
   // from canonical Mongo at read time; an unconditional sponsor-visibility
@@ -492,7 +633,9 @@ function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Recor
       'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
       'MERGE (d:TmagSteveDiscovery {discoveryId: $id}) ' +
       'SET d.completedAt = $completedAt, d.signedBy = $signedBy, ' +
-      'd.privacyStatus = $privacyStatus, d.privacyPolicyVersion = $privacyPolicyVersion ' +
+      'd.privacyStatus = $privacyStatus, d.privacyPolicyVersion = $privacyPolicyVersion, ' +
+      'd.eventBodiesCompactionEligible = $eventBodiesCompactionEligible, ' +
+      'd.eventBodyCompactionPolicyVersion = $eventBodyCompactionPolicyVersion ' +
       'MERGE (b)-[:HAD_STEVE_DISCOVERY]->(d)',
     params: {
       id: a._id,
@@ -501,6 +644,9 @@ function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Recor
       signedBy: a.successProfile.signedBy,
       privacyStatus: a.privacy?.status ?? 'active',
       privacyPolicyVersion: a.privacy?.policyVersion ?? 'acr-0031.v1',
+      eventBodiesCompactionEligible: a.eventBodyCompaction?.eligible === true,
+      eventBodyCompactionPolicyVersion:
+        a.eventBodyCompaction?.policyVersion ?? MCS_STEVE_PRIVACY_POLICY_VERSION,
     },
   };
 }
@@ -558,11 +704,28 @@ export async function ingestDiscoveryArtifact(
     successProfile,
     audioUrl: null,
     privacy: defaultStevePrivacyState(),
+    eventBodyCompaction: {
+      eligible: true,
+      policyVersion: MCS_STEVE_PRIVACY_POLICY_VERSION,
+      eventKind: STEVE_DISCOVERY_CHAT_KIND,
+      boundaryCompletedAt: payload.completedAt,
+      scope: 'new_record_only',
+    },
   };
 
   const cy = discoveryCypher(artifact);
   const existing = await getDiscoveryByTmagId(payload.tmagId);
   if (existing) {
+    if (isNewRecordEventCompactionEligible(existing)) {
+      await compactSteveConversationEventBodies({
+        tmagId: existing.tmagId,
+        discoveryId: existing._id,
+        boundaryCompletedAt: existing.eventBodyCompaction.boundaryCompletedAt,
+      });
+      if (existing.completedAt === payload.completedAt) {
+        return stripPersisted(existing);
+      }
+    }
     throw new DiscoveryIngestError(
       'ALREADY_EXISTS',
       `Discovery for tmagId=${payload.tmagId} already exists and requires BA-confirmed correction.`,
@@ -588,14 +751,27 @@ export async function ingestDiscoveryArtifact(
           privacyStatus: artifact.privacy.status,
           privacyPolicyVersion: artifact.privacy.policyVersion,
           consentedFieldCount: 0,
+          eventBodiesCompactionEligible: true,
+          eventBodyCompactionPolicyVersion: MCS_STEVE_PRIVACY_POLICY_VERSION,
         },
       },
     });
   } catch (err) {
     // A concurrent completion may have won the create race. Do not reinterpret
-    // that as correction authority; fail closed without updating any store.
+    // that as correction authority. A new-record eligibility marker may still
+    // authorize content-free event-body compaction for the winning artifact.
     const raced = await getDiscoveryByTmagId(payload.tmagId);
     if (raced) {
+      if (isNewRecordEventCompactionEligible(raced)) {
+        await compactSteveConversationEventBodies({
+          tmagId: raced.tmagId,
+          discoveryId: raced._id,
+          boundaryCompletedAt: raced.eventBodyCompaction.boundaryCompletedAt,
+        });
+        if (raced.completedAt === payload.completedAt) {
+          return stripPersisted(raced);
+        }
+      }
       throw new DiscoveryIngestError(
         'ALREADY_EXISTS',
         `Discovery for tmagId=${payload.tmagId} already exists and requires BA-confirmed correction.`,
@@ -609,12 +785,23 @@ export async function ingestDiscoveryArtifact(
   // would pass even when an update silently modified nothing (0 matched/modified
   // without throwing), so also assert completedAt reflects THIS artifact.
   const readback = await getDiscoveryByTmagId(payload.tmagId);
-  if (!readback || readback._id !== id || readback.completedAt !== artifact.completedAt) {
+  if (
+    !readback ||
+    readback._id !== id ||
+    readback.completedAt !== artifact.completedAt ||
+    !isNewRecordEventCompactionEligible(readback)
+  ) {
     throw new DiscoveryIngestError(
       'READBACK_FAILED',
       `Discovery for tmagId=${payload.tmagId} did not read back after write.`,
     );
   }
+
+  await compactSteveConversationEventBodies({
+    tmagId: readback.tmagId,
+    discoveryId: readback._id,
+    boundaryCompletedAt: readback.eventBodyCompaction.boundaryCompletedAt,
+  });
 
   return stripPersisted(readback);
 }

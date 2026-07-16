@@ -2,7 +2,7 @@
 
 ## Momentum Creation System V2
 
-Status: Approved — implementation verification in progress
+Status: Approved — follow-on implementation verification in progress
 
 Ratified: Kevin L. Gardner, 2026-07-16
 
@@ -301,7 +301,7 @@ ACR-0031 approval alone is not apply authority for historical data.
   },
   "verification": {
     "typecheck": true,
-    "server_tests": "2274 passed / 19 skipped",
+    "server_tests": "2277 passed / 19 skipped",
     "team_tests": "71 passed",
     "production_build": true,
     "route_access": "254 routes / 0 findings",
@@ -317,6 +317,8 @@ ACR-0031 approval alone is not apply authority for historical data.
       "BA self-export and one-way withdrawal",
       "withdrawal blocks tailored Launch guidance and why replay",
       "create-only ordinary ingest",
+      "new-record event bodies compact only after canonical read-back",
+      "event compaction retains content-free facts and excludes historical rows",
       "new records store null provider/audio fields",
       "content-free Neo4j and Chroma projections",
       "blocked admin bridge materialization",
