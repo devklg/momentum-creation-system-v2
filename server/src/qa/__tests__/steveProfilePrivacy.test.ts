@@ -69,6 +69,16 @@ describe('P2-141 Steve Success Profile privacy boundary', () => {
     expect(michael).not.toContain("'successProfile.launchRecommendations': 1");
   });
 
+  it('uses first-name-only member projections for Steve prompt personalization', () => {
+    const workerRoute = source('server/src/routes/steve.ts');
+    const browserRuntime = source('server/src/domain/steveConversationRuntime.ts');
+
+    for (const text of [workerRoute, browserRuntime]) {
+      expect(text).toContain('projection: { firstName: 1 }');
+      expect(text).toContain('limit: 1');
+    }
+  });
+
   it('keeps Steve private data out of the prospect-facing application', () => {
     const comFiles = [
       source('apps/com/src/App.tsx'),

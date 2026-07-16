@@ -261,7 +261,7 @@ steveRoutes.post(
 
 /** GET /api/steve/discovery/profile/:downlineTmagId — sponsor-only.
  *  The direct sponsor reads a downline's Steve Success Profile. Authoritative
- *  check is server-side; 403 if not the direct sponsor. */
+ *  check is server-side; all access/not-found failures return one opaque 404. */
 steveRoutes.get(
   '/discovery/profile/:downlineTmagId',
   requireAuth,

@@ -18,8 +18,8 @@ export const michaelRoutes: Router = express.Router();
 
 /** GET /api/michael/training-support/:downlineTmagId — sponsor-only.
  *  Sponsor reads derived training-support suggestions for a downline BA.
- *  Authoritative access check is server-side; 403 if not the direct sponsor,
- *  404 if no downline or no Steve discovery yet. */
+ *  Authoritative access check is server-side; all access/not-found failures
+ *  return one opaque 404. */
 michaelRoutes.get(
   '/training-support/:downlineTmagId',
   requireAuth,
