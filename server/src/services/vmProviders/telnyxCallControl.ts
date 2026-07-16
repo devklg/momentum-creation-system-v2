@@ -1,10 +1,14 @@
 import { env } from '../../env.js';
-import { dialCall } from '../telnyx.js';
+import { dialCall, TelnyxError } from '../telnyx.js';
 import type {
   DropResult,
   DropStatus,
   RinglessVoicemailProvider,
   VoicemailDropPayload,
+} from './types.js';
+import {
+  parseVmProviderRetryAfterMs,
+  VmProviderRateLimitError,
 } from './types.js';
 
 function encodeClientState(payload: Record<string, unknown>): string {
@@ -43,20 +47,31 @@ export const telnyxCallControlProvider: RinglessVoicemailProvider = {
       };
     }
 
-    const call = await dialCall({
-      to: payload.lead.normalizedPhone!,
-      from: env.TELNYX_DIAL_FROM_NUMBER,
-      connectionId: env.TELNYX_CONNECTION_ID,
-      amd: true,
-      clientState: encodeClientState({
-        source: 'mcs_vm_dialer_v1',
-        leadId: payload.lead.leadId,
-        vmCampaignId: payload.campaignId,
-        ownerTmagId: payload.lead.ownerTmagId,
-        tokenUrl: payload.tokenUrl,
-        audioUrl: payload.audioUrl,
-      }),
-    });
+    let call;
+    try {
+      call = await dialCall({
+        to: payload.lead.normalizedPhone!,
+        from: env.TELNYX_DIAL_FROM_NUMBER,
+        connectionId: env.TELNYX_CONNECTION_ID,
+        amd: true,
+        clientState: encodeClientState({
+          source: 'mcs_vm_dialer_v1',
+          leadId: payload.lead.leadId,
+          vmCampaignId: payload.campaignId,
+          ownerTmagId: payload.lead.ownerTmagId,
+          tokenUrl: payload.tokenUrl,
+          audioUrl: payload.audioUrl,
+        }),
+      });
+    } catch (err) {
+      if (err instanceof TelnyxError && err.status === 429) {
+        throw new VmProviderRateLimitError(
+          'telnyx_call_control',
+          parseVmProviderRetryAfterMs(err.retryAfter),
+        );
+      }
+      throw err;
+    }
 
     return {
       provider: 'telnyx_call_control',

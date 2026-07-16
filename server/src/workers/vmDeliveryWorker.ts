@@ -2,6 +2,8 @@ import { pathToFileURL } from 'node:url';
 import { env } from '../env.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { getVmProvider } from '../services/vmProviders/index.js';
+import { VmProviderThrottle } from '../services/vmProviders/throttle.js';
+import { VmProviderRateLimitError } from '../services/vmProviders/types.js';
 import {
   claimVmJobs,
   completeVmJob,
@@ -30,10 +32,28 @@ const BATCH = 10;
 let workerStarted = false;
 let timer: NodeJS.Timeout | null = null;
 let tickInFlight = false;
-let lastDispatchAt = 0;
+const providerThrottle = new VmProviderThrottle(
+  () => env.VM_DELIVERY_RATE_PER_MINUTE,
+);
 
 export function getVmDeliveryWorkerStatus() {
-  return { started: workerStarted, inFlight: tickInFlight, tickMs: TICK_MS, batchSize: BATCH, lastDispatchAt: lastDispatchAt > 0 ? new Date(lastDispatchAt).toISOString() : null };
+  const providers = providerThrottle.snapshot();
+  const lastDispatchAt =
+    providers
+      .map((provider) => provider.lastStartedAt)
+      .filter((value): value is string => value !== null)
+      .sort()
+      .at(-1) ?? null;
+  return {
+    started: workerStarted,
+    inFlight: tickInFlight,
+    tickMs: TICK_MS,
+    batchSize: BATCH,
+    ratePerMinute: env.VM_DELIVERY_RATE_PER_MINUTE,
+    maxConcurrencyPerProvider: 1,
+    lastDispatchAt,
+    providers,
+  };
 }
 
 interface DeliveryPayload extends Record<string, unknown> {
@@ -81,7 +101,6 @@ async function tick(): Promise<void> {
       vmDeliveryClaimBatchSize(env.VM_DELIVERY_RATE_PER_MINUTE, TICK_MS, BATCH),
     );
     for (const job of jobs) {
-      await throttle();
       await dispatch(job as VmQueueJob<DeliveryPayload>);
     }
   } catch (err) {
@@ -90,15 +109,6 @@ async function tick(): Promise<void> {
   } finally {
     tickInFlight = false;
   }
-}
-
-async function throttle(): Promise<void> {
-  const minGap = vmDeliveryMinGapMs(env.VM_DELIVERY_RATE_PER_MINUTE);
-  const wait = Math.max(0, minGap - (Date.now() - lastDispatchAt));
-  if (wait > 0) {
-    await new Promise((resolve) => setTimeout(resolve, wait));
-  }
-  lastDispatchAt = Date.now();
 }
 
 export function vmDeliveryMinGapMs(ratePerMinute: number): number {
@@ -115,6 +125,7 @@ export async function dispatchVmDeliveryJobForTest(job: VmQueueJob<DeliveryPaylo
 }
 
 async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
+  let resolvedProviderKey: ReturnType<typeof getVmProvider>['key'] | null = null;
   try {
     const lead = await findLead(job.payload.leadId);
     if (!lead) throw new Error('lead_not_found');
@@ -156,6 +167,7 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
     const provider = getVmProvider(
       job.payload.provider ?? campaignProvider?.key ?? env.VM_PROVIDER_MODE,
     );
+    resolvedProviderKey = provider.key;
 
     const gate = await gateCampaignForDelivery(job, campaign);
     if (!gate.proceed) return;
@@ -213,14 +225,34 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
     const adminApprovedForLiveDelivery = campaign?.adminApprovedForLiveDelivery === true;
     const dryRun = !env.VM_LIVE_DELIVERY_ENABLED || !adminApprovedForLiveDelivery || provider.key === 'manual_csv';
 
-    const result = await provider.sendDrop({
-      lead,
-      tokenUrl,
-      campaignId: lead.vmCampaignId,
-      audioUrl: campaign?.audioUrl ?? null,
-      dryRun,
-      adminApprovedForLiveDelivery,
-    });
+    if (!dryRun && provider.supportsLiveSend) {
+      const availability = providerThrottle.getAvailability(provider.key);
+      if (
+        !availability.allowed &&
+        availability.reason === 'provider_cooldown'
+      ) {
+        await requeueVmJobWithoutBurningAttempt(
+          job,
+          availability.availableAt,
+          `Provider ${provider.key} cooldown active; delivery requeued.`,
+        );
+        return;
+      }
+    }
+
+    const sendDrop = () =>
+      provider.sendDrop({
+        lead,
+        tokenUrl,
+        campaignId: lead.vmCampaignId,
+        audioUrl: campaign?.audioUrl ?? null,
+        dryRun,
+        adminApprovedForLiveDelivery,
+      });
+    const result =
+      !dryRun && provider.supportsLiveSend
+        ? await providerThrottle.run(provider.key, sendDrop)
+        : await sendDrop();
 
     await recordDeliveryEvent({
       provider: result.provider,
@@ -245,8 +277,24 @@ async function dispatch(job: VmQueueJob<DeliveryPayload>): Promise<void> {
     await completeVmJob(job.jobId, `Delivery processed for VM lead ${lead.leadId}: ${result.status}.`);
     await completeRunningCampaignIfIdle(lead.vmCampaignId);
   } catch (err) {
+    if (err instanceof VmProviderRateLimitError && resolvedProviderKey) {
+      const availableAt = providerThrottle.applyCooldown(
+        resolvedProviderKey,
+        err.retryAfterMs,
+      );
+      await requeueVmJobWithoutBurningAttempt(
+        job,
+        availableAt,
+        `Provider ${resolvedProviderKey} rate limited delivery; requeued.`,
+      );
+      return;
+    }
     await failVmJob(job, err instanceof Error ? err.message : String(err));
   }
+}
+
+export function resetVmDeliveryThrottleForTest(): void {
+  providerThrottle.resetForTest();
 }
 
 async function gateCampaignForDelivery(

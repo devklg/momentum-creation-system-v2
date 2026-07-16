@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T16:19:19.687Z",
+  "generatedAt": "2026-07-16T16:31:37.368Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -2586,7 +2586,7 @@
         },
         {
           "file": "server/src/workers/vmDeliveryWorker.ts",
-          "line": 307,
+          "line": 355,
           "source": "persistenceCall.mongodb.query"
         }
       ]
