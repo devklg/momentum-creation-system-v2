@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T18:25:57.810Z",
+  "generatedAt": "2026-07-16T19:52:46.505Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 74,
   "unclassifiedCount": 0,
@@ -313,7 +313,7 @@
       "persistenceTier": "mixed",
       "schemaMode": "explicit_mongoose_schema",
       "resolved": true,
-      "sourceCount": 61,
+      "sourceCount": 62,
       "sourceFiles": [
         "server/scripts/backfill-founder-timezones.ts",
         "server/scripts/setup-founder-access.ts",
@@ -340,6 +340,7 @@
         "server/src/domain/reports/trainingCompletion.ts",
         "server/src/domain/steve-success-interview.ts",
         "server/src/domain/steveConversationRuntime.ts",
+        "server/src/domain/stevePrivacy.ts",
         "server/src/domain/tmagIds.ts",
         "server/src/domain/workbook.ts",
         "server/src/routes/steve.ts"
@@ -977,12 +978,13 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 8,
+      "sourceCount": 12,
       "sourceFiles": [
         "server/src/domain/michael-training-support.ts",
         "server/src/domain/recruitingCycle.ts",
         "server/src/domain/reports/baActivation.ts",
-        "server/src/domain/steve-success-interview.ts"
+        "server/src/domain/steve-success-interview.ts",
+        "server/src/domain/stevePrivacy.ts"
       ]
     },
     {

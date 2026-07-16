@@ -79,6 +79,10 @@ const ALLOWED_PRE_GATE_PREFIXES = [
 
 const ALLOWED_STEVE_GATED_PRE_GATE_PATHS = new Set([
   '/api/michael/training-support/:downlineTmagId',
+  '/api/steve/discovery/export',
+  '/api/steve/discovery/privacy',
+  '/api/steve/discovery/privacy/consent',
+  '/api/steve/discovery/privacy/withdraw',
   '/api/steve/discovery/profile/:downlineTmagId',
 ]);
 

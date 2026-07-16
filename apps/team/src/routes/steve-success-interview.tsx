@@ -102,6 +102,36 @@ interface SteveDiscoveryView {
   artifact: SteveDiscoveryArtifact | null;
 }
 
+type SteveSponsorConsentField =
+  | 'why_statement'
+  | 'success_vision'
+  | 'support_obstacles'
+  | 'michael_handoff_summary';
+
+interface SteveSponsorConsentGrant {
+  field: SteveSponsorConsentField;
+  granted: boolean;
+  sponsorTmagId: string | null;
+  grantedAt: string | null;
+  revokedAt: string | null;
+}
+
+interface StevePrivacyState {
+  policyVersion: 'acr-0031.v1';
+  status: 'active' | 'withdrawn';
+  withdrawnAt: string | null;
+  sponsorConsent: Record<SteveSponsorConsentField, SteveSponsorConsentGrant>;
+}
+
+interface StevePrivacyResponse {
+  ok: boolean;
+  privacy?: StevePrivacyState;
+  currentSponsorTmagId?: string | null;
+  grantCopy?: string;
+  revocationCopy?: string;
+  error?: string;
+}
+
 type FetchState =
   | { kind: 'loading' }
   | { kind: 'error'; message: string }
@@ -675,8 +705,9 @@ function ProfileView({ artifact }: { artifact: SteveDiscoveryArtifact }) {
             How we'll support you
           </h1>
           <p className="mt-2 text-sm text-cream-mute">
-            This is what you shared, reflected back — so your sponsor and the team
-            can meet you where you are. Nothing here rates or ranks you.
+            This is what you shared, reflected back for you. Nothing here rates or
+            ranks you. Sponsor sharing is off for private fields unless you turn on
+            each field below.
           </p>
         </header>
 
@@ -750,11 +781,232 @@ function ProfileView({ artifact }: { artifact: SteveDiscoveryArtifact }) {
           </Section>
         ) : null}
 
+        <StevePrivacyControls tmagId={artifact.tmagId} />
+
         <p className="mt-10 text-[11px] font-mono uppercase tracking-[0.18em] text-cream-mute">
           {p.signedBy}
         </p>
       </div>
     </div>
+  );
+}
+
+const CONSENT_LABELS: Record<SteveSponsorConsentField, string> = {
+  why_statement: 'Primary why',
+  success_vision: 'Success vision',
+  support_obstacles: 'Potential obstacles',
+  michael_handoff_summary: 'Michael handoff summary',
+};
+
+const CONSENT_FIELDS = Object.keys(CONSENT_LABELS) as SteveSponsorConsentField[];
+const WITHDRAW_CONFIRMATION = 'WITHDRAW STEVE PERSONALIZATION';
+
+function StevePrivacyControls({ tmagId }: { tmagId: string }) {
+  const [privacy, setPrivacy] = useState<StevePrivacyState | null>(null);
+  const [currentSponsorTmagId, setCurrentSponsorTmagId] = useState<string | null>(null);
+  const [grantCopy, setGrantCopy] = useState('');
+  const [revocationCopy, setRevocationCopy] = useState('');
+  const [busyField, setBusyField] = useState<SteveSponsorConsentField | null>(null);
+  const [busyAction, setBusyAction] = useState<'export' | 'withdraw' | null>(null);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  const applyPrivacyResponse = useCallback((data: StevePrivacyResponse) => {
+    if (!data.ok || !data.privacy) {
+      throw new Error(data.error ?? 'Could not load privacy controls.');
+    }
+    setPrivacy(data.privacy);
+    setCurrentSponsorTmagId(data.currentSponsorTmagId ?? null);
+    setGrantCopy(data.grantCopy ?? '');
+    setRevocationCopy(data.revocationCopy ?? '');
+  }, []);
+
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      try {
+        const res = await fetch('/api/steve/discovery/privacy', {
+          credentials: 'include',
+        });
+        const data = (await res.json()) as StevePrivacyResponse;
+        if (!live) return;
+        applyPrivacyResponse(data);
+      } catch (err) {
+        if (!live) return;
+        setError(err instanceof Error ? err.message : 'Could not load privacy controls.');
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [applyPrivacyResponse]);
+
+  const updateConsent = async (
+    field: SteveSponsorConsentField,
+    granted: boolean,
+  ) => {
+    setBusyField(field);
+    setError('');
+    setMessage('');
+    try {
+      const res = await fetch('/api/steve/discovery/privacy/consent', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ field, granted }),
+      });
+      const data = (await res.json()) as StevePrivacyResponse;
+      applyPrivacyResponse(data);
+      setMessage(granted ? `${CONSENT_LABELS[field]} shared.` : `${CONSENT_LABELS[field]} sharing stopped.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not update sharing.');
+    } finally {
+      setBusyField(null);
+    }
+  };
+
+  const exportProfile = async () => {
+    setBusyAction('export');
+    setError('');
+    setMessage('');
+    try {
+      const res = await fetch('/api/steve/discovery/export', {
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        throw new Error(data.error ?? 'Could not export your profile.');
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `steve-success-profile-${tmagId}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      setMessage('Your private profile export is ready.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not export your profile.');
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const withdraw = async () => {
+    const confirmed = window.confirm(
+      'Turn off Steve personalization and all sponsor sharing? You will keep your self-visible copy. This action does not delete it.',
+    );
+    if (!confirmed) return;
+
+    setBusyAction('withdraw');
+    setError('');
+    setMessage('');
+    try {
+      const res = await fetch('/api/steve/discovery/privacy/withdraw', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmation: WITHDRAW_CONFIRMATION }),
+      });
+      const data = (await res.json()) as StevePrivacyResponse;
+      applyPrivacyResponse(data);
+      setMessage('Personalization and sponsor sharing are now off.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not withdraw personalization.');
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  return (
+    <Section title="Your Privacy Controls">
+      <p className="text-sm leading-relaxed text-cream-mute">
+        Your transcript, raw answers, full Success Profile, notes, audio, and
+        provider details are never shared with your sponsor. The training-support
+        card uses bounded guidance by default. You choose whether to share each
+        private field below with your current direct sponsor.
+      </p>
+
+      {privacy ? (
+        <>
+          {privacy.status === 'withdrawn' ? (
+            <div className="rounded-lg border border-teal/30 bg-teal/10 p-4 text-sm text-cream">
+              Personalization and sponsor sharing are off. Your current profile
+              remains visible to you.
+            </div>
+          ) : null}
+
+          <div className="space-y-3">
+            {CONSENT_FIELDS.map((field) => {
+              const grant = privacy.sponsorConsent[field];
+              const disabled =
+                privacy.status === 'withdrawn' ||
+                !currentSponsorTmagId ||
+                busyField !== null ||
+                busyAction !== null;
+              return (
+                <label
+                  key={field}
+                  className="flex items-start gap-3 rounded-lg border border-cream/10 bg-black/20 p-4"
+                >
+                  <input
+                    type="checkbox"
+                    checked={grant.granted}
+                    disabled={disabled}
+                    onChange={(event) => {
+                      void updateConsent(field, event.currentTarget.checked);
+                    }}
+                    className="mt-1 h-4 w-4 accent-[#C9A84C]"
+                  />
+                  <span>
+                    <span className="block text-sm font-medium text-cream">
+                      {CONSENT_LABELS[field]}
+                    </span>
+                    <span className="mt-1 block text-xs leading-relaxed text-cream-mute">
+                      {grant.granted ? revocationCopy : grantCopy}
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+
+          {!currentSponsorTmagId && privacy.status === 'active' ? (
+            <p className="text-xs text-cream-mute">
+              Sharing stays off because no current direct sponsor is recorded.
+            </p>
+          ) : null}
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => void exportProfile()}
+              disabled={busyAction !== null}
+              className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-2 text-sm text-gold hover:bg-gold/15 disabled:opacity-50"
+            >
+              {busyAction === 'export' ? 'Preparing…' : 'Export my profile'}
+            </button>
+            {privacy.status === 'active' ? (
+              <button
+                type="button"
+                onClick={() => void withdraw()}
+                disabled={busyAction !== null || busyField !== null}
+                className="rounded-lg border border-cream/20 bg-black/30 px-4 py-2 text-sm text-cream-mute hover:border-teal/50 hover:text-cream disabled:opacity-50"
+              >
+                {busyAction === 'withdraw' ? 'Withdrawing…' : 'Turn off personalization'}
+              </button>
+            ) : null}
+          </div>
+        </>
+      ) : error ? null : (
+        <p className="text-sm text-cream-mute">Loading privacy controls…</p>
+      )}
+
+      {message ? <p className="text-sm text-teal">{message}</p> : null}
+      {error ? <p className="text-sm text-red-400">{error}</p> : null}
+    </Section>
   );
 }
 

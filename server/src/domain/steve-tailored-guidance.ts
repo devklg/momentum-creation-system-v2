@@ -103,9 +103,13 @@ export function projectSteveTailoredGuidance(args: {
   steveComplete: boolean;
   profileRecordCount: number;
   successProfile: unknown;
+  personalizationActive?: boolean;
 }): McsSteveTailoredGuidance {
   if (!args.steveComplete) {
     return emptyGuidance({ status: 'unavailable', reason: 'profile_not_complete' });
+  }
+  if (args.personalizationActive === false) {
+    return emptyGuidance({ status: 'unavailable', reason: 'profile_missing' });
   }
   if (args.profileRecordCount === 0 || !isRecord(args.successProfile)) {
     return emptyGuidance({ status: 'unavailable', reason: 'profile_missing' });

@@ -4,9 +4,9 @@
 
 ## Summary
 
-- Generated: 2026-07-16T18:25:58.600Z
+- Generated: 2026-07-16T19:52:47.120Z
 - Labels: 83
-- Relationships: 69
+- Relationships: 68
 - Constraints/indexes cataloged: 18
 - Labels without a cataloged constraint/index: 68
 
@@ -50,7 +50,7 @@
 | `SPONSORED_BY` | 3 |
 | `SUPERSEDES` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 94 |
+| `TeamMagnificentMember` | 93 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 3 |
@@ -88,7 +88,7 @@
 | `TmagResourceVersion` | 5 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 4 |
-| `TmagSteveDiscovery` | 3 |
+| `TmagSteveDiscovery` | 4 |
 | `TmagThreeWayBooking` | 2 |
 | `TmagTrainingModule` | 1 |
 | `TmagVmAuditEvent` | 1 |
@@ -175,7 +175,6 @@
 | `SUPPRESSED_BY` | 1 |
 | `TARGETS_LEAD` | 2 |
 | `USES_VM_LEAD_OWNER` | 1 |
-| `VISIBLE_TO_SPONSOR` | 1 |
 | `WITH_UPLINE` | 1 |
 | `WROTE_NOTE` | 2 |
 

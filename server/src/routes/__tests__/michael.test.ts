@@ -46,7 +46,7 @@ afterEach(() => {
 });
 
 describe('Michael training-support privacy boundary', () => {
-  it.each(['NO_DOWNLINE', 'NOT_SPONSOR', 'NO_PROFILE'])(
+  it.each(['NO_DOWNLINE', 'NOT_SPONSOR', 'NO_PROFILE', 'WITHDRAWN'])(
     'returns one opaque sponsor-support response for %s',
     async (code) => {
       vi.spyOn(

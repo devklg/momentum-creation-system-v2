@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-16T18:26:10.262Z
+- Generated: 2026-07-16T19:52:56.264Z
 - Mongo collections: 74
 - Neo4j labels: 83
-- Neo4j relationships: 69
+- Neo4j relationships: 68
 - Chroma collections: 53
 - Route modules: 49
-- Route handlers: 286
-- Shared exports: 1153
+- Route handlers: 290
+- Shared exports: 1169
 
 ## Mongo Collections
 
@@ -38,7 +38,7 @@
 | `mcs_workbooks` | permissive_mongoose_schema | yes | 2 |
 | `orientation_sessions` | permissive_mongoose_schema | yes | 1 |
 | `RESOURCE_CATALOG_MONGO_COLLECTION` | permissive_mongoose_schema | expression | 2 |
-| `team_magnificent_members` | explicit_mongoose_schema | yes | 61 |
+| `team_magnificent_members` | explicit_mongoose_schema | yes | 62 |
 | `tenant_settings_versions` | permissive_mongoose_schema | yes | 3 |
 | `tmag_access_codes` | permissive_mongoose_schema | yes | 8 |
 | `tmag_admin_curated_leader_tags` | permissive_mongoose_schema | yes | 3 |
@@ -78,7 +78,7 @@
 | `tmag_questionnaires` | permissive_mongoose_schema | yes | 2 |
 | `tmag_recruiting_cycles` | permissive_mongoose_schema | yes | 3 |
 | `tmag_sponsor_availability` | permissive_mongoose_schema | yes | 5 |
-| `tmag_steve_success_interview` | permissive_mongoose_schema | yes | 8 |
+| `tmag_steve_success_interview` | permissive_mongoose_schema | yes | 12 |
 | `tmag_three_way_bookings` | permissive_mongoose_schema | yes | 5 |
 | `tmag_vm_audit_events` | permissive_mongoose_schema | yes | 1 |
 | `tmag_vm_bulk_leads` | permissive_mongoose_schema | yes | 21 |
@@ -126,7 +126,7 @@
 | `SPONSORED_BY` | 3 |
 | `SUPERSEDES` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 94 |
+| `TeamMagnificentMember` | 93 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 3 |
@@ -164,7 +164,7 @@
 | `TmagResourceVersion` | 5 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 4 |
-| `TmagSteveDiscovery` | 3 |
+| `TmagSteveDiscovery` | 4 |
 | `TmagThreeWayBooking` | 2 |
 | `TmagTrainingModule` | 1 |
 | `TmagVmAuditEvent` | 1 |
@@ -251,7 +251,6 @@
 | `SUPPRESSED_BY` | 1 |
 | `TARGETS_LEAD` | 2 |
 | `USES_VM_LEAD_OWNER` | 1 |
-| `VISIBLE_TO_SPONSOR` | 1 |
 | `WITH_UPLINE` | 1 |
 | `WROTE_NOTE` | 2 |
 
@@ -359,7 +358,7 @@
 | `(unmounted)` | `server/src/routes/rvm.ts` | GET /:token<br>POST /:token/activate<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats<br>POST /:token/info-request | `McsCallbackIntent`, `McsCallbackRequestResponse`, `McsHoldingTankSnapshot`, `McsPlacementEvent`, `McsRvmInfoRequestResponse`, `McsRvmResolvedTokenPayload`, `McsTeamStatsResponse`, `McsVideoEventKind`, `McsVideoEventResponse`, `McsWebinarReservationResponse` |
 | `(unmounted)` | `server/src/routes/scriptmaker.ts` | POST /draft<br>GET user-agent | `McsScriptMakerDraftPayload`, `McsScriptMakerDraftResponse`, `McsScriptMakerDraftSelectors`, `McsScriptMakerScriptKind` |
 | `(unmounted)` | `server/src/routes/sponsor-workbook.ts` | GET /:tmagId<br>PUT /:tmagId/draft<br>POST /:tmagId/finalize | none |
-| `(unmounted)` | `server/src/routes/steve.ts` | GET /discovery/state<br>GET /discovery/script<br>GET /discovery/system-prompt<br>POST /discovery/ingest<br>GET /discovery/profile/:downlineTmagId<br>GET /discovery/conversation<br>POST /discovery/converse | none |
+| `(unmounted)` | `server/src/routes/steve.ts` | GET /discovery/state<br>GET /discovery/script<br>GET /discovery/privacy<br>GET /discovery/export<br>PUT /discovery/privacy/consent<br>POST /discovery/privacy/withdraw<br>GET /discovery/system-prompt<br>POST /discovery/ingest<br>GET /discovery/profile/:downlineTmagId<br>GET /discovery/conversation<br>POST /discovery/converse | `MCS_STEVE_SPONSOR_CONSENT_FIELDS`, `MCS_STEVE_SPONSOR_CONSENT_GRANT_COPY`, `MCS_STEVE_SPONSOR_CONSENT_REVOCATION_COPY`, `MCS_STEVE_WITHDRAW_CONFIRMATION` |
 | `(unmounted)` | `server/src/routes/telnyx-webhook.ts` | POST /webhook | none |
 | `(unmounted)` | `server/src/routes/three-way.ts` | GET /availability<br>PUT /availability<br>GET /bookings<br>POST /bookings<br>POST /bookings/:id/cancel | `McsThreeWayBookPayload`, `McsThreeWayBookResponse`, `McsThreeWayCancelResponse`, `McsThreeWaySetAvailabilityPayload`, `McsThreeWaySetAvailabilityResponse` |
 | `(unmounted)` | `server/src/routes/training.ts` | GET /fast-start/progress<br>POST /fast-start/modules/:id/state | `McsFastStartMarkStatePayload`, `McsFastStartModuleId` |
@@ -965,6 +964,22 @@
 | `McsRuntimeQaFixtureScope` | interface | `packages/shared/src/runtime/qa.ts` |
 | `McsRuntimeQaStatus` | type | `packages/shared/src/runtime/qa.ts` |
 | `McsRuntimeVerificationReportShape` | interface | `packages/shared/src/runtime/qa.ts` |
+| `MCS_STEVE_PRIVACY_POLICY_VERSION` | const | `packages/shared/src/steve-privacy.ts` |
+| `MCS_STEVE_SPONSOR_CONSENT_FIELDS` | const | `packages/shared/src/steve-privacy.ts` |
+| `MCS_STEVE_SPONSOR_CONSENT_GRANT_COPY` | const | `packages/shared/src/steve-privacy.ts` |
+| `MCS_STEVE_SPONSOR_CONSENT_REVOCATION_COPY` | const | `packages/shared/src/steve-privacy.ts` |
+| `MCS_STEVE_WITHDRAW_CONFIRMATION` | const | `packages/shared/src/steve-privacy.ts` |
+| `McsStevePrivacyResponse` | interface | `packages/shared/src/steve-privacy.ts` |
+| `McsStevePrivacyState` | interface | `packages/shared/src/steve-privacy.ts` |
+| `McsStevePrivacyStatus` | type | `packages/shared/src/steve-privacy.ts` |
+| `McsStevePrivateExport` | interface | `packages/shared/src/steve-privacy.ts` |
+| `McsStevePrivateExportResponse` | interface | `packages/shared/src/steve-privacy.ts` |
+| `McsSteveSponsorConsentField` | type | `packages/shared/src/steve-privacy.ts` |
+| `McsSteveSponsorConsentGrant` | interface | `packages/shared/src/steve-privacy.ts` |
+| `McsSteveSponsorConsentPayload` | interface | `packages/shared/src/steve-privacy.ts` |
+| `McsSteveSponsorConsentResponse` | interface | `packages/shared/src/steve-privacy.ts` |
+| `McsSteveWithdrawPayload` | interface | `packages/shared/src/steve-privacy.ts` |
+| `McsSteveWithdrawResponse` | interface | `packages/shared/src/steve-privacy.ts` |
 | `MCS_TENANT_SURFACES` | const | `packages/shared/src/tenant.ts` |
 | `McsSaveTenantTemplatePayload` | interface | `packages/shared/src/tenant.ts` |
 | `McsSaveTenantTemplateResponse` | interface | `packages/shared/src/tenant.ts` |

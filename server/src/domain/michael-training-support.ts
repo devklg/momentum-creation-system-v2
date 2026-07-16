@@ -33,10 +33,16 @@
 import type {
   McsMichaelTrainingSupportCard,
   McsMichaelTrainingSupportGuidanceSection,
+  McsStevePrivacyState,
+  McsSteveSponsorConsentField,
   McsSteveSuccessProfile,
 } from '@momentum/shared';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { isSafeSteveGuidanceText } from './steve-tailored-guidance.js';
+import {
+  effectiveSteveSponsorConsentFields,
+  normalizeStevePrivacyState,
+} from './stevePrivacy.js';
 
 /** Provenance literal stamped on the derived training-support card. */
 export const MICHAEL_TRAINING_SUPPORT_SIGNED_BY =
@@ -57,6 +63,7 @@ interface PersistedSteveDiscovery {
   sponsorTmagId: string | null;
   completedAt?: string | null;
   successProfile: McsSteveSuccessProfile;
+  privacy?: McsStevePrivacyState;
 }
 
 interface TeamMagnificentMemberLookup {
@@ -116,11 +123,76 @@ async function getSteveDiscoveryByTmagId(
         'successProfile.supportNeeds.areas': 1,
         'successProfile.supportNeeds.helpStyle': 1,
         'successProfile.trainingRecommendations.text': 1,
+        privacy: 1,
       },
       limit: 1,
     },
   );
   return result.documents[0] ?? null;
+}
+
+interface ConsentedPrivateFields {
+  primaryWhy: string;
+  successVision: string;
+  supportObstacles: string[];
+  michaelHandoffSummary: string;
+}
+
+async function getConsentedPrivateFields(args: {
+  tmagId: string;
+  fields: McsSteveSponsorConsentField[];
+}): Promise<ConsentedPrivateFields> {
+  if (args.fields.length === 0) {
+    return {
+      primaryWhy: '',
+      successVision: '',
+      supportObstacles: [],
+      michaelHandoffSummary: '',
+    };
+  }
+
+  const projection: Record<string, 1> = { _id: 1 };
+  if (args.fields.includes('why_statement')) {
+    projection['successProfile.primaryWhy.statement'] = 1;
+  }
+  if (args.fields.includes('success_vision')) {
+    projection['successProfile.successVision.statement'] = 1;
+  }
+  if (args.fields.includes('support_obstacles')) {
+    projection['successProfile.supportNeeds.potentialObstacles'] = 1;
+  }
+  if (args.fields.includes('michael_handoff_summary')) {
+    projection['successProfile.michaelHandoffSummary'] = 1;
+  }
+
+  const result = await persistenceCall<{
+    documents: Array<{ successProfile?: Partial<McsSteveSuccessProfile> }>;
+  }>('mongodb', 'query', {
+    database: 'momentum',
+    collection: STEVE_DISCOVERIES_COLLECTION,
+    filter: { tmagId: args.tmagId },
+    projection,
+    limit: 1,
+  });
+  const profile = result.documents[0]?.successProfile;
+  return {
+    primaryWhy:
+      args.fields.includes('why_statement') && profile?.primaryWhy
+        ? trimToNonEmpty(profile.primaryWhy.statement)
+        : '',
+    successVision:
+      args.fields.includes('success_vision') && profile?.successVision
+        ? trimToNonEmpty(profile.successVision.statement)
+        : '',
+    supportObstacles:
+      args.fields.includes('support_obstacles') && profile?.supportNeeds
+        ? cleanList(profile.supportNeeds.potentialObstacles)
+        : [],
+    michaelHandoffSummary:
+      args.fields.includes('michael_handoff_summary')
+        ? trimToNonEmpty(profile?.michaelHandoffSummary)
+        : '',
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -184,25 +256,36 @@ export function projectSuccessProfileToCard(args: {
   downlineTmagId: string;
   downlineFirstName: string;
   profile: McsSteveSuccessProfile;
+  consentedFields?: ConsentedPrivateFields;
 }): McsMichaelTrainingSupportCard {
   const p = args.profile;
+  const consented = args.consentedFields ?? {
+    primaryWhy: '',
+    successVision: '',
+    supportObstacles: [],
+    michaelHandoffSummary: '',
+  };
+  const supportFocus = deriveSupportFocus(p.supportNeeds);
+  if (consented.supportObstacles.length > 0) {
+    supportFocus.bullets.push(
+      `Obstacles they chose to share: ${joinNatural(consented.supportObstacles)}.`,
+    );
+  }
   return {
     downlineTmagId: args.downlineTmagId,
     downlineFirstName: args.downlineFirstName,
     derivedFromSteveAt: p.generatedAt,
-    // Existing wire fields remain present for compatibility, but ACR-0031
-    // keeps them empty until the BA grants field-specific sponsor consent.
-    primaryWhy: '',
-    successVision: '',
+    primaryWhy: consented.primaryWhy,
+    successVision: consented.successVision,
     learningStyle: deriveLearningStyle(p.learningStyle),
     communication: deriveCommunication(p.communicationPreferences),
-    supportFocus: deriveSupportFocus(p.supportNeeds),
+    supportFocus,
     trainingRecommendations: cleanList(
       p.trainingRecommendations
         .map((recommendation) => recommendation.text)
         .filter(isSafeSteveGuidanceText),
     ),
-    michaelHandoffSummary: '',
+    michaelHandoffSummary: consented.michaelHandoffSummary,
     signedBy: MICHAEL_TRAINING_SUPPORT_SIGNED_BY,
   };
 }
@@ -246,10 +329,26 @@ export async function getTrainingSupportCardForSponsor(args: {
       'Steve discovery is not complete yet for this BA.',
     );
   }
+  const privacy = normalizeStevePrivacyState(discovery.privacy);
+  if (privacy.status === 'withdrawn') {
+    throw new TrainingSupportAccessError(
+      'WITHDRAWN',
+      'The BA withdrew this profile from sponsor sharing.',
+    );
+  }
+  const consentedFieldKeys = effectiveSteveSponsorConsentFields(
+    privacy,
+    args.requestingTmagId,
+  );
+  const consentedFields = await getConsentedPrivateFields({
+    tmagId: args.downlineTmagId,
+    fields: consentedFieldKeys,
+  });
 
   return projectSuccessProfileToCard({
     downlineTmagId: args.downlineTmagId,
     downlineFirstName: trimToNonEmpty(downline.firstName),
     profile: discovery.successProfile,
+    consentedFields,
   });
 }

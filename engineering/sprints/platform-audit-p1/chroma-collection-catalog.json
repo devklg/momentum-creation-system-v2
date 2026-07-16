@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T18:26:00.839Z",
+  "generatedAt": "2026-07-16T19:52:49.070Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -146,7 +146,7 @@
       "sources": [
         {
           "file": "server/src/domain/recruitingCycle.ts",
-          "line": 305,
+          "line": 317,
           "action": "writeKnowledge"
         }
       ],
@@ -1613,7 +1613,7 @@
       "sources": [
         {
           "file": "server/src/domain/recruitingCycle.ts",
-          "line": 407,
+          "line": 419,
           "action": "writeKnowledge"
         }
       ],
@@ -1830,18 +1830,18 @@
       "sources": [
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 371,
+          "line": 373,
           "action": "persistenceCall.chromadb.create_collection"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 576,
-          "action": "persistenceCall.chromadb.add"
+          "line": 574,
+          "action": "writeKnowledge"
         },
         {
-          "file": "server/src/domain/steve-success-interview.ts",
-          "line": 614,
-          "action": "writeKnowledge"
+          "file": "server/src/domain/stevePrivacy.ts",
+          "line": 197,
+          "action": "persistenceCall.chromadb.add"
         }
       ],
       "metadataContract": {
@@ -1855,9 +1855,12 @@
         "observedMetadataKeys": [
           "agent",
           "completedAt",
+          "consentedFieldCount",
           "discoveryId",
           "kind",
           "ownerTmagId",
+          "privacyPolicyVersion",
+          "privacyStatus",
           "purpose",
           "retrievalEligible"
         ],

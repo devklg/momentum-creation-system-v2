@@ -288,6 +288,7 @@ ACR-0031 approval alone is not apply authority for historical data.
   },
   "implementation": {
     "branch": "codex/p2-141-steve-privacy",
+    "follow_on_branch": "codex/p2-141-privacy-rights",
     "commits": [
       "7b748ad3",
       "a251fbfc"
@@ -299,9 +300,10 @@ ACR-0031 approval alone is not apply authority for historical data.
   },
   "verification": {
     "typecheck": true,
-    "server_tests": "2251 passed / 19 skipped",
+    "server_tests": "2274 passed / 19 skipped",
+    "team_tests": "71 passed",
     "production_build": true,
-    "route_access": "250 routes / 0 findings",
+    "route_access": "254 routes / 0 findings",
     "com_compliance": "34 files / 0 violations",
     "catalogs_current": true,
     "flows": [
@@ -310,6 +312,10 @@ ACR-0031 approval alone is not apply authority for historical data.
       "minimal Mongo projections",
       "raw sponsor route fails closed without field consent",
       "default sponsor projection excludes unconsented private fields",
+      "field-specific current-sponsor consent controls",
+      "BA self-export and one-way withdrawal",
+      "withdrawal blocks tailored Launch guidance and why replay",
+      "create-only ordinary ingest",
       "new records store null provider/audio fields",
       "content-free Neo4j and Chroma projections",
       "blocked admin bridge materialization",
@@ -320,7 +326,8 @@ ACR-0031 approval alone is not apply authority for historical data.
   "release": {
     "gates_passed": [
       "review",
-      "approval"
+      "approval",
+      "baseline_merge"
     ],
     "released_at": null
   },
@@ -338,7 +345,8 @@ ACR-0031 approval alone is not apply authority for historical data.
 
 ## 12. Approval and merge boundary
 
-Kevin approved ACR-0031 on 2026-07-16. This approval passes the high-risk
-approval gate. It does not merge PR #353, mutate production data, authorize a
-historical purge, or activate an external provider. Kevin's separate merge
-authority remains required after implementation verification.
+Kevin approved ACR-0031 and separately authorized PR #353, which merged on
+2026-07-16 as the fail-closed privacy baseline. That authority did not mutate
+production data, authorize a historical purge, or activate an external
+provider. Follow-on privacy-rights work remains subject to its own verification
+and merge authority, while every historical apply remains separately gated.

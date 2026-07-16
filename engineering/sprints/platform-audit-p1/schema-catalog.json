@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T18:26:10.262Z",
+  "generatedAt": "2026-07-16T19:52:56.264Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -653,7 +653,7 @@
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 147,
+          "line": 148,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -678,7 +678,7 @@
         },
         {
           "file": "server/src/domain/michael-training-support.ts",
-          "line": 85,
+          "line": 92,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -718,17 +718,22 @@
         },
         {
           "file": "server/src/domain/recruitingCycle.ts",
-          "line": 129,
+          "line": 130,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 402,
+          "line": 405,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steveConversationRuntime.ts",
           "line": 132,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/stevePrivacy.ts",
+          "line": 141,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -748,7 +753,7 @@
         },
         {
           "file": "server/src/routes/steve.ts",
-          "line": 116,
+          "line": 259,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -944,7 +949,7 @@
       "sources": [
         {
           "file": "server/src/domain/recruitingCycle.ts",
-          "line": 305,
+          "line": 317,
           "source": "writeKnowledge"
         }
       ]
@@ -973,7 +978,7 @@
       "sources": [
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 801,
+          "line": 802,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1185,7 +1190,7 @@
         },
         {
           "file": "server/src/domain/recruitingCycle.ts",
-          "line": 153,
+          "line": 165,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -1340,12 +1345,12 @@
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 531,
+          "line": 532,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 632,
+          "line": 633,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1387,7 +1392,7 @@
       "sources": [
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 653,
+          "line": 654,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1449,7 +1454,7 @@
       "sources": [
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 646,
+          "line": 647,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1489,7 +1494,7 @@
         },
         {
           "file": "server/src/domain/recruitingCycle.ts",
-          "line": 177,
+          "line": 189,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1526,7 +1531,7 @@
       "sources": [
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 660,
+          "line": 661,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1841,12 +1846,12 @@
       "sources": [
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 551,
+          "line": 552,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 639,
+          "line": 640,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -1888,7 +1893,7 @@
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 625,
+          "line": 626,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -2165,12 +2170,12 @@
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 515,
+          "line": 516,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/cockpit.ts",
-          "line": 618,
+          "line": 619,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -2255,7 +2260,7 @@
         },
         {
           "file": "server/src/domain/recruitingCycle.ts",
-          "line": 163,
+          "line": 175,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -2294,17 +2299,17 @@
       "sources": [
         {
           "file": "server/src/domain/recruitingCycle.ts",
-          "line": 113,
+          "line": 114,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/recruitingCycle.ts",
-          "line": 407,
+          "line": 419,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/domain/recruitingCycle.ts",
-          "line": 482,
+          "line": 494,
           "source": "persistenceCall.mongodb.update"
         }
       ]
@@ -2348,38 +2353,58 @@
       "sources": [
         {
           "file": "server/src/domain/michael-training-support.ts",
-          "line": 98,
+          "line": 105,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/michael-training-support.ts",
+          "line": 168,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/recruitingCycle.ts",
-          "line": 140,
+          "line": 141,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/recruitingCycle.ts",
-          "line": 751,
+          "line": 763,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 417,
+          "line": 420,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 458,
+          "line": 461,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 596,
+          "line": 574,
+          "source": "writeKnowledge"
+        },
+        {
+          "file": "server/src/domain/stevePrivacy.ts",
+          "line": 156,
+          "source": "persistenceCall.mongodb.query"
+        },
+        {
+          "file": "server/src/domain/stevePrivacy.ts",
+          "line": 222,
           "source": "persistenceCall.mongodb.update"
         },
         {
-          "file": "server/src/domain/steve-success-interview.ts",
-          "line": 614,
-          "source": "writeKnowledge"
+          "file": "server/src/domain/stevePrivacy.ts",
+          "line": 257,
+          "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/domain/stevePrivacy.ts",
+          "line": 489,
+          "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/reports/baActivation.ts",
@@ -2895,7 +2920,7 @@
       {
         "label": "ENROLLED",
         "sources": [
-          "server/src/domain/recruitingCycle.ts:581"
+          "server/src/domain/recruitingCycle.ts:593"
         ]
       },
       {
@@ -3144,9 +3169,9 @@
           "server/src/domain/profile.ts:540",
           "server/src/domain/prospectAccount.ts:252",
           "server/src/domain/questionnaire.ts:211",
-          "server/src/domain/recruitingCycle.ts:311",
-          "server/src/domain/recruitingCycle.ts:413",
-          "server/src/domain/recruitingCycle.ts:581",
+          "server/src/domain/recruitingCycle.ts:323",
+          "server/src/domain/recruitingCycle.ts:425",
+          "server/src/domain/recruitingCycle.ts:593",
           "server/src/domain/resourcePublishingGate.ts:72",
           "server/src/domain/resourceUsage.ts:81",
           "server/src/domain/sponsorImmutabilityPersistence.ts:101",
@@ -3158,8 +3183,7 @@
           "server/src/domain/sponsorImmutabilityPersistence.ts:51",
           "server/src/domain/sponsorImmutabilityPersistence.ts:89",
           "server/src/domain/sponsorImmutabilityPersistence.ts:96",
-          "server/src/domain/steve-success-interview.ts:488",
-          "server/src/domain/steve-success-interview.ts:494",
+          "server/src/domain/steve-success-interview.ts:492",
           "server/src/domain/threeWayCalls.ts:427",
           "server/src/domain/threeWayCalls.ts:582",
           "server/src/domain/threeWayCalls.ts:583",
@@ -3226,7 +3250,7 @@
       {
         "label": "TmagAgentMichaelEvent",
         "sources": [
-          "server/src/domain/recruitingCycle.ts:312"
+          "server/src/domain/recruitingCycle.ts:324"
         ]
       },
       {
@@ -3482,8 +3506,8 @@
       {
         "label": "TmagRecruitingCycle",
         "sources": [
-          "server/src/domain/recruitingCycle.ts:414",
-          "server/src/domain/recruitingCycle.ts:489"
+          "server/src/domain/recruitingCycle.ts:426",
+          "server/src/domain/recruitingCycle.ts:501"
         ]
       },
       {
@@ -3529,7 +3553,8 @@
         "sources": [
           "server/src/domain/adminConsistencyReport.ts:88",
           "server/src/domain/crossStoreReconciliation.ts:182",
-          "server/src/domain/steve-success-interview.ts:489"
+          "server/src/domain/steve-success-interview.ts:493",
+          "server/src/domain/stevePrivacy.ts:186"
         ]
       },
       {
@@ -3787,7 +3812,7 @@
         "sources": [
           "server/src/domain/adminConsistencyReport.ts:89",
           "server/src/domain/crossStoreReconciliation.ts:181",
-          "server/src/domain/steve-success-interview.ts:491"
+          "server/src/domain/steve-success-interview.ts:496"
         ]
       },
       {
@@ -3859,7 +3884,7 @@
       {
         "relationship": "HAS_RECRUITING_CYCLE",
         "sources": [
-          "server/src/domain/recruitingCycle.ts:418"
+          "server/src/domain/recruitingCycle.ts:430"
         ]
       },
       {
@@ -4024,7 +4049,7 @@
       {
         "relationship": "RECEIVED_MICHAEL_EVENT",
         "sources": [
-          "server/src/domain/recruitingCycle.ts:314"
+          "server/src/domain/recruitingCycle.ts:326"
         ]
       },
       {
@@ -4111,12 +4136,6 @@
         "relationship": "USES_VM_LEAD_OWNER",
         "sources": [
           "server/src/domain/vmCampaigns.ts:86"
-        ]
-      },
-      {
-        "relationship": "VISIBLE_TO_SPONSOR",
-        "sources": [
-          "server/src/domain/steve-success-interview.ts:495"
         ]
       },
       {
@@ -6043,40 +6062,65 @@
         {
           "method": "GET",
           "path": "/discovery/state",
-          "line": 72
+          "line": 113
         },
         {
           "method": "GET",
           "path": "/discovery/script",
-          "line": 88
+          "line": 129
+        },
+        {
+          "method": "GET",
+          "path": "/discovery/privacy",
+          "line": 138
+        },
+        {
+          "method": "GET",
+          "path": "/discovery/export",
+          "line": 155
+        },
+        {
+          "method": "PUT",
+          "path": "/discovery/privacy/consent",
+          "line": 182
+        },
+        {
+          "method": "POST",
+          "path": "/discovery/privacy/withdraw",
+          "line": 215
         },
         {
           "method": "GET",
           "path": "/discovery/system-prompt",
-          "line": 100
+          "line": 243
         },
         {
           "method": "POST",
           "path": "/discovery/ingest",
-          "line": 202
+          "line": 345
         },
         {
           "method": "GET",
           "path": "/discovery/profile/:downlineTmagId",
-          "line": 267
+          "line": 416
         },
         {
           "method": "GET",
           "path": "/discovery/conversation",
-          "line": 301
+          "line": 450
         },
         {
           "method": "POST",
           "path": "/discovery/converse",
-          "line": 317
+          "line": 466
         }
       ],
-      "sharedTypes": []
+      "sharedTypes": [
+        "MCS_STEVE_SPONSOR_CONSENT_FIELDS",
+        "MCS_STEVE_SPONSOR_CONSENT_GRANT_COPY",
+        "MCS_STEVE_SPONSOR_CONSENT_REVOCATION_COPY",
+        "MCS_STEVE_WITHDRAW_CONFIRMATION"
+      ]
     },
     {
       "file": "server/src/routes/telnyx-webhook.ts",
@@ -9330,6 +9374,86 @@
       "file": "packages/shared/src/runtime/qa.ts"
     },
     {
+      "name": "MCS_STEVE_PRIVACY_POLICY_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "MCS_STEVE_SPONSOR_CONSENT_FIELDS",
+      "kind": "const",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "MCS_STEVE_SPONSOR_CONSENT_GRANT_COPY",
+      "kind": "const",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "MCS_STEVE_SPONSOR_CONSENT_REVOCATION_COPY",
+      "kind": "const",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "MCS_STEVE_WITHDRAW_CONFIRMATION",
+      "kind": "const",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "McsStevePrivacyResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "McsStevePrivacyState",
+      "kind": "interface",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "McsStevePrivacyStatus",
+      "kind": "type",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "McsStevePrivateExport",
+      "kind": "interface",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "McsStevePrivateExportResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "McsSteveSponsorConsentField",
+      "kind": "type",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "McsSteveSponsorConsentGrant",
+      "kind": "interface",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "McsSteveSponsorConsentPayload",
+      "kind": "interface",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "McsSteveSponsorConsentResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "McsSteveWithdrawPayload",
+      "kind": "interface",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
+      "name": "McsSteveWithdrawResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/steve-privacy.ts"
+    },
+    {
       "name": "MCS_TENANT_SURFACES",
       "kind": "const",
       "file": "packages/shared/src/tenant.ts"
@@ -12128,10 +12252,10 @@
   "summary": {
     "mongoCollections": 74,
     "neo4jLabels": 83,
-    "neo4jRelationships": 69,
+    "neo4jRelationships": 68,
     "chromaCollections": 53,
     "routeModules": 49,
-    "routeHandlers": 286,
-    "sharedExports": 1153
+    "routeHandlers": 290,
+    "sharedExports": 1169
   }
 }

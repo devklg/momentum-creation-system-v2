@@ -23,9 +23,6 @@ interface Store {
 interface PersistenceOpts {
   /** list_collections throws on the first N calls, then succeeds. */
   listCollectionsFailFirst?: number;
-  /** mongodb.update becomes a no-op (does not apply $set) — simulates a
-   *  silently-modified-nothing update. */
-  updateNoop?: boolean;
 }
 
 function makePersistenceImpl(store: Store, opts: PersistenceOpts = {}) {
@@ -39,13 +36,7 @@ function makePersistenceImpl(store: Store, opts: PersistenceOpts = {}) {
       }
       return { documents: [] };
     }
-    if (tool === 'mongodb' && action === 'update') {
-      if (!opts.updateNoop && store.discovery) {
-        const set = (params.update as AnyRec | undefined)?.$set as AnyRec | undefined;
-        store.discovery = { ...store.discovery, ...(set ?? {}) };
-      }
-      return { matchedCount: 1 };
-    }
+    if (tool === 'mongodb' && action === 'update') return { matchedCount: 1 };
     if (tool === 'neo4j' && action === 'cypher') return {};
     if (tool === 'chromadb' && action === 'list_collections') {
       listCalls += 1;
@@ -110,7 +101,7 @@ beforeEach(() => {
 });
 
 describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
-  it('re-ingest (existing row) refreshes the Chroma semantic doc', async () => {
+  it('rejects ordinary re-ingest without mutating any store', async () => {
     const store: Store = {
       ba: { ...BA },
       discovery: { _id: 'SD-TMAG-1', tmagId: 'TMAG-1', completedAt: '2026-06-01T00:00:00.000Z' },
@@ -118,48 +109,21 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
     const steve = await loadSteve();
 
-    await steve.ingestDiscoveryArtifact(makePayload());
-
-    const chromaAdd = mocks.persistenceCall.mock.calls.find(
-      ([tool, action]) => tool === 'chromadb' && action === 'add',
-    );
-    expect(chromaAdd).toBeDefined();
-    expect(chromaAdd?.[2]).toMatchObject({
-      collection: 'mcs_steve_success_interview',
-      ids: ['SD-TMAG-1'],
-      metadatas: [
-        {
-          discoveryId: 'SD-TMAG-1',
-          ownerTmagId: 'TMAG-1',
-          kind: 'steve_discovery',
-          retrievalEligible: false,
-        },
-      ],
+    await expect(steve.ingestDiscoveryArtifact(makePayload())).rejects.toMatchObject({
+      code: 'ALREADY_EXISTS',
     });
-    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('callSid');
-    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('sponsorTmagId');
-    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Primary why');
-    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Success vision');
-    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Learns by');
-    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Support areas');
-    expect(JSON.stringify(chromaAdd?.[2])).toContain(
-      'Profile content is canonical in MongoDB.',
-    );
-
-    const graphWrite = mocks.persistenceCall.mock.calls.find(
-      ([tool, action]) => tool === 'neo4j' && action === 'cypher',
-    );
-    expect(JSON.stringify(graphWrite?.[2])).not.toContain('callSid');
-    expect(JSON.stringify(graphWrite?.[2])).not.toContain('audioUrl');
-
-    const mongoUpdate = mocks.persistenceCall.mock.calls.find(
-      ([tool, action]) => tool === 'mongodb' && action === 'update',
-    );
-    expect(JSON.stringify(mongoUpdate?.[2])).not.toContain('callSid');
-    expect(JSON.stringify(mongoUpdate?.[2])).not.toContain('audioUrl');
+    expect(mocks.writeKnowledge).not.toHaveBeenCalled();
+    expect(
+      mocks.persistenceCall.mock.calls.filter(
+        ([tool, action]) =>
+          (tool === 'mongodb' && action === 'update') ||
+          (tool === 'neo4j' && action === 'cypher') ||
+          (tool === 'chromadb' && action === 'add'),
+      ),
+    ).toEqual([]);
   });
 
-  it('stores no provider call identifier or audio URL on a new internal Steve record', async () => {
+  it('stores a private, consent-off marker with no provider/audio or sponsor visibility projection', async () => {
     const store: Store = { ba: { ...BA }, discovery: null };
     mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
     mocks.writeKnowledge.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
@@ -173,26 +137,32 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     );
 
     const write = mocks.writeKnowledge.mock.calls[0]?.[0] as { mongoDoc?: AnyRec } | undefined;
-    expect(write?.mongoDoc).toMatchObject({ callSid: null, audioUrl: null });
+    expect(write?.mongoDoc).toMatchObject({
+      callSid: null,
+      audioUrl: null,
+      privacy: {
+        policyVersion: 'acr-0031.v1',
+        status: 'active',
+        withdrawnAt: null,
+        sponsorConsent: {
+          why_statement: { granted: false },
+          success_vision: { granted: false },
+          support_obstacles: { granted: false },
+          michael_handoff_summary: { granted: false },
+        },
+      },
+    });
     expect(artifact.callSid).toBeNull();
     expect(artifact.audioUrl).toBeNull();
+    const serializedWrite = JSON.stringify(mocks.writeKnowledge.mock.calls[0]?.[0]);
+    expect(serializedWrite).not.toContain('CA-private');
+    expect(serializedWrite).not.toContain('https://private.example/audio');
+    expect(serializedWrite).not.toContain('VISIBLE_TO_SPONSOR');
+    expect(serializedWrite).toContain('HAD_STEVE_DISCOVERY');
+    expect(serializedWrite).toContain('Profile content is canonical in MongoDB.');
   });
 
-  it('read-back throws READBACK_FAILED when the update did not apply content', async () => {
-    const store: Store = {
-      ba: { ...BA },
-      discovery: { _id: 'SD-TMAG-1', tmagId: 'TMAG-1', completedAt: '2026-06-01T00:00:00.000Z' },
-    };
-    // updateNoop: the row exists but completedAt never advances to this ingest.
-    mocks.persistenceCall.mockImplementation(makePersistenceImpl(store, { updateNoop: true }));
-    const steve = await loadSteve();
-
-    await expect(steve.ingestDiscoveryArtifact(makePayload())).rejects.toMatchObject({
-      code: 'READBACK_FAILED',
-    });
-  });
-
-  it('TOCTOU: a raced duplicate insert falls back to the update path (no throw)', async () => {
+  it('TOCTOU: a raced duplicate insert rejects without taking correction authority', async () => {
     const store: Store = { ba: { ...BA }, discovery: null };
     mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
     // Simulate a concurrent writer: writeKnowledge lands the row then the
@@ -203,13 +173,14 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     });
     const steve = await loadSteve();
 
-    const artifact = await steve.ingestDiscoveryArtifact(makePayload());
-    expect(artifact.tmagId).toBe('TMAG-1');
-
-    const updateCall = mocks.persistenceCall.mock.calls.find(
-      ([tool, action]) => tool === 'mongodb' && action === 'update',
-    );
-    expect(updateCall).toBeDefined();
+    await expect(steve.ingestDiscoveryArtifact(makePayload())).rejects.toMatchObject({
+      code: 'ALREADY_EXISTS',
+    });
+    expect(
+      mocks.persistenceCall.mock.calls.some(
+        ([tool, action]) => tool === 'mongodb' && action === 'update',
+      ),
+    ).toBe(false);
   });
 
   it('bootstrap self-heals: a transient list_collections failure does not poison later ingests', async () => {

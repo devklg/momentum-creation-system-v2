@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T18:25:58.600Z",
+  "generatedAt": "2026-07-16T19:52:47.120Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -7,7 +7,7 @@
   ],
   "summary": {
     "labels": 83,
-    "relationships": 69,
+    "relationships": 68,
     "constraints": 18,
     "labelsWithoutConstraint": 68
   },
@@ -54,7 +54,7 @@
       "label": "ENROLLED",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/recruitingCycle.ts:581"
+        "server/src/domain/recruitingCycle.ts:593"
       ]
     },
     {
@@ -276,7 +276,7 @@
     },
     {
       "label": "TeamMagnificentMember",
-      "sourceCount": 94,
+      "sourceCount": 93,
       "sources": [
         "server/scripts/backfill-founder-timezones.ts:138",
         "server/scripts/backfill-founder-timezones.ts:82",
@@ -328,9 +328,9 @@
         "server/src/domain/profile.ts:540",
         "server/src/domain/prospectAccount.ts:252",
         "server/src/domain/questionnaire.ts:211",
-        "server/src/domain/recruitingCycle.ts:311",
-        "server/src/domain/recruitingCycle.ts:413",
-        "server/src/domain/recruitingCycle.ts:581",
+        "server/src/domain/recruitingCycle.ts:323",
+        "server/src/domain/recruitingCycle.ts:425",
+        "server/src/domain/recruitingCycle.ts:593",
         "server/src/domain/resourcePublishingGate.ts:72",
         "server/src/domain/resourceUsage.ts:81",
         "server/src/domain/sponsorImmutabilityPersistence.ts:101",
@@ -342,8 +342,7 @@
         "server/src/domain/sponsorImmutabilityPersistence.ts:51",
         "server/src/domain/sponsorImmutabilityPersistence.ts:89",
         "server/src/domain/sponsorImmutabilityPersistence.ts:96",
-        "server/src/domain/steve-success-interview.ts:488",
-        "server/src/domain/steve-success-interview.ts:494",
+        "server/src/domain/steve-success-interview.ts:492",
         "server/src/domain/threeWayCalls.ts:427",
         "server/src/domain/threeWayCalls.ts:582",
         "server/src/domain/threeWayCalls.ts:583",
@@ -416,7 +415,7 @@
       "label": "TmagAgentMichaelEvent",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/recruitingCycle.ts:312"
+        "server/src/domain/recruitingCycle.ts:324"
       ]
     },
     {
@@ -698,8 +697,8 @@
       "label": "TmagRecruitingCycle",
       "sourceCount": 2,
       "sources": [
-        "server/src/domain/recruitingCycle.ts:414",
-        "server/src/domain/recruitingCycle.ts:489"
+        "server/src/domain/recruitingCycle.ts:426",
+        "server/src/domain/recruitingCycle.ts:501"
       ]
     },
     {
@@ -747,11 +746,12 @@
     },
     {
       "label": "TmagSteveDiscovery",
-      "sourceCount": 3,
+      "sourceCount": 4,
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:88",
         "server/src/domain/crossStoreReconciliation.ts:182",
-        "server/src/domain/steve-success-interview.ts:489"
+        "server/src/domain/steve-success-interview.ts:493",
+        "server/src/domain/stevePrivacy.ts:186"
       ]
     },
     {
@@ -1044,7 +1044,7 @@
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:89",
         "server/src/domain/crossStoreReconciliation.ts:181",
-        "server/src/domain/steve-success-interview.ts:491"
+        "server/src/domain/steve-success-interview.ts:496"
       ]
     },
     {
@@ -1126,7 +1126,7 @@
       "relationship": "HAS_RECRUITING_CYCLE",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/recruitingCycle.ts:418"
+        "server/src/domain/recruitingCycle.ts:430"
       ]
     },
     {
@@ -1315,7 +1315,7 @@
       "relationship": "RECEIVED_MICHAEL_EVENT",
       "sourceCount": 1,
       "sources": [
-        "server/src/domain/recruitingCycle.ts:314"
+        "server/src/domain/recruitingCycle.ts:326"
       ]
     },
     {
@@ -1414,13 +1414,6 @@
       "sourceCount": 1,
       "sources": [
         "server/src/domain/vmCampaigns.ts:86"
-      ]
-    },
-    {
-      "relationship": "VISIBLE_TO_SPONSOR",
-      "sourceCount": 1,
-      "sources": [
-        "server/src/domain/steve-success-interview.ts:495"
       ]
     },
     {

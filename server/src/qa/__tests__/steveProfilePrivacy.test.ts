@@ -57,23 +57,73 @@ describe('P2-141 Steve Success Profile privacy boundary', () => {
     expect(domain).toContain('retrievalEligible: false');
     expect(domain).toContain('callSid: null');
     expect(domain).toContain('audioUrl: null');
+    expect(domain).not.toContain('VISIBLE_TO_SPONSOR');
+    expect(domain).toContain("'ALREADY_EXISTS'");
   });
 
-  it('projects only the sponsor-support fields Michael actually consumes', () => {
+  it('uses a bounded base sponsor projection and exact conditional private reads', () => {
     const michael = source('server/src/domain/michael-training-support.ts');
+    const baseProjection = michael.slice(
+      michael.indexOf('async function getSteveDiscoveryByTmagId'),
+      michael.indexOf('interface ConsentedPrivateFields'),
+    );
 
-    expect(michael).toContain("'successProfile.trainingRecommendations.text': 1");
-    expect(michael).not.toContain("'successProfile.trainingRecommendations': 1");
-    expect(michael).not.toContain("'successProfile.learningStyle.notes': 1");
-    expect(michael).not.toContain("'successProfile.supportNeeds.notes': 1");
-    expect(michael).not.toContain("'successProfile.launchRecommendations': 1");
-    expect(michael).not.toContain("'successProfile.primaryWhy.statement': 1");
-    expect(michael).not.toContain("'successProfile.successVision.statement': 1");
-    expect(michael).not.toContain("'successProfile.supportNeeds.potentialObstacles': 1");
-    expect(michael).not.toContain("'successProfile.michaelHandoffSummary': 1");
+    expect(baseProjection).toContain("'successProfile.trainingRecommendations.text': 1");
+    expect(baseProjection).not.toContain("'successProfile.trainingRecommendations': 1");
+    expect(baseProjection).not.toContain("'successProfile.learningStyle.notes': 1");
+    expect(baseProjection).not.toContain("'successProfile.supportNeeds.notes': 1");
+    expect(baseProjection).not.toContain("'successProfile.launchRecommendations': 1");
+    expect(baseProjection).not.toContain("'successProfile.primaryWhy.statement': 1");
+    expect(baseProjection).not.toContain("'successProfile.successVision.statement': 1");
+    expect(baseProjection).not.toContain("'successProfile.supportNeeds.potentialObstacles': 1");
+    expect(baseProjection).not.toContain("'successProfile.michaelHandoffSummary': 1");
+    expect(michael).toContain("projection['successProfile.primaryWhy.statement'] = 1");
+    expect(michael).toContain("projection['successProfile.successVision.statement'] = 1");
+    expect(michael).toContain(
+      "projection['successProfile.supportNeeds.potentialObstacles'] = 1",
+    );
+    expect(michael).toContain(
+      "projection['successProfile.michaelHandoffSummary'] = 1",
+    );
+    expect(michael).toContain('effectiveSteveSponsorConsentFields(');
     expect(michael).toContain("primaryWhy: ''");
     expect(michael).toContain("successVision: ''");
     expect(michael).toContain("michaelHandoffSummary: ''");
+  });
+
+  it('exposes BA-owned export, one-way withdrawal, and four exact consent controls', () => {
+    const route = source('server/src/routes/steve.ts');
+    const shared = source('packages/shared/src/steve-privacy.ts');
+    const page = source('apps/team/src/routes/steve-success-interview.tsx');
+    const cockpit = source('server/src/domain/cockpit.ts');
+    const recruitingCycle = source('server/src/domain/recruitingCycle.ts');
+
+    for (const path of [
+      '/discovery/privacy',
+      '/discovery/export',
+      '/discovery/privacy/consent',
+      '/discovery/privacy/withdraw',
+    ]) {
+      expect(route).toContain(path);
+    }
+    for (const field of [
+      'why_statement',
+      'success_vision',
+      'support_obstacles',
+      'michael_handoff_summary',
+    ]) {
+      expect(shared).toContain(`'${field}'`);
+      expect(page).toContain(`${field}:`);
+    }
+    expect(shared).toContain("'WITHDRAW STEVE PERSONALIZATION'");
+    expect(page).toContain('Sponsor sharing is off for private fields');
+    expect(page).toContain('Export my profile');
+    expect(page).toContain('Turn off personalization');
+    expect(cockpit).toContain('personalizationActive');
+    expect(cockpit).toContain('normalizeStevePrivacyState(rawProfile?.privacy)');
+    expect(recruitingCycle).toContain(
+      "normalizeStevePrivacyState(discovery?.privacy).status === 'withdrawn'",
+    );
   });
 
   it('fails the legacy raw sponsor route closed and nulls provider/audio fields', () => {
