@@ -1,14 +1,26 @@
 {
-  "generatedAt": "2026-07-16T21:21:58.640Z",
+  "generatedAt": "2026-07-16T22:34:18.778Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts"
   ],
-  "productionCallSiteCount": 2,
+  "productionCallSiteCount": 3,
   "countsByTier": {
-    "knowledge": 2
+    "knowledge": 3
   },
   "callSites": [
+    {
+      "file": "server/src/domain/steveVersioning.ts",
+      "line": 251,
+      "functionName": "archiveSteveDiscoveryVersion",
+      "idExpression": "versionId",
+      "mongoCollectionExpression": "VERSIONS_COLLECTION",
+      "hasNeo4j": true,
+      "hasChroma": true,
+      "tier": "knowledge",
+      "subsystem": "agent_context",
+      "rationale": "Agent, Steve, Michael, questionnaire, and training artifacts feed coaching context."
+    },
     {
       "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
       "line": 131,

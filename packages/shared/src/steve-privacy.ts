@@ -49,6 +49,9 @@ export const MCS_STEVE_WITHDRAW_CONFIRMATION =
 export const MCS_STEVE_CORRECTION_CONFIRMATION =
   'I CONFIRM THIS STEVE CORRECTION' as const;
 
+export const MCS_STEVE_RETAKE_CONFIRMATION =
+  'START A NEW STEVE INTERVIEW' as const;
+
 export const MCS_STEVE_CORRECTABLE_PROFILE_TEXT_FIELDS = [
   'primaryWhy.statement',
   'primaryWhy.who',
@@ -157,5 +160,17 @@ export interface McsStevePrivateExport {
 export interface McsStevePrivateExportResponse {
   ok: true;
   export: McsStevePrivateExport;
+  auditEntryId: string;
+}
+
+export interface McsSteveRetakePayload {
+  confirmation: typeof MCS_STEVE_RETAKE_CONFIRMATION;
+}
+
+export interface McsSteveRetakeResponse {
+  ok: true;
+  retakeSessionId: string;
+  profileVersion: number;
+  startedAt: string;
   auditEntryId: string;
 }

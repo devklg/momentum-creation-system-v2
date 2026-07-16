@@ -395,6 +395,8 @@ _Amended 2026-06-24: Steve is the sole success interviewer; Michael is repurpose
 
 _Amended 2026-07-02 (Kevin): the agent interaction surface changed from phone calls to **browser-based** — Steve's interview and Michael's coaching happen in the `.team` browser runtime (voice, text, or mixed; English/Spanish), per the S1.6 Browser Voice/Text Foundation. Telnyx carries no internal agent runtime traffic. Kevin's rationale, verbatim intent: a more elegant, simpler way for the agent to interact — the member activates the agent from their dashboard and communicates via speech or text directly, saving time and energy. Outbound channels (SMS, ringless voicemail, email) continue as signal/notification carriers — invitations to interact — while the conversation itself lives in the dashboard: channels carry signals; the dashboard carries conversations._
 
+_Amended 2026-07-16 (ACR-0032, Kevin): the completed Steve interview is durable input to the BA's plan of action. The product exposes no ordinary interview deletion. A BA may edit correctable answers or retake the interview; each confirmed revision is versioned across MongoDB, Neo4j, and ChromaDB according to their canonical/private, relationship-lineage, and governed-semantic roles. The last completed profile remains active until a retake completes and reads back successfully, so an abandoned retake never leaves the plan without support context._
+
 ## 3.13 Communication
 
 - **Telnyx** for SMS — BA callback alerts and signal events, and prospect magic-link delivery (3.17). ~~Outbound voice (Michael's calls)~~ — _superseded 2026-07-02: agent interaction (Steve, Michael, Ivory) is browser-based voice/text/mixed inside `.team` per S1.6; Telnyx is excluded from the internal browser runtime._

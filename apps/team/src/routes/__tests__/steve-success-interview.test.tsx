@@ -54,6 +54,7 @@ const artifact = {
   answers: [],
   audioUrl: null,
   correctionRevision: 0,
+  profileVersion: 1,
   lastCorrectedAt: null,
   successProfile: {
     tmagId: 'TMAG-BA',
@@ -180,7 +181,7 @@ describe('Steve Success Profile privacy controls', () => {
 
     expect(await screen.findByText('Your Privacy Controls')).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getAllByRole('checkbox')).toHaveLength(5);
+      expect(screen.getAllByRole('checkbox')).toHaveLength(6);
     });
     const privacyCheckboxes = fields.map((field) =>
       screen.getByRole('checkbox', {
@@ -343,13 +344,86 @@ describe('Steve Success Profile privacy controls', () => {
 
     expect(
       await screen.findByText(
-        'Your correction is saved. The previous private value was not retained.',
+        'Your correction is saved. The prior confirmed version is preserved.',
       ),
     ).toBeInTheDocument();
     expect((await screen.findAllByText('Family and freedom')).length).toBeGreaterThan(0);
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/steve/discovery/correction',
       expect.objectContaining({ method: 'PUT' }),
+    );
+  });
+
+  it('starts a retake without deleting the current active profile', async () => {
+    let retakeStarted = false;
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith('/api/steve/discovery/state')) {
+        return json({
+          ok: true,
+          view: retakeStarted
+            ? {
+                tmagId: 'TMAG-BA',
+                phase: 'call_in_progress',
+                transcript: artifact.transcript,
+                artifact,
+                retakeInProgress: true,
+              }
+            : { tmagId: 'TMAG-BA', phase: 'complete', artifact },
+        });
+      }
+      if (url.endsWith('/api/steve/discovery/privacy') && !init?.method) {
+        return json({
+          ok: true,
+          privacy: privacy(),
+          currentSponsorTmagId: 'TMAG-SPONSOR',
+          grantCopy,
+          revocationCopy,
+        });
+      }
+      if (url.endsWith('/api/steve/discovery/retake') && init?.method === 'POST') {
+        expect(JSON.parse(String(init.body))).toEqual({
+          confirmation: 'START A NEW STEVE INTERVIEW',
+        });
+        retakeStarted = true;
+        return json({
+          ok: true,
+          retakeSessionId: 'steve_retake_123',
+          profileVersion: 1,
+          startedAt: '2026-07-16T03:00:00.000Z',
+          auditEntryId: 'audit-retake',
+        });
+      }
+      if (url.endsWith('/api/steve/discovery/conversation')) {
+        return json({ ok: true, turns: [] });
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(
+      <MemoryRouter>
+        <SteveSuccessInterviewPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('Retake Your Interview')).toBeInTheDocument();
+    expect(
+      screen.getByText(/Version 1 stays active for your plan of action/),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole('checkbox', {
+        name: /current profile remains active until I complete/,
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Start a new Steve interview' }),
+    );
+
+    expect(await screen.findByText('Your discovery conversation')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/steve/discovery/retake',
+      expect.objectContaining({ method: 'POST' }),
     );
   });
 });

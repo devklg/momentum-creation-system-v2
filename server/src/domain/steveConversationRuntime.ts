@@ -41,8 +41,11 @@ import {
   STEVE_DISCOVERY_QUESTIONS,
   buildSteveSystemPrompt,
   ingestDiscoveryArtifact,
-  isSteveDiscoveryComplete,
 } from './steve-success-interview.js';
+import {
+  activeRetakeSession,
+  getVersionableSteveDiscovery,
+} from './steveVersioning.js';
 
 const MONGO_DB = 'momentum';
 const EVENTS_COLLECTION = 'tmag_agent_steve_events';
@@ -78,14 +81,33 @@ const RUNTIME_CONTRACT = [
 
 // ─── Event-sourced live transcript ──────────────────────────────────
 
-export async function loadConversation(tmagId: string): Promise<SteveChatTurn[]> {
+export async function loadConversation(
+  tmagId: string,
+  requestedSessionId?: string | null,
+): Promise<SteveChatTurn[]> {
+  const discovery =
+    requestedSessionId === undefined
+      ? await getVersionableSteveDiscovery(tmagId)
+      : null;
+  const sessionId =
+    requestedSessionId === undefined
+      ? activeRetakeSession(discovery)?.sessionId ?? null
+      : requestedSessionId;
+  const sessionFilter = sessionId
+    ? { 'payload.sessionId': sessionId }
+    : {
+        $or: [
+          { 'payload.sessionId': 'initial' },
+          { 'payload.sessionId': { $exists: false } },
+        ],
+      };
   const res = await persistenceCall<{ documents: Array<Record<string, unknown>> }>(
     'mongodb',
     'query',
     {
       database: MONGO_DB,
       collection: EVENTS_COLLECTION,
-      filter: { tmagId, agentId: 'steve', kind: CHAT_KIND },
+      filter: { tmagId, agentId: 'steve', kind: CHAT_KIND, ...sessionFilter },
     },
   );
   const docs = res.documents ?? [];
@@ -107,6 +129,7 @@ async function appendTurn(
   role: 'ba' | 'steve',
   text: string,
   seq: number,
+  sessionId: string | null,
 ): Promise<SteveChatTurn> {
   const at = new Date().toISOString();
   const eventId = `sce_${randomUUID()}`;
@@ -121,7 +144,7 @@ async function appendTurn(
         agentId: 'steve',
         kind: CHAT_KIND,
         createdAt: at,
-        payload: { role, text, seq },
+        payload: { role, text, seq, sessionId: sessionId ?? 'initial' },
       },
     ],
   });
@@ -366,12 +389,15 @@ export async function converseWithSteve(
   tmagId: string,
   rawMessage: string,
 ): Promise<ConverseResult> {
-  if (await isSteveDiscoveryComplete(tmagId)) {
+  const currentDiscovery = await getVersionableSteveDiscovery(tmagId);
+  const retakeSession = activeRetakeSession(currentDiscovery);
+  if (currentDiscovery && !retakeSession) {
     throw new SteveAlreadyCompleteError('Discovery already complete.');
   }
 
   const message = rawMessage.trim().slice(0, MESSAGE_CAP);
-  const turns = await loadConversation(tmagId);
+  const sessionId = retakeSession?.sessionId ?? null;
+  const turns = await loadConversation(tmagId, sessionId);
   const firstName = await getFirstName(tmagId);
   const createdAt = new Date().toISOString();
   const contextSupplement = await buildSteveContextPromptSupplement({
@@ -387,7 +413,7 @@ export async function converseWithSteve(
 
   let seq = turns.length;
   if (message) {
-    turns.push(await appendTurn(tmagId, 'ba', message, seq));
+    turns.push(await appendTurn(tmagId, 'ba', message, seq, sessionId));
     seq += 1;
   } else if (turns.length > 0) {
     // Re-opening the page mid-interview: return state, no LLM call.
@@ -401,7 +427,7 @@ export async function converseWithSteve(
   });
 
   const { text: reply, done: markerSeen } = splitCompletionMarker(res.text);
-  const steveTurn = await appendTurn(tmagId, 'steve', reply, seq);
+  const steveTurn = await appendTurn(tmagId, 'steve', reply, seq, sessionId);
   turns.push(steveTurn);
 
   if (!markerSeen) {
@@ -438,7 +464,9 @@ export async function converseWithSteve(
       audioUrl: null,
       profile: extraction.profile,
     };
-    await ingestDiscoveryArtifact(payload);
+    await ingestDiscoveryArtifact(payload, {
+      retakeSessionId: retakeSession?.sessionId ?? null,
+    });
     return { reply, done: true, extractionPending: false, turns };
   } catch (err) {
     console.error('[steve-runtime] extraction/ingest failed:', err instanceof Error ? err.message : err);

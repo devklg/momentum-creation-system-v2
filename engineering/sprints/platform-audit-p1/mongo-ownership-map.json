@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-07-16T21:21:46.661Z",
+  "generatedAt": "2026-07-16T22:34:06.776Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
-  "collectionCount": 74,
+  "collectionCount": 75,
   "unclassifiedCount": 0,
   "byOwner": {
     "dynamic_helper": 6,
     "broadcast_delivery": 3,
     "knowledge_content": 9,
     "operations_governance": 6,
-    "agents_training_success": 11,
+    "agents_training_success": 12,
     "events_orientation_and_calls": 7,
     "membership_identity": 6,
     "prospect_invitation_flow": 5,
@@ -980,14 +980,29 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 15,
+      "sourceCount": 20,
       "sourceFiles": [
         "server/src/domain/michael-training-support.ts",
         "server/src/domain/recruitingCycle.ts",
         "server/src/domain/reports/baActivation.ts",
         "server/src/domain/steve-success-interview.ts",
         "server/src/domain/steveCorrection.ts",
-        "server/src/domain/stevePrivacy.ts"
+        "server/src/domain/stevePrivacy.ts",
+        "server/src/domain/steveVersioning.ts"
+      ]
+    },
+    {
+      "collection": "tmag_steve_success_interview_versions",
+      "ownerId": "agents_training_success",
+      "owner": "BA agents, training, success profile, and commitments",
+      "steward": "Agent / training domain",
+      "primarySurface": "team + admin",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": true,
+      "sourceCount": 3,
+      "sourceFiles": [
+        "server/src/domain/steveVersioning.ts"
       ]
     },
     {

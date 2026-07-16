@@ -20,6 +20,13 @@ Proposer: Codex
 
 ---
 
+> **Supersession notice (2026-07-16):** ACR-0032 supersedes this ACR's
+> destructive correction and ordinary BA-requested deletion provisions. The
+> Steve interview is now durably versioned: confirmed edits and completed
+> retakes preserve prior versions, and the product exposes no ordinary
+> interview-deletion path. All other ACR-0031 privacy and exposure controls
+> remain in force.
+
 ## 1. Decision
 
 The Steve discovery record is private BA-owned support context.

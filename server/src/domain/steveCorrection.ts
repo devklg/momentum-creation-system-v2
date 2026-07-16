@@ -15,6 +15,14 @@ import {
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { appendAuditEntry } from './auditLog.js';
 import { normalizeStevePrivacyState } from './stevePrivacy.js';
+import {
+  activeRetakeSession,
+  archiveSteveDiscoveryVersion,
+  profileVersionOf,
+  STEVE_VERSIONING_POLICY_VERSION,
+  type SteveRetakeSession,
+  type VersionableSteveDiscovery,
+} from './steveVersioning.js';
 
 const MONGO_DB = 'momentum';
 const DISCOVERIES_COLLECTION = 'tmag_steve_success_interview';
@@ -52,7 +60,9 @@ interface PersistedCorrectionDiscovery extends McsSteveDiscoveryArtifact {
   _id: string;
   privacy?: unknown;
   correctionRevision?: number;
+  profileVersion?: number;
   lastCorrectedAt?: string | null;
+  retakeSession?: SteveRetakeSession | null;
   eventBodyCompaction?: {
     eligible?: boolean;
     policyVersion?: string;
@@ -94,6 +104,7 @@ function artifactForSelf(
     audioUrl: null,
     correctionRevision: revisionOf(discovery),
     lastCorrectedAt: discovery.lastCorrectedAt ?? null,
+    profileVersion: profileVersionOf(discovery),
   };
 }
 
@@ -362,11 +373,13 @@ async function writeArtifactProjection(args: {
   const consentedFieldCount = MCS_STEVE_SPONSOR_CONSENT_FIELDS.filter(
     (field) => privacy.sponsorConsent[field].granted,
   ).length;
+  const profileVersion = profileVersionOf(args.discovery);
 
   await persistenceCall('neo4j', 'cypher', {
     query:
       'MATCH (d:TmagSteveDiscovery {discoveryId: $discoveryId}) ' +
       'SET d.correctionRevision = $correctionRevision, ' +
+      'd.profileVersion = $profileVersion, ' +
       'd.lastCorrectedAt = $lastCorrectedAt, ' +
       'd.privacyStatus = $privacyStatus, ' +
       'd.privacyPolicyVersion = $privacyPolicyVersion, ' +
@@ -374,6 +387,7 @@ async function writeArtifactProjection(args: {
     params: {
       discoveryId: args.discovery._id,
       correctionRevision: args.revision,
+      profileVersion,
       lastCorrectedAt: args.correctedAt,
       privacyStatus: privacy.status,
       privacyPolicyVersion: privacy.policyVersion,
@@ -397,12 +411,14 @@ async function writeArtifactProjection(args: {
         privacyPolicyVersion: privacy.policyVersion,
         consentedFieldCount,
         correctionRevision: args.revision,
+        profileVersion,
         lastCorrectedAt: args.correctedAt ?? '',
         eventBodiesCompactionEligible:
           args.discovery.eventBodyCompaction?.eligible === true,
         eventBodyCompactionPolicyVersion:
           args.discovery.eventBodyCompaction?.policyVersion ??
           MCS_STEVE_PRIVACY_POLICY_VERSION,
+        versioningPolicyVersion: STEVE_VERSIONING_POLICY_VERSION,
       },
     ],
   });
@@ -415,7 +431,8 @@ async function writeArtifactProjection(args: {
         query:
           'MATCH (d:TmagSteveDiscovery {discoveryId: $discoveryId}) ' +
           'RETURN d.correctionRevision AS correctionRevision, ' +
-          'd.lastCorrectedAt AS lastCorrectedAt',
+          'd.lastCorrectedAt AS lastCorrectedAt, ' +
+          'd.profileVersion AS profileVersion',
         params: { discoveryId: args.discovery._id },
       },
     ),
@@ -432,8 +449,10 @@ async function writeArtifactProjection(args: {
     chromaIndex >= 0 ? chromaReadback.metadatas?.[chromaIndex] : undefined;
   if (
     Number(graph?.correctionRevision) !== args.revision ||
+    Number(graph?.profileVersion) !== profileVersion ||
     (graph?.lastCorrectedAt ?? null) !== args.correctedAt ||
     Number(chromaMetadata?.correctionRevision) !== args.revision ||
+    Number(chromaMetadata?.profileVersion) !== profileVersion ||
     (chromaMetadata?.lastCorrectedAt || null) !== args.correctedAt
   ) {
     throw new SteveCorrectionError(
@@ -579,6 +598,12 @@ export async function correctStevePrivateRecord(args: {
 }> {
   const previous = await getDiscovery(args.tmagId);
   const previousRevision = revisionOf(previous);
+  if (activeRetakeSession(previous)) {
+    throw new SteveCorrectionError(
+      'RETAKE_IN_PROGRESS',
+      'Finish the active Steve retake before editing the current profile.',
+    );
+  }
   if (args.payload.expectedRevision !== previousRevision) {
     throw new SteveCorrectionError(
       'STALE_REVISION',
@@ -600,6 +625,21 @@ export async function correctStevePrivateRecord(args: {
   }
   const correctedAt = new Date().toISOString();
   const nextRevision = previousRevision + 1;
+  try {
+    await archiveSteveDiscoveryVersion({
+      discovery: {
+        ...previous,
+        privacy: normalizeStevePrivacyState(previous.privacy),
+      } as VersionableSteveDiscovery,
+      reason: 'correction',
+      supersededAt: correctedAt,
+    });
+  } catch {
+    throw new SteveCorrectionError(
+      'ARCHIVE_FAILED',
+      'The current Steve profile could not be preserved before correction.',
+    );
+  }
   const update = await persistenceCall<{ matchedCount?: number }>(
     'mongodb',
     'update',
@@ -684,11 +724,14 @@ export async function correctStevePrivateRecord(args: {
         artifactId: previous._id,
         policyVersion: MCS_STEVE_PRIVACY_POLICY_VERSION,
         correctionRevision: previousRevision,
+        profileVersion: profileVersionOf(previous),
       },
       after: {
         artifactId: previous._id,
         policyVersion: MCS_STEVE_PRIVACY_POLICY_VERSION,
         correctionRevision: nextRevision,
+        profileVersion: profileVersionOf(previous),
+        versioningPolicyVersion: STEVE_VERSIONING_POLICY_VERSION,
         changedFieldPaths: corrected.changedFieldPaths,
       },
     });

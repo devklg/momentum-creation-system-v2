@@ -4,11 +4,11 @@
 
 ## Summary
 
-- Generated: 2026-07-16T21:21:47.298Z
-- Labels: 83
+- Generated: 2026-07-16T22:34:07.388Z
+- Labels: 84
 - Relationships: 68
 - Constraints/indexes cataloged: 18
-- Labels without a cataloged constraint/index: 68
+- Labels without a cataloged constraint/index: 69
 
 ## Constraints By Status
 
@@ -88,7 +88,8 @@
 | `TmagResourceVersion` | 5 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 4 |
-| `TmagSteveDiscovery` | 6 |
+| `TmagSteveDiscovery` | 10 |
+| `TmagSteveDiscoveryVersion` | 2 |
 | `TmagThreeWayBooking` | 2 |
 | `TmagTrainingModule` | 1 |
 | `TmagVmAuditEvent` | 1 |
@@ -142,7 +143,7 @@
 | `HAS_SETTINGS_VERSION` | 1 |
 | `HAS_THREE_WAY_AVAILABILITY` | 1 |
 | `HAS_TIMELINE_EVENT` | 3 |
-| `HAS_VERSION` | 6 |
+| `HAS_VERSION` | 7 |
 | `HAS_VM_AUDIT` | 1 |
 | `HAS_VM_DELIVERY_EVENT` | 1 |
 | `INVITED` | 7 |
@@ -259,6 +260,7 @@
 - `TmagResourceVersion`
 - `TmagSponsorAvailability`
 - `TmagSponsorOverride`
+- `TmagSteveDiscoveryVersion`
 - `TmagThreeWayBooking`
 - `TmagTrainingModule`
 - `TmagVmAuditEvent`

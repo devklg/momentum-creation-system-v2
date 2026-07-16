@@ -104,6 +104,7 @@ interface SteveDiscoveryArtifact {
   audioUrl: string | null;
   correctionRevision?: number;
   lastCorrectedAt?: string | null;
+  profileVersion?: number;
 }
 
 interface SteveDiscoveryView {
@@ -111,6 +112,7 @@ interface SteveDiscoveryView {
   phase: SteveDiscoveryPhase;
   transcript: SteveTranscriptChunk[];
   artifact: SteveDiscoveryArtifact | null;
+  retakeInProgress?: boolean;
 }
 
 type SteveSponsorConsentField =
@@ -183,6 +185,15 @@ interface SteveCorrectionResponse {
   correctionRevision?: number;
   correctedAt?: string;
   changedFieldPaths?: string[];
+  auditEntryId?: string;
+  error?: string;
+}
+
+interface SteveRetakeResponse {
+  ok: boolean;
+  retakeSessionId?: string;
+  profileVersion?: number;
+  startedAt?: string;
   auditEntryId?: string;
   error?: string;
 }
@@ -809,6 +820,12 @@ function ProfileView({
             ranks you. Sponsor sharing is off for private fields unless you turn on
             each field below.
           </p>
+          <p className="mt-3 text-[11px] font-mono uppercase tracking-[0.16em] text-cream-mute">
+            Active interview version {artifact.profileVersion ?? 1}
+            {artifact.correctionRevision
+              ? ` · correction ${artifact.correctionRevision}`
+              : ''}
+          </p>
         </header>
 
         <Section title="Your Primary Why">
@@ -901,6 +918,7 @@ function ProfileView({
           </Section>
         ) : null}
 
+        <SteveRetakeControls artifact={artifact} onReload={onReload} />
         <SteveCorrectionControls artifact={artifact} onReload={onReload} />
         <StevePrivacyControls tmagId={artifact.tmagId} />
 
@@ -909,6 +927,77 @@ function ProfileView({
         </p>
       </div>
     </div>
+  );
+}
+
+const RETAKE_CONFIRMATION = 'START A NEW STEVE INTERVIEW';
+
+function SteveRetakeControls({
+  artifact,
+  onReload,
+}: {
+  artifact: SteveDiscoveryArtifact;
+  onReload: () => Promise<void>;
+}) {
+  const [confirmed, setConfirmed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const beginRetake = async () => {
+    if (!confirmed || busy) return;
+    setBusy(true);
+    setError('');
+    try {
+      const res = await fetch('/api/steve/discovery/retake', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmation: RETAKE_CONFIRMATION }),
+      });
+      const data = (await res.json()) as SteveRetakeResponse;
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error ?? 'Could not start a new interview.');
+      }
+      await onReload();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Could not start a new interview.',
+      );
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Section title="Retake Your Interview">
+      <p className="text-sm leading-relaxed text-cream-mute">
+        You can start a new interview whenever your goals or circumstances
+        change. Version {artifact.profileVersion ?? 1} stays active for your
+        plan of action until the new interview is fully completed. Your prior
+        confirmed versions are preserved; this does not delete your record.
+      </p>
+      <label className="flex items-start gap-3 rounded-lg border border-gold/20 bg-gold/5 p-3">
+        <input
+          type="checkbox"
+          checked={confirmed}
+          disabled={busy}
+          onChange={(event) => setConfirmed(event.currentTarget.checked)}
+          className="mt-1 h-4 w-4 accent-[#C9A84C]"
+        />
+        <span className="text-xs leading-relaxed text-cream-mute">
+          I understand my current profile remains active until I complete the
+          new Steve interview.
+        </span>
+      </label>
+      <button
+        type="button"
+        disabled={!confirmed || busy}
+        onClick={() => void beginRetake()}
+        className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-2 text-sm text-gold hover:bg-gold/15 disabled:opacity-50"
+      >
+        {busy ? 'Starting new interview…' : 'Start a new Steve interview'}
+      </button>
+      {error ? <p className="text-sm text-red-400">{error}</p> : null}
+    </Section>
   );
 }
 
@@ -1183,7 +1272,7 @@ function SteveCorrectionControls({
         throw new Error(data.error ?? 'Could not correct your private record.');
       }
       setConfirmed(false);
-      setMessage('Your correction is saved. The previous private value was not retained.');
+      setMessage('Your correction is saved. The prior confirmed version is preserved.');
       await onReload();
     } catch (err) {
       setError(
@@ -1203,7 +1292,8 @@ function SteveCorrectionControls({
       <p className="text-sm leading-relaxed text-cream-mute">
         Choose one current value and replace it after confirmation. The audit
         records only the field path and revision — never the old or new private
-        text. Identity, timestamps, Steve&apos;s signature, provider details,
+        text. The prior confirmed version remains in your private version
+        history. Identity, timestamps, Steve&apos;s signature, provider details,
         and internal resource links cannot be edited here.
       </p>
 
@@ -1265,7 +1355,7 @@ function SteveCorrectionControls({
           />
           <span className="text-xs leading-relaxed text-cream-mute">
             I confirm this replacement is the current private value I want
-            saved. I understand the prior private value will not be retained.
+            saved. I understand the prior confirmed version will be preserved.
           </span>
         </label>
 
