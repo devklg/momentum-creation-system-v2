@@ -292,7 +292,8 @@ ACR-0031 approval alone is not apply authority for historical data.
     "follow_on_pr": 355,
     "commits": [
       "7b748ad3",
-      "a251fbfc"
+      "a251fbfc",
+      "25254777"
     ],
     "append_only_respected": true,
     "live_mutation_authorized": false,
