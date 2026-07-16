@@ -32,8 +32,8 @@ require historical mutation:
   evidence, projection read-back, and rollback on failure.
 
 The item remains partial. BA-requested private-content deletion, the
-deletion/onboarding-gate and tombstone behavior, provider inventory/terms
-review, and historical reconciliation remain separate visible work.
+deletion/onboarding-gate and tombstone behavior, provider activation evidence,
+and historical reconciliation remain separate visible work.
 
 No production record was read, changed, deleted, re-indexed, or backfilled.
 No external communication or provider call occurred.
@@ -86,8 +86,13 @@ No external communication or provider call occurred.
   the entire private payload from only that BA's Steve conversation events
   after canonical artifact read-back, retains content-free compaction facts,
   fails closed on residual payloads, and does not sweep historical rows.
-- Provider inventory/terms review remains required before production
-  activation.
+- The source-backed provider inventory and current official-terms review is
+  complete in
+  `engineering/audits/p2-141-steve-provider-inventory/README.md`. It found that
+  the ACR-0031 provider gate is not satisfied: browser speech recognition is
+  not local-only, TTS can prefer a remote online voice, Anthropic
+  organization-level ZDR is unverified, and managed-store/VPS backup settings
+  still need account evidence.
 - Any historical cleanup still requires report-only preview plus separate
   Kevin apply authority.
 
@@ -106,4 +111,6 @@ generated catalogs and freshness are current. Responsive fallback component
 visual QA passed at desktop, tablet, 390px, 360px, and 200% reflow with zero
 horizontal overflow and zero browser exceptions. The trusted in-app browser
 runtime was unavailable, so trusted-route QA is not represented as passed. The
-ACR decision and PR #353 merge state were verified.
+ACR decision and PR #353 merge state were verified. The provider inventory and
+official-terms review was source-only and made no live provider or production
+call.

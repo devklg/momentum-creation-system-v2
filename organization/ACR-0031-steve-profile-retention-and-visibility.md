@@ -175,6 +175,15 @@ Approved revocation copy:
   and deletion capabilities. A provider with incompatible retention or
   training-on-customer-data terms remains disabled.
 
+The source-backed inventory is recorded at
+`engineering/audits/p2-141-steve-provider-inventory/README.md`. The review
+identifies Anthropic, the browser/user-agent speech services, InterServer,
+MongoDB Atlas Flex, Neo4j Aura Free, and Chroma Cloud. The inventory itself is
+complete, but the activation gate is not passed: browser recognition is not
+local-only, browser TTS can select a remote online voice, Anthropic
+organization-level ZDR is unverified, and account-specific backup/retention
+evidence remains outstanding.
+
 ## 7. Semantic-memory boundary
 
 The only content-bearing Steve semantic projection authorized by this ACR is
@@ -254,6 +263,7 @@ ACR-0031 approval alone is not apply authority for historical data.
       "organization/ACR-0031-steve-profile-retention-and-visibility.md",
       "organization/ACR-REGISTER.md",
       "engineering/audits/p2-141-steve-profile-privacy/README.md",
+      "engineering/audits/p2-141-steve-provider-inventory/README.md",
       "PLATFORM_AUDIT_PRIORITY_TASKLIST.md"
     ],
     "schemas": [
@@ -335,6 +345,8 @@ ACR-0031 approval alone is not apply authority for historical data.
       "new-record event bodies compact only after canonical read-back",
       "event compaction retains content-free facts and excludes historical rows",
       "new records store null provider/audio fields",
+      "named source-backed provider inventory and official-terms review",
+      "provider activation blockers remain explicit and fail closed",
       "content-free Neo4j and Chroma projections",
       "blocked admin bridge materialization",
       "no Steve content on .com"
@@ -345,7 +357,14 @@ ACR-0031 approval alone is not apply authority for historical data.
     "gates_passed": [
       "review",
       "approval",
-      "baseline_merge"
+      "baseline_merge",
+      "provider_inventory"
+    ],
+    "gates_blocked": [
+      "browser_speech_local_only_or_named_remote_provider",
+      "browser_tts_local_only_or_named_remote_provider",
+      "anthropic_zdr_or_explicit_standard_retention_approval",
+      "account_specific_backup_and_log_retention_evidence"
     ],
     "released_at": null
   },

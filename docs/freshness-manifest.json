@@ -76,7 +76,7 @@
       ],
       "contentSha256": "283b3598e8f5c2bfe62270f4ef2ce38e5d204e02ef103ff86f54a41b8bbba41b",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-16T20:40:16.447Z"
+      "generatedAt": "2026-07-16T21:05:58.052Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/route-access-matrix.json",
@@ -90,7 +90,7 @@
       ],
       "contentSha256": "d5dfcc4e374cde486591eb953ed67f80491979782dac77f3a23a78a9540ea41d",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-16T20:40:16.505Z"
+      "generatedAt": "2026-07-16T21:05:58.106Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/persistence-write-catalog.json",
@@ -104,7 +104,7 @@
       ],
       "contentSha256": "da7c0e38e641701ffaf0fbb51aacc8b77d05f115e6bdef3d9b00d1fb57e10c97",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-16T20:40:21.369Z"
+      "generatedAt": "2026-07-16T21:06:02.825Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/schema-catalog.json",
@@ -122,7 +122,7 @@
       ],
       "contentSha256": "08a48cb5f6b4bf59abe5393902fedf5f07770d22e0cd8511b89a35c905e97847",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-16T20:40:19.180Z"
+      "generatedAt": "2026-07-16T21:06:00.676Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/mongo-ownership-map.json",
