@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T17:51:41.004Z",
+  "generatedAt": "2026-07-16T18:26:00.839Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -1835,12 +1835,12 @@
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 574,
+          "line": 576,
           "action": "persistenceCall.chromadb.add"
         },
         {
           "file": "server/src/domain/steve-success-interview.ts",
-          "line": 612,
+          "line": 614,
           "action": "writeKnowledge"
         }
       ],

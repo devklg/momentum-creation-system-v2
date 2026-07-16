@@ -151,6 +151,31 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     );
     expect(JSON.stringify(graphWrite?.[2])).not.toContain('callSid');
     expect(JSON.stringify(graphWrite?.[2])).not.toContain('audioUrl');
+
+    const mongoUpdate = mocks.persistenceCall.mock.calls.find(
+      ([tool, action]) => tool === 'mongodb' && action === 'update',
+    );
+    expect(JSON.stringify(mongoUpdate?.[2])).not.toContain('callSid');
+    expect(JSON.stringify(mongoUpdate?.[2])).not.toContain('audioUrl');
+  });
+
+  it('stores no provider call identifier or audio URL on a new internal Steve record', async () => {
+    const store: Store = { ba: { ...BA }, discovery: null };
+    mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
+    mocks.writeKnowledge.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
+      store.discovery = { _id: input.id, ...input.mongoDoc };
+      return { mongo: { ok: true }, neo4j: { ok: true }, chroma: { ok: true, verified: true } };
+    });
+    const steve = await loadSteve();
+
+    const artifact = await steve.ingestDiscoveryArtifact(
+      makePayload({ callSid: 'CA-private', audioUrl: 'https://private.example/audio' }),
+    );
+
+    const write = mocks.writeKnowledge.mock.calls[0]?.[0] as { mongoDoc?: AnyRec } | undefined;
+    expect(write?.mongoDoc).toMatchObject({ callSid: null, audioUrl: null });
+    expect(artifact.callSid).toBeNull();
+    expect(artifact.audioUrl).toBeNull();
   });
 
   it('read-back throws READBACK_FAILED when the update did not apply content', async () => {

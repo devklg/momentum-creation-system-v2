@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T17:51:45.616Z",
+  "generatedAt": "2026-07-16T18:26:07.361Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -1216,7 +1216,7 @@
         "requireAuth"
       ],
       "handler": "handler",
-      "source": "server/src/routes/steve.ts:70",
+      "source": "server/src/routes/steve.ts:72",
       "routeSource": "server/src/routes/steve.ts",
       "signals": {
         "requireAuth": true,
@@ -1242,7 +1242,7 @@
         "requireAuth"
       ],
       "handler": "handler",
-      "source": "server/src/routes/steve.ts:86",
+      "source": "server/src/routes/steve.ts:88",
       "routeSource": "server/src/routes/steve.ts",
       "signals": {
         "requireAuth": true,
@@ -1266,7 +1266,7 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/steve.ts:98",
+      "source": "server/src/routes/steve.ts:100",
       "routeSource": "server/src/routes/steve.ts",
       "signals": {
         "requireAuth": false,
@@ -1290,7 +1290,7 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/steve.ts:200",
+      "source": "server/src/routes/steve.ts:202",
       "routeSource": "server/src/routes/steve.ts",
       "signals": {
         "requireAuth": false,
@@ -1317,7 +1317,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/steve.ts:265",
+      "source": "server/src/routes/steve.ts:267",
       "routeSource": "server/src/routes/steve.ts",
       "signals": {
         "requireAuth": true,
@@ -1343,7 +1343,7 @@
         "requireAuth"
       ],
       "handler": "handler",
-      "source": "server/src/routes/steve.ts:299",
+      "source": "server/src/routes/steve.ts:301",
       "routeSource": "server/src/routes/steve.ts",
       "signals": {
         "requireAuth": true,
@@ -1369,7 +1369,7 @@
         "requireAuth"
       ],
       "handler": "handler",
-      "source": "server/src/routes/steve.ts:315",
+      "source": "server/src/routes/steve.ts:317",
       "routeSource": "server/src/routes/steve.ts",
       "signals": {
         "requireAuth": true,

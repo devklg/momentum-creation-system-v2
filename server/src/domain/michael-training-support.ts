@@ -4,8 +4,10 @@
  * READ-ONLY. This module owns no collections of its own. Steve (the new-BA
  * discovery agent) persists `tmag_steve_success_interview` with a SuccessProfile; this
  * module reads that artifact on demand and DERIVES a sponsor-facing training-
- * support card — "how to support this downline's training" — projecting the
- * BA's own discovery answers into actionable guidance for their direct sponsor.
+ * support card — "how to support this downline's training" — projecting only
+ * the ACR-0031 default-safe fields into actionable guidance for their direct
+ * sponsor. Private why/vision/obstacle/handoff fields remain hidden until a
+ * field-specific consent contract exists.
  *
  * RELATIONSHIP TO STEVE: this module DOES NOT IMPLEMENT STEVE and never
  * mutates `tmag_steve_success_interview`. The user-prompt contract is "assume Steve
@@ -106,18 +108,14 @@ async function getSteveDiscoveryByTmagId(
         sponsorTmagId: 1,
         completedAt: 1,
         'successProfile.generatedAt': 1,
-        'successProfile.primaryWhy.statement': 1,
-        'successProfile.successVision.statement': 1,
         'successProfile.learningStyle.modalities': 1,
         'successProfile.learningStyle.feedbackPreference': 1,
         'successProfile.communicationPreferences.preferredChannels': 1,
         'successProfile.communicationPreferences.cadence': 1,
         'successProfile.communicationPreferences.bestTimes': 1,
         'successProfile.supportNeeds.areas': 1,
-        'successProfile.supportNeeds.potentialObstacles': 1,
         'successProfile.supportNeeds.helpStyle': 1,
         'successProfile.trainingRecommendations.text': 1,
-        'successProfile.michaelHandoffSummary': 1,
       },
       limit: 1,
     },
@@ -170,11 +168,9 @@ function deriveCommunication(
 
 function deriveSupportFocus(sn: McsSteveSuccessProfile['supportNeeds']): McsMichaelTrainingSupportGuidanceSection {
   const areas = cleanList(sn.areas);
-  const obstacles = cleanList(sn.potentialObstacles);
   const helpStyle = trimToNonEmpty(sn.helpStyle);
   const bullets: string[] = [];
   if (areas.length > 0) bullets.push(`Where they want support early: ${joinNatural(areas)}.`);
-  if (obstacles.length > 0) bullets.push(`They named: ${joinNatural(obstacles)}.`);
   if (helpStyle) bullets.push(`When stuck: ${helpStyle}.`);
   return { label: 'Where to focus your support', bullets };
 }
@@ -194,8 +190,10 @@ export function projectSuccessProfileToCard(args: {
     downlineTmagId: args.downlineTmagId,
     downlineFirstName: args.downlineFirstName,
     derivedFromSteveAt: p.generatedAt,
-    primaryWhy: trimToNonEmpty(p.primaryWhy?.statement),
-    successVision: trimToNonEmpty(p.successVision?.statement),
+    // Existing wire fields remain present for compatibility, but ACR-0031
+    // keeps them empty until the BA grants field-specific sponsor consent.
+    primaryWhy: '',
+    successVision: '',
     learningStyle: deriveLearningStyle(p.learningStyle),
     communication: deriveCommunication(p.communicationPreferences),
     supportFocus: deriveSupportFocus(p.supportNeeds),
@@ -204,7 +202,7 @@ export function projectSuccessProfileToCard(args: {
         .map((recommendation) => recommendation.text)
         .filter(isSafeSteveGuidanceText),
     ),
-    michaelHandoffSummary: trimToNonEmpty(p.michaelHandoffSummary),
+    michaelHandoffSummary: '',
     signedBy: MICHAEL_TRAINING_SUPPORT_SIGNED_BY,
   };
 }

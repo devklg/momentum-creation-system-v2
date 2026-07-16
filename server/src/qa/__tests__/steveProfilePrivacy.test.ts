@@ -55,8 +55,8 @@ describe('P2-141 Steve Success Profile privacy boundary', () => {
     expect(domain).not.toContain('`Support areas: ${sp.supportNeeds.areas.join');
     expect(domain).toContain('Profile content is canonical in MongoDB.');
     expect(domain).toContain('retrievalEligible: false');
-    expect(domain).toContain('callSid: a.callSid');
-    expect(domain).toContain('audioUrl: a.audioUrl');
+    expect(domain).toContain('callSid: null');
+    expect(domain).toContain('audioUrl: null');
   });
 
   it('projects only the sponsor-support fields Michael actually consumes', () => {
@@ -67,6 +67,25 @@ describe('P2-141 Steve Success Profile privacy boundary', () => {
     expect(michael).not.toContain("'successProfile.learningStyle.notes': 1");
     expect(michael).not.toContain("'successProfile.supportNeeds.notes': 1");
     expect(michael).not.toContain("'successProfile.launchRecommendations': 1");
+    expect(michael).not.toContain("'successProfile.primaryWhy.statement': 1");
+    expect(michael).not.toContain("'successProfile.successVision.statement': 1");
+    expect(michael).not.toContain("'successProfile.supportNeeds.potentialObstacles': 1");
+    expect(michael).not.toContain("'successProfile.michaelHandoffSummary': 1");
+    expect(michael).toContain("primaryWhy: ''");
+    expect(michael).toContain("successVision: ''");
+    expect(michael).toContain("michaelHandoffSummary: ''");
+  });
+
+  it('fails the legacy raw sponsor route closed and nulls provider/audio fields', () => {
+    const domain = source('server/src/domain/steve-success-interview.ts');
+
+    expect(domain).toContain("'CONSENT_REQUIRED'");
+    expect(domain).not.toContain('answers: artifact.answers');
+    expect(domain).not.toContain('successProfile: artifact.successProfile');
+    expect(domain).toContain('callSid: null');
+    expect(domain).toContain('audioUrl: null');
+    expect(domain).not.toContain('callSid: a.callSid');
+    expect(domain).not.toContain('audioUrl: a.audioUrl');
   });
 
   it('uses first-name-only member projections for Steve prompt personalization', () => {

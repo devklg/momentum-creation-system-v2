@@ -80,7 +80,7 @@ describe('P2-118 Steve tailored guidance projection', () => {
     });
   });
 
-  it('reads canonical recommendation objects in the sponsor training-support projection', () => {
+  it('keeps the default sponsor projection bounded to ACR-0031 training support', () => {
     const canonical = {
       ...profile,
       primaryWhy: { statement: 'Build a family legacy', who: 'family', whyNow: 'now' },
@@ -106,6 +106,13 @@ describe('P2-118 Steve tailored guidance projection', () => {
       'Use this unknown page.',
       'Review the compensation plan with your sponsor.',
     ]);
-    expect(card.supportFocus.bullets).toContain('They named: time.');
+    expect(card.primaryWhy).toBe('');
+    expect(card.successVision).toBe('');
+    expect(card.michaelHandoffSummary).toBe('');
+    expect(card.supportFocus.bullets).not.toContain('They named: time.');
+    expect(card.supportFocus.bullets).toEqual([
+      'Where they want support early: inviting.',
+      'When stuck: Ask me early.',
+    ]);
   });
 });

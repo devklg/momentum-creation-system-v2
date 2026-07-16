@@ -10,8 +10,10 @@
  *   GET  /api/steve/discovery/system-prompt?tmagId=...  → system prompt string
  *   POST /api/steve/discovery/ingest                  → persist the artifact
  *
- * Sponsor-only:
- *   GET  /api/steve/discovery/profile/:downlineTmagId   → downline's profile card
+ * Legacy sponsor boundary:
+ *   GET  /api/steve/discovery/profile/:downlineTmagId   → fails closed under
+ *   ACR-0031 until field-specific BA consent exists. Sponsors use Michael's
+ *   bounded training-support projection by default.
  *
  * Compliance: BA-facing only, never prospect-facing, never on .com. No income
  * or placement language anywhere (locked-spec 3.10/3.12). Steve never scores or
@@ -259,9 +261,9 @@ steveRoutes.post(
   },
 );
 
-/** GET /api/steve/discovery/profile/:downlineTmagId — sponsor-only.
- *  The direct sponsor reads a downline's Steve Success Profile. Authoritative
- *  check is server-side; all access/not-found failures return one opaque 404. */
+/** GET /api/steve/discovery/profile/:downlineTmagId — legacy raw sponsor route.
+ *  ACR-0031 keeps it fail-closed; all access/not-found/consent failures return
+ *  one opaque 404. */
 steveRoutes.get(
   '/discovery/profile/:downlineTmagId',
   requireAuth,

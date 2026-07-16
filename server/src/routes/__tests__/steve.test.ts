@@ -248,7 +248,7 @@ describe('Steve route behavior', () => {
     expect(response.set).toHaveBeenCalledWith('Cache-Control', 'private, no-store');
   });
 
-  it.each(['NO_DOWNLINE', 'NOT_SPONSOR', 'NO_ARTIFACT', 'NO_COMPLETED_AT'])(
+  it.each(['NO_DOWNLINE', 'NOT_SPONSOR', 'NO_ARTIFACT', 'NO_COMPLETED_AT', 'CONSENT_REQUIRED'])(
     'returns one opaque sponsor-profile response for %s',
     async (code) => {
       vi.spyOn(steveDomain, 'getProfileCardForSponsor').mockRejectedValueOnce(

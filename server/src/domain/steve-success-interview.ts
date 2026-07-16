@@ -427,13 +427,15 @@ function stripPersisted(doc: PersistedDiscovery): McsSteveDiscoveryArtifact {
   return {
     tmagId: doc.tmagId,
     sponsorTmagId: doc.sponsorTmagId,
-    callSid: doc.callSid,
+    // ACR-0031: provider internals and audio pointers are not user-facing,
+    // including on legacy records that may still contain those fields.
+    callSid: null,
     startedAt: doc.startedAt,
     completedAt: doc.completedAt,
     transcript: doc.transcript,
     answers: doc.answers,
     successProfile: doc.successProfile,
-    audioUrl: doc.audioUrl,
+    audioUrl: null,
   };
 }
 
@@ -508,13 +510,11 @@ function chromaDocForDiscovery(_a: PersistedDiscovery): string {
 function artifactToUpdate(a: PersistedDiscovery): Partial<PersistedDiscovery> {
   return {
     sponsorTmagId: a.sponsorTmagId,
-    callSid: a.callSid,
     startedAt: a.startedAt,
     completedAt: a.completedAt,
     transcript: a.transcript,
     answers: a.answers,
     successProfile: a.successProfile,
-    audioUrl: a.audioUrl,
   };
 }
 
@@ -553,7 +553,9 @@ export async function ingestDiscoveryArtifact(
     _id: id,
     tmagId: payload.tmagId,
     sponsorTmagId: baInfo.sponsorTmagId, // server-stamped (3.5)
-    callSid: payload.callSid,
+    // Internal Steve uses browser voice/text. ACR-0031 stores transcripts,
+    // not provider call identifiers or raw-audio pointers.
+    callSid: null,
     startedAt: payload.startedAt,
     completedAt: payload.completedAt,
     transcript,
@@ -562,7 +564,7 @@ export async function ingestDiscoveryArtifact(
       answerText: ans.answerText.slice(0, 5000),
     })),
     successProfile,
-    audioUrl: payload.audioUrl,
+    audioUrl: null,
   };
 
   const cy = discoveryCypher(artifact);
@@ -663,8 +665,12 @@ export class SponsorAccessError extends Error {
   }
 }
 
-/** Sponsor-only fetch of a downline's Steve profile card. Authoritative check
- *  is server-side: requestingTmagId must equal the downline's sponsorTmagId. */
+/** Legacy raw sponsor-card boundary.
+ *
+ * ACR-0031 removed raw answers/full-profile/audio from the sponsor default.
+ * The direct sponsor must use Michael's bounded training-support projection.
+ * This route fails closed until a field-specific BA consent contract exists.
+ */
 export async function getProfileCardForSponsor(args: {
   requestingTmagId: string;
   downlineTmagId: string;
@@ -677,21 +683,8 @@ export async function getProfileCardForSponsor(args: {
     throw new SponsorAccessError('NOT_SPONSOR', 'Only the direct sponsor can read this profile.');
   }
 
-  const artifact = await getDiscoveryByTmagId(args.downlineTmagId);
-  if (!artifact) {
-    throw new SponsorAccessError('NO_ARTIFACT', 'Discovery is not complete yet for this BA.');
-  }
-  if (!artifact.completedAt) {
-    throw new SponsorAccessError('NO_COMPLETED_AT', 'Discovery artifact has no completedAt timestamp.');
-  }
-
-  return {
-    downlineTmagId: args.downlineTmagId,
-    downlineFirstName: downlineInfo.firstName,
-    completedAt: artifact.completedAt,
-    answers: artifact.answers,
-    successProfile: artifact.successProfile,
-    audioUrl: artifact.audioUrl,
-    signedBy: artifact.successProfile.signedBy,
-  };
+  throw new SponsorAccessError(
+    'CONSENT_REQUIRED',
+    'Raw Steve profile access is unavailable without field-specific BA consent.',
+  );
 }
