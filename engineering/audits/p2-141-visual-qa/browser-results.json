@@ -1,0 +1,86 @@
+{
+  "url": "http://127.0.0.1:7791/?focus=correction",
+  "exceptions": [],
+  "captures": [
+    {
+      "name": "desktop-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "scale": 1,
+      "titleVisible": true,
+      "controlVisible": true,
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "horizontalOverflow": false,
+      "section": {
+        "left": 408,
+        "right": 1032,
+        "width": 624
+      }
+    },
+    {
+      "name": "tablet-768x1024.png",
+      "width": 768,
+      "height": 1024,
+      "scale": 1,
+      "titleVisible": true,
+      "controlVisible": true,
+      "clientWidth": 768,
+      "scrollWidth": 768,
+      "horizontalOverflow": false,
+      "section": {
+        "left": 72,
+        "right": 696,
+        "width": 624
+      }
+    },
+    {
+      "name": "mobile-390x844.png",
+      "width": 390,
+      "height": 844,
+      "scale": 1,
+      "titleVisible": true,
+      "controlVisible": true,
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "horizontalOverflow": false,
+      "section": {
+        "left": 24,
+        "right": 366,
+        "width": 342
+      }
+    },
+    {
+      "name": "small-mobile-360x800.png",
+      "width": 360,
+      "height": 800,
+      "scale": 1,
+      "titleVisible": true,
+      "controlVisible": true,
+      "clientWidth": 360,
+      "scrollWidth": 360,
+      "horizontalOverflow": false,
+      "section": {
+        "left": 24,
+        "right": 336,
+        "width": 312
+      }
+    },
+    {
+      "name": "reflow-200-percent.png",
+      "width": 720,
+      "height": 900,
+      "scale": 2,
+      "titleVisible": true,
+      "controlVisible": true,
+      "clientWidth": 720,
+      "scrollWidth": 720,
+      "horizontalOverflow": false,
+      "section": {
+        "left": 48,
+        "right": 672,
+        "width": 624
+      }
+    }
+  ]
+}

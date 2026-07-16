@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T18:37:47.967Z",
+  "generatedAt": "2026-07-16T21:21:53.918Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -21,7 +21,7 @@
     "/api/training/fast-start/modules/1"
   ],
   "summary": {
-    "routes": 250,
+    "routes": 255,
     "byAccessClass": {
       "raw_body_webhook": 1,
       "admin": 110,
@@ -29,7 +29,7 @@
       "auth_bootstrap": 3,
       "auth_session": 2,
       "ba_auth_pre_steve": 21,
-      "ba_auth_steve_gated": 59,
+      "ba_auth_steve_gated": 64,
       "steve_worker_secret": 2,
       "admin_or_health_secret": 1,
       "internal_runtime_admin_or_secret": 5,
@@ -43,23 +43,23 @@
       "founder_admin": 116,
       "anonymous": 5,
       "system": 10,
-      "brand_ambassador": 107,
+      "brand_ambassador": 112,
       "prospect": 18
     },
     "byEntitlement": {
       "machine_credential": 12,
       "admin_allowlist": 116,
       "none": 5,
-      "registered_ba": 107,
+      "registered_ba": 112,
       "valid_prospect_identity": 18,
       "vm_dialer": 25
     },
     "guardCoverage": {
-      "requireAuth": 106,
+      "requireAuth": 111,
       "requireAdmin": 110,
       "requireAdminOrHealthSecret": 1,
       "requireRuntimeInternal": 5,
-      "requireSteveComplete": 91,
+      "requireSteveComplete": 96,
       "requireVmDialerAccess": 25,
       "rateLimited": 3,
       "rawBodyParser": 1,
@@ -1518,7 +1518,7 @@
       "id": "GET /api/steve/discovery/state",
       "method": "GET",
       "fullPath": "/api/steve/discovery/state",
-      "routeSource": "server/src/routes/steve.ts:72",
+      "routeSource": "server/src/routes/steve.ts:152",
       "mountPath": "/api/steve",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "pre_gate_or_public",
@@ -1572,7 +1572,7 @@
       "id": "GET /api/steve/discovery/script",
       "method": "GET",
       "fullPath": "/api/steve/discovery/script",
-      "routeSource": "server/src/routes/steve.ts:88",
+      "routeSource": "server/src/routes/steve.ts:168",
       "mountPath": "/api/steve",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "pre_gate_or_public",
@@ -1623,10 +1623,285 @@
       "findings": []
     },
     {
+      "id": "GET /api/steve/discovery/privacy",
+      "method": "GET",
+      "fullPath": "/api/steve/discovery/privacy",
+      "routeSource": "server/src/routes/steve.ts:177",
+      "mountPath": "/api/steve",
+      "mountPhase": "pre_gate",
+      "routeAccessProfile": "pre_gate_or_public",
+      "accessClass": "ba_auth_steve_gated",
+      "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/steve/discovery/export",
+      "method": "GET",
+      "fullPath": "/api/steve/discovery/export",
+      "routeSource": "server/src/routes/steve.ts:194",
+      "mountPath": "/api/steve",
+      "mountPhase": "pre_gate",
+      "routeAccessProfile": "pre_gate_or_public",
+      "accessClass": "ba_auth_steve_gated",
+      "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "PUT /api/steve/discovery/privacy/consent",
+      "method": "PUT",
+      "fullPath": "/api/steve/discovery/privacy/consent",
+      "routeSource": "server/src/routes/steve.ts:221",
+      "mountPath": "/api/steve",
+      "mountPhase": "pre_gate",
+      "routeAccessProfile": "pre_gate_or_public",
+      "accessClass": "ba_auth_steve_gated",
+      "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "PUT /api/steve/discovery/correction",
+      "method": "PUT",
+      "fullPath": "/api/steve/discovery/correction",
+      "routeSource": "server/src/routes/steve.ts:288",
+      "mountPath": "/api/steve",
+      "mountPhase": "pre_gate",
+      "routeAccessProfile": "pre_gate_or_public",
+      "accessClass": "ba_auth_steve_gated",
+      "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "POST /api/steve/discovery/privacy/withdraw",
+      "method": "POST",
+      "fullPath": "/api/steve/discovery/privacy/withdraw",
+      "routeSource": "server/src/routes/steve.ts:316",
+      "mountPath": "/api/steve",
+      "mountPhase": "pre_gate",
+      "routeAccessProfile": "pre_gate_or_public",
+      "accessClass": "ba_auth_steve_gated",
+      "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
       "id": "GET /api/steve/discovery/system-prompt",
       "method": "GET",
       "fullPath": "/api/steve/discovery/system-prompt",
-      "routeSource": "server/src/routes/steve.ts:100",
+      "routeSource": "server/src/routes/steve.ts:344",
       "mountPath": "/api/steve",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "pre_gate_or_public",
@@ -1679,7 +1954,7 @@
       "id": "POST /api/steve/discovery/ingest",
       "method": "POST",
       "fullPath": "/api/steve/discovery/ingest",
-      "routeSource": "server/src/routes/steve.ts:202",
+      "routeSource": "server/src/routes/steve.ts:446",
       "mountPath": "/api/steve",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "pre_gate_or_public",
@@ -1732,7 +2007,7 @@
       "id": "GET /api/steve/discovery/profile/:downlineTmagId",
       "method": "GET",
       "fullPath": "/api/steve/discovery/profile/:downlineTmagId",
-      "routeSource": "server/src/routes/steve.ts:267",
+      "routeSource": "server/src/routes/steve.ts:517",
       "mountPath": "/api/steve",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "pre_gate_or_public",
@@ -1787,7 +2062,7 @@
       "id": "GET /api/steve/discovery/conversation",
       "method": "GET",
       "fullPath": "/api/steve/discovery/conversation",
-      "routeSource": "server/src/routes/steve.ts:301",
+      "routeSource": "server/src/routes/steve.ts:551",
       "mountPath": "/api/steve",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "pre_gate_or_public",
@@ -1840,7 +2115,7 @@
       "id": "POST /api/steve/discovery/converse",
       "method": "POST",
       "fullPath": "/api/steve/discovery/converse",
-      "routeSource": "server/src/routes/steve.ts:317",
+      "routeSource": "server/src/routes/steve.ts:567",
       "mountPath": "/api/steve",
       "mountPhase": "pre_gate",
       "routeAccessProfile": "pre_gate_or_public",

@@ -1,0 +1,101 @@
+{
+  "url": "http://127.0.0.1:7791/?focus=voice-privacy",
+  "exceptions": [],
+  "captures": [
+    {
+      "name": "desktop-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "scale": 1,
+      "introVisible": true,
+      "privacyNoticeVisible": true,
+      "typedFallbackVisible": true,
+      "voiceButtonVisible": true,
+      "inputVisible": true,
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "horizontalOverflow": false,
+      "input": {
+        "left": 486.078125,
+        "right": 949.296875,
+        "width": 463.21875
+      }
+    },
+    {
+      "name": "tablet-768x1024.png",
+      "width": 768,
+      "height": 1024,
+      "scale": 1,
+      "introVisible": true,
+      "privacyNoticeVisible": true,
+      "typedFallbackVisible": true,
+      "voiceButtonVisible": true,
+      "inputVisible": true,
+      "clientWidth": 768,
+      "scrollWidth": 768,
+      "horizontalOverflow": false,
+      "input": {
+        "left": 150.078125,
+        "right": 613.296875,
+        "width": 463.21875
+      }
+    },
+    {
+      "name": "mobile-390x844.png",
+      "width": 390,
+      "height": 844,
+      "scale": 1,
+      "introVisible": true,
+      "privacyNoticeVisible": true,
+      "typedFallbackVisible": true,
+      "voiceButtonVisible": true,
+      "inputVisible": true,
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "horizontalOverflow": false,
+      "input": {
+        "left": 102.078125,
+        "right": 283.296875,
+        "width": 181.21875
+      }
+    },
+    {
+      "name": "small-mobile-360x800.png",
+      "width": 360,
+      "height": 800,
+      "scale": 1,
+      "introVisible": true,
+      "privacyNoticeVisible": true,
+      "typedFallbackVisible": true,
+      "voiceButtonVisible": true,
+      "inputVisible": true,
+      "clientWidth": 360,
+      "scrollWidth": 360,
+      "horizontalOverflow": false,
+      "input": {
+        "left": 102.078125,
+        "right": 253.296875,
+        "width": 151.21875
+      }
+    },
+    {
+      "name": "reflow-200-percent.png",
+      "width": 720,
+      "height": 900,
+      "scale": 2,
+      "introVisible": true,
+      "privacyNoticeVisible": true,
+      "typedFallbackVisible": true,
+      "voiceButtonVisible": true,
+      "inputVisible": true,
+      "clientWidth": 720,
+      "scrollWidth": 720,
+      "horizontalOverflow": false,
+      "input": {
+        "left": 126.078125,
+        "right": 589.296875,
+        "width": 463.21875
+      }
+    }
+  ]
+}

@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-16T18:37:47.917Z
+- Generated: 2026-07-16T21:21:53.867Z
 - Mounted routers: 50
 - Route files: 50
-- Static route rows: 250
+- Static route rows: 255
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
 | ba_facing_gated | 91 |
-| pre_gate | 148 |
+| pre_gate | 153 |
 | pre_json_admin_body_limit | 10 |
 | raw_body_before_json | 1 |
 
@@ -25,7 +25,7 @@
 | admin | 107 |
 | ba_auth_steve_gated | 91 |
 | internal_runtime | 5 |
-| pre_gate_or_public | 28 |
+| pre_gate_or_public | 33 |
 | prospect_token | 18 |
 | raw_body_webhook | 1 |
 
@@ -34,10 +34,10 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 7 |
-| GET | 129 |
+| GET | 131 |
 | PATCH | 9 |
-| POST | 98 |
-| PUT | 7 |
+| POST | 99 |
+| PUT | 9 |
 
 ## Mounts
 
@@ -125,13 +125,18 @@
 | PUT | `/api/sponsor/workbook/:tmagId/draft` | pre_gate | pre_gate_or_public | auth | `server/src/routes/sponsor-workbook.ts:171` |
 | POST | `/api/sponsor/workbook/:tmagId/finalize` | pre_gate | pre_gate_or_public | auth | `server/src/routes/sponsor-workbook.ts:241` |
 | GET | `/api/michael/training-support/:downlineTmagId` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/michael.ts:23` |
-| GET | `/api/steve/discovery/state` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:72` |
-| GET | `/api/steve/discovery/script` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:88` |
-| GET | `/api/steve/discovery/system-prompt` | pre_gate | pre_gate_or_public | none | `server/src/routes/steve.ts:100` |
-| POST | `/api/steve/discovery/ingest` | pre_gate | pre_gate_or_public | none | `server/src/routes/steve.ts:202` |
-| GET | `/api/steve/discovery/profile/:downlineTmagId` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/steve.ts:267` |
-| GET | `/api/steve/discovery/conversation` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:301` |
-| POST | `/api/steve/discovery/converse` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:317` |
+| GET | `/api/steve/discovery/state` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:152` |
+| GET | `/api/steve/discovery/script` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:168` |
+| GET | `/api/steve/discovery/privacy` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/steve.ts:177` |
+| GET | `/api/steve/discovery/export` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/steve.ts:194` |
+| PUT | `/api/steve/discovery/privacy/consent` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/steve.ts:221` |
+| PUT | `/api/steve/discovery/correction` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/steve.ts:288` |
+| POST | `/api/steve/discovery/privacy/withdraw` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/steve.ts:316` |
+| GET | `/api/steve/discovery/system-prompt` | pre_gate | pre_gate_or_public | none | `server/src/routes/steve.ts:344` |
+| POST | `/api/steve/discovery/ingest` | pre_gate | pre_gate_or_public | none | `server/src/routes/steve.ts:446` |
+| GET | `/api/steve/discovery/profile/:downlineTmagId` | pre_gate | pre_gate_or_public | auth, steve | `server/src/routes/steve.ts:517` |
+| GET | `/api/steve/discovery/conversation` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:551` |
+| POST | `/api/steve/discovery/converse` | pre_gate | pre_gate_or_public | auth | `server/src/routes/steve.ts:567` |
 | POST | `/api/admin/access-codes/` | pre_gate | admin | admin | `server/src/routes/admin/access-codes.ts:30` |
 | GET | `/api/admin/access-codes/` | pre_gate | admin | admin | `server/src/routes/admin/access-codes.ts:65` |
 | GET | `/api/admin/bas/entitlements/audit` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:55` |

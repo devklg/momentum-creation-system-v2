@@ -6451,3 +6451,13 @@ export interface McsAdminGraphIntegrityReport {
 export interface McsAdminConsistencyReportV2 extends McsAdminConsistencyReportResponse {
   graphIntegrity: McsAdminGraphIntegrityReport;
 }
+
+/* ─── P2-141 Steve private-record correction metadata ─────────────────────
+ * Declaration merge keeps the high-traffic shared type file append-only.
+ * Private values are replaced in place; only content-free revision facts are
+ * added to the BA-owned artifact contract.
+ */
+export interface McsSteveDiscoveryArtifact {
+  correctionRevision?: number;
+  lastCorrectedAt?: McsIsoTimestamp | null;
+}

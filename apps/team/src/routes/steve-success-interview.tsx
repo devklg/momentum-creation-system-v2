@@ -35,6 +35,13 @@ interface SteveDiscoveryAnswer {
   answerText: string;
 }
 
+interface SteveTranscriptChunk {
+  sequence: number;
+  speaker: 'steve' | 'ba';
+  text: string;
+  occurredAt: string;
+}
+
 interface StevePrimaryWhy {
   statement: string;
   who: string;
@@ -91,15 +98,93 @@ interface SteveDiscoveryArtifact {
   callSid: string | null;
   startedAt: string | null;
   completedAt: string | null;
+  transcript: SteveTranscriptChunk[];
   answers: SteveDiscoveryAnswer[];
   successProfile: SteveSuccessProfile;
   audioUrl: string | null;
+  correctionRevision?: number;
+  lastCorrectedAt?: string | null;
 }
 
 interface SteveDiscoveryView {
   tmagId: string;
   phase: SteveDiscoveryPhase;
+  transcript: SteveTranscriptChunk[];
   artifact: SteveDiscoveryArtifact | null;
+}
+
+type SteveSponsorConsentField =
+  | 'why_statement'
+  | 'success_vision'
+  | 'support_obstacles'
+  | 'michael_handoff_summary';
+
+interface SteveSponsorConsentGrant {
+  field: SteveSponsorConsentField;
+  granted: boolean;
+  sponsorTmagId: string | null;
+  grantedAt: string | null;
+  revokedAt: string | null;
+}
+
+interface StevePrivacyState {
+  policyVersion: 'acr-0031.v1';
+  status: 'active' | 'withdrawn';
+  withdrawnAt: string | null;
+  sponsorConsent: Record<SteveSponsorConsentField, SteveSponsorConsentGrant>;
+}
+
+interface StevePrivacyResponse {
+  ok: boolean;
+  privacy?: StevePrivacyState;
+  currentSponsorTmagId?: string | null;
+  grantCopy?: string;
+  revocationCopy?: string;
+  error?: string;
+}
+
+type SteveCorrectionTarget =
+  | { kind: 'transcript_text'; sequence: number }
+  | { kind: 'answer_text'; questionId: string }
+  | {
+      kind: 'profile_text';
+      path:
+        | 'primaryWhy.statement'
+        | 'primaryWhy.who'
+        | 'primaryWhy.whyNow'
+        | 'successVision.statement'
+        | 'successVision.oneBigChange'
+        | 'learningStyle.feedbackPreference'
+        | 'learningStyle.notes'
+        | 'communicationPreferences.cadence'
+        | 'communicationPreferences.bestTimes'
+        | 'communicationPreferences.notes'
+        | 'supportNeeds.helpStyle'
+        | 'supportNeeds.notes'
+        | 'michaelHandoffSummary';
+    }
+  | {
+      kind: 'profile_list';
+      path:
+        | 'learningStyle.modalities'
+        | 'communicationPreferences.preferredChannels'
+        | 'supportNeeds.areas'
+        | 'supportNeeds.potentialObstacles';
+    }
+  | {
+      kind: 'recommendation_text';
+      list: 'launch' | 'training';
+      index: number;
+    };
+
+interface SteveCorrectionResponse {
+  ok: boolean;
+  artifact?: SteveDiscoveryArtifact;
+  correctionRevision?: number;
+  correctedAt?: string;
+  changedFieldPaths?: string[];
+  auditEntryId?: string;
+  error?: string;
 }
 
 type FetchState =
@@ -147,7 +232,7 @@ export function SteveSuccessInterviewPage() {
     return <DiscoveryChat onComplete={load} />;
   }
 
-  return <ProfileView artifact={view.artifact} />;
+  return <ProfileView artifact={view.artifact} onReload={load} />;
 }
 
 /* ─── In-flight state — the live discovery conversation with Steve ─── */
@@ -159,10 +244,10 @@ interface ChatTurn {
   at: string;
 }
 
-/* ─── Browser voice (S1.6 completion) — Web Speech STT/TTS, browser-only,
-       no Telnyx/PSTN per the amended locked spec. The voice layer is purely
-       client-side: speech → text → the SAME /converse endpoint → text →
-       speech. The event-sourced transcript is identical either way. ─── */
+/* ─── Browser voice (S1.6 completion) — local-device Web Speech only,
+       no Telnyx/PSTN and no user-agent-selected remote speech provider.
+       Speech recognition must expose processLocally and TTS must expose a
+       localService voice. Otherwise the surface remains typed text only. ─── */
 
 interface SpeechAlt {
   transcript: string;
@@ -179,6 +264,7 @@ interface SpeechRec {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
+  processLocally: boolean;
   onresult: ((e: SpeechEventLike) => void) | null;
   onend: (() => void) | null;
   onerror: ((e: { error?: string }) => void) | null;
@@ -196,6 +282,17 @@ function speechRecognitionCtor(): (new () => SpeechRec) | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
+function localSpeechRecognitionCtor(): (new () => SpeechRec) | null {
+  const Ctor = speechRecognitionCtor();
+  if (!Ctor) return null;
+  try {
+    const probe = new Ctor();
+    return 'processLocally' in probe ? Ctor : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Strip emoji + markdown emphasis so TTS reads clean sentences. */
 function speakableText(text: string): string {
   return text
@@ -205,8 +302,11 @@ function speakableText(text: string): string {
 }
 
 function choosePreferredVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
-  const enUsVoices = voices.filter((voice) => /^en[-_]US/i.test(voice.lang));
-  const candidates = enUsVoices.length ? enUsVoices : voices.filter((voice) => /^en/i.test(voice.lang));
+  const localVoices = voices.filter((voice) => voice.localService);
+  const enUsVoices = localVoices.filter((voice) => /^en[-_]US/i.test(voice.lang));
+  const candidates = enUsVoices.length
+    ? enUsVoices
+    : localVoices.filter((voice) => /^en/i.test(voice.lang));
 
   const scored = candidates
     .map((voice) => {
@@ -214,9 +314,6 @@ function choosePreferredVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVo
       let score = 0;
       if (voice.lang.toLowerCase() === 'en-us') score += 8;
       if (name.includes('natural')) score += 12;
-      if (name.includes('google')) score += 10;
-      if (name.includes('microsoft')) score += 9;
-      if (name.includes('online')) score += 4;
       if (name.includes('neural')) score += 4;
       if (name.includes('default')) score -= 3;
       return { voice, score };
@@ -273,7 +370,7 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
   const pendingFinalRef = useRef('');
   const lastSpeechAtRef = useRef(0);
   const ignoreNextEndRef = useRef(false);
-  const voiceSupported = speechRecognitionCtor() !== null;
+  const voiceSupported = localSpeechRecognitionCtor() !== null && preferredVoice !== null;
 
   const send = useCallback(
     async (message: string) => {
@@ -341,8 +438,14 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
   }, []);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [turns, busy]);
+    if (
+      turns.length > 0 &&
+      !introOpen &&
+      typeof endRef.current?.scrollIntoView === 'function'
+    ) {
+      endRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [turns, busy, introOpen]);
 
   useEffect(() => {
     if (typeof speechSynthesis === 'undefined') return undefined;
@@ -395,11 +498,14 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
   /* ── voice controls ── */
 
   function speak(text: string) {
-    if (typeof speechSynthesis === 'undefined') return;
+    if (typeof speechSynthesis === 'undefined' || !preferredVoice?.localService) {
+      stopVoice();
+      return;
+    }
     speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(speakableText(text));
     utter.lang = 'en-US';
-    if (preferredVoice) utter.voice = preferredVoice;
+    utter.voice = preferredVoice;
     utter.rate = 1.0;
     utter.pitch = 0.92;
     utter.onend = () => {
@@ -411,11 +517,16 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
   function startListening() {
     if (!voiceOnRef.current || doneRef.current) return;
     if (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking) return;
-    const Ctor = speechRecognitionCtor();
-    if (!Ctor) return;
+    const Ctor = localSpeechRecognitionCtor();
+    if (!Ctor) {
+      setError('Private on-device voice is unavailable in this browser. Type your answer instead.');
+      stopVoice();
+      return;
+    }
     try { recRef.current?.abort(); } catch { /* noop */ }
     const rec = new Ctor();
     recRef.current = rec;
+    rec.processLocally = true;
     rec.lang = 'en-US';
     rec.continuous = true;
     rec.interimResults = true;
@@ -450,7 +561,11 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
         startListening();
       }
     };
-    rec.onerror = () => setListening(false);
+    rec.onerror = () => {
+      recRef.current = null;
+      setError('Private on-device voice could not start. Type your answer instead.');
+      stopVoice();
+    };
     setListening(true);
     rec.start();
   }
@@ -548,7 +663,7 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
 
         {error ? <p className="mt-2 text-sm text-red-400">{error}</p> : null}
 
-        <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
+        <form onSubmit={handleSubmit} className="mt-4 flex flex-wrap gap-2">
           {voiceSupported ? (
             <button
               type="button"
@@ -575,7 +690,7 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
                   : 'Type your answer…'
             }
             disabled={busy || !started}
-            className="flex-1 rounded-lg border border-cream/20 bg-black/30 px-4 py-3 text-sm text-cream placeholder:text-cream-mute focus:border-gold focus:outline-none"
+            className="min-w-0 basis-32 flex-1 rounded-lg border border-cream/20 bg-black/30 px-4 py-3 text-sm text-cream placeholder:text-cream-mute focus:border-gold focus:outline-none"
           />
           <button
             type="submit"
@@ -594,6 +709,11 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
             </button>
           ) : null}
         </form>
+        <p className="mt-2 text-xs leading-relaxed text-cream-mute">
+          Type is always available. Voice appears only when this browser reports both
+          on-device speech recognition and a local playback voice. Team Magnificent
+          receives the resulting text, not microphone audio.
+        </p>
       </div>
     </div>
   );
@@ -633,7 +753,11 @@ function IntroPanel({
         <p>
           What happens with your answers: they become your Success Profile… You already belong.
         </p>
-        <p>Takes about ten minutes. Talk or type. Your conversation saves as you go.</p>
+        <p>
+          Takes about ten minutes. Type your answers, or use voice when your browser
+          can keep speech recognition and playback on this device. Your conversation
+          saves as you go.
+        </p>
       </div>
       <div className="mt-5 flex flex-wrap gap-3">
         {!started ? (
@@ -661,7 +785,13 @@ function IntroPanel({
 
 /* ─── Complete state — the Success Profile ─── */
 
-function ProfileView({ artifact }: { artifact: SteveDiscoveryArtifact }) {
+function ProfileView({
+  artifact,
+  onReload,
+}: {
+  artifact: SteveDiscoveryArtifact;
+  onReload: () => Promise<void>;
+}) {
   const p = artifact.successProfile;
   return (
     <div className="min-h-screen bg-ink text-cream">
@@ -675,8 +805,9 @@ function ProfileView({ artifact }: { artifact: SteveDiscoveryArtifact }) {
             How we'll support you
           </h1>
           <p className="mt-2 text-sm text-cream-mute">
-            This is what you shared, reflected back — so your sponsor and the team
-            can meet you where you are. Nothing here rates or ranks you.
+            This is what you shared, reflected back for you. Nothing here rates or
+            ranks you. Sponsor sharing is off for private fields unless you turn on
+            each field below.
           </p>
         </header>
 
@@ -750,11 +881,625 @@ function ProfileView({ artifact }: { artifact: SteveDiscoveryArtifact }) {
           </Section>
         ) : null}
 
+        {artifact.transcript.length ? (
+          <Section title="Your Transcript">
+            <ol className="space-y-3">
+              {artifact.transcript.map((turn) => (
+                <li
+                  key={`${turn.sequence}-${turn.speaker}`}
+                  className="rounded-lg border border-cream/10 bg-black/20 p-3"
+                >
+                  <p className="text-[11px] font-mono uppercase tracking-[0.12em] text-cream-mute">
+                    {turn.speaker === 'ba' ? 'You' : 'Steve'} · turn {turn.sequence}
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-cream">
+                    {turn.text}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </Section>
+        ) : null}
+
+        <SteveCorrectionControls artifact={artifact} onReload={onReload} />
+        <StevePrivacyControls tmagId={artifact.tmagId} />
+
         <p className="mt-10 text-[11px] font-mono uppercase tracking-[0.18em] text-cream-mute">
           {p.signedBy}
         </p>
       </div>
     </div>
+  );
+}
+
+interface SteveCorrectionChoice {
+  id: string;
+  label: string;
+  currentValue: string;
+  kind: 'text' | 'list';
+  target: SteveCorrectionTarget;
+}
+
+const CORRECTION_CONFIRMATION = 'I CONFIRM THIS STEVE CORRECTION';
+
+function correctionChoices(
+  artifact: SteveDiscoveryArtifact,
+): SteveCorrectionChoice[] {
+  const profile = artifact.successProfile;
+  const choices: SteveCorrectionChoice[] = [];
+  const addText = (
+    id: string,
+    label: string,
+    currentValue: string,
+    target: SteveCorrectionTarget,
+  ) => {
+    choices.push({ id, label, currentValue, kind: 'text', target });
+  };
+  const addList = (
+    id: string,
+    label: string,
+    currentValue: string[],
+    target: SteveCorrectionTarget,
+  ) => {
+    choices.push({
+      id,
+      label,
+      currentValue: currentValue.join(', '),
+      kind: 'list',
+      target,
+    });
+  };
+
+  for (const turn of artifact.transcript) {
+    addText(
+      `transcript-${turn.sequence}`,
+      `Transcript · ${turn.speaker === 'ba' ? 'You' : 'Steve'} · turn ${turn.sequence}`,
+      turn.text,
+      { kind: 'transcript_text', sequence: turn.sequence },
+    );
+  }
+  for (const answer of artifact.answers) {
+    addText(
+      `answer-${answer.questionId}`,
+      `Answer · ${answer.prompt}`,
+      answer.answerText,
+      { kind: 'answer_text', questionId: answer.questionId },
+    );
+  }
+
+  const profileText: Array<{
+    id: string;
+    label: string;
+    value: string;
+    path: Extract<SteveCorrectionTarget, { kind: 'profile_text' }>['path'];
+  }> = [
+    {
+      id: 'primary-why',
+      label: 'Success Profile · Primary why',
+      value: profile.primaryWhy.statement,
+      path: 'primaryWhy.statement',
+    },
+    {
+      id: 'primary-who',
+      label: "Success Profile · Who it's for",
+      value: profile.primaryWhy.who,
+      path: 'primaryWhy.who',
+    },
+    {
+      id: 'primary-why-now',
+      label: 'Success Profile · Why now',
+      value: profile.primaryWhy.whyNow,
+      path: 'primaryWhy.whyNow',
+    },
+    {
+      id: 'success-vision',
+      label: 'Success Profile · Success vision',
+      value: profile.successVision.statement,
+      path: 'successVision.statement',
+    },
+    {
+      id: 'success-change',
+      label: 'Success Profile · One big change',
+      value: profile.successVision.oneBigChange,
+      path: 'successVision.oneBigChange',
+    },
+    {
+      id: 'learning-feedback',
+      label: 'Success Profile · Feedback preference',
+      value: profile.learningStyle.feedbackPreference,
+      path: 'learningStyle.feedbackPreference',
+    },
+    {
+      id: 'learning-notes',
+      label: 'Success Profile · Learning notes',
+      value: profile.learningStyle.notes,
+      path: 'learningStyle.notes',
+    },
+    {
+      id: 'communication-cadence',
+      label: 'Success Profile · Contact cadence',
+      value: profile.communicationPreferences.cadence ?? '',
+      path: 'communicationPreferences.cadence',
+    },
+    {
+      id: 'communication-best-times',
+      label: 'Success Profile · Best contact times',
+      value: profile.communicationPreferences.bestTimes,
+      path: 'communicationPreferences.bestTimes',
+    },
+    {
+      id: 'communication-notes',
+      label: 'Success Profile · Communication notes',
+      value: profile.communicationPreferences.notes,
+      path: 'communicationPreferences.notes',
+    },
+    {
+      id: 'support-help-style',
+      label: 'Success Profile · Help style',
+      value: profile.supportNeeds.helpStyle,
+      path: 'supportNeeds.helpStyle',
+    },
+    {
+      id: 'support-notes',
+      label: 'Success Profile · Support notes',
+      value: profile.supportNeeds.notes,
+      path: 'supportNeeds.notes',
+    },
+    {
+      id: 'michael-handoff',
+      label: 'Success Profile · Michael handoff summary',
+      value: profile.michaelHandoffSummary,
+      path: 'michaelHandoffSummary',
+    },
+  ];
+  for (const field of profileText) {
+    addText(field.id, field.label, field.value, {
+      kind: 'profile_text',
+      path: field.path,
+    });
+  }
+
+  addList(
+    'learning-modalities',
+    'Success Profile · Learning modalities',
+    profile.learningStyle.modalities,
+    { kind: 'profile_list', path: 'learningStyle.modalities' },
+  );
+  addList(
+    'communication-channels',
+    'Success Profile · Preferred contact channels',
+    profile.communicationPreferences.preferredChannels,
+    {
+      kind: 'profile_list',
+      path: 'communicationPreferences.preferredChannels',
+    },
+  );
+  addList(
+    'support-areas',
+    'Success Profile · Support areas',
+    profile.supportNeeds.areas,
+    { kind: 'profile_list', path: 'supportNeeds.areas' },
+  );
+  addList(
+    'support-obstacles',
+    'Success Profile · Potential obstacles',
+    profile.supportNeeds.potentialObstacles,
+    { kind: 'profile_list', path: 'supportNeeds.potentialObstacles' },
+  );
+
+  profile.launchRecommendations.forEach((recommendation, index) => {
+    addText(
+      `launch-${index}`,
+      `Success Profile · Launch recommendation ${index + 1}`,
+      recommendation.text,
+      { kind: 'recommendation_text', list: 'launch', index },
+    );
+  });
+  profile.trainingRecommendations.forEach((recommendation, index) => {
+    addText(
+      `training-${index}`,
+      `Success Profile · Training recommendation ${index + 1}`,
+      recommendation.text,
+      { kind: 'recommendation_text', list: 'training', index },
+    );
+  });
+
+  return choices;
+}
+
+function SteveCorrectionControls({
+  artifact,
+  onReload,
+}: {
+  artifact: SteveDiscoveryArtifact;
+  onReload: () => Promise<void>;
+}) {
+  const choices = correctionChoices(artifact);
+  const [selectedId, setSelectedId] = useState(choices[0]?.id ?? '');
+  const selected =
+    choices.find((choice) => choice.id === selectedId) ?? choices[0] ?? null;
+  const [replacement, setReplacement] = useState(
+    selected?.currentValue ?? '',
+  );
+  const [confirmed, setConfirmed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!selected) return;
+    setReplacement(selected.currentValue);
+  }, [selected?.id, selected?.currentValue]);
+
+  const submitCorrection = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!selected || !confirmed) return;
+
+    const normalizedReplacement =
+      selected.kind === 'list'
+        ? replacement
+            .split(/[,\n]/)
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : replacement;
+    if (
+      selected.kind === 'text' &&
+      normalizedReplacement === selected.currentValue
+    ) {
+      setError('Enter a replacement that differs from the current value.');
+      return;
+    }
+    if (
+      selected.kind === 'list' &&
+      JSON.stringify(normalizedReplacement) ===
+        JSON.stringify(
+          selected.currentValue
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean),
+        )
+    ) {
+      setError('Enter a replacement that differs from the current list.');
+      return;
+    }
+
+    setBusy(true);
+    setMessage('');
+    setError('');
+    try {
+      const res = await fetch('/api/steve/discovery/correction', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          target: selected.target,
+          replacement: normalizedReplacement,
+          expectedRevision: artifact.correctionRevision ?? 0,
+          confirmation: CORRECTION_CONFIRMATION,
+        }),
+      });
+      const data = (await res.json()) as SteveCorrectionResponse;
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error ?? 'Could not correct your private record.');
+      }
+      setConfirmed(false);
+      setMessage('Your correction is saved. The previous private value was not retained.');
+      await onReload();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Could not correct your private record.',
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!selected) return null;
+
+  return (
+    <Section title="Correct Your Private Record">
+      <p className="text-sm leading-relaxed text-cream-mute">
+        Choose one current value and replace it after confirmation. The audit
+        records only the field path and revision — never the old or new private
+        text. Identity, timestamps, Steve&apos;s signature, provider details,
+        and internal resource links cannot be edited here.
+      </p>
+
+      <form onSubmit={submitCorrection} className="space-y-4">
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-cream">
+            Value to correct
+          </span>
+          <select
+            data-testid="steve-correction-target"
+            value={selected.id}
+            disabled={busy}
+            onChange={(event) => {
+              const next = choices.find(
+                (choice) => choice.id === event.currentTarget.value,
+              );
+              setSelectedId(event.currentTarget.value);
+              setReplacement(next?.currentValue ?? '');
+              setConfirmed(false);
+              setMessage('');
+              setError('');
+            }}
+            className="w-full rounded-lg border border-cream/20 bg-ink px-3 py-2 text-sm text-cream focus:border-gold focus:outline-none"
+          >
+            {choices.map((choice) => (
+              <option key={choice.id} value={choice.id}>
+                {choice.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-cream">
+            Replacement
+          </span>
+          <textarea
+            data-testid="steve-correction-replacement"
+            rows={selected.kind === 'list' ? 3 : 5}
+            value={replacement}
+            disabled={busy}
+            onChange={(event) => setReplacement(event.currentTarget.value)}
+            className="w-full rounded-lg border border-cream/20 bg-black/30 px-3 py-2 text-sm leading-relaxed text-cream focus:border-gold focus:outline-none"
+          />
+          {selected.kind === 'list' ? (
+            <span className="mt-1 block text-xs text-cream-mute">
+              Separate list items with commas or new lines.
+            </span>
+          ) : null}
+        </label>
+
+        <label className="flex items-start gap-3 rounded-lg border border-gold/20 bg-gold/5 p-3">
+          <input
+            type="checkbox"
+            checked={confirmed}
+            disabled={busy}
+            onChange={(event) => setConfirmed(event.currentTarget.checked)}
+            className="mt-1 h-4 w-4 accent-[#C9A84C]"
+          />
+          <span className="text-xs leading-relaxed text-cream-mute">
+            I confirm this replacement is the current private value I want
+            saved. I understand the prior private value will not be retained.
+          </span>
+        </label>
+
+        <button
+          type="submit"
+          disabled={busy || !confirmed}
+          className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-2 text-sm text-gold hover:bg-gold/15 disabled:opacity-50"
+        >
+          {busy ? 'Saving correction…' : 'Save confirmed correction'}
+        </button>
+      </form>
+
+      {message ? <p className="text-sm text-teal">{message}</p> : null}
+      {error ? <p className="text-sm text-red-400">{error}</p> : null}
+    </Section>
+  );
+}
+
+const CONSENT_LABELS: Record<SteveSponsorConsentField, string> = {
+  why_statement: 'Primary why',
+  success_vision: 'Success vision',
+  support_obstacles: 'Potential obstacles',
+  michael_handoff_summary: 'Michael handoff summary',
+};
+
+const CONSENT_FIELDS = Object.keys(CONSENT_LABELS) as SteveSponsorConsentField[];
+const WITHDRAW_CONFIRMATION = 'WITHDRAW STEVE PERSONALIZATION';
+
+function StevePrivacyControls({ tmagId }: { tmagId: string }) {
+  const [privacy, setPrivacy] = useState<StevePrivacyState | null>(null);
+  const [currentSponsorTmagId, setCurrentSponsorTmagId] = useState<string | null>(null);
+  const [grantCopy, setGrantCopy] = useState('');
+  const [revocationCopy, setRevocationCopy] = useState('');
+  const [busyField, setBusyField] = useState<SteveSponsorConsentField | null>(null);
+  const [busyAction, setBusyAction] = useState<'export' | 'withdraw' | null>(null);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  const applyPrivacyResponse = useCallback((data: StevePrivacyResponse) => {
+    if (!data.ok || !data.privacy) {
+      throw new Error(data.error ?? 'Could not load privacy controls.');
+    }
+    setPrivacy(data.privacy);
+    setCurrentSponsorTmagId(data.currentSponsorTmagId ?? null);
+    setGrantCopy(data.grantCopy ?? '');
+    setRevocationCopy(data.revocationCopy ?? '');
+  }, []);
+
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      try {
+        const res = await fetch('/api/steve/discovery/privacy', {
+          credentials: 'include',
+        });
+        const data = (await res.json()) as StevePrivacyResponse;
+        if (!live) return;
+        applyPrivacyResponse(data);
+      } catch (err) {
+        if (!live) return;
+        setError(err instanceof Error ? err.message : 'Could not load privacy controls.');
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [applyPrivacyResponse]);
+
+  const updateConsent = async (
+    field: SteveSponsorConsentField,
+    granted: boolean,
+  ) => {
+    setBusyField(field);
+    setError('');
+    setMessage('');
+    try {
+      const res = await fetch('/api/steve/discovery/privacy/consent', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ field, granted }),
+      });
+      const data = (await res.json()) as StevePrivacyResponse;
+      applyPrivacyResponse(data);
+      setMessage(granted ? `${CONSENT_LABELS[field]} shared.` : `${CONSENT_LABELS[field]} sharing stopped.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not update sharing.');
+    } finally {
+      setBusyField(null);
+    }
+  };
+
+  const exportProfile = async () => {
+    setBusyAction('export');
+    setError('');
+    setMessage('');
+    try {
+      const res = await fetch('/api/steve/discovery/export', {
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        throw new Error(data.error ?? 'Could not export your profile.');
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `steve-success-profile-${tmagId}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      setMessage('Your private profile export is ready.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not export your profile.');
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const withdraw = async () => {
+    const confirmed = window.confirm(
+      'Turn off Steve personalization and all sponsor sharing? You will keep your self-visible copy. This action does not delete it.',
+    );
+    if (!confirmed) return;
+
+    setBusyAction('withdraw');
+    setError('');
+    setMessage('');
+    try {
+      const res = await fetch('/api/steve/discovery/privacy/withdraw', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmation: WITHDRAW_CONFIRMATION }),
+      });
+      const data = (await res.json()) as StevePrivacyResponse;
+      applyPrivacyResponse(data);
+      setMessage('Personalization and sponsor sharing are now off.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not withdraw personalization.');
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  return (
+    <Section title="Your Privacy Controls">
+      <p className="text-sm leading-relaxed text-cream-mute">
+        Your transcript, raw answers, full Success Profile, notes, audio, and
+        provider details are never shared with your sponsor. The training-support
+        card uses bounded guidance by default. You choose whether to share each
+        private field below with your current direct sponsor.
+      </p>
+
+      {privacy ? (
+        <>
+          {privacy.status === 'withdrawn' ? (
+            <div className="rounded-lg border border-teal/30 bg-teal/10 p-4 text-sm text-cream">
+              Personalization and sponsor sharing are off. Your current profile
+              remains visible to you.
+            </div>
+          ) : null}
+
+          <div className="space-y-3">
+            {CONSENT_FIELDS.map((field) => {
+              const grant = privacy.sponsorConsent[field];
+              const disabled =
+                privacy.status === 'withdrawn' ||
+                !currentSponsorTmagId ||
+                busyField !== null ||
+                busyAction !== null;
+              return (
+                <label
+                  key={field}
+                  className="flex items-start gap-3 rounded-lg border border-cream/10 bg-black/20 p-4"
+                >
+                  <input
+                    type="checkbox"
+                    checked={grant.granted}
+                    disabled={disabled}
+                    onChange={(event) => {
+                      void updateConsent(field, event.currentTarget.checked);
+                    }}
+                    className="mt-1 h-4 w-4 accent-[#C9A84C]"
+                  />
+                  <span>
+                    <span className="block text-sm font-medium text-cream">
+                      {CONSENT_LABELS[field]}
+                    </span>
+                    <span className="mt-1 block text-xs leading-relaxed text-cream-mute">
+                      {grant.granted ? revocationCopy : grantCopy}
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+
+          {!currentSponsorTmagId && privacy.status === 'active' ? (
+            <p className="text-xs text-cream-mute">
+              Sharing stays off because no current direct sponsor is recorded.
+            </p>
+          ) : null}
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => void exportProfile()}
+              disabled={busyAction !== null}
+              className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-2 text-sm text-gold hover:bg-gold/15 disabled:opacity-50"
+            >
+              {busyAction === 'export' ? 'Preparing…' : 'Export my profile'}
+            </button>
+            {privacy.status === 'active' ? (
+              <button
+                type="button"
+                onClick={() => void withdraw()}
+                disabled={busyAction !== null || busyField !== null}
+                className="rounded-lg border border-cream/20 bg-black/30 px-4 py-2 text-sm text-cream-mute hover:border-teal/50 hover:text-cream disabled:opacity-50"
+              >
+                {busyAction === 'withdraw' ? 'Withdrawing…' : 'Turn off personalization'}
+              </button>
+            ) : null}
+          </div>
+        </>
+      ) : error ? null : (
+        <p className="text-sm text-cream-mute">Loading privacy controls…</p>
+      )}
+
+      {message ? <p className="text-sm text-teal">{message}</p> : null}
+      {error ? <p className="text-sm text-red-400">{error}</p> : null}
+    </Section>
   );
 }
 

@@ -2,7 +2,7 @@
 
 ## Momentum Creation System V2
 
-Status: Approved — implementation verification in progress
+Status: Approved — follow-on implementation verification in progress
 
 Ratified: Kevin L. Gardner, 2026-07-16
 
@@ -110,6 +110,14 @@ sharing choices. A correction replaces the active private value after explicit
 confirmation. The audit fact records artifact id, changed field paths, actor,
 policy version, and time, but not the former or replacement private text.
 
+Draft PR #355 implements the current-record private-value portion of this
+right. It replaces one exact transcript, answer, profile, or recommendation
+value after the approved confirmation and a current revision match. Identity,
+timestamps, signatures, provider fields, and internal resource links remain
+immutable. A primary-why correction replaces and reads back the existing
+ACR-0011 projection without expanding its retrieval principals. Projection,
+audit, or read-back failure restores the prior canonical current record.
+
 ### 4.4 Withdrawal
 
 The BA may withdraw the Steve record from further personalization and sponsor
@@ -166,6 +174,16 @@ Approved revocation copy:
   recognition path, storage systems, subprocessors, applicable data-use terms,
   and deletion capabilities. A provider with incompatible retention or
   training-on-customer-data terms remains disabled.
+
+The source-backed inventory is recorded at
+`engineering/audits/p2-141-steve-provider-inventory/README.md`. The review
+identifies Anthropic, the browser/user-agent speech services, InterServer,
+MongoDB Atlas Flex, Neo4j Aura Free, and Chroma Cloud. The inventory itself is
+complete. Draft PR #355 now fails browser voice closed to
+`processLocally=true` recognition and `localService===true` playback, with
+typing preserved and an explicit privacy notice. The overall activation gate
+is not passed because Anthropic organization-level ZDR is unverified and
+account-specific backup/retention evidence remains outstanding.
 
 ## 7. Semantic-memory boundary
 
@@ -246,6 +264,7 @@ ACR-0031 approval alone is not apply authority for historical data.
       "organization/ACR-0031-steve-profile-retention-and-visibility.md",
       "organization/ACR-REGISTER.md",
       "engineering/audits/p2-141-steve-profile-privacy/README.md",
+      "engineering/audits/p2-141-steve-provider-inventory/README.md",
       "PLATFORM_AUDIT_PRIORITY_TASKLIST.md"
     ],
     "schemas": [
@@ -288,9 +307,16 @@ ACR-0031 approval alone is not apply authority for historical data.
   },
   "implementation": {
     "branch": "codex/p2-141-steve-privacy",
+    "follow_on_branch": "codex/p2-141-privacy-rights",
+    "follow_on_pr": 355,
     "commits": [
       "7b748ad3",
-      "a251fbfc"
+      "a251fbfc",
+      "25254777",
+      "7638c3df",
+      "62cfb268",
+      "1e276fc8",
+      "7d38df61"
     ],
     "append_only_respected": true,
     "live_mutation_authorized": false,
@@ -299,9 +325,10 @@ ACR-0031 approval alone is not apply authority for historical data.
   },
   "verification": {
     "typecheck": true,
-    "server_tests": "2251 passed / 19 skipped",
+    "server_tests": "2285 passed / 19 skipped",
+    "team_tests": "73 passed",
     "production_build": true,
-    "route_access": "250 routes / 0 findings",
+    "route_access": "255 routes / 0 findings",
     "com_compliance": "34 files / 0 violations",
     "catalogs_current": true,
     "flows": [
@@ -310,7 +337,22 @@ ACR-0031 approval alone is not apply authority for historical data.
       "minimal Mongo projections",
       "raw sponsor route fails closed without field consent",
       "default sponsor projection excludes unconsented private fields",
+      "field-specific current-sponsor consent controls",
+      "BA self-export and one-way withdrawal",
+      "withdrawal blocks tailored Launch guidance and why replay",
+      "create-only ordinary ingest",
+      "BA-confirmed one-value correction with optimistic revision control",
+      "correction audit excludes prior and replacement private text",
+      "correction projection read-back and rollback",
+      "primary why correction replaces the existing ACR-0011 projection",
+      "new-record event bodies compact only after canonical read-back",
+      "event compaction retains content-free facts and excludes historical rows",
       "new records store null provider/audio fields",
+      "named source-backed provider inventory and official-terms review",
+      "provider activation blockers remain explicit and fail closed",
+      "browser recognition requires processLocally and fails back to typing",
+      "browser playback requires a localService voice",
+      "browser voice privacy notice is visible",
       "content-free Neo4j and Chroma projections",
       "blocked admin bridge materialization",
       "no Steve content on .com"
@@ -320,7 +362,16 @@ ACR-0031 approval alone is not apply authority for historical data.
   "release": {
     "gates_passed": [
       "review",
-      "approval"
+      "approval",
+      "baseline_merge",
+      "provider_inventory",
+      "browser_speech_local_only",
+      "browser_tts_local_only",
+      "browser_voice_privacy_notice"
+    ],
+    "gates_blocked": [
+      "anthropic_zdr_or_explicit_standard_retention_approval",
+      "account_specific_backup_and_log_retention_evidence"
     ],
     "released_at": null
   },
@@ -338,7 +389,8 @@ ACR-0031 approval alone is not apply authority for historical data.
 
 ## 12. Approval and merge boundary
 
-Kevin approved ACR-0031 on 2026-07-16. This approval passes the high-risk
-approval gate. It does not merge PR #353, mutate production data, authorize a
-historical purge, or activate an external provider. Kevin's separate merge
-authority remains required after implementation verification.
+Kevin approved ACR-0031 and separately authorized PR #353, which merged on
+2026-07-16 as the fail-closed privacy baseline. That authority did not mutate
+production data, authorize a historical purge, or activate an external
+provider. Follow-on privacy-rights work remains subject to its own verification
+and merge authority, while every historical apply remains separately gated.

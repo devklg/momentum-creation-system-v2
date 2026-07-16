@@ -37,6 +37,7 @@
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeKnowledge } from '../services/tieredWrite.js';
+import { normalizeStevePrivacyState } from './stevePrivacy.js';
 import {
   MCS_RECRUITING_STEPS,
   MCS_RECRUITING_STEP_LABELS,
@@ -138,14 +139,25 @@ async function getMember(tmagId: string): Promise<MemberRow | null> {
 /** The BA's own why_statement, verbatim from Steve's Success Profile. */
 export async function getWhyStatement(tmagId: string): Promise<string | null> {
   const result = await persistenceCall<{
-    documents: Array<{ successProfile?: McsSteveSuccessProfile }>;
+    documents: Array<{
+      successProfile?: McsSteveSuccessProfile;
+      privacy?: unknown;
+    }>;
   }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: STEVE_COLLECTION,
     filter: { tmagId },
+    projection: {
+      'successProfile.primaryWhy.statement': 1,
+      privacy: 1,
+    },
     limit: 1,
   });
-  const statement = result.documents?.[0]?.successProfile?.primaryWhy?.statement;
+  const discovery = result.documents?.[0];
+  if (normalizeStevePrivacyState(discovery?.privacy).status === 'withdrawn') {
+    return null;
+  }
+  const statement = discovery?.successProfile?.primaryWhy?.statement;
   return statement && statement.trim() ? statement : null;
 }
 

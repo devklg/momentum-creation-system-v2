@@ -33,17 +33,30 @@ import type {
   McsSteveDiscoveryView,
   McsSteveDiscoveryFocus,
   McsSteveProfileCard,
+  McsStevePrivacyState,
   McsSteveSuccessProfile,
   McsSteveTranscriptChunk,
 } from '@momentum/shared';
+import { MCS_STEVE_PRIVACY_POLICY_VERSION } from '@momentum/shared';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeKnowledge } from '../services/tieredWrite.js';
+import { defaultStevePrivacyState } from './stevePrivacy.js';
 
 /** Provenance literal stamped on Steve artifacts. */
 export const STEVE_SIGNED_BY = 'Steve Success · New BA Discovery & Success Interview';
 
 const DISCOVERIES_COLLECTION = 'tmag_steve_success_interview';
 const CHROMA_DISCOVERIES = 'mcs_steve_success_interview';
+const STEVE_EVENTS_COLLECTION = 'tmag_agent_steve_events';
+const STEVE_DISCOVERY_CHAT_KIND = 'discovery_chat_message';
+
+interface SteveEventBodyCompactionEligibility {
+  eligible: true;
+  policyVersion: typeof MCS_STEVE_PRIVACY_POLICY_VERSION;
+  eventKind: typeof STEVE_DISCOVERY_CHAT_KIND;
+  boundaryCompletedAt: string;
+  scope: 'new_record_only';
+}
 
 // ─────────────────────────────────────────────────────────────────────────
 // Discovery script (the backbone Steve leads with)
@@ -393,6 +406,10 @@ async function ensureDiscoveriesCollection(): Promise<void> {
 
 interface PersistedDiscovery extends McsSteveDiscoveryArtifact {
   _id: string;
+  privacy: McsStevePrivacyState;
+  eventBodyCompaction?: SteveEventBodyCompactionEligibility;
+  correctionRevision?: number;
+  lastCorrectedAt?: string | null;
 }
 
 async function getBaSponsor(tmagId: string): Promise<{
@@ -436,6 +453,8 @@ function stripPersisted(doc: PersistedDiscovery): McsSteveDiscoveryArtifact {
     answers: doc.answers,
     successProfile: doc.successProfile,
     audioUrl: null,
+    correctionRevision: doc.correctionRevision ?? 0,
+    lastCorrectedAt: doc.lastCorrectedAt ?? null,
   };
 }
 
@@ -480,25 +499,158 @@ export class DiscoveryIngestError extends Error {
   }
 }
 
+function isNewRecordEventCompactionEligible(
+  discovery: PersistedDiscovery,
+): discovery is PersistedDiscovery & {
+  eventBodyCompaction: SteveEventBodyCompactionEligibility;
+} {
+  const eligibility = discovery.eventBodyCompaction;
+  return (
+    eligibility?.eligible === true &&
+    eligibility.policyVersion === MCS_STEVE_PRIVACY_POLICY_VERSION &&
+    eligibility.eventKind === STEVE_DISCOVERY_CHAT_KIND &&
+    eligibility.scope === 'new_record_only' &&
+    eligibility.boundaryCompletedAt === discovery.completedAt
+  );
+}
+
+/**
+ * ACR-0031 post-completion compaction for new records only.
+ *
+ * The canonical discovery must already exist and read back before this runs.
+ * Event rows remain as content-free operational facts while their private
+ * payload bodies are removed. Historical rows are excluded unless their
+ * canonical discovery carries the explicit eligibility marker written by this
+ * implementation.
+ */
+export async function compactSteveConversationEventBodies(args: {
+  tmagId: string;
+  discoveryId: string;
+  boundaryCompletedAt: string;
+}): Promise<{ matchedCount: number; modifiedCount: number; compactedAt: string }> {
+  const compactedAt = new Date().toISOString();
+  let update: { matchedCount?: number; modifiedCount?: number };
+
+  try {
+    update = await persistenceCall<{ matchedCount?: number; modifiedCount?: number }>(
+      'mongodb',
+      'update',
+      {
+        database: 'momentum',
+        collection: STEVE_EVENTS_COLLECTION,
+        filter: {
+          tmagId: args.tmagId,
+          agentId: 'steve',
+          kind: STEVE_DISCOVERY_CHAT_KIND,
+          $or: [
+            { payload: { $exists: true } },
+            { 'contentCompaction.state': { $ne: 'compacted' } },
+            {
+              'contentCompaction.policyVersion': {
+                $ne: MCS_STEVE_PRIVACY_POLICY_VERSION,
+              },
+            },
+            { 'contentCompaction.discoveryId': { $ne: args.discoveryId } },
+            {
+              'contentCompaction.boundaryCompletedAt': {
+                $ne: args.boundaryCompletedAt,
+              },
+            },
+          ],
+        },
+        update: {
+          $unset: { payload: '' },
+          $set: {
+            contentCompaction: {
+              state: 'compacted',
+              policyVersion: MCS_STEVE_PRIVACY_POLICY_VERSION,
+              discoveryId: args.discoveryId,
+              boundaryCompletedAt: args.boundaryCompletedAt,
+              compactedAt,
+            },
+          },
+        },
+      },
+    );
+  } catch {
+    throw new DiscoveryIngestError(
+      'EVENT_COMPACTION_FAILED',
+      'Steve event body compaction did not complete.',
+    );
+  }
+
+  let residual: { count?: number };
+  try {
+    residual = await persistenceCall<{ count?: number }>('mongodb', 'query', {
+      database: 'momentum',
+      collection: STEVE_EVENTS_COLLECTION,
+      filter: {
+        tmagId: args.tmagId,
+        agentId: 'steve',
+        kind: STEVE_DISCOVERY_CHAT_KIND,
+        $or: [
+          { payload: { $exists: true } },
+          { 'contentCompaction.state': { $ne: 'compacted' } },
+          {
+            'contentCompaction.policyVersion': {
+              $ne: MCS_STEVE_PRIVACY_POLICY_VERSION,
+            },
+          },
+          { 'contentCompaction.discoveryId': { $ne: args.discoveryId } },
+          {
+            'contentCompaction.boundaryCompletedAt': {
+              $ne: args.boundaryCompletedAt,
+            },
+          },
+        ],
+      },
+      projection: { _id: 1 },
+      limit: 1,
+    });
+  } catch {
+    throw new DiscoveryIngestError(
+      'EVENT_COMPACTION_FAILED',
+      'Steve event body compaction read-back did not complete.',
+    );
+  }
+
+  if ((residual.count ?? 0) > 0) {
+    throw new DiscoveryIngestError(
+      'EVENT_COMPACTION_FAILED',
+      'Steve event body compaction did not read back.',
+    );
+  }
+
+  return {
+    matchedCount: update.matchedCount ?? 0,
+    modifiedCount: update.modifiedCount ?? 0,
+    compactedAt,
+  };
+}
+
 function discoveryCypher(a: PersistedDiscovery): { cypher: string; params: Record<string, unknown> } {
-  // Keep Steve's graph independent from retired Michael interview data while
-  // preserving the shared BA and sponsor visibility shape.
+  // ACR-0031 keeps the graph relationship-only. Sponsor consent is enforced
+  // from canonical Mongo at read time; an unconditional sponsor-visibility
+  // edge is not consent evidence and is not created for new records.
   return {
     cypher:
       'MERGE (b:TeamMagnificentMember {tmagId: $tmagId}) ' +
       'MERGE (d:TmagSteveDiscovery {discoveryId: $id}) ' +
-      'SET d.completedAt = $completedAt, d.signedBy = $signedBy ' +
-      'MERGE (b)-[:HAD_STEVE_DISCOVERY]->(d) ' +
-      'WITH d, $sponsorTmagId AS sponsorId ' +
-      'WHERE sponsorId IS NOT NULL ' +
-      'MERGE (s:TeamMagnificentMember {tmagId: sponsorId}) ' +
-      'MERGE (d)-[:VISIBLE_TO_SPONSOR]->(s)',
+      'SET d.completedAt = $completedAt, d.signedBy = $signedBy, ' +
+      'd.privacyStatus = $privacyStatus, d.privacyPolicyVersion = $privacyPolicyVersion, ' +
+      'd.eventBodiesCompactionEligible = $eventBodiesCompactionEligible, ' +
+      'd.eventBodyCompactionPolicyVersion = $eventBodyCompactionPolicyVersion ' +
+      'MERGE (b)-[:HAD_STEVE_DISCOVERY]->(d)',
     params: {
       id: a._id,
       tmagId: a.tmagId,
-      sponsorTmagId: a.sponsorTmagId,
       completedAt: a.completedAt,
       signedBy: a.successProfile.signedBy,
+      privacyStatus: a.privacy?.status ?? 'active',
+      privacyPolicyVersion: a.privacy?.policyVersion ?? 'acr-0031.v1',
+      eventBodiesCompactionEligible: a.eventBodyCompaction?.eligible === true,
+      eventBodyCompactionPolicyVersion:
+        a.eventBodyCompaction?.policyVersion ?? MCS_STEVE_PRIVACY_POLICY_VERSION,
     },
   };
 }
@@ -507,23 +659,13 @@ function chromaDocForDiscovery(_a: PersistedDiscovery): string {
   return 'Private Steve discovery completion marker. Profile content is canonical in MongoDB.';
 }
 
-function artifactToUpdate(a: PersistedDiscovery): Partial<PersistedDiscovery> {
-  return {
-    sponsorTmagId: a.sponsorTmagId,
-    startedAt: a.startedAt,
-    completedAt: a.completedAt,
-    transcript: a.transcript,
-    answers: a.answers,
-    successProfile: a.successProfile,
-  };
-}
-
 /**
  * Persist a completed discovery. Triple-stacked (Mongo + Neo4j + Chroma) and
- * idempotent on tmagId — a re-ingest replaces the prior artifact. sponsorTmagId is
- * stamped from team_magnificent_members and is NEVER taken from the payload
- * (locked-spec 3.5). Reads the Mongo row back before returning to confirm the
- * write landed.
+ * create-only on tmagId. ACR-0031 requires explicit BA confirmation for any
+ * correction, so ordinary worker/runtime ingest cannot replace an existing
+ * private artifact. sponsorTmagId is stamped from team_magnificent_members and
+ * is NEVER taken from the payload (locked-spec 3.5). Reads the Mongo row back
+ * before returning to confirm the write landed.
  */
 export async function ingestDiscoveryArtifact(
   payload: McsSteveDiscoveryIngestPayload,
@@ -565,78 +707,81 @@ export async function ingestDiscoveryArtifact(
     })),
     successProfile,
     audioUrl: null,
+    privacy: defaultStevePrivacyState(),
+    eventBodyCompaction: {
+      eligible: true,
+      policyVersion: MCS_STEVE_PRIVACY_POLICY_VERSION,
+      eventKind: STEVE_DISCOVERY_CHAT_KIND,
+      boundaryCompletedAt: payload.completedAt,
+      scope: 'new_record_only',
+    },
   };
 
   const cy = discoveryCypher(artifact);
+  const existing = await getDiscoveryByTmagId(payload.tmagId);
+  if (existing) {
+    if (isNewRecordEventCompactionEligible(existing)) {
+      await compactSteveConversationEventBodies({
+        tmagId: existing.tmagId,
+        discoveryId: existing._id,
+        boundaryCompletedAt: existing.eventBodyCompaction.boundaryCompletedAt,
+      });
+      if (existing.completedAt === payload.completedAt) {
+        return stripPersisted(existing);
+      }
+    }
+    throw new DiscoveryIngestError(
+      'ALREADY_EXISTS',
+      `Discovery for tmagId=${payload.tmagId} already exists and requires BA-confirmed correction.`,
+    );
+  }
 
-  // Chroma add() upserts (it maps to the Chroma upsert endpoint), so re-writing
-  // the same id REFRESHES the semantic doc rather than duplicating it.
-  const upsertChromaDoc = async (): Promise<void> => {
+  try {
     await ensureDiscoveriesCollection();
-    await persistenceCall('chromadb', 'add', {
-      collection: CHROMA_DISCOVERIES,
-      ids: [id],
-      documents: [chromaDocForDiscovery(artifact)],
-      metadatas: [
-        {
+    await writeKnowledge({
+      id,
+      mongoCollection: DISCOVERIES_COLLECTION,
+      mongoDoc: { ...artifact },
+      neo4j: { cypher: cy.cypher, params: cy.params },
+      chroma: {
+        collection: CHROMA_DISCOVERIES,
+        document: chromaDocForDiscovery(artifact),
+        metadata: {
           discoveryId: id,
           ownerTmagId: artifact.tmagId,
           completedAt: artifact.completedAt ?? '',
           kind: 'steve_discovery',
           retrievalEligible: false,
+          privacyStatus: artifact.privacy.status,
+          privacyPolicyVersion: artifact.privacy.policyVersion,
+          consentedFieldCount: 0,
+          eventBodiesCompactionEligible: true,
+          eventBodyCompactionPolicyVersion: MCS_STEVE_PRIVACY_POLICY_VERSION,
         },
-      ],
+      },
     });
-  };
-
-  // Update path (existing row, or a TOCTOU-raced insert): refresh ALL THREE
-  // stores. The prior code updated Mongo + Neo4j only, leaving the Chroma
-  // semantic doc pinned to the FIRST version on every re-ingest.
-  const updateAllStores = async (): Promise<void> => {
-    await persistenceCall('mongodb', 'update', {
-      database: 'momentum',
-      collection: DISCOVERIES_COLLECTION,
-      filter: { _id: id },
-      update: { $set: artifactToUpdate(artifact) },
-    });
-    await persistenceCall('neo4j', 'cypher', { query: cy.cypher, params: cy.params });
-    await upsertChromaDoc();
-  };
-
-  // Upsert: branch on existence (mongodb.update does not honor upsert per
-  // tripleStack.ts gotchas).
-  const existing = await getDiscoveryByTmagId(payload.tmagId);
-  if (existing) {
-    await updateAllStores();
-  } else {
-    try {
-      await ensureDiscoveriesCollection();
-      await writeKnowledge({
-        id,
-        mongoCollection: DISCOVERIES_COLLECTION,
-        mongoDoc: { ...artifact },
-        neo4j: { cypher: cy.cypher, params: cy.params },
-        chroma: {
-          collection: CHROMA_DISCOVERIES,
-          document: chromaDocForDiscovery(artifact),
-          metadata: {
-            discoveryId: id,
-            ownerTmagId: artifact.tmagId,
-            completedAt: artifact.completedAt ?? '',
-            kind: 'steve_discovery',
-            retrievalEligible: false,
-          },
-        },
-      });
-    } catch (err) {
-      // TOCTOU: a concurrent ingest for the same tmagId may have inserted the row
-      // between the existence check above and this insert, so the insert fails
-      // on a duplicate _id. Re-check and fall back to the update path so a
-      // logically idempotent re-ingest converges instead of 500-ing.
-      const raced = await getDiscoveryByTmagId(payload.tmagId);
-      if (!raced) throw err;
-      await updateAllStores();
+  } catch (err) {
+    // A concurrent completion may have won the create race. Do not reinterpret
+    // that as correction authority. A new-record eligibility marker may still
+    // authorize content-free event-body compaction for the winning artifact.
+    const raced = await getDiscoveryByTmagId(payload.tmagId);
+    if (raced) {
+      if (isNewRecordEventCompactionEligible(raced)) {
+        await compactSteveConversationEventBodies({
+          tmagId: raced.tmagId,
+          discoveryId: raced._id,
+          boundaryCompletedAt: raced.eventBodyCompaction.boundaryCompletedAt,
+        });
+        if (raced.completedAt === payload.completedAt) {
+          return stripPersisted(raced);
+        }
+      }
+      throw new DiscoveryIngestError(
+        'ALREADY_EXISTS',
+        `Discovery for tmagId=${payload.tmagId} already exists and requires BA-confirmed correction.`,
+      );
     }
+    throw err;
   }
 
   // Read-back verification (VERIFY BEFORE DONE): confirm the Mongo row landed
@@ -644,12 +789,23 @@ export async function ingestDiscoveryArtifact(
   // would pass even when an update silently modified nothing (0 matched/modified
   // without throwing), so also assert completedAt reflects THIS artifact.
   const readback = await getDiscoveryByTmagId(payload.tmagId);
-  if (!readback || readback._id !== id || readback.completedAt !== artifact.completedAt) {
+  if (
+    !readback ||
+    readback._id !== id ||
+    readback.completedAt !== artifact.completedAt ||
+    !isNewRecordEventCompactionEligible(readback)
+  ) {
     throw new DiscoveryIngestError(
       'READBACK_FAILED',
       `Discovery for tmagId=${payload.tmagId} did not read back after write.`,
     );
   }
+
+  await compactSteveConversationEventBodies({
+    tmagId: readback.tmagId,
+    discoveryId: readback._id,
+    boundaryCompletedAt: readback.eventBodyCompaction.boundaryCompletedAt,
+  });
 
   return stripPersisted(readback);
 }

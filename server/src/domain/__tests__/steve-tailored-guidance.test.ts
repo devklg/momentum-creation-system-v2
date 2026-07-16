@@ -57,6 +57,18 @@ describe('P2-118 Steve tailored guidance projection', () => {
     expect(projectSteveTailoredGuidance({
       expectedTmagId: 'TMAG-OTHER', steveComplete: true, profileRecordCount: 1, successProfile: profile,
     })).toMatchObject({ status: 'needs_attention', reason: 'profile_duplicate_or_identity_inconsistent' });
+    expect(projectSteveTailoredGuidance({
+      expectedTmagId: 'TMAG-001',
+      steveComplete: true,
+      profileRecordCount: 1,
+      successProfile: profile,
+      personalizationActive: false,
+    })).toMatchObject({
+      status: 'unavailable',
+      reason: 'profile_missing',
+      training: [],
+      launch: [],
+    });
   });
 
   it('states that guidance never changes equal access, order, completion, or next action', () => {
@@ -114,5 +126,42 @@ describe('P2-118 Steve tailored guidance projection', () => {
       'Where they want support early: inviting.',
       'When stuck: Ask me early.',
     ]);
+  });
+
+  it('adds only the exact private fields the BA consented to share', () => {
+    const canonical = {
+      ...profile,
+      primaryWhy: { statement: 'Build a family legacy', who: 'family', whyNow: 'now' },
+      successVision: { statement: 'Lead with confidence', oneBigChange: 'consistency' },
+      learningStyle: { modalities: ['doing'], feedbackPreference: 'Directly', notes: '' },
+      communicationPreferences: { preferredChannels: ['text'], cadence: 'weekly', bestTimes: 'Evenings', notes: '' },
+      supportNeeds: {
+        areas: ['inviting'],
+        potentialObstacles: ['time', 'technology'],
+        helpStyle: 'Ask me early',
+        notes: '',
+      },
+      michaelHandoffSummary: 'Support with small actions.',
+    } as McsSteveSuccessProfile;
+
+    const card = projectSuccessProfileToCard({
+      downlineTmagId: 'TMAG-001',
+      downlineFirstName: 'Alex',
+      profile: canonical,
+      consentedFields: {
+        primaryWhy: 'Build a family legacy',
+        successVision: '',
+        supportObstacles: ['time'],
+        michaelHandoffSummary: 'Support with small actions.',
+      },
+    });
+
+    expect(card.primaryWhy).toBe('Build a family legacy');
+    expect(card.successVision).toBe('');
+    expect(card.michaelHandoffSummary).toBe('Support with small actions.');
+    expect(card.supportFocus.bullets).toContain(
+      'Obstacles they chose to share: time.',
+    );
+    expect(card.supportFocus.bullets).not.toContain('technology');
   });
 });

@@ -22,6 +22,15 @@
 
 import express, { type Request, type Response, type Router } from 'express';
 import { z } from 'zod';
+import {
+  MCS_STEVE_SPONSOR_CONSENT_FIELDS,
+  MCS_STEVE_SPONSOR_CONSENT_GRANT_COPY,
+  MCS_STEVE_SPONSOR_CONSENT_REVOCATION_COPY,
+  MCS_STEVE_CORRECTABLE_PROFILE_LIST_FIELDS,
+  MCS_STEVE_CORRECTABLE_PROFILE_TEXT_FIELDS,
+  MCS_STEVE_CORRECTION_CONFIRMATION,
+  MCS_STEVE_WITHDRAW_CONFIRMATION,
+} from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
@@ -38,14 +47,85 @@ import {
   converseWithSteve,
   loadConversation,
 } from '../domain/steveConversationRuntime.js';
+import {
+  exportStevePrivateRecord,
+  getStevePrivacyState,
+  setSteveSponsorConsent,
+  StevePrivacyError,
+  withdrawStevePersonalization,
+} from '../domain/stevePrivacy.js';
 import { AnthropicConfigError } from '../services/anthropic.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
+import {
+  correctStevePrivateRecord,
+  SteveCorrectionError,
+} from '../domain/steveCorrection.js';
 
 export const steveRoutes: Router = express.Router();
 
 function markPrivate(res: Response): void {
   res.set('Cache-Control', 'private, no-store');
   res.set('Pragma', 'no-cache');
+}
+
+function privacyResponse(args: Awaited<ReturnType<typeof getStevePrivacyState>>) {
+  return {
+    ok: true as const,
+    privacy: args.privacy,
+    currentSponsorTmagId: args.currentSponsorTmagId,
+    grantCopy: MCS_STEVE_SPONSOR_CONSENT_GRANT_COPY,
+    revocationCopy: MCS_STEVE_SPONSOR_CONSENT_REVOCATION_COPY,
+  };
+}
+
+function handleStevePrivacyError(err: unknown, res: Response): boolean {
+  if (!(err instanceof StevePrivacyError)) return false;
+  const status =
+    err.code === 'WITHDRAWN' || err.code === 'NO_CURRENT_SPONSOR' ? 409 : 404;
+  res.status(status).json({
+    ok: false,
+    error:
+      status === 409
+        ? 'Sponsor sharing is unavailable.'
+        : 'Steve privacy controls are unavailable.',
+    code:
+      status === 409
+        ? 'SPONSOR_SHARING_UNAVAILABLE'
+        : 'STEVE_PRIVACY_UNAVAILABLE',
+  });
+  return true;
+}
+
+function handleSteveCorrectionError(err: unknown, res: Response): boolean {
+  if (!(err instanceof SteveCorrectionError)) return false;
+  const status =
+    err.code === 'STALE_REVISION'
+      ? 409
+      : err.code === 'INVALID_TARGET' || err.code === 'INVALID_REPLACEMENT'
+        ? 400
+        : err.code === 'NO_PROFILE'
+          ? 404
+          : 500;
+  res.status(status).json({
+    ok: false,
+    error:
+      status === 409
+        ? 'Your Steve profile changed. Reload before correcting it.'
+        : status === 400
+          ? 'The Steve correction request is invalid.'
+          : status === 404
+            ? 'Steve correction is unavailable.'
+            : 'Steve correction failed.',
+    code:
+      status === 409
+        ? 'STALE_STEVE_CORRECTION'
+        : status === 400
+          ? 'INVALID_STEVE_CORRECTION'
+          : status === 404
+            ? 'STEVE_CORRECTION_UNAVAILABLE'
+            : 'STEVE_CORRECTION_FAILED',
+  });
+  return true;
 }
 
 /** Worker-only secret guard for ingest/system-prompt endpoints. Safe-by-default:
@@ -90,6 +170,170 @@ steveRoutes.get(
   requireAuth,
   (_req: Request, res: Response) => {
     res.json({ ok: true, sections: STEVE_DISCOVERY_SECTIONS });
+  },
+);
+
+/** GET /api/steve/discovery/privacy — BA-owned current privacy state. */
+steveRoutes.get(
+  '/discovery/privacy',
+  requireAuth,
+  requireSteveComplete,
+  async (req: Request, res: Response) => {
+    markPrivate(res);
+    try {
+      const state = await getStevePrivacyState(req.session!.tmagId);
+      res.json(privacyResponse(state));
+    } catch (err) {
+      if (handleStevePrivacyError(err, res)) return;
+      res.status(500).json({ ok: false, error: 'Steve privacy read failed.' });
+    }
+  },
+);
+
+/** GET /api/steve/discovery/export — one BA-owned structured export. */
+steveRoutes.get(
+  '/discovery/export',
+  requireAuth,
+  requireSteveComplete,
+  async (req: Request, res: Response) => {
+    markPrivate(res);
+    try {
+      const exported = await exportStevePrivateRecord(req.session!.tmagId);
+      const safeId = req.session!.tmagId.replace(/[^A-Za-z0-9_-]/g, '_');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="steve-success-profile-${safeId}.json"`,
+      );
+      res.json({ ok: true, ...exported });
+    } catch (err) {
+      if (handleStevePrivacyError(err, res)) return;
+      res.status(500).json({ ok: false, error: 'Steve export failed.' });
+    }
+  },
+);
+
+const SponsorConsentBody = z.object({
+  field: z.enum(MCS_STEVE_SPONSOR_CONSENT_FIELDS),
+  granted: z.boolean(),
+});
+
+/** PUT /api/steve/discovery/privacy/consent — one exact field grant/revoke. */
+steveRoutes.put(
+  '/discovery/privacy/consent',
+  requireAuth,
+  requireSteveComplete,
+  async (req: Request, res: Response) => {
+    markPrivate(res);
+    const parsed = SponsorConsentBody.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      res.status(400).json({ ok: false, error: 'Invalid sponsor-consent request.' });
+      return;
+    }
+    try {
+      const result = await setSteveSponsorConsent({
+        tmagId: req.session!.tmagId,
+        field: parsed.data.field,
+        granted: parsed.data.granted,
+      });
+      res.json({
+        ...privacyResponse(result),
+        auditEntryId: result.auditEntryId,
+      });
+    } catch (err) {
+      if (handleStevePrivacyError(err, res)) return;
+      res.status(500).json({ ok: false, error: 'Sponsor-consent update failed.' });
+    }
+  },
+);
+
+const WithdrawBody = z.object({
+  confirmation: z.literal(MCS_STEVE_WITHDRAW_CONFIRMATION),
+});
+
+const CorrectionTarget = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('transcript_text'),
+    sequence: z.number().int().nonnegative(),
+  }),
+  z.object({
+    kind: z.literal('answer_text'),
+    questionId: z.string().trim().min(1).max(160),
+  }),
+  z.object({
+    kind: z.literal('profile_text'),
+    path: z.enum(MCS_STEVE_CORRECTABLE_PROFILE_TEXT_FIELDS),
+  }),
+  z.object({
+    kind: z.literal('profile_list'),
+    path: z.enum(MCS_STEVE_CORRECTABLE_PROFILE_LIST_FIELDS),
+  }),
+  z.object({
+    kind: z.literal('recommendation_text'),
+    list: z.enum(['launch', 'training']),
+    index: z.number().int().nonnegative().max(100),
+  }),
+]);
+
+const CorrectionBody = z.object({
+  target: CorrectionTarget,
+  replacement: z.union([
+    z.string().max(4_000),
+    z.array(z.string().max(200)).max(20),
+  ]),
+  expectedRevision: z.number().int().nonnegative(),
+  confirmation: z.literal(MCS_STEVE_CORRECTION_CONFIRMATION),
+});
+
+/** PUT /api/steve/discovery/correction — replace one BA-owned private value. */
+steveRoutes.put(
+  '/discovery/correction',
+  requireAuth,
+  requireSteveComplete,
+  async (req: Request, res: Response) => {
+    markPrivate(res);
+    const parsed = CorrectionBody.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      res.status(400).json({
+        ok: false,
+        error: 'Correction confirmation and one valid replacement are required.',
+      });
+      return;
+    }
+    try {
+      const result = await correctStevePrivateRecord({
+        tmagId: req.session!.tmagId,
+        payload: parsed.data,
+      });
+      res.json({ ok: true, ...result });
+    } catch (err) {
+      if (handleSteveCorrectionError(err, res)) return;
+      res.status(500).json({ ok: false, error: 'Steve correction failed.' });
+    }
+  },
+);
+
+/** POST /api/steve/discovery/privacy/withdraw — stop personalization/sharing. */
+steveRoutes.post(
+  '/discovery/privacy/withdraw',
+  requireAuth,
+  requireSteveComplete,
+  async (req: Request, res: Response) => {
+    markPrivate(res);
+    const parsed = WithdrawBody.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      res.status(400).json({ ok: false, error: 'Withdrawal confirmation required.' });
+      return;
+    }
+    try {
+      const result = await withdrawStevePersonalization(req.session!.tmagId);
+      res.json({
+        ...privacyResponse(result),
+        auditEntryId: result.auditEntryId,
+      });
+    } catch (err) {
+      if (handleStevePrivacyError(err, res)) return;
+      res.status(500).json({ ok: false, error: 'Steve withdrawal failed.' });
+    }
   },
 );
 
@@ -248,10 +492,16 @@ steveRoutes.post(
       });
     } catch (err) {
       if (err instanceof DiscoveryIngestError) {
-        const status = err.code === 'NO_BA' ? 400 : 500;
+        const status =
+          err.code === 'NO_BA' ? 400 : err.code === 'ALREADY_EXISTS' ? 409 : 500;
         res.status(status).json({
           ok: false,
-          error: status === 400 ? 'No matching BA record.' : 'Discovery ingest failed.',
+          error:
+            status === 400
+              ? 'No matching BA record.'
+              : status === 409
+                ? 'Discovery already exists.'
+                : 'Discovery ingest failed.',
           code: err.code,
         });
         return;

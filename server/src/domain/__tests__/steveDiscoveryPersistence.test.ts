@@ -18,14 +18,13 @@ type AnyRec = Record<string, unknown>;
 interface Store {
   ba: AnyRec | null;
   discovery: (AnyRec & { _id: string }) | null;
+  events?: AnyRec[];
 }
 
 interface PersistenceOpts {
   /** list_collections throws on the first N calls, then succeeds. */
   listCollectionsFailFirst?: number;
-  /** mongodb.update becomes a no-op (does not apply $set) — simulates a
-   *  silently-modified-nothing update. */
-  updateNoop?: boolean;
+  leaveEventPayloadAfterUpdate?: boolean;
 }
 
 function makePersistenceImpl(store: Store, opts: PersistenceOpts = {}) {
@@ -37,14 +36,62 @@ function makePersistenceImpl(store: Store, opts: PersistenceOpts = {}) {
       if (col === 'tmag_steve_success_interview') {
         return { documents: store.discovery ? [store.discovery] : [] };
       }
+      if (col === 'tmag_agent_steve_events') {
+        const filter = (params.filter as AnyRec | undefined) ?? {};
+        const residualOnly = Array.isArray(filter.$or);
+        const events = store.events ?? [];
+        const documents = events
+          .filter(
+            (event) =>
+              event.tmagId === filter.tmagId &&
+              event.agentId === filter.agentId &&
+              event.kind === filter.kind,
+          )
+          .filter((event) => {
+            if (!residualOnly) return true;
+            const compaction = event.contentCompaction as AnyRec | undefined;
+            return (
+              event.payload !== undefined ||
+              compaction?.state !== 'compacted' ||
+              compaction?.policyVersion !== 'acr-0031.v1' ||
+              compaction?.discoveryId !== 'SD-TMAG-1' ||
+              compaction?.boundaryCompletedAt !== '2026-07-01T00:10:00.000Z'
+            );
+          });
+        return { documents, count: documents.length };
+      }
       return { documents: [] };
     }
-    if (tool === 'mongodb' && action === 'update') {
-      if (!opts.updateNoop && store.discovery) {
-        const set = (params.update as AnyRec | undefined)?.$set as AnyRec | undefined;
-        store.discovery = { ...store.discovery, ...(set ?? {}) };
+    if (
+      tool === 'mongodb' &&
+      action === 'update' &&
+      params.collection === 'tmag_agent_steve_events'
+    ) {
+      const events = store.events ?? [];
+      const filter = (params.filter as AnyRec | undefined) ?? {};
+      const compaction = ((params.update as AnyRec | undefined)?.$set as AnyRec | undefined)
+        ?.contentCompaction as AnyRec | undefined;
+      for (const event of events) {
+        if (
+          event.tmagId !== filter.tmagId ||
+          event.agentId !== filter.agentId ||
+          event.kind !== filter.kind
+        ) {
+          continue;
+        }
+        if (!opts.leaveEventPayloadAfterUpdate) delete event.payload;
+        event.contentCompaction = { ...compaction };
       }
-      return { matchedCount: 1 };
+      const matchedCount = events.filter(
+        (event) =>
+          event.tmagId === filter.tmagId &&
+          event.agentId === filter.agentId &&
+          event.kind === filter.kind,
+      ).length;
+      return { matchedCount, modifiedCount: matchedCount };
+    }
+    if (tool === 'mongodb' && action === 'update') {
+      return { matchedCount: 1, modifiedCount: 1 };
     }
     if (tool === 'neo4j' && action === 'cypher') return {};
     if (tool === 'chromadb' && action === 'list_collections') {
@@ -110,7 +157,7 @@ beforeEach(() => {
 });
 
 describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
-  it('re-ingest (existing row) refreshes the Chroma semantic doc', async () => {
+  it('rejects ordinary re-ingest without mutating any store', async () => {
     const store: Store = {
       ba: { ...BA },
       discovery: { _id: 'SD-TMAG-1', tmagId: 'TMAG-1', completedAt: '2026-06-01T00:00:00.000Z' },
@@ -118,48 +165,21 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
     const steve = await loadSteve();
 
-    await steve.ingestDiscoveryArtifact(makePayload());
-
-    const chromaAdd = mocks.persistenceCall.mock.calls.find(
-      ([tool, action]) => tool === 'chromadb' && action === 'add',
-    );
-    expect(chromaAdd).toBeDefined();
-    expect(chromaAdd?.[2]).toMatchObject({
-      collection: 'mcs_steve_success_interview',
-      ids: ['SD-TMAG-1'],
-      metadatas: [
-        {
-          discoveryId: 'SD-TMAG-1',
-          ownerTmagId: 'TMAG-1',
-          kind: 'steve_discovery',
-          retrievalEligible: false,
-        },
-      ],
+    await expect(steve.ingestDiscoveryArtifact(makePayload())).rejects.toMatchObject({
+      code: 'ALREADY_EXISTS',
     });
-    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('callSid');
-    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('sponsorTmagId');
-    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Primary why');
-    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Success vision');
-    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Learns by');
-    expect(JSON.stringify(chromaAdd?.[2])).not.toContain('Support areas');
-    expect(JSON.stringify(chromaAdd?.[2])).toContain(
-      'Profile content is canonical in MongoDB.',
-    );
-
-    const graphWrite = mocks.persistenceCall.mock.calls.find(
-      ([tool, action]) => tool === 'neo4j' && action === 'cypher',
-    );
-    expect(JSON.stringify(graphWrite?.[2])).not.toContain('callSid');
-    expect(JSON.stringify(graphWrite?.[2])).not.toContain('audioUrl');
-
-    const mongoUpdate = mocks.persistenceCall.mock.calls.find(
-      ([tool, action]) => tool === 'mongodb' && action === 'update',
-    );
-    expect(JSON.stringify(mongoUpdate?.[2])).not.toContain('callSid');
-    expect(JSON.stringify(mongoUpdate?.[2])).not.toContain('audioUrl');
+    expect(mocks.writeKnowledge).not.toHaveBeenCalled();
+    expect(
+      mocks.persistenceCall.mock.calls.filter(
+        ([tool, action]) =>
+          (tool === 'mongodb' && action === 'update') ||
+          (tool === 'neo4j' && action === 'cypher') ||
+          (tool === 'chromadb' && action === 'add'),
+      ),
+    ).toEqual([]);
   });
 
-  it('stores no provider call identifier or audio URL on a new internal Steve record', async () => {
+  it('stores a private, consent-off marker with no provider/audio or sponsor visibility projection', async () => {
     const store: Store = { ba: { ...BA }, discovery: null };
     mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
     mocks.writeKnowledge.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
@@ -173,43 +193,233 @@ describe('Steve ingestDiscoveryArtifact — persistence fixes', () => {
     );
 
     const write = mocks.writeKnowledge.mock.calls[0]?.[0] as { mongoDoc?: AnyRec } | undefined;
-    expect(write?.mongoDoc).toMatchObject({ callSid: null, audioUrl: null });
+    expect(write?.mongoDoc).toMatchObject({
+      callSid: null,
+      audioUrl: null,
+      privacy: {
+        policyVersion: 'acr-0031.v1',
+        status: 'active',
+        withdrawnAt: null,
+        sponsorConsent: {
+          why_statement: { granted: false },
+          success_vision: { granted: false },
+          support_obstacles: { granted: false },
+          michael_handoff_summary: { granted: false },
+        },
+      },
+      eventBodyCompaction: {
+        eligible: true,
+        policyVersion: 'acr-0031.v1',
+        eventKind: 'discovery_chat_message',
+        boundaryCompletedAt: '2026-07-01T00:10:00.000Z',
+        scope: 'new_record_only',
+      },
+    });
     expect(artifact.callSid).toBeNull();
     expect(artifact.audioUrl).toBeNull();
+    const serializedWrite = JSON.stringify(mocks.writeKnowledge.mock.calls[0]?.[0]);
+    expect(serializedWrite).not.toContain('CA-private');
+    expect(serializedWrite).not.toContain('https://private.example/audio');
+    expect(serializedWrite).not.toContain('VISIBLE_TO_SPONSOR');
+    expect(serializedWrite).toContain('HAD_STEVE_DISCOVERY');
+    expect(serializedWrite).toContain('Profile content is canonical in MongoDB.');
   });
 
-  it('read-back throws READBACK_FAILED when the update did not apply content', async () => {
+  it('compacts private event bodies only after the canonical artifact reads back', async () => {
     const store: Store = {
       ba: { ...BA },
-      discovery: { _id: 'SD-TMAG-1', tmagId: 'TMAG-1', completedAt: '2026-06-01T00:00:00.000Z' },
+      discovery: null,
+      events: [
+        {
+          _id: 'event-1',
+          tmagId: 'TMAG-1',
+          agentId: 'steve',
+          kind: 'discovery_chat_message',
+          payload: { role: 'ba', text: 'private answer', seq: 0 },
+        },
+        {
+          _id: 'event-2',
+          tmagId: 'TMAG-1',
+          agentId: 'steve',
+          kind: 'discovery_chat_message',
+          payload: { role: 'steve', text: 'private prompt', seq: 1 },
+        },
+        {
+          _id: 'event-unrelated',
+          tmagId: 'TMAG-2',
+          agentId: 'steve',
+          kind: 'discovery_chat_message',
+          payload: { role: 'ba', text: 'other BA private answer', seq: 0 },
+        },
+      ],
     };
-    // updateNoop: the row exists but completedAt never advances to this ingest.
-    mocks.persistenceCall.mockImplementation(makePersistenceImpl(store, { updateNoop: true }));
+    mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
+    mocks.writeKnowledge.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
+      store.discovery = { _id: input.id, ...input.mongoDoc };
+      return { mongo: { ok: true }, neo4j: { ok: true }, chroma: { ok: true, verified: true } };
+    });
+    const steve = await loadSteve();
+
+    await steve.ingestDiscoveryArtifact(makePayload());
+
+    expect(store.events).toEqual([
+      expect.objectContaining({
+        _id: 'event-1',
+        contentCompaction: expect.objectContaining({
+          state: 'compacted',
+          policyVersion: 'acr-0031.v1',
+          discoveryId: 'SD-TMAG-1',
+          boundaryCompletedAt: '2026-07-01T00:10:00.000Z',
+        }),
+      }),
+      expect.objectContaining({
+        _id: 'event-2',
+        contentCompaction: expect.objectContaining({
+          state: 'compacted',
+          policyVersion: 'acr-0031.v1',
+          discoveryId: 'SD-TMAG-1',
+        }),
+      }),
+      expect.objectContaining({
+        _id: 'event-unrelated',
+        payload: { role: 'ba', text: 'other BA private answer', seq: 0 },
+      }),
+    ]);
+    expect(store.events?.[0]?.payload).toBeUndefined();
+    expect(store.events?.[1]?.payload).toBeUndefined();
+    expect(store.events?.[2]?.payload).toBeDefined();
+
+    const discoveryReadbackOrder = Math.max(
+      ...mocks.persistenceCall.mock.calls
+        .map((call, index) => ({ call, order: mocks.persistenceCall.mock.invocationCallOrder[index] ?? 0 }))
+        .filter(
+          ({ call }) =>
+            call[0] === 'mongodb' &&
+            call[1] === 'query' &&
+            (call[2] as AnyRec).collection === 'tmag_steve_success_interview' &&
+            store.discovery !== null,
+        )
+        .map(({ order }) => order),
+    );
+    const compactionUpdateIndex = mocks.persistenceCall.mock.calls.findIndex(
+      ([tool, action, params]) =>
+        tool === 'mongodb' &&
+        action === 'update' &&
+        (params as AnyRec).collection === 'tmag_agent_steve_events',
+    );
+    expect(compactionUpdateIndex).toBeGreaterThanOrEqual(0);
+    expect(
+      mocks.persistenceCall.mock.invocationCallOrder[compactionUpdateIndex] ?? 0,
+    ).toBeGreaterThan(discoveryReadbackOrder);
+    expect(
+      mocks.persistenceCall.mock.invocationCallOrder[compactionUpdateIndex] ?? 0,
+    ).toBeGreaterThan(mocks.writeKnowledge.mock.invocationCallOrder[0] ?? 0);
+  });
+
+  it('fails closed when event compaction does not read back', async () => {
+    const store: Store = {
+      ba: { ...BA },
+      discovery: null,
+      events: [
+        {
+          _id: 'event-1',
+          tmagId: 'TMAG-1',
+          agentId: 'steve',
+          kind: 'discovery_chat_message',
+          payload: { role: 'ba', text: 'private answer', seq: 0 },
+        },
+      ],
+    };
+    mocks.persistenceCall.mockImplementation(
+      makePersistenceImpl(store, { leaveEventPayloadAfterUpdate: true }),
+    );
+    mocks.writeKnowledge.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
+      store.discovery = { _id: input.id, ...input.mongoDoc };
+      return { mongo: { ok: true }, neo4j: { ok: true }, chroma: { ok: true, verified: true } };
+    });
     const steve = await loadSteve();
 
     await expect(steve.ingestDiscoveryArtifact(makePayload())).rejects.toMatchObject({
-      code: 'READBACK_FAILED',
+      code: 'EVENT_COMPACTION_FAILED',
     });
+    expect(store.discovery?._id).toBe('SD-TMAG-1');
+    expect(store.events?.[0]?.payload).toBeDefined();
   });
 
-  it('TOCTOU: a raced duplicate insert falls back to the update path (no throw)', async () => {
+  it('allows an exact new-record retry to finish compaction without rewriting the artifact', async () => {
+    const payload = makePayload() as unknown as AnyRec;
+    const store: Store = {
+      ba: { ...BA },
+      discovery: {
+        _id: 'SD-TMAG-1',
+        ...payload,
+        privacy: {
+          policyVersion: 'acr-0031.v1',
+          status: 'active',
+          withdrawnAt: null,
+          sponsorConsent: {},
+        },
+        eventBodyCompaction: {
+          eligible: true,
+          policyVersion: 'acr-0031.v1',
+          eventKind: 'discovery_chat_message',
+          boundaryCompletedAt: '2026-07-01T00:10:00.000Z',
+          scope: 'new_record_only',
+        },
+      },
+      events: [
+        {
+          _id: 'event-retry',
+          tmagId: 'TMAG-1',
+          agentId: 'steve',
+          kind: 'discovery_chat_message',
+          payload: { role: 'ba', text: 'private answer', seq: 0 },
+        },
+      ],
+    };
+    mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
+    const steve = await loadSteve();
+
+    const artifact = await steve.ingestDiscoveryArtifact(makePayload());
+
+    expect(artifact.tmagId).toBe('TMAG-1');
+    expect(mocks.writeKnowledge).not.toHaveBeenCalled();
+    expect(store.events?.[0]?.payload).toBeUndefined();
+  });
+
+  it('TOCTOU: a raced duplicate insert rejects without taking correction authority', async () => {
     const store: Store = { ba: { ...BA }, discovery: null };
     mocks.persistenceCall.mockImplementation(makePersistenceImpl(store));
     // Simulate a concurrent writer: writeKnowledge lands the row then the
     // insert rejects on the duplicate _id.
     mocks.writeKnowledge.mockImplementation(async (input: { id: string; mongoDoc: AnyRec }) => {
-      store.discovery = { _id: input.id, ...input.mongoDoc };
+      store.discovery = {
+        _id: input.id,
+        ...input.mongoDoc,
+        completedAt: '2026-07-01T00:09:00.000Z',
+        eventBodyCompaction: {
+          eligible: true,
+          policyVersion: 'acr-0031.v1',
+          eventKind: 'discovery_chat_message',
+          boundaryCompletedAt: '2026-07-01T00:09:00.000Z',
+          scope: 'new_record_only',
+        },
+      };
       throw new Error('E11000 duplicate key');
     });
     const steve = await loadSteve();
 
-    const artifact = await steve.ingestDiscoveryArtifact(makePayload());
-    expect(artifact.tmagId).toBe('TMAG-1');
-
-    const updateCall = mocks.persistenceCall.mock.calls.find(
-      ([tool, action]) => tool === 'mongodb' && action === 'update',
-    );
-    expect(updateCall).toBeDefined();
+    await expect(steve.ingestDiscoveryArtifact(makePayload())).rejects.toMatchObject({
+      code: 'ALREADY_EXISTS',
+    });
+    expect(
+      mocks.persistenceCall.mock.calls.some(
+        ([tool, action, params]) =>
+          tool === 'mongodb' &&
+          action === 'update' &&
+          (params as AnyRec).collection === 'tmag_steve_success_interview',
+      ),
+    ).toBe(false);
   });
 
   it('bootstrap self-heals: a transient list_collections failure does not poison later ingests', async () => {

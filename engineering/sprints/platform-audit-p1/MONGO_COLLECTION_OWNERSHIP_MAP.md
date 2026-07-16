@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T18:37:35.463Z
+- Generated: 2026-07-16T21:21:46.661Z
 - Collections: 74
 - Unclassified: 0
 
@@ -49,7 +49,7 @@
 | `mcs_workbooks` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
 | `orientation_sessions` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 1 |
 | `RESOURCE_CATALOG_MONGO_COLLECTION` | Dynamic helper expression | Owning caller resolves at runtime | system | mixed | permissive_mongoose_schema | expression | 2 |
-| `team_magnificent_members` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | explicit_mongoose_schema | yes | 61 |
+| `team_magnificent_members` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | explicit_mongoose_schema | yes | 62 |
 | `tenant_settings_versions` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 3 |
 | `tmag_access_codes` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 8 |
 | `tmag_admin_curated_leader_tags` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 3 |
@@ -58,7 +58,7 @@
 | `tmag_admin_settings` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 3 |
 | `tmag_admin_sponsor_overrides` | Membership identity and sponsor governance | Admin / BA identity | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
 | `tmag_agent_michael_events` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 1 |
-| `tmag_agent_steve_events` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
+| `tmag_agent_steve_events` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 4 |
 | `tmag_commitments` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 3 |
 | `tmag_content_templates` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 2 |
 | `tmag_content_videos` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 5 |
@@ -87,9 +87,9 @@
 | `tmag_prospect_webinar_reservations` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 6 |
 | `tmag_prospects` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 38 |
 | `tmag_questionnaires` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
-| `tmag_recruiting_cycles` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 3 |
+| `tmag_recruiting_cycles` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 4 |
 | `tmag_sponsor_availability` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 5 |
-| `tmag_steve_success_interview` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 8 |
+| `tmag_steve_success_interview` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 15 |
 | `tmag_three_way_bookings` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 5 |
 | `tmag_vm_audit_events` | VM/RVM import, ownership, queue, and provider events | VM/RVM domain | admin + workers | operational | permissive_mongoose_schema | yes | 1 |
 | `tmag_vm_bulk_leads` | VM/RVM import, ownership, queue, and provider events | VM/RVM domain | admin + workers | operational | permissive_mongoose_schema | yes | 21 |

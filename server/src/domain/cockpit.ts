@@ -23,6 +23,7 @@ import { findBAByTmagId, type BARecord } from './ba.js';
 import { lastInitialOf } from './prospects.js';
 import { buildDiscoveryView } from './steve-success-interview.js';
 import { projectSteveTailoredGuidance } from './steve-tailored-guidance.js';
+import { normalizeStevePrivacyState } from './stevePrivacy.js';
 import { getFastStartProgress } from './training.js';
 import { listUpcomingWebinarEvents } from './webinarEvent.js';
 import { projectCockpitNextAction } from './cockpit-next-action.js';
@@ -953,6 +954,8 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
 
   const rawProfile = profileRows[0];
   const rawSuccessProfile = rawProfile?.successProfile as Record<string, unknown> | undefined;
+  const personalizationActive =
+    normalizeStevePrivacyState(rawProfile?.privacy).status === 'active';
   const profileIdentityMatches = rawSuccessProfile?.tmagId === tmagId;
   const profileAmbiguous = profileRows.length > 1 || (steveComplete && !profileIdentityMatches);
   const guidance = projectSteveTailoredGuidance({
@@ -960,6 +963,7 @@ export async function getTeamLaunchCenter(tmagId: string): Promise<McsTeamLaunch
     steveComplete,
     profileRecordCount: profileRows.length,
     successProfile: rawSuccessProfile,
+    personalizationActive,
   });
 
   const readinessItems: McsLaunchReadinessItem[] = [
