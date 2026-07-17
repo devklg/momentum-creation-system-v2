@@ -28,6 +28,10 @@
 import { randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeOperational } from '../services/tieredWrite.js';
+import {
+  resolveOrientationContentBinding,
+  verifyOrientationSessionContentBinding,
+} from '../services/contentVersioning.js';
 import { sendSms, TelnyxConfigError, TelnyxError } from '../services/telnyx.js';
 import {
   MCS_ORIENTATION_SESSION_CAPACITY,
@@ -38,6 +42,7 @@ import {
   type McsOrientationSessionAvailability,
   type McsOrientationSessionWithRoster,
   type McsOrientationRosterSeat,
+  type McsVersionedOrientationSession,
 } from '@momentum/shared';
 
 const MONGO_DB = 'momentum';
@@ -336,8 +341,9 @@ export interface CreateOrientationSessionInput {
  */
 export async function createOrientationSession(
   input: CreateOrientationSessionInput,
-): Promise<McsOrientationSession> {
+): Promise<McsVersionedOrientationSession> {
   await ensureOrientationCollection();
+  const contentBinding = await resolveOrientationContentBinding();
 
   const createdAt = new Date().toISOString();
   // Stable, readable id derived from the slot — keeps re-seeds idempotent at
@@ -352,7 +358,7 @@ export async function createOrientationSession(
   // Mongo range queries and cross-source Event Center ordering stay correct.
   const scheduledFor = new Date(input.scheduledFor).toISOString();
 
-  const session: McsOrientationSession = {
+  const session: McsVersionedOrientationSession = {
     sessionId,
     scheduledFor,
     hosts,
@@ -361,9 +367,12 @@ export async function createOrientationSession(
     joinUrl,
     status: 'upcoming',
     createdAt,
+    contentBinding,
   };
 
-  await writeOperational({
+  const resourceVersionIds = contentBinding.resources.map((resource) => resource.resourceVersionId);
+  const resourceVersionIdsJson = JSON.stringify(resourceVersionIds);
+  const writeResult = await writeOperational({
     id: sessionId,
     mongoCollection: SESSIONS_COLLECTION,
     mongoDoc: { ...session },
@@ -372,7 +381,12 @@ export async function createOrientationSession(
         'MERGE (e:TmagOrientationSession {sessionId: $sessionId}) ' +
         'SET e.scheduledFor = $scheduledFor, e.status = $status, ' +
         '    e.capacity = $capacity, e.durationMinutes = $durationMinutes, ' +
-        '    e.hosts = $hosts',
+        '    e.hosts = $hosts, e.primaryResourceVersionId = $primaryResourceVersionId, ' +
+        '    e.contentBindingDigestSha256 = $contentBindingDigestSha256, ' +
+        '    e.resourceVersionIds = $resourceVersionIds ' +
+        'WITH e UNWIND $resourceVersionIds AS resourceVersionId ' +
+        'MATCH (v:TmagResourceVersion {resourceVersionId: resourceVersionId}) ' +
+        'MERGE (e)-[:DELIVERS_RESOURCE_VERSION]->(v)',
       params: {
         sessionId,
         scheduledFor: session.scheduledFor,
@@ -380,6 +394,9 @@ export async function createOrientationSession(
         capacity,
         durationMinutes,
         hosts,
+        primaryResourceVersionId: contentBinding.primaryResourceVersionId,
+        contentBindingDigestSha256: contentBinding.bindingDigestSha256,
+        resourceVersionIds,
       },
     },
     chroma: {
@@ -393,9 +410,17 @@ export async function createOrientationSession(
         scheduledFor: session.scheduledFor,
         capacity,
         status: 'upcoming',
+        primaryResourceVersionId: contentBinding.primaryResourceVersionId,
+        contentBindingDigestSha256: contentBinding.bindingDigestSha256,
+        resourceVersionIdsJson,
       },
     },
   });
+
+  if (writeResult.neo4j?.ok !== true || writeResult.chroma?.ok !== true) {
+    throw new Error(`orientation_session_content_projection_pending:${sessionId}`);
+  }
+  await verifyOrientationSessionContentBinding(sessionId, contentBinding);
 
   return session;
 }

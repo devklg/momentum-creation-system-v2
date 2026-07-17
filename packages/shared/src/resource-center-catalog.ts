@@ -55,6 +55,7 @@ export const MCS_RESOURCE_CENTER_CATALOG = {
     retrievalLifecycle: 'active',
     publishingRule: 'exact_mongo_neo4j_chroma_identity_version_digest_and_freshness',
     sourceRule: 'catalog_is_projection_not_source_authority',
+    consumerBindingRule: 'exact_resource_version_id_snapshot',
   },
   ownership: {
     resourceCenter: ['discovery', 'browse', 'search', 'filter', 'source_owner_deep_link'],

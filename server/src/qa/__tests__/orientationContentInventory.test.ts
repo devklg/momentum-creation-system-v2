@@ -53,13 +53,22 @@ describe('P2-117 current orientation content inventory', () => {
     }
   });
 
-  it('reports access, language, and versioning gaps without inventing authority', () => {
+  it('reports remaining access/language gaps and the ACR-0033 version authority', () => {
     expect(MCS_CURRENT_ORIENTATION_CONTENT_INVENTORY.curriculum).toMatchObject({
       complianceSurface: 'team_only',
       accessControl: { routeContainer: 'TeamShell', authenticationEnforcement: 'not_evidenced' },
       languageAvailability: { en: 'implemented', es: 'missing' },
-      contentVersionAuthority: null,
-      sessionCurriculumBinding: null,
+      contentVersionAuthority: {
+        catalogSchemaVersion: 'resource_catalog.v1',
+        resourceVersionId: 'training:orientation:ten_step:v1',
+        authorityEvidenceId: 'ACR-0033',
+      },
+      sessionCurriculumBinding: {
+        schemaVersion: 'content_version_binding.v1',
+        bindingIdentity: 'resourceVersionId',
+        immutableAfterSessionCreation: true,
+        exactStoreReadbackRequired: true,
+      },
     });
   });
 

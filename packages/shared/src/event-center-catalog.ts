@@ -35,6 +35,9 @@ export const MCS_EVENT_CENTER_CATALOG = {
       sourceCollections: ['tmag_resource_catalog'],
       inclusion: 'verified_resource_with_explicit_event_context_tag_only',
       inference: 'forbidden',
+      versionAuthority: 'resource_catalog.v1',
+      bindingIdentity: 'resourceVersionId',
+      bindingMutation: 'new_event_or_session_snapshot_only',
     },
   ],
   ownership: {

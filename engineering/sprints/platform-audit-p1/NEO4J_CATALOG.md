@@ -4,9 +4,9 @@
 
 ## Summary
 
-- Generated: 2026-07-16T23:54:24.294Z
+- Generated: 2026-07-17T00:16:32.408Z
 - Labels: 84
-- Relationships: 68
+- Relationships: 69
 - Constraints/indexes cataloged: 18
 - Labels without a cataloged constraint/index: 69
 
@@ -50,7 +50,7 @@
 | `SPONSORED_BY` | 3 |
 | `SUPERSEDES` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 93 |
+| `TeamMagnificentMember` | 94 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 3 |
@@ -64,7 +64,7 @@
 | `TmagContentVideo` | 2 |
 | `TmagCrmNote` | 2 |
 | `TmagEventAttendance` | 1 |
-| `TmagEventMaterialContext` | 1 |
+| `TmagEventMaterialContext` | 2 |
 | `TmagFastStartProgress` | 2 |
 | `TmagGeneratorRun` | 1 |
 | `TmagHealthHeartbeat` | 3 |
@@ -73,7 +73,7 @@
 | `TmagIvoryName` | 6 |
 | `TmagKnowledge` | 5 |
 | `TmagLearningCandidate` | 4 |
-| `TmagOrientationSession` | 3 |
+| `TmagOrientationSession` | 4 |
 | `TmagOutcome` | 4 |
 | `TmagPool` | 7 |
 | `TmagProspect` | 45 |
@@ -83,15 +83,15 @@
 | `TmagProspectTimelineEvent` | 3 |
 | `TmagQuestionnaire` | 1 |
 | `TmagRecruitingCycle` | 2 |
-| `TmagResource` | 2 |
+| `TmagResource` | 3 |
 | `TmagResourceUsageEvent` | 1 |
-| `TmagResourceVersion` | 5 |
+| `TmagResourceVersion` | 8 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 4 |
 | `TmagSteveDiscovery` | 10 |
 | `TmagSteveDiscoveryVersion` | 2 |
 | `TmagThreeWayBooking` | 2 |
-| `TmagTrainingModule` | 1 |
+| `TmagTrainingModule` | 2 |
 | `TmagVmAuditEvent` | 1 |
 | `TmagVmBulkLead` | 19 |
 | `TmagVmCampaign` | 4 |
@@ -116,7 +116,7 @@
 | `ACTED_BY` | 1 |
 | `ACTED_FOR` | 1 |
 | `APPROVED_AS` | 1 |
-| `APPROVED_BY` | 2 |
+| `APPROVED_BY` | 3 |
 | `AVAILABLE_TO` | 1 |
 | `BECAME_PROSPECT_RECORD` | 2 |
 | `BELONGS_TO_DOMAIN` | 1 |
@@ -124,6 +124,7 @@
 | `CONDUCTED` | 1 |
 | `CONFIRMED_BY` | 1 |
 | `CONTAINS_LEAD` | 2 |
+| `DELIVERS_RESOURCE_VERSION` | 2 |
 | `DERIVED_FROM` | 2 |
 | `FOR` | 1 |
 | `FOR_EVENT` | 1 |
@@ -143,7 +144,7 @@
 | `HAS_SETTINGS_VERSION` | 1 |
 | `HAS_THREE_WAY_AVAILABILITY` | 1 |
 | `HAS_TIMELINE_EVENT` | 3 |
-| `HAS_VERSION` | 7 |
+| `HAS_VERSION` | 8 |
 | `HAS_VM_AUDIT` | 1 |
 | `HAS_VM_DELIVERY_EVENT` | 1 |
 | `INVITED` | 7 |
@@ -171,8 +172,8 @@
 | `SUBMITTED` | 1 |
 | `SUPERSEDES` | 3 |
 | `SUPPORTED_BY` | 1 |
-| `SUPPORTS_EVENT_MATERIAL` | 1 |
-| `SUPPORTS_TRAINING_MODULE` | 1 |
+| `SUPPORTS_EVENT_MATERIAL` | 2 |
+| `SUPPORTS_TRAINING_MODULE` | 2 |
 | `SUPPRESSED_BY` | 1 |
 | `TARGETS_LEAD` | 2 |
 | `USES_VM_LEAD_OWNER` | 1 |
