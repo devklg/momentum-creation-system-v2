@@ -50,6 +50,12 @@ export function Footer({ baFullName }: FooterProps) {
         </div>
 
         <p className="tm-footer__disclaimer">{MCS_COM_DISCLAIMER}</p>
+
+        <div className="tm-footer__legal-links" aria-label="Legal links">
+          <a href="/privacy">Privacy Policy</a>
+          <span aria-hidden="true">•</span>
+          <a href="/terms">Terms of Service</a>
+        </div>
       </div>
       <style>{styles}</style>
     </footer>
@@ -136,6 +142,29 @@ const styles = `
     color: rgba(245, 239, 230, 0.5);
     margin: 12px 0 0;
     max-width: 60ch;
+  }
+
+  .tm-footer__legal-links {
+    margin: 18px 0 0;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    align-items: center;
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .tm-footer__legal-links a {
+    color: rgba(245, 239, 230, 0.76);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+
+  .tm-footer__legal-links a:hover {
+    color: #C9A84C;
+    border-bottom-color: currentColor;
   }
 `;
 

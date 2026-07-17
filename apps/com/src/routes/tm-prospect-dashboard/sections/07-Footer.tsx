@@ -38,6 +38,11 @@ export function DashboardFooter() {
           We build people before we build volume.
         </div>
         <div className="tmpd-footer-disclaimer">{MCS_COM_DISCLAIMER}</div>
+        <div className="tmpd-footer-links" aria-label="Legal links">
+          <a href="/privacy">Privacy Policy</a>
+          <span aria-hidden="true">•</span>
+          <a href="/terms">Terms of Service</a>
+        </div>
       </footer>
       <style>{footerCss}</style>
     </>
@@ -112,5 +117,27 @@ const footerCss = `
     color: rgba(245, 239, 230, 0.48);
     max-width: 64ch;
     margin: 0 auto;
+  }
+
+  .tmpd-footer-links {
+    margin-top: 18px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: center;
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(245, 239, 230, 0.48);
+  }
+
+  .tmpd-footer-links a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .tmpd-footer-links a:hover {
+    color: #C9A84C;
   }
 `;
