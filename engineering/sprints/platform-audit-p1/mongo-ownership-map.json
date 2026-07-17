@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-17T14:12:41.133Z",
+  "generatedAt": "2026-07-17T21:16:27.229Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
-  "collectionCount": 75,
+  "collectionCount": 76,
   "unclassifiedCount": 0,
   "byOwner": {
-    "dynamic_helper": 6,
+    "dynamic_helper": 7,
     "broadcast_delivery": 3,
     "knowledge_content": 9,
     "operations_governance": 6,
@@ -190,6 +190,20 @@
       "sourceFiles": [
         "server/src/domain/graphrag.ts",
         "server/src/domain/graphragReadiness.ts"
+      ]
+    },
+    {
+      "collection": "MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION",
+      "ownerId": "dynamic_helper",
+      "owner": "Dynamic helper expression",
+      "steward": "Owning caller resolves at runtime",
+      "primarySurface": "system",
+      "persistenceTier": "mixed",
+      "schemaMode": "permissive_mongoose_schema",
+      "resolved": false,
+      "sourceCount": 2,
+      "sourceFiles": [
+        "server/src/services/knowledge/knowledgeDocumentStorage.ts"
       ]
     },
     {

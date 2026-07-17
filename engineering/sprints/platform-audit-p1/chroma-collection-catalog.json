@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T14:12:45.570Z",
+  "generatedAt": "2026-07-17T21:16:31.735Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -221,7 +221,7 @@
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 1025,
+          "line": 1026,
           "action": "persistenceCall.chromadb.add"
         },
         {
@@ -243,6 +243,7 @@
           "correction_id",
           "current_digest_sha256",
           "current_source_version_id",
+          "decided_at",
           "decided_by",
           "decision_id",
           "expected_lifecycle",
@@ -743,12 +744,12 @@
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 429,
+          "line": 430,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 1112,
+          "line": 1113,
           "action": "persistenceCall.chromadb.add"
         }
       ],
@@ -2606,7 +2607,7 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 382,
+          "line": 383,
           "action": "writeKnowledge"
         }
       ],
@@ -2623,7 +2624,7 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 1103,
+          "line": 1104,
           "action": "persistenceCall.chromadb.add"
         }
       ],

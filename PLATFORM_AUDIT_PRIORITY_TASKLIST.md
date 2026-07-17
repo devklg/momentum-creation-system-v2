@@ -132,7 +132,7 @@ Product unification, workflow completion, content operations, and scale-hardenin
 - [x] 97. **Launch Center:** Create a launch state projection combining orientation, training, invitations, profile, and CRM readiness.
 - [x] 98. **Launch Center:** Add a launch readiness admin view that avoids ranking or scoring people.
 - [x] 99. **Resource Center:** Define the Resource Center product boundary.
-- [x] 100. **Resource Center:** Build Resource Center UI with search, filters, categories, and version-safe content.
+- [x] 100. **Resource Center:** Build Resource Center UI with search, filters, categories, and version-safe content. *(Printable-document extension 2026-07-17: approved original PDFs are retained in Mongo GridFS under ACR-0008 and exposed only through the authenticated, version-gated BA document route; extracted knowledge remains governed and triple-stacked.)*
 - [x] 101. **Resource Center:** Connect resources to training modules and event materials.
 - [x] 102. **Resource Center:** Add resource usage analytics and stale-resource warnings.
 - [x] 103. **Event Center:** Define the Event Center product boundary.

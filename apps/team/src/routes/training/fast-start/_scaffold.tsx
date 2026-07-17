@@ -117,10 +117,12 @@ export interface ModuleScaffoldProps {
   moduleId: FastStartModuleId;
   /** Optional override for the next-module suggestion. Defaults to id+1's slug. */
   nextSlug?: string | null;
+  /** Optional lesson-specific orientation shown above the module identity. */
+  heroPrelude?: ReactNode;
   children: ReactNode;
 }
 
-export function ModuleScaffold({ moduleId, nextSlug, children }: ModuleScaffoldProps) {
+export function ModuleScaffold({ moduleId, nextSlug, heroPrelude, children }: ModuleScaffoldProps) {
   const navigate = useNavigate();
   const meta = FAST_START_MODULES.find((m) => m.id === moduleId);
   if (!meta) {
@@ -179,6 +181,7 @@ export function ModuleScaffold({ moduleId, nextSlug, children }: ModuleScaffoldP
 
       <section className="relative z-10 px-6 pt-12 pb-8 border-b border-line">
         <div className="max-w-[860px] mx-auto">
+          {heroPrelude}
           <div className="flex items-center gap-3 mb-4">
             <span className="font-mono tracking-[0.35em] text-[9px] text-gold uppercase">
               {meta.eyebrow}

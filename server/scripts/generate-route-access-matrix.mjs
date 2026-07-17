@@ -22,6 +22,9 @@ const STEVE_WHITELIST = [
   '/api/cockpit/launch',
   '/api/training/fast-start/progress',
   '/api/training/fast-start/modules/1',
+  // Module 1 opens its governed source PDF before Steve completion. The
+  // document stream remains BA-authenticated and exact-version gated.
+  '/api/resources/:resourceVersionId/document',
 ];
 
 function readExistingGeneratedAt() {

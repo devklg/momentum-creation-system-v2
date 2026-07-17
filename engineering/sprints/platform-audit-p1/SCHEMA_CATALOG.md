@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-17T14:12:58.274Z
-- Mongo collections: 75
+- Generated: 2026-07-17T21:16:44.460Z
+- Mongo collections: 76
 - Neo4j labels: 84
 - Neo4j relationships: 69
 - Chroma collections: 53
 - Route modules: 49
-- Route handlers: 292
-- Shared exports: 1225
+- Route handlers: 293
+- Shared exports: 1228
 
 ## Mongo Collections
 
@@ -30,6 +30,7 @@
 | `knowledge_supersession_records` | permissive_mongoose_schema | yes | 1 |
 | `mcs_audit_log` | permissive_mongoose_schema | yes | 6 |
 | `mcs_graphrag_records` | permissive_mongoose_schema | yes | 2 |
+| `MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION` | permissive_mongoose_schema | expression | 2 |
 | `mcs_knowledge_chunks` | permissive_mongoose_schema | yes | 1 |
 | `mcs_knowledge_sources` | permissive_mongoose_schema | yes | 1 |
 | `mcs_learning_candidates` | permissive_mongoose_schema | yes | 3 |
@@ -357,7 +358,7 @@
 | `(unmounted)` | `server/src/routes/preview.ts` | GET / | none |
 | `(unmounted)` | `server/src/routes/profile.ts` | GET /<br>GET /sponsor<br>PATCH /<br>POST /password<br>POST /email/start<br>POST /email/verify<br>POST /phone | `McsProfileGetResponse` |
 | `(unmounted)` | `server/src/routes/questionnaire.ts` | GET /status<br>POST /load<br>POST /submit<br>GET user-agent | none |
-| `(unmounted)` | `server/src/routes/resources.ts` | GET /<br>POST /:resourceVersionId/usage<br>GET /:resourceVersionId | `McsResourceCenterResponse` |
+| `(unmounted)` | `server/src/routes/resources.ts` | GET /<br>POST /:resourceVersionId/usage<br>GET /:resourceVersionId/document<br>GET /:resourceVersionId | `McsResourceCenterResponse` |
 | `(unmounted)` | `server/src/routes/rvm.ts` | GET /:token<br>POST /:token/activate<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats<br>POST /:token/info-request | `McsCallbackIntent`, `McsCallbackRequestResponse`, `McsHoldingTankSnapshot`, `McsPlacementEvent`, `McsRvmInfoRequestResponse`, `McsRvmResolvedTokenPayload`, `McsTeamStatsResponse`, `McsVideoEventKind`, `McsVideoEventResponse`, `McsWebinarReservationResponse` |
 | `(unmounted)` | `server/src/routes/scriptmaker.ts` | POST /draft<br>GET user-agent | `McsScriptMakerDraftPayload`, `McsScriptMakerDraftResponse`, `McsScriptMakerDraftSelectors`, `McsScriptMakerScriptKind` |
 | `(unmounted)` | `server/src/routes/sponsor-workbook.ts` | GET /:tmagId<br>PUT /:tmagId/draft<br>POST /:tmagId/finalize | none |
@@ -702,6 +703,7 @@
 | `MCS_RESOURCE_STALE_REVIEW_DAYS` | const | `packages/shared/src/resource-center.ts` |
 | `MCS_RESOURCE_USAGE_SCHEMA_VERSION` | const | `packages/shared/src/resource-center.ts` |
 | `McsResourceCenterDetailResponse` | interface | `packages/shared/src/resource-center.ts` |
+| `McsResourceCenterDocument` | interface | `packages/shared/src/resource-center.ts` |
 | `McsResourceCenterItem` | interface | `packages/shared/src/resource-center.ts` |
 | `McsResourceCenterResponse` | interface | `packages/shared/src/resource-center.ts` |
 | `McsResourceUsageEvent` | interface | `packages/shared/src/resource-center.ts` |
@@ -845,6 +847,8 @@
 | `McsKnowledgeBaseChunkRecord` | interface | `packages/shared/src/runtime/knowledge-base-schema.ts` |
 | `McsKnowledgeBaseCollection` | type | `packages/shared/src/runtime/knowledge-base-schema.ts` |
 | `McsKnowledgeBaseCreateResult` | interface | `packages/shared/src/runtime/knowledge-base-schema.ts` |
+| `McsKnowledgeBaseDocumentPointer` | interface | `packages/shared/src/runtime/knowledge-base-schema.ts` |
+| `McsKnowledgeBaseExtractionMetadata` | interface | `packages/shared/src/runtime/knowledge-base-schema.ts` |
 | `McsKnowledgeBaseFileUploadRequest` | interface | `packages/shared/src/runtime/knowledge-base-schema.ts` |
 | `McsKnowledgeBaseIndexProjection` | interface | `packages/shared/src/runtime/knowledge-base-schema.ts` |
 | `McsKnowledgeBaseNodeLabel` | type | `packages/shared/src/runtime/knowledge-base-schema.ts` |

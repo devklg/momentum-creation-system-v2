@@ -35,6 +35,12 @@ Resource opens use the additive `resource_usage.v1` event contract and land in M
 
 An active version receives a review warning when its `updatedAt` is invalid or at least 90 days old. The warning is advisory only. It cannot publish, retire, hide, approve, reject, supersede, or change the authority status of a resource. Kevin remains the only authority over which approved knowledge enters the application.
 
+## Printable approved documents
+
+Kevin-owned or Kevin-authorized uploaded documents may retain their original binary in the app MongoDB GridFS bucket defined by ACR-0008. The Knowledge Core remains the source authority: the binary is pointer-referenced from the exact source version, is not copied into Neo4j or ChromaDB, and cannot authorize publication by itself.
+
+For an active, BA-audience `knowledge_source` version, the authenticated detail response may expose a same-origin `/api/resources/:resourceVersionId/document` target. That endpoint repeats the exact Resource Publishing Gate and canonical-source digest checks before streaming the original file inline. This lets the BA open the designed PDF and use the browser's print controls without exposing GridFS identifiers or creating a public document URL. Superseded, candidate, mismatched, unauthenticated, or non-BA-audience versions fail closed.
+
 ## Exclusions
 
 Resource Center is not:

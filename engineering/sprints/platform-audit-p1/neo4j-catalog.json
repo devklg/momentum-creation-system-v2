@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T14:12:42.018Z",
+  "generatedAt": "2026-07-17T21:16:28.128Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -36,7 +36,7 @@
       "sources": [
         "server/src/runtime/knowledge-evolution/persistence/canonicalApprovalAuthority.ts:18",
         "server/src/services/knowledge/knowledgeCorrectionStore.ts:260",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:809"
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:810"
       ]
     },
     {
@@ -124,18 +124,18 @@
       "sourceCount": 6,
       "sources": [
         "server/src/services/knowledge/approvedKnowledgeStore.ts:232",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:488",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:582",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:589",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:632",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:910"
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:489",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:583",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:590",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:633",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:911"
       ]
     },
     {
       "label": "KnowledgeCorrection",
       "sourceCount": 3,
       "sources": [
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:1037",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:1038",
         "server/src/services/knowledge/knowledgeCorrectionStore.ts:137",
         "server/src/services/knowledge/knowledgeCorrectionStore.ts:166"
       ]
@@ -153,8 +153,8 @@
       "sources": [
         "server/src/services/knowledge/approvedKnowledgeStore.ts:174",
         "server/src/services/knowledge/approvedKnowledgeStore.ts:235",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:577",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:889",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:578",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:890",
         "server/src/services/knowledge/knowledgeResourceProjection.ts:266"
       ]
     },
@@ -162,13 +162,13 @@
       "label": "KnowledgeSourceVersion",
       "sourceCount": 7,
       "sources": [
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:487",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:578",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:586",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:630",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:723",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:890",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:909"
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:488",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:579",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:587",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:631",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:724",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:891",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:910"
       ]
     },
     {
@@ -259,7 +259,7 @@
       "label": "SUPERSEDES",
       "sourceCount": 1,
       "sources": [
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:723"
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:724"
       ]
     },
     {
@@ -1091,11 +1091,11 @@
       "sourceCount": 6,
       "sources": [
         "server/src/services/knowledge/approvedKnowledgeStore.ts:236",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:488",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:584",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:589",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:632",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:914"
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:489",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:585",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:590",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:633",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:915"
       ]
     },
     {
@@ -1192,8 +1192,8 @@
         "server/src/domain/steveVersioning.ts:217",
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186",
         "server/src/services/contentVersioning.ts:149",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:580",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:894",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:581",
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:895",
         "server/src/services/knowledge/knowledgeResourceProjection.ts:261"
       ]
     },
@@ -1403,7 +1403,7 @@
       "sources": [
         "server/src/domain/outcomes.ts:218",
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:199",
-        "server/src/services/knowledge/knowledgeCorrectionStore.ts:587"
+        "server/src/services/knowledge/knowledgeCorrectionStore.ts:588"
       ]
     },
     {
