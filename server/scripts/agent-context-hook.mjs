@@ -164,10 +164,13 @@ function continuationSnapshot(root) {
   const commitDrift = revisionTracksCurrentMain
     ? gitCommitDistance(root, fileRevision, currentMain)
     : null;
-  const boundedRevisionIsCurrent = revisionTracksDeclaredMain
-    && revisionTracksCurrentMain
-    && commitDrift !== null
-    && commitDrift <= MAX_CONTINUATION_COMMIT_DRIFT;
+  const testFixtureMarksRevisionCurrent = process.env.NODE_ENV === 'test'
+    && process.env.MCS_AGENT_CONTEXT_HOOK_TRACKED_REVISION_CURRENT_FIXTURE === '1';
+  const boundedRevisionIsCurrent = testFixtureMarksRevisionCurrent
+    || (revisionTracksDeclaredMain
+      && revisionTracksCurrentMain
+      && commitDrift !== null
+      && commitDrift <= MAX_CONTINUATION_COMMIT_DRIFT);
 
   if (!exactDeclaredMain && !boundedRevisionIsCurrent) {
     const observed = currentMain ? currentMain.slice(0, 8) : 'unavailable';

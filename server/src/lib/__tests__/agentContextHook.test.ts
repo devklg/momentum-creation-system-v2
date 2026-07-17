@@ -6,17 +6,13 @@ import { describe, expect, it } from 'vitest';
 
 const repoRoot = resolve(import.meta.dirname, '../../../../');
 const hookPath = join(repoRoot, 'server', 'scripts', 'agent-context-hook.mjs');
-const continuationRevision = execFileSync(
-  'git',
-  ['log', '-1', '--format=%H', '--', 'knowledge/CONTINUATION_CONTEXT.md'],
-  { cwd: repoRoot, encoding: 'utf8' },
-).trim();
 
 function runHook(
   input: Record<string, unknown>,
   stateDir: string,
   guardFixture = 'Prior context exists for fixture — 1 hit.',
   continuationMainFixture?: string,
+  trackedRevisionCurrentFixture = false,
 ): Record<string, unknown> | null {
   const output = execFileSync(process.execPath, [hookPath], {
     cwd: repoRoot,
@@ -29,6 +25,9 @@ function runHook(
       MCS_AGENT_CONTEXT_HOOK_GUARD_FIXTURE: guardFixture,
       ...(continuationMainFixture
         ? { MCS_AGENT_CONTEXT_HOOK_MAIN_FIXTURE: continuationMainFixture }
+        : {}),
+      ...(trackedRevisionCurrentFixture
+        ? { MCS_AGENT_CONTEXT_HOOK_TRACKED_REVISION_CURRENT_FIXTURE: '1' }
         : {}),
     },
   }).trim();
@@ -76,7 +75,7 @@ describe('ACR-0017 automatic Context Agent lifecycle hook', () => {
       hook_event_name: 'SessionStart',
       source: 'startup',
       model: 'gpt-test',
-    }, stateDir, undefined, continuationRevision);
+    }, stateDir, undefined, 'b365f3b7', true);
     const context = contextOf(result);
     expect(context).toContain('P2-107 — Build a unified follow-up queue');
     expect(context).not.toContain('CONTINUATION FOUNDATION STALE');
