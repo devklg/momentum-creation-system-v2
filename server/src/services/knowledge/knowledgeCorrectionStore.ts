@@ -297,6 +297,7 @@ export class DirectKnowledgeCorrectionStore implements KnowledgeCorrectionStore 
             status: decision.status,
             decision_id: decision.decision_id,
             decided_by: decision.decided_by,
+            decided_at: decision.decided_at,
             source_id: decision.source_id,
             current_source_version_id: decision.current_source_version_id,
             expected_version: decision.expected_version,

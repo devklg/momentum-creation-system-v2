@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T14:12:53.437Z",
+  "generatedAt": "2026-07-17T21:08:43.803Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,12 +8,12 @@
   "summary": {
     "mounts": 50,
     "routeFiles": 50,
-    "routes": 256,
+    "routes": 257,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 10,
       "pre_gate": 154,
-      "ba_facing_gated": 91
+      "ba_facing_gated": 92
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
@@ -21,11 +21,11 @@
       "pre_gate_or_public": 34,
       "internal_runtime": 5,
       "prospect_token": 18,
-      "ba_auth_steve_gated": 91
+      "ba_auth_steve_gated": 92
     },
     "byMethod": {
       "POST": 100,
-      "GET": 131,
+      "GET": 132,
       "PUT": 9,
       "PATCH": 9,
       "DELETE": 7
@@ -527,7 +527,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:55",
+      "source": "server/src/routes/admin/knowledge.ts:56",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -555,7 +555,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:64",
+      "source": "server/src/routes/admin/knowledge.ts:65",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -583,7 +583,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:80",
+      "source": "server/src/routes/admin/knowledge.ts:81",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -611,7 +611,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:88",
+      "source": "server/src/routes/admin/knowledge.ts:89",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -639,7 +639,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:101",
+      "source": "server/src/routes/admin/knowledge.ts:102",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -667,7 +667,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:125",
+      "source": "server/src/routes/admin/knowledge.ts:126",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -695,7 +695,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:133",
+      "source": "server/src/routes/admin/knowledge.ts:134",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -723,7 +723,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:151",
+      "source": "server/src/routes/admin/knowledge.ts:152",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -751,7 +751,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:177",
+      "source": "server/src/routes/admin/knowledge.ts:178",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -779,7 +779,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/knowledge.ts:242",
+      "source": "server/src/routes/admin/knowledge.ts:243",
       "routeSource": "server/src/routes/admin/knowledge.ts",
       "signals": {
         "requireAuth": false,
@@ -7143,7 +7143,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/resources.ts:11",
+      "source": "server/src/routes/resources.ts:13",
       "routeSource": "server/src/routes/resources.ts",
       "signals": {
         "requireAuth": true,
@@ -7170,12 +7170,38 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/resources.ts:22",
+      "source": "server/src/routes/resources.ts:24",
       "routeSource": "server/src/routes/resources.ts",
       "signals": {
         "requireAuth": true,
         "requireAdmin": false,
         "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/resources/:resourceVersionId/document",
+      "mountPath": "/api/resources",
+      "localPath": "/:resourceVersionId/document",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/resources.ts:42",
+      "routeSource": "server/src/routes/resources.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
         "requireVmDialerAccess": false,
         "requireRuntimeInternal": false,
         "requireAdminOrHealthSecret": false,
@@ -7197,7 +7223,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/resources.ts:38",
+      "source": "server/src/routes/resources.ts:70",
       "routeSource": "server/src/routes/resources.ts",
       "signals": {
         "requireAuth": true,

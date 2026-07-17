@@ -4,16 +4,16 @@
 
 ## Summary
 
-- Generated: 2026-07-17T14:12:53.437Z
+- Generated: 2026-07-17T21:08:43.803Z
 - Mounted routers: 50
 - Route files: 50
-- Static route rows: 256
+- Static route rows: 257
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
-| ba_facing_gated | 91 |
+| ba_facing_gated | 92 |
 | pre_gate | 154 |
 | pre_json_admin_body_limit | 10 |
 | raw_body_before_json | 1 |
@@ -23,7 +23,7 @@
 | Access profile | Routes |
 | --- | ---: |
 | admin | 107 |
-| ba_auth_steve_gated | 91 |
+| ba_auth_steve_gated | 92 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 34 |
 | prospect_token | 18 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 7 |
-| GET | 131 |
+| GET | 132 |
 | PATCH | 9 |
 | POST | 100 |
 | PUT | 9 |
@@ -99,16 +99,16 @@
 | Method | Full path | Phase | Access profile | Guard signals | Source |
 | --- | --- | --- | --- | --- | --- |
 | POST | `/api/telnyx/webhook` | raw_body_before_json | raw_body_webhook | raw-body | `server/src/routes/telnyx-webhook.ts:14` |
-| GET | `/api/admin/knowledge/status` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:55` |
-| GET | `/api/admin/knowledge/source-versions` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:64` |
-| GET | `/api/admin/knowledge/source-versions/:sourceVersionId` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:80` |
-| POST | `/api/admin/knowledge/source-versions/:sourceVersionId/corrections/preview` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:88` |
-| POST | `/api/admin/knowledge/source-versions/:sourceVersionId/corrections` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:101` |
-| GET | `/api/admin/knowledge/corrections/:correctionId` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:125` |
-| POST | `/api/admin/knowledge/corrections/:correctionId/retry` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:133` |
-| POST | `/api/admin/knowledge/corrections/:correctionId/rollback` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:151` |
-| POST | `/api/admin/knowledge/sources` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:177` |
-| POST | `/api/admin/knowledge/sources/upload` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:242` |
+| GET | `/api/admin/knowledge/status` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:56` |
+| GET | `/api/admin/knowledge/source-versions` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:65` |
+| GET | `/api/admin/knowledge/source-versions/:sourceVersionId` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:81` |
+| POST | `/api/admin/knowledge/source-versions/:sourceVersionId/corrections/preview` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:89` |
+| POST | `/api/admin/knowledge/source-versions/:sourceVersionId/corrections` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:102` |
+| GET | `/api/admin/knowledge/corrections/:correctionId` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:126` |
+| POST | `/api/admin/knowledge/corrections/:correctionId/retry` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:134` |
+| POST | `/api/admin/knowledge/corrections/:correctionId/rollback` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:152` |
+| POST | `/api/admin/knowledge/sources` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:178` |
+| POST | `/api/admin/knowledge/sources/upload` | pre_json_admin_body_limit | admin | admin | `server/src/routes/admin/knowledge.ts:243` |
 | GET | `/api/health/` | pre_gate | pre_gate_or_public | none | `server/src/routes/health.ts:7` |
 | GET | `/api/health/persistence` | pre_gate | pre_gate_or_public | none | `server/src/routes/health.ts:15` |
 | POST | `/api/auth/verify-code` | pre_gate | pre_gate_or_public | rate-limit | `server/src/routes/auth.ts:23` |
@@ -350,7 +350,8 @@
 | POST | `/api/three-way/bookings/:id/cancel` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/three-way.ts:110` |
 | POST | `/api/michael-runtime/resolve` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/michael-runtime.ts:245` |
 | GET | `/api/content/videos` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/content-videos.ts:16` |
-| GET | `/api/resources/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:11` |
-| POST | `/api/resources/:resourceVersionId/usage` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:22` |
-| GET | `/api/resources/:resourceVersionId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:38` |
+| GET | `/api/resources/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:13` |
+| POST | `/api/resources/:resourceVersionId/usage` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:24` |
+| GET | `/api/resources/:resourceVersionId/document` | ba_facing_gated | ba_auth_steve_gated | auth | `server/src/routes/resources.ts:42` |
+| GET | `/api/resources/:resourceVersionId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/resources.ts:70` |
 | GET | `/api/events/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/events.ts:8` |

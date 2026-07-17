@@ -31,6 +31,15 @@ export interface McsResourceCenterDetailResponse {
   schemaVersion: typeof MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION;
   item: McsResourceCenterItem;
   content: string;
+  document: McsResourceCenterDocument | null;
+}
+
+export interface McsResourceCenterDocument {
+  filename: string;
+  mimeType: string;
+  originalBytes: number;
+  sha256: string;
+  openTarget: string;
 }
 
 export const MCS_RESOURCE_USAGE_SCHEMA_VERSION = 'resource_usage.v1' as const;

@@ -266,6 +266,9 @@ importers:
       mammoth:
         specifier: ^1.12.0
         version: 1.12.0
+      mongodb:
+        specifier: 7.2.0
+        version: 7.2.0
       mongoose:
         specifier: 9.7.3
         version: 9.7.3

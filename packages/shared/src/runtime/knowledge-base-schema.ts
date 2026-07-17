@@ -66,12 +66,31 @@ export interface McsKnowledgeBaseAuthorityResolution {
 
 export type McsKnowledgeBaseUploadFormat = McsKnowledgeIntakeFormat;
 
+export interface McsKnowledgeBaseDocumentPointer {
+  storage: 'mongo_gridfs';
+  bucketName: string;
+  fileId: string;
+  filename: string;
+  mimeType: string;
+  originalBytes: number;
+  sha256: string;
+  uploadedAt: string;
+}
+
+export interface McsKnowledgeBaseExtractionMetadata {
+  engine: 'docling' | 'pdf_parse' | 'mammoth' | 'plain_text';
+  documentKey?: string;
+  extractedAt: string;
+}
+
 export interface McsKnowledgeBaseUploadMetadata {
   filename?: string;
   mimeType?: string;
   originalBytes?: number;
   extractedCharacters?: number;
   sourceRef?: string;
+  document?: McsKnowledgeBaseDocumentPointer;
+  extraction?: McsKnowledgeBaseExtractionMetadata;
 }
 
 export interface McsKnowledgeBaseTextUploadRequest {

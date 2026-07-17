@@ -32,6 +32,7 @@ import {
   KnowledgeCorrectionWorkflowError,
 } from '../../services/knowledge/knowledgeCorrectionWorkflow.js';
 import { knowledgeCorrectionStore } from '../../services/knowledge/knowledgeCorrectionStore.js';
+import { attachKnowledgeDocumentToSource } from '../../services/knowledge/knowledgeDocumentStorage.js';
 
 export const adminKnowledgeRoutes: Router = Router();
 
@@ -311,6 +312,17 @@ adminKnowledgeRoutes.post('/sources/upload', requireAdmin, async (req, res) => {
       },
       ...(agentScopes ? { agentScopes } : {}),
     });
+    const document = await attachKnowledgeDocumentToSource({
+      sourceId: String(result.source.sourceId),
+      sourceVersion: result.source.version,
+      filename,
+      mimeType: mimeType ?? defaultMimeType(extracted.kind),
+      bytes,
+      extraction: {
+        engine: extracted.kind === 'pdf' ? 'pdf_parse' : extracted.kind === 'docx' ? 'mammoth' : 'plain_text',
+        extractedAt: new Date().toISOString(),
+      },
+    });
 
     return res.status(201).json({
       ok: true,
@@ -326,6 +338,7 @@ adminKnowledgeRoutes.post('/sources/upload', requireAdmin, async (req, res) => {
       graphRagRecordCount: result.graphRagRecordCount,
       graphRagFailureCount: result.graphRagFailureCount,
       resourceCatalogProjection: result.resourceCatalogProjection,
+      document,
     });
   } catch (err) {
     if (err instanceof KnowledgeFileExtractionError) {
@@ -345,6 +358,16 @@ function isBase64Payload(value: string): boolean {
 function titleFromFilename(filename: string): string {
   const name = filename.replace(/^.*[\\/]/, '').replace(/\.[^.]+$/, '').trim();
   return name.slice(0, MAX_TITLE);
+}
+
+function defaultMimeType(kind: McsKnowledgeIntakeFormat): string {
+  if (kind === 'pdf') return 'application/pdf';
+  if (kind === 'docx') return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  if (kind === 'json') return 'application/json';
+  if (kind === 'html') return 'text/html; charset=utf-8';
+  if (kind === 'csv') return 'text/csv; charset=utf-8';
+  if (kind === 'markdown') return 'text/markdown; charset=utf-8';
+  return 'text/plain; charset=utf-8';
 }
 
 function pathParam(value: string | string[] | undefined): string {

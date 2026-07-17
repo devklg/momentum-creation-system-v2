@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { ArrowLeft, BookOpen, Printer } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 
 interface ResourceDetail {
@@ -15,6 +15,13 @@ interface ResourceDetail {
     updatedAt: string;
   };
   content: string;
+  document: {
+    filename: string;
+    mimeType: string;
+    originalBytes: number;
+    sha256: string;
+    openTarget: string;
+  } | null;
 }
 
 export function ResourceDetailPage() {
@@ -65,6 +72,16 @@ export function ResourceDetailPage() {
                 <div className="mt-6 flex flex-wrap gap-2">
                   {detail.item.categories.map((category) => <span key={category} className="rounded-full border border-line px-3 py-1 font-mono text-[9px] uppercase tracking-[0.1em] text-cream-faint">{category}</span>)}
                 </div>
+              )}
+              {detail.document && (
+                <a
+                  className="mt-7 inline-flex items-center gap-2 rounded-sm bg-gold px-5 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ink transition hover:bg-gold-bright"
+                  href={detail.document.openTarget}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Printer className="h-4 w-4" aria-hidden="true" /> Open / Print PDF
+                </a>
               )}
             </header>
             <div className="whitespace-pre-wrap px-6 py-8 text-[15px] leading-7 text-cream-mute md:px-10 md:py-10">{detail.content}</div>

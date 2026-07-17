@@ -68,6 +68,7 @@ export const MCS_TRAINING_MODULE_CATALOG: readonly McsTrainingModuleCatalogEntry
     contentSources: [
       'apps/team/src/routes/training/fast-start/product.tsx',
       'packages/shared/src/product-catalog.ts',
+      'docs/training-sources.md#6-the-pdr-position-required-product-training-foundation',
       'docs/training-sources.md#3-glp-three-scientific-dossier-official-three',
     ],
     routes: {
