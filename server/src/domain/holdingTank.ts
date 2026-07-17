@@ -66,7 +66,7 @@ export const TEAM_POOL_ID = 'tm_team_pool';
  * $inc path. This collapses to at most one extra round trip during the
  * very-first placement; steady state is one $inc + one query.
  */
-async function incrementPoolCounter(): Promise<number> {
+export async function incrementPoolCounter(): Promise<number> {
   // Try $inc first. If counter doc exists, this is the entire happy path.
   // The PERSISTENCE returns matchedCount/modifiedCount; we then read to learn
   // the new value.
@@ -312,7 +312,7 @@ export async function buildHoldingTankSnapshot(
  * Returns 0 if the counter doc has not been seeded yet (no placements
  * have happened ever).
  */
-async function readPoolCounter(): Promise<number> {
+export async function readPoolCounter(): Promise<number> {
   const result = await persistenceCall<{ documents: Array<{ current: number }> }>(
     'mongodb',
     'query',

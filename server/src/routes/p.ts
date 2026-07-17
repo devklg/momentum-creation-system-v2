@@ -31,9 +31,9 @@ import type {
   McsExpiredResponse,
   McsResolvedTokenPayload,
   McsVideoEventKind,
-  McsVideoEventPayload,
-  McsVideoEventResponse,
   McsTokenState,
+  McsKongaVideoEventPayload,
+  McsKongaVideoEventResponse,
 } from '@momentum/shared';
 import {
   findTokenRecord,
@@ -43,7 +43,18 @@ import {
 } from '../domain/tokens.js';
 import { findProspectById, lastInitialOf } from '../domain/prospects.js';
 import { findBAByTmagId, type BARecord } from '../domain/ba.js';
-import { buildHoldingTankSnapshot, placeProspect } from '../domain/holdingTank.js';
+import { buildHoldingTankSnapshot, readPoolCounter } from '../domain/holdingTank.js';
+import { placeKongaProspect } from '../domain/kongaPlacement.js';
+import { buildKongaSnapshot } from '../domain/kongaTelemetry.js';
+import {
+  isPageVisitUuid,
+  observeKongaPageVisit,
+  readKongaPageVisit,
+} from '../domain/kongaVisits.js';
+import {
+  readCurrentKongaReplay,
+  recordKongaReplayCompletion,
+} from '../domain/kongaReplay.js';
 import { createCallbackRequest } from '../domain/callbackRequest.js';
 import { alertBaVideoCompleted } from '../domain/invitations.js';
 import { findNextUpcomingEvent } from '../domain/webinarEvent.js';
@@ -53,7 +64,11 @@ import {
   attachPhoneOnConsent,
   createProspectAccount,
 } from '../domain/prospectAccount.js';
-import { subscribePlacements } from '../services/poolEvents.js';
+import {
+  subscribeJoins,
+  subscribeKongaPlacements,
+  subscribePlacements,
+} from '../services/poolEvents.js';
 import {
   readMasterContent,
   readMasterTemplate,
@@ -62,6 +77,8 @@ import {
 import type {
   McsComProspectCopy,
   McsHoldingTankSnapshot,
+  McsJoinEvent,
+  McsKongaPlacementEvent,
   McsPlacementEvent,
   McsTeamStatsResponse,
   McsWebinarReservationPayload,
@@ -224,7 +241,11 @@ async function resolveComProspectCopy(args: {
 
 prospectTokenRoutes.get('/:token', async (req, res) => {
   const { token } = req.params;
+  const pageVisitId = typeof req.query.pageVisitId === 'string' ? req.query.pageVisitId : null;
 
+  if (pageVisitId !== null && !isPageVisitUuid(pageVisitId)) {
+    return res.status(400).json({ error: 'invalid_page_visit_id' });
+  }
   if (!token || token.length < 4) {
     return res.status(404).json({ error: 'invalid_token' });
   }
@@ -326,6 +347,25 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
       positionNumber: prospect.positionNumber,
     });
 
+    if (pageVisitId) {
+      const [globalMaxPosition, replay] = await Promise.all([
+        readPoolCounter(),
+        readCurrentKongaReplay(),
+      ]);
+      await observeKongaPageVisit({
+        token: tokenRecord.token,
+        pageVisitId,
+        globalMaxPosition,
+      });
+      return res.status(200).json({
+        ...payload,
+        copy,
+        contractVersion: 'konga-v1',
+        pageVisitId,
+        replay,
+      });
+    }
+
     return res.status(200).json({ ...payload, copy });
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -383,13 +423,24 @@ const KIND_TO_STATE: Record<McsVideoEventKind, McsTokenState> = {
 
 prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
   const { token } = req.params;
-  const body = req.body as Partial<McsVideoEventPayload>;
+  const body = req.body as Partial<McsKongaVideoEventPayload>;
 
   if (!token || token.length < 4) {
     return res.status(404).json({ error: 'invalid_token' });
   }
-  if (!body?.kind || !VIDEO_EVENT_KINDS.includes(body.kind)) {
+  const replayComplete = body?.kind === 'replay_complete';
+  if (
+    !body?.kind ||
+    (!replayComplete && !VIDEO_EVENT_KINDS.includes(body.kind as McsVideoEventKind))
+  ) {
     return res.status(400).json({ error: 'invalid_kind' });
+  }
+  if (
+    replayComplete &&
+    (typeof (body as { replayEventId?: unknown }).replayEventId !== 'string' ||
+      typeof (body as { resourceVersionId?: unknown }).resourceVersionId !== 'string')
+  ) {
+    return res.status(400).json({ error: 'invalid_replay_binding' });
   }
 
   try {
@@ -416,9 +467,26 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
       return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
     }
 
-    // Forward-only state transition. If the inbound event is stale this
-    // returns the unchanged state and we still return the current position
-    // (if any) so the client converges.
+    if (body.kind === 'replay_complete') {
+      const replayBody = body as Extract<McsKongaVideoEventPayload, { kind: 'replay_complete' }>;
+      const completion = await recordKongaReplayCompletion({
+        token: tokenRecord.token,
+        replayEventId: replayBody.replayEventId,
+        resourceVersionId: replayBody.resourceVersionId,
+      });
+      const prospect = await findProspectById(tokenRecord.prospectId);
+      const response: McsKongaVideoEventResponse = {
+        token,
+        state: tokenRecord.state,
+        positionNumber: prospect?.positionNumber ?? null,
+        placedAt: prospect?.placedAt ?? null,
+        contractVersion: 'konga-v1',
+        replayCompletion: completion,
+      };
+      return res.status(200).json(response);
+    }
+
+    // Presentation milestones alone enter the forward lifecycle rail.
     const targetState = KIND_TO_STATE[body.kind];
     const transition = await transitionTokenState(token, targetState);
 
@@ -436,9 +504,10 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
         return res.status(404).json({ error: 'invalid_token' });
       }
 
-      const result = await placeProspect({
+      const result = await placeKongaProspect({
         prospectId: prospect.prospectId,
         sponsorTmagId: tokenRecord.sponsorTmagId,
+        invitationRecordId: tokenRecord.token,
         prospectExpiresAt: prospect.expiresAt,
         firstName: prospect.firstName,
         lastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),
@@ -495,11 +564,13 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
       placedAt = prospect?.placedAt ?? null;
     }
 
-    const response: McsVideoEventResponse = {
+    const response: McsKongaVideoEventResponse = {
       token,
       state: transition.state,
       positionNumber,
       placedAt,
+      contractVersion: 'konga-v1',
+      replayCompletion: null,
     };
     return res.status(200).json(response);
   } catch (err) {
@@ -646,6 +717,36 @@ prospectTokenRoutes.post('/:token/callback-request', async (req, res) => {
   }
 });
 
+prospectTokenRoutes.get('/:token/replay', async (req, res) => {
+  const { token } = req.params;
+  if (!token || token.length < 4) return res.status(404).json({ error: 'invalid_token' });
+  try {
+    const tokenRecord = await findTokenRecord(token);
+    if (!tokenRecord) return res.status(404).json({ error: 'invalid_token' });
+    if (tokenRecord.state === 'enrolled') {
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
+      return ba
+        ? res.status(409).json(buildEnrolledResponse(ba))
+        : res.status(404).json({ error: 'invalid_token' });
+    }
+    if (tokenRecord.state === 'expired' || isTokenExpired(tokenRecord)) {
+      if (tokenRecord.state !== 'expired') await transitionTokenState(token, 'expired');
+      const ba = await findSponsorBA(tokenRecord.sponsorTmagId);
+      return ba
+        ? res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt))
+        : res.status(404).json({ error: 'invalid_token' });
+    }
+    return res.status(200).json({
+      ok: true,
+      contractVersion: 'konga-v1',
+      replay: await readCurrentKongaReplay(),
+    });
+  } catch (error) {
+    console.error('[GET /api/p/:token/replay] failed', error);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
 /**
  * GET /api/p/:token/stream — the live placement SSE channel
  * (Chat #114 dashboard port — recovered architecture from Chat #84/#94).
@@ -688,6 +789,10 @@ function sseFrame(event: string, data: unknown, id?: string): string {
 
 prospectTokenRoutes.get('/:token/stream', async (req, res) => {
   const { token } = req.params;
+  const pageVisitId = typeof req.query.pageVisitId === 'string' ? req.query.pageVisitId : null;
+  if (pageVisitId !== null && !isPageVisitUuid(pageVisitId)) {
+    return res.status(400).json({ error: 'invalid_page_visit_id' });
+  }
   if (!token || token.length < 4) {
     return res.status(404).json({ error: 'invalid_token' });
   }
@@ -723,6 +828,13 @@ prospectTokenRoutes.get('/:token/stream', async (req, res) => {
     return res.status(410).json(buildExpiredResponse(ba, tokenRecord.expiresAt));
   }
 
+  const pageVisit = pageVisitId
+    ? await readKongaPageVisit(tokenRecord.token, pageVisitId)
+    : null;
+  if (pageVisitId && !pageVisit) {
+    return res.status(409).json({ error: 'page_visit_not_observed' });
+  }
+
   // Flip to SSE.
   res.status(200);
   res.setHeader('Content-Type', 'text/event-stream');
@@ -733,10 +845,23 @@ prospectTokenRoutes.get('/:token/stream', async (req, res) => {
 
   // Send the initial snapshot.
   try {
-    const snapshot: McsHoldingTankSnapshot = await buildHoldingTankSnapshot(
+    const legacySnapshot: McsHoldingTankSnapshot = await buildHoldingTankSnapshot(
       SSE_SNAPSHOT_RECENT_LIMIT,
     );
-    res.write(sseFrame('snapshot', snapshot));
+    if (pageVisitId && pageVisit) {
+      const [nextWebinar, snapshot] = await Promise.all([
+        findNextUpcomingEvent(),
+        buildKongaSnapshot({
+          legacy: legacySnapshot,
+          pageVisitId,
+          sinceLastVisit: pageVisit.sinceLastVisit,
+          nextWebinar: null,
+        }),
+      ]);
+      res.write(sseFrame('snapshot', { ...snapshot, nextWebinar }));
+    } else {
+      res.write(sseFrame('snapshot', legacySnapshot));
+    }
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[SSE :token/stream] snapshot failed', err);
@@ -746,14 +871,18 @@ prospectTokenRoutes.get('/:token/stream', async (req, res) => {
   }
 
   // Subscribe to live placements; serialize each one onto the wire.
-  const sub = subscribePlacements((event: McsPlacementEvent) => {
-    try {
-      res.write(sseFrame('placement', event, event.eventId));
-    } catch {
-      // Write to a closed socket throws; the `close` handler below will
-      // tear down the subscription on the next tick.
-    }
-  });
+  const sub = pageVisitId
+    ? subscribeKongaPlacements((event: McsKongaPlacementEvent) => {
+        try { res.write(sseFrame('placement', event, event.eventId)); } catch { /* close handles cleanup */ }
+      })
+    : subscribePlacements((event: McsPlacementEvent) => {
+        try { res.write(sseFrame('placement', event, event.eventId)); } catch { /* close handles cleanup */ }
+      });
+  const joinSub = pageVisitId
+    ? subscribeJoins((event: McsJoinEvent) => {
+        try { res.write(sseFrame('join', event, event.eventId)); } catch { /* close handles cleanup */ }
+      })
+    : null;
 
   // Heartbeat. SSE comments (lines starting with `:`) are ignored by the
   // EventSource API but keep proxies alive.
@@ -768,6 +897,7 @@ prospectTokenRoutes.get('/:token/stream', async (req, res) => {
   const teardown = () => {
     clearInterval(heartbeat);
     sub.unsubscribe();
+    joinSub?.unsubscribe();
   };
   req.on('close', teardown);
   req.on('aborted', teardown);

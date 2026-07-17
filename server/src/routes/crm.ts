@@ -54,6 +54,10 @@ import {
   setDisposition,
   setFollowUp,
 } from '../domain/crm.js';
+import {
+  attestKongaEnrollment,
+  KongaEnrollmentError,
+} from '../domain/kongaEnrollment.js';
 
 export const crmRoutes: Router = Router();
 
@@ -425,3 +429,75 @@ crmRoutes.delete('/:prospectId', requireAuth, requireSteveComplete, async (req, 
 // from /admin (adminRestoreProspect + POST /api/admin/prospects/:id/restore).
 // The BA-scoped restore wrapper and this route were removed deliberately;
 // the admin engine restore stays intact.
+
+const KongaEnrollmentSchema = {
+  parse(body: unknown): {
+    enrolleeTmagId: string;
+    legPlacement: 'left' | 'right' | 'core3';
+    offAppEnrollmentComplete: true;
+    legPlacementComplete: true;
+  } {
+    const value = (body ?? {}) as Record<string, unknown>;
+    const leg = value.legPlacement;
+    if (
+      typeof value.enrolleeTmagId !== 'string' ||
+      !['left', 'right', 'core3'].includes(String(leg)) ||
+      value.offAppEnrollmentComplete !== true ||
+      value.legPlacementComplete !== true
+    ) {
+      throw new Error('invalid_enrollment_attestation');
+    }
+    return {
+      enrolleeTmagId: value.enrolleeTmagId,
+      legPlacement: leg as 'left' | 'right' | 'core3',
+      offAppEnrollmentComplete: true,
+      legPlacementComplete: true,
+    };
+  },
+};
+
+/**
+ * A registration or CRM disposition is intentionally insufficient. This
+ * authenticated human route is the only BA path that can attest an off-app
+ * enrollment plus a real leg placement and therefore emit a public join.
+ */
+crmRoutes.post(
+  '/:prospectId/enrollment-attestation',
+  requireAuth,
+  requireSteveComplete,
+  async (req, res) => {
+    const sponsorTmagId = req.session?.tmagId;
+    if (!sponsorTmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    const prospectId = getProspectId(req);
+    if (!prospectId) return res.status(400).json({ ok: false, error: 'missing_prospect_id' });
+    try {
+      const body = KongaEnrollmentSchema.parse(req.body);
+      const result = await attestKongaEnrollment({
+        prospectId,
+        sponsorTmagId,
+        enrolleeTmagId: body.enrolleeTmagId,
+        actorTmagId: sponsorTmagId,
+        actorKind: 'sponsor',
+        legPlacement: body.legPlacement,
+        offAppEnrollmentComplete: body.offAppEnrollmentComplete,
+        legPlacementComplete: body.legPlacementComplete,
+      });
+      return res.status(200).json({
+        ok: true,
+        attestationId: result.attestationId,
+        joinedAt: result.event.joinedAt,
+        alreadyAttested: result.alreadyAttested,
+      });
+    } catch (error) {
+      if (error instanceof KongaEnrollmentError) {
+        const status = error.code === 'exact_live_linkage_required' ? 409 : 400;
+        return res.status(status).json({ ok: false, error: error.code });
+      }
+      if (error instanceof Error && error.message === 'invalid_enrollment_attestation') {
+        return res.status(400).json({ ok: false, error: error.message });
+      }
+      console.error('[POST /api/crm/:prospectId/enrollment-attestation] failed', error);
+      return res.status(500).json({ ok: false, error: 'server_error' });
+    }
+  },
+);

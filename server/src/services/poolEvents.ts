@@ -27,9 +27,10 @@
  */
 
 import { EventEmitter } from 'node:events';
-import type { McsPlacementEvent } from '@momentum/shared';
+import type { McsJoinEvent, McsKongaPlacementEvent, McsPlacementEvent } from '@momentum/shared';
 
 export const POOL_EVENT_PLACEMENT = 'placement' as const;
+export const POOL_EVENT_JOIN = 'join' as const;
 
 /**
  * Process-wide pool event emitter. setMaxListeners is raised because
@@ -94,6 +95,42 @@ export function subscribePlacements(
  */
 export function activePlacementSubscriberCount(): number {
   return bus.listenerCount(POOL_EVENT_PLACEMENT);
+}
+
+export function subscribeKongaPlacements(
+  handler: (event: McsKongaPlacementEvent) => void,
+): PlacementSubscription {
+  const guarded = (event: McsPlacementEvent | McsKongaPlacementEvent) => {
+    if ('contractVersion' in event && 'addedBy' in event) handler(event);
+  };
+  bus.on(POOL_EVENT_PLACEMENT, guarded);
+  let detached = false;
+  return {
+    unsubscribe: () => {
+      if (detached) return;
+      detached = true;
+      bus.off(POOL_EVENT_PLACEMENT, guarded);
+    },
+  };
+}
+
+export function publishJoin(event: McsJoinEvent): void {
+  recordEvent();
+  bus.emit(POOL_EVENT_JOIN, event);
+}
+
+export function subscribeJoins(
+  handler: (event: McsJoinEvent) => void,
+): PlacementSubscription {
+  bus.on(POOL_EVENT_JOIN, handler);
+  let detached = false;
+  return {
+    unsubscribe: () => {
+      if (detached) return;
+      detached = true;
+      bus.off(POOL_EVENT_JOIN, handler);
+    },
+  };
 }
 
 /* ── /admin Live Operations H.1 — additive surface (Chat #144) ──────

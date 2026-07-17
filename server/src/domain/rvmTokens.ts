@@ -26,7 +26,7 @@ import {
   createOrUpdateCrmRecordForToken,
   findCrmRecordByProspectId,
 } from './prospectCrm.js';
-import { placeProspect } from './holdingTank.js';
+import { placeKongaProspect } from './kongaPlacement.js';
 import { findNextUpcomingEvent } from './webinarEvent.js';
 
 const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/1IZiV7RXdCY';
@@ -184,9 +184,10 @@ export async function recordRvmVideoEvent(
   }
 
   if (kind === 'complete') {
-    const result = await placeProspect({
+    const result = await placeKongaProspect({
       prospectId: prospect.prospectId,
       sponsorTmagId: tokenRecord.sponsorTmagId,
+      invitationRecordId: tokenRecord.token,
       prospectExpiresAt: prospect.expiresAt,
       firstName: prospect.firstName,
       lastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),

@@ -9,6 +9,7 @@ import {
   recordWebinarAttendance,
 } from '../../domain/eventAttendance.js';
 import { requireAdmin } from '../../middleware/requireAuth.js';
+import { rotateKongaReplay } from '../../domain/kongaReplay.js';
 
 export const adminEventRoutes: Router = Router();
 
@@ -97,3 +98,50 @@ adminEventRoutes.post(
     }
   },
 );
+
+const ReplayRotationSchema = z.object({
+  eventId: z.string().min(1).max(200),
+  resourceVersionId: z.string().min(1).max(240),
+  recordedAt: z.string().datetime(),
+  availableAt: z.string().datetime(),
+  displayDate: z.string().min(1).max(120),
+}).strict();
+
+adminEventRoutes.post('/webinars/replay-rotation', requireAdmin, async (req, res) => {
+  const parsed = ReplayRotationSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: 'invalid_replay_rotation' });
+  }
+  try {
+    const actor = adminActor(req);
+    const replay = await rotateKongaReplay({
+      ...parsed.data,
+      authorizedByTmagId: actor.tmagId,
+    });
+    await appendAuditEntry({
+      actor,
+      action: 'admin.events.konga_replay_rotated',
+      entity: { kind: 'admin_session', id: actor.tmagId, displayLabel: replay.displayDate },
+      severity: 'critical',
+      after: {
+        eventId: replay.eventId,
+        resourceVersionId: replay.resourceVersionId,
+        availableAt: replay.availableAt,
+        publicationStatus: replay.publicationStatus,
+      },
+      reason: 'Authorized Konga replay pointer rotation.',
+      context: {
+        ip: req.ip ?? null,
+        userAgent: req.get('user-agent') ?? null,
+        route: '/api/admin/events/webinars/replay-rotation',
+        method: 'POST',
+        requestId: null,
+      },
+    });
+    return res.status(201).json({ ok: true, replay });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'server_error';
+    const status = message.startsWith('konga_replay_') ? 409 : 500;
+    return res.status(status).json({ ok: false, error: message });
+  }
+});
