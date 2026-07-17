@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-17T22:42:35.904Z",
+  "generatedAt": "2026-07-17T23:35:56.831Z",
   "scope": "apps/com/src visible strings plus shared compliance constants",
   "summary": {
-    "filesScanned": 34,
-    "visibleStringsScanned": 411,
+    "filesScanned": 38,
+    "visibleStringsScanned": 483,
     "blockingViolations": 0,
-    "allowedSignals": 68,
+    "allowedSignals": 71,
     "status": "pass",
     "allowedSignalsByRule": {
-      "glp_three_product_context": 13,
+      "glp_three_product_context": 14,
       "public_market_or_cost_context": 7,
       "team_goal_context": 5,
-      "pmv_language_context": 17,
-      "placement_demo_context": 24,
+      "pmv_language_context": 18,
+      "placement_demo_context": 25,
       "canonical_disclaimer": 2
     }
   },
@@ -76,6 +76,14 @@
   ],
   "violations": [],
   "allowedSignals": [
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "line": 115,
+      "text": "Team Magnificent provides informational presentations about the GLP-THREE product and the Team Magnificent business-building system, a personal dashboard including a live team activity display, and tools to request a conversation with the team member who invited you."
+    },
     {
       "ruleId": "glp_three_product_context",
       "severity": "allowed",
@@ -280,6 +288,14 @@
       "ruleId": "pmv_language_context",
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "line": 152,
+      "text": "Activity shown on the Service (names, cities, placements, joins) reflects real events from real people. Your first name and city/state may appear in this display; your contact information never does."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/p-login.tsx",
       "line": 139,
       "text": "We only text people whose phone was used to invite them and who have asked for their sponsor to reach out. If that's not you, ask whoever invited you for a fresh link."
@@ -411,6 +427,14 @@
       "file": "packages/shared/src/compliance.ts",
       "line": 22,
       "text": "Queue positions and momentum displays demonstrate team activity in real time and"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "line": 37,
+      "text": "Service activity: video viewing progress, page visits, position and activity in the live team display, and callback requests you submit."
     },
     {
       "ruleId": "placement_demo_context",
@@ -699,6 +723,390 @@
       "lineNumber": 8,
       "kind": "literal",
       "text": "root element missing"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 23,
+      "kind": "literal:title",
+      "text": "Privacy Policy — Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 24,
+      "kind": "literal:effectiveDate",
+      "text": "July 17, 2026 · teammagnificent.com"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 29,
+      "kind": "literal",
+      "text": "Team Magnificent (\"we,\" \"us\") operates teammagnificent.com and related services, including video presentations, live team activity displays, and call/text coordination (the \"Service\"). This policy explains what we collect, how we use it, and the choices you have."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 34,
+      "kind": "literal:heading",
+      "text": "Information We Collect"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 36,
+      "kind": "literal",
+      "text": "Information you or the team member who invited you provide: first and last name, phone number, email address, and city/state."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 37,
+      "kind": "literal",
+      "text": "Service activity: video viewing progress, page visits, position and activity in the live team display, and callback requests you submit."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 38,
+      "kind": "literal",
+      "text": "Technical basics: device, browser, and log information used to operate and secure the Service."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 43,
+      "kind": "literal:heading",
+      "text": "How We Use Information"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 45,
+      "kind": "literal",
+      "text": "To deliver what you asked for: the presentation video link, your personal dashboard, and scheduling of requested conversations."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 46,
+      "kind": "literal",
+      "text": "To operate the live team display. Only your FIRST NAME and general location (city/state) appear in activity visible to others; your contact information is never displayed."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 47,
+      "kind": "literal",
+      "text": "To send text messages you have consented to receive (see Text Messaging below)."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 48,
+      "kind": "literal",
+      "text": "To operate, secure, and improve the Service and meet legal obligations."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 53,
+      "kind": "literal:heading",
+      "text": "Text Messaging (SMS)"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 55,
+      "kind": "literal",
+      "text": "By submitting your phone number and checking the consent box, or by texting or calling us first, you agree to receive text messages from Team Magnificent related to your request. Message frequency varies. Message and data rates may apply. Reply STOP to end messages, HELP for help. Consent is not a condition of any purchase."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 60,
+      "kind": "literal:heading",
+      "text": "We Do Not Sell or Share Your Information"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 62,
+      "kind": "literal",
+      "text": "Your mobile information will not be sold or shared with third parties for promotional or marketing purposes."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 63,
+      "kind": "literal",
+      "text": "More broadly, we do not sell your personal information, and we do not share it with third parties for their own marketing. Information is shared only with:"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 66,
+      "kind": "literal",
+      "text": "the Team Magnificent member who invited you (so they can follow up on your request);"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 67,
+      "kind": "literal",
+      "text": "service providers who operate the platform for us (hosting, database, telecommunications), bound to use it only on our behalf; and"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 68,
+      "kind": "literal",
+      "text": "authorities when required by law."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 73,
+      "kind": "literal:heading",
+      "text": "Retention & Your Choices"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 75,
+      "kind": "literal",
+      "text": "We keep information only as long as needed for the purposes above. You may request access to or deletion of your information, or withdraw consent, at any time by emailing support@teammagnificent.com. Opting out of texts (STOP) is honored immediately."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 81,
+      "kind": "literal",
+      "text": "The Service is intended for adults and is not directed to anyone under 18."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 86,
+      "kind": "literal",
+      "text": "We use reasonable technical and administrative safeguards to protect your information."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 91,
+      "kind": "literal",
+      "text": "We will post any changes to this policy on this page with a new effective date."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 96,
+      "kind": "literal:organization",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 97,
+      "kind": "literal:email",
+      "text": "support@teammagnificent.com"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 98,
+      "kind": "literal:streetAddress",
+      "text": "1770 Litchfield Dr, Banning, CA 92220"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 104,
+      "kind": "literal:title",
+      "text": "Terms of Service — Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 105,
+      "kind": "literal:effectiveDate",
+      "text": "July 17, 2026 · teammagnificent.com"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 109,
+      "kind": "literal",
+      "text": "By using teammagnificent.com (the \"Service\"), you agree to these Terms."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 113,
+      "kind": "literal:heading",
+      "text": "The Service"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 115,
+      "kind": "literal",
+      "text": "Team Magnificent provides informational presentations about the GLP-THREE product and the Team Magnificent business-building system, a personal dashboard including a live team activity display, and tools to request a conversation with the team member who invited you."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 121,
+      "kind": "literal",
+      "text": "You must be 18 or older to use the Service."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 125,
+      "kind": "literal:heading",
+      "text": "No Guarantees"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 127,
+      "kind": "literal",
+      "text": "Building a business takes consistent effort. No result or outcome is guaranteed or implied. Any decision to join is yours, made after your own review and conversations."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 128,
+      "kind": "literal",
+      "text": "Product information on the Service stays within approved product materials; statements about dietary supplements have not been evaluated by the Food and Drug Administration, and the product is not intended to diagnose, treat, cure, or prevent any disease."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 133,
+      "kind": "literal:heading",
+      "text": "Text Messaging Program (Team Magnificent Updates)"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 135,
+      "kind": "literal",
+      "text": "Consent: you agree to receive texts by submitting your number with the consent box checked, or by texting or calling us first. Consent is not a condition of purchase."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 136,
+      "kind": "literal",
+      "text": "Message frequency varies. Message and data rates may apply."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 137,
+      "kind": "literal",
+      "text": "Reply STOP to cancel at any time (one final confirmation message will be sent). Reply HELP or email support@teammagnificent.com for help."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 138,
+      "kind": "literal",
+      "text": "Carriers are not liable for delayed or undelivered messages."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 143,
+      "kind": "literal:heading",
+      "text": "Acceptable Use"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 145,
+      "kind": "literal",
+      "text": "Do not misuse the Service: no unlawful use, no attempting to access other users' information, no interfering with the Service's operation, and no copying or scraping content or data."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 150,
+      "kind": "literal:heading",
+      "text": "Live Team Display"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 152,
+      "kind": "literal",
+      "text": "Activity shown on the Service (names, cities, placements, joins) reflects real events from real people. Your first name and city/state may appear in this display; your contact information never does."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 157,
+      "kind": "literal:heading",
+      "text": "Intellectual Property"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 159,
+      "kind": "literal",
+      "text": "The Service, its design, and its content are owned by Team Magnificent or its licensors. You may not reproduce them without permission."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 164,
+      "kind": "literal:heading",
+      "text": "Disclaimers & Limitation of Liability"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 166,
+      "kind": "literal",
+      "text": "The Service is provided \"as is\" without warranties of any kind. To the fullest extent permitted by law, Team Magnificent is not liable for indirect, incidental, or consequential damages arising from use of the Service."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 172,
+      "kind": "literal",
+      "text": "We may update these Terms; continued use after changes means acceptance. The current version is always posted here."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 176,
+      "kind": "literal:heading",
+      "text": "Governing Law"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 177,
+      "kind": "literal",
+      "text": "These Terms are governed by the laws of the State of California."
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 182,
+      "kind": "literal:organization",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 183,
+      "kind": "literal:email",
+      "text": "support@teammagnificent.com"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-documents.ts",
+      "lineNumber": 184,
+      "kind": "literal:streetAddress",
+      "text": "1770 Litchfield Dr, Banning, CA 92220"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-page.tsx",
+      "lineNumber": 13,
+      "kind": "jsx_text",
+      "text": "Team Magnificent"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-page.tsx",
+      "lineNumber": 15,
+      "kind": "jsx_text",
+      "text": "Effective date:"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-page.tsx",
+      "lineNumber": 31,
+      "kind": "jsx_text",
+      "text": "Prospect sign in"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-page.tsx",
+      "lineNumber": 33,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Legal pages"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-page.tsx",
+      "lineNumber": 34,
+      "kind": "jsx_text",
+      "text": "Privacy Policy"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-page.tsx",
+      "lineNumber": 35,
+      "kind": "jsx_text",
+      "text": "•"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-page.tsx",
+      "lineNumber": 36,
+      "kind": "jsx_text",
+      "text": "Terms of Service"
+    },
+    {
+      "file": "apps/com/src/routes/legal/legal-page.tsx",
+      "lineNumber": 68,
+      "kind": "jsx_text",
+      "text": "·"
     },
     {
       "file": "apps/com/src/routes/p-login-redeem.tsx",
@@ -1883,6 +2291,30 @@
       "text": "We build people before we build volume."
     },
     {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/07-Footer.tsx",
+      "lineNumber": 41,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Legal links"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/07-Footer.tsx",
+      "lineNumber": 42,
+      "kind": "jsx_text",
+      "text": "Privacy Policy"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/07-Footer.tsx",
+      "lineNumber": 43,
+      "kind": "jsx_text",
+      "text": "•"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/07-Footer.tsx",
+      "lineNumber": 44,
+      "kind": "jsx_text",
+      "text": "Terms of Service"
+    },
+    {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
       "lineNumber": 203,
       "kind": "jsx_attribute:aria-label",
@@ -3009,6 +3441,30 @@
       "lineNumber": 49,
       "kind": "jsx_text",
       "text": "Presented to you by"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "lineNumber": 54,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Legal links"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "lineNumber": 55,
+      "kind": "jsx_text",
+      "text": "Privacy Policy"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "lineNumber": 56,
+      "kind": "jsx_text",
+      "text": "•"
+    },
+    {
+      "file": "apps/com/src/routes/tm-video-presentation/sections/11-Footer.tsx",
+      "lineNumber": 57,
+      "kind": "jsx_text",
+      "text": "Terms of Service"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/sections/12-Leadership.tsx",

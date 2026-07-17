@@ -1,14 +1,14 @@
 # COM Prospect Compliance Scan
 
-Generated: 2026-07-17T22:42:35.904Z
+Generated: 2026-07-17T23:35:56.831Z
 
 ## Summary
 
 - Scope: `apps/com/src visible strings plus shared compliance constants`
-- Files scanned: 34
-- Visible strings scanned: 411
+- Files scanned: 38
+- Visible strings scanned: 483
 - Blocking violations: 0
-- Allowed signals: 68
+- Allowed signals: 71
 - Status: pass
 
 ## Blocking Rules
@@ -26,11 +26,11 @@ Generated: 2026-07-17T22:42:35.904Z
 
 | Signal | Count | Description |
 | --- | ---: | --- |
-| `glp_three_product_context` | 13 | GLP-THREE product naming is allowed when it does not name THREE International. |
+| `glp_three_product_context` | 14 | GLP-THREE product naming is allowed when it does not name THREE International. |
 | `public_market_or_cost_context` | 7 | Public market figures and product-category cost context are allowed when not tied to earnings. |
 | `team_goal_context` | 5 | The 100,000 team goal is allowed; current team head count is not. |
-| `pmv_language_context` | 17 | Prospect-facing PMV language is People, Momentum, Volume, and Checks. |
-| `placement_demo_context` | 24 | Queue, placement, and beneath-you language is allowed only as team activity demonstration. |
+| `pmv_language_context` | 18 | Prospect-facing PMV language is People, Momentum, Volume, and Checks. |
+| `placement_demo_context` | 25 | Queue, placement, and beneath-you language is allowed only as team activity demonstration. |
 | `canonical_disclaimer` | 2 | The canonical .com disclaimer is allowed only through packages/shared/src/compliance.ts. |
 
 ## Violations
@@ -41,6 +41,7 @@ None.
 
 | Signal | Source | Text |
 | --- | --- | --- |
+| `glp_three_product_context` | `apps/com/src/routes/legal/legal-documents.ts:115` | Team Magnificent provides informational presentations about the GLP-THREE product and the Team Magnificent business-building system, a personal dashboard including a live team activity display, and tools to request a conversation with the team member who invited you. |
 | `glp_three_product_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx:29` | GLP-THREE is a natural alternative in one of the fastest-expanding wellness categories on the planet. The numbers aren&rsquo;t ours — they&rsquo;re public. We&rsquo;re just standing where they point. |
 | `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx:32` | GLP-THREE launched January 2026 · trademark and patent pending |
 | `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:421` | Dr. Dan Gubler GLP-THREE product video |
@@ -66,6 +67,7 @@ None.
 | `team_goal_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx:83` | 100,000 |
 | `team_goal_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx:85` | Qualified Brand Ambassadors on Team Magnificent |
 | `team_goal_context` | `packages/shared/src/compliance.ts:15` | A current head count of the team (the 100,000 goal is named, the current count is not) |
+| `pmv_language_context` | `apps/com/src/routes/legal/legal-documents.ts:152` | Activity shown on the Service (names, cities, placements, joins) reflects real events from real people. Your first name and city/state may appear in this display; your contact information never does. |
 | `pmv_language_context` | `apps/com/src/routes/p-login.tsx:139` | We only text people whose phone was used to invite them and who have asked for their sponsor to reach out. If that's not you, ask whoever invited you for a fresh link. |
 | `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx:51` | Two people. Then they find two. |
 | `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx:96` | Find your first two people in 72 hours. It&rsquo;s not a deadline — it&rsquo;s a rhythm. The team moves at the speed of its leaders. |
@@ -83,6 +85,7 @@ None.
 | `pmv_language_context` | `packages/shared/src/compliance.ts:7` | it shows really how it works, and people are signing up |
 | `pmv_language_context` | `packages/shared/src/compliance.ts:14` | Compensation cycle math, volume math, or rank math |
 | `pmv_language_context` | `packages/shared/src/compliance.ts:22` | Queue positions and momentum displays demonstrate team activity in real time and |
+| `placement_demo_context` | `apps/com/src/routes/legal/legal-documents.ts:37` | Service activity: video viewing progress, page visits, position and activity in the live team display, and callback requests you submit. |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx:46` | Live · holding tank |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx:63` | Your position |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx:72` | You&rsquo;ve been placed in the Team Magnificent holding tank — the live demonstration of how the team is forming around you, in real time. |
