@@ -58,6 +58,73 @@
   Health/weight-product MLM — directly category-aligned.
 - Teach the principles **in our voice**; do **not** republish the transcripts.
 
+## 6. The PDR Position — required Product Training foundation
+
+- **Document:** `The-PDR-Position-Team-Magnificent_2.pdf`
+- **App resource version:**
+  `knowledge:knowledge_source_e0951cff-eeb0-45d2-b6c4-e491342c05ac:v2`
+- **Provenance:** Kevin L. Gardner commissioned and directed the research. The
+  research and document were produced with the Claude Fable 5 Research Agent
+  skill. Kevin vetted and authorized the finished report; the original design
+  and formatting are part of the approved artifact.
+- **Required sequence:** this is the **first document** and **opening discussion**
+  in Product Training for **every member**. It is foundational curriculum, not
+  supplemental reading. It comes before individual-product, ingredient, or
+  business-application instruction.
+- **Foundational insight:** Kevin learned in training that THREE is the only
+  company among approximately 28 nutritional companies represented in the
+  Physician's Digital Reference whose complete product catalog is included.
+  That realization establishes product quality as the foundation of the
+  business and the starting point for product confidence and training.
+- **Delivery:** the approved original PDF is held in the governed document
+  library for authenticated BA reading and printing. Its Docling extraction is
+  the active indexed knowledge version used for retrieval.
+- **Instructional delivery:** the module assumes no prior agent or product
+  context. It introduces Steve (discovery and Success Profile), Michael
+  (AI Learning, Development, and Training Agent and Daily Success Coach), and
+  Ivory (Who Do You Know support)
+  before relying on those names. The PDR lesson is a core Michael training
+  template: he explains the source, checks understanding, answers questions,
+  and helps the member state the significance in their own words. The page also
+  explains the benefit and boundaries of embedded, context-aware agentic
+  support; all decisions and external actions remain with the member.
+- **Agent ownership and explanation:** Steve, Michael, and Ivory are Team
+  Magnificent AI support agents. THREE International does not provide AI
+  agents. Member-facing copy explains what each agent is and the benefit to the
+  BA, not the underlying technical machinery. THREE remains the authority for
+  products, policies, enrollment, and compensation; Team Magnificent owns this
+  added training and support experience.
+- **Team distinction:** Kevin states that Team Magnificent is the only team in
+  THREE International currently providing AI-agent support to its members to
+  help them learn, develop, train, and build their business.
+- **Learning and development purpose:** develop professional network marketers.
+  “Professional” means building the product knowledge, recruiting skill, daily
+  discipline, and leadership capacity to create a large organization in THREE
+  International and pursue professional-level commission income paid by THREE
+  International according to their compensation structure. The BA relationship
+  is an independent, commission-based contract, not employment, a wage, or a
+  salary. Commissions are based on sales, product volume, and the organization
+  built; no amount or income result is guaranteed. Team Magnificent does not
+  define or pay BA commissions.
+- **Experience authority:** the professional-development path is not theoretical.
+  Team Magnificent leadership knows how to build this kind of commission-based
+  network marketing organization from direct experience. Michael's training
+  templates turn that leadership experience into a clear path members can learn
+  and follow.
+- **Professional analogy:** becoming a professional network marketer is like
+  becoming a professional chef who can also run the restaurant. Product
+  knowledge is knowing the ingredients; professional development adds the
+  ability to recruit and develop a team, create consistent operations and
+  product volume, serve people well, and lead the larger organization. A chef
+  learns through real kitchen experience, experienced mentors, and formal
+  education such as the Culinary Institute of America; a professional network
+  marketer likewise develops through structured learning plus guided work
+  inside a real organization with experienced leadership. Kevin's mastery
+  principle: to become masterful, a person apprentices or learns from other
+  masters. Team Magnificent provides that experienced leadership, a real
+  organization in which to practice, and Michael's structured learning,
+  development, and training.
+
 ---
 
 ## Core training truths locked this session

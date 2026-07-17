@@ -37,7 +37,9 @@ resourceRoutes.post('/:resourceVersionId/usage', requireAuth, requireSteveComple
   }
 });
 
-resourceRoutes.get('/:resourceVersionId/document', requireAuth, requireSteveComplete, async (req, res) => {
+// Module 1 is intentionally available before Steve is complete. Keep the exact-version
+// document stream BA-authenticated, but do not apply the later-training Steve gate here.
+resourceRoutes.get('/:resourceVersionId/document', requireAuth, async (req, res) => {
   try {
     const resourceVersionId = decodedResourceVersionId(req.params.resourceVersionId);
     if (!resourceVersionId || resourceVersionId.length > 300) {
