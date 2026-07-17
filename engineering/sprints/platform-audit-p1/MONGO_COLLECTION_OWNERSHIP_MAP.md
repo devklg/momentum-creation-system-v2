@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Generated: 2026-07-17T14:12:41.133Z
-- Collections: 75
+- Generated: 2026-07-17T21:16:27.229Z
+- Collections: 76
 - Unclassified: 0
 
 ## Collections By Owner
@@ -15,7 +15,7 @@
 | --- | ---: |
 | agents_training_success | 12 |
 | broadcast_delivery | 3 |
-| dynamic_helper | 6 |
+| dynamic_helper | 7 |
 | events_orientation_and_calls | 7 |
 | holding_tank_and_reentry | 6 |
 | knowledge_content | 9 |
@@ -41,6 +41,7 @@
 | `knowledge_supersession_records` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 1 |
 | `mcs_audit_log` | Operations, audit, tenant, settings, and projection health | Operations / governance | admin + system | operational | permissive_mongoose_schema | yes | 6 |
 | `mcs_graphrag_records` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 2 |
+| `MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION` | Dynamic helper expression | Owning caller resolves at runtime | system | mixed | permissive_mongoose_schema | expression | 2 |
 | `mcs_knowledge_chunks` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 1 |
 | `mcs_knowledge_sources` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 1 |
 | `mcs_learning_candidates` | Knowledge, content, and retrieval governance | Knowledge / content domain | admin + runtime | knowledge | permissive_mongoose_schema | yes | 3 |
