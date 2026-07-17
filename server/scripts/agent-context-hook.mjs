@@ -19,6 +19,7 @@ const require = createRequire(import.meta.url);
 const MAX_CONTEXT_CHARS = 9_200;
 const MAX_FOUNDATION_CHARS = 6_800;
 const MAX_GUARD_CHARS = 8_500;
+const MAX_CONTINUATION_COMMIT_DRIFT = 10;
 const STATE_DIR = process.env.MCS_AGENT_CONTEXT_STATE_DIR
   ?? join(tmpdir(), 'mcs-agent-context-hooks');
 
@@ -67,6 +68,25 @@ function gitValue(root, args, fallback) {
   } catch {
     return fallback;
   }
+}
+
+function gitIsAncestor(root, ancestor, descendant) {
+  try {
+    execFileSync('git', ['merge-base', '--is-ancestor', ancestor, descendant], {
+      cwd: root,
+      stdio: 'ignore',
+      timeout: 3_000,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function gitCommitDistance(root, ancestor, descendant) {
+  const raw = gitValue(root, ['rev-list', '--count', `${ancestor}..${descendant}`], '');
+  const count = Number(raw);
+  return Number.isSafeInteger(count) && count >= 0 ? count : null;
 }
 
 function statePath(sessionId) {
@@ -129,11 +149,32 @@ function continuationSnapshot(root) {
     };
   }
 
-  if (!currentMain || !currentMain.startsWith(declaredMain)) {
+  const exactDeclaredMain = Boolean(currentMain && currentMain.startsWith(declaredMain));
+  const fileRevision = gitValue(
+    root,
+    ['log', '-1', '--format=%H', '--', 'knowledge/CONTINUATION_CONTEXT.md'],
+    '',
+  );
+  const revisionTracksDeclaredMain = Boolean(
+    fileRevision && gitIsAncestor(root, declaredMain, fileRevision),
+  );
+  const revisionTracksCurrentMain = Boolean(
+    fileRevision && currentMain && gitIsAncestor(root, fileRevision, currentMain),
+  );
+  const commitDrift = revisionTracksCurrentMain
+    ? gitCommitDistance(root, fileRevision, currentMain)
+    : null;
+  const boundedRevisionIsCurrent = revisionTracksDeclaredMain
+    && revisionTracksCurrentMain
+    && commitDrift !== null
+    && commitDrift <= MAX_CONTINUATION_COMMIT_DRIFT;
+
+  if (!exactDeclaredMain && !boundedRevisionIsCurrent) {
     const observed = currentMain ? currentMain.slice(0, 8) : 'unavailable';
+    const drift = commitDrift === null ? 'unverifiable' : String(commitDrift);
     return {
       status: 'stale',
-      text: `CONTINUATION FOUNDATION STALE: knowledge/CONTINUATION_CONTEXT.md declares origin/main ${declaredMain}, but current origin/main is ${observed}. Its task pointer and front_of_line were deliberately withheld. Use the current user request, active decision ledger, and Intervector inbox instead.`,
+      text: `CONTINUATION FOUNDATION STALE: knowledge/CONTINUATION_CONTEXT.md declares origin/main ${declaredMain}, current origin/main is ${observed}, and its tracked revision is ${drift} commit(s) behind (maximum ${MAX_CONTINUATION_COMMIT_DRIFT}). Its task pointer and front_of_line were deliberately withheld. Use the current user request, active decision ledger, and Intervector inbox instead.`,
       frontOfLine: null,
     };
   }

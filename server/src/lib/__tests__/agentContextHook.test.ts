@@ -6,6 +6,11 @@ import { describe, expect, it } from 'vitest';
 
 const repoRoot = resolve(import.meta.dirname, '../../../../');
 const hookPath = join(repoRoot, 'server', 'scripts', 'agent-context-hook.mjs');
+const continuationRevision = execFileSync(
+  'git',
+  ['log', '-1', '--format=%H', '--', 'knowledge/CONTINUATION_CONTEXT.md'],
+  { cwd: repoRoot, encoding: 'utf8' },
+).trim();
 
 function runHook(
   input: Record<string, unknown>,
@@ -62,6 +67,19 @@ describe('ACR-0017 automatic Context Agent lifecycle hook', () => {
     const context = contextOf(result);
     expect(context).toContain('P2-107 — Build a unified follow-up queue');
     expect(context).toContain('The continuation commit matches origin/main');
+  });
+
+  it('keeps a freshly tracked continuation current after its base commit', () => {
+    const stateDir = mkdtempSync(join(tmpdir(), 'mcs-context-hook-'));
+    const result = runHook({
+      session_id: 'session-start-tracked-revision',
+      hook_event_name: 'SessionStart',
+      source: 'startup',
+      model: 'gpt-test',
+    }, stateDir, undefined, continuationRevision);
+    const context = contextOf(result);
+    expect(context).toContain('P2-107 — Build a unified follow-up queue');
+    expect(context).not.toContain('CONTINUATION FOUNDATION STALE');
   });
 
   it('runs the topic guard exactly once for the first user prompt', () => {
