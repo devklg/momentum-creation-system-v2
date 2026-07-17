@@ -24,6 +24,7 @@ type ResolveState =
 
 export function RvmTokenPage() {
   const { token } = useParams<{ token: string }>();
+  const [pageVisitId] = useState(() => crypto.randomUUID());
   const [state, setState] = useState<ResolveState>({ kind: 'loading' });
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export function RvmTokenPage() {
       return;
     }
     let cancelled = false;
-    void resolveRvmToken(token).then((result) => {
+    void resolveRvmToken(token, pageVisitId).then((result) => {
       if (cancelled) return;
       if (result.ok) setState({ kind: 'ok', data: result.data });
       else setState({ kind: 'err', error: result.error });
@@ -40,7 +41,7 @@ export function RvmTokenPage() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [pageVisitId, token]);
 
   if (state.kind === 'ok') {
     const composerInput: ComposerInput = {
@@ -53,6 +54,9 @@ export function RvmTokenPage() {
       placedAt: state.data.prospect.placedAt ?? undefined,
       nextEvent: state.data.nextEvent ?? null,
       copy: state.data.copy ?? null,
+      contractVersion: state.data.contractVersion ?? null,
+      pageVisitId: state.data.pageVisitId ?? pageVisitId,
+      replay: state.data.replay ?? null,
     };
     return <TmVideoPresentation resolved={composerInput} entryKind="rvm" />;
   }

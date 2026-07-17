@@ -1,48 +1,17 @@
-/**
- * tm-prospect-dashboard — the post-video_complete prospect surface.
- *
- * Locked sources:
- *   - Chat #82 (the conversation where this six-section design was
- *     locked) — see project knowledge dashboard-prototype.html.
- *   - locked-spec Part 3.4 (six-section dashboard).
- *   - locked-spec Part 3.9 (never anonymous; both prospect and BA
- *     interpolated everywhere).
- *   - locked-spec Part 3.10 (compliance — never on .com).
- *   - locked-spec Part 4.4 (live ticker, SSE, monotonic positions).
- *   - locked-spec Part 3.8 (brand isolation — Team Magnificent only,
- *     no product-company branding in footer or anywhere prospect-facing).
- *   - Chat #84 correction (Section 4 shows team being built BENEATH
- *     the prospect; the 'ahead-of-you' tile from the prototype was a
- *     pre-Chat-#84 artifact and is dropped here).
- *
- * Sections (vertical scroll, in render order):
- *   1. Arrival          — invited-by line, position card, headline.
- *   2. Opportunity      — market stat grid ($6.8T / $200B / 72% / $1,200).
- *   3. Mechanic         — Power of 2 cascade, 100,000 destination.
- *   4. LivePlace        — behind-only counter + live ticker (SSE).
- *   5. TmAdvantage      — Kevin quote, 100,000 mission board, pool
- *                         activity grid, compounding closer.
- *   6. YourNextMove     — callback form (3 intents) + webinar tile.
- *
- * Footer drift correction applied per Chat #112 build-state audit:
- *   the prototype's company-branded footer line VIOLATES locked-spec
- *   3.8. The dashboard footer here carries the Team Magnificent line
- *   only.
- */
-
-import { useEffect, useMemo, useState } from 'react';
-import type { McsComProspectCopy } from '@momentum/shared';
-
-import { ArrivalSection } from './sections/01-Arrival';
-import { OpportunitySection } from './sections/02-Opportunity';
-import { MechanicSection } from './sections/03-Mechanic';
-import { LivePlaceSection } from './sections/04-LivePlace';
-import { TmAdvantageSection } from './sections/05-TmAdvantage';
-import { YourNextMoveSection } from './sections/06-YourNextMove';
-import { DashboardRibbon } from './sections/00-Ribbon';
-import { DashboardFooter } from './sections/07-Footer';
+import { useMemo, useState, type CSSProperties } from 'react';
+import {
+  MCS_COM_DISCLAIMER,
+  MCS_KONGA_CONTRACT_VERSION,
+  MCS_KONGA_D23_CSS_VARIABLES,
+  type McsCallbackIntent,
+  type McsComProspectCopy,
+  type McsKongaContractVersion,
+  type McsWebinarReplay,
+} from '@momentum/shared';
+import { postCallbackRequest, postRvmCallbackRequest } from '@/lib/api';
 import { usePlacementStream } from '@/lib/usePlacementStream';
-import { fetchRvmTeamStats, fetchTeamStats, type McsTeamStatsResponse } from '@/lib/api';
+import { KongaLine } from './components/KongaLine';
+import './tm-prospect-dashboard.css';
 
 export interface TmProspectDashboardProps {
   token: string;
@@ -50,754 +19,400 @@ export interface TmProspectDashboardProps {
   baFullName: string;
   positionNumber: number;
   placedAt: string;
-  /**
-   * Next upcoming webinar event resolved server-side at /api/p/:token.
-   * Null when no upcoming event is seeded. Forwarded to Section 6 so
-   * the Countdown can render a real ticking countdown to scheduledFor.
-   * Chat #115.
-   */
   nextEvent: {
     eventId: string;
     scheduledFor: string;
     hosts: string[];
   } | null;
-  /**
-   * Chat #126: when the dashboard was reached from the presentation
-   * (the normal path via the WhatsNext closer / ?view=dashboard), the
-   * composer passes this so the ribbon can render a "Back to the video"
-   * link, letting the prospect return to the reference library and
-   * re-watch / re-read. Optional so a future standalone mount can omit it.
-   */
   onBackToPresentation?: () => void;
-  /**
-   * Master-content-resolved copy for the six dashboard sections (TASK-147
-   * inherit-com), resolved + interpolated server-side. Each section reads its
-   * own lead string from here and falls back to its built-in copy when the
-   * field is absent (older server / master-content read failure).
-   */
   copy?: McsComProspectCopy | null;
   entryKind?: 'pmv' | 'rvm';
+  contractVersion?: McsKongaContractVersion | null;
+  pageVisitId?: string;
+  replay?: McsWebinarReplay | null;
 }
 
-export function TmProspectDashboard(props: TmProspectDashboardProps) {
-  const {
-    token,
-    prospectFirstName,
-    baFullName,
-    positionNumber,
-    placedAt,
-    nextEvent,
-    copy,
-    entryKind = 'pmv',
-    onBackToPresentation,
-  } = props;
-
+export function TmProspectDashboard({
+  token,
+  prospectFirstName,
+  baFullName,
+  positionNumber,
+  placedAt,
+  nextEvent,
+  onBackToPresentation,
+  entryKind = 'pmv',
+  contractVersion = null,
+  pageVisitId,
+  replay = null,
+}: TmProspectDashboardProps) {
   const baFirstName = useMemo(
-    () => baFullName.trim().split(/\s+/)[0] ?? baFullName,
+    () => baFullName.trim().split(/\s+/)[0] || 'your inviter',
     [baFullName],
   );
-
-  // Live placement stream — powers Section 4's beneath-you counter and
-  // the position-stack ticker. Snapshot on connect, placement events on
-  // every team-wide video_complete. See lib/usePlacementStream.ts.
-  const stream = usePlacementStream(token, entryKind === 'rvm' ? '/api/rvm' : '/api/p');
+  const stream = usePlacementStream(
+    token,
+    entryKind === 'rvm' ? '/api/rvm' : '/api/p',
+    pageVisitId,
+  );
+  const preferredWebinar = stream.contractVersion === MCS_KONGA_CONTRACT_VERSION
+    ? stream.nextWebinar
+    : nextEvent;
+  const isVersioned = contractVersion === MCS_KONGA_CONTRACT_VERSION
+    || stream.contractVersion === MCS_KONGA_CONTRACT_VERSION;
+  const addedSincePlacement = stream.connected
+    ? Math.max(0, stream.globalMaxPosition - positionNumber)
+    : null;
 
   return (
-    <main className="tm-prospect-dashboard">
-      <DashboardRibbon onBack={onBackToPresentation} />
-      <PositionMomentumCenter
-        prospectFirstName={prospectFirstName}
-        baFullName={baFullName}
-        baFirstName={baFirstName}
-        positionNumber={positionNumber}
-        placedAt={placedAt}
-        nextEvent={nextEvent}
-        stream={stream}
-        token={token}
-        entryKind={entryKind}
-      />
-      <ArrivalSection
-        prospectFirstName={prospectFirstName}
-        baFullName={baFullName}
-        baFirstName={baFirstName}
-        positionNumber={positionNumber}
-        placedAt={placedAt}
-        copy={copy?.dashboardArrival}
-      />
-      <OpportunitySection copy={copy?.dashboardOpportunity} />
-      <MechanicSection copy={copy?.dashboardMechanic} />
-      <LivePlaceSection
-        prospectFirstName={prospectFirstName}
-        positionNumber={positionNumber}
-        placedAt={placedAt}
-        stream={stream}
-        copy={copy?.dashboardLivePlace}
-      />
-      <TmAdvantageSection
-        token={token}
-        baFirstName={baFirstName}
-        positionNumber={positionNumber}
-        copy={copy?.dashboardAdvantage}
-        entryKind={entryKind}
-      />
-      <YourNextMoveSection
-        token={token}
-        baFullName={baFullName}
-        baFirstName={baFirstName}
-        nextEvent={nextEvent}
-        copy={copy?.dashboardCallbackCta}
-        entryKind={entryKind}
-      />
-      <DashboardFooter />
+    <main
+      className="konga-dashboard"
+      style={MCS_KONGA_D23_CSS_VARIABLES as CSSProperties}
+    >
+      <nav className="konga-nav" aria-label="Dashboard controls">
+        <a className="konga-wordmark" href="#arrival" aria-label="Team Magnificent Konga Line">
+          TM · KONGA LINE
+        </a>
+        <div>
+          {onBackToPresentation && (
+            <button type="button" onClick={onBackToPresentation}>Rewatch presentation</button>
+          )}
+          <a href="#real-conversation">Talk with {baFirstName}</a>
+        </div>
+      </nav>
 
-      <DashboardShellStyles />
+      <section id="arrival" className="konga-section konga-arrival-section" aria-labelledby="arrival-title">
+        <div className="konga-arrival-grid">
+          <div className="konga-section-heading">
+            <span className="konga-eyebrow">As promised — the team, forming</span>
+            <h1 id="arrival-title">This is what {baFirstName} wanted you to see. Live.</h1>
+            <p>
+              The presentation told you something unusual: while you watched, you
+              were placed in our team&rsquo;s line so we could show you something real.
+              This is it. Every circle is a real person and every data-bearing movement
+              is a real event. Nothing on this screen is a simulation.
+            </p>
+          </div>
+          <div className="konga-arrival-position" aria-label={`Your position is ${positionNumber}`}>
+            <span>Position</span>
+            <strong>{positionNumber.toLocaleString()}</strong>
+            <small>is yours while you decide.</small>
+          </div>
+        </div>
+        {stream.sinceLastVisit !== null && (
+          <p className="konga-return-note" role="status">
+            Welcome back — the line kept moving. {stream.sinceLastVisit.toLocaleString()}
+            {' '}{stream.sinceLastVisit === 1 ? 'person arrived' : 'people arrived'} since your last visit.
+          </p>
+        )}
+        {!isVersioned && (
+          <p className="konga-contract-note">
+            This invitation is using the compatible live view. New visit and weekly
+            telemetry will appear when the versioned stream is available.
+          </p>
+        )}
+      </section>
+
+      <section id="product" className="konga-section" aria-labelledby="product-title">
+        <SectionHeading
+          eyebrow="The first question you're asking"
+          title="Does GLP-THREE actually work?"
+          id="product-title"
+        />
+        <p className="konga-lead">
+          GLP-THREE is the product you just saw. Team Magnificent is a team of
+          people building businesses around sharing it — and this page is their
+          work, visible.
+        </p>
+        <p>
+          The presentation is the approved product explanation. Rewatch it as often
+          as you need, then ask {baFirstName} about their own experience and sources.
+          This dashboard adds no unsourced efficacy, market, price, side-effect, or
+          launch-date claim.
+        </p>
+        {onBackToPresentation && (
+          <button type="button" className="konga-content-control" onClick={onBackToPresentation}>
+            Rewatch Dr. Dan&rsquo;s presentation
+          </button>
+        )}
+        <CallbackLink baFirstName={baFirstName} />
+      </section>
+
+      <section id="opportunity" className="konga-section konga-panel-section" aria-labelledby="opportunity-title">
+        <SectionHeading
+          eyebrow="The offer"
+          title="What exactly is the opportunity here?"
+          id="opportunity-title"
+        />
+        <p className="konga-lead">
+          Plainly: you&rsquo;re being offered the chance to build a business of your
+          own. As a builder, you&rsquo;d earn from real work: sharing the product with
+          people who want it, and helping people who want to build do the same —
+          with this system working alongside you. It is not a job, an investment,
+          or a lottery ticket. It is a business, with no guarantees and results
+          that follow effort.
+        </p>
+        <p>
+          Whether it becomes a new financial future depends on the same thing every
+          real business depends on — the work you put in. The line shows team
+          activity; it promises neither placement nor results.
+        </p>
+        <p className="konga-stack-intro">Three of these you have already seen. Two you can only see here.</p>
+        <div className="konga-reason-stack" aria-label="Five reasons to examine">
+          <Reason number="01" title="Product">
+            Rewatch the presentation, then ask {baFirstName} what they use and what
+            they have personally observed.
+          </Reason>
+          <Reason number="02" title="Timing">
+            Ask why {baFirstName} chose to share this with you now.
+          </Reason>
+          <Reason number="03" title="Market">
+            Bring the category questions and source questions to the conversation.
+          </Reason>
+          <Reason number="04" title="Method">
+            The working method is visible here: share, real response, live placement,
+            and human follow-up.
+          </Reason>
+          <Reason number="05" title="Team & training">
+            You are not being asked to evaluate a business without the people and
+            support around it.
+          </Reason>
+        </div>
+        <div className="konga-pmv" aria-label="People Momentum Volume Checks">
+          <span>People</span><span>Momentum</span><span>Volume</span><span>Checks</span>
+        </div>
+        <CallbackLink baFirstName={baFirstName} />
+      </section>
+
+      <section id="mechanic" className="konga-section" aria-labelledby="mechanic-title">
+        <SectionHeading eyebrow="How the line works" title="Three steps — and two already happened." id="mechanic-title" />
+        <div className="konga-three-column">
+          <div className="konga-copy-card">
+            <span className="konga-card-index">01</span>
+            <h3>Shared</h3>
+            <p>{baFirstName} shared a private presentation with you. That invitation fixed the person connected to your experience.</p>
+          </div>
+          <div className="konga-copy-card">
+            <span className="konga-card-index">02</span>
+            <h3>Watched</h3>
+            <p>Completing the presentation created the pinned position you see. It represents a real placement in this shared line.</p>
+          </div>
+          <div className="konga-copy-card">
+            <span className="konga-card-index">03</span>
+            <h3>Deciding</h3>
+            <p>When a person decides to build, a verified join exits at the front in gold. The system never invents that moment.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="live-place" className="konga-section konga-panel-section" aria-labelledby="live-place-title">
+        <SectionHeading eyebrow="Your live place" title="What am I watching?" id="live-place-title" />
+        <p className="konga-lead">
+          Each circle is a real person added by someone on the team. New arrivals
+          enter at the bottom. Verified joins leave at the destination above. The
+          marker that stays fixed is you.
+        </p>
+        <KongaLine
+          lens={{ head: 'sponsor' }}
+          sponsorFullName={baFullName}
+          viewer={{ firstName: prospectFirstName, positionNumber, placedAt }}
+          stream={stream}
+          nextWebinar={preferredWebinar}
+        />
+        <div className="konga-telemetry">
+          <Metric value={addedSincePlacement} label="added since your placement" empty="Live total not available yet" />
+          <Metric value={stream.placementsThisWeek} label="placements this week" empty="Weekly total not available yet" />
+          <Metric value={stream.geoSpreadCount} label="cities & states represented" empty="Geographic total not available yet" />
+        </div>
+        <p className="konga-data-note">
+          Every value above comes from the live Konga contract. Empty means the
+          system did not supply a trustworthy number.
+        </p>
+        {replay?.publicationStatus === 'active' && (
+          <p className="konga-replay-note">
+            Last live conversation: recording dated {replay.displayDate}. The
+            recording remains a content resource; completing it does not create a
+            placement or promise an outcome.
+          </p>
+        )}
+      </section>
+
+      <section id="system" className="konga-section" aria-labelledby="system-title">
+        <SectionHeading eyebrow="The second question you're asking" title="Could someone like me actually do this?" id="system-title" />
+        <p className="konga-lead">
+          What you are looking at is a live view into a working system built to
+          help people build without doing it alone.
+        </p>
+        <div className="konga-system-grid">
+          <SystemCard title="Guided onboarding">Your starting point becomes a plan you can follow.</SystemCard>
+          <SystemCard title="Daily coaching">A daily rhythm helps you keep moving and bring questions forward.</SystemCard>
+          <SystemCard title="A focused launch">The early mission gives your first actions a clear place to begin.</SystemCard>
+          <SystemCard title="Live learning">Team conversations and available replays keep the work connected to real people.</SystemCard>
+          <SystemCard title="The placement engine">Team momentum can work alongside your own effort; it never replaces it.</SystemCard>
+        </div>
+        <p className="konga-thesis">
+          The system will not do the work for you. Nothing real does. But you
+          will not have to work without a system around you.
+        </p>
+        <CallbackLink baFirstName={baFirstName} />
+      </section>
+
+      <section id="tm-advantage" className="konga-section konga-panel-section" aria-labelledby="advantage-title">
+        <SectionHeading
+          eyebrow="Why this team"
+          title="Building alone is why most people quit. So nobody here builds alone."
+          id="advantage-title"
+        />
+        <p className="konga-lead">
+          Team Magnificent pairs you with the person who shared this with you —
+          someone who was once exactly where you are — plus a team already in
+          motion. The line on this page is their daily work, made visible.
+        </p>
+        <p className="konga-signoff">Built by magnificent people. Driven by purpose.</p>
+      </section>
+
+      <RealConversation
+        token={token}
+        baFirstName={baFirstName}
+        entryKind={entryKind}
+      />
+
+      <footer className="konga-footer">
+        <div>
+          <span>Team Magnificent</span>
+        </div>
+        <p>{MCS_COM_DISCLAIMER}</p>
+      </footer>
     </main>
   );
 }
 
-export default TmProspectDashboard;
-
-function PositionMomentumCenter(props: {
-  prospectFirstName: string;
-  baFullName: string;
-  baFirstName: string;
-  positionNumber: number;
-  placedAt: string;
-  nextEvent: TmProspectDashboardProps['nextEvent'];
-  stream: ReturnType<typeof usePlacementStream>;
-  token: string;
-  entryKind: 'pmv' | 'rvm';
-}) {
-  const {
-    prospectFirstName,
-    baFullName,
-    baFirstName,
-    positionNumber,
-    placedAt,
-    nextEvent,
-    stream,
-    token,
-    entryKind,
-  } = props;
-  const beneathYou = Math.max(0, stream.globalMaxPosition - positionNumber);
-  const [stats, setStats] = useState<McsTeamStatsResponse | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = entryKind === 'rvm' ? fetchRvmTeamStats : fetchTeamStats;
-    void load(token).then((result) => {
-      if (!cancelled && result.ok) setStats(result.data);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [token, entryKind]);
-
-  const ticker = stream.ticker
-    .filter((entry) => entry.positionNumber !== positionNumber)
-    .slice(0, 6);
-
+function SectionHeading({ eyebrow, title, id }: { eyebrow: string; title: string; id: string }) {
   return (
-    <section className="tmpd-center" aria-labelledby="tmpd-center-title">
-      <div className="tmpd-center-brandline">
-        <span className="tm-logo tm-logo--navbar" role="img" aria-label="Team Magnificent" />
-        <span className="tmpd-center-live">
-          <span className="tmpd-center-live-dot" />
-          Live position center
-        </span>
-      </div>
-
-      <div className="tmpd-center-grid">
-        <div className="tmpd-center-lead">
-          <div className="tmpd-center-eyebrow">Invited by {baFullName}</div>
-          <h1 id="tmpd-center-title">
-            {prospectFirstName}, this is where you are.
-          </h1>
-          <p>
-            Your video is complete, your position is live, and the team is still
-            moving beneath you. The next step is simple: talk with {baFirstName}
-            when you are ready.
-          </p>
-          <div className="tmpd-center-actions">
-            <a href="#tmpd-talk-to-ba" className="tmpd-center-primary">
-              Talk with {baFirstName}
-            </a>
-            <a href="#tmpd-live-place" className="tmpd-center-secondary">
-              Watch live motion
-            </a>
-          </div>
-        </div>
-
-        <div className="tmpd-center-position" aria-label={`Your position is ${positionNumber}`}>
-          <span className="tmpd-center-position-label">Your position</span>
-          <span className="tmpd-center-position-number">#{positionNumber}</span>
-          <span className="tmpd-center-position-meta">
-            Placed {formatPlacedAtCompact(placedAt)}
-          </span>
-        </div>
-
-        <div className="tmpd-center-panel tmpd-center-beneath">
-          <span className="tmpd-center-panel-kicker">Beneath you · live</span>
-          <strong>{beneathYou}</strong>
-          <span>
-            New placements joining the team after your position as Team
-            Magnificent grows.
-          </span>
-        </div>
-
-        <div className="tmpd-center-panel tmpd-center-countdown">
-          <span className="tmpd-center-panel-kicker">Next live decision point</span>
-          <CenterCountdown scheduledFor={nextEvent?.scheduledFor ?? null} />
-        </div>
-      </div>
-
-      <div className="tmpd-center-bottom">
-        <div className="tmpd-center-ticker" aria-label="Recent team placements">
-          <div className="tmpd-center-ticker-head">
-            <span>Team momentum tape</span>
-            <span>{stream.errored ? 'Reconnecting' : stream.connected ? 'Live' : 'Connecting'}</span>
-          </div>
-          <div className="tmpd-center-ticker-rows">
-            {ticker.length === 0 ? (
-              <div className="tmpd-center-ticker-empty">
-                {stream.connecting
-                  ? 'Connecting to the live position stream.'
-                  : 'The next team placement will appear here.'}
-              </div>
-            ) : (
-              ticker.map((entry) => (
-                <div key={`${entry.positionNumber}-${entry.placedAt}`} className="tmpd-center-ticker-row">
-                  <span>#{entry.positionNumber}</span>
-                  <span>
-                    {entry.firstName} {entry.lastInitial}.
-                    {entry.city ? ` from ${entry.city}${entry.stateOrRegion ? `, ${entry.stateOrRegion}` : ''}` : ''}
-                  </span>
-                  <span>{formatClock(entry.placedAt)}</span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {stats && (
-          <div className="tmpd-center-stats" aria-label="Compact live team stats">
-            <CenterStat value={stats.basActive24h} label="BAs active · 24h" />
-            <CenterStat value={stats.invitationsSentToday} label="Invites today" />
-            <CenterStat value={stats.newPlacements24h} label="Placements · 24h" />
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
-
-function CenterCountdown({ scheduledFor }: { scheduledFor: string | null }) {
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    if (!scheduledFor) return;
-    const target = new Date(scheduledFor).getTime();
-    if (!Number.isFinite(target)) return;
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, [scheduledFor]);
-
-  if (!scheduledFor) {
-    return (
-      <div className="tmpd-center-event-fallback">
-        Next Team Magnificent live · check back soon
-      </div>
-    );
-  }
-
-  const target = new Date(scheduledFor).getTime();
-  if (!Number.isFinite(target)) {
-    return (
-      <div className="tmpd-center-event-fallback">
-        Next Team Magnificent live · check back soon
-      </div>
-    );
-  }
-
-  const totalSeconds = Math.max(0, Math.floor((target - now) / 1000));
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  return (
-    <>
-      <div className="tmpd-center-countdown-grid">
-        <CenterCountdownUnit value={days} label="days" />
-        <CenterCountdownUnit value={hours} label="hrs" />
-        <CenterCountdownUnit value={minutes} label="min" />
-        <CenterCountdownUnit value={seconds} label="sec" />
-      </div>
-      <div className="tmpd-center-event-when">{formatEventWhen(scheduledFor)}</div>
-    </>
-  );
-}
-
-function CenterCountdownUnit(props: { value: number; label: string }) {
-  return (
-    <span className="tmpd-center-countdown-unit">
-      <strong>{props.value < 10 ? `0${props.value}` : props.value}</strong>
-      <span>{props.label}</span>
-    </span>
-  );
-}
-
-function CenterStat(props: { value: number; label: string }) {
-  return (
-    <div className="tmpd-center-stat">
-      <strong>{props.value.toLocaleString()}</strong>
-      <span>{props.label}</span>
+    <div className="konga-section-heading">
+      <span className="konga-eyebrow">{eyebrow}</span>
+      <h2 id={id}>{title}</h2>
     </div>
   );
 }
 
-function formatPlacedAtCompact(iso: string): string {
-  const clock = formatClock(iso);
-  return clock ? `at ${clock}` : 'just now';
+function Reason({ number, title, children }: { number: string; title: string; children: React.ReactNode }) {
+  return (
+    <article>
+      <span>{number}</span>
+      <h3>{title}</h3>
+      <p>{children}</p>
+    </article>
+  );
 }
 
-function formatClock(iso: string): string {
-  try {
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return '';
-    return d.toLocaleTimeString(undefined, {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-  } catch {
-    return '';
-  }
+function SystemCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return <article><h3>{title}</h3><p>{children}</p></article>;
 }
 
-function formatEventWhen(iso: string): string {
-  try {
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return '';
-    return d.toLocaleString(undefined, {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      timeZoneName: 'short',
-    });
-  } catch {
-    return '';
-  }
+function CallbackLink({ baFirstName }: { baFirstName: string }) {
+  return <a className="konga-callback-link" href="#real-conversation">Request a call from {baFirstName}</a>;
 }
 
-/**
- * Shell styles — the ink background, atmospheric gradient mesh, film
- * grain, and shared scaffolding for every section. Mirrors the
- * tm-video-presentation shell so the transition from video to dashboard
- * feels seamless. The atmosphere is fixed-position and z-indexed
- * underneath section content.
- */
-function DashboardShellStyles() {
-  return <style>{shellCss}</style>;
+function Metric({ value, label, empty }: { value: number | null; label: string; empty: string }) {
+  return (
+    <article>
+      {value === null ? <strong className="is-empty">—</strong> : <strong>{value.toLocaleString()}</strong>}
+      <span>{label}</span>
+      {value === null && <small>{empty}</small>}
+    </article>
+  );
 }
 
-const shellCss = `
-  .tm-prospect-dashboard {
-    position: relative;
-    min-height: 100svh;
-    background: #0A0A0A;
-    color: #F5EFE6;
-    font-family: 'DM Sans', system-ui, sans-serif;
-    overflow-x: hidden;
-  }
-  .tm-prospect-dashboard::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(900px circle at 12% 8%, rgba(201, 168, 76, 0.10), transparent 55%),
-      radial-gradient(700px circle at 88% 95%, rgba(45, 212, 191, 0.08), transparent 55%),
-      radial-gradient(500px circle at 50% 50%, rgba(201, 168, 76, 0.04), transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .tm-prospect-dashboard::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.96 0 0 0 0 0.93 0 0 0 0 0.85 0 0 0 0.04 0'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>");
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.6;
-  }
-  .tm-prospect-dashboard > * {
-    position: relative;
-    z-index: 2;
-  }
-  .tm-prospect-dashboard section {
-    padding: clamp(40px, 6vw, 88px) clamp(20px, 5vw, 56px);
-    border-bottom: 1px solid rgba(245, 239, 230, 0.08);
-    position: relative;
-  }
-  .tmpd-center {
-    min-height: calc(100svh - 64px);
-    display: grid;
-    align-content: center;
-    gap: clamp(20px, 3vw, 32px);
-    padding-top: clamp(28px, 4vw, 52px) !important;
-    padding-bottom: clamp(28px, 4vw, 52px) !important;
-    background:
-      radial-gradient(780px circle at 12% 12%, rgba(201, 168, 76, 0.16), transparent 58%),
-      radial-gradient(720px circle at 92% 20%, rgba(45, 212, 191, 0.12), transparent 54%),
-      rgba(10, 10, 10, 0.92);
-  }
-  .tmpd-center-brandline {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-  }
-  .tmpd-center-live,
-  .tmpd-center-eyebrow,
-  .tmpd-center-panel-kicker,
-  .tmpd-center-ticker-head,
-  .tmpd-center-stat span,
-  .tmpd-center-position-label,
-  .tmpd-center-position-meta,
-  .tmpd-center-event-when,
-  .tmpd-center-event-fallback {
-    font-family: 'DM Mono', ui-monospace, monospace;
-    letter-spacing: 0;
-    text-transform: uppercase;
-  }
-  .tmpd-center-live {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: #2DD4BF;
-    font-size: 12px;
-  }
-  .tmpd-center-live-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: #2DD4BF;
-    animation: tmpd-pulse 2s infinite;
-  }
-  .tmpd-center-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.72fr);
-    grid-template-areas:
-      'lead position'
-      'lead beneath'
-      'lead countdown';
-    gap: clamp(14px, 2vw, 22px);
-    align-items: stretch;
-  }
-  .tmpd-center-lead {
-    grid-area: lead;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding-right: clamp(0px, 3vw, 32px);
-  }
-  .tmpd-center-eyebrow {
-    color: #C9A84C;
-    font-size: 12px;
-    margin-bottom: 18px;
-  }
-  .tmpd-center h1 {
-    max-width: 12ch;
-    margin: 0 0 18px;
-    color: #F5EFE6;
-    font-size: clamp(56px, 8vw, 118px);
-  }
-  .tmpd-center-lead p {
-    max-width: 52ch;
-    color: rgba(245, 239, 230, 0.7);
-    font-size: clamp(16px, 1.5vw, 19px);
-    line-height: 1.55;
-    margin: 0 0 26px;
-  }
-  .tmpd-center-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .tmpd-center-primary,
-  .tmpd-center-secondary {
-    min-height: 48px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #C9A84C;
-    padding: 0 18px;
-    color: #0A0A0A;
-    background: #C9A84C;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 0;
-    text-decoration: none;
-    text-transform: uppercase;
-  }
-  .tmpd-center-secondary {
-    color: #2DD4BF;
-    background: rgba(45, 212, 191, 0.08);
-    border-color: rgba(45, 212, 191, 0.45);
-  }
-  .tmpd-center-position,
-  .tmpd-center-panel,
-  .tmpd-center-ticker,
-  .tmpd-center-stats {
-    border: 1px solid rgba(245, 239, 230, 0.12);
-    background: rgba(15, 15, 15, 0.78);
-    box-shadow: 0 20px 70px rgba(0, 0, 0, 0.22);
-  }
-  .tmpd-center-position {
-    grid-area: position;
-    display: grid;
-    min-height: 190px;
-    align-content: center;
-    padding: 24px;
-    border-color: rgba(201, 168, 76, 0.42);
-    background: linear-gradient(135deg, rgba(201, 168, 76, 0.14), rgba(15, 15, 15, 0.82));
-  }
-  .tmpd-center-position-label,
-  .tmpd-center-panel-kicker {
-    color: #C9A84C;
-    font-size: 11px;
-  }
-  .tmpd-center-position-number {
-    color: #F5C030;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(80px, 10vw, 132px);
-    line-height: 0.86;
-    letter-spacing: 0;
-    font-variant-numeric: tabular-nums;
-  }
-  .tmpd-center-position-meta {
-    color: rgba(245, 239, 230, 0.58);
-    font-size: 11px;
-  }
-  .tmpd-center-panel {
-    display: grid;
-    gap: 8px;
-    align-content: center;
-    min-height: 128px;
-    padding: 20px;
-  }
-  .tmpd-center-beneath { grid-area: beneath; border-color: rgba(45, 212, 191, 0.36); }
-  .tmpd-center-countdown { grid-area: countdown; border-color: rgba(45, 212, 191, 0.24); }
-  .tmpd-center-panel strong {
-    color: #2DD4BF;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(46px, 6vw, 76px);
-    line-height: 0.9;
-    letter-spacing: 0;
-    font-variant-numeric: tabular-nums;
-  }
-  .tmpd-center-panel span:last-child,
-  .tmpd-center-event-fallback {
-    color: rgba(245, 239, 230, 0.62);
-    font-size: 13px;
-    line-height: 1.45;
-  }
-  .tmpd-center-countdown-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 6px;
-  }
-  .tmpd-center-countdown-unit {
-    display: grid;
-    place-items: center;
-    min-height: 58px;
-    border: 1px solid rgba(45, 212, 191, 0.22);
-    background: rgba(45, 212, 191, 0.06);
-  }
-  .tmpd-center-countdown-unit strong {
-    color: #2DD4BF;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 30px;
-    line-height: 1;
-    letter-spacing: 0;
-    font-variant-numeric: tabular-nums;
-  }
-  .tmpd-center-countdown-unit span {
-    color: rgba(245, 239, 230, 0.58);
-    font-family: 'DM Mono', ui-monospace, monospace;
-    font-size: 10px;
-    line-height: 1;
-    letter-spacing: 0;
-    text-transform: uppercase;
-  }
-  .tmpd-center-event-when {
-    color: rgba(245, 239, 230, 0.62);
-    font-size: 10px;
-  }
-  .tmpd-center-bottom {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.48fr);
-    gap: clamp(14px, 2vw, 22px);
-  }
-  .tmpd-center-ticker {
-    min-width: 0;
-    overflow: hidden;
-  }
-  .tmpd-center-ticker-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    min-height: 38px;
-    padding: 0 14px;
-    border-bottom: 1px solid rgba(245, 239, 230, 0.1);
-    color: #C9A84C;
-    font-size: 10px;
-  }
-  .tmpd-center-ticker-head span:last-child { color: #2DD4BF; }
-  .tmpd-center-ticker-rows {
-    display: grid;
-  }
-  .tmpd-center-ticker-row,
-  .tmpd-center-ticker-empty {
-    min-height: 38px;
-    display: grid;
-    grid-template-columns: 72px minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 12px;
-    padding: 0 14px;
-    border-bottom: 1px solid rgba(245, 239, 230, 0.06);
-    color: rgba(245, 239, 230, 0.68);
-    font-family: 'DM Mono', ui-monospace, monospace;
-    font-size: 12px;
-    letter-spacing: 0;
-  }
-  .tmpd-center-ticker-row span:first-child {
-    color: #2DD4BF;
-  }
-  .tmpd-center-ticker-row span:nth-child(2) {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .tmpd-center-ticker-row span:last-child {
-    color: rgba(245, 239, 230, 0.42);
-  }
-  .tmpd-center-ticker-empty {
-    grid-template-columns: 1fr;
-    color: rgba(245, 239, 230, 0.5);
-  }
-  .tmpd-center-stats {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-  .tmpd-center-stat {
-    display: grid;
-    gap: 4px;
-    align-content: center;
-    min-height: 76px;
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(245, 239, 230, 0.08);
-  }
-  .tmpd-center-stat strong {
-    color: #2DD4BF;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 38px;
-    line-height: 0.9;
-    letter-spacing: 0;
-    font-variant-numeric: tabular-nums;
-  }
-  .tmpd-center-stat span {
-    color: rgba(245, 239, 230, 0.58);
-    font-size: 10px;
-  }
-  @media (max-width: 980px) {
-    .tmpd-center {
-      min-height: auto;
-      align-content: start;
+function RealConversation({ token, baFirstName, entryKind }: {
+  token: string;
+  baFirstName: string;
+  entryKind: 'pmv' | 'rvm';
+}) {
+  const [intent, setIntent] = useState<McsCallbackIntent | null>(null);
+  const [consent, setConsent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async () => {
+    if (!intent || !consent || submitting) return;
+    setSubmitting(true);
+    setError(null);
+    const post = entryKind === 'rvm' ? postRvmCallbackRequest : postCallbackRequest;
+    const result = await post(token, intent);
+    setSubmitting(false);
+    if (result.ok) {
+      setSubmitted(true);
+      return;
     }
-    .tmpd-center-grid {
-      grid-template-columns: 1fr;
-      grid-template-areas:
-        'lead'
-        'position'
-        'beneath'
-        'countdown';
-    }
-    .tmpd-center-bottom {
-      grid-template-columns: 1fr;
-    }
-    .tmpd-center-stats {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-  @media (max-width: 620px) {
-    .tmpd-center-brandline,
-    .tmpd-center-actions {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-    .tmpd-center h1 {
-      font-size: clamp(46px, 15vw, 72px);
-    }
-    .tmpd-center-countdown-grid,
-    .tmpd-center-stats {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .tmpd-center-ticker-row {
-      grid-template-columns: 58px minmax(0, 1fr);
-    }
-    .tmpd-center-ticker-row span:last-child {
-      display: none;
-    }
-  }
-  .tm-prospect-dashboard .eyebrow {
-    font-family: 'DM Mono', ui-monospace, monospace;
-    font-size: 11px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: #C9A84C;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .tm-prospect-dashboard .eyebrow::before {
-    content: '';
-    width: 24px;
-    height: 1px;
-    background: #C9A84C;
-  }
-  .tm-prospect-dashboard h1,
-  .tm-prospect-dashboard h2,
-  .tm-prospect-dashboard h3 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    line-height: 0.96;
-  }
-  .tm-prospect-dashboard h1 { font-size: clamp(48px, 8.5vw, 112px); }
-  .tm-prospect-dashboard h2 { font-size: clamp(36px, 5.5vw, 72px); }
-  .tm-prospect-dashboard h3 { font-size: clamp(22px, 3vw, 32px); }
-  @keyframes tmpd-rise {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes tmpd-pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.6); }
-    70%  { box-shadow: 0 0 0 10px rgba(45, 212, 191, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); }
-  }
-  @keyframes tmpd-fresh {
-    0%   { background: rgba(45, 212, 191, 0.25); transform: translateX(-8px); opacity: 0; }
-    25%  { opacity: 1; transform: translateX(0); }
-    100% { background: transparent; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .tmpd-center-live-dot {
-      animation: none;
-    }
-  }
-`;
+    setError(
+      result.error.kind === 'expired'
+        ? 'This invitation has expired. Ask your inviter for a fresh one.'
+        : 'Your request did not land. Please try again.',
+    );
+  };
+
+  return (
+    <section id="real-conversation" className="konga-section konga-conversation" aria-labelledby="conversation-title">
+      <SectionHeading eyebrow="What to do now" title="The next step is a conversation — not a commitment." id="conversation-title" />
+      <p className="konga-lead">
+        Talk to {baFirstName} — the person who thought of you. Ask the money
+        question. Ask the time question. Ask what a bad week looks like. This
+        starts a real conversation with a real person.
+      </p>
+
+      {submitted ? (
+        <div className="konga-confirmation" role="status">
+          <span>Request received</span>
+          <h3>{baFirstName} will reach out.</h3>
+          <p>Keep an eye on the number where you received this invitation.</p>
+        </div>
+      ) : (
+        <div className="konga-conversation-form">
+          <fieldset>
+            <legend>What would you like to talk about?</legend>
+            <IntentOption value="interested_tell_me_more" current={intent} setIntent={setIntent}>
+              I&rsquo;m interested — help me understand more.
+            </IntentOption>
+            <IntentOption value="have_questions" current={intent} setIntent={setIntent}>
+              I have specific questions.
+            </IntentOption>
+            <IntentOption value="ready_to_join" current={intent} setIntent={setIntent}>
+              I&rsquo;m ready to discuss joining Team Magnificent.
+            </IntentOption>
+          </fieldset>
+
+          <label className="konga-consent">
+            <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} />
+            <span>
+              By sharing your number, you agree that {baFirstName} / Team Magnificent
+              may call or text you about your request. Message &amp; data rates may
+              apply. Message frequency varies. Reply STOP to end texts, HELP for help.
+            </span>
+          </label>
+
+          {error && <p className="konga-form-error" role="alert">{error}</p>}
+          <button type="button" onClick={() => void submit()} disabled={!intent || !consent || submitting}>
+            {submitting ? 'Sending…' : 'Request a call from ' + baFirstName}
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function IntentOption({ value, current, setIntent, children }: {
+  value: McsCallbackIntent;
+  current: McsCallbackIntent | null;
+  setIntent: (value: McsCallbackIntent) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className={current === value ? 'is-selected' : ''}>
+      <input type="radio" name="callback-intent" checked={current === value} onChange={() => setIntent(value)} />
+      <span>{children}</span>
+    </label>
+  );
+}
+
+export default TmProspectDashboard;

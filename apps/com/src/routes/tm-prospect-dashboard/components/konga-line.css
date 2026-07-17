@@ -1,0 +1,463 @@
+.konga-line-shell {
+  position: relative;
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  color: var(--konga-ink);
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+
+.konga-mono,
+.konga-commandbar,
+.konga-countdown,
+.konga-node time {
+  font-family: 'Spline Sans Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.konga-commandbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .7rem .85rem;
+  border: 1px solid var(--konga-edge-dim);
+  border-radius: .75rem;
+  background: var(--konga-panel);
+  color: var(--konga-muted);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+}
+
+.konga-commandbar > div {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  min-width: 0;
+}
+
+.konga-live-dot {
+  width: .58rem;
+  height: .58rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--konga-cyan);
+  box-shadow: 0 0 14px var(--konga-glow-cyan);
+  animation: konga-breathe 2.4s ease-in-out infinite;
+}
+
+.konga-live-dot.is-reconnecting {
+  background: var(--konga-blue-hi);
+  box-shadow: none;
+}
+
+.konga-sound {
+  flex: 0 0 auto;
+  min-height: 2.25rem;
+  padding: .42rem .72rem;
+  border: 1px solid var(--konga-edge);
+  border-radius: 999px;
+  background: var(--konga-slate);
+  color: var(--konga-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.konga-sound:hover,
+.konga-sound:focus-visible {
+  border-color: var(--konga-cyan);
+  outline: 2px solid transparent;
+}
+
+.konga-audio-note {
+  margin: .45rem .85rem 0;
+  color: var(--konga-muted);
+  font-size: .72rem;
+}
+
+.konga-dock {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(18rem, .85fr);
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--konga-edge);
+  border-top: 3px solid var(--konga-blue-hi);
+  border-radius: 1rem;
+  background: var(--konga-panel-solid);
+}
+
+.konga-dock-copy {
+  display: grid;
+  gap: .35rem;
+  min-width: 0;
+}
+
+.konga-dock-copy .konga-mono,
+.konga-head .konga-mono,
+.konga-arrivals .konga-mono,
+.konga-you .konga-mono {
+  color: var(--konga-blue-hi);
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+.konga-dock-copy strong,
+.konga-head strong {
+  font-family: 'Orbitron', system-ui, sans-serif;
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  letter-spacing: .025em;
+}
+
+.konga-dock-copy > span:last-child,
+.konga-head > span:last-child {
+  color: var(--konga-muted);
+  font-size: .83rem;
+}
+
+.konga-countdown {
+  display: grid;
+  justify-items: end;
+  gap: .55rem;
+  min-width: 0;
+}
+
+.konga-countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(3.1rem, 1fr));
+  gap: .4rem;
+  width: min(100%, 22rem);
+}
+
+.konga-countdown-grid > span {
+  display: grid;
+  place-items: center;
+  padding: .55rem .35rem;
+  border: 1px solid var(--konga-edge-dim);
+  border-radius: .55rem;
+  background: var(--konga-ground);
+}
+
+.konga-countdown-grid strong {
+  color: var(--konga-cyan);
+  font-size: clamp(1rem, 3vw, 1.45rem);
+}
+
+.konga-countdown-grid small {
+  color: var(--konga-muted);
+  font-size: .58rem;
+  text-transform: uppercase;
+}
+
+.konga-countdown time,
+.konga-countdown.is-empty {
+  color: var(--konga-muted);
+  font-size: .7rem;
+  text-align: right;
+}
+
+.konga-countdown.is-empty {
+  justify-items: end;
+}
+
+.konga-join-signal {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: .8rem;
+  margin: .75rem 0;
+  padding: .8rem 1rem;
+  border: 1px solid var(--konga-gold);
+  border-radius: .75rem;
+  background: var(--konga-panel-solid);
+  color: var(--konga-muted);
+  animation: konga-join 1.1s ease-out both;
+}
+
+.konga-join-signal > span:first-child {
+  color: var(--konga-gold);
+  font: 700 .7rem 'Spline Sans Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+.konga-join-signal strong {
+  color: var(--konga-ink);
+}
+
+.konga-line-stage {
+  position: relative;
+  margin: 0 auto;
+  padding: 1.25rem clamp(.6rem, 3vw, 2rem) 0;
+}
+
+.konga-head {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: .3rem;
+  width: min(100%, 34rem);
+  margin: 0 auto -1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--konga-edge);
+  border-radius: .9rem;
+  background: var(--konga-panel-solid);
+  text-align: center;
+}
+
+.konga-rail {
+  position: relative;
+  width: min(100%, 44rem);
+  min-height: 44rem;
+  margin: 0 auto;
+  padding: 3.5rem clamp(.55rem, 4vw, 2.5rem) 4.5rem;
+  border-inline: 1px solid var(--konga-edge-dim);
+  background: rgba(15, 23, 42, .24);
+  overflow: hidden;
+}
+
+.konga-belt {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: .34rem;
+  transform: translateX(-50%);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--konga-blue) 0,
+    var(--konga-blue) 1rem,
+    transparent 1rem,
+    transparent 2rem
+  );
+  background-size: 100% 2rem;
+  animation: konga-belt-up 2.8s linear infinite;
+  opacity: .72;
+}
+
+.konga-line-shell:hover .konga-belt,
+.konga-line-shell:focus-within .konga-belt {
+  animation-play-state: paused;
+}
+
+.konga-node-stack {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: .85rem;
+}
+
+.konga-node {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .7rem;
+  width: min(84%, 31rem);
+  padding: .75rem .85rem;
+  border: 1px solid var(--konga-edge-dim);
+  border-radius: .75rem;
+  background: var(--konga-panel-solid);
+}
+
+.konga-node:nth-child(even) {
+  justify-self: end;
+}
+
+.konga-node-marker {
+  width: .72rem;
+  height: .72rem;
+  border: 2px solid var(--konga-blue-hi);
+  border-radius: 50%;
+  background: var(--konga-ground);
+}
+
+.konga-node > div {
+  display: grid;
+  min-width: 0;
+}
+
+.konga-node strong {
+  color: var(--konga-ink);
+  font-size: .85rem;
+}
+
+.konga-node span,
+.konga-node small,
+.konga-node time {
+  color: var(--konga-muted);
+  font-size: .67rem;
+}
+
+.konga-node small {
+  color: var(--konga-blue-hi);
+}
+
+.konga-node.is-arriving {
+  border-color: var(--konga-blue-hi);
+  animation: konga-arrival .75s ease-out both;
+}
+
+.konga-you {
+  position: sticky;
+  top: 1rem;
+  z-index: 4;
+  display: grid;
+  justify-self: center;
+  gap: .25rem;
+  width: min(92%, 35rem);
+  padding: 1rem 1.15rem;
+  border: 2px solid var(--konga-gold);
+  border-radius: .85rem;
+  background: var(--konga-ground);
+  box-shadow: 0 0 24px rgba(250, 204, 21, .22);
+  text-align: center;
+}
+
+.konga-you strong {
+  color: var(--konga-gold);
+  font: 900 clamp(1.05rem, 3vw, 1.5rem) 'Orbitron', system-ui, sans-serif;
+  letter-spacing: .04em;
+}
+
+.konga-you > span:last-child {
+  color: var(--konga-muted);
+  font-size: .72rem;
+}
+
+.konga-honest-empty {
+  margin: .25rem auto;
+  padding: .9rem;
+  color: var(--konga-muted);
+  font-size: .78rem;
+  text-align: center;
+}
+
+.konga-open-slot {
+  display: grid;
+  place-items: center;
+  width: min(72%, 25rem);
+  min-height: 3.35rem;
+  border: 1px dashed var(--konga-edge);
+  border-radius: .7rem;
+  background: rgba(5, 7, 15, .64);
+  color: var(--konga-muted);
+  font: 500 .65rem 'Spline Sans Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.konga-open-slot:nth-last-child(1) {
+  justify-self: end;
+}
+
+.konga-arrivals {
+  position: absolute;
+  z-index: 3;
+  inset: auto 0 0;
+  display: grid;
+  justify-items: center;
+  gap: .2rem;
+  padding: .8rem;
+  border-top: 1px solid var(--konga-edge);
+  background: var(--konga-ground);
+  color: var(--konga-muted);
+  font-size: .7rem;
+}
+
+@keyframes konga-belt-up {
+  from { background-position-y: 2rem; }
+  to { background-position-y: 0; }
+}
+
+@keyframes konga-breathe {
+  50% { opacity: .55; box-shadow: 0 0 7px var(--konga-glow-cyan); }
+}
+
+@keyframes konga-arrival {
+  0% { transform: translateY(14px); opacity: .4; box-shadow: 0 0 0 transparent; }
+  45% { box-shadow: 0 0 22px var(--konga-glow-blue); }
+  100% { transform: translateY(0); opacity: 1; box-shadow: 0 0 0 transparent; }
+}
+
+@keyframes konga-join {
+  0% { transform: scale(.97); opacity: .3; box-shadow: 0 0 0 transparent; }
+  45% { box-shadow: 0 0 28px var(--konga-glow-gold); }
+  100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 transparent; }
+}
+
+@media (max-width: 720px) {
+  .konga-commandbar {
+    align-items: flex-start;
+  }
+
+  .konga-dock {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .konga-countdown {
+    justify-items: start;
+  }
+
+  .konga-countdown time,
+  .konga-countdown.is-empty {
+    text-align: left;
+  }
+
+  .konga-line-stage {
+    padding-inline: 0;
+  }
+
+  .konga-rail {
+    min-height: 40rem;
+    padding-inline: .45rem;
+  }
+
+  .konga-node {
+    width: 92%;
+    grid-template-columns: 1rem minmax(0, 1fr);
+  }
+
+  .konga-node time {
+    grid-column: 2;
+  }
+
+  .konga-join-signal {
+    grid-template-columns: 1fr;
+    gap: .25rem;
+  }
+}
+
+@media (max-width: 390px) {
+  .konga-commandbar {
+    flex-direction: column;
+  }
+
+  .konga-countdown-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .konga-node {
+    width: 96%;
+  }
+
+  .konga-node:nth-child(even) {
+    justify-self: start;
+  }
+
+  .konga-open-slot {
+    width: 86%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .konga-belt {
+    animation: konga-breathe 4s ease-in-out infinite;
+    background-position-y: 0;
+  }
+
+  .konga-node.is-arriving,
+  .konga-join-signal {
+    animation: none;
+  }
+}

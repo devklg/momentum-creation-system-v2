@@ -60,7 +60,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import type { McsComProspectCopy } from "@momentum/shared";
+import type {
+  McsComProspectCopy,
+  McsKongaContractVersion,
+  McsWebinarReplay,
+} from "@momentum/shared";
 
 import TickerStrip from "./sections/00-TickerStrip";
 import { getPresentationCopy, type PresentationEntryKind } from "./presentationCopy";
@@ -130,6 +134,9 @@ export interface ResolveTokenResponse {
    * consumer falls back to its built-in copy when absent.
    */
   copy?: McsComProspectCopy | null;
+  contractVersion?: McsKongaContractVersion | null;
+  pageVisitId?: string;
+  replay?: McsWebinarReplay | null;
 }
 
 export interface VideoCompletePlacement {
@@ -280,6 +287,9 @@ export function TmVideoPresentation({ resolved, entryKind = "pmv" }: TmVideoPres
         placedAt={placement.placedAt}
         nextEvent={nextEvent}
         copy={resolved.copy ?? null}
+        contractVersion={resolved.contractVersion ?? null}
+        pageVisitId={resolved.pageVisitId}
+        replay={resolved.replay ?? null}
         entryKind={entryKind}
         onBackToPresentation={goToPresentation}
       />

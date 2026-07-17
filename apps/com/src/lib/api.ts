@@ -20,6 +20,7 @@ import type {
   McsComProspectCopy,
   McsEnrolledResponse,
   McsExpiredResponse,
+  McsKongaContractVersion,
   McsProspectLoginRedeemPayload,
   McsProspectLoginRedeemResponse,
   McsProspectLoginStartPayload,
@@ -29,6 +30,7 @@ import type {
   McsVideoEventKind,
   McsVideoEventPayload,
   McsVideoEventResponse,
+  McsWebinarReplay,
   McsWebinarReservationPayload,
   McsWebinarReservationResponse,
 } from '@momentum/shared';
@@ -79,6 +81,10 @@ export interface ResolveTokenResponse {
    * leaves it absent, and every consumer falls back to its built-in copy.
    */
   copy?: McsComProspectCopy | null;
+  /** Additive ACR-0034 contract metadata; absent on rollback-safe servers. */
+  contractVersion?: McsKongaContractVersion;
+  pageVisitId?: string;
+  replay?: McsWebinarReplay | null;
 }
 
 /**
@@ -110,22 +116,26 @@ export type VideoEventError =
 
 export async function resolveToken(
   token: string,
+  pageVisitId?: string,
 ): Promise<{ ok: true; data: ResolveTokenResponse } | { ok: false; error: ResolveTokenError }> {
-  return resolveTokenAt('/api/p', token);
+  return resolveTokenAt('/api/p', token, pageVisitId);
 }
 
 export async function resolveRvmToken(
   token: string,
+  pageVisitId?: string,
 ): Promise<{ ok: true; data: ResolveTokenResponse } | { ok: false; error: ResolveTokenError }> {
-  return resolveTokenAt('/api/rvm', token);
+  return resolveTokenAt('/api/rvm', token, pageVisitId);
 }
 
 async function resolveTokenAt(
   apiBase: '/api/p' | '/api/rvm',
   token: string,
+  pageVisitId?: string,
 ): Promise<{ ok: true; data: ResolveTokenResponse } | { ok: false; error: ResolveTokenError }> {
   try {
-    const res = await fetch(`${apiBase}/${encodeURIComponent(token)}`, {
+    const visitQuery = pageVisitId ? `?pageVisitId=${encodeURIComponent(pageVisitId)}` : '';
+    const res = await fetch(`${apiBase}/${encodeURIComponent(token)}${visitQuery}`, {
       method: 'GET',
       headers: { Accept: 'application/json' },
     });

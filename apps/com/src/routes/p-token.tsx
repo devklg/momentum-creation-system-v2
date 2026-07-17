@@ -45,6 +45,7 @@ type ResolveState =
 
 export function PTokenPage() {
   const { token } = useParams<{ token: string }>();
+  const [pageVisitId] = useState(() => crypto.randomUUID());
   const [state, setState] = useState<ResolveState>({ kind: 'loading' });
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export function PTokenPage() {
       return;
     }
     let cancelled = false;
-    void resolveToken(token).then((result) => {
+    void resolveToken(token, pageVisitId).then((result) => {
       if (cancelled) return;
       if (result.ok) setState({ kind: 'ok', data: result.data });
       else setState({ kind: 'err', error: result.error });
@@ -61,7 +62,7 @@ export function PTokenPage() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [pageVisitId, token]);
 
   // Happy path — mount the full eleven-section composer. The composer
   // handles 200 return-visit routing internally: it initializes
@@ -86,6 +87,9 @@ export function PTokenPage() {
       // TASK-147 inherit-com: master-content-resolved copy for the hero +
       // dashboard sections, resolved + interpolated server-side.
       copy: state.data.copy ?? null,
+      contractVersion: state.data.contractVersion ?? null,
+      pageVisitId: state.data.pageVisitId ?? pageVisitId,
+      replay: state.data.replay ?? null,
     };
     return <TmVideoPresentation resolved={composerInput} />;
   }
