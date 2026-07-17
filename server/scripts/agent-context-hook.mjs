@@ -106,14 +106,43 @@ function outputContext(eventName, additionalContext) {
   }));
 }
 
-function continuationText(root) {
+function continuationSnapshot(root) {
   const path = join(root, 'knowledge', 'CONTINUATION_CONTEXT.md');
   if (!existsSync(path)) {
-    return 'Continuation foundation missing: knowledge/CONTINUATION_CONTEXT.md was not found.';
+    return {
+      status: 'missing',
+      text: 'CONTINUATION FOUNDATION MISSING: knowledge/CONTINUATION_CONTEXT.md was not found. Use the user request, current decision ledger, and Intervector inbox; do not infer a front_of_line.',
+      frontOfLine: null,
+    };
   }
+
   const full = readFileSync(path, 'utf8').trim();
-  if (full.length <= MAX_FOUNDATION_CHARS) return full;
-  return `${full.slice(0, MAX_FOUNDATION_CHARS)}\n\n[Read the full continuation file before substantive work.]`;
+  const declaredMain = full.match(/Current verified\s+`main`:\s+`([0-9a-f]{7,40})`/i)?.[1] ?? null;
+  const currentMain = process.env.MCS_AGENT_CONTEXT_HOOK_MAIN_FIXTURE
+    || gitValue(root, ['rev-parse', 'origin/main'], '');
+
+  if (!declaredMain) {
+    return {
+      status: 'unversioned',
+      text: 'CONTINUATION FOUNDATION UNVERIFIED: knowledge/CONTINUATION_CONTEXT.md does not declare the verified origin/main commit. Do not use its front_of_line until it is reconciled.',
+      frontOfLine: null,
+    };
+  }
+
+  if (!currentMain || !currentMain.startsWith(declaredMain)) {
+    const observed = currentMain ? currentMain.slice(0, 8) : 'unavailable';
+    return {
+      status: 'stale',
+      text: `CONTINUATION FOUNDATION STALE: knowledge/CONTINUATION_CONTEXT.md declares origin/main ${declaredMain}, but current origin/main is ${observed}. Its task pointer and front_of_line were deliberately withheld. Use the current user request, active decision ledger, and Intervector inbox instead.`,
+      frontOfLine: null,
+    };
+  }
+
+  const bounded = full.length <= MAX_FOUNDATION_CHARS
+    ? full
+    : `${full.slice(0, MAX_FOUNDATION_CHARS)}\n\n[Read the full continuation file before substantive work.]`;
+  const frontOfLine = full.match(/The single front-of-line item is:\s*>\s*([^\r\n]+)/i)?.[1]?.trim() ?? null;
+  return { status: 'current', text: bounded, frontOfLine };
 }
 
 function agentRecipients(model) {
@@ -165,6 +194,10 @@ async function unreadInbox(model) {
 function startupContext(root, input, inbox) {
   const branch = gitValue(root, ['branch', '--show-current'], '(detached or unavailable)');
   const commit = gitValue(root, ['log', '-1', '--format=%h %s'], '(git history unavailable)');
+  const continuation = continuationSnapshot(root);
+  const authorityInstruction = continuation.status === 'current'
+    ? 'The continuation commit matches origin/main. Follow its front_of_line and authority rules. The first substantive user prompt will receive a topic-specific memory guard automatically.'
+    : 'The continuation is not current authority. Follow the user request, current decision ledger, and Intervector evidence. The first substantive user prompt will receive a topic-specific memory guard automatically.';
   return [
     'AUTOMATIC CONTEXT AGENT — SESSION FOUNDATION (ACR-0017)',
     `Event: ${input.hook_event_name ?? 'SessionStart'} · source: ${input.source ?? 'unknown'} · model: ${input.model ?? 'unknown'}`,
@@ -173,23 +206,29 @@ function startupContext(root, input, inbox) {
     '',
     inbox,
     '',
-    continuationText(root),
+    continuation.text,
     '',
-    'This context was injected automatically. Follow its front_of_line and authority rules. The first user prompt will receive a topic-specific memory guard automatically.',
+    authorityInstruction,
   ].join('\n');
 }
 
-function isTrivialPrompt(prompt) {
-  const clean = String(prompt || '').replace(/\s+/g, ' ').trim();
-  return !clean || /^(hi|hello|hey|ok|okay|continue|go ahead|start)[.! ]*$/i.test(clean);
+function normalizedPrompt(prompt) {
+  return String(prompt || '').replace(/\s+/g, ' ').trim();
+}
+
+function isGreetingPrompt(prompt) {
+  return /^(hi|hello|hey)[.! ]*$/i.test(normalizedPrompt(prompt));
+}
+
+function isContinuationPrompt(prompt) {
+  return /^(ok|okay|continue|go ahead|start)[.! ]*$/i.test(normalizedPrompt(prompt));
 }
 
 function promptTopic(prompt, root) {
-  const clean = String(prompt || '').replace(/\s+/g, ' ').trim();
-  if (isTrivialPrompt(prompt)) {
-    const continuation = continuationText(root);
-    const front = continuation.match(/^>\s+(P2-\d+[^\r\n]*)/im)?.[1];
-    return front ?? 'current continuation front_of_line';
+  const clean = normalizedPrompt(prompt);
+  if (isContinuationPrompt(prompt)) {
+    const continuation = continuationSnapshot(root);
+    return continuation.frontOfLine ?? 'current user-directed task and active decision ledger';
   }
   return clean.slice(0, 700);
 }
@@ -251,19 +290,23 @@ async function main() {
   }
 
   if (eventName === 'SubagentStart') {
+    const continuation = continuationSnapshot(root);
     outputContext(eventName, [
       'AUTOMATIC CONTEXT AGENT — SUBAGENT FOUNDATION (ACR-0017)',
       `Agent type: ${input.agent_type ?? 'unknown'} · workspace: ${root}`,
-      continuationText(root),
-      'Run the memory guard for the assigned topic before proposing new work. Do not rediscover an existing concept.',
+      continuation.text,
+      continuation.status === 'current'
+        ? 'Run the memory guard for the assigned topic before proposing new work. Do not rediscover an existing concept.'
+        : 'Do not use a stale task pointer. Run the memory guard for the assigned topic and follow the parent assignment plus current decision evidence.',
     ].join('\n\n'));
     return;
   }
 
   if (eventName === 'UserPromptSubmit') {
-    const trivial = isTrivialPrompt(input.prompt);
-    if (!claimFirstPrompt(input.session_id, !trivial)) return;
-    const topic = promptTopic(input.prompt, root);
+    const prompt = normalizedPrompt(input.prompt);
+    if (!prompt || isGreetingPrompt(prompt)) return;
+    if (!claimFirstPrompt(input.session_id)) return;
+    const topic = promptTopic(prompt, root);
     const report = runGuard(root, topic);
     outputContext(eventName, [
       'AUTOMATIC CONTEXT AGENT — FIRST-PROMPT MEMORY GUARD (ACR-0017)',

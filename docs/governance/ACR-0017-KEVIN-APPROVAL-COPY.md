@@ -30,7 +30,8 @@ It would run at these events:
 
 ## What the hook does
 
-- Injects the continuation foundation into the agent's working context.
+- Validates the continuation's declared `origin/main` commit before injecting its task pointer.
+- Injects a verified-current continuation foundation into the agent's working context; stale or unversioned pointers are withheld with an explicit warning.
 - Alerts the agent when unread Intervector messages exist.
 - Runs the existing topic-specific memory guard on the first substantive prompt.
 - Reminds the agent that Kevin is the authority and agent-authored material is not Kevin approval.
@@ -56,7 +57,7 @@ It would run at these events:
 
 ## Failure behavior
 
-If the inbox or memory guard is unavailable, the hook reports that context is unavailable. It instructs the agent not to claim that no context exists and to perform the required manual check.
+If the continuation commit does not match current `origin/main`, the hook reports it as stale and withholds its task pointer. If the inbox or memory guard is unavailable, the hook reports that context is unavailable. It instructs the agent not to claim that no context exists and to perform the required manual check.
 
 ## Codex trust prompt
 
