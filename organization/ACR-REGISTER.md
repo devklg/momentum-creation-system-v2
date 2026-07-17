@@ -46,6 +46,7 @@ No ratified architecture document may be modified outside an approved ACR.
 | ACR-0031 | Steve Profile Retention and Visibility | P2-141 / Steve private-data lifecycle | Approved | v1.2 |
 | ACR-0032 | Steve Interview Versioning and Durable Retention | P2-141 / Steve plan-of-action continuity | Approved | v1.3 |
 | ACR-0033 | Resource Catalog Content-Version Bindings | P2-142 / training, orientation, resources, and event materials | Approved | v1.3 |
+| ACR-0034 | Konga Line Prospect Surface and Momentum Events | Konga Line / prospect + BA momentum surface | Approved | v1.4 |
 
 ---
 
