@@ -374,19 +374,26 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
 
   const [voiceOn, setVoiceOn] = useState(false);
   const [listening, setListening] = useState(false);
+  const [awaitingReply, setAwaitingReplyState] = useState(false);
   const voiceOnRef = useRef(false);
+  const awaitingReplyRef = useRef(false);
   const doneRef = useRef(false);
   const busyRef = useRef(false);
   const recRef = useRef<SpeechRec | null>(null);
   const pendingFinalRef = useRef('');
-  const lastSpeechAtRef = useRef(0);
-  const ignoreNextEndRef = useRef(false);
+  const steveTurnTokenRef = useRef(0);
   const voiceSupported = localSpeechRecognitionCtor() !== null && preferredVoice !== null;
+
+  const setAwaitingReply = (value: boolean) => {
+    awaitingReplyRef.current = value;
+    setAwaitingReplyState(value);
+  };
 
   const send = useCallback(
     async (message: string) => {
       setBusy(true);
       busyRef.current = true;
+      setAwaitingReply(false);
       setError(null);
       try {
         const res = await fetch('/api/steve/discovery/converse', {
@@ -407,12 +414,19 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
           return;
         }
         if (data.turns) setTurns(data.turns);
+        const latestTurn = data.turns?.slice(-1)[0];
         const lastSteve = data.turns?.filter((t) => t.role === 'steve').slice(-1)[0]?.text ?? '';
         if (data.done) {
           doneRef.current = true;
+          setAwaitingReply(false);
           stopVoice();
         }
-        if (voiceOnRef.current && lastSteve) speak(lastSteve);
+        else {
+          setAwaitingReply(latestTurn?.role === 'steve');
+        }
+        if (voiceOnRef.current && latestTurn?.role === 'steve' && lastSteve) {
+          speak(lastSteve);
+        }
         if (data.extractionPending) {
           setError('Steve is wrapping up your profile — send one more short message to finish.');
         }
@@ -427,7 +441,7 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
         busyRef.current = false;
       }
     },
-    [onComplete],
+    [onComplete, preferredVoice],
   );
 
   useEffect(() => {
@@ -474,8 +488,11 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
 
   useEffect(() => {
     return () => {
+      voiceOnRef.current = false;
+      const rec = recRef.current;
+      recRef.current = null;
       try {
-        recRef.current?.abort();
+        rec?.abort();
       } catch {
         /* noop */
       }
@@ -492,6 +509,9 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
   }
 
   function submitMessage(message: string) {
+    if (voiceOnRef.current) {
+      stopVoiceListeningForSubmit();
+    }
     pendingFinalRef.current = '';
     setTurns((prev) => [
       ...prev,
@@ -506,6 +526,18 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
     await send('');
   }
 
+  function stopVoiceListeningForSubmit() {
+    const rec = recRef.current;
+    setListening(false);
+    pendingFinalRef.current = '';
+    recRef.current = null;
+    try {
+      rec?.abort();
+    } catch {
+      /* noop */
+    }
+  }
+
   /* ── voice controls ── */
 
   function speak(text: string) {
@@ -513,6 +545,7 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
       stopVoice();
       return;
     }
+    const turnToken = ++steveTurnTokenRef.current;
     speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(speakableText(text));
     utter.lang = 'en-US';
@@ -520,13 +553,22 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
     utter.rate = 1.0;
     utter.pitch = 0.92;
     utter.onend = () => {
-      if (voiceOnRef.current && !doneRef.current && !busyRef.current) startListening();
+      if (
+        turnToken !== steveTurnTokenRef.current ||
+        !voiceOnRef.current ||
+        doneRef.current ||
+        !awaitingReplyRef.current ||
+        busyRef.current
+      ) {
+        return;
+      }
+      startListening();
     };
     speechSynthesis.speak(utter);
   }
 
   function startListening() {
-    if (!voiceOnRef.current || doneRef.current) return;
+    if (!voiceOnRef.current || doneRef.current || !awaitingReplyRef.current) return;
     if (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking) return;
     const Ctor = localSpeechRecognitionCtor();
     if (!Ctor) {
@@ -534,7 +576,15 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
       stopVoice();
       return;
     }
-    try { recRef.current?.abort(); } catch { /* noop */ }
+    const previousRec = recRef.current;
+    if (previousRec) {
+      recRef.current = null;
+      try {
+        previousRec.abort();
+      } catch {
+        /* noop */
+      }
+    }
     const rec = new Ctor();
     recRef.current = rec;
     rec.processLocally = true;
@@ -544,7 +594,6 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
     let sessionFinalText = pendingFinalRef.current;
     rec.onresult = (e) => {
       let interim = '';
-      lastSpeechAtRef.current = Date.now();
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const r = e.results[i];
         if (!r) continue;
@@ -557,18 +606,11 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
       setDraft(`${sessionFinalText}${interim}`.trimStart());
     };
     rec.onend = () => {
+      if (recRef.current !== rec) return;
+      recRef.current = null;
       setListening(false);
-      if (ignoreNextEndRef.current) {
-        ignoreNextEndRef.current = false;
-        return;
-      }
-      const message = pendingFinalRef.current.trim();
-      const quietLongEnough = Date.now() - lastSpeechAtRef.current >= 2500;
-      if (message && quietLongEnough && !busyRef.current) {
-        pendingFinalRef.current = '';
-        setDraft('');
-        submitMessage(message);
-      } else if (voiceOnRef.current && !doneRef.current && !busyRef.current && typeof speechSynthesis !== 'undefined' && !speechSynthesis.speaking) {
+      setDraft(pendingFinalRef.current);
+      if (voiceOnRef.current && !doneRef.current && awaitingReplyRef.current && !busyRef.current && typeof speechSynthesis !== 'undefined' && !speechSynthesis.speaking) {
         startListening();
       }
     };
@@ -583,12 +625,13 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
 
   function stopVoice() {
     voiceOnRef.current = false;
+    setAwaitingReply(false);
     setVoiceOn(false);
     setListening(false);
     pendingFinalRef.current = '';
-    lastSpeechAtRef.current = 0;
-    ignoreNextEndRef.current = true;
-    try { recRef.current?.abort(); } catch { /* noop */ }
+    const rec = recRef.current;
+    recRef.current = null;
+    try { rec?.abort(); } catch { /* noop */ }
     if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
   }
 
@@ -600,17 +643,6 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
     voiceOnRef.current = true;
     setVoiceOn(true);
     if (!busy) startListening();
-  }
-
-  function sendVoiceDraft() {
-    const message = draft.trim();
-    if (!message || busy) return;
-    ignoreNextEndRef.current = true;
-    try { recRef.current?.abort(); } catch { /* noop */ }
-    setListening(false);
-    setDraft('');
-    pendingFinalRef.current = '';
-    submitMessage(message);
   }
 
   const started = turns.length > 0;
@@ -696,7 +728,9 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
             placeholder={
               !started
                 ? "Press I'm ready to begin with Steve."
-                : listening
+                : !awaitingReply
+                  ? 'Wait for Steve to finish the question…'
+                  : listening
                   ? 'Listening — just talk…'
                   : 'Type your answer…'
             }
@@ -708,21 +742,13 @@ function DiscoveryChat({ onComplete }: { onComplete: () => void | Promise<void> 
             disabled={busy || !started || !draft.trim()}
             className="rounded-lg bg-gold px-5 py-3 text-sm font-semibold text-ink disabled:opacity-40"
           >
-            Send
+            Submit answer
           </button>
-          {started && listening && draft.trim() ? (
-            <button
-              type="button"
-              onClick={sendVoiceDraft}
-              className="rounded-lg border border-gold bg-gold/20 px-4 py-3 text-sm font-semibold text-gold"
-            >
-              Done — send
-            </button>
-          ) : null}
         </form>
         <p className="mt-2 text-xs leading-relaxed text-cream-mute">
           Type is always available. Voice appears only when this browser reports both
-          on-device speech recognition and a local playback voice. Team Magnificent
+          on-device speech recognition and a local playback voice. Press Submit
+          answer when your spoken or typed answer is complete. Team Magnificent
           receives the resulting text, not microphone audio.
         </p>
       </div>
@@ -804,6 +830,8 @@ function ProfileView({
   onReload: () => Promise<void>;
 }) {
   const p = artifact.successProfile;
+  const [conversationExpanded, setConversationExpanded] = useState(false);
+  const hasConversation = artifact.answers.length > 0 || artifact.transcript.length > 0;
   return (
     <div className="min-h-screen bg-ink text-cream">
       <SteveShellHeader kicker="Steve · Success Profile" />
@@ -885,42 +913,79 @@ function ProfileView({
           </Section>
         ) : null}
 
-        {artifact.answers.length ? (
-          <Section title="Your Discovery Conversation">
-            <ul className="space-y-4">
-              {artifact.answers.map((a) => (
-                <li key={a.questionId}>
-                  <p className="text-[13px] font-medium text-cream-faint">{a.prompt}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-cream">{a.answerText}</p>
-                </li>
-              ))}
-            </ul>
-          </Section>
-        ) : null}
+        {hasConversation ? (
+          <section className="mb-8 rounded-xl border border-cream/10 bg-cream/[0.02] p-5">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-[12px] font-mono uppercase tracking-[0.16em] text-teal">
+                Your Discovery Conversation
+              </h2>
+              <button
+                type="button"
+                onClick={() => setConversationExpanded((open) => !open)}
+                className="text-xs font-mono uppercase tracking-[0.2em] text-gold underline decoration-cream/30 underline-offset-4"
+              >
+                {conversationExpanded ? 'Hide full conversation' : 'View full conversation'}
+              </button>
+            </div>
+            {conversationExpanded ? (
+              <div className="space-y-6">
+                {artifact.answers.length ? (
+                  <div>
+                    <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-cream-mute">
+                      What you shared
+                    </p>
+                    <ul className="space-y-4">
+                      {artifact.answers.map((a) => (
+                        <li key={a.questionId}>
+                          <p className="text-[13px] font-medium text-cream-faint">{a.prompt}</p>
+                          <p className="mt-1 text-sm leading-relaxed text-cream">
+                            {a.answerText}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
 
-        {artifact.transcript.length ? (
-          <Section title="Your Transcript">
-            <ol className="space-y-3">
-              {artifact.transcript.map((turn) => (
-                <li
-                  key={`${turn.sequence}-${turn.speaker}`}
-                  className="rounded-lg border border-cream/10 bg-black/20 p-3"
-                >
-                  <p className="text-[11px] font-mono uppercase tracking-[0.12em] text-cream-mute">
-                    {turn.speaker === 'ba' ? 'You' : 'Steve'} · turn {turn.sequence}
-                  </p>
-                  <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-cream">
-                    {turn.text}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </Section>
+                {artifact.transcript.length ? (
+                  <div>
+                    <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-cream-mute">
+                      Transcript
+                    </p>
+                    <ol className="space-y-3">
+                      {artifact.transcript.map((turn) => (
+                        <li
+                          key={`${turn.sequence}-${turn.speaker}`}
+                          className="rounded-lg border border-cream/10 bg-black/20 p-3"
+                        >
+                          <p className="text-[11px] font-mono uppercase tracking-[0.12em] text-cream-mute">
+                            {turn.speaker === 'ba' ? 'You' : 'Steve'} · turn {turn.sequence}
+                          </p>
+                          <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-cream">
+                            {turn.text}
+                          </p>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </section>
         ) : null}
 
         <SteveRetakeControls artifact={artifact} onReload={onReload} />
         <SteveCorrectionControls artifact={artifact} onReload={onReload} />
         <StevePrivacyControls tmagId={artifact.tmagId} />
+
+        <div className="mt-10">
+          <Link
+            to="/launch"
+            className="inline-flex w-full justify-center rounded-lg bg-gold px-5 py-3 text-sm font-semibold text-ink hover:bg-gold/90 sm:w-auto"
+          >
+            Continue to Launch Center
+          </Link>
+        </div>
 
         <p className="mt-10 text-[11px] font-mono uppercase tracking-[0.18em] text-cream-mute">
           {p.signedBy}

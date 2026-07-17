@@ -96,7 +96,8 @@ One route /p/{token}, two faces by token state.
 - [x] Click-acknowledge commitment, triple-stack write, routes to Michael
 - [x] Audit current welcome.tsx against locked-spec v2; merge welcome-prototype-v2 letter-voice + 7-day-arc strip (#147 wf_0037)
 
-### 3.2 Steve discovery + Michael training and daily success coach  `[~]` (#102, #134, #147; reconciled 2026-06-24)
+### 3.2 Steve discovery + Michael training and daily success coach  `[x]` (#102, #134, #147; reconciled 2026-06-24)
+- [x] 2026-07-17 turn-taking/completion UX fix — while `voiceOn` is enabled, active speech recognition is explicitly stopped/aborted before each `/api/steve/discovery/converse` submit, its `onend` restart is suppressed for that in-flight request, and fresh listening only resumes after the returned Steve utterance `onend`.
 - [x] Scheduler + Telnyx call origination + webhook + STT wiring
 - [x] State 1 â€” Awaiting call (gold pill, pulsing dot, wrong-number link) (#134 wf_0038)
 - [x] State 2 â€” Call in progress (teal pill, near-real-time transcript via SSE, speaker labels, no buttons) (#134 wf_0039)
