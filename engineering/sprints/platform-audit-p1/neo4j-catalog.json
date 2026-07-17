@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T22:23:10.726Z",
+  "generatedAt": "2026-07-17T22:42:15.595Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
