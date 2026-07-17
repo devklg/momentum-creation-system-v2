@@ -1,5 +1,6 @@
 import type {
   McsResourceCatalogEntry,
+  McsResourceCenterDocument,
   McsResourceCenterDetailResponse,
   McsResourceCenterItem,
   McsResourceCenterResponse,
@@ -10,6 +11,8 @@ import { RESOURCE_CATALOG_MONGO_COLLECTION } from './resourceCatalogSchema.js';
 import { verifyResourcePublishingGate } from './resourcePublishingGate.js';
 import { knowledgeSourceContentDigest } from '../services/knowledge/knowledgeResourceProjection.js';
 import type { McsKnowledgeBaseSourceRecord } from '@momentum/shared/runtime';
+import type { McsKnowledgeBaseDocumentPointer } from '@momentum/shared/runtime';
+import { parseKnowledgeDocumentPointer } from '../services/knowledge/knowledgeDocumentStorage.js';
 
 type Persistence = typeof persistenceCall;
 type VerifyGate = typeof verifyResourcePublishingGate;
@@ -39,6 +42,33 @@ export async function getResourceCenterResourceDetail(
   persistence: Persistence = persistenceCall,
   verifyGate: VerifyGate = verifyResourcePublishingGate,
 ): Promise<McsResourceCenterDetailResponse | null> {
+  const resolved = await resolveKnowledgeResource(resourceVersionId, persistence, verifyGate);
+  if (!resolved) return null;
+  const { entry, source } = resolved;
+  const document = resourceCenterDocument(resourceVersionId, source.upload?.document);
+  return {
+    ok: true,
+    schemaVersion: MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION,
+    item: toItem(entry),
+    content: source.originalContent,
+    document,
+  };
+}
+
+export async function getResourceCenterKnowledgeDocumentPointer(
+  resourceVersionId: string,
+  persistence: Persistence = persistenceCall,
+  verifyGate: VerifyGate = verifyResourcePublishingGate,
+): Promise<McsKnowledgeBaseDocumentPointer | null> {
+  const resolved = await resolveKnowledgeResource(resourceVersionId, persistence, verifyGate);
+  return resolved ? parseKnowledgeDocumentPointer(resolved.source.upload?.document) : null;
+}
+
+async function resolveKnowledgeResource(
+  resourceVersionId: string,
+  persistence: Persistence,
+  verifyGate: VerifyGate,
+): Promise<{ entry: McsResourceCatalogEntry; source: McsKnowledgeBaseSourceRecord } | null> {
   const mongo = await persistence<{ documents?: McsResourceCatalogEntry[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: RESOURCE_CATALOG_MONGO_COLLECTION,
@@ -67,12 +97,21 @@ export async function getResourceCenterResourceDetail(
   });
   const source = sourceResult.documents?.[0];
   if (!source || knowledgeSourceContentDigest(source) !== entry.contentDigestSha256) return null;
-  return {
-    ok: true,
-    schemaVersion: MCS_RESOURCE_CENTER_RESPONSE_SCHEMA_VERSION,
-    item: toItem(entry),
-    content: source.originalContent,
-  };
+  return { entry, source };
+}
+
+function resourceCenterDocument(
+  resourceVersionId: string,
+  value: unknown,
+): McsResourceCenterDocument | null {
+  const pointer = parseKnowledgeDocumentPointer(value);
+  return pointer ? {
+    filename: pointer.filename,
+    mimeType: pointer.mimeType,
+    originalBytes: pointer.originalBytes,
+    sha256: pointer.sha256,
+    openTarget: `/api/resources/${encodeURIComponent(resourceVersionId)}/document`,
+  } : null;
 }
 
 function toItem(entry: McsResourceCatalogEntry): McsResourceCenterItem {

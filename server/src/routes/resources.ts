@@ -4,6 +4,8 @@ import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import { listResourceCenterResources } from '../domain/resourceCenter.js';
 import { getResourceCenterResourceDetail } from '../domain/resourceCenter.js';
+import { getResourceCenterKnowledgeDocumentPointer } from '../domain/resourceCenter.js';
+import { openKnowledgeDocument } from '../services/knowledge/knowledgeDocumentStorage.js';
 import { recordVerifiedResourceOpen } from '../domain/resourceUsage.js';
 
 export const resourceRoutes: Router = Router();
@@ -35,6 +37,34 @@ resourceRoutes.post('/:resourceVersionId/usage', requireAuth, requireSteveComple
   }
 });
 
+resourceRoutes.get('/:resourceVersionId/document', requireAuth, requireSteveComplete, async (req, res) => {
+  try {
+    const resourceVersionId = decodedResourceVersionId(req.params.resourceVersionId);
+    if (!resourceVersionId || resourceVersionId.length > 300) {
+      return res.status(400).json({ ok: false, error: 'invalid_resource_version_id' });
+    }
+    const pointer = await getResourceCenterKnowledgeDocumentPointer(resourceVersionId);
+    if (!pointer) return res.status(404).json({ ok: false, error: 'resource_document_not_found' });
+    const document = await openKnowledgeDocument(pointer);
+    res.setHeader('Content-Type', document.mimeType);
+    res.setHeader('Content-Length', String(document.originalBytes));
+    res.setHeader('Cache-Control', 'private, max-age=0, must-revalidate');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Disposition', inlineContentDisposition(document.filename));
+    document.stream.on('error', (error) => {
+      console.error('[GET /api/resources/:resourceVersionId/document] stream failed', error);
+      if (!res.headersSent) res.status(503).end();
+      else res.destroy(error);
+    });
+    document.stream.pipe(res);
+    return;
+  } catch (error) {
+    console.error('[GET /api/resources/:resourceVersionId/document] failed', error);
+    if (!res.headersSent) return res.status(503).json({ ok: false, error: 'resource_document_unavailable' });
+    return res.destroy(error instanceof Error ? error : undefined);
+  }
+});
+
 resourceRoutes.get('/:resourceVersionId', requireAuth, requireSteveComplete, async (req, res) => {
   try {
     const rawResourceVersionId = req.params.resourceVersionId;
@@ -52,3 +82,14 @@ resourceRoutes.get('/:resourceVersionId', requireAuth, requireSteveComplete, asy
     return res.status(503).json({ ok: false, error: 'resource_catalog_unavailable' });
   }
 });
+
+function decodedResourceVersionId(value: string | string[] | undefined): string {
+  const raw = Array.isArray(value) ? value[0] ?? '' : value ?? '';
+  return decodeURIComponent(raw).trim();
+}
+
+function inlineContentDisposition(filename: string): string {
+  const ascii = filename.replace(/[^A-Za-z0-9._ -]/g, '_').replace(/["\\]/g, '_').slice(0, 180) || 'document.pdf';
+  const unicodeSafe = filename.replace(/[\uD800-\uDFFF]/g, '_');
+  return `inline; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(unicodeSafe)}`;
+}

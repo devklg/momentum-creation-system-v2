@@ -110,12 +110,26 @@ describe('P2-100 Resource Center verified projection', () => {
       if (params.collection === 'mcs_knowledge_sources') return { documents: [{
         sourceId: 'source_1', version: 1, status: 'active', authorityDecision: 'active_authority',
         authority: { authorityKind: 'kevin_approved', authorityStatus: 'active_authority' }, originalContent: content,
+        upload: { document: {
+          storage: 'mongo_gridfs', bucketName: 'mcs_knowledge_documents', fileId: '507f1f77bcf86cd799439011',
+          filename: 'approved-report.pdf', mimeType: 'application/pdf', originalBytes: 62288,
+          sha256: 'b'.repeat(64), uploadedAt: NOW,
+        } },
       }] };
       throw new Error('unexpected');
     });
     const verify = vi.fn(async () => ({ allowed: true }));
     const response = await getResourceCenterResourceDetail(approved.resourceVersionId, persistence as never, verify as never);
-    expect(response).toMatchObject({ ok: true, item: { resourceVersionId: approved.resourceVersionId }, content });
+    expect(response).toMatchObject({
+      ok: true,
+      item: { resourceVersionId: approved.resourceVersionId },
+      content,
+      document: {
+        filename: 'approved-report.pdf',
+        mimeType: 'application/pdf',
+        openTarget: `/api/resources/${encodeURIComponent(approved.resourceVersionId)}/document`,
+      },
+    });
   });
 
   it('does not list an active knowledge catalog projection before its canonical source is active', async () => {
