@@ -25,6 +25,7 @@
     "reconcile:stores": "tsx scripts/run-cross-store-reconciliation.ts",
     "cleanup:crm": "tsx scripts/run-crm-cleanup.ts",
     "smoke:steve-context": "tsx scripts/smoke-steve-context-comparison.ts",
+    "smoke:provider-keys": "tsx scripts/smoke-provider-keys.ts",
     "worker:vm-import": "tsx src/workers/vmImportWorker.ts",
     "worker:vm-delivery": "tsx src/workers/vmDeliveryWorker.ts",
     "worker:vm-webhook": "tsx src/workers/vmWebhookWorker.ts",
