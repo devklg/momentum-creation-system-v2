@@ -36,3 +36,4 @@ export * from './admin-pagination.js';
 export * from './admin-knowledge-corrections.js';
 export * from './vm-provider-catalog.js';
 export * from './steve-privacy.js';
+export * from './content-versioning.js';

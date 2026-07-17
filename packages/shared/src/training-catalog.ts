@@ -1,4 +1,5 @@
 import type { McsFastStartModuleId } from './types.js';
+import { MCS_FAST_START_CONTENT_VERSIONING_BOUNDARY } from './content-versioning.js';
 
 export const MCS_TRAINING_CATALOG_SCHEMA_VERSION = 'training_catalog.v1' as const;
 
@@ -226,6 +227,7 @@ export const MCS_TRAINING_CATALOG = {
     },
   },
   modules: MCS_TRAINING_MODULE_CATALOG,
+  contentVersioning: MCS_FAST_START_CONTENT_VERSIONING_BOUNDARY,
   adjacentTrainingSurfaces: [
     {
       id: 'ten_step_orientation',
@@ -250,5 +252,7 @@ export const MCS_TRAINING_CATALOG = {
     completionRequiresExplicitEvidence: true,
     elapsedTimeNeverCompletesTraining: true,
     catalogIsProjectionNotContentAuthority: true,
+    resourceCatalogIsContentAuthority: true,
+    currentFastStartContentRatificationDeferredUntilPostAuditAppReview: true,
   },
 } as const;

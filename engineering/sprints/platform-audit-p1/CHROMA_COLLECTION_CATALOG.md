@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-16T23:54:26.352Z
+- Generated: 2026-07-17T00:16:34.384Z
 - Registered collections: 53
 - Schema-catalog collections: 53
 - Collections with observed write/query usage: 33
@@ -61,7 +61,7 @@
 | `mcs_knowledge_sources` | knowledge | not_language_scoped | Approved knowledge source retrieval and source lookup. | not observed | none observed | none observed | `domain`, `language` |
 | `mcs_learning_candidates_review` | knowledge_review | metadata.language | Review-only learning candidates; never active retrieval knowledge. | `writeKnowledge` | `createdAt`, `domain`, `kind`, `language`, `status`, `tenantId` | none observed | `tenantId` |
 | `mcs_members` | identity_access | not_language_scoped | Team Magnificent member identity semantic record. | `add`<br>`delete`<br>`get` | `backfilledAt`, `entitlements`, `kind`, `role`, `threeBaId`, `timezone`, `tmagId`, `updatedAt` | none observed | `threeBaId`, `tmagId` |
-| `mcs_new_member_orientation_reservations` | identity_access | not_language_scoped | Team Magnificent member identity semantic record. | `create_collection`<br>`writeOperational` | `capacity`, `chat_number`, `createdAt`, `kind`, `purpose`, `reservationId`, `scheduledFor`, `sessionId`, `status`, `tmagId`, `wireframe_leaf` | none observed | `reservationId`, `sessionId`, `tmagId` |
+| `mcs_new_member_orientation_reservations` | identity_access | not_language_scoped | Team Magnificent member identity semantic record. | `create_collection`<br>`writeOperational` | `capacity`, `chat_number`, `contentBindingDigestSha256`, `createdAt`, `kind`, `primaryResourceVersionId`, `purpose`, `reservationId`, `resourceVersionIdsJson`, `scheduledFor`, `sessionId`, `status`, `tmagId`, `wireframe_leaf` | none observed | `primaryResourceVersionId`, `reservationId`, `sessionId`, `tmagId` |
 | `mcs_organizational_knowledge_en` | knowledge | en | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_organizational_knowledge_es` | knowledge | es | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_outcomes` | outcomes | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `createdAt`, `kind`, `outcomeAt`, `prospectId`, `tenantId`, `tmagId`, `token`, `type` | none observed | `prospectId`, `tenantId`, `tmagId` |

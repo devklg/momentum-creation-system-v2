@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T23:54:26.352Z",
+  "generatedAt": "2026-07-17T00:16:34.384Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -958,17 +958,17 @@
       "sources": [
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 72,
+          "line": 77,
           "action": "persistenceCall.chromadb.create_collection"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 366,
+          "line": 375,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 482,
+          "line": 507,
           "action": "writeOperational"
         }
       ],
@@ -983,10 +983,13 @@
         "observedMetadataKeys": [
           "capacity",
           "chat_number",
+          "contentBindingDigestSha256",
           "createdAt",
           "kind",
+          "primaryResourceVersionId",
           "purpose",
           "reservationId",
+          "resourceVersionIdsJson",
           "scheduledFor",
           "sessionId",
           "status",
@@ -995,6 +998,7 @@
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
+          "primaryResourceVersionId",
           "reservationId",
           "sessionId",
           "tmagId"

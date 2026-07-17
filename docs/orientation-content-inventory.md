@@ -25,11 +25,14 @@ The contextual-resource block is an optional extension limited to active,
 approved resource-catalog entries; it is not curriculum sequence, attendance,
 or completion evidence.
 
-Current gaps remain visible: English exists and Spanish does not; no durable
-content-version authority binds the page to a scheduled session; and no record
-proves what a host actually delivered. P2-142 is the planned content-versioning
-item. External legacy onboarding material that is not shipped in this repo is
-not counted as current implementation.
+Current gaps remain visible: English exists and Spanish does not, and no record
+proves what a host actually delivered. ACR-0033 and P2-142 now provide the
+durable content-version boundary: the code-owned curriculum is
+`training:orientation:ten_step:v1` in `resource_catalog.v1`, its source digest
+is guarded against silent drift, and every newly created scheduled session
+snapshots the exact verified catalog versions it will deliver. That binding is
+not attendance or host-delivery evidence. External legacy onboarding material
+that is not shipped in this repo is not counted as current implementation.
 
 Although the regulated curriculum is intended for the `.team` surface,
 `TeamShell` is presently a layout wrapper rather than evidenced authentication

@@ -1,3 +1,5 @@
+import { MCS_ORIENTATION_CURRICULUM_RESOURCE_VERSION } from './content-versioning.js';
+
 export const MCS_ORIENTATION_CONTENT_INVENTORY_VERSION = 'orientation_content_inventory.v1' as const;
 
 export interface McsCurrentOrientationCurriculumStep {
@@ -45,8 +47,22 @@ export const MCS_CURRENT_ORIENTATION_CONTENT_INVENTORY = {
       authenticationEnforcement: 'not_evidenced',
     },
     languageAvailability: { en: 'implemented', es: 'missing' },
-    contentVersionAuthority: null,
-    sessionCurriculumBinding: null,
+    contentVersionAuthority: {
+      catalogSchemaVersion: 'resource_catalog.v1',
+      resourceId: MCS_ORIENTATION_CURRICULUM_RESOURCE_VERSION.resourceId,
+      resourceVersionId: MCS_ORIENTATION_CURRICULUM_RESOURCE_VERSION.resourceVersionId,
+      version: MCS_ORIENTATION_CURRICULUM_RESOURCE_VERSION.version,
+      contentDigestSha256: MCS_ORIENTATION_CURRICULUM_RESOURCE_VERSION.contentDigestSha256,
+      sourcePath: MCS_ORIENTATION_CURRICULUM_RESOURCE_VERSION.sourcePath,
+      authorityEvidenceId: MCS_ORIENTATION_CURRICULUM_RESOURCE_VERSION.authorityEvidenceId,
+    },
+    sessionCurriculumBinding: {
+      schemaVersion: 'content_version_binding.v1',
+      persistence: ['mongo', 'neo4j', 'chroma'],
+      bindingIdentity: 'resourceVersionId',
+      immutableAfterSessionCreation: true,
+      exactStoreReadbackRequired: true,
+    },
     steps: MCS_CURRENT_ORIENTATION_CURRICULUM_STEPS,
     supportingBlocks: [
       { id: 'hero', sourceAnchor: '<span className="block">10 Steps to</span>' },
@@ -91,5 +107,6 @@ export const MCS_CURRENT_ORIENTATION_CONTENT_INVENTORY = {
     historicalPlaceholderIsSupersededByLockedSpecChat99: true,
     legacyOnboardingHtmlIsNotCurrentImplementation: true,
     hostDeliveryEvidenceAuthority: null,
+    resourceCatalogIsContentAuthority: true,
   },
 } as const;

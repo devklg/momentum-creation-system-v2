@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T23:54:33.888Z",
+  "generatedAt": "2026-07-17T00:16:41.822Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -1212,32 +1212,32 @@
       "sources": [
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 146,
+          "line": 151,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 164,
+          "line": 169,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 182,
+          "line": 187,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 482,
+          "line": 507,
           "source": "writeOperational"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 562,
+          "line": 587,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 603,
+          "line": 628,
           "source": "persistenceCall.mongodb.update"
         }
       ]
@@ -1249,22 +1249,22 @@
       "sources": [
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 95,
+          "line": 100,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 111,
+          "line": 116,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 127,
+          "line": 132,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/domain/orientationSession.ts",
-          "line": 366,
+          "line": 375,
           "source": "writeOperational"
         }
       ]
@@ -3146,8 +3146,8 @@
       {
         "label": "RESERVED_ORIENTATION",
         "sources": [
-          "server/src/domain/orientationSession.ts:501",
-          "server/src/domain/orientationSession.ts:614"
+          "server/src/domain/orientationSession.ts:526",
+          "server/src/domain/orientationSession.ts:639"
         ]
       },
       {
@@ -3239,8 +3239,8 @@
           "server/src/domain/invitations.ts:254",
           "server/src/domain/ivory.ts:220",
           "server/src/domain/ivory.ts:233",
-          "server/src/domain/orientationSession.ts:499",
-          "server/src/domain/orientationSession.ts:614",
+          "server/src/domain/orientationSession.ts:524",
+          "server/src/domain/orientationSession.ts:639",
           "server/src/domain/outcomes.ts:218",
           "server/src/domain/profile.ts:238",
           "server/src/domain/profile.ts:540",
@@ -3288,6 +3288,7 @@
           "server/src/qa/sponsorImmutabilityGraphVerification.ts:87",
           "server/src/qa/sponsorImmutabilityGraphVerification.ts:88",
           "server/src/qa/sponsorImmutabilityGraphVerification.ts:97",
+          "server/src/services/contentVersioning.ts:150",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:262"
         ]
       },
@@ -3381,6 +3382,7 @@
       {
         "label": "TmagEventMaterialContext",
         "sources": [
+          "server/src/services/contentVersioning.ts:156",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:306"
         ]
       },
@@ -3462,9 +3464,10 @@
       {
         "label": "TmagOrientationSession",
         "sources": [
-          "server/src/domain/orientationSession.ts:372",
-          "server/src/domain/orientationSession.ts:500",
-          "server/src/domain/orientationSession.ts:614"
+          "server/src/domain/orientationSession.ts:381",
+          "server/src/domain/orientationSession.ts:525",
+          "server/src/domain/orientationSession.ts:639",
+          "server/src/services/contentVersioning.ts:274"
         ]
       },
       {
@@ -3591,6 +3594,7 @@
         "label": "TmagResource",
         "sources": [
           "server/src/domain/resourcePublishingGate.ts:72",
+          "server/src/services/contentVersioning.ts:144",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:256"
         ]
       },
@@ -3603,8 +3607,11 @@
       {
         "label": "TmagResourceVersion",
         "sources": [
+          "server/src/domain/orientationSession.ts:388",
           "server/src/domain/resourcePublishingGate.ts:72",
           "server/src/domain/resourceUsage.ts:82",
+          "server/src/services/contentVersioning.ts:146",
+          "server/src/services/contentVersioning.ts:275",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:258",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:290",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:305"
@@ -3657,6 +3664,7 @@
       {
         "label": "TmagTrainingModule",
         "sources": [
+          "server/src/services/contentVersioning.ts:153",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:291"
         ]
       },
@@ -3809,6 +3817,7 @@
         "relationship": "APPROVED_BY",
         "sources": [
           "server/src/domain/resourcePublishingGate.ts:72",
+          "server/src/services/contentVersioning.ts:152",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:264"
         ]
       },
@@ -3854,6 +3863,13 @@
         "sources": [
           "server/src/domain/bulkLeads.ts:248",
           "server/src/domain/bulkLeads.ts:263"
+        ]
+      },
+      {
+        "relationship": "DELIVERS_RESOURCE_VERSION",
+        "sources": [
+          "server/src/domain/orientationSession.ts:389",
+          "server/src/services/contentVersioning.ts:275"
         ]
       },
       {
@@ -4004,6 +4020,7 @@
           "server/src/domain/resourcePublishingGate.ts:72",
           "server/src/domain/steveVersioning.ts:217",
           "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186",
+          "server/src/services/contentVersioning.ts:149",
           "server/src/services/knowledge/knowledgeCorrectionStore.ts:580",
           "server/src/services/knowledge/knowledgeCorrectionStore.ts:894",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:261"
@@ -4201,12 +4218,14 @@
       {
         "relationship": "SUPPORTS_EVENT_MATERIAL",
         "sources": [
+          "server/src/services/contentVersioning.ts:158",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:308"
         ]
       },
       {
         "relationship": "SUPPORTS_TRAINING_MODULE",
         "sources": [
+          "server/src/services/contentVersioning.ts:155",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:293"
         ]
       },
@@ -7062,6 +7081,46 @@
       "name": "MCS_NEVER_ON_COM",
       "kind": "const",
       "file": "packages/shared/src/compliance.ts"
+    },
+    {
+      "name": "MCS_CONTENT_VERSION_BINDING_SCHEMA_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/content-versioning.ts"
+    },
+    {
+      "name": "MCS_FAST_START_CONTENT_VERSIONING_BOUNDARY",
+      "kind": "const",
+      "file": "packages/shared/src/content-versioning.ts"
+    },
+    {
+      "name": "MCS_ORIENTATION_CURRICULUM_RESOURCE_VERSION",
+      "kind": "const",
+      "file": "packages/shared/src/content-versioning.ts"
+    },
+    {
+      "name": "MCS_RESOURCE_AND_EVENT_MATERIAL_VERSIONING_BOUNDARY",
+      "kind": "const",
+      "file": "packages/shared/src/content-versioning.ts"
+    },
+    {
+      "name": "McsBoundResourceVersion",
+      "kind": "interface",
+      "file": "packages/shared/src/content-versioning.ts"
+    },
+    {
+      "name": "McsContentVersionBinding",
+      "kind": "interface",
+      "file": "packages/shared/src/content-versioning.ts"
+    },
+    {
+      "name": "McsVersionedOrientationSession",
+      "kind": "interface",
+      "file": "packages/shared/src/content-versioning.ts"
+    },
+    {
+      "name": "validateContentVersionBinding",
+      "kind": "function",
+      "file": "packages/shared/src/content-versioning.ts"
     },
     {
       "name": "CRM_CALLBACK_INTENTS",
@@ -12422,10 +12481,10 @@
   "summary": {
     "mongoCollections": 75,
     "neo4jLabels": 84,
-    "neo4jRelationships": 68,
+    "neo4jRelationships": 69,
     "chromaCollections": 53,
     "routeModules": 49,
     "routeHandlers": 292,
-    "sharedExports": 1182
+    "sharedExports": 1190
   }
 }
