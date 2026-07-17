@@ -12,6 +12,10 @@ import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  COMPILED_VIDEO_COUNT,
+  COMPILED_VIDEO_LIBRARY_SECTIONS,
+} from './video-library-catalog';
 
 type InvitationSource = 'self' | 'ivory' | 'scriptmaker';
 type ContentVideoAudience = 'member' | 'prospect' | 'both';
@@ -22,6 +26,7 @@ interface ContentVideo {
   title: string;
   youtubeId: string | null;
   url: string | null;
+  embedUrl?: string | null;
   description: string;
   sortOrder: number;
   audience: ContentVideoAudience;
@@ -103,8 +108,9 @@ interface DraftTarget {
 export function VideoLibraryPage() {
   const navigate = useNavigate();
   const ytReady = useYouTubeApi();
-  const [sections, setSections] = useState<ContentVideoSection[]>([]);
-  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [sections, setSections] = useState<ContentVideoSection[]>(
+    COMPILED_VIDEO_LIBRARY_SECTIONS,
+  );
   const [draftTarget, setDraftTarget] = useState<DraftTarget | null>(null);
 
   useEffect(() => {
@@ -114,14 +120,12 @@ export function VideoLibraryPage() {
         const res = await fetch('/api/content/videos', { credentials: 'include' });
         const data = (await res.json()) as ContentVideosResponse | { ok: false };
         if (cancelled) return;
-        if (!res.ok || !data.ok) {
-          setState('error');
-          return;
+        if (res.ok && data.ok) {
+          setSections(mergeLibrarySections(COMPILED_VIDEO_LIBRARY_SECTIONS, data.sections));
         }
-        setSections(data.sections);
-        setState('ready');
       } catch {
-        if (!cancelled) setState('error');
+        // The compiled library is deliberately available when the editable
+        // admin collection is empty or temporarily unavailable.
       }
     })();
     return () => {
@@ -179,41 +183,22 @@ export function VideoLibraryPage() {
           <span className="text-gold-bright">Share with confidence.</span>
         </h1>
         <p className="max-w-2xl mx-auto text-cream-mute text-[16px] leading-[1.7] mt-6">
-          Kevin can update this gallery from /admin. Watch product videos here,
-          then turn the right one into a personal invitation when someone comes to mind.
+          The complete Team Magnificent training gallery is ready now — {COMPILED_VIDEO_COUNT}{' '}
+          product and member-training resources compiled from the established GitHub library.
+          Kevin can add new videos from /admin without replacing this foundation.
         </p>
       </section>
 
       <main className="max-w-6xl mx-auto px-6 py-14">
-        {state === 'loading' && (
-          <p className="font-mono tracking-[0.12em] text-[12px] text-cream-faint uppercase">
-            Loading Product Gallery...
-          </p>
-        )}
-        {state === 'error' && (
-          <div className="border border-red-400/30 bg-red-500/[0.04] rounded-md p-5">
-            <p className="font-mono tracking-[0.08em] text-[12px] text-red-300 uppercase">
-              Product Gallery could not load.
-            </p>
-          </div>
-        )}
-        {state === 'ready' && sections.length === 0 && (
-          <div className="border border-line rounded-md p-6">
-            <p className="text-cream-mute text-[14px]">
-              No gallery videos are active yet. Kevin can add them from /admin.
-            </p>
-          </div>
-        )}
-        {state === 'ready' &&
-          sections.map((section, index) => (
-            <LibrarySection
-              key={section.section}
-              section={section}
-              number={String(index + 1).padStart(2, '0')}
-              ytReady={ytReady}
-              onDraft={openDraft}
-            />
-          ))}
+        {sections.map((section, index) => (
+          <LibrarySection
+            key={section.section}
+            section={section}
+            number={String(index + 1).padStart(2, '0')}
+            ytReady={ytReady}
+            onDraft={openDraft}
+          />
+        ))}
       </main>
 
       {draftTarget && (
@@ -290,7 +275,8 @@ function VideoCard({
   const [finished, setFinished] = useState(false);
 
   const draftable = canDraft(video);
-  const hasEmbed = !!video.youtubeId;
+  const hasYouTubeEmbed = !!video.youtubeId;
+  const hasExternalEmbed = !!video.embedUrl;
 
   const handleFinish = useCallback(() => {
     if (finishedRef.current) return;
@@ -300,7 +286,7 @@ function VideoCard({
   }, [draftable, onDraft, video]);
 
   useEffect(() => {
-    if (!ytReady || !hasEmbed || !containerRef.current || !video.youtubeId) return;
+    if (!ytReady || !hasYouTubeEmbed || !containerRef.current || !video.youtubeId) return;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window as any;
     if (!w.YT?.Player) return;
@@ -340,7 +326,7 @@ function VideoCard({
       playerRef.current = null;
       setPlayerReady(false);
     };
-  }, [ytReady, hasEmbed, video.youtubeId, handleFinish]);
+  }, [ytReady, hasYouTubeEmbed, video.youtubeId, handleFinish]);
 
   useEffect(() => {
     if (!playerReady) return;
@@ -367,18 +353,27 @@ function VideoCard({
   return (
     <div className="bg-ink-2 border border-line rounded-md overflow-hidden flex flex-col">
       <div className="relative aspect-video bg-ink">
-        {hasEmbed ? (
+        {hasYouTubeEmbed ? (
           <div
             ref={containerRef}
             className="tm-vl__frame absolute inset-0"
             aria-label={video.title}
+          />
+        ) : hasExternalEmbed ? (
+          <iframe
+            src={video.embedUrl ?? undefined}
+            title={video.title}
+            className="absolute inset-0 h-full w-full border-0"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+            loading="lazy"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <ExternalLink className="h-8 w-8 text-gold" aria-hidden="true" />
           </div>
         )}
-        {hasEmbed && !playerReady && (
+        {hasYouTubeEmbed && !playerReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-ink pointer-events-none">
             <span className="font-mono text-[11px] tracking-[0.18em] text-cream-faint uppercase">
               Loading...
@@ -569,6 +564,43 @@ function canDraft(video: ContentVideo): boolean {
 function productNameFor(video: ContentVideo): string {
   const section = video.section.replace(/^\d+\s*[.)-]?\s*/, '').trim();
   return section || video.title;
+}
+
+function mergeLibrarySections(
+  compiled: ContentVideoSection[],
+  additions: ContentVideoSection[],
+): ContentVideoSection[] {
+  const merged = compiled.map((section) => ({
+    section: section.section,
+    videos: [...section.videos],
+  }));
+
+  for (const addition of additions) {
+    let target = merged.find(
+      (section) => section.section.toLowerCase() === addition.section.toLowerCase(),
+    );
+    if (!target) {
+      target = { section: addition.section, videos: [] };
+      merged.push(target);
+    }
+
+    const existing = new Set(target.videos.map(videoIdentity));
+    for (const video of addition.videos) {
+      const identity = videoIdentity(video);
+      if (existing.has(identity)) continue;
+      target.videos.push(video);
+      existing.add(identity);
+    }
+    target.videos.sort((a, b) => a.sortOrder - b.sortOrder);
+  }
+
+  return merged;
+}
+
+function videoIdentity(video: ContentVideo): string {
+  if (video.youtubeId) return `youtube:${video.youtubeId}`;
+  if (video.url) return `url:${video.url}`;
+  return `title:${video.title.toLowerCase()}`;
 }
 
 export default VideoLibraryPage;
