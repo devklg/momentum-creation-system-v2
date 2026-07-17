@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T14:12:58.274Z",
+  "generatedAt": "2026-07-17T21:16:44.460Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -158,7 +158,7 @@
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 801,
+          "line": 802,
           "source": "persistenceCall.mongodb.query"
         },
         {
@@ -202,27 +202,27 @@
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 429,
+          "line": 430,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 569,
+          "line": 570,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 658,
+          "line": 659,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 713,
+          "line": 714,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 786,
+          "line": 787,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -254,27 +254,27 @@
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 382,
+          "line": 383,
           "source": "writeKnowledge"
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 552,
+          "line": 553,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 652,
+          "line": 653,
           "source": "persistenceCall.mongodb.update"
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 704,
+          "line": 705,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 775,
+          "line": 776,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -286,7 +286,7 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 665,
+          "line": 666,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -341,6 +341,23 @@
         {
           "file": "server/src/domain/graphragReadiness.ts",
           "line": 51,
+          "source": "persistenceCall.mongodb.query"
+        }
+      ]
+    },
+    {
+      "collection": "MCS_KNOWLEDGE_BASE_SOURCE_COLLECTION",
+      "resolved": false,
+      "schemaMode": "permissive_mongoose_schema",
+      "sources": [
+        {
+          "file": "server/src/services/knowledge/knowledgeDocumentStorage.ts",
+          "line": 88,
+          "source": "persistenceCall.mongodb.update"
+        },
+        {
+          "file": "server/src/services/knowledge/knowledgeDocumentStorage.ts",
+          "line": 101,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -456,12 +473,12 @@
       "sources": [
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 495,
+          "line": 496,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 1125,
+          "line": 1126,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -1328,12 +1345,12 @@
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 501,
+          "line": 502,
           "source": "persistenceCall.mongodb.query"
         },
         {
           "file": "server/src/services/knowledge/knowledgeCorrectionStore.ts",
-          "line": 737,
+          "line": 738,
           "source": "persistenceCall.mongodb.query"
         }
       ]
@@ -2981,7 +2998,7 @@
         "sources": [
           "server/src/runtime/knowledge-evolution/persistence/canonicalApprovalAuthority.ts:18",
           "server/src/services/knowledge/knowledgeCorrectionStore.ts:260",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:809"
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:810"
         ]
       },
       {
@@ -3060,17 +3077,17 @@
         "label": "KnowledgeChunk",
         "sources": [
           "server/src/services/knowledge/approvedKnowledgeStore.ts:232",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:488",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:582",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:589",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:632",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:910"
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:489",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:583",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:590",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:633",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:911"
         ]
       },
       {
         "label": "KnowledgeCorrection",
         "sources": [
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:1037",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:1038",
           "server/src/services/knowledge/knowledgeCorrectionStore.ts:137",
           "server/src/services/knowledge/knowledgeCorrectionStore.ts:166"
         ]
@@ -3086,21 +3103,21 @@
         "sources": [
           "server/src/services/knowledge/approvedKnowledgeStore.ts:174",
           "server/src/services/knowledge/approvedKnowledgeStore.ts:235",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:577",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:889",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:578",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:890",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:266"
         ]
       },
       {
         "label": "KnowledgeSourceVersion",
         "sources": [
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:487",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:578",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:586",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:630",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:723",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:890",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:909"
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:488",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:579",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:587",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:631",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:724",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:891",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:910"
         ]
       },
       {
@@ -3179,7 +3196,7 @@
       {
         "label": "SUPERSEDES",
         "sources": [
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:723"
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:724"
         ]
       },
       {
@@ -3932,11 +3949,11 @@
         "relationship": "HAS_CHUNK",
         "sources": [
           "server/src/services/knowledge/approvedKnowledgeStore.ts:236",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:488",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:584",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:589",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:632",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:914"
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:489",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:585",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:590",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:633",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:915"
         ]
       },
       {
@@ -4021,8 +4038,8 @@
           "server/src/domain/steveVersioning.ts:217",
           "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:186",
           "server/src/services/contentVersioning.ts:149",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:580",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:894",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:581",
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:895",
           "server/src/services/knowledge/knowledgeResourceProjection.ts:261"
         ]
       },
@@ -4206,7 +4223,7 @@
         "sources": [
           "server/src/domain/outcomes.ts:218",
           "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:199",
-          "server/src/services/knowledge/knowledgeCorrectionStore.ts:587"
+          "server/src/services/knowledge/knowledgeCorrectionStore.ts:588"
         ]
       },
       {
@@ -4857,52 +4874,52 @@
         {
           "method": "GET",
           "path": "/status",
-          "line": 55
+          "line": 56
         },
         {
           "method": "GET",
           "path": "/source-versions",
-          "line": 64
+          "line": 65
         },
         {
           "method": "GET",
           "path": "/source-versions/:sourceVersionId",
-          "line": 80
+          "line": 81
         },
         {
           "method": "POST",
           "path": "/source-versions/:sourceVersionId/corrections/preview",
-          "line": 88
+          "line": 89
         },
         {
           "method": "POST",
           "path": "/source-versions/:sourceVersionId/corrections",
-          "line": 101
+          "line": 102
         },
         {
           "method": "GET",
           "path": "/corrections/:correctionId",
-          "line": 125
+          "line": 126
         },
         {
           "method": "POST",
           "path": "/corrections/:correctionId/retry",
-          "line": 133
+          "line": 134
         },
         {
           "method": "POST",
           "path": "/corrections/:correctionId/rollback",
-          "line": 151
+          "line": 152
         },
         {
           "method": "POST",
           "path": "/sources",
-          "line": 177
+          "line": 178
         },
         {
           "method": "POST",
           "path": "/sources/upload",
-          "line": 242
+          "line": 243
         }
       ],
       "sharedTypes": [
@@ -6046,17 +6063,22 @@
         {
           "method": "GET",
           "path": "/",
-          "line": 11
+          "line": 13
         },
         {
           "method": "POST",
           "path": "/:resourceVersionId/usage",
-          "line": 22
+          "line": 24
+        },
+        {
+          "method": "GET",
+          "path": "/:resourceVersionId/document",
+          "line": 42
         },
         {
           "method": "GET",
           "path": "/:resourceVersionId",
-          "line": 38
+          "line": 70
         }
       ],
       "sharedTypes": [
@@ -8173,6 +8195,11 @@
       "file": "packages/shared/src/resource-center.ts"
     },
     {
+      "name": "McsResourceCenterDocument",
+      "kind": "interface",
+      "file": "packages/shared/src/resource-center.ts"
+    },
+    {
       "name": "McsResourceCenterItem",
       "kind": "interface",
       "file": "packages/shared/src/resource-center.ts"
@@ -8884,6 +8911,16 @@
     },
     {
       "name": "McsKnowledgeBaseCreateResult",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/knowledge-base-schema.ts"
+    },
+    {
+      "name": "McsKnowledgeBaseDocumentPointer",
+      "kind": "interface",
+      "file": "packages/shared/src/runtime/knowledge-base-schema.ts"
+    },
+    {
+      "name": "McsKnowledgeBaseExtractionMetadata",
       "kind": "interface",
       "file": "packages/shared/src/runtime/knowledge-base-schema.ts"
     },
@@ -12654,12 +12691,12 @@
     }
   ],
   "summary": {
-    "mongoCollections": 75,
+    "mongoCollections": 76,
     "neo4jLabels": 84,
     "neo4jRelationships": 69,
     "chromaCollections": 53,
     "routeModules": 49,
-    "routeHandlers": 292,
-    "sharedExports": 1225
+    "routeHandlers": 293,
+    "sharedExports": 1228
   }
 }

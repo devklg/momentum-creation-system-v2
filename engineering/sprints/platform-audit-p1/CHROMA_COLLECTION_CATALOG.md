@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-07-17T14:12:45.570Z
+- Generated: 2026-07-17T21:16:31.735Z
 - Registered collections: 53
 - Schema-catalog collections: 53
 - Collections with observed write/query usage: 33
@@ -46,7 +46,7 @@
 | `mcs_agent_ivory_events` | agents | not_language_scoped | Agent event/template semantic memory. | not observed | none observed | none observed | none inferred |
 | `mcs_agent_michael_events` | agents | not_language_scoped | Agent event/template semantic memory. | `writeKnowledge` | `agentId`, `createdAt`, `kind`, `tmagId` | none observed | `agentId`, `tmagId` |
 | `mcs_agent_steve_events` | agents | not_language_scoped | Agent event/template semantic memory. | not observed | none observed | none observed | none inferred |
-| `mcs_agent_system_events` | agents | not_language_scoped | Agent event/template semantic memory. | `add`<br>`get`<br>`tripleStackWrite` | `actor_tmag_id`, `correction_id`, `current_digest_sha256`, `current_source_version_id`, `decided_by`, `decision_id`, `expected_lifecycle`, `expected_replacement_source_version_id`, `expected_version`, `idempotency_key`, `preview_digest_sha256`, `reason_digest_sha256`, `replacement_digest_sha256`, `replacement_source_version_id`, `source_id`, `status`, `type` | none observed | none inferred |
+| `mcs_agent_system_events` | agents | not_language_scoped | Agent event/template semantic memory. | `add`<br>`get`<br>`tripleStackWrite` | `actor_tmag_id`, `correction_id`, `current_digest_sha256`, `current_source_version_id`, `decided_at`, `decided_by`, `decision_id`, `expected_lifecycle`, `expected_replacement_source_version_id`, `expected_version`, `idempotency_key`, `preview_digest_sha256`, `reason_digest_sha256`, `replacement_digest_sha256`, `replacement_source_version_id`, `source_id`, `status`, `type` | none observed | none inferred |
 | `mcs_agent_templates` | agents | not_language_scoped | Agent event/template semantic memory. | not observed | none observed | none observed | none inferred |
 | `mcs_audit_log` | audit_governance | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `action`, `agent`, `correlationId`, `entityKind`, `role`, `severity`, `taxonomyCategory`, `taxonomyImpact`, `taxonomyOutcome`, `tenantId`, `timestamp`, `tmagId`, `turnId` | none observed | `correlationId`, `tenantId`, `tmagId`, `turnId` |
 | `mcs_broadcasts` | broadcast_delivery | not_language_scoped | Registered app Chroma collection. | `writeOperational` | `audiencePreset`, `broadcastId`, `channel`, `createdAt`, `isTestSend` | none observed | `broadcastId` |
@@ -109,7 +109,7 @@ entries need explicit contract handling in P1-43.
 | `chroma.collection` | expression | `add` | 2 | `server/src/domain/steveVersioning.ts:266`<br>`server/src/services/tieredWrite.ts:303` |
 | `collection` | expression | `create_collection` | 1 | `server/src/runtime/knowledge-evolution/indexing/knowledgeEvolutionReindex.service.ts:63` |
 | `input.chroma.collection` | expression | `add` | 1 | `server/src/services/tripleStack.ts:72` |
-| `knowledgeChromaCollection(current.domain, current.language)` | expression | `writeKnowledge` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:382` |
-| `knowledgeChromaCollection(source.domain, source.language)` | expression | `add` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:1103` |
+| `knowledgeChromaCollection(current.domain, current.language)` | expression | `writeKnowledge` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:383` |
+| `knowledgeChromaCollection(source.domain, source.language)` | expression | `add` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:1104` |
 | `mcs_questionnaires` | literal/constant | `writeKnowledge` | 1 | `server/src/domain/questionnaire.ts:203` |
 | `tmag_workbooks` | literal/constant | `add` | 1 | `server/src/domain/workbook.ts:356` |
