@@ -74,7 +74,7 @@
           "contentSha256": "85e443f3b6e0e93e9c41a6fe9b3480d5c32cbe7c468858ea51aca2033277783c"
         }
       ],
-      "contentSha256": "ba6f616251cdbc8b9032896d03bb33f43ebb4aa4aef5683eb28838d2b01a05bf",
+      "contentSha256": "366d44f90d3d102a5413b020c196993ac4743fca2e8b434edf048349c589f016",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-17T03:32:22.938Z"
     },
@@ -85,12 +85,12 @@
       "sources": [
         {
           "path": "engineering/sprints/platform-audit-p1/api-route-map.json",
-          "contentSha256": "ba6f616251cdbc8b9032896d03bb33f43ebb4aa4aef5683eb28838d2b01a05bf"
+          "contentSha256": "366d44f90d3d102a5413b020c196993ac4743fca2e8b434edf048349c589f016"
         }
       ],
-      "contentSha256": "e7e4964179ed331c8d1d699568af5824a4b49b0880c9d1323a63dd0300953b85",
+      "contentSha256": "d9aab29111f2d2e8ad876694b72ef1f7d044b138f9b551eb2cb6c28fd7694b6b",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-17T03:32:22.991Z"
+      "generatedAt": "2026-07-17T12:13:54.132Z"
     },
     {
       "file": "engineering/sprints/platform-audit-p1/persistence-write-catalog.json",
@@ -102,7 +102,7 @@
           "contentSha256": "ffa41bd931b516cb24248d5cca97946830b7c26d8000f798f47051e80ecc07e9"
         }
       ],
-      "contentSha256": "64b6cd086bee6ff2c5a3e755377fa6ad53b89d132b0f23618376ae768916c890",
+      "contentSha256": "474036bd4656e7e01b1c91420de5b228bb66192d973f206d77620f40be8437ae",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-17T03:32:32.587Z"
     },
@@ -120,7 +120,7 @@
           "contentSha256": "ffa41bd931b516cb24248d5cca97946830b7c26d8000f798f47051e80ecc07e9"
         }
       ],
-      "contentSha256": "74bdfc4025b1ed5018463306624481328385bb94418485b51a39cd003130040d",
+      "contentSha256": "088290e7f3ec732e3d10df2ea19c7affec458e407be76a3112f6b1bd9ad6efff",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-17T03:32:28.077Z"
     },
@@ -134,7 +134,7 @@
           "contentSha256": "ffa41bd931b516cb24248d5cca97946830b7c26d8000f798f47051e80ecc07e9"
         }
       ],
-      "contentSha256": "6140f4c0be0635d7e6ab493c548c0550da8d027294f3707f7cd1389bc4bfdaa6",
+      "contentSha256": "5c3dc079f1738fd8d13228ddb637e463def06dc03bca7d8385ec5083c7a6574a",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-17T03:32:09.932Z"
     },
@@ -148,7 +148,7 @@
           "contentSha256": "ffa41bd931b516cb24248d5cca97946830b7c26d8000f798f47051e80ecc07e9"
         }
       ],
-      "contentSha256": "27b2b923aa7fa8494df0ee181be5a081311d491e07be74c87d52c1ef27b39deb",
+      "contentSha256": "a900187e73a1330c0446519984d3bfafe914a0199c7a485d0aee6953f412c7b1",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-17T03:32:10.391Z"
     },
@@ -162,7 +162,7 @@
           "contentSha256": "ffa41bd931b516cb24248d5cca97946830b7c26d8000f798f47051e80ecc07e9"
         }
       ],
-      "contentSha256": "8e5ec3af1f8238822719a321875f3c88b98b56e13665ea04c7cc79af171ee585",
+      "contentSha256": "8fe163b17013d437b1626d068b82086319996fb7159a59bf22c5e6ef5cee1057",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-17T03:32:10.867Z"
     },
@@ -176,7 +176,7 @@
           "contentSha256": "ffa41bd931b516cb24248d5cca97946830b7c26d8000f798f47051e80ecc07e9"
         }
       ],
-      "contentSha256": "214ff0cf17e4b72a12621c4480f6f10e1c4cab1eeb4e2a162ad24620ae669da9",
+      "contentSha256": "30e15f9b84c17887abc45f248009e785b0d06cc35b2f50fad4630d159560b9a1",
       "lastVerifiedAt": "2026-07-12",
       "generatedAt": "2026-07-17T03:32:14.673Z"
     },
@@ -194,9 +194,9 @@
           "contentSha256": "bc2dbf222cb4aa6e4920fb9e7d85e16a76aa1550a1e76282b7d366dafd1c333e"
         }
       ],
-      "contentSha256": "64a3b4dcb80bd064cf3617f5aa93f266f331e1cb4261e807b1c8be92ec6b77be",
+      "contentSha256": "79262d35240e20d44bdfcabe1e07ed173ed106f078f1eb9751ced5020a392788",
       "lastVerifiedAt": "2026-07-12",
-      "generatedAt": "2026-07-17T03:32:33.386Z"
+      "generatedAt": "2026-07-17T12:13:54.645Z"
     }
   ],
   "historicalDocs": [
