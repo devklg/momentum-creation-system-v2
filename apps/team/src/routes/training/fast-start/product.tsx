@@ -211,7 +211,7 @@ export function ModuleProductPage() {
         </div>
       </section>
 
-      <SectionLabel>What the PDR actually is</SectionLabel>
+      <SectionLabel>What it is</SectionLabel>
       <SectionTitle>Not an advertisement. A clinical reference.</SectionTitle>
       <Prose>
         <p>
@@ -421,7 +421,7 @@ export function ModuleProductPage() {
       </Callout>
 
       {/* ── The six-pillar product line ──────────────────────────── */}
-      <SectionLabel>Meet the product line</SectionLabel>
+      <SectionLabel>The product line</SectionLabel>
       <SectionTitle>Use this as a map, not a memory test.</SectionTitle>
       <Prose>
         <p>
