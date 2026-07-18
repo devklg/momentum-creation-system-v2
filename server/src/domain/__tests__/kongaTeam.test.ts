@@ -1,6 +1,7 @@
 import type { McsHoldingTankSnapshot } from '@momentum/shared';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  getKongaTeamLeaderboard,
   getKongaTeamSnapshot,
   projectKongaLaunchProgress,
   projectKongaLifetimeLeaderboard,
@@ -91,6 +92,76 @@ describe('Konga `.team` truthful domain projections', () => {
       { firstName: 'Jordan', lastInitial: 'R', addsCount: 2 },
       { firstName: 'Jordan', lastInitial: 'B', addsCount: 1 },
     ]);
+  });
+
+  it('keyset-pages the complete lifetime corpus without boundary duplicate or skip', async () => {
+    const rows = Array.from({ length: 2_005 }, (_, index) => ({
+      _id: `row-${String(index).padStart(6, '0')}`,
+      placementId: `placement-${String(index).padStart(6, '0')}`,
+      prospectId: `prospect-${index}`,
+      sponsorTmagId: index % 2 === 0 ? 'BA-1' : 'BA-2',
+      placedAt: new Date(Date.UTC(2026, 0, 1, 0, 0, index)).toISOString(),
+    }));
+    const placementQueries: Array<Record<string, unknown>> = [];
+    const persistence = vi.fn(async (_tool: string, action: string, params: Record<string, unknown>) => {
+      expect(action).toBe('query');
+      if (params.collection === 'team_magnificent_members') {
+        const filter = params.filter as { tmagId?: string | { $in?: string[] } };
+        if (typeof filter.tmagId === 'string') {
+          return {
+            documents: [{
+              tmagId: 'VIEWER',
+              firstName: 'Viewer',
+              lastName: 'Member',
+              createdAt: SIGNUP,
+            }],
+          };
+        }
+        return {
+          documents: [
+            { tmagId: 'BA-1', firstName: 'Alpha', lastName: 'Adder' },
+            { tmagId: 'BA-2', firstName: 'Beta', lastName: 'Builder' },
+          ],
+        };
+      }
+      if (params.collection !== 'tmag_prospect_htank_placements') {
+        throw new Error(`unexpected_collection:${String(params.collection)}`);
+      }
+      placementQueries.push(params);
+      const filter = params.filter as {
+        $and?: Array<Record<string, { $gt?: string }>>;
+      };
+      const cursor = filter.$and?.[1]?._id?.$gt;
+      const remaining = cursor ? rows.filter((row) => row._id > cursor) : rows;
+      const limit = Number(params.limit);
+      return {
+        documents: remaining.slice(0, limit),
+        count: remaining.length,
+      };
+    });
+
+    const result = await getKongaTeamLeaderboard('VIEWER', {
+      persistence: persistence as never,
+    });
+
+    expect(result).toMatchObject({
+      period: 'lifetime',
+      entries: [
+        { firstName: 'Alpha', lastInitial: 'A', addsCount: 1_003 },
+        { firstName: 'Beta', lastInitial: 'B', addsCount: 1_002 },
+      ],
+    });
+    expect(placementQueries).toHaveLength(3);
+    expect(placementQueries.map((query) => query.limit)).toEqual([1_000, 1_000, 1_000]);
+    expect(placementQueries[0]!.sort).toEqual({ _id: 1 });
+    expect(
+      (placementQueries[1]!.filter as { $and: Array<Record<string, { $gt: string }>> })
+        .$and[1]!._id!.$gt,
+    ).toBe('row-000999');
+    expect(
+      (placementQueries[2]!.filter as { $and: Array<Record<string, { $gt: string }>> })
+        .$and[1]!._id!.$gt,
+    ).toBe('row-001999');
   });
 
   it('builds genesis only from earliest invitation_sent and never assigns it a pool position', async () => {

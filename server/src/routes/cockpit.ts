@@ -113,12 +113,43 @@ cockpitRoutes.get(
     const tmagId = req.session?.tmagId;
     if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
 
+    let disconnected = false;
+    let heartbeat: ReturnType<typeof setInterval> | null = null;
+    let placementSub: ReturnType<typeof subscribeKongaPlacements> | null = null;
+    let joinSub: ReturnType<typeof subscribeJoins> | null = null;
+    const cleanupResources = () => {
+      if (heartbeat) {
+        clearInterval(heartbeat);
+        heartbeat = null;
+      }
+      if (placementSub) {
+        const subscription = placementSub;
+        placementSub = null;
+        subscription.unsubscribe();
+      }
+      if (joinSub) {
+        const subscription = joinSub;
+        joinSub = null;
+        subscription.unsubscribe();
+      }
+    };
+    const markDisconnected = () => {
+      disconnected = true;
+      cleanupResources();
+    };
+    // Install before the awaited snapshot so a disconnect cannot be missed.
+    req.on('close', markDisconnected);
+    req.on('aborted', markDisconnected);
+    res.on('close', markDisconnected);
+
     let snapshot;
     try {
       snapshot = await getKongaTeamSnapshot(tmagId);
     } catch (error) {
+      if (disconnected) return;
       return sendKongaReadError(res, error);
     }
+    if (disconnected) return;
 
     res.status(200);
     res.setHeader('Content-Type', 'text/event-stream');
@@ -126,29 +157,31 @@ cockpitRoutes.get(
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders?.();
-    res.write(kongaSseFrame('snapshot', snapshot));
+    try {
+      res.write(kongaSseFrame('snapshot', snapshot));
+    } catch {
+      markDisconnected();
+      return;
+    }
 
-    const placementSub = subscribeKongaPlacements((event: McsKongaPlacementEvent) => {
-      try { res.write(kongaSseFrame('placement', event, event.eventId)); } catch { /* teardown owns cleanup */ }
+    placementSub = subscribeKongaPlacements((event: McsKongaPlacementEvent) => {
+      try { res.write(kongaSseFrame('placement', event, event.eventId)); } catch { markDisconnected(); }
     });
-    const joinSub = subscribeJoins((event: McsJoinEvent) => {
-      try { res.write(kongaSseFrame('join', event, event.eventId)); } catch { /* teardown owns cleanup */ }
+    if (disconnected) {
+      cleanupResources();
+      return;
+    }
+    joinSub = subscribeJoins((event: McsJoinEvent) => {
+      try { res.write(kongaSseFrame('join', event, event.eventId)); } catch { markDisconnected(); }
     });
-    const heartbeat = setInterval(() => {
-      try { res.write(kongaSseFrame('ping', { at: new Date().toISOString() })); } catch { /* teardown owns cleanup */ }
+    if (disconnected) {
+      cleanupResources();
+      return;
+    }
+    heartbeat = setInterval(() => {
+      try { res.write(kongaSseFrame('ping', { at: new Date().toISOString() })); } catch { markDisconnected(); }
     }, KONGA_SSE_PING_INTERVAL_MS);
-
-    let closed = false;
-    const teardown = () => {
-      if (closed) return;
-      closed = true;
-      clearInterval(heartbeat);
-      placementSub.unsubscribe();
-      joinSub.unsubscribe();
-    };
-    req.on('close', teardown);
-    req.on('aborted', teardown);
-    res.on('close', teardown);
+    if (disconnected) cleanupResources();
     return;
   },
 );

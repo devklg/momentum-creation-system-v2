@@ -157,42 +157,71 @@ describe('authenticated cockpit Konga routes', () => {
   });
 
   it('streams snapshot, placement, and join without leaderboard and detaches once', async () => {
+    vi.useFakeTimers();
+    try {
+      const request = mockRequest();
+      const response = mockResponse();
+      await finalHandler('/konga/stream')(request, response);
+
+      expect(response.writes[0]).toContain('event: snapshot');
+      expect(response.writes[0]).not.toContain('leaderboard');
+      const placementHandler = mocks.subscribePlacements.mock.calls[0]![0];
+      placementHandler({
+        contractVersion: 'konga-v1',
+        eventId: 'placement-1',
+        positionNumber: 1,
+        firstName: 'Avery',
+        lastInitial: 'Q',
+        city: 'Los Angeles',
+        stateOrRegion: 'CA',
+        placedAt: '2026-07-18T00:00:00.000Z',
+        addedBy: { firstName: 'Jordan', lastInitial: 'R' },
+      });
+      const joinHandler = mocks.subscribeJoins.mock.calls[0]![0];
+      joinHandler({
+        contractVersion: 'konga-v1',
+        eventId: 'join-1',
+        positionNumber: 1,
+        firstName: 'Avery',
+        lastInitial: 'Q',
+        city: 'Los Angeles',
+        stateOrRegion: 'CA',
+        joinedAt: '2026-07-18T01:00:00.000Z',
+        addedBy: { firstName: 'Jordan', lastInitial: 'R' },
+      });
+      expect(response.writes.some((frame) => frame.includes('event: placement'))).toBe(true);
+      expect(response.writes.some((frame) => frame.includes('event: join'))).toBe(true);
+      vi.advanceTimersByTime(30_000);
+      expect(response.writes.filter((frame) => frame.includes('event: ping'))).toHaveLength(1);
+
+      request.emit('close');
+      response.emit('close');
+      vi.advanceTimersByTime(60_000);
+      expect(response.writes.filter((frame) => frame.includes('event: ping'))).toHaveLength(1);
+      expect(mocks.placementUnsubscribe).toHaveBeenCalledTimes(1);
+      expect(mocks.joinUnsubscribe).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not subscribe or start a heartbeat when the client disconnects during snapshot read', async () => {
+    let resolveSnapshot!: (value: typeof snapshot) => void;
+    mocks.getSnapshot.mockReturnValueOnce(new Promise((resolve) => {
+      resolveSnapshot = resolve;
+    }));
     const request = mockRequest();
     const response = mockResponse();
-    await finalHandler('/konga/stream')(request, response);
-
-    expect(response.writes[0]).toContain('event: snapshot');
-    expect(response.writes[0]).not.toContain('leaderboard');
-    const placementHandler = mocks.subscribePlacements.mock.calls[0]![0];
-    placementHandler({
-      contractVersion: 'konga-v1',
-      eventId: 'placement-1',
-      positionNumber: 1,
-      firstName: 'Avery',
-      lastInitial: 'Q',
-      city: 'Los Angeles',
-      stateOrRegion: 'CA',
-      placedAt: '2026-07-18T00:00:00.000Z',
-      addedBy: { firstName: 'Jordan', lastInitial: 'R' },
-    });
-    const joinHandler = mocks.subscribeJoins.mock.calls[0]![0];
-    joinHandler({
-      contractVersion: 'konga-v1',
-      eventId: 'join-1',
-      positionNumber: 1,
-      firstName: 'Avery',
-      lastInitial: 'Q',
-      city: 'Los Angeles',
-      stateOrRegion: 'CA',
-      joinedAt: '2026-07-18T01:00:00.000Z',
-      addedBy: { firstName: 'Jordan', lastInitial: 'R' },
-    });
-    expect(response.writes.some((frame) => frame.includes('event: placement'))).toBe(true);
-    expect(response.writes.some((frame) => frame.includes('event: join'))).toBe(true);
+    const pending = finalHandler('/konga/stream')(request, response);
 
     request.emit('close');
-    response.emit('close');
-    expect(mocks.placementUnsubscribe).toHaveBeenCalledTimes(1);
-    expect(mocks.joinUnsubscribe).toHaveBeenCalledTimes(1);
+    resolveSnapshot(snapshot);
+    await pending;
+
+    expect(response.writes).toEqual([]);
+    expect(mocks.subscribePlacements).not.toHaveBeenCalled();
+    expect(mocks.subscribeJoins).not.toHaveBeenCalled();
+    expect(mocks.placementUnsubscribe).not.toHaveBeenCalled();
+    expect(mocks.joinUnsubscribe).not.toHaveBeenCalled();
   });
 });

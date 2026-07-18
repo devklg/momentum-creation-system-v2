@@ -22,6 +22,7 @@ const ATTESTATIONS_COLLECTION = 'tmag_konga_enrollment_attestations';
 const PLACEMENTS_COLLECTION = 'tmag_prospect_htank_placements';
 const H72_MS = 72 * 60 * 60 * 1000;
 const TEAM_SNAPSHOT_RECENT_LIMIT = 40;
+const LEADERBOARD_PLACEMENT_PAGE_SIZE = 1_000;
 
 type Persistence = typeof persistenceCall;
 
@@ -155,6 +156,93 @@ function normalizedMongoId(raw: unknown): string | null {
 function placementEventId(fact: KongaTeamPlacementAddFact): string | null {
   const placementId = fact.placementId?.trim();
   return placementId || normalizedMongoId(fact._id);
+}
+
+function cursorFingerprint(raw: unknown): string | null {
+  const normalized = normalizedMongoId(raw);
+  if (!normalized) return null;
+  const constructorName =
+    raw && typeof raw === 'object'
+      ? (raw as { constructor?: { name?: string } }).constructor?.name ?? 'Object'
+      : typeof raw;
+  return `${constructorName}:${normalized}`;
+}
+
+/**
+ * Read every canonical placement row with `_id` keyset pagination. The page
+ * size bounds one query, never the lifetime result. The initial count is a
+ * completeness fence: concurrent mutation or a broken/non-advancing adapter
+ * fails closed instead of returning a silently partial leaderboard.
+ */
+async function readAllLifetimePlacementAdds(
+  persistence: Persistence,
+): Promise<KongaTeamPlacementAddFact[]> {
+  const baseFilter = {
+    sponsorTmagId: { $exists: true },
+    placedAt: { $exists: true },
+  };
+  const rows: KongaTeamPlacementAddFact[] = [];
+  const seenCursors = new Set<string>();
+  let cursor: unknown;
+  let hasCursor = false;
+  let expectedTotal: number | null = null;
+
+  while (true) {
+    const filter = hasCursor
+      ? { $and: [baseFilter, { _id: { $gt: cursor } }] }
+      : baseFilter;
+    const result = await persistence<{
+      documents?: KongaTeamPlacementAddFact[];
+      count?: number;
+    }>('mongodb', 'query', {
+      database: MONGO_DB,
+      collection: PLACEMENTS_COLLECTION,
+      filter,
+      projection: {
+        _id: 1,
+        placementId: 1,
+        prospectId: 1,
+        sponsorTmagId: 1,
+        placedAt: 1,
+      },
+      sort: { _id: 1 },
+      limit: LEADERBOARD_PLACEMENT_PAGE_SIZE,
+    });
+    if (expectedTotal === null) {
+      if (!Number.isSafeInteger(result.count) || result.count! < 0) {
+        throw new KongaTeamError('konga_leaderboard_count_missing');
+      }
+      expectedTotal = result.count!;
+    }
+    const page = result.documents ?? [];
+    if (page.length > LEADERBOARD_PLACEMENT_PAGE_SIZE) {
+      throw new KongaTeamError('konga_leaderboard_page_overflow');
+    }
+    if (page.length === 0) break;
+
+    for (const row of page) {
+      const fingerprint = cursorFingerprint(row._id);
+      if (!fingerprint) throw new KongaTeamError('konga_leaderboard_cursor_missing');
+      if (seenCursors.has(fingerprint)) {
+        throw new KongaTeamError('konga_leaderboard_cursor_duplicate');
+      }
+      seenCursors.add(fingerprint);
+      rows.push(row);
+    }
+    const nextCursor = page.at(-1)!._id;
+    const nextFingerprint = cursorFingerprint(nextCursor);
+    if (!nextFingerprint || (hasCursor && nextFingerprint === cursorFingerprint(cursor))) {
+      throw new KongaTeamError('konga_leaderboard_cursor_not_advanced');
+    }
+    cursor = nextCursor;
+    hasCursor = true;
+    if (page.length < LEADERBOARD_PLACEMENT_PAGE_SIZE) break;
+  }
+
+  if (rows.length !== expectedTotal) {
+    throw new KongaTeamError('konga_leaderboard_incomplete_read');
+  }
+  return rows;
 }
 
 /**
@@ -312,23 +400,10 @@ export async function getKongaTeamLeaderboard(
 ): Promise<McsKongaTeamLeaderboardResponse> {
   const persistence = deps.persistence ?? persistenceCall;
   await readMember(viewerTmagId, persistence);
-  const placementResult = await persistence<{ documents?: KongaTeamPlacementAddFact[] }>(
-    'mongodb',
-    'query',
-    {
-      database: MONGO_DB,
-      collection: PLACEMENTS_COLLECTION,
-      filter: {
-        sponsorTmagId: { $exists: true },
-        placedAt: { $exists: true },
-      },
-      sort: { placedAt: 1, placementId: 1, _id: 1 },
-      limit: 200_000,
-    },
-  );
+  const placements = await readAllLifetimePlacementAdds(persistence);
   const sponsorIds = [
     ...new Set(
-      (placementResult.documents ?? [])
+      placements
         .map((placement) => placement.sponsorTmagId?.trim())
         .filter((value): value is string => Boolean(value)),
     ),
@@ -353,6 +428,6 @@ export async function getKongaTeamLeaderboard(
     visibility: 'members_only',
     period: 'lifetime',
     sourceAuthority: 'tmag_prospect_htank_placements',
-    entries: projectKongaLifetimeLeaderboard(placementResult.documents ?? [], members),
+    entries: projectKongaLifetimeLeaderboard(placements, members),
   };
 }
