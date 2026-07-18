@@ -42,6 +42,7 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_prospect_invitation_activity', // domain/invitations.ts, domain/crm.ts
   'mcs_prospect_callback_requests', // domain/callbackRequest.ts
   'mcs_prospect_htank_events', // domain/holdingTank.ts + domain/kongaPlacement.ts
+  'mcs_konga_placement_claims', // domain/kongaPlacement.ts (governed placement claim lease metadata)
   'mcs_konga_page_visits', // domain/kongaVisits.ts
   'mcs_konga_replay_pointers', // domain/kongaReplay.ts
   'mcs_konga_replay_completions', // domain/kongaReplay.ts
