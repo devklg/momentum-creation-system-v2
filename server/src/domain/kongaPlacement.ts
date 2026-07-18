@@ -88,6 +88,24 @@ function parseFence(value: unknown): number {
   return 0;
 }
 
+function parseKnownFence(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return Math.trunc(value);
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return Math.trunc(parsed);
+  }
+  return null;
+}
+
+function ownershipFromPlacement(
+  placement: McsKongaPoolPlacement & { ownerAttempt?: unknown; fence?: unknown },
+): { ownerAttempt: string; fence: number } | null {
+  if (typeof placement.ownerAttempt !== 'string' || !placement.ownerAttempt) return null;
+  const fence = parseKnownFence(placement.fence);
+  if (fence === null) return null;
+  return { ownerAttempt: placement.ownerAttempt, fence };
+}
+
 function isExpired(claim: KongaPlacementClaim, now: Date): boolean {
   const expiresMs = Date.parse(claim.expiresAt);
   return Number.isFinite(expiresMs) && expiresMs <= now.getTime();
@@ -272,68 +290,89 @@ async function cleanupClaimProjection(
   claim: KongaPlacementClaim,
 ): Promise<void> {
   for (let attempt = 0; attempt < CLAIM_CLEANUP_ATTEMPTS; attempt += 1) {
-    await Promise.all([
-      persistence('mongodb', 'delete', {
+    const mongoFilter = {
+      _id: claim._id,
+      ownerAttempt: claim.ownerAttempt,
+      fence: claim.fence,
+      claimEventId: claim.claimEventId,
+    };
+    const neoParams = {
+      claimEventId: claim.claimEventId,
+      prospectId: claim.prospectId,
+      ownerAttempt: claim.ownerAttempt,
+      fence: claim.fence,
+    };
+    const chromaId = claim.claimEventId;
+
+    const deleteErrors: string[] = [];
+    try {
+      await persistence('mongodb', 'delete', {
         database: MONGO_DB,
         collection: KONGA_PLACEMENT_CLAIM_COLLECTION,
-        filter: {
-          _id: claim._id,
-          ownerAttempt: claim.ownerAttempt,
-          fence: claim.fence,
-          claimEventId: claim.claimEventId,
-        },
-      }),
-      persistence('neo4j', 'cypher', {
+        filter: mongoFilter,
+      });
+    } catch (error) {
+      deleteErrors.push(`mongo:${String(error instanceof Error ? error.message : error)}`);
+    }
+    try {
+      await persistence('neo4j', 'cypher', {
         query:
           'MATCH (c:TmagKongaPlacementClaim {claimEventId:$claimEventId, prospectId:$prospectId}) ' +
           'WHERE c.ownerAttempt = $ownerAttempt AND c.fence = $fence ' +
           'DETACH DELETE c',
-        params: {
-          claimEventId: claim.claimEventId,
-          prospectId: claim.prospectId,
-          ownerAttempt: claim.ownerAttempt,
-          fence: claim.fence,
-        },
-      }),
-      persistence('chromadb', 'delete', {
+        params: neoParams,
+      });
+    } catch (error) {
+      deleteErrors.push(`neo4j:${String(error instanceof Error ? error.message : error)}`);
+    }
+    try {
+      await persistence('chromadb', 'delete', {
         collection: KONGA_PLACEMENT_CLAIM_CHROMA_COLLECTION,
-        ids: [claim.claimEventId],
-      }),
-    ]);
+        ids: [chromaId],
+      });
+    } catch (error) {
+      deleteErrors.push(`chroma:${String(error instanceof Error ? error.message : error)}`);
+    }
 
-    const [mongoResult, neoResult, chromaResult] = await Promise.all([
-      persistence<{ documents?: Array<Record<string, unknown>> }>('mongodb', 'query', {
+    let mongoResult: { documents?: Array<Record<string, unknown>> };
+    let neoResult: { records?: Array<Record<string, unknown>> };
+    let chromaResult: { ids?: string[] };
+    try {
+      mongoResult = await persistence<{ documents?: Array<Record<string, unknown>> }>('mongodb', 'query', {
         database: MONGO_DB,
         collection: KONGA_PLACEMENT_CLAIM_COLLECTION,
-        filter: {
-          _id: claim._id,
-          ownerAttempt: claim.ownerAttempt,
-          fence: claim.fence,
-          claimEventId: claim.claimEventId,
-        },
+        filter: mongoFilter,
         limit: 1,
-      }),
-      persistence<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
+      });
+    } catch (error) {
+      deleteErrors.push(`mongo-read:${String(error instanceof Error ? error.message : error)}`);
+      mongoResult = { documents: [{}] };
+    }
+    try {
+      neoResult = await persistence<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
         query:
           'MATCH (c:TmagKongaPlacementClaim {claimEventId:$claimEventId, prospectId:$prospectId}) ' +
           'WHERE c.ownerAttempt = $ownerAttempt AND c.fence = $fence ' +
           'RETURN count(c) AS n',
-        params: {
-          claimEventId: claim.claimEventId,
-          prospectId: claim.prospectId,
-          ownerAttempt: claim.ownerAttempt,
-          fence: claim.fence,
-        },
-      }),
-      persistence<{ ids?: string[] }>('chromadb', 'get', {
+        params: neoParams,
+      });
+    } catch (error) {
+      deleteErrors.push(`neo4j-read:${String(error instanceof Error ? error.message : error)}`);
+      neoResult = { records: [{ n: 1 }] };
+    }
+    try {
+      chromaResult = await persistence<{ ids?: string[] }>('chromadb', 'get', {
         collection: KONGA_PLACEMENT_CLAIM_CHROMA_COLLECTION,
-        ids: [claim.claimEventId],
-      }),
-    ]);
+        ids: [chromaId],
+      });
+    } catch (error) {
+      deleteErrors.push(`chroma-read:${String(error instanceof Error ? error.message : error)}`);
+      chromaResult = { ids: [chromaId] };
+    }
 
     const mongoClear = !mongoResult.documents?.[0];
     const neoClear = Number(neoResult.records?.[0]?.n ?? 0) === 0;
-    const chromaClear = !(chromaResult.ids ?? []).includes(claim.claimEventId);
+    const chromaClear = !(chromaResult.ids ?? []).includes(chromaId);
     if (mongoClear && neoClear && chromaClear) {
       return;
     }
@@ -785,58 +824,127 @@ async function repairPlacementProjection(
 async function cleanupPlacementAttempt(
   persistence: Persistence,
   placement: McsKongaPoolPlacement,
+  ownership?: { ownerAttempt: string; fence: number },
 ): Promise<void> {
+  const ownershipToUse = ownership ?? ownershipFromPlacement(placement as McsKongaPoolPlacement);
+  if (!ownershipToUse) {
+    throw new Error(`konga_placement_projection_cleanup_missing_owner:${placement.placementId}`);
+  }
   const deleteFilter: Record<string, unknown> = {
     placementId: placement.placementId,
     placementAttemptId: placement.placementAttemptId,
     prospectId: placement.prospectId,
+    ownerAttempt: ownershipToUse.ownerAttempt,
+    fence: ownershipToUse.fence,
   };
   const neoFilter = {
     prospectId: placement.prospectId,
     placementId: placement.placementId,
+    placementAttemptId: placement.placementAttemptId,
+    ownerAttempt: ownershipToUse.ownerAttempt,
+    fence: ownershipToUse.fence,
   };
 
   for (let attempt = 0; attempt < CLAIM_CLEANUP_ATTEMPTS; attempt += 1) {
-    await Promise.all([
-      persistence('mongodb', 'delete', {
+    const deleteErrors: string[] = [];
+    try {
+      await persistence('mongodb', 'delete', {
         database: MONGO_DB,
         collection: PLACEMENTS_COLLECTION,
         filter: deleteFilter,
-      }),
-      persistence('neo4j', 'cypher', {
+      });
+    } catch (error) {
+      deleteErrors.push(`mongo:${String(error instanceof Error ? error.message : error)}`);
+    }
+    try {
+      await persistence('neo4j', 'cypher', {
         query:
           'MATCH (p:TmagProspect {prospectId:$prospectId})-[r:IN_HOLDING_TANK {placementId:$placementId}]->(:TmagPool) ' +
+          'WHERE r.ownerAttempt = $ownerAttempt AND r.fence = $fence AND r.placementAttemptId = $placementAttemptId ' +
           'DELETE r',
         params: neoFilter,
-      }),
-      persistence('chromadb', 'delete', {
-        collection: CHROMA_COLLECTION,
-        ids: [placement.placementId],
-      }),
-    ]);
+      });
+    } catch (error) {
+      deleteErrors.push(`neo4j:${String(error instanceof Error ? error.message : error)}`);
+    }
 
-    const [mongoResult, neoResult, chromaResult] = await Promise.all([
-      persistence<{ documents?: Array<Record<string, unknown>> }>('mongodb', 'query', {
+    let mongoResult: { documents?: Array<Record<string, unknown>> };
+    let neoResult: { records?: Array<Record<string, unknown>> };
+    let chromaResult: { ids?: string[]; metadatas?: Array<Record<string, unknown> | null> };
+    try {
+      mongoResult = await persistence<{ documents?: Array<Record<string, unknown>> }>('mongodb', 'query', {
         database: MONGO_DB,
         collection: PLACEMENTS_COLLECTION,
         filter: deleteFilter,
         limit: 1,
-      }),
-      persistence<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
+      });
+    } catch (error) {
+      deleteErrors.push(`mongo-read:${String(error instanceof Error ? error.message : error)}`);
+      mongoResult = { documents: [{}] };
+    }
+    try {
+      neoResult = await persistence<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
         query:
-          'MATCH (:TmagProspect)-[r:IN_HOLDING_TANK {placementId:$placementId}]->(:TmagPool) ' +
-          'RETURN count(r) AS n',
+          'MATCH (:TmagProspect {prospectId:$prospectId})-[r:IN_HOLDING_TANK {placementId:$placementId}]->(:TmagPool) ' +
+          'WHERE r.ownerAttempt = $ownerAttempt AND r.fence = $fence AND r.placementAttemptId = $placementAttemptId RETURN count(r) AS n',
         params: neoFilter,
-      }),
-      persistence<{ ids?: string[] }>('chromadb', 'get', {
-        collection: CHROMA_COLLECTION,
+      });
+    } catch (error) {
+      deleteErrors.push(`neo4j-read:${String(error instanceof Error ? error.message : error)}`);
+      neoResult = { records: [{ n: 1 }] };
+    }
+    try {
+      chromaResult = await persistence<{ ids?: string[]; metadatas?: Array<Record<string, unknown> | null> }>(
+        'chromadb',
+        'get',
+        {
+          collection: CHROMA_COLLECTION,
+          ids: [placement.placementId],
+        },
+      );
+    } catch (error) {
+      deleteErrors.push(`chroma-read:${String(error instanceof Error ? error.message : error)}`);
+      chromaResult = {
         ids: [placement.placementId],
-      }),
-    ]);
+        metadatas: [null],
+      };
+    }
 
     const mongoClear = !mongoResult.documents?.[0];
     const neoClear = Number(neoResult.records?.[0]?.n ?? 0) === 0;
-    const chromaClear = !(chromaResult.ids ?? []).includes(placement.placementId);
+    const chromaMetadata = chromaResult.metadatas?.[0];
+    const chromaOwnerAttempt = typeof chromaMetadata?.ownerAttempt === 'string'
+      ? chromaMetadata.ownerAttempt
+      : undefined;
+    const chromaFence = parseKnownFence(chromaMetadata?.fence);
+    const chromaOwnedByTarget =
+      chromaOwnerAttempt === ownershipToUse.ownerAttempt && chromaFence === ownershipToUse.fence;
+    let chromaClear = !((chromaResult.ids ?? []).includes(placement.placementId));
+    if (chromaResult.ids?.includes(placement.placementId)) {
+      if (!chromaOwnedByTarget) {
+        chromaClear = false;
+      } else {
+        try {
+          await persistence('chromadb', 'delete', {
+            collection: CHROMA_COLLECTION,
+            ids: [placement.placementId],
+          });
+        } catch (error) {
+          deleteErrors.push(`chroma-delete:${String(error instanceof Error ? error.message : error)}`);
+        }
+        try {
+          const afterChromaDelete = await persistence<{ ids?: string[] }>('chromadb', 'get', {
+            collection: CHROMA_COLLECTION,
+            ids: [placement.placementId],
+          });
+          chromaClear = !(afterChromaDelete.ids ?? []).includes(placement.placementId);
+        } catch (error) {
+          deleteErrors.push(`chroma-read-after-delete:${String(error instanceof Error ? error.message : error)}`);
+          chromaClear = false;
+        }
+      }
+    }
+
     if (mongoClear && neoClear && chromaClear) {
       return;
     }
@@ -845,6 +953,11 @@ async function cleanupPlacementAttempt(
       await new Promise<void>((resolve) => {
         setTimeout(resolve, CLAIM_CLEANUP_BACKOFF_MS * (attempt + 1));
       });
+      continue;
+    }
+
+    if (deleteErrors.length > 0) {
+      throw new Error(`konga_placement_projection_cleanup_failed:${placement.placementId}`);
     }
   }
 
@@ -962,7 +1075,7 @@ export async function placeKongaProspect(
     }
   }
 
-  const live = await persistence<{ documents?: Array<McsPoolPlacement> }>('mongodb', 'query', {
+  const live = await persistence<{ documents?: Array<McsKongaPoolPlacement> }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
     filter: { prospectId: input.prospectId, flushedAt: null },
@@ -971,11 +1084,11 @@ export async function placeKongaProspect(
   });
   const livePlacement = live.documents?.[0];
   if (livePlacement) {
-    const kongaLive = livePlacement as McsPoolPlacement & {
-      placementId?: string;
-      placementAttemptId?: string;
-    };
-    if (!kongaLive.placementId && !kongaLive.placementAttemptId) {
+    const liveOwnership = ownershipFromPlacement(livePlacement);
+    if (!liveOwnership) {
+      throw new Error('konga_live_placement_exists');
+    }
+    if (!livePlacement.placementId && !livePlacement.placementAttemptId) {
       return {
         prospectId: livePlacement.prospectId,
         positionNumber: livePlacement.positionNumber,
@@ -983,7 +1096,6 @@ export async function placeKongaProspect(
         alreadyPlaced: true,
       };
     }
-    throw new Error('konga_live_placement_exists');
   }
 
   const ba = await (deps.findBa ?? findBAByTmagId)(input.sponsorTmagId);
@@ -1024,41 +1136,108 @@ export async function placeKongaProspect(
   }
 
   let activeLease: KongaPlacementClaim = lease;
-  let heartbeatLostError: unknown = null;
   let heartbeatStopped = false;
-  const heartbeatTask = (async () => {
-    while (!heartbeatStopped) {
-      await waitMs(deps, CLAIM_HEARTBEAT_INTERVAL_MS);
-      if (heartbeatStopped) break;
-      try {
-        activeLease = await heartbeatPlacementClaim(persistence, activeLease, nowClock());
-      } catch (error) {
-        heartbeatLostError = error;
-        heartbeatStopped = true;
-      }
-    }
-  })();
-
-  const concurrentPlacementCheck = await persistence<{ documents?: Array<McsPoolPlacement> }>(
-    'mongodb',
-    'query',
-    {
-      database: MONGO_DB,
-      collection: PLACEMENTS_COLLECTION,
-      filter: { prospectId: input.prospectId, flushedAt: null },
-      sort: { placedAt: -1, placementId: -1, _id: -1 },
-      limit: 1,
-    },
-  );
-  if (concurrentPlacementCheck.documents?.[0]) {
-    throw new Error(`konga_placement_claim_conflict:${input.prospectId}`);
-  }
+  let activeResult: McsKongaPlaceProspectResult | McsPlaceProspectResult | null = null;
+  let caughtError: unknown = null;
+  let heartbeatTask = Promise.resolve();
+  const isCurrentLeaseOwner = async (): Promise<boolean> => {
+    const rows = await persistence<{ documents?: Array<Record<string, unknown>> }>(
+      'mongodb',
+      'query',
+      {
+        database: MONGO_DB,
+        collection: KONGA_PLACEMENT_CLAIM_COLLECTION,
+        filter: { _id: activeLease._id },
+        limit: 1,
+      },
+    );
+    const claimRow = rows.documents?.[0];
+    if (!claimRow) return false;
+    const current = normalizeClaim(claimRow);
+    return (
+      current.ownerAttempt === activeLease.ownerAttempt &&
+      current.fence === activeLease.fence &&
+      current.placementAttemptId === activeLease.placementAttemptId &&
+      current.placementId === activeLease.placementId
+    );
+  };
 
   try {
-    await assertLeaseOwner(persistence, activeLease, nowClock());
-    if (heartbeatLostError) {
-      throw new Error(`konga_placement_claim_heartbeat_lost:${input.prospectId}`);
+    heartbeatTask = (async () => {
+      while (!heartbeatStopped) {
+        await waitMs(deps, CLAIM_HEARTBEAT_INTERVAL_MS);
+        if (heartbeatStopped) break;
+        try {
+          activeLease = await heartbeatPlacementClaim(persistence, activeLease, nowClock());
+        } catch (error) {
+          heartbeatStopped = true;
+        }
+      }
+    })();
+
+    const livePlacementCheck = await persistence<{ documents?: Array<McsKongaPoolPlacement> }>(
+      'mongodb',
+      'query',
+      {
+        database: MONGO_DB,
+        collection: PLACEMENTS_COLLECTION,
+        filter: { prospectId: input.prospectId, flushedAt: null },
+        sort: { placedAt: -1, placementId: -1, _id: -1 },
+        limit: 1,
+      },
+    );
+    const livePlacement = livePlacementCheck.documents?.[0];
+    if (livePlacement) {
+      const sameAttempt = livePlacement.placementAttemptId === identity.placementAttemptId;
+      if (!sameAttempt) {
+      const liveOwnership = ownershipFromPlacement(livePlacement as McsKongaPoolPlacement);
+        if (!liveOwnership) {
+          throw new Error(`konga_placement_claim_not_owner:${input.prospectId}`);
+        }
+
+        const claimRows = await persistence<{ documents?: Array<Record<string, unknown>> }>(
+          'mongodb',
+          'query',
+          {
+            database: MONGO_DB,
+            collection: KONGA_PLACEMENT_CLAIM_COLLECTION,
+            filter: { _id: claimDocumentId(input.prospectId) },
+            limit: 1,
+          },
+        );
+        const claimRow = claimRows.documents?.[0];
+        if (claimRow) {
+          const claimOwner = normalizeClaim(claimRow);
+          if (
+            claimOwner.ownerAttempt === liveOwnership.ownerAttempt &&
+            claimOwner.fence === liveOwnership.fence &&
+            !isExpired(claimOwner, nowClock())
+          ) {
+            throw new Error(`konga_placement_claim_conflict:${input.prospectId}`);
+          }
+        }
+
+        const prospectComplete = await persistence<{ documents?: Array<Record<string, unknown>> }>(
+          'mongodb',
+          'query',
+          {
+            database: MONGO_DB,
+            collection: PROSPECTS_COLLECTION,
+            filter: {
+              prospectId: input.prospectId,
+              state: 'video_complete',
+            },
+            limit: 1,
+          },
+        );
+        if (prospectComplete.documents?.[0]) {
+          throw new Error(`konga_placement_claim_conflict:${input.prospectId}`);
+        }
+
+      }
     }
+
+    await assertLeaseOwner(persistence, activeLease, nowClock());
 
     await strictWrite(
       {
@@ -1113,9 +1292,6 @@ export async function placeKongaProspect(
       },
       persistence,
     );
-    if (heartbeatLostError) {
-      throw new Error(`konga_placement_claim_heartbeat_lost:${input.prospectId}`);
-    }
     await assertLeaseOwner(persistence, activeLease, nowClock());
 
     const prospectUpdate = await persistence<{ matchedCount?: number; modifiedCount?: number }>(
@@ -1172,8 +1348,9 @@ export async function placeKongaProspect(
       addedBy,
     };
     (deps.publish ?? publishPlacement)(event);
-    return resultOf(placement, false);
+    activeResult = resultOf(placement, false);
   } catch (error) {
+    caughtError = error;
     const sameAttemptPlacement = await sameAttemptPlacementRaw(identity);
     const fencedSameAttemptPlacement = sameAttemptPlacement as
       | (McsKongaPoolPlacement & { ownerAttempt?: string; fence?: unknown })
@@ -1181,44 +1358,78 @@ export async function placeKongaProspect(
     const isOwnOwnerAttempt =
       fencedSameAttemptPlacement?.ownerAttempt === activeLease.ownerAttempt &&
       parseFence(fencedSameAttemptPlacement?.fence) === activeLease.fence;
+    const currentLeaseOwner = await isCurrentLeaseOwner();
+    const isCurrentWinner = isOwnOwnerAttempt && currentLeaseOwner;
 
-    if (isOwnOwnerAttempt) {
-      if (sameAttemptPlacement) {
+    if (isCurrentWinner && sameAttemptPlacement) {
+      try {
+        await repairPlacementProjection(
+          persistence,
+          sameAttemptPlacement,
+          { ownerAttempt: activeLease.ownerAttempt, fence: activeLease.fence },
+        );
+        await ensurePlacementReadback(sameAttemptPlacement, strictVerify, persistence);
+        activeResult = resultOf(sameAttemptPlacement, true);
+        caughtError = null;
+      } catch (repairError) {
+        caughtError = repairError;
         try {
-          await repairPlacementProjection(
-            persistence,
-            sameAttemptPlacement,
-            { ownerAttempt: activeLease.ownerAttempt, fence: activeLease.fence },
-          );
-          await ensurePlacementReadback(sameAttemptPlacement, strictVerify, persistence);
-          return resultOf(sameAttemptPlacement, true);
-        } catch (repairError) {
-          await cleanupPlacementAttempt(persistence, sameAttemptPlacement);
-          throw repairError;
+          await cleanupPlacementAttempt(persistence, sameAttemptPlacement, {
+            ownerAttempt: activeLease.ownerAttempt,
+            fence: activeLease.fence,
+          });
+        } catch (cleanupError) {
+          caughtError = cleanupError;
         }
       }
-    } else if (
-      sameAttemptPlacement &&
-      (fencedSameAttemptPlacement?.ownerAttempt !== undefined || fencedSameAttemptPlacement?.fence !== undefined)
-    ) {
-      await cleanupPlacementAttempt(persistence, sameAttemptPlacement);
     }
 
+    const sameAttemptOwnership = fencedSameAttemptPlacement
+      ? ownershipFromPlacement(fencedSameAttemptPlacement as McsKongaPoolPlacement)
+      : null;
+    if (
+      !isCurrentWinner &&
+      sameAttemptPlacement &&
+      sameAttemptOwnership?.ownerAttempt === activeLease.ownerAttempt &&
+      sameAttemptOwnership?.fence === activeLease.fence
+        ) {
+        try {
+          await cleanupPlacementAttempt(persistence, sameAttemptPlacement, sameAttemptOwnership);
+        } catch (cleanupError) {
+          caughtError = cleanupError;
+        }
+    }
     const sameAttemptPlacementVerified = await sameAttemptPlacementVerification(identity, {
       ownerAttempt: activeLease.ownerAttempt,
       fence: activeLease.fence,
     });
-    if (sameAttemptPlacementVerified) return resultOf(sameAttemptPlacementVerified, true);
-    throw error;
+    if (sameAttemptPlacementVerified && isCurrentWinner) {
+      activeResult = resultOf(sameAttemptPlacementVerified, true);
+      caughtError = null;
+    }
   } finally {
     heartbeatStopped = true;
-    heartbeatTask.catch(() => {
+    await heartbeatTask.catch(() => {
       /* intentional: heartbeat stop is enforced by boolean signal */
     });
-    await releasePlacementClaim(persistence, lease).catch(() => {
-      // Non-throwing release keeps prior outcomes authoritative.
-    });
+    try {
+      await releasePlacementClaim(persistence, lease);
+    } catch (error) {
+      if (!caughtError) {
+        caughtError = error;
+      } else if (error instanceof Error && caughtError instanceof Error && caughtError.message !== error.message) {
+        caughtError = new Error(
+          `${caughtError.message}; release-failed:${error.message}`,
+          { cause: error },
+        );
+      }
+    }
   }
+
+  if (activeResult) {
+    return activeResult;
+  }
+  throw caughtError;
 }
 
 export function projectLegacyPlacementAddedBy(
