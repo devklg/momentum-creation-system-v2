@@ -165,7 +165,9 @@ async function replay(record: OutboxRecord): Promise<void> {
         params: { id: record.entityId, ...(p.verifyParams ?? {}) },
       });
       const n = extractCount(data);
-      if (n < 1) throw new Error(`neo4j projection verify returned ${n} (<1) for ${record.entityId}`);
+      if (n !== 1) {
+        throw new Error(`neo4j projection verify returned ${n} for ${record.entityId}`);
+      }
     }
     return;
   }

@@ -49,7 +49,10 @@ import {
 import { listLeaderTmagIds, LEADER_DETECTION_NOTE } from './adminMetrics.js';
 import { findProspectById } from './prospects.js';
 import { TOKEN_TTL_MS } from './tokens.js';
-import { findPlacementByProspectId } from './holdingTank.js';
+import {
+  findPlacementByProspectId,
+  findPlacementByProspectIdLive,
+} from './holdingTank.js';
 import { updatePoolPlacementOperational } from './poolPlacementPersistence.js';
 import type {
   McsAdminBaFilterOption,
@@ -912,21 +915,26 @@ async function loadInterventionContext(input: {
   prospectId: string;
   requestingTmagId: string;
   requireToTmagId?: string;
+  requireLivePlacement?: boolean;
 }): Promise<{
   prospect: McsProspectRecord;
   placement: McsPoolPlacement | null;
   requestingBa: BaDoc;
   toBa: BaDoc | null;
 }> {
+  const placementLookup = input.requireLivePlacement ? findPlacementByProspectIdLive : findPlacementByProspectId;
   const [prospect, placement, requestingBa, toBa] = await Promise.all([
     findProspectById(input.prospectId),
-    findPlacementByProspectId(input.prospectId),
+    placementLookup(input.prospectId),
     findBaDoc(input.requestingTmagId),
     input.requireToTmagId ? findBaDoc(input.requireToTmagId) : Promise.resolve(null),
   ]);
   if (!prospect) throw new InterventionError('prospect_not_found', 404);
   if (!requestingBa)
     throw new InterventionError('requesting_ba_not_found', 400);
+  if (input.requireLivePlacement && !placement) {
+    throw new InterventionError('no_live_placement', 400);
+  }
   if (input.requireToTmagId && !toBa)
     throw new InterventionError('target_ba_not_found', 400);
   return { prospect, placement, requestingBa, toBa };
@@ -1026,6 +1034,7 @@ export async function executeMoveIntervention(input: {
     prospectId: input.prospectId,
     requestingTmagId: input.body.requestingTmagId,
     requireToTmagId: input.body.toTmagId,
+    requireLivePlacement: true,
   });
 
   if (ctx.prospect.sponsorTmagId === input.body.toTmagId) {
@@ -1114,6 +1123,7 @@ export async function executeReassignSponsorIntervention(input: {
     prospectId: input.prospectId,
     requestingTmagId: input.body.requestingTmagId,
     requireToTmagId: input.body.newSponsorTmagId,
+    requireLivePlacement: true,
   });
   if (ctx.prospect.sponsorTmagId === input.body.newSponsorTmagId) {
     throw new InterventionError('no_op_same_sponsor', 400);
@@ -1204,6 +1214,7 @@ export async function executeManualFlushIntervention(input: {
   const ctx = await loadInterventionContext({
     prospectId: input.prospectId,
     requestingTmagId: input.body.requestingTmagId,
+    requireLivePlacement: true,
   });
   if (ctx.placement?.flushedAt) {
     throw new InterventionError('placement_already_flushed', 400);
@@ -1289,6 +1300,7 @@ export async function executeForceEnrollIntervention(input: {
   const ctx = await loadInterventionContext({
     prospectId: input.prospectId,
     requestingTmagId: input.body.requestingTmagId,
+    requireLivePlacement: true,
   });
   if (ctx.prospect.state === 'enrolled') {
     throw new InterventionError('prospect_already_enrolled', 400);

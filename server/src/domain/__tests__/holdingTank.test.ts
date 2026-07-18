@@ -101,6 +101,7 @@ describe('holding tank re-entry attempt selection', () => {
         collection: 'tmag_prospect_htank_placements',
         pipeline: expect.arrayContaining([
           { $match: { flushedAt: null, placedAt: expect.any(Object) } },
+          { $sort: { prospectId: 1, placedAt: -1, placementId: -1, _id: -1 } },
         ]),
       }),
     );
@@ -116,6 +117,7 @@ describe('holding tank re-entry attempt selection', () => {
       expiresAt: '2026-09-17T00:00:00.000Z',
       flushedAt: null,
       flushReason: null,
+      _id: 'live-row-id',
     };
     const stale = {
       prospectId: 'prospect-1',
@@ -126,34 +128,50 @@ describe('holding tank re-entry attempt selection', () => {
       expiresAt: '2026-09-01T00:00:00.000Z',
       flushedAt: '2026-07-05T00:00:00.000Z',
       flushReason: 'expired',
+      _id: 'stale-row-id',
     };
+    const datastoreRows = new Map<string, Record<string, string | number | null | undefined>>([
+      [candidate.placementId, structuredClone(candidate)],
+      [stale.placementId, structuredClone(stale)],
+    ]);
     mocks.persistenceCall.mockImplementation(
       async (_tool, action, _params: { collection?: string; pipeline?: unknown[]; filter?: unknown }) => {
-        void _params;
-        if (action === 'aggregate') return { results: [candidate] };
-        if (action === 'update') return {};
+        if (_tool === 'mongodb' && action === 'aggregate') return { results: [candidate] };
+        if (_tool === 'mongodb' && action === 'update') return {};
         return {};
       },
     );
+    mocks.updatePoolPlacementOperational.mockImplementation(async (input: { prospectId: string; placementId?: string; patch?: Record<string, unknown> }) => {
+      const target = input.placementId;
+      if (target && input.patch?.flushedAt) {
+        const row = datastoreRows.get(target);
+        if (row) Object.assign(row, input.patch);
+      }
+      return undefined as never;
+    });
     const { flushExpiredPlacements } = await import('../holdingTank.js');
     const res = await flushExpiredPlacements(4, Date.parse('2026-07-18T00:00:00.000Z'));
     expect(res.flushed).toHaveLength(1);
-    expect(res.flushed[0]).toMatchObject({ prospectId: 'prospect-1', positionNumber: 12 });
+    const flushed = res.flushed[0];
+    expect(flushed).toMatchObject({ prospectId: 'prospect-1', positionNumber: 12, placementId: 'live-attempt' });
     expect(mocks.updatePoolPlacementOperational).toHaveBeenCalledWith(
       expect.objectContaining({
         prospectId: 'prospect-1',
         placementId: candidate.placementId,
+        patch: { flushedAt: expect.any(String), flushReason: 'expired' },
       }),
     );
-    expect(stale).toEqual({
+    const updateCall = mocks.updatePoolPlacementOperational.mock.calls.at(0)?.[0] as
+      | { patch?: { flushedAt?: string; flushReason?: string } }
+      | undefined;
+    const flushedAt = updateCall?.patch?.flushedAt;
+    expect(typeof flushedAt).toBe('string');
+    expect(datastoreRows.get('live-attempt')).toMatchObject({
       prospectId: 'prospect-1',
-      sponsorTmagId: 'TMBA-1',
-      positionNumber: 7,
-      placedAt: '2026-07-01T00:00:00.000Z',
-      placementId: 'stale-attempt',
-      expiresAt: '2026-09-01T00:00:00.000Z',
-      flushedAt: '2026-07-05T00:00:00.000Z',
+      placementId: 'live-attempt',
       flushReason: 'expired',
     });
+    expect(datastoreRows.get('live-attempt')?.flushedAt).toBe(flushedAt);
+    expect(datastoreRows.get('stale-attempt')).toMatchObject(stale);
   });
 });

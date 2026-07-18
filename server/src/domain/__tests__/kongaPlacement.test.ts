@@ -23,7 +23,9 @@ function successfulPersistence() {
     if (tool === 'mongodb' && action === 'query') {
       if (collection === 'tmag_prospect_htank_placements') return { documents: [] };
       if (collection === 'tmag_prospects') return { documents: [{ prospectId: input.prospectId }] };
+      return { documents: [] };
     }
+    if (tool === 'mongodb' && action === 'delete') return {};
     return {};
   });
 }
@@ -78,6 +80,112 @@ describe('Konga placement permanence', () => {
       }),
     ).rejects.toThrow('konga_chroma_readback_missing');
     expect(publish).not.toHaveBeenCalled();
+  });
+
+  it('prevents concurrent distinct attempts from both becoming live', async () => {
+    const claimCollection = 'tmag_konga_placement_claims';
+    const placementCollection = 'tmag_prospect_htank_placements';
+    const claims = new Map<string, Record<string, unknown>>();
+    const persistence = vi.fn(async (tool: string, action: string, params: Record<string, unknown>) => {
+      const collection = params.collection as string;
+      if (tool === 'mongodb') {
+        if (action === 'query') {
+          if (collection === claimCollection) {
+            const id = (params.filter as Record<string, unknown> | undefined)?._id as string;
+            const row = claims.get(id);
+            return { documents: row ? [row] : [] };
+          }
+          if (collection === placementCollection) {
+            if ((params.filter as Record<string, unknown> | undefined)?.placementAttemptId) {
+              return { documents: [] };
+            }
+            if ((params.filter as Record<string, unknown> | undefined)?.prospectId === input.prospectId) {
+              return { documents: [] };
+            }
+            return { documents: [] };
+          }
+          if (collection === 'tmag_prospects') return { documents: [{ prospectId: input.prospectId }] };
+          return { documents: [] };
+        }
+        if (action === 'insert') {
+          const doc = (params.documents as Array<Record<string, unknown>> | undefined)?.[0];
+          if (!doc) {
+            return { insertedCount: 0 };
+          }
+          const id = String((doc as { _id: string })._id);
+          if (claims.has(id)) {
+            throw new Error('duplicate key');
+          }
+          claims.set(id, doc);
+          return {};
+        }
+        if (action === 'update') {
+          const filter = params.filter as { placementAttemptId?: string; _id?: string };
+          if (collection === claimCollection && filter?._id && filter.placementAttemptId) {
+            const row = claims.get(String(filter._id));
+            if (!row) return { matchedCount: 0 };
+            if (row.placementAttemptId !== filter.placementAttemptId) return { matchedCount: 0 };
+            const update = (params.update as { $set?: Record<string, unknown> })?.$set;
+            if (update) Object.assign(row, update);
+            return { matchedCount: 1 };
+          }
+          if (collection === claimCollection && filter._id) {
+            claims.delete(String(filter._id));
+            return { deletedCount: 1 };
+          }
+          return { matchedCount: 1 };
+        }
+        if (action === 'delete') {
+          if (claims.delete(String((params.filter as Record<string, unknown> | undefined)?._id))) {
+            return { deletedCount: 1 };
+          }
+          return { deletedCount: 0 };
+        }
+      }
+      return {};
+    });
+    const strictWrite = vi.fn(async (_input: unknown) => ({ mongo: {}, neo4jCount: 1, chromaId: 'x' }));
+    const findBa = vi.fn(async () => ({ firstName: 'Jordan', lastName: 'Rivera' })) as never;
+    const increment = vi.fn(async () => 41);
+
+    const [first, second] = await Promise.allSettled([
+      placeKongaProspect(
+        { ...input, invitationRecordId: 'attempt-a' },
+        {
+          persistence: persistence as never,
+          strictWrite,
+          findBa,
+          increment,
+        },
+      ),
+      placeKongaProspect(
+        { ...input, invitationRecordId: 'attempt-b' },
+        {
+          persistence: persistence as never,
+          strictWrite,
+          findBa,
+          increment,
+        },
+      ),
+    ]);
+
+    expect(first.status === 'fulfilled' || second.status === 'fulfilled').toBe(true);
+    expect(first.status === 'rejected' || second.status === 'rejected').toBe(true);
+    const rejected = first.status === 'rejected' ? first.reason : second.status === 'rejected' ? second.reason : undefined;
+    if (!rejected) {
+      throw new Error('expected one placement attempt to be rejected');
+    }
+    expect(String(rejected)).toContain('konga_placement_claim_conflict:prospect-1');
+    expect(increment).toHaveBeenCalledTimes(2);
+    expect(persistence).toHaveBeenCalledWith(
+      'mongodb',
+      'query',
+      expect.objectContaining({
+        collection: 'tmag_prospect_htank_placements',
+        sort: { placedAt: -1, placementId: -1, _id: -1 },
+        limit: 1,
+      }),
+    );
   });
 
   it('treats the same invitation attempt as idempotent', async () => {

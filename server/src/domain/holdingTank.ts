@@ -135,23 +135,30 @@ export async function incrementPoolCounter(): Promise<number> {
  * inside placeProspect.
  */
 export async function findPlacementByProspectId(prospectId: string): Promise<McsPoolPlacement | null> {
-  const liveResult = await persistenceCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
-    database: MONGO_DB,
-    collection: PLACEMENTS_COLLECTION,
-    filter: { prospectId, flushedAt: null },
-    sort: { placedAt: -1 },
-    limit: 1,
-  });
-  if (liveResult.documents[0]) return liveResult.documents[0]!;
+  const liveResult = await findPlacementByProspectIdLive(prospectId);
+  if (liveResult) return liveResult;
 
   const result = await persistenceCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
     filter: { prospectId },
+    sort: { placedAt: -1, placementId: -1, _id: -1 },
     limit: 1,
-    sort: { placedAt: -1 },
   });
   return result.documents[0] ?? null;
+}
+
+export async function findPlacementByProspectIdLive(
+  prospectId: string,
+): Promise<McsPoolPlacement | null> {
+  const liveResult = await persistenceCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: PLACEMENTS_COLLECTION,
+    filter: { prospectId, flushedAt: null },
+    sort: { placedAt: -1, placementId: -1, _id: -1 },
+    limit: 1,
+  });
+  return liveResult.documents[0] ?? null;
 }
 
 export interface PlaceProspectInput {
@@ -187,7 +194,7 @@ export interface PlaceProspectInput {
  */
 export async function placeProspect(input: PlaceProspectInput): Promise<McsPlaceProspectResult> {
   // Idempotency check first — cheapest path is no-op.
-  const existing = await findPlacementByProspectId(input.prospectId);
+  const existing = await findPlacementByProspectIdLive(input.prospectId);
   if (existing) {
     return {
       prospectId: existing.prospectId,
@@ -244,7 +251,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
     // Concurrent placement won; return the persisted one. The position we
     // minted in step 1 is now vacant (intentional per monotonicity
     // contract). We do not attempt to reclaim it.
-    const winner = await findPlacementByProspectId(input.prospectId);
+    const winner = await findPlacementByProspectIdLive(input.prospectId);
     if (winner) {
       return {
         prospectId: winner.prospectId,
@@ -435,7 +442,7 @@ export async function listProspectsAgedBeyond(
     collection: PLACEMENTS_COLLECTION,
     pipeline: [
       { $match: { flushedAt: null, placedAt: { $lt: cutoff } } },
-      { $sort: { prospectId: 1, placedAt: -1 } },
+      { $sort: { prospectId: 1, placedAt: -1, placementId: -1, _id: -1 } },
       {
         $group: {
           _id: '$prospectId',
@@ -443,7 +450,7 @@ export async function listProspectsAgedBeyond(
         },
       },
       { $replaceRoot: { newRoot: '$placement' } },
-      { $sort: { placedAt: -1 } },
+      { $sort: { placedAt: -1, placementId: -1, _id: -1 } },
       { $limit: 50_000 },
     ],
   });

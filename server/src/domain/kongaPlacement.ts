@@ -17,14 +17,126 @@ import { tripleStackWriteWithReadback, verifyKongaThreeLegs } from './kongaPersi
 const PLACEMENTS_COLLECTION = 'tmag_prospect_htank_placements';
 const CHROMA_COLLECTION = 'mcs_prospect_htank_events';
 const PROSPECTS_COLLECTION = 'tmag_prospects';
+const KONGA_PLACEMENT_CLAIM_COLLECTION = 'tmag_konga_placement_claims';
+const KONGA_PLACEMENT_CLAIM_TTL_MS = 120_000;
 
 type Persistence = typeof persistenceCall;
 type Publish = typeof publishPlacement;
 type FindBa = typeof findBAByTmagId;
 type Increment = typeof incrementPoolCounter;
 
+interface KongaPlacementClaim {
+  _id: string;
+  prospectId: string;
+  placementAttemptId: string;
+  placementId: string;
+  expiresAt: string;
+  createdAt: string;
+}
+
 function digest(value: string): string {
   return createHash('sha256').update(value).digest('hex');
+}
+
+function claimDocumentId(prospectId: string): string {
+  return `konga_claim_${prospectId}`;
+}
+
+function claimExpiresAt(at: Date): string {
+  return new Date(at.getTime() + KONGA_PLACEMENT_CLAIM_TTL_MS).toISOString();
+}
+
+async function acquirePlacementClaim(
+  persistence: Persistence,
+  prospectId: string,
+  identity: { placementId: string; placementAttemptId: string },
+  now: Date,
+): Promise<void> {
+  const claimId = claimDocumentId(prospectId);
+  const nowIso = now.toISOString();
+  const claim: KongaPlacementClaim = {
+    _id: claimId,
+    prospectId,
+    placementAttemptId: identity.placementAttemptId,
+    placementId: identity.placementId,
+    expiresAt: claimExpiresAt(now),
+    createdAt: nowIso,
+  };
+
+  try {
+    await persistence<{ insertedCount?: number }>('mongodb', 'insert', {
+      database: 'momentum',
+      collection: KONGA_PLACEMENT_CLAIM_COLLECTION,
+      documents: [claim],
+    });
+    return;
+  } catch (error) {
+    const currentClaimResult = await persistence<{ documents?: KongaPlacementClaim[] }>(
+      'mongodb',
+      'query',
+      {
+        database: 'momentum',
+        collection: KONGA_PLACEMENT_CLAIM_COLLECTION,
+        filter: { _id: claimId },
+        limit: 1,
+      },
+    );
+    const currentClaim = currentClaimResult.documents?.[0];
+    if (!currentClaim) {
+      throw error;
+    }
+
+    if (
+      currentClaim.placementAttemptId === identity.placementAttemptId &&
+      currentClaim.prospectId === prospectId
+    ) {
+      await persistence('mongodb', 'update', {
+        database: 'momentum',
+        collection: KONGA_PLACEMENT_CLAIM_COLLECTION,
+        filter: { _id: claimId, placementAttemptId: currentClaim.placementAttemptId },
+        update: { $set: { expiresAt: claim.expiresAt, createdAt: nowIso } },
+      });
+      return;
+    }
+
+    const currentExpiresMs = Date.parse(currentClaim.expiresAt);
+    if (Number.isFinite(currentExpiresMs) && currentExpiresMs <= now.getTime()) {
+      const reclaimed = await persistence<{ matchedCount?: number }>('mongodb', 'update', {
+        database: 'momentum',
+        collection: KONGA_PLACEMENT_CLAIM_COLLECTION,
+        filter: {
+          _id: claimId,
+          prospectId,
+          placementAttemptId: currentClaim.placementAttemptId,
+          expiresAt: { $lt: nowIso },
+        },
+        update: {
+          $set: {
+            placementAttemptId: identity.placementAttemptId,
+            placementId: identity.placementId,
+            expiresAt: claim.expiresAt,
+            createdAt: nowIso,
+          },
+        },
+      });
+      if ((reclaimed.matchedCount ?? 0) === 1) {
+        return;
+      }
+    }
+  }
+
+  throw new Error(`konga_placement_claim_conflict:${prospectId}`);
+}
+
+async function releasePlacementClaim(
+  persistence: Persistence,
+  prospectId: string,
+): Promise<void> {
+  await persistence('mongodb', 'delete', {
+    database: 'momentum',
+    collection: KONGA_PLACEMENT_CLAIM_COLLECTION,
+    filter: { _id: claimDocumentId(prospectId) },
+  });
 }
 
 export function deriveKongaPlacementIdentity(input: {
@@ -124,7 +236,7 @@ export async function placeKongaProspect(
     database: 'momentum',
     collection: PLACEMENTS_COLLECTION,
     filter: { prospectId: input.prospectId, flushedAt: null },
-    sort: { placedAt: -1 },
+    sort: { placedAt: -1, placementId: -1, _id: -1 },
     limit: 1,
   });
   const livePlacement = live.documents?.[0];
@@ -147,7 +259,8 @@ export async function placeKongaProspect(
   const ba = await (deps.findBa ?? findBAByTmagId)(input.sponsorTmagId);
   const addedBy = publicAddedBy(ba);
   const positionNumber = await (deps.increment ?? incrementPoolCounter)();
-  const placedAt = (input.now ?? new Date()).toISOString();
+  const now = input.now ?? new Date();
+  const placedAt = now.toISOString();
   const placement: McsKongaPoolPlacement & {
     firstName: string;
     lastInitial: string;
@@ -168,6 +281,8 @@ export async function placeKongaProspect(
     flushReason: null,
     addedBy,
   };
+
+  await acquirePlacementClaim(persistence, input.prospectId, identity, now);
 
   try {
     await strictWrite(
@@ -226,6 +341,10 @@ export async function placeKongaProspect(
     if (!stored) throw error;
     await strictVerify(placementVerify(stored.placementId), persistence);
     return resultOf(stored, true);
+  } finally {
+    await releasePlacementClaim(persistence, input.prospectId).catch(() => {
+      // Non-throwing release keeps original write/verify outcomes authoritative.
+    });
   }
 
   await persistence('mongodb', 'update', {

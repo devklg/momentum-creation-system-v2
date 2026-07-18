@@ -117,11 +117,15 @@ async function projectPlacementPatchToNeo4j(
       'SET r += $relationshipProps',
     params: {
       relationshipProps: patch,
+      placementId,
     },
     verifyCypher:
       'MATCH (p:TmagProspect {prospectId: $id})-[r:IN_HOLDING_TANK]->(:TmagPool) ' +
       targetClause +
       'RETURN count(r) AS n',
+    verifyParams: {
+      placementId,
+    },
   };
   const neo4jParams =
     placementId === null
@@ -142,7 +146,10 @@ async function projectPlacementPatchToNeo4j(
       query: payload.verifyCypher,
       params: { ...neo4jParams, ...(payload.verifyParams ?? {}) },
     });
-    if (extractCount(check) < 1) throw new Error('pool placement graph read-back returned 0');
+    const count = extractCount(check);
+    if (count !== 1) {
+      throw new Error(`pool placement graph read-back expected one row, got ${count}`);
+    }
   } catch (err) {
     await enqueueProjection({
       tier: 'operational',
@@ -160,14 +167,22 @@ export async function updatePoolPlacementOperational(
 ): Promise<void> {
   const patch = withoutUndefined(input.patch);
   const relationshipPatch = withoutUndefined(input.relationshipPatch);
+  const baseFilter: Record<string, unknown> = {
+    prospectId: input.prospectId,
+    flushedAt: null,
+  };
+  if (input.placementId) {
+    baseFilter.placementId = input.placementId;
+  } else {
+    baseFilter.placementId = { $exists: false };
+  }
+
   const placementMatch = await persistenceCall<{ documents: PoolPlacementCandidate[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
-    filter: input.placementId
-      ? { prospectId: input.prospectId, placementId: input.placementId }
-      : { prospectId: input.prospectId, flushedAt: null, placementId: { $exists: false } },
-    sort: { placedAt: -1 },
-    limit: 2,
+    filter: baseFilter,
+    sort: { placedAt: -1, placementId: -1, _id: -1 },
+    limit: input.placementId ? 1 : 2,
   });
   if (placementMatch.documents.length === 0) {
     throw new Error(`pool_placement_target_missing:${input.prospectId}`);
@@ -181,12 +196,26 @@ export async function updatePoolPlacementOperational(
   const target = placementMatch.documents[0]!;
   const placementId = target.placementId ?? null;
 
-  await persistenceCall('mongodb', 'update', {
+  const updateFilter: Record<string, unknown> = {
+    _id: target._id,
+    prospectId: input.prospectId,
+    flushedAt: null,
+  };
+  if (placementId === null) {
+    updateFilter.placementId = { $exists: false };
+  } else {
+    updateFilter.placementId = placementId;
+  }
+
+  const updateResult = await persistenceCall<{ matchedCount?: number; modifiedCount?: number }>('mongodb', 'update', {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
-    filter: { _id: target._id },
+    filter: updateFilter,
     update: { $set: patch },
   });
+  if ((updateResult.matchedCount ?? 0) !== 1) {
+    throw new Error(`pool_placement_operational_update_stale:${input.prospectId}`);
+  }
   await verifyPlacementPatch({ prospectId: input.prospectId, _id: target._id }, patch);
   await projectPlacementPatchToNeo4j(
     input.prospectId,
