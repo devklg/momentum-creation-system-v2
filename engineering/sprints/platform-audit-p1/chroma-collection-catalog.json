@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T23:35:38.621Z",
+  "generatedAt": "2026-07-17T23:58:43.957Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -7,11 +7,11 @@
     "engineering/sprints/platform-audit-p1/schema-catalog.json"
   ],
   "summary": {
-    "collections": 53,
-    "schemaCatalogCollections": 53,
+    "collections": 57,
+    "schemaCatalogCollections": 57,
     "withObservedWrites": 33,
     "languageScopedCollections": 10,
-    "metadataContractRows": 53,
+    "metadataContractRows": 57,
     "observedUnregisteredTargets": 10
   },
   "byDomain": {
@@ -25,11 +25,11 @@
     "onboarding_training": 2,
     "operations": 1,
     "knowledge": 12,
+    "general": 7,
     "knowledge_review": 1,
     "outcomes": 1,
     "crm": 2,
     "holding_tank": 2,
-    "general": 3,
     "tenant_admin": 1,
     "vm_rvm": 4
   },
@@ -833,6 +833,110 @@
           "domain",
           "language"
         ],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_konga_enrollment_attestations",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "general",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_konga_page_visits",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "general",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_konga_replay_completions",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "general",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_konga_replay_pointers",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "general",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
         "embeddingDimension": 384,
         "embeddingModel": "all-MiniLM-L6-v2"
       }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T23:35:46.695Z",
+  "generatedAt": "2026-07-17T23:58:48.976Z",
   "sources": [
     "server/src/index.ts",
     "server/src/routes/**/*.ts",
@@ -8,24 +8,24 @@
   "summary": {
     "mounts": 50,
     "routeFiles": 50,
-    "routes": 257,
+    "routes": 262,
     "byPhase": {
       "raw_body_before_json": 1,
       "pre_json_admin_body_limit": 10,
-      "pre_gate": 154,
-      "ba_facing_gated": 92
+      "pre_gate": 158,
+      "ba_facing_gated": 93
     },
     "byAccessProfile": {
       "raw_body_webhook": 1,
-      "admin": 107,
+      "admin": 110,
       "pre_gate_or_public": 34,
       "internal_runtime": 5,
-      "prospect_token": 18,
-      "ba_auth_steve_gated": 92
+      "prospect_token": 19,
+      "ba_auth_steve_gated": 93
     },
     "byMethod": {
-      "POST": 100,
-      "GET": 132,
+      "POST": 103,
+      "GET": 134,
       "PUT": 9,
       "PATCH": 9,
       "DELETE": 7
@@ -1921,7 +1921,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:116",
+      "source": "server/src/routes/admin/prospects.ts:120",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1947,7 +1947,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:178",
+      "source": "server/src/routes/admin/prospects.ts:182",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1973,7 +1973,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:202",
+      "source": "server/src/routes/admin/prospects.ts:206",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -1999,7 +1999,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:271",
+      "source": "server/src/routes/admin/prospects.ts:275",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2025,7 +2025,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:319",
+      "source": "server/src/routes/admin/prospects.ts:323",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2051,7 +2051,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:356",
+      "source": "server/src/routes/admin/prospects.ts:360",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2077,7 +2077,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:377",
+      "source": "server/src/routes/admin/prospects.ts:381",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2103,7 +2103,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:409",
+      "source": "server/src/routes/admin/prospects.ts:413",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2129,7 +2129,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:438",
+      "source": "server/src/routes/admin/prospects.ts:442",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2155,7 +2155,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:595",
+      "source": "server/src/routes/admin/prospects.ts:599",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2181,7 +2181,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:643",
+      "source": "server/src/routes/admin/prospects.ts:647",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2207,7 +2207,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:685",
+      "source": "server/src/routes/admin/prospects.ts:689",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2233,7 +2233,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:714",
+      "source": "server/src/routes/admin/prospects.ts:718",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2259,7 +2259,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:753",
+      "source": "server/src/routes/admin/prospects.ts:757",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2285,7 +2285,33 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/prospects.ts:789",
+      "source": "server/src/routes/admin/prospects.ts:793",
+      "routeSource": "server/src/routes/admin/prospects.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/prospects/:prospectId/konga-enrollment-attestation",
+      "mountPath": "/api/admin/prospects",
+      "localPath": "/:prospectId/konga-enrollment-attestation",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/prospects.ts:818",
       "routeSource": "server/src/routes/admin/prospects.ts",
       "signals": {
         "requireAuth": false,
@@ -2701,7 +2727,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:89",
+      "source": "server/src/routes/admin/reporting.ts:90",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -2727,7 +2753,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:125",
+      "source": "server/src/routes/admin/reporting.ts:126",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -2753,7 +2779,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:172",
+      "source": "server/src/routes/admin/reporting.ts:173",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -2779,7 +2805,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:222",
+      "source": "server/src/routes/admin/reporting.ts:223",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -2805,7 +2831,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:273",
+      "source": "server/src/routes/admin/reporting.ts:274",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -2831,7 +2857,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:328",
+      "source": "server/src/routes/admin/reporting.ts:329",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -2857,7 +2883,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:358",
+      "source": "server/src/routes/admin/reporting.ts:359",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -2883,7 +2909,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:388",
+      "source": "server/src/routes/admin/reporting.ts:389",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -2909,7 +2935,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:418",
+      "source": "server/src/routes/admin/reporting.ts:419",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -2935,7 +2961,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:508",
+      "source": "server/src/routes/admin/reporting.ts:509",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -2961,7 +2987,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:535",
+      "source": "server/src/routes/admin/reporting.ts:536",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -2987,7 +3013,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:562",
+      "source": "server/src/routes/admin/reporting.ts:563",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -3013,7 +3039,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:592",
+      "source": "server/src/routes/admin/reporting.ts:593",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -3039,7 +3065,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:619",
+      "source": "server/src/routes/admin/reporting.ts:620",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -3065,7 +3091,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:646",
+      "source": "server/src/routes/admin/reporting.ts:647",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -3091,7 +3117,33 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/reporting.ts:673",
+      "source": "server/src/routes/admin/reporting.ts:674",
+      "routeSource": "server/src/routes/admin/reporting.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/admin/reporting/mission-funnel",
+      "mountPath": "/api/admin/reporting",
+      "localPath": "/mission-funnel",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/reporting.ts:701",
       "routeSource": "server/src/routes/admin/reporting.ts",
       "signals": {
         "requireAuth": false,
@@ -4027,7 +4079,7 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/events.ts:24",
+      "source": "server/src/routes/admin/events.ts:25",
       "routeSource": "server/src/routes/admin/events.ts",
       "signals": {
         "requireAuth": false,
@@ -4053,7 +4105,33 @@
         "requireAdmin"
       ],
       "handler": "handler",
-      "source": "server/src/routes/admin/events.ts:70",
+      "source": "server/src/routes/admin/events.ts:71",
+      "routeSource": "server/src/routes/admin/events.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": true,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/admin/events/webinars/replay-rotation",
+      "mountPath": "/api/admin/events",
+      "localPath": "/webinars/replay-rotation",
+      "mountPhase": "pre_gate",
+      "accessProfile": "admin",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAdmin"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/admin/events.ts:110",
       "routeSource": "server/src/routes/admin/events.ts",
       "signals": {
         "requireAuth": false,
@@ -4303,7 +4381,7 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/p.ts:225",
+      "source": "server/src/routes/p.ts:242",
       "routeSource": "server/src/routes/p.ts",
       "signals": {
         "requireAuth": false,
@@ -4327,7 +4405,7 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/p.ts:384",
+      "source": "server/src/routes/p.ts:424",
       "routeSource": "server/src/routes/p.ts",
       "signals": {
         "requireAuth": false,
@@ -4351,7 +4429,31 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/p.ts:556",
+      "source": "server/src/routes/p.ts:627",
+      "routeSource": "server/src/routes/p.ts",
+      "signals": {
+        "requireAuth": false,
+        "requireAdmin": false,
+        "requireSteveComplete": false,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "GET",
+      "fullPath": "/api/p/:token/replay",
+      "mountPath": "/api/p",
+      "localPath": "/:token/replay",
+      "mountPhase": "pre_gate",
+      "accessProfile": "prospect_token",
+      "mountMiddleware": [],
+      "localMiddleware": [],
+      "handler": "handler",
+      "source": "server/src/routes/p.ts:720",
       "routeSource": "server/src/routes/p.ts",
       "signals": {
         "requireAuth": false,
@@ -4375,7 +4477,7 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/p.ts:689",
+      "source": "server/src/routes/p.ts:790",
       "routeSource": "server/src/routes/p.ts",
       "signals": {
         "requireAuth": false,
@@ -4399,7 +4501,7 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/p.ts:812",
+      "source": "server/src/routes/p.ts:942",
       "routeSource": "server/src/routes/p.ts",
       "signals": {
         "requireAuth": false,
@@ -4423,7 +4525,7 @@
       "mountMiddleware": [],
       "localMiddleware": [],
       "handler": "handler",
-      "source": "server/src/routes/p.ts:912",
+      "source": "server/src/routes/p.ts:1042",
       "routeSource": "server/src/routes/p.ts",
       "signals": {
         "requireAuth": false,
@@ -5067,7 +5169,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/crm.ts:92",
+      "source": "server/src/routes/crm.ts:96",
       "routeSource": "server/src/routes/crm.ts",
       "signals": {
         "requireAuth": true,
@@ -5094,7 +5196,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/crm.ts:107",
+      "source": "server/src/routes/crm.ts:111",
       "routeSource": "server/src/routes/crm.ts",
       "signals": {
         "requireAuth": true,
@@ -5121,7 +5223,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/crm.ts:125",
+      "source": "server/src/routes/crm.ts:129",
       "routeSource": "server/src/routes/crm.ts",
       "signals": {
         "requireAuth": true,
@@ -5148,7 +5250,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/crm.ts:151",
+      "source": "server/src/routes/crm.ts:155",
       "routeSource": "server/src/routes/crm.ts",
       "signals": {
         "requireAuth": true,
@@ -5175,7 +5277,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/crm.ts:178",
+      "source": "server/src/routes/crm.ts:182",
       "routeSource": "server/src/routes/crm.ts",
       "signals": {
         "requireAuth": true,
@@ -5202,7 +5304,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/crm.ts:201",
+      "source": "server/src/routes/crm.ts:205",
       "routeSource": "server/src/routes/crm.ts",
       "signals": {
         "requireAuth": true,
@@ -5229,7 +5331,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/crm.ts:232",
+      "source": "server/src/routes/crm.ts:236",
       "routeSource": "server/src/routes/crm.ts",
       "signals": {
         "requireAuth": true,
@@ -5256,7 +5358,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/crm.ts:267",
+      "source": "server/src/routes/crm.ts:271",
       "routeSource": "server/src/routes/crm.ts",
       "signals": {
         "requireAuth": true,
@@ -5283,7 +5385,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/crm.ts:318",
+      "source": "server/src/routes/crm.ts:322",
       "routeSource": "server/src/routes/crm.ts",
       "signals": {
         "requireAuth": true,
@@ -5310,7 +5412,7 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/crm.ts:364",
+      "source": "server/src/routes/crm.ts:368",
       "routeSource": "server/src/routes/crm.ts",
       "signals": {
         "requireAuth": true,
@@ -5337,7 +5439,34 @@
         "requireSteveComplete"
       ],
       "handler": "handler",
-      "source": "server/src/routes/crm.ts:396",
+      "source": "server/src/routes/crm.ts:400",
+      "routeSource": "server/src/routes/crm.ts",
+      "signals": {
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "requireRuntimeInternal": false,
+        "requireAdminOrHealthSecret": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false
+      },
+      "staticAnalysisStatus": "ok"
+    },
+    {
+      "method": "POST",
+      "fullPath": "/api/crm/:prospectId/enrollment-attestation",
+      "mountPath": "/api/crm",
+      "localPath": "/:prospectId/enrollment-attestation",
+      "mountPhase": "ba_facing_gated",
+      "accessProfile": "ba_auth_steve_gated",
+      "mountMiddleware": [],
+      "localMiddleware": [
+        "requireAuth",
+        "requireSteveComplete"
+      ],
+      "handler": "handler",
+      "source": "server/src/routes/crm.ts:464",
       "routeSource": "server/src/routes/crm.ts",
       "signals": {
         "requireAuth": true,

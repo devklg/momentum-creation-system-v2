@@ -4,11 +4,11 @@
 
 ## Summary
 
-- Generated: 2026-07-17T23:35:34.886Z
-- Labels: 84
-- Relationships: 69
+- Generated: 2026-07-17T23:58:41.607Z
+- Labels: 88
+- Relationships: 71
 - Constraints/indexes cataloged: 18
-- Labels without a cataloged constraint/index: 69
+- Labels without a cataloged constraint/index: 73
 
 ## Constraints By Status
 
@@ -25,10 +25,10 @@
 | `BrandAmbassador` | 1 |
 | `Decision` | 3 |
 | `DISPOSED` | 5 |
-| `ENROLLED` | 1 |
+| `ENROLLED` | 2 |
 | `FOUNDER_PASSWORD` | 1 |
 | `HAS_FOLLOWUP` | 5 |
-| `IN_HOLDING_TANK` | 8 |
+| `IN_HOLDING_TANK` | 12 |
 | `INVITED_AS` | 1 |
 | `Knowledge` | 10 |
 | `KnowledgeCandidate` | 1 |
@@ -50,7 +50,7 @@
 | `SPONSORED_BY` | 3 |
 | `SUPERSEDES` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 94 |
+| `TeamMagnificentMember` | 100 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 3 |
@@ -69,14 +69,18 @@
 | `TmagGeneratorRun` | 1 |
 | `TmagHealthHeartbeat` | 3 |
 | `TmagInvitationActivity` | 2 |
-| `TmagInviteToken` | 12 |
+| `TmagInviteToken` | 13 |
 | `TmagIvoryName` | 6 |
 | `TmagKnowledge` | 5 |
+| `TmagKongaEnrollmentAttestation` | 2 |
+| `TmagKongaPageVisit` | 2 |
+| `TmagKongaReplayCompletion` | 2 |
+| `TmagKongaReplayPointer` | 2 |
 | `TmagLearningCandidate` | 4 |
 | `TmagOrientationSession` | 4 |
 | `TmagOutcome` | 4 |
-| `TmagPool` | 7 |
-| `TmagProspect` | 45 |
+| `TmagPool` | 11 |
+| `TmagProspect` | 49 |
 | `TmagProspectAccount` | 3 |
 | `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |
@@ -85,7 +89,7 @@
 | `TmagRecruitingCycle` | 2 |
 | `TmagResource` | 3 |
 | `TmagResourceUsageEvent` | 1 |
-| `TmagResourceVersion` | 8 |
+| `TmagResourceVersion` | 9 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 4 |
 | `TmagSteveDiscovery` | 10 |
@@ -126,9 +130,10 @@
 | `CONTAINS_LEAD` | 2 |
 | `DELIVERS_RESOURCE_VERSION` | 2 |
 | `DERIVED_FROM` | 2 |
+| `ENROLLED` | 2 |
 | `FOR` | 1 |
 | `FOR_EVENT` | 1 |
-| `FOR_PROSPECT` | 8 |
+| `FOR_PROSPECT` | 9 |
 | `FOR_VM_LEAD` | 4 |
 | `HAD_STEVE_DISCOVERY` | 3 |
 | `HAS_ACTIVITY` | 2 |
@@ -176,6 +181,7 @@
 | `SUPPORTS_TRAINING_MODULE` | 2 |
 | `SUPPRESSED_BY` | 1 |
 | `TARGETS_LEAD` | 2 |
+| `USES_AUTHORIZED_VERSION` | 1 |
 | `USES_VM_LEAD_OWNER` | 1 |
 | `WITH_UPLINE` | 1 |
 | `WROTE_NOTE` | 2 |
@@ -250,6 +256,10 @@
 - `TmagHealthHeartbeat`
 - `TmagInvitationActivity`
 - `TmagIvoryName`
+- `TmagKongaEnrollmentAttestation`
+- `TmagKongaPageVisit`
+- `TmagKongaReplayCompletion`
+- `TmagKongaReplayPointer`
 - `TmagOrientationSession`
 - `TmagProspectAccount`
 - `TmagProspectMagicLink`

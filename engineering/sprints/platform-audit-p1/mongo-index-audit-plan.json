@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T23:35:34.408Z",
+  "generatedAt": "2026-07-17T23:58:41.280Z",
   "sources": [
     "docs/app-data-model-contract.md §9",
     "engineering/sprints/platform-audit-p1/mongo-ownership-map.json",
@@ -12,9 +12,9 @@
     "knowledgeEvolutionEnsureIndexes": "present_for_knowledge_evolution_only",
     "vmIndexDefinitions": "declared_in_schema_registry_not_generally_applied"
   },
-  "indexCount": 74,
+  "indexCount": 81,
   "byStatus": {
-    "planned_missing_enforcement": 42,
+    "planned_missing_enforcement": 49,
     "vm_registry_declared": 6,
     "required_not_verified": 26
   },
@@ -222,14 +222,54 @@
     },
     {
       "collection": "tmag_prospect_htank_placements",
-      "name": "unique_prospectId",
+      "name": "prospect_flushed_placedAt",
       "keys": {
-        "prospectId": 1
+        "prospectId": 1,
+        "flushedAt": 1,
+        "placedAt": -1
+      },
+      "options": {},
+      "rationale": "One live placement lookup while preserving historical flushed attempts.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_htank_placements",
+      "name": "unique_placementId",
+      "keys": {
+        "placementId": 1
       },
       "options": {
-        "unique": true
+        "unique": true,
+        "partialFilterExpression": {
+          "placementId": {
+            "$type": "string"
+          }
+        }
       },
-      "rationale": "One placement per prospect.",
+      "rationale": "Konga placement identity; legacy rows remain valid.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "holding_tank_and_reentry",
+      "steward": "Prospect access / pool placement",
+      "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_prospect_htank_placements",
+      "name": "unique_placementAttemptId",
+      "keys": {
+        "placementAttemptId": 1
+      },
+      "options": {
+        "unique": true,
+        "partialFilterExpression": {
+          "placementAttemptId": {
+            "$type": "string"
+          }
+        }
+      },
+      "rationale": "One placement per immutable invitation attempt; legacy rows remain valid.",
       "status": "planned_missing_enforcement",
       "ownerId": "holding_tank_and_reentry",
       "steward": "Prospect access / pool placement",
@@ -277,6 +317,79 @@
       "ownerId": "holding_tank_and_reentry",
       "steward": "Prospect access / pool placement",
       "primarySurface": "com + admin"
+    },
+    {
+      "collection": "tmag_konga_page_visits",
+      "name": "token_observedAt",
+      "keys": {
+        "tokenHash": 1,
+        "observedAt": -1
+      },
+      "options": {},
+      "rationale": "Token-bound visit delta and idempotent reconnect lookup.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "unknown",
+      "steward": "unknown",
+      "primarySurface": "unknown"
+    },
+    {
+      "collection": "tmag_konga_replay_pointers",
+      "name": "active_availableAt",
+      "keys": {
+        "publicationStatus": 1,
+        "availableAt": -1
+      },
+      "options": {},
+      "rationale": "Current authorized replay pointer.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "unknown",
+      "steward": "unknown",
+      "primarySurface": "unknown"
+    },
+    {
+      "collection": "tmag_konga_replay_completions",
+      "name": "token_completedAt",
+      "keys": {
+        "tokenHash": 1,
+        "completedAt": -1
+      },
+      "options": {},
+      "rationale": "Replay completion and callback unlock readback.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "unknown",
+      "steward": "unknown",
+      "primarySurface": "unknown"
+    },
+    {
+      "collection": "tmag_konga_enrollment_attestations",
+      "name": "prospect_enrollee_status",
+      "keys": {
+        "prospectId": 1,
+        "enrolleeTmagId": 1,
+        "status": 1
+      },
+      "options": {
+        "unique": true
+      },
+      "rationale": "Idempotent human enrollment attestation.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "unknown",
+      "steward": "unknown",
+      "primarySurface": "unknown"
+    },
+    {
+      "collection": "tmag_konga_enrollment_attestations",
+      "name": "sponsor_joinedAt",
+      "keys": {
+        "sponsorTmagId": 1,
+        "joinedAt": 1
+      },
+      "options": {},
+      "rationale": "Report-only mission funnel source.",
+      "status": "planned_missing_enforcement",
+      "ownerId": "unknown",
+      "steward": "unknown",
+      "primarySurface": "unknown"
     },
     {
       "collection": "tmag_prospect_htank_accounts",

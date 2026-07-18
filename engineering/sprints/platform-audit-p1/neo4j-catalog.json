@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-17T23:35:34.886Z",
+  "generatedAt": "2026-07-17T23:58:41.607Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
     "server/src/domain/* Cypher writers"
   ],
   "summary": {
-    "labels": 84,
-    "relationships": 69,
+    "labels": 88,
+    "relationships": 71,
     "constraints": 18,
-    "labelsWithoutConstraint": 69
+    "labelsWithoutConstraint": 73
   },
   "byStatus": {
     "planned_core_not_applied": 11,
@@ -52,8 +52,9 @@
     },
     {
       "label": "ENROLLED",
-      "sourceCount": 1,
+      "sourceCount": 2,
       "sources": [
+        "server/src/domain/kongaEnrollment.ts:272",
         "server/src/domain/recruitingCycle.ts:593"
       ]
     },
@@ -77,11 +78,15 @@
     },
     {
       "label": "IN_HOLDING_TANK",
-      "sourceCount": 8,
+      "sourceCount": 12,
       "sources": [
         "server/scripts/smoke-holding-tank.ts:114",
         "server/scripts/smoke-holding-tank.ts:66",
         "server/src/domain/crossStoreReconciliation.ts:165",
+        "server/src/domain/kongaEnrollment.ts:268",
+        "server/src/domain/kongaEnrollment.ts:79",
+        "server/src/domain/kongaPlacement.ts:182",
+        "server/src/domain/kongaPlacement.ts:75",
         "server/src/domain/poolPlacementPersistence.ts:101",
         "server/src/domain/poolPlacementPersistence.ts:107",
         "server/src/domain/poolPlacementPersistence.ts:38",
@@ -276,7 +281,7 @@
     },
     {
       "label": "TeamMagnificentMember",
-      "sourceCount": 94,
+      "sourceCount": 100,
       "sources": [
         "server/scripts/backfill-founder-timezones.ts:138",
         "server/scripts/backfill-founder-timezones.ts:82",
@@ -321,6 +326,10 @@
         "server/src/domain/invitations.ts:254",
         "server/src/domain/ivory.ts:220",
         "server/src/domain/ivory.ts:233",
+        "server/src/domain/kongaEnrollment.ts:265",
+        "server/src/domain/kongaEnrollment.ts:266",
+        "server/src/domain/kongaEnrollment.ts:77",
+        "server/src/domain/kongaEnrollment.ts:78",
         "server/src/domain/orientationSession.ts:524",
         "server/src/domain/orientationSession.ts:639",
         "server/src/domain/outcomes.ts:218",
@@ -331,6 +340,8 @@
         "server/src/domain/recruitingCycle.ts:323",
         "server/src/domain/recruitingCycle.ts:425",
         "server/src/domain/recruitingCycle.ts:593",
+        "server/src/domain/reports/missionFunnel.ts:166",
+        "server/src/domain/reports/missionFunnel.ts:167",
         "server/src/domain/resourcePublishingGate.ts:72",
         "server/src/domain/resourceUsage.ts:81",
         "server/src/domain/sponsorImmutabilityPersistence.ts:101",
@@ -516,11 +527,12 @@
     },
     {
       "label": "TmagInviteToken",
-      "sourceCount": 12,
+      "sourceCount": 13,
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:78",
         "server/src/domain/crossStoreReconciliation.ts:101",
         "server/src/domain/crossStoreReconciliation.ts:109",
+        "server/src/domain/kongaEnrollment.ts:269",
         "server/src/domain/prospectAccount.ts:250",
         "server/src/domain/tokenLifecyclePersistence.ts:152",
         "server/src/domain/tokenLifecyclePersistence.ts:158",
@@ -556,6 +568,38 @@
       ]
     },
     {
+      "label": "TmagKongaEnrollmentAttestation",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/kongaEnrollment.ts:270",
+        "server/src/domain/kongaEnrollment.ts:76"
+      ]
+    },
+    {
+      "label": "TmagKongaPageVisit",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/kongaVisits.ts:104",
+        "server/src/domain/kongaVisits.ts:39"
+      ]
+    },
+    {
+      "label": "TmagKongaReplayCompletion",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/kongaReplay.ts:160",
+        "server/src/domain/kongaReplay.ts:221"
+      ]
+    },
+    {
+      "label": "TmagKongaReplayPointer",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/kongaReplay.ts:33",
+        "server/src/domain/kongaReplay.ts:94"
+      ]
+    },
+    {
       "label": "TmagLearningCandidate",
       "sourceCount": 4,
       "sources": [
@@ -587,10 +631,14 @@
     },
     {
       "label": "TmagPool",
-      "sourceCount": 7,
+      "sourceCount": 11,
       "sources": [
         "server/scripts/smoke-holding-tank.ts:114",
         "server/src/domain/crossStoreReconciliation.ts:165",
+        "server/src/domain/kongaEnrollment.ts:268",
+        "server/src/domain/kongaEnrollment.ts:79",
+        "server/src/domain/kongaPlacement.ts:180",
+        "server/src/domain/kongaPlacement.ts:76",
         "server/src/domain/poolPlacementPersistence.ts:101",
         "server/src/domain/poolPlacementPersistence.ts:107",
         "server/src/domain/poolPlacementPersistence.ts:36",
@@ -600,7 +648,7 @@
     },
     {
       "label": "TmagProspect",
-      "sourceCount": 45,
+      "sourceCount": 49,
       "sources": [
         "server/scripts/smoke-holding-tank.ts:114",
         "server/scripts/smoke-holding-tank.ts:66",
@@ -634,6 +682,10 @@
         "server/src/domain/invitations.ts:255",
         "server/src/domain/invitations.ts:383",
         "server/src/domain/ivory.ts:497",
+        "server/src/domain/kongaEnrollment.ts:267",
+        "server/src/domain/kongaEnrollment.ts:79",
+        "server/src/domain/kongaPlacement.ts:181",
+        "server/src/domain/kongaPlacement.ts:75",
         "server/src/domain/outcomes.ts:218",
         "server/src/domain/poolPlacementPersistence.ts:101",
         "server/src/domain/poolPlacementPersistence.ts:107",
@@ -722,8 +774,9 @@
     },
     {
       "label": "TmagResourceVersion",
-      "sourceCount": 8,
+      "sourceCount": 9,
       "sources": [
+        "server/src/domain/kongaReplay.ts:93",
         "server/src/domain/orientationSession.ts:388",
         "server/src/domain/resourcePublishingGate.ts:72",
         "server/src/domain/resourceUsage.ts:82",
@@ -1032,6 +1085,14 @@
       ]
     },
     {
+      "relationship": "ENROLLED",
+      "sourceCount": 2,
+      "sources": [
+        "server/src/domain/kongaEnrollment.ts:77",
+        "server/src/domain/reports/missionFunnel.ts:167"
+      ]
+    },
+    {
       "relationship": "FOR",
       "sourceCount": 1,
       "sources": [
@@ -1047,12 +1108,13 @@
     },
     {
       "relationship": "FOR_PROSPECT",
-      "sourceCount": 8,
+      "sourceCount": 9,
       "sources": [
         "server/src/domain/adminConsistencyReport.ts:79",
         "server/src/domain/crmOwnershipPersistence.ts:53",
         "server/src/domain/crmOwnershipPersistence.ts:56",
         "server/src/domain/crossStoreReconciliation.ts:109",
+        "server/src/domain/kongaEnrollment.ts:269",
         "server/src/domain/tokenLifecyclePersistence.ts:49",
         "server/src/domain/tokenLifecyclePersistence.ts:51",
         "server/src/qa/sponsorImmutabilityGraphVerification.ts:109",
@@ -1445,6 +1507,13 @@
       ]
     },
     {
+      "relationship": "USES_AUTHORIZED_VERSION",
+      "sourceCount": 1,
+      "sources": [
+        "server/src/domain/kongaReplay.ts:95"
+      ]
+    },
+    {
       "relationship": "USES_VM_LEAD_OWNER",
       "sourceCount": 1,
       "sources": [
@@ -1695,6 +1764,10 @@
     "TmagHealthHeartbeat",
     "TmagInvitationActivity",
     "TmagIvoryName",
+    "TmagKongaEnrollmentAttestation",
+    "TmagKongaPageVisit",
+    "TmagKongaReplayCompletion",
+    "TmagKongaReplayPointer",
     "TmagOrientationSession",
     "TmagProspectAccount",
     "TmagProspectMagicLink",

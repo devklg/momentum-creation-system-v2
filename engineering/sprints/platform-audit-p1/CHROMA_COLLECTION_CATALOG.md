@@ -5,12 +5,12 @@
 
 ## Summary
 
-- Generated: 2026-07-17T23:35:38.621Z
-- Registered collections: 53
-- Schema-catalog collections: 53
+- Generated: 2026-07-17T23:58:43.957Z
+- Registered collections: 57
+- Schema-catalog collections: 57
 - Collections with observed write/query usage: 33
 - Language-scoped collections: 10
-- Metadata contract rows: 53
+- Metadata contract rows: 57
 - Observed unregistered/dynamic targets: 10
 - Embedding model: all-MiniLM-L6-v2
 - Embedding dimension: 384
@@ -25,7 +25,7 @@
 | content_resources | 3 |
 | crm | 2 |
 | events | 4 |
-| general | 3 |
+| general | 7 |
 | holding_tank | 2 |
 | identity_access | 4 |
 | knowledge | 12 |
@@ -59,6 +59,10 @@
 | `mcs_ivory_prospect_names` | agents | not_language_scoped | Prospect funnel semantic record. | `add`<br>`create_collection`<br>`writeGraphCritical`<br>`writeKnowledge` | `angle`, `chat_number`, `createdAt`, `description`, `ivoryId`, `kind`, `preferredAngle`, `productKey`, `project`, `runId`, `tmagId` | none observed | `ivoryId`, `runId`, `tmagId` |
 | `mcs_knowledge_chunks` | knowledge | metadata.language | Approved knowledge chunk retrieval index. | `add`<br>`query_with_filter`<br>`writeKnowledge` | `agentScopes`, `authority`, `authorityStatus`, `chunkId`, `chunkIndex`, `citationLabel`, `citationSourceRef`, `documentId`, `domain`, `endOffset`, `heading`, `kind`, `language`, `retrievalEligible`, `scope.teamId`, `scope.teamKey`, `scope.teamName`, `scope.tenantId`, `sourceId`, `sourceTitle`, `sourceVersion`, `startOffset`, `status`, `surfaceScopes`, `title`, `topicTags` | `retrievalEligible`, `status` | `chunkId`, `documentId`, `domain`, `language`, `retrievalEligible`, `scope.teamId`, `scope.tenantId`, `sourceId`, `status` |
 | `mcs_knowledge_sources` | knowledge | not_language_scoped | Approved knowledge source retrieval and source lookup. | not observed | none observed | none observed | `domain`, `language` |
+| `mcs_konga_enrollment_attestations` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
+| `mcs_konga_page_visits` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
+| `mcs_konga_replay_completions` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
+| `mcs_konga_replay_pointers` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
 | `mcs_learning_candidates_review` | knowledge_review | metadata.language | Review-only learning candidates; never active retrieval knowledge. | `writeKnowledge` | `createdAt`, `domain`, `kind`, `language`, `status`, `tenantId` | none observed | `tenantId` |
 | `mcs_members` | identity_access | not_language_scoped | Team Magnificent member identity semantic record. | `add`<br>`delete`<br>`get` | `backfilledAt`, `entitlements`, `kind`, `role`, `threeBaId`, `timezone`, `tmagId`, `updatedAt` | none observed | `threeBaId`, `tmagId` |
 | `mcs_new_member_orientation_reservations` | identity_access | not_language_scoped | Team Magnificent member identity semantic record. | `create_collection`<br>`writeOperational` | `capacity`, `chat_number`, `contentBindingDigestSha256`, `createdAt`, `kind`, `primaryResourceVersionId`, `purpose`, `reservationId`, `resourceVersionIdsJson`, `scheduledFor`, `sessionId`, `status`, `tmagId`, `wireframe_leaf` | none observed | `primaryResourceVersionId`, `reservationId`, `sessionId`, `tmagId` |

@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Generated: 2026-07-17T23:35:34.408Z
-- Planned/audited indexes: 74
+- Generated: 2026-07-17T23:58:41.280Z
+- Planned/audited indexes: 81
 - General ensureIndexes runner: not_present
 - Knowledge Evolution ensureIndexes: present_for_knowledge_evolution_only
 - VM index definitions: declared_in_schema_registry_not_generally_applied
@@ -14,7 +14,7 @@
 
 | Status | Count |
 | --- | ---: |
-| planned_missing_enforcement | 42 |
+| planned_missing_enforcement | 49 |
 | required_not_verified | 26 |
 | vm_registry_declared | 6 |
 
@@ -40,10 +40,17 @@
 | `tmag_prospect_invite_tokens` | `prospectId` | `prospectId:1` | no | planned_missing_enforcement | Prospect / invitation domain | Token/prospect join. |
 | `tmag_prospect_invite_tokens` | `sponsor_state` | `sponsorTmagId:1, state:1` | no | planned_missing_enforcement | Prospect / invitation domain | Sponsor token state scans. |
 | `tmag_prospect_invite_tokens` | `expiresAt` | `expiresAt:1` | no | planned_missing_enforcement | Prospect / invitation domain | Token expiry checks. |
-| `tmag_prospect_htank_placements` | `unique_prospectId` | `prospectId:1` | yes | planned_missing_enforcement | Prospect access / pool placement | One placement per prospect. |
+| `tmag_prospect_htank_placements` | `prospect_flushed_placedAt` | `prospectId:1, flushedAt:1, placedAt:-1` | no | planned_missing_enforcement | Prospect access / pool placement | One live placement lookup while preserving historical flushed attempts. |
+| `tmag_prospect_htank_placements` | `unique_placementId` | `placementId:1` | yes | planned_missing_enforcement | Prospect access / pool placement | Konga placement identity; legacy rows remain valid. |
+| `tmag_prospect_htank_placements` | `unique_placementAttemptId` | `placementAttemptId:1` | yes | planned_missing_enforcement | Prospect access / pool placement | One placement per immutable invitation attempt; legacy rows remain valid. |
 | `tmag_prospect_htank_placements` | `unique_positionNumber` | `positionNumber:1` | yes | planned_missing_enforcement | Prospect access / pool placement | Monotonic team pool position. |
 | `tmag_prospect_htank_placements` | `expires_flushed` | `expiresAt:1, flushedAt:1` | no | planned_missing_enforcement | Prospect access / pool placement | Flush sweep. |
 | `tmag_prospect_htank_placements` | `sponsor_placedAt` | `sponsorTmagId:1, placedAt:-1` | no | planned_missing_enforcement | Prospect access / pool placement | Sponsor pool history. |
+| `tmag_konga_page_visits` | `token_observedAt` | `tokenHash:1, observedAt:-1` | no | planned_missing_enforcement | unknown | Token-bound visit delta and idempotent reconnect lookup. |
+| `tmag_konga_replay_pointers` | `active_availableAt` | `publicationStatus:1, availableAt:-1` | no | planned_missing_enforcement | unknown | Current authorized replay pointer. |
+| `tmag_konga_replay_completions` | `token_completedAt` | `tokenHash:1, completedAt:-1` | no | planned_missing_enforcement | unknown | Replay completion and callback unlock readback. |
+| `tmag_konga_enrollment_attestations` | `prospect_enrollee_status` | `prospectId:1, enrolleeTmagId:1, status:1` | yes | planned_missing_enforcement | unknown | Idempotent human enrollment attestation. |
+| `tmag_konga_enrollment_attestations` | `sponsor_joinedAt` | `sponsorTmagId:1, joinedAt:1` | no | planned_missing_enforcement | unknown | Report-only mission funnel source. |
 | `tmag_prospect_htank_accounts` | `unique_accountId` | `accountId:1` | yes | planned_missing_enforcement | Prospect access / pool placement | Prospect account id. |
 | `tmag_prospect_htank_accounts` | `unique_tokenId` | `tokenId:1` | yes | planned_missing_enforcement | Prospect access / pool placement | One account per invite token. |
 | `tmag_prospect_htank_accounts` | `phoneHash` | `phoneHash:1` | no | planned_missing_enforcement | Prospect access / pool placement | Prospect re-entry by phone hash. |

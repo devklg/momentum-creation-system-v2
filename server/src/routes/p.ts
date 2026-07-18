@@ -849,15 +849,13 @@ prospectTokenRoutes.get('/:token/stream', async (req, res) => {
       SSE_SNAPSHOT_RECENT_LIMIT,
     );
     if (pageVisitId && pageVisit) {
-      const [nextWebinar, snapshot] = await Promise.all([
-        findNextUpcomingEvent(),
-        buildKongaSnapshot({
-          legacy: legacySnapshot,
-          pageVisitId,
-          sinceLastVisit: pageVisit.sinceLastVisit,
-          nextWebinar: null,
-        }),
-      ]);
+      const nextWebinar = await findNextUpcomingEvent();
+      const snapshot = await buildKongaSnapshot({
+        legacy: legacySnapshot,
+        pageVisitId,
+        sinceLastVisit: pageVisit.sinceLastVisit,
+        nextWebinar,
+      });
       res.write(sseFrame('snapshot', { ...snapshot, nextWebinar }));
     } else {
       res.write(sseFrame('snapshot', legacySnapshot));

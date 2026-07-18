@@ -4,17 +4,17 @@
 
 ## Summary
 
-- Generated: 2026-07-17T23:35:46.695Z
+- Generated: 2026-07-17T23:58:48.976Z
 - Mounted routers: 50
 - Route files: 50
-- Static route rows: 257
+- Static route rows: 262
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
-| ba_facing_gated | 92 |
-| pre_gate | 154 |
+| ba_facing_gated | 93 |
+| pre_gate | 158 |
 | pre_json_admin_body_limit | 10 |
 | raw_body_before_json | 1 |
 
@@ -22,11 +22,11 @@
 
 | Access profile | Routes |
 | --- | ---: |
-| admin | 107 |
-| ba_auth_steve_gated | 92 |
+| admin | 110 |
+| ba_auth_steve_gated | 93 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 34 |
-| prospect_token | 18 |
+| prospect_token | 19 |
 | raw_body_webhook | 1 |
 
 ## Routes By Method
@@ -34,9 +34,9 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 7 |
-| GET | 132 |
+| GET | 134 |
 | PATCH | 9 |
-| POST | 100 |
+| POST | 103 |
 | PUT | 9 |
 
 ## Mounts
@@ -152,21 +152,22 @@
 | PATCH | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:473` |
 | DELETE | `/api/admin/bas/:tmagId` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:499` |
 | POST | `/api/admin/bas/:tmagId/restore` | pre_gate | admin | admin | `server/src/routes/admin/bas.ts:525` |
-| GET | `/api/admin/prospects/` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:116` |
-| GET | `/api/admin/prospects/filters` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:178` |
-| GET | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:202` |
-| GET | `/api/admin/prospects/:prospectId/sandbox-preview` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:271` |
-| POST | `/api/admin/prospects/:prospectId/notes` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:319` |
-| POST | `/api/admin/prospects/:prospectId/move` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:356` |
-| POST | `/api/admin/prospects/:prospectId/reassign-sponsor` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:377` |
-| POST | `/api/admin/prospects/:prospectId/manual-flush` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:409` |
-| POST | `/api/admin/prospects/:prospectId/force-enroll` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:438` |
-| POST | `/api/admin/prospects/` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:595` |
-| PATCH | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:643` |
-| DELETE | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:685` |
-| POST | `/api/admin/prospects/:prospectId/restore` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:714` |
-| POST | `/api/admin/prospects/flush-expired` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:753` |
-| GET | `/api/admin/prospects/alerts/aged` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:789` |
+| GET | `/api/admin/prospects/` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:120` |
+| GET | `/api/admin/prospects/filters` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:182` |
+| GET | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:206` |
+| GET | `/api/admin/prospects/:prospectId/sandbox-preview` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:275` |
+| POST | `/api/admin/prospects/:prospectId/notes` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:323` |
+| POST | `/api/admin/prospects/:prospectId/move` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:360` |
+| POST | `/api/admin/prospects/:prospectId/reassign-sponsor` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:381` |
+| POST | `/api/admin/prospects/:prospectId/manual-flush` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:413` |
+| POST | `/api/admin/prospects/:prospectId/force-enroll` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:442` |
+| POST | `/api/admin/prospects/` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:599` |
+| PATCH | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:647` |
+| DELETE | `/api/admin/prospects/:prospectId` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:689` |
+| POST | `/api/admin/prospects/:prospectId/restore` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:718` |
+| POST | `/api/admin/prospects/flush-expired` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:757` |
+| GET | `/api/admin/prospects/alerts/aged` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:793` |
+| POST | `/api/admin/prospects/:prospectId/konga-enrollment-attestation` | pre_gate | admin | admin | `server/src/routes/admin/prospects.ts:818` |
 | GET | `/api/admin/queue/summary` | pre_gate | admin | admin | `server/src/routes/admin/queue.ts:77` |
 | GET | `/api/admin/queue/lookup` | pre_gate | admin | admin | `server/src/routes/admin/queue.ts:105` |
 | GET | `/api/admin/queue/visible-window` | pre_gate | admin | admin | `server/src/routes/admin/queue.ts:146` |
@@ -182,22 +183,23 @@
 | GET | `/api/admin/dashboard/drilldown` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:176` |
 | GET | `/api/admin/dashboard/training-analytics` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:223` |
 | GET | `/api/admin/dashboard/stream` | pre_gate | admin | admin | `server/src/routes/admin/dashboard.ts:337` |
-| GET | `/api/admin/reporting/bottlenecks` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:89` |
-| GET | `/api/admin/reporting/master-report.pdf` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:125` |
-| GET | `/api/admin/reporting/activation` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:172` |
-| GET | `/api/admin/reporting/training` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:222` |
-| GET | `/api/admin/reporting/invite-funnel` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:273` |
-| GET | `/api/admin/reporting/queue-velocity` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:328` |
-| GET | `/api/admin/reporting/enrollment-completion` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:358` |
-| GET | `/api/admin/reporting/follow-up-aging` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:388` |
-| GET | `/api/admin/reporting/leader-scorecards` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:418` |
-| GET | `/api/admin/reporting/activation/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:508` |
-| GET | `/api/admin/reporting/training/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:535` |
-| GET | `/api/admin/reporting/invite-funnel/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:562` |
-| GET | `/api/admin/reporting/queue-velocity/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:592` |
-| GET | `/api/admin/reporting/enrollment-completion/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:619` |
-| GET | `/api/admin/reporting/follow-up-aging/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:646` |
-| GET | `/api/admin/reporting/leader-scorecards/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:673` |
+| GET | `/api/admin/reporting/bottlenecks` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:90` |
+| GET | `/api/admin/reporting/master-report.pdf` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:126` |
+| GET | `/api/admin/reporting/activation` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:173` |
+| GET | `/api/admin/reporting/training` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:223` |
+| GET | `/api/admin/reporting/invite-funnel` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:274` |
+| GET | `/api/admin/reporting/queue-velocity` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:329` |
+| GET | `/api/admin/reporting/enrollment-completion` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:359` |
+| GET | `/api/admin/reporting/follow-up-aging` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:389` |
+| GET | `/api/admin/reporting/leader-scorecards` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:419` |
+| GET | `/api/admin/reporting/activation/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:509` |
+| GET | `/api/admin/reporting/training/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:536` |
+| GET | `/api/admin/reporting/invite-funnel/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:563` |
+| GET | `/api/admin/reporting/queue-velocity/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:593` |
+| GET | `/api/admin/reporting/enrollment-completion/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:620` |
+| GET | `/api/admin/reporting/follow-up-aging/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:647` |
+| GET | `/api/admin/reporting/leader-scorecards/export` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:674` |
+| GET | `/api/admin/reporting/mission-funnel` | pre_gate | admin | admin | `server/src/routes/admin/reporting.ts:701` |
 | GET | `/api/admin/live-ops/operations` | pre_gate | admin | admin | `server/src/routes/admin/liveOps.ts:51` |
 | GET | `/api/admin/live-ops/growth` | pre_gate | admin | admin | `server/src/routes/admin/liveOps.ts:91` |
 | GET | `/api/admin/live-ops/grid` | pre_gate | admin | admin | `server/src/routes/admin/liveOps.ts:132` |
@@ -233,8 +235,9 @@
 | GET | `/api/admin/consistency/crm-integrity` | pre_gate | admin | admin | `server/src/routes/admin/consistency.ts:69` |
 | GET | `/api/admin/resource-center/index-awareness` | pre_gate | admin | admin | `server/src/routes/admin/resourceCenter.ts:11` |
 | GET | `/api/admin/resource-center/analytics` | pre_gate | admin | admin | `server/src/routes/admin/resourceCenter.ts:31` |
-| GET | `/api/admin/events/` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:24` |
-| POST | `/api/admin/events/webinars/:eventId/reservations/:reservationId/attendance` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:70` |
+| GET | `/api/admin/events/` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:25` |
+| POST | `/api/admin/events/webinars/:eventId/reservations/:reservationId/attendance` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:71` |
+| POST | `/api/admin/events/webinars/replay-rotation` | pre_gate | admin | admin | `server/src/routes/admin/events.ts:110` |
 | GET | `/api/runtime/knowledge-evolution/metrics` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:236` |
 | POST | `/api/runtime/knowledge-evolution/` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:239` |
 | GET | `/api/runtime/knowledge-evolution/:evolutionId` | pre_gate | internal_runtime | runtime-internal | `server/src/runtime/knowledge-evolution/routes.ts:242` |
@@ -244,12 +247,13 @@
 | POST | `/api/p/login/redeem` | pre_gate | prospect_token | none | `server/src/routes/p-login.ts:202` |
 | POST | `/api/p/login/code` | pre_gate | prospect_token | none | `server/src/routes/p-login.ts:264` |
 | POST | `/api/p/login/logout` | pre_gate | prospect_token | none | `server/src/routes/p-login.ts:312` |
-| GET | `/api/p/:token` | pre_gate | prospect_token | none | `server/src/routes/p.ts:225` |
-| POST | `/api/p/:token/video-event` | pre_gate | prospect_token | none | `server/src/routes/p.ts:384` |
-| POST | `/api/p/:token/callback-request` | pre_gate | prospect_token | none | `server/src/routes/p.ts:556` |
-| GET | `/api/p/:token/stream` | pre_gate | prospect_token | none | `server/src/routes/p.ts:689` |
-| POST | `/api/p/:token/webinar-reserve` | pre_gate | prospect_token | none | `server/src/routes/p.ts:812` |
-| GET | `/api/p/:token/team-stats` | pre_gate | prospect_token | none | `server/src/routes/p.ts:912` |
+| GET | `/api/p/:token` | pre_gate | prospect_token | none | `server/src/routes/p.ts:242` |
+| POST | `/api/p/:token/video-event` | pre_gate | prospect_token | none | `server/src/routes/p.ts:424` |
+| POST | `/api/p/:token/callback-request` | pre_gate | prospect_token | none | `server/src/routes/p.ts:627` |
+| GET | `/api/p/:token/replay` | pre_gate | prospect_token | none | `server/src/routes/p.ts:720` |
+| GET | `/api/p/:token/stream` | pre_gate | prospect_token | none | `server/src/routes/p.ts:790` |
+| POST | `/api/p/:token/webinar-reserve` | pre_gate | prospect_token | none | `server/src/routes/p.ts:942` |
+| GET | `/api/p/:token/team-stats` | pre_gate | prospect_token | none | `server/src/routes/p.ts:1042` |
 | GET | `/api/rvm/:token` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:117` |
 | POST | `/api/rvm/:token/activate` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:128` |
 | POST | `/api/rvm/:token/video-event` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:139` |
@@ -274,17 +278,18 @@
 | GET | `/api/cockpit/follow-up-queue` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:142` |
 | GET | `/api/cockpit/team-calendar` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:165` |
 | GET | `/api/cockpit/invites/print.pdf` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:191` |
-| GET | `/api/crm/today` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:92` |
-| GET | `/api/crm/:prospectId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:107` |
-| POST | `/api/crm/:prospectId/notes` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:125` |
-| POST | `/api/crm/:prospectId/followup` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:151` |
-| DELETE | `/api/crm/:prospectId/followup` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:178` |
-| POST | `/api/crm/:prospectId/disposition` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:201` |
-| POST | `/api/crm/:prospectId/reinvite` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:232` |
-| POST | `/api/crm/:prospectId/reinvite-script` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:267` |
-| POST | `/api/crm/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:318` |
-| PUT | `/api/crm/:prospectId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:364` |
-| DELETE | `/api/crm/:prospectId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:396` |
+| GET | `/api/crm/today` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:96` |
+| GET | `/api/crm/:prospectId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:111` |
+| POST | `/api/crm/:prospectId/notes` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:129` |
+| POST | `/api/crm/:prospectId/followup` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:155` |
+| DELETE | `/api/crm/:prospectId/followup` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:182` |
+| POST | `/api/crm/:prospectId/disposition` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:205` |
+| POST | `/api/crm/:prospectId/reinvite` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:236` |
+| POST | `/api/crm/:prospectId/reinvite-script` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:271` |
+| POST | `/api/crm/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:322` |
+| PUT | `/api/crm/:prospectId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:368` |
+| DELETE | `/api/crm/:prospectId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:400` |
+| POST | `/api/crm/:prospectId/enrollment-attestation` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:464` |
 | GET | `/api/crm-hub/prospects` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crmHub.ts:60` |
 | GET | `/api/crm-hub/prospects/:prospectId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crmHub.ts:72` |
 | POST | `/api/crm-hub/prospects/:prospectId/close-as-ba` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crmHub.ts:86` |
