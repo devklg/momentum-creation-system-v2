@@ -4,16 +4,16 @@
 
 ## Summary
 
-- Generated: 2026-07-18T03:17:17.473Z
+- Generated: 2026-07-18T04:06:57.825Z
 - Mounted routers: 50
 - Route files: 50
-- Static route rows: 262
+- Static route rows: 265
 
 ## Routes By Phase
 
 | Phase | Routes |
 | --- | ---: |
-| ba_facing_gated | 93 |
+| ba_facing_gated | 96 |
 | pre_gate | 158 |
 | pre_json_admin_body_limit | 10 |
 | raw_body_before_json | 1 |
@@ -23,7 +23,7 @@
 | Access profile | Routes |
 | --- | ---: |
 | admin | 110 |
-| ba_auth_steve_gated | 93 |
+| ba_auth_steve_gated | 96 |
 | internal_runtime | 5 |
 | pre_gate_or_public | 34 |
 | prospect_token | 19 |
@@ -34,7 +34,7 @@
 | Method | Routes |
 | --- | ---: |
 | DELETE | 7 |
-| GET | 134 |
+| GET | 137 |
 | PATCH | 9 |
 | POST | 103 |
 | PUT | 9 |
@@ -270,14 +270,17 @@
 | POST | `/api/invitations/` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/invitations.ts:140` |
 | POST | `/api/invitations/:prospectId/sent` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/invitations.ts:195` |
 | POST | `/api/invitations/log` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/invitations.ts:241` |
-| GET | `/api/cockpit/launch` | ba_facing_gated | ba_auth_steve_gated | auth | `server/src/routes/cockpit.ts:44` |
-| GET | `/api/cockpit/invites` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:62` |
-| GET | `/api/cockpit/summary` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:79` |
-| GET | `/api/cockpit/pmv` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:99` |
-| GET | `/api/cockpit/todays-actions` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:118` |
-| GET | `/api/cockpit/follow-up-queue` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:142` |
-| GET | `/api/cockpit/team-calendar` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:165` |
-| GET | `/api/cockpit/invites/print.pdf` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:191` |
+| GET | `/api/cockpit/konga` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:74` |
+| GET | `/api/cockpit/konga/leaderboard` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:87` |
+| GET | `/api/cockpit/konga/stream` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:108` |
+| GET | `/api/cockpit/launch` | ba_facing_gated | ba_auth_steve_gated | auth | `server/src/routes/cockpit.ts:193` |
+| GET | `/api/cockpit/invites` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:211` |
+| GET | `/api/cockpit/summary` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:228` |
+| GET | `/api/cockpit/pmv` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:248` |
+| GET | `/api/cockpit/todays-actions` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:267` |
+| GET | `/api/cockpit/follow-up-queue` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:291` |
+| GET | `/api/cockpit/team-calendar` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:314` |
+| GET | `/api/cockpit/invites/print.pdf` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/cockpit.ts:340` |
 | GET | `/api/crm/today` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:96` |
 | GET | `/api/crm/:prospectId` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:111` |
 | POST | `/api/crm/:prospectId/notes` | ba_facing_gated | ba_auth_steve_gated | auth, steve | `server/src/routes/crm.ts:129` |

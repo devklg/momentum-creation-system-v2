@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-18T03:17:22.495Z",
+  "generatedAt": "2026-07-18T04:07:00.496Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -5664,46 +5664,64 @@
       "routes": [
         {
           "method": "GET",
+          "path": "/konga",
+          "line": 74
+        },
+        {
+          "method": "GET",
+          "path": "/konga/leaderboard",
+          "line": 87
+        },
+        {
+          "method": "GET",
+          "path": "/konga/stream",
+          "line": 108
+        },
+        {
+          "method": "GET",
           "path": "/launch",
-          "line": 44
+          "line": 193
         },
         {
           "method": "GET",
           "path": "/invites",
-          "line": 62
+          "line": 211
         },
         {
           "method": "GET",
           "path": "/summary",
-          "line": 79
+          "line": 228
         },
         {
           "method": "GET",
           "path": "/pmv",
-          "line": 99
+          "line": 248
         },
         {
           "method": "GET",
           "path": "/todays-actions",
-          "line": 118
+          "line": 267
         },
         {
           "method": "GET",
           "path": "/follow-up-queue",
-          "line": 142
+          "line": 291
         },
         {
           "method": "GET",
           "path": "/team-calendar",
-          "line": 165
+          "line": 314
         },
         {
           "method": "GET",
           "path": "/invites/print.pdf",
-          "line": 191
+          "line": 340
         }
       ],
-      "sharedTypes": []
+      "sharedTypes": [
+        "McsJoinEvent",
+        "McsKongaPlacementEvent"
+      ]
     },
     {
       "file": "server/src/routes/content-videos.ts",
@@ -7721,8 +7739,33 @@
       "file": "packages/shared/src/konga-line.ts"
     },
     {
+      "name": "McsKongaTeamGenesisNode",
+      "kind": "interface",
+      "file": "packages/shared/src/konga-line.ts"
+    },
+    {
+      "name": "McsKongaTeamLeaderboardResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/konga-line.ts"
+    },
+    {
       "name": "McsKongaTeamLensResponse",
       "kind": "interface",
+      "file": "packages/shared/src/konga-line.ts"
+    },
+    {
+      "name": "McsKongaTeamPlacementSnapshot",
+      "kind": "interface",
+      "file": "packages/shared/src/konga-line.ts"
+    },
+    {
+      "name": "McsKongaTeamSnapshotResponse",
+      "kind": "interface",
+      "file": "packages/shared/src/konga-line.ts"
+    },
+    {
+      "name": "McsKongaTeamStreamEvent",
+      "kind": "type",
       "file": "packages/shared/src/konga-line.ts"
     },
     {
@@ -12877,7 +12920,7 @@
     "neo4jRelationships": 71,
     "chromaCollections": 59,
     "routeModules": 49,
-    "routeHandlers": 300,
-    "sharedExports": 1229
+    "routeHandlers": 303,
+    "sharedExports": 1234
   }
 }

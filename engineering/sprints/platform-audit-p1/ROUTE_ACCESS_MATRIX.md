@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Generated: 2026-07-18T03:17:17.522Z
-- Routes: 262
+- Generated: 2026-07-18T04:06:57.880Z
+- Routes: 265
 - Findings: 0
 
 ## Routes By Access Category
@@ -17,7 +17,7 @@
 | auth_bootstrap | 3 |
 | auth_session | 2 |
 | ba_auth_pre_steve | 22 |
-| ba_auth_steve_gated | 66 |
+| ba_auth_steve_gated | 69 |
 | ba_auth_steve_vm_entitled | 25 |
 | internal_runtime_admin_or_secret | 5 |
 | prospect_reentry | 4 |
@@ -36,9 +36,9 @@
 | rawBodyParser | 1 |
 | requireAdmin | 113 |
 | requireAdminOrHealthSecret | 1 |
-| requireAuth | 114 |
+| requireAuth | 117 |
 | requireRuntimeInternal | 5 |
-| requireSteveComplete | 98 |
+| requireSteveComplete | 101 |
 | requireVmDialerAccess | 25 |
 
 ## Role Coverage
@@ -46,7 +46,7 @@
 | Role | Routes |
 | --- | ---: |
 | anonymous | 5 |
-| brand_ambassador | 115 |
+| brand_ambassador | 118 |
 | founder_admin | 119 |
 | prospect | 19 |
 | provider | 2 |
@@ -59,7 +59,7 @@
 | admin_allowlist | 119 |
 | machine_credential | 12 |
 | none | 5 |
-| registered_ba | 115 |
+| registered_ba | 118 |
 | valid_prospect_identity | 19 |
 | vm_dialer | 25 |
 
@@ -259,14 +259,17 @@
 | POST | `/api/invitations/` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/invitations.ts:140` |
 | POST | `/api/invitations/:prospectId/sent` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/invitations.ts:195` |
 | POST | `/api/invitations/log` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/invitations.ts:241` |
-| GET | `/api/cockpit/launch` | brand_ambassador | registered_ba | ba_session, whitelisted | ba_auth_pre_steve | ba_session | none | whitelisted | static_whitelist | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:44` |
-| GET | `/api/cockpit/invites` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:62` |
-| GET | `/api/cockpit/summary` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:79` |
-| GET | `/api/cockpit/pmv` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:99` |
-| GET | `/api/cockpit/todays-actions` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:118` |
-| GET | `/api/cockpit/follow-up-queue` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:142` |
-| GET | `/api/cockpit/team-calendar` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:165` |
-| GET | `/api/cockpit/invites/print.pdf` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:191` |
+| GET | `/api/cockpit/konga` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:74` |
+| GET | `/api/cockpit/konga/leaderboard` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:87` |
+| GET | `/api/cockpit/konga/stream` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:108` |
+| GET | `/api/cockpit/launch` | brand_ambassador | registered_ba | ba_session, whitelisted | ba_auth_pre_steve | ba_session | none | whitelisted | static_whitelist | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:193` |
+| GET | `/api/cockpit/invites` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:211` |
+| GET | `/api/cockpit/summary` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:228` |
+| GET | `/api/cockpit/pmv` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:248` |
+| GET | `/api/cockpit/todays-actions` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:267` |
+| GET | `/api/cockpit/follow-up-queue` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:291` |
+| GET | `/api/cockpit/team-calendar` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:314` |
+| GET | `/api/cockpit/invites/print.pdf` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/cockpit.ts:340` |
 | GET | `/api/crm/today` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/crm.ts:96` |
 | GET | `/api/crm/:prospectId` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/crm.ts:111` |
 | POST | `/api/crm/:prospectId/notes` | brand_ambassador | registered_ba | ba_session, requireSteveComplete | ba_auth_steve_gated | ba_session | none | requireSteveComplete | none | none | none | none | no | no | global_256kb_json | none | none | `server/src/routes/crm.ts:129` |
