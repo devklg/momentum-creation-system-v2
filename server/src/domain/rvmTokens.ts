@@ -7,6 +7,7 @@
  */
 
 import type {
+  McsInviteTokenRecord,
   McsRvmResolvedTokenPayload,
   McsTokenState,
   McsVideoEventKind,
@@ -66,7 +67,7 @@ export async function resolveRvmToken(token: string): Promise<McsRvmResolvedToke
   const bulkLead = await findBulkLeadByToken(token);
   if (!bulkLead) throw new RvmTokenError('invalid_token');
 
-  const tokenRecord = await findTokenRecord(token);
+  const tokenRecord = (await findTokenRecord(token)) as (McsInviteTokenRecord & { invitationRecordId?: string }) | null;
   if (!tokenRecord) throw new RvmTokenError('invalid_token');
   if (tokenRecord.state === 'enrolled') throw new RvmTokenError('enrolled');
   if (tokenRecord.state === 'expired') throw new RvmTokenError('expired');
@@ -94,6 +95,7 @@ export async function resolveRvmToken(token: string): Promise<McsRvmResolvedToke
       leadId: bulkLead.leadId,
       leadOwnerId: bulkLead.leadOwnerId,
       vmCampaignId: bulkLead.vmCampaignId,
+      invitationRecordId: tokenRecord.invitationRecordId,
     });
   }
 
@@ -161,7 +163,7 @@ export async function recordRvmVideoEvent(
   const bulkLead = await findBulkLeadByToken(token);
   if (!bulkLead) throw new RvmTokenError('invalid_token');
 
-  const tokenRecord = await findTokenRecord(token);
+  const tokenRecord = (await findTokenRecord(token)) as (McsInviteTokenRecord & { invitationRecordId?: string }) | null;
   if (!tokenRecord) throw new RvmTokenError('invalid_token');
   if (tokenRecord.state === 'enrolled') throw new RvmTokenError('enrolled');
   if (tokenRecord.state === 'expired') throw new RvmTokenError('expired');
@@ -228,7 +230,7 @@ export async function activateRvmLeadByToken(
 ): Promise<{ prospectId: string; createdAt: string }> {
   const bulkLead = await findBulkLeadByToken(token);
   if (!bulkLead) throw new RvmTokenError('invalid_token');
-  const tokenRecord = await findTokenRecord(token);
+  const tokenRecord = (await findTokenRecord(token)) as (McsInviteTokenRecord & { invitationRecordId?: string }) | null;
   if (!tokenRecord) throw new RvmTokenError('invalid_token');
   if (tokenRecord.state === 'enrolled') throw new RvmTokenError('enrolled');
   if (tokenRecord.state === 'expired' || isTokenExpired(tokenRecord)) {

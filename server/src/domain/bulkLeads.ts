@@ -305,6 +305,7 @@ async function createBulkLeadRecord(input: {
     leadId,
     leadOwnerId: input.leadOwnerId,
     vmCampaignId: input.vmCampaignId,
+    invitationRecordId,
     createdAt: now,
     correlation: withCrmCorrelation(correlation, `crm_${prospectId}`),
   });

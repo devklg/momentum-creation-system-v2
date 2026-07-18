@@ -144,6 +144,7 @@ export function writeVmLeadTokenGraphCritical(
 }
 
 async function verifyTokenPatch(token: string, expected: Record<string, unknown>): Promise<void> {
+  const tokenHash = createHash('sha256').update(token).digest('hex');
   const result = await persistenceCall<{ documents?: Array<Record<string, unknown>> }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: TOKENS_COLLECTION,
@@ -151,10 +152,10 @@ async function verifyTokenPatch(token: string, expected: Record<string, unknown>
     limit: 1,
   });
   const doc = result.documents?.[0];
-  if (!doc) throw new Error(`token_lifecycle_readback_missing:${token}`);
+  if (!doc) throw new Error(`token_lifecycle_readback_missing:tokenHash=${tokenHash}`);
   for (const [key, value] of Object.entries(expected)) {
     if (doc[key] !== value) {
-      throw new Error(`token_lifecycle_readback_mismatch:${token}:${key}`);
+      throw new Error(`token_lifecycle_readback_mismatch:tokenHash=${tokenHash}:field=${key}`);
     }
   }
 }

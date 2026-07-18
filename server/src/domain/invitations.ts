@@ -327,6 +327,7 @@ export async function createInvitation(
     leadOwnerId: null,
     vmCampaignId: null,
     createdAt,
+    invitationRecordId,
     correlation: withCrmCorrelation(correlation, crmRecordId),
   });
 
@@ -340,6 +341,7 @@ export async function createInvitation(
     prospectId,
     tokenId: token,
     sponsorTmagId: input.sponsorTmagId,
+    invitationRecordId,
     tokenExpiresAt: expiresAt,
     phone: normalizePhone(input.phone),
     reentryCode,

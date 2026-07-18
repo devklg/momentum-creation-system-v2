@@ -154,4 +154,39 @@ describe('token lifecycle persistence', () => {
       }),
     );
   });
+
+  it('hides raw token in readback-missing verification errors', async () => {
+    const token = 'TOKEN123';
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    mocks.persistenceCall.mockResolvedValueOnce({}); 
+    mocks.persistenceCall.mockResolvedValueOnce({ documents: [] });
+    mocks.persistenceCall.mockResolvedValueOnce({});
+    try {
+      await updateTokenLifecycleOperational({ token, patch: { state: 'clicked' } });
+      expect.fail('expected readback-missing error');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).toContain(`token_lifecycle_readback_missing:tokenHash=${tokenHash}`);
+      expect(message).not.toContain(token);
+    }
+  });
+
+  it('hides raw token in readback mismatch verification errors', async () => {
+    const token = 'TOKEN-SECURE-9';
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    mocks.persistenceCall
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ documents: [{ token, state: 'expired' }] })
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ records: [{ n: 1 }] });
+
+    try {
+      await updateTokenLifecycleOperational({ token, patch: { state: 'clicked' } });
+      expect.fail('expected readback-mismatch error');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).toContain(`token_lifecycle_readback_mismatch:tokenHash=${tokenHash}:field=state`);
+      expect(message).not.toContain(token);
+    }
+  });
 });
