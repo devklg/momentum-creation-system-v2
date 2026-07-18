@@ -1,0 +1,228 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mocks = vi.hoisted(() => ({
+  appendProspectTimelineEvent: vi.fn(),
+  createOrUpdateCrmRecordForToken: vi.fn(),
+  createProspectAccount: vi.fn(),
+  findVMCampaignForOwner: vi.fn(),
+  markLeadOwnerImported: vi.fn(),
+  mintUniqueToken: vi.fn(),
+  persistenceCall: vi.fn(),
+  writeGraphCritical: vi.fn(),
+  writeKnowledge: vi.fn(),
+  writeProspectTokenGraphCritical: vi.fn(),
+}));
+
+vi.mock('../../services/persistence/dispatch.js', () => ({
+  persistenceCall: mocks.persistenceCall,
+}));
+
+vi.mock('../../services/tieredWrite.js', () => ({
+  writeGraphCritical: mocks.writeGraphCritical,
+  writeKnowledge: mocks.writeKnowledge,
+}));
+
+vi.mock('../tokenLifecyclePersistence.js', () => ({
+  writeProspectTokenGraphCritical: mocks.writeProspectTokenGraphCritical,
+}));
+
+vi.mock('../prospectAccount.js', async () => {
+  const actual = await vi.importActual<typeof import('../prospectAccount.js')>('../prospectAccount.js');
+  return {
+    ...actual,
+    createProspectAccount: mocks.createProspectAccount,
+  };
+});
+
+vi.mock('../prospectCrm.js', () => ({
+  appendProspectTimelineEvent: mocks.appendProspectTimelineEvent,
+  createOrUpdateCrmRecordForToken: mocks.createOrUpdateCrmRecordForToken,
+}));
+
+vi.mock('../tokens.js', async () => {
+  const actual = await vi.importActual<typeof import('../tokens.js')>('../tokens.js');
+  return {
+    ...actual,
+    mintUniqueToken: mocks.mintUniqueToken,
+  };
+});
+
+vi.mock('../vmCampaigns.js', () => ({
+  findVMCampaignForOwner: mocks.findVMCampaignForOwner,
+}));
+
+vi.mock('../vmLeadOwners.js', () => ({
+  markLeadOwnerImported: mocks.markLeadOwnerImported,
+}));
+
+describe('invitation mint identity', () => {
+  beforeEach(async () => {
+    mocks.appendProspectTimelineEvent.mockReset();
+    mocks.createOrUpdateCrmRecordForToken.mockReset();
+    mocks.createProspectAccount.mockReset();
+    mocks.findVMCampaignForOwner.mockReset();
+    mocks.markLeadOwnerImported.mockReset();
+    mocks.mintUniqueToken.mockReset();
+    mocks.persistenceCall.mockReset();
+    mocks.writeGraphCritical.mockReset();
+    mocks.writeKnowledge.mockReset();
+    mocks.writeProspectTokenGraphCritical.mockReset();
+    vi.resetModules();
+  });
+
+  it('writes a fresh invitationRecordId for every minted invitation', async () => {
+    mocks.mintUniqueToken.mockResolvedValue('TOKEN-NEW');
+    mocks.createProspectAccount.mockResolvedValue({
+      tokenId: 'TOKEN-NEW',
+    } as never);
+    mocks.createOrUpdateCrmRecordForToken.mockResolvedValue({
+      crmRecordId: 'crm_1',
+      prospectId: 'prospect_new',
+      status: 'active',
+    } as never);
+    mocks.writeGraphCritical.mockResolvedValue({
+      mongo: { ok: true, insertedCount: 1 },
+      neo4j: { ok: true },
+      chroma: { ok: true, verified: true },
+    } as never);
+    mocks.writeProspectTokenGraphCritical.mockResolvedValue({
+      mongo: { ok: true },
+    } as never);
+
+    const { createInvitation } = await import('../invitations.js');
+    const result = await createInvitation({
+      sponsorTmagId: 'TMBA-SPONSOR',
+      firstName: 'Avery',
+      lastName: 'Quinn',
+      email: null,
+      phone: '2125551000',
+      city: 'Los Angeles',
+      stateOrRegion: 'CA',
+      country: 'US',
+      message: null,
+      source: 'pmv',
+      relationshipReason: null,
+    });
+
+    const write = mocks.writeProspectTokenGraphCritical.mock.calls[0]![0] as {
+      token: string;
+      mongoDoc: { token: string; invitationRecordId?: string };
+      tokenProps: Record<string, unknown>;
+    };
+    expect(result.token).toBe('TOKEN-NEW');
+    expect(result.inviteUrl).toContain('TOKEN-NEW');
+    expect(write.token).toBe('TOKEN-NEW');
+    expect(write.mongoDoc.invitationRecordId).toMatch(/^invite_/);
+    expect(write.mongoDoc.invitationRecordId).not.toBe(write.token);
+  });
+
+  it('reinvites with a fresh invitationRecordId when the token is expired', async () => {
+    mocks.persistenceCall.mockImplementation(
+      async (_tool: string, action: string, params: Record<string, unknown>) => {
+        if (action === 'query') {
+          if (params.collection === 'tmag_prospects') {
+            return {
+              documents: [
+                {
+                  prospectId: 'prospect-1',
+                  sponsorTmagId: 'TMBA-SPONSOR',
+                  token: 'TOKEN-OLD',
+                  state: 'video_started',
+                  sentAt: '2026-07-01T00:00:00.000Z',
+                  expiresAt: '2026-07-01T00:00:00.000Z',
+                },
+              ],
+            };
+          }
+          return { documents: [] };
+        }
+        if (action === 'update') return { matchedCount: 1 };
+        return { ok: true };
+      },
+    );
+
+    mocks.mintUniqueToken.mockResolvedValue('TOKEN-CRM-REINVITE');
+    mocks.writeKnowledge.mockResolvedValue({
+      mongo: { ok: true },
+      neo4j: { ok: true },
+      chroma: { ok: true },
+    } as never);
+    mocks.writeProspectTokenGraphCritical.mockResolvedValue({
+      mongo: { ok: true },
+    } as never);
+
+    const { reinvite } = await import('../crm.js');
+    const response = await reinvite('prospect-1', 'TMBA-SPONSOR');
+    const write = mocks.writeProspectTokenGraphCritical.mock.calls[0]![0] as {
+      token: string;
+      mongoDoc: { invitationRecordId?: string };
+      tokenProps: Record<string, unknown>;
+    };
+
+    expect(response.fresh).toBe(true);
+    expect(response.token).toBe('TOKEN-CRM-REINVITE');
+    expect(write.token).toBe('TOKEN-CRM-REINVITE');
+    expect(write.mongoDoc.invitationRecordId).toMatch(/^invite_/);
+    expect(write.mongoDoc.invitationRecordId).not.toBe(write.token);
+    expect(write.tokenProps.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
+  });
+
+  it('writes invitationRecordId during bulk import with separate identity from the token', async () => {
+    mocks.findVMCampaignForOwner.mockResolvedValue({
+      leadOwnerId: 'lead-owner-1',
+      provider: 'rvm',
+    } as never);
+    mocks.markLeadOwnerImported.mockResolvedValue({
+      leadOwnerId: 'lead-owner-1',
+      importedCount: 1,
+    } as never);
+    mocks.mintUniqueToken.mockResolvedValue('TOKEN-BULK');
+    mocks.writeGraphCritical.mockResolvedValue({
+      mongo: { ok: true, insertedCount: 1 },
+      neo4j: { ok: true },
+      chroma: { ok: true, verified: true },
+    } as never);
+    mocks.writeProspectTokenGraphCritical.mockResolvedValue({
+      mongo: { ok: true },
+    } as never);
+    mocks.createOrUpdateCrmRecordForToken.mockResolvedValue({
+      crmRecordId: 'crm_bulk_1',
+      prospectId: 'prospect_bulk_1',
+      status: 'inactive_pre_engagement',
+    } as never);
+    mocks.appendProspectTimelineEvent.mockResolvedValue({
+      prospectTimelineEventId: 'timeline_1',
+    } as never);
+
+    const { importBulkLeads } = await import('../bulkLeads.js');
+    await importBulkLeads({
+      ownerTmagId: 'owner-1',
+      sponsorTmagId: 'TMBA-SPONSOR',
+      leadOwnerId: 'lead-owner-1',
+      vmCampaignId: 'campaign-1',
+      leads: [
+        {
+          firstName: 'Avery',
+          lastName: 'Quinn',
+          city: 'Los Angeles',
+          stateOrRegion: 'CA',
+          country: 'US',
+          phone: '2125551111',
+          email: 'avery@example.com',
+        },
+      ],
+    });
+
+    expect(mocks.findVMCampaignForOwner).toHaveBeenCalledWith('campaign-1', 'owner-1');
+    expect(mocks.markLeadOwnerImported).toHaveBeenCalledWith('lead-owner-1', 'owner-1', 1);
+
+    const write = mocks.writeProspectTokenGraphCritical.mock.calls[0]![0] as {
+      token: string;
+      mongoDoc: { invitationRecordId?: string };
+      tokenProps: Record<string, unknown>;
+    };
+    expect(write.token).toBe('TOKEN-BULK');
+    expect(write.mongoDoc.invitationRecordId).toMatch(/^invite_/);
+    expect(write.mongoDoc.invitationRecordId).not.toBe(write.token);
+  });
+});

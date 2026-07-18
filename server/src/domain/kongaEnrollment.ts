@@ -57,9 +57,13 @@ type KongaPlacementRecord = McsKongaPoolPlacement & {
 };
 
 function resolvePlacementAttemptFromTokenRecord(token: TokenDoc): string {
+  const invitationRecordId = resolveInvitationRecordId(token);
+  if (!invitationRecordId) {
+    throw new KongaEnrollmentError('legacy_placement_requires_no_backfill');
+  }
   return deriveKongaPlacementIdentity({
     prospectId: token.prospectId,
-    invitationRecordId: resolveInvitationRecordId(token),
+    invitationRecordId,
   }).placementAttemptId;
 }
 

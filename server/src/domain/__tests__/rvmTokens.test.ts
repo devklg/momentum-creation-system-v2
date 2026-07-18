@@ -137,7 +137,7 @@ describe('RVM placement identity', () => {
       ...baseTokenRecord,
       token: 'TOKEN-RVM-LEGACY',
       invitationRecordId: undefined as unknown as string,
-      _id: 'legacy-token-id',
+      _id: 'TOKEN-RVM-LEGACY',
       createdAt: '2026-07-10T00:00:00.000Z',
       state: 'clicked',
     });
@@ -151,7 +151,27 @@ describe('RVM placement identity', () => {
     const placementInput = mocks.placeKongaProspect.mock.calls[0]![0] as {
       invitationRecordId: string;
     };
-    expect(placementInput.invitationRecordId).toBe('legacy_invitation_legacy-token-id');
+    expect(placementInput.invitationRecordId).toBe(
+      'legacy_invitation_prospect-1|TMBA-SPONSOR|2026-07-10T00:00:00.000Z',
+    );
+  });
+
+  it('rejects legacy raw-token identity without a provable non-secret fallback path', async () => {
+    mocks.findBulkLeadByToken.mockResolvedValue(bulkLead);
+    mocks.findTokenRecord.mockResolvedValue({
+      ...baseTokenRecord,
+      token: 'TOKEN-RVM-RAW',
+      invitationRecordId: undefined as unknown as string,
+      _id: 'TOKEN-RVM-RAW',
+      createdAt: undefined as unknown as string,
+      state: 'clicked',
+    });
+    mocks.isTokenExpired.mockReturnValue(false);
+    mocks.transitionTokenState.mockResolvedValue({ state: 'video_complete', changed: true });
+    mocks.findProspectById.mockResolvedValue(prospect);
+    await expect(recordRvmVideoEvent('TOKEN-RVM-RAW', 'complete')).rejects.toThrow(
+      'konga_invitation_attempt_identity_unresolved',
+    );
   });
 
   it('does not emit CRM lifecycle milestones again on replayed complete milestone', async () => {
@@ -160,7 +180,7 @@ describe('RVM placement identity', () => {
     mocks.isTokenExpired.mockReturnValue(false);
     mocks.transitionTokenState.mockResolvedValue({ state: 'video_complete', changed: false });
     mocks.findProspectById.mockResolvedValue(prospect);
-    mocks.placeKongaProspect.mockResolvedValue(placementResult);
+    mocks.placeKongaProspect.mockResolvedValue({ ...placementResult, alreadyPlaced: true });
 
     await recordRvmVideoEvent('TOKEN-RVM-LIVE', 'complete');
 

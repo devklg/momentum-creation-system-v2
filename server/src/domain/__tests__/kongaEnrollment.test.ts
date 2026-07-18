@@ -208,6 +208,70 @@ describe('truthful Konga join boundary', () => {
     expect(JSON.stringify(fixture.call.mock.calls)).not.toContain(token.token);
   });
 
+  it('rejects token A enrollment against token B placement attempt', async () => {
+    placement.placementAttemptId = deriveKongaPlacementIdentity({
+      prospectId: prospect.prospectId,
+      invitationRecordId: 'invite-other',
+    }).placementAttemptId;
+    const fixture = persistenceFixture({
+      tokenRecords: [
+        {
+          ...token,
+          token: 'TOKEN-A',
+          invitationRecordId: 'invite-match',
+          state: 'video_complete',
+          createdAt: '2026-07-01T00:00:00.000Z',
+        },
+      ],
+    });
+    const publish = vi.fn();
+    await expect(
+      attestKongaEnrollment(input, {
+        persistence: fixture.call as never,
+        publish,
+        strictWrite: vi.fn(async () => {
+          throw new Error('must not create enrollment');
+        }) as never,
+        strictVerify: vi.fn(async () => {
+          throw new Error('must not verify');
+        }) as never,
+      }),
+    ).rejects.toEqual(new KongaEnrollmentError('exact_live_linkage_required'));
+    expect(publish).not.toHaveBeenCalled();
+  });
+
+  it('rejects token B enrollment against token A placement attempt', async () => {
+    placement.placementAttemptId = deriveKongaPlacementIdentity({
+      prospectId: prospect.prospectId,
+      invitationRecordId: 'invite-match',
+    }).placementAttemptId;
+    const fixture = persistenceFixture({
+      tokenRecords: [
+        {
+          ...token,
+          token: 'TOKEN-B',
+          invitationRecordId: 'invite-other',
+          state: 'video_complete',
+          createdAt: '2026-07-01T00:00:00.000Z',
+        },
+      ],
+    });
+    const publish = vi.fn();
+    await expect(
+      attestKongaEnrollment(input, {
+        persistence: fixture.call as never,
+        publish,
+        strictWrite: vi.fn(async () => {
+          throw new Error('must not create enrollment');
+        }) as never,
+        strictVerify: vi.fn(async () => {
+          throw new Error('must not verify');
+        }) as never,
+      }),
+    ).rejects.toEqual(new KongaEnrollmentError('exact_live_linkage_required'));
+    expect(publish).not.toHaveBeenCalled();
+  });
+
   it('rejects partial enrollment linkage when no video-complete token matches the placement', async () => {
     const strictWrite = vi.fn();
     const strictVerify = vi.fn();
@@ -283,6 +347,58 @@ describe('truthful Konga join boundary', () => {
     });
     expect(ignored.placementAttemptId).not.toBe(matching.placementAttemptId);
     expect(publish).toHaveBeenCalledTimes(1);
+  });
+
+  it('supports direct enrollment idempotence and treats repeated matching requests as already-attested', async () => {
+    const fixture = persistenceFixture();
+    const publish = vi.fn();
+    const strictWrite = vi.fn(async (write: { id: string; mongoDoc: Record<string, unknown> }) => {
+      fixture.attestations.push({ _id: write.id, ...write.mongoDoc });
+      return { mongo: write.mongoDoc, neo4jCount: 1, chromaId: write.id };
+    });
+
+    const first = await attestKongaEnrollment(input, {
+      persistence: fixture.call as never,
+      strictWrite,
+      strictVerify: vi.fn(async () => ({ mongo: placement, neo4jCount: 1, chromaId: placement.placementId })),
+      publish,
+    });
+    const second = await attestKongaEnrollment(input, {
+      persistence: fixture.call as never,
+      strictWrite,
+      strictVerify: vi.fn(async () => ({ mongo: placement, neo4jCount: 1, chromaId: placement.placementId })),
+      publish,
+    });
+
+    expect(first.alreadyAttested).toBe(false);
+    expect(second.alreadyAttested).toBe(true);
+    expect(strictWrite).toHaveBeenCalledTimes(1);
+    expect(publish).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects legacy legacy raw-token identity without a non-secret fallback path', async () => {
+    token.invitationRecordId = undefined as unknown as string;
+    token.createdAt = undefined as unknown as string;
+    const fixture = persistenceFixture({
+      tokenRecords: [
+        {
+          ...token,
+          token: 'TOKEN-RAW',
+          _id: 'TOKEN-RAW',
+          createdAt: undefined as unknown as string,
+          state: 'video_complete',
+        },
+      ],
+    });
+    const publish = vi.fn();
+    await expect(
+      attestKongaEnrollment(input, {
+        persistence: fixture.call as never,
+        publish,
+        strictWrite: vi.fn(),
+      }),
+    ).rejects.toEqual(new KongaEnrollmentError('legacy_placement_requires_no_backfill'));
+    expect(publish).not.toHaveBeenCalled();
   });
 
   it('rejects legacy placement records lacking attempt identity', async () => {

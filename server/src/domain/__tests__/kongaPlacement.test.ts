@@ -109,12 +109,104 @@ describe('Konga placement permanence', () => {
     expect(publish).not.toHaveBeenCalled();
   });
 
-  it('derives legacy token identity without using raw tokens', () => {
+  it('derives raw-token-backed legacy identity from prospect/sponsor/createdAt fields', () => {
+    const tokenRecord = {
+      token: 'TOKEN-LEGACY-RAW',
+      prospectId: input.prospectId,
+      sponsorTmagId: input.sponsorTmagId,
+      state: 'video_complete',
+      createdAt: '2026-07-10T00:00:00.000Z',
+      _id: 'TOKEN-LEGACY-RAW',
+    } as const;
+
+    const invitationRecordId = resolveInvitationRecordId(tokenRecord);
+    expect(invitationRecordId).toBe(
+      `legacy_invitation_${input.prospectId}|${input.sponsorTmagId}|${tokenRecord.createdAt}`,
+    );
+    expect(invitationRecordId).not.toContain(tokenRecord.token);
+  });
+
+  it('fails closed when raw-token-backed legacy identity cannot be proven', () => {
+    const tokenRecord = {
+      token: 'TOKEN-LEGACY-RAW',
+      prospectId: 'prospect-1',
+      sponsorTmagId: 'TMBA-SPONSOR',
+      state: 'video_complete',
+      createdAt: undefined as unknown as string,
+      _id: 'TOKEN-LEGACY-RAW',
+    } as const;
+
+    expect(resolveInvitationRecordId(tokenRecord)).toBeNull();
+  });
+
+  it('emits a new placement attempt after re-entry while retaining flushed attempt history', async () => {
+    const flushRow = {
+      ...input,
+      prospectId: input.prospectId,
+      sponsorTmagId: input.sponsorTmagId,
+      placementId: 'old-placement',
+      placementAttemptId: deriveKongaPlacementIdentity({
+        prospectId: input.prospectId,
+        invitationRecordId: 'prior-attempt',
+      }).placementAttemptId,
+      positionNumber: 101,
+      placedAt: '2026-07-10T00:00:00.000Z',
+      expiresAt: input.prospectExpiresAt,
+      flushedAt: '2026-07-11T00:00:00.000Z',
+      flushReason: 'enrolled',
+      addedBy: null,
+    };
+    const placements: Array<Record<string, unknown>> = [flushRow];
+
+    const persistence = vi.fn(async (_tool: string, action: string, params: Record<string, unknown>) => {
+      if (action !== 'query') return {};
+      if (params.collection === 'tmag_prospect_htank_placements') {
+        const filter = params.filter as Record<string, unknown>;
+        if (filter.placementAttemptId) {
+          return {
+            documents: placements.filter((row) => row.placementAttemptId === filter.placementAttemptId),
+          };
+        }
+        return { documents: placements.filter((row) => row.flushedAt === null) };
+      }
+      if (params.collection === 'tmag_prospects') {
+        return { documents: [{ prospectId: input.prospectId }] };
+      }
+      return {};
+    });
+
+    const strictWrite = vi.fn(async (input: { mongoDoc: Record<string, unknown> }) => {
+      placements.push(input.mongoDoc);
+      return { mongo: input.mongoDoc, neo4jCount: 1, chromaId: 'x' };
+    });
+
+    const result = await placeKongaProspect(
+      { ...input, invitationRecordId: 'fresh-attempt' },
+      {
+        persistence: persistence as never,
+        strictWrite: strictWrite as never,
+        increment: vi.fn(async () => 200),
+        findBa: vi.fn(async () => ({ firstName: 'Jordan', lastName: 'Rivera' })) as never,
+      },
+    );
+
+    expect(result.placementId).not.toBe(flushRow.placementId);
+    expect(placements).toHaveLength(2);
+    expect((result.placementAttemptId !== flushRow.placementAttemptId)).toBe(true);
+    expect(placements[0]).toMatchObject({
+      placementId: flushRow.placementId,
+      flushedAt: flushRow.flushedAt,
+      flushReason: 'enrolled',
+    });
+    expect(placements[1]).toMatchObject({ flushReason: null, flushedAt: null });
+  });
+
+  it('derives legacy token identity without using raw tokens from non-secret fields', () => {
     const tokenRecord = {
       token: 'TOKEN-RAW-UNSAFE',
       prospectId: input.prospectId,
       sponsorTmagId: input.sponsorTmagId,
-      state: 'video_complete',
+      state: 'clicked',
       createdAt: '2026-07-10T00:00:00.000Z',
       _id: 'legacy-token-doc-id',
     } as const;

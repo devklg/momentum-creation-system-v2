@@ -28,7 +28,10 @@ type Increment = typeof incrementPoolCounter;
 type LegacyIdInput = Pick<
   McsInviteTokenRecord,
   'invitationRecordId' | 'prospectId' | 'sponsorTmagId' | 'createdAt'
-> & { _id?: unknown };
+> & {
+  _id?: unknown;
+  token?: string;
+};
 
 function digest(value: string): string {
   return createHash('sha256').update(value).digest('hex');
@@ -51,14 +54,28 @@ function normalizeDbId(raw: unknown): string | null {
   return null;
 }
 
-export function resolveInvitationRecordId(tokenRecord: LegacyIdInput): string {
+export function resolveInvitationRecordId(tokenRecord: LegacyIdInput): string | null {
   const explicit = tokenRecord.invitationRecordId?.trim();
   if (explicit) return explicit;
 
   const dbId = normalizeDbId(tokenRecord._id);
-  if (dbId) return `${LEGACY_INVITATION_ID_PREFIX}${dbId}`;
+  if (dbId && dbId !== tokenRecord.token?.trim()) {
+    return `${LEGACY_INVITATION_ID_PREFIX}${dbId}`;
+  }
+
+  if (!tokenRecord.createdAt || !tokenRecord.prospectId || !tokenRecord.sponsorTmagId) {
+    return null;
+  }
 
   return `${LEGACY_INVITATION_ID_PREFIX}${tokenRecord.prospectId}|${tokenRecord.sponsorTmagId}|${tokenRecord.createdAt}`;
+}
+
+function assertInvitationRecordId(tokenRecord: LegacyIdInput): string {
+  const invitationRecordId = resolveInvitationRecordId(tokenRecord);
+  if (!invitationRecordId) {
+    throw new Error('konga_invitation_attempt_identity_unresolved');
+  }
+  return invitationRecordId;
 }
 
 export function resolvePlacementIdentityFromTokenRecord(
@@ -66,7 +83,7 @@ export function resolvePlacementIdentityFromTokenRecord(
 ): { placementId: string; placementAttemptId: string } {
   return deriveKongaPlacementIdentity({
     prospectId: tokenRecord.prospectId,
-    invitationRecordId: resolveInvitationRecordId(tokenRecord),
+    invitationRecordId: assertInvitationRecordId(tokenRecord),
   });
 }
 

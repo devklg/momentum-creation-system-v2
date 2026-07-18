@@ -187,10 +187,14 @@ export async function recordRvmVideoEvent(
   }
 
   if (kind === 'complete') {
+    const invitationRecordId = resolveInvitationRecordId(tokenRecord);
+    if (!invitationRecordId) {
+      throw new Error('konga_invitation_attempt_identity_unresolved');
+    }
     const result = await placeKongaProspect({
       prospectId: prospect.prospectId,
       sponsorTmagId: tokenRecord.sponsorTmagId,
-      invitationRecordId: resolveInvitationRecordId(tokenRecord),
+      invitationRecordId,
       prospectExpiresAt: prospect.expiresAt,
       firstName: prospect.firstName,
       lastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),

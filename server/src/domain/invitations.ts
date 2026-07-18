@@ -284,7 +284,7 @@ export async function createInvitation(
   // ── Step 3: invite-token record, Mongo + Neo4j. ───────────────────────
   // Chroma already carries the invitation event from step 2; the token's
   // authoritative home is Mongo (resolver reads it) + Neo4j (graph walks).
-  const tokenRecord: McsInviteTokenRecord = {
+  const tokenRecord: McsInviteTokenRecord & { invitationRecordId: string } = {
     token,
     prospectId,
     invitationRecordId,

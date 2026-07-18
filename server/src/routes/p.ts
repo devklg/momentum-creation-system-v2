@@ -507,10 +507,15 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
         return res.status(404).json({ error: 'invalid_token' });
       }
 
+      const invitationRecordId = resolveInvitationRecordId(tokenRecord);
+      if (!invitationRecordId) {
+        return res.status(500).json({ error: 'server_error' });
+      }
+
       const result = await placeKongaProspect({
         prospectId: prospect.prospectId,
         sponsorTmagId: tokenRecord.sponsorTmagId,
-        invitationRecordId: resolveInvitationRecordId(tokenRecord),
+        invitationRecordId,
         prospectExpiresAt: prospect.expiresAt,
         firstName: prospect.firstName,
         lastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),

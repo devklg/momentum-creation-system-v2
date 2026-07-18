@@ -178,7 +178,7 @@ async function createBulkLeadRecord(input: {
     },
   });
 
-  const tokenRecord: McsInviteTokenRecord = {
+  const tokenRecord: McsInviteTokenRecord & { invitationRecordId: string } = {
     token,
     invitationRecordId,
     prospectId,
