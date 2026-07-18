@@ -9,6 +9,7 @@ import { MCS_KONGA_CONTRACT_VERSION } from '@momentum/shared';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { publishJoin } from '../services/poolEvents.js';
 import type { BARecord } from './ba.js';
+import { deriveKongaPlacementIdentity, resolveInvitationRecordId } from './kongaPlacement.js';
 import { tripleStackWriteWithReadback, verifyKongaThreeLegs } from './kongaPersistence.js';
 
 const ATTESTATION_COLLECTION = 'tmag_konga_enrollment_attestations';
@@ -28,6 +29,8 @@ interface TokenDoc {
   sponsorTmagId: string;
   state: string;
   createdAt: string;
+  invitationRecordId?: string;
+  _id?: unknown;
 }
 
 interface EnrollmentAttestation {
@@ -46,6 +49,33 @@ interface EnrollmentAttestation {
   reason: string | null;
   humanAttested: true;
   status: 'completed';
+}
+
+type KongaPlacementRecord = McsKongaPoolPlacement & {
+  placementId?: string;
+  placementAttemptId?: string;
+};
+
+function resolvePlacementAttemptFromTokenRecord(token: TokenDoc): string {
+  return deriveKongaPlacementIdentity({
+    prospectId: token.prospectId,
+    invitationRecordId: resolveInvitationRecordId(token),
+  }).placementAttemptId;
+}
+
+function findMatchingVideoCompleteToken(
+  tokens: TokenDoc[] | undefined,
+  placement: Pick<KongaPlacementRecord, 'placementAttemptId'>,
+): TokenDoc {
+  const liveAttempt = placement.placementAttemptId;
+  if (!liveAttempt) throw new KongaEnrollmentError('legacy_placement_requires_no_backfill');
+  const matching = (tokens ?? []).filter(
+    (token) => resolvePlacementAttemptFromTokenRecord(token) === liveAttempt,
+  );
+  if (matching.length !== 1) {
+    throw new KongaEnrollmentError('exact_live_linkage_required');
+  }
+  return matching[0];
 }
 
 export class KongaEnrollmentError extends Error {
@@ -189,7 +219,7 @@ export async function attestKongaEnrollment(
       filter: { prospectId: input.prospectId, sponsorTmagId: input.sponsorTmagId },
       limit: 1,
     }),
-    persistence<{ documents?: McsKongaPoolPlacement[] }>('mongodb', 'query', {
+    persistence<{ documents?: KongaPlacementRecord[] }>('mongodb', 'query', {
       database: 'momentum',
       collection: PLACEMENTS_COLLECTION,
       filter: { prospectId: input.prospectId, sponsorTmagId: input.sponsorTmagId, flushedAt: null },
@@ -205,7 +235,6 @@ export async function attestKongaEnrollment(
         state: 'video_complete',
       },
       sort: { createdAt: -1 },
-      limit: 1,
     }),
     persistence<{ documents?: BARecord[] }>('mongodb', 'query', {
       database: 'momentum',
@@ -217,13 +246,16 @@ export async function attestKongaEnrollment(
 
   const prospect = prospectResult.documents?.[0];
   const placement = placementResult.documents?.[0];
-  const token = tokenResult.documents?.[0];
-  const enrollee = enrolleeResult.documents?.[0];
-  if (!prospect || !placement || !token || !enrollee) {
+  if (!placement) {
     throw new KongaEnrollmentError('exact_live_linkage_required');
   }
   if (!placement.placementId || !placement.placementAttemptId) {
     throw new KongaEnrollmentError('legacy_placement_requires_no_backfill');
+  }
+  const token = findMatchingVideoCompleteToken(tokenResult.documents, placement);
+  const enrollee = enrolleeResult.documents?.[0];
+  if (!prospect || !placement || !enrollee || !token) {
+    throw new KongaEnrollmentError('exact_live_linkage_required');
   }
 
   const attestationId = `konga_enrollment_${sha(

@@ -44,7 +44,10 @@ import {
 import { findProspectById, lastInitialOf } from '../domain/prospects.js';
 import { findBAByTmagId, type BARecord } from '../domain/ba.js';
 import { buildHoldingTankSnapshot, readPoolCounter } from '../domain/holdingTank.js';
-import { placeKongaProspect } from '../domain/kongaPlacement.js';
+import {
+  placeKongaProspect,
+  resolveInvitationRecordId,
+} from '../domain/kongaPlacement.js';
 import { buildKongaSnapshot } from '../domain/kongaTelemetry.js';
 import {
   isPageVisitUuid,
@@ -507,7 +510,7 @@ prospectTokenRoutes.post('/:token/video-event', async (req, res) => {
       const result = await placeKongaProspect({
         prospectId: prospect.prospectId,
         sponsorTmagId: tokenRecord.sponsorTmagId,
-        invitationRecordId: tokenRecord.token,
+        invitationRecordId: resolveInvitationRecordId(tokenRecord),
         prospectExpiresAt: prospect.expiresAt,
         firstName: prospect.firstName,
         lastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),

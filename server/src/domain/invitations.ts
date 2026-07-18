@@ -182,6 +182,7 @@ export async function createInvitation(
   const reentryCode = genReentryCode();
   const createdAt = new Date().toISOString();
   const expiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
+  const invitationRecordId = `invite_${randomUUID()}`;
   const lastInitial = lastInitialOf(input.lastName);
   const invitationId = `inv_${prospectId}`;
   const correlation = createFlowCorrelation({ rootKind: 'invitation', rootId: invitationId, invitationId, prospectId, tokenId: token });
@@ -286,6 +287,7 @@ export async function createInvitation(
   const tokenRecord: McsInviteTokenRecord = {
     token,
     prospectId,
+    invitationRecordId,
     sponsorTmagId: input.sponsorTmagId,
     state: 'minted',
     createdAt,

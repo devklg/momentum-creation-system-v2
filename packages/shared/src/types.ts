@@ -145,6 +145,12 @@ export interface McsInviteTokenRecord {
   token: string;
   prospectId: string;
   sponsorTmagId: string;
+  /**
+   * Canonical invitation record identity for this token (immutable once minted).
+   * Legacy rows omit this field and are backfilled via invitation-record-id
+   * inference from non-token persistence identity fields.
+   */
+  invitationRecordId?: string;
   state: McsTokenState;
   createdAt: McsIsoTimestamp;
   clickedAt: McsIsoTimestamp | null;

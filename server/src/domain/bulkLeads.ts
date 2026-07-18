@@ -90,6 +90,7 @@ async function createBulkLeadRecord(input: {
   const leadId = `lead_${randomUUID()}`;
   const prospectId = `prospect_${randomUUID()}`;
   const token = await mintUniqueToken();
+  const invitationRecordId = `invite_${randomUUID()}`;
   const correlation = createFlowCorrelation({ rootKind: 'vm_rvm', rootId: leadId, leadId, vmCampaignId: input.vmCampaignId, prospectId, tokenId: token });
   const location: McsProspectLocation = { city, stateOrRegion, country };
   const lastInitial = lastInitialOf(lastName);
@@ -179,6 +180,7 @@ async function createBulkLeadRecord(input: {
 
   const tokenRecord: McsInviteTokenRecord = {
     token,
+    invitationRecordId,
     prospectId,
     sponsorTmagId: input.sponsorTmagId,
     state: 'minted',

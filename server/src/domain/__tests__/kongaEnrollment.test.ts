@@ -1,8 +1,9 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   attestKongaEnrollment,
   KongaEnrollmentError,
 } from '../kongaEnrollment.js';
+import { deriveKongaPlacementIdentity } from '../kongaPlacement.js';
 
 const prospect = {
   prospectId: 'prospect-1',
@@ -32,6 +33,7 @@ const token = {
   token: 'TOKEN-1',
   prospectId: prospect.prospectId,
   sponsorTmagId: prospect.sponsorTmagId,
+  invitationRecordId: 'invite-match',
   state: 'video_complete',
   createdAt: '2026-07-01T00:00:00.000Z',
 };
@@ -52,8 +54,32 @@ const input = {
   now: new Date('2026-07-17T12:00:00.000Z'),
 };
 
-function persistenceFixture() {
+function snapshotState() {
+  placement.flushedAt = null;
+  placement.flushReason = null;
+  placement.placementAttemptId = deriveKongaPlacementIdentity({
+    prospectId: prospect.prospectId,
+    invitationRecordId: 'invite-match',
+  }).placementAttemptId;
+  token.invitationRecordId = 'invite-match';
+  token.state = 'video_complete';
+  token.createdAt = '2026-07-01T00:00:00.000Z';
+  prospect.state = 'video_complete';
+}
+
+function filterDocuments<T extends Record<string, unknown>>(rows: readonly T[], filter: Record<string, unknown>): T[] {
+  return rows.filter((row) =>
+    Object.entries(filter).every(
+      ([key, value]) =>
+        row[key as keyof T] === value,
+    ),
+  );
+}
+
+function persistenceFixture(options?: { tokenRecords?: typeof token[]; enrolleeRows?: typeof enrollee[] }) {
   const attestations: Record<string, unknown>[] = [];
+  const tokenRecords = options?.tokenRecords ? options.tokenRecords.map((row) => ({ ...row })) : [token];
+  const enrolleeRows = options?.enrolleeRows ? options.enrolleeRows : [enrollee];
   const call = vi.fn(async (_tool: string, action: string, params: Record<string, unknown>) => {
     const collection = params.collection;
     const filter = (params.filter ?? {}) as Record<string, unknown>;
@@ -61,17 +87,26 @@ function persistenceFixture() {
       const update = params.update as { $set: Record<string, unknown> };
       if (collection === 'tmag_prospect_htank_placements') Object.assign(placement, update.$set);
       if (collection === 'tmag_prospects') Object.assign(prospect, update.$set);
-      if (collection === 'tmag_prospect_invite_tokens') Object.assign(token, update.$set);
+      if (collection === 'tmag_prospect_invite_tokens') {
+        if (!filter) return { matchedCount: 1 };
+        const target = filterDocuments(tokenRecords, filter as Record<string, unknown>).at(0);
+        if (target) Object.assign(target, update.$set);
+      }
       return { matchedCount: 1 };
     }
     if (action !== 'query') return {};
-    if (collection === 'tmag_prospects') return { documents: [prospect] };
+    if (collection === 'tmag_prospects') return { documents: filterDocuments([prospect], filter as Record<string, unknown>) };
     if (collection === 'tmag_prospect_htank_placements') {
-      if (filter.flushedAt === null && placement.flushedAt !== null) return { documents: [] };
-      return { documents: [placement] };
+      const docs = filterDocuments([placement], filter as Record<string, unknown>);
+      if (!docs.length && filter.flushedAt === null) return { documents: [] };
+      return { documents: docs };
     }
-    if (collection === 'tmag_prospect_invite_tokens') return { documents: [token] };
-    if (collection === 'team_magnificent_members') return { documents: [enrollee] };
+    if (collection === 'tmag_prospect_invite_tokens') {
+      return { documents: filterDocuments(tokenRecords, filter as Record<string, unknown>) };
+    }
+    if (collection === 'team_magnificent_members') {
+      return { documents: filterDocuments(enrolleeRows, filter as Record<string, unknown>) };
+    }
     if (collection === 'tmag_konga_enrollment_attestations') {
       return { documents: [...attestations] };
     }
@@ -79,6 +114,10 @@ function persistenceFixture() {
   });
   return { call, attestations };
 }
+
+beforeEach(() => {
+  snapshotState();
+});
 
 describe('truthful Konga join boundary', () => {
   it('rejects registration/CRM-like facts without both human attestations', async () => {
@@ -140,6 +179,137 @@ describe('truthful Konga join boundary', () => {
         publish,
       }),
     ).rejects.toThrow('konga_neo4j_readback_not_exact');
+    expect(publish).not.toHaveBeenCalled();
+  });
+
+  it('rejects enrollment when token attempt does not match the live placement attempt', async () => {
+    const strictWrite = vi.fn();
+    const strictVerify = vi.fn();
+    placement.placementAttemptId = deriveKongaPlacementIdentity({
+      prospectId: prospect.prospectId,
+      invitationRecordId: 'invite-live-mismatch',
+    }).placementAttemptId;
+    token.invitationRecordId = 'invite-token-mismatch';
+    token.createdAt = '2026-07-01T00:00:00.000Z';
+
+    const fixture = persistenceFixture();
+    const publish = vi.fn();
+    await expect(
+      attestKongaEnrollment(input, {
+        persistence: fixture.call as never,
+        strictWrite: strictWrite as never,
+        strictVerify: strictVerify as never,
+        publish,
+      }),
+    ).rejects.toEqual(new KongaEnrollmentError('exact_live_linkage_required'));
+    expect(publish).not.toHaveBeenCalled();
+    expect(strictWrite).not.toHaveBeenCalled();
+    expect(strictVerify).not.toHaveBeenCalled();
+    expect(JSON.stringify(fixture.call.mock.calls)).not.toContain(token.token);
+  });
+
+  it('rejects partial enrollment linkage when no video-complete token matches the placement', async () => {
+    const strictWrite = vi.fn();
+    const strictVerify = vi.fn();
+    token.invitationRecordId = 'invite-live-match';
+    token.state = 'video_started';
+    token.createdAt = '2026-07-01T00:00:00.000Z';
+    const fixture = persistenceFixture();
+    const publish = vi.fn();
+    await expect(
+      attestKongaEnrollment(input, {
+        persistence: fixture.call as never,
+        strictWrite: strictWrite as never,
+        strictVerify: strictVerify as never,
+        publish,
+      }),
+    ).rejects.toEqual(new KongaEnrollmentError('exact_live_linkage_required'));
+    expect(publish).not.toHaveBeenCalled();
+    expect(strictWrite).not.toHaveBeenCalled();
+    expect(strictVerify).not.toHaveBeenCalled();
+  });
+
+  it('attests the matching invitation when multiple video-complete invitations exist for one prospect', async () => {
+    const matching = deriveKongaPlacementIdentity({
+      prospectId: prospect.prospectId,
+      invitationRecordId: 'invite-match',
+    });
+    const ignored = deriveKongaPlacementIdentity({
+      prospectId: prospect.prospectId,
+      invitationRecordId: 'invite-ignored',
+    });
+    placement.placementAttemptId = matching.placementAttemptId;
+    token.state = 'video_complete';
+    prospect.state = 'video_complete';
+    const fixture = persistenceFixture({
+      tokenRecords: [
+        {
+          ...token,
+          token: 'TOKEN-IGNORED',
+          invitationRecordId: 'invite-ignored',
+          createdAt: '2026-07-01T00:00:00.000Z',
+          state: 'video_complete',
+        },
+        {
+          ...token,
+          token: 'TOKEN-MATCH',
+          invitationRecordId: 'invite-match',
+          createdAt: '2026-07-02T00:00:00.000Z',
+          state: 'video_complete',
+        },
+      ],
+    });
+    const publish = vi.fn();
+
+    await attestKongaEnrollment(input, {
+      persistence: fixture.call as never,
+      strictWrite: vi.fn(async (write: { id: string; mongoDoc: Record<string, unknown> }) => {
+        fixture.call;
+        return { mongo: write.mongoDoc, neo4jCount: 1, chromaId: write.id };
+      }) as never,
+      strictVerify: vi.fn(async () => ({ mongo: {}, neo4jCount: 1, chromaId: 'x' })),
+      publish,
+    });
+
+    const tokenUpdate = fixture.call.mock.calls.find(
+      ([tool, action, params]) =>
+        tool === 'mongodb' &&
+        action === 'update' &&
+        (params.collection as string) === 'tmag_prospect_invite_tokens',
+    );
+    expect(tokenUpdate?.[2]).toMatchObject({
+      collection: 'tmag_prospect_invite_tokens',
+      filter: { token: 'TOKEN-MATCH' },
+    });
+    expect(ignored.placementAttemptId).not.toBe(matching.placementAttemptId);
+    expect(publish).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects legacy placement records lacking attempt identity', async () => {
+    const legacyPlacement = {
+      ...placement,
+      // Simulates pre-identity records: no identity fields.
+      placementAttemptId: undefined as unknown as string,
+    };
+    const fixture = persistenceFixture({
+      tokenRecords: [token],
+    });
+    const originalFixture = fixture.call;
+    const legacyPersistence = vi.fn(async (tool: string, action: string, params: Record<string, unknown>) => {
+      const result = await originalFixture(tool, action, params);
+      if (action === 'query' && params.collection === 'tmag_prospect_htank_placements') {
+        return { documents: [legacyPlacement] };
+      }
+      return result;
+    });
+    const publish = vi.fn();
+
+    await expect(
+      attestKongaEnrollment(input, {
+        persistence: legacyPersistence as never,
+        publish,
+      }),
+    ).rejects.toEqual(new KongaEnrollmentError('legacy_placement_requires_no_backfill'));
     expect(publish).not.toHaveBeenCalled();
   });
 });

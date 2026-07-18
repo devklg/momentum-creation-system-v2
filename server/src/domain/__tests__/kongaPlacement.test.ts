@@ -3,6 +3,7 @@ import {
   deriveKongaPlacementIdentity,
   placeKongaProspect,
   projectLegacyPlacementAddedBy,
+  resolveInvitationRecordId,
 } from '../kongaPlacement.js';
 
 const input = {
@@ -106,6 +107,26 @@ describe('Konga placement permanence', () => {
     expect(result.positionNumber).toBe(88);
     expect(increment).not.toHaveBeenCalled();
     expect(publish).not.toHaveBeenCalled();
+  });
+
+  it('derives legacy token identity without using raw tokens', () => {
+    const tokenRecord = {
+      token: 'TOKEN-RAW-UNSAFE',
+      prospectId: input.prospectId,
+      sponsorTmagId: input.sponsorTmagId,
+      state: 'video_complete',
+      createdAt: '2026-07-10T00:00:00.000Z',
+      _id: 'legacy-token-doc-id',
+    } as const;
+
+    const invitationRecordId = resolveInvitationRecordId(tokenRecord);
+    const { placementAttemptId } = deriveKongaPlacementIdentity({
+      prospectId: tokenRecord.prospectId,
+      invitationRecordId,
+    });
+
+    expect(invitationRecordId).toBe('legacy_invitation_legacy-token-doc-id');
+    expect(placementAttemptId).not.toContain('TOKEN-RAW-UNSAFE');
   });
 
   it('blocks a fresh attempt while another placement is still live', async () => {

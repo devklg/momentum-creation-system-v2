@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import type {
   McsKongaAddedBy,
+  McsInviteTokenRecord,
   McsKongaPlaceProspectResult,
   McsKongaPlacementEvent,
   McsKongaPoolPlacement,
@@ -17,14 +18,56 @@ import { tripleStackWriteWithReadback, verifyKongaThreeLegs } from './kongaPersi
 const PLACEMENTS_COLLECTION = 'tmag_prospect_htank_placements';
 const CHROMA_COLLECTION = 'mcs_prospect_htank_events';
 const PROSPECTS_COLLECTION = 'tmag_prospects';
+const LEGACY_INVITATION_ID_PREFIX = 'legacy_invitation_';
 
 type Persistence = typeof persistenceCall;
 type Publish = typeof publishPlacement;
 type FindBa = typeof findBAByTmagId;
 type Increment = typeof incrementPoolCounter;
 
+type LegacyIdInput = Pick<
+  McsInviteTokenRecord,
+  'invitationRecordId' | 'prospectId' | 'sponsorTmagId' | 'createdAt'
+> & { _id?: unknown };
+
 function digest(value: string): string {
   return createHash('sha256').update(value).digest('hex');
+}
+
+function normalizeDbId(raw: unknown): string | null {
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    return trimmed || null;
+  }
+  if (!raw || typeof raw !== 'object') return null;
+  const rawObj = raw as { toString?: () => string; $oid?: unknown };
+  if (typeof rawObj.$oid === 'string' && rawObj.$oid.trim()) {
+    return rawObj.$oid.trim();
+  }
+  const rendered = rawObj.toString?.() ?? '';
+  if (typeof rendered === 'string' && rendered && rendered !== '[object Object]') {
+    return rendered;
+  }
+  return null;
+}
+
+export function resolveInvitationRecordId(tokenRecord: LegacyIdInput): string {
+  const explicit = tokenRecord.invitationRecordId?.trim();
+  if (explicit) return explicit;
+
+  const dbId = normalizeDbId(tokenRecord._id);
+  if (dbId) return `${LEGACY_INVITATION_ID_PREFIX}${dbId}`;
+
+  return `${LEGACY_INVITATION_ID_PREFIX}${tokenRecord.prospectId}|${tokenRecord.sponsorTmagId}|${tokenRecord.createdAt}`;
+}
+
+export function resolvePlacementIdentityFromTokenRecord(
+  tokenRecord: LegacyIdInput,
+): { placementId: string; placementAttemptId: string } {
+  return deriveKongaPlacementIdentity({
+    prospectId: tokenRecord.prospectId,
+    invitationRecordId: resolveInvitationRecordId(tokenRecord),
+  });
 }
 
 export function deriveKongaPlacementIdentity(input: {

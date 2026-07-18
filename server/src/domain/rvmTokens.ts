@@ -26,7 +26,10 @@ import {
   createOrUpdateCrmRecordForToken,
   findCrmRecordByProspectId,
 } from './prospectCrm.js';
-import { placeKongaProspect } from './kongaPlacement.js';
+import {
+  placeKongaProspect,
+  resolveInvitationRecordId,
+} from './kongaPlacement.js';
 import { findNextUpcomingEvent } from './webinarEvent.js';
 
 const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/1IZiV7RXdCY';
@@ -187,7 +190,7 @@ export async function recordRvmVideoEvent(
     const result = await placeKongaProspect({
       prospectId: prospect.prospectId,
       sponsorTmagId: tokenRecord.sponsorTmagId,
-      invitationRecordId: tokenRecord.token,
+      invitationRecordId: resolveInvitationRecordId(tokenRecord),
       prospectExpiresAt: prospect.expiresAt,
       firstName: prospect.firstName,
       lastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),
