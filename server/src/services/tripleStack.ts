@@ -27,6 +27,8 @@ export interface TripleStackInput {
   neo4j?: { cypher: string; params?: Record<string, unknown> };
   /** ChromaDB collection name and embedding text. Skip if not semantically searchable. */
   chroma?: { collection: string; document: string; metadata?: Record<string, unknown> };
+  /** Optional identity override for the Chroma record id. Defaults to `id`. */
+  chromaId?: string;
   /** MongoDB database name. Defaults to 'momentum'. */
   mongoDatabase?: string;
 }
@@ -71,7 +73,7 @@ export async function tripleStackWrite(input: TripleStackInput): Promise<McsTrip
   if (input.chroma) {
     await persistenceCall('chromadb', 'add', {
       collection: input.chroma.collection,
-      ids: [input.id],
+      ids: [input.chromaId ?? input.id],
       documents: [input.chroma.document],
       metadatas: [input.chroma.metadata ?? {}],
     });

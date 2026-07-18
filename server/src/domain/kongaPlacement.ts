@@ -35,6 +35,19 @@ type Publish = typeof publishPlacement;
 type FindBa = typeof findBAByTmagId;
 type Increment = typeof incrementPoolCounter;
 
+type ProjectionIdentityPlacement = {
+  placementId?: string;
+  placementAttemptId?: string;
+  ownerAttempt?: unknown;
+  fence?: unknown;
+  projectionEventId?: unknown;
+  _id?: unknown;
+  sponsorTmagId?: unknown;
+  prospectId?: unknown;
+  positionNumber?: unknown;
+  placedAt?: unknown;
+};
+
 interface KongaPlacementClaim {
   _id: string;
   claimEventId: string;
@@ -95,6 +108,69 @@ function parseKnownFence(value: unknown): number | null {
     if (Number.isFinite(parsed)) return Math.trunc(parsed);
   }
   return null;
+}
+
+const PLACEMENT_PROJECTION_EVENT_SEPARATOR = '|';
+
+function buildPlacementProjectionEventId(
+  placementId: string,
+  ownerAttempt: string,
+  fence: number,
+): string {
+  return `${placementId}${PLACEMENT_PROJECTION_EVENT_SEPARATOR}${ownerAttempt}${PLACEMENT_PROJECTION_EVENT_SEPARATOR}${fence}`;
+}
+
+function inferPlacementProjectionEventId(
+  placement: ProjectionIdentityPlacement,
+  ownerHint?: { ownerAttempt: string; fence: number },
+): string | undefined {
+  const placementId =
+    typeof placement.placementId === 'string' && placement.placementId
+      ? placement.placementId
+      : typeof placement._id === 'string' && placement._id.trim()
+        ? placement._id
+        : undefined;
+  const ownerAttempt =
+    ownerHint?.ownerAttempt ??
+    (typeof placement.ownerAttempt === 'string' && placement.ownerAttempt
+      ? placement.ownerAttempt
+      : undefined);
+  const fence = ownerHint?.fence ?? parseKnownFence(placement.fence);
+  if (ownerHint && ownerAttempt && fence !== null && placementId) {
+    const hasMatchingCurrentOwner =
+      typeof placement.ownerAttempt === 'string' &&
+      placement.ownerAttempt === ownerHint.ownerAttempt &&
+      parseKnownFence(placement.fence) === ownerHint.fence;
+    if (hasMatchingCurrentOwner) {
+      const explicit = placement.projectionEventId;
+      if (typeof explicit === 'string' && explicit.trim()) {
+        return explicit;
+      }
+    }
+    return buildPlacementProjectionEventId(placementId, ownerAttempt, fence);
+  }
+
+  const explicit = placement.projectionEventId;
+  if (typeof explicit === 'string' && explicit.trim()) {
+    return explicit;
+  }
+
+  if (typeof ownerAttempt === 'string' && ownerAttempt && fence !== null) {
+    return placementId
+      ? buildPlacementProjectionEventId(placementId, ownerAttempt, fence)
+      : undefined;
+  }
+  if (placementId) {
+    return placementId;
+  }
+  return undefined;
+}
+
+function placementChromaReadbackId(
+  placement: ProjectionIdentityPlacement,
+  ownerHint?: { ownerAttempt: string; fence: number },
+): string | undefined {
+  return inferPlacementProjectionEventId(placement, ownerHint);
 }
 
 function ownershipFromPlacement(
@@ -526,6 +602,59 @@ async function waitMs(deps: PlacementDeps, ms: number): Promise<void> {
   });
 }
 
+async function verifyLegacyPlacementProjectionReadback(
+  placement: McsKongaPoolPlacement & { _id?: unknown },
+  persistence: Persistence,
+): Promise<boolean> {
+  const legacyPlacementId = String(placement._id ?? '');
+  if (!legacyPlacementId) return false;
+  const legacyProjectionId = placementChromaReadbackId(placement) ?? legacyPlacementId;
+  let mongoResult: Awaited<ReturnType<typeof persistence<{ documents?: Array<Record<string, unknown>> }>>>;
+  let neoResult: Awaited<ReturnType<typeof persistence<{ records?: Array<Record<string, unknown>> }>>>;
+  let chromaResult: Awaited<
+    ReturnType<typeof persistence<{ ids?: string[]; metadatas?: Array<Record<string, unknown> | null> }>>
+  >;
+  try {
+    [mongoResult, neoResult, chromaResult] = await Promise.all([
+      persistence<{ documents?: Array<Record<string, unknown>> }>('mongodb', 'query', {
+        database: MONGO_DB,
+        collection: PLACEMENTS_COLLECTION,
+        filter: { _id: legacyPlacementId },
+        limit: 1,
+      }),
+      persistence<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
+        query:
+          'MATCH (p:TmagProspect {prospectId:$prospectId})-[r:IN_HOLDING_TANK]->(:TmagPool {id:$poolId}) ' +
+          'WHERE r.position = $positionNumber AND r.sponsorTmagId = $sponsorTmagId AND r.placedAt = $placedAt ' +
+          'RETURN count(r) AS n',
+        params: {
+          prospectId: placement.prospectId,
+          poolId: TEAM_POOL_ID,
+          positionNumber: placement.positionNumber,
+          sponsorTmagId: placement.sponsorTmagId,
+          placedAt: placement.placedAt,
+        },
+      }),
+      persistence<{ ids?: string[]; metadatas?: Array<Record<string, unknown> | null> }>('chromadb', 'get', {
+        collection: CHROMA_COLLECTION,
+        ids: [legacyProjectionId],
+      }),
+    ]);
+  } catch {
+    return false;
+  }
+  if (!mongoResult.documents?.[0]) return false;
+  if (Number(neoResult.records?.[0]?.n ?? 0) !== 1) return false;
+  const chromaMetadata = chromaResult.metadatas?.[0];
+  if (!chromaMetadata) return false;
+  if (String(chromaMetadata.placementId ?? '') !== String(legacyPlacementId)) return false;
+  if (String(chromaMetadata.prospectId ?? '') !== String(placement.prospectId)) return false;
+  if (String(chromaMetadata.sponsorTmagId ?? '') !== String(placement.sponsorTmagId)) return false;
+  if (Number(chromaMetadata.positionNumber) !== placement.positionNumber) return false;
+  if (String(chromaMetadata.placedAt ?? '') !== String(placement.placedAt)) return false;
+  return true;
+}
+
 async function loadVerifiedAttemptPlacement(
   persistence: Persistence,
   identity: { placementAttemptId: string },
@@ -537,7 +666,18 @@ async function loadVerifiedAttemptPlacement(
   const fencedPlacement = placement as McsKongaPoolPlacement & {
     ownerAttempt?: string;
     fence?: unknown;
+    projectionEventId?: unknown;
+    _id?: unknown;
   };
+  const legacyLiveWithoutIdentity =
+    !fencedPlacement.placementId && !fencedPlacement.placementAttemptId;
+  if (legacyLiveWithoutIdentity) {
+    if (!(await verifyLegacyPlacementProjectionReadback(fencedPlacement, persistence))) {
+      return null;
+    }
+    return placement;
+  }
+
   if (
     ownerFence &&
     (fencedPlacement.ownerAttempt !== ownerFence.ownerAttempt ||
@@ -562,6 +702,7 @@ async function loadVerifiedAttemptPlacement(
           },
         },
         chromaCollection: CHROMA_COLLECTION,
+        chromaId: placementChromaReadbackId(placement),
       },
       persistence,
     );
@@ -745,6 +886,7 @@ async function ensurePlacementReadback(
   strictVerify: typeof verifyKongaThreeLegs,
   persistence: Persistence,
 ): Promise<void> {
+  const chromaId = placementChromaReadbackId(placement);
   const placementInput = {
     id: placement.placementId,
     mongoCollection: PLACEMENTS_COLLECTION,
@@ -755,6 +897,7 @@ async function ensurePlacementReadback(
       params: { poolId: TEAM_POOL_ID },
     },
     chromaCollection: CHROMA_COLLECTION,
+    chromaId,
   };
   await strictVerify(placementInput, persistence);
 }
@@ -771,6 +914,7 @@ async function repairPlacementProjection(
     stateOrRegion?: string;
   };
 
+  const projectionEventId = placementChromaReadbackId(placement, claim);
   const neo4jRelationshipProps = {
     placementAttemptId: placement.placementAttemptId,
     position: placement.positionNumber,
@@ -790,7 +934,13 @@ async function repairPlacementProjection(
         placementAttemptId: placement.placementAttemptId,
         prospectId: placement.prospectId,
       },
-      update: { $set: { ...placement } },
+      update: {
+        $set: {
+          ...placement,
+          ...(projectionEventId ? { projectionEventId } : {}),
+          ...(claim ? { ownerAttempt: claim.ownerAttempt, fence: claim.fence } : {}),
+        },
+      },
     }),
     persistence('neo4j', 'cypher', {
       query:
@@ -807,7 +957,7 @@ async function repairPlacementProjection(
     }),
     persistence('chromadb', 'add', {
       collection: CHROMA_COLLECTION,
-      ids: [placement.placementId],
+      ids: [projectionEventId ?? placement.placementId],
       documents: [
         `Holding-tank placement #${placement.positionNumber} for ${placementProfile.firstName ?? ''} ` +
         `${placementProfile.lastInitial ?? ''} in ${placementProfile.city ?? ''}, ` +
@@ -824,6 +974,7 @@ async function repairPlacementProjection(
           placedAt: placement.placedAt,
           addedByFirstName: placement.addedBy?.firstName,
           addedByLastInitial: placement.addedBy?.lastInitial,
+          projectionEventId,
           ...(claim ? { ownerAttempt: claim.ownerAttempt, fence: claim.fence } : {}),
         },
       ],
@@ -832,6 +983,7 @@ async function repairPlacementProjection(
 
   const verifyInput = {
     id: placement.placementId,
+    chromaId: projectionEventId ?? placement.placementId,
     mongoCollection: PLACEMENTS_COLLECTION,
     neo4jVerify: {
       cypher:
@@ -842,7 +994,7 @@ async function repairPlacementProjection(
     chromaCollection: CHROMA_COLLECTION,
   };
   const verify = await verifyKongaThreeLegs(verifyInput, persistence);
-  if (verify.chromaId !== placement.placementId) {
+  if (verify.chromaId !== (projectionEventId ?? placement.placementId)) {
     throw new Error(`konga_konga_placement_repair_readback_missing:${placement.placementId}`);
   }
 }
@@ -870,6 +1022,7 @@ async function cleanupPlacementAttempt(
     ownerAttempt: ownershipToUse.ownerAttempt,
     fence: ownershipToUse.fence,
   };
+  const projectionEventId = placementChromaReadbackId(placement, ownershipToUse) ?? placement.placementId;
 
   for (let attempt = 0; attempt < CLAIM_CLEANUP_ATTEMPTS; attempt += 1) {
     const deleteErrors: string[] = [];
@@ -925,7 +1078,7 @@ async function cleanupPlacementAttempt(
         'get',
         {
           collection: CHROMA_COLLECTION,
-          ids: [placement.placementId],
+          ids: [projectionEventId],
         },
       );
     } catch (error) {
@@ -938,36 +1091,25 @@ async function cleanupPlacementAttempt(
 
     const mongoClear = !mongoResult.documents?.[0];
     const neoClear = Number(neoResult.records?.[0]?.n ?? 0) === 0;
-    const chromaMetadata = chromaResult.metadatas?.[0];
-    const chromaOwnerAttempt = typeof chromaMetadata?.ownerAttempt === 'string'
-      ? chromaMetadata.ownerAttempt
-      : undefined;
-    const chromaFence = parseKnownFence(chromaMetadata?.fence);
-    const chromaOwnedByTarget =
-      chromaOwnerAttempt === ownershipToUse.ownerAttempt && chromaFence === ownershipToUse.fence;
-    let chromaClear = !((chromaResult.ids ?? []).includes(placement.placementId));
-    if (chromaResult.ids?.includes(placement.placementId)) {
-      if (!chromaOwnedByTarget) {
+    let chromaClear = !((chromaResult.ids ?? []).includes(projectionEventId));
+    if (chromaResult.ids?.includes(projectionEventId)) {
+      try {
+        await persistence('chromadb', 'delete', {
+          collection: CHROMA_COLLECTION,
+          ids: [projectionEventId],
+        });
+      } catch (error) {
+        deleteErrors.push(`chroma-delete:${String(error instanceof Error ? error.message : error)}`);
+      }
+      try {
+        const afterChromaDelete = await persistence<{ ids?: string[] }>('chromadb', 'get', {
+          collection: CHROMA_COLLECTION,
+          ids: [projectionEventId],
+        });
+        chromaClear = !(afterChromaDelete.ids ?? []).includes(projectionEventId);
+      } catch (error) {
+        deleteErrors.push(`chroma-read-after-delete:${String(error instanceof Error ? error.message : error)}`);
         chromaClear = false;
-      } else {
-        try {
-          await persistence('chromadb', 'delete', {
-            collection: CHROMA_COLLECTION,
-            ids: [placement.placementId],
-          });
-        } catch (error) {
-          deleteErrors.push(`chroma-delete:${String(error instanceof Error ? error.message : error)}`);
-        }
-        try {
-          const afterChromaDelete = await persistence<{ ids?: string[] }>('chromadb', 'get', {
-            collection: CHROMA_COLLECTION,
-            ids: [placement.placementId],
-          });
-          chromaClear = !(afterChromaDelete.ids ?? []).includes(placement.placementId);
-        } catch (error) {
-          deleteErrors.push(`chroma-read-after-delete:${String(error instanceof Error ? error.message : error)}`);
-          chromaClear = false;
-        }
       }
     }
 
@@ -1098,7 +1240,10 @@ export async function placeKongaProspect(
     }
   }
 
-  const live = await persistence<{ documents?: Array<McsKongaPoolPlacement> }>('mongodb', 'query', {
+  const live = await persistence<{ documents?: Array<McsKongaPoolPlacement & { _id?: string }> }>(
+    'mongodb',
+    'query',
+    {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
     filter: { prospectId: input.prospectId, flushedAt: null },
@@ -1107,17 +1252,20 @@ export async function placeKongaProspect(
   });
   const livePlacement = live.documents?.[0];
   if (livePlacement) {
+    if (
+      !livePlacement.placementId &&
+      !livePlacement.placementAttemptId &&
+      !!livePlacement._id &&
+      !(await verifyLegacyPlacementProjectionReadback(livePlacement, persistence))
+    ) {
+      throw new Error('konga_live_placement_verification_failed');
+    }
+    if (!livePlacement.placementId && !livePlacement.placementAttemptId && !!livePlacement._id) {
+      return resultOf(livePlacement as unknown as McsKongaPoolPlacement, true);
+    }
     const liveOwnership = ownershipFromPlacement(livePlacement);
     if (!liveOwnership) {
       throw new Error('konga_live_placement_exists');
-    }
-    if (!livePlacement.placementId && !livePlacement.placementAttemptId) {
-      return {
-        prospectId: livePlacement.prospectId,
-        positionNumber: livePlacement.positionNumber,
-        placedAt: livePlacement.placedAt,
-        alreadyPlaced: true,
-      };
     }
   }
 
@@ -1261,6 +1409,11 @@ export async function placeKongaProspect(
     }
 
     await assertLeaseOwner(persistence, activeLease, nowClock());
+    const projectionEventId = buildPlacementProjectionEventId(
+      identity.placementId,
+      activeLease.ownerAttempt,
+      activeLease.fence,
+    );
 
     await strictWrite(
       {
@@ -1270,6 +1423,7 @@ export async function placeKongaProspect(
           ...placement,
           ownerAttempt: activeLease.ownerAttempt,
           fence: activeLease.fence,
+          projectionEventId,
         },
         neo4j: {
           cypher:
@@ -1309,8 +1463,10 @@ export async function placeKongaProspect(
             addedByLastInitial: addedBy.lastInitial,
             ownerAttempt: activeLease.ownerAttempt,
             fence: activeLease.fence,
+            projectionEventId,
           },
         },
+        chromaId: projectionEventId,
         neo4jVerify: placementVerify(identity.placementId).neo4jVerify,
       },
       persistence,
@@ -1383,7 +1539,6 @@ export async function placeKongaProspect(
       parseFence(fencedSameAttemptPlacement?.fence) === activeLease.fence;
     const currentLeaseOwner = await isCurrentLeaseOwner();
     const isCurrentWinner = isOwnOwnerAttempt && currentLeaseOwner;
-
     if (isCurrentWinner && sameAttemptPlacement) {
       try {
         await repairPlacementProjection(
@@ -1392,8 +1547,17 @@ export async function placeKongaProspect(
           { ownerAttempt: activeLease.ownerAttempt, fence: activeLease.fence },
         );
         await ensurePlacementReadback(sameAttemptPlacement, strictVerify, persistence);
-        activeResult = resultOf(sameAttemptPlacement, true);
-        caughtError = null;
+        const repaired = await sameAttemptPlacementVerification(identity, {
+          ownerAttempt: activeLease.ownerAttempt,
+          fence: activeLease.fence,
+        });
+        if (repaired) {
+          activeResult = resultOf(repaired, true);
+          caughtError = null;
+        } else if (currentLeaseOwner) {
+          activeResult = resultOf(sameAttemptPlacement, true);
+          caughtError = null;
+        }
       } catch (repairError) {
         caughtError = repairError;
         try {
@@ -1410,23 +1574,28 @@ export async function placeKongaProspect(
     const sameAttemptOwnership = fencedSameAttemptPlacement
       ? ownershipFromPlacement(fencedSameAttemptPlacement as McsKongaPoolPlacement)
       : null;
-    if (
-      !isCurrentWinner &&
-      sameAttemptPlacement &&
-      sameAttemptOwnership?.ownerAttempt === activeLease.ownerAttempt &&
-      sameAttemptOwnership?.fence === activeLease.fence
-        ) {
-        try {
-          await cleanupPlacementAttempt(persistence, sameAttemptPlacement, sameAttemptOwnership);
-        } catch (cleanupError) {
-          caughtError = cleanupError;
-        }
+    if (!isCurrentWinner && sameAttemptPlacement) {
+      const staleOwnership = {
+        ownerAttempt: activeLease.ownerAttempt,
+        fence: activeLease.fence,
+      };
+      const cleanupOwnership =
+        sameAttemptOwnership &&
+        sameAttemptOwnership.ownerAttempt === activeLease.ownerAttempt &&
+        sameAttemptOwnership.fence === activeLease.fence
+          ? sameAttemptOwnership
+          : staleOwnership;
+      try {
+        await cleanupPlacementAttempt(persistence, sameAttemptPlacement, cleanupOwnership);
+      } catch (cleanupError) {
+        caughtError = cleanupError;
+      }
     }
     const sameAttemptPlacementVerified = await sameAttemptPlacementVerification(identity, {
       ownerAttempt: activeLease.ownerAttempt,
       fence: activeLease.fence,
     });
-    if (sameAttemptPlacementVerified && isCurrentWinner) {
+    if (!activeResult && sameAttemptPlacementVerified && isCurrentWinner) {
       activeResult = resultOf(sameAttemptPlacementVerified, true);
       caughtError = null;
     }

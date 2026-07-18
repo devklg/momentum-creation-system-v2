@@ -87,8 +87,15 @@ type KongaPlacementResult = {
 
 type KongaStrictWrite = typeof tripleStackWriteWithReadback;
 type KongaStrictVerify = typeof verifyKongaThreeLegs;
-type KongaStrictWriteInput = Parameters<KongaStrictWrite>[0];
-
+type KongaStrictWriteInput = {
+  id: string;
+  mongoCollection: string;
+  mongoDoc: JsonRecord;
+  neo4j?: { cypher: string; params?: JsonRecord };
+  chroma?: { collection: string; document: string; metadata?: Record<string, unknown> };
+  neo4jVerify: { cypher: string; params?: JsonRecord };
+  chromaId?: string;
+};
 function createBarrier(): Barrier {
   let permits = 0;
   const waiters: Array<() => void> = [];
@@ -174,6 +181,10 @@ function placementEdgeKey(poolId: string, placementId: string): string {
   return `${poolId}|${placementId}`;
 }
 
+function placementProjectionEventId(placement: { placementId: string; ownerAttempt: string; fence: number }): string {
+  return `${placement.placementId}|${placement.ownerAttempt}|${placement.fence}`;
+}
+
 function claimId(prospectId: string): string {
   return `konga_claim_${prospectId}`;
 }
@@ -199,6 +210,31 @@ function asKongaResult(result: Awaited<ReturnType<typeof placeKongaProspect>>): 
     throw new Error('Expected Konga placement result');
   }
   return result as KongaPlacementResult;
+}
+
+function asLegacyPlaceResult(result: Awaited<ReturnType<typeof placeKongaProspect>>): {
+  prospectId: string;
+  positionNumber: number;
+  placedAt: string;
+  alreadyPlaced: boolean;
+} {
+  const candidate = result as {
+    prospectId: string;
+    positionNumber: number;
+    placedAt: string;
+    alreadyPlaced: boolean;
+    placementId?: string;
+    placementAttemptId?: string;
+  };
+  if (typeof candidate.prospectId !== 'string' || typeof candidate.positionNumber !== 'number') {
+    throw new Error('Expected legacy place result');
+  }
+  return {
+    prospectId: candidate.prospectId,
+    positionNumber: candidate.positionNumber,
+    placedAt: candidate.placedAt,
+    alreadyPlaced: Boolean(candidate.alreadyPlaced),
+  };
 }
 
 function createFixture(overrides: {
@@ -504,11 +540,33 @@ function createFixture(overrides: {
           const placementId = String((qparams.id ?? qparams.placementId) ?? '');
           const prospectId = qparams.prospectId;
           const poolId = String(qparams.poolId ?? TEAM_POOL_ID);
+          const ownerAttemptParam = qparams.ownerAttempt;
+          const fenceParam = qparams.fence;
+          const placementAttemptIdParam = qparams.placementAttemptId;
           let count = 0;
+          const hasLegacyMatch =
+            query.includes('WHERE r.position = $positionNumber') ||
+            query.includes('WHERE r.sponsorTmagId = $sponsorTmagId') ||
+            query.includes('WHERE r.placedAt = $placedAt');
           for (const edge of placementNeo.values()) {
             if (edge.poolId !== poolId) continue;
-            if (placementId && edge.placementId !== placementId) continue;
+            if (!hasLegacyMatch && placementId && edge.placementId !== placementId) continue;
             if (prospectId !== undefined && edge.prospectId !== prospectId) continue;
+            const props = edge.relationshipProps as JsonRecord | undefined;
+            if (placementAttemptIdParam !== undefined && props?.placementAttemptId !== placementAttemptIdParam) {
+              continue;
+            }
+            if (ownerAttemptParam !== undefined && props?.ownerAttempt !== ownerAttemptParam) {
+              continue;
+            }
+            if (fenceParam !== undefined && props?.fence !== fenceParam) {
+              continue;
+            }
+            if (hasLegacyMatch) {
+              if (qparams.positionNumber !== undefined && props?.position !== qparams.positionNumber) continue;
+              if (qparams.sponsorTmagId !== undefined && props?.sponsorTmagId !== qparams.sponsorTmagId) continue;
+              if (qparams.placedAt !== undefined && props?.placedAt !== qparams.placedAt) continue;
+            }
             count += 1;
           }
           return { records: [{ n: count }], summary: { counters: {} } };
@@ -605,8 +663,10 @@ function createFixture(overrides: {
     mongoCollection: string;
     neo4jVerify: { cypher: string; params?: JsonRecord };
     chromaCollection: string;
+    chromaId?: string;
     mongoDatabase?: string;
   }): Promise<KongaReadback> {
+    const chromaId = input.chromaId ?? input.id;
     const [mongoResult, neo4jResult, chromaResult] = await Promise.all([
       persistence('mongodb', 'query', {
         database: input.mongoDatabase ?? 'momentum',
@@ -620,7 +680,7 @@ function createFixture(overrides: {
       }),
       persistence('chromadb', 'get', {
         collection: input.chromaCollection,
-        ids: [input.id],
+        ids: [chromaId],
       }),
     ]);
 
@@ -628,11 +688,11 @@ function createFixture(overrides: {
     if (!mongo) throw new Error(`konga_mongo_readback_missing:${input.id}`);
     const neo4jCount = Number((neo4jResult.records?.[0] as JsonRecord)?.n ?? 0);
     if (neo4jCount !== 1) throw new Error(`konga_neo4j_readback_not_exact:${input.id}:${neo4jCount}`);
-    if (!((chromaResult.ids ?? []).includes(input.id))) {
-      throw new Error(`konga_chroma_readback_missing:${input.id}`);
+    if (!((chromaResult.ids ?? []).includes(chromaId))) {
+      throw new Error(`konga_chroma_readback_missing:${chromaId}`);
     }
 
-    return { mongo, neo4jCount, chromaId: input.id };
+    return { mongo, neo4jCount, chromaId };
   }
 
   function strictWriteBuilder(payload: KongaStrictWriteInput): KongaStrictWrite {
@@ -641,7 +701,11 @@ function createFixture(overrides: {
     return vi.fn(async (input: KongaStrictWriteInput) => {
       const request = input ?? defaults;
       const writeId = request.id;
-      const { mongoCollection, neo4j, chroma, neo4jVerify, mongoDoc } = request;
+      const chroma = request.chroma as
+        | ({ collection: string; document: string; metadata?: Record<string, unknown>; id?: string })
+        | undefined;
+      const { mongoCollection, neo4j, neo4jVerify, mongoDoc } = request;
+      const chromaId = request.chromaId ?? chroma?.id ?? writeId;
 
       await persistence('mongodb', 'insert', {
         database: 'momentum',
@@ -675,8 +739,9 @@ function createFixture(overrides: {
                     qparams.placementAttemptId__maybe ??
                     '',
                 ),
-                position: qparams.position ?? qparams.positionNumber ?? 0,
-                placedAt: qparams.placedAt ?? qparams.placedAtIso ?? '',
+                position: qparams.position ?? qparams.positionNumber ?? relationshipProps.position ?? 0,
+                placedAt:
+                  qparams.placedAt ?? qparams.placedAtIso ?? relationshipProps.placedAt ?? '',
                 sponsorTmagId: qparams.sponsorTmagId ?? qparams.tmag ?? '',
                 addedByFirstName: qparams.addedByFirstName ?? qparams.addedByFirstInitial ?? '',
                 addedByLastInitial:
@@ -693,7 +758,7 @@ function createFixture(overrides: {
       if (chroma) {
         await persistence('chromadb', 'add', {
           collection: chroma.collection,
-          ids: [writeId],
+          ids: [chromaId],
           documents: [chroma.document],
           metadatas: [chroma.metadata ?? {}],
         });
@@ -704,6 +769,7 @@ function createFixture(overrides: {
         mongoCollection,
         neo4jVerify,
         chromaCollection: chroma?.collection ?? CHROMA_COLLECTION,
+        chromaId,
       });
     }) as unknown as KongaStrictWrite;
   }
@@ -961,6 +1027,7 @@ describe('Konga placement permanence', () => {
 
     allowSecond.release();
     const [firstResult, secondResult] = await Promise.allSettled([firstCall, secondCall]);
+
     expect(firstResult.status).toBe('rejected');
     expect(secondResult.status).toBe('fulfilled');
     const secondKongaResult = asKongaResult(
@@ -973,14 +1040,12 @@ describe('Konga placement permanence', () => {
     expect(fixture.state.placements.has(sharedIdentity.placementId)).toBe(true);
   });
 
-  it('returns ownerless legacy rows only after readback verification', async () => {
-    const ids = deriveKongaPlacementIdentity(input);
+  it('returns legacy rows with no placement identifiers only after readback verification', async () => {
+    const legacyPlacementId = 'legacy-row-without-ids';
     const fixture = createFixture({
       initialPlacements: [
         {
-          _id: ids.placementId,
-          placementId: ids.placementId,
-          placementAttemptId: ids.placementAttemptId,
+          _id: legacyPlacementId,
           prospectId: input.prospectId,
           sponsorTmagId: input.sponsorTmagId,
           positionNumber: 88,
@@ -992,25 +1057,30 @@ describe('Konga placement permanence', () => {
       ],
     });
     const chromaCollection = fixture.state.chromaCollections.get(CHROMA_COLLECTION)!;
-    const placementEdge = placementEdgeKey(TEAM_POOL_ID, ids.placementId);
+    const placementEdge = placementEdgeKey(TEAM_POOL_ID, legacyPlacementId);
     fixture.state.placementNeo.set(placementEdge, {
       poolId: TEAM_POOL_ID,
-      placementId: ids.placementId,
+      placementId: legacyPlacementId,
       prospectId: input.prospectId,
       relationshipProps: {
         position: 88,
+        sponsorTmagId: input.sponsorTmagId,
+        placedAt: input.now.toISOString(),
+        ownerAttempt: 'legacy-owner',
+        fence: 1,
       },
     });
-    chromaCollection.set(ids.placementId, {
+    chromaCollection.set(legacyPlacementId, {
       document: 'legacy-backed placement',
       metadata: {
         kind: 'konga_placement',
-        placementId: ids.placementId,
-        placementAttemptId: ids.placementAttemptId,
+        placementId: legacyPlacementId,
         prospectId: input.prospectId,
         sponsorTmagId: input.sponsorTmagId,
         positionNumber: 88,
         placedAt: input.now.toISOString(),
+        ownerAttempt: 'legacy-owner',
+        fence: 1,
       },
     });
 
@@ -1020,14 +1090,73 @@ describe('Konga placement permanence', () => {
       increment: vi.fn(),
       publish: vi.fn(),
     });
-    const kongaResult = asKongaResult(result);
+    const kongaResult = asLegacyPlaceResult(result);
+    const persistedLegacyPlacement = fixture.state.placements.get(legacyPlacementId);
 
     expect(kongaResult.alreadyPlaced).toBe(true);
     expect(kongaResult.positionNumber).toBe(88);
-    expect(kongaResult.placementId).toBe(ids.placementId);
+    expect(kongaResult.prospectId).toBe(input.prospectId);
+    expect(persistedLegacyPlacement?.placementId).toBeUndefined();
+    expect(persistedLegacyPlacement?.placementAttemptId).toBeUndefined();
+    expect(persistedLegacyPlacement?.ownerAttempt).toBeUndefined();
+    expect(persistedLegacyPlacement?.fence).toBeUndefined();
+    expect(persistedLegacyPlacement?.projectionEventId).toBeUndefined();
     expect(
       fixture.calls.find((call) => call.tool === 'mongodb' && call.action === 'update' && call.params.collection === PLACEMENT_COLLECTION),
     ).toBeUndefined();
+  });
+
+  it('fails closed when a legacy live row cannot be exactly read back', async () => {
+    const legacyPlacementId = 'legacy-row-without-ids-bad-proof';
+    const fixture = createFixture({
+      initialPlacements: [
+        {
+          _id: legacyPlacementId,
+          prospectId: input.prospectId,
+          sponsorTmagId: input.sponsorTmagId,
+          positionNumber: 88,
+          placedAt: input.now.toISOString(),
+          expiresAt: input.prospectExpiresAt,
+          flushedAt: null,
+          flushReason: null,
+        },
+      ],
+    });
+    fixture.state.placementNeo.set(placementEdgeKey(TEAM_POOL_ID, legacyPlacementId), {
+      poolId: TEAM_POOL_ID,
+      placementId: legacyPlacementId,
+      prospectId: input.prospectId,
+      relationshipProps: {
+        position: 88,
+        sponsorTmagId: 'OTHER',
+        placedAt: input.now.toISOString(),
+        ownerAttempt: 'legacy-owner',
+        fence: 1,
+      },
+    });
+    const chromaCollection = fixture.state.chromaCollections.get(CHROMA_COLLECTION)!;
+    chromaCollection.set(legacyPlacementId, {
+      document: 'legacy-backed placement mismatch',
+      metadata: {
+        kind: 'konga_placement',
+        placementId: legacyPlacementId,
+        prospectId: input.prospectId,
+        sponsorTmagId: input.sponsorTmagId,
+        positionNumber: 88,
+        placedAt: input.now.toISOString(),
+        ownerAttempt: 'legacy-owner',
+        fence: 1,
+      },
+    });
+
+    await expect(
+      placeKongaProspect(input, {
+        persistence: fixture.persistence as never,
+        strictVerify: fixture.strictVerify as never,
+        increment: vi.fn(),
+        publish: vi.fn(),
+      }),
+    ).rejects.toThrow('konga_live_placement_verification_failed');
   });
 
   it('blocks a fresh attempt while another live placement is present', async () => {
@@ -1291,7 +1420,18 @@ describe('Konga placement permanence', () => {
     const edgeKey = placementEdgeKey(TEAM_POOL_ID, kongaResult.placementId);
     expect(fixture.state.placementNeo.has(edgeKey)).toBe(true);
     const chromaCollection = fixture.state.chromaCollections.get(CHROMA_COLLECTION)!;
-    expect(chromaCollection.has(kongaResult.placementId)).toBe(true);
+    const persisted = fixture.state.placements.get(kongaResult.placementId);
+    expect(persisted).toBeDefined();
+    const persistedPlacement = persisted as { placementId: string; ownerAttempt: string; fence: number };
+    expect(
+      chromaCollection.has(
+        placementProjectionEventId({
+          placementId: persistedPlacement.placementId,
+          ownerAttempt: persistedPlacement.ownerAttempt,
+          fence: persistedPlacement.fence,
+        }),
+      ),
+    ).toBe(true);
   });
 
   it('repairs claim projection when partial claim writes are observed', async () => {
@@ -1407,9 +1547,172 @@ describe('Konga placement permanence', () => {
     await blockedWrite.wait();
     expect(fixture.state.placementNeo.has(placementEdgeKey(TEAM_POOL_ID, winnerIdentity.placementId))).toBe(true);
     const chromaCollection = fixture.state.chromaCollections.get(CHROMA_COLLECTION)!;
-    expect(chromaCollection.has(winnerIdentity.placementId)).toBe(true);
+    const winnerPlacement = fixture.state.placements.get(winnerIdentity.placementId) as JsonRecord | undefined;
+    if (!winnerPlacement) {
+      throw new Error('missing winner placement row in fixture');
+    }
+    const winnerProjectionId = placementProjectionEventId({
+      placementId: String(winnerPlacement.placementId ?? winnerPlacement._id ?? ''),
+      ownerAttempt: String(winnerPlacement.ownerAttempt ?? ''),
+      fence: Number(winnerPlacement.fence ?? 0),
+    });
+    expect(chromaCollection.has(winnerProjectionId)).toBe(true);
   });
 
+  it('survives same-placementId overwrite during same-attempt cleanup with winner projection fenced to a distinct id', async () => {
+    const fixture = createFixture();
+    const sharedInput = { ...input, invitationRecordId: 'adversarial-cleanup' };
+    const sharedIdentity = deriveKongaPlacementIdentity(sharedInput);
+    const winnerOwnerAttempt = 'konga_owner_adversarial_winner';
+    const baseWrite = fixture.strictWrite({
+      id: sharedIdentity.placementId,
+      mongoCollection: PLACEMENT_COLLECTION,
+      mongoDoc: {},
+      neo4j: { cypher: PLACEMENT_NEO4J_WRITE },
+      chroma: {
+        collection: CHROMA_COLLECTION,
+        document: 'placement',
+      },
+      neo4jVerify: {
+        cypher:
+          'MATCH (:TmagProspect)-[r:IN_HOLDING_TANK {placementId:$id}]->(:TmagPool {id:$poolId}) RETURN count(r) AS n',
+      },
+    });
+    const aWrites = createBarrier();
+    const allowAContinue = createBarrier();
+    let capturedA: KongaStrictWriteInput | null = null;
+    let winnerFence = 0;
+    const winnerProjection = { id: '' };
+
+    const adversary = (async () => {
+      await aWrites.wait();
+      const captured = capturedA as KongaStrictWriteInput | null;
+      if (!captured) {
+        throw new Error('missing captured cleanup attempt input');
+      }
+      const mongoDoc = captured.mongoDoc as JsonRecord;
+      const baseFence = Number(mongoDoc.fence ?? NaN);
+      winnerFence = Number.isFinite(baseFence) ? baseFence + 1 : 1;
+      const winnerProjectionEventId = placementProjectionEventId({
+        placementId: sharedIdentity.placementId,
+        ownerAttempt: winnerOwnerAttempt,
+        fence: winnerFence,
+      });
+      winnerProjection.id = winnerProjectionEventId;
+
+      const neoParams = ((captured.neo4j as JsonRecord)?.params as JsonRecord) ?? {};
+      const relationshipProps = (neoParams.relationshipProps as JsonRecord) ?? {};
+      const chromaMetadata = (((captured.chroma as JsonRecord) ?? {}).metadata as JsonRecord) ?? {};
+
+      const updatedRelationshipProps = {
+        ...relationshipProps,
+        placementAttemptId: sharedIdentity.placementAttemptId,
+        ownerAttempt: winnerOwnerAttempt,
+        fence: winnerFence,
+      };
+      const updatedChromaMetadata = {
+        ...chromaMetadata,
+        placementId: sharedIdentity.placementId,
+        placementAttemptId: sharedIdentity.placementAttemptId,
+        ownerAttempt: winnerOwnerAttempt,
+        fence: winnerFence,
+        projectionEventId: winnerProjectionEventId,
+      };
+
+      await fixture.persistence('neo4j', 'cypher', {
+        query: ((captured.neo4j as JsonRecord) ?? {}).cypher as string,
+        params: {
+          ...(neoParams as JsonRecord),
+          id: captured.id,
+          relationshipProps: updatedRelationshipProps,
+        },
+      });
+      await fixture.persistence('mongodb', 'update', {
+        database: MONGO_DB,
+        collection: PLACEMENT_COLLECTION,
+        filter: { _id: sharedIdentity.placementId },
+        update: {
+          $set: {
+            ...mongoDoc,
+            placementAttemptId: sharedIdentity.placementAttemptId,
+            ownerAttempt: winnerOwnerAttempt,
+            fence: winnerFence,
+            projectionEventId: winnerProjectionEventId,
+          },
+        },
+      });
+      await fixture.persistence('chromadb', 'add', {
+        collection: CHROMA_COLLECTION,
+        ids: [winnerProjectionEventId],
+        documents: ['winner placement'],
+        metadatas: [updatedChromaMetadata],
+      });
+      fixture.state.claims.delete(claimId(sharedInput.prospectId));
+      allowAContinue.release();
+    })();
+
+    const strictWrite = vi.fn(async (payload: KongaStrictWriteInput) => {
+      const writePayload = payload as KongaStrictWriteInput;
+      capturedA = writePayload;
+      await baseWrite(writePayload);
+      aWrites.release();
+      await allowAContinue.wait();
+      throw new Error('staged-recovery-failure-before-chroma-proof');
+    }) as unknown as KongaStrictWrite;
+
+    const placementCall = placeKongaProspect(sharedInput, {
+      persistence: fixture.persistence as never,
+      strictWrite,
+      strictVerify: fixture.strictVerify as never,
+      increment: vi.fn(async () => 188),
+      findBa: vi.fn(async () => ({ firstName: 'Jordan', lastName: 'Rivera' })) as never,
+      clock: () => new Date('2026-07-17T00:00:00.000Z'),
+    });
+
+    const placementFailure = placementCall;
+    await adversary;
+    if (!capturedA) {
+      throw new Error('missing captured cleanup attempt input');
+    }
+    const aPayload = capturedA as JsonRecord;
+    const aMongoDoc = aPayload?.mongoDoc as JsonRecord;
+    const staleProjectionId = placementProjectionEventId({
+      placementId: String(aPayload?.id ?? ''),
+      ownerAttempt: String(aMongoDoc?.ownerAttempt ?? ''),
+      fence: Number(aMongoDoc?.fence ?? 0),
+    });
+
+    expect(capturedA).toBeTruthy();
+    expect(staleProjectionId).toBeTruthy();
+    await expect(placementFailure).rejects.toThrow('staged-recovery-failure-before-chroma-proof');
+    expect(staleProjectionId).not.toBe(winnerProjection.id);
+
+    const verification = await fixture.strictVerify({
+      id: sharedIdentity.placementId,
+      mongoCollection: PLACEMENT_COLLECTION,
+      neo4jVerify: {
+        cypher:
+          'MATCH (:TmagProspect)-[r:IN_HOLDING_TANK {placementId:$id}]->(:TmagPool {id:$poolId}) RETURN count(r) AS n',
+        params: { poolId: TEAM_POOL_ID },
+      },
+      chromaCollection: CHROMA_COLLECTION,
+      chromaId: winnerProjection.id,
+      mongoDatabase: 'momentum',
+    });
+    expect(verification.mongo.placementAttemptId).toBe(sharedIdentity.placementAttemptId);
+    expect(verification.chromaId).toBe(winnerProjection.id);
+
+    const chromaCollection = fixture.state.chromaCollections.get(CHROMA_COLLECTION)!;
+    expect(chromaCollection.has(staleProjectionId)).toBe(false);
+    expect(chromaCollection.has(winnerProjection.id)).toBe(true);
+    const winnerEdge = fixture.state.placementNeo.get(placementEdgeKey(TEAM_POOL_ID, sharedIdentity.placementId)) as
+      | JsonRecord
+      | undefined;
+    const winnerRelationshipProps = (winnerEdge?.relationshipProps ?? {}) as JsonRecord;
+    expect(winnerRelationshipProps.placementAttemptId).toBe(sharedIdentity.placementAttemptId);
+    expect(winnerRelationshipProps.ownerAttempt).toBe(winnerOwnerAttempt);
+    expect(winnerRelationshipProps.fence).toBe(winnerFence);
+  });
   it('retries placement cleanup when one store delete fails once before succeeding', async () => {
     const fixture = createFixture({ failPlacementMongoDeleteOnce: true });
     const contenderInput = { ...input, invitationRecordId: 'cleanup-attempt-keep' };
