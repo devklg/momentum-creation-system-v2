@@ -281,6 +281,11 @@ export function TmProspectDashboard({
           <span>Team Magnificent</span>
         </div>
         <p>{MCS_COM_DISCLAIMER}</p>
+        <div className="konga-footer-links" aria-label="Legal links">
+          <a href="/privacy">Privacy Policy</a>
+          <span aria-hidden="true">•</span>
+          <a href="/terms">Terms of Service</a>
+        </div>
       </footer>
     </main>
   );
