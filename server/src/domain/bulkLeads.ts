@@ -10,7 +10,7 @@
  * placeProspect and never inserts holding-tank rows.
  */
 
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeGraphCritical } from '../services/tieredWrite.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
@@ -91,6 +91,7 @@ async function createBulkLeadRecord(input: {
   const prospectId = `prospect_${randomUUID()}`;
   const token = await mintUniqueToken();
   const invitationRecordId = `invite_${randomUUID()}`;
+  const tokenHash = createHash('sha256').update(token).digest('hex');
   const correlation = createFlowCorrelation({ rootKind: 'vm_rvm', rootId: leadId, leadId, vmCampaignId: input.vmCampaignId, prospectId, tokenId: token });
   const location: McsProspectLocation = { city, stateOrRegion, country };
   const lastInitial = lastInitialOf(lastName);
@@ -167,7 +168,8 @@ async function createBulkLeadRecord(input: {
         kind: 'rvm_prospect_created',
         prospectId,
         leadId,
-        token,
+        invitationRecordId,
+        tokenHash,
         ownerTmagId: input.ownerTmagId,
         sponsorTmagId: input.sponsorTmagId,
         leadOwnerId: input.leadOwnerId,
@@ -203,6 +205,7 @@ async function createBulkLeadRecord(input: {
       correlation,
     },
     tokenProps: {
+      invitationRecordId,
       prospectId,
       ownerTmagId: input.ownerTmagId,
       sponsorTmagId: input.sponsorTmagId,

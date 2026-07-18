@@ -151,8 +151,6 @@ export interface McsInviteTokenRecord {
   expiresAt: McsIsoTimestamp;
 }
 
-/** Invitation token with optional Konga placement-attempt identity payload. */
-
 /**
  * Discrete video milestones the .com client reports as the prospect
  * progresses through Dr. Dan's 17-minute video. Only 'complete' triggers

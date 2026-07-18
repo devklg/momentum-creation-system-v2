@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -115,11 +116,22 @@ describe('invitation mint identity', () => {
       mongoDoc: { token: string; invitationRecordId?: string };
       tokenProps: Record<string, unknown>;
     };
+    const graphWrite = mocks.writeGraphCritical.mock.calls[0]![0] as {
+      chroma: { collection: string; document: string; metadata: Record<string, unknown> };
+    };
+    const tokenHash = createHash('sha256').update(result.token).digest('hex');
+
     expect(result.token).toBe('TOKEN-NEW');
     expect(result.inviteUrl).toContain('TOKEN-NEW');
     expect(write.token).toBe('TOKEN-NEW');
     expect(write.mongoDoc.invitationRecordId).toMatch(/^invite_/);
     expect(write.mongoDoc.invitationRecordId).not.toBe(write.token);
+    expect(write.tokenProps.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
+    expect(graphWrite.chroma.metadata.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
+    expect(graphWrite.chroma.metadata.tokenHash).toBe(tokenHash);
+    expect(graphWrite.chroma.document).not.toContain(result.token);
+    expect(graphWrite.chroma.document).toContain(tokenHash);
+    expect(graphWrite.chroma.metadata).not.toHaveProperty('token');
   });
 
   it('reinvites with a fresh invitationRecordId when the token is expired', async () => {
@@ -171,6 +183,8 @@ describe('invitation mint identity', () => {
     expect(write.mongoDoc.invitationRecordId).toMatch(/^invite_/);
     expect(write.mongoDoc.invitationRecordId).not.toBe(write.token);
     expect(write.tokenProps.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
+    expect(write.tokenProps).not.toHaveProperty('token');
+    expect(write.mongoDoc).toHaveProperty('invitationRecordId');
   });
 
   it('writes fresh invitationRecordId for fresh VM provider tokens and keeps token separate', async () => {
@@ -218,12 +232,21 @@ describe('invitation mint identity', () => {
     const write = mocks.writeVmLeadTokenGraphCritical.mock.calls[0]?.[0] as {
       token: string;
       mongoDoc: { invitationRecordId?: string; token: string };
-      tokenProps: Record<string, unknown>;
+      tokenProps: { invitationRecordId?: string; tokenHash?: string };
+      chroma?: { document?: string; metadata?: Record<string, unknown> };
     };
+    const tokenHash = createHash('sha256').update(write.token).digest('hex');
+
     expect(write.token).toBe('TOKEN-VM-LIVE');
     expect(write.mongoDoc.invitationRecordId).toMatch(/^invite_/);
     expect(write.mongoDoc.invitationRecordId).not.toBe(write.token);
     expect(write.tokenProps.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
+    expect(write.tokenProps.tokenHash).toBe(tokenHash);
+    expect(write.chroma?.metadata?.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
+    expect(write.chroma?.metadata?.tokenHash).toBe(tokenHash);
+    expect(write.chroma?.metadata).not.toHaveProperty('token');
+    expect(write.chroma?.document).toBeTypeOf('string');
+    expect(write.chroma?.document).not.toContain('TOKEN-VM-LIVE');
   });
 
   it('writes invitationRecordId during bulk import with separate identity from the token', async () => {
@@ -280,8 +303,18 @@ describe('invitation mint identity', () => {
       mongoDoc: { invitationRecordId?: string };
       tokenProps: Record<string, unknown>;
     };
+    const graphWrite = mocks.writeGraphCritical.mock.calls[0]![0] as {
+      chroma: { collection: string; document: string; metadata: Record<string, unknown> };
+    };
+    const tokenHash = createHash('sha256').update(write.token).digest('hex');
+
     expect(write.token).toBe('TOKEN-BULK');
     expect(write.mongoDoc.invitationRecordId).toMatch(/^invite_/);
     expect(write.mongoDoc.invitationRecordId).not.toBe(write.token);
+    expect(write.tokenProps.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
+    expect(graphWrite.chroma.metadata.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
+    expect(graphWrite.chroma.metadata.tokenHash).toBe(tokenHash);
+    expect(graphWrite.chroma.document).not.toContain('TOKEN-BULK');
+    expect(graphWrite.chroma.metadata).not.toHaveProperty('token');
   });
 });

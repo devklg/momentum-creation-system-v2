@@ -40,7 +40,7 @@
  *     bootstrapped Chat #119 (CK-04).
  */
 
-import { randomUUID, randomInt } from 'node:crypto';
+import { createHash, randomUUID, randomInt } from 'node:crypto';
 import { env } from '../env.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeGraphCritical, writeKnowledge } from '../services/tieredWrite.js';
@@ -182,6 +182,7 @@ export async function createInvitation(
   const reentryCode = genReentryCode();
   const createdAt = new Date().toISOString();
   const expiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
+  const tokenHash = createHash('sha256').update(token).digest('hex');
   const invitationRecordId = `invite_${randomUUID()}`;
   const lastInitial = lastInitialOf(input.lastName);
   const invitationId = `inv_${prospectId}`;
@@ -264,13 +265,14 @@ export async function createInvitation(
       document:
         `${input.firstName} ${lastInitial}. from ${input.city}, ` +
         `${input.stateOrRegion} invited by ${input.sponsorTmagId} ` +
-        `at ${createdAt} (token ${token})` +
+        `at ${createdAt} (token ${tokenHash})` +
         (relationshipReason ? `. Relationship context: ${relationshipReason}` : ''),
       metadata: {
         kind: 'invitation_created',
         prospectId,
-        token,
         sponsorTmagId: input.sponsorTmagId,
+        invitationRecordId,
+        tokenHash,
         city: input.city,
         stateOrRegion: input.stateOrRegion,
         source: input.source,
@@ -301,6 +303,7 @@ export async function createInvitation(
     sponsorTmagId: input.sponsorTmagId,
     mongoDoc: { ...tokenRecord, correlation },
     tokenProps: {
+      invitationRecordId,
       state: 'minted',
       createdAt,
       expiresAt,
