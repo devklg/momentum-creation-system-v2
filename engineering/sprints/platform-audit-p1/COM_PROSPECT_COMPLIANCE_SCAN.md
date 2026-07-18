@@ -1,14 +1,14 @@
 # COM Prospect Compliance Scan
 
-Generated: 2026-07-18T02:53:22.571Z
+Generated: 2026-07-18T03:07:25.669Z
 
 ## Summary
 
 - Scope: `apps/com/src visible strings plus shared compliance constants`
-- Files scanned: 38
-- Visible strings scanned: 483
+- Files scanned: 39
+- Visible strings scanned: 584
 - Blocking violations: 0
-- Allowed signals: 71
+- Allowed signals: 88
 - Status: pass
 
 ## Blocking Rules
@@ -26,11 +26,11 @@ Generated: 2026-07-18T02:53:22.571Z
 
 | Signal | Count | Description |
 | --- | ---: | --- |
-| `glp_three_product_context` | 14 | GLP-THREE product naming is allowed when it does not name THREE International. |
+| `glp_three_product_context` | 16 | GLP-THREE product naming is allowed when it does not name THREE International. |
 | `public_market_or_cost_context` | 7 | Public market figures and product-category cost context are allowed when not tied to earnings. |
 | `team_goal_context` | 5 | The 100,000 team goal is allowed; current team head count is not. |
-| `pmv_language_context` | 18 | Prospect-facing PMV language is People, Momentum, Volume, and Checks. |
-| `placement_demo_context` | 25 | Queue, placement, and beneath-you language is allowed only as team activity demonstration. |
+| `pmv_language_context` | 29 | Prospect-facing PMV language is People, Momentum, Volume, and Checks. |
+| `placement_demo_context` | 29 | Queue, placement, and beneath-you language is allowed only as team activity demonstration. |
 | `canonical_disclaimer` | 2 | The canonical .com disclaimer is allowed only through packages/shared/src/compliance.ts. |
 
 ## Violations
@@ -43,6 +43,8 @@ None.
 | --- | --- | --- |
 | `glp_three_product_context` | `apps/com/src/routes/legal/legal-documents.ts:115` | Team Magnificent provides informational presentations about the GLP-THREE product and the Team Magnificent business-building system, a personal dashboard including a live team activity display, and tools to request a conversation with the team member who invited you. |
 | `glp_three_product_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx:29` | GLP-THREE is a natural alternative in one of the fastest-expanding wellness categories on the planet. The numbers aren&rsquo;t ours — they&rsquo;re public. We&rsquo;re just standing where they point. |
+| `glp_three_product_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:118` | Does GLP-THREE actually work? |
+| `glp_three_product_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:122` | GLP-THREE is the product you just saw. Team Magnificent is a team of people building businesses around sharing it — and this page is their work, visible. |
 | `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx:32` | GLP-THREE launched January 2026 · trademark and patent pending |
 | `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:421` | Dr. Dan Gubler GLP-THREE product video |
 | `glp_three_product_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:429` | Dr. Dan Gubler — GLP-THREE product video |
@@ -75,7 +77,18 @@ None.
 | `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx:129` | Every prospect who lands here sees more team than the prospect who landed an hour ago. The momentum compounds. Your placement at # |
 | `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/06-YourNextMove.tsx:268` | Hosted by Kevin L. Gardner and Paul Barrios. Open conversation, real team, real momentum — see for yourself. |
 | `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/07-Footer.tsx:38` | We build people before we build volume. |
-| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:257` | Team momentum tape |
+| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:104` | people arrived |
+| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:122` | GLP-THREE is the product you just saw. Team Magnificent is a team of people building businesses around sharing it — and this page is their work, visible. |
+| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:147` | Plainly: you&rsquo;re being offered the chance to build a business of your own. As a builder, you&rsquo;d earn from real work: sharing the product with people who want it, and helping people who want to build do the same — with this system working alongside you. It is not a job, an investment, or a lottery ticket. It is a business, with no guarantees and results that follow effort. |
+| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:176` | You are not being asked to evaluate a business without the people and support around it. |
+| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:180` | People Momentum Volume Checks |
+| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:181` | Checks |
+| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:181` | Momentum |
+| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:181` | People |
+| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:181` | Volume |
+| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:242` | THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it. |
+| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:250` | Building alone is why most people quit. So nobody here builds alone. |
+| `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:258` | Built by magnificent people. Driven by purpose. |
 | `pmv_language_context` | `apps/com/src/routes/tm-video-presentation/presentationCopy.ts:71` | Once the video is complete, this page opens a private team view so you can see the momentum this message is connected to. |
 | `pmv_language_context` | `apps/com/src/routes/tm-video-presentation/sections/00-TickerStrip.tsx:36` | Real people. Real results. No injections, no prescription. |
 | `pmv_language_context` | `apps/com/src/routes/tm-video-presentation/sections/04-Market.tsx:112` | You are watching a generational shift in how people manage weight. It has already started. It is accelerating. |
@@ -86,6 +99,10 @@ None.
 | `pmv_language_context` | `packages/shared/src/compliance.ts:14` | Compensation cycle math, volume math, or rank math |
 | `pmv_language_context` | `packages/shared/src/compliance.ts:22` | Queue positions and momentum displays demonstrate team activity in real time and |
 | `placement_demo_context` | `apps/com/src/routes/legal/legal-documents.ts:37` | Service activity: video viewing progress, page visits, position and activity in the live team display, and callback requests you submit. |
+| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx:129` | Vertical upward live placement line |
+| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx:150` | · placed |
+| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx:150` | Position |
+| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx:155` | Connecting to the real placement stream. |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx:46` | Live · holding tank |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx:63` | Your position |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx:72` | You&rsquo;ve been placed in the Team Magnificent holding tank — the live demonstration of how the team is forming around you, in real time. |
@@ -96,19 +113,11 @@ None.
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx:103` | Joining the team beneath your position as Team Magnificent grows. |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/04-LivePlace.tsx:118` | You&rsquo;re first in line. The next placement will land here. |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx:129` | Every prospect who lands here sees more team than the prospect who landed an hour ago. The momentum compounds. Your placement at # |
-| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:206` | Live position center |
-| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:217` | Your video is complete, your position is live, and the team is still moving beneath you. The next step is simple: talk with |
-| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:232` | Your position |
-| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:235` | Placed |
-| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:240` | Beneath you · live |
-| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:243` | New placements joining the team after your position as Team Magnificent grows. |
-| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:264` | Connecting to the live position stream. |
-| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:265` | The next team placement will appear here. |
-| `placement_demo_context` | `apps/com/src/routes/tm-video-presentation/presentationCopy.ts:43` | Here is something you may not have noticed. While you were watching, you were placed into our team's line. Not enrolled, not signed up - placed, so we could show you something real. |
-| `placement_demo_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:466` | When the video finishes, continue to your live team position. |
-| `placement_demo_context` | `packages/shared/src/compliance.ts:12` | Placement or queue-position-equals-leg-position promises |
-| `placement_demo_context` | `packages/shared/src/compliance.ts:22` | Queue positions and momentum displays demonstrate team activity in real time and |
-| `placement_demo_context` | `packages/shared/src/compliance.ts:23` | do not guarantee any final placement, compensation, or earnings outcome. |
-| `placement_demo_context` | `packages/shared/src/compliance.ts:25` | This page contains no income claims, placement promises, or guarantees of any kind. |
-| `canonical_disclaimer` | `packages/shared/src/compliance.ts:23` | do not guarantee any final placement, compensation, or earnings outcome. |
-| `canonical_disclaimer` | `packages/shared/src/compliance.ts:25` | This page contains no income claims, placement promises, or guarantees of any kind. |
+| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:89` | The presentation told you something unusual: while you watched, you were placed in our team&rsquo;s line so we could show you something real. This is it. Every circle is a real person and every data-bearing movement is a real event. Nothing on this screen is a simulation. |
+| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:96` | Position |
+| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:155` | Whether it becomes a new financial future depends on the same thing every real business depends on — the work you put in. The line shows team activity; it promises neither placement nor results. |
+| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:172` | The working method is visible here: share, real response, live placement, and human follow-up. |
+| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:197` | Completing the presentation created the pinned position you see. It represents a real placement in this shared line. |
+| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:222` | added since your placement |
+| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:232` | . The recording remains a content resource; completing it does not create a placement or promise an outcome. |
+| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:242` | THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it. |

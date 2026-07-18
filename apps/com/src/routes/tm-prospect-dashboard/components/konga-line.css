@@ -451,13 +451,21 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .konga-line-shell,
+  .konga-line-shell *,
+  .konga-line-shell *::before,
+  .konga-line-shell *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
   .konga-belt {
-    animation: konga-breathe 4s ease-in-out infinite;
+    animation: none;
     background-position-y: 0;
   }
 
   .konga-node.is-arriving,
   .konga-join-signal {
-    animation: none;
+    animation: none !important;
   }
 }

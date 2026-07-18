@@ -239,19 +239,7 @@ export function TmProspectDashboard({
       <section id="system" className="konga-section" aria-labelledby="system-title">
         <SectionHeading eyebrow="The second question you're asking" title="Could someone like me actually do this?" id="system-title" />
         <p className="konga-lead">
-          What you are looking at is a live view into a working system built to
-          help people build without doing it alone.
-        </p>
-        <div className="konga-system-grid">
-          <SystemCard title="Guided onboarding">Your starting point becomes a plan you can follow.</SystemCard>
-          <SystemCard title="Daily coaching">A daily rhythm helps you keep moving and bring questions forward.</SystemCard>
-          <SystemCard title="A focused launch">The early mission gives your first actions a clear place to begin.</SystemCard>
-          <SystemCard title="Live learning">Team conversations and available replays keep the work connected to real people.</SystemCard>
-          <SystemCard title="The placement engine">Team momentum can work alongside your own effort; it never replaces it.</SystemCard>
-        </div>
-        <p className="konga-thesis">
-          The system will not do the work for you. Nothing real does. But you
-          will not have to work without a system around you.
+          THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it.
         </p>
         <CallbackLink baFirstName={baFirstName} />
       </section>
@@ -308,10 +296,6 @@ function Reason({ number, title, children }: { number: string; title: string; ch
       <p>{children}</p>
     </article>
   );
-}
-
-function SystemCard({ title, children }: { title: string; children: React.ReactNode }) {
-  return <article><h3>{title}</h3><p>{children}</p></article>;
 }
 
 function CallbackLink({ baFirstName }: { baFirstName: string }) {
@@ -392,7 +376,8 @@ function RealConversation({ token, baFirstName, entryKind }: {
             <span>
               By sharing your number, you agree that {baFirstName} / Team Magnificent
               may call or text you about your request. Message &amp; data rates may
-              apply. Message frequency varies. Reply STOP to end texts, HELP for help.
+              apply. Message frequency varies. Reply STOP to end texts, HELP for help. Review the
+              <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms of Service</a>.
             </span>
           </label>
 

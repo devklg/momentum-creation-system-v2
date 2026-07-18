@@ -26,8 +26,8 @@ export function KongaLine({ lens, sponsorFullName, viewer, stream, nextWebinar }
   const [audioReady, setAudioReady] = useState(false);
   const audioRef = useRef<AudioContext | null>(null);
   const lastSignalAt = useRef<Record<SignalKind, number>>({ arrival: 0, join: 0 });
-  const sponsorFirstName = sponsorFullName.trim().split(/\s+/)[0] || 'your inviter';
-  const headLabel = lens.head === 'sponsor' ? sponsorFullName : viewer.firstName;
+  const sponsorIdentity = formatPersonIdentity(sponsorFullName);
+  const headLabel = lens.head === 'sponsor' ? sponsorIdentity : viewer.firstName;
   const visiblePlacements = useMemo(
     () => stream.ticker.filter((entry) => entry.positionNumber !== viewer.positionNumber).slice(0, 6),
     [stream.ticker, viewer.positionNumber],
@@ -123,7 +123,7 @@ export function KongaLine({ lens, sponsorFullName, viewer, stream, nextWebinar }
         <div className="konga-head">
           <span className="konga-mono">{lens.head === 'sponsor' ? 'Your line starts with' : 'Line head'}</span>
           <strong>{headLabel}</strong>
-          <span>{lens.head === 'sponsor' ? sponsorFirstName + ' invited you into this view.' : 'Your team view.'}</span>
+          <span>{lens.head === 'sponsor' ? sponsorIdentity + ' invited you into this view.' : 'Your team view.'}</span>
         </div>
 
         <div className="konga-rail" aria-label="Vertical upward live placement line">
@@ -131,7 +131,7 @@ export function KongaLine({ lens, sponsorFullName, viewer, stream, nextWebinar }
           <div className="konga-node-stack">
             {visiblePlacements.map((entry) => (
               <article
-                key={entry.positionNumber + '-' + entry.placedAt}
+                key={`${entry.positionNumber}-${entry.placedAt ?? ''}`}
                 className={'konga-node ' + (stream.latestArrival?.positionNumber === entry.positionNumber ? 'is-arriving' : '')}
               >
                 <span className="konga-node-marker" aria-hidden="true" />
@@ -140,7 +140,7 @@ export function KongaLine({ lens, sponsorFullName, viewer, stream, nextWebinar }
                   <span>{formatLocation(entry.city, entry.stateOrRegion)}</span>
                   {entry.addedBy && <small>added by {entry.addedBy.firstName} {entry.addedBy.lastInitial}.</small>}
                 </div>
-                <time dateTime={entry.placedAt}>{formatClock(entry.placedAt)}</time>
+                <time dateTime={entry.placedAt ?? ''}>{formatClock(entry.placedAt ?? '')}</time>
               </article>
             ))}
 
@@ -227,6 +227,16 @@ function formatPlacedAt(iso: string): string {
   const value = new Date(iso);
   if (Number.isNaN(value.getTime())) return 'time unavailable';
   return value.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+function formatPersonIdentity(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return 'your inviter';
+  const firstName = parts[0];
+  if (!firstName) return 'your inviter';
+  if (parts.length === 1) return firstName;
+  const lastInitial = parts[parts.length - 1]?.slice(0, 1) ?? '';
+  return `${firstName} ${lastInitial}.`;
 }
 
 function formatEventDate(iso: string): string {
