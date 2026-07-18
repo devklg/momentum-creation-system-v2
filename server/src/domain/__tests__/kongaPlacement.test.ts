@@ -3,6 +3,7 @@ import {
   deriveKongaPlacementIdentity,
   placeKongaProspect,
   projectLegacyPlacementAddedBy,
+  resolveInvitationRecordId,
 } from '../kongaPlacement.js';
 import {
   type KongaReadback,
@@ -968,6 +969,112 @@ describe('Konga placement permanence', () => {
     ).toBeUndefined();
   });
 
+  it('derives raw-token-backed legacy identity from prospect/sponsor/createdAt fields', () => {
+    const tokenRecord = {
+      token: 'TOKEN-LEGACY-RAW',
+      prospectId: input.prospectId,
+      sponsorTmagId: input.sponsorTmagId,
+      state: 'video_complete',
+      createdAt: '2026-07-10T00:00:00.000Z',
+      _id: 'TOKEN-LEGACY-RAW',
+    } as const;
+
+    const invitationRecordId = resolveInvitationRecordId(tokenRecord);
+    expect(invitationRecordId).toBe(
+      `legacy_invitation_${input.prospectId}|${input.sponsorTmagId}|${tokenRecord.createdAt}`,
+    );
+    expect(invitationRecordId).not.toContain(tokenRecord.token);
+  });
+
+  it('fails closed when raw-token-backed legacy identity cannot be proven', () => {
+    const tokenRecord = {
+      token: 'TOKEN-LEGACY-RAW',
+      prospectId: input.prospectId,
+      sponsorTmagId: input.sponsorTmagId,
+      state: 'video_complete',
+      createdAt: undefined as unknown as string,
+      _id: 'TOKEN-LEGACY-RAW',
+    } as const;
+
+    expect(resolveInvitationRecordId(tokenRecord)).toBeNull();
+  });
+
+  it('derives legacy invitation identity from a non-secret database id', () => {
+    const tokenRecord = {
+      token: 'TOKEN-RAW-UNSAFE',
+      prospectId: input.prospectId,
+      sponsorTmagId: input.sponsorTmagId,
+      state: 'clicked',
+      createdAt: '2026-07-10T00:00:00.000Z',
+      _id: 'legacy-token-doc-id',
+    } as const;
+
+    const invitationRecordId = resolveInvitationRecordId(tokenRecord);
+    const identity = deriveKongaPlacementIdentity({
+      prospectId: tokenRecord.prospectId,
+      invitationRecordId: invitationRecordId!,
+    });
+
+    expect(invitationRecordId).toBe('legacy_invitation_legacy-token-doc-id');
+    expect(JSON.stringify(identity)).not.toContain(tokenRecord.token);
+  });
+
+  it('retains flushed attempt history when a fresh invitation is placed', async () => {
+    const priorIdentity = deriveKongaPlacementIdentity({
+      prospectId: input.prospectId,
+      invitationRecordId: 'prior-attempt',
+    });
+    const priorPlacement = {
+      _id: priorIdentity.placementId,
+      ...priorIdentity,
+      prospectId: input.prospectId,
+      sponsorTmagId: input.sponsorTmagId,
+      positionNumber: 101,
+      placedAt: '2026-07-10T00:00:00.000Z',
+      expiresAt: input.prospectExpiresAt,
+      flushedAt: '2026-07-11T00:00:00.000Z',
+      flushReason: 'enrolled',
+      addedBy: { firstName: 'Jordan', lastInitial: 'R' },
+    };
+    const fixture = createFixture({ initialPlacements: [priorPlacement] });
+    const freshInput = { ...input, invitationRecordId: 'fresh-attempt' };
+    const freshIdentity = deriveKongaPlacementIdentity(freshInput);
+    const strictWrite = fixture.strictWrite({
+      id: freshIdentity.placementId,
+      mongoCollection: PLACEMENT_COLLECTION,
+      mongoDoc: {},
+      neo4j: { cypher: PLACEMENT_NEO4J_WRITE },
+      chroma: { collection: CHROMA_COLLECTION, document: 'placement' },
+      neo4jVerify: {
+        cypher:
+          'MATCH (:TmagProspect)-[r:IN_HOLDING_TANK {placementId:$id}]->(:TmagPool {id:$poolId}) RETURN count(r) AS n',
+      },
+    });
+
+    const result = asKongaResult(await placeKongaProspect(freshInput, {
+      persistence: fixture.persistence as never,
+      strictWrite,
+      strictVerify: fixture.strictVerify as never,
+      increment: vi.fn(async () => 200),
+      findBa: vi.fn(async () => ({ firstName: 'Jordan', lastName: 'Rivera' })) as never,
+      publish: vi.fn(),
+    }));
+
+    expect(result.placementId).toBe(freshIdentity.placementId);
+    expect(result.placementAttemptId).not.toBe(priorIdentity.placementAttemptId);
+    expect(fixture.state.placements.size).toBe(2);
+    expect(fixture.state.placements.get(priorIdentity.placementId)).toMatchObject({
+      placementId: priorIdentity.placementId,
+      flushedAt: priorPlacement.flushedAt,
+      flushReason: priorPlacement.flushReason,
+    });
+    expect(fixture.state.placements.get(freshIdentity.placementId)).toMatchObject({
+      placementId: freshIdentity.placementId,
+      flushedAt: null,
+      flushReason: null,
+    });
+  });
+
   it('does not return a same-attempt row owned by a claim owner before a completion marker exists', async () => {
     const sharedInput = { ...input, invitationRecordId: 'owned-attempt-race' };
     const sharedIdentity = deriveKongaPlacementIdentity(sharedInput);
@@ -1222,6 +1329,7 @@ describe('Konga placement permanence', () => {
     const fresh = asKongaResult(await makeAttempt('fresh-invitation'));
 
     expect(fresh.placementAttemptId).not.toBe(prior.placementAttemptId);
+    expect(fresh.placementId).not.toBe(prior.placementId);
     expect(fresh.positionNumber).toBeGreaterThan(prior.positionNumber);
   });
 

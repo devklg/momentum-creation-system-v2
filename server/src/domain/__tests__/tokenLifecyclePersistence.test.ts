@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createHash } from 'node:crypto';
 
 const mocks = vi.hoisted(() => ({
   writeGraphCritical: vi.fn(),
@@ -47,6 +48,7 @@ beforeEach(() => {
 
 describe('token lifecycle persistence', () => {
   it('creates prospect tokens with a MATCHed prospect edge and readback', async () => {
+    const tokenHash = createHash('sha256').update('TOKEN123').digest('hex');
     await writeProspectTokenGraphCritical({
       token: 'TOKEN123',
       prospectId: 'prospect_1',
@@ -60,15 +62,19 @@ describe('token lifecycle persistence', () => {
     expect(call.neo4j.cypher).toContain('MATCH (p:TmagProspect {prospectId: $prospectId})');
     expect(call.neo4j.cypher).not.toContain('MERGE (p:TmagProspect');
     expect(call.neo4j.verifyCypher).toContain('RETURN count(t) AS n');
+    expect(call.id).toBe(tokenHash);
     expect(call.neo4j.params.tokenProps).toMatchObject({
-      token: 'TOKEN123',
+      tokenHash,
       prospectId: 'prospect_1',
       sponsorTmagId: 'TMAG-01',
       state: 'minted',
     });
+    expect(call.neo4j.params).not.toHaveProperty('token');
+    expect(JSON.stringify(call.neo4j)).not.toContain('TOKEN123');
   });
 
   it('creates VM lead tokens with a MATCHed VM lead edge and readback', async () => {
+    const tokenHash = createHash('sha256').update('RVMTOKEN').digest('hex');
     await writeVmLeadTokenGraphCritical({
       token: 'RVMTOKEN',
       leadId: 'lead_1',
@@ -82,12 +88,15 @@ describe('token lifecycle persistence', () => {
     expect(call.neo4j.cypher).toContain('MATCH (l:TmagVmBulkLead {leadId: $leadId})');
     expect(call.neo4j.cypher).not.toContain('MERGE (l:TmagVmBulkLead');
     expect(call.neo4j.verifyCypher).toContain('FOR_VM_LEAD');
+    expect(call.id).toBe(tokenHash);
     expect(call.neo4j.params.tokenProps).toMatchObject({
-      token: 'RVMTOKEN',
+      tokenHash,
       leadId: 'lead_1',
       ownerTmagId: 'TMAG-OWNER',
       sponsorTmagId: 'TMAG-SPONSOR',
     });
+    expect(call.neo4j.params).not.toHaveProperty('token');
+    expect(JSON.stringify(call.neo4j)).not.toContain('RVMTOKEN');
   });
 
   it('documents the graph readback shapes', () => {
@@ -118,7 +127,7 @@ describe('token lifecycle persistence', () => {
       'neo4j',
       'cypher',
       expect.objectContaining({
-        query: expect.stringContaining('MATCH (t:TmagInviteToken {token: $id})'),
+        query: expect.stringContaining('MATCH (t:TmagInviteToken {tokenHash: $tokenHash})'),
       }),
     );
     expect(mocks.enqueueProjection).not.toHaveBeenCalled();
@@ -140,9 +149,44 @@ describe('token lifecycle persistence', () => {
       expect.objectContaining({
         tier: 'operational',
         target: 'neo4j',
-        entityId: 'TOKEN123',
+        entityId: createHash('sha256').update('TOKEN123').digest('hex'),
         mongoCollection: 'tmag_prospect_invite_tokens',
       }),
     );
+  });
+
+  it('hides raw token in readback-missing verification errors', async () => {
+    const token = 'TOKEN123';
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    mocks.persistenceCall.mockResolvedValueOnce({}); 
+    mocks.persistenceCall.mockResolvedValueOnce({ documents: [] });
+    mocks.persistenceCall.mockResolvedValueOnce({});
+    try {
+      await updateTokenLifecycleOperational({ token, patch: { state: 'clicked' } });
+      expect.fail('expected readback-missing error');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).toContain(`token_lifecycle_readback_missing:tokenHash=${tokenHash}`);
+      expect(message).not.toContain(token);
+    }
+  });
+
+  it('hides raw token in readback mismatch verification errors', async () => {
+    const token = 'TOKEN-SECURE-9';
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    mocks.persistenceCall
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ documents: [{ token, state: 'expired' }] })
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ records: [{ n: 1 }] });
+
+    try {
+      await updateTokenLifecycleOperational({ token, patch: { state: 'clicked' } });
+      expect.fail('expected readback-mismatch error');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).toContain(`token_lifecycle_readback_mismatch:tokenHash=${tokenHash}:field=state`);
+      expect(message).not.toContain(token);
+    }
   });
 });

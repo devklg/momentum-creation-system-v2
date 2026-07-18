@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 import { runCrossStoreReconciliation } from '../crossStoreReconciliation.js';
 
@@ -82,6 +83,73 @@ describe('cross-store reconciliation job', () => {
         where: { prospectId: 'prospect_1' },
       }),
     );
+  });
+
+  it('uses tokenHash params for token-derived graph checks and excludes raw token values', async () => {
+    const tokenHash = createHash('sha256').update('tok_1').digest('hex');
+    const persistence = vi.fn(async (tool: string, action: string, params: AnyRec) => {
+      if (tool === 'mongodb' && action === 'query') {
+        if (params.collection === 'tmag_prospect_invite_tokens') {
+          return { documents: [{ token: 'tok_1', prospectId: 'prospect_1' }], count: 1 };
+        }
+        return { documents: mongoDocuments(String(params.collection)), count: 1 };
+      }
+      if (tool === 'neo4j' && action === 'cypher') {
+        const callParams = params as AnyRec;
+        const query = String(callParams.query ?? '');
+        if (query.includes('INVITED')) {
+          expect(callParams.params).toMatchObject({ sponsorTmagId: 'TMAG-01', tokenHash });
+          expect(callParams.params).not.toMatchObject({ token: 'tok_1' });
+          expect(query).toContain('{tokenHash: $tokenHash}');
+        }
+        if (query.includes('TmagInviteToken')) {
+          expect(callParams.params).toMatchObject({ tokenHash });
+          expect(callParams.params).not.toMatchObject({ token: 'tok_1' });
+          expect(query).toContain('{tokenHash: $tokenHash}');
+        }
+        return { records: [{ n: 1 }], summary: { counters: {} } };
+      }
+      if (tool === 'chromadb' && action === 'query_with_filter') {
+        const where = params.where as AnyRec;
+        const [field, value] = Object.entries(where)[0] ?? [];
+        return {
+          results: {
+            ids: [String(value)],
+            metadatas: [{ [String(field)]: value }],
+          },
+        };
+      }
+      throw new Error(`unexpected ${tool}.${action}`);
+    });
+
+    const report = await runCrossStoreReconciliation({
+      specKeys: ['prospects', 'invite_tokens'],
+      persistence: persistence as never,
+      now: () => new Date('2026-07-11T00:00:00.000Z'),
+      limitPerSpec: 2,
+    });
+
+    expect(report.ok).toBe(true);
+    expect(report.totals.issues).toBe(0);
+    expect(report.totals.scanned).toBe(2);
+    expect(persistence).toHaveBeenCalledWith(
+      'neo4j',
+      'cypher',
+      expect.objectContaining({
+        query: expect.stringContaining('tokenHash'),
+        params: expect.objectContaining({ tokenHash }),
+      }),
+    );
+    expect(persistence).toHaveBeenCalledWith(
+      'mongodb',
+      'query',
+      expect.objectContaining({ collection: 'tmag_prospect_invite_tokens' }),
+    );
+    const neoPayloads = persistence.mock.calls.filter((entry) => entry[0] === 'neo4j' && entry[1] === 'cypher');
+    expect(
+      neoPayloads.every(([, , callParams]) => !JSON.stringify(callParams.params).includes('tok_1')),
+    ).toBe(true);
+    expect(neoPayloads.length).toBe(2);
   });
 
   it('flags missing Neo4j and Chroma projections without hiding the Mongo sample', async () => {

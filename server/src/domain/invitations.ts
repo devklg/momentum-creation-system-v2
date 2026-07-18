@@ -40,7 +40,7 @@
  *     bootstrapped Chat #119 (CK-04).
  */
 
-import { randomUUID, randomInt } from 'node:crypto';
+import { createHash, randomUUID, randomInt } from 'node:crypto';
 import { env } from '../env.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeGraphCritical, writeKnowledge } from '../services/tieredWrite.js';
@@ -182,6 +182,8 @@ export async function createInvitation(
   const reentryCode = genReentryCode();
   const createdAt = new Date().toISOString();
   const expiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
+  const tokenHash = createHash('sha256').update(token).digest('hex');
+  const invitationRecordId = `invite_${randomUUID()}`;
   const lastInitial = lastInitialOf(input.lastName);
   const invitationId = `inv_${prospectId}`;
   const correlation = createFlowCorrelation({ rootKind: 'invitation', rootId: invitationId, invitationId, prospectId, tokenId: token });
@@ -232,11 +234,11 @@ export async function createInvitation(
     neo4j: {
       // BA INVITED prospect. sponsorTmagId stamped immutably here.
       cypher:
-        'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
+      'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
         'CREATE (p:TmagProspect {prospectId: $id, firstName: $firstName, lastInitial: $lastInitial, ' +
         '  city: $city, stateOrRegion: $stateOrRegion, country: $country, state: $state, ' +
         '  sponsorTmagId: $sponsorTmagId, relationshipReason: $relationshipReason, correlationId: $correlationId, createdAt: $createdAt}) ' +
-        'CREATE (b)-[:INVITED {token: $token, createdAt: $createdAt}]->(p)',
+        'CREATE (b)-[:INVITED {tokenHash: $tokenHash, invitationRecordId: $invitationRecordId, createdAt: $createdAt}]->(p)',
       params: {
         sponsorTmagId: input.sponsorTmagId,
         firstName: input.firstName,
@@ -246,16 +248,17 @@ export async function createInvitation(
         country: input.country,
         state: 'minted',
         relationshipReason,
-        token,
+        tokenHash,
+        invitationRecordId,
         createdAt,
         correlationId: correlation.correlationId,
       },
       verifyCypher:
         'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-' +
-        '[:INVITED {token: $token}]->(p:TmagProspect {prospectId: $id}) RETURN count(p) AS n',
+        '[:INVITED {tokenHash: $tokenHash}]->(p:TmagProspect {prospectId: $id}) RETURN count(p) AS n',
       verifyParams: {
         sponsorTmagId: input.sponsorTmagId,
-        token,
+        tokenHash,
       },
     },
     chroma: {
@@ -263,13 +266,14 @@ export async function createInvitation(
       document:
         `${input.firstName} ${lastInitial}. from ${input.city}, ` +
         `${input.stateOrRegion} invited by ${input.sponsorTmagId} ` +
-        `at ${createdAt} (token ${token})` +
+        `at ${createdAt} (token ${tokenHash})` +
         (relationshipReason ? `. Relationship context: ${relationshipReason}` : ''),
       metadata: {
         kind: 'invitation_created',
         prospectId,
-        token,
         sponsorTmagId: input.sponsorTmagId,
+        invitationRecordId,
+        tokenHash,
         city: input.city,
         stateOrRegion: input.stateOrRegion,
         source: input.source,
@@ -283,9 +287,10 @@ export async function createInvitation(
   // ── Step 3: invite-token record, Mongo + Neo4j. ───────────────────────
   // Chroma already carries the invitation event from step 2; the token's
   // authoritative home is Mongo (resolver reads it) + Neo4j (graph walks).
-  const tokenRecord: McsInviteTokenRecord = {
+  const tokenRecord: McsInviteTokenRecord & { invitationRecordId: string } = {
     token,
     prospectId,
+    invitationRecordId,
     sponsorTmagId: input.sponsorTmagId,
     state: 'minted',
     createdAt,
@@ -299,6 +304,7 @@ export async function createInvitation(
     sponsorTmagId: input.sponsorTmagId,
     mongoDoc: { ...tokenRecord, correlation },
     tokenProps: {
+      invitationRecordId,
       state: 'minted',
       createdAt,
       expiresAt,
@@ -321,6 +327,7 @@ export async function createInvitation(
     leadOwnerId: null,
     vmCampaignId: null,
     createdAt,
+    invitationRecordId,
     correlation: withCrmCorrelation(correlation, crmRecordId),
   });
 
@@ -334,6 +341,7 @@ export async function createInvitation(
     prospectId,
     tokenId: token,
     sponsorTmagId: input.sponsorTmagId,
+    invitationRecordId,
     tokenExpiresAt: expiresAt,
     phone: normalizePhone(input.phone),
     reentryCode,

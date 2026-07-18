@@ -10,7 +10,7 @@
  * placeProspect and never inserts holding-tank rows.
  */
 
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeGraphCritical } from '../services/tieredWrite.js';
 import { mintUniqueToken, TOKEN_TTL_MS } from './tokens.js';
@@ -90,6 +90,8 @@ async function createBulkLeadRecord(input: {
   const leadId = `lead_${randomUUID()}`;
   const prospectId = `prospect_${randomUUID()}`;
   const token = await mintUniqueToken();
+  const invitationRecordId = `invite_${randomUUID()}`;
+  const tokenHash = createHash('sha256').update(token).digest('hex');
   const correlation = createFlowCorrelation({ rootKind: 'vm_rvm', rootId: leadId, leadId, vmCampaignId: input.vmCampaignId, prospectId, tokenId: token });
   const location: McsProspectLocation = { city, stateOrRegion, country };
   const lastInitial = lastInitialOf(lastName);
@@ -166,7 +168,8 @@ async function createBulkLeadRecord(input: {
         kind: 'rvm_prospect_created',
         prospectId,
         leadId,
-        token,
+        invitationRecordId,
+        tokenHash,
         ownerTmagId: input.ownerTmagId,
         sponsorTmagId: input.sponsorTmagId,
         leadOwnerId: input.leadOwnerId,
@@ -177,8 +180,9 @@ async function createBulkLeadRecord(input: {
     },
   });
 
-  const tokenRecord: McsInviteTokenRecord = {
+  const tokenRecord: McsInviteTokenRecord & { invitationRecordId: string } = {
     token,
+    invitationRecordId,
     prospectId,
     sponsorTmagId: input.sponsorTmagId,
     state: 'minted',
@@ -201,6 +205,7 @@ async function createBulkLeadRecord(input: {
       correlation,
     },
     tokenProps: {
+      invitationRecordId,
       prospectId,
       ownerTmagId: input.ownerTmagId,
       sponsorTmagId: input.sponsorTmagId,
@@ -243,7 +248,7 @@ async function createBulkLeadRecord(input: {
         'MATCH (lb:TmagVmLeadOwner {leadOwnerId: $leadOwnerId}) ' +
         'MATCH (vm:TmagVmCampaign {vmCampaignId: $vmCampaignId}) ' +
         'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
-        'CREATE (lead:TmagVmBulkLead {leadId: $id, token: $token, status: $status, ' +
+        'CREATE (lead:TmagVmBulkLead {leadId: $id, tokenHash: $tokenHash, invitationRecordId: $invitationRecordId, status: $status, ' +
         '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, correlationId: $correlationId, createdAt: $createdAt}) ' +
         'CREATE (lb)-[:CONTAINS_LEAD]->(lead) ' +
         'CREATE (vm)-[:TARGETS_LEAD]->(lead) ' +
@@ -252,7 +257,8 @@ async function createBulkLeadRecord(input: {
         leadOwnerId: bulkLead.leadOwnerId,
         vmCampaignId: bulkLead.vmCampaignId,
         prospectId: bulkLead.prospectId,
-        token: bulkLead.token,
+        tokenHash,
+        invitationRecordId,
         status: bulkLead.status,
         ownerTmagId: bulkLead.ownerTmagId,
         sponsorTmagId: bulkLead.sponsorTmagId,
@@ -273,13 +279,14 @@ async function createBulkLeadRecord(input: {
     chroma: {
       collection: CHROMA_COLLECTION,
       document:
-        `Bulk RVM lead ${firstName} ${lastInitial}. imported with token ${token}; ` +
+        `Bulk RVM lead ${firstName} ${lastInitial}. imported with token ${tokenHash}; ` +
         `owner ${input.ownerTmagId}; campaign ${input.vmCampaignId}.`,
       metadata: {
         kind: 'bulk_lead_imported',
         leadId,
         prospectId,
-        token,
+        tokenHash,
+        invitationRecordId,
         ownerTmagId: input.ownerTmagId,
         leadOwnerId: input.leadOwnerId,
         vmCampaignId: input.vmCampaignId,
@@ -298,6 +305,7 @@ async function createBulkLeadRecord(input: {
     leadId,
     leadOwnerId: input.leadOwnerId,
     vmCampaignId: input.vmCampaignId,
+    invitationRecordId,
     createdAt: now,
     correlation: withCrmCorrelation(correlation, `crm_${prospectId}`),
   });
@@ -319,7 +327,7 @@ async function createBulkLeadRecord(input: {
     sponsorTmagId: input.sponsorTmagId,
     kind: 'token_created',
     note: 'RVM token created. CRM-visible; not placed in the holding tank.',
-    metadata: { leadId, token, correlationId: correlation.correlationId },
+    metadata: { leadId, tokenHash, invitationRecordId, correlationId: correlation.correlationId },
     createdAt: now,
   });
 

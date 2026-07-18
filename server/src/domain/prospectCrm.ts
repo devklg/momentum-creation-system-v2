@@ -12,7 +12,7 @@
  *   - client payloads never carry owner/sponsor authority.
  */
 
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { writeKnowledge } from '../services/tieredWrite.js';
 import { appendAuditEntry } from './auditLog.js';
@@ -29,7 +29,11 @@ import type {
   McsFlowCorrelation,
 } from '@momentum/shared';
 
-type ProspectCRMDocument = McsProspectCRMRecord & { token: string | null; correlation?: McsFlowCorrelation };
+type ProspectCRMDocument = McsProspectCRMRecord & {
+  token: string | null;
+  correlation?: McsFlowCorrelation;
+  invitationRecordId?: string | null;
+};
 
 const MONGO_DB = 'momentum';
 const CRM_COLLECTION = 'tmag_prospect_crm_records';
@@ -57,6 +61,7 @@ interface CreateOrUpdateCrmInput {
   vmCampaignId?: string | null;
   createdAt?: string;
   correlation?: McsFlowCorrelation;
+  invitationRecordId?: string;
 }
 
 interface TimelineInput {
@@ -85,6 +90,19 @@ function timelinePayload(input: Record<string, unknown> = {}): Record<string, st
     }
   }
   return out;
+}
+
+function sanitizeTimelineMetadata(input: Record<string, unknown>): Record<string, unknown> {
+  if (typeof input.token !== 'string') return input;
+  const tokenHash = createHash('sha256').update(input.token).digest('hex');
+  const sanitized = { ...input };
+  sanitized.tokenHash = tokenHash;
+  delete sanitized.token;
+  return sanitized;
+}
+
+function tokenHashFromToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
 }
 
 function crmIdForProspect(prospectId: string): string {
@@ -205,6 +223,7 @@ export async function appendProspectTimelineEvent(
 ): Promise<McsProspectTimelineEventRecord> {
   const createdAt = input.createdAt ?? new Date().toISOString();
   const eventId = `ptl_${randomUUID()}`;
+  const sanitizedMetadata = sanitizeTimelineMetadata(input.metadata ?? {});
   const record: McsProspectTimelineEventRecord = {
     eventId,
     prospectId: input.prospectId,
@@ -217,7 +236,7 @@ export async function appendProspectTimelineEvent(
     kind: input.kind,
     title: input.note,
     occurredAt: createdAt,
-    payload: timelinePayload(input.metadata),
+    payload: timelinePayload(sanitizedMetadata),
   };
 
   await writeKnowledge({
@@ -251,6 +270,7 @@ export async function appendProspectTimelineEvent(
         prospectId: record.prospectId,
         ownerTmagId: record.ownerTmagId,
         sponsorTmagId: record.sponsorTmagId,
+        ...timelinePayload(sanitizedMetadata),
         createdAt,
       },
     },
@@ -264,6 +284,8 @@ export async function createOrUpdateCrmRecordForToken(
 ): Promise<ProspectCRMDocument> {
   const existing = await findCrmRecordByProspectId(input.prospectId);
   const now = input.createdAt ?? new Date().toISOString();
+  const tokenHash = tokenHashFromToken(input.token);
+  const invitationRecordId = input.invitationRecordId ?? existing?.invitationRecordId;
 
   if (existing) {
     const patch: Partial<ProspectCRMDocument> = {
@@ -284,12 +306,14 @@ export async function createOrUpdateCrmRecordForToken(
     await persistenceCall('neo4j', 'cypher', {
       query:
         'MATCH (c:TmagProspectCrmRecord {crmRecordId: $crmRecordId}) ' +
-        'SET c.token = $token, c.source = $source, c.updatedAt = $updatedAt, c.correlationId = $correlationId',
+        'SET c.tokenHash = $tokenHash, c.source = $source, c.updatedAt = $updatedAt, ' +
+        'c.correlationId = $correlationId, c.invitationRecordId = $invitationRecordId',
       params: {
         crmRecordId: existing.crmRecordId,
-        token: input.token,
         source: input.source,
         updatedAt: now,
+        invitationRecordId,
+        tokenHash,
         correlationId: input.correlation?.correlationId ?? existing.correlation?.correlationId ?? null,
       },
     });
@@ -323,7 +347,8 @@ export async function createOrUpdateCrmRecordForToken(
     target: { kind: 'prospect', prospectId: record.prospectId },
     crmProps: {
       prospectId: record.prospectId,
-      token: record.token,
+      tokenHash,
+      invitationRecordId: input.invitationRecordId,
       source: record.source,
       status: record.status,
       sponsorTmagId: record.sponsorTmagId,
@@ -335,11 +360,12 @@ export async function createOrUpdateCrmRecordForToken(
       collection: CRM_CHROMA_COLLECTION,
       document:
         `CRM record created for prospect ${record.prospectId} from ${record.source}; ` +
-        `owner ${record.ownerTmagId}, sponsor ${record.sponsorTmagId}, token ${record.token}.`,
+        `owner ${record.ownerTmagId}, sponsor ${record.sponsorTmagId}, token ${tokenHash}.`,
       metadata: {
         kind: 'crm_record_created',
         prospectId: record.prospectId,
-        token: record.token,
+        tokenHash,
+        invitationRecordId: input.invitationRecordId,
         ownerTmagId: record.ownerTmagId,
         sponsorTmagId: record.sponsorTmagId,
         source: record.source,
@@ -356,7 +382,12 @@ export async function createOrUpdateCrmRecordForToken(
     sponsorTmagId: record.sponsorTmagId,
     kind: 'crm_created',
     note: `CRM record created from ${record.source} token creation.`,
-    metadata: { token: record.token, source: record.source, correlationId: input.correlation?.correlationId ?? null },
+    metadata: {
+      source: record.source,
+      tokenHash,
+      invitationRecordId: input.invitationRecordId,
+      correlationId: input.correlation?.correlationId ?? null,
+    },
     createdAt: now,
   });
 
@@ -419,6 +450,7 @@ export async function applyCrmLifecycleEvent(
   });
 
   if (nextStatus && nextStatus !== record.status) {
+    const tokenHash = record.token ? tokenHashFromToken(record.token) : null;
     await appendAuditEntry({
       actor: { kind: 'system', label: 'crm_lifecycle' },
       action: 'system.crm.status_changed',
@@ -433,7 +465,7 @@ export async function applyCrmLifecycleEvent(
         status: nextStatus,
         timelineEventKind: kind,
         crmRecordId: record.crmRecordId,
-        token: record.token,
+        tokenHash,
         leadId: record.leadId,
       },
     });

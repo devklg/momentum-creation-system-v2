@@ -9,6 +9,7 @@ import { MCS_KONGA_CONTRACT_VERSION } from '@momentum/shared';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { publishJoin } from '../services/poolEvents.js';
 import type { BARecord } from './ba.js';
+import { deriveKongaPlacementIdentity, resolveInvitationRecordId } from './kongaPlacement.js';
 import { tripleStackWriteWithReadback, verifyKongaThreeLegs } from './kongaPersistence.js';
 
 const ATTESTATION_COLLECTION = 'tmag_konga_enrollment_attestations';
@@ -28,6 +29,8 @@ interface TokenDoc {
   sponsorTmagId: string;
   state: string;
   createdAt: string;
+  invitationRecordId?: string;
+  _id?: unknown;
 }
 
 interface EnrollmentAttestation {
@@ -46,6 +49,39 @@ interface EnrollmentAttestation {
   reason: string | null;
   humanAttested: true;
   status: 'completed';
+}
+
+type KongaPlacementRecord = McsKongaPoolPlacement & {
+  placementId?: string;
+  placementAttemptId?: string;
+};
+
+function resolvePlacementAttemptFromTokenRecord(token: TokenDoc): string {
+  const invitationRecordId = resolveInvitationRecordId(token);
+  if (!invitationRecordId) {
+    throw new KongaEnrollmentError('legacy_placement_requires_no_backfill');
+  }
+  return deriveKongaPlacementIdentity({
+    prospectId: token.prospectId,
+    invitationRecordId,
+  }).placementAttemptId;
+}
+
+function findMatchingVideoCompleteToken(
+  tokens: TokenDoc[] | undefined,
+  placement: Pick<KongaPlacementRecord, 'placementAttemptId'>,
+): TokenDoc {
+  const liveAttempt = placement.placementAttemptId;
+  if (!liveAttempt) throw new KongaEnrollmentError('legacy_placement_requires_no_backfill');
+  const matching = (tokens ?? []).filter(
+    (token) => resolvePlacementAttemptFromTokenRecord(token) === liveAttempt,
+  );
+  if (matching.length !== 1) {
+    throw new KongaEnrollmentError('exact_live_linkage_required');
+  }
+  const match = matching[0];
+  if (!match) throw new KongaEnrollmentError('exact_live_linkage_required');
+  return match;
 }
 
 export class KongaEnrollmentError extends Error {
@@ -189,7 +225,7 @@ export async function attestKongaEnrollment(
       filter: { prospectId: input.prospectId, sponsorTmagId: input.sponsorTmagId },
       limit: 1,
     }),
-    persistence<{ documents?: McsKongaPoolPlacement[] }>('mongodb', 'query', {
+    persistence<{ documents?: KongaPlacementRecord[] }>('mongodb', 'query', {
       database: 'momentum',
       collection: PLACEMENTS_COLLECTION,
       filter: { prospectId: input.prospectId, sponsorTmagId: input.sponsorTmagId, flushedAt: null },
@@ -205,7 +241,6 @@ export async function attestKongaEnrollment(
         state: 'video_complete',
       },
       sort: { createdAt: -1 },
-      limit: 1,
     }),
     persistence<{ documents?: BARecord[] }>('mongodb', 'query', {
       database: 'momentum',
@@ -217,13 +252,16 @@ export async function attestKongaEnrollment(
 
   const prospect = prospectResult.documents?.[0];
   const placement = placementResult.documents?.[0];
-  const token = tokenResult.documents?.[0];
-  const enrollee = enrolleeResult.documents?.[0];
-  if (!prospect || !placement || !token || !enrollee) {
+  if (!placement) {
     throw new KongaEnrollmentError('exact_live_linkage_required');
   }
   if (!placement.placementId || !placement.placementAttemptId) {
     throw new KongaEnrollmentError('legacy_placement_requires_no_backfill');
+  }
+  const token = findMatchingVideoCompleteToken(tokenResult.documents, placement);
+  const enrollee = enrolleeResult.documents?.[0];
+  if (!prospect || !placement || !enrollee || !token) {
+    throw new KongaEnrollmentError('exact_live_linkage_required');
   }
 
   const attestationId = `konga_enrollment_${sha(
@@ -260,13 +298,15 @@ export async function attestKongaEnrollment(
         id: attestationId,
         mongoCollection: ATTESTATION_COLLECTION,
         mongoDoc: { ...attestation },
+        // IMPORTANT: all graph writes must use tokenHash only.
+        // Preserve Mongo token operations as raw tokens per write audit and backfill compatibility.
         neo4j: {
           cypher:
             'MATCH (s:TeamMagnificentMember {tmagId:$sponsorTmagId}) ' +
             'MATCH (e:TeamMagnificentMember {tmagId:$enrolleeTmagId, sponsorTmagId:$sponsorTmagId}) ' +
             'MATCH (p:TmagProspect {prospectId:$prospectId})-' +
             '[r:IN_HOLDING_TANK {placementId:$placementId}]->(:TmagPool) ' +
-            'MATCH (t:TmagInviteToken {token:$token})-[:FOR_PROSPECT]->(p) ' +
+            'MATCH (t:TmagInviteToken {tokenHash:$tokenHash})-[:FOR_PROSPECT]->(p) ' +
             'MERGE (a:TmagKongaEnrollmentAttestation {attestationId:$id}) ' +
             'SET a += $props ' +
             'MERGE (s)-[en:ENROLLED {attestationId:$id}]->(e) ' +
@@ -278,7 +318,7 @@ export async function attestKongaEnrollment(
             enrolleeTmagId: input.enrolleeTmagId,
             prospectId: input.prospectId,
             placementId: placement.placementId,
-            token: token.token,
+            tokenHash: sha(token.token),
             joinedAt,
             props: attestation,
             enrollmentProps: {
